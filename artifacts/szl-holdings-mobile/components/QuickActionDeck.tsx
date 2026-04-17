@@ -1,10 +1,11 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback } from "react";
 import {
   View,
   Text,
   StyleSheet,
   Dimensions,
   TouchableOpacity,
+  ActivityIndicator,
   Platform,
 } from "react-native";
 import Animated, {
@@ -19,8 +20,10 @@ import Animated, {
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useColors } from "@/hooks/useColors";
 import { WORKSPACES } from "@/context/WorkspaceContext";
+import { apiGet, apiPost } from "@/lib/apiClient";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.3;
@@ -49,83 +52,16 @@ export interface QuickAction {
   denyLabel?: string;
 }
 
-const MOCK_ACTIONS: QuickAction[] = [
-  {
-    id: "1",
-    domain: "portfolio",
-    title: "Wire Transfer Authorization",
-    description: "Authorize $2.4M wire transfer to Alloy Capital fund for Q2 close.",
-    type: "authorize",
-    amount: "$2,400,000",
-    urgency: "critical",
-    requester: "CFO Office",
-    dueBy: "Today 5:00 PM",
-    approveLabel: "Authorize",
-    denyLabel: "Hold",
-  },
-  {
-    id: "2",
-    domain: "defense",
-    title: "Critical CVE Patch",
-    description: "Emergency patch for CVE-2024-3891 on 3 production systems — requires exec sign-off.",
-    type: "approve",
-    urgency: "critical",
-    requester: "Aegis SOC",
-    dueBy: "Within 2 hours",
-    approveLabel: "Approve Patch",
-    denyLabel: "Defer",
-  },
-  {
-    id: "3",
-    domain: "properties",
-    title: "LOI for 1400 Brickell Ave",
-    description: "Sign Letter of Intent for $18.5M acquisition in Miami Brickell corridor.",
-    type: "approve",
-    amount: "$18,500,000",
-    urgency: "high",
-    requester: "Terra Team",
-    dueBy: "Tomorrow 12 PM",
-    approveLabel: "Sign LOI",
-    denyLabel: "Decline",
-  },
-  {
-    id: "4",
-    domain: "fleet",
-    title: "Port Diversion — MV Atlantis",
-    description: "Approve emergency diversion of MV Atlantis to Port of Antwerp due to weather advisory.",
-    type: "approve",
-    urgency: "high",
-    requester: "Fleet Ops",
-    dueBy: "Within 4 hours",
-    approveLabel: "Approve Diversion",
-    denyLabel: "Hold Route",
-  },
-  {
-    id: "5",
-    domain: "advisory",
-    title: "New Client Engagement",
-    description: "Carlota Jo requests approval to onboard BlackRock as advisory client. Fee: $240K/yr.",
-    type: "approve",
-    amount: "$240,000/yr",
-    urgency: "medium",
-    requester: "Carlota Jo",
-    dueBy: "3 Days",
-    approveLabel: "Approve",
-    denyLabel: "Decline",
-  },
-  {
-    id: "6",
-    domain: "operations",
-    title: "Acknowledge Latency Alert",
-    description: "API latency exceeded threshold for 18 minutes. Lyte agent has isolated cause.",
-    type: "acknowledge",
-    urgency: "medium",
-    requester: "Lyte AIOps",
-    dueBy: "Pending",
-    approveLabel: "Acknowledge",
-    denyLabel: "Escalate",
-  },
-];
+interface QuickActionsResponse {
+  items: QuickAction[];
+  total: number;
+}
+
+interface ActionResponse {
+  id: string;
+  decision: string;
+  updatedStatus: string;
+}
 
 function urgencyColor(urgency: string, colors: ReturnType<typeof useColors>) {
   switch (urgency) {
@@ -286,80 +222,147 @@ function ActionCard({ action, isTop, index, onSwipeLeft, onSwipeRight, colors }:
 
 export function QuickActionDeck() {
   const colors = useColors();
-  const [actions, setActions] = useState<QuickAction[]>(MOCK_ACTIONS);
-  const [resolved, setResolved] = useState<{ id: string; decision: "approved" | "denied" }[]>([]);
+  const qc = useQueryClient();
+
+  const { data, isLoading, isError, refetch } = useQuery({
+    queryKey: ["cortex", "quick-actions"],
+    queryFn: () => apiGet<QuickActionsResponse>("/api/cortex/quick-actions"),
+    staleTime: 30_000,
+    refetchOnWindowFocus: true,
+  });
+
+  const actions: QuickAction[] = data?.items ?? [];
+
+  const [resolved, setResolved] = React.useState<{ id: string; decision: "approved" | "denied" }[]>([]);
+  const [dismissed, setDismissed] = React.useState<Set<string>>(new Set());
+
+  const mutation = useMutation({
+    mutationFn: ({ id, decision }: { id: string; decision: "approved" | "denied" }) =>
+      apiPost<ActionResponse>(`/api/cortex/quick-actions/${id}/action`, { decision }),
+    onSuccess: (_result, variables) => {
+      qc.invalidateQueries({ queryKey: ["cortex", "quick-actions"] });
+      setResolved((prev) => [...prev, { id: variables.id, decision: variables.decision }]);
+      setDismissed((prev) => new Set([...prev, variables.id]));
+    },
+    onError: (_err, variables) => {
+      setDismissed((prev) => {
+        const next = new Set(prev);
+        next.delete(variables.id);
+        return next;
+      });
+      setResolved((prev) => prev.filter((r) => r.id !== variables.id));
+    },
+  });
 
   const handleSwipeRight = useCallback((id: string) => {
-    setResolved((prev) => [...prev, { id, decision: "approved" }]);
-    setActions((prev) => prev.filter((a) => a.id !== id));
-  }, []);
+    setDismissed((prev) => new Set([...prev, id]));
+    mutation.mutate({ id, decision: "approved" });
+  }, [mutation]);
 
   const handleSwipeLeft = useCallback((id: string) => {
-    setResolved((prev) => [...prev, { id, decision: "denied" }]);
-    setActions((prev) => prev.filter((a) => a.id !== id));
-  }, []);
+    setDismissed((prev) => new Set([...prev, id]));
+    mutation.mutate({ id, decision: "denied" });
+  }, [mutation]);
 
   const handleReset = useCallback(() => {
-    setActions(MOCK_ACTIONS);
     setResolved([]);
-  }, []);
+    setDismissed(new Set());
+    refetch();
+  }, [refetch]);
 
-  if (actions.length === 0) {
+  if (isLoading) {
     return (
-      <View style={styles.emptyDeck}>
-        <Text style={styles.emptyIcon}>✓</Text>
-        <Text style={[styles.emptyTitle, { color: colors.foreground }]}>All Clear</Text>
+      <View style={styles.centerState}>
+        <ActivityIndicator size="large" color={ACCENT} />
+        <Text style={[styles.loadingText, { color: colors.mutedForeground }]}>Loading pending decisions…</Text>
+      </View>
+    );
+  }
+
+  if (isError) {
+    return (
+      <View style={styles.centerState}>
+        <Text style={styles.emptyIcon}>⚠</Text>
+        <Text style={[styles.emptyTitle, { color: colors.foreground }]}>Unable to Load</Text>
         <Text style={[styles.emptySubtitle, { color: colors.mutedForeground }]}>
-          You've actioned all {resolved.length} pending decisions.
+          Could not fetch pending approvals. Check your connection.
         </Text>
-        <View style={styles.resolvedStats}>
-          <View style={[styles.resolvedStat, { borderColor: `${colors.green}40` }]}>
-            <Text style={[styles.resolvedNum, { color: colors.green }]}>
-              {resolved.filter((r) => r.decision === "approved").length}
-            </Text>
-            <Text style={[styles.resolvedLabel, { color: colors.mutedForeground }]}>Approved</Text>
-          </View>
-          <View style={[styles.resolvedStat, { borderColor: `${colors.red}40` }]}>
-            <Text style={[styles.resolvedNum, { color: colors.red }]}>
-              {resolved.filter((r) => r.decision === "denied").length}
-            </Text>
-            <Text style={[styles.resolvedLabel, { color: colors.mutedForeground }]}>Denied</Text>
-          </View>
-        </View>
         <TouchableOpacity
           style={[styles.resetBtn, { borderColor: "rgba(201,168,76,0.3)" }]}
-          onPress={handleReset}
+          onPress={() => refetch()}
         >
-          <Text style={styles.resetBtnText}>Review Again</Text>
+          <Text style={styles.resetBtnText}>Retry</Text>
         </TouchableOpacity>
       </View>
     );
   }
 
-  const visibleCards = actions.slice(0, 3);
+  const visibleActions = actions.filter((a) => !dismissed.has(a.id));
+
+  if (visibleActions.length === 0) {
+    return (
+      <View style={styles.emptyDeck}>
+        <Text style={styles.emptyIcon}>✓</Text>
+        <Text style={[styles.emptyTitle, { color: colors.foreground }]}>All Clear</Text>
+        <Text style={[styles.emptySubtitle, { color: colors.mutedForeground }]}>
+          {resolved.length > 0
+            ? `You've actioned all ${resolved.length} pending decision${resolved.length !== 1 ? "s" : ""}.`
+            : "No pending approvals at this time."}
+        </Text>
+        {resolved.length > 0 && (
+          <View style={styles.resolvedStats}>
+            <View style={[styles.resolvedStat, { borderColor: `${colors.green}40` }]}>
+              <Text style={[styles.resolvedNum, { color: colors.green }]}>
+                {resolved.filter((r) => r.decision === "approved").length}
+              </Text>
+              <Text style={[styles.resolvedLabel, { color: colors.mutedForeground }]}>Approved</Text>
+            </View>
+            <View style={[styles.resolvedStat, { borderColor: `${colors.red}40` }]}>
+              <Text style={[styles.resolvedNum, { color: colors.red }]}>
+                {resolved.filter((r) => r.decision === "denied").length}
+              </Text>
+              <Text style={[styles.resolvedLabel, { color: colors.mutedForeground }]}>Denied</Text>
+            </View>
+          </View>
+        )}
+        <TouchableOpacity
+          style={[styles.resetBtn, { borderColor: "rgba(201,168,76,0.3)" }]}
+          onPress={handleReset}
+        >
+          <Text style={styles.resetBtnText}>Refresh</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  const allForProgress = [...actions, ...resolved.filter((r) => !actions.find((a) => a.id === r.id))];
+  const visibleCards = visibleActions.slice(0, 3);
 
   return (
     <View style={styles.deckContainer}>
       <View style={styles.deckHeader}>
         <Text style={[styles.deckCount, { color: colors.mutedForeground }]}>
-          {actions.length} actions pending
+          {visibleActions.length} action{visibleActions.length !== 1 ? "s" : ""} pending
         </Text>
         <View style={styles.deckProgress}>
-          {MOCK_ACTIONS.map((a) => (
-            <View
-              key={a.id}
-              style={[
-                styles.progressDot,
-                {
-                  backgroundColor: resolved.find((r) => r.id === a.id)
-                    ? resolved.find((r) => r.id === a.id)!.decision === "approved"
-                      ? colors.green
-                      : colors.red
-                    : colors.border,
-                },
-              ]}
-            />
-          ))}
+          {allForProgress.map((a) => {
+            const r = resolved.find((rv) => rv.id === a.id);
+            return (
+              <View
+                key={a.id}
+                style={[
+                  styles.progressDot,
+                  {
+                    backgroundColor: r
+                      ? r.decision === "approved"
+                        ? colors.green
+                        : colors.red
+                      : colors.border,
+                  },
+                ]}
+              />
+            );
+          })}
         </View>
       </View>
 
@@ -384,6 +387,18 @@ export function QuickActionDeck() {
 }
 
 const styles = StyleSheet.create({
+  centerState: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 12,
+    padding: 32,
+  },
+  loadingText: {
+    fontSize: 14,
+    fontFamily: "Inter_400Regular",
+    marginTop: 8,
+  },
   deckContainer: { flex: 1, alignItems: "center" },
   deckHeader: {
     width: CARD_WIDTH,

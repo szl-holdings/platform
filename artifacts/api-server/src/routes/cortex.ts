@@ -11,6 +11,8 @@
  * GET  /cortex/entity-graph        — Entity graph data (nodes + edges) for force-directed viz
  * POST /cortex/whatif              — What-if scenario engine: traces projected impact across domains
  * GET  /cortex/briefing/today      — CORTEX executive briefing (today's cross-domain summary)
+ * GET  /cortex/quick-actions       — Pending approval requests formatted for the mobile QuickActionDeck
+ * POST /cortex/quick-actions/:id/action — Approve or deny a quick action (delegates to approvals system)
  * GET  /cortex/action-drafts       — List persistent autonomous action drafts awaiting approval
  * POST /cortex/action-drafts/generate — Generate drafts from a fusion alert or correlation
  * POST /cortex/action-drafts/:id/approve — Approve an action draft (persisted + governance audit)
@@ -962,6 +964,164 @@ function generateActionDrafts(
 
   return drafts;
 }
+
+// ─── Quick-Actions: mobile swipe deck ────────────────────────────────────────
+
+const RESOURCE_TYPE_TO_DOMAIN: Array<[RegExp, string]> = [
+  [/wire_transfer|financial|capital|fund|payment|invoice/i, "portfolio"],
+  [/security|cve|patch|vuln|threat|soc|incident/i, "defense"],
+  [/loi|property|real_estate|terra|acquisition|lease/i, "properties"],
+  [/vessel|fleet|diversion|ship|maritime|cargo/i, "fleet"],
+  [/client|engagement|advisory|onboard|counsel/i, "advisory"],
+  [/alert|ops|latency|slo|infra|service|ticket/i, "operations"],
+];
+
+const ACTION_CLASS_TO_TYPE: Record<string, string> = {
+  authorize: "authorize",
+  financial: "authorize",
+  acknowledge: "acknowledge",
+  schedule: "schedule",
+  escalate: "escalate",
+};
+
+function inferDomain(resourceType: string, actionClass: string): string {
+  const combined = `${resourceType} ${actionClass}`.toLowerCase();
+  for (const [pattern, domain] of RESOURCE_TYPE_TO_DOMAIN) {
+    if (pattern.test(combined)) return domain;
+  }
+  return "operations";
+}
+
+function inferActionType(actionClass: string): string {
+  return ACTION_CLASS_TO_TYPE[actionClass?.toLowerCase()] ?? "approve";
+}
+
+function inferLabels(actionType: string, domain: string): { approveLabel: string; denyLabel: string } {
+  const labels: Record<string, { approveLabel: string; denyLabel: string }> = {
+    authorize: { approveLabel: "Authorize", denyLabel: "Hold" },
+    acknowledge: { approveLabel: "Acknowledge", denyLabel: "Escalate" },
+    schedule: { approveLabel: "Schedule", denyLabel: "Defer" },
+    escalate: { approveLabel: "Escalate", denyLabel: "Dismiss" },
+  };
+  if (labels[actionType]) return labels[actionType];
+  if (domain === "properties") return { approveLabel: "Sign LOI", denyLabel: "Decline" };
+  if (domain === "fleet") return { approveLabel: "Approve Diversion", denyLabel: "Hold Route" };
+  if (domain === "defense") return { approveLabel: "Approve Patch", denyLabel: "Defer" };
+  return { approveLabel: "Approve", denyLabel: "Decline" };
+}
+
+router.get(
+  "/cortex/quick-actions",
+  authMiddleware({ required: true }),
+  perUserApiSlidingLimiter,
+  async (req, res) => {
+    try {
+      const user = req.user;
+      const isAdmin = user?.roles?.some((r) => ["super_admin", "admin"].includes(r)) ?? false;
+      const orgId = isAdmin ? undefined : (user?.orgs?.[0]?.orgId);
+
+      if (!isAdmin && orgId == null) {
+        sendSuccess(res, { items: [], total: 0 });
+        return;
+      }
+
+      const { listPendingApprovals } = await import("@szl-holdings/covenant-policy");
+      const pending = await listPendingApprovals({ orgId, limit: 30 });
+
+      const quickActions = pending.map((approval) => {
+        const domain = inferDomain(approval.resourceType ?? "", approval.actionClass ?? "");
+        const actionType = inferActionType(approval.actionClass ?? "");
+        const urgency = (approval.priority ?? "medium") as "critical" | "high" | "medium" | "low";
+        const { approveLabel, denyLabel } = inferLabels(actionType, domain);
+
+        const payload = (approval.payload ?? {}) as Record<string, unknown>;
+        const amount = typeof payload.amount === "string" ? payload.amount : undefined;
+        const dueBy = approval.expiresAt
+          ? new Date(approval.expiresAt).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })
+          : undefined;
+
+        return {
+          id: String(approval.id),
+          domain,
+          title: approval.title,
+          description: approval.description ?? "",
+          type: actionType,
+          amount,
+          urgency,
+          requester: approval.requestedByRole ?? (approval.requestedById != null ? `User #${approval.requestedById}` : undefined),
+          dueBy,
+          approveLabel,
+          denyLabel,
+        };
+      });
+
+      sendSuccess(res, { items: quickActions, total: quickActions.length });
+    } catch (err) {
+      handleRouteError(res, err, "CORTEX quick-actions fetch failed");
+    }
+  }
+);
+
+router.post(
+  "/cortex/quick-actions/:id/action",
+  authMiddleware({ required: true }),
+  perUserWriteSlidingLimiter,
+  async (req, res) => {
+    try {
+      const approvalId = parseInt(req.params["id"] as string, 10);
+      if (isNaN(approvalId)) {
+        sendBadRequest(res, "Invalid quick action id");
+        return;
+      }
+
+      const { decision, note } = req.body as { decision?: string; note?: string };
+      if (!decision || !["approved", "denied"].includes(decision)) {
+        sendBadRequest(res, "decision must be 'approved' or 'denied'");
+        return;
+      }
+
+      const reviewDecision = decision === "denied" ? "rejected" : "approved";
+
+      const { reviewApproval, getApprovalById } = await import("@szl-holdings/covenant-policy");
+
+      const approval = await getApprovalById(approvalId);
+      if (!approval) {
+        sendNotFound(res, "Quick action not found");
+        return;
+      }
+
+      const user = req.user;
+      const isAdmin = user?.roles?.some((r) => ["super_admin", "admin"].includes(r)) ?? false;
+      const userOrgId = user?.orgs?.[0]?.orgId ?? null;
+      if (!isAdmin && approval.orgId != null && approval.orgId !== userOrgId) {
+        sendNotFound(res, "Quick action not found");
+        return;
+      }
+
+      const updated = await reviewApproval({
+        approvalId,
+        actorId: user?.id ?? null,
+        actorRole: user?.roles?.[0],
+        decision: reviewDecision,
+        note: note ?? `${decision} via mobile Quick Action deck`,
+        correlationId: (req as unknown as { correlationId?: string }).correlationId,
+        serviceAttribution: "mobile-quick-actions",
+        expectedOrgId: isAdmin ? null : userOrgId,
+      });
+
+      logger.info(
+        { approvalId, decision, actorId: user?.id ?? null },
+        "[CORTEX] Quick action actioned via mobile deck"
+      );
+
+      sendSuccess(res, { id: String(approvalId), decision, updatedStatus: updated.status });
+    } catch (err) {
+      handleRouteError(res, err, "CORTEX quick-action update failed");
+    }
+  }
+);
+
+// ─── Action Drafts ────────────────────────────────────────────────────────────
 
 router.get(
   "/cortex/action-drafts",
