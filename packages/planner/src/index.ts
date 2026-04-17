@@ -7,6 +7,7 @@ export {
   topoSort,
 } from "./risk-estimator.js";
 export { generateFallbackPlans } from "./fallback-generator.js";
+export { rankFallbacks } from "./ranker.js";
 export { createPlan, replayPlan, type CreatePlanResult } from "./planner.js";
 export {
   InMemoryPlanStore,
@@ -14,3 +15,4 @@ export {
   type PlanStore,
   type PlanStoreQuery,
 } from "./store.js";
+export { DbPlanStore } from "./db-store.js";

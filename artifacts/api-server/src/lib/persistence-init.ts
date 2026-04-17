@@ -1,5 +1,6 @@
 import { defaultTraceStore, PostgresTraceStore } from "@workspace/trace-graph";
 import { defaultMemoryStore, PostgresMemoryStore } from "@workspace/memory-fabric";
+import { defaultPlanStore, DbPlanStore } from "@workspace/planner";
 import { logger } from "./logger";
 
 let traceStore: PostgresTraceStore | undefined;
@@ -33,7 +34,9 @@ export async function initDurablePersistence(): Promise<void> {
 
   try {
     const { db } = await import("@szl-holdings/db");
-    const { tracesTable, memoryRecordsTable } = await import("@szl-holdings/db/schema");
+    const { tracesTable, memoryRecordsTable, plansTable, planStepsTable } = await import(
+      "@szl-holdings/db/schema"
+    );
 
     traceStore = new PostgresTraceStore({
       db,
@@ -65,6 +68,13 @@ export async function initDurablePersistence(): Promise<void> {
 
     defaultTraceStore.setBackend(traceStore);
     defaultMemoryStore.setBackend(memoryStore);
+
+    try {
+      defaultPlanStore.setBackend(new DbPlanStore({ db, plansTable, planStepsTable }));
+      logger.info("[persistence] Planner store backed by PostgreSQL");
+    } catch (err) {
+      logger.warn({ err }, "[persistence] Planner DB store init failed — staying in-memory");
+    }
 
     logger.info(
       {

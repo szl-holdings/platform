@@ -9,8 +9,17 @@ import { decomposeObjective } from "./decomposer.js";
 import { routePlanSteps } from "./router.js";
 import { estimateRiskAndApprovals, levelForRisk, topoSort } from "./risk-estimator.js";
 import { generateFallbackPlans } from "./fallback-generator.js";
+import { rankFallbacks } from "./ranker.js";
 import { defaultPlanStore, type PlanStore } from "./store.js";
 
+/**
+ * Result of {@link createPlan}.
+ *
+ * NOTE: createPlan returns BOTH the primary plan graph AND the ranked
+ * counterfactual fallback graphs. The primary's `fallbacks` field contains
+ * the ids of the returned fallback graphs in priority order — callers that
+ * only want the primary can read `result.primary`.
+ */
 export interface CreatePlanResult {
   primary: PlanGraph;
   fallbacks: PlanGraph[];
@@ -19,11 +28,12 @@ export interface CreatePlanResult {
 /**
  * Build a plan graph for the given objective:
  *   1. Decompose into steps (or use caller-provided seeds).
- *   2. Route each step to a model/tool via @workspace/ai-control-plane.
+ *   2. Route each step to a model/tool via @szl-holdings/ai-control-plane.
  *   3. Estimate per-step risk, gate high-risk steps with approvals + rollbacks.
  *   4. Topologically sort by dependencies — throws on cycles.
  *   5. Generate counterfactual fallback plans.
- *   6. Persist primary + fallbacks to the configured PlanStore.
+ *   6. Rank fallbacks via @szl-holdings/decision-engine priority scoring.
+ *   7. Persist primary + fallbacks to the configured PlanStore.
  */
 export async function createPlan(
   objective: string,
@@ -68,7 +78,8 @@ export async function createPlan(
     updatedAt: now,
   };
 
-  const fallbacks = generateFallbackPlans(primary, { count: ctx.fallbackCount });
+  const rawFallbacks = generateFallbackPlans(primary, { count: ctx.fallbackCount });
+  const fallbacks = rankFallbacks(primary, rawFallbacks);
   primary.fallbacks = fallbacks.map((f) => f.planId);
   // Re-sort fallbacks (faster fallback drops deps so order needs recompute).
   for (const fb of fallbacks) {

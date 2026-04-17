@@ -86,6 +86,7 @@ export default defineConfig({
       { find: "@workspace/reflection-engine", replacement: resolve(__dirname, "packages/reflection-engine/src/index.ts") },
       { find: "@szl-holdings/ai-control-plane/router", replacement: resolve(__dirname, "packages/ai-control-plane/src/router.ts") },
       { find: "@szl-holdings/ai-control-plane", replacement: resolve(__dirname, "packages/ai-control-plane/src/index.ts") },
+      { find: "@szl-holdings/decision-engine", replacement: resolve(__dirname, "packages/decision-engine/src/index.ts") },
       { find: "@workspace/planner/types", replacement: resolve(__dirname, "packages/planner/src/types.ts") },
       { find: "@workspace/planner/store", replacement: resolve(__dirname, "packages/planner/src/store.ts") },
       { find: "@workspace/planner/router", replacement: resolve(__dirname, "packages/planner/src/router.ts") },
@@ -99,6 +100,8 @@ export default defineConfig({
       { find: "@szl-holdings/action-engine", replacement: resolve(__dirname, "packages/action-engine/src/index.ts") },
       { find: "@szl-holdings/observability-core", replacement: resolve(__dirname, "packages/observability-core/src/index.ts") },
       { find: "@szl-holdings/decision-engine", replacement: resolve(__dirname, "packages/decision-engine/src/index.ts") },
+      { find: "@szl-holdings/db/schema", replacement: resolve(__dirname, "lib/db/src/schema/index.ts") },
+      { find: "@szl-holdings/db", replacement: resolve(__dirname, "lib/db/src/index.ts") },
     ],
   },
   test: {

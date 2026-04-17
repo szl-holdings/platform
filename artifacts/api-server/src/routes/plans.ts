@@ -18,13 +18,30 @@ import {
 
 const router: IRouter = Router();
 
+const ALLOWED_STATUSES = new Set([
+  "draft",
+  "ready",
+  "executing",
+  "completed",
+  "failed",
+  "cancelled",
+]);
+
 router.get("/plans", authMiddleware(), async (req, res) => {
   try {
     const query: PlanStoreQuery = {};
-    if (req.query.objective) query.objective = req.query.objective as string;
-    if (req.query.status) query.status = req.query.status as PlanStoreQuery["status"];
+    if (req.query.status) {
+      const status = req.query.status as string;
+      if (!ALLOWED_STATUSES.has(status)) {
+        sendBadRequest(res, `Invalid status: ${status}`);
+        return;
+      }
+      query.status = status as PlanStoreQuery["status"];
+    }
     if (req.query.agentId) query.agentId = req.query.agentId as string;
     if (req.query.sessionId) query.sessionId = req.query.sessionId as string;
+    if (req.query.workflowId) query.workflowId = req.query.workflowId as string;
+    if (req.query.parentPlanId) query.parentPlanId = req.query.parentPlanId as string;
 
     const rawLimit = parseInt((req.query.limit as string) ?? "50", 10);
     const rawOffset = parseInt((req.query.offset as string) ?? "0", 10);
@@ -39,13 +56,7 @@ router.get("/plans", authMiddleware(), async (req, res) => {
     query.limit = rawLimit;
     query.offset = rawOffset;
 
-    const items = await defaultPlanStore.list(query);
-    const total = await defaultPlanStore.count({
-      objective: query.objective,
-      status: query.status,
-      agentId: query.agentId,
-      sessionId: query.sessionId,
-    });
+    const { items, total } = await defaultPlanStore.list(query);
     sendSuccess(res, { items, total, limit: rawLimit, offset: rawOffset });
   } catch (err) {
     handleRouteError(res, err, "Failed to list plans");

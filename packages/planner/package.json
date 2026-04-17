@@ -41,6 +41,7 @@
   "dependencies": {
     "@szl-holdings/ai-control-plane": "workspace:*",
     "@szl-holdings/decision-engine": "workspace:*",
+    "drizzle-orm": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
