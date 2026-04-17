@@ -10,9 +10,9 @@ Generated: 2026-04-15
 - `docker-compose.yml` uses `SESSION_SECRET:-local_dev_secret_change_in_prod` — fine for docker-compose but pattern should not propagate
 - **Fix**: Replace dev fallbacks with hard errors in production (`NODE_ENV === 'production'` guard)
 
-### 2. Test Token in Source
-- `tests/api/server-live.test.ts` hardcodes `szl-test-integration-live-2026` as an internal token
-- **Fix**: Move to env var or generate at test time
+### 2. Test Token in Source — ✅ RESOLVED (task #721)
+- `tests/api/server-live.test.ts` previously hardcoded `szl-test-integration-live-2026` as an internal token
+- **Fix applied**: Token is now read from `process.env.INTEGRATION_TEST_TOKEN`; the file throws a descriptive error at load time if the variable is absent. No literal remains in source.
 
 ### 3. Zombie Directories Create Confusion
 - 11 empty artifact dirs (aegis-mobile, alloy-mobile, etc.) with no code

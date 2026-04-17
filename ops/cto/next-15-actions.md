@@ -34,7 +34,7 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 
 | # | Action | Owner | Effort | Blocking |
 |---|--------|-------|--------|---------|
-| 5 | Move `INTEGRATION_TEST_TOKEN` from source code (`tests/api/server-live.test.ts`) to a GitHub Secret and environment variable; generate a new unique token value when doing so | Founder / Dev | 30 min | CI security |
+| 5 | ✅ DONE — `INTEGRATION_TEST_TOKEN` removed from source (task #721); tests read from env var. Remaining: add a freshly generated value to GitHub Actions Secrets (`openssl rand -base64 24`) | Founder / Dev | 5 min | CI security |
 | 6 | Run full go-live sequence (Phases 0–7) from `docs/internal/ops/go-live-sequence.md` and check off every item | Founder | 3–4 hours | Launch gate |
 | 7 | Create smoke test user account in production with a dedicated email (e.g. `smoke@yourdomain.com`) and a unique randomly generated password; store the password in Replit Secrets as `SMOKE_TEST_PASSWORD` — never use a predictable or reused password | Founder | 15 min | Smoke tests |
 | 8 | Verify Slack webhook is connected and `#ops-alerts` channel receives a test alert | Founder | 15 min | Incident detection |

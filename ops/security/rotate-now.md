@@ -52,16 +52,14 @@ Purpose: Immediate action list for credentials exposed or at-risk.
 
 ## HIGH PRIORITY — Within 30 Days
 
-### 4. Test Token in Source
+### 4. Test Token in Source — ✅ RESOLVED
 
 **Location:** `tests/api/server-live.test.ts`
-**Value:** `szl-test-integration-live-2026` (per risks-and-gaps.md)
-**Risk:** Predictable token; anyone reading repo can use it for integration test bypass.
+**Value:** `szl-test-integration-live-2026` — **removed from source**
+**Resolution:** Token is now read from `process.env.INTEGRATION_TEST_TOKEN`; the file throws a clear error at startup if the variable is missing. No literal value remains in any tracked file.
 
-**Action:**
-1. Move to env var `INTEGRATION_TEST_TOKEN`
-2. Generate a random token: `openssl rand -base64 24`
-3. Add to Replit Secrets panel for CI use
+**Remaining action:**
+- Add `INTEGRATION_TEST_TOKEN` to Replit Secrets panel and GitHub Actions secrets with a freshly generated value: `openssl rand -base64 24`
 
 ---
 

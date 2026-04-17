@@ -13,7 +13,7 @@ Generated: 2026-04-15
 - [x] VITE_* audit — no secret leakage, only public keys use VITE_ prefix
 - [x] Credential rotation inventory → `ops/security/credential-rotation-required.md`
 - [x] Secrets bootstrap guide → `ops/security/secrets-bootstrap.md`
-- [ ] Move test token `szl-test-integration-live-2026` to env var (pending — low risk, test-only)
+- [x] Move test token `szl-test-integration-live-2026` to env var — DONE (task #721; reads from INTEGRATION_TEST_TOKEN, fails fast if unset)
 
 ## Phase 2: Product Topology & Cleanup [COMPLETE]
 - [x] Deleted 11 empty artifact stubs (aegis-mobile, alloy-mobile, etc.)

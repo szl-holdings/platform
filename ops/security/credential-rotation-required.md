@@ -61,9 +61,9 @@ This document lists every credential-bearing artifact that must be rotated or ve
 
 ## Test Credentials
 
-| Item | Location | Action |
+| Item | Location | Status |
 |------|----------|--------|
-| `szl-test-integration-live-2026` | `tests/api/server-live.test.ts` | Move to `INTEGRATION_TEST_TOKEN` env var |
+| `szl-test-integration-live-2026` | `tests/api/server-live.test.ts` | ✅ RESOLVED — token now read from `INTEGRATION_TEST_TOKEN` env var; hardcoded value removed |
 
 ## Rotation Schedule
 

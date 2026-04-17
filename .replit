@@ -41,6 +41,8 @@ PUBLIC_APP_URL = "https://szlholdings.replit.app"
 VAPID_PUBLIC_KEY = "BIe1uJr8KS1Ilhz9KWTwRwfV_BC6C2FDdo6gbn-KDt1QS14KaOIMHuWVhzzJFUYIP0iKiWZOLh4xbcUiay2ZrEc"
 VAPID_SUBJECT = "mailto:platform@szlholdings.com"
 
+[userenv.development]
+
 [[ports]]
 localPort = 8080
 externalPort = 80

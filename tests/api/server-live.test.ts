@@ -32,7 +32,13 @@ import express, {
 import cookieParser from "cookie-parser";
 
 // ── Internal token for ALLOY_INTERNAL_TOKEN auth path ────────────────────────
-const LIVE_TOKEN = "szl-test-integration-live-2026";
+if (!process.env.INTEGRATION_TEST_TOKEN) {
+  throw new Error(
+    "INTEGRATION_TEST_TOKEN env var is required to run live integration tests. " +
+      "Set it in your .env file or CI secret store (see .env.example).",
+  );
+}
+const LIVE_TOKEN = process.env.INTEGRATION_TEST_TOKEN;
 // Set BEFORE any module that reads process.env at import time
 process.env.ALLOY_INTERNAL_TOKEN = LIVE_TOKEN;
 

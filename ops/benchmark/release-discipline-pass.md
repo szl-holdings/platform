@@ -69,7 +69,7 @@ A point-in-time audit of release discipline across the repository. Identifies wh
 | `OAUTH_STATE_SECRET` in Replit Secrets | ACTION NEEDED | Removed from .replit; confirm it's been added to Replit Secrets |
 | `VAPID_PRIVATE_KEY` in Replit Secrets | ACTION NEEDED | Removed from .replit; confirm it's been added to Replit Secrets |
 | External service secrets (Stripe, SendGrid, Mapbox) | UNCONFIRMED | See `ops/security/secret-inventory.md` |
-| `INTEGRATION_TEST_TOKEN` not in source | ACTION NEEDED | Move to env var / GitHub Secrets |
+| `INTEGRATION_TEST_TOKEN` not in source | ✅ RESOLVED | Literal removed from source; test reads from env var; fails fast if unset |
 | Secret guidance consistent across ops docs | PASS | `production-hardening-checklist.md` and `production-secret-checklist.md` aligned (no contradictions) |
 
 ---
@@ -93,7 +93,7 @@ A point-in-time audit of release discipline across the repository. Identifies wh
 |----------|--------|-------|
 | HIGH | Add `OAUTH_STATE_SECRET` to Replit Secrets (new value) | Platform ops |
 | HIGH | Add `VAPID_PRIVATE_KEY` to Replit Secrets (new value) | Platform ops |
-| HIGH | Move `INTEGRATION_TEST_TOKEN` to GitHub Secrets / env var | Engineering |
+| ~~HIGH~~ DONE | ~~Move `INTEGRATION_TEST_TOKEN` to GitHub Secrets / env var~~ Token removed from source (task #721); add to GitHub Actions Secrets to complete provisioning | Engineering |
 | MEDIUM | Confirm `STRIPE_SECRET_KEY`, `RESEND_API_KEY`, `MAPBOX_ACCESS_TOKEN` in Replit Secrets | Platform ops |
 | MEDIUM | Evaluate and remove `npm-publish.yml`, `maven-publish.yml`, `rubygems-publish.yml`, `nuget-publish.yml` if unused | Engineering |
 | LOW | Pin `actions/setup-node` to SHA in all workflows that use version tag | Engineering |
