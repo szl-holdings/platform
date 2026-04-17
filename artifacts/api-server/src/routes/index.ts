@@ -25,6 +25,7 @@ import * as graph from "./groups/graph";
 import * as guardian from "./groups/guardian";
 import tracesRouter from "./traces";
 import reflectionsRouter from "./reflections";
+import plansRouter from "./plans";
 import * as alloyRuntime from "./groups/alloy-runtime-group";
 
 const router: IRouter = Router();
@@ -57,5 +58,6 @@ alloyRuntime.register(router);
 
 router.use(tracesRouter);
 router.use(reflectionsRouter);
+router.use(plansRouter);
 
 export default router;
