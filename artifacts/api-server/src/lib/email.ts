@@ -1086,3 +1086,47 @@ export function buildSupportTicketStatusUpdateEmail(params: {
   `);
 }
 
+const TYPE_COLORS: Record<string, string> = {
+  info:            "#6366f1",
+  success:         "#10b981",
+  warning:         "#f59e0b",
+  error:           "#ef4444",
+  action_required: "#f59e0b",
+  alert:           "#ef4444",
+};
+
+const TYPE_LABELS: Record<string, string> = {
+  info:            "Info",
+  success:         "Success",
+  warning:         "Warning",
+  error:           "Alert",
+  action_required: "Action Required",
+  alert:           "Alert",
+};
+
+export function buildTransactionalNotificationEmail(params: {
+  name: string;
+  title: string;
+  message: string;
+  type: string;
+  actionUrl?: string | null;
+}): string {
+  const { name, title, message, type, actionUrl } = params;
+  const color = TYPE_COLORS[type] ?? "#6366f1";
+  const label = TYPE_LABELS[type] ?? "Notification";
+  const safeName = escapeHtml(name);
+  const safeTitle = escapeHtml(title);
+  const safeMessage = escapeHtml(message).replace(/\n/g, "<br />");
+
+  return szlBrand(`
+    <div style="display:inline-block;padding:3px 10px;background:${color}15;border-radius:4px;margin-bottom:16px;">
+      <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:${color};">${label}</span>
+    </div>
+    <h2>${safeTitle}</h2>
+    <p>Hi ${safeName},</p>
+    <p>${safeMessage}</p>
+    ${actionUrl ? `<a class="cta" href="${actionUrl}" style="background:${color};">View Details</a>` : ""}
+    <p style="margin-top:20px;font-size:12px;color:#9ca3af;">This is a notification from the SZL Holdings platform. To manage your notification preferences, visit your account settings.</p>
+  `);
+}
+

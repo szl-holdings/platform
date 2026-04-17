@@ -2,9 +2,10 @@ import { logger } from "./logger";
 import { JOB_TYPES } from "./job-queue";
 import { durableJobQueue } from "@szl-holdings/forge-runtime";
 import { serverTelemetry } from "@szl-holdings/observability";
-import { db, pool, platformJobRunsTable, notificationsTable, notificationPreferencesTable } from "@szl-holdings/db";
+import { db, pool, platformJobRunsTable, notificationsTable, notificationPreferencesTable, usersTable } from "@szl-holdings/db";
 import { eq, and, gte, sql } from "drizzle-orm";
 import { randomUUID } from "crypto";
+import { sendEmail, buildNotificationDigestEmail, buildTransactionalNotificationEmail } from "./email";
 
 export const PLATFORM_JOB_TYPES = {
   LYTE_DIGEST: "lyte_digest",
@@ -743,6 +744,47 @@ durableJobQueue.register(PLATFORM_JOB_TYPES.NOTIFICATION_DISPATCH, async (job) =
     "[notification-dispatch] Processing channel dispatch job",
   );
 
+  if (payload.channel === "email") {
+    const [user] = await db
+      .select({ email: usersTable.email, displayName: usersTable.displayName })
+      .from(usersTable)
+      .where(eq(usersTable.id, payload.userId))
+      .limit(1);
+
+    if (!user) {
+      logger.warn({ userId: payload.userId }, "[notification-dispatch] User not found for email dispatch");
+    } else {
+      const appUrl = process.env["APP_URL"] ?? process.env["VITE_APP_URL"] ?? "https://szlholdings.com";
+      const actionUrl = payload.actionUrl
+        ? (payload.actionUrl.startsWith("http") ? payload.actionUrl : `${appUrl}${payload.actionUrl}`)
+        : null;
+
+      const name = user.displayName ?? user.email;
+      const html = buildTransactionalNotificationEmail({ name, title: payload.title, message: payload.message, type: payload.type, actionUrl });
+      const text = `${payload.title}\n\n${payload.message}${actionUrl ? `\n\n${actionUrl}` : ""}`;
+
+      const result = await sendEmail({
+        to: user.email,
+        subject: payload.title,
+        html,
+        text,
+      });
+
+      if (result.success) {
+        logger.info(
+          { channel: payload.channel, notificationId: payload.notificationId, userId: payload.userId, messageId: result.messageId },
+          "[notification-dispatch] Email sent",
+        );
+      } else {
+        logger.warn(
+          { channel: payload.channel, notificationId: payload.notificationId, userId: payload.userId, error: result.error },
+          "[notification-dispatch] Email delivery failed — provider rejected",
+        );
+        throw new Error(`Email delivery failed: ${result.error}`);
+      }
+    }
+  }
+
   logger.info({ channel: payload.channel, notificationId: payload.notificationId }, "[notification-dispatch] Job complete");
 });
 
@@ -769,6 +811,10 @@ durableJobQueue.register(PLATFORM_JOB_TYPES.NOTIFICATION_DIGEST, async (job) => 
   }
 
   let digestsSent = 0;
+  let digestsSkipped = 0;
+  const appUrl = process.env["APP_URL"] ?? process.env["VITE_APP_URL"] ?? "https://szlholdings.com";
+  const dateLabel = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
+
   for (const row of unreadByUser) {
     const [prefs] = await db
       .select({ emailEnabled: notificationPreferencesTable.emailEnabled })
@@ -776,15 +822,74 @@ durableJobQueue.register(PLATFORM_JOB_TYPES.NOTIFICATION_DIGEST, async (job) => 
       .where(eq(notificationPreferencesTable.userId, row.userId))
       .limit(1);
 
-    if (!prefs?.emailEnabled) continue;
+    if (!prefs?.emailEnabled) {
+      digestsSkipped++;
+      continue;
+    }
 
-    logger.info(
-      { userId: row.userId, unreadCount: row.count },
-      "[notification-digest] Email digest queued for user",
-    );
-    digestsSent++;
+    const [user] = await db
+      .select({ email: usersTable.email, displayName: usersTable.displayName })
+      .from(usersTable)
+      .where(eq(usersTable.id, row.userId))
+      .limit(1);
+
+    if (!user) {
+      logger.warn({ userId: row.userId }, "[notification-digest] User record not found — skipping");
+      digestsSkipped++;
+      continue;
+    }
+
+    const recentNotifs = await db
+      .select({
+        title: notificationsTable.title,
+        message: notificationsTable.message,
+        type: notificationsTable.type,
+        actionUrl: notificationsTable.actionUrl,
+        createdAt: notificationsTable.createdAt,
+      })
+      .from(notificationsTable)
+      .where(and(
+        eq(notificationsTable.userId, row.userId),
+        eq(notificationsTable.isRead, false),
+        gte(notificationsTable.createdAt, since),
+      ))
+      .limit(10);
+
+    const html = buildNotificationDigestEmail({
+      userName: user.displayName ?? user.email,
+      date: dateLabel,
+      notifications: recentNotifs.map(n => ({
+        title: n.title,
+        message: n.message,
+        type: n.type,
+        actionUrl: n.actionUrl ?? null,
+        createdAt: n.createdAt.toISOString(),
+      })),
+    });
+
+    const subject = `Your ${hours >= 24 ? "daily" : `${hours}-hour`} digest — ${row.count} unread notification${row.count !== 1 ? "s" : ""}`;
+
+    const result = await sendEmail({
+      to: user.email,
+      subject,
+      html,
+      text: `You have ${row.count} unread notification${row.count !== 1 ? "s" : ""} in the last ${hours} hours. Visit ${appUrl} to view them.`,
+    });
+
+    if (result.success) {
+      logger.info(
+        { userId: row.userId, unreadCount: row.count, messageId: result.messageId },
+        "[notification-digest] Digest email sent",
+      );
+      digestsSent++;
+    } else {
+      logger.warn(
+        { userId: row.userId, unreadCount: row.count, error: result.error },
+        "[notification-digest] Failed to send digest email",
+      );
+      digestsSkipped++;
+    }
   }
 
-  logger.info({ digestsSent, periodHours: hours }, "[notification-digest] Digest run complete");
-  logger.info({ digestsSent, periodHours: hours }, "[notification-digest] Digest complete");
+  logger.info({ digestsSent, digestsSkipped, periodHours: hours }, "[notification-digest] Digest complete");
 });
