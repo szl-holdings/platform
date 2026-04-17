@@ -80,6 +80,8 @@ const convergences = [
   { from: "Defense", to: "Command", icon: AlertTriangle, desc: "Incident INC-2847 impacts managed client Northgate. Lateral movement on DC-PROD-03 triggers automatic SLA escalation, client notification, and containment protocol — before the client knows.", color: "#ef4444", toColor: "#3b82f6" },
   { from: "Labs", to: "Defense", icon: Brain, desc: "Neural explorer detects anomalous pattern matching APT29 TTPs. Intelligence model confidence: 94%. MITRE mapping and hunting queries generated automatically. Defense SOC receives enriched alert in < 60 seconds.", color: "#8b5cf6", toColor: "#ef4444" },
   { from: "Command", to: "Labs", icon: Radio, desc: "Service desk ticket volume anomaly across 3 managed clients. Labs ingests the signal, generates churn risk model, and surfaces preventive actions to Command — within the same operating session.", color: "#3b82f6", toColor: "#8b5cf6" },
+  { from: "Defense", to: "Legal", icon: AlertTriangle, desc: "Ransomware containment on client Harfield Group triggers automatic legal intake. Matter opened, breach notification deadlines calculated across 7 jurisdictions, and privilege log initiated — all within the incident response window.", color: "#ef4444", toColor: "#d4a054" },
+  { from: "Legal", to: "Command", icon: FileSearch, desc: "Regulatory filing deadline for client Meridian Capital is 11 days out. Legal surfaces the hard constraint to Command, which auto-adjusts SLA priorities, reassigns support bandwidth, and flags any at-risk delivery commitments.", color: "#d4a054", toColor: "#3b82f6" },
 ];
 
 const operatingModel = [
