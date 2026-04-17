@@ -657,7 +657,7 @@ function App() {
               <Suspense fallback={<PageLoader />}><InvestorsTrustPage /></Suspense>
             </Route>
             <Route path="/investors/data-room">
-              <Suspense fallback={<PageLoader />}><InvestorsDataRoomPage /></Suspense>
+              <RequireAuth><Suspense fallback={<PageLoader />}><InvestorsDataRoomPage /></Suspense></RequireAuth>
             </Route>
             <Route path="/investors/founder">
               <Suspense fallback={<PageLoader />}><InvestorsFounderPage /></Suspense>

@@ -1,6 +1,8 @@
 import { Router, type IRouter } from "express";
 import rateLimit from "express-rate-limit";
 import { z } from "zod";
+import { readFileSync } from "fs";
+import { join } from "path";
 import { logger } from "../lib/logger";
 import { validateBody } from "../lib/validation";
 import {
@@ -21,10 +23,11 @@ import {
   firestormFindingsTable,
   carlotaInquiriesTable,
   carlotaReservationsTable,
+  auditEventsTable,
 } from "@szl-holdings/db";
-import { eq, desc, ilike, or, sql, count } from "drizzle-orm";
+import { eq, desc, ilike, or, sql, count, and } from "drizzle-orm";
 import { sendSuccess, sendNotFound, handleRouteError, parsePagination } from "../lib/api-response";
-import { authMiddleware, parseIdParam } from "../middlewares/auth";
+import { authMiddleware, parseIdParam, requireRole } from "../middlewares/auth";
 import { sendEmail, buildInquiryAckEmail, buildLeadNotificationEmail, INTERNAL_EMAIL } from "../lib/email";
 
 const createVentureSchema = z.object({
@@ -490,6 +493,121 @@ router.get("/holdings/search", async (req, res) => {
     res.json({ data: results, meta: { page: 1, limit: 25, total: results.length } });
   } catch (err) {
     handleRouteError(res, err, "Failed to search");
+  }
+});
+
+const INVESTOR_DOCS_DIR = join(__dirname, "../data/investor-docs");
+
+const INVESTOR_DOC_MANIFEST: Record<string, string> = {
+  "system-overview": "SYSTEM-OVERVIEW.md",
+  "architecture": "ARCHITECTURE.md",
+  "product-surfaces": "PRODUCT-SURFACES.md",
+  "data-model": "DATA-MODEL.md",
+  "api-spec": "API-SPEC.md",
+  "access-control": "ACCESS-CONTROL-MATRIX.md",
+  "security-checklist": "SECURITY-CHECKLIST.md",
+  "deployment-guide": "DEPLOYMENT-GUIDE.md",
+  "operations-runbook": "OPERATIONS-RUNBOOK.md",
+  "analytics-events": "ANALYTICS-EVENTS.md",
+  "known-gaps": "KNOWN-GAPS.md",
+};
+
+const INVESTOR_NDA_ACTION = "investor_nda_accepted";
+
+router.get("/investors/nda/status", authMiddleware(), async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).json({ error: "Unauthenticated" });
+      return;
+    }
+    const [record] = await db
+      .select({ id: auditEventsTable.id, createdAt: auditEventsTable.createdAt })
+      .from(auditEventsTable)
+      .where(and(eq(auditEventsTable.userId, userId), eq(auditEventsTable.action, INVESTOR_NDA_ACTION)))
+      .orderBy(desc(auditEventsTable.createdAt))
+      .limit(1);
+    res.json({ data: { accepted: Boolean(record), acceptedAt: record?.createdAt ?? null } });
+  } catch (err) {
+    logger.error({ err }, "Failed to check NDA status");
+    res.status(500).json({ error: "Failed to check NDA status" });
+  }
+});
+
+router.post("/investors/nda/accept", authMiddleware(), async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).json({ error: "Unauthenticated" });
+      return;
+    }
+    await db.insert(auditEventsTable).values({
+      userId,
+      action: INVESTOR_NDA_ACTION,
+      entityType: "investor_data_room",
+      entityId: "data-room-nda",
+      ipAddress: req.ip ?? null,
+      userAgent: req.headers["user-agent"] ?? null,
+      newValues: { acceptedAt: new Date().toISOString(), userAgent: req.headers["user-agent"] ?? null },
+    });
+    res.json({ data: { accepted: true } });
+  } catch (err) {
+    logger.error({ err }, "Failed to record NDA acceptance");
+    res.status(500).json({ error: "Failed to record NDA acceptance" });
+  }
+});
+
+router.get("/investors/docs", authMiddleware(), requireRole("admin", "exec", "analyst"), async (req, res) => {
+  const userId = req.user?.id;
+  if (!userId) {
+    res.status(401).json({ error: "Unauthenticated" });
+    return;
+  }
+  try {
+    const [ndaRecord] = await db
+      .select({ id: auditEventsTable.id })
+      .from(auditEventsTable)
+      .where(and(eq(auditEventsTable.userId, userId), eq(auditEventsTable.action, INVESTOR_NDA_ACTION)))
+      .limit(1);
+    if (!ndaRecord) {
+      res.status(403).json({ error: "NDA acceptance required", code: "NDA_REQUIRED" });
+      return;
+    }
+    const docs = Object.entries(INVESTOR_DOC_MANIFEST).map(([id, filename]) => ({ id, filename }));
+    res.json({ data: docs });
+  } catch (err) {
+    logger.error({ err }, "Failed to list investor docs");
+    res.status(500).json({ error: "Failed to list investor docs" });
+  }
+});
+
+router.get("/investors/docs/:id", authMiddleware(), requireRole("admin", "exec", "analyst"), async (req, res) => {
+  const userId = req.user?.id;
+  if (!userId) {
+    res.status(401).json({ error: "Unauthenticated" });
+    return;
+  }
+  try {
+    const [ndaRecord] = await db
+      .select({ id: auditEventsTable.id })
+      .from(auditEventsTable)
+      .where(and(eq(auditEventsTable.userId, userId), eq(auditEventsTable.action, INVESTOR_NDA_ACTION)))
+      .limit(1);
+    if (!ndaRecord) {
+      res.status(403).json({ error: "NDA acceptance required", code: "NDA_REQUIRED" });
+      return;
+    }
+    const { id } = req.params;
+    const filename = INVESTOR_DOC_MANIFEST[id];
+    if (!filename) {
+      res.status(404).json({ error: "Document not found" });
+      return;
+    }
+    const content = readFileSync(join(INVESTOR_DOCS_DIR, filename), "utf-8");
+    res.json({ data: { id, filename, content } });
+  } catch (err) {
+    logger.error({ err, id: req.params.id }, "Failed to read investor doc");
+    res.status(500).json({ error: "Failed to read document" });
   }
 });
 

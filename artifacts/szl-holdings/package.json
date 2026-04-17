@@ -33,20 +33,22 @@
   },
   "dependencies": {
     "@szl-holdings/analytics": "workspace:*",
+    "@szl-holdings/covenant-policy": "workspace:*",
     "@szl-holdings/graphql-client": "workspace:*",
+    "@szl-holdings/monte-carlo": "workspace:*",
     "@szl-holdings/observability": "workspace:*",
+    "@szl-holdings/prism-bus": "workspace:*",
     "@szl-holdings/replit-auth-web": "workspace:*",
     "@szl-holdings/shared-ui": "workspace:*",
+    "@szl-holdings/ui-command": "workspace:*",
     "clsx": "catalog:",
     "date-fns": "^3.6.0",
     "i18next": "^26.0.3",
     "i18next-browser-languagedetector": "^8.2.1",
     "react-i18next": "^17.0.2",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1",
     "sonner": "^2.0.7",
-    "@szl-holdings/prism-bus": "workspace:*",
-    "@szl-holdings/covenant-policy": "workspace:*",
-    "@szl-holdings/monte-carlo": "workspace:*",
-    "@szl-holdings/ui-command": "workspace:*",
     "zod": "catalog:"
   }
 }
