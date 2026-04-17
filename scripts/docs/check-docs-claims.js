@@ -1,0 +1,483 @@
+#!/usr/bin/env node
+/**
+ * check-docs-claims.js
+ *
+ * Strict validator for specific, high-risk documentation claims.
+ * Unlike check-docs-sync.js (which is advisory), this script FAILS with a
+ * non-zero exit code when a documented claim no longer matches the codebase.
+ *
+ * This prevents small code changes (a renamed role, a new CSRF exemption, a
+ * removed middleware file) from silently invalidating investor or enterprise
+ * diligence documents such as API-SPEC.md, ACCESS-CONTROL-MATRIX.md, and
+ * SECURITY-CHECKLIST.md.
+ *
+ * Checks performed:
+ *   1. Platform role enum   — ACCESS-CONTROL-MATRIX.md vs lib/db/src/schema/auth.ts
+ *   2. Roles-table enum     — ACCESS-CONTROL-MATRIX.md vs lib/db/src/schema/auth.ts
+ *   3. CSRF exempt paths    — API-SPEC.md documented exemptions vs middlewares/csrf.ts
+ *   4. CSRF prefix rules    — API-SPEC.md prefix exemptions (/api/ai/*, /api/webhooks/)
+ *   5. Key route mounts     — API-SPEC.md route groups vs artifacts/api-server/src/routes/index.ts
+ *   6. Referenced files     — SECURITY-CHECKLIST.md file references exist on disk
+ *   7. Referenced DB tables — SECURITY-CHECKLIST.md / ACCESS-CONTROL-MATRIX.md table
+ *                             names exist in lib/db/src/schema/ as pgTable declarations
+ *
+ * CI integration:
+ *   The .github/workflows/ci.yml "docs-claims-check" job runs this script.
+ *   It has NO continue-on-error — a failure here blocks the PR merge.
+ *   When GITHUB_STEP_SUMMARY is set a Markdown summary is written for triage.
+ *
+ * Exits 0 on full pass, 1 on any failure.
+ */
+
+import { readFileSync, existsSync, readdirSync, appendFileSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const ROOT = join(__dirname, '..', '..');
+
+// ─── helpers ──────────────────────────────────────────────────────────────────
+
+function readFile(relPath) {
+  const abs = join(ROOT, relPath);
+  try {
+    return readFileSync(abs, 'utf8');
+  } catch {
+    return null;
+  }
+}
+
+function fileExists(relPath) {
+  return existsSync(join(ROOT, relPath));
+}
+
+// Extract all quoted strings from a TypeScript enum array literal.
+// Handles both:
+//   fieldName: text("col_name", { enum: ["a", "b"] })
+//   fieldName: text("col_name", { enum: ["a",
+//                                         "b"] })
+// Pass the column name string as it appears quoted in text("col_name", ...).
+function extractTsEnumValues(src, colName) {
+  // Match text("col_name", { enum: [...] }) — colName is the quoted string argument
+  const escaped = colName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const re = new RegExp('"' + escaped + '"\\s*,\\s*\\{[^}]*enum:\\s*\\[([^\\]]+)\\]', 's');
+  const m = src.match(re);
+  if (!m) return null;
+  const items = m[1].match(/"([^"]+)"/g);
+  if (!items) return [];
+  return items.map((s) => s.replace(/"/g, ''));
+}
+
+// Extract backtick-quoted identifiers from the first column of markdown table rows
+// within a section. Stops at the next heading of any level (##, ###, etc.).
+// Designed to pull role enum values from tables like:
+//   | `founder_admin` | Full platform access |
+function extractTableFirstColRoles(mdText, sectionHeading) {
+  const idx = mdText.indexOf(sectionHeading);
+  if (idx === -1) return null;
+  // Stop at the next heading line (any level: ##, ###, ####) that is NOT the heading itself
+  const afterHeading = mdText.slice(idx + sectionHeading.length);
+  const nextHeadingMatch = afterHeading.match(/\n#{2,}\s/);
+  const slice = nextHeadingMatch
+    ? afterHeading.slice(0, nextHeadingMatch.index)
+    : afterHeading;
+  // Match table rows: | `identifier` | ...
+  const rows = slice.match(/^\|\s*`([a-z][a-z0-9_]*)`\s*\|/gm);
+  if (!rows) return [];
+  return [...new Set(rows.map((r) => r.match(/`([a-z][a-z0-9_]*)`/)[1]))];
+}
+
+// ─── GitHub Actions step summary ──────────────────────────────────────────────
+
+const GH_SUMMARY = process.env.GITHUB_STEP_SUMMARY || null;
+const summaryLines = [];
+function addSummary(line) { summaryLines.push(line); }
+
+// ─── result tracking ──────────────────────────────────────────────────────────
+
+let failures = 0;
+let passes = 0;
+
+function pass(label, detail) {
+  passes++;
+  const msg = '  \u2713  ' + label + (detail ? '  (' + detail + ')' : '');
+  console.log(msg);
+  addSummary('| \u2705 Pass | ' + label + ' | ' + (detail || '') + ' |');
+}
+
+function fail(label, detail) {
+  failures++;
+  const msg = '  \u2717  ' + label + (detail ? '\n       \u21b3 ' + detail : '');
+  console.error(msg);
+  addSummary('| \u274c Fail | ' + label + ' | ' + (detail || '') + ' |');
+}
+
+function skip(label, reason) {
+  const msg = '  \u2014  ' + label + ' (skipped: ' + reason + ')';
+  console.log(msg);
+  addSummary('| \u23ed Skip | ' + label + ' | ' + reason + ' |');
+}
+
+function section(title) {
+  console.log('\n[ ' + title + ' ]');
+}
+
+// ─── load source files ────────────────────────────────────────────────────────
+
+const authSchema      = readFile('lib/db/src/schema/auth.ts');
+const csrfMiddleware  = readFile('artifacts/api-server/src/middlewares/csrf.ts');
+const routesIndex     = readFile('artifacts/api-server/src/routes/index.ts');
+const accessMatrix    = readFile('ACCESS-CONTROL-MATRIX.md');
+const apiSpec         = readFile('API-SPEC.md');
+const securityChecklist = readFile('SECURITY-CHECKLIST.md');
+
+// ─── header ───────────────────────────────────────────────────────────────────
+
+console.log('\n\u2554' + '\u2550'.repeat(62) + '\u2557');
+console.log('\u2551        Strict Documentation Claims Check                    \u2551');
+console.log('\u255a' + '\u2550'.repeat(62) + '\u255d');
+
+addSummary('## Strict Documentation Claims Check');
+addSummary('');
+addSummary('| Status | Check | Detail |');
+addSummary('|--------|-------|--------|');
+
+// ─── CHECK 1: Platform role enum ──────────────────────────────────────────────
+// ACCESS-CONTROL-MATRIX.md §"Platform Roles" must match the platform_role enum
+// in lib/db/src/schema/auth.ts usersTable.
+
+section('Platform roles — ACCESS-CONTROL-MATRIX.md vs lib/db/src/schema/auth.ts');
+
+if (!authSchema) {
+  fail('Cannot read lib/db/src/schema/auth.ts', 'file not found or unreadable');
+} else if (!accessMatrix) {
+  fail('Cannot read ACCESS-CONTROL-MATRIX.md', 'file not found or unreadable');
+} else {
+  const liveRoles = extractTsEnumValues(authSchema, 'platform_role');
+  if (!liveRoles || liveRoles.length === 0) {
+    fail('Could not parse platform_role enum from auth.ts', 'regex found no match');
+  } else {
+    const docRoles = extractTableFirstColRoles(accessMatrix, '### Platform Roles');
+    if (!docRoles) {
+      fail('Could not find "### Platform Roles" section in ACCESS-CONTROL-MATRIX.md');
+    } else {
+      const inDocNotCode = docRoles.filter((r) => !liveRoles.includes(r));
+      const inCodeNotDoc = liveRoles.filter((r) => !docRoles.includes(r));
+
+      if (inDocNotCode.length > 0) {
+        fail(
+          'ACCESS-CONTROL-MATRIX.md documents platform roles not found in auth.ts enum',
+          'Missing from code: ' + inDocNotCode.join(', ')
+        );
+      }
+      if (inCodeNotDoc.length > 0) {
+        fail(
+          'auth.ts platform_role enum has values not documented in ACCESS-CONTROL-MATRIX.md',
+          'Undocumented roles: ' + inCodeNotDoc.join(', ')
+        );
+      }
+      if (inDocNotCode.length === 0 && inCodeNotDoc.length === 0) {
+        pass('Platform role enum matches ACCESS-CONTROL-MATRIX.md', liveRoles.join(', '));
+      }
+    }
+  }
+}
+
+// ─── CHECK 2: Roles-table enum ────────────────────────────────────────────────
+// ACCESS-CONTROL-MATRIX.md §"Extended Roles Table" lists roles.name enum values.
+// These must match rolesTable in auth.ts.
+
+section('Roles-table enum — ACCESS-CONTROL-MATRIX.md §"Extended Roles Table" vs auth.ts');
+
+if (!authSchema) {
+  skip('Roles-table enum check', 'auth.ts not readable (see check 1)');
+} else if (!accessMatrix) {
+  skip('Roles-table enum check', 'ACCESS-CONTROL-MATRIX.md not readable (see check 1)');
+} else {
+  // The rolesTable name enum: name: text("name", { enum: [...] })
+  const liveRoles = extractTsEnumValues(authSchema, 'name');
+  if (!liveRoles) {
+    fail('Could not parse rolesTable name enum from auth.ts', 'regex found no match');
+  } else {
+    // Extract from the "Roles include: …" sentence in the Extended Roles Table section.
+    // That sentence enumerates every role — targeting it avoids picking up table/schema
+    // names (like `roles`, `user_roles`) that appear in surrounding prose.
+    const rolesIncludeLine = (() => {
+      const idx = accessMatrix.indexOf('Extended Roles Table');
+      if (idx === -1) return null;
+      const slice = accessMatrix.slice(idx, idx + 1000);
+      return slice.split('\n').find((l) => l.includes('Roles include:')) || null;
+    })();
+
+    if (!rolesIncludeLine) {
+      fail('Could not find "Roles include:" sentence in Extended Roles Table section of ACCESS-CONTROL-MATRIX.md');
+    }
+
+    // Extract only the portion of the line that comes AFTER "Roles include:" so that
+    // table/schema names mentioned earlier in the same sentence are not captured.
+    const docRoles = rolesIncludeLine
+      ? (() => {
+          const afterMarker = rolesIncludeLine.slice(rolesIncludeLine.indexOf('Roles include:') + 'Roles include:'.length);
+          return (afterMarker.match(/`([a-z][a-z0-9_]+)`/g) || []).map((s) => s.replace(/`/g, ''));
+        })()
+      : [];
+
+    if (docRoles.length === 0) {
+      fail('Could not extract role names from "Extended Roles Table" section', 'no backtick-quoted role identifiers found in the "Roles include:" sentence');
+    } else {
+      const inDocNotCode = docRoles.filter((r) => !liveRoles.includes(r));
+      const inCodeNotDoc = liveRoles.filter((r) => !docRoles.includes(r));
+
+      if (inDocNotCode.length > 0) {
+        fail(
+          'ACCESS-CONTROL-MATRIX.md Extended Roles Table lists roles absent from auth.ts',
+          'Missing from code: ' + inDocNotCode.join(', ')
+        );
+      }
+      if (inCodeNotDoc.length > 0) {
+        fail(
+          'auth.ts rolesTable has values not listed in ACCESS-CONTROL-MATRIX.md Extended Roles Table',
+          'Undocumented: ' + inCodeNotDoc.join(', ')
+        );
+      }
+      if (inDocNotCode.length === 0 && inCodeNotDoc.length === 0) {
+        pass('Roles-table enum matches ACCESS-CONTROL-MATRIX.md', liveRoles.join(', '));
+      }
+    }
+  }
+}
+
+// ─── CHECK 3: CSRF exempt paths ───────────────────────────────────────────────
+// API-SPEC.md documents specific paths as CSRF-exempt. Verify each one still
+// appears in the EXEMPT_PATHS set (or isExempt() logic) in csrf.ts.
+
+section('CSRF exempt paths — API-SPEC.md documented exemptions vs middlewares/csrf.ts');
+
+// These are the specific paths API-SPEC.md §"CSRF Protection" calls out.
+const DOCUMENTED_CSRF_EXEMPT_PATHS = [
+  '/api/csrf-token',
+  '/api/auth/login',
+  '/api/auth/login-password',
+  '/api/auth/logout',
+  '/api/auth/callback',
+  '/api/auth/ws-ticket',
+  '/api/billing/webhooks',
+];
+
+if (!csrfMiddleware) {
+  fail('Cannot read artifacts/api-server/src/middlewares/csrf.ts', 'file not found or unreadable');
+} else if (!apiSpec) {
+  fail('Cannot read API-SPEC.md', 'file not found or unreadable');
+} else {
+  for (const exemptPath of DOCUMENTED_CSRF_EXEMPT_PATHS) {
+    // The path should appear as a quoted string literal in csrf.ts
+    const escaped = exemptPath.replace(/\//g, '\\/');
+    const pattern = new RegExp('"' + escaped + '"');
+    if (pattern.test(csrfMiddleware)) {
+      pass('CSRF exempt: ' + exemptPath);
+    } else {
+      fail(
+        'Documented CSRF-exempt path not found in csrf.ts EXEMPT_PATHS',
+        exemptPath + ' — API-SPEC.md claims this path is CSRF-exempt but it is not in the source'
+      );
+    }
+  }
+}
+
+// ─── CHECK 4: CSRF prefix exemptions ─────────────────────────────────────────
+// API-SPEC.md §"CSRF Protection" states /api/ai/* routes are "fully exempt" and
+// /api/webhooks/* uses provider-signature verification instead of CSRF tokens.
+
+section('CSRF prefix rules — API-SPEC.md prefix exemptions vs middlewares/csrf.ts');
+
+if (!csrfMiddleware) {
+  skip('CSRF prefix rules check', 'csrf.ts not readable (see check 3)');
+} else {
+  const prefixChecks = [
+    {
+      desc: '/api/ai/* routes are CSRF-exempt (startsWith check)',
+      pattern: /path\.startsWith\(['"]\/api\/ai\//,
+    },
+    {
+      desc: '/api/webhooks/* routes are CSRF-exempt (startsWith check)',
+      pattern: /path\.startsWith\(['"]\/api\/webhooks\//,
+    },
+    {
+      desc: '/api/mcp/* routes are CSRF-exempt (mcp check)',
+      pattern: /path\.startsWith\(['"]\/api\/mcp\//,
+    },
+  ];
+
+  for (const { desc, pattern } of prefixChecks) {
+    if (pattern.test(csrfMiddleware)) {
+      pass('CSRF prefix rule present: ' + desc);
+    } else {
+      fail(
+        'Documented CSRF prefix exemption not found in csrf.ts isExempt()',
+        desc + ' — pattern not found in source'
+      );
+    }
+  }
+}
+
+// ─── CHECK 5: Key route mounts ────────────────────────────────────────────────
+// API-SPEC.md documents specific route groups. Verify each is mounted in
+// artifacts/api-server/src/routes/index.ts.
+
+section('Key route mounts — API-SPEC.md route groups vs routes/index.ts');
+
+// Documented route groups and the corresponding mount evidence in routes/index.ts.
+const DOCUMENTED_ROUTE_MOUNTS = [
+  { desc: '/pulse route group', pattern: /router\.use\(['"]\/pulse['"]/ },
+  { desc: '/nexus route group', pattern: /router\.use\(['"]\/nexus['"]/ },
+  { desc: 'core routes registered', pattern: /core\.register\(router\)/ },
+  { desc: 'billing routes registered', pattern: /billing\.register\(router\)/ },
+  { desc: 'ai routes registered', pattern: /ai\.register\(router\)/ },
+  { desc: 'security routes registered', pattern: /security\.register\(router\)/ },
+  { desc: 'terra routes registered', pattern: /terra\.register\(router\)/ },
+  { desc: 'vessels routes registered', pattern: /vessels\.register\(router\)/ },
+  { desc: 'alloy routes registered', pattern: /alloy\.register\(router\)/ },
+  { desc: 'guardian policy check applied', pattern: /guardianPolicyCheck\(\)/ },
+];
+
+if (!routesIndex) {
+  fail('Cannot read artifacts/api-server/src/routes/index.ts', 'file not found or unreadable');
+} else {
+  for (const { desc, pattern } of DOCUMENTED_ROUTE_MOUNTS) {
+    if (pattern.test(routesIndex)) {
+      pass('Route mount confirmed: ' + desc);
+    } else {
+      fail(
+        'Documented route group not found in routes/index.ts',
+        desc + ' — expected pattern not present; update API-SPEC.md if the route was intentionally removed'
+      );
+    }
+  }
+}
+
+// ─── CHECK 6: Referenced files exist ─────────────────────────────────────────
+// SECURITY-CHECKLIST.md cites specific source files as evidence for controls.
+// Verify those files exist on disk.
+
+section('Referenced source files — SECURITY-CHECKLIST.md evidence files exist on disk');
+
+const SECURITY_REFERENCED_FILES = [
+  'artifacts/api-server/src/middlewares/auth.ts',
+  'artifacts/api-server/src/middlewares/csrf.ts',
+  'artifacts/api-server/src/middlewares/admin-guard.ts',
+  // startup validation (SECURITY-CHECKLIST.md A3 — formerly startup-config.ts)
+  'artifacts/api-server/src/lib/startup-validation.ts',
+  // admin routes are a directory; check the entry-point index
+  'artifacts/api-server/src/routes/admin/index.ts',
+  'artifacts/api-server/src/routes/alloy-governance.ts',
+  'artifacts/api-server/src/routes/ai-engine.ts',
+  'artifacts/api-server/src/routes/mcp.ts',
+  'lib/db/src/schema/auth.ts',
+];
+
+for (const relPath of SECURITY_REFERENCED_FILES) {
+  if (fileExists(relPath)) {
+    pass('File exists: ' + relPath);
+  } else {
+    fail(
+      'File referenced in SECURITY-CHECKLIST.md no longer exists',
+      relPath + ' — update SECURITY-CHECKLIST.md evidence column if the file was moved or renamed'
+    );
+  }
+}
+
+// ─── CHECK 7: Referenced DB tables exist in schema ───────────────────────────
+// SECURITY-CHECKLIST.md and ACCESS-CONTROL-MATRIX.md reference specific table
+// names. Verify each is declared as a pgTable in lib/db/src/schema/.
+
+section('DB table references — docs-cited table names exist in lib/db/src/schema/');
+
+// Map: table name → which doc cited it.
+const DOCUMENTED_TABLES = {
+  sessions:             'ACCESS-CONTROL-MATRIX.md (session management)',
+  users:                'ACCESS-CONTROL-MATRIX.md / SECURITY-CHECKLIST.md',
+  roles:                'ACCESS-CONTROL-MATRIX.md (roles-table section)',
+  user_roles:           'ACCESS-CONTROL-MATRIX.md (user_roles join)',
+  rag_knowledge_chunks: 'SECURITY-CHECKLIST.md (T6 — tenant isolation migration)',
+};
+
+for (const [tableName, citation] of Object.entries(DOCUMENTED_TABLES)) {
+  // pgTable("table_name", ...) — search across schema files via string presence in auth.ts
+  // and a wider grep-like scan via reading all schema TS files is expensive here;
+  // instead we rely on each table being grep-able via a known pattern in the schema dir.
+  // We do a direct string search across all .ts files we can find via require patterns.
+  // Since we can't do a true recursive grep here, we search through known schema file paths
+  // and the main auth.ts that we already loaded.
+
+  const quotedName = '"' + tableName + '"';
+  let found = false;
+
+  // Check in the already-loaded auth.ts
+  if (authSchema && authSchema.includes(quotedName)) {
+    found = true;
+  }
+
+  // For tables not in auth.ts, check the schema directory directly
+  if (!found) {
+    const schemaDir = join(ROOT, 'lib/db/src/schema');
+    try {
+      const files = readdirSync(schemaDir).filter((f) => f.endsWith('.ts'));
+      for (const f of files) {
+        const content = readFile('lib/db/src/schema/' + f);
+        if (content && content.includes(quotedName)) {
+          found = true;
+          break;
+        }
+      }
+    } catch {
+      // fallback: accept as unknown
+    }
+  }
+
+  if (found) {
+    pass('Table "' + tableName + '" exists in schema (cited by ' + citation + ')');
+  } else {
+    fail(
+      'Documented table not found in lib/db/src/schema/',
+      '"' + tableName + '" — cited by ' + citation + '. Update docs if table was renamed/removed.'
+    );
+  }
+}
+
+// ─── summary ──────────────────────────────────────────────────────────────────
+
+console.log('\n' + '\u2501'.repeat(66));
+console.log('  Result: ' + passes + ' check(s) passed, ' + failures + ' failure(s)');
+
+if (failures > 0) {
+  console.error(
+    '\n  \u274c ' + failures + ' documented claim(s) no longer match the codebase.\n' +
+    '  Update the relevant docs (API-SPEC.md, ACCESS-CONTROL-MATRIX.md,\n' +
+    '  SECURITY-CHECKLIST.md) to reflect the current implementation, or\n' +
+    '  revert the code change that caused the divergence.\n'
+  );
+} else {
+  console.log('\n  \u2713 All documented claims are consistent with the codebase.\n');
+}
+
+// Write GitHub Actions step summary when running in CI.
+if (GH_SUMMARY) {
+  addSummary('');
+  addSummary('**Result:** ' + passes + ' passed, ' + failures + ' failure(s)');
+  if (failures > 0) {
+    addSummary('');
+    addSummary(
+      '> **' + failures + ' documented claim(s) no longer match the codebase.**\n' +
+      '> Update API-SPEC.md, ACCESS-CONTROL-MATRIX.md, or SECURITY-CHECKLIST.md\n' +
+      '> to match the current implementation, or revert the offending code change.'
+    );
+  }
+  try {
+    appendFileSync(GH_SUMMARY, summaryLines.join('\n') + '\n');
+  } catch {
+    // Non-fatal: step summary is best-effort
+  }
+}
+
+process.exit(failures > 0 ? 1 : 0);

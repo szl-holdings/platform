@@ -17,11 +17,11 @@ This checklist maps security controls to their actual implementation in the code
 |---|---------|--------|----------|
 | A1 | All internal service tokens compared with `crypto.timingSafeEqual` | ✅ Done | `middlewares/auth.ts` `checkInternalToken()` |
 | A2 | Session secret rotatable via `SESSION_SECRET` env var | ✅ Done | `app.ts` — express-session config |
-| A3 | `ALLOY_INTERNAL_TOKEN` enforces min 32 chars; secure fallback in dev | ✅ Done | `lib/startup-config.ts` |
+| A3 | `ALLOY_INTERNAL_TOKEN` enforces min 32 chars; secure fallback in dev | ✅ Done | `lib/startup-validation.ts` |
 | A4 | JWT/session expiry enforced | ✅ Done | Session `maxAge` and token expiry validated |
 | A5 | Auth middleware applied to all non-public routes | ✅ Done | Required on all write routes |
 | A6 | RBAC (`requireRole`) on admin/exec routes | ✅ Done | Enforced on admin, ops, exec, and certification routes |
-| A7 | Impersonation requires `admin` role and persists audit log | ✅ Done | `routes/admin.ts` logs activity on start/end |
+| A7 | Impersonation requires `admin` role and persists audit log | ✅ Done | `routes/admin/index.ts` logs activity on start/end |
 
 ### Tenant Isolation
 | # | Control | Status | Evidence |
