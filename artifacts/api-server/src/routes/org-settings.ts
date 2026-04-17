@@ -636,7 +636,7 @@ router.post("/user/password-reset", writeLimiter, async (req: Request, res: Resp
       const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
 
       await pool.query(
-        `UPDATE users SET email_verification_token = $1, email_verification_token_expires_at = $2, updated_at = NOW() WHERE id = $3`,
+        `UPDATE users SET password_reset_token = $1, password_reset_token_expires_at = $2, updated_at = NOW() WHERE id = $3`,
         [token, expiresAt, user.id],
       );
 
@@ -689,9 +689,9 @@ router.post("/user/password-reset/confirm", writeLimiter, async (req: Request, r
 
     const { rows } = await pool.query<{ id: number; email: string }>(
       `SELECT id, email FROM users
-       WHERE email_verification_token = $1
-         AND email_verification_token_expires_at > NOW()
-         AND email_verification_token IS NOT NULL
+       WHERE password_reset_token = $1
+         AND password_reset_token_expires_at > NOW()
+         AND password_reset_token IS NOT NULL
        LIMIT 1`,
       [token],
     );
@@ -708,8 +708,8 @@ router.post("/user/password-reset/confirm", writeLimiter, async (req: Request, r
     await pool.query(
       `UPDATE users SET
          password_hash = $1,
-         email_verification_token = NULL,
-         email_verification_token_expires_at = NULL,
+         password_reset_token = NULL,
+         password_reset_token_expires_at = NULL,
          updated_at = NOW()
        WHERE id = $2`,
       [passwordHash, user.id],

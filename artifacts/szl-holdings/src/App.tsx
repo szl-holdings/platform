@@ -123,6 +123,7 @@ const HowItWorksPage = lazy(() => import("@/pages/how-it-works"));
 const CompanyPage = lazy(() => import("@/pages/company"));
 const FounderPage = lazy(() => import("@/pages/founder"));
 const NotFoundPage = lazy(() => import("@/pages/not-found"));
+const ResetPasswordPage = lazy(() => import("@/pages/reset-password"));
 const EcosystemPage = lazy(() => import("@/pages/ecosystem"));
 const AutopilotPage = lazy(() => import("@/pages/autopilot"));
 const CaseStudiesPage = lazy(() => import("@/pages/case-studies"));
@@ -1086,6 +1087,11 @@ function App() {
             </Route>
             <Route path="/support">
               <RequireAuth><Suspense fallback={<PageLoader />}><SupportPortalPage /></Suspense></RequireAuth>
+            </Route>
+
+            {/* ── Auth utility routes ── */}
+            <Route path="/reset-password">
+              <Suspense fallback={<PageLoader />}><ResetPasswordPage /></Suspense>
             </Route>
 
             {/* ── Legal / utility routes ── */}
