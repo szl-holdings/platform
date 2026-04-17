@@ -4,6 +4,7 @@ import { View, StyleSheet } from "react-native";
 import { useAuth } from "@/context/AuthContext";
 import { WorkspaceSwitcher } from "@/components/WorkspaceSwitcher";
 import { ScreenshotPolicyEnforcer } from "@/components/ScreenshotPolicyEnforcer";
+import { BottomTabBar } from "@/components/BottomTabBar";
 
 export default function ShellLayout() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -14,21 +15,24 @@ export default function ShellLayout() {
 
   return (
     <View style={styles.root}>
-      <Stack screenOptions={{ headerShown: false, animation: "none" }}>
-        <Stack.Screen name="index" />
-        <Stack.Screen name="defense" />
-        <Stack.Screen name="fleet" />
-        <Stack.Screen name="properties" />
-        <Stack.Screen name="operations" />
-        <Stack.Screen name="advisory" />
-        <Stack.Screen name="portfolio" />
-        <Stack.Screen name="founder" />
-        <Stack.Screen name="quick-actions" options={{ animation: "slide_from_bottom" }} />
-        <Stack.Screen name="settings" options={{ animation: "slide_from_right" }} />
-        <Stack.Screen name="intelligence" />
-        <Stack.Screen name="notifications" options={{ animation: "slide_from_right" }} />
-        <Stack.Screen name="usage" options={{ animation: "slide_from_right" }} />
-      </Stack>
+      <View style={styles.stackContainer}>
+        <Stack screenOptions={{ headerShown: false, animation: "none" }}>
+          <Stack.Screen name="index" />
+          <Stack.Screen name="defense" />
+          <Stack.Screen name="fleet" />
+          <Stack.Screen name="properties" />
+          <Stack.Screen name="operations" />
+          <Stack.Screen name="advisory" />
+          <Stack.Screen name="portfolio" />
+          <Stack.Screen name="founder" />
+          <Stack.Screen name="quick-actions" options={{ animation: "slide_from_bottom" }} />
+          <Stack.Screen name="settings" options={{ animation: "slide_from_right" }} />
+          <Stack.Screen name="intelligence" />
+          <Stack.Screen name="notifications" options={{ animation: "slide_from_right" }} />
+          <Stack.Screen name="usage" options={{ animation: "slide_from_right" }} />
+        </Stack>
+      </View>
+      <BottomTabBar />
       <WorkspaceSwitcher />
       <ScreenshotPolicyEnforcer />
     </View>
@@ -37,4 +41,5 @@ export default function ShellLayout() {
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
+  stackContainer: { flex: 1 },
 });

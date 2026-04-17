@@ -216,7 +216,7 @@ export default function CommandFeedScreen() {
     }
     const allDomains: WorkspaceDomain[] = [
       "command", "defense", "fleet", "properties", "operations",
-      "advisory", "portfolio", "founder", "intelligence",
+      "advisory", "portfolio", "founder",
     ];
     for (const d of allDomains) {
       setBadge(d, counts[d] ?? 0);
