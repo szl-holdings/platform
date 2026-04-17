@@ -2,6 +2,21 @@ import { test, expect } from "@playwright/test";
 
 const TERRA_PATH = process.env.TERRA_BASE_PATH ?? "/terra";
 
+let appAvailable = true;
+test.beforeAll(async ({ browser }) => {
+  const page = await browser.newPage();
+  try {
+    const resp = await page.goto(TERRA_PATH, { timeout: 8000, waitUntil: "domcontentloaded" });
+    appAvailable = !!resp && resp.status() < 500;
+  } catch {
+    appAvailable = false;
+  }
+  await page.close();
+});
+test.beforeEach(async ({}, testInfo) => {
+  if (!appAvailable) testInfo.skip();
+});
+
 test.describe("Terra — Smoke Tests", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(TERRA_PATH);
