@@ -35,14 +35,40 @@ export function listChecks(): string[] {
 /**
  * Run every applicable check against the output and aggregate into a
  * VerifierDecision. Checks that opt out (return undefined) are skipped.
+ *
+ * Two call shapes are supported:
+ *   verify(output, target, context?)   — full form with explicit target
+ *   verify(output, context?)           — short form; target defaults to
+ *                                        a synthetic "output" target
  */
 export function verify(
   output: VerifierOutput,
+  context?: Partial<VerifierContext>,
+): VerifierDecision;
+export function verify(
+  output: VerifierOutput,
   target: VerifierTarget,
-  context: Partial<VerifierContext> = {},
+  context?: Partial<VerifierContext>,
+): VerifierDecision;
+export function verify(
+  output: VerifierOutput,
+  targetOrContext?: VerifierTarget | Partial<VerifierContext>,
+  maybeContext: Partial<VerifierContext> = {},
 ): VerifierDecision {
+  const targetParse =
+    targetOrContext !== undefined
+      ? VerifierTargetSchema.safeParse(targetOrContext)
+      : null;
+  const target: VerifierTarget = targetParse?.success
+    ? targetParse.data
+    : { targetType: "output", targetId: randomUUID() };
+  const context: Partial<VerifierContext> =
+    targetParse?.success
+      ? maybeContext
+      : ((targetOrContext as Partial<VerifierContext> | undefined) ?? {});
+
   const parsedOutput = VerifierOutputSchema.parse(output);
-  const parsedTarget = VerifierTargetSchema.parse(target);
+  const parsedTarget = target;
   const parsedContext = VerifierContextSchema.parse(context);
 
   const disabled = new Set(parsedContext.disabledChecks);
@@ -55,7 +81,7 @@ export function verify(
     // Short-circuit: if any check raises a blocker, stop running further
     // checks. The aggregator will still emit a fully-populated decision
     // from the partial results.
-    if (r.severity === "blocker") break;
+    if (r.outcome === "blocked") break;
   }
 
   const aggregated = aggregateDecision(results);
