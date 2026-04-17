@@ -240,7 +240,7 @@ For any investor, technical advisor, or new executive joining the team, review d
 | Create `CODEOWNERS` file (KG013) | Map critical paths to review owners | Eng Lead | P1 — 2 hours |
 | Billing flow end-to-end test (TG-001) | Write test for billing event flows | Engineering | P1 |
 | Add guardrail cross-reference to AI_GOVERNANCE.md (RT-003) | Editorial addition linking to SECURITY-CHECKLIST.md | Engineering | P2 |
-| Update PRODUCT-SURFACES.md — fix domain-specific mobile status (RT-010 / TD-006) | Change aegis-mobile, vessels-mobile, terra-mobile, lyte-mobile from "Functional Alpha" to "Concept / Planned" | Engineering | P2 — before external product eval |
+| Update PRODUCT-SURFACES.md — fix domain-specific mobile status (RT-010 / TD-006) | ✅ Resolved Apr-2026 — PRODUCT-SURFACES.md § "Domain-Specific Mobile Apps" relabeled "Roadmap (Not Yet Built)"; each unregistered app annotated as "Roadmap — not yet built" with planned artifact path marked "(not registered)" and an earliest build window. Live mobile coverage today is delivered via CORTEX (`artifacts/szl-holdings-mobile`). | Engineering | ✅ Done |
 | Align PRISM Counsel status across all docs (RT-009 / RT-017) | Clarify PRISM Counsel status in DEMO_GUIDE.md and SALES_NARRATIVE.md | Engineering | P2 — before legal-buyer demos |
 
 ---

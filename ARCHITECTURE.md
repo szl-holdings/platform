@@ -55,10 +55,11 @@ Additional supporting surfaces: **Command Portal** (ecosystem hub), **SZL Holdin
 │  CLIENTS                                                        │
 │  Web (Vite + React 19)           Mobile (Expo + React Native)   │
 │  szl-holdings  lyte-cmd-center   CORTEX (szl-holdings-mobile)   │
-│  firestorm     terra             carlota-jo-mobile              │
-│  vessels       prism-counsel     aegis/vessels/terra/lyte-mobile │
-│  carlota-jo    command                                          │
-│  imperium      stephen-site                                     │
+│  firestorm     terra             cortex-mobile (WIP)            │
+│  vessels       prism-counsel                                    │
+│  carlota-jo    command           Roadmap (not built):           │
+│  imperium      stephen-site        aegis-, vessels-, terra-,    │
+│                                    lyte-, carlota-jo-mobile     │
 └──────────────────┬──────────────────────┬───────────────────────┘
                    │  REST/JSON           │  REST/JSON
                    │  GraphQL (Apollo)    │  (EXPO_PUBLIC_API_URL)

@@ -100,7 +100,7 @@ This register catalogs every finding from all operational audit phases (Phase 0�
 | DATA-008 | Command Overview KPIs | P2 | `artifacts/command` | New module KPIs not yet wired | ⚠️ Open | No | No |
 | DATA-009 | Stripe demo/test mode | P1 | Billing routes | No revenue collectible — test mode only | ⚠️ Open — GAP-005 | No | Yes (before first revenue) |
 | DOC-001 | TRUST_CENTER_INDEX.md model ref | P2 | `docs/trust/trust-center.md` (~line 94) | Incorrect AI model reference misleads external reviewers | ⚠️ Re-opened — TD-004 | **Yes** — editorial review before external trust center share | Before external review |
-| DOC-002 | Domain-specific mobile apps listed but unregistered | P2 | `PRODUCT-SURFACES.md` | Product narrative claims unbuilt surfaces | ⚠️ Open — TD-006 | **Yes** — product roadmap decision needed | Before external product eval |
+| DOC-002 | Domain-specific mobile apps listed but unregistered | P2 | `PRODUCT-SURFACES.md` | Product narrative claims unbuilt surfaces | ✅ Resolved Apr-2026 — TD-006. PRODUCT-SURFACES.md § "Domain-Specific Mobile Apps — Roadmap (Not Yet Built)" now demarcates roadmap vs. live, annotates each entry as "Roadmap — not yet built" with planned artifact path marked "(not registered)" and earliest build window. | No | Done |
 | DOC-003 | Stale Azure deployment refs | P3 | Several docs | Confusing deployment narrative (Azure vs Replit) | ⚠️ Partially resolved — GAP-010 | No | No |
 | DOC-004 | PRISM naming inconsistency | P3 | Internal docs | Two naming conventions in use | ⚠️ Open — TD-001 | No | No |
 | OPS-001 | Archived artifacts not cleaned up | P3 | `artifacts/` (5 deprecated dirs) | Dev confusion; pressure on 15-artifact limit | ⚠️ Open — GAP-012 | No | No |

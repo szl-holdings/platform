@@ -279,15 +279,25 @@ All surfaces share six platform primitives — see [PLATFORM_PRIMITIVES.md](PLAT
 
 ---
 
-### Domain-Specific Mobile Apps
+### Domain-Specific Mobile Apps — Roadmap (Not Yet Built)
 
-| App | Artifact | Domain | Status |
-|-----|----------|--------|--------|
-| Aegis Mobile — SOC Command | `artifacts/aegis-mobile` | Security | Functional Alpha |
-| Vessels Mobile — Fleet Command | `artifacts/vessels-mobile` | Maritime | Functional Alpha |
-| Terra Mobile — Field Intelligence | `artifacts/terra-mobile` | Real Estate | Functional Alpha |
-| Lyte Mobile — AIOps Command | `artifacts/lyte-mobile` | Business Ops | Functional Alpha |
-| Carlota Jo Mobile — Client App | `artifacts/carlota-jo-mobile` | Advisory | Live |
+> **Status disclosure (resolves TD-006):** None of the apps in the table below are
+> registered artifacts or built code. They are planned domain-specific companions to
+> CORTEX (`artifacts/szl-holdings-mobile`), which today already exposes every domain
+> workspace inside one Expo/React Native app. Domain-specific mobile apps will only
+> be split out from CORTEX when a paying customer or design partner requires a
+> standalone, single-domain mobile experience. Until then, mobile coverage for these
+> domains is delivered through CORTEX.
+
+| App | Planned Artifact | Domain | Status | Earliest Build Window |
+|-----|------------------|--------|--------|------------------------|
+| Aegis Mobile — SOC Command | `artifacts/aegis-mobile` (not registered) | Security | Roadmap — not yet built | H2 2026, contingent on Aegis design-partner demand |
+| Vessels Mobile — Fleet Command | `artifacts/vessels-mobile` (not registered) | Maritime | Roadmap — not yet built | H2 2026, contingent on Vessels commercial pilot |
+| Terra Mobile — Field Intelligence | `artifacts/terra-mobile` (not registered) | Real Estate | Roadmap — not yet built | 2027, after Terra field-ops paid pilot |
+| Lyte Mobile — AIOps Command | `artifacts/lyte-mobile` (not registered) | Business Ops | Roadmap — not yet built | 2027, after Lyte enterprise GA |
+| Carlota Jo Mobile — Client App | `artifacts/carlota-jo-mobile` (not registered) | Advisory | Roadmap — not yet built | H2 2026, contingent on Carlota Jo client demand |
+
+For the live mobile surface available today, see **CORTEX — Unified Mobile Command** above (`artifacts/szl-holdings-mobile`).
 
 ---
 
