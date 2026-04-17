@@ -83,6 +83,10 @@ const WorldModelExplorer = lazy(() => import("./pages/cognitive/world-model"));
 const ReplayLab = lazy(() => import("./pages/replay-lab"));
 const EvalLab = lazy(() => import("./pages/eval-lab"));
 const TrustConsole = lazy(() => import("./pages/trust-console"));
+const CognitiveMemory = lazy(() => import("./pages/cognitive/memory"));
+const CognitivePlanner = lazy(() => import("./pages/cognitive/planner"));
+const CognitiveVerifier = lazy(() => import("./pages/cognitive/verifier"));
+const CognitiveReflection = lazy(() => import("./pages/cognitive/reflection"));
 const PolicyApprovalsPage = lazy(() => import("./pages/policy-approvals"));
 const ApprovalsCenter = lazy(() => import("@lyte/pages/approvals-center"));
 const CommandInbox = lazy(() => import("@lyte/pages/command-inbox"));
@@ -282,6 +286,11 @@ function AppShell() {
               <Route path="/operations/alloy/replay-lab" component={() => <ReplayLab />} />
               <Route path="/operations/alloy/eval-lab" component={() => <EvalLab />} />
               <Route path="/operations/alloy/trust-console" component={() => <TrustConsole />} />
+
+              <Route path="/cognitive/memory" component={() => <CognitiveMemory />} />
+              <Route path="/cognitive/planner" component={() => <CognitivePlanner />} />
+              <Route path="/cognitive/verifier" component={() => <CognitiveVerifier />} />
+              <Route path="/cognitive/reflection" component={() => <CognitiveReflection />} />
 
               <Route path="/infrastructure" component={() => <LegatusConsole />} />
               <Route path="/infrastructure/legatus" component={() => <LegatusConsole />} />

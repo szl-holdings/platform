@@ -1,6 +1,7 @@
-import { ReactNode } from "react";
+import React, { ReactNode } from "react";
 import { Link, useLocation } from "wouter";
-import { Brain, Cpu, Globe, Activity, ArrowLeft } from "lucide-react";
+import { Brain, Cpu, Globe, Archive, GitMerge, CheckCircle2, Lightbulb } from "lucide-react";
+import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -9,76 +10,70 @@ const BG = "#080c14";
 const BORDER = "rgba(139,122,200,0.12)";
 
 const NAV_ITEMS = [
-  { href: "/cognitive", label: "Command Center", icon: Activity, sublabel: "Runtime state" },
-  { href: "/cognitive/self-model", label: "Self Model", icon: Cpu, sublabel: "Identity & drift" },
-  { href: "/cognitive/world-model", label: "World Model", icon: Globe, sublabel: "CONSTELLATION graph" },
+  { href: "/cognitive", label: "Command Center", icon: Brain },
+  { href: "/cognitive/self-model", label: "Self Model", icon: Cpu },
+  { href: "/cognitive/world-model", label: "World Model", icon: Globe },
+  { href: "/cognitive/memory", label: "Memory Explorer", icon: Archive },
+  { href: "/cognitive/planner", label: "Planner Studio", icon: GitMerge },
+  { href: "/cognitive/verifier", label: "Verifier Console", icon: CheckCircle2 },
+  { href: "/cognitive/reflection", label: "Reflection Console", icon: Lightbulb },
 ];
 
-export function CognitiveLayout({ children }: { children: ReactNode }) {
+interface CognitiveLayoutProps {
+  title: string;
+  subtitle: string;
+  children: ReactNode;
+}
+
+export function CognitiveLayout({ title, subtitle, children }: CognitiveLayoutProps) {
   const [location] = useLocation();
 
   return (
-    <div className="flex flex-col h-full" style={{ background: BG, color: "var(--color-fg-primary)" }}>
+    <div style={{ background: BG, minHeight: "100vh", color: "#e2e8f0", fontFamily: "system-ui, sans-serif" }}>
+      <EcosystemNav currentAppId="command" currentAppName="Unified Command" accentColor={ACCENT} />
       <div
-        className="shrink-0 flex items-center gap-0 border-b"
-        style={{ borderColor: BORDER, background: "rgba(6,10,18,0.95)", backdropFilter: "blur(8px)" }}
+        style={{ borderBottom: `1px solid ${BORDER}`, background: "rgba(6,10,18,0.95)", backdropFilter: "blur(8px)", overflowX: "auto" }}
       >
-        <Link
-          href={`${BASE}/strategy`}
-          className="flex items-center gap-1.5 px-4 py-2.5 text-[10px] hover:opacity-80 transition-opacity border-r shrink-0"
-          style={{ color: "rgba(255,255,255,0.3)", borderColor: BORDER }}
-        >
-          <ArrowLeft className="w-3 h-3" />
-          Strategy
-        </Link>
-
-        <div className="flex items-center gap-2 px-4 shrink-0">
-          <div
-            className="w-5 h-5 rounded flex items-center justify-center"
-            style={{ background: `${ACCENT}14`, border: `1px solid ${ACCENT}25` }}
-          >
-            <Brain className="w-3 h-3" style={{ color: ACCENT }} />
-          </div>
-          <div>
-            <span className="text-[11px] font-bold tracking-wide" style={{ color: "rgba(255,255,255,0.9)" }}>
-              Cognitive Consoles
-            </span>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-0 ml-2">
+        <div style={{ display: "flex", alignItems: "center", gap: 0 }}>
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
             const isActive =
               item.href === "/cognitive"
                 ? location === "/cognitive"
                 : location.startsWith(item.href);
-
             return (
               <Link
                 key={item.href}
                 href={`${BASE}${item.href}`}
-                className="flex items-center gap-1.5 px-3 py-2.5 text-[10px] font-medium transition-all relative"
                 style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 5,
+                  padding: "8px 12px",
+                  fontSize: 10,
+                  fontWeight: isActive ? 700 : 500,
                   color: isActive ? ACCENT : "rgba(255,255,255,0.4)",
                   borderBottom: isActive ? `2px solid ${ACCENT}` : "2px solid transparent",
+                  textDecoration: "none",
+                  whiteSpace: "nowrap",
+                  transition: "color 0.12s",
                 }}
               >
-                <Icon className="w-3 h-3 shrink-0" style={{ color: isActive ? ACCENT : "rgba(255,255,255,0.25)" }} />
+                <Icon style={{ width: 12, height: 12, color: isActive ? ACCENT : "rgba(255,255,255,0.25)" }} />
                 {item.label}
-                <span
-                  className="hidden sm:inline text-[8px] ml-0.5"
-                  style={{ color: isActive ? `${ACCENT}70` : "rgba(255,255,255,0.2)" }}
-                >
-                  · {item.sublabel}
-                </span>
               </Link>
             );
           })}
         </div>
       </div>
-
-      <div className="flex-1 overflow-auto">
+      <div style={{ maxWidth: 1280, margin: "0 auto", padding: "24px 20px" }}>
+        <div style={{ marginBottom: 24 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 6 }}>
+            <span style={{ fontSize: 22, fontWeight: 700, color: "#e2e8f0" }}>{title}</span>
+            <span style={{ fontSize: 10, color: ACCENT, background: `${ACCENT}18`, padding: "2px 10px", borderRadius: 20, border: `1px solid ${ACCENT}40`, fontWeight: 600, letterSpacing: 1 }}>COGNITIVE</span>
+          </div>
+          <p style={{ color: "#64748b", fontSize: 13, margin: 0 }}>{subtitle}</p>
+        </div>
         {children}
       </div>
     </div>

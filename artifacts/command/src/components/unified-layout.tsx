@@ -8,7 +8,7 @@ import {
   TrendingUp, DollarSign, RotateCcw, Calculator, Bot, Monitor, Building,
   BellOff, Code, Target, Phone, Calendar, Layers, Map, Crown, ChevronRight,
   Menu, X, BarChart3, Clapperboard, Power, Bell, Lock, GitCommit, Sigma,
-  FlaskConical, ShieldCheck, Globe
+  FlaskConical, ShieldCheck, Globe, Archive, GitMerge, CheckCircle2, Lightbulb
 } from "lucide-react";
 import { MultiplayerSessionBanner, EcosystemNav, EnvironmentLabel, useDemoMode, MODE_LABELS, MODE_COLORS, MODE_ICONS } from "@szl-holdings/shared-ui";
 
@@ -52,11 +52,15 @@ const STRATEGY_NAV: NavGroup[] = [
     ],
   },
   {
-    section: "Cognitive Consoles",
+    section: "Cognitive Runtime",
     items: [
       { href: "/cognitive", label: "Command Center", icon: Brain },
       { href: "/cognitive/self-model", label: "Self Model", icon: Cpu },
       { href: "/cognitive/world-model", label: "World Model", icon: Globe },
+      { href: "/cognitive/memory", label: "Memory Explorer", icon: Archive },
+      { href: "/cognitive/planner", label: "Planner Studio", icon: GitMerge },
+      { href: "/cognitive/verifier", label: "Verifier Console", icon: CheckCircle2 },
+      { href: "/cognitive/reflection", label: "Reflection Console", icon: Lightbulb },
     ],
   },
 ];
