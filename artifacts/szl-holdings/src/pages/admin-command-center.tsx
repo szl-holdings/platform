@@ -1282,19 +1282,36 @@ function AuditPanel() {
       <div className="grid grid-cols-2 gap-2">
         <div className="col-span-2"><SearchInput value={search} onChange={setSearch} placeholder="Search by user, action, or entity..." /></div>
         <input value={action} onChange={(e) => setAction(e.target.value)} placeholder="Filter action..." className="px-3 py-2 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/40" />
-        <select
-          value={tenantFilter}
-          onChange={(e) => setTenantFilter(e.target.value)}
-          className="px-3 py-2 bg-background border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/40"
-        >
-          <option value="">All Tenants</option>
-          {(tenantsData?.tenants ?? []).map((t) => (
-            <option key={t.id} value={String(t.id)}>{t.name}</option>
-          ))}
-        </select>
+        <div className="relative">
+          <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
+          <select
+            value={tenantFilter}
+            onChange={(e) => setTenantFilter(e.target.value)}
+            className={cn(
+              "w-full pl-9 pr-3 py-2 bg-background border rounded-lg text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/40 appearance-none",
+              tenantFilter ? "border-primary/50 text-foreground font-medium" : "border-border",
+            )}
+          >
+            <option value="">All Tenants</option>
+            {(tenantsData?.tenants ?? []).map((t) => (
+              <option key={t.id} value={String(t.id)}>{t.name}</option>
+            ))}
+          </select>
+        </div>
         <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="px-3 py-2 bg-background border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/40" />
         <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="px-3 py-2 bg-background border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/40" />
       </div>
+      {tenantFilter && (
+        <div className="flex items-center gap-2 text-xs text-primary">
+          <Building2 className="w-3.5 h-3.5" />
+          <span className="font-medium">
+            Showing events for: {tenantsData?.tenants.find((t) => String(t.id) === tenantFilter)?.name ?? "selected tenant"}
+          </span>
+          <button onClick={() => setTenantFilter("")} className="ml-auto text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors">
+            <X className="w-3 h-3" /> Clear
+          </button>
+        </div>
+      )}
 
       <div className="flex justify-end">
         <button onClick={exportCsv} className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">

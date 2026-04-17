@@ -116,8 +116,25 @@ export function register(router: IRouter): void {
       const dateFrom = req.query["dateFrom"] as string | undefined;
       const dateTo = req.query["dateTo"] as string | undefined;
       const userFilter = req.query["user"] as string | undefined;
+      const orgIdParam = req.query["orgId"] as string | undefined;
       const limitParam = parseInt(req.query["limit"] as string ?? "50", 10);
       const limit = Math.min(isNaN(limitParam) ? 50 : limitParam, 200);
+
+      // If filtering by tenant/org, resolve the set of member user IDs first
+      let orgMemberUserIds: number[] | null = null;
+      if (orgIdParam) {
+        const orgId = parseInt(orgIdParam, 10);
+        if (isNaN(orgId) || orgId < 1) {
+          sendBadRequest(res, "Invalid orgId — must be a positive integer");
+          return;
+        }
+        const members = await db
+          .select({ userId: orgMembersTable.userId })
+          .from(orgMembersTable)
+          .where(eq(orgMembersTable.orgId, orgId));
+        orgMemberUserIds = members.map((m) => m.userId);
+      }
+
       const conditions = [];
       if (dateFrom) conditions.push(gte(auditEventsTable.createdAt, new Date(dateFrom)));
       if (dateTo) conditions.push(lte(auditEventsTable.createdAt, new Date(dateTo)));
@@ -127,6 +144,16 @@ export function register(router: IRouter): void {
         conditions.push(or(ilike(auditEventsTable.action, `%${search}%`), ilike(auditEventsTable.entityType, `%${search}%`), ilike(usersTable.email, `%${search}%`), ilike(usersTable.displayName, `%${search}%`))!);
       }
       if (userFilter) conditions.push(or(ilike(usersTable.email, `%${userFilter}%`), ilike(usersTable.displayName, `%${userFilter}%`))!);
+      // Filter to only events from members of the selected org
+      if (orgMemberUserIds !== null) {
+        if (orgMemberUserIds.length === 0) {
+          // Org exists but has no members — return empty result
+          res.json({ logs: [], total: 0 });
+          return;
+        }
+        conditions.push(inArray(auditEventsTable.userId, orgMemberUserIds));
+      }
+
       const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
       const rows = await db.select({ id: auditEventsTable.id, action: auditEventsTable.action, entityType: auditEventsTable.entityType, entityId: auditEventsTable.entityId, userId: auditEventsTable.userId, userName: usersTable.displayName, userEmail: usersTable.email, oldValues: auditEventsTable.oldValues, newValues: auditEventsTable.newValues, ipAddress: auditEventsTable.ipAddress, createdAt: auditEventsTable.createdAt }).from(auditEventsTable).leftJoin(usersTable, eq(auditEventsTable.userId, usersTable.id)).where(whereClause).orderBy(desc(auditEventsTable.createdAt)).limit(limit);
       const logs = rows.map((r) => ({ id: `log_${r.id}`, action: r.action, actor: r.userEmail ?? r.userName ?? `user_${r.userId}`, target: r.entityType + (r.entityId ? `/${r.entityId}` : ""), result: "success", timestamp: r.createdAt.toISOString(), details: r.newValues ? JSON.stringify(r.newValues).slice(0, 120) : null, ipAddress: r.ipAddress }));
