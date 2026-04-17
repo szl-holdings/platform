@@ -551,6 +551,34 @@ export function ConstellationGraph({
     activeOnly,
   ]);
 
+  // --- Attach-to-case modal state ------------------------------------------
+  // Lets the operator post the currently-traced subgraph as evidence on an
+  // existing Aegis case (or a freshly-created one) without leaving the graph.
+  interface AttachCaseSummary {
+    id: number;
+    caseNumber: string;
+    title: string;
+    status: string;
+    priority: string;
+  }
+  const [attachOpen, setAttachOpen] = useState(false);
+  const [attachCases, setAttachCases] = useState<AttachCaseSummary[] | null>(null);
+  const [attachLoading, setAttachLoading] = useState(false);
+  const [attachListError, setAttachListError] = useState<string | null>(null);
+  const [attachQuery, setAttachQuery] = useState("");
+  const [attachMode, setAttachMode] = useState<"existing" | "new">("existing");
+  const [attachSelectedId, setAttachSelectedId] = useState<number | null>(null);
+  const [attachNewTitle, setAttachNewTitle] = useState("");
+  const [attachNewPriority, setAttachNewPriority] = useState<
+    "p1_critical" | "p2_high" | "p3_medium" | "p4_low"
+  >("p3_medium");
+  const [attachSubmitting, setAttachSubmitting] = useState(false);
+  const [attachError, setAttachError] = useState<string | null>(null);
+  const [attachSuccess, setAttachSuccess] = useState<{
+    caseNumber: string;
+    title: string;
+  } | null>(null);
+
   // Cache of enriched cross-domain entities (id -> full node), filled lazily
   const [externalCache, setExternalCache] = useState<Record<string, ConstellationGraphNode>>({});
 
@@ -859,16 +887,20 @@ export function ConstellationGraph({
     };
   }, [traceOriginId, traceDistances, nodes, edges, hostDomain, traceDepth, traceTruncated]);
 
+  const traceBundleSlug = useCallback((bundle: NonNullable<ReturnType<typeof buildTraceBundle>>) => {
+    return (bundle.origin.name ?? bundle.origin.id ?? "trace")
+      .toString()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 48) || "trace";
+  }, []);
+
   const exportTrace = useCallback(
     async (format: "json" | "csv") => {
       const bundle = buildTraceBundle();
       if (!bundle) return;
-      const slug = (bundle.origin.name ?? bundle.origin.id ?? "trace")
-        .toString()
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-+|-+$/g, "")
-        .slice(0, 48) || "trace";
+      const slug = traceBundleSlug(bundle);
       const ts = bundle.generatedAt.replace(/[:.]/g, "-");
       const downloadBlob = (blob: Blob, filename: string) => {
         const url = URL.createObjectURL(blob);
@@ -986,6 +1018,113 @@ export function ConstellationGraph({
     },
     [buildTraceBundle],
   );
+
+  const openAttachToCase = useCallback(() => {
+    const bundle = buildTraceBundle();
+    if (!bundle) return;
+    setAttachOpen(true);
+    setAttachError(null);
+    setAttachSuccess(null);
+    setAttachQuery("");
+    setAttachMode("existing");
+    setAttachSelectedId(null);
+    setAttachNewTitle(
+      `Constellation trace · ${bundle.origin.name ?? bundle.origin.id} (${bundle.depth} hops)`,
+    );
+    if (attachCases !== null) return; // already loaded
+    setAttachLoading(true);
+    setAttachListError(null);
+    apiFetch<{ data?: AttachCaseSummary[] } | AttachCaseSummary[]>(`/aegis/cases`)
+      .then((res) => {
+        const list = Array.isArray(res)
+          ? res
+          : (res as { data?: AttachCaseSummary[] }).data ?? [];
+        setAttachCases(list);
+      })
+      .catch((err) => {
+        setAttachListError((err as Error)?.message ?? "Failed to load cases");
+      })
+      .finally(() => setAttachLoading(false));
+  }, [buildTraceBundle, attachCases]);
+
+  const submitAttachToCase = useCallback(async () => {
+    const bundle = buildTraceBundle();
+    if (!bundle) return;
+    setAttachSubmitting(true);
+    setAttachError(null);
+    try {
+      const slug = traceBundleSlug(bundle);
+      const ts = bundle.generatedAt.replace(/[:.]/g, "-");
+      const evidenceItem = {
+        name: `trace-${slug}-${ts}.json`,
+        type: "constellation_trace",
+        source: "constellation_graph",
+        origin: bundle.origin,
+        hostDomain: bundle.hostDomain,
+        hopCount: bundle.depth,
+        nodeCount: bundle.nodeCount,
+        edgeCount: bundle.edgeCount,
+        truncated: bundle.truncated,
+        generatedAt: bundle.generatedAt,
+        bundle,
+      };
+      let targetId = attachSelectedId;
+      let targetCase: { caseNumber: string; title: string } | null = null;
+      if (attachMode === "new") {
+        if (!attachNewTitle.trim()) {
+          throw new Error("Title is required for a new case");
+        }
+        const newCaseNumber = `CASE-CON-${Date.now()}`;
+        const created = await apiFetch<
+          | { data?: { id: number; caseNumber: string; title: string } }
+          | { id: number; caseNumber: string; title: string }
+        >(`/aegis/cases`, {
+          method: "POST",
+          body: JSON.stringify({
+            caseNumber: newCaseNumber,
+            title: attachNewTitle.trim(),
+            description: `Auto-created from Constellation trace · origin ${bundle.origin.name ?? bundle.origin.id} · ${bundle.nodeCount} nodes / ${bundle.edgeCount} edges within ${bundle.depth} hops.`,
+            priority: attachNewPriority,
+            status: "open",
+          }),
+        });
+        const createdPayload =
+          (created as { data?: { id: number; caseNumber: string; title: string } }).data ??
+          (created as { id: number; caseNumber: string; title: string });
+        targetId = createdPayload.id;
+        targetCase = { caseNumber: createdPayload.caseNumber, title: createdPayload.title };
+      } else {
+        if (!targetId) throw new Error("Pick a case to attach to");
+        const existing = (attachCases ?? []).find((c) => c.id === targetId);
+        if (existing) targetCase = { caseNumber: existing.caseNumber, title: existing.title };
+      }
+      await apiFetch(`/aegis/cases/${targetId}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          evidenceItem,
+          note: {
+            content: `Attached Constellation trace from ${bundle.hostDomain} · origin ${bundle.origin.name ?? bundle.origin.id} · ${bundle.nodeCount} nodes within ${bundle.depth} hops`,
+            author: "Constellation Operator",
+          },
+        }),
+      });
+      setAttachSuccess(targetCase ?? { caseNumber: String(targetId), title: "" });
+      // Refresh case list so the next open shows the new/updated case immediately
+      setAttachCases(null);
+    } catch (err) {
+      setAttachError((err as Error)?.message ?? "Failed to attach trace to case");
+    } finally {
+      setAttachSubmitting(false);
+    }
+  }, [
+    buildTraceBundle,
+    traceBundleSlug,
+    attachMode,
+    attachSelectedId,
+    attachNewTitle,
+    attachNewPriority,
+    attachCases,
+  ]);
 
   const tracePath = useCallback(
     async (node: ConstellationGraphNode, depth: number) => {
@@ -2139,6 +2278,29 @@ export function ConstellationGraph({
                 >
                   CSV
                 </button>
+                <button
+                  onClick={openAttachToCase}
+                  disabled={!traceOriginId}
+                  style={{
+                    fontSize: 11,
+                    padding: "5px 10px",
+                    borderRadius: 4,
+                    border: `1px solid ${traceOriginId ? `${accentColor}60` : "rgba(255,255,255,0.15)"}`,
+                    background: traceOriginId ? `${accentColor}18` : "rgba(255,255,255,0.04)",
+                    color: traceOriginId ? accentColor : "#64748b",
+                    cursor: traceOriginId ? "pointer" : "not-allowed",
+                    fontWeight: 600,
+                    letterSpacing: "0.04em",
+                  }}
+                  data-testid="constellation-attach-to-case"
+                  title={
+                    traceOriginId
+                      ? "Attach the trace bundle to an Aegis case as evidence"
+                      : "Run a trace first to enable attach"
+                  }
+                >
+                  📎 Attach to case
+                </button>
               </div>
               <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
                 <button
@@ -2279,6 +2441,369 @@ export function ConstellationGraph({
               </button>
             </div>
           )}
+        </div>
+      )}
+
+      {attachOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          data-testid="constellation-attach-modal"
+          onClick={() => !attachSubmitting && setAttachOpen(false)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 60,
+            background: "rgba(2,6,23,0.7)",
+            backdropFilter: "blur(4px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 16,
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: "100%",
+              maxWidth: 520,
+              background: "#0a0f1c",
+              border: `1px solid ${accentColor}40`,
+              borderRadius: 10,
+              padding: 18,
+              color: "#e2e8f0",
+              boxShadow: "0 24px 60px rgba(0,0,0,0.5)",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: accentColor, letterSpacing: "0.05em", textTransform: "uppercase" }}>
+                  Attach trace to Aegis case
+                </div>
+                <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 4 }}>
+                  {(() => {
+                    const b = buildTraceBundle();
+                    if (!b) return null;
+                    return `Origin: ${b.origin.name ?? b.origin.id} · ${b.nodeCount} nodes · ${b.edgeCount} edges · ${b.depth} hops`;
+                  })()}
+                </div>
+              </div>
+              <button
+                onClick={() => !attachSubmitting && setAttachOpen(false)}
+                disabled={attachSubmitting}
+                style={{
+                  fontSize: 12,
+                  padding: "3px 8px",
+                  borderRadius: 4,
+                  border: "1px solid rgba(255,255,255,0.15)",
+                  background: "transparent",
+                  color: "#94a3b8",
+                  cursor: attachSubmitting ? "default" : "pointer",
+                }}
+                aria-label="Close"
+              >
+                ✕
+              </button>
+            </div>
+
+            {attachSuccess ? (
+              <div
+                data-testid="constellation-attach-success"
+                style={{
+                  marginTop: 14,
+                  padding: "12px 14px",
+                  borderRadius: 6,
+                  background: "rgba(16,185,129,0.1)",
+                  border: "1px solid rgba(16,185,129,0.4)",
+                  color: "#a7f3d0",
+                  fontSize: 12,
+                }}
+              >
+                <div style={{ fontWeight: 700, marginBottom: 4 }}>
+                  ✓ Trace attached to {attachSuccess.caseNumber}
+                </div>
+                {attachSuccess.title && (
+                  <div style={{ color: "#cbd5e1" }}>{attachSuccess.title}</div>
+                )}
+                <div style={{ marginTop: 10, display: "flex", gap: 8 }}>
+                  <button
+                    onClick={() => setAttachOpen(false)}
+                    style={{
+                      fontSize: 11,
+                      padding: "5px 12px",
+                      borderRadius: 4,
+                      border: `1px solid ${accentColor}60`,
+                      background: `${accentColor}20`,
+                      color: accentColor,
+                      cursor: "pointer",
+                      fontWeight: 600,
+                      letterSpacing: "0.04em",
+                    }}
+                  >
+                    Done
+                  </button>
+                  <button
+                    onClick={() => {
+                      setAttachSuccess(null);
+                      setAttachSelectedId(null);
+                    }}
+                    style={{
+                      fontSize: 11,
+                      padding: "5px 12px",
+                      borderRadius: 4,
+                      border: "1px solid rgba(255,255,255,0.15)",
+                      background: "transparent",
+                      color: "#cbd5e1",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Attach to another case
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div style={{ display: "flex", gap: 6, marginTop: 14 }}>
+                  <button
+                    onClick={() => setAttachMode("existing")}
+                    data-testid="constellation-attach-mode-existing"
+                    style={{
+                      flex: 1,
+                      fontSize: 11,
+                      padding: "6px 10px",
+                      borderRadius: 4,
+                      border: `1px solid ${attachMode === "existing" ? accentColor : "rgba(255,255,255,0.15)"}`,
+                      background: attachMode === "existing" ? `${accentColor}20` : "transparent",
+                      color: attachMode === "existing" ? accentColor : "#cbd5e1",
+                      cursor: "pointer",
+                      fontWeight: 600,
+                      letterSpacing: "0.04em",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    Existing case
+                  </button>
+                  <button
+                    onClick={() => setAttachMode("new")}
+                    data-testid="constellation-attach-mode-new"
+                    style={{
+                      flex: 1,
+                      fontSize: 11,
+                      padding: "6px 10px",
+                      borderRadius: 4,
+                      border: `1px solid ${attachMode === "new" ? accentColor : "rgba(255,255,255,0.15)"}`,
+                      background: attachMode === "new" ? `${accentColor}20` : "transparent",
+                      color: attachMode === "new" ? accentColor : "#cbd5e1",
+                      cursor: "pointer",
+                      fontWeight: 600,
+                      letterSpacing: "0.04em",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    + New case
+                  </button>
+                </div>
+
+                {attachMode === "existing" ? (
+                  <div style={{ marginTop: 12 }}>
+                    <input
+                      type="text"
+                      value={attachQuery}
+                      onChange={(e) => setAttachQuery(e.target.value)}
+                      placeholder="Search by case number or title…"
+                      data-testid="constellation-attach-search"
+                      style={{
+                        width: "100%",
+                        fontSize: 12,
+                        padding: "6px 10px",
+                        borderRadius: 4,
+                        border: "1px solid rgba(255,255,255,0.15)",
+                        background: "rgba(255,255,255,0.04)",
+                        color: "#e2e8f0",
+                        boxSizing: "border-box",
+                      }}
+                    />
+                    <div
+                      style={{
+                        marginTop: 8,
+                        maxHeight: 240,
+                        overflowY: "auto",
+                        border: "1px solid rgba(255,255,255,0.08)",
+                        borderRadius: 6,
+                      }}
+                      data-testid="constellation-attach-case-list"
+                    >
+                      {attachLoading && (
+                        <div style={{ padding: 12, fontSize: 11, color: "#94a3b8", textAlign: "center" }}>
+                          Loading cases…
+                        </div>
+                      )}
+                      {attachListError && (
+                        <div style={{ padding: 12, fontSize: 11, color: "#fca5a5" }}>
+                          {attachListError}
+                        </div>
+                      )}
+                      {!attachLoading && !attachListError && (attachCases ?? []).length === 0 && (
+                        <div style={{ padding: 12, fontSize: 11, color: "#94a3b8", textAlign: "center" }}>
+                          No cases yet — switch to “New case” to create one.
+                        </div>
+                      )}
+                      {(attachCases ?? [])
+                        .filter((c) => {
+                          const q = attachQuery.trim().toLowerCase();
+                          if (!q) return true;
+                          return (
+                            c.caseNumber.toLowerCase().includes(q) ||
+                            c.title.toLowerCase().includes(q)
+                          );
+                        })
+                        .slice(0, 50)
+                        .map((c) => {
+                          const isSel = attachSelectedId === c.id;
+                          return (
+                            <button
+                              key={c.id}
+                              onClick={() => setAttachSelectedId(c.id)}
+                              data-testid={`constellation-attach-case-${c.id}`}
+                              style={{
+                                display: "block",
+                                width: "100%",
+                                textAlign: "left",
+                                padding: "8px 10px",
+                                background: isSel ? `${accentColor}20` : "transparent",
+                                border: "none",
+                                borderBottom: "1px solid rgba(255,255,255,0.05)",
+                                cursor: "pointer",
+                                color: "#e2e8f0",
+                              }}
+                            >
+                              <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "baseline" }}>
+                                <span style={{ fontSize: 10, fontFamily: "monospace", color: "#94a3b8" }}>
+                                  {c.caseNumber}
+                                </span>
+                                <span style={{ fontSize: 9, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                                  {c.priority} · {c.status}
+                                </span>
+                              </div>
+                              <div style={{ fontSize: 12, marginTop: 2 }}>{c.title}</div>
+                            </button>
+                          );
+                        })}
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 8 }}>
+                    <label style={{ fontSize: 10, color: "#94a3b8", letterSpacing: "0.05em", textTransform: "uppercase" }}>
+                      Title
+                    </label>
+                    <input
+                      type="text"
+                      value={attachNewTitle}
+                      onChange={(e) => setAttachNewTitle(e.target.value)}
+                      data-testid="constellation-attach-new-title"
+                      style={{
+                        fontSize: 12,
+                        padding: "6px 10px",
+                        borderRadius: 4,
+                        border: "1px solid rgba(255,255,255,0.15)",
+                        background: "rgba(255,255,255,0.04)",
+                        color: "#e2e8f0",
+                        boxSizing: "border-box",
+                      }}
+                    />
+                    <label style={{ fontSize: 10, color: "#94a3b8", letterSpacing: "0.05em", textTransform: "uppercase", marginTop: 4 }}>
+                      Priority
+                    </label>
+                    <select
+                      value={attachNewPriority}
+                      onChange={(e) =>
+                        setAttachNewPriority(
+                          e.target.value as "p1_critical" | "p2_high" | "p3_medium" | "p4_low",
+                        )
+                      }
+                      data-testid="constellation-attach-new-priority"
+                      style={{
+                        fontSize: 12,
+                        padding: "6px 10px",
+                        borderRadius: 4,
+                        border: "1px solid rgba(255,255,255,0.15)",
+                        background: "rgba(15,23,42,0.8)",
+                        color: "#e2e8f0",
+                      }}
+                    >
+                      <option value="p1_critical">P1 Critical</option>
+                      <option value="p2_high">P2 High</option>
+                      <option value="p3_medium">P3 Medium</option>
+                      <option value="p4_low">P4 Low</option>
+                    </select>
+                  </div>
+                )}
+
+                {attachError && (
+                  <div
+                    role="alert"
+                    data-testid="constellation-attach-error"
+                    style={{
+                      marginTop: 10,
+                      padding: "8px 10px",
+                      borderRadius: 4,
+                      background: "rgba(239,68,68,0.1)",
+                      border: "1px solid rgba(239,68,68,0.4)",
+                      color: "#fecaca",
+                      fontSize: 11,
+                    }}
+                  >
+                    {attachError}
+                  </div>
+                )}
+
+                <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 14 }}>
+                  <button
+                    onClick={() => setAttachOpen(false)}
+                    disabled={attachSubmitting}
+                    style={{
+                      fontSize: 11,
+                      padding: "6px 12px",
+                      borderRadius: 4,
+                      border: "1px solid rgba(255,255,255,0.15)",
+                      background: "transparent",
+                      color: "#cbd5e1",
+                      cursor: attachSubmitting ? "default" : "pointer",
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={submitAttachToCase}
+                    disabled={
+                      attachSubmitting ||
+                      (attachMode === "existing" && !attachSelectedId) ||
+                      (attachMode === "new" && !attachNewTitle.trim())
+                    }
+                    data-testid="constellation-attach-submit"
+                    style={{
+                      fontSize: 11,
+                      padding: "6px 14px",
+                      borderRadius: 4,
+                      border: `1px solid ${accentColor}80`,
+                      background: attachSubmitting ? "rgba(255,255,255,0.06)" : `${accentColor}30`,
+                      color: attachSubmitting ? "#94a3b8" : accentColor,
+                      cursor: attachSubmitting ? "default" : "pointer",
+                      fontWeight: 700,
+                      letterSpacing: "0.04em",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    {attachSubmitting
+                      ? "Attaching…"
+                      : attachMode === "new"
+                      ? "Create & attach"
+                      : "Attach"}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       )}
 

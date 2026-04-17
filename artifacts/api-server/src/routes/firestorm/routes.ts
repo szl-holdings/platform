@@ -1417,8 +1417,17 @@ router.patch("/firestorm/cases/:id", authMiddleware({ required: true }), async (
     }
 
     const existingTrail = Array.isArray(current.auditTrail) ? current.auditTrail : [];
-    const auditEntry = { action: `Status updated to ${status ?? current.status}`, user: req.body.updatedBy ?? "Operator", at: new Date().toISOString() };
-    updates.auditTrail = [...existingTrail, auditEntry];
+    const auditUser = req.body.updatedBy ?? "Operator";
+    const auditEntries: Array<{ action: string; user: string; at: string }> = [];
+    if (status !== undefined && status !== current.status) {
+      auditEntries.push({ action: `Status updated to ${status}`, user: auditUser, at: new Date().toISOString() });
+    }
+    if (priority !== undefined && priority !== current.priority) {
+      auditEntries.push({ action: `Priority updated to ${priority}`, user: auditUser, at: new Date().toISOString() });
+    }
+    if (assignedAnalyst !== undefined && assignedAnalyst !== current.assignedAnalyst) {
+      auditEntries.push({ action: `Assigned to ${assignedAnalyst ?? "Unassigned"}`, user: auditUser, at: new Date().toISOString() });
+    }
 
     if (note) {
       const existingNotes = Array.isArray(current.notes) ? current.notes : [];
@@ -1428,7 +1437,18 @@ router.patch("/firestorm/cases/:id", authMiddleware({ required: true }), async (
     if (evidenceItem) {
       const existingEvidence = Array.isArray(current.evidence) ? current.evidence : [];
       updates.evidence = [...existingEvidence, { ...evidenceItem, addedAt: new Date().toISOString() }];
+      const isTrace = evidenceItem?.type === "constellation_trace" || evidenceItem?.source === "constellation_graph";
+      const summary = isTrace
+        ? `Attached Constellation trace · origin ${evidenceItem.origin?.name ?? evidenceItem.origin?.id ?? "unknown"} · ${evidenceItem.nodeCount ?? 0} nodes within ${evidenceItem.hopCount ?? 0} hops`
+        : `Attached evidence: ${evidenceItem.name ?? "item"}`;
+      auditEntries.push({ action: summary, user: auditUser, at: new Date().toISOString() });
     }
+
+    // Always record at least one audit entry per PATCH so the timeline reflects the operator action.
+    if (auditEntries.length === 0) {
+      auditEntries.push({ action: "Case updated", user: auditUser, at: new Date().toISOString() });
+    }
+    updates.auditTrail = [...existingTrail, ...auditEntries];
 
     const [updated] = await db.update(firestormCasesTable).set(updates).where(eq(firestormCasesTable.id, id)).returning();
     sendSuccess(res, updated);

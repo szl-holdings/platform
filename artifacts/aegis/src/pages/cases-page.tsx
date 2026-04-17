@@ -22,7 +22,23 @@ import {
 import { TradecraftPanel } from "@/components/tradecraft-panel";
 
 interface CaseNote { content: string; author: string; at: string }
-interface EvidenceItem { name: string; type: string; url?: string; addedAt: string }
+interface ConstellationTraceEvidence {
+  source?: "constellation_graph";
+  origin?: { id: string; name?: string | null; entityType?: string; domain?: string; canonicalId?: string | null };
+  hostDomain?: string;
+  hopCount?: number;
+  nodeCount?: number;
+  edgeCount?: number;
+  truncated?: boolean;
+  generatedAt?: string;
+  bundle?: unknown;
+}
+type EvidenceItem = {
+  name: string;
+  type: string;
+  url?: string;
+  addedAt: string;
+} & ConstellationTraceEvidence;
 interface AuditEntry { action: string; user: string; at: string }
 
 interface Case {
@@ -251,13 +267,83 @@ function CaseDetailPanel({ caseItem, onClose, onUpdate }: { caseItem: Case; onCl
                 Evidence ({caseItem.evidence?.length ?? 0} items)
               </div>
               <div className="space-y-1.5">
-                {caseItem.evidence?.map((item, i) => (
-                  <div key={i} className="flex items-center gap-2 px-3 py-2 bg-white/5 rounded-lg">
-                    <FileText className="w-3 h-3 text-muted-foreground shrink-0" />
-                    <span className="text-xs text-foreground/80 flex-1 truncate">{item.name}</span>
-                    <Badge variant="outline" className="text-[9px] bg-blue-500/5 text-blue-400/70 border-blue-500/20 shrink-0">{item.type}</Badge>
-                  </div>
-                ))}
+                {caseItem.evidence?.map((item, i) => {
+                  const isTrace = item.type === "constellation_trace" || item.source === "constellation_graph";
+                  if (isTrace) {
+                    const downloadBundle = () => {
+                      if (!item.bundle) return;
+                      const blob = new Blob([JSON.stringify(item.bundle, null, 2)], { type: "application/json" });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = url;
+                      a.download = item.name;
+                      document.body.appendChild(a);
+                      a.click();
+                      document.body.removeChild(a);
+                      setTimeout(() => URL.revokeObjectURL(url), 1000);
+                    };
+                    return (
+                      <div
+                        key={i}
+                        data-testid="case-evidence-constellation-trace"
+                        className="px-3 py-2.5 bg-amber-500/5 border border-amber-500/20 rounded-lg"
+                      >
+                        <div className="flex items-start gap-2">
+                          <Activity className="w-3 h-3 text-amber-400 shrink-0 mt-0.5" />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-xs font-medium text-foreground/90 truncate">{item.name}</span>
+                              <Badge variant="outline" className="text-[9px] bg-amber-500/10 text-amber-400 border-amber-500/30 shrink-0">
+                                Constellation trace
+                              </Badge>
+                            </div>
+                            <div className="mt-1 text-[10px] font-mono text-muted-foreground/80 leading-relaxed">
+                              <div>
+                                <span className="text-muted-foreground/60">Origin:</span>{" "}
+                                <span className="text-foreground/80">{item.origin?.name ?? item.origin?.id ?? "Unknown"}</span>
+                                {item.origin?.entityType && (
+                                  <span className="text-muted-foreground/60"> · {item.origin.entityType}</span>
+                                )}
+                                {(item.origin?.domain ?? item.hostDomain) && (
+                                  <span className="text-muted-foreground/60"> · {item.origin?.domain ?? item.hostDomain}</span>
+                                )}
+                              </div>
+                              <div className="flex flex-wrap gap-x-3 mt-0.5">
+                                <span>{item.hopCount ?? 0} hops</span>
+                                <span>{item.nodeCount ?? 0} nodes</span>
+                                <span>{item.edgeCount ?? 0} edges</span>
+                                {item.truncated && (
+                                  <span className="text-amber-400">truncated</span>
+                                )}
+                              </div>
+                              <div className="text-muted-foreground/50 mt-0.5">
+                                Attached {new Date(item.addedAt).toLocaleString()}
+                              </div>
+                            </div>
+                          </div>
+                          {Boolean(item.bundle) && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={downloadBundle}
+                              data-testid="case-evidence-trace-download"
+                              className="h-6 px-2 text-[10px] border-amber-500/30 text-amber-400 hover:bg-amber-500/10 shrink-0"
+                            >
+                              JSON
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  }
+                  return (
+                    <div key={i} className="flex items-center gap-2 px-3 py-2 bg-white/5 rounded-lg">
+                      <FileText className="w-3 h-3 text-muted-foreground shrink-0" />
+                      <span className="text-xs text-foreground/80 flex-1 truncate">{item.name}</span>
+                      <Badge variant="outline" className="text-[9px] bg-blue-500/5 text-blue-400/70 border-blue-500/20 shrink-0">{item.type}</Badge>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
