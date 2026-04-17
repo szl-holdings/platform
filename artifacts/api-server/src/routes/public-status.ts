@@ -139,22 +139,31 @@ router.get("/status", async (_req, res) => {
   }
 });
 
+// Public uptime-history endpoint — no auth required.
+// This is the canonical source for the /status page UptimeBar component.
+// Returns: { history: { [serviceId]: { [YYYY-MM-DD]: { uptime: 0-1, latency: ms|null } } } }
+// For the authenticated admin view see /api/ops/uptime-history (ops-management.ts),
+// which returns an array of raw rows with per-day totals and is used by the ops dashboard.
 router.get("/uptime-history", async (_req, res) => {
   try {
-    const result = await pool.query<{ service_id: string; day: string; uptime_fraction: string }>(
+    const result = await pool.query<{ service_id: string; day: string; uptime_fraction: string; avg_latency_ms: string | null }>(
       `SELECT
          service_id,
          DATE(checked_at AT TIME ZONE 'UTC') AS day,
-         COUNT(*) FILTER (WHERE status = 'operational')::float / NULLIF(COUNT(*), 0) AS uptime_fraction
+         COUNT(*) FILTER (WHERE status = 'operational')::float / NULLIF(COUNT(*), 0) AS uptime_fraction,
+         ROUND(AVG(latency_ms))::int AS avg_latency_ms
        FROM platform_status_checks
        WHERE checked_at >= NOW() - INTERVAL '90 days'
        GROUP BY service_id, day
        ORDER BY service_id, day ASC`
     );
-    const byService: Record<string, Record<string, number>> = {};
+    const byService: Record<string, Record<string, { uptime: number; latency: number | null }>> = {};
     for (const row of result.rows) {
       if (!byService[row.service_id]) byService[row.service_id] = {};
-      byService[row.service_id][row.day] = parseFloat(row.uptime_fraction);
+      byService[row.service_id][row.day] = {
+        uptime: parseFloat(row.uptime_fraction),
+        latency: row.avg_latency_ms !== null ? parseInt(row.avg_latency_ms) : null,
+      };
     }
     res.json({ history: byService });
   } catch (err) {

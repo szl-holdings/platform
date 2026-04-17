@@ -42,7 +42,11 @@ interface StatusData {
   incidents: Incident[];
 }
 
-type UptimeHistory = Record<string, Record<string, number>>;
+interface DayUptime {
+  uptime: number;
+  latency: number | null;
+}
+type UptimeHistory = Record<string, Record<string, DayUptime>>;
 
 function statusColor(status: string): string {
   if (status === "operational") return "#10b981";
@@ -79,32 +83,83 @@ function UptimeBadge({ value, label }: { value: number; label: string }) {
   );
 }
 
-function UptimeBar({ service, history }: { service: ServiceStatus; history: Record<string, number> }) {
+function UptimeBar({ service, history }: { service: ServiceStatus; history: Record<string, DayUptime> }) {
+  const [tooltip, setTooltip] = useState<{ day: string; x: number; y: number } | null>(null);
   const bars = 90;
   const days = Array.from({ length: bars }, (_, i) => {
     const d = new Date();
     d.setUTCDate(d.getUTCDate() - (bars - 1 - i));
     return d.toISOString().slice(0, 10);
   });
+
+  const tooltipData = tooltip ? history[tooltip.day] : null;
+
   return (
-    <div style={{ display: "flex", gap: 2, alignItems: "flex-end", height: 24 }}>
-      {days.map((day, i) => {
-        const isLast = i === bars - 1;
-        const fraction = history[day];
-        const hasData = fraction !== undefined;
-        const color = isLast && service.status !== "operational"
-          ? statusColor(service.status)
-          : hasData && fraction < 0.99 ? (fraction < 0.95 ? "#ef4444" : "#f59e0b") : "#10b981";
-        const opacity = isLast ? 1 : hasData ? 0.35 + fraction * 0.65 : 0.2;
-        const height = isLast ? 20 : hasData ? 10 + fraction * 10 : 10;
-        return (
-          <div key={day} title={`${day}: ${hasData ? `${(fraction * 100).toFixed(1)}%` : "no data"}`} style={{
-            width: 3, height,
-            background: color, borderRadius: 2, opacity,
-            flexShrink: 0,
-          }} />
-        );
-      })}
+    <div style={{ position: "relative" }}>
+      <div style={{ display: "flex", gap: 2, alignItems: "flex-end", height: 24 }}>
+        {days.map((day, i) => {
+          const isLast = i === bars - 1;
+          const dayData = history[day];
+          const hasData = dayData !== undefined;
+          const fraction = dayData?.uptime ?? 0;
+          const color = isLast && service.status !== "operational"
+            ? statusColor(service.status)
+            : hasData && fraction < 0.99 ? (fraction < 0.95 ? "#ef4444" : "#f59e0b") : "#10b981";
+          const opacity = isLast ? 1 : hasData ? 0.35 + fraction * 0.65 : 0.2;
+          const height = isLast ? 20 : hasData ? 10 + fraction * 10 : 10;
+          return (
+            <div
+              key={day}
+              onMouseEnter={(e) => {
+                const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                const parentRect = (e.currentTarget as HTMLElement).parentElement!.parentElement!.getBoundingClientRect();
+                setTooltip({ day, x: rect.left - parentRect.left + rect.width / 2, y: rect.top - parentRect.top });
+              }}
+              onMouseLeave={() => setTooltip(null)}
+              style={{
+                width: 3, height,
+                background: color, borderRadius: 2, opacity,
+                flexShrink: 0, cursor: "default",
+              }}
+            />
+          );
+        })}
+      </div>
+
+      {tooltip && (
+        <div style={{
+          position: "absolute",
+          bottom: "calc(100% + 8px)",
+          left: tooltip.x,
+          transform: "translateX(-50%)",
+          background: "hsl(210,12%,10%)",
+          border: "1px solid hsla(0,0%,100%,0.12)",
+          borderRadius: 6,
+          padding: "6px 10px",
+          pointerEvents: "none",
+          whiteSpace: "nowrap",
+          zIndex: 50,
+          boxShadow: "0 4px 12px rgba(0,0,0,0.5)",
+        }}>
+          <div style={{ fontSize: 11, fontWeight: 600, color: "hsl(38,12%,88%)", marginBottom: 3 }}>
+            {new Date(tooltip.day + "T00:00:00Z").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" })}
+          </div>
+          {tooltipData ? (
+            <>
+              <div style={{ fontSize: 11, color: tooltipData.uptime >= 0.99 ? "#10b981" : tooltipData.uptime >= 0.95 ? "#f59e0b" : "#ef4444" }}>
+                {(tooltipData.uptime * 100).toFixed(2)}% uptime
+              </div>
+              {tooltipData.latency !== null && (
+                <div style={{ fontSize: 11, color: "hsl(210,5%,52%)", marginTop: 1 }}>
+                  {tooltipData.latency}ms avg latency
+                </div>
+              )}
+            </>
+          ) : (
+            <div style={{ fontSize: 11, color: "hsl(210,5%,44%)" }}>No data</div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

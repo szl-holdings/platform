@@ -882,7 +882,11 @@ router.delete("/ops/service-deps/:id", async (req, res) => {
 });
 
 // ──────────────────────────────────────────────────────────────────────────────
-// UPTIME HISTORY (per-service daily snapshots for status page)
+// UPTIME HISTORY (admin-only, per-service daily snapshots for ops dashboard)
+// Returns: { history: Row[] } where each Row has service_id, day, total_checks,
+// operational_checks, uptime_pct, avg_latency_ms — richer than the public endpoint.
+// The PUBLIC /api/public/uptime-history (public-status.ts) is what the /status
+// page UptimeBar component uses; it requires no auth and returns a nested map.
 // ──────────────────────────────────────────────────────────────────────────────
 
 router.get("/ops/uptime-history", async (req, res) => {
