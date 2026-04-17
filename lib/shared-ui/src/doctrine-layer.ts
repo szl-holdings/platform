@@ -69,11 +69,12 @@ export const DOCTRINE_APP_MAP: DoctrineLayerConfig[] = [
     primaryRole: "Intelligence Backbone & Execution Engine",
   },
   {
-    appId: "lyte",
-    appName: "Lyte",
+    appId: "command",
+    appName: "Command",
+    displayName: "Unified Command",
     layers: ["OBSERVE", "DECIDE", "EXECUTE"],
-    description: "Business observability — surfaces risk, latency, ownership gaps, and workflow friction before they hit execution.",
-    primaryRole: "Business Observability Platform",
+    description: "Unified Command workspace — Strategy, Operations, and Infrastructure modes for end-to-end business orchestration.",
+    primaryRole: "Unified Command Surface",
   },
   {
     appId: "vessels",

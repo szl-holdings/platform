@@ -25,14 +25,14 @@ const ECOSYSTEM_NODES: EcosystemNode[] = [
     angle: 0,
   },
   {
-    id: "lyte",
-    name: "Lyte",
-    icon: "⚡",
+    id: "command",
+    name: "Command",
+    icon: "◆",
     layer: 0,
     accent: "#22d3ee",
-    path: "/command/operations/",
-    subtitle: "AIOps Command",
-    description: "AI-driven incident orchestration & workflow automation",
+    path: "/command/",
+    subtitle: "Unified Command",
+    description: "Strategy, Operations & Infrastructure workspace",
     angle: 90,
   },
   {
@@ -91,8 +91,8 @@ const LAYER_CONFIG = [
 const CONNECTION_PAIRS: Array<[string, string, string]> = [
   ["vessels", "aegis", "AIS anomaly → alert"],
   ["aegis", "alloy", "Containment → playbook"],
-  ["alloy", "lyte", "Prediction → workflow"],
-  ["lyte", "alloy", "Action → execution"],
+  ["alloy", "command", "Prediction → workflow"],
+  ["command", "alloy", "Action → execution"],
   ["alloy", "beacon", "Result → telemetry"],
   ["carlota-jo", "aegis", "Advisory → intelligence"],
 ];

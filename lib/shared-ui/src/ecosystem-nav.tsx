@@ -158,13 +158,13 @@ const ECOSYSTEM_APPS: EcosystemApp[] = [
     description: "Execution Fabric & Governed Orchestration Engine",
   },
   {
-    id: "lyte",
-    name: "Lyte",
-    subtitle: "Command Surface · Business Observability",
-    path: "/command/operations/",
+    id: "command",
+    name: "Command",
+    subtitle: "Command Surface · Unified Workspace",
+    path: "/command/",
     accent: "#22d3ee",
     icon: "◆",
-    description: "Flagship Command Surface — Business Observability",
+    description: "Unified Command — Strategy, Operations & Infrastructure",
   },
   {
     id: "aegis",
@@ -1153,7 +1153,7 @@ function getDomainSearchResults(q: string): SearchResult[] {
   const results: SearchResult[] = [];
   const searchableContent = [
     { keywords: ["fleet", "vessel", "ship", "port", "maritime", "route", "anchor"], app: "Vessels", icon: "🚢", accent: "#4a90b8", href: "/vessels/", items: ["Fleet Dashboard", "Port Analytics", "Route Planning", "Risk Scoring", "Dark Vessel Detection"] },
-    { keywords: ["signal", "workflow", "observability", "playbook", "ops", "anomaly", "business", "escalation"], app: "Lyte", icon: "⚡", accent: "#d4a054", href: "/command/operations/", items: ["Command Inbox", "Approvals Center", "Ownership Map", "Escalation Center", "Intervention Workspace"] },
+    { keywords: ["signal", "workflow", "observability", "playbook", "ops", "anomaly", "business", "escalation", "strategy", "operations", "infrastructure", "command"], app: "Command", icon: "◆", accent: "#22d3ee", href: "/command/", items: ["Strategy Workspace", "Operations Workspace", "Infrastructure Workspace", "Command Inbox", "Approvals Center", "Ownership Map", "Escalation Center"] },
     { keywords: ["alloy", "automation", "connector", "workflow", "orchestration", "execution", "run"], app: "Alloy", icon: "⬡", accent: "#60a5fa", href: "/alloy/", items: ["Execution Runs", "Workflow Orchestration", "Connector Mesh", "Governance", "Automation Analytics"] },
     { keywords: ["brand", "consulting", "advisory", "discreet", "residence", "estate", "private"], app: "Carlota Jo", icon: "◈", accent: "#d4b896", href: "/carlota-jo/", items: ["Services", "Approach", "Private Inquiry"] },
   ];

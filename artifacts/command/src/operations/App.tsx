@@ -369,7 +369,7 @@ function PrivateApp({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
   return (
     <PowerUserProvider shortcuts={lyteShortcuts} appName="Lyte" accentColor={LYTE_ACCENT}>
       <div className="flex flex-col h-screen bg-[#080c14]">
-        <EcosystemNav currentAppId="lyte" currentAppName="Lyte" accentColor={LYTE_ACCENT} />
+        <EcosystemNav currentAppId="command" currentAppName="Unified Command" accentColor={LYTE_ACCENT} />
         <SandboxModeBanner />
         <div className="flex-1 overflow-hidden">
           <LyteLayout>
