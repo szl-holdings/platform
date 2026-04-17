@@ -124,6 +124,7 @@ const BusinessSignalsIntelligence = lazy(() => import("@lyte/pages/business-sign
 const LytePredictiveIntelligence = lazy(() => import("@lyte/pages/predictive-intelligence"));
 const LivingTopology = lazy(() => import("@lyte/pages/living-topology"));
 const GovernedDecisionLoop = lazy(() => import("@lyte/pages/governed-decision-loop"));
+const CognitiveRuntime = lazy(() => import("@lyte/pages/cognitive-runtime"));
 
 const LegatusConsole = lazy(() => import("@imp/pages/legatus-console"));
 const ImperiumMap = lazy(() => import("@imp/pages/imperium-map"));
@@ -269,6 +270,7 @@ function AppShell() {
               <Route path="/operations/predictive-intelligence" component={() => <LytePredictiveIntelligence />} />
               <Route path="/operations/living-topology" component={() => <LivingTopology />} />
               <Route path="/operations/governed-decision-loop" component={() => <GovernedDecisionLoop />} />
+              <Route path="/operations/cognitive-runtime" component={() => <CognitiveRuntime />} />
               <Route path="/operations/alloy/canvas" component={() => <AlloyWorkflowCanvas />} />
               <Route path="/operations/alloy/actions" component={() => <AlloyActionConsole />} />
               <Route path="/operations/alloy/templates" component={() => <AlloyWorkflowTemplates />} />

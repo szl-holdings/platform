@@ -114,6 +114,7 @@ const NAV_GROUPS = [
       { href: "/gpu-observatory", label: "GPU & AI Observatory", icon: Cpu },
       { href: "/business-signals", label: "Business Signals", icon: DollarSign },
       { href: "/predictive-intelligence", label: "Predictive Intel", icon: TrendingUp },
+      { href: "/cognitive-runtime", label: "Cognitive Runtime", icon: Brain },
       { href: "/revenue-impact", label: "Revenue Impact", icon: DollarSign },
       { href: "/self-healing", label: "Self-Healing Ops", icon: RotateCcw },
       { href: "/failure-timeline", label: "Failure Timeline", icon: TrendingUp },

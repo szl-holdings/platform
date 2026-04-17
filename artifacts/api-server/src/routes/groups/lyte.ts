@@ -7,6 +7,7 @@ import lytePlatformRouter from "../lyte-platform";
 import lyteLiveRouter from "../lyte-live";
 import lyteObservabilityRouter from "../lyte-observability";
 import lyteExtendedRouter from "../lyte-extended";
+import lyteCognitiveRouter from "../lyte-cognitive";
 
 const _readLimiter = perUserApiSlidingLimiter;
 const _writeLimiter = perUserWriteSlidingLimiter;
@@ -26,4 +27,7 @@ export function register(router: IRouter): void {
 
   router.use("/lyte", _readLimiter);
   router.use(lyteLiveRouter);
+
+  router.use("/lyte/cognitive", _readLimiter);
+  router.use(lyteCognitiveRouter);
 }
