@@ -2,15 +2,22 @@ import { Router, type IRouter } from "express";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../middlewares/sliding-window-limiter";
 import {
-  ALL_SUITES,
-  SUITE_BY_ID,
-  SUITE_BY_DOMAIN,
+  FORGE_SUITES as ALL_SUITES,
+  FORGE_SUITE_BY_ID as SUITE_BY_ID,
+  FORGE_SUITE_BY_DOMAIN as SUITE_BY_DOMAIN,
   runEvalSuite,
   checkRunRegression,
   runNightlyEvals,
+  scheduleNightlyRun,
+  ALL_EVAL_TYPES,
   type EvalRunReport,
   type EvalSuiteDef,
-} from "@workspace/eval-os";
+} from "@workspace/eval-forge";
+import {
+  upsertEvalForgeSuites,
+  persistEvalForgeRun,
+  loadRecentRunsFromDb,
+} from "../lib/eval-forge-store";
 
 const router: IRouter = Router();
 
@@ -18,6 +25,46 @@ const runStore = new Map<string, EvalRunReport>();
 const suiteStore = new Map<string, EvalSuiteDef>(
   ALL_SUITES.map((s) => [s.suiteId, s]),
 );
+
+upsertEvalForgeSuites(ALL_SUITES).catch(() => {});
+
+loadRecentRunsFromDb(200).then((runs) => {
+  for (const r of runs) {
+    if (!runStore.has(r.runId)) {
+      runStore.set(r.runId, r);
+    }
+  }
+}).catch(() => {});
+
+async function runAndPersistNightly(): Promise<void> {
+  try {
+    const baselineStore = new Map<string, EvalRunReport>(
+      Array.from(runStore.values())
+        .reduce((acc, r) => {
+          if (!acc.has(r.suiteId) || acc.get(r.suiteId)!.runAt < r.runAt) {
+            acc.set(r.suiteId, r);
+          }
+          return acc;
+        }, new Map<string, EvalRunReport>()),
+    );
+    const summary = await runNightlyEvals({
+      triggeredBy: "nightly-cron",
+      baselineStore,
+      verbose: false,
+    });
+    for (const report of summary.suiteReports) {
+      runStore.set(report.runId, report);
+      persistEvalForgeRun(report).catch(() => {});
+    }
+  } catch {}
+}
+
+scheduleNightlyRun(2, { triggeredBy: "nightly-cron", verbose: false })
+  .then(({ unschedule }) => {
+    process.once("SIGTERM", unschedule);
+    process.once("SIGINT", unschedule);
+  })
+  .catch(() => {});
 
 function defaultExecutor(input: Record<string, unknown>, caseId: string, domain: string) {
   const start = Date.now();
@@ -41,6 +88,7 @@ router.get(
       name: s.name,
       description: s.description,
       domain: s.domain,
+      evalType: s.evalType,
       version: s.version,
       tags: s.tags,
       caseCount: s.cases.length,
@@ -72,8 +120,10 @@ router.get(
       suites,
       recentRuns: runs,
       domains: Object.keys(SUITE_BY_DOMAIN),
+      evalTypes: ALL_EVAL_TYPES,
       totalSuites: suiteStore.size,
       totalRuns: runStore.size,
+      version: "eval-forge-v1",
     });
   },
 );
@@ -95,6 +145,7 @@ router.get(
         name: s.name,
         description: s.description,
         domain: s.domain,
+        evalType: s.evalType,
         version: s.version,
         tags: s.tags,
         caseCount: s.cases.length,
@@ -255,6 +306,7 @@ router.post(
       }
 
       runStore.set(report.runId, report);
+      persistEvalForgeRun(report).catch(() => {});
 
       res.status(201).json({
         runId: report.runId,
@@ -316,6 +368,7 @@ router.post(
 
       for (const report of summary.suiteReports) {
         runStore.set(report.runId, report);
+        persistEvalForgeRun(report).catch(() => {});
       }
 
       res.status(201).json({

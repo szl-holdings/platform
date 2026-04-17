@@ -50,6 +50,7 @@
     "@szl-holdings/prism-bus": "workspace:*",
     "@szl-holdings/proof-chain": "workspace:*",
     "@szl-holdings/pulse-evals": "workspace:*",
+    "@workspace/eval-forge": "workspace:*",
     "@workspace/eval-os": "workspace:*",
     "@workspace/reflection-engine": "workspace:*",
     "@workspace/planner": "workspace:*",

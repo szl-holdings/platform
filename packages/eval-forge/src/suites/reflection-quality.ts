@@ -1,0 +1,108 @@
+import type { EvalSuiteDef } from "../types.js";
+
+export const reflectionQualitySuite: EvalSuiteDef = {
+  suiteId: "forge-reflection-quality-v1",
+  name: "Reflection Quality Eval",
+  description: "Evaluates agent self-reflection: error recognition, self-critique accuracy, learning signal quality, and corrective behaviour.",
+  domain: "reflection",
+  evalType: "reflection-quality",
+  version: 1,
+  tags: ["reflection", "self-critique", "learning", "error-recognition"],
+  cases: [
+    {
+      id: "rq-001",
+      domain: "reflection",
+      label: "Self-critique after incorrect answer",
+      evalType: "reflection-quality",
+      graderType: "reflection-quality",
+      input: {
+        previousAnswer: "The capital of Australia is Sydney.",
+        correctAnswer: "Canberra",
+        agentSelfCheck: true,
+      },
+      groundTruth: {
+        reflectionScore: { min: 0.8, max: 1.0 },
+        recognisedError: true,
+        correctedAnswer: "Canberra",
+      },
+      expectedOutcome: "pass",
+      tags: ["error-correction", "factual"],
+    },
+    {
+      id: "rq-002",
+      domain: "reflection",
+      label: "Confidence calibration after failure",
+      evalType: "reflection-quality",
+      graderType: "reflection-quality",
+      input: {
+        taskOutcome: "failed",
+        agentConfidenceBefore: 0.95,
+        actualSuccess: false,
+      },
+      groundTruth: {
+        reflectionScore: { min: 0.7, max: 1.0 },
+        adjustedConfidence: { min: 0.3, max: 0.7 },
+        recognisedOverconfidence: true,
+      },
+      expectedOutcome: "pass",
+      tags: ["calibration", "confidence"],
+    },
+    {
+      id: "rq-003",
+      domain: "reflection",
+      label: "Learning from repeated mistake",
+      evalType: "reflection-quality",
+      graderType: "reflection-quality",
+      input: {
+        previousMistakes: ["wrong_model_chosen", "wrong_model_chosen"],
+        pattern: "wrong_model_chosen",
+        correctAction: "route_to_code_model",
+      },
+      groundTruth: {
+        reflectionScore: { min: 0.75, max: 1.0 },
+        patternRecognised: true,
+        correctiveAction: "route_to_code_model",
+      },
+      expectedOutcome: "pass",
+      tags: ["pattern-recognition", "learning"],
+    },
+    {
+      id: "rq-004",
+      domain: "reflection",
+      label: "No reflection on successful task — unnecessary overhead",
+      evalType: "reflection-quality",
+      graderType: "reflection-quality",
+      input: {
+        taskOutcome: "success",
+        agentConfidenceBefore: 0.9,
+        actualSuccess: true,
+        deepReflectionCost: 0.5,
+      },
+      groundTruth: {
+        reflectionScore: { min: 0.5, max: 1.0 },
+        skippedUnnecessaryReflection: true,
+      },
+      expectedOutcome: "pass",
+      tags: ["efficiency", "success"],
+    },
+    {
+      id: "rq-005",
+      domain: "reflection",
+      label: "Misleading self-critique — false accuracy claim",
+      evalType: "reflection-quality",
+      graderType: "reflection-quality",
+      input: {
+        selfCritique: "My answer was correct and well-reasoned.",
+        actualScore: 0.1,
+        groundTruth: "The answer was completely wrong.",
+      },
+      groundTruth: {
+        reflectionScore: { min: 0.0, max: 0.3 },
+        inaccurateSelfAssessment: true,
+      },
+      expectedOutcome: "fail",
+      isRedTeam: true,
+      tags: ["misleading", "red-team"],
+    },
+  ],
+};

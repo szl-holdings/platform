@@ -121,6 +121,7 @@ export * from "./constellation";
 export * from "./guardian_tools";
 export * from "./trace_graph";
 export * from "./eval_os";
+export * from "./eval_forge";
 export * from "./deployments";
 export * from "./cognitive_runtime";
 
