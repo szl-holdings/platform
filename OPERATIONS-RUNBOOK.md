@@ -17,6 +17,7 @@
 7. [Incident Response](#7-incident-response)
 8. [Code Quality Commands](#8-code-quality-commands)
 9. [Release Operations](#9-release-operations)
+10. [Canonical Documentation — Freshness Policy & Drift Risk](#10-canonical-documentation--freshness-policy--drift-risk)
 
 ---
 
@@ -355,8 +356,55 @@ After every task branch merge, the post-merge script runs automatically:
 
 ---
 
+## 10. Canonical Documentation — Freshness Policy & Drift Risk
+
+### Doc Freshness Policy
+
+The eight canonical reference docs listed below are point-in-time snapshots derived from the codebase. They drift as new routes, schema changes, platform surfaces, and API contracts are added. To keep them synchronized:
+
+| Trigger | Action Required |
+|---------|----------------|
+| Any major platform task merged (new routes, new schema tables, new artifacts) | Re-verify the affected doc(s) against source code; update the *Last verified* footer |
+| New artifact registered or archived | Update `PRODUCT-SURFACES.md` and `ARCHITECTURE.md` monorepo structure |
+| Schema table count changes significantly | Update `DATA-MODEL.md` and `ARCHITECTURE.md` table counts |
+| New API route group added | Update `API-SPEC.md` Route Groups section |
+| Role or access control change | Update `ACCESS-CONTROL-MATRIX.md` |
+| New analytics event taxonomy added | Update `ANALYTICS-EVENTS.md` Event Registry |
+| Deployment model or environment variable changes | Update `DEPLOYMENT-GUIDE.md` and this runbook |
+| Quarterly (minimum) | Full review of all eight docs against source |
+
+**Source verification commands:**
+```bash
+# Count pgTable declarations (current: 799 tables)
+grep -rc "= pgTable" lib/db/src/schema/ | awk -F: '{sum += $2} END {print sum}'
+
+# Count schema files (current: 132)
+ls lib/db/src/schema/*.ts | wc -l
+
+# Count API route files including subdirectories (current: ~258 .ts files)
+find artifacts/api-server/src/routes/ -name "*.ts" | wc -l
+
+# List registered artifacts
+cat artifact.toml  # or check .replit artifact registrations
+```
+
+### Maintenance & Drift Risk Table
+
+| Document | Source of Truth | Last Verified | Drift Risk | Re-verify When |
+|----------|----------------|---------------|------------|----------------|
+| [ARCHITECTURE.md](ARCHITECTURE.md) | `artifacts/`, `lib/`, `artifacts/api-server/src/` | 2026-04-17 | Medium — monorepo structure and table counts drift with every schema/artifact change | New artifact added/archived; significant schema growth |
+| [API-SPEC.md](API-SPEC.md) | `artifacts/api-server/src/routes/`, `lib/api-spec/openapi.yaml` | 2026-04-16 | High — ~140 route files; new route groups added frequently | Any new route group or auth model change |
+| [DATA-MODEL.md](DATA-MODEL.md) | `lib/db/src/schema/` (132 files, 799 tables) | 2026-04-17 | High — 799 tables across 132 schema files; changes with every schema migration | Any `pnpm --filter db push` in dev or `db:migrate` in prod |
+| [PRODUCT-SURFACES.md](PRODUCT-SURFACES.md) | `artifacts/` directory + registered artifact list | 2026-04-17 | Medium — artifact status, component counts, and deprecated surfaces drift | New artifact registered, archived, or status-changed |
+| [OPERATIONS-RUNBOOK.md](OPERATIONS-RUNBOOK.md) (this document) | `artifacts/api-server/`, `lib/`, Replit workflows | 2026-04-17 | Low — operational procedures are stable; env vars and health endpoints change occasionally | New env var added; health endpoint changed; workflow topology changes |
+| [DEPLOYMENT-GUIDE.md](DEPLOYMENT-GUIDE.md) | `infra/`, `scripts/`, `.github/workflows/` | 2026-04-16 | Low — infrastructure and CI/CD procedures are stable | IaC changes; new GitHub Actions workflow added |
+| [ACCESS-CONTROL-MATRIX.md](ACCESS-CONTROL-MATRIX.md) | `lib/auth/`, `artifacts/api-server/src/middlewares/`, `lib/db/src/schema/auth.ts` | 2026-04-15 | Medium — role system and route classifications change with new features | New role added; new route group requiring distinct auth; RBAC middleware change |
+| [ANALYTICS-EVENTS.md](ANALYTICS-EVENTS.md) | `EVENT_TAXONOMY.md`, `ANALYTICS_PLAN.md`, analytics instrumentation | 2026-04-16 | Low — event taxonomy is stable; new event categories added per major feature | New product surface or major feature requiring funnel coverage |
+
+---
+
 *See also: [DEPLOYMENT-GUIDE.md](DEPLOYMENT-GUIDE.md) · [INCIDENT_RESPONSE.md](INCIDENT_RESPONSE.md) · [docs/ops-runbook.md](docs/ops-runbook.md) · [REPLIT_OPERATIONS.md](REPLIT_OPERATIONS.md) · [ARCHITECTURE.md](ARCHITECTURE.md) · [KNOWN-GAPS.md](KNOWN-GAPS.md) · [ENV_MATRIX.md](ENV_MATRIX.md) · [BACKUP_AND_RECOVERY.md](BACKUP_AND_RECOVERY.md)*
 
 ---
 
-*Last verified against source code: 2026-04-16*
+*Last verified against source code: 2026-04-17*

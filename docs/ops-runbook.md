@@ -796,3 +796,5 @@ This document was audited against the following source files. When a claim in th
 | API Reference | `/api/docs` (live) | OpenAPI specification via Swagger UI |
 | Secrets Policy | `docs/SECRETS_POLICY.md` | Secret handling, rotation, and classification |
 | Access Control | `docs/ACCESS_CONTROL.md` | RBAC model and permission boundaries |
+
+> **Canonical reference doc freshness:** The eight root-level canonical docs (`ARCHITECTURE.md`, `API-SPEC.md`, `DATA-MODEL.md`, `PRODUCT-SURFACES.md`, `OPERATIONS-RUNBOOK.md`, `DEPLOYMENT-GUIDE.md`, `ACCESS-CONTROL-MATRIX.md`, `ANALYTICS-EVENTS.md`) are maintained at the repository root. Their freshness policy, drift risk table, and source verification commands are defined in `OPERATIONS-RUNBOOK.md` Section 10.

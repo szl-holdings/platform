@@ -1,7 +1,7 @@
 # Data Model — SZL Holdings Platform
 
 **Version:** 1.0 · **Last updated:** April 2026
-**Source:** `lib/db/src/schema/` (112 schema files, 685 tables total)
+**Source:** `lib/db/src/schema/` (132 schema files, 799 tables total)
 
 > The source of truth for the database schema is the Drizzle ORM schema files in `lib/db/src/schema/`. This document describes domain groupings, key tables, relationships, and conventions. For migration history see `lib/db/drizzle/`.
 
@@ -12,7 +12,8 @@
 **Engine:** PostgreSQL 16
 **ORM:** Drizzle ORM (`@szl-holdings/db`)
 **Migration strategy:** Drizzle migrations (`lib/db/drizzle/`)
-**Table count:** 685 `pgTable` declarations across 112 schema files (verified by `grep -rc "= pgTable" lib/db/src/schema/`)
+**Table count:** 799 `pgTable` declarations across 132 schema files
+**Counting method:** `grep -rc "= pgTable" lib/db/src/schema/ | awk -F: '{sum += $2} END {print sum}'`
 
 **Connection exports from `@szl-holdings/db`:**
 - `.` — db client + pool (default export)
@@ -336,7 +337,7 @@ See `docs/disaster-recovery.md` for the full restore playbook and `BACKUP_AND_RE
 
 ## Overview
 
-The SZL Holdings platform uses a single **PostgreSQL 16+** database managed via **Drizzle ORM**. The schema contains 644 tables organized into 10 domain namespaces. Each domain prefix provides logical isolation; all tables live in a single PostgreSQL database (not separate databases or schemas).
+The SZL Holdings platform uses a single **PostgreSQL 16+** database managed via **Drizzle ORM**. The schema contains **799 tables** across 132 schema files organized into 10 domain namespaces. Each domain prefix provides logical isolation; all tables live in a single PostgreSQL database (not separate databases or schemas).
 
 Schema source of truth: `lib/db/` — Drizzle schema files, migrations, and seed data.
 

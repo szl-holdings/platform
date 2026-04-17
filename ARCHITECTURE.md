@@ -95,7 +95,7 @@ Additional supporting surfaces: **Command Portal** (ecosystem hub), **SZL Holdin
 ┌──────────────────────┐    ┌────────────────────────────────────┐
 │  PostgreSQL 16+      │    │  External Services                 │
 │  Drizzle ORM         │    │  • OpenAI / Anthropic / Gemini     │
-│  644 tables          │    │    (via Replit AI proxy)           │
+│  799 tables          │    │    (via Replit AI proxy)           │
 │  10 schema domains   │    │  • Stripe (billing)                │
 │                      │    │  • Resend / SMTP (email)           │
 │  Domain isolation:   │    │  • AIS feeds (maritime)            │
@@ -162,14 +162,14 @@ Confirmed Action + Full Audit Trail
 │   ├── vessels/            # Vessels — Maritime Intelligence
 │   ├── carlota-jo/         # Carlota Jo — Advisory
 │   ├── command/            # Command Portal — Ecosystem Hub
-│   ├── imperium/           # IMPERIUM — Cloud Sovereignty (in development)
+│   ├── imperium/           # IMPERIUM — Cloud Sovereignty (archived — no running workflow)
 │   ├── szl-holdings-mobile/# CORTEX — Unified Mobile Command
-│   ├── prism-counsel/      # PRISM Counsel — Legal Command
-│   ├── stephen-site/       # Stephen Lutar — Founder site
+│   ├── prism-counsel/      # PRISM Counsel — Legal Command (archived — frontend removed, API retained)
+│   ├── stephen-site/       # Stephen Lutar — Founder site (archived — source removed)
 │   └── mockup-sandbox/     # Component design preview (internal)
 │
 ├── lib/                    # 37 shared TypeScript packages
-│   ├── db/                 # Drizzle schema (700+ tables), migrations, seed
+│   ├── db/                 # Drizzle schema (799 tables, 132 schema files), migrations, seed
 │   ├── shared-ui/          # Cross-app React component library
 │   ├── auth/               # OIDC authentication, session management
 │   ├── services/           # Business logic adapters
@@ -265,4 +265,4 @@ Confirmed Action + Full Audit Trail
 
 ---
 
-*Last verified against source code: 2026-04-16 (Phase 2–3 audit). Re-verify against `artifacts/api-server/src/`, `lib/db/src/schema/`, and `lib/auth/src/` after significant code changes. See [AUDIT_FINDINGS_REGISTER.md](AUDIT_FINDINGS_REGISTER.md) for open architectural findings.*
+*Last verified against source code: 2026-04-17 (drift review — table count updated to 799 from `grep -rc "= pgTable" lib/db/src/schema/ | awk -F: '{sum += $2} END {print sum}'`; archived artifacts annotated). Re-verify against `artifacts/api-server/src/`, `lib/db/src/schema/`, and `lib/auth/src/` after significant code changes. See [AUDIT_FINDINGS_REGISTER.md](AUDIT_FINDINGS_REGISTER.md) for open architectural findings.*

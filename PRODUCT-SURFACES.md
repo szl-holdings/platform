@@ -157,21 +157,21 @@ All surfaces share six platform primitives — see [PLATFORM_PRIMITIVES.md](PLAT
 
 ---
 
-### PRISM Counsel — Legal Matter Command
+### PRISM Counsel — Legal Matter Command *(Archived)*
 
 | Attribute | Detail |
 |-----------|--------|
 | **Artifact** | `artifacts/prism-counsel` |
 | **Preview Path** | `/prism-counsel/` |
-| **Status** | Functional alpha |
+| **Status** | **Archived** — frontend app source code (pages, components, routes) removed; no running workflow. API routes (`/api/prism-counsel/*`) remain for data access but are no longer actively developed. Database schema (120+ tables) is intact. |
 | **Audience** | Legal partners, case managers, discovery analysts, recovery specialists |
 | **Problem solved** | High-stakes litigation and recovery operations require cross-domain intelligence that standalone LegalTech platforms lack |
 | **Core capability** | Agentic legal operating system — Matter Twin case management, AI-assisted document review, court filing integration, recovery ops, NY No-Fault module, pressure/friction boards |
 | **Key modules** | Matter management, court filing integration (NY courts), document review, multi-jurisdictional support, recovery tracking (liens, settlements), proof chain audit, pressure/friction boards, copilot workbench, No-Fault module |
 | **Stack** | React 19, Vite, `@szl-holdings/ai-engine`, `@szl-holdings/proof-chain`, `@szl-holdings/receipt-graph`, `@szl-holdings/covenant-policy`, `@szl-holdings/shared-ui` |
 | **Key dependencies** | `@szl-holdings/ai-engine`, `@szl-holdings/proof-chain`, `@szl-holdings/receipt-graph`, `@szl-holdings/covenant-policy`, `@szl-holdings/shared-ui` |
-| **Components** | 127 web components |
-| **DB Tables** | 120+ tables across 10 schema modules |
+| **Components** | 127 web components (archived) |
+| **DB Tables** | 120+ tables across 10 schema modules (schema retained) |
 | **Primitives used** | All 6 — Outcome Graph, Proof Chain, Covenant Policy, Decision Simulation, Workflow Engine, Event Fabric |
 | **Strategic role** | Legal domain pack with cross-domain intelligence from defense, maritime, and financial domains |
 
@@ -230,18 +230,18 @@ All surfaces share six platform primitives — see [PLATFORM_PRIMITIVES.md](PLAT
 
 ---
 
-### Stephen Lutar — Founder Authority Site
+### Stephen Lutar — Founder Authority Site *(Archived)*
 
 | Attribute | Detail |
 |-----------|--------|
 | **Artifact** | `artifacts/stephen-site` |
 | **Preview Path** | `/stephen-site/` |
-| **Status** | Live |
+| **Status** | **Archived** — app source code (pages, components, routes) removed; residual config and dist files may remain. No running workflow. |
 | **Audience** | Prospective partners, employers, clients, collaborators |
 | **Core Capability** | Research impact tracking, media relations, audience intelligence, digital product storefront, work showcase |
 | **Key Modules** | Professional portfolio, research showcase, media relations |
 | **Stack** | React 19, Vite, `@szl-holdings/shared-ui` |
-| **Components** | 58 components |
+| **Components** | 58 components (archived) |
 | **Strategic Role** | Founder positioning and personal brand — independent from SZL Holdings corporate identity |
 
 ---
@@ -336,7 +336,7 @@ The following directories exist under `artifacts/` but are not yet deployed arti
 
 ---
 
-*Last verified against code on 2026-04-16*
+*Last verified against code on 2026-04-17 (drift review — prism-counsel and stephen-site marked Archived; status now consistent with OPERATIONS-RUNBOOK.md)*
 
 ---
 
