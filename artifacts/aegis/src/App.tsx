@@ -389,6 +389,7 @@ const opsNavItems = [
   { path: "/ops/mrr", label: "MRR Dashboard", icon: TrendingUp },
   { path: "/ops/rmm", label: "RMM Console", icon: Server },
   { path: "/ops/provider-settings", label: "Provider Settings", icon: Settings },
+  { path: "/ops/settings", label: "Ops Settings", icon: SlidersHorizontal },
 ];
 
 const intelNavPrimary = [
