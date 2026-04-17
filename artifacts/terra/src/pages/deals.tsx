@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import { CrdtEntityPanel, EmptyState } from "@szl-holdings/shared-ui";
+import { CrdtEntityPanel } from "@szl-holdings/shared-ui";
+import { EmptyState } from "@szl-holdings/shared-ui/design-system";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRealtimeChannel } from "@szl-holdings/shared-ui";
 import { Activity, AlertTriangle, RefreshCw, Plus, X } from "lucide-react";
@@ -527,9 +528,14 @@ export default function DealsPage() {
 
       {showEmptyState && (
         <EmptyState
+          icon={Activity}
           headline="No deals in pipeline"
-          description="Add your first deal to start tracking your real estate pipeline."
+          description="No active deals across the 12-stage brokerage pipeline. Add a deal manually or convert a qualified lead from the Leads page to start tracking close probability, agent activity, and at-risk signals."
           accentColor="#3a7ad4"
+          action={{
+            label: "Add Deal",
+            onClick: () => setShowAddModal(true),
+          }}
         />
       )}
 

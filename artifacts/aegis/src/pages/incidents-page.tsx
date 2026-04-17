@@ -9,7 +9,7 @@ import { Label } from "@szl-holdings/shared-ui/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@szl-holdings/shared-ui/ui/select";
 import { Textarea } from "@szl-holdings/shared-ui/ui/textarea";
 import { Plus, AlertTriangle, Shield, Clock, Users, Trash2, ArrowRight, FileText, Loader2, X, ChevronUp, ChevronDown } from "lucide-react";
-import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
+import { EmptyState } from "@szl-holdings/shared-ui/design-system";
 import { CommentThread, ActivityFeed } from "@szl-holdings/shared-ui/collaboration";
 import { useState, useEffect, useRef } from "react";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
@@ -470,8 +470,9 @@ export default function IncidentsPage() {
           ) : incidents.length === 0 ? (
             <EmptyState
               icon={Shield}
-              headline="No incidents recorded"
-              description="Create an incident to begin tracking"
+              headline="No active incidents"
+              description="Defenses are holding — no incidents have been opened or escalated. New incidents created from alerts, hunts, or analyst escalations will land here."
+              accentColor="#10b981"
               className="border border-dashed border-border rounded-lg"
             />
           ) : (

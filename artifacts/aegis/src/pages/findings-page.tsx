@@ -10,6 +10,7 @@ import { Label } from "@szl-holdings/shared-ui/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@szl-holdings/shared-ui/ui/select";
 import { Textarea } from "@szl-holdings/shared-ui/ui/textarea";
 import { AlertTriangle, Plus, Shield, Bug, CheckCircle, XCircle, Search } from "lucide-react";
+import { EmptyState } from "@szl-holdings/shared-ui/design-system";
 import { useState, useEffect, useRef } from "react";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 
@@ -171,15 +172,17 @@ export default function FindingsPage() {
           {[...Array(4)].map((_, i) => <FindingSkeleton key={i} />)}
         </div>
       ) : filtered.length === 0 ? (
-        <Card className="bg-card border-border border-dashed animate-fade-in-up stagger-6">
-          <CardContent className="p-16 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-primary/5 flex items-center justify-center mx-auto mb-4">
-              <Search className="w-8 h-8 text-muted-foreground/30" />
-            </div>
-            <p className="text-muted-foreground font-medium">No findings found</p>
-            <p className="text-xs text-muted-foreground/60 mt-1">{filter !== "all" ? "Try a different severity filter" : "Findings will appear after assessments are run"}</p>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={filter === "all" ? CheckCircle : Search}
+          headline={filter === "all" ? "No open findings" : `No ${filter}-severity findings`}
+          description={
+            filter === "all"
+              ? "Recent assessments produced no findings — the surface area is clean. New issues will appear here as scans, hunts, and assessments complete."
+              : `No findings match severity “${filter}.” Switch to “All” to review every finding from recent assessments.`
+          }
+          accentColor={filter === "all" ? "#10b981" : "#8b7ac8"}
+          className="animate-fade-in-up stagger-6 border border-dashed border-border rounded-lg"
+        />
       ) : (
         <div className="space-y-3">
           {filtered.map((finding: any, i: number) => {

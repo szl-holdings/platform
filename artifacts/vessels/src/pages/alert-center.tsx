@@ -14,7 +14,7 @@ import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 import { doctrineEventBus } from "@szl-holdings/observability";
 import { DoctrineLayerBadge } from "@szl-holdings/shared-ui/doctrine-layer-badge";
 import { DataStateBadge, AnimatedCounter} from "@szl-holdings/shared-ui";
-import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
+import { EmptyState } from "@szl-holdings/shared-ui/design-system";
 
 interface FleetAlert {
   id: number;
@@ -201,9 +201,9 @@ export default function AlertCenterPage() {
           ) : alerts.length === 0 ? (
             <EmptyState
               icon={BellOff}
-              headline="No fleet alerts"
-              description="The fleet is operating within normal parameters. Active alerts will appear here when triggered by vessels or alert rules."
-              accentColor="#38bdf8"
+              headline="All vessels nominal"
+              description="No active fleet alerts. Speed, geofence, weather, schedule, cargo, and maintenance thresholds are all within tolerance — alerts will surface here the moment a rule trips."
+              accentColor="#10b981"
             />
           ) : (
             alerts.map((alert, i: number) => {

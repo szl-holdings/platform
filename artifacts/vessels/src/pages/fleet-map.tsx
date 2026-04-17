@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { useRealtimeChannel } from "@szl-holdings/shared-ui";
+import { EmptyState } from "@szl-holdings/shared-ui/design-system";
 import { useQueryClient } from "@tanstack/react-query";
 
 const statusColors: Record<string, string> = {
@@ -812,7 +813,7 @@ export default function FleetMapPage() {
         </div>
       )}
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden relative">
         <SectionErrorBoundary sectionName="Fleet Map">
           <MapboxFleetMap
             filteredVessels={filteredVessels}
@@ -823,6 +824,32 @@ export default function FleetMapPage() {
             showAis={showAis}
           />
         </SectionErrorBoundary>
+
+        {!tokenLoading && filteredVessels.length === 0 && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+            <div className="pointer-events-auto rounded-2xl bg-[#060e1a]/85 backdrop-blur-md border border-sky-500/20 px-6 py-2 max-w-md shadow-2xl">
+              <EmptyState
+                icon={Ship}
+                headline={vessels.length === 0 ? "No vessels in fleet" : "No vessels matching filters"}
+                description={
+                  vessels.length === 0
+                    ? "No vessels have been onboarded yet. Once vessels are added to the fleet they will plot here in real time via AIS."
+                    : "Adjust status or vessel-type filters to expand results. Currently 0 of " + vessels.length + " vessels match the active filter set."
+                }
+                action={
+                  vessels.length > 0
+                    ? {
+                        label: "Reset filters",
+                        onClick: () => setFilters({ fleet: "all", status: "all", type: "all" }),
+                      }
+                    : undefined
+                }
+                accentColor="#38bdf8"
+                compact
+              />
+            </div>
+          </div>
+        )}
 
         {selectedVessel && (
           <VesselSidePanel vessel={selectedVessel} onClose={() => setSelectedVessel(null)} exceptions={fleetExceptions} />

@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Users, Search, Phone, Mail, TrendingUp, CheckSquare, Plus, RefreshCw, X } from "lucide-react";
+import { EmptyState } from "@szl-holdings/shared-ui/design-system";
 import { StageBadge, AgentAvatar, formatCurrency, ProbabilityBar } from "@/components/brokerage-ui";
 import { cn } from "@szl-holdings/shared-ui/utils";
 
@@ -372,13 +373,17 @@ export default function LeadsPage() {
       )}
 
       {!isLoading && !isError && leads.length === 0 && (
-        <div className="rounded-xl border border-dashed border-terra-border bg-terra-surface/30 p-12 text-center">
-          <Users className="w-10 h-10 text-terra-text-muted mx-auto mb-3" />
-          <p className="text-sm font-semibold text-terra-text mb-1">No leads yet</p>
-          <p className="text-xs text-terra-text-muted mb-4">Add your first lead manually, or convert a distress property from the Distress Engine.</p>
-          <button onClick={() => setShowAddModal(true)} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-terra-primary text-white text-sm font-semibold hover:bg-terra-primary/90 transition-colors">
-            <Plus className="w-4 h-4" /> Add First Lead
-          </button>
+        <div className="rounded-xl border border-dashed border-terra-border bg-terra-surface/30">
+          <EmptyState
+            icon={Users}
+            headline="No leads in the funnel"
+            description="No active leads to score or follow up on. Add a lead manually, import a CSV, or convert a distressed property from the Distress Engine to start tracking conversion probability."
+            accentColor="#3a7ad4"
+            action={{
+              label: "Add First Lead",
+              onClick: () => setShowAddModal(true),
+            }}
+          />
         </div>
       )}
 

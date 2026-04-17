@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@szl-holdings/shared-ui";
-import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
+import { EmptyState } from "@szl-holdings/shared-ui/design-system";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import {
   AlertTriangle, Clock, User, ChevronDown, ChevronRight,
@@ -416,9 +416,9 @@ export default function ExceptionsCenterPage() {
           {filtered.length === 0 ? (
             <EmptyState
               icon={CheckCircle2}
-              headline="No exceptions"
-              description="No fleet exceptions match the current filter. The fleet is operating within defined parameters."
-              accentColor="#38bdf8"
+              headline="Exception queue is clear"
+              description="Every voyage, port call, and charter parameter is operating within tolerance. New exceptions raised by the rules engine or operator escalation will appear here for triage."
+              accentColor="#10b981"
             />
           ) : (
             filtered.map(exc => (

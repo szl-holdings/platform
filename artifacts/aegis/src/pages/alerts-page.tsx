@@ -10,7 +10,7 @@ import { Label } from "@szl-holdings/shared-ui/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@szl-holdings/shared-ui/ui/select";
 import { Textarea } from "@szl-holdings/shared-ui/ui/textarea";
 import { Bell, Plus, AlertTriangle, CheckCircle, Eye, XCircle, Clock } from "lucide-react";
-import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
+import { EmptyState } from "@szl-holdings/shared-ui/design-system";
 import { useState, useEffect, useRef } from "react";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 
@@ -156,9 +156,14 @@ export default function AlertsPage() {
         </div>
       ) : filtered.length === 0 ? (
         <EmptyState
-          icon={Bell}
-          headline="No alerts found"
-          description={filter !== "all" ? "Try a different filter" : "Create alerts to start monitoring"}
+          icon={filter === "all" ? CheckCircle : Bell}
+          headline={filter === "all" ? "No active alerts" : `No ${filter} alerts`}
+          description={
+            filter === "all"
+              ? "Alert thresholds are met — the environment is clean. New correlated alerts will appear here as soon as they trigger."
+              : `No alerts currently sit in ${filter} status. Switch filter to “All” to see the full alert queue.`
+          }
+          accentColor={filter === "all" ? "#10b981" : "#8b7ac8"}
           className="animate-fade-in-up stagger-3 border border-dashed border-border rounded-lg"
         />
       ) : (

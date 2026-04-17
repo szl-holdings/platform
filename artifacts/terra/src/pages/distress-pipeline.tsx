@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { TrendingDown, Search, CheckCircle } from "lucide-react";
+import { EmptyState } from "@szl-holdings/shared-ui/design-system";
 
 const ACCENT = "#c8a060";
 const BG = { page: "#060a07", surface: "#0a0e08", elevated: "#0e1209" } as const;
@@ -259,16 +260,35 @@ export default function DistressPipelinePage() {
           <div className="px-4 py-2" style={{ borderBottom: `1px solid ${BORDER.subtle}`, background: BG.elevated }}>
             <p className="text-[10px]" style={{ color: TEXT.muted }}>{filtered.length} properties · sorted by distress score</p>
           </div>
-          {filtered.map((property) => (
-            <PropertyRow
-              key={property.id}
-              property={property}
-              selected={selected === property.id}
-              onClick={() => setSelected(property.id)}
+          {filtered.length === 0 ? (
+            <EmptyState
+              icon={search ? Search : TrendingDown}
+              headline={search ? "No properties match search" : "No distressed properties in pipeline"}
+              description={
+                search
+                  ? `No properties match “${search}.” Clear the search or broaden the address/borough query to expand results.`
+                  : "The pipeline is clear. Adjust borough filters or expand the date range to surface foreclosure, delinquency, vacancy, and tax-lien candidates from the Distress Engine."
+              }
+              accentColor={ACCENT}
+              action={
+                search
+                  ? { label: "Clear search", onClick: () => setSearch("") }
+                  : undefined
+              }
+              compact
             />
-          ))}
+          ) : (
+            filtered.map((property) => (
+              <PropertyRow
+                key={property.id}
+                property={property}
+                selected={selected === property.id}
+                onClick={() => setSelected(property.id)}
+              />
+            ))
+          )}
         </div>
-        {selectedProperty && <PropertyDetail property={selectedProperty} />}
+        {selectedProperty && filtered.length > 0 && <PropertyDetail property={selectedProperty} />}
       </div>
     </div>
   );
