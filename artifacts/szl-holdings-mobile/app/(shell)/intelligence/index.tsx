@@ -502,6 +502,32 @@ export default function CortexIntelligenceScreen() {
             </View>
           </TouchableOpacity>
 
+          <View style={styles.runtimeSection}>
+            <Text style={[styles.runtimeSectionLabel, { color: colors.mutedForeground }]}>COGNITIVE RUNTIME</Text>
+            <View style={styles.runtimeGrid}>
+              {[
+                { route: "/(shell)/intelligence/approval-inbox", label: "Approval Inbox", icon: "inbox" as const, color: "#f97316", sub: "Guardian-routed decisions" },
+                { route: "/(shell)/intelligence/alert-center", label: "Alert Center", icon: "alert-triangle" as const, color: "#ef4444", sub: "Escalations & world-model" },
+                { route: "/(shell)/intelligence/executive-brief", label: "Executive Brief", icon: "file-text" as const, color: ACCENT, sub: "Daily · Weekly · Live snapshot" },
+                { route: "/(shell)/intelligence/secure-quick-actions", label: "Quick Actions", icon: "shield" as const, color: "#6366f1", sub: "Guardian-scoped · Rollback" },
+                { route: "/(shell)/intelligence/run-review", label: "Run Review", icon: "activity" as const, color: "#22c55e", sub: "Cognitive loop traces" },
+              ].map(({ route, label, icon, color, sub }) => (
+                <TouchableOpacity
+                  key={route}
+                  onPress={() => router.navigate(route as Parameters<typeof router.navigate>[0])}
+                  activeOpacity={0.8}
+                  style={[styles.runtimeCard, { backgroundColor: color + "0d", borderColor: color + "30" }]}
+                >
+                  <View style={[styles.runtimeIcon, { backgroundColor: color + "18", borderColor: color + "35" }]}>
+                    <Feather name={icon} size={16} color={color} />
+                  </View>
+                  <Text style={[styles.runtimeLabel, { color: "#e8edf8" }]}>{label}</Text>
+                  <Text style={[styles.runtimeSub, { color: "#6b7280" }]} numberOfLines={1}>{sub}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
           {stats && (
             <View style={styles.statsRow}>
               {[
@@ -777,6 +803,19 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     letterSpacing: 0.5,
   },
+  runtimeSection: { marginBottom: 4 },
+  runtimeSectionLabel: { fontSize: 10, fontWeight: "700", letterSpacing: 0.8, marginBottom: 8 },
+  runtimeGrid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  runtimeCard: {
+    width: "47%", borderRadius: 10, borderWidth: 1,
+    padding: 12, gap: 6,
+  },
+  runtimeIcon: {
+    width: 32, height: 32, borderRadius: 8,
+    alignItems: "center", justifyContent: "center", borderWidth: 1,
+  },
+  runtimeLabel: { fontSize: 12, fontWeight: "700" },
+  runtimeSub: { fontSize: 10, lineHeight: 14 },
   statsRow: { flexDirection: "row", gap: 8, marginBottom: 8 },
   statCard: {
     flex: 1,
