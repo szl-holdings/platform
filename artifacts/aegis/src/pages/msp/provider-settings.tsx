@@ -64,6 +64,48 @@ function getAuthFields(provider: string, authType: string): Array<{ key: string;
   return [...base, { key: "apiKey", label: "API Key", placeholder: "your-api-key", type: "password" }];
 }
 
+function validateUrl(val: string): boolean {
+  try { new URL(val); return true; } catch { return false; }
+}
+
+function validateProviderForm(
+  form: Record<string, string>,
+  authFields: Array<{ key: string; label: string }>
+): Record<string, string> {
+  const errors: Record<string, string> = {};
+
+  if (!form.name?.trim()) {
+    errors.name = "Display name is required";
+  } else if (form.name.trim().length < 2) {
+    errors.name = "Display name must be at least 2 characters";
+  }
+
+  for (const field of authFields) {
+    const val = form[field.key] ?? "";
+    if (!val.trim()) {
+      errors[field.key] = `${field.label} is required`;
+    } else if (field.key === "baseUrl" && !validateUrl(val.trim())) {
+      errors[field.key] = "Must be a valid URL (e.g. https://app.example.com)";
+    }
+  }
+
+  const syncVal = parseInt(form.syncIntervalMinutes || "5", 10);
+  if (isNaN(syncVal) || syncVal < 1 || syncVal > 60) {
+    errors.syncIntervalMinutes = "Sync interval must be between 1 and 60 minutes";
+  }
+
+  return errors;
+}
+
+function FieldError({ msg }: { msg?: string }) {
+  if (!msg) return null;
+  return (
+    <p className="flex items-center gap-1 mt-1 text-[11px] text-red-400">
+      <AlertTriangle className="w-3 h-3 shrink-0" /> {msg}
+    </p>
+  );
+}
+
 interface AddProviderFormProps {
   onClose: () => void;
   onSave: (data: Record<string, unknown>) => void;
@@ -77,14 +119,24 @@ function AddProviderForm({ onClose, onSave, loading }: AddProviderFormProps) {
     mode: "both",
     syncIntervalMinutes: "5",
   });
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [submitAttempted, setSubmitAttempted] = useState(false);
 
   const selected = PROVIDER_OPTIONS.find(p => p.value === form.provider);
   const authType = selected?.auth ?? "api_key";
   const authFields = getAuthFields(form.provider, authType);
 
   const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
+  const handleBlur = (k: string) => setTouched(t => ({ ...t, [k]: true }));
+
+  const validationErrors = validateProviderForm(form, authFields);
+  const showError = (k: string) => (touched[k] || submitAttempted) ? validationErrors[k] : undefined;
+  const hasErrors = Object.keys(validationErrors).length > 0;
 
   const handleSave = () => {
+    setSubmitAttempted(true);
+    if (hasErrors) return;
+
     const { name, provider, mode, syncIntervalMinutes, notes, ...rest } = form;
     onSave({
       name, provider, mode, authType,
@@ -93,6 +145,13 @@ function AddProviderForm({ onClose, onSave, loading }: AddProviderFormProps) {
       config: rest,
     });
   };
+
+  const inputClass = (k: string) =>
+    `w-full px-3 py-2 text-sm rounded-lg border focus:outline-none transition-colors ${
+      showError(k)
+        ? "bg-red-500/5 border-red-500/50 focus:border-red-500/70"
+        : "bg-muted border-border focus:border-primary/50"
+    }`;
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -105,14 +164,33 @@ function AddProviderForm({ onClose, onSave, loading }: AddProviderFormProps) {
           <button onClick={onClose}><X className="w-4 h-4 text-muted-foreground hover:text-foreground" /></button>
         </div>
         <div className="p-4 space-y-4">
+          {submitAttempted && hasErrors && (
+            <div className="flex items-center gap-2 text-xs text-amber-400 bg-amber-500/10 border border-amber-500/20 px-3 py-2 rounded-lg">
+              <AlertTriangle className="w-3.5 h-3.5 shrink-0" /> Please fix the highlighted errors before saving.
+            </div>
+          )}
+
           <div className="grid grid-cols-2 gap-3">
             <div className="col-span-2">
-              <label className="text-xs text-muted-foreground block mb-1">Display Name</label>
-              <input value={form.name} onChange={e => set("name", e.target.value)} placeholder="e.g. NinjaOne Production" className="w-full px-3 py-2 text-sm bg-muted rounded-lg border border-border focus:outline-none" />
+              <label className="text-xs text-muted-foreground block mb-1">
+                Display Name <span className="text-red-400">*</span>
+              </label>
+              <input
+                value={form.name}
+                onChange={e => set("name", e.target.value)}
+                onBlur={() => handleBlur("name")}
+                placeholder="e.g. NinjaOne Production"
+                className={inputClass("name")}
+              />
+              <FieldError msg={showError("name")} />
             </div>
             <div>
               <label className="text-xs text-muted-foreground block mb-1">Provider</label>
-              <select value={form.provider} onChange={e => set("provider", e.target.value)} className="w-full px-3 py-2 text-sm bg-muted rounded-lg border border-border focus:outline-none">
+              <select
+                value={form.provider}
+                onChange={e => { set("provider", e.target.value); setTouched({}); setSubmitAttempted(false); }}
+                className="w-full px-3 py-2 text-sm bg-muted rounded-lg border border-border focus:outline-none"
+              >
                 {PROVIDER_OPTIONS.map(p => <option key={p.value} value={p.value} disabled={!p.supported}>{p.label}</option>)}
               </select>
             </div>
@@ -133,14 +211,18 @@ function AddProviderForm({ onClose, onSave, loading }: AddProviderFormProps) {
             <div className="space-y-3">
               {authFields.map(f => (
                 <div key={f.key}>
-                  <label className="text-xs text-muted-foreground block mb-1">{f.label}</label>
+                  <label className="text-xs text-muted-foreground block mb-1">
+                    {f.label} <span className="text-red-400">*</span>
+                  </label>
                   <input
                     value={form[f.key] ?? ""}
                     onChange={e => set(f.key, e.target.value)}
+                    onBlur={() => handleBlur(f.key)}
                     placeholder={f.placeholder}
                     type={f.type}
-                    className="w-full px-3 py-2 text-sm bg-background rounded-lg border border-border focus:outline-none font-mono"
+                    className={`${inputClass(f.key)} font-mono`}
                   />
+                  <FieldError msg={showError(f.key)} />
                 </div>
               ))}
             </div>
@@ -148,8 +230,19 @@ function AddProviderForm({ onClose, onSave, loading }: AddProviderFormProps) {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs text-muted-foreground block mb-1">Sync Interval (minutes)</label>
-              <input value={form.syncIntervalMinutes} onChange={e => set("syncIntervalMinutes", e.target.value)} type="number" min={1} max={60} className="w-full px-3 py-2 text-sm bg-muted rounded-lg border border-border focus:outline-none" />
+              <label className="text-xs text-muted-foreground block mb-1">
+                Sync Interval (minutes) <span className="text-red-400">*</span>
+              </label>
+              <input
+                value={form.syncIntervalMinutes}
+                onChange={e => set("syncIntervalMinutes", e.target.value)}
+                onBlur={() => handleBlur("syncIntervalMinutes")}
+                type="number"
+                min={1}
+                max={60}
+                className={inputClass("syncIntervalMinutes")}
+              />
+              <FieldError msg={showError("syncIntervalMinutes")} />
             </div>
             <div>
               <label className="text-xs text-muted-foreground block mb-1">Notes (optional)</label>
@@ -163,8 +256,18 @@ function AddProviderForm({ onClose, onSave, loading }: AddProviderFormProps) {
 
           <div className="flex gap-2 pt-2">
             <Button variant="outline" size="sm" onClick={onClose} className="flex-1">Cancel</Button>
-            <Button size="sm" onClick={handleSave} disabled={loading || !form.name || !form.provider} className="flex-1">
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save & Connect"}
+            <Button
+              size="sm"
+              onClick={handleSave}
+              disabled={loading}
+              className={`flex-1 ${submitAttempted && hasErrors && !loading ? "bg-red-500/10 text-red-400 border border-red-500/30 hover:bg-red-500/20" : ""}`}
+            >
+              {loading
+                ? <Loader2 className="w-4 h-4 animate-spin" />
+                : submitAttempted && hasErrors
+                  ? "Fix errors above"
+                  : "Save & Connect"
+              }
             </Button>
           </div>
         </div>

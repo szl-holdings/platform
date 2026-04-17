@@ -25,9 +25,43 @@ interface AzureTenant {
   updatedAt: string;
 }
 
+const GUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const DOMAIN_RE = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*\.[a-z]{2,}$/i;
+
+function validateTenantForm(form: { azureTenantId: string; displayName: string; domain: string }) {
+  const errors: Record<string, string> = {};
+  if (!form.azureTenantId.trim()) {
+    errors.azureTenantId = "Azure Tenant ID is required";
+  } else if (!GUID_RE.test(form.azureTenantId.trim())) {
+    errors.azureTenantId = "Must be a valid GUID (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)";
+  }
+  if (!form.displayName.trim()) {
+    errors.displayName = "Display name is required";
+  } else if (form.displayName.trim().length < 2) {
+    errors.displayName = "Display name must be at least 2 characters";
+  }
+  if (!form.domain.trim()) {
+    errors.domain = "Primary domain is required";
+  } else if (!DOMAIN_RE.test(form.domain.trim())) {
+    errors.domain = "Must be a valid domain (e.g. contoso.onmicrosoft.com)";
+  }
+  return errors;
+}
+
+function FieldError({ msg }: { msg?: string }) {
+  if (!msg) return null;
+  return (
+    <p className="flex items-center gap-1 mt-1 text-[11px] text-red-500">
+      <AlertCircle className="w-3 h-3 shrink-0" /> {msg}
+    </p>
+  );
+}
+
 function AzureTenantsPanel() {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ azureTenantId: "", displayName: "", domain: "", status: "active" });
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [submitAttempted, setSubmitAttempted] = useState(false);
   const [formError, setFormError] = useState("");
   const [actionError, setActionError] = useState("");
   const [saving, setSaving] = useState(false);
@@ -42,20 +76,37 @@ function AzureTenantsPanel() {
 
   const tenants: AzureTenant[] = data?.tenants ?? [];
 
+  const validationErrors = validateTenantForm(form);
+  const showErrors = (field: string) => (touched[field] || submitAttempted) && validationErrors[field];
+
+  const handleBlur = (field: string) => {
+    setTouched(t => ({ ...t, [field]: true }));
+  };
+
+  const resetForm = () => {
+    setForm({ azureTenantId: "", displayName: "", domain: "", status: "active" });
+    setTouched({});
+    setSubmitAttempted(false);
+    setFormError("");
+  };
+
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
+    setSubmitAttempted(true);
     setFormError("");
-    if (!form.azureTenantId.trim() || !form.displayName.trim() || !form.domain.trim()) {
-      setFormError("All fields are required");
+
+    const errors = validateTenantForm(form);
+    if (Object.keys(errors).length > 0) {
       return;
     }
+
     setSaving(true);
     try {
       await apiFetch("/admin/tenants", {
         method: "POST",
         body: JSON.stringify(form),
       });
-      setForm({ azureTenantId: "", displayName: "", domain: "", status: "active" });
+      resetForm();
       setShowForm(false);
       qc.invalidateQueries({ queryKey: ["azure-tenants"] });
     } catch (err) {
@@ -98,6 +149,8 @@ function AzureTenantsPanel() {
     }
   }
 
+  const hasValidationErrors = Object.keys(validationErrors).length > 0;
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -110,7 +163,7 @@ function AzureTenantsPanel() {
           </p>
         </div>
         <button
-          onClick={() => setShowForm(v => !v)}
+          onClick={() => { setShowForm(v => !v); if (showForm) resetForm(); }}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors"
         >
           <Plus className="w-3.5 h-3.5" /> Provision Tenant
@@ -125,6 +178,7 @@ function AzureTenantsPanel() {
             exit={{ opacity: 0, y: -8 }}
             onSubmit={handleCreate}
             className="bg-card border border-border rounded-xl p-5 space-y-4"
+            noValidate
           >
             <div className="flex items-center gap-2 mb-1">
               <Cloud className="w-4 h-4 text-primary" />
@@ -135,33 +189,65 @@ function AzureTenantsPanel() {
                 <AlertCircle className="w-3.5 h-3.5 shrink-0" /> {formError}
               </div>
             )}
+            {submitAttempted && hasValidationErrors && !formError && (
+              <div className="flex items-center gap-2 text-xs text-amber-600 bg-amber-500/10 border border-amber-500/20 px-3 py-2 rounded-lg">
+                <AlertCircle className="w-3.5 h-3.5 shrink-0" /> Please fix the errors below before submitting.
+              </div>
+            )}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-medium text-muted-foreground mb-1">Azure Tenant ID (GUID)</label>
+                <label className="block text-xs font-medium text-muted-foreground mb-1">
+                  Azure Tenant ID (GUID) <span className="text-red-500">*</span>
+                </label>
                 <input
-                  className="w-full px-3 py-2 rounded-lg bg-background border border-border text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary font-mono"
+                  className={cn(
+                    "w-full px-3 py-2 rounded-lg bg-background border text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:ring-1 font-mono transition-colors",
+                    showErrors("azureTenantId")
+                      ? "border-red-500/60 focus:ring-red-500/30"
+                      : "border-border focus:ring-primary"
+                  )}
                   placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
                   value={form.azureTenantId}
                   onChange={e => setForm(f => ({ ...f, azureTenantId: e.target.value.trim() }))}
+                  onBlur={() => handleBlur("azureTenantId")}
                 />
+                <FieldError msg={showErrors("azureTenantId") ? validationErrors.azureTenantId : undefined} />
               </div>
               <div>
-                <label className="block text-xs font-medium text-muted-foreground mb-1">Display Name</label>
+                <label className="block text-xs font-medium text-muted-foreground mb-1">
+                  Display Name <span className="text-red-500">*</span>
+                </label>
                 <input
-                  className="w-full px-3 py-2 rounded-lg bg-background border border-border text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                  className={cn(
+                    "w-full px-3 py-2 rounded-lg bg-background border text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:ring-1 transition-colors",
+                    showErrors("displayName")
+                      ? "border-red-500/60 focus:ring-red-500/30"
+                      : "border-border focus:ring-primary"
+                  )}
                   placeholder="Contoso Corporation"
                   value={form.displayName}
                   onChange={e => setForm(f => ({ ...f, displayName: e.target.value }))}
+                  onBlur={() => handleBlur("displayName")}
                 />
+                <FieldError msg={showErrors("displayName") ? validationErrors.displayName : undefined} />
               </div>
               <div>
-                <label className="block text-xs font-medium text-muted-foreground mb-1">Primary Domain</label>
+                <label className="block text-xs font-medium text-muted-foreground mb-1">
+                  Primary Domain <span className="text-red-500">*</span>
+                </label>
                 <input
-                  className="w-full px-3 py-2 rounded-lg bg-background border border-border text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                  className={cn(
+                    "w-full px-3 py-2 rounded-lg bg-background border text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:ring-1 transition-colors",
+                    showErrors("domain")
+                      ? "border-red-500/60 focus:ring-red-500/30"
+                      : "border-border focus:ring-primary"
+                  )}
                   placeholder="contoso.onmicrosoft.com"
                   value={form.domain}
                   onChange={e => setForm(f => ({ ...f, domain: e.target.value.trim() }))}
+                  onBlur={() => handleBlur("domain")}
                 />
+                <FieldError msg={showErrors("domain") ? validationErrors.domain : undefined} />
               </div>
               <div>
                 <label className="block text-xs font-medium text-muted-foreground mb-1">Initial Status</label>
@@ -180,12 +266,17 @@ function AzureTenantsPanel() {
               <button
                 type="submit"
                 disabled={saving}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 disabled:opacity-60 transition-colors"
+                className={cn(
+                  "flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium transition-colors",
+                  submitAttempted && hasValidationErrors && !saving
+                    ? "bg-red-500/10 text-red-500 border border-red-500/30 hover:bg-red-500/20"
+                    : "bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
+                )}
               >
                 {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-                {saving ? "Provisioning…" : "Provision Tenant"}
+                {saving ? "Provisioning…" : submitAttempted && hasValidationErrors ? "Fix errors above" : "Provision Tenant"}
               </button>
-              <button type="button" onClick={() => setShowForm(false)} className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+              <button type="button" onClick={() => { setShowForm(false); resetForm(); }} className="text-xs text-muted-foreground hover:text-foreground transition-colors">
                 Cancel
               </button>
             </div>
