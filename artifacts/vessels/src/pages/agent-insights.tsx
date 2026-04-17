@@ -1,4 +1,5 @@
 import { AgentInsightsWidget } from "@szl-holdings/shared-ui/agent-insights-widget";
+import { MicroFeedbackWidget } from "@szl-holdings/shared-ui";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Brain, Zap, Database, Radio } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
@@ -70,6 +71,16 @@ export default function AgentInsightsPage() {
         compact={false}
         className="border-sky-500/10 bg-[#060e1a]/60"
       />
+
+      <div className="flex justify-end pt-1">
+        <MicroFeedbackWidget
+          featureId="vessels-agent-insights"
+          featureName="Vessels Autonomous Fleet Intelligence"
+          app="vessels"
+          compact
+          prompt="Were these fleet insights useful?"
+        />
+      </div>
 
       <div className="text-[10px] text-sky-400/30 text-center pt-2">
         Powered by SZL Agent OS — autonomous intelligence running 24/7

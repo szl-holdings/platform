@@ -1,4 +1,5 @@
 import { AgentInsightsWidget } from "@szl-holdings/shared-ui/agent-insights-widget";
+import { MicroFeedbackWidget } from "@szl-holdings/shared-ui";
 import { useQuery } from "@tanstack/react-query";
 import { Brain, Zap, Radio, ShieldAlert } from "lucide-react";
 
@@ -69,6 +70,16 @@ export default function AgentInsightsPage() {
         compact={false}
         className="border-orange-500/10 bg-[#09080f]/60"
       />
+
+      <div className="flex justify-end pt-1">
+        <MicroFeedbackWidget
+          featureId="aegis-agent-insights"
+          featureName="Aegis Autonomous Threat Intelligence"
+          app="aegis"
+          compact
+          prompt="Were these threat insights useful?"
+        />
+      </div>
 
       <div className="text-[10px] text-orange-400/30 text-center pt-2">
         Powered by SZL Agent OS — autonomous security intelligence running 24/7

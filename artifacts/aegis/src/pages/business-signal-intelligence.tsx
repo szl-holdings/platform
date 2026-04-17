@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { DollarSign, Shield, AlertTriangle, Users, TrendingDown, Activity, Clock, FileText } from "lucide-react";
+import { MicroFeedbackWidget } from "@szl-holdings/shared-ui";
 
 const ACCENT = "#ef4444";
 const DS = {
@@ -197,7 +198,16 @@ export default function BusinessSignalIntelligence() {
           </div>
 
           <div className="rounded-xl border p-4" style={{ borderColor: DS.border, background: DS.surface }}>
-            <div className="text-[10px] font-bold text-white mb-3">Executive Brief</div>
+            <div className="flex items-center justify-between mb-3">
+              <div className="text-[10px] font-bold text-white">Executive Brief</div>
+              <MicroFeedbackWidget
+                featureId="aegis-business-signal-brief"
+                featureName="Business Signal Executive Brief"
+                app="aegis"
+                compact
+                prompt="Useful?"
+              />
+            </div>
             <div className="space-y-2 text-[10px]" style={{ color: "rgba(255,255,255,0.5)" }}>
               <p>🔴 Active incidents carry <strong className="text-white/80">{formatUSD(totalBreachExposure)}</strong> breach cost exposure and <strong className="text-white/80">{formatUSD(totalFineExposure)}</strong> in compliance fines</p>
               <p>🟡 <strong className="text-white/80">GDPR</strong> and <strong className="text-white/80">HIPAA</strong> require immediate attention — exposure above acceptable thresholds</p>

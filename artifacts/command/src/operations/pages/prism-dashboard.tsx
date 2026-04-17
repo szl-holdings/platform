@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { apiFetch } from "@szl-holdings/shared-ui";
+import { apiFetch, MicroFeedbackWidget } from "@szl-holdings/shared-ui";
 import { TrendingUp, TrendingDown, Minus, BarChart3, ChevronRight, Zap, AlertTriangle, RefreshCw, ArrowRight, CheckCircle2, Clock, Target, UserCheck, Shield } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 
@@ -417,6 +417,18 @@ export default function PrismDashboard() {
             if (!score) return null;
             return <LensCard key={lens} score={score} onDrill={setDrill} />;
           })}
+        </div>
+      )}
+
+      {scoredLenses.length > 0 && (
+        <div className="flex justify-end pt-2">
+          <MicroFeedbackWidget
+            featureId="prism-counsel-lens-scores"
+            featureName="PRISM Counsel Risk & Contract Lens Scores"
+            app="prism"
+            compact
+            prompt="Were these PRISM scores useful?"
+          />
         </div>
       )}
 

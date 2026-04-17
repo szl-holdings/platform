@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Eye, EyeOff, AlertTriangle, Shield, Radio, Ship, MapPin, Clock, Filter, Search, RefreshCw, Sparkles, Loader2 } from "lucide-react";
+import { MicroFeedbackWidget } from "@szl-holdings/shared-ui";
 
 const darkVessels = [
   { id: "DV-001", name: "PACIFIC MERIDIAN", imo: "9821045", flag: "Unknown", lat: 25.4, lon: 56.2, lastAIS: "14h ago", gapDuration: "14h 22m", suspicionScore: 94, reason: "AIS disabled near Iran — sanctions zone transit", priorCalls: ["Bandar Abbas", "Jebel Ali"], ownerChain: "Obscured via 3 shell co.", status: "Critical" },
@@ -282,6 +283,16 @@ export default function DarkVesselDetection() {
           ))}
         </div>
       )}
+
+      <div className="flex justify-end pt-2">
+        <MicroFeedbackWidget
+          featureId="vessels-dark-vessel-detection"
+          featureName="Dark Vessel Detection Alerts"
+          app="vessels"
+          compact
+          prompt="Were these AIS alerts useful?"
+        />
+      </div>
     </div>
   );
 }

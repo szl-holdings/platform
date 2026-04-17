@@ -1,4 +1,5 @@
 import { AgentInsightsWidget } from "@szl-holdings/shared-ui/agent-insights-widget";
+import { MicroFeedbackWidget } from "@szl-holdings/shared-ui";
 import { useQuery } from "@tanstack/react-query";
 import { Brain, Zap, Radio, Building2 } from "lucide-react";
 
@@ -67,6 +68,16 @@ export default function AgentInsightsPage() {
         accentColor="#ef4444"
         compact={false}
       />
+
+      <div className="flex justify-end pt-1">
+        <MicroFeedbackWidget
+          featureId="terra-agent-insights"
+          featureName="Terra Autonomous Market Intelligence"
+          app="terra"
+          compact
+          prompt="Were these market insights useful?"
+        />
+      </div>
 
       <div className="text-[10px] text-muted-foreground/40 text-center pt-2">
         Powered by SZL Agent OS — autonomous market intelligence running 24/7

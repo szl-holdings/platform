@@ -6,6 +6,7 @@ import {
   Target, Percent, Calculator, Scale
 } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { MicroFeedbackWidget } from "@szl-holdings/shared-ui";
 
 type Approach = "sales_comparison" | "income" | "cost" | "dcf";
 
@@ -297,6 +298,16 @@ export default function AvmEnginePage() {
                   <p className="text-[10px] text-white/35 mt-0.5">This automated valuation model achieves a {v.medianError}% median absolute percentage error on back-tested data. The blended estimate uses a weighted average of four valuation approaches. Results are for analytical purposes only and should not substitute for a licensed appraisal.</p>
                 </div>
               </div>
+            </div>
+
+            <div className="flex justify-end mt-3">
+              <MicroFeedbackWidget
+                featureId="terra-avm-valuation"
+                featureName="Terra AVM Property Valuation"
+                app="terra"
+                compact
+                prompt="Was this valuation useful?"
+              />
             </div>
           </div>
         </div>
