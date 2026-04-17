@@ -1,26 +1,26 @@
 import { Router, type IRouter } from "express";
 import { logger } from "../lib/logger";
 import {
-  db,
-  atlasArtifactsTable,
-  atlasExportJobsTable,
+  generateArtifact,
+  regenerateArtifact,
+  listArtifacts,
+  getArtifactById,
+  getArtifactVersionHistory,
+  compareArtifactVersions,
+  createExportJob,
+  createShareLink,
+  getArtifactByShareToken,
   ATLAS_TEMPLATE_TYPES,
   ATLAS_EXPORT_FORMATS,
-} from "@szl-holdings/db";
-import { eq, and, desc } from "drizzle-orm";
-import { authMiddleware, requireRole } from "../middlewares/auth";
+} from "@szl-holdings/atlas-artifacts";
+import { db, atlasExportJobsTable } from "@szl-holdings/db";
+import { eq } from "drizzle-orm";
+import { authMiddleware } from "../middlewares/auth";
 import type { Request, Response } from "express";
 import { z } from "zod";
-import { randomBytes } from "crypto";
 
 const atlasRouter: IRouter = Router();
 atlasRouter.use("/atlas", authMiddleware({ required: true }));
-
-function generateSlug(title: string, templateType: string): string {
-  const base = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 40);
-  const suffix = randomBytes(4).toString("hex");
-  return `${templateType}-${base}-${suffix}`;
-}
 
 const sectionSchema = z.object({
   id: z.string(),
@@ -42,6 +42,7 @@ const createArtifactSchema = z.object({
   metadata: z.record(z.unknown()).optional(),
   correlationId: z.string().optional(),
   outcomeGraphId: z.number().int().optional(),
+  attachProvenance: z.boolean().default(false),
 });
 
 const updateArtifactSchema = z.object({
@@ -59,28 +60,23 @@ atlasRouter.post("/atlas/artifacts", async (req: Request, res: Response) => {
     }
 
     const user = (req as any).user;
-    const orgId: number | null = user?.orgId ?? null;
-    const slug = generateSlug(parsed.data.title, parsed.data.templateType);
 
-    const [artifact] = await db.insert(atlasArtifactsTable).values({
-      orgId,
-      slug,
+    const artifact = await generateArtifact({
+      orgId: user?.orgId ?? null,
       title: parsed.data.title,
       templateType: parsed.data.templateType,
       domain: parsed.data.domain,
-      entityType: parsed.data.entityType ?? null,
-      entityId: parsed.data.entityId ?? null,
-      version: 1,
-      status: "ready",
-      content: parsed.data.content ?? {},
-      sections: parsed.data.sections,
-      metadata: parsed.data.metadata ?? {},
+      entityType: parsed.data.entityType,
+      entityId: parsed.data.entityId,
+      sections: parsed.data.sections as any,
+      content: parsed.data.content,
+      metadata: parsed.data.metadata,
       generatedBy: "atlas-ui",
       generatedByUserId: user?.id ?? null,
-      correlationId: parsed.data.correlationId ?? null,
+      correlationId: parsed.data.correlationId,
       outcomeGraphId: parsed.data.outcomeGraphId ?? null,
-      isLatest: true,
-    }).returning();
+      attachProvenance: parsed.data.attachProvenance,
+    });
 
     return void res.status(201).json({ success: true, data: artifact });
   } catch (err) {
@@ -92,7 +88,7 @@ atlasRouter.post("/atlas/artifacts", async (req: Request, res: Response) => {
 atlasRouter.get("/atlas/artifacts", async (req: Request, res: Response) => {
   try {
     const user = (req as any).user;
-    const orgId: number | null = user?.orgId ?? null;
+    const orgId: number | undefined = user?.orgId ?? undefined;
 
     const domain = req.query.domain as string | undefined;
     const templateType = req.query.templateType as string | undefined;
@@ -102,20 +98,17 @@ atlasRouter.get("/atlas/artifacts", async (req: Request, res: Response) => {
     const limit = Math.min(parseInt(req.query.limit as string ?? "50", 10), 200);
     const offset = parseInt(req.query.offset as string ?? "0", 10);
 
-    const conditions: any[] = [];
-    if (orgId != null) conditions.push(eq(atlasArtifactsTable.orgId, orgId));
-    if (domain) conditions.push(eq(atlasArtifactsTable.domain, domain as any));
-    if (templateType) conditions.push(eq(atlasArtifactsTable.templateType, templateType as any));
-    if (entityType) conditions.push(eq(atlasArtifactsTable.entityType, entityType));
-    if (entityId) conditions.push(eq(atlasArtifactsTable.entityId, entityId));
-    if (latestOnly) conditions.push(eq(atlasArtifactsTable.isLatest, true));
+    const rows = await listArtifacts({
+      orgId,
+      domain: domain as any,
+      templateType: templateType as any,
+      entityType,
+      entityId,
+      latestOnly,
+      limit,
+      offset,
+    });
 
-    const q = db.select().from(atlasArtifactsTable)
-      .orderBy(desc(atlasArtifactsTable.createdAt))
-      .limit(limit)
-      .offset(offset);
-
-    const rows = conditions.length > 0 ? await q.where(and(...conditions)) : await q;
     return void res.json({ success: true, data: rows, total: rows.length });
   } catch (err) {
     logger.error({ err }, "GET /atlas/artifacts error:");
@@ -128,7 +121,7 @@ atlasRouter.get("/atlas/artifacts/:id", async (req: Request, res: Response) => {
     const id = parseInt(req.params.id as string ?? "0", 10);
     if (!id) return void res.status(400).json({ error: "Invalid id" });
 
-    const [artifact] = await db.select().from(atlasArtifactsTable).where(eq(atlasArtifactsTable.id, id));
+    const artifact = await getArtifactById(id);
     if (!artifact) return void res.status(404).json({ error: "Artifact not found" });
 
     return void res.json({ success: true, data: artifact });
@@ -146,22 +139,14 @@ atlasRouter.patch("/atlas/artifacts/:id", async (req: Request, res: Response) =>
     const parsed = updateArtifactSchema.safeParse(req.body);
     if (!parsed.success) return void res.status(400).json({ error: "Validation failed", details: parsed.error.issues });
 
-    const [existing] = await db.select().from(atlasArtifactsTable).where(eq(atlasArtifactsTable.id, id));
+    const existing = await getArtifactById(id);
     if (!existing) return void res.status(404).json({ error: "Artifact not found" });
 
-    const [updated] = await db.update(atlasArtifactsTable)
-      .set({
-        ...(parsed.data.title ? { title: parsed.data.title } : {}),
-        ...(parsed.data.sections ? { sections: parsed.data.sections } : {}),
-        ...(parsed.data.content ? { content: parsed.data.content } : {}),
-        ...(parsed.data.metadata ? { metadata: parsed.data.metadata } : {}),
-        updatedAt: new Date(),
-      })
-      .where(eq(atlasArtifactsTable.id, id))
-      .returning();
+    const updated = await regenerateArtifact(id, parsed.data);
 
     return void res.json({ success: true, data: updated });
-  } catch (err) {
+  } catch (err: any) {
+    if (err?.code === "NOT_FOUND") return void res.status(404).json({ error: "Artifact not found" });
     logger.error({ err }, "PATCH /atlas/artifacts/:id error:");
     return void res.status(500).json({ error: "Failed to update artifact" });
   }
@@ -172,37 +157,12 @@ atlasRouter.post("/atlas/artifacts/:id/regenerate", async (req: Request, res: Re
     const id = parseInt(req.params.id as string ?? "0", 10);
     if (!id) return void res.status(400).json({ error: "Invalid id" });
 
-    const [existing] = await db.select().from(atlasArtifactsTable).where(eq(atlasArtifactsTable.id, id));
-    if (!existing) return void res.status(404).json({ error: "Artifact not found" });
-
-    await db.update(atlasArtifactsTable)
-      .set({ isLatest: false })
-      .where(eq(atlasArtifactsTable.id, id));
-
     const updates = updateArtifactSchema.safeParse(req.body);
-    const [newVersion] = await db.insert(atlasArtifactsTable).values({
-      orgId: existing.orgId,
-      slug: existing.slug,
-      title: updates.success && updates.data.title ? updates.data.title : existing.title,
-      templateType: existing.templateType as any,
-      domain: existing.domain as any,
-      entityType: existing.entityType,
-      entityId: existing.entityId,
-      version: existing.version + 1,
-      parentArtifactId: id,
-      status: "ready",
-      content: updates.success && updates.data.content ? updates.data.content : (existing.content ?? {}),
-      sections: updates.success && updates.data.sections ? updates.data.sections : (existing.sections ?? []),
-      metadata: updates.success && updates.data.metadata ? updates.data.metadata : (existing.metadata ?? {}),
-      generatedBy: existing.generatedBy,
-      generatedByUserId: existing.generatedByUserId,
-      correlationId: existing.correlationId,
-      outcomeGraphId: existing.outcomeGraphId,
-      isLatest: true,
-    }).returning();
+    const newVersion = await regenerateArtifact(id, updates.success ? updates.data : {});
 
     return void res.status(201).json({ success: true, data: newVersion });
-  } catch (err) {
+  } catch (err: any) {
+    if (err?.code === "NOT_FOUND") return void res.status(404).json({ error: "Artifact not found" });
     logger.error({ err }, "POST /atlas/artifacts/:id/regenerate error:");
     return void res.status(500).json({ error: "Failed to regenerate artifact" });
   }
@@ -213,23 +173,26 @@ atlasRouter.get("/atlas/artifacts/:slug/versions", async (req: Request, res: Res
     const slug = req.params.slug as string;
     if (!slug) return void res.status(400).json({ error: "Invalid slug" });
 
-    const rows = await db
-      .select({
-        id: atlasArtifactsTable.id,
-        version: atlasArtifactsTable.version,
-        title: atlasArtifactsTable.title,
-        status: atlasArtifactsTable.status,
-        isLatest: atlasArtifactsTable.isLatest,
-        createdAt: atlasArtifactsTable.createdAt,
-      })
-      .from(atlasArtifactsTable)
-      .where(eq(atlasArtifactsTable.slug, slug))
-      .orderBy(desc(atlasArtifactsTable.version));
-
+    const rows = await getArtifactVersionHistory(slug);
     return void res.json({ success: true, data: rows });
   } catch (err) {
     logger.error({ err }, "GET /atlas/artifacts/:slug/versions error:");
     return void res.status(500).json({ error: "Failed to get version history" });
+  }
+});
+
+atlasRouter.get("/atlas/artifacts/:idA/compare/:idB", async (req: Request, res: Response) => {
+  try {
+    const idA = parseInt(req.params.idA as string ?? "0", 10);
+    const idB = parseInt(req.params.idB as string ?? "0", 10);
+    if (!idA || !idB) return void res.status(400).json({ error: "Invalid ids" });
+
+    const diff = await compareArtifactVersions(idA, idB);
+    return void res.json({ success: true, data: diff });
+  } catch (err: any) {
+    if (err?.code === "NOT_FOUND") return void res.status(404).json({ error: "One or both artifacts not found" });
+    logger.error({ err }, "GET /atlas/artifacts/:idA/compare/:idB error:");
+    return void res.status(500).json({ error: "Failed to compare artifacts" });
   }
 });
 
@@ -239,12 +202,8 @@ atlasRouter.post("/atlas/artifacts/:id/share", async (req: Request, res: Respons
     if (!id) return void res.status(400).json({ error: "Invalid id" });
 
     const { expiresInHours = 72 } = req.body as { expiresInHours?: number };
-    const token = randomBytes(24).toString("base64url");
+    const token = await createShareLink(id, Math.min(expiresInHours, 168));
     const expiresAt = new Date(Date.now() + Math.min(expiresInHours, 168) * 60 * 60 * 1000);
-
-    await db.update(atlasArtifactsTable)
-      .set({ shareToken: token, shareExpiresAt: expiresAt, updatedAt: new Date() })
-      .where(eq(atlasArtifactsTable.id, id));
 
     return void res.json({ success: true, token, expiresAt });
   } catch (err) {
@@ -258,13 +217,8 @@ atlasRouter.get("/atlas/shared/:token", async (req: Request, res: Response) => {
     const token = req.params.token as string;
     if (!token) return void res.status(400).json({ error: "Invalid token" });
 
-    const [artifact] = await db.select().from(atlasArtifactsTable)
-      .where(eq(atlasArtifactsTable.shareToken, token));
-
-    if (!artifact) return void res.status(404).json({ error: "Artifact not found or link expired" });
-    if (artifact.shareExpiresAt && artifact.shareExpiresAt < new Date()) {
-      return void res.status(410).json({ error: "Share link has expired" });
-    }
+    const artifact = await getArtifactByShareToken(token);
+    if (!artifact) return void res.status(410).json({ error: "Artifact not found or share link has expired" });
 
     return void res.json({ success: true, data: artifact });
   } catch (err) {
@@ -284,24 +238,18 @@ atlasRouter.post("/atlas/artifacts/:id/export", async (req: Request, res: Respon
     const parsed = schema.safeParse(req.body);
     if (!parsed.success) return void res.status(400).json({ error: "Invalid export format" });
 
-    const [artifact] = await db.select().from(atlasArtifactsTable).where(eq(atlasArtifactsTable.id, id));
-    if (!artifact) return void res.status(404).json({ error: "Artifact not found" });
-
     const user = (req as any).user;
-    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
-    const [job] = await db.insert(atlasExportJobsTable).values({
-      orgId: artifact.orgId,
+    const job = await createExportJob({
+      orgId: user?.orgId ?? null,
       artifactId: id,
       format: parsed.data.format,
-      status: "pending",
       requestedByUserId: user?.id ?? null,
-      expiresAt,
-      metadata: { templateType: artifact.templateType, title: artifact.title },
-    }).returning();
+    });
 
     return void res.status(202).json({ success: true, data: job, message: "Export job queued" });
-  } catch (err) {
+  } catch (err: any) {
+    if (err?.code === "NOT_FOUND") return void res.status(404).json({ error: "Artifact not found" });
     logger.error({ err }, "POST /atlas/artifacts/:id/export error:");
     return void res.status(500).json({ error: "Failed to create export job" });
   }

@@ -40,6 +40,8 @@ import fundInboundDealsRouter from "./fund-inbound-deals";
 import aegisPcapRouter from "./aegis-pcap";
 import carlotaTimeTrackingRouter from "./carlota-time-tracking";
 import lpPortalRouter from "./lp-portal";
+import atlasArtifactsRouter from "./atlas-artifacts";
+import outcomeGraphRouter from "./outcome-graph";
 
 const router: IRouter = Router();
 
@@ -102,5 +104,7 @@ router.use(tracesRouter);
 router.use(reflectionsRouter);
 router.use(plansRouter);
 router.use(cognitiveRuntimeRouter);
+router.use(atlasArtifactsRouter);
+router.use(outcomeGraphRouter);
 
 export default router;

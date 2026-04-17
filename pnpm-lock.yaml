@@ -339,6 +339,9 @@ importers:
       '@szl-holdings/api-zod':
         specifier: workspace:*
         version: link:../../lib/api-zod
+      '@szl-holdings/atlas-artifacts':
+        specifier: workspace:*
+        version: link:../../lib/atlas-artifacts
       '@szl-holdings/atlas-spatial-runtime':
         specifier: workspace:*
         version: link:../../lib/atlas-spatial-runtime
@@ -387,6 +390,9 @@ importers:
       '@szl-holdings/observability':
         specifier: workspace:*
         version: link:../../lib/observability
+      '@szl-holdings/outcome-graph':
+        specifier: workspace:*
+        version: link:../../lib/outcome-graph
       '@szl-holdings/policy-engine':
         specifier: workspace:*
         version: link:../../packages/policy-engine

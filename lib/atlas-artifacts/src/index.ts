@@ -82,6 +82,9 @@ const TEMPLATE_STRUCTURE: Record<AtlasTemplateType, string[]> = {
   voyage_report: ["voyage_summary", "route_data", "incidents", "fuel_consumption", "recommendations"],
   property_brief: ["property_overview", "market_analysis", "valuation", "opportunity_score", "due_diligence"],
   threat_assessment: ["threat_landscape", "attack_vectors", "risk_matrix", "mitigations", "response_plan"],
+  ops_runbook: ["overview", "prerequisites", "steps", "rollback_procedure", "escalation_contacts"],
+  incident_postmortem: ["incident_summary", "timeline", "root_cause", "contributing_factors", "action_items", "lessons_learned"],
+  market_analysis: ["executive_summary", "market_overview", "competitive_landscape", "opportunities", "risks", "recommendations"],
 };
 
 export async function generateArtifact(params: GenerateArtifactParams): Promise<AtlasArtifact> {
@@ -295,7 +298,7 @@ export async function listArtifacts(options: {
   if (options.templateType) conditions.push(eq(atlasArtifactsTable.templateType, options.templateType));
   if (options.entityType) conditions.push(eq(atlasArtifactsTable.entityType, options.entityType));
   if (options.entityId) conditions.push(eq(atlasArtifactsTable.entityId, options.entityId));
-  if (options.status) conditions.push(eq(atlasArtifactsTable.status, options.status));
+  if (options.status) conditions.push(eq(atlasArtifactsTable.status, options.status as any));
   if (options.latestOnly) conditions.push(eq(atlasArtifactsTable.isLatest, true));
 
   const q = db
