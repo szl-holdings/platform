@@ -504,6 +504,62 @@ app.get("/api/csrf-token", (req: Request, res: Response) => {
   res.json({ csrfToken: token });
 });
 
+app.get("/api/cortex/command-feed", async (_req: Request, res: Response) => {
+  try {
+    const { fusionCortex } = await import("@szl-holdings/ai-engine");
+    const alerts = fusionCortex.getAlerts({ status: ["active"], limit: 20 });
+    const DOMAIN_META: Record<string, { label: string; icon: string; accent: string; route: string }> = {
+      vessels:   { label: "Vessels",   icon: "⚓", accent: "#0ea5e9", route: "/(shell)/fleet" },
+      firestorm: { label: "Aegis",     icon: "⬡", accent: "#ef4444", route: "/(shell)/defense" },
+      terra:     { label: "Terra",     icon: "⬢", accent: "#22c55e", route: "/(shell)/properties" },
+      lyte:      { label: "Lyte",      icon: "⚡", accent: "#f59e0b", route: "/(shell)/operations" },
+      inca:      { label: "INCA",      icon: "◈", accent: "#8b5cf6", route: "/(shell)/advisory" },
+      msp:       { label: "MSP",       icon: "◆", accent: "#6366f1", route: "/(shell)/operations" },
+      prism:     { label: "PRISM",     icon: "⚖", accent: "#a855f7", route: "/(shell)/advisory" },
+      szl:       { label: "Portfolio", icon: "◆", accent: "#c9a84c", route: "/(shell)/portfolio" },
+    };
+    const fmt = (d: Date) => {
+      const diff = Math.max(0, Date.now() - d.getTime());
+      const m = Math.floor(diff / 60000);
+      if (m < 1) return "just now";
+      if (m < 60) return `${m}m ago`;
+      const h = Math.floor(m / 60);
+      if (h < 24) return `${h}h ago`;
+      return `${Math.floor(h / 24)}d ago`;
+    };
+    const signals = alerts.map((a) => ({
+      id: a.id,
+      domain: a.affectedDomains[0] ?? "szl",
+      severity: a.severity,
+      title: a.title,
+      source: "CORTEX Fusion",
+      time: fmt(new Date(a.generatedAt)),
+    }));
+    const domainKeys = Object.keys(DOMAIN_META);
+    const summaries = domainKeys.map((domain) => {
+      const domainAlerts = alerts.filter((a) => a.affectedDomains.includes(domain));
+      const critCount = domainAlerts.filter((a) => a.severity === "critical").length;
+      const highCount = domainAlerts.filter((a) => a.severity === "high").length;
+      const meta = DOMAIN_META[domain];
+      const status: "operational" | "degraded" | "critical" =
+        critCount > 0 ? "critical" : highCount > 0 ? "degraded" : "operational";
+      return {
+        domain,
+        label: meta.label,
+        icon: meta.icon,
+        accent: meta.accent,
+        activeCount: domainAlerts.length,
+        criticalCount: critCount,
+        status,
+        route: meta.route,
+      };
+    });
+    res.json({ signals, summaries });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to load command feed", message: err instanceof Error ? err.message : String(err) });
+  }
+});
+
 app.use("/api", etagMiddleware);
 app.use(globalAuthEnforcer);
 app.use("/api", router);

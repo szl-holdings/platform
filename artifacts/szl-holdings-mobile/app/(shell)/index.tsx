@@ -23,7 +23,7 @@ const ACCENT = "#c9a84c";
 
 interface CommandSignal {
   id: string;
-  domain: WorkspaceDomain;
+  domain: WorkspaceDomain | string;
   severity: "critical" | "high" | "medium" | "low" | "info";
   title: string;
   source: string;
@@ -31,7 +31,7 @@ interface CommandSignal {
 }
 
 interface DomainSummary {
-  domain: WorkspaceDomain;
+  domain: WorkspaceDomain | string;
   label: string;
   icon: string;
   accent: string;
@@ -39,6 +39,33 @@ interface DomainSummary {
   criticalCount: number;
   status: "operational" | "degraded" | "critical" | "unknown";
   route: string;
+}
+
+const SERVER_TO_WORKSPACE: Record<string, WorkspaceDomain> = {
+  vessels: "fleet",
+  firestorm: "defense",
+  aegis: "defense",
+  terra: "properties",
+  lyte: "operations",
+  msp: "operations",
+  inca: "intelligence",
+  cortex: "intelligence",
+  prism: "advisory",
+  carlota: "advisory",
+  szl: "portfolio",
+  founder: "founder",
+  command: "command",
+};
+
+function mapServerDomain(d: string): WorkspaceDomain | null {
+  if ((SERVER_TO_WORKSPACE as Record<string, WorkspaceDomain>)[d]) {
+    return SERVER_TO_WORKSPACE[d];
+  }
+  const known: WorkspaceDomain[] = [
+    "command", "defense", "fleet", "properties", "operations",
+    "advisory", "portfolio", "founder", "intelligence",
+  ];
+  return (known as string[]).includes(d) ? (d as WorkspaceDomain) : null;
 }
 
 function getApiBase(): string {
@@ -146,7 +173,7 @@ export default function CommandFeedScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
-  const { setActiveWorkspace } = useWorkspace();
+  const { setActiveWorkspace, setBadge } = useWorkspace();
   const apiStatus = useApiStatus();
   const [voiceVisible, setVoiceVisible] = useState(false);
 
@@ -163,6 +190,30 @@ export default function CommandFeedScreen() {
 
   const signals = data?.signals ?? [];
   const summaries = data?.summaries ?? [];
+
+  useEffect(() => {
+    if (!data) return;
+    const counts: Partial<Record<WorkspaceDomain, number>> = {};
+    for (const s of summaries) {
+      const ws = mapServerDomain(String(s.domain));
+      if (!ws) continue;
+      counts[ws] = (counts[ws] ?? 0) + (s.activeCount ?? 0);
+    }
+    for (const s of signals) {
+      const ws = mapServerDomain(String(s.domain));
+      if (!ws) continue;
+      if (counts[ws] === undefined) {
+        counts[ws] = (counts[ws] ?? 0) + 1;
+      }
+    }
+    const allDomains: WorkspaceDomain[] = [
+      "command", "defense", "fleet", "properties", "operations",
+      "advisory", "portfolio", "founder", "intelligence",
+    ];
+    for (const d of allDomains) {
+      setBadge(d, counts[d] ?? 0);
+    }
+  }, [data, setBadge, signals, summaries]);
 
   const criticalCount = signals.filter((s) => s.severity === "critical").length;
 

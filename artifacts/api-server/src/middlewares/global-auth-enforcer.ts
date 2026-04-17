@@ -51,6 +51,7 @@ const PUBLIC_EXACT_PATHS = new Set([
   "/api/federation/agents",
   "/api/prism-counsel/health",
   "/api/prism-counsel/readiness",
+  "/api/cortex/command-feed",
 ]);
 
 const PUBLIC_PREFIXES = [
