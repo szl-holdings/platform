@@ -252,6 +252,32 @@ export class OntologyEngine {
   private entityCache = new Map<string, OntologyEntity>();
   private cacheExpiry = new Map<string, number>();
   private readonly CACHE_TTL_MS = 5 * 60 * 1000;
+  private readonly MAX_CACHE_SIZE = 500;
+  private evictionTimer: ReturnType<typeof setInterval> | null = null;
+
+  constructor() {
+    this.evictionTimer = setInterval(() => this.evictExpiredCache(), 60 * 1000);
+    if (this.evictionTimer.unref) this.evictionTimer.unref();
+  }
+
+  dispose(): void {
+    if (this.evictionTimer) {
+      clearInterval(this.evictionTimer);
+      this.evictionTimer = null;
+    }
+    this.entityCache.clear();
+    this.cacheExpiry.clear();
+  }
+
+  private evictExpiredCache(): void {
+    const now = Date.now();
+    for (const [id, expiry] of this.cacheExpiry) {
+      if (now >= expiry) {
+        this.entityCache.delete(id);
+        this.cacheExpiry.delete(id);
+      }
+    }
+  }
 
   private isCacheValid(id: string): boolean {
     const expiry = this.cacheExpiry.get(id);
@@ -259,6 +285,13 @@ export class OntologyEngine {
   }
 
   private setCache(entity: OntologyEntity): void {
+    if (this.entityCache.size >= this.MAX_CACHE_SIZE && !this.entityCache.has(entity.id)) {
+      const firstKey = this.entityCache.keys().next().value;
+      if (firstKey !== undefined) {
+        this.entityCache.delete(firstKey);
+        this.cacheExpiry.delete(firstKey);
+      }
+    }
     this.entityCache.set(entity.id, entity);
     this.cacheExpiry.set(entity.id, Date.now() + this.CACHE_TTL_MS);
   }

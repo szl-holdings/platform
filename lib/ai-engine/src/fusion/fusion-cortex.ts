@@ -267,12 +267,35 @@ const FUSION_PATTERNS: FusionPattern[] = [
   },
 ];
 
+const MAX_ALERTS = 200;
+
 export class FusionCortex {
   private alerts: FusionAlert[] = [];
   private lastScanAt: string = new Date().toISOString();
   private scanIntervalMs = 5 * 60 * 1000;
   private scanTimer: ReturnType<typeof setTimeout> | null = null;
   private alertSubscribers: Array<(alert: FusionAlert) => void> = [];
+  private evictionTimer: ReturnType<typeof setInterval>;
+
+  constructor() {
+    this.evictionTimer = setInterval(() => this.evictAlerts(), 60 * 1000);
+    if (this.evictionTimer.unref) this.evictionTimer.unref();
+  }
+
+  dispose(): void {
+    clearInterval(this.evictionTimer);
+    this.stopContinuousScan();
+    this.alerts = [];
+    this.alertSubscribers = [];
+  }
+
+  private evictAlerts(): void {
+    const now = new Date();
+    this.alerts = this.alerts.filter(a => new Date(a.expiresAt) > now);
+    if (this.alerts.length > MAX_ALERTS) {
+      this.alerts = this.alerts.slice(0, MAX_ALERTS);
+    }
+  }
 
   async scan(): Promise<FusionScanResult> {
     const start = Date.now();
@@ -346,8 +369,8 @@ export class FusionCortex {
         }
       }
 
-      if (this.alerts.length > 500) {
-        this.alerts = this.alerts.slice(0, 500);
+      if (this.alerts.length > MAX_ALERTS) {
+        this.alerts = this.alerts.slice(0, MAX_ALERTS);
       }
 
       this.lastScanAt = new Date().toISOString();
@@ -439,6 +462,9 @@ export class FusionCortex {
       status: "active",
     };
     this.alerts.unshift(full);
+    if (this.alerts.length > MAX_ALERTS) {
+      this.alerts = this.alerts.slice(0, MAX_ALERTS);
+    }
     this.alertSubscribers.forEach(sub => sub(full));
     return full;
   }
