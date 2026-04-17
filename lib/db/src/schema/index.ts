@@ -60,6 +60,7 @@ export * from "./feedback";
 export * from "./intelligence_cache";
 export * from "./invitations";
 export * from "./fund_ops";
+export * from "./fund_inbound_deals";
 export * from "./revenue_events";
 export * from "./governance";
 export * from "./prism_counsel";

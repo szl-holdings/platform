@@ -35,6 +35,7 @@ import * as skillLibrary from "./groups/skill-library";
 import nexusRouter from "./nexus";
 import cognitiveRuntimeRouter from "./cognitive-runtime";
 import execBriefingsRouter from "./executive-briefings";
+import fundInboundDealsRouter from "./fund-inbound-deals";
 
 const router: IRouter = Router();
 
@@ -51,6 +52,7 @@ router.use(driftRouter);
 router.use(deploymentsRouter);
 router.use(domainsRouter);
 router.use(constellationViewsRouter);
+router.use(fundInboundDealsRouter);
 
 core.register(router);
 vessels.register(router);

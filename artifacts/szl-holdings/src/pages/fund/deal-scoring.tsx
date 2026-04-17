@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { getSubmittedDeals, subscribeSubmittedDeals, type SubmittedDeal } from "@/lib/dealSubmissions";
+import { getSubmittedDeals, loadSubmittedDeals, subscribeSubmittedDeals, type SubmittedDeal } from "@/lib/dealSubmissions";
 import { m, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
 import {
@@ -149,7 +149,10 @@ export default function DealScoringPage() {
   const [filter, setFilter] = useState<string>("all");
   const [submissions, setSubmissions] = useState<SubmittedDeal[]>(() => getSubmittedDeals());
 
-  useEffect(() => subscribeSubmittedDeals(() => setSubmissions(getSubmittedDeals())), []);
+  useEffect(() => {
+    void loadSubmittedDeals().then(list => setSubmissions(list));
+    return subscribeSubmittedDeals(() => setSubmissions(getSubmittedDeals()));
+  }, []);
 
   const allDeals = useMemo<Deal[]>(() => [...submissions.map(toDeal), ...DEALS], [submissions]);
   const [selectedId, setSelectedId] = useState<string>(allDeals[0]?.id ?? "d1");

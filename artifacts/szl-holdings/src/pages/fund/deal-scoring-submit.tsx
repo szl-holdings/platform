@@ -9,7 +9,7 @@ import {
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
-import { addSubmittedDeal } from "@/lib/dealSubmissions";
+import { submitDeal } from "@/lib/dealSubmissions";
 
 type SubmissionForm = {
   company: string;
@@ -140,6 +140,8 @@ export default function DealScoringSubmitPage() {
   const [form, setForm] = useState<SubmissionForm>(EMPTY);
   const [submitted, setSubmitted] = useState(false);
   const [pipelineId, setPipelineId] = useState<string>("");
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string>("");
 
   const triage = useMemo(() => scoreTriage(form), [form]);
   const founder = useMemo(() => scoreFounder(form), [form]);
@@ -156,40 +158,51 @@ export default function DealScoringSubmitPage() {
 
   const canSubmit = form.company && form.sector && form.stage && form.founderName && form.founderEmail && form.summary;
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!canSubmit) return;
-    const id = `DF-${Date.now().toString(36).toUpperCase().slice(-6)}`;
+    if (!canSubmit || submitting) return;
+    setSubmitError("");
+    setSubmitting(true);
     const teamScore = founder.score;
     const marketScore = form.sector === "Enterprise AI" || form.sector === "HealthTech" ? 85 : 70;
     const tractionScore = Math.min(95, 40 + Math.round(parseFloat((form.arr || "0").replace(/[^0-9.]/g, "")) * 10));
-    addSubmittedDeal({
-      id,
-      company: form.company,
-      sector: form.sector,
-      stage: form.stage,
-      askSize: form.askSize || "—",
-      valuation: form.valuation || "—",
-      convictionScore: compositeScore,
-      scores: {
-        team: teamScore,
-        market: marketScore,
-        product: triage.score,
-        traction: tractionScore,
-        competitive: Math.max(50, triage.score - 8),
-        financials: Math.max(40, triage.score - 12),
-      },
-      status: compositeScore >= 78 ? "active" : compositeScore >= 62 ? "screening" : "passed",
-      founder: form.founderName + (form.founderBackground ? ` (${form.founderBackground.slice(0, 60)}${form.founderBackground.length > 60 ? "…" : ""})` : ""),
-      founderEmail: form.founderEmail,
-      summary: form.summary,
-      strengths: founder.factors.map(f => `${f.label}: ${f.reason}`),
-      risks: triage.signals.filter(s => !s.positive).map(s => s.label),
-      date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
-      source: "inbound",
-    });
-    setPipelineId(id);
-    setSubmitted(true);
+    try {
+      const result = await submitDeal({
+        company: form.company,
+        website: form.website || undefined,
+        sector: form.sector,
+        stage: form.stage,
+        askSize: form.askSize || undefined,
+        valuation: form.valuation || undefined,
+        arr: form.arr || undefined,
+        growth: form.growth || undefined,
+        founderName: form.founderName,
+        founderEmail: form.founderEmail,
+        founderBackground: form.founderBackground || undefined,
+        founderEducation: form.founderEducation || undefined,
+        founderPriorExits: form.founderPriorExits || undefined,
+        summary: form.summary,
+        deckUrl: form.deckUrl || undefined,
+        convictionScore: compositeScore,
+        scores: {
+          team: teamScore,
+          market: marketScore,
+          product: triage.score,
+          traction: tractionScore,
+          competitive: Math.max(50, triage.score - 8),
+          financials: Math.max(40, triage.score - 12),
+        },
+        status: compositeScore >= 78 ? "active" : compositeScore >= 62 ? "screening" : "passed",
+        strengths: founder.factors.map(f => `${f.label}: ${f.reason}`),
+        risks: triage.signals.filter(s => !s.positive).map(s => s.label),
+      });
+      setPipelineId(result.pipelineId);
+      setSubmitted(true);
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : "Submission failed. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -220,7 +233,7 @@ export default function DealScoringSubmitPage() {
           </div>
 
           {submitted ? (
-            <SuccessPanel form={form} composite={compositeScore} recommendation={recommendation} pipelineId={pipelineId} onReset={() => { setForm(EMPTY); setSubmitted(false); setPipelineId(""); }} />
+            <SuccessPanel form={form} composite={compositeScore} recommendation={recommendation} pipelineId={pipelineId} onReset={() => { setForm(EMPTY); setSubmitted(false); setPipelineId(""); setSubmitError(""); }} />
           ) : (
             <div className="grid grid-cols-12 gap-5 mt-8">
               <form onSubmit={handleSubmit} className="col-span-7 space-y-5">
@@ -267,10 +280,10 @@ export default function DealScoringSubmitPage() {
                 <div className="flex items-center gap-3">
                   <button
                     type="submit"
-                    disabled={!canSubmit}
+                    disabled={!canSubmit || submitting}
                     className="flex items-center gap-2 rounded-xl bg-[#d4a054] px-5 py-2.5 text-xs font-semibold text-black hover:bg-[#d4a054]/90 disabled:cursor-not-allowed disabled:opacity-40"
                   >
-                    <Send className="h-3.5 w-3.5" /> Submit to SZL Pipeline
+                    <Send className="h-3.5 w-3.5" /> {submitting ? "Submitting…" : "Submit to SZL Pipeline"}
                   </button>
                   <button
                     type="button"
@@ -280,6 +293,11 @@ export default function DealScoringSubmitPage() {
                   </button>
                   <span className="text-[10px] text-white/35">All submissions trigger autonomous triage within 60 seconds.</span>
                 </div>
+                {submitError ? (
+                  <div className="rounded-xl border border-[#c45a4a]/30 bg-[#c45a4a]/[0.08] px-4 py-2 text-[11px] text-[#c45a4a]">
+                    {submitError}
+                  </div>
+                ) : null}
               </form>
 
               <aside className="col-span-5 space-y-4">
