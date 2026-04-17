@@ -57,6 +57,8 @@ The platform is a pnpm monorepo utilizing TypeScript 5.9, React 19, Vite, and No
 -   **Memory Fabric:** A tiered memory layer (`@workspace/memory-fabric`) with 8 scopes, tracking provenance, freshness, retention, and sensitivity for each record.
 -   **Alloy Runtime:** The `@workspace/alloy` package acts as the cognitive runtime and execution control plane, orchestrating workflows, integrating with policy engines, managing action ledgers, and handling checkpoints. It leverages extensive DB schema additions for its operations, and exposes its functionalities via new API endpoints for memory, workflows, agents, models, prompts, signals, and actions.
 
+**Reflection Engine (`@workspace/reflection-engine`):** A structured self-improvement package that runs after every agent trace. It scores run quality, classifies failure modes (tool_failure, guardrail_block, retrieval_miss, timeout, policy_violation, high_cost), writes reusable lessons, identifies the best-performing model/tool/prompt route, and drafts candidate skills for high-quality runs. Lessons are persisted into memory-fabric (long-term episodic + domain skill tiers) and candidate skills are surfaced for governance review. API endpoints `/reflections` (GET list, GET by ID, POST trigger) and `/reflections/by-trace/:traceId` are available. 23 tests cover all subsystems.
+
 ## External Dependencies
 -   **Database:** PostgreSQL 16
 -   **Authentication:** Replit Auth (OIDC/PKCE)
