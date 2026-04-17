@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import {
   Clock, DollarSign, FileText, CheckCircle, Plus, Sparkles,
-  Loader2, ChevronDown, ChevronUp, Calendar, TrendingUp,
-  AlertCircle, Download, Filter, BarChart3, CreditCard
+  Loader2, ChevronDown, ChevronUp, Calendar,
+  Download, BarChart3,
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import {
@@ -12,11 +12,19 @@ import {
   INVOICES,
   BILLING_DATA,
   RATE_CARDS,
-  type TimeEntry,
-  type Invoice,
+  type TimeEntry as BaseTimeEntry,
+  type Invoice as BaseInvoice,
 } from "@/data/operationalData";
+import { jsPDF } from "jspdf";
 
 const GOLD = "var(--color-gold)";
+const GOLD_HEX: [number, number, number] = [201, 169, 97];
+const INK: [number, number, number] = [26, 26, 20];
+const MUTED: [number, number, number] = [138, 122, 96];
+const RULE: [number, number, number] = [232, 226, 214];
+
+type TimeEntry = BaseTimeEntry & { invoiceId?: string };
+type Invoice = BaseInvoice & { entryIds?: string[]; sentAt?: string };
 
 const RATE_META: Record<TimeEntry["rateType"], { label: string; color: string }> = {
   standard:      { label: "Standard", color: "#0284C7" },
@@ -32,9 +40,59 @@ const INVOICE_STATUS: Record<Invoice["status"], { label: string; color: string }
   overdue: { label: "Overdue", color: "#DC2626" },
 };
 
-const totalBillable = TIME_ENTRIES.filter(e => e.billable).reduce((s, e) => s + e.hours, 0);
-const totalRevenue = TIME_ENTRIES.filter(e => e.billable).reduce((s, e) => s + e.hours * (e.rateType === "fixed" ? e.rate / e.hours : e.rate), 0);
-const utilizationRate = Math.round((totalBillable / (totalBillable + TIME_ENTRIES.filter(e => !e.billable).reduce((s, e) => s + e.hours, 0))) * 100);
+const ENGAGEMENT_TO_CLIENT: Record<string, string> = {
+  "Luminary Brands": "Luminary Brands",
+  "Vertex Capital": "Vertex Capital Partners",
+  "Vertex Capital Partners": "Vertex Capital Partners",
+  "Aurelius PE": "Aurelius Private Equity",
+  "Aurelius Private Equity": "Aurelius Private Equity",
+  "Oasis Wellness": "Oasis Wellness",
+  "Solaris Health": "Solaris Health Systems",
+  "Internal": "Internal",
+};
+
+const STORAGE_KEY = "carlota-jo:time-tracking:v1";
+
+type PersistedState = { entries: TimeEntry[]; invoices: Invoice[]; nextInvoiceSeq: number };
+
+function defaultState(): PersistedState {
+  return { entries: TIME_ENTRIES as TimeEntry[], invoices: INVOICES as Invoice[], nextInvoiceSeq: 12 };
+}
+
+function loadState(): PersistedState {
+  if (typeof window === "undefined") return defaultState();
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return defaultState();
+    const parsed = JSON.parse(raw) as PersistedState;
+    if (!parsed.entries || !parsed.invoices) throw new Error("invalid");
+    return parsed;
+  } catch {
+    return defaultState();
+  }
+}
+
+function saveState(state: PersistedState) {
+  if (typeof window === "undefined") return;
+  try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch { /* ignore quota */ }
+}
+
+function formatToday(): string {
+  const d = new Date();
+  return d.toLocaleDateString("en-GB", { month: "short", day: "numeric", year: "numeric" });
+}
+
+function addDays(days: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return d.toLocaleDateString("en-GB", { month: "short", day: "numeric", year: "numeric" });
+}
+
+function entryValue(e: TimeEntry): number {
+  if (!e.billable) return 0;
+  if (e.rateType === "fixed") return e.rate;
+  return e.hours * e.rate;
+}
 
 export default function TimeTracking() {
   usePageMeta({
@@ -48,6 +106,21 @@ export default function TimeTracking() {
   const [expandedEntry, setExpandedEntry] = useState<string | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
+
+  const [entries, setEntries] = useState<TimeEntry[]>(() => loadState().entries);
+  const [invoices, setInvoices] = useState<Invoice[]>(() => loadState().invoices);
+  const [nextInvoiceSeq, setNextInvoiceSeq] = useState<number>(() => loadState().nextInvoiceSeq);
+
+  useEffect(() => {
+    saveState({ entries, invoices, nextInvoiceSeq });
+  }, [entries, invoices, nextInvoiceSeq]);
+
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 3200);
+    return () => clearTimeout(t);
+  }, [toast]);
 
   const [newEntry, setNewEntry] = useState({
     engagement: "Luminary Brands",
@@ -57,6 +130,28 @@ export default function TimeTracking() {
     rateType: "standard" as TimeEntry["rateType"],
     description: "",
   });
+
+  const totalBillable = useMemo(
+    () => entries.filter(e => e.billable).reduce((s, e) => s + e.hours, 0),
+    [entries]
+  );
+  const totalNonBillable = useMemo(
+    () => entries.filter(e => !e.billable).reduce((s, e) => s + e.hours, 0),
+    [entries]
+  );
+  const utilizationRate = totalBillable + totalNonBillable > 0
+    ? Math.round((totalBillable / (totalBillable + totalNonBillable)) * 100)
+    : 0;
+  const unbilledRevenue = useMemo(
+    () => entries.filter(e => e.billable && e.approved && !e.invoiceId).reduce((s, e) => s + entryValue(e), 0),
+    [entries]
+  );
+  const outstandingTotal = useMemo(
+    () => invoices.filter(i => i.status === "sent" || i.status === "overdue").reduce((s, i) => s + i.amount, 0),
+    [invoices]
+  );
+  const outstandingCount = invoices.filter(i => i.status === "sent" || i.status === "overdue").length;
+  const invoicesTotal = invoices.reduce((s, i) => s + i.amount, 0);
 
   const generateAISuggestions = async () => {
     setAiLoading(true);
@@ -76,8 +171,264 @@ export default function TimeTracking() {
     }
   };
 
+  const saveNewEntry = () => {
+    const hours = parseFloat(newEntry.hours);
+    if (!newEntry.phase.trim() || !newEntry.deliverable.trim() || !Number.isFinite(hours) || hours <= 0) {
+      setToast("Please complete phase, deliverable, and hours.");
+      return;
+    }
+    const rateMap: Record<TimeEntry["rateType"], number> = { standard: 275, premium: 350, fixed: 4200, "non-billable": 0 };
+    const entry: TimeEntry = {
+      id: "t-" + Date.now().toString(36),
+      date: formatToday(),
+      engagement: newEntry.engagement,
+      phase: newEntry.phase.trim(),
+      deliverable: newEntry.deliverable.trim(),
+      hours,
+      rateType: newEntry.rateType,
+      rate: rateMap[newEntry.rateType],
+      description: newEntry.description.trim(),
+      billable: newEntry.rateType !== "non-billable",
+      approved: false,
+    };
+    setEntries(prev => [entry, ...prev]);
+    setShowNewEntry(false);
+    setNewEntry({ engagement: "Luminary Brands", phase: "", deliverable: "", hours: "", rateType: "standard", description: "" });
+    setToast("Time entry logged.");
+  };
+
+  const generateInvoices = () => {
+    const eligible = entries.filter(e => e.billable && e.approved && !e.invoiceId && e.engagement !== "Internal");
+    if (eligible.length === 0) {
+      setToast("No approved billable entries ready to invoice.");
+      return;
+    }
+    const groups = new Map<string, TimeEntry[]>();
+    for (const e of eligible) {
+      const arr = groups.get(e.engagement) ?? [];
+      arr.push(e);
+      groups.set(e.engagement, arr);
+    }
+    const newInvoices: Invoice[] = [];
+    let seq = nextInvoiceSeq;
+    const updatedEntries = [...entries];
+    for (const [engagement, items] of groups) {
+      const id = `INV-2026-${String(seq).padStart(3, "0")}`;
+      seq += 1;
+      const amount = items.reduce((s, e) => s + entryValue(e), 0);
+      const inv: Invoice = {
+        id,
+        client: ENGAGEMENT_TO_CLIENT[engagement] ?? engagement,
+        engagement,
+        amount,
+        status: "draft",
+        dueDate: addDays(15),
+        issuedDate: formatToday(),
+        items: items.length,
+        entryIds: items.map(e => e.id),
+      };
+      newInvoices.push(inv);
+      for (const e of items) {
+        const idx = updatedEntries.findIndex(x => x.id === e.id);
+        if (idx !== -1) updatedEntries[idx] = { ...updatedEntries[idx], invoiceId: id };
+      }
+    }
+    setEntries(updatedEntries);
+    setInvoices(prev => [...newInvoices, ...prev]);
+    setNextInvoiceSeq(seq);
+    setActiveTab("invoices");
+    const total = newInvoices.reduce((s, i) => s + i.amount, 0);
+    setToast(`${newInvoices.length} draft invoice${newInvoices.length > 1 ? "s" : ""} generated · £${total.toLocaleString()}`);
+  };
+
+  const sendInvoice = (id: string) => {
+    setInvoices(prev => prev.map(inv => inv.id === id && inv.status === "draft"
+      ? { ...inv, status: "sent", sentAt: new Date().toISOString() }
+      : inv));
+    setToast(`${id} marked as sent.`);
+  };
+
+  const exportInvoicePdf = (inv: Invoice) => {
+    const items = inv.entryIds && inv.entryIds.length > 0
+      ? entries.filter(e => inv.entryIds!.includes(e.id))
+      : [];
+
+    const doc = new jsPDF({ unit: "pt", format: "a4" });
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const marginX = 48;
+    let y = 56;
+
+    // Brand
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(26);
+    doc.setTextColor(...INK);
+    doc.text("Carlota Jo", marginX, y);
+    doc.setTextColor(...GOLD_HEX);
+    doc.setFont("helvetica", "italic");
+    const carlotaWidth = doc.getTextWidth("Carlota Jo");
+    doc.text(" Strategic Advisory", marginX + carlotaWidth, y);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(...MUTED);
+    doc.text("STRATEGIC ADVISORY", marginX, y + 14);
+
+    // Invoice meta (right-aligned)
+    doc.setFontSize(16);
+    doc.setTextColor(...INK);
+    doc.text(inv.id, pageW - marginX, y, { align: "right" });
+    doc.setFontSize(10);
+    doc.setTextColor(...MUTED);
+    doc.text(`Issued ${inv.issuedDate}`, pageW - marginX, y + 16, { align: "right" });
+    doc.text(`Due ${inv.dueDate}`, pageW - marginX, y + 30, { align: "right" });
+    doc.setTextColor(...GOLD_HEX);
+    doc.setFont("helvetica", "bold");
+    doc.text(INVOICE_STATUS[inv.status].label.toUpperCase(), pageW - marginX, y + 46, { align: "right" });
+    doc.setFont("helvetica", "normal");
+
+    y += 70;
+    // Gold rule
+    doc.setDrawColor(...GOLD_HEX);
+    doc.setLineWidth(1.5);
+    doc.line(marginX, y, pageW - marginX, y);
+    y += 28;
+
+    // Bill to / From
+    doc.setFontSize(8);
+    doc.setTextColor(...MUTED);
+    doc.text("BILL TO", marginX, y);
+    doc.text("FROM", pageW - marginX, y, { align: "right" });
+    y += 14;
+    doc.setFontSize(12);
+    doc.setTextColor(...INK);
+    doc.setFont("helvetica", "bold");
+    doc.text(inv.client, marginX, y);
+    doc.text("Carlota Jo Consulting Ltd", pageW - marginX, y, { align: "right" });
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(...MUTED);
+    y += 14;
+    doc.text(`Engagement: ${inv.engagement}`, marginX, y);
+    doc.text("London, United Kingdom", pageW - marginX, y, { align: "right" });
+    y += 12;
+    doc.text("billing@carlotajo.com", pageW - marginX, y, { align: "right" });
+
+    y += 32;
+
+    // Table header
+    const colDate = marginX;
+    const colDesc = marginX + 80;
+    const colHours = pageW - marginX - 200;
+    const colRate = pageW - marginX - 110;
+    const colAmount = pageW - marginX;
+
+    doc.setDrawColor(...RULE);
+    doc.setLineWidth(0.5);
+    doc.line(marginX, y, pageW - marginX, y);
+    y += 12;
+
+    doc.setFontSize(8);
+    doc.setTextColor(...MUTED);
+    doc.text("DATE", colDate, y);
+    doc.text("DESCRIPTION", colDesc, y);
+    doc.text("HOURS", colHours, y, { align: "right" });
+    doc.text("RATE", colRate, y, { align: "right" });
+    doc.text("AMOUNT", colAmount, y, { align: "right" });
+    y += 8;
+    doc.line(marginX, y, pageW - marginX, y);
+    y += 14;
+
+    // Rows
+    doc.setFontSize(10);
+    doc.setTextColor(...INK);
+    if (items.length === 0) {
+      doc.setTextColor(...MUTED);
+      doc.text("Summary invoice — line item details unavailable.", colDesc, y);
+      y += 18;
+    } else {
+      for (const e of items) {
+        if (y > pageH - 140) {
+          doc.addPage();
+          y = 56;
+        }
+        doc.setTextColor(...INK);
+        doc.setFontSize(10);
+        doc.text(e.date, colDate, y);
+        doc.text(e.phase, colDesc, y);
+        doc.setTextColor(...MUTED);
+        doc.setFontSize(9);
+        doc.text(e.deliverable, colDesc, y + 11);
+        doc.setTextColor(...INK);
+        doc.setFontSize(10);
+        doc.text(e.hours.toFixed(2), colHours, y, { align: "right" });
+        doc.text(e.rateType === "fixed" ? "Fixed" : `£${e.rate.toFixed(2)}`, colRate, y, { align: "right" });
+        doc.text(`£${entryValue(e).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, colAmount, y, { align: "right" });
+        y += 26;
+        doc.setDrawColor(...RULE);
+        doc.line(marginX, y - 8, pageW - marginX, y - 8);
+      }
+    }
+
+    // Totals
+    y += 12;
+    if (y > pageH - 120) {
+      doc.addPage();
+      y = 56;
+    }
+    const totalHours = items.reduce((s, e) => s + e.hours, 0);
+    const totalsX = pageW - marginX - 180;
+    doc.setFontSize(10);
+    doc.setTextColor(...MUTED);
+    doc.text("Total hours", totalsX, y);
+    doc.setTextColor(...INK);
+    doc.text(totalHours.toFixed(2), colAmount, y, { align: "right" });
+    y += 16;
+    doc.setTextColor(...MUTED);
+    doc.text("Subtotal", totalsX, y);
+    doc.setTextColor(...INK);
+    doc.text(`£${inv.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, colAmount, y, { align: "right" });
+    y += 14;
+    doc.setDrawColor(...INK);
+    doc.setLineWidth(1);
+    doc.line(totalsX, y, colAmount, y);
+    y += 18;
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text("Total Due", totalsX, y);
+    doc.text(`£${inv.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, colAmount, y, { align: "right" });
+    doc.setFont("helvetica", "normal");
+
+    // Footer
+    doc.setFontSize(9);
+    doc.setTextColor(...MUTED);
+    const footerY = pageH - 56;
+    doc.setDrawColor(...RULE);
+    doc.line(marginX, footerY - 14, pageW - marginX, footerY - 14);
+    doc.text(
+      "Payment terms: Net 15. Please remit via bank transfer to the account on file.",
+      marginX, footerY,
+    );
+    doc.text("For questions, contact billing@carlotajo.com.", marginX, footerY + 12);
+    doc.text("Thank you for your partnership.", pageW - marginX, footerY + 12, { align: "right" });
+
+    doc.save(`${inv.id}.pdf`);
+    setToast(`${inv.id}.pdf downloaded.`);
+  };
+
+  const readyToInvoiceCount = entries.filter(e => e.billable && e.approved && !e.invoiceId && e.engagement !== "Internal").length;
+
   return (
     <div style={{ minHeight: "100vh", background: "#FAFAF8", paddingTop: 64 }}>
+      {/* Toast */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}
+            style={{ position: "fixed", top: 80, left: "50%", transform: "translateX(-50%)", zIndex: 1000, background: "#1A1A14", color: "#F5F0E8", padding: "12px 22px", borderRadius: 10, fontSize: 13, fontWeight: 500, boxShadow: "0 12px 32px rgba(0,0,0,0.18)" }}>
+            {toast}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Header */}
       <div style={{ background: "linear-gradient(135deg, #0A0F1A 0%, #141E2D 50%, #060B14 100%)", padding: "48px 0 40px" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
@@ -98,8 +449,8 @@ export default function TimeTracking() {
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 16, maxWidth: 800 }}>
               {[
                 { label: "Billable Hours (week)", value: `${totalBillable}h`, sub: `${utilizationRate}% utilisation` },
-                { label: "Unbilled Revenue", value: `£${(totalRevenue * 0.6 / 1000).toFixed(1)}K`, sub: "Ready to invoice" },
-                { label: "Invoices Outstanding", value: "£15.1K", sub: "2 invoices pending" },
+                { label: "Unbilled Revenue", value: `£${(unbilledRevenue / 1000).toFixed(1)}K`, sub: `${readyToInvoiceCount} entries ready` },
+                { label: "Invoices Outstanding", value: `£${(outstandingTotal / 1000).toFixed(1)}K`, sub: `${outstandingCount} invoice${outstandingCount === 1 ? "" : "s"} pending` },
                 { label: "Avg Realisation Rate", value: "94%", sub: "vs target rate" },
               ].map(kpi => (
                 <div key={kpi.label} style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, padding: "14px 16px" }}>
@@ -183,7 +534,7 @@ export default function TimeTracking() {
         {activeTab === "entries" && (
           <div style={{ marginBottom: 64 }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-              <div style={{ fontSize: 13, color: "#6B5E47" }}>{TIME_ENTRIES.length} entries this week · {totalBillable}h billable</div>
+              <div style={{ fontSize: 13, color: "#6B5E47" }}>{entries.length} entries · {totalBillable}h billable</div>
               <button onClick={() => setShowNewEntry(!showNewEntry)}
                 style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 18px", background: GOLD, border: "none", borderRadius: 10, color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
                 <Plus size={14} /> Log Time
@@ -225,7 +576,7 @@ export default function TimeTracking() {
                       rows={2} style={{ width: "100%", padding: "8px 10px", border: "1px solid #E8E2D6", borderRadius: 8, fontSize: 13, fontFamily: "inherit", resize: "none", outline: "none", boxSizing: "border-box" }} />
                   </div>
                   <div style={{ display: "flex", gap: 10 }}>
-                    <button onClick={() => setShowNewEntry(false)}
+                    <button onClick={saveNewEntry}
                       style={{ padding: "8px 20px", background: GOLD, border: "none", borderRadius: 8, color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
                       Save Entry
                     </button>
@@ -240,11 +591,11 @@ export default function TimeTracking() {
 
             {/* Entries list */}
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {TIME_ENTRIES.map((entry, i) => {
+              {entries.map((entry, i) => {
                 const rateMeta = RATE_META[entry.rateType];
-                const value = entry.rateType === "fixed" ? entry.rate : entry.hours * entry.rate;
+                const value = entryValue(entry);
                 return (
-                  <motion.div key={entry.id} initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.04 }}
+                  <motion.div key={entry.id} initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: Math.min(i, 6) * 0.04 }}
                     style={{ background: "#fff", border: "1px solid #E8E2D6", borderRadius: 12, overflow: "hidden" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 16, padding: "16px 20px", cursor: "pointer" }}
                       onClick={() => setExpandedEntry(expandedEntry === entry.id ? null : entry.id)}>
@@ -253,10 +604,15 @@ export default function TimeTracking() {
                         <div style={{ fontSize: 9, color: "#A89878", textTransform: "uppercase" }}>{entry.date.split(",")[0]}</div>
                       </div>
                       <div style={{ flex: 1 }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3, flexWrap: "wrap" }}>
                           <span style={{ fontSize: 13, fontWeight: 600, color: "#1A1A14" }}>{entry.engagement}</span>
                           <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 100, background: `${rateMeta.color}12`, color: rateMeta.color, fontWeight: 600 }}>{rateMeta.label}</span>
                           {entry.approved && <CheckCircle size={12} color="#059669" />}
+                          {entry.invoiceId && (
+                            <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 100, background: "#F5F0E8", color: "#6B5E47", fontWeight: 600 }}>
+                              Invoiced · {entry.invoiceId}
+                            </span>
+                          )}
                         </div>
                         <div style={{ fontSize: 12, color: "#6B5E47" }}>{entry.phase} · {entry.deliverable}</div>
                       </div>
@@ -277,6 +633,18 @@ export default function TimeTracking() {
                             <span>{entry.date}</span>
                             <span>·</span>
                             <span>{entry.approved ? "✓ Approved" : "Pending approval"}</span>
+                            {!entry.approved && (
+                              <>
+                                <span>·</span>
+                                <button onClick={(ev) => {
+                                  ev.stopPropagation();
+                                  setEntries(prev => prev.map(x => x.id === entry.id ? { ...x, approved: true } : x));
+                                  setToast("Entry approved.");
+                                }} style={{ background: "none", border: "none", padding: 0, color: GOLD, fontSize: 11, fontWeight: 600, cursor: "pointer" }}>
+                                  Approve
+                                </button>
+                              </>
+                            )}
                           </div>
                         </motion.div>
                       )}
@@ -292,16 +660,17 @@ export default function TimeTracking() {
         {activeTab === "invoices" && (
           <div style={{ marginBottom: 64 }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-              <div style={{ fontSize: 13, color: "#6B5E47" }}>4 invoices · £46,250 total</div>
-              <button style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 18px", background: GOLD, border: "none", borderRadius: 10, color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
+              <div style={{ fontSize: 13, color: "#6B5E47" }}>{invoices.length} invoice{invoices.length === 1 ? "" : "s"} · £{invoicesTotal.toLocaleString()} total · {readyToInvoiceCount} entries ready</div>
+              <button onClick={generateInvoices}
+                style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 18px", background: GOLD, border: "none", borderRadius: 10, color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
                 <Plus size={14} /> Generate Invoice
               </button>
             </div>
 
-            {INVOICES.map((inv, i) => {
+            {invoices.map((inv, i) => {
               const statusMeta = INVOICE_STATUS[inv.status];
               return (
-                <motion.div key={inv.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}
+                <motion.div key={inv.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: Math.min(i, 6) * 0.06 }}
                   style={{ background: "#fff", border: `1px solid ${inv.status === "overdue" ? "#DC262620" : "#E8E2D6"}`, borderRadius: 14, padding: "20px 24px", marginBottom: 10, display: "flex", alignItems: "center", gap: 20 }}>
                   <div>
                     <div style={{ fontSize: 11, fontWeight: 600, color: "#A89878", marginBottom: 2 }}>{inv.id}</div>
@@ -322,11 +691,13 @@ export default function TimeTracking() {
                     <span style={{ fontSize: 10, fontWeight: 600, padding: "2px 8px", borderRadius: 100, background: `${statusMeta.color}12`, color: statusMeta.color }}>{statusMeta.label}</span>
                   </div>
                   <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
-                    <button style={{ padding: "6px 12px", border: "1px solid #E8E2D6", borderRadius: 8, background: "#F5F0E8", fontSize: 11, color: "#6B5E47", cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
+                    <button onClick={() => exportInvoicePdf(inv)}
+                      style={{ padding: "6px 12px", border: "1px solid #E8E2D6", borderRadius: 8, background: "#F5F0E8", fontSize: 11, color: "#6B5E47", cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
                       <Download size={11} /> PDF
                     </button>
                     {inv.status === "draft" && (
-                      <button style={{ padding: "6px 12px", background: GOLD, border: "none", borderRadius: 8, color: "#fff", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>
+                      <button onClick={() => sendInvoice(inv.id)}
+                        style={{ padding: "6px 12px", background: GOLD, border: "none", borderRadius: 8, color: "#fff", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>
                         Send
                       </button>
                     )}
