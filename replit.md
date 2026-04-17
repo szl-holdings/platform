@@ -27,6 +27,8 @@ The platform is a pnpm monorepo utilizing TypeScript 5.9, React 19, Vite, and No
 
 **Canonical Artifacts (Active Applications):** Key applications include `szl-holdings` (corporate), `api-server` (backend), `command` (unified operations), `aegis` (defense intelligence), `vessels` (maritime command), `terra` (real estate intelligence), `carlota-jo` (advisory), `pulse` (AI executive briefing), and `szl-holdings-mobile` (mobile command).
 
+**Known ID alias — Aegis:** The `artifacts/aegis/.replit-artifact/artifact.toml` carries `id = "artifacts/firestorm"` (a legacy name from when the app was called Firestorm). The platform API does not support changing artifact IDs in place, so the alias persists until a full re-registration is performed (see follow-up task #1300). The stale `/artifacts/firestorm` directory (which held only build output, no source) has been deleted. The workflow is correctly named `artifacts/aegis: web`.
+
 **Vite Sub-Path App Config Notes:**
 - All sub-path apps (aegis, terra, vessels, carlota-jo, command, pulse) share `PORT=9090` via `reusePort: true` shared proxy
 - Each app has its own Vite dev server on a dedicated `VITE_PORT` (3000, 5201, 6099, etc.)
