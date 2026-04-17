@@ -116,6 +116,137 @@ export interface RequestCustomBriefInput {
   agents?: string[];
 }
 
+export interface DomainSnapshot {
+  domain: string;
+  entityCount: number;
+  activeCount: number;
+  edgeCount: number;
+  avgConfidence: number;
+  topEntityTypes: Array<{ type: string; count: number }>;
+  staleFraction: number;
+  healthScore: number;
+  summary: string;
+}
+
+export interface ExecutiveBrief {
+  generatedAt: string;
+  totalEntities: number;
+  totalEdges: number;
+  crossDomainLinks: number;
+  overallHealthScore: number;
+  domains: DomainSnapshot[];
+  highlights: string[];
+  alerts: Array<{ domain: string; message: string; severity: "info" | "warning" | "critical" }>;
+}
+
+export interface DomainDrift {
+  domain: string;
+  totalEntities: number;
+  avgConfidence: number;
+  confidenceDrift: number;
+  freshnessWindows: Array<{ windowHours: number; staleCount: number; stalePercent: number }>;
+  driftScore: number;
+  status: "healthy" | "degraded" | "critical";
+}
+
+export interface DriftSummary {
+  measuredAt: string;
+  overallDriftScore: number;
+  status: "healthy" | "degraded" | "critical";
+  domains: DomainDrift[];
+  topAlerts: Array<{ domain: string; reason: string; severity: "warning" | "critical" }>;
+}
+
+export interface DeploymentRecord {
+  appId: string;
+  appName: string;
+  version: string;
+  environment: "development" | "staging" | "production";
+  status: "active" | "deploying" | "rolled-back" | "failed" | "inactive";
+  deployedAt: string;
+  deployedBy: string;
+  commitSha?: string;
+  notes?: string;
+}
+
+async function rawFetch<T>(path: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(path, {
+    credentials: "include",
+    headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
+    ...init,
+  });
+  if (!res.ok) {
+    let detail = "";
+    try {
+      const body = await res.json();
+      detail = body?.error ?? "";
+    } catch {
+      // ignore
+    }
+    throw new Error(`Request failed: ${res.status} ${res.statusText}${detail ? ` — ${detail}` : ""}`);
+  }
+  return (await res.json()) as T;
+}
+
+export function useExecutiveBrief() {
+  return useQuery({
+    queryKey: ["pulse", "executive-brief"],
+    queryFn: () => rawFetch<ExecutiveBrief>("/api/briefings"),
+    refetchInterval: 60_000,
+  });
+}
+
+export function useDriftSummary() {
+  return useQuery({
+    queryKey: ["pulse", "drift"],
+    queryFn: () => rawFetch<DriftSummary>("/api/drift"),
+    refetchInterval: 60_000,
+  });
+}
+
+export function useDeployments(environment: "production" | "staging" | "development" = "production") {
+  return useQuery({
+    queryKey: ["pulse", "deployments", environment],
+    queryFn: () =>
+      rawFetch<{ deployments: DeploymentRecord[]; environment: string; count: number }>(
+        `/api/deployments?environment=${environment}`,
+      ),
+    refetchInterval: 60_000,
+  });
+}
+
+export function useApproveBriefing() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) =>
+      rawFetch<{ id: string; status: string; approvedAt: string }>(
+        `/api/briefings/${encodeURIComponent(id)}/approve`,
+        { method: "PUT" },
+      ),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["pulse", "briefings"] });
+      qc.invalidateQueries({ queryKey: ["pulse", "briefing"] });
+      qc.invalidateQueries({ queryKey: ["pulse", "today"] });
+    },
+  });
+}
+
+export function useArchiveBriefing() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) =>
+      rawFetch<{ id: string; status: string; archivedAt: string }>(
+        `/api/briefings/${encodeURIComponent(id)}/archive`,
+        { method: "PUT" },
+      ),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["pulse", "briefings"] });
+      qc.invalidateQueries({ queryKey: ["pulse", "briefing"] });
+      qc.invalidateQueries({ queryKey: ["pulse", "today"] });
+    },
+  });
+}
+
 export function useRequestCustomBrief() {
   const qc = useQueryClient();
   return useMutation({

@@ -14,15 +14,16 @@
 
 import { Router, type IRouter, type Request, type Response } from "express";
 import { db } from "@szl-holdings/db";
-import { cstNodes, cstEdges } from "@szl-holdings/db";
+import { cstNodes, cstEdges, pulseBriefingsTable } from "@szl-holdings/db";
 import { eq, and, sql } from "drizzle-orm";
 import {
   sendSuccess,
   sendBadRequest,
+  sendNotFound,
   handleRouteError,
 } from "../lib/api-response";
-import { authMiddleware } from "../middlewares/auth";
-import { perUserApiSlidingLimiter } from "../middlewares/sliding-window-limiter";
+import { authMiddleware, requireRole } from "../middlewares/auth";
+import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../middlewares/sliding-window-limiter";
 import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
@@ -150,6 +151,44 @@ router.get("/briefings/:domain", async (req: Request, res: Response) => {
     return sendSuccess(res, snap);
   } catch (err) {
     return handleRouteError(res, err, `GET /briefings/${req.params.domain}`);
+  }
+});
+
+router.put("/briefings/:id/approve", authMiddleware({ required: true }), requireRole("ops", "exec", "admin", "super_admin"), perUserWriteSlidingLimiter, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const existing = await db.select().from(pulseBriefingsTable).where(eq(pulseBriefingsTable.id, id)).limit(1);
+    if (existing.length === 0) {
+      return sendNotFound(res, `Briefing '${id}' not found`);
+    }
+    const [updated] = await db
+      .update(pulseBriefingsTable)
+      .set({ status: "published" })
+      .where(eq(pulseBriefingsTable.id, id))
+      .returning({ id: pulseBriefingsTable.id, status: pulseBriefingsTable.status });
+    logger.info({ briefingId: id, by: req.user?.id ?? "system" }, "Briefing approved");
+    return sendSuccess(res, { id: updated!.id, status: updated!.status, approvedAt: new Date().toISOString() });
+  } catch (err) {
+    return handleRouteError(res, err, `PUT /briefings/${req.params.id}/approve`);
+  }
+});
+
+router.put("/briefings/:id/archive", authMiddleware({ required: true }), requireRole("ops", "exec", "admin", "super_admin"), perUserWriteSlidingLimiter, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const existing = await db.select().from(pulseBriefingsTable).where(eq(pulseBriefingsTable.id, id)).limit(1);
+    if (existing.length === 0) {
+      return sendNotFound(res, `Briefing '${id}' not found`);
+    }
+    const [updated] = await db
+      .update(pulseBriefingsTable)
+      .set({ status: "archived" })
+      .where(eq(pulseBriefingsTable.id, id))
+      .returning({ id: pulseBriefingsTable.id, status: pulseBriefingsTable.status });
+    logger.info({ briefingId: id, by: req.user?.id ?? "system" }, "Briefing archived");
+    return sendSuccess(res, { id: updated!.id, status: updated!.status, archivedAt: new Date().toISOString() });
+  } catch (err) {
+    return handleRouteError(res, err, `PUT /briefings/${req.params.id}/archive`);
   }
 });
 

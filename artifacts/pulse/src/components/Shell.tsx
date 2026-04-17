@@ -2,7 +2,7 @@ import { ReactNode, ComponentType } from "react";
 import { Link, useLocation } from "wouter";
 import {
   BookOpen, BarChart2, FileText, MessageSquare,
-  Settings, Radio, ChevronRight, Zap, Shield,
+  Settings, Radio, ChevronRight, Zap, Shield, Activity,
   type LucideProps
 } from "lucide-react";
 
@@ -16,6 +16,7 @@ const NAV_ITEMS = [
   { href: `${BASE}/confidence`, label: "Confidence", icon: BarChart2 },
   { href: `${BASE}/custom`, label: "Custom Brief", icon: FileText },
   { href: `${BASE}/dissent`, label: "Dissent Channel", icon: MessageSquare },
+  { href: `${BASE}/system`, label: "System Health", icon: Activity },
   { href: `${BASE}/settings`, label: "Settings", icon: Settings },
 ];
 

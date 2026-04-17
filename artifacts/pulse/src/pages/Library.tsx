@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Link } from "wouter";
-import { Search, Filter, ChevronRight, Calendar, Shield } from "lucide-react";
+import { Search, Filter, ChevronRight, Calendar, Shield, Check, Archive } from "lucide-react";
 import { getRiskColor, type DomainKey, type RiskLevel } from "../lib/data";
-import { useBriefings } from "../lib/api";
+import { useBriefings, useApproveBriefing, useArchiveBriefing } from "../lib/api";
 import ConfidenceChip from "../components/ConfidenceChip";
 
 type RiskFilter = RiskLevel | "all";
@@ -25,6 +25,8 @@ export default function Library() {
   const [riskFilter, setRiskFilter] = useState<RiskFilter>("all");
 
   const { data: briefings, isLoading, error } = useBriefings({ domain: domainFilter, risk: riskFilter });
+  const approveMut = useApproveBriefing();
+  const archiveMut = useArchiveBriefing();
   const allBriefings = briefings ?? [];
 
   const filtered = allBriefings.filter(b => {
@@ -146,6 +148,54 @@ export default function Library() {
                       border: `1px solid ${getRiskColor(briefing.overallRisk)}40`,
                     }}>{briefing.overallRisk}</span>
                     <ConfidenceChip score={briefing.overallConfidence} size="sm" />
+                    <span style={{
+                      fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase",
+                      color: briefing.status === "archived" ? "#7a8295" : briefing.status === "draft" ? "#c8a84b" : "#4eca8b",
+                    }}>{briefing.status}</span>
+                    <div style={{ display: "flex", gap: 4 }} onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+                      <button
+                        type="button"
+                        title="Approve briefing"
+                        disabled={approveMut.isPending || briefing.status === "published"}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          approveMut.mutate(briefing.id);
+                        }}
+                        style={{
+                          display: "inline-flex", alignItems: "center", gap: 4,
+                          padding: "3px 8px", borderRadius: 4,
+                          background: briefing.status === "published" ? "rgba(78,202,139,0.06)" : "rgba(78,202,139,0.12)",
+                          border: "1px solid rgba(78,202,139,0.3)",
+                          color: "#4eca8b", fontSize: "0.65rem", fontWeight: 600,
+                          cursor: briefing.status === "published" ? "default" : "pointer",
+                          opacity: approveMut.isPending ? 0.6 : 1,
+                        }}
+                      >
+                        <Check size={10} /> Approve
+                      </button>
+                      <button
+                        type="button"
+                        title="Archive briefing"
+                        disabled={archiveMut.isPending || briefing.status === "archived"}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          archiveMut.mutate(briefing.id);
+                        }}
+                        style={{
+                          display: "inline-flex", alignItems: "center", gap: 4,
+                          padding: "3px 8px", borderRadius: 4,
+                          background: briefing.status === "archived" ? "rgba(122,130,149,0.06)" : "rgba(122,130,149,0.12)",
+                          border: "1px solid rgba(122,130,149,0.3)",
+                          color: "#a0a8b8", fontSize: "0.65rem", fontWeight: 600,
+                          cursor: briefing.status === "archived" ? "default" : "pointer",
+                          opacity: archiveMut.isPending ? 0.6 : 1,
+                        }}
+                      >
+                        <Archive size={10} /> Archive
+                      </button>
+                    </div>
                     <ChevronRight size={14} color="var(--pulse-text-muted)" />
                   </div>
                 </div>
