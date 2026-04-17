@@ -74,7 +74,17 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with: { node-version: '22', cache: 'pnpm' }
       - run: pnpm install --frozen-lockfile
+      # Recursive build covers every workspace package with a `build` script.
       - run: pnpm -r --if-present run build
+      # Explicit per-app gates for the newer artifacts so a regression in
+      # one of them surfaces as a named, easy-to-find CI failure rather
+      # than getting buried in the recursive build output.
+      - name: Build @workspace/command (Ecosystem Command Portal)
+        run: pnpm --filter @workspace/command run build
+      - name: Build @workspace/aegis (Aegis Defense & Intelligence)
+        run: pnpm --filter @workspace/aegis run build
+      - name: Build @workspace/pulse (Pulse Executive Briefing)
+        run: pnpm --filter @workspace/pulse run build
 
   integration-test:
     name: Integration Tests
