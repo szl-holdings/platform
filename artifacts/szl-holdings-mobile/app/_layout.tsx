@@ -16,7 +16,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
 import { persistQueryClient } from "@tanstack/query-persist-client-core";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Stack } from "expo-router";
+import { Stack, router } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import * as SystemUI from "expo-system-ui";
 import React, { useEffect } from "react";
@@ -71,6 +71,51 @@ setUploadAuthTokenGetter(getCortexAuthToken);
 
 configurePushNotificationHandler();
 
+// Maps a server `domain` (legacy per-app appIds plus unified workspace IDs) to
+// the matching Expo Router path inside the unified shell.
+const DOMAIN_TO_WORKSPACE_PATH: Record<string, string> = {
+  defense: "/(shell)/defense",
+  aegis: "/(shell)/defense",
+  "aegis-mobile": "/(shell)/defense",
+  fleet: "/(shell)/fleet",
+  vessels: "/(shell)/fleet",
+  properties: "/(shell)/properties",
+  terra: "/(shell)/properties",
+  operations: "/(shell)/operations",
+  lyte: "/(shell)/operations",
+  msp: "/(shell)/operations",
+  "aegis-ops": "/(shell)/operations",
+  advisory: "/(shell)/advisory",
+  carlota: "/(shell)/advisory",
+  "carlota-jo": "/(shell)/advisory",
+  portfolio: "/(shell)/portfolio",
+  szl: "/(shell)/portfolio",
+  founder: "/(shell)/founder",
+  stephen: "/(shell)/founder",
+  intelligence: "/(shell)/intelligence",
+  cortex: "/(shell)/intelligence",
+  inca: "/(shell)/intelligence",
+  prism: "/(shell)/advisory",
+  command: "/(shell)/",
+};
+
+function resolveDeepLinkRoute(data: Record<string, unknown> | undefined | null): string | null {
+  if (!data) return null;
+  if (typeof data.route === "string" && data.route.length > 0) {
+    const r = data.route;
+    if (r.startsWith("/(shell)") || r.startsWith("/")) return r;
+  }
+  if (typeof data.domain === "string") {
+    const path = DOMAIN_TO_WORKSPACE_PATH[data.domain.toLowerCase()];
+    if (path) return path;
+  }
+  if (typeof data.appId === "string") {
+    const path = DOMAIN_TO_WORKSPACE_PATH[data.appId.toLowerCase()];
+    if (path) return path;
+  }
+  return null;
+}
+
 SplashScreen.preventAutoHideAsync();
 SystemUI.setBackgroundColorAsync("#090810");
 
@@ -103,11 +148,38 @@ function AppShell() {
   usePushNotificationsBase({
     onTokenAcquired: async (token) => {
       console.log("[CORTEX Push] token:", token.substring(0, 20) + "...");
+      try {
+        const authToken = await getCortexAuthToken();
+        const headers: Record<string, string> = { "Content-Type": "application/json" };
+        if (authToken) headers["Authorization"] = `Bearer ${authToken}`;
+        await fetch(`${API_BASE}/push-tokens`, {
+          method: "POST",
+          headers,
+          body: JSON.stringify({
+            token,
+            platform: Platform.OS,
+            appId: "cortex-mobile",
+          }),
+        });
+      } catch (err) {
+        console.warn("[CORTEX Push] Failed to register token:", err);
+      }
     },
     onNotificationReceived: (notification) => {
       const data = notification.request.content.data as Record<string, unknown>;
       if (data?.domain) {
         queryClient.invalidateQueries({ queryKey: [`${data.domain}-signals`] });
+      }
+    },
+    onNotificationResponse: (response) => {
+      const data = response.notification.request.content.data as Record<string, unknown>;
+      const target = resolveDeepLinkRoute(data);
+      if (target) {
+        try {
+          router.navigate(target as never);
+        } catch (err) {
+          console.warn("[CORTEX Push] navigate failed:", err);
+        }
       }
     },
   });

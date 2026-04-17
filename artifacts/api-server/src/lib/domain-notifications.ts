@@ -13,7 +13,43 @@ export interface DomainNotif {
   actionUrl?: string;
 }
 
+// Maps the legacy per-app `appId` used here to the unified CORTEX mobile
+// workspace domain so push consumers (mobile shell) can deep-link into the
+// correct workspace tab without knowing the legacy app taxonomy.
+const APP_ID_TO_CORTEX_DOMAIN: Record<string, string> = {
+  aegis: "defense",
+  vessels: "fleet",
+  terra: "properties",
+  lyte: "operations",
+  "aegis-ops": "operations",
+  msp: "operations",
+  carlota: "advisory",
+  "carlota-jo": "advisory",
+  prism: "advisory",
+  "aegis-intel": "intelligence",
+  inca: "intelligence",
+  cortex: "intelligence",
+  "alloy-creative": "portfolio",
+  szl: "portfolio",
+  stephen: "founder",
+};
+
+const DOMAIN_TO_CORTEX_ROUTE: Record<string, string> = {
+  defense: "/(shell)/defense",
+  fleet: "/(shell)/fleet",
+  properties: "/(shell)/properties",
+  operations: "/(shell)/operations",
+  advisory: "/(shell)/advisory",
+  portfolio: "/(shell)/portfolio",
+  founder: "/(shell)/founder",
+  intelligence: "/(shell)/intelligence",
+  command: "/(shell)/",
+};
+
 export function broadcastNotification(notif: DomainNotif): void {
+  const cortexDomain = APP_ID_TO_CORTEX_DOMAIN[notif.appId] ?? "command";
+  const cortexRoute = DOMAIN_TO_CORTEX_ROUTE[cortexDomain] ?? "/(shell)/";
+
   const payload = {
     id: `${notif.appId}-${Date.now()}-${Math.random().toString(36).slice(2)}`,
     appId: notif.appId,
@@ -22,6 +58,8 @@ export function broadcastNotification(notif: DomainNotif): void {
     message: notif.message,
     severity: notif.severity,
     actionUrl: notif.actionUrl ?? null,
+    domain: cortexDomain,
+    route: cortexRoute,
     isRead: false,
     createdAt: new Date().toISOString(),
     type: notif.severity === "critical" ? "error" : notif.severity === "warning" ? "warning" : "info",
