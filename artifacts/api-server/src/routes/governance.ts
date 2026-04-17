@@ -386,10 +386,26 @@ router.get("/incidents", authMiddleware(), async (req: Request, res: Response) =
   }
 });
 
-router.post("/incidents", authMiddleware(), async (req: Request, res: Response) => {
+const createIncidentSchema = z.object({
+  severity: z.enum(["critical", "high", "medium", "low", "info"]).optional(),
+  incidentType: z.string().min(1).max(100),
+  title: z.string().min(1).max(500).trim(),
+  description: z.string().max(5000).trim().optional().nullable(),
+  agentId: z.string().max(200).optional().nullable(),
+  userId: z.number().int().positive().optional().nullable(),
+  resourceType: z.string().max(100).optional().nullable(),
+  resourceId: z.string().max(200).optional().nullable(),
+  policyId: z.number().int().positive().optional().nullable(),
+  metadata: z.record(z.unknown()).optional(),
+});
+
+const resolveIncidentSchema = z.object({
+  resolution: z.string().max(5000).trim().optional(),
+});
+
+router.post("/incidents", authMiddleware(), validateBody(createIncidentSchema), async (req: Request, res: Response) => {
   try {
     const { severity, incidentType, title, description, agentId, userId, resourceType, resourceId, policyId, metadata } = req.body;
-    if (!incidentType || !title) return sendBadRequest(res, "incidentType and title are required");
     const orgId = req.user?.orgs?.[0]?.orgId ?? null;
     const [row] = await db.insert(governanceIncidentsTable).values({
       orgId,
@@ -407,7 +423,7 @@ router.post("/incidents", authMiddleware(), async (req: Request, res: Response) 
   }
 });
 
-router.patch("/incidents/:id/resolve", authMiddleware(), requireRole("super_admin", "admin", "ops"), async (req: Request, res: Response) => {
+router.patch("/incidents/:id/resolve", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(resolveIncidentSchema), async (req: Request, res: Response) => {
   try {
     const id = parseInt(String(req.params.id), 10);
     if (isNaN(id)) return sendBadRequest(res, "Invalid incident ID");

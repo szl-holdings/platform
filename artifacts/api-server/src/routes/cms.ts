@@ -84,6 +84,252 @@ const patchCmsPostSchema = createCmsPostSchema.partial().refine(
   { message: "At least one field is required" }
 );
 
+const patchSiteSchema = z.object({
+  name: z.string().min(1).max(200).trim().optional(),
+  slug: z.string().min(1).max(100).regex(/^[a-z0-9-_]+$/i).optional(),
+  domain: z.string().max(253).optional().nullable(),
+  description: z.string().max(2000).trim().optional().nullable(),
+  logoUrl: z.string().url().max(2048).optional().nullable(),
+  settings: z.record(z.unknown()).optional(),
+  metadata: z.record(z.unknown()).optional(),
+}).refine(d => Object.keys(d).length > 0, { message: "At least one field is required" });
+
+const createSectionSchema = z.object({
+  pageId: z.number().int().positive().optional().nullable(),
+  sectionType: z.string().min(1).max(100).trim(),
+  title: z.string().max(500).trim().optional().nullable(),
+  content: z.record(z.unknown()).optional(),
+  sortOrder: z.number().int().min(0).optional(),
+  isVisible: z.boolean().optional(),
+  metadata: z.record(z.unknown()).optional(),
+});
+
+const patchSectionSchema = createSectionSchema.partial().refine(
+  d => Object.keys(d).length > 0,
+  { message: "At least one field is required" }
+);
+
+const createVentureSchema = z.object({
+  name: z.string().min(1).max(200).trim(),
+  slug: z.string().min(1).max(100).regex(/^[a-z0-9-_]+$/i),
+  tagline: z.string().max(500).trim().optional().nullable(),
+  description: z.string().max(5000).trim().optional().nullable(),
+  status: z.enum(["active", "stealth", "sunset", "acquired"]).optional(),
+  logoUrl: z.string().url().max(2048).optional().nullable(),
+  heroImageUrl: z.string().url().max(2048).optional().nullable(),
+  externalUrl: z.string().url().max(2048).optional().nullable(),
+  sortOrder: z.number().int().min(0).optional(),
+  tags: z.array(z.string()).optional(),
+  metadata: z.record(z.unknown()).optional(),
+});
+
+const patchVentureSchema = createVentureSchema.partial().refine(
+  d => Object.keys(d).length > 0,
+  { message: "At least one field is required" }
+);
+
+const createCaseStudySchema = z.object({
+  siteId: z.number().int().positive().optional().nullable(),
+  title: z.string().min(1).max(500).trim(),
+  slug: z.string().min(1).max(200).trim(),
+  status: z.enum(["draft", "published", "archived"]).optional(),
+  client: z.string().max(200).trim().optional().nullable(),
+  excerpt: z.string().max(1000).trim().optional().nullable(),
+  content: z.string().max(100000).optional().nullable(),
+  coverImageUrl: z.string().url().max(2048).optional().nullable(),
+  tags: z.array(z.string()).optional(),
+  metadata: z.record(z.unknown()).optional(),
+});
+
+const patchCaseStudySchema = createCaseStudySchema.partial().refine(
+  d => Object.keys(d).length > 0,
+  { message: "At least one field is required" }
+);
+
+const createNavigationItemSchema = z.object({
+  siteId: z.number().int().positive().optional().nullable(),
+  navGroup: z.string().max(100).trim().optional(),
+  label: z.string().min(1).max(200).trim(),
+  href: z.string().max(2048).trim(),
+  icon: z.string().max(100).trim().optional().nullable(),
+  sortOrder: z.number().int().min(0).optional(),
+  isExternal: z.boolean().optional(),
+  isVisible: z.boolean().optional(),
+  metadata: z.record(z.unknown()).optional(),
+});
+
+const patchNavigationItemSchema = createNavigationItemSchema.partial().refine(
+  d => Object.keys(d).length > 0,
+  { message: "At least one field is required" }
+);
+
+const createTestimonialSchema = z.object({
+  siteId: z.number().int().positive().optional().nullable(),
+  author: z.string().min(1).max(200).trim(),
+  role: z.string().max(200).trim().optional().nullable(),
+  company: z.string().max(200).trim().optional().nullable(),
+  content: z.string().min(1).max(5000).trim(),
+  avatarUrl: z.string().url().max(2048).optional().nullable(),
+  rating: z.number().int().min(1).max(5).optional().nullable(),
+  sortOrder: z.number().int().min(0).optional(),
+  metadata: z.record(z.unknown()).optional(),
+});
+
+const patchTestimonialSchema = createTestimonialSchema.partial().refine(
+  d => Object.keys(d).length > 0,
+  { message: "At least one field is required" }
+);
+
+const createFaqSchema = z.object({
+  siteId: z.number().int().positive().optional().nullable(),
+  question: z.string().min(1).max(1000).trim(),
+  answer: z.string().min(1).max(10000).trim(),
+  category: z.string().max(100).trim().optional().nullable(),
+  sortOrder: z.number().int().min(0).optional(),
+  isVisible: z.boolean().optional(),
+  metadata: z.record(z.unknown()).optional(),
+});
+
+const patchFaqSchema = createFaqSchema.partial().refine(
+  d => Object.keys(d).length > 0,
+  { message: "At least one field is required" }
+);
+
+const createCtaSchema = z.object({
+  siteId: z.number().int().positive().optional().nullable(),
+  label: z.string().min(1).max(200).trim(),
+  href: z.string().max(2048).trim(),
+  variant: z.string().max(50).trim().optional(),
+  icon: z.string().max(100).trim().optional().nullable(),
+  isExternal: z.boolean().optional(),
+  metadata: z.record(z.unknown()).optional(),
+});
+
+const patchCtaSchema = createCtaSchema.partial().refine(
+  d => Object.keys(d).length > 0,
+  { message: "At least one field is required" }
+);
+
+const createRoadmapItemSchema = z.object({
+  siteId: z.number().int().positive().optional().nullable(),
+  title: z.string().min(1).max(500).trim(),
+  description: z.string().max(2000).trim().optional().nullable(),
+  status: z.enum(["planned", "in_progress", "completed", "cancelled"]).optional(),
+  quarter: z.string().max(20).trim().optional().nullable(),
+  sortOrder: z.number().int().min(0).optional(),
+  metadata: z.record(z.unknown()).optional(),
+});
+
+const patchRoadmapItemSchema = createRoadmapItemSchema.partial().refine(
+  d => Object.keys(d).length > 0,
+  { message: "At least one field is required" }
+);
+
+const createServiceItemSchema = z.object({
+  siteId: z.number().int().positive().optional().nullable(),
+  name: z.string().min(1).max(200).trim(),
+  slug: z.string().min(1).max(100).regex(/^[a-z0-9-_]+$/i).optional(),
+  tagline: z.string().max(500).trim().optional().nullable(),
+  description: z.string().max(5000).trim().optional().nullable(),
+  iconUrl: z.string().url().max(2048).optional().nullable(),
+  sortOrder: z.number().int().min(0).optional(),
+  metadata: z.record(z.unknown()).optional(),
+});
+
+const patchServiceItemSchema = createServiceItemSchema.partial().refine(
+  d => Object.keys(d).length > 0,
+  { message: "At least one field is required" }
+);
+
+const createFeatureItemSchema = z.object({
+  siteId: z.number().int().positive().optional().nullable(),
+  name: z.string().min(1).max(200).trim(),
+  description: z.string().max(2000).trim().optional().nullable(),
+  iconUrl: z.string().url().max(2048).optional().nullable(),
+  sortOrder: z.number().int().min(0).optional(),
+  metadata: z.record(z.unknown()).optional(),
+});
+
+const createUseCaseSchema = z.object({
+  siteId: z.number().int().positive().optional().nullable(),
+  title: z.string().min(1).max(500).trim(),
+  description: z.string().max(5000).trim().optional().nullable(),
+  industry: z.string().max(100).trim().optional().nullable(),
+  iconUrl: z.string().url().max(2048).optional().nullable(),
+  sortOrder: z.number().int().min(0).optional(),
+  metadata: z.record(z.unknown()).optional(),
+});
+
+const createUpdateSchema = z.object({
+  siteId: z.number().int().positive().optional().nullable(),
+  title: z.string().min(1).max(500).trim(),
+  slug: z.string().min(1).max(200).trim().optional(),
+  status: z.enum(["draft", "published", "archived"]).optional(),
+  content: z.string().max(100000).optional().nullable(),
+  excerpt: z.string().max(1000).trim().optional().nullable(),
+  coverImageUrl: z.string().url().max(2048).optional().nullable(),
+  tags: z.array(z.string()).optional(),
+  metadata: z.record(z.unknown()).optional(),
+});
+
+const patchUpdateSchema = createUpdateSchema.partial().refine(
+  d => Object.keys(d).length > 0,
+  { message: "At least one field is required" }
+);
+
+const createLeadStatusSchema = z.object({
+  submissionId: z.number().int().positive().optional().nullable(),
+  status: z.string().min(1).max(100).trim(),
+  notes: z.string().max(2000).trim().optional().nullable(),
+  assignedTo: z.string().max(200).trim().optional().nullable(),
+  metadata: z.record(z.unknown()).optional(),
+});
+
+const patchLeadStatusSchema = createLeadStatusSchema.partial().refine(
+  d => Object.keys(d).length > 0,
+  { message: "At least one field is required" }
+);
+
+const siteSettingSchema = z.object({
+  siteId: z.number().int().positive(),
+  key: z.string().min(1).max(200).trim(),
+  valueJson: z.unknown(),
+});
+
+const createMediaAssetSchema = z.object({
+  siteId: z.number().int().positive().optional().nullable(),
+  fileName: z.string().min(1).max(255).trim(),
+  fileUrl: z.string().url().max(2048),
+  mimeType: z.string().min(1).max(100),
+  altText: z.string().max(500).trim().optional().nullable(),
+  size: z.number().int().positive().optional().nullable(),
+  width: z.number().int().positive().optional().nullable(),
+  height: z.number().int().positive().optional().nullable(),
+  metadata: z.record(z.unknown()).optional(),
+});
+
+const createDownloadSchema = z.object({
+  siteId: z.number().int().positive().optional().nullable(),
+  title: z.string().min(1).max(500).trim(),
+  description: z.string().max(2000).trim().optional().nullable(),
+  fileUrl: z.string().url().max(2048),
+  mimeType: z.string().max(100).trim().optional().nullable(),
+  status: z.enum(["draft", "published", "archived"]).optional(),
+  metadata: z.record(z.unknown()).optional(),
+});
+
+const patchDownloadSchema = createDownloadSchema.partial().refine(
+  d => Object.keys(d).length > 0,
+  { message: "At least one field is required" }
+);
+
+const createRedirectSchema = z.object({
+  fromPath: z.string().min(1).max(2048).trim(),
+  toPath: z.string().min(1).max(2048).trim(),
+  statusCode: z.number().int().refine(v => [301, 302, 307, 308].includes(v), { message: "statusCode must be 301, 302, 307, or 308" }).optional(),
+  isActive: z.boolean().optional(),
+});
+
 const router: IRouter = Router();
 
 // All CMS mutating operations require authentication and editor/admin role.
@@ -121,7 +367,7 @@ router.get("/cms/sites/:slug", async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to get site"); }
 });
 
-router.patch("/cms/sites/:id", requireCmsWrite, async (req, res) => {
+router.patch("/cms/sites/:id", requireCmsWrite, validateBody(patchSiteSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(sitesTable).set({ ...req.body, updatedAt: new Date() }).where(eq(sitesTable.id, id)).returning();
@@ -200,14 +446,14 @@ router.get("/cms/sections", async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to list sections"); }
 });
 
-router.post("/cms/sections", requireCmsWrite, async (req, res) => {
+router.post("/cms/sections", requireCmsWrite, validateBody(createSectionSchema), async (req, res) => {
   try {
     const [row] = await db.insert(sectionsTable).values(req.body).returning();
     sendSuccess(res, row, 201);
   } catch (err) { handleRouteError(res, err, "Failed to create section"); }
 });
 
-router.patch("/cms/sections/:id", requireCmsWrite, async (req, res) => {
+router.patch("/cms/sections/:id", requireCmsWrite, validateBody(patchSectionSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(sectionsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(sectionsTable.id, id)).returning();
@@ -241,14 +487,14 @@ router.get("/cms/ventures/:slug", async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to get venture"); }
 });
 
-router.post("/cms/ventures", requireCmsWrite, async (req, res) => {
+router.post("/cms/ventures", requireCmsWrite, validateBody(createVentureSchema), async (req, res) => {
   try {
     const [row] = await db.insert(venturesTable).values(req.body).returning();
     sendSuccess(res, row, 201);
   } catch (err) { handleRouteError(res, err, "Failed to create venture"); }
 });
 
-router.patch("/cms/ventures/:id", requireCmsWrite, async (req, res) => {
+router.patch("/cms/ventures/:id", requireCmsWrite, validateBody(patchVentureSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(venturesTable).set({ ...req.body, updatedAt: new Date() }).where(eq(venturesTable.id, id)).returning();
@@ -355,14 +601,14 @@ router.get("/cms/case-studies/:slug", authMiddleware({ required: false }), async
   } catch (err) { handleRouteError(res, err, "Failed to get case study"); }
 });
 
-router.post("/cms/case-studies", requireCmsWrite, async (req, res) => {
+router.post("/cms/case-studies", requireCmsWrite, validateBody(createCaseStudySchema), async (req, res) => {
   try {
     const [row] = await db.insert(caseStudiesTable).values(req.body).returning();
     sendSuccess(res, row, 201);
   } catch (err) { handleRouteError(res, err, "Failed to create case study"); }
 });
 
-router.patch("/cms/case-studies/:id", requireCmsWrite, async (req, res) => {
+router.patch("/cms/case-studies/:id", requireCmsWrite, validateBody(patchCaseStudySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(caseStudiesTable).set({ ...req.body, updatedAt: new Date() }).where(eq(caseStudiesTable.id, id)).returning();
@@ -395,14 +641,14 @@ router.get("/cms/navigation-items", async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to list navigation items"); }
 });
 
-router.post("/cms/navigation-items", requireCmsWrite, async (req, res) => {
+router.post("/cms/navigation-items", requireCmsWrite, validateBody(createNavigationItemSchema), async (req, res) => {
   try {
     const [row] = await db.insert(navigationItemsTable).values(req.body).returning();
     sendSuccess(res, row, 201);
   } catch (err) { handleRouteError(res, err, "Failed to create navigation item"); }
 });
 
-router.patch("/cms/navigation-items/:id", requireCmsWrite, async (req, res) => {
+router.patch("/cms/navigation-items/:id", requireCmsWrite, validateBody(patchNavigationItemSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(navigationItemsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(navigationItemsTable.id, id)).returning();
@@ -431,14 +677,14 @@ router.get("/cms/testimonials", async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to list testimonials"); }
 });
 
-router.post("/cms/testimonials", requireCmsWrite, async (req, res) => {
+router.post("/cms/testimonials", requireCmsWrite, validateBody(createTestimonialSchema), async (req, res) => {
   try {
     const [row] = await db.insert(testimonialsTable).values(req.body).returning();
     sendSuccess(res, row, 201);
   } catch (err) { handleRouteError(res, err, "Failed to create testimonial"); }
 });
 
-router.patch("/cms/testimonials/:id", requireCmsWrite, async (req, res) => {
+router.patch("/cms/testimonials/:id", requireCmsWrite, validateBody(patchTestimonialSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(testimonialsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(testimonialsTable.id, id)).returning();
@@ -467,14 +713,14 @@ router.get("/cms/faqs", async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to list FAQs"); }
 });
 
-router.post("/cms/faqs", requireCmsWrite, async (req, res) => {
+router.post("/cms/faqs", requireCmsWrite, validateBody(createFaqSchema), async (req, res) => {
   try {
     const [row] = await db.insert(faqsTable).values(req.body).returning();
     sendSuccess(res, row, 201);
   } catch (err) { handleRouteError(res, err, "Failed to create FAQ"); }
 });
 
-router.patch("/cms/faqs/:id", requireCmsWrite, async (req, res) => {
+router.patch("/cms/faqs/:id", requireCmsWrite, validateBody(patchFaqSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(faqsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(faqsTable.id, id)).returning();
@@ -503,14 +749,14 @@ router.get("/cms/ctas", async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to list CTAs"); }
 });
 
-router.post("/cms/ctas", requireCmsWrite, async (req, res) => {
+router.post("/cms/ctas", requireCmsWrite, validateBody(createCtaSchema), async (req, res) => {
   try {
     const [row] = await db.insert(ctasTable).values(req.body).returning();
     sendSuccess(res, row, 201);
   } catch (err) { handleRouteError(res, err, "Failed to create CTA"); }
 });
 
-router.patch("/cms/ctas/:id", requireCmsWrite, async (req, res) => {
+router.patch("/cms/ctas/:id", requireCmsWrite, validateBody(patchCtaSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(ctasTable).set({ ...req.body, updatedAt: new Date() }).where(eq(ctasTable.id, id)).returning();
@@ -539,14 +785,14 @@ router.get("/cms/roadmap-items", async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to list roadmap items"); }
 });
 
-router.post("/cms/roadmap-items", requireCmsWrite, async (req, res) => {
+router.post("/cms/roadmap-items", requireCmsWrite, validateBody(createRoadmapItemSchema), async (req, res) => {
   try {
     const [row] = await db.insert(roadmapItemsTable).values(req.body).returning();
     sendSuccess(res, row, 201);
   } catch (err) { handleRouteError(res, err, "Failed to create roadmap item"); }
 });
 
-router.patch("/cms/roadmap-items/:id", requireCmsWrite, async (req, res) => {
+router.patch("/cms/roadmap-items/:id", requireCmsWrite, validateBody(patchRoadmapItemSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(roadmapItemsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(roadmapItemsTable.id, id)).returning();
@@ -575,14 +821,14 @@ router.get("/cms/services-items", async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to list services"); }
 });
 
-router.post("/cms/services-items", requireCmsWrite, async (req, res) => {
+router.post("/cms/services-items", requireCmsWrite, validateBody(createServiceItemSchema), async (req, res) => {
   try {
     const [row] = await db.insert(servicesTable).values(req.body).returning();
     sendSuccess(res, row, 201);
   } catch (err) { handleRouteError(res, err, "Failed to create service"); }
 });
 
-router.patch("/cms/services-items/:id", requireCmsWrite, async (req, res) => {
+router.patch("/cms/services-items/:id", requireCmsWrite, validateBody(patchServiceItemSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(servicesTable).set({ ...req.body, updatedAt: new Date() }).where(eq(servicesTable.id, id)).returning();
@@ -611,7 +857,7 @@ router.get("/cms/features-items", async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to list features"); }
 });
 
-router.post("/cms/features-items", requireCmsWrite, async (req, res) => {
+router.post("/cms/features-items", requireCmsWrite, validateBody(createFeatureItemSchema), async (req, res) => {
   try {
     const [row] = await db.insert(featuresTable).values(req.body).returning();
     sendSuccess(res, row, 201);
@@ -630,7 +876,7 @@ router.get("/cms/use-cases", async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to list use cases"); }
 });
 
-router.post("/cms/use-cases", requireCmsWrite, async (req, res) => {
+router.post("/cms/use-cases", requireCmsWrite, validateBody(createUseCaseSchema), async (req, res) => {
   try {
     const [row] = await db.insert(useCasesTable).values(req.body).returning();
     sendSuccess(res, row, 201);
@@ -656,14 +902,14 @@ router.get("/cms/updates", authMiddleware({ required: false }), async (req, res)
   } catch (err) { handleRouteError(res, err, "Failed to list updates"); }
 });
 
-router.post("/cms/updates", requireCmsWrite, async (req, res) => {
+router.post("/cms/updates", requireCmsWrite, validateBody(createUpdateSchema), async (req, res) => {
   try {
     const [row] = await db.insert(updatesTable).values(req.body).returning();
     sendSuccess(res, row, 201);
   } catch (err) { handleRouteError(res, err, "Failed to create update"); }
 });
 
-router.patch("/cms/updates/:id", requireCmsWrite, async (req, res) => {
+router.patch("/cms/updates/:id", requireCmsWrite, validateBody(patchUpdateSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(updatesTable).set({ ...req.body, updatedAt: new Date() }).where(eq(updatesTable.id, id)).returning();
@@ -695,14 +941,14 @@ router.get("/cms/contact-submissions", requireCmsWrite, async (req, res) => {
 
 // ─── Lead Status ──────────────────────────────────────────────────────────────
 
-router.post("/cms/lead-status", requireCmsWrite, async (req, res) => {
+router.post("/cms/lead-status", requireCmsWrite, validateBody(createLeadStatusSchema), async (req, res) => {
   try {
     const [row] = await db.insert(leadStatusTable).values(req.body).returning();
     sendSuccess(res, row, 201);
   } catch (err) { handleRouteError(res, err, "Failed to create lead status"); }
 });
 
-router.patch("/cms/lead-status/:id", requireCmsWrite, async (req, res) => {
+router.patch("/cms/lead-status/:id", requireCmsWrite, validateBody(patchLeadStatusSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(leadStatusTable).set({ ...req.body, updatedAt: new Date() }).where(eq(leadStatusTable.id, id)).returning();
@@ -731,7 +977,7 @@ router.get("/cms/site-settings/:siteId", async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to get site settings"); }
 });
 
-router.post("/cms/site-settings", requireCmsWrite, async (req, res) => {
+router.post("/cms/site-settings", requireCmsWrite, validateBody(siteSettingSchema), async (req, res) => {
     try {
       const { siteId, key, valueJson } = req.body;
       const [existing] = await db.select().from(siteSettingsTable)
@@ -747,7 +993,7 @@ router.post("/cms/site-settings", requireCmsWrite, async (req, res) => {
     } catch (err) { handleRouteError(res, err, "Failed to set site setting"); }
   });
 
-  router.put("/cms/site-settings", requireCmsWrite, async (req, res) => {
+  router.put("/cms/site-settings", requireCmsWrite, validateBody(siteSettingSchema), async (req, res) => {
   try {
     const { siteId, key, valueJson } = req.body;
     const [existing] = await db.select().from(siteSettingsTable)
@@ -783,7 +1029,7 @@ router.get("/cms/media-assets", async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to list media assets"); }
 });
 
-router.post("/cms/media-assets", requireCmsWrite, async (req, res) => {
+router.post("/cms/media-assets", requireCmsWrite, validateBody(createMediaAssetSchema), async (req, res) => {
   try {
     const [row] = await db.insert(mediaAssetsTable).values(req.body).returning();
     sendSuccess(res, row, 201);
@@ -814,14 +1060,14 @@ router.get("/cms/downloads", authMiddleware({ required: false }), async (req, re
   } catch (err) { handleRouteError(res, err, "Failed to list downloads"); }
 });
 
-router.post("/cms/downloads", requireCmsWrite, async (req, res) => {
+router.post("/cms/downloads", requireCmsWrite, validateBody(createDownloadSchema), async (req, res) => {
   try {
     const [row] = await db.insert(downloadsTable).values(req.body).returning();
     sendSuccess(res, row, 201);
   } catch (err) { handleRouteError(res, err, "Failed to create download"); }
 });
 
-router.patch("/cms/downloads/:id", requireCmsWrite, async (req, res) => {
+router.patch("/cms/downloads/:id", requireCmsWrite, validateBody(patchDownloadSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(downloadsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(downloadsTable.id, id)).returning();
@@ -839,7 +1085,7 @@ router.get("/cms/redirects", authMiddleware({ required: false }), async (req, re
   } catch (err) { handleRouteError(res, err, "Failed to list redirects"); }
 });
 
-router.post("/cms/redirects", requireCmsWrite, async (req, res) => {
+router.post("/cms/redirects", requireCmsWrite, validateBody(createRedirectSchema), async (req, res) => {
   try {
     const [row] = await db.insert(redirectsTable).values(req.body).returning();
     sendSuccess(res, row, 201);
@@ -912,7 +1158,7 @@ router.post("/cms/posts", authMiddleware(), requireRole("admin", "editor"), vali
   } catch (err) { handleRouteError(res, err, "Failed to create CMS post"); }
 });
 
-router.put("/cms/posts/:id", authMiddleware(), requireRole("admin", "editor"), async (req, res) => {
+router.put("/cms/posts/:id", authMiddleware(), requireRole("admin", "editor"), validateBody(createCmsPostSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const updateData = { ...req.body, updatedAt: new Date() };

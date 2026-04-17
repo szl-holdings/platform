@@ -56,6 +56,53 @@ const approvalDecisionSchema = z.object({
   notes: z.string().max(5000).trim().optional(),
 });
 
+const workflowRunSchema = z.object({
+  signalId: z.number().int().positive().optional().nullable(),
+  input: z.record(z.unknown()).optional(),
+});
+
+const artifactApproveSchema = z.object({
+  notes: z.string().max(5000).trim().optional().nullable(),
+});
+
+const artifactRejectSchema = z.object({
+  reason: z.string().max(5000).trim().optional().nullable(),
+});
+
+const createDecisionSchema = z.object({
+  title: z.string().min(1).max(500).trim(),
+  summary: z.string().max(5000).trim().optional().nullable(),
+  verdict: z.string().max(200).trim().optional().nullable(),
+  confidence: z.number().min(0).max(1).optional().nullable(),
+  approvalStatus: z.enum(["propose_only", "approved_execute", "blocked_by_policy"]).optional(),
+  evidence: z.array(z.unknown()).optional(),
+  agentId: z.string().max(200).trim().optional().nullable(),
+  agentName: z.string().max(200).trim().optional().nullable(),
+  modelUsed: z.string().max(200).trim().optional().nullable(),
+  workflowRunId: z.number().int().positive().optional().nullable(),
+});
+
+const createSkillSchema = z.object({
+  name: z.string().min(1).max(200).trim(),
+  slug: z.string().min(1).max(100).regex(/^[a-z0-9_-]+$/i),
+  version: z.string().max(50).trim().optional(),
+  category: z.string().min(1).max(100).trim(),
+  description: z.string().min(1).max(2000).trim(),
+  approvalClass: z.enum(["auto", "review", "admin_only"]).optional(),
+  isInternal: z.boolean().optional(),
+  dryRunSupported: z.boolean().optional(),
+  inputSchema: z.record(z.unknown()).optional().nullable(),
+  outputSchema: z.record(z.unknown()).optional().nullable(),
+  tags: z.array(z.string()).optional(),
+});
+
+const patchSkillSchema = z.object({
+  isEnabled: z.boolean().optional(),
+  description: z.string().max(2000).trim().optional(),
+  approvalClass: z.enum(["auto", "review", "admin_only"]).optional(),
+  tags: z.array(z.string()).optional(),
+}).refine(d => Object.keys(d).length > 0, { message: "At least one field is required" });
+
 const router: IRouter = Router();
 
 function getUserOrgIds(user?: AuthenticatedUser): number[] {
@@ -283,7 +330,7 @@ router.delete("/alloy/workflows/:id", authMiddleware(), requireRole("super_admin
   }
 });
 
-router.post("/alloy/workflows/:id/run", authMiddleware(), async (req, res) => {
+router.post("/alloy/workflows/:id/run", authMiddleware(), validateBody(workflowRunSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [workflow] = await withDbSpan(req, () => db.select().from(alloyWorkflowsTable).where(eq(alloyWorkflowsTable.id, id)), "alloy_workflows:get");
@@ -514,7 +561,7 @@ router.get("/alloy/artifacts/:id", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/alloy/artifacts/:id/approve", authMiddleware(), requireRole("super_admin", "ops", "compliance"), async (req, res) => {
+router.post("/alloy/artifacts/:id/approve", authMiddleware(), requireRole("super_admin", "ops", "compliance"), validateBody(artifactApproveSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [artifact] = await db.select().from(alloyArtifactsTable).where(eq(alloyArtifactsTable.id, id));
@@ -544,7 +591,7 @@ router.post("/alloy/artifacts/:id/approve", authMiddleware(), requireRole("super
   }
 });
 
-router.post("/alloy/artifacts/:id/reject", authMiddleware(), requireRole("super_admin", "ops", "compliance"), async (req, res) => {
+router.post("/alloy/artifacts/:id/reject", authMiddleware(), requireRole("super_admin", "ops", "compliance"), validateBody(artifactRejectSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [artifact] = await db.select().from(alloyArtifactsTable).where(eq(alloyArtifactsTable.id, id));
@@ -995,10 +1042,9 @@ router.get("/decisions/:id", platformAuth, async (req: Request, res: Response) =
   }
 });
 
-router.post("/decisions", platformAuth, async (req: Request, res: Response) => {
+router.post("/decisions", platformAuth, validateBody(createDecisionSchema), async (req: Request, res: Response) => {
   try {
     const { title, summary, verdict, confidence, approvalStatus, evidence, agentId, agentName, modelUsed, workflowRunId } = req.body;
-    if (!title) return sendBadRequest(res, "title is required");
     const [row] = await db.insert(alloyDecisions).values({
       title, summary, verdict, confidence, approvalStatus: approvalStatus ?? "propose_only",
       evidence: evidence ?? [], agentId, agentName, modelUsed, workflowRunId,
@@ -1079,10 +1125,9 @@ router.get("/skills/:id", platformAuth, async (req: Request, res: Response) => {
   }
 });
 
-router.post("/skills", platformAuth, async (req: Request, res: Response) => {
+router.post("/skills", platformAuth, validateBody(createSkillSchema), async (req: Request, res: Response) => {
   try {
     const { name, slug, version, category, description, approvalClass, isInternal, dryRunSupported, inputSchema, outputSchema, tags } = req.body;
-    if (!name || !slug || !category || !description) return sendBadRequest(res, "name, slug, category, description are required");
     const [row] = await db.insert(alloySkills).values({
       name, slug, version: version ?? "1.0.0", category, description,
       approvalClass: approvalClass ?? "auto", isInternal: isInternal ?? true,
@@ -1095,7 +1140,7 @@ router.post("/skills", platformAuth, async (req: Request, res: Response) => {
   }
 });
 
-router.patch("/skills/:id", platformAuth, async (req: Request, res: Response) => {
+router.patch("/skills/:id", platformAuth, validateBody(patchSkillSchema), async (req: Request, res: Response) => {
   try {
     const id = parseIdParam(req.params.id);
     if (!id) return;
