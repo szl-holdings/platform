@@ -36,7 +36,7 @@ const DOMAIN_PACKS = [
 export default function AboutPage() {
   usePageMeta({
     title: "About — SZL Holdings",
-    description: "SZL Holdings builds governed decision infrastructure — the structural layer between signal detection and action execution, with governance, attribution, and outcome tracking on every decision.",
+    description: "SZL Holdings builds a governed decision operating system — the structural layer between signal detection and action execution, with governance, attribution, and outcome tracking on every decision.",
     canonical: "https://szlholdings.com/about",
   });
 
@@ -53,7 +53,7 @@ export default function AboutPage() {
                 </p>
                 <span style={{ width: "1px", height: "12px", background: "hsla(0,0%,100%,0.15)" }} aria-hidden="true" />
                 <p style={{ fontSize: "0.6875rem", fontFamily: "var(--font-mono)", fontWeight: 500, letterSpacing: "0.08em", textTransform: "uppercase", color: "hsl(192,72%,48%)", margin: 0 }}>
-                  Governed Decision Infrastructure
+                  Governed Decision Operating System
                 </p>
               </div>
               <h1 style={{ fontSize: "clamp(2rem,4.5vw,3.25rem)", fontWeight: 600, letterSpacing: "-0.026em", lineHeight: 1.1, maxWidth: "24ch", marginBottom: "1.5rem", color: "hsl(38,8%,96%)" }}>

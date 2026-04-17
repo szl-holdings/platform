@@ -90,7 +90,7 @@ const HOW_IT_WORKS = [
 export default function PlatformPage() {
   usePageMeta({
     title: "Platform — SZL Holdings",
-    description: "Governed decision infrastructure: Command operator surface, Alloy execution fabric, and six domain packs — Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM. One governance loop. Every high-consequence domain.",
+    description: "Governed decision operating system: Command operator surface, Alloy execution fabric, and six domain packs — Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM. One governance loop. Every high-consequence domain.",
     canonical: "https://szlholdings.com/platform",
     ogImage: "https://szlholdings.com/og/og-platform.jpg",
   });

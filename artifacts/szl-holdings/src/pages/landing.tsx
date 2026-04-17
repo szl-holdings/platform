@@ -284,8 +284,8 @@ function NewsletterSection() {
 
 export default function HomePage() {
   usePageMeta({
-    title: "SZL Holdings — Governed Decision Infrastructure",
-    description: "SZL Holdings builds governed decision infrastructure for high-consequence enterprise environments. Nine-stage decision loop, full AI provenance, and immutable audit trail — across every domain pack.",
+    title: "SZL Holdings — Governed Decision Operating System",
+    description: "SZL Holdings builds a governed decision operating system for high-consequence enterprise environments. Nine-stage decision loop, full AI provenance, and immutable audit trail — across every domain pack.",
     canonical: "https://szlholdings.com",
   });
 
@@ -317,7 +317,7 @@ export default function HomePage() {
                 </span>
                 <span style={{ width: 1, height: 12, background: BORDER }} />
                 <span style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: LYTE }}>
-                  Governed Decision Infrastructure
+                  Governed Decision Operating System
                 </span>
               </div>
 
@@ -340,7 +340,7 @@ export default function HomePage() {
                 maxWidth: "54ch",
                 marginBottom: "0.875rem",
               }}>
-                Governed decision infrastructure for enterprise operations. Not a dashboard. Not an AI copilot. The structural layer between signal detection and action execution — with governance, attribution, and outcome tracking on every decision that matters.
+                Governed decision operating system for enterprise operations. Not a dashboard. Not an AI copilot. The structural layer between signal detection and action execution — with governance, attribution, and outcome tracking on every decision that matters.
               </p>
 
               <p style={{

@@ -13,7 +13,7 @@ const NAV_ITEMS = [
     href: "/platform",
     highlight: false,
     children: [
-      { label: "Platform Overview", href: "/platform", note: "Governed decision infrastructure" },
+      { label: "Platform Overview", href: "/platform", note: "Governed decision operating system" },
       { label: "Lyte", href: "/lyte", note: "Operational nerve center" },
       { label: "Lyte · Decision Theater", href: "/lyte/decision-theater", note: "Governed decision flow" },
       { label: "Lyte · Signal Fusion", href: "/lyte/signal-fusion", note: "Cross-domain signal aggregation" },

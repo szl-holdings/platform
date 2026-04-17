@@ -119,7 +119,7 @@ export default function LeadershipPage() {
             transition={{ duration: 0.5, delay: 0.1 }}
             style={{ fontSize: "clamp(1rem,1.8vw,1.125rem)", lineHeight: 1.75, color: "var(--color-szl-text-secondary)", maxWidth: "38rem", marginBottom: "2.5rem" }}
           >
-            Founder and architect of SZL Holdings. I build governed decision infrastructure at the intersection of observability, model-assisted reasoning, and accountable execution — across maritime, security, real estate, and advisory domains.
+            Founder and architect of SZL Holdings. I build a governed decision operating system at the intersection of observability, model-assisted reasoning, and accountable execution — across maritime, security, real estate, and advisory domains.
           </m.p>
           <m.div
             initial={{ opacity: 0, y: 10 }}

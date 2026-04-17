@@ -52,7 +52,7 @@ const GO_TO_MARKET = [
 export default function CompanyPage() {
   usePageMeta({
     title: "Company — SZL Holdings",
-    description: "SZL Holdings builds governed decision infrastructure — the structural layer between signal detection and action execution. About the company, platform hierarchy, and go-to-market approach.",
+    description: "SZL Holdings builds a governed decision operating system — the structural layer between signal detection and action execution. About the company, platform hierarchy, and go-to-market approach.",
     canonical: "https://szlholdings.com/company",
   });
 
@@ -85,7 +85,7 @@ export default function CompanyPage() {
                 One governed decision loop. Every high-consequence domain.
               </h1>
               <p style={{ fontSize: "clamp(1rem,1.8vw,1.125rem)", lineHeight: 1.72, color: "var(--color-szl-text-secondary)", maxWidth: "48ch" }}>
-                SZL Holdings builds governed decision infrastructure — the structural layer between signal detection and action execution, with governance, attribution, and outcome tracking on every consequential decision.
+                SZL Holdings builds a governed decision operating system — the structural layer between signal detection and action execution, with governance, attribution, and outcome tracking on every consequential decision.
               </p>
             </m.div>
           </div>

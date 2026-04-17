@@ -59,7 +59,7 @@ const SOLUTIONS = [
 export default function SolutionsPage() {
   usePageMeta({
     title: "Solutions — SZL Holdings",
-    description: "Governed operational intelligence for security, maritime, real estate, and professional services. Domain packs extend the SZL Holdings platform with purpose-built intelligence for each domain.",
+    description: "Governed decision operating system for security, maritime, real estate, and professional services. Domain packs extend the SZL Holdings platform with purpose-built intelligence for each domain.",
     ogImage: "https://szlholdings.com/og/og-solutions.jpg",
     canonical: "https://szlholdings.com/solutions",
   });

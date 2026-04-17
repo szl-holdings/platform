@@ -134,7 +134,7 @@ export function SiteFooter() {
               </span>
             </div>
             <p style={{ color: "var(--color-szl-text-secondary)", fontSize: "0.8125rem", lineHeight: 1.65, maxWidth: "16rem", marginBottom: "1rem" }}>
-              Governed decision infrastructure. Signal to action, under governance, with full attribution.
+              Governed decision operating system. Signal to action, under governance, with full attribution.
             </p>
             <p style={{ color: "var(--color-szl-text-faint)", fontSize: "0.6875rem", fontFamily: "var(--font-mono)", letterSpacing: "0.04em", marginBottom: "0.2rem" }}>
               Washington, D.C. · London · Singapore
