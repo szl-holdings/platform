@@ -4,7 +4,7 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 import {
   Clock, DollarSign, FileText, CheckCircle, Plus, Sparkles,
   Loader2, ChevronDown, ChevronUp, Calendar,
-  Download, BarChart3,
+  Download, BarChart3, Mail, AlertCircle, RefreshCw, X,
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import {
@@ -24,7 +24,12 @@ const MUTED: [number, number, number] = [138, 122, 96];
 const RULE: [number, number, number] = [232, 226, 214];
 
 type TimeEntry = BaseTimeEntry & { invoiceId?: string };
-type Invoice = BaseInvoice & { entryIds?: string[]; sentAt?: string };
+type Invoice = BaseInvoice & {
+  entryIds?: string[];
+  sentAt?: string;
+  sentTo?: string;
+  lastSendError?: string;
+};
 
 const RATE_META: Record<TimeEntry["rateType"], { label: string; color: string }> = {
   standard:      { label: "Standard", color: "#0284C7" },
@@ -52,6 +57,31 @@ const ENGAGEMENT_TO_CLIENT: Record<string, string> = {
 };
 
 const STORAGE_KEY = "carlota-jo:time-tracking:v1";
+const CLIENT_EMAIL_KEY = "carlota-jo:client-emails:v1";
+
+const DEFAULT_CLIENT_EMAILS: Record<string, string> = {
+  "Luminary Brands": "billing@luminarybrands.example.com",
+  "Vertex Capital Partners": "ap@vertexcapital.example.com",
+  "Aurelius Private Equity": "finance@aurelius-pe.example.com",
+  "Oasis Wellness": "accounts@oasiswellness.example.com",
+  "Solaris Health Systems": "ap@solarishealth.example.com",
+};
+
+function loadClientEmails(): Record<string, string> {
+  if (typeof window === "undefined") return { ...DEFAULT_CLIENT_EMAILS };
+  try {
+    const raw = window.localStorage.getItem(CLIENT_EMAIL_KEY);
+    if (!raw) return { ...DEFAULT_CLIENT_EMAILS };
+    return { ...DEFAULT_CLIENT_EMAILS, ...JSON.parse(raw) };
+  } catch {
+    return { ...DEFAULT_CLIENT_EMAILS };
+  }
+}
+
+function saveClientEmails(map: Record<string, string>) {
+  if (typeof window === "undefined") return;
+  try { window.localStorage.setItem(CLIENT_EMAIL_KEY, JSON.stringify(map)); } catch { /* ignore */ }
+}
 
 type PersistedState = { entries: TimeEntry[]; invoices: Invoice[]; nextInvoiceSeq: number };
 
@@ -111,6 +141,16 @@ export default function TimeTracking() {
   const [entries, setEntries] = useState<TimeEntry[]>(() => loadState().entries);
   const [invoices, setInvoices] = useState<Invoice[]>(() => loadState().invoices);
   const [nextInvoiceSeq, setNextInvoiceSeq] = useState<number>(() => loadState().nextInvoiceSeq);
+  const [clientEmails, setClientEmails] = useState<Record<string, string>>(() => loadClientEmails());
+  const [emailModal, setEmailModal] = useState<{ invoiceId: string; mode: "send" | "resend" } | null>(null);
+  const [emailRecipient, setEmailRecipient] = useState("");
+  const [ccAdmin, setCcAdmin] = useState(true);
+  const [emailSending, setEmailSending] = useState(false);
+  const [emailError, setEmailError] = useState<string | null>(null);
+
+  useEffect(() => {
+    saveClientEmails(clientEmails);
+  }, [clientEmails]);
 
   useEffect(() => {
     saveState({ entries, invoices, nextInvoiceSeq });
@@ -241,11 +281,108 @@ export default function TimeTracking() {
     setToast(`${newInvoices.length} draft invoice${newInvoices.length > 1 ? "s" : ""} generated · £${total.toLocaleString()}`);
   };
 
-  const sendInvoice = (id: string) => {
-    setInvoices(prev => prev.map(inv => inv.id === id && inv.status === "draft"
-      ? { ...inv, status: "sent", sentAt: new Date().toISOString() }
-      : inv));
-    setToast(`${id} marked as sent.`);
+  const openSendInvoice = (id: string, mode: "send" | "resend" = "send") => {
+    const inv = invoices.find(i => i.id === id);
+    if (!inv) return;
+    const initial = inv.sentTo || clientEmails[inv.client] || "";
+    setEmailRecipient(initial);
+    setCcAdmin(true);
+    setEmailError(null);
+    setEmailModal({ invoiceId: id, mode });
+  };
+
+  const closeEmailModal = () => {
+    if (emailSending) return;
+    setEmailModal(null);
+    setEmailError(null);
+  };
+
+  const submitInvoiceEmail = async () => {
+    if (!emailModal) return;
+    const inv = invoices.find(i => i.id === emailModal.invoiceId);
+    if (!inv) return;
+    const recipient = emailRecipient.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipient)) {
+      setEmailError("Please enter a valid email address.");
+      return;
+    }
+
+    setEmailSending(true);
+    setEmailError(null);
+
+    const items = inv.entryIds && inv.entryIds.length > 0
+      ? entries.filter(e => inv.entryIds!.includes(e.id)).map(e => ({
+          date: e.date,
+          phase: e.phase,
+          deliverable: e.deliverable,
+          hours: e.hours,
+          rate: e.rate,
+          rateType: e.rateType,
+          amount: entryValue(e),
+        }))
+      : undefined;
+
+    try {
+      const csrfMatch = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
+      let csrfToken = csrfMatch ? decodeURIComponent(csrfMatch[1]) : "";
+      if (!csrfToken) {
+        try {
+          const tokenResp = await fetch("/api/csrf-token", { credentials: "include" });
+          const tokenData = await tokenResp.json().catch(() => ({} as { csrfToken?: string; token?: string }));
+          csrfToken = (tokenData?.csrfToken as string) || (tokenData?.token as string) || "";
+          if (!csrfToken) {
+            const refreshed = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
+            csrfToken = refreshed ? decodeURIComponent(refreshed[1]) : "";
+          }
+        } catch {
+          /* fall through — request will return 403 and surface a clear error */
+        }
+      }
+
+      const resp = await fetch("/api/booking/invoices/email", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json", "x-csrf-token": csrfToken },
+        body: JSON.stringify({
+          recipientEmail: recipient,
+          ccAdmin,
+          invoiceId: inv.id,
+          clientName: inv.client,
+          engagement: inv.engagement,
+          issuedDate: inv.issuedDate,
+          dueDate: inv.dueDate,
+          amount: inv.amount,
+          currency: "GBP",
+          items,
+        }),
+      });
+      const data = await resp.json().catch(() => ({} as Record<string, unknown>));
+
+      if (!resp.ok || !data.success) {
+        const msg = (data && (data.message || data.error)) as string | undefined;
+        const errorMsg = msg || `Delivery failed (status ${resp.status}).`;
+        setEmailError(errorMsg);
+        setInvoices(prev => prev.map(x => x.id === inv.id ? { ...x, lastSendError: errorMsg } : x));
+        setEmailSending(false);
+        return;
+      }
+
+      const sentAtIso = (data.sentAt as string) || new Date().toISOString();
+      setInvoices(prev => prev.map(x => x.id === inv.id
+        ? { ...x, status: x.status === "draft" ? "sent" : x.status, sentAt: sentAtIso, sentTo: recipient, lastSendError: undefined }
+        : x));
+      setClientEmails(prev => ({ ...prev, [inv.client]: recipient }));
+      setEmailSending(false);
+      setEmailModal(null);
+      setToast(emailModal.mode === "resend"
+        ? `${inv.id} resent to ${recipient}.`
+        : `${inv.id} emailed to ${recipient}.`);
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : "Network error while sending email.";
+      setEmailError(errorMsg);
+      setInvoices(prev => prev.map(x => x.id === inv.id ? { ...x, lastSendError: errorMsg } : x));
+      setEmailSending(false);
+    }
   };
 
   const exportInvoicePdf = (inv: Invoice) => {
@@ -419,6 +556,91 @@ export default function TimeTracking() {
 
   return (
     <div style={{ minHeight: "100vh", background: "#FAFAF8", paddingTop: 64 }}>
+      {/* Email Invoice Modal */}
+      <AnimatePresence>
+        {emailModal && (() => {
+          const inv = invoices.find(i => i.id === emailModal.invoiceId);
+          if (!inv) return null;
+          return (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={closeEmailModal}
+              style={{ position: "fixed", inset: 0, background: "rgba(10, 15, 26, 0.55)", zIndex: 1100, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+              <motion.div initial={{ opacity: 0, y: 20, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 10, scale: 0.96 }}
+                onClick={(e) => e.stopPropagation()}
+                style={{ background: "#fff", borderRadius: 16, width: "100%", maxWidth: 480, padding: 28, boxShadow: "0 30px 60px rgba(0,0,0,0.25)", border: "1px solid #E8E2D6" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: `${GOLD}15`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <Mail size={18} color={GOLD} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 15, fontWeight: 600, color: "#1A1A14" }}>
+                        {emailModal.mode === "resend" ? "Resend Invoice" : "Email Invoice"}
+                      </div>
+                      <div style={{ fontSize: 12, color: "#A89878" }}>{inv.id} · {inv.client}</div>
+                    </div>
+                  </div>
+                  <button onClick={closeEmailModal} disabled={emailSending}
+                    style={{ background: "none", border: "none", padding: 6, cursor: emailSending ? "not-allowed" : "pointer", color: "#A89878" }}>
+                    <X size={16} />
+                  </button>
+                </div>
+
+                <div style={{ background: "#FAFAF8", border: "1px solid #F0EBE0", borderRadius: 10, padding: "12px 14px", marginBottom: 18, fontSize: 12, color: "#6B5E47" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                    <span>Engagement</span><span style={{ color: "#1A1A14", fontWeight: 500 }}>{inv.engagement}</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                    <span>Due</span><span style={{ color: "#1A1A14", fontWeight: 500 }}>{inv.dueDate}</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                    <span>Amount</span><span style={{ color: "#1A1A14", fontWeight: 700, fontFamily: "'Cormorant Garamond', serif", fontSize: 14 }}>£{inv.amount.toLocaleString()}</span>
+                  </div>
+                  {inv.sentAt && emailModal.mode === "resend" && (
+                    <div style={{ marginTop: 8, paddingTop: 8, borderTop: "1px solid #F0EBE0", fontSize: 11, color: "#A89878" }}>
+                      Last sent {new Date(inv.sentAt).toLocaleString()}{inv.sentTo ? ` to ${inv.sentTo}` : ""}.
+                    </div>
+                  )}
+                </div>
+
+                <label style={{ fontSize: 11, fontWeight: 600, color: "#6B5E47", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                  Recipient Email
+                </label>
+                <input type="email" value={emailRecipient} onChange={(e) => { setEmailRecipient(e.target.value); setEmailError(null); }}
+                  placeholder="client@example.com" autoFocus
+                  disabled={emailSending}
+                  style={{ width: "100%", padding: "10px 12px", border: `1px solid ${emailError ? "#DC2626" : "#E8E2D6"}`, borderRadius: 10, fontSize: 13, fontFamily: "inherit", outline: "none", boxSizing: "border-box", marginBottom: 12 }} />
+
+                <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "#6B5E47", cursor: "pointer", marginBottom: 12 }}>
+                  <input type="checkbox" checked={ccAdmin} onChange={(e) => setCcAdmin(e.target.checked)} disabled={emailSending} />
+                  Send a copy to the billing team
+                </label>
+
+                {emailError && (
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: 8, padding: "10px 12px", background: "#FEF2F2", border: "1px solid #FCA5A5", borderRadius: 8, marginBottom: 12 }}>
+                    <AlertCircle size={14} color="#DC2626" style={{ marginTop: 1, flexShrink: 0 }} />
+                    <div style={{ fontSize: 12, color: "#991B1B", lineHeight: 1.5 }}>{emailError}</div>
+                  </div>
+                )}
+
+                <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+                  <button onClick={closeEmailModal} disabled={emailSending}
+                    style={{ padding: "9px 18px", background: "transparent", border: "1px solid #E8E2D6", borderRadius: 8, color: "#6B5E47", fontSize: 12, cursor: emailSending ? "not-allowed" : "pointer" }}>
+                    Cancel
+                  </button>
+                  <button onClick={submitInvoiceEmail} disabled={emailSending}
+                    style={{ padding: "9px 20px", background: GOLD, border: "none", borderRadius: 8, color: "#fff", fontSize: 12, fontWeight: 600, cursor: emailSending ? "wait" : "pointer", display: "flex", alignItems: "center", gap: 6, opacity: emailSending ? 0.8 : 1 }}>
+                    {emailSending
+                      ? <><Loader2 size={12} style={{ animation: "spin 1s linear infinite" }} /> Sending…</>
+                      : <><Mail size={12} /> {emailModal.mode === "resend" ? "Resend Invoice" : "Send Invoice"}</>}
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          );
+        })()}
+      </AnimatePresence>
+
       {/* Toast */}
       <AnimatePresence>
         {toast && (
@@ -696,9 +918,16 @@ export default function TimeTracking() {
                       <Download size={11} /> PDF
                     </button>
                     {inv.status === "draft" && (
-                      <button onClick={() => sendInvoice(inv.id)}
-                        style={{ padding: "6px 12px", background: GOLD, border: "none", borderRadius: 8, color: "#fff", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>
-                        Send
+                      <button onClick={() => openSendInvoice(inv.id, "send")}
+                        style={{ padding: "6px 12px", background: GOLD, border: "none", borderRadius: 8, color: "#fff", fontSize: 11, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
+                        <Mail size={11} /> Email
+                      </button>
+                    )}
+                    {(inv.status === "sent" || inv.status === "overdue") && (
+                      <button onClick={() => openSendInvoice(inv.id, "resend")}
+                        title={inv.sentTo ? `Last sent to ${inv.sentTo}${inv.sentAt ? ` on ${new Date(inv.sentAt).toLocaleDateString()}` : ""}` : "Resend invoice"}
+                        style={{ padding: "6px 12px", background: "transparent", border: `1px solid ${GOLD}`, borderRadius: 8, color: "#6B5E47", fontSize: 11, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
+                        <RefreshCw size={11} color={GOLD} /> Resend
                       </button>
                     )}
                   </div>

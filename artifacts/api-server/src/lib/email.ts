@@ -551,6 +551,93 @@ export function buildCarlotaContactAckEmail(name: string): string {
   `);
 }
 
+export interface CarlotaInvoiceEmailData {
+  invoiceId: string;
+  clientName: string;
+  engagement: string;
+  issuedDate: string;
+  dueDate: string;
+  amount: number;
+  currency?: string;
+  items?: Array<{
+    date: string;
+    phase: string;
+    deliverable: string;
+    hours: number;
+    rate: number;
+    rateType: "standard" | "premium" | "fixed" | "non-billable";
+    amount: number;
+  }>;
+  fromName?: string;
+  fromEmail?: string;
+  notes?: string;
+}
+
+export function buildCarlotaInvoiceEmail(invoice: CarlotaInvoiceEmailData): string {
+  const currency = invoice.currency || "GBP";
+  const symbol = currency === "GBP" ? "£" : currency === "EUR" ? "€" : "$";
+  const fmt = (n: number) =>
+    `${symbol}${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+  const itemsHtml = invoice.items && invoice.items.length > 0
+    ? `
+      <table style="width:100%;border-collapse:collapse;margin:16px 0;font-family:-apple-system,sans-serif;">
+        <thead>
+          <tr style="border-bottom:1px solid #c9a97a;">
+            <th style="text-align:left;padding:8px 4px;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:#a07850;font-weight:600;">Date</th>
+            <th style="text-align:left;padding:8px 4px;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:#a07850;font-weight:600;">Description</th>
+            <th style="text-align:right;padding:8px 4px;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:#a07850;font-weight:600;">Hours</th>
+            <th style="text-align:right;padding:8px 4px;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:#a07850;font-weight:600;">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${invoice.items.map(it => `
+            <tr style="border-bottom:1px solid #f0ebe0;">
+              <td style="padding:10px 4px;font-size:12px;color:#4a4a4a;vertical-align:top;">${it.date}</td>
+              <td style="padding:10px 4px;font-size:12px;color:#1a1a1a;vertical-align:top;">
+                <div style="font-weight:600;">${it.phase}</div>
+                <div style="color:#6b5e47;font-size:11px;margin-top:2px;">${it.deliverable}</div>
+              </td>
+              <td style="padding:10px 4px;font-size:12px;color:#4a4a4a;text-align:right;vertical-align:top;">${it.hours.toFixed(2)}</td>
+              <td style="padding:10px 4px;font-size:12px;color:#1a1a1a;text-align:right;vertical-align:top;">${fmt(it.amount)}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    `
+    : `<p style="font-size:12px;color:#6b5e47;font-style:italic;">Summary invoice — line item details available on request.</p>`;
+
+  return carlotaBrand(`
+    <h2>Invoice ${invoice.invoiceId}</h2>
+    <p>Dear ${invoice.clientName},</p>
+    <p>Please find attached your invoice for <strong>${invoice.engagement}</strong>. We thank you for your continued partnership.</p>
+    <div class="highlight">
+      <p class="label">Invoice Reference</p>
+      <p style="font-size:14px;color:#1a1a1a;font-weight:600;">${invoice.invoiceId}</p>
+      <p class="label" style="margin-top:10px;">Engagement</p>
+      <p>${invoice.engagement}</p>
+      <p class="label" style="margin-top:10px;">Issued</p>
+      <p>${invoice.issuedDate}</p>
+      <p class="label" style="margin-top:10px;">Due</p>
+      <p>${invoice.dueDate}</p>
+    </div>
+    ${itemsHtml}
+    <table style="width:100%;border-collapse:collapse;margin-top:8px;font-family:-apple-system,sans-serif;">
+      <tr>
+        <td style="padding:8px 4px;font-size:13px;color:#6b5e47;text-align:right;">Subtotal</td>
+        <td style="padding:8px 4px;font-size:13px;color:#1a1a1a;text-align:right;width:120px;">${fmt(invoice.amount)}</td>
+      </tr>
+      <tr style="border-top:1px solid #1a1a1a;">
+        <td style="padding:12px 4px;font-size:14px;color:#1a1a1a;text-align:right;font-weight:600;">Total Due</td>
+        <td style="padding:12px 4px;font-size:16px;color:#1a1a1a;text-align:right;font-weight:700;font-family:Georgia,serif;">${fmt(invoice.amount)}</td>
+      </tr>
+    </table>
+    ${invoice.notes ? `<p style="font-size:12px;color:#6b5e47;font-style:italic;margin-top:16px;">${invoice.notes}</p>` : ""}
+    <p style="margin-top:24px;">Payment terms: <strong>Net 15</strong>. Please remit via bank transfer to the account on file. For any questions regarding this invoice, reply directly to this email or contact <strong>billing@carlotajo.com</strong>.</p>
+    <p>With appreciation,<br /><em>Carlota Jo Advisory</em></p>
+  `);
+}
+
 export function buildCarlotaInquiryNotificationEmail(inquiry: {
   name: string;
   email: string;

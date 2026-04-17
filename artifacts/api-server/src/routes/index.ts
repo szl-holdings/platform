@@ -21,6 +21,7 @@ import * as operations from "./groups/operations";
 import * as dataServices from "./groups/data-services";
 import * as billing from "./groups/billing";
 import * as misc from "./groups/misc";
+import carlotaJoInvoiceEmailRouter from "./carlota-jo-invoice-email";
 import * as decisions from "./groups/decisions";
 import * as domainAtlas from "./groups/domain-atlas";
 import * as graph from "./groups/graph";
@@ -43,6 +44,12 @@ const router: IRouter = Router();
 // applies to every agent-facing route family. Read-only methods skip
 // automatically. Tier is derived server-side from authenticated user.
 router.use(guardianPolicyCheck());
+
+// Carlota Jo invoice email router is mounted early (before group registers)
+// so it matches before unrelated sub-routers — like copilotRouter — that
+// apply tenantScope as router-level middleware. Tracked by follow-up #1367;
+// once that lands, this early mount can be removed.
+router.use(carlotaJoInvoiceEmailRouter);
 
 router.use("/pulse", perUserApiSlidingLimiter, pulseBriefingRouter);
 router.use("/pulse", perUserApiSlidingLimiter, execBriefingsRouter);
