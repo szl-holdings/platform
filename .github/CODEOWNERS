@@ -30,6 +30,8 @@
 
 # ── API Server ────────────────────────────────────────────────────────────────
 /artifacts/api-server/  @stephenlutar2-hash
+/artifacts/api-server/src/routes/  @stephenlutar2-hash
+/artifacts/api-server/src/routes/admin/  @stephenlutar2-hash
 
 # ── Platform command surfaces ──────────────────────────────────────────────────
 /artifacts/szl-holdings/  @stephenlutar2-hash
@@ -61,8 +63,15 @@
 README.md  @stephenlutar2-hash
 CHANGELOG.md  @stephenlutar2-hash
 
+# ── Database schema & migrations ─────────────────────────────────────────────
+**/migrations/  @stephenlutar2-hash
+**/schema.ts  @stephenlutar2-hash
+
 # ── Security-sensitive files ──────────────────────────────────────────────────
 SECURITY.md  @stephenlutar2-hash
+SECURITY-CHECKLIST.md  @stephenlutar2-hash
+SECRETS_SETUP.md  @stephenlutar2-hash
+KNOWN-GAPS.md  @stephenlutar2-hash
 CODE_OF_CONDUCT.md  @stephenlutar2-hash
 LICENSE.md  @stephenlutar2-hash
 .env.example  @stephenlutar2-hash
