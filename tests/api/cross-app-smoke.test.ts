@@ -166,6 +166,8 @@ afterAll(async () => {
 // ── Domain: Vessels ──────────────────────────────────────────────────────────
 
 describe("Domain: Vessels", () => {
+  const cleanupFleetIds: number[] = [];
+
   it("GET /vessels/fleets returns 200 with array", async () => {
     const app = buildAuthApp();
     const router = (await import("../../artifacts/api-server/src/routes/vessels")).default;
@@ -193,20 +195,7 @@ describe("Domain: Vessels", () => {
       .send({ name: "Smoke Test Fleet", description: "Smoke test fleet — safe to delete" });
     expect(res.status).toBe(201);
     expect(res.body).toHaveProperty("id");
-
-    // Cleanup: delete the created record
-    if (res.body?.id) {
-      try {
-        const { db } = await import("@szl-holdings/db");
-        const { fleetsTable } = await import("@szl-holdings/db/schema");
-        const { eq } = await import("drizzle-orm");
-        await (db as { delete: (t: unknown) => { where: (c: unknown) => Promise<unknown> } })
-          .delete(fleetsTable)
-          .where(eq(fleetsTable.id, res.body.id));
-      } catch {
-        // best-effort cleanup
-      }
-    }
+    if (typeof res.body?.id === "number") cleanupFleetIds.push(res.body.id as number);
   });
 
   it("GET /vessels/fleets/:id returns a valid HTTP response (200 or 404, not 500)", async () => {
@@ -234,6 +223,17 @@ describe("Domain: Vessels", () => {
     const res = await request(app).get("/vessels/alerts/all");
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
+  });
+
+  afterAll(async () => {
+    if (cleanupFleetIds.length > 0) {
+      const app = buildAuthApp(["ops", "exec", "admin"]);
+      const router = (await import("../../artifacts/api-server/src/routes/vessels")).default;
+      app.use(router);
+      for (const id of cleanupFleetIds) {
+        await request(app).delete(`/vessels/fleets/${id}`);
+      }
+    }
   });
 });
 
@@ -427,6 +427,8 @@ describe("Domain: Lyte", () => {
 // ── Domain: Carlota Jo ───────────────────────────────────────────────────────
 
 describe("Domain: Carlota Jo", () => {
+  const cleanupInquiryIds: number[] = [];
+
   it("GET /booking/inquiries returns 200 with pagination envelope for authenticated user", async () => {
     const app = buildAuthApp();
     const router = (await import("../../artifacts/api-server/src/routes/carlota-jo")).default;
@@ -450,21 +452,8 @@ describe("Domain: Carlota Jo", () => {
         message: "Integration test inquiry for smoke testing",
       });
     expect([200, 201]).toContain(res.status);
-
-    // Cleanup created inquiry record
-    const inquiryId = res.body?.inquiryId ?? res.body?.id;
-    if (inquiryId) {
-      try {
-        const { db } = await import("@szl-holdings/db");
-        const { carlotaInquiriesTable } = await import("@szl-holdings/db/schema");
-        const { eq } = await import("drizzle-orm");
-        await (db as { delete: (t: unknown) => { where: (c: unknown) => Promise<unknown> } })
-          .delete(carlotaInquiriesTable)
-          .where(eq(carlotaInquiriesTable.id, inquiryId));
-      } catch {
-        // best-effort cleanup
-      }
-    }
+    const inquiryId: number | undefined = res.body?.inquiryId ?? res.body?.id;
+    if (typeof inquiryId === "number") cleanupInquiryIds.push(inquiryId);
   });
 
   it("POST /booking/inquiries returns 400 when required fields are missing", async () => {
@@ -487,6 +476,15 @@ describe("Domain: Carlota Jo", () => {
     expect(res.body).toHaveProperty("data");
     expect(res.body).toHaveProperty("meta");
     expect(Array.isArray(res.body.data)).toBe(true);
+  });
+
+  afterAll(async () => {
+    if (cleanupInquiryIds.length > 0) {
+      const { pool } = await import("@szl-holdings/db");
+      for (const id of cleanupInquiryIds) {
+        await pool.query("DELETE FROM carlota_inquiries WHERE id = $1", [id]);
+      }
+    }
   });
 });
 
