@@ -181,7 +181,10 @@ Confirmed Action + Full Audit Trail
 │   ├── api-zod/            # Zod schema validation
 │   ├── api-spec/           # OpenAPI 3.1 specification
 │   ├── prism-bus/          # Cross-domain event bus
-│   ├── forge-runtime/      # Durable job queue / agent execution
+│   ├── forge-runtime/      # Durable job queue / agent execution (legacy lib)
+│   #  Forge (April 2026): governed agent factory & promotion pipeline lives in
+│   #    artifacts/api-server/src/services/forge/ + lib/db/src/schema/forge.ts
+│   #    UI: artifacts/szl-holdings/src/pages/forge/ — see service README.md
 │   ├── intelligence-feeds/ # AIS, STIX/TAXII, legal data adapters
 │   ├── proof-chain/        # Cryptographic audit trail
 │   ├── worldline/          # Timeline and event sequencing

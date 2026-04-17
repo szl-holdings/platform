@@ -48,4 +48,7 @@ pnpm --filter @workspace/scripts run seed:agent-os || echo "[demo-seed] Agent OS
 echo "[demo-seed] Step 12: Distribution OS — editorial pillars, articles, newsletters, campaigns & leads"
 pnpm --filter @workspace/scripts run seed:distribution-os || echo "[demo-seed] Distribution OS seed skipped (already seeded)"
 
+echo "[demo-seed] Step 13: Forge — agents, models, prompts, tools, drift, promotions, executions"
+pnpm --filter @workspace/scripts run seed:forge || echo "[demo-seed] Forge seed skipped (already seeded)"
+
 echo "[demo-seed] All demo seed packs complete."

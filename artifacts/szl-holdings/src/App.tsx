@@ -162,6 +162,12 @@ const CarlotaJoPublicPage = lazy(() => import("@/pages/carlota-jo-public"));
 
 const LeadershipPage = lazy(() => import("@/pages/leadership"));
 const ForgeHomePage = lazy(() => import("@/pages/forge-home"));
+const ForgeOverviewPage = lazy(() => import("@/pages/forge/overview"));
+const ForgeRegistryPage = lazy(() => import("@/pages/forge/registry"));
+const ForgeAgentDetailPage = lazy(() => import("@/pages/forge/agent-detail"));
+const ForgeDriftPage = lazy(() => import("@/pages/forge/drift"));
+const ForgePromotionsPage = lazy(() => import("@/pages/forge/promotions"));
+const ForgeTelemetryPage = lazy(() => import("@/pages/forge/telemetry"));
 
 const NuroForgeDashboard = lazy(() => import("@/pages/nuro-forge/index"));
 const NuroForgeArena = lazy(() => import("@/pages/nuro-forge/arena"));
@@ -421,6 +427,24 @@ function App() {
             {/* ── Forge — Authenticated admin portal ── */}
             <Route path="/forge">
               <RequireAuth><Suspense fallback={<PageLoader />}><ForgeHomePage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/forge/overview">
+              <RequireAuth><Suspense fallback={<PageLoader />}><ForgeOverviewPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/forge/registry">
+              <RequireAuth><Suspense fallback={<PageLoader />}><ForgeRegistryPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/forge/agents/:id">
+              <RequireAuth><Suspense fallback={<PageLoader />}><ForgeAgentDetailPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/forge/drift">
+              <RequireAuth><Suspense fallback={<PageLoader />}><ForgeDriftPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/forge/promotions">
+              <RequireAuth><Suspense fallback={<PageLoader />}><ForgePromotionsPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/forge/telemetry">
+              <RequireAuth><Suspense fallback={<PageLoader />}><ForgeTelemetryPage /></Suspense></RequireAuth>
             </Route>
             <Route path="/forge/:rest*">
               <RequireAuth><Suspense fallback={<PageLoader />}><ForgeHomePage /></Suspense></RequireAuth>

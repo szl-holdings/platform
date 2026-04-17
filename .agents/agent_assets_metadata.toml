@@ -178,7 +178,7 @@ title = "SZL Medium Launch Plan (100 pages)"
 id = "uoV-wgFnavinxmSKQI3iJ"
 uri = "file://deliverables/SZL-Newsletter-Screenshots.zip"
 type = "unspecified"
-title = "SZL Newsletter Screenshots — mockups + references"
+title = "SZL Newsletter Screenshots (for X post)"
 
 [[outputs]]
 id = "MnKJY6i-AXmOeXBWj8SoH"
@@ -203,3 +203,21 @@ id = "-aCqoY2873He6M2Wt5Pa8"
 uri = "file://output/szl-x-launch-kit.zip"
 type = "unspecified"
 title = "SZL Holdings — X Launch Kit"
+
+[[outputs]]
+id = "cTEPxs8hpFrA8dWxjIxoF"
+uri = "file://01-thursday-intro.zip"
+type = "unspecified"
+title = "Thursday Intro Post Bundle"
+
+[[outputs]]
+id = "-q8qzdK37DPsbuVIElMm4"
+uri = "file://02-sunday-deep-dive.zip"
+type = "unspecified"
+title = "Sunday Deep Dive Bundle"
+
+[[outputs]]
+id = "1DWq0fa3XuQoD-LNM202T"
+uri = "file://03-monday-operator-lens.zip"
+type = "unspecified"
+title = "Monday Operator Lens Bundle"

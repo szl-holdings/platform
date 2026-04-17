@@ -23,6 +23,7 @@ import digitalTwinsRouter from "../digital-twins";
 import fusionRouter from "../fusion";
 import knowledgeGraphRouter from "../knowledge-graph";
 import aiSafetyRouter from "../ai-safety";
+import forgeRouter from "../forge";
 import ragKnowledgeRouter from "../rag-knowledge";
 import streamingIngestionRouter from "../streaming-ingestion";
 import connectorHubRouter from "../connector-hub";
@@ -98,6 +99,7 @@ export function register(router: IRouter): void {
 
   router.use("/ai-safety", _readLimiter);
   router.use(aiSafetyRouter);
+  router.use(forgeRouter);
 
   router.use("/rag", _readLimiter);
   router.use(ragKnowledgeRouter);

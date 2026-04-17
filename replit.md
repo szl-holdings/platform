@@ -154,6 +154,27 @@ In production mode: seed data paths throw, connector fallbacks are blocked, bill
 -   `docs/operations/runtime-modes.md` — Runtime mode model (authoritative)
 -   `docs/operations/surface-area-decisions.md` — Archive/quarantine/delete audit log
 
+## Forge — AI Runtime, Agent Factory & Promotion Pipeline
+
+Governed lifecycle layer for every AI agent on the platform. Owns the registry,
+runtime capture, drift evaluator, promotion validator (8 blocker codes),
+rollback orchestrator, and audit trail.
+
+- **Schema** (20 `forge_*` tables): `lib/db/src/schema/forge.ts`
+- **Service**: `artifacts/api-server/src/services/forge/index.ts` (+ README)
+- **REST**: `/forge/*` mounted via `routes/groups/ai.ts`
+- **UI**: `artifacts/szl-holdings/src/pages/forge/` (Overview, Registry,
+  Agent Detail, Drift, Promotions, Telemetry)
+- **Seed**: `pnpm --filter @workspace/scripts run seed:forge` — 5 agents,
+  10 versions, 4 models, 4 tools, 4 prompts, 8 promotions, 4 drift events,
+  30 runs. Integrated as step 13 of `seed-demo-canonical.sh`.
+- **Smoke**: `pnpm --filter @workspace/scripts run smoke:forge` — 10-step
+  end-to-end governance check.
+
+> **DB note:** the 20 Forge tables were applied with `psql -f` (CREATE TABLE
+> IF NOT EXISTS) because `drizzle-kit push` hangs on the 575-table
+> introspection. `lib/db/src/schema/forge.ts` remains the source of truth.
+
 ## Replay, Eval & Trust Infrastructure
 
 Three interlinked capabilities for measuring, replaying, and improving agent behavior:

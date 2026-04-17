@@ -330,6 +330,25 @@ The following directories exist under `artifacts/` but are not yet deployed arti
 
 ---
 
+## Forge — AI Runtime, Agent Factory & Promotion Pipeline (April 2026)
+
+Forge is the governed lifecycle layer for every AI agent on the platform. It owns
+the registry, runtime capture, drift evaluator, promotion validator (8 blocker
+codes) and rollback orchestrator. Surfaced inside the SZL Holdings dashboard
+under `/forge/*`.
+
+| Item | Location |
+| --- | --- |
+| Schema (20 tables, `forge_*`) | `lib/db/src/schema/forge.ts` |
+| Service layer | `artifacts/api-server/src/services/forge/index.ts` |
+| REST API (mounted under `/forge/*`) | `artifacts/api-server/src/routes/forge.ts` |
+| UI pages (Overview · Registry · Agent Detail · Drift · Promotions · Telemetry) | `artifacts/szl-holdings/src/pages/forge/` |
+| Seed (5 agents · 10 versions · 4 models · 4 tools · 4 prompts · 8 promotions · 4 drift events · 30 runs) | `pnpm --filter @workspace/scripts run seed:forge` |
+| End-to-end smoke (10 governance checks) | `pnpm --filter @workspace/scripts run smoke:forge` |
+| Detailed README | `artifacts/api-server/src/services/forge/README.md` |
+
+---
+
 ## Decision Fabric surfaces (April 2026)
 
 The Decision Fabric exposes a single, governed API namespace

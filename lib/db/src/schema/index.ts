@@ -114,3 +114,4 @@ export * from "./changelog";
 export * from "./support_tickets";
 export * from "./data_retention";
 export * from "./atlas_spatial_runtime";
+export * from "./forge";

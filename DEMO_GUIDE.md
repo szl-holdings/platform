@@ -354,6 +354,27 @@ fabric surfaces have something to render.
    *Talking point:* "Patterns that prove themselves become repeatable
    workflows automatically."
 
+### Forge — agent factory & governed promotion pipeline (`/forge`)
+
+Open the SZL Holdings dashboard and visit `/forge/overview`. From there you can
+walk through the canonical 9-step loop:
+
+1. **Registry** (`/forge/registry`) — five seeded agents, each with versioned
+   bindings to an approved model + prompt + tools + policy pack.
+2. **Agent detail** (`/forge/registry/:agentId`) — inspect versions, recent
+   runs, drift events, and rollback history.
+3. **Promotions** (`/forge/promotions`) — eight seeded promotions show the
+   blocked / validated / requested / approved states with the exact blocker
+   codes the validator emits.
+4. **Drift** (`/forge/drift`) — four seeded drift events ranging from low to
+   critical, with one promotion already blocked by drift.
+5. **Telemetry** (`/forge/telemetry`) — last 30 runs aggregated by agent and
+   environment with latency, tokens, tool calls, and policy outcomes.
+
+Run `pnpm --filter @workspace/scripts run smoke:forge` for an end-to-end check
+that exercises drift evaluation, every promotion blocker code, policy
+enforcement, runtime capture, rollback, and audit logging.
+
 ### Audience cuts
 
 - **Investors:** steps 1, 3, 5 — emphasize the moat (decision memory +
