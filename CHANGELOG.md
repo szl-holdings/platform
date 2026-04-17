@@ -6,6 +6,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).  
 See `/docs/releases/versioning-policy.md` for the full versioning policy.
 
+> **This file is updated automatically** by the release workflow on every tagged release.  
+> Entries are generated from [conventional commits](https://www.conventionalcommits.org/) and categorised into Breaking Changes, Features, Bug Fixes, and Other Changes with links to individual commits.  
+> Do not edit versioned entries manually — edit the `## [Unreleased]` section only.
+
 ---
 
 ## [Unreleased]

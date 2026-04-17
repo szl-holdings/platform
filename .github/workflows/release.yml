@@ -97,46 +97,138 @@ jobs:
       - name: Generate changelog
         if: steps.check_release.outputs.skip != 'true'
         id: changelog
+        env:
+          LATEST_TAG: ${{ steps.version.outputs.latest_tag }}
+          NEXT_VERSION: ${{ steps.version.outputs.next_version }}
+          REPO: ${{ github.repository }}
         run: |
-          LATEST_TAG="${{ steps.version.outputs.latest_tag }}"
-          NEXT_VERSION="${{ steps.version.outputs.next_version }}"
+          python3 - <<'PYEOF'
+          import subprocess, re, os
+          from datetime import date
 
-          {
-            echo "## $NEXT_VERSION — $(date +'%Y-%m-%d')"
-            echo ""
-          } > RELEASE_NOTES.md
+          latest_tag  = os.environ["LATEST_TAG"]
+          next_version = os.environ["NEXT_VERSION"]
+          repo        = os.environ["REPO"]
+          today       = date.today().strftime("%Y-%m-%d")
 
-          if [ "$LATEST_TAG" = "v0.0.0" ]; then
-            COMMITS=$(git log --pretty=format:"- %s (%h)" --max-count=50)
-          else
-            COMMITS=$(git log "$LATEST_TAG"..HEAD --pretty=format:"- %s (%h)" 2>/dev/null)
+          # Collect commits since last tag.
+          # Fields: subject \x1f short-hash \x1f full-hash \x1f body, separated by \x1e per commit.
+          # The body is needed to detect "BREAKING CHANGE:" footers per the conventional-commits spec.
+          fmt = "%s%x1f%h%x1f%H%x1f%b%x1e"
+          if latest_tag == "v0.0.0":
+              result = subprocess.run(
+                  ["git", "log", f"--pretty=format:{fmt}", "--max-count=50"],
+                  capture_output=True, text=True
+              )
+          else:
+              result = subprocess.run(
+                  ["git", "log", f"{latest_tag}..HEAD", f"--pretty=format:{fmt}"],
+                  capture_output=True, text=True
+              )
+
+          commits = []
+          for record in result.stdout.split("\x1e"):
+              record = record.strip()
+              if not record:
+                  continue
+              parts = record.split("\x1f", 3)
+              if len(parts) >= 3:
+                  subject = parts[0].strip()
+                  short_h = parts[1].strip()
+                  full_h  = parts[2].strip()
+                  body    = parts[3].strip() if len(parts) > 3 else ""
+                  if subject and full_h:
+                      commits.append((subject, short_h, full_h, body))
+
+          # Categorise by conventional-commit prefix (https://www.conventionalcommits.org).
+          # Breaking changes: any type with "!" OR "BREAKING CHANGE" / "BREAKING-CHANGE" in subject or body/footer.
+          breaking, features, fixes, others = [], [], [], []
+          for subject, short_h, full_h, body in commits:
+              link  = f"[{short_h}](https://github.com/{repo}/commit/{full_h})"
+              entry = f"- {subject} ({link})"
+              breaking_subject = re.match(r"^[a-z]+(\(.*\))?!:", subject, re.I)
+              breaking_body    = bool(re.search(r"BREAKING[- ]CHANGE", body or "", re.I))
+              if breaking_subject or breaking_body or "BREAKING CHANGE" in subject:
+                  breaking.append(entry)
+              elif re.match(r"^(feat|feature)(\(.*\))?:", subject, re.I):
+                  features.append(entry)
+              elif re.match(r"^fix(\(.*\))?:", subject, re.I):
+                  fixes.append(entry)
+              else:
+                  others.append(entry)
+
+          # Build RELEASE_NOTES.md (used by GitHub Release body)
+          version_bare = next_version.lstrip("v")
+          lines = [f"## [{version_bare}] \u2014 {today}", ""]
+
+          if not commits:
+              lines.append("- Maintenance release")
+          else:
+              for label, items in [
+                  ("Breaking Changes", breaking),
+                  ("Features",         features),
+                  ("Bug Fixes",        fixes),
+                  ("Other Changes",    others),
+              ]:
+                  if items:
+                      lines += [f"### {label}", ""] + items + [""]
+
+          notes = "\n".join(lines)
+          with open("RELEASE_NOTES.md", "w") as f:
+              f.write(notes)
+
+          print("Generated release notes:")
+          print(notes)
+          PYEOF
+
+      - name: Update CHANGELOG.md
+        if: steps.check_release.outputs.skip != 'true'
+        env:
+          NEXT_VERSION: ${{ steps.version.outputs.next_version }}
+        run: |
+          python3 - <<'PYEOF'
+          import re, os, sys
+
+          next_version = os.environ["NEXT_VERSION"].lstrip("v")
+
+          with open("RELEASE_NOTES.md") as f:
+              notes = f.read().strip()
+
+          with open("CHANGELOG.md") as f:
+              content = f.read()
+
+          # Guard against duplicate insertion on workflow reruns (e.g. manual re-trigger).
+          if f"## [{next_version}]" in content:
+              print(f"CHANGELOG.md already contains an entry for [{next_version}] — skipping insertion")
+              sys.exit(0)
+
+          # Insert the new release section just before the first versioned ## [x.y.z] entry
+          # so it appears below ## [Unreleased] but above the previous release.
+          match = re.search(r'\n## \[\d', content)
+          if match:
+              pos = match.start()
+              new_content = content[:pos] + "\n\n" + notes + "\n\n---\n" + content[pos + 1:]
+          else:
+              # Fallback: append before the footer block
+              new_content = content.rstrip() + "\n\n" + notes + "\n"
+
+          with open("CHANGELOG.md", "w") as f:
+              f.write(new_content)
+
+          print("CHANGELOG.md updated successfully")
+          PYEOF
+
+      - name: Commit CHANGELOG.md
+        if: steps.check_release.outputs.skip != 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md
+          # Only commit when there are actual changes
+          if ! git diff --cached --quiet; then
+            git commit -m "chore(release): update CHANGELOG.md for ${{ steps.version.outputs.next_version }} [skip ci]"
+            git push origin HEAD:${{ github.ref_name }}
           fi
-
-          if [ -z "$COMMITS" ]; then
-            echo "- Maintenance release" >> RELEASE_NOTES.md
-          else
-            FEATURES=$(echo "$COMMITS" | grep -iE "^- (feat|feature)" || true)
-            FIXES=$(echo "$COMMITS" | grep -iE "^- fix" || true)
-            CHORES=$(echo "$COMMITS" | grep -ivE "^- (feat|feature|fix)" || true)
-
-            if [ -n "$FEATURES" ]; then
-              echo "### Features" >> RELEASE_NOTES.md
-              echo "$FEATURES" >> RELEASE_NOTES.md
-              echo "" >> RELEASE_NOTES.md
-            fi
-            if [ -n "$FIXES" ]; then
-              echo "### Bug Fixes" >> RELEASE_NOTES.md
-              echo "$FIXES" >> RELEASE_NOTES.md
-              echo "" >> RELEASE_NOTES.md
-            fi
-            if [ -n "$CHORES" ]; then
-              echo "### Other Changes" >> RELEASE_NOTES.md
-              echo "$CHORES" >> RELEASE_NOTES.md
-            fi
-          fi
-
-          echo "Generated release notes:"
-          cat RELEASE_NOTES.md
 
       - name: Create tag
         if: steps.check_release.outputs.skip != 'true'
@@ -169,4 +261,5 @@ jobs:
             echo "- **Bump type:** ${{ steps.version.outputs.bump_type }}" >> "$GITHUB_STEP_SUMMARY"
             echo "- **Previous tag:** ${{ steps.version.outputs.latest_tag }}" >> "$GITHUB_STEP_SUMMARY"
             echo "- **Trigger:** ${{ github.event_name }}" >> "$GITHUB_STEP_SUMMARY"
+            echo "- **CHANGELOG.md:** Updated automatically" >> "$GITHUB_STEP_SUMMARY"
           fi
