@@ -1,6 +1,6 @@
 import * as React from "react";
 import { X, ChevronRight, ChevronLeft, CheckCircle2, Circle, Sparkles, Trophy, RotateCcw } from "lucide-react";
-import { cn } from "./utils";
+import { cn } from "../utils";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
