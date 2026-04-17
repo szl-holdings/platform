@@ -98,6 +98,12 @@ export type ContradictionPair = z.infer<typeof ContradictionPairSchema>;
 /** Optional context fed into the verifier alongside the output. */
 export const VerifierContextSchema = z.object({
   domain: z.string().optional(),
+  /**
+   * Owning organization id for tenant scoping. When set, the verifier
+   * persists this id so list/get/latestForTarget/delete can enforce
+   * org-level access control.
+   */
+  orgId: z.number().int().nullable().optional(),
   /** Minimum citations required per claim. */
   evidenceMinPerClaim: z.number().int().min(0).default(1),
   /** Maximum claims allowed without any citation. */
@@ -145,6 +151,8 @@ export const VerifierDecisionSchema = z.object({
   passCount: z.number().int().nonnegative(),
   failCount: z.number().int().nonnegative(),
   evaluatedAt: z.number(),
+  /** Owning organization id for tenant scoping (null = global / no org). */
+  orgId: z.number().int().nullable().optional(),
   metadata: z.record(z.unknown()).default({}),
 });
 export type VerifierDecision = z.infer<typeof VerifierDecisionSchema>;

@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { Router, type IRouter } from "express";
+import { Router, type IRouter, type Request } from "express";
 import {
   verify,
   defaultVerifierStore,
@@ -21,6 +21,44 @@ const router: IRouter = Router();
 
 const ALLOWED_TARGET_TYPES = new Set(["plan", "plan_step", "skill_run", "action", "output"]);
 const ALLOWED_OUTCOMES = new Set(["pass", "fail", "warn", "blocked"]);
+
+const PRIVILEGED_ROLES = new Set(["admin", "super_admin"]);
+
+/**
+ * Resolve the org-scope for a request.
+ *
+ * - Internal agents bypass scoping (orgIds === undefined → cross-org).
+ * - Privileged roles (admin / super_admin) may opt into cross-org reads
+ *   via `?allOrgs=true`. By default they remain scoped to their own
+ *   memberships, matching every other authenticated user.
+ * - Returns `[]` (empty allow-list, matches nothing) when the caller has
+ *   no org memberships and is not privileged — so we never accidentally
+ *   leak rows that were saved with `orgId = null`.
+ */
+function resolveOrgScope(req: Request): { orgIds: number[] | undefined } {
+  if (req.isInternalAgent) return { orgIds: undefined };
+  const user = req.user;
+  if (!user) return { orgIds: [] };
+
+  const isPrivileged = user.roles.some((r) => PRIVILEGED_ROLES.has(r));
+  const wantsAllOrgs = String(req.query["allOrgs"] ?? "") === "true";
+  if (isPrivileged && wantsAllOrgs) return { orgIds: undefined };
+
+  return { orgIds: user.orgs.map((o) => o.orgId) };
+}
+
+/** Pick the org id to stamp on a newly created decision. */
+function resolveSaveOrgId(req: Request, requested: number | null | undefined): number | null {
+  // Internal agents may persist with the org id they explicitly set.
+  if (req.isInternalAgent) return requested ?? null;
+  const user = req.user;
+  if (!user) return null;
+  const memberOrgIds = new Set(user.orgs.map((o) => o.orgId));
+  // Honor a caller-supplied org id only if the caller is a member.
+  if (typeof requested === "number" && memberOrgIds.has(requested)) return requested;
+  // Otherwise default to the caller's first membership (deterministic).
+  return user.orgs[0]?.orgId ?? null;
+}
 
 router.post("/verifier", authMiddleware(), async (req, res) => {
   try {
@@ -54,7 +92,14 @@ router.post("/verifier", authMiddleware(), async (req, res) => {
     } else {
       target = { targetType: "output" as const, targetId: randomUUID() };
     }
-    const decision = verify(outputParse.data, target, ctxParse.data);
+
+    // Stamp the owning org so persisted records can be tenant-scoped on
+    // read. Honors caller-supplied context.orgId only when the caller is
+    // a member of that org; otherwise falls back to their first org.
+    const stampedOrgId = resolveSaveOrgId(req, ctxParse.data.orgId ?? null);
+    const scopedContext = { ...ctxParse.data, orgId: stampedOrgId };
+
+    const decision = verify(outputParse.data, target, scopedContext);
     if (body.persist !== false) {
       await defaultVerifierStore.save(decision);
     }
@@ -100,6 +145,9 @@ router.get("/verifier", authMiddleware(), async (req, res) => {
     query.limit = limit;
     query.offset = offset;
 
+    const { orgIds } = resolveOrgScope(req);
+    if (orgIds !== undefined) query.orgIds = orgIds;
+
     const { items, total } = await defaultVerifierStore.list(query);
     sendSuccess(res, { items, total, limit, offset });
   } catch (err) {
@@ -115,11 +163,14 @@ router.get("/verifier/target/:targetType/:targetId", authMiddleware(), async (re
       sendBadRequest(res, `Invalid targetType: ${targetType}`);
       return;
     }
+    const { orgIds } = resolveOrgScope(req);
     const latest = await defaultVerifierStore.latestForTarget(
       targetType as "plan" | "plan_step" | "skill_run" | "action" | "output",
       targetId,
+      { orgIds },
     );
     if (!latest) {
+      // Return 404 (not 403) on cross-org access to avoid leaking existence.
       sendNotFound(res, "No verifier result for target");
       return;
     }
@@ -131,8 +182,10 @@ router.get("/verifier/target/:targetType/:targetId", authMiddleware(), async (re
 
 router.get("/verifier/:id", authMiddleware(), async (req, res) => {
   try {
-    const decision = await defaultVerifierStore.get(String(req.params.id));
+    const { orgIds } = resolveOrgScope(req);
+    const decision = await defaultVerifierStore.get(String(req.params.id), { orgIds });
     if (!decision) {
+      // 404 (not 403) on cross-org miss — do not leak record existence.
       sendNotFound(res, "Verifier result not found");
       return;
     }
@@ -149,7 +202,12 @@ router.delete(
   async (req, res) => {
     try {
       const id = String(req.params.id);
-      await defaultVerifierStore.delete(id);
+      const { orgIds } = resolveOrgScope(req);
+      const deleted = await defaultVerifierStore.delete(id, { orgIds });
+      if (!deleted) {
+        sendNotFound(res, "Verifier result not found");
+        return;
+      }
       sendSuccess(res, { deleted: id });
     } catch (err) {
       handleRouteError(res, err, "Failed to delete verifier result");

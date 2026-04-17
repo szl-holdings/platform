@@ -98,6 +98,7 @@ export function verify(
     passCount: aggregated.totals.passCount,
     failCount: aggregated.totals.failCount,
     evaluatedAt: Date.now(),
+    orgId: parsedContext.orgId ?? null,
     metadata: parsedContext.metadata,
   };
 }

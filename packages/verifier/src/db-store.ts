@@ -9,7 +9,7 @@ import type {
   VerifierTarget,
 } from "./types.js";
 import { VerifierResultNotFoundError } from "./types.js";
-import type { VerifierStore, VerifierStoreQuery } from "./store.js";
+import type { VerifierAccessScope, VerifierStore, VerifierStoreQuery } from "./store.js";
 
 type Drizzle = NodePgDatabase<Record<string, unknown>>;
 
@@ -94,6 +94,12 @@ function rowToDecision(row: VerifierRow): VerifierDecision {
   const failCount = typeof planner["failCount"] === "number" ? (planner["failCount"] as number) : 0;
   const evaluatedAt =
     typeof planner["evaluatedAt"] === "number" ? (planner["evaluatedAt"] as number) : row.createdAt.getTime();
+  const orgId =
+    typeof planner["orgId"] === "number"
+      ? (planner["orgId"] as number)
+      : planner["orgId"] === null
+        ? null
+        : null;
 
   const checks = Array.isArray(row.checks)
     ? (row.checks as unknown[]).map((c): CheckResult => {
@@ -129,6 +135,7 @@ function rowToDecision(row: VerifierRow): VerifierDecision {
     passCount: row.passCount,
     failCount,
     evaluatedAt,
+    orgId,
     metadata: userMeta,
   };
 }
@@ -140,6 +147,7 @@ function decisionToRow(d: VerifierDecision): Record<string, unknown> {
       action: d.action,
       failCount: d.failCount,
       evaluatedAt: d.evaluatedAt,
+      orgId: d.orgId ?? null,
     },
   };
   return {
@@ -169,6 +177,26 @@ function decisionToRow(d: VerifierDecision): Record<string, unknown> {
   };
 }
 
+/**
+ * SQL fragment that filters rows by the orgId persisted under
+ * `metadata.__verifier.orgId`. Returns undefined when no scoping is
+ * requested (cross-org callers).
+ */
+function orgScopeSql(
+  table: VerifierResultsTableLike,
+  orgIds: number[] | undefined,
+): SQL | undefined {
+  if (orgIds === undefined) return undefined;
+  if (orgIds.length === 0) {
+    // Empty allow-list — match nothing.
+    return sql`false`;
+  }
+  return sql`((${table.metadata}->'__verifier'->>'orgId')::bigint IN (${sql.join(
+    orgIds.map((id) => sql`${id}`),
+    sql`, `,
+  )}))`;
+}
+
 export class DbVerifierStore implements VerifierStore {
   private readonly db: Drizzle;
   private readonly table: VerifierResultsTableLike;
@@ -184,19 +212,23 @@ export class DbVerifierStore implements VerifierStore {
     return decision;
   }
 
-  async get(verifierId: string): Promise<VerifierDecision | undefined> {
+  async get(verifierId: string, scope?: VerifierAccessScope): Promise<VerifierDecision | undefined> {
+    const orgFilter = orgScopeSql(this.table, scope?.orgIds);
+    const where = orgFilter
+      ? and(eq(this.table.verifierId, verifierId), orgFilter)
+      : eq(this.table.verifierId, verifierId);
     const rows = (await this.db
       .select()
       .from(this.table)
-      .where(eq(this.table.verifierId, verifierId))
+      .where(where)
       .limit(1)) as unknown as VerifierRow[];
     const row = rows[0];
     if (!row) return undefined;
     return rowToDecision(row);
   }
 
-  async getOrThrow(verifierId: string): Promise<VerifierDecision> {
-    const r = await this.get(verifierId);
+  async getOrThrow(verifierId: string, scope?: VerifierAccessScope): Promise<VerifierDecision> {
+    const r = await this.get(verifierId, scope);
     if (!r) throw new VerifierResultNotFoundError(verifierId);
     return r;
   }
@@ -204,13 +236,18 @@ export class DbVerifierStore implements VerifierStore {
   async latestForTarget(
     targetType: VerifierTarget["targetType"],
     targetId: string,
+    scope?: VerifierAccessScope,
   ): Promise<VerifierDecision | undefined> {
+    const orgFilter = orgScopeSql(this.table, scope?.orgIds);
+    const baseWhere = and(
+      eq(this.table.targetType, targetType),
+      eq(this.table.targetId, targetId),
+    );
+    const where = orgFilter ? and(baseWhere, orgFilter) : baseWhere;
     const rows = (await this.db
       .select()
       .from(this.table)
-      .where(
-        and(eq(this.table.targetType, targetType), eq(this.table.targetId, targetId)),
-      )
+      .where(where)
       .orderBy(desc(this.table.createdAt))
       .limit(1)) as unknown as VerifierRow[];
     const row = rows[0];
@@ -225,6 +262,8 @@ export class DbVerifierStore implements VerifierStore {
     if (query.traceId) filters.push(eq(this.table.traceId, query.traceId));
     if (query.planId) filters.push(eq(this.table.planId, query.planId));
     if (query.outcome) filters.push(eq(this.table.outcome, query.outcome));
+    const orgFilter = orgScopeSql(this.table, query.orgIds);
+    if (orgFilter) filters.push(orgFilter);
     const where = filters.length > 0 ? and(...filters) : undefined;
 
     const limit = query.limit ?? 50;
@@ -247,7 +286,15 @@ export class DbVerifierStore implements VerifierStore {
     return { items: rows.map(rowToDecision), total };
   }
 
-  async delete(verifierId: string): Promise<void> {
-    await this.db.delete(this.table).where(eq(this.table.verifierId, verifierId));
+  async delete(verifierId: string, scope?: VerifierAccessScope): Promise<boolean> {
+    const orgFilter = orgScopeSql(this.table, scope?.orgIds);
+    const where = orgFilter
+      ? and(eq(this.table.verifierId, verifierId), orgFilter)
+      : eq(this.table.verifierId, verifierId);
+    const result = (await this.db.delete(this.table).where(where)) as unknown as {
+      rowCount?: number | null;
+    };
+    return (result?.rowCount ?? 0) > 0;
   }
 }
+
