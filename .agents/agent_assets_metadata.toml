@@ -40,7 +40,7 @@ title = "stephen mobile icon"
 id = "8XtMoQC4u9OBpaZepBumJ"
 uri = "file://artifacts/szl-holdings-mobile/assets/images/icon.png"
 type = "image"
-title = "szl holdings mobile icon"
+title = "generated_image"
 
 [[generated]]
 id = "zhRhjDImKNrFWlu3iHDVW"
@@ -76,7 +76,7 @@ title = "stephen splash screen"
 id = "UuhhexJXS7bD9r5DfsQD9"
 uri = "file://artifacts/szl-holdings-mobile/assets/images/splash-icon.png"
 type = "image"
-title = "szl holdings splash screen"
+title = "generated_image"
 
 [[generated]]
 id = "2l4gnEVImV_teY9nUTFU4"
