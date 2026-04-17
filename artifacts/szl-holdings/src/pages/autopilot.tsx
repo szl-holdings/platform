@@ -14,7 +14,10 @@ import { cn } from "@/lib/utils";
 import { MicroFeedbackWidget } from "@szl-holdings/shared-ui";
 
 async function apiFetch<T>(path: string): Promise<T> {
-  const res = await fetch(`/api${path}`);
+  const res = await fetch(`/api${path}`, {
+    credentials: "include",
+    headers: { "x-requested-with": "XMLHttpRequest" },
+  });
   if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
   const body = await res.json();
   return body.data as T;
