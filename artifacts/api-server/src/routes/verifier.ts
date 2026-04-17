@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { Router, type IRouter } from "express";
 import {
   verify,
@@ -29,11 +30,6 @@ router.post("/verifier", authMiddleware(), async (req, res) => {
       context?: unknown;
       persist?: boolean;
     };
-    const targetParse = VerifierTargetSchema.safeParse(body.target);
-    if (!targetParse.success) {
-      sendBadRequest(res, `Invalid target: ${targetParse.error.message}`);
-      return;
-    }
     const outputParse = VerifierOutputSchema.safeParse(body.output ?? {});
     if (!outputParse.success) {
       sendBadRequest(res, `Invalid output: ${outputParse.error.message}`);
@@ -45,7 +41,20 @@ router.post("/verifier", authMiddleware(), async (req, res) => {
       return;
     }
 
-    const decision = verify(outputParse.data, targetParse.data, ctxParse.data);
+    // Target is optional — when omitted, generate a synthetic "output"
+    // target so we can use the unified 3-arg engine signature.
+    let target;
+    if (body.target !== undefined) {
+      const t = VerifierTargetSchema.safeParse(body.target);
+      if (!t.success) {
+        sendBadRequest(res, `Invalid target: ${t.error.message}`);
+        return;
+      }
+      target = t.data;
+    } else {
+      target = { targetType: "output" as const, targetId: randomUUID() };
+    }
+    const decision = verify(outputParse.data, target, ctxParse.data);
     if (body.persist !== false) {
       await defaultVerifierStore.save(decision);
     }
