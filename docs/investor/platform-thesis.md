@@ -11,6 +11,8 @@ The enterprises that will win the next decade are not the ones with the most dat
 
 SZL Holdings is building the platform that makes that possible. We are doing it in operational domains where the stakes are high enough that the platform's value is undeniable, and with architecture that is explicit enough that it compounds as we scale.
 
+![SZL Holdings platform map — command surfaces, execution fabric, domain packs, and shared governance primitives](../../assets/readme/architecture/platform-map.svg)
+
 ---
 
 ## The Category: Governed Decision Operating System
@@ -84,6 +86,17 @@ The primary commercial entry point is **Lyte + Alloy** — the command surface a
 ## Current Platform
 
 As of Q2 2026, the SZL Holdings platform consists of command surfaces, an execution fabric, and six domain packs — all sharing the same six platform primitives:
+
+![SZL Holdings ecosystem map — how command surfaces, execution fabric, domain packs, and external signal sources interconnect](../../assets/readme/architecture/ecosystem-map.svg)
+
+A representative cross-section of the live product surfaces:
+
+![SZL Holdings corporate dashboard — investor portal and platform overview](../../assets/readme/products/szl-holdings-dashboard.jpg)
+
+![Aegis — unified Security & Defense command surface](../../assets/readme/products/aegis-command.jpg)
+
+![Vessels — Maritime Intelligence command surface with AIS fleet, sanctions screening, and Helmsman agent](../../assets/readme/products/vessels-maritime.jpg)
+
 
 **Command surfaces:**
 | Surface | Purpose | Status |

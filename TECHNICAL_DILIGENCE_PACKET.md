@@ -34,6 +34,8 @@ Signal → Context → Recommendation → Simulation → Policy → Approval →
 
 This loop is not replicated per domain — it is implemented once in shared infrastructure and inherited by every domain pack.
 
+![SZL Holdings platform map — command surfaces, execution fabric, domain packs, and shared governance primitives](assets/readme/architecture/platform-map.svg)
+
 ### 1.2 Platform Layer Model
 
 ```
@@ -127,6 +129,18 @@ Mobile Clients (Expo/RN)    →  artifacts/api-server
 | API format | OpenAPI 3.1, GraphQL (Apollo), MCP |
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for the full architecture reference.
+
+### 1.6 Representative Product Surfaces
+
+The following screenshots show representative live surfaces drawn from across the platform — the unified command portal that aggregates all domain packs, the Aegis security command, and the Terra real estate intelligence command. Each surface is built on the same six governance primitives described in §3.3.
+
+![Unified Command Portal — cross-domain ops command surface](assets/readme/products/command-portal.jpg)
+
+![Aegis — unified Security & Defense command surface](assets/readme/products/aegis-command.jpg)
+
+![Terra — Real Estate Intelligence command surface with NYC distress pipeline and ownership graph](assets/readme/products/terra-real-estate.jpg)
+
+![SZL Holdings ecosystem map — how command surfaces, execution fabric, domain packs, and external signal sources interconnect](assets/readme/architecture/ecosystem-map.svg)
 
 ---
 
