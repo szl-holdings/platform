@@ -36,6 +36,7 @@
     "qa:atlas": "node scripts/qa/check-atlas.js",
     "qa:meta": "node scripts/qa/check-metadata.js",
     "qa:site": "pnpm qa:routes && pnpm qa:links && pnpm qa:trust && pnpm qa:meta",
+    "docs:sync-check": "node scripts/docs/check-docs-sync.js",
     "test:atlas": "vitest run --config vitest.config.ts --reporter=verbose lib/scene-export",
     "release:prep": "echo 'Release prep: run pnpm build && pnpm test && pnpm qa:site, then update CHANGELOG.md'",
     "release:notes": "echo 'Generate release notes from CHANGELOG.md for the latest version'",
