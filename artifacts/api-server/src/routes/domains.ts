@@ -25,7 +25,7 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { db } from "@szl-holdings/db";
 import { cstNodes, cstEdges } from "@szl-holdings/db";
-import { eq, and, or, sql, inArray } from "drizzle-orm";
+import { eq, and, or, sql, inArray, notInArray } from "drizzle-orm";
 import {
   sendSuccess,
   sendBadRequest,
@@ -56,7 +56,7 @@ async function buildDomainGraph(
   if (opts.entityType) nodeConditions.push(eq(cstNodes.entityType, opts.entityType));
   if (opts.isActive !== undefined) nodeConditions.push(eq(cstNodes.isActive, opts.isActive));
 
-  const [nodes, nodeCountResult] = await Promise.all([
+  const [nodes, nodeCountResult, allDomainNodeIdRows] = await Promise.all([
     db
       .select()
       .from(cstNodes)
@@ -68,7 +68,12 @@ async function buildDomainGraph(
       .select({ count: sql<number>`count(*)::int` })
       .from(cstNodes)
       .where(and(...nodeConditions)),
+    db
+      .select({ id: cstNodes.id })
+      .from(cstNodes)
+      .where(and(...nodeConditions)),
   ]);
+  const allDomainNodeIds = allDomainNodeIdRows.map((r) => r.id);
 
   const nodeIds = nodes.map((n) => n.id);
   let edges: (typeof cstEdges.$inferSelect)[] = [];
@@ -113,6 +118,42 @@ async function buildDomainGraph(
     return (fromInDomain && !toInDomain) || (!fromInDomain && toInDomain);
   });
 
+  // True totals across the entire (filtered) domain — independent of the
+  // current limit/offset window — so the UI can show "loaded / total" and
+  // analysts know how many connections still aren't loaded.
+  let totalInternalEdgeCount = 0;
+  let totalCrossDomainEdgeCount = 0;
+  if (allDomainNodeIds.length > 0) {
+    const [internalTotalRow, crossTotalRow] = await Promise.all([
+      db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(cstEdges)
+        .where(
+          and(
+            inArray(cstEdges.fromNodeId, allDomainNodeIds),
+            inArray(cstEdges.toNodeId, allDomainNodeIds),
+          ),
+        ),
+      db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(cstEdges)
+        .where(
+          or(
+            and(
+              inArray(cstEdges.fromNodeId, allDomainNodeIds),
+              notInArray(cstEdges.toNodeId, allDomainNodeIds),
+            ),
+            and(
+              notInArray(cstEdges.fromNodeId, allDomainNodeIds),
+              inArray(cstEdges.toNodeId, allDomainNodeIds),
+            ),
+          ),
+        ),
+    ]);
+    totalInternalEdgeCount = internalTotalRow[0]?.count ?? 0;
+    totalCrossDomainEdgeCount = crossTotalRow[0]?.count ?? 0;
+  }
+
   return {
     domain,
     nodes: nodes.map((n) => ({
@@ -144,6 +185,9 @@ async function buildDomainGraph(
       edgeCount: edges.length,
       crossDomainEdgeCount: crossDomainEdges.length,
       internalEdgeCount: edges.length - crossDomainEdges.length,
+      totalInternalEdgeCount,
+      totalCrossDomainEdgeCount,
+      totalEdgeCount: totalInternalEdgeCount + totalCrossDomainEdgeCount,
     },
   };
 }

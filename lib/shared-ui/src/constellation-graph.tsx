@@ -41,6 +41,12 @@ export interface ConstellationGraphStats {
   edgeCount: number;
   crossDomainEdgeCount: number;
   internalEdgeCount: number;
+  /** Total internal edges across the whole domain (ignores limit/offset). */
+  totalInternalEdgeCount?: number;
+  /** Total cross-domain edges across the whole domain (ignores limit/offset). */
+  totalCrossDomainEdgeCount?: number;
+  /** Total edges across the whole domain (ignores limit/offset). */
+  totalEdgeCount?: number;
 }
 
 export interface ConstellationGraphResponse {
@@ -1272,15 +1278,43 @@ export function ConstellationGraph({
               gap: 12,
             }}
           >
-            <span data-testid="constellation-stats-nodes">
+            <span
+              data-testid="constellation-stats-nodes"
+              title="loaded / total nodes in this domain"
+            >
               {data
                 ? `${stats.nodeCount} nodes`
                 : `${loadedNodeCount} / ${stats.nodeCount} nodes`}
             </span>
             <span>·</span>
-            <span>{stats.internalEdgeCount} internal</span>
+            <span
+              title={
+                stats.totalInternalEdgeCount !== undefined
+                  ? "loaded / total internal edges in this domain"
+                  : undefined
+              }
+            >
+              {stats.internalEdgeCount}
+              {stats.totalInternalEdgeCount !== undefined
+                ? ` / ${stats.totalInternalEdgeCount}`
+                : ""}{" "}
+              internal
+            </span>
             <span>·</span>
-            <span style={{ color: "#fbbf24" }}>{stats.crossDomainEdgeCount} cross-domain</span>
+            <span
+              style={{ color: "#fbbf24" }}
+              title={
+                stats.totalCrossDomainEdgeCount !== undefined
+                  ? "loaded / total cross-domain edges in this domain"
+                  : undefined
+              }
+            >
+              {stats.crossDomainEdgeCount}
+              {stats.totalCrossDomainEdgeCount !== undefined
+                ? ` / ${stats.totalCrossDomainEdgeCount}`
+                : ""}{" "}
+              cross-domain
+            </span>
           </div>
         )}
       </div>
