@@ -129,6 +129,10 @@ export default defineConfig({
       { find: "@workspace/skill-library/runner", replacement: resolve(__dirname, "packages/skill-library/src/runner.ts") },
       { find: "@workspace/skill-library/seeds", replacement: resolve(__dirname, "packages/skill-library/src/seeds.ts") },
       { find: "@workspace/skill-library", replacement: resolve(__dirname, "packages/skill-library/src/index.ts") },
+      { find: "@workspace/cognitive-runtime/types", replacement: resolve(__dirname, "packages/cognitive-runtime/src/types.ts") },
+      { find: "@workspace/cognitive-runtime/checkpoint", replacement: resolve(__dirname, "packages/cognitive-runtime/src/checkpoint.ts") },
+      { find: "@workspace/cognitive-runtime/orchestrator", replacement: resolve(__dirname, "packages/cognitive-runtime/src/orchestrator.ts") },
+      { find: "@workspace/cognitive-runtime", replacement: resolve(__dirname, "packages/cognitive-runtime/src/index.ts") },
     ],
   },
   test: {
@@ -153,6 +157,7 @@ export default defineConfig({
       "packages/self-model/src/**/*.test.ts",
       "packages/verifier/src/**/*.test.ts",
       "packages/skill-library/src/**/*.test.ts",
+      "packages/cognitive-runtime/src/**/*.test.ts",
     ],
     exclude: [
       "tests/e2e/**",

@@ -43,7 +43,7 @@
     }
   },
   "dependencies": {
-    "@szl-holdings/replay-core": "workspace:*",
+    "@workspace/replay-core": "workspace:*",
     "drizzle-orm": "catalog:",
     "zod": "catalog:"
   },

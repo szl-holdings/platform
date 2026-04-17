@@ -33,6 +33,7 @@ import * as selfModel from "./groups/self-model";
 import * as verifier from "./groups/verifier";
 import * as skillLibrary from "./groups/skill-library";
 import nexusRouter from "./nexus";
+import cognitiveRuntimeRouter from "./cognitive-runtime";
 
 const router: IRouter = Router();
 
@@ -76,5 +77,6 @@ router.use("/nexus", nexusRouter);
 router.use(tracesRouter);
 router.use(reflectionsRouter);
 router.use(plansRouter);
+router.use(cognitiveRuntimeRouter);
 
 export default router;

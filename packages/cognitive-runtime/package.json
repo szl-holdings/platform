@@ -1,0 +1,41 @@
+{
+  "name": "@workspace/cognitive-runtime",
+  "version": "0.0.0",
+  "private": false,
+  "type": "module",
+  "description": "Cognitive Runtime — end-to-end PERCEIVE → ORIENT → PLAN → EXECUTE → VERIFY → REFLECT → UPDATE SELF MODEL → UPDATE MEMORY loop orchestrator with checkpointing, retries, and resume.",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./src/index.ts"
+    },
+    "./types": {
+      "types": "./dist/types.d.ts",
+      "import": "./src/types.ts"
+    },
+    "./orchestrator": {
+      "types": "./dist/orchestrator.d.ts",
+      "import": "./src/orchestrator.ts"
+    },
+    "./checkpoint": {
+      "types": "./dist/checkpoint.d.ts",
+      "import": "./src/checkpoint.ts"
+    }
+  },
+  "dependencies": {
+    "@workspace/trace-graph": "workspace:*",
+    "@workspace/planner": "workspace:*",
+    "@workspace/verifier": "workspace:*",
+    "@workspace/reflection-engine": "workspace:*",
+    "@workspace/memory-fabric": "workspace:*",
+    "@workspace/self-model": "workspace:*",
+    "@workspace/guardian": "workspace:*",
+    "@workspace/tool-mesh": "workspace:*",
+    "@workspace/cognitive-observability": "workspace:*",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "vitest": "^4.1.2"
+  }
+}

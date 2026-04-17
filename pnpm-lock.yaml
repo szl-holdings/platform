@@ -417,6 +417,9 @@ importers:
       '@workspace/alloy':
         specifier: workspace:*
         version: link:../../packages/alloy
+      '@workspace/cognitive-runtime':
+        specifier: workspace:*
+        version: link:../../packages/cognitive-runtime
       '@workspace/eval-forge':
         specifier: workspace:*
         version: link:../../packages/eval-forge
@@ -2390,6 +2393,46 @@ importers:
         specifier: ^4.1.2
         version: 4.1.2(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
+  packages/cognitive-runtime:
+    dependencies:
+      '@workspace/cognitive-observability':
+        specifier: workspace:*
+        version: link:../cognitive-observability
+      '@workspace/guardian':
+        specifier: workspace:*
+        version: link:../guardian
+      '@workspace/memory-fabric':
+        specifier: workspace:*
+        version: link:../memory-fabric
+      '@workspace/planner':
+        specifier: workspace:*
+        version: link:../planner
+      '@workspace/reflection-engine':
+        specifier: workspace:*
+        version: link:../reflection-engine
+      '@workspace/self-model':
+        specifier: workspace:*
+        version: link:../self-model
+      '@workspace/tool-mesh':
+        specifier: workspace:*
+        version: link:../tool-mesh
+      '@workspace/trace-graph':
+        specifier: workspace:*
+        version: link:../trace-graph
+      '@workspace/verifier':
+        specifier: workspace:*
+        version: link:../verifier
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
+      vitest:
+        specifier: ^4.1.2
+        version: 4.1.2(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+
   packages/constellation:
     dependencies:
       '@szl-holdings/atlas-core':
@@ -2697,7 +2740,7 @@ importers:
 
   packages/trace-graph:
     dependencies:
-      '@szl-holdings/replay-core':
+      '@workspace/replay-core':
         specifier: workspace:*
         version: link:../replay-core
       drizzle-orm:
