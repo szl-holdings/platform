@@ -344,6 +344,72 @@ describe("ConstellationGraph — Expand neighbors action", () => {
     expect(hubNeighborCalls).toBe(2);
   });
 
+  it("debounces search-query URL writes: keystrokes share one history entry, chip clicks push their own", async () => {
+    // The filter panel (and search input) only render when the graph drives
+    // its own fetch — i.e. `domain` is provided instead of `data`. Mock that
+    // fetch with the same payload other tests use.
+    fetchSpy.mockImplementation(async (input: RequestInfo | URL): Promise<Response> => {
+      const url = typeof input === "string" ? input : input.toString();
+      calls.push({ url });
+      if (url.includes("/domains/terra/graph")) {
+        return jsonResponse({ data: baseData });
+      }
+      return new Response("not-mocked", { status: 500 });
+    });
+
+    // Reset URL so the initial sync doesn't see leftover query params from
+    // earlier tests (jsdom shares window.location across tests in the file).
+    window.history.replaceState(null, "", "/");
+
+    // Spy on the history methods so we can assert push vs. replace usage.
+    const pushSpy = vi.spyOn(window.history, "pushState");
+    const replaceSpy = vi.spyOn(window.history, "replaceState");
+
+    render(<ConstellationGraph domain="terra" height={300} />);
+
+    // Wait for the search input to appear.
+    const searchInput = await waitFor(() =>
+      screen.getByTestId("constellation-search") as HTMLInputElement,
+    );
+
+    // Reset spies so we only count post-mount activity (initial mount may
+    // replaceState once to normalise the URL).
+    pushSpy.mockClear();
+    replaceSpy.mockClear();
+
+    // Type "tank" one character at a time. The first keystroke should push
+    // exactly one new history entry; the rest should only replace it in place.
+    for (const ch of ["t", "ta", "tan", "tank"]) {
+      await act(async () => {
+        fireEvent.change(searchInput, { target: { value: ch } });
+      });
+    }
+
+    expect(pushSpy).toHaveBeenCalledTimes(1);
+    // 3 mid-session replaces for the 2nd/3rd/4th keystrokes.
+    expect(replaceSpy).toHaveBeenCalledTimes(3);
+    // The URL reflects the latest typed value, not a stale mid-word state.
+    expect(window.location.search).toContain("q=tank");
+
+    // Wait past the 300ms debounce so the typing session closes.
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 350));
+    });
+
+    // A discrete chip click after the session closes must push its own entry.
+    pushSpy.mockClear();
+    replaceSpy.mockClear();
+    const activeChip = screen.getByTestId("constellation-active-chip");
+    await act(async () => {
+      fireEvent.click(activeChip);
+    });
+    expect(pushSpy).toHaveBeenCalledTimes(1);
+    expect(replaceSpy).not.toHaveBeenCalled();
+
+    pushSpy.mockRestore();
+    replaceSpy.mockRestore();
+  });
+
   it("hub neighbors call is sent with limit=25 by default", async () => {
     render(<ConstellationGraph data={baseData} height={300} />);
 

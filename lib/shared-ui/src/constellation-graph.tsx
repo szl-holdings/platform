@@ -579,33 +579,86 @@ export function ConstellationGraph({
   // --- URL state persistence -------------------------------------------------
   // Filters are mirrored to the URL query string so views survive reloads and
   // can be shared/linked. Browser back/forward navigates between filter states.
+  //
+  // Search-query typing is special: every keystroke updates state, but writing
+  // a new history entry for each one would bury the previous filter combo
+  // under a pile of mid-word URLs. So when *only* the search query changes,
+  // we treat the run of keystrokes as a single typing session: the first
+  // change of the session pushes one new history entry, subsequent changes
+  // replace it in place, and 300ms of inactivity closes the session. Any
+  // discrete chip click (type/active/since) flushes the open session and
+  // pushes its own entry, preserving "one click = one history entry".
   const isInitialUrlSync = useRef(true);
   const skipNextUrlWrite = useRef(false);
+  const lastFiltersRef = useRef<PersistedFilters>(initialFilters);
+  const searchSessionActiveRef = useRef(false);
+  const searchDebounceRef = useRef<number | null>(null);
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (skipNextUrlWrite.current) {
-      // The state was just updated from a popstate event — don't bounce it back.
-      skipNextUrlWrite.current = false;
-      return;
-    }
-    const current = new URLSearchParams(window.location.search);
-    const nextSearch = buildFilterSearch(current, {
+    const nextFilters: PersistedFilters = {
       entityTypeFilter,
       activeOnly,
       sinceWindow,
       searchQuery,
-    });
-    if (nextSearch === current.toString()) return;
+    };
+    if (skipNextUrlWrite.current) {
+      // The state was just updated from a popstate event — don't bounce it back.
+      skipNextUrlWrite.current = false;
+      lastFiltersRef.current = nextFilters;
+      return;
+    }
+    const current = new URLSearchParams(window.location.search);
+    const nextSearch = buildFilterSearch(current, nextFilters);
+    if (nextSearch === current.toString()) {
+      lastFiltersRef.current = nextFilters;
+      return;
+    }
     const url = `${window.location.pathname}${nextSearch ? `?${nextSearch}` : ""}${window.location.hash}`;
+    const prev = lastFiltersRef.current;
+    const onlySearchChanged =
+      prev.entityTypeFilter === entityTypeFilter &&
+      prev.activeOnly === activeOnly &&
+      prev.sinceWindow === sinceWindow &&
+      prev.searchQuery !== searchQuery;
     if (isInitialUrlSync.current) {
       // First sync just normalizes the URL (e.g. drop unknown values) without polluting history.
       window.history.replaceState(window.history.state, "", url);
+    } else if (onlySearchChanged) {
+      if (searchSessionActiveRef.current) {
+        // Mid-typing: overwrite the entry we already pushed for this session.
+        window.history.replaceState(window.history.state, "", url);
+      } else {
+        // First keystroke of a new typing session — create exactly one history entry.
+        window.history.pushState(window.history.state, "", url);
+        searchSessionActiveRef.current = true;
+      }
+      if (searchDebounceRef.current !== null) {
+        window.clearTimeout(searchDebounceRef.current);
+      }
+      searchDebounceRef.current = window.setTimeout(() => {
+        searchDebounceRef.current = null;
+        searchSessionActiveRef.current = false;
+      }, 300);
     } else {
+      // Chip click or other discrete change — close any open typing session
+      // (so the next keystroke starts a fresh one) and push its own entry.
+      if (searchDebounceRef.current !== null) {
+        window.clearTimeout(searchDebounceRef.current);
+        searchDebounceRef.current = null;
+      }
+      searchSessionActiveRef.current = false;
       window.history.pushState(window.history.state, "", url);
     }
+    lastFiltersRef.current = nextFilters;
   }, [entityTypeFilter, activeOnly, sinceWindow, searchQuery]);
   useEffect(() => {
     isInitialUrlSync.current = false;
+    return () => {
+      if (typeof window !== "undefined" && searchDebounceRef.current !== null) {
+        window.clearTimeout(searchDebounceRef.current);
+        searchDebounceRef.current = null;
+      }
+    };
   }, []);
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -613,6 +666,13 @@ export function ConstellationGraph({
       const f = readFiltersFromUrl();
       // Suppress the URL-write effect that would otherwise fire from these setStates.
       skipNextUrlWrite.current = true;
+      // popstate means the browser navigated history — any in-flight typing
+      // session is no longer relevant, so close it.
+      if (searchDebounceRef.current !== null) {
+        window.clearTimeout(searchDebounceRef.current);
+        searchDebounceRef.current = null;
+      }
+      searchSessionActiveRef.current = false;
       setEntityTypeFilter(f.entityTypeFilter);
       setActiveOnly(f.activeOnly);
       setSinceWindow(f.sinceWindow);
