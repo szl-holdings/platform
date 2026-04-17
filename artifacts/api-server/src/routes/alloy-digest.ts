@@ -10,7 +10,7 @@ import { tenantScope } from "../middlewares/tenant-scope";
 
 const router: IRouter = Router();
 
-router.use(tenantScope({ required: false }));
+router.use(tenantScope({ required: true }));
 
 
 interface DigestContent {

@@ -26,7 +26,7 @@ import { tenantScope } from "../middlewares/tenant-scope";
 
 const router = Router();
 
-router.use(tenantScope({ required: false }));
+router.use(tenantScope({ required: true }));
 
 const adminOnly = [authMiddleware(), requireRole("admin")];
 
