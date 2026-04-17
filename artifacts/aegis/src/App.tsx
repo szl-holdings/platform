@@ -102,6 +102,7 @@ const ThreatHunting = lazy(() => import("@/pages/threat-hunting"));
 const ThreatKillChain = lazy(() => import("@/pages/threat-kill-chain"));
 const IdentityThreat = lazy(() => import("@/pages/identity-threat"));
 const ExecutiveRisk = lazy(() => import("@/pages/executive-risk"));
+const CisoDashboard = lazy(() => import("@/pages/ciso-dashboard"));
 const SacsayhuamanShield = lazy(() => import("@/pages/sacsayhuaman-shield"));
 const AdversaryEmulation = lazy(() => import("@/pages/simulation-runner"));
 const AgentInsightsPage = lazy(() => import("@/pages/agent-insights"));
@@ -267,6 +268,7 @@ const commandSurfacesNav = [
   { path: "/decision-console", label: "Decision Console", icon: ClipboardCheck },
   { path: "/response-orchestration", label: "Response Orchestration", icon: Zap },
   { path: "/executive-board", label: "Executive / Board View", icon: BarChart3 },
+  { path: "/ciso-dashboard", label: "CISO Executive Dashboard", icon: Shield },
 ];
 
 const citadelNav = [
@@ -867,6 +869,7 @@ function AppRouter() {
         <Route path="/decision-console" component={DecisionConsole} />
         <Route path="/response-orchestration" component={ResponseOrchestration} />
         <Route path="/executive-board" component={ExecutiveBoardView} />
+        <Route path="/ciso-dashboard" component={CisoDashboard} />
         {/* Security Operations */}
         <Route path="/soc" component={SOCDashboard} />
         <Route path="/" component={AegisMarketingHome} />
@@ -1052,6 +1055,7 @@ const aegisCommands: CommandItem[] = [
   { id: "nav-decision-console", label: "Decision Console", icon: "📋", group: "Command Surfaces", keywords: ["decision", "confidence", "evidence", "approve"], action: nav("/decision-console") },
   { id: "nav-response-orchestration", label: "Response Orchestration", icon: "⚡", group: "Command Surfaces", keywords: ["playbook", "response", "orchestration", "containment"], action: nav("/response-orchestration") },
   { id: "nav-executive-board", label: "Executive / Board View", icon: "📊", group: "Command Surfaces", keywords: ["executive", "board", "posture", "ciso"], action: nav("/executive-board") },
+  { id: "nav-ciso-dashboard", label: "CISO Executive Dashboard", icon: "🛡️", group: "Command Surfaces", keywords: ["ciso", "executive", "dashboard", "asm", "cspm", "itdr", "dlp", "zero trust", "phish", "deception", "ot", "ics", "kpi", "roi"], action: nav("/ciso-dashboard") },
   { id: "nav-soc", label: "SOC Overview", icon: "🛡️", group: "Security Operations", keywords: ["dashboard", "home", "soc"], action: nav("/soc") },
   { id: "nav-incidents", label: "Incidents", icon: "🚨", group: "Security Operations", action: nav("/incidents") },
   { id: "nav-alerts", label: "Alerts", icon: "🔔", group: "Security Operations", action: nav("/alerts") },
