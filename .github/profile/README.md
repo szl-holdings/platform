@@ -118,7 +118,7 @@ All 8 domain workspaces in a single Expo/React Native app. Biometric auth, cross
 ### Vessels — Maritime Fleet Intelligence
 | Fleet Command | Mobile Fleet Tracking |
 |---|---|
-| ![Vessels Fleet](./assets/screenshots/vessels-fleet-command.jpg) | ![Vessels Mobile](./assets/screenshots/vessels-mobile-fleet.jpg) |
+| ![Vessels Fleet](./assets/screenshots/vessels-fresh.jpg) | ![Vessels Mobile](./assets/screenshots/vessels-mobile-fleet.jpg) |
 
 *AIS telemetry, sanctions screening, dark vessel detection, voyage economics, commodity trading, and marine insurance — all in one command surface. Helmsman AI agent. 83 components.*
 
@@ -127,7 +127,7 @@ All 8 domain workspaces in a single Expo/React Native app. Biometric auth, cross
 ### Terra — Real Estate Intelligence
 | Property Intelligence | Mobile Property View |
 |---|---|
-| ![Terra Dashboard](./assets/screenshots/terra-dashboard.jpg) | ![Terra Mobile](./assets/screenshots/terra-mobile-home.jpg) |
+| ![Terra Dashboard](./assets/screenshots/terra-fresh.jpg) | ![Terra Mobile](./assets/screenshots/terra-mobile-home.jpg) |
 
 *NYC distress property pipeline, ownership entity graph, deal pipeline, MLS ingestion, broker workflow, and market signal intelligence. 77 components.*
 
@@ -149,13 +149,13 @@ All 8 domain workspaces in a single Expo/React Native app. Biometric auth, cross
 ---
 
 ### Command Portal — Ecosystem Intelligence Hub
-![Command Portal](./assets/screenshots/command-hero.jpg)
+![Command Portal](./assets/screenshots/command-fresh.jpg)
 *Real-time 8-domain dashboard with SSE updates, composite health scoring, global Cmd+K search, and executive briefing view. The cross-domain nerve center of the platform.*
 
 ---
 
 ### Carlota Jo — Premium Advisory
-![Carlota Jo](./assets/screenshots/carlota-jo-hero.jpg)
+![Carlota Jo](./assets/screenshots/carlota-jo-fresh.jpg)
 *White-glove advisory operations for UHNW clients. Private intake, client portal, service catalog, booking, document delivery, and client messaging. 60 components.*
 
 ---
