@@ -36,6 +36,7 @@ import {
 } from "@szl-holdings/db";
 import { REFERENCE_COMPLIANCE_CONTROLS } from "../readiness.js";
 import { eq, desc, sql, inArray, and } from "drizzle-orm";
+import { z } from "zod";
 import { sendSuccess, sendCreated, sendNotFound, sendNoContent, handleRouteError } from "../../lib/api-response";
 import { authMiddleware, parseIdParam } from "../../middlewares/auth";
 import { logger } from "../../lib/logger";
@@ -50,6 +51,122 @@ import {
 } from "@szl-holdings/ai-engine/domain-embedding-hooks";
 
 const router: IRouter = Router();
+
+const updateVulnerabilitySchema = z.object({
+  status: z.string().min(1).max(50).optional(),
+  remediationOwner: z.string().max(200).trim().optional(),
+  dueDate: z.string().max(100).optional().nullable(),
+  recommendedAction: z.string().max(5000).trim().optional(),
+  recommendation: z.string().max(5000).trim().optional(),
+}).strict();
+
+const updateComplianceControlSchema = z.object({
+  status: z.string().min(1).max(50).optional(),
+  owner: z.string().max(200).trim().optional(),
+  dueDate: z.string().max(100).optional().nullable(),
+  notes: z.string().max(5000).trim().optional(),
+}).strict();
+
+const updateWorkflowActionSchema = z.object({
+  status: z.string().min(1).max(50).optional(),
+  notes: z.string().max(5000).trim().optional(),
+  assignedTo: z.string().max(200).trim().optional(),
+  completedAt: z.union([z.string().datetime({ offset: true }), z.date()]).optional(),
+}).strict();
+
+const updateHardeningControlSchema = z.object({
+  status: z.string().min(1).max(50).optional(),
+  owner: z.string().max(200).trim().optional(),
+  recommendedAction: z.string().max(5000).trim().optional(),
+  dueDate: z.string().max(100).optional().nullable(),
+  notes: z.string().max(5000).trim().optional(),
+}).strict();
+
+const pushTokenSchema = z.object({
+  token: z.string().min(1, "token is required").max(4096),
+  platform: z.string().max(50).trim().optional(),
+}).strict();
+
+const ingestWebhookSchema = z.object({
+  source: z.string().max(200).optional(),
+  severity: z.string().max(50).optional(),
+  level: z.string().max(50).optional(),
+  title: z.string().max(2000).optional(),
+  message: z.string().max(5000).optional(),
+  summary: z.string().max(2000).optional(),
+}).passthrough();
+
+const ingestSyslogSchema = z.object({
+  message: z.string().max(10000).optional(),
+  raw: z.string().max(10000).optional(),
+  host: z.string().max(255).optional(),
+  hostname: z.string().max(255).optional(),
+}).passthrough();
+
+const updateCaseSchema = z.object({
+  status: z.string().min(1).max(50).optional(),
+  priority: z.string().min(1).max(50).optional(),
+  assignedAnalyst: z.string().max(200).trim().optional().nullable(),
+  note: z.object({
+    content: z.string().min(1).max(10000),
+    author: z.string().max(200).trim().optional(),
+  }).optional(),
+  evidenceItem: z.record(z.unknown()).optional(),
+  updatedBy: z.string().max(200).trim().optional(),
+}).strict();
+
+const createCaseMemorySchema = z.object({
+  caseId: z.string().min(1).max(200),
+  incidentId: z.string().max(200).optional().nullable(),
+}).passthrough();
+
+const CASE_MEMORY_PHASE_ENUM = ["detection", "triage", "investigation", "containment", "eradication", "recovery", "closed"] as const;
+
+const updateCaseMemorySchema = z.object({
+  phase: z.enum(CASE_MEMORY_PHASE_ENUM).optional(),
+  phaseHistory: z.array(z.object({
+    phase: z.string().max(50),
+    enteredAt: z.string().max(100),
+    exitedAt: z.string().max(100).nullable(),
+  })).optional(),
+  analystNotes: z.array(z.object({
+    noteId: z.string().max(200),
+    content: z.string().max(20000),
+    author: z.string().max(200),
+    noteType: z.string().max(50),
+    createdAt: z.string().max(100),
+  })).optional(),
+  changeLog: z.array(z.unknown()).optional(),
+  summary: z.record(z.unknown()).optional(),
+  closedAt: z.string().datetime({ offset: true }).optional(),
+}).strict();
+
+const tradecraftDecisionInputSchema = z.object({
+  decisionType: z.string().min(1).max(100),
+  summary: z.string().min(10).max(10000),
+  recommendedAction: z.string().min(1).max(5000),
+  confidence: z.union([z.string(), z.number()]).optional(),
+  rawOutput: z.string().max(50000).optional(),
+  modelRoute: z.string().max(200).optional(),
+  caseId: z.string().max(200).optional().nullable(),
+  incidentId: z.string().max(200).optional().nullable(),
+  signalId: z.string().max(200).optional().nullable(),
+  objectId: z.string().max(200).optional(),
+}).passthrough();
+
+const evidenceIndexQuerySchema = z.object({
+  query: z.string().min(1).max(2000),
+  caseId: z.string().max(200).optional(),
+  incidentId: z.string().max(200).optional(),
+  sourceTypes: z.array(z.string().max(100)).max(50).optional(),
+  maxResults: z.number().int().min(1).max(50).optional(),
+  minRelevance: z.number().min(0).max(1).optional(),
+}).strict();
+
+const tradecraftDecisionActionSchema = z.object({
+  action: z.enum(["approve", "reject"]).optional(),
+  rejectionReason: z.string().max(5000).optional(),
+}).passthrough();
 
 const firestormCrudLimit = rateLimit({
   windowMs: 15 * 60 * 1000, max: 200, standardHeaders: true, legacyHeaders: false,
@@ -536,13 +653,7 @@ router.get("/firestorm/vulnerabilities/:id", authMiddleware(), async (req, res) 
 router.put("/firestorm/vulnerabilities/:id", authMiddleware({ required: true }), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id as string);
-    const { status, remediationOwner, dueDate, recommendedAction, recommendation } = req.body as {
-      status?: string;
-      remediationOwner?: string;
-      dueDate?: string;
-      recommendedAction?: string;
-      recommendation?: string;
-    };
+    const { status, remediationOwner, dueDate, recommendedAction, recommendation } = updateVulnerabilitySchema.parse(req.body);
     const [current] = await db.select().from(firestormFindingsTable).where(eq(firestormFindingsTable.id, id));
     if (!current) { sendNotFound(res, "Vulnerability"); return; }
 
@@ -639,7 +750,7 @@ router.put("/firestorm/compliance/:controlId", authMiddleware({ required: true }
   try {
     await ensureComplianceControlsSeeded();
     const { controlId } = req.params as Record<string, string>;
-    const { status, owner, dueDate, notes } = req.body as { status?: string; owner?: string; dueDate?: string; notes?: string };
+    const { status, owner, dueDate, notes } = updateComplianceControlSchema.parse(req.body);
     const [existing] = await db.select().from(firestormComplianceControlsTable).where(eq(firestormComplianceControlsTable.controlId, controlId));
     if (!existing) { sendNotFound(res, "Compliance Control"); return; }
 
@@ -1132,7 +1243,7 @@ router.get("/firestorm/live/feed-status", firestormLiveLimit, authMiddleware(), 
 
 router.post("/firestorm/ingest/webhook", authMiddleware({ required: true }), async (req, res) => {
   try {
-    const body = req.body;
+    const body = ingestWebhookSchema.parse(req.body ?? {});
     const source = (req.headers["x-firestorm-source"] as string) || body?.source || "webhook";
     const severity = body?.severity || body?.level || "medium";
     const title = body?.title || body?.message || body?.summary || "Incoming security event";
@@ -1222,7 +1333,7 @@ router.post("/firestorm/workflow-actions", authMiddleware({ required: true }), a
 router.patch("/firestorm/workflow-actions/:id", authMiddleware({ required: true }), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id as string);
-    const { status, notes, assignedTo, completedAt } = req.body;
+    const { status, notes, assignedTo, completedAt } = updateWorkflowActionSchema.parse(req.body);
     const updateData: Record<string, unknown> = { updatedAt: new Date() };
     if (status) updateData.status = status;
     if (notes) updateData.notes = notes;
@@ -1266,13 +1377,7 @@ router.get("/firestorm/hardening-controls/:id", authMiddleware(), async (req, re
 router.put("/firestorm/hardening-controls/:id", authMiddleware({ required: true }), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id as string);
-    const { status, owner, recommendedAction, dueDate, notes } = req.body as {
-      status?: string;
-      owner?: string;
-      recommendedAction?: string;
-      dueDate?: string;
-      notes?: string;
-    };
+    const { status, owner, recommendedAction, dueDate, notes } = updateHardeningControlSchema.parse(req.body);
     const [current] = await db.select().from(firestormHardeningControlsTable).where(eq(firestormHardeningControlsTable.id, id));
     if (!current) { sendNotFound(res, "Hardening control"); return; }
 
@@ -1334,12 +1439,8 @@ router.get("/firestorm/hardening-summary", authMiddleware(), async (_req, res) =
 
 router.post("/firestorm/push-token", authMiddleware({ required: true }), async (req, res) => {
   try {
-    const { token, platform } = req.body as { token?: string; platform?: string };
-    if (!token || typeof token !== "string") {
-      res.status(400).json({ error: "token is required" });
-      return;
-    }
-    logger.info({ platform: platform ?? "unknown" }, "[Push] Registered push token");
+    const { token, platform } = pushTokenSchema.parse(req.body);
+    logger.info({ platform: platform ?? "unknown", tokenLength: token.length }, "[Push] Registered push token");
     sendSuccess(res, { registered: true, platform: platform ?? "unknown" });
   } catch (err) {
     handleRouteError(res, err, "Failed to register push token");
@@ -1348,7 +1449,7 @@ router.post("/firestorm/push-token", authMiddleware({ required: true }), async (
 
 router.post("/firestorm/ingest/syslog", authMiddleware({ required: true }), async (req, res) => {
   try {
-    const body = req.body;
+    const body = ingestSyslogSchema.parse(req.body ?? {});
     const rawMessage = body?.message || body?.raw || "";
     const severity = /crit|emerg|alert/i.test(rawMessage) ? "critical"
       : /error|err\b/i.test(rawMessage) ? "high"
@@ -1400,7 +1501,8 @@ router.post("/firestorm/cases", authMiddleware({ required: true }), async (req, 
 router.patch("/firestorm/cases/:id", authMiddleware({ required: true }), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id as string);
-    const { status, priority, assignedAnalyst, note, evidenceItem } = req.body;
+    const parsedCase = updateCaseSchema.parse(req.body);
+    const { status, priority, assignedAnalyst, note, evidenceItem } = parsedCase;
     const [current] = await db.select().from(firestormCasesTable).where(eq(firestormCasesTable.id, id));
     if (!current) { sendNotFound(res, "Case"); return; }
 
@@ -1417,7 +1519,7 @@ router.patch("/firestorm/cases/:id", authMiddleware({ required: true }), async (
     }
 
     const existingTrail = Array.isArray(current.auditTrail) ? current.auditTrail : [];
-    const auditUser = req.body.updatedBy ?? "Operator";
+    const auditUser = parsedCase.updatedBy ?? "Operator";
     const auditEntries: Array<{ action: string; user: string; at: string }> = [];
     if (status !== undefined && status !== current.status) {
       auditEntries.push({ action: `Status updated to ${status}`, user: auditUser, at: new Date().toISOString() });
@@ -1435,12 +1537,25 @@ router.patch("/firestorm/cases/:id", authMiddleware({ required: true }), async (
     }
 
     if (evidenceItem) {
+      const ev: Record<string, unknown> = evidenceItem;
+      const evStr = (key: string): string | undefined => {
+        const v = ev[key];
+        return typeof v === "string" ? v : undefined;
+      };
+      const evNum = (key: string): number | undefined => {
+        const v = ev[key];
+        return typeof v === "number" ? v : undefined;
+      };
+      const origin = (ev.origin && typeof ev.origin === "object") ? ev.origin as Record<string, unknown> : {};
+      const originName = typeof origin.name === "string" ? origin.name : undefined;
+      const originId = typeof origin.id === "string" || typeof origin.id === "number" ? String(origin.id) : undefined;
+
       const existingEvidence = Array.isArray(current.evidence) ? current.evidence : [];
-      updates.evidence = [...existingEvidence, { ...evidenceItem, addedAt: new Date().toISOString() }];
-      const isTrace = evidenceItem?.type === "constellation_trace" || evidenceItem?.source === "constellation_graph";
+      updates.evidence = [...existingEvidence, { ...ev, addedAt: new Date().toISOString() }];
+      const isTrace = evStr("type") === "constellation_trace" || evStr("source") === "constellation_graph";
       const summary = isTrace
-        ? `Attached Constellation trace · origin ${evidenceItem.origin?.name ?? evidenceItem.origin?.id ?? "unknown"} · ${evidenceItem.nodeCount ?? 0} nodes within ${evidenceItem.hopCount ?? 0} hops`
-        : `Attached evidence: ${evidenceItem.name ?? "item"}`;
+        ? `Attached Constellation trace · origin ${originName ?? originId ?? "unknown"} · ${evNum("nodeCount") ?? 0} nodes within ${evNum("hopCount") ?? 0} hops`
+        : `Attached evidence: ${evStr("name") ?? "item"}`;
       auditEntries.push({ action: summary, user: auditUser, at: new Date().toISOString() });
     }
 
@@ -1934,22 +2049,15 @@ router.get("/firestorm/tradecraft/decisions/:objectId", authMiddleware({ require
 router.post("/firestorm/tradecraft/decisions", authMiddleware({ required: true }), async (req, res) => {
   try {
     const { randomUUID } = await import("crypto");
-    const body = req.body as Record<string, unknown>;
+    const parsedDecision = tradecraftDecisionInputSchema.parse(req.body);
+    const body = parsedDecision as Record<string, unknown>;
 
-    if (!body.decisionType || typeof body.decisionType !== "string" || !DECISION_TYPE_ENUM.has(body.decisionType)) {
+    if (!DECISION_TYPE_ENUM.has(parsedDecision.decisionType)) {
       res.status(422).json({ error: "Invalid or missing decisionType. Must be one of the 8 supported decision object types." });
       return;
     }
-    if (!body.summary || typeof body.summary !== "string" || body.summary.trim().length < 10) {
-      res.status(422).json({ error: "summary is required and must be at least 10 characters." });
-      return;
-    }
-    if (!body.recommendedAction || typeof body.recommendedAction !== "string") {
-      res.status(422).json({ error: "recommendedAction is required." });
-      return;
-    }
-    if (body.confidence !== undefined) {
-      const conf = parseFloat(String(body.confidence));
+    if (parsedDecision.confidence !== undefined) {
+      const conf = parseFloat(String(parsedDecision.confidence));
       if (isNaN(conf) || conf < 0 || conf > 1) {
         res.status(422).json({ error: "confidence must be a number between 0 and 1." });
         return;
@@ -2067,7 +2175,7 @@ router.post("/firestorm/tradecraft/decisions", authMiddleware({ required: true }
 
 router.put("/firestorm/tradecraft/decisions/:objectId", authMiddleware({ required: true }), async (req, res) => {
   try {
-    const body = req.body as Record<string, unknown>;
+    const body = tradecraftDecisionActionSchema.parse(req.body) as Record<string, unknown>;
     const action = typeof body.action === "string" ? body.action : null;
     const user = req.user;
 
@@ -2138,10 +2246,9 @@ router.get("/firestorm/tradecraft/case-memory/:caseId", authMiddleware({ require
 
 router.post("/firestorm/tradecraft/case-memory", authMiddleware({ required: true }), async (req, res) => {
   try {
-    const body = req.body as Record<string, unknown>;
-    const caseId = typeof body.caseId === "string" ? body.caseId : null;
-    if (!caseId) { res.status(400).json({ error: "caseId required" }); return; }
-    const incidentId = typeof body.incidentId === "string" ? body.incidentId : null;
+    const body = createCaseMemorySchema.parse(req.body);
+    const caseId = body.caseId;
+    const incidentId = body.incidentId ?? null;
     const existing = await db.select().from(firestormCaseMemoryTable).where(sql`${firestormCaseMemoryTable.caseId} = ${caseId}`);
     if (existing.length > 0) {
       sendSuccess(res, existing[0]);
@@ -2167,33 +2274,19 @@ router.post("/firestorm/tradecraft/case-memory", authMiddleware({ required: true
 
 router.put("/firestorm/tradecraft/case-memory/:caseId", authMiddleware({ required: true }), async (req, res) => {
   try {
-    const body = req.body as Record<string, unknown>;
-    const phaseEnum = ["detection", "triage", "investigation", "containment", "eradication", "recovery", "closed"] as const;
-    type CaseMemoryPhase = typeof phaseEnum[number];
+    const body = updateCaseMemorySchema.parse(req.body);
 
     const update: Partial<InsertFirestormCaseMemory> & { lastUpdatedAt: Date; updatedAt: Date } = {
       lastUpdatedAt: new Date(),
       updatedAt: new Date(),
     };
 
-    if (typeof body.phase === "string" && (phaseEnum as readonly string[]).includes(body.phase)) {
-      update.phase = body.phase as CaseMemoryPhase;
-    }
-    if (Array.isArray(body.phaseHistory)) {
-      update.phaseHistory = body.phaseHistory as Array<{ phase: string; enteredAt: string; exitedAt: string | null }>;
-    }
-    if (Array.isArray(body.analystNotes)) {
-      update.analystNotes = body.analystNotes as Array<{ noteId: string; content: string; author: string; noteType: string; createdAt: string }>;
-    }
-    if (Array.isArray(body.changeLog)) {
-      update.changeLog = body.changeLog as unknown[];
-    }
-    if (typeof body.summary === "object" && body.summary !== null && !Array.isArray(body.summary)) {
-      update.summary = body.summary as Record<string, unknown>;
-    }
-    if (typeof body.closedAt === "string") {
-      update.closedAt = new Date(body.closedAt);
-    }
+    if (body.phase) update.phase = body.phase;
+    if (body.phaseHistory) update.phaseHistory = body.phaseHistory;
+    if (body.analystNotes) update.analystNotes = body.analystNotes;
+    if (body.changeLog) update.changeLog = body.changeLog;
+    if (body.summary) update.summary = body.summary;
+    if (body.closedAt) update.closedAt = new Date(body.closedAt);
 
     const [memory] = await db.update(firestormCaseMemoryTable)
       .set(update)
@@ -2325,17 +2418,11 @@ router.get("/firestorm/tradecraft/evidence-index", authMiddleware({ required: tr
 
 router.post("/firestorm/tradecraft/evidence-index/query", authMiddleware({ required: true }), async (req, res) => {
   try {
-    const body = req.body as Record<string, unknown>;
-    const query = typeof body.query === "string" ? body.query.trim() : "";
-    if (!query) {
-      res.status(422).json({ error: "query string is required." });
-      return;
-    }
-    const caseId = typeof body.caseId === "string" ? body.caseId : undefined;
-    const incidentId = typeof body.incidentId === "string" ? body.incidentId : undefined;
-    const sourceTypes = Array.isArray(body.sourceTypes) ? (body.sourceTypes as string[]) : undefined;
-    const maxResults = typeof body.maxResults === "number" ? Math.min(body.maxResults, 50) : 15;
-    const minRelevance = typeof body.minRelevance === "number" ? body.minRelevance : 0.0;
+    const body = evidenceIndexQuerySchema.parse(req.body);
+    const query = body.query.trim();
+    const { caseId, incidentId, sourceTypes } = body;
+    const maxResults = body.maxResults !== undefined ? Math.min(body.maxResults, 50) : 15;
+    const minRelevance = body.minRelevance ?? 0.0;
 
     const result = await queryEvidenceIndex({ query, caseId, incidentId, sourceTypes, maxResults, minRelevance });
 

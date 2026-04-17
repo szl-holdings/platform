@@ -22,7 +22,7 @@ import {
   carlotaReservationsTable,
 } from "@szl-holdings/db";
 import { eq, desc, ilike, or, sql, count } from "drizzle-orm";
-import { sendSuccess, sendNotFound, handleRouteError, sendBadRequest, parsePagination } from "../lib/api-response";
+import { sendSuccess, sendNotFound, handleRouteError, parsePagination } from "../lib/api-response";
 import { authMiddleware, parseIdParam } from "../middlewares/auth";
 import { sendEmail, buildInquiryAckEmail, buildLeadNotificationEmail, INTERNAL_EMAIL } from "../lib/email";
 
@@ -72,6 +72,16 @@ const createLeadershipSchema = z.object({
   linkedinUrl: z.string().url().max(2048).optional().nullable(),
   sortOrder: z.number().int().min(0).optional(),
   metadata: z.record(z.unknown()).optional(),
+});
+
+const createInquirySchema = z.object({
+  name: z.string().min(1, "Name is required").max(200).trim(),
+  email: z.string().email("Valid email is required").max(320).trim().toLowerCase(),
+  subject: z.string().min(1, "Subject is required").max(500).trim(),
+  message: z.string().min(10, "Message must be at least 10 characters").max(5000).trim(),
+  company: z.string().max(200).trim().optional(),
+  intent: z.string().max(200).trim().optional(),
+  source: z.string().max(200).trim().optional(),
 });
 
 const router: IRouter = Router();
@@ -407,47 +417,38 @@ router.get("/holdings/inquiries", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/holdings/inquiries", (req, res) => {
-  const { name, email, subject, message, company, intent, source } = req.body || {};
-  const errors: string[] = [];
-  if (!name || typeof name !== "string" || !name.trim()) errors.push("Name is required");
-  if (!email || typeof email !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.push("Valid email is required");
-  if (!subject || typeof subject !== "string" || !subject.trim()) errors.push("Subject is required");
-  if (!message || typeof message !== "string" || message.trim().length < 10) errors.push("Message must be at least 10 characters");
-  if (errors.length > 0) {
-    res.status(400).json({ error: "Validation failed", details: errors });
-    return;
-  }
+router.post("/holdings/inquiries", validateBody(createInquirySchema), (req, res) => {
+  const { name, email, subject, message, company, intent, source } = req.body as z.infer<typeof createInquirySchema>;
 
   const metadata: Record<string, string> = {};
-  if (typeof intent === "string" && intent.trim()) metadata.intent = intent.trim();
-  if (typeof source === "string" && source.trim()) metadata.source = source.trim();
+  if (intent) metadata.intent = intent;
+  if (source) metadata.source = source;
 
   db.insert(holdingsInquiriesTable).values({
-    name: name.trim(), email: email.trim(),
-    company: typeof company === "string" ? company.trim() : null,
-    subject: subject.trim(), message: message.trim(),
+    name, email,
+    company: company ?? null,
+    subject, message,
     ...(Object.keys(metadata).length > 0 ? { metadata } : {}),
   }).returning().then(([row]) => {
     res.status(201).json({ success: true, data: row });
     setImmediate(async () => {
       try {
         await sendEmail({
-          to: email.trim(),
+          to: email,
           subject: "We received your inquiry — SZL Holdings",
-          html: buildInquiryAckEmail(name.trim(), subject.trim()),
+          html: buildInquiryAckEmail(name, subject),
         });
         await sendEmail({
           to: INTERNAL_EMAIL,
-          subject: `New Inquiry: ${subject.trim()} — from ${name.trim()}`,
+          subject: `New Inquiry: ${subject} — from ${name}`,
           html: buildLeadNotificationEmail({
-            name: name.trim(), email: email.trim(),
-            company: typeof company === "string" ? company.trim() : undefined,
-            subject: subject.trim(), message: message.trim(),
-            intent: typeof intent === "string" ? intent.trim() : undefined,
-            source: typeof source === "string" ? source.trim() : undefined,
+            name, email,
+            company,
+            subject, message,
+            intent,
+            source,
           }),
-          replyTo: email.trim(),
+          replyTo: email,
         });
       } catch (emailErr) {
         logger.warn({ err: emailErr }, "[holdings] Email send failed (non-blocking)");
