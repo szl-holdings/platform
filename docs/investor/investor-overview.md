@@ -6,6 +6,10 @@
 
 ---
 
+![SZL Holdings corporate dashboard — investor portal and platform overview](../../assets/readme/products/szl-holdings-dashboard.jpg)
+
+---
+
 ## Company Summary
 
 | Field | Detail |
@@ -23,6 +27,8 @@
 ---
 
 ## Investment Thesis
+
+![SZL Holdings platform map — command surfaces, execution fabric, domain packs, and shared governance primitives](../../assets/readme/architecture/platform-map.svg)
 
 SZL Holdings is building the **governed decision operating system** — the platform layer that connects what is observable to what is executable, under governance, with full attribution. This is a structurally distinct category from dashboards, AI copilots, and workflow tools.
 

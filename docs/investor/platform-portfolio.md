@@ -8,9 +8,13 @@
 
 SZL Holdings operates a governed decision operating system with six domain packs sharing one governance infrastructure, one execution fabric, one design system, and one data layer. This is not a portfolio of unrelated products — it is a compounding system where each domain pack strengthens the architectural investment shared by all. Six platform primitives (Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine, Event Fabric) run across every surface.
 
+![SZL Holdings ecosystem map — how command surfaces, execution fabric, domain packs, and external signal sources interconnect](../../assets/readme/architecture/ecosystem-map.svg)
+
 ---
 
 ## Lyte — Governed Command Surface
+
+![Unified Command portal — cross-domain ecosystem hub aggregating signals from every domain pack](../../assets/readme/products/command-portal.jpg)
 
 **Category:** Governed Decision Operating System  
 **Layer:** Observe / Decide / Act  
@@ -60,6 +64,8 @@ Alloy is the shared connective tissue of the entire ecosystem. When any platform
 
 ## Aegis — Unified Defense & Intelligence
 
+![Aegis — unified Security & Defense command surface](../../assets/readme/products/aegis-command.jpg)
+
 **Category:** Cybersecurity & Defense Intelligence  
 **Layer:** Observe / Respond  
 **Readiness:** Functional Alpha  
@@ -82,6 +88,8 @@ Enterprise cybersecurity and managed services command. Three unified workspaces 
 ---
 
 ## Terra — Real Estate Intelligence
+
+![Terra — Real Estate Intelligence with NYC distress signal pipeline and ownership tracking](../../assets/readme/products/terra-real-estate.jpg)
 
 **Category:** Real Estate Intelligence  
 **Layer:** Observe / Underwrite  
@@ -109,6 +117,8 @@ Property intelligence for NYC brokers, investors, and portfolio teams.
 
 ## Vessels — Maritime Intelligence
 
+![Vessels — Maritime Intelligence command surface with AIS fleet, sanctions screening, and Helmsman agent](../../assets/readme/products/vessels-maritime.jpg)
+
 **Category:** Maritime Intelligence  
 **Layer:** Track / Analyze  
 **Readiness:** Functional Alpha  
@@ -129,6 +139,8 @@ Fleet command for maritime operators.
 ---
 
 ## Carlota Jo — Private Advisory
+
+![Carlota Jo Consulting — luxury advisory web platform](../../assets/readme/products/carlota-jo.jpg)
 
 **Category:** Private Advisory  
 **Layer:** Advise  

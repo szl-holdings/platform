@@ -21,6 +21,8 @@
 
 ## Product Readiness Matrix
 
+![SZL Holdings ecosystem map — how command surfaces, execution fabric, domain packs, and external signal sources interconnect](../../assets/readme/architecture/ecosystem-map.svg)
+
 ### Lyte — Governed Command Surface
 
 | Dimension | Assessment |
@@ -49,6 +51,8 @@
 
 ### Aegis — Unified Defense & Intelligence
 
+![Aegis — unified Security & Defense command surface](../../assets/readme/products/aegis-command.jpg)
+
 | Dimension | Assessment |
 |-----------|-----------|
 | **Readiness Label** | Functional Alpha |
@@ -61,6 +65,8 @@
 
 ### Terra — Real Estate Intelligence
 
+![Terra — Real Estate Intelligence with NYC distress signal pipeline and ownership tracking](../../assets/readme/products/terra-real-estate.jpg)
+
 | Dimension | Assessment |
 |-----------|-----------|
 | **Readiness Label** | Functional Alpha |
@@ -72,6 +78,8 @@
 
 ### Vessels — Maritime Intelligence
 
+![Vessels — Maritime Intelligence command surface with AIS fleet, sanctions screening, and Helmsman agent](../../assets/readme/products/vessels-maritime.jpg)
+
 | Dimension | Assessment |
 |-----------|-----------|
 | **Readiness Label** | Functional Alpha |
@@ -82,6 +90,8 @@
 | **What's Needed for GA** | Live AIS data feed subscription, sanctions list API, billing activation |
 
 ### Carlota Jo — Private Advisory
+
+![Carlota Jo Consulting — luxury advisory web platform](../../assets/readme/products/carlota-jo.jpg)
 
 | Dimension | Assessment |
 |-----------|-----------|
