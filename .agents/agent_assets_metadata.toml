@@ -233,3 +233,9 @@ id = "JCKLG0Ag-7g0dvXRBQCQv"
 uri = "file://attached_assets/launch-bundle-2026.04.zip"
 type = "unspecified"
 title = "Launch Bundle — Ecosystem Cycle 2026.04 (zip)"
+
+[[outputs]]
+id = "YrYkn9JzDwMCO40yd_lAV"
+uri = "file://LINKEDIN-LAUNCH.zip"
+type = "unspecified"
+title = "LinkedIn Launch Bundle — SZL Holdings ecosystem (post + 10 carousel images + posting guide)"
