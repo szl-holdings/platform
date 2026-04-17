@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Zap, CheckCircle, AlertCircle, Clock, Play, ChevronDown, ChevronUp, RefreshCw } from "lucide-react";
+import { Zap, CheckCircle, AlertCircle, Clock, Play, ChevronDown, ChevronUp, RefreshCw, History } from "lucide-react";
 
 interface SignalChainStep {
   id: string;
@@ -38,6 +38,22 @@ interface SignalChain {
   lastExecution?: SignalChainExecution;
 }
 
+interface AuditRow {
+  id: number;
+  chainId: string;
+  triggerDomain: string;
+  payloadSnapshot: {
+    executionId: string;
+    triggerReason: string;
+    triggerValue: number;
+    threshold: number;
+    auditRef?: string;
+  } | null;
+  outcomes: SignalChainStep[] | null;
+  triggeredAt: string;
+  status: "running" | "completed" | "failed";
+}
+
 const DOMAIN_COLORS: Record<string, string> = {
   vessels: "#0ea5e9",
   aegis: "#ef4444",
@@ -54,9 +70,15 @@ const SEVERITY_COLORS: Record<string, string> = {
   low: "#6b7280",
 };
 
-function timeAgo(ts?: number) {
+const STATUS_COLORS: Record<string, string> = {
+  completed: "#22c55e",
+  failed: "#ef4444",
+  running: "#f59e0b",
+};
+
+function timeAgo(ts?: number | string) {
   if (!ts) return "Never";
-  const diff = Date.now() - ts;
+  const diff = Date.now() - (typeof ts === "string" ? new Date(ts).getTime() : ts);
   if (diff < 60000) return "Just now";
   if (diff < 3600000) return `${Math.round(diff / 60000)}m ago`;
   if (diff < 86400000) return `${Math.round(diff / 3600000)}h ago`;
@@ -72,6 +94,11 @@ export function SignalChainsPanel({ apiBase = "" }: SignalChainsPanelProps) {
   const [loading, setLoading] = useState(true);
   const [triggering, setTriggering] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [auditView, setAuditView] = useState<string | null>(null);
+  const [auditRows, setAuditRows] = useState<Record<string, AuditRow[]>>({});
+  const [auditLoading, setAuditLoading] = useState<string | null>(null);
+  const [auditHasMore, setAuditHasMore] = useState<Record<string, boolean>>({});
+  const [auditTotal, setAuditTotal] = useState<Record<string, number>>({});
 
   async function fetchChains() {
     setLoading(true);
@@ -83,6 +110,26 @@ export function SignalChainsPanel({ apiBase = "" }: SignalChainsPanelProps) {
       /* ignore */
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function fetchAudit(chainId: string, append = false) {
+    setAuditLoading(chainId);
+    try {
+      const currentRows = append ? (auditRows[chainId] ?? []) : [];
+      const offset = append ? currentRows.length : 0;
+      const res = await fetch(`${apiBase}/api/signal-chains/${chainId}/audit?limit=25&offset=${offset}`);
+      const data = await res.json();
+      if (data.success) {
+        const newRows = append ? [...currentRows, ...data.entries] : data.entries;
+        setAuditRows((prev) => ({ ...prev, [chainId]: newRows }));
+        setAuditHasMore((prev) => ({ ...prev, [chainId]: !!data.hasMore }));
+        setAuditTotal((prev) => ({ ...prev, [chainId]: data.total ?? 0 }));
+      }
+    } catch {
+      /* ignore */
+    } finally {
+      setAuditLoading(null);
     }
   }
 
@@ -100,11 +147,25 @@ export function SignalChainsPanel({ apiBase = "" }: SignalChainsPanelProps) {
           )
         );
         setExpanded(chainId);
+        if (auditView === chainId) {
+          await fetchAudit(chainId);
+        }
       }
     } catch {
       /* ignore */
     } finally {
       setTriggering(null);
+    }
+  }
+
+  function toggleAudit(chainId: string) {
+    if (auditView === chainId) {
+      setAuditView(null);
+    } else {
+      setAuditView(chainId);
+      if (!auditRows[chainId]) {
+        fetchAudit(chainId);
+      }
     }
   }
 
@@ -148,6 +209,8 @@ export function SignalChainsPanel({ apiBase = "" }: SignalChainsPanelProps) {
           const severityColor = SEVERITY_COLORS[chain.severity] ?? "#6b7280";
           const domainColor = DOMAIN_COLORS[chain.triggerDomain] ?? "#6b7280";
           const isExpanded = expanded === chain.id;
+          const isAuditOpen = auditView === chain.id;
+          const chainAuditRows = auditRows[chain.id] ?? [];
 
           return (
             <div
@@ -226,16 +289,26 @@ export function SignalChainsPanel({ apiBase = "" }: SignalChainsPanelProps) {
                     <Clock className="w-3 h-3" />
                     <span>Last: {timeAgo(chain.lastExecuted)}</span>
                   </div>
-                  {chain.lastExecution && (
+                  <div className="flex items-center gap-2 ml-auto">
+                    {chain.lastExecution && (
+                      <button
+                        onClick={() => setExpanded(isExpanded ? null : chain.id)}
+                        className="flex items-center gap-1 hover:opacity-80"
+                        style={{ color: "#8b7ac8" }}
+                      >
+                        {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                        {isExpanded ? "Hide" : "View"} last execution
+                      </button>
+                    )}
                     <button
-                      onClick={() => setExpanded(isExpanded ? null : chain.id)}
-                      className="flex items-center gap-1 ml-auto hover:opacity-80"
-                      style={{ color: "#8b7ac8" }}
+                      onClick={() => toggleAudit(chain.id)}
+                      className="flex items-center gap-1 hover:opacity-80"
+                      style={{ color: isAuditOpen ? "#22c55e" : "var(--color-fg-muted)" }}
                     >
-                      {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-                      {isExpanded ? "Hide" : "View"} last execution
+                      <History className="w-3 h-3" />
+                      {isAuditOpen ? "Hide" : "Full"} history
                     </button>
-                  )}
+                  </div>
                 </div>
               </div>
 
@@ -283,6 +356,113 @@ export function SignalChainsPanel({ apiBase = "" }: SignalChainsPanelProps) {
                         </div>
                       </div>
                     ))}
+                  </div>
+                </div>
+              )}
+
+              {isAuditOpen && (
+                <div
+                  className="px-4 pb-4 pt-0"
+                  style={{ borderTop: "1px solid var(--color-surface-border)" }}
+                >
+                  <div className="pt-3 flex flex-col gap-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--color-fg-muted)" }}>
+                          Persistent Audit Trail · DB
+                        </div>
+                        {(auditTotal[chain.id] ?? 0) > 0 && (
+                          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded" style={{ backgroundColor: "var(--color-surface-base)", color: "var(--color-fg-muted)" }}>
+                            {auditTotal[chain.id]} total
+                          </span>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => fetchAudit(chain.id, false)}
+                        disabled={auditLoading === chain.id}
+                        className="flex items-center gap-1 text-[10px] hover:opacity-80"
+                        style={{ color: "var(--color-fg-muted)" }}
+                      >
+                        <RefreshCw className={`w-3 h-3 ${auditLoading === chain.id ? "animate-spin" : ""}`} />
+                        Reload
+                      </button>
+                    </div>
+
+                    {auditLoading === chain.id && chainAuditRows.length === 0 && (
+                      <div className="text-[11px] text-center py-4" style={{ color: "var(--color-fg-muted)" }}>
+                        Loading audit history…
+                      </div>
+                    )}
+
+                    {auditLoading !== chain.id && chainAuditRows.length === 0 && (
+                      <div className="text-[11px] text-center py-4" style={{ color: "var(--color-fg-muted)" }}>
+                        No persistent executions yet. Trigger the chain to begin building an audit trail.
+                      </div>
+                    )}
+
+                    {chainAuditRows.map((row) => (
+                      <div
+                        key={row.id}
+                        className="rounded-lg p-3 flex flex-col gap-1.5"
+                        style={{ backgroundColor: "var(--color-surface-base)", border: "1px solid var(--color-surface-border)" }}
+                      >
+                        <div className="flex items-center justify-between flex-wrap gap-2">
+                          <div className="flex items-center gap-2">
+                            <span
+                              className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded"
+                              style={{ color: STATUS_COLORS[row.status] ?? "#6b7280", backgroundColor: `color-mix(in srgb, ${STATUS_COLORS[row.status] ?? "#6b7280"} 12%, transparent)` }}
+                            >
+                              {row.status}
+                            </span>
+                            <span className="text-[10px] font-mono" style={{ color: "var(--color-fg-muted)" }}>
+                              #{row.id}
+                            </span>
+                          </div>
+                          <span className="text-[10px]" style={{ color: "var(--color-fg-muted)" }}>
+                            {timeAgo(row.triggeredAt)}
+                          </span>
+                        </div>
+                        {row.payloadSnapshot && (
+                          <div className="text-[11px]" style={{ color: "var(--color-fg-secondary)" }}>
+                            <span className="font-bold">Trigger: </span>{row.payloadSnapshot.triggerReason}
+                            <span className="ml-2 text-[10px]" style={{ color: "var(--color-fg-muted)" }}>
+                              ({row.payloadSnapshot.triggerValue} vs {row.payloadSnapshot.threshold})
+                            </span>
+                          </div>
+                        )}
+                        {row.outcomes && Array.isArray(row.outcomes) && row.outcomes.length > 0 && (
+                          <div className="flex flex-col gap-1 mt-1">
+                            {(row.outcomes as SignalChainStep[]).map((step, i) => (
+                              <div key={i} className="flex items-start gap-2 text-[10px]">
+                                <CheckCircle className="w-3 h-3 shrink-0 mt-0.5" style={{ color: "#22c55e" }} />
+                                <span style={{ color: "var(--color-fg-muted)" }}>{step.explainability}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+
+                    {chainAuditRows.length > 0 && auditHasMore[chain.id] && (
+                      <button
+                        onClick={() => fetchAudit(chain.id, true)}
+                        disabled={auditLoading === chain.id}
+                        className="w-full text-[10px] py-2 rounded-lg text-center hover:opacity-80 disabled:opacity-40"
+                        style={{ backgroundColor: "var(--color-surface-base)", border: "1px solid var(--color-surface-border)", color: "var(--color-fg-muted)" }}
+                      >
+                        {auditLoading === chain.id ? (
+                          <span className="flex items-center justify-center gap-1"><RefreshCw className="w-3 h-3 animate-spin" /> Loading…</span>
+                        ) : (
+                          `Load more (showing ${chainAuditRows.length} of ${auditTotal[chain.id]})`
+                        )}
+                      </button>
+                    )}
+
+                    {chainAuditRows.length > 0 && !auditHasMore[chain.id] && (
+                      <div className="text-[10px] text-center py-1" style={{ color: "var(--color-fg-muted)" }}>
+                        All {auditTotal[chain.id]} execution{(auditTotal[chain.id] ?? 0) !== 1 ? "s" : ""} shown
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

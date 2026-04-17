@@ -5,11 +5,12 @@
  * are crossed, and logs each step with full explainability metadata.
  *
  * Routes:
- *   GET  /signal-chains            — list all signal chains and their status
- *   GET  /signal-chains/:id        — get a specific chain with execution history
- *   POST /signal-chains/:id/trigger — manually trigger a chain (for demo/test)
- *   GET  /signal-chains/audit-log  — full audit trail of chain executions
- *   POST /signal-chains/evaluate   — evaluate all chains against current signals
+ *   GET  /signal-chains                — list all signal chains and their status
+ *   GET  /signal-chains/audit-log      — full in-memory audit trail of chain executions
+ *   GET  /signal-chains/:id            — get a specific chain with execution history
+ *   GET  /signal-chains/:id/audit      — persistent audit history from DB for a chain
+ *   POST /signal-chains/:id/trigger    — manually trigger a chain (for demo/test)
+ *   POST /signal-chains/evaluate       — evaluate all chains against current signals
  */
 
 import { Router, type IRouter } from "express";
@@ -17,6 +18,8 @@ import { authMiddleware } from "../middlewares/auth";
 import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../middlewares/sliding-window-limiter";
 import { logActivity } from "@szl-holdings/audit";
 import { logger } from "../lib/logger";
+import { db, signalChainExecutionsTable } from "@szl-holdings/db";
+import { desc, eq, count } from "drizzle-orm";
 
 const router: IRouter = Router();
 
@@ -229,6 +232,27 @@ function buildExecution(chain: SignalChain, manual = false): SignalChainExecutio
   };
 }
 
+async function persistExecution(execution: SignalChainExecution, triggerDomain: string): Promise<void> {
+  try {
+    await db.insert(signalChainExecutionsTable).values({
+      chainId: execution.chainId,
+      triggerDomain,
+      payloadSnapshot: {
+        executionId: execution.executionId,
+        triggerReason: execution.triggerReason,
+        triggerValue: execution.triggerValue,
+        threshold: execution.threshold,
+        auditRef: execution.auditRef,
+      },
+      outcomes: execution.steps,
+      triggeredAt: new Date(execution.triggeredAt),
+      status: execution.status,
+    });
+  } catch (err) {
+    logger.warn({ err }, "[SignalChains] DB persist failed — execution still logged in memory");
+  }
+}
+
 router.get(
   "/signal-chains",
   authMiddleware({ required: false }),
@@ -261,6 +285,52 @@ router.get(
     const limit = Math.min(Number(req.query.limit ?? 50), 200);
     const log = auditLog.slice(-limit).reverse();
     res.json({ success: true, entries: log, total: auditLog.length });
+  }
+);
+
+router.get(
+  "/signal-chains/:id/audit",
+  authMiddleware({ required: false }),
+  perUserApiSlidingLimiter,
+  async (req, res) => {
+    const { id } = req.params as { id: string };
+    const chain = chainState.get(id);
+    if (!chain) {
+      res.status(404).json({ success: false, error: "Signal chain not found" });
+      return;
+    }
+    const rawLimit = Number(req.query.limit ?? 25);
+    const rawOffset = Number(req.query.offset ?? 0);
+    const limit = Number.isFinite(rawLimit) && rawLimit > 0 ? Math.min(Math.floor(rawLimit), 200) : 25;
+    const offset = Number.isFinite(rawOffset) && rawOffset >= 0 ? Math.floor(rawOffset) : 0;
+    try {
+      const [rows, countRows] = await Promise.all([
+        db
+          .select()
+          .from(signalChainExecutionsTable)
+          .where(eq(signalChainExecutionsTable.chainId, id))
+          .orderBy(desc(signalChainExecutionsTable.triggeredAt))
+          .limit(limit)
+          .offset(offset),
+        db
+          .select({ total: count() })
+          .from(signalChainExecutionsTable)
+          .where(eq(signalChainExecutionsTable.chainId, id)),
+      ]);
+      const total = Number(countRows[0]?.total ?? 0);
+      res.json({
+        success: true,
+        chainId: id,
+        entries: rows,
+        total,
+        limit,
+        offset,
+        hasMore: offset + rows.length < total,
+      });
+    } catch (err) {
+      logger.warn({ err }, "[SignalChains] DB audit query failed");
+      res.status(500).json({ success: false, error: "Failed to query audit trail" });
+    }
   }
 );
 
@@ -300,6 +370,8 @@ router.post(
     chain.lastExecution = execution;
     auditLog.push(execution);
 
+    await persistExecution(execution, chain.triggerDomain);
+
     try {
       await logActivity({
         action: "signal_chain.triggered",
@@ -337,6 +409,8 @@ router.post(
       chain.lastExecution = execution;
       auditLog.push(execution);
       triggered.push(execution);
+
+      await persistExecution(execution, chain.triggerDomain);
 
       try {
         await logActivity({

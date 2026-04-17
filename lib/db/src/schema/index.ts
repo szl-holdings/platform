@@ -128,3 +128,4 @@ export * from "./deployments";
 export * from "./cognitive_runtime";
 
 export * from "./skill_library";
+export * from "./signal_chain_executions";
