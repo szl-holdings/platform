@@ -15,14 +15,19 @@
  * POST /cortex/action-drafts/generate — Generate drafts from a fusion alert or correlation
  * POST /cortex/action-drafts/:id/approve — Approve an action draft (persisted + governance audit)
  * POST /cortex/action-drafts/:id/dismiss — Dismiss an action draft (persisted)
+ * POST /cortex/entity-graph/snapshot      — Capture and persist current graph state
+ * GET  /cortex/entity-graph/snapshots     — List org-scoped graph snapshots (paginated)
+ * GET  /cortex/entity-graph/snapshot/:id  — Retrieve a single snapshot by UUID
+ * DELETE /cortex/entity-graph/snapshot/:id — Delete a snapshot manually
  */
 
 import crypto from "crypto";
 import { Router, type IRouter } from "express";
-import { eq, and, desc, sql, inArray } from "drizzle-orm";
+import { eq, and, desc, sql, inArray, gt } from "drizzle-orm";
 import {
   db,
   cortexActionDraftsTable,
+  cortexGraphSnapshotsTable,
   dailyBriefingsTable,
   alloyAuditLogTable,
 } from "@szl-holdings/db";
@@ -894,6 +899,247 @@ router.post(
       });
     } catch (err) {
       handleRouteError(res, err, "CORTEX action draft dismissal failed");
+    }
+  }
+);
+
+
+const DEFAULT_RETENTION_DAYS = parseInt(process.env.CORTEX_SNAPSHOT_RETENTION_DAYS ?? "30", 10);
+
+router.post(
+  "/cortex/entity-graph/snapshot",
+  authMiddleware({ required: true }),
+  perUserWriteSlidingLimiter,
+  async (req, res) => {
+    try {
+      const orgId = callerOrgId(req as Record<string, unknown>);
+      if (!orgId) {
+        sendBadRequest(res, "An organisation context is required to create a graph snapshot");
+        return;
+      }
+      const label: string | undefined = typeof req.body?.label === "string" ? req.body.label.slice(0, 120) : undefined;
+      const parsedRetention = parseInt(String(req.body?.retentionDays ?? DEFAULT_RETENTION_DAYS), 10);
+      const retentionDays = Math.min(Math.max(1, Number.isFinite(parsedRetention) ? parsedRetention : DEFAULT_RETENTION_DAYS), 365);
+
+      const domain = req.body?.domain ? String(req.body.domain) : undefined;
+      const parsedLimit = parseInt(String(req.body?.limit ?? "60"), 10);
+      const limit = Math.min(Number.isFinite(parsedLimit) ? Math.max(1, parsedLimit) : 60, 150);
+      const parsedRisk = parseFloat(String(req.body?.minRisk ?? "0"));
+      const minRisk = Number.isFinite(parsedRisk) ? Math.min(Math.max(0, parsedRisk), 1) : 0;
+
+      const domainEntities = await ontologyEngine.getDomainEntities(domain ?? "vessels", Math.ceil(limit / 2));
+      const allDomains = ["vessels", "firestorm", "terra", "prism", "szl"];
+      const crossDomainEntities = domain
+        ? []
+        : (await Promise.all(
+            allDomains.slice(0, 4).map((d) => ontologyEngine.getDomainEntities(d, Math.ceil(limit / 8)))
+          )).flat();
+
+      const rawEntities = [...domainEntities, ...crossDomainEntities]
+        .filter((e, i, arr) => arr.findIndex((x) => x.id === e.id) === i)
+        .filter((e) => (e.riskScore ?? 0) >= minRisk)
+        .slice(0, limit);
+
+      const nodes = rawEntities.map((e) => ({
+        id: e.id,
+        label: e.name,
+        type: e.type,
+        domain: e.domain,
+        riskScore: e.riskScore ?? 0,
+        tags: e.tags ?? [],
+        metadata: e.metadata,
+        lastSeen: e.lastUpdated,
+      }));
+
+      const entityIds = new Set(rawEntities.map((e) => e.id));
+      const edgesRaw: Array<{ source: string; target: string; type: string; strength: string }> = [];
+      for (const entity of rawEntities.slice(0, 20)) {
+        try {
+          const connections = await ontologyEngine.getEntityConnections(entity.id);
+          const allConns = [...connections.outgoing.map((c) => c.rel), ...connections.incoming.map((c) => c.rel)];
+          for (const conn of allConns) {
+            if (entityIds.has(conn.fromEntityId) && entityIds.has(conn.toEntityId)) {
+              edgesRaw.push({ source: conn.fromEntityId, target: conn.toEntityId, type: conn.type, strength: conn.strength });
+            }
+          }
+        } catch { /* skip */ }
+      }
+      const edges = edgesRaw.filter(
+        (e, i, arr) =>
+          arr.findIndex((x) => x.source === e.source && x.target === e.target && x.type === e.type) === i
+      );
+
+      const graphStats = await ontologyEngine.getGraphStats().catch(() => ({ totalEntities: 0, totalRelationships: 0 }));
+      const snapshotAt = new Date();
+      const expiresAt = new Date(snapshotAt.getTime() + retentionDays * 24 * 60 * 60 * 1000);
+
+      const [created] = await db
+        .insert(cortexGraphSnapshotsTable)
+        .values({
+          snapshotUuid: crypto.randomUUID(),
+          orgId: orgId,
+          label: label ?? null,
+          nodes: nodes as unknown as Record<string, unknown>[],
+          edges: edges as unknown as Record<string, unknown>[],
+          meta: {
+            totalNodes: nodes.length,
+            totalEdges: edges.length,
+            domain: domain ?? "all",
+            minRisk,
+            graphStats,
+          } as Record<string, unknown>,
+          retentionDays,
+          expiresAt,
+        })
+        .returning();
+
+      logger.info({ snapshotUuid: created.snapshotUuid, orgId }, "[CORTEX] Graph snapshot created");
+
+      sendSuccess(res, {
+        snapshot: {
+          id: created.snapshotUuid,
+          label: created.label,
+          snapshotAt: created.snapshotAt,
+          expiresAt: created.expiresAt,
+          retentionDays: created.retentionDays,
+          meta: created.meta,
+        },
+        message: "Graph snapshot saved",
+      });
+    } catch (err) {
+      handleRouteError(res, err, "CORTEX graph snapshot creation failed");
+    }
+  }
+);
+
+router.get(
+  "/cortex/entity-graph/snapshots",
+  authMiddleware({ required: true }),
+  perUserApiSlidingLimiter,
+  async (req, res) => {
+    try {
+      const orgIds = callerOrgIds(req as Record<string, unknown>);
+      if (orgIds.length === 0) {
+        sendSuccess(res, { snapshots: [], total: 0 });
+        return;
+      }
+      const limit = Math.min(parseInt(String(req.query.limit ?? "20")), 100);
+      const offset = Math.max(0, parseInt(String(req.query.offset ?? "0"), 10));
+
+      const now = new Date();
+      const orgFilter = and(
+        inArray(cortexGraphSnapshotsTable.orgId, orgIds),
+        gt(cortexGraphSnapshotsTable.expiresAt, now)
+      );
+
+      const [countRow] = await db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(cortexGraphSnapshotsTable)
+        .where(orgFilter);
+
+      const rows = await db
+        .select({
+          id: cortexGraphSnapshotsTable.snapshotUuid,
+          label: cortexGraphSnapshotsTable.label,
+          snapshotAt: cortexGraphSnapshotsTable.snapshotAt,
+          expiresAt: cortexGraphSnapshotsTable.expiresAt,
+          retentionDays: cortexGraphSnapshotsTable.retentionDays,
+          meta: cortexGraphSnapshotsTable.meta,
+        })
+        .from(cortexGraphSnapshotsTable)
+        .where(orgFilter)
+        .orderBy(desc(cortexGraphSnapshotsTable.snapshotAt))
+        .limit(limit)
+        .offset(offset);
+
+      sendSuccess(res, { snapshots: rows, total: countRow?.count ?? 0 });
+    } catch (err) {
+      handleRouteError(res, err, "CORTEX graph snapshots list failed");
+    }
+  }
+);
+
+router.get(
+  "/cortex/entity-graph/snapshot/:uuid",
+  authMiddleware({ required: true }),
+  perUserApiSlidingLimiter,
+  async (req, res) => {
+    try {
+      const { uuid } = req.params;
+      const orgIds = callerOrgIds(req as Record<string, unknown>);
+
+      const rows = await db
+        .select()
+        .from(cortexGraphSnapshotsTable)
+        .where(eq(cortexGraphSnapshotsTable.snapshotUuid, uuid))
+        .limit(1);
+
+      const row = rows[0];
+      if (!row) {
+        sendNotFound(res, "Snapshot not found");
+        return;
+      }
+
+      if (orgIds.length === 0 || row.orgId === null || !orgIds.includes(row.orgId)) {
+        sendNotFound(res, "Snapshot not found");
+        return;
+      }
+
+      if (new Date(row.expiresAt).getTime() <= Date.now()) {
+        sendNotFound(res, "Snapshot has expired");
+        return;
+      }
+
+      sendSuccess(res, {
+        snapshot: {
+          id: row.snapshotUuid,
+          label: row.label,
+          snapshotAt: row.snapshotAt,
+          expiresAt: row.expiresAt,
+          retentionDays: row.retentionDays,
+          nodes: row.nodes,
+          edges: row.edges,
+          meta: row.meta,
+        },
+      });
+    } catch (err) {
+      handleRouteError(res, err, "CORTEX graph snapshot fetch failed");
+    }
+  }
+);
+
+router.delete(
+  "/cortex/entity-graph/snapshot/:uuid",
+  authMiddleware({ required: true }),
+  perUserWriteSlidingLimiter,
+  async (req, res) => {
+    try {
+      const { uuid } = req.params;
+      const orgIds = callerOrgIds(req as Record<string, unknown>);
+
+      const rows = await db
+        .select({ id: cortexGraphSnapshotsTable.id, orgId: cortexGraphSnapshotsTable.orgId })
+        .from(cortexGraphSnapshotsTable)
+        .where(eq(cortexGraphSnapshotsTable.snapshotUuid, uuid))
+        .limit(1);
+
+      const row = rows[0];
+      if (!row) {
+        sendNotFound(res, "Snapshot not found");
+        return;
+      }
+
+      if (orgIds.length === 0 || row.orgId === null || !orgIds.includes(row.orgId)) {
+        sendNotFound(res, "Snapshot not found");
+        return;
+      }
+
+      await db.delete(cortexGraphSnapshotsTable).where(eq(cortexGraphSnapshotsTable.snapshotUuid, uuid));
+
+      logger.info({ snapshotUuid: uuid }, "[CORTEX] Graph snapshot deleted");
+      sendSuccess(res, { message: "Snapshot deleted" });
+    } catch (err) {
+      handleRouteError(res, err, "CORTEX graph snapshot deletion failed");
     }
   }
 );

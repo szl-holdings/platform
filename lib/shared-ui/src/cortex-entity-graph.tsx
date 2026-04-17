@@ -25,6 +25,15 @@ export interface EntityGraphMeta {
   graphStats?: { totalEntities: number; totalRelationships: number };
 }
 
+export interface SnapshotInfo {
+  id: string;
+  label?: string | null;
+  snapshotAt: string | Date;
+  expiresAt: string | Date;
+  retentionDays: number;
+  meta?: Record<string, unknown>;
+}
+
 export interface CortexEntityGraphProps {
   nodes: EntityGraphNode[];
   edges: EntityGraphEdge[];
@@ -41,6 +50,13 @@ export interface CortexEntityGraphProps {
   onSinceHoursChange?: (hours: number | undefined) => void;
   minRisk?: number;
   onMinRiskChange?: (minRisk: number) => void;
+  viewMode?: "live" | "snapshot";
+  onViewModeChange?: (mode: "live" | "snapshot") => void;
+  snapshots?: SnapshotInfo[];
+  activeSnapshotId?: string;
+  onSnapshotSelect?: (snapshotId: string) => void;
+  onSnapshotCapture?: () => void;
+  snapshotLoading?: boolean;
 }
 
 const DOMAIN_COLORS: Record<string, string> = {
@@ -195,6 +211,13 @@ export function CortexEntityGraph({
   onSinceHoursChange,
   minRisk = 0,
   onMinRiskChange,
+  viewMode = "live",
+  onViewModeChange,
+  snapshots,
+  activeSnapshotId,
+  onSnapshotSelect,
+  onSnapshotCapture,
+  snapshotLoading,
 }: CortexEntityGraphProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -389,6 +412,105 @@ export function CortexEntityGraph({
 
   return (
     <div className={cn(className)} style={{ fontFamily: "system-ui, sans-serif" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10, flexWrap: "wrap" as const }}>
+        <div style={{ display: "flex", borderRadius: 6, overflow: "hidden", border: "1px solid #ffffff18" }}>
+          {(["live", "snapshot"] as const).map((mode) => {
+            const isActive = viewMode === mode;
+            return (
+              <button
+                key={mode}
+                onClick={() => onViewModeChange?.(mode)}
+                style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  padding: "4px 14px",
+                  border: "none",
+                  background: isActive
+                    ? mode === "live" ? "#22c55e20" : "#a78bfa20"
+                    : "transparent",
+                  color: isActive
+                    ? mode === "live" ? "#22c55e" : "#a78bfa"
+                    : "#ffffff40",
+                  cursor: "pointer",
+                  letterSpacing: "0.06em",
+                  textTransform: "uppercase" as const,
+                  transition: "background 0.15s, color 0.15s",
+                }}
+              >
+                {mode === "live" ? "◉ Live" : "◷ Snapshot"}
+              </button>
+            );
+          })}
+        </div>
+
+        {viewMode === "live" && onSnapshotCapture && (
+          <button
+            onClick={onSnapshotCapture}
+            disabled={snapshotLoading}
+            style={{
+              fontSize: 10,
+              fontWeight: 600,
+              padding: "4px 11px",
+              borderRadius: 5,
+              border: "1px solid #ffffff20",
+              background: snapshotLoading ? "#ffffff08" : "#ffffff0a",
+              color: snapshotLoading ? "#ffffff30" : "#ffffff60",
+              cursor: snapshotLoading ? "default" : "pointer",
+              letterSpacing: "0.04em",
+            }}
+          >
+            {snapshotLoading ? "Capturing…" : "⊕ Capture Snapshot"}
+          </button>
+        )}
+
+        {viewMode === "snapshot" && snapshots && snapshots.length > 0 && (
+          <select
+            value={activeSnapshotId ?? ""}
+            onChange={(e) => onSnapshotSelect?.(e.target.value)}
+            style={{
+              fontSize: 11,
+              padding: "3px 8px",
+              borderRadius: 5,
+              border: "1px solid #ffffff20",
+              background: "#0d0d0d",
+              color: "#ffffff80",
+              cursor: "pointer",
+              maxWidth: 260,
+            }}
+          >
+            <option value="" disabled>Select snapshot…</option>
+            {snapshots.map((s) => {
+              const d = new Date(s.snapshotAt);
+              const label = s.label
+                ? s.label
+                : d.toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+              return (
+                <option key={s.id} value={s.id}>{label}</option>
+              );
+            })}
+          </select>
+        )}
+
+        {viewMode === "snapshot" && (!snapshots || snapshots.length === 0) && (
+          <span style={{ fontSize: 11, color: "#ffffff30", fontStyle: "italic" }}>
+            No snapshots yet — switch to Live and capture one
+          </span>
+        )}
+
+        {viewMode === "snapshot" && activeSnapshotId && snapshots && (
+          (() => {
+            const snap = snapshots.find((s) => s.id === activeSnapshotId);
+            if (!snap) return null;
+            const expiresAt = new Date(snap.expiresAt);
+            return (
+              <span style={{ fontSize: 10, color: "#ffffff30", marginLeft: "auto" }}>
+                Expires {expiresAt.toLocaleDateString()}
+              </span>
+            );
+          })()
+        )}
+      </div>
+
       <div style={{ display: "flex", gap: 6, flexWrap: "wrap" as const, marginBottom: 10 }}>
         {DOMAINS_LIST.map((d) => {
           const color = DOMAIN_COLORS[d] ?? "#ffffff";

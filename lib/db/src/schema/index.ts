@@ -110,6 +110,7 @@ export * from "./web_push";
 export * from "./audit_chain_events";
 export * from "./daily_briefings";
 export * from "./cortex_action_drafts";
+export * from "./cortex_graph_snapshots";
 export * from "./multiplayer_sessions";
 export * from "./settings";
 export * from "./changelog";
