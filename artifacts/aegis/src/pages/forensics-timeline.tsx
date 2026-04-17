@@ -1,5 +1,6 @@
-import { Clock, Shield, AlertTriangle, Eye, Search, Filter, FileText, Terminal, Globe, Lock, Unlock, Database } from "lucide-react";
+import { Clock, Shield, AlertTriangle, Eye, Search, Filter, FileText, Terminal, Globe, Lock, Unlock, Database, Factory } from "lucide-react";
 import { useState } from "react";
+import { Link } from "wouter";
 
 interface ForensicEvent {
   id: string;
@@ -44,11 +45,19 @@ export default function ForensicsTimeline() {
 
   return (
     <div className="p-6 space-y-6">
-      <div>
-        <h1 className="text-2xl font-display font-bold flex items-center gap-2">
-          <Clock className="w-6 h-6 text-primary" /> Forensics Timeline
-        </h1>
-        <p className="text-sm text-muted-foreground mt-1">Event reconstruction with chain-of-custody, timeline correlation, and IOC extraction</p>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-display font-bold flex items-center gap-2">
+            <Clock className="w-6 h-6 text-primary" /> Forensics Timeline
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">Event reconstruction with chain-of-custody, timeline correlation, and IOC extraction</p>
+        </div>
+        <Link
+          href="/ot-ics"
+          className="text-xs px-3 py-2 rounded-lg border border-emerald-500/30 bg-emerald-500/5 text-emerald-300 hover:bg-emerald-500/10 transition flex items-center gap-2"
+        >
+          <Factory className="w-3.5 h-3.5" /> OT / ICS Protocol Decoder
+        </Link>
       </div>
 
       <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4 flex items-center gap-3">

@@ -93,6 +93,7 @@ const ObservabilityPage = lazy(() => import("@/pages/observability"));
 const SentinelDashboard = lazy(() => import("@/pages/sentinel-dashboard"));
 const Watchlists = lazy(() => import("@/pages/watchlists"));
 const ForensicsTimeline = lazy(() => import("@/pages/forensics-timeline"));
+const OtIcsDashboard = lazy(() => import("@/pages/ot-ics-dashboard"));
 const XDRConsole = lazy(() => import("@/pages/xdr-console"));
 const XDRIncidentWorkbench = lazy(() => import("@/pages/xdr-incident-workbench"));
 const ThreatGraph = lazy(() => import("@/pages/threat-graph"));
@@ -332,6 +333,7 @@ const securityNavSecondary = [
   { path: "/threat-hunting", label: "Threat Hunting", icon: Search },
   { path: "/identity-threat", label: "Identity Threats", icon: Users },
   { path: "/forensics", label: "Forensics", icon: Flame },
+  { path: "/ot-ics", label: "OT / ICS Security", icon: Cpu },
   { path: "/executive-risk", label: "Executive Risk", icon: BarChart3 },
   { path: "/risk-scoring", label: "Risk Scoring", icon: BarChart3 },
   { path: "/threat-feed", label: "Threat Feed", icon: Rss },
@@ -887,6 +889,7 @@ function AppRouter() {
         <Route path="/stix-taxii" component={StixTaxii} />
         <Route path="/tradecraft" component={TradecraftEnginePage} />
         <Route path="/forensics" component={ForensicsTimeline} />
+        <Route path="/ot-ics" component={OtIcsDashboard} />
         <Route path="/xdr-console" component={XDRConsole} />
         <Route path="/xdr-workbench" component={XDRIncidentWorkbench} />
         <Route path="/threat-graph" component={ThreatGraph} />
