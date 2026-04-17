@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { FileText, CheckCircle, Clock, AlertCircle, Shield, Tag, RefreshCw, ChevronDown, ChevronUp, Layers, ExternalLink, BookOpen } from "lucide-react";
+import { FileText, CheckCircle, Clock, AlertCircle, Shield, Tag, RefreshCw, ChevronDown, ChevronUp, Layers, ExternalLink, BookOpen, Plus, Upload } from "lucide-react";
 
 const ACCENT = "#40856a";
 const API = "/api";
@@ -9,7 +9,47 @@ function fetchDiligenceRoom(matterId?: string) {
   const url = matterId
     ? `${API}/terra/cognitive/diligence-room?matterId=${encodeURIComponent(matterId)}`
     : `${API}/terra/cognitive/diligence-room`;
-  return fetch(url).then(r => r.json()).then(d => d.data ?? d);
+  return fetch(url, { credentials: "include" }).then(r => r.json()).then(d => d.data ?? d);
+}
+
+async function createMatter(payload: { title: string; borough?: string; targetCloseDate?: string; stage?: string; ownerName?: string; }) {
+  const res = await fetch(`${API}/terra/cognitive/diligence-room/matters`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error((await res.json()).error ?? "Failed to create matter");
+  return (await res.json()).data ?? null;
+}
+
+async function uploadEvidence(matterId: string, payload: { file: File | null; category: string; label: string; source?: string; summary?: string; confidence?: number; status?: string; }) {
+  const fd = new FormData();
+  if (payload.file) fd.append("file", payload.file);
+  fd.append("category", payload.category);
+  fd.append("label", payload.label);
+  if (payload.source) fd.append("source", payload.source);
+  if (payload.summary) fd.append("summary", payload.summary);
+  if (payload.confidence !== undefined) fd.append("confidence", String(payload.confidence));
+  if (payload.status) fd.append("status", payload.status);
+  const res = await fetch(`${API}/terra/cognitive/diligence-room/matters/${encodeURIComponent(matterId)}/evidence`, {
+    method: "POST",
+    credentials: "include",
+    body: fd,
+  });
+  if (!res.ok) throw new Error((await res.json()).error ?? "Upload failed");
+  return (await res.json()).data ?? null;
+}
+
+async function updateEvidenceStatus(evidenceId: string, status: string) {
+  const res = await fetch(`${API}/terra/cognitive/diligence-room/evidence/${encodeURIComponent(evidenceId)}`, {
+    method: "PATCH",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status }),
+  });
+  if (!res.ok) throw new Error((await res.json()).error ?? "Update failed");
+  return (await res.json()).data ?? null;
 }
 
 const STATUS_CONFIG: Record<string, { color: string; Icon: typeof CheckCircle; label: string }> = {
@@ -38,11 +78,19 @@ function ConfidencePill({ value }: { value: number }) {
   );
 }
 
-function EvidenceCard({ evidence, index }: { evidence: any; index: number }) {
+function EvidenceCard({ evidence, index, onStatusChange }: { evidence: any; index: number; onStatusChange?: (status: string) => void }) {
   const [expanded, setExpanded] = useState(false);
+  const [updating, setUpdating] = useState(false);
   const cfg = STATUS_CONFIG[evidence.status] ?? STATUS_CONFIG.pending;
   const Icon = cfg.Icon;
   const catColor = CATEGORY_COLORS[evidence.category] ?? "#64748b";
+
+  const handleAdvance = async (e: React.MouseEvent, next: string) => {
+    e.stopPropagation();
+    if (!onStatusChange) return;
+    setUpdating(true);
+    try { await onStatusChange(next); } finally { setUpdating(false); }
+  };
 
   return (
     <div className="rounded-xl overflow-hidden" style={{ border: `1px solid ${evidence.status === "verified" ? "rgba(64,133,106,0.2)" : evidence.status === "in_review" ? "rgba(74,125,200,0.2)" : "rgba(200,160,96,0.2)"}` }}>
@@ -83,11 +131,48 @@ function EvidenceCard({ evidence, index }: { evidence: any; index: number }) {
 
             <p className="text-[11px] mt-2 leading-relaxed" style={{ color: "rgba(255,255,255,0.6)" }}>{evidence.summary}</p>
 
-            <div className="flex items-center justify-between mt-2">
+            <div className="flex items-center justify-between mt-2 gap-2 flex-wrap">
               <ConfidencePill value={evidence.confidence} />
-              <div className="flex items-center gap-1 text-[9px]" style={{ color: "rgba(255,255,255,0.3)" }}>
-                {expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-                {evidence.citations?.length ?? 0} citation{(evidence.citations?.length ?? 0) !== 1 ? "s" : ""}
+              <div className="flex items-center gap-1.5">
+                {onStatusChange && evidence.status !== "verified" && (
+                  <>
+                    {evidence.status === "pending" && (
+                      <button
+                        disabled={updating}
+                        onClick={(e) => handleAdvance(e, "in_review")}
+                        className="text-[9px] px-2 py-0.5 rounded font-mono font-semibold transition-all disabled:opacity-50"
+                        style={{ background: "rgba(74,125,200,0.18)", border: "1px solid rgba(74,125,200,0.4)", color: "#4a7dc8" }}
+                      >
+                        → In Review
+                      </button>
+                    )}
+                    <button
+                      disabled={updating}
+                      onClick={(e) => handleAdvance(e, "verified")}
+                      className="text-[9px] px-2 py-0.5 rounded font-mono font-semibold transition-all disabled:opacity-50"
+                      style={{ background: `${ACCENT}18`, border: `1px solid ${ACCENT}40`, color: ACCENT }}
+                    >
+                      ✓ Verify
+                    </button>
+                  </>
+                )}
+                {evidence.document?.url && (
+                  <a
+                    href={evidence.document.url.startsWith("/objects/") ? `${API}${evidence.document.url}` : evidence.document.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="text-[9px] px-2 py-0.5 rounded font-mono font-semibold transition-all inline-flex items-center gap-1"
+                    style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.7)" }}
+                  >
+                    <ExternalLink className="w-2.5 h-2.5" />
+                    {evidence.document.name ?? "Doc"}
+                  </a>
+                )}
+                <div className="flex items-center gap-1 text-[9px]" style={{ color: "rgba(255,255,255,0.3)" }}>
+                  {expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                  {evidence.citations?.length ?? 0} cit.
+                </div>
               </div>
             </div>
           </div>
@@ -115,6 +200,123 @@ function EvidenceCard({ evidence, index }: { evidence: any; index: number }) {
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+function NewMatterForm({ onCreated }: { onCreated: (id: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const [title, setTitle] = useState("");
+  const [borough, setBorough] = useState("");
+  const [targetCloseDate, setTargetCloseDate] = useState("");
+  const [stage, setStage] = useState("pre_diligence");
+  const [ownerName, setOwnerName] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  const submit = async () => {
+    setErr(null); setBusy(true);
+    try {
+      const r = await createMatter({ title, borough: borough || undefined, targetCloseDate: targetCloseDate || undefined, stage, ownerName: ownerName || undefined });
+      if (r?.matter?.id) { onCreated(r.matter.id); setOpen(false); setTitle(""); setBorough(""); setTargetCloseDate(""); setOwnerName(""); }
+    } catch (e) { setErr((e as Error).message); }
+    finally { setBusy(false); }
+  };
+
+  if (!open) {
+    return (
+      <button onClick={() => setOpen(true)} className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg text-[10px] font-semibold mb-2"
+        style={{ background: `${ACCENT}12`, border: `1px dashed ${ACCENT}40`, color: ACCENT }}>
+        <Plus className="w-3 h-3" /> New Matter
+      </button>
+    );
+  }
+  return (
+    <div className="rounded-lg p-3 mb-2 space-y-2" style={{ background: "rgba(64,133,106,0.06)", border: `1px solid ${ACCENT}30` }}>
+      <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Matter title (e.g. 245 Park — Acquisition)" className="w-full px-2 py-1 text-[11px] rounded"
+        style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.1)", color: "#e8edf8" }} />
+      <div className="grid grid-cols-2 gap-2">
+        <input value={borough} onChange={e => setBorough(e.target.value)} placeholder="Borough" className="px-2 py-1 text-[11px] rounded"
+          style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.1)", color: "#e8edf8" }} />
+        <input value={targetCloseDate} onChange={e => setTargetCloseDate(e.target.value)} placeholder="Target close YYYY-MM-DD" className="px-2 py-1 text-[11px] rounded"
+          style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.1)", color: "#e8edf8" }} />
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <select value={stage} onChange={e => setStage(e.target.value)} className="px-2 py-1 text-[11px] rounded"
+          style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.1)", color: "#e8edf8" }}>
+          <option value="pre_diligence">Pre-Diligence</option>
+          <option value="initial_review">Initial Review</option>
+          <option value="title_review">Title Review</option>
+          <option value="environmental">Environmental</option>
+          <option value="financial_audit">Financial Audit</option>
+          <option value="legal_review">Legal Review</option>
+          <option value="final_approval">IC Sign-Off</option>
+        </select>
+        <input value={ownerName} onChange={e => setOwnerName(e.target.value)} placeholder="Owner (optional)" className="px-2 py-1 text-[11px] rounded"
+          style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.1)", color: "#e8edf8" }} />
+      </div>
+      {err && <div className="text-[10px]" style={{ color: "#ef4444" }}>{err}</div>}
+      <div className="flex gap-2">
+        <button disabled={busy || title.length < 3} onClick={submit} className="flex-1 py-1 text-[10px] font-semibold rounded disabled:opacity-50"
+          style={{ background: ACCENT, color: "#0a0f0c" }}>{busy ? "Creating…" : "Create"}</button>
+        <button onClick={() => setOpen(false)} className="px-3 py-1 text-[10px] rounded"
+          style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.6)" }}>Cancel</button>
+      </div>
+    </div>
+  );
+}
+
+function AddEvidenceForm({ matterId, onAdded }: { matterId: string; onAdded: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [category, setCategory] = useState("title");
+  const [label, setLabel] = useState("");
+  const [summary, setSummary] = useState("");
+  const [source, setSource] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  const submit = async () => {
+    setErr(null); setBusy(true);
+    try {
+      await uploadEvidence(matterId, { file, category, label, source: source || undefined, summary: summary || undefined, status: "pending", confidence: 0.7 });
+      setOpen(false); setLabel(""); setSummary(""); setSource(""); setFile(null); onAdded();
+    } catch (e) { setErr((e as Error).message); }
+    finally { setBusy(false); }
+  };
+
+  if (!open) {
+    return (
+      <button onClick={() => setOpen(true)} className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg text-[10px] font-semibold"
+        style={{ background: `${ACCENT}12`, border: `1px dashed ${ACCENT}40`, color: ACCENT }}>
+        <Upload className="w-3 h-3" /> Attach Evidence Document
+      </button>
+    );
+  }
+  return (
+    <div className="rounded-lg p-3 space-y-2" style={{ background: "rgba(64,133,106,0.06)", border: `1px solid ${ACCENT}30` }}>
+      <div className="grid grid-cols-2 gap-2">
+        <select value={category} onChange={e => setCategory(e.target.value)} className="px-2 py-1 text-[11px] rounded"
+          style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.1)", color: "#e8edf8" }}>
+          {Object.keys(CATEGORY_COLORS).map(c => <option key={c} value={c}>{c}</option>)}
+        </select>
+        <input value={label} onChange={e => setLabel(e.target.value)} placeholder="Label (e.g. Title Commitment)" className="px-2 py-1 text-[11px] rounded"
+          style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.1)", color: "#e8edf8" }} />
+      </div>
+      <input value={source} onChange={e => setSource(e.target.value)} placeholder="Source (e.g. Chicago Title Insurance)" className="w-full px-2 py-1 text-[11px] rounded"
+        style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.1)", color: "#e8edf8" }} />
+      <textarea value={summary} onChange={e => setSummary(e.target.value)} placeholder="Summary / findings" rows={2} className="w-full px-2 py-1 text-[11px] rounded"
+        style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.1)", color: "#e8edf8" }} />
+      <input type="file" onChange={e => setFile(e.target.files?.[0] ?? null)}
+        accept=".pdf,.docx,.doc,.txt,.csv,.xlsx,.xls,.png,.jpg,.jpeg"
+        className="w-full text-[10px]" style={{ color: "rgba(255,255,255,0.6)" }} />
+      {err && <div className="text-[10px]" style={{ color: "#ef4444" }}>{err}</div>}
+      <div className="flex gap-2">
+        <button disabled={busy || label.length < 2} onClick={submit} className="flex-1 py-1 text-[10px] font-semibold rounded disabled:opacity-50"
+          style={{ background: ACCENT, color: "#0a0f0c" }}>{busy ? "Uploading…" : "Attach"}</button>
+        <button onClick={() => setOpen(false)} className="px-3 py-1 text-[10px] rounded"
+          style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.6)" }}>Cancel</button>
+      </div>
     </div>
   );
 }
@@ -173,6 +375,7 @@ export default function DiligenceRoomPage() {
               <div className="text-xs font-semibold mb-3 uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.4)" }}>
                 Active Matters
               </div>
+              <NewMatterForm onCreated={(id) => { setSelectedMatterId(id); refetch(); }} />
               {allMatters.map(m => (
                 <button
                   key={m.id}
@@ -271,9 +474,21 @@ export default function DiligenceRoomPage() {
 
                 <div className="space-y-2">
                   {matter.evidenceChain?.map((ev: any, i: number) => (
-                    <EvidenceCard key={ev.id} evidence={ev} index={i} />
+                    <EvidenceCard
+                      key={ev.id}
+                      evidence={ev}
+                      index={i}
+                      onStatusChange={matter.source === "diligence-db" ? async (next: string) => {
+                        await updateEvidenceStatus(ev.id, next);
+                        refetch();
+                      } : undefined}
+                    />
                   ))}
                 </div>
+
+                {matter.source === "diligence-db" && (
+                  <AddEvidenceForm matterId={matter.id} onAdded={() => refetch()} />
+                )}
               </>
             )}
           </div>

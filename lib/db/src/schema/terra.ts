@@ -434,6 +434,72 @@ export const insertTerraCovenantSchema = createInsertSchema(terraCovenantsTable)
 export type InsertTerraCovenant = z.infer<typeof insertTerraCovenantSchema>;
 export type TerraCovenant = typeof terraCovenantsTable.$inferSelect;
 
+// ─── Diligence Matters & Evidence Chain ──────────────────────────────────────
+
+export const terraDiligenceMattersTable = pgTable("terra_diligence_matters", {
+  id: text("id").primaryKey(),
+  title: text("title").notNull(),
+  propertyId: integer("property_id").references(() => terraDistressPropertiesTable.id, { onDelete: "set null" }),
+  propertyExternalId: text("property_external_id"),
+  borough: text("borough"),
+  status: text("status", { enum: ["in_progress", "on_hold", "completed", "withdrawn"] }).notNull().default("in_progress"),
+  stage: text("stage", {
+    enum: ["pre_diligence", "initial_review", "title_review", "environmental", "financial_audit", "legal_review", "final_approval"],
+  }).notNull().default("pre_diligence"),
+  completionPct: integer("completion_pct").notNull().default(0),
+  openedAt: timestamp("opened_at").notNull().defaultNow(),
+  targetCloseDate: text("target_close_date"),
+  ownerUserId: integer("owner_user_id"),
+  ownerName: text("owner_name"),
+  notes: text("notes"),
+  metadata: jsonb("metadata"),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (t) => [
+  index("terra_diligence_matter_status_idx").on(t.status),
+  index("terra_diligence_matter_stage_idx").on(t.stage),
+  index("terra_diligence_matter_property_idx").on(t.propertyId),
+  index("terra_diligence_matter_active_idx").on(t.isActive),
+]);
+
+export const terraDiligenceEvidenceTable = pgTable("terra_diligence_evidence", {
+  id: text("id").primaryKey(),
+  matterId: text("matter_id").notNull().references(() => terraDiligenceMattersTable.id, { onDelete: "cascade" }),
+  category: text("category", {
+    enum: ["title", "environmental", "financial", "lease", "structural", "legal"],
+  }).notNull(),
+  label: text("label").notNull(),
+  source: text("source").notNull().default(""),
+  summary: text("summary").notNull().default(""),
+  status: text("status", { enum: ["pending", "in_review", "verified", "rejected"] }).notNull().default("pending"),
+  confidence: numeric("confidence", { precision: 4, scale: 3 }).notNull().default("0.5"),
+  evidenceDate: text("evidence_date"),
+  documentUrl: text("document_url"),
+  documentName: text("document_name"),
+  documentSize: integer("document_size"),
+  documentMimeType: text("document_mime_type"),
+  documentSha256: text("document_sha256"),
+  citations: jsonb("citations").$type<Array<{ ref: string; page?: number; excerpt: string }>>().notNull().default([]),
+  reviewedByUserId: integer("reviewed_by_user_id"),
+  reviewedByName: text("reviewed_by_name"),
+  reviewedAt: timestamp("reviewed_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (t) => [
+  index("terra_diligence_evidence_matter_idx").on(t.matterId),
+  index("terra_diligence_evidence_status_idx").on(t.status),
+  index("terra_diligence_evidence_category_idx").on(t.category),
+]);
+
+export const insertTerraDiligenceMatterSchema = createInsertSchema(terraDiligenceMattersTable).omit({ createdAt: true, updatedAt: true });
+export type InsertTerraDiligenceMatter = z.infer<typeof insertTerraDiligenceMatterSchema>;
+export type TerraDiligenceMatter = typeof terraDiligenceMattersTable.$inferSelect;
+
+export const insertTerraDiligenceEvidenceSchema = createInsertSchema(terraDiligenceEvidenceTable).omit({ createdAt: true, updatedAt: true });
+export type InsertTerraDiligenceEvidence = z.infer<typeof insertTerraDiligenceEvidenceSchema>;
+export type TerraDiligenceEvidence = typeof terraDiligenceEvidenceTable.$inferSelect;
+
 export const terraMlsListingsTable = pgTable("terra_mls_listings", {
   id: serial("id").primaryKey(),
   listingKey: text("listing_key").notNull().unique(),

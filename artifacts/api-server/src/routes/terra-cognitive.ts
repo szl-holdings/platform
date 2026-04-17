@@ -1,7 +1,8 @@
-import { Router, type IRouter, type RequestHandler, type Request } from "express";
+import { Router, type IRouter, type RequestHandler, type Request, type Response } from "express";
 import { randomUUID, createHash } from "crypto";
 import rateLimit from "express-rate-limit";
-import { sendSuccess, sendBadRequest, sendUnauthorized, handleRouteError } from "../lib/api-response";
+import multer from "multer";
+import { sendSuccess, sendBadRequest, sendUnauthorized, sendCreated, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
 import {
   queryNodes,
@@ -14,8 +15,12 @@ import {
   terraDistressPropertiesTable,
   terraPropertiesTable,
   terraTransactionsTable,
+  terraDiligenceMattersTable,
+  terraDiligenceEvidenceTable,
 } from "@szl-holdings/db";
 import { eq, and, or, sql, desc, inArray, isNotNull } from "drizzle-orm";
+import { z } from "zod";
+import { ObjectStorageService } from "../lib/objectStorage";
 import {
   searchDistressedProperties,
 } from "../lib/terra-distress-service";
@@ -1396,10 +1401,327 @@ router.get("/terra/cognitive/underwriting-copilot", cogLimit, auth, async (req, 
 
 // ─── Diligence Room ──────────────────────────────────────────────────────────
 
+const diligenceUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 25 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    const allowed = ["pdf", "docx", "doc", "txt", "csv", "xlsx", "xls", "png", "jpg", "jpeg"];
+    const ext = (file.originalname.split(".").pop() ?? "").toLowerCase();
+    cb(null, allowed.includes(ext));
+  },
+});
+
+const authWrite = authMiddleware({ required: true });
+
+const STAGE_ORDER = ["pre_diligence", "initial_review", "title_review", "environmental", "financial_audit", "legal_review", "final_approval"] as const;
+type DiligenceStage = (typeof STAGE_ORDER)[number];
+type DiligenceStatus = "in_progress" | "on_hold" | "completed" | "withdrawn";
+type EvidenceStatus = "pending" | "in_review" | "verified" | "rejected";
+type EvidenceCategory = "title" | "environmental" | "financial" | "lease" | "structural" | "legal";
+
+const createMatterSchema = z.object({
+  title: z.string().min(3).max(300),
+  propertyId: z.number().int().positive().optional(),
+  propertyExternalId: z.string().max(120).optional(),
+  borough: z.string().max(60).optional(),
+  stage: z.enum(STAGE_ORDER).optional(),
+  status: z.enum(["in_progress", "on_hold", "completed", "withdrawn"]).optional(),
+  targetCloseDate: z.string().optional(),
+  ownerName: z.string().max(120).optional(),
+  notes: z.string().max(4000).optional(),
+});
+
+const createEvidenceSchema = z.object({
+  category: z.enum(["title", "environmental", "financial", "lease", "structural", "legal"]),
+  label: z.string().min(2).max(240),
+  source: z.string().max(240).optional(),
+  summary: z.string().max(4000).optional(),
+  status: z.enum(["pending", "in_review", "verified", "rejected"]).optional(),
+  confidence: z.number().min(0).max(1).optional(),
+  evidenceDate: z.string().optional(),
+  documentUrl: z.string().url().optional(),
+  documentName: z.string().max(240).optional(),
+  documentMimeType: z.string().max(120).optional(),
+  documentSize: z.number().int().nonnegative().optional(),
+  citations: z.array(z.object({ ref: z.string(), page: z.number().int().optional(), excerpt: z.string() })).optional(),
+});
+
+const patchEvidenceSchema = z.object({
+  status: z.enum(["pending", "in_review", "verified", "rejected"]).optional(),
+  confidence: z.number().min(0).max(1).optional(),
+  summary: z.string().max(4000).optional(),
+  reviewedByName: z.string().max(120).optional(),
+  citations: z.array(z.object({ ref: z.string(), page: z.number().int().optional(), excerpt: z.string() })).optional(),
+});
+
+function freshnessLabel(date: Date | string | null | undefined): string {
+  if (!date) return "—";
+  const d = typeof date === "string" ? new Date(date) : date;
+  const days = Math.max(0, Math.floor((Date.now() - d.getTime()) / 86400000));
+  if (days === 0) return "today";
+  if (days < 1) return "live";
+  return `${days}d`;
+}
+
+function computeCompletionPct(evidence: Array<{ status: string }>): number {
+  if (evidence.length === 0) return 0;
+  const verified = evidence.filter(e => e.status === "verified").length;
+  const inReview = evidence.filter(e => e.status === "in_review").length;
+  return Math.round(((verified + inReview * 0.5) / evidence.length) * 100);
+}
+
+async function recomputeMatterCompletion(matterId: string): Promise<void> {
+  const evidence = await db
+    .select({ status: terraDiligenceEvidenceTable.status })
+    .from(terraDiligenceEvidenceTable)
+    .where(eq(terraDiligenceEvidenceTable.matterId, matterId));
+  const pct = computeCompletionPct(evidence);
+  await db
+    .update(terraDiligenceMattersTable)
+    .set({ completionPct: pct, updatedAt: new Date() })
+    .where(eq(terraDiligenceMattersTable.id, matterId));
+}
+
+async function loadMatterWithEvidence(matterId: string) {
+  const matterRows = await db
+    .select()
+    .from(terraDiligenceMattersTable)
+    .where(eq(terraDiligenceMattersTable.id, matterId))
+    .limit(1);
+  if (!matterRows[0]) return null;
+  const evidence = await db
+    .select()
+    .from(terraDiligenceEvidenceTable)
+    .where(eq(terraDiligenceEvidenceTable.matterId, matterId))
+    .orderBy(desc(terraDiligenceEvidenceTable.createdAt));
+  return { matter: matterRows[0], evidence };
+}
+
+function serializeMatter(matter: typeof terraDiligenceMattersTable.$inferSelect, evidence: Array<typeof terraDiligenceEvidenceTable.$inferSelect>) {
+  return {
+    id: matter.id,
+    title: matter.title,
+    status: matter.status,
+    stage: matter.stage,
+    completionPct: matter.completionPct,
+    opened: matter.openedAt.toISOString().split("T")[0],
+    targetClose: matter.targetCloseDate ?? null,
+    propertyId: matter.propertyExternalId ?? matter.propertyId ?? null,
+    borough: matter.borough,
+    ownerName: matter.ownerName,
+    source: "diligence-db",
+    evidenceChain: evidence.map(e => ({
+      id: e.id,
+      category: e.category,
+      label: e.label,
+      source: e.source,
+      date: e.evidenceDate ?? e.createdAt.toISOString().split("T")[0],
+      freshness: freshnessLabel(e.evidenceDate ? new Date(e.evidenceDate) : e.createdAt),
+      status: e.status,
+      confidence: Number(e.confidence),
+      summary: e.summary,
+      citations: e.citations ?? [],
+      document: e.documentUrl ? {
+        url: e.documentUrl,
+        name: e.documentName,
+        size: e.documentSize,
+        mimeType: e.documentMimeType,
+      } : null,
+      reviewedBy: e.reviewedByName,
+      reviewedAt: e.reviewedAt?.toISOString() ?? null,
+    })),
+  };
+}
+
+// POST: create new diligence matter
+router.post("/terra/cognitive/diligence-room/matters", cogLimit, authWrite, async (req: Request, res: Response) => {
+  try {
+    const parsed = createMatterSchema.safeParse(req.body);
+    if (!parsed.success) return sendBadRequest(res, "Invalid matter payload", "VALIDATION_ERROR", parsed.error.flatten());
+    const userId = (req as Request & { user?: { id?: string | number; name?: string } }).user;
+    const id = `matter_${randomUUID().slice(0, 8)}`;
+    const inserted = await db
+      .insert(terraDiligenceMattersTable)
+      .values({
+        id,
+        title: parsed.data.title,
+        propertyId: parsed.data.propertyId ?? null,
+        propertyExternalId: parsed.data.propertyExternalId ?? null,
+        borough: parsed.data.borough ?? null,
+        stage: (parsed.data.stage ?? "pre_diligence") as DiligenceStage,
+        status: (parsed.data.status ?? "in_progress") as DiligenceStatus,
+        targetCloseDate: parsed.data.targetCloseDate ?? null,
+        ownerName: parsed.data.ownerName ?? userId?.name ?? null,
+        ownerUserId: typeof userId?.id === "number" ? userId.id : null,
+        notes: parsed.data.notes ?? null,
+      })
+      .returning();
+    sendCreated(res, { matter: serializeMatter(inserted[0], []) });
+  } catch (err) { handleRouteError(res, err, "Failed to create diligence matter"); }
+});
+
+// POST: attach/upload evidence to a matter (supports multipart file OR JSON with documentUrl)
+router.post("/terra/cognitive/diligence-room/matters/:matterId/evidence", cogLimit, authWrite, diligenceUpload.single("file"), async (req: Request, res: Response) => {
+  try {
+    const matterId = req.params.matterId;
+    const matterRows = await db
+      .select({ id: terraDiligenceMattersTable.id })
+      .from(terraDiligenceMattersTable)
+      .where(eq(terraDiligenceMattersTable.id, matterId))
+      .limit(1);
+    if (!matterRows[0]) return sendBadRequest(res, "Matter not found", "NOT_FOUND");
+
+    // Multipart: fields are in req.body as strings; parse JSON-encoded fields
+    const body: Record<string, unknown> = { ...req.body };
+    if (typeof body.citations === "string") {
+      try { body.citations = JSON.parse(body.citations); } catch { body.citations = []; }
+    }
+    if (typeof body.confidence === "string") body.confidence = Number(body.confidence);
+    if (typeof body.documentSize === "string") body.documentSize = Number(body.documentSize);
+
+    const parsed = createEvidenceSchema.safeParse(body);
+    if (!parsed.success) return sendBadRequest(res, "Invalid evidence payload", "VALIDATION_ERROR", parsed.error.flatten());
+
+    let documentUrl = parsed.data.documentUrl ?? null;
+    let documentName = parsed.data.documentName ?? null;
+    let documentMimeType = parsed.data.documentMimeType ?? null;
+    let documentSize = parsed.data.documentSize ?? null;
+    let documentSha256: string | null = null;
+
+    if (req.file) {
+      documentName = documentName ?? req.file.originalname;
+      documentMimeType = req.file.mimetype;
+      documentSize = req.file.size;
+      documentSha256 = createHash("sha256").update(req.file.buffer).digest("hex");
+      // Try object storage; fall back to inline data URL on dev environments without storage
+      try {
+        const storage = new ObjectStorageService();
+        const safeName = (req.file.originalname || `upload-${Date.now()}`).replace(/[^a-zA-Z0-9._-]/g, "_");
+        const subPath = `terra/diligence/${matterId}/${randomUUID().slice(0, 8)}-${safeName}`;
+        documentUrl = await storage.uploadBuffer(req.file.buffer, subPath, req.file.mimetype);
+      } catch (storageErr) {
+        logger.warn({ err: (storageErr as Error).message }, "Object storage unavailable for diligence upload; storing metadata only");
+        documentUrl = documentUrl ?? `sha256:${documentSha256}`;
+      }
+    }
+
+    const id = `ev_${randomUUID().slice(0, 10)}`;
+    const inserted = await db
+      .insert(terraDiligenceEvidenceTable)
+      .values({
+        id,
+        matterId,
+        category: parsed.data.category as EvidenceCategory,
+        label: parsed.data.label,
+        source: parsed.data.source ?? "Uploaded by team",
+        summary: parsed.data.summary ?? "",
+        status: (parsed.data.status ?? "pending") as EvidenceStatus,
+        confidence: String(parsed.data.confidence ?? 0.7),
+        evidenceDate: parsed.data.evidenceDate ?? new Date().toISOString().split("T")[0],
+        documentUrl,
+        documentName,
+        documentMimeType,
+        documentSize,
+        documentSha256,
+        citations: parsed.data.citations ?? [],
+      })
+      .returning();
+
+    await recomputeMatterCompletion(matterId);
+    sendCreated(res, { evidence: inserted[0] });
+  } catch (err) { handleRouteError(res, err, "Failed to attach evidence"); }
+});
+
+// PATCH: update evidence status / confidence / review fields
+router.patch("/terra/cognitive/diligence-room/evidence/:evidenceId", cogLimit, authWrite, async (req: Request, res: Response) => {
+  try {
+    const parsed = patchEvidenceSchema.safeParse(req.body);
+    if (!parsed.success) return sendBadRequest(res, "Invalid patch payload", "VALIDATION_ERROR", parsed.error.flatten());
+    const existing = await db
+      .select()
+      .from(terraDiligenceEvidenceTable)
+      .where(eq(terraDiligenceEvidenceTable.id, req.params.evidenceId))
+      .limit(1);
+    if (!existing[0]) return sendBadRequest(res, "Evidence not found", "NOT_FOUND");
+
+    const user = (req as Request & { user?: { id?: string | number; name?: string } }).user;
+    const updates: Partial<typeof terraDiligenceEvidenceTable.$inferInsert> = { updatedAt: new Date() };
+    if (parsed.data.status) {
+      updates.status = parsed.data.status as EvidenceStatus;
+      if (parsed.data.status === "verified" || parsed.data.status === "rejected") {
+        updates.reviewedAt = new Date();
+        updates.reviewedByName = parsed.data.reviewedByName ?? user?.name ?? "Reviewer";
+        if (typeof user?.id === "number") updates.reviewedByUserId = user.id;
+      }
+    }
+    if (parsed.data.confidence !== undefined) updates.confidence = String(parsed.data.confidence);
+    if (parsed.data.summary !== undefined) updates.summary = parsed.data.summary;
+    if (parsed.data.citations !== undefined) updates.citations = parsed.data.citations;
+
+    const updated = await db
+      .update(terraDiligenceEvidenceTable)
+      .set(updates)
+      .where(eq(terraDiligenceEvidenceTable.id, req.params.evidenceId))
+      .returning();
+
+    await recomputeMatterCompletion(existing[0].matterId);
+    sendSuccess(res, { evidence: updated[0] });
+  } catch (err) { handleRouteError(res, err, "Failed to update evidence"); }
+});
+
+// GET: list/show diligence room — DB is primary source; falls back to graph/distress when empty
 router.get("/terra/cognitive/diligence-room", cogLimit, auth, async (req, res) => {
   try {
     const matterId = req.query.matterId as string | undefined;
     const trace = reqTraceRef(req);
+
+    // Primary: real diligence matters in DB
+    const dbMatters = await db
+      .select()
+      .from(terraDiligenceMattersTable)
+      .where(eq(terraDiligenceMattersTable.isActive, true))
+      .orderBy(desc(terraDiligenceMattersTable.openedAt))
+      .limit(50);
+
+    if (dbMatters.length > 0) {
+      const matters = await Promise.all(dbMatters.map(async m => {
+        const evidence = await db
+          .select()
+          .from(terraDiligenceEvidenceTable)
+          .where(eq(terraDiligenceEvidenceTable.matterId, m.id))
+          .orderBy(desc(terraDiligenceEvidenceTable.createdAt));
+        return serializeMatter(m, evidence);
+      }));
+
+      const matter = matterId
+        ? matters.find(m => m.id === matterId) ?? matters[0]
+        : matters[0];
+      const chain = matter?.evidenceChain ?? [];
+      const verified = chain.filter(e => e.status === "verified").length;
+      const inReview = chain.filter(e => e.status === "in_review").length;
+      const pending = chain.filter(e => e.status === "pending").length;
+      const avgConfidence = chain.length > 0 ? chain.reduce((s, e) => s + e.confidence, 0) / chain.length : 0;
+
+      return sendSuccess(res, {
+        source: "Terra Diligence Room — Evidence Chain Runtime (DB)",
+        summary: {
+          totalMatters: matters.length, verified, inReview, pending,
+          avgConfidence: +avgConfidence.toFixed(2), chainLength: chain.length,
+        },
+        documents: matters.map(m => ({
+          id: m.id, title: m.title, status: m.status, stage: m.stage,
+          completionPct: m.completionPct, targetClose: m.targetClose,
+          source: m.source,
+        })),
+        matter: { ...matter, chainSummary: { verified, inReview, pending, avgConfidence: +avgConfidence.toFixed(2) } },
+        allMatters: matters.map(m => ({
+          id: m.id, title: m.title, status: m.status, stage: m.stage,
+          completionPct: m.completionPct, targetClose: m.targetClose,
+          source: m.source,
+        })),
+        provenance: provenance("Terra-Diligence-DB", 0.95, trace),
+      });
+    }
 
     // Try CONSTELLATION for matter nodes
     const { nodes: matterNodes } = await queryNodes({
