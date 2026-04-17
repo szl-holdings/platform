@@ -25,7 +25,13 @@ The platform is a pnpm monorepo utilizing TypeScript 5.9, React 19, Vite, and No
 
 **Business Observability Fabric (ATLAS):** Implemented via three packages (`@szl-holdings/observability-core`, `@szl-holdings/business-events`, `@szl-holdings/telemetry-standards`) for OpenTelemetry setup, event emission, and semantic conventions.
 
-**Canonical Artifacts (Active Applications):** Key applications include `szl-holdings` (corporate), `api-server` (backend), `command` (unified operations), `aegis` (defense intelligence), `vessels` (maritime command), `terra` (real estate intelligence), `carlota-jo` (advisory), and `szl-holdings-mobile` (mobile command).
+**Canonical Artifacts (Active Applications):** Key applications include `szl-holdings` (corporate), `api-server` (backend), `command` (unified operations), `aegis` (defense intelligence), `vessels` (maritime command), `terra` (real estate intelligence), `carlota-jo` (advisory), `pulse` (AI executive briefing), and `szl-holdings-mobile` (mobile command).
+
+**Vite Sub-Path App Config Notes:**
+- All sub-path apps (aegis, terra, vessels, carlota-jo, command, pulse) share `PORT=9090` via `reusePort: true` shared proxy
+- Each app has its own Vite dev server on a dedicated `VITE_PORT` (3000, 5201, 6099, etc.)
+- All sub-path vite configs MUST use `fs.strict: false` to allow Vite to serve workspace library files from `lib/`
+- SZL Holdings (root app) uses `PORT` directly; sub-apps use the shared proxy architecture
 **Technology Stack:**
 -   **Frontend:** React 19, Vite, TanStack React Query, Wouter, Tailwind CSS v4, Framer Motion.
 -   **Backend:** Express 5, Drizzle ORM, Zod, pino.

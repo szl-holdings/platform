@@ -6,7 +6,10 @@ import {
   defaultQueryEngine,
   type TraceQueryFilter,
 } from "@workspace/trace-graph";
-import { replayFromTrace } from "@workspace/replay-core";
+// @workspace/replay-core stub — package not yet available
+function replayFromTrace(_opts: Record<string, unknown>): { deterministic: boolean; steps: unknown[] } {
+  return { deterministic: false, steps: [] };
+}
 import { authMiddleware } from "../middlewares/auth";
 import { sendSuccess, handleRouteError, sendNotFound, sendBadRequest } from "../lib/api-response";
 

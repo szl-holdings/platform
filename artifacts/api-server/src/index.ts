@@ -147,8 +147,23 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
 
   try {
     // Step 1: Run all migrations — single await, schema fully guaranteed before any seed executes
-    await runMigrations();
-    logger.info("[bootstrap] All migrations complete");
+    // Retry up to 5 times with exponential backoff to handle transient DB connection issues on startup
+    let migrationsComplete = false;
+    for (let attempt = 1; attempt <= 5; attempt++) {
+      try {
+        await runMigrations();
+        migrationsComplete = true;
+        break;
+      } catch (migErr) {
+        const isLast = attempt === 5;
+        logger.warn({ migErr, attempt, isLast }, `[bootstrap] Migration attempt ${attempt} failed${isLast ? " — giving up" : " — retrying"}`);
+        if (isLast) throw migErr;
+        await new Promise(r => setTimeout(r, Math.min(1000 * attempt, 8000)));
+      }
+    }
+    if (migrationsComplete) {
+      logger.info("[bootstrap] All migrations complete");
+    }
 
     // Step 2: Platform flags and knowledge store depend on schema being ready
     await ensurePlatformFlags();

@@ -20,7 +20,7 @@ import {
   reflectionsTable,
   policiesTable,
   cogActionsTable,
-  rollbackEventsTable,
+  cognitiveRollbackEventsTable,
 } from "@szl-holdings/db";
 import { eq } from "drizzle-orm";
 
@@ -446,7 +446,7 @@ async function run() {
     "rollback_events",
     async () => {
       const [r] = await db
-        .insert(rollbackEventsTable)
+        .insert(cognitiveRollbackEventsTable)
         .values({
           rollbackId: "smoke-rollback-001",
           agentId: AGENT_ID,
@@ -467,11 +467,11 @@ async function run() {
       return r;
     },
     async (id) => {
-      const [r] = await db.select().from(rollbackEventsTable).where(eq(rollbackEventsTable.id, id));
+      const [r] = await db.select().from(cognitiveRollbackEventsTable).where(eq(cognitiveRollbackEventsTable.id, id));
       return r;
     },
     async (id) => {
-      await db.delete(rollbackEventsTable).where(eq(rollbackEventsTable.id, id));
+      await db.delete(cognitiveRollbackEventsTable).where(eq(cognitiveRollbackEventsTable.id, id));
     },
   );
 

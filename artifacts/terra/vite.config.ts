@@ -118,7 +118,7 @@ export default defineConfig({
     allowedHosts: true,
     hmr: { clientPort: 443 },
     fs: {
-      strict: true,
+      strict: false,
       deny: ["**/.*"],
     },
   },

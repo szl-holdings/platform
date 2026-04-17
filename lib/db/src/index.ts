@@ -15,11 +15,11 @@ const SLOW_QUERY_THRESHOLD_MS = parseInt(process.env.SLOW_QUERY_THRESHOLD_MS ?? 
 
 export const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  min: parseInt(process.env.DB_POOL_MIN ?? "2", 10),
+  min: parseInt(process.env.DB_POOL_MIN ?? "1", 10),
   max: parseInt(process.env.DB_POOL_MAX ?? "20", 10),
   idleTimeoutMillis: parseInt(process.env.DB_IDLE_TIMEOUT_MS ?? "60000", 10),
-  connectionTimeoutMillis: parseInt(process.env.DB_CONNECT_TIMEOUT_MS ?? "5000", 10),
-  statement_timeout: parseInt(process.env.DB_STATEMENT_TIMEOUT_MS ?? "30000", 10),
+  connectionTimeoutMillis: parseInt(process.env.DB_CONNECT_TIMEOUT_MS ?? "30000", 10),
+  statement_timeout: parseInt(process.env.DB_STATEMENT_TIMEOUT_MS ?? "60000", 10),
 });
 
 const _originalPoolQuery = pool.query.bind(pool);

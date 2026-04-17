@@ -729,5 +729,5 @@ export type PolicyRow = typeof policiesTable.$inferSelect;
 export type PolicyInsert = typeof policiesTable.$inferInsert;
 export type CogActionRow = typeof cogActionsTable.$inferSelect;
 export type CogActionInsert = typeof cogActionsTable.$inferInsert;
-export type RollbackEventRow = typeof cognitiveRollbackEventsTable.$inferSelect;
-export type RollbackEventInsert = typeof cognitiveRollbackEventsTable.$inferInsert;
+export type CognitiveRollbackEventRow = typeof cognitiveRollbackEventsTable.$inferSelect;
+export type CognitiveRollbackEventInsert = typeof cognitiveRollbackEventsTable.$inferInsert;
