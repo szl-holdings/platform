@@ -508,6 +508,74 @@ export function buildNotificationDigestEmail(params: {
   `);
 }
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+const STATUS_LABELS: Record<string, string> = {
+  new:       "New",
+  contacted: "Contacted",
+  qualified: "Qualified",
+  closed:    "Closed",
+  lost:      "Lost",
+};
+
+export function buildTicketStatusEmail(params: {
+  name: string;
+  previousStatus?: string;
+  newStatus: string;
+  notes?: string | null;
+  ticketId: number;
+}): { subject: string; html: string; text: string } {
+  const { name, previousStatus, newStatus, notes, ticketId } = params;
+  const statusLabel = STATUS_LABELS[newStatus] ?? escapeHtml(newStatus);
+  const safeName = escapeHtml(name);
+
+  const subject = `Update on your inquiry — ${statusLabel}`;
+
+  const notesBlock = notes
+    ? `<div class="highlight"><p class="label">Note from our team</p><p>${escapeHtml(notes).replace(/\n/g, "<br />")}</p></div>`
+    : "";
+
+  const html = szlBrand(`
+    <h2>Your Inquiry Has Been Updated</h2>
+    <p>Hello ${safeName},</p>
+    <p>We wanted to keep you informed — our team has updated the status of your inquiry.</p>
+    <div class="highlight">
+      <p class="label">Status</p>
+      <p><strong>${statusLabel}</strong></p>
+      ${previousStatus && previousStatus !== newStatus ? `<p style="margin-top:4px;font-size:12px;color:#9ca3af;">Previously: ${STATUS_LABELS[previousStatus] ?? escapeHtml(previousStatus)}</p>` : ""}
+    </div>
+    ${notesBlock}
+    <p>If you have any questions or need further assistance, feel free to reply directly to this email or contact us at <strong>inquiries@szlholdings.com</strong>.</p>
+    <a class="cta" href="mailto:inquiries@szlholdings.com">Reply to Our Team</a>
+    <p style="margin-top:20px;font-size:12px;color:#9ca3af;">Inquiry reference: #${ticketId}</p>
+  `);
+
+  const textParts = [
+    `Your Inquiry Has Been Updated`,
+    ``,
+    `Hello ${name},`,
+    ``,
+    `Our team has updated the status of your inquiry.`,
+    ``,
+    `Status: ${statusLabel}`,
+    ...(previousStatus && previousStatus !== newStatus ? [`Previously: ${STATUS_LABELS[previousStatus] ?? previousStatus}`] : []),
+    ...(notes ? [``, `Note from our team:`, notes] : []),
+    ``,
+    `If you have questions, reply to this email or contact inquiries@szlholdings.com.`,
+    ``,
+    `Inquiry reference: #${ticketId}`,
+  ];
+
+  return { subject, html, text: textParts.join("\n") };
+}
+
 export function buildBillingNotificationEmail(params: {
   name: string;
   eventType: "invoice_paid" | "invoice_due" | "payment_failed" | "subscription_renewed" | "subscription_cancelled" | "trial_ending";

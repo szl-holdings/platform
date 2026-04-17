@@ -5,13 +5,16 @@ import { eq, desc, sql } from "drizzle-orm";
 import { z } from "zod";
 import { validateBody } from "../../lib/validation.js";
 import { sendError, sendNotFound, sendBadRequest } from "../../lib/api-response.js";
-import { sendEmail } from "../../lib/email.js";
+import { sendEmail, buildTicketStatusEmail } from "../../lib/email.js";
 import { logger } from "../../lib/logger.js";
+
+const SUPPORT_NOTIFICATIONS_ENABLED = process.env.SUPPORT_EMAIL_NOTIFICATIONS !== "false";
 
 const updateStatusSchema = z.object({
   status: z.enum(["new", "contacted", "qualified", "closed", "lost"]).optional(),
   ownerUserId: z.number().int().positive().optional(),
   notes: z.string().max(5000).optional(),
+  notify: z.boolean().optional(),
 });
 
 const replySchema = z.object({
@@ -140,16 +143,19 @@ export function register(router: IRouter): void {
 
       if (!submission) { sendNotFound(res, "Ticket"); return; }
 
-      const { status, ownerUserId, notes } = req.body as {
+      const { status, ownerUserId, notes, notify } = req.body as {
         status?: string;
         ownerUserId?: number;
         notes?: string;
+        notify?: boolean;
       };
 
       const [existingLead] = await db
         .select()
         .from(leadStatusTable)
         .where(eq(leadStatusTable.contactSubmissionId, id));
+
+      const previousStatus = existingLead?.status;
 
       let leadRow;
       if (existingLead) {
@@ -174,7 +180,37 @@ export function register(router: IRouter): void {
           .returning();
       }
 
-      res.json({ success: true, leadStatus: leadRow });
+      const shouldNotify = notify !== undefined ? notify : SUPPORT_NOTIFICATIONS_ENABLED;
+      const statusChanged = status !== undefined && status !== previousStatus;
+      const notesAdded = notes !== undefined && notes !== (existingLead?.notes ?? null);
+
+      if (shouldNotify && (statusChanged || notesAdded) && leadRow) {
+        const emailPayload = buildTicketStatusEmail({
+          name: submission.fullName,
+          previousStatus: previousStatus ?? undefined,
+          newStatus: leadRow.status,
+          notes: notesAdded ? notes : null,
+          ticketId: id,
+        });
+
+        sendEmail({
+          to: submission.email,
+          subject: emailPayload.subject,
+          html: emailPayload.html,
+          text: emailPayload.text,
+          replyTo: "inquiries@szlholdings.com",
+        }).then((result) => {
+          if (result.success) {
+            logger.info({ id, provider: result.provider }, "[admin/support-queue] Status notification email sent");
+          } else {
+            logger.warn({ id, error: result.error }, "[admin/support-queue] Status notification email failed");
+          }
+        }).catch((err) => {
+          logger.error({ err, id }, "[admin/support-queue] Status notification email threw unexpectedly");
+        });
+      }
+
+      res.json({ success: true, leadStatus: leadRow, notificationQueued: shouldNotify && (statusChanged || notesAdded) });
     } catch (err) {
       logger.error({ err }, "[admin/support-queue] POST status failed");
       sendError(res, "Failed to update ticket status", 500, "INTERNAL_ERROR");
