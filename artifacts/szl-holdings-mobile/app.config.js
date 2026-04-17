@@ -1,0 +1,122 @@
+module.exports = {
+  expo: {
+    name: "CORTEX",
+    slug: "szl-holdings-mobile",
+    version: "2.0.0",
+    description:
+      "CORTEX Unified Command — The SZL Holdings ecosystem command app. Defense, Fleet, Properties, Operations, Advisory, Portfolio, and Founder workspaces in a single secured command surface.",
+    runtimeVersion: {
+      policy: "appVersion",
+    },
+    orientation: "portrait",
+    icon: "./assets/images/icon.png",
+    scheme: "cortex",
+    userInterfaceStyle: "dark",
+    newArchEnabled: true,
+    splash: {
+      image: "./assets/images/splash-icon.png",
+      resizeMode: "contain",
+      backgroundColor: "#090810",
+    },
+    ios: {
+      supportsTablet: false,
+      bundleIdentifier: "com.szlholdings.executive.mobile",
+      buildNumber: "1",
+      googleServicesFile:
+        process.env.GOOGLE_SERVICE_INFO_PLIST ?? "./GoogleService-Info.plist",
+      infoPlist: {
+        NSFaceIDUsageDescription:
+          "CORTEX uses Face ID for secure command access.",
+        NSCameraUsageDescription:
+          "CORTEX uses your camera for AR property intelligence overlays and document scanning.",
+        NSUserNotificationUsageDescription:
+          "CORTEX sends cross-domain alerts, signals, and executive briefings.",
+        ITSAppUsesNonExemptEncryption: false,
+      },
+      privacyManifests: {
+        NSPrivacyAccessedAPITypes: [
+          {
+            NSPrivacyAccessedAPIType:
+              "NSPrivacyAccessedAPICategoryUserDefaults",
+            NSPrivacyAccessedAPITypeReasons: ["CA92.1"],
+          },
+          {
+            NSPrivacyAccessedAPIType:
+              "NSPrivacyAccessedAPICategoryFileTimestamp",
+            NSPrivacyAccessedAPITypeReasons: ["C617.1"],
+          },
+        ],
+        NSPrivacyCollectedDataTypes: [],
+        NSPrivacyTracking: false,
+      },
+    },
+    android: {
+      package: "com.szlholdings.executive.mobile",
+      versionCode: 1,
+      adaptiveIcon: {
+        foregroundImage: "./assets/images/icon.png",
+        backgroundColor: "#090810",
+      },
+      googleServicesFile:
+        process.env.GOOGLE_SERVICES_JSON ?? "./google-services.json",
+      permissions: [
+        "android.permission.INTERNET",
+        "android.permission.CAMERA",
+        "android.permission.RECEIVE_BOOT_COMPLETED",
+        "android.permission.VIBRATE",
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT",
+        "android.permission.POST_NOTIFICATIONS",
+      ],
+    },
+    web: {
+      favicon: "./assets/images/icon.png",
+    },
+    plugins: [
+      [
+        "expo-router",
+        {
+          origin: "https://replit.com/",
+        },
+      ],
+      "expo-camera",
+      "expo-font",
+      "expo-secure-store",
+      [
+        "expo-local-authentication",
+        {
+          faceIDPermission:
+            "Allow CORTEX to use Face ID for secure command access.",
+        },
+      ],
+      [
+        "expo-notifications",
+        {
+          icon: "./assets/images/icon.png",
+          color: "#c9a84c",
+          sounds: [],
+        },
+      ],
+    ],
+    experiments: {
+      typedRoutes: true,
+    },
+    extra: {
+      eas: {
+        projectId: "FILL_IN_EAS_PROJECT_UUID",
+      },
+      supportUrl: "https://szlholdings.com/support",
+      privacyUrl: "https://szlholdings.com/privacy",
+      termsUrl: "https://szlholdings.com/terms",
+    },
+    updates: {
+      enabled: false,
+      fallbackToCacheTimeout: 0,
+      url: "https://u.expo.dev/FILL_IN_EAS_PROJECT_UUID",
+      checkAutomatically: "ON_LOAD",
+      requestHeaders: {
+        "expo-channel-name": "production",
+      },
+    },
+  },
+};
