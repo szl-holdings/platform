@@ -925,3 +925,96 @@ export function buildTenantNotificationEmail(
   `);
 }
 
+export function buildSupportTicketConfirmationEmail(params: {
+  submitterName: string;
+  ticketRef: string;
+  subject: string;
+  category: string;
+  priority: string;
+}): string {
+  const priorityLabel = params.priority.charAt(0).toUpperCase() + params.priority.slice(1);
+  const categoryLabel = params.category.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  return szlBrand(`
+    <h2>Support ticket received</h2>
+    <p>Hi ${params.submitterName}, your support request has been logged and our team will be in touch shortly.</p>
+    <div class="highlight">
+      <p class="label">Reference</p>
+      <p style="font-weight:600;font-size:15px;">${params.ticketRef}</p>
+      <p class="label" style="margin-top:8px;">Subject</p>
+      <p>${params.subject}</p>
+      <p class="label" style="margin-top:8px;">Category</p>
+      <p>${categoryLabel}</p>
+      <p class="label" style="margin-top:8px;">Priority</p>
+      <p>${priorityLabel}</p>
+    </div>
+    <p>Please keep your reference number handy — you'll need it if you contact us directly.</p>
+    <p>Our support team typically responds within <strong>1–2 business days</strong> for standard requests, or within <strong>4 hours</strong> for urgent issues.</p>
+    <p>For immediate assistance you can reach us at <strong>support@szlholdings.com</strong>.</p>
+  `);
+}
+
+export function buildSupportTicketAdminNotificationEmail(params: {
+  ticketRef: string;
+  submitterName: string;
+  submitterEmail: string;
+  subject: string;
+  description: string;
+  category: string;
+  priority: string;
+}): string {
+  const priorityLabel = params.priority.charAt(0).toUpperCase() + params.priority.slice(1);
+  const categoryLabel = params.category.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  return szlBrand(`
+    <h2>New support ticket — ${params.ticketRef}</h2>
+    <p>A new support ticket has been submitted and requires attention.</p>
+    <div class="highlight">
+      <p class="label">Reference</p>
+      <p style="font-weight:600;">${params.ticketRef}</p>
+      <p class="label" style="margin-top:8px;">From</p>
+      <p>${params.submitterName} &lt;${params.submitterEmail}&gt;</p>
+      <p class="label" style="margin-top:8px;">Subject</p>
+      <p>${params.subject}</p>
+      <p class="label" style="margin-top:8px;">Category</p>
+      <p>${categoryLabel}</p>
+      <p class="label" style="margin-top:8px;">Priority</p>
+      <p>${priorityLabel}</p>
+      <p class="label" style="margin-top:8px;">Description</p>
+      <p>${params.description.replace(/\n/g, "<br />")}</p>
+    </div>
+  `);
+}
+
+export function buildSupportTicketStatusUpdateEmail(params: {
+  submitterName: string;
+  ticketRef: string;
+  subject: string;
+  newStatus: string;
+}): string {
+  const statusLabels: Record<string, string> = {
+    open: "Open",
+    in_progress: "In Progress",
+    waiting_on_customer: "Waiting on You",
+    resolved: "Resolved",
+    closed: "Closed",
+  };
+  const statusLabel = statusLabels[params.newStatus] ?? params.newStatus;
+  const isResolved = params.newStatus === "resolved" || params.newStatus === "closed";
+  return szlBrand(`
+    <h2>Your ticket status has been updated</h2>
+    <p>Hi ${params.submitterName}, there's an update on your support request.</p>
+    <div class="highlight">
+      <p class="label">Reference</p>
+      <p style="font-weight:600;">${params.ticketRef}</p>
+      <p class="label" style="margin-top:8px;">Subject</p>
+      <p>${params.subject}</p>
+      <p class="label" style="margin-top:8px;">New Status</p>
+      <p style="font-weight:600;">${statusLabel}</p>
+    </div>
+    ${isResolved
+      ? `<p>We believe your issue has been resolved. If you have further questions or the issue persists, please don't hesitate to reach out at <strong>support@szlholdings.com</strong>.</p>`
+      : `<p>Our team is actively working on your request. We'll keep you updated as things progress.</p>`
+    }
+    <p>Thank you for your patience.</p>
+  `);
+}
+

@@ -7,6 +7,14 @@ import { z } from "zod";
 import { eq, desc, and, inArray, isNull, or } from "drizzle-orm";
 import { logger } from "../lib/logger";
 import { randomBytes } from "crypto";
+import {
+  sendEmail,
+  buildSupportTicketConfirmationEmail,
+  buildSupportTicketAdminNotificationEmail,
+  buildSupportTicketStatusUpdateEmail,
+} from "../lib/email";
+
+const SUPPORT_ADMIN_EMAIL = process.env.SUPPORT_ADMIN_EMAIL || process.env.SZL_INTERNAL_EMAIL || "support@szlholdings.com";
 
 const router: IRouter = Router();
 
@@ -141,9 +149,15 @@ router.post("/support/tickets", authMiddleware(), validateBody(submitTicketSchem
     const { subject, description, category, priority, submitterName, submitterEmail } = req.body as z.infer<typeof submitTicketSchema>;
     const ticketRef = generateTicketRef();
 
-    const user = req.user;
+    const user = req.user as AuthenticatedUser | undefined;
     const userId = user?.id ?? null;
     const orgId = user?.orgs?.[0]?.orgId ?? null;
+
+    const privileged = user ? (isGlobalAdmin(user) || isSuperAdmin(user)) : false;
+    if (user && !privileged && user.email && user.email.toLowerCase() !== submitterEmail.toLowerCase()) {
+      res.status(403).json({ error: "submitterEmail must match your account email address" });
+      return;
+    }
 
     const [ticket] = await db.insert(supportTicketsTable).values({
       ticketRef,
@@ -159,6 +173,46 @@ router.post("/support/tickets", authMiddleware(), validateBody(submitTicketSchem
     }).returning();
 
     logger.info({ ticketRef, category, priority }, "Support ticket submitted");
+
+    const confirmationHtml = buildSupportTicketConfirmationEmail({
+      submitterName,
+      ticketRef,
+      subject,
+      category,
+      priority,
+    });
+    const adminNotificationHtml = buildSupportTicketAdminNotificationEmail({
+      ticketRef,
+      submitterName,
+      submitterEmail,
+      subject,
+      description,
+      category,
+      priority,
+    });
+
+    const [confirmResult, adminResult] = await Promise.allSettled([
+      sendEmail({
+        to: submitterEmail,
+        subject: `[${ticketRef}] Support request received — ${subject}`,
+        html: confirmationHtml,
+        text: `Hi ${submitterName},\n\nYour support ticket has been received.\n\nReference: ${ticketRef}\nSubject: ${subject}\n\nWe'll be in touch soon.`,
+      }),
+      sendEmail({
+        to: SUPPORT_ADMIN_EMAIL,
+        subject: `[New Ticket] ${ticketRef} — ${subject}`,
+        html: adminNotificationHtml,
+        text: `New support ticket ${ticketRef} submitted by ${submitterName} <${submitterEmail}>.\n\nSubject: ${subject}\nCategory: ${category}\nPriority: ${priority}\n\n${description}`,
+        replyTo: submitterEmail,
+      }),
+    ]);
+
+    if (confirmResult.status === "rejected" || (confirmResult.status === "fulfilled" && !confirmResult.value.success)) {
+      logger.warn({ ticketRef, err: confirmResult.status === "rejected" ? confirmResult.reason : confirmResult.value.error }, "Failed to send ticket confirmation email");
+    }
+    if (adminResult.status === "rejected" || (adminResult.status === "fulfilled" && !adminResult.value.success)) {
+      logger.warn({ ticketRef, err: adminResult.status === "rejected" ? adminResult.reason : adminResult.value.error }, "Failed to send admin notification email");
+    }
 
     res.status(201).json({ ticket });
   } catch (err) {
@@ -350,6 +404,24 @@ router.patch("/support/tickets/:id/status", authMiddleware(), requireRole("admin
     if (assignedToName !== undefined) updates.assignedToName = assignedToName;
 
     const [ticket] = await db.update(supportTicketsTable).set(updates).where(eq(supportTicketsTable.id, ticketId)).returning();
+
+    if (status && status !== existing.status) {
+      const statusUpdateHtml = buildSupportTicketStatusUpdateEmail({
+        submitterName: existing.submitterName,
+        ticketRef: existing.ticketRef,
+        subject: existing.subject,
+        newStatus: status,
+      });
+      const emailResult = await sendEmail({
+        to: existing.submitterEmail,
+        subject: `[${existing.ticketRef}] Your ticket status has been updated`,
+        html: statusUpdateHtml,
+        text: `Hi ${existing.submitterName},\n\nYour support ticket ${existing.ticketRef} has been updated.\n\nNew status: ${status}\nSubject: ${existing.subject}\n\nThank you for your patience.`,
+      });
+      if (!emailResult.success) {
+        logger.warn({ ticketRef: existing.ticketRef, status, err: emailResult.error }, "Failed to send ticket status update email");
+      }
+    }
 
     res.json({ ticket });
   } catch (err) {
