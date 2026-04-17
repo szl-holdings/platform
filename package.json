@@ -55,7 +55,9 @@
     "smoke:product-mode": "node scripts/qa/smoke-product-mode.js",
     "readiness:gate": "pnpm run typecheck && pnpm run test && pnpm run qa:routes && pnpm run audit:mocks && pnpm run audit:deps && pnpm run audit:copy && pnpm run smoke:product-mode && pnpm -r --if-present run build",
     "audit:series-a": "pnpm run typecheck && pnpm run test && pnpm run audit:mocks && pnpm run audit:routes && pnpm run audit:deps && pnpm run audit:copy && pnpm run security:audit && pnpm run smoke:product-mode && pnpm -r --if-present run build",
-    "readme:check": "node scripts/validate-readme-assets.js"
+    "readme:check": "node scripts/validate-readme-assets.js",
+    "readme:generate": "node scripts/generate-readme-product-table.js",
+    "readme:generate:check": "node scripts/generate-readme-product-table.js --check"
   },
   "private": true,
   "packageManager": "pnpm@10.26.1",
