@@ -4,6 +4,7 @@ import {
   AlertTriangle, CheckCircle, Pause, Play, Edit, Trash2, ArrowRight,
   Moon, Sun, Calendar, Shield, Zap, RefreshCw, MoreHorizontal, User, Globe
 } from "lucide-react";
+import { MicroFeedbackWidget } from "@szl-holdings/shared-ui";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 
@@ -380,6 +381,16 @@ export default function AlertManagementPage() {
             ))}
           </div>
         )}
+
+        <div className="flex justify-end pt-3">
+          <MicroFeedbackWidget
+            featureId="lyte-alert-management-summary"
+            featureName="Lyte AIOps Alert Summaries"
+            app="lyte"
+            compact
+            prompt="Were these alert summaries useful?"
+          />
+        </div>
       </div>
     </div>
   );

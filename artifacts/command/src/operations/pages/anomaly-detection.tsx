@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-u
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Brain, Activity, AlertTriangle, TrendingUp, Zap, Eye } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
+import { MicroFeedbackWidget } from "@szl-holdings/shared-ui";
 
 const anomalies = [
   { id: "ANO-001", service: "payment-service", metric: "Latency p99", value: "847ms", baseline: "120ms", deviation: "+606%", severity: "Critical", detected: "4 min ago", rootCause: "DB connection pool exhaustion", impact: "Checkout degraded for 12% of users" },
@@ -89,6 +90,16 @@ export default function AnomalyDetection() {
             </CardContent>
           </Card>
         ))}
+      </div>
+
+      <div className="flex justify-end pt-2">
+        <MicroFeedbackWidget
+          featureId="lyte-anomaly-detection"
+          featureName="Lyte AIOps Metric Spike & Anomaly Cards"
+          app="lyte"
+          compact
+          prompt="Were these anomaly cards useful?"
+        />
       </div>
     </div>
   );
