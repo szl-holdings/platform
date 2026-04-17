@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import {
   Globe2, Shield, BookOpen, Network, Cpu, Radio,
   ChevronRight, Activity, Crown, Menu, X,
-  Map
+  Map, Satellite
 } from "lucide-react";
 import { IMPERIUM_DATA, getThreatColor } from "@imp/lib/imperium-data";
 import { cn } from "@imp/lib/utils";
@@ -16,6 +16,7 @@ const NAV_ITEMS = [
   { path: "/infrastructure/supply-lines", label: "NETWORK TOPOLOGY", sublabel: "Service Mesh Routes", icon: Network },
   { path: "/infrastructure/centurion", label: "AI OPERATIONS", sublabel: "Agent Profiles", icon: Cpu },
   { path: "/infrastructure/intelligence", label: "INTELLIGENCE", sublabel: "Signals Briefing", icon: Radio },
+  { path: "/infrastructure/geospatial", label: "GEOSPATIAL", sublabel: "Intelligence Layers", icon: Satellite },
 ];
 
 function ThreatBadge({ level }: { level: string }) {

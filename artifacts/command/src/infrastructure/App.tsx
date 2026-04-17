@@ -36,6 +36,7 @@ const SenateChamber = lazy(() => import("@/pages/senate-chamber"));
 const SupplyLines = lazy(() => import("@/pages/supply-lines"));
 const CenturionAI = lazy(() => import("@/pages/centurion-ai"));
 const IntelligenceBriefing = lazy(() => import("@/pages/intelligence-briefing"));
+const GeospatialIntelligence = lazy(() => import("@/pages/geospatial"));
 
 const base = (import.meta.env.BASE_URL || "/imperium/").replace(/\/$/, "");
 
@@ -54,6 +55,7 @@ export default function App() {
               <Route path="/supply-lines" component={SupplyLines} />
               <Route path="/centurion" component={CenturionAI} />
               <Route path="/intelligence" component={IntelligenceBriefing} />
+              <Route path="/geospatial" component={GeospatialIntelligence} />
               <Route>
                 <div className="flex items-center justify-center h-64 text-slate-400 text-sm font-display tracking-widest">
                   PAGE NOT FOUND — RETURN TO IMPERIUM

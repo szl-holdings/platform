@@ -137,6 +137,7 @@ const SenateChamber = lazy(() => import("@imp/pages/senate-chamber"));
 const SupplyLines = lazy(() => import("@imp/pages/supply-lines"));
 const CenturionAI = lazy(() => import("@imp/pages/centurion-ai"));
 const IntelligenceBriefing = lazy(() => import("@imp/pages/intelligence-briefing"));
+const GeospatialIntelligence = lazy(() => import("@imp/pages/geospatial"));
 
 function getMode(location: string): WorkspaceMode {
   if (location.startsWith("/operations") || location.startsWith("/cognitive")) return "operations";
@@ -310,6 +311,7 @@ function AppShell() {
               <Route path="/infrastructure/supply-lines" component={() => <SupplyLines />} />
               <Route path="/infrastructure/centurion" component={() => <CenturionAI />} />
               <Route path="/infrastructure/intelligence" component={() => <IntelligenceBriefing />} />
+              <Route path="/infrastructure/geospatial" component={() => <GeospatialIntelligence />} />
 
               <Route>
                 <div className="flex items-center justify-center h-64 text-slate-400 text-sm">Page not found</div>

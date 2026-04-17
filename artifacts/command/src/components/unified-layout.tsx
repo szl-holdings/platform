@@ -8,7 +8,8 @@ import {
   TrendingUp, DollarSign, RotateCcw, Calculator, Bot, Monitor, Building,
   BellOff, Code, Target, Phone, Calendar, Layers, Map, Crown, ChevronRight,
   Menu, X, BarChart3, Clapperboard, Power, Bell, Lock, GitCommit, Sigma,
-  FlaskConical, ShieldCheck, Globe, Archive, GitMerge, CheckCircle2, Lightbulb
+  FlaskConical, ShieldCheck, Globe, Archive, GitMerge, CheckCircle2, Lightbulb,
+  Satellite
 } from "lucide-react";
 import { MultiplayerSessionBanner, EcosystemNav, EnvironmentLabel, useDemoMode, MODE_LABELS, MODE_COLORS, MODE_ICONS } from "@szl-holdings/shared-ui";
 
@@ -144,6 +145,7 @@ const INFRASTRUCTURE_NAV: NavGroup[] = [
     section: "Network",
     items: [
       { href: "/infrastructure/supply-lines", label: "Network Topology", icon: Network },
+      { href: "/infrastructure/geospatial", label: "Geospatial Intel", icon: Satellite },
     ],
   },
 ];

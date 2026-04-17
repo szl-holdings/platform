@@ -869,6 +869,251 @@ export const CENTURION_PROFILES = [
   },
 ];
 
+export type GeoLayer = "SIGINT" | "INFRASTRUCTURE" | "PERSONNEL" | "WEATHER";
+export type GeoThreat = "CRITICAL" | "HIGH" | "MEDIUM" | "LOW" | "NOMINAL";
+
+export interface GeoPin {
+  id: string;
+  layer: GeoLayer;
+  lat: number;
+  lng: number;
+  label: string;
+  sublabel: string;
+  classification: Classification;
+  threat: GeoThreat;
+  detail: {
+    summary: string;
+    source: string;
+    timestamp: string;
+    confidence: number;
+    tags: string[];
+  };
+}
+
+export const GEO_PINS: GeoPin[] = [
+  {
+    id: "geo-infra-useast",
+    layer: "INFRASTRUCTURE",
+    lat: 37.4316,
+    lng: -78.6569,
+    label: "Legio I — US East",
+    sublabel: "Primary compute region",
+    classification: "SOVEREIGN",
+    threat: "NOMINAL",
+    detail: {
+      summary: "Container App + PostgreSQL HA cluster. 32 resources active. Aquila Score 94. Zero P1/P2 incidents in 24h.",
+      source: "Azure Monitor / Internal",
+      timestamp: "T-00:04",
+      confidence: 100,
+      tags: ["PRIMARY", "HA", "SOVEREIGN"],
+    },
+  },
+  {
+    id: "geo-infra-uswest",
+    layer: "INFRASTRUCTURE",
+    lat: 47.6062,
+    lng: -120.7104,
+    label: "Legio II — US West 2",
+    sublabel: "Failover & DR region",
+    classification: "RESTRICTED",
+    threat: "NOMINAL",
+    detail: {
+      summary: "Geo-redundant PostgreSQL backup active. Static Web App secondary endpoints warm. RTO < 15 min confirmed.",
+      source: "Azure Site Recovery",
+      timestamp: "T-00:12",
+      confidence: 98,
+      tags: ["FAILOVER", "DR", "GEO-REDUNDANT"],
+    },
+  },
+  {
+    id: "geo-infra-westeurope",
+    layer: "INFRASTRUCTURE",
+    lat: 52.3702,
+    lng: 4.8952,
+    label: "Legio III — West Europe",
+    sublabel: "GDPR-compliant EU dataplane",
+    classification: "CONFIDENTIAL",
+    threat: "NOMINAL",
+    detail: {
+      summary: "EU data residency zone. GDPR-scoped data processing only. Automated compliance scan last run T-02:00.",
+      source: "Azure Policy / Compliance",
+      timestamp: "T-00:08",
+      confidence: 99,
+      tags: ["GDPR", "EU-RESIDENCY", "COMPLIANT"],
+    },
+  },
+  {
+    id: "geo-infra-seasia",
+    layer: "INFRASTRUCTURE",
+    lat: 1.3521,
+    lng: 103.8198,
+    label: "Legio IV — Southeast Asia",
+    sublabel: "APAC CDN edge node",
+    classification: "OPEN",
+    threat: "NOMINAL",
+    detail: {
+      summary: "Front Door CDN edge pop active. Average latency 8ms to APAC clients. No anomalies. Cache hit rate 97.1%.",
+      source: "Azure Front Door Analytics",
+      timestamp: "T-00:06",
+      confidence: 97,
+      tags: ["CDN", "APAC", "EDGE"],
+    },
+  },
+  {
+    id: "geo-sigint-001",
+    layer: "SIGINT",
+    lat: 55.7558,
+    lng: 37.6173,
+    label: "SIGINT-001 — Moscow",
+    sublabel: "Auth endpoint probe cluster",
+    classification: "CONFIDENTIAL",
+    threat: "HIGH",
+    detail: {
+      summary: "Distributed credential stuffing campaign originating from 14 IPs in Moscow ASN. WAF rate-limiting engaged. 412 blocked requests in last hour.",
+      source: "WAF Threat Feed / Aegis SIEM",
+      timestamp: "T-00:22",
+      confidence: 87,
+      tags: ["BRUTEFORCE", "CREDENTIAL-STUFFING", "WAF-BLOCKED"],
+    },
+  },
+  {
+    id: "geo-sigint-002",
+    layer: "SIGINT",
+    lat: 39.9042,
+    lng: 116.4074,
+    label: "SIGINT-002 — Beijing",
+    sublabel: "SQLi probe — /api/graphql",
+    classification: "CONFIDENTIAL",
+    threat: "MEDIUM",
+    detail: {
+      summary: "Automated SQL injection probes against GraphQL endpoint. DRS 2.1 rule set blocking. Pattern matches APT-41 tooling signature.",
+      source: "WAF DRS 2.1 / Threat Intel",
+      timestamp: "T-00:18",
+      confidence: 72,
+      tags: ["SQLI", "APT-41", "GRAPHQL"],
+    },
+  },
+  {
+    id: "geo-sigint-003",
+    layer: "SIGINT",
+    lat: 51.5074,
+    lng: -0.1278,
+    label: "SIGINT-003 — London",
+    sublabel: "Bot crawler — static assets",
+    classification: "RESTRICTED",
+    threat: "LOW",
+    detail: {
+      summary: "Automated crawling of static asset endpoints by known bot ASN. Bot Manager 1.1 applied rate-limit. No data exfiltration risk.",
+      source: "Bot Manager / CDN Logs",
+      timestamp: "T-00:35",
+      confidence: 95,
+      tags: ["BOT", "CRAWLER", "RATE-LIMITED"],
+    },
+  },
+  {
+    id: "geo-sigint-004",
+    layer: "SIGINT",
+    lat: -23.5505,
+    lng: -46.6333,
+    label: "SIGINT-004 — São Paulo",
+    sublabel: "Reconnaissance scan — port sweep",
+    classification: "RESTRICTED",
+    threat: "MEDIUM",
+    detail: {
+      summary: "Port sweep against external IP range. Front Door absorbing all traffic. No internal exposure. Geo-filter recommendation pending senate vote.",
+      source: "Azure Network Watcher",
+      timestamp: "T-01:02",
+      confidence: 81,
+      tags: ["PORT-SCAN", "RECON", "CONTAINED"],
+    },
+  },
+  {
+    id: "geo-personnel-001",
+    layer: "PERSONNEL",
+    lat: 40.7128,
+    lng: -74.006,
+    label: "EXEC — New York",
+    sublabel: "Authorized administrator",
+    classification: "SOVEREIGN",
+    threat: "NOMINAL",
+    detail: {
+      summary: "C-suite executive access via Zero Trust NAC. MFA verified. Session duration 2h 14m. Read-only mode active.",
+      source: "Entra ID / Conditional Access",
+      timestamp: "T-00:02",
+      confidence: 100,
+      tags: ["C-SUITE", "MFA-VERIFIED", "READ-ONLY"],
+    },
+  },
+  {
+    id: "geo-personnel-002",
+    layer: "PERSONNEL",
+    lat: 34.0522,
+    lng: -118.2437,
+    label: "DEVOPS — Los Angeles",
+    sublabel: "Infrastructure engineer",
+    classification: "RESTRICTED",
+    threat: "NOMINAL",
+    detail: {
+      summary: "Senior DevOps engineer. Active deployment pipeline session. Azure RBAC: Contributor on Compute RG. Approved change window.",
+      source: "Entra ID / Azure RBAC",
+      timestamp: "T-00:08",
+      confidence: 100,
+      tags: ["DEVOPS", "CONTRIBUTOR", "CHANGE-WINDOW"],
+    },
+  },
+  {
+    id: "geo-personnel-003",
+    layer: "PERSONNEL",
+    lat: 48.8566,
+    lng: 2.3522,
+    label: "ANALYST — Paris",
+    sublabel: "Security analyst — read-only",
+    classification: "CONFIDENTIAL",
+    threat: "NOMINAL",
+    detail: {
+      summary: "SOC analyst reviewing threat telemetry. Reader role on Aegis SIEM workspace. Session started 14 min ago. No anomalies.",
+      source: "Entra ID / Aegis Access Log",
+      timestamp: "T-00:14",
+      confidence: 100,
+      tags: ["SOC", "READER", "NOMINAL"],
+    },
+  },
+  {
+    id: "geo-weather-001",
+    layer: "WEATHER",
+    lat: 38.9072,
+    lng: -77.0369,
+    label: "WEATHER-DC — Thunderstorm risk",
+    sublabel: "AZ-1 availability concern",
+    classification: "OPEN",
+    threat: "LOW",
+    detail: {
+      summary: "Severe thunderstorm watch in DC metro. Azure US East AZ-1 colocation may experience power fluctuation. HA failover pre-warmed to AZ-2.",
+      source: "NOAA API / Azure Health",
+      timestamp: "T-00:30",
+      confidence: 78,
+      tags: ["WEATHER", "AZ-RISK", "PRE-WARMED"],
+    },
+  },
+  {
+    id: "geo-weather-002",
+    layer: "WEATHER",
+    lat: 35.6762,
+    lng: 139.6503,
+    label: "WEATHER-Tokyo — Seismic alert",
+    sublabel: "APAC edge node monitoring",
+    classification: "OPEN",
+    threat: "LOW",
+    detail: {
+      summary: "M4.2 earthquake registered near Tokyo. Azure Japan East CDN edge operating normally. No infrastructure impact detected.",
+      source: "JMA / Azure Health Advisories",
+      timestamp: "T-01:15",
+      confidence: 90,
+      tags: ["SEISMIC", "MONITORING", "NO-IMPACT"],
+    },
+  },
+];
+
 export const INTELLIGENCE_BRIEFS = {
   cost: {
     title: "COST INTELLIGENCE",
