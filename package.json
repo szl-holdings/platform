@@ -36,7 +36,6 @@
     "qa:atlas": "node scripts/qa/check-atlas.js",
     "qa:meta": "node scripts/qa/check-metadata.js",
     "qa:site": "pnpm qa:routes && pnpm qa:links && pnpm qa:trust && pnpm qa:meta",
-    "docs:sync-check": "node scripts/docs/check-docs-sync.js",
     "test:atlas": "vitest run --config vitest.config.ts --reporter=verbose lib/scene-export",
     "release:prep": "echo 'Release prep: run pnpm build && pnpm test && pnpm qa:site, then update CHANGELOG.md'",
     "release:notes": "echo 'Generate release notes from CHANGELOG.md for the latest version'",
@@ -58,7 +57,10 @@
     "audit:series-a": "pnpm run typecheck && pnpm run test && pnpm run audit:mocks && pnpm run audit:routes && pnpm run audit:deps && pnpm run audit:copy && pnpm run security:audit && pnpm run smoke:product-mode && pnpm -r --if-present run build",
     "readme:check": "node scripts/validate-readme-assets.js",
     "readme:generate": "node scripts/generate-readme-product-table.js",
-    "readme:generate:check": "node scripts/generate-readme-product-table.js --check"
+    "readme:generate:check": "node scripts/generate-readme-product-table.js --check",
+    "docs:generate": "node --experimental-vm-modules scripts/docs/generate-api-catalogue.js",
+    "docs:check": "node --experimental-vm-modules scripts/docs/generate-api-catalogue.js --check",
+    "docs:sync-check": "node --experimental-vm-modules scripts/docs/check-docs-sync.js"
   },
   "private": true,
   "packageManager": "pnpm@10.26.1",

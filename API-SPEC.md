@@ -16,6 +16,7 @@ The SZL Holdings platform exposes a single centralized API server (`artifacts/ap
 | Route files | 140+ TypeScript route files in `artifacts/api-server/src/routes/` |
 | Spec format | OpenAPI 3.1 (served at `/api/docs`) |
 | JSON spec | `/api/docs.json` |
+| Endpoint catalogue | [`API-CATALOGUE.md`](API-CATALOGUE.md) (auto-generated from spec) |
 | GraphQL | Apollo Server at `/api/graphql` |
 | Protocol | REST/JSON primary; GraphQL for complex queries |
 | Authentication | Session cookie (`sid`) or `Authorization: Bearer` token |
@@ -341,6 +342,18 @@ Specific limits are environment-configured. Clients that exceed limits receive `
 ## OpenAPI Specification
 
 The full machine-readable spec is maintained in `lib/api-spec/openapi.yaml` (OpenAPI 3.1). It is served at `/api/docs` as Swagger UI and can be fetched as JSON at `/api/docs.json`.
+
+A human-readable endpoint table is auto-generated from the spec and committed as **[API-CATALOGUE.md](API-CATALOGUE.md)**. Regenerate it after any spec changes with:
+
+```bash
+pnpm docs:generate
+```
+
+To verify the catalogue matches the current spec without writing a new file (useful in CI):
+
+```bash
+pnpm docs:check
+```
 
 The spec is the authoritative source for:
 - Request/response schemas (Zod validation is used in many handlers; several high-traffic routes lack Zod validation — see KNOWN-GAPS.md)
