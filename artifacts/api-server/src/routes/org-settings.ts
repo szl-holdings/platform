@@ -42,6 +42,7 @@ import {
   handleRouteError,
   sendForbidden,
 } from "../lib/api-response";
+import { sendEmail, buildPasswordResetEmail } from "../lib/email";
 import { logger } from "../lib/logger";
 import type { Request, Response } from "express";
 
@@ -645,6 +646,24 @@ router.post("/user/password-reset", writeLimiter, async (req: Request, res: Resp
         title: "Password reset requested",
         message: "A password reset link has been generated. Check your email.",
       });
+
+      const appUrl = process.env.APP_URL || process.env.VITE_APP_URL || "https://szlholdings.com";
+      const resetUrl = `${appUrl}/reset-password?token=${token}`;
+
+      const [userDetails] = await db
+        .select({ displayName: usersTable.displayName })
+        .from(usersTable)
+        .where(eq(usersTable.id, user.id))
+        .limit(1);
+
+      sendEmail({
+        to: user.email,
+        subject: "Reset your SZL Holdings password",
+        html: buildPasswordResetEmail(userDetails?.displayName || user.email, resetUrl),
+        text: `Reset your SZL Holdings password by visiting: ${resetUrl} — This link expires in 1 hour.`,
+      }).then(result => {
+        if (!result.success) logger.warn({ error: result.error, userId: user.id }, "[user-lifecycle] Email provider rejected password reset email");
+      }).catch(err => logger.warn({ err, userId: user.id }, "[user-lifecycle] Failed to send password reset email"));
 
       logger.info({ userId: user.id, email: user.email }, "[user-lifecycle] Password reset token generated");
     }

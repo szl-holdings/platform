@@ -11,13 +11,14 @@
 import { Router } from "express";
 import crypto from "crypto";
 import { z } from "zod";
-import { db, orgInvitationsTable, organizationsTable, orgMembersTable, auditEventsTable } from "@szl-holdings/db";
+import { db, orgInvitationsTable, organizationsTable, orgMembersTable, auditEventsTable, usersTable } from "@szl-holdings/db";
 import { eq, and, gt } from "drizzle-orm";
 import { authMiddleware } from "../middlewares/auth";
 import { writeLimiter } from "../middlewares/rate-limiters";
 import { logger } from "../lib/logger";
 import { validateBody } from "../lib/validation";
 import { sendError, sendUnauthorized, sendNotFound, sendForbidden, sendBadRequest, handleRouteError } from "../lib/api-response";
+import { sendEmail, buildOrgInviteEmail } from "../lib/email";
 import type { Request, Response } from "express";
 
 const router = Router();
@@ -150,6 +151,30 @@ router.post(
         ipAddress: req.ip,
         newValues: { orgId: org.id, email: email.toLowerCase(), role, expiresAt: expiresAt.toISOString() },
       });
+
+      const [inviter] = await db
+        .select({ displayName: usersTable.displayName, email: usersTable.email })
+        .from(usersTable)
+        .where(eq(usersTable.id, req.user!.id))
+        .limit(1);
+
+      const appUrl = process.env.APP_URL || process.env.VITE_APP_URL || "https://szlholdings.com";
+      const inviteUrl = `${appUrl}/accept-invite?token=${token}`;
+
+      sendEmail({
+        to: email.toLowerCase(),
+        subject: `You've been invited to join ${org.name} on SZL Holdings`,
+        html: buildOrgInviteEmail({
+          orgName: org.name,
+          inviteUrl,
+          role,
+          expiresAt: expiresAt.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
+          invitedByName: inviter?.displayName || inviter?.email || undefined,
+        }),
+        text: `You've been invited to join ${org.name} as a ${role}. Accept your invitation here: ${inviteUrl} (expires ${expiresAt.toLocaleDateString()})`,
+      }).then(result => {
+        if (!result.success) logger.warn({ error: result.error, email: email.toLowerCase() }, "[invitations] Email provider rejected invite email");
+      }).catch(err => logger.warn({ err, email: email.toLowerCase() }, "[invitations] Failed to send invite email"));
 
       res.status(201).json({
         id: invitation.id,

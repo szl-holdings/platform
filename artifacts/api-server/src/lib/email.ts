@@ -367,6 +367,82 @@ export function buildClientPortalInviteEmail(name: string, company: string, invi
   `);
 }
 
+export function buildOrgInviteEmail(params: {
+  orgName: string;
+  inviteUrl: string;
+  role: string;
+  expiresAt: string;
+  invitedByName?: string;
+}): string {
+  const { orgName, inviteUrl, role, expiresAt, invitedByName } = params;
+  return szlBrand(`
+    <h2>You've been invited to join ${orgName}</h2>
+    <p>Hello,</p>
+    <p>${invitedByName ? `<strong>${invitedByName}</strong> has invited you` : "You have been invited"} to join <strong>${orgName}</strong> on the SZL Holdings platform as a <strong>${role}</strong>.</p>
+    <div class="highlight">
+      <p class="label">Organization</p>
+      <p>${orgName}</p>
+      <p class="label" style="margin-top:8px;">Role</p>
+      <p>${role.charAt(0).toUpperCase() + role.slice(1)}</p>
+      <p class="label" style="margin-top:8px;">Invitation expires</p>
+      <p>${expiresAt}</p>
+    </div>
+    <p>Click below to accept the invitation and set up your account. This link can only be used once.</p>
+    <a class="cta" href="${inviteUrl}">Accept Invitation</a>
+    <p style="margin-top:20px;font-size:12px;color:#9ca3af;">If you did not expect this invitation, you can safely ignore this email. If you have concerns, contact us at <strong>security@szlholdings.com</strong>.</p>
+  `);
+}
+
+export function buildNotificationDigestEmail(params: {
+  userName: string;
+  date: string;
+  notifications: Array<{ title: string; message: string; type: string; actionUrl?: string | null; createdAt: string }>;
+}): string {
+  const { userName, date, notifications } = params;
+
+  const typeLabel: Record<string, string> = {
+    info: "Info",
+    success: "Success",
+    warning: "Warning",
+    error: "Alert",
+    action_required: "Action Required",
+  };
+
+  const typeColor: Record<string, string> = {
+    info: "#6366f1",
+    success: "#10b981",
+    warning: "#f59e0b",
+    error: "#ef4444",
+    action_required: "#f59e0b",
+  };
+
+  const items = notifications.map(n => {
+    const color = typeColor[n.type] ?? "#6366f1";
+    const label = typeLabel[n.type] ?? n.type;
+    const time = new Date(n.createdAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+    return `
+    <div style="border-left:3px solid ${color};padding:10px 14px;margin:10px 0;background:#f9fafb;border-radius:4px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+        <span style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:${color};">${label}</span>
+        <span style="font-size:11px;color:#9ca3af;">${time}</span>
+      </div>
+      <p style="margin:0 0 4px;font-size:13px;font-weight:600;color:#111827;">${n.title}</p>
+      <p style="margin:0;font-size:13px;color:#4b5563;">${n.message}</p>
+      ${n.actionUrl ? `<a href="${n.actionUrl.startsWith("http") ? n.actionUrl : `${process.env.APP_URL || "https://szlholdings.com"}${n.actionUrl}`}" style="font-size:12px;color:#6366f1;text-decoration:none;margin-top:6px;display:inline-block;">View →</a>` : ""}
+    </div>`;
+  }).join("");
+
+  return szlBrand(`
+    <h2>Your Daily Digest — ${date}</h2>
+    <p>Hello ${userName},</p>
+    <p>Here's a summary of your <strong>${notifications.length} unread notification${notifications.length !== 1 ? "s" : ""}</strong> from the past 24 hours.</p>
+    ${items}
+    <div class="divider"></div>
+    <p style="font-size:13px;color:#6b7280;">To manage your notification preferences or turn off digest emails, visit your account settings.</p>
+    <a class="cta" href="${process.env.APP_URL || "https://szlholdings.com"}/settings/notifications">Manage Preferences</a>
+  `);
+}
+
 export function buildBillingNotificationEmail(params: {
   name: string;
   eventType: "invoice_paid" | "invoice_due" | "payment_failed" | "subscription_renewed" | "subscription_cancelled" | "trial_ending";

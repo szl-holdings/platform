@@ -24,6 +24,7 @@ import { authMiddleware, isElevatedUser } from "../middlewares/auth";
 import { writeLimiter } from "../middlewares/rate-limiters";
 import { validateBody } from "../lib/validation";
 import { sendSuccess, sendCreated, sendBadRequest, sendForbidden, handleRouteError, sendNotFound } from "../lib/api-response";
+import { sendEmail, buildOrgInviteEmail } from "../lib/email";
 import { logger } from "../lib/logger";
 import type { Request, Response } from "express";
 
@@ -448,6 +449,30 @@ router.post(
         .returning();
 
       logger.info({ userId: user.id, orgId: org.id, email }, "[onboarding] Invite sent");
+
+      const appUrl = process.env.APP_URL || process.env.VITE_APP_URL || "https://szlholdings.com";
+      const inviteUrl = `${appUrl}/accept-invite?token=${token}`;
+
+      const [inviter] = await db
+        .select({ displayName: usersTable.displayName, email: usersTable.email })
+        .from(usersTable)
+        .where(eq(usersTable.id, user.id))
+        .limit(1);
+
+      sendEmail({
+        to: email.toLowerCase(),
+        subject: `You've been invited to join ${org.name} on SZL Holdings`,
+        html: buildOrgInviteEmail({
+          orgName: org.name,
+          inviteUrl,
+          role,
+          expiresAt: expiresAt.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
+          invitedByName: inviter?.displayName || inviter?.email || undefined,
+        }),
+        text: `You've been invited to join ${org.name} as a ${role}. Accept your invitation here: ${inviteUrl} (expires ${expiresAt.toLocaleDateString()})`,
+      }).then(result => {
+        if (!result.success) logger.warn({ error: result.error, email: email.toLowerCase() }, "[onboarding] Email provider rejected invite email");
+      }).catch(err => logger.warn({ err, email: email.toLowerCase() }, "[onboarding] Failed to send invite email"));
 
       sendCreated(res, {
         invitationId: invitation.id,

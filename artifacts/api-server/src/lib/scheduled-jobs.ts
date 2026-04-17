@@ -87,8 +87,106 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_LYTE_DIGEST, async (job) => {
   logger.info({ jobId: job.id }, "daily_lyte_digest: aggregating Lyte signal digest");
   const payload = job.payload as { date?: string };
   const date = payload.date ?? new Date().toISOString().split("T")[0];
-  await new Promise(r => setTimeout(r, 80));
-  serverTelemetry.recordBusinessEvent({ type: "daily_lyte_digest_completed", domain: "lyte", durationMs: Date.now() - start, success: true, metadata: { date } });
+
+  let sent = 0;
+  let skipped = 0;
+  let failed = 0;
+
+  try {
+    const { db } = await import("@szl-holdings/db");
+    const { notificationPreferencesTable, notificationsTable, usersTable } = await import("@szl-holdings/db");
+    const { eq, and, gte, desc } = await import("drizzle-orm");
+    const { sendEmail, buildNotificationDigestEmail } = await import("./email");
+
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+    const emailRecipients = await db
+      .select({
+        userId: notificationPreferencesTable.userId,
+        email: usersTable.email,
+        displayName: usersTable.displayName,
+      })
+      .from(notificationPreferencesTable)
+      .innerJoin(usersTable, eq(notificationPreferencesTable.userId, usersTable.id))
+      .where(
+        and(
+          eq(notificationPreferencesTable.emailEnabled, true),
+          eq(usersTable.isActive, true),
+        ),
+      );
+
+    logger.info({ jobId: job.id, recipientCount: emailRecipients.length }, "daily_lyte_digest: found email-enabled users");
+
+    for (const recipient of emailRecipients) {
+      if (!recipient.email) {
+        skipped++;
+        continue;
+      }
+      try {
+        const notifications = await db
+          .select({
+            id: notificationsTable.id,
+            title: notificationsTable.title,
+            message: notificationsTable.message,
+            type: notificationsTable.type,
+            actionUrl: notificationsTable.actionUrl,
+            createdAt: notificationsTable.createdAt,
+          })
+          .from(notificationsTable)
+          .where(
+            and(
+              eq(notificationsTable.userId, recipient.userId),
+              eq(notificationsTable.isRead, false),
+              gte(notificationsTable.createdAt, since),
+            ),
+          )
+          .orderBy(desc(notificationsTable.createdAt))
+          .limit(20);
+
+        if (notifications.length === 0) {
+          skipped++;
+          continue;
+        }
+
+        const dateLabel = new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+
+        const result = await sendEmail({
+          to: recipient.email,
+          subject: `Your Daily Digest — ${dateLabel}`,
+          html: buildNotificationDigestEmail({
+            userName: recipient.displayName || recipient.email,
+            date: dateLabel,
+            notifications: notifications.map(n => ({
+              title: n.title,
+              message: n.message,
+              type: n.type,
+              actionUrl: n.actionUrl ?? null,
+              createdAt: n.createdAt.toISOString(),
+            })),
+          }),
+          text: `Your Daily Digest (${dateLabel}) — ${notifications.length} unread notification(s). Log in to review them at ${process.env.APP_URL || "https://szlholdings.com"}.`,
+        });
+
+        if (result.success) {
+          sent++;
+        } else {
+          failed++;
+          logger.warn({ userId: recipient.userId, error: result.error }, "daily_lyte_digest: provider rejected digest email");
+        }
+      } catch (err) {
+        failed++;
+        logger.warn({ err, userId: recipient.userId }, "daily_lyte_digest: failed to send digest to user");
+      }
+    }
+
+    logger.info({ jobId: job.id, date, sent, skipped, failed }, "daily_lyte_digest: delivery complete");
+  } catch (err) {
+    logger.error({ err, jobId: job.id }, "daily_lyte_digest: fatal error during digest delivery");
+    updateRegistry(NAMED_JOB_TYPES.DAILY_LYTE_DIGEST, { lastStatus: "failed", lastDurationMs: Date.now() - start });
+    return;
+  }
+
+  serverTelemetry.recordBusinessEvent({ type: "daily_lyte_digest_completed", domain: "lyte", durationMs: Date.now() - start, success: true, metadata: { date, sent, skipped, failed } });
   updateRegistry(NAMED_JOB_TYPES.DAILY_LYTE_DIGEST, { lastStatus: "completed", lastDurationMs: Date.now() - start });
   logger.info({ jobId: job.id, date }, "daily_lyte_digest: complete");
 });
