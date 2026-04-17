@@ -1,5 +1,6 @@
 import type { IRouter } from "express";
 import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../../middlewares/sliding-window-limiter";
+import { tenantScope } from "../../middlewares/tenant-scope";
 
 import stephenRouter from "../stephen";
 import carlotaJoRouter from "../carlota-jo";
@@ -47,8 +48,49 @@ const _readLimiter = perUserApiSlidingLimiter;
 const _writeLimiter = perUserWriteSlidingLimiter;
 
 export function register(router: IRouter): void {
-  router.use(stephenRouter);
+  router.use("/holdings", tenantScope({ required: true }));
+  router.use("/capital", tenantScope({ required: true }));
+  router.use("/certification", tenantScope({ required: true }));
+  router.use("/ownership", tenantScope({ required: true }));
+  router.use("/fund-ops", tenantScope({ required: true }));
+  router.use("/booking", tenantScope({ required: true }));
+  router.use("/salesforce", tenantScope({ required: true }));
+  router.use("/hubspot", tenantScope({ required: true }));
+  router.use("/dynamics", tenantScope({ required: true }));
+  router.use("/crm", tenantScope({ required: true }));
+  router.use("/dreamscape", tenantScope({ required: true }));
+  router.use("/briefing", tenantScope({ required: true }));
+  router.use("/cortex", tenantScope({ required: true }));
+  router.use("/innovation-engine", tenantScope({ required: true }));
+  router.use("/autopilot", tenantScope({ required: true }));
+  router.use("/monte-carlo", tenantScope({ required: true }));
+  router.use("/signal-chains", tenantScope({ required: true }));
+  router.use("/cross-domain-query", tenantScope({ required: true }));
+  router.use("/correlation-map", tenantScope({ required: true }));
+  router.use("/realtime", tenantScope({ required: true }));
+  router.use("/helm", tenantScope({ required: true }));
+  router.use("/cross-app", tenantScope({ required: true }));
+  router.use("/sessions/command", tenantScope({ required: true }));
+  router.use("/prism-bus", tenantScope({ required: true }));
+  router.use("/forge", tenantScope({ required: true }));
+  router.use("/covenant", tenantScope({ required: true }));
+  router.use("/imperium", tenantScope({ required: true }));
+  router.use("/distribution-os", tenantScope({ required: true }));
+  router.use("/integrations", tenantScope({ required: true }));
+  router.use("/microsoft", tenantScope({ required: true }));
+  router.use("/push-tokens", tenantScope({ required: true }));
+  router.use("/push-notifications", tenantScope({ required: true }));
+  router.use("/push-preferences", tenantScope({ required: true }));
+  router.use("/push-history", tenantScope({ required: true }));
+  router.use("/push-analytics", tenantScope({ required: true }));
+  router.use("/web-push", tenantScope({ required: true }));
+  router.use("/notification-recipients", tenantScope({ required: true }));
+  router.use("/support", tenantScope({ required: true }));
+  router.use("/data-retention", tenantScope({ required: true }));
+  router.use("/analytics/investor", tenantScope({ required: true }));
+  router.use("/stephen", tenantScope({ required: true }));
 
+  router.use(stephenRouter);
   router.use(carlotaJoRouter);
 
   router.use("/holdings/inquiries", _writeLimiter);
@@ -134,6 +176,7 @@ export function register(router: IRouter): void {
 
   router.use("/distribution-os", _writeLimiter);
   router.use("/distribution-os", distributionOsRouter);
+  // /v1 — public API gated by dosApiKeyAuth (API key), not user session. Exempt from tenantScope by design.
   router.use("/v1", dosPublicApiRouter);
 
   router.use("/integrations", _readLimiter);

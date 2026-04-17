@@ -1,5 +1,6 @@
 import type { IRouter } from "express";
 import { perUserApiSlidingLimiter } from "../../middlewares/sliding-window-limiter";
+import { tenantScope } from "../../middlewares/tenant-scope";
 
 import vesselsRouter from "../vessels";
 import vesselsPlatformRouter from "../vessels-platform";
@@ -12,6 +13,8 @@ import vesselsCognitiveRouter from "../vessels-cognitive";
 const _readLimiter = perUserApiSlidingLimiter;
 
 export function register(router: IRouter): void {
+  router.use("/vessels", tenantScope({ required: true }));
+
   router.use("/vessels", _readLimiter);
   router.use(vesselsRouter);
 

@@ -1,6 +1,7 @@
 import type { IRouter } from "express";
 import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../../middlewares/sliding-window-limiter";
 import { idempotencyMiddleware, optionalIdempotencyMiddleware } from "../../middlewares/idempotency";
+import { tenantScope } from "../../middlewares/tenant-scope";
 
 import billingRouter from "../billing";
 import meteringRouter from "../metering";
@@ -16,6 +17,16 @@ const _readLimiter = perUserApiSlidingLimiter;
 const _writeLimiter = perUserWriteSlidingLimiter;
 
 export function register(router: IRouter): void {
+  router.use("/billing", tenantScope({ required: true }));
+  router.use("/metering", tenantScope({ required: true }));
+  router.use("/usage", tenantScope({ required: true }));
+  router.use("/notifications", tenantScope({ required: true }));
+  router.use("/projects", tenantScope({ required: true }));
+  router.use("/connectors", tenantScope({ required: true }));
+  router.use("/feature-flags", tenantScope({ required: true }));
+  router.use("/partner", tenantScope({ required: true }));
+  router.use("/services", tenantScope({ required: true }));
+
   router.use("/billing", _writeLimiter);
   router.use("/billing", optionalIdempotencyMiddleware);
   router.use("/billing/checkout", idempotencyMiddleware);

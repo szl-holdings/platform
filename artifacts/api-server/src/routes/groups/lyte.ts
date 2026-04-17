@@ -1,5 +1,6 @@
 import type { IRouter } from "express";
 import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../../middlewares/sliding-window-limiter";
+import { tenantScope } from "../../middlewares/tenant-scope";
 
 import lyteRouter from "../lyte";
 import lyteBillingRouter from "../lyte-billing";
@@ -13,6 +14,8 @@ const _readLimiter = perUserApiSlidingLimiter;
 const _writeLimiter = perUserWriteSlidingLimiter;
 
 export function register(router: IRouter): void {
+  router.use("/lyte", tenantScope({ required: true }));
+
   router.use("/lyte", _readLimiter);
   router.use("/lyte/billing", _writeLimiter);
   router.use(lyteBillingRouter);

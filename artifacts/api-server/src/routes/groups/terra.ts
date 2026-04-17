@@ -1,5 +1,6 @@
 import type { IRouter } from "express";
 import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../../middlewares/sliding-window-limiter";
+import { tenantScope } from "../../middlewares/tenant-scope";
 
 import terraRouter from "../terra";
 import terraCrmRouter from "../terra-crm";
@@ -13,6 +14,9 @@ const _readLimiter = perUserApiSlidingLimiter;
 const _writeLimiter = perUserWriteSlidingLimiter;
 
 export function register(router: IRouter): void {
+  router.use("/terra", tenantScope({ required: true }));
+  router.use("/beacon", tenantScope({ required: true }));
+
   router.use("/terra", _readLimiter);
   router.use(terraRouter);
   router.use("/beacon", _readLimiter);

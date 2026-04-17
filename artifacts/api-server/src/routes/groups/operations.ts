@@ -1,6 +1,7 @@
 import type { IRouter } from "express";
 import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../../middlewares/sliding-window-limiter";
 import { adminGuard } from "../../middlewares/admin-guard";
+import { tenantScope } from "../../middlewares/tenant-scope";
 
 import adminRouter from "../admin";
 import observabilityRouter from "../observability";
@@ -12,6 +13,9 @@ const _readLimiter = perUserApiSlidingLimiter;
 const _writeLimiter = perUserWriteSlidingLimiter;
 
 export function register(router: IRouter): void {
+  router.use("/observability", tenantScope({ required: true }));
+  router.use("/business-events", tenantScope({ required: true }));
+
   router.use("/admin", adminGuard);
   router.use(adminRouter);
 

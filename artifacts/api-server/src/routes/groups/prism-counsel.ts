@@ -1,5 +1,6 @@
 import type { IRouter } from "express";
 import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../../middlewares/sliding-window-limiter";
+import { tenantScope } from "../../middlewares/tenant-scope";
 
 import prismCounselCoreRouter from "../prism-counsel-core";
 import prismCounselOpsRouter from "../prism-counsel-ops";
@@ -15,6 +16,8 @@ const _readLimiter = perUserApiSlidingLimiter;
 const _writeLimiter = perUserWriteSlidingLimiter;
 
 export function register(router: IRouter): void {
+  router.use("/prism-counsel", tenantScope({ required: true }));
+
   router.use("/prism-counsel", _readLimiter);
   router.use("/prism-counsel", _writeLimiter);
   router.use(prismCounselCoreRouter);

@@ -26,8 +26,30 @@ const _readLimiter = perUserApiSlidingLimiter;
 const _writeLimiter = perUserWriteSlidingLimiter;
 
 export function register(router: IRouter): void {
+  // Org-member–required paths: these are only accessible once a user belongs
+  // to an organization. required: true returns 403 for no-org users.
+  router.use("/audit", tenantScope({ required: true }));
+  router.use("/tenant-health", tenantScope({ required: true }));
+  router.use("/settings", tenantScope({ required: true }));
+  router.use("/changelog", tenantScope({ required: true }));
+  router.use("/aegis/sync", tenantScope({ required: true }));
+  router.use("/vessels/sync", tenantScope({ required: true }));
+  router.use("/alloy/sync", tenantScope({ required: true }));
+  router.use("/compliance", tenantScope({ required: true }));
+  router.use("/approvals", tenantScope({ required: true }));
+  router.use("/proof-chain", tenantScope({ required: true }));
+  router.use("/audit-chain", tenantScope({ required: true }));
+  router.use("/worldline", tenantScope({ required: true }));
+  router.use("/dataverse", tenantScope({ required: true }));
+
+  // Bootstrap / pre-membership paths: these are used before an org is joined
+  // (invitation acceptance, onboarding, password-reset). required: false resolves
+  // org context when present but does not block users with zero org memberships.
+  router.use("/orgs", tenantScope({ required: false }));
+  router.use("/user", tenantScope({ required: false }));
+  router.use("/onboarding", tenantScope({ required: false }));
+
   router.use("/audit", _readLimiter);
-  router.use("/audit", tenantScope({ required: false }));
   router.use(auditRouter);
 
   router.use("/admin/tenants", _writeLimiter);
@@ -48,7 +70,6 @@ export function register(router: IRouter): void {
   router.use(onboardingRouter);
 
   router.use("/orgs", _writeLimiter);
-  router.use("/orgs", tenantScope({ required: false }));
   router.use(invitationsRouter);
 
   router.use("/tenant-health", _readLimiter);

@@ -22,22 +22,35 @@ const _readLimiter = perUserApiSlidingLimiter;
 const _writeLimiter = perUserWriteSlidingLimiter;
 
 export function register(router: IRouter): void {
+  router.use("/documents", tenantScope({ required: true }));
+  router.use("/exports", tenantScope({ required: true }));
+  router.use("/comments", tenantScope({ required: true }));
+  router.use("/cms", tenantScope({ required: true }));
+  router.use("/reports", tenantScope({ required: true }));
+  router.use("/atlas", tenantScope({ required: true }));
+  router.use("/telemetry", tenantScope({ required: true }));
+  router.use("/doctrine", tenantScope({ required: true }));
+  router.use("/analytics", tenantScope({ required: true }));
+  router.use("/analytics-engine", tenantScope({ required: true }));
+  router.use("/genai-telemetry", tenantScope({ required: true }));
+  router.use("/outcome-graph", tenantScope({ required: true }));
+  router.use("/pulse-evals", tenantScope({ required: true }));
+  router.use("/receipt-graph", tenantScope({ required: true }));
+  router.use("/revenue-intelligence", tenantScope({ required: true }));
+
   router.use("/documents", _writeLimiter);
-  router.use("/documents", tenantScope({ required: false }));
   router.use(documentsRouter);
 
   router.use("/cms", _readLimiter);
   router.use(cmsRouter);
 
   router.use("/exports", _writeLimiter);
-  router.use("/exports", tenantScope({ required: false }));
   router.use(exportsRouter);
 
   router.use("/reports", _readLimiter);
   router.use(reportsRouter);
 
   router.use("/comments", _writeLimiter);
-  router.use("/comments", tenantScope({ required: false }));
   router.use(commentsRouter);
 
   router.use("/atlas", _writeLimiter);

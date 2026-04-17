@@ -1,5 +1,6 @@
 import type { IRouter } from "express";
 import { perUserApiSlidingLimiter } from "../../middlewares/sliding-window-limiter";
+import { tenantScope } from "../../middlewares/tenant-scope";
 
 import aegisSocRouter from "../firestorm";
 import aegisSocLiveRouter from "../firestorm-live";
@@ -25,6 +26,15 @@ const FIRESTORM_SOC_PATHS = new Set([
 ]);
 
 export function register(router: IRouter): void {
+  router.use("/firestorm", tenantScope({ required: true }));
+  router.use("/inca", tenantScope({ required: true }));
+  router.use("/msp", tenantScope({ required: true }));
+  router.use("/aegis", tenantScope({ required: true }));
+  router.use("/intelligence", tenantScope({ required: true }));
+  router.use("/gov", tenantScope({ required: true }));
+  router.use("/readiness", tenantScope({ required: true }));
+  router.use("/command", tenantScope({ required: true }));
+
   router.use("/firestorm", _readLimiter);
   router.use("/inca", _readLimiter);
   router.use("/msp", _readLimiter);

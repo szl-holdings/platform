@@ -1,6 +1,7 @@
 import type { IRouter } from "express";
 import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../../middlewares/sliding-window-limiter";
 import { optionalIdempotencyMiddleware } from "../../middlewares/idempotency";
+import { tenantScope } from "../../middlewares/tenant-scope";
 import alloyRouter from "../alloy";
 import alloyChatRouter from "../alloy-chat";
 import alloyEmailRouter from "../alloy-email";
@@ -19,6 +20,9 @@ const _readLimiter = perUserApiSlidingLimiter;
 const _writeLimiter = perUserWriteSlidingLimiter;
 
 export function register(router: IRouter): void {
+  router.use("/alloy", tenantScope({ required: true }));
+  router.use("/governance", tenantScope({ required: true }));
+
   router.use("/alloy", _readLimiter);
   router.use("/alloy/ingest", optionalIdempotencyMiddleware);
   router.use("/alloy/workflows", _writeLimiter);

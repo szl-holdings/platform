@@ -773,6 +773,7 @@ router.get(
   async (req: Request, res: Response) => {
     try {
       const orgId = parseIdParam(req.params.orgId);
+      if (!assertTenantAccess(req, res, orgId)) return;
       const assignments = await db
         .select({
           assignment: rateCardAssignmentsTable,

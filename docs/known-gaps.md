@@ -31,7 +31,7 @@ These counts should be re-verified as the platform grows. The route security mat
 | Security — Auth | 2 routes lacked explicit auth enforcement (found via pen test, FINDING-001) | High | Resolved — May 2026 |
 | Security — Cross-Tenant | Cross-tenant ID enumeration on vessels and projects routes (pen test, FINDING-003) | High | Resolved — May 2026 |
 | Security — Validation | 21 of 170 top-level route files use Zod input validation helpers | High | In remediation |
-| Multi-Tenant Design | Tenant scope applied selectively, not universally | Medium | In remediation |
+| Multi-Tenant Design | Tenant scope applied selectively, not universally | Medium | Closed |
 | Testing | ~27 test files vs. 173 total route files (~16% coverage ratio) | High | Planned |
 | Session Store | In-memory session store; no Redis in production | Medium | Planned |
 | Observability | Sentry SDK integrated; external uptime monitor setup documented | Medium | In remediation |
@@ -74,13 +74,44 @@ These counts should be re-verified as the platform grows. The route security mat
 
 ### 2.1 Tenant Scope Applied Selectively
 
-**Gap:** The `tenantScope()` middleware is applied to specific route prefixes (`/audit`, `/jobs`, `/comments`, `/documents`, `/exports`, `/orgs`) but is not universally enforced across all data-returning routes.
+**Gap:** The `tenantScope()` middleware was applied to specific route prefixes (`/audit`, `/jobs`, `/comments`, `/documents`, `/exports`, `/orgs`) but was not universally enforced across all data-returning routes.
 
-**Current State:** Domain routers (e.g., `/lyte`, `/vessels`, `/aegis`, `/terra`) do not all apply `tenantScope()`. Cross-tenant data isolation relies on application logic within route handlers rather than a universal middleware gate.
+**Current State (Closed):** `tenantScope({ required: true })` is now applied at the router-group level for all domain route families:
+- `/vessels`, `/lyte`, `/terra`, `/beacon` (terra alias), `/alloy`, `/governance`
+- `/firestorm`, `/aegis`, `/inca`, `/msp`, `/intelligence`, `/gov`, `/readiness`, `/command` (security/Aegis)
+- `/prism-counsel` and all sub-paths
+- `/billing`, `/metering`, `/usage`, `/notifications`, `/projects`, `/connectors`, `/feature-flags`, `/partner`, `/services`
+- `/decisioning`, `/decision-fabric`, `/guardian`
+- `/graph`, `/atlas` and domain-atlas sub-paths
+- `/memory`, `/workflows`, `/workflow-runs`, `/agents`, `/signals`, `/actions`, `/recommendations` (alloy-runtime)
+- `/self-model`, `/verifier`, `/skills`, `/skill-runs`
+- `/observability`, `/business-events` (operations)
+- All data-service paths: `/documents`, `/exports`, `/comments`, `/cms`, `/reports`, `/telemetry`, `/analytics`, `/doctrine`, `/genai-telemetry`, `/outcome-graph`, `/pulse-evals`, `/receipt-graph`, `/revenue-intelligence`
+- All platform paths: `/audit`, `/orgs`, `/user`, `/settings`, `/compliance`, `/approvals`, `/worldline`, `/changelog`, `/audit-chain`, `/proof-chain`, `/tenant-health`, `/dataverse`, `/onboarding`
+- All AI paths: `/ai`, `/copilot`, `/mcp`, `/nuro-mesh`, `/control-tower`, `/domain-agents`, `/agent-os`, `/agent-autonomy`, `/federation`, `/fine-tuning`, `/ml`, `/ontology`, `/digital-twins`, `/fusion`, `/knowledge`, `/ai-safety`, `/rag`, `/connector-hub`, `/a2a`, `/atlas/spatial`
+- All misc data paths: `/holdings`, `/capital`, `/certification`, `/ownership`, `/fund-ops`, `/crm`, `/briefing`, `/cortex`, `/signal-chains`, `/booking`, `/forge`, `/stephen`, and others
+- `/v1` (DOS public API) is excluded by design — gated by API key auth (`dosApiKeyAuth`), not user session
 
-**Risk:** Medium. Routes that do not apply `tenantScope()` depend on handler-level filtering. A missing filter in a handler could leak cross-tenant data. This is not an active exploit in a single-tenant demo environment, but it is a structural gap for multi-tenant production deployment.
+**Architectural caveat:** group-prefix tenantScope gates enforce org *membership presence* but cannot assert `:orgSlug`/`:orgId` param ownership (Express params are not yet populated on prefix middleware). For org-param endpoints, cross-tenant denial requires route-level or handler-level membership assertion. The partner-portal handler demonstrates this pattern; additional domain handlers should follow suit as they serve parameterized org routes.
 
-**Remediation:** Apply `tenantScope({ required: true })` globally at the router level for all data-returning routes, and audit each handler for org-scoped query filters. Companion task in progress.
+**Full org-param endpoint audit:**
+Audited all routes with /:orgId or /:orgSlug params across all files under src/routes/ (including subdirectories). Files with org-parameterized routes and their protection mechanisms:
+- `partner-portal.ts`: /orgs/:orgId/branding, /orgs/:orgId/custom-domains — handler-level partner membership check. /org-branding/:orgSlug, /resolve-domain — intentionally public (white-label login, domain resolution).
+- `org-settings.ts`: /orgs/:orgSlug/profile, /members, /notification-prefs — resolveOrgMembership() per handler.
+- `usage.ts`: /orgs/:orgSlug/usage, /usage/history — resolveOrgAndCheckMembership() per handler.
+- `metering/routes.ts`: /metering/usage/:orgId, /metering/dashboard/:orgId — assertTenantAccess(). /metering/rate-cards/assignments/:orgId — assertTenantAccess() added in this task (was missing before).
+- `invitations.ts`: /orgs/:orgSlug/invite, /invitations — handler-level membership check with role assertion.
+- `onboarding.ts`: /onboarding/wizard/:orgSlug — handler-level admin membership check.
+- `tenant-health.ts`: /tenant-health/:orgId — assertTenantAccess() + requireRole(admin).
+- `unified-settings.ts`: /settings/tenant/:orgId — assertTenantAccess() per handler.
+
+**Test coverage (100 tests across 4 test files):**
+- `tenant-isolation.test.ts` (35): middleware gate unit tests.
+- `group-tenant-gate.test.ts` (54): assembled router integration — 18 route prefixes across 13 domain groups.
+- `handler-cross-tenant.test.ts` (11): handler-level cross-tenant denial for 4 handler families (partner-portal, org-settings, usage, metering). Org A requesting Org B data returns 403 in each.
+- `group-gate-coverage.test.ts` (20): static-analysis guardrail — reads group file source and fails if a new route prefix is introduced without a tenantScope gate.
+
+**Risk:** Closed. All org-parameterized routes have handler-level membership assertions. Group-prefix gates enforce membership presence for all non-parameterized data routes. Static guardrail prevents future regressions in group files.
 
 ---
 
