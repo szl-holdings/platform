@@ -574,6 +574,24 @@ export function ConstellationGraph({
   const [traceDistances, setTraceDistances] = useState<Record<string, number>>({});
   const [traceTruncated, setTraceTruncated] = useState(false);
 
+  // Shortest-path highlight state. The operator first picks an origin
+  // (selected as usual), clicks "Find path to…" which arms `pathPickFrom`,
+  // then clicks any other node to fire the lookup. `pathHighlight` holds the
+  // resolved chain that gets visually highlighted on the canvas.
+  const [pathPickFrom, setPathPickFrom] = useState<ConstellationGraphNode | null>(null);
+  const [pathFinding, setPathFinding] = useState(false);
+  const [pathError, setPathError] = useState<string | null>(null);
+  const [pathHighlight, setPathHighlight] = useState<{
+    from: { id: string; name: string };
+    to: { id: string; name: string };
+    found: boolean;
+    depth: number;
+    nodeIds: string[];
+    edgeIds: Set<string>;
+    crossDomainSteps: number[];
+    maxDepth: number;
+  } | null>(null);
+
   // Reset operator expansions whenever the host graph changes (new domain or
   // refreshed payload) so fragments from a previous view never leak into the
   // next one.
@@ -588,6 +606,10 @@ export function ConstellationGraph({
     setTraceOriginId(null);
     setTraceDistances({});
     setTraceTruncated(false);
+    setPathPickFrom(null);
+    setPathFinding(false);
+    setPathError(null);
+    setPathHighlight(null);
   }, [graphKey]);
 
   // Compute the cutoff time for the freshness window filter
@@ -981,6 +1003,97 @@ export function ConstellationGraph({
     [expanding],
   );
 
+  const findPath = useCallback(
+    async (from: ConstellationGraphNode, to: ConstellationGraphNode) => {
+      if (!from?.id || !to?.id || from.id === to.id) return;
+      setPathFinding(true);
+      setPathError(null);
+      try {
+        const res = await apiFetch<
+          | {
+              data?: {
+                from: { id: string; name: string; domain?: string };
+                to: { id: string; name: string; domain?: string };
+                found: boolean;
+                depth?: number;
+                maxDepth: number;
+                path: {
+                  nodes: ConstellationGraphNode[];
+                  edges: ConstellationGraphEdge[];
+                  crossDomainSteps: number[];
+                } | null;
+              };
+            }
+          | {
+              from: { id: string; name: string; domain?: string };
+              to: { id: string; name: string; domain?: string };
+              found: boolean;
+              depth?: number;
+              maxDepth: number;
+              path: {
+                nodes: ConstellationGraphNode[];
+                edges: ConstellationGraphEdge[];
+                crossDomainSteps: number[];
+              } | null;
+            }
+        >(
+          `/graph/entities/${encodeURIComponent(from.id)}/path/${encodeURIComponent(to.id)}?maxDepth=4`,
+        );
+        const payload =
+          (res as { data?: unknown }).data ?? res;
+        const p = payload as {
+          from: { id: string; name: string };
+          to: { id: string; name: string };
+          found: boolean;
+          depth?: number;
+          maxDepth: number;
+          path: { nodes: ConstellationGraphNode[]; edges: ConstellationGraphEdge[]; crossDomainSteps: number[] } | null;
+        };
+        if (!p?.from) throw new Error("Empty response");
+
+        // Merge any nodes/edges along the path that aren't already on the
+        // canvas so the highlight has something to draw against.
+        if (p.path) {
+          setExpandedNodes((prev) => {
+            const next = { ...prev };
+            for (const n of p.path!.nodes) next[n.id] = n;
+            return next;
+          });
+          setExpandedEdges((prev) => {
+            const next = { ...prev };
+            for (const e of p.path!.edges) next[e.id] = e;
+            return next;
+          });
+          setExpandedIds((prev) => {
+            const next = new Set(prev);
+            for (const n of p.path!.nodes) next.add(n.id);
+            return next;
+          });
+        }
+        setPathHighlight({
+          from: p.from,
+          to: p.to,
+          found: p.found,
+          depth: p.depth ?? 0,
+          nodeIds: p.path?.nodes.map((n) => n.id) ?? [],
+          edgeIds: new Set(p.path?.edges.map((e) => e.id) ?? []),
+          crossDomainSteps: p.path?.crossDomainSteps ?? [],
+          maxDepth: p.maxDepth,
+        });
+        // Pin the origin as the canvas selection so the details panel stays
+        // anchored to the chain the operator is reading.
+        setSelected(from);
+        alphaRef.current = 1;
+      } catch (err) {
+        setPathError((err as Error)?.message ?? "Failed to find path");
+      } finally {
+        setPathFinding(false);
+        setPathPickFrom(null);
+      }
+    },
+    [],
+  );
+
   // Lazily enrich cross-domain placeholder nodes via /graph/entities/:id so we
   // can show real names/types and resolve their owning domain for navigation.
   useEffect(() => {
@@ -1058,6 +1171,17 @@ export function ConstellationGraph({
 
   const handleNode = useCallback(
     (n: ConstellationGraphNode) => {
+      // Path-pick mode: the operator armed "Find path to…" on `pathPickFrom`
+      // and is now choosing the target. Any node other than the origin
+      // triggers the lookup; clicking the origin again cancels the mode.
+      if (pathPickFrom) {
+        if (n.id === pathPickFrom.id) {
+          setPathPickFrom(null);
+          return;
+        }
+        findPath(pathPickFrom, n);
+        return;
+      }
       // First click: select & show details. Second click on the already-selected
       // node: navigate to the owning app. Custom onNodeClick suppresses default.
       if (onNodeClick) {
@@ -1071,7 +1195,7 @@ export function ConstellationGraph({
         setSelected(n);
       }
     },
-    [onNodeClick, selected, navigateToOwner],
+    [onNodeClick, selected, navigateToOwner, pathPickFrom, findPath],
   );
 
   const handleNodeDoubleClick = useCallback(
@@ -1266,6 +1390,124 @@ export function ConstellationGraph({
         </div>
       )}
 
+      {pathPickFrom && (
+        <div
+          data-testid="constellation-path-pick-banner"
+          style={{
+            marginBottom: 8,
+            padding: "8px 12px",
+            borderRadius: 6,
+            background: "rgba(251,191,36,0.12)",
+            border: "1px solid rgba(251,191,36,0.5)",
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            fontSize: 12,
+            color: "#fde68a",
+          }}
+        >
+          <span style={{ fontSize: 14 }}>↹</span>
+          <span style={{ flex: 1 }}>
+            Pick a target node to find the shortest path from{" "}
+            <strong>{pathPickFrom.name}</strong>
+          </span>
+          <button
+            onClick={() => setPathPickFrom(null)}
+            style={{
+              fontSize: 10,
+              padding: "3px 8px",
+              borderRadius: 4,
+              border: "1px solid rgba(251,191,36,0.4)",
+              background: "transparent",
+              color: "#fde68a",
+              cursor: "pointer",
+            }}
+          >
+            Cancel
+          </button>
+        </div>
+      )}
+      {pathHighlight && (
+        <div
+          data-testid="constellation-path-summary"
+          style={{
+            marginBottom: 8,
+            padding: "8px 12px",
+            borderRadius: 6,
+            background: pathHighlight.found
+              ? "rgba(251,191,36,0.1)"
+              : "rgba(239,68,68,0.1)",
+            border: `1px solid ${pathHighlight.found ? "rgba(251,191,36,0.5)" : "rgba(239,68,68,0.5)"}`,
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            fontSize: 12,
+            color: pathHighlight.found ? "#fde68a" : "#fecaca",
+            flexWrap: "wrap",
+          }}
+        >
+          <span style={{ fontSize: 14 }}>{pathHighlight.found ? "↹" : "⚠"}</span>
+          <span style={{ flex: 1, minWidth: 0 }}>
+            {pathHighlight.found ? (
+              <>
+                Shortest path: <strong>{pathHighlight.from.name}</strong> →{" "}
+                <strong>{pathHighlight.to.name}</strong> ·{" "}
+                <span data-testid="constellation-path-hops">
+                  {pathHighlight.depth} hop{pathHighlight.depth === 1 ? "" : "s"}
+                </span>
+                {pathHighlight.crossDomainSteps.length > 0 && (
+                  <>
+                    {" · "}
+                    <span data-testid="constellation-path-cross">
+                      {pathHighlight.crossDomainSteps.length} cross-domain step
+                      {pathHighlight.crossDomainSteps.length === 1 ? "" : "s"}
+                    </span>
+                  </>
+                )}
+              </>
+            ) : (
+              <>
+                No path found between <strong>{pathHighlight.from.name}</strong> and{" "}
+                <strong>{pathHighlight.to.name}</strong> within {pathHighlight.maxDepth}{" "}
+                hop{pathHighlight.maxDepth === 1 ? "" : "s"} on each side.
+              </>
+            )}
+          </span>
+          <button
+            onClick={() => setPathHighlight(null)}
+            data-testid="constellation-path-clear"
+            style={{
+              fontSize: 10,
+              padding: "3px 8px",
+              borderRadius: 4,
+              border: "1px solid rgba(255,255,255,0.2)",
+              background: "transparent",
+              color: "#cbd5e1",
+              cursor: "pointer",
+            }}
+          >
+            Clear
+          </button>
+        </div>
+      )}
+      {pathError && (
+        <div
+          role="alert"
+          data-testid="constellation-path-error"
+          style={{
+            marginBottom: 8,
+            padding: "8px 12px",
+            borderRadius: 6,
+            background: "rgba(239,68,68,0.1)",
+            border: "1px solid rgba(239,68,68,0.45)",
+            fontSize: 12,
+            color: "#fecaca",
+          }}
+        >
+          {pathError}
+        </div>
+      )}
+
       <div
         ref={containerRef}
         style={{
@@ -1329,15 +1571,19 @@ export function ConstellationGraph({
               const b = simRef.current.find((n) => n.id === e.toNodeId);
               if (!a || !b) return null;
               const isCross = !internalIds.has(e.fromNodeId) || !internalIds.has(e.toNodeId);
+              const onPath = pathHighlight?.edgeIds.has(e.id) ?? false;
               const selHighlight =
                 selected && (e.fromNodeId === selected.id || e.toNodeId === selected.id);
               const searchHighlight =
                 searchMatches !== null &&
                 (searchMatches.has(e.fromNodeId) || searchMatches.has(e.toNodeId));
-              const highlight = selHighlight || searchHighlight;
-              const dim =
-                (selected && !selHighlight) ||
-                (searchMatches !== null && !searchHighlight);
+              const highlight = onPath || selHighlight || searchHighlight;
+              // When a shortest path is being highlighted, dim everything that
+              // isn't on it so the chain reads as a single bright thread.
+              const dim = pathHighlight
+                ? !onPath
+                : (selected && !selHighlight) ||
+                  (searchMatches !== null && !searchHighlight);
               return (
                 <line
                   key={e.id}
@@ -1345,15 +1591,17 @@ export function ConstellationGraph({
                   y1={a.y}
                   x2={b.x}
                   y2={b.y}
-                  stroke={isCross ? "#fbbf24" : accentColor}
-                  strokeWidth={highlight ? 2 : isCross ? 1.4 : 1}
-                  strokeOpacity={dim ? 0.12 : isCross ? 0.7 : 0.45}
-                  strokeDasharray={isCross ? "6 4" : undefined}
+                  stroke={onPath ? "#fbbf24" : isCross ? "#fbbf24" : accentColor}
+                  strokeWidth={onPath ? 3 : highlight ? 2 : isCross ? 1.4 : 1}
+                  strokeOpacity={dim ? 0.08 : onPath ? 1 : isCross ? 0.7 : 0.45}
+                  strokeDasharray={onPath ? undefined : isCross ? "6 4" : undefined}
                   markerEnd={isCross ? "url(#arrow-cross)" : "url(#arrow-internal)"}
+                  data-testid={onPath ? `constellation-path-edge-${e.id}` : undefined}
                 >
                   <title>
                     {e.relationshipType}
                     {isCross ? "  (cross-domain)" : ""}
+                    {onPath ? "  · on shortest path" : ""}
                   </title>
                 </line>
               );
@@ -1371,12 +1619,18 @@ export function ConstellationGraph({
                     (e.toNodeId === selected.id && e.fromNodeId === n.id),
                 );
               const isSearchMatch = searchMatches !== null && searchMatches.has(n.id);
-              const dim =
-                (selected && !isSelected && !isNeighbor) ||
-                (searchMatches !== null && !isSearchMatch);
-              const r = isSelected || isSearchMatch
+              const onPath = pathHighlight?.nodeIds.includes(n.id) ?? false;
+              const isPathEndpoint =
+                pathHighlight !== null &&
+                (n.id === pathHighlight.from.id || n.id === pathHighlight.to.id);
+              const isPickOrigin = pathPickFrom?.id === n.id;
+              const dim = pathHighlight
+                ? !onPath
+                : (selected && !isSelected && !isNeighbor) ||
+                  (searchMatches !== null && !isSearchMatch);
+              const r = isSelected || isSearchMatch || isPathEndpoint
                 ? s.radius * 1.4
-                : isHovered
+                : isHovered || isPickOrigin
                 ? s.radius * 1.2
                 : s.radius;
               return (
@@ -1396,11 +1650,28 @@ export function ConstellationGraph({
                   }}
                   data-testid={`constellation-node-${n.id}`}
                 >
-                  {(isSelected || isHovered || isSearchMatch) && (
+                  {(isSelected || isHovered || isSearchMatch || onPath || isPickOrigin) && (
                     <circle
                       r={r + 5}
-                      fill={isSearchMatch ? "#fbbf24" : color}
-                      fillOpacity={isSearchMatch ? 0.32 : 0.18}
+                      fill={onPath || isSearchMatch || isPickOrigin ? "#fbbf24" : color}
+                      fillOpacity={onPath ? 0.4 : isSearchMatch ? 0.32 : isPickOrigin ? 0.35 : 0.18}
+                    />
+                  )}
+                  {onPath && (
+                    <circle
+                      r={r + 3}
+                      fill="none"
+                      stroke="#fbbf24"
+                      strokeWidth={isPathEndpoint ? 2.5 : 1.8}
+                    />
+                  )}
+                  {isPickOrigin && (
+                    <circle
+                      r={r + 8}
+                      fill="none"
+                      stroke="#fbbf24"
+                      strokeWidth={1.5}
+                      strokeDasharray="3 3"
                     />
                   )}
                   {isSearchMatch && (
@@ -1733,6 +2004,46 @@ export function ConstellationGraph({
                   {expanding === selected.id ? "Tracing…" : `↳ Trace ${traceDepth} hops`}
                 </button>
               </div>
+              <button
+                onClick={() => {
+                  if (pathPickFrom?.id === selected.id) {
+                    setPathPickFrom(null);
+                  } else {
+                    setPathError(null);
+                    setPathPickFrom(selected);
+                  }
+                }}
+                disabled={pathFinding}
+                style={{
+                  fontSize: 11,
+                  padding: "5px 10px",
+                  borderRadius: 4,
+                  border: `1px solid ${pathPickFrom?.id === selected.id ? "#fbbf24" : `${accentColor}60`}`,
+                  background:
+                    pathPickFrom?.id === selected.id
+                      ? "rgba(251,191,36,0.2)"
+                      : pathFinding
+                      ? "rgba(255,255,255,0.04)"
+                      : `${accentColor}18`,
+                  color:
+                    pathPickFrom?.id === selected.id
+                      ? "#fbbf24"
+                      : pathFinding
+                      ? "#64748b"
+                      : accentColor,
+                  cursor: pathFinding ? "default" : "pointer",
+                  fontWeight: 600,
+                  letterSpacing: "0.04em",
+                }}
+                data-testid="constellation-find-path"
+                title="Then click another node to highlight the shortest path between them"
+              >
+                {pathFinding
+                  ? "Finding…"
+                  : pathPickFrom?.id === selected.id
+                  ? "Cancel pick"
+                  : "↹ Find path to…"}
+              </button>
               <div
                 style={{ display: "flex", alignItems: "center", gap: 4 }}
                 data-testid="constellation-export-controls"
