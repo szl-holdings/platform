@@ -445,24 +445,68 @@ describe("Integration — /domains/:domain/graph", () => {
 
 // ── /domains/:domain/graph — seeded fixture (cross-domain edge correctness) ──
 //
-// Task #1087: Seed a small known graph spanning terra → vessels so we can
-// assert *exact* crossDomainEdgeCount values, which the shape-only tests
-// above cannot do. The fixture uses a unique entityType so the route's
-// `entityType` filter isolates it from any pre-existing rows in the DB,
-// and a unique provenanceSourceId tag so teardown can target only our
-// seeded rows.
-describe("Integration — /domains/:domain/graph (seeded cross-domain fixture)", () => {
+// Task #1087 + #1094: Seed a known graph spanning terra, vessels, aegis,
+// and carlota-jo (4 domains) so we can assert *exact* crossDomainEdgeCount
+// values across:
+//   • explicit per-domain handlers (terra, vessels, aegis)
+//   • the generic fallback (carlota-jo)
+//   • cross-domain edges in BOTH directions for each domain
+//   • inactive (isActive=false) nodes and inactive (active=false) edges
+//
+// The fixture uses a unique entityType so the route's `entityType` filter
+// isolates it from any pre-existing rows in the DB, and a unique
+// provenanceSourceId tag so teardown can target only our seeded rows.
+//
+// Graph topology (active unless noted):
+//
+//   terra:      T1, T2, T3       (+ T_INACTIVE)
+//   vessels:    V1, V2
+//   aegis:      A1, A2
+//   carlota-jo: C1
+//
+//   Edges (active):
+//     T1 -> T2    terra internal
+//     T2 -> T3    terra internal
+//     T1 -> V1    terra → vessels   (terra outbound,  vessels inbound)
+//     V2 -> T3    vessels → terra   (vessels outbound, terra inbound)
+//     V1 -> V2    vessels internal
+//     A1 -> T1    aegis → terra     (aegis outbound,  terra inbound)
+//     T2 -> A2    terra → aegis     (terra outbound,  aegis inbound)
+//     A1 -> A2    aegis internal
+//     V1 -> A1    vessels → aegis   (vessels outbound, aegis inbound)
+//     A2 -> V2    aegis → vessels   (aegis outbound,  vessels inbound)
+//     C1 -> T3    carlota-jo → terra (terra inbound, exercises fallback)
+//     A1 -> C1    aegis → carlota-jo
+//
+//   Edges touching inactive nodes:
+//     T1 -> T_INACTIVE   terra internal but target node inactive
+//     A2 -> T_INACTIVE   cross-domain into an inactive terra node
+//
+//   Inactive edge (active=false on the edge row itself):
+//     T1 -> T3    terra internal, edge.active=false
+//                 (route does NOT filter on edge.active, so it must
+//                  still appear in the count.)
+describe("Integration — /domains/:domain/graph (multi-domain seeded fixture)", () => {
   let app: express.Express;
   const RUN_TAG = `it-x-domain-${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
   const FIXTURE_ENTITY_TYPE = `fixture_${RUN_TAG}`;
-  const PROVENANCE_ID = `task-1087:${RUN_TAG}`;
+  const PROVENANCE_ID = `task-1094:${RUN_TAG}`;
 
-  // Seeded node ids — populated in beforeAll, used in assertions and teardown.
   const seeded: {
-    terra: string[]; // [T1, T2, T3]
-    vessels: string[]; // [V1, V2]
+    terra: string[];        // active terra nodes [T1, T2, T3]
+    terraInactive: string[]; // [T_INACTIVE]
+    vessels: string[];       // [V1, V2]
+    aegis: string[];         // [A1, A2]
+    carlotaJo: string[];     // [C1]
     edgeIds: string[];
-  } = { terra: [], vessels: [], edgeIds: [] };
+  } = {
+    terra: [],
+    terraInactive: [],
+    vessels: [],
+    aegis: [],
+    carlotaJo: [],
+    edgeIds: [],
+  };
 
   beforeAll(async () => {
     app = buildApp();
@@ -471,16 +515,18 @@ describe("Integration — /domains/:domain/graph (seeded cross-domain fixture)",
 
     const { db, cstNodes, cstEdges } = await import("@szl-holdings/db");
 
-    // Seed 3 terra nodes + 2 vessels nodes — all sharing FIXTURE_ENTITY_TYPE
-    // so the entityType filter selects exactly this fixture.
     const insertedNodes = await db
       .insert(cstNodes)
       .values([
-        { domain: "terra", entityType: FIXTURE_ENTITY_TYPE, name: `${RUN_TAG}-T1`, provenanceSourceId: PROVENANCE_ID },
-        { domain: "terra", entityType: FIXTURE_ENTITY_TYPE, name: `${RUN_TAG}-T2`, provenanceSourceId: PROVENANCE_ID },
-        { domain: "terra", entityType: FIXTURE_ENTITY_TYPE, name: `${RUN_TAG}-T3`, provenanceSourceId: PROVENANCE_ID },
-        { domain: "vessels", entityType: FIXTURE_ENTITY_TYPE, name: `${RUN_TAG}-V1`, provenanceSourceId: PROVENANCE_ID },
-        { domain: "vessels", entityType: FIXTURE_ENTITY_TYPE, name: `${RUN_TAG}-V2`, provenanceSourceId: PROVENANCE_ID },
+        { domain: "terra",      entityType: FIXTURE_ENTITY_TYPE, name: `${RUN_TAG}-T1`,         provenanceSourceId: PROVENANCE_ID },
+        { domain: "terra",      entityType: FIXTURE_ENTITY_TYPE, name: `${RUN_TAG}-T2`,         provenanceSourceId: PROVENANCE_ID },
+        { domain: "terra",      entityType: FIXTURE_ENTITY_TYPE, name: `${RUN_TAG}-T3`,         provenanceSourceId: PROVENANCE_ID },
+        { domain: "terra",      entityType: FIXTURE_ENTITY_TYPE, name: `${RUN_TAG}-T_INACTIVE`, provenanceSourceId: PROVENANCE_ID, isActive: false },
+        { domain: "vessels",    entityType: FIXTURE_ENTITY_TYPE, name: `${RUN_TAG}-V1`,         provenanceSourceId: PROVENANCE_ID },
+        { domain: "vessels",    entityType: FIXTURE_ENTITY_TYPE, name: `${RUN_TAG}-V2`,         provenanceSourceId: PROVENANCE_ID },
+        { domain: "aegis",      entityType: FIXTURE_ENTITY_TYPE, name: `${RUN_TAG}-A1`,         provenanceSourceId: PROVENANCE_ID },
+        { domain: "aegis",      entityType: FIXTURE_ENTITY_TYPE, name: `${RUN_TAG}-A2`,         provenanceSourceId: PROVENANCE_ID },
+        { domain: "carlota-jo", entityType: FIXTURE_ENTITY_TYPE, name: `${RUN_TAG}-C1`,         provenanceSourceId: PROVENANCE_ID },
       ])
       .returning({ id: cstNodes.id, name: cstNodes.name, domain: cstNodes.domain });
 
@@ -488,27 +534,39 @@ describe("Integration — /domains/:domain/graph (seeded cross-domain fixture)",
     const T1 = byName.get(`${RUN_TAG}-T1`)!;
     const T2 = byName.get(`${RUN_TAG}-T2`)!;
     const T3 = byName.get(`${RUN_TAG}-T3`)!;
+    const T_INACTIVE = byName.get(`${RUN_TAG}-T_INACTIVE`)!;
     const V1 = byName.get(`${RUN_TAG}-V1`)!;
     const V2 = byName.get(`${RUN_TAG}-V2`)!;
+    const A1 = byName.get(`${RUN_TAG}-A1`)!;
+    const A2 = byName.get(`${RUN_TAG}-A2`)!;
+    const C1 = byName.get(`${RUN_TAG}-C1`)!;
 
     seeded.terra = [T1, T2, T3];
+    seeded.terraInactive = [T_INACTIVE];
     seeded.vessels = [V1, V2];
+    seeded.aegis = [A1, A2];
+    seeded.carlotaJo = [C1];
 
-    // Edges (relationshipType is unique per pair in unique index, so each
-    // edge gets a distinct relationshipType to avoid collisions):
-    //   T1 -> T2  (terra internal)
-    //   T2 -> T3  (terra internal)
-    //   T1 -> V1  (terra → vessels, cross-domain)
-    //   V2 -> T3  (vessels → terra, cross-domain inbound for terra)
-    //   V1 -> V2  (vessels internal)
     const insertedEdges = await db
       .insert(cstEdges)
       .values([
-        { fromNodeId: T1, toNodeId: T2, relationshipType: `${RUN_TAG}_t_internal_a`, sourceId: PROVENANCE_ID },
-        { fromNodeId: T2, toNodeId: T3, relationshipType: `${RUN_TAG}_t_internal_b`, sourceId: PROVENANCE_ID },
-        { fromNodeId: T1, toNodeId: V1, relationshipType: `${RUN_TAG}_t_to_v`,        sourceId: PROVENANCE_ID },
-        { fromNodeId: V2, toNodeId: T3, relationshipType: `${RUN_TAG}_v_to_t`,        sourceId: PROVENANCE_ID },
-        { fromNodeId: V1, toNodeId: V2, relationshipType: `${RUN_TAG}_v_internal`,    sourceId: PROVENANCE_ID },
+        { fromNodeId: T1, toNodeId: T2,         relationshipType: `${RUN_TAG}_t_internal_a`,   sourceId: PROVENANCE_ID },
+        { fromNodeId: T2, toNodeId: T3,         relationshipType: `${RUN_TAG}_t_internal_b`,   sourceId: PROVENANCE_ID },
+        { fromNodeId: T1, toNodeId: V1,         relationshipType: `${RUN_TAG}_t_to_v`,         sourceId: PROVENANCE_ID },
+        { fromNodeId: V2, toNodeId: T3,         relationshipType: `${RUN_TAG}_v_to_t`,         sourceId: PROVENANCE_ID },
+        { fromNodeId: V1, toNodeId: V2,         relationshipType: `${RUN_TAG}_v_internal`,     sourceId: PROVENANCE_ID },
+        { fromNodeId: A1, toNodeId: T1,         relationshipType: `${RUN_TAG}_a_to_t`,         sourceId: PROVENANCE_ID },
+        { fromNodeId: T2, toNodeId: A2,         relationshipType: `${RUN_TAG}_t_to_a`,         sourceId: PROVENANCE_ID },
+        { fromNodeId: A1, toNodeId: A2,         relationshipType: `${RUN_TAG}_a_internal`,     sourceId: PROVENANCE_ID },
+        { fromNodeId: V1, toNodeId: A1,         relationshipType: `${RUN_TAG}_v_to_a`,         sourceId: PROVENANCE_ID },
+        { fromNodeId: A2, toNodeId: V2,         relationshipType: `${RUN_TAG}_a_to_v`,         sourceId: PROVENANCE_ID },
+        { fromNodeId: C1, toNodeId: T3,         relationshipType: `${RUN_TAG}_c_to_t`,         sourceId: PROVENANCE_ID },
+        { fromNodeId: A1, toNodeId: C1,         relationshipType: `${RUN_TAG}_a_to_c`,         sourceId: PROVENANCE_ID },
+        { fromNodeId: T1, toNodeId: T_INACTIVE, relationshipType: `${RUN_TAG}_t_to_inactive`,  sourceId: PROVENANCE_ID },
+        { fromNodeId: A2, toNodeId: T_INACTIVE, relationshipType: `${RUN_TAG}_a_to_inactive`,  sourceId: PROVENANCE_ID },
+        // Inactive edge (active=false). The route does NOT filter on
+        // edge.active, so it must still be counted.
+        { fromNodeId: T1, toNodeId: T3,         relationshipType: `${RUN_TAG}_t_internal_inactive`, sourceId: PROVENANCE_ID, active: false },
       ])
       .returning({ id: cstEdges.id });
 
@@ -516,25 +574,28 @@ describe("Integration — /domains/:domain/graph (seeded cross-domain fixture)",
   });
 
   afterAll(async () => {
-    // Targeted cleanup: delete edges first (they'd cascade with nodes
-    // anyway, but being explicit keeps the assertion errors clearer if
-    // anything goes wrong). We match by the unique ids we captured at
-    // insert time, which can only belong to this fixture run.
     const { db, cstNodes, cstEdges } = await import("@szl-holdings/db");
     const { inArray } = await import("drizzle-orm");
     if (seeded.edgeIds.length > 0) {
       await db.delete(cstEdges).where(inArray(cstEdges.id, seeded.edgeIds));
     }
-    const allNodeIds = [...seeded.terra, ...seeded.vessels];
+    const allNodeIds = [
+      ...seeded.terra,
+      ...seeded.terraInactive,
+      ...seeded.vessels,
+      ...seeded.aegis,
+      ...seeded.carlotaJo,
+    ];
     if (allNodeIds.length > 0) {
       await db.delete(cstNodes).where(inArray(cstNodes.id, allNodeIds));
     }
   });
 
-  it("terra graph (entityType-filtered to fixture) reports exactly 3 nodes, 4 edges, 2 cross-domain, 2 internal", async () => {
+  // ── terra (explicit per-domain handler) ───────────────────────────────────
+  it("terra graph (isActive=true) reports 3 nodes, 9 edges, 6 cross-domain, 3 internal", async () => {
     const res = await request(app)
       .get("/domains/terra/graph")
-      .query({ entityType: FIXTURE_ENTITY_TYPE });
+      .query({ entityType: FIXTURE_ENTITY_TYPE, isActive: "true" });
     expect(res.status).toBe(200);
     expect(res.body.domain).toBe("terra");
 
@@ -542,19 +603,28 @@ describe("Integration — /domains/:domain/graph (seeded cross-domain fixture)",
     expect(returnedIds).toEqual([...seeded.terra].sort());
     expect(res.body.stats.nodeCount).toBe(3);
 
-    // 4 edges total (2 internal + 1 outbound + 1 inbound cross-domain)
-    expect(res.body.stats.edgeCount).toBe(4);
-    expect(res.body.stats.crossDomainEdgeCount).toBe(2);
-    expect(res.body.stats.internalEdgeCount).toBe(2);
+    // Edges touching {T1,T2,T3}:
+    //   internal: T1->T2, T2->T3, T1->T3(inactive edge — still counted)
+    //   cross:    T1->V1, V2->T3, A1->T1, T2->A2, C1->T3,
+    //             T1->T_INACTIVE (terra-domain target but excluded by
+    //             isActive filter, so route classifies it as cross)
+    expect(res.body.stats.edgeCount).toBe(9);
+    expect(res.body.stats.crossDomainEdgeCount).toBe(6);
+    expect(res.body.stats.internalEdgeCount).toBe(3);
     expect(res.body.stats.edgeCount).toBe(
       res.body.stats.crossDomainEdgeCount + res.body.stats.internalEdgeCount,
     );
+
+    // The inactive edge T1->T3 must be present in the returned edges array.
+    const edges = res.body.edges as Array<{ id: string; active: boolean }>;
+    expect(edges.some((e) => e.active === false)).toBe(true);
   });
 
-  it("vessels graph (entityType-filtered to fixture) reports exactly 2 nodes, 3 edges, 2 cross-domain, 1 internal", async () => {
+  // ── vessels (explicit per-domain handler) ─────────────────────────────────
+  it("vessels graph (isActive=true) reports 2 nodes, 5 edges, 4 cross-domain, 1 internal", async () => {
     const res = await request(app)
       .get("/domains/vessels/graph")
-      .query({ entityType: FIXTURE_ENTITY_TYPE });
+      .query({ entityType: FIXTURE_ENTITY_TYPE, isActive: "true" });
     expect(res.status).toBe(200);
     expect(res.body.domain).toBe("vessels");
 
@@ -562,32 +632,126 @@ describe("Integration — /domains/:domain/graph (seeded cross-domain fixture)",
     expect(returnedIds).toEqual([...seeded.vessels].sort());
     expect(res.body.stats.nodeCount).toBe(2);
 
-    // 3 edges total: T1->V1, V2->T3, V1->V2 (1 internal + 2 cross-domain)
-    expect(res.body.stats.edgeCount).toBe(3);
-    expect(res.body.stats.crossDomainEdgeCount).toBe(2);
+    // Edges touching {V1,V2}:
+    //   internal: V1->V2
+    //   cross:    T1->V1, V2->T3, V1->A1, A2->V2  (4)
+    expect(res.body.stats.edgeCount).toBe(5);
+    expect(res.body.stats.crossDomainEdgeCount).toBe(4);
     expect(res.body.stats.internalEdgeCount).toBe(1);
   });
 
-  it("includeCross=false on terra graph drops both inbound and outbound cross-domain edges", async () => {
+  // ── aegis (explicit per-domain handler) ───────────────────────────────────
+  it("aegis graph (isActive=true) reports 2 nodes, 7 edges, 6 cross-domain, 1 internal", async () => {
     const res = await request(app)
-      .get("/domains/terra/graph")
-      .query({ entityType: FIXTURE_ENTITY_TYPE, includeCross: "false" });
+      .get("/domains/aegis/graph")
+      .query({ entityType: FIXTURE_ENTITY_TYPE, isActive: "true" });
     expect(res.status).toBe(200);
-    expect(res.body.stats.nodeCount).toBe(3);
-    expect(res.body.stats.crossDomainEdgeCount).toBe(0);
-    // Only the 2 terra-internal edges should remain.
-    expect(res.body.stats.edgeCount).toBe(2);
-    expect(res.body.stats.internalEdgeCount).toBe(2);
+    expect(res.body.domain).toBe("aegis");
+
+    const returnedIds = (res.body.nodes as Array<{ id: string }>).map((n) => n.id).sort();
+    expect(returnedIds).toEqual([...seeded.aegis].sort());
+    expect(res.body.stats.nodeCount).toBe(2);
+
+    // Edges touching {A1,A2}:
+    //   internal: A1->A2
+    //   cross:    A1->T1, T2->A2, V1->A1, A2->V2, A1->C1, A2->T_INACTIVE  (6)
+    expect(res.body.stats.edgeCount).toBe(7);
+    expect(res.body.stats.crossDomainEdgeCount).toBe(6);
+    expect(res.body.stats.internalEdgeCount).toBe(1);
   });
 
-  it("returned terra nodes all belong to the requested domain (no vessels nodes leak in)", async () => {
+  // ── carlota-jo (generic fallback handler) ─────────────────────────────────
+  it("carlota-jo graph via generic fallback reports 1 node, 2 edges, 2 cross-domain, 0 internal", async () => {
+    const res = await request(app)
+      .get("/domains/carlota-jo/graph")
+      .query({ entityType: FIXTURE_ENTITY_TYPE, isActive: "true" });
+    expect(res.status).toBe(200);
+    expect(res.body.domain).toBe("carlota-jo");
+
+    const returnedIds = (res.body.nodes as Array<{ id: string }>).map((n) => n.id).sort();
+    expect(returnedIds).toEqual([...seeded.carlotaJo].sort());
+    expect(res.body.stats.nodeCount).toBe(1);
+
+    // Edges touching {C1}:
+    //   cross: C1->T3, A1->C1
+    expect(res.body.stats.edgeCount).toBe(2);
+    expect(res.body.stats.crossDomainEdgeCount).toBe(2);
+    expect(res.body.stats.internalEdgeCount).toBe(0);
+  });
+
+  // ── inactive node coverage ────────────────────────────────────────────────
+  it("terra graph with isActive=false returns ONLY inactive nodes and their edges", async () => {
+    const res = await request(app)
+      .get("/domains/terra/graph")
+      .query({ entityType: FIXTURE_ENTITY_TYPE, isActive: "false" });
+    expect(res.status).toBe(200);
+    expect(res.body.domain).toBe("terra");
+
+    const returnedIds = (res.body.nodes as Array<{ id: string }>).map((n) => n.id).sort();
+    expect(returnedIds).toEqual([...seeded.terraInactive].sort());
+    expect(res.body.stats.nodeCount).toBe(1);
+
+    // Edges touching {T_INACTIVE}: T1->T_INACTIVE (cross? no — T1 is terra
+    // too, but T1 is NOT in the active-set of returned ids, so the route
+    // classifies it as cross-domain. Same for A2->T_INACTIVE.)
+    expect(res.body.stats.edgeCount).toBe(2);
+    expect(res.body.stats.crossDomainEdgeCount).toBe(2);
+    expect(res.body.stats.internalEdgeCount).toBe(0);
+  });
+
+  it("terra graph without isActive filter includes BOTH active and inactive terra nodes", async () => {
     const res = await request(app)
       .get("/domains/terra/graph")
       .query({ entityType: FIXTURE_ENTITY_TYPE });
     expect(res.status).toBe(200);
-    const vesselsIdSet = new Set(seeded.vessels);
+    expect(res.body.domain).toBe("terra");
+
+    const expected = [...seeded.terra, ...seeded.terraInactive].sort();
+    const returnedIds = (res.body.nodes as Array<{ id: string }>).map((n) => n.id).sort();
+    expect(returnedIds).toEqual(expected);
+    expect(res.body.stats.nodeCount).toBe(4);
+
+    // Edges touching {T1,T2,T3,T_INACTIVE}:
+    //   internal: T1->T2, T2->T3, T1->T3(inactive edge), T1->T_INACTIVE  (4)
+    //   cross:    T1->V1, V2->T3, A1->T1, T2->A2, C1->T3, A2->T_INACTIVE (6)
+    expect(res.body.stats.edgeCount).toBe(10);
+    expect(res.body.stats.crossDomainEdgeCount).toBe(6);
+    expect(res.body.stats.internalEdgeCount).toBe(4);
+  });
+
+  // ── includeCross=false ────────────────────────────────────────────────────
+  it("includeCross=false on terra graph drops both inbound and outbound cross-domain edges", async () => {
+    const res = await request(app)
+      .get("/domains/terra/graph")
+      .query({ entityType: FIXTURE_ENTITY_TYPE, isActive: "true", includeCross: "false" });
+    expect(res.status).toBe(200);
+    expect(res.body.stats.nodeCount).toBe(3);
+    expect(res.body.stats.crossDomainEdgeCount).toBe(0);
+    // Internal terra edges only: T1->T2, T2->T3, T1->T3(inactive edge)
+    expect(res.body.stats.edgeCount).toBe(3);
+    expect(res.body.stats.internalEdgeCount).toBe(3);
+  });
+
+  it("includeCross=false on aegis graph leaves only the single internal edge", async () => {
+    const res = await request(app)
+      .get("/domains/aegis/graph")
+      .query({ entityType: FIXTURE_ENTITY_TYPE, isActive: "true", includeCross: "false" });
+    expect(res.status).toBe(200);
+    expect(res.body.stats.nodeCount).toBe(2);
+    expect(res.body.stats.crossDomainEdgeCount).toBe(0);
+    expect(res.body.stats.edgeCount).toBe(1);
+    expect(res.body.stats.internalEdgeCount).toBe(1);
+  });
+
+  // ── domain isolation ──────────────────────────────────────────────────────
+  it("returned terra nodes never leak in vessels/aegis/carlota-jo nodes", async () => {
+    const res = await request(app)
+      .get("/domains/terra/graph")
+      .query({ entityType: FIXTURE_ENTITY_TYPE });
+    expect(res.status).toBe(200);
+    const foreign = new Set([...seeded.vessels, ...seeded.aegis, ...seeded.carlotaJo]);
     for (const node of res.body.nodes as Array<{ id: string }>) {
-      expect(vesselsIdSet.has(node.id)).toBe(false);
+      expect(foreign.has(node.id)).toBe(false);
     }
   });
 });
