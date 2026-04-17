@@ -16,10 +16,33 @@ import express, {
 import { vi, beforeAll, afterAll, describe, it, expect } from "vitest";
 
 // ── Shared mock constants ────────────────────────────────────────────────────
-const TEST_USER = { id: "test-user-1", isAdmin: false, orgs: [{ orgId: 1 }] };
+const TEST_USER = {
+  id: "test-user-1",
+  email: "test-user-1@szl.test",
+  displayName: "Test User",
+  isAdmin: false,
+  orgs: [{ orgId: 1 }],
+};
 
-const mockAuthMiddleware = () =>
+// Header used by tests to opt-in to "no credentials presented" so we can
+// exercise the 401 path even though the middleware itself is mocked.
+const NO_AUTH_HEADER = "x-test-no-auth";
+
+const mockAuthMiddleware = (options: { required?: boolean } = {}) =>
   (req: Request, res: Response, next: NextFunction) => {
+    const noAuth = req.headers[NO_AUTH_HEADER] === "1";
+    if (noAuth) {
+      if (options.required) {
+        res.status(401).json({
+          error: "Authentication required",
+          code: "UNAUTHORIZED",
+        });
+        return;
+      }
+      // Optional auth + no credentials → continue without populating req.user.
+      next();
+      return;
+    }
     res.locals.userId = TEST_USER.id;
     res.locals.role = "ops";
     (req as Request & { user?: typeof TEST_USER }).user = TEST_USER;
@@ -315,6 +338,46 @@ describe("Integration — /deployments", () => {
       .send({ environment: ENV });
     expect(res.status).toBe(400);
     expect(res.body).toHaveProperty("error");
+  });
+
+  it("POST /deployments returns 401 when the request is unauthenticated", async () => {
+    const res = await request(app)
+      .post("/deployments")
+      .set(NO_AUTH_HEADER, "1")
+      .send({
+        appId: `${APP_ID}-unauth`,
+        appName: "Unauthed Attempt",
+        version: "9.9.9",
+        environment: ENV,
+      });
+    expect(res.status).toBe(401);
+    expect(res.body).toHaveProperty("error");
+  });
+
+  it("POST /deployments/:appId/rollback returns 401 when the request is unauthenticated", async () => {
+    const res = await request(app)
+      .post(`/deployments/${APP_ID}/rollback`)
+      .set(NO_AUTH_HEADER, "1")
+      .send({ environment: ENV });
+    expect(res.status).toBe(401);
+    expect(res.body).toHaveProperty("error");
+  });
+
+  it("POST /deployments records the authenticated principal as deployedBy and ignores client-supplied value", async () => {
+    const auditAppId = `${APP_ID}-audit`;
+    const res = await request(app)
+      .post("/deployments")
+      .send({
+        appId: auditAppId,
+        appName: "Audit Trail App",
+        version: "2.0.0",
+        environment: ENV,
+        // Client tries to spoof — server must overwrite with the real principal.
+        deployedBy: "spoofed-attacker",
+      });
+    expect(res.status).toBe(201);
+    expect(res.body.deployedBy).not.toBe("spoofed-attacker");
+    expect(res.body.deployedBy).toBe(TEST_USER.email);
   });
 
   it("persists registry across a simulated API server restart", async () => {

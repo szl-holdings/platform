@@ -32,7 +32,21 @@ import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../middlew
 import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
-router.use(authMiddleware({ required: false }));
+
+/**
+ * Resolve a stable, human-readable identifier for the authenticated principal
+ * to record on each deployment row. Prefers email, then displayName, then the
+ * numeric user id as a string. POST routes require auth, so req.user is
+ * guaranteed to be present at this point.
+ */
+function principalFor(req: Request): string {
+  const u = req.user;
+  if (!u) {
+    // Defensive — should be unreachable because POST routes require auth.
+    throw new Error("principalFor called without an authenticated user");
+  }
+  return u.email ?? u.displayName ?? String(u.id);
+}
 
 export type DeploymentStatus = "active" | "deploying" | "rolled-back" | "failed" | "inactive";
 export type DeploymentEnvironment = "development" | "staging" | "production";
@@ -94,7 +108,7 @@ async function getActive(appId: string, env: string): Promise<Deployment | undef
   return rows[0];
 }
 
-router.get("/deployments", perUserApiSlidingLimiter, async (req: Request, res: Response) => {
+router.get("/deployments", authMiddleware({ required: false }), perUserApiSlidingLimiter, async (req: Request, res: Response) => {
   try {
     const env = (req.query.environment as string) ?? "production";
     const rows = await db
@@ -113,7 +127,7 @@ router.get("/deployments", perUserApiSlidingLimiter, async (req: Request, res: R
   }
 });
 
-router.get("/deployments/:appId", perUserApiSlidingLimiter, async (req: Request, res: Response) => {
+router.get("/deployments/:appId", authMiddleware({ required: false }), perUserApiSlidingLimiter, async (req: Request, res: Response) => {
   try {
     const { appId } = req.params;
     const env = (req.query.environment as string) ?? "production";
@@ -127,7 +141,7 @@ router.get("/deployments/:appId", perUserApiSlidingLimiter, async (req: Request,
   }
 });
 
-router.get("/deployments/:appId/history", perUserApiSlidingLimiter, async (req: Request, res: Response) => {
+router.get("/deployments/:appId/history", authMiddleware({ required: false }), perUserApiSlidingLimiter, async (req: Request, res: Response) => {
   try {
     const { appId } = req.params;
     const env = (req.query.environment as string) ?? "production";
@@ -139,13 +153,16 @@ router.get("/deployments/:appId/history", perUserApiSlidingLimiter, async (req: 
   }
 });
 
-router.post("/deployments", perUserWriteSlidingLimiter, async (req: Request, res: Response) => {
+router.post("/deployments", authMiddleware({ required: true }), perUserWriteSlidingLimiter, async (req: Request, res: Response) => {
   try {
-    const { appId, appName, version, environment, deployedBy, commitSha, notes, metadata } =
+    const { appId, appName, version, environment, commitSha, notes, metadata } =
       req.body as Partial<DeploymentRecord>;
     if (!appId || !version || !environment) {
       return sendBadRequest(res, "appId, version, and environment are required");
     }
+    // Audit trail: deployedBy is always taken from the authenticated principal,
+    // never from request input — clients cannot spoof who triggered a deploy.
+    const deployedBy = principalFor(req);
 
     const inserted = await db.transaction(async (tx) => {
       await tx
@@ -167,7 +184,7 @@ router.post("/deployments", perUserWriteSlidingLimiter, async (req: Request, res
           version,
           environment: environment as DeploymentEnvironment,
           status: "active",
-          deployedBy: deployedBy ?? (req.user?.id ?? "system"),
+          deployedBy,
           commitSha: commitSha ?? null,
           notes: notes ?? null,
           metadata: metadata ?? null,
@@ -183,11 +200,12 @@ router.post("/deployments", perUserWriteSlidingLimiter, async (req: Request, res
   }
 });
 
-router.post("/deployments/:appId/rollback", perUserWriteSlidingLimiter, async (req: Request, res: Response) => {
+router.post("/deployments/:appId/rollback", authMiddleware({ required: true }), perUserWriteSlidingLimiter, async (req: Request, res: Response) => {
   try {
     const { appId } = req.params;
     const env = (req.body.environment as string) ?? "production";
     const targetVersion = req.body.version as string | undefined;
+    const deployedBy = principalFor(req);
 
     const result = await db.transaction(async (tx) => {
       const history = await tx
@@ -241,7 +259,7 @@ router.post("/deployments/:appId/rollback", perUserWriteSlidingLimiter, async (r
           version: target.version,
           environment: target.environment,
           status: "active",
-          deployedBy: req.user?.id ?? "system",
+          deployedBy,
           commitSha: target.commitSha,
           notes: `Rolled back from ${activeRow.version} to ${target.version}`,
           metadata: target.metadata,
