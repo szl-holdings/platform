@@ -227,3 +227,9 @@ id = "PqRSXeyyK-wJIAsdgtJNv"
 uri = "file://docs/strategy/FRONTIER_DOCTRINE.md"
 type = "text"
 title = "Frontier Doctrine — Public AI patterns mapped to SZL's 10 layers"
+
+[[outputs]]
+id = "JCKLG0Ag-7g0dvXRBQCQv"
+uri = "file://attached_assets/launch-bundle-2026.04.zip"
+type = "unspecified"
+title = "Launch Bundle — Ecosystem Cycle 2026.04 (zip)"
