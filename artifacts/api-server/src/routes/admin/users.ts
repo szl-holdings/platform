@@ -1,5 +1,5 @@
 import type { IRouter } from "express";
-import { db, usersTable, rolesTable, userRolesTable, auditEventsTable, exportJobsTable } from "@szl-holdings/db";
+import { db, usersTable, rolesTable, userRolesTable, auditEventsTable, exportJobsTable, orgMembersTable, organizationsTable } from "@szl-holdings/db";
 import { desc, sql, ilike, or, eq, and, inArray, gte, lte } from "drizzle-orm";
 import { requireRole } from "../../middlewares/auth.js";
 import { isFlagEnabled } from "../../lib/platform-flags.js";
@@ -14,8 +14,73 @@ const createUserSchema = z.object({
 });
 const reasonSchema = z.object({ reason: z.string().max(2000).optional() });
 const impersonateEndSchema = z.object({ impersonationToken: z.string().min(1) });
+const roleAssignSchema = z.object({
+  roleId: z.number().int().positive(),
+  action: z.enum(["add", "remove"]),
+});
+const deactivateSchema = z.object({
+  active: z.boolean(),
+});
 
 export function register(router: IRouter): void {
+  router.get("/admin/roles", async (_req, res) => {
+    try {
+      const roles = await db.select({ id: rolesTable.id, name: rolesTable.name, description: rolesTable.description }).from(rolesTable).orderBy(rolesTable.name);
+      res.json({ roles });
+    } catch {
+      sendError(res, "Failed to fetch roles", 500, "INTERNAL_ERROR");
+    }
+  });
+
+  router.get("/admin/users/:id/detail", async (req, res) => {
+    try {
+      const userId = parseInt(req.params["id"] as string, 10);
+      if (isNaN(userId) || userId < 1) { sendBadRequest(res, "Invalid user ID"); return; }
+      const [user] = await db.select({ id: usersTable.id, email: usersTable.email, displayName: usersTable.displayName, avatarUrl: usersTable.avatarUrl, isActive: usersTable.isActive, lastLoginAt: usersTable.lastLoginAt, createdAt: usersTable.createdAt }).from(usersTable).where(eq(usersTable.id, userId));
+      if (!user) { sendNotFound(res, "User not found"); return; }
+      const roleRows = await db.select({ id: rolesTable.id, name: rolesTable.name }).from(userRolesTable).innerJoin(rolesTable, eq(userRolesTable.roleId, rolesTable.id)).where(eq(userRolesTable.userId, userId));
+      const orgRows = await db.select({ id: organizationsTable.id, name: organizationsTable.name, slug: organizationsTable.slug, role: orgMembersTable.role }).from(orgMembersTable).innerJoin(organizationsTable, eq(orgMembersTable.orgId, organizationsTable.id)).where(eq(orgMembersTable.userId, userId));
+      res.json({ ...user, createdAt: user.createdAt.toISOString(), lastLoginAt: user.lastLoginAt?.toISOString() ?? null, roles: roleRows, organizations: orgRows });
+    } catch {
+      sendError(res, "Failed to fetch user detail", 500, "INTERNAL_ERROR");
+    }
+  });
+
+  router.patch("/admin/users/:id/deactivate", validateBody(deactivateSchema), async (req, res) => {
+    try {
+      const userId = parseInt(req.params["id"] as string, 10);
+      if (isNaN(userId) || userId < 1) { sendBadRequest(res, "Invalid user ID"); return; }
+      const { active } = req.body as z.infer<typeof deactivateSchema>;
+      const [updated] = await db.update(usersTable).set({ isActive: active, updatedAt: new Date() }).where(eq(usersTable.id, userId)).returning({ id: usersTable.id, isActive: usersTable.isActive });
+      if (!updated) { sendNotFound(res, "User not found"); return; }
+      await db.insert(auditEventsTable).values({ userId: req.user?.id ?? null, action: active ? "user.activated" : "user.deactivated", entityType: "user", entityId: String(userId), newValues: { active }, ipAddress: req.ip ?? null, userAgent: req.headers["user-agent"] ?? null });
+      res.json({ id: updated.id, isActive: updated.isActive });
+    } catch {
+      sendError(res, "Failed to update user status", 500, "INTERNAL_ERROR");
+    }
+  });
+
+  router.patch("/admin/users/:id/role", validateBody(roleAssignSchema), async (req, res) => {
+    try {
+      const userId = parseInt(req.params["id"] as string, 10);
+      if (isNaN(userId) || userId < 1) { sendBadRequest(res, "Invalid user ID"); return; }
+      const { roleId, action } = req.body as z.infer<typeof roleAssignSchema>;
+      const [role] = await db.select({ id: rolesTable.id, name: rolesTable.name }).from(rolesTable).where(eq(rolesTable.id, roleId));
+      if (!role) { sendNotFound(res, "Role not found"); return; }
+      const [targetUser] = await db.select({ id: usersTable.id, email: usersTable.email }).from(usersTable).where(eq(usersTable.id, userId));
+      if (!targetUser) { sendNotFound(res, "User not found"); return; }
+      if (action === "add") {
+        await db.insert(userRolesTable).values({ userId, roleId }).onConflictDoNothing();
+      } else {
+        await db.delete(userRolesTable).where(and(eq(userRolesTable.userId, userId), eq(userRolesTable.roleId, roleId)));
+      }
+      await db.insert(auditEventsTable).values({ userId: req.user?.id ?? null, action: action === "add" ? "user.role.assigned" : "user.role.removed", entityType: "user", entityId: String(userId), newValues: { roleName: role.name, roleId, targetUserEmail: targetUser.email, action }, ipAddress: req.ip ?? null, userAgent: req.headers["user-agent"] ?? null });
+      res.json({ ok: true, userId, roleId, roleName: role.name, action });
+    } catch {
+      sendError(res, "Failed to update user role", 500, "INTERNAL_ERROR");
+    }
+  });
+
   router.get("/admin/users", async (_req, res) => {
     try {
       const users = await db.select({ id: usersTable.id, email: usersTable.email, displayName: usersTable.displayName, avatarUrl: usersTable.avatarUrl, isActive: usersTable.isActive, lastLoginAt: usersTable.lastLoginAt, createdAt: usersTable.createdAt }).from(usersTable).orderBy(desc(usersTable.createdAt));
