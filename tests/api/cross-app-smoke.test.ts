@@ -7,9 +7,10 @@
  *
  * Domains covered: Vessels, Terra, PRISM Counsel, Aegis/Firestorm, Lyte, Carlota Jo, SZL Holdings
  */
-import { describe, it, expect, afterAll, vi } from "vitest";
+import { describe, it, expect, afterAll, afterEach, vi } from "vitest";
 import request from "supertest";
 import { createTestApp } from "../utils/test-app";
+import { registerCleanup, flushCleanup } from "../utils/cleanup-registry";
 
 // ── Module mocks (external side-effects only — DB is real) ────────────────────
 
@@ -166,7 +167,9 @@ afterAll(async () => {
 // ── Domain: Vessels ──────────────────────────────────────────────────────────
 
 describe("Domain: Vessels", () => {
-  const cleanupFleetIds: number[] = [];
+  afterEach(async () => {
+    await flushCleanup();
+  });
 
   it("GET /vessels/fleets returns 200 with array", async () => {
     const app = buildAuthApp();
@@ -195,7 +198,10 @@ describe("Domain: Vessels", () => {
       .send({ name: "Smoke Test Fleet", description: "Smoke test fleet — safe to delete" });
     expect(res.status).toBe(201);
     expect(res.body).toHaveProperty("id");
-    if (typeof res.body?.id === "number") cleanupFleetIds.push(res.body.id as number);
+
+    if (res.body?.id) {
+      registerCleanup({ table: "vesselsFleetsTable", id: res.body.id });
+    }
   });
 
   it("GET /vessels/fleets/:id returns a valid HTTP response (200 or 404, not 500)", async () => {
@@ -225,16 +231,6 @@ describe("Domain: Vessels", () => {
     expect(Array.isArray(res.body)).toBe(true);
   });
 
-  afterAll(async () => {
-    if (cleanupFleetIds.length > 0) {
-      const app = buildAuthApp(["ops", "exec", "admin"]);
-      const router = (await import("../../artifacts/api-server/src/routes/vessels")).default;
-      app.use(router);
-      for (const id of cleanupFleetIds) {
-        await request(app).delete(`/vessels/fleets/${id}`);
-      }
-    }
-  });
 });
 
 // ── Domain: Terra (Real Estate) ──────────────────────────────────────────────
@@ -427,7 +423,9 @@ describe("Domain: Lyte", () => {
 // ── Domain: Carlota Jo ───────────────────────────────────────────────────────
 
 describe("Domain: Carlota Jo", () => {
-  const cleanupInquiryIds: number[] = [];
+  afterEach(async () => {
+    await flushCleanup();
+  });
 
   it("GET /booking/inquiries returns 200 with pagination envelope for authenticated user", async () => {
     const app = buildAuthApp();
@@ -452,8 +450,11 @@ describe("Domain: Carlota Jo", () => {
         message: "Integration test inquiry for smoke testing",
       });
     expect([200, 201]).toContain(res.status);
-    const inquiryId: number | undefined = res.body?.inquiryId ?? res.body?.id;
-    if (typeof inquiryId === "number") cleanupInquiryIds.push(inquiryId);
+
+    const inquiryId = res.body?.inquiryId ?? res.body?.id;
+    if (inquiryId) {
+      registerCleanup({ table: "carlotaInquiriesTable", id: inquiryId });
+    }
   });
 
   it("POST /booking/inquiries returns 400 when required fields are missing", async () => {
@@ -478,14 +479,6 @@ describe("Domain: Carlota Jo", () => {
     expect(Array.isArray(res.body.data)).toBe(true);
   });
 
-  afterAll(async () => {
-    if (cleanupInquiryIds.length > 0) {
-      const { pool } = await import("@szl-holdings/db");
-      for (const id of cleanupInquiryIds) {
-        await pool.query("DELETE FROM carlota_inquiries WHERE id = $1", [id]);
-      }
-    }
-  });
 });
 
 // ── Domain: SZL Holdings ─────────────────────────────────────────────────────
