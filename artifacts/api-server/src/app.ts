@@ -1,4 +1,5 @@
 import express, { type Express, type Request, type Response, type NextFunction } from "express";
+import * as Sentry from "@sentry/node";
 import cors from "cors";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
@@ -529,6 +530,8 @@ app.use("/api/graphql", (req: Request, res: Response, next: import("express").Ne
     sendError(res, "GraphQL is still initializing", 503, "SERVICE_UNAVAILABLE");
   }
 });
+
+Sentry.setupExpressErrorHandler(app);
 
 app.use((_req: Request, res: Response) => {
   sendNotFound(res, "The requested resource");

@@ -1,4 +1,6 @@
 import http from "http";
+import { initServerSentry, flushSentry } from "./lib/sentry";
+initServerSentry();
 import app from "./app";
 import { logger } from "./lib/logger";
 import { failFastOnInvalidConfig } from "./lib/startup-validation";
@@ -353,6 +355,8 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
     } catch (err) {
       logger.warn({ err }, "Error closing HTTP server");
     }
+
+    await flushSentry(2000).catch(() => {});
 
     stopDomainNotificationGenerators();
     stopSelfMonitoring();

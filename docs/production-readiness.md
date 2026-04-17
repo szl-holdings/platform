@@ -45,6 +45,22 @@ _Updated: April 3, 2026_
 | ALLOY_REQUIRE_APPROVAL_CRITICAL | true | Require approval for critical ops |
 | ALLOY_MAX_BATCH_SIZE | 100 | Max batch processing size |
 
+### Error Tracking (Sentry)
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `SENTRY_DSN` | No — graceful fallback | Server-side Sentry DSN. Captures uncaught exceptions, Express errors, and PostgreSQL query errors in the API server. Obtain from your Sentry project → Settings → Client Keys. |
+| `SENTRY_TRACES_SAMPLE_RATE` | No | Fraction of transactions sampled for performance traces (default: `0.1`). Range: `0.0`–`1.0`. |
+| `SENTRY_PROFILES_SAMPLE_RATE` | No | Fraction of sampled traces that also collect CPU profiles (default: `0.1`). |
+| `VITE_SENTRY_DSN` | No — graceful fallback | Frontend Sentry DSN. Injected at Vite build time. Shared across `szl-holdings`, `command`, and `vessels` frontends. Can be the same DSN as the server or a separate Sentry project per environment. |
+
+**Setup steps:**
+1. Create a Sentry project at [sentry.io](https://sentry.io) (free tier supports up to 5K errors/month).
+2. Copy the DSN from Settings → Client Keys (DSN).
+3. Set `SENTRY_DSN` and `VITE_SENTRY_DSN` in Replit Secrets before deploying.
+4. Optionally configure a Slack alert rule in Sentry: Project → Alerts → Create Alert → set threshold (e.g. error rate > 5 events/min) → action: notify Slack channel.
+
+> **If `SENTRY_DSN` is not set:** The API server starts normally without error tracking — no crash risk. Errors are still captured in Pino structured logs.
+
 ### Logging
 | Variable | Default | Description |
 |----------|---------|-------------|
@@ -152,7 +168,10 @@ _Updated: April 3, 2026_
 ### Pending / Recommended before launch:
 - [ ] CORS_ORIGINS must be set to production domains before deploy
 - [ ] Rate limiting on public marketing pages (currently no limit)
-- [ ] Sentry DSN for production error tracking (frontend + backend)
+- [x] Sentry SDK integrated — API server + 3 frontend apps (szl-holdings, command, vessels)
+- [ ] Set `SENTRY_DSN` and `VITE_SENTRY_DSN` in Replit Secrets to activate error tracking
+- [ ] Configure external uptime monitor for `/api/health` (see `docs/observability-setup.md`)
+- [ ] Configure Sentry Slack/email alert rules (see `docs/observability-setup.md`)
 - [ ] Log aggregation service (Logtail, Datadog, etc.) for production
 - [ ] Security headers audit for all frontend apps
 - [ ] DDoS mitigation (Cloudflare proxy recommended in front of Replit)
@@ -242,7 +261,7 @@ All scripts are available via `pnpm` from the workspace root:
 - [ ] CORS_ORIGINS configured for production domains
 - [ ] Rate limiting on public endpoints
 - [ ] Custom domain DNS configuration
-- [ ] Sentry error monitoring configured
+- [x] Sentry SDK integrated (API server + 3 frontend apps) — set SENTRY_DSN to activate
 - [ ] SSL/TLS via Replit deployment (automatic)
 
 ---
@@ -294,7 +313,8 @@ All scripts are available via `pnpm` from the workspace root:
 - **SCIM provisioning** — real endpoint exists; needs IdP admin configuration per tenant
 - **Object Storage** — falls back to local filesystem without `OBJECT_STORAGE_BUCKET_ID`
 - **Production domain** — DNS and custom domain configuration required for public access
-- **Error monitoring** — Sentry DSN not configured; errors logged to console only
+- **Error monitoring** — Sentry SDK integrated in code; requires `SENTRY_DSN` and `VITE_SENTRY_DSN` set in Replit Secrets to activate. See `docs/observability-setup.md`.
+- **External uptime monitoring** — `/api/health` endpoint is ready; requires configuration in Better Uptime / UptimeRobot / Freshping. See `docs/observability-setup.md`.
 
 ---
 

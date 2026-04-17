@@ -34,7 +34,7 @@ These counts should be re-verified as the platform grows. The route security mat
 | Multi-Tenant Design | Tenant scope applied selectively, not universally | Medium | In remediation |
 | Testing | ~27 test files vs. 173 total route files (~16% coverage ratio) | High | Planned |
 | Session Store | In-memory session store; no Redis in production | Medium | Planned |
-| Observability | No Sentry / external error tracking in production | Medium | Planned |
+| Observability | Sentry SDK integrated; external uptime monitor setup documented | Medium | In remediation |
 | CI | Integration tests do not run automatically on merge | Medium | Planned |
 | Admin Tooling | No dedicated admin interface for tenant/user management | Low | Planned |
 | Support Workflows | No ticketing or in-app support channel integration | Low | Planned |
@@ -209,11 +209,17 @@ These counts should be re-verified as the platform grows. The route security mat
 
 **Gap:** No Sentry (or equivalent) SDK is configured for frontend JavaScript errors or server-side exception tracking.
 
-**Current State:** Server uses Pino structured logging and an internal self-monitor. Frontend errors surface only in browser consoles. There is no aggregated error view or alerting.
+**Current State (updated April 2026):** Sentry SDK is now integrated:
+- **API server** (`artifacts/api-server`): `@sentry/node` installed; `initServerSentry()` called at startup before any other module. Sentry's Express error handler captures all unhandled Express errors. Sentry is flushed on graceful shutdown. Initialization is no-op if `SENTRY_DSN` env var is absent (no crash risk).
+- **Frontend — szl-holdings**: `initSentry({ appSlug: "szl-holdings" })` called in `main.tsx` via `@szl-holdings/observability/react`.
+- **Frontend — vessels**: `initSentry({ appSlug: "vessels" })` called in `main.tsx`.
+- **Frontend — command**: `initSentry({ appSlug: "command" })` added to `main.tsx`.
+- DSN configuration documented in `docs/production-readiness.md` and `.env.example`.
+- Alert setup instructions documented in `docs/observability-setup.md`.
 
-**Risk:** Medium. In commercial deployment, undetected frontend errors and server exceptions create poor customer experience and slow incident response.
+**Risk:** Reduced to Low once `SENTRY_DSN` is configured in production secrets.
 
-**Remediation:** Add Sentry SDK to API server and frontend artifacts. Configure DSN in environment variables. 1-day engineering effort.
+**Remediation:** Configure `SENTRY_DSN` and `VITE_SENTRY_DSN` in Replit Secrets. See `docs/observability-setup.md` for full instructions including Slack alert wiring.
 
 ---
 
@@ -221,11 +227,11 @@ These counts should be re-verified as the platform grows. The route security mat
 
 **Gap:** No external uptime monitoring service (Datadog, Better Uptime, Pingdom) is configured to check platform availability from outside the deployment environment.
 
-**Current State:** Internal self-monitor (`lib/self-monitor.ts`) polls `/api/health/detailed` every 5 minutes from inside the same process. This does not detect infrastructure-level outages (DNS, load balancer, CDN).
+**Current State (updated April 2026):** The `/api/health` endpoint returns a rich health payload and is ready for external monitoring. Setup instructions with recommended providers (Better Uptime free tier, UptimeRobot, Freshping) are documented in `docs/observability-setup.md`. Configuration requires a 5-minute setup in the chosen provider's web UI — no code changes needed.
 
-**Risk:** Medium. A full deployment outage would not trigger an alert until a user reports it.
+**Risk:** Medium — configuration gap, not a code gap. Reduces to Low once a monitor is activated.
 
-**Remediation:** Configure an external uptime monitor before first enterprise pilot. $0–$50/month depending on provider.
+**Remediation:** Follow the instructions in `docs/observability-setup.md` to activate an external uptime monitor before first enterprise pilot. $0/month on free tiers (Better Uptime, UptimeRobot).
 
 ---
 
@@ -427,6 +433,8 @@ The following active tasks are closing gaps documented above:
 | Integration tests (§7.3, §10.1) | "Extend integration tests to cover POST/mutation paths for Vessels and Firestorm" |
 | CI for integration tests (§7.3) | "Add CI step so integration tests run automatically on every merge" |
 | Pen test Medium findings | FINDING-005 (session cookie prefix), FINDING-007 (Zod expansion), FINDING-010 (WebSocket re-validation) |
+| Observability — error tracking (§7.1) | Completed — Sentry SDK integrated in API server and 3 frontend apps. Activate by setting `SENTRY_DSN` in Replit Secrets. |
+| Observability — uptime monitoring (§7.2) | See `docs/observability-setup.md` — 5-minute configuration task in chosen provider (no code changes). |
 
 ---
 
