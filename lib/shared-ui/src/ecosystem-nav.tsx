@@ -616,7 +616,7 @@ function AppSwitcherPanel({
           All Projects
         </a>
         <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.25)", fontFamily: "'Geist Mono', monospace", textTransform: "uppercase", letterSpacing: "0.06em" }}>
-          {ECOSYSTEM_APPS.length} apps
+          SZL Holdings · Governed Decision Infrastructure
         </span>
       </div>
     </div>
