@@ -18,6 +18,7 @@ const propertiesCommands: SpotlightCommand[] = [
   { id: "nav-properties", label: "Properties", description: "All listings", icon: "🏛", group: "Navigate", action: () => router.push("/(shell)/properties/(tabs)/properties") },
   { id: "nav-pipeline", label: "Pipeline", description: "Deal pipeline", icon: "📊", group: "Navigate", action: () => router.push("/(shell)/properties/(tabs)/pipeline") },
   { id: "nav-scanner", label: "Scanner", description: "AI property scanner", icon: "⚡", group: "Navigate", action: () => router.push("/(shell)/properties/(tabs)/scanner") },
+  { id: "nav-terra", label: "Terra Modules", description: "Rent Roll, Construction, Tenant Screening & more", icon: "🏗", group: "Navigate", action: () => router.push("/(shell)/properties/(tabs)/terra-modules") },
   { id: "nav-ai", label: "Terrain AI", description: "Real estate intelligence assistant", icon: "🤖", group: "Navigate", action: () => router.push("/(shell)/properties/(tabs)/agent-chat") },
 ];
 
@@ -41,6 +42,10 @@ function NativeTabLayout() {
       <NativeTabs.Trigger name="scanner">
         <Icon sf={{ default: "sparkles", selected: "sparkles" }} />
         <Label>Scanner</Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="terra-modules">
+        <Icon sf={{ default: "building.columns", selected: "building.columns.fill" }} />
+        <Label>Terra</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="agent-chat">
         <Icon sf={{ default: "bubble.left.and.bubble.right", selected: "bubble.left.and.bubble.right.fill" }} />
@@ -102,6 +107,14 @@ function ClassicTabLayout() {
           title: "Scanner",
           tabBarIcon: ({ color }) =>
             isIOS ? <SymbolView name="sparkles" tintColor={color} size={22} /> : <Feather name="zap" size={20} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="terra-modules"
+        options={{
+          title: "Terra",
+          tabBarIcon: ({ color }) =>
+            isIOS ? <SymbolView name="building.columns.fill" tintColor={color} size={22} /> : <Feather name="layers" size={20} color={color} />,
         }}
       />
       <Tabs.Screen

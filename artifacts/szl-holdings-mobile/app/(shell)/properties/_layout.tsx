@@ -10,6 +10,14 @@ export default function PropertiesLayout() {
       <Stack.Screen name="agent-chat" />
       <Stack.Screen name="mcp-tools" />
       <Stack.Screen name="ar-viewer" options={{ animation: "fade" }} />
+      <Stack.Screen name="rent-roll" />
+      <Stack.Screen name="construction-monitor" />
+      <Stack.Screen name="tenant-screening" />
+      <Stack.Screen name="lease-abstraction" />
+      <Stack.Screen name="pro-forma" />
+      <Stack.Screen name="exchange-1031" />
+      <Stack.Screen name="tax-appeal" />
+      <Stack.Screen name="waterfall" />
     </Stack>
   );
 }
