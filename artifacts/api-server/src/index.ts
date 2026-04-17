@@ -41,6 +41,8 @@ import { initializeAlloyDomainEventSubscriptions } from "./lib/domain-events/all
 import { startIntelligenceFeeds, stopIntelligenceFeeds } from "./lib/intelligence-feeds-init";
 import { startMeshPublisher } from "./lib/control-tower-mesh-publisher";
 import { initDurablePersistence, stopDurablePersistence } from "./lib/persistence-init";
+import { initGuardianEngine } from "./lib/guardian-engine";
+import { getAlloyRunManager } from "./lib/alloy-run-manager-singleton";
 
 failFastOnInvalidConfig();
 
@@ -65,6 +67,8 @@ const HEAP_WARN_THRESHOLD_MB = Math.round(HEAP_LIMIT_MB * 0.82);
 const HEAP_GC_THRESHOLD_MB = Math.round(HEAP_LIMIT_MB * 0.70);
 
 export { app };
+export { getAlloyRunManager } from "./lib/alloy-run-manager-singleton";
+export { getGuardianEngine, syncGuardianPolicies, recordGuardianAction } from "./lib/guardian-engine";
 
 export async function bootstrap(server: http.Server, port: number): Promise<http.RequestListener> {
   buildGraphQLMiddleware(server)
@@ -173,6 +177,13 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
     // Step 2b: Wire Trace Graph and Memory Fabric to Postgres so traces,
     // approvals, audit trails, and agent memory survive restarts.
     await initDurablePersistence();
+
+    // Step 2c: Hydrate the shared Guardian decision engine from policy rows
+    // and warm the Alloy RunManager singleton so any agent endpoint can
+    // submit work as soon as the server starts accepting traffic.
+    await initGuardianEngine();
+    getAlloyRunManager();
+    logger.info("[bootstrap] Guardian engine and Alloy RunManager ready");
 
     // Step 3: Start durable (PostgreSQL-backed) job queue
     await startDurableQueue();

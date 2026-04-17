@@ -6,6 +6,7 @@ import driftRouter from "./drift";
 import deploymentsRouter from "./deployments";
 import domainsRouter from "./domains";
 import { perUserApiSlidingLimiter } from "../middlewares/sliding-window-limiter";
+import { guardianPolicyCheck } from "../middlewares/guardian-policy";
 import * as core from "./groups/core";
 import * as vessels from "./groups/vessels";
 import * as security from "./groups/security";
@@ -33,6 +34,11 @@ import * as skillLibrary from "./groups/skill-library";
 import nexusRouter from "./nexus";
 
 const router: IRouter = Router();
+
+// Global Guardian policy check — derives category from request path and
+// applies to every agent-facing route family. Read-only methods skip
+// automatically. Tier is derived server-side from authenticated user.
+router.use(guardianPolicyCheck());
 
 router.use("/pulse", perUserApiSlidingLimiter, pulseBriefingRouter);
 router.use(evalsRouter);

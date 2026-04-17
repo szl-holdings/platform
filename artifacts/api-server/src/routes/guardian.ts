@@ -21,6 +21,7 @@ import {
   type GuardianRule,
   type PolicyTier,
 } from "@workspace/guardian";
+import { getGuardianEngine, syncGuardianPolicies } from "../lib/guardian-engine";
 import {
   defaultToolRegistry,
   ToolManifestSchema,
@@ -53,7 +54,7 @@ import { and, desc, eq, sql } from "drizzle-orm";
 
 const router: IRouter = Router();
 
-const sharedDecisionEngine = new GuardianDecisionEngine();
+const sharedDecisionEngine: GuardianDecisionEngine = getGuardianEngine();
 
 const allToolManifests = [
   GRAPH_QUERY_TOOL_MANIFEST,
@@ -190,16 +191,9 @@ function approvalRowToApi(row: ToolMeshActionApproval) {
   };
 }
 
-let policyEngineSyncedAt = 0;
 async function syncDecisionEngine(): Promise<void> {
-  if (Date.now() - policyEngineSyncedAt < 10_000) return;
-  policyEngineSyncedAt = Date.now();
-  const rows = await db.select().from(guardianPoliciesTable).where(eq(guardianPoliciesTable.enabled, true));
-  for (const r of sharedDecisionEngine.getRules()) sharedDecisionEngine.removeRule(r.id);
-  for (const row of rows) sharedDecisionEngine.addRule(policyRowToRule(row));
+  await syncGuardianPolicies(true);
 }
-
-syncDecisionEngine().catch(err => logger.warn({ err }, "Initial guardian policy sync failed"));
 
 const PII_FIELD_PATTERNS = [
   /^(email|phone|ssn|dob|date_of_birth|birthdate|address|postal_code|zip|credit_card|card_number|cvv|password|secret|token|api_key|private_key|national_id|passport|drivers_license|bank_account|routing_number|tax_id|ein|sin)/i,
@@ -316,6 +310,7 @@ router.post("/policies", authMiddleware(), requireRole("super_admin", "admin", "
 
     if (!inserted) { handleRouteError(res, new Error("insert returned no row"), "Failed to create policy"); return; }
     if (inserted.enabled) sharedDecisionEngine.addRule(policyRowToRule(inserted));
+    await syncDecisionEngine();
 
     logger.info({ policyId: inserted.id, tier: inserted.tier, action: inserted.action }, "Policy created");
     sendCreated(res, policyRowToApi(inserted));
@@ -356,7 +351,7 @@ router.patch("/policies/:id", authMiddleware(), requireRole("super_admin", "admi
     const [updated] = await db.update(guardianPoliciesTable).set(u).where(eq(guardianPoliciesTable.id, id)).returning();
     if (!updated) { sendNotFound(res, "Policy not found"); return; }
 
-    policyEngineSyncedAt = 0;
+    await syncDecisionEngine();
     sendSuccess(res, policyRowToApi(updated));
   } catch (err) {
     handleRouteError(res, err, "Failed to update policy");
@@ -369,7 +364,7 @@ router.delete("/policies/:id", authMiddleware(), requireRole("super_admin", "adm
     if (isNaN(id)) { sendBadRequest(res, "Invalid policy ID"); return; }
     const deleted = await db.delete(guardianPoliciesTable).where(eq(guardianPoliciesTable.id, id)).returning({ id: guardianPoliciesTable.id });
     if (deleted.length === 0) { sendNotFound(res, "Policy not found"); return; }
-    policyEngineSyncedAt = 0;
+    await syncDecisionEngine();
     logger.info({ policyId: id }, "Policy deleted");
     sendSuccess(res, { deleted: true });
   } catch (err) {
