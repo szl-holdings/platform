@@ -564,7 +564,27 @@ export function ConstellationGraph({
   // Remember the node that failed so the Retry button can re-issue the same
   // request even if the operator briefly clicks elsewhere in the panel.
   const expandErrorNodeRef = useRef<ConstellationGraphNode | null>(null);
-  const [expandLimit, setExpandLimit] = useState<25 | 50 | 100 | 200>(25);
+  const [expandLimit, setExpandLimit] = useState<25 | 50 | 100 | 200>(() => {
+    if (typeof window === "undefined") return 25;
+    try {
+      const stored = window.localStorage.getItem("constellation:expandLimit");
+      const parsed = stored ? Number(stored) : NaN;
+      if (parsed === 25 || parsed === 50 || parsed === 100 || parsed === 200) {
+        return parsed;
+      }
+    } catch {
+      // localStorage may be unavailable (private mode, SSR, etc.) — fall through to default.
+    }
+    return 25;
+  });
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      window.localStorage.setItem("constellation:expandLimit", String(expandLimit));
+    } catch {
+      // Ignore quota / access errors; persistence is best-effort.
+    }
+  }, [expandLimit]);
 
   // Multi-hop trace state. `traceOriginId` anchors the distance scale visible
   // on the canvas; `traceDistances` maps node id -> shortest hop count from
