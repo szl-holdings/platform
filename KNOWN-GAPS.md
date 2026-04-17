@@ -60,7 +60,7 @@ Operational gaps, process health, test coverage, observability, team ownership.
 | KG012 | Dependency review not in CI | P1 | ✅ Resolved Apr-2026 |
 | KG013 | No `CODEOWNERS` file | P1 | ✅ Resolved Apr-2026 |
 | KG018 | 80+ env vars with no formal schema documentation | P2 | ⚠️ Open — Sprint 4 |
-| GAP-004 | No `.env.example` files for all artifacts | Low | ⚠️ Open |
+| GAP-004 | No `.env.example` files for all artifacts | Low | ✅ Resolved Apr-2026 |
 | KG019 | No Lighthouse CI performance regression guard | P2 | ⚠️ Open — Sprint 4 |
 | KG023 | SLI/SLO definitions absent | P2 | ⚠️ Open — Sprint 4 |
 | KG024 | Large vendor bundle sizes on all web apps (1–1.7 MB) | P2 | ⚠️ Open — Sprint 4 |

@@ -117,9 +117,27 @@ When `eas build` runs with the file secrets above, EAS sets these env vars to th
 
 ## Environment Variables (API keys, backend URLs)
 
-- Copy `.env.example` to `.env` at the repo root (comprehensive — 175 variables).
+Each application has its own `.env.example` file documenting the variables it needs:
+
+| App | `.env.example` location | Copy to |
+|-----|-------------------------|---------|
+| API Server | `artifacts/api-server/.env.example` | `artifacts/api-server/.env` |
+| SZL Holdings Dashboard | `artifacts/szl-holdings/.env.example` | `artifacts/szl-holdings/.env.local` |
+| Aegis | `artifacts/aegis/.env.example` | `artifacts/aegis/.env.local` |
+| Vessels | `artifacts/vessels/.env.example` | `artifacts/vessels/.env.local` |
+| Unified Command | `artifacts/command/.env.example` | `artifacts/command/.env.local` |
+| Pulse | `artifacts/pulse/.env.example` | `artifacts/pulse/.env.local` |
+| Terra | `artifacts/terra/.env.example` | `artifacts/terra/.env.local` |
+| Carlota Jo | `artifacts/carlota-jo/.env.example` | `artifacts/carlota-jo/.env.local` |
+
+- Copy `.env.example` to the destination path listed above.
+- The root `.env.example` contains a comprehensive superset of all variables (175 vars) and is the canonical reference for the API server. Per-artifact files document only the variables relevant to that specific app.
 - Fill in values from the team secrets store.
-- `.env` files are gitignored. Never commit filled-in `.env` files.
+- `.env` and `.env.local` files are gitignored. Never commit filled-in environment files.
+- See `ENVIRONMENT_VARIABLES.md` for the full canonical reference with descriptions, required/optional status, and source-verified defaults.
+- See `AUDIT_FINDINGS_REGISTER.md` for active security findings related to secret hygiene.
+- Fill in values from the team secrets store.
+- `.env` and `.env.local` files are gitignored. Never commit filled-in environment files.
 - See `ENVIRONMENT_VARIABLES.md` for the full canonical reference with descriptions, required/optional status, and source-verified defaults.
 - See `AUDIT_FINDINGS_REGISTER.md` for active security findings related to secret hygiene.
 
