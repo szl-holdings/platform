@@ -1,5 +1,5 @@
 import { useLocation } from "wouter";
-import { Bell, Users, DollarSign, GitCommit, Target, Shield, BarChart2, Zap, AlertTriangle } from "lucide-react";
+import { Bell, Users, DollarSign, GitCommit, Target, Shield, BarChart2, Zap, AlertTriangle, Rocket } from "lucide-react";
 
 const OPS_ITEMS = [
   {
@@ -34,6 +34,13 @@ const OPS_ITEMS = [
     description: "Auto-generated change log for all apps — deployments, features, fixes",
     icon: GitCommit,
     color: "#0ea5e9",
+  },
+  {
+    path: "/operations/deployments",
+    label: "Deployments",
+    description: "Active versions per app, full deployment history, guarded rollback controls",
+    icon: Rocket,
+    color: "#8b7ac8",
   },
   {
     path: "/sla",

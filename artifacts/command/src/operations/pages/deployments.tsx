@@ -1,0 +1,509 @@
+import { useMemo, useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiFetch, ApiError } from "@szl-holdings/shared-ui";
+import {
+  Rocket,
+  History,
+  RotateCcw,
+  ChevronRight,
+  AlertTriangle,
+  CheckCircle2,
+  XCircle,
+  Loader2,
+  RefreshCw,
+  GitCommit,
+  Server,
+  Clock,
+} from "lucide-react";
+
+type DeploymentStatus = "active" | "deploying" | "rolled-back" | "failed" | "inactive";
+type DeploymentEnvironment = "development" | "staging" | "production";
+
+interface DeploymentRecord {
+  appId: string;
+  appName: string;
+  version: string;
+  environment: DeploymentEnvironment;
+  status: DeploymentStatus;
+  deployedAt: string;
+  deployedBy: string;
+  commitSha?: string;
+  notes?: string;
+  metadata?: Record<string, unknown>;
+}
+
+interface ListResponse {
+  deployments: DeploymentRecord[];
+  environment: string;
+  count: number;
+}
+
+interface HistoryResponse {
+  appId: string;
+  environment: string;
+  history: DeploymentRecord[];
+  count: number;
+}
+
+interface RollbackResponse {
+  rolledBack: boolean;
+  previous: DeploymentRecord;
+  current: DeploymentRecord;
+}
+
+const ENVIRONMENTS: DeploymentEnvironment[] = ["production", "staging", "development"];
+
+const STATUS_STYLES: Record<DeploymentStatus, { color: string; label: string; icon: typeof CheckCircle2 }> = {
+  active: { color: "#10b981", label: "Active", icon: CheckCircle2 },
+  deploying: { color: "#8b7ac8", label: "Deploying", icon: Loader2 },
+  "rolled-back": { color: "#f59e0b", label: "Rolled Back", icon: RotateCcw },
+  failed: { color: "#ef4444", label: "Failed", icon: XCircle },
+  inactive: { color: "#64748b", label: "Inactive", icon: Clock },
+};
+
+function StatusBadge({ status }: { status: DeploymentStatus }) {
+  const cfg = STATUS_STYLES[status] ?? STATUS_STYLES.inactive;
+  const Icon = cfg.icon;
+  return (
+    <span
+      className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded"
+      style={{
+        color: cfg.color,
+        backgroundColor: `color-mix(in srgb, ${cfg.color} 12%, transparent)`,
+        border: `1px solid color-mix(in srgb, ${cfg.color} 25%, transparent)`,
+      }}
+    >
+      <Icon className={`w-3 h-3 ${status === "deploying" ? "animate-spin" : ""}`} />
+      {cfg.label}
+    </span>
+  );
+}
+
+function formatTime(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+export default function DeploymentsPage() {
+  const queryClient = useQueryClient();
+  const [environment, setEnvironment] = useState<DeploymentEnvironment>("production");
+  const [selectedAppId, setSelectedAppId] = useState<string | null>(null);
+  const [confirmRollback, setConfirmRollback] = useState<{ appId: string; from: string; to?: string } | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  const listQuery = useQuery<ListResponse>({
+    queryKey: ["deployments", "list", environment],
+    queryFn: () => apiFetch<ListResponse>(`/deployments?environment=${environment}`),
+    refetchInterval: 30_000,
+  });
+
+  const historyQuery = useQuery<HistoryResponse>({
+    queryKey: ["deployments", "history", selectedAppId, environment],
+    queryFn: () =>
+      apiFetch<HistoryResponse>(`/deployments/${selectedAppId}/history?environment=${environment}`),
+    enabled: !!selectedAppId,
+  });
+
+  const rollbackMutation = useMutation({
+    mutationFn: async (vars: { appId: string; version?: string }) => {
+      return apiFetch<RollbackResponse>(`/deployments/${vars.appId}/rollback`, {
+        method: "POST",
+        body: JSON.stringify({ environment, version: vars.version }),
+      });
+    },
+    onSuccess: (data, vars) => {
+      setError(null);
+      setSuccess(
+        `Rolled back ${vars.appId} from ${data.previous.version} to ${data.current.version}.`,
+      );
+      setConfirmRollback(null);
+      queryClient.invalidateQueries({ queryKey: ["deployments"] });
+    },
+    onError: (err: unknown) => {
+      setSuccess(null);
+      setError(err instanceof ApiError ? err.message : "Rollback failed");
+    },
+  });
+
+  const deployments = listQuery.data?.deployments ?? [];
+  const sortedDeployments = useMemo(
+    () => [...deployments].sort((a, b) => a.appName.localeCompare(b.appName)),
+    [deployments],
+  );
+
+  const selectedActive = sortedDeployments.find((d) => d.appId === selectedAppId);
+  const history = historyQuery.data?.history ?? [];
+  const sortedHistory = useMemo(
+    () => [...history].sort((a, b) => new Date(b.deployedAt).getTime() - new Date(a.deployedAt).getTime()),
+    [history],
+  );
+
+  return (
+    <div
+      className="min-h-full p-6 lg:p-8"
+      style={{ backgroundColor: "var(--color-bg-primary)", color: "var(--color-fg-primary)" }}
+    >
+      <div className="max-w-[1600px] mx-auto flex flex-col gap-6">
+        <header className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div
+              className="w-9 h-9 rounded-lg flex items-center justify-center"
+              style={{
+                backgroundColor: "color-mix(in srgb, #8b7ac8 14%, transparent)",
+                border: "1px solid color-mix(in srgb, #8b7ac8 30%, transparent)",
+              }}
+            >
+              <Rocket className="w-4 h-4" style={{ color: "#8b7ac8" }} />
+            </div>
+            <div>
+              <div className="text-xs font-mono uppercase tracking-[0.18em]" style={{ color: "var(--color-fg-muted)" }}>
+                Operator Console
+              </div>
+              <h1 className="text-xl font-bold tracking-tight">Deployments</h1>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 p-1 rounded-lg" style={{ backgroundColor: "var(--color-surface-base)", border: "1px solid var(--color-surface-border)" }}>
+              {ENVIRONMENTS.map((env) => (
+                <button
+                  key={env}
+                  onClick={() => {
+                    setEnvironment(env);
+                    setSelectedAppId(null);
+                  }}
+                  className="px-2.5 py-1 rounded-md text-[10px] font-mono uppercase tracking-wider transition-all"
+                  style={{
+                    backgroundColor: environment === env ? "color-mix(in srgb, #8b7ac8 18%, transparent)" : "transparent",
+                    color: environment === env ? "#cdb8f0" : "var(--color-fg-muted)",
+                  }}
+                >
+                  {env}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => {
+                listQuery.refetch();
+                if (selectedAppId) historyQuery.refetch();
+              }}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs"
+              style={{ backgroundColor: "var(--color-surface-base)", border: "1px solid var(--color-surface-border)", color: "var(--color-fg-muted)" }}
+            >
+              <RefreshCw className={`w-3 h-3 ${listQuery.isFetching ? "animate-spin" : ""}`} />
+              Refresh
+            </button>
+          </div>
+        </header>
+
+        {error && (
+          <div
+            className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs"
+            style={{ backgroundColor: "color-mix(in srgb, #ef4444 10%, transparent)", border: "1px solid color-mix(in srgb, #ef4444 25%, transparent)", color: "#fca5a5" }}
+          >
+            <AlertTriangle className="w-3.5 h-3.5" />
+            {error}
+            <button className="ml-auto opacity-70 hover:opacity-100" onClick={() => setError(null)}>×</button>
+          </div>
+        )}
+        {success && (
+          <div
+            className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs"
+            style={{ backgroundColor: "color-mix(in srgb, #10b981 10%, transparent)", border: "1px solid color-mix(in srgb, #10b981 25%, transparent)", color: "#86efac" }}
+          >
+            <CheckCircle2 className="w-3.5 h-3.5" />
+            {success}
+            <button className="ml-auto opacity-70 hover:opacity-100" onClick={() => setSuccess(null)}>×</button>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-6">
+          {/* Active deployments list */}
+          <section
+            className="rounded-xl overflow-hidden flex flex-col"
+            style={{ backgroundColor: "var(--color-surface-base)", border: "1px solid var(--color-surface-border)" }}
+          >
+            <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: "1px solid var(--color-surface-border)" }}>
+              <div className="flex items-center gap-2">
+                <Server className="w-3.5 h-3.5" style={{ color: "var(--color-fg-muted)" }} />
+                <h2 className="text-xs font-bold uppercase tracking-[0.15em]">Active Versions</h2>
+              </div>
+              <span className="text-[10px] font-mono" style={{ color: "var(--color-fg-muted)" }}>
+                {sortedDeployments.length} app{sortedDeployments.length === 1 ? "" : "s"}
+              </span>
+            </div>
+            <div className="flex-1">
+              {listQuery.isLoading ? (
+                <div className="flex items-center justify-center py-10 text-xs" style={{ color: "var(--color-fg-muted)" }}>
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" /> Loading deployments…
+                </div>
+              ) : listQuery.isError ? (
+                <div className="px-4 py-6 text-xs" style={{ color: "#fca5a5" }}>
+                  Failed to load deployments: {(listQuery.error as Error)?.message ?? "Unknown error"}
+                </div>
+              ) : sortedDeployments.length === 0 ? (
+                <div className="px-4 py-10 text-center text-xs" style={{ color: "var(--color-fg-muted)" }}>
+                  No active deployments registered for <span className="font-mono">{environment}</span>.
+                </div>
+              ) : (
+                <ul>
+                  {sortedDeployments.map((d) => {
+                    const active = selectedAppId === d.appId;
+                    return (
+                      <li key={d.appId}>
+                        <button
+                          onClick={() => setSelectedAppId(d.appId)}
+                          className="w-full text-left px-4 py-3 flex items-center gap-3 transition-all"
+                          style={{
+                            backgroundColor: active ? "color-mix(in srgb, #8b7ac8 10%, transparent)" : "transparent",
+                            borderBottom: "1px solid var(--color-surface-border)",
+                            borderLeft: active ? "3px solid #8b7ac8" : "3px solid transparent",
+                          }}
+                        >
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-sm font-semibold truncate">{d.appName}</span>
+                              <span className="text-[10px] font-mono" style={{ color: "var(--color-fg-muted)" }}>
+                                {d.appId}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-[11px] font-mono" style={{ color: "#cdb8f0" }}>{d.version}</span>
+                              <StatusBadge status={d.status} />
+                              <span className="text-[10px] font-mono" style={{ color: "var(--color-fg-muted)" }}>
+                                {formatTime(d.deployedAt)} · {d.deployedBy}
+                              </span>
+                            </div>
+                          </div>
+                          <ChevronRight
+                            className="w-3.5 h-3.5"
+                            style={{ color: active ? "#8b7ac8" : "var(--color-fg-muted)" }}
+                          />
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </div>
+          </section>
+
+          {/* History panel */}
+          <section
+            className="rounded-xl overflow-hidden flex flex-col"
+            style={{ backgroundColor: "var(--color-surface-base)", border: "1px solid var(--color-surface-border)" }}
+          >
+            <div className="flex items-center justify-between px-4 py-3 gap-3" style={{ borderBottom: "1px solid var(--color-surface-border)" }}>
+              <div className="flex items-center gap-2 min-w-0">
+                <History className="w-3.5 h-3.5" style={{ color: "var(--color-fg-muted)" }} />
+                <h2 className="text-xs font-bold uppercase tracking-[0.15em] truncate">
+                  {selectedActive ? `${selectedActive.appName} History` : "Deployment History"}
+                </h2>
+              </div>
+              {selectedActive && (
+                <button
+                  onClick={() =>
+                    setConfirmRollback({
+                      appId: selectedActive.appId,
+                      from: selectedActive.version,
+                    })
+                  }
+                  disabled={sortedHistory.length < 2 || rollbackMutation.isPending}
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[11px] font-mono uppercase tracking-wider disabled:opacity-40 disabled:cursor-not-allowed"
+                  style={{
+                    backgroundColor: "color-mix(in srgb, #f59e0b 14%, transparent)",
+                    border: "1px solid color-mix(in srgb, #f59e0b 35%, transparent)",
+                    color: "#fbbf24",
+                  }}
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  Roll back
+                </button>
+              )}
+            </div>
+            <div className="flex-1">
+              {!selectedAppId ? (
+                <div className="px-6 py-12 text-center text-xs" style={{ color: "var(--color-fg-muted)" }}>
+                  Select an app on the left to view its deployment history.
+                </div>
+              ) : historyQuery.isLoading ? (
+                <div className="flex items-center justify-center py-10 text-xs" style={{ color: "var(--color-fg-muted)" }}>
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" /> Loading history…
+                </div>
+              ) : historyQuery.isError ? (
+                <div className="px-4 py-6 text-xs" style={{ color: "#fca5a5" }}>
+                  Failed to load history: {(historyQuery.error as Error)?.message ?? "Unknown error"}
+                </div>
+              ) : sortedHistory.length === 0 ? (
+                <div className="px-4 py-10 text-center text-xs" style={{ color: "var(--color-fg-muted)" }}>
+                  No deployment records for this app in <span className="font-mono">{environment}</span>.
+                </div>
+              ) : (
+                <ol className="px-4 py-3 flex flex-col gap-2">
+                  {sortedHistory.map((entry, idx) => {
+                    const isCurrentActive = entry.status === "active";
+                    const canRollbackTo = !isCurrentActive && entry.status !== "failed";
+                    return (
+                      <li
+                        key={`${entry.version}-${entry.deployedAt}-${idx}`}
+                        className="rounded-lg p-3 flex items-start gap-3"
+                        style={{
+                          backgroundColor: isCurrentActive
+                            ? "color-mix(in srgb, #10b981 8%, transparent)"
+                            : "var(--color-bg-elevated)",
+                          border: isCurrentActive
+                            ? "1px solid color-mix(in srgb, #10b981 30%, transparent)"
+                            : "1px solid var(--color-surface-border)",
+                        }}
+                      >
+                        <div
+                          className="w-7 h-7 rounded-md flex items-center justify-center shrink-0"
+                          style={{
+                            backgroundColor: "color-mix(in srgb, #8b7ac8 14%, transparent)",
+                            border: "1px solid color-mix(in srgb, #8b7ac8 25%, transparent)",
+                          }}
+                        >
+                          <GitCommit className="w-3.5 h-3.5" style={{ color: "#cdb8f0" }} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-wrap items-center gap-2 mb-1">
+                            <span className="text-sm font-mono font-semibold" style={{ color: "var(--color-fg-primary)" }}>
+                              {entry.version}
+                            </span>
+                            <StatusBadge status={entry.status} />
+                            {entry.commitSha && (
+                              <span
+                                className="text-[10px] font-mono px-1.5 py-0.5 rounded"
+                                style={{
+                                  backgroundColor: "var(--color-bg-elevated)",
+                                  border: "1px solid var(--color-surface-border)",
+                                  color: "var(--color-fg-muted)",
+                                }}
+                              >
+                                {entry.commitSha.slice(0, 8)}
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-[11px] font-mono mb-1" style={{ color: "var(--color-fg-muted)" }}>
+                            {formatTime(entry.deployedAt)} · {entry.deployedBy}
+                          </div>
+                          {entry.notes && (
+                            <div className="text-xs leading-relaxed" style={{ color: "var(--color-fg-secondary, var(--color-fg-muted))" }}>
+                              {entry.notes}
+                            </div>
+                          )}
+                        </div>
+                        {canRollbackTo && (
+                          <button
+                            onClick={() =>
+                              setConfirmRollback({
+                                appId: entry.appId,
+                                from: selectedActive?.version ?? "current",
+                                to: entry.version,
+                              })
+                            }
+                            disabled={rollbackMutation.isPending}
+                            className="text-[10px] font-mono uppercase tracking-wider px-2 py-1 rounded-md shrink-0 disabled:opacity-40"
+                            style={{
+                              backgroundColor: "color-mix(in srgb, #f59e0b 12%, transparent)",
+                              border: "1px solid color-mix(in srgb, #f59e0b 30%, transparent)",
+                              color: "#fbbf24",
+                            }}
+                          >
+                            Roll back to this
+                          </button>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ol>
+              )}
+            </div>
+          </section>
+        </div>
+      </div>
+
+      {/* Confirm rollback modal */}
+      {confirmRollback && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+          style={{ backgroundColor: "rgba(8,12,20,0.72)" }}
+          onClick={() => !rollbackMutation.isPending && setConfirmRollback(null)}
+        >
+          <div
+            className="max-w-md w-full rounded-xl p-5"
+            style={{ backgroundColor: "var(--color-bg-elevated)", border: "1px solid var(--color-surface-border)" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-3 mb-3">
+              <div
+                className="w-9 h-9 rounded-lg flex items-center justify-center"
+                style={{
+                  backgroundColor: "color-mix(in srgb, #f59e0b 14%, transparent)",
+                  border: "1px solid color-mix(in srgb, #f59e0b 35%, transparent)",
+                }}
+              >
+                <AlertTriangle className="w-4 h-4" style={{ color: "#fbbf24" }} />
+              </div>
+              <div>
+                <div className="text-xs font-mono uppercase tracking-wider" style={{ color: "var(--color-fg-muted)" }}>
+                  Confirm Rollback
+                </div>
+                <h3 className="text-base font-bold">
+                  {confirmRollback.appId} · {environment}
+                </h3>
+              </div>
+            </div>
+            <p className="text-sm leading-relaxed mb-4" style={{ color: "var(--color-fg-muted)" }}>
+              This will roll <span className="font-mono" style={{ color: "var(--color-fg-primary)" }}>{confirmRollback.appId}</span> back from{" "}
+              <span className="font-mono" style={{ color: "#fbbf24" }}>{confirmRollback.from}</span> to{" "}
+              <span className="font-mono" style={{ color: "#86efac" }}>
+                {confirmRollback.to ?? "the previous version"}
+              </span>{" "}
+              in the <span className="font-mono">{environment}</span> environment. The current version will be marked rolled-back.
+            </p>
+            <div className="flex items-center justify-end gap-2">
+              <button
+                disabled={rollbackMutation.isPending}
+                onClick={() => setConfirmRollback(null)}
+                className="px-3 py-1.5 rounded-md text-xs"
+                style={{
+                  backgroundColor: "transparent",
+                  border: "1px solid var(--color-surface-border)",
+                  color: "var(--color-fg-muted)",
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                disabled={rollbackMutation.isPending}
+                onClick={() =>
+                  rollbackMutation.mutate({ appId: confirmRollback.appId, version: confirmRollback.to })
+                }
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold"
+                style={{
+                  backgroundColor: "color-mix(in srgb, #f59e0b 22%, transparent)",
+                  border: "1px solid color-mix(in srgb, #f59e0b 45%, transparent)",
+                  color: "#fbbf24",
+                }}
+              >
+                {rollbackMutation.isPending ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <RotateCcw className="w-3.5 h-3.5" />
+                )}
+                Confirm rollback
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

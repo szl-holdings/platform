@@ -56,6 +56,7 @@ const MarketingVerifyEmail = lazy(() => import("./pages/marketing/verify-email")
 
 const AtlasRuntimePage = lazy(() => import("./pages/atlas-runtime").then(m => ({ default: m.AtlasRuntimePage })));
 const WhatChangedPage = lazy(() => import("./operations/pages/what-changed"));
+const DeploymentsPage = lazy(() => import("./operations/pages/deployments"));
 const ExecutiveCommand = lazy(() => import("@lyte/pages/executive-command"));
 const LytePulse = lazy(() => import("@lyte/pages/pulse"));
 const PrismDashboard = lazy(() => import("@lyte/pages/prism-dashboard"));
@@ -216,6 +217,7 @@ function AppShell() {
               <Route path="/operations/prism/motion" component={() => <ActionQueue />} />
               <Route path="/operations/blocker-board" component={() => <BlockerBoard />} />
               <Route path="/operations/what-changed" component={() => <WhatChangedPage />} />
+              <Route path="/operations/deployments" component={() => <DeploymentsPage />} />
               <Route path="/lyte/what-changed" component={() => <WhatChangedPage />} />
               <Route path="/operations/digest" component={() => <DigestCenter />} />
               <Route path="/operations/trust-audit" component={() => <TrustAudit />} />
