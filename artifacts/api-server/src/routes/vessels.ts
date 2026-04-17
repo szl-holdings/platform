@@ -18,6 +18,7 @@ import {
   insertVesselSchema,
   insertVesselRouteSchema,
   insertVesselAlertRuleSchema,
+  insertVesselAlertSchema,
   insertVesselSimulationSchema,
   insertVesselsExceptionEventSchema,
   insertVesselCommandWorkflowSchema,
@@ -260,6 +261,27 @@ router.get("/vessels/alerts/all", authMiddleware(), async (_req, res) => {
     sendSuccess(res, alerts);
   } catch (err) {
     handleRouteError(res, err, "Failed to list alerts");
+  }
+});
+
+router.post("/vessels/alerts", authMiddleware(), requireRole("ops", "exec", "admin", "editor"), async (req, res) => {
+  try {
+    const data = insertVesselAlertSchema.parse(req.body);
+    const [alert] = await db.insert(vesselsAlertsTable).values(data).returning();
+    sendCreated(res, alert);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to create alert");
+  }
+});
+
+router.delete("/vessels/alerts/:id", authMiddleware(), requireRole("ops", "exec", "admin"), async (req, res) => {
+  try {
+    const id = parseIdParam(req.params.id);
+    const [alert] = await db.delete(vesselsAlertsTable).where(eq(vesselsAlertsTable.id, id)).returning();
+    if (!alert) { sendNotFound(res, "Alert"); return; }
+    sendNoContent(res);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to delete alert");
   }
 });
 

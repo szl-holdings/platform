@@ -125,6 +125,7 @@ function buildApp() {
 
 const cleanupVentureIds: number[] = [];
 const cleanupFleetIds: number[] = [];
+const cleanupAlertIds: number[] = [];
 
 // ── Domain: Vessels ───────────────────────────────────────────────────────────
 describe("DB Integration — Vessels domain", () => {
@@ -178,9 +179,38 @@ describe("DB Integration — Vessels domain", () => {
     cleanupFleetIds.push(res.body.id as number);
   });
 
+  it("POST /vessels/alerts rejects missing required fields with 400", async () => {
+    const res = await request(app)
+      .post("/vessels/alerts")
+      .send({ severity: "low" });
+    expect(res.status).toBe(400);
+    expect(res.body).toHaveProperty("error");
+  });
+
+  it("POST /vessels/alerts creates a real DB record and returns 201", async () => {
+    const res = await request(app)
+      .post("/vessels/alerts")
+      .send({
+        title: `IT-Alert-${Date.now()}`,
+        message: "Integration test alert — please ignore",
+        severity: "low",
+      });
+    expect(res.status).toBe(201);
+    expect(res.body).toHaveProperty("id");
+    expect(typeof res.body.id).toBe("number");
+    expect(res.body.severity).toBe("low");
+    cleanupAlertIds.push(res.body.id as number);
+  });
+
   afterAll(async () => {
     for (const id of cleanupFleetIds) {
       await request(app).delete(`/vessels/fleets/${id}`);
+    }
+    if (cleanupAlertIds.length > 0) {
+      const { pool } = await import("@szl-holdings/db");
+      for (const id of cleanupAlertIds) {
+        await pool.query("DELETE FROM vessels_alerts WHERE id = $1", [id]);
+      }
     }
   });
 });
@@ -373,6 +403,7 @@ describe("DB Integration — Lyte domain", () => {
 describe("DB Integration — Aegis / Firestorm domain", () => {
   let app: express.Express;
   const cleanupScenarioIds: number[] = [];
+  const cleanupIncidentIds: number[] = [];
 
   beforeAll(async () => {
     app = buildApp();
@@ -417,9 +448,39 @@ describe("DB Integration — Aegis / Firestorm domain", () => {
     expect(res.body).toHaveProperty("error");
   });
 
+  it("POST /firestorm/incidents rejects missing required title with 400", async () => {
+    const res = await request(app)
+      .post("/firestorm/incidents")
+      .send({ severity: "high", description: "No title provided" });
+    expect(res.status).toBe(400);
+    expect(res.body).toHaveProperty("error");
+  });
+
+  it("POST /firestorm/incidents creates a real DB record and returns 201", async () => {
+    const res = await request(app)
+      .post("/firestorm/incidents")
+      .send({
+        title: `IT-Incident-${Date.now()}`,
+        severity: "medium",
+        description: "Integration test incident — please ignore",
+      });
+    expect(res.status).toBe(201);
+    expect(res.body).toHaveProperty("id");
+    expect(typeof res.body.id).toBe("number");
+    expect(res.body.severity).toBe("medium");
+    expect(res.body.status).toBe("detection");
+    cleanupIncidentIds.push(res.body.id as number);
+  });
+
   afterAll(async () => {
     for (const id of cleanupScenarioIds) {
       await request(app).delete(`/firestorm/scenarios/${id}`);
+    }
+    if (cleanupIncidentIds.length > 0) {
+      const { pool } = await import("@szl-holdings/db");
+      for (const id of cleanupIncidentIds) {
+        await pool.query("DELETE FROM firestorm_incidents WHERE id = $1", [id]);
+      }
     }
   });
 });
