@@ -77,6 +77,9 @@ const AlloyAgentHandoffs = lazy(() => import("@lyte/pages/alloy-agent-handoffs")
 const AlloyTrustReceipts = lazy(() => import("@lyte/pages/alloy-trust-receipts"));
 const AlloyIntegrationHealth = lazy(() => import("@lyte/pages/alloy-integration-health"));
 const AlloyGraphCompiler = lazy(() => import("@lyte/pages/alloy-graph-compiler"));
+const CognitiveCommandCenter = lazy(() => import("./pages/cognitive/index"));
+const SelfModelConsole = lazy(() => import("./pages/cognitive/self-model"));
+const WorldModelExplorer = lazy(() => import("./pages/cognitive/world-model"));
 const ReplayLab = lazy(() => import("./pages/replay-lab"));
 const EvalLab = lazy(() => import("./pages/eval-lab"));
 const TrustConsole = lazy(() => import("./pages/trust-console"));
@@ -206,6 +209,9 @@ function AppShell() {
               <Route path="/strategy/signal-chains" component={() => <SignalChainsPage />} />
               <Route path="/strategy/enterprise-state" component={() => <EnterpriseStatePage />} />
               <Route path="/strategy/atlas-runtime" component={() => <AtlasRuntimePage />} />
+              <Route path="/cognitive" component={() => <CognitiveCommandCenter />} />
+              <Route path="/cognitive/self-model" component={() => <SelfModelConsole />} />
+              <Route path="/cognitive/world-model" component={() => <WorldModelExplorer />} />
               <Route path="/command/atlas-runtime" component={() => <AtlasRuntimePage />} />
 
               <Route path="/operations" component={() => <ExecutiveCommand />} />

@@ -8,7 +8,7 @@ import {
   TrendingUp, DollarSign, RotateCcw, Calculator, Bot, Monitor, Building,
   BellOff, Code, Target, Phone, Calendar, Layers, Map, Crown, ChevronRight,
   Menu, X, BarChart3, Clapperboard, Power, Bell, Lock, GitCommit, Sigma,
-  FlaskConical, ShieldCheck
+  FlaskConical, ShieldCheck, Globe
 } from "lucide-react";
 import { MultiplayerSessionBanner, EcosystemNav, EnvironmentLabel, useDemoMode, MODE_LABELS, MODE_COLORS, MODE_ICONS } from "@szl-holdings/shared-ui";
 
@@ -49,6 +49,14 @@ const STRATEGY_NAV: NavGroup[] = [
       { href: "/strategy/simulation", label: "Simulation", icon: Activity },
       { href: "/strategy/correlation-map", label: "Outcome Graph", icon: Network },
       { href: "/strategy/signal-chains", label: "Signal Chains", icon: GitCommit },
+    ],
+  },
+  {
+    section: "Cognitive Consoles",
+    items: [
+      { href: "/cognitive", label: "Command Center", icon: Brain },
+      { href: "/cognitive/self-model", label: "Self Model", icon: Cpu },
+      { href: "/cognitive/world-model", label: "World Model", icon: Globe },
     ],
   },
 ];
@@ -373,9 +381,10 @@ export function UnifiedLayout({ children, mode, onModeChange }: {
             <div key={group.section}>
               <SectionHeader label={group.section} />
               {group.items.map((item) => {
-                const isActive = item.href === "/strategy" || item.href === "/operations" || item.href === "/infrastructure"
+                const exactOnlyRoutes = ["/strategy", "/operations", "/infrastructure", "/cognitive"];
+                const isActive = exactOnlyRoutes.includes(item.href)
                   ? location === item.href || (location === "/" && item.href === "/strategy")
-                  : location.startsWith(item.href) && item.href !== "/operations" && item.href !== "/strategy" && item.href !== "/infrastructure"
+                  : location.startsWith(item.href) && !exactOnlyRoutes.includes(item.href)
                     ? true
                     : location === item.href;
                 const badge = item.href === "/operations/policy-approvals"
