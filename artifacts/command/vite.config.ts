@@ -16,7 +16,7 @@ const SHARED_PROXY_PORT = 9090;
 const API_SERVER_PORT = 8080;
 
 const PROXY_ROUTES = [
-  { prefix: "/aegis/", port: 23933 },
+  { prefix: "/aegis/", port: 3000 },
   { prefix: "/firestorm/", port: 23931 },
   { prefix: "/carlota-jo/", port: 3101 },
   { prefix: "/command/", port: 3102 },
