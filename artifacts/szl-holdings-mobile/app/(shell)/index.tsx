@@ -73,12 +73,10 @@ function getApiBase(): string {
   return domain ? `https://${domain}` : "";
 }
 
-async function fetchCommandFeed(token: string | null): Promise<{
+async function fetchCommandFeed(headers: Record<string, string>): Promise<{
   signals: CommandSignal[];
   summaries: DomainSummary[];
 }> {
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
-  if (token) headers["Authorization"] = `Bearer ${token}`;
   try {
     const res = await fetch(`${getApiBase()}/api/cortex/command-feed`, { headers });
     if (!res.ok) throw new Error("feed unavailable");
@@ -172,7 +170,7 @@ function DomainCard({
 export default function CommandFeedScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const { user } = useAuth();
+  const { user, buildHeaders, isAuthenticated } = useAuth();
   const { setActiveWorkspace, setBadge } = useWorkspace();
   const apiStatus = useApiStatus();
   const [voiceVisible, setVoiceVisible] = useState(false);
@@ -182,8 +180,9 @@ export default function CommandFeedScreen() {
   }, [setActiveWorkspace]);
 
   const { data, isLoading, refetch, isRefetching } = useQuery({
-    queryKey: ["cortex-command-feed"],
-    queryFn: () => fetchCommandFeed(null),
+    queryKey: ["cortex-command-feed", isAuthenticated],
+    queryFn: () => fetchCommandFeed(buildHeaders()),
+    enabled: isAuthenticated,
     staleTime: 30000,
     refetchInterval: 60000,
   });

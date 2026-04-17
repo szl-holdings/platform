@@ -159,7 +159,7 @@ router.get(
 
 router.get(
   "/cortex/command-feed",
-  authMiddleware({ required: false }),
+  authMiddleware({ required: true }),
   perUserApiSlidingLimiter,
   async (_req, res) => {
     try {
