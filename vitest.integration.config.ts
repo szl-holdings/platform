@@ -45,6 +45,7 @@ export default defineConfig({
       "tests/api/openapi-contract.test.ts",
       "tests/api/db-integration.test.ts",
       "tests/api/cross-cutting-routes-integration.test.ts",
+      "tests/api/graph-neighbors-integration.test.ts",
       "tests/api/graphql-schema.test.ts",
       "tests/api/server-live.test.ts",
       "tests/api/stress.test.ts",
