@@ -1,9 +1,9 @@
 {
   "name": "@workspace/memory-fabric",
-  "version": "0.0.0",
+  "version": "2.0.0",
   "private": false,
   "type": "module",
-  "description": "Memory Fabric — tiered memory for session, workflow, entity, artifact, executive, domain, operator-feedback, and long-term scopes. Provenance, freshness, confidence, retention, and sensitivity tracking for the SZL Agentic Cognitive Operating Intelligence Platform.",
+  "description": "Memory Fabric — 10-type cognitive memory for working, session, episodic, semantic, workflow, entity, artifact, operator-feedback, executive, and skill scopes. Provenance, freshness, confidence, retention enforcement, episodic summarization, lesson distillation, and tier-based sensitivity redaction.",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -20,6 +20,10 @@
     "./retention": {
       "types": "./dist/retention.d.ts",
       "import": "./src/retention.ts"
+    },
+    "./behaviors": {
+      "types": "./dist/behaviors.d.ts",
+      "import": "./src/behaviors.ts"
     }
   },
   "dependencies": {

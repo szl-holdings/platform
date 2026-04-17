@@ -11,40 +11,119 @@ import {
 } from "../lib/api-response";
 import { logger } from "../lib/logger";
 import { InMemoryStore } from "@workspace/memory-fabric/store";
-import { applyRetentionDefaults, isExpired, checkSensitivity } from "@workspace/memory-fabric/retention";
-import { MemoryEntrySchema } from "@workspace/memory-fabric/types";
-import type { MemoryEntry } from "@workspace/memory-fabric/types";
+import {
+  applyRetentionDefaults,
+  redactEntry,
+} from "@workspace/memory-fabric/retention";
+import {
+  summarizeEpisodes,
+  distillLessons,
+  enforceRetention,
+} from "@workspace/memory-fabric/behaviors";
+import { MemoryEntrySchema, MemoryTypeSchema } from "@workspace/memory-fabric/types";
+import type { MemoryEntry, MemoryType, SensitivityLevel } from "@workspace/memory-fabric/types";
 
 const router: IRouter = Router();
 
 const memoryStore = new InMemoryStore();
 
+const ALL_MEMORY_TYPES: MemoryType[] = [
+  "working", "session", "episodic", "semantic", "workflow",
+  "entity", "artifact", "operator-feedback", "executive", "skill",
+];
+
+function validateTier(tier: string | undefined): MemoryType | undefined | "invalid" {
+  if (!tier) return undefined;
+  const parsed = MemoryTypeSchema.safeParse(tier);
+  return parsed.success ? parsed.data : "invalid";
+}
+
+function getRequesterSensitivity(req: Request): SensitivityLevel {
+  const role = req.user?.role ?? "user";
+  if (role === "super_admin" || role === "admin") return "restricted";
+  if (role === "analyst") return "confidential";
+  if (role === "operator") return "internal";
+  return "public";
+}
+
 router.get("/memory", authMiddleware(), async (req: Request, res: Response) => {
   try {
-    const { tier, key, scopeId, tags, includeStale } = req.query as {
+    const { tier, key, scopeId, tags, includeStale, minConfidence, search, sortBy } = req.query as {
       tier?: string;
       key?: string;
       scopeId?: string;
       tags?: string;
       includeStale?: string;
+      minConfidence?: string;
+      search?: string;
+      sortBy?: string;
     };
     const { limit, offset } = parsePagination(req.query as Record<string, unknown>);
 
+    const validatedTier = validateTier(tier);
+    if (validatedTier === "invalid") {
+      sendBadRequest(res, `Invalid tier '${tier}'. Must be one of: ${ALL_MEMORY_TYPES.join(", ")}`);
+      return;
+    }
+
     const tagList = tags ? tags.split(",").filter(Boolean) : undefined;
+    const requesterSensitivity = getRequesterSensitivity(req);
 
     const entries = memoryStore.list({
-      tier: tier as MemoryEntry["tier"] | undefined,
+      tier: validatedTier,
       key,
       scopeId,
       tags: tagList,
       includeStale: includeStale === "true",
+      minConfidence: minConfidence ? parseFloat(minConfidence) : undefined,
+      search,
+      sortBy: sortBy as "confidence" | "freshness" | "default" | undefined,
     });
 
-    const paged = entries.slice(offset, offset + limit);
+    const redacted = entries
+      .map((e) => redactEntry(e, requesterSensitivity))
+      .filter((e): e is MemoryEntry => e !== null);
 
-    sendSuccess(res, { data: paged, total: entries.length, limit, offset });
+    const paged = redacted.slice(offset, offset + limit);
+
+    sendSuccess(res, { data: paged, total: redacted.length, limit, offset });
   } catch (err) {
     handleRouteError(res, err, "memory:list");
+  }
+});
+
+router.get("/memory/search", authMiddleware(), async (req: Request, res: Response) => {
+  try {
+    const { q, tier } = req.query as { q?: string; tier?: string };
+    if (!q) {
+      sendBadRequest(res, "Query parameter `q` is required");
+      return;
+    }
+    const validatedTier = validateTier(tier);
+    if (validatedTier === "invalid") {
+      sendBadRequest(res, `Invalid tier '${tier}'. Must be one of: ${ALL_MEMORY_TYPES.join(", ")}`);
+      return;
+    }
+    const requesterSensitivity = getRequesterSensitivity(req);
+    const results = memoryStore.search(q, validatedTier);
+    const redacted = results
+      .map((e) => redactEntry(e, requesterSensitivity))
+      .filter((e): e is MemoryEntry => e !== null);
+    sendSuccess(res, { data: redacted, total: redacted.length });
+  } catch (err) {
+    handleRouteError(res, err, "memory:search");
+  }
+});
+
+router.get("/memory/stats/summary", authMiddleware(), async (_req: Request, res: Response) => {
+  try {
+    const stats: Record<string, number> = {};
+    for (const type of ALL_MEMORY_TYPES) {
+      stats[type] = memoryStore.count(type);
+    }
+    sendSuccess(res, { total: memoryStore.count(), byType: stats });
+  } catch (err) {
+    handleRouteError(res, err, "memory:stats");
   }
 });
 
@@ -56,7 +135,13 @@ router.get("/memory/:id", authMiddleware(), async (req: Request, res: Response) 
       sendNotFound(res, "MemoryEntry");
       return;
     }
-    sendSuccess(res, entry);
+    const requesterSensitivity = getRequesterSensitivity(req);
+    const redacted = redactEntry(entry, requesterSensitivity);
+    if (!redacted) {
+      sendNotFound(res, "MemoryEntry");
+      return;
+    }
+    sendSuccess(res, redacted);
   } catch (err) {
     handleRouteError(res, err, "memory:get");
   }
@@ -69,8 +154,10 @@ router.post("/memory", authMiddleware(), async (req: Request, res: Response) => 
     const entryInput = {
       id: body.id ?? randomUUID(),
       tier: body.tier,
+      memoryType: body.memoryType ?? body.tier,
       key: body.key,
       value: body.value,
+      summary: body.summary,
       provenance: {
         source: body.provenance?.source ?? "api",
         sourceId: body.provenance?.sourceId,
@@ -97,7 +184,10 @@ router.post("/memory", authMiddleware(), async (req: Request, res: Response) => 
     const withRetention = applyRetentionDefaults(parsed);
     memoryStore.put(withRetention);
 
-    logger.info({ id: withRetention.id, tier: withRetention.tier, key: withRetention.key }, "Memory record written");
+    logger.info(
+      { id: withRetention.id, tier: withRetention.tier, key: withRetention.key },
+      "Memory record written"
+    );
 
     sendCreated(res, withRetention);
   } catch (err) {
@@ -139,45 +229,98 @@ router.put("/memory/:id", authMiddleware(), async (req: Request, res: Response) 
   }
 });
 
-router.delete("/memory/:id", authMiddleware(), requireRole("admin", "super_admin"), async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params as { id: string };
-    const deleted = memoryStore.delete(id);
-    if (!deleted) {
-      sendNotFound(res, "MemoryEntry");
-      return;
+router.delete(
+  "/memory/:id",
+  authMiddleware(),
+  requireRole("admin", "super_admin"),
+  async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params as { id: string };
+      const deleted = memoryStore.delete(id);
+      if (!deleted) {
+        sendNotFound(res, "MemoryEntry");
+        return;
+      }
+      logger.info({ id }, "Memory record deleted");
+      sendSuccess(res, { deleted: true, id });
+    } catch (err) {
+      handleRouteError(res, err, "memory:delete");
     }
-    logger.info({ id }, "Memory record deleted");
-    sendSuccess(res, { deleted: true, id });
-  } catch (err) {
-    handleRouteError(res, err, "memory:delete");
   }
-});
+);
 
-router.post("/memory/evict-expired", authMiddleware(), requireRole("admin", "super_admin"), async (_req: Request, res: Response) => {
-  try {
-    const count = memoryStore.evictExpired();
-    logger.info({ count }, "Memory eviction completed");
-    sendSuccess(res, { evicted: count });
-  } catch (err) {
-    handleRouteError(res, err, "memory:evict");
-  }
-});
-
-router.get("/memory/stats/summary", authMiddleware(), async (_req: Request, res: Response) => {
-  try {
-    const tiers = [
-      "session", "workflow", "entity", "artifact",
-      "executive", "domain", "operator-feedback", "long-term",
-    ] as const;
-    const stats: Record<string, number> = {};
-    for (const tier of tiers) {
-      stats[tier] = memoryStore.count(tier);
+router.post(
+  "/memory/evict-expired",
+  authMiddleware(),
+  requireRole("admin", "super_admin"),
+  async (_req: Request, res: Response) => {
+    try {
+      const count = memoryStore.evictExpired();
+      logger.info({ count }, "Memory eviction completed");
+      sendSuccess(res, { evicted: count });
+    } catch (err) {
+      handleRouteError(res, err, "memory:evict");
     }
-    sendSuccess(res, { total: memoryStore.count(), byTier: stats });
-  } catch (err) {
-    handleRouteError(res, err, "memory:stats");
   }
-});
+);
+
+router.post(
+  "/memory/behaviors/summarize-episodes",
+  authMiddleware(),
+  requireRole("admin", "super_admin"),
+  async (req: Request, res: Response) => {
+    try {
+      const { scopeId, minEpisodes } = req.body as { scopeId: string; minEpisodes?: number };
+      if (!scopeId) {
+        sendBadRequest(res, "scopeId is required");
+        return;
+      }
+      const result = summarizeEpisodes(memoryStore, scopeId, { minEpisodes });
+      if (!result) {
+        sendSuccess(res, { summarized: false, reason: "Not enough episodes to summarize" });
+        return;
+      }
+      logger.info({ scopeId, collapsedCount: result.collapsedIds.length }, "Episodes summarized");
+      sendSuccess(res, { summarized: true, summary: result.summary, collapsedIds: result.collapsedIds });
+    } catch (err) {
+      handleRouteError(res, err, "memory:summarize-episodes");
+    }
+  }
+);
+
+router.post(
+  "/memory/behaviors/distill-lessons",
+  authMiddleware(),
+  requireRole("admin", "super_admin"),
+  async (req: Request, res: Response) => {
+    try {
+      const { minFeedback } = req.body as { minFeedback?: number };
+      const result = distillLessons(memoryStore, { minFeedback });
+      if (!result) {
+        sendSuccess(res, { distilled: false, reason: "Not enough high-quality feedback to distill" });
+        return;
+      }
+      logger.info({ sourceCount: result.sourceIds.length }, "Lessons distilled");
+      sendSuccess(res, { distilled: true, lesson: result.lesson, sourceIds: result.sourceIds });
+    } catch (err) {
+      handleRouteError(res, err, "memory:distill-lessons");
+    }
+  }
+);
+
+router.post(
+  "/memory/behaviors/enforce-retention",
+  authMiddleware(),
+  requireRole("admin", "super_admin"),
+  async (_req: Request, res: Response) => {
+    try {
+      const result = enforceRetention(memoryStore);
+      logger.info(result, "Retention enforced");
+      sendSuccess(res, result);
+    } catch (err) {
+      handleRouteError(res, err, "memory:enforce-retention");
+    }
+  }
+);
 
 export default router;

@@ -1,22 +1,29 @@
-import type { MemoryEntry, MemoryTier } from "./types.js";
+import type { MemoryEntry, MemoryType } from "./types.js";
+
+export type MemoryTier = MemoryType;
 
 export interface MemoryStoreQuery {
-  tier?: MemoryTier;
+  tier?: MemoryType;
   key?: string;
   scopeId?: string;
   tags?: string[];
   includeStale?: boolean;
+  minConfidence?: number;
+  sensitivity?: MemoryEntry["sensitivity"];
+  search?: string;
+  sortBy?: "confidence" | "freshness" | "default";
 }
 
 export interface MemoryStore {
   put(entry: MemoryEntry): void;
   get(id: string): MemoryEntry | undefined;
-  getByKey(tier: MemoryTier, key: string, scopeId?: string): MemoryEntry | undefined;
+  getByKey(tier: MemoryType, key: string, scopeId?: string): MemoryEntry | undefined;
   list(query?: MemoryStoreQuery): MemoryEntry[];
+  search(query: string, tier?: MemoryType): MemoryEntry[];
   delete(id: string): boolean;
   evictExpired(): number;
-  count(tier?: MemoryTier): number;
-  clear(tier?: MemoryTier): void;
+  count(tier?: MemoryType): number;
+  clear(tier?: MemoryType): void;
 }
 
 export class InMemoryStore implements MemoryStore {
@@ -25,6 +32,7 @@ export class InMemoryStore implements MemoryStore {
   put(entry: MemoryEntry): void {
     const updated: MemoryEntry = {
       ...entry,
+      memoryType: entry.memoryType ?? entry.tier,
       freshness: {
         ...entry.freshness,
         lastUpdatedAt: new Date().toISOString(),
@@ -46,7 +54,7 @@ export class InMemoryStore implements MemoryStore {
     return undefined;
   }
 
-  getByKey(tier: MemoryTier, key: string, scopeId?: string): MemoryEntry | undefined {
+  getByKey(tier: MemoryType, key: string, scopeId?: string): MemoryEntry | undefined {
     for (const entry of this.entries.values()) {
       if (entry.tier === tier && entry.key === key) {
         if (scopeId === undefined || entry.scopeId === scopeId) return entry;
@@ -67,8 +75,34 @@ export class InMemoryStore implements MemoryStore {
     if (!query?.includeStale) {
       results = results.filter((e) => !e.freshness.isStale);
     }
+    if (query?.minConfidence !== undefined) {
+      results = results.filter((e) => e.confidence >= query.minConfidence!);
+    }
+    if (query?.search) {
+      const needle = query.search.toLowerCase();
+      results = results.filter((e) =>
+        e.key.toLowerCase().includes(needle) ||
+        (typeof e.value === "string" && e.value.toLowerCase().includes(needle)) ||
+        (e.summary && e.summary.toLowerCase().includes(needle)) ||
+        e.tags.some((t) => t.toLowerCase().includes(needle))
+      );
+    }
+
+    if (query?.sortBy === "confidence") {
+      results.sort((a, b) => b.confidence - a.confidence);
+    } else if (query?.sortBy === "freshness") {
+      results.sort(
+        (a, b) =>
+          new Date(b.freshness.lastUpdatedAt).getTime() -
+          new Date(a.freshness.lastUpdatedAt).getTime()
+      );
+    }
 
     return results;
+  }
+
+  search(query: string, tier?: MemoryType): MemoryEntry[] {
+    return this.list({ search: query, tier, includeStale: false, sortBy: "confidence" });
   }
 
   delete(id: string): boolean {
@@ -80,14 +114,16 @@ export class InMemoryStore implements MemoryStore {
     let count = 0;
     for (const [id, entry] of this.entries) {
       if (entry.retention.expiresAt && new Date(entry.retention.expiresAt) < now) {
-        this.entries.delete(id);
-        count++;
+        if (!entry.retention.pinned) {
+          this.entries.delete(id);
+          count++;
+        }
       }
     }
     return count;
   }
 
-  count(tier?: MemoryTier): number {
+  count(tier?: MemoryType): number {
     if (!tier) return this.entries.size;
     let n = 0;
     for (const e of this.entries.values()) {
@@ -96,7 +132,7 @@ export class InMemoryStore implements MemoryStore {
     return n;
   }
 
-  clear(tier?: MemoryTier): void {
+  clear(tier?: MemoryType): void {
     if (!tier) {
       this.entries.clear();
       return;

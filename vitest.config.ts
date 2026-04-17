@@ -53,6 +53,7 @@ export default defineConfig({
       { find: "@workspace/memory-fabric/types", replacement: resolve(__dirname, "packages/memory-fabric/src/types.ts") },
       { find: "@workspace/memory-fabric/store", replacement: resolve(__dirname, "packages/memory-fabric/src/store.ts") },
       { find: "@workspace/memory-fabric/retention", replacement: resolve(__dirname, "packages/memory-fabric/src/retention.ts") },
+      { find: "@workspace/memory-fabric/behaviors", replacement: resolve(__dirname, "packages/memory-fabric/src/behaviors.ts") },
       { find: "@workspace/memory-fabric", replacement: resolve(__dirname, "packages/memory-fabric/src/index.ts") },
       { find: "@workspace/eval-os/types", replacement: resolve(__dirname, "packages/eval-os/src/types.ts") },
       { find: "@workspace/eval-os/dataset", replacement: resolve(__dirname, "packages/eval-os/src/dataset.ts") },

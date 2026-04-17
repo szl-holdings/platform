@@ -1,22 +1,30 @@
-import type { MemoryEntry, MemoryTier } from "./types.js";
+import type { MemoryEntry, MemoryType, SensitivityLevel } from "./types.js";
 
-const DEFAULT_TTL_BY_TIER: Record<MemoryTier, number | null> = {
+const DEFAULT_TTL_BY_TYPE: Record<MemoryType, number | null> = {
+  "working": 0.042,
   "session": 1,
+  "episodic": 90,
+  "semantic": null,
   "workflow": 7,
   "entity": 90,
   "artifact": 365,
-  "executive": 180,
-  "domain": null,
   "operator-feedback": 730,
-  "long-term": null,
+  "executive": 180,
+  "skill": null,
 };
 
+const SENSITIVITY_LEVELS: SensitivityLevel[] = ["public", "internal", "confidential", "restricted"];
+
+function sensitivityIdx(level: SensitivityLevel): number {
+  return SENSITIVITY_LEVELS.indexOf(level);
+}
+
 export function applyRetentionDefaults(entry: MemoryEntry): MemoryEntry {
-  const ttlDays = DEFAULT_TTL_BY_TIER[entry.tier];
+  const ttlDays = DEFAULT_TTL_BY_TYPE[entry.tier];
   if (!ttlDays || entry.retention.expiresAt) return entry;
 
   const expiresAt = new Date();
-  expiresAt.setDate(expiresAt.getDate() + ttlDays);
+  expiresAt.setTime(expiresAt.getTime() + ttlDays * 24 * 60 * 60 * 1000);
 
   return {
     ...entry,
@@ -42,10 +50,47 @@ export function markStale(entry: MemoryEntry): MemoryEntry {
 
 export function checkSensitivity(
   entry: MemoryEntry,
-  requesterSensitivityLevel: MemoryEntry["sensitivity"]
+  requesterSensitivityLevel: SensitivityLevel
 ): boolean {
-  const levels: MemoryEntry["sensitivity"][] = ["public", "internal", "confidential", "restricted"];
-  const entryIdx = levels.indexOf(entry.sensitivity);
-  const requesterIdx = levels.indexOf(requesterSensitivityLevel);
-  return requesterIdx >= entryIdx;
+  return sensitivityIdx(requesterSensitivityLevel) >= sensitivityIdx(entry.sensitivity);
+}
+
+export function redactEntry(
+  entry: MemoryEntry,
+  requesterSensitivityLevel: SensitivityLevel
+): MemoryEntry | null {
+  const entryIdx = sensitivityIdx(entry.sensitivity);
+  const requesterIdx = sensitivityIdx(requesterSensitivityLevel);
+
+  if (requesterIdx >= entryIdx) {
+    return entry;
+  }
+
+  const gap = entryIdx - requesterIdx;
+
+  if (gap >= 2) {
+    return null;
+  }
+
+  return {
+    ...entry,
+    value: "[REDACTED]",
+    summary: entry.summary ? "[REDACTED]" : undefined,
+    metadata: {},
+    linkedEntities: [],
+    linkedTraces: [],
+    linkedActions: [],
+  };
+}
+
+export function isLowValue(entry: MemoryEntry): boolean {
+  return entry.confidence < 0.3 && !entry.retention.pinned;
+}
+
+export function isProvenPlaybook(entry: MemoryEntry): boolean {
+  return entry.tier === "skill" && entry.confidence >= 0.8;
+}
+
+export function getTTLByType(): Record<MemoryType, number | null> {
+  return { ...DEFAULT_TTL_BY_TYPE };
 }

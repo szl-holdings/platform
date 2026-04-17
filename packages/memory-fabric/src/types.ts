@@ -1,15 +1,19 @@
 import { z } from "zod";
 
-export const MemoryTierSchema = z.enum([
+export const MemoryTypeSchema = z.enum([
+  "working",
   "session",
+  "episodic",
+  "semantic",
   "workflow",
   "entity",
   "artifact",
-  "executive",
-  "domain",
   "operator-feedback",
-  "long-term",
+  "executive",
+  "skill",
 ]);
+
+export const MemoryTierSchema = MemoryTypeSchema;
 
 export const SensitivityLevelSchema = z.enum(["public", "internal", "confidential", "restricted"]);
 
@@ -23,9 +27,11 @@ export const MemoryProvenanceSchema = z.object({
 
 export const MemoryEntrySchema = z.object({
   id: z.string(),
-  tier: MemoryTierSchema,
+  tier: MemoryTypeSchema,
+  memoryType: MemoryTypeSchema.optional(),
   key: z.string(),
   value: z.unknown(),
+  summary: z.string().optional(),
   provenance: MemoryProvenanceSchema,
   freshness: z.object({
     lastAccessedAt: z.string().datetime().optional(),
@@ -37,6 +43,7 @@ export const MemoryEntrySchema = z.object({
     policy: z.enum(["ephemeral", "session-scoped", "workflow-scoped", "persistent", "archival"]).default("persistent"),
     expiresAt: z.string().datetime().optional(),
     maxAgeDays: z.number().positive().optional(),
+    pinned: z.boolean().default(false),
   }).default({ policy: "persistent" }),
   sensitivity: SensitivityLevelSchema.default("internal"),
   linkedEntities: z.array(z.string()).default([]),
@@ -47,7 +54,8 @@ export const MemoryEntrySchema = z.object({
   metadata: z.record(z.unknown()).default({}),
 });
 
-export type MemoryTier = z.infer<typeof MemoryTierSchema>;
+export type MemoryType = z.infer<typeof MemoryTypeSchema>;
+export type MemoryTier = MemoryType;
 export type SensitivityLevel = z.infer<typeof SensitivityLevelSchema>;
 export type MemoryProvenance = z.infer<typeof MemoryProvenanceSchema>;
 export type MemoryEntry = z.infer<typeof MemoryEntrySchema>;
