@@ -1,7 +1,7 @@
 # SZL Holdings Platform
 
 ## Overview
-The SZL Holdings Platform is **governed decision infrastructure** — the structural layer between signal detection and action execution that enforces governance, attribution, and outcome tracking on every consequential decision. It is a pnpm monorepo encompassing web and mobile applications, an API, a design system, and a development sandbox. The platform's core architecture revolves around one canonical nine-step loop: Signal → Context → Recommendation → Simulation → Policy → Execution → Proof → Outcome → Learning. This loop is powered by six platform primitives: Outcome Graph, Proof Chain, Covenant Policy, Decision Simulation, Workflow Engine, and Event Fabric.
+The SZL Holdings Platform is a governed decision infrastructure designed to enforce governance, attribution, and outcome tracking for critical decisions. It integrates signal detection with action execution through a canonical nine-step loop: Signal → Context → Recommendation → Simulation → Policy → Execution → Proof → Outcome → Learning. The platform is a pnpm monorepo consisting of web and mobile applications, an API, a design system, and a development sandbox. Its core capabilities are built around six platform primitives: Outcome Graph, Proof Chain, Covenant Policy, Decision Simulation, Workflow Engine, and Event Fabric. The project aims to provide comprehensive decision-making support with robust governance and observability.
 
 ## User Preferences
 I prefer detailed explanations.
@@ -12,236 +12,50 @@ Do not make changes to the file `Y`.
 
 ## System Architecture
 
-### Core Architecture
-The platform is built as a pnpm monorepo using TypeScript 5.9, React 19, Vite, and Node.js. It features a micro-frontend architecture for web applications, utilizing a shared gateway proxy pattern on port 9090 for routing sub-path artifacts.
+The platform is a pnpm monorepo utilizing TypeScript 5.9, React 19, Vite, and Node.js. It employs a micro-frontend architecture for web applications, routed via a shared gateway proxy on port 9090.
 
-**Six Platform Primitives:**
--   **Outcome Graph:** Tracks the decision lifecycle from recommendation to outcome.
--   **Proof Chain:** Provides an immutable audit trail with provenance.
--   **Covenant Policy:** Manages permissions and human-in-the-loop approval gates.
--   **Monte Carlo:** Offers probabilistic risk simulation before execution.
--   **Workflow Engine:** Orchestrates durable processes.
--   **Event Fabric (PRISM Bus):** Cross-domain event bus for signal routing.
+**Core Platform Primitives:**
+-   **Outcome Graph:** Manages the decision lifecycle and outcomes.
+-   **Proof Chain:** Ensures an immutable audit trail with provenance.
+-   **Covenant Policy:** Handles permissions and human approval gates.
+-   **Monte Carlo (Decision Simulation):** Provides probabilistic risk assessment.
+-   **Workflow Engine:** Orchestrates durable business processes.
+-   **Event Fabric (PRISM Bus):** A cross-domain event bus for signal routing.
 
-### Monorepo Structure
--   **15 artifact dirs** in `artifacts/` — 7 canonical web, 1 canonical mobile, 1 internal, 5 archived, 1 shell
--   **34 lib packages** in `lib/` — shared infrastructure and platform primitives
--   **3 packages** in `packages/` — business observability fabric (observability-core, business-events, telemetry-standards)
--   **5 new platform packages** in `packages/` — AI Control Plane and NVIDIA-Ready Modules (see below)
--   **569 DB tables**, 116 schema files in `lib/db/src/schema/`
+**Monorepo Structure:** It comprises active and archived artifact directories, numerous shared library packages for infrastructure and primitives, and dedicated packages for business observability, AI Control Plane, and NVIDIA-Ready Modules. The database schema consists of 569 tables managed by Drizzle ORM.
 
-### Business Observability Fabric (packages/)
+**Business Observability Fabric (ATLAS):** Implemented via three packages (`@szl-holdings/observability-core`, `@szl-holdings/business-events`, `@szl-holdings/telemetry-standards`) for OpenTelemetry setup, event emission, and semantic conventions.
 
-Three new packages implement the ATLAS business telemetry layer:
+**Canonical Artifacts (Active Applications):** Key applications include `szl-holdings` (corporate), `api-server` (backend), `command` (unified operations), `aegis` (defense intelligence), `vessels` (maritime command), `terra` (real estate intelligence), `carlota-jo` (advisory), and `szl-holdings-mobile` (mobile command).
 
-| Package | Path | Purpose |
-|---------|------|---------|
-| `@szl-holdings/observability-core` | `packages/observability-core` | OTEL setup, AsyncLocalStorage context, correlation ID propagation, Express middleware |
-| `@szl-holdings/business-events` | `packages/business-events` | Typed ATLAS event emitters (11 event classes), domain KPI adapters, event bus |
-| `@szl-holdings/telemetry-standards` | `packages/telemetry-standards` | GenAI semantic convention constants, business/HTTP attribute name contracts |
-
-**Architecture docs:**
-- `docs/observability/business-observability-spec.md` — ATLAS event contract, API endpoints, ingestion adapters
-- `docs/observability/genai-observability-spec.md` — GenAI span types, OTel semantic conventions, prompt trace contract
-
-**API server routes added:**
-- `POST /api/business-events/kpi` — ingest batch KPI records → ATLAS events
-- `POST /api/business-events/transactions` — ingest domain transactions → ATLAS events
-- `POST /api/business-events/emit` — emit typed ATLAS events directly
-- `GET /api/business-events/summary` — aggregated event counts by class/domain
-- `GET /api/business-events/events` — recent raw events (ops/admin)
-
-### Canonical Artifacts (Active)
-| Artifact | Path | Files | Purpose |
-|----------|------|-------|---------|
-| szl-holdings | `/` | 403 | Corporate, marketing, trust center, investor hub, Decision Theater |
-| api-server | `/api` | 395 | REST + GraphQL + WebSocket backend |
-| command | `/command/` | 223 | Unified ops command (absorbed Lyte + IMPERIUM) |
-| aegis | `/aegis/` | 166 | Defense & security intelligence |
-| vessels | `/vessels/` | 103 | Maritime fleet command |
-| terra | `/terra/` | 92 | Real estate intelligence |
-| carlota-jo | `/carlota-jo/` | 70 | Premium advisory |
-| szl-holdings-mobile | Expo | 167 | CORTEX mobile command |
-
-### Archived Artifacts (Code Removed)
-firestorm, lyte-command-center, imperium, prism-counsel, stephen-site — no app source (pages/components) remains; DEPRECATED.md/ARCHIVED.md markers, stale dist/node_modules, and residual config files may exist.
-
-### Technology Stack
+**Technology Stack:**
 -   **Frontend:** React 19, Vite, TanStack React Query, Wouter, Tailwind CSS v4, Framer Motion.
--   **Backend:** Express 5, Drizzle ORM, Zod validation, pino logging.
--   **Database:** PostgreSQL 16 with Drizzle ORM (569 tables, 116 schema files).
--   **Authentication:** OIDC/PKCE, session-based with cookie+Bearer token, 11-role RBAC.
+-   **Backend:** Express 5, Drizzle ORM, Zod, pino.
+-   **Database:** PostgreSQL 16.
+-   **Authentication:** OIDC/PKCE, session-based, 11-role RBAC.
 -   **Mobile:** Expo / React Native, NativeWind.
--   **AI:** Multi-provider (OpenAI, Anthropic, Gemini) with fallback, supporting 9 schema-validated decision types.
--   **AI Evaluation:** Trace capture (`lib/ai-engine/src/evals/trace-capture.ts`), evaluator hooks (`evaluator-hooks.ts`), and review queue (`review-queue.ts`) for every AI recommendation lifecycle.
--   **AI Ops Dashboard:** REST endpoints at `/api/ai/ops/*` for cost, latency, confidence, review queue, and evaluator stats.
--   **Real-time:** WebSocket (HMAC-signed tickets), Server-Sent Events (SSE), push notifications.
--   **Bundling:** esbuild (CJS) and Vite.
+-   **AI:** Multi-provider (OpenAI, Anthropic, Gemini) with schema-validated decision types and AI evaluation infrastructure including trace capture, evaluator hooks, and a review queue. An AI Ops Dashboard is available via API endpoints.
+-   **Real-time:** WebSocket, Server-Sent Events (SSE), push notifications.
 
-### AI Control Plane & NVIDIA-Ready Packages (`packages/`)
+**AI Control Plane & NVIDIA-Ready Packages:** Five packages (`@szl-holdings/ai-control-plane`, `@szl-holdings/prompt-registry`, `@szl-holdings/tool-registry`, `@szl-holdings/nvidia-adapters`, `@szl-holdings/openusd-export`) provide provider-agnostic AI infrastructure for model routing, prompt/tool management, NVIDIA integration, and OpenUSD digital twin export for simulations.
 
-Five new packages in `packages/` provide provider-agnostic AI infrastructure:
+**UI/UX and Design System:** A premium, SZL-branded, dark-first design system is used, incorporating typography like Space Grotesk, Inter, and JetBrains Mono.
 
-| Package | Description |
-|---------|-------------|
-| `@szl-holdings/ai-control-plane` | Model routing, eval-aware selection, fallback engine, cost controls (budget policies + hard stops), PII redactor, prompt injection scanner, agent tier definitions (assistant/analyst/operator/autonomous), policy engine |
-| `@szl-holdings/prompt-registry` | Versioned prompt management with eval metadata, A/B comparison, and promotion lifecycle |
-| `@szl-holdings/tool-registry` | Tool management with approval classes, MCP bridging, dry-run execution, and audit trail |
-| `@szl-holdings/nvidia-adapters` | Optional NVIDIA NIM endpoint adapter, NeMo eval hooks + observability events, agent profiler with performance grades |
-| `@szl-holdings/openusd-export` | OpenUSD digital twin export for Vessels (route simulation), Terra (property scenarios), and Aegis (security scenario rehearsal) |
+**API Layers:** Features a REST API, a GraphQL API using Apollo Server, and an MCP Gateway (Model Context Protocol) for tool integration.
 
-**Architecture docs:** `docs/ai/ai-control-plane.md`, `docs/ai/nvidia-optional-runtime.md`, `docs/platform/digital-twin-and-simulation-strategy.md`
+**Key Features:** Reporting & Analytics Engine, robust Authentication & RBAC, Alloy Execution Fabric for workflow orchestration, 12 specialized AI Agents, PRISM Bus, Monte Carlo Engine for simulations, Multi-Tenant Provisioning, and GCS-backed Object Storage.
 
-### UI/UX and Design System
-The platform utilizes a premium, SZL-branded, dark-first design system. Typography includes Space Grotesk, Inter, and JetBrains Mono. Domain packs maintain unique visual identities within the overarching brand.
+**Forge — AI Runtime, Agent Factory & Promotion Pipeline:** This system manages the governed lifecycle of AI agents, including registry, runtime capture, drift evaluation, promotion validation, rollback orchestration, and auditing, supported by dedicated DB tables, API services, and UI.
 
-### API Layers
--   **REST API:** Modular Express routes using Zod and Drizzle.
--   **GraphQL API:** Unified API at `/api/graphql` using Apollo Server v5 and `graphql-ws` for subscriptions.
--   **MCP Gateway:** Model Context Protocol server at `/api/mcp` (JSON-RPC 2.0 + SSE) with 26 tenant-scoped, role-enforced, approval-aware tools. See `MCP_GATEWAY_STRATEGY.md`.
+**Replay, Eval & Trust Infrastructure:** Three packages (`@szl-holdings/replay-core`, `@szl-holdings/evals-core`, `@workspace/eval-os`) enable incident capture, scenario replay, comprehensive evaluation of agent behavior (precision, recall, policy compliance), and regression detection, with UI surfaces for Replay Lab, Eval Lab, and Trust Console.
 
-### Key Features
--   **Reporting & Analytics Engine:** Includes an Investor Analytics Dashboard, Data Export Builder, and Scheduled Reports.
--   **Authentication & RBAC:** 11-role hierarchy with global auth enforcer.
--   **Alloy Execution Fabric:** Workflow orchestration with approval gates and decision tracking.
--   **AI Agents:** 12 specialized domain AI agents governed by Covenant Policy.
--   **PRISM Bus:** Cross-domain event bus for signal routing.
--   **Monte Carlo Engine:** Probabilistic simulation with domain-specific scenario libraries.
--   **Multi-Tenant Provisioning:** Azure AD multi-tenant SSO, SCIM 2.0, white-label branding.
--   **Object Storage:** Replit's GCS-backed storage for file uploads and documents, secured by ACLs and presigned URLs.
+**SZL Foundation — Trace Graph:** The `@workspace/trace-graph` package provides a canonical trace layer that links all agent runs, model calls, tool invocations, retrievals, memory operations, and workflow steps into a queryable graph, backed by four Drizzle tables and exposed via API routes. Middleware automatically emits request-level traces.
 
-## Navigation Hierarchy
-Three-tier model: Platform (Command, Alloy, CORTEX, SZL Holdings) → Primitives (invisible, surface through interactions) → Domain Packs (Aegis, Vessels, Terra, Carlota Jo).
+**ATLAS Enterprise State Model:** Three packages (`@szl-holdings/atlas-core`, `@szl-holdings/atlas-types`, `@szl-holdings/atlas-events`) define a shared entity vocabulary with 14 primitive and 6 domain-specific types, along with a standardized event taxonomy for cross-domain communication.
 
-See `NAVIGATION_STRATEGY.md`, `PRODUCT_SURFACE_MAP.md`, `ROUTE_INVENTORY.md` for full details.
-
-## GitHub Enterprise Files
--   `.github/CODEOWNERS` — Code ownership for PR reviews
--   `.github/PULL_REQUEST_TEMPLATE.md` — PR template with quality checklist
--   `.github/ISSUE_TEMPLATE/` — Bug report, feature request, security report templates
--   `.github/dependabot.yml` — Dependency update schedule (weekly, grouped)
--   `.github/workflows/ci.yml` — CI pipeline (lint, typecheck, test, build)
--   `.github/workflows/release.yml` — Semantic versioning + GitHub Release
--   `.github/workflows/deploy-staging.yml` — Auto-deploy to staging on push to main
--   `.github/workflows/deploy-production.yml` — Deploy to production on release publish
--   `GITHUB_SETUP_CHECKLIST.md` — Manual GitHub UI settings for branch protection
-
-## Runtime Mode System
-
-The platform uses a formal four-mode runtime model. Mode is resolved from environment variables at startup with no silent fallback.
-
-| Mode | Purpose | Key ENV |
-|------|---------|---------|
-| `local-dev` | Engineer development (default) | (no vars needed) |
-| `internal-preview` | Internal demos, stakeholder previews | `APP_ENV=internal-preview` |
-| `demo` | External demos, investor walkthroughs | `DEMO_MODE=true` or `APP_ENV=demo` |
-| `production` | Live customer service | `NODE_ENV=production` or `APP_ENV=production` |
-
-**Implementation:** `lib/config/src/runtime-mode.ts` (exported from `@szl-holdings/config`)  
-**Documentation:** `docs/operations/runtime-modes.md`  
-**Surface area audit:** `docs/operations/surface-area-decisions.md`
-
-Key gate functions: `isProductionMode()`, `isDemoMode()`, `isSeedDataAllowed()`, `isConnectorFallbackAllowed()`, `isBillingActive()`, `areNotificationsActive()`, `resolveConnectorStatus()`
-
-In production mode: seed data paths throw, connector fallbacks are blocked, billing is live, all external notifications fire.
-
-## Operational Docs
--   `CONTRIBUTING.md` — Setup, branching, PR workflow, engineering standards
--   `DEPLOYMENT-GUIDE.md` — Replit + Azure deployment procedures
--   `OPERATIONS-RUNBOOK.md` — Environment, database, health checks, incident response
--   `SECRETS_SETUP.md` — Mobile credential provisioning guide
--   `RELEASE_CHECKLIST.md` — Pre-release checklist
--   `docs/operations/runtime-modes.md` — Runtime mode model (authoritative)
--   `docs/operations/surface-area-decisions.md` — Archive/quarantine/delete audit log
-
-## Forge — AI Runtime, Agent Factory & Promotion Pipeline
-
-Governed lifecycle layer for every AI agent on the platform. Owns the registry,
-runtime capture, drift evaluator, promotion validator (8 blocker codes),
-rollback orchestrator, and audit trail.
-
-- **Schema** (20 `forge_*` tables): `lib/db/src/schema/forge.ts`
-- **Service**: `artifacts/api-server/src/services/forge/index.ts` (+ README)
-- **REST**: `/forge/*` mounted via `routes/groups/ai.ts`
-- **UI**: `artifacts/szl-holdings/src/pages/forge/` (Overview, Registry,
-  Agent Detail, Drift, Promotions, Telemetry)
-- **Seed**: `pnpm --filter @workspace/scripts run seed:forge` — 5 agents,
-  10 versions, 4 models, 4 tools, 4 prompts, 8 promotions, 4 drift events,
-  30 runs. Integrated as step 13 of `seed-demo-canonical.sh`.
-- **Smoke**: `pnpm --filter @workspace/scripts run smoke:forge` — 10-step
-  end-to-end governance check.
-
-> **DB note:** the 20 Forge tables were applied with `psql -f` (CREATE TABLE
-> IF NOT EXISTS) because `drizzle-kit push` hangs on the 575-table
-> introspection. `lib/db/src/schema/forge.ts` remains the source of truth.
-
-## Replay, Eval & Trust Infrastructure
-
-Three interlinked capabilities for measuring, replaying, and improving agent behavior:
-
-| Package | Name | Purpose |
-|---------|------|---------|
-| `packages/replay-core` | `@szl-holdings/replay-core` | Incident/flow capture, sanitized snapshot generation, PII redaction, scenario registry, workflow/agent replay against historical context |
-| `packages/evals-core` | `@szl-holdings/evals-core` | Evaluation runner, precision/recall, usefulness, policy compliance, operator override rate, cost/latency metrics, regression detection, strategy comparison |
-| `packages/eval-os` | `@workspace/eval-os` | Eval OS — unified eval framework; graders (prompt, model-routing, tool-reliability, workflow, citation, hallucination, bias/safety, latency, trace, human-review); domain suites for Terra, PRISM Counsel, Vessels, Aegis, Lyte, Carlota Jo, Imperium; nightly runner CLI; regression detection |
-
-UI surfaces (Command app):
-- **Replay Lab** — `/operations/alloy/replay-lab` — Browse captured scenarios, replay, compare outcomes
-- **Eval Lab** — `/operations/alloy/eval-lab` — Run eval suites, view benchmarks, track regressions
-- **Trust Console** — `/operations/alloy/trust-console` — Production trust dashboard with all metrics
-
-Seeded scenarios: `aegis-soc-threat-triage-v1` (3 snapshots, ground truth), `vessels-voyage-pnl-optimization-v1` (1 snapshot)
-
-Framework docs: `docs/ai/agent-evaluation-framework.md`
-
-## SZL Foundation — Trace Graph
-
-**Foundation 03** delivers the canonical trace layer that links every agent run, model call, tool invocation, retrieval, memory op, and workflow step into a queryable graph.
-
-### @workspace/trace-graph (`packages/trace-graph/`)
-
-| Module | Purpose |
-|--------|---------|
-| `schema.ts` | Zod types for TraceRecord, TraceSpan, ToolCallRecord, RetrievalRecord, MemoryIORecord, CitationRecord, GuardrailResult |
-| `store.ts` | InMemoryTraceStore (implements TraceStore interface) |
-| `writer.ts` | TraceWriter — startTrace, appendToolCall/Retrieval/MemoryIO/Span/Citation, completeTrace, recordError |
-| `replay.ts` | TraceReplayer — visitor-based replay, tree construction, compareTraces diff |
-| `queue.ts` | WriteQueue + QueuedTraceStore — non-blocking write-behind ingestion queue |
-| `query.ts` | TraceQueryEngine — filter by agent/workflow/entity/session/status/errors/time, pagination, entity linkage |
-| `sdk.ts` | TraceSdk + TraceSession — span lifecycle, wrapToolCall/wrapModelCall decorators, linkEntity |
-
-### DB Schema (`lib/db/src/schema/trace_graph.ts`)
-Four Drizzle tables: `traces`, `trace_spans`, `trace_events`, `trace_entity_links`
-- Full field coverage: requestId, agentId, workflowId, userId, operatorId, domain, model, promptVersion, latency/tokens/cost, retries, rollback, replay markers, businessImpact
-- `trace_entity_links` FK to `entities.id` (constellation linkage)
-- Migration: `lib/db/drizzle/0044_trace_graph.sql`
-
-### API Routes (`artifacts/api-server/src/routes/traces.ts`)
-- `GET /api/traces` — query with all filter params + pagination
-- `GET /api/traces/:id` — single trace + linked entity IDs
-- `POST /api/traces/:id/replay` — replay visitor traversal with step log and diff summary
-- `POST /api/traces/:id/link-entity` — link a constellation entity to a trace
-
-### Middleware (`artifacts/api-server/src/middlewares/trace-emit.ts`)
-Auto-emits a request-level trace on every non-health/apm request. Non-blocking (write-behind). Wired after telemetryMiddleware in `app.ts`.
-
-## ATLAS Enterprise State Model
-
-Three canonical packages define the shared entity vocabulary across all domain packs:
-
-| Package | Name | Purpose |
-|---------|------|---------|
-| `packages/atlas-core` | `@szl-holdings/atlas-core` | Full ATLAS schema: 14 primitive types + 6 domain-specific types with Zod validation |
-| `packages/atlas-types` | `@szl-holdings/atlas-types` | Convenience re-exports of all ATLAS TypeScript types |
-| `packages/atlas-events` | `@szl-holdings/atlas-events` | Standardized event taxonomy (100+ named events) + envelope contract |
-
-Architecture doc: `docs/architecture/atlas-enterprise-state-model.md`  
-Env registry doc: `docs/architecture/env-registry.md`
-
-ATLAS primitives: `Signal`, `Event`, `Risk`, `Opportunity`, `Control`, `Workflow`, `Recommendation`, `Action`, `Approval`, `Evidence`, `Outcome`, `Policy`, `KPI`, `SLO`  
-ATLAS domain types: `Case`, `Matter`, `Mission`, `Deal`, `Voyage`, `Incident`
-
-Event naming convention: `domain.subject.verb` (e.g., `security.incident.created`, `business.risk.detected`)
+**Memory Fabric & Alloy Runtime (Foundation 06):**
+-   **Memory Fabric:** A tiered memory layer (`@workspace/memory-fabric`) with 8 scopes, tracking provenance, freshness, retention, and sensitivity for each record.
+-   **Alloy Runtime:** The `@workspace/alloy` package acts as the cognitive runtime and execution control plane, orchestrating workflows, integrating with policy engines, managing action ledgers, and handling checkpoints. It leverages extensive DB schema additions for its operations, and exposes its functionalities via new API endpoints for memory, workflows, agents, models, prompts, signals, and actions.
 
 ## External Dependencies
 -   **Database:** PostgreSQL 16
@@ -254,43 +68,3 @@ Event naming convention: `domain.subject.verb` (e.g., `security.incident.created
 -   **Government Data:** CISA KEV, NVD CVE, MITRE ATT&CK, Census/BLS, FEMA NRI, NYC Open Data, SEC EDGAR
 -   **Legal Data:** CourtListener REST API
 -   **Other APIs/Services:** GitHub API, Figma, Google APIs, HubSpot
-
-## Important Operational Notes
--   Demo credentials are stored in Replit Secrets — see SECRETS_SETUP.md
--   Strategy dashboard: `use-ecosystem-data.ts` DEMO_SNAPSHOT fallback on 401/403 only
--   SSE URL: root-relative `/api/command/snapshot/stream`
--   **Artifact limit:** 15 active — do NOT use createArtifact()
--   **Auth model:** `req.user.roles` is array; CSRF `/api/analytics/event` exempt
--   **`@lyte` alias:** maps to `src/operations` in vite.config.ts
--   **db:migrate:** Stuck on interactive drizzle-kit prompt for `firestorm_tool_audit_log` — use `--force` flag
-
-## Memory Fabric & Alloy Runtime (Foundation 06)
-
-### @workspace/memory-fabric (packages/memory-fabric)
-Tiered memory layer with 8 scopes and full provenance/freshness/retention/sensitivity tracking:
-- **Tiers:** session (1d), workflow (7d), entity (90d), artifact (365d), executive (180d), domain (∞), operator-feedback (730d), long-term (∞)
-- **Each record carries:** provenance (source, sourceId, author, method), freshness (lastAccessedAt, lastUpdatedAt, isStale), confidence (0-1), sensitivity tier (public/internal/confidential/restricted), retention policy, linkedEntities, linkedTraces, linkedActions
-- **Key exports:** MemoryEntry, MemoryEntrySchema, InMemoryStore, applyRetentionDefaults, isExpired, checkSensitivity
-
-### @workspace/alloy (packages/alloy)
-Cognitive runtime and execution control plane. Absorbs ai-control-plane, decision-engine, action-engine concepts:
-- **RunManager:** orchestrates workflow steps, emits trace spans via TraceWriter, calls Guardian for policy decisions, saves checkpoints, writes ledger entries
-- **GuardianDecisionEngine integration:** deny → failed, require-approval → awaiting-approval
-- **InMemoryActionLedger:** immutable ledger (copies stored and returned to prevent external mutation)
-- **CheckpointStore, DefaultModelRouter, workflow primitives (ECHO_STEP, VALIDATE_STEP)**
-
-### DB Schema additions (lib/db/src/schema)
-- `memory_fabric.ts` → `memory_records`, `memory_links` tables
-- `alloy_runtime.ts` → 12 tables: `alloy_runtime_workflows`, `alloy_runtime_workflow_steps`, `alloy_runtime_workflow_runs`, `alloy_runtime_agents`, `alloy_runtime_agent_versions`, `alloy_runtime_prompts`, `alloy_runtime_prompt_versions`, `alloy_runtime_models`, `alloy_runtime_model_versions`, `alloy_runtime_model_routes`, `alloy_runtime_signals`, `alloy_runtime_signal_sources`, `alloy_runtime_signal_scores`, `alloy_runtime_actions`
-
-### API routes (api-server)
-New endpoints registered under `routes/groups/alloy-runtime-group.ts`:
-- `/memory` — GET/POST/PUT/DELETE memory records, stats, eviction
-- `/workflows` — CRUD workflow definitions
-- `/workflow-runs` — execute runs, replay, get run state
-- `/agents` + `/agents/:id/versions` — agent CRUD + versioning
-- `/models` + `/models/route` — model registry + model routing
-- `/prompts` + `/prompts/:id/versions` — prompt management
-- `/signals` — ingest and manage runtime signals
-- `/actions` — action ledger reads and writes
-- `/recommendations` — stub backed by DB recommendations table

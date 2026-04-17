@@ -114,6 +114,51 @@ const TYPE_GLYPH: Record<string, string> = {
   agent: "✦",
 };
 
+type SinceWindow = "24h" | "7d" | "30d" | "all";
+
+const SINCE_VALUES: readonly SinceWindow[] = ["24h", "7d", "30d", "all"] as const;
+
+interface PersistedFilters {
+  entityTypeFilter: string | null;
+  activeOnly: boolean;
+  sinceWindow: SinceWindow;
+  searchQuery: string;
+}
+
+const DEFAULT_FILTERS: PersistedFilters = {
+  entityTypeFilter: null,
+  activeOnly: true,
+  sinceWindow: "all",
+  searchQuery: "",
+};
+
+function readFiltersFromUrl(): PersistedFilters {
+  if (typeof window === "undefined") return DEFAULT_FILTERS;
+  const params = new URLSearchParams(window.location.search);
+  const since = params.get("since");
+  return {
+    entityTypeFilter: params.get("type") || null,
+    // ?active=false disables the "active only" toggle. Anything else (or absent) keeps default true.
+    activeOnly: params.get("active") !== "false",
+    sinceWindow: SINCE_VALUES.includes(since as SinceWindow) ? (since as SinceWindow) : "all",
+    searchQuery: params.get("q") ?? "",
+  };
+}
+
+function buildFilterSearch(current: URLSearchParams, f: PersistedFilters): string {
+  const next = new URLSearchParams(current);
+  if (f.entityTypeFilter) next.set("type", f.entityTypeFilter);
+  else next.delete("type");
+  if (!f.activeOnly) next.set("active", "false");
+  else next.delete("active");
+  if (f.sinceWindow !== "all") next.set("since", f.sinceWindow);
+  else next.delete("since");
+  const q = f.searchQuery.trim();
+  if (q) next.set("q", q);
+  else next.delete("q");
+  return next.toString();
+}
+
 interface SimNode {
   id: string;
   ref: ConstellationGraphNode;
@@ -290,10 +335,12 @@ export function ConstellationGraph({
   const [selected, setSelected] = useState<ConstellationGraphNode | null>(null);
   const [hovered, setHovered] = useState<string | null>(null);
   const [width, setWidth] = useState(640);
-  const [entityTypeFilter, setEntityTypeFilter] = useState<string | null>(null);
-  const [activeOnly, setActiveOnly] = useState(true);
-  const [sinceWindow, setSinceWindow] = useState<"24h" | "7d" | "30d" | "all">("all");
-  const [searchQuery, setSearchQuery] = useState("");
+  // Initialize filter state from the URL so shared/bookmarked links restore the same view.
+  const initialFilters = useMemo(() => readFiltersFromUrl(), []);
+  const [entityTypeFilter, setEntityTypeFilter] = useState<string | null>(initialFilters.entityTypeFilter);
+  const [activeOnly, setActiveOnly] = useState(initialFilters.activeOnly);
+  const [sinceWindow, setSinceWindow] = useState<SinceWindow>(initialFilters.sinceWindow);
+  const [searchQuery, setSearchQuery] = useState(initialFilters.searchQuery);
   const [seenTypes, setSeenTypes] = useState<string[]>([]);
   const [pageSize, setPageSize] = useState(120);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -305,6 +352,52 @@ export function ConstellationGraph({
   const refresh = useCallback(() => {
     reload.current += 1;
     force((x) => x + 1);
+  }, []);
+
+  // --- URL state persistence -------------------------------------------------
+  // Filters are mirrored to the URL query string so views survive reloads and
+  // can be shared/linked. Browser back/forward navigates between filter states.
+  const isInitialUrlSync = useRef(true);
+  const skipNextUrlWrite = useRef(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (skipNextUrlWrite.current) {
+      // The state was just updated from a popstate event — don't bounce it back.
+      skipNextUrlWrite.current = false;
+      return;
+    }
+    const current = new URLSearchParams(window.location.search);
+    const nextSearch = buildFilterSearch(current, {
+      entityTypeFilter,
+      activeOnly,
+      sinceWindow,
+      searchQuery,
+    });
+    if (nextSearch === current.toString()) return;
+    const url = `${window.location.pathname}${nextSearch ? `?${nextSearch}` : ""}${window.location.hash}`;
+    if (isInitialUrlSync.current) {
+      // First sync just normalizes the URL (e.g. drop unknown values) without polluting history.
+      window.history.replaceState(window.history.state, "", url);
+    } else {
+      window.history.pushState(window.history.state, "", url);
+    }
+  }, [entityTypeFilter, activeOnly, sinceWindow, searchQuery]);
+  useEffect(() => {
+    isInitialUrlSync.current = false;
+  }, []);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const onPop = () => {
+      const f = readFiltersFromUrl();
+      // Suppress the URL-write effect that would otherwise fire from these setStates.
+      skipNextUrlWrite.current = true;
+      setEntityTypeFilter(f.entityTypeFilter);
+      setActiveOnly(f.activeOnly);
+      setSinceWindow(f.sinceWindow);
+      setSearchQuery(f.searchQuery);
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
   }, []);
 
   // Resize observer
