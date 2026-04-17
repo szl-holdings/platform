@@ -1092,13 +1092,19 @@ router.get("/governance", requireAnyAuth(), async (_req: Request, res: Response)
 
     const policies = rows.map((p) => {
       const policyApprovals = approvalsByPolicy.get(String(p.id)) ?? [];
+      const normalizeStatus = (s: string): "approved" | "pending" | "rejected" => {
+        if (s === "approved") return "approved";
+        if (s === "rejected" || s === "expired" || s === "withdrawn") return "rejected";
+        return "pending";
+      };
+      const fmtDate = (d: Date | string | null) =>
+        d ? new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : undefined;
       const approvalChain = policyApprovals.slice(0, 5).map((a) => ({
-        approvalId: a.id,
-        status: a.status,
-        requiredRole: a.requiredApproverRole,
-        requestedByRole: a.requestedByRole,
-        requestedAt: new Date(a.createdAt).toISOString(),
-        decidedAt: a.approvedAt ?? a.rejectedAt ?? null,
+        role: a.requiredApproverRole ?? "Approver",
+        approver: a.requestedByRole ?? "—",
+        status: normalizeStatus(a.status),
+        date: fmtDate(a.approvedAt ?? a.rejectedAt ?? a.createdAt),
+        comment: a.status === "rejected" ? "Rejected" : a.status === "approved" ? "Approved" : undefined,
       }));
       const auditLog = policyApprovals.flatMap((a) => auditByApproval.get(a.id) ?? [])
         .slice(0, 10)

@@ -143,7 +143,7 @@ export default function GovernancePage() {
     refetchInterval: 60_000,
     staleTime: 30_000,
   });
-  const POLICIES: Policy[] = apiData?.policies && apiData.policies.length > 0 ? apiData.policies : FALLBACK_POLICIES;
+  const POLICIES: Policy[] = apiData?.policies ?? FALLBACK_POLICIES;
 
   const [selected, setSelected] = useState<string | null>("p1");
   const [tab, setTab] = useState<"policies" | "audit">("policies");

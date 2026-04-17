@@ -75,8 +75,8 @@ export default function TeamPage() {
     refetchInterval: 60_000,
     staleTime: 30_000,
   });
-  const MEMBERS: TeamMember[] = apiData?.members && apiData.members.length > 0 ? apiData.members : FALLBACK_MEMBERS;
-  const TEAMS = apiData?.teams && apiData.teams.length > 0 ? apiData.teams : FALLBACK_TEAMS;
+  const MEMBERS: TeamMember[] = apiData?.members ?? FALLBACK_MEMBERS;
+  const TEAMS = apiData?.teams ?? FALLBACK_TEAMS;
 
   const filtered = MEMBERS.filter((m) => {
     const s = search.toLowerCase();

@@ -64,7 +64,7 @@ export default function CostsPage() {
     staleTime: 30_000,
   });
 
-  const DOMAIN_BUDGETS = apiData?.domains && apiData.domains.length > 0 ? apiData.domains : FALLBACK_DOMAIN_BUDGETS;
+  const DOMAIN_BUDGETS = apiData?.domains ?? FALLBACK_DOMAIN_BUDGETS;
   const TOTAL_BUDGET = apiData?.summary?.totalBudget ?? DOMAIN_BUDGETS.reduce((s, d) => s + d.budget, 0);
   const TOTAL_SPENT = apiData?.summary?.totalSpent ?? DOMAIN_BUDGETS.reduce((s, d) => s + d.spent, 0);
   const OVERBUDGET = DOMAIN_BUDGETS.filter((d) => d.spent > d.budget);

@@ -95,7 +95,7 @@ export default function SLAPage() {
     staleTime: 15_000,
   });
 
-  const SLAS: SLADefinition[] = apiData?.slas && apiData.slas.length > 0
+  const SLAS: SLADefinition[] = apiData?.slas
     ? apiData.slas.map((s) => ({ ...s, trend: s.trend ?? Array.from({ length: 12 }, () => s.current) } as SLADefinition))
     : FALLBACK_SLAS;
 

@@ -69,7 +69,7 @@ export default function AlertsPage() {
 
   const [alerts, setAlerts] = useState<Alert[]>(INITIAL_ALERTS);
   useEffect(() => {
-    if (apiData?.alerts && apiData.alerts.length > 0) {
+    if (apiData?.alerts !== undefined) {
       setAlerts(apiData.alerts);
     }
   }, [apiData]);
