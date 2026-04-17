@@ -17,6 +17,7 @@ const portfolioCommands: SpotlightCommand[] = [
   { id: "nav-command", label: "Command", description: "Executive command overview", icon: "◆", group: "Navigate", action: () => router.push("/(shell)/portfolio/(tabs)") },
   { id: "nav-portfolio", label: "Portfolio", description: "Holdings & venture performance", icon: "💼", group: "Navigate", action: () => router.push("/(shell)/portfolio/(tabs)/portfolio") },
   { id: "nav-investors", label: "Investors", description: "Investor relations & reports", icon: "📈", group: "Navigate", action: () => router.push("/(shell)/portfolio/(tabs)/investor") },
+  { id: "nav-analytics", label: "Analytics", description: "MRR, ARR, churn & funnel metrics", icon: "📊", group: "Navigate", action: () => router.push("/(shell)/portfolio/(tabs)/analytics") },
   { id: "nav-ai", label: "Navigator AI", description: "Executive intelligence assistant", icon: "🤖", group: "Navigate", action: () => router.push("/(shell)/portfolio/(tabs)/agent-chat") },
 ];
 
@@ -36,6 +37,10 @@ function NativeTabLayout() {
       <NativeTabs.Trigger name="investor">
         <Icon sf={{ default: "chart.line.uptrend.xyaxis", selected: "chart.line.uptrend.xyaxis.circle.fill" }} />
         <Label>Investors</Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="analytics">
+        <Icon sf={{ default: "chart.bar.fill", selected: "chart.bar.fill" }} />
+        <Label>Analytics</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="agent-chat">
         <Icon sf={{ default: "sparkles", selected: "sparkles" }} />
@@ -92,6 +97,14 @@ function ClassicTabLayout() {
           title: "Investors",
           tabBarIcon: ({ color }) =>
             isIOS ? <SymbolView name="chart.line.uptrend.xyaxis" tintColor={color} size={22} /> : <Feather name="trending-up" size={20} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="analytics"
+        options={{
+          title: "Analytics",
+          tabBarIcon: ({ color }) =>
+            isIOS ? <SymbolView name="chart.bar.fill" tintColor={color} size={22} /> : <Feather name="bar-chart-2" size={20} color={color} />,
         }}
       />
       <Tabs.Screen
