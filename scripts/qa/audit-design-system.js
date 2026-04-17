@@ -53,7 +53,7 @@ const SCAN_DIRS = [
   "artifacts/lyte-command-center/src",
   "artifacts/terra/src",
   "artifacts/vessels/src",
-  "artifacts/firestorm/src",
+  "artifacts/aegis/src",
   "artifacts/carlota-jo/src",
   "artifacts/stephen-site/src",
   "lib/shared-ui/src",
