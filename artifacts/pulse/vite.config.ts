@@ -4,6 +4,7 @@ import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 import fs from "fs";
+import { PROXY_ROUTES } from "../../packages/proxy-routes.js";
 
 process.env.GOMAXPROCS = process.env.GOMAXPROCS ?? "2";
 
@@ -11,16 +12,6 @@ const port = Number(process.env.VITE_PORT) || 5201;
 const basePath = process.env.BASE_PATH || "/pulse/";
 
 const SHARED_PROXY_PORT = 9090;
-
-const PROXY_ROUTES = [
-  { prefix: "/aegis/", port: 3000 },
-  { prefix: "/firestorm/", port: 23931 },
-  { prefix: "/carlota-jo/", port: 3101 },
-  { prefix: "/command/", port: 3102 },
-  { prefix: "/terra/", port: 6099 },
-  { prefix: "/vessels/", port: 6899 },
-  { prefix: "/pulse/", port: 5201 },
-];
 
 function sharedProxyPlugin() {
   return {
