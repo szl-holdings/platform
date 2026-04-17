@@ -17,6 +17,7 @@ import { MorningBriefingCard, DEMO_BRIEFING_HISTORY } from "@szl-holdings/shared
 import { ActivationBanner, useActivationState } from "@szl-holdings/shared-ui/onboarding";
 import type { ActivationStep } from "@szl-holdings/shared-ui/onboarding";
 import { GitBranch, Zap, Map } from "lucide-react";
+import { EcosystemAppsGrid } from "../components/ecosystem-apps-grid";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -143,6 +144,8 @@ export function Dashboard() {
         <DomainGrid domains={data.domains} />
 
         <OpsCenterGrid />
+
+        <EcosystemAppsGrid />
 
         <AmbientSignalRanker />
 
