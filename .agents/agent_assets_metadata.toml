@@ -221,3 +221,9 @@ id = "1DWq0fa3XuQoD-LNM202T"
 uri = "file://03-monday-operator-lens.zip"
 type = "unspecified"
 title = "Monday Operator Lens Bundle"
+
+[[outputs]]
+id = "PqRSXeyyK-wJIAsdgtJNv"
+uri = "file://docs/strategy/FRONTIER_DOCTRINE.md"
+type = "text"
+title = "Frontier Doctrine — Public AI patterns mapped to SZL's 10 layers"
