@@ -293,3 +293,9 @@ id = "k6xy6Woyt-gGFnCMmpikP"
 uri = "file://deliverables/linkedin-4-17.zip"
 type = "unspecified"
 title = "linkedin 4/17 — SZL Holdings demo video"
+
+[[outputs]]
+id = "aEWwcYFA65VSVTexQD4w6"
+uri = "file://demo-assets/szl-holdings-investor-carousel.pdf"
+type = "pdf"
+title = "SZL Holdings — Investor Carousel (10 slides)"
