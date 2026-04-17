@@ -1,0 +1,2 @@
+-- Placeholder migration file
+-- The cognitive runtime schema was consolidated into 0046_sparkling_edwin_jarvis.sql
