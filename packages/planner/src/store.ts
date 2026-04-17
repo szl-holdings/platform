@@ -7,6 +7,8 @@ export interface PlanStoreQuery {
   workflowId?: string;
   status?: PlanGraph["status"];
   parentPlanId?: string;
+  /** Tenant scoping: only return plans whose `context.orgId` matches. */
+  orgId?: string;
   limit?: number;
   offset?: number;
 }
@@ -38,6 +40,7 @@ export class InMemoryPlanStore implements PlanStore {
     if (query.workflowId) items = items.filter((p) => p.context.workflowId === query.workflowId);
     if (query.status) items = items.filter((p) => p.status === query.status);
     if (query.parentPlanId) items = items.filter((p) => p.parentPlanId === query.parentPlanId);
+    if (query.orgId !== undefined) items = items.filter((p) => p.context["orgId"] === query.orgId);
     items.sort((a, b) => b.createdAt - a.createdAt);
     const total = items.length;
     const offset = query.offset ?? 0;

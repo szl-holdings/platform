@@ -13,19 +13,6 @@ import { rankFallbacks } from "./ranker.js";
 import { defaultPlanStore, type PlanStore } from "./store.js";
 
 /**
- * Result of {@link createPlan}.
- *
- * NOTE: createPlan returns BOTH the primary plan graph AND the ranked
- * counterfactual fallback graphs. The primary's `fallbacks` field contains
- * the ids of the returned fallback graphs in priority order — callers that
- * only want the primary can read `result.primary`.
- */
-export interface CreatePlanResult {
-  primary: PlanGraph;
-  fallbacks: PlanGraph[];
-}
-
-/**
  * Build a plan graph for the given objective:
  *   1. Decompose into steps (or use caller-provided seeds).
  *   2. Route each step to a model/tool via @szl-holdings/ai-control-plane.
@@ -34,12 +21,16 @@ export interface CreatePlanResult {
  *   5. Generate counterfactual fallback plans.
  *   6. Rank fallbacks via @szl-holdings/decision-engine priority scoring.
  *   7. Persist primary + fallbacks to the configured PlanStore.
+ *
+ * Returns the primary {@link PlanGraph}. Fallbacks are persisted under
+ * separate plan ids; their ids are exposed on `primary.fallbacks` and they
+ * can be retrieved via {@link getPlanFallbacks} or directly from the store.
  */
 export async function createPlan(
   objective: string,
   context: PlanContext = {},
   options: { store?: PlanStore; persist?: boolean } = {},
-): Promise<CreatePlanResult> {
+): Promise<PlanGraph> {
   if (!objective || !objective.trim()) {
     throw new Error("objective must be a non-empty string");
   }
@@ -95,7 +86,24 @@ export async function createPlan(
     for (const fb of fallbacks) await store.put(fb);
   }
 
-  return { primary, fallbacks };
+  return primary;
+}
+
+/**
+ * Fetch the ranked fallback plan graphs for a given plan from the store.
+ * Returns them in the priority order recorded on `plan.fallbacks`.
+ */
+export async function getPlanFallbacks(
+  plan: PlanGraph,
+  options: { store?: PlanStore } = {},
+): Promise<PlanGraph[]> {
+  const store = options.store ?? defaultPlanStore;
+  const out: PlanGraph[] = [];
+  for (const id of plan.fallbacks) {
+    const fb = await store.get(id);
+    if (fb) out.push(fb);
+  }
+  return out;
 }
 
 function deriveTitle(objective: string): string {

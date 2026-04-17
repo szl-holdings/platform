@@ -1,4 +1,5 @@
 import { computePriorityScore } from "@szl-holdings/decision-engine";
+import type { BusinessImpact } from "@szl-holdings/decision-engine";
 import type { PlanGraph } from "./types.js";
 
 /**
@@ -28,21 +29,45 @@ export function rankFallbacks(primary: PlanGraph, fallbacks: PlanGraph[]): PlanG
     const costDelta = Math.max(0, primary.estimatedCostUsd - fb.estimatedCostUsd);
     const riskDelta = Math.max(0, primary.estimatedRisk - fb.estimatedRisk);
 
-    const businessImpact = {
+    // Score the *benefit* of swapping to this fallback (cost saved + risk
+    // reduced), so higher decision-engine priority => better fallback.
+    const reputationalRisk: BusinessImpact["reputationalRisk"] =
+      riskDelta > 0.4
+        ? "critical"
+        : riskDelta > 0.2
+          ? "high"
+          : riskDelta > 0.05
+            ? "medium"
+            : "low";
+
+    const businessImpact: BusinessImpact = {
       financialExposureUsd: Math.round(costDelta * 1000),
       regulatoryExposure: fb.steps.some((s) => s.requiredApproval),
+      reputationalRisk,
+      affectedEntities: fb.steps.length * 10,
       crossDomainBlastRadius: dedupe(
         fb.steps
-          .map((s) => (s.metadata.fallbackKind as string | undefined) ?? "")
-          .filter(Boolean),
+          .map((s) => {
+            const kind = s.metadata["fallbackKind"];
+            return typeof kind === "string" ? kind : "";
+          })
+          .filter((k): k is string => k.length > 0),
       ),
-      affectedUsers: fb.steps.length * 10,
-      customerImpactSeverity: fb.estimatedRisk > 0.5 ? "high" : fb.estimatedRisk > 0.25 ? "medium" : "low",
-    } as const;
+    };
+
+    // Higher urgency when the primary is itself critical (we *need* a viable
+    // fallback fast). Falls through on the fallback's own risk level for
+    // tie-breaking.
+    const urgency: "critical" | "urgent" | "moderate" =
+      primary.riskLevel === "critical"
+        ? "critical"
+        : primary.riskLevel === "high"
+          ? "urgent"
+          : "moderate";
 
     const score = computePriorityScore({
-      businessImpact: businessImpact as any,
-      urgency: fb.riskLevel === "critical" ? "critical" : fb.riskLevel === "high" ? "urgent" : "moderate",
+      businessImpact,
+      urgency,
       confidence: clamp01(fb.confidence + riskDelta),
       signals: [],
       weights,

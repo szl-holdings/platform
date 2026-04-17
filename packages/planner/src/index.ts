@@ -8,7 +8,7 @@ export {
 } from "./risk-estimator.js";
 export { generateFallbackPlans } from "./fallback-generator.js";
 export { rankFallbacks } from "./ranker.js";
-export { createPlan, replayPlan, type CreatePlanResult } from "./planner.js";
+export { createPlan, replayPlan, getPlanFallbacks } from "./planner.js";
 export {
   InMemoryPlanStore,
   defaultPlanStore,

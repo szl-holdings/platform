@@ -1,13 +1,15 @@
 import { describe, it, expect } from "vitest";
-import { createPlan, rankFallbacks, InMemoryPlanStore } from "../index.js";
+import { createPlan, getPlanFallbacks, rankFallbacks, InMemoryPlanStore } from "../index.js";
 
 describe("rankFallbacks (decision-engine)", () => {
   it("assigns sequential rank starting at 1 and surfaces a fallbackPriority score", async () => {
-    const { primary, fallbacks } = await createPlan(
+    const store = new InMemoryPlanStore();
+    const primary = await createPlan(
       "Cut maritime fuel cost",
       { fallbackCount: 3 },
-      { store: new InMemoryPlanStore() },
+      { store },
     );
+    const fallbacks = await getPlanFallbacks(primary, { store });
 
     expect(fallbacks.length).toBeGreaterThan(1);
     const ranks = fallbacks.map((f) => f.rank);

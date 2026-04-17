@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import {
   createPlan,
+  getPlanFallbacks,
   replayPlan,
   decomposeObjective,
   estimateRiskAndApprovals,
@@ -99,7 +100,7 @@ describe("topoSort", () => {
 
 describe("router (ai-control-plane)", () => {
   it("attaches a model + provider + fallback chain to every step", async () => {
-    const { primary } = await createPlan("Triage exception", ctx({ fallbackCount: 0 }), {
+    const primary = await createPlan("Triage exception", ctx({ fallbackCount: 0 }), {
       store: new InMemoryPlanStore(),
     });
     for (const step of primary.steps) {
@@ -122,7 +123,8 @@ describe("createPlan", () => {
   });
 
   it("persists primary and fallbacks", async () => {
-    const { primary, fallbacks } = await createPlan("Reduce fuel cost", { fallbackCount: 2 }, { store });
+    const primary = await createPlan("Reduce fuel cost", { fallbackCount: 2 }, { store });
+    const fallbacks = await getPlanFallbacks(primary, { store });
     expect(fallbacks).toHaveLength(2);
     expect(primary.fallbacks).toEqual(fallbacks.map((f) => f.planId));
     expect(await store.count()).toBe(3);
@@ -131,7 +133,8 @@ describe("createPlan", () => {
   });
 
   it("each fallback has a distinct strategy and references the primary", async () => {
-    const { primary, fallbacks } = await createPlan("Investigate alert", { fallbackCount: 3 }, { store });
+    const primary = await createPlan("Investigate alert", { fallbackCount: 3 }, { store });
+    const fallbacks = await getPlanFallbacks(primary, { store });
     const kinds = new Set(fallbacks.map((f) => f.steps[0]!.metadata.fallbackKind));
     expect(kinds.size).toBe(3);
     for (const fb of fallbacks) {
@@ -141,7 +144,7 @@ describe("createPlan", () => {
   });
 
   it("aggregate risk + cost reflect step-level numbers", async () => {
-    const { primary } = await createPlan("Approve trade", {}, { store });
+    const primary = await createPlan("Approve trade", {}, { store });
     const expectedRisk =
       primary.steps.reduce((sum, s) => sum + s.estimatedRisk, 0) / primary.steps.length;
     expect(primary.estimatedRisk).toBeCloseTo(expectedRisk, 5);
@@ -151,7 +154,7 @@ describe("createPlan", () => {
 
 describe("fallback strategies", () => {
   it("cheaper fallback halves estimated cost per step", async () => {
-    const { primary } = await createPlan("Plan x", {}, { store: new InMemoryPlanStore() });
+    const primary = await createPlan("Plan x", {}, { store: new InMemoryPlanStore() });
     const [cheap] = generateFallbackPlans(primary, { count: 1 });
     for (let i = 0; i < primary.steps.length; i++) {
       expect(cheap!.steps[i]!.route.estimatedCostUsd).toBeCloseTo(
@@ -165,7 +168,7 @@ describe("fallback strategies", () => {
 describe("replayPlan", () => {
   it("returns steps in execution order with route + approval info", async () => {
     const store = new InMemoryPlanStore();
-    const { primary } = await createPlan("Run audit", {}, { store });
+    const primary = await createPlan("Run audit", {}, { store });
     const out = await replayPlan(primary.planId, { store });
     expect(out.steps.map((s) => s.stepId)).toEqual(primary.executionOrder);
     expect(out.steps[2]!.requiredApproval).toBe(true); // the Act step
