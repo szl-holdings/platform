@@ -39,6 +39,7 @@ import { providerHealth } from "./lib/provider-health";
 import { startEmbeddingWorker, stopEmbeddingWorker, getWorkerStatus } from "./lib/embedding-worker";
 import { initIngestionFramework } from "./lib/ingestion-framework";
 import { registerAnalyticsJobHandlers } from "./lib/analytics-jobs";
+import { runAlertRuleEvaluation } from "./routes/ops-management";
 import { initializeAlloyDomainEventSubscriptions } from "./lib/domain-events/alloy-wiring.js";
 import { startIntelligenceFeeds, stopIntelligenceFeeds } from "./lib/intelligence-feeds-init";
 import { startMeshPublisher } from "./lib/control-tower-mesh-publisher";
@@ -136,6 +137,26 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
       });
     }).catch(err => logger.warn({ err }, "[analytics] Failed to load analytics-jobs for anomaly scan"));
   }, 6 * 60 * 60 * 1000);
+
+  // Schedule alert rule evaluation on a configurable interval (default: 5 minutes)
+  const alertEvalIntervalMinutes = Math.max(
+    1,
+    parseInt(process.env["ALERT_EVAL_INTERVAL_MINUTES"] ?? "5", 10) || 5
+  );
+  const alertEvalIntervalMs = alertEvalIntervalMinutes * 60 * 1000;
+  logger.info({ intervalMinutes: alertEvalIntervalMinutes }, "[alert-eval] Scheduling automatic alert rule evaluation");
+  const alertEvalInterval = setInterval(() => {
+    const runAt = new Date().toISOString();
+    runAlertRuleEvaluation()
+      .then(({ evaluated, fired, metrics }) => {
+        logger.info({ runAt, evaluated, fired, metrics }, "[alert-eval] Scheduled evaluation complete");
+      })
+      .catch(err => {
+        logger.warn({ err, runAt }, "[alert-eval] Scheduled evaluation failed (non-fatal)");
+      });
+  }, alertEvalIntervalMs);
+  alertEvalInterval.unref();
+
   import("./routes/rmm").then(m => m.startSyncScheduler()).catch(err => logger.warn({ err }, "RMM sync scheduler start failed (non-fatal)"));
   pingRedis().catch(err => logger.warn({ err }, "[redis] Startup ping failed (non-fatal)"));
   prewarmIntelligenceCache().catch(err => {

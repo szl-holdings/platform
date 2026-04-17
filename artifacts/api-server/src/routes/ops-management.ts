@@ -603,71 +603,76 @@ router.post("/ops/alert-events/:id/acknowledge", async (req, res) => {
   }
 });
 
-// Alert rule evaluation against current metrics
-router.post("/ops/alert-rules/evaluate", async (_req, res) => {
-  try {
-    const rulesResult = await pool.query(`SELECT * FROM platform_alert_rules WHERE enabled = true`);
-    const rules = rulesResult.rows as Array<{
-      id: number; name: string; metric_name: string; condition: string;
-      threshold: number; window_minutes: number; severity: string;
-      notify_email: boolean; email_recipients: string[];
-    }>;
+// ---------------------------------------------------------------------------
+// Shared alert rule evaluation logic — called by the route and the scheduler
+// ---------------------------------------------------------------------------
+export async function runAlertRuleEvaluation(): Promise<{
+  evaluated: number;
+  fired: number;
+  metrics: Record<string, number>;
+}> {
+  const rulesResult = await pool.query(`SELECT * FROM platform_alert_rules WHERE enabled = true`);
+  const rules = rulesResult.rows as Array<{
+    id: number; name: string; metric_name: string; condition: string;
+    threshold: number; window_minutes: number; severity: string;
+    notify_email: boolean; email_recipients: string[];
+  }>;
 
-    // Get current metrics from observability snapshot
-    const { serverTelemetry } = await import("@szl-holdings/observability");
-    const snapshot = serverTelemetry.getSnapshot();
+  // Get current metrics from observability snapshot
+  const { serverTelemetry } = await import("@szl-holdings/observability");
+  const snapshot = serverTelemetry.getSnapshot();
 
-    const [latencyRes, queueRes, poolRes, aiFailRes] = await Promise.all([
-      pool.query<{ p95: number | null }>(
-        `SELECT PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY latency_ms)::float AS p95 FROM platform_status_checks WHERE service_id = 'api' AND latency_ms IS NOT NULL AND checked_at > NOW() - INTERVAL '5 minutes'`
-      ).catch(() => ({ rows: [{ p95: null }] })),
-      pool.query<{ depth: string }>(
-        `SELECT COUNT(*)::text AS depth FROM durable_jobs WHERE status = 'pending'`
-      ).catch(() => ({ rows: [{ depth: "0" }] })),
-      pool.query<{ util: string }>(
-        `SELECT ROUND(COUNT(*)::numeric / NULLIF((SELECT setting FROM pg_settings WHERE name = 'max_connections')::int, 0) * 100, 1)::text AS util FROM pg_stat_activity WHERE datname = current_database()`
-      ).catch(() => ({ rows: [{ util: "0" }] })),
-      pool.query<{ fail_rate: string }>(
-        `SELECT ROUND(COUNT(*) FILTER (WHERE status = 'failed')::numeric / NULLIF(COUNT(*), 0) * 100, 1)::text AS fail_rate FROM durable_jobs WHERE type LIKE '%agent%' AND created_at > NOW() - INTERVAL '5 minutes'`
-      ).catch(() => ({ rows: [{ fail_rate: "0" }] })),
-    ]);
+  const [latencyRes, queueRes, poolRes, aiFailRes] = await Promise.all([
+    pool.query<{ p95: number | null }>(
+      `SELECT PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY latency_ms)::float AS p95 FROM platform_status_checks WHERE service_id = 'api' AND latency_ms IS NOT NULL AND checked_at > NOW() - INTERVAL '5 minutes'`
+    ).catch(() => ({ rows: [{ p95: null }] })),
+    pool.query<{ depth: string }>(
+      `SELECT COUNT(*)::text AS depth FROM durable_jobs WHERE status = 'pending'`
+    ).catch(() => ({ rows: [{ depth: "0" }] })),
+    pool.query<{ util: string }>(
+      `SELECT ROUND(COUNT(*)::numeric / NULLIF((SELECT setting FROM pg_settings WHERE name = 'max_connections')::int, 0) * 100, 1)::text AS util FROM pg_stat_activity WHERE datname = current_database()`
+    ).catch(() => ({ rows: [{ util: "0" }] })),
+    pool.query<{ fail_rate: string }>(
+      `SELECT ROUND(COUNT(*) FILTER (WHERE status = 'failed')::numeric / NULLIF(COUNT(*), 0) * 100, 1)::text AS fail_rate FROM durable_jobs WHERE type LIKE '%agent%' AND created_at > NOW() - INTERVAL '5 minutes'`
+    ).catch(() => ({ rows: [{ fail_rate: "0" }] })),
+  ]);
 
-    const metricValues: Record<string, number> = {
-      "api.error_rate": parseFloat((snapshot.errorRate ?? 0).toFixed(2)),
-      "api.latency_p95": parseFloat((latencyRes.rows[0]?.p95 ?? 0).toString()),
-      "queue.depth": parseInt(queueRes.rows[0]?.depth ?? "0"),
-      "db.pool_utilization": parseFloat(poolRes.rows[0]?.util ?? "0"),
-      "system.memory_pct": (() => {
-        const mem = process.memoryUsage();
-        return Math.round((mem.heapUsed / mem.heapTotal) * 100);
-      })(),
-      "ai.failure_rate": parseFloat(aiFailRes.rows[0]?.fail_rate ?? "0"),
-    };
+  const metricValues: Record<string, number> = {
+    "api.error_rate": parseFloat((snapshot.errorRate ?? 0).toFixed(2)),
+    "api.latency_p95": parseFloat((latencyRes.rows[0]?.p95 ?? 0).toString()),
+    "queue.depth": parseInt(queueRes.rows[0]?.depth ?? "0"),
+    "db.pool_utilization": parseFloat(poolRes.rows[0]?.util ?? "0"),
+    "system.memory_pct": (() => {
+      const mem = process.memoryUsage();
+      return Math.round((mem.heapUsed / mem.heapTotal) * 100);
+    })(),
+    "ai.failure_rate": parseFloat(aiFailRes.rows[0]?.fail_rate ?? "0"),
+  };
 
-    const firedCount = { count: 0 };
-    for (const rule of rules) {
-      await pool.query(`UPDATE platform_alert_rules SET last_evaluated_at = NOW() WHERE id = $1`, [rule.id]);
-      const metricVal = metricValues[rule.metric_name];
-      if (metricVal === undefined) continue;
+  const firedCount = { count: 0 };
+  for (const rule of rules) {
+    await pool.query(`UPDATE platform_alert_rules SET last_evaluated_at = NOW() WHERE id = $1`, [rule.id]);
+    const metricVal = metricValues[rule.metric_name];
+    if (metricVal === undefined) continue;
 
-      let triggered = false;
-      switch (rule.condition) {
-        case "gt": triggered = metricVal > rule.threshold; break;
-        case "lt": triggered = metricVal < rule.threshold; break;
-        case "gte": triggered = metricVal >= rule.threshold; break;
-        case "lte": triggered = metricVal <= rule.threshold; break;
-        case "eq": triggered = metricVal === rule.threshold; break;
-      }
+    let triggered = false;
+    switch (rule.condition) {
+      case "gt": triggered = metricVal > rule.threshold; break;
+      case "lt": triggered = metricVal < rule.threshold; break;
+      case "gte": triggered = metricVal >= rule.threshold; break;
+      case "lte": triggered = metricVal <= rule.threshold; break;
+      case "eq": triggered = metricVal === rule.threshold; break;
+    }
 
-      if (triggered) {
-        const alertMsg = `${rule.name}: ${rule.metric_name} = ${metricVal} (threshold: ${rule.condition} ${rule.threshold})`;
-        await pool.query(
-          `INSERT INTO platform_alert_events (rule_id, rule_name, severity, metric_name, metric_value, threshold, condition, message)
-           VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
-          [rule.id, rule.name, rule.severity, rule.metric_name, metricVal, rule.threshold, rule.condition, alertMsg]
-        );
-        await pool.query(`UPDATE platform_alert_rules SET last_fired_at = NOW() WHERE id = $1`, [rule.id]);
-        firedCount.count++;
+    if (triggered) {
+      const alertMsg = `${rule.name}: ${rule.metric_name} = ${metricVal} (threshold: ${rule.condition} ${rule.threshold})`;
+      await pool.query(
+        `INSERT INTO platform_alert_events (rule_id, rule_name, severity, metric_name, metric_value, threshold, condition, message)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+        [rule.id, rule.name, rule.severity, rule.metric_name, metricVal, rule.threshold, rule.condition, alertMsg]
+      );
+      await pool.query(`UPDATE platform_alert_rules SET last_fired_at = NOW() WHERE id = $1`, [rule.id]);
+      firedCount.count++;
 
         // Dispatch email notifications if configured for this rule
         if (rule.notify_email && rule.email_recipients.length > 0) {
@@ -697,9 +702,17 @@ router.post("/ops/alert-rules/evaluate", async (_req, res) => {
             }
           }
         }
-      }
     }
-    res.json({ ok: true, evaluated: rules.length, fired: firedCount.count, metrics: metricValues });
+  }
+
+  return { evaluated: rules.length, fired: firedCount.count, metrics: metricValues };
+}
+
+// Alert rule evaluation against current metrics
+router.post("/ops/alert-rules/evaluate", async (_req, res) => {
+  try {
+    const result = await runAlertRuleEvaluation();
+    res.json({ ok: true, ...result });
   } catch (err) {
     logger.error({ err }, "[ops] Alert evaluation failed");
     res.status(500).json({ error: "Alert evaluation failed" });
