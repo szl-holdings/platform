@@ -1,6 +1,14 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { OpsLayout } from "../components/ops-layout";
 import { Shield, FileText, CheckCircle2, Clock, AlertTriangle, Plus, ChevronRight, ChevronDown, User } from "lucide-react";
+
+interface ApiGovernanceResponse {
+  policies: Policy[];
+  summary: { total: number; active: number; draft: number };
+  generatedAt: string;
+  dataSource: string;
+}
 
 type PolicyStatus = "active" | "draft" | "pending-approval" | "archived";
 type PolicyCategory = "data" | "access" | "compliance" | "security" | "operational";
@@ -29,7 +37,7 @@ interface Policy {
   enforcement: "auto" | "manual" | "advisory";
 }
 
-const POLICIES: Policy[] = [
+const FALLBACK_POLICIES: Policy[] = [
   {
     id: "p1", title: "Data Retention & Disposal Policy", category: "data", status: "active",
     domains: ["All Domains"], version: "v2.1", owner: "Priya Nair", lastUpdated: "Apr 10",
@@ -124,6 +132,19 @@ const STATUS_COLORS: Record<PolicyStatus, string> = {
 };
 
 export default function GovernancePage() {
+  const { data: apiData } = useQuery<ApiGovernanceResponse>({
+    queryKey: ["command-governance"],
+    queryFn: async () => {
+      const res = await fetch("/api/command/governance", { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to load governance");
+      const json = await res.json();
+      return (json?.data ?? json) as ApiGovernanceResponse;
+    },
+    refetchInterval: 60_000,
+    staleTime: 30_000,
+  });
+  const POLICIES: Policy[] = apiData?.policies && apiData.policies.length > 0 ? apiData.policies : FALLBACK_POLICIES;
+
   const [selected, setSelected] = useState<string | null>("p1");
   const [tab, setTab] = useState<"policies" | "audit">("policies");
   const [categoryFilter, setCategoryFilter] = useState<PolicyCategory | "all">("all");

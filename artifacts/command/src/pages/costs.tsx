@@ -1,9 +1,17 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { OpsLayout } from "../components/ops-layout";
 import { DollarSign, TrendingUp, TrendingDown, AlertTriangle, BarChart2, Cpu, Database, Activity } from "lucide-react";
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Cell } from "recharts";
 
-const DOMAIN_BUDGETS = [
+interface ApiCostsResponse {
+  domains: Array<{ id: string; name: string; color: string; budget: number; spent: number; apiCalls: number; storage: number; compute: number; trend: number }>;
+  summary: { totalSpent: number; totalBudget: number; overBudget: number; totalApiCalls: number; totalStorageTb: number };
+  generatedAt: string;
+  dataSource: string;
+}
+
+const FALLBACK_DOMAIN_BUDGETS = [
   { id: "aegis", name: "Aegis", color: "#ef4444", budget: 28000, spent: 24800, apiCalls: 1420000, storage: 4.2, compute: 18, trend: +12 },
   { id: "vessels", name: "Vessels", color: "#0ea5e9", budget: 35000, spent: 38200, apiCalls: 2100000, storage: 11.8, compute: 31, trend: +24 },
   { id: "terra", name: "Terra", color: "#22c55e", budget: 18000, spent: 15300, apiCalls: 840000, storage: 6.1, compute: 14, trend: -8 },
@@ -40,13 +48,26 @@ const API_BREAKDOWN = [
   { name: "Weather & Metocean", cost: 3100, calls: 960000 },
 ];
 
-const TOTAL_BUDGET = DOMAIN_BUDGETS.reduce((s, d) => s + d.budget, 0);
-const TOTAL_SPENT = DOMAIN_BUDGETS.reduce((s, d) => s + d.spent, 0);
-const OVERBUDGET = DOMAIN_BUDGETS.filter((d) => d.spent > d.budget);
-
 export default function CostsPage() {
   const [period, setPeriod] = useState<"mtd" | "3m" | "ytd">("mtd");
   const [view, setView] = useState<"overview" | "api" | "domains">("overview");
+
+  const { data: apiData } = useQuery<ApiCostsResponse>({
+    queryKey: ["command-costs"],
+    queryFn: async () => {
+      const res = await fetch("/api/command/costs", { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to load costs");
+      const json = await res.json();
+      return (json?.data ?? json) as ApiCostsResponse;
+    },
+    refetchInterval: 60_000,
+    staleTime: 30_000,
+  });
+
+  const DOMAIN_BUDGETS = apiData?.domains && apiData.domains.length > 0 ? apiData.domains : FALLBACK_DOMAIN_BUDGETS;
+  const TOTAL_BUDGET = apiData?.summary?.totalBudget ?? DOMAIN_BUDGETS.reduce((s, d) => s + d.budget, 0);
+  const TOTAL_SPENT = apiData?.summary?.totalSpent ?? DOMAIN_BUDGETS.reduce((s, d) => s + d.spent, 0);
+  const OVERBUDGET = DOMAIN_BUDGETS.filter((d) => d.spent > d.budget);
 
   return (
     <OpsLayout title="Cost & Usage Analytics">

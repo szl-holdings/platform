@@ -1,10 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { OpsLayout } from "../components/ops-layout";
 import { Bell, BellOff, ArrowUpRight, Clock, CheckCircle2, AlarmClock, ChevronDown, Filter, Settings, XCircle } from "lucide-react";
 import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
 
 type AlertStatus = "active" | "acknowledged" | "snoozed" | "resolved";
 type AlertPriority = "critical" | "high" | "medium" | "low";
+
+interface ApiAlertsResponse {
+  alerts: Alert[];
+  counts: { active: number; critical: number; acknowledged: number; snoozed: number };
+  generatedAt: string;
+  dataSource: "live" | "empty";
+}
 
 interface Alert {
   id: string;
@@ -47,7 +55,24 @@ const STATUS_ICONS: Record<AlertStatus, React.ElementType> = {
 };
 
 export default function AlertsPage() {
+  const { data: apiData } = useQuery<ApiAlertsResponse>({
+    queryKey: ["command-alerts"],
+    queryFn: async () => {
+      const res = await fetch("/api/command/alerts", { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to load alerts");
+      const json = await res.json();
+      return (json?.data ?? json) as ApiAlertsResponse;
+    },
+    refetchInterval: 30_000,
+    staleTime: 15_000,
+  });
+
   const [alerts, setAlerts] = useState<Alert[]>(INITIAL_ALERTS);
+  useEffect(() => {
+    if (apiData?.alerts && apiData.alerts.length > 0) {
+      setAlerts(apiData.alerts);
+    }
+  }, [apiData]);
   const [filter, setFilter] = useState<AlertStatus | "all">("all");
   const [priorityFilter, setPriorityFilter] = useState<AlertPriority | "all">("all");
   const [domainFilter, setDomainFilter] = useState("all");

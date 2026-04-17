@@ -1,6 +1,15 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { OpsLayout } from "../components/ops-layout";
 import { Users, UserPlus, Shield, Key, Search, Edit2, Check } from "lucide-react";
+
+interface ApiTeamResponse {
+  members: TeamMember[];
+  teams: Array<{ name: string; count: number; color: string }>;
+  summary: { total: number; active: number };
+  generatedAt: string;
+  dataSource: string;
+}
 
 interface TeamMember {
   id: string;
@@ -16,7 +25,7 @@ interface TeamMember {
 
 const APPS = ["Aegis", "Vessels", "Terra", "Lyte", "PRISM", "Carlota Jo", "SZL Holdings", "Command"];
 
-const MEMBERS: TeamMember[] = [
+const FALLBACK_MEMBERS: TeamMember[] = [
   { id: "u1", name: "Stephen Lutar", email: "stephen@szlholdings.com", role: "Super Admin", team: "Executive", status: "active", lastSeen: "Now", apps: APPS, avatar: "SL" },
   { id: "u2", name: "Marcus Chen", email: "m.chen@szlholdings.com", role: "Operations Lead", team: "Maritime Ops", status: "active", lastSeen: "5m ago", apps: ["Vessels", "Command", "SZL Holdings"], avatar: "MC" },
   { id: "u3", name: "Priya Nair", email: "p.nair@szlholdings.com", role: "Legal Counsel", team: "Legal", status: "active", lastSeen: "1h ago", apps: ["PRISM", "Command", "Aegis"], avatar: "PN" },
@@ -28,7 +37,7 @@ const MEMBERS: TeamMember[] = [
   { id: "u9", name: "Legacy User", email: "legacy@external.com", role: "Read Only", team: "External", status: "suspended", lastSeen: "3 months ago", apps: ["Vessels"], avatar: "LU" },
 ];
 
-const TEAMS = [
+const FALLBACK_TEAMS = [
   { name: "Executive", count: 1, color: "#f59e0b" },
   { name: "Maritime Ops", count: 2, color: "#0ea5e9" },
   { name: "Aegis SOC", count: 1, color: "#ef4444" },
@@ -54,6 +63,20 @@ export default function TeamPage() {
   const [search, setSearch] = useState("");
   const [teamFilter, setTeamFilter] = useState("all");
   const [editingId, setEditingId] = useState<string | null>(null);
+
+  const { data: apiData } = useQuery<ApiTeamResponse>({
+    queryKey: ["command-team"],
+    queryFn: async () => {
+      const res = await fetch("/api/command/team", { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to load team");
+      const json = await res.json();
+      return (json?.data ?? json) as ApiTeamResponse;
+    },
+    refetchInterval: 60_000,
+    staleTime: 30_000,
+  });
+  const MEMBERS: TeamMember[] = apiData?.members && apiData.members.length > 0 ? apiData.members : FALLBACK_MEMBERS;
+  const TEAMS = apiData?.teams && apiData.teams.length > 0 ? apiData.teams : FALLBACK_TEAMS;
 
   const filtered = MEMBERS.filter((m) => {
     const s = search.toLowerCase();

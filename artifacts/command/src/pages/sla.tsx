@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { OpsLayout } from "../components/ops-layout";
 import { Target, AlertTriangle, CheckCircle2, Clock, Plus } from "lucide-react";
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, ReferenceLine } from "recharts";
@@ -20,7 +21,14 @@ interface SLADefinition {
   owner: string;
 }
 
-const SLAS: SLADefinition[] = [
+interface ApiSlaResponse {
+  slas: Array<Omit<SLADefinition, "trend"> & { trend?: number[] }>;
+  summary: { total: number; breaching: number; nominal: number; avgCompliance: number };
+  generatedAt: string;
+  dataSource: string;
+}
+
+const FALLBACK_SLAS: SLADefinition[] = [
   {
     id: "s1", domain: "Aegis", domainColor: "#ef4444",
     name: "Security Incident MTTR", metric: "Mean Time to Respond", target: 15, unit: "min", current: 11,
@@ -75,6 +83,22 @@ const COMPLIANCE_COLOR = (pct: number) =>
   pct >= 95 ? "var(--color-low)" : pct >= 80 ? "var(--color-medium)" : "var(--color-critical)";
 
 export default function SLAPage() {
+  const { data: apiData } = useQuery<ApiSlaResponse>({
+    queryKey: ["command-sla"],
+    queryFn: async () => {
+      const res = await fetch("/api/command/sla", { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to load SLA");
+      const json = await res.json();
+      return (json?.data ?? json) as ApiSlaResponse;
+    },
+    refetchInterval: 30_000,
+    staleTime: 15_000,
+  });
+
+  const SLAS: SLADefinition[] = apiData?.slas && apiData.slas.length > 0
+    ? apiData.slas.map((s) => ({ ...s, trend: s.trend ?? Array.from({ length: 12 }, () => s.current) } as SLADefinition))
+    : FALLBACK_SLAS;
+
   const [selected, setSelected] = useState<string | null>("s1");
   const [showBuilder, setShowBuilder] = useState(false);
   const [filter, setFilter] = useState<"all" | "breach" | "nominal">("all");
