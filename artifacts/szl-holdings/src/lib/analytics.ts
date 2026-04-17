@@ -1,3 +1,5 @@
+import posthog from "posthog-js";
+
 type EventName =
   | "page_view"
   | "cta_click"
@@ -52,6 +54,13 @@ function track(event: EventName, properties?: EventProperties): void {
   if (typeof window === "undefined") return;
   if (typeof (window as any).gtag === "function") {
     (window as any).gtag("event", event, properties);
+  }
+  try {
+    posthog.capture(event, properties);
+  } catch (err) {
+    if (import.meta.env.DEV) {
+      console.warn("[analytics] posthog.capture failed:", err);
+    }
   }
   if (import.meta.env.DEV) {
     console.debug(`[analytics] ${event}`, properties);

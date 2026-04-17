@@ -4,6 +4,7 @@ import { Link } from "wouter";
 import { ArrowRight, ExternalLink, BookOpen, Network, Activity, TrendingUp, Users, Target } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const THESIS_POINTS = [
   {
@@ -89,6 +90,13 @@ const WRITING = [
 
 export default function LeadershipPage() {
   const [activeCase, setActiveCase] = useState(0);
+
+  usePageMeta({
+    title: "Leadership — SZL Holdings",
+    description: "Meet the founder and investment thesis behind SZL Holdings — the governed decision operating system built for enterprise operations, domain intelligence, and accountable AI execution.",
+    canonical: "https://szlholdings.com/leadership",
+    ogImage: "https://szlholdings.com/og/og-home.jpg",
+  });
 
   return (
     <div className="min-h-screen bg-white">
