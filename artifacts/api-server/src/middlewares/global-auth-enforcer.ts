@@ -37,6 +37,9 @@ const PUBLIC_EXACT_PATHS = new Set([
   "/api/contact",
   "/api/demo-requests",
   "/api/csrf-token",
+  // Mobile OIDC token exchange — called before the user has a session, so must be public.
+  // The route validates the OIDC authorization code and issues a session token.
+  "/api/mobile-auth/token-exchange",
   "/api/docs.json",
   "/api/openapi",
   "/api/openapi.json",

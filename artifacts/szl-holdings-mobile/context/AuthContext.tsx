@@ -164,15 +164,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     (async () => {
       try {
         setIsLoading(true);
-        const { code } = response.params;
+        const { code, state } = response.params;
         const apiBase = getApiBaseUrl();
-        const tokenResp = await fetch(`${apiBase}/api/mobile-auth/token`, {
+        const tokenResp = await fetch(`${apiBase}/api/mobile-auth/token-exchange`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             code,
-            redirectUri,
-            codeVerifier: request.codeVerifier,
+            redirect_uri: redirectUri,
+            code_verifier: request.codeVerifier,
+            state: state ?? "",
           }),
         });
         if (!tokenResp.ok) {

@@ -23,6 +23,10 @@ const EXEMPT_PATHS = new Set([
   // Terra Cognitive POST mutations — server-to-server calls authenticated via
   // authMiddleware({ required: true }) at route level; CSRF not applicable.
   "/api/terra/cognitive/covenants/submit-review",
+  // Mobile OIDC auth — native apps use Authorization header + PKCE, not browser cookies,
+  // so double-submit CSRF protection does not apply.
+  "/api/mobile-auth/token-exchange",
+  "/api/mobile-auth/logout",
   "/api/health",
   "/api/health/live",
   "/api/health/ready",
