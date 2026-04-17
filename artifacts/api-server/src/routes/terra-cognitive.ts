@@ -16,6 +16,11 @@ import { eq, and } from "drizzle-orm";
 import {
   searchDistressedProperties,
 } from "../lib/terra-distress-service";
+import {
+  evaluateAllCovenants,
+  seedCovenantsFromDistress,
+} from "../lib/terra-covenant-store";
+import { dispatchCovenantBreaches } from "../lib/agent-scheduler";
 import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
@@ -459,12 +464,63 @@ router.get("/terra/cognitive/covenants", cogLimit, auth, async (req, res) => {
   try {
     const trace = reqTraceRef(req);
 
-    // Query real distress properties and derive covenant metrics
-    const properties = await searchDistressedProperties({ limit: 50 });
+    // Primary path: read real covenant rows from terra_covenants and evaluate
+    // them against live financial data.
+    let measurements = await evaluateAllCovenants();
+    let usedCovenantTable = measurements.length > 0;
 
     let covenants: Array<Record<string, unknown>> = [];
 
-    if (properties.length > 0) {
+    if (usedCovenantTable) {
+      // Look up guardian actions for each covenant in one batch
+      for (const m of measurements) {
+        const reqId = breachRequestId(m.covenant.propertyExternalId, m.covenant.covenantType);
+        let guardianActionId: string | null = null;
+        let pendingApproval = false;
+        try {
+          const existing = await db
+            .select({ id: guardianActionsTable.id, outcome: guardianActionsTable.outcome })
+            .from(guardianActionsTable)
+            .where(eq(guardianActionsTable.requestId, reqId))
+            .limit(1);
+          if (existing[0]) {
+            guardianActionId = existing[0].id;
+            pendingApproval = existing[0].outcome === "require-approval";
+          }
+        } catch { /* non-fatal */ }
+
+        const remedyDate = m.status === "breach"
+          ? new Date(Date.now() + (m.covenant.remedyPeriodDays ?? 60) * 86400000).toISOString().split("T")[0]
+          : null;
+
+        covenants.push({
+          id: m.covenant.externalId ?? `cov_${m.covenant.id}`,
+          property: m.covenant.propertyAddress,
+          propertyId: m.covenant.propertyExternalId,
+          borough: m.covenant.borough,
+          lender: m.covenant.lender,
+          loanAgreementId: m.covenant.loanAgreementId,
+          loanAgreementUrl: m.covenant.loanAgreementUrl,
+          type: m.covenant.covenantType,
+          label: m.covenant.label ?? m.covenant.covenantType.toUpperCase(),
+          threshold: Number(m.covenant.thresholdValue),
+          comparator: m.covenant.comparator,
+          current: m.measuredValue,
+          status: m.status,
+          severity: m.status === "breach" ? "high" : m.status === "watch" ? "medium" : "none",
+          breachDate: m.status === "breach" ? new Date().toISOString().split("T")[0] : null,
+          evidence: m.evidence,
+          remedyDeadline: remedyDate,
+          guardianActionId,
+          pendingApproval,
+        });
+      }
+    } else {
+      // No covenants seeded yet — fall back to deriving from distress data so
+      // first-time users see a populated UI. The scheduler's first run (or a
+      // POST /covenants/scan) will populate the table for real.
+      const properties = await searchDistressedProperties({ limit: 50 });
+      if (properties.length > 0) {
       const highDistress = properties
         .filter(p => (p.opportunityScore ?? 0) >= 50)
         .slice(0, 8);
@@ -521,6 +577,7 @@ router.get("/terra/cognitive/covenants", cogLimit, auth, async (req, res) => {
           pendingApproval,
         });
       }
+      }
     }
 
     if (covenants.length === 0) {
@@ -539,7 +596,7 @@ router.get("/terra/cognitive/covenants", cogLimit, auth, async (req, res) => {
       watch: covenants.filter(c => c.status === "watch").length,
       compliant: covenants.filter(c => c.status === "compliant").length,
       pendingApprovals: covenants.filter(c => c.pendingApproval).length,
-      source: properties.length > 0 ? "distress-db" : "illustrative",
+      source: usedCovenantTable ? "terra-covenants-table" : covenants.length > 0 ? "distress-db" : "illustrative",
     };
 
     sendSuccess(res, {
@@ -554,9 +611,38 @@ router.get("/terra/cognitive/covenants", cogLimit, auth, async (req, res) => {
         nextRun: new Date(Date.now() + 21 * 3600000).toISOString(),
         status: "healthy",
       },
-      provenance: provenance("Distress-DB/Guardian-Actions/Loan-Agreements", properties.length > 0 ? 0.89 : 0.72, trace),
+      provenance: provenance(usedCovenantTable ? "terra_covenants/Live-Financials/Guardian-Actions" : "Distress-DB/Guardian-Actions/Loan-Agreements", usedCovenantTable ? 0.93 : 0.78, trace),
     });
   } catch (err) { handleRouteError(res, err, "Failed to fetch covenant status"); }
+});
+
+// ─── Run-Now scan (operator-triggered) — re-evaluates all covenants and
+// dispatches guardian approvals for any new breaches.
+
+router.post("/terra/cognitive/covenants/scan", cogLimit, auth, async (req, res) => {
+  try {
+    const trace = reqTraceRef(req);
+    const result = await dispatchCovenantBreaches();
+    sendSuccess(res, {
+      source: "Terra Covenant Monitor — operator-triggered scan",
+      ...result,
+      provenance: provenance("terra_covenants/Live-Financials/Guardian-Actions", 0.95, trace),
+    });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to run covenant scan");
+  }
+});
+
+// ─── Seed covenants from distress registry (operator action, idempotent) ──────
+
+router.post("/terra/cognitive/covenants/seed", cogLimit, auth, async (req, res) => {
+  try {
+    const limit = Math.min(Number(req.body?.limit ?? 12), 50);
+    const inserted = await seedCovenantsFromDistress(limit);
+    sendSuccess(res, { inserted, source: "distress-registry" });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to seed covenants");
+  }
 });
 
 // ─── Covenant Review Submission (mutation — requires stronger auth) ────────────

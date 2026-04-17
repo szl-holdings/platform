@@ -9,6 +9,15 @@ function fetchCovenants() {
   return fetch(`${API}/terra/cognitive/covenants`).then(r => r.json()).then(d => d.data ?? d);
 }
 
+async function runScan() {
+  const r = await fetch(`${API}/terra/cognitive/covenants/scan`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: "{}",
+  });
+  return r.json();
+}
+
 const STATUS_CONFIG: Record<string, { color: string; Icon: typeof CheckCircle; label: string }> = {
   breach: { color: "#c04a2a", Icon: AlertTriangle, label: "Breach" },
   watch: { color: "#c8a060", Icon: Clock, label: "Watch" },
@@ -151,7 +160,10 @@ export default function CovenantMonitoringPage() {
           </p>
         </div>
         <button
-          onClick={() => refetch()}
+          onClick={async () => {
+            try { await runScan(); } catch { /* swallowed; refetch will reflect cached state */ }
+            refetch();
+          }}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
           style={{ background: `${ACCENT}18`, border: `1px solid ${ACCENT}30`, color: ACCENT }}
         >

@@ -9,7 +9,11 @@ import { agentScheduler, agentExecutionRuntime, durableScheduler, seedDefaultSch
 import { createHash } from "crypto";
 import { db, guardianActionsTable, guardianApprovalRequestsTable } from "@szl-holdings/db";
 import { eq } from "drizzle-orm";
-import { searchDistressedProperties } from "./terra-distress-service";
+import {
+  evaluateAllCovenants,
+  recordCovenantEvaluation,
+  seedCovenantsFromDistress,
+} from "./terra-covenant-store";
 import { logger } from "./logger";
 
 const BASE_URL = `http://localhost:${process.env["PORT"] || 3000}`;
@@ -51,35 +55,68 @@ function covenantBreachRequestId(propertyId: string, breachType: string): string
 }
 
 /**
- * Scan distress properties and dispatch guardian approval requests for any
- * covenant breaches detected.  Safe to re-run: onConflictDoNothing prevents
- * duplicates via the deterministic requestId.
+ * Scan all active covenants in the terra_covenants table, measure them against
+ * live financials from the property registry, and dispatch guardian approval
+ * requests for any breaches detected. Safe to re-run: onConflictDoNothing
+ * prevents duplicates via the deterministic requestId built from
+ * (propertyExternalId, covenantType).
+ *
+ * If the covenants table is empty, seed it from the distress registry first so
+ * the monitor has a real working set on first run.
  */
-async function dispatchCovenantBreaches(): Promise<void> {
+export async function dispatchCovenantBreaches(): Promise<{
+  evaluated: number;
+  breaches: number;
+  approvalsCreated: number;
+  seeded: number;
+}> {
+  let seeded = 0;
   try {
-    const properties = await searchDistressedProperties({ limit: 50 });
-    const critical = properties.filter(p => (p.opportunityScore ?? 0) >= 70);
+    let measurements = await evaluateAllCovenants();
+    if (measurements.length === 0) {
+      seeded = await seedCovenantsFromDistress(12);
+      if (seeded > 0) measurements = await evaluateAllCovenants();
+    }
 
-    for (const prop of critical) {
-      const debt = prop.debtAmount ?? 0;
-      const value = prop.estimatedValue ?? 1;
-      const impliedLtv = value > 0 ? Math.min(1.0, debt / value) : 0;
-      const impliedDscr = Math.max(0.6, 1.8 - ((prop.opportunityScore ?? 70) / 100) * 1.4);
+    let approvalsCreated = 0;
+    let breachCount = 0;
+    const env = process.env["NODE_ENV"] === "production" ? "production" : "development";
 
-      const covenantType = prop.distressType === "tax_lien" ? "ltv"
-        : impliedDscr < 1.2 ? "dscr"
-        : "occupancy";
+    for (const m of measurements) {
+      // Persist this evaluation on the covenant row regardless of status.
+      await recordCovenantEvaluation(m.covenant.id, m);
 
-      const requestId = covenantBreachRequestId(prop.id, covenantType);
-      const env = process.env["NODE_ENV"] === "production" ? "production" : "development";
+      if (m.status !== "breach") continue;
+      breachCount += 1;
 
+      const requestId = covenantBreachRequestId(m.covenant.propertyExternalId, m.covenant.covenantType);
       const existing = await db
         .select({ id: guardianActionsTable.id })
         .from(guardianActionsTable)
         .where(eq(guardianActionsTable.requestId, requestId))
         .limit(1);
-
       if (existing.length > 0) continue;
+
+      const reason =
+        `Covenant breach on ${m.covenant.propertyAddress}: ${m.covenant.covenantType.toUpperCase()} ` +
+        `${m.covenant.comparator === "gte" ? "≥" : "≤"} ${m.covenant.thresholdValue} ` +
+        `— measured ${m.measuredValue}. Loan agreement ${m.covenant.loanAgreementId ?? "(linked)"}. ` +
+        `Lender: ${m.covenant.lender}.`;
+
+      const payload = {
+        covenantId: m.covenant.id,
+        propertyId: m.covenant.propertyExternalId,
+        address: m.covenant.propertyAddress,
+        lender: m.covenant.lender,
+        loanAgreementId: m.covenant.loanAgreementId,
+        loanAgreementUrl: m.covenant.loanAgreementUrl,
+        covenantType: m.covenant.covenantType,
+        threshold: Number(m.covenant.thresholdValue),
+        comparator: m.covenant.comparator,
+        measuredValue: m.measuredValue,
+        evidence: m.evidence,
+        remedyPeriodDays: m.covenant.remedyPeriodDays,
+      };
 
       const [inserted] = await db.insert(guardianActionsTable).values({
         requestId,
@@ -93,11 +130,11 @@ async function dispatchCovenantBreaches(): Promise<void> {
         environment: env,
         outcome: "require-approval",
         matchedRuleId: "terra-covenant-t1",
-        reason: `Daily covenant scan: ${covenantType} breach on ${prop.address ?? prop.id} (score ${prop.opportunityScore ?? 70}/100, LTV ${(impliedLtv * 100).toFixed(1)}%, DSCR ${impliedDscr.toFixed(2)})`,
+        reason,
         rollbackRequired: false,
         redactApplied: false,
         controlViolations: [],
-        payload: { propertyId: prop.id, address: prop.address, distressType: prop.distressType, covenantType, score: prop.opportunityScore, debtAmount: debt, estimatedValue: value },
+        payload,
         decidedAt: new Date(),
       }).onConflictDoNothing().returning();
 
@@ -112,17 +149,26 @@ async function dispatchCovenantBreaches(): Promise<void> {
           toolId: "covenant-monitor",
           approvalType: "single",
           status: "pending",
-          requiredApprovers: ["terra-risk-officer"],
+          requiredApprovers: m.covenant.requiredApprovers ?? ["terra-risk-officer"],
           approvals: [],
-          payload: { propertyId: prop.id, address: prop.address, distressType: prop.distressType, covenantType, score: prop.opportunityScore },
+          payload,
         }).onConflictDoNothing();
-        logger.info({ requestId, propertyId: prop.id, covenantType }, "[terra-covenant-monitor] Guardian approval request dispatched");
+        approvalsCreated += 1;
+        logger.info(
+          { requestId, propertyId: m.covenant.propertyExternalId, covenantType: m.covenant.covenantType, measured: m.measuredValue, threshold: m.covenant.thresholdValue },
+          "[terra-covenant-monitor] Guardian approval request dispatched",
+        );
       }
     }
 
-    logger.info({ breachCount: critical.length }, "[terra-covenant-monitor] Covenant breach scan complete");
+    logger.info(
+      { evaluated: measurements.length, breaches: breachCount, approvalsCreated, seeded },
+      "[terra-covenant-monitor] Covenant breach scan complete",
+    );
+    return { evaluated: measurements.length, breaches: breachCount, approvalsCreated, seeded };
   } catch (err) {
     logger.warn({ err }, "[terra-covenant-monitor] Guardian dispatch failed (non-fatal)");
+    return { evaluated: 0, breaches: 0, approvalsCreated: 0, seeded };
   }
 }
 

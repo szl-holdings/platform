@@ -400,6 +400,40 @@ export const insertTerraSavedOpportunitySchema = createInsertSchema(terraSavedOp
 export type InsertTerraSavedOpportunity = z.infer<typeof insertTerraSavedOpportunitySchema>;
 export type TerraSavedOpportunity = typeof terraSavedOpportunitiesTable.$inferSelect;
 
+export const terraCovenantsTable = pgTable("terra_covenants", {
+  id: serial("id").primaryKey(),
+  externalId: text("external_id").unique(),
+  propertyExternalId: text("property_external_id").notNull(),
+  propertyAddress: text("property_address").notNull(),
+  borough: text("borough"),
+  lender: text("lender").notNull(),
+  loanAgreementId: text("loan_agreement_id"),
+  loanAgreementUrl: text("loan_agreement_url"),
+  covenantType: text("covenant_type", { enum: ["dscr", "ltv", "occupancy", "debt_yield"] }).notNull(),
+  label: text("label"),
+  thresholdValue: numeric("threshold_value", { precision: 12, scale: 4 }).notNull(),
+  comparator: text("comparator", { enum: ["gte", "lte"] }).notNull().default("gte"),
+  remedyPeriodDays: integer("remedy_period_days").notNull().default(60),
+  requiredApprovers: jsonb("required_approvers").$type<string[]>().notNull().default(["terra-risk-officer"]),
+  active: boolean("active").notNull().default(true),
+  isDemo: boolean("is_demo").notNull().default(false),
+  metadata: jsonb("metadata").$type<Record<string, unknown>>().notNull().default({}),
+  lastEvaluatedAt: timestamp("last_evaluated_at"),
+  lastStatus: text("last_status"),
+  lastMeasuredValue: numeric("last_measured_value", { precision: 12, scale: 4 }),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (t) => [
+  index("terra_covenant_property_idx").on(t.propertyExternalId),
+  index("terra_covenant_lender_idx").on(t.lender),
+  index("terra_covenant_type_idx").on(t.covenantType),
+  index("terra_covenant_active_idx").on(t.active),
+]);
+
+export const insertTerraCovenantSchema = createInsertSchema(terraCovenantsTable).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertTerraCovenant = z.infer<typeof insertTerraCovenantSchema>;
+export type TerraCovenant = typeof terraCovenantsTable.$inferSelect;
+
 export const terraMlsListingsTable = pgTable("terra_mls_listings", {
   id: serial("id").primaryKey(),
   listingKey: text("listing_key").notNull().unique(),
