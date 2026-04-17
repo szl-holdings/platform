@@ -8,7 +8,7 @@ import {
   TrendingUp, DollarSign, RotateCcw, Calculator, Bot, Monitor, Building,
   BellOff, Code, Target, Phone, Calendar, Layers, Map, Crown, ChevronRight,
   Menu, X, BarChart3, Clapperboard, Power, Bell, Lock, GitCommit, Sigma,
-  FlaskConical
+  FlaskConical, ShieldCheck
 } from "lucide-react";
 import { MultiplayerSessionBanner, EcosystemNav, EnvironmentLabel, useDemoMode, MODE_LABELS, MODE_COLORS, MODE_ICONS } from "@szl-holdings/shared-ui";
 
@@ -62,6 +62,7 @@ const OPERATIONS_NAV: NavGroup[] = [
       { href: "/operations/prism/signals", label: "Signal Feed", icon: Radio },
       { href: "/operations/blocker-board", label: "Blocker Board", icon: AlertTriangle },
       { href: "/operations/approvals", label: "Approvals", icon: CheckSquare },
+      { href: "/operations/policy-approvals", label: "Policy Approvals", icon: ShieldCheck },
       { href: "/operations/trust-audit", label: "Proof Chain Audit", icon: Shield },
       { href: "/operations/inbox", label: "Command Inbox", icon: Inbox },
     ],
@@ -144,8 +145,8 @@ function SectionHeader({ label }: { label: string }) {
   );
 }
 
-function NavItem({ href, label, icon: Icon, isActive, accent }: {
-  href: string; label: string; icon: typeof LayoutDashboard; isActive: boolean; accent: string;
+function NavItem({ href, label, icon: Icon, isActive, accent, badge }: {
+  href: string; label: string; icon: typeof LayoutDashboard; isActive: boolean; accent: string; badge?: ReactNode;
 }) {
   return (
     <Link
@@ -155,8 +156,40 @@ function NavItem({ href, label, icon: Icon, isActive, accent }: {
     >
       {isActive && <div className="absolute left-0 top-1 bottom-1 w-[2px] rounded-r" style={{ background: accent }} />}
       <Icon className="w-3 h-3 shrink-0" style={{ color: isActive ? accent : "rgba(255,255,255,0.3)", opacity: isActive ? 1 : 0.7 }} />
-      <span>{label}</span>
+      <span className="flex-1 truncate">{label}</span>
+      {badge}
     </Link>
+  );
+}
+
+function PendingApprovalsBadge({ accent }: { accent: string }) {
+  const { data } = useQuery<{ data?: unknown[]; meta?: { total?: number } }>({
+    queryKey: ["guardian", "actions-pending-count"],
+    queryFn: () =>
+      fetch("/api/guardian/actions?status=pending&limit=1", { credentials: "include" })
+        .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`)))),
+    refetchInterval: 30_000,
+    staleTime: 15_000,
+    retry: 0,
+  });
+  const count = data?.meta?.total ?? data?.data?.length ?? 0;
+  if (!count) return null;
+  return (
+    <span
+      className="text-[8px] font-mono font-bold px-1 rounded shrink-0"
+      style={{
+        color: accent,
+        background: `${accent}1a`,
+        border: `1px solid ${accent}40`,
+        minWidth: 14,
+        textAlign: "center",
+        lineHeight: "13px",
+      }}
+      data-testid="policy-approvals-badge"
+      title={`${count} pending policy approval${count === 1 ? "" : "s"}`}
+    >
+      {count > 99 ? "99+" : count}
+    </span>
   );
 }
 
@@ -345,6 +378,9 @@ export function UnifiedLayout({ children, mode, onModeChange }: {
                   : location.startsWith(item.href) && item.href !== "/operations" && item.href !== "/strategy" && item.href !== "/infrastructure"
                     ? true
                     : location === item.href;
+                const badge = item.href === "/operations/policy-approvals"
+                  ? <PendingApprovalsBadge accent={accent} />
+                  : undefined;
                 return (
                   <NavItem
                     key={item.href}
@@ -353,6 +389,7 @@ export function UnifiedLayout({ children, mode, onModeChange }: {
                     icon={item.icon}
                     isActive={isActive}
                     accent={accent}
+                    badge={badge}
                   />
                 );
               })}
