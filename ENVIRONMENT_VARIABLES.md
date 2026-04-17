@@ -30,6 +30,7 @@ For security posture, see `SECURITY-CHECKLIST.md`.
 | `PORT` | Required | Port the API server listens on (set by Replit) | `3000` |
 | `NODE_ENV` | Required | Runtime environment (`development` / `production`) | `production` |
 | `SESSION_SECRET` | Required (prod) | Secret for session cookie signing. Min 32 chars. Falls back to per-process ephemeral in dev | `your-long-random-string-here` |
+| `IP_HASH_SALT` | Required (prod) | Salt for SHA-256 IP address anonymization (`lib/audit/src/ip-hash.ts`). Without a salt, hashes are precomputable over the IPv4/v6 space. Startup warning emitted if unset outside dev/test. Rotate by updating value — historical hashes become un-correlatable (forward-only). | Random 32+ char string |
 | `ISSUER_URL` | Required | OIDC issuer URL for authentication | `https://your-app.replit.app` |
 | `PUBLIC_APP_URL` | Required (prod) | Canonical public URL (used in OG tags, emails, canonical links) | `https://szlholdings.com` |
 | `CORS_ORIGINS` | Required (prod) | Comma-separated list of allowed CORS origins | `https://szlholdings.com,https://app.szlholdings.com` |

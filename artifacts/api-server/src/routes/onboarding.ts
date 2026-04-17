@@ -22,6 +22,7 @@ import {
 import { eq, and, gt } from "drizzle-orm";
 import { authMiddleware, isElevatedUser } from "../middlewares/auth";
 import { writeLimiter } from "../middlewares/rate-limiters";
+import { hashIp } from "@szl-holdings/audit";
 import { validateBody } from "../lib/validation";
 import { sendSuccess, sendCreated, sendBadRequest, sendForbidden, handleRouteError, sendNotFound } from "../lib/api-response";
 import { sendEmail, buildOrgInviteEmail } from "../lib/email";
@@ -167,7 +168,7 @@ router.post(
         action: "org_created",
         entityType: "organization",
         entityId: String(org.id),
-        ipAddress: req.ip ?? null,
+        ipAddress: hashIp(req.ip ?? null),
         newValues: { name, slug, plan },
       });
 
@@ -375,7 +376,7 @@ router.post(
         action: "onboarding_completed",
         entityType: "organization",
         entityId: String(org.id),
-        ipAddress: req.ip ?? null,
+        ipAddress: hashIp(req.ip ?? null),
       });
 
       logger.info({ userId: user.id, orgId: org.id }, "[onboarding] Onboarding completed");

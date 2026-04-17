@@ -4,6 +4,7 @@ import { type Request, type Response } from "express";
 import { db, usersTable, sessionsTable, rolesTable, userRolesTable, azureTenantsTable, orgMembersTable, organizationsTable } from "@szl-holdings/db";
 import { eq, and, gt } from "drizzle-orm";
 import type { RoleName } from "@szl-holdings/db";
+import { hashIp } from "@szl-holdings/audit";
 
 export const ISSUER_URL = process.env.ISSUER_URL ?? "https://replit.com/oidc";
 export const SESSION_COOKIE = "sid";
@@ -281,7 +282,7 @@ export async function upsertUserFromAzureAd(claims: Record<string, unknown>): Pr
 export async function createOidcSession(userId: number, ipAddress: string | null, userAgent: string | null): Promise<string> {
   const token = crypto.randomBytes(32).toString("hex");
   const expiresAt = new Date(Date.now() + SESSION_TTL);
-  await db.insert(sessionsTable).values({ userId, token, expiresAt, ipAddress, userAgent });
+  await db.insert(sessionsTable).values({ userId, token, expiresAt, ipAddress: hashIp(ipAddress), userAgent });
   return token;
 }
 

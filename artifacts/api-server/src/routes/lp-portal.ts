@@ -19,6 +19,7 @@ import {
   handleRouteError,
 } from "../lib/api-response";
 import { authMiddleware, parseIdParam } from "../middlewares/auth";
+import { hashIp } from "@szl-holdings/audit";
 
 const router: IRouter = Router();
 
@@ -334,7 +335,7 @@ router.post("/lp-portal/lps/:id/activity", optionalAuth, async (req, res) => {
       target: String(body.target).slice(0, 280),
       documentId: typeof body.documentId === "number" ? body.documentId : null,
       reportId: typeof body.reportId === "number" ? body.reportId : null,
-      ipAddress: (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() || req.ip || null,
+      ipAddress: hashIp((req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() || req.ip || null),
       userAgent: (req.headers["user-agent"] as string) || null,
       isDemo,
     }).returning();

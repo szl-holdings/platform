@@ -11,6 +11,7 @@
 
 import { db, alloyAuditLogTable } from "@szl-holdings/db";
 import type { Request } from "express";
+import { hashIp } from "./ip-hash.js";
 
 export type AdminActionClass =
   | "user_management"
@@ -66,7 +67,7 @@ export async function writeEnrichedAudit(params: EnrichedAuditParams): Promise<v
       correlationId: params.correlationId ?? null,
       serviceAttribution: params.serviceAttribution ?? null,
       adminActionClass: params.adminActionClass ?? null,
-      ipAddress: params.ipAddress ?? null,
+      ipAddress: hashIp(params.ipAddress),
       userAgent: params.userAgent ?? null,
       metadata: {
         ...((params.metadata ?? {}) as Record<string, unknown>),
@@ -88,7 +89,7 @@ export async function writeExportAudit(params: ExportAuditParams): Promise<void>
       correlationId: params.correlationId ?? null,
       serviceAttribution: "export-service",
       adminActionClass: "data_export",
-      ipAddress: params.ipAddress ?? null,
+      ipAddress: hashIp(params.ipAddress),
       userAgent: params.userAgent ?? null,
       after: {
         exportId: params.exportId,

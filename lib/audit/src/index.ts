@@ -1,6 +1,8 @@
 import { db, activityLogTable, auditEventsTable, auditLogsTable } from "@szl-holdings/db";
 import { desc, eq, and, like } from "drizzle-orm";
 import type { Request, Response, NextFunction } from "express";
+import { hashIp } from "./ip-hash.js";
+export { hashIp };
 
 export { activityLogTable, auditEventsTable, auditLogsTable };
 export {
@@ -76,7 +78,7 @@ export async function logActivity(params: LogActivityParams): Promise<void> {
       resourceId: params.resourceId,
       description: params.description,
       metadata: params.metadata ?? null,
-      ipAddress: params.ipAddress ?? null,
+      ipAddress: hashIp(params.ipAddress),
     });
   } catch {
   }

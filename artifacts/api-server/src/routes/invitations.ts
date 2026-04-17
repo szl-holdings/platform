@@ -16,6 +16,7 @@ import { eq, and, gt } from "drizzle-orm";
 import { authMiddleware } from "../middlewares/auth";
 import { writeLimiter } from "../middlewares/rate-limiters";
 import { logger } from "../lib/logger";
+import { hashIp } from "@szl-holdings/audit";
 import { validateBody } from "../lib/validation";
 import { sendError, sendUnauthorized, sendNotFound, sendForbidden, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { sendEmail, buildOrgInviteEmail } from "../lib/email";
@@ -48,7 +49,7 @@ async function writeAuditEvent(params: {
       action: params.action,
       entityType: params.entityType,
       entityId: params.entityId,
-      ipAddress: params.ipAddress ?? null,
+      ipAddress: hashIp(params.ipAddress ?? null),
       newValues: params.newValues ?? null,
     };
     await db.insert(auditEventsTable).values(row);

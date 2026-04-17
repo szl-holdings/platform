@@ -18,6 +18,7 @@
 
 import { Router, type IRouter, type Request, type Response } from "express";
 import { db, platformSettingsTable, tenantSettingsTable, userSettingsTable, settingsAuditLogTable } from "@szl-holdings/db";
+import { hashIp } from "@szl-holdings/audit";
 import { eq, and, desc, asc } from "drizzle-orm";
 import { sendSuccess, sendCreated, sendNoContent, sendNotFound, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
@@ -73,7 +74,7 @@ async function writeAudit(params: {
       action: params.action,
       oldValue: params.oldValue ?? null,
       newValue: params.newValue ?? null,
-      ipAddress: params.ipAddress ?? null,
+      ipAddress: hashIp(params.ipAddress ?? null),
       userAgent: params.userAgent ?? null,
     });
   } catch {

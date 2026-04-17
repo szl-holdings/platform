@@ -1,8 +1,10 @@
 import type { IRouter } from "express";
-import { db, usersTable, rolesTable, userRolesTable, auditEventsTable, exportJobsTable, orgMembersTable, organizationsTable } from "@szl-holdings/db";
+import { db, usersTable, rolesTable, userRolesTable, auditEventsTable, exportJobsTable, orgMembersTable, organizationsTable, type RoleName } from "@szl-holdings/db";
 import { desc, sql, ilike, or, eq, and, inArray, gte, lte } from "drizzle-orm";
 import { requireRole } from "../../middlewares/auth.js";
+import { hashIp } from "@szl-holdings/audit";
 import { isFlagEnabled } from "../../lib/platform-flags.js";
+import { revokeUserSessionsOnRoleChange } from "../../middlewares/session-policy.js";
 import { z } from "zod";
 import { validateBody } from "../../lib/validation.js";
 import { sendError, sendNotFound, sendForbidden, sendBadRequest } from "../../lib/api-response.js";
@@ -20,6 +22,10 @@ const roleAssignSchema = z.object({
 });
 const deactivateSchema = z.object({
   active: z.boolean(),
+});
+const assignRolesSchema = z.object({
+  roles: z.array(z.string().min(1)).min(1, "At least one role required"),
+  reason: z.string().max(2000).optional(),
 });
 
 export function register(router: IRouter): void {
@@ -53,7 +59,7 @@ export function register(router: IRouter): void {
       const { active } = req.body as z.infer<typeof deactivateSchema>;
       const [updated] = await db.update(usersTable).set({ isActive: active, updatedAt: new Date() }).where(eq(usersTable.id, userId)).returning({ id: usersTable.id, isActive: usersTable.isActive });
       if (!updated) { sendNotFound(res, "User not found"); return; }
-      await db.insert(auditEventsTable).values({ userId: req.user?.id ?? null, action: active ? "user.activated" : "user.deactivated", entityType: "user", entityId: String(userId), newValues: { active }, ipAddress: req.ip ?? null, userAgent: req.headers["user-agent"] ?? null });
+      await db.insert(auditEventsTable).values({ userId: req.user?.id ?? null, action: active ? "user.activated" : "user.deactivated", entityType: "user", entityId: String(userId), newValues: { active }, ipAddress: hashIp(req.ip ?? null), userAgent: req.headers["user-agent"] ?? null });
       res.json({ id: updated.id, isActive: updated.isActive });
     } catch {
       sendError(res, "Failed to update user status", 500, "INTERNAL_ERROR");
@@ -74,7 +80,7 @@ export function register(router: IRouter): void {
       } else {
         await db.delete(userRolesTable).where(and(eq(userRolesTable.userId, userId), eq(userRolesTable.roleId, roleId)));
       }
-      await db.insert(auditEventsTable).values({ userId: req.user?.id ?? null, action: action === "add" ? "user.role.assigned" : "user.role.removed", entityType: "user", entityId: String(userId), newValues: { roleName: role.name, roleId, targetUserEmail: targetUser.email, action }, ipAddress: req.ip ?? null, userAgent: req.headers["user-agent"] ?? null });
+      await db.insert(auditEventsTable).values({ userId: req.user?.id ?? null, action: action === "add" ? "user.role.assigned" : "user.role.removed", entityType: "user", entityId: String(userId), newValues: { roleName: role.name, roleId, targetUserEmail: targetUser.email, action }, ipAddress: hashIp(req.ip ?? null), userAgent: req.headers["user-agent"] ?? null });
       res.json({ ok: true, userId, roleId, roleName: role.name, action });
     } catch {
       sendError(res, "Failed to update user role", 500, "INTERNAL_ERROR");
@@ -212,6 +218,63 @@ export function register(router: IRouter): void {
       res.status(200).json({ deletedCount: result.deletedCount, message: "Sessions terminated" });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Failed to terminate sessions";
+      sendError(res, message, 500, "INTERNAL_ERROR");
+    }
+  });
+
+  router.put("/admin/users/:userId/roles", requireRole("super_admin"), validateBody(assignRolesSchema), async (req, res) => {
+    try {
+      const targetUserId = parseInt(req.params["userId"] as string, 10);
+      if (isNaN(targetUserId) || targetUserId < 1) { sendBadRequest(res, "Invalid user ID"); return; }
+
+      if (targetUserId === req.user!.id) {
+        sendForbidden(res, "Cannot modify your own roles");
+        return;
+      }
+
+      const [targetUser] = await db.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.id, targetUserId)).limit(1);
+      if (!targetUser) { sendNotFound(res, "User"); return; }
+
+      const { roles, reason } = req.body as z.infer<typeof assignRolesSchema>;
+
+      const roleRows = await db.select().from(rolesTable).where(inArray(rolesTable.name, roles as RoleName[]));
+      if (roleRows.length !== roles.length) {
+        const foundNames = roleRows.map((r) => r.name as string);
+        const invalid = (roles as string[]).filter((r) => !foundNames.includes(r));
+        sendBadRequest(res, `Unknown role(s): ${invalid.join(", ")}`);
+        return;
+      }
+
+      await db.transaction(async (tx) => {
+        await tx.delete(userRolesTable).where(eq(userRolesTable.userId, targetUserId));
+        for (const role of roleRows) {
+          await tx.insert(userRolesTable).values({ userId: targetUserId, roleId: role.id }).onConflictDoNothing();
+        }
+        await tx.insert(auditEventsTable).values({
+          userId: req.user!.id,
+          action: "admin_role_assignment",
+          entityType: "user",
+          entityId: String(targetUserId),
+          ipAddress: hashIp(req.ip ?? null),
+          userAgent: req.headers["user-agent"] ?? null,
+          newValues: { targetUserId, roles, reason: reason ?? "admin_role_assignment", assignedBy: req.user!.id },
+        });
+      });
+
+      const { revokedCount } = await revokeUserSessionsOnRoleChange({
+        userId: targetUserId,
+        changedByUserId: req.user!.id,
+        reason: reason ?? "admin_role_assignment",
+      });
+
+      res.status(200).json({
+        userId: targetUserId,
+        roles,
+        revokedSessionCount: revokedCount,
+        message: "Roles updated and existing sessions revoked",
+      });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Failed to update roles";
       sendError(res, message, 500, "INTERNAL_ERROR");
     }
   });

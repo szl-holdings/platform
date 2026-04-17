@@ -18,6 +18,7 @@ import { db, sessionsTable, usersTable, auditEventsTable, userRolesTable, rolesT
 import { eq, and, gt, desc } from "drizzle-orm";
 import { SESSION_COOKIE, SESSION_TTL, setSessionCookie } from "../lib/auth";
 import { logger } from "../lib/logger";
+import { hashIp } from "@szl-holdings/audit";
 import type { RoleName } from "@szl-holdings/db";
 import type { AuthenticatedUser } from "./auth";
 
@@ -135,7 +136,7 @@ async function writeAuditEvent(params: {
       action: params.action,
       entityType: params.entityType,
       entityId: params.entityId ?? undefined,
-      ipAddress: params.ipAddress ?? null,
+      ipAddress: hashIp(params.ipAddress),
       userAgent: params.userAgent ?? null,
       newValues: params.newValues ?? null,
     };
@@ -143,6 +144,53 @@ async function writeAuditEvent(params: {
   } catch (err) {
     logger.error({ err }, "Failed to write audit event");
   }
+}
+
+/**
+ * Revoke all active sessions for a user after a role change.
+ *
+ * Call this whenever a user's roles are assigned, updated, or removed so that
+ * privilege escalation or de-escalation takes effect immediately. The user
+ * will be required to re-authenticate with their new role set.
+ *
+ * Writes an audit event so the revocation is traceable.
+ */
+export async function revokeUserSessionsOnRoleChange(params: {
+  userId: number;
+  changedByUserId: number | null;
+  reason?: string;
+}): Promise<{ revokedCount: number }> {
+  const { userId, changedByUserId, reason } = params;
+
+  const sessions = await db
+    .select({ id: sessionsTable.id })
+    .from(sessionsTable)
+    .where(eq(sessionsTable.userId, userId));
+
+  if (sessions.length > 0) {
+    for (const s of sessions) {
+      await db.delete(sessionsTable).where(eq(sessionsTable.id, s.id));
+    }
+
+    await writeAuditEvent({
+      userId: changedByUserId,
+      action: "role_change_session_revocation",
+      entityType: "user",
+      entityId: String(userId),
+      newValues: {
+        targetUserId: userId,
+        revokedSessionCount: sessions.length,
+        reason: reason ?? "role change",
+      },
+    });
+
+    logger.info(
+      { userId, changedByUserId, revokedCount: sessions.length },
+      "Sessions revoked on role change",
+    );
+  }
+
+  return { revokedCount: sessions.length };
 }
 
 /**
@@ -205,7 +253,7 @@ export async function startImpersonation(params: {
     userId: targetUserId,
     token,
     expiresAt,
-    ipAddress,
+    ipAddress: hashIp(ipAddress),
     userAgent: impersonationMeta,
   });
 

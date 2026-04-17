@@ -8,6 +8,7 @@ import { logActivity } from "../lib/activity-logger";
 import { createAuthService } from "@szl-holdings/auth";
 import { issueWsTicket } from "../lib/websocket.js";
 import { getSessionToken, getSessionUser } from "../lib/auth";
+import { hashIp } from "@szl-holdings/audit";
 import { z } from "zod";
 import { validateBody, loginPasswordSchema } from "../lib/validation";
 
@@ -51,7 +52,7 @@ router.post("/auth/login", validateBody(loginBodySchema), async (req, res) => {
       userId: user.id,
       token,
       expiresAt,
-      ipAddress: req.ip ?? null,
+      ipAddress: hashIp(req.ip ?? null),
       userAgent: req.headers["user-agent"] ?? null,
     }).returning();
 
@@ -122,7 +123,7 @@ router.post("/auth/sessions", authMiddleware(), async (req, res) => {
       userId: req.user!.id,
       token,
       expiresAt,
-      ipAddress: req.ip ?? null,
+      ipAddress: hashIp(req.ip ?? null),
       userAgent: req.headers["user-agent"] ?? null,
     }).returning();
 
@@ -371,7 +372,7 @@ router.get("/auth/verify-email", async (req, res) => {
       userId: user.id,
       token: sessionToken,
       expiresAt,
-      ipAddress: req.ip ?? null,
+      ipAddress: hashIp(req.ip ?? null),
       userAgent: req.headers["user-agent"] ?? null,
     });
 
@@ -432,7 +433,7 @@ router.post("/auth/login-password", validateBody(loginPasswordSchema), async (re
       userId: user.id,
       token: sessionToken,
       expiresAt,
-      ipAddress: req.ip ?? null,
+      ipAddress: hashIp(req.ip ?? null),
       userAgent: req.headers["user-agent"] ?? null,
     });
 

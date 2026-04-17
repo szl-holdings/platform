@@ -1,6 +1,6 @@
 # SZL Holdings — Security Checklist (API & Credentials)
 
-**Last updated:** 2026-04-16
+**Last updated:** 2026-04-17
 **Audience:** Enterprise architects, Series A technical advisors, security reviewers, compliance officers
 **Scope:** `artifacts/api-server` — multi-tenant Express/Node.js API
 
@@ -155,6 +155,15 @@ If a credential is accidentally committed:
 | D1 | All DB queries use parameterized statements (Drizzle ORM) | ✅ Done | No raw SQL string interpolation |
 | D2 | Object storage objects are private by default | ✅ Done | `routes/documents.ts` — explicit ACL set |
 | D3 | Soft deletes used where data integrity matters | ✅ Done | Certification programs use `isActive: false`; firestorm uses soft-delete patterns |
+| D4 | IP addresses anonymized before storage | ✅ Done Apr-2026 | `hashIp()` in `lib/audit/src/ip-hash.ts` applies SHA-256 with optional `IP_HASH_SALT` env var. Applied to all audit log and session storage paths. Raw IPs are never persisted. |
+
+---
+
+## Dependency Pinning
+
+| # | Control | Status | Evidence |
+|---|---------|--------|----------|
+| DP1 | Exact dependency versions pinned for all installs | ✅ Formally Accepted Apr-2026 | `pnpm-lock.yaml` pins exact versions for every package. CI uses `pnpm install --frozen-lockfile` — fresh installs never run without the lockfile. The `^` semver ranges in `package.json` only apply to manual installs without the lockfile, which don't occur in CI or production. Supply chain protection via `dependency-review.yml` (KG012). No further action required. |
 
 ---
 
@@ -181,7 +190,7 @@ The following gaps were identified in the Phase 2–3 Architecture, Auth & Tenan
 | AF-007 | `vessels.*` DB tables (fleet, vessel, positions, cargo, routes) missing `org_id` column | P1 | ⚠️ Open |
 | AF-004 | Backup export endpoint accepts arbitrary `orgId` without verifying admin authority | P2 | ⚠️ Open |
 | AF-008 | `conversations` table missing `org_id` — AI chat history not tenant-scoped at DB level | P2 | ⚠️ Open |
-| AF-010 | Sessions not invalidated on role change (up to 30-day exposure window) | P2 | ⚠️ Open |
+| AF-010 | Sessions not invalidated on role change (up to 30-day exposure window) | P2 | ✅ Resolved Apr-2026 — `revokeUserSessionsOnRoleChange()` in `middlewares/session-policy.ts` deletes all sessions and writes audit event; called on SCIM group changes and new `PUT /admin/users/:userId/roles` endpoint. |
 | AF-012 | Sessions not invalidated on `SESSION_SECRET` rotation | P2 | ⚠️ Open |
 | AF-013 | Internal token verification duplicated with divergent patterns across middlewares | P2 | ⚠️ Open |
 | AF-014 | No ORM-layer cross-tenant query guard — developer can accidentally write cross-tenant query | P2 | ⚠️ Open |
@@ -196,7 +205,7 @@ The following gaps were identified in the Phase 2–3 Architecture, Auth & Tenan
 | AF-001 | `adminGuard` non-timing-safe internal token comparison | P1 | Sprint 3 | 🟡 Conditional |
 | AF-003 / AF-007 | Vessels schema + routes lack tenant scoping | P1 | Sprint 3 | 🟡 Conditional |
 | KG009 | OTEL exporter not wired for production | P1 | Pre-deploy | 🔴 Hard blocker (LB-006) |
-| KG026 | MFA not implemented | P1 | Enterprise tier launch | 🟡 Conditional (LC-005) |
+| KG026 | MFA not implemented | P1 | Enterprise tier launch | **Formally Accepted Apr-2026.** IdP-level MFA (Replit OIDC / Azure AD) is the current control. Platform-native MFA on roadmap for enterprise tier. Risk accepted with IdP enforcement requirement for enterprise pilots. |
 | KG027 | External uptime monitoring absent | P1 | Pre-deploy | 🔴 Hard blocker (LB-002) |
 | KG028 | Sentry / error tracking not in production | P1 | Pre-deploy | 🔴 Hard blocker (LB-003) |
 | KG011 | CodeQL scanning not configured in CI | P1 | Sprint 3 | 🟡 Conditional (LC-002) |
@@ -215,4 +224,6 @@ The following gaps were identified in the Phase 2–3 Architecture, Auth & Tenan
 
 *Phase 0–1 audit (2026-04-16): No hardcoded credentials found in source — all 175 env vars use `process.env.*` references. Audit confirmed via grep scan of all artifacts, lib, and packages directories. Session secret hygiene verified (SESSION_TTL_MS default = 7 days per env-config.ts). See FULL_SYSTEM_INVENTORY.md Appendix A for reproducible verification commands.*
 
-*Last verified against code on 2026-04-16*
+*Last verified against code on 2026-04-17*
+
+*Apr-2026 Diligence Sprint: 5 pre-commercial security gaps closed or formally accepted. IP hashing (KG034), session revocation on role change (AF-010), input validation confirmation (KG003–KG008 verified), MFA formal acceptance (KG026), dependency pinning formal acceptance (KG035). See KNOWN-GAPS.md rev 9 incident log for full details.*

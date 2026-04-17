@@ -26,6 +26,7 @@ import {
   auditEventsTable,
 } from "@szl-holdings/db";
 import { eq, desc, ilike, or, sql, count, and } from "drizzle-orm";
+import { hashIp } from "@szl-holdings/audit";
 import { sendSuccess, sendNotFound, handleRouteError, parsePagination } from "../lib/api-response";
 import { authMiddleware, parseIdParam, requireRole } from "../middlewares/auth";
 import { sendEmail, buildInquiryAckEmail, buildLeadNotificationEmail, INTERNAL_EMAIL } from "../lib/email";
@@ -546,7 +547,7 @@ router.post("/investors/nda/accept", authMiddleware(), async (req, res) => {
       action: INVESTOR_NDA_ACTION,
       entityType: "investor_data_room",
       entityId: "data-room-nda",
-      ipAddress: req.ip ?? null,
+      ipAddress: hashIp(req.ip ?? null),
       userAgent: req.headers["user-agent"] ?? null,
       newValues: { acceptedAt: new Date().toISOString(), userAgent: req.headers["user-agent"] ?? null },
     });

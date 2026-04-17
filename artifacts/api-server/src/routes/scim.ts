@@ -23,6 +23,7 @@
 import { Router, type Request, type Response, type NextFunction } from "express";
 import crypto from "crypto";
 import { logger } from "../lib/logger";
+import { revokeUserSessionsOnRoleChange } from "../middlewares/session-policy";
 import { db } from "@szl-holdings/db";
 import {
   usersTable,
@@ -1002,20 +1003,37 @@ router.patch("/scim/v2/Groups/:id", scimBearerAuth, async (req: Request, res: Re
             await db.insert(scimGroupMembersTable).values(
               existingUsers.map((u) => ({ groupId, userId: u.id }))
             ).onConflictDoNothing();
+            for (const u of existingUsers) {
+              await revokeUserSessionsOnRoleChange({ userId: u.id, changedByUserId: null, reason: "scim_group_member_add" }).catch((err) => {
+                logger.error({ err, userId: u.id }, "[scim] session revocation failed on member add");
+              });
+            }
           }
         } else if (opName === "remove") {
           if (memberIds.length > 0) {
             await db.delete(scimGroupMembersTable).where(
               and(eq(scimGroupMembersTable.groupId, groupId), inArray(scimGroupMembersTable.userId, memberIds))
             );
+            for (const id of memberIds) {
+              await revokeUserSessionsOnRoleChange({ userId: id, changedByUserId: null, reason: "scim_group_member_remove" }).catch((err) => {
+                logger.error({ err, userId: id }, "[scim] session revocation failed on member remove");
+              });
+            }
           }
         } else if (opName === "replace") {
+          const previousMembers = await db.select({ userId: scimGroupMembersTable.userId }).from(scimGroupMembersTable).where(eq(scimGroupMembersTable.groupId, groupId));
           await db.delete(scimGroupMembersTable).where(eq(scimGroupMembersTable.groupId, groupId));
           if (memberIds.length > 0) {
             const existingUsers = await db.select({ id: usersTable.id }).from(usersTable).where(inArray(usersTable.id, memberIds));
             await db.insert(scimGroupMembersTable).values(
               existingUsers.map((u) => ({ groupId, userId: u.id }))
             ).onConflictDoNothing();
+          }
+          const allAffected = new Set([...previousMembers.map((m) => m.userId), ...memberIds]);
+          for (const uid of allAffected) {
+            await revokeUserSessionsOnRoleChange({ userId: uid, changedByUserId: null, reason: "scim_group_replace" }).catch((err) => {
+              logger.error({ err, userId: uid }, "[scim] session revocation failed on group replace");
+            });
           }
         }
       }

@@ -33,6 +33,7 @@ import {
 import { eq, and, ne } from "drizzle-orm";
 import { authMiddleware } from "../middlewares/auth";
 import { writeLimiter, readLimiter } from "../middlewares/rate-limiters";
+import { hashIp } from "@szl-holdings/audit";
 import { validateBody } from "../lib/validation";
 import {
   sendSuccess,
@@ -190,7 +191,7 @@ router.put(
         action: "org_profile_updated",
         entityType: "organization",
         entityId: String(org.id),
-        ipAddress: req.ip ?? null,
+        ipAddress: hashIp(req.ip ?? null),
         newValues: updates,
       });
 
@@ -318,7 +319,7 @@ router.delete(
         action: "member_removed",
         entityType: "org_member",
         entityId: String(targetMembership.id),
-        ipAddress: req.ip ?? null,
+        ipAddress: hashIp(req.ip ?? null),
         newValues: { orgId: org.id, targetUserId },
       });
 
@@ -396,7 +397,7 @@ router.put(
         action: "member_role_updated",
         entityType: "org_member",
         entityId: String(targetMembership.id),
-        ipAddress: req.ip ?? null,
+        ipAddress: hashIp(req.ip ?? null),
         newValues: { orgId: org.id, targetUserId, oldRole: targetMembership.role, newRole: role },
       });
 
@@ -603,7 +604,7 @@ router.post("/user/deactivate", writeLimiter, authMiddleware(), async (req: Requ
       action: "account_deactivated",
       entityType: "user",
       entityId: String(userId),
-      ipAddress: req.ip ?? null,
+      ipAddress: hashIp(req.ip ?? null),
       newValues: { reason: reason ?? null },
     });
 

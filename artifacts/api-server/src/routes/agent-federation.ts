@@ -3,6 +3,7 @@ import rateLimit from "express-rate-limit";
 import { AGENT_REGISTRY, type AgentDefinition } from "./nuro-mesh";
 import { logger } from "../lib/logger";
 import { db, auditEventsTable } from "@szl-holdings/db";
+import { hashIp } from "@szl-holdings/audit";
 import { z } from "zod";
 import { validateBody } from "../lib/validation";
 
@@ -180,7 +181,7 @@ federationRouter.post("/federation/agents/:agentId/chat", async (req, res) => {
 
   const start = Date.now();
 
-  const callerIp = req.ip ?? "unknown";
+  const callerIp = hashIp(req.ip ?? null) ?? "unknown";
   const auditEntry = {
     event: "federation_delegation",
     agentId: agent.id,
