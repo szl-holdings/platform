@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -156,6 +156,64 @@ const DOMAIN_CONFIGS: Record<DataDomain, { label: string; endpoint: string; colo
 
 const STATUSES = ["all", "active", "completed", "pending", "draft", "open", "closed", "canceled"];
 
+interface ExportJob {
+  exportId: string;
+  name: string;
+  dataSource: string;
+  format: string;
+  status: "pending" | "processing" | "completed" | "failed";
+  rowCount: number | null;
+  fileSizeBytes: number | null;
+  expiresAt: string | null;
+  completedAt: string | null;
+  errorMessage: string | null;
+  triggeredByEmail: string | null;
+  filterParams: string | null;
+  downloadAvailable: boolean;
+  expired?: boolean;
+  createdAt: string;
+}
+
+interface ActiveExport {
+  exportId: string;
+  status: "pending" | "processing" | "completed" | "failed";
+  progress: number;
+  name: string;
+  format: string;
+  startedAt: number;
+}
+
+function formatBytes(bytes: number | null): string {
+  if (!bytes) return "—";
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function formatRelative(iso: string | null): string {
+  if (!iso) return "—";
+  const diff = Date.now() - new Date(iso).getTime();
+  if (diff < 60_000) return "just now";
+  if (diff < 3_600_000) return `${Math.floor(diff / 60_000)}m ago`;
+  if (diff < 86_400_000) return `${Math.floor(diff / 3_600_000)}h ago`;
+  return new Date(iso).toLocaleDateString();
+}
+
+function StatusBadge({ status }: { status: string }) {
+  const colors: Record<string, string> = {
+    completed: "bg-emerald-950 text-emerald-400 border-emerald-800",
+    failed: "bg-red-950 text-red-400 border-red-800",
+    processing: "bg-blue-950 text-blue-400 border-blue-800",
+    pending: "bg-zinc-800 text-zinc-400 border-zinc-700",
+  };
+  return (
+    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded border text-xs font-medium ${colors[status] ?? colors.pending}`}>
+      {status === "processing" && <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />}
+      {status}
+    </span>
+  );
+}
+
 function ColumnToggle({ col, enabled, onToggle }: { col: ColumnDef; enabled: boolean; onToggle: () => void }) {
   return (
     <label className="flex items-center gap-2 cursor-pointer py-1 group">
@@ -185,6 +243,20 @@ async function fetchPreviewData(domain: DataDomain, filters: Record<string, stri
   return Array.isArray(json) ? json : (json.data ?? []);
 }
 
+async function fetchExportHistory(): Promise<ExportJob[]> {
+  const res = await fetch(`${API}/exports/history?limit=20`, { credentials: "include" });
+  if (!res.ok) return [];
+  const json = await res.json();
+  return Array.isArray(json) ? json : (json.data ?? []);
+}
+
+async function pollJobStatus(exportId: string): Promise<ExportJob | null> {
+  const res = await fetch(`${API}/exports/jobs/${exportId}`, { credentials: "include" });
+  if (!res.ok) return null;
+  const json = await res.json();
+  return (json.data ?? json) as ExportJob;
+}
+
 export default function ExportBuilder() {
   const [domain, setDomain] = useState<DataDomain>("audit_events");
   const [format, setFormat] = useState<"csv" | "pdf">("csv");
@@ -202,9 +274,12 @@ export default function ExportBuilder() {
     new Set(config.columns.filter(c => c.default).map(c => c.key))
   );
 
-  const [exporting, setExporting] = useState(false);
+  const [activeExport, setActiveExport] = useState<ActiveExport | null>(null);
   const [exportMsg, setExportMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [previewMode, setPreviewMode] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   const { data: previewData, isLoading: previewLoading } = useQuery({
     queryKey: ["export-preview", domain, filters],
@@ -213,6 +288,13 @@ export default function ExportBuilder() {
       dateTo: filters.dateTo || "",
     }),
     enabled: previewMode,
+  });
+
+  const { data: historyData, refetch: refetchHistory } = useQuery({
+    queryKey: ["export-history"],
+    queryFn: fetchExportHistory,
+    enabled: showHistory,
+    refetchInterval: activeExport ? 5000 : false,
   });
 
   const handleDomainChange = (d: DataDomain) => {
@@ -227,7 +309,7 @@ export default function ExportBuilder() {
     setEnabledColumns(prev => {
       const next = new Set(prev);
       if (next.has(key)) {
-        if (next.size === 1) return prev; // keep at least 1
+        if (next.size === 1) return prev;
         next.delete(key);
       } else {
         next.add(key);
@@ -236,11 +318,72 @@ export default function ExportBuilder() {
     });
   };
 
+  useEffect(() => {
+    if (!activeExport) return;
+    if (activeExport.status === "completed" || activeExport.status === "failed") return;
+
+    if (pollRef.current) clearInterval(pollRef.current);
+    pollRef.current = setInterval(async () => {
+      const job = await pollJobStatus(activeExport.exportId);
+      if (!job) return;
+
+      const elapsed = (Date.now() - activeExport.startedAt) / 1000;
+      const estimatedProgress = Math.min(90, elapsed * 15);
+
+      if (job.status === "completed") {
+        if (pollRef.current) clearInterval(pollRef.current);
+        setActiveExport(prev => prev ? { ...prev, status: "completed", progress: 100 } : null);
+        refetchHistory();
+        await triggerDownload(activeExport.exportId, activeExport.format, activeExport.name);
+        setTimeout(() => {
+          setActiveExport(null);
+          setExportMsg({ type: "success", text: `Export complete — ${job.rowCount?.toLocaleString() ?? 0} rows, ${formatBytes(job.fileSizeBytes)}` });
+        }, 600);
+      } else if (job.status === "failed") {
+        if (pollRef.current) clearInterval(pollRef.current);
+        setActiveExport(prev => prev ? { ...prev, status: "failed", progress: 0 } : null);
+        setTimeout(() => {
+          setActiveExport(null);
+          setExportMsg({ type: "error", text: `Export failed: ${job.errorMessage ?? "Unknown error"}` });
+        }, 600);
+      } else {
+        setActiveExport(prev => prev ? { ...prev, status: job.status, progress: estimatedProgress } : null);
+      }
+    }, 1500);
+
+    return () => { if (pollRef.current) clearInterval(pollRef.current); };
+  }, [activeExport?.exportId]);
+
+  async function triggerDownload(exportId: string, fmt: string, name: string) {
+    try {
+      const res = await fetch(`${API}/exports/jobs/${exportId}/download`, { credentials: "include" });
+      if (!res.ok) return;
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${name.replace(/[^a-z0-9]/gi, "-").toLowerCase()}.${fmt}`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+    }
+  }
+
+  async function handleReDownload(exportId: string, fmt: string, name: string) {
+    setDownloadingId(exportId);
+    try {
+      await triggerDownload(exportId, fmt, name);
+    } finally {
+      setDownloadingId(null);
+    }
+  }
+
   const handleExport = async () => {
-    setExporting(true);
+    if (activeExport) return;
     setExportMsg(null);
     try {
       const body: Record<string, unknown> = {
+        domain,
         format,
         schedule: filters.schedule || "once",
         columns: activeColumns.map(c => c.key),
@@ -250,9 +393,8 @@ export default function ExportBuilder() {
       if (filters.search) body["search"] = filters.search;
       if (filters.status && filters.status !== "all") body["status"] = filters.status;
       if (filters.orgId && !isNaN(parseInt(filters.orgId))) body["orgId"] = parseInt(filters.orgId);
-      if (filters.schedule === "monthly") body["schedule"] = "monthly";
 
-      const res = await fetch(`${API}${config.endpoint}`, {
+      const res = await fetch(`${API}/exports/enqueue`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -264,18 +406,19 @@ export default function ExportBuilder() {
         throw new Error(err.error || `HTTP ${res.status}`);
       }
 
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${domain}-export-${new Date().toISOString().slice(0, 10)}.${format}`;
-      a.click();
-      URL.revokeObjectURL(url);
-      setExportMsg({ type: "success", text: `${format.toUpperCase()} export downloaded successfully` });
+      const json = await res.json();
+      const data = json.data ?? json;
+      setActiveExport({
+        exportId: data.exportId,
+        status: "pending",
+        progress: 5,
+        name: data.name,
+        format: data.format,
+        startedAt: Date.now(),
+      });
+      if (!showHistory) setShowHistory(true);
     } catch (err) {
       setExportMsg({ type: "error", text: err instanceof Error ? err.message : "Export failed" });
-    } finally {
-      setExporting(false);
     }
   };
 
@@ -294,24 +437,75 @@ export default function ExportBuilder() {
           <p className="text-xs text-zinc-500">Select data source, apply filters, pick columns, and export</p>
         </div>
         <div className="flex gap-2">
+          <button
+            onClick={() => { setShowHistory(s => !s); refetchHistory(); }}
+            className={`px-3 py-1.5 text-xs border rounded-lg transition-colors ${
+              showHistory
+                ? "border-[#c2a55a] text-[#c2a55a] bg-[#c2a55a]/10"
+                : "border-zinc-700 text-zinc-400 hover:text-zinc-200 hover:border-zinc-600"
+            }`}
+          >
+            Export History
+          </button>
           <a
             href={`${BASE}/reports/scheduled`}
             className="px-3 py-1.5 text-xs border border-zinc-700 rounded-lg text-zinc-400 hover:text-zinc-200 hover:border-zinc-600 transition-colors"
           >
             Scheduled Reports
           </a>
-          <a
-            href={`${BASE}/investor-analytics`}
-            className="px-3 py-1.5 text-xs border border-zinc-700 rounded-lg text-zinc-400 hover:text-zinc-200 hover:border-zinc-600 transition-colors"
-          >
-            Investor Analytics
-          </a>
         </div>
       </div>
 
-      {exportMsg && (
-        <div className={`px-6 py-2 text-xs ${exportMsg.type === "success" ? "bg-emerald-950 text-emerald-400" : "bg-red-950 text-red-400"}`}>
-          {exportMsg.text}
+      {/* Active export progress banner */}
+      <AnimatePresence>
+        {activeExport && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="px-6 py-3 bg-zinc-900 border-b border-zinc-800">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  {activeExport.status !== "failed" && activeExport.status !== "completed" && (
+                    <svg className="animate-spin w-3.5 h-3.5 text-[#c2a55a]" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                  )}
+                  <span className="text-xs text-zinc-300 font-medium">
+                    {activeExport.status === "pending" && "Queuing export…"}
+                    {activeExport.status === "processing" && `Generating ${activeExport.name}…`}
+                    {activeExport.status === "completed" && "Export complete — downloading…"}
+                    {activeExport.status === "failed" && "Export failed"}
+                  </span>
+                </div>
+                <span className="text-xs text-zinc-500">{Math.round(activeExport.progress)}%</span>
+              </div>
+              <div className="h-1 bg-zinc-800 rounded-full overflow-hidden">
+                <motion.div
+                  className="h-full rounded-full"
+                  style={{ backgroundColor: activeExport.status === "failed" ? "#ef4444" : "#c2a55a" }}
+                  animate={{ width: `${activeExport.progress}%` }}
+                  transition={{ duration: 0.5, ease: "easeOut" }}
+                />
+              </div>
+              <p className="text-xs text-zinc-600 mt-1">
+                {activeExport.status === "pending" && "Job queued — processing will begin shortly"}
+                {activeExport.status === "processing" && "Querying database and building file…"}
+                {activeExport.status === "completed" && "File ready — download starting"}
+                {activeExport.status === "failed" && "Check the Export History for details"}
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {exportMsg && !activeExport && (
+        <div className={`px-6 py-2 text-xs flex items-center justify-between ${exportMsg.type === "success" ? "bg-emerald-950 text-emerald-400" : "bg-red-950 text-red-400"}`}>
+          <span>{exportMsg.text}</span>
+          <button onClick={() => setExportMsg(null)} className="opacity-60 hover:opacity-100">✕</button>
         </div>
       )}
 
@@ -463,11 +657,11 @@ export default function ExportBuilder() {
               </button>
               <button
                 onClick={handleExport}
-                disabled={exporting}
-                className="px-4 py-1.5 text-xs font-medium text-zinc-900 rounded-lg disabled:opacity-50 transition-colors"
+                disabled={!!activeExport}
+                className="px-4 py-1.5 text-xs font-medium text-zinc-900 rounded-lg disabled:opacity-40 transition-colors"
                 style={{ backgroundColor: config.color }}
               >
-                {exporting ? "Generating..." : `Export ${format.toUpperCase()}`}
+                {activeExport ? "Exporting…" : `Export ${format.toUpperCase()}`}
               </button>
             </div>
           </div>
@@ -582,15 +776,90 @@ export default function ExportBuilder() {
               )}
             </AnimatePresence>
 
+            {/* Export History */}
+            <AnimatePresence>
+              {showHistory && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 8 }}
+                  className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden"
+                >
+                  <div className="px-4 py-3 border-b border-zinc-800 flex items-center justify-between">
+                    <p className="text-xs text-zinc-500 uppercase tracking-widest">Export History</p>
+                    <button
+                      onClick={() => refetchHistory()}
+                      className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors"
+                    >
+                      ↺ Refresh
+                    </button>
+                  </div>
+
+                  {!historyData || historyData.length === 0 ? (
+                    <div className="px-4 py-8 text-center text-xs text-zinc-600">
+                      No exports yet. Run your first export above.
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-zinc-800">
+                      {historyData.map((job: ExportJob) => (
+                        <div key={job.exportId} className="px-4 py-3 flex items-center gap-3 hover:bg-zinc-800/30 transition-colors">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-0.5">
+                              <span className="text-xs text-zinc-200 font-medium truncate">{job.name}</span>
+                              <span className="text-[10px] text-zinc-600 uppercase font-medium shrink-0">{job.format}</span>
+                            </div>
+                            <div className="flex items-center gap-3 text-[11px] text-zinc-500">
+                              <span>{job.dataSource.replace(/_/g, " ")}</span>
+                              {job.rowCount != null && <span>{job.rowCount.toLocaleString()} rows</span>}
+                              {job.fileSizeBytes != null && <span>{formatBytes(job.fileSizeBytes)}</span>}
+                              <span>{formatRelative(job.createdAt)}</span>
+                              {job.triggeredByEmail && <span className="text-zinc-600 truncate max-w-[120px]">{job.triggeredByEmail}</span>}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <StatusBadge status={job.status} />
+                            {job.status === "completed" && job.downloadAvailable && !job.expired && (
+                              <button
+                                onClick={() => handleReDownload(job.exportId, job.format, job.name)}
+                                disabled={downloadingId === job.exportId}
+                                className="px-2.5 py-1 text-[11px] border border-zinc-700 rounded text-zinc-400 hover:text-zinc-200 hover:border-zinc-500 transition-colors disabled:opacity-40"
+                              >
+                                {downloadingId === job.exportId ? "…" : "↓ Download"}
+                              </button>
+                            )}
+                            {job.status === "completed" && (!job.downloadAvailable || job.expired) && (
+                              <span className="text-[11px] text-zinc-700" title={job.expired ? "Download link expired" : "File no longer cached — re-export to download"}>
+                                {job.expired ? "Expired" : "Cache miss"}
+                              </span>
+                            )}
+                            {job.status === "failed" && job.errorMessage && (
+                              <span className="text-[11px] text-red-500 max-w-[150px] truncate" title={job.errorMessage}>
+                                {job.errorMessage}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="px-4 py-2 bg-zinc-900/50 text-[11px] text-zinc-600 flex items-center justify-between">
+                    <span>Showing last 20 exports · Files available for 24h after generation</span>
+                    <span>All exports are logged in the audit trail</span>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             {/* Info box */}
             <div className="bg-zinc-900/40 border border-zinc-800/50 rounded-lg px-4 py-3">
               <p className="text-xs text-zinc-500 font-medium mb-1">Export Info</p>
               <ul className="space-y-1 text-xs text-zinc-600">
+                <li>• Exports are queued and processed asynchronously — large datasets won&apos;t time out</li>
                 <li>• CSV exports up to 10,000 rows with all selected columns</li>
                 <li>• PDF exports include branded header and pagination (up to 5,000 rows)</li>
-                <li>• Daily/weekly schedules generate a download link delivered to your configured email</li>
                 <li>• Download links expire after 24 hours for security</li>
-                <li>• All exports are logged in the audit trail</li>
+                <li>• All exports are logged in the audit trail with actor, domain, and row count</li>
               </ul>
             </div>
           </div>

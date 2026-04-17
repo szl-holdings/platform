@@ -4,6 +4,7 @@
  * - Streams large datasets in pages (max 10k rows per chunk)
  * - Records every export in the export_jobs table for audit trail
  * - Download tokens expire after 24 hours
+ * - Async queue with in-memory buffer store (24h TTL) for progress tracking
  */
 import { randomUUID } from "crypto";
 import { renderToBuffer, Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
@@ -14,6 +15,46 @@ import { logger } from "./logger";
 
 const MAX_ROWS_INLINE = 10_000;
 const EXPORT_TTL_MS = 24 * 60 * 60 * 1000;
+
+// ─── In-memory buffer store (serves re-downloads within 24h) ─────────────────
+interface StoredBuffer {
+  buffer: Buffer;
+  expiresAt: Date;
+  format: string;
+  name: string;
+}
+const exportBufferStore = new Map<string, StoredBuffer>();
+
+const cleanupInterval = setInterval(() => {
+  const now = new Date();
+  for (const [key, val] of exportBufferStore) {
+    if (val.expiresAt < now) exportBufferStore.delete(key);
+  }
+}, 60 * 60 * 1000);
+if (cleanupInterval.unref) cleanupInterval.unref();
+
+export function storeExportBuffer(exportId: string, buffer: Buffer, expiresAt: Date, format: string, name: string) {
+  exportBufferStore.set(exportId, { buffer, expiresAt, format, name });
+}
+
+export function getExportBuffer(exportId: string): StoredBuffer | null {
+  const entry = exportBufferStore.get(exportId);
+  if (!entry) return null;
+  if (entry.expiresAt < new Date()) {
+    exportBufferStore.delete(exportId);
+    return null;
+  }
+  return entry;
+}
+
+export async function getExportJobStatus(exportId: string) {
+  const [job] = await db
+    .select()
+    .from(exportJobsTable)
+    .where(eq(exportJobsTable.exportId, exportId))
+    .limit(1);
+  return job ?? null;
+}
 
 export interface ExportColumn {
   key: string;
@@ -168,6 +209,8 @@ export async function runExport(options: ExportOptions): Promise<ExportResult> {
         completedAt: new Date(),
       })
       .where(eq(exportJobsTable.exportId, exportId));
+
+    storeExportBuffer(exportId, buffer, expiresAt, options.format, options.name);
 
     logger.info({ exportId, dataSource: options.dataSource, format: options.format, rowCount, fileSizeBytes }, "Export completed");
 
