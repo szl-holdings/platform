@@ -9,6 +9,7 @@ export interface GraphStore {
   deleteEdge(id: string): boolean;
   listNodes(filter?: Partial<Pick<ConstellationNode, "type" | "domain">>): ConstellationNode[];
   listEdges(filter?: { fromNodeId?: string; toNodeId?: string; type?: string }): ConstellationEdge[];
+  lookupByAlias(aliasType: string, aliasValue: string): ConstellationNode | undefined;
   nodeCount(): number;
   edgeCount(): number;
   clear(): void;
@@ -17,9 +18,24 @@ export interface GraphStore {
 export class InMemoryGraphStore implements GraphStore {
   private nodes = new Map<string, ConstellationNode>();
   private edges = new Map<string, ConstellationEdge>();
+  /** aliasType:aliasValue → canonical node id */
+  private aliasIndex = new Map<string, string>();
 
   upsertNode(node: ConstellationNode): void {
+    const existing = this.nodes.get(node.id);
+    if (existing) {
+      for (const alias of existing.aliases ?? []) {
+        const key = `${alias.aliasType}:${alias.aliasValue}`;
+        if (this.aliasIndex.get(key) === node.id) {
+          this.aliasIndex.delete(key);
+        }
+      }
+    }
     this.nodes.set(node.id, node);
+    for (const alias of node.aliases ?? []) {
+      const key = `${alias.aliasType}:${alias.aliasValue}`;
+      this.aliasIndex.set(key, node.id);
+    }
   }
 
   upsertEdge(edge: ConstellationEdge): void {
@@ -35,6 +51,12 @@ export class InMemoryGraphStore implements GraphStore {
   }
 
   deleteNode(id: string): boolean {
+    const node = this.nodes.get(id);
+    if (node) {
+      for (const alias of node.aliases ?? []) {
+        this.aliasIndex.delete(`${alias.aliasType}:${alias.aliasValue}`);
+      }
+    }
     return this.nodes.delete(id);
   }
 
@@ -57,6 +79,12 @@ export class InMemoryGraphStore implements GraphStore {
     return results;
   }
 
+  lookupByAlias(aliasType: string, aliasValue: string): ConstellationNode | undefined {
+    const nodeId = this.aliasIndex.get(`${aliasType}:${aliasValue}`);
+    if (!nodeId) return undefined;
+    return this.nodes.get(nodeId);
+  }
+
   nodeCount(): number {
     return this.nodes.size;
   }
@@ -68,6 +96,7 @@ export class InMemoryGraphStore implements GraphStore {
   clear(): void {
     this.nodes.clear();
     this.edges.clear();
+    this.aliasIndex.clear();
   }
 }
 

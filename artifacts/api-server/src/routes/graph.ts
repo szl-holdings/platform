@@ -10,6 +10,7 @@ import {
   CstRelationshipFiltersSchema,
   CstSearchParamsSchema,
 } from "@szl-holdings/constellation";
+import type { CstNode } from "@szl-holdings/constellation";
 import { db, cstNodes, cstEdges } from "@szl-holdings/db";
 import { eq, or, inArray } from "drizzle-orm";
 
@@ -33,7 +34,48 @@ router.get("/graph/entities", async (req: Request, res: Response) => {
       return sendBadRequest(res, "Invalid query parameters", { errors: parsed.error.flatten() });
     }
 
-    const result = await queryNodes(parsed.data);
+    /**
+     * maxAgeSec:         exclude nodes updated more than N seconds ago (must be > 0)
+     * minFreshnessScore: exclude nodes whose freshness score (0–1) is below this (must be 0–1)
+     */
+    let maxAgeSec: number | undefined;
+    let minFreshnessScore: number | undefined;
+
+    if (req.query.maxAgeSec !== undefined) {
+      const v = Number(req.query.maxAgeSec);
+      if (!isFinite(v) || v <= 0) return sendBadRequest(res, "maxAgeSec must be a positive number");
+      maxAgeSec = v;
+    }
+    if (req.query.minFreshnessScore !== undefined) {
+      const v = Number(req.query.minFreshnessScore);
+      if (!isFinite(v) || v < 0 || v > 1) return sendBadRequest(res, "minFreshnessScore must be between 0 and 1");
+      minFreshnessScore = v;
+    }
+
+    let result = await queryNodes(parsed.data);
+
+    if (maxAgeSec !== undefined || minFreshnessScore !== undefined) {
+      const now = Date.now();
+      result = {
+        ...result,
+        nodes: result.nodes.filter((n: CstNode) => {
+          if (maxAgeSec !== undefined) {
+            const ageMs = now - new Date(n.freshness).getTime();
+            if (ageMs / 1000 > maxAgeSec) return false;
+          }
+          if (minFreshnessScore !== undefined) {
+            const freshnessMs = now - new Date(n.freshness).getTime();
+            const freshnessSec = freshnessMs / 1000;
+            const defaultTtl = 72 * 3600;
+            const score = Math.max(0, 1 - freshnessSec / defaultTtl);
+            if (score < minFreshnessScore) return false;
+          }
+          return true;
+        }),
+      };
+      result = { ...result, total: result.nodes.length };
+    }
+
     return sendSuccess(res, result);
   } catch (err) {
     return handleRouteError(res, err, "GET /graph/entities");
@@ -503,7 +545,33 @@ router.get("/graph/search", async (req: Request, res: Response) => {
       return sendBadRequest(res, "Invalid search parameters", { errors: parsed.error.flatten() });
     }
 
-    const nodes = await searchNodes(parsed.data);
+    let minConfidence: number | undefined;
+    let maxAgeSec: number | undefined;
+
+    if (req.query.minConfidence !== undefined) {
+      const v = Number(req.query.minConfidence);
+      if (!isFinite(v) || v < 0 || v > 1) return sendBadRequest(res, "minConfidence must be between 0 and 1");
+      minConfidence = v;
+    }
+    if (req.query.maxAgeSec !== undefined) {
+      const v = Number(req.query.maxAgeSec);
+      if (!isFinite(v) || v <= 0) return sendBadRequest(res, "maxAgeSec must be a positive number");
+      maxAgeSec = v;
+    }
+
+    let nodes = await searchNodes(parsed.data);
+
+    if (minConfidence !== undefined) {
+      nodes = nodes.filter((n) => n.confidence >= minConfidence);
+    }
+    if (maxAgeSec !== undefined) {
+      const now = Date.now();
+      nodes = nodes.filter((n) => {
+        const ageMs = now - new Date(n.freshness).getTime();
+        return ageMs / 1000 <= maxAgeSec;
+      });
+    }
+
     return sendSuccess(res, { nodes, count: nodes.length });
   } catch (err) {
     return handleRouteError(res, err, "GET /graph/search");

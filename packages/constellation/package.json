@@ -36,6 +36,34 @@
     "./adapters/*": {
       "types": "./dist/adapters/*.d.ts",
       "import": "./src/adapters/*.ts"
+    },
+    "./entity-resolution": {
+      "types": "./dist/entity-resolution.d.ts",
+      "import": "./src/entity-resolution.ts"
+    },
+    "./relationship-inference": {
+      "types": "./dist/relationship-inference.d.ts",
+      "import": "./src/relationship-inference.ts"
+    },
+    "./contradiction-detection": {
+      "types": "./dist/contradiction-detection.d.ts",
+      "import": "./src/contradiction-detection.ts"
+    },
+    "./evidence-ranking": {
+      "types": "./dist/evidence-ranking.d.ts",
+      "import": "./src/evidence-ranking.ts"
+    },
+    "./freshness-decay": {
+      "types": "./dist/freshness-decay.d.ts",
+      "import": "./src/freshness-decay.ts"
+    },
+    "./confidence-fusion": {
+      "types": "./dist/confidence-fusion.d.ts",
+      "import": "./src/confidence-fusion.ts"
+    },
+    "./cross-domain": {
+      "types": "./dist/cross-domain.d.ts",
+      "import": "./src/cross-domain.ts"
     }
   },
   "dependencies": {

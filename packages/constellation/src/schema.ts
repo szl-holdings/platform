@@ -26,6 +26,30 @@ export const NodeTypeSchema = z.enum([
   "matter",
   "person",
   "organization",
+  "user",
+  "vendor",
+  "account",
+  "property",
+  "lender",
+  "filing",
+  "clause",
+  "obligation",
+  "voyage",
+  "port",
+  "counterparty",
+  "sanctions_entity",
+  "cyber_asset",
+  "identity",
+  "incident",
+  "approval",
+  "prompt",
+  "model",
+  "trace",
+  "memory",
+  "recommendation",
+  "action",
+  "evidence",
+  "citation",
   "custom",
 ]);
 
@@ -41,6 +65,8 @@ export const EdgeTypeSchema = z.enum([
   "linked-trace",
   "similar-to",
   "supersedes",
+  "infers",
+  "contradicts",
   "custom",
 ]);
 
@@ -53,11 +79,19 @@ export const ProvenanceSchema = z.object({
   author: z.string().optional(),
 });
 
+export const NodeAliasSchema = z.object({
+  aliasType: z.string(),
+  aliasValue: z.string(),
+  sourceSystem: z.string().optional(),
+  isPrimary: z.boolean().default(false),
+});
+
 export const ConstellationNodeSchema = z.object({
   id: z.string(),
   type: NodeTypeSchema,
   label: z.string(),
   domain: z.string(),
+  aliases: z.array(NodeAliasSchema).default([]),
   properties: z.record(z.unknown()).default({}),
   provenance: ProvenanceSchema,
   freshness: z.object({
@@ -68,6 +102,7 @@ export const ConstellationNodeSchema = z.object({
   confidence: z.number().min(0).max(1).default(1),
   owner: z.string().optional(),
   sensitivityTier: SensitivityTierSchema.default("internal"),
+  impactScore: z.number().min(0).max(10).optional(),
   businessImpact: z.object({
     score: z.number().min(0).max(10).optional(),
     currency: z.string().optional(),
@@ -90,6 +125,8 @@ export const ConstellationEdgeSchema = z.object({
   weight: z.number().default(1),
   provenance: ProvenanceSchema,
   confidence: z.number().min(0).max(1).default(1),
+  evidenceLinks: z.array(z.string()).default([]),
+  activeStatus: z.boolean().default(true),
   properties: z.record(z.unknown()).default({}),
   linkedTraces: z.array(z.string()).default([]),
   createdAt: z.string().datetime(),
@@ -100,5 +137,6 @@ export type SensitivityTier = z.infer<typeof SensitivityTierSchema>;
 export type NodeType = z.infer<typeof NodeTypeSchema>;
 export type EdgeType = z.infer<typeof EdgeTypeSchema>;
 export type Provenance = z.infer<typeof ProvenanceSchema>;
+export type NodeAlias = z.infer<typeof NodeAliasSchema>;
 export type ConstellationNode = z.infer<typeof ConstellationNodeSchema>;
 export type ConstellationEdge = z.infer<typeof ConstellationEdgeSchema>;
