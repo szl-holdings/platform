@@ -191,6 +191,15 @@ export default function CommandFeedScreen() {
   const summaries = data?.summaries ?? [];
 
   useEffect(() => {
+    if (isAuthenticated) return;
+    const allDomains: WorkspaceDomain[] = [
+      "command", "defense", "fleet", "properties", "operations",
+      "advisory", "portfolio", "founder", "intelligence",
+    ];
+    for (const d of allDomains) setBadge(d, 0);
+  }, [isAuthenticated, setBadge]);
+
+  useEffect(() => {
     if (!data) return;
     const counts: Partial<Record<WorkspaceDomain, number>> = {};
     for (const s of summaries) {
