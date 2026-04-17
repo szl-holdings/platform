@@ -229,10 +229,10 @@ export default function LegatusConsole() {
       {/* Quick Actions */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
         {[
-          { label: "RESOURCE MAP", sub: "Full hierarchy view", href: "/imperium-map", icon: Globe2 },
-          { label: "GOVERNANCE BOARD", sub: "3 proposals pending", href: "/senate", icon: AlertTriangle },
-          { label: "NETWORK TOPOLOGY", sub: "Service mesh routes", href: "/supply-lines", icon: Wifi },
-          { label: "INTELLIGENCE", sub: "Signals briefing", href: "/intelligence", icon: Database },
+          { label: "RESOURCE MAP", sub: "Full hierarchy view", href: "/infrastructure/imperium-map", icon: Globe2 },
+          { label: "GOVERNANCE BOARD", sub: "3 proposals pending", href: "/infrastructure/senate", icon: AlertTriangle },
+          { label: "NETWORK TOPOLOGY", sub: "Service mesh routes", href: "/infrastructure/supply-lines", icon: Wifi },
+          { label: "INTELLIGENCE", sub: "Signals briefing", href: "/infrastructure/intelligence", icon: Database },
         ].map((action) => {
           const Icon = action.icon;
           return (

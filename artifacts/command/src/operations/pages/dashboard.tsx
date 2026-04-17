@@ -102,11 +102,11 @@ function PanelHead({ icon: Icon, title, right, accent }: { icon: React.ElementTy
 }
 
 const PRISM_DATA = [
-  { key: "P", name: "Pulse", icon: Heart, color: "#d4a054", href: "/prism/pulse", score: 72 },
-  { key: "R", name: "Risk", icon: AlertTriangle, color: "#c45a4a", href: "/prism/risk", score: 41 },
-  { key: "I", name: "Intelligence", icon: Eye, color: "#8b7ac8", href: "/prism/intelligence", score: 68 },
-  { key: "S", name: "Signals", icon: Radio, color: "#c8953c", href: "/prism/signals", score: 55 },
-  { key: "M", name: "Motion", icon: Gauge, color: "#4a90b8", href: "/prism/motion", score: 63 },
+  { key: "P", name: "Pulse", icon: Heart, color: "#d4a054", href: "/operations/prism/pulse", score: 72 },
+  { key: "R", name: "Risk", icon: AlertTriangle, color: "#c45a4a", href: "/operations/prism/risk", score: 41 },
+  { key: "I", name: "Intelligence", icon: Eye, color: "#8b7ac8", href: "/operations/prism/intelligence", score: 68 },
+  { key: "S", name: "Signals", icon: Radio, color: "#c8953c", href: "/operations/prism/signals", score: 55 },
+  { key: "M", name: "Motion", icon: Gauge, color: "#4a90b8", href: "/operations/prism/motion", score: 63 },
 ];
 
 /* PRISM Composite Arc Ring */
@@ -326,7 +326,7 @@ export default function Dashboard() {
             {activeRole === "analyst" && `${signals.length} signals across ${new Set(signals.map(s => s.source)).size} sources. ${criticalSignals.length} critical, ${highSignals.length} high. $5.03M exposure.`}
             {activeRole === "buyer" && "Viewing Lyte with sample data. Signals and actions demonstrate intelligence from your existing tools."}
           </span>
-          <Link href="/approvals" className="shrink-0 ml-auto text-[8px] px-2 py-px rounded font-mono hover:opacity-80" style={{ color: "#c8953c", background: "rgba(200,149,60,0.06)", border: "1px solid rgba(200,149,60,0.12)" }}>
+          <Link href="/operations/approvals" className="shrink-0 ml-auto text-[8px] px-2 py-px rounded font-mono hover:opacity-80" style={{ color: "#c8953c", background: "rgba(200,149,60,0.06)", border: "1px solid rgba(200,149,60,0.12)" }}>
             14 Approvals →
           </Link>
         </div>
@@ -341,7 +341,7 @@ export default function Dashboard() {
             <PanelHead icon={Target} title="Priority Action Queue" accent="#c45a4a" right={
               <div className="flex items-center gap-2">
                 <span className="text-[8px] font-mono px-1.5 py-px rounded" style={{ color: "#c45a4a", background: "rgba(196,90,74,0.06)", border: "1px solid rgba(196,90,74,0.12)" }}>HITL Required</span>
-                <Link href="/approvals" className="text-[9px] font-mono flex items-center gap-0.5 hover:opacity-80" style={{ color: TEXT.tertiary }}>All <ArrowUpRight className="w-2.5 h-2.5" /></Link>
+                <Link href="/operations/approvals" className="text-[9px] font-mono flex items-center gap-0.5 hover:opacity-80" style={{ color: TEXT.tertiary }}>All <ArrowUpRight className="w-2.5 h-2.5" /></Link>
               </div>
             } />
             <div className="divide-y" style={{ borderColor: BORDER.subtle }}>
@@ -460,7 +460,7 @@ export default function Dashboard() {
           {/* Signal Timeline */}
           <Panel accent="#c8953c">
             <PanelHead icon={Radio} title="Signal Timeline" accent="#c8953c" right={
-              <Link href="/signals" className="text-[9px] font-mono flex items-center gap-0.5 hover:opacity-80" style={{ color: TEXT.tertiary }}>Feed <ArrowUpRight className="w-2.5 h-2.5" /></Link>
+              <Link href="/operations/signals" className="text-[9px] font-mono flex items-center gap-0.5 hover:opacity-80" style={{ color: TEXT.tertiary }}>Feed <ArrowUpRight className="w-2.5 h-2.5" /></Link>
             } />
             <div className="px-3">
               {recentSignals.length === 0 ? (

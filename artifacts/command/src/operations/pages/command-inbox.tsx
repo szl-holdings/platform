@@ -17,7 +17,7 @@ const PRISM_CARDS = [
     label: "Business Health",
     trend: "stable",
     detail: "3 systems nominal · 2 degraded",
-    href: "/prism/pulse",
+    href: "/operations/prism/pulse",
   },
   {
     key: "Risk",
@@ -27,7 +27,7 @@ const PRISM_CARDS = [
     label: "Active Exposures",
     trend: "up",
     detail: "$5.03M total value at risk",
-    href: "/prism/risk",
+    href: "/operations/prism/risk",
   },
   {
     key: "Intelligence",
@@ -37,7 +37,7 @@ const PRISM_CARDS = [
     label: "AI Recommendations",
     trend: "new",
     detail: "2 high-confidence · 2 pending review",
-    href: "/prism/intelligence",
+    href: "/operations/prism/intelligence",
   },
   {
     key: "Signals",
@@ -47,7 +47,7 @@ const PRISM_CARDS = [
     label: "Active Signals",
     trend: "up",
     detail: "7 anomalies · 6 threshold · 5 events",
-    href: "/prism/signals",
+    href: "/operations/prism/signals",
   },
   {
     key: "Motion",
@@ -57,7 +57,7 @@ const PRISM_CARDS = [
     label: "In-Flight Actions",
     trend: "down",
     detail: "4 escalations · 5 approvals · 3 routing",
-    href: "/prism/motion",
+    href: "/operations/prism/motion",
   },
 ];
 
@@ -354,7 +354,7 @@ export default function LyteOverview() {
                 </div>
               ))}
             </div>
-            <Link href="/prism/signals" className="flex items-center gap-1 mt-3 text-[10px] font-medium hover:opacity-80 transition-opacity" style={{ color: "#d4a054" }}>
+            <Link href="/operations/prism/signals" className="flex items-center gap-1 mt-3 text-[10px] font-medium hover:opacity-80 transition-opacity" style={{ color: "#d4a054" }}>
               View all signals <ArrowRight className="w-3 h-3" />
             </Link>
           </div>

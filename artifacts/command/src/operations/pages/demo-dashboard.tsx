@@ -145,7 +145,7 @@ export default function DemoDashboard() {
         <div className="col-span-2 space-y-3">
           <Panel>
             <PanelHead icon={Radio} title="Active Signals" accent="#c45a4a" right={
-              <Link href="/signals" className="flex items-center gap-0.5 text-[9px] font-mono" style={{ color: TEXT.tertiary }}>All signals <ChevronRight className="w-2.5 h-2.5" /></Link>
+              <Link href="/operations/signals" className="flex items-center gap-0.5 text-[9px] font-mono" style={{ color: TEXT.tertiary }}>All signals <ChevronRight className="w-2.5 h-2.5" /></Link>
             } />
             <div className="divide-y" style={{ borderColor: BORDER.subtle }}>
               {[...criticalSignals, ...highSignals].slice(0, 6).map((sig) => {
@@ -172,7 +172,7 @@ export default function DemoDashboard() {
 
           <Panel>
             <PanelHead icon={Target} title="Top Priorities" accent="#d4a054" right={
-              <Link href="/priorities" className="flex items-center gap-0.5 text-[9px] font-mono" style={{ color: TEXT.tertiary }}>All priorities <ChevronRight className="w-2.5 h-2.5" /></Link>
+              <Link href="/operations/priorities" className="flex items-center gap-0.5 text-[9px] font-mono" style={{ color: TEXT.tertiary }}>All priorities <ChevronRight className="w-2.5 h-2.5" /></Link>
             } />
             <div className="divide-y" style={{ borderColor: BORDER.subtle }}>
               {topPriorities.map((pri) => {
@@ -230,7 +230,7 @@ export default function DemoDashboard() {
 
           <Panel>
             <PanelHead icon={Workflow} title="Stalled Workflows" accent="#c8953c" right={
-              <Link href="/workflows" className="flex items-center gap-0.5 text-[9px] font-mono" style={{ color: TEXT.tertiary }}>View all <ChevronRight className="w-2.5 h-2.5" /></Link>
+              <Link href="/operations/workflows" className="flex items-center gap-0.5 text-[9px] font-mono" style={{ color: TEXT.tertiary }}>View all <ChevronRight className="w-2.5 h-2.5" /></Link>
             } />
             <div className="divide-y" style={{ borderColor: BORDER.subtle }}>
               {stalledWorkflows.map((wf) => (
@@ -248,7 +248,7 @@ export default function DemoDashboard() {
 
           <Panel>
             <PanelHead icon={Shield} title="Readiness Status" accent="#6b8f71" right={
-              <Link href="/readiness" className="flex items-center gap-0.5 text-[9px] font-mono" style={{ color: TEXT.tertiary }}>Details <ChevronRight className="w-2.5 h-2.5" /></Link>
+              <Link href="/operations/readiness" className="flex items-center gap-0.5 text-[9px] font-mono" style={{ color: TEXT.tertiary }}>Details <ChevronRight className="w-2.5 h-2.5" /></Link>
             } />
             <div className="px-3 py-3">
               <div className="flex items-end justify-between mb-2">
@@ -303,7 +303,7 @@ export default function DemoDashboard() {
 
         <Panel>
           <PanelHead icon={Brain} title="Top Recommendation" accent="#8b7ac8" right={
-            <Link href="/recommendations" className="flex items-center gap-0.5 text-[9px] font-mono" style={{ color: TEXT.tertiary }}>All <ChevronRight className="w-2.5 h-2.5" /></Link>
+            <Link href="/operations/recommendations" className="flex items-center gap-0.5 text-[9px] font-mono" style={{ color: TEXT.tertiary }}>All <ChevronRight className="w-2.5 h-2.5" /></Link>
           } />
           <div className="px-3 py-2.5">
             <div className="text-[10px] font-semibold leading-snug mb-1.5" style={{ color: TEXT.primary }}>Implement parallel legal review for deals &gt;$1M TCV</div>

@@ -9,13 +9,13 @@ import { IMPERIUM_DATA, getThreatColor } from "@imp/lib/imperium-data";
 import { cn } from "@imp/lib/utils";
 
 const NAV_ITEMS = [
-  { path: "/", label: "EXECUTIVE CONSOLE", sublabel: "Executive Overview", icon: Crown },
-  { path: "/imperium-map", label: "RESOURCE MAP", sublabel: "Resource Hierarchy", icon: Map },
-  { path: "/praetorian", label: "SECURITY PERIMETER", sublabel: "Security Controls", icon: Shield },
-  { path: "/senate", label: "GOVERNANCE BOARD", sublabel: "Change Management", icon: BookOpen },
-  { path: "/supply-lines", label: "NETWORK TOPOLOGY", sublabel: "Service Mesh Routes", icon: Network },
-  { path: "/centurion", label: "AI OPERATIONS", sublabel: "Agent Profiles", icon: Cpu },
-  { path: "/intelligence", label: "INTELLIGENCE", sublabel: "Signals Briefing", icon: Radio },
+  { path: "/infrastructure", label: "EXECUTIVE CONSOLE", sublabel: "Executive Overview", icon: Crown },
+  { path: "/infrastructure/imperium-map", label: "RESOURCE MAP", sublabel: "Resource Hierarchy", icon: Map },
+  { path: "/infrastructure/praetorian", label: "SECURITY PERIMETER", sublabel: "Security Controls", icon: Shield },
+  { path: "/infrastructure/senate", label: "GOVERNANCE BOARD", sublabel: "Change Management", icon: BookOpen },
+  { path: "/infrastructure/supply-lines", label: "NETWORK TOPOLOGY", sublabel: "Service Mesh Routes", icon: Network },
+  { path: "/infrastructure/centurion", label: "AI OPERATIONS", sublabel: "Agent Profiles", icon: Cpu },
+  { path: "/infrastructure/intelligence", label: "INTELLIGENCE", sublabel: "Signals Briefing", icon: Radio },
 ];
 
 function ThreatBadge({ level }: { level: string }) {
@@ -81,7 +81,7 @@ export function ImperiumLayout({ children }: { children: React.ReactNode }) {
         <nav className="flex-1 overflow-y-auto py-3 scrollbar-imperial">
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
-            const isActive = location === item.path || (item.path !== "/" && location.startsWith(item.path));
+            const isActive = location === item.path || (item.path !== "/infrastructure" && location.startsWith(item.path));
             return (
               <Link key={item.path} href={item.path}>
                 <a
@@ -166,7 +166,7 @@ export function ImperiumLayout({ children }: { children: React.ReactNode }) {
               <span className="tracking-widest">PLATFORM SZLHOLDINGS</span>
               <span>/</span>
               <span style={{ color: "#c9a227" }}>
-                {NAV_ITEMS.find((n) => location === n.path || (n.path !== "/" && location.startsWith(n.path)))?.label || "COMMAND"}
+                {NAV_ITEMS.find((n) => location === n.path || (n.path !== "/infrastructure" && location.startsWith(n.path)))?.label || "COMMAND"}
               </span>
             </div>
           </div>
