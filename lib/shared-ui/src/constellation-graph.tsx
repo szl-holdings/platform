@@ -195,6 +195,44 @@ function tickSim(
   }
 }
 
+function FilterChip({
+  label,
+  active,
+  onClick,
+  accentColor,
+  testId,
+}: {
+  label: string;
+  active: boolean;
+  onClick: () => void;
+  accentColor: string;
+  testId?: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      data-testid={testId}
+      data-active={active ? "true" : "false"}
+      style={{
+        fontSize: 10,
+        padding: "3px 9px",
+        borderRadius: 999,
+        border: `1px solid ${active ? accentColor : "rgba(255,255,255,0.12)"}`,
+        background: active ? `${accentColor}25` : "rgba(255,255,255,0.03)",
+        color: active ? accentColor : "#cbd5e1",
+        cursor: "pointer",
+        letterSpacing: "0.04em",
+        textTransform: "uppercase",
+        fontWeight: active ? 600 : 500,
+        whiteSpace: "nowrap",
+      }}
+    >
+      {label}
+    </button>
+  );
+}
+
 export interface ConstellationGraphProps {
   /** Domain to fetch via /api/domains/:domain/graph. Ignored if `data` provided. */
   domain?: string;
@@ -234,6 +272,11 @@ export function ConstellationGraph({
   const [selected, setSelected] = useState<ConstellationGraphNode | null>(null);
   const [hovered, setHovered] = useState<string | null>(null);
   const [width, setWidth] = useState(640);
+  const [entityTypeFilter, setEntityTypeFilter] = useState<string | null>(null);
+  const [activeOnly, setActiveOnly] = useState(true);
+  const [sinceWindow, setSinceWindow] = useState<"24h" | "7d" | "30d" | "all">("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [seenTypes, setSeenTypes] = useState<string[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
   const simRef = useRef<SimNode[]>([]);
   const alphaRef = useRef(1);
@@ -259,7 +302,15 @@ export function ConstellationGraph({
     let cancelled = false;
     setLoading(true);
     setError(null);
-    const url = `/domains/${encodeURIComponent(domain)}/graph?includeCross=${showCross}&limit=120`;
+    const params = new URLSearchParams();
+    params.set("includeCross", String(showCross));
+    params.set("limit", "120");
+    if (entityTypeFilter) params.set("entityType", entityTypeFilter);
+    // Only constrain when "Active only" is on. When off the user wants to see
+    // all statuses, so we omit the param (server returns inactive-only when
+    // isActive=false is sent).
+    if (activeOnly) params.set("isActive", "true");
+    const url = `/domains/${encodeURIComponent(domain)}/graph?${params.toString()}`;
     apiFetch<{ data?: ConstellationGraphResponse } | ConstellationGraphResponse>(url)
       .then((res) => {
         if (cancelled) return;
@@ -277,7 +328,7 @@ export function ConstellationGraph({
     return () => {
       cancelled = true;
     };
-  }, [domain, data, showCross, reload.current]);
+  }, [domain, data, showCross, entityTypeFilter, activeOnly, reload.current]);
 
   const graph = data ?? fetched;
   const hostDomain = graph?.domain ?? domain ?? "platform";
@@ -306,33 +357,72 @@ export function ConstellationGraph({
     setSelected(null);
   }, [graphKey]);
 
+  // Compute the cutoff time for the freshness window filter
+  const sinceCutoff = useMemo(() => {
+    if (sinceWindow === "all") return null;
+    const ms =
+      sinceWindow === "24h" ? 24 * 60 * 60 * 1000
+      : sinceWindow === "7d" ? 7 * 24 * 60 * 60 * 1000
+      : 30 * 24 * 60 * 60 * 1000;
+    return Date.now() - ms;
+  }, [sinceWindow]);
+
   // Resolve which nodes are inside vs. outside the host domain
   const { nodes, edges, internalIds, externalIds } = useMemo(() => {
     if (!graph) {
       return { nodes: [], edges: [], internalIds: new Set<string>(), externalIds: new Set<string>() };
     }
-    const internal = new Set(graph.nodes.map((n) => n.id));
+    // Original (pre-since-filter) internal IDs — used to identify which edge
+    // endpoints are truly external vs. just filtered out by the freshness
+    // window. Without this distinction, filtered-out internal nodes would be
+    // re-added as "external" placeholders.
+    const originalInternal = new Set(graph.nodes.map((n) => n.id));
+    // Apply client-side "since" freshness filter to internal nodes
+    const filteredInternal = sinceCutoff === null
+      ? graph.nodes
+      : graph.nodes.filter((n) => {
+          const f = n.freshness ?? n.updatedAt;
+          if (!f) return true; // keep nodes without a freshness timestamp
+          const t = Date.parse(f);
+          return Number.isNaN(t) ? true : t >= sinceCutoff;
+        });
+    const internal = new Set(filteredInternal.map((n) => n.id));
+
     // Merge edges: API-supplied + operator-expanded (deduped by id)
     const allEdgesMap = new Map<string, ConstellationGraphEdge>();
     for (const e of graph.edges) allEdgesMap.set(e.id, e);
     for (const e of Object.values(expandedEdges)) allEdgesMap.set(e.id, e);
     const allEdges = Array.from(allEdgesMap.values());
 
-    // Known node ids from the graph payload + any nodes the operator has loaded
-    const knownIds = new Set<string>(internal);
-    for (const id of Object.keys(expandedNodes)) knownIds.add(id);
+    // Drop edges that reference an internal node hidden by the freshness
+    // filter — without this they'd be re-introduced as external placeholders.
+    const expandedNodeIds = new Set(Object.keys(expandedNodes));
+    const sinceVisibleEdges = allEdges.filter((e) => {
+      const fromHidden =
+        originalInternal.has(e.fromNodeId) && !internal.has(e.fromNodeId);
+      const toHidden =
+        originalInternal.has(e.toNodeId) && !internal.has(e.toNodeId);
+      return !fromHidden && !toHidden;
+    });
 
-    // External nodes referenced by edges but not in any known node list
+    // Known node ids from the (filtered) graph payload + any nodes the
+    // operator has loaded via expand-neighbors.
+    const knownIds = new Set<string>(internal);
+    for (const id of expandedNodeIds) knownIds.add(id);
+
+    // External nodes referenced by visible edges but not in any known node list
     const external = new Set<string>();
-    for (const e of allEdges) {
+    for (const e of sinceVisibleEdges) {
       if (!knownIds.has(e.fromNodeId)) external.add(e.fromNodeId);
       if (!knownIds.has(e.toNodeId)) external.add(e.toNodeId);
     }
+
     const allNodes: ConstellationGraphNode[] = [
       // Preserve any existing domain on the node; default to host domain only
       // when the API didn't supply one (current /domains/:domain/graph contract).
-      ...graph.nodes.map((n) => ({ ...n, domain: n.domain ?? hostDomain })),
-      // Operator-expanded neighbors (any domain)
+      ...filteredInternal.map((n) => ({ ...n, domain: n.domain ?? hostDomain })),
+      // Operator-expanded neighbors (any domain) — skip ones already shown as
+      // visible internal nodes.
       ...Object.values(expandedNodes).filter((n) => !internal.has(n.id)),
       // Remaining placeholders for unresolved cross-domain references
       ...Array.from(external).map<ConstellationGraphNode>((id) => {
@@ -347,10 +437,46 @@ export function ConstellationGraph({
       }),
     ];
     const visibleEdges = showCross
-      ? allEdges
-      : allEdges.filter((e) => knownIds.has(e.fromNodeId) && knownIds.has(e.toNodeId) && internal.has(e.fromNodeId) && internal.has(e.toNodeId));
+      ? sinceVisibleEdges
+      : sinceVisibleEdges.filter(
+          (e) => internal.has(e.fromNodeId) && internal.has(e.toNodeId),
+        );
     return { nodes: allNodes, edges: visibleEdges, internalIds: internal, externalIds: external };
-  }, [graph, hostDomain, showCross, externalCache, expandedNodes, expandedEdges]);
+  }, [graph, hostDomain, showCross, externalCache, sinceCutoff, expandedNodes, expandedEdges]);
+
+  // Track entity types we've seen so the type chips remain stable when a type
+  // filter is active (which would otherwise reduce the chip set).
+  useEffect(() => {
+    if (!graph) return;
+    const fresh = new Set<string>();
+    for (const n of graph.nodes) fresh.add(n.entityType);
+    setSeenTypes((prev) => {
+      const merged = new Set(prev);
+      let changed = false;
+      for (const t of fresh) {
+        if (!merged.has(t)) {
+          merged.add(t);
+          changed = true;
+        }
+      }
+      return changed ? Array.from(merged).sort() : prev;
+    });
+  }, [graph]);
+
+  // Search highlighting — case-insensitive match on name or canonicalId
+  const searchMatches = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return null;
+    const matches = new Set<string>();
+    for (const n of nodes) {
+      const name = (n.name ?? "").toLowerCase();
+      const cid = (n.canonicalId ?? "").toLowerCase();
+      if (name.includes(q) || cid.includes(q) || n.id.toLowerCase().includes(q)) {
+        matches.add(n.id);
+      }
+    }
+    return matches;
+  }, [nodes, searchQuery]);
 
   const expandNeighbors = useCallback(
     async (node: ConstellationGraphNode) => {
@@ -555,6 +681,100 @@ export function ConstellationGraph({
         )}
       </div>
 
+      {showControls && !data && (
+        <div
+          data-testid="constellation-filters"
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 8,
+            marginBottom: 10,
+            padding: "10px 12px",
+            borderRadius: 8,
+            background: "rgba(255,255,255,0.02)",
+            border: "1px solid rgba(255,255,255,0.06)",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+            <span style={{ fontSize: 10, color: "#64748b", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+              Type
+            </span>
+            <FilterChip
+              label="All"
+              active={entityTypeFilter === null}
+              onClick={() => setEntityTypeFilter(null)}
+              accentColor={accentColor}
+            />
+            {seenTypes.map((t) => (
+              <FilterChip
+                key={t}
+                label={`${TYPE_GLYPH[t] ?? "◆"} ${t}`}
+                active={entityTypeFilter === t}
+                onClick={() => setEntityTypeFilter(entityTypeFilter === t ? null : t)}
+                accentColor={accentColor}
+                testId={`constellation-type-chip-${t}`}
+              />
+            ))}
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+            <span style={{ fontSize: 10, color: "#64748b", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+              Status
+            </span>
+            <FilterChip
+              label="Active only"
+              active={activeOnly}
+              onClick={() => setActiveOnly((v) => !v)}
+              accentColor={accentColor}
+              testId="constellation-active-chip"
+            />
+            <span
+              style={{
+                fontSize: 10,
+                color: "#64748b",
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                marginLeft: 8,
+              }}
+            >
+              Since
+            </span>
+            {(["24h", "7d", "30d", "all"] as const).map((w) => (
+              <FilterChip
+                key={w}
+                label={w === "all" ? "All time" : `Last ${w}`}
+                active={sinceWindow === w}
+                onClick={() => setSinceWindow(w)}
+                accentColor={accentColor}
+                testId={`constellation-since-chip-${w}`}
+              />
+            ))}
+            <div style={{ flex: 1 }} />
+            <input
+              type="search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search name or canonical ID…"
+              data-testid="constellation-search"
+              style={{
+                fontSize: 11,
+                padding: "5px 10px",
+                borderRadius: 4,
+                border: "1px solid rgba(255,255,255,0.12)",
+                background: "rgba(0,0,0,0.25)",
+                color: "#e8edf8",
+                minWidth: 220,
+                outline: "none",
+              }}
+            />
+            {searchQuery && (
+              <span style={{ fontSize: 10, color: "#94a3b8" }} data-testid="constellation-search-count">
+                {searchMatches?.size ?? 0} match{(searchMatches?.size ?? 0) === 1 ? "" : "es"}
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
       <div
         ref={containerRef}
         style={{
@@ -618,9 +838,15 @@ export function ConstellationGraph({
               const b = simRef.current.find((n) => n.id === e.toNodeId);
               if (!a || !b) return null;
               const isCross = !internalIds.has(e.fromNodeId) || !internalIds.has(e.toNodeId);
-              const highlight =
+              const selHighlight =
                 selected && (e.fromNodeId === selected.id || e.toNodeId === selected.id);
-              const dim = selected && !highlight;
+              const searchHighlight =
+                searchMatches !== null &&
+                (searchMatches.has(e.fromNodeId) || searchMatches.has(e.toNodeId));
+              const highlight = selHighlight || searchHighlight;
+              const dim =
+                (selected && !selHighlight) ||
+                (searchMatches !== null && !searchHighlight);
               return (
                 <line
                   key={e.id}
@@ -653,8 +879,15 @@ export function ConstellationGraph({
                     (e.fromNodeId === selected.id && e.toNodeId === n.id) ||
                     (e.toNodeId === selected.id && e.fromNodeId === n.id),
                 );
-              const dim = selected && !isSelected && !isNeighbor;
-              const r = isSelected ? s.radius * 1.4 : isHovered ? s.radius * 1.2 : s.radius;
+              const isSearchMatch = searchMatches !== null && searchMatches.has(n.id);
+              const dim =
+                (selected && !isSelected && !isNeighbor) ||
+                (searchMatches !== null && !isSearchMatch);
+              const r = isSelected || isSearchMatch
+                ? s.radius * 1.4
+                : isHovered
+                ? s.radius * 1.2
+                : s.radius;
               return (
                 <g
                   key={n.id}
@@ -672,8 +905,20 @@ export function ConstellationGraph({
                   }}
                   data-testid={`constellation-node-${n.id}`}
                 >
-                  {(isSelected || isHovered) && (
-                    <circle r={r + 5} fill={color} fillOpacity={0.18} />
+                  {(isSelected || isHovered || isSearchMatch) && (
+                    <circle
+                      r={r + 5}
+                      fill={isSearchMatch ? "#fbbf24" : color}
+                      fillOpacity={isSearchMatch ? 0.32 : 0.18}
+                    />
+                  )}
+                  {isSearchMatch && (
+                    <circle
+                      r={r + 3}
+                      fill="none"
+                      stroke="#fbbf24"
+                      strokeWidth={1.5}
+                    />
                   )}
                   <circle
                     r={r}
