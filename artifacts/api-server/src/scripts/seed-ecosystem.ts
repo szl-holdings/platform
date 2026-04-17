@@ -10,6 +10,7 @@ import {
 } from "@szl-holdings/db";
 import { sql } from "drizzle-orm";
 import { randomUUID } from "crypto";
+import { seedVesselsData } from "../lib/seed-vessels.js";
 
 async function seedDistressProperties() {
   console.log("Seeding distress properties…");
@@ -693,6 +694,7 @@ async function main() {
     await seedWorkflowRuns();
     await seedAuditLogs();
     await seedRecommendations();
+    await seedVesselsData();
     console.log("=== Seed complete ===");
     process.exit(0);
   } catch (err) {
