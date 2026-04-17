@@ -1,5 +1,5 @@
-import type { GuardianRule, DecisionRequest, DecisionResult, RuleCondition } from "./schema.js";
-import { TIER_RISK_LEVEL, type PolicyTier } from "./tiers.js";
+import type { GuardianRule, DecisionRequest, DecisionResult, RuleCondition, EvaluateResult } from "./schema.js";
+import { TIER_RISK_LEVEL, TIER_CONTROLS, type PolicyTier, PolicyTierSchema } from "./tiers.js";
 
 function evaluateCondition(condition: RuleCondition, context: Record<string, unknown>): boolean {
   const actual = context[condition.field];
@@ -32,7 +32,16 @@ function evaluateCondition(condition: RuleCondition, context: Record<string, unk
 function ruleMatchesRequest(rule: GuardianRule, request: DecisionRequest): boolean {
   if (!rule.enabled) return false;
   if (request.tier && rule.tier !== request.tier) return false;
-  const ctx = { action: request.action, domain: request.domain, agentId: request.agentId, ...request.context };
+  const ctx = {
+    action: request.action,
+    domain: request.domain,
+    agentId: request.agentId,
+    toolId: request.toolId,
+    model: request.model,
+    environment: request.environment,
+    actionCount: request.actionCount,
+    ...request.context,
+  };
   return rule.conditions.every((c) => evaluateCondition(c, ctx as Record<string, unknown>));
 }
 
@@ -76,24 +85,39 @@ export class GuardianDecisionEngine {
     }
 
     const tierRisk = TIER_RISK_LEVEL[request.tier as PolicyTier];
-    if (tierRisk >= 8) {
-      return {
-        requestId: request.requestId,
-        outcome: "require-approval",
-        reason: "Policy tier 'human-approval-mandatory' always requires explicit human approval",
-        requiredApprovers: ["human-approver"],
-        decidedAt,
-      };
+    if (tierRisk >= 4) {
+      const controls = TIER_CONTROLS[request.tier as PolicyTier];
+      if (controls.approvalGate === "dual") {
+        return {
+          requestId: request.requestId,
+          outcome: "require-dual-approval" as const,
+          reason: `Policy tier '${request.tier}' requires dual human approval (operator + executive)`,
+          requiredApprovers: ["operator", "executive"],
+          decidedAt,
+        };
+      }
     }
 
     for (const rule of this.rules) {
       if (ruleMatchesRequest(rule, request)) {
+        const isDualRule = rule.action === "require-dual-approval" || rule.action === "escalate";
+        const outcome = rule.action === "log" || rule.action === "redact"
+          ? "allow" as const
+          : rule.action === "block" || rule.action === "deny"
+            ? "deny" as const
+            : isDualRule
+              ? "require-dual-approval" as const
+              : rule.action as "allow" | "deny" | "require-approval";
         return {
           requestId: request.requestId,
-          outcome: rule.action === "log" ? "allow" : rule.action === "escalate" ? "require-approval" : rule.action === "redact" ? "allow" : rule.action,
+          outcome,
           matchedRuleId: rule.id,
           reason: rule.description ?? `Matched rule: ${rule.name}`,
-          requiredApprovers: rule.action === "require-approval" ? ["approver"] : [],
+          requiredApprovers: isDualRule
+            ? ["operator", "executive"]
+            : rule.action === "require-approval"
+              ? ["approver"]
+              : [],
           decidedAt,
         };
       }
@@ -104,6 +128,263 @@ export class GuardianDecisionEngine {
       outcome: "deny",
       reason: "Deny-by-default: no matching allow rule found",
       requiredApprovers: [],
+      decidedAt,
+    };
+  }
+
+  evaluate(request: DecisionRequest): EvaluateResult {
+    const decidedAt = new Date().toISOString();
+    const controlViolations: string[] = [];
+    let rollbackRequired = false;
+    let redactApplied = false;
+
+    if (!request.tier) {
+      return {
+        requestId: request.requestId,
+        outcome: "block",
+        reason: "Block-by-default: no policy tier set on request",
+        requiredApprovers: [],
+        rollbackRequired: false,
+        redactApplied: false,
+        controlViolations: ["missing-tier"],
+        decidedAt,
+      };
+    }
+
+    const tierParsed = PolicyTierSchema.safeParse(request.tier);
+    if (!tierParsed.success) {
+      return {
+        requestId: request.requestId,
+        outcome: "block",
+        reason: `Block: unknown tier '${request.tier}'`,
+        requiredApprovers: [],
+        rollbackRequired: false,
+        redactApplied: false,
+        controlViolations: ["unknown-tier"],
+        decidedAt,
+      };
+    }
+
+    const tier = tierParsed.data;
+    const controls = TIER_CONTROLS[tier];
+
+    rollbackRequired = controls.requiresRollback;
+    redactApplied = controls.redactPII;
+
+    if (!controls.allowMemoryWrite && request.memoryScope) {
+      controlViolations.push("memory-write-not-allowed");
+    }
+
+    if (!controls.allowExternalComms && request.isExternalComms) {
+      controlViolations.push("external-comms-blocked");
+    }
+
+    if (controls.allowedEnvironments.length > 0 && request.environment) {
+      if (!controls.allowedEnvironments.includes(request.environment)) {
+        controlViolations.push(`environment-not-allowed:${request.environment}`);
+      }
+    }
+
+    if (controls.maxActionsPerSession !== null && request.actionCount !== undefined) {
+      if (request.actionCount >= controls.maxActionsPerSession) {
+        controlViolations.push(`action-limit-exceeded:${request.actionCount}/${controls.maxActionsPerSession}`);
+      }
+    }
+
+    if (controls.allowedModels !== null && request.model) {
+      if (!controls.allowedModels.includes(request.model)) {
+        controlViolations.push(`model-not-allowlisted:${request.model}`);
+      }
+    }
+
+    if (controls.allowedTools !== null && request.toolId) {
+      if (!controls.allowedTools.includes(request.toolId)) {
+        controlViolations.push(`tool-not-allowlisted:${request.toolId}`);
+      }
+    }
+
+    const ruleViolations = controlViolations.filter(
+      v => v === "external-comms-blocked" || v.startsWith("environment-not-allowed") ||
+           v.startsWith("action-limit-exceeded") || v.startsWith("model-not-allowlisted") ||
+           v.startsWith("tool-not-allowlisted")
+    );
+
+    if (ruleViolations.length > 0) {
+      return {
+        requestId: request.requestId,
+        outcome: "block",
+        reason: `Blocked by tier control violations: ${ruleViolations.join(", ")}`,
+        requiredApprovers: [],
+        rollbackRequired,
+        redactApplied,
+        controlViolations,
+        decidedAt,
+      };
+    }
+
+    if (controlViolations.includes("memory-write-not-allowed")) {
+      return {
+        requestId: request.requestId,
+        outcome: "block",
+        reason: "Memory write not permitted at this autonomy tier",
+        requiredApprovers: [],
+        rollbackRequired,
+        redactApplied,
+        controlViolations,
+        decidedAt,
+      };
+    }
+
+    if (controls.approvalGate === "dual") {
+      return {
+        requestId: request.requestId,
+        outcome: "require-dual-approval",
+        reason: `Tier '${tier}' requires dual approval (operator + executive)`,
+        requiredApprovers: ["operator", "executive"],
+        rollbackRequired,
+        redactApplied,
+        controlViolations,
+        decidedAt,
+      };
+    }
+
+    for (const rule of this.rules) {
+      if (ruleMatchesRequest(rule, request)) {
+        if (rule.allowedModels !== undefined && request.model && !rule.allowedModels.includes(request.model)) {
+          controlViolations.push(`rule-model-not-allowlisted:${request.model}`);
+          return {
+            requestId: request.requestId,
+            outcome: "block",
+            reason: `Rule '${rule.id}' does not allow model '${request.model}'`,
+            requiredApprovers: [],
+            rollbackRequired,
+            redactApplied,
+            controlViolations,
+            matchedRuleId: rule.id,
+            decidedAt,
+          };
+        }
+
+        if (rule.allowedTools !== undefined && request.toolId && !rule.allowedTools.includes(request.toolId)) {
+          controlViolations.push(`rule-tool-not-allowlisted:${request.toolId}`);
+          return {
+            requestId: request.requestId,
+            outcome: "block",
+            reason: `Rule '${rule.id}' does not allow tool '${request.toolId}'`,
+            requiredApprovers: [],
+            rollbackRequired,
+            redactApplied,
+            controlViolations,
+            matchedRuleId: rule.id,
+            decidedAt,
+          };
+        }
+
+        if (rule.action === "allow" || rule.action === "log") {
+          if (controls.approvalGate === "single") {
+            return {
+              requestId: request.requestId,
+              outcome: "require-approval",
+              reason: `Tier '${tier}' requires single operator approval`,
+              requiredApprovers: ["operator"],
+              rollbackRequired,
+              redactApplied,
+              controlViolations,
+              matchedRuleId: rule.id,
+              decidedAt,
+            };
+          }
+          return {
+            requestId: request.requestId,
+            outcome: "allow",
+            matchedRuleId: rule.id,
+            reason: rule.description ?? `Matched rule: ${rule.name}`,
+            requiredApprovers: [],
+            rollbackRequired,
+            redactApplied,
+            controlViolations,
+            decidedAt,
+          };
+        }
+
+        if (rule.action === "require-approval") {
+          if (controls.approvalGate === "single") {
+            return {
+              requestId: request.requestId,
+              outcome: "require-approval",
+              matchedRuleId: rule.id,
+              reason: rule.description ?? `Rule requires approval: ${rule.name}`,
+              requiredApprovers: ["operator"],
+              rollbackRequired,
+              redactApplied,
+              controlViolations,
+              decidedAt,
+            };
+          }
+          return {
+            requestId: request.requestId,
+            outcome: "require-approval",
+            matchedRuleId: rule.id,
+            reason: rule.description ?? `Rule requires approval: ${rule.name}`,
+            requiredApprovers: ["approver"],
+            rollbackRequired,
+            redactApplied,
+            controlViolations,
+            decidedAt,
+          };
+        }
+
+        if (rule.action === "require-dual-approval" || rule.action === "escalate") {
+          return {
+            requestId: request.requestId,
+            outcome: "require-dual-approval",
+            matchedRuleId: rule.id,
+            reason: rule.description ?? `Rule requires dual approval: ${rule.name}`,
+            requiredApprovers: ["operator", "executive"],
+            rollbackRequired,
+            redactApplied,
+            controlViolations,
+            decidedAt,
+          };
+        }
+
+        if (rule.action === "deny" || rule.action === "block" || rule.action === "redact") {
+          return {
+            requestId: request.requestId,
+            outcome: "block",
+            matchedRuleId: rule.id,
+            reason: rule.description ?? `Rule blocks action: ${rule.name}`,
+            requiredApprovers: [],
+            rollbackRequired,
+            redactApplied: rule.action === "redact" ? true : redactApplied,
+            controlViolations,
+            decidedAt,
+          };
+        }
+      }
+    }
+
+    if (controls.approvalGate === "single") {
+      return {
+        requestId: request.requestId,
+        outcome: "require-approval",
+        reason: `Tier '${tier}' requires operator approval for unmatched actions`,
+        requiredApprovers: ["operator"],
+        rollbackRequired,
+        redactApplied,
+        controlViolations,
+        decidedAt,
+      };
+    }
+
+    return {
+      requestId: request.requestId,
+      outcome: "block",
+      reason: "Block-by-default: no matching allow rule found",
+      requiredApprovers: [],
+      rollbackRequired,
+      redactApplied,
+      controlViolations,
       decidedAt,
     };
   }

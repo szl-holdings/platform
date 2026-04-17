@@ -12,31 +12,40 @@ import {
 import { organizationsTable } from "./organizations";
 import { usersTable } from "./auth";
 
+const GUARDIAN_TIER_ENUM = [
+  "advisory",
+  "supervised",
+  "operator-approved",
+  "dual-approved",
+  "regulated",
+  "sovereign",
+] as const;
+
+const RULE_ACTION_ENUM = [
+  "allow",
+  "deny",
+  "require-approval",
+  "require-dual-approval",
+  "log",
+  "redact",
+  "escalate",
+  "block",
+] as const;
+
 export const guardianPoliciesTable = pgTable("guardian_policies", {
   id: serial("id").primaryKey(),
   orgId: integer("org_id").references(() => organizationsTable.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   description: text("description"),
-  tier: text("tier", {
-    enum: [
-      "advisory-only",
-      "internal-workflow",
-      "operator-assisted",
-      "executive-facing",
-      "regulated-workflow",
-      "external-client-facing",
-      "autonomous-reversible",
-      "human-approval-mandatory",
-    ],
-  }).notNull(),
+  tier: text("tier", { enum: GUARDIAN_TIER_ENUM }).notNull(),
   conditions: jsonb("conditions").notNull().default([]),
-  action: text("action", {
-    enum: ["allow", "deny", "require-approval", "log", "redact", "escalate"],
-  }).notNull(),
+  action: text("action", { enum: RULE_ACTION_ENUM }).notNull(),
   priority: integer("priority").notNull().default(100),
   enabled: boolean("enabled").notNull().default(true),
   owner: text("owner"),
   tags: jsonb("tags").notNull().default([]),
+  allowedModels: jsonb("allowed_models"),
+  allowedTools: jsonb("allowed_tools"),
   createdById: integer("created_by_id").references(() => usersTable.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
@@ -64,6 +73,94 @@ export const guardianPolicyAssignmentsTable = pgTable("guardian_policy_assignmen
   uniqueIndex("guardian_policy_assignments_unique_idx").on(table.policyId, table.subjectType, table.subjectId),
 ]);
 
+export const guardianActionsTable = pgTable("guardian_actions", {
+  id: serial("id").primaryKey(),
+  requestId: text("request_id").notNull().unique(),
+  agentId: text("agent_id"),
+  sessionId: text("session_id"),
+  workflowId: text("workflow_id"),
+  orgId: integer("org_id").references(() => organizationsTable.id, { onDelete: "cascade" }),
+  tier: text("tier", { enum: GUARDIAN_TIER_ENUM }).notNull(),
+  action: text("action").notNull(),
+  toolId: text("tool_id"),
+  model: text("model"),
+  environment: text("environment"),
+  outcome: text("outcome", {
+    enum: ["allow", "require-approval", "require-dual-approval", "block"],
+  }).notNull(),
+  matchedRuleId: text("matched_rule_id"),
+  reason: text("reason").notNull(),
+  rollbackRequired: boolean("rollback_required").notNull().default(false),
+  rollbackToken: text("rollback_token"),
+  redactApplied: boolean("redact_applied").notNull().default(false),
+  controlViolations: jsonb("control_violations").notNull().default([]),
+  payload: jsonb("payload").notNull().default({}),
+  decidedAt: timestamp("decided_at").notNull().defaultNow(),
+  executedAt: timestamp("executed_at"),
+  rolledBackAt: timestamp("rolled_back_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => [
+  index("guardian_actions_agent_idx").on(table.agentId),
+  index("guardian_actions_session_idx").on(table.sessionId),
+  index("guardian_actions_tier_idx").on(table.tier),
+  index("guardian_actions_outcome_idx").on(table.outcome),
+  index("guardian_actions_org_idx").on(table.orgId),
+  index("guardian_actions_created_idx").on(table.createdAt),
+]);
+
+export const rollbackEventsTable = pgTable("rollback_events", {
+  id: serial("id").primaryKey(),
+  actionId: text("action_id").notNull(),
+  requestId: text("request_id").notNull(),
+  agentId: text("agent_id"),
+  orgId: integer("org_id").references(() => organizationsTable.id, { onDelete: "cascade" }),
+  tier: text("tier", { enum: GUARDIAN_TIER_ENUM }).notNull(),
+  triggeredBy: text("triggered_by").notNull(),
+  reason: text("reason").notNull(),
+  status: text("status", {
+    enum: ["pending", "in-progress", "completed", "failed"],
+  }).notNull().default("pending"),
+  metadata: jsonb("metadata").notNull().default({}),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => [
+  index("rollback_events_action_idx").on(table.actionId),
+  index("rollback_events_request_idx").on(table.requestId),
+  index("rollback_events_org_idx").on(table.orgId),
+  index("rollback_events_status_idx").on(table.status),
+  index("rollback_events_created_idx").on(table.createdAt),
+]);
+
+export const guardianApprovalRequestsTable = pgTable("guardian_approval_requests", {
+  id: serial("id").primaryKey(),
+  requestId: text("request_id").notNull().unique(),
+  agentId: text("agent_id"),
+  sessionId: text("session_id"),
+  workflowId: text("workflow_id"),
+  orgId: integer("org_id").references(() => organizationsTable.id, { onDelete: "cascade" }),
+  tier: text("tier", { enum: GUARDIAN_TIER_ENUM }).notNull(),
+  action: text("action").notNull(),
+  toolId: text("tool_id"),
+  approvalType: text("approval_type", { enum: ["single", "dual"] }).notNull(),
+  status: text("status", {
+    enum: ["pending", "approved", "rejected", "expired", "cancelled"],
+  }).notNull().default("pending"),
+  requiredApprovers: jsonb("required_approvers").notNull().default([]),
+  approvals: jsonb("approvals").notNull().default([]),
+  payload: jsonb("payload").notNull().default({}),
+  expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => [
+  index("guardian_approval_requests_agent_idx").on(table.agentId),
+  index("guardian_approval_requests_tier_idx").on(table.tier),
+  index("guardian_approval_requests_status_idx").on(table.status),
+  index("guardian_approval_requests_org_idx").on(table.orgId),
+  index("guardian_approval_requests_created_idx").on(table.createdAt),
+]);
+
 export const toolMeshToolsTable = pgTable("tool_mesh_tools", {
   id: serial("id").primaryKey(),
   toolId: text("tool_id").notNull().unique(),
@@ -71,18 +168,7 @@ export const toolMeshToolsTable = pgTable("tool_mesh_tools", {
   version: text("version").notNull().default("1.0.0"),
   description: text("description").notNull(),
   domainTags: jsonb("domain_tags").notNull().default([]),
-  policyTier: text("policy_tier", {
-    enum: [
-      "advisory-only",
-      "internal-workflow",
-      "operator-assisted",
-      "executive-facing",
-      "regulated-workflow",
-      "external-client-facing",
-      "autonomous-reversible",
-      "human-approval-mandatory",
-    ],
-  }).notNull(),
+  policyTier: text("policy_tier", { enum: GUARDIAN_TIER_ENUM }).notNull(),
   allowedEnvironments: jsonb("allowed_environments").notNull().default(["development", "staging", "production"]),
   inputSchema: jsonb("input_schema"),
   outputSchema: jsonb("output_schema"),
@@ -169,6 +255,15 @@ export type InsertGuardianPolicy = typeof guardianPoliciesTable.$inferInsert;
 
 export type GuardianPolicyAssignment = typeof guardianPolicyAssignmentsTable.$inferSelect;
 export type InsertGuardianPolicyAssignment = typeof guardianPolicyAssignmentsTable.$inferInsert;
+
+export type GuardianAction = typeof guardianActionsTable.$inferSelect;
+export type InsertGuardianAction = typeof guardianActionsTable.$inferInsert;
+
+export type RollbackEvent = typeof rollbackEventsTable.$inferSelect;
+export type InsertRollbackEvent = typeof rollbackEventsTable.$inferInsert;
+
+export type GuardianApprovalRequest = typeof guardianApprovalRequestsTable.$inferSelect;
+export type InsertGuardianApprovalRequest = typeof guardianApprovalRequestsTable.$inferInsert;
 
 export type ToolMeshTool = typeof toolMeshToolsTable.$inferSelect;
 export type InsertToolMeshTool = typeof toolMeshToolsTable.$inferInsert;
