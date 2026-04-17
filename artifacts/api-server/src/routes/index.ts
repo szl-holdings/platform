@@ -29,6 +29,7 @@ import plansRouter from "./plans";
 import * as alloyRuntime from "./groups/alloy-runtime-group";
 import * as selfModel from "./groups/self-model";
 import * as verifier from "./groups/verifier";
+import * as skillLibrary from "./groups/skill-library";
 
 const router: IRouter = Router();
 
@@ -59,6 +60,7 @@ guardian.register(router);
 alloyRuntime.register(router);
 selfModel.register(router);
 verifier.register(router);
+skillLibrary.register(router);
 
 router.use(tracesRouter);
 router.use(reflectionsRouter);

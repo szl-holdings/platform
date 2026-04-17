@@ -53,6 +53,7 @@
     "@workspace/eval-os": "workspace:*",
     "@workspace/reflection-engine": "workspace:*",
     "@workspace/planner": "workspace:*",
+    "@workspace/skill-library": "workspace:*",
     "@szl-holdings/receipt-graph": "workspace:*",
     "@szl-holdings/constellation": "workspace:*",
     "@szl-holdings/services": "workspace:*",

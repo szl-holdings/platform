@@ -113,6 +113,11 @@ export default defineConfig({
       { find: "@workspace/verifier/engine", replacement: resolve(__dirname, "packages/verifier/src/engine.ts") },
       { find: "@workspace/verifier/store", replacement: resolve(__dirname, "packages/verifier/src/store.ts") },
       { find: "@workspace/verifier", replacement: resolve(__dirname, "packages/verifier/src/index.ts") },
+      { find: "@workspace/skill-library/types", replacement: resolve(__dirname, "packages/skill-library/src/types.ts") },
+      { find: "@workspace/skill-library/registry", replacement: resolve(__dirname, "packages/skill-library/src/registry.ts") },
+      { find: "@workspace/skill-library/runner", replacement: resolve(__dirname, "packages/skill-library/src/runner.ts") },
+      { find: "@workspace/skill-library/seeds", replacement: resolve(__dirname, "packages/skill-library/src/seeds.ts") },
+      { find: "@workspace/skill-library", replacement: resolve(__dirname, "packages/skill-library/src/index.ts") },
     ],
   },
   test: {
@@ -135,6 +140,7 @@ export default defineConfig({
       "packages/planner/src/**/*.test.ts",
       "packages/self-model/src/**/*.test.ts",
       "packages/verifier/src/**/*.test.ts",
+      "packages/skill-library/src/**/*.test.ts",
     ],
     exclude: [
       "tests/e2e/**",

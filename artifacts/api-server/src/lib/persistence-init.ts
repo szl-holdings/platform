@@ -2,6 +2,14 @@ import { defaultTraceStore, PostgresTraceStore } from "@workspace/trace-graph";
 import { defaultMemoryStore, PostgresMemoryStore } from "@workspace/memory-fabric";
 import { defaultPlanStore, DbPlanStore } from "@workspace/planner";
 import { defaultVerifierStore, DbVerifierStore } from "@workspace/verifier";
+import {
+  defaultSkillRegistry,
+  defaultSkillRunStore,
+  PostgresSkillRegistry,
+  PostgresSkillRunStore,
+  builtinSkills,
+  setSkillLibraryLogger,
+} from "@workspace/skill-library";
 import { logger } from "./logger";
 
 let traceStore: PostgresTraceStore | undefined;
@@ -81,6 +89,56 @@ export async function initDurablePersistence(): Promise<void> {
       logger.info("[persistence] Verifier store backed by PostgreSQL");
     } catch (err) {
       logger.warn({ err }, "[persistence] Verifier DB store init failed — staying in-memory");
+    }
+
+    try {
+      const { skillsTable, skillRunsTable } = await import("@szl-holdings/db/schema");
+      setSkillLibraryLogger(logger);
+
+      const pgSkillRegistry = new PostgresSkillRegistry({
+        db,
+        skillsTable,
+        logger,
+      });
+
+      const pgSkillRunStore = new PostgresSkillRunStore({
+        db,
+        skillRunsTable,
+        hydrateLimit: 2000,
+      });
+
+      const [hydratedSkills, hydratedRuns] = await Promise.all([
+        pgSkillRegistry.hydrate().catch((err) => {
+          logger.warn({ err }, "[persistence] Skill registry hydration failed");
+          return [] as import("@workspace/skill-library").SkillDefinition[];
+        }),
+        pgSkillRunStore.hydrate().catch((err) => {
+          logger.warn({ err }, "[persistence] Skill run store hydration failed");
+          return [] as import("@workspace/skill-library").SkillRun[];
+        }),
+      ]);
+
+      for (const skill of hydratedSkills) {
+        defaultSkillRegistry.registerSkill(skill);
+      }
+      for (const run of hydratedRuns) {
+        defaultSkillRunStore.saveRun(run);
+      }
+
+      defaultSkillRegistry.setBackend(pgSkillRegistry);
+      defaultSkillRunStore.setBackend(pgSkillRunStore);
+
+      const seeded = await pgSkillRegistry.seedBuiltins(builtinSkills).catch((err) => {
+        logger.warn({ err }, "[persistence] Skill builtin seeding failed");
+        return 0;
+      });
+
+      logger.info(
+        { hydratedSkills: hydratedSkills.length, hydratedRuns: hydratedRuns.length, seeded },
+        "[persistence] Skill Library is now durably persisted to PostgreSQL"
+      );
+    } catch (err) {
+      logger.warn({ err }, "[persistence] Skill Library DB store init failed — staying in-memory");
     }
 
     logger.info(

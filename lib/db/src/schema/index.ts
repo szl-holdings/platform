@@ -123,3 +123,5 @@ export * from "./trace_graph";
 export * from "./eval_os";
 export * from "./deployments";
 export * from "./cognitive_runtime";
+
+export * from "./skill_library";
