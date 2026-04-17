@@ -1,8 +1,10 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import {
-  Layers, DollarSign, TrendingUp, Users, BarChart3, Calculator, ChevronDown, ArrowRight
+  Layers, DollarSign, TrendingUp, Users, BarChart3, Calculator, ChevronDown, ArrowRight, Save, FolderOpen
 } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { api } from "../lib/api";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 import { cn } from "@szl-holdings/shared-ui/utils";
 
@@ -126,34 +128,102 @@ const CustomTooltip = ({ active, payload, label }: ChartTooltipProps) => {
 
 const TIER_COLORS = [DS.accent.blue, DS.accent.green, DS.accent.purple, DS.accent.gold];
 
+const DEFAULT_WATERFALL_INPUTS: WaterfallInputs = {
+  totalEquity: 15_000_000,
+  gpContributionPct: 10,
+  preferredReturn: 8,
+  catchUpPct: 50,
+  promotePct: 20,
+  exitProceeds: 28_500_000,
+  holdMonths: 48,
+};
+
 export default function WaterfallCalculatorPage() {
-  const [inputs, setInputs] = useState<WaterfallInputs>({
-    totalEquity: 15_000_000,
-    gpContributionPct: 10,
-    preferredReturn: 8,
-    catchUpPct: 50,
-    promotePct: 20,
-    exitProceeds: 28_500_000,
-    holdMonths: 48,
+  const queryClient = useQueryClient();
+
+  const { data: savedStructures } = useQuery({
+    queryKey: ["terra-waterfall-structures"],
+    queryFn: () => api.waterfall.list(),
+    staleTime: 30_000,
   });
+
+  const saveStructureMutation = useMutation({
+    mutationFn: (data: { name: string; inputs: Record<string, unknown>; results: Record<string, unknown> }) =>
+      api.waterfall.create(data),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["terra-waterfall-structures"] }); },
+  });
+
+  const [inputs, setInputs] = useState<WaterfallInputs>(DEFAULT_WATERFALL_INPUTS);
+  const [showStructures, setShowStructures] = useState(false);
+  const [savedMsg, setSavedMsg] = useState<string | null>(null);
+  const [structureName, setStructureName] = useState("Waterfall Structure");
 
   const set = (k: keyof WaterfallInputs) => (v: number) => setInputs(prev => ({ ...prev, [k]: v }));
   const r = useWaterfall(inputs);
 
-  const barData = r.tiers.map((t, i) => ({ name: t.description.split(" (")[0], GP: t.gpAmount, LP: t.lpAmount }));
+  const barData = r.tiers.map((t) => ({ name: t.description.split(" (")[0], GP: t.gpAmount, LP: t.lpAmount }));
   const pieData = [
     { name: "GP Total", value: r.gpTotal, color: DS.accent.gold },
     { name: "LP Total", value: r.lpTotal, color: DS.accent.blue },
   ];
 
+  function saveStructure() {
+    saveStructureMutation.mutate({
+      name: structureName,
+      inputs: inputs as unknown as Record<string, unknown>,
+      results: { gpEM: r.gpEM, lpEM: r.lpEM, gpIRR: r.gpIRR, lpIRR: r.lpIRR, gpTotal: r.gpTotal, lpTotal: r.lpTotal },
+    }, {
+      onSuccess: () => { setSavedMsg("Saved!"); setTimeout(() => setSavedMsg(null), 2000); },
+    });
+  }
+
+  function loadStructure(s: { inputs: Record<string, unknown>; name: string }) {
+    setInputs(s.inputs as unknown as WaterfallInputs);
+    setStructureName(s.name);
+    setShowStructures(false);
+  }
+
   return (
     <div className="space-y-4 max-w-[1400px]">
-      <div>
-        <div className="flex items-center gap-2.5 mb-0.5">
-          <h1 className="text-base font-bold text-white tracking-tight font-display">Investor Waterfall Calculator</h1>
-          <span className="text-[9px] font-mono px-1.5 py-0.5 rounded uppercase tracking-wider font-bold" style={{ color: DS.accent.purple, background: `${DS.accent.purple}15`, border: `1px solid ${DS.accent.purple}25` }}>GP / LP</span>
+      <div className="flex items-center justify-between">
+        <div>
+          <div className="flex items-center gap-2.5 mb-0.5">
+            <h1 className="text-base font-bold text-white tracking-tight font-display">Investor Waterfall Calculator</h1>
+            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded uppercase tracking-wider font-bold" style={{ color: DS.accent.purple, background: `${DS.accent.purple}15`, border: `1px solid ${DS.accent.purple}25` }}>GP / LP</span>
+          </div>
+          <p className="text-[10px] font-mono" style={{ color: DS.text.muted }}>Preferred return · catch-up · promote splits · multi-tier GP/LP distribution waterfall modeling</p>
         </div>
-        <p className="text-[10px] font-mono" style={{ color: DS.text.muted }}>Preferred return · catch-up · promote splits · multi-tier GP/LP distribution waterfall modeling</p>
+        <div className="flex items-center gap-2">
+          <input value={structureName} onChange={e => setStructureName(e.target.value)}
+            className="bg-transparent border rounded-lg px-2 py-1.5 text-[10px] w-40"
+            style={{ borderColor: DS.border, color: DS.text.secondary }} />
+          <button onClick={saveStructure} disabled={saveStructureMutation.isPending}
+            className="flex items-center gap-1.5 text-[10px] px-3 py-1.5 rounded-lg"
+            style={{ background: `${DS.accent.purple}15`, border: `1px solid ${DS.accent.purple}30`, color: DS.accent.purple }}>
+            <Save className="w-3 h-3" />
+            {savedMsg ?? (saveStructureMutation.isPending ? "Saving…" : "Save")}
+          </button>
+          <div className="relative">
+            <button onClick={() => setShowStructures(v => !v)}
+              className="flex items-center gap-1.5 text-[10px] px-3 py-1.5 rounded-lg"
+              style={{ background: DS.surface, border: `1px solid ${DS.border}`, color: DS.text.secondary }}>
+              <FolderOpen className="w-3 h-3" />
+              Load ({savedStructures?.structures.length ?? 0})
+            </button>
+            {showStructures && (savedStructures?.structures.length ?? 0) > 0 && (
+              <div className="absolute right-0 top-full mt-1 w-64 rounded-xl border shadow-2xl z-50 overflow-hidden" style={{ background: "#0d0f15", borderColor: DS.border }}>
+                {savedStructures!.structures.map(s => (
+                  <button key={s.id} onClick={() => loadStructure(s)}
+                    className="w-full text-left px-3 py-2.5 hover:bg-white/5 transition-colors"
+                    style={{ borderBottom: `1px solid ${DS.border}` }}>
+                    <p className="text-[11px] font-medium" style={{ color: DS.text.primary }}>{s.name}</p>
+                    <p className="text-[9px] mt-0.5" style={{ color: DS.text.muted }}>{new Date(s.updatedAt).toLocaleDateString()}</p>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       <div className="rounded-xl border p-4" style={{ borderColor: DS.border, background: DS.surface }}>

@@ -2,8 +2,10 @@ import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import {
   Clock, AlertTriangle, CheckCircle, Building2, DollarSign, Calendar,
-  ArrowRight, Shield, FileText, RefreshCw, ChevronRight, CircleAlert, Plus, X
+  ArrowRight, Shield, FileText, RefreshCw, ChevronRight, CircleAlert, Plus, X, Database
 } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { api } from "../lib/api";
 
 const DS = {
   surface: "rgba(255,255,255,0.025)",
@@ -191,12 +193,52 @@ function ExchangeCard({ ex, selected, onClick }: { ex: Exchange; selected: boole
 }
 
 export default function Exchange1031Page() {
-  const [selectedId, setSelectedId] = useState(EXCHANGES[0].id);
-  const ex = EXCHANGES.find(e => e.id === selectedId) ?? EXCHANGES[0];
-  const completePct = Math.round((ex.complianceItems.filter(c => c.status === "complete").length / ex.complianceItems.length) * 100);
+  const queryClient = useQueryClient();
 
-  const totalDeferredGain = EXCHANGES.reduce((s, e) => s + e.deferredGain, 0);
-  const totalTaxSavings = EXCHANGES.reduce((s, e) => s + e.taxSavings, 0);
+  const { data: apiData, isLoading, isError } = useQuery({
+    queryKey: ["terra-exchanges-1031"],
+    queryFn: () => api.exchanges1031.list(),
+    staleTime: 30_000,
+  });
+
+  const seedMutation = useMutation({
+    mutationFn: async () => {
+      for (const ex of EXCHANGES) {
+        await api.exchanges1031.create({
+          relinquishedProperty: ex.relinquishedProperty,
+          relinquishedAddress: ex.relinquishedAddress,
+          saleDate: ex.saleDate,
+          salePrice: ex.salePrice,
+          adjustedBasis: ex.adjustedBasis,
+          deferredGain: ex.deferredGain,
+          qi: ex.qi,
+          qiContact: ex.qiContact,
+          status: ex.status,
+          identificationDeadline: ex.identificationDeadline,
+          exchangeDeadline: ex.exchangeDeadline,
+          identifiedProperties: ex.identifiedProperties as Array<Record<string, unknown>>,
+          complianceItems: ex.complianceItems as Array<Record<string, unknown>>,
+          taxSavings: ex.taxSavings,
+          isDemo: true,
+        });
+      }
+    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["terra-exchanges-1031"] }); },
+  });
+
+  const isLive = !isLoading && !isError && apiData && apiData.dataMode === "live";
+  const exchanges: Exchange[] = isLive
+    ? (apiData.exchanges as unknown as Exchange[])
+    : EXCHANGES;
+
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const effectiveId = selectedId ?? exchanges[0]?.id;
+  const ex = exchanges.find(e => e.id === effectiveId) ?? exchanges[0];
+  if (!ex) return null;
+  const completePct = Math.round((ex.complianceItems.filter(c => (c as {status: string}).status === "complete").length / ex.complianceItems.length) * 100);
+
+  const totalDeferredGain = exchanges.reduce((s, e) => s + e.deferredGain, 0);
+  const totalTaxSavings = exchanges.reduce((s, e) => s + e.taxSavings, 0);
 
   return (
     <div className="space-y-4 max-w-[1400px]">
@@ -204,16 +246,27 @@ export default function Exchange1031Page() {
         <div className="flex items-center gap-2.5 mb-0.5">
           <h1 className="text-base font-bold text-white tracking-tight font-display">1031 Exchange Tracker</h1>
           <span className="text-[9px] font-mono px-1.5 py-0.5 rounded uppercase tracking-wider font-bold" style={{ color: DS.accent.gold, background: `${DS.accent.gold}10`, border: `1px solid ${DS.accent.gold}20` }}>IRC §1031</span>
+          {isLive ? (
+            <span className="flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ color: DS.accent.green, background: `${DS.accent.green}10`, border: `1px solid ${DS.accent.green}20` }}>
+              <Database className="w-2.5 h-2.5" /> Live DB
+            </span>
+          ) : !isLoading && !isError && (
+            <button onClick={() => seedMutation.mutate()} disabled={seedMutation.isPending}
+              className="flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded cursor-pointer"
+              style={{ color: DS.text.muted, background: DS.surface, border: `1px solid ${DS.border}` }}>
+              {seedMutation.isPending ? "Seeding…" : "Seed to DB"}
+            </button>
+          )}
         </div>
         <p className="text-[10px] font-mono" style={{ color: DS.text.muted }}>45-day identification · 180-day exchange · QI status · replacement property matching</p>
       </div>
 
       <div className="grid grid-cols-4 gap-3">
         {[
-          { label: "Active Exchanges", value: EXCHANGES.filter(e => e.status !== "completed" && e.status !== "failed").length.toString(), color: DS.accent.gold },
+          { label: "Active Exchanges", value: exchanges.filter(e => e.status !== "completed" && e.status !== "failed").length.toString(), color: DS.accent.gold },
           { label: "Total Deferred Gain", value: fmt(totalDeferredGain), color: DS.accent.green },
           { label: "Tax Savings Est.", value: fmt(totalTaxSavings), color: DS.accent.green },
-          { label: "Properties Identified", value: EXCHANGES.flatMap(e => e.identifiedProperties).length.toString(), color: DS.accent.blue },
+          { label: "Properties Identified", value: exchanges.flatMap(e => e.identifiedProperties).length.toString(), color: DS.accent.blue },
         ].map(m => (
           <div key={m.label} className="rounded-xl border p-3" style={{ borderColor: DS.border, background: DS.surface }}>
             <p className="text-[8px] uppercase tracking-wider" style={{ color: DS.text.muted }}>{m.label}</p>
@@ -225,8 +278,8 @@ export default function Exchange1031Page() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="space-y-3">
           <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: DS.text.muted }}>Exchanges</p>
-          {EXCHANGES.map(e => (
-            <ExchangeCard key={e.id} ex={e} selected={selectedId === e.id} onClick={() => setSelectedId(e.id)} />
+          {exchanges.map(e => (
+            <ExchangeCard key={e.id} ex={e} selected={effectiveId === e.id} onClick={() => setSelectedId(e.id)} />
           ))}
         </div>
 

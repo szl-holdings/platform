@@ -1,9 +1,11 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FileText, Upload, CheckCircle, AlertTriangle, Clock, Calendar,
-  DollarSign, TrendingUp, ChevronRight, ChevronDown, Building2, RefreshCw, Download
+  DollarSign, TrendingUp, ChevronRight, ChevronDown, Building2, RefreshCw, Download, Database
 } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { api } from "../lib/api";
 
 const DS = {
   page: "#08090e",
@@ -182,26 +184,38 @@ function ConfidenceBadge({ score }: { score: number }) {
   );
 }
 
-function UploadZone({ onUpload }: { onUpload: () => void }) {
+function UploadZone({ onUpload, processing }: { onUpload: (files: FileList) => void; processing?: boolean }) {
   const [dragging, setDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault();
+    setDragging(false);
+    if (e.dataTransfer.files.length > 0) onUpload(e.dataTransfer.files);
+  }
+
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    if (e.target.files && e.target.files.length > 0) onUpload(e.target.files);
+  }
+
   return (
     <div
-      onClick={() => inputRef.current?.click()}
+      onClick={() => !processing && inputRef.current?.click()}
       onDragOver={e => { e.preventDefault(); setDragging(true); }}
       onDragLeave={() => setDragging(false)}
-      onDrop={e => { e.preventDefault(); setDragging(false); onUpload(); }}
+      onDrop={handleDrop}
       className="rounded-xl border-2 border-dashed p-8 text-center cursor-pointer transition-all"
-      style={{ borderColor: dragging ? DS.accent.gold : "rgba(255,255,255,0.1)", background: dragging ? "rgba(184,148,60,0.04)" : "transparent" }}
+      style={{ borderColor: dragging ? DS.accent.gold : "rgba(255,255,255,0.1)", background: dragging ? "rgba(184,148,60,0.04)" : "transparent", opacity: processing ? 0.7 : 1 }}
     >
-      <input ref={inputRef} type="file" accept=".pdf,.docx,.txt" multiple className="hidden" onChange={onUpload} />
+      <input ref={inputRef} type="file" accept=".pdf,.docx,.txt" multiple className="hidden" onChange={handleChange} />
       <Upload className="w-8 h-8 mx-auto mb-3" style={{ color: DS.accent.gold }} />
-      <p className="text-sm font-semibold" style={{ color: DS.text.primary }}>Drop lease documents here</p>
-      <p className="text-xs mt-1" style={{ color: DS.text.muted }}>PDF, DOCX, or TXT · AI extracts key terms in seconds</p>
+      <p className="text-sm font-semibold" style={{ color: DS.text.primary }}>
+        {processing ? "Extracting lease terms…" : "Drop lease documents here"}
+      </p>
+      <p className="text-xs mt-1" style={{ color: DS.text.muted }}>PDF, DOCX, or TXT · Terra AI Engine extracts key terms</p>
       <div className="flex items-center justify-center gap-2 mt-4">
-        <span className="text-[10px] px-2 py-0.5 rounded" style={{ background: "rgba(184,148,60,0.08)", color: DS.accent.gold, border: `1px solid rgba(184,148,60,0.2)` }}>Simulated extraction</span>
-        <span className="text-[10px]" style={{ color: DS.text.muted }}>· Powered by Terra AI Engine</span>
+        <span className="text-[10px] px-2 py-0.5 rounded" style={{ background: "rgba(58,122,212,0.08)", color: DS.accent.blue, border: `1px solid rgba(58,122,212,0.2)` }}>Live Extraction</span>
+        <span className="text-[10px]" style={{ color: DS.text.muted }}>· Text parsing · persisted to DB</span>
       </div>
     </div>
   );
@@ -349,52 +363,64 @@ function LeaseDetail({ lease }: { lease: ExtractedLease }) {
 }
 
 export default function LeaseAbstractionPage() {
-  const [leases, setLeases] = useState<ExtractedLease[]>(DEMO_LEASES);
-  const [selectedId, setSelectedId] = useState<string | null>(DEMO_LEASES[0].id);
-  const [processing, setProcessing] = useState(false);
+  const queryClient = useQueryClient();
 
-  const selected = leases.find(l => l.id === selectedId) ?? null;
+  const { data: apiData, isLoading, isError } = useQuery({
+    queryKey: ["terra-leases"],
+    queryFn: () => api.leases.list(),
+    staleTime: 30_000,
+  });
 
-  function simulateUpload() {
-    setProcessing(true);
-    setTimeout(() => {
-      const newId = `lease-new-${Date.now()}`;
-      const tenants = ["Apex Ventures LLC", "Coastal Capital Partners", "Summit Health Group", "Orion Logistics Inc.", "Azure Analytics Corp"];
-      const tenant = tenants[leases.length % tenants.length];
-      const sqft = 6500 + (leases.length * 1200);
-      const rentPerSqft = 2.8 + (leases.length * 0.15);
-      const baseRent = Math.round(sqft * rentPerSqft);
-      const commencementDate = new Date(Date.now() - 180 * 86400000).toISOString().slice(0, 10);
-      const expirationDate = new Date(Date.now() + (4 + leases.length % 3) * 365 * 86400000).toISOString().slice(0, 10);
-      const confidence = 79 + (leases.length * 5 % 17);
-      const newLease: ExtractedLease = {
-        id: newId,
-        documentName: `${tenant.replace(/ /g, "_")}_Lease_2024.pdf`,
-        tenant,
-        premises: `Suite ${300 + leases.length * 100}, Floor ${3 + leases.length}`,
-        propertyAddress: "1200 Gateway Blvd, Dallas, TX 75201",
-        leaseType: ["NNN", "Modified Gross", "Full Service Gross"][leases.length % 3],
-        commencementDate,
-        expirationDate,
-        baseRent,
-        rentPerSqft: Number(rentPerSqft.toFixed(2)),
-        sqft,
-        escalations: ["3% per annum", "CPI capped at 3%", "2.5% annual fixed"][leases.length % 3],
-        options: [`1 × 5-year renewal at then-market rent`],
-        cam: Math.round(sqft * 0.45),
-        tiAllowance: sqft * 60,
-        securityDeposit: baseRent * 2,
-        terminationOption: "No early termination clause",
-        exclusiveUse: "No exclusive use clause",
-        coTenancy: "Not applicable",
-        extractedAt: new Date().toISOString(),
-        confidence,
-        flags: confidence < 88 ? [{ field: "Escalation Clause", issue: "Escalation language ambiguous — confirm compounding basis with landlord counsel", severity: "warning" as const }] : [],
-      };
-      setLeases(prev => [newLease, ...prev]);
-      setSelectedId(newId);
-      setProcessing(false);
-    }, 2200);
+  const seedMutation = useMutation({
+    mutationFn: async () => {
+      for (const lease of DEMO_LEASES) {
+        await api.leases.create({
+          documentName: lease.documentName, tenant: lease.tenant, premises: lease.premises,
+          propertyAddress: lease.propertyAddress, leaseType: lease.leaseType,
+          commencementDate: lease.commencementDate, expirationDate: lease.expirationDate,
+          baseRent: lease.baseRent, rentPerSqft: lease.rentPerSqft, sqft: lease.sqft,
+          escalations: lease.escalations, options: lease.options, cam: lease.cam,
+          tiAllowance: lease.tiAllowance, securityDeposit: lease.securityDeposit,
+          terminationOption: lease.terminationOption, exclusiveUse: lease.exclusiveUse,
+          coTenancy: lease.coTenancy, confidence: lease.confidence, flags: lease.flags, isDemo: true,
+        });
+      }
+    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["terra-leases"] }); },
+  });
+
+  const isLive = !isLoading && !isError && apiData && apiData.dataMode === "live";
+  const apiLeases: ExtractedLease[] = isLive
+    ? (apiData.leases as unknown as ExtractedLease[])
+    : [];
+
+  const uploadMutation = useMutation({
+    mutationFn: (file: File) => api.leases.upload(file),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["terra-leases"] });
+      setSelectedId(data.lease.id);
+    },
+  });
+
+  const [localLeases, setLocalLeases] = useState<ExtractedLease[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  const processing = uploadMutation.isPending;
+
+  const leases = isLive ? apiLeases : [...localLeases, ...DEMO_LEASES.filter(d => !localLeases.some(l => l.id === d.id))];
+  const effectiveId = selectedId ?? leases[0]?.id ?? null;
+  const selected = leases.find(l => l.id === effectiveId) ?? null;
+
+  function handleFileUpload(files: FileList) {
+    setUploadError(null);
+    const file = files[0];
+    if (!file) return;
+    uploadMutation.mutate(file, {
+      onError: (err) => {
+        setUploadError(err instanceof Error ? err.message : "Upload failed");
+      },
+    });
   }
 
   const totalAnnualRent = leases.reduce((s, l) => s + l.baseRent * 12, 0);
@@ -408,6 +434,17 @@ export default function LeaseAbstractionPage() {
           <div className="flex items-center gap-2.5 mb-0.5">
             <h1 className="text-base font-bold text-white tracking-tight font-display">Lease Abstraction Engine</h1>
             <span className="text-[9px] font-mono px-1.5 py-0.5 rounded uppercase tracking-wider font-bold" style={{ color: DS.accent.gold, background: `${DS.accent.gold}10`, border: `1px solid ${DS.accent.gold}20` }}>AI-Powered</span>
+            {isLive ? (
+              <span className="flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ color: DS.accent.green, background: `${DS.accent.green}10`, border: `1px solid ${DS.accent.green}20` }}>
+                <Database className="w-2.5 h-2.5" /> Live DB ({leases.length})
+              </span>
+            ) : !isLoading && !isError && (
+              <button onClick={() => seedMutation.mutate()} disabled={seedMutation.isPending}
+                className="flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded cursor-pointer"
+                style={{ color: DS.text.muted, background: DS.surface, border: `1px solid ${DS.border}` }}>
+                {seedMutation.isPending ? "Seeding…" : "Seed to DB"}
+              </button>
+            )}
           </div>
           <p className="text-[10px] font-mono" style={{ color: DS.text.muted }}>Upload lease documents — AI extracts key terms, flags issues, feeds property detail pages</p>
         </div>
@@ -435,7 +472,13 @@ export default function LeaseAbstractionPage() {
         ))}
       </div>
 
-      <UploadZone onUpload={simulateUpload} />
+      <UploadZone onUpload={handleFileUpload} processing={processing} />
+      {uploadError && (
+        <div className="rounded-lg border p-3 flex items-center gap-2" style={{ borderColor: `${DS.accent.red}40`, background: `${DS.accent.red}08` }}>
+          <AlertTriangle className="w-3 h-3 shrink-0" style={{ color: DS.accent.red }} />
+          <p className="text-[10px]" style={{ color: DS.accent.red }}>{uploadError}</p>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="space-y-3">

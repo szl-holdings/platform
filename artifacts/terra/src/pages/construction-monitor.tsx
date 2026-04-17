@@ -2,8 +2,10 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Hammer, Calendar, DollarSign, AlertTriangle, CheckCircle, Clock, Camera,
-  TrendingUp, Building2, ChevronRight, BarChart3, ArrowUpRight, Activity, X
+  TrendingUp, Building2, ChevronRight, BarChart3, ArrowUpRight, Activity, X, Database
 } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { api } from "../lib/api";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { cn } from "@szl-holdings/shared-ui/utils";
 
@@ -159,19 +161,49 @@ const CustomTooltip = ({ active, payload, label }: ChartTooltipProps) => {
 };
 
 export default function ConstructionMonitorPage() {
-  const [selectedId, setSelectedId] = useState(PROJECTS[0].id);
+  const queryClient = useQueryClient();
+
+  const { data: apiData, isLoading, isError } = useQuery({
+    queryKey: ["terra-construction-projects"],
+    queryFn: () => api.construction.list(),
+    staleTime: 30_000,
+  });
+
+  const seedMutation = useMutation({
+    mutationFn: async () => {
+      for (const p of PROJECTS) {
+        await api.construction.create({
+          name: p.name, address: p.address, type: p.type,
+          totalBudget: p.totalBudget, totalSpent: p.totalSpent, overallPct: p.overallPct,
+          startDate: p.startDate, projectedCompletion: p.projectedCompletion, revisedCompletion: p.revisedCompletion,
+          status: p.status, gc: p.gc, architect: p.architect,
+          milestones: p.milestones as Array<Record<string, unknown>>,
+          budgetLines: p.budgetLines as Array<Record<string, unknown>>,
+          photos: p.photos as Array<Record<string, unknown>>,
+          isDemo: true,
+        });
+      }
+    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["terra-construction-projects"] }); },
+  });
+
+  const isLive = !isLoading && !isError && apiData && apiData.dataMode === "live";
+  const projects: Project[] = isLive ? (apiData.projects as unknown as Project[]) : PROJECTS;
+
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [photoModal, setPhotoModal] = useState<PhotoUpdate | null>(null);
 
-  const proj = PROJECTS.find(p => p.id === selectedId) ?? PROJECTS[0];
+  const effectiveId = selectedId ?? projects[0]?.id;
+  const proj = projects.find(p => p.id === effectiveId) ?? projects[0];
+  if (!proj) return null;
   const statusCfg = STATUS_CONFIG[proj.status];
   const budgetVariance = proj.totalBudget - proj.totalSpent;
-  const completeMilestones = proj.milestones.filter(m => m.status === "complete").length;
+  const completeMilestones = proj.milestones.filter(m => (m as {status: string}).status === "complete").length;
 
-  const budgetChartData = proj.budgetLines.map(b => ({
-    name: b.category.split(" — ")[1] || b.category,
-    Budget: b.budget,
-    Spent: b.spent,
-  }));
+  const budgetChartData = proj.budgetLines.map(b => {
+    const bl = b as {category: string; budget: number; spent: number};
+    return { name: bl.category.split(" — ")[1] || bl.category, Budget: bl.budget, Spent: bl.spent };
+  });
 
   return (
     <div className="space-y-4 max-w-[1400px]">
@@ -179,12 +211,23 @@ export default function ConstructionMonitorPage() {
         <div className="flex items-center gap-2.5 mb-0.5">
           <h1 className="text-base font-bold text-white tracking-tight font-display">Construction Progress Monitor</h1>
           <span className="text-[9px] font-mono px-1.5 py-0.5 rounded uppercase tracking-wider font-bold" style={{ color: DS.accent.blue, background: `${DS.accent.blue}10`, border: `1px solid ${DS.accent.blue}20` }}>Active Developments</span>
+          {isLive ? (
+            <span className="flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ color: DS.accent.green, background: `${DS.accent.green}10`, border: `1px solid ${DS.accent.green}20` }}>
+              <Database className="w-2.5 h-2.5" /> Live DB
+            </span>
+          ) : !isLoading && !isError && (
+            <button onClick={() => seedMutation.mutate()} disabled={seedMutation.isPending}
+              className="flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded cursor-pointer"
+              style={{ color: DS.text.muted, background: DS.surface, border: `1px solid ${DS.border}` }}>
+              {seedMutation.isPending ? "Seeding…" : "Seed to DB"}
+            </button>
+          )}
         </div>
         <p className="text-[10px] font-mono" style={{ color: DS.text.muted }}>Milestone timelines · budget vs. actual · photo documentation · portfolio dashboard integration</p>
       </div>
 
       <div className="flex gap-2 overflow-x-auto pb-1">
-        {PROJECTS.map(p => (
+        {projects.map(p => (
           <button
             key={p.id}
             onClick={() => setSelectedId(p.id)}

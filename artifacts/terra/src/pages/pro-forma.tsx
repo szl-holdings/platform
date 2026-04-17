@@ -2,8 +2,10 @@ import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import {
   BarChart3, DollarSign, TrendingUp, Calculator, Building2, Calendar,
-  ChevronDown, ChevronUp, AlertTriangle, CheckCircle, RefreshCw, Download
+  ChevronDown, ChevronUp, AlertTriangle, CheckCircle, RefreshCw, Download, Save, FolderOpen
 } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { api } from "../lib/api";
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
 import { cn } from "@szl-holdings/shared-ui/utils";
 
@@ -151,8 +153,24 @@ const CustomTooltip = ({ active, payload, label }: ChartTooltipProps) => {
 };
 
 export default function ProFormaPage() {
+  const queryClient = useQueryClient();
+
+  const { data: savedProjects } = useQuery({
+    queryKey: ["terra-pro-forma-projects"],
+    queryFn: () => api.proForma.list(),
+    staleTime: 30_000,
+  });
+
+  const saveProjectMutation = useMutation({
+    mutationFn: (data: { projectName: string; inputs: Record<string, unknown>; results: Record<string, unknown> }) =>
+      api.proForma.create(data),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["terra-pro-forma-projects"] }); },
+  });
+
   const [inputs, setInputs] = useState<ProFormaInputs>(DEFAULT_INPUTS);
   const [showInputs, setShowInputs] = useState(true);
+  const [showProjects, setShowProjects] = useState(false);
+  const [savedMsg, setSavedMsg] = useState<string | null>(null);
   const r = useProForma(inputs);
 
   const set = (k: keyof ProFormaInputs) => (v: number | string) => setInputs(prev => ({ ...prev, [k]: v }));
@@ -160,6 +178,25 @@ export default function ProFormaPage() {
   const irr_ok = r.irr >= 18;
   const em_ok = r.equityMultiple >= inputs.equityMultipleTarget;
   const poc_ok = r.profitOnCost >= 15;
+
+  function saveProject() {
+    saveProjectMutation.mutate({
+      projectName: inputs.projectName,
+      inputs: inputs as unknown as Record<string, unknown>,
+      results: {
+        irr: r.irr, equityMultiple: r.equityMultiple, profitOnCost: r.profitOnCost,
+        totalProjectCost: r.totalProjectCost, stabilizedValue: r.stabilizedValue,
+        developerProfit: r.developerProfit,
+      },
+    }, {
+      onSuccess: () => { setSavedMsg("Saved!"); setTimeout(() => setSavedMsg(null), 2000); },
+    });
+  }
+
+  function loadProject(project: { inputs: Record<string, unknown> }) {
+    setInputs(project.inputs as unknown as ProFormaInputs);
+    setShowProjects(false);
+  }
 
   return (
     <div className="space-y-4 max-w-[1400px]">
@@ -172,6 +209,32 @@ export default function ProFormaPage() {
           <p className="text-[10px] font-mono" style={{ color: DS.text.muted }}>{inputs.projectName} · Ground-up development analysis with IRR, equity multiple, and sensitivity tables</p>
         </div>
         <div className="flex items-center gap-2">
+          <button onClick={saveProject} disabled={saveProjectMutation.isPending}
+            className="flex items-center gap-1.5 text-[10px] px-3 py-1.5 rounded-lg"
+            style={{ background: saveProjectMutation.isPending ? DS.surface : `${DS.accent.gold}15`, border: `1px solid ${saveProjectMutation.isPending ? DS.border : DS.accent.gold}`, color: DS.accent.gold }}>
+            <Save className="w-3 h-3" />
+            {savedMsg ?? (saveProjectMutation.isPending ? "Saving…" : "Save")}
+          </button>
+          <div className="relative">
+            <button onClick={() => setShowProjects(v => !v)}
+              className="flex items-center gap-1.5 text-[10px] px-3 py-1.5 rounded-lg"
+              style={{ background: DS.surface, border: `1px solid ${DS.border}`, color: DS.text.secondary }}>
+              <FolderOpen className="w-3 h-3" />
+              Load ({savedProjects?.projects.length ?? 0})
+            </button>
+            {showProjects && (savedProjects?.projects.length ?? 0) > 0 && (
+              <div className="absolute right-0 top-full mt-1 w-64 rounded-xl border shadow-2xl z-50 overflow-hidden" style={{ background: "#0d0f15", borderColor: DS.border }}>
+                {savedProjects!.projects.map(p => (
+                  <button key={p.id} onClick={() => loadProject(p)}
+                    className="w-full text-left px-3 py-2.5 hover:bg-white/5 transition-colors"
+                    style={{ borderBottom: `1px solid ${DS.border}` }}>
+                    <p className="text-[11px] font-medium" style={{ color: DS.text.primary }}>{p.projectName}</p>
+                    <p className="text-[9px] mt-0.5" style={{ color: DS.text.muted }}>{new Date(p.updatedAt).toLocaleDateString()}</p>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
           <button onClick={() => setShowInputs(v => !v)} className="flex items-center gap-1.5 text-[10px] px-3 py-1.5 rounded-lg" style={{ background: DS.surface, border: `1px solid ${DS.border}`, color: DS.text.secondary }}>
             <Calculator className="w-3 h-3" />
             {showInputs ? "Hide" : "Show"} Inputs

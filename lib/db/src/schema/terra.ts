@@ -582,3 +582,211 @@ export const terraActionItemsTable = pgTable("terra_action_items", {
 export const insertTerraActionItemSchema = createInsertSchema(terraActionItemsTable).omit({ id: true, createdAt: true, updatedAt: true });
 export type InsertTerraActionItem = z.infer<typeof insertTerraActionItemSchema>;
 export type TerraActionItem = typeof terraActionItemsTable.$inferSelect;
+
+export const terraLeasesTable = pgTable("terra_leases", {
+  id: serial("id").primaryKey(),
+  externalId: text("external_id").unique(),
+  documentName: text("document_name").notNull(),
+  tenant: text("tenant").notNull(),
+  premises: text("premises"),
+  propertyAddress: text("property_address"),
+  leaseType: text("lease_type"),
+  commencementDate: text("commencement_date"),
+  expirationDate: text("expiration_date"),
+  baseRent: numeric("base_rent", { precision: 16, scale: 2 }),
+  rentPerSqft: numeric("rent_per_sqft", { precision: 10, scale: 2 }),
+  sqft: integer("sqft"),
+  escalations: text("escalations"),
+  options: jsonb("options").$type<string[]>().notNull().default([]),
+  cam: numeric("cam", { precision: 14, scale: 2 }),
+  tiAllowance: numeric("ti_allowance", { precision: 14, scale: 2 }),
+  securityDeposit: numeric("security_deposit", { precision: 14, scale: 2 }),
+  terminationOption: text("termination_option"),
+  exclusiveUse: text("exclusive_use"),
+  coTenancy: text("co_tenancy"),
+  confidence: integer("confidence").notNull().default(85),
+  flags: jsonb("flags").$type<Array<{ field: string; issue: string; severity: string }>>().notNull().default([]),
+  rawData: jsonb("raw_data"),
+  ownerUserId: integer("owner_user_id"),
+  isDemo: boolean("is_demo").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (t) => [
+  index("terra_lease_tenant_idx").on(t.tenant),
+  index("terra_lease_created_idx").on(t.createdAt),
+  index("terra_lease_expiration_idx").on(t.expirationDate),
+]);
+
+export const insertTerraLeaseSchema = createInsertSchema(terraLeasesTable).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertTerraLease = z.infer<typeof insertTerraLeaseSchema>;
+export type TerraLease = typeof terraLeasesTable.$inferSelect;
+
+export const terraProFormaProjectsTable = pgTable("terra_pro_forma_projects", {
+  id: serial("id").primaryKey(),
+  externalId: text("external_id").unique(),
+  projectName: text("project_name").notNull(),
+  propertyType: text("property_type"),
+  inputs: jsonb("inputs").$type<Record<string, unknown>>().notNull().default({}),
+  results: jsonb("results").$type<Record<string, unknown>>(),
+  ownerName: text("owner_name"),
+  ownerUserId: integer("owner_user_id"),
+  isDemo: boolean("is_demo").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (t) => [
+  index("terra_pro_forma_name_idx").on(t.projectName),
+  index("terra_pro_forma_created_idx").on(t.createdAt),
+]);
+
+export const insertTerraProFormaProjectSchema = createInsertSchema(terraProFormaProjectsTable).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertTerraProFormaProject = z.infer<typeof insertTerraProFormaProjectSchema>;
+export type TerraProFormaProject = typeof terraProFormaProjectsTable.$inferSelect;
+
+export const terraExchanges1031Table = pgTable("terra_exchanges_1031", {
+  id: serial("id").primaryKey(),
+  externalId: text("external_id").unique(),
+  relinquishedProperty: text("relinquished_property").notNull(),
+  relinquishedAddress: text("relinquished_address"),
+  saleDate: text("sale_date"),
+  salePrice: numeric("sale_price", { precision: 16, scale: 2 }),
+  adjustedBasis: numeric("adjusted_basis", { precision: 16, scale: 2 }),
+  deferredGain: numeric("deferred_gain", { precision: 16, scale: 2 }),
+  qi: text("qi"),
+  qiContact: text("qi_contact"),
+  status: text("status", { enum: ["identification", "exchange", "completed", "failed"] }).notNull().default("identification"),
+  identificationDeadline: text("identification_deadline"),
+  exchangeDeadline: text("exchange_deadline"),
+  identifiedProperties: jsonb("identified_properties").$type<Array<Record<string, unknown>>>().notNull().default([]),
+  complianceItems: jsonb("compliance_items").$type<Array<Record<string, unknown>>>().notNull().default([]),
+  taxSavings: numeric("tax_savings", { precision: 14, scale: 2 }),
+  ownerUserId: integer("owner_user_id"),
+  isDemo: boolean("is_demo").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (t) => [
+  index("terra_exchange_status_idx").on(t.status),
+  index("terra_exchange_created_idx").on(t.createdAt),
+]);
+
+export const insertTerraExchange1031Schema = createInsertSchema(terraExchanges1031Table).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertTerraExchange1031 = z.infer<typeof insertTerraExchange1031Schema>;
+export type TerraExchange1031 = typeof terraExchanges1031Table.$inferSelect;
+
+export const terraTaxAppealsTable = pgTable("terra_tax_appeals", {
+  id: serial("id").primaryKey(),
+  externalId: text("external_id").unique(),
+  name: text("name").notNull(),
+  address: text("address"),
+  propertyType: text("property_type"),
+  sqft: integer("sqft"),
+  assessedValue: numeric("assessed_value", { precision: 16, scale: 2 }),
+  avmValue: numeric("avm_value", { precision: 16, scale: 2 }),
+  taxRate: numeric("tax_rate", { precision: 8, scale: 4 }),
+  overAssessedPct: numeric("over_assessed_pct", { precision: 8, scale: 2 }),
+  annualTax: numeric("annual_tax", { precision: 14, scale: 2 }),
+  potentialSavings: numeric("potential_savings", { precision: 14, scale: 2 }),
+  appealDeadline: text("appeal_deadline"),
+  appealStatus: text("appeal_status", { enum: ["eligible", "filed", "hearing", "won", "lost", "not-eligible"] }).notNull().default("eligible"),
+  juris: text("juris"),
+  comparables: jsonb("comparables").$type<Array<Record<string, unknown>>>().notNull().default([]),
+  appealStrength: text("appeal_strength", { enum: ["strong", "moderate", "weak"] }).notNull().default("moderate"),
+  notes: text("notes"),
+  ownerUserId: integer("owner_user_id"),
+  isDemo: boolean("is_demo").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (t) => [
+  index("terra_tax_appeal_status_idx").on(t.appealStatus),
+  index("terra_tax_appeal_created_idx").on(t.createdAt),
+]);
+
+export const insertTerraTaxAppealSchema = createInsertSchema(terraTaxAppealsTable).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertTerraTaxAppeal = z.infer<typeof insertTerraTaxAppealSchema>;
+export type TerraTaxAppeal = typeof terraTaxAppealsTable.$inferSelect;
+
+export const terraWaterfallStructuresTable = pgTable("terra_waterfall_structures", {
+  id: serial("id").primaryKey(),
+  externalId: text("external_id").unique(),
+  name: text("name").notNull(),
+  description: text("description"),
+  inputs: jsonb("inputs").$type<Record<string, unknown>>().notNull().default({}),
+  results: jsonb("results").$type<Record<string, unknown>>(),
+  ownerName: text("owner_name"),
+  ownerUserId: integer("owner_user_id"),
+  isDemo: boolean("is_demo").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (t) => [
+  index("terra_waterfall_name_idx").on(t.name),
+  index("terra_waterfall_created_idx").on(t.createdAt),
+]);
+
+export const insertTerraWaterfallStructureSchema = createInsertSchema(terraWaterfallStructuresTable).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertTerraWaterfallStructure = z.infer<typeof insertTerraWaterfallStructureSchema>;
+export type TerraWaterfallStructure = typeof terraWaterfallStructuresTable.$inferSelect;
+
+export const terraConstructionProjectsTable = pgTable("terra_construction_projects", {
+  id: serial("id").primaryKey(),
+  externalId: text("external_id").unique(),
+  name: text("name").notNull(),
+  address: text("address"),
+  type: text("type"),
+  totalBudget: numeric("total_budget", { precision: 16, scale: 2 }),
+  totalSpent: numeric("total_spent", { precision: 16, scale: 2 }),
+  overallPct: integer("overall_pct").notNull().default(0),
+  startDate: text("start_date"),
+  projectedCompletion: text("projected_completion"),
+  revisedCompletion: text("revised_completion"),
+  status: text("status", { enum: ["on-track", "behind", "at-risk", "complete"] }).notNull().default("on-track"),
+  gc: text("gc"),
+  architect: text("architect"),
+  milestones: jsonb("milestones").$type<Array<Record<string, unknown>>>().notNull().default([]),
+  budgetLines: jsonb("budget_lines").$type<Array<Record<string, unknown>>>().notNull().default([]),
+  photos: jsonb("photos").$type<Array<Record<string, unknown>>>().notNull().default([]),
+  ownerUserId: integer("owner_user_id"),
+  isDemo: boolean("is_demo").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (t) => [
+  index("terra_construction_status_idx").on(t.status),
+  index("terra_construction_created_idx").on(t.createdAt),
+]);
+
+export const insertTerraConstructionProjectSchema = createInsertSchema(terraConstructionProjectsTable).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertTerraConstructionProject = z.infer<typeof insertTerraConstructionProjectSchema>;
+export type TerraConstructionProject = typeof terraConstructionProjectsTable.$inferSelect;
+
+export const terraTenantApplicationsTable = pgTable("terra_tenant_applications", {
+  id: serial("id").primaryKey(),
+  externalId: text("external_id").unique(),
+  name: text("name").notNull(),
+  type: text("type", { enum: ["individual", "entity"] }).notNull().default("individual"),
+  targetUnit: text("target_unit"),
+  proposedRent: numeric("proposed_rent", { precision: 14, scale: 2 }),
+  leaseTermMonths: integer("lease_term_months"),
+  submittedDate: text("submitted_date"),
+  status: text("status", { enum: ["pending", "approved", "conditional", "declined"] }).notNull().default("pending"),
+  overallScore: integer("overall_score").notNull().default(50),
+  recommendation: text("recommendation", { enum: ["approve", "conditional", "decline"] }).notNull().default("conditional"),
+  creditScore: integer("credit_score"),
+  annualIncome: numeric("annual_income", { precision: 14, scale: 2 }),
+  incomeVerified: boolean("income_verified").notNull().default(false),
+  rentToIncomeRatio: numeric("rent_to_income_ratio", { precision: 6, scale: 2 }),
+  priorEvictions: integer("prior_evictions").notNull().default(0),
+  backgroundClear: boolean("background_clear").notNull().default(true),
+  screeningData: jsonb("screening_data").$type<Record<string, unknown>>().notNull().default({}),
+  flags: jsonb("flags").$type<Array<Record<string, unknown>>>().notNull().default([]),
+  notes: text("notes"),
+  ownerUserId: integer("owner_user_id"),
+  isDemo: boolean("is_demo").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (t) => [
+  index("terra_tenant_status_idx").on(t.status),
+  index("terra_tenant_recommendation_idx").on(t.recommendation),
+  index("terra_tenant_created_idx").on(t.createdAt),
+]);
+
+export const insertTerraTenantApplicationSchema = createInsertSchema(terraTenantApplicationsTable).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertTerraTenantApplication = z.infer<typeof insertTerraTenantApplicationSchema>;
+export type TerraTenantApplication = typeof terraTenantApplicationsTable.$inferSelect;

@@ -2,8 +2,10 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   User, Shield, DollarSign, TrendingUp, AlertTriangle, CheckCircle,
-  Clock, FileText, Star, ChevronRight, Building2, BarChart3, X, ArrowRight
+  Clock, FileText, Star, ChevronRight, Building2, BarChart3, X, ArrowRight, Database
 } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { api } from "../lib/api";
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from "recharts";
 import { cn } from "@szl-holdings/shared-ui/utils";
 
@@ -205,14 +207,69 @@ function ScoreGauge({ score }: { score: number }) {
 }
 
 export default function TenantScreeningPage() {
-  const [selectedId, setSelectedId] = useState<string>(APPLICANTS[0].id);
-  const selected = APPLICANTS.find(a => a.id === selectedId) ?? APPLICANTS[0];
+  const queryClient = useQueryClient();
+
+  const { data: apiData, isLoading, isError } = useQuery({
+    queryKey: ["terra-tenant-applications"],
+    queryFn: () => api.tenantApplications.list(),
+    staleTime: 30_000,
+  });
+
+  const seedMutation = useMutation({
+    mutationFn: async () => {
+      for (const a of APPLICANTS) {
+        await api.tenantApplications.create({
+          name: a.name, type: a.type, targetUnit: a.targetUnit,
+          proposedRent: a.proposedRent, leaseTermMonths: a.leaseTermMonths, submittedDate: a.submittedDate,
+          status: a.status, overallScore: a.overallScore, recommendation: a.recommendation,
+          creditScore: a.creditScore, annualIncome: a.annualIncome, incomeVerified: a.incomeVerified,
+          rentToIncomeRatio: a.rentToIncomeRatio, priorEvictions: a.priorEvictions, backgroundClear: a.backgroundClear,
+          screeningData: {
+            creditHistory: a.creditHistory, bankruptcies: a.bankruptcies, judgments: a.judgments,
+            employmentStatus: a.employmentStatus, employerName: a.employerName, employmentYears: a.employmentYears,
+            priorLandlordRefs: a.priorLandlordRefs, priorLandlordScore: a.priorLandlordScore,
+            rentalHistory: a.rentalHistory, criminalFlags: a.criminalFlags, radarScores: a.radarScores,
+          },
+          flags: a.flags as Array<Record<string, unknown>>,
+          notes: a.notes, isDemo: true,
+        });
+      }
+    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["terra-tenant-applications"] }); },
+  });
+
+  const isLive = !isLoading && !isError && apiData && apiData.dataMode === "live";
+  const applicants: Applicant[] = isLive
+    ? apiData.applicants.map(a => {
+        const sd = a.screeningData as Record<string, unknown>;
+        return {
+          ...a,
+          creditHistory: (sd.creditHistory as string) ?? "",
+          bankruptcies: (sd.bankruptcies as number) ?? 0,
+          judgments: (sd.judgments as number) ?? 0,
+          employmentStatus: (sd.employmentStatus as string) ?? "",
+          employerName: (sd.employerName as string) ?? "",
+          employmentYears: (sd.employmentYears as number) ?? 0,
+          priorLandlordRefs: (sd.priorLandlordRefs as number) ?? 0,
+          priorLandlordScore: (sd.priorLandlordScore as number) ?? 0,
+          rentalHistory: (sd.rentalHistory as string) ?? "",
+          criminalFlags: (sd.criminalFlags as string[]) ?? [],
+          radarScores: (sd.radarScores as { subject: string; score: number }[]) ?? [],
+          flags: a.flags as Applicant["flags"],
+        } as Applicant;
+      })
+    : APPLICANTS;
+
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const effectiveId = selectedId ?? applicants[0]?.id;
+  const selected = applicants.find(a => a.id === effectiveId) ?? applicants[0];
+  if (!selected) return null;
   const rec = RECOMMENDATION_CONFIG[selected.recommendation];
   const RecIcon = rec.icon;
 
-  const approved = APPLICANTS.filter(a => a.recommendation === "approve").length;
-  const conditional = APPLICANTS.filter(a => a.recommendation === "conditional").length;
-  const declined = APPLICANTS.filter(a => a.recommendation === "decline").length;
+  const approved = applicants.filter(a => a.recommendation === "approve").length;
+  const conditional = applicants.filter(a => a.recommendation === "conditional").length;
+  const declined = applicants.filter(a => a.recommendation === "decline").length;
 
   return (
     <div className="space-y-4 max-w-[1400px]">
@@ -220,13 +277,24 @@ export default function TenantScreeningPage() {
         <div className="flex items-center gap-2.5 mb-0.5">
           <h1 className="text-base font-bold text-white tracking-tight font-display">Tenant Screening & Credit Module</h1>
           <span className="text-[9px] font-mono px-1.5 py-0.5 rounded uppercase tracking-wider font-bold" style={{ color: DS.accent.green, background: `${DS.accent.green}10`, border: `1px solid ${DS.accent.green}20` }}>Risk Scoring</span>
+          {isLive ? (
+            <span className="flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ color: DS.accent.green, background: `${DS.accent.green}10`, border: `1px solid ${DS.accent.green}20` }}>
+              <Database className="w-2.5 h-2.5" /> Live DB
+            </span>
+          ) : !isLoading && !isError && (
+            <button onClick={() => seedMutation.mutate()} disabled={seedMutation.isPending}
+              className="flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded cursor-pointer"
+              style={{ color: DS.text.muted, background: DS.surface, border: `1px solid ${DS.border}` }}>
+              {seedMutation.isPending ? "Seeding…" : "Seed to DB"}
+            </button>
+          )}
         </div>
         <p className="text-[10px] font-mono" style={{ color: DS.text.muted }}>Applicant scoring · credit & income analysis · rental history · background check · lease recommendation</p>
       </div>
 
       <div className="grid grid-cols-4 gap-3">
         {[
-          { label: "Applications", value: APPLICANTS.length.toString(), color: DS.text.primary },
+          { label: "Applications", value: applicants.length.toString(), color: DS.text.primary },
           { label: "Approved", value: approved.toString(), color: DS.accent.green },
           { label: "Conditional", value: conditional.toString(), color: DS.accent.gold },
           { label: "Declined", value: declined.toString(), color: DS.accent.red },
@@ -241,7 +309,7 @@ export default function TenantScreeningPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="space-y-3">
           <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: DS.text.muted }}>Applicant Queue</p>
-          {APPLICANTS.map(app => {
+          {applicants.map(app => {
             const r = RECOMMENDATION_CONFIG[app.recommendation];
             const Icon = r.icon;
             const scoreColor = app.overallScore >= 75 ? DS.accent.green : app.overallScore >= 55 ? DS.accent.gold : DS.accent.red;

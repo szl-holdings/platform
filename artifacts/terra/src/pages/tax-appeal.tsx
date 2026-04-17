@@ -2,8 +2,10 @@ import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Scale, AlertTriangle, CheckCircle, DollarSign, TrendingDown, Building2,
-  FileText, Download, Search, ChevronRight, Target, BarChart3, X
+  FileText, Download, Search, ChevronRight, Target, BarChart3, X, Database
 } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { api } from "../lib/api";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Cell } from "recharts";
 import { cn } from "@szl-holdings/shared-ui/utils";
 
@@ -168,15 +170,43 @@ const CustomTooltip = ({ active, payload, label }: ChartTooltipProps) => {
 };
 
 export default function TaxAppealPage() {
-  const [selectedId, setSelectedId] = useState<string | null>(PROPERTIES[0].id);
+  const queryClient = useQueryClient();
+
+  const { data: apiData, isLoading, isError } = useQuery({
+    queryKey: ["terra-tax-appeals"],
+    queryFn: () => api.taxAppeals.list(),
+    staleTime: 30_000,
+  });
+
+  const seedMutation = useMutation({
+    mutationFn: async () => {
+      for (const p of PROPERTIES) {
+        await api.taxAppeals.create({
+          name: p.name, address: p.address, propertyType: p.propertyType, sqft: p.sqft,
+          assessedValue: p.assessedValue, avmValue: p.avmValue, taxRate: p.taxRate,
+          overAssessedPct: p.overAssessedPct, annualTax: p.annualTax, potentialSavings: p.potentialSavings,
+          appealDeadline: p.appealDeadline, appealStatus: p.appealStatus, juris: p.juris,
+          comparables: p.comparables as Array<Record<string, unknown>>, appealStrength: p.appealStrength,
+          notes: p.notes, isDemo: true,
+        });
+      }
+    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["terra-tax-appeals"] }); },
+  });
+
+  const isLive = !isLoading && !isError && apiData && apiData.dataMode === "live";
+  const properties: AppealProperty[] = isLive ? (apiData.properties as unknown as AppealProperty[]) : PROPERTIES;
+
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "eligible" | "filed">("all");
   const [showPacket, setShowPacket] = useState(false);
 
-  const filtered = PROPERTIES.filter(p => filter === "all" || p.appealStatus === filter || (filter === "eligible" && p.appealStatus === "eligible"));
+  const effectiveId = selectedId ?? properties[0]?.id;
+  const filtered = properties.filter(p => filter === "all" || p.appealStatus === filter || (filter === "eligible" && p.appealStatus === "eligible"));
 
-  const selected = PROPERTIES.find(p => p.id === selectedId);
-  const totalSavings = PROPERTIES.filter(p => ["eligible", "filed"].includes(p.appealStatus)).reduce((s, p) => s + p.potentialSavings, 0);
-  const eligible = PROPERTIES.filter(p => p.appealStatus === "eligible").length;
+  const selected = properties.find(p => p.id === effectiveId);
+  const totalSavings = properties.filter(p => ["eligible", "filed"].includes(p.appealStatus)).reduce((s, p) => s + p.potentialSavings, 0);
+  const eligible = properties.filter(p => p.appealStatus === "eligible").length;
 
   return (
     <div className="space-y-4 max-w-[1400px]">
@@ -184,16 +214,27 @@ export default function TaxAppealPage() {
         <div className="flex items-center gap-2.5 mb-0.5">
           <h1 className="text-base font-bold text-white tracking-tight font-display">Tax Appeal Automation</h1>
           <span className="text-[9px] font-mono px-1.5 py-0.5 rounded uppercase tracking-wider font-bold" style={{ color: DS.accent.red, background: `${DS.accent.red}10`, border: `1px solid ${DS.accent.red}20` }}>Property Tax</span>
+          {isLive ? (
+            <span className="flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ color: DS.accent.green, background: `${DS.accent.green}10`, border: `1px solid ${DS.accent.green}20` }}>
+              <Database className="w-2.5 h-2.5" /> Live DB
+            </span>
+          ) : !isLoading && !isError && (
+            <button onClick={() => seedMutation.mutate()} disabled={seedMutation.isPending}
+              className="flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded cursor-pointer"
+              style={{ color: DS.text.muted, background: DS.surface, border: `1px solid ${DS.border}` }}>
+              {seedMutation.isPending ? "Seeding…" : "Seed to DB"}
+            </button>
+          )}
         </div>
         <p className="text-[10px] font-mono" style={{ color: DS.text.muted }}>Assessed value vs. AVM comparison · over-assessment flagging · comp evidence builder · appeal packet generator</p>
       </div>
 
       <div className="grid grid-cols-4 gap-3">
         {[
-          { label: "Properties Analyzed", value: PROPERTIES.length.toString(), color: DS.accent.gold },
+          { label: "Properties Analyzed", value: properties.length.toString(), color: DS.accent.gold },
           { label: "Appeal Eligible", value: eligible.toString(), color: DS.accent.gold },
           { label: "Potential Annual Savings", value: fmt(totalSavings), color: DS.accent.green },
-          { label: "Avg Over-Assessment", value: `${(PROPERTIES.filter(p => p.overAssessedPct > 0).reduce((s, p) => s + p.overAssessedPct, 0) / PROPERTIES.filter(p => p.overAssessedPct > 0).length).toFixed(1)}%`, color: DS.accent.red },
+          { label: "Avg Over-Assessment", value: `${properties.filter(p => p.overAssessedPct > 0).length > 0 ? (properties.filter(p => p.overAssessedPct > 0).reduce((s, p) => s + p.overAssessedPct, 0) / properties.filter(p => p.overAssessedPct > 0).length).toFixed(1) : "0"}%`, color: DS.accent.red },
         ].map(m => (
           <div key={m.label} className="rounded-xl border p-3" style={{ borderColor: DS.border, background: DS.surface }}>
             <p className="text-[8px] uppercase tracking-wider" style={{ color: DS.text.muted }}>{m.label}</p>
