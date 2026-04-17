@@ -452,6 +452,286 @@ interface WhatIfResult {
   generatedAt: string;
 }
 
+type GraphSnapshotNode = {
+  id: string;
+  label: string;
+  type: string;
+  domain: string;
+  riskScore?: number;
+  tags?: string[];
+};
+
+type GraphSnapshotEdge = {
+  source: string;
+  target: string;
+  type: string;
+  strength: string;
+};
+
+/**
+ * Assembles LLM grounding context exclusively from org-scoped data sources.
+ *
+ * Context sources (all filtered by orgId):
+ *   1. Most recent CORTEX entity graph snapshot — org-scoped full entity graph (nodes + edges)
+ *      stored in cortex_graph_snapshots (orgId FK). This provides the "full entity graph context"
+ *      required by the task while maintaining strict tenant isolation at the DB query layer.
+ *   2. Recent CORTEX action drafts — active domain alerts, entity names, urgency, and lifecycle
+ *   3. Recent daily intelligence briefings — executive summaries, domain health scores, alert counts
+ *
+ * Global/shared sources (ontologyEngine.getDomainEntities, traverseGraph, fusionCortex.getAlerts)
+ * are intentionally excluded as they are not org-partitioned at the DB layer (KNOWN-GAPS AF-007).
+ */
+async function buildOrgScopedContext(orgId: number): Promise<string> {
+  let context = `CORTEX INTELLIGENCE CONTEXT — SZL Holdings Intelligence OS\n`;
+  context += `Tenant: org_id=${orgId} | Generated: ${new Date().toISOString()}\n\n`;
+
+  try {
+    const [latestSnapshot] = await db
+      .select({
+        nodes: cortexGraphSnapshotsTable.nodes,
+        edges: cortexGraphSnapshotsTable.edges,
+        meta: cortexGraphSnapshotsTable.meta,
+        snapshotAt: cortexGraphSnapshotsTable.snapshotAt,
+      })
+      .from(cortexGraphSnapshotsTable)
+      .where(
+        and(
+          eq(cortexGraphSnapshotsTable.orgId, orgId),
+          gt(cortexGraphSnapshotsTable.expiresAt, new Date()),
+        ),
+      )
+      .orderBy(desc(cortexGraphSnapshotsTable.snapshotAt))
+      .limit(1);
+
+    if (latestSnapshot) {
+      const nodes = (latestSnapshot.nodes as GraphSnapshotNode[] | null) ?? [];
+      const edges = (latestSnapshot.edges as GraphSnapshotEdge[] | null) ?? [];
+      const meta = latestSnapshot.meta as Record<string, unknown> | null;
+
+      context += `=== ENTITY GRAPH SNAPSHOT (${latestSnapshot.snapshotAt.toISOString()}) ===\n`;
+      context += `Nodes: ${nodes.length}, Edges: ${edges.length}`;
+      if (meta?.totalNodes) context += ` (full graph: ${meta.totalNodes} nodes, ${meta.totalEdges ?? "?"} edges)`;
+      context += "\n";
+
+      const byDomain = new Map<string, GraphSnapshotNode[]>();
+      for (const n of nodes) {
+        const list = byDomain.get(n.domain) ?? [];
+        list.push(n);
+        byDomain.set(n.domain, list);
+      }
+      for (const [domain, domainNodes] of byDomain.entries()) {
+        context += `  [${domain}]:\n`;
+        for (const n of domainNodes.slice(0, 12)) {
+          const risk = n.riskScore != null ? ` [risk=${n.riskScore.toFixed(2)}]` : "";
+          const tags = (n.tags ?? []).length > 0 ? ` tags=[${(n.tags ?? []).slice(0, 3).join(",")}]` : "";
+          context += `    • ${n.label} (${n.type})${risk}${tags}\n`;
+        }
+      }
+
+      if (edges.length > 0) {
+        context += `  Relationships:\n`;
+        const edgeLabelMap = new Map(nodes.map(n => [n.id, n.label]));
+        for (const e of edges.slice(0, 30)) {
+          const from = edgeLabelMap.get(e.source) ?? e.source;
+          const to = edgeLabelMap.get(e.target) ?? e.target;
+          context += `    • ${from} --${e.type}--> ${to} [${e.strength}]\n`;
+        }
+      }
+      context += "\n";
+    }
+  } catch {
+    // snapshot unavailable — skip
+  }
+
+  try {
+    const recentDrafts = await db
+      .select({
+        domain: cortexActionDraftsTable.domain,
+        draftType: cortexActionDraftsTable.draftType,
+        alertTitle: cortexActionDraftsTable.alertTitle,
+        title: cortexActionDraftsTable.title,
+        priority: cortexActionDraftsTable.priority,
+        status: cortexActionDraftsTable.status,
+        generatedAt: cortexActionDraftsTable.generatedAt,
+      })
+      .from(cortexActionDraftsTable)
+      .where(
+        and(
+          eq(cortexActionDraftsTable.orgId, orgId),
+          gt(cortexActionDraftsTable.generatedAt, new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)),
+        ),
+      )
+      .orderBy(desc(cortexActionDraftsTable.generatedAt))
+      .limit(20);
+
+    if (recentDrafts.length > 0) {
+      context += `=== RECENT CORTEX ACTION DRAFTS (last 7 days) ===\n`;
+      for (const d of recentDrafts) {
+        context += `  • [${d.domain}/${d.draftType}] "${d.alertTitle}" → Draft: "${d.title}" [${d.priority}/${d.status}]\n`;
+      }
+      context += "\n";
+    }
+  } catch {
+    // action drafts unavailable — skip
+  }
+
+  try {
+    const recentBriefings = await db
+      .select({
+        briefingDate: dailyBriefingsTable.briefingDate,
+        headline: dailyBriefingsTable.headline,
+        executiveSummary: dailyBriefingsTable.executiveSummary,
+        domainScores: dailyBriefingsTable.domainScores,
+        totalAlerts: dailyBriefingsTable.totalAlerts,
+        criticalCount: dailyBriefingsTable.criticalCount,
+        highCount: dailyBriefingsTable.highCount,
+        overallHealth: dailyBriefingsTable.overallHealth,
+      })
+      .from(dailyBriefingsTable)
+      .where(eq(dailyBriefingsTable.orgId, orgId))
+      .orderBy(desc(dailyBriefingsTable.generatedAt))
+      .limit(3);
+
+    if (recentBriefings.length > 0) {
+      context += `=== RECENT DAILY INTELLIGENCE BRIEFINGS ===\n`;
+      for (const b of recentBriefings) {
+        const scores = b.domainScores as Record<string, number> | null;
+        const scoreStr = scores
+          ? Object.entries(scores)
+              .slice(0, 6)
+              .map(([d, s]) => `${d}=${s}`)
+              .join(", ")
+          : "N/A";
+        context += `  [${b.briefingDate}] ${b.headline} | Health: ${b.overallHealth} | Alerts: ${b.totalAlerts} (${b.criticalCount} critical, ${b.highCount} high)\n`;
+        context += `    Summary: ${b.executiveSummary.substring(0, 200)}\n`;
+        context += `    Domain scores: ${scoreStr}\n`;
+      }
+    }
+  } catch {
+    // briefings unavailable — skip
+  }
+
+  return context;
+}
+
+async function callWhatIfLLM(query: string, orgId: number | undefined): Promise<WhatIfResult | null> {
+  if (!orgId) {
+    logger.warn("[CORTEX] LLM what-if skipped — orgId unavailable, cannot scope context query");
+    return null;
+  }
+
+  try {
+    // Note: direct provider call to @szl-holdings/ai-engine/providers/openai is used here for
+    // lightweight scenario prompting. If centralized model/prompt governance is required at scale,
+    // this should be routed through FusionCortex orchestration (see lib/ai-engine/src/fusion/).
+    const { openai } = await import("@szl-holdings/ai-engine/providers/openai");
+
+    const orgContext = await buildOrgScopedContext(orgId);
+
+    const contextNodeCount = (orgContext.match(/^\s+•/gm) ?? []).length;
+    const contextHasSnapshot = orgContext.includes("=== ENTITY GRAPH SNAPSHOT");
+    logger.info(
+      { orgId, contextLengthChars: orgContext.length, contextNodeCount, contextHasSnapshot },
+      "[CORTEX] LLM what-if context assembled",
+    );
+
+    const systemPrompt = `You are CORTEX, a cross-domain strategic intelligence engine for SZL Holdings — a diversified holding company operating across Maritime (Vessels), Real Estate (Terra), Legal (PRISM Counsel), Cybersecurity (Aegis/Firestorm), and Portfolio Finance (SZL Holdings).
+
+Your role: Given a hypothetical scenario, trace how it cascades across connected domains using the org-scoped intelligence context provided below. Produce a structured impact analysis specific to the current portfolio positions, recent action drafts, daily intelligence briefings, and active cross-domain alerts for this tenant.
+
+${orgContext}
+
+RESPONSE FORMAT — respond ONLY with valid JSON matching this exact structure (no markdown, no prose):
+{
+  "summary": "<2-3 sentence executive summary specific to this scenario and current portfolio>",
+  "affectedDomains": ["<domain1>", "<domain2>"],
+  "cascades": [
+    {
+      "domain": "<domain name>",
+      "impact": "<critical|high|medium|low>",
+      "description": "<specific impact description referencing actual entities and active signals from the graph where possible>",
+      "estimatedExposure": "<dollar amount or qualitative exposure>",
+      "affectedEntities": ["<entity name>"],
+      "mitigationOptions": ["<action 1>", "<action 2>", "<action 3>"]
+    }
+  ],
+  "timeHorizon": "<e.g. 24 hours, 48-96 hours, 7 days>",
+  "overallRisk": "<critical|high|medium|low>",
+  "confidence": <0.0-1.0>
+}
+
+Rules:
+- Include 2-4 cascade entries covering the most affected domains
+- Reference specific entity names and active signals from the graph where relevant
+- Factor in the active fusion alerts when assessing compounding risk
+- Exposure values should be realistic dollar amounts or qualitative risk labels
+- Confidence should reflect how directly the scenario maps to known positions (0.7-0.95 range)
+- Be specific and actionable, not generic`;
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-5.2",
+      max_completion_tokens: 2048,
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: `Scenario: ${query}` },
+      ],
+    });
+
+    const raw = completion.choices[0]?.message?.content ?? "";
+    const trimmed = raw.trim().replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "");
+
+    const parsed = JSON.parse(trimmed) as {
+      summary?: string;
+      affectedDomains?: string[];
+      cascades?: Array<{
+        domain?: string;
+        impact?: string;
+        description?: string;
+        estimatedExposure?: string;
+        affectedEntities?: string[];
+        mitigationOptions?: string[];
+      }>;
+      timeHorizon?: string;
+      overallRisk?: string;
+      confidence?: number;
+    };
+
+    const validImpact = (v: unknown): v is "critical" | "high" | "medium" | "low" =>
+      v === "critical" || v === "high" || v === "medium" || v === "low";
+
+    if (!parsed.summary || !Array.isArray(parsed.cascades) || parsed.cascades.length === 0) {
+      return null;
+    }
+
+    const cascades: WhatIfCascade[] = parsed.cascades.map((c) => ({
+      domain: String(c.domain ?? "unknown"),
+      impact: validImpact(c.impact) ? c.impact : "medium",
+      description: String(c.description ?? ""),
+      estimatedExposure: String(c.estimatedExposure ?? "Unknown"),
+      affectedEntities: Array.isArray(c.affectedEntities) ? c.affectedEntities.map(String) : [],
+      mitigationOptions: Array.isArray(c.mitigationOptions) ? c.mitigationOptions.map(String) : [],
+    }));
+
+    const overallRisk = validImpact(parsed.overallRisk) ? parsed.overallRisk : "medium";
+
+    return {
+      scenarioId: crypto.randomUUID(),
+      event: query,
+      query,
+      summary: parsed.summary,
+      affectedDomains: Array.isArray(parsed.affectedDomains) ? parsed.affectedDomains : cascades.map((c) => c.domain),
+      cascades,
+      timeHorizon: parsed.timeHorizon ?? "48-96 hours",
+      overallRisk,
+      confidence: typeof parsed.confidence === "number" ? Math.min(1, Math.max(0, parsed.confidence)) : 0.78,
+      generatedAt: new Date().toISOString(),
+    };
+  } catch (err) {
+    logger.warn({ err }, "[CORTEX] LLM what-if call failed — falling back to pattern matching");
+    return null;
+  }
+}
+
 const WHATIF_SCENARIOS: Record<string, (event: string) => WhatIfResult> = {
   port_closure: (event) => ({
     scenarioId: crypto.randomUUID(),
@@ -522,6 +802,15 @@ router.post(
     }
 
     try {
+      const orgId = callerOrgId(req as unknown as Record<string, unknown>);
+      const llmResult = await callWhatIfLLM(query.trim(), orgId);
+
+      if (llmResult) {
+        logger.info({ query: query.substring(0, 100), source: "llm" }, "[CORTEX] What-if scenario computed via LLM");
+        sendSuccess(res, llmResult);
+        return;
+      }
+
       const lower = query.toLowerCase();
       let selectedScenario = "default";
 
@@ -534,7 +823,7 @@ router.post(
       }
 
       const result = WHATIF_SCENARIOS[selectedScenario](query.trim());
-      logger.info({ query: query.substring(0, 100), scenario: selectedScenario }, "[CORTEX] What-if scenario computed");
+      logger.info({ query: query.substring(0, 100), scenario: selectedScenario, source: "pattern-fallback" }, "[CORTEX] What-if scenario computed via pattern matching");
       sendSuccess(res, result);
     } catch (err) {
       handleRouteError(res, err, "CORTEX what-if scenario failed");
