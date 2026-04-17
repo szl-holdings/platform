@@ -109,11 +109,25 @@ interface SimNode {
   radius: number;
 }
 
-function initSim(nodes: ConstellationGraphNode[], w: number, h: number): SimNode[] {
+function initSim(
+  nodes: ConstellationGraphNode[],
+  w: number,
+  h: number,
+  prev?: SimNode[],
+): SimNode[] {
   const cx = w / 2;
   const cy = h / 2;
   const r = Math.min(w, h) * 0.32;
+  // Preserve positions of nodes that were already in the simulation so newly
+  // added neighbors ease into place around them rather than the whole graph
+  // re-shuffling.
+  const prevById = new Map((prev ?? []).map((p) => [p.id, p] as const));
   return nodes.map((n, i) => {
+    const radius = 9 + Math.min((n.confidence ?? 0.5) * 8, 8);
+    const existing = prevById.get(n.id);
+    if (existing) {
+      return { ...existing, ref: n, radius };
+    }
     const angle = (i / Math.max(nodes.length, 1)) * Math.PI * 2;
     const jitter = 0.6 + Math.random() * 0.5;
     return {
@@ -123,7 +137,7 @@ function initSim(nodes: ConstellationGraphNode[], w: number, h: number): SimNode
       y: cy + Math.sin(angle) * r * jitter,
       vx: 0,
       vy: 0,
-      radius: 9 + Math.min((n.confidence ?? 0.5) * 8, 8),
+      radius,
     };
   });
 }
@@ -271,22 +285,56 @@ export function ConstellationGraph({
   // Cache of enriched cross-domain entities (id -> full node), filled lazily
   const [externalCache, setExternalCache] = useState<Record<string, ConstellationGraphNode>>({});
 
+  // Operator-driven "expand neighbor" additions: merged into the rendered graph
+  // whenever a node is expanded via the detail panel.
+  const [expandedNodes, setExpandedNodes] = useState<Record<string, ConstellationGraphNode>>({});
+  const [expandedEdges, setExpandedEdges] = useState<Record<string, ConstellationGraphEdge>>({});
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set());
+  const [expanding, setExpanding] = useState<string | null>(null);
+  const [expandError, setExpandError] = useState<string | null>(null);
+
+  // Reset operator expansions whenever the host graph changes (new domain or
+  // refreshed payload) so fragments from a previous view never leak into the
+  // next one.
+  const graphKey = data ? "__data__" : `${domain ?? ""}#${reload.current}`;
+  useEffect(() => {
+    setExpandedNodes({});
+    setExpandedEdges({});
+    setExpandedIds(new Set());
+    setExpanding(null);
+    setExpandError(null);
+    setSelected(null);
+  }, [graphKey]);
+
   // Resolve which nodes are inside vs. outside the host domain
   const { nodes, edges, internalIds, externalIds } = useMemo(() => {
     if (!graph) {
       return { nodes: [], edges: [], internalIds: new Set<string>(), externalIds: new Set<string>() };
     }
     const internal = new Set(graph.nodes.map((n) => n.id));
-    // External nodes referenced by edges but not in the node list
+    // Merge edges: API-supplied + operator-expanded (deduped by id)
+    const allEdgesMap = new Map<string, ConstellationGraphEdge>();
+    for (const e of graph.edges) allEdgesMap.set(e.id, e);
+    for (const e of Object.values(expandedEdges)) allEdgesMap.set(e.id, e);
+    const allEdges = Array.from(allEdgesMap.values());
+
+    // Known node ids from the graph payload + any nodes the operator has loaded
+    const knownIds = new Set<string>(internal);
+    for (const id of Object.keys(expandedNodes)) knownIds.add(id);
+
+    // External nodes referenced by edges but not in any known node list
     const external = new Set<string>();
-    for (const e of graph.edges) {
-      if (!internal.has(e.fromNodeId)) external.add(e.fromNodeId);
-      if (!internal.has(e.toNodeId)) external.add(e.toNodeId);
+    for (const e of allEdges) {
+      if (!knownIds.has(e.fromNodeId)) external.add(e.fromNodeId);
+      if (!knownIds.has(e.toNodeId)) external.add(e.toNodeId);
     }
     const allNodes: ConstellationGraphNode[] = [
       // Preserve any existing domain on the node; default to host domain only
       // when the API didn't supply one (current /domains/:domain/graph contract).
       ...graph.nodes.map((n) => ({ ...n, domain: n.domain ?? hostDomain })),
+      // Operator-expanded neighbors (any domain)
+      ...Object.values(expandedNodes).filter((n) => !internal.has(n.id)),
+      // Remaining placeholders for unresolved cross-domain references
       ...Array.from(external).map<ConstellationGraphNode>((id) => {
         const cached = externalCache[id];
         if (cached) return cached;
@@ -299,10 +347,53 @@ export function ConstellationGraph({
       }),
     ];
     const visibleEdges = showCross
-      ? graph.edges
-      : graph.edges.filter((e) => internal.has(e.fromNodeId) && internal.has(e.toNodeId));
+      ? allEdges
+      : allEdges.filter((e) => knownIds.has(e.fromNodeId) && knownIds.has(e.toNodeId) && internal.has(e.fromNodeId) && internal.has(e.toNodeId));
     return { nodes: allNodes, edges: visibleEdges, internalIds: internal, externalIds: external };
-  }, [graph, hostDomain, showCross, externalCache]);
+  }, [graph, hostDomain, showCross, externalCache, expandedNodes, expandedEdges]);
+
+  const expandNeighbors = useCallback(
+    async (node: ConstellationGraphNode) => {
+      if (!node?.id || expanding === node.id) return;
+      setExpanding(node.id);
+      setExpandError(null);
+      try {
+        const res = await apiFetch<
+          | { data?: { node: ConstellationGraphNode; neighbors: ConstellationGraphNode[]; edges: ConstellationGraphEdge[] } }
+          | { node: ConstellationGraphNode; neighbors: ConstellationGraphNode[]; edges: ConstellationGraphEdge[] }
+        >(`/graph/entities/${encodeURIComponent(node.id)}/neighbors?limit=25`);
+        const payload =
+          (res as { data?: { node: ConstellationGraphNode; neighbors: ConstellationGraphNode[]; edges: ConstellationGraphEdge[] } }).data ??
+          (res as { node: ConstellationGraphNode; neighbors: ConstellationGraphNode[]; edges: ConstellationGraphEdge[] });
+        if (!payload?.node) throw new Error("Empty response");
+        // Merge the canonical node itself (so placeholders get real data) and its neighbors.
+        setExpandedNodes((prev) => {
+          const next = { ...prev, [payload.node.id]: payload.node };
+          for (const n of payload.neighbors ?? []) next[n.id] = n;
+          return next;
+        });
+        setExpandedEdges((prev) => {
+          const next = { ...prev };
+          for (const e of payload.edges ?? []) next[e.id] = e;
+          return next;
+        });
+        setExpandedIds((prev) => {
+          const next = new Set(prev);
+          next.add(node.id);
+          return next;
+        });
+        // Keep the selected node in sync with the freshly-loaded canonical entity
+        setSelected((prev) => (prev?.id === payload.node.id ? payload.node : prev));
+        // Re-energize the simulation so new nodes ease into place
+        alphaRef.current = 1;
+      } catch (err) {
+        setExpandError((err as Error)?.message ?? "Failed to expand neighbors");
+      } finally {
+        setExpanding((cur) => (cur === node.id ? null : cur));
+      }
+    },
+    [expanding],
+  );
 
   // Lazily enrich cross-domain placeholder nodes via /graph/entities/:id so we
   // can show real names/types and resolve their owning domain for navigation.
@@ -344,9 +435,10 @@ export function ConstellationGraph({
   const W = Math.max(width, 320);
   const H = height;
 
-  // Init simulation when nodes change
+  // Init simulation when nodes change — preserve existing positions so
+  // newly-loaded neighbors slot in without re-shuffling the whole graph.
   useEffect(() => {
-    simRef.current = initSim(nodes, W, H);
+    simRef.current = initSim(nodes, W, H, simRef.current);
     alphaRef.current = 1;
   }, [nodes, W, H]);
 
@@ -729,6 +821,29 @@ export function ConstellationGraph({
                 </span>
               )}
               <button
+                onClick={() => expandNeighbors(selected)}
+                disabled={expanding === selected.id}
+                style={{
+                  fontSize: 11,
+                  padding: "5px 10px",
+                  borderRadius: 4,
+                  border: `1px solid ${accentColor}60`,
+                  background: expanding === selected.id ? "rgba(255,255,255,0.04)" : `${accentColor}18`,
+                  color: expanding === selected.id ? "#64748b" : accentColor,
+                  cursor: expanding === selected.id ? "default" : "pointer",
+                  fontWeight: 600,
+                  letterSpacing: "0.04em",
+                }}
+                data-testid="constellation-expand-neighbors"
+                title="Fetch this node's 1-hop neighbors across all domains"
+              >
+                {expanding === selected.id
+                  ? "Expanding…"
+                  : expandedIds.has(selected.id)
+                  ? "Re-expand neighbors ↻"
+                  : "+ Expand neighbors"}
+              </button>
+              <button
                 onClick={() => navigateToOwner(selected)}
                 disabled={!selected.domain}
                 style={{
@@ -748,6 +863,11 @@ export function ConstellationGraph({
                   ? `Open in ${DOMAIN_LABEL[selected.domain] ?? selected.domain} →`
                   : "Resolving owner…"}
               </button>
+              {expandError && (
+                <span style={{ fontSize: 10, color: "#ef4444", maxWidth: 180, textAlign: "right" }}>
+                  {expandError}
+                </span>
+              )}
               <button
                 onClick={() => setSelected(null)}
                 style={{

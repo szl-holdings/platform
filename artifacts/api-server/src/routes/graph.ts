@@ -10,6 +10,8 @@ import {
   CstRelationshipFiltersSchema,
   CstSearchParamsSchema,
 } from "@szl-holdings/constellation";
+import { db, cstNodes, cstEdges } from "@szl-holdings/db";
+import { eq, or, inArray } from "drizzle-orm";
 
 const router: IRouter = Router();
 
@@ -48,6 +50,84 @@ router.get("/graph/entities/:id", async (req: Request, res: Response) => {
     return sendSuccess(res, { node });
   } catch (err) {
     return handleRouteError(res, err, "GET /graph/entities/:id");
+  }
+});
+
+/**
+ * GET /graph/entities/:id/neighbors
+ *
+ * Returns the entity plus its 1-hop neighbors and the edges that connect them.
+ * Used by ConstellationGraph's "Expand neighbor" action so operators can
+ * traverse the constellation across domain boundaries interactively.
+ *
+ * Query params:
+ *   limit  max neighbors to return (default 25, max 200)
+ */
+router.get("/graph/entities/:id/neighbors", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const rawLimit = parseInt((req.query.limit as string) ?? "25", 10);
+    if (isNaN(rawLimit) || rawLimit < 1 || rawLimit > 200) {
+      return sendBadRequest(res, "limit must be 1–200");
+    }
+
+    const node = await getNodeById(id);
+    if (!node) {
+      return res.status(404).json({ error: "Entity not found", id });
+    }
+
+    const edgeRows = await db
+      .select()
+      .from(cstEdges)
+      .where(or(eq(cstEdges.fromNodeId, id), eq(cstEdges.toNodeId, id)))
+      .limit(rawLimit);
+
+    const neighborIds = Array.from(
+      new Set(
+        edgeRows
+          .map((e) => (e.fromNodeId === id ? e.toNodeId : e.fromNodeId))
+          .filter((nid): nid is string => !!nid && nid !== id),
+      ),
+    );
+
+    const neighborRows = neighborIds.length > 0
+      ? await db.select().from(cstNodes).where(inArray(cstNodes.id, neighborIds))
+      : [];
+
+    return sendSuccess(res, {
+      node,
+      neighbors: neighborRows.map((n) => ({
+        id: n.id,
+        canonicalId: n.canonicalId,
+        domain: n.domain,
+        entityType: n.entityType,
+        name: n.name,
+        description: n.description,
+        labels: n.labels,
+        confidence: n.confidence,
+        sensitivityTier: n.sensitivityTier,
+        isActive: n.isActive,
+        freshness: n.freshness,
+        extensions: n.extensions,
+        createdAt: n.createdAt,
+        updatedAt: n.updatedAt,
+      })),
+      edges: edgeRows.map((e) => ({
+        id: e.id,
+        fromNodeId: e.fromNodeId,
+        toNodeId: e.toNodeId,
+        relationshipType: e.relationshipType,
+        confidence: e.confidence,
+        active: e.active,
+        createdAt: e.createdAt,
+      })),
+      stats: {
+        neighborCount: neighborRows.length,
+        edgeCount: edgeRows.length,
+      },
+    });
+  } catch (err) {
+    return handleRouteError(res, err, "GET /graph/entities/:id/neighbors");
   }
 });
 
