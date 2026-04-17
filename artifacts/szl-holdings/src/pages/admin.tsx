@@ -8,7 +8,7 @@ import {
   TrendingUp, Clock, ExternalLink, ChevronDown, ChevronUp,
   DollarSign, Cloud, Key, Database, HardDrive, Activity,
   SmilePlus, Eye, EyeOff, ClipboardList, Plus, X,
-  Building2, UserCheck,
+  Building2, UserCheck, Terminal,
 } from "lucide-react";
 import { Link } from "wouter";
 import { cn } from "@/lib/utils";
@@ -187,6 +187,12 @@ export default function AdminPage() {
             <span className="text-[10px] text-emerald-500 flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full">
               <Shield className="w-3 h-3" /> Admin Access
             </span>
+            <Link
+              href="/admin/command-center"
+              className="flex items-center gap-1.5 text-xs font-medium text-cyan-400 hover:text-cyan-300 transition-colors bg-cyan-500/10 border border-cyan-500/20 px-2.5 py-1 rounded-full"
+            >
+              <Terminal className="w-3 h-3" /> Command Center
+            </Link>
             <button
               onClick={() => { setUnlocked(false); try { localStorage.removeItem("szl_admin_unlocked"); } catch {} }}
               className="text-xs text-muted-foreground hover:text-foreground transition-colors"
