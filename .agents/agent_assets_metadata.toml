@@ -126,6 +126,18 @@ uri = "file://attached_assets/generated_images/szl-cover-source.png"
 type = "image"
 title = "generated_image"
 
+[[generated]]
+id = "nLG44eyQLyRmFZWXbm0v8"
+uri = "file://attached_assets/generated_images/imperium-cloud.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "8U38juXtq2hLOClqoVEOD"
+uri = "file://attached_assets/generated_images/cortex-mobile.png"
+type = "image"
+title = "generated_image"
+
 [[outputs]]
 id = "I_ORUhKS2b7MEVDwDdGWJ"
 uri = "file://social-content/banners/linkedin-7-lenses-banner.png"

@@ -82,6 +82,12 @@ The Command Portal is the cross-domain real-time dashboard aggregating signals f
 
 ![Carlota Jo Advisory](assets/readme/products/carlota-jo.jpg)
 
+![PRISM Counsel — Legal Matter Command](assets/readme/products/prism-counsel.jpg)
+
+![IMPERIUM — Cloud Sovereignty](assets/readme/products/imperium-cloud.jpg)
+
+![CORTEX — Unified Mobile Command](assets/readme/products/cortex-mobile.jpg)
+
 ---
 
 ## Architecture
