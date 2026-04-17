@@ -771,6 +771,53 @@ describe("Integration — /domains/:domain/graph (multi-domain seeded fixture)",
     expect(res.body.stats.internalEdgeCount).toBe(1);
   });
 
+  // ── activeEdgesOnly ───────────────────────────────────────────────────────
+  it("activeEdgesOnly=true on terra graph excludes the inactive T1->T3 edge and tightens internal count", async () => {
+    const res = await request(app)
+      .get("/domains/terra/graph")
+      .query({ entityType: FIXTURE_ENTITY_TYPE, isActive: "true", activeEdgesOnly: "true" });
+    expect(res.status).toBe(200);
+    expect(res.body.stats.nodeCount).toBe(3);
+
+    // Same edges as the baseline terra (active=true) test, minus T1->T3 (active=false).
+    expect(res.body.stats.edgeCount).toBe(8);
+    expect(res.body.stats.crossDomainEdgeCount).toBe(6);
+    expect(res.body.stats.internalEdgeCount).toBe(2);
+
+    const edges = res.body.edges as Array<{ id: string; active: boolean }>;
+    expect(edges.every((e) => e.active === true)).toBe(true);
+  });
+
+  it("activeEdgesOnly=true with includeCross=false on terra graph drops the inactive internal edge too", async () => {
+    const res = await request(app)
+      .get("/domains/terra/graph")
+      .query({
+        entityType: FIXTURE_ENTITY_TYPE,
+        isActive: "true",
+        includeCross: "false",
+        activeEdgesOnly: "true",
+      });
+    expect(res.status).toBe(200);
+    expect(res.body.stats.nodeCount).toBe(3);
+    expect(res.body.stats.crossDomainEdgeCount).toBe(0);
+    // Internal active terra edges only: T1->T2, T2->T3 (T1->T3 is inactive)
+    expect(res.body.stats.edgeCount).toBe(2);
+    expect(res.body.stats.internalEdgeCount).toBe(2);
+
+    const edges = res.body.edges as Array<{ id: string; active: boolean }>;
+    expect(edges.every((e) => e.active === true)).toBe(true);
+  });
+
+  it("activeEdgesOnly=false (default) on terra graph still includes the inactive edge", async () => {
+    const res = await request(app)
+      .get("/domains/terra/graph")
+      .query({ entityType: FIXTURE_ENTITY_TYPE, isActive: "true", activeEdgesOnly: "false" });
+    expect(res.status).toBe(200);
+    expect(res.body.stats.edgeCount).toBe(9);
+    const edges = res.body.edges as Array<{ id: string; active: boolean }>;
+    expect(edges.some((e) => e.active === false)).toBe(true);
+  });
+
   // ── domain isolation ──────────────────────────────────────────────────────
   it("returned terra nodes never leak in vessels/aegis/carlota-jo nodes", async () => {
     const res = await request(app)

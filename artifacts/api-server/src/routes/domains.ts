@@ -19,6 +19,7 @@
  *   limit        max nodes (default: 100, max: 500)
  *   offset       pagination offset (default: 0)
  *   includeCross include cross-domain edges (default: true)
+ *   activeEdgesOnly  exclude edges where active=false (default: false)
  */
 
 import { Router, type IRouter, type Request, type Response } from "express";
@@ -48,6 +49,7 @@ async function buildDomainGraph(
     limit: number;
     offset: number;
     includeCross: boolean;
+    activeEdgesOnly: boolean;
   }
 ) {
   const nodeConditions = [eq(cstNodes.domain, domain)];
@@ -73,26 +75,33 @@ async function buildDomainGraph(
 
   if (nodeIds.length > 0) {
     if (opts.includeCross) {
+      const whereExpr = opts.activeEdgesOnly
+        ? and(
+            or(
+              inArray(cstEdges.fromNodeId, nodeIds),
+              inArray(cstEdges.toNodeId, nodeIds),
+            ),
+            eq(cstEdges.active, true),
+          )
+        : or(
+            inArray(cstEdges.fromNodeId, nodeIds),
+            inArray(cstEdges.toNodeId, nodeIds),
+          );
       edges = await db
         .select()
         .from(cstEdges)
-        .where(
-          or(
-            inArray(cstEdges.fromNodeId, nodeIds),
-            inArray(cstEdges.toNodeId, nodeIds),
-          )
-        )
+        .where(whereExpr)
         .limit(opts.limit * 3);
     } else {
+      const internalConds = [
+        inArray(cstEdges.fromNodeId, nodeIds),
+        inArray(cstEdges.toNodeId, nodeIds),
+      ];
+      if (opts.activeEdgesOnly) internalConds.push(eq(cstEdges.active, true));
       edges = await db
         .select()
         .from(cstEdges)
-        .where(
-          and(
-            inArray(cstEdges.fromNodeId, nodeIds),
-            inArray(cstEdges.toNodeId, nodeIds),
-          )
-        )
+        .where(and(...internalConds))
         .limit(opts.limit * 2);
     }
   }
@@ -152,6 +161,7 @@ function domainHandler(domain: string) {
       }
       const includeCross = req.query.includeCross !== "false";
       const isActive = req.query.isActive !== undefined ? req.query.isActive !== "false" : undefined;
+      const activeEdgesOnly = req.query.activeEdgesOnly === "true";
 
       const graph = await buildDomainGraph(domain, {
         entityType: req.query.entityType as string | undefined,
@@ -159,6 +169,7 @@ function domainHandler(domain: string) {
         limit: rawLimit,
         offset: rawOffset,
         includeCross,
+        activeEdgesOnly,
       });
       return sendSuccess(res, graph);
     } catch (err) {
