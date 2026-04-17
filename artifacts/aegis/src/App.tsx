@@ -180,6 +180,13 @@ const BreachCostPredictor = lazy(() => import("@/pages/breach-cost-predictor"));
 const PurpleTeam = lazy(() => import("@/pages/purple-team"));
 const APTEmulationPage = lazy(() => import("@/pages/apt-emulation"));
 
+// ─── Cognitive Runtime Upgrades (Task 1129) ───────────────────────────────────
+const CognitiveAttackPath = lazy(() => import("@/pages/cognitive-attack-path"));
+const IdentityBlastRadius = lazy(() => import("@/pages/identity-blast-radius"));
+const ControlEvidenceGraph = lazy(() => import("@/pages/control-evidence-graph"));
+const IncidentProofChain = lazy(() => import("@/pages/incident-proof-chain"));
+const BusinessImpactMap = lazy(() => import("@/pages/business-impact-map"));
+
 // ─── PHANTOM & SENTINEL (Task 566) ───────────────────────────────────────────
 const PhantomWarRoom = lazy(() => import("@/pages/phantom-war-room"));
 const PhantomPurpleExercise = lazy(() => import("@/pages/phantom-purple-exercise"));
@@ -581,6 +588,17 @@ function AegisSidebarContent({ location, onNavigate, collapsed, onToggleCollapse
       id: "governance",
       label: "Governance & Reporting",
       items: governanceNavItems.map(({ path, label, icon: Icon }) => ({ id: path, label, href: path, icon: <Icon className="w-3 h-3" /> })),
+    },
+    {
+      id: "cognitive-runtime",
+      label: "Cognitive Runtime",
+      items: [
+        { id: "/cognitive/attack-path", label: "Attack Path Graph", href: "/cognitive/attack-path", icon: <Network className="w-3.5 h-3.5" /> },
+        { id: "/cognitive/identity-blast-radius", label: "Identity Blast Radius", href: "/cognitive/identity-blast-radius", icon: <Users className="w-3.5 h-3.5" /> },
+        { id: "/cognitive/control-evidence-graph", label: "Control Evidence Graph", href: "/cognitive/control-evidence-graph", icon: <ShieldCheck className="w-3.5 h-3.5" /> },
+        { id: "/cognitive/incident-proof-chain", label: "Incident Proof Chain", href: "/cognitive/incident-proof-chain", icon: <Link2 className="w-3.5 h-3.5" /> },
+        { id: "/cognitive/business-impact-map", label: "Business Impact Map", href: "/cognitive/business-impact-map", icon: <TrendingUp className="w-3.5 h-3.5" /> },
+      ],
     },
     {
       id: "compliance",
@@ -986,6 +1004,13 @@ function AppRouter() {
         <Route path="/business-signal-intelligence" component={AegisBusinessSignalIntelligence} />
         <Route path="/predictive-intelligence" component={AegisPredictiveIntelligence} />
         <Route path="/threat-cost-translator" component={ThreatCostTranslator} />
+
+        {/* Cognitive Runtime Upgrades (Task 1129) */}
+        <Route path="/cognitive/attack-path" component={CognitiveAttackPath} />
+        <Route path="/cognitive/identity-blast-radius" component={IdentityBlastRadius} />
+        <Route path="/cognitive/control-evidence-graph" component={ControlEvidenceGraph} />
+        <Route path="/cognitive/incident-proof-chain" component={IncidentProofChain} />
+        <Route path="/cognitive/business-impact-map" component={BusinessImpactMap} />
 
         {/* Agentic SOC & Autonomous Cyber Defense (Task 521) */}
         <Route path="/agentic-soc" component={AgenticSOC} />

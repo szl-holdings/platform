@@ -4,6 +4,7 @@ import { perUserApiSlidingLimiter } from "../../middlewares/sliding-window-limit
 import aegisSocRouter from "../firestorm";
 import aegisSocLiveRouter from "../firestorm-live";
 import firestormCommandRouter from "../firestorm-command-surfaces";
+import firestormCognitiveRouter from "../firestorm-cognitive";
 import intelligenceRouter from "../intelligence";
 import aegisIntelRouter from "../inca";
 import govDataRouter from "../gov-data";
@@ -41,6 +42,9 @@ export function register(router: IRouter): void {
   router.use("/command", _readLimiter);
   router.use("/firestorm/command", _readLimiter);
   router.use(firestormCommandRouter);
+
+  router.use("/firestorm/cognitive", _readLimiter);
+  router.use(firestormCognitiveRouter);
 
   router.use(intelligenceRouter);
   router.use(aegisIntelRouter);

@@ -14,7 +14,8 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "seed:terra": "tsx src/scripts/seed-terra-distress.ts",
     "seed:ecosystem": "tsx src/scripts/seed-ecosystem.ts",
-    "smoke:cognitive-runtime": "tsx src/scripts/smoke-cognitive-runtime.ts"
+    "smoke:cognitive-runtime": "tsx src/scripts/smoke-cognitive-runtime.ts",
+    "test:cognitive-contracts": "tsx src/scripts/smoke-cognitive-contracts.ts"
   },
   "dependencies": {
     "@apollo/server": "^5.5.0",
