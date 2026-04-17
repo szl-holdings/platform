@@ -33,9 +33,12 @@ import {
   insertFirestormTradecraftDecisionSchema,
   insertFirestormAnalystNotebookSchema,
   type InsertFirestormCaseMemory,
+  alloyRuntimeAgentsTable,
+  alloyRuntimeAgentVersionsTable,
+  auditEventsTable,
 } from "@szl-holdings/db";
 import { REFERENCE_COMPLIANCE_CONTROLS } from "../readiness.js";
-import { eq, desc, sql, inArray, and } from "drizzle-orm";
+import { eq, desc, sql, inArray, and, or } from "drizzle-orm";
 import { z } from "zod";
 import { sendSuccess, sendCreated, sendNotFound, sendNoContent, handleRouteError } from "../../lib/api-response";
 import { authMiddleware, parseIdParam } from "../../middlewares/auth";
@@ -2437,6 +2440,171 @@ router.post("/firestorm/tradecraft/evidence-index/query", authMiddleware({ requi
       latencyMs: result.latencyMs,
     });
   } catch (err) { handleRouteError(res, err, "Failed to query evidence index"); }
+});
+
+// ─── AI Governance: Model Registry & Inference Log ──────────────────────────
+
+function getSessionContext(req: import("express").Request): {
+  userId: number | undefined;
+  orgId: number | undefined;
+  isPrivileged: boolean;
+} {
+  const user = (req as unknown as Record<string, unknown>).user as {
+    id?: unknown;
+    roles?: string[];
+    orgs?: Array<{ orgId?: unknown }>;
+  } | undefined;
+  const rawOrgId = user?.orgs?.[0]?.orgId;
+  const rawUserId = user?.id;
+  const toInt = (v: unknown) => { const n = typeof v === "number" ? v : parseInt(String(v ?? ""), 10); return isNaN(n) ? undefined : n; };
+  return {
+    userId: toInt(rawUserId),
+    orgId: toInt(rawOrgId),
+    isPrivileged: (user?.roles ?? []).some(r => r === "super_admin" || r === "admin"),
+  };
+}
+
+const INFERENCE_ENTITY_TYPES = new Set([
+  "agent", "inference", "ai-inference", "model-call", "llm-call",
+  "alloy-agent", "alloy-inference", "cortex-inference",
+]);
+
+router.get("/firestorm/ai-governance/registry", authMiddleware(), async (req, res) => {
+  try {
+    const { orgId, isPrivileged } = getSessionContext(req);
+
+    if (orgId == null && !isPrivileged) {
+      res.status(403).json({ error: "Forbidden: org context required", code: "INSUFFICIENT_PERMISSIONS" });
+      return;
+    }
+
+    const agentBaseQuery = db
+      .select({
+        id: alloyRuntimeAgentsTable.id,
+        agentId: alloyRuntimeAgentsTable.agentId,
+        name: alloyRuntimeAgentsTable.name,
+        description: alloyRuntimeAgentsTable.description,
+        domain: alloyRuntimeAgentsTable.domain,
+        policyTier: alloyRuntimeAgentsTable.policyTier,
+        defaultModel: alloyRuntimeAgentsTable.defaultModel,
+        isActive: alloyRuntimeAgentsTable.isActive,
+        metadata: alloyRuntimeAgentsTable.metadata,
+        createdAt: alloyRuntimeAgentsTable.createdAt,
+        updatedAt: alloyRuntimeAgentsTable.updatedAt,
+      })
+      .from(alloyRuntimeAgentsTable)
+      .orderBy(desc(alloyRuntimeAgentsTable.updatedAt))
+      .limit(100);
+
+    const agents = orgId != null
+      ? await agentBaseQuery.where(eq(alloyRuntimeAgentsTable.orgId, orgId))
+      : await agentBaseQuery;
+
+    const versions = agents.length > 0
+      ? await db
+          .select()
+          .from(alloyRuntimeAgentVersionsTable)
+          .where(eq(alloyRuntimeAgentVersionsTable.isDeployed, true))
+          .orderBy(desc(alloyRuntimeAgentVersionsTable.deployedAt))
+      : [];
+
+    const versionByAgent: Record<string, typeof versions[number]> = {};
+    for (const v of versions) {
+      if (!versionByAgent[v.agentId]) versionByAgent[v.agentId] = v;
+    }
+
+    const registry = agents.map((agent) => {
+      const meta = (agent.metadata ?? {}) as Record<string, unknown>;
+      const version = versionByAgent[agent.agentId];
+      const rawModel = agent.defaultModel ?? "";
+      const [providerSlug, ...modelParts] = rawModel.includes("/") ? rawModel.split("/") : ["internal", rawModel];
+      const provider = providerSlug.charAt(0).toUpperCase() + providerSlug.slice(1);
+      const modelName = modelParts.join("/") || rawModel || agent.name;
+      return {
+        id: agent.agentId,
+        name: agent.name,
+        description: agent.description,
+        provider,
+        model: modelName,
+        version: (version?.version ?? meta["version"] ?? "1.0") as string,
+        domain: agent.domain,
+        policyTier: agent.policyTier,
+        status: agent.isActive ? "active" : "deprecated",
+        confidenceBaseline: (meta["confidenceBaseline"] ?? meta["confidence_baseline"] ?? null) as number | null,
+        deployedAt: version?.deployedAt ?? null,
+        updatedAt: agent.updatedAt,
+        createdAt: agent.createdAt,
+      };
+    });
+
+    sendSuccess(res, { registry, total: registry.length });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to fetch AI model registry");
+  }
+});
+
+router.get("/firestorm/ai-governance/log", authMiddleware(), async (req, res) => {
+  try {
+    const rawLimit = parseInt((req.query.limit as string) ?? "50", 10);
+    const limit = isNaN(rawLimit) ? 50 : Math.max(1, Math.min(rawLimit, 200));
+
+    const { orgId, isPrivileged } = getSessionContext(req);
+
+    if (orgId == null && !isPrivileged) {
+      res.status(403).json({ error: "Forbidden: org context required", code: "INSUFFICIENT_PERMISSIONS" });
+      return;
+    }
+
+    // audit_events has no orgId column; scope via org-discriminator in newValues.
+    // Events written by Alloy must include orgId in newValues for reliable attribution.
+    const jsonbModelFilter = sql<boolean>`${auditEventsTable.newValues}::jsonb ? 'model'`;
+    const entityTypeFilters = [...INFERENCE_ENTITY_TYPES].map(t => eq(auditEventsTable.entityType, t));
+    const inferenceFilter = or(jsonbModelFilter, ...entityTypeFilters);
+
+    // When org context is present, require newValues->>'orgId' = caller's orgId.
+    // Guard the ::integer cast with a numeric regex to avoid Postgres cast errors
+    // on rows where orgId is absent or non-numeric.
+    const orgScopeFilter = orgId != null
+      ? sql<boolean>`(${auditEventsTable.newValues}->>'orgId' ~ '^[0-9]+$' AND (${auditEventsTable.newValues}->>'orgId')::integer = ${orgId})`
+      : undefined;
+
+    const events = await db
+      .select({
+        id: auditEventsTable.id,
+        action: auditEventsTable.action,
+        entityType: auditEventsTable.entityType,
+        entityId: auditEventsTable.entityId,
+        userId: auditEventsTable.userId,
+        newValues: auditEventsTable.newValues,
+        userAgent: auditEventsTable.userAgent,
+        createdAt: auditEventsTable.createdAt,
+      })
+      .from(auditEventsTable)
+      .where(orgScopeFilter != null ? and(inferenceFilter, orgScopeFilter) : inferenceFilter)
+      .orderBy(desc(auditEventsTable.createdAt))
+      .limit(limit);
+
+    const log = events.map((e) => {
+      const vals = (e.newValues ?? {}) as Record<string, unknown>;
+      // Prefer explicit model fields; fall back to "unknown" only for known inference entity types
+      const model = (vals["model"] ?? vals["modelId"] ?? vals["defaultModel"] ?? (
+        INFERENCE_ENTITY_TYPES.has(e.entityType) ? "unknown" : null
+      )) as string | null;
+      if (!model) return null;
+
+      const confidence = (vals["confidence"] ?? vals["confidenceScore"] ?? null) as number | null;
+      const actor = e.userId != null ? `user:${e.userId}` : "system";
+      const platform = e.userAgent
+        ? e.userAgent.includes("Mobile") ? "Mobile" : e.userAgent.includes("curl") ? "API" : "Web"
+        : "Internal";
+
+      return { id: e.id, model, action: e.action, entityType: e.entityType, entityId: e.entityId, actor, platform, confidence, timestamp: e.createdAt };
+    }).filter(Boolean);
+
+    sendSuccess(res, { log, total: log.length });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to fetch AI governance log");
+  }
 });
 
 export default router;
