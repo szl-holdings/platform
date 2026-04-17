@@ -263,6 +263,7 @@ function MonthlyFunnelChart({ data }: { data: Array<{ month: string; signups: nu
 
 export default function InvestorAnalytics() {
   const [tab, setTab] = useState<"metrics" | "funnel" | "cohort" | "diffs">("metrics");
+  const [cohortGranularity, setCohortGranularity] = useState<"month" | "week">("month");
 
   const { data: metricsRaw, isLoading: mLoading } = useQuery({
     queryKey: ["investor-metrics"],
@@ -277,8 +278,8 @@ export default function InvestorAnalytics() {
   });
 
   const { data: cohortRaw } = useQuery({
-    queryKey: ["investor-cohort"],
-    queryFn: () => apiFetch("/investor-analytics/cohort"),
+    queryKey: ["investor-cohort", cohortGranularity],
+    queryFn: () => apiFetch(`/investor-analytics/cohort?granularity=${cohortGranularity}`),
     enabled: tab === "cohort",
   });
 
@@ -538,12 +539,39 @@ export default function InvestorAnalytics() {
         {/* ── Cohort Retention Tab ── */}
         {tab === "cohort" && (
           <>
+            <div className="flex items-center justify-end">
+              <div className="flex items-center gap-1 bg-[#111318] border border-[#1e2230] rounded-lg p-1">
+                <button
+                  onClick={() => setCohortGranularity("month")}
+                  className={`px-3 py-1 text-xs rounded-md transition-colors ${
+                    cohortGranularity === "month"
+                      ? "bg-[#1e2230] text-zinc-100 font-medium"
+                      : "text-zinc-500 hover:text-zinc-300"
+                  }`}
+                >
+                  Monthly
+                </button>
+                <button
+                  onClick={() => setCohortGranularity("week")}
+                  className={`px-3 py-1 text-xs rounded-md transition-colors ${
+                    cohortGranularity === "week"
+                      ? "bg-[#1e2230] text-zinc-100 font-medium"
+                      : "text-zinc-500 hover:text-zinc-300"
+                  }`}
+                >
+                  Weekly
+                </button>
+              </div>
+            </div>
             {!cohort ? (
               <div className="text-center py-20 text-zinc-600">Loading cohort data...</div>
             ) : (
               <>
                 <div className="bg-[#111318] border border-[#1e2230] rounded-xl p-5">
-                  <SectionHeader title="Cohort Retention Matrix" sub="User retention by signup cohort and period" />
+                  <SectionHeader
+                    title="Cohort Retention Matrix"
+                    sub={`User retention by signup cohort and ${cohortGranularity === "week" ? "week" : "month"}`}
+                  />
                   {cohort.cohorts?.length > 0 ? (
                     <CohortMatrix
                       cohorts={cohort.cohorts}
@@ -560,7 +588,10 @@ export default function InvestorAnalytics() {
 
                 {(cohort.averageRetentionCurve?.length ?? 0) > 0 && (
                   <div className="bg-[#111318] border border-[#1e2230] rounded-xl p-5">
-                    <SectionHeader title="Average Retention Curve" sub="Aggregate retention across all cohorts" />
+                    <SectionHeader
+                      title="Average Retention Curve"
+                      sub={`Aggregate retention across all cohorts — by ${cohortGranularity === "week" ? "week" : "month"}`}
+                    />
                     <ResponsiveContainer width="100%" height={200}>
                       <AreaChart
                         data={(cohort.periodLabels ?? []).map((label: string, i: number) => ({
