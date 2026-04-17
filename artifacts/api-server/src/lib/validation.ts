@@ -193,8 +193,13 @@ export function validateBody<T>(schema: z.ZodSchema<T>) {
   return (req: Request, res: Response, next: NextFunction) => {
     const result = schema.safeParse(req.body);
     if (!result.success) {
-      const errors = result.error.errors.map(e => `${e.path.join(".")}: ${e.message}`).join("; ");
-      sendBadRequest(res, `Validation error: ${errors}`);
+      const issues = result.error.errors.map(e => ({
+        path: e.path,
+        message: e.message,
+        code: e.code,
+      }));
+      const errors = issues.map(e => `${e.path.join(".") || "(root)"}: ${e.message}`).join("; ");
+      sendBadRequest(res, `Validation error: ${errors}`, { issues });
       return;
     }
     req.body = result.data;
