@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
-
-const ACCENT = "#8b7ac8";
+import { ACCENT } from "./cognitive/shared";
 
 interface EvalSuiteConfig {
   id: string;

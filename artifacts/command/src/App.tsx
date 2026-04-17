@@ -87,6 +87,9 @@ const CognitiveMemory = lazy(() => import("./pages/cognitive/memory"));
 const CognitivePlanner = lazy(() => import("./pages/cognitive/planner"));
 const CognitiveVerifier = lazy(() => import("./pages/cognitive/verifier"));
 const CognitiveReflection = lazy(() => import("./pages/cognitive/reflection"));
+const CognitiveTraces = lazy(() => import("./pages/cognitive/traces"));
+const CognitiveEvals = lazy(() => import("./pages/cognitive/evals"));
+const CognitivePolicies = lazy(() => import("./pages/cognitive/policies"));
 const PolicyApprovalsPage = lazy(() => import("./pages/policy-approvals"));
 const ApprovalsCenter = lazy(() => import("@lyte/pages/approvals-center"));
 const CommandInbox = lazy(() => import("@lyte/pages/command-inbox"));
@@ -135,7 +138,7 @@ const CenturionAI = lazy(() => import("@imp/pages/centurion-ai"));
 const IntelligenceBriefing = lazy(() => import("@imp/pages/intelligence-briefing"));
 
 function getMode(location: string): WorkspaceMode {
-  if (location.startsWith("/operations")) return "operations";
+  if (location.startsWith("/operations") || location.startsWith("/cognitive")) return "operations";
   if (location.startsWith("/infrastructure")) return "infrastructure";
   return "strategy";
 }
@@ -293,6 +296,9 @@ function AppShell() {
               <Route path="/cognitive/planner" component={() => <CognitivePlanner />} />
               <Route path="/cognitive/verifier" component={() => <CognitiveVerifier />} />
               <Route path="/cognitive/reflection" component={() => <CognitiveReflection />} />
+              <Route path="/cognitive/traces" component={() => <CognitiveTraces />} />
+              <Route path="/cognitive/evals" component={() => <CognitiveEvals />} />
+              <Route path="/cognitive/policies" component={() => <CognitivePolicies />} />
 
               <Route path="/infrastructure" component={() => <LegatusConsole />} />
               <Route path="/infrastructure/legatus" component={() => <LegatusConsole />} />

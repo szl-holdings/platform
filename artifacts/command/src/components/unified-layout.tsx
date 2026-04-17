@@ -113,6 +113,14 @@ const OPERATIONS_NAV: NavGroup[] = [
       { href: "/operations/noise-reduction", label: "Noise Reduction", icon: BellOff },
     ],
   },
+  {
+    section: "Cognitive Consoles",
+    items: [
+      { href: "/cognitive/traces", label: "Trace Replay", icon: Clapperboard },
+      { href: "/cognitive/evals", label: "Eval Console", icon: FlaskConical },
+      { href: "/cognitive/policies", label: "Policy Console", icon: ShieldCheck },
+    ],
+  },
 ];
 
 const INFRASTRUCTURE_NAV: NavGroup[] = [

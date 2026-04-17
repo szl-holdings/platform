@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
-
-const ACCENT = "#8b7ac8";
+import { ACCENT, DOMAIN_COLORS, DOMAIN_ICONS } from "./cognitive/shared";
 
 interface Scenario {
   id: string;
@@ -117,22 +116,6 @@ const RECENT_RUNS: ReplayRun[] = [
     totalCostUsd: 0.00218,
   },
 ];
-
-const DOMAIN_COLORS: Record<string, string> = {
-  aegis: "#ef4444",
-  vessels: "#0ea5e9",
-  terra: "#22c55e",
-  prism: "#a855f7",
-  default: "#8b7ac8",
-};
-
-const DOMAIN_ICONS: Record<string, string> = {
-  aegis: "⚔",
-  vessels: "⚓",
-  terra: "⬢",
-  prism: "⚖",
-  default: "◆",
-};
 
 function OutcomeBadge({ outcome }: { outcome?: Scenario["lastOutcome"] }) {
   if (!outcome) return <span style={{ color: "#64748b", fontSize: 11 }}>Not run</span>;
