@@ -102,6 +102,11 @@ export default defineConfig({
       { find: "@szl-holdings/decision-engine", replacement: resolve(__dirname, "packages/decision-engine/src/index.ts") },
       { find: "@szl-holdings/db/schema", replacement: resolve(__dirname, "lib/db/src/schema/index.ts") },
       { find: "@szl-holdings/db", replacement: resolve(__dirname, "lib/db/src/index.ts") },
+      { find: "@workspace/self-model/types", replacement: resolve(__dirname, "packages/self-model/src/types.ts") },
+      { find: "@workspace/self-model/schema", replacement: resolve(__dirname, "packages/self-model/src/schema.ts") },
+      { find: "@workspace/self-model/store", replacement: resolve(__dirname, "packages/self-model/src/store.ts") },
+      { find: "@workspace/self-model/update", replacement: resolve(__dirname, "packages/self-model/src/update.ts") },
+      { find: "@workspace/self-model", replacement: resolve(__dirname, "packages/self-model/src/index.ts") },
     ],
   },
   test: {
@@ -122,6 +127,7 @@ export default defineConfig({
       "packages/reflection-engine/src/**/*.test.ts",
       "packages/replay-core/src/**/*.test.ts",
       "packages/planner/src/**/*.test.ts",
+      "packages/self-model/src/**/*.test.ts",
     ],
     exclude: [
       "tests/e2e/**",

@@ -27,6 +27,7 @@ import tracesRouter from "./traces";
 import reflectionsRouter from "./reflections";
 import plansRouter from "./plans";
 import * as alloyRuntime from "./groups/alloy-runtime-group";
+import * as selfModel from "./groups/self-model";
 
 const router: IRouter = Router();
 
@@ -55,6 +56,7 @@ domainAtlas.register(router);
 graph.register(router);
 guardian.register(router);
 alloyRuntime.register(router);
+selfModel.register(router);
 
 router.use(tracesRouter);
 router.use(reflectionsRouter);

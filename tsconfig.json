@@ -110,6 +110,9 @@
     },
     {
       "path": "./packages/cognitive-observability"
+    },
+    {
+      "path": "./packages/self-model"
     }
   ]
 }

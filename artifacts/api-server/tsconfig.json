@@ -64,6 +64,9 @@
     },
     {
       "path": "../../packages/tool-mesh"
+    },
+    {
+      "path": "../../packages/self-model"
     }
   ]
 }

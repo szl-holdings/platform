@@ -435,6 +435,9 @@ importers:
       '@workspace/reflection-engine':
         specifier: workspace:*
         version: link:../../packages/reflection-engine
+      '@workspace/self-model':
+        specifier: workspace:*
+        version: link:../../packages/self-model
       '@workspace/tool-mesh':
         specifier: workspace:*
         version: link:../../packages/tool-mesh
@@ -2530,6 +2533,19 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.5
+
+  packages/self-model:
+    dependencies:
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
+      vitest:
+        specifier: ^4.1.2
+        version: 4.1.2(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/telemetry-standards:
     devDependencies:
