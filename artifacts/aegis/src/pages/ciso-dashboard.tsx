@@ -164,7 +164,7 @@ const modules: Module[] = [
     name: "OT / ICS Security",
     short: "OT/ICS",
     icon: Factory,
-    route: "/sacsayhuaman-shield",
+    route: "/adaptive-defense-shield",
     metricLabel: "ICS Risk Score",
     metricValue: "62 / 100",
     delta: "-6 pts QoQ",
@@ -268,7 +268,7 @@ const roiPanel = [
     intervention: "7 unauthorized PLC programming attempts blocked",
     avoided: 18.2,
     icon: Factory,
-    route: "/sacsayhuaman-shield",
+    route: "/adaptive-defense-shield",
   },
 ];
 

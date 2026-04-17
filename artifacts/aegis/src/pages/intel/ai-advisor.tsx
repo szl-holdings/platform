@@ -86,7 +86,7 @@ const COMPARISON_RESULTS: ComparisonResult[] = [
   { oracle: "Security Oracle", answer: "Implement continuous agent action auditing across all agent network nodes — current visibility gap means 23% of agent actions are unaudited, creating compliance and security exposure.", confidence: 96, reasoning: ["Compliance frameworks require full audit trails by Q3 2026", "3 incidents last quarter traced to unaudited agent actions", "Audit infrastructure reduces investigation time by 80%"], caveats: "Performance overhead estimated at 4–7ms per action." },
 ];
 
-export default function WillaqUmu() {
+export default function AiAdvisor() {
   const [selectedOracle, setSelectedOracle] = useState<string | null>(null);
   const [question, setQuestion] = useState("");
   const [consulting, setConsulting] = useState(false);

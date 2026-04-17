@@ -84,7 +84,7 @@ const DECISION_COLORS = {
   escalated: { color: "text-amber-400", bg: "bg-amber-400/10", icon: AlertTriangle, dot: "bg-amber-400 animate-pulse" },
 };
 
-export default function SacsayhuamanShield() {
+export default function AdaptiveDefenseShield() {
   const [decisions, setDecisions] = useState<PolicyDecision[]>(SEED_DECISIONS);
   const [filter, setFilter] = useState<"all" | "permitted" | "blocked" | "escalated">("all");
   const [expandedPolicy, setExpandedPolicy] = useState<string | null>(null);

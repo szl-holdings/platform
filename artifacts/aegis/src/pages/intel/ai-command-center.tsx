@@ -224,7 +224,7 @@ function LiveClock() {
   );
 }
 
-export default function QuipuCommand() {
+export default function AiCommandCenter() {
   return (
     <div className="p-6 lg:p-8 space-y-6 max-w-[1600px]">
       {/* Header */}
@@ -345,7 +345,7 @@ export default function QuipuCommand() {
           { href: "/agent-spawner", label: "Spawn New Agent" },
           { href: "/chasqui-relay", label: "Signal Routing Console" },
           { href: "/dual-mind", label: "Dual-Mode Monitor" },
-          { href: "/willaq-umu", label: "AI Advisor Console" },
+          { href: "/intel/ai-advisor", label: "AI Advisor Console" },
         ].map(link => (
           <Link key={link.href} href={link.href}>
             <span className="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-border text-xs text-muted-foreground hover:text-foreground hover:border-primary/30 transition-all cursor-pointer">

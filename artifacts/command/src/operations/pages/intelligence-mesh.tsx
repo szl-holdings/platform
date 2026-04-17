@@ -63,7 +63,7 @@ const TYPE_COLORS = {
   reflex: "text-[#6b8f71] bg-[#6b8f71]/10",
 };
 
-export default function QhapaqNan() {
+export default function IntelligenceMesh() {
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
   const [tick, setTick] = useState(0);
 

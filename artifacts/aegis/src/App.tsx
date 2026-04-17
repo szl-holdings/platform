@@ -103,7 +103,7 @@ const ThreatKillChain = lazy(() => import("@/pages/threat-kill-chain"));
 const IdentityThreat = lazy(() => import("@/pages/identity-threat"));
 const ExecutiveRisk = lazy(() => import("@/pages/executive-risk"));
 const CisoDashboard = lazy(() => import("@/pages/ciso-dashboard"));
-const SacsayhuamanShield = lazy(() => import("@/pages/sacsayhuaman-shield"));
+const AdaptiveDefenseShield = lazy(() => import("@/pages/adaptive-defense-shield"));
 const AdversaryEmulation = lazy(() => import("@/pages/simulation-runner"));
 const AgentInsightsPage = lazy(() => import("@/pages/agent-insights"));
 const AgentOpsExplorerPage = lazy(() => import("@/pages/agentops-explorer"));
@@ -168,10 +168,10 @@ const AegisUnifiedSettings = lazy(() => import("@/pages/settings/unified-setting
 
 // ─── Intelligence Engine pages (from INCA) ────────────────────────────────────
 const IntelDashboard = lazy(() => import("@/pages/intel/dashboard"));
-const QuipuCommand = lazy(() => import("@/pages/intel/quipu-command"));
+const AiCommandCenter = lazy(() => import("@/pages/intel/ai-command-center"));
 const ChasquiRelay = lazy(() => import("@/pages/intel/chasqui-relay"));
 const DualMindMonitor = lazy(() => import("@/pages/intel/dual-mind-monitor"));
-const WillaqUmu = lazy(() => import("@/pages/intel/willaq-umu"));
+const AiAdvisor = lazy(() => import("@/pages/intel/ai-advisor"));
 const AgentAutonomyDashboard = lazy(() => import("@/pages/intel/agent-autonomy"));
 const Models = lazy(() => import("@/pages/intel/models"));
 const Predictions = lazy(() => import("@/pages/intel/predictions"));
@@ -291,7 +291,7 @@ const governanceNavItems = [
 
 const securityNavPrimary = [
   { path: "/soc", label: "SOC Overview", icon: Activity },
-  { path: "/sacsayhuaman-shield", label: "Adaptive Defense", icon: ShieldCheck },
+  { path: "/adaptive-defense-shield", label: "Adaptive Defense", icon: ShieldCheck },
   { path: "/incidents", label: "Incidents", icon: Shield },
   { path: "/alerts", label: "Alerts", icon: Bell },
   { path: "/cases", label: "Case Management", icon: Briefcase },
@@ -400,10 +400,10 @@ const intelNavPrimary = [
 ];
 
 const intelCortexNav = [
-  { path: "/intel/quipu-command", label: "Agent Orchestration", icon: Network },
+  { path: "/intel/ai-command-center", label: "Agent Orchestration", icon: Network },
   { path: "/intel/chasqui-relay", label: "Signal Routing", icon: Radio },
   { path: "/intel/dual-mind", label: "Reasoning Monitor", icon: Sun },
-  { path: "/intel/willaq-umu", label: "AI Advisor", icon: Eye },
+  { path: "/intel/ai-advisor", label: "AI Advisor", icon: Eye },
   { path: "/intel/agent-autonomy", label: "Agent Autonomy", icon: BrainIcon },
   { path: "/intel/agent-autonomy/agents", label: "↳ Live Agents", icon: Users },
   { path: "/intel/agent-autonomy/a2a", label: "↳ A2A Graph", icon: Network },
@@ -909,7 +909,7 @@ function AppRouter() {
         <Route path="/cr/ai-insights" component={ReadinessAIInsights} />
         <Route path="/audit-chain" component={AuditChainPage} />
         <Route path="/trust-provenance" component={TrustProvenancePage} />
-        <Route path="/sacsayhuaman-shield" component={SacsayhuamanShield} />
+        <Route path="/adaptive-defense-shield" component={AdaptiveDefenseShield} />
         <Route path="/adversary-emulation" component={AdversaryEmulation} />
         <Route path="/agent-insights" component={AgentInsightsPage} />
         <Route path="/agentops-explorer" component={AgentOpsExplorerPage} />
@@ -955,10 +955,10 @@ function AppRouter() {
 
         {/* Intelligence Engine — requires security or admin role */}
         <Route path="/intel/dashboard">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><IntelDashboard /></RoleGate>}</Route>
-        <Route path="/intel/quipu-command">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><QuipuCommand /></RoleGate>}</Route>
+        <Route path="/intel/ai-command-center">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><AiCommandCenter /></RoleGate>}</Route>
         <Route path="/intel/chasqui-relay">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><ChasquiRelay /></RoleGate>}</Route>
         <Route path="/intel/dual-mind">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><DualMindMonitor /></RoleGate>}</Route>
-        <Route path="/intel/willaq-umu">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><WillaqUmu /></RoleGate>}</Route>
+        <Route path="/intel/ai-advisor">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><AiAdvisor /></RoleGate>}</Route>
         <Route path="/intel/agent-autonomy">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><AgentAutonomyDashboard /></RoleGate>}</Route>
         <Route path="/intel/agent-autonomy/agents">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><AgentAutonomyDashboard /></RoleGate>}</Route>
         <Route path="/intel/agent-autonomy/a2a">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><AgentAutonomyDashboard /></RoleGate>}</Route>
@@ -1072,7 +1072,7 @@ const aegisCommands: CommandItem[] = [
   { id: "nav-devices", label: "Device Inventory", icon: "💻", group: "Managed Operations", action: nav("/ops/devices") },
   { id: "nav-dispatch", label: "Technician Dispatch", icon: "🔧", group: "Managed Operations", action: nav("/ops/dispatch") },
   { id: "nav-intel-dashboard", label: "Intelligence Dashboard", icon: "🧠", group: "Intelligence Engine", action: nav("/intel/dashboard") },
-  { id: "nav-quipu", label: "Agent Console", icon: "🕸️", group: "Intelligence Engine", action: nav("/intel/quipu-command") },
+  { id: "nav-quipu", label: "Agent Console", icon: "🕸️", group: "Intelligence Engine", action: nav("/intel/ai-command-center") },
   { id: "nav-models", label: "Models", icon: "⚙️", group: "Intelligence Engine", action: nav("/intel/models") },
   { id: "nav-predictions", label: "Predictions", icon: "📈", group: "Intelligence Engine", action: nav("/intel/predictions") },
   { id: "nav-intel-insights", label: "Intel Insights", icon: "💡", group: "Intelligence Engine", action: nav("/intel/insights") },
