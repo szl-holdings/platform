@@ -1,3 +1,4 @@
+import { Link } from "wouter";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { usePageMeta } from "@/hooks/usePageMeta";
@@ -156,7 +157,11 @@ export default function LegalTermsPage() {
       <Navbar />
       <div className="max-w-3xl mx-auto px-6 pt-32 pb-24">
         <div className="mb-10">
-          <p style={{ fontSize: "11px", fontWeight: "600", letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,42%)", marginBottom: "0.75rem" }}>Legal</p>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem" }}>
+            <Link href="/trust" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,42%)", textDecoration: "none" }}>Trust Center</Link>
+            <span style={{ color: "hsl(210,5%,30%)" }}>/</span>
+            <span style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,55%)" }}>Legal · Terms</span>
+          </div>
           <h1 style={{ fontSize: "2rem", fontWeight: "700", letterSpacing: "-0.022em", color: "hsl(38,12%,94%)", marginBottom: "0.75rem" }}>Terms of Service</h1>
           <p style={{ fontSize: "13px", color: "hsl(210,5%,44%)" }}>Last updated: April 2026 · Effective date: 1 April 2026</p>
         </div>

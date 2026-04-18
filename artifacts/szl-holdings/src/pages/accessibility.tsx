@@ -1,3 +1,4 @@
+import { Link } from "wouter";
 import { Navbar } from "@/components/Navbar";
 import { SiteFooter } from "@/components/SiteFooter";
 
@@ -13,12 +14,11 @@ export default function AccessibilityPage() {
         <div style={{ maxWidth: "720px", margin: "0 auto", padding: "0 1.5rem" }}>
 
           <div style={{ marginBottom: "2.5rem" }}>
-            <p
-              className="szl-eyebrow"
-              style={{ marginBottom: "0.75rem" }}
-            >
-              Accessibility
-            </p>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem" }}>
+              <Link href="/trust" className="szl-eyebrow" style={{ textDecoration: "none" }}>Trust Center</Link>
+              <span style={{ color: "var(--color-szl-text-faint)" }}>/</span>
+              <span className="szl-eyebrow">Accessibility</span>
+            </div>
             <h1
               style={{
                 fontFamily: "var(--font-display)",

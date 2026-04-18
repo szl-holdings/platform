@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { m } from "framer-motion";
 import { Link } from "wouter";
-import { ShieldCheck, Lock, Brain, Download, Settings, CheckSquare, ArrowRight, Layers, Database, Eye, Briefcase, Code2, UserCheck, BarChart2, Github, Calendar, Key, FileOutput, GitBranch, ExternalLink } from "lucide-react";
+import { ShieldCheck, Lock, Brain, Download, Settings, CheckSquare, ArrowRight, Layers, Database, Eye, Briefcase, Code2, UserCheck, BarChart2, Github, Calendar, Key, FileOutput, GitBranch, ExternalLink, FileText, Cookie, Accessibility, Scale, Shield } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
@@ -56,6 +56,7 @@ const DILIGENCE_PATHS = [
       { label: "Security posture", href: "/trust/security" },
       { label: "AI governance", href: "/trust/governance" },
       { label: "Responsible disclosure", href: "/legal/security-disclosure" },
+      { label: "Acceptable use policy", href: "/legal/acceptable-use" },
       { label: "Architecture trust layer", href: "/trust/architecture" },
     ],
   },
@@ -74,7 +75,48 @@ const DILIGENCE_PATHS = [
       { label: "Operating doctrine", href: "/operating-doctrine" },
       { label: "Investor relations", href: "/investor-relations" },
       { label: "Governance audit trail", href: "/trust/governance" },
+      { label: "Privacy policy", href: "/legal/privacy" },
+      { label: "Terms of service", href: "/legal/terms" },
     ],
+  },
+];
+
+const LEGAL_PAGES = [
+  {
+    href: "/legal/privacy",
+    icon: Shield,
+    label: "Privacy Policy",
+    description: "How we collect, use, and protect personal information. UK GDPR / EU GDPR aligned.",
+  },
+  {
+    href: "/legal/terms",
+    icon: Scale,
+    label: "Terms of Service",
+    description: "The contractual terms governing use of every SZL platform and the Governance API.",
+  },
+  {
+    href: "/legal/acceptable-use",
+    icon: FileText,
+    label: "Acceptable Use Policy",
+    description: "What is and isn't permitted on Lyte, Alloy, and the domain pack platforms.",
+  },
+  {
+    href: "/legal/cookies",
+    icon: Cookie,
+    label: "Cookie Policy",
+    description: "Strictly necessary, preference, and analytics cookies — with the consent model.",
+  },
+  {
+    href: "/legal/security-disclosure",
+    icon: ShieldCheck,
+    label: "Security Disclosure",
+    description: "Responsible vulnerability disclosure: reporting channel, scope, and safe-harbour.",
+  },
+  {
+    href: "/accessibility",
+    icon: Accessibility,
+    label: "Accessibility Statement",
+    description: "WCAG 2.1 AA conformance, reviewed annually, with a feedback channel for users.",
   },
 ];
 
@@ -346,6 +388,53 @@ export default function TrustPage() {
                             </li>
                           ))}
                         </ul>
+                      </div>
+                    </Link>
+                  </m.div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* Legal & policy documents */}
+        <section id="legal" style={{ padding: "var(--space-section-md) 0", borderBottom: "1px solid var(--color-szl-border)" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", marginBottom: "1rem" }}>Legal & policy documents</p>
+              <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "32ch", marginBottom: "0.75rem" }}>
+                The legal page, next to the technical controls.
+              </h2>
+              <p style={{ fontSize: "0.9375rem", lineHeight: 1.68, color: "hsl(214,7%,58%)", maxWidth: "56ch", marginBottom: "3rem" }}>
+                Compliance reviewers expect the legal documents to live alongside the security and governance controls — not buried in a footer. Privacy, terms, acceptable use, cookies, security disclosure, and accessibility, all from one place.
+              </p>
+            </m.div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "1rem" }}>
+              {LEGAL_PAGES.map((page, i) => {
+                const Icon = page.icon;
+                return (
+                  <m.div
+                    key={page.href}
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.35, delay: i * 0.05 }}
+                  >
+                    <Link href={page.href} style={{ display: "block", textDecoration: "none" }}>
+                      <div className="szl-card" style={{ borderRadius: "0.75rem", padding: "1.25rem", height: "100%", display: "flex", flexDirection: "column", gap: "0.75rem", transition: "border-color 0.18s ease, background 0.18s ease", cursor: "pointer" }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "hsla(145,62%,40%,0.32)"; (e.currentTarget as HTMLElement).style.background = "hsla(145,62%,40%,0.04)"; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = ""; (e.currentTarget as HTMLElement).style.background = ""; }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
+                            <div style={{ width: "30px", height: "30px", display: "flex", alignItems: "center", justifyContent: "center", background: "hsla(145,62%,40%,0.07)", border: "1px solid hsla(145,62%,40%,0.20)", borderRadius: "0.375rem" }}>
+                              <Icon size={14} color="hsl(145,62%,46%)" />
+                            </div>
+                            <span style={{ fontSize: "0.8125rem", fontWeight: 600, color: "hsl(38,8%,86%)" }}>{page.label}</span>
+                          </div>
+                          <ArrowRight size={13} color="hsl(214,7%,42%)" />
+                        </div>
+                        <p style={{ fontSize: "0.8125rem", lineHeight: 1.55, color: "hsl(214,7%,58%)" }}>{page.description}</p>
                       </div>
                     </Link>
                   </m.div>
