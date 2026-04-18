@@ -50,6 +50,7 @@ const STRATEGY_NAV: NavGroup[] = [
     section: "Cross-Platform Intelligence",
     items: [
       { href: "/strategy/cross-platform", label: "Signal Correlation", icon: GitMerge },
+      { href: "/intelligence/evidence", label: "Evidence Explorer", icon: Sigma },
       { href: "/strategy/cross-platform/evidence", label: "Evidence Registry", icon: Database },
       { href: "/strategy/cross-platform/run-health", label: "Run Health", icon: Activity },
       { href: "/strategy/cross-platform/pilots", label: "Pilot Intelligence", icon: Users },

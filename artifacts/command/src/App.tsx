@@ -75,6 +75,7 @@ const DigestCenter = lazy(() => import("@lyte/pages/digest-center"));
 const TrustAudit = lazy(() => import("@lyte/pages/trust-audit"));
 const AlloyActionConsole = lazy(() => import("@lyte/pages/alloy-action-console"));
 const DecisionCenterPage = lazy(() => import("./pages/decision-center"));
+const EvidenceExplorerPage = lazy(() => import("./pages/intelligence/evidence-explorer"));
 const AlloyWorkflowCanvas = lazy(() => import("@lyte/pages/alloy-workflow-canvas"));
 const AlloyIntelligence = lazy(() => import("@lyte/pages/alloy-intelligence"));
 const AlloyGovernance = lazy(() => import("@lyte/pages/alloy-governance"));
@@ -232,6 +233,8 @@ function AppShell() {
               <Route path="/strategy/executive-briefing" component={() => <ExecutiveBriefingPage />} />
               <Route path="/strategy/simulation" component={() => <SimulationPage />} />
               <Route path="/decisions" component={() => <DecisionCenterPage />} />
+              <Route path="/intelligence/evidence" component={() => <EvidenceExplorerPage />} />
+              <Route path="/strategy/intelligence/evidence" component={() => <EvidenceExplorerPage />} />
               <Route path="/strategy/briefing" component={() => <BriefingHistoryPage />} />
               <Route path="/strategy/correlation-map" component={() => <CorrelationMapPage />} />
               <Route path="/strategy/signal-chains" component={() => <SignalChainsPage />} />
