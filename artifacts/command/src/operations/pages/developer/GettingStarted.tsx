@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { ArrowRight, Key, Webhook, Code2, Shield, Zap, Globe, BookMarked } from "lucide-react";
+import { ArrowRight, Key, Webhook, Code2, Shield, Zap, Globe, BookMarked, Activity } from "lucide-react";
 
 export default function GettingStarted() {
   return (
@@ -15,6 +15,7 @@ export default function GettingStarted() {
           { icon: Code2, title: "2. Explore the API", desc: "Interactive documentation with live request sandbox", href: "/developer/api-explorer", color: "text-[#4a90b8]" },
           { icon: Webhook, title: "3. Set Up Webhooks", desc: "Real-time event notifications for your app", href: "/developer/webhooks", color: "text-[#6b8f71]" },
           { icon: Zap, title: "4. Install the SDK", desc: "Type-safe TypeScript client with retry logic", href: "/developer/sdk-guide", color: "text-[#d4a054]" },
+          { icon: Activity, title: "Decision Event Log", desc: "Live log of decision lifecycle webhook events", href: "/developer/decision-events", color: "text-violet-400" },
         ].map((item) => (
           <Link key={item.href} href={item.href}>
             <div className="p-5 bg-card rounded-xl border border-border hover:border-primary/30 transition-all cursor-pointer group">

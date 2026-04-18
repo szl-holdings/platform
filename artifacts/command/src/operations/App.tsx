@@ -127,6 +127,7 @@ const OutcomeLoop = lazy(() => import("@/pages/outcome-loop"));
 const DeferLane = lazy(() => import("@/pages/defer-lane"));
 const ShadowMode = lazy(() => import("@/pages/shadow-mode"));
 const GovernedDecisionLoop = lazy(() => import("@/pages/governed-decision-loop"));
+const DecisionEventLog = lazy(() => import("@/pages/developer/DecisionEventLog"));
 
 // ─── Living Intelligence Platform (new) ──────────────────────────────────────
 const LivingTopology = lazy(() => import("@/pages/living-topology"));
@@ -263,6 +264,7 @@ function PrivateRouter() {
         <Route path="/decision-receipts" component={DecisionReceipts} />
         <Route path="/outcome-loop" component={OutcomeLoop} />
         <Route path="/governed-decision-loop" component={GovernedDecisionLoop} />
+        <Route path="/developer/decision-events" component={DecisionEventLog} />
         <Route path="/defer-lane" component={DeferLane} />
         <Route path="/shadow-mode" component={ShadowMode} />
         <Route path="/atlas-artifacts" component={LyteAtlasArtifactsPage} />

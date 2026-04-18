@@ -70,6 +70,8 @@ tags:
     description: Report builder — templates, generation, approval workflow, distribution, and scheduling
   - name: exports
     description: Data export builder — domain-specific exports, download history, and preview
+  - name: webhooks
+    description: Webhook management — register endpoints, list deliveries, and receive Stripe-style signed event notifications for decision lifecycle events
 paths:
   /healthz:
     get:
@@ -7248,6 +7250,431 @@ paths:
         "429":
           description: Rate limit exceeded
 
+  /webhooks:
+    post:
+      operationId: registerWebhook
+      tags: [webhooks]
+      summary: Register a webhook endpoint
+      description: |
+        Registers a new webhook endpoint to receive Stripe-style signed event notifications.
+        The response includes a `secret` (prefixed `whsec_`) used to verify the `X-SZL-Signature`
+        header on every delivery. Store it securely — it is only returned once.
+      security:
+        - bearerAuth: []
+        - sessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WebhookRegistrationRequest"
+      responses:
+        "201":
+          description: Webhook endpoint registered
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    $ref: "#/components/schemas/WebhookEndpointWithSecret"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    get:
+      operationId: listWebhooks
+      tags: [webhooks]
+      summary: List registered webhook endpoints
+      security:
+        - bearerAuth: []
+        - sessionAuth: []
+      responses:
+        "200":
+          description: List of registered webhook endpoints
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/WebhookEndpoint"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /webhooks/endpoints:
+    post:
+      operationId: registerWebhookEndpoint
+      tags: [webhooks]
+      summary: Register a webhook endpoint (verbose path)
+      description: Alias for POST /webhooks. Returns full endpoint object including signing secret.
+      security:
+        - bearerAuth: []
+        - sessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WebhookRegistrationRequest"
+      responses:
+        "201":
+          description: Webhook endpoint registered
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    $ref: "#/components/schemas/WebhookEndpointWithSecret"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    get:
+      operationId: listWebhookEndpoints
+      tags: [webhooks]
+      summary: List registered webhook endpoints (verbose path)
+      security:
+        - bearerAuth: []
+        - sessionAuth: []
+      responses:
+        "200":
+          description: List of endpoints
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/WebhookEndpoint"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /webhooks/endpoints/{id}:
+    patch:
+      operationId: updateWebhookEndpoint
+      tags: [webhooks]
+      summary: Update a webhook endpoint
+      security:
+        - bearerAuth: []
+        - sessionAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                url: { type: string, format: uri }
+                eventTypes:
+                  oneOf:
+                    - type: string
+                      enum: ["*"]
+                    - type: array
+                      items: { type: string }
+                active: { type: boolean }
+                description: { type: string }
+      responses:
+        "200":
+          description: Endpoint updated
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      operationId: deleteWebhookEndpoint
+      tags: [webhooks]
+      summary: Delete a webhook endpoint
+      security:
+        - bearerAuth: []
+        - sessionAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "204":
+          description: Endpoint deleted
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /webhooks/endpoints/{id}/ping:
+    post:
+      operationId: pingWebhookEndpoint
+      tags: [webhooks]
+      summary: Send a test ping to a webhook endpoint
+      security:
+        - bearerAuth: []
+        - sessionAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Ping result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: object
+                    properties:
+                      delivered: { type: boolean }
+                      statusCode: { type: integer }
+                      error: { type: string }
+
+  /webhooks/deliveries:
+    get:
+      operationId: listWebhookDeliveries
+      tags: [webhooks]
+      summary: List webhook delivery attempts
+      description: Returns recent webhook delivery attempts, optionally filtered by endpoint or event type. Use `eventType=decision.*` to see all decision lifecycle events.
+      security:
+        - bearerAuth: []
+        - sessionAuth: []
+      parameters:
+        - name: endpointId
+          in: query
+          schema: { type: string }
+          description: Filter by endpoint ID
+        - name: eventType
+          in: query
+          schema: { type: string }
+          description: "Filter by event type. Supports prefix wildcard, e.g. `decision.*`"
+        - name: limit
+          in: query
+          schema: { type: integer, default: 50, maximum: 200 }
+      responses:
+        "200":
+          description: List of delivery attempts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/WebhookDelivery"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /webhooks/event-types:
+    get:
+      operationId: listWebhookEventTypes
+      tags: [webhooks]
+      summary: List all supported webhook event types
+      description: Returns all supported event type strings, including decision lifecycle events.
+      responses:
+        "200":
+          description: Supported event types
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: object
+                    properties:
+                      eventTypes:
+                        type: array
+                        items: { type: string }
+                        example:
+                          - decision.created
+                          - decision.approved
+                          - decision.executed
+                          - decision.proved
+                          - decision.outcome_recorded
+
+  /decisioning/evaluate:
+    post:
+      operationId: evaluateDecisionSignals
+      tags: [decisions]
+      summary: Evaluate signals into ranked recommendations
+      description: |
+        Evaluates one or more signal groups through the decision engine and returns
+        ranked recommendations with policy evaluations. Emits a `decision.created`
+        webhook event after evaluation.
+      security:
+        - bearerAuth: []
+        - sessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [groups]
+              properties:
+                groups:
+                  type: array
+                  minItems: 1
+                  items:
+                    type: object
+                    description: Signal group with domain context and business impact
+                weights:
+                  type: object
+                  description: Optional custom ranking weights
+      responses:
+        "200":
+          description: Ranked recommendations with policy evaluations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  recommendations:
+                    type: array
+                    items:
+                      type: object
+                  totalSignalsEvaluated: { type: integer }
+                  evaluatedAt: { type: integer }
+                  engineVersion: { type: string }
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /decisioning/execute:
+    post:
+      operationId: executeDecisionWorkflow
+      tags: [decisions]
+      summary: Execute a decision workflow
+      description: |
+        Runs a registered workflow definition through the governed execution pipeline.
+        Policy is checked before execution. Emits `decision.approved` (when approved)
+        and `decision.executed` webhook events.
+      security:
+        - bearerAuth: []
+        - sessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [workflowId]
+              properties:
+                workflowId: { type: string }
+                recommendationId: { type: string }
+                isDryRun: { type: boolean, default: false }
+                isSimulation: { type: boolean, default: false }
+                approvedBy: { type: string }
+                metadata: { type: object }
+      responses:
+        "201":
+          description: Workflow run created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  run:
+                    type: object
+                    description: Workflow run record
+                  requiresApproval: { type: boolean }
+                  policyEvaluation: { type: object }
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /decisioning/runs/{runId}/outcome:
+    post:
+      operationId: recordDecisionOutcome
+      tags: [decisions]
+      summary: Record the outcome of a decision run
+      description: |
+        Logs the final outcome (success, partial, failed, or cancelled) for a completed
+        workflow run. Emits a `decision.outcome_recorded` webhook event.
+      security:
+        - bearerAuth: []
+        - sessionAuth: []
+      parameters:
+        - name: runId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DecisionOutcomeRequest"
+      responses:
+        "200":
+          description: Outcome recorded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  runId: { type: string }
+                  outcome: { type: string, enum: [success, partial, failed, cancelled] }
+                  recordedBy: { type: string }
+                  recordedAt: { type: integer }
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /decisioning/runs/{runId}/prove:
+    post:
+      operationId: proveDecisionRun
+      tags: [decisions]
+      summary: Record proof for a decision run
+      description: |
+        Records cryptographic or human proof for a decision run (audit, verification,
+        or compliance evidence). Emits a `decision.proved` webhook event.
+      security:
+        - bearerAuth: []
+        - sessionAuth: []
+      parameters:
+        - name: runId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DecisionProofRequest"
+      responses:
+        "200":
+          description: Proof recorded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  runId: { type: string }
+                  proofType: { type: string }
+                  provedBy: { type: string }
+                  provedAt: { type: integer }
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
 components:
   securitySchemes:
     bearerAuth:
@@ -9296,3 +9723,245 @@ components:
         - status
         - requestedBy
         - createdAt
+    WebhookRegistrationRequest:
+      type: object
+      required: [url]
+      properties:
+        url:
+          type: string
+          format: uri
+          description: The HTTPS endpoint that will receive webhook deliveries
+        eventTypes:
+          description: |
+            Event types to subscribe to. Use `"*"` for all events, or an array of specific
+            event type strings such as `["decision.created", "decision.executed"]`.
+          oneOf:
+            - type: string
+              enum: ["*"]
+            - type: array
+              items:
+                type: string
+                enum:
+                  - decision.created
+                  - decision.approved
+                  - decision.executed
+                  - decision.proved
+                  - decision.outcome_recorded
+                  - payment.succeeded
+                  - payment.failed
+                  - subscription.created
+                  - subscription.updated
+                  - subscription.cancelled
+                  - alert.raised
+                  - alert.resolved
+                  - workflow.started
+                  - workflow.completed
+                  - workflow.failed
+                  - user.created
+                  - user.updated
+                  - deal.created
+                  - deal.updated
+                  - vulnerability.detected
+                  - vessel.anomaly
+                  - health.degraded
+                  - health.restored
+                  - ingestion.completed
+                  - api.error_spike
+        description:
+          type: string
+          description: Human-readable label for this endpoint
+    WebhookEndpoint:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique endpoint identifier (prefix `whe_`)
+        url:
+          type: string
+          format: uri
+        eventTypes:
+          oneOf:
+            - type: string
+              enum: ["*"]
+            - type: array
+              items: { type: string }
+        active:
+          type: boolean
+        description:
+          type: string
+        createdAt:
+          type: integer
+          description: Unix timestamp (ms)
+        lastDeliveredAt:
+          type: integer
+          description: Unix timestamp of last successful delivery (ms)
+        failureCount:
+          type: integer
+      required: [id, url, eventTypes, active, createdAt, failureCount]
+    WebhookEndpointWithSecret:
+      allOf:
+        - $ref: "#/components/schemas/WebhookEndpoint"
+        - type: object
+          properties:
+            secret:
+              type: string
+              description: HMAC-SHA256 signing secret (prefix `whsec_`). Only returned on creation.
+    WebhookDelivery:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique delivery attempt identifier (prefix `del_`)
+        endpointId:
+          type: string
+        eventType:
+          type: string
+          description: The event type, e.g. `decision.executed`
+        status:
+          type: string
+          enum: [pending, delivered, failed]
+        statusCode:
+          type: integer
+          description: HTTP status code from the receiving server
+        attempt:
+          type: integer
+          description: Delivery attempt number (1 = first, 2+ = retry)
+        deliveredAt:
+          type: integer
+          description: Unix timestamp of delivery attempt (ms)
+        error:
+          type: string
+          description: Error message if delivery failed
+      required: [id, endpointId, eventType, status, attempt]
+    WebhookEvent:
+      type: object
+      description: |
+        Envelope sent to registered webhook endpoints. Verify authenticity using
+        the `X-SZL-Signature` header: `t=<timestamp>,v1=<hmac-sha256-hex>` where
+        the signed payload is `<timestamp>.<json-body>`.
+      properties:
+        id:
+          type: string
+          description: Unique event identifier (prefix `evt_`)
+        type:
+          type: string
+          description: Event type string, e.g. `decision.executed`
+        created:
+          type: integer
+          description: Unix timestamp (seconds) when the event was created
+        correlation_id:
+          type: string
+          description: Optional correlation ID linking related events
+        data:
+          type: object
+          description: Event-specific payload. Schema varies by event type.
+      required: [id, type, created, data]
+    DecisionCreatedEvent:
+      type: object
+      description: Payload for the `decision.created` event (emitted after POST /decisioning/evaluate)
+      properties:
+        recommendationCount: { type: integer }
+        domains:
+          type: array
+          items: { type: string }
+        totalSignalsEvaluated: { type: integer }
+        evaluatedAt: { type: integer }
+        initiatedBy: { type: string }
+    DecisionApprovedEvent:
+      type: object
+      description: Payload for the `decision.approved` event
+      properties:
+        runId: { type: string }
+        workflowId: { type: string }
+        workflowName: { type: string }
+        domain: { type: string }
+        initiatedBy: { type: string }
+        approvedBy: { type: string }
+        policyEffect: { type: string, enum: [allow, block, require_approval] }
+    DecisionExecutedEvent:
+      type: object
+      description: Payload for the `decision.executed` event (emitted after POST /decisioning/execute)
+      properties:
+        runId: { type: string }
+        workflowId: { type: string }
+        workflowName: { type: string }
+        domain: { type: string }
+        initiatedBy: { type: string }
+        status: { type: string }
+        isDryRun: { type: boolean }
+        isSimulation: { type: boolean }
+        requiresApproval: { type: boolean }
+        stepCount: { type: integer }
+    DecisionProvedEvent:
+      type: object
+      description: Payload for the `decision.proved` event (emitted after POST /decisioning/runs/{runId}/prove)
+      properties:
+        runId: { type: string }
+        workflowId: { type: string }
+        proofType:
+          type: string
+          enum: [human-verified, automated-check, audit-trail, cryptographic]
+        proofHash: { type: string }
+        provedBy: { type: string }
+        provedAt: { type: integer }
+        notes: { type: string }
+        evidence:
+          type: array
+          items:
+            type: object
+            properties:
+              label: { type: string }
+              value: { type: string }
+              source: { type: string }
+    DecisionOutcomeRecordedEvent:
+      type: object
+      description: Payload for the `decision.outcome_recorded` event (emitted after POST /decisioning/runs/{runId}/outcome)
+      properties:
+        runId: { type: string }
+        workflowId: { type: string }
+        outcome:
+          type: string
+          enum: [success, partial, failed, cancelled]
+        summary: { type: string }
+        recordedBy: { type: string }
+        recordedAt: { type: integer }
+        impact:
+          type: object
+          properties:
+            financialUsd: { type: number }
+            entitiesAffected: { type: integer }
+            notes: { type: string }
+    DecisionOutcomeRequest:
+      type: object
+      required: [outcome]
+      properties:
+        outcome:
+          type: string
+          enum: [success, partial, failed, cancelled]
+        summary: { type: string }
+        impact:
+          type: object
+          properties:
+            financialUsd: { type: number }
+            entitiesAffected: { type: integer }
+            notes: { type: string }
+        metadata: { type: object }
+    DecisionProofRequest:
+      type: object
+      required: [proofType, provedBy]
+      properties:
+        proofType:
+          type: string
+          enum: [human-verified, automated-check, audit-trail, cryptographic]
+        proofHash: { type: string, description: "Optional cryptographic hash of proof artifact" }
+        provedBy: { type: string, description: "Identifier of the person or system providing proof" }
+        notes: { type: string }
+        evidence:
+          type: array
+          items:
+            type: object
+            required: [label, value]
+            properties:
+              label: { type: string }
+              value: { type: string }
+              source: { type: string }

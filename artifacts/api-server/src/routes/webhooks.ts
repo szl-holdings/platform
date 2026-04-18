@@ -70,6 +70,11 @@ export const SZL_EVENT_TYPES = [
   "health.restored",
   "ingestion.completed",
   "api.error_spike",
+  "decision.created",
+  "decision.approved",
+  "decision.executed",
+  "decision.proved",
+  "decision.outcome_recorded",
 ] as const;
 
 export type SzlEventType = typeof SZL_EVENT_TYPES[number];
@@ -334,11 +339,18 @@ router.post("/webhooks/endpoints/:id/ping", authMiddleware(), async (req: Reques
 router.get("/webhooks/deliveries", authMiddleware(), async (req: Request, res: Response) => {
   try {
     const endpointId = req.query.endpointId as string | undefined;
+    const eventType = req.query.eventType as string | undefined;
     const limit = Math.min(parseInt((req.query.limit as string) ?? "50", 10), 200);
 
     let deliveries = webhookDeliveries;
     if (endpointId) {
       deliveries = deliveries.filter((d) => d.endpointId === endpointId);
+    }
+    if (eventType) {
+      const prefix = eventType.endsWith(".*") ? eventType.slice(0, -2) : null;
+      deliveries = deliveries.filter((d) =>
+        prefix ? d.eventType.startsWith(prefix + ".") : d.eventType === eventType
+      );
     }
 
     sendSuccess(res, deliveries.slice(0, limit).map((d) => ({
@@ -353,6 +365,55 @@ router.get("/webhooks/deliveries", authMiddleware(), async (req: Request, res: R
     })));
   } catch (err) {
     handleRouteError(res, err, "Failed to list webhook deliveries");
+  }
+});
+
+router.post("/webhooks", authMiddleware(), async (req: Request, res: Response) => {
+  const parsed = webhookEndpointSchema.safeParse(req.body);
+  if (!parsed.success) {
+    sendError(res, parsed.error.errors.map(e => e.message).join(", "), 400);
+    return;
+  }
+  try {
+    const { url, eventTypes, description } = parsed.data;
+    const id = `whe_${Date.now()}_${crypto.randomBytes(6).toString("hex")}`;
+    const secret = generateWebhookSecret();
+    const endpoint: WebhookEndpoint = {
+      id,
+      url,
+      secret,
+      eventTypes: eventTypes ?? "*",
+      active: true,
+      description,
+      createdAt: Date.now(),
+      failureCount: 0,
+    };
+    webhookEndpoints.set(id, endpoint);
+    logger.info({ endpointId: id, url }, "Webhook endpoint registered via POST /webhooks");
+    res.status(201).json({
+      success: true,
+      data: { id, url, secret, eventTypes: endpoint.eventTypes, active: endpoint.active, description, createdAt: endpoint.createdAt },
+    });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to create webhook endpoint");
+  }
+});
+
+router.get("/webhooks", authMiddleware(), async (_req, res) => {
+  try {
+    const endpoints = Array.from(webhookEndpoints.values()).map((e) => ({
+      id: e.id,
+      url: e.url,
+      eventTypes: e.eventTypes,
+      active: e.active,
+      description: e.description,
+      createdAt: e.createdAt,
+      lastDeliveredAt: e.lastDeliveredAt,
+      failureCount: e.failureCount,
+    }));
+    sendSuccess(res, endpoints);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to list webhook endpoints");
   }
 });
 

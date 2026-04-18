@@ -29,6 +29,7 @@ import {
 } from "../lib/api-response";
 import { validateBody } from "../lib/validation";
 import { logger } from "../lib/logger";
+import { deliverWebhookEvent } from "./webhooks";
 
 const router: IRouter = Router();
 
@@ -301,12 +302,27 @@ router.post(
         };
       });
 
-      return sendSuccess(res, {
+      const evaluatedAt = Date.now();
+      const payload = {
         recommendations: withPolicies,
         totalSignalsEvaluated: groups.reduce((sum: number, g: SignalGroup) => sum + g.signals.length, 0),
-        evaluatedAt: Date.now(),
+        evaluatedAt,
         engineVersion: "1.0.0",
+      };
+
+      setImmediate(() => {
+        deliverWebhookEvent("decision.created", {
+          recommendationCount: withPolicies.length,
+          domains: [...new Set(withPolicies.map((r: Recommendation) => r.domain))],
+          totalSignalsEvaluated: payload.totalSignalsEvaluated,
+          evaluatedAt,
+          initiatedBy: req.user?.id?.toString() ?? "api",
+        }).catch((err) => {
+          logger.warn({ err }, "[Decisioning] decision.created webhook delivery failed");
+        });
       });
+
+      return sendSuccess(res, payload);
     } catch (err) {
       handleRouteError(res, err, "Failed to evaluate signals");
     }
@@ -373,6 +389,42 @@ router.post(
       recordRun(result.run);
 
       logger.info({ runId: result.run.runId, workflowId, status: result.run.status }, "[Decisioning] Workflow executed");
+
+      const runApprovedBy = result.run.approvedBy;
+      const isApproved = !!runApprovedBy;
+
+      setImmediate(() => {
+        const basePayload = {
+          runId: result.run.runId,
+          workflowId,
+          workflowName: definition.name,
+          domain: definition.domain,
+          initiatedBy: result.run.initiatedBy,
+          tenantId: result.run.tenantId,
+          isDryRun: result.run.isDryRun ?? false,
+          isSimulation: result.run.isSimulation ?? false,
+          status: result.run.status,
+        };
+
+        if (isApproved) {
+          deliverWebhookEvent("decision.approved", {
+            ...basePayload,
+            approvedBy: runApprovedBy,
+            policyEffect: policyResult.effect,
+          }).catch((err) => {
+            logger.warn({ err }, "[Decisioning] decision.approved webhook delivery failed");
+          });
+        }
+
+        deliverWebhookEvent("decision.executed", {
+          ...basePayload,
+          requiresApproval: result.requiresApproval ?? false,
+          approvedBy: runApprovedBy,
+          stepCount: definition.steps.length,
+        }).catch((err) => {
+          logger.warn({ err }, "[Decisioning] decision.executed webhook delivery failed");
+        });
+      });
 
       return sendCreated(res, {
         run: result.run,
@@ -499,6 +551,116 @@ router.get(
       });
     } catch (err) {
       handleRouteError(res, err, "Failed to fetch stats");
+    }
+  }
+);
+
+const OutcomeSchema = z.object({
+  outcome: z.enum(["success", "partial", "failed", "cancelled"]),
+  summary: z.string().optional(),
+  impact: z.object({
+    financialUsd: z.number().optional(),
+    entitiesAffected: z.number().int().optional(),
+    notes: z.string().optional(),
+  }).optional(),
+  metadata: z.record(z.unknown()).optional(),
+});
+
+const ProveSchema = z.object({
+  proofType: z.enum(["human-verified", "automated-check", "audit-trail", "cryptographic"]),
+  proofHash: z.string().optional(),
+  provedBy: z.string(),
+  notes: z.string().optional(),
+  evidence: z.array(z.object({ label: z.string(), value: z.string(), source: z.string().optional() })).optional(),
+});
+
+router.post(
+  "/decisioning/runs/:runId/outcome",
+  authMiddleware({ required: false }),
+  async (req: Request, res: Response) => {
+    try {
+      const run = getRunById(req.params.runId as string);
+      if (!run) return sendNotFound(res, "Run not found");
+
+      const parsed = OutcomeSchema.safeParse(req.body);
+      if (!parsed.success) return sendBadRequest(res, parsed.error.message);
+
+      const { outcome, summary, impact, metadata } = parsed.data;
+      const recordedAt = Date.now();
+      const recordedBy = req.user?.displayName ?? req.user?.id?.toString() ?? "api";
+
+      logger.info({ runId: req.params.runId, outcome, recordedBy }, "[Decisioning] Outcome recorded");
+
+      setImmediate(() => {
+        deliverWebhookEvent("decision.outcome_recorded", {
+          runId: req.params.runId,
+          workflowId: run.workflowId,
+          outcome,
+          summary,
+          impact,
+          recordedBy,
+          recordedAt,
+          metadata,
+        }).catch((err) => {
+          logger.warn({ err }, "[Decisioning] decision.outcome_recorded webhook delivery failed");
+        });
+      });
+
+      return sendSuccess(res, {
+        runId: req.params.runId,
+        outcome,
+        summary,
+        impact,
+        recordedBy,
+        recordedAt,
+      });
+    } catch (err) {
+      handleRouteError(res, err, "Failed to record outcome");
+    }
+  }
+);
+
+router.post(
+  "/decisioning/runs/:runId/prove",
+  authMiddleware({ required: false }),
+  async (req: Request, res: Response) => {
+    try {
+      const run = getRunById(req.params.runId as string);
+      if (!run) return sendNotFound(res, "Run not found");
+
+      const parsed = ProveSchema.safeParse(req.body);
+      if (!parsed.success) return sendBadRequest(res, parsed.error.message);
+
+      const { proofType, proofHash, provedBy, notes, evidence } = parsed.data;
+      const provedAt = Date.now();
+
+      logger.info({ runId: req.params.runId, proofType, provedBy }, "[Decisioning] Decision proved");
+
+      setImmediate(() => {
+        deliverWebhookEvent("decision.proved", {
+          runId: req.params.runId,
+          workflowId: run.workflowId,
+          proofType,
+          proofHash,
+          provedBy,
+          notes,
+          evidence,
+          provedAt,
+        }).catch((err) => {
+          logger.warn({ err }, "[Decisioning] decision.proved webhook delivery failed");
+        });
+      });
+
+      return sendSuccess(res, {
+        runId: req.params.runId,
+        proofType,
+        proofHash,
+        provedBy,
+        provedAt,
+        evidence,
+      });
+    } catch (err) {
+      handleRouteError(res, err, "Failed to record proof");
     }
   }
 );
