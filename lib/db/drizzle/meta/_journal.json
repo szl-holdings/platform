@@ -358,6 +358,13 @@
       "when": 1776500000000,
       "tag": "0063_carlota_advisory_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 64,
+      "version": "7",
+      "when": 1776545200000,
+      "tag": "0064_partner_pilots",
+      "breakpoints": true
     }
   ]
 }
