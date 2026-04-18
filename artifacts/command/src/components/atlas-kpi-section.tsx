@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Layers, GitBranch, Shield, Globe, Network, Activity, Zap, AlertTriangle, CheckCircle, ChevronRight, RefreshCw } from "lucide-react";
+import { Layers, GitBranch, Shield, Globe, Network, Activity, Zap, AlertTriangle, CheckCircle, ChevronRight, RefreshCw, ExternalLink, GitMerge, Cpu } from "lucide-react";
 import { Link } from "wouter";
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") || "";
@@ -16,13 +16,14 @@ interface DomainTwinSummary {
   pendingActions: number;
   worldline: string;
   appPath: string;
+  atlasRuntimePath?: string;
   icon: typeof Globe;
 }
 
 const DOMAIN_CONFIG: Omit<DomainTwinSummary, "twinCount" | "stableCount" | "degradedCount" | "awaitingCount" | "driftAvg" | "pendingActions" | "worldline">[] = [
   { domain: "aegis", label: "Aegis — Defense", color: "#ef4444", appPath: "/aegis", icon: Shield },
-  { domain: "terra", label: "Terra — Real Estate", color: "#10b981", appPath: "/terra", icon: Globe },
-  { domain: "vessels", label: "Vessels — Maritime", color: "#06b6d4", appPath: "/vessels", icon: Network },
+  { domain: "terra", label: "Terra — Real Estate", color: "#10b981", appPath: "/terra", atlasRuntimePath: "/terra/atlas-runtime", icon: Globe },
+  { domain: "vessels", label: "Vessels — Maritime", color: "#06b6d4", appPath: "/vessels", atlasRuntimePath: "/vessels/atlas-runtime", icon: Network },
   { domain: "alloy", label: "Alloy — Execution", color: "#4B8BDB", appPath: `${BASE}/operations`, icon: Zap },
   { domain: "prism", label: "Prism — Counsel", color: "#f59e0b", appPath: `${BASE}/operations/prism`, icon: Activity },
   { domain: "lyte", label: "Lyte — AIOps", color: "#d4a054", appPath: `${BASE}/operations`, icon: Activity },
@@ -36,6 +37,104 @@ const DEMO_SUMMARIES: DomainTwinSummary[] = [
   { ...DOMAIN_CONFIG[4], twinCount: 2, stableCount: 2, degradedCount: 0, awaitingCount: 0, driftAvg: 3, pendingActions: 0, worldline: "WL-ALPHA" },
   { ...DOMAIN_CONFIG[5], twinCount: 4, stableCount: 2, degradedCount: 2, awaitingCount: 0, driftAvg: 18, pendingActions: 4, worldline: "WL-BETA" },
 ];
+
+interface AtlasBranchEvent {
+  id: string;
+  domain: "vessels" | "terra";
+  domainLabel: string;
+  domainColor: string;
+  type: "branch_activated" | "scenario_simulation" | "drift_spike" | "worldline_merge";
+  title: string;
+  description: string;
+  severity: "info" | "warning" | "critical";
+  ts: string;
+  atlasPath: string;
+}
+
+const DEMO_ATLAS_EVENTS: AtlasBranchEvent[] = [
+  {
+    id: "ev-1",
+    domain: "vessels",
+    domainLabel: "Vessels",
+    domainColor: "#06b6d4",
+    type: "branch_activated",
+    title: "Branch WL-DELTA-3 Activated",
+    description: "Pacific Navigator rerouted via Cape of Good Hope — storm avoidance scenario activated by ATLAS Spatial.",
+    severity: "warning",
+    ts: new Date(Date.now() - 14 * 60000).toISOString(),
+    atlasPath: "/vessels/atlas-runtime",
+  },
+  {
+    id: "ev-2",
+    domain: "terra",
+    domainLabel: "Terra",
+    domainColor: "#10b981",
+    type: "scenario_simulation",
+    title: "Williamsburg Submarket Simulation",
+    description: "Cap rate expansion scenario (+85 bps) simulated across 4 property twins. Decision gate pending review.",
+    severity: "info",
+    ts: new Date(Date.now() - 38 * 60000).toISOString(),
+    atlasPath: "/terra/atlas-runtime",
+  },
+  {
+    id: "ev-3",
+    domain: "vessels",
+    domainLabel: "Vessels",
+    domainColor: "#06b6d4",
+    type: "drift_spike",
+    title: "Arctic Breeze Drift Spike — Δ23%",
+    description: "Route memory divergence exceeded threshold. ATLAS flagged for human review before next waypoint.",
+    severity: "critical",
+    ts: new Date(Date.now() - 72 * 60000).toISOString(),
+    atlasPath: "/vessels/atlas-runtime",
+  },
+  {
+    id: "ev-4",
+    domain: "terra",
+    domainLabel: "Terra",
+    domainColor: "#10b981",
+    type: "worldline_merge",
+    title: "WL-ALPHA Merged — 2 Twins Reconciled",
+    description: "Dallas–Fort Worth asset twins reconciled after valuation refresh. Both twins stable on WL-ALPHA.",
+    severity: "info",
+    ts: new Date(Date.now() - 4 * 3600000).toISOString(),
+    atlasPath: "/terra/atlas-runtime",
+  },
+  {
+    id: "ev-5",
+    domain: "vessels",
+    domainLabel: "Vessels",
+    domainColor: "#06b6d4",
+    type: "scenario_simulation",
+    title: "Bay of Bengal Corridor Scenario",
+    description: "3-vessel detour scenario simulated — 18h ETA delay projected. Awaiting operator approval to activate.",
+    severity: "warning",
+    ts: new Date(Date.now() - 6 * 3600000).toISOString(),
+    atlasPath: "/vessels/atlas-runtime",
+  },
+];
+
+const EVENT_TYPE_META: Record<AtlasBranchEvent["type"], { label: string; icon: typeof GitBranch; color: string }> = {
+  branch_activated: { label: "Branch Activated", icon: GitBranch, color: "#8b7ac8" },
+  scenario_simulation: { label: "Scenario Sim", icon: Cpu, color: "#06b6d4" },
+  drift_spike: { label: "Drift Spike", icon: AlertTriangle, color: "#f59e0b" },
+  worldline_merge: { label: "Worldline Merge", icon: GitMerge, color: "#10b981" },
+};
+
+const SEV_STYLE: Record<AtlasBranchEvent["severity"], { bg: string; border: string; badgeText: string }> = {
+  info: { bg: "rgba(255,255,255,0.01)", border: "rgba(255,255,255,0.06)", badgeText: "rgba(255,255,255,0.35)" },
+  warning: { bg: "rgba(192,138,44,0.04)", border: "rgba(192,138,44,0.2)", badgeText: "#f59e0b" },
+  critical: { bg: "rgba(239,68,68,0.05)", border: "rgba(239,68,68,0.22)", badgeText: "#f87171" },
+};
+
+function relTime(iso: string) {
+  const diff = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  return `${Math.floor(h / 24)}d ago`;
+}
 
 interface ApiRunSummary {
   domain: string;
@@ -89,9 +188,26 @@ function useCrossDomainSummary() {
   });
 }
 
+interface AtlasBranchesResponse {
+  data: { branches: Array<{ id: string; name: string; status: string; activatedAt?: string; description?: string }> };
+}
+
+function useAtlasBranches(twinCategory: "vessel" | "property") {
+  return useQuery<AtlasBranchesResponse>({
+    queryKey: ["atlas-branches", twinCategory],
+    queryFn: () =>
+      fetch(`/api/atlas/spatial/branches?twinCategory=${twinCategory}`)
+        .then(r => r.ok ? r.json() : Promise.reject(r.status)),
+    staleTime: 60_000,
+    retry: 1,
+  });
+}
+
 export function AtlasKpiSection() {
   const { data: runData, isLoading } = useAtlasRunSummary();
   const { data: crossDomain } = useCrossDomainSummary();
+  const { data: vesselBranches } = useAtlasBranches("vessel");
+  const { data: propertyBranches } = useAtlasBranches("property");
   const runSummaries: ApiRunSummary[] = runData?.data ?? [];
 
   const totalTwins = crossDomain?.totals.totalTwins ?? DEMO_SUMMARIES.reduce((s, d) => s + d.twinCount, 0);
@@ -99,6 +215,15 @@ export function AtlasKpiSection() {
   const totalPending = DEMO_SUMMARIES.reduce((s, d) => s + d.pendingActions, 0);
   const stableTotal = crossDomain?.totals.stableTotal ?? DEMO_SUMMARIES.reduce((s, d) => s + d.stableCount, 0);
   const stablePercent = totalTwins > 0 ? Math.round((stableTotal / totalTwins) * 100) : 0;
+
+  const activeBranchesVessels =
+    vesselBranches?.data?.branches?.filter(b => b.status === "active").length ??
+    crossDomain?.domains?.find(d => d.domain === "vessels")?.activeBranches ??
+    3;
+  const activeBranchesTerra =
+    propertyBranches?.data?.branches?.filter(b => b.status === "active").length ??
+    crossDomain?.domains?.find(d => d.domain === "terra")?.activeBranches ??
+    1;
 
   return (
     <div
@@ -160,7 +285,11 @@ export function AtlasKpiSection() {
           const DIcon = d.icon;
           const isHealthy = d.degradedCount === 0 && d.awaitingCount === 0;
           const statusColor = isHealthy ? "#10b981" : d.degradedCount > 0 ? "#f59e0b" : "#8b7ac8";
-          const runData = runSummaries.find(r => r.domain === d.domain);
+          const runInfo = runSummaries.find(r => r.domain === d.domain);
+          const activeBranches =
+            d.domain === "vessels" ? activeBranchesVessels :
+            d.domain === "terra" ? activeBranchesTerra :
+            undefined;
 
           return (
             <div
@@ -195,6 +324,15 @@ export function AtlasKpiSection() {
                 ))}
               </div>
 
+              {activeBranches !== undefined && (
+                <div className="flex items-center gap-1.5 px-1.5 py-1 rounded border" style={{ borderColor: "rgba(139,122,200,0.12)", background: "rgba(139,122,200,0.04)" }}>
+                  <GitBranch className="w-2.5 h-2.5 shrink-0" style={{ color: "#8b7ac8" }} />
+                  <span className="text-[8px] font-mono" style={{ color: "rgba(255,255,255,0.4)" }}>
+                    <span className="font-bold" style={{ color: "#8b7ac8" }}>{activeBranches}</span> active branch{activeBranches !== 1 ? "es" : ""}
+                  </span>
+                </div>
+              )}
+
               <div className="flex items-center justify-between text-[9px]">
                 <span className="font-mono" style={{ color: "rgba(255,255,255,0.25)" }}>
                   {d.worldline}
@@ -202,19 +340,96 @@ export function AtlasKpiSection() {
                     <span className="ml-2 font-bold" style={{ color: "#f59e0b" }}>{d.pendingActions} pending</span>
                   )}
                 </span>
-                {runData && (
-                  <span style={{ color: "rgba(255,255,255,0.25)" }}>
-                    {runData.runCount} run{runData.runCount !== 1 ? "s" : ""}
-                    {runData.pendingCount > 0 && <span className="text-amber-400 ml-1">({runData.pendingCount} active)</span>}
-                  </span>
-                )}
-                {isLoading && !runData && (
-                  <RefreshCw className="w-2.5 h-2.5 animate-spin" style={{ color: "rgba(255,255,255,0.2)" }} />
-                )}
+                <div className="flex items-center gap-2">
+                  {runInfo && (
+                    <span style={{ color: "rgba(255,255,255,0.25)" }}>
+                      {runInfo.runCount} run{runInfo.runCount !== 1 ? "s" : ""}
+                      {runInfo.pendingCount > 0 && <span className="text-amber-400 ml-1">({runInfo.pendingCount} active)</span>}
+                    </span>
+                  )}
+                  {isLoading && !runInfo && (
+                    <RefreshCw className="w-2.5 h-2.5 animate-spin" style={{ color: "rgba(255,255,255,0.2)" }} />
+                  )}
+                  {d.atlasRuntimePath && (
+                    <a
+                      href={d.atlasRuntimePath}
+                      className="flex items-center gap-0.5 text-[8px] font-bold uppercase tracking-wider transition-opacity hover:opacity-80"
+                      style={{ color: d.color }}
+                    >
+                      ATLAS <ExternalLink className="w-2 h-2" />
+                    </a>
+                  )}
+                </div>
               </div>
             </div>
           );
         })}
+      </div>
+
+      <div className="mt-5 pt-5" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+        <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+          <div className="flex items-center gap-2">
+            <GitBranch className="w-3.5 h-3.5" style={{ color: "#8b7ac8" }} />
+            <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--color-fg-muted)" }}>
+              What Changed — ATLAS Branch Activations &amp; Scenarios
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <a
+              href="/vessels/atlas-runtime"
+              className="flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider px-2 py-1 rounded border transition-all hover:bg-white/5"
+              style={{ color: "#06b6d4", borderColor: "rgba(6,182,212,0.2)", background: "rgba(6,182,212,0.04)" }}
+            >
+              <Network className="w-2.5 h-2.5" /> Vessels ATLAS
+            </a>
+            <a
+              href="/terra/atlas-runtime"
+              className="flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider px-2 py-1 rounded border transition-all hover:bg-white/5"
+              style={{ color: "#10b981", borderColor: "rgba(16,185,129,0.2)", background: "rgba(16,185,129,0.04)" }}
+            >
+              <Globe className="w-2.5 h-2.5" /> Terra ATLAS
+            </a>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          {DEMO_ATLAS_EVENTS.map(ev => {
+            const meta = EVENT_TYPE_META[ev.type];
+            const MetaIcon = meta.icon;
+            const sev = SEV_STYLE[ev.severity];
+            return (
+              <a
+                key={ev.id}
+                href={ev.atlasPath}
+                className="rounded-xl border px-3 py-2.5 flex items-start gap-3 transition-all hover:bg-white/3 group"
+                style={{ background: sev.bg, borderColor: sev.border, textDecoration: "none" }}
+              >
+                <div className="p-1.5 rounded-lg shrink-0 mt-0.5" style={{ background: `${ev.domainColor}12`, border: `1px solid ${ev.domainColor}20` }}>
+                  <MetaIcon className="w-3 h-3" style={{ color: meta.color }} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                    <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: ev.domainColor }}>
+                      {ev.domainLabel}
+                    </span>
+                    <span className="text-[8px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider" style={{ background: `${meta.color}15`, color: meta.color }}>
+                      {meta.label}
+                    </span>
+                    {ev.severity !== "info" && (
+                      <span className="text-[8px] font-bold uppercase tracking-wider" style={{ color: sev.badgeText }}>
+                        {ev.severity}
+                      </span>
+                    )}
+                    <span className="text-[8px] font-mono ml-auto" style={{ color: "rgba(255,255,255,0.25)" }}>{relTime(ev.ts)}</span>
+                  </div>
+                  <div className="text-[10px] font-semibold mb-0.5" style={{ color: "rgba(255,255,255,0.75)" }}>{ev.title}</div>
+                  <div className="text-[9px] leading-relaxed" style={{ color: "rgba(255,255,255,0.38)" }}>{ev.description}</div>
+                </div>
+                <ChevronRight className="w-3 h-3 shrink-0 mt-0.5 opacity-0 group-hover:opacity-40 transition-opacity" style={{ color: "rgba(255,255,255,0.5)" }} />
+              </a>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
