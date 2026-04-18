@@ -101,7 +101,7 @@ All surfaces share six platform primitives — see [PLATFORM_PRIMITIVES.md](PLAT
 
 | Attribute | Detail |
 |-----------|--------|
-| **Artifact** | `artifacts/firestorm` (primary) + `artifacts/aegis` |
+| **Artifact** | `artifacts/firestorm` |
 | **Preview Path** | `/firestorm/` |
 | **Status** | Functional alpha |
 | **Components** | 157 web components |

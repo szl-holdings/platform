@@ -153,7 +153,6 @@ Artifact inventory (auto-generated from `artifacts/*/.replit-artifact/artifact.t
 | Artifact | Kind | Path | Preview |
 |----------|------|------|---------|
 | SZL Holdings Dashboard | web | `artifacts/szl-holdings/` | `/` |
-| Aegis — Unified Defense & Intelligence Command | web | `artifacts/aegis/` | `/aegis/` |
 | API Server | web | `artifacts/api-server/` | `/api/` |
 | Carlota Jo Consulting | web | `artifacts/carlota-jo/` | `/carlota-jo/` |
 | NEXUS — Unified Agentic AI Layer | design | `artifacts/mockup-sandbox/` | `/nexus/` |

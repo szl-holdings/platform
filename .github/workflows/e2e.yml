@@ -36,11 +36,8 @@ jobs:
             dist: artifacts/szl-holdings/dist/public
             port: 3000
             spec: forge.spec.ts
-          - app: aegis
-            filter: "@workspace/aegis"
-            dist: artifacts/aegis/dist/public
-            port: 3001
-            spec: aegis.spec.ts
+          # aegis removed from artifact registry 2026-04-18 (duplicate of firestorm);
+          #   aegis.spec.ts uses appAvailable guard and will self-skip.
           - app: terra
             filter: "@workspace/terra"
             dist: artifacts/terra/dist/public

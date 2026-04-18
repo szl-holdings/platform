@@ -1,6 +1,6 @@
 # Archive and Deprecate Register
 
-Updated: 2026-04-16
+Updated: 2026-04-18
 
 ## Purpose
 
@@ -16,11 +16,11 @@ These apps are either empty stubs, duplicates of an active app, or have been sup
 
 | App Directory | Reason | Canonical Replacement | Status |
 |--------------|--------|----------------------|--------|
-| `artifacts/aegis` | Duplicate of `artifacts/firestorm` (same codebase, both registered as "Aegis") | `artifacts/firestorm` at `/firestorm/` | Deprecation marker needed |
+| `artifacts/aegis` | Duplicate of `artifacts/firestorm` (same codebase, both registered as "Aegis") | `artifacts/firestorm` at `/firestorm/` | **Removed from artifact registry 2026-04-18** |
 | `artifacts/imperium` | Merged into `artifacts/command` | `artifacts/command` | Not in artifact registry; confirm deleted |
 | `artifacts/lyte-command-center` | Merged into `artifacts/command` | `artifacts/command` | Not in artifact registry; confirm deleted |
-| `artifacts/prism-counsel` | Deprecated (Task #579); re-registered in error | None (archived) | Remove from artifact registry |
-| `artifacts/stephen-site` | Deprecated (Task #579); replaced by `/founder` in `szl-holdings` | `artifacts/szl-holdings` `/founder` | Remove from artifact registry |
+| `artifacts/prism-counsel` | Deprecated (Task #579); re-registered in error | None (archived) | **Not in artifact registry (confirmed 2026-04-18)** |
+| `artifacts/stephen-site` | Deprecated (Task #579); replaced by `/founder` in `szl-holdings` | `artifacts/szl-holdings` `/founder` | **Not in artifact registry (confirmed 2026-04-18)** |
 
 ### Mobile App Stubs (Archive)
 
@@ -94,13 +94,13 @@ No active workflows are marked for removal at this time. If workflows for deprec
 ## Deprecation Execution Checklist
 
 - [ ] Add deprecation notices to all root-level docs listed above
-- [ ] Remove `artifacts/aegis` registration OR redirect its workflow to `firestorm`
-- [ ] Remove `artifacts/prism-counsel` from artifact registry
-- [ ] Remove `artifacts/stephen-site` from artifact registry
-- [ ] Audit all `import` and cross-link references to deprecated apps
-- [ ] Update `README.md` to remove references to deprecated apps
-- [ ] Update `PRODUCT_SURFACE_MAP.md` and `PRODUCT-SURFACES.md` to reflect current state
-- [ ] Verify no CI jobs reference deprecated app directories
+- [x] Remove `artifacts/aegis` registration OR redirect its workflow to `firestorm` — **Done 2026-04-18**
+- [x] Remove `artifacts/prism-counsel` from artifact registry — **Confirmed not registered (2026-04-18)**
+- [x] Remove `artifacts/stephen-site` from artifact registry — **Confirmed not registered (2026-04-18)**
+- [x] Audit all `import` and cross-link references to deprecated apps — **Done 2026-04-18** (README.md artifact inventory table and PRODUCT-SURFACES.md updated)
+- [x] Update `README.md` to remove references to deprecated apps — **Done 2026-04-18** (removed aegis row from artifact inventory table)
+- [x] Update `PRODUCT_SURFACE_MAP.md` and `PRODUCT-SURFACES.md` to reflect current state — **Done 2026-04-18** (PRODUCT-SURFACES.md updated; PRODUCT_SURFACE_MAP.md had no references)
+- [x] Verify no CI jobs reference deprecated app directories — **Done 2026-04-18** (removed aegis from build.yml and e2e.yml; prism-counsel-ci.yml was already archived)
 
 ---
 
