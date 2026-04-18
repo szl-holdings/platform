@@ -4,6 +4,7 @@ import { z } from "zod/v4";
 
 export const vesselsFleetsTable = pgTable("vessels_fleets", {
   id: serial("id").primaryKey(),
+  orgId: integer("org_id"),
   name: text("name").notNull(),
   description: text("description"),
   region: text("region"),
@@ -15,6 +16,7 @@ export const vesselsFleetsTable = pgTable("vessels_fleets", {
 
 export const vesselsTable = pgTable("vessels", {
   id: serial("id").primaryKey(),
+  orgId: integer("org_id"),
   fleetId: integer("fleet_id").references(() => vesselsFleetsTable.id, { onDelete: "set null" }),
   name: text("name").notNull(),
   imo: text("imo").unique(),
@@ -66,6 +68,7 @@ export const vesselsRoutesTable = pgTable("vessels_routes", {
 
 export const vesselsAlertRulesTable = pgTable("vessels_alert_rules", {
   id: serial("id").primaryKey(),
+  orgId: integer("org_id"),
   name: text("name").notNull(),
   description: text("description"),
   ruleType: text("rule_type", { enum: ["speed", "geofence", "weather", "schedule", "cargo", "maintenance"] }).notNull(),

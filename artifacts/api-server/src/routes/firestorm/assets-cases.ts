@@ -385,6 +385,13 @@ router.get("/firestorm/mitre-detections/:techniqueId", authMiddleware(), async (
 });
 
 router.post("/firestorm/seed", authMiddleware({ required: true }), async (_req, res) => {
+  if (process.env.NODE_ENV === "production" || process.env.APP_ENV === "production") {
+    res.status(403).json({
+      error: "Seed endpoint is disabled in production",
+      code: "SEED_DISABLED_IN_PRODUCTION",
+    });
+    return;
+  }
   try {
     // @ts-ignore
     const { seedAegis } = await import("../scripts/seed-aegis.js");

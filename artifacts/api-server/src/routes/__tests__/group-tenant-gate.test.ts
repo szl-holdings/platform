@@ -51,6 +51,9 @@ vi.mock("../../middlewares/auth", () => ({
 
 vi.mock("../../lib/validation", () => ({
   validateBody: () => (_req: Request, _res: Response, next: NextFunction) => next(),
+  jsonObjectBodySchema: {},
+  validateQuery: () => (_req: Request, _res: Response, next: NextFunction) => next(),
+  listQuerySchema: {},
 }));
 
 const stubRouter = () => {

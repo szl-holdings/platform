@@ -7,6 +7,7 @@ import {
   costBudgetsTable,
   costEventsTable,
   governanceIncidentsTable,
+  auditEventsTable,
 } from "@szl-holdings/db";
 import { eq, desc, and, sql } from "drizzle-orm";
 import { authMiddleware, requireRole, type AuthenticatedUser } from "../middlewares/auth";
@@ -20,6 +21,30 @@ import {
   parsePagination,
 } from "../lib/api-response";
 import { validateBody, validateQuery, listQuerySchema} from "../lib/validation";
+import { logger } from "../lib/logger";
+
+async function writeGovernanceAuditEvent(params: {
+  userId: number | null;
+  action: string;
+  entityType: string;
+  entityId: string | null;
+  newValues?: Record<string, unknown>;
+  req: Request;
+}) {
+  try {
+    await db.insert(auditEventsTable).values({
+      userId: params.userId,
+      action: params.action,
+      entityType: params.entityType,
+      entityId: params.entityId ?? undefined,
+      newValues: params.newValues ?? null,
+      ipAddress: params.req.ip ?? null,
+      userAgent: params.req.get("user-agent") ?? null,
+    });
+  } catch (err) {
+    logger.error({ err, action: params.action }, "Failed to write governance audit event");
+  }
+}
 
 const createPolicySchema = z.object({
   name: z.string().min(1).max(200).trim(),
@@ -143,6 +168,14 @@ router.post("/policies", authMiddleware(), requireRole("super_admin", "admin", "
       complianceFramework,
       createdBy: req.user?.displayName ?? "system",
     }).returning();
+    void writeGovernanceAuditEvent({
+      userId: req.user?.id ?? null,
+      action: "policy.created",
+      entityType: "governance_policy",
+      entityId: String(row.id),
+      newValues: { name, policyType, scope: scope ?? "tenant", priority: priority ?? 100 },
+      req,
+    });
     return sendCreated(res, row);
   } catch (err) {
     handleRouteError(res, err, "Failed to create policy");
@@ -163,6 +196,14 @@ router.patch("/policies/:id", authMiddleware(), requireRole("super_admin", "admi
     if (scope !== undefined) updates.scope = scope;
     const [row] = await db.update(alloyLegacyPoliciesTable).set(updates as any).where(eq(alloyLegacyPoliciesTable.id, id)).returning();
     if (!row) return sendNotFound(res, "Policy not found");
+    void writeGovernanceAuditEvent({
+      userId: req.user?.id ?? null,
+      action: "policy.updated",
+      entityType: "governance_policy",
+      entityId: String(id),
+      newValues: { ...updates, updatedAt: undefined },
+      req,
+    });
     return sendSuccess(res, row);
   } catch (err) {
     handleRouteError(res, err, "Failed to update policy");
@@ -175,6 +216,13 @@ router.delete("/policies/:id", authMiddleware(), requireRole("super_admin", "adm
     if (isNaN(id)) return sendBadRequest(res, "Invalid policy ID");
     const [row] = await db.delete(alloyLegacyPoliciesTable).where(eq(alloyLegacyPoliciesTable.id, id)).returning();
     if (!row) return sendNotFound(res, "Policy not found");
+    void writeGovernanceAuditEvent({
+      userId: req.user?.id ?? null,
+      action: "policy.deleted",
+      entityType: "governance_policy",
+      entityId: String(id),
+      req,
+    });
     return sendNoContent(res);
   } catch (err) {
     handleRouteError(res, err, "Failed to delete policy");
@@ -213,6 +261,14 @@ router.post("/model-routing", authMiddleware(), requireRole("super_admin", "admi
       priority: priority ?? 100,
       environment: environment ?? "production",
     }).returning();
+    void writeGovernanceAuditEvent({
+      userId: req.user?.id ?? null,
+      action: "model_routing.created",
+      entityType: "model_routing_policy",
+      entityId: String(row.id),
+      newValues: { name, modelProvider, modelId, isAllowed: isAllowed ?? true, isDefault: isDefault ?? false },
+      req,
+    });
     return sendCreated(res, row);
   } catch (err) {
     handleRouteError(res, err, "Failed to create model routing policy");
@@ -232,6 +288,14 @@ router.patch("/model-routing/:id", authMiddleware(), requireRole("super_admin", 
     if (taskCategories !== undefined) updates.taskCategories = taskCategories;
     const [row] = await db.update(modelRoutingPoliciesTable).set(updates as any).where(eq(modelRoutingPoliciesTable.id, id)).returning();
     if (!row) return sendNotFound(res, "Model routing policy not found");
+    void writeGovernanceAuditEvent({
+      userId: req.user?.id ?? null,
+      action: "model_routing.updated",
+      entityType: "model_routing_policy",
+      entityId: String(id),
+      newValues: { ...updates, updatedAt: undefined },
+      req,
+    });
     return sendSuccess(res, row);
   } catch (err) {
     handleRouteError(res, err, "Failed to update model routing policy");

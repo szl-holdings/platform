@@ -101,6 +101,9 @@ vi.mock("../../lib/ssrf-guard", () => ({
 
 vi.mock("../../lib/validation", () => ({
   validateBody: (_schema: unknown) => (_req: Request, _res: Response, next: NextFunction) => next(),
+  jsonObjectBodySchema: {},
+  validateQuery: (_schema: unknown) => (_req: Request, _res: Response, next: NextFunction) => next(),
+  listQuerySchema: {},
 }));
 
 vi.mock("dns", () => ({

@@ -1,3 +1,4 @@
+import { createHmac, timingSafeEqual } from "crypto";
 import type { Request, Response, NextFunction } from "express";
 import { getSessionToken, getSessionUser } from "../lib/auth";
 import { sendUnauthorized, sendForbidden, sendError } from "../lib/api-response";
@@ -7,10 +8,25 @@ import { logger } from "../lib/logger";
 const ADMIN_ROLES: RoleName[] = ["super_admin", "ops", "exec"];
 
 /**
+ * Fixed-size HMAC digest of a string value.
+ * By hashing both the secret and the header with the same key, both outputs
+ * are always 32 bytes regardless of input length.  This eliminates the
+ * length side-channel that would leak whether the header length matches the
+ * configured secret length before the constant-time comparison runs.
+ */
+const TOKEN_HMAC_KEY = Buffer.from("szl-internal-token-comparison-key", "utf8");
+function tokenDigest(val: string): Buffer {
+  return createHmac("sha256", TOKEN_HMAC_KEY).update(Buffer.from(val, "utf8")).digest();
+}
+
+/**
  * Check whether the request carries the platform-internal service token.
  * Server-to-server calls (e.g., AlloyChat → admin endpoints) must include
  * `x-internal-token: <ALLOY_INTERNAL_TOKEN>` in the request headers.
  * This is the only non-user bypass path — requires explicit configuration.
+ *
+ * Comparison uses HMAC digests via timingSafeEqual to prevent both timing
+ * and length side-channel attacks.
  */
 function hasInternalServiceToken(req: Request): boolean {
   const internalSecret = process.env.ALLOY_INTERNAL_TOKEN;
@@ -20,8 +36,7 @@ function hasInternalServiceToken(req: Request): boolean {
   if (!header) return false;
 
   try {
-    return header.length === internalSecret.length &&
-      Buffer.from(header).equals(Buffer.from(internalSecret));
+    return timingSafeEqual(tokenDigest(internalSecret), tokenDigest(header));
   } catch {
     return false;
   }

@@ -32,6 +32,7 @@ export const ENV_SPECS: EnvVarSpec[] = [
   { key: "ISSUER_URL", required: false, description: "OIDC issuer URL (defaults to https://replit.com/oidc)", group: "auth" },
 
   { key: "ALLOY_INTERNAL_TOKEN", required: false, description: "Internal admin token for AlloyChat admin context (enables privileged agent access) — must be 32+ chars", sensitive: true, group: "alloy" },
+  { key: "CONNECTOR_ENCRYPTION_KEY", required: false, description: "AES-256-GCM encryption key (64 hex chars) for RMM provider credential storage — required in production", sensitive: true, group: "alloy" },
 
   { key: "STRIPE_SECRET_KEY", required: false, description: "Stripe secret key for payment processing", sensitive: true, group: "billing" },
 
@@ -172,6 +173,21 @@ export function validateStartupConfig(): ValidationResult {
       errors.push(`ALLOY_INTERNAL_TOKEN is too short (${alloyToken.length} chars, minimum 32) — replace with a secure 32+ character secret.`);
     } else {
       warnings.push(`ALLOY_INTERNAL_TOKEN is short (${alloyToken.length} chars) — use a 32+ character secret in production`);
+    }
+  }
+
+  const connectorKey = process.env.CONNECTOR_ENCRYPTION_KEY;
+  if (!connectorKey) {
+    if (isProduction) {
+      errors.push("CONNECTOR_ENCRYPTION_KEY is not set — this is required in production for RMM credential encryption. Generate a 64-char hex key and add it to secrets.");
+    } else {
+      warnings.push("CONNECTOR_ENCRYPTION_KEY not set — RMM provider credentials will use a derived development key (not safe for production)");
+    }
+  } else if (!/^[0-9a-fA-F]{64}$/.test(connectorKey)) {
+    if (isProduction) {
+      errors.push("CONNECTOR_ENCRYPTION_KEY must be exactly 64 hex characters (256 bits) — replace with a properly generated key.");
+    } else {
+      warnings.push("CONNECTOR_ENCRYPTION_KEY format is invalid (expected 64 hex chars) — verify before deploying to production");
     }
   }
 

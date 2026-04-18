@@ -1,7 +1,19 @@
-import { Router, type IRouter } from "express";
+import { Router, type IRouter, type Request, type Response, type NextFunction } from "express";
 import { HealthCheckResponse } from "@szl-holdings/api-zod";
 import { getBackupHealthStatus } from "../lib/backup-service";
 import { pool } from "@szl-holdings/db";
+import { adminGuard } from "../middlewares/admin-guard";
+
+/**
+ * Apply adminGuard in production environments.
+ * In development/staging the endpoint is accessible without auth so local
+ * operators and integration tests can reach diagnostics without a session.
+ * Set APP_ENV=production or NODE_ENV=production to activate the guard.
+ */
+const IS_PRODUCTION = process.env.NODE_ENV === "production" || process.env.APP_ENV === "production";
+const productionAdminGuard = IS_PRODUCTION
+  ? adminGuard
+  : (_req: Request, _res: Response, next: NextFunction) => next();
 
 const router: IRouter = Router();
 
@@ -70,6 +82,65 @@ router.get("/healthz", async (_req, res) => {
 router.get("/health", async (req, res) => {
   req.url = "/healthz";
   (router as any).handle(req, res, () => {});
+});
+
+/**
+ * Detailed health endpoint — includes sensitive diagnostics.
+ * In production (NODE_ENV or APP_ENV = "production"), requires adminGuard:
+ *   either a session with super_admin/ops/exec role, or a correct
+ *   x-internal-token matching ALLOY_INTERNAL_TOKEN (platform services).
+ * In development/staging, the endpoint is unrestricted so operators and
+ *   integration tests can access diagnostics without credentials.
+ */
+router.get("/health/detailed", productionAdminGuard, async (_req: Request, res: Response) => {
+  const dbHealth = await checkDatabase();
+  const backupHealth = getBackupHealthStatus();
+  const memUsage = process.memoryUsage();
+
+  const sensitiveEnvStatus = {
+    SESSION_SECRET: !!process.env.SESSION_SECRET,
+    ALLOY_INTERNAL_TOKEN: !!process.env.ALLOY_INTERNAL_TOKEN,
+    ALLOY_INTERNAL_TOKEN_LENGTH_OK: (process.env.ALLOY_INTERNAL_TOKEN?.length ?? 0) >= 32,
+    CONNECTOR_ENCRYPTION_KEY: !!process.env.CONNECTOR_ENCRYPTION_KEY,
+    DATABASE_URL: !!process.env.DATABASE_URL,
+    STRIPE_SECRET_KEY: !!process.env.STRIPE_SECRET_KEY,
+    AI_KEY_CONFIGURED: !!(
+      process.env.AI_INTEGRATIONS_OPENAI_API_KEY ||
+      process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY ||
+      process.env.AI_INTEGRATIONS_GEMINI_API_KEY
+    ),
+    SENTRY_DSN: !!process.env.SENTRY_DSN,
+    FIELD_ENCRYPTION_KEY: !!process.env.FIELD_ENCRYPTION_KEY,
+  };
+
+  res.json({
+    status: "ok",
+    timestamp: new Date().toISOString(),
+    version: process.env.npm_package_version ?? "0.0.0",
+    uptime: Math.floor(process.uptime()),
+    nodeVersion: process.version,
+    pid: process.pid,
+    env: process.env.NODE_ENV,
+    runtimeMode: process.env.RUNTIME_MODE ?? process.env.APP_ENV ?? "unknown",
+    database: dbHealth,
+    backup: {
+      status: backupHealth.status,
+      lastBackupAt: backupHealth.lastBackupAt,
+      ageHours: backupHealth.ageHours,
+      totalBackups: backupHealth.totalBackups,
+    },
+    memory: {
+      heapUsedMb: Math.round(memUsage.heapUsed / 1024 / 1024),
+      heapTotalMb: Math.round(memUsage.heapTotal / 1024 / 1024),
+      rssMb: Math.round(memUsage.rss / 1024 / 1024),
+      externalMb: Math.round(memUsage.external / 1024 / 1024),
+    },
+    platform: {
+      apps: PLATFORM_APPS,
+      totalApps: PLATFORM_APPS.length,
+    },
+    envStatus: sensitiveEnvStatus,
+  });
 });
 
 export default router;

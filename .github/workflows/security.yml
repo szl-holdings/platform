@@ -114,3 +114,24 @@ jobs:
 
       - name: Verify lockfile is up to date
         run: pnpm install --frozen-lockfile --dry-run
+
+  security-gate:
+    name: Security Gate (blocking)
+    runs-on: ubuntu-latest
+    needs: [dependency-scan, secret-scan, lockfile-integrity]
+    if: always()
+    permissions:
+      contents: read
+    steps:
+      - name: Check all security jobs passed
+        run: |
+          if [[ "${{ needs.dependency-scan.result }}" != "success" ]] || \
+             [[ "${{ needs.secret-scan.result }}" != "success" ]] || \
+             [[ "${{ needs.lockfile-integrity.result }}" != "success" ]]; then
+            echo "One or more security checks failed:"
+            echo "  dependency-scan: ${{ needs.dependency-scan.result }}"
+            echo "  secret-scan: ${{ needs.secret-scan.result }}"
+            echo "  lockfile-integrity: ${{ needs.lockfile-integrity.result }}"
+            exit 1
+          fi
+          echo "All security checks passed"

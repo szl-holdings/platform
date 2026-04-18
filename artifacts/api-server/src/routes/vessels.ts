@@ -1,4 +1,4 @@
-import { Router, type IRouter, type RequestHandler } from "express";
+import { Router, type IRouter, type Request, type RequestHandler } from "express";
 import { LRUCache } from "lru-cache";
 import rateLimit from "express-rate-limit";
 import {
@@ -23,27 +23,78 @@ import {
   insertVesselsExceptionEventSchema,
   insertVesselCommandWorkflowSchema,
 } from "@szl-holdings/db";
-import { eq, desc } from "drizzle-orm";
-import { sendSuccess, sendCreated, sendNotFound, sendNoContent, sendBadRequest, handleRouteError } from "../lib/api-response";
+import { eq, desc, and, inArray } from "drizzle-orm";
+import { z } from "zod";
+import { sendSuccess, sendCreated, sendNotFound, sendNoContent, handleRouteError } from "../lib/api-response";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
+import { tenantScope } from "../middlewares/tenant-scope";
 import { broadcastWs, pubsub, VESSELS_EVENTS } from "../lib/pubsub-bridge.js";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
-router.get("/vessels/fleets", authMiddleware(), async (_req, res) => {
+// ─── Org-scoping helpers ─────────────────────────────────────────────────────
+
+/**
+ * Returns a WHERE clause that scopes a fleet query to the requesting org.
+ * When orgId is undefined (elevated admin bypassed tenantScope), no filter is applied.
+ */
+function fleetOrgWhere(orgId: number | undefined) {
+  return orgId !== undefined ? eq(vesselsFleetsTable.orgId, orgId) : undefined;
+}
+
+function vesselOrgWhere(orgId: number | undefined) {
+  return orgId !== undefined ? eq(vesselsTable.orgId, orgId) : undefined;
+}
+
+function alertRuleOrgWhere(orgId: number | undefined) {
+  return orgId !== undefined ? eq(vesselsAlertRulesTable.orgId, orgId) : undefined;
+}
+
+/**
+ * Verify that a vessel record belongs to the requesting user's org.
+ * Returns the vessel or null. Elevated admins (orgId undefined) can access any vessel.
+ */
+async function getVesselInOrg(vesselId: number, orgId: number | undefined) {
+  const condition = orgId !== undefined
+    ? and(eq(vesselsTable.id, vesselId), eq(vesselsTable.orgId, orgId))
+    : eq(vesselsTable.id, vesselId);
+  const [vessel] = await db.select().from(vesselsTable).where(condition);
+  return vessel ?? null;
+}
+
+/**
+ * Returns all vessel IDs for the given org.
+ * Returns null for elevated admins (no filter — can see all vessels).
+ * Returns [] when the org has no vessels (sub-resource queries should return empty).
+ */
+async function getOrgVesselIds(orgId: number | undefined): Promise<number[] | null> {
+  if (orgId === undefined) return null;
+  const vessels = await db.select().from(vesselsTable).where(eq(vesselsTable.orgId, orgId));
+  return (vessels as Array<{ id: number }>).map(v => v.id);
+}
+
+// ─── Fleets ─────────────────────────────────────────────────────────────────
+
+router.get("/vessels/fleets", authMiddleware(), tenantScope(), async (req: Request, res) => {
   try {
-    const fleets = await db.select().from(vesselsFleetsTable).orderBy(desc(vesselsFleetsTable.createdAt));
+    const where = fleetOrgWhere(req.tenantOrgId);
+    const fleets = where
+      ? await db.select().from(vesselsFleetsTable).where(where).orderBy(desc(vesselsFleetsTable.createdAt))
+      : await db.select().from(vesselsFleetsTable).orderBy(desc(vesselsFleetsTable.createdAt));
     sendSuccess(res, fleets);
   } catch (err) {
     handleRouteError(res, err, "Failed to list fleets");
   }
 });
 
-router.get("/vessels/fleets/:id", authMiddleware(), async (req, res) => {
+router.get("/vessels/fleets/:id", authMiddleware(), tenantScope(), async (req: Request, res) => {
   try {
     const id = parseIdParam(req.params.id);
-    const [fleet] = await db.select().from(vesselsFleetsTable).where(eq(vesselsFleetsTable.id, id));
+    const condition = req.tenantOrgId !== undefined
+      ? and(eq(vesselsFleetsTable.id, id), eq(vesselsFleetsTable.orgId, req.tenantOrgId))
+      : eq(vesselsFleetsTable.id, id);
+    const [fleet] = await db.select().from(vesselsFleetsTable).where(condition);
     if (!fleet) { sendNotFound(res, "Fleet"); return; }
     sendSuccess(res, fleet);
   } catch (err) {
@@ -51,21 +102,28 @@ router.get("/vessels/fleets/:id", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/vessels/fleets", authMiddleware(), requireRole("ops", "exec", "admin", "editor"), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/vessels/fleets", authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin", "editor"), validateBody(jsonObjectBodySchema), async (req: Request, res) => {
   try {
     const data = insertVesselFleetSchema.parse(req.body);
-    const [fleet] = await db.insert(vesselsFleetsTable).values(data).returning();
+    const [fleet] = await db.insert(vesselsFleetsTable).values({
+      ...data,
+      orgId: req.tenantOrgId ?? null,
+    }).returning();
     sendCreated(res, fleet);
   } catch (err) {
     handleRouteError(res, err, "Failed to create fleet");
   }
 });
 
-router.put("/vessels/fleets/:id", authMiddleware(), requireRole("ops", "exec", "admin", "editor"), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.put("/vessels/fleets/:id", authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin", "editor"), validateBody(jsonObjectBodySchema), async (req: Request, res) => {
   try {
     const id = parseIdParam(req.params.id);
-    const data = insertVesselFleetSchema.partial().parse(req.body);
-    const [fleet] = await db.update(vesselsFleetsTable).set({ ...data, updatedAt: new Date() }).where(eq(vesselsFleetsTable.id, id)).returning();
+    // Strip orgId — tenant context is authoritative; clients must not reassign tenancy
+    const { orgId: _discardOrgId, ...data } = insertVesselFleetSchema.partial().parse(req.body);
+    const condition = req.tenantOrgId !== undefined
+      ? and(eq(vesselsFleetsTable.id, id), eq(vesselsFleetsTable.orgId, req.tenantOrgId))
+      : eq(vesselsFleetsTable.id, id);
+    const [fleet] = await db.update(vesselsFleetsTable).set({ ...data, updatedAt: new Date() }).where(condition).returning();
     if (!fleet) { sendNotFound(res, "Fleet"); return; }
     sendSuccess(res, fleet);
   } catch (err) {
@@ -73,10 +131,13 @@ router.put("/vessels/fleets/:id", authMiddleware(), requireRole("ops", "exec", "
   }
 });
 
-router.delete("/vessels/fleets/:id", authMiddleware(), requireRole("ops", "exec", "admin"), async (req, res) => {
+router.delete("/vessels/fleets/:id", authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin"), async (req: Request, res) => {
   try {
     const id = parseIdParam(req.params.id);
-    const [fleet] = await db.delete(vesselsFleetsTable).where(eq(vesselsFleetsTable.id, id)).returning();
+    const condition = req.tenantOrgId !== undefined
+      ? and(eq(vesselsFleetsTable.id, id), eq(vesselsFleetsTable.orgId, req.tenantOrgId))
+      : eq(vesselsFleetsTable.id, id);
+    const [fleet] = await db.delete(vesselsFleetsTable).where(condition).returning();
     if (!fleet) { sendNotFound(res, "Fleet"); return; }
     sendNoContent(res);
   } catch (err) {
@@ -84,19 +145,99 @@ router.delete("/vessels/fleets/:id", authMiddleware(), requireRole("ops", "exec"
   }
 });
 
-router.get("/vessels", authMiddleware(), async (_req, res) => {
+// ─── Literal 2-segment routes — must be registered BEFORE /vessels/:id ───────
+
+router.get("/vessels/events", authMiddleware(), tenantScope(), validateQuery(listQuerySchema), async (req: Request, res) => {
   try {
-    const vessels = await db.select().from(vesselsTable).orderBy(desc(vesselsTable.createdAt));
+    const statusFilter = req.query.status as string | undefined;
+    // Optional: narrow to a specific vessel within the org (client convenience filter).
+    // The org-level scope is always enforced — vesselId is validated against orgVesselIds.
+    const vesselIdFilter = req.query.vesselId ? parseInt(req.query.vesselId as string, 10) : undefined;
+
+    const orgVesselIds = await getOrgVesselIds(req.tenantOrgId);
+
+    if (orgVesselIds !== null && orgVesselIds.length === 0) { sendSuccess(res, []); return; }
+
+    // If a vesselId filter is requested, verify it belongs to this org before using it
+    if (vesselIdFilter !== undefined && orgVesselIds !== null && !orgVesselIds.includes(vesselIdFilter)) {
+      sendNotFound(res, "Vessel"); return;
+    }
+
+    const effectiveVesselIds = vesselIdFilter !== undefined
+      ? [vesselIdFilter]
+      : orgVesselIds;
+
+    const events = effectiveVesselIds !== null
+      ? await db.select().from(vesselsEventsTable).where(inArray(vesselsEventsTable.vesselId, effectiveVesselIds)).orderBy(desc(vesselsEventsTable.occurredAt))
+      : await db.select().from(vesselsEventsTable).orderBy(desc(vesselsEventsTable.occurredAt));
+
+    const filtered = statusFilter ? events.filter((e) => e.status === statusFilter) : events;
+    sendSuccess(res, filtered);
+  } catch (err) { handleRouteError(res, err, "Failed to list vessel events"); }
+});
+
+router.post("/vessels/events", authMiddleware(), tenantScope(), validateBody(jsonObjectBodySchema), async (req: Request, res) => {
+  try {
+    const data = insertVesselsExceptionEventSchema.parse(req.body);
+    const vessel = await getVesselInOrg(data.vesselId, req.tenantOrgId);
+    if (!vessel) { sendNotFound(res, "Vessel"); return; }
+    const [event] = await db.insert(vesselsEventsTable).values(data).returning();
+    sendCreated(res, event);
+  } catch (err) { handleRouteError(res, err, "Failed to create vessel event"); }
+});
+
+router.get("/vessels/command-workflows", authMiddleware(), tenantScope(), validateQuery(listQuerySchema), async (req: Request, res) => {
+  try {
+    // Optional: narrow to a specific vessel within the org (client convenience filter).
+    // Org-level scope is always enforced — vesselId is validated against orgVesselIds.
+    const vesselIdFilter = req.query.vesselId ? parseInt(req.query.vesselId as string, 10) : undefined;
+
+    const orgVesselIds = await getOrgVesselIds(req.tenantOrgId);
+    if (orgVesselIds !== null && orgVesselIds.length === 0) { sendSuccess(res, []); return; }
+
+    if (vesselIdFilter !== undefined && orgVesselIds !== null && !orgVesselIds.includes(vesselIdFilter)) {
+      sendNotFound(res, "Vessel"); return;
+    }
+
+    const effectiveVesselIds = vesselIdFilter !== undefined ? [vesselIdFilter] : orgVesselIds;
+
+    const workflows = effectiveVesselIds !== null
+      ? await db.select().from(vesselsCommandWorkflowsTable).where(inArray(vesselsCommandWorkflowsTable.vesselId, effectiveVesselIds)).orderBy(desc(vesselsCommandWorkflowsTable.createdAt))
+      : await db.select().from(vesselsCommandWorkflowsTable).orderBy(desc(vesselsCommandWorkflowsTable.createdAt));
+    sendSuccess(res, workflows);
+  } catch (err) { handleRouteError(res, err, "Failed to list command workflows"); }
+});
+
+router.post("/vessels/command-workflows", authMiddleware(), tenantScope(), validateBody(jsonObjectBodySchema), async (req: Request, res) => {
+  try {
+    const data = insertVesselCommandWorkflowSchema.parse(req.body);
+    if (data.vesselId) {
+      const vessel = await getVesselInOrg(data.vesselId, req.tenantOrgId);
+      if (!vessel) { sendNotFound(res, "Vessel"); return; }
+    }
+    const [workflow] = await db.insert(vesselsCommandWorkflowsTable).values(data).returning();
+    sendCreated(res, workflow);
+  } catch (err) { handleRouteError(res, err, "Failed to create command workflow"); }
+});
+
+// ─── Vessels ─────────────────────────────────────────────────────────────────
+
+router.get("/vessels", authMiddleware(), tenantScope(), async (req: Request, res) => {
+  try {
+    const where = vesselOrgWhere(req.tenantOrgId);
+    const vessels = where
+      ? await db.select().from(vesselsTable).where(where).orderBy(desc(vesselsTable.createdAt))
+      : await db.select().from(vesselsTable).orderBy(desc(vesselsTable.createdAt));
     sendSuccess(res, vessels);
   } catch (err) {
     handleRouteError(res, err, "Failed to list vessels");
   }
 });
 
-router.get("/vessels/:id", authMiddleware(), async (req, res) => {
+router.get("/vessels/:id", authMiddleware(), tenantScope(), async (req: Request, res) => {
   try {
     const id = parseIdParam(req.params.id);
-    const [vessel] = await db.select().from(vesselsTable).where(eq(vesselsTable.id, id));
+    const vessel = await getVesselInOrg(id, req.tenantOrgId);
     if (!vessel) { sendNotFound(res, "Vessel"); return; }
     sendSuccess(res, vessel);
   } catch (err) {
@@ -104,21 +245,34 @@ router.get("/vessels/:id", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/vessels", authMiddleware(), requireRole("ops", "exec", "admin", "editor"), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/vessels", authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin", "editor"), validateBody(jsonObjectBodySchema), async (req: Request, res) => {
   try {
     const data = insertVesselSchema.parse(req.body);
-    const [vessel] = await db.insert(vesselsTable).values(data).returning();
+    // orgId is intentionally nullable: a super_admin acting outside any tenant
+    // context (tenantOrgId = undefined) produces a "platform vessel" with
+    // orgId = null.  Tenant-scoped users query with WHERE org_id = <id>, so
+    // NULL rows are invisible to them — SQL NULL comparison always evaluates
+    // to UNKNOWN, never TRUE.  Platform vessels are only accessible to admins
+    // whose tenantOrgId is undefined (no WHERE filter applied).
+    const [vessel] = await db.insert(vesselsTable).values({
+      ...data,
+      orgId: req.tenantOrgId ?? null,
+    }).returning();
     sendCreated(res, vessel);
   } catch (err) {
     handleRouteError(res, err, "Failed to create vessel");
   }
 });
 
-router.put("/vessels/:id", authMiddleware(), requireRole("ops", "exec", "admin", "editor"), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.put("/vessels/:id", authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin", "editor"), validateBody(jsonObjectBodySchema), async (req: Request, res) => {
   try {
     const id = parseIdParam(req.params.id);
-    const data = insertVesselSchema.partial().parse(req.body);
-    const [vessel] = await db.update(vesselsTable).set({ ...data, updatedAt: new Date() }).where(eq(vesselsTable.id, id)).returning();
+    // Strip orgId — tenant context is authoritative; clients must not reassign tenancy
+    const { orgId: _discardOrgId, ...data } = insertVesselSchema.partial().parse(req.body);
+    const condition = req.tenantOrgId !== undefined
+      ? and(eq(vesselsTable.id, id), eq(vesselsTable.orgId, req.tenantOrgId))
+      : eq(vesselsTable.id, id);
+    const [vessel] = await db.update(vesselsTable).set({ ...data, updatedAt: new Date() }).where(condition).returning();
     if (!vessel) { sendNotFound(res, "Vessel"); return; }
     broadcastWs("vessel-positions", "vessel-updated", { id: vessel.id, status: vessel.status });
     const [latestPos] = await db.select().from(vesselsPositionsTable).where(eq(vesselsPositionsTable.vesselId, vessel.id)).orderBy(desc(vesselsPositionsTable.recordedAt)).limit(1);
@@ -131,10 +285,13 @@ router.put("/vessels/:id", authMiddleware(), requireRole("ops", "exec", "admin",
   }
 });
 
-router.delete("/vessels/:id", authMiddleware(), requireRole("ops", "exec", "admin"), async (req, res) => {
+router.delete("/vessels/:id", authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin"), async (req: Request, res) => {
   try {
     const id = parseIdParam(req.params.id);
-    const [vessel] = await db.delete(vesselsTable).where(eq(vesselsTable.id, id)).returning();
+    const condition = req.tenantOrgId !== undefined
+      ? and(eq(vesselsTable.id, id), eq(vesselsTable.orgId, req.tenantOrgId))
+      : eq(vesselsTable.id, id);
+    const [vessel] = await db.delete(vesselsTable).where(condition).returning();
     if (!vessel) { sendNotFound(res, "Vessel"); return; }
     sendNoContent(res);
   } catch (err) {
@@ -142,9 +299,13 @@ router.delete("/vessels/:id", authMiddleware(), requireRole("ops", "exec", "admi
   }
 });
 
-router.get("/vessels/:id/positions", authMiddleware(), async (req, res) => {
+// ─── Positions (scoped through parent vessel org check) ─────────────────────
+
+router.get("/vessels/:id/positions", authMiddleware(), tenantScope(), async (req: Request, res) => {
   try {
     const id = parseIdParam(req.params.id);
+    const vessel = await getVesselInOrg(id, req.tenantOrgId);
+    if (!vessel) { sendNotFound(res, "Vessel"); return; }
     const positions = await db.select().from(vesselsPositionsTable).where(eq(vesselsPositionsTable.vesselId, id)).orderBy(desc(vesselsPositionsTable.recordedAt));
     sendSuccess(res, positions);
   } catch (err) {
@@ -152,9 +313,13 @@ router.get("/vessels/:id/positions", authMiddleware(), async (req, res) => {
   }
 });
 
-router.get("/vessels/:id/cargo", authMiddleware(), async (req, res) => {
+// ─── Cargo (scoped through parent vessel org check) ─────────────────────────
+
+router.get("/vessels/:id/cargo", authMiddleware(), tenantScope(), async (req: Request, res) => {
   try {
     const id = parseIdParam(req.params.id);
+    const vessel = await getVesselInOrg(id, req.tenantOrgId);
+    if (!vessel) { sendNotFound(res, "Vessel"); return; }
     const cargo = await db.select().from(vesselsCargoTable).where(eq(vesselsCargoTable.vesselId, id)).orderBy(desc(vesselsCargoTable.createdAt));
     sendSuccess(res, cargo);
   } catch (err) {
@@ -162,18 +327,26 @@ router.get("/vessels/:id/cargo", authMiddleware(), async (req, res) => {
   }
 });
 
-router.get("/vessels/routes/all", authMiddleware(), async (_req, res) => {
+// ─── Routes (org-scoped via vessel ownership) ────────────────────────────────
+
+router.get("/vessels/routes/all", authMiddleware(), tenantScope(), async (req: Request, res) => {
   try {
-    const routes = await db.select().from(vesselsRoutesTable).orderBy(desc(vesselsRoutesTable.createdAt));
+    const orgVesselIds = await getOrgVesselIds(req.tenantOrgId);
+    if (orgVesselIds !== null && orgVesselIds.length === 0) { sendSuccess(res, []); return; }
+    const routes = orgVesselIds !== null
+      ? await db.select().from(vesselsRoutesTable).where(inArray(vesselsRoutesTable.vesselId, orgVesselIds)).orderBy(desc(vesselsRoutesTable.createdAt))
+      : await db.select().from(vesselsRoutesTable).orderBy(desc(vesselsRoutesTable.createdAt));
     sendSuccess(res, routes);
   } catch (err) {
     handleRouteError(res, err, "Failed to list routes");
   }
 });
 
-router.get("/vessels/:id/routes", authMiddleware(), async (req, res) => {
+router.get("/vessels/:id/routes", authMiddleware(), tenantScope(), async (req: Request, res) => {
   try {
     const id = parseIdParam(req.params.id);
+    const vessel = await getVesselInOrg(id, req.tenantOrgId);
+    if (!vessel) { sendNotFound(res, "Vessel"); return; }
     const routes = await db.select().from(vesselsRoutesTable).where(eq(vesselsRoutesTable.vesselId, id)).orderBy(desc(vesselsRoutesTable.createdAt));
     sendSuccess(res, routes);
   } catch (err) {
@@ -181,9 +354,11 @@ router.get("/vessels/:id/routes", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/vessels/routes", authMiddleware(), requireRole("ops", "exec", "admin", "editor"), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/vessels/routes", authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin", "editor"), validateBody(jsonObjectBodySchema), async (req: Request, res) => {
   try {
     const data = insertVesselRouteSchema.parse(req.body);
+    const vessel = await getVesselInOrg(data.vesselId, req.tenantOrgId);
+    if (!vessel) { sendNotFound(res, "Vessel"); return; }
     const [route] = await db.insert(vesselsRoutesTable).values(data).returning();
     sendCreated(res, route);
   } catch (err) {
@@ -191,10 +366,17 @@ router.post("/vessels/routes", authMiddleware(), requireRole("ops", "exec", "adm
   }
 });
 
-router.put("/vessels/routes/:id", authMiddleware(), requireRole("ops", "exec", "admin", "editor"), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.put("/vessels/routes/:id", authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin", "editor"), validateBody(jsonObjectBodySchema), async (req: Request, res) => {
   try {
     const id = parseIdParam(req.params.id);
-    const data = insertVesselRouteSchema.partial().parse(req.body);
+    // Strip vesselId — parent ownership must not be reassigned by clients
+    const { vesselId: _discardVesselId, ...data } = insertVesselRouteSchema.partial().parse(req.body);
+    const [existing] = await db.select().from(vesselsRoutesTable).where(eq(vesselsRoutesTable.id, id));
+    if (!existing) { sendNotFound(res, "Route"); return; }
+    if (existing.vesselId) {
+      const vessel = await getVesselInOrg(existing.vesselId, req.tenantOrgId);
+      if (!vessel) { sendNotFound(res, "Route"); return; }
+    }
     const [route] = await db.update(vesselsRoutesTable).set(data).where(eq(vesselsRoutesTable.id, id)).returning();
     if (!route) { sendNotFound(res, "Route"); return; }
     sendSuccess(res, route);
@@ -203,9 +385,15 @@ router.put("/vessels/routes/:id", authMiddleware(), requireRole("ops", "exec", "
   }
 });
 
-router.delete("/vessels/routes/:id", authMiddleware(), requireRole("ops", "exec", "admin"), async (req, res) => {
+router.delete("/vessels/routes/:id", authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin"), async (req: Request, res) => {
   try {
     const id = parseIdParam(req.params.id);
+    const [existing] = await db.select().from(vesselsRoutesTable).where(eq(vesselsRoutesTable.id, id));
+    if (!existing) { sendNotFound(res, "Route"); return; }
+    if (existing.vesselId) {
+      const vessel = await getVesselInOrg(existing.vesselId, req.tenantOrgId);
+      if (!vessel) { sendNotFound(res, "Route"); return; }
+    }
     const [route] = await db.delete(vesselsRoutesTable).where(eq(vesselsRoutesTable.id, id)).returning();
     if (!route) { sendNotFound(res, "Route"); return; }
     sendNoContent(res);
@@ -214,30 +402,42 @@ router.delete("/vessels/routes/:id", authMiddleware(), requireRole("ops", "exec"
   }
 });
 
-router.get("/vessels/alert-rules/all", authMiddleware(), async (_req, res) => {
+// ─── Alert Rules (org-scoped via orgId column) ────────────────────────────────
+
+router.get("/vessels/alert-rules/all", authMiddleware(), tenantScope(), async (req: Request, res) => {
   try {
-    const rules = await db.select().from(vesselsAlertRulesTable).orderBy(desc(vesselsAlertRulesTable.createdAt));
+    const where = alertRuleOrgWhere(req.tenantOrgId);
+    const rules = where
+      ? await db.select().from(vesselsAlertRulesTable).where(where).orderBy(desc(vesselsAlertRulesTable.createdAt))
+      : await db.select().from(vesselsAlertRulesTable).orderBy(desc(vesselsAlertRulesTable.createdAt));
     sendSuccess(res, rules);
   } catch (err) {
     handleRouteError(res, err, "Failed to list alert rules");
   }
 });
 
-router.post("/vessels/alert-rules", authMiddleware(), requireRole("ops", "exec", "admin", "editor"), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/vessels/alert-rules", authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin", "editor"), validateBody(jsonObjectBodySchema), async (req: Request, res) => {
   try {
     const data = insertVesselAlertRuleSchema.parse(req.body);
-    const [rule] = await db.insert(vesselsAlertRulesTable).values(data).returning();
+    const [rule] = await db.insert(vesselsAlertRulesTable).values({
+      ...data,
+      orgId: req.tenantOrgId ?? null,
+    }).returning();
     sendCreated(res, rule);
   } catch (err) {
     handleRouteError(res, err, "Failed to create alert rule");
   }
 });
 
-router.put("/vessels/alert-rules/:id", authMiddleware(), requireRole("ops", "exec", "admin", "editor"), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.put("/vessels/alert-rules/:id", authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin", "editor"), validateBody(jsonObjectBodySchema), async (req: Request, res) => {
   try {
     const id = parseIdParam(req.params.id);
-    const data = insertVesselAlertRuleSchema.partial().parse(req.body);
-    const [rule] = await db.update(vesselsAlertRulesTable).set(data).where(eq(vesselsAlertRulesTable.id, id)).returning();
+    // Strip orgId — tenant context is authoritative; clients must not reassign tenancy
+    const { orgId: _discardOrgId, ...data } = insertVesselAlertRuleSchema.partial().parse(req.body);
+    const condition = req.tenantOrgId !== undefined
+      ? and(eq(vesselsAlertRulesTable.id, id), eq(vesselsAlertRulesTable.orgId, req.tenantOrgId))
+      : eq(vesselsAlertRulesTable.id, id);
+    const [rule] = await db.update(vesselsAlertRulesTable).set(data).where(condition).returning();
     if (!rule) { sendNotFound(res, "Alert Rule"); return; }
     sendSuccess(res, rule);
   } catch (err) {
@@ -245,10 +445,13 @@ router.put("/vessels/alert-rules/:id", authMiddleware(), requireRole("ops", "exe
   }
 });
 
-router.delete("/vessels/alert-rules/:id", authMiddleware(), requireRole("ops", "exec", "admin"), async (req, res) => {
+router.delete("/vessels/alert-rules/:id", authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin"), async (req: Request, res) => {
   try {
     const id = parseIdParam(req.params.id);
-    const [rule] = await db.delete(vesselsAlertRulesTable).where(eq(vesselsAlertRulesTable.id, id)).returning();
+    const condition = req.tenantOrgId !== undefined
+      ? and(eq(vesselsAlertRulesTable.id, id), eq(vesselsAlertRulesTable.orgId, req.tenantOrgId))
+      : eq(vesselsAlertRulesTable.id, id);
+    const [rule] = await db.delete(vesselsAlertRulesTable).where(condition).returning();
     if (!rule) { sendNotFound(res, "Alert Rule"); return; }
     sendNoContent(res);
   } catch (err) {
@@ -256,18 +459,28 @@ router.delete("/vessels/alert-rules/:id", authMiddleware(), requireRole("ops", "
   }
 });
 
-router.get("/vessels/alerts/all", authMiddleware(), async (_req, res) => {
+// ─── Alerts (org-scoped via parent vessel ownership) ─────────────────────────
+
+router.get("/vessels/alerts/all", authMiddleware(), tenantScope(), async (req: Request, res) => {
   try {
-    const alerts = await db.select().from(vesselsAlertsTable).orderBy(desc(vesselsAlertsTable.triggeredAt));
+    const orgVesselIds = await getOrgVesselIds(req.tenantOrgId);
+    if (orgVesselIds !== null && orgVesselIds.length === 0) { sendSuccess(res, []); return; }
+    const alerts = orgVesselIds !== null
+      ? await db.select().from(vesselsAlertsTable).where(inArray(vesselsAlertsTable.vesselId, orgVesselIds)).orderBy(desc(vesselsAlertsTable.triggeredAt))
+      : await db.select().from(vesselsAlertsTable).orderBy(desc(vesselsAlertsTable.triggeredAt));
     sendSuccess(res, alerts);
   } catch (err) {
     handleRouteError(res, err, "Failed to list alerts");
   }
 });
 
-router.post("/vessels/alerts", authMiddleware(), requireRole("ops", "exec", "admin", "editor"), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/vessels/alerts", authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin", "editor"), validateBody(jsonObjectBodySchema), async (req: Request, res) => {
   try {
     const data = insertVesselAlertSchema.parse(req.body);
+    if (data.vesselId) {
+      const vessel = await getVesselInOrg(data.vesselId, req.tenantOrgId);
+      if (!vessel) { sendNotFound(res, "Vessel"); return; }
+    }
     const [alert] = await db.insert(vesselsAlertsTable).values(data).returning();
     sendCreated(res, alert);
   } catch (err) {
@@ -275,9 +488,15 @@ router.post("/vessels/alerts", authMiddleware(), requireRole("ops", "exec", "adm
   }
 });
 
-router.delete("/vessels/alerts/:id", authMiddleware(), requireRole("ops", "exec", "admin"), async (req, res) => {
+router.delete("/vessels/alerts/:id", authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin"), async (req: Request, res) => {
   try {
     const id = parseIdParam(req.params.id);
+    const [existing] = await db.select().from(vesselsAlertsTable).where(eq(vesselsAlertsTable.id, id));
+    if (!existing) { sendNotFound(res, "Alert"); return; }
+    if (existing.vesselId) {
+      const vessel = await getVesselInOrg(existing.vesselId, req.tenantOrgId);
+      if (!vessel) { sendNotFound(res, "Alert"); return; }
+    }
     const [alert] = await db.delete(vesselsAlertsTable).where(eq(vesselsAlertsTable.id, id)).returning();
     if (!alert) { sendNotFound(res, "Alert"); return; }
     sendNoContent(res);
@@ -286,31 +505,63 @@ router.delete("/vessels/alerts/:id", authMiddleware(), requireRole("ops", "exec"
   }
 });
 
-router.get("/vessels/weather/snapshots", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
+// ─── Weather Snapshots (org-scoped via route→vessel chain) ───────────────────
+
+router.get("/vessels/weather/snapshots", authMiddleware(), tenantScope(), validateQuery(listQuerySchema), async (req: Request, res) => {
   try {
-    const routeId = req.query.routeId ? parseInt(req.query.routeId as string, 10) : undefined;
-    const query = routeId
-      ? db.select().from(vesselsWeatherSnapshotsTable).where(eq(vesselsWeatherSnapshotsTable.routeId, routeId)).orderBy(desc(vesselsWeatherSnapshotsTable.recordedAt))
-      : db.select().from(vesselsWeatherSnapshotsTable).orderBy(desc(vesselsWeatherSnapshotsTable.recordedAt));
-    const snapshots = await query;
-    sendSuccess(res, snapshots);
+    const routeIdParam = req.query.routeId ? parseInt(req.query.routeId as string, 10) : undefined;
+
+    if (routeIdParam !== undefined) {
+      const [route] = await db.select().from(vesselsRoutesTable).where(eq(vesselsRoutesTable.id, routeIdParam));
+      if (!route) { sendSuccess(res, []); return; }
+      if (route.vesselId) {
+        const vessel = await getVesselInOrg(route.vesselId, req.tenantOrgId);
+        if (!vessel) { sendSuccess(res, []); return; }
+      }
+      const snapshots = await db.select().from(vesselsWeatherSnapshotsTable).where(eq(vesselsWeatherSnapshotsTable.routeId, routeIdParam)).orderBy(desc(vesselsWeatherSnapshotsTable.recordedAt));
+      sendSuccess(res, snapshots);
+      return;
+    }
+
+    const orgVesselIds = await getOrgVesselIds(req.tenantOrgId);
+    if (orgVesselIds !== null) {
+      if (orgVesselIds.length === 0) { sendSuccess(res, []); return; }
+      const orgRoutes = await db.select().from(vesselsRoutesTable).where(inArray(vesselsRoutesTable.vesselId, orgVesselIds));
+      const orgRouteIds = (orgRoutes as Array<{ id: number }>).map(r => r.id);
+      if (orgRouteIds.length === 0) { sendSuccess(res, []); return; }
+      const snapshots = await db.select().from(vesselsWeatherSnapshotsTable).where(inArray(vesselsWeatherSnapshotsTable.routeId, orgRouteIds)).orderBy(desc(vesselsWeatherSnapshotsTable.recordedAt));
+      sendSuccess(res, snapshots);
+    } else {
+      const snapshots = await db.select().from(vesselsWeatherSnapshotsTable).orderBy(desc(vesselsWeatherSnapshotsTable.recordedAt));
+      sendSuccess(res, snapshots);
+    }
   } catch (err) {
     handleRouteError(res, err, "Failed to get weather snapshots");
   }
 });
 
-router.get("/vessels/simulations/all", authMiddleware(), async (_req, res) => {
+// ─── Simulations (org-scoped via parent vessel ownership) ────────────────────
+
+router.get("/vessels/simulations/all", authMiddleware(), tenantScope(), async (req: Request, res) => {
   try {
-    const simulations = await db.select().from(vesselsSimulationsTable).orderBy(desc(vesselsSimulationsTable.createdAt));
+    const orgVesselIds = await getOrgVesselIds(req.tenantOrgId);
+    if (orgVesselIds !== null && orgVesselIds.length === 0) { sendSuccess(res, []); return; }
+    const simulations = orgVesselIds !== null
+      ? await db.select().from(vesselsSimulationsTable).where(inArray(vesselsSimulationsTable.vesselId, orgVesselIds)).orderBy(desc(vesselsSimulationsTable.createdAt))
+      : await db.select().from(vesselsSimulationsTable).orderBy(desc(vesselsSimulationsTable.createdAt));
     sendSuccess(res, simulations);
   } catch (err) {
     handleRouteError(res, err, "Failed to list simulations");
   }
 });
 
-router.post("/vessels/simulations", authMiddleware(), requireRole("ops", "exec", "admin", "analyst"), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/vessels/simulations", authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin", "analyst"), validateBody(jsonObjectBodySchema), async (req: Request, res) => {
   try {
     const data = insertVesselSimulationSchema.parse(req.body);
+    if (data.vesselId) {
+      const vessel = await getVesselInOrg(data.vesselId, req.tenantOrgId);
+      if (!vessel) { sendNotFound(res, "Vessel"); return; }
+    }
     const [simulation] = await db.insert(vesselsSimulationsTable).values({
       ...data,
       status: "running",
@@ -345,16 +596,22 @@ router.post("/vessels/simulations", authMiddleware(), requireRole("ops", "exec",
   }
 });
 
-router.get("/vessels/simulations/:id", authMiddleware(), async (req, res) => {
+router.get("/vessels/simulations/:id", authMiddleware(), tenantScope(), async (req: Request, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [simulation] = await db.select().from(vesselsSimulationsTable).where(eq(vesselsSimulationsTable.id, id));
     if (!simulation) { sendNotFound(res, "Simulation"); return; }
+    if (simulation.vesselId) {
+      const vessel = await getVesselInOrg(simulation.vesselId, req.tenantOrgId);
+      if (!vessel) { sendNotFound(res, "Simulation"); return; }
+    }
     sendSuccess(res, simulation);
   } catch (err) {
     handleRouteError(res, err, "Failed to get simulation");
   }
 });
+
+// ─── Live Data (global maritime intelligence — authenticated + org-gated) ────
 
 const vesselsLiveLimit = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -395,7 +652,7 @@ async function fetchVesJson(url: string, timeoutMs = 10000): Promise<unknown> {
   }
 }
 
-router.get("/vessels/live/chokepoints", vesselsLiveLimit, authMiddleware(), async (_req, res) => {
+router.get("/vessels/live/chokepoints", vesselsLiveLimit, authMiddleware(), tenantScope(), async (_req, res) => {
   try {
     const gdeltSignals = await getVesCached("vessels-chokepoints-gdelt", 3600000, async () => {
       const raw = await fetchVesJson(
@@ -420,7 +677,7 @@ router.get("/vessels/live/chokepoints", vesselsLiveLimit, authMiddleware(), asyn
   } catch (err) { handleRouteError(res, err, "Failed to fetch chokepoint data"); }
 });
 
-router.get("/vessels/live/geopolitical-events", vesselsLiveLimit, authMiddleware(), async (_req, res) => {
+router.get("/vessels/live/geopolitical-events", vesselsLiveLimit, authMiddleware(), tenantScope(), async (_req, res) => {
   try {
     const gdeltArticles = await getVesCached("vessels-geopolitical-gdelt", 600000, async () => {
       const raw = await fetchVesJson(
@@ -451,7 +708,7 @@ router.get("/vessels/live/geopolitical-events", vesselsLiveLimit, authMiddleware
   } catch (err) { handleRouteError(res, err, "Failed to fetch geopolitical events"); }
 });
 
-router.get("/vessels/live/port-congestion", vesselsLiveLimit, authMiddleware(), async (_req, res) => {
+router.get("/vessels/live/port-congestion", vesselsLiveLimit, authMiddleware(), tenantScope(), async (_req, res) => {
   try {
     sendSuccess(res, {
       status: "NOT_CONFIGURED",
@@ -463,7 +720,7 @@ router.get("/vessels/live/port-congestion", vesselsLiveLimit, authMiddleware(), 
   } catch (err) { handleRouteError(res, err, "Failed to fetch port congestion data"); }
 });
 
-router.get("/vessels/live/weather-marine", vesselsLiveLimit, authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
+router.get("/vessels/live/weather-marine", vesselsLiveLimit, authMiddleware(), tenantScope(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const lat = parseFloat(req.query.lat as string) || 24.5;
     const lon = parseFloat(req.query.lon as string) || 56.3;
@@ -508,82 +765,87 @@ router.get("/vessels/live/weather-marine", vesselsLiveLimit, authMiddleware(), v
   } catch (err) { handleRouteError(res, err, "Failed to fetch marine weather"); }
 });
 
-router.get("/vessels/events", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
-  try {
-    const vesselId = req.query.vesselId ? parseInt(req.query.vesselId as string, 10) : undefined;
-    const status = req.query.status as string | undefined;
-    const events = await db.select().from(vesselsEventsTable).orderBy(desc(vesselsEventsTable.occurredAt));
-    const filtered = events.filter(e => {
-      if (vesselId && e.vesselId !== vesselId) return false;
-      if (status && e.status !== status) return false;
-      return true;
-    });
-    sendSuccess(res, filtered);
-  } catch (err) { handleRouteError(res, err, "Failed to list vessel events"); }
-});
+// ─── Events (org-scoped via parent vessel ownership) ─────────────────────────
 
-router.get("/vessels/:id/events", authMiddleware(), async (req, res) => {
+router.get("/vessels/:id/events", authMiddleware(), tenantScope(), async (req: Request, res) => {
   try {
     const id = parseIdParam(req.params.id);
+    const vessel = await getVesselInOrg(id, req.tenantOrgId);
+    if (!vessel) { sendNotFound(res, "Vessel"); return; }
     const events = await db.select().from(vesselsEventsTable).where(eq(vesselsEventsTable.vesselId, id)).orderBy(desc(vesselsEventsTable.occurredAt));
     sendSuccess(res, events);
   } catch (err) { handleRouteError(res, err, "Failed to list vessel events"); }
 });
 
-router.post("/vessels/events", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
-  try {
-    const data = insertVesselsExceptionEventSchema.parse(req.body);
-    const [event] = await db.insert(vesselsEventsTable).values(data).returning();
-    sendCreated(res, event);
-  } catch (err) { handleRouteError(res, err, "Failed to create vessel event"); }
+// ─── PATCH schemas — typed, enum-constrained, whitelist-only (no ownership fields) ───
+
+const patchVesselEventSchema = z.object({
+  status: z.enum(["open", "acknowledged", "assigned", "resolved"]).optional(),
+  assignedTo: z.string().max(255).nullable().optional(),
+  notes: z.string().max(4000).optional(),
 });
 
-router.patch("/vessels/events/:id", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+const patchVesselCommandWorkflowSchema = z.object({
+  status: z.enum(["pending", "in_progress", "completed", "failed"]).optional(),
+  notes: z.string().max(4000).optional(),
+  assignedTo: z.string().max(255).nullable().optional(),
+  consequenceImpact: z.string().max(2000).optional(),
+});
+
+router.patch("/vessels/events/:id", authMiddleware(), tenantScope(), validateBody(jsonObjectBodySchema), async (req: Request, res) => {
   try {
     const id = parseIdParam(req.params.id);
-    const { status, assignedTo, ...rest } = req.body;
-    const updateData: Record<string, unknown> = { ...rest };
-    if (status) updateData.status = status;
-    if (assignedTo !== undefined) updateData.assignedTo = assignedTo;
-    if (status === "acknowledged") updateData.acknowledgedAt = new Date();
-    if (status === "resolved") updateData.resolvedAt = new Date();
+    // Strict schema: enum-constrained, length-bounded, no unknown keys allowed
+    const parseResult = patchVesselEventSchema.strict().safeParse(req.body);
+    if (!parseResult.success) {
+      const errors = parseResult.error.issues.map(i => `${(i.path ?? []).join(".") || "(root)"}: ${i.message}`).join("; ");
+      res.status(400).json({ error: `Validation error: ${errors}`, issues: parseResult.error.issues });
+      return;
+    }
+    const patch = parseResult.data;
+    if (Object.keys(patch).length === 0) { res.status(400).json({ error: "At least one field is required for update" }); return; }
+    const [existing] = await db.select().from(vesselsEventsTable).where(eq(vesselsEventsTable.id, id));
+    if (!existing) { sendNotFound(res, "Vessel event"); return; }
+    const vessel = await getVesselInOrg(existing.vesselId, req.tenantOrgId);
+    if (!vessel) { sendNotFound(res, "Vessel event"); return; }
+    const updateData: Record<string, unknown> = {};
+    if (patch.status !== undefined) updateData.status = patch.status;
+    if (patch.assignedTo !== undefined) updateData.assignedTo = patch.assignedTo;
+    if (patch.notes !== undefined) updateData.notes = patch.notes;
+    if (patch.status === "acknowledged") updateData.acknowledgedAt = new Date();
+    if (patch.status === "resolved") updateData.resolvedAt = new Date();
     const [event] = await db.update(vesselsEventsTable).set(updateData).where(eq(vesselsEventsTable.id, id)).returning();
     if (!event) { sendNotFound(res, "Vessel event"); return; }
     sendSuccess(res, event);
   } catch (err) { handleRouteError(res, err, "Failed to update vessel event"); }
 });
 
-router.get("/vessels/command-workflows", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
-  try {
-    const vesselId = req.query.vesselId ? parseInt(req.query.vesselId as string, 10) : undefined;
-    const status = req.query.status as string | undefined;
-    const workflows = await db.select().from(vesselsCommandWorkflowsTable).orderBy(desc(vesselsCommandWorkflowsTable.createdAt));
-    const filtered = workflows.filter(w => {
-      if (vesselId && w.vesselId !== vesselId) return false;
-      if (status && w.status !== status) return false;
-      return true;
-    });
-    sendSuccess(res, filtered);
-  } catch (err) { handleRouteError(res, err, "Failed to list command workflows"); }
-});
+// ─── Command Workflows (org-scoped via parent vessel ownership) ───────────────
 
-router.post("/vessels/command-workflows", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
-  try {
-    const data = insertVesselCommandWorkflowSchema.parse(req.body);
-    const [workflow] = await db.insert(vesselsCommandWorkflowsTable).values(data).returning();
-    sendCreated(res, workflow);
-  } catch (err) { handleRouteError(res, err, "Failed to create command workflow"); }
-});
-
-router.patch("/vessels/command-workflows/:id", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/vessels/command-workflows/:id", authMiddleware(), tenantScope(), validateBody(jsonObjectBodySchema), async (req: Request, res) => {
   try {
     const id = parseIdParam(req.params.id);
-    const { status, assignedTo, notes, ...rest } = req.body;
-    const updateData: Record<string, unknown> = { ...rest, updatedAt: new Date() };
-    if (status) updateData.status = status;
-    if (assignedTo !== undefined) updateData.assignedTo = assignedTo;
-    if (notes !== undefined) updateData.notes = notes;
-    if (status === "completed") updateData.completedAt = new Date();
+    // Strict schema: enum-constrained, length-bounded, no unknown keys allowed
+    const parseResult = patchVesselCommandWorkflowSchema.strict().safeParse(req.body);
+    if (!parseResult.success) {
+      const errors = parseResult.error.issues.map(i => `${(i.path ?? []).join(".") || "(root)"}: ${i.message}`).join("; ");
+      res.status(400).json({ error: `Validation error: ${errors}`, issues: parseResult.error.issues });
+      return;
+    }
+    const patch = parseResult.data;
+    if (Object.keys(patch).length === 0) { res.status(400).json({ error: "At least one field is required for update" }); return; }
+    const [existing] = await db.select().from(vesselsCommandWorkflowsTable).where(eq(vesselsCommandWorkflowsTable.id, id));
+    if (!existing) { sendNotFound(res, "Command workflow"); return; }
+    if (existing.vesselId) {
+      const vessel = await getVesselInOrg(existing.vesselId, req.tenantOrgId);
+      if (!vessel) { sendNotFound(res, "Command workflow"); return; }
+    }
+    const updateData: Record<string, unknown> = { updatedAt: new Date() };
+    if (patch.status !== undefined) updateData.status = patch.status;
+    if (patch.notes !== undefined) updateData.notes = patch.notes;
+    if (patch.assignedTo !== undefined) updateData.assignedTo = patch.assignedTo;
+    if (patch.consequenceImpact !== undefined) updateData.consequenceImpact = patch.consequenceImpact;
+    if (patch.status === "completed") updateData.completedAt = new Date();
     const [workflow] = await db.update(vesselsCommandWorkflowsTable).set(updateData).where(eq(vesselsCommandWorkflowsTable.id, id)).returning();
     if (!workflow) { sendNotFound(res, "Command workflow"); return; }
     sendSuccess(res, workflow);

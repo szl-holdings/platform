@@ -45,6 +45,7 @@ import {
   toolMeshToolVersionsTable,
   toolMeshToolPermissionsTable,
   toolMeshActionApprovalsTable,
+  auditEventsTable,
   type GuardianPolicy,
   type GuardianPolicyAssignment,
   type ToolMeshTool,
@@ -61,6 +62,28 @@ const router: IRouter = Router();
 const GUARDIAN_ALERT_EMAIL = process.env.FOUNDER_ALERT_EMAIL ?? process.env.SZL_INTERNAL_EMAIL ?? "team@szlholdings.com";
 const GUARDIAN_SLACK_WEBHOOK = process.env.SLACK_WEBHOOK_URL;
 const APPROVALS_URL = process.env.APP_URL ? `${process.env.APP_URL}/command/operations/guardian/approvals` : "https://szlholdings.com/command/operations/guardian/approvals";
+
+async function logToolAuditEvent(params: {
+  action: string;
+  entityType: string;
+  entityId: string | null;
+  newValues?: Record<string, unknown>;
+  req: Request;
+}) {
+  try {
+    await db.insert(auditEventsTable).values({
+      userId: params.req.user?.id ?? null,
+      action: params.action,
+      entityType: params.entityType,
+      entityId: params.entityId ?? undefined,
+      newValues: params.newValues ?? null,
+      ipAddress: params.req.ip ?? null,
+      userAgent: params.req.get("user-agent") ?? null,
+    });
+  } catch (err) {
+    logger.error({ err, action: params.action }, "Failed to write tool audit event");
+  }
+}
 
 async function notifyApprovalQueueFilled(params: {
   requestId: string;
@@ -531,6 +554,7 @@ router.post("/tools", authMiddleware(), requireRole("super_admin", "admin"), val
     const manifest = toolRowToManifest(inserted);
     defaultToolRegistry.register(manifest);
     logger.info({ toolId: manifest.id, policyTier: manifest.policyTier }, "Tool registered");
+    await logToolAuditEvent({ action: "tool.register", entityType: "tool", entityId: manifest.id, newValues: { policyTier: manifest.policyTier, version: manifest.version }, req });
     sendCreated(res, manifest);
   } catch (err) {
     handleRouteError(res, err, "Failed to register tool");
@@ -572,6 +596,7 @@ router.patch("/tools/:toolId", authMiddleware(), requireRole("super_admin", "adm
 
     const manifest = toolRowToManifest(updated);
     defaultToolRegistry.register(manifest);
+    await logToolAuditEvent({ action: "tool.update", entityType: "tool", entityId: manifest.id, newValues: { policyTier: manifest.policyTier, version: manifest.version, versionChanged }, req });
     sendSuccess(res, manifest);
   } catch (err) {
     handleRouteError(res, err, "Failed to update tool");
@@ -602,6 +627,7 @@ router.post("/tools/:toolId/versions", authMiddleware(), requireRole("super_admi
       schemaSnapshot: body.schemaSnapshot ?? {}, publishedById: req.user?.id ?? null,
     }).onConflictDoNothing({ target: [toolMeshToolVersionsTable.toolDbId, toolMeshToolVersionsTable.version] }).returning();
     if (!inserted) { sendBadRequest(res, `Version ${body.version} already exists for tool ${toolId}`); return; }
+    await logToolAuditEvent({ action: "tool.version.add", entityType: "tool_version", entityId: toolId, newValues: { version: body.version }, req });
     sendCreated(res, versionRowToApi(inserted));
   } catch (err) {
     handleRouteError(res, err, "Failed to create tool version");
@@ -638,6 +664,7 @@ router.post("/tools/:toolId/permissions", authMiddleware(), requireRole("super_a
       handleRouteError(res, new Error("insert returned no row"), "Failed to grant permission");
       return;
     }
+    await logToolAuditEvent({ action: "tool.permission.grant", entityType: "tool_permission", entityId: toolId, newValues: { subjectType: body.subjectType, subjectId: body.subjectId, permission }, req });
     sendCreated(res, permissionRowToApi(inserted));
   } catch (err) {
     handleRouteError(res, err, "Failed to grant tool permission");
@@ -653,6 +680,7 @@ router.delete("/tools/:toolId/permissions/:permissionId", authMiddleware(), requ
     if (!tool) { sendNotFound(res, "Tool not found"); return; }
     const deleted = await db.delete(toolMeshToolPermissionsTable).where(and(eq(toolMeshToolPermissionsTable.id, permissionId), eq(toolMeshToolPermissionsTable.toolDbId, tool.id))).returning({ id: toolMeshToolPermissionsTable.id });
     if (deleted.length === 0) { sendNotFound(res, "Permission not found"); return; }
+    await logToolAuditEvent({ action: "tool.permission.revoke", entityType: "tool_permission", entityId: toolId, newValues: { permissionId }, req });
     sendSuccess(res, { deleted: true });
   } catch (err) {
     handleRouteError(res, err, "Failed to revoke tool permission");
