@@ -20,8 +20,8 @@ const NAV_ITEMS = [
 ];
 
 interface CognitiveLayoutProps {
-  title: string;
-  subtitle: string;
+  title?: string;
+  subtitle?: string;
   children: ReactNode;
 }
 
@@ -67,13 +67,15 @@ export function CognitiveLayout({ title, subtitle, children }: CognitiveLayoutPr
         </div>
       </div>
       <div style={{ maxWidth: 1280, margin: "0 auto", padding: "24px 20px" }}>
-        <div style={{ marginBottom: 24 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 6 }}>
-            <span style={{ fontSize: 22, fontWeight: 700, color: "#e2e8f0" }}>{title}</span>
-            <span style={{ fontSize: 10, color: ACCENT, background: `${ACCENT}18`, padding: "2px 10px", borderRadius: 20, border: `1px solid ${ACCENT}40`, fontWeight: 600, letterSpacing: 1 }}>COGNITIVE</span>
+        {title && (
+          <div style={{ marginBottom: 24 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 6 }}>
+              <span style={{ fontSize: 22, fontWeight: 700, color: "#e2e8f0" }}>{title}</span>
+              <span style={{ fontSize: 10, color: ACCENT, background: `${ACCENT}18`, padding: "2px 10px", borderRadius: 20, border: `1px solid ${ACCENT}40`, fontWeight: 600, letterSpacing: 1 }}>COGNITIVE</span>
+            </div>
+            {subtitle && <p style={{ color: "#64748b", fontSize: 13, margin: 0 }}>{subtitle}</p>}
           </div>
-          <p style={{ color: "#64748b", fontSize: 13, margin: 0 }}>{subtitle}</p>
-        </div>
+        )}
         {children}
       </div>
     </div>

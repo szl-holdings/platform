@@ -10,7 +10,7 @@ import {
   index,
 } from "drizzle-orm/pg-core";
 
-export const skillsTable = pgTable(
+export const skillLibraryTable = pgTable(
   "skills",
   {
     id: serial("id").primaryKey(),
@@ -47,7 +47,7 @@ export const skillsTable = pgTable(
   ]
 );
 
-export const skillRunsTable = pgTable(
+export const skillLibraryRunsTable = pgTable(
   "skill_runs",
   {
     id: serial("id").primaryKey(),
@@ -70,5 +70,5 @@ export const skillRunsTable = pgTable(
   ]
 );
 
-export type SkillRow = typeof skillsTable.$inferSelect;
-export type SkillRunRow = typeof skillRunsTable.$inferSelect;
+export type SkillLibraryRow = typeof skillLibraryTable.$inferSelect;
+export type SkillLibraryRunRow = typeof skillLibraryRunsTable.$inferSelect;
