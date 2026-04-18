@@ -137,6 +137,9 @@ const GovernedDecisionLoop = lazy(() => import("@lyte/pages/governed-decision-lo
 const CognitiveRuntime = lazy(() => import("@lyte/pages/cognitive-runtime"));
 const AIQualityDashboard = lazy(() => import("@lyte/pages/ai-quality-dashboard"));
 
+const PrismAtlasExecute = lazy(() => import("./operations/pages/atlas-execute"));
+const ImperiumAtlasExecute = lazy(() => import("./infrastructure/pages/atlas-execute"));
+
 const LegatusConsole = lazy(() => import("@imp/pages/legatus-console"));
 const ImperiumMap = lazy(() => import("@imp/pages/imperium-map"));
 const PraetorianGuard = lazy(() => import("@imp/pages/praetorian-guard"));
@@ -245,6 +248,7 @@ function AppShell() {
               <Route path="/operations/prism/intelligence" component={() => <PrismDashboard />} />
               <Route path="/operations/prism/signals" component={() => <DemoSignals />} />
               <Route path="/operations/prism/motion" component={() => <ActionQueue />} />
+              <Route path="/operations/prism/atlas-execute" component={() => <PrismAtlasExecute />} />
               <Route path="/operations/blocker-board" component={() => <BlockerBoard />} />
               <Route path="/operations/what-changed" component={() => <WhatChangedPage />} />
               <Route path="/operations/deployments" component={() => <DeploymentsPage />} />
@@ -330,6 +334,7 @@ function AppShell() {
               <Route path="/infrastructure/directives" component={() => <DirectiveCascade />} />
               <Route path="/infrastructure/coalition" component={() => <Coalition />} />
               <Route path="/infrastructure/reserves" component={() => <StrategicReserves />} />
+              <Route path="/infrastructure/imperium/atlas-execute" component={() => <ImperiumAtlasExecute />} />
 
               <Route>
                 <div className="flex items-center justify-center h-64 text-slate-400 text-sm">Page not found</div>

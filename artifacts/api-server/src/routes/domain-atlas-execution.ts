@@ -31,7 +31,7 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { z } from "zod";
 import { authMiddleware } from "../middlewares/auth.js";
-import { sendSuccess, sendCreated, sendBadRequest, sendNotFound, handleRouteError } from "../lib/api-response.js";
+import { sendSuccess, sendCreated, sendBadRequest, sendNotFound, sendForbidden, handleRouteError } from "../lib/api-response.js";
 import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation.js";
 import { logger } from "../lib/logger.js";
 import {
@@ -52,7 +52,7 @@ import {
   DOMAIN_WORKFLOWS,
   type AtlasSignalRecord,
 } from "../lib/atlas-execution-engine.js";
-import { dbListRuns, dbGetRunById } from "../lib/decisioning-store.js";
+import { dbListRuns, dbGetRunById, dbCancelRun, dbApproveRun } from "../lib/decisioning-store.js";
 
 initializeAtlasExecutionEngine();
 
@@ -403,6 +403,75 @@ function buildDomainRoutes(domain: string): void {
       sendSuccess(res, { domain, run });
     } catch (err) {
       handleRouteError(res, err, "Failed to get run");
+    }
+  });
+
+  // ── POST /:domain/atlas/runs/:runId/approve ─────────────────────────────────
+  router.post(`${prefix}/runs/:runId/approve`, authMiddleware({ required: true }), async (req: Request, res: Response) => {
+    try {
+      const { runId } = req.params;
+      const tenantId = req.user?.orgs?.[0]?.orgId?.toString();
+      const approvedBy = `user:${String(req.user!.id)}`;
+
+      // Fetch the paused run to extract workflow context for continuation
+      const existing = await dbGetRunById(runId as string, tenantId);
+      if (!existing) { sendNotFound(res, "Run not found"); return; }
+      if (!["pending", "pending_approval", "awaiting_approval"].includes(existing.status)) {
+        sendBadRequest(res, `Run is not in an approvable state (status: ${existing.status})`); return;
+      }
+
+      // Derive workflow context from the stored run
+      const existingMeta = existing.metadata as Record<string, unknown> | null;
+      const signalIds = Array.isArray(existingMeta?.signalIds) ? (existingMeta.signalIds as string[]) : undefined;
+      const workflowKey = existing.workflowId ?? Object.keys(DOMAIN_WORKFLOWS).find(k => k.startsWith(`${domain}.`));
+      if (!workflowKey || !DOMAIN_WORKFLOWS[workflowKey]) {
+        sendBadRequest(res, `Cannot continue run: workflow key '${workflowKey}' not found`); return;
+      }
+
+      // Check that the current user holds the role required by the approval step
+      type WFStep = { requiresApproval?: boolean; approverRole?: string };
+      const approvalStep = (DOMAIN_WORKFLOWS[workflowKey].steps as WFStep[]).find(s => s.requiresApproval);
+      const requiredRole = approvalStep?.approverRole;
+      if (requiredRole) {
+        const userRoles: string[] = (req.user!.roles as string[]) ?? [];
+        const isSuperAdmin = userRoles.includes("super_admin") || userRoles.includes("admin");
+        if (!isSuperAdmin && !userRoles.includes(requiredRole)) {
+          sendForbidden(res, `Insufficient role: '${requiredRole}' required to approve this run`); return;
+        }
+      }
+
+      // Mark the original pending run as approved in the DB
+      await dbApproveRun(runId as string, tenantId, approvedBy);
+
+      const result = await executedomainWorkflow({
+        domain,
+        workflowKey,
+        signalIds,
+        approvedBy,
+        tenantId,
+        initiatedBy: approvedBy,
+        metadata: { continuationOf: runId as string },
+      });
+
+      logger.info({ domain, runId, approvedBy, newRunId: result.run.runId }, "domain-atlas:run:approved+continued");
+      sendSuccess(res, { domain, runId, status: "approved", approvedBy, continuationRun: result.run });
+    } catch (err) {
+      handleRouteError(res, err, "Failed to approve run");
+    }
+  });
+
+  // ── POST /:domain/atlas/runs/:runId/cancel ──────────────────────────────────
+  router.post(`${prefix}/runs/:runId/cancel`, authMiddleware({ required: true }), async (req: Request, res: Response) => {
+    try {
+      const { runId } = req.params;
+      const tenantId = req.user?.orgs?.[0]?.orgId?.toString();
+      const rejectedBy = `user:${String(req.user!.id)}`;
+      const cancelled = await dbCancelRun(runId as string, tenantId, rejectedBy);
+      if (!cancelled) { sendNotFound(res, "Run not found or already completed"); return; }
+      logger.info({ domain, runId, rejectedBy }, "domain-atlas:run:rejected");
+      sendSuccess(res, { domain, runId, status: "rejected" });
+    } catch (err) {
+      handleRouteError(res, err, "Failed to cancel run");
     }
   });
 

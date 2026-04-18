@@ -72,6 +72,7 @@ const KnowledgeVault = lazy(() => import("@/pages/knowledge-vault"));
 const BenchmarkDatabase = lazy(() => import("@/pages/benchmark-database"));
 const DeliverableWorkflow = lazy(() => import("@/pages/deliverable-workflow"));
 const ProfitabilityAnalytics = lazy(() => import("@/pages/profitability-analytics"));
+const CarlotaJoAtlasExecute = lazy(() => import("@/pages/atlas-execute"));
 
 function PageLoader() {
   return (
@@ -187,6 +188,7 @@ function Router() {
         <Route path="/benchmark-database" component={BenchmarkDatabase} />
         <Route path="/deliverable-workflow" component={DeliverableWorkflow} />
         <Route path="/profitability-analytics" component={ProfitabilityAnalytics} />
+        <Route path="/atlas-execute" component={CarlotaJoAtlasExecute} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>

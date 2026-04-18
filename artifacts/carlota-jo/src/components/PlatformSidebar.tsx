@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import {
   Cpu, FileText, Network, Radar, Activity, Heart, TrendingUp,
   GraduationCap, Users, FolderOpen, Clock, BookOpen, BarChart3,
-  CheckCircle, ChevronDown, Sparkles, Lightbulb,
+  CheckCircle, ChevronDown, Sparkles, Lightbulb, Zap,
 } from "lucide-react";
 
 type NavItem = {
@@ -42,9 +42,14 @@ const OPERATIONS: NavItem[] = [
   { href: "/profitability-analytics", label: "Profitability Analytics", icon: TrendingUp },
 ];
 
+const ATLAS_ITEMS: NavItem[] = [
+  { href: "/atlas-execute", label: "Run Workflow", icon: Zap },
+];
+
 const GROUPS: NavGroup[] = [
   { id: "advisory", label: "Advisory", items: ADVISORY },
   { id: "operations", label: "Operations", items: OPERATIONS },
+  { id: "atlas", label: "ATLAS Execution", items: ATLAS_ITEMS },
 ];
 
 const GOLD = "var(--color-gold)";

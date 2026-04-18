@@ -183,6 +183,48 @@ export async function dbUpdateRunOutcome(
   }
 }
 
+const CANCELLABLE_STATUSES = `('pending', 'pending_approval', 'awaiting_approval', 'running', 'started')`;
+
+export async function dbCancelRun(runId: string, tenantId?: string, rejectedBy?: string): Promise<boolean> {
+  try {
+    const tenantClause = tenantId ? `AND (tenant_id = $4 OR tenant_id IS NULL)` : `AND tenant_id IS NULL`;
+    const params: unknown[] = ["rejected", rejectedBy ?? "operator", runId];
+    if (tenantId) params.push(tenantId);
+    const result = await pool.query(
+      `UPDATE szl_decisioning_runs
+       SET status = $1, outcome = $1, outcome_recorded_by = $2,
+           outcome_recorded_at = NOW(), completed_at = NOW()
+       WHERE run_id = $3 ${tenantClause}
+       AND status IN ${CANCELLABLE_STATUSES}`,
+      params,
+    );
+    return (result.rowCount ?? 0) > 0;
+  } catch (err) {
+    logger.warn({ err, runId }, "[DecisioningStore] Failed to cancel run");
+    return false;
+  }
+}
+
+export async function dbApproveRun(runId: string, tenantId?: string, approvedBy?: string): Promise<boolean> {
+  try {
+    const tenantClause = tenantId ? `AND (tenant_id = $4 OR tenant_id IS NULL)` : `AND tenant_id IS NULL`;
+    const params: unknown[] = ["approved", approvedBy ?? "operator", runId];
+    if (tenantId) params.push(tenantId);
+    const result = await pool.query(
+      `UPDATE szl_decisioning_runs
+       SET status = $1, outcome = $1, outcome_recorded_by = $2,
+           outcome_recorded_at = NOW()
+       WHERE run_id = $3 ${tenantClause}
+       AND status IN ${CANCELLABLE_STATUSES}`,
+      params,
+    );
+    return (result.rowCount ?? 0) > 0;
+  } catch (err) {
+    logger.warn({ err, runId }, "[DecisioningStore] Failed to approve run");
+    return false;
+  }
+}
+
 export async function dbGetHistoryStats(): Promise<{
   totalRuns: number;
   byStatus: Record<string, number>;

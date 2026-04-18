@@ -36,6 +36,7 @@ if (typeof window !== "undefined") {
 const TerraPulse = lazy(() => import("@/pages/pulse"));
 const DecisionCenterPage = lazy(() => import("@/pages/decision-center"));
 const TerraAtlasArtifactsPage = lazy(() => import("@/pages/atlas-artifacts"));
+const TerraAtlasExecutePage = lazy(() => import("@/pages/atlas-execute"));
 const Dashboard = lazy(() => import("@/pages/dashboard"));
 const DistressEngine = lazy(() => import("@/pages/distress-engine"));
 const Deals = lazy(() => import("@/pages/deals"));
@@ -187,6 +188,7 @@ function PrivateRouter() {
         <Route path="/construction-monitor" component={ConstructionMonitor} />
         <Route path="/tenant-screening" component={TenantScreening} />
         <Route path="/atlas-runtime" component={TerraAtlasRuntimePage} />
+        <Route path="/atlas-execute" component={TerraAtlasExecutePage} />
         <Route path="/replay" component={TerraReplayPage} />
         <Route path="/scenario-branches" component={TerraScenarioBranchesPage} />
         <Route path="/constellation" component={TerraConstellationPage} />

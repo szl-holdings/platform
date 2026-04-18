@@ -199,6 +199,7 @@ const VesselsTeamPanelPage = lazy(() => import("@/pages/team-panel"));
 const VesselsAuditLogPanelPage = lazy(() => import("@/pages/audit-log-panel"));
 const DecisionCenterPage = lazy(() => import("@/pages/decision-center"));
 const VesselsAtlasRuntimePage = lazy(() => import("@/pages/atlas-runtime"));
+const VesselsAtlasExecutePage = lazy(() => import("@/pages/atlas-execute"));
 const VesselsReplayPage = lazy(() => import("@/pages/replay"));
 const VesselsScenarioBranchesPage = lazy(() => import("@/pages/scenario-branches"));
 const OwnerCargoGraphPage = lazy(() => import("@/pages/owner-cargo-graph"));
@@ -353,6 +354,7 @@ function VesselsSidebarContent({ expanded, onMobileClose, onToggleCollapse }: { 
       id: "atlas-runtime",
       label: "ATLAS Spatial Runtime",
       items: [
+        { id: "atlas-execute", label: "Run Workflow", href: "/atlas-execute", icon: <Zap className="w-3.5 h-3.5" /> },
         { id: "atlas-runtime", label: "Route Memory Twin", href: "/atlas-runtime", icon: <Layers className="w-3.5 h-3.5" /> },
         { id: "voyage-replay", label: "Voyage Replay", href: "/replay", icon: <RotateCcw className="w-3.5 h-3.5" /> },
         { id: "scenario-branches", label: "Scenario Branches", href: "/scenario-branches", icon: <GitBranch className="w-3.5 h-3.5" /> },
@@ -623,6 +625,7 @@ function DashboardRouter() {
         <Route path="/insurance-panel" component={InsurancePanelPage} />
         <Route path="/decision-center" component={DecisionCenterPage} />
         <Route path="/atlas-runtime" component={VesselsAtlasRuntimePage} />
+        <Route path="/atlas-execute" component={VesselsAtlasExecutePage} />
         <Route path="/replay" component={VesselsReplayPage} />
         <Route path="/scenario-branches" component={VesselsScenarioBranchesPage} />
         <Route path="/owner-cargo-graph" component={OwnerCargoGraphPage} />

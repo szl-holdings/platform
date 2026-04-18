@@ -75,6 +75,7 @@ const OPERATIONS_NAV: NavGroup[] = [
       { href: "/operations", label: "Executive Command", icon: LayoutDashboard },
       { href: "/operations/prism/pulse", label: "Pulse", icon: Heart },
       { href: "/operations/prism/signals", label: "Signal Feed", icon: Radio },
+      { href: "/operations/prism/atlas-execute", label: "ATLAS Execute", icon: Play },
       { href: "/operations/blocker-board", label: "Blocker Board", icon: AlertTriangle },
       { href: "/operations/approvals", label: "Approvals", icon: CheckSquare },
       { href: "/operations/policy-approvals", label: "Policy Approvals", icon: ShieldCheck },
@@ -134,6 +135,7 @@ const INFRASTRUCTURE_NAV: NavGroup[] = [
       { href: "/infrastructure", label: "Executive Console", icon: Crown },
       { href: "/infrastructure/intelligence", label: "Intelligence Briefing", icon: Radio },
       { href: "/infrastructure/imperium-map", label: "Resource Map", icon: Map },
+      { href: "/infrastructure/imperium/atlas-execute", label: "ATLAS Execute", icon: Play },
     ],
   },
   {

@@ -1,7 +1,7 @@
 import { lazy, Suspense, useState, useCallback, useEffect } from "react";
 import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Layers, RotateCcw, GitBranch, Shield, Menu, X, ChevronRight, Presentation } from "lucide-react";
+import { Layers, RotateCcw, GitBranch, Shield, Menu, X, ChevronRight, Presentation, Play } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 
 import S01Cover from "./pages/slides/S01Cover";
@@ -17,6 +17,7 @@ import S09Ask from "./pages/slides/S09Ask";
 const AegisAtlasRuntime = lazy(() => import("./pages/atlas-runtime"));
 const AegisReplay = lazy(() => import("./pages/replay"));
 const AegisScenarioBranches = lazy(() => import("./pages/scenario-branches"));
+const AegisAtlasExecute = lazy(() => import("./pages/atlas-execute"));
 
 const SLIDES = [S01Cover, S02SeriesProblem, S03Category, S04Product, S05Demo, S06Market, S07SeriesDomains, S08BusinessModel, S09Ask];
 const TOTAL = SLIDES.length;
@@ -31,6 +32,7 @@ const ATLAS_NAV = [
   { path: "/atlas-runtime", label: "Threat Twin", icon: Layers },
   { path: "/replay", label: "Incident Replay", icon: RotateCcw },
   { path: "/scenario-branches", label: "Scenario Branches", icon: GitBranch },
+  { path: "/atlas-execute", label: "ATLAS Execute", icon: Play },
 ];
 
 function PageLoader() {
@@ -252,6 +254,13 @@ function AppRoutes() {
         <AtlasDashboardLayout>
           <Suspense fallback={<PageLoader />}>
             <AegisScenarioBranches />
+          </Suspense>
+        </AtlasDashboardLayout>
+      </Route>
+      <Route path="/atlas-execute">
+        <AtlasDashboardLayout>
+          <Suspense fallback={<PageLoader />}>
+            <AegisAtlasExecute />
           </Suspense>
         </AtlasDashboardLayout>
       </Route>

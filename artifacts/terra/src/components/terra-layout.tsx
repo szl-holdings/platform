@@ -11,7 +11,7 @@ import {
   Shield, Layers, Radio, Search, PieChart, PanelLeftClose, PanelLeftOpen,
   Camera, Hammer, Box, DollarSign, Scale, Ruler, FileSearch,
   ClipboardList, TrendingDown, RefreshCw, Calculator, Percent, UserCheck, HardHat, GitBranch, Network,
-  Brain, GitMerge, AlertTriangle, Landmark, MapPin
+  Brain, GitMerge, AlertTriangle, Landmark, MapPin, Zap
 } from "lucide-react";
 import { useRealtimeChannel, RealtimeStatusIndicator, GettingStartedChecklist, OnboardingWizard, useOnboardingState, type OnboardingConfig } from "@szl-holdings/shared-ui";
 import { useOnboardingAnalytics } from "@szl-holdings/shared-ui/onboarding";
@@ -65,6 +65,7 @@ const NAV_SECTIONS: SidebarNavSection[] = [
     id: "atlas-runtime",
     label: "ATLAS Spatial Runtime",
     items: [
+      { id: "atlas-execute", href: "/atlas-execute", label: "Run Workflow", icon: <Zap className="w-full h-full" /> },
       { id: "atlas-runtime", href: "/atlas-runtime", label: "Property Twin", icon: <Layers className="w-full h-full" /> },
       { id: "property-replay", href: "/replay", label: "Property Replay", icon: <RefreshCw className="w-full h-full" /> },
       { id: "scenario-branches", href: "/scenario-branches", label: "Scenario Branches", icon: <GitBranch className="w-full h-full" /> },
