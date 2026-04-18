@@ -6,6 +6,7 @@ import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { DataStateBadge } from "@/components/DataStateBadge";
 import { usePageMeta } from "@/hooks/usePageMeta";
+import { useUtm } from "@/hooks/useUtm";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 import { analytics } from "@/lib/analytics";
 
@@ -263,6 +264,7 @@ export default function DemoPage() {
   const [accessErrors, setAccessErrors] = useState<Record<string, string>>({});
   const [accessSubmitting, setAccessSubmitting] = useState(false);
   const [accessSent, setAccessSent] = useState(false);
+  const utms = useUtm();
 
   const pack = PACKS[selectedPack];
 
@@ -297,6 +299,10 @@ export default function DemoPage() {
           company: accessForm.company.trim(),
           subject: `Demo Access Request — ${pack.name}`,
           message: `Demo access request from ${accessForm.name.trim()} at ${accessForm.company.trim()} for ${pack.name}. Email: ${accessForm.email.trim()}`,
+          ...(utms.utm_source ? { utm_source: utms.utm_source } : {}),
+          ...(utms.utm_medium ? { utm_medium: utms.utm_medium } : {}),
+          ...(utms.utm_campaign ? { utm_campaign: utms.utm_campaign } : {}),
+          ...(utms.utm_content ? { utm_content: utms.utm_content } : {}),
         }),
       });
       if (response.status === 201 || response.ok) {

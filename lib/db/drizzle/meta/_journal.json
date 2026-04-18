@@ -337,6 +337,13 @@
       "when": 1776461300000,
       "tag": "0054_fix_auth_timestamp_timezone",
       "breakpoints": true
+    },
+    {
+      "idx": 58,
+      "version": "7",
+      "when": 1776475200000,
+      "tag": "0058_holdings_inquiries_utm",
+      "breakpoints": true
     }
   ]
 }

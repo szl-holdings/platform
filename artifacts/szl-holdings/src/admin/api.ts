@@ -17,6 +17,7 @@ export interface Faq { id: number; siteId: number; question: string; answerRicht
 export interface Cta { id: number; siteId: number; label: string; url: string; variant?: string; helperText?: string; }
 export interface NavigationItem { id: number; siteId: number; navGroup: string; label: string; url: string; sortOrder: number; isEnabled: boolean; }
 export interface ContactSubmission { id: number; formKey: string; fullName: string; email: string; company?: string; message?: string; createdAt: string; }
+export interface HoldingsInquiry { id: number; name: string; email: string; company?: string; subject: string; message: string; status: string; utmSource?: string; utmMedium?: string; utmCampaign?: string; utmContent?: string; createdAt: string; }
 export interface Service { id: number; siteId: number; slug: string; title: string; shortDescription?: string; category?: string; isFeatured: boolean; sortOrder: number; }
 
 export async function apiFetch<T>(path: string, opts?: RequestInit): Promise<T> {

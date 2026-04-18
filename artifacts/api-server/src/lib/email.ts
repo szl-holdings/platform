@@ -326,7 +326,12 @@ export function buildLeadNotificationEmail(inquiry: {
   message: string;
   intent?: string;
   source?: string;
+  utm_source?: string;
+  utm_medium?: string;
+  utm_campaign?: string;
+  utm_content?: string;
 }): string {
+  const hasUtm = inquiry.utm_source || inquiry.utm_medium || inquiry.utm_campaign || inquiry.utm_content;
   return szlBrand(`
     <h2>New Inquiry Received</h2>
     <p>A new inquiry has been submitted through the SZL Holdings contact form.</p>
@@ -342,7 +347,14 @@ export function buildLeadNotificationEmail(inquiry: {
       <p class="label" style="margin-top:8px;">Intent</p>
       <p>${inquiry.intent}</p>` : ""}${inquiry.source ? `
       <p class="label" style="margin-top:8px;">Source</p>
-      <p>${inquiry.source}</p>` : ""}
+      <p>${inquiry.source}</p>` : ""}${hasUtm ? `
+      <p class="label" style="margin-top:8px;">Attribution</p>
+      <p>${[
+        inquiry.utm_source ? `source: ${inquiry.utm_source}` : "",
+        inquiry.utm_medium ? `medium: ${inquiry.utm_medium}` : "",
+        inquiry.utm_campaign ? `campaign: ${inquiry.utm_campaign}` : "",
+        inquiry.utm_content ? `content: ${inquiry.utm_content}` : "",
+      ].filter(Boolean).join(" · ")}</p>` : ""}
     </div>
     <p>Review and respond in the admin panel or reply directly to this email.</p>
     <a class="cta" href="${process.env.VITE_APP_URL || "https://szlholdings.com"}/admin">Open Admin</a>

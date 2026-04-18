@@ -87,6 +87,10 @@ const createInquirySchema = z.object({
   company: z.string().max(200).trim().optional(),
   intent: z.string().max(200).trim().optional(),
   source: z.string().max(200).trim().optional(),
+  utm_source: z.string().max(200).trim().optional(),
+  utm_medium: z.string().max(200).trim().optional(),
+  utm_campaign: z.string().max(200).trim().optional(),
+  utm_content: z.string().max(200).trim().optional(),
 });
 
 const router: IRouter = Router();
@@ -431,7 +435,7 @@ const inquiryRateLimit = rateLimit({
 });
 
 router.post("/holdings/inquiries", inquiryRateLimit, validateBody(createInquirySchema), (req, res) => {
-  const { name, email, subject, message, company, intent, source } = req.body as z.infer<typeof createInquirySchema>;
+  const { name, email, subject, message, company, intent, source, utm_source, utm_medium, utm_campaign, utm_content } = req.body as z.infer<typeof createInquirySchema>;
 
   const metadata: Record<string, string> = {};
   if (intent) metadata.intent = intent;
@@ -441,6 +445,10 @@ router.post("/holdings/inquiries", inquiryRateLimit, validateBody(createInquiryS
     name, email,
     company: company ?? null,
     subject, message,
+    utmSource: utm_source ?? null,
+    utmMedium: utm_medium ?? null,
+    utmCampaign: utm_campaign ?? null,
+    utmContent: utm_content ?? null,
     ...(Object.keys(metadata).length > 0 ? { metadata } : {}),
   }).returning().then(([row]) => {
     res.status(201).json({ success: true, data: row });
@@ -460,6 +468,10 @@ router.post("/holdings/inquiries", inquiryRateLimit, validateBody(createInquiryS
             subject, message,
             intent,
             source,
+            utm_source,
+            utm_medium,
+            utm_campaign,
+            utm_content,
           }),
           replyTo: email,
         });

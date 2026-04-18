@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 import { CapitalReadinessOS } from "@/components/CapitalReadinessOS";
 import { CertificationReadinessOS } from "@/components/CertificationReadinessOS";
 import { CAPITAL_DOCUMENTS, getDocumentsByChannel } from "@/data/capital-arsenal";
-import { DashboardPanel, SubmissionsPanel, AnalyticsPanel } from "@/admin/CmsTablePanel";
+import { DashboardPanel, SubmissionsPanel, AnalyticsPanel, InquiriesPanel } from "@/admin/CmsTablePanel";
 import { AzureTenantsPanel } from "@/admin/AzurePanel";
 import { RevenuePanel } from "@/admin/RevenuePanel";
 import { BackupPanel } from "@/admin/BackupPanel";
@@ -138,6 +138,7 @@ const ADMIN_SECTIONS = [
   { id: "navigation", label: "Navigation", icon: Navigation },
   { id: "testimonials", label: "Testimonials", icon: MessageSquare },
   { id: "faqs", label: "FAQs", icon: HelpCircle },
+  { id: "inquiries", label: "Lead Inquiries", icon: Users },
   { id: "submissions", label: "Submissions", icon: Mail },
   { id: "feedback", label: "Feedback & NPS", icon: SmilePlus },
   { id: "analytics", label: "Analytics", icon: BarChart3 },
@@ -419,6 +420,7 @@ export default function AdminPage() {
             {activeSection === "navigation" && <NavigationPanel />}
             {activeSection === "testimonials" && <TestimonialsPanel />}
             {activeSection === "faqs" && <FaqsPanel />}
+            {activeSection === "inquiries" && <InquiriesPanel />}
             {activeSection === "submissions" && <SubmissionsPanel />}
             {activeSection === "feedback" && <FeedbackPanel />}
             {activeSection === "analytics" && <AnalyticsPanel />}

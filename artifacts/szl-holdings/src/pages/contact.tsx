@@ -5,6 +5,7 @@ import { ArrowRight, CheckCircle2, Shield } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
+import { useUtm } from "@/hooks/useUtm";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 import { analytics } from "@/lib/analytics";
 
@@ -42,6 +43,7 @@ export default function ContactPage() {
     canonical: "https://szlholdings.com/contact",
   });
 
+  const utms = useUtm();
   const [form, setForm] = useState<FormState>({ name: "", email: "", org: "", type: "demo", message: "" });
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -93,7 +95,14 @@ export default function ContactPage() {
           company: form.org.trim(),
           message,
           app: "szl-holdings",
-          metadata: { inquiryType: form.type, source: "szl-holdings-contact-page" },
+          metadata: {
+            inquiryType: form.type,
+            source: "szl-holdings-contact-page",
+            ...(utms.utm_source ? { utm_source: utms.utm_source } : {}),
+            ...(utms.utm_medium ? { utm_medium: utms.utm_medium } : {}),
+            ...(utms.utm_campaign ? { utm_campaign: utms.utm_campaign } : {}),
+            ...(utms.utm_content ? { utm_content: utms.utm_content } : {}),
+          },
         }),
       });
       if (!res.ok) {
@@ -103,6 +112,23 @@ export default function ContactPage() {
       setSubmitted(true);
       analytics.contactFormSubmit(form.type);
       if (form.type === "demo") analytics.demoRequest("contact-page");
+
+      fetch(`${API}/holdings/inquiries`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          email,
+          company: form.org.trim() || undefined,
+          subject: `Contact: ${INQUIRY_TYPES.find(t => t.value === form.type)?.label ?? form.type}`,
+          message,
+          source: "contact-page",
+          ...(utms.utm_source ? { utm_source: utms.utm_source } : {}),
+          ...(utms.utm_medium ? { utm_medium: utms.utm_medium } : {}),
+          ...(utms.utm_campaign ? { utm_campaign: utms.utm_campaign } : {}),
+          ...(utms.utm_content ? { utm_content: utms.utm_content } : {}),
+        }),
+      }).catch(() => {});
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Something went wrong.";
       toast.error(`${msg} Please try again or email hello@szlholdings.com directly.`);

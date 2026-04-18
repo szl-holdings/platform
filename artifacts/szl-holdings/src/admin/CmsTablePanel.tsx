@@ -4,11 +4,11 @@ import { m, AnimatePresence } from "framer-motion";
 import {
   Plus, Edit3, Trash2, Save, Loader2, X, Mail, BarChart3, RefreshCw,
   Globe, TrendingUp, Users, Activity, ChevronDown, ChevronUp,
-  Building2, FileText,
+  Building2, FileText, Tag,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { apiFetch } from "./api";
-import type { Site, Venture, Article, ContactSubmission } from "./api";
+import type { Site, Venture, Article, ContactSubmission, HoldingsInquiry } from "./api";
 
 // ─── Status Badge ─────────────────────────────────────────────────────────────
 
@@ -378,4 +378,113 @@ function AnalyticsPanel() {
 }
 
 
-export { StatusBadge, DashboardPanel, CmsTablePanel, SubmissionsPanel, AnalyticsPanel };
+// ─── Inquiries Panel ──────────────────────────────────────────────────────────
+
+function InquiriesPanel() {
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: ["holdings-inquiries"],
+    queryFn: () => apiFetch<HoldingsInquiry[]>("/holdings/inquiries"),
+  });
+
+  const inquiries = data ?? [];
+  const [expanded, setExpanded] = useState<number | null>(null);
+
+  const statusColors: Record<string, string> = {
+    new: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+    read: "bg-slate-500/10 text-slate-600 border-slate-500/20",
+    replied: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+    closed: "bg-muted text-muted-foreground border-border",
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
+            <Mail className="w-4 h-4 text-primary" /> Demo &amp; Lead Inquiries
+          </h2>
+          <p className="text-xs text-muted-foreground mt-0.5">{inquiries.length} inquiry{inquiries.length !== 1 ? "ies" : "y"} — with UTM source attribution</p>
+        </div>
+        <button onClick={() => refetch()} className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+          <RefreshCw className="w-4 h-4" />
+        </button>
+      </div>
+      {isLoading ? (
+        <div className="flex items-center justify-center py-12"><Loader2 className="w-5 h-5 text-muted-foreground animate-spin" /></div>
+      ) : inquiries.length === 0 ? (
+        <div className="bg-card border border-border rounded-xl p-8 text-center">
+          <p className="text-sm text-muted-foreground">No inquiries yet. Demo and access request submissions will appear here.</p>
+        </div>
+      ) : (
+        <div className="bg-card border border-border rounded-xl divide-y divide-border/50">
+          {inquiries.map(inq => {
+            const hasUtm = inq.utmSource || inq.utmMedium || inq.utmCampaign || inq.utmContent;
+            return (
+              <div key={inq.id}>
+                <button onClick={() => setExpanded(expanded === inq.id ? null : inq.id)} className="w-full flex items-center justify-between px-4 py-3 hover:bg-muted/20 transition-colors text-left">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className={cn("text-[10px] font-semibold px-2 py-0.5 rounded-full border shrink-0 uppercase tracking-wider", statusColors[inq.status] ?? "bg-muted text-muted-foreground border-border")}>
+                      {inq.status}
+                    </span>
+                    <div className="min-w-0">
+                      <div className="text-sm font-medium text-foreground truncate">{inq.name}{inq.company ? ` · ${inq.company}` : ""}</div>
+                      <div className="text-xs text-muted-foreground truncate">{inq.subject}</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0 ml-4">
+                    {hasUtm && (
+                      <span className="flex items-center gap-1 text-[10px] text-cyan-600 bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.5 rounded-full font-semibold">
+                        <Tag className="w-2.5 h-2.5" /> UTM
+                      </span>
+                    )}
+                    <span className="text-[10px] text-muted-foreground">{new Date(inq.createdAt).toLocaleDateString()}</span>
+                    {expanded === inq.id ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
+                  </div>
+                </button>
+                <AnimatePresence>
+                  {expanded === inq.id && (
+                    <m.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                      <div className="px-4 pb-4 space-y-2 bg-muted/20">
+                        <div className="text-xs"><span className="text-muted-foreground">Email: </span><span className="text-foreground">{inq.email}</span></div>
+                        {inq.message && <div className="text-xs text-foreground bg-background border border-border rounded-lg p-3 leading-relaxed">{inq.message}</div>}
+                        {hasUtm && (
+                          <div className="flex flex-wrap gap-2 pt-1">
+                            {inq.utmSource && (
+                              <span className="text-[10px] font-mono bg-cyan-500/8 border border-cyan-500/20 text-cyan-700 px-2 py-1 rounded">
+                                source: {inq.utmSource}
+                              </span>
+                            )}
+                            {inq.utmMedium && (
+                              <span className="text-[10px] font-mono bg-cyan-500/8 border border-cyan-500/20 text-cyan-700 px-2 py-1 rounded">
+                                medium: {inq.utmMedium}
+                              </span>
+                            )}
+                            {inq.utmCampaign && (
+                              <span className="text-[10px] font-mono bg-cyan-500/8 border border-cyan-500/20 text-cyan-700 px-2 py-1 rounded">
+                                campaign: {inq.utmCampaign}
+                              </span>
+                            )}
+                            {inq.utmContent && (
+                              <span className="text-[10px] font-mono bg-cyan-500/8 border border-cyan-500/20 text-cyan-700 px-2 py-1 rounded">
+                                content: {inq.utmContent}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                        {!hasUtm && (
+                          <p className="text-[11px] text-muted-foreground italic">No UTM attribution — direct or organic traffic.</p>
+                        )}
+                      </div>
+                    </m.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export { StatusBadge, DashboardPanel, CmsTablePanel, SubmissionsPanel, AnalyticsPanel, InquiriesPanel };
