@@ -8,10 +8,11 @@ admin, reports, exports, notifications, connectors, projects, files, observabili
 
  * OpenAPI spec version: 0.3.0
  */
+import type { CreateAegisInvoiceBodyLineItemsItem } from './createAegisInvoiceBodyLineItemsItem';
 
 export type CreateAegisInvoiceBody = {
   customerId: string;
-  lineItems: { description: string; amount: number; currency?: string }[];
+  lineItems: CreateAegisInvoiceBodyLineItemsItem[];
   dueDate?: number;
   notes?: string;
 };

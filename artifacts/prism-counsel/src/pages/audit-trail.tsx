@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { Scale, Eye, Edit, Download, Lock, AlertTriangle, ChevronUp, ChevronDown, Shield } from "lucide-react";
-import { SEED_MATTERS, getPrivilegeColor } from "@/data/matters";
+import { useMatters, getPrivilegeColor } from "@/data/matters";
 import type { AuditAction } from "@/data/matters";
 
 const ACCENT = "#a78bfa";
@@ -43,16 +43,17 @@ export default function AuditTrailPage() {
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [actionFilter, setActionFilter] = useState<AuditAction | "all">("all");
   const [matterFilter, setMatterFilter] = useState("all");
+  const { matters } = useMatters();
 
   const allEntries: AuditEntryWithMatter[] = useMemo(() => {
     const entries: AuditEntryWithMatter[] = [];
-    for (const matter of SEED_MATTERS) {
+    for (const matter of matters) {
       for (const entry of matter.auditTrail) {
         entries.push({ ...entry, matterId: matter.id, matterName: matter.name });
       }
     }
     return entries;
-  }, []);
+  }, [matters]);
 
   const filtered = useMemo(() => {
     let es = allEntries;
@@ -116,7 +117,7 @@ export default function AuditTrailPage() {
             className="text-xs bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-white/70 focus:outline-none"
           >
             <option value="all">All Matters</option>
-            {SEED_MATTERS.map((m) => <option key={m.id} value={m.id}>{m.name.split(" — ")[0]}</option>)}
+            {matters.map((m) => <option key={m.id} value={m.id}>{m.name.split(" — ")[0]}</option>)}
           </select>
         </div>
         <button

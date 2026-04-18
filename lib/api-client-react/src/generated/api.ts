@@ -56,8 +56,24 @@ import type {
   Connector,
   CopilotChat200One,
   CopilotChatRequest,
+  CounselAppendAuditEntryBody,
+  CounselAppendProofChainEntryBody,
+  CounselAuditEntry,
+  CounselDeleteMatter200,
+  CounselListAuditTrail200,
+  CounselListAuditTrailParams,
+  CounselListMatters200,
+  CounselListProofChain200,
+  CounselListProofChainParams,
+  CounselMatter,
+  CounselMatterCreate,
+  CounselMatterUpdate,
+  CounselObligation,
+  CounselProofChainEntry,
+  CounselUpdateObligationBody,
   CreateA2ATaskBody,
   CreateAdminUserBody,
+  CreateAegisInvoiceBody,
   CreateAlloyWorkflow,
   CreateConnector,
   CreateCustomerPortal200,
@@ -65,7 +81,6 @@ import type {
   CreateDecision201,
   CreateDecisionBody,
   CreateFeatureFlag,
-  CreateAegisInvoiceBody,
   CreateHoldingsInquiryBody,
   CreateNotification,
   CreatePlatformDecisionBody,
@@ -91,6 +106,8 @@ import type {
   CreateWsTicket200,
   DeactivateAdminUserBody,
   DecideAlloyApprovalBody,
+  DecisionOutcomeRequest,
+  DecisionProofRequest,
   DelegateA2ATask200,
   DelegateA2ATaskBody,
   DetailedHealthStatus,
@@ -101,6 +118,10 @@ import type {
   DreamscapeProject,
   EndImpersonationBody,
   ErrorEnvelope,
+  EvaluateDecisionSignals200,
+  EvaluateDecisionSignalsBody,
+  ExecuteDecisionWorkflow201,
+  ExecuteDecisionWorkflowBody,
   ExportJob,
   ExportRequest,
   FeatureFlag,
@@ -220,6 +241,11 @@ import type {
   ListVenturesParams,
   ListVesselCommandWorkflowsParams,
   ListVesselEventsParams,
+  ListWebhookDeliveries200,
+  ListWebhookDeliveriesParams,
+  ListWebhookEndpoints200,
+  ListWebhookEventTypes200,
+  ListWebhooks200,
   LivenessCheck200,
   Login201,
   LoginBody,
@@ -235,17 +261,23 @@ import type {
   NotFoundResponse,
   Notification,
   PatchAlloyAdminFlagBody,
+  PingWebhookEndpoint200,
   PreviewExport200,
   PreviewExportParams,
   Project,
+  ProveDecisionRun200,
   QueryAgentKnowledge200,
   QueryAgentKnowledgeParams,
+  RateLimitedResponse,
   ReadinessAssessment,
   RecordA2AHeartbeat200,
+  RecordDecisionOutcome200,
   RecordTerraMeteredUsageBody,
   RecordWebVitalsBody,
   Register201,
   RegisterBody,
+  RegisterWebhook201,
+  RegisterWebhookEndpoint201,
   RejectAlloyArtifactBody,
   RejectDecision200,
   RejectDecisionBody,
@@ -302,6 +334,7 @@ import type {
   UpdateVentureBody,
   UpdateVesselCommandWorkflowBody,
   UpdateVesselEventBody,
+  UpdateWebhookEndpointBody,
   UploadUrlRequest,
   UploadUrlResponse,
   UpsertAlloyAdminFlagBody,
@@ -321,6 +354,7 @@ import type {
   VesselPosition,
   VesselRoute,
   VesselSimulation,
+  WebhookRegistrationRequest,
   WebsocketHealthCheck200,
 } from './api.schemas';
 
@@ -354,7 +388,7 @@ export const getHealthCheckQueryKey = () => {
 
 export const getHealthCheckQueryOptions = <
   TData = Awaited<ReturnType<typeof healthCheck>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof healthCheck>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -374,7 +408,7 @@ export const getHealthCheckQueryOptions = <
 };
 
 export type HealthCheckQueryResult = NonNullable<Awaited<ReturnType<typeof healthCheck>>>;
-export type HealthCheckQueryError = ErrorType<unknown>;
+export type HealthCheckQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Health check
@@ -382,7 +416,7 @@ export type HealthCheckQueryError = ErrorType<unknown>;
 
 export function useHealthCheck<
   TData = Awaited<ReturnType<typeof healthCheck>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof healthCheck>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -415,7 +449,7 @@ export const getLivenessCheckQueryKey = () => {
 
 export const getLivenessCheckQueryOptions = <
   TData = Awaited<ReturnType<typeof livenessCheck>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof livenessCheck>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -435,7 +469,7 @@ export const getLivenessCheckQueryOptions = <
 };
 
 export type LivenessCheckQueryResult = NonNullable<Awaited<ReturnType<typeof livenessCheck>>>;
-export type LivenessCheckQueryError = ErrorType<unknown>;
+export type LivenessCheckQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Liveness probe
@@ -443,7 +477,7 @@ export type LivenessCheckQueryError = ErrorType<unknown>;
 
 export function useLivenessCheck<
   TData = Awaited<ReturnType<typeof livenessCheck>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof livenessCheck>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -602,7 +636,7 @@ export const getAiProviderHealthCheckQueryKey = () => {
 
 export const getAiProviderHealthCheckQueryOptions = <
   TData = Awaited<ReturnType<typeof aiProviderHealthCheck>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof aiProviderHealthCheck>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -624,7 +658,7 @@ export const getAiProviderHealthCheckQueryOptions = <
 export type AiProviderHealthCheckQueryResult = NonNullable<
   Awaited<ReturnType<typeof aiProviderHealthCheck>>
 >;
-export type AiProviderHealthCheckQueryError = ErrorType<unknown>;
+export type AiProviderHealthCheckQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary AI provider health
@@ -632,7 +666,7 @@ export type AiProviderHealthCheckQueryError = ErrorType<unknown>;
 
 export function useAiProviderHealthCheck<
   TData = Awaited<ReturnType<typeof aiProviderHealthCheck>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof aiProviderHealthCheck>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -667,7 +701,7 @@ export const getWebsocketHealthCheckQueryKey = () => {
 
 export const getWebsocketHealthCheckQueryOptions = <
   TData = Awaited<ReturnType<typeof websocketHealthCheck>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof websocketHealthCheck>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -689,7 +723,7 @@ export const getWebsocketHealthCheckQueryOptions = <
 export type WebsocketHealthCheckQueryResult = NonNullable<
   Awaited<ReturnType<typeof websocketHealthCheck>>
 >;
-export type WebsocketHealthCheckQueryError = ErrorType<unknown>;
+export type WebsocketHealthCheckQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary WebSocket server health
@@ -697,7 +731,7 @@ export type WebsocketHealthCheckQueryError = ErrorType<unknown>;
 
 export function useWebsocketHealthCheck<
   TData = Awaited<ReturnType<typeof websocketHealthCheck>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof websocketHealthCheck>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -730,7 +764,7 @@ export const getBillingHealthCheckQueryKey = () => {
 
 export const getBillingHealthCheckQueryOptions = <
   TData = Awaited<ReturnType<typeof billingHealthCheck>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof billingHealthCheck>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -752,7 +786,7 @@ export const getBillingHealthCheckQueryOptions = <
 export type BillingHealthCheckQueryResult = NonNullable<
   Awaited<ReturnType<typeof billingHealthCheck>>
 >;
-export type BillingHealthCheckQueryError = ErrorType<unknown>;
+export type BillingHealthCheckQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Billing provider health
@@ -760,7 +794,7 @@ export type BillingHealthCheckQueryError = ErrorType<unknown>;
 
 export function useBillingHealthCheck<
   TData = Awaited<ReturnType<typeof billingHealthCheck>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof billingHealthCheck>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -877,7 +911,7 @@ export const createDecision = async (
 };
 
 export const getCreateDecisionMutationOptions = <
-  TError = ErrorType<BadRequestResponse | UnauthorizedResponse>,
+  TError = ErrorType<BadRequestResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -914,13 +948,13 @@ export const getCreateDecisionMutationOptions = <
 
 export type CreateDecisionMutationResult = NonNullable<Awaited<ReturnType<typeof createDecision>>>;
 export type CreateDecisionMutationBody = BodyType<CreateDecisionBody>;
-export type CreateDecisionMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse>;
+export type CreateDecisionMutationError = ErrorType<BadRequestResponse>;
 
 /**
  * @summary Create an Alloy decision
  */
 export const useCreateDecision = <
-  TError = ErrorType<BadRequestResponse | UnauthorizedResponse>,
+  TError = ErrorType<BadRequestResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -1029,9 +1063,7 @@ export const approveDecision = async (
 };
 
 export const getApproveDecisionMutationOptions = <
-  TError = ErrorType<
-    UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse
-  >,
+  TError = ErrorType<ForbiddenResponse | NotFoundResponse | ConflictResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -1071,16 +1103,14 @@ export type ApproveDecisionMutationResult = NonNullable<
 >;
 export type ApproveDecisionMutationBody = BodyType<ApproveDecisionBody>;
 export type ApproveDecisionMutationError = ErrorType<
-  UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse
+  ForbiddenResponse | NotFoundResponse | ConflictResponse
 >;
 
 /**
  * @summary Approve a pending Alloy decision
  */
 export const useApproveDecision = <
-  TError = ErrorType<
-    UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse
-  >,
+  TError = ErrorType<ForbiddenResponse | NotFoundResponse | ConflictResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -1121,9 +1151,7 @@ export const rejectDecision = async (
 };
 
 export const getRejectDecisionMutationOptions = <
-  TError = ErrorType<
-    UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse
-  >,
+  TError = ErrorType<ForbiddenResponse | NotFoundResponse | ConflictResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -1161,16 +1189,14 @@ export const getRejectDecisionMutationOptions = <
 export type RejectDecisionMutationResult = NonNullable<Awaited<ReturnType<typeof rejectDecision>>>;
 export type RejectDecisionMutationBody = BodyType<RejectDecisionBody>;
 export type RejectDecisionMutationError = ErrorType<
-  UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse
+  ForbiddenResponse | NotFoundResponse | ConflictResponse
 >;
 
 /**
  * @summary Reject a pending Alloy decision
  */
 export const useRejectDecision = <
-  TError = ErrorType<
-    UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse
-  >,
+  TError = ErrorType<ForbiddenResponse | NotFoundResponse | ConflictResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -1210,7 +1236,7 @@ export const getGetApprovalMatrixQueryKey = () => {
 
 export const getGetApprovalMatrixQueryOptions = <
   TData = Awaited<ReturnType<typeof getApprovalMatrix>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof getApprovalMatrix>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -1232,7 +1258,7 @@ export const getGetApprovalMatrixQueryOptions = <
 export type GetApprovalMatrixQueryResult = NonNullable<
   Awaited<ReturnType<typeof getApprovalMatrix>>
 >;
-export type GetApprovalMatrixQueryError = ErrorType<unknown>;
+export type GetApprovalMatrixQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Get decision approval matrix
@@ -1240,7 +1266,7 @@ export type GetApprovalMatrixQueryError = ErrorType<unknown>;
 
 export function useGetApprovalMatrix<
   TData = Awaited<ReturnType<typeof getApprovalMatrix>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof getApprovalMatrix>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -1275,7 +1301,7 @@ export const getListObservabilityAppsQueryKey = () => {
 
 export const getListObservabilityAppsQueryOptions = <
   TData = Awaited<ReturnType<typeof listObservabilityApps>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listObservabilityApps>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -1297,7 +1323,7 @@ export const getListObservabilityAppsQueryOptions = <
 export type ListObservabilityAppsQueryResult = NonNullable<
   Awaited<ReturnType<typeof listObservabilityApps>>
 >;
-export type ListObservabilityAppsQueryError = ErrorType<unknown>;
+export type ListObservabilityAppsQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List all app observability snapshots
@@ -1305,7 +1331,7 @@ export type ListObservabilityAppsQueryError = ErrorType<unknown>;
 
 export function useListObservabilityApps<
   TData = Awaited<ReturnType<typeof listObservabilityApps>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listObservabilityApps>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -1616,7 +1642,7 @@ export const getListProjectsQueryKey = () => {
 
 export const getListProjectsQueryOptions = <
   TData = Awaited<ReturnType<typeof listProjects>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listProjects>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -1636,7 +1662,7 @@ export const getListProjectsQueryOptions = <
 };
 
 export type ListProjectsQueryResult = NonNullable<Awaited<ReturnType<typeof listProjects>>>;
-export type ListProjectsQueryError = ErrorType<unknown>;
+export type ListProjectsQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List all projects
@@ -1644,7 +1670,7 @@ export type ListProjectsQueryError = ErrorType<unknown>;
 
 export function useListProjects<
   TData = Awaited<ReturnType<typeof listProjects>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listProjects>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -1677,7 +1703,7 @@ export const createProject = async (
 };
 
 export const getCreateProjectMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -1714,12 +1740,15 @@ export const getCreateProjectMutationOptions = <
 
 export type CreateProjectMutationResult = NonNullable<Awaited<ReturnType<typeof createProject>>>;
 export type CreateProjectMutationBody = BodyType<CreateProject>;
-export type CreateProjectMutationError = ErrorType<unknown>;
+export type CreateProjectMutationError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Create a new project
  */
-export const useCreateProject = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useCreateProject = <
+  TError = ErrorType<UnauthorizedResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof createProject>>,
     TError,
@@ -2048,7 +2077,7 @@ export const getGetCurrentAuthUserQueryKey = () => {
 
 export const getGetCurrentAuthUserQueryOptions = <
   TData = Awaited<ReturnType<typeof getCurrentAuthUser>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof getCurrentAuthUser>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -2070,7 +2099,7 @@ export const getGetCurrentAuthUserQueryOptions = <
 export type GetCurrentAuthUserQueryResult = NonNullable<
   Awaited<ReturnType<typeof getCurrentAuthUser>>
 >;
-export type GetCurrentAuthUserQueryError = ErrorType<unknown>;
+export type GetCurrentAuthUserQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Get the currently authenticated user
@@ -2078,7 +2107,7 @@ export type GetCurrentAuthUserQueryError = ErrorType<unknown>;
 
 export function useGetCurrentAuthUser<
   TData = Awaited<ReturnType<typeof getCurrentAuthUser>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof getCurrentAuthUser>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -2123,7 +2152,7 @@ export const getBeginBrowserLoginQueryKey = (params?: BeginBrowserLoginParams) =
 
 export const getBeginBrowserLoginQueryOptions = <
   TData = Awaited<ReturnType<typeof beginBrowserLogin>>,
-  TError = ErrorType<void>,
+  TError = ErrorType<void | UnauthorizedResponse>,
 >(
   params?: BeginBrowserLoginParams,
   options?: {
@@ -2148,7 +2177,7 @@ export const getBeginBrowserLoginQueryOptions = <
 export type BeginBrowserLoginQueryResult = NonNullable<
   Awaited<ReturnType<typeof beginBrowserLogin>>
 >;
-export type BeginBrowserLoginQueryError = ErrorType<void>;
+export type BeginBrowserLoginQueryError = ErrorType<void | UnauthorizedResponse>;
 
 /**
  * @summary Start the browser OIDC login flow
@@ -2156,7 +2185,7 @@ export type BeginBrowserLoginQueryError = ErrorType<void>;
 
 export function useBeginBrowserLogin<
   TData = Awaited<ReturnType<typeof beginBrowserLogin>>,
-  TError = ErrorType<void>,
+  TError = ErrorType<void | UnauthorizedResponse>,
 >(
   params?: BeginBrowserLoginParams,
   options?: {
@@ -2206,7 +2235,7 @@ export const getHandleBrowserLoginCallbackQueryKey = (
 
 export const getHandleBrowserLoginCallbackQueryOptions = <
   TData = Awaited<ReturnType<typeof handleBrowserLoginCallback>>,
-  TError = ErrorType<void>,
+  TError = ErrorType<void | UnauthorizedResponse>,
 >(
   params?: HandleBrowserLoginCallbackParams,
   options?: {
@@ -2232,7 +2261,7 @@ export const getHandleBrowserLoginCallbackQueryOptions = <
 export type HandleBrowserLoginCallbackQueryResult = NonNullable<
   Awaited<ReturnType<typeof handleBrowserLoginCallback>>
 >;
-export type HandleBrowserLoginCallbackQueryError = ErrorType<void>;
+export type HandleBrowserLoginCallbackQueryError = ErrorType<void | UnauthorizedResponse>;
 
 /**
  * @summary Complete the browser OIDC login flow
@@ -2240,7 +2269,7 @@ export type HandleBrowserLoginCallbackQueryError = ErrorType<void>;
 
 export function useHandleBrowserLoginCallback<
   TData = Awaited<ReturnType<typeof handleBrowserLoginCallback>>,
-  TError = ErrorType<void>,
+  TError = ErrorType<void | UnauthorizedResponse>,
 >(
   params?: HandleBrowserLoginCallbackParams,
   options?: {
@@ -2275,7 +2304,7 @@ export const getLogoutBrowserSessionQueryKey = () => {
 
 export const getLogoutBrowserSessionQueryOptions = <
   TData = Awaited<ReturnType<typeof logoutBrowserSession>>,
-  TError = ErrorType<void>,
+  TError = ErrorType<void | UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof logoutBrowserSession>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -2297,7 +2326,7 @@ export const getLogoutBrowserSessionQueryOptions = <
 export type LogoutBrowserSessionQueryResult = NonNullable<
   Awaited<ReturnType<typeof logoutBrowserSession>>
 >;
-export type LogoutBrowserSessionQueryError = ErrorType<void>;
+export type LogoutBrowserSessionQueryError = ErrorType<void | UnauthorizedResponse>;
 
 /**
  * @summary Clear the session and begin OIDC logout
@@ -2305,7 +2334,7 @@ export type LogoutBrowserSessionQueryError = ErrorType<void>;
 
 export function useLogoutBrowserSession<
   TData = Awaited<ReturnType<typeof logoutBrowserSession>>,
-  TError = ErrorType<void>,
+  TError = ErrorType<void | UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof logoutBrowserSession>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -2416,7 +2445,7 @@ export const logoutMobileSession = async (options?: RequestInit): Promise<Logout
 };
 
 export const getLogoutMobileSessionMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -2448,12 +2477,15 @@ export type LogoutMobileSessionMutationResult = NonNullable<
   Awaited<ReturnType<typeof logoutMobileSession>>
 >;
 
-export type LogoutMobileSessionMutationError = ErrorType<unknown>;
+export type LogoutMobileSessionMutationError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Delete a mobile session token
  */
-export const useLogoutMobileSession = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useLogoutMobileSession = <
+  TError = ErrorType<UnauthorizedResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof logoutMobileSession>>,
     TError,
@@ -2485,7 +2517,7 @@ export const getGetAuthProvidersQueryKey = () => {
 
 export const getGetAuthProvidersQueryOptions = <
   TData = Awaited<ReturnType<typeof getAuthProviders>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof getAuthProviders>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -2505,7 +2537,7 @@ export const getGetAuthProvidersQueryOptions = <
 };
 
 export type GetAuthProvidersQueryResult = NonNullable<Awaited<ReturnType<typeof getAuthProviders>>>;
-export type GetAuthProvidersQueryError = ErrorType<unknown>;
+export type GetAuthProvidersQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List available authentication providers
@@ -2513,7 +2545,7 @@ export type GetAuthProvidersQueryError = ErrorType<unknown>;
 
 export function useGetAuthProviders<
   TData = Awaited<ReturnType<typeof getAuthProviders>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof getAuthProviders>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -2600,7 +2632,7 @@ export const createSession = async (options?: RequestInit): Promise<SessionToken
 };
 
 export const getCreateSessionMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<Awaited<ReturnType<typeof createSession>>, TError, void, TContext>;
@@ -2622,12 +2654,15 @@ export const getCreateSessionMutationOptions = <
 
 export type CreateSessionMutationResult = NonNullable<Awaited<ReturnType<typeof createSession>>>;
 
-export type CreateSessionMutationError = ErrorType<unknown>;
+export type CreateSessionMutationError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Create a new session token
  */
-export const useCreateSession = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useCreateSession = <
+  TError = ErrorType<UnauthorizedResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<Awaited<ReturnType<typeof createSession>>, TError, void, TContext>;
   request?: SecondParameter<typeof customFetch>;
 }): UseMutationResult<Awaited<ReturnType<typeof createSession>>, TError, void, TContext> => {
@@ -2649,7 +2684,7 @@ export const deleteCurrentSession = async (options?: RequestInit): Promise<void>
 };
 
 export const getDeleteCurrentSessionMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -2686,12 +2721,15 @@ export type DeleteCurrentSessionMutationResult = NonNullable<
   Awaited<ReturnType<typeof deleteCurrentSession>>
 >;
 
-export type DeleteCurrentSessionMutationError = ErrorType<unknown>;
+export type DeleteCurrentSessionMutationError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Revoke the current session (from Authorization header)
  */
-export const useDeleteCurrentSession = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useDeleteCurrentSession = <
+  TError = ErrorType<UnauthorizedResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof deleteCurrentSession>>,
     TError,
@@ -2718,7 +2756,7 @@ export const deleteSession = async (id: number, options?: RequestInit): Promise<
 };
 
 export const getDeleteSessionMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -2754,12 +2792,15 @@ export const getDeleteSessionMutationOptions = <
 
 export type DeleteSessionMutationResult = NonNullable<Awaited<ReturnType<typeof deleteSession>>>;
 
-export type DeleteSessionMutationError = ErrorType<unknown>;
+export type DeleteSessionMutationError = ErrorType<UnauthorizedResponse | NotFoundResponse>;
 
 /**
  * @summary Revoke a session by ID
  */
-export const useDeleteSession = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useDeleteSession = <
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof deleteSession>>,
     TError,
@@ -2796,7 +2837,7 @@ export const getListRolesQueryKey = () => {
 
 export const getListRolesQueryOptions = <
   TData = Awaited<ReturnType<typeof listRoles>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listRoles>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -2816,7 +2857,7 @@ export const getListRolesQueryOptions = <
 };
 
 export type ListRolesQueryResult = NonNullable<Awaited<ReturnType<typeof listRoles>>>;
-export type ListRolesQueryError = ErrorType<unknown>;
+export type ListRolesQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List all roles
@@ -2824,7 +2865,7 @@ export type ListRolesQueryError = ErrorType<unknown>;
 
 export function useListRoles<
   TData = Awaited<ReturnType<typeof listRoles>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listRoles>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -2856,7 +2897,7 @@ export const getListUsersQueryKey = () => {
 
 export const getListUsersQueryOptions = <
   TData = Awaited<ReturnType<typeof listUsers>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listUsers>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -2876,7 +2917,7 @@ export const getListUsersQueryOptions = <
 };
 
 export type ListUsersQueryResult = NonNullable<Awaited<ReturnType<typeof listUsers>>>;
-export type ListUsersQueryError = ErrorType<unknown>;
+export type ListUsersQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List all users
@@ -2884,7 +2925,7 @@ export type ListUsersQueryError = ErrorType<unknown>;
 
 export function useListUsers<
   TData = Awaited<ReturnType<typeof listUsers>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listUsers>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -2916,7 +2957,7 @@ export const getListConnectorsQueryKey = () => {
 
 export const getListConnectorsQueryOptions = <
   TData = Awaited<ReturnType<typeof listConnectors>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listConnectors>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -2936,7 +2977,7 @@ export const getListConnectorsQueryOptions = <
 };
 
 export type ListConnectorsQueryResult = NonNullable<Awaited<ReturnType<typeof listConnectors>>>;
-export type ListConnectorsQueryError = ErrorType<unknown>;
+export type ListConnectorsQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List all connectors
@@ -2944,7 +2985,7 @@ export type ListConnectorsQueryError = ErrorType<unknown>;
 
 export function useListConnectors<
   TData = Awaited<ReturnType<typeof listConnectors>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listConnectors>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -2976,7 +3017,7 @@ export const createConnector = async (
 };
 
 export const getCreateConnectorMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -3015,12 +3056,15 @@ export type CreateConnectorMutationResult = NonNullable<
   Awaited<ReturnType<typeof createConnector>>
 >;
 export type CreateConnectorMutationBody = BodyType<CreateConnector>;
-export type CreateConnectorMutationError = ErrorType<unknown>;
+export type CreateConnectorMutationError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Create a new connector
  */
-export const useCreateConnector = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useCreateConnector = <
+  TError = ErrorType<UnauthorizedResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof createConnector>>,
     TError,
@@ -3124,7 +3168,7 @@ export const updateConnector = async (
 };
 
 export const getUpdateConnectorMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -3163,12 +3207,15 @@ export type UpdateConnectorMutationResult = NonNullable<
   Awaited<ReturnType<typeof updateConnector>>
 >;
 export type UpdateConnectorMutationBody = BodyType<UpdateConnector>;
-export type UpdateConnectorMutationError = ErrorType<unknown>;
+export type UpdateConnectorMutationError = ErrorType<UnauthorizedResponse | NotFoundResponse>;
 
 /**
  * @summary Update a connector
  */
-export const useUpdateConnector = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useUpdateConnector = <
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof updateConnector>>,
     TError,
@@ -3200,7 +3247,7 @@ export const deleteConnector = async (id: number, options?: RequestInit): Promis
 };
 
 export const getDeleteConnectorMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -3239,12 +3286,15 @@ export type DeleteConnectorMutationResult = NonNullable<
   Awaited<ReturnType<typeof deleteConnector>>
 >;
 
-export type DeleteConnectorMutationError = ErrorType<unknown>;
+export type DeleteConnectorMutationError = ErrorType<UnauthorizedResponse | NotFoundResponse>;
 
 /**
  * @summary Delete a connector
  */
-export const useDeleteConnector = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useDeleteConnector = <
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof deleteConnector>>,
     TError,
@@ -3296,7 +3346,7 @@ export const getListNotificationsQueryKey = (params?: ListNotificationsParams) =
 
 export const getListNotificationsQueryOptions = <
   TData = Awaited<ReturnType<typeof listNotifications>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(
   params?: ListNotificationsParams,
   options?: {
@@ -3321,7 +3371,7 @@ export const getListNotificationsQueryOptions = <
 export type ListNotificationsQueryResult = NonNullable<
   Awaited<ReturnType<typeof listNotifications>>
 >;
-export type ListNotificationsQueryError = ErrorType<unknown>;
+export type ListNotificationsQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List notifications
@@ -3329,7 +3379,7 @@ export type ListNotificationsQueryError = ErrorType<unknown>;
 
 export function useListNotifications<
   TData = Awaited<ReturnType<typeof listNotifications>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(
   params?: ListNotificationsParams,
   options?: {
@@ -3364,7 +3414,7 @@ export const createNotification = async (
 };
 
 export const getCreateNotificationMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -3403,12 +3453,15 @@ export type CreateNotificationMutationResult = NonNullable<
   Awaited<ReturnType<typeof createNotification>>
 >;
 export type CreateNotificationMutationBody = BodyType<CreateNotification>;
-export type CreateNotificationMutationError = ErrorType<unknown>;
+export type CreateNotificationMutationError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Create a notification
  */
-export const useCreateNotification = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useCreateNotification = <
+  TError = ErrorType<UnauthorizedResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof createNotification>>,
     TError,
@@ -3443,7 +3496,7 @@ export const markNotificationRead = async (
 };
 
 export const getMarkNotificationReadMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -3482,12 +3535,15 @@ export type MarkNotificationReadMutationResult = NonNullable<
   Awaited<ReturnType<typeof markNotificationRead>>
 >;
 
-export type MarkNotificationReadMutationError = ErrorType<unknown>;
+export type MarkNotificationReadMutationError = ErrorType<UnauthorizedResponse | NotFoundResponse>;
 
 /**
  * @summary Mark notification as read
  */
-export const useMarkNotificationRead = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useMarkNotificationRead = <
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof markNotificationRead>>,
     TError,
@@ -3524,7 +3580,7 @@ export const getListActivityLogsQueryKey = () => {
 
 export const getListActivityLogsQueryOptions = <
   TData = Awaited<ReturnType<typeof listActivityLogs>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listActivityLogs>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -3544,7 +3600,7 @@ export const getListActivityLogsQueryOptions = <
 };
 
 export type ListActivityLogsQueryResult = NonNullable<Awaited<ReturnType<typeof listActivityLogs>>>;
-export type ListActivityLogsQueryError = ErrorType<unknown>;
+export type ListActivityLogsQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List activity logs
@@ -3552,7 +3608,7 @@ export type ListActivityLogsQueryError = ErrorType<unknown>;
 
 export function useListActivityLogs<
   TData = Awaited<ReturnType<typeof listActivityLogs>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listActivityLogs>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -3584,7 +3640,7 @@ export const getListAuditEventsQueryKey = () => {
 
 export const getListAuditEventsQueryOptions = <
   TData = Awaited<ReturnType<typeof listAuditEvents>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listAuditEvents>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -3604,7 +3660,7 @@ export const getListAuditEventsQueryOptions = <
 };
 
 export type ListAuditEventsQueryResult = NonNullable<Awaited<ReturnType<typeof listAuditEvents>>>;
-export type ListAuditEventsQueryError = ErrorType<unknown>;
+export type ListAuditEventsQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List audit events
@@ -3612,7 +3668,7 @@ export type ListAuditEventsQueryError = ErrorType<unknown>;
 
 export function useListAuditEvents<
   TData = Awaited<ReturnType<typeof listAuditEvents>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listAuditEvents>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -3644,7 +3700,7 @@ export const getListBillingPlansQueryKey = () => {
 
 export const getListBillingPlansQueryOptions = <
   TData = Awaited<ReturnType<typeof listBillingPlans>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listBillingPlans>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -3664,7 +3720,7 @@ export const getListBillingPlansQueryOptions = <
 };
 
 export type ListBillingPlansQueryResult = NonNullable<Awaited<ReturnType<typeof listBillingPlans>>>;
-export type ListBillingPlansQueryError = ErrorType<unknown>;
+export type ListBillingPlansQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List billing plans
@@ -3672,7 +3728,7 @@ export type ListBillingPlansQueryError = ErrorType<unknown>;
 
 export function useListBillingPlans<
   TData = Awaited<ReturnType<typeof listBillingPlans>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listBillingPlans>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -3704,7 +3760,7 @@ export const getListSubscriptionsQueryKey = () => {
 
 export const getListSubscriptionsQueryOptions = <
   TData = Awaited<ReturnType<typeof listSubscriptions>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listSubscriptions>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -3726,7 +3782,7 @@ export const getListSubscriptionsQueryOptions = <
 export type ListSubscriptionsQueryResult = NonNullable<
   Awaited<ReturnType<typeof listSubscriptions>>
 >;
-export type ListSubscriptionsQueryError = ErrorType<unknown>;
+export type ListSubscriptionsQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List subscriptions
@@ -3734,7 +3790,7 @@ export type ListSubscriptionsQueryError = ErrorType<unknown>;
 
 export function useListSubscriptions<
   TData = Awaited<ReturnType<typeof listSubscriptions>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listSubscriptions>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -3766,7 +3822,7 @@ export const getListInvoicesQueryKey = () => {
 
 export const getListInvoicesQueryOptions = <
   TData = Awaited<ReturnType<typeof listInvoices>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listInvoices>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -3786,7 +3842,7 @@ export const getListInvoicesQueryOptions = <
 };
 
 export type ListInvoicesQueryResult = NonNullable<Awaited<ReturnType<typeof listInvoices>>>;
-export type ListInvoicesQueryError = ErrorType<unknown>;
+export type ListInvoicesQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List invoices
@@ -3794,7 +3850,7 @@ export type ListInvoicesQueryError = ErrorType<unknown>;
 
 export function useListInvoices<
   TData = Awaited<ReturnType<typeof listInvoices>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listInvoices>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -3826,7 +3882,7 @@ export const getListStripeProductsQueryKey = () => {
 
 export const getListStripeProductsQueryOptions = <
   TData = Awaited<ReturnType<typeof listStripeProducts>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listStripeProducts>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -3848,7 +3904,7 @@ export const getListStripeProductsQueryOptions = <
 export type ListStripeProductsQueryResult = NonNullable<
   Awaited<ReturnType<typeof listStripeProducts>>
 >;
-export type ListStripeProductsQueryError = ErrorType<unknown>;
+export type ListStripeProductsQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List Stripe products with prices
@@ -3856,7 +3912,7 @@ export type ListStripeProductsQueryError = ErrorType<unknown>;
 
 export function useListStripeProducts<
   TData = Awaited<ReturnType<typeof listStripeProducts>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listStripeProducts>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -3888,7 +3944,7 @@ export const createCheckoutSession = async (
 };
 
 export const getCreateCheckoutSessionMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -3927,13 +3983,13 @@ export type CreateCheckoutSessionMutationResult = NonNullable<
   Awaited<ReturnType<typeof createCheckoutSession>>
 >;
 export type CreateCheckoutSessionMutationBody = BodyType<CheckoutRequest>;
-export type CreateCheckoutSessionMutationError = ErrorType<unknown>;
+export type CreateCheckoutSessionMutationError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Create a Stripe Checkout Session
  */
 export const useCreateCheckoutSession = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -3987,7 +4043,7 @@ export const getGetSubscriptionStatusQueryKey = (params?: GetSubscriptionStatusP
 
 export const getGetSubscriptionStatusQueryOptions = <
   TData = Awaited<ReturnType<typeof getSubscriptionStatus>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(
   params?: GetSubscriptionStatusParams,
   options?: {
@@ -4012,7 +4068,7 @@ export const getGetSubscriptionStatusQueryOptions = <
 export type GetSubscriptionStatusQueryResult = NonNullable<
   Awaited<ReturnType<typeof getSubscriptionStatus>>
 >;
-export type GetSubscriptionStatusQueryError = ErrorType<unknown>;
+export type GetSubscriptionStatusQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Get subscription status for a customer
@@ -4020,7 +4076,7 @@ export type GetSubscriptionStatusQueryError = ErrorType<unknown>;
 
 export function useGetSubscriptionStatus<
   TData = Awaited<ReturnType<typeof getSubscriptionStatus>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(
   params?: GetSubscriptionStatusParams,
   options?: {
@@ -4055,7 +4111,7 @@ export const createCustomerPortal = async (
 };
 
 export const getCreateCustomerPortalMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -4094,12 +4150,15 @@ export type CreateCustomerPortalMutationResult = NonNullable<
   Awaited<ReturnType<typeof createCustomerPortal>>
 >;
 export type CreateCustomerPortalMutationBody = BodyType<CreateCustomerPortalBody>;
-export type CreateCustomerPortalMutationError = ErrorType<unknown>;
+export type CreateCustomerPortalMutationError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Create a Stripe Customer Portal session
  */
-export const useCreateCustomerPortal = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useCreateCustomerPortal = <
+  TError = ErrorType<UnauthorizedResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof createCustomerPortal>>,
     TError,
@@ -4139,7 +4198,7 @@ export const getGetCheckoutSessionQueryKey = (sessionId: string) => {
 
 export const getGetCheckoutSessionQueryOptions = <
   TData = Awaited<ReturnType<typeof getCheckoutSession>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
 >(
   sessionId: string,
   options?: {
@@ -4164,7 +4223,7 @@ export const getGetCheckoutSessionQueryOptions = <
 export type GetCheckoutSessionQueryResult = NonNullable<
   Awaited<ReturnType<typeof getCheckoutSession>>
 >;
-export type GetCheckoutSessionQueryError = ErrorType<unknown>;
+export type GetCheckoutSessionQueryError = ErrorType<UnauthorizedResponse | NotFoundResponse>;
 
 /**
  * @summary Get a checkout session by ID
@@ -4172,7 +4231,7 @@ export type GetCheckoutSessionQueryError = ErrorType<unknown>;
 
 export function useGetCheckoutSession<
   TData = Awaited<ReturnType<typeof getCheckoutSession>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
 >(
   sessionId: string,
   options?: {
@@ -4222,7 +4281,7 @@ export const getListStripeInvoicesQueryKey = (params?: ListStripeInvoicesParams)
 
 export const getListStripeInvoicesQueryOptions = <
   TData = Awaited<ReturnType<typeof listStripeInvoices>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(
   params?: ListStripeInvoicesParams,
   options?: {
@@ -4247,7 +4306,7 @@ export const getListStripeInvoicesQueryOptions = <
 export type ListStripeInvoicesQueryResult = NonNullable<
   Awaited<ReturnType<typeof listStripeInvoices>>
 >;
-export type ListStripeInvoicesQueryError = ErrorType<unknown>;
+export type ListStripeInvoicesQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List Stripe invoices
@@ -4255,7 +4314,7 @@ export type ListStripeInvoicesQueryError = ErrorType<unknown>;
 
 export function useListStripeInvoices<
   TData = Awaited<ReturnType<typeof listStripeInvoices>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(
   params?: ListStripeInvoicesParams,
   options?: {
@@ -4290,7 +4349,7 @@ export const getListFeatureFlagsQueryKey = () => {
 
 export const getListFeatureFlagsQueryOptions = <
   TData = Awaited<ReturnType<typeof listFeatureFlags>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listFeatureFlags>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -4310,7 +4369,7 @@ export const getListFeatureFlagsQueryOptions = <
 };
 
 export type ListFeatureFlagsQueryResult = NonNullable<Awaited<ReturnType<typeof listFeatureFlags>>>;
-export type ListFeatureFlagsQueryError = ErrorType<unknown>;
+export type ListFeatureFlagsQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List feature flags
@@ -4318,7 +4377,7 @@ export type ListFeatureFlagsQueryError = ErrorType<unknown>;
 
 export function useListFeatureFlags<
   TData = Awaited<ReturnType<typeof listFeatureFlags>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listFeatureFlags>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -4350,7 +4409,7 @@ export const createFeatureFlag = async (
 };
 
 export const getCreateFeatureFlagMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -4389,12 +4448,15 @@ export type CreateFeatureFlagMutationResult = NonNullable<
   Awaited<ReturnType<typeof createFeatureFlag>>
 >;
 export type CreateFeatureFlagMutationBody = BodyType<CreateFeatureFlag>;
-export type CreateFeatureFlagMutationError = ErrorType<unknown>;
+export type CreateFeatureFlagMutationError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Create a feature flag
  */
-export const useCreateFeatureFlag = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useCreateFeatureFlag = <
+  TError = ErrorType<UnauthorizedResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof createFeatureFlag>>,
     TError,
@@ -4432,7 +4494,7 @@ export const updateFeatureFlag = async (
 };
 
 export const getUpdateFeatureFlagMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -4471,12 +4533,15 @@ export type UpdateFeatureFlagMutationResult = NonNullable<
   Awaited<ReturnType<typeof updateFeatureFlag>>
 >;
 export type UpdateFeatureFlagMutationBody = BodyType<UpdateFeatureFlag>;
-export type UpdateFeatureFlagMutationError = ErrorType<unknown>;
+export type UpdateFeatureFlagMutationError = ErrorType<UnauthorizedResponse | NotFoundResponse>;
 
 /**
  * @summary Update a feature flag
  */
-export const useUpdateFeatureFlag = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useUpdateFeatureFlag = <
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof updateFeatureFlag>>,
     TError,
@@ -4508,7 +4573,7 @@ export const deleteFeatureFlag = async (id: number, options?: RequestInit): Prom
 };
 
 export const getDeleteFeatureFlagMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -4547,12 +4612,15 @@ export type DeleteFeatureFlagMutationResult = NonNullable<
   Awaited<ReturnType<typeof deleteFeatureFlag>>
 >;
 
-export type DeleteFeatureFlagMutationError = ErrorType<unknown>;
+export type DeleteFeatureFlagMutationError = ErrorType<UnauthorizedResponse | NotFoundResponse>;
 
 /**
  * @summary Delete a feature flag
  */
-export const useDeleteFeatureFlag = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useDeleteFeatureFlag = <
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof deleteFeatureFlag>>,
     TError,
@@ -4589,7 +4657,7 @@ export const getListFilesQueryKey = () => {
 
 export const getListFilesQueryOptions = <
   TData = Awaited<ReturnType<typeof listFiles>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listFiles>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -4609,7 +4677,7 @@ export const getListFilesQueryOptions = <
 };
 
 export type ListFilesQueryResult = NonNullable<Awaited<ReturnType<typeof listFiles>>>;
-export type ListFilesQueryError = ErrorType<unknown>;
+export type ListFilesQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List files
@@ -4617,7 +4685,7 @@ export type ListFilesQueryError = ErrorType<unknown>;
 
 export function useListFiles<
   TData = Awaited<ReturnType<typeof listFiles>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listFiles>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -4712,7 +4780,7 @@ export const getListAssetsQueryKey = () => {
 
 export const getListAssetsQueryOptions = <
   TData = Awaited<ReturnType<typeof listAssets>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listAssets>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -4732,7 +4800,7 @@ export const getListAssetsQueryOptions = <
 };
 
 export type ListAssetsQueryResult = NonNullable<Awaited<ReturnType<typeof listAssets>>>;
-export type ListAssetsQueryError = ErrorType<unknown>;
+export type ListAssetsQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List assets
@@ -4740,7 +4808,7 @@ export type ListAssetsQueryError = ErrorType<unknown>;
 
 export function useListAssets<
   TData = Awaited<ReturnType<typeof listAssets>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listAssets>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -4772,7 +4840,7 @@ export const getListStephenContactsQueryKey = () => {
 
 export const getListStephenContactsQueryOptions = <
   TData = Awaited<ReturnType<typeof listStephenContacts>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listStephenContacts>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -4794,7 +4862,7 @@ export const getListStephenContactsQueryOptions = <
 export type ListStephenContactsQueryResult = NonNullable<
   Awaited<ReturnType<typeof listStephenContacts>>
 >;
-export type ListStephenContactsQueryError = ErrorType<unknown>;
+export type ListStephenContactsQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List contact submissions
@@ -4802,7 +4870,7 @@ export type ListStephenContactsQueryError = ErrorType<unknown>;
 
 export function useListStephenContacts<
   TData = Awaited<ReturnType<typeof listStephenContacts>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listStephenContacts>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -4834,7 +4902,7 @@ export const createStephenContact = async (
 };
 
 export const getCreateStephenContactMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -4873,12 +4941,15 @@ export type CreateStephenContactMutationResult = NonNullable<
   Awaited<ReturnType<typeof createStephenContact>>
 >;
 export type CreateStephenContactMutationBody = BodyType<CreateStephenContact>;
-export type CreateStephenContactMutationError = ErrorType<unknown>;
+export type CreateStephenContactMutationError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Submit a contact form
  */
-export const useCreateStephenContact = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useCreateStephenContact = <
+  TError = ErrorType<UnauthorizedResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof createStephenContact>>,
     TError,
@@ -4917,7 +4988,7 @@ export const getListStephenTestimonialsQueryKey = () => {
 
 export const getListStephenTestimonialsQueryOptions = <
   TData = Awaited<ReturnType<typeof listStephenTestimonials>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listStephenTestimonials>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -4940,7 +5011,7 @@ export const getListStephenTestimonialsQueryOptions = <
 export type ListStephenTestimonialsQueryResult = NonNullable<
   Awaited<ReturnType<typeof listStephenTestimonials>>
 >;
-export type ListStephenTestimonialsQueryError = ErrorType<unknown>;
+export type ListStephenTestimonialsQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List testimonials
@@ -4948,7 +5019,7 @@ export type ListStephenTestimonialsQueryError = ErrorType<unknown>;
 
 export function useListStephenTestimonials<
   TData = Awaited<ReturnType<typeof listStephenTestimonials>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listStephenTestimonials>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -4982,7 +5053,7 @@ export const getListStephenCaseStudiesQueryKey = () => {
 
 export const getListStephenCaseStudiesQueryOptions = <
   TData = Awaited<ReturnType<typeof listStephenCaseStudies>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listStephenCaseStudies>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -5004,7 +5075,7 @@ export const getListStephenCaseStudiesQueryOptions = <
 export type ListStephenCaseStudiesQueryResult = NonNullable<
   Awaited<ReturnType<typeof listStephenCaseStudies>>
 >;
-export type ListStephenCaseStudiesQueryError = ErrorType<unknown>;
+export type ListStephenCaseStudiesQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List case studies
@@ -5012,7 +5083,7 @@ export type ListStephenCaseStudiesQueryError = ErrorType<unknown>;
 
 export function useListStephenCaseStudies<
   TData = Awaited<ReturnType<typeof listStephenCaseStudies>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listStephenCaseStudies>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -5044,7 +5115,7 @@ export const getGetStephenProfileQueryKey = () => {
 
 export const getGetStephenProfileQueryOptions = <
   TData = Awaited<ReturnType<typeof getStephenProfile>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof getStephenProfile>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -5066,7 +5137,7 @@ export const getGetStephenProfileQueryOptions = <
 export type GetStephenProfileQueryResult = NonNullable<
   Awaited<ReturnType<typeof getStephenProfile>>
 >;
-export type GetStephenProfileQueryError = ErrorType<unknown>;
+export type GetStephenProfileQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Get Stephen's profile data
@@ -5074,7 +5145,7 @@ export type GetStephenProfileQueryError = ErrorType<unknown>;
 
 export function useGetStephenProfile<
   TData = Awaited<ReturnType<typeof getStephenProfile>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof getStephenProfile>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -5121,7 +5192,7 @@ export const getListStephenContentBlocksQueryKey = (params?: ListStephenContentB
 
 export const getListStephenContentBlocksQueryOptions = <
   TData = Awaited<ReturnType<typeof listStephenContentBlocks>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(
   params?: ListStephenContentBlocksParams,
   options?: {
@@ -5147,7 +5218,7 @@ export const getListStephenContentBlocksQueryOptions = <
 export type ListStephenContentBlocksQueryResult = NonNullable<
   Awaited<ReturnType<typeof listStephenContentBlocks>>
 >;
-export type ListStephenContentBlocksQueryError = ErrorType<unknown>;
+export type ListStephenContentBlocksQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List all content blocks
@@ -5155,7 +5226,7 @@ export type ListStephenContentBlocksQueryError = ErrorType<unknown>;
 
 export function useListStephenContentBlocks<
   TData = Awaited<ReturnType<typeof listStephenContentBlocks>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(
   params?: ListStephenContentBlocksParams,
   options?: {
@@ -5190,7 +5261,7 @@ export const createStephenContentBlock = async (
 };
 
 export const getCreateStephenContentBlockMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -5229,13 +5300,13 @@ export type CreateStephenContentBlockMutationResult = NonNullable<
   Awaited<ReturnType<typeof createStephenContentBlock>>
 >;
 export type CreateStephenContentBlockMutationBody = BodyType<CreateStephenContentBlock>;
-export type CreateStephenContentBlockMutationError = ErrorType<unknown>;
+export type CreateStephenContentBlockMutationError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Create a content block
  */
 export const useCreateStephenContentBlock = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -5443,7 +5514,7 @@ export const getListStephenPortfolioCaseStudiesQueryKey = () => {
 
 export const getListStephenPortfolioCaseStudiesQueryOptions = <
   TData = Awaited<ReturnType<typeof listStephenPortfolioCaseStudies>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<
     Awaited<ReturnType<typeof listStephenPortfolioCaseStudies>>,
@@ -5470,7 +5541,7 @@ export const getListStephenPortfolioCaseStudiesQueryOptions = <
 export type ListStephenPortfolioCaseStudiesQueryResult = NonNullable<
   Awaited<ReturnType<typeof listStephenPortfolioCaseStudies>>
 >;
-export type ListStephenPortfolioCaseStudiesQueryError = ErrorType<unknown>;
+export type ListStephenPortfolioCaseStudiesQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List portfolio case studies
@@ -5478,7 +5549,7 @@ export type ListStephenPortfolioCaseStudiesQueryError = ErrorType<unknown>;
 
 export function useListStephenPortfolioCaseStudies<
   TData = Awaited<ReturnType<typeof listStephenPortfolioCaseStudies>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<
     Awaited<ReturnType<typeof listStephenPortfolioCaseStudies>>,
@@ -5514,7 +5585,7 @@ export const createStephenPortfolioCaseStudy = async (
 };
 
 export const getCreateStephenPortfolioCaseStudyMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -5553,13 +5624,13 @@ export type CreateStephenPortfolioCaseStudyMutationResult = NonNullable<
   Awaited<ReturnType<typeof createStephenPortfolioCaseStudy>>
 >;
 export type CreateStephenPortfolioCaseStudyMutationBody = BodyType<CreateStephenPortfolioCaseStudy>;
-export type CreateStephenPortfolioCaseStudyMutationError = ErrorType<unknown>;
+export type CreateStephenPortfolioCaseStudyMutationError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Create a portfolio case study
  */
 export const useCreateStephenPortfolioCaseStudy = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -5847,7 +5918,7 @@ export const getListStephenBookingRequestsQueryKey = () => {
 
 export const getListStephenBookingRequestsQueryOptions = <
   TData = Awaited<ReturnType<typeof listStephenBookingRequests>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listStephenBookingRequests>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -5870,7 +5941,7 @@ export const getListStephenBookingRequestsQueryOptions = <
 export type ListStephenBookingRequestsQueryResult = NonNullable<
   Awaited<ReturnType<typeof listStephenBookingRequests>>
 >;
-export type ListStephenBookingRequestsQueryError = ErrorType<unknown>;
+export type ListStephenBookingRequestsQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List booking requests
@@ -5878,7 +5949,7 @@ export type ListStephenBookingRequestsQueryError = ErrorType<unknown>;
 
 export function useListStephenBookingRequests<
   TData = Awaited<ReturnType<typeof listStephenBookingRequests>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listStephenBookingRequests>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -5910,7 +5981,7 @@ export const createStephenBookingRequest = async (
 };
 
 export const getCreateStephenBookingRequestMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -5949,13 +6020,13 @@ export type CreateStephenBookingRequestMutationResult = NonNullable<
   Awaited<ReturnType<typeof createStephenBookingRequest>>
 >;
 export type CreateStephenBookingRequestMutationBody = BodyType<CreateStephenBookingRequest>;
-export type CreateStephenBookingRequestMutationError = ErrorType<unknown>;
+export type CreateStephenBookingRequestMutationError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Submit a booking request
  */
 export const useCreateStephenBookingRequest = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -5996,7 +6067,7 @@ export const getGetStephenEcosystemStatusQueryKey = () => {
 
 export const getGetStephenEcosystemStatusQueryOptions = <
   TData = Awaited<ReturnType<typeof getStephenEcosystemStatus>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof getStephenEcosystemStatus>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -6019,7 +6090,7 @@ export const getGetStephenEcosystemStatusQueryOptions = <
 export type GetStephenEcosystemStatusQueryResult = NonNullable<
   Awaited<ReturnType<typeof getStephenEcosystemStatus>>
 >;
-export type GetStephenEcosystemStatusQueryError = ErrorType<unknown>;
+export type GetStephenEcosystemStatusQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Get ecosystem status
@@ -6027,7 +6098,7 @@ export type GetStephenEcosystemStatusQueryError = ErrorType<unknown>;
 
 export function useGetStephenEcosystemStatus<
   TData = Awaited<ReturnType<typeof getStephenEcosystemStatus>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof getStephenEcosystemStatus>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -6119,7 +6190,7 @@ export const createVessel = async (
 };
 
 export const getCreateVesselMutationOptions = <
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -6156,13 +6227,13 @@ export const getCreateVesselMutationOptions = <
 
 export type CreateVesselMutationResult = NonNullable<Awaited<ReturnType<typeof createVessel>>>;
 export type CreateVesselMutationBody = BodyType<CreateVessel>;
-export type CreateVesselMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse>;
+export type CreateVesselMutationError = ErrorType<ForbiddenResponse>;
 
 /**
  * @summary Add a new vessel
  */
 export const useCreateVessel = <
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -6428,7 +6499,7 @@ export const getListFirestormCampaignsQueryKey = () => {
 
 export const getListFirestormCampaignsQueryOptions = <
   TData = Awaited<ReturnType<typeof listFirestormCampaigns>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listFirestormCampaigns>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -6450,7 +6521,7 @@ export const getListFirestormCampaignsQueryOptions = <
 export type ListFirestormCampaignsQueryResult = NonNullable<
   Awaited<ReturnType<typeof listFirestormCampaigns>>
 >;
-export type ListFirestormCampaignsQueryError = ErrorType<unknown>;
+export type ListFirestormCampaignsQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List campaigns
@@ -6458,7 +6529,7 @@ export type ListFirestormCampaignsQueryError = ErrorType<unknown>;
 
 export function useListFirestormCampaigns<
   TData = Awaited<ReturnType<typeof listFirestormCampaigns>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listFirestormCampaigns>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -6490,7 +6561,7 @@ export const getListFirestormLeadsQueryKey = () => {
 
 export const getListFirestormLeadsQueryOptions = <
   TData = Awaited<ReturnType<typeof listFirestormLeads>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listFirestormLeads>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -6512,7 +6583,7 @@ export const getListFirestormLeadsQueryOptions = <
 export type ListFirestormLeadsQueryResult = NonNullable<
   Awaited<ReturnType<typeof listFirestormLeads>>
 >;
-export type ListFirestormLeadsQueryError = ErrorType<unknown>;
+export type ListFirestormLeadsQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List leads
@@ -6520,7 +6591,7 @@ export type ListFirestormLeadsQueryError = ErrorType<unknown>;
 
 export function useListFirestormLeads<
   TData = Awaited<ReturnType<typeof listFirestormLeads>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listFirestormLeads>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -6567,7 +6638,7 @@ export const getListFirestormAnalyticsQueryKey = (params?: ListFirestormAnalytic
 
 export const getListFirestormAnalyticsQueryOptions = <
   TData = Awaited<ReturnType<typeof listFirestormAnalytics>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(
   params?: ListFirestormAnalyticsParams,
   options?: {
@@ -6592,7 +6663,7 @@ export const getListFirestormAnalyticsQueryOptions = <
 export type ListFirestormAnalyticsQueryResult = NonNullable<
   Awaited<ReturnType<typeof listFirestormAnalytics>>
 >;
-export type ListFirestormAnalyticsQueryError = ErrorType<unknown>;
+export type ListFirestormAnalyticsQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List campaign analytics
@@ -6600,7 +6671,7 @@ export type ListFirestormAnalyticsQueryError = ErrorType<unknown>;
 
 export function useListFirestormAnalytics<
   TData = Awaited<ReturnType<typeof listFirestormAnalytics>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(
   params?: ListFirestormAnalyticsParams,
   options?: {
@@ -6635,7 +6706,7 @@ export const getListLyteProductsQueryKey = () => {
 
 export const getListLyteProductsQueryOptions = <
   TData = Awaited<ReturnType<typeof listLyteProducts>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listLyteProducts>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -6655,7 +6726,7 @@ export const getListLyteProductsQueryOptions = <
 };
 
 export type ListLyteProductsQueryResult = NonNullable<Awaited<ReturnType<typeof listLyteProducts>>>;
-export type ListLyteProductsQueryError = ErrorType<unknown>;
+export type ListLyteProductsQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List products
@@ -6663,7 +6734,7 @@ export type ListLyteProductsQueryError = ErrorType<unknown>;
 
 export function useListLyteProducts<
   TData = Awaited<ReturnType<typeof listLyteProducts>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listLyteProducts>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -6695,7 +6766,7 @@ export const getListLyteOrdersQueryKey = () => {
 
 export const getListLyteOrdersQueryOptions = <
   TData = Awaited<ReturnType<typeof listLyteOrders>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listLyteOrders>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -6715,7 +6786,7 @@ export const getListLyteOrdersQueryOptions = <
 };
 
 export type ListLyteOrdersQueryResult = NonNullable<Awaited<ReturnType<typeof listLyteOrders>>>;
-export type ListLyteOrdersQueryError = ErrorType<unknown>;
+export type ListLyteOrdersQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List orders
@@ -6723,7 +6794,7 @@ export type ListLyteOrdersQueryError = ErrorType<unknown>;
 
 export function useListLyteOrders<
   TData = Awaited<ReturnType<typeof listLyteOrders>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listLyteOrders>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -6757,7 +6828,7 @@ export const getListDreamscapeProjectsQueryKey = () => {
 
 export const getListDreamscapeProjectsQueryOptions = <
   TData = Awaited<ReturnType<typeof listDreamscapeProjects>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listDreamscapeProjects>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -6779,7 +6850,7 @@ export const getListDreamscapeProjectsQueryOptions = <
 export type ListDreamscapeProjectsQueryResult = NonNullable<
   Awaited<ReturnType<typeof listDreamscapeProjects>>
 >;
-export type ListDreamscapeProjectsQueryError = ErrorType<unknown>;
+export type ListDreamscapeProjectsQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List creative projects
@@ -6787,7 +6858,7 @@ export type ListDreamscapeProjectsQueryError = ErrorType<unknown>;
 
 export function useListDreamscapeProjects<
   TData = Awaited<ReturnType<typeof listDreamscapeProjects>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listDreamscapeProjects>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -6821,7 +6892,7 @@ export const getListReadinessAssessmentsQueryKey = () => {
 
 export const getListReadinessAssessmentsQueryOptions = <
   TData = Awaited<ReturnType<typeof listReadinessAssessments>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listReadinessAssessments>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -6844,7 +6915,7 @@ export const getListReadinessAssessmentsQueryOptions = <
 export type ListReadinessAssessmentsQueryResult = NonNullable<
   Awaited<ReturnType<typeof listReadinessAssessments>>
 >;
-export type ListReadinessAssessmentsQueryError = ErrorType<unknown>;
+export type ListReadinessAssessmentsQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List readiness assessments
@@ -6852,7 +6923,7 @@ export type ListReadinessAssessmentsQueryError = ErrorType<unknown>;
 
 export function useListReadinessAssessments<
   TData = Awaited<ReturnType<typeof listReadinessAssessments>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listReadinessAssessments>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -7162,7 +7233,7 @@ export const createWsTicket = async (options?: RequestInit): Promise<CreateWsTic
 };
 
 export const getCreateWsTicketMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<Awaited<ReturnType<typeof createWsTicket>>, TError, void, TContext>;
@@ -7184,12 +7255,15 @@ export const getCreateWsTicketMutationOptions = <
 
 export type CreateWsTicketMutationResult = NonNullable<Awaited<ReturnType<typeof createWsTicket>>>;
 
-export type CreateWsTicketMutationError = ErrorType<unknown>;
+export type CreateWsTicketMutationError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Create a short-lived WebSocket upgrade ticket
  */
-export const useCreateWsTicket = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useCreateWsTicket = <
+  TError = ErrorType<UnauthorizedResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<Awaited<ReturnType<typeof createWsTicket>>, TError, void, TContext>;
   request?: SecondParameter<typeof customFetch>;
 }): UseMutationResult<Awaited<ReturnType<typeof createWsTicket>>, TError, void, TContext> => {
@@ -7313,7 +7387,7 @@ export const getVerifyEmailQueryKey = (params?: VerifyEmailParams) => {
 
 export const getVerifyEmailQueryOptions = <
   TData = Awaited<ReturnType<typeof verifyEmail>>,
-  TError = ErrorType<void>,
+  TError = ErrorType<void | UnauthorizedResponse>,
 >(
   params: VerifyEmailParams,
   options?: {
@@ -7336,7 +7410,7 @@ export const getVerifyEmailQueryOptions = <
 };
 
 export type VerifyEmailQueryResult = NonNullable<Awaited<ReturnType<typeof verifyEmail>>>;
-export type VerifyEmailQueryError = ErrorType<void>;
+export type VerifyEmailQueryError = ErrorType<void | UnauthorizedResponse>;
 
 /**
  * @summary Verify an email address with a token
@@ -7344,7 +7418,7 @@ export type VerifyEmailQueryError = ErrorType<void>;
 
 export function useVerifyEmail<
   TData = Awaited<ReturnType<typeof verifyEmail>>,
-  TError = ErrorType<void>,
+  TError = ErrorType<void | UnauthorizedResponse>,
 >(
   params: VerifyEmailParams,
   options?: {
@@ -7529,7 +7603,7 @@ export const getGetStripeConfigQueryKey = () => {
 
 export const getGetStripeConfigQueryOptions = <
   TData = Awaited<ReturnType<typeof getStripeConfig>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof getStripeConfig>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -7549,7 +7623,7 @@ export const getGetStripeConfigQueryOptions = <
 };
 
 export type GetStripeConfigQueryResult = NonNullable<Awaited<ReturnType<typeof getStripeConfig>>>;
-export type GetStripeConfigQueryError = ErrorType<unknown>;
+export type GetStripeConfigQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Get public Stripe configuration (publishable key, mode)
@@ -7557,7 +7631,7 @@ export type GetStripeConfigQueryError = ErrorType<unknown>;
 
 export function useGetStripeConfig<
   TData = Awaited<ReturnType<typeof getStripeConfig>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof getStripeConfig>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -7671,7 +7745,7 @@ export const createStripeCheckoutDirect = async (
 };
 
 export const getCreateStripeCheckoutDirectMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -7710,13 +7784,13 @@ export type CreateStripeCheckoutDirectMutationResult = NonNullable<
   Awaited<ReturnType<typeof createStripeCheckoutDirect>>
 >;
 export type CreateStripeCheckoutDirectMutationBody = BodyType<CheckoutRequest>;
-export type CreateStripeCheckoutDirectMutationError = ErrorType<unknown>;
+export type CreateStripeCheckoutDirectMutationError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Create a Stripe Checkout session (direct path alias)
  */
 export const useCreateStripeCheckoutDirect = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -7755,7 +7829,7 @@ export const getListCommandBillingPlansQueryKey = () => {
 
 export const getListCommandBillingPlansQueryOptions = <
   TData = Awaited<ReturnType<typeof listCommandBillingPlans>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listCommandBillingPlans>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -7778,7 +7852,7 @@ export const getListCommandBillingPlansQueryOptions = <
 export type ListCommandBillingPlansQueryResult = NonNullable<
   Awaited<ReturnType<typeof listCommandBillingPlans>>
 >;
-export type ListCommandBillingPlansQueryError = ErrorType<unknown>;
+export type ListCommandBillingPlansQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List Unified Command billing plans
@@ -7786,7 +7860,7 @@ export type ListCommandBillingPlansQueryError = ErrorType<unknown>;
 
 export function useListCommandBillingPlans<
   TData = Awaited<ReturnType<typeof listCommandBillingPlans>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listCommandBillingPlans>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -7818,7 +7892,7 @@ export const subscribeCommandPlan = async (
 };
 
 export const getSubscribeCommandPlanMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -7857,12 +7931,15 @@ export type SubscribeCommandPlanMutationResult = NonNullable<
   Awaited<ReturnType<typeof subscribeCommandPlan>>
 >;
 export type SubscribeCommandPlanMutationBody = BodyType<SubscribeCommandPlanBody>;
-export type SubscribeCommandPlanMutationError = ErrorType<unknown>;
+export type SubscribeCommandPlanMutationError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Subscribe to a Unified Command plan
  */
-export const useSubscribeCommandPlan = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useSubscribeCommandPlan = <
+  TError = ErrorType<UnauthorizedResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof subscribeCommandPlan>>,
     TError,
@@ -7899,7 +7976,7 @@ export const getListTerraBillingPlansQueryKey = () => {
 
 export const getListTerraBillingPlansQueryOptions = <
   TData = Awaited<ReturnType<typeof listTerraBillingPlans>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listTerraBillingPlans>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -7921,7 +7998,7 @@ export const getListTerraBillingPlansQueryOptions = <
 export type ListTerraBillingPlansQueryResult = NonNullable<
   Awaited<ReturnType<typeof listTerraBillingPlans>>
 >;
-export type ListTerraBillingPlansQueryError = ErrorType<unknown>;
+export type ListTerraBillingPlansQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List Terra real estate intelligence billing plans
@@ -7929,7 +8006,7 @@ export type ListTerraBillingPlansQueryError = ErrorType<unknown>;
 
 export function useListTerraBillingPlans<
   TData = Awaited<ReturnType<typeof listTerraBillingPlans>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listTerraBillingPlans>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -7961,7 +8038,7 @@ export const subscribeTerraplan = async (
 };
 
 export const getSubscribeTerraplanMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -8000,12 +8077,15 @@ export type SubscribeTerraplanMutationResult = NonNullable<
   Awaited<ReturnType<typeof subscribeTerraplan>>
 >;
 export type SubscribeTerraplanMutationBody = BodyType<SubscribeTerraplanBody>;
-export type SubscribeTerraplanMutationError = ErrorType<unknown>;
+export type SubscribeTerraplanMutationError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Subscribe to a Terra plan
  */
-export const useSubscribeTerraplan = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useSubscribeTerraplan = <
+  TError = ErrorType<UnauthorizedResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof subscribeTerraplan>>,
     TError,
@@ -8042,7 +8122,7 @@ export const recordTerraMeteredUsage = async (
 };
 
 export const getRecordTerraMeteredUsageMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -8081,13 +8161,13 @@ export type RecordTerraMeteredUsageMutationResult = NonNullable<
   Awaited<ReturnType<typeof recordTerraMeteredUsage>>
 >;
 export type RecordTerraMeteredUsageMutationBody = BodyType<RecordTerraMeteredUsageBody>;
-export type RecordTerraMeteredUsageMutationError = ErrorType<unknown>;
+export type RecordTerraMeteredUsageMutationError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Record metered API usage for Terra
  */
 export const useRecordTerraMeteredUsage = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -8126,7 +8206,7 @@ export const requestAegisEnterpriseQuote = async (
 };
 
 export const getRequestAegisEnterpriseQuoteMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -8165,13 +8245,13 @@ export type RequestAegisEnterpriseQuoteMutationResult = NonNullable<
   Awaited<ReturnType<typeof requestAegisEnterpriseQuote>>
 >;
 export type RequestAegisEnterpriseQuoteMutationBody = BodyType<RequestAegisEnterpriseQuoteBody>;
-export type RequestAegisEnterpriseQuoteMutationError = ErrorType<unknown>;
+export type RequestAegisEnterpriseQuoteMutationError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Submit an Aegis enterprise quote request
  */
 export const useRequestAegisEnterpriseQuote = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -8205,7 +8285,7 @@ export const syncBillingPlans = async (options?: RequestInit): Promise<SyncBilli
 };
 
 export const getSyncBillingPlansMutationOptions = <
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -8234,13 +8314,13 @@ export type SyncBillingPlansMutationResult = NonNullable<
   Awaited<ReturnType<typeof syncBillingPlans>>
 >;
 
-export type SyncBillingPlansMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse>;
+export type SyncBillingPlansMutationError = ErrorType<ForbiddenResponse>;
 
 /**
  * @summary Sync billing plans from Stripe (admin only)
  */
 export const useSyncBillingPlans = <
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -8444,7 +8524,7 @@ export const getGetBillingRevenueAnalyticsQueryKey = () => {
 
 export const getGetBillingRevenueAnalyticsQueryOptions = <
   TData = Awaited<ReturnType<typeof getBillingRevenueAnalytics>>,
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof getBillingRevenueAnalytics>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -8467,9 +8547,7 @@ export const getGetBillingRevenueAnalyticsQueryOptions = <
 export type GetBillingRevenueAnalyticsQueryResult = NonNullable<
   Awaited<ReturnType<typeof getBillingRevenueAnalytics>>
 >;
-export type GetBillingRevenueAnalyticsQueryError = ErrorType<
-  UnauthorizedResponse | ForbiddenResponse
->;
+export type GetBillingRevenueAnalyticsQueryError = ErrorType<ForbiddenResponse>;
 
 /**
  * @summary Get revenue analytics dashboard data
@@ -8477,7 +8555,7 @@ export type GetBillingRevenueAnalyticsQueryError = ErrorType<
 
 export function useGetBillingRevenueAnalytics<
   TData = Awaited<ReturnType<typeof getBillingRevenueAnalytics>>,
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof getBillingRevenueAnalytics>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -8490,7 +8568,7 @@ export function useGetBillingRevenueAnalytics<
 }
 
 /**
- * @summary Create a Aegis invoice (admin)
+ * @summary Create an Aegis invoice (admin)
  */
 export const getCreateAegisInvoiceUrl = () => {
   return `/api/billing/aegis/invoice`;
@@ -8509,7 +8587,7 @@ export const createAegisInvoice = async (
 };
 
 export const getCreateAegisInvoiceMutationOptions = <
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -8548,15 +8626,13 @@ export type CreateAegisInvoiceMutationResult = NonNullable<
   Awaited<ReturnType<typeof createAegisInvoice>>
 >;
 export type CreateAegisInvoiceMutationBody = BodyType<CreateAegisInvoiceBody>;
-export type CreateAegisInvoiceMutationError = ErrorType<
-  UnauthorizedResponse | ForbiddenResponse
->;
+export type CreateAegisInvoiceMutationError = ErrorType<ForbiddenResponse>;
 
 /**
- * @summary Create a Aegis invoice (admin)
+ * @summary Create an Aegis invoice (admin)
  */
 export const useCreateAegisInvoice = <
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -8598,7 +8674,7 @@ export const getGetTerraMarketIntelligenceQueryKey = () => {
 
 export const getGetTerraMarketIntelligenceQueryOptions = <
   TData = Awaited<ReturnType<typeof getTerraMarketIntelligence>>,
-  TError = ErrorType<void>,
+  TError = ErrorType<RateLimitedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof getTerraMarketIntelligence>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -8621,7 +8697,7 @@ export const getGetTerraMarketIntelligenceQueryOptions = <
 export type GetTerraMarketIntelligenceQueryResult = NonNullable<
   Awaited<ReturnType<typeof getTerraMarketIntelligence>>
 >;
-export type GetTerraMarketIntelligenceQueryError = ErrorType<void>;
+export type GetTerraMarketIntelligenceQueryError = ErrorType<RateLimitedResponse>;
 
 /**
  * @summary Get real estate market intelligence snapshot
@@ -8629,7 +8705,7 @@ export type GetTerraMarketIntelligenceQueryError = ErrorType<void>;
 
 export function useGetTerraMarketIntelligence<
   TData = Awaited<ReturnType<typeof getTerraMarketIntelligence>>,
-  TError = ErrorType<void>,
+  TError = ErrorType<RateLimitedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof getTerraMarketIntelligence>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -8663,7 +8739,7 @@ export const getGetTerraReitFilingsQueryKey = () => {
 
 export const getGetTerraReitFilingsQueryOptions = <
   TData = Awaited<ReturnType<typeof getTerraReitFilings>>,
-  TError = ErrorType<void>,
+  TError = ErrorType<RateLimitedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof getTerraReitFilings>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -8685,7 +8761,7 @@ export const getGetTerraReitFilingsQueryOptions = <
 export type GetTerraReitFilingsQueryResult = NonNullable<
   Awaited<ReturnType<typeof getTerraReitFilings>>
 >;
-export type GetTerraReitFilingsQueryError = ErrorType<void>;
+export type GetTerraReitFilingsQueryError = ErrorType<RateLimitedResponse>;
 
 /**
  * @summary Get recent REIT regulatory filings
@@ -8693,7 +8769,7 @@ export type GetTerraReitFilingsQueryError = ErrorType<void>;
 
 export function useGetTerraReitFilings<
   TData = Awaited<ReturnType<typeof getTerraReitFilings>>,
-  TError = ErrorType<void>,
+  TError = ErrorType<RateLimitedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof getTerraReitFilings>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -8727,7 +8803,7 @@ export const getGetTerraDemographicsQueryKey = () => {
 
 export const getGetTerraDemographicsQueryOptions = <
   TData = Awaited<ReturnType<typeof getTerraDemographics>>,
-  TError = ErrorType<void>,
+  TError = ErrorType<RateLimitedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof getTerraDemographics>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -8749,7 +8825,7 @@ export const getGetTerraDemographicsQueryOptions = <
 export type GetTerraDemographicsQueryResult = NonNullable<
   Awaited<ReturnType<typeof getTerraDemographics>>
 >;
-export type GetTerraDemographicsQueryError = ErrorType<void>;
+export type GetTerraDemographicsQueryError = ErrorType<RateLimitedResponse>;
 
 /**
  * @summary Get demographic data for real estate analysis
@@ -8757,7 +8833,7 @@ export type GetTerraDemographicsQueryError = ErrorType<void>;
 
 export function useGetTerraDemographics<
   TData = Awaited<ReturnType<typeof getTerraDemographics>>,
-  TError = ErrorType<void>,
+  TError = ErrorType<RateLimitedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof getTerraDemographics>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -8791,7 +8867,7 @@ export const getGetTerraPropertyRiskQueryKey = () => {
 
 export const getGetTerraPropertyRiskQueryOptions = <
   TData = Awaited<ReturnType<typeof getTerraPropertyRisk>>,
-  TError = ErrorType<void>,
+  TError = ErrorType<RateLimitedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof getTerraPropertyRisk>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -8813,7 +8889,7 @@ export const getGetTerraPropertyRiskQueryOptions = <
 export type GetTerraPropertyRiskQueryResult = NonNullable<
   Awaited<ReturnType<typeof getTerraPropertyRisk>>
 >;
-export type GetTerraPropertyRiskQueryError = ErrorType<void>;
+export type GetTerraPropertyRiskQueryError = ErrorType<RateLimitedResponse>;
 
 /**
  * @summary Get property risk assessment data (flood, fire, seismic)
@@ -8821,7 +8897,7 @@ export type GetTerraPropertyRiskQueryError = ErrorType<void>;
 
 export function useGetTerraPropertyRisk<
   TData = Awaited<ReturnType<typeof getTerraPropertyRisk>>,
-  TError = ErrorType<void>,
+  TError = ErrorType<RateLimitedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof getTerraPropertyRisk>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -8868,7 +8944,7 @@ export const getGetTerraEmploymentOutlookQueryKey = (params?: GetTerraEmployment
 
 export const getGetTerraEmploymentOutlookQueryOptions = <
   TData = Awaited<ReturnType<typeof getTerraEmploymentOutlook>>,
-  TError = ErrorType<void>,
+  TError = ErrorType<RateLimitedResponse>,
 >(
   params?: GetTerraEmploymentOutlookParams,
   options?: {
@@ -8894,7 +8970,7 @@ export const getGetTerraEmploymentOutlookQueryOptions = <
 export type GetTerraEmploymentOutlookQueryResult = NonNullable<
   Awaited<ReturnType<typeof getTerraEmploymentOutlook>>
 >;
-export type GetTerraEmploymentOutlookQueryError = ErrorType<void>;
+export type GetTerraEmploymentOutlookQueryError = ErrorType<RateLimitedResponse>;
 
 /**
  * @summary Get employment outlook for a market area
@@ -8902,7 +8978,7 @@ export type GetTerraEmploymentOutlookQueryError = ErrorType<void>;
 
 export function useGetTerraEmploymentOutlook<
   TData = Awaited<ReturnType<typeof getTerraEmploymentOutlook>>,
-  TError = ErrorType<void>,
+  TError = ErrorType<RateLimitedResponse>,
 >(
   params?: GetTerraEmploymentOutlookParams,
   options?: {
@@ -8939,7 +9015,7 @@ export const getGetTerraSectorPerformanceQueryKey = () => {
 
 export const getGetTerraSectorPerformanceQueryOptions = <
   TData = Awaited<ReturnType<typeof getTerraSectorPerformance>>,
-  TError = ErrorType<void>,
+  TError = ErrorType<RateLimitedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof getTerraSectorPerformance>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -8962,7 +9038,7 @@ export const getGetTerraSectorPerformanceQueryOptions = <
 export type GetTerraSectorPerformanceQueryResult = NonNullable<
   Awaited<ReturnType<typeof getTerraSectorPerformance>>
 >;
-export type GetTerraSectorPerformanceQueryError = ErrorType<void>;
+export type GetTerraSectorPerformanceQueryError = ErrorType<RateLimitedResponse>;
 
 /**
  * @summary Get real estate sector performance by asset class
@@ -8970,7 +9046,7 @@ export type GetTerraSectorPerformanceQueryError = ErrorType<void>;
 
 export function useGetTerraSectorPerformance<
   TData = Awaited<ReturnType<typeof getTerraSectorPerformance>>,
-  TError = ErrorType<void>,
+  TError = ErrorType<RateLimitedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof getTerraSectorPerformance>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -9168,7 +9244,7 @@ export const getTerraGeocodingStatusQueryKey = () => {
 
 export const getTerraGeocodingStatusQueryOptions = <
   TData = Awaited<ReturnType<typeof terraGeocodingStatus>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof terraGeocodingStatus>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -9190,7 +9266,7 @@ export const getTerraGeocodingStatusQueryOptions = <
 export type TerraGeocodingStatusQueryResult = NonNullable<
   Awaited<ReturnType<typeof terraGeocodingStatus>>
 >;
-export type TerraGeocodingStatusQueryError = ErrorType<unknown>;
+export type TerraGeocodingStatusQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Check geocoding service availability and quota
@@ -9198,7 +9274,7 @@ export type TerraGeocodingStatusQueryError = ErrorType<unknown>;
 
 export function useTerraGeocodingStatus<
   TData = Awaited<ReturnType<typeof terraGeocodingStatus>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof terraGeocodingStatus>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -9245,7 +9321,7 @@ export const getGetTerraMLSListingsQueryKey = (params?: GetTerraMLSListingsParam
 
 export const getGetTerraMLSListingsQueryOptions = <
   TData = Awaited<ReturnType<typeof getTerraMLSListings>>,
-  TError = ErrorType<void>,
+  TError = ErrorType<RateLimitedResponse>,
 >(
   params?: GetTerraMLSListingsParams,
   options?: {
@@ -9270,7 +9346,7 @@ export const getGetTerraMLSListingsQueryOptions = <
 export type GetTerraMLSListingsQueryResult = NonNullable<
   Awaited<ReturnType<typeof getTerraMLSListings>>
 >;
-export type GetTerraMLSListingsQueryError = ErrorType<void>;
+export type GetTerraMLSListingsQueryError = ErrorType<RateLimitedResponse>;
 
 /**
  * @summary Search MLS residential property listings
@@ -9278,7 +9354,7 @@ export type GetTerraMLSListingsQueryError = ErrorType<void>;
 
 export function useGetTerraMLSListings<
   TData = Awaited<ReturnType<typeof getTerraMLSListings>>,
-  TError = ErrorType<void>,
+  TError = ErrorType<RateLimitedResponse>,
 >(
   params?: GetTerraMLSListingsParams,
   options?: {
@@ -9330,7 +9406,7 @@ export const getGetTerraCommercialPropertiesQueryKey = (
 
 export const getGetTerraCommercialPropertiesQueryOptions = <
   TData = Awaited<ReturnType<typeof getTerraCommercialProperties>>,
-  TError = ErrorType<void>,
+  TError = ErrorType<RateLimitedResponse>,
 >(
   params?: GetTerraCommercialPropertiesParams,
   options?: {
@@ -9360,7 +9436,7 @@ export const getGetTerraCommercialPropertiesQueryOptions = <
 export type GetTerraCommercialPropertiesQueryResult = NonNullable<
   Awaited<ReturnType<typeof getTerraCommercialProperties>>
 >;
-export type GetTerraCommercialPropertiesQueryError = ErrorType<void>;
+export type GetTerraCommercialPropertiesQueryError = ErrorType<RateLimitedResponse>;
 
 /**
  * @summary Search commercial real estate properties
@@ -9368,7 +9444,7 @@ export type GetTerraCommercialPropertiesQueryError = ErrorType<void>;
 
 export function useGetTerraCommercialProperties<
   TData = Awaited<ReturnType<typeof getTerraCommercialProperties>>,
-  TError = ErrorType<void>,
+  TError = ErrorType<RateLimitedResponse>,
 >(
   params?: GetTerraCommercialPropertiesParams,
   options?: {
@@ -9422,7 +9498,7 @@ export const getGetTerraCommercialCompsQueryKey = (params?: GetTerraCommercialCo
 
 export const getGetTerraCommercialCompsQueryOptions = <
   TData = Awaited<ReturnType<typeof getTerraCommercialComps>>,
-  TError = ErrorType<void>,
+  TError = ErrorType<RateLimitedResponse>,
 >(
   params?: GetTerraCommercialCompsParams,
   options?: {
@@ -9448,7 +9524,7 @@ export const getGetTerraCommercialCompsQueryOptions = <
 export type GetTerraCommercialCompsQueryResult = NonNullable<
   Awaited<ReturnType<typeof getTerraCommercialComps>>
 >;
-export type GetTerraCommercialCompsQueryError = ErrorType<void>;
+export type GetTerraCommercialCompsQueryError = ErrorType<RateLimitedResponse>;
 
 /**
  * @summary Get commercial real estate comparable sales
@@ -9456,7 +9532,7 @@ export type GetTerraCommercialCompsQueryError = ErrorType<void>;
 
 export function useGetTerraCommercialComps<
   TData = Awaited<ReturnType<typeof getTerraCommercialComps>>,
-  TError = ErrorType<void>,
+  TError = ErrorType<RateLimitedResponse>,
 >(
   params?: GetTerraCommercialCompsParams,
   options?: {
@@ -9493,7 +9569,7 @@ export const getGetTerraEnterpriseFlagsQueryKey = () => {
 
 export const getGetTerraEnterpriseFlagsQueryOptions = <
   TData = Awaited<ReturnType<typeof getTerraEnterpriseFlags>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof getTerraEnterpriseFlags>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -9516,7 +9592,7 @@ export const getGetTerraEnterpriseFlagsQueryOptions = <
 export type GetTerraEnterpriseFlagsQueryResult = NonNullable<
   Awaited<ReturnType<typeof getTerraEnterpriseFlags>>
 >;
-export type GetTerraEnterpriseFlagsQueryError = ErrorType<unknown>;
+export type GetTerraEnterpriseFlagsQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Get Terra enterprise feature flags
@@ -9524,7 +9600,7 @@ export type GetTerraEnterpriseFlagsQueryError = ErrorType<unknown>;
 
 export function useGetTerraEnterpriseFlags<
   TData = Awaited<ReturnType<typeof getTerraEnterpriseFlags>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof getTerraEnterpriseFlags>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -9737,7 +9813,7 @@ export const createVesselFleet = async (
 };
 
 export const getCreateVesselFleetMutationOptions = <
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -9776,13 +9852,13 @@ export type CreateVesselFleetMutationResult = NonNullable<
   Awaited<ReturnType<typeof createVesselFleet>>
 >;
 export type CreateVesselFleetMutationBody = BodyType<CreateVesselFleet>;
-export type CreateVesselFleetMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse>;
+export type CreateVesselFleetMutationError = ErrorType<ForbiddenResponse>;
 
 /**
  * @summary Create a new fleet
  */
 export const useCreateVesselFleet = <
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -10067,7 +10143,7 @@ export const getGetVesselPositionsQueryKey = (id: number, params?: GetVesselPosi
 
 export const getGetVesselPositionsQueryOptions = <
   TData = Awaited<ReturnType<typeof getVesselPositions>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
 >(
   id: number,
   params?: GetVesselPositionsParams,
@@ -10093,7 +10169,7 @@ export const getGetVesselPositionsQueryOptions = <
 export type GetVesselPositionsQueryResult = NonNullable<
   Awaited<ReturnType<typeof getVesselPositions>>
 >;
-export type GetVesselPositionsQueryError = ErrorType<unknown>;
+export type GetVesselPositionsQueryError = ErrorType<UnauthorizedResponse | NotFoundResponse>;
 
 /**
  * @summary Get position history for a vessel
@@ -10101,7 +10177,7 @@ export type GetVesselPositionsQueryError = ErrorType<unknown>;
 
 export function useGetVesselPositions<
   TData = Awaited<ReturnType<typeof getVesselPositions>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
 >(
   id: number,
   params?: GetVesselPositionsParams,
@@ -10137,7 +10213,7 @@ export const getGetVesselCargoQueryKey = (id: number) => {
 
 export const getGetVesselCargoQueryOptions = <
   TData = Awaited<ReturnType<typeof getVesselCargo>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
 >(
   id: number,
   options?: {
@@ -10160,7 +10236,7 @@ export const getGetVesselCargoQueryOptions = <
 };
 
 export type GetVesselCargoQueryResult = NonNullable<Awaited<ReturnType<typeof getVesselCargo>>>;
-export type GetVesselCargoQueryError = ErrorType<unknown>;
+export type GetVesselCargoQueryError = ErrorType<UnauthorizedResponse | NotFoundResponse>;
 
 /**
  * @summary Get cargo manifest for a vessel
@@ -10168,7 +10244,7 @@ export type GetVesselCargoQueryError = ErrorType<unknown>;
 
 export function useGetVesselCargo<
   TData = Awaited<ReturnType<typeof getVesselCargo>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
 >(
   id: number,
   options?: {
@@ -10203,7 +10279,7 @@ export const getListAllVesselRoutesQueryKey = () => {
 
 export const getListAllVesselRoutesQueryOptions = <
   TData = Awaited<ReturnType<typeof listAllVesselRoutes>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listAllVesselRoutes>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -10225,7 +10301,7 @@ export const getListAllVesselRoutesQueryOptions = <
 export type ListAllVesselRoutesQueryResult = NonNullable<
   Awaited<ReturnType<typeof listAllVesselRoutes>>
 >;
-export type ListAllVesselRoutesQueryError = ErrorType<unknown>;
+export type ListAllVesselRoutesQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List all planned vessel routes
@@ -10233,7 +10309,7 @@ export type ListAllVesselRoutesQueryError = ErrorType<unknown>;
 
 export function useListAllVesselRoutes<
   TData = Awaited<ReturnType<typeof listAllVesselRoutes>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listAllVesselRoutes>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -10268,7 +10344,7 @@ export const getGetVesselRoutesQueryKey = (id: number) => {
 
 export const getGetVesselRoutesQueryOptions = <
   TData = Awaited<ReturnType<typeof getVesselRoutes>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
 >(
   id: number,
   options?: {
@@ -10291,7 +10367,7 @@ export const getGetVesselRoutesQueryOptions = <
 };
 
 export type GetVesselRoutesQueryResult = NonNullable<Awaited<ReturnType<typeof getVesselRoutes>>>;
-export type GetVesselRoutesQueryError = ErrorType<unknown>;
+export type GetVesselRoutesQueryError = ErrorType<UnauthorizedResponse | NotFoundResponse>;
 
 /**
  * @summary Get planned routes for a specific vessel
@@ -10299,7 +10375,7 @@ export type GetVesselRoutesQueryError = ErrorType<unknown>;
 
 export function useGetVesselRoutes<
   TData = Awaited<ReturnType<typeof getVesselRoutes>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
 >(
   id: number,
   options?: {
@@ -10334,7 +10410,7 @@ export const createVesselRoute = async (
 };
 
 export const getCreateVesselRouteMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -10373,12 +10449,15 @@ export type CreateVesselRouteMutationResult = NonNullable<
   Awaited<ReturnType<typeof createVesselRoute>>
 >;
 export type CreateVesselRouteMutationBody = BodyType<CreateVesselRoute>;
-export type CreateVesselRouteMutationError = ErrorType<unknown>;
+export type CreateVesselRouteMutationError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Create a new vessel route
  */
-export const useCreateVesselRoute = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useCreateVesselRoute = <
+  TError = ErrorType<UnauthorizedResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof createVesselRoute>>,
     TError,
@@ -10416,7 +10495,7 @@ export const updateVesselRoute = async (
 };
 
 export const getUpdateVesselRouteMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -10455,12 +10534,15 @@ export type UpdateVesselRouteMutationResult = NonNullable<
   Awaited<ReturnType<typeof updateVesselRoute>>
 >;
 export type UpdateVesselRouteMutationBody = BodyType<CreateVesselRoute>;
-export type UpdateVesselRouteMutationError = ErrorType<unknown>;
+export type UpdateVesselRouteMutationError = ErrorType<UnauthorizedResponse | NotFoundResponse>;
 
 /**
  * @summary Update a vessel route
  */
-export const useUpdateVesselRoute = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useUpdateVesselRoute = <
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof updateVesselRoute>>,
     TError,
@@ -10492,7 +10574,7 @@ export const deleteVesselRoute = async (id: number, options?: RequestInit): Prom
 };
 
 export const getDeleteVesselRouteMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -10531,12 +10613,15 @@ export type DeleteVesselRouteMutationResult = NonNullable<
   Awaited<ReturnType<typeof deleteVesselRoute>>
 >;
 
-export type DeleteVesselRouteMutationError = ErrorType<unknown>;
+export type DeleteVesselRouteMutationError = ErrorType<UnauthorizedResponse | NotFoundResponse>;
 
 /**
  * @summary Delete a vessel route
  */
-export const useDeleteVesselRoute = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useDeleteVesselRoute = <
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof deleteVesselRoute>>,
     TError,
@@ -10573,7 +10658,7 @@ export const getListVesselAlertRulesQueryKey = () => {
 
 export const getListVesselAlertRulesQueryOptions = <
   TData = Awaited<ReturnType<typeof listVesselAlertRules>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listVesselAlertRules>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -10595,7 +10680,7 @@ export const getListVesselAlertRulesQueryOptions = <
 export type ListVesselAlertRulesQueryResult = NonNullable<
   Awaited<ReturnType<typeof listVesselAlertRules>>
 >;
-export type ListVesselAlertRulesQueryError = ErrorType<unknown>;
+export type ListVesselAlertRulesQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List all vessel alert rules
@@ -10603,7 +10688,7 @@ export type ListVesselAlertRulesQueryError = ErrorType<unknown>;
 
 export function useListVesselAlertRules<
   TData = Awaited<ReturnType<typeof listVesselAlertRules>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listVesselAlertRules>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -10635,7 +10720,7 @@ export const createVesselAlertRule = async (
 };
 
 export const getCreateVesselAlertRuleMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -10674,13 +10759,13 @@ export type CreateVesselAlertRuleMutationResult = NonNullable<
   Awaited<ReturnType<typeof createVesselAlertRule>>
 >;
 export type CreateVesselAlertRuleMutationBody = BodyType<CreateVesselAlertRule>;
-export type CreateVesselAlertRuleMutationError = ErrorType<unknown>;
+export type CreateVesselAlertRuleMutationError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Create a vessel alert rule
  */
 export const useCreateVesselAlertRule = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -10720,7 +10805,7 @@ export const updateVesselAlertRule = async (
 };
 
 export const getUpdateVesselAlertRuleMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -10759,13 +10844,13 @@ export type UpdateVesselAlertRuleMutationResult = NonNullable<
   Awaited<ReturnType<typeof updateVesselAlertRule>>
 >;
 export type UpdateVesselAlertRuleMutationBody = BodyType<CreateVesselAlertRule>;
-export type UpdateVesselAlertRuleMutationError = ErrorType<unknown>;
+export type UpdateVesselAlertRuleMutationError = ErrorType<UnauthorizedResponse | NotFoundResponse>;
 
 /**
  * @summary Update a vessel alert rule
  */
 export const useUpdateVesselAlertRule = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -10799,7 +10884,7 @@ export const deleteVesselAlertRule = async (id: number, options?: RequestInit): 
 };
 
 export const getDeleteVesselAlertRuleMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -10838,13 +10923,13 @@ export type DeleteVesselAlertRuleMutationResult = NonNullable<
   Awaited<ReturnType<typeof deleteVesselAlertRule>>
 >;
 
-export type DeleteVesselAlertRuleMutationError = ErrorType<unknown>;
+export type DeleteVesselAlertRuleMutationError = ErrorType<UnauthorizedResponse | NotFoundResponse>;
 
 /**
  * @summary Delete a vessel alert rule
  */
 export const useDeleteVesselAlertRule = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -10883,7 +10968,7 @@ export const getListVesselAlertsQueryKey = () => {
 
 export const getListVesselAlertsQueryOptions = <
   TData = Awaited<ReturnType<typeof listVesselAlerts>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listVesselAlerts>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -10903,7 +10988,7 @@ export const getListVesselAlertsQueryOptions = <
 };
 
 export type ListVesselAlertsQueryResult = NonNullable<Awaited<ReturnType<typeof listVesselAlerts>>>;
-export type ListVesselAlertsQueryError = ErrorType<unknown>;
+export type ListVesselAlertsQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List all active vessel alerts
@@ -10911,7 +10996,7 @@ export type ListVesselAlertsQueryError = ErrorType<unknown>;
 
 export function useListVesselAlerts<
   TData = Awaited<ReturnType<typeof listVesselAlerts>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listVesselAlerts>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -10943,7 +11028,7 @@ export const createVesselAlert = async (
 };
 
 export const getCreateVesselAlertMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -10982,12 +11067,15 @@ export type CreateVesselAlertMutationResult = NonNullable<
   Awaited<ReturnType<typeof createVesselAlert>>
 >;
 export type CreateVesselAlertMutationBody = BodyType<CreateVesselAlertBody>;
-export type CreateVesselAlertMutationError = ErrorType<unknown>;
+export type CreateVesselAlertMutationError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Create a vessel alert
  */
-export const useCreateVesselAlert = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useCreateVesselAlert = <
+  TError = ErrorType<UnauthorizedResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof createVesselAlert>>,
     TError,
@@ -11019,7 +11107,7 @@ export const deleteVesselAlert = async (id: number, options?: RequestInit): Prom
 };
 
 export const getDeleteVesselAlertMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -11058,12 +11146,15 @@ export type DeleteVesselAlertMutationResult = NonNullable<
   Awaited<ReturnType<typeof deleteVesselAlert>>
 >;
 
-export type DeleteVesselAlertMutationError = ErrorType<unknown>;
+export type DeleteVesselAlertMutationError = ErrorType<UnauthorizedResponse | NotFoundResponse>;
 
 /**
  * @summary Dismiss a vessel alert
  */
-export const useDeleteVesselAlert = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useDeleteVesselAlert = <
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof deleteVesselAlert>>,
     TError,
@@ -11115,7 +11206,7 @@ export const getGetVesselWeatherSnapshotsQueryKey = (params?: GetVesselWeatherSn
 
 export const getGetVesselWeatherSnapshotsQueryOptions = <
   TData = Awaited<ReturnType<typeof getVesselWeatherSnapshots>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(
   params?: GetVesselWeatherSnapshotsParams,
   options?: {
@@ -11141,7 +11232,7 @@ export const getGetVesselWeatherSnapshotsQueryOptions = <
 export type GetVesselWeatherSnapshotsQueryResult = NonNullable<
   Awaited<ReturnType<typeof getVesselWeatherSnapshots>>
 >;
-export type GetVesselWeatherSnapshotsQueryError = ErrorType<unknown>;
+export type GetVesselWeatherSnapshotsQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Get weather snapshots for vessel locations
@@ -11149,7 +11240,7 @@ export type GetVesselWeatherSnapshotsQueryError = ErrorType<unknown>;
 
 export function useGetVesselWeatherSnapshots<
   TData = Awaited<ReturnType<typeof getVesselWeatherSnapshots>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(
   params?: GetVesselWeatherSnapshotsParams,
   options?: {
@@ -11184,7 +11275,7 @@ export const getListVesselSimulationsQueryKey = () => {
 
 export const getListVesselSimulationsQueryOptions = <
   TData = Awaited<ReturnType<typeof listVesselSimulations>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listVesselSimulations>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -11206,7 +11297,7 @@ export const getListVesselSimulationsQueryOptions = <
 export type ListVesselSimulationsQueryResult = NonNullable<
   Awaited<ReturnType<typeof listVesselSimulations>>
 >;
-export type ListVesselSimulationsQueryError = ErrorType<unknown>;
+export type ListVesselSimulationsQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List all route simulations
@@ -11214,7 +11305,7 @@ export type ListVesselSimulationsQueryError = ErrorType<unknown>;
 
 export function useListVesselSimulations<
   TData = Awaited<ReturnType<typeof listVesselSimulations>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listVesselSimulations>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -11246,7 +11337,7 @@ export const createVesselSimulation = async (
 };
 
 export const getCreateVesselSimulationMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -11285,13 +11376,13 @@ export type CreateVesselSimulationMutationResult = NonNullable<
   Awaited<ReturnType<typeof createVesselSimulation>>
 >;
 export type CreateVesselSimulationMutationBody = BodyType<CreateVesselSimulationBody>;
-export type CreateVesselSimulationMutationError = ErrorType<unknown>;
+export type CreateVesselSimulationMutationError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Run a route simulation
  */
 export const useCreateVesselSimulation = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -11404,7 +11495,7 @@ export const getGetVesselLiveChokepointsQueryKey = () => {
 
 export const getGetVesselLiveChokepointsQueryOptions = <
   TData = Awaited<ReturnType<typeof getVesselLiveChokepoints>>,
-  TError = ErrorType<void>,
+  TError = ErrorType<RateLimitedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof getVesselLiveChokepoints>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -11427,7 +11518,7 @@ export const getGetVesselLiveChokepointsQueryOptions = <
 export type GetVesselLiveChokepointsQueryResult = NonNullable<
   Awaited<ReturnType<typeof getVesselLiveChokepoints>>
 >;
-export type GetVesselLiveChokepointsQueryError = ErrorType<void>;
+export type GetVesselLiveChokepointsQueryError = ErrorType<RateLimitedResponse>;
 
 /**
  * @summary Get real-time maritime chokepoint status
@@ -11435,7 +11526,7 @@ export type GetVesselLiveChokepointsQueryError = ErrorType<void>;
 
 export function useGetVesselLiveChokepoints<
   TData = Awaited<ReturnType<typeof getVesselLiveChokepoints>>,
-  TError = ErrorType<void>,
+  TError = ErrorType<RateLimitedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof getVesselLiveChokepoints>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -11472,7 +11563,7 @@ export const getGetVesselLiveGeopoliticalEventsQueryKey = () => {
 
 export const getGetVesselLiveGeopoliticalEventsQueryOptions = <
   TData = Awaited<ReturnType<typeof getVesselLiveGeopoliticalEvents>>,
-  TError = ErrorType<void>,
+  TError = ErrorType<RateLimitedResponse>,
 >(options?: {
   query?: UseQueryOptions<
     Awaited<ReturnType<typeof getVesselLiveGeopoliticalEvents>>,
@@ -11499,7 +11590,7 @@ export const getGetVesselLiveGeopoliticalEventsQueryOptions = <
 export type GetVesselLiveGeopoliticalEventsQueryResult = NonNullable<
   Awaited<ReturnType<typeof getVesselLiveGeopoliticalEvents>>
 >;
-export type GetVesselLiveGeopoliticalEventsQueryError = ErrorType<void>;
+export type GetVesselLiveGeopoliticalEventsQueryError = ErrorType<RateLimitedResponse>;
 
 /**
  * @summary Get active geopolitical events affecting maritime routes
@@ -11507,7 +11598,7 @@ export type GetVesselLiveGeopoliticalEventsQueryError = ErrorType<void>;
 
 export function useGetVesselLiveGeopoliticalEvents<
   TData = Awaited<ReturnType<typeof getVesselLiveGeopoliticalEvents>>,
-  TError = ErrorType<void>,
+  TError = ErrorType<RateLimitedResponse>,
 >(options?: {
   query?: UseQueryOptions<
     Awaited<ReturnType<typeof getVesselLiveGeopoliticalEvents>>,
@@ -11545,7 +11636,7 @@ export const getGetVesselLivePortCongestionQueryKey = () => {
 
 export const getGetVesselLivePortCongestionQueryOptions = <
   TData = Awaited<ReturnType<typeof getVesselLivePortCongestion>>,
-  TError = ErrorType<void>,
+  TError = ErrorType<RateLimitedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof getVesselLivePortCongestion>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -11568,7 +11659,7 @@ export const getGetVesselLivePortCongestionQueryOptions = <
 export type GetVesselLivePortCongestionQueryResult = NonNullable<
   Awaited<ReturnType<typeof getVesselLivePortCongestion>>
 >;
-export type GetVesselLivePortCongestionQueryError = ErrorType<void>;
+export type GetVesselLivePortCongestionQueryError = ErrorType<RateLimitedResponse>;
 
 /**
  * @summary Get real-time port congestion data
@@ -11576,7 +11667,7 @@ export type GetVesselLivePortCongestionQueryError = ErrorType<void>;
 
 export function useGetVesselLivePortCongestion<
   TData = Awaited<ReturnType<typeof getVesselLivePortCongestion>>,
-  TError = ErrorType<void>,
+  TError = ErrorType<RateLimitedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof getVesselLivePortCongestion>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -11625,7 +11716,7 @@ export const getGetVesselLiveMarineWeatherQueryKey = (
 
 export const getGetVesselLiveMarineWeatherQueryOptions = <
   TData = Awaited<ReturnType<typeof getVesselLiveMarineWeather>>,
-  TError = ErrorType<void>,
+  TError = ErrorType<RateLimitedResponse>,
 >(
   params?: GetVesselLiveMarineWeatherParams,
   options?: {
@@ -11651,7 +11742,7 @@ export const getGetVesselLiveMarineWeatherQueryOptions = <
 export type GetVesselLiveMarineWeatherQueryResult = NonNullable<
   Awaited<ReturnType<typeof getVesselLiveMarineWeather>>
 >;
-export type GetVesselLiveMarineWeatherQueryError = ErrorType<void>;
+export type GetVesselLiveMarineWeatherQueryError = ErrorType<RateLimitedResponse>;
 
 /**
  * @summary Get live marine weather for a region
@@ -11659,7 +11750,7 @@ export type GetVesselLiveMarineWeatherQueryError = ErrorType<void>;
 
 export function useGetVesselLiveMarineWeather<
   TData = Awaited<ReturnType<typeof getVesselLiveMarineWeather>>,
-  TError = ErrorType<void>,
+  TError = ErrorType<RateLimitedResponse>,
 >(
   params?: GetVesselLiveMarineWeatherParams,
   options?: {
@@ -11709,7 +11800,7 @@ export const getListVesselEventsQueryKey = (params?: ListVesselEventsParams) => 
 
 export const getListVesselEventsQueryOptions = <
   TData = Awaited<ReturnType<typeof listVesselEvents>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(
   params?: ListVesselEventsParams,
   options?: {
@@ -11732,7 +11823,7 @@ export const getListVesselEventsQueryOptions = <
 };
 
 export type ListVesselEventsQueryResult = NonNullable<Awaited<ReturnType<typeof listVesselEvents>>>;
-export type ListVesselEventsQueryError = ErrorType<unknown>;
+export type ListVesselEventsQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List all vessel events
@@ -11740,7 +11831,7 @@ export type ListVesselEventsQueryError = ErrorType<unknown>;
 
 export function useListVesselEvents<
   TData = Awaited<ReturnType<typeof listVesselEvents>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(
   params?: ListVesselEventsParams,
   options?: {
@@ -11775,7 +11866,7 @@ export const createVesselEvent = async (
 };
 
 export const getCreateVesselEventMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -11814,12 +11905,15 @@ export type CreateVesselEventMutationResult = NonNullable<
   Awaited<ReturnType<typeof createVesselEvent>>
 >;
 export type CreateVesselEventMutationBody = BodyType<CreateVesselEventBody>;
-export type CreateVesselEventMutationError = ErrorType<unknown>;
+export type CreateVesselEventMutationError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Record a new vessel event
  */
-export const useCreateVesselEvent = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useCreateVesselEvent = <
+  TError = ErrorType<UnauthorizedResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof createVesselEvent>>,
     TError,
@@ -11859,7 +11953,7 @@ export const getGetVesselEventsQueryKey = (id: number) => {
 
 export const getGetVesselEventsQueryOptions = <
   TData = Awaited<ReturnType<typeof getVesselEvents>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
 >(
   id: number,
   options?: {
@@ -11882,7 +11976,7 @@ export const getGetVesselEventsQueryOptions = <
 };
 
 export type GetVesselEventsQueryResult = NonNullable<Awaited<ReturnType<typeof getVesselEvents>>>;
-export type GetVesselEventsQueryError = ErrorType<unknown>;
+export type GetVesselEventsQueryError = ErrorType<UnauthorizedResponse | NotFoundResponse>;
 
 /**
  * @summary Get events for a specific vessel
@@ -11890,7 +11984,7 @@ export type GetVesselEventsQueryError = ErrorType<unknown>;
 
 export function useGetVesselEvents<
   TData = Awaited<ReturnType<typeof getVesselEvents>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
 >(
   id: number,
   options?: {
@@ -11926,7 +12020,7 @@ export const updateVesselEvent = async (
 };
 
 export const getUpdateVesselEventMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -11965,12 +12059,15 @@ export type UpdateVesselEventMutationResult = NonNullable<
   Awaited<ReturnType<typeof updateVesselEvent>>
 >;
 export type UpdateVesselEventMutationBody = BodyType<UpdateVesselEventBody>;
-export type UpdateVesselEventMutationError = ErrorType<unknown>;
+export type UpdateVesselEventMutationError = ErrorType<UnauthorizedResponse | NotFoundResponse>;
 
 /**
  * @summary Update a vessel event
  */
-export const useUpdateVesselEvent = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useUpdateVesselEvent = <
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof updateVesselEvent>>,
     TError,
@@ -12024,7 +12121,7 @@ export const getListVesselCommandWorkflowsQueryKey = (
 
 export const getListVesselCommandWorkflowsQueryOptions = <
   TData = Awaited<ReturnType<typeof listVesselCommandWorkflows>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(
   params?: ListVesselCommandWorkflowsParams,
   options?: {
@@ -12050,7 +12147,7 @@ export const getListVesselCommandWorkflowsQueryOptions = <
 export type ListVesselCommandWorkflowsQueryResult = NonNullable<
   Awaited<ReturnType<typeof listVesselCommandWorkflows>>
 >;
-export type ListVesselCommandWorkflowsQueryError = ErrorType<unknown>;
+export type ListVesselCommandWorkflowsQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List vessel command workflows
@@ -12058,7 +12155,7 @@ export type ListVesselCommandWorkflowsQueryError = ErrorType<unknown>;
 
 export function useListVesselCommandWorkflows<
   TData = Awaited<ReturnType<typeof listVesselCommandWorkflows>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(
   params?: ListVesselCommandWorkflowsParams,
   options?: {
@@ -12093,7 +12190,7 @@ export const createVesselCommandWorkflow = async (
 };
 
 export const getCreateVesselCommandWorkflowMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -12132,13 +12229,13 @@ export type CreateVesselCommandWorkflowMutationResult = NonNullable<
   Awaited<ReturnType<typeof createVesselCommandWorkflow>>
 >;
 export type CreateVesselCommandWorkflowMutationBody = BodyType<CreateVesselCommandWorkflowBody>;
-export type CreateVesselCommandWorkflowMutationError = ErrorType<unknown>;
+export type CreateVesselCommandWorkflowMutationError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Create a vessel command workflow
  */
 export const useCreateVesselCommandWorkflow = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -12178,7 +12275,7 @@ export const updateVesselCommandWorkflow = async (
 };
 
 export const getUpdateVesselCommandWorkflowMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -12217,13 +12314,15 @@ export type UpdateVesselCommandWorkflowMutationResult = NonNullable<
   Awaited<ReturnType<typeof updateVesselCommandWorkflow>>
 >;
 export type UpdateVesselCommandWorkflowMutationBody = BodyType<UpdateVesselCommandWorkflowBody>;
-export type UpdateVesselCommandWorkflowMutationError = ErrorType<unknown>;
+export type UpdateVesselCommandWorkflowMutationError = ErrorType<
+  UnauthorizedResponse | NotFoundResponse
+>;
 
 /**
  * @summary Update a vessel command workflow status
  */
 export const useUpdateVesselCommandWorkflow = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -12263,7 +12362,7 @@ export const ingestAlloySignal = async (
 };
 
 export const getIngestAlloySignalMutationOptions = <
-  TError = ErrorType<BadRequestResponse | UnauthorizedResponse>,
+  TError = ErrorType<BadRequestResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -12302,13 +12401,13 @@ export type IngestAlloySignalMutationResult = NonNullable<
   Awaited<ReturnType<typeof ingestAlloySignal>>
 >;
 export type IngestAlloySignalMutationBody = BodyType<AlloySignalInput>;
-export type IngestAlloySignalMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse>;
+export type IngestAlloySignalMutationError = ErrorType<BadRequestResponse>;
 
 /**
  * @summary Ingest a single signal into the Alloy pipeline
  */
 export const useIngestAlloySignal = <
-  TError = ErrorType<BadRequestResponse | UnauthorizedResponse>,
+  TError = ErrorType<BadRequestResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -12347,7 +12446,7 @@ export const ingestAlloySignalBatch = async (
 };
 
 export const getIngestAlloySignalBatchMutationOptions = <
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -12386,15 +12485,13 @@ export type IngestAlloySignalBatchMutationResult = NonNullable<
   Awaited<ReturnType<typeof ingestAlloySignalBatch>>
 >;
 export type IngestAlloySignalBatchMutationBody = BodyType<IngestAlloySignalBatchBody>;
-export type IngestAlloySignalBatchMutationError = ErrorType<
-  UnauthorizedResponse | ForbiddenResponse
->;
+export type IngestAlloySignalBatchMutationError = ErrorType<ForbiddenResponse>;
 
 /**
  * @summary Batch-ingest multiple signals into the Alloy pipeline
  */
 export const useIngestAlloySignalBatch = <
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -12597,7 +12694,7 @@ export const createAlloyWorkflow = async (
 };
 
 export const getCreateAlloyWorkflowMutationOptions = <
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -12636,13 +12733,13 @@ export type CreateAlloyWorkflowMutationResult = NonNullable<
   Awaited<ReturnType<typeof createAlloyWorkflow>>
 >;
 export type CreateAlloyWorkflowMutationBody = BodyType<CreateAlloyWorkflow>;
-export type CreateAlloyWorkflowMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse>;
+export type CreateAlloyWorkflowMutationError = ErrorType<ForbiddenResponse>;
 
 /**
  * @summary Create a new Alloy workflow
  */
 export const useCreateAlloyWorkflow = <
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -12751,7 +12848,7 @@ export const updateAlloyWorkflow = async (
 };
 
 export const getUpdateAlloyWorkflowMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -12790,12 +12887,15 @@ export type UpdateAlloyWorkflowMutationResult = NonNullable<
   Awaited<ReturnType<typeof updateAlloyWorkflow>>
 >;
 export type UpdateAlloyWorkflowMutationBody = BodyType<UpdateAlloyWorkflowBody>;
-export type UpdateAlloyWorkflowMutationError = ErrorType<unknown>;
+export type UpdateAlloyWorkflowMutationError = ErrorType<UnauthorizedResponse | NotFoundResponse>;
 
 /**
  * @summary Update an Alloy workflow
  */
-export const useUpdateAlloyWorkflow = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useUpdateAlloyWorkflow = <
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof updateAlloyWorkflow>>,
     TError,
@@ -12827,7 +12927,7 @@ export const deleteAlloyWorkflow = async (id: string, options?: RequestInit): Pr
 };
 
 export const getDeleteAlloyWorkflowMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -12866,12 +12966,15 @@ export type DeleteAlloyWorkflowMutationResult = NonNullable<
   Awaited<ReturnType<typeof deleteAlloyWorkflow>>
 >;
 
-export type DeleteAlloyWorkflowMutationError = ErrorType<unknown>;
+export type DeleteAlloyWorkflowMutationError = ErrorType<UnauthorizedResponse | NotFoundResponse>;
 
 /**
  * @summary Delete an Alloy workflow
  */
-export const useDeleteAlloyWorkflow = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useDeleteAlloyWorkflow = <
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof deleteAlloyWorkflow>>,
     TError,
@@ -12909,7 +13012,7 @@ export const runAlloyWorkflow = async (
 };
 
 export const getRunAlloyWorkflowMutationOptions = <
-  TError = ErrorType<UnauthorizedResponse>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -12948,13 +13051,13 @@ export type RunAlloyWorkflowMutationResult = NonNullable<
   Awaited<ReturnType<typeof runAlloyWorkflow>>
 >;
 export type RunAlloyWorkflowMutationBody = BodyType<RunAlloyWorkflowBody>;
-export type RunAlloyWorkflowMutationError = ErrorType<UnauthorizedResponse>;
+export type RunAlloyWorkflowMutationError = ErrorType<UnauthorizedResponse | NotFoundResponse>;
 
 /**
  * @summary Trigger an Alloy workflow run
  */
 export const useRunAlloyWorkflow = <
-  TError = ErrorType<UnauthorizedResponse>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -13006,7 +13109,7 @@ export const getListAlloyRunsQueryKey = (params?: ListAlloyRunsParams) => {
 
 export const getListAlloyRunsQueryOptions = <
   TData = Awaited<ReturnType<typeof listAlloyRuns>>,
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
 >(
   params?: ListAlloyRunsParams,
   options?: {
@@ -13029,7 +13132,7 @@ export const getListAlloyRunsQueryOptions = <
 };
 
 export type ListAlloyRunsQueryResult = NonNullable<Awaited<ReturnType<typeof listAlloyRuns>>>;
-export type ListAlloyRunsQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse>;
+export type ListAlloyRunsQueryError = ErrorType<ForbiddenResponse>;
 
 /**
  * @summary List Alloy workflow runs
@@ -13037,7 +13140,7 @@ export type ListAlloyRunsQueryError = ErrorType<UnauthorizedResponse | Forbidden
 
 export function useListAlloyRuns<
   TData = Awaited<ReturnType<typeof listAlloyRuns>>,
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
 >(
   params?: ListAlloyRunsParams,
   options?: {
@@ -13141,7 +13244,7 @@ export const getGetAlloyRunStepsQueryKey = (id: string) => {
 
 export const getGetAlloyRunStepsQueryOptions = <
   TData = Awaited<ReturnType<typeof getAlloyRunSteps>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
 >(
   id: string,
   options?: {
@@ -13164,7 +13267,7 @@ export const getGetAlloyRunStepsQueryOptions = <
 };
 
 export type GetAlloyRunStepsQueryResult = NonNullable<Awaited<ReturnType<typeof getAlloyRunSteps>>>;
-export type GetAlloyRunStepsQueryError = ErrorType<unknown>;
+export type GetAlloyRunStepsQueryError = ErrorType<UnauthorizedResponse | NotFoundResponse>;
 
 /**
  * @summary Get step-level execution details for a run
@@ -13172,7 +13275,7 @@ export type GetAlloyRunStepsQueryError = ErrorType<unknown>;
 
 export function useGetAlloyRunSteps<
   TData = Awaited<ReturnType<typeof getAlloyRunSteps>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
 >(
   id: string,
   options?: {
@@ -13202,7 +13305,7 @@ export const retryAlloyRun = async (id: string, options?: RequestInit): Promise<
 };
 
 export const getRetryAlloyRunMutationOptions = <
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -13238,13 +13341,13 @@ export const getRetryAlloyRunMutationOptions = <
 
 export type RetryAlloyRunMutationResult = NonNullable<Awaited<ReturnType<typeof retryAlloyRun>>>;
 
-export type RetryAlloyRunMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse>;
+export type RetryAlloyRunMutationError = ErrorType<ForbiddenResponse>;
 
 /**
  * @summary Retry a failed Alloy run
  */
 export const useRetryAlloyRun = <
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -13278,7 +13381,7 @@ export const cancelAlloyRun = async (id: string, options?: RequestInit): Promise
 };
 
 export const getCancelAlloyRunMutationOptions = <
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -13314,13 +13417,13 @@ export const getCancelAlloyRunMutationOptions = <
 
 export type CancelAlloyRunMutationResult = NonNullable<Awaited<ReturnType<typeof cancelAlloyRun>>>;
 
-export type CancelAlloyRunMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse>;
+export type CancelAlloyRunMutationError = ErrorType<ForbiddenResponse>;
 
 /**
  * @summary Cancel a running Alloy workflow run
  */
 export const useCancelAlloyRun = <
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -13374,7 +13477,7 @@ export const getListAlloyArtifactsQueryKey = (params?: ListAlloyArtifactsParams)
 
 export const getListAlloyArtifactsQueryOptions = <
   TData = Awaited<ReturnType<typeof listAlloyArtifacts>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(
   params?: ListAlloyArtifactsParams,
   options?: {
@@ -13399,7 +13502,7 @@ export const getListAlloyArtifactsQueryOptions = <
 export type ListAlloyArtifactsQueryResult = NonNullable<
   Awaited<ReturnType<typeof listAlloyArtifacts>>
 >;
-export type ListAlloyArtifactsQueryError = ErrorType<unknown>;
+export type ListAlloyArtifactsQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List Alloy output artifacts awaiting review
@@ -13407,7 +13510,7 @@ export type ListAlloyArtifactsQueryError = ErrorType<unknown>;
 
 export function useListAlloyArtifacts<
   TData = Awaited<ReturnType<typeof listAlloyArtifacts>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(
   params?: ListAlloyArtifactsParams,
   options?: {
@@ -13681,7 +13784,7 @@ export const getListAlloyAdminFlagsQueryKey = () => {
 
 export const getListAlloyAdminFlagsQueryOptions = <
   TData = Awaited<ReturnType<typeof listAlloyAdminFlags>>,
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listAlloyAdminFlags>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -13703,7 +13806,7 @@ export const getListAlloyAdminFlagsQueryOptions = <
 export type ListAlloyAdminFlagsQueryResult = NonNullable<
   Awaited<ReturnType<typeof listAlloyAdminFlags>>
 >;
-export type ListAlloyAdminFlagsQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse>;
+export type ListAlloyAdminFlagsQueryError = ErrorType<ForbiddenResponse>;
 
 /**
  * @summary List Alloy admin feature flags
@@ -13711,7 +13814,7 @@ export type ListAlloyAdminFlagsQueryError = ErrorType<UnauthorizedResponse | For
 
 export function useListAlloyAdminFlags<
   TData = Awaited<ReturnType<typeof listAlloyAdminFlags>>,
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listAlloyAdminFlags>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -13743,7 +13846,7 @@ export const upsertAlloyAdminFlag = async (
 };
 
 export const getUpsertAlloyAdminFlagMutationOptions = <
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -13782,13 +13885,13 @@ export type UpsertAlloyAdminFlagMutationResult = NonNullable<
   Awaited<ReturnType<typeof upsertAlloyAdminFlag>>
 >;
 export type UpsertAlloyAdminFlagMutationBody = BodyType<UpsertAlloyAdminFlagBody>;
-export type UpsertAlloyAdminFlagMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse>;
+export type UpsertAlloyAdminFlagMutationError = ErrorType<ForbiddenResponse>;
 
 /**
  * @summary Create or update an Alloy admin flag
  */
 export const useUpsertAlloyAdminFlag = <
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -13828,7 +13931,7 @@ export const patchAlloyAdminFlag = async (
 };
 
 export const getPatchAlloyAdminFlagMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -13867,12 +13970,15 @@ export type PatchAlloyAdminFlagMutationResult = NonNullable<
   Awaited<ReturnType<typeof patchAlloyAdminFlag>>
 >;
 export type PatchAlloyAdminFlagMutationBody = BodyType<PatchAlloyAdminFlagBody>;
-export type PatchAlloyAdminFlagMutationError = ErrorType<unknown>;
+export type PatchAlloyAdminFlagMutationError = ErrorType<UnauthorizedResponse | NotFoundResponse>;
 
 /**
  * @summary Patch a single Alloy admin flag
  */
-export const usePatchAlloyAdminFlag = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const usePatchAlloyAdminFlag = <
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof patchAlloyAdminFlag>>,
     TError,
@@ -13924,7 +14030,7 @@ export const getListAlloyAuditLogQueryKey = (params?: ListAlloyAuditLogParams) =
 
 export const getListAlloyAuditLogQueryOptions = <
   TData = Awaited<ReturnType<typeof listAlloyAuditLog>>,
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
 >(
   params?: ListAlloyAuditLogParams,
   options?: {
@@ -13949,7 +14055,7 @@ export const getListAlloyAuditLogQueryOptions = <
 export type ListAlloyAuditLogQueryResult = NonNullable<
   Awaited<ReturnType<typeof listAlloyAuditLog>>
 >;
-export type ListAlloyAuditLogQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse>;
+export type ListAlloyAuditLogQueryError = ErrorType<ForbiddenResponse>;
 
 /**
  * @summary List Alloy audit log entries
@@ -13957,7 +14063,7 @@ export type ListAlloyAuditLogQueryError = ErrorType<UnauthorizedResponse | Forbi
 
 export function useListAlloyAuditLog<
   TData = Awaited<ReturnType<typeof listAlloyAuditLog>>,
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
 >(
   params?: ListAlloyAuditLogParams,
   options?: {
@@ -14071,7 +14177,7 @@ export const getListAlloyApprovalsQueryKey = (params?: ListAlloyApprovalsParams)
 
 export const getListAlloyApprovalsQueryOptions = <
   TData = Awaited<ReturnType<typeof listAlloyApprovals>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(
   params?: ListAlloyApprovalsParams,
   options?: {
@@ -14096,7 +14202,7 @@ export const getListAlloyApprovalsQueryOptions = <
 export type ListAlloyApprovalsQueryResult = NonNullable<
   Awaited<ReturnType<typeof listAlloyApprovals>>
 >;
-export type ListAlloyApprovalsQueryError = ErrorType<unknown>;
+export type ListAlloyApprovalsQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List pending Alloy approvals
@@ -14104,7 +14210,7 @@ export type ListAlloyApprovalsQueryError = ErrorType<unknown>;
 
 export function useListAlloyApprovals<
   TData = Awaited<ReturnType<typeof listAlloyApprovals>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(
   params?: ListAlloyApprovalsParams,
   options?: {
@@ -14140,7 +14246,7 @@ export const decideAlloyApproval = async (
 };
 
 export const getDecideAlloyApprovalMutationOptions = <
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -14179,13 +14285,13 @@ export type DecideAlloyApprovalMutationResult = NonNullable<
   Awaited<ReturnType<typeof decideAlloyApproval>>
 >;
 export type DecideAlloyApprovalMutationBody = BodyType<DecideAlloyApprovalBody>;
-export type DecideAlloyApprovalMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse>;
+export type DecideAlloyApprovalMutationError = ErrorType<ForbiddenResponse>;
 
 /**
  * @summary Approve or reject an Alloy approval request
  */
 export const useDecideAlloyApproval = <
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -14523,7 +14629,7 @@ export const approvePlatformDecision = async (
 };
 
 export const getApprovePlatformDecisionMutationOptions = <
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -14562,15 +14668,13 @@ export type ApprovePlatformDecisionMutationResult = NonNullable<
   Awaited<ReturnType<typeof approvePlatformDecision>>
 >;
 export type ApprovePlatformDecisionMutationBody = BodyType<ApprovePlatformDecisionBody>;
-export type ApprovePlatformDecisionMutationError = ErrorType<
-  UnauthorizedResponse | ForbiddenResponse
->;
+export type ApprovePlatformDecisionMutationError = ErrorType<ForbiddenResponse>;
 
 /**
  * @summary Approve a platform-level decision
  */
 export const useApprovePlatformDecision = <
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -14610,7 +14714,7 @@ export const rejectPlatformDecision = async (
 };
 
 export const getRejectPlatformDecisionMutationOptions = <
-  TError = ErrorType<UnauthorizedResponse>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -14649,13 +14753,15 @@ export type RejectPlatformDecisionMutationResult = NonNullable<
   Awaited<ReturnType<typeof rejectPlatformDecision>>
 >;
 export type RejectPlatformDecisionMutationBody = BodyType<RejectPlatformDecisionBody>;
-export type RejectPlatformDecisionMutationError = ErrorType<UnauthorizedResponse>;
+export type RejectPlatformDecisionMutationError = ErrorType<
+  UnauthorizedResponse | NotFoundResponse
+>;
 
 /**
  * @summary Reject a platform-level decision
  */
 export const useRejectPlatformDecision = <
-  TError = ErrorType<UnauthorizedResponse>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -14707,7 +14813,7 @@ export const getListSkillsQueryKey = (params?: ListSkillsParams) => {
 
 export const getListSkillsQueryOptions = <
   TData = Awaited<ReturnType<typeof listSkills>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(
   params?: ListSkillsParams,
   options?: {
@@ -14730,7 +14836,7 @@ export const getListSkillsQueryOptions = <
 };
 
 export type ListSkillsQueryResult = NonNullable<Awaited<ReturnType<typeof listSkills>>>;
-export type ListSkillsQueryError = ErrorType<unknown>;
+export type ListSkillsQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List available agent skills
@@ -14738,7 +14844,7 @@ export type ListSkillsQueryError = ErrorType<unknown>;
 
 export function useListSkills<
   TData = Awaited<ReturnType<typeof listSkills>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(
   params?: ListSkillsParams,
   options?: {
@@ -14922,7 +15028,7 @@ export const updateSkill = async (
 };
 
 export const getUpdateSkillMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -14959,12 +15065,15 @@ export const getUpdateSkillMutationOptions = <
 
 export type UpdateSkillMutationResult = NonNullable<Awaited<ReturnType<typeof updateSkill>>>;
 export type UpdateSkillMutationBody = BodyType<UpdateSkillBody>;
-export type UpdateSkillMutationError = ErrorType<unknown>;
+export type UpdateSkillMutationError = ErrorType<UnauthorizedResponse | NotFoundResponse>;
 
 /**
  * @summary Update an agent skill
  */
-export const useUpdateSkill = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useUpdateSkill = <
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof updateSkill>>,
     TError,
@@ -15017,7 +15126,7 @@ export const getGetSkillRunsQueryKey = (id: string, params?: GetSkillRunsParams)
 
 export const getGetSkillRunsQueryOptions = <
   TData = Awaited<ReturnType<typeof getSkillRuns>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
 >(
   id: string,
   params?: GetSkillRunsParams,
@@ -15041,7 +15150,7 @@ export const getGetSkillRunsQueryOptions = <
 };
 
 export type GetSkillRunsQueryResult = NonNullable<Awaited<ReturnType<typeof getSkillRuns>>>;
-export type GetSkillRunsQueryError = ErrorType<unknown>;
+export type GetSkillRunsQueryError = ErrorType<UnauthorizedResponse | NotFoundResponse>;
 
 /**
  * @summary List execution runs for a skill
@@ -15049,7 +15158,7 @@ export type GetSkillRunsQueryError = ErrorType<unknown>;
 
 export function useGetSkillRuns<
   TData = Awaited<ReturnType<typeof getSkillRuns>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
 >(
   id: string,
   params?: GetSkillRunsParams,
@@ -15085,7 +15194,7 @@ export const getGetHoldingsHealthQueryKey = () => {
 
 export const getGetHoldingsHealthQueryOptions = <
   TData = Awaited<ReturnType<typeof getHoldingsHealth>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof getHoldingsHealth>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -15107,7 +15216,7 @@ export const getGetHoldingsHealthQueryOptions = <
 export type GetHoldingsHealthQueryResult = NonNullable<
   Awaited<ReturnType<typeof getHoldingsHealth>>
 >;
-export type GetHoldingsHealthQueryError = ErrorType<unknown>;
+export type GetHoldingsHealthQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Holdings service health check
@@ -15115,7 +15224,7 @@ export type GetHoldingsHealthQueryError = ErrorType<unknown>;
 
 export function useGetHoldingsHealth<
   TData = Awaited<ReturnType<typeof getHoldingsHealth>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof getHoldingsHealth>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -15209,7 +15318,7 @@ export const getGetHoldingsEcosystemHealthQueryKey = () => {
 
 export const getGetHoldingsEcosystemHealthQueryOptions = <
   TData = Awaited<ReturnType<typeof getHoldingsEcosystemHealth>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof getHoldingsEcosystemHealth>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -15232,7 +15341,7 @@ export const getGetHoldingsEcosystemHealthQueryOptions = <
 export type GetHoldingsEcosystemHealthQueryResult = NonNullable<
   Awaited<ReturnType<typeof getHoldingsEcosystemHealth>>
 >;
-export type GetHoldingsEcosystemHealthQueryError = ErrorType<unknown>;
+export type GetHoldingsEcosystemHealthQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Get health status across all portfolio ventures
@@ -15240,7 +15349,7 @@ export type GetHoldingsEcosystemHealthQueryError = ErrorType<unknown>;
 
 export function useGetHoldingsEcosystemHealth<
   TData = Awaited<ReturnType<typeof getHoldingsEcosystemHealth>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof getHoldingsEcosystemHealth>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -15274,7 +15383,7 @@ export const getGetHoldingsEcosystemSummaryQueryKey = () => {
 
 export const getGetHoldingsEcosystemSummaryQueryOptions = <
   TData = Awaited<ReturnType<typeof getHoldingsEcosystemSummary>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof getHoldingsEcosystemSummary>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -15297,7 +15406,7 @@ export const getGetHoldingsEcosystemSummaryQueryOptions = <
 export type GetHoldingsEcosystemSummaryQueryResult = NonNullable<
   Awaited<ReturnType<typeof getHoldingsEcosystemSummary>>
 >;
-export type GetHoldingsEcosystemSummaryQueryError = ErrorType<unknown>;
+export type GetHoldingsEcosystemSummaryQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Get high-level ecosystem summary for the holdings dashboard
@@ -15305,7 +15414,7 @@ export type GetHoldingsEcosystemSummaryQueryError = ErrorType<unknown>;
 
 export function useGetHoldingsEcosystemSummary<
   TData = Awaited<ReturnType<typeof getHoldingsEcosystemSummary>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof getHoldingsEcosystemSummary>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -15352,7 +15461,7 @@ export const getListVenturesQueryKey = (params?: ListVenturesParams) => {
 
 export const getListVenturesQueryOptions = <
   TData = Awaited<ReturnType<typeof listVentures>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(
   params?: ListVenturesParams,
   options?: {
@@ -15375,7 +15484,7 @@ export const getListVenturesQueryOptions = <
 };
 
 export type ListVenturesQueryResult = NonNullable<Awaited<ReturnType<typeof listVentures>>>;
-export type ListVenturesQueryError = ErrorType<unknown>;
+export type ListVenturesQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List all portfolio ventures
@@ -15383,7 +15492,7 @@ export type ListVenturesQueryError = ErrorType<unknown>;
 
 export function useListVentures<
   TData = Awaited<ReturnType<typeof listVentures>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(
   params?: ListVenturesParams,
   options?: {
@@ -15567,7 +15676,7 @@ export const updateVenture = async (
 };
 
 export const getUpdateVentureMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -15604,12 +15713,15 @@ export const getUpdateVentureMutationOptions = <
 
 export type UpdateVentureMutationResult = NonNullable<Awaited<ReturnType<typeof updateVenture>>>;
 export type UpdateVentureMutationBody = BodyType<UpdateVentureBody>;
-export type UpdateVentureMutationError = ErrorType<unknown>;
+export type UpdateVentureMutationError = ErrorType<UnauthorizedResponse | NotFoundResponse>;
 
 /**
  * @summary Update a portfolio venture
  */
-export const useUpdateVenture = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useUpdateVenture = <
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof updateVenture>>,
     TError,
@@ -15641,7 +15753,7 @@ export const deleteVenture = async (id: number, options?: RequestInit): Promise<
 };
 
 export const getDeleteVentureMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -15677,12 +15789,15 @@ export const getDeleteVentureMutationOptions = <
 
 export type DeleteVentureMutationResult = NonNullable<Awaited<ReturnType<typeof deleteVenture>>>;
 
-export type DeleteVentureMutationError = ErrorType<unknown>;
+export type DeleteVentureMutationError = ErrorType<UnauthorizedResponse | NotFoundResponse>;
 
 /**
  * @summary Remove a portfolio venture
  */
-export const useDeleteVenture = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useDeleteVenture = <
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof deleteVenture>>,
     TError,
@@ -15734,7 +15849,7 @@ export const getListVentureMilestonesQueryKey = (params?: ListVentureMilestonesP
 
 export const getListVentureMilestonesQueryOptions = <
   TData = Awaited<ReturnType<typeof listVentureMilestones>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(
   params?: ListVentureMilestonesParams,
   options?: {
@@ -15759,7 +15874,7 @@ export const getListVentureMilestonesQueryOptions = <
 export type ListVentureMilestonesQueryResult = NonNullable<
   Awaited<ReturnType<typeof listVentureMilestones>>
 >;
-export type ListVentureMilestonesQueryError = ErrorType<unknown>;
+export type ListVentureMilestonesQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List portfolio milestones
@@ -15767,7 +15882,7 @@ export type ListVentureMilestonesQueryError = ErrorType<unknown>;
 
 export function useListVentureMilestones<
   TData = Awaited<ReturnType<typeof listVentureMilestones>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(
   params?: ListVentureMilestonesParams,
   options?: {
@@ -15802,7 +15917,7 @@ export const createVentureMilestone = async (
 };
 
 export const getCreateVentureMilestoneMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -15841,13 +15956,13 @@ export type CreateVentureMilestoneMutationResult = NonNullable<
   Awaited<ReturnType<typeof createVentureMilestone>>
 >;
 export type CreateVentureMilestoneMutationBody = BodyType<CreateVentureMilestoneBody>;
-export type CreateVentureMilestoneMutationError = ErrorType<unknown>;
+export type CreateVentureMilestoneMutationError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Create a milestone for a venture
  */
 export const useCreateVentureMilestone = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -15881,7 +15996,7 @@ export const deleteVentureMilestone = async (id: number, options?: RequestInit):
 };
 
 export const getDeleteVentureMilestoneMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -15920,13 +16035,15 @@ export type DeleteVentureMilestoneMutationResult = NonNullable<
   Awaited<ReturnType<typeof deleteVentureMilestone>>
 >;
 
-export type DeleteVentureMilestoneMutationError = ErrorType<unknown>;
+export type DeleteVentureMilestoneMutationError = ErrorType<
+  UnauthorizedResponse | NotFoundResponse
+>;
 
 /**
  * @summary Delete a milestone
  */
 export const useDeleteVentureMilestone = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -15980,7 +16097,7 @@ export const getListVentureMetricsQueryKey = (params?: ListVentureMetricsParams)
 
 export const getListVentureMetricsQueryOptions = <
   TData = Awaited<ReturnType<typeof listVentureMetrics>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(
   params?: ListVentureMetricsParams,
   options?: {
@@ -16005,7 +16122,7 @@ export const getListVentureMetricsQueryOptions = <
 export type ListVentureMetricsQueryResult = NonNullable<
   Awaited<ReturnType<typeof listVentureMetrics>>
 >;
-export type ListVentureMetricsQueryError = ErrorType<unknown>;
+export type ListVentureMetricsQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List venture performance metrics
@@ -16013,7 +16130,7 @@ export type ListVentureMetricsQueryError = ErrorType<unknown>;
 
 export function useListVentureMetrics<
   TData = Awaited<ReturnType<typeof listVentureMetrics>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(
   params?: ListVentureMetricsParams,
   options?: {
@@ -16048,7 +16165,7 @@ export const createVentureMetric = async (
 };
 
 export const getCreateVentureMetricMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -16087,12 +16204,15 @@ export type CreateVentureMetricMutationResult = NonNullable<
   Awaited<ReturnType<typeof createVentureMetric>>
 >;
 export type CreateVentureMetricMutationBody = BodyType<CreateVentureMetricBody>;
-export type CreateVentureMetricMutationError = ErrorType<unknown>;
+export type CreateVentureMetricMutationError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Record a venture metric data point
  */
-export const useCreateVentureMetric = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useCreateVentureMetric = <
+  TError = ErrorType<UnauthorizedResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof createVentureMetric>>,
     TError,
@@ -16124,7 +16244,7 @@ export const deleteVentureMetric = async (id: number, options?: RequestInit): Pr
 };
 
 export const getDeleteVentureMetricMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -16163,12 +16283,15 @@ export type DeleteVentureMetricMutationResult = NonNullable<
   Awaited<ReturnType<typeof deleteVentureMetric>>
 >;
 
-export type DeleteVentureMetricMutationError = ErrorType<unknown>;
+export type DeleteVentureMetricMutationError = ErrorType<UnauthorizedResponse | NotFoundResponse>;
 
 /**
  * @summary Delete a metric data point
  */
-export const useDeleteVentureMetric = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useDeleteVentureMetric = <
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof deleteVentureMetric>>,
     TError,
@@ -16220,7 +16343,7 @@ export const getListVentureLeadershipQueryKey = (params?: ListVentureLeadershipP
 
 export const getListVentureLeadershipQueryOptions = <
   TData = Awaited<ReturnType<typeof listVentureLeadership>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(
   params?: ListVentureLeadershipParams,
   options?: {
@@ -16245,7 +16368,7 @@ export const getListVentureLeadershipQueryOptions = <
 export type ListVentureLeadershipQueryResult = NonNullable<
   Awaited<ReturnType<typeof listVentureLeadership>>
 >;
-export type ListVentureLeadershipQueryError = ErrorType<unknown>;
+export type ListVentureLeadershipQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List venture leadership profiles
@@ -16253,7 +16376,7 @@ export type ListVentureLeadershipQueryError = ErrorType<unknown>;
 
 export function useListVentureLeadership<
   TData = Awaited<ReturnType<typeof listVentureLeadership>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(
   params?: ListVentureLeadershipParams,
   options?: {
@@ -16288,7 +16411,7 @@ export const createVentureLeader = async (
 };
 
 export const getCreateVentureLeaderMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -16327,12 +16450,15 @@ export type CreateVentureLeaderMutationResult = NonNullable<
   Awaited<ReturnType<typeof createVentureLeader>>
 >;
 export type CreateVentureLeaderMutationBody = BodyType<CreateVentureLeaderBody>;
-export type CreateVentureLeaderMutationError = ErrorType<unknown>;
+export type CreateVentureLeaderMutationError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Add a leadership profile to a venture
  */
-export const useCreateVentureLeader = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useCreateVentureLeader = <
+  TError = ErrorType<UnauthorizedResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof createVentureLeader>>,
     TError,
@@ -16364,7 +16490,7 @@ export const deleteVentureLeader = async (id: number, options?: RequestInit): Pr
 };
 
 export const getDeleteVentureLeaderMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -16403,12 +16529,15 @@ export type DeleteVentureLeaderMutationResult = NonNullable<
   Awaited<ReturnType<typeof deleteVentureLeader>>
 >;
 
-export type DeleteVentureLeaderMutationError = ErrorType<unknown>;
+export type DeleteVentureLeaderMutationError = ErrorType<UnauthorizedResponse | NotFoundResponse>;
 
 /**
  * @summary Remove a leadership profile
  */
-export const useDeleteVentureLeader = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useDeleteVentureLeader = <
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof deleteVentureLeader>>,
     TError,
@@ -16528,7 +16657,7 @@ export const createHoldingsInquiry = async (
 };
 
 export const getCreateHoldingsInquiryMutationOptions = <
-  TError = ErrorType<void>,
+  TError = ErrorType<RateLimitedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -16567,12 +16696,15 @@ export type CreateHoldingsInquiryMutationResult = NonNullable<
   Awaited<ReturnType<typeof createHoldingsInquiry>>
 >;
 export type CreateHoldingsInquiryMutationBody = BodyType<CreateHoldingsInquiryBody>;
-export type CreateHoldingsInquiryMutationError = ErrorType<void>;
+export type CreateHoldingsInquiryMutationError = ErrorType<RateLimitedResponse>;
 
 /**
  * @summary Submit a holdings inquiry (public — rate limited)
  */
-export const useCreateHoldingsInquiry = <TError = ErrorType<void>, TContext = unknown>(options?: {
+export const useCreateHoldingsInquiry = <
+  TError = ErrorType<RateLimitedResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof createHoldingsInquiry>>,
     TError,
@@ -16604,7 +16736,7 @@ export const deleteHoldingsInquiry = async (id: number, options?: RequestInit): 
 };
 
 export const getDeleteHoldingsInquiryMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -16643,13 +16775,13 @@ export type DeleteHoldingsInquiryMutationResult = NonNullable<
   Awaited<ReturnType<typeof deleteHoldingsInquiry>>
 >;
 
-export type DeleteHoldingsInquiryMutationError = ErrorType<unknown>;
+export type DeleteHoldingsInquiryMutationError = ErrorType<UnauthorizedResponse | NotFoundResponse>;
 
 /**
  * @summary Archive/delete an inquiry
  */
 export const useDeleteHoldingsInquiry = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -16703,7 +16835,7 @@ export const getSearchHoldingsQueryKey = (params?: SearchHoldingsParams) => {
 
 export const getSearchHoldingsQueryOptions = <
   TData = Awaited<ReturnType<typeof searchHoldings>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(
   params: SearchHoldingsParams,
   options?: {
@@ -16726,7 +16858,7 @@ export const getSearchHoldingsQueryOptions = <
 };
 
 export type SearchHoldingsQueryResult = NonNullable<Awaited<ReturnType<typeof searchHoldings>>>;
-export type SearchHoldingsQueryError = ErrorType<unknown>;
+export type SearchHoldingsQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Full-text search across ventures, metrics, and milestones
@@ -16734,7 +16866,7 @@ export type SearchHoldingsQueryError = ErrorType<unknown>;
 
 export function useSearchHoldings<
   TData = Awaited<ReturnType<typeof searchHoldings>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(
   params: SearchHoldingsParams,
   options?: {
@@ -16897,7 +17029,7 @@ export const getListInvestorDocsQueryKey = () => {
 
 export const getListInvestorDocsQueryOptions = <
   TData = Awaited<ReturnType<typeof listInvestorDocs>>,
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listInvestorDocs>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -16917,7 +17049,7 @@ export const getListInvestorDocsQueryOptions = <
 };
 
 export type ListInvestorDocsQueryResult = NonNullable<Awaited<ReturnType<typeof listInvestorDocs>>>;
-export type ListInvestorDocsQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse>;
+export type ListInvestorDocsQueryError = ErrorType<ForbiddenResponse>;
 
 /**
  * @summary List investor-grade documents (requires NDA acceptance and analyst+ role)
@@ -16925,7 +17057,7 @@ export type ListInvestorDocsQueryError = ErrorType<UnauthorizedResponse | Forbid
 
 export function useListInvestorDocs<
   TData = Awaited<ReturnType<typeof listInvestorDocs>>,
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listInvestorDocs>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -16957,7 +17089,7 @@ export const getGetInvestorDocQueryKey = (id: number) => {
 
 export const getGetInvestorDocQueryOptions = <
   TData = Awaited<ReturnType<typeof getInvestorDoc>>,
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>,
+  TError = ErrorType<ForbiddenResponse | NotFoundResponse>,
 >(
   id: number,
   options?: {
@@ -16980,9 +17112,7 @@ export const getGetInvestorDocQueryOptions = <
 };
 
 export type GetInvestorDocQueryResult = NonNullable<Awaited<ReturnType<typeof getInvestorDoc>>>;
-export type GetInvestorDocQueryError = ErrorType<
-  UnauthorizedResponse | ForbiddenResponse | NotFoundResponse
->;
+export type GetInvestorDocQueryError = ErrorType<ForbiddenResponse | NotFoundResponse>;
 
 /**
  * @summary Get a specific investor document
@@ -16990,7 +17120,7 @@ export type GetInvestorDocQueryError = ErrorType<
 
 export function useGetInvestorDoc<
   TData = Awaited<ReturnType<typeof getInvestorDoc>>,
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>,
+  TError = ErrorType<ForbiddenResponse | NotFoundResponse>,
 >(
   id: number,
   options?: {
@@ -17025,7 +17155,7 @@ export const getListAdminRolesQueryKey = () => {
 
 export const getListAdminRolesQueryOptions = <
   TData = Awaited<ReturnType<typeof listAdminRoles>>,
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listAdminRoles>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -17045,7 +17175,7 @@ export const getListAdminRolesQueryOptions = <
 };
 
 export type ListAdminRolesQueryResult = NonNullable<Awaited<ReturnType<typeof listAdminRoles>>>;
-export type ListAdminRolesQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse>;
+export type ListAdminRolesQueryError = ErrorType<ForbiddenResponse>;
 
 /**
  * @summary List all platform roles
@@ -17053,7 +17183,7 @@ export type ListAdminRolesQueryError = ErrorType<UnauthorizedResponse | Forbidde
 
 export function useListAdminRoles<
   TData = Awaited<ReturnType<typeof listAdminRoles>>,
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listAdminRoles>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -17100,7 +17230,7 @@ export const getListAdminUsersQueryKey = (params?: ListAdminUsersParams) => {
 
 export const getListAdminUsersQueryOptions = <
   TData = Awaited<ReturnType<typeof listAdminUsers>>,
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
 >(
   params?: ListAdminUsersParams,
   options?: {
@@ -17123,7 +17253,7 @@ export const getListAdminUsersQueryOptions = <
 };
 
 export type ListAdminUsersQueryResult = NonNullable<Awaited<ReturnType<typeof listAdminUsers>>>;
-export type ListAdminUsersQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse>;
+export type ListAdminUsersQueryError = ErrorType<ForbiddenResponse>;
 
 /**
  * @summary List all platform users (admin)
@@ -17131,7 +17261,7 @@ export type ListAdminUsersQueryError = ErrorType<UnauthorizedResponse | Forbidde
 
 export function useListAdminUsers<
   TData = Awaited<ReturnType<typeof listAdminUsers>>,
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
 >(
   params?: ListAdminUsersParams,
   options?: {
@@ -17166,7 +17296,7 @@ export const createAdminUser = async (
 };
 
 export const getCreateAdminUserMutationOptions = <
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -17205,13 +17335,13 @@ export type CreateAdminUserMutationResult = NonNullable<
   Awaited<ReturnType<typeof createAdminUser>>
 >;
 export type CreateAdminUserMutationBody = BodyType<CreateAdminUserBody>;
-export type CreateAdminUserMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse>;
+export type CreateAdminUserMutationError = ErrorType<ForbiddenResponse>;
 
 /**
  * @summary Create a platform user (admin)
  */
 export const useCreateAdminUser = <
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -17322,7 +17452,7 @@ export const deactivateAdminUser = async (
 };
 
 export const getDeactivateAdminUserMutationOptions = <
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -17361,13 +17491,13 @@ export type DeactivateAdminUserMutationResult = NonNullable<
   Awaited<ReturnType<typeof deactivateAdminUser>>
 >;
 export type DeactivateAdminUserMutationBody = BodyType<DeactivateAdminUserBody>;
-export type DeactivateAdminUserMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse>;
+export type DeactivateAdminUserMutationError = ErrorType<ForbiddenResponse>;
 
 /**
  * @summary Deactivate a user account
  */
 export const useDeactivateAdminUser = <
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -17407,7 +17537,7 @@ export const setAdminUserRole = async (
 };
 
 export const getSetAdminUserRoleMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -17446,12 +17576,15 @@ export type SetAdminUserRoleMutationResult = NonNullable<
   Awaited<ReturnType<typeof setAdminUserRole>>
 >;
 export type SetAdminUserRoleMutationBody = BodyType<SetAdminUserRoleBody>;
-export type SetAdminUserRoleMutationError = ErrorType<unknown>;
+export type SetAdminUserRoleMutationError = ErrorType<UnauthorizedResponse | NotFoundResponse>;
 
 /**
  * @summary Set a user's primary role
  */
-export const useSetAdminUserRole = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useSetAdminUserRole = <
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof setAdminUserRole>>,
     TError,
@@ -17489,7 +17622,7 @@ export const assignAdminUserRoles = async (
 };
 
 export const getAssignAdminUserRolesMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -17528,12 +17661,15 @@ export type AssignAdminUserRolesMutationResult = NonNullable<
   Awaited<ReturnType<typeof assignAdminUserRoles>>
 >;
 export type AssignAdminUserRolesMutationBody = BodyType<AssignAdminUserRolesBody>;
-export type AssignAdminUserRolesMutationError = ErrorType<unknown>;
+export type AssignAdminUserRolesMutationError = ErrorType<UnauthorizedResponse | NotFoundResponse>;
 
 /**
  * @summary Assign multiple roles to a user (super admin)
  */
-export const useAssignAdminUserRoles = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useAssignAdminUserRoles = <
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof assignAdminUserRoles>>,
     TError,
@@ -17585,7 +17721,7 @@ export const getGetAdminAuditLogQueryKey = (params?: GetAdminAuditLogParams) => 
 
 export const getGetAdminAuditLogQueryOptions = <
   TData = Awaited<ReturnType<typeof getAdminAuditLog>>,
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
 >(
   params?: GetAdminAuditLogParams,
   options?: {
@@ -17608,7 +17744,7 @@ export const getGetAdminAuditLogQueryOptions = <
 };
 
 export type GetAdminAuditLogQueryResult = NonNullable<Awaited<ReturnType<typeof getAdminAuditLog>>>;
-export type GetAdminAuditLogQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse>;
+export type GetAdminAuditLogQueryError = ErrorType<ForbiddenResponse>;
 
 /**
  * @summary Get the platform audit log (admin)
@@ -17616,7 +17752,7 @@ export type GetAdminAuditLogQueryError = ErrorType<UnauthorizedResponse | Forbid
 
 export function useGetAdminAuditLog<
   TData = Awaited<ReturnType<typeof getAdminAuditLog>>,
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
 >(
   params?: GetAdminAuditLogParams,
   options?: {
@@ -17666,7 +17802,7 @@ export const getGetAdminExportHistoryQueryKey = (params?: GetAdminExportHistoryP
 
 export const getGetAdminExportHistoryQueryOptions = <
   TData = Awaited<ReturnType<typeof getAdminExportHistory>>,
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
 >(
   params?: GetAdminExportHistoryParams,
   options?: {
@@ -17691,7 +17827,7 @@ export const getGetAdminExportHistoryQueryOptions = <
 export type GetAdminExportHistoryQueryResult = NonNullable<
   Awaited<ReturnType<typeof getAdminExportHistory>>
 >;
-export type GetAdminExportHistoryQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse>;
+export type GetAdminExportHistoryQueryError = ErrorType<ForbiddenResponse>;
 
 /**
  * @summary Get export job history (admin)
@@ -17699,7 +17835,7 @@ export type GetAdminExportHistoryQueryError = ErrorType<UnauthorizedResponse | F
 
 export function useGetAdminExportHistory<
   TData = Awaited<ReturnType<typeof getAdminExportHistory>>,
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
 >(
   params?: GetAdminExportHistoryParams,
   options?: {
@@ -17735,7 +17871,7 @@ export const impersonateUser = async (
 };
 
 export const getImpersonateUserMutationOptions = <
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -17774,13 +17910,13 @@ export type ImpersonateUserMutationResult = NonNullable<
   Awaited<ReturnType<typeof impersonateUser>>
 >;
 export type ImpersonateUserMutationBody = BodyType<ImpersonateUserBody>;
-export type ImpersonateUserMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse>;
+export type ImpersonateUserMutationError = ErrorType<ForbiddenResponse>;
 
 /**
  * @summary Start impersonating a user (admin)
  */
 export const useImpersonateUser = <
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -17819,7 +17955,7 @@ export const endImpersonation = async (
 };
 
 export const getEndImpersonationMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -17858,12 +17994,15 @@ export type EndImpersonationMutationResult = NonNullable<
   Awaited<ReturnType<typeof endImpersonation>>
 >;
 export type EndImpersonationMutationBody = BodyType<EndImpersonationBody>;
-export type EndImpersonationMutationError = ErrorType<unknown>;
+export type EndImpersonationMutationError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary End the current impersonation session
  */
-export const useEndImpersonation = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useEndImpersonation = <
+  TError = ErrorType<UnauthorizedResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof endImpersonation>>,
     TError,
@@ -17901,7 +18040,7 @@ export const revokeUserSessions = async (
 };
 
 export const getRevokeUserSessionsMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -17940,12 +18079,15 @@ export type RevokeUserSessionsMutationResult = NonNullable<
   Awaited<ReturnType<typeof revokeUserSessions>>
 >;
 export type RevokeUserSessionsMutationBody = BodyType<RevokeUserSessionsBody>;
-export type RevokeUserSessionsMutationError = ErrorType<unknown>;
+export type RevokeUserSessionsMutationError = ErrorType<UnauthorizedResponse | NotFoundResponse>;
 
 /**
  * @summary Revoke all sessions for a user (admin)
  */
-export const useRevokeUserSessions = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useRevokeUserSessions = <
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof revokeUserSessions>>,
     TError,
@@ -17982,7 +18124,7 @@ export const getListAdminFeatureFlagsQueryKey = () => {
 
 export const getListAdminFeatureFlagsQueryOptions = <
   TData = Awaited<ReturnType<typeof listAdminFeatureFlags>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listAdminFeatureFlags>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -18004,7 +18146,7 @@ export const getListAdminFeatureFlagsQueryOptions = <
 export type ListAdminFeatureFlagsQueryResult = NonNullable<
   Awaited<ReturnType<typeof listAdminFeatureFlags>>
 >;
-export type ListAdminFeatureFlagsQueryError = ErrorType<unknown>;
+export type ListAdminFeatureFlagsQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List all feature flags (admin)
@@ -18012,7 +18154,7 @@ export type ListAdminFeatureFlagsQueryError = ErrorType<unknown>;
 
 export function useListAdminFeatureFlags<
   TData = Awaited<ReturnType<typeof listAdminFeatureFlags>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listAdminFeatureFlags>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -18045,7 +18187,7 @@ export const setAdminFeatureFlag = async (
 };
 
 export const getSetAdminFeatureFlagMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -18084,12 +18226,15 @@ export type SetAdminFeatureFlagMutationResult = NonNullable<
   Awaited<ReturnType<typeof setAdminFeatureFlag>>
 >;
 export type SetAdminFeatureFlagMutationBody = BodyType<SetAdminFeatureFlagBody>;
-export type SetAdminFeatureFlagMutationError = ErrorType<unknown>;
+export type SetAdminFeatureFlagMutationError = ErrorType<UnauthorizedResponse | NotFoundResponse>;
 
 /**
  * @summary Enable or disable a feature flag (admin)
  */
-export const useSetAdminFeatureFlag = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useSetAdminFeatureFlag = <
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof setAdminFeatureFlag>>,
     TError,
@@ -18198,7 +18343,7 @@ export const deleteNotification = async (id: number, options?: RequestInit): Pro
 };
 
 export const getDeleteNotificationMutationOptions = <
-  TError = ErrorType<UnauthorizedResponse>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -18237,13 +18382,13 @@ export type DeleteNotificationMutationResult = NonNullable<
   Awaited<ReturnType<typeof deleteNotification>>
 >;
 
-export type DeleteNotificationMutationError = ErrorType<UnauthorizedResponse>;
+export type DeleteNotificationMutationError = ErrorType<UnauthorizedResponse | NotFoundResponse>;
 
 /**
  * @summary Delete a notification
  */
 export const useDeleteNotification = <
-  TError = ErrorType<UnauthorizedResponse>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -18284,7 +18429,7 @@ export const getListBuiltInReportTemplatesQueryKey = () => {
 
 export const getListBuiltInReportTemplatesQueryOptions = <
   TData = Awaited<ReturnType<typeof listBuiltInReportTemplates>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listBuiltInReportTemplates>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -18307,7 +18452,7 @@ export const getListBuiltInReportTemplatesQueryOptions = <
 export type ListBuiltInReportTemplatesQueryResult = NonNullable<
   Awaited<ReturnType<typeof listBuiltInReportTemplates>>
 >;
-export type ListBuiltInReportTemplatesQueryError = ErrorType<unknown>;
+export type ListBuiltInReportTemplatesQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List built-in report templates
@@ -18315,7 +18460,7 @@ export type ListBuiltInReportTemplatesQueryError = ErrorType<unknown>;
 
 export function useListBuiltInReportTemplates<
   TData = Awaited<ReturnType<typeof listBuiltInReportTemplates>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listBuiltInReportTemplates>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -18419,7 +18564,7 @@ export const getListReportTemplatesQueryKey = () => {
 
 export const getListReportTemplatesQueryOptions = <
   TData = Awaited<ReturnType<typeof listReportTemplates>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listReportTemplates>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -18441,7 +18586,7 @@ export const getListReportTemplatesQueryOptions = <
 export type ListReportTemplatesQueryResult = NonNullable<
   Awaited<ReturnType<typeof listReportTemplates>>
 >;
-export type ListReportTemplatesQueryError = ErrorType<unknown>;
+export type ListReportTemplatesQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List custom report templates
@@ -18449,7 +18594,7 @@ export type ListReportTemplatesQueryError = ErrorType<unknown>;
 
 export function useListReportTemplates<
   TData = Awaited<ReturnType<typeof listReportTemplates>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listReportTemplates>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -18481,7 +18626,7 @@ export const createReportTemplate = async (
 };
 
 export const getCreateReportTemplateMutationOptions = <
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -18520,13 +18665,13 @@ export type CreateReportTemplateMutationResult = NonNullable<
   Awaited<ReturnType<typeof createReportTemplate>>
 >;
 export type CreateReportTemplateMutationBody = BodyType<CreateReportTemplateBody>;
-export type CreateReportTemplateMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse>;
+export type CreateReportTemplateMutationError = ErrorType<ForbiddenResponse>;
 
 /**
  * @summary Create a report template
  */
 export const useCreateReportTemplate = <
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -18637,7 +18782,7 @@ export const updateReportTemplate = async (
 };
 
 export const getUpdateReportTemplateMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -18676,12 +18821,15 @@ export type UpdateReportTemplateMutationResult = NonNullable<
   Awaited<ReturnType<typeof updateReportTemplate>>
 >;
 export type UpdateReportTemplateMutationBody = BodyType<UpdateReportTemplateBody>;
-export type UpdateReportTemplateMutationError = ErrorType<unknown>;
+export type UpdateReportTemplateMutationError = ErrorType<UnauthorizedResponse | NotFoundResponse>;
 
 /**
  * @summary Update a report template
  */
-export const useUpdateReportTemplate = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useUpdateReportTemplate = <
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof updateReportTemplate>>,
     TError,
@@ -18800,7 +18948,7 @@ export const generateReportNarrative = async (
 };
 
 export const getGenerateReportNarrativeMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -18839,13 +18987,13 @@ export type GenerateReportNarrativeMutationResult = NonNullable<
   Awaited<ReturnType<typeof generateReportNarrative>>
 >;
 export type GenerateReportNarrativeMutationBody = BodyType<GenerateReportNarrativeBody>;
-export type GenerateReportNarrativeMutationError = ErrorType<unknown>;
+export type GenerateReportNarrativeMutationError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Generate an AI narrative section for a report
  */
 export const useGenerateReportNarrative = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -18897,7 +19045,7 @@ export const getListReportsQueryKey = (params?: ListReportsParams) => {
 
 export const getListReportsQueryOptions = <
   TData = Awaited<ReturnType<typeof listReports>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(
   params?: ListReportsParams,
   options?: {
@@ -18920,7 +19068,7 @@ export const getListReportsQueryOptions = <
 };
 
 export type ListReportsQueryResult = NonNullable<Awaited<ReturnType<typeof listReports>>>;
-export type ListReportsQueryError = ErrorType<unknown>;
+export type ListReportsQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List generated reports
@@ -18928,7 +19076,7 @@ export type ListReportsQueryError = ErrorType<unknown>;
 
 export function useListReports<
   TData = Awaited<ReturnType<typeof listReports>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(
   params?: ListReportsParams,
   options?: {
@@ -18963,7 +19111,7 @@ export const getGetReportStatsQueryKey = () => {
 
 export const getGetReportStatsQueryOptions = <
   TData = Awaited<ReturnType<typeof getReportStats>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof getReportStats>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -18983,7 +19131,7 @@ export const getGetReportStatsQueryOptions = <
 };
 
 export type GetReportStatsQueryResult = NonNullable<Awaited<ReturnType<typeof getReportStats>>>;
-export type GetReportStatsQueryError = ErrorType<unknown>;
+export type GetReportStatsQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Get report generation statistics
@@ -18991,7 +19139,7 @@ export type GetReportStatsQueryError = ErrorType<unknown>;
 
 export function useGetReportStats<
   TData = Awaited<ReturnType<typeof getReportStats>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof getReportStats>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -19025,7 +19173,7 @@ export const getListReportSchedulesQueryKey = () => {
 
 export const getListReportSchedulesQueryOptions = <
   TData = Awaited<ReturnType<typeof listReportSchedules>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listReportSchedules>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -19047,7 +19195,7 @@ export const getListReportSchedulesQueryOptions = <
 export type ListReportSchedulesQueryResult = NonNullable<
   Awaited<ReturnType<typeof listReportSchedules>>
 >;
-export type ListReportSchedulesQueryError = ErrorType<unknown>;
+export type ListReportSchedulesQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List scheduled report jobs
@@ -19055,7 +19203,7 @@ export type ListReportSchedulesQueryError = ErrorType<unknown>;
 
 export function useListReportSchedules<
   TData = Awaited<ReturnType<typeof listReportSchedules>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listReportSchedules>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -19224,7 +19372,7 @@ export const getListReportVersionsQueryKey = (reportId: number) => {
 
 export const getListReportVersionsQueryOptions = <
   TData = Awaited<ReturnType<typeof listReportVersions>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
 >(
   reportId: number,
   options?: {
@@ -19249,7 +19397,7 @@ export const getListReportVersionsQueryOptions = <
 export type ListReportVersionsQueryResult = NonNullable<
   Awaited<ReturnType<typeof listReportVersions>>
 >;
-export type ListReportVersionsQueryError = ErrorType<unknown>;
+export type ListReportVersionsQueryError = ErrorType<UnauthorizedResponse | NotFoundResponse>;
 
 /**
  * @summary List version history for a report
@@ -19257,7 +19405,7 @@ export type ListReportVersionsQueryError = ErrorType<unknown>;
 
 export function useListReportVersions<
   TData = Awaited<ReturnType<typeof listReportVersions>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
 >(
   reportId: number,
   options?: {
@@ -19293,7 +19441,7 @@ export const updateReportStatus = async (
 };
 
 export const getUpdateReportStatusMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -19332,12 +19480,15 @@ export type UpdateReportStatusMutationResult = NonNullable<
   Awaited<ReturnType<typeof updateReportStatus>>
 >;
 export type UpdateReportStatusMutationBody = BodyType<UpdateReportStatusBody>;
-export type UpdateReportStatusMutationError = ErrorType<unknown>;
+export type UpdateReportStatusMutationError = ErrorType<UnauthorizedResponse | NotFoundResponse>;
 
 /**
  * @summary Update a report status
  */
-export const useUpdateReportStatus = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useUpdateReportStatus = <
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof updateReportStatus>>,
     TError,
@@ -19372,7 +19523,7 @@ export const requestReportApproval = async (
 };
 
 export const getRequestReportApprovalMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -19411,13 +19562,13 @@ export type RequestReportApprovalMutationResult = NonNullable<
   Awaited<ReturnType<typeof requestReportApproval>>
 >;
 
-export type RequestReportApprovalMutationError = ErrorType<unknown>;
+export type RequestReportApprovalMutationError = ErrorType<UnauthorizedResponse | NotFoundResponse>;
 
 /**
  * @summary Submit a report for approval review
  */
 export const useRequestReportApproval = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -19457,7 +19608,7 @@ export const submitReportReview = async (
 };
 
 export const getSubmitReportReviewMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -19496,12 +19647,15 @@ export type SubmitReportReviewMutationResult = NonNullable<
   Awaited<ReturnType<typeof submitReportReview>>
 >;
 export type SubmitReportReviewMutationBody = BodyType<SubmitReportReviewBody>;
-export type SubmitReportReviewMutationError = ErrorType<unknown>;
+export type SubmitReportReviewMutationError = ErrorType<UnauthorizedResponse | NotFoundResponse>;
 
 /**
  * @summary Submit a compliance review for a report
  */
-export const useSubmitReportReview = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useSubmitReportReview = <
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof submitReportReview>>,
     TError,
@@ -19541,7 +19695,7 @@ export const getGetReportApprovalQueryKey = (reportId: number) => {
 
 export const getGetReportApprovalQueryOptions = <
   TData = Awaited<ReturnType<typeof getReportApproval>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
 >(
   reportId: number,
   options?: {
@@ -19566,7 +19720,7 @@ export const getGetReportApprovalQueryOptions = <
 export type GetReportApprovalQueryResult = NonNullable<
   Awaited<ReturnType<typeof getReportApproval>>
 >;
-export type GetReportApprovalQueryError = ErrorType<unknown>;
+export type GetReportApprovalQueryError = ErrorType<UnauthorizedResponse | NotFoundResponse>;
 
 /**
  * @summary Get approval status for a report
@@ -19574,7 +19728,7 @@ export type GetReportApprovalQueryError = ErrorType<unknown>;
 
 export function useGetReportApproval<
   TData = Awaited<ReturnType<typeof getReportApproval>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
 >(
   reportId: number,
   options?: {
@@ -19610,7 +19764,7 @@ export const distributeReport = async (
 };
 
 export const getDistributeReportMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -19649,12 +19803,15 @@ export type DistributeReportMutationResult = NonNullable<
   Awaited<ReturnType<typeof distributeReport>>
 >;
 export type DistributeReportMutationBody = BodyType<DistributeReportBody>;
-export type DistributeReportMutationError = ErrorType<unknown>;
+export type DistributeReportMutationError = ErrorType<UnauthorizedResponse | NotFoundResponse>;
 
 /**
  * @summary Distribute a report to recipients
  */
-export const useDistributeReport = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useDistributeReport = <
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof distributeReport>>,
     TError,
@@ -19694,7 +19851,7 @@ export const getListReportDistributionsQueryKey = (reportId: number) => {
 
 export const getListReportDistributionsQueryOptions = <
   TData = Awaited<ReturnType<typeof listReportDistributions>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
 >(
   reportId: number,
   options?: {
@@ -19720,7 +19877,7 @@ export const getListReportDistributionsQueryOptions = <
 export type ListReportDistributionsQueryResult = NonNullable<
   Awaited<ReturnType<typeof listReportDistributions>>
 >;
-export type ListReportDistributionsQueryError = ErrorType<unknown>;
+export type ListReportDistributionsQueryError = ErrorType<UnauthorizedResponse | NotFoundResponse>;
 
 /**
  * @summary List distribution history for a report
@@ -19728,7 +19885,7 @@ export type ListReportDistributionsQueryError = ErrorType<unknown>;
 
 export function useListReportDistributions<
   TData = Awaited<ReturnType<typeof listReportDistributions>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
 >(
   reportId: number,
   options?: {
@@ -19763,7 +19920,7 @@ export const exportAuditLog = async (
 };
 
 export const getExportAuditLogMutationOptions = <
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -19800,13 +19957,13 @@ export const getExportAuditLogMutationOptions = <
 
 export type ExportAuditLogMutationResult = NonNullable<Awaited<ReturnType<typeof exportAuditLog>>>;
 export type ExportAuditLogMutationBody = BodyType<ExportRequest>;
-export type ExportAuditLogMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse>;
+export type ExportAuditLogMutationError = ErrorType<ForbiddenResponse>;
 
 /**
  * @summary Export platform audit log to CSV/JSON
  */
 export const useExportAuditLog = <
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -19845,7 +20002,7 @@ export const exportAegisIncidents = async (
 };
 
 export const getExportAegisIncidentsMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -19884,12 +20041,15 @@ export type ExportAegisIncidentsMutationResult = NonNullable<
   Awaited<ReturnType<typeof exportAegisIncidents>>
 >;
 export type ExportAegisIncidentsMutationBody = BodyType<ExportRequest>;
-export type ExportAegisIncidentsMutationError = ErrorType<unknown>;
+export type ExportAegisIncidentsMutationError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Export Aegis security incidents
  */
-export const useExportAegisIncidents = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useExportAegisIncidents = <
+  TError = ErrorType<UnauthorizedResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof exportAegisIncidents>>,
     TError,
@@ -19926,7 +20086,7 @@ export const exportVesselsData = async (
 };
 
 export const getExportVesselsDataMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -19965,12 +20125,15 @@ export type ExportVesselsDataMutationResult = NonNullable<
   Awaited<ReturnType<typeof exportVesselsData>>
 >;
 export type ExportVesselsDataMutationBody = BodyType<ExportRequest>;
-export type ExportVesselsDataMutationError = ErrorType<unknown>;
+export type ExportVesselsDataMutationError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Export Vessels maritime data
  */
-export const useExportVesselsData = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useExportVesselsData = <
+  TError = ErrorType<UnauthorizedResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof exportVesselsData>>,
     TError,
@@ -20007,7 +20170,7 @@ export const exportTerraDeals = async (
 };
 
 export const getExportTerraDealsMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -20046,12 +20209,15 @@ export type ExportTerraDealsMutationResult = NonNullable<
   Awaited<ReturnType<typeof exportTerraDeals>>
 >;
 export type ExportTerraDealsMutationBody = BodyType<ExportRequest>;
-export type ExportTerraDealsMutationError = ErrorType<unknown>;
+export type ExportTerraDealsMutationError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Export Terra real estate deals
  */
-export const useExportTerraDeals = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useExportTerraDeals = <
+  TError = ErrorType<UnauthorizedResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof exportTerraDeals>>,
     TError,
@@ -20088,7 +20254,7 @@ export const exportLyteSignals = async (
 };
 
 export const getExportLyteSignalsMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -20127,12 +20293,15 @@ export type ExportLyteSignalsMutationResult = NonNullable<
   Awaited<ReturnType<typeof exportLyteSignals>>
 >;
 export type ExportLyteSignalsMutationBody = BodyType<ExportRequest>;
-export type ExportLyteSignalsMutationError = ErrorType<unknown>;
+export type ExportLyteSignalsMutationError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Export Lyte e-commerce signals
  */
-export const useExportLyteSignals = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useExportLyteSignals = <
+  TError = ErrorType<UnauthorizedResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof exportLyteSignals>>,
     TError,
@@ -20169,7 +20338,7 @@ export const exportMSPTickets = async (
 };
 
 export const getExportMSPTicketsMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -20208,12 +20377,15 @@ export type ExportMSPTicketsMutationResult = NonNullable<
   Awaited<ReturnType<typeof exportMSPTickets>>
 >;
 export type ExportMSPTicketsMutationBody = BodyType<ExportRequest>;
-export type ExportMSPTicketsMutationError = ErrorType<unknown>;
+export type ExportMSPTicketsMutationError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Export MSP support tickets
  */
-export const useExportMSPTickets = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useExportMSPTickets = <
+  TError = ErrorType<UnauthorizedResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof exportMSPTickets>>,
     TError,
@@ -20250,7 +20422,7 @@ export const exportUsageMetering = async (
 };
 
 export const getExportUsageMeteringMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -20289,12 +20461,15 @@ export type ExportUsageMeteringMutationResult = NonNullable<
   Awaited<ReturnType<typeof exportUsageMetering>>
 >;
 export type ExportUsageMeteringMutationBody = BodyType<ExportRequest>;
-export type ExportUsageMeteringMutationError = ErrorType<unknown>;
+export type ExportUsageMeteringMutationError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Export usage metering records
  */
-export const useExportUsageMetering = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useExportUsageMetering = <
+  TError = ErrorType<UnauthorizedResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof exportUsageMetering>>,
     TError,
@@ -20331,7 +20506,7 @@ export const exportRevenueEvents = async (
 };
 
 export const getExportRevenueEventsMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -20370,12 +20545,15 @@ export type ExportRevenueEventsMutationResult = NonNullable<
   Awaited<ReturnType<typeof exportRevenueEvents>>
 >;
 export type ExportRevenueEventsMutationBody = BodyType<ExportRequest>;
-export type ExportRevenueEventsMutationError = ErrorType<unknown>;
+export type ExportRevenueEventsMutationError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Export revenue events from billing
  */
-export const useExportRevenueEvents = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useExportRevenueEvents = <
+  TError = ErrorType<UnauthorizedResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof exportRevenueEvents>>,
     TError,
@@ -20427,7 +20605,7 @@ export const getPreviewExportQueryKey = (params?: PreviewExportParams) => {
 
 export const getPreviewExportQueryOptions = <
   TData = Awaited<ReturnType<typeof previewExport>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(
   params: PreviewExportParams,
   options?: {
@@ -20450,7 +20628,7 @@ export const getPreviewExportQueryOptions = <
 };
 
 export type PreviewExportQueryResult = NonNullable<Awaited<ReturnType<typeof previewExport>>>;
-export type PreviewExportQueryError = ErrorType<unknown>;
+export type PreviewExportQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Preview export data before download (first 100 rows)
@@ -20458,7 +20636,7 @@ export type PreviewExportQueryError = ErrorType<unknown>;
 
 export function usePreviewExport<
   TData = Awaited<ReturnType<typeof previewExport>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(
   params: PreviewExportParams,
   options?: {
@@ -20508,7 +20686,7 @@ export const getListExportHistoryQueryKey = (params?: ListExportHistoryParams) =
 
 export const getListExportHistoryQueryOptions = <
   TData = Awaited<ReturnType<typeof listExportHistory>>,
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
 >(
   params?: ListExportHistoryParams,
   options?: {
@@ -20533,7 +20711,7 @@ export const getListExportHistoryQueryOptions = <
 export type ListExportHistoryQueryResult = NonNullable<
   Awaited<ReturnType<typeof listExportHistory>>
 >;
-export type ListExportHistoryQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse>;
+export type ListExportHistoryQueryError = ErrorType<ForbiddenResponse>;
 
 /**
  * @summary List past export jobs and download links
@@ -20541,7 +20719,7 @@ export type ListExportHistoryQueryError = ErrorType<UnauthorizedResponse | Forbi
 
 export function useListExportHistory<
   TData = Awaited<ReturnType<typeof listExportHistory>>,
-  TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<ForbiddenResponse>,
 >(
   params?: ListExportHistoryParams,
   options?: {
@@ -20646,7 +20824,7 @@ export const getGetMeshAgentIndexQueryKey = () => {
 
 export const getGetMeshAgentIndexQueryOptions = <
   TData = Awaited<ReturnType<typeof getMeshAgentIndex>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof getMeshAgentIndex>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -20668,7 +20846,7 @@ export const getGetMeshAgentIndexQueryOptions = <
 export type GetMeshAgentIndexQueryResult = NonNullable<
   Awaited<ReturnType<typeof getMeshAgentIndex>>
 >;
-export type GetMeshAgentIndexQueryError = ErrorType<unknown>;
+export type GetMeshAgentIndexQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Mesh index of all A2A agent cards
@@ -20676,7 +20854,7 @@ export type GetMeshAgentIndexQueryError = ErrorType<unknown>;
 
 export function useGetMeshAgentIndex<
   TData = Awaited<ReturnType<typeof getMeshAgentIndex>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof getMeshAgentIndex>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -20708,7 +20886,7 @@ export const getListA2AAgentsQueryKey = () => {
 
 export const getListA2AAgentsQueryOptions = <
   TData = Awaited<ReturnType<typeof listA2AAgents>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listA2AAgents>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -20728,7 +20906,7 @@ export const getListA2AAgentsQueryOptions = <
 };
 
 export type ListA2AAgentsQueryResult = NonNullable<Awaited<ReturnType<typeof listA2AAgents>>>;
-export type ListA2AAgentsQueryError = ErrorType<unknown>;
+export type ListA2AAgentsQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List all registered A2A agent cards
@@ -20736,7 +20914,7 @@ export type ListA2AAgentsQueryError = ErrorType<unknown>;
 
 export function useListA2AAgents<
   TData = Awaited<ReturnType<typeof listA2AAgents>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listA2AAgents>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -20977,7 +21155,7 @@ export const recordA2AHeartbeat = async (
 };
 
 export const getRecordA2AHeartbeatMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -21016,12 +21194,15 @@ export type RecordA2AHeartbeatMutationResult = NonNullable<
   Awaited<ReturnType<typeof recordA2AHeartbeat>>
 >;
 
-export type RecordA2AHeartbeatMutationError = ErrorType<unknown>;
+export type RecordA2AHeartbeatMutationError = ErrorType<UnauthorizedResponse | NotFoundResponse>;
 
 /**
  * @summary Record an agent heartbeat
  */
-export const useRecordA2AHeartbeat = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useRecordA2AHeartbeat = <
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof recordA2AHeartbeat>>,
     TError,
@@ -21157,7 +21338,7 @@ export const getListA2ATasksQueryKey = (agentId: string, params?: ListA2ATasksPa
 
 export const getListA2ATasksQueryOptions = <
   TData = Awaited<ReturnType<typeof listA2ATasks>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
 >(
   agentId: string,
   params?: ListA2ATasksParams,
@@ -21181,7 +21362,7 @@ export const getListA2ATasksQueryOptions = <
 };
 
 export type ListA2ATasksQueryResult = NonNullable<Awaited<ReturnType<typeof listA2ATasks>>>;
-export type ListA2ATasksQueryError = ErrorType<unknown>;
+export type ListA2ATasksQueryError = ErrorType<UnauthorizedResponse | NotFoundResponse>;
 
 /**
  * @summary List tasks for an agent
@@ -21189,7 +21370,7 @@ export type ListA2ATasksQueryError = ErrorType<unknown>;
 
 export function useListA2ATasks<
   TData = Awaited<ReturnType<typeof listA2ATasks>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
 >(
   agentId: string,
   params?: ListA2ATasksParams,
@@ -21382,7 +21563,7 @@ export const a2aJsonRpc = async (
 };
 
 export const getA2aJsonRpcMutationOptions = <
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -21419,12 +21600,15 @@ export const getA2aJsonRpcMutationOptions = <
 
 export type A2aJsonRpcMutationResult = NonNullable<Awaited<ReturnType<typeof a2aJsonRpc>>>;
 export type A2aJsonRpcMutationBody = BodyType<A2aJsonRpcBody>;
-export type A2aJsonRpcMutationError = ErrorType<unknown>;
+export type A2aJsonRpcMutationError = ErrorType<UnauthorizedResponse | NotFoundResponse>;
 
 /**
  * @summary JSON-RPC 2.0 endpoint for agent
  */
-export const useA2aJsonRpc = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+export const useA2aJsonRpc = <
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
+  TContext = unknown,
+>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof a2aJsonRpc>>,
     TError,
@@ -21476,7 +21660,7 @@ export const getDiscoverA2AAgentsQueryKey = (params?: DiscoverA2AAgentsParams) =
 
 export const getDiscoverA2AAgentsQueryOptions = <
   TData = Awaited<ReturnType<typeof discoverA2AAgents>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(
   params?: DiscoverA2AAgentsParams,
   options?: {
@@ -21501,7 +21685,7 @@ export const getDiscoverA2AAgentsQueryOptions = <
 export type DiscoverA2AAgentsQueryResult = NonNullable<
   Awaited<ReturnType<typeof discoverA2AAgents>>
 >;
-export type DiscoverA2AAgentsQueryError = ErrorType<unknown>;
+export type DiscoverA2AAgentsQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Discover agents by capability, domain, or task query
@@ -21509,7 +21693,7 @@ export type DiscoverA2AAgentsQueryError = ErrorType<unknown>;
 
 export function useDiscoverA2AAgents<
   TData = Awaited<ReturnType<typeof discoverA2AAgents>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(
   params?: DiscoverA2AAgentsParams,
   options?: {
@@ -21712,7 +21896,7 @@ export const getListA2ADelegationsQueryKey = () => {
 
 export const getListA2ADelegationsQueryOptions = <
   TData = Awaited<ReturnType<typeof listA2ADelegations>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listA2ADelegations>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -21734,7 +21918,7 @@ export const getListA2ADelegationsQueryOptions = <
 export type ListA2ADelegationsQueryResult = NonNullable<
   Awaited<ReturnType<typeof listA2ADelegations>>
 >;
-export type ListA2ADelegationsQueryError = ErrorType<unknown>;
+export type ListA2ADelegationsQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Get active and historical delegations
@@ -21742,7 +21926,7 @@ export type ListA2ADelegationsQueryError = ErrorType<unknown>;
 
 export function useListA2ADelegations<
   TData = Awaited<ReturnType<typeof listA2ADelegations>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listA2ADelegations>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -21776,7 +21960,7 @@ export const getGetA2ADelegationStatsQueryKey = () => {
 
 export const getGetA2ADelegationStatsQueryOptions = <
   TData = Awaited<ReturnType<typeof getA2ADelegationStats>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof getA2ADelegationStats>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -21798,7 +21982,7 @@ export const getGetA2ADelegationStatsQueryOptions = <
 export type GetA2ADelegationStatsQueryResult = NonNullable<
   Awaited<ReturnType<typeof getA2ADelegationStats>>
 >;
-export type GetA2ADelegationStatsQueryError = ErrorType<unknown>;
+export type GetA2ADelegationStatsQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Delegation statistics by agent
@@ -21806,7 +21990,7 @@ export type GetA2ADelegationStatsQueryError = ErrorType<unknown>;
 
 export function useGetA2ADelegationStats<
   TData = Awaited<ReturnType<typeof getA2ADelegationStats>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof getA2ADelegationStats>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -21898,7 +22082,7 @@ export const getListAgentSchedulesQueryKey = () => {
 
 export const getListAgentSchedulesQueryOptions = <
   TData = Awaited<ReturnType<typeof listAgentSchedules>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listAgentSchedules>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -21920,7 +22104,7 @@ export const getListAgentSchedulesQueryOptions = <
 export type ListAgentSchedulesQueryResult = NonNullable<
   Awaited<ReturnType<typeof listAgentSchedules>>
 >;
-export type ListAgentSchedulesQueryError = ErrorType<unknown>;
+export type ListAgentSchedulesQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary List all agent schedules
@@ -21928,7 +22112,7 @@ export type ListAgentSchedulesQueryError = ErrorType<unknown>;
 
 export function useListAgentSchedules<
   TData = Awaited<ReturnType<typeof listAgentSchedules>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof listAgentSchedules>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -21958,7 +22142,7 @@ export const triggerAgentRun = async (
 };
 
 export const getTriggerAgentRunMutationOptions = <
-  TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<BadRequestResponse | ForbiddenResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -21997,15 +22181,13 @@ export type TriggerAgentRunMutationResult = NonNullable<
   Awaited<ReturnType<typeof triggerAgentRun>>
 >;
 
-export type TriggerAgentRunMutationError = ErrorType<
-  BadRequestResponse | UnauthorizedResponse | ForbiddenResponse
->;
+export type TriggerAgentRunMutationError = ErrorType<BadRequestResponse | ForbiddenResponse>;
 
 /**
  * @summary Manually trigger a scheduled agent run (admin only)
  */
 export const useTriggerAgentRun = <
-  TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse>,
+  TError = ErrorType<BadRequestResponse | ForbiddenResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -22059,7 +22241,7 @@ export const getListAgentRunsQueryKey = (params?: ListAgentRunsParams) => {
 
 export const getListAgentRunsQueryOptions = <
   TData = Awaited<ReturnType<typeof listAgentRuns>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(
   params?: ListAgentRunsParams,
   options?: {
@@ -22082,7 +22264,7 @@ export const getListAgentRunsQueryOptions = <
 };
 
 export type ListAgentRunsQueryResult = NonNullable<Awaited<ReturnType<typeof listAgentRuns>>>;
-export type ListAgentRunsQueryError = ErrorType<unknown>;
+export type ListAgentRunsQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Get agent run history
@@ -22090,7 +22272,7 @@ export type ListAgentRunsQueryError = ErrorType<unknown>;
 
 export function useListAgentRuns<
   TData = Awaited<ReturnType<typeof listAgentRuns>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(
   params?: ListAgentRunsParams,
   options?: {
@@ -22140,7 +22322,7 @@ export const getQueryAgentKnowledgeQueryKey = (params?: QueryAgentKnowledgeParam
 
 export const getQueryAgentKnowledgeQueryOptions = <
   TData = Awaited<ReturnType<typeof queryAgentKnowledge>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(
   params?: QueryAgentKnowledgeParams,
   options?: {
@@ -22165,7 +22347,7 @@ export const getQueryAgentKnowledgeQueryOptions = <
 export type QueryAgentKnowledgeQueryResult = NonNullable<
   Awaited<ReturnType<typeof queryAgentKnowledge>>
 >;
-export type QueryAgentKnowledgeQueryError = ErrorType<unknown>;
+export type QueryAgentKnowledgeQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Query the agent knowledge store
@@ -22173,7 +22355,7 @@ export type QueryAgentKnowledgeQueryError = ErrorType<unknown>;
 
 export function useQueryAgentKnowledge<
   TData = Awaited<ReturnType<typeof queryAgentKnowledge>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(
   params?: QueryAgentKnowledgeParams,
   options?: {
@@ -22223,7 +22405,7 @@ export const getListAgentEventsQueryKey = (params?: ListAgentEventsParams) => {
 
 export const getListAgentEventsQueryOptions = <
   TData = Awaited<ReturnType<typeof listAgentEvents>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(
   params?: ListAgentEventsParams,
   options?: {
@@ -22246,7 +22428,7 @@ export const getListAgentEventsQueryOptions = <
 };
 
 export type ListAgentEventsQueryResult = NonNullable<Awaited<ReturnType<typeof listAgentEvents>>>;
-export type ListAgentEventsQueryError = ErrorType<unknown>;
+export type ListAgentEventsQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Get agent event bus history
@@ -22254,7 +22436,7 @@ export type ListAgentEventsQueryError = ErrorType<unknown>;
 
 export function useListAgentEvents<
   TData = Awaited<ReturnType<typeof listAgentEvents>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(
   params?: ListAgentEventsParams,
   options?: {
@@ -22304,7 +22486,7 @@ export const getGetGlobalAgentFeedQueryKey = (params?: GetGlobalAgentFeedParams)
 
 export const getGetGlobalAgentFeedQueryOptions = <
   TData = Awaited<ReturnType<typeof getGlobalAgentFeed>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(
   params?: GetGlobalAgentFeedParams,
   options?: {
@@ -22329,7 +22511,7 @@ export const getGetGlobalAgentFeedQueryOptions = <
 export type GetGlobalAgentFeedQueryResult = NonNullable<
   Awaited<ReturnType<typeof getGlobalAgentFeed>>
 >;
-export type GetGlobalAgentFeedQueryError = ErrorType<unknown>;
+export type GetGlobalAgentFeedQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Get global agent intelligence feed
@@ -22337,7 +22519,7 @@ export type GetGlobalAgentFeedQueryError = ErrorType<unknown>;
 
 export function useGetGlobalAgentFeed<
   TData = Awaited<ReturnType<typeof getGlobalAgentFeed>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(
   params?: GetGlobalAgentFeedParams,
   options?: {
@@ -22391,7 +22573,7 @@ export const getGetDomainAgentFeedQueryKey = (
 
 export const getGetDomainAgentFeedQueryOptions = <
   TData = Awaited<ReturnType<typeof getDomainAgentFeed>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
 >(
   domain: string,
   params?: GetDomainAgentFeedParams,
@@ -22417,7 +22599,7 @@ export const getGetDomainAgentFeedQueryOptions = <
 export type GetDomainAgentFeedQueryResult = NonNullable<
   Awaited<ReturnType<typeof getDomainAgentFeed>>
 >;
-export type GetDomainAgentFeedQueryError = ErrorType<unknown>;
+export type GetDomainAgentFeedQueryError = ErrorType<UnauthorizedResponse | NotFoundResponse>;
 
 /**
  * @summary Get domain-specific agent intelligence feed
@@ -22425,7 +22607,7 @@ export type GetDomainAgentFeedQueryError = ErrorType<unknown>;
 
 export function useGetDomainAgentFeed<
   TData = Awaited<ReturnType<typeof getDomainAgentFeed>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
 >(
   domain: string,
   params?: GetDomainAgentFeedParams,
@@ -22461,7 +22643,7 @@ export const getGetAgentStatsQueryKey = () => {
 
 export const getGetAgentStatsQueryOptions = <
   TData = Awaited<ReturnType<typeof getAgentStats>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof getAgentStats>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -22481,7 +22663,7 @@ export const getGetAgentStatsQueryOptions = <
 };
 
 export type GetAgentStatsQueryResult = NonNullable<Awaited<ReturnType<typeof getAgentStats>>>;
-export type GetAgentStatsQueryError = ErrorType<unknown>;
+export type GetAgentStatsQueryError = ErrorType<UnauthorizedResponse>;
 
 /**
  * @summary Get detailed per-agent statistics
@@ -22489,7 +22671,7 @@ export type GetAgentStatsQueryError = ErrorType<unknown>;
 
 export function useGetAgentStats<
   TData = Awaited<ReturnType<typeof getAgentStats>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<UnauthorizedResponse>,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof getAgentStats>>, TError, TData>;
   request?: SecondParameter<typeof customFetch>;
@@ -22521,7 +22703,7 @@ export const copilotChat = async (
 };
 
 export const getCopilotChatMutationOptions = <
-  TError = ErrorType<BadRequestResponse | UnauthorizedResponse | void>,
+  TError = ErrorType<BadRequestResponse | RateLimitedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -22558,13 +22740,13 @@ export const getCopilotChatMutationOptions = <
 
 export type CopilotChatMutationResult = NonNullable<Awaited<ReturnType<typeof copilotChat>>>;
 export type CopilotChatMutationBody = BodyType<CopilotChatRequest>;
-export type CopilotChatMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | void>;
+export type CopilotChatMutationError = ErrorType<BadRequestResponse | RateLimitedResponse>;
 
 /**
  * @summary Send a message to the AI copilot (domain-specific)
  */
 export const useCopilotChat = <
-  TError = ErrorType<BadRequestResponse | UnauthorizedResponse | void>,
+  TError = ErrorType<BadRequestResponse | RateLimitedResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -22581,4 +22763,1850 @@ export const useCopilotChat = <
   TContext
 > => {
   return useMutation(getCopilotChatMutationOptions(options));
+};
+
+/**
+ * Registers a new webhook endpoint to receive Stripe-style signed event notifications.
+The response includes a `secret` (prefixed `whsec_`) used to verify the `X-SZL-Signature`
+header on every delivery. Store it securely — it is only returned once.
+
+ * @summary Register a webhook endpoint
+ */
+export const getRegisterWebhookUrl = () => {
+  return `/api/webhooks`;
+};
+
+export const registerWebhook = async (
+  webhookRegistrationRequest: WebhookRegistrationRequest,
+  options?: RequestInit,
+): Promise<RegisterWebhook201> => {
+  return customFetch<RegisterWebhook201>(getRegisterWebhookUrl(), {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(webhookRegistrationRequest),
+  });
+};
+
+export const getRegisterWebhookMutationOptions = <
+  TError = ErrorType<BadRequestResponse | UnauthorizedResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof registerWebhook>>,
+    TError,
+    { data: BodyType<WebhookRegistrationRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof registerWebhook>>,
+  TError,
+  { data: BodyType<WebhookRegistrationRequest> },
+  TContext
+> => {
+  const mutationKey = ['registerWebhook'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof registerWebhook>>,
+    { data: BodyType<WebhookRegistrationRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return registerWebhook(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type RegisterWebhookMutationResult = NonNullable<
+  Awaited<ReturnType<typeof registerWebhook>>
+>;
+export type RegisterWebhookMutationBody = BodyType<WebhookRegistrationRequest>;
+export type RegisterWebhookMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse>;
+
+/**
+ * @summary Register a webhook endpoint
+ */
+export const useRegisterWebhook = <
+  TError = ErrorType<BadRequestResponse | UnauthorizedResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof registerWebhook>>,
+    TError,
+    { data: BodyType<WebhookRegistrationRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof registerWebhook>>,
+  TError,
+  { data: BodyType<WebhookRegistrationRequest> },
+  TContext
+> => {
+  return useMutation(getRegisterWebhookMutationOptions(options));
+};
+
+/**
+ * @summary List registered webhook endpoints
+ */
+export const getListWebhooksUrl = () => {
+  return `/api/webhooks`;
+};
+
+export const listWebhooks = async (options?: RequestInit): Promise<ListWebhooks200> => {
+  return customFetch<ListWebhooks200>(getListWebhooksUrl(), {
+    ...options,
+    method: 'GET',
+  });
+};
+
+export const getListWebhooksQueryKey = () => {
+  return [`/api/webhooks`] as const;
+};
+
+export const getListWebhooksQueryOptions = <
+  TData = Awaited<ReturnType<typeof listWebhooks>>,
+  TError = ErrorType<UnauthorizedResponse>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof listWebhooks>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListWebhooksQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listWebhooks>>> = ({ signal }) =>
+    listWebhooks({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listWebhooks>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListWebhooksQueryResult = NonNullable<Awaited<ReturnType<typeof listWebhooks>>>;
+export type ListWebhooksQueryError = ErrorType<UnauthorizedResponse>;
+
+/**
+ * @summary List registered webhook endpoints
+ */
+
+export function useListWebhooks<
+  TData = Awaited<ReturnType<typeof listWebhooks>>,
+  TError = ErrorType<UnauthorizedResponse>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof listWebhooks>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListWebhooksQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Alias for POST /webhooks. Returns full endpoint object including signing secret.
+ * @summary Register a webhook endpoint (verbose path)
+ */
+export const getRegisterWebhookEndpointUrl = () => {
+  return `/api/webhooks/endpoints`;
+};
+
+export const registerWebhookEndpoint = async (
+  webhookRegistrationRequest: WebhookRegistrationRequest,
+  options?: RequestInit,
+): Promise<RegisterWebhookEndpoint201> => {
+  return customFetch<RegisterWebhookEndpoint201>(getRegisterWebhookEndpointUrl(), {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(webhookRegistrationRequest),
+  });
+};
+
+export const getRegisterWebhookEndpointMutationOptions = <
+  TError = ErrorType<BadRequestResponse | UnauthorizedResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof registerWebhookEndpoint>>,
+    TError,
+    { data: BodyType<WebhookRegistrationRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof registerWebhookEndpoint>>,
+  TError,
+  { data: BodyType<WebhookRegistrationRequest> },
+  TContext
+> => {
+  const mutationKey = ['registerWebhookEndpoint'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof registerWebhookEndpoint>>,
+    { data: BodyType<WebhookRegistrationRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return registerWebhookEndpoint(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type RegisterWebhookEndpointMutationResult = NonNullable<
+  Awaited<ReturnType<typeof registerWebhookEndpoint>>
+>;
+export type RegisterWebhookEndpointMutationBody = BodyType<WebhookRegistrationRequest>;
+export type RegisterWebhookEndpointMutationError = ErrorType<
+  BadRequestResponse | UnauthorizedResponse
+>;
+
+/**
+ * @summary Register a webhook endpoint (verbose path)
+ */
+export const useRegisterWebhookEndpoint = <
+  TError = ErrorType<BadRequestResponse | UnauthorizedResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof registerWebhookEndpoint>>,
+    TError,
+    { data: BodyType<WebhookRegistrationRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof registerWebhookEndpoint>>,
+  TError,
+  { data: BodyType<WebhookRegistrationRequest> },
+  TContext
+> => {
+  return useMutation(getRegisterWebhookEndpointMutationOptions(options));
+};
+
+/**
+ * @summary List registered webhook endpoints (verbose path)
+ */
+export const getListWebhookEndpointsUrl = () => {
+  return `/api/webhooks/endpoints`;
+};
+
+export const listWebhookEndpoints = async (
+  options?: RequestInit,
+): Promise<ListWebhookEndpoints200> => {
+  return customFetch<ListWebhookEndpoints200>(getListWebhookEndpointsUrl(), {
+    ...options,
+    method: 'GET',
+  });
+};
+
+export const getListWebhookEndpointsQueryKey = () => {
+  return [`/api/webhooks/endpoints`] as const;
+};
+
+export const getListWebhookEndpointsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listWebhookEndpoints>>,
+  TError = ErrorType<UnauthorizedResponse>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof listWebhookEndpoints>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListWebhookEndpointsQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listWebhookEndpoints>>> = ({ signal }) =>
+    listWebhookEndpoints({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listWebhookEndpoints>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListWebhookEndpointsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listWebhookEndpoints>>
+>;
+export type ListWebhookEndpointsQueryError = ErrorType<UnauthorizedResponse>;
+
+/**
+ * @summary List registered webhook endpoints (verbose path)
+ */
+
+export function useListWebhookEndpoints<
+  TData = Awaited<ReturnType<typeof listWebhookEndpoints>>,
+  TError = ErrorType<UnauthorizedResponse>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof listWebhookEndpoints>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListWebhookEndpointsQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Update a webhook endpoint
+ */
+export const getUpdateWebhookEndpointUrl = (id: string) => {
+  return `/api/webhooks/endpoints/${id}`;
+};
+
+export const updateWebhookEndpoint = async (
+  id: string,
+  updateWebhookEndpointBody: UpdateWebhookEndpointBody,
+  options?: RequestInit,
+): Promise<void> => {
+  return customFetch<void>(getUpdateWebhookEndpointUrl(id), {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(updateWebhookEndpointBody),
+  });
+};
+
+export const getUpdateWebhookEndpointMutationOptions = <
+  TError = ErrorType<NotFoundResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateWebhookEndpoint>>,
+    TError,
+    { id: string; data: BodyType<UpdateWebhookEndpointBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateWebhookEndpoint>>,
+  TError,
+  { id: string; data: BodyType<UpdateWebhookEndpointBody> },
+  TContext
+> => {
+  const mutationKey = ['updateWebhookEndpoint'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateWebhookEndpoint>>,
+    { id: string; data: BodyType<UpdateWebhookEndpointBody> }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return updateWebhookEndpoint(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateWebhookEndpointMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateWebhookEndpoint>>
+>;
+export type UpdateWebhookEndpointMutationBody = BodyType<UpdateWebhookEndpointBody>;
+export type UpdateWebhookEndpointMutationError = ErrorType<NotFoundResponse>;
+
+/**
+ * @summary Update a webhook endpoint
+ */
+export const useUpdateWebhookEndpoint = <
+  TError = ErrorType<NotFoundResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateWebhookEndpoint>>,
+    TError,
+    { id: string; data: BodyType<UpdateWebhookEndpointBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof updateWebhookEndpoint>>,
+  TError,
+  { id: string; data: BodyType<UpdateWebhookEndpointBody> },
+  TContext
+> => {
+  return useMutation(getUpdateWebhookEndpointMutationOptions(options));
+};
+
+/**
+ * @summary Delete a webhook endpoint
+ */
+export const getDeleteWebhookEndpointUrl = (id: string) => {
+  return `/api/webhooks/endpoints/${id}`;
+};
+
+export const deleteWebhookEndpoint = async (id: string, options?: RequestInit): Promise<void> => {
+  return customFetch<void>(getDeleteWebhookEndpointUrl(id), {
+    ...options,
+    method: 'DELETE',
+  });
+};
+
+export const getDeleteWebhookEndpointMutationOptions = <
+  TError = ErrorType<NotFoundResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteWebhookEndpoint>>,
+    TError,
+    { id: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteWebhookEndpoint>>,
+  TError,
+  { id: string },
+  TContext
+> => {
+  const mutationKey = ['deleteWebhookEndpoint'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteWebhookEndpoint>>,
+    { id: string }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return deleteWebhookEndpoint(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteWebhookEndpointMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteWebhookEndpoint>>
+>;
+
+export type DeleteWebhookEndpointMutationError = ErrorType<NotFoundResponse>;
+
+/**
+ * @summary Delete a webhook endpoint
+ */
+export const useDeleteWebhookEndpoint = <
+  TError = ErrorType<NotFoundResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteWebhookEndpoint>>,
+    TError,
+    { id: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof deleteWebhookEndpoint>>,
+  TError,
+  { id: string },
+  TContext
+> => {
+  return useMutation(getDeleteWebhookEndpointMutationOptions(options));
+};
+
+/**
+ * @summary Send a test ping to a webhook endpoint
+ */
+export const getPingWebhookEndpointUrl = (id: string) => {
+  return `/api/webhooks/endpoints/${id}/ping`;
+};
+
+export const pingWebhookEndpoint = async (
+  id: string,
+  options?: RequestInit,
+): Promise<PingWebhookEndpoint200> => {
+  return customFetch<PingWebhookEndpoint200>(getPingWebhookEndpointUrl(id), {
+    ...options,
+    method: 'POST',
+  });
+};
+
+export const getPingWebhookEndpointMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof pingWebhookEndpoint>>,
+    TError,
+    { id: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof pingWebhookEndpoint>>,
+  TError,
+  { id: string },
+  TContext
+> => {
+  const mutationKey = ['pingWebhookEndpoint'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof pingWebhookEndpoint>>,
+    { id: string }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return pingWebhookEndpoint(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PingWebhookEndpointMutationResult = NonNullable<
+  Awaited<ReturnType<typeof pingWebhookEndpoint>>
+>;
+
+export type PingWebhookEndpointMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Send a test ping to a webhook endpoint
+ */
+export const usePingWebhookEndpoint = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof pingWebhookEndpoint>>,
+    TError,
+    { id: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof pingWebhookEndpoint>>,
+  TError,
+  { id: string },
+  TContext
+> => {
+  return useMutation(getPingWebhookEndpointMutationOptions(options));
+};
+
+/**
+ * Returns recent webhook delivery attempts, optionally filtered by endpoint or event type. Use `eventType=decision.*` to see all decision lifecycle events.
+ * @summary List webhook delivery attempts
+ */
+export const getListWebhookDeliveriesUrl = (params?: ListWebhookDeliveriesParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/webhooks/deliveries?${stringifiedParams}`
+    : `/api/webhooks/deliveries`;
+};
+
+export const listWebhookDeliveries = async (
+  params?: ListWebhookDeliveriesParams,
+  options?: RequestInit,
+): Promise<ListWebhookDeliveries200> => {
+  return customFetch<ListWebhookDeliveries200>(getListWebhookDeliveriesUrl(params), {
+    ...options,
+    method: 'GET',
+  });
+};
+
+export const getListWebhookDeliveriesQueryKey = (params?: ListWebhookDeliveriesParams) => {
+  return [`/api/webhooks/deliveries`, ...(params ? [params] : [])] as const;
+};
+
+export const getListWebhookDeliveriesQueryOptions = <
+  TData = Awaited<ReturnType<typeof listWebhookDeliveries>>,
+  TError = ErrorType<UnauthorizedResponse>,
+>(
+  params?: ListWebhookDeliveriesParams,
+  options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof listWebhookDeliveries>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListWebhookDeliveriesQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listWebhookDeliveries>>> = ({ signal }) =>
+    listWebhookDeliveries(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listWebhookDeliveries>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListWebhookDeliveriesQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listWebhookDeliveries>>
+>;
+export type ListWebhookDeliveriesQueryError = ErrorType<UnauthorizedResponse>;
+
+/**
+ * @summary List webhook delivery attempts
+ */
+
+export function useListWebhookDeliveries<
+  TData = Awaited<ReturnType<typeof listWebhookDeliveries>>,
+  TError = ErrorType<UnauthorizedResponse>,
+>(
+  params?: ListWebhookDeliveriesParams,
+  options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof listWebhookDeliveries>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListWebhookDeliveriesQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Returns all supported event type strings, including decision lifecycle events.
+ * @summary List all supported webhook event types
+ */
+export const getListWebhookEventTypesUrl = () => {
+  return `/api/webhooks/event-types`;
+};
+
+export const listWebhookEventTypes = async (
+  options?: RequestInit,
+): Promise<ListWebhookEventTypes200> => {
+  return customFetch<ListWebhookEventTypes200>(getListWebhookEventTypesUrl(), {
+    ...options,
+    method: 'GET',
+  });
+};
+
+export const getListWebhookEventTypesQueryKey = () => {
+  return [`/api/webhooks/event-types`] as const;
+};
+
+export const getListWebhookEventTypesQueryOptions = <
+  TData = Awaited<ReturnType<typeof listWebhookEventTypes>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof listWebhookEventTypes>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListWebhookEventTypesQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listWebhookEventTypes>>> = ({ signal }) =>
+    listWebhookEventTypes({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listWebhookEventTypes>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListWebhookEventTypesQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listWebhookEventTypes>>
+>;
+export type ListWebhookEventTypesQueryError = ErrorType<unknown>;
+
+/**
+ * @summary List all supported webhook event types
+ */
+
+export function useListWebhookEventTypes<
+  TData = Awaited<ReturnType<typeof listWebhookEventTypes>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof listWebhookEventTypes>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListWebhookEventTypesQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Evaluates one or more signal groups through the decision engine and returns
+ranked recommendations with policy evaluations. Emits a `decision.created`
+webhook event after evaluation.
+
+ * @summary Evaluate signals into ranked recommendations
+ */
+export const getEvaluateDecisionSignalsUrl = () => {
+  return `/api/decisioning/evaluate`;
+};
+
+export const evaluateDecisionSignals = async (
+  evaluateDecisionSignalsBody: EvaluateDecisionSignalsBody,
+  options?: RequestInit,
+): Promise<EvaluateDecisionSignals200> => {
+  return customFetch<EvaluateDecisionSignals200>(getEvaluateDecisionSignalsUrl(), {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(evaluateDecisionSignalsBody),
+  });
+};
+
+export const getEvaluateDecisionSignalsMutationOptions = <
+  TError = ErrorType<BadRequestResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof evaluateDecisionSignals>>,
+    TError,
+    { data: BodyType<EvaluateDecisionSignalsBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof evaluateDecisionSignals>>,
+  TError,
+  { data: BodyType<EvaluateDecisionSignalsBody> },
+  TContext
+> => {
+  const mutationKey = ['evaluateDecisionSignals'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof evaluateDecisionSignals>>,
+    { data: BodyType<EvaluateDecisionSignalsBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return evaluateDecisionSignals(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type EvaluateDecisionSignalsMutationResult = NonNullable<
+  Awaited<ReturnType<typeof evaluateDecisionSignals>>
+>;
+export type EvaluateDecisionSignalsMutationBody = BodyType<EvaluateDecisionSignalsBody>;
+export type EvaluateDecisionSignalsMutationError = ErrorType<BadRequestResponse>;
+
+/**
+ * @summary Evaluate signals into ranked recommendations
+ */
+export const useEvaluateDecisionSignals = <
+  TError = ErrorType<BadRequestResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof evaluateDecisionSignals>>,
+    TError,
+    { data: BodyType<EvaluateDecisionSignalsBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof evaluateDecisionSignals>>,
+  TError,
+  { data: BodyType<EvaluateDecisionSignalsBody> },
+  TContext
+> => {
+  return useMutation(getEvaluateDecisionSignalsMutationOptions(options));
+};
+
+/**
+ * Runs a registered workflow definition through the governed execution pipeline.
+Policy is checked before execution. Emits `decision.approved` (when approved)
+and `decision.executed` webhook events.
+
+ * @summary Execute a decision workflow
+ */
+export const getExecuteDecisionWorkflowUrl = () => {
+  return `/api/decisioning/execute`;
+};
+
+export const executeDecisionWorkflow = async (
+  executeDecisionWorkflowBody: ExecuteDecisionWorkflowBody,
+  options?: RequestInit,
+): Promise<ExecuteDecisionWorkflow201> => {
+  return customFetch<ExecuteDecisionWorkflow201>(getExecuteDecisionWorkflowUrl(), {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(executeDecisionWorkflowBody),
+  });
+};
+
+export const getExecuteDecisionWorkflowMutationOptions = <
+  TError = ErrorType<BadRequestResponse | UnauthorizedResponse | NotFoundResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof executeDecisionWorkflow>>,
+    TError,
+    { data: BodyType<ExecuteDecisionWorkflowBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof executeDecisionWorkflow>>,
+  TError,
+  { data: BodyType<ExecuteDecisionWorkflowBody> },
+  TContext
+> => {
+  const mutationKey = ['executeDecisionWorkflow'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof executeDecisionWorkflow>>,
+    { data: BodyType<ExecuteDecisionWorkflowBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return executeDecisionWorkflow(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ExecuteDecisionWorkflowMutationResult = NonNullable<
+  Awaited<ReturnType<typeof executeDecisionWorkflow>>
+>;
+export type ExecuteDecisionWorkflowMutationBody = BodyType<ExecuteDecisionWorkflowBody>;
+export type ExecuteDecisionWorkflowMutationError = ErrorType<
+  BadRequestResponse | UnauthorizedResponse | NotFoundResponse
+>;
+
+/**
+ * @summary Execute a decision workflow
+ */
+export const useExecuteDecisionWorkflow = <
+  TError = ErrorType<BadRequestResponse | UnauthorizedResponse | NotFoundResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof executeDecisionWorkflow>>,
+    TError,
+    { data: BodyType<ExecuteDecisionWorkflowBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof executeDecisionWorkflow>>,
+  TError,
+  { data: BodyType<ExecuteDecisionWorkflowBody> },
+  TContext
+> => {
+  return useMutation(getExecuteDecisionWorkflowMutationOptions(options));
+};
+
+/**
+ * Logs the final outcome (success, partial, failed, or cancelled) for a completed
+workflow run. Emits a `decision.outcome_recorded` webhook event.
+
+ * @summary Record the outcome of a decision run
+ */
+export const getRecordDecisionOutcomeUrl = (runId: string) => {
+  return `/api/decisioning/runs/${runId}/outcome`;
+};
+
+export const recordDecisionOutcome = async (
+  runId: string,
+  decisionOutcomeRequest: DecisionOutcomeRequest,
+  options?: RequestInit,
+): Promise<RecordDecisionOutcome200> => {
+  return customFetch<RecordDecisionOutcome200>(getRecordDecisionOutcomeUrl(runId), {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(decisionOutcomeRequest),
+  });
+};
+
+export const getRecordDecisionOutcomeMutationOptions = <
+  TError = ErrorType<BadRequestResponse | NotFoundResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof recordDecisionOutcome>>,
+    TError,
+    { runId: string; data: BodyType<DecisionOutcomeRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof recordDecisionOutcome>>,
+  TError,
+  { runId: string; data: BodyType<DecisionOutcomeRequest> },
+  TContext
+> => {
+  const mutationKey = ['recordDecisionOutcome'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof recordDecisionOutcome>>,
+    { runId: string; data: BodyType<DecisionOutcomeRequest> }
+  > = (props) => {
+    const { runId, data } = props ?? {};
+
+    return recordDecisionOutcome(runId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type RecordDecisionOutcomeMutationResult = NonNullable<
+  Awaited<ReturnType<typeof recordDecisionOutcome>>
+>;
+export type RecordDecisionOutcomeMutationBody = BodyType<DecisionOutcomeRequest>;
+export type RecordDecisionOutcomeMutationError = ErrorType<BadRequestResponse | NotFoundResponse>;
+
+/**
+ * @summary Record the outcome of a decision run
+ */
+export const useRecordDecisionOutcome = <
+  TError = ErrorType<BadRequestResponse | NotFoundResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof recordDecisionOutcome>>,
+    TError,
+    { runId: string; data: BodyType<DecisionOutcomeRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof recordDecisionOutcome>>,
+  TError,
+  { runId: string; data: BodyType<DecisionOutcomeRequest> },
+  TContext
+> => {
+  return useMutation(getRecordDecisionOutcomeMutationOptions(options));
+};
+
+/**
+ * Records cryptographic or human proof for a decision run (audit, verification,
+or compliance evidence). Emits a `decision.proved` webhook event.
+
+ * @summary Record proof for a decision run
+ */
+export const getProveDecisionRunUrl = (runId: string) => {
+  return `/api/decisioning/runs/${runId}/prove`;
+};
+
+export const proveDecisionRun = async (
+  runId: string,
+  decisionProofRequest: DecisionProofRequest,
+  options?: RequestInit,
+): Promise<ProveDecisionRun200> => {
+  return customFetch<ProveDecisionRun200>(getProveDecisionRunUrl(runId), {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(decisionProofRequest),
+  });
+};
+
+export const getProveDecisionRunMutationOptions = <
+  TError = ErrorType<BadRequestResponse | NotFoundResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof proveDecisionRun>>,
+    TError,
+    { runId: string; data: BodyType<DecisionProofRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof proveDecisionRun>>,
+  TError,
+  { runId: string; data: BodyType<DecisionProofRequest> },
+  TContext
+> => {
+  const mutationKey = ['proveDecisionRun'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof proveDecisionRun>>,
+    { runId: string; data: BodyType<DecisionProofRequest> }
+  > = (props) => {
+    const { runId, data } = props ?? {};
+
+    return proveDecisionRun(runId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ProveDecisionRunMutationResult = NonNullable<
+  Awaited<ReturnType<typeof proveDecisionRun>>
+>;
+export type ProveDecisionRunMutationBody = BodyType<DecisionProofRequest>;
+export type ProveDecisionRunMutationError = ErrorType<BadRequestResponse | NotFoundResponse>;
+
+/**
+ * @summary Record proof for a decision run
+ */
+export const useProveDecisionRun = <
+  TError = ErrorType<BadRequestResponse | NotFoundResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof proveDecisionRun>>,
+    TError,
+    { runId: string; data: BodyType<DecisionProofRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof proveDecisionRun>>,
+  TError,
+  { runId: string; data: BodyType<DecisionProofRequest> },
+  TContext
+> => {
+  return useMutation(getProveDecisionRunMutationOptions(options));
+};
+
+/**
+ * @summary List all matters with full nested obligations, audit trail, and proof chain
+ */
+export const getCounselListMattersUrl = () => {
+  return `/api/counsel/matters`;
+};
+
+export const counselListMatters = async (options?: RequestInit): Promise<CounselListMatters200> => {
+  return customFetch<CounselListMatters200>(getCounselListMattersUrl(), {
+    ...options,
+    method: 'GET',
+  });
+};
+
+export const getCounselListMattersQueryKey = () => {
+  return [`/api/counsel/matters`] as const;
+};
+
+export const getCounselListMattersQueryOptions = <
+  TData = Awaited<ReturnType<typeof counselListMatters>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof counselListMatters>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getCounselListMattersQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof counselListMatters>>> = ({ signal }) =>
+    counselListMatters({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof counselListMatters>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type CounselListMattersQueryResult = NonNullable<
+  Awaited<ReturnType<typeof counselListMatters>>
+>;
+export type CounselListMattersQueryError = ErrorType<unknown>;
+
+/**
+ * @summary List all matters with full nested obligations, audit trail, and proof chain
+ */
+
+export function useCounselListMatters<
+  TData = Awaited<ReturnType<typeof counselListMatters>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof counselListMatters>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getCounselListMattersQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Create a new matter (requires authentication)
+ */
+export const getCounselCreateMatterUrl = () => {
+  return `/api/counsel/matters`;
+};
+
+export const counselCreateMatter = async (
+  counselMatterCreate: CounselMatterCreate,
+  options?: RequestInit,
+): Promise<CounselMatter> => {
+  return customFetch<CounselMatter>(getCounselCreateMatterUrl(), {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(counselMatterCreate),
+  });
+};
+
+export const getCounselCreateMatterMutationOptions = <
+  TError = ErrorType<BadRequestResponse | UnauthorizedResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof counselCreateMatter>>,
+    TError,
+    { data: BodyType<CounselMatterCreate> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof counselCreateMatter>>,
+  TError,
+  { data: BodyType<CounselMatterCreate> },
+  TContext
+> => {
+  const mutationKey = ['counselCreateMatter'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof counselCreateMatter>>,
+    { data: BodyType<CounselMatterCreate> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return counselCreateMatter(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CounselCreateMatterMutationResult = NonNullable<
+  Awaited<ReturnType<typeof counselCreateMatter>>
+>;
+export type CounselCreateMatterMutationBody = BodyType<CounselMatterCreate>;
+export type CounselCreateMatterMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse>;
+
+/**
+ * @summary Create a new matter (requires authentication)
+ */
+export const useCounselCreateMatter = <
+  TError = ErrorType<BadRequestResponse | UnauthorizedResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof counselCreateMatter>>,
+    TError,
+    { data: BodyType<CounselMatterCreate> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof counselCreateMatter>>,
+  TError,
+  { data: BodyType<CounselMatterCreate> },
+  TContext
+> => {
+  return useMutation(getCounselCreateMatterMutationOptions(options));
+};
+
+/**
+ * @summary Get a single matter with full detail
+ */
+export const getCounselGetMatterUrl = (id: string) => {
+  return `/api/counsel/matters/${id}`;
+};
+
+export const counselGetMatter = async (
+  id: string,
+  options?: RequestInit,
+): Promise<CounselMatter> => {
+  return customFetch<CounselMatter>(getCounselGetMatterUrl(id), {
+    ...options,
+    method: 'GET',
+  });
+};
+
+export const getCounselGetMatterQueryKey = (id: string) => {
+  return [`/api/counsel/matters/${id}`] as const;
+};
+
+export const getCounselGetMatterQueryOptions = <
+  TData = Awaited<ReturnType<typeof counselGetMatter>>,
+  TError = ErrorType<NotFoundResponse>,
+>(
+  id: string,
+  options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof counselGetMatter>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getCounselGetMatterQueryKey(id);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof counselGetMatter>>> = ({ signal }) =>
+    counselGetMatter(id, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, enabled: !!id, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof counselGetMatter>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type CounselGetMatterQueryResult = NonNullable<Awaited<ReturnType<typeof counselGetMatter>>>;
+export type CounselGetMatterQueryError = ErrorType<NotFoundResponse>;
+
+/**
+ * @summary Get a single matter with full detail
+ */
+
+export function useCounselGetMatter<
+  TData = Awaited<ReturnType<typeof counselGetMatter>>,
+  TError = ErrorType<NotFoundResponse>,
+>(
+  id: string,
+  options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof counselGetMatter>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getCounselGetMatterQueryOptions(id, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Update a matter (requires authentication)
+ */
+export const getCounselUpdateMatterUrl = (id: string) => {
+  return `/api/counsel/matters/${id}`;
+};
+
+export const counselUpdateMatter = async (
+  id: string,
+  counselMatterUpdate: CounselMatterUpdate,
+  options?: RequestInit,
+): Promise<CounselMatter> => {
+  return customFetch<CounselMatter>(getCounselUpdateMatterUrl(id), {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(counselMatterUpdate),
+  });
+};
+
+export const getCounselUpdateMatterMutationOptions = <
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof counselUpdateMatter>>,
+    TError,
+    { id: string; data: BodyType<CounselMatterUpdate> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof counselUpdateMatter>>,
+  TError,
+  { id: string; data: BodyType<CounselMatterUpdate> },
+  TContext
+> => {
+  const mutationKey = ['counselUpdateMatter'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof counselUpdateMatter>>,
+    { id: string; data: BodyType<CounselMatterUpdate> }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return counselUpdateMatter(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CounselUpdateMatterMutationResult = NonNullable<
+  Awaited<ReturnType<typeof counselUpdateMatter>>
+>;
+export type CounselUpdateMatterMutationBody = BodyType<CounselMatterUpdate>;
+export type CounselUpdateMatterMutationError = ErrorType<UnauthorizedResponse | NotFoundResponse>;
+
+/**
+ * @summary Update a matter (requires authentication)
+ */
+export const useCounselUpdateMatter = <
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof counselUpdateMatter>>,
+    TError,
+    { id: string; data: BodyType<CounselMatterUpdate> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof counselUpdateMatter>>,
+  TError,
+  { id: string; data: BodyType<CounselMatterUpdate> },
+  TContext
+> => {
+  return useMutation(getCounselUpdateMatterMutationOptions(options));
+};
+
+/**
+ * @summary Delete a matter and its child records (requires authentication)
+ */
+export const getCounselDeleteMatterUrl = (id: string) => {
+  return `/api/counsel/matters/${id}`;
+};
+
+export const counselDeleteMatter = async (
+  id: string,
+  options?: RequestInit,
+): Promise<CounselDeleteMatter200> => {
+  return customFetch<CounselDeleteMatter200>(getCounselDeleteMatterUrl(id), {
+    ...options,
+    method: 'DELETE',
+  });
+};
+
+export const getCounselDeleteMatterMutationOptions = <
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof counselDeleteMatter>>,
+    TError,
+    { id: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof counselDeleteMatter>>,
+  TError,
+  { id: string },
+  TContext
+> => {
+  const mutationKey = ['counselDeleteMatter'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof counselDeleteMatter>>,
+    { id: string }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return counselDeleteMatter(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CounselDeleteMatterMutationResult = NonNullable<
+  Awaited<ReturnType<typeof counselDeleteMatter>>
+>;
+
+export type CounselDeleteMatterMutationError = ErrorType<UnauthorizedResponse | NotFoundResponse>;
+
+/**
+ * @summary Delete a matter and its child records (requires authentication)
+ */
+export const useCounselDeleteMatter = <
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof counselDeleteMatter>>,
+    TError,
+    { id: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof counselDeleteMatter>>,
+  TError,
+  { id: string },
+  TContext
+> => {
+  return useMutation(getCounselDeleteMatterMutationOptions(options));
+};
+
+/**
+ * @summary Update an obligation (status, completed date, assignee, due date)
+ */
+export const getCounselUpdateObligationUrl = (id: string) => {
+  return `/api/counsel/obligations/${id}`;
+};
+
+export const counselUpdateObligation = async (
+  id: string,
+  counselUpdateObligationBody: CounselUpdateObligationBody,
+  options?: RequestInit,
+): Promise<CounselObligation> => {
+  return customFetch<CounselObligation>(getCounselUpdateObligationUrl(id), {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(counselUpdateObligationBody),
+  });
+};
+
+export const getCounselUpdateObligationMutationOptions = <
+  TError = ErrorType<NotFoundResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof counselUpdateObligation>>,
+    TError,
+    { id: string; data: BodyType<CounselUpdateObligationBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof counselUpdateObligation>>,
+  TError,
+  { id: string; data: BodyType<CounselUpdateObligationBody> },
+  TContext
+> => {
+  const mutationKey = ['counselUpdateObligation'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof counselUpdateObligation>>,
+    { id: string; data: BodyType<CounselUpdateObligationBody> }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return counselUpdateObligation(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CounselUpdateObligationMutationResult = NonNullable<
+  Awaited<ReturnType<typeof counselUpdateObligation>>
+>;
+export type CounselUpdateObligationMutationBody = BodyType<CounselUpdateObligationBody>;
+export type CounselUpdateObligationMutationError = ErrorType<NotFoundResponse>;
+
+/**
+ * @summary Update an obligation (status, completed date, assignee, due date)
+ */
+export const useCounselUpdateObligation = <
+  TError = ErrorType<NotFoundResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof counselUpdateObligation>>,
+    TError,
+    { id: string; data: BodyType<CounselUpdateObligationBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof counselUpdateObligation>>,
+  TError,
+  { id: string; data: BodyType<CounselUpdateObligationBody> },
+  TContext
+> => {
+  return useMutation(getCounselUpdateObligationMutationOptions(options));
+};
+
+/**
+ * @summary List audit-trail entries for a matter (or all matters)
+ */
+export const getCounselListAuditTrailUrl = (params?: CounselListAuditTrailParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/counsel/audit-trail?${stringifiedParams}`
+    : `/api/counsel/audit-trail`;
+};
+
+export const counselListAuditTrail = async (
+  params?: CounselListAuditTrailParams,
+  options?: RequestInit,
+): Promise<CounselListAuditTrail200> => {
+  return customFetch<CounselListAuditTrail200>(getCounselListAuditTrailUrl(params), {
+    ...options,
+    method: 'GET',
+  });
+};
+
+export const getCounselListAuditTrailQueryKey = (params?: CounselListAuditTrailParams) => {
+  return [`/api/counsel/audit-trail`, ...(params ? [params] : [])] as const;
+};
+
+export const getCounselListAuditTrailQueryOptions = <
+  TData = Awaited<ReturnType<typeof counselListAuditTrail>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: CounselListAuditTrailParams,
+  options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof counselListAuditTrail>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getCounselListAuditTrailQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof counselListAuditTrail>>> = ({ signal }) =>
+    counselListAuditTrail(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof counselListAuditTrail>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type CounselListAuditTrailQueryResult = NonNullable<
+  Awaited<ReturnType<typeof counselListAuditTrail>>
+>;
+export type CounselListAuditTrailQueryError = ErrorType<unknown>;
+
+/**
+ * @summary List audit-trail entries for a matter (or all matters)
+ */
+
+export function useCounselListAuditTrail<
+  TData = Awaited<ReturnType<typeof counselListAuditTrail>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: CounselListAuditTrailParams,
+  options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof counselListAuditTrail>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getCounselListAuditTrailQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Append an audit-trail entry to a matter
+ */
+export const getCounselAppendAuditEntryUrl = () => {
+  return `/api/counsel/audit-trail`;
+};
+
+export const counselAppendAuditEntry = async (
+  counselAppendAuditEntryBody: CounselAppendAuditEntryBody,
+  options?: RequestInit,
+): Promise<CounselAuditEntry> => {
+  return customFetch<CounselAuditEntry>(getCounselAppendAuditEntryUrl(), {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(counselAppendAuditEntryBody),
+  });
+};
+
+export const getCounselAppendAuditEntryMutationOptions = <
+  TError = ErrorType<NotFoundResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof counselAppendAuditEntry>>,
+    TError,
+    { data: BodyType<CounselAppendAuditEntryBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof counselAppendAuditEntry>>,
+  TError,
+  { data: BodyType<CounselAppendAuditEntryBody> },
+  TContext
+> => {
+  const mutationKey = ['counselAppendAuditEntry'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof counselAppendAuditEntry>>,
+    { data: BodyType<CounselAppendAuditEntryBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return counselAppendAuditEntry(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CounselAppendAuditEntryMutationResult = NonNullable<
+  Awaited<ReturnType<typeof counselAppendAuditEntry>>
+>;
+export type CounselAppendAuditEntryMutationBody = BodyType<CounselAppendAuditEntryBody>;
+export type CounselAppendAuditEntryMutationError = ErrorType<NotFoundResponse>;
+
+/**
+ * @summary Append an audit-trail entry to a matter
+ */
+export const useCounselAppendAuditEntry = <
+  TError = ErrorType<NotFoundResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof counselAppendAuditEntry>>,
+    TError,
+    { data: BodyType<CounselAppendAuditEntryBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof counselAppendAuditEntry>>,
+  TError,
+  { data: BodyType<CounselAppendAuditEntryBody> },
+  TContext
+> => {
+  return useMutation(getCounselAppendAuditEntryMutationOptions(options));
+};
+
+/**
+ * @summary List proof-chain entries for a matter
+ */
+export const getCounselListProofChainUrl = (params: CounselListProofChainParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/counsel/proof-chain?${stringifiedParams}`
+    : `/api/counsel/proof-chain`;
+};
+
+export const counselListProofChain = async (
+  params: CounselListProofChainParams,
+  options?: RequestInit,
+): Promise<CounselListProofChain200> => {
+  return customFetch<CounselListProofChain200>(getCounselListProofChainUrl(params), {
+    ...options,
+    method: 'GET',
+  });
+};
+
+export const getCounselListProofChainQueryKey = (params?: CounselListProofChainParams) => {
+  return [`/api/counsel/proof-chain`, ...(params ? [params] : [])] as const;
+};
+
+export const getCounselListProofChainQueryOptions = <
+  TData = Awaited<ReturnType<typeof counselListProofChain>>,
+  TError = ErrorType<BadRequestResponse | NotFoundResponse>,
+>(
+  params: CounselListProofChainParams,
+  options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof counselListProofChain>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getCounselListProofChainQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof counselListProofChain>>> = ({ signal }) =>
+    counselListProofChain(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof counselListProofChain>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type CounselListProofChainQueryResult = NonNullable<
+  Awaited<ReturnType<typeof counselListProofChain>>
+>;
+export type CounselListProofChainQueryError = ErrorType<BadRequestResponse | NotFoundResponse>;
+
+/**
+ * @summary List proof-chain entries for a matter
+ */
+
+export function useCounselListProofChain<
+  TData = Awaited<ReturnType<typeof counselListProofChain>>,
+  TError = ErrorType<BadRequestResponse | NotFoundResponse>,
+>(
+  params: CounselListProofChainParams,
+  options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof counselListProofChain>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getCounselListProofChainQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Append a proof-chain entry to a matter
+ */
+export const getCounselAppendProofChainEntryUrl = () => {
+  return `/api/counsel/proof-chain`;
+};
+
+export const counselAppendProofChainEntry = async (
+  counselAppendProofChainEntryBody: CounselAppendProofChainEntryBody,
+  options?: RequestInit,
+): Promise<CounselProofChainEntry> => {
+  return customFetch<CounselProofChainEntry>(getCounselAppendProofChainEntryUrl(), {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(counselAppendProofChainEntryBody),
+  });
+};
+
+export const getCounselAppendProofChainEntryMutationOptions = <
+  TError = ErrorType<NotFoundResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof counselAppendProofChainEntry>>,
+    TError,
+    { data: BodyType<CounselAppendProofChainEntryBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof counselAppendProofChainEntry>>,
+  TError,
+  { data: BodyType<CounselAppendProofChainEntryBody> },
+  TContext
+> => {
+  const mutationKey = ['counselAppendProofChainEntry'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof counselAppendProofChainEntry>>,
+    { data: BodyType<CounselAppendProofChainEntryBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return counselAppendProofChainEntry(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CounselAppendProofChainEntryMutationResult = NonNullable<
+  Awaited<ReturnType<typeof counselAppendProofChainEntry>>
+>;
+export type CounselAppendProofChainEntryMutationBody = BodyType<CounselAppendProofChainEntryBody>;
+export type CounselAppendProofChainEntryMutationError = ErrorType<NotFoundResponse>;
+
+/**
+ * @summary Append a proof-chain entry to a matter
+ */
+export const useCounselAppendProofChainEntry = <
+  TError = ErrorType<NotFoundResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof counselAppendProofChainEntry>>,
+    TError,
+    { data: BodyType<CounselAppendProofChainEntryBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof counselAppendProofChainEntry>>,
+  TError,
+  { data: BodyType<CounselAppendProofChainEntryBody> },
+  TContext
+> => {
+  return useMutation(getCounselAppendProofChainEntryMutationOptions(options));
 };

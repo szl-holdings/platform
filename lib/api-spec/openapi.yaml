@@ -7683,6 +7683,275 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
 
+  # ─── PRISM Counsel — GC matters (matter board, obligations, audit, proof chain) ──
+  /counsel/matters:
+    get:
+      operationId: counselListMatters
+      tags: [counsel]
+      summary: List all matters with full nested obligations, audit trail, and proof chain
+      security:
+        - {}
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Matters list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  matters:
+                    type: array
+                    items: { $ref: "#/components/schemas/CounselMatter" }
+    post:
+      operationId: counselCreateMatter
+      tags: [counsel]
+      summary: Create a new matter (requires authentication)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CounselMatterCreate" }
+      responses:
+        "200":
+          description: Created matter
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CounselMatter" }
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /counsel/matters/{id}:
+    get:
+      operationId: counselGetMatter
+      tags: [counsel]
+      summary: Get a single matter with full detail
+      security:
+        - {}
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Matter detail
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CounselMatter" }
+        "404":
+          $ref: "#/components/responses/NotFound"
+    patch:
+      operationId: counselUpdateMatter
+      tags: [counsel]
+      summary: Update a matter (requires authentication)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CounselMatterUpdate" }
+      responses:
+        "200":
+          description: Updated matter
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CounselMatter" }
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      operationId: counselDeleteMatter
+      tags: [counsel]
+      summary: Delete a matter and its child records (requires authentication)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Deletion result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id: { type: string }
+                  deleted: { type: boolean }
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /counsel/obligations/{id}:
+    patch:
+      operationId: counselUpdateObligation
+      tags: [counsel]
+      summary: Update an obligation (status, completed date, assignee, due date)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [matterId]
+              properties:
+                matterId: { type: string }
+                status:
+                  type: string
+                  enum: [pending, in-progress, complete, overdue, at-risk]
+                completedDate: { type: string }
+                assignee: { type: string }
+                dueDate: { type: string }
+      responses:
+        "200":
+          description: Updated obligation
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CounselObligation" }
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /counsel/audit-trail:
+    get:
+      operationId: counselListAuditTrail
+      tags: [counsel]
+      summary: List audit-trail entries for a matter (or all matters)
+      security:
+        - {}
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: matterId
+          schema: { type: string }
+      responses:
+        "200":
+          description: Audit entries
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  entries:
+                    type: array
+                    items: { $ref: "#/components/schemas/CounselAuditEntry" }
+    post:
+      operationId: counselAppendAuditEntry
+      tags: [counsel]
+      summary: Append an audit-trail entry to a matter
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [matterId, user, role, action, detail]
+              properties:
+                matterId: { type: string }
+                user: { type: string }
+                role: { type: string }
+                action:
+                  type: string
+                  enum: [viewed, edited, exported, redacted, accessed-wall, escalated, deadline-updated, privilege-changed]
+                detail: { type: string }
+                ip: { type: string }
+      responses:
+        "201":
+          description: Audit entry created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CounselAuditEntry" }
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /counsel/proof-chain:
+    get:
+      operationId: counselListProofChain
+      tags: [counsel]
+      summary: List proof-chain entries for a matter
+      security:
+        - {}
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: matterId
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Proof chain entries
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  matterId: { type: string }
+                  entries:
+                    type: array
+                    items: { $ref: "#/components/schemas/CounselProofChainEntry" }
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    post:
+      operationId: counselAppendProofChainEntry
+      tags: [counsel]
+      summary: Append a proof-chain entry to a matter
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [matterId, eventType, title, summary, privilegeLevel, author]
+              properties:
+                matterId: { type: string }
+                eventType:
+                  type: string
+                  enum: [filing, communication, discovery, order, settlement, hearing, deadline, expert-report]
+                title: { type: string }
+                summary: { type: string }
+                privilegeLevel:
+                  type: string
+                  enum: [public, confidential, privileged, restricted]
+                author: { type: string }
+                parties:
+                  type: array
+                  items: { type: string }
+                documentRef: { type: string }
+                hash: { type: string }
+                redacted: { type: boolean }
+      responses:
+        "201":
+          description: Proof chain entry created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CounselProofChainEntry" }
+        "404":
+          $ref: "#/components/responses/NotFound"
+
 components:
   securitySchemes:
     bearerAuth:
@@ -10010,3 +10279,210 @@ components:
               label: { type: string }
               value: { type: string }
               source: { type: string }
+    CounselParty:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        role:
+          type: string
+          enum: [client, opposing-counsel, regulator, third-party, expert, co-counsel]
+        counsel: { type: string }
+        jurisdiction: { type: string }
+    CounselWall:
+      type: object
+      properties:
+        enabled: { type: boolean }
+        reason: { type: string }
+        blockedRoles:
+          type: array
+          items: { type: string }
+        approvedUsers:
+          type: array
+          items: { type: string }
+        createdAt: { type: string }
+        createdBy: { type: string }
+    CounselObligation:
+      type: object
+      properties:
+        id: { type: string }
+        matterId: { type: string }
+        title: { type: string }
+        description: { type: string }
+        dueDate: { type: string }
+        status:
+          type: string
+          enum: [pending, in-progress, complete, overdue, at-risk]
+        assignee: { type: string }
+        dependencies:
+          type: array
+          items: { type: string }
+        privilegeLevel:
+          type: string
+          enum: [public, confidential, privileged, restricted]
+        filingRequired: { type: boolean }
+        courtId: { type: string }
+        consequence: { type: string }
+        completedDate: { type: string }
+    CounselAuditEntry:
+      type: object
+      properties:
+        id: { type: string }
+        matterId: { type: string }
+        timestamp: { type: string, format: date-time }
+        user: { type: string }
+        role: { type: string }
+        action:
+          type: string
+          enum: [viewed, edited, exported, redacted, accessed-wall, escalated, deadline-updated, privilege-changed]
+        detail: { type: string }
+        ip: { type: string }
+    CounselProofChainEntry:
+      type: object
+      properties:
+        id: { type: string }
+        matterId: { type: string }
+        timestamp: { type: string, format: date-time }
+        eventType:
+          type: string
+          enum: [filing, communication, discovery, order, settlement, hearing, deadline, expert-report]
+        title: { type: string }
+        summary: { type: string }
+        privilegeLevel:
+          type: string
+          enum: [public, confidential, privileged, restricted]
+        author: { type: string }
+        parties:
+          type: array
+          items: { type: string }
+        documentRef: { type: string }
+        hash: { type: string }
+        redacted: { type: boolean }
+    CounselMatter:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        clientName: { type: string }
+        matterNumber: { type: string }
+        type:
+          type: string
+          enum: [litigation, transaction, regulatory, employment, ip, real-estate, contract]
+        status:
+          type: string
+          enum: [active, pending, closed, escalated, on-hold]
+        privilegeLevel:
+          type: string
+          enum: [public, confidential, privileged, restricted]
+        pressureScore: { type: number }
+        complexityScore: { type: number }
+        openedDate: { type: string }
+        trialDate: { type: string }
+        closingDate: { type: string }
+        nextDeadline: { type: string }
+        nextDeadlineLabel: { type: string }
+        leadCounsel: { type: string }
+        jurisdiction: { type: string }
+        estimatedExposure: { type: number }
+        summary: { type: string }
+        tags:
+          type: array
+          items: { type: string }
+        parties:
+          type: array
+          items: { $ref: "#/components/schemas/CounselParty" }
+        wall: { $ref: "#/components/schemas/CounselWall" }
+        obligations:
+          type: array
+          items: { $ref: "#/components/schemas/CounselObligation" }
+        auditTrail:
+          type: array
+          items: { $ref: "#/components/schemas/CounselAuditEntry" }
+        proofChain:
+          type: array
+          items: { $ref: "#/components/schemas/CounselProofChainEntry" }
+    CounselMatterCreate:
+      type: object
+      required:
+        - name
+        - clientName
+        - matterNumber
+        - type
+        - status
+        - privilegeLevel
+        - pressureScore
+        - complexityScore
+        - openedDate
+        - nextDeadline
+        - nextDeadlineLabel
+        - leadCounsel
+        - jurisdiction
+        - summary
+        - tags
+        - wall
+        - parties
+      properties:
+        id: { type: string }
+        name: { type: string }
+        clientName: { type: string }
+        matterNumber: { type: string }
+        type:
+          type: string
+          enum: [litigation, transaction, regulatory, employment, ip, real-estate, contract]
+        status:
+          type: string
+          enum: [active, pending, closed, escalated, on-hold]
+        privilegeLevel:
+          type: string
+          enum: [public, confidential, privileged, restricted]
+        pressureScore: { type: number }
+        complexityScore: { type: number }
+        openedDate: { type: string }
+        trialDate: { type: string, nullable: true }
+        closingDate: { type: string, nullable: true }
+        nextDeadline: { type: string }
+        nextDeadlineLabel: { type: string }
+        leadCounsel: { type: string }
+        jurisdiction: { type: string }
+        estimatedExposure: { type: number, nullable: true }
+        summary: { type: string }
+        tags:
+          type: array
+          items: { type: string }
+        wall: { $ref: "#/components/schemas/CounselWall" }
+        parties:
+          type: array
+          items: { $ref: "#/components/schemas/CounselParty" }
+    CounselMatterUpdate:
+      type: object
+      properties:
+        name: { type: string }
+        clientName: { type: string }
+        matterNumber: { type: string }
+        type:
+          type: string
+          enum: [litigation, transaction, regulatory, employment, ip, real-estate, contract]
+        status:
+          type: string
+          enum: [active, pending, closed, escalated, on-hold]
+        privilegeLevel:
+          type: string
+          enum: [public, confidential, privileged, restricted]
+        pressureScore: { type: number }
+        complexityScore: { type: number }
+        openedDate: { type: string }
+        trialDate: { type: string, nullable: true }
+        closingDate: { type: string, nullable: true }
+        nextDeadline: { type: string }
+        nextDeadlineLabel: { type: string }
+        leadCounsel: { type: string }
+        jurisdiction: { type: string }
+        estimatedExposure: { type: number, nullable: true }
+        summary: { type: string }
+        tags:
+          type: array
+          items: { type: string }
+        wall: { $ref: "#/components/schemas/CounselWall" }
+        parties:
+          type: array
+          items: { $ref: "#/components/schemas/CounselParty" }

@@ -6,7 +6,7 @@ import {
   AlertTriangle, Filter
 } from "lucide-react";
 import {
-  SEED_MATTERS, getMatterById, getPrivilegeColor, getPressureColor,
+  useMatters, findMatterById, getPrivilegeColor,
   formatCurrency
 } from "@/data/matters";
 import type { ProofChainEntry, PrivilegeLevel } from "@/data/matters";
@@ -131,21 +131,28 @@ function ProofEntry({ entry, showHash, userRole }: { entry: ProofChainEntry; sho
 
 export default function ProofChainExport() {
   const [, params] = useRoute("/proof-chain/:matterId");
-  const [selectedMatterId, setSelectedMatterId] = useState(params?.matterId ?? SEED_MATTERS[0].id);
+  const { matters, isLoading } = useMatters();
+  const [selectedMatterId, setSelectedMatterId] = useState<string>(params?.matterId ?? "");
   const [exportScope, setExportScope] = useState<"full" | "counsel" | "court" | "public">("counsel");
   const [userRole, setUserRole] = useState("partner");
   const [showHashes, setShowHashes] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [generated, setGenerated] = useState(false);
 
-  const matter = useMemo(() => getMatterById(selectedMatterId) ?? SEED_MATTERS[0], [selectedMatterId]);
+  const effectiveId = selectedMatterId || matters[0]?.id || "";
+  const matter = useMemo(() => findMatterById(matters, effectiveId) ?? matters[0], [matters, effectiveId]);
   const allowedPriv = PRIV_INCLUDE_MAP[exportScope];
 
   const visibleEntries = useMemo(() => {
+    if (!matter) return [];
     return [...matter.proofChain]
       .filter((e) => allowedPriv.includes(e.privilegeLevel))
       .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
   }, [matter, allowedPriv]);
+
+  if (!matter) {
+    return <div className="p-6 text-xs text-white/30">{isLoading ? "Loading matters…" : "No matters available."}</div>;
+  }
 
   const handleGenerate = async () => {
     setGenerating(true);
@@ -267,11 +274,11 @@ export default function ProofChainExport() {
             <div className="space-y-2">
               <label className="text-[10px] text-white/30 uppercase tracking-wider block">Matter</label>
               <select
-                value={selectedMatterId}
+                value={effectiveId}
                 onChange={(e) => setSelectedMatterId(e.target.value)}
                 className="text-xs bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white/70 focus:outline-none focus:border-purple-500/40 w-full"
               >
-                {SEED_MATTERS.map((m) => (
+                {matters.map((m) => (
                   <option key={m.id} value={m.id}>{m.name}</option>
                 ))}
               </select>

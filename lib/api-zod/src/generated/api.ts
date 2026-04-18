@@ -4858,3 +4858,1159 @@ export const CopilotChatBody = zod.object({
 export const CopilotChatResponse = zod.object({
   content: zod.string().optional(),
 });
+
+/**
+ * Registers a new webhook endpoint to receive Stripe-style signed event notifications.
+The response includes a `secret` (prefixed `whsec_`) used to verify the `X-SZL-Signature`
+header on every delivery. Store it securely — it is only returned once.
+
+ * @summary Register a webhook endpoint
+ */
+export const RegisterWebhookBody = zod.object({
+  url: zod.string().url().describe('The HTTPS endpoint that will receive webhook deliveries'),
+  eventTypes: zod
+    .union([
+      zod.enum(['*']),
+      zod.array(
+        zod.enum([
+          'decision.created',
+          'decision.approved',
+          'decision.executed',
+          'decision.proved',
+          'decision.outcome_recorded',
+          'payment.succeeded',
+          'payment.failed',
+          'subscription.created',
+          'subscription.updated',
+          'subscription.cancelled',
+          'alert.raised',
+          'alert.resolved',
+          'workflow.started',
+          'workflow.completed',
+          'workflow.failed',
+          'user.created',
+          'user.updated',
+          'deal.created',
+          'deal.updated',
+          'vulnerability.detected',
+          'vessel.anomaly',
+          'health.degraded',
+          'health.restored',
+          'ingestion.completed',
+          'api.error_spike',
+        ]),
+      ),
+    ])
+    .optional()
+    .describe(
+      'Event types to subscribe to. Use `\"\*\"` for all events, or an array of specific\nevent type strings such as `[\"decision.created\", \"decision.executed\"]`.\n',
+    ),
+  description: zod.string().optional().describe('Human-readable label for this endpoint'),
+});
+
+/**
+ * @summary List registered webhook endpoints
+ */
+export const ListWebhooksResponse = zod.object({
+  success: zod.boolean().optional(),
+  data: zod
+    .array(
+      zod.object({
+        id: zod.string().describe('Unique endpoint identifier (prefix `whe_`)'),
+        url: zod.string().url(),
+        eventTypes: zod.union([zod.enum(['*']), zod.array(zod.string())]),
+        active: zod.boolean(),
+        description: zod.string().optional(),
+        createdAt: zod.number().describe('Unix timestamp (ms)'),
+        lastDeliveredAt: zod
+          .number()
+          .optional()
+          .describe('Unix timestamp of last successful delivery (ms)'),
+        failureCount: zod.number(),
+      }),
+    )
+    .optional(),
+});
+
+/**
+ * Alias for POST /webhooks. Returns full endpoint object including signing secret.
+ * @summary Register a webhook endpoint (verbose path)
+ */
+export const RegisterWebhookEndpointBody = zod.object({
+  url: zod.string().url().describe('The HTTPS endpoint that will receive webhook deliveries'),
+  eventTypes: zod
+    .union([
+      zod.enum(['*']),
+      zod.array(
+        zod.enum([
+          'decision.created',
+          'decision.approved',
+          'decision.executed',
+          'decision.proved',
+          'decision.outcome_recorded',
+          'payment.succeeded',
+          'payment.failed',
+          'subscription.created',
+          'subscription.updated',
+          'subscription.cancelled',
+          'alert.raised',
+          'alert.resolved',
+          'workflow.started',
+          'workflow.completed',
+          'workflow.failed',
+          'user.created',
+          'user.updated',
+          'deal.created',
+          'deal.updated',
+          'vulnerability.detected',
+          'vessel.anomaly',
+          'health.degraded',
+          'health.restored',
+          'ingestion.completed',
+          'api.error_spike',
+        ]),
+      ),
+    ])
+    .optional()
+    .describe(
+      'Event types to subscribe to. Use `\"\*\"` for all events, or an array of specific\nevent type strings such as `[\"decision.created\", \"decision.executed\"]`.\n',
+    ),
+  description: zod.string().optional().describe('Human-readable label for this endpoint'),
+});
+
+/**
+ * @summary List registered webhook endpoints (verbose path)
+ */
+export const ListWebhookEndpointsResponse = zod.object({
+  success: zod.boolean().optional(),
+  data: zod
+    .array(
+      zod.object({
+        id: zod.string().describe('Unique endpoint identifier (prefix `whe_`)'),
+        url: zod.string().url(),
+        eventTypes: zod.union([zod.enum(['*']), zod.array(zod.string())]),
+        active: zod.boolean(),
+        description: zod.string().optional(),
+        createdAt: zod.number().describe('Unix timestamp (ms)'),
+        lastDeliveredAt: zod
+          .number()
+          .optional()
+          .describe('Unix timestamp of last successful delivery (ms)'),
+        failureCount: zod.number(),
+      }),
+    )
+    .optional(),
+});
+
+/**
+ * @summary Update a webhook endpoint
+ */
+export const UpdateWebhookEndpointParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const UpdateWebhookEndpointBody = zod.object({
+  url: zod.string().url().optional(),
+  eventTypes: zod.union([zod.enum(['*']), zod.array(zod.string())]).optional(),
+  active: zod.boolean().optional(),
+  description: zod.string().optional(),
+});
+
+/**
+ * @summary Delete a webhook endpoint
+ */
+export const DeleteWebhookEndpointParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary Send a test ping to a webhook endpoint
+ */
+export const PingWebhookEndpointParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const PingWebhookEndpointResponse = zod.object({
+  success: zod.boolean().optional(),
+  data: zod
+    .object({
+      delivered: zod.boolean().optional(),
+      statusCode: zod.number().optional(),
+      error: zod.string().optional(),
+    })
+    .optional(),
+});
+
+/**
+ * Returns recent webhook delivery attempts, optionally filtered by endpoint or event type. Use `eventType=decision.*` to see all decision lifecycle events.
+ * @summary List webhook delivery attempts
+ */
+export const listWebhookDeliveriesQueryLimitDefault = 50;
+export const listWebhookDeliveriesQueryLimitMax = 200;
+
+export const ListWebhookDeliveriesQueryParams = zod.object({
+  endpointId: zod.coerce.string().optional().describe('Filter by endpoint ID'),
+  eventType: zod.coerce
+    .string()
+    .optional()
+    .describe('Filter by event type. Supports prefix wildcard, e.g. `decision.\*`'),
+  limit: zod.coerce
+    .number()
+    .max(listWebhookDeliveriesQueryLimitMax)
+    .default(listWebhookDeliveriesQueryLimitDefault),
+});
+
+export const ListWebhookDeliveriesResponse = zod.object({
+  success: zod.boolean().optional(),
+  data: zod
+    .array(
+      zod.object({
+        id: zod.string().describe('Unique delivery attempt identifier (prefix `del_`)'),
+        endpointId: zod.string(),
+        eventType: zod.string().describe('The event type, e.g. `decision.executed`'),
+        status: zod.enum(['pending', 'delivered', 'failed']),
+        statusCode: zod.number().optional().describe('HTTP status code from the receiving server'),
+        attempt: zod.number().describe('Delivery attempt number (1 = first, 2+ = retry)'),
+        deliveredAt: zod.number().optional().describe('Unix timestamp of delivery attempt (ms)'),
+        error: zod.string().optional().describe('Error message if delivery failed'),
+      }),
+    )
+    .optional(),
+});
+
+/**
+ * Returns all supported event type strings, including decision lifecycle events.
+ * @summary List all supported webhook event types
+ */
+export const ListWebhookEventTypesResponse = zod.object({
+  success: zod.boolean().optional(),
+  data: zod
+    .object({
+      eventTypes: zod.array(zod.string()).optional(),
+    })
+    .optional(),
+});
+
+/**
+ * Evaluates one or more signal groups through the decision engine and returns
+ranked recommendations with policy evaluations. Emits a `decision.created`
+webhook event after evaluation.
+
+ * @summary Evaluate signals into ranked recommendations
+ */
+
+export const EvaluateDecisionSignalsBody = zod.object({
+  groups: zod
+    .array(
+      zod.object({}).passthrough().describe('Signal group with domain context and business impact'),
+    )
+    .min(1),
+  weights: zod.object({}).passthrough().optional().describe('Optional custom ranking weights'),
+});
+
+export const EvaluateDecisionSignalsResponse = zod.object({
+  recommendations: zod.array(zod.object({}).passthrough()).optional(),
+  totalSignalsEvaluated: zod.number().optional(),
+  evaluatedAt: zod.number().optional(),
+  engineVersion: zod.string().optional(),
+});
+
+/**
+ * Runs a registered workflow definition through the governed execution pipeline.
+Policy is checked before execution. Emits `decision.approved` (when approved)
+and `decision.executed` webhook events.
+
+ * @summary Execute a decision workflow
+ */
+export const executeDecisionWorkflowBodyIsDryRunDefault = false;
+export const executeDecisionWorkflowBodyIsSimulationDefault = false;
+
+export const ExecuteDecisionWorkflowBody = zod.object({
+  workflowId: zod.string(),
+  recommendationId: zod.string().optional(),
+  isDryRun: zod.boolean().default(executeDecisionWorkflowBodyIsDryRunDefault),
+  isSimulation: zod.boolean().default(executeDecisionWorkflowBodyIsSimulationDefault),
+  approvedBy: zod.string().optional(),
+  metadata: zod.object({}).passthrough().optional(),
+});
+
+/**
+ * Logs the final outcome (success, partial, failed, or cancelled) for a completed
+workflow run. Emits a `decision.outcome_recorded` webhook event.
+
+ * @summary Record the outcome of a decision run
+ */
+export const RecordDecisionOutcomeParams = zod.object({
+  runId: zod.coerce.string(),
+});
+
+export const RecordDecisionOutcomeBody = zod.object({
+  outcome: zod.enum(['success', 'partial', 'failed', 'cancelled']),
+  summary: zod.string().optional(),
+  impact: zod
+    .object({
+      financialUsd: zod.number().optional(),
+      entitiesAffected: zod.number().optional(),
+      notes: zod.string().optional(),
+    })
+    .optional(),
+  metadata: zod.object({}).passthrough().optional(),
+});
+
+export const RecordDecisionOutcomeResponse = zod.object({
+  runId: zod.string().optional(),
+  outcome: zod.enum(['success', 'partial', 'failed', 'cancelled']).optional(),
+  recordedBy: zod.string().optional(),
+  recordedAt: zod.number().optional(),
+});
+
+/**
+ * Records cryptographic or human proof for a decision run (audit, verification,
+or compliance evidence). Emits a `decision.proved` webhook event.
+
+ * @summary Record proof for a decision run
+ */
+export const ProveDecisionRunParams = zod.object({
+  runId: zod.coerce.string(),
+});
+
+export const ProveDecisionRunBody = zod.object({
+  proofType: zod.enum(['human-verified', 'automated-check', 'audit-trail', 'cryptographic']),
+  proofHash: zod.string().optional().describe('Optional cryptographic hash of proof artifact'),
+  provedBy: zod.string().describe('Identifier of the person or system providing proof'),
+  notes: zod.string().optional(),
+  evidence: zod
+    .array(
+      zod.object({
+        label: zod.string(),
+        value: zod.string(),
+        source: zod.string().optional(),
+      }),
+    )
+    .optional(),
+});
+
+export const ProveDecisionRunResponse = zod.object({
+  runId: zod.string().optional(),
+  proofType: zod.string().optional(),
+  provedBy: zod.string().optional(),
+  provedAt: zod.number().optional(),
+});
+
+/**
+ * @summary List all matters with full nested obligations, audit trail, and proof chain
+ */
+export const CounselListMattersResponse = zod.object({
+  matters: zod
+    .array(
+      zod.object({
+        id: zod.string().optional(),
+        name: zod.string().optional(),
+        clientName: zod.string().optional(),
+        matterNumber: zod.string().optional(),
+        type: zod
+          .enum([
+            'litigation',
+            'transaction',
+            'regulatory',
+            'employment',
+            'ip',
+            'real-estate',
+            'contract',
+          ])
+          .optional(),
+        status: zod.enum(['active', 'pending', 'closed', 'escalated', 'on-hold']).optional(),
+        privilegeLevel: zod.enum(['public', 'confidential', 'privileged', 'restricted']).optional(),
+        pressureScore: zod.number().optional(),
+        complexityScore: zod.number().optional(),
+        openedDate: zod.string().optional(),
+        trialDate: zod.string().optional(),
+        closingDate: zod.string().optional(),
+        nextDeadline: zod.string().optional(),
+        nextDeadlineLabel: zod.string().optional(),
+        leadCounsel: zod.string().optional(),
+        jurisdiction: zod.string().optional(),
+        estimatedExposure: zod.number().optional(),
+        summary: zod.string().optional(),
+        tags: zod.array(zod.string()).optional(),
+        parties: zod
+          .array(
+            zod.object({
+              id: zod.string().optional(),
+              name: zod.string().optional(),
+              role: zod
+                .enum([
+                  'client',
+                  'opposing-counsel',
+                  'regulator',
+                  'third-party',
+                  'expert',
+                  'co-counsel',
+                ])
+                .optional(),
+              counsel: zod.string().optional(),
+              jurisdiction: zod.string().optional(),
+            }),
+          )
+          .optional(),
+        wall: zod
+          .object({
+            enabled: zod.boolean().optional(),
+            reason: zod.string().optional(),
+            blockedRoles: zod.array(zod.string()).optional(),
+            approvedUsers: zod.array(zod.string()).optional(),
+            createdAt: zod.string().optional(),
+            createdBy: zod.string().optional(),
+          })
+          .optional(),
+        obligations: zod
+          .array(
+            zod.object({
+              id: zod.string().optional(),
+              matterId: zod.string().optional(),
+              title: zod.string().optional(),
+              description: zod.string().optional(),
+              dueDate: zod.string().optional(),
+              status: zod
+                .enum(['pending', 'in-progress', 'complete', 'overdue', 'at-risk'])
+                .optional(),
+              assignee: zod.string().optional(),
+              dependencies: zod.array(zod.string()).optional(),
+              privilegeLevel: zod
+                .enum(['public', 'confidential', 'privileged', 'restricted'])
+                .optional(),
+              filingRequired: zod.boolean().optional(),
+              courtId: zod.string().optional(),
+              consequence: zod.string().optional(),
+              completedDate: zod.string().optional(),
+            }),
+          )
+          .optional(),
+        auditTrail: zod
+          .array(
+            zod.object({
+              id: zod.string().optional(),
+              matterId: zod.string().optional(),
+              timestamp: zod.date().optional(),
+              user: zod.string().optional(),
+              role: zod.string().optional(),
+              action: zod
+                .enum([
+                  'viewed',
+                  'edited',
+                  'exported',
+                  'redacted',
+                  'accessed-wall',
+                  'escalated',
+                  'deadline-updated',
+                  'privilege-changed',
+                ])
+                .optional(),
+              detail: zod.string().optional(),
+              ip: zod.string().optional(),
+            }),
+          )
+          .optional(),
+        proofChain: zod
+          .array(
+            zod.object({
+              id: zod.string().optional(),
+              matterId: zod.string().optional(),
+              timestamp: zod.date().optional(),
+              eventType: zod
+                .enum([
+                  'filing',
+                  'communication',
+                  'discovery',
+                  'order',
+                  'settlement',
+                  'hearing',
+                  'deadline',
+                  'expert-report',
+                ])
+                .optional(),
+              title: zod.string().optional(),
+              summary: zod.string().optional(),
+              privilegeLevel: zod
+                .enum(['public', 'confidential', 'privileged', 'restricted'])
+                .optional(),
+              author: zod.string().optional(),
+              parties: zod.array(zod.string()).optional(),
+              documentRef: zod.string().optional(),
+              hash: zod.string().optional(),
+              redacted: zod.boolean().optional(),
+            }),
+          )
+          .optional(),
+      }),
+    )
+    .optional(),
+});
+
+/**
+ * @summary Create a new matter (requires authentication)
+ */
+export const CounselCreateMatterBody = zod.object({
+  id: zod.string().optional(),
+  name: zod.string(),
+  clientName: zod.string(),
+  matterNumber: zod.string(),
+  type: zod.enum([
+    'litigation',
+    'transaction',
+    'regulatory',
+    'employment',
+    'ip',
+    'real-estate',
+    'contract',
+  ]),
+  status: zod.enum(['active', 'pending', 'closed', 'escalated', 'on-hold']),
+  privilegeLevel: zod.enum(['public', 'confidential', 'privileged', 'restricted']),
+  pressureScore: zod.number(),
+  complexityScore: zod.number(),
+  openedDate: zod.string(),
+  trialDate: zod.string().nullish(),
+  closingDate: zod.string().nullish(),
+  nextDeadline: zod.string(),
+  nextDeadlineLabel: zod.string(),
+  leadCounsel: zod.string(),
+  jurisdiction: zod.string(),
+  estimatedExposure: zod.number().nullish(),
+  summary: zod.string(),
+  tags: zod.array(zod.string()),
+  wall: zod.object({
+    enabled: zod.boolean().optional(),
+    reason: zod.string().optional(),
+    blockedRoles: zod.array(zod.string()).optional(),
+    approvedUsers: zod.array(zod.string()).optional(),
+    createdAt: zod.string().optional(),
+    createdBy: zod.string().optional(),
+  }),
+  parties: zod.array(
+    zod.object({
+      id: zod.string().optional(),
+      name: zod.string().optional(),
+      role: zod
+        .enum(['client', 'opposing-counsel', 'regulator', 'third-party', 'expert', 'co-counsel'])
+        .optional(),
+      counsel: zod.string().optional(),
+      jurisdiction: zod.string().optional(),
+    }),
+  ),
+});
+
+export const CounselCreateMatterResponse = zod.object({
+  id: zod.string().optional(),
+  name: zod.string().optional(),
+  clientName: zod.string().optional(),
+  matterNumber: zod.string().optional(),
+  type: zod
+    .enum([
+      'litigation',
+      'transaction',
+      'regulatory',
+      'employment',
+      'ip',
+      'real-estate',
+      'contract',
+    ])
+    .optional(),
+  status: zod.enum(['active', 'pending', 'closed', 'escalated', 'on-hold']).optional(),
+  privilegeLevel: zod.enum(['public', 'confidential', 'privileged', 'restricted']).optional(),
+  pressureScore: zod.number().optional(),
+  complexityScore: zod.number().optional(),
+  openedDate: zod.string().optional(),
+  trialDate: zod.string().optional(),
+  closingDate: zod.string().optional(),
+  nextDeadline: zod.string().optional(),
+  nextDeadlineLabel: zod.string().optional(),
+  leadCounsel: zod.string().optional(),
+  jurisdiction: zod.string().optional(),
+  estimatedExposure: zod.number().optional(),
+  summary: zod.string().optional(),
+  tags: zod.array(zod.string()).optional(),
+  parties: zod
+    .array(
+      zod.object({
+        id: zod.string().optional(),
+        name: zod.string().optional(),
+        role: zod
+          .enum(['client', 'opposing-counsel', 'regulator', 'third-party', 'expert', 'co-counsel'])
+          .optional(),
+        counsel: zod.string().optional(),
+        jurisdiction: zod.string().optional(),
+      }),
+    )
+    .optional(),
+  wall: zod
+    .object({
+      enabled: zod.boolean().optional(),
+      reason: zod.string().optional(),
+      blockedRoles: zod.array(zod.string()).optional(),
+      approvedUsers: zod.array(zod.string()).optional(),
+      createdAt: zod.string().optional(),
+      createdBy: zod.string().optional(),
+    })
+    .optional(),
+  obligations: zod
+    .array(
+      zod.object({
+        id: zod.string().optional(),
+        matterId: zod.string().optional(),
+        title: zod.string().optional(),
+        description: zod.string().optional(),
+        dueDate: zod.string().optional(),
+        status: zod.enum(['pending', 'in-progress', 'complete', 'overdue', 'at-risk']).optional(),
+        assignee: zod.string().optional(),
+        dependencies: zod.array(zod.string()).optional(),
+        privilegeLevel: zod.enum(['public', 'confidential', 'privileged', 'restricted']).optional(),
+        filingRequired: zod.boolean().optional(),
+        courtId: zod.string().optional(),
+        consequence: zod.string().optional(),
+        completedDate: zod.string().optional(),
+      }),
+    )
+    .optional(),
+  auditTrail: zod
+    .array(
+      zod.object({
+        id: zod.string().optional(),
+        matterId: zod.string().optional(),
+        timestamp: zod.date().optional(),
+        user: zod.string().optional(),
+        role: zod.string().optional(),
+        action: zod
+          .enum([
+            'viewed',
+            'edited',
+            'exported',
+            'redacted',
+            'accessed-wall',
+            'escalated',
+            'deadline-updated',
+            'privilege-changed',
+          ])
+          .optional(),
+        detail: zod.string().optional(),
+        ip: zod.string().optional(),
+      }),
+    )
+    .optional(),
+  proofChain: zod
+    .array(
+      zod.object({
+        id: zod.string().optional(),
+        matterId: zod.string().optional(),
+        timestamp: zod.date().optional(),
+        eventType: zod
+          .enum([
+            'filing',
+            'communication',
+            'discovery',
+            'order',
+            'settlement',
+            'hearing',
+            'deadline',
+            'expert-report',
+          ])
+          .optional(),
+        title: zod.string().optional(),
+        summary: zod.string().optional(),
+        privilegeLevel: zod.enum(['public', 'confidential', 'privileged', 'restricted']).optional(),
+        author: zod.string().optional(),
+        parties: zod.array(zod.string()).optional(),
+        documentRef: zod.string().optional(),
+        hash: zod.string().optional(),
+        redacted: zod.boolean().optional(),
+      }),
+    )
+    .optional(),
+});
+
+/**
+ * @summary Get a single matter with full detail
+ */
+export const CounselGetMatterParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const CounselGetMatterResponse = zod.object({
+  id: zod.string().optional(),
+  name: zod.string().optional(),
+  clientName: zod.string().optional(),
+  matterNumber: zod.string().optional(),
+  type: zod
+    .enum([
+      'litigation',
+      'transaction',
+      'regulatory',
+      'employment',
+      'ip',
+      'real-estate',
+      'contract',
+    ])
+    .optional(),
+  status: zod.enum(['active', 'pending', 'closed', 'escalated', 'on-hold']).optional(),
+  privilegeLevel: zod.enum(['public', 'confidential', 'privileged', 'restricted']).optional(),
+  pressureScore: zod.number().optional(),
+  complexityScore: zod.number().optional(),
+  openedDate: zod.string().optional(),
+  trialDate: zod.string().optional(),
+  closingDate: zod.string().optional(),
+  nextDeadline: zod.string().optional(),
+  nextDeadlineLabel: zod.string().optional(),
+  leadCounsel: zod.string().optional(),
+  jurisdiction: zod.string().optional(),
+  estimatedExposure: zod.number().optional(),
+  summary: zod.string().optional(),
+  tags: zod.array(zod.string()).optional(),
+  parties: zod
+    .array(
+      zod.object({
+        id: zod.string().optional(),
+        name: zod.string().optional(),
+        role: zod
+          .enum(['client', 'opposing-counsel', 'regulator', 'third-party', 'expert', 'co-counsel'])
+          .optional(),
+        counsel: zod.string().optional(),
+        jurisdiction: zod.string().optional(),
+      }),
+    )
+    .optional(),
+  wall: zod
+    .object({
+      enabled: zod.boolean().optional(),
+      reason: zod.string().optional(),
+      blockedRoles: zod.array(zod.string()).optional(),
+      approvedUsers: zod.array(zod.string()).optional(),
+      createdAt: zod.string().optional(),
+      createdBy: zod.string().optional(),
+    })
+    .optional(),
+  obligations: zod
+    .array(
+      zod.object({
+        id: zod.string().optional(),
+        matterId: zod.string().optional(),
+        title: zod.string().optional(),
+        description: zod.string().optional(),
+        dueDate: zod.string().optional(),
+        status: zod.enum(['pending', 'in-progress', 'complete', 'overdue', 'at-risk']).optional(),
+        assignee: zod.string().optional(),
+        dependencies: zod.array(zod.string()).optional(),
+        privilegeLevel: zod.enum(['public', 'confidential', 'privileged', 'restricted']).optional(),
+        filingRequired: zod.boolean().optional(),
+        courtId: zod.string().optional(),
+        consequence: zod.string().optional(),
+        completedDate: zod.string().optional(),
+      }),
+    )
+    .optional(),
+  auditTrail: zod
+    .array(
+      zod.object({
+        id: zod.string().optional(),
+        matterId: zod.string().optional(),
+        timestamp: zod.date().optional(),
+        user: zod.string().optional(),
+        role: zod.string().optional(),
+        action: zod
+          .enum([
+            'viewed',
+            'edited',
+            'exported',
+            'redacted',
+            'accessed-wall',
+            'escalated',
+            'deadline-updated',
+            'privilege-changed',
+          ])
+          .optional(),
+        detail: zod.string().optional(),
+        ip: zod.string().optional(),
+      }),
+    )
+    .optional(),
+  proofChain: zod
+    .array(
+      zod.object({
+        id: zod.string().optional(),
+        matterId: zod.string().optional(),
+        timestamp: zod.date().optional(),
+        eventType: zod
+          .enum([
+            'filing',
+            'communication',
+            'discovery',
+            'order',
+            'settlement',
+            'hearing',
+            'deadline',
+            'expert-report',
+          ])
+          .optional(),
+        title: zod.string().optional(),
+        summary: zod.string().optional(),
+        privilegeLevel: zod.enum(['public', 'confidential', 'privileged', 'restricted']).optional(),
+        author: zod.string().optional(),
+        parties: zod.array(zod.string()).optional(),
+        documentRef: zod.string().optional(),
+        hash: zod.string().optional(),
+        redacted: zod.boolean().optional(),
+      }),
+    )
+    .optional(),
+});
+
+/**
+ * @summary Update a matter (requires authentication)
+ */
+export const CounselUpdateMatterParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const CounselUpdateMatterBody = zod.object({
+  name: zod.string().optional(),
+  clientName: zod.string().optional(),
+  matterNumber: zod.string().optional(),
+  type: zod
+    .enum([
+      'litigation',
+      'transaction',
+      'regulatory',
+      'employment',
+      'ip',
+      'real-estate',
+      'contract',
+    ])
+    .optional(),
+  status: zod.enum(['active', 'pending', 'closed', 'escalated', 'on-hold']).optional(),
+  privilegeLevel: zod.enum(['public', 'confidential', 'privileged', 'restricted']).optional(),
+  pressureScore: zod.number().optional(),
+  complexityScore: zod.number().optional(),
+  openedDate: zod.string().optional(),
+  trialDate: zod.string().nullish(),
+  closingDate: zod.string().nullish(),
+  nextDeadline: zod.string().optional(),
+  nextDeadlineLabel: zod.string().optional(),
+  leadCounsel: zod.string().optional(),
+  jurisdiction: zod.string().optional(),
+  estimatedExposure: zod.number().nullish(),
+  summary: zod.string().optional(),
+  tags: zod.array(zod.string()).optional(),
+  wall: zod
+    .object({
+      enabled: zod.boolean().optional(),
+      reason: zod.string().optional(),
+      blockedRoles: zod.array(zod.string()).optional(),
+      approvedUsers: zod.array(zod.string()).optional(),
+      createdAt: zod.string().optional(),
+      createdBy: zod.string().optional(),
+    })
+    .optional(),
+  parties: zod
+    .array(
+      zod.object({
+        id: zod.string().optional(),
+        name: zod.string().optional(),
+        role: zod
+          .enum(['client', 'opposing-counsel', 'regulator', 'third-party', 'expert', 'co-counsel'])
+          .optional(),
+        counsel: zod.string().optional(),
+        jurisdiction: zod.string().optional(),
+      }),
+    )
+    .optional(),
+});
+
+export const CounselUpdateMatterResponse = zod.object({
+  id: zod.string().optional(),
+  name: zod.string().optional(),
+  clientName: zod.string().optional(),
+  matterNumber: zod.string().optional(),
+  type: zod
+    .enum([
+      'litigation',
+      'transaction',
+      'regulatory',
+      'employment',
+      'ip',
+      'real-estate',
+      'contract',
+    ])
+    .optional(),
+  status: zod.enum(['active', 'pending', 'closed', 'escalated', 'on-hold']).optional(),
+  privilegeLevel: zod.enum(['public', 'confidential', 'privileged', 'restricted']).optional(),
+  pressureScore: zod.number().optional(),
+  complexityScore: zod.number().optional(),
+  openedDate: zod.string().optional(),
+  trialDate: zod.string().optional(),
+  closingDate: zod.string().optional(),
+  nextDeadline: zod.string().optional(),
+  nextDeadlineLabel: zod.string().optional(),
+  leadCounsel: zod.string().optional(),
+  jurisdiction: zod.string().optional(),
+  estimatedExposure: zod.number().optional(),
+  summary: zod.string().optional(),
+  tags: zod.array(zod.string()).optional(),
+  parties: zod
+    .array(
+      zod.object({
+        id: zod.string().optional(),
+        name: zod.string().optional(),
+        role: zod
+          .enum(['client', 'opposing-counsel', 'regulator', 'third-party', 'expert', 'co-counsel'])
+          .optional(),
+        counsel: zod.string().optional(),
+        jurisdiction: zod.string().optional(),
+      }),
+    )
+    .optional(),
+  wall: zod
+    .object({
+      enabled: zod.boolean().optional(),
+      reason: zod.string().optional(),
+      blockedRoles: zod.array(zod.string()).optional(),
+      approvedUsers: zod.array(zod.string()).optional(),
+      createdAt: zod.string().optional(),
+      createdBy: zod.string().optional(),
+    })
+    .optional(),
+  obligations: zod
+    .array(
+      zod.object({
+        id: zod.string().optional(),
+        matterId: zod.string().optional(),
+        title: zod.string().optional(),
+        description: zod.string().optional(),
+        dueDate: zod.string().optional(),
+        status: zod.enum(['pending', 'in-progress', 'complete', 'overdue', 'at-risk']).optional(),
+        assignee: zod.string().optional(),
+        dependencies: zod.array(zod.string()).optional(),
+        privilegeLevel: zod.enum(['public', 'confidential', 'privileged', 'restricted']).optional(),
+        filingRequired: zod.boolean().optional(),
+        courtId: zod.string().optional(),
+        consequence: zod.string().optional(),
+        completedDate: zod.string().optional(),
+      }),
+    )
+    .optional(),
+  auditTrail: zod
+    .array(
+      zod.object({
+        id: zod.string().optional(),
+        matterId: zod.string().optional(),
+        timestamp: zod.date().optional(),
+        user: zod.string().optional(),
+        role: zod.string().optional(),
+        action: zod
+          .enum([
+            'viewed',
+            'edited',
+            'exported',
+            'redacted',
+            'accessed-wall',
+            'escalated',
+            'deadline-updated',
+            'privilege-changed',
+          ])
+          .optional(),
+        detail: zod.string().optional(),
+        ip: zod.string().optional(),
+      }),
+    )
+    .optional(),
+  proofChain: zod
+    .array(
+      zod.object({
+        id: zod.string().optional(),
+        matterId: zod.string().optional(),
+        timestamp: zod.date().optional(),
+        eventType: zod
+          .enum([
+            'filing',
+            'communication',
+            'discovery',
+            'order',
+            'settlement',
+            'hearing',
+            'deadline',
+            'expert-report',
+          ])
+          .optional(),
+        title: zod.string().optional(),
+        summary: zod.string().optional(),
+        privilegeLevel: zod.enum(['public', 'confidential', 'privileged', 'restricted']).optional(),
+        author: zod.string().optional(),
+        parties: zod.array(zod.string()).optional(),
+        documentRef: zod.string().optional(),
+        hash: zod.string().optional(),
+        redacted: zod.boolean().optional(),
+      }),
+    )
+    .optional(),
+});
+
+/**
+ * @summary Delete a matter and its child records (requires authentication)
+ */
+export const CounselDeleteMatterParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const CounselDeleteMatterResponse = zod.object({
+  id: zod.string().optional(),
+  deleted: zod.boolean().optional(),
+});
+
+/**
+ * @summary Update an obligation (status, completed date, assignee, due date)
+ */
+export const CounselUpdateObligationParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const CounselUpdateObligationBody = zod.object({
+  matterId: zod.string(),
+  status: zod.enum(['pending', 'in-progress', 'complete', 'overdue', 'at-risk']).optional(),
+  completedDate: zod.string().optional(),
+  assignee: zod.string().optional(),
+  dueDate: zod.string().optional(),
+});
+
+export const CounselUpdateObligationResponse = zod.object({
+  id: zod.string().optional(),
+  matterId: zod.string().optional(),
+  title: zod.string().optional(),
+  description: zod.string().optional(),
+  dueDate: zod.string().optional(),
+  status: zod.enum(['pending', 'in-progress', 'complete', 'overdue', 'at-risk']).optional(),
+  assignee: zod.string().optional(),
+  dependencies: zod.array(zod.string()).optional(),
+  privilegeLevel: zod.enum(['public', 'confidential', 'privileged', 'restricted']).optional(),
+  filingRequired: zod.boolean().optional(),
+  courtId: zod.string().optional(),
+  consequence: zod.string().optional(),
+  completedDate: zod.string().optional(),
+});
+
+/**
+ * @summary List audit-trail entries for a matter (or all matters)
+ */
+export const CounselListAuditTrailQueryParams = zod.object({
+  matterId: zod.coerce.string().optional(),
+});
+
+export const CounselListAuditTrailResponse = zod.object({
+  entries: zod
+    .array(
+      zod.object({
+        id: zod.string().optional(),
+        matterId: zod.string().optional(),
+        timestamp: zod.date().optional(),
+        user: zod.string().optional(),
+        role: zod.string().optional(),
+        action: zod
+          .enum([
+            'viewed',
+            'edited',
+            'exported',
+            'redacted',
+            'accessed-wall',
+            'escalated',
+            'deadline-updated',
+            'privilege-changed',
+          ])
+          .optional(),
+        detail: zod.string().optional(),
+        ip: zod.string().optional(),
+      }),
+    )
+    .optional(),
+});
+
+/**
+ * @summary Append an audit-trail entry to a matter
+ */
+export const CounselAppendAuditEntryBody = zod.object({
+  matterId: zod.string(),
+  user: zod.string(),
+  role: zod.string(),
+  action: zod.enum([
+    'viewed',
+    'edited',
+    'exported',
+    'redacted',
+    'accessed-wall',
+    'escalated',
+    'deadline-updated',
+    'privilege-changed',
+  ]),
+  detail: zod.string(),
+  ip: zod.string().optional(),
+});
+
+/**
+ * @summary List proof-chain entries for a matter
+ */
+export const CounselListProofChainQueryParams = zod.object({
+  matterId: zod.coerce.string(),
+});
+
+export const CounselListProofChainResponse = zod.object({
+  matterId: zod.string().optional(),
+  entries: zod
+    .array(
+      zod.object({
+        id: zod.string().optional(),
+        matterId: zod.string().optional(),
+        timestamp: zod.date().optional(),
+        eventType: zod
+          .enum([
+            'filing',
+            'communication',
+            'discovery',
+            'order',
+            'settlement',
+            'hearing',
+            'deadline',
+            'expert-report',
+          ])
+          .optional(),
+        title: zod.string().optional(),
+        summary: zod.string().optional(),
+        privilegeLevel: zod.enum(['public', 'confidential', 'privileged', 'restricted']).optional(),
+        author: zod.string().optional(),
+        parties: zod.array(zod.string()).optional(),
+        documentRef: zod.string().optional(),
+        hash: zod.string().optional(),
+        redacted: zod.boolean().optional(),
+      }),
+    )
+    .optional(),
+});
+
+/**
+ * @summary Append a proof-chain entry to a matter
+ */
+export const CounselAppendProofChainEntryBody = zod.object({
+  matterId: zod.string(),
+  eventType: zod.enum([
+    'filing',
+    'communication',
+    'discovery',
+    'order',
+    'settlement',
+    'hearing',
+    'deadline',
+    'expert-report',
+  ]),
+  title: zod.string(),
+  summary: zod.string(),
+  privilegeLevel: zod.enum(['public', 'confidential', 'privileged', 'restricted']),
+  author: zod.string(),
+  parties: zod.array(zod.string()).optional(),
+  documentRef: zod.string().optional(),
+  hash: zod.string().optional(),
+  redacted: zod.boolean().optional(),
+});

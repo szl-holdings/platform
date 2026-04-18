@@ -1973,6 +1973,576 @@ export interface ExportJob {
   completedAt?: string | null;
 }
 
+export interface WebhookRegistrationRequest {
+  /** The HTTPS endpoint that will receive webhook deliveries */
+  url: string;
+  /** Event types to subscribe to. Use `"*"` for all events, or an array of specific
+event type strings such as `["decision.created", "decision.executed"]`.
+ */
+  eventTypes?:
+    | '*'
+    | (
+        | 'decision.created'
+        | 'decision.approved'
+        | 'decision.executed'
+        | 'decision.proved'
+        | 'decision.outcome_recorded'
+        | 'payment.succeeded'
+        | 'payment.failed'
+        | 'subscription.created'
+        | 'subscription.updated'
+        | 'subscription.cancelled'
+        | 'alert.raised'
+        | 'alert.resolved'
+        | 'workflow.started'
+        | 'workflow.completed'
+        | 'workflow.failed'
+        | 'user.created'
+        | 'user.updated'
+        | 'deal.created'
+        | 'deal.updated'
+        | 'vulnerability.detected'
+        | 'vessel.anomaly'
+        | 'health.degraded'
+        | 'health.restored'
+        | 'ingestion.completed'
+        | 'api.error_spike'
+      )[];
+  /** Human-readable label for this endpoint */
+  description?: string;
+}
+
+export interface WebhookEndpoint {
+  /** Unique endpoint identifier (prefix `whe_`) */
+  id: string;
+  url: string;
+  eventTypes: '*' | string[];
+  active: boolean;
+  description?: string;
+  /** Unix timestamp (ms) */
+  createdAt: number;
+  /** Unix timestamp of last successful delivery (ms) */
+  lastDeliveredAt?: number;
+  failureCount: number;
+}
+
+export type WebhookEndpointWithSecret = WebhookEndpoint & {
+  /** HMAC-SHA256 signing secret (prefix `whsec_`). Only returned on creation. */
+  secret?: string;
+};
+
+export type WebhookDeliveryStatus =
+  (typeof WebhookDeliveryStatus)[keyof typeof WebhookDeliveryStatus];
+
+export const WebhookDeliveryStatus = {
+  pending: 'pending',
+  delivered: 'delivered',
+  failed: 'failed',
+} as const;
+
+export interface WebhookDelivery {
+  /** Unique delivery attempt identifier (prefix `del_`) */
+  id: string;
+  endpointId: string;
+  /** The event type, e.g. `decision.executed` */
+  eventType: string;
+  status: WebhookDeliveryStatus;
+  /** HTTP status code from the receiving server */
+  statusCode?: number;
+  /** Delivery attempt number (1 = first, 2+ = retry) */
+  attempt: number;
+  /** Unix timestamp of delivery attempt (ms) */
+  deliveredAt?: number;
+  /** Error message if delivery failed */
+  error?: string;
+}
+
+/**
+ * Event-specific payload. Schema varies by event type.
+ */
+export type WebhookEventData = { [key: string]: unknown };
+
+/**
+ * Envelope sent to registered webhook endpoints. Verify authenticity using
+the `X-SZL-Signature` header: `t=<timestamp>,v1=<hmac-sha256-hex>` where
+the signed payload is `<timestamp>.<json-body>`.
+
+ */
+export interface WebhookEvent {
+  /** Unique event identifier (prefix `evt_`) */
+  id: string;
+  /** Event type string, e.g. `decision.executed` */
+  type: string;
+  /** Unix timestamp (seconds) when the event was created */
+  created: number;
+  /** Optional correlation ID linking related events */
+  correlation_id?: string;
+  /** Event-specific payload. Schema varies by event type. */
+  data: WebhookEventData;
+}
+
+/**
+ * Payload for the `decision.created` event (emitted after POST /decisioning/evaluate)
+ */
+export interface DecisionCreatedEvent {
+  recommendationCount?: number;
+  domains?: string[];
+  totalSignalsEvaluated?: number;
+  evaluatedAt?: number;
+  initiatedBy?: string;
+}
+
+export type DecisionApprovedEventPolicyEffect =
+  (typeof DecisionApprovedEventPolicyEffect)[keyof typeof DecisionApprovedEventPolicyEffect];
+
+export const DecisionApprovedEventPolicyEffect = {
+  allow: 'allow',
+  block: 'block',
+  require_approval: 'require_approval',
+} as const;
+
+/**
+ * Payload for the `decision.approved` event
+ */
+export interface DecisionApprovedEvent {
+  runId?: string;
+  workflowId?: string;
+  workflowName?: string;
+  domain?: string;
+  initiatedBy?: string;
+  approvedBy?: string;
+  policyEffect?: DecisionApprovedEventPolicyEffect;
+}
+
+/**
+ * Payload for the `decision.executed` event (emitted after POST /decisioning/execute)
+ */
+export interface DecisionExecutedEvent {
+  runId?: string;
+  workflowId?: string;
+  workflowName?: string;
+  domain?: string;
+  initiatedBy?: string;
+  status?: string;
+  isDryRun?: boolean;
+  isSimulation?: boolean;
+  requiresApproval?: boolean;
+  stepCount?: number;
+}
+
+export type DecisionProvedEventProofType =
+  (typeof DecisionProvedEventProofType)[keyof typeof DecisionProvedEventProofType];
+
+export const DecisionProvedEventProofType = {
+  'human-verified': 'human-verified',
+  'automated-check': 'automated-check',
+  'audit-trail': 'audit-trail',
+  cryptographic: 'cryptographic',
+} as const;
+
+export type DecisionProvedEventEvidenceItem = {
+  label?: string;
+  value?: string;
+  source?: string;
+};
+
+/**
+ * Payload for the `decision.proved` event (emitted after POST /decisioning/runs/{runId}/prove)
+ */
+export interface DecisionProvedEvent {
+  runId?: string;
+  workflowId?: string;
+  proofType?: DecisionProvedEventProofType;
+  proofHash?: string;
+  provedBy?: string;
+  provedAt?: number;
+  notes?: string;
+  evidence?: DecisionProvedEventEvidenceItem[];
+}
+
+export type DecisionOutcomeRecordedEventOutcome =
+  (typeof DecisionOutcomeRecordedEventOutcome)[keyof typeof DecisionOutcomeRecordedEventOutcome];
+
+export const DecisionOutcomeRecordedEventOutcome = {
+  success: 'success',
+  partial: 'partial',
+  failed: 'failed',
+  cancelled: 'cancelled',
+} as const;
+
+export type DecisionOutcomeRecordedEventImpact = {
+  financialUsd?: number;
+  entitiesAffected?: number;
+  notes?: string;
+};
+
+/**
+ * Payload for the `decision.outcome_recorded` event (emitted after POST /decisioning/runs/{runId}/outcome)
+ */
+export interface DecisionOutcomeRecordedEvent {
+  runId?: string;
+  workflowId?: string;
+  outcome?: DecisionOutcomeRecordedEventOutcome;
+  summary?: string;
+  recordedBy?: string;
+  recordedAt?: number;
+  impact?: DecisionOutcomeRecordedEventImpact;
+}
+
+export type DecisionOutcomeRequestOutcome =
+  (typeof DecisionOutcomeRequestOutcome)[keyof typeof DecisionOutcomeRequestOutcome];
+
+export const DecisionOutcomeRequestOutcome = {
+  success: 'success',
+  partial: 'partial',
+  failed: 'failed',
+  cancelled: 'cancelled',
+} as const;
+
+export type DecisionOutcomeRequestImpact = {
+  financialUsd?: number;
+  entitiesAffected?: number;
+  notes?: string;
+};
+
+export type DecisionOutcomeRequestMetadata = { [key: string]: unknown };
+
+export interface DecisionOutcomeRequest {
+  outcome: DecisionOutcomeRequestOutcome;
+  summary?: string;
+  impact?: DecisionOutcomeRequestImpact;
+  metadata?: DecisionOutcomeRequestMetadata;
+}
+
+export type DecisionProofRequestProofType =
+  (typeof DecisionProofRequestProofType)[keyof typeof DecisionProofRequestProofType];
+
+export const DecisionProofRequestProofType = {
+  'human-verified': 'human-verified',
+  'automated-check': 'automated-check',
+  'audit-trail': 'audit-trail',
+  cryptographic: 'cryptographic',
+} as const;
+
+export type DecisionProofRequestEvidenceItem = {
+  label: string;
+  value: string;
+  source?: string;
+};
+
+export interface DecisionProofRequest {
+  proofType: DecisionProofRequestProofType;
+  /** Optional cryptographic hash of proof artifact */
+  proofHash?: string;
+  /** Identifier of the person or system providing proof */
+  provedBy: string;
+  notes?: string;
+  evidence?: DecisionProofRequestEvidenceItem[];
+}
+
+export type CounselPartyRole = (typeof CounselPartyRole)[keyof typeof CounselPartyRole];
+
+export const CounselPartyRole = {
+  client: 'client',
+  'opposing-counsel': 'opposing-counsel',
+  regulator: 'regulator',
+  'third-party': 'third-party',
+  expert: 'expert',
+  'co-counsel': 'co-counsel',
+} as const;
+
+export interface CounselParty {
+  id?: string;
+  name?: string;
+  role?: CounselPartyRole;
+  counsel?: string;
+  jurisdiction?: string;
+}
+
+export interface CounselWall {
+  enabled?: boolean;
+  reason?: string;
+  blockedRoles?: string[];
+  approvedUsers?: string[];
+  createdAt?: string;
+  createdBy?: string;
+}
+
+export type CounselObligationStatus =
+  (typeof CounselObligationStatus)[keyof typeof CounselObligationStatus];
+
+export const CounselObligationStatus = {
+  pending: 'pending',
+  'in-progress': 'in-progress',
+  complete: 'complete',
+  overdue: 'overdue',
+  'at-risk': 'at-risk',
+} as const;
+
+export type CounselObligationPrivilegeLevel =
+  (typeof CounselObligationPrivilegeLevel)[keyof typeof CounselObligationPrivilegeLevel];
+
+export const CounselObligationPrivilegeLevel = {
+  public: 'public',
+  confidential: 'confidential',
+  privileged: 'privileged',
+  restricted: 'restricted',
+} as const;
+
+export interface CounselObligation {
+  id?: string;
+  matterId?: string;
+  title?: string;
+  description?: string;
+  dueDate?: string;
+  status?: CounselObligationStatus;
+  assignee?: string;
+  dependencies?: string[];
+  privilegeLevel?: CounselObligationPrivilegeLevel;
+  filingRequired?: boolean;
+  courtId?: string;
+  consequence?: string;
+  completedDate?: string;
+}
+
+export type CounselAuditEntryAction =
+  (typeof CounselAuditEntryAction)[keyof typeof CounselAuditEntryAction];
+
+export const CounselAuditEntryAction = {
+  viewed: 'viewed',
+  edited: 'edited',
+  exported: 'exported',
+  redacted: 'redacted',
+  'accessed-wall': 'accessed-wall',
+  escalated: 'escalated',
+  'deadline-updated': 'deadline-updated',
+  'privilege-changed': 'privilege-changed',
+} as const;
+
+export interface CounselAuditEntry {
+  id?: string;
+  matterId?: string;
+  timestamp?: string;
+  user?: string;
+  role?: string;
+  action?: CounselAuditEntryAction;
+  detail?: string;
+  ip?: string;
+}
+
+export type CounselProofChainEntryEventType =
+  (typeof CounselProofChainEntryEventType)[keyof typeof CounselProofChainEntryEventType];
+
+export const CounselProofChainEntryEventType = {
+  filing: 'filing',
+  communication: 'communication',
+  discovery: 'discovery',
+  order: 'order',
+  settlement: 'settlement',
+  hearing: 'hearing',
+  deadline: 'deadline',
+  'expert-report': 'expert-report',
+} as const;
+
+export type CounselProofChainEntryPrivilegeLevel =
+  (typeof CounselProofChainEntryPrivilegeLevel)[keyof typeof CounselProofChainEntryPrivilegeLevel];
+
+export const CounselProofChainEntryPrivilegeLevel = {
+  public: 'public',
+  confidential: 'confidential',
+  privileged: 'privileged',
+  restricted: 'restricted',
+} as const;
+
+export interface CounselProofChainEntry {
+  id?: string;
+  matterId?: string;
+  timestamp?: string;
+  eventType?: CounselProofChainEntryEventType;
+  title?: string;
+  summary?: string;
+  privilegeLevel?: CounselProofChainEntryPrivilegeLevel;
+  author?: string;
+  parties?: string[];
+  documentRef?: string;
+  hash?: string;
+  redacted?: boolean;
+}
+
+export type CounselMatterType = (typeof CounselMatterType)[keyof typeof CounselMatterType];
+
+export const CounselMatterType = {
+  litigation: 'litigation',
+  transaction: 'transaction',
+  regulatory: 'regulatory',
+  employment: 'employment',
+  ip: 'ip',
+  'real-estate': 'real-estate',
+  contract: 'contract',
+} as const;
+
+export type CounselMatterStatus = (typeof CounselMatterStatus)[keyof typeof CounselMatterStatus];
+
+export const CounselMatterStatus = {
+  active: 'active',
+  pending: 'pending',
+  closed: 'closed',
+  escalated: 'escalated',
+  'on-hold': 'on-hold',
+} as const;
+
+export type CounselMatterPrivilegeLevel =
+  (typeof CounselMatterPrivilegeLevel)[keyof typeof CounselMatterPrivilegeLevel];
+
+export const CounselMatterPrivilegeLevel = {
+  public: 'public',
+  confidential: 'confidential',
+  privileged: 'privileged',
+  restricted: 'restricted',
+} as const;
+
+export interface CounselMatter {
+  id?: string;
+  name?: string;
+  clientName?: string;
+  matterNumber?: string;
+  type?: CounselMatterType;
+  status?: CounselMatterStatus;
+  privilegeLevel?: CounselMatterPrivilegeLevel;
+  pressureScore?: number;
+  complexityScore?: number;
+  openedDate?: string;
+  trialDate?: string;
+  closingDate?: string;
+  nextDeadline?: string;
+  nextDeadlineLabel?: string;
+  leadCounsel?: string;
+  jurisdiction?: string;
+  estimatedExposure?: number;
+  summary?: string;
+  tags?: string[];
+  parties?: CounselParty[];
+  wall?: CounselWall;
+  obligations?: CounselObligation[];
+  auditTrail?: CounselAuditEntry[];
+  proofChain?: CounselProofChainEntry[];
+}
+
+export type CounselMatterCreateType =
+  (typeof CounselMatterCreateType)[keyof typeof CounselMatterCreateType];
+
+export const CounselMatterCreateType = {
+  litigation: 'litigation',
+  transaction: 'transaction',
+  regulatory: 'regulatory',
+  employment: 'employment',
+  ip: 'ip',
+  'real-estate': 'real-estate',
+  contract: 'contract',
+} as const;
+
+export type CounselMatterCreateStatus =
+  (typeof CounselMatterCreateStatus)[keyof typeof CounselMatterCreateStatus];
+
+export const CounselMatterCreateStatus = {
+  active: 'active',
+  pending: 'pending',
+  closed: 'closed',
+  escalated: 'escalated',
+  'on-hold': 'on-hold',
+} as const;
+
+export type CounselMatterCreatePrivilegeLevel =
+  (typeof CounselMatterCreatePrivilegeLevel)[keyof typeof CounselMatterCreatePrivilegeLevel];
+
+export const CounselMatterCreatePrivilegeLevel = {
+  public: 'public',
+  confidential: 'confidential',
+  privileged: 'privileged',
+  restricted: 'restricted',
+} as const;
+
+export interface CounselMatterCreate {
+  id?: string;
+  name: string;
+  clientName: string;
+  matterNumber: string;
+  type: CounselMatterCreateType;
+  status: CounselMatterCreateStatus;
+  privilegeLevel: CounselMatterCreatePrivilegeLevel;
+  pressureScore: number;
+  complexityScore: number;
+  openedDate: string;
+  trialDate?: string | null;
+  closingDate?: string | null;
+  nextDeadline: string;
+  nextDeadlineLabel: string;
+  leadCounsel: string;
+  jurisdiction: string;
+  estimatedExposure?: number | null;
+  summary: string;
+  tags: string[];
+  wall: CounselWall;
+  parties: CounselParty[];
+}
+
+export type CounselMatterUpdateType =
+  (typeof CounselMatterUpdateType)[keyof typeof CounselMatterUpdateType];
+
+export const CounselMatterUpdateType = {
+  litigation: 'litigation',
+  transaction: 'transaction',
+  regulatory: 'regulatory',
+  employment: 'employment',
+  ip: 'ip',
+  'real-estate': 'real-estate',
+  contract: 'contract',
+} as const;
+
+export type CounselMatterUpdateStatus =
+  (typeof CounselMatterUpdateStatus)[keyof typeof CounselMatterUpdateStatus];
+
+export const CounselMatterUpdateStatus = {
+  active: 'active',
+  pending: 'pending',
+  closed: 'closed',
+  escalated: 'escalated',
+  'on-hold': 'on-hold',
+} as const;
+
+export type CounselMatterUpdatePrivilegeLevel =
+  (typeof CounselMatterUpdatePrivilegeLevel)[keyof typeof CounselMatterUpdatePrivilegeLevel];
+
+export const CounselMatterUpdatePrivilegeLevel = {
+  public: 'public',
+  confidential: 'confidential',
+  privileged: 'privileged',
+  restricted: 'restricted',
+} as const;
+
+export interface CounselMatterUpdate {
+  name?: string;
+  clientName?: string;
+  matterNumber?: string;
+  type?: CounselMatterUpdateType;
+  status?: CounselMatterUpdateStatus;
+  privilegeLevel?: CounselMatterUpdatePrivilegeLevel;
+  pressureScore?: number;
+  complexityScore?: number;
+  openedDate?: string;
+  trialDate?: string | null;
+  closingDate?: string | null;
+  nextDeadline?: string;
+  nextDeadlineLabel?: string;
+  leadCounsel?: string;
+  jurisdiction?: string;
+  estimatedExposure?: number | null;
+  summary?: string;
+  tags?: string[];
+  wall?: CounselWall;
+  parties?: CounselParty[];
+}
+
 export type BadRequestResponse = {
   error?: string;
   message?: string;
@@ -2000,6 +2570,13 @@ export type NotFoundResponse = {
 };
 
 export type ConflictResponse = {
+  error?: string;
+  message?: string;
+  statusCode?: number;
+  code?: string;
+};
+
+export type RateLimitedResponse = {
   error?: string;
   message?: string;
   statusCode?: number;
@@ -2398,9 +2975,15 @@ export type GetBillingRevenueAnalytics200 = {
   cancelledSubscriptions?: number;
 };
 
+export type CreateAegisInvoiceBodyLineItemsItem = {
+  description: string;
+  amount: number;
+  currency?: string;
+};
+
 export type CreateAegisInvoiceBody = {
   customerId: string;
-  lineItems: { description: string; amount: number; currency?: string }[];
+  lineItems: CreateAegisInvoiceBodyLineItemsItem[];
   dueDate?: number;
   notes?: string;
 };
@@ -3710,4 +4293,251 @@ export type GetAgentStats200 = {
 
 export type CopilotChat200One = {
   content?: string;
+};
+
+export type RegisterWebhook201 = {
+  success?: boolean;
+  data?: WebhookEndpointWithSecret;
+};
+
+export type ListWebhooks200 = {
+  success?: boolean;
+  data?: WebhookEndpoint[];
+};
+
+export type RegisterWebhookEndpoint201 = {
+  success?: boolean;
+  data?: WebhookEndpointWithSecret;
+};
+
+export type ListWebhookEndpoints200 = {
+  success?: boolean;
+  data?: WebhookEndpoint[];
+};
+
+export type UpdateWebhookEndpointBody = {
+  url?: string;
+  eventTypes?: '*' | string[];
+  active?: boolean;
+  description?: string;
+};
+
+export type PingWebhookEndpoint200Data = {
+  delivered?: boolean;
+  statusCode?: number;
+  error?: string;
+};
+
+export type PingWebhookEndpoint200 = {
+  success?: boolean;
+  data?: PingWebhookEndpoint200Data;
+};
+
+export type ListWebhookDeliveriesParams = {
+  /**
+   * Filter by endpoint ID
+   */
+  endpointId?: string;
+  /**
+   * Filter by event type. Supports prefix wildcard, e.g. `decision.*`
+   */
+  eventType?: string;
+  /**
+   * @maximum 200
+   */
+  limit?: number;
+};
+
+export type ListWebhookDeliveries200 = {
+  success?: boolean;
+  data?: WebhookDelivery[];
+};
+
+export type ListWebhookEventTypes200Data = {
+  eventTypes?: string[];
+};
+
+export type ListWebhookEventTypes200 = {
+  success?: boolean;
+  data?: ListWebhookEventTypes200Data;
+};
+
+/**
+ * Signal group with domain context and business impact
+ */
+export type EvaluateDecisionSignalsBodyGroupsItem = { [key: string]: unknown };
+
+/**
+ * Optional custom ranking weights
+ */
+export type EvaluateDecisionSignalsBodyWeights = { [key: string]: unknown };
+
+export type EvaluateDecisionSignalsBody = {
+  /** @minItems 1 */
+  groups: EvaluateDecisionSignalsBodyGroupsItem[];
+  /** Optional custom ranking weights */
+  weights?: EvaluateDecisionSignalsBodyWeights;
+};
+
+export type EvaluateDecisionSignals200RecommendationsItem = { [key: string]: unknown };
+
+export type EvaluateDecisionSignals200 = {
+  recommendations?: EvaluateDecisionSignals200RecommendationsItem[];
+  totalSignalsEvaluated?: number;
+  evaluatedAt?: number;
+  engineVersion?: string;
+};
+
+export type ExecuteDecisionWorkflowBodyMetadata = { [key: string]: unknown };
+
+export type ExecuteDecisionWorkflowBody = {
+  workflowId: string;
+  recommendationId?: string;
+  isDryRun?: boolean;
+  isSimulation?: boolean;
+  approvedBy?: string;
+  metadata?: ExecuteDecisionWorkflowBodyMetadata;
+};
+
+/**
+ * Workflow run record
+ */
+export type ExecuteDecisionWorkflow201Run = { [key: string]: unknown };
+
+export type ExecuteDecisionWorkflow201PolicyEvaluation = { [key: string]: unknown };
+
+export type ExecuteDecisionWorkflow201 = {
+  /** Workflow run record */
+  run?: ExecuteDecisionWorkflow201Run;
+  requiresApproval?: boolean;
+  policyEvaluation?: ExecuteDecisionWorkflow201PolicyEvaluation;
+};
+
+export type RecordDecisionOutcome200Outcome =
+  (typeof RecordDecisionOutcome200Outcome)[keyof typeof RecordDecisionOutcome200Outcome];
+
+export const RecordDecisionOutcome200Outcome = {
+  success: 'success',
+  partial: 'partial',
+  failed: 'failed',
+  cancelled: 'cancelled',
+} as const;
+
+export type RecordDecisionOutcome200 = {
+  runId?: string;
+  outcome?: RecordDecisionOutcome200Outcome;
+  recordedBy?: string;
+  recordedAt?: number;
+};
+
+export type ProveDecisionRun200 = {
+  runId?: string;
+  proofType?: string;
+  provedBy?: string;
+  provedAt?: number;
+};
+
+export type CounselListMatters200 = {
+  matters?: CounselMatter[];
+};
+
+export type CounselDeleteMatter200 = {
+  id?: string;
+  deleted?: boolean;
+};
+
+export type CounselUpdateObligationBodyStatus =
+  (typeof CounselUpdateObligationBodyStatus)[keyof typeof CounselUpdateObligationBodyStatus];
+
+export const CounselUpdateObligationBodyStatus = {
+  pending: 'pending',
+  'in-progress': 'in-progress',
+  complete: 'complete',
+  overdue: 'overdue',
+  'at-risk': 'at-risk',
+} as const;
+
+export type CounselUpdateObligationBody = {
+  matterId: string;
+  status?: CounselUpdateObligationBodyStatus;
+  completedDate?: string;
+  assignee?: string;
+  dueDate?: string;
+};
+
+export type CounselListAuditTrailParams = {
+  matterId?: string;
+};
+
+export type CounselListAuditTrail200 = {
+  entries?: CounselAuditEntry[];
+};
+
+export type CounselAppendAuditEntryBodyAction =
+  (typeof CounselAppendAuditEntryBodyAction)[keyof typeof CounselAppendAuditEntryBodyAction];
+
+export const CounselAppendAuditEntryBodyAction = {
+  viewed: 'viewed',
+  edited: 'edited',
+  exported: 'exported',
+  redacted: 'redacted',
+  'accessed-wall': 'accessed-wall',
+  escalated: 'escalated',
+  'deadline-updated': 'deadline-updated',
+  'privilege-changed': 'privilege-changed',
+} as const;
+
+export type CounselAppendAuditEntryBody = {
+  matterId: string;
+  user: string;
+  role: string;
+  action: CounselAppendAuditEntryBodyAction;
+  detail: string;
+  ip?: string;
+};
+
+export type CounselListProofChainParams = {
+  matterId: string;
+};
+
+export type CounselListProofChain200 = {
+  matterId?: string;
+  entries?: CounselProofChainEntry[];
+};
+
+export type CounselAppendProofChainEntryBodyEventType =
+  (typeof CounselAppendProofChainEntryBodyEventType)[keyof typeof CounselAppendProofChainEntryBodyEventType];
+
+export const CounselAppendProofChainEntryBodyEventType = {
+  filing: 'filing',
+  communication: 'communication',
+  discovery: 'discovery',
+  order: 'order',
+  settlement: 'settlement',
+  hearing: 'hearing',
+  deadline: 'deadline',
+  'expert-report': 'expert-report',
+} as const;
+
+export type CounselAppendProofChainEntryBodyPrivilegeLevel =
+  (typeof CounselAppendProofChainEntryBodyPrivilegeLevel)[keyof typeof CounselAppendProofChainEntryBodyPrivilegeLevel];
+
+export const CounselAppendProofChainEntryBodyPrivilegeLevel = {
+  public: 'public',
+  confidential: 'confidential',
+  privileged: 'privileged',
+  restricted: 'restricted',
+} as const;
+
+export type CounselAppendProofChainEntryBody = {
+  matterId: string;
+  eventType: CounselAppendProofChainEntryBodyEventType;
+  title: string;
+  summary: string;
+  privilegeLevel: CounselAppendProofChainEntryBodyPrivilegeLevel;
+  author: string;
+  parties?: string[];
+  documentRef?: string;
+  hash?: string;
+  redacted?: boolean;
 };

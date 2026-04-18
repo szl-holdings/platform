@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useLocation } from "wouter";
 import { Scale, AlertTriangle, Clock, Filter, ChevronDown, Lock, Shield, Eye } from "lucide-react";
-import { SEED_MATTERS, getPressureColor, getPressureLabel, getStatusColor, getPrivilegeColor, formatCurrency, formatDeadline, daysUntil } from "@/data/matters";
+import { useMatters, getPressureColor, getPressureLabel, getStatusColor, getPrivilegeColor, formatCurrency, formatDeadline, daysUntil } from "@/data/matters";
 import type { MatterStatus, MatterType, PrivilegeLevel } from "@/data/matters";
 
 const ACCENT = "#a78bfa";
@@ -52,13 +52,18 @@ export default function MatterBoard() {
   const [typeFilter, setTypeFilter] = useState<MatterType | "all">("all");
   const [sortBy, setSortBy] = useState<"pressure" | "deadline" | "exposure">("pressure");
   const [showFilters, setShowFilters] = useState(false);
+  const { matters, isLoading } = useMatters();
 
-  const totalExposure = SEED_MATTERS.reduce((s, m) => s + (m.estimatedExposure || 0), 0);
-  const criticalCount = SEED_MATTERS.filter((m) => m.pressureScore >= 90).length;
-  const overdueObligations = SEED_MATTERS.flatMap((m) => m.obligations).filter((o) => o.status === "overdue" || o.status === "at-risk").length;
+  const totalExposure = matters.reduce((s, m) => s + (m.estimatedExposure || 0), 0);
+  const criticalCount = matters.filter((m) => m.pressureScore >= 90).length;
+  const overdueObligations = matters.flatMap((m) => m.obligations).filter((o) => o.status === "overdue" || o.status === "at-risk").length;
+  const sortedByDeadline = useMemo(
+    () => [...matters].sort((a, b) => daysUntil(a.nextDeadline) - daysUntil(b.nextDeadline)),
+    [matters],
+  );
 
   const filtered = useMemo(() => {
-    let ms = SEED_MATTERS;
+    let ms = matters;
     if (statusFilter !== "all") ms = ms.filter((m) => m.status === statusFilter);
     if (typeFilter !== "all") ms = ms.filter((m) => m.type === typeFilter);
     return [...ms].sort((a, b) => {
@@ -66,14 +71,18 @@ export default function MatterBoard() {
       if (sortBy === "deadline") return daysUntil(a.nextDeadline) - daysUntil(b.nextDeadline);
       return (b.estimatedExposure || 0) - (a.estimatedExposure || 0);
     });
-  }, [statusFilter, typeFilter, sortBy]);
+  }, [matters, statusFilter, typeFilter, sortBy]);
+
+  if (isLoading && matters.length === 0) {
+    return <div className="p-6 text-xs text-white/30">Loading matters…</div>;
+  }
 
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-lg font-semibold font-display text-white/90">Matter Board</h1>
-          <p className="text-xs text-white/30 mt-0.5">{SEED_MATTERS.length} active matters · {criticalCount} critical</p>
+          <p className="text-xs text-white/30 mt-0.5">{matters.length} active matters · {criticalCount} critical</p>
         </div>
         <button
           onClick={() => setShowFilters((v) => !v)}
@@ -87,10 +96,10 @@ export default function MatterBoard() {
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
-          { label: "Total Matters", value: String(SEED_MATTERS.length), sub: `${criticalCount} critical` },
+          { label: "Total Matters", value: String(matters.length), sub: `${criticalCount} critical` },
           { label: "Aggregate Exposure", value: formatCurrency(totalExposure), sub: "across all matters" },
           { label: "At-Risk Obligations", value: String(overdueObligations), sub: "need attention now" },
-          { label: "Next Deadline", value: formatDeadline(SEED_MATTERS.sort((a, b) => daysUntil(a.nextDeadline) - daysUntil(b.nextDeadline))[0].nextDeadline), sub: SEED_MATTERS.sort((a, b) => daysUntil(a.nextDeadline) - daysUntil(b.nextDeadline))[0].name.split(" — ")[0] },
+          { label: "Next Deadline", value: sortedByDeadline[0] ? formatDeadline(sortedByDeadline[0].nextDeadline) : "—", sub: sortedByDeadline[0]?.name.split(" — ")[0] ?? "" },
         ].map((s) => (
           <div key={s.label} className="rounded-xl p-4 border border-white/5" style={{ background: "rgba(255,255,255,0.02)" }}>
             <p className="text-[10px] text-white/30 mb-1">{s.label}</p>

@@ -66,6 +66,7 @@ export * from "./fund_inbound_deals";
 export * from "./revenue_events";
 export * from "./governance";
 export * from "./prism_counsel";
+export * from "./prism_counsel_gc";
 export * from "./prism_counsel_ny";
 export * from "./prism_counsel_ops";
 export * from "./prism_counsel_s31";

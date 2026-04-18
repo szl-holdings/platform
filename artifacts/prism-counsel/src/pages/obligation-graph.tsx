@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { GraphCanvas, type GraphNode, type GraphEdge } from "@szl-holdings/design-system";
 import {
-  SEED_MATTERS, getMatterById, getPrivilegeColor, getObligationStatusColor,
+  useMatters, findMatterById, getPrivilegeColor, getObligationStatusColor,
   formatDeadline, daysUntil
 } from "@/data/matters";
 import type { Obligation, Party, PartyRole, Matter, ProofChainEntry } from "@/data/matters";
@@ -631,11 +631,13 @@ function PartyNode({ party }: { party: Party }) {
 export default function ObligationGraph() {
   const [, params] = useRoute("/obligation-graph/:matterId");
   const [, navigate] = useLocation();
-  const [selectedMatterId, setSelectedMatterId] = useState(params?.matterId ?? SEED_MATTERS[0].id);
+  const { matters, isLoading } = useMatters();
+  const [selectedMatterId, setSelectedMatterId] = useState<string>(params?.matterId ?? "");
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [expandedSection, setExpandedSection] = useState<"parties" | "obligations" | null>("obligations");
 
-  const matter = useMemo(() => getMatterById(selectedMatterId) ?? SEED_MATTERS[0], [selectedMatterId]);
+  const effectiveId = selectedMatterId || matters[0]?.id || "";
+  const matter = useMemo(() => findMatterById(matters, effectiveId) ?? matters[0], [matters, effectiveId]);
 
   // Reset selection when matter changes
   useEffect(() => { setSelectedNodeId(null); }, [selectedMatterId]);
@@ -646,11 +648,15 @@ export default function ObligationGraph() {
   );
 
   const obligsByStatus = useMemo(() => ({
-    critical: matter.obligations.filter((o) => o.status === "at-risk" || o.status === "overdue"),
-    active: matter.obligations.filter((o) => o.status === "in-progress"),
-    pending: matter.obligations.filter((o) => o.status === "pending"),
-    complete: matter.obligations.filter((o) => o.status === "complete"),
+    critical: matter ? matter.obligations.filter((o) => o.status === "at-risk" || o.status === "overdue") : [],
+    active: matter ? matter.obligations.filter((o) => o.status === "in-progress") : [],
+    pending: matter ? matter.obligations.filter((o) => o.status === "pending") : [],
+    complete: matter ? matter.obligations.filter((o) => o.status === "complete") : [],
   }), [matter]);
+
+  if (!matter) {
+    return <div className="p-6 text-xs text-white/30">{isLoading ? "Loading matters…" : "No matters available."}</div>;
+  }
 
   const selected = selectedNodeId ? nodeData[selectedNodeId] : null;
   const criticalObligationCount = matter.obligations.filter((o) => criticalIds.has(`oblig:${o.id}`)).length;
@@ -670,11 +676,11 @@ export default function ObligationGraph() {
       <div>
         <label className="text-[10px] text-white/30 uppercase tracking-wider block mb-2">Matter</label>
         <select
-          value={selectedMatterId}
+          value={effectiveId}
           onChange={(e) => { setSelectedMatterId(e.target.value); navigate(`/obligation-graph/${e.target.value}`); }}
           className="text-sm bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white/70 focus:outline-none focus:border-purple-500/40 w-full max-w-md"
         >
-          {SEED_MATTERS.map((m) => (
+          {matters.map((m) => (
             <option key={m.id} value={m.id}>{m.name} ({m.matterNumber})</option>
           ))}
         </select>

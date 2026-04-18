@@ -57,6 +57,7 @@ import preferencesRouter from "./preferences";
 import evidenceGraphRouter from "./evidence-graph";
 import policyModesRouter from "./policy-modes";
 import demoGovernedScenariosRouter from "./demo-governed-scenarios";
+import counselRouter from "./counsel";
 
 const router: IRouter = Router();
 
@@ -93,6 +94,10 @@ router.use(simulationWhatIfRouter);
 // console to show live AquilaScore and threat level. Must be mounted
 // BEFORE guardianPolicyCheck. /api/infrastructure/ is in PUBLIC_PREFIXES.
 router.use(infrastructureStatusRouter);
+
+// PRISM Counsel — GC matters CRUD (public, demo data backed by Postgres).
+// /api/counsel/ is in PUBLIC_PREFIXES in global-auth-enforcer.ts.
+router.use(counselRouter);
 
 // Cross-platform intelligence — read-only GET routes for signal correlations,
 // shared evidence registry, run health, and pilot intelligence. Mounted BEFORE

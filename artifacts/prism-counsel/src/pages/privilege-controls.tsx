@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Shield, Lock, AlertTriangle, CheckCircle, Play, Loader2 } from "lucide-react";
-import { SEED_MATTERS, getPrivilegeColor } from "@/data/matters";
+import { useMatters, getPrivilegeColor } from "@/data/matters";
 
 const ACCENT = "#a78bfa";
 
@@ -16,15 +16,20 @@ type PolicyCheckResult = {
 };
 
 export default function PrivilegeControls() {
-  const [selectedMatterId, setSelectedMatterId] = useState(SEED_MATTERS[0].id);
-  const matter = SEED_MATTERS.find((m) => m.id === selectedMatterId) ?? SEED_MATTERS[0];
+  const { matters, isLoading } = useMatters();
+  const [selectedMatterId, setSelectedMatterId] = useState<string>("");
   const [checkRole, setCheckRole] = useState("associate");
   const [checkAction, setCheckAction] = useState<"prism-counsel:access" | "prism-counsel:export" | "prism-counsel:view">("prism-counsel:export");
   const [checking, setChecking] = useState(false);
   const [policyResult, setPolicyResult] = useState<PolicyCheckResult | null>(null);
   const [checkError, setCheckError] = useState<string | null>(null);
 
-  const wallMatters = SEED_MATTERS.filter((m) => m.wall.enabled);
+  const matter = matters.find((m) => m.id === selectedMatterId) ?? matters[0];
+  const wallMatters = matters.filter((m) => m.wall.enabled);
+
+  if (!matter) {
+    return <div className="p-6 text-xs text-white/30">{isLoading ? "Loading matters…" : "No matters available."}</div>;
+  }
 
   const runPolicyCheck = async () => {
     setChecking(true);
@@ -67,9 +72,9 @@ export default function PrivilegeControls() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
           { label: "Matter Walls Active", value: String(wallMatters.length), color: "#ef4444" },
-          { label: "Restricted Matters", value: String(SEED_MATTERS.filter((m) => m.privilegeLevel === "restricted").length), color: "#ef4444" },
-          { label: "Privileged Matters", value: String(SEED_MATTERS.filter((m) => m.privilegeLevel === "privileged").length), color: "#f97316" },
-          { label: "Total Matters", value: String(SEED_MATTERS.length), color: ACCENT },
+          { label: "Restricted Matters", value: String(matters.filter((m) => m.privilegeLevel === "restricted").length), color: "#ef4444" },
+          { label: "Privileged Matters", value: String(matters.filter((m) => m.privilegeLevel === "privileged").length), color: "#f97316" },
+          { label: "Total Matters", value: String(matters.length), color: ACCENT },
         ].map((s) => (
           <div key={s.label} className="rounded-xl p-4 border border-white/5" style={{ background: "rgba(255,255,255,0.02)" }}>
             <p className="text-[10px] text-white/30 mb-1">{s.label}</p>
@@ -119,7 +124,7 @@ export default function PrivilegeControls() {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {SEED_MATTERS.map((m) => {
+              {matters.map((m) => {
                 const privColor = getPrivilegeColor(m.privilegeLevel);
                 return (
                   <tr key={m.id} className="hover:bg-white/2 transition-colors">
@@ -161,11 +166,11 @@ export default function PrivilegeControls() {
           <div className="space-y-1">
             <label className="text-[10px] text-white/30 uppercase tracking-wider block">Matter</label>
             <select
-              value={selectedMatterId}
+              value={selectedMatterId || matter.id}
               onChange={(e) => { setSelectedMatterId(e.target.value); setPolicyResult(null); }}
               className="text-xs bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white/70 focus:outline-none focus:border-purple-500/40 w-full"
             >
-              {SEED_MATTERS.map((m) => <option key={m.id} value={m.id}>{m.name.split(" — ")[0]}</option>)}
+              {matters.map((m) => <option key={m.id} value={m.id}>{m.name.split(" — ")[0]}</option>)}
             </select>
           </div>
           <div className="space-y-1">

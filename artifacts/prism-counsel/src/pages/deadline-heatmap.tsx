@@ -1,7 +1,6 @@
 import { useState, useMemo } from "react";
 import { BarChart3, AlertTriangle, Clock, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
-import { SEED_MATTERS, getPressureColor, getStatusColor, formatDeadline, daysUntil } from "@/data/matters";
-import type { Matter, Obligation } from "@/data/matters";
+import { useMatters, getPressureColor, getStatusColor, formatDeadline, daysUntil } from "@/data/matters";
 
 const ACCENT = "#a78bfa";
 
@@ -40,10 +39,11 @@ function imminenceScore(daysLeft: number): number {
 export default function DeadlineHeatmap() {
   const [viewMode, setViewMode] = useState<"heatmap" | "timeline">("heatmap");
   const [weekOffset, setWeekOffset] = useState(0);
+  const { matters } = useMatters();
 
   const allCells: HeatCell[] = useMemo(() => {
     const cells: HeatCell[] = [];
-    for (const matter of SEED_MATTERS) {
+    for (const matter of matters) {
       for (const obl of matter.obligations) {
         if (obl.status === "complete") continue;
         const days = daysUntil(obl.dueDate);
@@ -65,7 +65,7 @@ export default function DeadlineHeatmap() {
       }
     }
     return cells.sort((a, b) => b.heatScore - a.heatScore);
-  }, []);
+  }, [matters]);
 
   const weekDays = useMemo(() => {
     const days: { date: Date; label: string; dayLabel: string; cells: HeatCell[] }[] = [];
@@ -89,11 +89,11 @@ export default function DeadlineHeatmap() {
   }, [allCells, weekOffset]);
 
   const matterRows = useMemo(() => {
-    return SEED_MATTERS.map((m) => ({
+    return matters.map((m) => ({
       matter: m,
       cells: allCells.filter((c) => c.matterId === m.id),
     }));
-  }, [allCells]);
+  }, [matters, allCells]);
 
   const criticalCount = allCells.filter((c) => c.heatScore >= 90).length;
   const highCount = allCells.filter((c) => c.heatScore >= 70 && c.heatScore < 90).length;

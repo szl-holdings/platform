@@ -182,6 +182,14 @@ export function globalAuthEnforcer(
     }
   }
 
+  // PRISM Counsel GC matters — read-only GET routes are public so the
+  // prism-counsel artifact's demo views can render seeded data without a
+  // session. All mutations (POST/PATCH/DELETE on /counsel/*) require auth.
+  if (req.method === "GET" && path.startsWith("/api/counsel/")) {
+    next();
+    return;
+  }
+
   // Non-production demo access routes: PIN-validated but session-free.
   // Completely disabled in production; route handlers apply timing-safe PIN check.
   // /api/pulse/demo/verify accepts PIN in POST body (never in URL).
