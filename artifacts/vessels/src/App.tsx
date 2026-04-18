@@ -192,6 +192,9 @@ const BunkerOptimizerPage = lazy(() => import("@/pages/bunker-optimizer"));
 const PscInspectorPage = lazy(() => import("@/pages/psc-inspector"));
 const InsurancePanelPage = lazy(() => import("@/pages/insurance-panel"));
 const VesselsSettingsPage = lazy(() => import("@/pages/settings"));
+const VesselsBillingPanelPage = lazy(() => import("@/pages/billing-panel"));
+const VesselsTeamPanelPage = lazy(() => import("@/pages/team-panel"));
+const VesselsAuditLogPanelPage = lazy(() => import("@/pages/audit-log-panel"));
 const VesselsAtlasRuntimePage = lazy(() => import("@/pages/atlas-runtime"));
 const VesselsReplayPage = lazy(() => import("@/pages/replay"));
 const VesselsScenarioBranchesPage = lazy(() => import("@/pages/scenario-branches"));
@@ -541,34 +544,10 @@ function DashboardRouter() {
         <Route path="/dashboard/routes" component={CorridorRoutesPage} />
         <Route path="/dashboard/alerts" component={AlertCenterPage} />
         <Route path="/dashboard/reports" component={PerformanceAnalyticsPage} />
-        <Route path="/dashboard/billing">
-          <div className="p-6 max-w-xl mx-auto space-y-4">
-            <h1 className="font-display text-xl font-bold text-sky-50">Billing</h1>
-            <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-5">
-              <p className="text-sm font-medium text-sky-100 mb-1">Active subscription</p>
-              <p className="text-xs text-sky-400/40">Fleet Command Plan · 10 vessels · Billed annually</p>
-            </div>
-          </div>
-        </Route>
+        <Route path="/dashboard/billing" component={VesselsBillingPanelPage} />
         <Route path="/dashboard/settings" component={VesselsSettingsPage} />
-        <Route path="/dashboard/team">
-          <div className="p-6 max-w-xl mx-auto space-y-4">
-            <h1 className="font-display text-xl font-bold text-sky-50">Team</h1>
-            <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-5">
-              <p className="text-sm font-medium text-sky-100 mb-1">Team management</p>
-              <p className="text-xs text-sky-400/40">Invite members, assign roles, and manage fleet access permissions.</p>
-            </div>
-          </div>
-        </Route>
-        <Route path="/dashboard/audit-log">
-          <div className="p-6 max-w-xl mx-auto space-y-4">
-            <h1 className="font-display text-xl font-bold text-sky-50">Audit Log</h1>
-            <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-5">
-              <p className="text-sm font-medium text-sky-100 mb-1">Activity history</p>
-              <p className="text-xs text-sky-400/40">Full audit trail of user actions, data access, and configuration changes.</p>
-            </div>
-          </div>
-        </Route>
+        <Route path="/dashboard/team" component={VesselsTeamPanelPage} />
+        <Route path="/dashboard/audit-log" component={VesselsAuditLogPanelPage} />
         {/* Legacy route redirects — kept for backward compatibility, redirect to /dashboard/* equivalents */}
         <Route path="/fleet"><Redirect to="/dashboard/fleet" /></Route>
         <Route path="/vessels-list"><Redirect to="/dashboard/vessels" /></Route>
