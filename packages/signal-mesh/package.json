@@ -16,10 +16,15 @@
     "./pipeline": {
       "types": "./dist/pipeline.d.ts",
       "import": "./src/pipeline.ts"
+    },
+    "./postgres-bus": {
+      "types": "./dist/postgres-bus.d.ts",
+      "import": "./src/postgres-bus.ts"
     }
   },
   "dependencies": {
     "@workspace/ontology": "workspace:*",
+    "drizzle-orm": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {

@@ -3,6 +3,15 @@ import { defaultMemoryStore, PostgresMemoryStore } from "@workspace/memory-fabri
 import { defaultPlanStore, DbPlanStore } from "@workspace/planner";
 import { defaultVerifierStore, DbVerifierStore } from "@workspace/verifier";
 import {
+  defaultEvidenceStore,
+  defaultRecommendationStore,
+  PostgresEvidenceStore,
+  PostgresRecommendationStore,
+  PostgresEntityRegistry,
+} from "@szl-holdings/evidence-graph";
+import { defaultSignalBus, PostgresSignalBusStore } from "@szl-holdings/signal-mesh";
+import { defaultEntityRegistry } from "@workspace/ontology";
+import {
   defaultSkillRegistry,
   defaultSkillRunStore,
   PostgresSkillRegistry,
@@ -14,6 +23,10 @@ import { logger } from "./logger";
 
 let traceStore: PostgresTraceStore | undefined;
 let memoryStore: PostgresMemoryStore | undefined;
+let signalBusStore: PostgresSignalBusStore | undefined;
+let evidenceStore: PostgresEvidenceStore | undefined;
+let recommendationStore: PostgresRecommendationStore | undefined;
+let entityRegistry: PostgresEntityRegistry | undefined;
 let retentionTimer: ReturnType<typeof setInterval> | undefined;
 
 const TRACE_RETENTION_DAYS = parseInt(process.env.TRACE_RETENTION_DAYS ?? "30", 10);
@@ -43,8 +56,18 @@ export async function initDurablePersistence(): Promise<void> {
 
   try {
     const { db } = await import("@szl-holdings/db");
-    const { tracesTable, memoryRecordsTable, plansTable, planStepsTable, verifierResultsTable } =
-      await import("@szl-holdings/db/schema");
+    const {
+      tracesTable,
+      memoryRecordsTable,
+      plansTable,
+      planStepsTable,
+      verifierResultsTable,
+      meshSignalsTable,
+      meshEvidenceItemsTable,
+      meshEvidenceEntityLinksTable,
+      meshRecommendationsTable,
+      meshEntitySnapshotsTable,
+    } = await import("@szl-holdings/db/schema");
 
     traceStore = new PostgresTraceStore({
       db,
@@ -76,6 +99,71 @@ export async function initDurablePersistence(): Promise<void> {
 
     defaultTraceStore.setBackend(traceStore);
     defaultMemoryStore.setBackend(memoryStore);
+
+    try {
+      signalBusStore = new PostgresSignalBusStore({
+        db,
+        signalsTable: meshSignalsTable,
+        flushIntervalMs: FLUSH_INTERVAL_MS,
+        logger,
+      });
+      evidenceStore = new PostgresEvidenceStore({
+        db,
+        evidenceItemsTable: meshEvidenceItemsTable,
+        evidenceEntityLinksTable: meshEvidenceEntityLinksTable,
+        flushIntervalMs: FLUSH_INTERVAL_MS,
+        logger,
+      });
+      recommendationStore = new PostgresRecommendationStore({
+        db,
+        recommendationsTable: meshRecommendationsTable,
+        flushIntervalMs: FLUSH_INTERVAL_MS,
+        logger,
+      });
+      entityRegistry = new PostgresEntityRegistry({
+        db,
+        entitySnapshotsTable: meshEntitySnapshotsTable,
+        flushIntervalMs: FLUSH_INTERVAL_MS,
+        logger,
+      });
+
+      const [hydratedSignals, evidenceLoaded, recsLoaded, entitiesLoaded] = await Promise.all([
+        signalBusStore.hydrate().catch((err) => {
+          logger.warn({ err }, "[persistence] Signal bus hydration failed");
+          return [] as Awaited<ReturnType<PostgresSignalBusStore["hydrate"]>>;
+        }),
+        evidenceStore.hydrate().catch((err) => {
+          logger.warn({ err }, "[persistence] Evidence store hydration failed");
+          return 0;
+        }),
+        recommendationStore.hydrate().catch((err) => {
+          logger.warn({ err }, "[persistence] Recommendation store hydration failed");
+          return 0;
+        }),
+        entityRegistry.hydrate().catch((err) => {
+          logger.warn({ err }, "[persistence] Entity registry hydration failed");
+          return 0;
+        }),
+      ]);
+
+      defaultSignalBus.loadBuffer(hydratedSignals);
+      defaultSignalBus.setStore(signalBusStore);
+      defaultEvidenceStore.setBackend(evidenceStore);
+      defaultRecommendationStore.setBackend(recommendationStore);
+      defaultEntityRegistry.setBackend(entityRegistry);
+
+      logger.info(
+        {
+          signals: hydratedSignals.length,
+          evidence: evidenceLoaded,
+          recommendations: recsLoaded,
+          entities: entitiesLoaded,
+        },
+        "[persistence] Signal Mesh (signals/evidence/recommendations/entities) backed by PostgreSQL",
+      );
+    } catch (err) {
+      logger.warn({ err }, "[persistence] Signal Mesh DB store init failed — staying in-memory");
+    }
 
     try {
       defaultPlanStore.setBackend(new DbPlanStore({ db, plansTable, planStepsTable }));
@@ -281,6 +369,10 @@ export async function stopDurablePersistence(): Promise<void> {
   await Promise.allSettled([
     traceStore?.stop(),
     memoryStore?.stop(),
+    signalBusStore?.stop(),
+    evidenceStore?.stop(),
+    recommendationStore?.stop(),
+    entityRegistry?.stop(),
   ]);
   logger.info("[persistence] Trace/Memory stores flushed and stopped");
 }

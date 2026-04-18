@@ -22,5 +22,6 @@
 
 export * from "./bus.js";
 export * from "./pipeline.js";
+export * from "./postgres-bus.js";
 
 export const SIGNAL_MESH_VERSION = "1.0.0" as const;

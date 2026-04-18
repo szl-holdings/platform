@@ -4,6 +4,11 @@
  * Entity snapshots are updated by the entity-resolve stage of the signal
  * pipeline and are used by the evidence graph to provide context about
  * what entities are involved in recommendations.
+ *
+ * The default `EntityRegistry` instance (`defaultEntityRegistry`) is a
+ * mutable wrapper that delegates to a backend. The default backend is in
+ * memory; the API server may swap in a Postgres-backed backend at boot
+ * time so that snapshots survive process restarts.
  */
 
 import { z } from "zod";
@@ -79,7 +84,20 @@ export function createEntitySnapshot(input: EntitySnapshotInput): EntitySnapshot
   });
 }
 
-export class EntityRegistry {
+export interface EntityRegistryBackend {
+  upsert(snapshot: EntitySnapshot): void;
+  get(entityId: string): EntitySnapshot | undefined;
+  list(filter?: {
+    domain?: string;
+    entityType?: string;
+    health?: EntityHealth;
+  }): EntitySnapshot[];
+  linkSignal(entityId: string, signalId: string): void;
+  linkRecommendation(entityId: string, recommendationId: string): void;
+  count(): number;
+}
+
+export class InMemoryEntityRegistry implements EntityRegistryBackend {
   private readonly snapshots = new Map<string, EntitySnapshot>();
 
   upsert(snapshot: EntitySnapshot): void {
@@ -117,6 +135,51 @@ export class EntityRegistry {
 
   count(): number {
     return this.snapshots.size;
+  }
+}
+
+/**
+ * EntityRegistry — mutable wrapper over a swappable backend so the API
+ * server can install a durable Postgres-backed registry at boot without
+ * breaking existing imports of `defaultEntityRegistry`.
+ */
+export class EntityRegistry implements EntityRegistryBackend {
+  private backend: EntityRegistryBackend;
+
+  constructor(initial: EntityRegistryBackend = new InMemoryEntityRegistry()) {
+    this.backend = initial;
+  }
+
+  setBackend(backend: EntityRegistryBackend): void {
+    this.backend = backend;
+  }
+
+  getBackend(): EntityRegistryBackend {
+    return this.backend;
+  }
+
+  upsert(snapshot: EntitySnapshot): void {
+    this.backend.upsert(snapshot);
+  }
+
+  get(entityId: string): EntitySnapshot | undefined {
+    return this.backend.get(entityId);
+  }
+
+  list(filter?: { domain?: string; entityType?: string; health?: EntityHealth }): EntitySnapshot[] {
+    return this.backend.list(filter);
+  }
+
+  linkSignal(entityId: string, signalId: string): void {
+    this.backend.linkSignal(entityId, signalId);
+  }
+
+  linkRecommendation(entityId: string, recommendationId: string): void {
+    this.backend.linkRecommendation(entityId, recommendationId);
+  }
+
+  count(): number {
+    return this.backend.count();
   }
 }
 

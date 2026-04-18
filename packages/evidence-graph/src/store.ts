@@ -3,65 +3,16 @@
  *   - EvidenceItems linked to entities and signals
  *   - Recommendations with their evidence chains
  *
- * Postgres table definitions are provided as SQL comments for future migration.
+ * The default singletons (`defaultEvidenceStore`, `defaultRecommendationStore`)
+ * are mutable wrappers that delegate to a backend. The default backend is the
+ * in-memory implementation. The API server may swap in a Postgres-backed
+ * backend at boot time via `defaultEvidenceStore.setBackend(pg)` so that data
+ * survives process restarts.
  *
- * SQL Schema (Postgres):
- *
- *   CREATE TABLE evidence_items (
- *     evidence_id   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
- *     type          TEXT NOT NULL,
- *     domain        TEXT NOT NULL,
- *     signal_id     UUID REFERENCES signals(signal_id),
- *     summary       TEXT NOT NULL,
- *     detail        TEXT,
- *     confidence    FLOAT NOT NULL,
- *     freshness     FLOAT NOT NULL,
- *     weight        FLOAT NOT NULL DEFAULT 1.0,
- *     entity_refs   JSONB NOT NULL DEFAULT '[]',
- *     provenance    JSONB,
- *     tags          TEXT[] NOT NULL DEFAULT '{}',
- *     observed_at   TIMESTAMPTZ NOT NULL,
- *     expires_at    TIMESTAMPTZ,
- *     schema_version TEXT NOT NULL DEFAULT 'evidence/1.0',
- *     created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
- *   );
- *
- *   CREATE TABLE recommendations (
- *     recommendation_id  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
- *     domain             TEXT NOT NULL,
- *     title              TEXT NOT NULL,
- *     summary            TEXT NOT NULL,
- *     rationale          TEXT NOT NULL,
- *     suggested_action   TEXT NOT NULL,
- *     action_payload     JSONB NOT NULL DEFAULT '{}',
- *     confidence         FLOAT NOT NULL,
- *     freshness          FLOAT NOT NULL,
- *     projected_impact_usd BIGINT,
- *     projected_risk_reduction_pct FLOAT,
- *     evidence_ids       UUID[] NOT NULL DEFAULT '{}',
- *     signal_ids         UUID[] NOT NULL DEFAULT '{}',
- *     entity_refs        JSONB NOT NULL DEFAULT '[]',
- *     status             TEXT NOT NULL DEFAULT 'pending',
- *     policy_evaluation  JSONB NOT NULL DEFAULT '{"outcome":"pending","policyIds":[]}',
- *     tenant_id          TEXT,
- *     generated_by       TEXT,
- *     provenance         JSONB,
- *     generated_at       TIMESTAMPTZ NOT NULL,
- *     expires_at         TIMESTAMPTZ,
- *     resolved_at        TIMESTAMPTZ,
- *     tags               TEXT[] NOT NULL DEFAULT '{}',
- *     schema_version     TEXT NOT NULL DEFAULT 'recommendation/1.0',
- *     created_at         TIMESTAMPTZ NOT NULL DEFAULT NOW()
- *   );
- *
- *   CREATE TABLE evidence_entity_links (
- *     evidence_id   UUID NOT NULL REFERENCES evidence_items(evidence_id),
- *     entity_id     TEXT NOT NULL,
- *     entity_type   TEXT NOT NULL,
- *     domain        TEXT NOT NULL,
- *     linked_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
- *     PRIMARY KEY (evidence_id, entity_id)
- *   );
+ * SQL schema for the Postgres-backed backend lives in
+ * `lib/db/src/schema/signal_mesh.ts` (tables: `mesh_signals`,
+ * `mesh_evidence_items`, `mesh_recommendations`, `mesh_entity_snapshots`,
+ * `mesh_evidence_entity_links`).
  */
 
 import type { EvidenceItem, Recommendation } from "@workspace/ontology";
@@ -74,7 +25,40 @@ export interface EvidenceEntityLink {
   linkedAt: string;
 }
 
-export class EvidenceStore {
+export interface EvidenceStoreBackend {
+  save(item: EvidenceItem): void;
+  get(evidenceId: string): EvidenceItem | undefined;
+  getMany(evidenceIds: string[]): EvidenceItem[];
+  forEntity(entityId: string): EvidenceItem[];
+  forSignal(signalId: string): EvidenceItem[];
+  list(filter?: {
+    domain?: string;
+    type?: EvidenceItem["type"];
+    limit?: number;
+    offset?: number;
+  }): EvidenceItem[];
+  count(): number;
+}
+
+export interface RecommendationStoreBackend {
+  save(rec: Recommendation): void;
+  get(recommendationId: string): Recommendation | undefined;
+  list(filter?: {
+    domain?: string;
+    status?: Recommendation["status"];
+    tenantId?: string;
+    limit?: number;
+    offset?: number;
+  }): Recommendation[];
+  updateStatus(
+    recommendationId: string,
+    status: Recommendation["status"],
+  ): boolean;
+  forEntity(entityId: string): Recommendation[];
+  count(): number;
+}
+
+export class InMemoryEvidenceStore implements EvidenceStoreBackend {
   private readonly items = new Map<string, EvidenceItem>();
   private readonly entityLinks = new Map<string, Set<string>>();
 
@@ -133,7 +117,7 @@ export class EvidenceStore {
   }
 }
 
-export class RecommendationStore {
+export class InMemoryRecommendationStore implements RecommendationStoreBackend {
   private readonly recs = new Map<string, Recommendation>();
 
   save(rec: Recommendation): void {
@@ -182,6 +166,109 @@ export class RecommendationStore {
 
   count(): number {
     return this.recs.size;
+  }
+}
+
+/**
+ * Mutable EvidenceStore — wraps a swappable backend. The API server may call
+ * `setBackend()` at boot to install a Postgres-backed implementation while
+ * existing imports of `defaultEvidenceStore` continue to work.
+ */
+export class EvidenceStore implements EvidenceStoreBackend {
+  private backend: EvidenceStoreBackend;
+
+  constructor(initial: EvidenceStoreBackend = new InMemoryEvidenceStore()) {
+    this.backend = initial;
+  }
+
+  setBackend(store: EvidenceStoreBackend): void {
+    this.backend = store;
+  }
+
+  getBackend(): EvidenceStoreBackend {
+    return this.backend;
+  }
+
+  save(item: EvidenceItem): void {
+    this.backend.save(item);
+  }
+
+  get(evidenceId: string): EvidenceItem | undefined {
+    return this.backend.get(evidenceId);
+  }
+
+  getMany(evidenceIds: string[]): EvidenceItem[] {
+    return this.backend.getMany(evidenceIds);
+  }
+
+  forEntity(entityId: string): EvidenceItem[] {
+    return this.backend.forEntity(entityId);
+  }
+
+  forSignal(signalId: string): EvidenceItem[] {
+    return this.backend.forSignal(signalId);
+  }
+
+  list(filter?: {
+    domain?: string;
+    type?: EvidenceItem["type"];
+    limit?: number;
+    offset?: number;
+  }): EvidenceItem[] {
+    return this.backend.list(filter);
+  }
+
+  count(): number {
+    return this.backend.count();
+  }
+}
+
+export class RecommendationStore implements RecommendationStoreBackend {
+  private backend: RecommendationStoreBackend;
+
+  constructor(initial: RecommendationStoreBackend = new InMemoryRecommendationStore()) {
+    this.backend = initial;
+  }
+
+  setBackend(store: RecommendationStoreBackend): void {
+    this.backend = store;
+  }
+
+  getBackend(): RecommendationStoreBackend {
+    return this.backend;
+  }
+
+  save(rec: Recommendation): void {
+    this.backend.save(rec);
+  }
+
+  get(recommendationId: string): Recommendation | undefined {
+    return this.backend.get(recommendationId);
+  }
+
+  list(filter?: {
+    domain?: string;
+    status?: Recommendation["status"];
+    tenantId?: string;
+    limit?: number;
+    offset?: number;
+  }): Recommendation[] {
+    return this.backend.list(filter);
+  }
+
+  updateStatus(
+    recommendationId: string,
+    status: Recommendation["status"],
+  ): boolean {
+    return this.backend.updateStatus(recommendationId, status);
+  }
+
+  forEntity(entityId: string): Recommendation[] {
+    return this.backend.forEntity(entityId);
+  }
+
+  count(): number {
+    return this.backend.count();
   }
 }
 
