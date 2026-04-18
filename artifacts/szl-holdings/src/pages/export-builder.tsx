@@ -21,6 +21,63 @@ interface ColumnDef {
   default?: boolean;
 }
 
+interface ExportHistoryItem {
+  id: number;
+  exportId: string;
+  name: string;
+  dataSource: string;
+  format: "csv" | "pdf";
+  status: "processing" | "completed" | "failed";
+  rowCount: number | null;
+  fileSizeBytes: number | null;
+  downloadToken: string;
+  expiresAt: string | null;
+  completedAt: string | null;
+  createdAt: string;
+  triggeredByEmail: string | null;
+  scheduleFrequency: string | null;
+}
+
+const DATA_SOURCE_TO_DOMAIN: Record<string, DataDomain> = {
+  audit_events: "audit_events",
+  firestorm_findings: "aegis_incidents",
+  vessels: "vessels",
+  terra_deals: "terra_deals",
+  lyte_signals: "lyte_signals",
+  msp_tickets: "msp_tickets",
+  metering_events: "usage_metering",
+  invoices: "revenue_events",
+};
+
+async function fetchExportHistory(): Promise<ExportHistoryItem[]> {
+  const res = await fetch(`${API}/exports/history?limit=10`, { credentials: "include" });
+  if (!res.ok) {
+    if (res.status === 403) return [];
+    throw new Error(`Failed to load export history (${res.status})`);
+  }
+  const json = await res.json();
+  return Array.isArray(json.data) ? json.data : [];
+}
+
+function formatBytes(bytes: number | null): string {
+  if (!bytes) return "";
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function formatRelativeDate(iso: string): string {
+  const date = new Date(iso);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60_000);
+  if (diffMins < 1) return "just now";
+  if (diffMins < 60) return `${diffMins}m ago`;
+  const diffHrs = Math.floor(diffMins / 60);
+  if (diffHrs < 24) return `${diffHrs}h ago`;
+  return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+
 const DOMAIN_CONFIGS: Record<DataDomain, { label: string; endpoint: string; color: string; columns: ColumnDef[] }> = {
   audit_events: {
     label: "Audit Logs",
@@ -258,6 +315,7 @@ async function pollJobStatus(exportId: string): Promise<ExportJob | null> {
 }
 
 export default function ExportBuilder() {
+  const queryClient = useQueryClient();
   const [domain, setDomain] = useState<DataDomain>("audit_events");
   const [format, setFormat] = useState<"csv" | "pdf">("csv");
   const [filters, setFilters] = useState<{
@@ -280,6 +338,13 @@ export default function ExportBuilder() {
   const [showHistory, setShowHistory] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
+
+  const { data: exportHistory, isLoading: historyLoading, isError: historyError } = useQuery({
+    queryKey: ["export-history"],
+    queryFn: fetchExportHistory,
+    refetchInterval: 30_000,
+    retry: 1,
+  });
 
   const { data: previewData, isLoading: previewLoading } = useQuery({
     queryKey: ["export-preview", domain, filters],
@@ -861,6 +926,113 @@ export default function ExportBuilder() {
                 <li>• Download links expire after 24 hours for security</li>
                 <li>• All exports are logged in the audit trail with actor, domain, and row count</li>
               </ul>
+            </div>
+
+            {/* Recent Exports */}
+            <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+              <div className="px-4 py-3 border-b border-zinc-800 flex items-center justify-between">
+                <p className="text-xs text-zinc-500 uppercase tracking-widest">Recent Exports</p>
+                {exportHistory && exportHistory.length > 0 && (
+                  <span className="text-xs text-zinc-600">{exportHistory.length} recent</span>
+                )}
+              </div>
+
+              {historyLoading ? (
+                <div className="px-4 py-6 text-center">
+                  <div className="text-xs text-zinc-600">Loading export history...</div>
+                </div>
+              ) : historyError ? (
+                <div className="px-4 py-6 text-center">
+                  <p className="text-xs text-red-500">Could not load export history. Check your connection or permissions.</p>
+                </div>
+              ) : !exportHistory || exportHistory.length === 0 ? (
+                <div className="px-4 py-8 text-center">
+                  <p className="text-xs text-zinc-600">No exports yet. Run your first export above.</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-zinc-800/60">
+                  {exportHistory.map((item) => {
+                    const isExpired = item.expiresAt ? new Date(item.expiresAt) < new Date() : false;
+                    const mappedDomain: DataDomain | undefined = DATA_SOURCE_TO_DOMAIN[item.dataSource];
+                    const domainCfg = mappedDomain ? DOMAIN_CONFIGS[mappedDomain] : undefined;
+                    const accentColor = domainCfg?.color ?? "#c2a55a";
+
+                    return (
+                      <div key={item.exportId} className="px-4 py-3 flex items-center gap-3 hover:bg-zinc-800/20 transition-colors">
+                        {/* Source color dot */}
+                        <div
+                          className="w-2 h-2 rounded-full shrink-0 mt-0.5"
+                          style={{ backgroundColor: accentColor }}
+                        />
+
+                        {/* Main info */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-xs font-medium text-zinc-300 truncate">{item.name}</span>
+                            <span
+                              className="text-[10px] px-1.5 py-0.5 rounded font-mono uppercase shrink-0"
+                              style={{ backgroundColor: `${accentColor}18`, color: accentColor }}
+                            >
+                              {item.format}
+                            </span>
+                            {item.status === "processing" && (
+                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-950 text-amber-400 shrink-0">
+                                processing
+                              </span>
+                            )}
+                            {item.status === "failed" && (
+                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-red-950 text-red-400 shrink-0">
+                                failed
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                            <span className="text-[10px] text-zinc-600">{formatRelativeDate(item.createdAt)}</span>
+                            {item.rowCount != null && (
+                              <span className="text-[10px] text-zinc-600">{item.rowCount.toLocaleString()} rows</span>
+                            )}
+                            {item.fileSizeBytes != null && (
+                              <span className="text-[10px] text-zinc-600">{formatBytes(item.fileSizeBytes)}</span>
+                            )}
+                            {item.triggeredByEmail && (
+                              <span className="text-[10px] text-zinc-700 truncate max-w-[140px]">{item.triggeredByEmail}</span>
+                            )}
+                            {isExpired && (
+                              <span className="text-[10px] text-red-500">expired</span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Action button */}
+                        <div className="shrink-0">
+                          {item.status === "completed" && !isExpired ? (
+                            <a
+                              href={`${API}/exports/download/${item.downloadToken}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="px-2.5 py-1 text-[10px] font-medium rounded border border-zinc-700 text-zinc-300 hover:border-zinc-500 hover:text-zinc-100 transition-colors whitespace-nowrap"
+                            >
+                              Re-download
+                            </a>
+                          ) : item.status === "completed" && isExpired ? (
+                            mappedDomain ? (
+                              <button
+                                onClick={() => handleDomainChange(mappedDomain)}
+                                title="This export has expired. Click to open the builder pre-set to this data source and run a new export."
+                                className="px-2.5 py-1 text-[10px] font-medium rounded border border-zinc-700 text-amber-400 hover:border-amber-600 hover:text-amber-300 transition-colors whitespace-nowrap"
+                              >
+                                Open Builder
+                              </button>
+                            ) : (
+                              <span className="text-[10px] text-zinc-700 italic">expired</span>
+                            )
+                          ) : null}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
         </div>
