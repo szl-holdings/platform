@@ -289,6 +289,7 @@ const HelpPage = lazy(() => import("@/pages/help"));
 const DemosPage = lazy(() => import("@/pages/demos"));
 const ChangelogPage = lazy(() => import("@/pages/changelog"));
 const LPSentimentPulse = lazy(() => import("@/pages/lp-sentiment-pulse"));
+const CommandNewsletterPage = lazy(() => import("@/pages/command-newsletter"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -1399,6 +1400,11 @@ function App() {
             </Route>
             <Route path="/usage">
               <Suspense fallback={<PageLoader />}><UsageDashboardPage /></Suspense>
+            </Route>
+
+            {/* ── Command — Newsletter Analytics ── */}
+            <Route path="/command/newsletter">
+              <Suspense fallback={<PageLoader />}><CommandNewsletterPage /></Suspense>
             </Route>
 
             {/* Catch-all → 404 */}
