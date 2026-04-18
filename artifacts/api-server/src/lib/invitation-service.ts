@@ -9,7 +9,7 @@
 
 import crypto from "crypto";
 import { db, orgInvitationsTable, auditEventsTable, usersTable } from "@szl-holdings/db";
-import { and, eq } from "drizzle-orm";
+import { and, eq, gt } from "drizzle-orm";
 import { sendEmail, buildOrgInviteEmail } from "./email";
 import { hashIp } from "@szl-holdings/audit";
 import { logger } from "./logger";
@@ -66,6 +66,10 @@ export async function createOrgInvitation(
   const email = params.email.toLowerCase();
 
   if (params.conflictMode === "reject") {
+    // Only treat NON-EXPIRED pending invites as conflicts. Stale rows whose
+    // expiresAt has passed (but were never marked "expired" by a sweeper)
+    // must not block re-inviting the same email.
+    const now = new Date();
     const existing = await db
       .select({ id: orgInvitationsTable.id })
       .from(orgInvitationsTable)
@@ -73,6 +77,7 @@ export async function createOrgInvitation(
         eq(orgInvitationsTable.orgId, params.orgId),
         eq(orgInvitationsTable.email, email),
         eq(orgInvitationsTable.status, "pending"),
+        gt(orgInvitationsTable.expiresAt, now),
       ))
       .limit(1);
 
