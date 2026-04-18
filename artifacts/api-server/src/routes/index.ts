@@ -52,6 +52,7 @@ import infrastructureStatusRouter from "./infrastructure-status";
 import debugRouter from "./debug";
 import mapsRouter from "./maps";
 import atlasSceneExportRouter from "./atlas-scene-export";
+import preferencesRouter from "./preferences";
 
 const router: IRouter = Router();
 
@@ -154,5 +155,6 @@ router.use(outcomeGraphRouter);
 
 router.use(mapsRouter);
 router.use(debugRouter);
+router.use(preferencesRouter);
 
 export default router;

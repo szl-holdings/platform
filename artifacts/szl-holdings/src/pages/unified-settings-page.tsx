@@ -7,13 +7,13 @@ import {
   SettingsRow,
   type SettingsSection,
 } from "@szl-holdings/shared-ui/settings-shell";
-import { useSidebarCollapsed, useNotificationSound } from "@szl-holdings/shared-ui";
 import {
   Bell, BellOff, Shield, Key, Lock, Users, Loader2, Globe, Mail,
   Building2, RefreshCw, Layers, FileText, Save, CheckCircle, AlertTriangle,
-  PanelLeftClose, PanelLeft, Volume2, VolumeX,
+  PanelLeftClose, PanelLeftOpen, PanelLeft, Volume2, VolumeX,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useUserPreferences } from "@szl-holdings/shared-ui";
 
 const API = "/api";
 
@@ -460,6 +460,78 @@ function AuditLogPanel() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// App Preferences Panel — user-level UI preferences persisted to the API
+// ─────────────────────────────────────────────────────────────────────────────
+
+function AppPreferencesPanel() {
+  const { prefs, setPreference, isLoaded } = useUserPreferences();
+
+  const items = [
+    {
+      key: "sidebar_collapsed" as const,
+      label: "Collapsed Sidebar",
+      description: "Start with the navigation sidebar collapsed on all workspaces",
+      onIcon: <PanelLeftClose className="w-3 h-3" />,
+      offIcon: <PanelLeftOpen className="w-3 h-3" />,
+      onLabel: "Collapsed",
+      offLabel: "Expanded",
+    },
+    {
+      key: "notification_sound" as const,
+      label: "Notification Sound",
+      description: "Play a soft audio cue when new notifications arrive in the platform",
+      onIcon: <Volume2 className="w-3 h-3" />,
+      offIcon: <VolumeX className="w-3 h-3" />,
+      onLabel: "On",
+      offLabel: "Off",
+    },
+  ];
+
+  return (
+    <SettingsSectionPanel
+      title="Preferences"
+      description="Personal UI preferences that travel with your account across all SZL workspaces"
+    >
+      <SettingsCard title="Layout & Sound">
+        {isLoaded ? (
+          items.map(({ key, label, description, onIcon, offIcon, onLabel, offLabel }) => {
+            const enabled = prefs[key];
+            return (
+              <SettingsRow key={key} label={label} description={description}>
+                <button
+                  onClick={() => setPreference(key, !enabled)}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors",
+                    enabled
+                      ? "bg-amber-500/10 border-amber-500/20 text-amber-400"
+                      : "bg-muted border-border text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {enabled ? onIcon : offIcon}
+                  {enabled ? onLabel : offLabel}
+                </button>
+              </SettingsRow>
+            );
+          })
+        ) : (
+          <div className="space-y-2 py-2">
+            {[1, 2].map((i) => (
+              <div key={i} className="h-10 bg-muted animate-pulse rounded-lg" />
+            ))}
+          </div>
+        )}
+      </SettingsCard>
+
+      <div className="mt-4 p-3 rounded-lg bg-muted/30 border border-border">
+        <p className="text-xs text-muted-foreground">
+          Preferences are saved to your account and applied automatically the next time you sign in on any device.
+        </p>
+      </div>
+    </SettingsSectionPanel>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Billing Panel
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -495,67 +567,6 @@ function BillingPanel() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Workspace Panel — personal UI preferences (Task #886)
-// ─────────────────────────────────────────────────────────────────────────────
-
-function WorkspacePanel() {
-  const [collapsed, setCollapsed] = useSidebarCollapsed();
-  const [soundOn, setSoundOn] = useNotificationSound();
-
-  return (
-    <SettingsSectionPanel
-      title="Workspace"
-      description="Personal layout and notification preferences. Synced across devices and applied before first paint."
-    >
-      <SettingsCard title="Layout">
-        <SettingsRow
-          label="Collapse navigation sidebar"
-          description="Start each session with the sidebar in compact mode."
-        >
-          <button
-            type="button"
-            onClick={() => setCollapsed(!collapsed)}
-            aria-pressed={collapsed}
-            aria-label={collapsed ? "Sidebar set to collapsed; activate to expand" : "Sidebar set to expanded; activate to collapse"}
-            className={cn(
-              "inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors",
-              collapsed
-                ? "border-primary/40 bg-primary/10 text-primary"
-                : "border-border bg-background text-muted-foreground hover:text-foreground",
-            )}
-          >
-            {collapsed ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeft className="h-4 w-4" />}
-            {collapsed ? "Collapsed" : "Expanded"}
-          </button>
-        </SettingsRow>
-      </SettingsCard>
-      <SettingsCard title="Notifications">
-        <SettingsRow
-          label="Notification sound"
-          description="Play a short chime when a new notification arrives in the global header."
-        >
-          <button
-            type="button"
-            onClick={() => setSoundOn(!soundOn)}
-            aria-pressed={soundOn}
-            aria-label={soundOn ? "Notification sound on; activate to mute" : "Notification sound muted; activate to enable"}
-            className={cn(
-              "inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors",
-              soundOn
-                ? "border-primary/40 bg-primary/10 text-primary"
-                : "border-border bg-background text-muted-foreground hover:text-foreground",
-            )}
-          >
-            {soundOn ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
-            {soundOn ? "On" : "Muted"}
-          </button>
-        </SettingsRow>
-      </SettingsCard>
-    </SettingsSectionPanel>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
 // Main
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -564,13 +575,12 @@ export default function UnifiedSettingsPage() {
 
   const panels: Partial<Record<SettingsSection, React.ReactNode>> = {
     account: <AccountPanel />,
-    workspace: <WorkspacePanel />,
     team: <TeamPanel />,
     notifications: <NotificationsPanel />,
     integrations: <IntegrationsPanel />,
     security: <SecurityPanel />,
     billing: <BillingPanel />,
-    preferences: <PlatformSettingsPanel />,
+    preferences: <AppPreferencesPanel />,
     audit: <AuditLogPanel />,
   };
 

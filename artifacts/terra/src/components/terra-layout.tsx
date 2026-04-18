@@ -2,7 +2,7 @@ import { Link, useLocation } from "wouter";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { toAlpha } from "@szl-holdings/shared-ui/utils";
 import { SectionErrorBoundary } from "@szl-holdings/shared-ui/error-boundary";
-import { ReactNode, useState, useCallback } from "react";
+import { ReactNode, useState, useCallback, useEffect, useRef } from "react";
 import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";
 import {
   Building2, LayoutDashboard, Eye, Activity,
@@ -13,7 +13,7 @@ import {
   ClipboardList, TrendingDown, RefreshCw, Calculator, Percent, UserCheck, HardHat, GitBranch, Network,
   Brain, GitMerge, AlertTriangle, Landmark, MapPin, Zap
 } from "lucide-react";
-import { useRealtimeChannel, RealtimeStatusIndicator, GettingStartedChecklist, OnboardingWizard, useOnboardingState, type OnboardingConfig } from "@szl-holdings/shared-ui";
+import { useRealtimeChannel, RealtimeStatusIndicator, GettingStartedChecklist, OnboardingWizard, useOnboardingState, type OnboardingConfig, useUserPreferences } from "@szl-holdings/shared-ui";
 import { useOnboardingAnalytics } from "@szl-holdings/shared-ui/onboarding";
 import { SidebarNav, type SidebarNavSection, DashboardShell as SharedDashboardShell } from "@szl-holdings/shared-ui/design-system";
 import { useQuery } from "@tanstack/react-query";
@@ -141,27 +141,30 @@ const NAV_SECTIONS: SidebarNavSection[] = [
 
 const API = "/api";
 
-const TERRA_COLLAPSE_KEY = "terra-sidebar-collapsed";
-
-function readCollapsed(): boolean {
-  try { return localStorage.getItem(TERRA_COLLAPSE_KEY) === "true"; } catch { return false; }
-}
-
 export function TerraLayout({ children }: { children: ReactNode }) {
   const { trackTourCompleted, trackTourSkipped } = useOnboardingAnalytics({ platform: "terra", tourId: "terra-tour" });
   const [location, navigate] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(readCollapsed);
+  const { prefs, setPreference, isLoaded } = useUserPreferences();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => prefs.sidebar_collapsed);
+  const userOverriddenSidebarRef = useRef(false);
   const { status: wsStatus } = useRealtimeChannel("terra-signals");
   const { replay: replayOnboarding } = useOnboardingState("terra");
 
+  useEffect(() => {
+    if (isLoaded && !userOverriddenSidebarRef.current) {
+      setSidebarCollapsed(prefs.sidebar_collapsed);
+    }
+  }, [isLoaded, prefs.sidebar_collapsed]);
+
   const toggleCollapsed = useCallback(() => {
+    userOverriddenSidebarRef.current = true;
     setSidebarCollapsed((prev) => {
       const next = !prev;
-      try { localStorage.setItem(TERRA_COLLAPSE_KEY, String(next)); } catch {}
+      setPreference("sidebar_collapsed", next);
       return next;
     });
-  }, []);
+  }, [setPreference]);
 
   const { data: apiHealth, isError: apiDown } = useQuery({
     queryKey: ["terra-api-health"],

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { m, AnimatePresence } from "framer-motion";
 import {
@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { Link } from "wouter";
 import { cn } from "@/lib/utils";
-import { useRole } from "@szl-holdings/shared-ui";
+import { useRole, useUserPreferences } from "@szl-holdings/shared-ui";
 import { EmptyState as SharedEmptyState } from "@szl-holdings/shared-ui/EmptyState";
 
 const API = "/api";
@@ -1741,7 +1741,15 @@ function AccessDenied() {
 
 export default function AdminCommandCenter() {
   const [section, setSection] = useState<Section>("overview");
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const { prefs, setPreference, isLoaded } = useUserPreferences();
+  const [sidebarOpen, setSidebarOpen] = useState(() => !prefs.sidebar_collapsed);
+  const userOverriddenRef = useRef(false);
+
+  useEffect(() => {
+    if (isLoaded && !userOverriddenRef.current) {
+      setSidebarOpen(!prefs.sidebar_collapsed);
+    }
+  }, [isLoaded, prefs.sidebar_collapsed]);
 
   const { isAdmin, roles, isLoading: roleLoading } = useRole();
   const hasSuperAdmin = roles.includes("super_admin");
@@ -1786,7 +1794,17 @@ export default function AdminCommandCenter() {
               <div className="text-[10px] text-muted-foreground">Admin Portal</div>
             </div>
           )}
-          <button onClick={() => setSidebarOpen((p) => !p)} className="ml-auto p-1 rounded text-muted-foreground hover:text-foreground transition-colors shrink-0">
+          <button
+            onClick={() => {
+              userOverriddenRef.current = true;
+              setSidebarOpen((p) => {
+                const next = !p;
+                setPreference("sidebar_collapsed", !next);
+                return next;
+              });
+            }}
+            className="ml-auto p-1 rounded text-muted-foreground hover:text-foreground transition-colors shrink-0"
+          >
             <ChevronRight className={cn("w-3.5 h-3.5 transition-transform", sidebarOpen && "rotate-180")} />
           </button>
         </div>

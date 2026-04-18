@@ -10,7 +10,7 @@ import {
 import { DemoModeSwitcher } from "./demo-mode";
 import { SandboxToggle } from "./sandbox-mode";
 import { useAuth } from "@szl-holdings/replit-auth-web";
-import { useNotificationSound } from "./use-user-prefs";
+import { useUserPreferences } from "./use-user-preferences";
 
 export interface EcosystemApp {
   id: string;
@@ -635,7 +635,9 @@ function NotificationsPanel({
   onMarkAllRead: () => void;
   onClose: () => void;
 }) {
-  const [soundOn, setSoundOn] = useNotificationSound();
+  const { prefs, setPrefs } = useUserPreferences();
+  const soundOn = prefs.notification_sound;
+  const setSoundOn = (on: boolean) => setPrefs({ notification_sound: on });
   const unread = notifications.filter((n) => !n.read);
   const recent = [...notifications].sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()).slice(0, 20);
 
@@ -1250,6 +1252,25 @@ function DoctrineNavBadge({ appId }: { appId: string }) {
   );
 }
 
+function playNotificationBeep(): void {
+  try {
+    const ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(880, ctx.currentTime);
+    gain.gain.setValueAtTime(0.08, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.25);
+    osc.onended = () => ctx.close();
+  } catch {
+    // AudioContext not available in all environments
+  }
+}
+
 export function EcosystemNav({
   currentAppId,
   currentAppName,
@@ -1267,11 +1288,21 @@ export function EcosystemNav({
   const appData = ECOSYSTEM_APPS.find((a) => a.id === currentAppId);
   const notificationCenter = useNotificationCenter(appData?.name ?? currentAppName);
   const recentItems = useRecentItems();
+  const { prefs } = useUserPreferences();
 
   const [showAppSwitcher, setShowAppSwitcher] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+
+  const prevUnreadRef = useRef<number | null>(null);
+  const { unreadCount: currentUnread } = notificationCenter;
+  useEffect(() => {
+    if (prevUnreadRef.current !== null && currentUnread > prevUnreadRef.current && prefs.notification_sound) {
+      playNotificationBeep();
+    }
+    prevUnreadRef.current = currentUnread;
+  }, [currentUnread, prefs.notification_sound]);
 
   const appSwitcherRef = useRef<HTMLDivElement>(null);
   const notificationsRef = useRef<HTMLDivElement>(null);
@@ -1299,12 +1330,12 @@ export function EcosystemNav({
 
   const { notifications: liveNotifications, unreadCount, markRead, markAllRead } = notificationCenter;
 
-  const [notifSoundOn] = useNotificationSound();
-  const prevUnreadRef = useRef(unreadCount);
+  const notifSoundOn = prefs.notification_sound;
+  const prevUnreadRefInner = useRef(unreadCount);
   const chimeBaselineSetRef = useRef(false);
   useEffect(() => {
-    const prev = prevUnreadRef.current;
-    prevUnreadRef.current = unreadCount;
+    const prev = prevUnreadRefInner.current;
+    prevUnreadRefInner.current = unreadCount;
     // Skip the first transition after mount so existing unread items present
     // at initial hydration do not trigger a chime — only real new arrivals do.
     if (!chimeBaselineSetRef.current) {

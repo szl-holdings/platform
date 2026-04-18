@@ -55,6 +55,7 @@ export {
   type ProvenanceViewerProps,
 } from "./receipt-graph";
 export { LanguageSwitcher, type LanguageSwitcherProps, type SupportedLocale } from "./language-switcher";
+export { useUserPreferences, type UserPreferences, type UseUserPreferencesResult, PREFERENCES_NAMESPACE } from "./use-user-preferences";
 export { ContactModal, useContactModal, type ContactModalProps } from "./contact-modal";
 export { WelcomeOverlay, useWelcomeState, type WelcomeOverlayProps, type WelcomeFeature } from "./WelcomeOverlay";
 export {

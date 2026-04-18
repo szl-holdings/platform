@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState, useEffect } from "react";
+import { lazy, Suspense, useState, useEffect, useRef } from "react";
 import { Switch, Route, Router as WouterRouter, Link, Redirect, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
@@ -23,7 +23,7 @@ import { toAlpha } from "@szl-holdings/shared-ui/utils";
 import { AuthProvider, useAuth as useVesselsRoleAuth, roleLabels, type UserRole } from "@/contexts/auth-context";
 import { useAuth } from "@szl-holdings/replit-auth-web";
 import { identifyAnalyticsUser, resetAnalyticsUser, setUser as setSentryUser, clearUser as clearSentryUser } from "@szl-holdings/observability/react";
-import { PrivateAppGuard, useRealtimeChannel, RealtimeStatusIndicator, OnboardingWizard, GettingStartedChecklist, useOnboardingState, type OnboardingConfig, SyncStatusBadge, useWebSyncStatus } from "@szl-holdings/shared-ui";
+import { PrivateAppGuard, useRealtimeChannel, RealtimeStatusIndicator, OnboardingWizard, GettingStartedChecklist, useOnboardingState, type OnboardingConfig, SyncStatusBadge, useWebSyncStatus, useUserPreferences } from "@szl-holdings/shared-ui";
 import { useOnboardingAnalytics } from "@szl-holdings/shared-ui/onboarding";
 import { IndexedDBAdapter, CommandQueue, ConflictResolver } from "@szl-holdings/offline-engine";
 import { CommandPalette, useCommandPalette, getEcosystemSwitchCommands, createBaselineWebActions, type CommandItem } from "@szl-holdings/shared-ui/command-palette";
@@ -676,13 +676,21 @@ function VesselsDashboard({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpe
   const { trackTourCompleted, trackTourSkipped } = useOnboardingAnalytics({ platform: "vessels", tourId: "vessels-tour" });
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarHovered, setSidebarHovered] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
-    try { return localStorage.getItem(VESSELS_COLLAPSE_KEY) === "true"; } catch { return false; }
-  });
+  const { prefs, setPreference, isLoaded } = useUserPreferences();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => prefs.sidebar_collapsed);
+  const userOverriddenSidebarRef = useRef(false);
+
+  useEffect(() => {
+    if (isLoaded && !userOverriddenSidebarRef.current) {
+      setSidebarCollapsed(prefs.sidebar_collapsed);
+    }
+  }, [isLoaded, prefs.sidebar_collapsed]);
+
   const toggleSidebarCollapsed = () => {
+    userOverriddenSidebarRef.current = true;
     setSidebarCollapsed((prev) => {
       const next = !prev;
-      try { localStorage.setItem(VESSELS_COLLAPSE_KEY, String(next)); } catch {}
+      setPreference("sidebar_collapsed", next);
       return next;
     });
   };
