@@ -1,6 +1,8 @@
 import { Router, type IRouter } from "express";
+import { z } from "zod";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../middlewares/sliding-window-limiter";
+import { validateBody } from "../lib/validation";
 import {
   listScenarios,
   getScenario,
@@ -11,6 +13,32 @@ import {
   persistRun,
   seedScenariosIfEmpty,
 } from "../lib/replay-store";
+
+const scenarioCreateSchema = z.object({
+  scenarioId: z.string().min(1, "scenarioId is required").max(200).trim(),
+  name: z.string().min(1, "name is required").max(300).trim(),
+  domain: z.string().min(1, "domain is required").max(100).trim(),
+  description: z.string().max(2000).trim().optional(),
+  tags: z.array(z.string().max(100)).max(20).optional(),
+  snapshotCount: z.number().int().min(0).optional(),
+});
+
+const snapshotCreateSchema = z.object({
+  snapshotId: z.string().max(200).trim().optional(),
+  scenarioId: z.string().min(1, "scenarioId is required").max(200).trim(),
+  label: z.string().min(1, "label is required").max(300).trim(),
+  domain: z.string().min(1, "domain is required").max(100).trim(),
+  snapshotType: z.string().min(1, "snapshotType is required").max(100).trim(),
+  historicalContext: z.record(z.unknown()).optional(),
+  agentInputs: z.array(z.record(z.unknown())).optional(),
+  groundTruth: z.record(z.unknown()).optional(),
+  tags: z.array(z.string().max(100)).max(20).optional(),
+  metadata: z.record(z.unknown()).optional(),
+});
+
+const runTriggerSchema = z.object({
+  scenarioId: z.string().min(1, "scenarioId is required").max(200).trim(),
+});
 
 const router: IRouter = Router();
 
@@ -165,21 +193,10 @@ router.post(
   authMiddleware({ required: true }),
   requireRole("admin", "operator"),
   perUserWriteSlidingLimiter,
+  validateBody(scenarioCreateSchema),
   async (req, res) => {
     try {
-      const { scenarioId, name, domain, description, tags, snapshotCount } = req.body as {
-        scenarioId: string;
-        name: string;
-        domain: string;
-        description?: string;
-        tags?: string[];
-        snapshotCount?: number;
-      };
-
-      if (!scenarioId || !name || !domain) {
-        res.status(400).json({ error: "scenarioId, name, and domain are required" });
-        return;
-      }
+      const { scenarioId, name, domain, description, tags, snapshotCount } = req.body as z.infer<typeof scenarioCreateSchema>;
 
       const scenario = await upsertScenario({
         scenarioId,
@@ -223,25 +240,10 @@ router.post(
   authMiddleware({ required: true }),
   requireRole("admin", "operator"),
   perUserWriteSlidingLimiter,
+  validateBody(snapshotCreateSchema),
   async (req, res) => {
     try {
-      const body = req.body as {
-        snapshotId?: string;
-        scenarioId: string;
-        label: string;
-        domain: string;
-        snapshotType: string;
-        historicalContext?: Record<string, unknown>;
-        agentInputs?: Record<string, unknown>[];
-        groundTruth?: Record<string, unknown>;
-        tags?: string[];
-        metadata?: Record<string, unknown>;
-      };
-
-      if (!body.scenarioId || !body.label || !body.domain || !body.snapshotType) {
-        res.status(400).json({ error: "scenarioId, label, domain, and snapshotType are required" });
-        return;
-      }
+      const body = req.body as z.infer<typeof snapshotCreateSchema>;
 
       const snapshotId = body.snapshotId ?? `snap-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
@@ -301,14 +303,10 @@ router.post(
   authMiddleware({ required: true }),
   requireRole("admin", "operator"),
   perUserWriteSlidingLimiter,
+  validateBody(runTriggerSchema),
   async (req, res) => {
     try {
-      const { scenarioId } = req.body as { scenarioId: string };
-
-      if (!scenarioId) {
-        res.status(400).json({ error: "scenarioId is required" });
-        return;
-      }
+      const { scenarioId } = req.body as z.infer<typeof runTriggerSchema>;
 
       const scenario = await getScenario(scenarioId);
       if (!scenario) {

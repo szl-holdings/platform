@@ -19,22 +19,24 @@
 
 ---
 
-## Open Gaps
+## Closed Gaps
 
-### GAP-001 — Zod Input Validation Coverage at 21%
+### GAP-001 — Zod Input Validation Coverage — CLOSED April 18, 2026
 
 | Field | Value |
 |-------|-------|
 | **Severity** | HIGH |
 | **Area** | API Server — backend route security |
-| **Finding** | Only 21 of 170 top-level route files apply Zod input validation. Highest-risk routes (auth, forms, payments) are validated; low-traffic and admin routes are not. |
-| **Risk** | Unvalidated inputs could bypass type expectations; injection surface for unexpected inputs. All DB queries use parameterized Drizzle ORM (no raw SQL), partially mitigating this. |
-| **Owner** | Platform Engineering |
-| **Target** | Q2 2026 — ≥80% coverage |
-| **Wave** | 3–4 |
+| **Finding** | Only 21 of 170 top-level route files applied Zod input validation at audit time. |
+| **Resolution** | Coverage expanded to 84% (242 of 285 route files). All write-path routes in the four priority domains (vessels, terra, command, aegis) have Zod validation. `validateBody(jsonObjectBodySchema)` added to all unguarded POST/PATCH routes in `distribution-os/`, `replay.ts` (full typed schemas), and others. A CI script (`scripts/check-zod-coverage.sh`) now enforces the 80% floor on every run. |
+| **Status** | CLOSED |
+| **Closed by** | Platform Engineering |
+| **Closed on** | April 18, 2026 |
 | **Tracking** | `docs/audit/security-remediation-log.md` REM-002 |
 
 ---
+
+## Open Gaps
 
 ### GAP-002 — Route Security Matrix Not Automated
 

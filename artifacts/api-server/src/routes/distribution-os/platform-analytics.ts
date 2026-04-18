@@ -42,7 +42,7 @@ router.get("/platform-connections", requireAuth, validateQuery(listQuerySchema),
 
 // ── AI Atomizer Job Stubs ──
 
-router.post("/atomizer/atomize", requireAuth, async (req: Request, res: Response): Promise<void> => {
+router.post("/atomizer/atomize", requireAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
   const { title, content, platforms } = req.body;
   if (!content) return void res.status(400).json({ error: "content is required" });
   const jobId = `atomize_${Date.now()}`;
@@ -72,7 +72,7 @@ router.get("/api-keys", requireAuth, validateQuery(listQuerySchema), async (_req
   res.json(settings.map(s => ({ id: s.id, name: s.label, maskedKey: "szl_live_sk_••••••••••••", scopes: [], createdAt: s.key.replace("apikey_", ""), active: true })));
 });
 
-router.post("/api-keys", requireAuth, async (req: Request, res: Response): Promise<void> => {
+router.post("/api-keys", requireAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
   const { name, scopes } = req.body;
   const rawKey = randomBytes(24).toString("hex");
   const key = `szl_live_sk_${rawKey}`;
@@ -106,7 +106,7 @@ router.get("/webhook-subscriptions", requireAuth, validateQuery(listQuerySchema)
   }));
 });
 
-router.post("/webhook-subscriptions", requireAuth, async (req: Request, res: Response): Promise<void> => {
+router.post("/webhook-subscriptions", requireAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
   const { name, url, events } = req.body;
   if (!url || !events?.length) return void res.status(400).json({ error: "url and events required" });
   if (!url.startsWith("https://")) return void res.status(400).json({ error: "Webhook URL must use HTTPS" });
@@ -128,7 +128,7 @@ router.delete("/webhook-subscriptions/:id", requireAuth, async (req: Request, re
   res.json({ success: true });
 });
 
-router.post("/webhook-subscriptions/:id/test", requireAuth, async (req: Request, res: Response): Promise<void> => {
+router.post("/webhook-subscriptions/:id/test", requireAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
   res.json({ delivered: true, statusCode: 200, duration: Math.floor(Math.random() * 200 + 80), timestamp: new Date().toISOString() });
 });
 
@@ -203,7 +203,7 @@ router.get("/subscribers", requireAuth, validateQuery(listQuerySchema), async (r
   })));
 });
 
-router.post("/subscribers/magic-link", async (req: Request, res: Response): Promise<void> => {
+router.post("/subscribers/magic-link", validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
   const { email, source } = req.body;
   if (!email || typeof email !== "string" || !email.includes("@")) {
     return void res.status(400).json({ error: "valid email required" });
@@ -351,7 +351,7 @@ router.get("/virality/scores", requireAuth, validateQuery(listQuerySchema), asyn
   res.json({ scores: scored, summary: { avgScore, topPerformers, totalScored: scored.length, trendingNow: ["AI governance", "Operator playbooks", "B2B content strategy"] } });
 });
 
-router.post("/virality/score-content", requireAuth, async (req: Request, res: Response): Promise<void> => {
+router.post("/virality/score-content", requireAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
   const { title, contentType = "article", body } = req.body as { title: string; contentType: string; body?: string };
   const seed = title.length + (body?.length || 0);
   const score = Math.min(97, Math.max(35, seeded(seed, 50, 92) + (body && body.length > 500 ? 8 : 0)));
@@ -415,7 +415,7 @@ router.get("/ab-tests", requireAuth, validateQuery(listQuerySchema), async (_req
   res.json({ tests, running: tests.filter(t => t.status === "running").length, concluded: tests.filter(t => t.status === "winner-declared").length });
 });
 
-router.post("/ab-tests", requireAuth, async (req: Request, res: Response): Promise<void> => {
+router.post("/ab-tests", requireAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
   const { name, testType, variants } = req.body;
   const [test] = await db.insert(dosAbTestsTable).values({ name, testType, variants, status: "draft", significanceLevel: 95 }).returning();
   res.status(201).json(test);

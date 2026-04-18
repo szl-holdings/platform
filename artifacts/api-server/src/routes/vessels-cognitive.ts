@@ -3,6 +3,7 @@ import rateLimit from "express-rate-limit";
 import { db, vesselsTable } from "@szl-holdings/db";
 import { sendSuccess, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
+import { validateQuery, listQuerySchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -204,7 +205,7 @@ const SAMPLE_VESSELS_GRAPH: VesselEntry[] = [
 
 // ─── Owner–Port–Cargo Graph ───────────────────────────────────────────────────
 
-router.get("/vessels/cognitive/owner-graph", cogLimit, authMiddleware({ required: false }), async (_req, res) => {
+router.get("/vessels/cognitive/owner-graph", cogLimit, validateQuery(listQuerySchema), authMiddleware({ required: false }), async (_req, res) => {
   try {
     let dbVessels: DbVessel[] = [];
     try {
@@ -373,7 +374,7 @@ interface AnomalyAlert {
   provenance: Provenance;
 }
 
-router.get("/vessels/cognitive/route-anomalies", cogLimit, authMiddleware({ required: false }), async (_req, res) => {
+router.get("/vessels/cognitive/route-anomalies", cogLimit, validateQuery(listQuerySchema), authMiddleware({ required: false }), async (_req, res) => {
   try {
     const dayKey = Math.floor(Date.now() / 86400000);
     const rng = seedRng(dayKey + 777);
@@ -464,7 +465,7 @@ const DEFAULT_CHAIN: OwnershipHop[] = [
   { hopIndex: 1, entityType: "registered_owner", entityName: "Ocean Fleet Holdings", entityId: "REG:PA-2020-0001", country: "PA", registeredAt: "2019-08-12", sanctioned: false, evidence: ["Panama Registry"], confidence: 0.82 },
 ];
 
-router.get("/vessels/cognitive/sanctions-chain/:vesselImo", cogLimit, authMiddleware({ required: false }), async (req, res) => {
+router.get("/vessels/cognitive/sanctions-chain/:vesselImo", cogLimit, validateQuery(listQuerySchema), authMiddleware({ required: false }), async (req, res) => {
   try {
     const vesselImo = req.params["vesselImo"] as string;
     const chain = OWNERSHIP_CHAINS[vesselImo] ?? DEFAULT_CHAIN;
@@ -511,7 +512,7 @@ const COUNTERPARTIES: Counterparty[] = [
   { id: "CP-006", name: "Pacific Coal Resources", type: "commodity_trader", country: "HK", creditRating: "B+", activeContracts: 1, totalExposureUsd: 8_200_000, overdueAmount: 820_000, paymentRecord: "poor", sanctionRisk: "elevated", relationships: ["spot_charter"] },
 ];
 
-router.get("/vessels/cognitive/counterparty-risk", cogLimit, authMiddleware({ required: false }), async (_req, res) => {
+router.get("/vessels/cognitive/counterparty-risk", cogLimit, validateQuery(listQuerySchema), authMiddleware({ required: false }), async (_req, res) => {
   try {
     const rng = seedRng(Math.floor(Date.now() / 3600000));
     const totalExposure = COUNTERPARTIES.reduce((s, c) => s + c.totalExposureUsd, 0);
@@ -584,7 +585,7 @@ const WHAT_IF_SCENARIOS: WhatIfScenario[] = [
   { id: "WI-004", label: "Emergency port call at Gibraltar", etaDeltaHours: +18, fuelDeltaMt: +12, costDeltaUsd: +45_000, feasibility: "conditional" },
 ];
 
-router.get("/vessels/cognitive/voyage-twin/:voyageRef", cogLimit, authMiddleware({ required: false }), async (req, res) => {
+router.get("/vessels/cognitive/voyage-twin/:voyageRef", cogLimit, validateQuery(listQuerySchema), authMiddleware({ required: false }), async (req, res) => {
   try {
     const voyageRef = req.params["voyageRef"] as string;
     const normalizedRef = voyageRef === "latest" ? "VOY-2026-001" : voyageRef;

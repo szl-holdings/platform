@@ -240,4 +240,4 @@ The following route files exist but are classified as speculative — not curren
 | MOCK | ~15 | ~9% |
 | SPECULATIVE | ~30 | ~18% |
 
-> **Note:** Zod input validation coverage is ~21% of route files (GAP-001 in gap register). All DB queries use parameterized Drizzle ORM — no raw SQL.
+> **Note:** Zod input validation coverage is 84%+ of route files (GAP-001 closed April 18, 2026). All DB queries use parameterized Drizzle ORM — no raw SQL. A CI script (`scripts/check-zod-coverage.sh`) enforces the 80% threshold.

@@ -1,4 +1,5 @@
 import { pgTable, text, serial, timestamp, integer, boolean, jsonb, numeric, index } from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
 
 export const dosEditorialPillarsTable = pgTable("dos_editorial_pillars", {
   id: serial("id").primaryKey(),
@@ -513,3 +514,26 @@ export const dosContentLifecycleTable = pgTable("dos_content_lifecycle", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
+
+// ─── Typed insert schemas (drizzle-zod) ──────────────────────────────────────
+// These are used by route handlers to validate request bodies before touching
+// the database. Each schema omits server-managed fields (id, createdAt, updatedAt).
+
+const BASE_OMIT = { id: true, createdAt: true, updatedAt: true } as const;
+const BASE_OMIT_NO_UPDATED = { id: true, createdAt: true } as const;
+
+export const insertDosArticleSchema = createInsertSchema(dosArticlesTable).omit(BASE_OMIT);
+export const insertDosNewsletterSchema = createInsertSchema(dosNewslettersTable).omit(BASE_OMIT);
+export const insertDosCarouselProjectSchema = createInsertSchema(dosCarouselProjectsTable).omit(BASE_OMIT);
+export const insertDosCarouselSlideSchema = createInsertSchema(dosCarouselSlidesTable).omit(BASE_OMIT_NO_UPDATED);
+export const insertDosXPostSchema = createInsertSchema(dosXPostsTable).omit(BASE_OMIT);
+export const insertDosCampaignSchema = createInsertSchema(dosCampaignsTable).omit(BASE_OMIT);
+export const insertDosCampaignLinkSchema = createInsertSchema(dosCampaignLinksTable).omit(BASE_OMIT_NO_UPDATED);
+export const insertDosLeadNoteSchema = createInsertSchema(dosLeadNotesTable).omit(BASE_OMIT_NO_UPDATED);
+export const insertDosEditorialPillarSchema = createInsertSchema(dosEditorialPillarsTable).omit(BASE_OMIT);
+export const insertDosCtaBlockSchema = createInsertSchema(dosCtaBlocksTable).omit(BASE_OMIT);
+export const insertDosContentCalendarItemSchema = createInsertSchema(dosContentCalendarItemsTable).omit(BASE_OMIT);
+export const insertDosDistributionTargetSchema = createInsertSchema(dosDistributionTargetsTable).omit(BASE_OMIT);
+export const insertDosAuthorProfileSchema = createInsertSchema(dosAuthorProfilesTable).omit(BASE_OMIT);
+export const insertDosAutomationRunSchema = createInsertSchema(dosAutomationRunsTable).omit({ id: true, createdAt: true, startedAt: true } as const);
+export const insertDosIntegrationStatusSchema = createInsertSchema(dosIntegrationStatusTable).omit(BASE_OMIT);

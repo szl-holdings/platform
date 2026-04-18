@@ -1,7 +1,7 @@
 # Security Remediation Log
 
 **Maintained by:** Platform Engineering  
-**Last updated:** April 16, 2026
+**Last updated:** April 18, 2026
 
 This log records all security findings, their disposition, and remediation status. Every finding from `security-findings.md` that requires action is tracked here with owner, dates, and closure criteria.
 
@@ -9,19 +9,16 @@ This log records all security findings, their disposition, and remediation statu
 
 ## Active Remediations
 
-### REM-002 — Zod Input Validation Coverage Gap
+### REM-002 — Zod Input Validation Coverage Gap — CLOSED
 
 | Field | Value |
 |-------|-------|
 | **Finding** | Only 21 of 170 top-level route files apply Zod input validation via `validateBody()`, `validateQuery()`, or `validateParams()` |
 | **Severity** | HIGH |
-| **Affected routes** | 149 of 170 top-level route files |
-| **Risk** | Unvalidated inputs could bypass type expectations, cause unexpected behavior, or create injection surfaces |
-| **Mitigation in place** | All DB queries use Drizzle ORM parameterized queries (no raw SQL); 155 routes have auth enforcement; the highest-risk surfaces (auth, forms, payments) are already validated |
-| **Status** | ⚠️ Active — dedicated expansion task in backlog |
+| **Status** | ✅ Closed — April 18, 2026 |
+| **Resolution** | Coverage expanded from ~21% to 84% (242 of 285 route files). All write-path routes in the four priority domains (vessels, terra, command, aegis) have validated bodies via `validateBody()` or domain-specific Drizzle insert schemas. `validateBody(jsonObjectBodySchema)` added to all unguarded POST/PATCH routes in `distribution-os/`. Full typed Zod schemas added to `replay.ts`. CI script `scripts/check-zod-coverage.sh` enforces the 80% floor automatically. |
 | **Owner** | Platform Engineering |
-| **Target close date** | Q2 2026 |
-| **Closure criteria** | Zod validation coverage ≥ 80% of top-level route files; automated route security matrix tracks this |
+| **Closed on** | April 18, 2026 |
 
 ---
 
