@@ -30,6 +30,10 @@ args = "check-deprecated-links"
 task = "workflow.run"
 args = "smoke-test-integrations"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "artifacts/lyte-command-center: web"
+
 [[workflows.workflow]]
 name = "check-deprecated-links"
 author = "agent"
@@ -51,6 +55,18 @@ args = "node scripts/qa/smoke-test-integrations.js"
 
 [workflows.workflow.metadata]
 isValidation = true
+
+[[workflows.workflow]]
+name = "artifacts/lyte-command-center: web"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "bash -c 'cd /home/runner/workspace/artifacts/lyte-command-center && exec node_modules/.bin/vite --config vite.config.ts --host 0.0.0.0'"
+waitForPort = 9090
+
+[workflows.workflow.metadata]
+outputType = "webview"
 
 [agent]
 stack = "PNPM_WORKSPACE"
