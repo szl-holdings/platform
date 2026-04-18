@@ -42,7 +42,7 @@ Authority: Phase 0 Truth Audit — verified against live repo
 | Artifact | Dir | Src Files | Classification | Disposition |
 |----------|-----|-----------|----------------|-------------|
 | szl-holdings-mobile | `artifacts/szl-holdings-mobile` | 167 | CANONICAL-MOBILE | Keep — primary mobile app; full Expo app |
-| cortex-mobile | `artifacts/cortex-mobile` | 2 | SHELL | Scaffold only; 8-domain concept not yet implemented |
+| cortex-mobile | `artifacts/cortex-mobile` | 0 | ARCHIVE | Archived; empty scaffold; no real code; ARCHIVED.md |
 
 ---
 
@@ -130,4 +130,4 @@ README was updated as part of Task #893. Current accuracy:
 | Packages: 51 | CLOSE | Actual: 49 dirs (34 lib + 15 artifact) |
 | Products table | ACCURATE | Deprecated apps correctly marked |
 | Node 24 | ACCURATE | Matches .replit modules |
-| CORTEX Mobile: "Alpha prep" | MISLEADING | Only 2 src files — scaffold, not alpha |
+| CORTEX Mobile: "Alpha prep" | RESOLVED | Archived in Task #921; ARCHIVED.md added |
