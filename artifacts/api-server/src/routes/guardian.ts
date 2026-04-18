@@ -54,8 +54,42 @@ import {
 } from "@szl-holdings/db";
 import { and, desc, eq, sql } from "drizzle-orm";
 import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { sendEmail, hasEmailProviderConfigured } from "../lib/email";
 
 const router: IRouter = Router();
+
+const GUARDIAN_ALERT_EMAIL = process.env.FOUNDER_ALERT_EMAIL ?? process.env.SZL_INTERNAL_EMAIL ?? "team@szlholdings.com";
+const GUARDIAN_SLACK_WEBHOOK = process.env.SLACK_WEBHOOK_URL;
+const APPROVALS_URL = process.env.APP_URL ? `${process.env.APP_URL}/command/operations/guardian/approvals` : "https://szlholdings.com/command/operations/guardian/approvals";
+
+async function notifyApprovalQueueFilled(params: {
+  requestId: string;
+  action: string;
+  tier: string;
+  approvalType: string;
+  agentId?: string | null;
+  toolId?: string | null;
+}): Promise<void> {
+  const label = params.approvalType === "dual" ? "Dual-Approval Required" : "Approval Required";
+  const subject = `[Guardian] ${label}: ${params.action}`;
+  const body = `A new Guardian approval request has been queued and is awaiting review.\n\nRequest ID: ${params.requestId}\nAction: ${params.action}\nTier: ${params.tier}\nType: ${params.approvalType === "dual" ? "Dual-approval" : "Single-approval"}\nAgent: ${params.agentId ?? "unknown"}\nTool: ${params.toolId ?? "unknown"}\n\nReview at: ${APPROVALS_URL}`;
+  const html = `<div style="font-family:sans-serif;max-width:600px;margin:0 auto"><div style="background:#7c3aed;color:#fff;padding:16px 24px;border-radius:8px 8px 0 0"><h1 style="margin:0;font-size:18px">🛡 Guardian: ${label}</h1></div><div style="background:#1e1e2e;color:#e2e8f0;padding:24px;border-radius:0 0 8px 8px"><table style="width:100%;border-collapse:collapse;margin-bottom:16px"><tr><td style="color:#94a3b8;padding:4px 0;font-size:13px;width:120px">Request ID</td><td style="color:#f8f8f8;font-size:13px">${params.requestId}</td></tr><tr><td style="color:#94a3b8;padding:4px 0;font-size:13px">Action</td><td style="color:#f8f8f8;font-size:13px">${params.action}</td></tr><tr><td style="color:#94a3b8;padding:4px 0;font-size:13px">Policy Tier</td><td style="color:#f8f8f8;font-size:13px">${params.tier}</td></tr><tr><td style="color:#94a3b8;padding:4px 0;font-size:13px">Type</td><td style="color:#f8f8f8;font-size:13px">${params.approvalType === "dual" ? "Dual-approval (2 reviewers required)" : "Single-approval"}</td></tr><tr><td style="color:#94a3b8;padding:4px 0;font-size:13px">Agent</td><td style="color:#f8f8f8;font-size:13px">${params.agentId ?? "unknown"}</td></tr><tr><td style="color:#94a3b8;padding:4px 0;font-size:13px">Tool</td><td style="color:#f8f8f8;font-size:13px">${params.toolId ?? "unknown"}</td></tr></table><a href="${APPROVALS_URL}" style="display:inline-block;background:#7c3aed;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-size:14px">Review in Command Center →</a></div></div>`;
+
+  if (hasEmailProviderConfigured()) {
+    sendEmail({ to: GUARDIAN_ALERT_EMAIL, subject, html, text: body }).catch((err: unknown) =>
+      logger.warn({ err }, "[guardian] Failed to send approval queue email notification"),
+    );
+  }
+
+  if (GUARDIAN_SLACK_WEBHOOK) {
+    const slackText = `*🛡 Guardian — ${label}*\n*Action:* ${params.action}\n*Tier:* ${params.tier} | *Type:* ${params.approvalType === "dual" ? "dual-approval" : "single-approval"}\n*Request ID:* \`${params.requestId}\`\n*Review:* <${APPROVALS_URL}|Open in Command Center>`;
+    fetch(GUARDIAN_SLACK_WEBHOOK, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: slackText }),
+    }).catch((err: unknown) => logger.warn({ err }, "[guardian] Failed to post approval Slack notification"));
+  }
+}
 
 const sharedDecisionEngine: GuardianDecisionEngine = getGuardianEngine();
 
@@ -1009,11 +1043,22 @@ router.post("/guardian/evaluate", authMiddleware(), validateBody(jsonObjectBodyS
 
       if (result.outcome === "require-approval" || result.outcome === "require-dual-approval") {
         const approvalType = result.outcome === "require-dual-approval" ? "dual" : "single";
-        await db.insert(guardianApprovalRequestsTable).values({
+        const inserted = await db.insert(guardianApprovalRequestsTable).values({
           requestId, agentId, sessionId, workflowId, orgId,
           tier: tierValue, action, toolId, approvalType, status: "pending",
           requiredApprovers: result.requiredApprovers, approvals: [], payload: redactedPayload,
-        }).onConflictDoNothing();
+        }).onConflictDoNothing().returning({ requestId: guardianApprovalRequestsTable.requestId });
+
+        if (inserted.length > 0) {
+          void notifyApprovalQueueFilled({
+            requestId,
+            action,
+            tier: String(tierValue),
+            approvalType,
+            agentId,
+            toolId,
+          });
+        }
       }
 
       logger.info({

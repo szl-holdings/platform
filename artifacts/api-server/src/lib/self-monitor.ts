@@ -3,6 +3,7 @@ import { lt, sql } from "drizzle-orm";
 import { LRUCache } from "lru-cache";
 import { publish, WS_CHANNELS } from "./websocket";
 import { logger } from "./logger";
+import { sendEmail, hasEmailProviderConfigured } from "./email";
 
 const POLL_INTERVAL_MS = 5 * 60_000;
 const SIGNAL_COOLDOWN_MS = 10 * 60_000;
@@ -78,6 +79,50 @@ async function createSignal(params: {
   body: string;
   metadata: Record<string, unknown>;
 }): Promise<void> {
+  const now = new Date().toISOString();
+  const signalsUrl = `${process.env.APP_URL ?? "https://szlholdings.com"}/command/operations/prism/signals`;
+
+  if (params.severity === "critical" || params.severity === "high") {
+    const severityLabel = params.severity === "critical" ? "🚨 CRITICAL" : "⚠️ HIGH";
+    const recommendedAction = (params.metadata["recommendedAction"] as string | undefined) ?? "Review logs and take corrective action immediately.";
+
+    if (hasEmailProviderConfigured()) {
+      const founderEmail = process.env.FOUNDER_ALERT_EMAIL ?? process.env.SZL_INTERNAL_EMAIL ?? "team@szlholdings.com";
+      sendEmail({
+        to: founderEmail,
+        subject: `[${severityLabel}] ${params.title}`,
+        html: `
+          <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
+            <div style="background:${params.severity === "critical" ? "#dc2626" : "#d97706"};color:#fff;padding:16px 24px;border-radius:8px 8px 0 0">
+              <h1 style="margin:0;font-size:18px">${severityLabel}: Platform Alert</h1>
+              <p style="margin:4px 0 0;font-size:13px;opacity:0.85">${now}</p>
+            </div>
+            <div style="background:#1e1e2e;color:#e2e8f0;padding:24px;border-radius:0 0 8px 8px">
+              <h2 style="margin:0 0 12px;font-size:16px;color:#f8f8f8">${params.title}</h2>
+              <p style="margin:0 0 16px;line-height:1.6;color:#cbd5e1">${params.body}</p>
+              <div style="background:#2d2d3d;border-radius:6px;padding:12px 16px;margin-bottom:16px">
+                <p style="margin:0;font-size:13px;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:0.05em">Recommended Action</p>
+                <p style="margin:6px 0 0;color:#e2e8f0;font-size:14px">${recommendedAction}</p>
+              </div>
+              <a href="${signalsUrl}" style="display:inline-block;background:#6366f1;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-size:14px">View in Command Center →</a>
+            </div>
+          </div>`,
+        text: `${severityLabel}: ${params.title}\n\n${params.body}\n\nRecommended Action: ${recommendedAction}\n\nTime: ${now}`,
+      }).catch((err: unknown) => logger.warn({ err }, "Self-monitor: failed to send founder email alert"));
+    }
+
+    const slackWebhook = process.env.SLACK_WEBHOOK_URL;
+    if (slackWebhook) {
+      fetch(slackWebhook, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text: `*${severityLabel}: ${params.title}*\n${params.body}\n\n*Recommended Action:* ${recommendedAction}\n<${signalsUrl}|View in Command Center>`,
+        }),
+      }).catch((err: unknown) => logger.warn({ err }, "Self-monitor: failed to post Slack founder alert"));
+    }
+  }
+
   try {
     const [signal] = await db.insert(lyteSignalsTable).values({
       source: "Lyte Self-Monitor",
@@ -99,14 +144,14 @@ async function createSignal(params: {
       severity: params.severity === "critical" ? "critical" : params.severity === "high" ? "warning" : "info",
       actionUrl: "/command/operations/prism/signals",
       isRead: false,
-      createdAt: new Date().toISOString(),
+      createdAt: now,
       type: params.severity === "critical" ? "error" : params.severity === "high" ? "warning" : "info",
       signal,
     });
 
     logger.info({ signalId: signal.id, severity: params.severity, title: params.title }, "Self-monitor: signal created");
   } catch (err) {
-    logger.warn({ err }, "Self-monitor: failed to create signal");
+    logger.warn({ err }, "Self-monitor: DB persistence failed for signal (alerts already dispatched)");
   }
 }
 

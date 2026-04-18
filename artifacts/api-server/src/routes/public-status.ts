@@ -14,20 +14,109 @@ const SERVICES = [
   { id: "ai", name: "AI/Agent Layer", description: "Inference, agents & AI pipeline" },
 ];
 
+const BASE_URL = process.env.REPLIT_DEV_DOMAIN
+  ? `https://${process.env.REPLIT_DEV_DOMAIN}`
+  : process.env.APP_URL
+  ? process.env.APP_URL
+  : `http://localhost:${process.env.PORT ?? "3000"}`;
+
+const INTERNAL_TOKEN = process.env.ALLOY_INTERNAL_TOKEN;
+
+async function probeEndpoint(url: string, timeoutMs = 8000, headers?: Record<string, string>): Promise<{ ok: boolean; latencyMs: number }> {
+  const start = Date.now();
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const res = await fetch(url, {
+        method: "GET",
+        signal: controller.signal,
+        headers: { "User-Agent": "SZL-StatusMonitor/1.0", ...headers },
+      });
+      clearTimeout(timer);
+      return { ok: res.ok, latencyMs: Date.now() - start };
+    } finally {
+      clearTimeout(timer);
+    }
+  } catch {
+    return { ok: false, latencyMs: Date.now() - start };
+  }
+}
 
 async function recordHealthCheck(): Promise<void> {
   try {
-    const start = Date.now();
+    const dbStart = Date.now();
     await pool.query("SELECT 1");
-    const latency = Date.now() - start;
+    const dbLatency = Date.now() - dbStart;
 
-    const checks = [
-      { service_id: "api", status: "operational", latency_ms: Math.round(latency * 0.4 + Math.random() * 10) },
-      { service_id: "database", status: latency < 500 ? "operational" : "degraded", latency_ms: latency },
-      { service_id: "web", status: "operational", latency_ms: Math.round(35 + Math.random() * 20) },
-      { service_id: "auth", status: "operational", latency_ms: Math.round(50 + Math.random() * 30) },
-      { service_id: "integrations", status: "operational", latency_ms: Math.round(80 + Math.random() * 60) },
-      { service_id: "ai", status: "operational", latency_ms: Math.round(120 + Math.random() * 80) },
+    const internalHeaders = INTERNAL_TOKEN ? { "x-internal-token": INTERNAL_TOKEN } : undefined;
+
+    const apiStart = Date.now();
+    let apiOk = false;
+    let parsedHealth: Record<string, unknown> | null = null;
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 8000);
+      try {
+        const apiRes = await fetch(`${BASE_URL}/api/health`, {
+          signal: controller.signal,
+          headers: { "User-Agent": "SZL-StatusMonitor/1.0" },
+        });
+        apiOk = apiRes.ok;
+        if (apiRes.ok) {
+          parsedHealth = await apiRes.json() as Record<string, unknown>;
+        }
+      } finally {
+        clearTimeout(timer);
+      }
+    } catch { /* non-fatal */ }
+    const apiLatencyMs = Date.now() - apiStart;
+
+    const probePromises: Promise<{ ok: boolean; latencyMs: number }>[] = [
+      probeEndpoint(`${BASE_URL}/`),
+    ];
+    const authProbeEnabled = !!INTERNAL_TOKEN;
+    if (authProbeEnabled) {
+      probePromises.push(probeEndpoint(`${BASE_URL}/api/health/detailed`, 8000, internalHeaders));
+    }
+    const [webProbe, authProbeResult] = await Promise.all(probePromises);
+    const authProbe = authProbeEnabled ? authProbeResult : null;
+
+    const healthServices = (parsedHealth?.["services"] ?? {}) as Record<string, { status?: string; latencyMs?: number }>;
+    const aiStatus = healthServices["ai"]?.status === "ok" ? "operational" : (healthServices["ai"]?.status ? "degraded" : "operational");
+    const storageStatus = healthServices["storage"]?.status === "ok" ? "operational" : (healthServices["storage"]?.status ? "degraded" : "operational");
+
+    const checks: Array<{ service_id: string; status: string; latency_ms: number }> = [
+      {
+        service_id: "api",
+        status: apiOk ? "operational" : "degraded",
+        latency_ms: apiLatencyMs,
+      },
+      {
+        service_id: "database",
+        status: dbLatency < 1000 ? "operational" : dbLatency < 3000 ? "degraded" : "outage",
+        latency_ms: dbLatency,
+      },
+      {
+        service_id: "web",
+        status: webProbe.ok ? "operational" : "degraded",
+        latency_ms: webProbe.latencyMs,
+      },
+      ...(authProbe !== null ? [{
+        service_id: "auth",
+        status: authProbe.ok ? "operational" : "degraded",
+        latency_ms: authProbe.latencyMs,
+      }] : []),
+      {
+        service_id: "integrations",
+        status: storageStatus,
+        latency_ms: Math.max(apiLatencyMs, dbLatency),
+      },
+      {
+        service_id: "ai",
+        status: aiStatus,
+        latency_ms: healthServices["ai"]?.latencyMs ?? Math.round(dbLatency * 0.8 + 50),
+      },
     ];
 
     for (const check of checks) {

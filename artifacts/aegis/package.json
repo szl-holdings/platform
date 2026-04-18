@@ -10,6 +10,9 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "validate-slides": "node scripts/validate-slides.js"
   },
+  "dependencies": {
+    "@szl-holdings/observability": "workspace:*"
+  },
   "devDependencies": {
     "@replit/vite-plugin-cartographer": "catalog:",
     "@replit/vite-plugin-dev-banner": "catalog:",

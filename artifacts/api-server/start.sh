@@ -46,8 +46,11 @@ if [ "${SKIP_NEXUS_BUILD:-0}" = "1" ]; then
 fi
 if [ "$NEEDS_NEXUS_BUILD" = "1" ]; then
   echo "[api-server start.sh] Building NEXUS frontend (mockup-sandbox)..."
-  (cd "$NEXUS_DIR" && NODE_ENV=production node_modules/.bin/vite build)
-  echo "[api-server start.sh] NEXUS frontend build complete."
+  if (cd "$NEXUS_DIR" && NODE_ENV=production node_modules/.bin/vite build); then
+    echo "[api-server start.sh] NEXUS frontend build complete."
+  else
+    echo "[api-server start.sh] WARN: NEXUS frontend build failed — API server will start without updated NEXUS UI." >&2
+  fi
 else
   echo "[api-server start.sh] NEXUS frontend build is up to date; skipping rebuild."
 fi
