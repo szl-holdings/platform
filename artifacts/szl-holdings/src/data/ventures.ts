@@ -1,6 +1,6 @@
 /**
  * Ventures data — public-facing metric values are sourced from the platform
- * claims registry (@szl-holdings/config/public-claims) via the local claims
+ * claims registry (@szl-holdings/platform-registry/public-claims) via the local claims
  * adapter (src/lib/claims.ts). Hardcoded values were replaced as part of the
  * April 2026 audit proof-point migration (task-1786).
  *

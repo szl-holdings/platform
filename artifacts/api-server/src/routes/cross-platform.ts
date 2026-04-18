@@ -37,6 +37,8 @@ import {
   type TraceQueryFilter,
 } from "@workspace/trace-graph";
 import { z } from "zod";
+import { db, partnerPilotsTable } from "@szl-holdings/db";
+import { and, eq, gte, lte, isNull, inArray, or, type SQL } from "drizzle-orm";
 
 const router = Router();
 
@@ -613,10 +615,13 @@ router.get(
 // ────────────────────────────────────────────────────────────────────────────
 // GET /api/cross-platform/pilots
 //
-// Pilot / design-partner / prospect pipeline. There is no dedicated pilots
-// table yet (tracked as a follow-up task). This endpoint derives partial pilot
-// signal from the trace-graph (active agents per domain → active pilots) and
-// supplements with structured demo records for the pre-table period.
+// Pilot / design-partner / prospect pipeline. Reads real records from the
+// `partner_pilots` table and joins each row with live trace-graph activity
+// for the row's `product` domain (weekly runs, pass rate, last-run, agents).
+//
+// Empty-state behavior: if the table has no rows, this endpoint returns
+// { accounts: [], pipeline: { ...zeros }, total: 0 } with dataSource set to
+// "partner_pilots:empty" — explicit empty state, no fabricated demo data.
 // ────────────────────────────────────────────────────────────────────────────
 
 const pilotsQuerySchema = z.object({
@@ -638,103 +643,177 @@ router.get(
         req.query as z.infer<typeof pilotsQuerySchema>;
 
       const { orgSlug } = tenantContextFromRequest(req);
+      const callerOrgIds = (req.user?.orgs ?? []).map((o) => o.orgId);
 
-      // Query window: default to last 30 days for the account-activity view
+      // Query window for the joined trace-graph activity columns
       const windowEnd   = before ?? new Date(Date.now()).toISOString();
       const windowStart = after  ?? new Date(Date.now() - 30 * 86400000).toISOString();
       const weekAgo     = new Date(Date.now() - 7 * 86400000).toISOString();
 
-      // Derive one "account" record per product domain, entirely from trace-graph.
-      // For each domain: pull 30-day traces, apply org-level isolation, compute
-      // live health metrics. Domains with zero runs are still returned (status:
-      // "inactive") so the surface shows the full product portfolio.
+      // ── Pull real pilot rows (tenant-scoped) ────────────────────────────
+      // Tenant rule: rows with organization_id NULL are global/demo and visible
+      // to everyone; rows with a concrete org are visible only to callers who
+      // are members of that org. Callers without orgs (anonymous / unauth in
+      // dev) only see global rows.
+      const conditions: SQL[] = [];
+      const tenantClause: SQL = callerOrgIds.length > 0
+        ? or(
+            isNull(partnerPilotsTable.organizationId),
+            inArray(partnerPilotsTable.organizationId, callerOrgIds),
+          )!
+        : isNull(partnerPilotsTable.organizationId);
+      conditions.push(tenantClause);
+
+      // Note: status filter is intentionally NOT applied at SQL level — the
+      // effective response status can be promoted to "at-risk" from live trace
+      // activity, so filtering must happen after that derivation. Product and
+      // date filters are safe to apply early because they reference stored
+      // columns directly.
+      if (product) conditions.push(eq(partnerPilotsTable.product, product));
+      if (after)   conditions.push(gte(partnerPilotsTable.createdAt, new Date(after)));
+      if (before)  conditions.push(lte(partnerPilotsTable.createdAt, new Date(before)));
+
+      const pilotRows = await db
+        .select()
+        .from(partnerPilotsTable)
+        .where(and(...conditions));
+
+      // ── Empty state: no fabricated data ────────────────────────────────
+      if (pilotRows.length === 0) {
+        sendSuccess(res, {
+          accounts: [],
+          pipeline: {
+            total:           0,
+            active:          0,
+            pilot:           0,
+            prospect:        0,
+            atRisk:          0,
+            inactive:        0,
+            totalRuns:       0,
+            weeklyRuns:      0,
+            contractValueUsd: 0,
+            // Backward-compatible aliases for existing UI consumers
+            totalDomains:    0,
+            activeDomains:   0,
+          },
+          total:       0,
+          liveData:    true,
+          dataSource:  "partner_pilots:empty",
+          productMeta: PRODUCT_META,
+        });
+        return;
+      }
+
+      // ── Join each pilot with live trace-graph activity for its product ──
       const accounts = await Promise.all(
-        PRODUCTS.map(async (dom) => {
-          const monthTraces = filterByOrg(
-            defaultQueryEngine.query(buildTenantFilter(orgSlug, {
-              domain: dom,
-              after:  windowStart,
-              before: windowEnd,
-              limit:  5000,
-            })).traces,
-            orgSlug,
-          );
+        pilotRows.map(async (row) => {
+          const productKey = row.product as Product;
+          const meta = PRODUCT_META[productKey];
 
-          // 7-day subset for the weekly run count
-          const weekTraces = monthTraces.filter(
-            (t) => t.startedAt >= weekAgo,
-          );
+          let totalRuns = 0;
+          let weeklyRuns = 0;
+          let errorCount = 0;
+          let passRate: number | null = null;
+          let agents: string[] = [];
+          let lastRunAt: string | null = null;
 
-          const totalRuns   = monthTraces.length;
-          const passCount   = monthTraces.filter(
-            (t) => t.status === "completed" && t.errors.length === 0,
-          ).length;
-          const errorCount  = monthTraces.filter((t) => t.errors.length > 0).length;
-          const passRate    = totalRuns > 0
-            ? Math.round((passCount / totalRuns) * 1000) / 10
-            : null;
+          if (meta) {
+            const monthTraces = filterByOrg(
+              defaultQueryEngine.query(buildTenantFilter(orgSlug, {
+                domain: productKey,
+                after:  windowStart,
+                before: windowEnd,
+                limit:  5000,
+              })).traces,
+              orgSlug,
+            );
 
-          // Distinct agents active on this domain
-          const agents = [...new Set(
-            monthTraces.map((t) => t.agentId).filter(Boolean),
-          )];
+            const weekTraces = monthTraces.filter((t) => t.startedAt >= weekAgo);
+            totalRuns  = monthTraces.length;
+            weeklyRuns = weekTraces.length;
+            errorCount = monthTraces.filter((t) => t.errors.length > 0).length;
+            const passCount = monthTraces.filter(
+              (t) => t.status === "completed" && t.errors.length === 0,
+            ).length;
+            passRate = totalRuns > 0
+              ? Math.round((passCount / totalRuns) * 1000) / 10
+              : null;
+            agents = [...new Set(monthTraces.map((t) => t.agentId).filter(Boolean))];
+            lastRunAt = monthTraces.map((t) => t.startedAt).sort().reverse()[0] ?? null;
+          }
 
-          // Most recent run timestamp
-          const lastRunAt = monthTraces
-            .map((t) => t.startedAt)
-            .sort()
-            .reverse()[0] ?? null;
-
-          // Derive status from live metrics
-          const derivedStatus =
-            totalRuns === 0           ? "inactive"
-            : passRate === null        ? "inactive"
-            : passRate >= 90          ? "active"
-            : passRate >= 70          ? "at-risk"
-            :                           "degraded";
+          // Promote stored status to "at-risk" when live activity is unhealthy.
+          // Stored status wins for prospect/inactive (lifecycle, not health).
+          const liveDerivedAtRisk =
+            (row.status === "active" || row.status === "pilot") &&
+            passRate !== null &&
+            passRate < 70;
+          const effectiveStatus = liveDerivedAtRisk ? "at-risk" : row.status;
 
           return {
-            accountId:    `DOMAIN-${dom.toUpperCase()}`,
-            domain:       dom,
-            name:         PRODUCT_META[dom].label,
-            icon:         PRODUCT_META[dom].icon,
-            color:        PRODUCT_META[dom].color,
-            drillBase:    PRODUCT_META[dom].drillBase,
-            status:       derivedStatus,
+            accountId:        row.externalId,
+            id:               row.id,
+            organizationId:   row.organizationId,
+            name:             row.name,
+            domain:           row.product,
+            product:          row.product,
+            status:           effectiveStatus,
+            storedStatus:     row.status,
+            tier:             row.tier,
+            region:           row.region,
+            industry:         row.industry,
+            primaryContact:   row.primaryContact,
+            contactEmail:     row.contactEmail,
+            pilotStartedAt:   row.pilotStartedAt?.toISOString() ?? null,
+            contractValueUsd: row.contractValueUsd,
+            notes:            row.notes,
+            metadata:         row.metadata,
+            icon:             meta?.icon ?? "●",
+            color:            meta?.color ?? "#888",
+            drillBase:        meta?.drillBase ?? "/",
+            label:            meta?.label ?? row.product,
             totalRuns,
-            weeklyRuns:   weekTraces.length,
+            weeklyRuns,
             passRate,
             errorCount,
             agents,
             lastRunAt,
-            dataSource:   "trace-graph:domain-activity",
+            dataSource:       "partner_pilots+trace-graph:domain-activity",
           };
         }),
       );
 
-      // Status + product filters
-      let filtered = accounts;
-      if (status) filtered = filtered.filter((a) => a.status === status);
-      if (product) filtered = filtered.filter((a) => a.domain === product);
+      // Apply status filter against the EFFECTIVE (post-promotion) status so
+      // ?status=at-risk catches rows promoted from active/pilot by live trace
+      // health, and ?status=active no longer returns rows now flagged at-risk.
+      const visibleAccounts = status
+        ? accounts.filter((a) => a.status === status)
+        : accounts;
 
       const pipeline = {
-        totalDomains:   accounts.length,
-        activeDomains:  accounts.filter((a) => a.status === "active").length,
-        atRisk:         accounts.filter((a) => a.status === "at-risk").length,
-        inactive:       accounts.filter((a) => a.status === "inactive").length,
-        totalRuns:      accounts.reduce((s, a) => s + a.totalRuns, 0),
-        weeklyRuns:     accounts.reduce((s, a) => s + a.weeklyRuns, 0),
+        total:            visibleAccounts.length,
+        active:           visibleAccounts.filter((a) => a.status === "active").length,
+        pilot:            visibleAccounts.filter((a) => a.status === "pilot").length,
+        prospect:         visibleAccounts.filter((a) => a.status === "prospect").length,
+        atRisk:           visibleAccounts.filter((a) => a.status === "at-risk").length,
+        inactive:         visibleAccounts.filter((a) => a.status === "inactive").length,
+        totalRuns:        visibleAccounts.reduce((s, a) => s + a.totalRuns, 0),
+        weeklyRuns:       visibleAccounts.reduce((s, a) => s + a.weeklyRuns, 0),
+        contractValueUsd: visibleAccounts.reduce((s, a) => s + (a.contractValueUsd ?? 0), 0),
+        // Backward-compatible aliases for existing UI consumers
+        totalDomains:     visibleAccounts.length,
+        activeDomains:    visibleAccounts.filter((a) => a.status === "active").length,
       };
 
-      const total     = filtered.length;
-      const paginated = filtered.slice(Number(offset), Number(offset) + Number(limit));
+      const total     = visibleAccounts.length;
+      const paginated = visibleAccounts.slice(Number(offset), Number(offset) + Number(limit));
 
       sendSuccess(res, {
         accounts: paginated,
         pipeline,
         total,
         liveData:    true,
-        dataSource:  "trace-graph:domain-activity",
+        dataSource:  "partner_pilots+trace-graph:domain-activity",
         productMeta: PRODUCT_META,
       });
     } catch (err) {

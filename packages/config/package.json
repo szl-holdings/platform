@@ -1,5 +1,5 @@
 {
-  "name": "@szl-holdings/config",
+  "name": "@szl-holdings/platform-registry",
   "version": "0.1.0",
   "private": true,
   "type": "module",

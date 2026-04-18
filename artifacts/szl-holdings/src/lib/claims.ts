@@ -2,7 +2,7 @@
  * Claims adapter for szl-holdings
  *
  * All public-facing numbers, taglines, and capability claims on this surface
- * are sourced from @szl-holdings/config/public-claims. This is the proof-point
+ * are sourced from @szl-holdings/platform-registry/public-claims. This is the proof-point
  * migration: instead of hardcoded strings in ventures.ts or component files,
  * every claim goes through this adapter so:
  *
@@ -18,7 +18,7 @@ import {
   getClaim,
   FOUNDER_YEARS_EXPERIENCE,
   type ClaimTruthValue,
-} from "@szl-holdings/config/public-claims";
+} from "@szl-holdings/platform-registry/public-claims";
 
 export interface ClaimValue {
   value: string;

@@ -353,7 +353,7 @@ importers:
         version: link:../../packages/business-events
       '@szl-holdings/config':
         specifier: workspace:*
-        version: link:../../packages/config
+        version: link:../../lib/config
       '@szl-holdings/connectors':
         specifier: workspace:*
         version: link:../../packages/connectors
@@ -1209,7 +1209,7 @@ importers:
         version: link:../../packages/brand-registry
       '@szl-holdings/config':
         specifier: workspace:*
-        version: link:../../packages/config
+        version: link:../../lib/config
       '@szl-holdings/covenant-policy':
         specifier: workspace:*
         version: link:../../lib/covenant-policy
@@ -1225,6 +1225,9 @@ importers:
       '@szl-holdings/observability':
         specifier: workspace:*
         version: link:../../lib/observability
+      '@szl-holdings/platform-registry':
+        specifier: workspace:*
+        version: link:../../packages/config
       '@szl-holdings/prism-bus':
         specifier: workspace:*
         version: link:../../lib/prism-bus
