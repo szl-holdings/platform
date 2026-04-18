@@ -40,7 +40,7 @@ This log records all security findings, their disposition, and remediation statu
 
 ---
 
-### REM-004 — In-Memory Session Store
+### ~~REM-004~~ — In-Memory Session Store — **CLOSED**
 
 | Field | Value |
 |-------|-------|
@@ -48,10 +48,11 @@ This log records all security findings, their disposition, and remediation statu
 | **Severity** | MEDIUM |
 | **Risk** | Sessions are lost on server restart; does not support horizontal scaling; a memory leak in session store could cause OOM |
 | **Mitigation in place** | Short session TTL (7 days); single-instance deployment (no horizontal scaling currently) |
-| **Status** | ⚠️ Planned — see `docs/known-gaps.md §Session Store` |
+| **Status** | ✅ **Closed — April 18, 2026** |
 | **Owner** | Platform Engineering |
 | **Target close date** | Before first paid production tenant |
 | **Closure criteria** | Session store backed by Redis or Postgres; sessions survive server restart |
+| **Resolution** | Sessions are already persisted in PostgreSQL via Drizzle ORM (`sessionsTable` in `@szl-holdings/db`). Session lifecycle (create, read, update, delete) is fully DB-backed in `artifacts/api-server/src/lib/auth.ts` and `artifacts/api-server/src/middlewares/session-policy.ts`. Sessions survive server restarts. Sliding-window refresh and impersonation TTLs are enforced at the DB layer. Redis is OPTIONAL/INACTIVE for rate-limiter caching only — not required for session persistence. No code changes were needed; the gap was already resolved in the implementation. |
 
 ---
 
@@ -60,6 +61,18 @@ This log records all security findings, their disposition, and remediation statu
 ---
 
 ## Closed Remediations
+
+### REM-C006 — In-Memory Session Store (CLOSED)
+
+| Field | Value |
+|-------|-------|
+| **Finding** | Session data described as stored in memory, not in a persistent store |
+| **Severity** | MEDIUM |
+| **Resolution** | Sessions are persisted in PostgreSQL via Drizzle ORM (`sessionsTable`). Session lifecycle is fully DB-backed across `artifacts/api-server/src/lib/auth.ts` (create/read/delete) and `artifacts/api-server/src/middlewares/session-policy.ts` (sliding-window refresh, impersonation TTL, force-revoke). Sessions survive server restarts. Redis remains OPTIONAL/INACTIVE for rate-limiter caching only. No code changes required — the implementation already satisfied the closure criteria. |
+| **Evidence** | Code inspection confirms: (1) `createOidcSession` inserts a row into `sessionsTable` (not a Map or in-memory cache), (2) `getSessionUser` queries `sessionsTable` filtered by `expiresAt > now()`, (3) on server restart, the DB retains all rows — any in-flight `sid` cookie is still valid and resolves correctly via the same DB query path. The token column has a `UNIQUE` constraint creating an index for O(1) lookups per request. |
+| **Status** | ✅ Closed |
+| **Closed date** | April 18, 2026 |
+| **Gap reference** | GAP-003 |
 
 ### REM-C001 — Real Secrets in Tracked Files (CLOSED — NOT FOUND)
 

@@ -51,7 +51,7 @@
 
 ---
 
-### GAP-003 — In-Memory Session Store
+### ~~GAP-003~~ — In-Memory Session Store — **CLOSED**
 
 | Field | Value |
 |-------|-------|
@@ -64,6 +64,7 @@
 | **Target** | Before first paid production tenant |
 | **Wave** | 3–4 |
 | **Tracking** | `docs/audit/security-remediation-log.md` REM-004 |
+| **Status** | **CLOSED — April 18, 2026** — Sessions are persisted in PostgreSQL via Drizzle ORM (`sessionsTable`). All create/read/update/delete operations go through the database. Sessions survive server restarts. Sliding-window refresh policy and impersonation TTL also enforced at the DB layer. Redis remains OPTIONAL/INACTIVE for rate-limiter caching only — no change needed for session durability. |
 
 ---
 
@@ -251,6 +252,7 @@
 | GAP-C007 | Real secrets in `.env.example` | April 16, 2026 — All values are safe placeholders |
 | GAP-C008 | Deployment doctrine ambiguity (Replit vs Azure) | April 16, 2026 — Resolved: Replit is primary. Documented in canonical-deployment-model.md. Direct fixes applied to: REPLIT_OPERATIONS.md (release section), docs/production-readiness.md (section 2 clarification), docs/DEPLOYMENT_MODEL.md (superseded notice). DEPLOYMENT_READINESS.md already deprecated. |
 | GAP-008 | `container-publish.yml` references archived `lyte-command-center` artifact | April 16, 2026 — `lyte-command-center` entry removed from build matrix and summary step |
+| GAP-003 | In-Memory Session Store | April 18, 2026 — Sessions already persisted in PostgreSQL via Drizzle ORM (`sessionsTable`). Sessions survive server restarts. Redis remains optional for rate-limiter caching only. |
 
 ---
 

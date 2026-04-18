@@ -33,12 +33,12 @@ These counts should be re-verified as the platform grows. The route security mat
 | Security — Validation | 21 of 170 top-level route files use Zod input validation helpers | High | In remediation |
 | Multi-Tenant Design | Tenant scope applied selectively, not universally | Medium | Closed |
 | Testing | ~27 test files vs. 173 total route files (~16% coverage ratio) | High | Planned |
-| Session Store | In-memory session store; no Redis in production | Medium | Planned |
+| Session Store | ~~In-memory session store~~ — Already persisted in PostgreSQL via Drizzle ORM | Medium | Closed — April 18, 2026 |
 | Observability | Sentry SDK integrated; external uptime monitor setup documented | Medium | In remediation |
 | CI | Integration tests do not run automatically on merge | Medium | Planned |
 | Admin Tooling | No dedicated admin interface for tenant/user management | Low | Planned |
 | Support Workflows | No ticketing or in-app support channel integration | Low | Planned |
-| Scalability | Single-instance session store; no multi-region failover | Medium | Planned |
+| Scalability | Single-instance deployment; no multi-region failover (session store is DB-backed) | Medium | Planned |
 | Analytics | Seeded / simulated data in most dashboards | Low | By design (pre-commercial) |
 | Documentation | Prior investor docs contained false absolute claims | Resolved | This document |
 
@@ -304,15 +304,15 @@ Audited all routes with /:orgId or /:orgSlug params across all files under src/r
 
 ## Section 9: Scalability
 
-### 9.1 In-Memory Session Store
+### ~~9.1 In-Memory Session Store~~ — CLOSED (April 18, 2026)
 
-**Gap:** Session management uses an in-memory store. Sessions are lost on server restart. Horizontal scaling across multiple server instances is not possible without a shared session store.
+**Finding (original):** Session management was described as using an in-memory store. Sessions would be lost on server restart. Horizontal scaling would require a shared session store.
 
-**Current State:** In-memory store. Single-instance deployment.
+**Actual State:** Sessions are persisted in PostgreSQL via Drizzle ORM (`sessionsTable` in `@szl-holdings/db`). All session lifecycle operations — create, read, update (sliding-window refresh), delete, and force-revoke — are fully database-backed. Sessions survive server restarts by design. Impersonation sessions are stored in the same table with a 1-hour TTL enforced at the DB layer.
 
-**Risk:** Medium for commercial deployment. Currently Very Low for demonstration environment.
+**Redis:** Remains OPTIONAL/INACTIVE. Used by the sliding-window rate limiter and caching layer only — not involved in session persistence. Falls back to in-memory rate limiting when `REDIS_URL` is absent (acceptable for current single-instance deployment).
 
-**Remediation:** Azure Cache for Redis is included in IaC templates. 1 day of engineering to wire up. Activate at revenue phase.
+**Risk:** Resolved. No action required before first paid tenant.
 
 ---
 
