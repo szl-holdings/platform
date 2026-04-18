@@ -125,7 +125,7 @@ export default function ControlPlanePage() {
                 </p>
               </div>
               <h1 style={{ fontSize: "clamp(1.75rem, 3.5vw, 2.5rem)", fontWeight: 700, letterSpacing: "-0.025em", color: "hsl(38,12%,94%)", lineHeight: 1.1, marginBottom: "0.75rem", fontFamily: "var(--font-display)" }}>
-                Control Plane
+                Governance API
               </h1>
               <p style={{ fontSize: "0.9375rem", lineHeight: 1.7, color: "hsl(210,5%,58%)", maxWidth: "34rem" }}>
                 Centralized platform operations, service health, connector management, and feature governance across the SZL ecosystem.

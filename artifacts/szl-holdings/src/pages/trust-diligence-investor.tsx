@@ -12,7 +12,7 @@ const SECTIONS = [
       "Domain pack architecture creates compounding depth: each vertical (Legal, Maritime, Real Estate, Defense) deepens independently",
       "Digital twin layer enables state modeling that competitors cannot replicate without equivalent data history",
       "Proof Chain provides tamper-evident decision lineage — a structural compliance advantage in regulated markets",
-      "GraphQL control plane and model mesh are proprietary — not off-the-shelf middleware",
+      "Governance API and governed inference layer are proprietary — not off-the-shelf middleware",
     ],
   },
   {
@@ -48,7 +48,7 @@ const SECTIONS = [
 ];
 
 const KEY_QUESTIONS = [
-  { q: "What makes this defensible?", a: "Architecture depth (Proof Chain, model mesh, domain packs), regulatory moat in HITL-first design, and compounding data advantage across verticals." },
+  { q: "What makes this defensible?", a: "Architecture depth (Proof Chain, governed inference layer, domain packs), regulatory moat in HITL-first design, and compounding data advantage across verticals." },
   { q: "Why can't incumbents copy this?", a: "Legacy enterprise software cannot retrofit audit-grade AI governance without rebuilding core data and workflow layers. This was designed HITL-first." },
   { q: "What is the expansion thesis?", a: "Each domain pack deploys on shared governance rails. Legal, Maritime, Real Estate, and Defense are live; additional verticals are additive, not multiplicative in cost." },
   { q: "Where is the audit-grade governance?", a: "Proof Chain, decision lineage export, and override logging are architectural — present in every deployment, not configurable off." },

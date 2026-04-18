@@ -18,7 +18,7 @@ const SIMULATION_CAPABILITIES = [
   {
     icon: Shield,
     name: "Governed sandbox",
-    desc: "Simulation runs execute in a fully isolated sandbox. No simulated state leaks into the live Outcome Graph, Worldline, or Domain Twin records. Every run is explicitly scoped, time-bounded, and attributed to the requesting principal.",
+    desc: "Simulation runs execute in a fully isolated sandbox. No simulated state leaks into the live Outcome Graph, audit timeline, or Domain Twin records. Every run is explicitly scoped, time-bounded, and attributed to the requesting principal.",
   },
   {
     icon: Sliders,
@@ -28,7 +28,7 @@ const SIMULATION_CAPABILITIES = [
   {
     icon: Clock,
     name: "Temporal replay",
-    desc: "The simulation engine can replay past Worldline events under current model versions to show how current AI capabilities would have handled historical situations — useful for governance validation and model upgrade assessments.",
+    desc: "The simulation engine can replay past audit timeline events under current model versions to show how current AI capabilities would have handled historical situations — useful for governance validation and model upgrade assessments.",
   },
   {
     icon: FlaskConical,
@@ -41,7 +41,7 @@ const SIMULATION_MODES = [
   { mode: "Prospective scenario", desc: "Model the effect of future signal changes or external events on current Twin state and pending workflows." },
   { mode: "Parameter sweep", desc: "Run the same scenario across a range of parameter values to understand the sensitivity of outcomes to configuration choices." },
   { mode: "Branch comparison", desc: "Compare two or more decision paths from the same starting state to determine which produces the best projected outcome under current policy." },
-  { mode: "Temporal replay", desc: "Re-run a historical Worldline segment under a different model version or configuration to validate upgrade decisions." },
+  { mode: "Temporal replay", desc: "Re-run a historical audit timeline segment under a different model version or configuration to validate upgrade decisions." },
   { mode: "Covenant stress test", desc: "Subject a proposed Covenant Policy configuration to synthetic signal load to verify it enforces correctly before deployment." },
 ];
 
@@ -129,10 +129,10 @@ export default function DocsSimulationPage() {
             <h2 className="mt-3 text-2xl font-semibold text-white">How simulation runs are governed</h2>
             <div className="mt-6 space-y-3">
               {[
-                { rule: "Full isolation", detail: "Simulation runs execute against a point-in-time snapshot of the Outcome Graph. No write paths from a simulation sandbox reach live Twin state, the Worldline, or the approval queue." },
+                { rule: "Full isolation", detail: "Simulation runs execute against a point-in-time snapshot of the Outcome Graph. No write paths from a simulation sandbox reach live Twin state, the audit timeline, or the approval queue." },
                 { rule: "Attribution", detail: "Every simulation run is attributed to the requesting principal with their role and timestamp recorded. Run history is retained for governance review and audit access." },
                 { rule: "Covenant Policy enforcement", detail: "Simulation sandboxes enforce the same Covenant Policy rules as the live platform. A run cannot be configured to bypass policy constraints — stress testing policy is a supported use case; bypassing it is not." },
-                { rule: "Expiry", detail: "Simulation runs and their outputs expire after a configurable retention window. Expired runs are purged from the sandbox — they are never written to the Worldline or Proof Chain of live records." },
+                { rule: "Expiry", detail: "Simulation runs and their outputs expire after a configurable retention window. Expired runs are purged from the sandbox — they are never written to the audit timeline or Proof Chain of live records." },
               ].map((r) => (
                 <div key={r.rule} className="flex gap-4 rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-4">
                   <div className="w-44 flex-shrink-0 text-xs font-semibold text-white/55">{r.rule}</div>
@@ -151,8 +151,8 @@ export default function DocsSimulationPage() {
               {[
                 { label: "Outcome Graph", href: "/docs/outcome-graph", detail: "The graph traversal engine simulation runs against" },
                 { label: "Covenant Policy", href: "/docs/covenant-policy", detail: "Policy rules enforced inside simulation sandboxes" },
-                { label: "Worldline", href: "/docs/worldline", detail: "Temporal replay uses Worldline event sequences" },
-                { label: "Model Mesh", href: "/docs/model-mesh", detail: "Inference layer invoked during simulation runs" },
+                { label: "Audit Timeline", href: "/docs/worldline", detail: "Temporal replay uses audit timeline event sequences" },
+                { label: "Governed Inference", href: "/docs/model-mesh", detail: "Inference layer invoked during simulation runs" },
                 { label: "Architecture", href: "/docs/architecture", detail: "Full platform pipeline and three-tier design" },
                 { label: "Back to docs hub", href: "/docs", detail: "Full documentation index" },
               ].map((link) => (

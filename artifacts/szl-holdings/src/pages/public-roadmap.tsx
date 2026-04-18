@@ -64,10 +64,10 @@ const NEXT = [
     area: "Platform maturity",
     color: "hsl(145,62%,46%)",
     items: [
-      { label: "GraphQL control plane API documentation", done: false },
+      { label: "Governance API documentation", done: false },
       { label: "SCIM 2.0 provisioning testing with enterprise identity providers", done: false },
       { label: "Azure AD multi-tenant SSO validation with design partners", done: false },
-      { label: "Worldline and Model Mesh stability for enterprise load", done: false },
+      { label: "Audit timeline and governed inference stability for enterprise load", done: false },
     ],
   },
 ];

@@ -40,7 +40,7 @@ const hubPages = [
     label: "Moat",
     title: "Why It's Hard to Copy",
     description:
-      "Shared spine, pack twins, worldline, proof chain, Model Mesh, GraphQL control plane, Microsoft-native distribution.",
+      "Shared spine, pack twins, audit timeline, proof chain, governed inference layer, governance API, Microsoft-native distribution.",
   },
   {
     href: "/investors/roadmap",

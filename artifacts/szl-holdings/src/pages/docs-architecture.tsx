@@ -131,10 +131,10 @@ export default function DocsArchitecturePage() {
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/40">Related documentation</p>
             <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {[
-                { label: "Control plane", href: "/docs/control-plane", detail: "GraphQL control plane API and tenant management" },
-                { label: "Worldline", href: "/docs/worldline", detail: "The unified chronological event and decision timeline" },
+                { label: "Covenant Policy", href: "/docs/control-plane", detail: "Governance API and Covenant Policy management" },
+                { label: "Audit Timeline", href: "/docs/worldline", detail: "The unified chronological event and decision record" },
                 { label: "Proof chain", href: "/docs/proof-chain", detail: "How outputs are traced back to source signals" },
-                { label: "Model mesh", href: "/docs/model-mesh", detail: "AI model routing, versioning, and cost management" },
+                { label: "Governed inference", href: "/docs/model-mesh", detail: "AI model routing, versioning, and cost management" },
                 { label: "Trust", href: "/docs/trust", detail: "Trust controls and governance model documentation" },
                 { label: "Back to docs hub", href: "/docs", detail: "Full documentation index" },
               ].map((link) => (

@@ -33,12 +33,12 @@ const DILIGENCE_PATHS = [
     colorBorder: "hsla(258,55%,68%,0.20)",
     audience: "Technical Evaluator",
     question: "How is this actually built?",
-    summary: "Architecture layers, integration surface, control plane, proof chain, and data handling.",
+    summary: "Architecture layers, integration surface, Governance API, proof chain, and data handling.",
     briefHref: "/trust/diligence/technical",
     links: [
       { label: "Platform architecture", href: "/architecture" },
       { label: "Security controls", href: "/trust/security" },
-      { label: "Control plane docs", href: "/docs/control-plane" },
+      { label: "Governance API docs", href: "/docs/control-plane" },
       { label: "Proof chain docs", href: "/docs/proof-chain" },
     ],
   },
@@ -106,7 +106,7 @@ const TRUST_PAGES = [
     colorMuted: "hsla(258,55%,68%,0.08)",
     colorBorder: "hsla(258,55%,68%,0.20)",
     label: "AI Policy",
-    headline: "AI usage model, source-grounding, model mesh governance",
+    headline: "AI usage model, source-grounding, governed inference layer",
     items: ["Source-grounded assertions only", "Model isolation — no training on client data", "Confidence scoring and contradiction detection", "Generated content always labeled as such"],
   },
   {
@@ -665,8 +665,8 @@ export default function TrustPage() {
                   </h2>
                   <p style={{ fontSize: "0.9375rem", lineHeight: 1.68, color: "hsl(214,7%,58%)", maxWidth: "50ch" }}>
                     The standalone architecture page explains every layer of Lyte + Alloy — Lyte as command layer,
-                    Alloy as action spine, pack-specific twins, Proof Chain, Worldline, GraphQL control plane,
-                    and model mesh — in terms of business value, trust, and defensibility.
+                    Alloy as action spine, pack-specific twins, Proof Chain, external intelligence, the governance
+                    API, and the governed inference layer — in terms of business value, trust, and defensibility.
                   </p>
                 </div>
                 <div style={{ flexShrink: 0 }}>

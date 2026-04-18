@@ -85,41 +85,41 @@ const ARCH_SECTIONS = [
     id: "worldline",
     icon: Globe,
     number: "06",
-    label: "Worldline",
+    label: "External Intelligence",
     headline: "External intelligence context without external data liability.",
     color: "hsl(200,70%,52%)",
     colorMuted: "hsla(200,70%,52%,0.08)",
     colorBorder: "hsla(200,70%,52%,0.20)",
-    business: "Operational intelligence is worthless without external context. Market movements, regulatory changes, counterparty events, and external signals all affect the meaning of internal data. Worldline is the platform layer that ingests, structures, and attributes external intelligence — without importing the liability of unstructured external data into the governance model.",
-    product: "Worldline ingests external data through defined source connectors, applies provenance tagging at ingestion, and makes that data available to signal enrichment and interpretation stages. External intelligence appears in the platform with its origin, timestamp, and freshness clearly marked — never silently mixed with source-of-record data.",
-    trust: "Every Worldline data point carries a provenance record: origin system, ingestion timestamp, schema version, and processing status. External data cannot overwrite internal source-of-record data. Retention policies for external data are defined per source category and enforced at the storage layer.",
-    operational: "Worldline source connectors are configured by tenant admins. No silent collection from unconfigured sources. Source health is monitored continuously. Ingestion failures are surfaced as operational events — not silently dropped.",
+    business: "Operational intelligence is worthless without external context. Market movements, regulatory changes, counterparty events, and external signals all affect the meaning of internal data. The external intelligence layer ingests, structures, and attributes external context — without importing the liability of unstructured external data into the governance model.",
+    product: "External intelligence ingests data through defined source connectors, applies provenance tagging at ingestion, and makes that data available to signal enrichment and interpretation stages. External intelligence appears in the platform with its origin, timestamp, and freshness clearly marked — never silently mixed with source-of-record data.",
+    trust: "Every external data point carries a provenance record: origin system, ingestion timestamp, schema version, and processing status. External data cannot overwrite internal source-of-record data. Retention policies for external data are defined per source category and enforced at the storage layer.",
+    operational: "External intelligence source connectors are configured by tenant admins. No silent collection from unconfigured sources. Source health is monitored continuously. Ingestion failures are surfaced as operational events — not silently dropped.",
   },
   {
     id: "graphql",
     icon: Network,
     number: "07",
-    label: "GraphQL control plane",
+    label: "Governance API",
     headline: "A typed, governed interface for every data access and action.",
     color: "hsl(258,55%,68%)",
     colorMuted: "hsla(258,55%,68%,0.08)",
     colorBorder: "hsla(258,55%,68%,0.20)",
-    business: "Unstructured data access is the source of most governance failures in enterprise platforms — data that should be scoped leaks through undisciplined interfaces. The GraphQL control plane gives the platform a typed, governed surface for all data access: every query is tenant-scoped, every mutation is permission-checked, every interface is versioned.",
-    product: "The control plane serves as the single interface layer between all platform surfaces (Lyte, Alloy, packs) and the underlying data and connector services. Frontend surfaces, mobile clients, external integrations, and the audit layer all operate through the same typed interface — no side channels.",
-    trust: "Every GraphQL resolver is tenant-scoped by middleware. Cross-tenant data access is not possible through the control plane. Every mutation goes through the permission model. Interface versioning allows governance changes to propagate uniformly across all platform surfaces.",
-    operational: "The control plane is monitored for query latency, error rates, and resolver performance. Schema changes are versioned and backward-compatible by policy. Breaking changes require a migration path — not a flag day.",
+    business: "Unstructured data access is the source of most governance failures in enterprise platforms — data that should be scoped leaks through undisciplined interfaces. The governance API gives the platform a typed, governed surface for all data access: every query is tenant-scoped, every mutation is permission-checked, every interface is versioned.",
+    product: "The governance API serves as the single interface layer between all platform surfaces (Lyte, Alloy, packs) and the underlying data and connector services. Frontend surfaces, mobile clients, external integrations, and the audit layer all operate through the same typed interface — no side channels.",
+    trust: "Every resolver is tenant-scoped by middleware. Cross-tenant data access is not possible through the governance API. Every mutation goes through the permission model. Interface versioning allows governance changes to propagate uniformly across all platform surfaces.",
+    operational: "The governance API is monitored for query latency, error rates, and resolver performance. Schema changes are versioned and backward-compatible by policy. Breaking changes require a migration path — not a flag day.",
   },
   {
     id: "modelmesh",
     icon: Brain,
     number: "08",
-    label: "Model mesh",
+    label: "Governed Inference",
     headline: "Governed model selection, inference, and output validation.",
     color: "hsl(258,55%,68%)",
     colorMuted: "hsla(258,55%,68%,0.08)",
     colorBorder: "hsla(258,55%,68%,0.20)",
-    business: "AI capabilities differentiate the platform — but only if they operate under governance that buyers and capital partners can trust. The Model Mesh is the configuration and governance layer for all AI inference in the platform: model selection, prompt templates, context scoping, output validation, and training isolation.",
-    product: "The Model Mesh allows per-tenant and per-task model configuration. Different actions can use different models. Prompt templates are versioned and governed. Output validation — confidence scoring, contradiction detection, source-grounding checks — runs before any AI output reaches a review queue.",
+    business: "AI capabilities differentiate the platform — but only if they operate under governance that buyers and capital partners can trust. The governed inference layer is the configuration and governance surface for all AI inference in the platform: model selection, prompt templates, context scoping, output validation, and training isolation.",
+    product: "The governed inference layer allows per-tenant and per-task model configuration. Different actions can use different models. Prompt templates are versioned and governed. Output validation — confidence scoring, contradiction detection, source-grounding checks — runs before any AI output reaches a review queue.",
     trust: "Tenant data is never used for model training. Model providers receive only anonymized, scoped context — never raw client data. Training isolation is architectural, not a policy promise. Every model interaction is logged with the model version, prompt template version, and output confidence score.",
     operational: "Model provider health is monitored. Inference failures surface as operational events. Model version changes are logged in the audit record. Prompt template changes require a versioned deployment — not an ad-hoc update.",
   },
@@ -146,7 +146,7 @@ const ARCH_SECTIONS = [
     color: "hsl(358,75%,58%)",
     colorMuted: "hsla(358,75%,58%,0.08)",
     colorBorder: "hsla(358,75%,58%,0.20)",
-    business: "Any individual piece of this architecture can be copied. The moat is the combination: a six-stage governed pipeline, tenant-isolated at every layer, with domain packs that extend without bypassing governance, a proof chain attached to every action, external intelligence structured by Worldline, a typed control plane, a governed model mesh, and approval infrastructure built into the execution model — all designed for external review. Assembling these properties coherently takes years, not quarters.",
+    business: "Any individual piece of this architecture can be copied. The moat is the combination: a six-stage governed pipeline, tenant-isolated at every layer, with domain packs that extend without bypassing governance, a proof chain attached to every action, a structured external intelligence layer, a typed governance API, a governed inference layer, and approval infrastructure built into the execution model — all designed for external review. Assembling these properties coherently takes years, not quarters.",
     product: "The product moat is the coherence: signal, command, action, approval, audit, and external intelligence all integrated in a platform that feels native to the operator's domain through pack-specific surfaces — not a generic tool with domain templates applied.",
     trust: "The trust moat is completeness: every layer has a governance property, every claim is backed by architecture rather than policy, and the entire system is designed to withstand external diligence review. No layer is exempt, no bypass is silent, no promise requires trusting the vendor.",
     operational: "The operational moat is the embedded observability: health monitoring, retry and replay, structured incidents, and runbook-backed procedures are not features added later — they are part of the architecture from the start. A competitor starting fresh would need to build all of this while simultaneously shipping product.",
@@ -207,7 +207,7 @@ function SectionCard({ section, i }: { section: typeof ARCH_SECTIONS[0]; i: numb
 export default function ArchitecturePage() {
   usePageMeta({
     title: "System Architecture — SZL Holdings",
-    description: "Why this architecture exists, how Lyte, Alloy, packs, Proof Chain, Worldline, GraphQL control plane, model mesh, and trust infrastructure work together — and why this is hard to copy.",
+    description: "Why this architecture exists, how Lyte, Alloy, packs, Proof Chain, external intelligence, the governance API, governed inference, and trust infrastructure work together — and why this is hard to copy.",
     canonical: "https://szlholdings.com/architecture",
   });
 
@@ -304,9 +304,9 @@ export default function ArchitecturePage() {
         <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
           <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
             <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(258,55%,68%)", marginBottom: "0.75rem" }}>Control plane</p>
+              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(258,55%,68%)", marginBottom: "0.75rem" }}>Governance API</p>
               <h2 style={{ fontSize: "clamp(1.375rem,2.5vw,1.875rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.22, maxWidth: "36ch", marginBottom: "2rem" }}>
-                GraphQL as the single, tenant-scoped data access layer.
+                The single, tenant-scoped data access layer.
               </h2>
             </m.div>
             <ControlPlaneDiagram />

@@ -34,7 +34,7 @@ const PRINCIPLES = [
   {
     icon: ShieldCheck,
     title: "Model isolation and tenant boundaries",
-    body: "Tenant data is never used for model training. Model selection, prompt templates, and inference boundaries are governed through the Model Mesh configuration layer. Each tenant's context is strictly scoped before inference.",
+    body: "Tenant data is never used for model training. Model selection, prompt templates, and inference boundaries are governed through the governed inference layer. Each tenant's context is strictly scoped before inference.",
   },
 ];
 
@@ -60,7 +60,7 @@ const HARD_BOUNDARIES = [
 export default function TrustAIPage() {
   usePageMeta({
     title: "AI Policy — Trust Center · SZL Holdings",
-    description: "AI usage model, source-grounding, model mesh governance, and generated-vs-source controls for Lyte + Alloy.",
+    description: "AI usage model, source-grounding, governed inference layer, and generated-vs-source controls for Lyte + Alloy.",
     canonical: "https://szlholdings.com/trust/ai",
   });
 
@@ -168,7 +168,7 @@ export default function TrustAIPage() {
             <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
               <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
                 <Network size={14} color="hsl(258,55%,68%)" />
-                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(258,55%,68%)" }}>Model Mesh</p>
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(258,55%,68%)" }}>Governed Inference</p>
               </div>
               <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "28ch", marginBottom: "3rem" }}>
                 How model selection and inference is governed.

@@ -95,13 +95,13 @@ const TECHNICAL_DOCS = [
   },
   {
     icon: Clock,
-    title: "Worldline",
+    title: "Audit Timeline",
     desc: "The unified, immutable chronological record of all signal, decision, and execution events in a workflow.",
     href: "/docs/worldline",
   },
   {
     icon: Cpu,
-    title: "Model Mesh",
+    title: "Governed Inference",
     desc: "AI model routing, versioning, cost tracking, quality signals, and governance integration across all inference.",
     href: "/docs/model-mesh",
   },

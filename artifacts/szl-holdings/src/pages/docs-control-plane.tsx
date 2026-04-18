@@ -8,32 +8,32 @@ const CAPABILITIES = [
   {
     icon: Settings,
     name: "Tenant configuration",
-    desc: "Operators configure their environment through the control plane — signal sources, connector endpoints, threshold parameters, domain vocabulary, and integration credentials. Configuration changes are versioned and audited.",
+    desc: "Operators configure their environment through the Governance API — signal sources, connector endpoints, threshold parameters, domain vocabulary, and integration credentials. Configuration changes are versioned and audited.",
   },
   {
     icon: Users,
     name: "Role and access management",
-    desc: "Role-scoped access is enforced at the control plane layer. Every principal in the system has a defined role with explicit capabilities — what they can see, what they can act on, and what requires additional approval.",
+    desc: "Role-scoped access is enforced at the Governance API layer. Every principal in the system has a defined role with explicit capabilities — what they can see, what they can act on, and what requires additional approval.",
   },
   {
     icon: BarChart3,
     name: "Observability and health",
-    desc: "The control plane exposes system health, signal processing metrics, Twin staleness indicators, and approval queue depth through structured queries. Operators can monitor the state of their environment without raw system access.",
+    desc: "The Governance API exposes system health, signal processing metrics, Twin staleness indicators, and approval queue depth through structured queries. Operators can monitor the state of their environment without raw system access.",
   },
   {
     icon: RefreshCw,
     name: "Workflow orchestration control",
-    desc: "Workflow definitions, routing rules, and execution parameters are managed through the control plane. Changes take effect immediately with full audit trail — no redeploy required for configuration-level updates.",
+    desc: "Workflow definitions, routing rules, and execution parameters are managed through the Governance API. Changes take effect immediately with full audit trail — no redeploy required for configuration-level updates.",
   },
   {
     icon: Lock,
     name: "Audit and governance access",
-    desc: "The control plane provides structured access to audit records, approval history, and decision logs. Governance teams can query decision history without requiring raw database access or system-level credentials.",
+    desc: "The Governance API provides structured access to audit records, approval history, and decision logs. Governance teams can query decision history without requiring raw database access or system-level credentials.",
   },
   {
     icon: Terminal,
     name: "Integration management",
-    desc: "External integrations — M365, AIS feeds, CISA, NVD, domain APIs — are registered, authorized, and monitored through the control plane. Connection health, last-sync timestamps, and error states are surfaced in structured form.",
+    desc: "External integrations — M365, AIS feeds, CISA, NVD, domain APIs — are registered, authorized, and monitored through the Governance API. Connection health, last-sync timestamps, and error states are surfaced in structured form.",
   },
 ];
 
@@ -82,7 +82,7 @@ export default function DocsControlPlanePage() {
               Covenant Policy is the governance rules engine in Lyte + Alloy. It defines — in explicit,
               versioned, auditable form — what the platform is and is not permitted to do on behalf of any
               principal. No model invocation, workflow action, or data export occurs outside the boundary
-              defined by the tenant's active Covenant. The control plane API is the surface through which
+              defined by the tenant's active Covenant. The Governance API is the surface through which
               Covenants are configured, monitored, and enforced.
             </p>
           </div>
@@ -113,12 +113,12 @@ export default function DocsControlPlanePage() {
         {/* Schema examples */}
         <section className="border-b border-white/10">
           <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/40">Control plane API</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/40">Governance API</p>
             <h2 className="mt-3 text-2xl font-semibold text-white">Representative Covenant Policy query shapes</h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-white/55">
-              These examples represent the shape and style of Covenant Policy queries through the GraphQL
-              control plane. Specific field availability depends on the tenant configuration and role scope
-              of the requesting principal.
+              These examples represent the shape and style of Covenant Policy queries through the governance
+              API. Specific field availability depends on the tenant configuration and role scope of the
+              requesting principal.
             </p>
             <div className="mt-8 space-y-4">
               {SCHEMA_EXAMPLES.map((ex) => (
@@ -137,7 +137,7 @@ export default function DocsControlPlanePage() {
         <section className="border-b border-white/10">
           <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/40">Access model</p>
-            <h2 className="mt-3 text-2xl font-semibold text-white">Role-scoped control plane access</h2>
+            <h2 className="mt-3 text-2xl font-semibold text-white">Role-scoped Governance API access</h2>
             <div className="mt-6 space-y-3">
               {[
                 { role: "Operator", access: "Can view observability surfaces, submit workflow approvals, and read audit records within their scope." },
@@ -163,7 +163,7 @@ export default function DocsControlPlanePage() {
                 { label: "Outcome Graph", href: "/docs/outcome-graph", detail: "The signal and state fabric governed by Covenant Policy" },
                 { label: "Proof Chain", href: "/docs/proof-chain", detail: "How outputs are traced to source signals" },
                 { label: "Simulation", href: "/docs/simulation", detail: "Test Covenant configurations before deploying" },
-                { label: "Worldline", href: "/docs/worldline", detail: "Chronological event and decision timeline" },
+                { label: "Audit Timeline", href: "/docs/worldline", detail: "Chronological event and decision record" },
                 { label: "Trust", href: "/docs/trust", detail: "Trust controls and governance documentation" },
                 { label: "Back to docs hub", href: "/docs", detail: "Full documentation index" },
               ].map((link) => (

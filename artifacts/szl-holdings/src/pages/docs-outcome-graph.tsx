@@ -153,8 +153,8 @@ export default function DocsOutcomeGraphPage() {
             <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {[
                 { label: "Proof Chain", href: "/docs/proof-chain", detail: "Audit trail derived from the Outcome Graph" },
-                { label: "Worldline", href: "/docs/worldline", detail: "Temporal event sequence that the graph resolves against" },
-                { label: "Model Mesh", href: "/docs/model-mesh", detail: "Inference layer that produces Inference nodes" },
+                { label: "Audit Timeline", href: "/docs/worldline", detail: "Temporal event sequence that the graph resolves against" },
+                { label: "Governed Inference", href: "/docs/model-mesh", detail: "Inference layer that produces Inference nodes" },
                 { label: "Simulation", href: "/docs/simulation", detail: "Forward-looking graph traversal for decision modeling" },
                 { label: "Architecture", href: "/docs/architecture", detail: "Full platform pipeline and three-tier design" },
                 { label: "Back to docs hub", href: "/docs", detail: "Full documentation index" },

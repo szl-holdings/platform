@@ -15,7 +15,7 @@ const layers = [
     icon: Brain,
     name: "Intelligence Layer",
     description: "Classifies, enriches, and correlates signals. AI models provide recommendations, but every output is source-grounded and confidence-scored.",
-    components: ["Model Mesh", "Signal Forge", "Worldline enrichment", "Contradiction detection"],
+    components: ["Governed Inference", "Signal Forge", "External intelligence enrichment", "Contradiction detection"],
   },
   {
     icon: Workflow,
@@ -32,8 +32,8 @@ const layers = [
   {
     icon: Database,
     name: "Data Layer",
-    description: "PostgreSQL with tenant isolation, GraphQL control plane, and structured schema for every domain pack.",
-    components: ["Tenant-scoped queries", "GraphQL API", "Schema registry", "Drizzle ORM"],
+    description: "PostgreSQL with tenant isolation, governed query interface, and structured schema for every domain pack.",
+    components: ["Tenant-scoped queries", "Governance API", "Schema registry", "Drizzle ORM"],
   },
   {
     icon: Server,

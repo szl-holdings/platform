@@ -156,13 +156,13 @@ export default function ApiPage() {
                 Lyte + Alloy API
               </h1>
               <p style={{ fontSize: "clamp(1rem,1.8vw,1.125rem)", lineHeight: 1.72, color: "hsl(214,7%,62%)", maxWidth: "54ch", marginBottom: "2rem" }}>
-                The Lyte + Alloy platform exposes a REST API and a GraphQL control plane for tenant
+                The Lyte + Alloy platform exposes a REST API and a governance API for tenant
                 configuration, observability access, and audit queries. This page documents the
                 primary REST API surface.
               </p>
               <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
                 <Link href="/docs/control-plane" className="szl-btn-primary">
-                  GraphQL control plane <ArrowRight size={14} />
+                  Governance API <ArrowRight size={14} />
                 </Link>
                 <Link href="/docs" className="szl-btn-secondary">
                   Full documentation →
@@ -302,7 +302,7 @@ Accept: application/json`}</pre>
         <section style={{ padding: "var(--space-section-sm) 0" }}>
           <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
-              <Link href="/docs/control-plane" className="szl-btn-secondary">GraphQL control plane →</Link>
+              <Link href="/docs/control-plane" className="szl-btn-secondary">Governance API →</Link>
               <Link href="/docs" className="szl-btn-secondary">Full docs →</Link>
               <Link href="/contact" className="szl-btn-ghost">Request API access <ArrowRight size={13} /></Link>
             </div>

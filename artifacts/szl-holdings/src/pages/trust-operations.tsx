@@ -47,7 +47,7 @@ const ADMIN_VISIBILITY = [
 
 const EXTERNAL_DATA_POLICY = [
   { label: "Ingestion scope", body: "External data ingestion is scoped to the source types explicitly configured by the tenant. No silent collection from unconfigured sources." },
-  { label: "Worldline provenance", body: "Every data point ingested through external sources carries a provenance record: origin system, ingestion timestamp, schema version, and processing status." },
+  { label: "External data provenance", body: "Every data point ingested through external sources carries a provenance record: origin system, ingestion timestamp, schema version, and processing status." },
   { label: "Retention governance", body: "Data retention policies are defined per data category and enforced at the storage layer. Expired data is purged on schedule, not on request." },
   { label: "External provider boundaries", body: "External data providers receive only the minimum context required for their integration. No cross-tenant data sharing through integration layers." },
 ];
@@ -190,7 +190,7 @@ export default function TrustOperationsPage() {
                 <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(200,70%,52%)" }}>External data policy</p>
               </div>
               <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "28ch", marginBottom: "3rem" }}>
-                How external and worldline data is handled.
+                How external and audit timeline data is handled.
               </h2>
             </m.div>
             <div className="szl-grid-2">

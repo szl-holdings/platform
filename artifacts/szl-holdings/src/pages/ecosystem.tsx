@@ -95,7 +95,7 @@ const SERVICES: Platform[] = [
 ];
 
 const INTERNAL = [
-  { name: "Control Plane", role: "Platform Operations", description: "Service registry, health monitoring, connector management, feature governance, and audit controls.", accent: "hsl(210,8%,56%)", href: "/control-plane" },
+  { name: "Governance API", role: "Platform Operations", description: "Service registry, health monitoring, connector management, feature governance, and audit controls.", accent: "hsl(210,8%,56%)", href: "/control-plane" },
   { name: "Portfolio Readiness", role: "Maturity Assessment", description: "App-by-app readiness scoring, deployment status, ownership, confidence, and risk tracking.", accent: "hsl(218,72%,52%)", href: "/portfolio-ops" },
   { name: "Trust Center", role: "Security & Architecture", description: "Platform architecture, access control, auditability, data governance, and AI accountability documentation.", accent: "hsl(152,50%,42%)", href: "/trust" },
 ];

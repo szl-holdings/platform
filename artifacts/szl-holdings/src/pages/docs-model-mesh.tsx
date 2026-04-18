@@ -8,7 +8,7 @@ const MESH_PROPERTIES = [
   {
     icon: GitBranch,
     name: "Model routing by task type",
-    desc: "The model mesh routes each inference request to the appropriate model based on task type, domain context, latency requirements, and cost constraints. No single model handles all tasks — each is selected for fit.",
+    desc: "The governed inference layer routes each inference request to the appropriate model based on task type, domain context, latency requirements, and cost constraints. No single model handles all tasks — each is selected for fit.",
   },
   {
     icon: RefreshCw,
@@ -18,22 +18,22 @@ const MESH_PROPERTIES = [
   {
     icon: DollarSign,
     name: "Cost tracking per invocation",
-    desc: "Each model invocation is tracked by tenant, workflow, task type, and model version. Cost data is surfaced through the control plane and included in tenant billing summaries. No hidden inference costs.",
+    desc: "Each model invocation is tracked by tenant, workflow, task type, and model version. Cost data is surfaced through the Governance API and included in tenant billing summaries. No hidden inference costs.",
   },
   {
     icon: Shield,
     name: "Output governance integration",
-    desc: "Model outputs flow into the governance layer before any recommendation is presented to an operator. The model mesh does not bypass governance — it feeds it. Every output is labeled with its model version for review context.",
+    desc: "Model outputs flow into the governance layer before any recommendation is presented to an operator. The governed inference layer does not bypass governance — it feeds it. Every output is labeled with its model version for review context.",
   },
   {
     icon: BarChart3,
     name: "Quality signal collection",
-    desc: "Operator approvals, rejections, and correction signals are fed back into the model mesh quality tracking system. Quality signals inform routing preferences and trigger evaluation cycles for underperforming model versions.",
+    desc: "Operator approvals, rejections, and correction signals are fed back into the governed inference quality tracking system. Quality signals inform routing preferences and trigger evaluation cycles for underperforming model versions.",
   },
   {
     icon: Cpu,
     name: "Multi-provider architecture",
-    desc: "The model mesh is provider-agnostic. Models from different providers can be used for different task types within the same workflow. Provider dependencies are isolated at the mesh layer — no provider lock-in reaches the application layer.",
+    desc: "The governed inference layer is provider-agnostic. Models from different providers can be used for different task types within the same workflow. Provider dependencies are isolated at the inference layer — no provider lock-in reaches the application layer.",
   },
 ];
 
@@ -48,8 +48,8 @@ const ROUTING_FACTORS = [
 
 export default function DocsModelMeshPage() {
   usePageMeta({
-    title: "Model Mesh — Docs — SZL Holdings",
-    description: "Model mesh documentation: AI model routing, versioning, cost tracking, quality signals, and governance integration in the Lyte + Alloy platform.",
+    title: "Governed Inference — Docs — SZL Holdings",
+    description: "Governed inference documentation: AI model routing, versioning, cost tracking, quality signals, and governance integration in the Lyte + Alloy platform.",
     canonical: "https://szlholdings.com/docs/model-mesh",
   });
 
@@ -63,19 +63,19 @@ export default function DocsModelMeshPage() {
             <div className="flex items-center gap-2 text-sm text-white/40">
               <Link href="/docs" className="hover:text-white/70 transition">Docs</Link>
               <span>/</span>
-              <span className="text-white/60">Model Mesh</span>
+              <span className="text-white/60">Governed Inference</span>
             </div>
             <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-white/50">
               <Cpu className="h-3 w-3" />
-              Model mesh
+              Platform infrastructure
             </div>
             <h1 className="mt-5 max-w-3xl text-5xl font-semibold tracking-tight text-white md:text-6xl">
-              Model mesh.
+              Governed Inference.
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-white/65">
-              The model mesh is the AI model management layer of the Lyte + Alloy platform. It handles
+              Governed inference is the AI model management layer of the Lyte + Alloy platform. It handles
               model routing, versioning, cost tracking, quality signal collection, and governance integration.
-              No model in the platform operates outside the mesh — all inference is tracked, governed, and
+              No model in the platform operates outside this layer — all inference is tracked, governed, and
               accountable.
             </p>
           </div>
@@ -85,7 +85,7 @@ export default function DocsModelMeshPage() {
         <section className="border-b border-white/10">
           <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/40">System properties</p>
-            <h2 className="mt-3 text-2xl font-semibold text-white">What the model mesh provides</h2>
+            <h2 className="mt-3 text-2xl font-semibold text-white">What governed inference provides</h2>
             <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
               {MESH_PROPERTIES.map((prop) => {
                 const Icon = prop.icon;
@@ -126,17 +126,17 @@ export default function DocsModelMeshPage() {
         <section className="border-b border-white/10">
           <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/40">Governance position</p>
-            <h2 className="mt-3 text-2xl font-semibold text-white">The model mesh is not the decision maker</h2>
+            <h2 className="mt-3 text-2xl font-semibold text-white">The governed inference layer is not the decision maker</h2>
             <p className="mt-4 max-w-3xl text-sm leading-7 text-white/65">
-              The model mesh produces candidate outputs — classification results, summaries, recommendations,
-              and extracted facts. Every output flows into the governance layer before any operator sees it.
-              The model mesh does not approve actions. It does not execute workflows. It does not make
-              consequential decisions. Its role is to produce well-attributed, version-tracked, cost-monitored
-              candidates that humans review and approve.
+              The governed inference layer produces candidate outputs — classification results, summaries,
+              recommendations, and extracted facts. Every output flows into the governance layer before any
+              operator sees it. Governed inference does not approve actions. It does not execute workflows.
+              It does not make consequential decisions. Its role is to produce well-attributed, version-tracked,
+              cost-monitored candidates that humans review and approve.
             </p>
             <p className="mt-4 max-w-3xl text-sm leading-7 text-white/65">
               This is a structural property of the platform, not a policy configuration. The governance
-              layer cannot be bypassed by a mesh routing decision.
+              layer cannot be bypassed by an inference routing decision.
             </p>
             <div className="mt-6">
               <Link href="/docs/proof-chain" className="inline-flex items-center gap-2 text-sm text-white/58 transition hover:text-white/85">
@@ -153,10 +153,10 @@ export default function DocsModelMeshPage() {
             <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {[
                 { label: "Proof chain", href: "/docs/proof-chain", detail: "How model invocations are recorded in output provenance" },
-                { label: "Architecture", href: "/docs/architecture", detail: "Where the model mesh fits in the platform pipeline" },
+                { label: "Architecture", href: "/docs/architecture", detail: "Where governed inference fits in the platform pipeline" },
                 { label: "Trust", href: "/docs/trust", detail: "Governance model and AI accountability" },
-                { label: "Control plane", href: "/docs/control-plane", detail: "API access to model cost and quality data" },
-                { label: "Worldline", href: "/docs/worldline", detail: "Model invocation events in the chronological record" },
+                { label: "Covenant Policy", href: "/docs/control-plane", detail: "API access to model cost and quality data" },
+                { label: "Audit Timeline", href: "/docs/worldline", detail: "Model invocation events in the chronological record" },
                 { label: "Back to docs hub", href: "/docs", detail: "Full documentation index" },
               ].map((link) => (
                 <Link

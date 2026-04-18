@@ -8,7 +8,7 @@ const STACK_LAYERS = [
   {
     number: "01",
     title: "Signal Ingestion",
-    subtitle: "Event Fabric + Worldline Engine",
+    subtitle: "Event Fabric + Decision Timeline",
     desc: "Public APIs, business systems, and domain-specific data feeds are normalized into a unified signal stream. Every data point carries source attribution, retrieval timestamp, and confidence metadata. The Event Fabric correlates signals across domain packs without collapsing their domain-specific context.",
     icon: Radio,
     color: "#4a90b8",

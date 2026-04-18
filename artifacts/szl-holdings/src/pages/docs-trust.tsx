@@ -13,7 +13,7 @@ const TRUST_PILLARS = [
   {
     icon: Lock,
     name: "Immutable audit trail",
-    desc: "Every signal ingestion, Twin update, AI recommendation, human decision, and execution event is written to an immutable, tamper-evident Worldline. The record cannot be modified after the fact. Governance teams can reconstruct the full decision context for any point in any workflow's history.",
+    desc: "Every signal ingestion, Twin update, AI recommendation, human decision, and execution event is written to an immutable, tamper-evident audit timeline. The record cannot be modified after the fact. Governance teams can reconstruct the full decision context for any point in any workflow's history.",
   },
   {
     icon: FileText,
@@ -41,7 +41,7 @@ const GOVERNANCE_COMMITMENTS = [
   "No autonomous AI action — every consequential output requires human authorization",
   "No model hallucination propagation — unsupported claims cannot reach exported outputs",
   "No privilege exposure — sensitive classifications are screened before AI processing",
-  "No audit gaps — every decision has a Worldline record that cannot be deleted",
+  "No audit gaps — every decision has an audit timeline record that cannot be deleted",
   "No cross-tenant leakage — data isolation is enforced at the data layer",
   "No governance override — approval gates cannot be bypassed by configuration",
 ];
@@ -206,10 +206,10 @@ export default function DocsTrustPage() {
             <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {[
                 { label: "Proof chain", href: "/docs/proof-chain", detail: "How outputs carry source provenance and approval records" },
-                { label: "Worldline", href: "/docs/worldline", detail: "The immutable chronological record" },
+                { label: "Audit Timeline", href: "/docs/worldline", detail: "The immutable chronological record" },
                 { label: "Architecture", href: "/docs/architecture", detail: "Where governance fits in the platform pipeline" },
-                { label: "Model mesh", href: "/docs/model-mesh", detail: "AI model governance and accountability" },
-                { label: "Control plane", href: "/docs/control-plane", detail: "Role-scoped access and audit query interface" },
+                { label: "Governed inference", href: "/docs/model-mesh", detail: "AI model governance and accountability" },
+                { label: "Covenant Policy", href: "/docs/control-plane", detail: "Role-scoped access and audit query interface" },
                 { label: "Back to docs hub", href: "/docs", detail: "Full documentation index" },
               ].map((link) => (
                 <Link

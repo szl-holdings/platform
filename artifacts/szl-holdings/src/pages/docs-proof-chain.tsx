@@ -39,14 +39,14 @@ const PROOF_CHAIN_PROPERTIES = [
 
 const CHAIN_ANATOMY = [
   { field: "output_id", desc: "Unique identifier for the output artifact (document, report, or recommendation)." },
-  { field: "generation_ts", desc: "Timestamp when the output was generated, linked to the Worldline event record." },
+  { field: "generation_ts", desc: "Timestamp when the output was generated, linked to the audit timeline event record." },
   { field: "subject_ref", desc: "Reference to the Domain Twin subject (matter, voyage, property, or threat) at the time of generation." },
   { field: "twin_snapshot_ref", desc: "Reference to the specific Twin state version used at decision time." },
   { field: "source_signals", desc: "Array of source signals that contributed to this output, each with origin, ingestion timestamp, and classification." },
   { field: "model_invocations", desc: "Array of AI model calls made during generation, with model version, input hash, and output hash." },
   { field: "recommendation_set", desc: "All candidate recommendations generated, including the selected one and any alternatives." },
   { field: "approval_record", desc: "The approval event: actor identity, role, timestamp, decision (approve/reject), and optional rationale." },
-  { field: "worldline_ref", desc: "Direct reference to the Worldline event sequence that produced this output, for independent verification." },
+  { field: "worldline_ref", desc: "Direct reference to the audit timeline event sequence that produced this output, for independent verification." },
 ];
 
 export default function DocsProofChainPage() {
@@ -138,7 +138,7 @@ export default function DocsProofChainPage() {
                 { label: "Governance report (Aegis)", detail: "Security governance reports include the full threat assessment chain and response authorization record." },
                 { label: "Voyage exception report (Vessels)", detail: "Maritime exception reports carry the Voyage Twin state, risk scoring basis, and operator decision record." },
                 { label: "AI recommendations", detail: "Every recommendation generated includes inline source citations with confidence scores — visible before approval." },
-                { label: "Audit export", detail: "Audit trail exports generated via the control plane include full Worldline references for independent verification." },
+                { label: "Audit export", detail: "Audit trail exports generated via the governance API include full audit timeline references for independent verification." },
               ].map((s) => (
                 <div key={s.label} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5">
                   <h3 className="text-sm font-semibold text-white">{s.label}</h3>
@@ -156,8 +156,8 @@ export default function DocsProofChainPage() {
             <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {[
                 { label: "Outcome Graph", href: "/docs/outcome-graph", detail: "The graph from which proof chains are derived" },
-                { label: "Worldline", href: "/docs/worldline", detail: "The event timeline that proof chains reference" },
-                { label: "Model Mesh", href: "/docs/model-mesh", detail: "Model invocations recorded in the proof chain" },
+                { label: "Audit Timeline", href: "/docs/worldline", detail: "The event timeline that proof chains reference" },
+                { label: "Governed Inference", href: "/docs/model-mesh", detail: "Model invocations recorded in the proof chain" },
                 { label: "Covenant Policy", href: "/docs/covenant-policy", detail: "Governance rules that authorize each proof chain step" },
                 { label: "Trust", href: "/docs/trust", detail: "How proof chains support trust and compliance requirements" },
                 { label: "Back to docs hub", href: "/docs", detail: "Full documentation index" },

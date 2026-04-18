@@ -13,7 +13,7 @@ const GOVERNANCE_CONTROLS = [
   {
     icon: Brain,
     title: "Model routing transparency",
-    body: "The Model Mesh routes requests across multiple AI providers based on task class, cost, and capability. Every routing decision is logged with model selection rationale and cost attribution.",
+    body: "The governed inference layer routes requests across multiple AI providers based on task class, cost, and capability. Every routing decision is logged with model selection rationale and cost attribution.",
   },
   {
     icon: Lock,

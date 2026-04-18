@@ -99,10 +99,10 @@ const MODULES = [
     icon: Brain,
     name: "Section 31 Intelligence",
     tagline: "Deep matter intelligence and proof chain",
-    description: "The advanced intelligence layer: 14-domain matter twin, worldline signal assembly, pressure graph analysis, forecast diff tracking, and SHA-256 proof chain for every AI output.",
+    description: "The advanced intelligence layer: 14-domain matter twin, external signal assembly, pressure graph analysis, forecast diff tracking, and SHA-256 proof chain for every AI output.",
     capabilities: [
       "14-domain digital matter twin with real-time change tracking",
-      "Worldline signal assembly (weather, regulatory, court, medical)",
+      "External signal assembly (weather, regulatory, court, medical)",
       "Multi-dimensional pressure graph across deadline, insurer, evidence, settlement axes",
       "SHA-256 hashed proof chain — every AI output source-grounded and export-safe verified",
     ],
@@ -272,7 +272,7 @@ export default function PrismCounselPublicPage() {
                     marginBottom: "2.25rem",
                   }}
                 >
-                  Built for NY insurance litigation — no-fault, bodily injury, premises liability — on top of Microsoft 365 and the Alloy control plane. Human approval on every consequential action. Source-grounded AI. Immutable audit trail.
+                  Built for NY insurance litigation — no-fault, bodily injury, premises liability — on top of Microsoft 365 and the Alloy Governance API. Human approval on every consequential action. Source-grounded AI. Immutable audit trail.
                 </p>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
                   <Link href="/aegis/" className="szl-btn-primary">
@@ -533,7 +533,7 @@ export default function PrismCounselPublicPage() {
         <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
           <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
             <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
-              <SectionLabel>Alloy Control Plane</SectionLabel>
+              <SectionLabel>Alloy Governance API</SectionLabel>
               <SectionHeading maxWidth="34ch">How Alloy powers everything that moves in PRISM Counsel.</SectionHeading>
             </m.div>
             <div style={{ display: "grid", gap: "clamp(2.5rem,5vw,4rem)" }} className="lg:grid-cols-[1fr_1.1fr]">

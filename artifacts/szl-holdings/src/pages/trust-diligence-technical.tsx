@@ -28,10 +28,10 @@ const SECTIONS = [
   },
   {
     icon: Cpu,
-    title: "Control Plane & Model Mesh",
+    title: "Governance API & Governed Inference",
     items: [
-      "GraphQL control plane exposes query/mutation surface with field-level permission enforcement",
-      "Model mesh routes inference to best-fit model per signal type and latency requirement",
+      "Governance API exposes query/mutation surface with field-level permission enforcement",
+      "Governed inference routes AI requests to best-fit model per signal type and latency requirement",
       "All AI assertions are source-grounded — confidence scores and source attribution required",
       "Contradiction detection flags conflicting signals before they surface to operators",
       "Generated content is always labeled — no unmarked AI output reaches decision surfaces",
@@ -44,7 +44,7 @@ const SECTIONS = [
       "Connector permission scoping: each integration granted minimum-required access",
       "API surface protected with rate limiting, CSRF protection, and OpenID Connect / PKCE",
       "Proof chain attached to every write-back and exported document — cryptographic hash included",
-      "Worldline provides temporal audit — state snapshots indexed by decision event",
+      "The audit timeline provides temporal record — state snapshots indexed by decision event",
       "No plaintext credentials in codebase, environment logs, or any observable surface",
     ],
   },
@@ -54,7 +54,7 @@ const KEY_QUESTIONS = [
   { q: "How does the agent pipeline work?", a: "Six stages: Ingest → Parse → Enrich → Decide → Approve → Execute. Each stage is auditable and HITL gates sit at Approve." },
   { q: "How is multi-tenancy enforced?", a: "At the database query layer and middleware — scoped by org context, not just filtered in application code." },
   { q: "What is the Proof Chain?", a: "A cryptographic record attached to every AI-driven action and export, providing tamper-evident decision lineage." },
-  { q: "How is the model mesh governed?", a: "Model selection is deterministic per signal type. Client data never flows back to model training pipelines." },
+  { q: "How is the governed inference layer managed?", a: "Model selection is deterministic per signal type. Client data never flows back to model training pipelines." },
 ];
 
 export default function DiligenceTechnicalPage() {
@@ -111,7 +111,7 @@ export default function DiligenceTechnicalPage() {
                 How is this actually built?
               </h1>
               <p style={{ fontSize: "0.9375rem", lineHeight: 1.65, color: "hsl(214,7%,62%)", maxWidth: "52ch" }}>
-                Architecture layers, integration surface, control plane, Proof Chain, and data handling — documented for engineers and platform architects evaluating the SZL Holdings stack.
+                Architecture layers, integration surface, Governance API, Proof Chain, and data handling — documented for engineers and platform architects evaluating the SZL Holdings stack.
               </p>
             </div>
             <div style={{ textAlign: "right", flexShrink: 0 }}>
@@ -162,7 +162,7 @@ export default function DiligenceTechnicalPage() {
               {[
                 { label: "Platform Architecture", href: "/architecture" },
                 { label: "Security Controls", href: "/trust/security" },
-                { label: "Control Plane Docs", href: "/docs/control-plane" },
+                { label: "Governance API Docs", href: "/docs/control-plane" },
                 { label: "Proof Chain Docs", href: "/docs/proof-chain" },
                 { label: "AI Policy", href: "/trust/ai" },
               ].map((l) => (

@@ -198,7 +198,7 @@ const TABS: Array<{ id: TabId; label: string; group: "cross-app" | "platform" }>
   { id: "agents", label: "Agent Runs", group: "platform" },
   { id: "outcomes", label: "Outcome Graph", group: "platform" },
   { id: "artifacts", label: "Atlas Artifacts", group: "platform" },
-  { id: "worldline", label: "Worldline", group: "platform" },
+  { id: "worldline", label: "Audit Timeline", group: "platform" },
   { id: "proofchain", label: "Proof Chain", group: "platform" },
 ];
 
@@ -509,13 +509,13 @@ export default function HelmConsolePage() {
                       <MetricCard label="Agent Runs (24h)" value={Number(overview.agentRuns?.total ?? 0)} sub={overview.agentRuns ? `${Math.round(Number(overview.agentRuns.avgLatency ?? 0))}ms avg latency` : undefined} color={ACCENT.blue} />
                       <MetricCard label="Atlas Artifacts (7d)" value={overview.artifactStats.reduce((s, r) => s + Number(r.total), 0)} sub={`${overview.artifactStats.find(a => a.status === "failed")?.total ?? 0} failed`} color={ACCENT.gold} />
                       <MetricCard label="Outcome Decisions (7d)" value={overview.outcomeStats.reduce((s, r) => s + Number(r.total), 0)} sub={`${overview.outcomeStats.find(o => o.status === "overridden")?.total ?? 0} overrides`} color={ACCENT.purple} />
-                      <MetricCard label="Worldline Sources" value={overview.worldlineHealth.reduce((s, r) => s + Number(r.total), 0)} sub={`${overview.worldlineHealth.find(w => w.status === "degraded")?.total ?? 0} degraded`} color={overview.worldlineHealth.find(w => w.status === "degraded")?.total !== "0" ? ACCENT.red : ACCENT.green} />
+                      <MetricCard label="Ext. Data Sources" value={overview.worldlineHealth.reduce((s, r) => s + Number(r.total), 0)} sub={`${overview.worldlineHealth.find(w => w.status === "degraded")?.total ?? 0} degraded`} color={overview.worldlineHealth.find(w => w.status === "degraded")?.total !== "0" ? ACCENT.red : ACCENT.green} />
                       <MetricCard label="Proof Anomalies (7d)" value={overview.proofChainStats.filter(p => p.reviewState === "flagged").reduce((s, r) => s + Number(r.total), 0)} sub="flagged for review" color={ACCENT.red} />
                       <MetricCard label="Export Jobs (7d)" value={overview.exportJobStats.reduce((s, r) => s + Number(r.total), 0)} sub={`${overview.exportJobStats.find(e => e.status === "failed")?.total ?? 0} failed`} color={ACCENT.amber} />
                     </div>
                     {overview.worldlineHealth.some(w => w.status === "degraded" && Number(w.total) > 0) && (
                       <div style={{ background: `${ACCENT.red}08`, border: `1px solid ${ACCENT.red}30`, borderRadius: 10, padding: "12px 16px" }}>
-                        <span style={{ fontSize: 12, color: ACCENT.red }}>⚠ Degraded data sources detected — check Worldline tab for details.</span>
+                        <span style={{ fontSize: 12, color: ACCENT.red }}>⚠ Degraded data sources detected — check Audit Timeline tab for details.</span>
                       </div>
                     )}
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
