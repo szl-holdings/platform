@@ -58,6 +58,7 @@ import evidenceGraphRouter from "./evidence-graph";
 import policyModesRouter from "./policy-modes";
 import demoGovernedScenariosRouter from "./demo-governed-scenarios";
 import counselRouter from "./counsel";
+import fabricRouter from "./fabric";
 
 const router: IRouter = Router();
 
@@ -104,6 +105,11 @@ router.use(counselRouter);
 // guardianPolicyCheck. NOT in PUBLIC_PREFIXES — protected in production by the
 // global auth enforcer (NODE_ENV === "production" blocks unauthenticated access).
 crossPlatform.register(router);
+
+// Global Operations Fabric — read-only snapshot + SSE stream aggregating all
+// products, signals, runs, alerts, recommendations, approvals, connector health
+// and system health. Public in demo/dev mode so the Fabric page works without auth.
+router.use(fabricRouter);
 
 // Global Guardian policy check — derives category from request path and
 // applies to every agent-facing route family. Read-only methods skip

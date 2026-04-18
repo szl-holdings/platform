@@ -92,6 +92,7 @@ const AlloyGraphCompiler = lazy(() => import("@lyte/pages/alloy-graph-compiler")
 const CognitiveCommandCenter = lazy(() => import("./pages/cognitive/index"));
 const AlloyProofPage = lazy(() => import("./pages/alloy-proof").then(m => ({ default: m.AlloyProofPage })));
 const GovernedCockpitPage = lazy(() => import("./pages/governed-cockpit"));
+const GlobalFabricPage = lazy(() => import("./pages/operations/fabric").then((m) => ({ default: m.GlobalFabricPage })));
 const SelfModelConsole = lazy(() => import("./pages/cognitive/self-model"));
 const WorldModelExplorer = lazy(() => import("./pages/cognitive/world-model"));
 const ReplayLab = lazy(() => import("./pages/replay-lab"));
@@ -310,6 +311,7 @@ function AppShell() {
               <Route path="/operations/governed-decision-loop" component={() => <GovernedDecisionLoop />} />
               <Route path="/operations/cognitive-runtime" component={() => <CognitiveRuntime />} />
               <Route path="/operations/ai-ops" component={() => <AIQualityDashboard />} />
+              <Route path="/operations/fabric" component={() => <GlobalFabricPage />} />
               <Route path="/operations/alloy/canvas" component={() => <AlloyWorkflowCanvas />} />
               <Route path="/operations/alloy/actions" component={() => <AlloyActionConsole />} />
               <Route path="/operations/alloy/templates" component={() => <AlloyWorkflowTemplates />} />

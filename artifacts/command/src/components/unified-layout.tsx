@@ -3,6 +3,8 @@ import { EnvironmentLabel } from "@szl-holdings/shared-ui/alloy-decision-card";
 import { useState, ReactNode } from "react";
 import { useLocation, Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
+import { EvidenceDrawer } from "@szl-holdings/design-system/cockpit/evidence-drawer";
+import { FabricShellProvider, useFabricShell } from "../lib/fabric-shell-context";
 import {
   LayoutDashboard, Globe2, Activity, Zap, Shield, Network, Cpu, BookOpen, Radio, Brain, Heart, AlertTriangle, Workflow, Inbox, Settings, Users, Flag, FileText, Database, Play, CheckSquare, Download, GitBranch, Send, TrendingUp, DollarSign, RotateCcw, Calculator, Bot, Monitor, Building, BellOff, Code, Target, Phone, Calendar, Layers, Map, Crown, ChevronRight, Menu, X, BarChart3, Clapperboard, Power, Bell, Lock, GitCommit, Sigma, FlaskConical, ShieldCheck, Globe, Archive, GitMerge, CheckCircle2, Lightbulb, Satellite
 } from "lucide-react";
@@ -75,6 +77,12 @@ const STRATEGY_NAV: NavGroup[] = [
 ];
 
 const OPERATIONS_NAV: NavGroup[] = [
+  {
+    section: "Global Fabric",
+    items: [
+      { href: "/operations/fabric", label: "Global Operations Fabric", icon: Globe2 },
+    ],
+  },
   {
     section: "Governed Decision Loop",
     items: [
@@ -371,7 +379,49 @@ function DemoEnvironmentBanner({ environment }: { environment: string }) {
   );
 }
 
-export function UnifiedLayout({ children, mode, onModeChange }: {
+function GlobalActivityTicker() {
+  const { auditEvents } = useFabricShell();
+  if (auditEvents.length === 0) return null;
+  return (
+    <div
+      className="shrink-0 flex items-center overflow-hidden"
+      style={{ height: 24, background: "rgba(6,10,18,0.95)", borderTop: "1px solid rgba(255,255,255,0.04)" }}
+    >
+      <div className="flex items-center gap-2 px-3 shrink-0 border-r" style={{ borderColor: "rgba(255,255,255,0.04)", height: "100%" }}>
+        <Activity className="w-2.5 h-2.5" style={{ color: "#8b7ac8" }} />
+        <span className="text-[8px] font-bold uppercase tracking-widest" style={{ color: "#8b7ac8" }}>Fabric</span>
+      </div>
+      <div className="flex-1 overflow-hidden">
+        <div className="flex items-center gap-6 pl-3 whitespace-nowrap" style={{ animation: "fabric-scroll 25s linear infinite" }}>
+          {[...auditEvents.slice(0, 10), ...auditEvents.slice(0, 10)].map((ev, i) => (
+            <span key={`${ev.eventId}-${i}`} className="text-[9px] shrink-0 flex items-center gap-1.5" style={{ color: "rgba(255,255,255,0.4)" }}>
+              <span className="w-1 h-1 rounded-full inline-block" style={{
+                background: ev.kind === "approval" ? "#22c55e" : ev.kind === "policy-gate" ? "#f59e0b" : ev.kind === "agent-action" ? "#d4a054" : "#8b7ac8"
+              }} />
+              {ev.action}
+            </span>
+          ))}
+        </div>
+      </div>
+      <style>{`@keyframes fabric-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }`}</style>
+    </div>
+  );
+}
+
+function GlobalEvidenceDrawerShell() {
+  const { drawerOpen, drawerTitle, drawerEvidence, closeEvidenceDrawer } = useFabricShell();
+  return (
+    <EvidenceDrawer
+      open={drawerOpen}
+      onClose={closeEvidenceDrawer}
+      title={drawerTitle}
+      evidence={drawerEvidence}
+      accent="#8b7ac8"
+    />
+  );
+}
+
+function UnifiedLayoutInner({ children, mode, onModeChange }: {
   children: ReactNode;
   mode: WorkspaceMode;
   onModeChange: (m: WorkspaceMode) => void;
@@ -496,7 +546,25 @@ export function UnifiedLayout({ children, mode, onModeChange }: {
         <main className="flex-1 overflow-auto" style={{ background: "#080c14" }}>
           {children}
         </main>
+
+        <GlobalActivityTicker />
       </div>
+
+      <GlobalEvidenceDrawerShell />
     </div>
+  );
+}
+
+export function UnifiedLayout({ children, mode, onModeChange }: {
+  children: ReactNode;
+  mode: WorkspaceMode;
+  onModeChange: (m: WorkspaceMode) => void;
+}) {
+  return (
+    <FabricShellProvider>
+      <UnifiedLayoutInner mode={mode} onModeChange={onModeChange}>
+        {children}
+      </UnifiedLayoutInner>
+    </FabricShellProvider>
   );
 }

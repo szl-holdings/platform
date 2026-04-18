@@ -110,6 +110,12 @@ const PUBLIC_PREFIXES = [
   // Infrastructure status — lightweight public health summary used by the
   // Legatus infrastructure console to show live AquilaScore and threat level.
   "/api/infrastructure/",
+  // Global Operations Fabric — snapshot + SSE stream for the Fabric page.
+  // Public prefix bypasses this enforcer so the route handler can apply its own
+  // production/demo guard: in production the handler checks req.user and returns
+  // 401 for unauthenticated requests; in sandbox/demo mode it serves synthetic
+  // seed data publicly. Never exposes live production signals to anonymous users.
+  "/api/fabric/",
 ];
 
 function isValidInternalToken(req: Request): boolean {
