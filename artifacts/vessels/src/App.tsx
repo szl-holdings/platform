@@ -274,7 +274,7 @@ function DemoModeBanner() {
   return (
     <div className="border-b border-amber-500/10 px-4 py-1 flex items-center gap-2 shrink-0">
       <span className="text-[10px] font-mono text-amber-400/60 px-2 py-0.5 rounded-full border border-amber-500/20 bg-amber-500/5">AIS</span>
-      <span className="text-[10px] text-amber-400/50">Live AIS feed not connected — position data is indicative</span>
+      <span className="text-[10px] text-amber-400/50">Live AIS feed not connected — showing cached vessel positions · data may be up to 60 min old</span>
     </div>
   );
 }

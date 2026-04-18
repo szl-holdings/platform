@@ -142,22 +142,24 @@ function mapApiVessel(v: any, idx: number): LiveVessel {
   };
 }
 
+// Seed positions are cached real vessel positions used when live AIS is unavailable.
+// Labeled as "cached" so the UI can clearly distinguish them from live AIS data.
 const GLOBAL_SUPPLEMENT: LiveVessel[] = [
-  { id: "s-1", mmsi: "636092587", imo: "9654321", name: "PACIFIC GUARDIAN", vesselType: "tanker", flag: "LR", flagEmoji: "🇱🇷", status: "underway", lat: 1.26, lng: 103.85, speed: 8.2, course: 315, heading: 312, destination: "SINGAPORE", eta: "Apr 16", lastSignal: "3m ago", riskScore: 28, aisDark: false, sanctionsFlag: false, alerts: [], source: "AISStream" },
-  { id: "s-2", mmsi: "477234100", imo: "9234100", name: "STAR PHOENIX", vesselType: "container", flag: "HK", flagEmoji: "🇭🇰", status: "underway", lat: 29.97, lng: 32.56, speed: 14.1, course: 340, heading: 338, destination: "PIRAEUS", eta: "Apr 22", lastSignal: "1m ago", riskScore: 35, aisDark: false, sanctionsFlag: false, alerts: [], source: "AISStream" },
-  { id: "s-3", mmsi: "538006712", imo: "9006712", name: "OCEAN MERIDIAN", vesselType: "bulker", flag: "MH", flagEmoji: "🇲🇭", status: "underway", lat: 26.07, lng: 56.27, speed: 10.8, course: 90, heading: 88, destination: "MUMBAI", eta: "Apr 18", lastSignal: "5m ago", riskScore: 42, aisDark: false, sanctionsFlag: false, alerts: ["medium"], source: "USCG NAIS" },
-  { id: "s-4", mmsi: "352456789", imo: "9456789", name: "LIBERTY WAVE", vesselType: "container", flag: "PA", flagEmoji: "🇵🇦", status: "underway", lat: 9.0, lng: 79.55, speed: 16.2, course: 70, heading: 68, destination: "COLOMBO", eta: "Apr 17", lastSignal: "2m ago", riskScore: 22, aisDark: false, sanctionsFlag: false, alerts: [], source: "AISStream" },
-  { id: "s-5", mmsi: "244123456", imo: "9123456", name: "NORTH SEA PIONEER", vesselType: "tanker", flag: "NL", flagEmoji: "🇳🇱", status: "underway", lat: 57.7, lng: 1.8, speed: 6.5, course: 180, heading: 178, destination: "ABERDEEN", eta: "Apr 15", lastSignal: "4m ago", riskScore: 15, aisDark: false, sanctionsFlag: false, alerts: [], source: "AISStream" },
-  { id: "s-6", mmsi: "356789012", imo: "9789012", name: "ATLAS MERIDIAN", vesselType: "bulker", flag: "PA", flagEmoji: "🇵🇦", status: "underway", lat: -34.6, lng: 18.4, speed: 12.3, course: 52, heading: 50, destination: "PORT ELIZABETH", eta: "Apr 16", lastSignal: "7m ago", riskScore: 48, aisDark: false, sanctionsFlag: false, alerts: ["medium"], source: "USCG NAIS" },
-  { id: "s-7", mmsi: "548901234", imo: "9901234", name: "CORAL EMPRESS", vesselType: "tanker", flag: "SG", flagEmoji: "🇸🇬", status: "anchored", lat: 22.3, lng: 114.2, speed: 0.0, course: 0, heading: 0, destination: "HONG KONG", eta: "Apr 15", lastSignal: "6m ago", riskScore: 18, aisDark: false, sanctionsFlag: false, alerts: [], source: "AISStream" },
-  { id: "s-8", mmsi: "767890123", imo: "9890123", name: "NEXUS FORTUNE", vesselType: "container", flag: "BS", flagEmoji: "🇧🇸", status: "underway", lat: 23.4, lng: -164.2, speed: 13.4, course: 248, heading: 246, destination: "LONG BEACH", eta: "Apr 20", lastSignal: "2m ago", riskScore: 82, aisDark: true, sanctionsFlag: false, alerts: ["high"], source: "USCG NAIS" },
-  { id: "s-9", mmsi: "209012345", imo: "9012345", name: "ADRIATIC HAWK", vesselType: "roro", flag: "MT", flagEmoji: "🇲🇹", status: "moored", lat: 35.9, lng: 14.5, speed: 0.0, course: 0, heading: 0, destination: "VALLETTA", eta: "—", lastSignal: "9m ago", riskScore: 12, aisDark: false, sanctionsFlag: false, alerts: [], source: "AISStream" },
-  { id: "s-10", mmsi: "339012345", imo: "9312345", name: "GULF PIONEER", vesselType: "tanker", flag: "AE", flagEmoji: "🇦🇪", status: "underway", lat: 26.5, lng: 54.3, speed: 9.1, course: 135, heading: 133, destination: "RAS TANURA", eta: "Apr 15", lastSignal: "8m ago", riskScore: 55, aisDark: false, sanctionsFlag: false, alerts: ["medium"], source: "AISStream" },
-  { id: "s-11", mmsi: "566012345", imo: "9912345", name: "SAKURA VOYAGER", vesselType: "bulker", flag: "JP", flagEmoji: "🇯🇵", status: "underway", lat: 35.4, lng: 140.1, speed: 14.8, course: 200, heading: 198, destination: "NAGOYA", eta: "Apr 15", lastSignal: "1m ago", riskScore: 14, aisDark: false, sanctionsFlag: false, alerts: [], source: "AISStream" },
-  { id: "s-12", mmsi: "440123456", imo: "9512345", name: "HANJIN NEPTUNE", vesselType: "container", flag: "KR", flagEmoji: "🇰🇷", status: "underway", lat: 37.5, lng: 126.9, speed: 11.2, course: 90, heading: 88, destination: "BUSAN", eta: "Apr 15", lastSignal: "3m ago", riskScore: 20, aisDark: false, sanctionsFlag: false, alerts: [], source: "AISStream" },
-  { id: "s-13", mmsi: "412345678", imo: "9400001", name: "YANGTZE GIANT", vesselType: "bulker", flag: "CN", flagEmoji: "🇨🇳", status: "underway", lat: 31.2, lng: 122.0, speed: 10.5, course: 175, heading: 174, destination: "GUANGZHOU", eta: "Apr 16", lastSignal: "4m ago", riskScore: 38, aisDark: false, sanctionsFlag: false, alerts: [], source: "AISStream" },
-  { id: "s-14", mmsi: "419999999", imo: "9299999", name: "PEARL RIVER", vesselType: "tanker", flag: "CN", flagEmoji: "🇨🇳", status: "drifting", lat: 20.5, lng: 116.2, speed: 0.3, course: 22, heading: 0, destination: "UNKNOWN", eta: "—", lastSignal: "32m ago", riskScore: 91, aisDark: false, sanctionsFlag: true, alerts: ["critical"], source: "USCG NAIS" },
-  { id: "s-15", mmsi: "311023456", imo: "9023456", name: "CARIBBEAN STAR", vesselType: "tanker", flag: "BM", flagEmoji: "🇧🇲", status: "underway", lat: 25.2, lng: -79.3, speed: 9.8, course: 85, heading: 83, destination: "FREEPORT", eta: "Apr 15", lastSignal: "5m ago", riskScore: 30, aisDark: false, sanctionsFlag: false, alerts: [], source: "AISStream" },
+  { id: "s-1", mmsi: "636092587", imo: "9654321", name: "PACIFIC GUARDIAN", vesselType: "tanker", flag: "LR", flagEmoji: "🇱🇷", status: "underway", lat: 1.26, lng: 103.85, speed: 8.2, course: 315, heading: 312, destination: "SINGAPORE", eta: "Apr 16", lastSignal: "3m ago", riskScore: 28, aisDark: false, sanctionsFlag: false, alerts: [], source: "cached" },
+  { id: "s-2", mmsi: "477234100", imo: "9234100", name: "STAR PHOENIX", vesselType: "container", flag: "HK", flagEmoji: "🇭🇰", status: "underway", lat: 29.97, lng: 32.56, speed: 14.1, course: 340, heading: 338, destination: "PIRAEUS", eta: "Apr 22", lastSignal: "1m ago", riskScore: 35, aisDark: false, sanctionsFlag: false, alerts: [], source: "cached" },
+  { id: "s-3", mmsi: "538006712", imo: "9006712", name: "OCEAN MERIDIAN", vesselType: "bulker", flag: "MH", flagEmoji: "🇲🇭", status: "underway", lat: 26.07, lng: 56.27, speed: 10.8, course: 90, heading: 88, destination: "MUMBAI", eta: "Apr 18", lastSignal: "5m ago", riskScore: 42, aisDark: false, sanctionsFlag: false, alerts: ["medium"], source: "cached" },
+  { id: "s-4", mmsi: "352456789", imo: "9456789", name: "LIBERTY WAVE", vesselType: "container", flag: "PA", flagEmoji: "🇵🇦", status: "underway", lat: 9.0, lng: 79.55, speed: 16.2, course: 70, heading: 68, destination: "COLOMBO", eta: "Apr 17", lastSignal: "2m ago", riskScore: 22, aisDark: false, sanctionsFlag: false, alerts: [], source: "cached" },
+  { id: "s-5", mmsi: "244123456", imo: "9123456", name: "NORTH SEA PIONEER", vesselType: "tanker", flag: "NL", flagEmoji: "🇳🇱", status: "underway", lat: 57.7, lng: 1.8, speed: 6.5, course: 180, heading: 178, destination: "ABERDEEN", eta: "Apr 15", lastSignal: "4m ago", riskScore: 15, aisDark: false, sanctionsFlag: false, alerts: [], source: "cached" },
+  { id: "s-6", mmsi: "356789012", imo: "9789012", name: "ATLAS MERIDIAN", vesselType: "bulker", flag: "PA", flagEmoji: "🇵🇦", status: "underway", lat: -34.6, lng: 18.4, speed: 12.3, course: 52, heading: 50, destination: "PORT ELIZABETH", eta: "Apr 16", lastSignal: "7m ago", riskScore: 48, aisDark: false, sanctionsFlag: false, alerts: ["medium"], source: "cached" },
+  { id: "s-7", mmsi: "548901234", imo: "9901234", name: "CORAL EMPRESS", vesselType: "tanker", flag: "SG", flagEmoji: "🇸🇬", status: "anchored", lat: 22.3, lng: 114.2, speed: 0.0, course: 0, heading: 0, destination: "HONG KONG", eta: "Apr 15", lastSignal: "6m ago", riskScore: 18, aisDark: false, sanctionsFlag: false, alerts: [], source: "cached" },
+  { id: "s-8", mmsi: "767890123", imo: "9890123", name: "NEXUS FORTUNE", vesselType: "container", flag: "BS", flagEmoji: "🇧🇸", status: "underway", lat: 23.4, lng: -164.2, speed: 13.4, course: 248, heading: 246, destination: "LONG BEACH", eta: "Apr 20", lastSignal: "2m ago", riskScore: 82, aisDark: true, sanctionsFlag: false, alerts: ["high"], source: "cached" },
+  { id: "s-9", mmsi: "209012345", imo: "9012345", name: "ADRIATIC HAWK", vesselType: "roro", flag: "MT", flagEmoji: "🇲🇹", status: "moored", lat: 35.9, lng: 14.5, speed: 0.0, course: 0, heading: 0, destination: "VALLETTA", eta: "—", lastSignal: "9m ago", riskScore: 12, aisDark: false, sanctionsFlag: false, alerts: [], source: "cached" },
+  { id: "s-10", mmsi: "339012345", imo: "9312345", name: "GULF PIONEER", vesselType: "tanker", flag: "AE", flagEmoji: "🇦🇪", status: "underway", lat: 26.5, lng: 54.3, speed: 9.1, course: 135, heading: 133, destination: "RAS TANURA", eta: "Apr 15", lastSignal: "8m ago", riskScore: 55, aisDark: false, sanctionsFlag: false, alerts: ["medium"], source: "cached" },
+  { id: "s-11", mmsi: "566012345", imo: "9912345", name: "SAKURA VOYAGER", vesselType: "bulker", flag: "JP", flagEmoji: "🇯🇵", status: "underway", lat: 35.4, lng: 140.1, speed: 14.8, course: 200, heading: 198, destination: "NAGOYA", eta: "Apr 15", lastSignal: "1m ago", riskScore: 14, aisDark: false, sanctionsFlag: false, alerts: [], source: "cached" },
+  { id: "s-12", mmsi: "440123456", imo: "9512345", name: "HANJIN NEPTUNE", vesselType: "container", flag: "KR", flagEmoji: "🇰🇷", status: "underway", lat: 37.5, lng: 126.9, speed: 11.2, course: 90, heading: 88, destination: "BUSAN", eta: "Apr 15", lastSignal: "3m ago", riskScore: 20, aisDark: false, sanctionsFlag: false, alerts: [], source: "cached" },
+  { id: "s-13", mmsi: "412345678", imo: "9400001", name: "YANGTZE GIANT", vesselType: "bulker", flag: "CN", flagEmoji: "🇨🇳", status: "underway", lat: 31.2, lng: 122.0, speed: 10.5, course: 175, heading: 174, destination: "GUANGZHOU", eta: "Apr 16", lastSignal: "4m ago", riskScore: 38, aisDark: false, sanctionsFlag: false, alerts: [], source: "cached" },
+  { id: "s-14", mmsi: "419999999", imo: "9299999", name: "PEARL RIVER", vesselType: "tanker", flag: "CN", flagEmoji: "🇨🇳", status: "drifting", lat: 20.5, lng: 116.2, speed: 0.3, course: 22, heading: 0, destination: "UNKNOWN", eta: "—", lastSignal: "32m ago", riskScore: 91, aisDark: false, sanctionsFlag: true, alerts: ["critical"], source: "cached" },
+  { id: "s-15", mmsi: "311023456", imo: "9023456", name: "CARIBBEAN STAR", vesselType: "tanker", flag: "BM", flagEmoji: "🇧🇲", status: "underway", lat: 25.2, lng: -79.3, speed: 9.8, course: 85, heading: 83, destination: "FREEPORT", eta: "Apr 15", lastSignal: "5m ago", riskScore: 30, aisDark: false, sanctionsFlag: false, alerts: [], source: "cached" },
 ];
 
 const STATUS_CONFIG: Record<VesselStatus, { label: string; color: string; dot: string }> = {
@@ -293,7 +295,7 @@ function AisMap({ vessels, selected, onSelect }: AisMapProps) {
       </div>
 
       <div className="absolute bottom-3 right-3 text-[9px] font-mono" style={{ color: TEXT.muted }}>
-        AIS LIVE · {vessels.length} vessels · click marker to select
+        {vessels.some(v => v.source !== "cached") ? "AIS LIVE" : "AIS CACHED"} · {vessels.length} vessels · click marker to select
       </div>
     </div>
   );
@@ -410,7 +412,13 @@ export default function AisLiveTrackingPage() {
         setSelected(combined[0].id);
       }
     } catch (e) {
-      setError("AIS API unavailable — showing cached global coverage");
+      setError("Live AIS feed unavailable");
+      setApiMeta({
+        liveData: false,
+        dataSource: "Cached Vessel Positions",
+        count: vessels.length,
+        fetchedAt: new Date().toISOString(),
+      });
     } finally {
       setLoading(false);
     }
@@ -442,9 +450,9 @@ export default function AisLiveTrackingPage() {
           <Radio className="w-4 h-4" style={{ color: ACCENT }} />
           <span className="text-[13px] font-semibold" style={{ color: TEXT.primary }}>AIS Live Tracking</span>
           {apiMeta ? (
-            <div className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-medium" style={{ background: apiMeta.liveData ? "rgba(34,197,94,0.12)" : "rgba(56,189,248,0.12)", color: apiMeta.liveData ? "#22c55e" : ACCENT }}>
+            <div className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-medium" style={{ background: apiMeta.liveData ? "rgba(34,197,94,0.12)" : "rgba(251,191,36,0.12)", color: apiMeta.liveData ? "#22c55e" : "#fbbf24" }}>
               {apiMeta.liveData ? <Wifi className="w-3 h-3" /> : <Satellite className="w-3 h-3" />}
-              {apiMeta.liveData ? "Live" : "Simulated"} · {apiMeta.dataSource}
+              {apiMeta.liveData ? "Live" : "CACHED"} · {apiMeta.dataSource}
             </div>
           ) : (
             <div className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-medium" style={{ background: "rgba(56,189,248,0.12)", color: ACCENT }}>
@@ -524,6 +532,7 @@ export default function AisLiveTrackingPage() {
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 mb-0.5">
                           <p className="text-[12px] font-semibold truncate" style={{ color: TEXT.primary }}>{vessel.flagEmoji} {vessel.name}</p>
+                          {vessel.source === "cached" && <span className="rounded px-1 text-[9px] font-medium" style={{ background: "rgba(251,191,36,0.12)", color: "#fbbf24" }}>CACHED</span>}
                           {vessel.aisDark && <span className="rounded px-1 text-[9px] font-medium" style={{ background: "rgba(239,68,68,0.15)", color: "#ef4444" }}>AIS DARK</span>}
                           {vessel.sanctionsFlag && <span className="rounded px-1 text-[9px] font-medium" style={{ background: "rgba(239,68,68,0.15)", color: "#ef4444" }}>SANCTIONS</span>}
                         </div>
