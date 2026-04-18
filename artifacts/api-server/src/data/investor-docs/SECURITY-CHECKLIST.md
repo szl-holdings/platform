@@ -174,7 +174,7 @@ The following gaps were identified in the Phase 2–3 Architecture, Auth & Tenan
 
 | Finding ID | Description | Severity | Status |
 |-----------|-------------|----------|--------|
-| AF-001 | `adminGuard` uses `Buffer.equals()` instead of `crypto.timingSafeEqual` for internal token | P1 | ⚠️ Open |
+| AF-001 | `adminGuard` uses `Buffer.equals()` instead of `crypto.timingSafeEqual` for internal token | P1 | ✅ Resolved Apr-2026 — `middlewares/admin-guard.ts` uses HMAC-SHA256 digests + `crypto.timingSafeEqual` (eliminates length side-channel). Regression test: `__tests__/security-hardening.test.ts` §1. |
 | AF-003 | `GET /vessels/fleets` and fleet sub-routes return all tenants' fleet data | P1 | ⚠️ Open |
 | AF-007 | `vessels.*` DB tables (fleet, vessel, positions, cargo, routes) missing `org_id` column | P1 | ⚠️ Open |
 | AF-004 | Backup export endpoint accepts arbitrary `orgId` without verifying admin authority | P2 | ⚠️ Open |
@@ -191,7 +191,7 @@ The following gaps were identified in the Phase 2–3 Architecture, Auth & Tenan
 | Gap ID | Description | Severity | ETA | Launch Impact |
 |--------|-------------|----------|-----|---------------|
 | GAP-001 | Manual rotation of Firebase/Google keys needed | High | Immediate | 🔴 Hard blocker (LB-001) |
-| AF-001 | `adminGuard` non-timing-safe internal token comparison | P1 | Sprint 3 | 🟡 Conditional |
+| AF-001 | `adminGuard` non-timing-safe internal token comparison | P1 | Sprint 3 | ✅ Resolved Apr-2026 |
 | AF-003 / AF-007 | Vessels schema + routes lack tenant scoping | P1 | Sprint 3 | 🟡 Conditional |
 | KG009 | OTEL exporter not wired for production | P1 | Pre-deploy | 🔴 Hard blocker (LB-006) |
 | KG026 | MFA not implemented | P1 | Enterprise tier launch | 🟡 Conditional (LC-005) |

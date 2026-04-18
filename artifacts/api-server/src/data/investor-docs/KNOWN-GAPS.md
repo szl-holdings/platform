@@ -102,7 +102,7 @@ Operational gaps, process health, test coverage, observability, team ownership.
 | KG026 | MFA not implemented | Security | Auth risk | Planned for enterprise tier launch | Security |
 | KG027 | External uptime monitoring absent | Ops | Visibility gap | Configure before first enterprise pilot | Platform |
 | KG028 | Sentry / error tracking not in prod | Observability | Debugging delay | Add Sentry DSN to production | Platform |
-| AF-001 | `adminGuard` uses `Buffer.equals()` not `crypto.timingSafeEqual` for internal token | Security / Auth | Theoretical timing attack on admin token | Replace with `timingSafeEqual` (same fix as KG002 in auth.ts) | Security Lead |
+| ~~AF-001~~ | ~~`adminGuard` uses `Buffer.equals()` not `crypto.timingSafeEqual`~~ | ~~Security / Auth~~ | ✅ Resolved Apr-2026. `middlewares/admin-guard.ts` hashes both inputs with HMAC-SHA256 before `crypto.timingSafeEqual`, eliminating both timing and length side-channels. Regression test in `__tests__/security-hardening.test.ts` §1. | — |
 | AF-003 | `GET /vessels/fleets` routes return all tenants' fleet data without tenant scoping | Security / Multi-tenancy | Cross-tenant data visibility | Add tenant scope filtering to vessels fleet routes | Engineering |
 | AF-007 | `vessels.*` tables (`vessels_fleets`, `vessels`, positions, cargo, routes) missing `org_id` | Security / Multi-tenancy | DB-level cross-tenant vessel data access | Add `org_id` migration; designate `maritime.ts` as authoritative schema | Engineering |
 | KG030 | PostHog product analytics not yet wired | Analytics | No funnel or feature-adoption data | Instrument before launch (OBS-007) | Product |
