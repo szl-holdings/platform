@@ -213,10 +213,17 @@ export default function CommandHome() {
     [navigate],
   );
 
+  const TOUR_COMPLETED_KEY = "szl_aegis_activation_tour_completed";
   const trackedAllCompleteRef = useRef(false);
   useEffect(() => {
     if (activation.isLoading) return;
     if (trackedAllCompleteRef.current) return;
+    try {
+      if (localStorage.getItem(TOUR_COMPLETED_KEY) === "true") {
+        trackedAllCompleteRef.current = true;
+        return;
+      }
+    } catch {}
     if (
       activation.signalSourceConnected &&
       activation.workflowDeployed &&
@@ -224,6 +231,7 @@ export default function CommandHome() {
       activation.teamMemberInvited
     ) {
       trackedAllCompleteRef.current = true;
+      try { localStorage.setItem(TOUR_COMPLETED_KEY, "true"); } catch {}
       trackTourCompleted();
     }
   }, [
