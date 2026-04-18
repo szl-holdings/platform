@@ -1,0 +1,122 @@
+[
+  {
+    "id": "a1b2c3d4-0001-4000-8000-000000000001",
+    "position": 1,
+    "filepath": "src/pages/slides/S01Title.tsx",
+    "title": "The Governed Decision Layer",
+    "description": "Title slide — SZL Holdings Investor Presentation 2026",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-0002-4000-8000-000000000002",
+    "position": 2,
+    "filepath": "src/pages/slides/S02Problem.tsx",
+    "title": "The Problem",
+    "description": "Enterprise AI has a trust problem — opacity, no audit trail, governance as afterthought",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-0003-4000-8000-000000000003",
+    "position": 3,
+    "filepath": "src/pages/slides/S03Thesis.tsx",
+    "title": "The Thesis",
+    "description": "Signal. Decision. Proof — the governed infrastructure between AI output and real-world consequence",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-0004-4000-8000-000000000004",
+    "position": 4,
+    "filepath": "src/pages/slides/S04Loop.tsx",
+    "title": "The Canonical Decision Loop",
+    "description": "Nine-step decision loop: Signal, Context, Recommendation, Simulation, Policy, Execution, Proof, Outcome, Learning",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-0005-4000-8000-000000000005",
+    "position": 5,
+    "filepath": "src/pages/slides/S05Architecture.tsx",
+    "title": "Three-Layer Platform Architecture",
+    "description": "Command Surfaces, Execution Fabric, Domain Packs",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-0006-4000-8000-000000000006",
+    "position": 6,
+    "filepath": "src/pages/slides/S06Primitives.tsx",
+    "title": "Six Shared Governance Primitives",
+    "description": "Outcome Graph, Proof Chain, Covenant Policy, Simulation Engine, Alloy Runtime, PRISM Bus",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-0007-4000-8000-000000000007",
+    "position": 7,
+    "filepath": "src/pages/slides/S07Domains.tsx",
+    "title": "Six High-Consequence Verticals",
+    "description": "Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-0008-4000-8000-000000000008",
+    "position": 8,
+    "filepath": "src/pages/slides/S08DividerMoat.tsx",
+    "title": "Why This Wins",
+    "description": "Section divider — competitive differentiation, architecture moat, build evidence",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-0009-4000-8000-000000000009",
+    "position": 9,
+    "filepath": "src/pages/slides/S09Competitive.tsx",
+    "title": "Governed by Design, Not Compliance",
+    "description": "Legacy approach vs SZL Holdings differentiation",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-0010-4000-8000-000000000010",
+    "position": 10,
+    "filepath": "src/pages/slides/S10Evidence.tsx",
+    "title": "The Architecture Exists",
+    "description": "Build evidence — 700+ tables, 40+ packages, 12 AI agents, 9-step loop",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-0011-4000-8000-000000000011",
+    "position": 11,
+    "filepath": "src/pages/slides/S11Market.tsx",
+    "title": "Six High-Value Markets",
+    "description": "Market sizing across six verticals — $134B+ combined TAM",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-0012-4000-8000-000000000012",
+    "position": 12,
+    "filepath": "src/pages/slides/S12GoToMarket.tsx",
+    "title": "Three-Phase Commercial Path",
+    "description": "Design Partners → Domain Licensing → Platform Licensing",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-0013-4000-8000-000000000013",
+    "position": 13,
+    "filepath": "src/pages/slides/S13DividerVerdict.tsx",
+    "title": "The Verdict",
+    "description": "Section divider — commercial path, the ask, what we offer",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-0014-4000-8000-000000000014",
+    "position": 14,
+    "filepath": "src/pages/slides/S14Commercial.tsx",
+    "title": "The Founder Runs Every Conversation",
+    "description": "Commercial path forward — what we are building, why now, design-partner stage",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-0015-4000-8000-000000000015",
+    "position": 15,
+    "filepath": "src/pages/slides/S15Closing.tsx",
+    "title": "Governed Autonomy for High-Consequence Operations",
+    "description": "Closing slide — szlholdings.com · Washington D.C. · London · Singapore",
+    "speakerNotes": ""
+  }
+]
