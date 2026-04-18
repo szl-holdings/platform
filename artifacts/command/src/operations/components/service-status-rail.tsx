@@ -1,73 +1,107 @@
 import { useState, useEffect, useCallback } from "react";
 import { CheckCircle, AlertTriangle, RefreshCw, WifiOff } from "lucide-react";
 
-// Prefer an explicit API base from env (for split-domain deployments),
-// otherwise fall back to same-origin relative path (standard Vite-proxy setup).
 const API_BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "";
 
-type ServiceStatus = "ok" | "degraded" | "not_configured" | "unavailable";
-type OverallStatus = "healthy" | "degraded" | "warning";
+type ProbeStatus = "ok" | "degraded" | "error" | "not_configured" | "connected" | "unavailable" | "backpressure" | string;
+type OverallStatus = "healthy" | "degraded" | "warning" | string;
 
-interface HealthService {
-  status: ServiceStatus;
+interface ServiceEntry {
+  status: ProbeStatus;
   latencyMs?: number | null;
+  depth?: number;
   mode?: string;
+  details?: string;
 }
 
-interface HealthResponse {
-  status?: OverallStatus | string;
+interface DetailedHealthResponse {
+  status?: OverallStatus;
   environment?: string;
   mode?: string;
   version?: string;
   uptime?: number;
+  cacheAgeMs?: number | null;
   services?: {
-    server?: Partial<HealthService> | null;
-    database?: Partial<HealthService> | null;
-    job_queue?: { status?: string; depth?: number } | null;
-    storage?: Partial<HealthService> | null;
-    auth?: Partial<HealthService> | null;
-    ai?: Partial<HealthService> | null;
+    server?: Partial<ServiceEntry> | null;
+    database?: Partial<ServiceEntry> | null;
+    auth?: Partial<ServiceEntry> | null;
+    ai?: Partial<ServiceEntry> | null;
+    job_queue?: Partial<ServiceEntry> | null;
     [key: string]: unknown;
   };
 }
 
 const ENV_COLORS: Record<string, { color: string; bg: string; label: string }> = {
-  production: { color: "#c45a4a", bg: "rgba(196,90,74,0.12)", label: "PRODUCTION" },
-  staging:    { color: "#c8953c", bg: "rgba(200,149,60,0.12)", label: "STAGING" },
-  development:{ color: "#6b8f71", bg: "rgba(107,143,113,0.1)", label: "DEVELOPMENT" },
-  demo:       { color: "#8b7ac8", bg: "rgba(139,122,200,0.1)", label: "DEMO" },
+  production:  { color: "#c45a4a", bg: "rgba(196,90,74,0.12)",   label: "PRODUCTION" },
+  staging:     { color: "#c8953c", bg: "rgba(200,149,60,0.12)",  label: "STAGING" },
+  development: { color: "#6b8f71", bg: "rgba(107,143,113,0.1)",  label: "DEVELOPMENT" },
+  "local-dev": { color: "#6b8f71", bg: "rgba(107,143,113,0.1)",  label: "LOCAL" },
+  demo:        { color: "#8b7ac8", bg: "rgba(139,122,200,0.1)",  label: "DEMO" },
 };
 
-function getStatusDot(status: string) {
-  if (status === "ok" || status === "connected") return "#6b8f71";
-  if (status === "degraded" || status === "backpressure") return "#c8953c";
+const SLOW_THRESHOLD_MS = 500;
+
+function resolveColor(status: ProbeStatus, latencyMs?: number | null): string {
+  if (status === "ok" || status === "connected") {
+    if (latencyMs != null && latencyMs > SLOW_THRESHOLD_MS) return "#c8953c";
+    return "#6b8f71";
+  }
+  if (
+    status === "degraded" ||
+    status === "backpressure" ||
+    status === "not_configured"
+  ) return "#c8953c";
   return "#c45a4a";
 }
 
-function ServiceDot({ label, status, latencyMs }: { label: string; status: string; latencyMs?: number | null }) {
-  const color = getStatusDot(status);
-  const isOk = status === "ok" || status === "connected";
+function isOkStatus(status: ProbeStatus, latencyMs?: number | null): boolean {
+  return (status === "ok" || status === "connected") && !(latencyMs != null && latencyMs > SLOW_THRESHOLD_MS);
+}
+
+function ServiceDot({
+  label,
+  status,
+  latencyMs,
+}: {
+  label: string;
+  status: ProbeStatus;
+  latencyMs?: number | null;
+}) {
+  const color = resolveColor(status, latencyMs);
+  const ok = isOkStatus(status, latencyMs);
+  const latencyLabel = latencyMs != null ? `${latencyMs}ms` : null;
+
+  const title = `${label}: ${status}${latencyMs != null ? ` · ${latencyMs}ms` : ""}`;
+
   return (
     <div
       className="flex items-center gap-1 cursor-default"
-      title={`${label}: ${status}${latencyMs != null ? ` · ${latencyMs}ms` : ""}`}
+      title={title}
       role="status"
       aria-label={`${label} status: ${status}`}
     >
       <span
-        className={`w-1.5 h-1.5 rounded-full shrink-0 ${!isOk ? "animate-pulse" : ""}`}
+        className={`w-1.5 h-1.5 rounded-full shrink-0 ${!ok ? "animate-pulse" : ""}`}
         style={{ background: color }}
         aria-hidden="true"
       />
       <span className="text-[8px] font-mono hidden lg:inline" style={{ color: "rgba(255,255,255,0.35)" }}>
         {label}
       </span>
+      {latencyLabel && (
+        <span
+          className="text-[7px] font-mono hidden xl:inline"
+          style={{ color }}
+        >
+          {latencyLabel}
+        </span>
+      )}
     </div>
   );
 }
 
 export function ServiceStatusRail() {
-  const [health, setHealth] = useState<HealthResponse | null>(null);
+  const [health, setHealth] = useState<DetailedHealthResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [lastFetched, setLastFetched] = useState<Date | null>(null);
   const [error, setError] = useState(false);
@@ -75,28 +109,40 @@ export function ServiceStatusRail() {
   const fetchHealth = useCallback(async () => {
     setLoading(true);
     try {
-      const resp = await fetch(`${API_BASE}/api/health`, {
-        signal: AbortSignal.timeout(4000),
+      const resp = await fetch(`${API_BASE}/api/health/detailed`, {
+        signal: AbortSignal.timeout(6000),
         credentials: "include",
       });
-      // Accept 200 (healthy/warning) and 503 (degraded) — both return structured JSON.
-      // Only treat non-parseable or true network errors as "unreachable".
       if (resp.ok || resp.status === 503) {
         try {
-          const data: HealthResponse = await resp.json();
+          const data: DetailedHealthResponse = await resp.json();
           setHealth(data);
           setError(false);
           setLastFetched(new Date());
         } catch {
-          // Body is not JSON (e.g. a proxy error page) — treat as unreachable
+          setError(true);
+        }
+      } else if (resp.status === 401 || resp.status === 403) {
+        const fallback = await fetch(`${API_BASE}/api/health`, {
+          signal: AbortSignal.timeout(4000),
+          credentials: "include",
+        });
+        if (fallback.ok || fallback.status === 503) {
+          try {
+            const data: DetailedHealthResponse = await fallback.json();
+            setHealth(data);
+            setError(false);
+            setLastFetched(new Date());
+          } catch {
+            setError(true);
+          }
+        } else {
           setError(true);
         }
       } else {
-        // Unexpected status (4xx auth, 502 gateway, etc.) — treat as unreachable
         setError(true);
       }
     } catch {
-      // Network error or timeout — truly unreachable
       setError(true);
     } finally {
       setLoading(false);
@@ -105,12 +151,10 @@ export function ServiceStatusRail() {
 
   useEffect(() => {
     fetchHealth();
-    const interval = setInterval(fetchHealth, 60_000);
+    const interval = setInterval(fetchHealth, 30_000);
     return () => clearInterval(interval);
   }, [fetchHealth]);
 
-  // Prefer explicit `mode` (demo/prod/staging) over NODE_ENV-derived `environment`
-  // so demo setups running with NODE_ENV=production show the correct badge.
   const env = health?.mode ?? health?.environment ?? "development";
   const envCfg = ENV_COLORS[env] ?? ENV_COLORS.development;
   const overallStatus = health?.status;
@@ -118,12 +162,15 @@ export function ServiceStatusRail() {
   const isConnected = !error && health != null;
 
   const svc = health?.services ?? {};
-  const apiStatus   = svc.server?.status    ?? "unavailable";
-  const dbStatus    = svc.database?.status  ?? "unavailable";
-  const dbLatency   = svc.database?.latencyMs ?? null;
-  const authStatus  = svc.auth?.status      ?? "not_configured";
-  const aiStatus    = svc.ai?.status        ?? "not_configured";
-  const queueStatus = svc.job_queue?.status ?? "not_configured";
+  const apiStatus    = (svc.server?.status    as ProbeStatus | undefined) ?? "unavailable";
+  const dbStatus     = (svc.database?.status  as ProbeStatus | undefined) ?? "unavailable";
+  const dbLatency    = svc.database?.latencyMs ?? null;
+  const authStatus   = (svc.auth?.status      as ProbeStatus | undefined) ?? "not_configured";
+  const authLatency  = svc.auth?.latencyMs ?? null;
+  const aiStatus     = (svc.ai?.status        as ProbeStatus | undefined) ?? "not_configured";
+  const aiLatency    = svc.ai?.latencyMs ?? null;
+  const queueStatus  = (svc.job_queue?.status as ProbeStatus | undefined) ?? "not_configured";
+  const queueLatency = svc.job_queue?.latencyMs ?? null;
 
   return (
     <div
@@ -148,10 +195,10 @@ export function ServiceStatusRail() {
         {isConnected ? (
           <div className="flex items-center gap-2.5">
             <ServiceDot label="API"   status={apiStatus} />
-            <ServiceDot label="DB"    status={dbStatus}  latencyMs={dbLatency} />
-            <ServiceDot label="Auth"  status={authStatus} />
-            <ServiceDot label="AI"    status={aiStatus} />
-            <ServiceDot label="Queue" status={queueStatus} />
+            <ServiceDot label="DB"    status={dbStatus}   latencyMs={dbLatency} />
+            <ServiceDot label="Auth"  status={authStatus} latencyMs={authLatency} />
+            <ServiceDot label="AI"    status={aiStatus}   latencyMs={aiLatency} />
+            <ServiceDot label="Queue" status={queueStatus} latencyMs={queueLatency} />
           </div>
         ) : error ? (
           <div className="flex items-center gap-1" title="Cannot reach API">

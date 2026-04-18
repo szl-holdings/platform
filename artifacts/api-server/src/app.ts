@@ -344,57 +344,57 @@ app.get("/api/health/detailed", async (req: Request, res: Response) => {
       }
     }
   }
-  const checks: Record<string, { status: string; latencyMs?: number; details?: string }> = {};
 
-  const dbUrl = process.env.DATABASE_URL;
-  if (dbUrl) {
-    const start = Date.now();
-    try {
-      const { db, pool } = await import("@szl-holdings/db");
-      const { sql } = await import("drizzle-orm");
-      await Promise.race([
-        db.execute(sql`SELECT 1`),
-        new Promise<never>((_, reject) => setTimeout(() => reject(new Error("timeout")), 3000)),
-      ]);
-      const poolDetails = pool
-        ? `total=${pool.totalCount} idle=${pool.idleCount} waiting=${pool.waitingCount}`
-        : undefined;
-      checks["database"] = { status: "connected", latencyMs: Date.now() - start, details: poolDetails };
-    } catch {
-      checks["database"] = { status: "unreachable", latencyMs: Date.now() - start };
-    }
-  } else {
-    checks["database"] = { status: "not_configured" };
-  }
+  const { getDetailedHealth, getCacheAge } = await import("./lib/health-probes.js");
+  const probes = await getDetailedHealth();
 
-  try {
-    const { durableJobQueue } = await import("@szl-holdings/forge-runtime");
-    const stats = await durableJobQueue.getStats();
-    const queueDepth = stats.pending + stats.running;
-    checks["job_queue"] = {
-      status: queueDepth > 50 ? "backpressure" : "ok",
-      details: `pending=${stats.pending} running=${stats.running} completed=${stats.completed} failed=${stats.failed}`,
-    };
-  } catch {
-    checks["job_queue"] = { status: "unavailable" };
-  }
-
+  const telemetry: { status: string; details?: string } = { status: "unavailable" };
   try {
     const { serverTelemetry } = await import("@szl-holdings/observability");
     const snapshot = serverTelemetry.getSnapshot();
-    checks["telemetry"] = {
-      status: snapshot.errorRate > 10 ? "elevated_errors" : "ok",
-      details: `p95=${snapshot.p95Latency.toFixed(0)}ms error_rate=${snapshot.errorRate.toFixed(1)}% active_alerts=${snapshot.activeAlerts}`,
-    };
-  } catch {
-    checks["telemetry"] = { status: "unavailable" };
-  }
+    telemetry.status = snapshot.errorRate > 10 ? "elevated_errors" : "ok";
+    telemetry.details = `p95=${snapshot.p95Latency.toFixed(0)}ms error_rate=${snapshot.errorRate.toFixed(1)}% active_alerts=${snapshot.activeAlerts}`;
+  } catch { /* telemetry not available */ }
+
+  const dbStatus = probes.database.status === "ok" ? "connected"
+    : probes.database.status === "error" ? "unreachable"
+    : probes.database.status;
+
+  const queueCheckStatus =
+    probes.queue.status === "ok" ? "ok" :
+    probes.queue.status === "degraded" ? "backpressure" :
+    probes.queue.status === "error" ? "error" :
+    "not_configured";
+
+  const checks: Record<string, { status: string; latencyMs?: number; details?: string }> = {
+    database: { status: dbStatus, latencyMs: probes.database.latencyMs, details: probes.database.details },
+    auth: { status: probes.auth.status, latencyMs: probes.auth.latencyMs, details: probes.auth.details },
+    ai: { status: probes.ai.status, latencyMs: probes.ai.latencyMs, details: probes.ai.details },
+    job_queue: {
+      status: queueCheckStatus,
+      latencyMs: probes.queue.latencyMs,
+      details: probes.queue.details,
+    },
+    telemetry,
+  };
 
   const allStatuses = Object.values(checks).map((c) => c.status);
   const overallStatus =
-    allStatuses.some((s) => s === "unreachable" || s === "unavailable") ? "degraded" :
-    allStatuses.some((s) => s === "backpressure" || s === "elevated_errors") ? "warning" :
+    allStatuses.some((s) => s === "unreachable" || s === "error") ? "degraded" :
+    allStatuses.some((s) => s === "backpressure" || s === "elevated_errors" || s === "degraded" || s === "unavailable") ? "warning" :
     "healthy";
+
+  const services = {
+    server: { status: "ok" as const, latencyMs: 0 },
+    database: { status: probes.database.status, latencyMs: probes.database.latencyMs ?? null },
+    auth: { status: probes.auth.status, latencyMs: probes.auth.latencyMs ?? null },
+    ai: { status: probes.ai.status, latencyMs: probes.ai.latencyMs ?? null },
+    job_queue: {
+      status: probes.queue.status,
+      latencyMs: probes.queue.latencyMs ?? null,
+      depth: probes.queue.depth ?? 0,
+    },
+  };
 
   res.status(overallStatus === "degraded" ? 503 : 200).json({
     status: overallStatus,
@@ -402,7 +402,12 @@ app.get("/api/health/detailed", async (req: Request, res: Response) => {
     uptime: process.uptime(),
     version: process.env.npm_package_version ?? "0.0.0",
     environment: process.env.NODE_ENV ?? "development",
+    mode: (() => {
+      try { return resolveRuntimeMode(); } catch { return process.env.NODE_ENV === "production" ? "production" : "local-dev"; }
+    })(),
+    cacheAgeMs: getCacheAge(),
     checks,
+    services,
     memory: (() => {
       const m = process.memoryUsage();
       return {
