@@ -19,6 +19,9 @@ import {
   builtinSkills,
   setSkillLibraryLogger,
 } from "@workspace/skill-library";
+import { defaultCheckpointStore, PostgresCheckpointStore } from "@workspace/cognitive-runtime";
+import { defaultSelfModelStore } from "@workspace/self-model";
+import { registerEvalRunSink } from "@workspace/eval-forge";
 import { logger } from "./logger";
 
 let traceStore: PostgresTraceStore | undefined;
@@ -27,6 +30,7 @@ let signalBusStore: PostgresSignalBusStore | undefined;
 let evidenceStore: PostgresEvidenceStore | undefined;
 let recommendationStore: PostgresRecommendationStore | undefined;
 let entityRegistry: PostgresEntityRegistry | undefined;
+let checkpointStore: PostgresCheckpointStore | undefined;
 let retentionTimer: ReturnType<typeof setInterval> | undefined;
 
 const TRACE_RETENTION_DAYS = parseInt(process.env.TRACE_RETENTION_DAYS ?? "30", 10);
@@ -229,6 +233,57 @@ export async function initDurablePersistence(): Promise<void> {
       logger.warn({ err }, "[persistence] Skill Library DB store init failed — staying in-memory");
     }
 
+    // ----- Self-Model store: install Pool adapter + hydrate at boot -----
+    try {
+      const { pool } = await import("@szl-holdings/db");
+      const { PoolSelfModelAdapter } = await import("./self-model-db-adapter");
+      defaultSelfModelStore.setPersistenceAdapter(new PoolSelfModelAdapter(pool));
+      const hydratedSelfModels = await defaultSelfModelStore.hydrateAll().catch((err) => {
+        logger.warn({ err }, "[persistence] Self-model hydration failed");
+        return 0;
+      });
+      logger.info({ hydratedSelfModels }, "[persistence] Self-Model store backed by PostgreSQL");
+    } catch (err) {
+      logger.warn({ err }, "[persistence] Self-Model adapter init failed — staying in-memory");
+    }
+
+    // ----- Orchestration checkpoints: write-behind + boot hydration -----
+    try {
+      const { orchestrationCheckpointsTable } = await import("@szl-holdings/db/schema");
+      checkpointStore = new PostgresCheckpointStore({
+        db,
+        table: orchestrationCheckpointsTable,
+        flushIntervalMs: FLUSH_INTERVAL_MS,
+        hydrateLimit: 1000,
+        logger,
+      });
+      const hydratedCheckpoints = await checkpointStore.hydrate().catch((err) => {
+        logger.warn({ err }, "[persistence] Checkpoint hydration failed");
+        return 0;
+      });
+      defaultCheckpointStore.setBackend(checkpointStore);
+      logger.info(
+        { hydratedCheckpoints },
+        "[persistence] Cognitive-runtime checkpoints backed by PostgreSQL",
+      );
+    } catch (err) {
+      logger.warn({ err }, "[persistence] Checkpoint store init failed — staying in-memory");
+    }
+
+    // ----- Eval-forge runs: register persistence sink so every runEvalSuite
+    //       call lands in eval_forge_runs without route-level wiring. -----
+    try {
+      const { persistEvalForgeRun } = await import("./eval-forge-store");
+      registerEvalRunSink((report) => {
+        void persistEvalForgeRun(report).catch((err) =>
+          logger.warn({ err, runId: report.runId }, "[persistence] Eval run sink failed"),
+        );
+      });
+      logger.info("[persistence] Eval-forge run sink registered");
+    } catch (err) {
+      logger.warn({ err }, "[persistence] Eval sink registration failed");
+    }
+
     try {
       const { setHistoryAdapter } = await import("@szl-holdings/action-engine");
       const { dbRecordRun, dbListRuns, dbGetRunById, dbGetHistoryStats } = await import("./decisioning-store");
@@ -373,6 +428,7 @@ export async function stopDurablePersistence(): Promise<void> {
     evidenceStore?.stop(),
     recommendationStore?.stop(),
     entityRegistry?.stop(),
+    checkpointStore?.stop(),
   ]);
   logger.info("[persistence] Trace/Memory stores flushed and stopped");
 }

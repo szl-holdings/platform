@@ -1,5 +1,11 @@
 export * from "./types.js";
 export * from "./checkpoint.js";
+export {
+  PostgresCheckpointStore,
+  type PostgresCheckpointStoreOptions,
+  type PostgresCheckpointStoreLogger,
+  type OrchestrationCheckpointsTableLike,
+} from "./postgres-checkpoint-store.js";
 export { run, type CognitiveRuntimeOptions, type RunResult } from "./orchestrator.js";
 
 export { perceivePhase, type PerceiveOutput } from "./phases/perceive.js";

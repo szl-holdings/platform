@@ -4,6 +4,25 @@ import type { EvalSuiteDef, EvalExecutor, EvalCaseResult, EvalRunReport, EvalCas
 
 export type { EvalSuiteDef, EvalExecutor, EvalCaseResult, EvalRunReport, EvalCase };
 
+/**
+ * Persistence sink invoked by `runEvalSuite` after each completed run.
+ * Wired by `persistence-init.ts` so that every eval run — regardless of
+ * caller — lands in `eval_runs`/`eval_scores` automatically. Errors in the
+ * sink are swallowed so eval execution is never blocked by persistence
+ * failures.
+ */
+export type EvalRunSink = (report: EvalRunReport) => void | Promise<void>;
+
+let evalRunSink: EvalRunSink | null = null;
+
+export function registerEvalRunSink(sink: EvalRunSink | null): void {
+  evalRunSink = sink;
+}
+
+export function getEvalRunSink(): EvalRunSink | null {
+  return evalRunSink;
+}
+
 export async function runEvalSuite(
   suite: EvalSuiteDef,
   executor: EvalExecutor,
@@ -111,7 +130,7 @@ export async function runEvalSuite(
   const totalTokensUsed = caseResults.reduce((s, r) => s + r.tokensUsed, 0);
   const metrics = computeAllMetrics(caseResults);
 
-  return {
+  const report: EvalRunReport = {
     runId,
     suiteId: suite.suiteId,
     suiteName: suite.name,
@@ -131,6 +150,19 @@ export async function runEvalSuite(
     metrics,
     caseResults,
   };
+
+  if (evalRunSink) {
+    try {
+      const result = evalRunSink(report);
+      if (result && typeof (result as Promise<void>).catch === "function") {
+        (result as Promise<void>).catch(() => {});
+      }
+    } catch {
+      // Persistence is best-effort; never fail an eval run because of it.
+    }
+  }
+
+  return report;
 }
 
 export function checkRunRegression(

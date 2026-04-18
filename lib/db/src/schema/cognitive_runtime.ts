@@ -702,6 +702,33 @@ export const cognitiveRollbackEventsTable = pgTable(
 );
 
 // ---------------------------------------------------------------------------
+// Orchestration checkpoints — durable in-flight CognitiveLoopRun snapshots.
+// Mirror of cognitive-runtime InMemoryCheckpointStore so a process crash
+// loses ≤1s of state. Re-hydrated at boot to enable resume.
+// ---------------------------------------------------------------------------
+
+export const orchestrationCheckpointsTable = pgTable(
+  "orchestration_checkpoints",
+  {
+    ref: text("ref").primaryKey(),
+    runId: text("run_id").notNull(),
+    agentId: text("agent_id").notNull(),
+    objective: text("objective").notNull(),
+    phase: text("phase").notNull(),
+    stepIndex: integer("step_index").notNull().default(0),
+    snapshot: jsonb("snapshot").$type<Record<string, unknown>>().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }),
+  },
+  (t) => ({
+    runIdIdx: index("orchestration_checkpoints_run_id_idx").on(t.runId),
+    agentIdIdx: index("orchestration_checkpoints_agent_id_idx").on(t.agentId),
+    createdAtIdx: index("orchestration_checkpoints_created_at_idx").on(t.createdAt),
+    expiresAtIdx: index("orchestration_checkpoints_expires_at_idx").on(t.expiresAt),
+  }),
+);
+
+// ---------------------------------------------------------------------------
 // TypeScript types
 // ---------------------------------------------------------------------------
 

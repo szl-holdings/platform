@@ -62,7 +62,53 @@ export class InMemoryCheckpointStore implements CheckpointStore {
   }
 }
 
-export const defaultCheckpointStore = new InMemoryCheckpointStore();
+/**
+ * A CheckpointStore wrapper that delegates to a swappable backend. Mirrors
+ * the MutableTraceStore pattern: process-wide singletons hold a reference to
+ * a MutableCheckpointStore so the API server can install a Postgres-backed
+ * implementation at boot time without breaking import sites.
+ */
+export class MutableCheckpointStore implements CheckpointStore {
+  private backend: CheckpointStore;
+
+  constructor(initial: CheckpointStore = new InMemoryCheckpointStore()) {
+    this.backend = initial;
+  }
+
+  setBackend(store: CheckpointStore): void {
+    this.backend = store;
+  }
+
+  getBackend(): CheckpointStore {
+    return this.backend;
+  }
+
+  save(entry: CheckpointEntry): void {
+    this.backend.save(entry);
+  }
+
+  load(ref: string): CheckpointEntry | undefined {
+    return this.backend.load(ref);
+  }
+
+  list(runId?: string): CheckpointEntry[] {
+    return this.backend.list(runId);
+  }
+
+  listByAgent(agentId: string, runId?: string): CheckpointEntry[] {
+    return this.backend.listByAgent(agentId, runId);
+  }
+
+  delete(ref: string): boolean {
+    return this.backend.delete(ref);
+  }
+
+  prune(maxAgeMs?: number): number {
+    return this.backend.prune(maxAgeMs);
+  }
+}
+
+export const defaultCheckpointStore: MutableCheckpointStore = new MutableCheckpointStore();
 
 export function saveCheckpoint(
   run: CognitiveLoopRun,
