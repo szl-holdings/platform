@@ -1,6 +1,6 @@
 import { m } from "framer-motion";
 import { Link } from "wouter";
-import { ArrowRight, Lock, Key, Shield, Users, Server, AlertTriangle } from "lucide-react";
+import { ArrowRight, Lock, Key, Shield, Users, Server, AlertTriangle, FileText } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
@@ -10,7 +10,7 @@ const CONTROLS = [
     icon: Users,
     title: "Identity & Access",
     items: [
-      "Role-based access control (RBAC) with six-tier hierarchy enforced server-side",
+      "11-role platform hierarchy (founder_admin → anonymous_visitor) enforced server-side with deny-by-default global auth enforcer on all /api/* routes",
       "OpenID Connect with PKCE (Replit + Azure AD multi-tenant SSO)",
       "SCIM 2.0 provisioning server for automated user lifecycle management",
       "Session management with DB-backed sessions, expiration, and rotation",
@@ -152,6 +152,41 @@ export default function TrustSecurityPage() {
                 Report a vulnerability <ArrowRight size={14} />
               </Link>
             </m.div>
+          </div>
+        </section>
+
+        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
+                <FileText size={14} color="hsl(145,62%,46%)" />
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "hsl(145,62%,46%)" }}>Diligence Materials</p>
+              </div>
+              <h2 style={{ fontSize: "clamp(1.25rem,2.5vw,1.75rem)", fontWeight: 600, letterSpacing: "-0.018em", lineHeight: 1.2, maxWidth: "32ch", marginBottom: "1.5rem" }}>
+                Security documentation for enterprise evaluators.
+              </h2>
+            </m.div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px,1fr))", gap: "0.875rem" }}>
+              {[
+                { label: "Security Diligence Brief", desc: "RBAC matrix, isolation model, credential handling, and vulnerability disclosure process", href: "/trust/diligence/security" },
+                { label: "Technical Diligence Brief", desc: "Architecture layers, tenancy model, API surface, integration security, and proof chain", href: "/trust/diligence/technical" },
+                { label: "Known Gaps Register", desc: "Transparent gap register with severity classification and remediation sprint assignments — all P0 gaps resolved April 2026", href: "/trust-center" },
+              ].map((item, i) => (
+                <m.div key={item.label} initial={{ opacity: 0, y: 8 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.35, delay: i * 0.07 }} className="szl-card" style={{ borderRadius: "0.75rem", padding: "1.125rem 1.25rem" }}>
+                  <Link href={item.href} style={{ textDecoration: "none", display: "block" }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.4rem" }}>
+                      <span style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(38,8%,85%)" }}>{item.label}</span>
+                      <ArrowRight size={13} color="hsl(145,62%,46%)" />
+                    </div>
+                    <p style={{ fontSize: "12.5px", lineHeight: 1.6, color: "hsl(214,7%,52%)" }}>{item.desc}</p>
+                  </Link>
+                </m.div>
+              ))}
+            </div>
+            <m.p initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 0.4, delay: 0.25 }} style={{ fontSize: "12px", color: "hsl(214,7%,40%)", marginTop: "1.25rem" }}>
+              Full technical diligence packet available on request —{" "}
+              <a href="mailto:security@szlholdings.com" style={{ color: "hsl(145,62%,46%)", textDecoration: "none" }}>security@szlholdings.com</a>
+            </m.p>
           </div>
         </section>
 

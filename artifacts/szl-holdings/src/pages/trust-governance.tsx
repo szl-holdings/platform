@@ -1,6 +1,6 @@
 import { m } from "framer-motion";
 import { Link } from "wouter";
-import { ArrowRight, Brain, CheckSquare, FileText, AlertOctagon, Eye, GitBranch } from "lucide-react";
+import { ArrowRight, Brain, CheckSquare, FileText, AlertOctagon, Eye, GitBranch, Layers, Shield, BarChart2, Workflow, Radio } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
@@ -36,6 +36,15 @@ const GOVERNANCE_PRINCIPLES = [
     title: "Audit Trail Is Designed for Capital and Compliance Diligence",
     body: "The governance audit trail is structured for external review — LP reporting, regulatory inquiry, or enterprise compliance review. Fields, formats, and export paths are designed from that use case backward.",
   },
+];
+
+const SIX_PRIMITIVES = [
+  { icon: Shield, label: "Proof Chain", lib: "@szl-holdings/proof-chain", desc: "Immutable, cryptographically verifiable audit trail for every significant action. AI outputs carry model identity, source citations, and confidence scores." },
+  { icon: CheckSquare, label: "Covenant Policy", lib: "@szl-holdings/covenant-policy", desc: "Permission and approval gates. Human-in-the-loop is an enforced policy constraint — AI cannot bypass it, only a human override (which is itself recorded) can." },
+  { icon: BarChart2, label: "Outcome Graph", lib: "@szl-holdings/outcome-graph", desc: "Tracks recommendation → decision → outcome. Enables closed-loop AI calibration so confidence scores improve with real-world results." },
+  { icon: Layers, label: "Decision Simulation", lib: "@szl-holdings/monte-carlo", desc: "Monte Carlo probabilistic simulation before action. Confidence intervals, sensitivity analysis, and scenario comparison built into the approval workflow." },
+  { icon: Workflow, label: "Workflow Engine", lib: "@szl-holdings/workflow-engine", desc: "Durable multi-step process orchestration with state persistence, approval gates, and checkpoint recovery across service restarts." },
+  { icon: Radio, label: "Event Fabric", lib: "@szl-holdings/prism-bus", desc: "Cross-domain signal backbone — normalizes, routes, and correlates events across all domain packs. All events carry a correlation ID." },
 ];
 
 const HITL_MODEL = [
@@ -145,6 +154,73 @@ export default function TrustGovernancePage() {
                 </m.div>
               ))}
             </div>
+          </div>
+        </section>
+
+        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "var(--color-alloy-light)", marginBottom: "1rem" }}>Six Governance Primitives</p>
+              <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "32ch", marginBottom: "0.75rem" }}>
+                Governance enforced at the library layer — not the UI.
+              </h2>
+              <p style={{ fontSize: "0.9375rem", lineHeight: 1.68, color: "hsl(214,7%,58%)", maxWidth: "60ch", marginBottom: "2.5rem" }}>
+                These six shared libraries are inherited by every domain pack and command surface. Governance cannot be turned off by product configuration because it is not implemented at the product layer.
+              </p>
+            </m.div>
+            <div className="szl-grid-2" style={{ gap: "1rem" }}>
+              {SIX_PRIMITIVES.map((p, i) => {
+                const Icon = p.icon;
+                return (
+                  <m.div key={p.label} initial={{ opacity: 0, y: 8 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.35, delay: i * 0.06 }} className="szl-card" style={{ borderRadius: "0.75rem", padding: "1.125rem 1.375rem" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.625rem" }}>
+                      <div style={{ width: "30px", height: "30px", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--color-alloy-muted)", border: "1px solid var(--color-alloy-border)", borderRadius: "0.375rem", flexShrink: 0 }}>
+                        <Icon size={14} color="var(--color-alloy-light)" />
+                      </div>
+                      <div>
+                        <span style={{ fontSize: "0.9375rem", fontWeight: 600, letterSpacing: "-0.01em", color: "hsl(38,8%,88%)" }}>{p.label}</span>
+                        <code style={{ display: "block", fontSize: "10px", color: "hsl(214,7%,42%)", fontFamily: "var(--font-mono)", marginTop: "1px" }}>{p.lib}</code>
+                      </div>
+                    </div>
+                    <p style={{ fontSize: "0.8125rem", lineHeight: 1.65, color: "hsl(214,7%,56%)" }}>{p.desc}</p>
+                  </m.div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
+                <FileText size={14} color="var(--color-alloy-light)" />
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "var(--color-alloy-light)" }}>Diligence Materials</p>
+              </div>
+              <h2 style={{ fontSize: "clamp(1.25rem,2.5vw,1.75rem)", fontWeight: 600, letterSpacing: "-0.018em", lineHeight: 1.2, maxWidth: "32ch", marginBottom: "1.5rem" }}>
+                Governance documentation for enterprise evaluators.
+              </h2>
+            </m.div>
+            <div style={{ display: "flex", flexWrap: "wrap" as const, gap: "0.875rem" }}>
+              {[
+                { label: "Executive Diligence Brief", desc: "AI governance model, approval workflows, risk posture", href: "/trust/diligence/executive" },
+                { label: "Technical Diligence Brief", desc: "Six governance primitives, proof chain architecture, covenant policy implementation", href: "/trust/diligence/technical" },
+              ].map((item, i) => (
+                <m.div key={item.label} initial={{ opacity: 0, y: 8 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.35, delay: i * 0.07 }} className="szl-card" style={{ borderRadius: "0.75rem", padding: "1.125rem 1.375rem", flex: "1 1 220px" }}>
+                  <Link href={item.href} style={{ textDecoration: "none", display: "block" }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.4rem" }}>
+                      <span style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(38,8%,85%)" }}>{item.label}</span>
+                      <ArrowRight size={13} color="var(--color-alloy-light)" />
+                    </div>
+                    <p style={{ fontSize: "12.5px", lineHeight: 1.6, color: "hsl(214,7%,52%)" }}>{item.desc}</p>
+                  </Link>
+                </m.div>
+              ))}
+            </div>
+            <m.p initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 0.4, delay: 0.2 }} style={{ fontSize: "12px", color: "hsl(214,7%,38%)", marginTop: "1.25rem" }}>
+              Full diligence packet on request —{" "}
+              <a href="mailto:security@szlholdings.com" style={{ color: "var(--color-alloy-light)", textDecoration: "none" }}>security@szlholdings.com</a>
+            </m.p>
           </div>
         </section>
 

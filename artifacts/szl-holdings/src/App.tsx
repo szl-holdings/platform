@@ -596,6 +596,9 @@ function App() {
             </Route>
 
             {/* ── Trust Center ── */}
+            <Route path="/trust-center">
+              <Suspense fallback={<PageLoader />}><TrustCenterPage /></Suspense>
+            </Route>
             <Route path="/trust/security">
               <Suspense fallback={<PageLoader />}><TrustSecurityPage /></Suspense>
             </Route>

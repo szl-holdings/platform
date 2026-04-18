@@ -1,6 +1,6 @@
 import { m } from "framer-motion";
 import { Link } from "wouter";
-import { ArrowRight, Brain, Users, Eye, FileCheck2, AlertTriangle, Workflow, ShieldCheck, Network } from "lucide-react";
+import { ArrowRight, Brain, Users, Eye, FileCheck2, AlertTriangle, Workflow, ShieldCheck, Network, FileText, Bot, BarChart2 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
@@ -45,6 +45,20 @@ const MODEL_MESH_ROWS = [
   { layer: "Output validation", control: "Confidence scoring + contradiction detection", note: "Outputs below confidence threshold are flagged. Contradictions with source documents are blocked." },
   { layer: "Training isolation", control: "Zero training on client data", note: "No tenant data, interaction history, or document content is used to improve model behavior." },
   { layer: "Provider governance", control: "Commercially licensed APIs only", note: "No open-weight models with unclear training provenance. Provider selection is auditable." },
+];
+
+const DOMAIN_AGENTS = [
+  { name: "Nuro Mesh", domain: "Platform", role: "General-purpose orchestration and routing across all domain packs", color: "hsl(258,55%,68%)" },
+  { name: "Helmsman", domain: "Maritime — Vessels", role: "Voyage risk, sanctions screening, route optimization, and regulatory compliance", color: "hsl(200,65%,52%)" },
+  { name: "Sentinel", domain: "Security — Aegis", role: "Threat triage, playbook recommendation, and security incident classification", color: "hsl(145,62%,46%)" },
+  { name: "INCA", domain: "Evaluation", role: "Model confidence calibration, output scoring, drift detection, and adversarial resistance testing", color: "hsl(38,80%,56%)" },
+];
+
+const INCA_CAPABILITIES = [
+  { label: "Confidence calibration", desc: "Calibrates AI confidence scores using historical outcome data from the Outcome Graph — so accuracy improves as real-world results accumulate." },
+  { label: "Agent benchmarking", desc: "Benchmarks each domain agent's performance by action type. Regressions surface automatically before they reach production." },
+  { label: "Adversarial resistance", desc: "Tests prompt injection resistance and evaluates whether outputs remain within governed bounds under adversarial inputs." },
+  { label: "Drift detection", desc: "Monitors long-running agent processes for output drift — when a model's behavior shifts materially, INCA flags it before operators notice degradation." },
 ];
 
 const HARD_BOUNDARIES = [
@@ -238,6 +252,96 @@ export default function TrustAIPage() {
                 </ul>
               </m.div>
             </div>
+          </div>
+        </section>
+
+        {/* Domain agents */}
+        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
+                <Bot size={14} color="hsl(258,55%,68%)" />
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "hsl(258,55%,68%)" }}>Domain Agents</p>
+              </div>
+              <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "30ch", marginBottom: "0.75rem" }}>
+                Named agents — each subject to the same governance model.
+              </h2>
+              <p style={{ fontSize: "0.9375rem", lineHeight: 1.68, color: "hsl(214,7%,58%)", maxWidth: "58ch", marginBottom: "2.5rem" }}>
+                No agent has a separate identity bypass or elevated trust level. All agents present a valid session token on behalf of a human user or service account and are subject to the same role enforcement as any other caller.
+              </p>
+            </m.div>
+            <div className="szl-grid-2" style={{ gap: "1rem" }}>
+              {DOMAIN_AGENTS.map((agent, i) => (
+                <m.div key={agent.name} initial={{ opacity: 0, y: 8 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.35, delay: i * 0.07 }} className="szl-card" style={{ borderRadius: "0.75rem", padding: "1.125rem 1.375rem", borderLeft: `2px solid ${agent.color}` }}>
+                  <div style={{ display: "flex", alignItems: "baseline", gap: "0.625rem", marginBottom: "0.375rem" }}>
+                    <span style={{ fontSize: "0.9375rem", fontWeight: 700, letterSpacing: "-0.012em", color: agent.color }}>{agent.name}</span>
+                    <span style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase" as const, color: "hsl(214,7%,42%)" }}>{agent.domain}</span>
+                  </div>
+                  <p style={{ fontSize: "0.8125rem", lineHeight: 1.65, color: "hsl(214,7%,56%)" }}>{agent.role}</p>
+                </m.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* INCA evaluation framework */}
+        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
+                <BarChart2 size={14} color="hsl(38,80%,56%)" />
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "hsl(38,80%,56%)" }}>INCA Evaluation Framework</p>
+              </div>
+              <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "32ch", marginBottom: "0.75rem" }}>
+                Intelligence, Normalization, Confidence, Accuracy.
+              </h2>
+              <p style={{ fontSize: "0.9375rem", lineHeight: 1.68, color: "hsl(214,7%,58%)", maxWidth: "56ch", marginBottom: "2.5rem" }}>
+                INCA is the platform's AI evaluation agent — responsible for measuring, calibrating, and monitoring the quality of every other agent's output. It is not a UI feature; it runs continuously in the background.
+              </p>
+            </m.div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px,1fr))", gap: "0.875rem" }}>
+              {INCA_CAPABILITIES.map((cap, i) => (
+                <m.div key={cap.label} initial={{ opacity: 0, y: 8 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.35, delay: i * 0.06 }} className="szl-card" style={{ borderRadius: "0.75rem", padding: "1.125rem 1.25rem" }}>
+                  <div style={{ fontSize: "12px", fontWeight: 700, color: "hsl(38,80%,56%)", letterSpacing: "0.04em", textTransform: "uppercase" as const, marginBottom: "0.5rem" }}>{cap.label}</div>
+                  <p style={{ fontSize: "0.8125rem", lineHeight: 1.65, color: "hsl(214,7%,54%)" }}>{cap.desc}</p>
+                </m.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Diligence materials */}
+        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
+                <FileText size={14} color="hsl(258,55%,68%)" />
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "hsl(258,55%,68%)" }}>Diligence Materials</p>
+              </div>
+              <h2 style={{ fontSize: "clamp(1.25rem,2.5vw,1.75rem)", fontWeight: 600, letterSpacing: "-0.018em", lineHeight: 1.2, maxWidth: "32ch", marginBottom: "1.5rem" }}>
+                AI governance documentation for enterprise evaluators.
+              </h2>
+            </m.div>
+            <div style={{ display: "flex", flexWrap: "wrap" as const, gap: "0.875rem" }}>
+              {[
+                { label: "Technical Diligence Brief", desc: "AI agent architecture, governance primitives, multi-provider model stack, MCP gateway, and INCA evaluation", href: "/trust/diligence/technical" },
+                { label: "Executive Diligence Brief", desc: "AI oversight posture, HITL enforcement, approval workflows, and decision accountability", href: "/trust/diligence/executive" },
+              ].map((item, i) => (
+                <m.div key={item.label} initial={{ opacity: 0, y: 8 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.35, delay: i * 0.07 }} className="szl-card" style={{ borderRadius: "0.75rem", padding: "1.125rem 1.375rem", flex: "1 1 220px" }}>
+                  <Link href={item.href} style={{ textDecoration: "none", display: "block" }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.4rem" }}>
+                      <span style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(38,8%,85%)" }}>{item.label}</span>
+                      <ArrowRight size={13} color="hsl(258,55%,68%)" />
+                    </div>
+                    <p style={{ fontSize: "12.5px", lineHeight: 1.6, color: "hsl(214,7%,52%)" }}>{item.desc}</p>
+                  </Link>
+                </m.div>
+              ))}
+            </div>
+            <m.p initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 0.4, delay: 0.2 }} style={{ fontSize: "12px", color: "hsl(214,7%,38%)", marginTop: "1.25rem" }}>
+              Full AI governance documentation available on request —{" "}
+              <a href="mailto:security@szlholdings.com" style={{ color: "hsl(258,55%,68%)", textDecoration: "none" }}>security@szlholdings.com</a>
+            </m.p>
           </div>
         </section>
 

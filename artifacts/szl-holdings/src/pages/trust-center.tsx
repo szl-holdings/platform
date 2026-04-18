@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { m } from "framer-motion";
-import { Shield, Lock, Eye, Activity, Database, Server, CheckCircle } from "lucide-react";
+import { Shield, Lock, Eye, Activity, Database, Server, CheckCircle, FileText, ArrowRight, ExternalLink } from "lucide-react";
+import { Link } from "wouter";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
@@ -124,11 +125,29 @@ const sections = [
 ];
 
 const COMPLIANCE_FRAMEWORKS = [
-  { name: "SOC 2 Type II", status: "In Progress", color: "#f59e0b", detail: "Audit preparation underway. Expected Q3 2026." },
-  { name: "NIST 800-53", status: "Aligned", color: "#10b981", detail: "Controls mapped and implemented." },
-  { name: "GDPR", status: "Compliant", color: "#10b981", detail: "Data processing agreements, DPIAs, and subject access request workflows in place." },
-  { name: "ISO 27001", status: "Planned", color: "#3b82f6", detail: "ISMS development in progress. Certification targeted Q1 2027." },
-  { name: "CCPA", status: "Compliant", color: "#10b981", detail: "Consumer privacy rights implemented. Opt-out and deletion workflows operational." },
+  { name: "SOC 2 Type II", status: "Roadmapped", color: "#f59e0b", detail: "Not yet initiated. Targeted for Phase 3 post-funding. Controls alignment underway." },
+  { name: "ISO 27001", status: "Roadmapped", color: "#3b82f6", detail: "Not yet initiated. Targeted for Phase 3 alongside SOC 2." },
+  { name: "GDPR", status: "Framework active", color: "#10b981", detail: "Privacy framework in place. Data subject rights requests: support@szlholdings.com" },
+  { name: "CCPA", status: "Framework active", color: "#10b981", detail: "California resident rights honored within 45 days. Opt-out and deletion workflows operational." },
+  { name: "HIPAA", status: "Per contract", color: "#6366f1", detail: "Business Associate Agreement evaluated per enterprise customer need." },
+];
+
+const TRUST_SUMMARY = [
+  { concern: "AI without oversight", how: "Covenant Policy enforces approval gates — AI cannot execute consequential actions without human confirmation. Enforced at the library layer, not the UI." },
+  { concern: "Opaque AI outputs", how: "All recommendations include source citations, model identity, confidence scores, and retrieval provenance via Proof Chain." },
+  { concern: "Audit accountability", how: "Every action generates an immutable audit event with actor attribution, role context, and timestamp. Proof Chain is cryptographically verifiable." },
+  { concern: "Access control", how: "11-role RBAC with org-scoped tenant isolation. Deny-by-default global auth enforcer on all /api/* routes." },
+  { concern: "Multi-tenancy", how: "All queries scoped by org_id. Cross-org access returns 404 to prevent information leakage. AI/RAG retrieval is tenant-isolated at the library layer." },
+  { concern: "Data in transit", how: "TLS 1.3 for all connections. WebSocket uses HMAC-signed tickets with 5-minute TTL." },
+  { concern: "Secrets management", how: "All credentials injected via environment variables. No secrets in source control. Azure Key Vault in production." },
+  { concern: "Compliance posture", how: "GDPR/CCPA privacy frameworks in place. SOC 2 Type II roadmapped post-funding." },
+];
+
+const DILIGENCE_BRIEFS = [
+  { label: "Technical Evaluator", description: "Architecture, tenancy, integration surface, control plane, and security controls", href: "/trust/diligence/technical", accent: "#3b82f6" },
+  { label: "Executive Buyer", description: "Governance model, risk posture, AI oversight, and approval workflows", href: "/trust/diligence/executive", accent: "#8b5cf6" },
+  { label: "Security Reviewer", description: "RBAC matrix, data isolation, credential handling, and vulnerability disclosure", href: "/trust/diligence/security", accent: "#10b981" },
+  { label: "Investor", description: "Platform defensibility, architecture moat, governance depth, and operational maturity", href: "/trust/diligence/investor", accent: "#f59e0b" },
 ];
 
 function DisclosureForm() {
@@ -235,7 +254,7 @@ function DisclosureForm() {
         {state === "loading" ? "Submitting..." : "Submit Report"}
       </button>
       <p style={{ fontSize: "11.5px", color: "hsl(210,5%,42%)", lineHeight: 1.5 }}>
-        Prefer email? Send to <a href="mailto:security@stephenl.dev" style={{ color: "hsl(210,55%,52%)", textDecoration: "none" }}>security@stephenl.dev</a>. PGP key available on request.
+        Prefer email? Send to <a href="mailto:security@szlholdings.com" style={{ color: "hsl(210,55%,52%)", textDecoration: "none" }}>security@szlholdings.com</a>. Subject line: <code style={{ fontFamily: "monospace", fontSize: "11px", background: "hsla(0,0%,100%,0.05)", padding: "1px 5px", borderRadius: "3px" }}>[SECURITY] Brief description</code>. PGP key available on request.
       </p>
     </form>
   );
@@ -274,14 +293,135 @@ export default function TrustCenter() {
               fontSize: "clamp(2rem,4vw,3rem)", fontWeight: 700, letterSpacing: "-0.025em",
               lineHeight: 1.1, color: "hsl(38,12%,94%)", marginBottom: "1.25rem", maxWidth: "32rem",
             }}>
-              Security and control are part of the product.
+              Trust is part of the product.
             </h1>
             <p style={{
-              fontSize: "1.0625rem", color: "hsl(210,5%,60%)", lineHeight: 1.65, maxWidth: "36rem",
+              fontSize: "1.0625rem", color: "hsl(210,5%,60%)", lineHeight: 1.65, maxWidth: "36rem", marginBottom: "1.5rem",
             }}>
-              This page describes the architecture principles, access and control model, AI governance approach, deployment discipline, and security posture built into Lyte + Alloy from the start. Not a compliance checklist — a record of how we build.
+              The enterprise diligence hub for SZL Holdings — security architecture, AI governance, access control, compliance posture, and operational commitments. Start here for procurement reviews.
+            </p>
+            <div style={{ display: "flex", flexWrap: "wrap" as const, gap: "0.75rem" }}>
+              <Link href="/trust" style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", fontSize: "0.875rem", fontWeight: 600, color: "hsl(210,55%,58%)", textDecoration: "none" }}>
+                Choose diligence path <ArrowRight size={13} />
+              </Link>
+              <span style={{ color: "hsl(210,5%,30%)" }}>·</span>
+              <a href="mailto:security@szlholdings.com" style={{ fontSize: "0.875rem", color: "hsl(210,5%,48%)", textDecoration: "none" }}>security@szlholdings.com</a>
+              <span style={{ color: "hsl(210,5%,30%)" }}>·</span>
+              <span style={{ fontSize: "0.875rem", color: "hsl(210,5%,36%)" }}>Last reviewed: 2026-04-16</span>
+            </div>
+          </m.div>
+        </div>
+      </section>
+
+      {/* Trust Summary */}
+      <section style={{
+        paddingTop: "clamp(3.5rem,6vw,5rem)", paddingBottom: "clamp(3rem,5vw,4rem)",
+        borderBottom: "1px solid hsla(0,0%,100%,0.05)",
+        background: "hsla(0,0%,100%,0.012)",
+      }}>
+        <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
+          <m.div
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
+            <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: "hsl(210,5%,40%)", marginBottom: "1.5rem" }}>Trust Summary</p>
+          </m.div>
+          <div style={{ borderRadius: "10px", overflow: "hidden", border: "1px solid hsla(0,0%,100%,0.06)" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "minmax(10rem,18rem) 1fr", padding: "0.75rem 1.25rem", background: "hsla(0,0%,100%,0.03)", borderBottom: "1px solid hsla(0,0%,100%,0.06)" }}>
+              <span style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.07em", textTransform: "uppercase" as const, color: "hsl(210,5%,40%)" }}>Concern</span>
+              <span style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.07em", textTransform: "uppercase" as const, color: "hsl(210,5%,40%)" }}>How it is addressed</span>
+            </div>
+            {TRUST_SUMMARY.map((row, i) => (
+              <m.div
+                key={row.concern}
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.3, delay: i * 0.04 }}
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "minmax(10rem,18rem) 1fr",
+                  padding: "0.875rem 1.25rem",
+                  borderBottom: i < TRUST_SUMMARY.length - 1 ? "1px solid hsla(0,0%,100%,0.04)" : "none",
+                  gap: "1.5rem",
+                  alignItems: "start",
+                }}
+              >
+                <span style={{ fontSize: "13px", fontWeight: 600, color: "hsl(38,12%,80%)" }}>{row.concern}</span>
+                <span style={{ fontSize: "13px", lineHeight: 1.62, color: "hsl(210,5%,56%)" }}>{row.how}</span>
+              </m.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Enterprise Diligence Packet */}
+      <section style={{
+        paddingTop: "clamp(3.5rem,6vw,5rem)", paddingBottom: "clamp(3rem,5vw,4rem)",
+        borderBottom: "1px solid hsla(0,0%,100%,0.05)",
+      }}>
+        <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
+          <m.div
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            style={{ marginBottom: "2rem" }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "1rem" }}>
+              <FileText size={14} style={{ color: "hsl(210,55%,58%)" }} />
+              <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: "hsl(210,55%,58%)" }}>Enterprise Diligence Packet</p>
+            </div>
+            <h2 style={{ fontSize: "clamp(1.375rem,2.5vw,1.75rem)", fontWeight: 700, letterSpacing: "-0.02em", color: "hsl(38,12%,92%)", marginBottom: "0.875rem", maxWidth: "32rem" }}>
+              Audience-specific diligence briefs
+            </h2>
+            <p style={{ fontSize: "0.9375rem", color: "hsl(210,5%,56%)", lineHeight: 1.65, maxWidth: "52ch" }}>
+              Each brief packages the relevant architecture, security, governance, and compliance content for a specific reviewer type. Select the path that matches your role in the evaluation.
             </p>
           </m.div>
+          <div className="grid sm:grid-cols-2 gap-3" style={{ marginBottom: "1.5rem" }}>
+            {DILIGENCE_BRIEFS.map((brief, i) => (
+              <m.div
+                key={brief.label}
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: i * 0.07, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <Link
+                  href={brief.href}
+                  style={{
+                    display: "block",
+                    padding: "1.25rem 1.5rem",
+                    borderRadius: "10px",
+                    background: "hsla(0,0%,100%,0.02)",
+                    border: `1px solid hsla(0,0%,100%,0.07)`,
+                    borderTop: `2px solid ${brief.accent}`,
+                    textDecoration: "none",
+                    transition: "background 0.18s",
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.5rem" }}>
+                    <span style={{ fontSize: "13px", fontWeight: 700, color: "hsl(38,12%,90%)", letterSpacing: "-0.01em" }}>{brief.label}</span>
+                    <ArrowRight size={13} style={{ color: brief.accent }} />
+                  </div>
+                  <p style={{ fontSize: "12.5px", lineHeight: 1.6, color: "hsl(210,5%,52%)" }}>{brief.description}</p>
+                </Link>
+              </m.div>
+            ))}
+          </div>
+          <m.p
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4, delay: 0.2 }}
+            style={{ fontSize: "12px", color: "hsl(210,5%,38%)" }}
+          >
+            Full technical diligence packet available on request — contact{" "}
+            <a href="mailto:security@szlholdings.com" style={{ color: "hsl(210,55%,52%)", textDecoration: "none" }}>security@szlholdings.com</a>.
+          </m.p>
         </div>
       </section>
 
