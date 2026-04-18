@@ -14,6 +14,91 @@ const CAPABILITIES = [
   { icon: Ship, title: "Fleet Intelligence Dashboard", body: "One command surface for commercial, operations, and chartering teams. Signal-first, not report-first. The right alert at the right moment." },
 ];
 
+const USE_CASES = [
+  {
+    label: "Dark vessel alert",
+    title: "AIS gap detected — fleet manager routes to compliance officer",
+    role: "Fleet Manager → Compliance Officer → Chartering Desk",
+    steps: [
+      { signal: true, text: "AIS transmission gap detected on MV Andromeda — 11 hours of dark sailing in a sanctions-sensitive corridor" },
+      { text: "Fleet manager opens vessel record: last confirmed position, voyage context, cargo manifest, and flag state displayed" },
+      { text: "Vessels surfaces correlated signals — similar AIS patterns from this vessel six months prior, current OFAC watch list proximity" },
+      { text: "Fleet manager routes incident to compliance officer with full evidence package and recommended escalation path" },
+      { proof: true, text: "Proof Chain captures the decision: who reviewed it, what evidence was considered, which action was approved, and when" },
+    ],
+  },
+  {
+    label: "Port delay exception",
+    title: "Berth delay cascades — operations team acts before commercial impact compounds",
+    role: "Operations Team → Commercial Director → Port Agent",
+    steps: [
+      { signal: true, text: "Berth delay exception fires — MV Crestline is 18 hours behind schedule at Port of Rotterdam, cargo handoff at risk" },
+      { text: "Operations team reviews impact model: downstream charter party obligations, demurrage exposure, connecting cargo windows" },
+      { text: "Alloy routes pre-arrival workflow revision to port agent with updated ETA, berth instructions, and customs clearance tasks" },
+      { text: "Commercial director approves revised voyage plan within the governed decision loop — no off-platform approval chains" },
+      { proof: true, text: "Outcome tracked to delivery: revised ETA, actual arrival, and demurrage outcome logged against the original decision" },
+    ],
+  },
+  {
+    label: "Sanctions screening",
+    title: "Counterparty flag triggers due diligence before charter is signed",
+    role: "Chartering Desk → Legal → CCSM Officer",
+    steps: [
+      { signal: true, text: "Counterparty screening signal fires — proposed cargo receiver matches a newly designated SDN subsidiary" },
+      { text: "Chartering desk reviews risk summary: entity ownership graph, prior transaction history, and designation date" },
+      { text: "Alloy routes to legal for secondary review with full sanctions context, recommended hold, and charter clause reference" },
+      { text: "Legal team confirms hold — charter signing workflow suspended pending clear-to-proceed from CCSM officer" },
+      { proof: true, text: "Proof Chain records the entire review chain — no action taken without approved sign-off, evidence preserved for regulator review" },
+    ],
+  },
+];
+
+function UseCaseLane({ useCase, delay }: { useCase: typeof USE_CASES[0]; delay: number }) {
+  return (
+    <m.div
+      initial={{ opacity: 0, y: 14 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.42, delay }}
+      className="szl-card"
+      style={{ borderRadius: "0.875rem", padding: "clamp(1.5rem,3vw,2rem)", display: "flex", flexDirection: "column", gap: "1.5rem" }}
+    >
+      <div>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.625rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-vessels)", opacity: 0.85 }}>{useCase.label}</span>
+        <h3 style={{ fontSize: "clamp(1rem,1.8vw,1.125rem)", fontWeight: 600, letterSpacing: "-0.016em", lineHeight: 1.3, marginTop: "0.4rem", marginBottom: "0.375rem" }}>{useCase.title}</h3>
+        <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.625rem", color: "hsl(214,7%,48%)", letterSpacing: "0.06em" }}>{useCase.role}</p>
+      </div>
+      <ol style={{ display: "flex", flexDirection: "column", gap: "0", listStyle: "none", margin: 0, padding: 0 }}>
+        {useCase.steps.map((step, i) => (
+          <li key={i} style={{ display: "flex", gap: "0.875rem", alignItems: "flex-start" }}>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0 }}>
+              <div style={{
+                width: "22px", height: "22px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+                background: step.signal ? `hsla(206,72%,40%,0.15)` : step.proof ? `hsla(152,70%,50%,0.12)` : "hsla(214,12%,14%,1)",
+                border: step.signal ? `1px solid hsla(206,72%,40%,0.40)` : step.proof ? `1px solid hsla(152,70%,50%,0.30)` : "1px solid hsla(0,0%,100%,0.08)",
+                fontSize: "0.6rem", fontWeight: 700, color: step.signal ? "hsl(206,72%,68%)" : step.proof ? "hsl(152,70%,55%)" : "hsl(214,7%,52%)",
+                fontFamily: "var(--font-mono)",
+              }}>
+                {i + 1}
+              </div>
+              {i < useCase.steps.length - 1 && (
+                <div style={{ width: "1px", height: "1.5rem", background: "hsla(0,0%,100%,0.07)", margin: "0.25rem 0" }} />
+              )}
+            </div>
+            <div style={{ paddingTop: "0.2rem" }}>
+              <p style={{ fontSize: "0.8125rem", lineHeight: 1.62, color: step.signal ? "hsl(38,8%,88%)" : step.proof ? "hsl(152,40%,72%)" : "hsl(214,7%,62%)" }}>
+                {step.signal && <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.5625rem", fontWeight: 700, letterSpacing: "0.10em", textTransform: "uppercase", color: "hsl(206,72%,65%)", marginRight: "0.4rem" }}>Signal</span>}
+                {step.proof && <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.5625rem", fontWeight: 700, letterSpacing: "0.10em", textTransform: "uppercase", color: "hsl(152,70%,55%)", marginRight: "0.4rem" }}>Proof Chain</span>}
+                {step.text}
+              </p>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </m.div>
+  );
+}
+
 export default function SolutionsVesselsPage() {
   usePageMeta({
     title: "Vessels — Maritime Intelligence · SZL Holdings",
@@ -60,7 +145,7 @@ export default function SolutionsVesselsPage() {
           </div>
         </section>
 
-        <section style={{ padding: "var(--space-section-md) 0" }}>
+        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
           <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
             <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
               <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-vessels)", marginBottom: "1rem" }}>Capabilities</p>
@@ -81,6 +166,25 @@ export default function SolutionsVesselsPage() {
                   </m.div>
                 );
               })}
+            </div>
+          </div>
+        </section>
+
+        <section style={{ padding: "var(--space-section-md) 0" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-vessels)", marginBottom: "1rem" }}>Scenarios</p>
+              <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "36ch", marginBottom: "0.75rem" }}>
+                A day in the life of a maritime operations team.
+              </h2>
+              <p style={{ fontSize: "0.9375rem", lineHeight: 1.7, color: "hsl(214,7%,56%)", maxWidth: "56ch", marginBottom: "3rem" }}>
+                Exception fires. Fleet manager acts. Decision is captured. Every consequential maritime workflow — from dark vessel detection to sanctions screening — follows the same governed loop.
+              </p>
+            </m.div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 360px), 1fr))", gap: "1.25rem" }}>
+              {USE_CASES.map((uc, i) => (
+                <UseCaseLane key={uc.label} useCase={uc} delay={i * 0.08} />
+              ))}
             </div>
           </div>
         </section>

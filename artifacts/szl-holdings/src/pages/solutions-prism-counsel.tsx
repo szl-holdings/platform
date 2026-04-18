@@ -1,5 +1,6 @@
 import { Scale, Eye, Shield, TrendingUp, DollarSign, FileCheck, MessageSquare, ArrowRight, CheckCircle, Cpu, Building2, MapPin, Clock, AlertTriangle, Lock, Server } from "lucide-react";
 import { Link } from "wouter";
+import { m } from "framer-motion";
 import { SiteNav } from "@/components/SiteNav";
 import { usePageMeta } from "@/hooks/usePageMeta";
 
@@ -11,6 +12,92 @@ const PILLARS = [
   { icon: DollarSign, name: "Money", desc: "Settlement band forecasting, lien exposure, damages completeness, reserve movement tracking, and offer trajectory analysis." },
   { icon: Scale, name: "Governance", desc: "Approval state, AI usage trace, user/role attribution, export safety, audit packet completeness, and client-consent checkpoints." },
 ];
+
+const USE_CASES = [
+  {
+    label: "Demand readiness",
+    title: "Deadline approaching — attorney reviews demand readiness before filing",
+    role: "Paralegal → Associate Attorney → Partner",
+    steps: [
+      { signal: true, text: "Compliance clock fires — demand deadline 14 days out on Ramirez v. Empire Transit, matter readiness score 61/100" },
+      { text: "Attorney opens matter command surface: PRISM scoring surfaces two critical gaps — incomplete medical chronology and missing lost wage documentation" },
+      { text: "Alloy routes gap remediation tasks to paralegal: medical records request to Dr. Okonkwo's office, W-2 documentation workflow initiated" },
+      { text: "Partner reviews completed demand package — readiness score rises to 94/100, approves filing via the governed approval gate" },
+      { proof: true, text: "Proof Chain records the readiness state at filing: which records were reviewed, who approved the package, and when the decision was made" },
+    ],
+  },
+  {
+    label: "Insurer behavior",
+    title: "Silence window detected — attorney adjusts strategy before offer window closes",
+    role: "Associate Attorney → Supervising Partner → Client",
+    steps: [
+      { signal: true, text: "Signal fires — adjuster at Empire Mutual has gone silent for 31 days, outside their documented response pattern for bodily injury files" },
+      { text: "PRISM Counsel surfaces insurer behavior intel: this adjuster typically responds within 18 days; silence at 30+ days preceded reserve increases in 4 of 6 prior matters" },
+      { text: "Settlement band forecast updated — AI recommendation surfaces a narrower offer window based on reserve movement pattern, with source citations" },
+      { text: "Supervising partner reviews recommendation and approves accelerated outreach strategy — deadline for response demand set, client notified" },
+      { proof: true, text: "Proof Chain logs the signal, AI recommendation, source citations, and partner approval — defensible record for any subsequent dispute over negotiation conduct" },
+    ],
+  },
+  {
+    label: "Matter intake",
+    title: "New matter opened — compliance clocks started, insurer profile attached, attorney assigned",
+    role: "Intake Coordinator → Attorney → Partner",
+    steps: [
+      { signal: true, text: "New matter intake: Chen v. Metro Logistics — no-fault PIP claim, date of loss March 4, carrier is National Indemnity Group" },
+      { text: "PRISM Counsel scores the matter across six pillars: Posture 70, Readiness 45, Integrity 80, Strategy 55, Money 60, Governance 100" },
+      { text: "Compliance clocks started automatically: 30-day acknowledgement clock (NY Reg 68), 15-day verification clock, and notice of claim deadline entered in calendar" },
+      { text: "National Indemnity Group insurer profile attached — adjuster behavior patterns, average time-to-offer, and prior matter outcomes surfaced" },
+      { proof: true, text: "Alloy routes matter to assigned attorney with full intake packet; Proof Chain records the intake state, clock start timestamps, and routing decision" },
+    ],
+  },
+];
+
+function UseCaseLane({ useCase, delay }: { useCase: typeof USE_CASES[0]; delay: number }) {
+  const gold = "#d4a054";
+  return (
+    <m.div
+      initial={{ opacity: 0, y: 14 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.42, delay }}
+      className="rounded-lg border border-white/[0.06]"
+      style={{ background: "#0c1220", padding: "clamp(1.5rem,3vw,2rem)", display: "flex", flexDirection: "column", gap: "1.5rem" }}
+    >
+      <div>
+        <span style={{ fontFamily: "var(--font-mono, monospace)", fontSize: "0.625rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: gold, opacity: 0.85 }}>{useCase.label}</span>
+        <h3 style={{ fontSize: "1.0625rem", fontWeight: 600, letterSpacing: "-0.016em", lineHeight: 1.3, marginTop: "0.4rem", marginBottom: "0.375rem", color: "#e2e8f0" }}>{useCase.title}</h3>
+        <p style={{ fontFamily: "var(--font-mono, monospace)", fontSize: "0.625rem", color: "rgba(148,163,184,0.6)", letterSpacing: "0.06em" }}>{useCase.role}</p>
+      </div>
+      <ol style={{ display: "flex", flexDirection: "column", gap: "0", listStyle: "none", margin: 0, padding: 0 }}>
+        {useCase.steps.map((step, i) => (
+          <li key={i} style={{ display: "flex", gap: "0.875rem", alignItems: "flex-start" }}>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0 }}>
+              <div style={{
+                width: "22px", height: "22px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+                background: step.signal ? `rgba(212,160,84,0.14)` : step.proof ? `rgba(52,211,153,0.10)` : "rgba(255,255,255,0.04)",
+                border: step.signal ? `1px solid rgba(212,160,84,0.38)` : step.proof ? `1px solid rgba(52,211,153,0.28)` : "1px solid rgba(255,255,255,0.08)",
+                fontSize: "0.6rem", fontWeight: 700, color: step.signal ? gold : step.proof ? "#34d399" : "#64748b",
+                fontFamily: "var(--font-mono, monospace)",
+              }}>
+                {i + 1}
+              </div>
+              {i < useCase.steps.length - 1 && (
+                <div style={{ width: "1px", height: "1.5rem", background: "rgba(255,255,255,0.06)", margin: "0.25rem 0" }} />
+              )}
+            </div>
+            <div style={{ paddingTop: "0.2rem" }}>
+              <p style={{ fontSize: "0.8125rem", lineHeight: 1.62, color: step.signal ? "#e2e8f0" : step.proof ? "#6ee7b7" : "#94a3b8" }}>
+                {step.signal && <span style={{ fontFamily: "var(--font-mono, monospace)", fontSize: "0.5625rem", fontWeight: 700, letterSpacing: "0.10em", textTransform: "uppercase", color: gold, marginRight: "0.4rem" }}>Signal</span>}
+                {step.proof && <span style={{ fontFamily: "var(--font-mono, monospace)", fontSize: "0.5625rem", fontWeight: 700, letterSpacing: "0.10em", textTransform: "uppercase", color: "#34d399", marginRight: "0.4rem" }}>Proof Chain</span>}
+                {step.text}
+              </p>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </m.div>
+  );
+}
 
 export default function SolutionsPrismCounselPage() {
   usePageMeta({
@@ -75,6 +162,21 @@ export default function SolutionsPrismCounselPage() {
               <h3 className="text-sm font-semibold text-slate-200 mb-1">{item.title}</h3>
               <p className="text-[11px] text-slate-400 leading-relaxed">{item.desc}</p>
             </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="max-w-5xl mx-auto px-6 py-16 border-t border-white/[0.04]">
+        <h2 className="text-xl font-semibold text-slate-100 mb-2">Scenarios</h2>
+        <p className="text-sm text-slate-400 max-w-3xl mb-2 leading-relaxed">
+          A day in the life of a plaintiff-side litigation team.
+        </p>
+        <p className="text-[11px] text-slate-500 mb-8">
+          Signal fires. Attorney acts. Decision is captured. Every consequential legal workflow follows the same governed loop — deadline, demand, intake, or settlement.
+        </p>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 340px), 1fr))", gap: "1.25rem" }}>
+          {USE_CASES.map((uc, i) => (
+            <UseCaseLane key={uc.label} useCase={uc} delay={i * 0.08} />
           ))}
         </div>
       </section>
