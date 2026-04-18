@@ -1,8 +1,24 @@
 # Branch Rulesets and Protections — SZL Holdings Platform
 
-Last updated: 2026-04-16
+Last updated: 2026-04-18
 
 This document defines the exact branch protection and ruleset configuration required for the repository. It pairs with `/ops/github/manual-click-paths.md` which provides the step-by-step GitHub UI instructions.
+
+---
+
+## Configuration Status
+
+| Item | Status | Notes |
+|------|--------|-------|
+| `codeql.yml` workflow | **Done** | Runs on every PR; job name `analyze` |
+| `dependency-review.yml` workflow | **Done** | Runs on every PR; fails on high/critical CVE |
+| `main-protection` ruleset created | **Pending** | Must be done in GitHub UI (see manual-click-paths.md §2) |
+| `CodeQL Analysis / analyze` as required check | **Pending** | Requires ruleset to be active |
+| `Dependency Review` as required check | **Pending** | Requires ruleset to be active |
+
+> **Why pending?** The GitHub branch protection and Rulesets APIs require **GitHub Team** (for private org repos) or a public repository. This repo is currently private on the free org plan. Options to unblock:
+> - Upgrade the organization to **GitHub Team** — unlocks the Rulesets API and the `ops/github/configure-branch-protection.sh` script can then configure everything in one command.
+> - **Until then**, the two security workflows run on every PR and will report failures, but a determined reviewer can still merge. Manual discipline is required.
 
 ---
 

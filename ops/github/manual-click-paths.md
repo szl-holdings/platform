@@ -19,6 +19,22 @@ This document provides exact step-by-step instructions for GitHub UI changes tha
 
 ## 2. Configure Branch Ruleset for `main`
 
+> **Status: PENDING** — This step has not been completed. The `CodeQL Analysis / analyze` and
+> `Dependency Review` checks run on every PR but are not yet enforced as required status checks,
+> meaning a PR with a critical finding can still be merged.
+>
+> **Prerequisite:** The GitHub API for branch protection on private org repos requires **GitHub Team**.
+> If the organization has been upgraded, run the automated script instead of the UI steps below:
+>
+> ```bash
+> GH_TOKEN=<admin-pat> bash ops/github/configure-branch-protection.sh
+> ```
+>
+> The PAT needs the `repo` scope (or a fine-grained PAT with Administration read+write). The script
+> configures both `main` and `master` and sets all five required status checks in one shot.
+>
+> If still on the free plan, complete the UI steps below manually.
+
 ### Navigate to rulesets
 
 1. Go to: `https://github.com/stephenlutar2-hash/szl-holdings-platform/settings/rules`
