@@ -176,6 +176,57 @@ Go to Play Console → Testing → Internal Testing → create release from uplo
 
 ---
 
+## Step 9 — Investor Preview Without Expo Go or TestFlight
+
+Investors who haven't installed Expo Go or received a TestFlight invitation can still
+preview the full app via Expo's hosted web build. This requires no app store, no device
+configuration, and no login to Expo.
+
+### Option A — Expo Web (fastest, no install)
+
+```bash
+cd artifacts/szl-holdings-mobile
+
+# Start the app in web mode with demo fixtures enabled (no live API required)
+EXPO_PUBLIC_APP_MODE=demo npx expo start --web
+
+# The app runs at the Replit preview URL:
+#   https://YOUR_REPL_DEV_DOMAIN/szl-holdings-mobile/
+```
+
+Share the Replit preview URL with investors. The app runs in the browser with the full
+CORTEX UI (Command Feed, CORTEX Intelligence, Portfolio Investor tab, FusionBar). No
+app store account or device enrollment required.
+
+> **Local vs EAS env vars**: `EXPO_PUBLIC_APP_MODE=demo` must be set in the **local
+> shell** when running `npx expo start --web` (as shown above). EAS secrets only apply
+> to EAS-managed builds — they do not affect local dev server sessions. The `.env`
+> file approach also works: add `EXPO_PUBLIC_APP_MODE=demo` to a local `.env` file in
+> the `artifacts/szl-holdings-mobile/` directory.
+>
+> **Demo fixture behavior**: In demo mode, POST endpoints like the FusionBar query and
+> What-If scenario engine return static fixture responses regardless of the query
+> submitted. This is intentional — it guarantees a polished, consistent demo without
+> a live backend. The fixtures are defined in `lib/apiClient.ts`.
+
+### Option B — Expo Go QR Code (iOS/Android)
+
+```bash
+npx expo start
+# Scan the QR code with Expo Go (available free on the App Store)
+```
+
+Investors scan the QR code to preview the app instantly on their iPhone or Android.
+No TestFlight enrollment needed, but Expo Go must be installed.
+
+### Option C — TestFlight (production-ready, preferred for investor demos)
+
+Complete Steps 1–7 above and send investors a TestFlight link via App Store Connect.
+The TestFlight build uses `credentialsSource: "remote"` so no local signing files
+are required — EAS manages the entire signing credential chain.
+
+---
+
 ## Credential Checklist
 
 Before running Step 6:
@@ -184,11 +235,13 @@ Before running Step 6:
 - [ ] `updates.enabled` set to `true` in `app.json`
 - [ ] `EXPO_PUBLIC_DOMAIN` EAS secret set to the Replit production domain
 - [ ] `EXPO_PUBLIC_REPL_ID` EAS secret set to the Replit project ID
+- [ ] `EXPO_PUBLIC_APP_MODE` set to `demo` for investor-demo builds (enables built-in fixtures, no live API required)
 - [ ] `google-services.json` is the real Firebase file (not the placeholder)
 - [ ] `GoogleService-Info.plist` is the real Firebase file (not the placeholder)
 - [ ] APNs key uploaded to Firebase Console
-- [ ] `eas.json` Apple fields filled in (`appleId`, `ascAppId`, `appleTeamId`)
+- [ ] `eas.json` Apple fields filled in (`appleId`, `ascAppId`, `appleTeamId`) under `submit.testflight.ios`
 - [ ] `google-play-service-account.json` is the real Play Console service account key
+- [ ] All four build profiles (`device-development`, `preview`, `testflight`, `production`) use `credentialsSource: "remote"` ✓
 
 ---
 

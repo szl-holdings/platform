@@ -1,13 +1,13 @@
 {
-  "app": "szl",
-  "name": "SZL Holdings — Executive Command",
-  "generatedAt": "2026-04-15T01:10:23.850Z",
+  "app": "cortex",
+  "name": "CORTEX — Unified Command",
+  "generatedAt": "2026-04-18T00:00:00.000Z",
   "instructions": {
-    "step1": "Run the app with: npx expo start --web",
-    "step2": "Open browser dev tools and set viewport to each device size below",
-    "step3": "Navigate to each screen listed and capture a screenshot",
-    "step4": "Save screenshots with the naming convention: <label>-<screen-index>.png",
-    "step5": "Upload to App Store Connect / Google Play Console using store/ metadata"
+    "step1": "Run: npx expo start --web  (or start the Expo workflow in Replit)",
+    "step2": "Open browser dev tools → set viewport to each device size below",
+    "step3": "Navigate to each listed screen and capture a screenshot",
+    "step4": "Save with naming convention: <label>-<NN>.png (zero-padded, 01 through 05)",
+    "step5": "Upload to App Store Connect (iOS) and Google Play Console (Android) under the relevant metadata section"
   },
   "ios": [
     {
@@ -18,30 +18,30 @@
       "required": true,
       "notes": "iPhone 15 Pro Max / 14 Plus",
       "screens": [
-        "Portfolio Overview — Entity performance KPIs",
-        "Deal Flow — Active transactions and pipeline",
-        "Communications — Encrypted principal messaging",
-        "Documents — Board materials and investment memos",
-        "Reporting — Financial summaries and analytics"
+        "Command Feed — cross-domain live signals and domain health cards",
+        "CORTEX Intelligence — fusion signals, cognitive runtime grid",
+        "Portfolio Investor — quarterly letters, cap table, strategic priorities",
+        "Portfolio Analytics — MRR, ARR, customer growth, plan distribution",
+        "Fleet — vessel list with status, speed, ETA"
       ],
-      "outputDir": "screenshots/szl/ios/iphone-6_7/",
+      "outputDir": "store/screenshots/ios/iphone-6_7/",
       "fileNaming": "iphone-6_7-NN.png (01 through 05)"
     },
     {
-      "name": "iPhone 6.5\"",
+      "name": "iPhone 6.5\" (recommended)",
       "width": 1242,
       "height": 2688,
       "label": "iphone-6_5",
       "required": false,
       "notes": "iPhone 11 Pro Max / XS Max",
       "screens": [
-        "Portfolio Overview — Entity performance KPIs",
-        "Deal Flow — Active transactions and pipeline",
-        "Communications — Encrypted principal messaging",
-        "Documents — Board materials and investment memos",
-        "Reporting — Financial summaries and analytics"
+        "Command Feed — cross-domain live signals and domain health cards",
+        "CORTEX Intelligence — fusion signals, cognitive runtime grid",
+        "Portfolio Investor — quarterly letters, cap table, strategic priorities",
+        "Portfolio Analytics — MRR, ARR, customer growth, plan distribution",
+        "Fleet — vessel list with status, speed, ETA"
       ],
-      "outputDir": "screenshots/szl/ios/iphone-6_5/",
+      "outputDir": "store/screenshots/ios/iphone-6_5/",
       "fileNaming": "iphone-6_5-NN.png (01 through 05)"
     },
     {
@@ -52,30 +52,30 @@
       "required": false,
       "notes": "iPhone 8 Plus",
       "screens": [
-        "Portfolio Overview — Entity performance KPIs",
-        "Deal Flow — Active transactions and pipeline",
-        "Communications — Encrypted principal messaging",
-        "Documents — Board materials and investment memos",
-        "Reporting — Financial summaries and analytics"
+        "Command Feed — cross-domain live signals and domain health cards",
+        "CORTEX Intelligence — fusion signals, cognitive runtime grid",
+        "Portfolio Investor — quarterly letters, cap table, strategic priorities",
+        "Portfolio Analytics — MRR, ARR, customer growth, plan distribution",
+        "Fleet — vessel list with status, speed, ETA"
       ],
-      "outputDir": "screenshots/szl/ios/iphone-5_5/",
+      "outputDir": "store/screenshots/ios/iphone-5_5/",
       "fileNaming": "iphone-5_5-NN.png (01 through 05)"
     },
     {
-      "name": "iPad Pro 12.9\" (required for tablet)",
+      "name": "iPad Pro 12.9\" (tablet)",
       "width": 2048,
       "height": 2732,
       "label": "ipad-12_9",
       "required": false,
-      "notes": "iPad Pro 12.9\" 3rd gen+",
+      "notes": "iPad Pro 12.9\" 3rd gen+. Note: app is portrait-only.",
       "screens": [
-        "Portfolio Overview — Entity performance KPIs",
-        "Deal Flow — Active transactions and pipeline",
-        "Communications — Encrypted principal messaging",
-        "Documents — Board materials and investment memos",
-        "Reporting — Financial summaries and analytics"
+        "Command Feed — cross-domain live signals and domain health cards",
+        "CORTEX Intelligence — fusion signals, cognitive runtime grid",
+        "Portfolio Investor — quarterly letters, cap table, strategic priorities",
+        "Portfolio Analytics — MRR, ARR, customer growth, plan distribution",
+        "Fleet — vessel list with status, speed, ETA"
       ],
-      "outputDir": "screenshots/szl/ios/ipad-12_9/",
+      "outputDir": "store/screenshots/ios/ipad-12_9/",
       "fileNaming": "ipad-12_9-NN.png (01 through 05)"
     }
   ],
@@ -88,13 +88,13 @@
       "required": true,
       "notes": "Standard Android phone",
       "screens": [
-        "Portfolio Overview — Entity performance KPIs",
-        "Deal Flow — Active transactions and pipeline",
-        "Communications — Encrypted principal messaging",
-        "Documents — Board materials and investment memos",
-        "Reporting — Financial summaries and analytics"
+        "Command Feed — cross-domain live signals and domain health cards",
+        "CORTEX Intelligence — fusion signals, cognitive runtime grid",
+        "Portfolio Investor — quarterly letters, cap table, strategic priorities",
+        "Portfolio Analytics — MRR, ARR, customer growth, plan distribution",
+        "Fleet — vessel list with status, speed, ETA"
       ],
-      "outputDir": "screenshots/szl/android/android-phone/",
+      "outputDir": "store/screenshots/android/android-phone/",
       "fileNaming": "android-phone-NN.png (01 through 05)"
     },
     {
@@ -105,31 +105,14 @@
       "required": false,
       "notes": "7-inch tablet",
       "screens": [
-        "Portfolio Overview — Entity performance KPIs",
-        "Deal Flow — Active transactions and pipeline",
-        "Communications — Encrypted principal messaging",
-        "Documents — Board materials and investment memos",
-        "Reporting — Financial summaries and analytics"
+        "Command Feed — cross-domain live signals and domain health cards",
+        "CORTEX Intelligence — fusion signals, cognitive runtime grid",
+        "Portfolio Investor — quarterly letters, cap table, strategic priorities",
+        "Portfolio Analytics — MRR, ARR, customer growth, plan distribution",
+        "Fleet — vessel list with status, speed, ETA"
       ],
-      "outputDir": "screenshots/szl/android/android-tablet-7/",
+      "outputDir": "store/screenshots/android/android-tablet-7/",
       "fileNaming": "android-tablet-7-NN.png (01 through 05)"
-    },
-    {
-      "name": "Android Tablet 10\"",
-      "width": 1920,
-      "height": 1200,
-      "label": "android-tablet-10",
-      "required": false,
-      "notes": "10-inch tablet",
-      "screens": [
-        "Portfolio Overview — Entity performance KPIs",
-        "Deal Flow — Active transactions and pipeline",
-        "Communications — Encrypted principal messaging",
-        "Documents — Board materials and investment memos",
-        "Reporting — Financial summaries and analytics"
-      ],
-      "outputDir": "screenshots/szl/android/android-tablet-10/",
-      "fileNaming": "android-tablet-10-NN.png (01 through 05)"
     }
   ]
 }

@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useColors } from "@/hooks/useColors";
+import { apiFetch } from "@/lib/apiClient";
 
 if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -57,11 +58,6 @@ const SUGGESTIONS = [
   "Current cyber threat posture and legal implications?",
   "Portfolio risk snapshot across all domains",
 ];
-
-function getApiBase(): string {
-  const domain = process.env.EXPO_PUBLIC_DOMAIN;
-  return domain ? `https://${domain}` : "";
-}
 
 function severityColor(sev: string, colors: ReturnType<typeof useColors>): string {
   switch (sev) {
@@ -175,15 +171,12 @@ export function FusionBar() {
       setExpanded(true);
     }
     try {
-      const res = await fetch(`${getApiBase()}/api/cross-domain-query`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: finalQuery }),
-      });
-      if (!res.ok) throw new Error(`Server error: ${res.status}`);
-      const body = await res.json();
+      const body = await apiFetch<{ success: boolean; result: FusedResult }>(
+        "/api/cross-domain-query",
+        { method: "POST", body: JSON.stringify({ query: finalQuery }) }
+      );
       if (!body.success) throw new Error("Query failed");
-      setResult(body.result as FusedResult);
+      setResult(body.result);
       if (q) setQuery(q);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Query failed");
