@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const DecisionTheater = lazy(() => import("@/components/DecisionTheater"));
+const DecisionTheater = lazy(() => import("@/components/decision-theater"));
 
 function useCountUp(target: number, duration = 1200, enabled = true) {
   const [value, setValue] = useState(0);
