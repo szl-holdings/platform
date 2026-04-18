@@ -4,7 +4,7 @@ import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { DataStateBadge } from "@/components/DataStateBadge";
 import { useAuth } from "@szl-holdings/replit-auth-web";
-import { Lock, TrendingUp, Ship, Layers, Eye, Shield, Sparkles, BarChart3, ArrowUpRight, RefreshCw, Activity, Zap } from "lucide-react";
+import { Lock, TrendingUp, Ship, Layers, Eye, Shield, Sparkles, BarChart3, ArrowUpRight, RefreshCw, Activity, Zap, Play, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
 import { PageDataSkeleton } from "@szl-holdings/shared-ui";
 
 interface KpiData {
@@ -239,6 +239,154 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+interface RunHealthData {
+  totalRuns: number;
+  recentRuns: number;
+  successCount: number;
+  blockedCount: number;
+  partialCount: number;
+  failedCount: number;
+  policyBlockCount: number;
+  approvalCount: number;
+  passRate: number;
+  avgLatencyMs: number;
+  domainBreakdown: Record<string, number>;
+  autonomyBreakdown: Record<string, number>;
+  checkedAt: string;
+}
+
+function RunHealthWidget() {
+  const [health, setHealth] = useState<RunHealthData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/runs/health", { credentials: "include" })
+      .then((r) => {
+        if (!r.ok) return null;
+        return r.json() as Promise<RunHealthData>;
+      })
+      .then((j) => { if (j) setHealth(j); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  const passRate = health ? Math.round(health.passRate * 100) : null;
+  const passColor = passRate === null ? "hsl(210,5%,38%)" : passRate >= 85 ? "hsl(142,62%,52%)" : passRate >= 65 ? "hsl(38,72%,58%)" : "hsl(0,72%,62%)";
+
+  const DOMAIN_ACCENT: Record<string, string> = {
+    aegis: "hsl(0,72%,62%)",
+    terra: "hsl(88,42%,52%)",
+    vessels: "hsl(205,85%,55%)",
+    prism: "hsl(270,68%,65%)",
+    pulse: "hsl(38,72%,58%)",
+  };
+
+  return (
+    <m.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
+      style={{
+        borderRadius: "14px",
+        background: "radial-gradient(ellipse at top left, hsla(139,62%,48%,0.06) 0%, hsla(0,0%,100%,0.018) 60%)",
+        border: "1px solid hsla(139,62%,48%,0.18)",
+        padding: "1.25rem 1.5rem",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "2px", background: "linear-gradient(90deg, hsl(139,62%,48%)70, transparent)" }} />
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
+          <div style={{ width: "28px", height: "28px", borderRadius: "7px", display: "flex", alignItems: "center", justifyContent: "center", background: "hsla(139,62%,48%,0.12)", border: "1px solid hsla(139,62%,48%,0.2)" }}>
+            <Play size={13} style={{ color: "hsl(139,62%,55%)" }} />
+          </div>
+          <span style={{ fontSize: "13px", fontWeight: 700, color: "hsl(38,12%,88%)", letterSpacing: "-0.01em" }}>Run Health</span>
+          <span style={{ fontSize: "9px", fontWeight: 700, color: "hsl(139,62%,55%)", background: "hsla(139,62%,48%,0.12)", padding: "1px 7px", borderRadius: "10px", border: "1px solid hsla(139,62%,48%,0.2)", letterSpacing: "0.06em", textTransform: "uppercase" }}>LIVE</span>
+        </div>
+        {!loading && health && (
+          <a
+            href="/command/operations/runs"
+            style={{ fontSize: "11px", color: "hsl(139,62%,55%)", textDecoration: "none", display: "flex", alignItems: "center", gap: "3px", opacity: 0.8 }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.opacity = "0.8"; }}
+          >
+            Open Console <ArrowUpRight size={11} />
+          </a>
+        )}
+      </div>
+
+      {loading && (
+        <div style={{ display: "flex", gap: "8px", height: "60px", alignItems: "center" }}>
+          {[80, 60, 90, 50, 75].map((w, i) => (
+            <div key={i} style={{ flex: 1, height: `${w}%`, borderRadius: "4px", background: "hsla(0,0%,100%,0.06)", animation: "pulse 1.5s ease-in-out infinite", animationDelay: `${i * 0.1}s` }} />
+          ))}
+        </div>
+      )}
+
+      {!loading && health && (
+        <div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "0.75rem", marginBottom: "1rem" }}>
+            {[
+              { label: "Total Runs", value: health.totalRuns, icon: Activity, color: "hsl(214,80%,65%)" },
+              { label: "Pass Rate", value: `${passRate}%`, icon: CheckCircle2, color: passColor },
+              { label: "Policy Blocks", value: health.policyBlockCount, icon: XCircle, color: "hsl(0,72%,62%)" },
+              { label: "Approvals", value: health.approvalCount, icon: AlertTriangle, color: "hsl(38,72%,58%)" },
+            ].map(({ label, value, icon: Icon, color }) => (
+              <div key={label} style={{ textAlign: "center" }}>
+                <div style={{ fontSize: "1.4rem", fontWeight: 800, color, letterSpacing: "-0.04em", lineHeight: 1.1, fontFamily: "'Space Grotesk', system-ui" }}>
+                  {typeof value === "number" ? value.toLocaleString() : value}
+                </div>
+                <div style={{ fontSize: "10px", color: "hsl(210,5%,40%)", marginTop: "2px", display: "flex", alignItems: "center", justifyContent: "center", gap: "3px" }}>
+                  <Icon size={9} />
+                  {label}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {Object.keys(health.domainBreakdown).length > 0 && (
+            <div>
+              <div style={{ fontSize: "9px", fontWeight: 700, color: "hsl(210,5%,36%)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "6px" }}>Domain Breakdown</div>
+              <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                {Object.entries(health.domainBreakdown).map(([domain, count]) => (
+                  <span key={domain} style={{ fontSize: "10px", color: DOMAIN_ACCENT[domain] ?? "hsl(139,62%,55%)", background: `${DOMAIN_ACCENT[domain] ?? "hsl(139,62%,48%)"}12`, padding: "2px 8px", borderRadius: "4px", border: `1px solid ${DOMAIN_ACCENT[domain] ?? "hsl(139,62%,48%)"}28`, fontWeight: 600 }}>
+                    {domain} {count}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {Object.keys(health.autonomyBreakdown).length > 0 && (
+            <div style={{ marginTop: "0.625rem" }}>
+              <div style={{ fontSize: "9px", fontWeight: 700, color: "hsl(210,5%,36%)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "6px" }}>Autonomy Modes</div>
+              <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                {Object.entries(health.autonomyBreakdown).map(([mode, count]) => {
+                  const modeColor = mode === "autonomous" ? "hsl(142,62%,52%)" : mode === "supervised" ? "hsl(38,72%,58%)" : mode === "advisory" ? "hsl(205,85%,55%)" : "hsl(210,5%,50%)";
+                  return (
+                    <span key={mode} style={{ fontSize: "10px", color: modeColor, background: `${modeColor}12`, padding: "2px 8px", borderRadius: "4px", border: `1px solid ${modeColor}28`, fontWeight: 600 }}>
+                      {mode} {count}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          <div style={{ marginTop: "0.75rem", fontSize: "10px", color: "hsl(210,5%,36%)" }}>
+            Avg latency {health.avgLatencyMs >= 60_000 ? `${(health.avgLatencyMs / 60_000).toFixed(1)}m` : `${(health.avgLatencyMs / 1000).toFixed(1)}s`} · {health.recentRuns} run{health.recentRuns !== 1 ? "s" : ""} in last 24h
+          </div>
+        </div>
+      )}
+
+      {!loading && !health && (
+        <p style={{ fontSize: "12px", color: "hsl(210,5%,40%)", margin: 0 }}>Run health unavailable — agent runtime not connected.</p>
+      )}
+    </m.div>
+  );
+}
+
 export default function KpiDashboardPage() {
   const [data, setData] = useState<KpiData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -343,6 +491,11 @@ export default function KpiDashboardPage() {
                     <PlatformBlock name="Lyte" icon={Eye} accent="hsl(190,90%,55%)" href={platforms!.lyte.href} delay={0.3} metrics={[{ label: "Active Incidents", value: platforms!.lyte.incidents }]} />
                     <PlatformBlock name="Carlota Jo" icon={Sparkles} accent="hsl(38,55%,58%)" href={platforms!.carlotaJo.href} delay={0.35} metrics={[{ label: "Client Inquiries", value: platforms!.carlotaJo.inquiries }]} />
                   </div>
+
+                  <div style={{ marginTop: "1.5rem", marginBottom: "0.625rem" }}>
+                    <p style={{ fontSize: "9px", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(210,5%,36%)" }}>Governed Autonomy</p>
+                  </div>
+                  <RunHealthWidget />
                 </>
               )}
             </div>

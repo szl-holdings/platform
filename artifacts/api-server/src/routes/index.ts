@@ -90,6 +90,17 @@ router.use(fundInboundDealsRouter);
 router.use(aegisPcapRouter);
 router.use(lpPortalRouter);
 
+// tracesRouter (/runs*, /traces*, /reflections*, /plans*, /replay*) and its
+// companions must be registered BEFORE ai.register() because copilotRouter
+// is mounted there without a path prefix and applies a global
+// tenantScope({ required: true }) that would terminate unauthenticated
+// requests before they ever reach these handlers.
+router.use(tracesRouter);
+router.use(reflectionsRouter);
+router.use(plansRouter);
+router.use(replayRouter);
+router.use(trustProvenanceRouter);
+
 core.register(router);
 vessels.register(router);
 security.register(router);
@@ -114,13 +125,8 @@ skillLibrary.register(router);
 
 router.use("/nexus", nexusRouter);
 
-router.use(trustProvenanceRouter);
-router.use(tracesRouter);
-router.use(reflectionsRouter);
-router.use(plansRouter);
 router.use(cognitiveRuntimeRouter);
 router.use(atlasArtifactsRouter);
 router.use(outcomeGraphRouter);
-router.use(replayRouter);
 
 export default router;

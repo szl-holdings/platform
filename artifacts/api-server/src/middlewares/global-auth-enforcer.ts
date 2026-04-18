@@ -78,7 +78,6 @@ const PUBLIC_PREFIXES = [
   "/api/booking/time-entries",
   "/api/booking/time-invoices",
   "/api/booking/services",
-  // Debug: add console.log to confirm matching
   "/api/booking/health",
   // LP portal — read-only GET routes use authMiddleware({ required: false }) so the
   // marketing demo at /fund/lp-portal can showcase seeded data, while authenticated

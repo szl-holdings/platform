@@ -88,6 +88,7 @@ const OPERATIONS_NAV: NavGroup[] = [
       { href: "/operations/alloy/governance", label: "Covenant Policy", icon: Lock },
       { href: "/operations/alloy/intelligence", label: "Intelligence", icon: Brain },
       { href: "/operations/alloy/traces", label: "Execution Traces", icon: GitBranch },
+      { href: "/operations/runs", label: "Run Console", icon: Play },
       { href: "/operations/ownership", label: "Ownership Map", icon: Users },
     ],
   },
