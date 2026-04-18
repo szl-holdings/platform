@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "wouter";
-import { Search, Filter, ChevronRight, Calendar, Shield, Check, Archive } from "lucide-react";
+import { Search, ChevronRight, Calendar, Shield, Check, Archive } from "lucide-react";
 import { getRiskColor, type DomainKey, type RiskLevel } from "../lib/data";
-import { useBriefings, useApproveBriefing, useArchiveBriefing } from "../lib/api";
+import { useBriefings, useApproveBriefing, useArchiveBriefing, useBriefingSearch } from "../lib/api";
 import ConfidenceChip from "../components/ConfidenceChip";
 
 type RiskFilter = RiskLevel | "all";
@@ -19,30 +19,58 @@ const DOMAIN_OPTIONS: { value: DomainKey | "all"; label: string }[] = [
   { value: "platform", label: "Platform" },
 ];
 
+const SEARCH_DEBOUNCE_MS = 350;
+
+function useDebounced<T>(value: T, delay: number): T {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const id = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(id);
+  }, [value, delay]);
+  return debounced;
+}
+
 export default function Library() {
   const [search, setSearch] = useState("");
   const [domainFilter, setDomainFilter] = useState<DomainKey | "all">("all");
   const [riskFilter, setRiskFilter] = useState<RiskFilter>("all");
 
-  const { data: briefings, isLoading, error } = useBriefings({ domain: domainFilter, risk: riskFilter });
+  const debouncedSearch = useDebounced(search.trim(), SEARCH_DEBOUNCE_MS);
+  const isSearching = debouncedSearch.length > 0;
+
+  const listQuery = useBriefings(
+    isSearching ? undefined : { domain: domainFilter, risk: riskFilter },
+  );
+  const searchQuery = useBriefingSearch(debouncedSearch);
+
+  const allBriefings = isSearching
+    ? (searchQuery.data?.briefings ?? [])
+    : (listQuery.data ?? []);
+
+  const isLoading = isSearching ? searchQuery.isLoading : listQuery.isLoading;
+  const error = isSearching ? searchQuery.error : listQuery.error;
+
+  const filtered = isSearching
+    ? allBriefings
+    : allBriefings.filter((b) => {
+        if (domainFilter !== "all" && !b.domains.includes(domainFilter)) return false;
+        if (riskFilter !== "all" && b.overallRisk !== riskFilter) return false;
+        return true;
+      });
+
   const approveMut = useApproveBriefing();
   const archiveMut = useArchiveBriefing();
-  const allBriefings = briefings ?? [];
 
-  const filtered = allBriefings.filter(b => {
-    const q = search.toLowerCase();
-    const matchSearch = !q || b.headline.toLowerCase().includes(q) || b.date.includes(q) || b.leadSentence.toLowerCase().includes(q);
-    return matchSearch;
-  });
+  const totalLabel = isSearching
+    ? `${searchQuery.data?.total ?? 0} results across all briefings`
+    : `${listQuery.data?.length ?? 0} briefings · searchable archive of all AI-generated intelligence products`;
 
   return (
     <div style={{ padding: "28px 28px 40px" }}>
       {/* Page header */}
       <div style={{ marginBottom: 24 }}>
         <h1 style={{ fontSize: "1.4rem", fontWeight: 600, color: "var(--pulse-text)", marginBottom: 6 }}>Briefing Library</h1>
-        <p style={{ fontSize: "0.85rem", color: "var(--pulse-text-muted)" }}>
-          {allBriefings.length} briefings · searchable archive of all AI-generated intelligence products
-        </p>
+        <p style={{ fontSize: "0.85rem", color: "var(--pulse-text-muted)" }}>{totalLabel}</p>
       </div>
 
       {/* Filters */}
@@ -57,41 +85,54 @@ export default function Library() {
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder="Search briefings by topic, entity, date..."
+            placeholder="Search all briefings — titles, body, entities, citations…"
             style={{ flex: 1, background: "transparent", border: "none", outline: "none", color: "var(--pulse-text)", fontSize: "0.85rem" }}
           />
+          {isSearching && search !== debouncedSearch && (
+            <div style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--pulse-gold)", opacity: 0.7, flexShrink: 0 }} />
+          )}
         </div>
-        <select
-          value={domainFilter}
-          onChange={e => setDomainFilter(e.target.value as DomainKey | "all")}
-          style={{
-            padding: "8px 12px", borderRadius: 6,
-            background: "var(--pulse-card)", border: "1px solid var(--pulse-border)",
-            color: "var(--pulse-text)", fontSize: "0.82rem", cursor: "pointer",
-          }}
-        >
-          {DOMAIN_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-        </select>
-        <select
-          value={riskFilter}
-          onChange={e => setRiskFilter(e.target.value as RiskFilter)}
-          style={{
-            padding: "8px 12px", borderRadius: 6,
-            background: "var(--pulse-card)", border: "1px solid var(--pulse-border)",
-            color: "var(--pulse-text)", fontSize: "0.82rem", cursor: "pointer",
-          }}
-        >
-          <option value="all">All Risk Levels</option>
-          <option value="CRITICAL">Critical</option>
-          <option value="HIGH">High</option>
-          <option value="MEDIUM">Medium</option>
-          <option value="LOW">Low</option>
-        </select>
+        {!isSearching && (
+          <>
+            <select
+              value={domainFilter}
+              onChange={e => setDomainFilter(e.target.value as DomainKey | "all")}
+              style={{
+                padding: "8px 12px", borderRadius: 6,
+                background: "var(--pulse-card)", border: "1px solid var(--pulse-border)",
+                color: "var(--pulse-text)", fontSize: "0.82rem", cursor: "pointer",
+              }}
+            >
+              {DOMAIN_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+            </select>
+            <select
+              value={riskFilter}
+              onChange={e => setRiskFilter(e.target.value as RiskFilter)}
+              style={{
+                padding: "8px 12px", borderRadius: 6,
+                background: "var(--pulse-card)", border: "1px solid var(--pulse-border)",
+                color: "var(--pulse-text)", fontSize: "0.82rem", cursor: "pointer",
+              }}
+            >
+              <option value="all">All Risk Levels</option>
+              <option value="CRITICAL">Critical</option>
+              <option value="HIGH">High</option>
+              <option value="MEDIUM">Medium</option>
+              <option value="LOW">Low</option>
+            </select>
+          </>
+        )}
       </div>
 
       {/* Results count */}
       <div style={{ fontSize: "0.72rem", color: "var(--pulse-text-muted)", marginBottom: 12 }}>
-        {isLoading ? "Loading briefings…" : error ? `Error: ${error instanceof Error ? error.message : "failed to load"}` : `Showing ${filtered.length} of ${allBriefings.length} briefings`}
+        {isLoading
+          ? isSearching ? `Searching across all briefings for "${debouncedSearch}"…` : "Loading briefings…"
+          : error
+            ? `Error: ${error instanceof Error ? error.message : "failed to load"}`
+            : isSearching
+              ? `${filtered.length} match${filtered.length !== 1 ? "es" : ""} for "${debouncedSearch}"`
+              : `Showing ${filtered.length} of ${allBriefings.length} briefings`}
       </div>
 
       {/* Briefing list */}
@@ -203,9 +244,11 @@ export default function Library() {
             </a>
           </Link>
         ))}
-        {filtered.length === 0 && (
+        {!isLoading && filtered.length === 0 && (
           <div style={{ textAlign: "center", padding: "60px 0", color: "var(--pulse-text-muted)" }}>
-            <p style={{ fontSize: "0.9rem" }}>No briefings match your current filters</p>
+            <p style={{ fontSize: "0.9rem" }}>
+              {isSearching ? `No briefings match "${debouncedSearch}"` : "No briefings match your current filters"}
+            </p>
             <button onClick={() => { setSearch(""); setDomainFilter("all"); setRiskFilter("all"); }}
               style={{ marginTop: 12, padding: "6px 14px", borderRadius: 6, background: "var(--pulse-card)", border: "1px solid var(--pulse-border)", color: "var(--pulse-text-dim)", cursor: "pointer", fontSize: "0.8rem" }}>
               Clear filters

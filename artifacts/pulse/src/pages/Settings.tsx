@@ -1,32 +1,140 @@
-import { useState } from "react";
-import { Bell, Clock, Globe, Shield, Zap, Check, CreditCard, ArrowRight } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Bell, Clock, Globe, Shield, Zap, Check, CreditCard, ArrowRight, Loader } from "lucide-react";
 import { trackEvent } from "@szl-holdings/observability/react";
 
 type Toggle = { key: string; label: string; description: string; value: boolean };
 
+const NS = "pulse";
+
+async function loadPulseSettings(): Promise<Record<string, unknown>> {
+  const res = await fetch(`/api/settings/resolve?namespace=${NS}`, {
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+  });
+  if (!res.ok) return {};
+  const body = (await res.json()) as
+    | { data?: { settings: Array<{ key: string; value: unknown }> } }
+    | { settings: Array<{ key: string; value: unknown }> };
+  const rows: Array<{ key: string; value: unknown }> =
+    (body as { data?: { settings: Array<{ key: string; value: unknown }> } }).data?.settings ??
+    (body as { settings: Array<{ key: string; value: unknown }> }).settings ??
+    [];
+  const out: Record<string, unknown> = {};
+  for (const r of rows) {
+    out[r.key] = r.value;
+  }
+  return out;
+}
+
+async function savePulseSetting(key: string, value: unknown, valueType: string): Promise<void> {
+  const res = await fetch("/api/settings/user", {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ namespace: NS, key, value, valueType }),
+  });
+  if (!res.ok) {
+    let detail = "";
+    try {
+      const body = (await res.json()) as { error?: string };
+      detail = body?.error ?? "";
+    } catch {
+      // ignore parse error
+    }
+    throw new Error(`Failed to save ${key}${detail ? `: ${detail}` : ` (HTTP ${res.status})`}`);
+  }
+  const body = (await res.json()) as { success?: boolean; error?: string };
+  if (body && body.success === false) {
+    throw new Error(body.error ?? `Setting ${key} was not saved`);
+  }
+}
+
+const DEFAULT_TOGGLES: Toggle[] = [
+  { key: "daily_brief", label: "Daily Brief Auto-Generation", description: "Automatically generate the Morning Brief at 5:30 AM UTC every day", value: true },
+  { key: "push_notify", label: "Push Notification on Daily Drop", description: "Receive a push notification when the daily brief is published (mobile)", value: true },
+  { key: "dissent_alerts", label: "Dissent Resolution Alerts", description: "Get notified when your dissents are acknowledged or resolved", value: true },
+  { key: "confidence_warnings", label: "Low Confidence Warnings", description: "Alert when any domain drops below 60% confidence", value: true },
+  { key: "custom_brief_complete", label: "Custom Brief Complete Alerts", description: "Notify when a custom brief request has been synthesized", value: true },
+  { key: "offline_cache", label: "Offline Cache (Mobile)", description: "Cache the latest brief for offline reading on mobile", value: true },
+];
+
 export default function Settings() {
   const [saved, setSaved] = useState(false);
-  const [toggles, setToggles] = useState<Toggle[]>([
-    { key: "daily_brief", label: "Daily Brief Auto-Generation", description: "Automatically generate the Morning Brief at 5:30 AM UTC every day", value: true },
-    { key: "push_notify", label: "Push Notification on Daily Drop", description: "Receive a push notification when the daily brief is published (mobile)", value: true },
-    { key: "dissent_alerts", label: "Dissent Resolution Alerts", description: "Get notified when your dissents are acknowledged or resolved", value: true },
-    { key: "confidence_warnings", label: "Low Confidence Warnings", description: "Alert when any domain drops below 60% confidence", value: true },
-    { key: "custom_brief_complete", label: "Custom Brief Complete Alerts", description: "Notify when a custom brief request has been synthesized", value: true },
-    { key: "offline_cache", label: "Offline Cache (Mobile)", description: "Cache the latest brief for offline reading on mobile", value: true },
-  ]);
-
+  const [saving, setSaving] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [toggles, setToggles] = useState<Toggle[]>(DEFAULT_TOGGLES);
   const [briefTime, setBriefTime] = useState("05:30");
+  const [notifCadence, setNotifCadence] = useState("daily");
+  const [defaultDomain, setDefaultDomain] = useState("all");
+  const [briefingTone, setBriefingTone] = useState("executive");
+  const [timeZone, setTimeZone] = useState("UTC");
   const [classification, setClassification] = useState("SZL-EXEC-RESTRICTED");
   const [defaultView, setDefaultView] = useState("today");
+  const initialised = useRef(false);
+
+  useEffect(() => {
+    if (initialised.current) return;
+    initialised.current = true;
+
+    loadPulseSettings()
+      .then((prefs) => {
+        if (typeof prefs.brief_time === "string") setBriefTime(prefs.brief_time);
+        if (typeof prefs.notif_cadence === "string") setNotifCadence(prefs.notif_cadence);
+        if (typeof prefs.default_domain === "string") setDefaultDomain(prefs.default_domain);
+        if (typeof prefs.briefing_tone === "string") setBriefingTone(prefs.briefing_tone);
+        if (typeof prefs.time_zone === "string") setTimeZone(prefs.time_zone);
+        if (typeof prefs.classification === "string") setClassification(prefs.classification);
+        if (typeof prefs.default_view === "string") setDefaultView(prefs.default_view);
+        setToggles((prev) =>
+          prev.map((t) => {
+            const stored = prefs[`notif_${t.key}`];
+            return typeof stored === "boolean" ? { ...t, value: stored } : t;
+          }),
+        );
+      })
+      .catch((err) => {
+        setLoadError(err instanceof Error ? err.message : "Failed to load settings");
+      });
+  }, []);
 
   const handleToggle = (key: string) => {
-    setToggles(prev => prev.map(t => t.key === key ? { ...t, value: !t.value } : t));
+    setToggles((prev) => prev.map((t) => (t.key === key ? { ...t, value: !t.value } : t)));
   };
 
-  const handleSave = () => {
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2500);
+  const handleSave = async () => {
+    setSaving(true);
+    setLoadError(null);
+    try {
+      const saves = [
+        savePulseSetting("brief_time", briefTime, "string"),
+        savePulseSetting("notif_cadence", notifCadence, "string"),
+        savePulseSetting("default_domain", defaultDomain, "string"),
+        savePulseSetting("briefing_tone", briefingTone, "string"),
+        savePulseSetting("time_zone", timeZone, "string"),
+        savePulseSetting("classification", classification, "string"),
+        savePulseSetting("default_view", defaultView, "string"),
+        ...toggles.map((t) => savePulseSetting(`notif_${t.key}`, t.value, "boolean")),
+      ];
+      const results = await Promise.allSettled(saves);
+      const failures = results
+        .filter((r): r is PromiseRejectedResult => r.status === "rejected")
+        .map((r) => (r.reason instanceof Error ? r.reason.message : "Unknown error"));
+      if (failures.length > 0) {
+        setLoadError(`Some settings failed to save: ${failures.join("; ")}`);
+      } else {
+        setSaved(true);
+        setTimeout(() => setSaved(false), 2500);
+      }
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : "Failed to save settings. Please try again.");
+    } finally {
+      setSaving(false);
+    }
   };
+
+  const tzOptions = Intl.supportedValuesOf
+    ? Intl.supportedValuesOf("timeZone")
+    : ["UTC", "America/New_York", "America/Chicago", "America/Denver", "America/Los_Angeles", "Europe/London", "Europe/Paris", "Asia/Dubai", "Asia/Singapore", "Asia/Tokyo"];
 
   return (
     <div style={{ padding: "28px 28px 40px", maxWidth: 700 }}>
@@ -35,6 +143,11 @@ export default function Settings() {
         <p style={{ fontSize: "0.85rem", color: "var(--pulse-text-muted)" }}>
           Configure Pulse briefing preferences, notification settings, and classification defaults.
         </p>
+        {loadError && (
+          <div style={{ marginTop: 8, padding: "8px 12px", borderRadius: 6, background: "rgba(224,80,80,0.1)", border: "1px solid rgba(224,80,80,0.3)", fontSize: "0.78rem", color: "#e05050" }}>
+            {loadError}
+          </div>
+        )}
       </div>
 
       {/* Brief generation */}
@@ -51,6 +164,17 @@ export default function Settings() {
             />
           </div>
           <div>
+            <label style={{ display: "block", fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--pulse-text-muted)", marginBottom: 6 }}>Notification Cadence</label>
+            <select value={notifCadence} onChange={e => setNotifCadence(e.target.value)}
+              style={{ padding: "9px 12px", borderRadius: 6, background: "var(--pulse-bg)", border: "1px solid var(--pulse-border)", color: "var(--pulse-text)", fontSize: "0.85rem", cursor: "pointer", width: "100%" }}
+            >
+              <option value="daily">Once daily (5:30 AM UTC)</option>
+              <option value="twice_daily">Twice daily (5:30 AM + 12:00 PM)</option>
+              <option value="weekly">Weekly digest (Monday AM)</option>
+              <option value="on_demand">On-demand only</option>
+            </select>
+          </div>
+          <div>
             <label style={{ display: "block", fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--pulse-text-muted)", marginBottom: 6 }}>Default View</label>
             <select value={defaultView} onChange={e => setDefaultView(e.target.value)}
               style={{ padding: "9px 12px", borderRadius: 6, background: "var(--pulse-bg)", border: "1px solid var(--pulse-border)", color: "var(--pulse-text)", fontSize: "0.85rem", cursor: "pointer", width: "100%" }}
@@ -58,6 +182,51 @@ export default function Settings() {
               <option value="today">Today's Brief</option>
               <option value="library">Briefing Library</option>
               <option value="confidence">Confidence Dashboard</option>
+            </select>
+          </div>
+          <div>
+            <label style={{ display: "block", fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--pulse-text-muted)", marginBottom: 6 }}>Default Domain Focus</label>
+            <select value={defaultDomain} onChange={e => setDefaultDomain(e.target.value)}
+              style={{ padding: "9px 12px", borderRadius: 6, background: "var(--pulse-bg)", border: "1px solid var(--pulse-border)", color: "var(--pulse-text)", fontSize: "0.85rem", cursor: "pointer", width: "100%" }}
+            >
+              <option value="all">All Domains</option>
+              <option value="maritime">Maritime</option>
+              <option value="security">Security</option>
+              <option value="real_estate">Real Estate</option>
+              <option value="legal">Legal</option>
+              <option value="financial">Financial</option>
+              <option value="platform">Platform</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {/* Briefing tone & locale */}
+      <div className="section-card" style={{ padding: "18px 20px", marginBottom: 16 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+          <Globe size={15} color="var(--pulse-text-muted)" />
+          <h3 style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--pulse-text)" }}>Briefing Style & Locale</h3>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+          <div>
+            <label style={{ display: "block", fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--pulse-text-muted)", marginBottom: 6 }}>Briefing Tone</label>
+            <select value={briefingTone} onChange={e => setBriefingTone(e.target.value)}
+              style={{ padding: "9px 12px", borderRadius: 6, background: "var(--pulse-bg)", border: "1px solid var(--pulse-border)", color: "var(--pulse-text)", fontSize: "0.85rem", cursor: "pointer", width: "100%" }}
+            >
+              <option value="executive">Executive — concise, action-oriented</option>
+              <option value="tactical">Tactical — operational detail, numbered steps</option>
+              <option value="detailed">Detailed — full narrative with citations</option>
+              <option value="diplomatic">Diplomatic — hedged, multi-perspective</option>
+            </select>
+          </div>
+          <div>
+            <label style={{ display: "block", fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--pulse-text-muted)", marginBottom: 6 }}>Time Zone</label>
+            <select value={timeZone} onChange={e => setTimeZone(e.target.value)}
+              style={{ padding: "9px 12px", borderRadius: 6, background: "var(--pulse-bg)", border: "1px solid var(--pulse-border)", color: "var(--pulse-text)", fontSize: "0.85rem", cursor: "pointer", width: "100%" }}
+            >
+              {tzOptions.map((tz) => (
+                <option key={tz} value={tz}>{tz.replace(/_/g, " ")}</option>
+              ))}
             </select>
           </div>
         </div>
@@ -214,18 +383,19 @@ export default function Settings() {
 
       <button
         onClick={handleSave}
+        disabled={saving}
         style={{
           display: "flex", alignItems: "center", gap: 7,
           padding: "10px 20px", borderRadius: 6,
           background: saved ? "rgba(78,202,139,0.1)" : "rgba(200,168,75,0.12)",
           border: `1px solid ${saved ? "rgba(78,202,139,0.35)" : "rgba(200,168,75,0.35)"}`,
           color: saved ? "#4eca8b" : "var(--pulse-gold)",
-          fontSize: "0.85rem", fontWeight: 600, cursor: "pointer",
-          transition: "all 0.2s",
+          fontSize: "0.85rem", fontWeight: 600, cursor: saving ? "not-allowed" : "pointer",
+          transition: "all 0.2s", opacity: saving ? 0.7 : 1,
         }}
       >
-        {saved ? <Check size={15} /> : <Zap size={15} />}
-        {saved ? "Saved" : "Save Settings"}
+        {saving ? <Loader size={15} style={{ animation: "spin 1s linear infinite" }} /> : saved ? <Check size={15} /> : <Zap size={15} />}
+        {saving ? "Saving…" : saved ? "Saved" : "Save Settings"}
       </button>
     </div>
   );

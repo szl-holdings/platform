@@ -72,12 +72,9 @@ function useAuth() {
   }, []);
 
   useEffect(() => {
-    if (isDemoActive()) {
-      setUser(DEMO_USER);
-      setIsLoading(false);
-      return;
-    }
     let cancelled = false;
+    // Always check real auth first. If the server confirms a real session,
+    // clear any lingering demo token so live endpoints are always used.
     fetch("/api/auth/user", { credentials: "include" })
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -85,12 +82,23 @@ function useAuth() {
       })
       .then((data) => {
         if (!cancelled) {
-          setUser(data.user ?? null);
+          if (data.user) {
+            // Real authenticated user — kill demo fallback unconditionally.
+            clearDemoSession();
+            setUser(data.user);
+          } else if (isDemoActive()) {
+            setUser(DEMO_USER);
+          } else {
+            setUser(null);
+          }
           setIsLoading(false);
         }
       })
       .catch(() => {
         if (!cancelled) {
+          // Network or server error — we cannot confirm auth status.
+          // Never route an unconfirmed user into demo endpoints; show the auth
+          // gate so they can sign in explicitly.
           setUser(null);
           setIsLoading(false);
         }
@@ -201,10 +209,7 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
     return params.has("demo") && !isDemoActive();
   });
 
-  if (showPinModal) {
-    return <PinModal onSuccess={() => { setShowPinModal(false); activateDemo(); }} />;
-  }
-
+  // Always resolve auth before deciding demo eligibility.
   if (isLoading) {
     return (
       <div style={{
@@ -215,6 +220,12 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
         Authenticating…
       </div>
     );
+  }
+
+  // PIN modal is only offered to users the server confirms are NOT authenticated.
+  // Authenticated users are never eligible for demo mode regardless of URL params.
+  if (!isAuthenticated && showPinModal) {
+    return <PinModal onSuccess={() => { setShowPinModal(false); activateDemo(); }} />;
   }
 
   if (!isAuthenticated) {

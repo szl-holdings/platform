@@ -373,6 +373,43 @@ export function useRollbackDeployment(
   });
 }
 
+export function useBriefingSearch(query: string) {
+  const q = query.trim();
+  return useQuery({
+    queryKey: ["pulse", "briefings", "search", q],
+    queryFn: async () => {
+      if (!q) return { briefings: [] as Briefing[], total: 0 };
+      // In demo mode the search endpoint is not available (it requires auth).
+      // Fall back to a local search over the already-cached demo briefing list
+      // so the Library search box keeps working in unauthenticated demo flows.
+      if (isDemoMode()) {
+        const cached = await demoApiFetch<{ success: true; briefings: Briefing[]; total: number }>(
+          "/api/pulse/demo/briefings",
+        );
+        const ql = q.toLowerCase();
+        const matches = (cached.briefings ?? []).filter((b) => {
+          if (b.headline.toLowerCase().includes(ql)) return true;
+          if (b.leadSentence.toLowerCase().includes(ql)) return true;
+          if (b.date.includes(ql)) return true;
+          if (b.domains.some((d) => d.toLowerCase().includes(ql))) return true;
+          for (const s of b.sections) {
+            if (s.keyJudgment.toLowerCase().includes(ql)) return true;
+            if (s.narrative.some((p) => p.toLowerCase().includes(ql))) return true;
+          }
+          return false;
+        });
+        return { briefings: matches, total: matches.length };
+      }
+      return apiFetch<{ success: true; briefings: Briefing[]; total: number; query: string }>(
+        `/api/pulse/briefings/search?q=${encodeURIComponent(q)}`,
+      );
+    },
+    select: (d) => ({ briefings: d.briefings, total: d.total }),
+    enabled: q.length > 0,
+    placeholderData: (prev) => prev,
+  });
+}
+
 export function useApproveBriefing() {
   const qc = useQueryClient();
   return useMutation({

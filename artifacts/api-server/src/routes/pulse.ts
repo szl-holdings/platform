@@ -1007,6 +1007,56 @@ router.get("/briefings", validateQuery(listQuerySchema), async (req: Request, re
   res.json({ success: true, briefings: briefings.slice(0, limit).map(withAgentNames), total: briefings.length });
 });
 
+router.get("/briefings/search", validateQuery(listQuerySchema), async (req: Request, res: Response): Promise<void> => {
+  const q = String(req.query.q ?? "").trim().toLowerCase();
+  if (!q) {
+    res.json({ success: true, briefings: [], total: 0 });
+    return;
+  }
+
+  const limit = Math.min(parseInt(String(req.query.limit ?? "50"), 10), 200);
+  const all = await listBriefings(500);
+
+  const matches = all.filter((b) => {
+    // Top-level fields: headline, lead, metadata
+    if (b.headline.toLowerCase().includes(q)) return true;
+    if (b.leadSentence.toLowerCase().includes(q)) return true;
+    if (b.date.includes(q)) return true;
+    if (b.edition.toLowerCase().includes(q)) return true;
+    if (b.classification.toLowerCase().includes(q)) return true;
+    if (b.domains.some((d: string) => d.toLowerCase().includes(q))) return true;
+
+    // Sections — title, judgment, full narrative (body text), findings, and
+    // assumptions / gaps which carry entity names, citations, and source refs
+    for (const s of b.sections) {
+      if (s.title.toLowerCase().includes(q)) return true;
+      if (s.keyJudgment.toLowerCase().includes(q)) return true;
+      if (s.narrative.some((p: string) => p.toLowerCase().includes(q))) return true;
+      if (s.keyFindings.some((f: { finding: string }) => f.finding.toLowerCase().includes(q))) return true;
+      // Assumptions and gaps frequently contain entity names, vessel IDs, people,
+      // org names, and source citations (e.g. "Skuld", "TA505", "Fund III")
+      if (s.assumptions?.some((a: string) => a.toLowerCase().includes(q))) return true;
+      if (s.gaps?.some((g: string) => g.toLowerCase().includes(q))) return true;
+    }
+
+    // Recommended actions (owner names, action descriptions)
+    if (b.recommendedActions?.some((a: { action: string; owner: string; rationale: string }) =>
+      a.action.toLowerCase().includes(q) ||
+      a.owner.toLowerCase().includes(q) ||
+      a.rationale.toLowerCase().includes(q)
+    )) return true;
+
+    return false;
+  });
+
+  res.json({
+    success: true,
+    briefings: matches.slice(0, limit).map(withAgentNames),
+    total: matches.length,
+    query: q,
+  });
+});
+
 router.get("/briefings/:id", validateQuery(listQuerySchema), async (req: Request, res: Response): Promise<void> => {
   const brief = await getBriefingById(String(req.params.id));
   if (!brief) {
