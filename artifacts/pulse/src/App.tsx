@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, lazy, Suspense } from "react";
 import { Switch, Route } from "wouter";
 import Constellation from "@/pages/Constellation";
 import Shell from "./components/Shell";
@@ -11,6 +11,7 @@ import Settings from "./pages/Settings";
 import BriefingDetail from "./pages/BriefingDetail";
 import SystemHealth from "./pages/SystemHealth";
 import BriefingEngine from "./pages/BriefingEngine";
+const DecisionCenterPage = lazy(() => import("@/pages/decision-center"));
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") || "/pulse";
 
@@ -261,6 +262,7 @@ export default function App() {
           <Route path={`${BASE}/settings`} component={Settings} />
           <Route path={`${BASE}/constellation`} component={Constellation} />
           <Route path={`${BASE}/engine`} component={BriefingEngine} />
+          <Route path={`${BASE}/decisions`}>{() => <Suspense fallback={null}><DecisionCenterPage /></Suspense>}</Route>
           <Route component={TodaysBrief} />
         </Switch>
       </Shell>

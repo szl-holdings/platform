@@ -45,6 +45,16 @@ The platform is a pnpm monorepo utilizing TypeScript 5.9, React 19, Vite, and No
 
 **UI/UX and Design System:** A premium, SZL-branded, dark-first governed-intelligence design language ships via `@szl-holdings/design-system` (`packages/design-system`). It provides: proof-envelope primitives (`EvidenceBadge`, `FreshnessChip`, `ConfidenceMeter`, `PolicyStateChip`, `AutonomyModeToggle`, `ProofEnvelope`) and cockpit primitives (`DenseTable`, `TimelineLane`, `GraphCanvas`, `MapSurface`, `NarrativePanel`). Dark-first tokens (color, type, spacing, motion, elevation) are defined in `src/tokens/index.ts`. A Storybook-style preview lives at `/nexus/#design-system` inside the mockup-sandbox artifact. A forbidden-copy linter at `scripts/lint-copy.sh` blocks banned phrases ("sentient", "AI magic", etc.) and enforces "governed intelligence", "evidence-backed", and "traceable autonomy" vocabulary. The existing `@szl-holdings/ui-command` package (`packages/ui-command`) provides higher-level business components (KPIBlock, CausalTimeline, RecommendationQueue, etc.).
 
+**OS Layer (Decision Center):** All web apps and mobile share a unified "Operating System" layer implemented in `lib/shared-ui/src/` with the following shared primitives:
+- `os-layer.ts` — canonical TypeScript types: `Recommendation`, `Evidence`, `PolicyVerdict`, `Run`, `SourceHealth`, `AutonomyMode`, `OSAuditEntry`
+- `DecisionCenter.tsx` — ranked recommendation cards with inline Evidence Drawer, policy verdict badges, autonomy dial, and approve/reject/escalate/rollback actions
+- `RunConsole.tsx` — cognitive run trace viewer with eval strip
+- `SourceHealthStrip.tsx` — horizontal freshness indicator strip with degradation alerts
+- `AutonomyDial.tsx` — autonomy mode selector/display (suggest → full-auto)
+- `PolicyVerdictBadge.tsx` — cleared/conditional/blocked/flagged badge
+- `os-demo-data.ts` — believable cross-variant seed data for all 7 portfolio domains
+Decision Center pages are mounted in: `szl-holdings` (`/decision-center`), `command` (`/decisions`), `pulse` (`/decisions`), `vessels` (`/decision-center`), `terra` (`/decision-center`), `carlota-jo` (`/decision-center`). Mobile app has `app/(shell)/intelligence/decisions.tsx` via Expo Router. Aegis is a slide deck app — skipped. Tagline: "Decisions, with receipts."
+
 **API Layers:** Features a REST API, a GraphQL API using Apollo Server, and an MCP Gateway (Model Context Protocol) for tool integration.
 
 **Key Features:** Reporting & Analytics Engine, robust Authentication & RBAC, Alloy Execution Fabric for workflow orchestration, 12 specialized AI Agents, PRISM Bus, Monte Carlo Engine for simulations, Multi-Tenant Provisioning, and GCS-backed Object Storage.

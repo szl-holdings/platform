@@ -33,6 +33,7 @@ if (typeof window !== "undefined") {
 }
 
 const TerraPulse = lazy(() => import("@/pages/pulse"));
+const DecisionCenterPage = lazy(() => import("@/pages/decision-center"));
 const TerraAtlasArtifactsPage = lazy(() => import("@/pages/atlas-artifacts"));
 const Dashboard = lazy(() => import("@/pages/dashboard"));
 const DistressEngine = lazy(() => import("@/pages/distress-engine"));
@@ -123,6 +124,7 @@ function PrivateRouter() {
     <Suspense fallback={<PageLoader />}>
       <Switch>
         <Route path="/pulse" component={TerraPulse} />
+        <Route path="/decision-center" component={DecisionCenterPage} />
         <Route path="/" component={() => <Redirect to="/dashboard" />} />
         <Route path="/dashboard" component={Dashboard} />
         <Route path="/home" component={() => <Redirect to="/dashboard" />} />

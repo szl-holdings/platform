@@ -101,6 +101,7 @@ const AdminDataRetentionPage = lazy(() => import("@/pages/admin-data-retention")
 
 // New platform-repositioning pages
 const DecisioningCommandPage = lazy(() => import("@/pages/decisioning-command"));
+const DecisionCenterPage = lazy(() => import("@/pages/decision-center"));
 const LytePage = lazy(() => import("@/pages/lyte-page"));
 const SignalFusionPage = lazy(() => import("@/pages/signal-fusion"));
 const DecisionSchemaLibraryPage = lazy(() => import("@/pages/decision-schema-library"));
@@ -517,6 +518,9 @@ function App() {
             </Route>
             <Route path="/decisioning">
               <Suspense fallback={<PageLoader />}><DecisioningCommandPage /></Suspense>
+            </Route>
+            <Route path="/decision-center">
+              <Suspense fallback={<PageLoader />}><DecisionCenterPage /></Suspense>
             </Route>
             <Route path="/platform/alloy">
               <Suspense fallback={<PageLoader />}><AlloyPublicPage /></Suspense>

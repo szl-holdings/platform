@@ -396,3 +396,37 @@ export {
   type AiRecommendation as DecisionAiRecommendation,
   type Alternative as DecisionAlternative,
 } from "./decision-receipt-card";
+
+// ─── OS Layer ────────────────────────────────────────────────────────────────
+export * from "./os-layer";
+export {
+  PolicyVerdictBadge,
+  type PolicyVerdictBadgeProps,
+} from "./PolicyVerdictBadge";
+export {
+  AutonomyDial,
+  type AutonomyDialProps,
+} from "./AutonomyDial";
+export {
+  SourceHealthStrip,
+  SourceHealthPill,
+  FreshnessPill,
+  type SourceHealthStripProps,
+  type SourceHealthPillProps,
+  type FreshnessPillProps,
+} from "./SourceHealthStrip";
+export {
+  DecisionCenter,
+  RecommendationCard,
+  type DecisionCenterProps,
+  type RecommendationCardProps,
+} from "./DecisionCenter";
+export {
+  RunConsole,
+  RunDetailPanel,
+  EvalsStrip,
+  type RunConsoleProps,
+  type RunDetailProps,
+  type EvalsStripProps,
+  type EvalResult,
+} from "./RunConsole";

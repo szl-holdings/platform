@@ -123,7 +123,14 @@
     "./onboarding/use-product-tour": "./src/onboarding/use-product-tour.ts",
     "./onboarding/onboarding-checklist": "./src/onboarding/onboarding-checklist.tsx",
     "./onboarding/help-tip": "./src/onboarding/help-tip.tsx",
-    "./onboarding/changelog-page": "./src/onboarding/changelog-page.tsx"
+    "./onboarding/changelog-page": "./src/onboarding/changelog-page.tsx",
+    "./os-layer": "./src/os-layer.ts",
+    "./os-demo-data": "./src/os-demo-data.ts",
+    "./DecisionCenter": "./src/DecisionCenter.tsx",
+    "./RunConsole": "./src/RunConsole.tsx",
+    "./SourceHealthStrip": "./src/SourceHealthStrip.tsx",
+    "./AutonomyDial": "./src/AutonomyDial.tsx",
+    "./PolicyVerdictBadge": "./src/PolicyVerdictBadge.tsx"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.4",

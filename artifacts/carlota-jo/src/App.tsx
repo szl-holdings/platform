@@ -17,6 +17,7 @@ const CARLOTA_ACCENT = LANE_ACCENT_HEX.carlotaJo.primary;
 
 
 const CarlotaJoPulse = lazy(() => import("@/pages/pulse"));
+const DecisionCenterPage = lazy(() => import("@/pages/decision-center"));
 const Home = lazy(() => import("@/pages/PremiumHome"));
 const ServicesPage = lazy(() => import("@/pages/Services"));
 const ApproachPage = lazy(() => import("@/pages/Approach"));
@@ -141,6 +142,7 @@ function Router() {
         <Route path="/booking/success" component={BookingSuccess} />
         <Route path="/booking/cancel" component={BookingCancel} />
         <Route path="/booking/follow-up" component={BookingFollowUp} />
+        <Route path="/decision-center" component={DecisionCenterPage} />
         <Route path="/observability" component={ObservabilityPage} />
         <Route path="/advisory" component={AdvisoryIntel} />
         <Route path="/ai-advisory" component={AIAdvisory} />

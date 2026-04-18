@@ -506,6 +506,7 @@ export default function CortexIntelligenceScreen() {
             <Text style={[styles.runtimeSectionLabel, { color: colors.mutedForeground }]}>COGNITIVE RUNTIME</Text>
             <View style={styles.runtimeGrid}>
               {[
+                { route: "/(shell)/intelligence/decisions", label: "Decision Center", icon: "layers" as const, color: "#c9a84c", sub: "Decisions, with receipts" },
                 { route: "/(shell)/intelligence/approval-inbox", label: "Approval Inbox", icon: "inbox" as const, color: "#f97316", sub: "Guardian-routed decisions" },
                 { route: "/(shell)/intelligence/alert-center", label: "Alert Center", icon: "alert-triangle" as const, color: "#ef4444", sub: "Escalations & world-model" },
                 { route: "/(shell)/intelligence/executive-brief", label: "Executive Brief", icon: "file-text" as const, color: ACCENT, sub: "Daily · Weekly · Live snapshot" },

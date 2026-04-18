@@ -195,6 +195,7 @@ const VesselsSettingsPage = lazy(() => import("@/pages/settings"));
 const VesselsBillingPanelPage = lazy(() => import("@/pages/billing-panel"));
 const VesselsTeamPanelPage = lazy(() => import("@/pages/team-panel"));
 const VesselsAuditLogPanelPage = lazy(() => import("@/pages/audit-log-panel"));
+const DecisionCenterPage = lazy(() => import("@/pages/decision-center"));
 const VesselsAtlasRuntimePage = lazy(() => import("@/pages/atlas-runtime"));
 const VesselsReplayPage = lazy(() => import("@/pages/replay"));
 const VesselsScenarioBranchesPage = lazy(() => import("@/pages/scenario-branches"));
@@ -329,6 +330,13 @@ function VesselsSidebarContent({ expanded, onMobileClose, onToggleCollapse }: { 
   const [location, navigate] = useLocation();
 
   const primarySections: SidebarNavSection[] = [
+    {
+      id: "os-layer",
+      label: "OS Layer",
+      items: [
+        { id: "decision-center", label: "Decision Center", href: "/decision-center", icon: <Zap className="w-3.5 h-3.5" /> },
+      ],
+    },
     {
       id: "core",
       label: "Core",
@@ -611,6 +619,7 @@ function DashboardRouter() {
         <Route path="/bunker-optimizer" component={BunkerOptimizerPage} />
         <Route path="/psc-inspector" component={PscInspectorPage} />
         <Route path="/insurance-panel" component={InsurancePanelPage} />
+        <Route path="/decision-center" component={DecisionCenterPage} />
         <Route path="/atlas-runtime" component={VesselsAtlasRuntimePage} />
         <Route path="/replay" component={VesselsReplayPage} />
         <Route path="/scenario-branches" component={VesselsScenarioBranchesPage} />
