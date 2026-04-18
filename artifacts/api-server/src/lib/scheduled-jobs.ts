@@ -20,6 +20,7 @@ export const NAMED_JOB_TYPES = {
   ROUTE_ECONOMICS_RECOMPUTE_JOB: "route_economics_recompute_job",
   READINESS_SCORE_RECOMPUTE_JOB: "readiness_score_recompute_job",
   HOURLY_SCHEDULED_REPORTS: "hourly_scheduled_reports",
+  HOURLY_EXECUTIVE_DIGEST: "hourly_executive_digest",
 } as const;
 
 export type NamedJobType = typeof NAMED_JOB_TYPES[keyof typeof NAMED_JOB_TYPES];
@@ -61,6 +62,75 @@ registerEntry({ type: NAMED_JOB_TYPES.ROUTE_ECONOMICS_RECOMPUTE_JOB, name: "Rout
 registerEntry({ type: NAMED_JOB_TYPES.READINESS_SCORE_RECOMPUTE_JOB, name: "Readiness Score Recompute", description: "Recomputes readiness dimension scores for a specified program using the latest evidence and dimension weights.", schedule: "on_demand", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.DAILY_DOCUMENT_BATCH, name: "Daily Document Batch Generation", description: "Generates PDF exports for all approved documents pending batch processing across Terra, Aegis, Carlota Jo, Vessels, and Alloy. Archives completed PDFs and notifies document owners.", schedule: "daily", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.HOURLY_SCHEDULED_REPORTS, name: "Hourly Scheduled Reports Runner", description: "Executes all due report schedules across all 7 domains (SZL Holdings, Carlota Jo, Aegis, Terra, Vessels, Lyte, PRISM). Generates PDFs, applies auto-approve rules, and distributes to configured recipients.", schedule: "hourly", enabled: true });
+registerEntry({ type: NAMED_JOB_TYPES.HOURLY_EXECUTIVE_DIGEST, name: "Hourly Executive Digest Dispatcher", description: "Runs every hour, finds users whose digest_config.enabled=true and deliveryHour matches the current UTC hour, generates a per-role cross-domain briefing, and sends it via Expo push with a deepLink to the briefing workspace.", schedule: "hourly", enabled: true });
+
+durableJobQueue.register(NAMED_JOB_TYPES.HOURLY_EXECUTIVE_DIGEST, async (job) => {
+  const start = Date.now();
+  const payload = (job.payload ?? {}) as { forceHour?: number; testUserId?: number };
+  const currentHour = typeof payload.forceHour === "number" ? payload.forceHour : new Date().getUTCHours();
+  let dispatched = 0;
+  let skipped = 0;
+  let failed = 0;
+
+  try {
+    const { pool } = await import("@szl-holdings/db");
+    const { sendPushToUser } = await import("./expo-push");
+    const { gatherDigestData, generateDigestMarkdown } = await import("../routes/alloy-digest");
+
+    const filterClause = payload.testUserId
+      ? "WHERE user_id = $1"
+      : "WHERE digest_config IS NOT NULL AND (digest_config->>'enabled')::boolean = true AND (digest_config->>'deliveryHour')::int = $1";
+    const filterParam = payload.testUserId ?? currentHour;
+    const recipients = await pool.query(
+      `SELECT user_id, digest_config FROM notification_preferences ${filterClause}`,
+      [filterParam],
+    );
+
+    logger.info({ jobId: job.id, currentHour, recipientCount: recipients.rows.length }, "hourly_executive_digest: dispatching");
+
+    const date = new Date().toISOString().slice(0, 10);
+    let cachedMarkdown: string | null = null;
+    let cachedData: Awaited<ReturnType<typeof gatherDigestData>> | null = null;
+
+    for (const row of recipients.rows as Array<{ user_id: number; digest_config: Record<string, unknown> }>) {
+      try {
+        const cfg = row.digest_config ?? {};
+        const fmt = (cfg.digestFormat as string) ?? "concise";
+        if (!cachedData) cachedData = await gatherDigestData("executive");
+        if (!cachedMarkdown) cachedMarkdown = await generateDigestMarkdown(cachedData, "executive", date);
+
+        const headline = cachedData.suggestedPriorities[0]?.action ?? "Cross-domain briefing ready";
+        const body = `${headline} · ${cachedData.signalsSummary.critical}C/${cachedData.signalsSummary.high}H · ${cachedData.pendingApprovals.length} approvals · ${fmt === "concise" ? "30-sec read" : "2-min briefing"}`;
+
+        const result = await sendPushToUser(row.user_id, {
+          title: "⬡ Executive Morning Briefing",
+          body,
+          data: {
+            type: "daily_digest",
+            format: fmt,
+            deepLink: "/(shell)/intelligence/pulse",
+            date,
+            priorities: cachedData.suggestedPriorities.slice(0, 3),
+          },
+          sound: "default",
+        });
+
+        if (result.sent > 0) dispatched++; else skipped++;
+      } catch (err) {
+        failed++;
+        logger.warn({ err, userId: row.user_id }, "hourly_executive_digest: per-user delivery failed");
+      }
+    }
+  } catch (err) {
+    logger.error({ err, jobId: job.id }, "hourly_executive_digest: fatal");
+    updateRegistry(NAMED_JOB_TYPES.HOURLY_EXECUTIVE_DIGEST, { lastStatus: "failed", lastDurationMs: Date.now() - start, failCount: (jobRegistry.get(NAMED_JOB_TYPES.HOURLY_EXECUTIVE_DIGEST)?.failCount || 0) + 1 });
+    return;
+  }
+
+  serverTelemetry.recordBusinessEvent({ type: "hourly_executive_digest_completed", durationMs: Date.now() - start, success: true, metadata: { currentHour, dispatched, skipped, failed } });
+  updateRegistry(NAMED_JOB_TYPES.HOURLY_EXECUTIVE_DIGEST, { lastStatus: "completed", lastDurationMs: Date.now() - start });
+  logger.info({ jobId: job.id, currentHour, dispatched, skipped, failed }, "hourly_executive_digest: complete");
+});
 
 function updateRegistry(type: NamedJobType, update: Partial<JobScheduleEntry>) {
   const entry = jobRegistry.get(type);

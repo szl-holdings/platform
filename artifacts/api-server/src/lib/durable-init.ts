@@ -308,6 +308,7 @@ const DEFAULT_SCHEDULES: ScheduleDefinition[] = [
   { name: "vessel_eta_refresh_hourly", jobType: NAMED_JOB_TYPES.HOURLY_VESSEL_ETA_REFRESH, cronExpression: "0 * * * *", payload: {}, maxRetries: 2 },
   { name: "route_pressure_scan_hourly", jobType: NAMED_JOB_TYPES.HOURLY_ROUTE_PRESSURE_SCAN, cronExpression: "0 * * * *", payload: {}, maxRetries: 2 },
   { name: "terra_inquiry_digest_hourly", jobType: NAMED_JOB_TYPES.HOURLY_TERRA_INQUIRY_DIGEST, cronExpression: "0 * * * *", payload: {}, maxRetries: 2 },
+  { name: "executive_digest_hourly", jobType: NAMED_JOB_TYPES.HOURLY_EXECUTIVE_DIGEST, cronExpression: "0 * * * *", payload: {}, maxRetries: 2 },
   { name: "platform_lyte_digest_0700", jobType: PLATFORM_JOB_TYPES.LYTE_DIGEST, cronExpression: "0 7 * * *", payload: { period: "daily" }, maxRetries: 2 },
   { name: "platform_readiness_digest_0700", jobType: PLATFORM_JOB_TYPES.READINESS_DIGEST, cronExpression: "0 7 * * *", payload: {}, maxRetries: 2 },
   { name: "platform_exception_summary_0700", jobType: PLATFORM_JOB_TYPES.EXCEPTION_SUMMARY, cronExpression: "0 7 * * *", payload: { domain: "platform" }, maxRetries: 2 },

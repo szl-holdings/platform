@@ -24,7 +24,7 @@ interface DigestContent {
   metrics: Record<string, unknown>;
 }
 
-async function gatherDigestData(roleScope: string): Promise<DigestContent> {
+export async function gatherDigestData(roleScope: string): Promise<DigestContent> {
   const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
   const [workflowStats, pendingApprovals, signals] = await Promise.all([
@@ -109,7 +109,7 @@ async function gatherDigestData(roleScope: string): Promise<DigestContent> {
   };
 }
 
-async function generateDigestMarkdown(data: DigestContent, roleScope: string, date: string): Promise<string> {
+export async function generateDigestMarkdown(data: DigestContent, roleScope: string, date: string): Promise<string> {
   const dateStr = new Date(date).toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
 
   const prompt = `Generate a concise executive daily digest in markdown for ${dateStr}.
