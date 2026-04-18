@@ -47,6 +47,15 @@ const STRATEGY_NAV: NavGroup[] = [
     ],
   },
   {
+    section: "Cross-Platform Intelligence",
+    items: [
+      { href: "/strategy/cross-platform", label: "Signal Correlation", icon: GitMerge },
+      { href: "/strategy/cross-platform/evidence", label: "Evidence Registry", icon: Database },
+      { href: "/strategy/cross-platform/run-health", label: "Run Health", icon: Activity },
+      { href: "/strategy/cross-platform/pilots", label: "Pilot Intelligence", icon: Users },
+    ],
+  },
+  {
     section: "Primitives",
     items: [
       { href: "/strategy/simulation", label: "Simulation", icon: Activity },
@@ -408,7 +417,7 @@ export function UnifiedLayout({ children, mode, onModeChange }: {
             <div key={group.section}>
               <SectionHeader label={group.section} />
               {group.items.map((item) => {
-                const exactOnlyRoutes = ["/strategy", "/operations", "/infrastructure", "/cognitive"];
+                const exactOnlyRoutes = ["/strategy", "/operations", "/infrastructure", "/cognitive", "/strategy/cross-platform"];
                 const isActive = exactOnlyRoutes.includes(item.href)
                   ? location === item.href || (location === "/" && item.href === "/strategy")
                   : location.startsWith(item.href) && !exactOnlyRoutes.includes(item.href)

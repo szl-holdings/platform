@@ -19,6 +19,12 @@ const CorrelationMapPage = lazy(() => import("./pages/correlation-map").then((m)
 const SignalChainsPage = lazy(() => import("./pages/signal-chains").then((m) => ({ default: m.SignalChainsPage })));
 const EnterpriseStatePage = lazy(() => import("./pages/enterprise-state"));
 
+const CrossPlatformHubPage = lazy(() => import("./pages/cross-platform/index").then((m) => ({ default: m.CrossPlatformHubPage })));
+const SignalCorrelationPage = lazy(() => import("./pages/cross-platform/signal-correlation").then((m) => ({ default: m.SignalCorrelationPage })));
+const EvidenceRegistryPage = lazy(() => import("./pages/cross-platform/evidence-registry").then((m) => ({ default: m.EvidenceRegistryPage })));
+const RunHealthPage = lazy(() => import("./pages/cross-platform/run-health").then((m) => ({ default: m.RunHealthPage })));
+const PilotIntelligencePage = lazy(() => import("./pages/cross-platform/pilot-intelligence").then((m) => ({ default: m.PilotIntelligencePage })));
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: { refetchOnWindowFocus: false, staleTime: 30_000, retry: 1 },
@@ -231,6 +237,13 @@ function AppShell() {
               <Route path="/strategy/enterprise-state" component={() => <EnterpriseStatePage />} />
               <Route path="/strategy/atlas-runtime" component={() => <AtlasRuntimePage />} />
               <Route path="/strategy/worldline-registry" component={() => <WorldlineRegistryPage />} />
+
+              <Route path="/strategy/cross-platform" component={() => <SignalCorrelationPage />} />
+              <Route path="/strategy/cross-platform/hub" component={() => <CrossPlatformHubPage />} />
+              <Route path="/strategy/cross-platform/evidence" component={() => <EvidenceRegistryPage />} />
+              <Route path="/strategy/cross-platform/run-health" component={() => <RunHealthPage />} />
+              <Route path="/strategy/cross-platform/pilots" component={() => <PilotIntelligencePage />} />
+
               <Route path="/cognitive" component={() => <CognitiveCommandCenter />} />
               <Route path="/cognitive/self-model" component={() => <SelfModelConsole />} />
               <Route path="/cognitive/world-model" component={() => <WorldModelExplorer />} />

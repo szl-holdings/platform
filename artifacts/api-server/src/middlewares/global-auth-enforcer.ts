@@ -190,6 +190,17 @@ export function globalAuthEnforcer(
     return;
   }
 
+  // Cross-platform intelligence — read-only GET routes reading live trace-graph
+  // data (signal correlations, evidence registry, run health, pilot intelligence).
+  // Accessible without a session in non-production/demo environments so the Command
+  // Surface can showcase cross-product intelligence without requiring login.
+  // In production, auth is required (req.user check at the top of this function
+  // already passes authenticated callers through before reaching this block).
+  if (process.env.NODE_ENV !== "production" && path.startsWith("/api/cross-platform/")) {
+    next();
+    return;
+  }
+
   serverTelemetry.recordAuthFailure();
   sendUnauthorized(res, "This endpoint requires a valid session. Please log in.");
 }

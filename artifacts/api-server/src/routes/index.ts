@@ -34,6 +34,7 @@ import * as alloyRuntime from "./groups/alloy-runtime-group";
 import * as selfModel from "./groups/self-model";
 import * as verifier from "./groups/verifier";
 import * as skillLibrary from "./groups/skill-library";
+import * as crossPlatform from "./groups/cross-platform";
 import nexusRouter from "./nexus";
 import replayRouter from "./replay";
 import cognitiveRuntimeRouter from "./cognitive-runtime";
@@ -90,6 +91,12 @@ router.use(simulationWhatIfRouter);
 // console to show live AquilaScore and threat level. Must be mounted
 // BEFORE guardianPolicyCheck. /api/infrastructure/ is in PUBLIC_PREFIXES.
 router.use(infrastructureStatusRouter);
+
+// Cross-platform intelligence — read-only GET routes for signal correlations,
+// shared evidence registry, run health, and pilot intelligence. Mounted BEFORE
+// guardianPolicyCheck. NOT in PUBLIC_PREFIXES — protected in production by the
+// global auth enforcer (NODE_ENV === "production" blocks unauthenticated access).
+crossPlatform.register(router);
 
 // Global Guardian policy check — derives category from request path and
 // applies to every agent-facing route family. Read-only methods skip
