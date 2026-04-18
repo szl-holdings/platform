@@ -659,6 +659,9 @@ type CommandAlert = {
   id: string; domain: string; domainColor: string; priority: "critical" | "high" | "medium" | "low";
   title: string; description: string; time: string; status: "active" | "acknowledged" | "snoozed" | "resolved";
   category: string; assignee?: string;
+  // Optional deep-link metadata. Cross-platform correlation alerts populate
+  // these so the inbox card can navigate back to the Signal Correlation page.
+  correlationId?: string; href?: string;
 };
 
 /**
@@ -666,7 +669,15 @@ type CommandAlert = {
  * /api/command/alerts (full payload) and /api/command/alerts/count
  * (badge count) so the two cannot drift.
  */
-async function computeAlerts(): Promise<CommandAlert[]> {
+/**
+ * Compute the inbox alerts for the caller. The caller's tenant context is
+ * required to scope cross-platform correlation alerts pulled from the prism-bus
+ * — those events are tenant-tagged at publish time and must not leak across
+ * orgs. Pass `{ isAdmin: true }` to opt into the cross-tenant view.
+ */
+async function computeAlerts(
+  caller: { tenantId: string | null; isAdmin: boolean } = { tenantId: null, isAdmin: true },
+): Promise<CommandAlert[]> {
   const alerts: CommandAlert[] = [];
 
   // Aegis threats from OTX
@@ -776,12 +787,60 @@ async function computeAlerts(): Promise<CommandAlert[]> {
     });
   }
 
+  // Cross-platform correlation alerts published onto the PRISM bus by the
+  // correlation detector (artifacts/api-server/src/routes/cross-platform.ts).
+  // High-strength (≥85%) and "escalated" correlations land here so operators
+  // see them in the Command Inbox without navigating to the Signal Correlation
+  // page.
+  try {
+    const { prismBus } = await import("@szl-holdings/prism-bus");
+    const events = prismBus.getHistory({ type: "cross_domain_correlation", limit: 100 });
+    // Tenant filter mirrors /api/prism-bus/events: untagged events are visible
+    // to everyone (demo mode); tagged events are visible to admins or to the
+    // matching tenant only. Prevents cross-tenant correlation leakage.
+    const visible = events.filter((e) =>
+      caller.isAdmin || e.tenantId == null || e.tenantId === caller.tenantId,
+    ).slice(0, 25);
+    for (const evt of visible) {
+      const p = evt.payload as Record<string, unknown>;
+      const correlationId = typeof p["correlationId"] === "string" ? p["correlationId"] : evt.id;
+      const title = typeof p["title"] === "string" ? p["title"] : "Cross-platform correlation detected";
+      const description = typeof p["description"] === "string" ? p["description"] : "";
+      const products = Array.isArray(p["products"]) ? (p["products"] as unknown[]).filter((x): x is string => typeof x === "string") : [];
+      const strengthVal = typeof p["strength"] === "number" ? (p["strength"] as number) : 0;
+      const outcome = typeof p["outcome"] === "string" ? (p["outcome"] as string) : "informational";
+      const priority: "critical" | "high" | "medium" =
+        evt.severity === "critical" ? "critical" : evt.severity === "high" ? "high" : "medium";
+      const drillUrl = typeof p["drillUrl"] === "string"
+        ? (p["drillUrl"] as string)
+        : `/strategy/cross-platform?correlationId=${encodeURIComponent(correlationId)}`;
+      alerts.push({
+        id: `xplat-corr-${correlationId}`,
+        domain: "Cross-Platform",
+        domainColor: "#a855f7",
+        priority,
+        title: `Correlation: ${title}`,
+        description:
+          `${description}${description ? " " : ""}` +
+          `Strength ${(strengthVal * 100).toFixed(0)}%, outcome ${outcome}` +
+          `${products.length ? `, products: ${products.join(", ")}` : ""}.`,
+        time: relTime(new Date(evt.timestamp).toISOString()),
+        status: "active",
+        category: "Cross-Platform",
+        correlationId,
+        href: drillUrl,
+      });
+    }
+  } catch { /* non-fatal */ }
+
   return alerts;
 }
 
-router.get("/alerts", requireAnyAuth(), async (_req: Request, res: Response) => {
+router.get("/alerts", requireAnyAuth(), async (req: Request, res: Response) => {
   try {
-    const alerts = await computeAlerts();
+    const tenantId = req.user?.orgs?.[0]?.orgId?.toString() ?? null;
+    const isAdmin = req.user?.roles?.some((r) => r === "super_admin" || r === "admin") ?? false;
+    const alerts = await computeAlerts({ tenantId, isAdmin });
 
     sendSuccess(res, {
       alerts,
@@ -807,11 +866,13 @@ router.get("/alerts", requireAnyAuth(), async (_req: Request, res: Response) => 
  * sources as /api/command/alerts but skips serializing the full payload
  * so polling clients (badge counts) stay cheap.
  */
-router.get("/alerts/count", requireAnyAuth(), async (_req: Request, res: Response) => {
+router.get("/alerts/count", requireAnyAuth(), async (req: Request, res: Response) => {
   try {
     // Re-use the same builder as /alerts so the badge count cannot drift
     // from the inbox total. Equivalent to alerts.counts.active.
-    const alerts = await computeAlerts();
+    const tenantId = req.user?.orgs?.[0]?.orgId?.toString() ?? null;
+    const isAdmin = req.user?.roles?.some((r) => r === "super_admin" || r === "admin") ?? false;
+    const alerts = await computeAlerts({ tenantId, isAdmin });
     const active = alerts.filter((a) => a.status === "active").length;
     sendSuccess(res, { count: active, generatedAt: new Date().toISOString() });
   } catch (err) {

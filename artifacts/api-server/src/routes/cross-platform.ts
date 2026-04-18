@@ -36,6 +36,8 @@ import {
   type TraceRecord,
   type TraceQueryFilter,
 } from "@workspace/trace-graph";
+import { prismBus } from "@szl-holdings/prism-bus";
+import { logger } from "../lib/logger";
 import { z } from "zod";
 import { db, partnerPilotsTable } from "@szl-holdings/db";
 import { and, eq, gte, lte, isNull, inArray, or, type SQL } from "drizzle-orm";
@@ -123,6 +125,179 @@ function parseTimeWindow(query: Record<string, unknown>): { after?: string; befo
 }
 
 // ────────────────────────────────────────────────────────────────────────────
+// Cross-platform correlation alert emission
+//
+// When a correlation is detected with strength ≥ 0.85 OR outcome === "escalated",
+// we publish a `cross_domain_correlation` event onto the prism-bus. The Command
+// Inbox (/operations/inbox) reads this stream via /api/command/alerts and surfaces
+// the correlation as an inbox message — operators no longer have to navigate to
+// the Signal Correlation page to see them.
+//
+// When the correlation also involves an unresolved policy breach (a guardrail
+// outcome of "block" / "require-approval" on any participating trace), we
+// additionally create a human-in-the-loop approval request via covenant-policy
+// so it appears in /operations/approvals.
+//
+// Both emissions are deduplicated by correlationId (in-memory) so re-running the
+// detector on the same trace-graph state does not flood the inbox / approvals.
+// ────────────────────────────────────────────────────────────────────────────
+
+const emittedCorrelationEventIds = new Set<string>();
+const emittedCorrelationApprovalIds = new Set<string>();
+const MAX_DEDUP_SET_SIZE = 5000;
+
+type CorrelationForEmission = {
+  correlationId: string;
+  rule: string;
+  title: string;
+  description: string;
+  products: string[];
+  strength: number;
+  outcome: string;
+  hasUnresolvedPolicyBreach: boolean;
+};
+
+function dedupKey(orgId: number | null, orgSlug: string | null, correlationId: string): string {
+  // Prefer the numeric orgId for tenant scoping (matches the tenantId tagged
+  // onto bus events and approval rows). Fall back to orgSlug, then to a
+  // global bucket only when no tenant context is available.
+  const tenantPart = orgId != null ? `org:${orgId}` : orgSlug != null ? `slug:${orgSlug}` : "_global_";
+  return `${tenantPart}::${correlationId}`;
+}
+
+// Map a cross-platform product code (lyte, vessels, terra, prism, aegis, carlota)
+// to a valid PrismDomain accepted by prism-bus. Products without a 1:1 domain
+// (prism, carlota) collapse to their canonical domain or to "global".
+function productToPrismDomain(product: string | undefined): "lyte" | "vessels" | "terra" | "aegis" | "carlota-jo" | "global" {
+  switch (product) {
+    case "lyte":
+    case "vessels":
+    case "terra":
+    case "aegis":
+      return product;
+    case "carlota":
+      return "carlota-jo";
+    case "prism":
+    default:
+      return "global";
+  }
+}
+
+function trimDedupSet(set: Set<string>): void {
+  if (set.size <= MAX_DEDUP_SET_SIZE) return;
+  const overflow = set.size - MAX_DEDUP_SET_SIZE;
+  const it = set.values();
+  for (let i = 0; i < overflow; i++) {
+    const next = it.next();
+    if (next.done) break;
+    set.delete(next.value);
+  }
+}
+
+async function emitCorrelationAlerts(
+  correlations: CorrelationForEmission[],
+  tenant: { orgSlug: string | null; orgId: number | null },
+  userId: number | null,
+): Promise<void> {
+  const { orgSlug, orgId } = tenant;
+  for (const c of correlations) {
+    const isHighStrength = c.strength >= 0.85;
+    const isEscalated = c.outcome === "escalated";
+    // Inbox surfacing fires when the correlation is high-strength OR escalated.
+    // Approval surfacing fires whenever an unresolved policy breach is involved
+    // — independently of strength — because the requirement is HITL review for
+    // breaches, even those whose strength formula falls below the inbox bar
+    // (e.g. time-window correlations with require-approval but no block).
+    const shouldEmitInbox = isHighStrength || isEscalated;
+    const shouldEmitApproval = c.hasUnresolvedPolicyBreach;
+    if (!shouldEmitInbox && !shouldEmitApproval) continue;
+
+    const key = dedupKey(orgId, orgSlug, c.correlationId);
+
+    // ── Inbox surfacing via prism-bus ────────────────────────────────────
+    if (shouldEmitInbox && !emittedCorrelationEventIds.has(key)) {
+      const severity: "high" | "critical" = isEscalated ? "critical" : "high";
+      try {
+        await prismBus.publish({
+          type: "cross_domain_correlation",
+          // Map the first product of the correlation to a valid PrismDomain so
+          // the bus receives a semantically correct domain (no untyped cast).
+          domain: productToPrismDomain(c.products[0]),
+          sourceId: "cross-platform-correlation-detector",
+          payload: {
+            correlationId: c.correlationId,
+            rule: c.rule,
+            title: c.title,
+            description: c.description,
+            products: c.products,
+            strength: c.strength,
+            outcome: c.outcome,
+            drillUrl: `/strategy/cross-platform?correlationId=${encodeURIComponent(c.correlationId)}`,
+          },
+          severity,
+          correlationId: c.correlationId,
+          // Tenant-tag the bus event so per-tenant inbox readers can filter it.
+          tenantId: orgId != null ? String(orgId) : (orgSlug ?? null),
+          userId: userId != null ? String(userId) : null,
+        });
+        // Mark deduped only after successful publish so transient failures
+        // can still be retried on the next detection run.
+        emittedCorrelationEventIds.add(key);
+        trimDedupSet(emittedCorrelationEventIds);
+      } catch (err) {
+        logger.warn({ err, correlationId: c.correlationId }, "cross-platform.correlation-alert-publish-failed");
+      }
+    }
+
+    // ── Approvals surfacing for unresolved policy-breach correlations ────
+    if (shouldEmitApproval && !emittedCorrelationApprovalIds.has(key)) {
+      try {
+        const { createApprovalRequest, listApprovalsByResource } = await import("@szl-holdings/covenant-policy");
+        // listApprovalsByResource is global — filter by the caller's orgId so
+        // we do not let one tenant's approval suppress emission for another.
+        const existing = await listApprovalsByResource("cross-platform-correlation", c.correlationId);
+        const sameOrg = existing.filter((a) => (a.orgId ?? null) === (orgId ?? null));
+        const hasOpen = sameOrg.some((a) => a.status === "pending" || a.status === "escalated");
+        if (!hasOpen) {
+          await createApprovalRequest({
+            orgId,
+            resourceType: "cross-platform-correlation",
+            resourceId: c.correlationId,
+            title: `Cross-platform correlation requires review: ${c.title}`,
+            description:
+              `${c.description}\n\nStrength: ${(c.strength * 100).toFixed(0)}%. ` +
+              `Outcome: ${c.outcome}. Products: ${c.products.join(", ")}. ` +
+              `An unresolved policy breach is involved — operator review required.`,
+            actionClass: "policy-review",
+            priority: "critical",
+            requestedById: null,
+            requestedByRole: "cross-platform-correlation-agent",
+            requiredApproverRole: "compliance",
+            correlationId: c.correlationId,
+            serviceAttribution: "cross-platform-correlation-detector",
+            payload: {
+              correlationId: c.correlationId,
+              rule: c.rule,
+              products: c.products,
+              strength: c.strength,
+              outcome: c.outcome,
+              drillUrl: `/strategy/cross-platform?correlationId=${encodeURIComponent(c.correlationId)}`,
+            },
+          });
+        }
+        // Mark deduped only after the create attempt completed without throwing
+        // (or after we determined an open approval already exists). Transient
+        // failures will be re-attempted on the next detection run.
+        emittedCorrelationApprovalIds.add(key);
+        trimDedupSet(emittedCorrelationApprovalIds);
+      } catch (err) {
+        logger.warn({ err, correlationId: c.correlationId }, "cross-platform.correlation-approval-create-failed");
+      }
+    }
+  }
+}
+
+// ────────────────────────────────────────────────────────────────────────────
 // GET /api/cross-platform/correlations
 //
 // Rule 1: entity-overlap — same entityId appears in traces from ≥2 distinct
@@ -180,6 +355,10 @@ router.get(
         proofEnvelope: { hash: string; signedAt: string; signerAgentId: string };
       }> = [];
 
+      // Track which correlations involve an unresolved policy breach so we can
+      // emit a corresponding approval request after the response is built.
+      const unresolvedPolicyBreachByCorrelationId = new Set<string>();
+
       // ── Rule 1: entity-overlap ──────────────────────────────────────────
       for (const [eid, entries] of entityDomainMap.entries()) {
         const domainSet = new Set(entries.map((e) => e.domain));
@@ -199,8 +378,11 @@ router.get(
           return (t?.errors.length ?? 0) > 0;
         });
 
+        const eoCorrelationId = `CORR-eo-${eid.replace(/[^a-z0-9]/gi, "-").slice(0, 24)}`;
+        if (hasBlock) unresolvedPolicyBreachByCorrelationId.add(eoCorrelationId);
+
         correlations.push({
-          correlationId: `CORR-eo-${eid.replace(/[^a-z0-9]/gi, "-").slice(0, 24)}`,
+          correlationId: eoCorrelationId,
           rule: "entity-overlap",
           title: `Entity ${eid} spans ${products.join(" + ")}`,
           description:
@@ -261,9 +443,18 @@ router.get(
           const t = defaultTraceStore.get(pt.traceId);
           return t?.guardrailResults.some((g) => g.outcome === "block");
         });
+        // Parity with entity-overlap rule: an unresolved "require-approval"
+        // outcome is also a policy breach that needs HITL review.
+        const hasUnresolvedBreachTW = pairTraces.some((pt) => {
+          const t = defaultTraceStore.get(pt.traceId);
+          return t?.guardrailResults.some((g) => g.outcome === "block" || g.outcome === "require-approval");
+        });
+
+        const twCorrelationId = `CORR-tw-${pairKey.replace(/[^a-z0-9]/gi, "-").slice(0, 24)}`;
+        if (hasUnresolvedBreachTW) unresolvedPolicyBreachByCorrelationId.add(twCorrelationId);
 
         correlations.push({
-          correlationId: `CORR-tw-${pairKey.replace(/[^a-z0-9]/gi, "-").slice(0, 24)}`,
+          correlationId: twCorrelationId,
           rule: "time-window",
           title: `Concurrent ${products.join(" + ")} activity within ${windowMins}min window`,
           description:
@@ -308,6 +499,25 @@ router.get(
         liveData: true,
         dataSource: "trace-graph:entity-overlap+time-window",
         productMeta: PRODUCT_META,
+      });
+
+      // Fire-and-forget: surface high-strength / escalated correlations to the
+      // Command Inbox via prism-bus, and mint approval requests for those
+      // involving an unresolved policy breach. Failures must not affect the
+      // response.
+      const forEmission: CorrelationForEmission[] = correlations.map((c) => ({
+        correlationId: c.correlationId,
+        rule: c.rule,
+        title: c.title,
+        description: c.description,
+        products: c.products,
+        strength: c.strength,
+        outcome: c.outcome,
+        hasUnresolvedPolicyBreach: unresolvedPolicyBreachByCorrelationId.has(c.correlationId),
+      }));
+      const callerOrgId = req.user?.orgs?.[0]?.orgId ?? null;
+      void emitCorrelationAlerts(forEmission, { orgSlug, orgId: callerOrgId }, req.user?.id ?? null).catch((err) => {
+        logger.warn({ err }, "cross-platform.correlation-emit-failed");
       });
     } catch (err) {
       handleRouteError(res, err, "Failed to load cross-platform correlations");
