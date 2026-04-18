@@ -183,7 +183,7 @@ const CARBON_PRICE_USD = 72; // USD/MT CO2
 
 const VOYAGE_EMISSIONS: VoyageEmissionRecord[] = [
   {
-    id: "ve-001", vesselName: "Pacific Navigator", imo: "9234891", grossTonnage: 82000,
+    id: "ve-001", vesselName: "Pacific Navigator", imo: "9234891", grossTonnage: 82000, mmsi: "273456780",
     voyageId: "VOY-2026-018", origin: "Primorsk, Russia", destination: "Rotterdam, Netherlands",
     distanceNm: 3840, fuelType: "VLSFO", fuelConsumedMt: 1180,
     co2EmissionsMt: computeEmissions(1180, "VLSFO"),
@@ -212,7 +212,7 @@ const VOYAGE_EMISSIONS: VoyageEmissionRecord[] = [
     euEtsLiability: 0,
     departedAt: "2026-04-12T09:30:00Z", arrivedAt: null,
     passportHash: makePassportHash("VOY-2026-015", computeEmissions(920, "LNG"), "LNG"),
-    dataSource: "ais-live",
+    dataSource: "ais-live", mmsi: "538090123",
   },
   {
     id: "ve-003", vesselName: "Meridian Bulk", imo: "9312004", grossTonnage: 68000,
@@ -244,7 +244,7 @@ const VOYAGE_EMISSIONS: VoyageEmissionRecord[] = [
     euEtsLiability: Math.round(computeEmissions(1340, "HFO") * EU_ETS_PRICE_EUR),
     departedAt: "2026-04-14T11:00:00Z", arrivedAt: null,
     passportHash: makePassportHash("VOY-2026-022", computeEmissions(1340, "HFO"), "HFO"),
-    dataSource: "ais-cached",
+    dataSource: "ais-cached", mmsi: "367123450",
   },
   {
     id: "ve-005", vesselName: "Coral Endeavour", imo: "9501667", grossTonnage: 44000,
@@ -264,29 +264,97 @@ const VOYAGE_EMISSIONS: VoyageEmissionRecord[] = [
   },
 ];
 
-router.get("/vessels/modules/voyages-emissions", authMiddleware(), (_req, res) => {
+// ─── Live AIS refresh for in-progress voyages ────────────────────────────────
+//
+// In-progress voyages with an MMSI re-derive their sailed distance from the
+// live AIS feed each time the endpoint is polled. Fuel consumption is scaled
+// by the original specific fuel consumption (MT fuel / nm) captured at
+// passport issuance, which preserves the vessel's bunker profile while
+// reflecting actual distance covered. Completed voyages are immutable —
+// their final figures and passport hash are returned as-is.
+//
+// Per-voyage results are cached for 90s so polling the endpoint every 2
+// minutes from the UI hits the upstream Digitraffic API at most once per
+// voyage per refresh, with a fresh window between calls.
+
+interface RefreshCacheEntry { record: VoyageEmissionRecord; expiry: number; }
+const refreshCache = new Map<string, RefreshCacheEntry>();
+const REFRESH_TTL_MS = 90_000;
+
+async function refreshInProgressFromAis(v: VoyageEmissionRecord): Promise<VoyageEmissionRecord> {
+  if (v.status !== "in-progress" || !v.mmsi) return v;
+
+  const cached = refreshCache.get(v.id);
+  const now = Date.now();
+  if (cached && cached.expiry > now) return cached.record;
+
+  const depMs = new Date(v.departedAt).getTime();
+  if (isNaN(depMs) || depMs >= now) {
+    refreshCache.set(v.id, { record: v, expiry: now + REFRESH_TTL_MS });
+    return v;
+  }
+
+  const track = await deriveAisTrack(v.mmsi, depMs, now);
+  if (track.distanceNm <= 0) {
+    refreshCache.set(v.id, { record: v, expiry: now + REFRESH_TTL_MS });
+    return v;
+  }
+
+  // Preserve the vessel's specific fuel consumption (MT/nm) from issuance,
+  // and rescale fuel + emissions by AIS-derived distance.
+  const originalSpecificFuel = v.fuelConsumedMt / v.distanceNm;
+  const newDistanceNm = +track.distanceNm.toFixed(1);
+  const newFuelMt = +(originalSpecificFuel * newDistanceNm).toFixed(1);
+  const newCo2 = computeEmissions(newFuelMt, v.fuelType);
+  const newCo2PerNm = +(newCo2 / newDistanceNm).toFixed(4);
+  const newAer = +(newCo2 / (v.grossTonnage * newDistanceNm)).toFixed(6);
+
+  const refreshed: VoyageEmissionRecord = {
+    ...v,
+    distanceNm: newDistanceNm,
+    fuelConsumedMt: newFuelMt,
+    co2EmissionsMt: newCo2,
+    co2PerNm: newCo2PerNm,
+    aer: newAer,
+    ciiRating: ciiRating(newAer),
+    carbonCostUsd: Math.round(newCo2 * CARBON_PRICE_USD),
+    euEtsLiability: v.euEtsLiability > 0 ? Math.round(newCo2 * EU_ETS_PRICE_EUR) : 0,
+    trackSource: track.source,
+    trackSampledPoints: track.sampledPoints,
+    dataSource: "ais-live",
+    // passportHash intentionally NOT recomputed — final hash is locked at completion.
+  };
+
+  refreshCache.set(v.id, { record: refreshed, expiry: now + REFRESH_TTL_MS });
+  return refreshed;
+}
+
+router.get("/vessels/modules/voyages-emissions", authMiddleware(), async (_req, res) => {
   try {
+    const voyages = await Promise.all(VOYAGE_EMISSIONS.map(refreshInProgressFromAis));
     const fleetAvgCo2PerNm = +(
-      VOYAGE_EMISSIONS.reduce((s, v) => s + v.co2PerNm, 0) / VOYAGE_EMISSIONS.length
+      voyages.reduce((s, v) => s + v.co2PerNm, 0) / voyages.length
     ).toFixed(4);
+    const voyagesWithFleetAvg = voyages.map(v => ({ ...v, fleetAvgCo2PerNm }));
     const totals = {
-      totalCo2Mt: +VOYAGE_EMISSIONS.reduce((s, v) => s + v.co2EmissionsMt, 0).toFixed(1),
-      totalCarbonCostUsd: VOYAGE_EMISSIONS.reduce((s, v) => s + v.carbonCostUsd, 0),
-      totalEuEtsUsd: VOYAGE_EMISSIONS.reduce((s, v) => s + v.euEtsLiability, 0),
-      avgEfficiencyScore: Math.round(VOYAGE_EMISSIONS.reduce((s, v) => s + v.efficiencyScore, 0) / VOYAGE_EMISSIONS.length),
+      totalCo2Mt: +voyages.reduce((s, v) => s + v.co2EmissionsMt, 0).toFixed(1),
+      totalCarbonCostUsd: voyages.reduce((s, v) => s + v.carbonCostUsd, 0),
+      totalEuEtsUsd: voyages.reduce((s, v) => s + v.euEtsLiability, 0),
+      avgEfficiencyScore: Math.round(voyages.reduce((s, v) => s + v.efficiencyScore, 0) / voyages.length),
       fleetAvgCo2PerNm,
     };
-    sendSuccess(res, { voyages: VOYAGE_EMISSIONS, totals });
+    sendSuccess(res, { voyages: voyagesWithFleetAvg, totals });
   } catch (err) {
     handleRouteError(res, err, "Failed to fetch voyage emissions");
   }
 });
 
-router.get("/vessels/modules/voyages-emissions/:id", authMiddleware(), (req: Request, res) => {
+router.get("/vessels/modules/voyages-emissions/:id", authMiddleware(), async (req: Request, res) => {
   try {
     const v = VOYAGE_EMISSIONS.find(v => v.id === req.params.id);
     if (!v) { sendNotFound(res, "VoyageEmission"); return; }
-    sendSuccess(res, v);
+    const refreshed = await refreshInProgressFromAis(v);
+    sendSuccess(res, refreshed);
   } catch (err) {
     handleRouteError(res, err, "Failed to fetch voyage emission");
   }

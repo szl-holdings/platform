@@ -110,6 +110,15 @@ export default function VoyageCarbonPassport() {
         return r.json().then(d => d.data ?? d);
       }),
     staleTime: 60_000,
+    // Poll every 2 minutes while any voyage is in-progress so AIS-derived
+    // distance and emissions stay current. Completed voyages are immutable
+    // server-side, so we stop polling when none are in flight.
+    refetchInterval: (query) => {
+      const resp = query.state.data as EmissionsApiResponse | undefined;
+      const hasInProgress = resp?.voyages?.some(v => v.status === "in-progress") ?? true;
+      return hasInProgress ? 120_000 : false;
+    },
+    refetchIntervalInBackground: false,
   });
 
   const computeMutation = useMutation({
