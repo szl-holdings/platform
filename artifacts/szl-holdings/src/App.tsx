@@ -133,7 +133,15 @@ const SolutionsAegisTrustPage = lazy(() => import("@/pages/solutions-aegis-trust
 const SolutionsLyteTrustPage = lazy(() => import("@/pages/solutions-lyte-trust"));
 const HowItWorksPage = lazy(() => import("@/pages/how-it-works"));
 const CompanyPage = lazy(() => import("@/pages/company"));
-const FounderPage = lazy(() => import("@/pages/founder"));
+const FounderHomePage = lazy(() => import("@/pages/founder/FounderHome"));
+const FounderDoctrinePage = lazy(() => import("@/pages/founder/FounderDoctrine"));
+const FounderEssaysPage = lazy(() => import("@/pages/founder/FounderEssays"));
+const FounderEssayDetailPage = lazy(() => import("@/pages/founder/FounderEssayDetail"));
+const FounderArchitecturePage = lazy(() => import("@/pages/founder/FounderArchitecture"));
+const FounderCaseStudiesPage = lazy(() => import("@/pages/founder/FounderCaseStudies"));
+const FounderDesignPartnerPage = lazy(() => import("@/pages/founder/FounderDesignPartner"));
+const FounderPressPage = lazy(() => import("@/pages/founder/FounderPress"));
+const FounderContactPage = lazy(() => import("@/pages/founder/FounderContact"));
 const NotFoundPage = lazy(() => import("@/pages/not-found"));
 const ResetPasswordPage = lazy(() => import("@/pages/reset-password"));
 const EcosystemPage = lazy(() => import("@/pages/ecosystem"));
@@ -472,7 +480,31 @@ function App() {
               <Suspense fallback={<PageLoader />}><CompanyPage /></Suspense>
             </Route>
             <Route path="/founder">
-              <Suspense fallback={<PageLoader />}><FounderPage /></Suspense>
+              <Suspense fallback={<PageLoader />}><FounderHomePage /></Suspense>
+            </Route>
+            <Route path="/founder/doctrine">
+              <Suspense fallback={<PageLoader />}><FounderDoctrinePage /></Suspense>
+            </Route>
+            <Route path="/founder/essays/:slug">
+              <Suspense fallback={<PageLoader />}><FounderEssayDetailPage /></Suspense>
+            </Route>
+            <Route path="/founder/essays">
+              <Suspense fallback={<PageLoader />}><FounderEssaysPage /></Suspense>
+            </Route>
+            <Route path="/founder/architecture">
+              <Suspense fallback={<PageLoader />}><FounderArchitecturePage /></Suspense>
+            </Route>
+            <Route path="/founder/case-studies">
+              <Suspense fallback={<PageLoader />}><FounderCaseStudiesPage /></Suspense>
+            </Route>
+            <Route path="/founder/design-partner">
+              <Suspense fallback={<PageLoader />}><FounderDesignPartnerPage /></Suspense>
+            </Route>
+            <Route path="/founder/press">
+              <Suspense fallback={<PageLoader />}><FounderPressPage /></Suspense>
+            </Route>
+            <Route path="/founder/contact">
+              <Suspense fallback={<PageLoader />}><FounderContactPage /></Suspense>
             </Route>
             <Route path="/leadership">
               <Suspense fallback={<PageLoader />}><LeadershipPage /></Suspense>

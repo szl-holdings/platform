@@ -7,6 +7,7 @@ import {
   stephenContentBlocksTable,
   stephenCaseStudiesTable,
   stephenBookingRequestsTable,
+  alloySignals,
 } from "@szl-holdings/db";
 import { z } from "zod";
 import { eq, desc, asc } from "drizzle-orm";
@@ -469,6 +470,101 @@ router.get("/stephen/ecosystem-status", async (_req, res) => {
     { name: "AWS", slug: "aws", status: "connected", lastChecked: now },
   ];
   res.json({ apps, connectors, lastChecked: now });
+});
+
+const CreateDesignPartnerIntakeBody = z.object({
+  name: z.string().min(1).max(200),
+  email: z.string().email(),
+  company: z.string().min(1).max(200),
+  role: z.string().max(200).optional(),
+  product: z.string().max(200).optional(),
+  useCase: z.string().max(1000).optional(),
+  message: z.string().min(1).max(5000),
+});
+
+router.post("/stephen/design-partner-intake", validateBody(jsonObjectBodySchema), async (req, res) => {
+  try {
+    const body = CreateDesignPartnerIntakeBody.parse(req.body);
+
+    const fullMessage = [
+      body.product ? `Product interest: ${body.product}` : null,
+      body.useCase ? `Workflow to instrument: ${body.useCase}` : null,
+      body.role ? `Role: ${body.role}` : null,
+      `\n${body.message}`,
+    ].filter(Boolean).join("\n");
+
+    const [bookingRequest] = await db
+      .insert(stephenBookingRequestsTable)
+      .values({
+        name: body.name.trim(),
+        email: body.email.trim(),
+        company: body.company.trim(),
+        role: body.role?.trim() ?? null,
+        type: "partnership" as const,
+        message: fullMessage.trim(),
+        status: "pending",
+      })
+      .returning();
+
+    Promise.allSettled([
+      db.insert(alloySignals).values({
+        source: "stephen-site",
+        sourceType: "api",
+        domain: "design-partner",
+        title: `Design partner application: ${body.company} (${body.name})`,
+        summary: `${body.name} from ${body.company} applied to the design partner program. Product interest: ${body.product ?? "unspecified"}. Use case: ${body.useCase ?? "not specified"}.`,
+        category: "lead",
+        severity: "medium",
+        confidence: 0.9,
+        score: 75,
+        tags: ["design-partner", "lead", "founder-site"],
+        metadata: {
+          bookingRequestId: bookingRequest.id,
+          email: body.email,
+          company: body.company,
+          product: body.product,
+          useCase: body.useCase,
+          source: "founder-site",
+        },
+        status: "raw",
+        dedupeKey: `design-partner-${body.email}-${body.company}`.toLowerCase().replace(/[^a-z0-9-]/g, "-"),
+      }),
+      sendEmail({
+        to: body.email,
+        subject: "Design partner application received — Stephen Lutar",
+        html: buildStephenContactAckEmail(body.name, "partnership"),
+        replyTo: STEPHEN_ADMIN_EMAIL,
+      }),
+      sendEmail({
+        to: STEPHEN_ADMIN_EMAIL,
+        subject: `New design partner application: ${body.company} — ${body.name}`,
+        html: buildStephenContactNotificationEmail({
+          name: body.name,
+          email: body.email,
+          company: body.company,
+          type: "partnership",
+          message: fullMessage,
+        }),
+        replyTo: body.email,
+      }),
+    ]).then((results) => {
+      for (const r of results) {
+        if (r.status === "rejected") {
+          logger.warn({ err: r.reason }, "[design-partner-intake] background task threw");
+        }
+      }
+    }).catch((err) => {
+      logger.warn({ err }, "[design-partner-intake] background fanout error");
+    });
+
+    res.status(201).json({
+      id: bookingRequest.id,
+      submitted: true,
+      message: "Application received. Stephen will respond personally within 5 business days.",
+    });
+  } catch (err) {
+    handleError(err, req, res, "Failed to create design partner intake");
+  }
 });
 
 function handleError(err: unknown, req: any, res: any, label: string) {
