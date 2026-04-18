@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Play, Pause, SkipBack, SkipForward, Clock, AlertTriangle, Shield, Network, Server, Zap, ChevronRight, Target, Lock } from "lucide-react";
-import { useExecutiveSafeMode } from "../lib/executive-safe-mode-context";
+import { ExecutiveSafeModeProvider, useExecutiveSafeMode } from "../lib/executive-safe-mode-context";
 
 type EventSeverity = "critical" | "high" | "medium" | "low";
 
@@ -76,6 +76,14 @@ function EventDot({ event, playhead, onClick }: { event: ReplayEvent; playhead: 
 }
 
 export default function AegisReplay() {
+  return (
+    <ExecutiveSafeModeProvider>
+      <AegisReplayContent />
+    </ExecutiveSafeModeProvider>
+  );
+}
+
+function AegisReplayContent() {
   const [playing, setPlaying] = useState(false);
   const [playhead, setPlayhead] = useState(0);
   const [selectedEvent, setSelectedEvent] = useState<ReplayEvent | null>(null);

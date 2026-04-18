@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Layers, Activity, AlertTriangle, CheckCircle, Clock, Shield, Zap, Server, Network, Globe, Database, RefreshCw, ChevronRight, Eye, GitBranch, Radio, Lock } from "lucide-react";
-import { useExecutiveSafeMode } from "../lib/executive-safe-mode-context";
+import { ExecutiveSafeModeProvider, useExecutiveSafeMode, useExecutiveSafeModeToggle } from "../lib/executive-safe-mode-context";
 
 type TwinHealth = "stable" | "degraded" | "awaiting_approval" | "offline";
 
@@ -125,10 +125,19 @@ function EvidenceOverlay({ twin, onClose }: { twin: DigitalTwin; onClose: () => 
 }
 
 export default function AegisAtlasRuntime() {
+  return (
+    <ExecutiveSafeModeProvider>
+      <AegisAtlasRuntimeContent />
+    </ExecutiveSafeModeProvider>
+  );
+}
+
+function AegisAtlasRuntimeContent() {
   const [selectedTwin, setSelectedTwin] = useState<DigitalTwin | null>(null);
   const [lastRefresh, setLastRefresh] = useState(new Date());
   const [pulse, setPulse] = useState(false);
   const safeMode = useExecutiveSafeMode();
+  const [, setSafeMode] = useExecutiveSafeModeToggle();
 
   const visibleTwins = safeMode ? TWINS.filter(t => t.health === "stable" && t.proofState === "verified") : TWINS;
   const visibleEvents = safeMode ? [] : EVENTS;
@@ -153,9 +162,18 @@ export default function AegisAtlasRuntime() {
           <h1 className="text-xl font-bold text-white tracking-tight">Posture Twin Theater</h1>
           <p className="text-[11px] mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>Live spatial twin state with incident theater, drift monitoring, and evidence-verified proof states.</p>
         </div>
-        <button onClick={() => setLastRefresh(new Date())} className="flex items-center gap-1.5 text-[11px] border px-3 py-1.5 rounded-lg hover:bg-white/5 transition-colors shrink-0" style={{ color: "rgba(255,255,255,0.4)", borderColor: "rgba(255,255,255,0.08)" }}>
-          <RefreshCw className="w-3 h-3" /> Sync
-        </button>
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={() => setSafeMode(!safeMode)}
+            className="flex items-center gap-1.5 text-[11px] border px-3 py-1.5 rounded-lg hover:bg-white/5 transition-colors"
+            style={safeMode ? { color: "#8b7ac8", borderColor: "rgba(139,122,200,0.4)", background: "rgba(139,122,200,0.1)" } : { color: "rgba(255,255,255,0.4)", borderColor: "rgba(255,255,255,0.08)" }}
+          >
+            <Lock className="w-3 h-3" /> {safeMode ? "Safe Mode ON" : "Safe Mode"}
+          </button>
+          <button onClick={() => setLastRefresh(new Date())} className="flex items-center gap-1.5 text-[11px] border px-3 py-1.5 rounded-lg hover:bg-white/5 transition-colors" style={{ color: "rgba(255,255,255,0.4)", borderColor: "rgba(255,255,255,0.08)" }}>
+            <RefreshCw className="w-3 h-3" /> Sync
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-4 gap-3">

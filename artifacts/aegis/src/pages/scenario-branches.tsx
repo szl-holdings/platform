@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { GitBranch, Zap, AlertTriangle, CheckCircle, XCircle, ChevronRight, Target, Shield, Clock, BarChart3, Play, Lock } from "lucide-react";
-import { useExecutiveSafeMode } from "../lib/executive-safe-mode-context";
+import { ExecutiveSafeModeProvider, useExecutiveSafeMode } from "../lib/executive-safe-mode-context";
 
 type BranchOutcome = "contained" | "escalated" | "catastrophic" | "recovering";
 
@@ -212,6 +212,14 @@ function ComparisonDrawer({ a, b, onClose }: { a: ScenarioBranch; b: ScenarioBra
 }
 
 export default function AegisScenarioBranches() {
+  return (
+    <ExecutiveSafeModeProvider>
+      <AegisScenarioBranchesContent />
+    </ExecutiveSafeModeProvider>
+  );
+}
+
+function AegisScenarioBranchesContent() {
   const [selected, setSelected] = useState<string[]>(["br-001"]);
   const [comparing, setComparing] = useState(false);
   const safeMode = useExecutiveSafeMode();

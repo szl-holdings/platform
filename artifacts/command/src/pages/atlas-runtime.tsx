@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSafeMode } from "../lib/use-safe-mode";
 import { useQuery } from "@tanstack/react-query";
 import { Layers, Activity, AlertTriangle, CheckCircle, Clock, Shield, Globe, ChevronRight, X, GitBranch, Zap, Server, Network, Eye, Lock, RefreshCw } from "lucide-react";
 
@@ -108,7 +109,7 @@ function useAtlasBranches() {
 export function AtlasRuntimePage() {
   const [showWorldline, setShowWorldline] = useState(false);
   const [selectedTwin, setSelectedTwin] = useState<CrossDomainTwin | null>(null);
-  const [safeMode, setSafeMode] = useState(false);
+  const [safeMode, setSafeMode] = useSafeMode();
   const [lastRefresh, setLastRefresh] = useState(new Date());
   const { data: branchData, isLoading: loadingBranches } = useAtlasBranches();
 
@@ -133,7 +134,7 @@ export function AtlasRuntimePage() {
         </div>
         <div className="flex items-center gap-2 flex-wrap shrink-0">
           <button
-            onClick={() => setSafeMode(m => !m)}
+            onClick={() => setSafeMode(!safeMode)}
             className="flex items-center gap-1.5 text-[11px] border px-3 py-1.5 rounded-lg hover:bg-white/5 transition-colors"
             style={safeMode ? { color: "#8b7ac8", borderColor: "rgba(139,122,200,0.4)", background: "rgba(139,122,200,0.1)" } : { color: "rgba(255,255,255,0.35)", borderColor: "rgba(255,255,255,0.08)" }}
           >
