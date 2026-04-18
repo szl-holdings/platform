@@ -7,9 +7,11 @@ import {
   SettingsRow,
   type SettingsSection,
 } from "@szl-holdings/shared-ui/settings-shell";
+import { useSidebarCollapsed, useNotificationSound } from "@szl-holdings/shared-ui";
 import {
   Bell, BellOff, Shield, Key, Lock, Users, Loader2, Globe, Mail,
   Building2, RefreshCw, Layers, FileText, Save, CheckCircle, AlertTriangle,
+  PanelLeftClose, PanelLeft, Volume2, VolumeX,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -493,6 +495,67 @@ function BillingPanel() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Workspace Panel — personal UI preferences (Task #886)
+// ─────────────────────────────────────────────────────────────────────────────
+
+function WorkspacePanel() {
+  const [collapsed, setCollapsed] = useSidebarCollapsed();
+  const [soundOn, setSoundOn] = useNotificationSound();
+
+  return (
+    <SettingsSectionPanel
+      title="Workspace"
+      description="Personal layout and notification preferences. Synced across devices and applied before first paint."
+    >
+      <SettingsCard title="Layout">
+        <SettingsRow
+          label="Collapse navigation sidebar"
+          description="Start each session with the sidebar in compact mode."
+        >
+          <button
+            type="button"
+            onClick={() => setCollapsed(!collapsed)}
+            aria-pressed={collapsed}
+            aria-label={collapsed ? "Sidebar set to collapsed; activate to expand" : "Sidebar set to expanded; activate to collapse"}
+            className={cn(
+              "inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors",
+              collapsed
+                ? "border-primary/40 bg-primary/10 text-primary"
+                : "border-border bg-background text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {collapsed ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeft className="h-4 w-4" />}
+            {collapsed ? "Collapsed" : "Expanded"}
+          </button>
+        </SettingsRow>
+      </SettingsCard>
+      <SettingsCard title="Notifications">
+        <SettingsRow
+          label="Notification sound"
+          description="Play a short chime when a new notification arrives in the global header."
+        >
+          <button
+            type="button"
+            onClick={() => setSoundOn(!soundOn)}
+            aria-pressed={soundOn}
+            aria-label={soundOn ? "Notification sound on; activate to mute" : "Notification sound muted; activate to enable"}
+            className={cn(
+              "inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors",
+              soundOn
+                ? "border-primary/40 bg-primary/10 text-primary"
+                : "border-border bg-background text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {soundOn ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+            {soundOn ? "On" : "Muted"}
+          </button>
+        </SettingsRow>
+      </SettingsCard>
+    </SettingsSectionPanel>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Main
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -501,6 +564,7 @@ export default function UnifiedSettingsPage() {
 
   const panels: Partial<Record<SettingsSection, React.ReactNode>> = {
     account: <AccountPanel />,
+    workspace: <WorkspacePanel />,
     team: <TeamPanel />,
     notifications: <NotificationsPanel />,
     integrations: <IntegrationsPanel />,

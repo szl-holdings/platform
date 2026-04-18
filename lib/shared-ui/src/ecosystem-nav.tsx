@@ -10,6 +10,7 @@ import {
 import { DemoModeSwitcher } from "./demo-mode";
 import { SandboxToggle } from "./sandbox-mode";
 import { useAuth } from "@szl-holdings/replit-auth-web";
+import { useNotificationSound } from "./use-user-prefs";
 
 export interface EcosystemApp {
   id: string;
@@ -634,6 +635,7 @@ function NotificationsPanel({
   onMarkAllRead: () => void;
   onClose: () => void;
 }) {
+  const [soundOn, setSoundOn] = useNotificationSound();
   const unread = notifications.filter((n) => !n.read);
   const recent = [...notifications].sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()).slice(0, 20);
 
@@ -698,6 +700,36 @@ function NotificationsPanel({
           )}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <button
+            type="button"
+            onClick={() => setSoundOn(!soundOn)}
+            aria-pressed={soundOn}
+            aria-label={soundOn ? "Mute notification sound" : "Unmute notification sound"}
+            title={soundOn ? "Notification sound on" : "Notification sound muted"}
+            style={{
+              background: "none",
+              border: "none",
+              color: soundOn ? "rgba(255,255,255,0.7)" : "rgba(255,255,255,0.3)",
+              cursor: "pointer",
+              padding: "2px",
+              lineHeight: 0,
+              borderRadius: "4px",
+              transition: "color 0.15s",
+            }}
+          >
+            {soundOn ? (
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M8 2L4 5H2v6h2l4 3V2Z" stroke="currentColor" strokeWidth="1.25" strokeLinejoin="round" />
+                <path d="M11 5.5a3.5 3.5 0 0 1 0 5" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" />
+                <path d="M13 3.5a6 6 0 0 1 0 9" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" />
+              </svg>
+            ) : (
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M8 2L4 5H2v6h2l4 3V2Z" stroke="currentColor" strokeWidth="1.25" strokeLinejoin="round" />
+                <path d="M11 6l4 4M15 6l-4 4" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" />
+              </svg>
+            )}
+          </button>
           {unread.length > 0 && (
             <button
               onClick={onMarkAllRead}
@@ -1266,6 +1298,42 @@ export function EcosystemNav({
   }, []);
 
   const { notifications: liveNotifications, unreadCount, markRead, markAllRead } = notificationCenter;
+
+  const [notifSoundOn] = useNotificationSound();
+  const prevUnreadRef = useRef(unreadCount);
+  const chimeBaselineSetRef = useRef(false);
+  useEffect(() => {
+    const prev = prevUnreadRef.current;
+    prevUnreadRef.current = unreadCount;
+    // Skip the first transition after mount so existing unread items present
+    // at initial hydration do not trigger a chime — only real new arrivals do.
+    if (!chimeBaselineSetRef.current) {
+      chimeBaselineSetRef.current = true;
+      return;
+    }
+    if (!notifSoundOn) return;
+    if (unreadCount <= prev) return;
+    if (typeof window === "undefined") return;
+    try {
+      const Ctx = (window as unknown as { AudioContext?: typeof AudioContext; webkitAudioContext?: typeof AudioContext }).AudioContext
+        ?? (window as unknown as { AudioContext?: typeof AudioContext; webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      if (!Ctx) return;
+      const ctx = new Ctx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.frequency.setValueAtTime(880, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(660, ctx.currentTime + 0.18);
+      gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.06, ctx.currentTime + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.22);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.24);
+      osc.onended = () => { void ctx.close(); };
+    } catch {
+      /* sound is best-effort */
+    }
+  }, [unreadCount, notifSoundOn]);
 
   const handleNotificationRead = useCallback(
     (id: string) => {

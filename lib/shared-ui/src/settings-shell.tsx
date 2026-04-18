@@ -18,6 +18,7 @@ import {
 
 export type SettingsSection =
   | "account"
+  | "workspace"
   | "team"
   | "notifications"
   | "integrations"
@@ -35,6 +36,7 @@ interface SettingsSectionDef {
 
 const SETTINGS_SECTIONS: SettingsSectionDef[] = [
   { id: "account", label: "Account", icon: User },
+  { id: "workspace", label: "Workspace", icon: Sliders },
   { id: "team", label: "Team", icon: Users },
   { id: "notifications", label: "Notifications", icon: Bell },
   { id: "integrations", label: "Integrations", icon: Plug },

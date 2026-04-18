@@ -344,6 +344,7 @@ export {
   type WhatIfCascade,
 } from "./cortex-what-if";
 export * from "./settings-shell";
+export * from "./use-user-prefs";
 export * from "./onboarding";
 export { LiveClock, type LiveClockProps } from "./live-clock";
 export { AnimatedCounter, type AnimatedCounterProps } from "./animated-counter";
