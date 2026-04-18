@@ -12,6 +12,7 @@ import "./lib/platform-jobs";
 import { ensurePlatformFlags } from "./lib/platform-flags";
 import { startDomainNotificationGenerators, stopDomainNotificationGenerators } from "./lib/domain-notifications";
 import { startSelfMonitoring, stopSelfMonitoring } from "./lib/self-monitor";
+import { startHealthDegradationWatcher, stopHealthDegradationWatcher } from "./lib/health-degradation-watcher";
 import { agentScheduler, registerDefaultSchedules } from "./lib/agent-scheduler";
 import { knowledgeStore } from "./lib/knowledge-store";
 import { runMigrations } from "./lib/run-migrations";
@@ -83,6 +84,7 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
   startPrismBusBridge();
   startDomainNotificationGenerators();
   startSelfMonitoring();
+  startHealthDegradationWatcher();
 
   providerHealth.startActiveProbes();
   registerAllPrismJobHandlers();
@@ -396,6 +398,7 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
 
     stopDomainNotificationGenerators();
     stopSelfMonitoring();
+    stopHealthDegradationWatcher();
     stopPrismBusBridge();
     stopEmbeddingWorker();
     await stopIntelligenceFeeds();
