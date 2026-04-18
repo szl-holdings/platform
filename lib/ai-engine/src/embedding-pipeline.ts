@@ -85,7 +85,7 @@ class OpenAIEmbeddingProvider implements EmbeddingProvider {
     this.id = modelId;
     this.name = modelId;
     this.dimensions = dimensions;
-    this.apiKey = apiKey ?? process.env["OPENAI_API_KEY"] ?? "";
+    this.apiKey = apiKey ?? process.env["AI_INTEGRATIONS_OPENAI_API_KEY"] ?? "";
     this.baseUrl = baseUrl;
   }
 
@@ -134,9 +134,9 @@ class GeminiEmbeddingProvider implements EmbeddingProvider {
   }
 
   async embed(texts: string[]): Promise<number[][]> {
-    const apiKey = process.env["GEMINI_API_KEY"] ?? process.env["GOOGLE_API_KEY"];
+    const apiKey = process.env["AI_INTEGRATIONS_GEMINI_API_KEY"] ?? process.env["GOOGLE_API_KEY"];
     if (!apiKey) {
-      console.warn("[embedding-pipeline] No GEMINI_API_KEY — returning zero embeddings");
+      console.warn("[embedding-pipeline] No Gemini API key — returning zero embeddings");
       return texts.map(() => new Array(this.dimensions).fill(0) as number[]);
     }
 

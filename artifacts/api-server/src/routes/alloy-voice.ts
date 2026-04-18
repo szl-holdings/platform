@@ -24,11 +24,10 @@ function detectIntent(transcription: string): IntentType {
 }
 
 async function transcribeAudio(buffer: Buffer, mimeType: string): Promise<{ text: string; duration?: number }> {
-  const openaiKey = process.env.OPENAI_API_KEY;
   const replitKey = process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
   const replitUrl = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL;
-  const apiKey = openaiKey || replitKey;
-  const baseUrl = openaiKey ? "https://api.openai.com/v1" : replitUrl;
+  const apiKey = replitKey;
+  const baseUrl = replitUrl;
 
   if (!apiKey || !baseUrl) {
     throw new Error("OpenAI API not configured for transcription");

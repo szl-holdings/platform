@@ -56,15 +56,16 @@ async function submitOpenAIFineTuning(
   hyperparameters: FineTuningJobRequest["hyperparameters"],
   suffix: string,
 ): Promise<{ providerJobId: string }> {
-  const openaiKey = process.env["OPENAI_API_KEY"];
-  if (!openaiKey) throw new Error("OPENAI_API_KEY not configured");
+  const openaiKey = process.env["AI_INTEGRATIONS_OPENAI_API_KEY"];
+  if (!openaiKey) throw new Error("AI_INTEGRATIONS_OPENAI_API_KEY not configured");
+  const openaiBase = process.env["AI_INTEGRATIONS_OPENAI_BASE_URL"] ?? "https://api.openai.com/v1";
 
   const fileBlob = new Blob([samples], { type: "application/jsonl" });
   const formData = new FormData();
   formData.append("file", fileBlob, `${suffix}.jsonl`);
   formData.append("purpose", "fine-tune");
 
-  const uploadResponse = await fetch("https://api.openai.com/v1/files", {
+  const uploadResponse = await fetch(`${openaiBase}/files`, {
     method: "POST",
     headers: { Authorization: `Bearer ${openaiKey}` },
     body: formData,
@@ -86,7 +87,7 @@ async function submitOpenAIFineTuning(
 
   if (hyperparameters?.nEpochs) ftBody.hyperparameters = { n_epochs: hyperparameters.nEpochs };
 
-  const ftResponse = await fetch("https://api.openai.com/v1/fine_tuning/jobs", {
+  const ftResponse = await fetch(`${openaiBase}/fine_tuning/jobs`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${openaiKey}`,
@@ -149,10 +150,11 @@ async function pollOpenAIJobStatus(providerJobId: string): Promise<{
   trainingCost?: number;
   error?: string;
 }> {
-  const openaiKey = process.env["OPENAI_API_KEY"];
-  if (!openaiKey) throw new Error("OPENAI_API_KEY not configured");
+  const openaiKey = process.env["AI_INTEGRATIONS_OPENAI_API_KEY"];
+  if (!openaiKey) throw new Error("AI_INTEGRATIONS_OPENAI_API_KEY not configured");
+  const openaiBase = process.env["AI_INTEGRATIONS_OPENAI_BASE_URL"] ?? "https://api.openai.com/v1";
 
-  const response = await fetch(`https://api.openai.com/v1/fine_tuning/jobs/${providerJobId}`, {
+  const response = await fetch(`${openaiBase}/fine_tuning/jobs/${providerJobId}`, {
     headers: { Authorization: `Bearer ${openaiKey}` },
   });
 
@@ -438,9 +440,10 @@ export async function cancelFineTuningJob(jobId: string): Promise<void> {
   const providerJobId = hyperparams["providerJobId"] as string;
 
   if (job.provider === "openai" && providerJobId) {
-    const openaiKey = process.env["OPENAI_API_KEY"];
+    const openaiKey = process.env["AI_INTEGRATIONS_OPENAI_API_KEY"];
     if (openaiKey) {
-      await fetch(`https://api.openai.com/v1/fine_tuning/jobs/${providerJobId}/cancel`, {
+      const openaiBase = process.env["AI_INTEGRATIONS_OPENAI_BASE_URL"] ?? "https://api.openai.com/v1";
+      await fetch(`${openaiBase}/fine_tuning/jobs/${providerJobId}/cancel`, {
         method: "POST",
         headers: { Authorization: `Bearer ${openaiKey}` },
       }).catch(() => {});

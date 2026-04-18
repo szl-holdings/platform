@@ -204,7 +204,7 @@ federationRouter.post("/federation/agents/:agentId/chat", async (req, res) => {
   } catch {
   }
 
-  const response = `[${agent.name}] Processing external delegation. Domain: ${agent.domain}. Message received and queued for processing. This endpoint supports the A2A delegation protocol. For live AI inference, ensure OPENAI_API_KEY / ANTHROPIC_API_KEY / GOOGLE_GEMINI_API_KEY are configured.`;
+  const response = `[${agent.name}] Processing external delegation. Domain: ${agent.domain}. Message received and queued for processing. This endpoint supports the A2A delegation protocol. For live AI inference, ensure AI_INTEGRATIONS_OPENAI_API_KEY / AI_INTEGRATIONS_ANTHROPIC_API_KEY are configured.`;
 
   res.json({
     agentId: agent.id,

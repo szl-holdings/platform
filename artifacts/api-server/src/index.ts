@@ -307,7 +307,7 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
     if (process.env.STRIPE_SECRET_KEY) enabledFeatures.push("stripe-payments");
     if (process.env.AZURE_AD_CLIENT_ID) enabledFeatures.push("azure-sso");
     if (process.env.SENDGRID_API_KEY || process.env.RESEND_API_KEY) enabledFeatures.push("email");
-    if (process.env.OPENAI_API_KEY || process.env.ANTHROPIC_API_KEY) enabledFeatures.push("ai-engine");
+    if (process.env.AI_INTEGRATIONS_OPENAI_API_KEY || process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY) enabledFeatures.push("ai-engine");
     if (process.env.REDIS_URL || process.env.REDIS_HOST) enabledFeatures.push("redis");
     if (process.env.S3_BUCKET || process.env.OBJECT_STORE_BUCKET) enabledFeatures.push("object-storage");
     if (process.env.OTLP_ENDPOINT || process.env.OTEL_EXPORTER_OTLP_ENDPOINT) enabledFeatures.push("opentelemetry");

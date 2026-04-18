@@ -63,8 +63,12 @@
 | Variable | Service | Required | Secret |
 |----------|---------|----------|--------|
 | `HUGGINGFACE_API_KEY` | HuggingFace Inference | For AI features | **Yes** |
-| `OPENAI_API_KEY` | OpenAI (fallback) | Optional | **Yes** |
-| `ANTHROPIC_API_KEY` | Anthropic (fallback) | Optional | **Yes** |
+| `AI_INTEGRATIONS_OPENAI_API_KEY` | Replit AI Integrations proxy (OpenAI-compatible) | For OpenAI inference | **Yes** |
+| `AI_INTEGRATIONS_OPENAI_BASE_URL` | Replit AI Integrations proxy (OpenAI-compatible) | For OpenAI inference | No |
+| `AI_INTEGRATIONS_ANTHROPIC_API_KEY` | Replit AI Integrations proxy (Anthropic-compatible) | For Claude inference | **Yes** |
+| `AI_INTEGRATIONS_ANTHROPIC_BASE_URL` | Replit AI Integrations proxy (Anthropic-compatible) | For Claude inference | No |
+| `AI_INTEGRATIONS_GEMINI_API_KEY` | Replit AI Integrations proxy (Gemini-compatible) | For Gemini inference | **Yes** |
+| `AI_INTEGRATIONS_GEMINI_BASE_URL` | Replit AI Integrations proxy (Gemini-compatible) | For Gemini inference | No |
 
 ### Payments
 

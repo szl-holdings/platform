@@ -32,7 +32,7 @@ router.get("/healthz", async (_req, res) => {
   const dbHealth = await checkDatabase();
 
   const hasSessionSecret = !!process.env.SESSION_SECRET;
-  const hasAiKey = !!(process.env.AI_INTEGRATIONS_OPENAI_BASE_URL || process.env.OPENAI_API_KEY);
+  const hasAiKey = !!(process.env.AI_INTEGRATIONS_OPENAI_API_KEY || process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY || process.env.AI_INTEGRATIONS_GEMINI_API_KEY);
   const hasCloudStorage = !!process.env.OBJECT_STORAGE_BUCKET_ID;
   const authStatus = hasSessionSecret ? "ok" : "degraded";
 

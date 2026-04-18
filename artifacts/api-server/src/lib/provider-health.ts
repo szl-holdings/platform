@@ -37,7 +37,7 @@ const LATENCY_WINDOW = 20;
 const DEGRADED_LATENCY_MS = 5000;
 const PROBE_INTERVAL_MS = 120_000;
 
-const KNOWN_PROVIDERS: InferenceProvider[] = ["replit-proxy", "openai", "anthropic", "gemini", "huggingface"];
+const KNOWN_PROVIDERS: InferenceProvider[] = ["replit-proxy", "huggingface"];
 
 class ProviderHealthMonitor {
   private providers: Map<InferenceProvider, ProviderHealthRecord> = new Map();
@@ -195,9 +195,6 @@ class ProviderHealthMonitor {
   private async probeProvider(provider: InferenceProvider): Promise<boolean> {
     const probeEndpoints: Record<string, string | undefined> = {
       "replit-proxy": process.env.AI_INTEGRATIONS_OPENAI_BASE_URL ? `${process.env.AI_INTEGRATIONS_OPENAI_BASE_URL}/models` : undefined,
-      "openai": process.env.OPENAI_API_KEY ? "https://api.openai.com/v1/models" : undefined,
-      "anthropic": process.env.ANTHROPIC_API_KEY ? "https://api.anthropic.com/v1/messages" : undefined,
-      "gemini": process.env.GEMINI_API_KEY ? "https://generativelanguage.googleapis.com/v1beta/models" : undefined,
       "huggingface": process.env.HUGGINGFACE_API_KEY ? "https://api-inference.huggingface.co/status" : undefined,
     };
 
@@ -207,13 +204,6 @@ class ProviderHealthMonitor {
     const headers: Record<string, string> = {};
     if (provider === "replit-proxy" && process.env.AI_INTEGRATIONS_OPENAI_API_KEY) {
       headers["Authorization"] = `Bearer ${process.env.AI_INTEGRATIONS_OPENAI_API_KEY}`;
-    } else if (provider === "openai" && process.env.OPENAI_API_KEY) {
-      headers["Authorization"] = `Bearer ${process.env.OPENAI_API_KEY}`;
-    } else if (provider === "anthropic" && process.env.ANTHROPIC_API_KEY) {
-      headers["x-api-key"] = process.env.ANTHROPIC_API_KEY;
-      headers["anthropic-version"] = "2023-06-01";
-    } else if (provider === "gemini" && process.env.GEMINI_API_KEY) {
-      headers["x-goog-api-key"] = process.env.GEMINI_API_KEY;
     } else if (provider === "huggingface" && process.env.HUGGINGFACE_API_KEY) {
       headers["Authorization"] = `Bearer ${process.env.HUGGINGFACE_API_KEY}`;
     }
@@ -223,7 +213,7 @@ class ProviderHealthMonitor {
 
     try {
       const resp = await fetch(endpoint, {
-        method: provider === "anthropic" ? "OPTIONS" : "GET",
+        method: "GET",
         headers,
         signal: controller.signal,
       });

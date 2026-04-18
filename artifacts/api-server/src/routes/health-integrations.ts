@@ -508,19 +508,20 @@ router.get("/health/ai", async (_req, res) => {
     const config = getRouteConfig();
     const stats = alloyRetrieval.getStats();
 
-    const openaiKey = process.env.OPENAI_API_KEY;
-    const anthropicKey = process.env.ANTHROPIC_API_KEY;
-    const geminiKey = process.env.GEMINI_API_KEY;
+    const openaiKey = process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
+    const anthropicKey = process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY;
+    const geminiKey = process.env.AI_INTEGRATIONS_GEMINI_API_KEY;
     const hfToken = process.env.HF_TOKEN ?? process.env.HUGGINGFACE_API_KEY;
     const executionMode = process.env.AI_EXECUTION_MODE ?? "propose_only";
 
     const providers: Record<string, { status: string; latencyMs?: number; details?: unknown }> = {};
 
     if (openaiKey) {
+      const proxyBase = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL ?? "https://ai.replit.com/v1";
       const start = Date.now();
       try {
         const resp = await Promise.race([
-          fetch("https://api.openai.com/v1/models", {
+          fetch(`${proxyBase}/models`, {
             headers: { Authorization: `Bearer ${openaiKey}` },
             signal: AbortSignal.timeout(5000),
           }),

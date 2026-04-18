@@ -717,9 +717,7 @@ async function callLLM(prompt: string, system: string): Promise<string> {
   const baseUrl = process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL
     || process.env.AI_INTEGRATIONS_OPENAI_BASE_URL;
   const apiKey = process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY
-    || process.env.AI_INTEGRATIONS_OPENAI_API_KEY
-    || process.env.ANTHROPIC_API_KEY
-    || process.env.OPENAI_API_KEY;
+    || process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
 
   if (!baseUrl && !apiKey) {
     // Return a convincing demo response

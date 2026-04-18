@@ -261,7 +261,7 @@ app.get("/api/health", async (_req: Request, res: Response) => {
       job_queue: { status: queueStatus, depth: queueDepth },
       storage: { status: "ok", mode: process.env.OBJECT_STORAGE_BUCKET_ID ? "cloud" : "local" },
       auth: { status: authOk, mode: hasSessionSecret ? "configured" : "missing_secret" },
-      ai: { status: "ok", mode: (process.env.AI_INTEGRATIONS_OPENAI_BASE_URL || process.env.OPENAI_API_KEY) ? "live" : "mock" },
+      ai: { status: "ok", mode: (process.env.AI_INTEGRATIONS_OPENAI_API_KEY || process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY || process.env.AI_INTEGRATIONS_GEMINI_API_KEY) ? "live" : "mock" },
     },
     platform: {
       apps: platformApps,

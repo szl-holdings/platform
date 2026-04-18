@@ -36,8 +36,8 @@ export const ENV_SPECS: EnvVarSpec[] = [
   { key: "STRIPE_SECRET_KEY", required: false, description: "Stripe secret key for payment processing", sensitive: true, group: "billing" },
 
   { key: "GITHUB_TOKEN", required: false, description: "GitHub personal access token or OAuth token for repository integration", sensitive: true, group: "integrations" },
-  { key: "OPENAI_API_KEY", required: false, description: "OpenAI API key for AI agent inference", sensitive: true, group: "integrations" },
-  { key: "ANTHROPIC_API_KEY", required: false, description: "Anthropic API key for Claude model access", sensitive: true, group: "integrations" },
+  { key: "AI_INTEGRATIONS_OPENAI_API_KEY", required: false, description: "Replit AI Integrations proxy key for OpenAI-compatible inference", sensitive: true, group: "integrations" },
+  { key: "AI_INTEGRATIONS_ANTHROPIC_API_KEY", required: false, description: "Replit AI Integrations proxy key for Anthropic-compatible inference", sensitive: true, group: "integrations" },
   { key: "ELEVENLABS_API_KEY", required: false, description: "ElevenLabs API key for voice asset generation", sensitive: true, group: "integrations" },
 
   { key: "DEFAULT_OBJECT_STORAGE_BUCKET_ID", required: false, description: "Replit GCS object storage bucket ID (set by App Storage provisioning)", group: "storage" },

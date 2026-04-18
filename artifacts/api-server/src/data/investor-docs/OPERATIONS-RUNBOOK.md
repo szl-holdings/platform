@@ -127,10 +127,11 @@ Secrets are managed via **Replit Secrets** (development) and **Azure Key Vault**
 | Variable | Description |
 |----------|-------------|
 | `AI_INTEGRATIONS_OPENAI_API_KEY` | OpenAI API key (Replit AI proxy) |
-| `AI_INTEGRATIONS_OPENAI_BASE_URL` | OpenAI base URL (Replit proxy in dev) |
-| `OPENAI_API_KEY` | Direct OpenAI key (fallback) |
+| `AI_INTEGRATIONS_OPENAI_BASE_URL` | OpenAI base URL (Replit proxy) |
 | `AI_INTEGRATIONS_ANTHROPIC_API_KEY` | Anthropic API key (Replit AI proxy) |
+| `AI_INTEGRATIONS_ANTHROPIC_BASE_URL` | Anthropic base URL (Replit proxy) |
 | `AI_INTEGRATIONS_GEMINI_API_KEY` | Gemini API key (Replit AI proxy) |
+| `AI_INTEGRATIONS_GEMINI_BASE_URL` | Gemini base URL (Replit proxy) |
 
 ### Mobile
 

@@ -411,11 +411,10 @@ alloyChatRouter.post("/alloy-chat/image-generate", aiLimit, authMiddleware({ req
     const startTime = Date.now();
 
     if (provider === "openai") {
-      const openaiKey = process.env["OPENAI_API_KEY"];
       const replitProxyKey = process.env["AI_INTEGRATIONS_OPENAI_API_KEY"];
       const replitProxyUrl = process.env["AI_INTEGRATIONS_OPENAI_BASE_URL"];
-      const apiKey = openaiKey || replitProxyKey;
-      const baseUrl = openaiKey ? "https://api.openai.com/v1" : replitProxyUrl;
+      const apiKey = replitProxyKey;
+      const baseUrl = replitProxyUrl;
 
       if (!apiKey || !baseUrl) { sendError(res, "OpenAI not configured. Please use HuggingFace provider.", 400); return; }
 
@@ -688,8 +687,8 @@ alloyChatRouter.post("/alloy-chat/compare", aiLimit, authMiddleware({ required: 
       const start = Date.now();
       try {
         if (provider === "openai") {
-          const apiKey = process.env["OPENAI_API_KEY"] || process.env["AI_INTEGRATIONS_OPENAI_API_KEY"];
-          const baseUrl = process.env["OPENAI_API_KEY"] ? "https://api.openai.com/v1" : process.env["AI_INTEGRATIONS_OPENAI_BASE_URL"];
+          const apiKey = process.env["AI_INTEGRATIONS_OPENAI_API_KEY"];
+          const baseUrl = process.env["AI_INTEGRATIONS_OPENAI_BASE_URL"];
           if (!apiKey || !baseUrl) {
             results[provider] = { content: "", model: "gpt-4o-mini", provider: "openai", responseTimeMs: 0, usage: { promptTokens: 0, completionTokens: 0 }, error: "OpenAI not configured" };
             return;
@@ -702,16 +701,17 @@ alloyChatRouter.post("/alloy-chat/compare", aiLimit, authMiddleware({ required: 
           const data = await resp.json() as any;
           results[provider] = { content: data.choices?.[0]?.message?.content || "", model: data.model || "gpt-4o-mini", provider: "openai", responseTimeMs: Date.now() - start, usage: { promptTokens: data.usage?.prompt_tokens || 0, completionTokens: data.usage?.completion_tokens || 0 } };
         } else if (provider === "anthropic") {
-          const anthropicKey = process.env["ANTHROPIC_API_KEY"];
+          const anthropicKey = process.env["AI_INTEGRATIONS_ANTHROPIC_API_KEY"];
           if (!anthropicKey) {
             results[provider] = { content: "", model: "claude-3-haiku", provider: "anthropic", responseTimeMs: 0, usage: { promptTokens: 0, completionTokens: 0 }, error: "Anthropic not configured" };
             return;
           }
+          const anthropicBase = process.env["AI_INTEGRATIONS_ANTHROPIC_BASE_URL"] ?? "https://api.anthropic.com";
           const systemMsg = chatMsgs.find(m => m.role === "system");
           const nonSystemMsgs = chatMsgs.filter(m => m.role !== "system");
           const body: Record<string, unknown> = { model: "claude-3-haiku-20240307", max_tokens: 512, messages: nonSystemMsgs };
           if (systemMsg) body["system"] = systemMsg.content;
-          const resp = await fetch("https://api.anthropic.com/v1/messages", {
+          const resp = await fetch(`${anthropicBase}/v1/messages`, {
             method: "POST",
             headers: { "Content-Type": "application/json", "x-api-key": anthropicKey, "anthropic-version": "2023-06-01" },
             body: JSON.stringify(body),
