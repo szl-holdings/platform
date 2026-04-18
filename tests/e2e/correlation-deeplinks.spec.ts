@@ -115,91 +115,143 @@ test.describe("Correlation deep-links — drill-through to detail pages", () => 
     expect(matchesPropertyDomain, "terra detail page lacks property-domain content").toBe(true);
   });
 
+  // The valid productEntityUrl shapes any entity drill-through link in the
+  // command artifact may take. Anything outside this set is treated as a
+  // malformed link and FAILS the test (no pre-filtering).
+  const VALID_ENTITY_HREF =
+    /^\/(vessels\/vessels\/[^/?#]+|terra\/property\/[^/?#]+|carlota-jo\/inquiries(\/[^/?#]+|$|\?)|aegis(\/|\?|$)|operations\/prism(\/[^/?#]+|$|\?)|operations(\/[^/?#]+|$|\?))/;
+
+  // Anchors whose href looks like a product/entity drill-through link (i.e.
+  // points into another artifact via a top-level prefix). This intentionally
+  // captures EVERY artifact-prefixed href so that malformed links can fail.
+  const ARTIFACT_PREFIX =
+    /^\/(vessels|terra|carlota-jo|aegis|operations|sentra|counsel|pulse|lyte|prism-counsel)\b/;
+
   test("command: cross-platform evidence registry renders entity links shaped like productEntityUrl(...)", async ({ page }, testInfo) => {
     if (!commandAvailable) testInfo.skip();
     const body = await navigateWithUpstreamRetry(page, `${COMMAND_BASE}/strategy/cross-platform/evidence`);
     if (/upstream not ready/i.test(body)) testInfo.skip();
 
-    // The page must at least render without crashing. An empty seed is fine —
-    // we only inspect entity links if any are present.
     const errorBoundary = page.locator("text=Something went wrong").first();
     expect(await errorBoundary.isVisible().catch(() => false)).toBe(false);
 
-    const entityHrefs = await page.locator("a[href]").evaluateAll((els) =>
+    // Pull EVERY artifact-prefixed href without pre-filtering to known-good
+    // prefixes. Anything that points at another artifact must match the
+    // productEntityUrl shape; anything else is a malformed link bug.
+    const allArtifactHrefs = await page.locator("a[href]").evaluateAll((els) =>
       (els as HTMLAnchorElement[])
         .map((a) => a.getAttribute("href") ?? "")
-        .filter((h) =>
-          h.startsWith("/vessels/vessels/") ||
-          h.startsWith("/terra/property/") ||
-          h.startsWith("/carlota-jo/inquiries") ||
-          h.startsWith("/aegis/") ||
-          h.startsWith("/operations/prism") ||
-          h.startsWith("/operations"),
-        ),
+        .filter((h) => h.startsWith("/") && !h.startsWith("//")),
     );
+    const artifactHrefs = allArtifactHrefs.filter((h) => ARTIFACT_PREFIX.test(h));
 
-    // Every entity link the page renders must match the productEntityUrl
-    // shape — that is the contract we are protecting.
-    for (const href of entityHrefs) {
-      expect(href, `unexpected entity-link shape: ${href}`).toMatch(
-        /^\/(vessels\/vessels\/|terra\/property\/|carlota-jo\/inquiries|aegis\/|operations\/prism|operations)/,
+    for (const href of artifactHrefs) {
+      expect(href, `evidence registry rendered a malformed artifact link: ${href}`).toMatch(
+        VALID_ENTITY_HREF,
       );
     }
 
-    // When the page is in seeded mode (default for the dev/preview
-    // environment) there must be at least one entity drill-through link.
-    // A silent zero-link state would let a regression that strips all
-    // hrefs pass undetected. Detect seeded mode by looking for the
-    // registry's row count / table content; only enforce the lower bound
-    // when seed data is actually present.
+    // Seeded-mode lower bound: the dev/preview environment ships with seed
+    // evidence rows. If we can see registry rows at all, there must be at
+    // least one entity drill-through link, otherwise something stripped them.
     const bodyText = await page.locator("body").innerText();
     const seededMode =
       /evidence|signal|correlation/i.test(bodyText) &&
       !/no evidence|empty|no correlations/i.test(bodyText);
     if (seededMode) {
       expect(
-        entityHrefs.length,
-        `seeded evidence registry rendered no entity drill-through links — productEntityUrl helper or registry rendering may be broken`,
+        artifactHrefs.length,
+        `seeded evidence registry rendered no artifact drill-through links — productEntityUrl helper or registry rendering may be broken`,
       ).toBeGreaterThan(0);
+    }
+
+    // Click-through: pick the first vessels OR terra entity link, follow it
+    // (the registry uses target="_blank", so handle the popup), and assert
+    // the destination URL/page-content match. This is the true end-to-end
+    // signal the reviewer asked for.
+    const clickable = artifactHrefs.find(
+      (h) => h.startsWith("/vessels/vessels/") || h.startsWith("/terra/property/"),
+    );
+    if (clickable) {
+      const link = page.locator(`a[href="${clickable}"]`).first();
+      const popupPromise = page.context().waitForEvent("page", { timeout: 5_000 }).catch(() => null);
+      await link.click({ modifiers: [] });
+      const popup = await popupPromise;
+      const dest = popup ?? page;
+      await dest.waitForLoadState("domcontentloaded", { timeout: 15_000 }).catch(() => null);
+      await dest.waitForLoadState("networkidle", { timeout: 15_000 }).catch(() => null);
+      expect(dest.url(), `click-through landed on unexpected URL`).toContain(clickable);
+      const destText = await dest.locator("body").innerText().catch(() => "");
+      if (!/upstream not ready/i.test(destText)) {
+        await assertNotGenericNotFound(dest as Page, testInfo, destText);
+        const destDomain = clickable.startsWith("/vessels/")
+          ? /vessel|fleet|imo|mmsi|voyage|return to fleet/i
+          : /property|terra|portfolio|tower|leas|tenant/i;
+        expect(
+          destDomain.test(destText),
+          `click-through destination ${dest.url()} lacks expected domain content. Body:\n${destText.slice(0, 500)}`,
+        ).toBe(true);
+      }
+      if (popup) await popup.close().catch(() => null);
     }
   });
 
-  test("command: cross-platform correlation page renders without crashing", async ({ page }, testInfo) => {
+  test("command: cross-platform correlation page wires real product drill-through links", async ({ page }, testInfo) => {
     if (!commandAvailable) testInfo.skip();
-    await page.goto(`${COMMAND_BASE}/strategy/cross-platform`);
-    await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => null);
-
-    const body = await page.locator("body").innerText();
-    // Skip when the workspace proxy momentarily returns an upstream-not-ready
-    // page (Replit dev proxy under restart load); that is environmental, not a
-    // bug in the correlation surface.
+    const body = await navigateWithUpstreamRetry(page, `${COMMAND_BASE}/strategy/cross-platform`);
     if (/upstream not ready/i.test(body)) testInfo.skip();
 
     const errorBoundary = page.locator("text=Something went wrong").first();
     expect(await errorBoundary.isVisible().catch(() => false)).toBe(false);
 
-    // Either correlation rows are visible or the empty state is.
     const hasContent =
       /correlation|cross-platform|signal|no correlations detected/i.test(body);
     expect(hasContent).toBe(true);
 
-    // Pluck any product chip / card link aimed at vessels or terra and
-    // assert it has a productEntityUrl-shaped href. This guards against a
-    // regression where correlation cards stop wiring drill-through links
-    // even though the helper itself still works.
-    const productLinkHrefs = await page.locator("a[href]").evaluateAll((els) =>
+    // Same contract as evidence registry: every artifact-prefixed link must
+    // be a valid productEntityUrl/productDashboardUrl shape — no pre-filter.
+    const allArtifactHrefs = await page.locator("a[href]").evaluateAll((els) =>
       (els as HTMLAnchorElement[])
         .map((a) => a.getAttribute("href") ?? "")
-        .filter(
-          (h) =>
-            h.startsWith("/vessels/vessels/") ||
-            h.startsWith("/terra/property/"),
-        ),
+        .filter((h) => h.startsWith("/") && !h.startsWith("//")),
     );
-    for (const href of productLinkHrefs) {
-      expect(href, `correlation card link has wrong shape: ${href}`).toMatch(
-        /^\/(vessels\/vessels\/[^/]+|terra\/property\/[^/]+)/,
+    const artifactHrefs = allArtifactHrefs.filter((h) => ARTIFACT_PREFIX.test(h));
+
+    for (const href of artifactHrefs) {
+      expect(href, `correlation page rendered a malformed artifact link: ${href}`).toMatch(
+        VALID_ENTITY_HREF,
       );
+    }
+
+    // Seeded-mode lower bound for correlation cards too — if the page shows
+    // any correlation rows, at least one card must wire a drill-through link.
+    const seededMode =
+      /correlation|signal/i.test(body) && !/no correlations detected|empty/i.test(body);
+    if (seededMode) {
+      expect(
+        artifactHrefs.length,
+        `seeded correlation page rendered no artifact drill-through links — card-link wiring or productEntityUrl may be broken`,
+      ).toBeGreaterThan(0);
+    }
+
+    // Click-through one vessels or terra link from the correlation page.
+    const clickable = artifactHrefs.find(
+      (h) => h.startsWith("/vessels/vessels/") || h.startsWith("/terra/property/"),
+    );
+    if (clickable) {
+      const link = page.locator(`a[href="${clickable}"]`).first();
+      const popupPromise = page.context().waitForEvent("page", { timeout: 5_000 }).catch(() => null);
+      await link.click({ modifiers: [] });
+      const popup = await popupPromise;
+      const dest = popup ?? page;
+      await dest.waitForLoadState("domcontentloaded", { timeout: 15_000 }).catch(() => null);
+      await dest.waitForLoadState("networkidle", { timeout: 15_000 }).catch(() => null);
+      expect(dest.url(), `correlation card click landed on unexpected URL`).toContain(clickable);
+      const destText = await dest.locator("body").innerText().catch(() => "");
+      if (!/upstream not ready/i.test(destText)) {
+        await assertNotGenericNotFound(dest as Page, testInfo, destText);
+      }
+      if (popup) await popup.close().catch(() => null);
     }
   });
 });
