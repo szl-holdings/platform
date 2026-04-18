@@ -44,11 +44,11 @@ Work through this list from top to bottom. The order is priority-sorted.
 
 | # | Action | Where | Instruction | Acceptance Test |
 |---|--------|--------|-------------|-----------------|
-| 13 | Set up Firebase project for CORTEX mobile | Firebase console (console.firebase.google.com) | Create project → Add Android/iOS apps → download `google-services.json` and `GoogleService-Info.plist` → place in `artifacts/cortex-mobile/` | EAS build completes without Firebase config error |
-| 14 | Create App Store Connect record for CORTEX | App Store Connect (appstoreconnect.apple.com) | Log in → My Apps → + → New App; set bundle ID `com.szlholdings.cortex` (or chosen ID); set name "CORTEX" | App record visible in App Store Connect |
-| 15 | Create Google Play Console record for CORTEX | Play Console (play.google.com/console) | Log in → All Apps → Create App; set package name matching `app.json` | App record visible in Play Console |
-| 16 | Link EAS project to app store records | Terminal (Expo CLI) | Run `eas init` in `artifacts/cortex-mobile/`; link to App Store Connect and Play Console records; confirm `eas.json` credentials configured | `eas build --platform all` completes successfully |
-| 17 | Create iOS Privacy Manifest (`PrivacyInfo.xcprivacy`) | Xcode or file in `artifacts/cortex-mobile/` | Required for iOS 17+ App Store submissions; list all APIs used (camera, biometrics, etc.) | App Store submission accepted without Privacy Manifest error |
+| 13 | Set up Firebase project for CORTEX mobile | Firebase console (console.firebase.google.com) | Create project → Add Android/iOS apps → download `google-services.json` and `GoogleService-Info.plist` → copy to `artifacts/szl-holdings-mobile/` (replacing the placeholder files) | EAS build completes without Firebase config error |
+| 14 | Create App Store Connect record for CORTEX | App Store Connect (appstoreconnect.apple.com) | Log in → My Apps → + → New App; set bundle ID `com.szlholdings.executive.mobile`; set name "CORTEX"; fill `appleId`, `ascAppId`, `appleTeamId` in `artifacts/szl-holdings-mobile/eas.json` → `submit.testflight.ios` | App record visible in App Store Connect |
+| 15 | Create Google Play Console record for CORTEX | Play Console (play.google.com/console) | Log in → All Apps → Create App; set package name `com.szlholdings.executive.mobile` | App record visible in Play Console |
+| 16 | Link EAS project to app store records | Terminal (Expo CLI) | Run `eas init` inside `artifacts/szl-holdings-mobile/`; link to App Store Connect and Play Console records; paste the UUID into `app.json` `extra.eas.projectId` and `updates.url`; flip `updates.enabled` to `true` | `eas build --profile testflight --platform ios` completes successfully |
+| 17 | ✅ DONE — iOS Privacy Manifest (`PrivacyInfo.xcprivacy`) created | `artifacts/szl-holdings-mobile/ios/PrivacyInfo.xcprivacy` | File created; `privacyManifests` also configured in `app.config.js` (Expo managed workflow uses the config key; the xcprivacy file is the bare-workflow reference) | App Store submission accepted without Privacy Manifest error |
 | 18 | Add `google-play-service-account.json` to EAS Secrets | EAS dashboard | Generate in Google Play Console → Setup → API access → Create service account; grant release manager role; download JSON; upload to EAS | `eas submit --platform android` succeeds |
 
 ---
@@ -82,10 +82,10 @@ Work through this list from top to bottom. The order is priority-sorted.
 |----------|------------|-----------|-----------|
 | Secrets & Credentials | 8 | 0 | 8 |
 | GitHub / CI Secrets | 4 | 0 | 4 |
-| Mobile App Release | 6 | 0 | 6 |
+| Mobile App Release | 6 | 1 | 5 |
 | Domain & Production Config | 5 | 0 | 5 |
 | Operational Setup | 4 | 0 | 4 |
-| **Total** | **27** | **0** | **27** |
+| **Total** | **27** | **1** | **26** |
 
 Update the "Completed" column as you work through each item.
 

@@ -11,6 +11,18 @@ const router: IRouter = Router();
 // Auth is optional — allows apps without user sessions (e.g. public portfolio
 // apps) to register device tokens with an appId. When authenticated the token
 // is linked to the user; otherwise userId is stored as null.
+//
+// AppId taxonomy (used by expo-push.ts sendPushToApp / sendPushToUser):
+//   "cortex-mobile"    — fallback for the CORTEX unified app when no workspace is specified
+//   "cortex-advisory"  — advisory / Carlota Jo workspace within CORTEX
+//   "aegis-mobile"     — defense / Aegis workspace within CORTEX
+//   "lyte-mobile"      — operations / Lyte workspace within CORTEX
+//   "terra-mobile"     — properties / Terra workspace within CORTEX
+//   "stephen-mobile"   — founder workspace within CORTEX
+// Workspaces that have not yet configured their own push hook (fleet, portfolio,
+// intelligence) also fall back to "cortex-mobile" until their hooks are set up.
+// Push fanout via sendPushToApp(appId, ...) targets tokens with the matching appId;
+// cross-workspace broadcasts use sendPushBroadcast or target "cortex-mobile".
 router.post("/push-tokens", authMiddleware({ required: false }), async (req, res) => {
   try {
     const { token, platform, appId } = req.body;
@@ -59,7 +71,7 @@ router.post("/push-tokens", authMiddleware({ required: false }), async (req, res
         userId,
         token,
         platform: resolvedPlatform,
-        appId: appId ?? "carlota-jo-mobile",
+        appId: appId ?? "cortex-mobile",
         isActive: true,
       })
       .returning();

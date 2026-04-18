@@ -34,7 +34,7 @@ async function registerDeviceToken(token: string, authToken: string | null): Pro
       body: JSON.stringify({
         token,
         platform,
-        appId: "carlota-jo-mobile",
+        appId: "cortex-advisory",
       }),
     });
 

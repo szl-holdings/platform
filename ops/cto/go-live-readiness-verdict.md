@@ -81,10 +81,10 @@ The CORTEX mobile app framework is complete. The release infrastructure is not. 
 | App Store Connect record created | Founder | 45 min |
 | Play Console record created | Founder | 30 min |
 | EAS project linked to app stores | Dev | 1–2 hours |
-| `app.json` configured with correct bundle IDs and version | Dev | 30 min |
-| iOS Privacy Manifest created | Dev | 2–4 hours |
+| ✅ `app.json` configured with correct bundle IDs and version | Dev | Done — bundle ID `com.szlholdings.executive.mobile`, version 2.0.0, all permissions set |
+| ✅ iOS Privacy Manifest created | Dev | Done — `artifacts/szl-holdings-mobile/ios/PrivacyInfo.xcprivacy` + `app.config.js` `privacyManifests` key |
 | Physical device testing (iPhone + Android) | Founder / Dev | 1–2 days |
-| Push token backend endpoint implemented | Dev | 4–8 hours |
+| ✅ Push token backend endpoint implemented | Dev | Done — `POST /push-tokens`, `DELETE /push-tokens/:token`, `GET /push-tokens/me` live in API server |
 | Store screenshots and metadata | Founder | 4–8 hours |
 | EAS build + submit pipeline tested end-to-end | Dev | 1–2 days |
 | Apple review process (TestFlight) | Apple | 1–3 days |
