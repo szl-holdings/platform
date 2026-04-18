@@ -89,6 +89,95 @@ async function logToolAuditEvent(params: {
   }
 }
 
+interface PolicyEvaluationLike {
+  evaluationId?: string;
+  resolvedMode?: string;
+  mode?: string;
+  confidence?: number;
+  blockedReason?: string;
+  projectedImpact?: Record<string, unknown> | null;
+  policyResult?: { effect?: string };
+  memoryRefs?: unknown;
+  evidenceChain?: unknown;
+}
+
+function extractPolicyEvaluation(payload: unknown): PolicyEvaluationLike | null {
+  if (!payload || typeof payload !== "object") return null;
+  const obj = payload as Record<string, unknown>;
+  const ev = (obj["policyEvaluation"] ?? obj["policy_evaluation"]) as PolicyEvaluationLike | undefined;
+  return ev && typeof ev === "object" ? ev : null;
+}
+
+function extractProduct(payload: unknown, fallback?: string | null): string | null {
+  if (payload && typeof payload === "object") {
+    const obj = payload as Record<string, unknown>;
+    if (typeof obj["product"] === "string") return obj["product"] as string;
+    const ev = obj["policyEvaluation"] as { product?: string } | undefined;
+    if (ev && typeof ev.product === "string") return ev.product;
+  }
+  return fallback ?? null;
+}
+
+/**
+ * Persist an approve/reject policy decision into the unified audit_events log.
+ * Captures: who decided, the action, the policy evaluation id, the resolved
+ * mode, confidence, blocked reason, and projected impact — so post-hoc
+ * compliance review and the executive digest can replay why an action ran.
+ */
+async function recordPolicyDecisionAudit(params: {
+  req: Request;
+  decision: "approved" | "rejected";
+  entityType: string;
+  entityId: string;
+  action: string;
+  product?: string | null;
+  decisionReason?: string | null;
+  payload?: unknown;
+  policyEvaluation?: PolicyEvaluationLike | null;
+  extra?: Record<string, unknown>;
+}): Promise<void> {
+  try {
+    const ev = params.policyEvaluation ?? extractPolicyEvaluation(params.payload);
+    const resolvedMode =
+      (ev?.resolvedMode as string | undefined) ??
+      (ev?.mode as string | undefined) ??
+      null;
+    const confidence = typeof ev?.confidence === "number" ? ev.confidence : null;
+    const blockedReason = (ev?.blockedReason as string | undefined) ?? null;
+    const projectedImpact =
+      (ev?.projectedImpact as Record<string, unknown> | null | undefined) ?? null;
+    const evaluationId = (ev?.evaluationId as string | undefined) ?? null;
+    const product = extractProduct(params.payload, params.product);
+
+    await db.insert(auditEventsTable).values({
+      userId: params.req.user?.id ?? null,
+      action: `policy.${params.decision === "approved" ? "approve" : "reject"}`,
+      entityType: params.entityType,
+      entityId: params.entityId,
+      newValues: {
+        action: params.action,
+        decisionReason: params.decisionReason ?? null,
+        memoryRefs: ev?.memoryRefs ?? ev?.evidenceChain ?? null,
+        ...(params.extra ?? {}),
+      },
+      ipAddress: params.req.ip ?? null,
+      userAgent: params.req.get("user-agent") ?? null,
+      decision: params.decision,
+      policyEvaluationId: evaluationId,
+      resolvedMode,
+      confidence,
+      blockedReason,
+      projectedImpact,
+      product,
+    });
+  } catch (err) {
+    logger.error(
+      { err, entityId: params.entityId, decision: params.decision },
+      "Failed to write policy decision audit event",
+    );
+  }
+}
+
 async function notifyApprovalQueueFilled(params: {
   requestId: string;
   action: string;
@@ -849,6 +938,16 @@ router.post("/tool-approvals/:id/approve", authMiddleware(), requireRole("super_
     const [updated] = await db.update(toolMeshActionApprovalsTable).set({ status: "approved", approvedById: user?.id ?? null, approvedAt: new Date(), decisionReason: reason ?? null, updatedAt: new Date() }).where(eq(toolMeshActionApprovalsTable.id, id)).returning();
     if (!updated) { sendNotFound(res, "Action approval not found"); return; }
     logger.info({ actionId: id, approvedBy: user?.id, toolId: updated.toolId }, "Action approved");
+    await recordPolicyDecisionAudit({
+      req, decision: "approved",
+      entityType: "tool_action_approval",
+      entityId: updated.requestId,
+      action: updated.action,
+      product: updated.toolId,
+      decisionReason: reason ?? null,
+      payload: updated.payload,
+      extra: { toolId: updated.toolId, agentId: updated.agentId, approvalId: updated.id },
+    });
     sendSuccess(res, approvalRowToApi(updated));
   } catch (err) {
     handleRouteError(res, err, "Failed to approve action");
@@ -867,6 +966,16 @@ router.post("/tool-approvals/:id/reject", authMiddleware(), requireRole("super_a
     const [updated] = await db.update(toolMeshActionApprovalsTable).set({ status: "rejected", rejectedById: user?.id ?? null, rejectedAt: new Date(), decisionReason: reason ?? null, updatedAt: new Date() }).where(eq(toolMeshActionApprovalsTable.id, id)).returning();
     if (!updated) { sendNotFound(res, "Action approval not found"); return; }
     logger.info({ actionId: id, rejectedBy: user?.id, toolId: updated.toolId }, "Action rejected");
+    await recordPolicyDecisionAudit({
+      req, decision: "rejected",
+      entityType: "tool_action_approval",
+      entityId: updated.requestId,
+      action: updated.action,
+      product: updated.toolId,
+      decisionReason: reason ?? null,
+      payload: updated.payload,
+      extra: { toolId: updated.toolId, agentId: updated.agentId, approvalId: updated.id },
+    });
     sendSuccess(res, approvalRowToApi(updated));
   } catch (err) {
     handleRouteError(res, err, "Failed to reject action");
@@ -978,11 +1087,76 @@ router.post("/approvals/:requestId/review", authMiddleware(), requireRole("super
 
     const [updated] = await db.update(guardianApprovalRequestsTable).set({ approvals: updatedApprovals, status: newStatus, updatedAt: new Date() }).where(eq(guardianApprovalRequestsTable.requestId, requestId)).returning();
     logger.info({ requestId, decision, approverId: resolvedApproverId, newStatus }, "Guardian approval reviewed");
+    if (decision === "approved" || decision === "rejected") {
+      await recordPolicyDecisionAudit({
+        req,
+        decision: decision as "approved" | "rejected",
+        entityType: "guardian_approval_request",
+        entityId: requestId,
+        action: existing.action,
+        product: existing.toolId ?? null,
+        decisionReason: note ?? null,
+        payload: existing.payload,
+        extra: {
+          tier: existing.tier,
+          approvalType: existing.approvalType,
+          approverRole: resolvedApproverRole,
+          newStatus,
+          agentId: existing.agentId,
+          toolId: existing.toolId,
+        },
+      });
+    }
     sendSuccess(res, updated);
   } catch (err) {
     handleRouteError(res, err, "Failed to review guardian approval");
   }
 });
+
+// ============================================================
+// POLICY DECISION AUDIT EVENTS (proof chain replay)
+// ============================================================
+
+router.get(
+  "/audit/policy-decisions",
+  authMiddleware(),
+  requireRole("super_admin", "admin", "ops", "analyst", "compliance", "exec"),
+  validateQuery(listQuerySchema),
+  async (req: Request, res: Response) => {
+    try {
+      const { page, limit } = parsePagination(req.query as Record<string, unknown>);
+      const product = req.query["product"] as string | undefined;
+      const mode = req.query["mode"] as string | undefined;
+      const decision = req.query["decision"] as string | undefined;
+      const sinceParam = req.query["since"] as string | undefined;
+
+      const conditions: Parameters<typeof and>[0][] = [
+        sql`${auditEventsTable.action} IN ('policy.approve', 'policy.reject')`,
+      ];
+      if (product) conditions.push(eq(auditEventsTable.product, product));
+      if (mode) conditions.push(eq(auditEventsTable.resolvedMode, mode));
+      if (decision) conditions.push(eq(auditEventsTable.decision, decision));
+      if (sinceParam) {
+        const sinceDate = new Date(sinceParam);
+        if (!isNaN(sinceDate.getTime())) {
+          conditions.push(sql`${auditEventsTable.createdAt} >= ${sinceDate}`);
+        }
+      }
+
+      const where = and(...conditions);
+      const offset = (page - 1) * limit;
+
+      const [rows, totalRow] = await Promise.all([
+        db.select().from(auditEventsTable).where(where as ReturnType<typeof and>).orderBy(desc(auditEventsTable.createdAt)).limit(limit).offset(offset),
+        db.select({ count: sql<number>`count(*)::int` }).from(auditEventsTable).where(where as ReturnType<typeof and>),
+      ]);
+
+      sendSuccess(res, rows, 200, { page, limit, total: totalRow[0]?.count ?? 0 });
+    } catch (err) {
+      handleRouteError(res, err, "Failed to list policy-decision audit events");
+    }
+  },
+);
 
 // ============================================================
 // ROLLBACK EVENTS

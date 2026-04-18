@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp, integer, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, integer, jsonb, real } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { usersTable } from "./auth";
@@ -25,6 +25,16 @@ export const auditEventsTable = pgTable("audit_events", {
   newValues: jsonb("new_values"),
   ipAddress: text("ip_address"),
   userAgent: text("user_agent"),
+  // Policy-decision audit fields — populated when an approve/reject decision
+  // is recorded so the proof chain (resolved mode, confidence, evidence) is
+  // durable and replayable from this single events log.
+  decision: text("decision"),
+  policyEvaluationId: text("policy_evaluation_id"),
+  resolvedMode: text("resolved_mode"),
+  confidence: real("confidence"),
+  blockedReason: text("blocked_reason"),
+  projectedImpact: jsonb("projected_impact"),
+  product: text("product"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

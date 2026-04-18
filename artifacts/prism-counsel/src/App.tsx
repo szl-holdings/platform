@@ -151,6 +151,8 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
   );
 }
 
+export { PRISM_ONBOARDING_CONFIG };
+
 function App() {
   const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(prismCommands);
 

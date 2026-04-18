@@ -1,81 +1,129 @@
-import { useState } from "react";
-import { Shield, Clock, User, Filter, Activity, CheckCircle2, AlertTriangle, Eye } from "lucide-react";
+import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Shield, Clock, User, Filter, Activity, CheckCircle2, AlertTriangle, Eye, RefreshCw } from "lucide-react";
 
 const BG = { page: "#080c14", surface: "#0c1018", elevated: "#10141e" };
 const BORDER = { subtle: "rgba(255,255,255,0.04)", muted: "rgba(255,255,255,0.06)" };
 const TEXT = { primary: "rgba(255,255,255,0.88)", secondary: "rgba(255,255,255,0.55)", tertiary: "rgba(255,255,255,0.28)", muted: "rgba(255,255,255,0.14)" };
 const ELECTRIC = "#2dd4bf";
 
-interface AuditEvent {
-  id: string;
-  timestamp: string;
-  actor: string;
-  actorRole: string;
+// API row shape from /api/guardian/audit/policy-decisions
+interface PolicyDecisionAuditRow {
+  id: number;
+  userId: number | null;
   action: string;
-  resourceType: string;
-  resourceId: string;
-  pack: string;
-  packColor: string;
-  outcome: "success" | "denied" | "warning";
-  details: string;
+  entityType: string;
+  entityId: string | null;
+  newValues: Record<string, unknown> | null;
+  decision: "approved" | "rejected" | string | null;
+  policyEvaluationId: string | null;
+  resolvedMode: string | null;
+  confidence: number | null;
+  blockedReason: string | null;
+  projectedImpact: Record<string, unknown> | null;
+  product: string | null;
+  createdAt: string;
 }
 
-const AUDIT_EVENTS: AuditEvent[] = [
-  { id: "AUD-8821", timestamp: "Today · 11:42 AM", actor: "Stephen Lutar", actorRole: "exec", action: "approve_workflow", resourceType: "workflow_run", resourceId: "WF-3041", pack: "PRISM", packColor: "#d4a054", outcome: "success", details: "Q1 financial reporting workflow approved and dispatched." },
-  { id: "AUD-8820", timestamp: "Today · 10:18 AM", actor: "System", actorRole: "system", action: "ingest_signal", resourceType: "alloy_signal", resourceId: "SIG-9041", pack: "Vessels", packColor: "#38bdf8", outcome: "success", details: "Fuel surcharge signal ingested — high severity. 22h age." },
-  { id: "AUD-8819", timestamp: "Today · 9:55 AM", actor: "Lisa Monroe", actorRole: "ops", action: "update_workflow", resourceType: "alloy_workflow", resourceId: "WF-2981", pack: "Aegis", packColor: "#4f6ef7", outcome: "success", details: "Security audit workflow updated — approver role changed to compliance." },
-  { id: "AUD-8818", timestamp: "Today · 8:30 AM", actor: "David Chen", actorRole: "analyst", action: "export_data", resourceType: "alloy_artifact", resourceId: "ART-1204", pack: "PRISM", packColor: "#d4a054", outcome: "denied", details: "Export request denied — insufficient role. Required: ops or above." },
-  { id: "AUD-8817", timestamp: "Yesterday · 5:12 PM", actor: "Maria Torres", actorRole: "ops", action: "create_approval", resourceType: "alloy_approval", resourceId: "APR-1041", pack: "PRISM", packColor: "#d4a054", outcome: "success", details: "Q2 pricing approval request created and routed to executive queue." },
-  { id: "AUD-8816", timestamp: "Yesterday · 3:44 PM", actor: "System", actorRole: "system", action: "flag_signal", resourceType: "alloy_signal", resourceId: "SIG-9028", pack: "Terra", packColor: "#a07848", outcome: "warning", details: "Lease document signal flagged — compliance review required." },
-  { id: "AUD-8815", timestamp: "Yesterday · 2:01 PM", actor: "Stephen Lutar", actorRole: "exec", action: "approve_workflow", resourceType: "alloy_approval", resourceId: "APR-1038", pack: "Vessels", packColor: "#38bdf8", outcome: "success", details: "Charter contract approval completed — 4 vessels authorized." },
-  { id: "AUD-8814", timestamp: "Yesterday · 11:30 AM", actor: "James Park", actorRole: "ops", action: "retry_run", resourceType: "workflow_run", resourceId: "WF-2940", pack: "Vessels", packColor: "#38bdf8", outcome: "success", details: "Failed fuel calculation workflow retried and completed." },
-  { id: "AUD-8813", timestamp: "2 days ago · 4:00 PM", actor: "System", actorRole: "system", action: "batch_ingest", resourceType: "alloy_signal", resourceId: "BATCH-0412", pack: "Aegis", packColor: "#4f6ef7", outcome: "success", details: "Batch signal ingestion — 34 signals processed across Aegis pack." },
-];
+interface ListResponse<T> {
+  data: T[];
+  meta?: { total?: number };
+}
 
-const TRUST_METRICS = [
-  { label: "Audit Coverage", value: "100%", sub: "All events logged", color: "#22c55e", icon: CheckCircle2 },
-  { label: "Access Denials", value: "3", sub: "Last 30 days", color: "#c45a4a", icon: AlertTriangle },
-  { label: "Total Events", value: "1,204", sub: "This month", color: ELECTRIC, icon: Activity },
-  { label: "Actors", value: "12", sub: "Unique this week", color: "#8b7ac8", icon: User },
-];
+async function fetchJson<T>(url: string): Promise<T> {
+  const res = await fetch(url, {
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+  return res.json() as Promise<T>;
+}
 
-function OutcomePill({ outcome }: { outcome: AuditEvent["outcome"] }) {
-  const cfg = {
-    success: { color: "#22c55e", bg: "rgba(34,197,94,0.08)", label: "OK" },
-    denied: { color: "#c45a4a", bg: "rgba(196,90,74,0.08)", label: "Denied" },
-    warning: { color: "#d4a054", bg: "rgba(212,160,84,0.08)", label: "Warning" },
-  }[outcome];
+function timeAgo(iso: string): string {
+  const t = new Date(iso).getTime();
+  if (isNaN(t)) return iso;
+  const s = Math.max(1, Math.floor((Date.now() - t) / 1000));
+  if (s < 60) return `${s}s ago`;
+  const m = Math.floor(s / 60);
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  const d = Math.floor(h / 24);
+  return `${d}d ago`;
+}
+
+function decisionStyle(decision: string | null) {
+  if (decision === "approved") return { color: "#22c55e", bg: "rgba(34,197,94,0.08)", label: "Approved" };
+  if (decision === "rejected") return { color: "#c45a4a", bg: "rgba(196,90,74,0.08)", label: "Rejected" };
+  return { color: "#d4a054", bg: "rgba(212,160,84,0.08)", label: decision ?? "Unknown" };
+}
+
+function DecisionPill({ decision }: { decision: string | null }) {
+  const cfg = decisionStyle(decision);
   return (
-    <span className="text-[7px] font-mono px-1.5 py-0.5 rounded uppercase tracking-wider" style={{ color: cfg.color, background: cfg.bg }}>{cfg.label}</span>
+    <span className="text-[7px] font-mono px-1.5 py-0.5 rounded uppercase tracking-wider" style={{ color: cfg.color, background: cfg.bg }}>
+      {cfg.label}
+    </span>
   );
 }
 
 export default function TrustAuditPage() {
-  const [filterOutcome, setFilterOutcome] = useState<string>("all");
-  const [filterPack, setFilterPack] = useState<string>("all");
+  const [filterDecision, setFilterDecision] = useState<string>("all");
+  const [filterProduct, setFilterProduct] = useState<string>("all");
+  const [filterMode, setFilterMode] = useState<string>("all");
 
-  const packs = Array.from(new Set(AUDIT_EVENTS.map(e => e.pack)));
-  const filtered = AUDIT_EVENTS.filter(e => {
-    if (filterOutcome !== "all" && e.outcome !== filterOutcome) return false;
-    if (filterPack !== "all" && e.pack !== filterPack) return false;
-    return true;
+  const params = new URLSearchParams({ limit: "100" });
+  if (filterDecision !== "all") params.set("decision", filterDecision);
+  if (filterProduct !== "all") params.set("product", filterProduct);
+  if (filterMode !== "all") params.set("mode", filterMode);
+
+  const auditQ = useQuery<ListResponse<PolicyDecisionAuditRow>>({
+    queryKey: ["guardian", "audit-policy-decisions", filterDecision, filterProduct, filterMode],
+    queryFn: () => fetchJson(`/api/guardian/audit/policy-decisions?${params.toString()}`),
+    refetchInterval: 30_000,
   });
+
+  const events = auditQ.data?.data ?? [];
+  const total = auditQ.data?.meta?.total ?? events.length;
+
+  // For filter dropdowns, get unique products & modes from a wider sample
+  const allEventsQ = useQuery<ListResponse<PolicyDecisionAuditRow>>({
+    queryKey: ["guardian", "audit-policy-decisions-index"],
+    queryFn: () => fetchJson(`/api/guardian/audit/policy-decisions?limit=200`),
+    staleTime: 5 * 60_000,
+  });
+  const allEvents = allEventsQ.data?.data ?? [];
+  const productOptions = useMemo(() => Array.from(new Set(allEvents.map(e => e.product).filter((p): p is string => !!p))), [allEvents]);
+  const modeOptions = useMemo(() => Array.from(new Set(allEvents.map(e => e.resolvedMode).filter((m): m is string => !!m))), [allEvents]);
+
+  const approvedCount = allEvents.filter(e => e.decision === "approved").length;
+  const rejectedCount = allEvents.filter(e => e.decision === "rejected").length;
+  const totalCount = allEvents.length;
+  const uniqueActors = new Set(allEvents.map(e => e.userId).filter((u): u is number => u !== null)).size;
+
+  const trustMetrics = [
+    { label: "Decisions Logged", value: String(totalCount), sub: "Last 200 events", color: "#22c55e", icon: CheckCircle2 },
+    { label: "Rejections", value: String(rejectedCount), sub: "Recent denials", color: "#c45a4a", icon: AlertTriangle },
+    { label: "Approvals", value: String(approvedCount), sub: "Recent approvals", color: ELECTRIC, icon: Activity },
+    { label: "Approvers", value: String(uniqueActors), sub: "Unique operators", color: "#8b7ac8", icon: User },
+  ];
 
   return (
     <div className="p-4 md:p-5 space-y-5" style={{ background: BG.page }}>
-      {/* Header */}
       <div>
         <div className="flex items-center gap-2 mb-1">
           <Shield className="w-3.5 h-3.5" style={{ color: "#8b7ac8" }} />
           <span className="text-[9px] font-mono uppercase tracking-widest" style={{ color: "#8b7ac8" }}>Trust & Audit</span>
         </div>
-        <h1 className="text-lg font-bold tracking-tight" style={{ color: TEXT.primary }}>Portfolio Trust Summary</h1>
-        <p className="text-[11px] mt-0.5" style={{ color: TEXT.secondary }}>Immutable audit log of all decisions, approvals, and access events across the portfolio</p>
+        <h1 className="text-lg font-bold tracking-tight" style={{ color: TEXT.primary }}>Proof Chain Audit</h1>
+        <p className="text-[11px] mt-0.5" style={{ color: TEXT.secondary }}>
+          Immutable record of every approve / reject policy decision — replay why an action was run with the resolved mode, confidence, blocked reason and projected impact for each call.
+        </p>
       </div>
 
       {/* Metrics */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {TRUST_METRICS.map(m => (
+        {trustMetrics.map(m => (
           <div key={m.label} className="rounded-md p-3 flex items-center gap-3" style={{ background: BG.surface, border: `1px solid ${BORDER.subtle}` }}>
             <div className="w-8 h-8 rounded flex items-center justify-center shrink-0" style={{ background: `${m.color}10` }}>
               <m.icon className="w-4 h-4" style={{ color: m.color }} />
@@ -90,76 +138,133 @@ export default function TrustAuditPage() {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 items-center">
         <div className="flex items-center gap-1.5 text-[9px]" style={{ color: TEXT.tertiary }}>
           <Filter className="w-3 h-3" />
-          <span>Filter:</span>
+          <span>Decision:</span>
         </div>
-        {["all", "success", "denied", "warning"].map(o => (
+        {["all", "approved", "rejected"].map(o => (
           <button
             key={o}
-            onClick={() => setFilterOutcome(o)}
+            onClick={() => setFilterDecision(o)}
             className="px-2.5 py-1 rounded text-[9px] font-medium capitalize transition-all"
             style={{
-              background: filterOutcome === o ? "rgba(45,212,191,0.12)" : "rgba(255,255,255,0.04)",
-              border: `1px solid ${filterOutcome === o ? "rgba(45,212,191,0.25)" : BORDER.subtle}`,
-              color: filterOutcome === o ? ELECTRIC : TEXT.secondary,
+              background: filterDecision === o ? "rgba(45,212,191,0.12)" : "rgba(255,255,255,0.04)",
+              border: `1px solid ${filterDecision === o ? "rgba(45,212,191,0.25)" : BORDER.subtle}`,
+              color: filterDecision === o ? ELECTRIC : TEXT.secondary,
             }}
           >
-            {o === "all" ? "All outcomes" : o}
+            {o === "all" ? "All decisions" : o}
           </button>
         ))}
         <div className="w-px h-5 self-center" style={{ background: BORDER.subtle }} />
-        {["all", ...packs].map(pack => (
-          <button
-            key={pack}
-            onClick={() => setFilterPack(pack)}
-            className="px-2.5 py-1 rounded text-[9px] font-medium transition-all"
-            style={{
-              background: filterPack === pack ? "rgba(45,212,191,0.12)" : "rgba(255,255,255,0.04)",
-              border: `1px solid ${filterPack === pack ? "rgba(45,212,191,0.25)" : BORDER.subtle}`,
-              color: filterPack === pack ? ELECTRIC : TEXT.secondary,
-            }}
-          >
-            {pack === "all" ? "All packs" : pack}
-          </button>
-        ))}
+        <span className="text-[9px]" style={{ color: TEXT.tertiary }}>Product:</span>
+        <select
+          value={filterProduct}
+          onChange={(e) => setFilterProduct(e.target.value)}
+          className="px-2 py-1 rounded text-[9px] font-medium outline-none"
+          style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${BORDER.subtle}`, color: TEXT.secondary }}
+        >
+          <option value="all">All products</option>
+          {productOptions.map(p => <option key={p} value={p}>{p}</option>)}
+        </select>
+        <span className="text-[9px]" style={{ color: TEXT.tertiary }}>Mode:</span>
+        <select
+          value={filterMode}
+          onChange={(e) => setFilterMode(e.target.value)}
+          className="px-2 py-1 rounded text-[9px] font-medium outline-none"
+          style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${BORDER.subtle}`, color: TEXT.secondary }}
+        >
+          <option value="all">All modes</option>
+          {modeOptions.map(m => <option key={m} value={m}>{m}</option>)}
+        </select>
+        <button
+          onClick={() => auditQ.refetch()}
+          className="ml-auto flex items-center gap-1.5 px-2 py-1 rounded text-[9px] font-mono"
+          style={{ color: TEXT.secondary, border: `1px solid ${BORDER.subtle}` }}
+        >
+          <RefreshCw className={`w-3 h-3 ${auditQ.isFetching ? "animate-spin" : ""}`} /> Refresh
+        </button>
       </div>
 
       {/* Audit log */}
       <div className="rounded-md overflow-hidden" style={{ background: BG.surface, border: `1px solid ${BORDER.subtle}` }}>
         <div className="px-4 py-2.5 flex items-center gap-2" style={{ borderBottom: `1px solid ${BORDER.subtle}` }}>
           <Eye className="w-3 h-3" style={{ color: TEXT.tertiary }} />
-          <span className="text-[9px] uppercase tracking-widest font-medium" style={{ color: TEXT.muted }}>Audit Log</span>
-          <span className="text-[8px] font-mono ml-auto" style={{ color: TEXT.tertiary }}>{filtered.length} events shown</span>
+          <span className="text-[9px] uppercase tracking-widest font-medium" style={{ color: TEXT.muted }}>Policy Decision Audit Log</span>
+          <span className="text-[8px] font-mono ml-auto" style={{ color: TEXT.tertiary }}>{events.length} of {total} events</span>
         </div>
-        <div className="divide-y" style={{ "--tw-divide-opacity": 1 } as any}>
-          {filtered.map(ev => (
-            <div key={ev.id} className="flex items-start gap-3 px-4 py-3 hover:bg-white/[0.01] transition-colors">
-              <div className="shrink-0 mt-0.5">
-                <OutcomePill outcome={ev.outcome} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                  <span className="text-[9px] font-mono font-medium" style={{ color: TEXT.primary }}>{ev.action.replace(/_/g, " ")}</span>
-                  <span className="text-[8px] font-mono" style={{ color: ev.packColor }}>{ev.pack}</span>
-                  <span className="text-[8px] font-mono" style={{ color: TEXT.muted }}>{ev.resourceType} · {ev.resourceId}</span>
+
+        {auditQ.isLoading && (
+          <div className="px-4 py-6 text-center text-[10px]" style={{ color: TEXT.tertiary }}>Loading audit events…</div>
+        )}
+        {auditQ.error && (
+          <div className="px-4 py-6 text-center text-[10px]" style={{ color: "#c45a4a" }}>
+            Failed to load audit events: {(auditQ.error as Error).message}
+          </div>
+        )}
+        {!auditQ.isLoading && !auditQ.error && events.length === 0 && (
+          <div className="px-4 py-6 text-center text-[10px]" style={{ color: TEXT.tertiary }}>
+            No policy decisions yet — approved/rejected policy actions will appear here.
+          </div>
+        )}
+
+        <div>
+          {events.map(ev => {
+            const newValues = ev.newValues ?? {};
+            const action = typeof newValues["action"] === "string" ? (newValues["action"] as string) : "policy decision";
+            const decisionReason = typeof newValues["decisionReason"] === "string" ? (newValues["decisionReason"] as string) : null;
+            const impact = ev.projectedImpact ?? {};
+            const severity = typeof impact["severity"] === "string" ? (impact["severity"] as string) : null;
+            const reversible = typeof impact["reversible"] === "boolean" ? (impact["reversible"] as boolean) : null;
+            const conf = ev.confidence !== null ? `${(ev.confidence * 100).toFixed(0)}%` : "—";
+
+            return (
+              <div key={ev.id} className="flex items-start gap-3 px-4 py-3 hover:bg-white/[0.01] transition-colors" style={{ borderTop: `1px solid ${BORDER.subtle}` }}>
+                <div className="shrink-0 mt-0.5">
+                  <DecisionPill decision={ev.decision} />
                 </div>
-                <p className="text-[10px]" style={{ color: TEXT.secondary }}>{ev.details}</p>
-                <div className="flex items-center gap-2 mt-0.5 text-[8px]">
-                  <span style={{ color: TEXT.tertiary }}>{ev.actor}</span>
-                  <span style={{ color: TEXT.muted }}>·</span>
-                  <span className="capitalize px-1 py-px rounded" style={{ color: TEXT.muted, background: "rgba(255,255,255,0.03)" }}>{ev.actorRole}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                    <span className="text-[10px] font-mono font-medium" style={{ color: TEXT.primary }}>{action}</span>
+                    {ev.product && (
+                      <span className="text-[8px] font-mono px-1 py-px rounded" style={{ color: "#38bdf8", background: "rgba(56,189,248,0.06)" }}>
+                        {ev.product}
+                      </span>
+                    )}
+                    {ev.resolvedMode && (
+                      <span className="text-[8px] font-mono px-1 py-px rounded" style={{ color: "#8b7ac8", background: "rgba(139,122,200,0.06)" }}>
+                        mode: {ev.resolvedMode}
+                      </span>
+                    )}
+                    <span className="text-[8px] font-mono" style={{ color: TEXT.muted }}>conf {conf}</span>
+                    {severity && (
+                      <span className="text-[8px] font-mono" style={{ color: severity === "critical" || severity === "high" ? "#ef4444" : "#d4a054" }}>
+                        impact: {severity}{reversible === false ? " · irreversible" : ""}
+                      </span>
+                    )}
+                  </div>
+                  {ev.blockedReason && (
+                    <p className="text-[10px]" style={{ color: "#f97316" }}>⚠ {ev.blockedReason}</p>
+                  )}
+                  {decisionReason && (
+                    <p className="text-[10px]" style={{ color: TEXT.secondary }}>{decisionReason}</p>
+                  )}
+                  <div className="flex items-center gap-2 mt-0.5 text-[8px] font-mono" style={{ color: TEXT.tertiary }}>
+                    {ev.userId !== null && <span>by user #{ev.userId}</span>}
+                    {ev.entityId && <span style={{ color: TEXT.muted }}>req {ev.entityId.substring(0, 24)}{ev.entityId.length > 24 ? "…" : ""}</span>}
+                    {ev.policyEvaluationId && <span style={{ color: TEXT.muted }}>eval {ev.policyEvaluationId.substring(0, 16)}…</span>}
+                  </div>
+                </div>
+                <div className="shrink-0 flex flex-col items-end gap-1">
+                  <span className="text-[8px] font-mono" style={{ color: TEXT.muted }}>AUD-{String(ev.id).padStart(5, "0")}</span>
+                  <span className="text-[8px] flex items-center gap-1" style={{ color: TEXT.tertiary }}>
+                    <Clock className="w-2 h-2" /> {timeAgo(ev.createdAt)}
+                  </span>
                 </div>
               </div>
-              <div className="shrink-0 flex flex-col items-end gap-1">
-                <span className="text-[8px] font-mono" style={{ color: TEXT.muted }}>{ev.id}</span>
-                <span className="text-[8px] flex items-center gap-1" style={{ color: TEXT.tertiary }}>
-                  <Clock className="w-2 h-2" /> {ev.timestamp}
-                </span>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

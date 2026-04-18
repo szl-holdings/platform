@@ -1,7 +1,7 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { pool, db } from "@szl-holdings/db";
-import { alloyWorkflows, alloyApprovals, alloySignals, alloyActions, notificationPreferencesTable } from "@szl-holdings/db";
-import { eq, desc, gte, count, and } from "drizzle-orm";
+import { alloyWorkflows, alloyApprovals, alloySignals, alloyActions, notificationPreferencesTable, auditEventsTable } from "@szl-holdings/db";
+import { eq, desc, gte, count, and, sql } from "drizzle-orm";
 import { services } from "@szl-holdings/services";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { sendSuccess, sendCreated, handleRouteError, sendBadRequest } from "../lib/api-response";
@@ -20,6 +20,22 @@ interface DigestContent {
   pendingApprovals: Array<{ id: string; workflow: string; description: string; requiredBy: string; urgency: string }>;
   workflowSummary: { completed: number; failed: number; running: number; pendingApproval: number };
   signalsSummary: { critical: number; high: number; medium: number; low: number; newToday: number };
+  policyDecisionsSummary: {
+    approved: number;
+    rejected: number;
+    total: number;
+    avgConfidence: number | null;
+    recent: Array<{
+      id: number;
+      decision: string;
+      action: string;
+      product: string | null;
+      resolvedMode: string | null;
+      confidence: number | null;
+      blockedReason: string | null;
+      decidedAt: string;
+    }>;
+  };
   suggestedPriorities: Array<{ rank: number; action: string; reason: string; urgency: string }>;
   metrics: Record<string, unknown>;
 }
@@ -27,7 +43,7 @@ interface DigestContent {
 export async function gatherDigestData(roleScope: string): Promise<DigestContent> {
   const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
-  const [workflowStats, pendingApprovals, signals] = await Promise.all([
+  const [workflowStats, pendingApprovals, signals, policyDecisions] = await Promise.all([
     db
       .select({ status: alloyWorkflows.status, cnt: count() })
       .from(alloyWorkflows)
@@ -44,6 +60,17 @@ export async function gatherDigestData(roleScope: string): Promise<DigestContent
       .from(alloySignals)
       .where(gte(alloySignals.createdAt, since24h))
       .groupBy(alloySignals.severity),
+    db
+      .select()
+      .from(auditEventsTable)
+      .where(
+        and(
+          sql`${auditEventsTable.action} IN ('policy.approve', 'policy.reject')`,
+          gte(auditEventsTable.createdAt, since24h),
+        ),
+      )
+      .orderBy(desc(auditEventsTable.createdAt))
+      .limit(50),
   ]);
 
   const workflowSummary = {
@@ -93,11 +120,49 @@ export async function gatherDigestData(roleScope: string): Promise<DigestContent
     suggestedPriorities.push({ rank: rank++, action: `Review ${workflowSummary.completed} completed workflow outputs`, reason: "Completed workflows may have deliverables requiring review", urgency: "low" });
   }
 
+  const policyApproved = policyDecisions.filter(d => d.decision === "approved").length;
+  const policyRejected = policyDecisions.filter(d => d.decision === "rejected").length;
+  const confidences = policyDecisions
+    .map(d => (typeof d.confidence === "number" ? d.confidence : null))
+    .filter((c): c is number => c !== null);
+  const avgConfidence = confidences.length > 0
+    ? confidences.reduce((a, b) => a + b, 0) / confidences.length
+    : null;
+  const policyDecisionsSummary = {
+    approved: policyApproved,
+    rejected: policyRejected,
+    total: policyDecisions.length,
+    avgConfidence,
+    recent: policyDecisions.slice(0, 10).map(d => {
+      const newValues = (d.newValues as Record<string, unknown> | null) ?? {};
+      return {
+        id: d.id,
+        decision: d.decision ?? "unknown",
+        action: typeof newValues["action"] === "string" ? (newValues["action"] as string) : "(unknown)",
+        product: d.product ?? null,
+        resolvedMode: d.resolvedMode ?? null,
+        confidence: typeof d.confidence === "number" ? d.confidence : null,
+        blockedReason: d.blockedReason ?? null,
+        decidedAt: d.createdAt instanceof Date ? d.createdAt.toISOString() : String(d.createdAt),
+      };
+    }),
+  };
+
+  if (policyRejected > 0) {
+    suggestedPriorities.push({
+      rank: rank++,
+      action: `Review ${policyRejected} rejected policy decision(s)`,
+      reason: "Rejected actions may indicate policy gaps or escalations needing attention",
+      urgency: "medium",
+    });
+  }
+
   return {
     keyDecisions: [],
     pendingApprovals: approvalItems,
     workflowSummary,
     signalsSummary,
+    policyDecisionsSummary,
     suggestedPriorities,
     metrics: {
       workflowCompletionRate: workflowSummary.completed + workflowSummary.failed > 0
@@ -105,6 +170,10 @@ export async function gatherDigestData(roleScope: string): Promise<DigestContent
         : null,
       signalResponseRate: null,
       approvalBacklog: approvalItems.length,
+      policyDecisions24h: policyDecisions.length,
+      policyApprovalRate: policyDecisions.length > 0
+        ? Math.round((policyApproved / policyDecisions.length) * 100)
+        : null,
     },
   };
 }
@@ -120,6 +189,7 @@ Data:
 - Workflows (last 24h): ${data.workflowSummary.completed} completed, ${data.workflowSummary.failed} failed, ${data.workflowSummary.running} running, ${data.workflowSummary.pendingApproval} awaiting approval
 - Signals: ${data.signalsSummary.critical} critical, ${data.signalsSummary.high} high, ${data.signalsSummary.medium} medium, ${data.signalsSummary.newToday} new today
 - Pending Approvals: ${data.pendingApprovals.length} items
+- Policy Decisions (last 24h): ${data.policyDecisionsSummary.total} total — ${data.policyDecisionsSummary.approved} approved, ${data.policyDecisionsSummary.rejected} rejected${data.policyDecisionsSummary.avgConfidence !== null ? `, avg confidence ${(data.policyDecisionsSummary.avgConfidence * 100).toFixed(0)}%` : ""}
 - Suggested Priorities: ${data.suggestedPriorities.map(p => p.action).join("; ")}
 
 Format it as:
@@ -149,6 +219,10 @@ Keep it executive-grade: sharp, actionable, no fluff. Use tables for metrics whe
 | Workflows Failed | ${data.workflowSummary.failed} |
 | Critical Signals | ${data.signalsSummary.critical} |
 | Pending Approvals | ${data.pendingApprovals.length} |
+| Policy Decisions (24h) | ${data.policyDecisionsSummary.total} (${data.policyDecisionsSummary.approved} ✓ / ${data.policyDecisionsSummary.rejected} ✗) |
+
+### Proof Chain — Recent Policy Decisions
+${data.policyDecisionsSummary.recent.length > 0 ? data.policyDecisionsSummary.recent.map(d => `- **${d.decision.toUpperCase()}** \`${d.action}\`${d.product ? ` · ${d.product}` : ""}${d.resolvedMode ? ` · mode: ${d.resolvedMode}` : ""}${d.confidence !== null ? ` · conf ${(d.confidence * 100).toFixed(0)}%` : ""}${d.blockedReason ? ` — ${d.blockedReason}` : ""}`).join("\n") : "_No policy decisions in the last 24h._"}
 
 ### Action Required
 ${data.pendingApprovals.length > 0 ? data.pendingApprovals.map(a => `- **${a.urgency.toUpperCase()}**: ${a.description}`).join("\n") : "_No pending approvals._"}
