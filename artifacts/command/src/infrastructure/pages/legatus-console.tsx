@@ -104,15 +104,39 @@ function StatCard({ icon: Icon, label, value, sub, color, href }: {
   return content;
 }
 
+interface LiveStatus {
+  aquilaScore: number;
+  threatLevel: ThreatLevel;
+  uptime: number;
+  activeAgents: number;
+  p95LatencyMs: number;
+  totalResources: number;
+  generatedAt: string;
+}
+
 export default function LegatusConsole() {
-  const imperium = IMPERIUM_DATA;
-  const [tick, setTick] = useState(0);
+  const base = IMPERIUM_DATA;
+  const [liveStatus, setLiveStatus] = useState<LiveStatus | null>(null);
   const badgeCounts = useOpsBadgeCounts();
 
   useEffect(() => {
-    const t = setInterval(() => setTick((x) => x + 1), 5000);
+    const fetchStatus = () => {
+      fetch("/api/infrastructure/status", { credentials: "include" })
+        .then((r) => r.ok ? r.json() as Promise<LiveStatus> : null)
+        .then((data) => { if (data) setLiveStatus(data); })
+        .catch(() => {});
+    };
+    fetchStatus();
+    const t = setInterval(fetchStatus, 30000);
     return () => clearInterval(t);
   }, []);
+
+  const imperium = {
+    ...base,
+    aquilaScore: liveStatus?.aquilaScore ?? base.aquilaScore,
+    threatLevel: liveStatus?.threatLevel ?? base.threatLevel,
+    totalResources: liveStatus?.totalResources ?? base.totalResources,
+  };
 
   const classEntries = Object.entries(imperium.classificationSummary) as [keyof typeof imperium.classificationSummary, number][];
 
@@ -131,9 +155,16 @@ export default function LegatusConsole() {
             Platform at a glance — {imperium.name}
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <RefreshCw className="w-3 h-3 text-slate-600 animate-spin" style={{ animationDuration: "3s" }} />
-          <span className="text-[10px] font-mono text-slate-600 tracking-widest">LIVE</span>
+        <div className="flex flex-col items-end gap-1">
+          <div className="flex items-center gap-2">
+            <RefreshCw className="w-3 h-3 text-slate-600 animate-spin" style={{ animationDuration: "3s" }} />
+            <span className="text-[10px] font-mono text-slate-600 tracking-widest">LIVE</span>
+          </div>
+          {liveStatus && (
+            <span className="text-[9px] font-mono text-slate-700 tracking-wider">
+              {new Date(liveStatus.generatedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+            </span>
+          )}
         </div>
       </div>
 

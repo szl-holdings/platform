@@ -46,6 +46,9 @@ import atlasArtifactsRouter from "./atlas-artifacts";
 import outcomeGraphRouter from "./outcome-graph";
 import pageViewTrackingRouter from "./page-view-tracking";
 import newsletterRouter from "./newsletter";
+import selfHealingRouter from "./self-healing";
+import simulationWhatIfRouter from "./simulation-whatif";
+import infrastructureStatusRouter from "./infrastructure-status";
 import debugRouter from "./debug";
 import mapsRouter from "./maps";
 import atlasSceneExportRouter from "./atlas-scene-export";
@@ -69,6 +72,22 @@ router.use(pageViewTrackingRouter);
 // subscriptions to the Substack API on behalf of all portfolio sites.
 // /api/newsletter/ is in PUBLIC_PREFIXES in global-auth-enforcer.ts.
 router.use(newsletterRouter);
+
+// Self-healing orchestrator — GET routes are publicly accessible (stats, policies
+// and runs are whitelisted in global-auth-enforcer via PUBLIC_EXACT_PATHS/PREFIX).
+// The PATCH /policies/:id/toggle mutation requires auth and is NOT whitelisted.
+// Must be mounted BEFORE guardianPolicyCheck so the public GETs reach the handler.
+router.use(selfHealingRouter);
+
+// Simulation what-if engine — POST route is public so the Strategy simulation
+// page can compute cross-domain scenario impacts in demo mode. Must be mounted
+// BEFORE guardianPolicyCheck. /api/simulation/ is in PUBLIC_PREFIXES.
+router.use(simulationWhatIfRouter);
+
+// Infrastructure status — lightweight public endpoint used by the Legatus
+// console to show live AquilaScore and threat level. Must be mounted
+// BEFORE guardianPolicyCheck. /api/infrastructure/ is in PUBLIC_PREFIXES.
+router.use(infrastructureStatusRouter);
 
 // Global Guardian policy check — derives category from request path and
 // applies to every agent-facing route family. Read-only methods skip

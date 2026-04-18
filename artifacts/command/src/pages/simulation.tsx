@@ -149,15 +149,20 @@ export default function SimulationPage() {
   const runSimulation = useCallback(async () => {
     setRunning(true);
     try {
+      const csrfMatch = document.cookie.split(";").find((c) => c.trim().startsWith("csrf_token="));
+      const csrfToken = csrfMatch ? decodeURIComponent(csrfMatch.split("=")[1]!) : undefined;
       const res = await fetch("/api/simulation/what-if", {
         method: "POST",
         credentials: "include",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(csrfToken ? { "x-csrf-token": csrfToken } : {}),
+        },
         body: JSON.stringify({ variables: values, iterations }),
       });
       if (res.ok) {
-        const json = await res.json() as { data?: { domainImpacts?: DomainImpact[] } };
-        const apiImpacts = json.data?.domainImpacts;
+        const json = await res.json() as { domainImpacts?: DomainImpact[] };
+        const apiImpacts = json.domainImpacts;
         if (Array.isArray(apiImpacts) && apiImpacts.length > 0) {
           setImpacts(apiImpacts);
           setHasRun(true);

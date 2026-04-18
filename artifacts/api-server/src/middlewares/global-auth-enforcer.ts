@@ -55,6 +55,11 @@ const PUBLIC_EXACT_PATHS = new Set([
   "/api/federation/agents",
   "/api/prism-counsel/health",
   "/api/prism-counsel/readiness",
+  // Self-healing orchestrator — read-only GET endpoints.
+  // Exact-path matches ensure the mutating PATCH /policies/:id/toggle
+  // (which requires auth) is NOT covered by these allowlist entries.
+  "/api/self-healing/stats",
+  "/api/self-healing/policies",
 ]);
 
 const PUBLIC_PREFIXES = [
@@ -89,6 +94,17 @@ const PUBLIC_PREFIXES = [
   // Newsletter subscribe proxy — public, unauthenticated. Visitors on any
   // portfolio marketing page can subscribe to SZL Command without logging in.
   "/api/newsletter/",
+  // Self-healing orchestrator — only /runs and /runs/:id GET requests are
+  // whitelisted here as a prefix (covers the list endpoint and per-run detail).
+  // /stats and /policies use PUBLIC_EXACT_PATHS above so the path-prefix match
+  // cannot bleed into /policies/:id/toggle (the mutating PATCH route).
+  "/api/self-healing/runs",
+  // Simulation what-if engine — POST route is public so the Strategy simulation
+  // page can compute cross-domain scenario impacts in demo mode without a session.
+  "/api/simulation/",
+  // Infrastructure status — lightweight public health summary used by the
+  // Legatus infrastructure console to show live AquilaScore and threat level.
+  "/api/infrastructure/",
 ];
 
 function isValidInternalToken(req: Request): boolean {

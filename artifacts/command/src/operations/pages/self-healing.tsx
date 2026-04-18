@@ -1,5 +1,7 @@
-import { useState, useEffect } from "react";
-import { Zap, CheckCircle, Clock, AlertTriangle, Play, Pause, ChevronRight, Shield, RefreshCw, Activity, RotateCcw } from "lucide-react";
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Zap, CheckCircle, Clock, AlertTriangle, Shield, Activity, RotateCcw, RefreshCw, ChevronRight } from "lucide-react";
+import { apiFetch } from "@szl-holdings/shared-ui";
 
 const GOLD = "#d4a054";
 const DS = {
@@ -47,6 +49,17 @@ interface FailurePattern {
   runbook: string;
 }
 
+interface StatsResponse {
+  totalRuns: number;
+  executing: number;
+  pendingApproval: number;
+  completed: number;
+  totalMttrSavedMins: number;
+  successRate: number;
+  patternsActive: number;
+  patternsTotal: number;
+}
+
 const TYPE_COLOR: Record<PatternType, string> = {
   restart: "#3b82f6",
   scale: "#10b981",
@@ -62,96 +75,6 @@ const STATUS_COLOR: Record<RemediationStatus, string> = {
   failed: "#ef4444",
   queued: "#6b7280",
 };
-
-const PATTERNS: FailurePattern[] = [
-  { id: "p1", name: "Service Restart on OOM", type: "restart", matchCount: 142, successRate: 97.2, avgMttrSavedMins: 34, enabled: true, trigger: "OOM kill detected on pod", runbook: "RUNBOOK-001: Drain → Restart → Health-check → Reroute" },
-  { id: "p2", name: "Auto-Scale on CPU Saturation", type: "scale", matchCount: 89, successRate: 94.4, avgMttrSavedMins: 18, enabled: true, trigger: "CPU > 85% for 5 consecutive minutes", runbook: "RUNBOOK-002: Scale +2 replicas → Verify HPA → Alert" },
-  { id: "p3", name: "DB Failover on Primary Failure", type: "failover", matchCount: 12, successRate: 100, avgMttrSavedMins: 87, enabled: true, trigger: "Primary DB health check failures > 3", runbook: "RUNBOOK-003: Promote replica → Update DNS → Validate" },
-  { id: "p4", name: "Queue Drain on Backlog Overflow", type: "clear_queue", matchCount: 204, successRate: 88.7, avgMttrSavedMins: 12, enabled: true, trigger: "Queue depth > 50k messages for 3 min", runbook: "RUNBOOK-004: Pause producers → Drain → Flush DLQ → Resume" },
-  { id: "p5", name: "Canary Rollback on Error Spike", type: "rollback", matchCount: 28, successRate: 92.9, avgMttrSavedMins: 55, enabled: false, trigger: "Error rate delta > 5% vs baseline on new deploy", runbook: "RUNBOOK-005: Halt canary → Shift traffic → Rollback image" },
-];
-
-const SEED_RUNS: RemediationRun[] = [
-  {
-    id: "REM-4821",
-    patternId: "p1",
-    patternName: "Service Restart on OOM",
-    patternType: "restart",
-    triggerSignal: "api-gateway pod OOM kill — 3 restarts in 10m",
-    service: "api-gateway",
-    detectedAt: Date.now() - 4 * 60000,
-    startedAt: Date.now() - 3.5 * 60000,
-    status: "executing",
-    steps: [
-      { id: "s1", action: "Drain existing connections", status: "done", durationMs: 1240 },
-      { id: "s2", action: "Signal graceful shutdown", status: "done", durationMs: 890 },
-      { id: "s3", action: "Restart pod & await ready state", status: "running" },
-      { id: "s4", action: "Run health check suite", status: "pending" },
-      { id: "s5", action: "Re-route traffic and verify", status: "pending" },
-    ],
-    mttrSavedMins: 34,
-    auditRef: "AUD-2024-4821",
-  },
-  {
-    id: "REM-4819",
-    patternId: "p4",
-    patternName: "Queue Drain on Backlog Overflow",
-    patternType: "clear_queue",
-    triggerSignal: "ml-inference queue depth 78k messages",
-    service: "ml-inference",
-    detectedAt: Date.now() - 22 * 60000,
-    startedAt: Date.now() - 21 * 60000,
-    completedAt: Date.now() - 14 * 60000,
-    status: "completed",
-    steps: [
-      { id: "s1", action: "Pause message producers", status: "done", durationMs: 320 },
-      { id: "s2", action: "Drain backlog queue", status: "done", durationMs: 4100 },
-      { id: "s3", action: "Flush dead letter queue", status: "done", durationMs: 880 },
-      { id: "s4", action: "Resume producers & validate", status: "done", durationMs: 540 },
-    ],
-    mttrSavedMins: 12,
-    auditRef: "AUD-2024-4819",
-  },
-  {
-    id: "REM-4817",
-    patternId: "p2",
-    patternName: "Auto-Scale on CPU Saturation",
-    patternType: "scale",
-    triggerSignal: "auth-service CPU at 91% for 6 consecutive minutes",
-    service: "auth-service",
-    detectedAt: Date.now() - 45 * 60000,
-    status: "pending_approval",
-    steps: [
-      { id: "s1", action: "Scale +2 replicas via HPA", status: "pending" },
-      { id: "s2", action: "Verify pod readiness", status: "pending" },
-      { id: "s3", action: "Alert on-call engineer", status: "pending" },
-    ],
-    mttrSavedMins: 18,
-    approver: "ops-manager",
-    auditRef: "AUD-2024-4817",
-  },
-  {
-    id: "REM-4815",
-    patternId: "p1",
-    patternName: "Service Restart on OOM",
-    patternType: "restart",
-    triggerSignal: "data-pipeline OOM kill",
-    service: "data-pipeline",
-    detectedAt: Date.now() - 3 * 3600000,
-    startedAt: Date.now() - 3 * 3600000 + 30000,
-    completedAt: Date.now() - 3 * 3600000 + 95000,
-    status: "completed",
-    steps: [
-      { id: "s1", action: "Drain existing connections", status: "done", durationMs: 980 },
-      { id: "s2", action: "Signal graceful shutdown", status: "done", durationMs: 720 },
-      { id: "s3", action: "Restart pod & await ready state", status: "done", durationMs: 28000 },
-      { id: "s4", action: "Run health check suite", status: "done", durationMs: 3200 },
-      { id: "s5", action: "Re-route traffic and verify", status: "done", durationMs: 1100 },
-    ],
-    mttrSavedMins: 34,
-    auditRef: "AUD-2024-4815",
-  },
-];
 
 function fmtAgo(ts: number) {
   const s = Math.floor((Date.now() - ts) / 1000);
@@ -239,11 +162,16 @@ function RunCard({ run }: { run: RemediationRun }) {
   );
 }
 
-function PatternRow({ p }: { p: FailurePattern }) {
+function PatternRow({ p, onToggle }: { p: FailurePattern; onToggle: (id: string) => void }) {
   const tc = TYPE_COLOR[p.type];
   return (
     <div className="flex items-center gap-3 py-2.5 px-3 rounded-lg" style={{ background: DS.surface, border: `1px solid ${DS.border}` }}>
-      <div className="w-2 h-2 rounded-full shrink-0" style={{ background: p.enabled ? tc : DS.text.muted }} />
+      <button
+        onClick={() => onToggle(p.id)}
+        className="w-2 h-2 rounded-full shrink-0 transition-all hover:scale-125"
+        style={{ background: p.enabled ? tc : DS.text.muted }}
+        title={p.enabled ? "Click to disable" : "Click to enable"}
+      />
       <div className="flex-1 min-w-0">
         <div className="text-[11px] font-medium" style={{ color: DS.text.primary }}>{p.name}</div>
         <div className="text-[9px] mt-0.5" style={{ color: DS.text.muted }}>{p.trigger}</div>
@@ -261,10 +189,55 @@ function PatternRow({ p }: { p: FailurePattern }) {
 }
 
 export default function SelfHealingPage() {
-  const [runs] = useState<RemediationRun[]>(SEED_RUNS);
   const [tab, setTab] = useState<"runs" | "patterns">("runs");
-  const totalMttrSaved = runs.filter(r => r.status === "completed").reduce((s, r) => s + r.mttrSavedMins, 0);
-  const successRate = runs.length > 0 ? Math.round((runs.filter(r => r.status === "completed").length / runs.filter(r => r.status !== "pending_approval" && r.status !== "queued").length) * 100) : 0;
+  const qc = useQueryClient();
+
+  const statsQuery = useQuery<StatsResponse>({
+    queryKey: ["self-healing-stats"],
+    queryFn: () => apiFetch<StatsResponse>("/self-healing/stats"),
+    refetchInterval: 15000,
+  });
+
+  const runsQuery = useQuery<{ runs: RemediationRun[]; total: number }>({
+    queryKey: ["self-healing-runs"],
+    queryFn: () => apiFetch<{ runs: RemediationRun[]; total: number }>("/self-healing/runs"),
+    refetchInterval: 10000,
+  });
+
+  const policiesQuery = useQuery<{ policies: FailurePattern[] }>({
+    queryKey: ["self-healing-policies"],
+    queryFn: () => apiFetch<{ policies: FailurePattern[] }>("/self-healing/policies"),
+  });
+
+  const getCsrfToken = () => {
+    const m = document.cookie.split(";").find((c) => c.trim().startsWith("csrf_token="));
+    return m ? decodeURIComponent(m.split("=")[1]!) : undefined;
+  };
+
+  const toggleMutation = useMutation({
+    mutationFn: (id: string) => {
+      const csrfToken = getCsrfToken();
+      return apiFetch<{ policy: FailurePattern }>(`/self-healing/policies/${id}/toggle`, {
+        method: "PATCH",
+        headers: csrfToken ? { "x-csrf-token": csrfToken } : undefined,
+      });
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["self-healing-policies"] });
+      void qc.invalidateQueries({ queryKey: ["self-healing-stats"] });
+    },
+  });
+
+  const stats = statsQuery.data;
+  const runs = runsQuery.data?.runs ?? [];
+  const policies = policiesQuery.data?.policies ?? [];
+
+  const totalMttrSaved = stats?.totalMttrSavedMins ?? 0;
+  const successRate = stats?.successRate ?? 0;
+  const executing = stats?.executing ?? 0;
+  const pendingApproval = stats?.pendingApproval ?? 0;
+
+  const isLoading = statsQuery.isLoading && runsQuery.isLoading;
 
   return (
     <div className="p-4 md:p-6 max-w-7xl space-y-6">
@@ -277,47 +250,90 @@ export default function SelfHealingPage() {
           </div>
           <p className="text-[11px]" style={{ color: DS.text.muted }}>Pattern-matched auto-remediation with Alloy approval gates and immutable audit trails. MTTR: hours → seconds.</p>
         </div>
+        <button
+          onClick={() => {
+            void qc.invalidateQueries({ queryKey: ["self-healing-stats"] });
+            void qc.invalidateQueries({ queryKey: ["self-healing-runs"] });
+          }}
+          className="p-2 rounded-lg hover:bg-white/5 transition-colors"
+          style={{ color: DS.text.muted }}
+        >
+          <RefreshCw className={`w-4 h-4 ${statsQuery.isFetching ? "animate-spin" : ""}`} />
+        </button>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {[
-          { label: "MTTR Saved Today", value: `${totalMttrSaved}m`, color: "#10b981", icon: Clock },
-          { label: "Active Executions", value: String(runs.filter(r => r.status === "executing").length), color: "#f59e0b", icon: Activity },
-          { label: "Pending Approval", value: String(runs.filter(r => r.status === "pending_approval").length), color: "#8b5cf6", icon: Shield },
-          { label: "Success Rate", value: `${successRate}%`, color: GOLD, icon: CheckCircle },
-        ].map(k => (
-          <div key={k.label} className="rounded-xl border p-4" style={{ borderColor: DS.border, background: DS.surface }}>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[9px] uppercase tracking-widest" style={{ color: DS.text.muted }}>{k.label}</span>
-              <k.icon className="w-3.5 h-3.5" style={{ color: k.color }} />
+      {isLoading ? (
+        <div className="flex items-center justify-center h-32">
+          <div className="w-6 h-6 border-2 rounded-full animate-spin" style={{ borderColor: "rgba(212,160,84,0.25)", borderTopColor: GOLD }} />
+        </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {[
+              { label: "MTTR Saved Today", value: `${totalMttrSaved}m`, color: "#10b981", icon: Clock },
+              { label: "Active Executions", value: String(executing), color: "#f59e0b", icon: Activity },
+              { label: "Pending Approval", value: String(pendingApproval), color: "#8b5cf6", icon: Shield },
+              { label: "Success Rate", value: `${successRate}%`, color: GOLD, icon: CheckCircle },
+            ].map(k => (
+              <div key={k.label} className="rounded-xl border p-4" style={{ borderColor: DS.border, background: DS.surface }}>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[9px] uppercase tracking-widest" style={{ color: DS.text.muted }}>{k.label}</span>
+                  <k.icon className="w-3.5 h-3.5" style={{ color: k.color }} />
+                </div>
+                <div className="text-[22px] font-bold font-mono" style={{ color: k.color }}>{k.value}</div>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex gap-1 border-b" style={{ borderColor: DS.border }}>
+            {(["runs", "patterns"] as const).map(t => (
+              <button key={t} onClick={() => setTab(t)} className="text-[11px] px-4 py-2 capitalize transition-all" style={{
+                color: tab === t ? GOLD : DS.text.muted,
+                borderBottom: `2px solid ${tab === t ? GOLD : "transparent"}`,
+              }}>{t === "runs" ? "Remediation Runs" : "Pattern Library"}</button>
+            ))}
+          </div>
+
+          {tab === "runs" && (
+            <div className="space-y-3">
+              {runsQuery.isLoading && (
+                <div className="flex items-center justify-center h-24" style={{ color: DS.text.muted }}>
+                  <div className="w-5 h-5 border-2 rounded-full animate-spin mr-2" style={{ borderColor: "rgba(212,160,84,0.25)", borderTopColor: GOLD }} />
+                  Loading runs...
+                </div>
+              )}
+              {!runsQuery.isLoading && runs.length === 0 && (
+                <div className="flex items-center justify-center h-24 rounded-xl border" style={{ borderColor: DS.border, color: DS.text.muted }}>
+                  <span className="text-[11px]">No remediation runs found</span>
+                </div>
+              )}
+              {runs.map(r => <RunCard key={r.id} run={r} />)}
             </div>
-            <div className="text-[22px] font-bold font-mono" style={{ color: k.color }}>{k.value}</div>
-          </div>
-        ))}
-      </div>
+          )}
 
-      <div className="flex gap-1 border-b" style={{ borderColor: DS.border }}>
-        {(["runs", "patterns"] as const).map(t => (
-          <button key={t} onClick={() => setTab(t)} className="text-[11px] px-4 py-2 capitalize transition-all" style={{
-            color: tab === t ? GOLD : DS.text.muted,
-            borderBottom: `2px solid ${tab === t ? GOLD : "transparent"}`,
-          }}>{t === "runs" ? "Remediation Runs" : "Pattern Library"}</button>
-        ))}
-      </div>
-
-      {tab === "runs" && (
-        <div className="space-y-3">
-          {runs.map(r => <RunCard key={r.id} run={r} />)}
-        </div>
-      )}
-
-      {tab === "patterns" && (
-        <div className="space-y-2">
-          <div className="text-[10px] mb-3" style={{ color: DS.text.muted }}>
-            {PATTERNS.filter(p => p.enabled).length} patterns active · {PATTERNS.filter(p => !p.enabled).length} disabled
-          </div>
-          {PATTERNS.map(p => <PatternRow key={p.id} p={p} />)}
-        </div>
+          {tab === "patterns" && (
+            <div className="space-y-2">
+              {policiesQuery.isLoading && (
+                <div className="flex items-center justify-center h-24" style={{ color: DS.text.muted }}>
+                  <div className="w-5 h-5 border-2 rounded-full animate-spin mr-2" style={{ borderColor: "rgba(212,160,84,0.25)", borderTopColor: GOLD }} />
+                  Loading policies...
+                </div>
+              )}
+              {!policiesQuery.isLoading && (
+                <div className="text-[10px] mb-3" style={{ color: DS.text.muted }}>
+                  {policies.filter(p => p.enabled).length} patterns active · {policies.filter(p => !p.enabled).length} disabled
+                </div>
+              )}
+              {policies.map(p => (
+                <PatternRow
+                  key={p.id}
+                  p={p}
+                  onToggle={(id) => toggleMutation.mutate(id)}
+                />
+              ))}
+            </div>
+          )}
+        </>
       )}
     </div>
   );

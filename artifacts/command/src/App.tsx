@@ -108,14 +108,9 @@ const MetricsExplorer = lazy(() => import("@lyte/pages/metrics-explorer"));
 const ServiceTopology = lazy(() => import("@lyte/pages/service-topology"));
 const LogExplorer = lazy(() => import("@lyte/pages/log-explorer"));
 const AlertManagement = lazy(() => import("@lyte/pages/alert-management"));
-const DemoSignals = lazy(() => import("@lyte/pages/demo-signals"));
-const DemoAlerts = lazy(() => import("@lyte/pages/demo-alerts"));
-const DemoPriorities = lazy(() => import("@lyte/pages/demo-priorities"));
-const DemoWorkflows = lazy(() => import("@lyte/pages/demo-workflows"));
-const DemoRecommendations = lazy(() => import("@lyte/pages/demo-recommendations"));
-const DemoAudit = lazy(() => import("@lyte/pages/demo-audit"));
-const DemoExceptions = lazy(() => import("@lyte/pages/demo-exceptions"));
-const DemoReadiness = lazy(() => import("@lyte/pages/demo-readiness"));
+const LiveSignals = lazy(() => import("@lyte/pages/signals"));
+const LiveRecommendations = lazy(() => import("@lyte/pages/recommendations"));
+const LiveReadiness = lazy(() => import("@lyte/pages/readiness"));
 const AutonomousNOC = lazy(() => import("@lyte/pages/autonomous-noc"));
 const DEXScoring = lazy(() => import("@lyte/pages/dex-scoring"));
 const RunbookStudio = lazy(() => import("@lyte/pages/runbook-studio"));
@@ -246,7 +241,7 @@ function AppShell() {
               <Route path="/operations/prism/pulse" component={() => <PrismDashboard />} />
               <Route path="/operations/prism/risk" component={() => <PrismDashboard />} />
               <Route path="/operations/prism/intelligence" component={() => <PrismDashboard />} />
-              <Route path="/operations/prism/signals" component={() => <DemoSignals />} />
+              <Route path="/operations/prism/signals" component={() => <LiveSignals />} />
               <Route path="/operations/prism/motion" component={() => <ActionQueue />} />
               <Route path="/operations/prism/atlas-execute" component={() => <PrismAtlasExecute />} />
               <Route path="/operations/blocker-board" component={() => <BlockerBoard />} />
@@ -262,14 +257,14 @@ function AppShell() {
               <Route path="/operations/escalation" component={() => <EscalationCenter />} />
               <Route path="/operations/queue" component={() => <OperationalQueue />} />
               <Route path="/operations/action-queue" component={() => <ActionQueue />} />
-              <Route path="/operations/signals" component={() => <DemoSignals />} />
-              <Route path="/operations/alerts" component={() => <DemoAlerts />} />
-              <Route path="/operations/priorities" component={() => <DemoPriorities />} />
-              <Route path="/operations/workflows" component={() => <DemoWorkflows />} />
-              <Route path="/operations/recommendations" component={() => <DemoRecommendations />} />
-              <Route path="/operations/audit" component={() => <DemoAudit />} />
-              <Route path="/operations/exceptions" component={() => <DemoExceptions />} />
-              <Route path="/operations/readiness" component={() => <DemoReadiness />} />
+              <Route path="/operations/signals" component={() => <LiveSignals />} />
+              <Route path="/operations/alerts" component={() => <AlertManagement />} />
+              <Route path="/operations/priorities" component={() => <ActionQueue />} />
+              <Route path="/operations/workflows" component={() => <AlloyWorkflowCanvas />} />
+              <Route path="/operations/recommendations" component={() => <LiveRecommendations />} />
+              <Route path="/operations/audit" component={() => <TrustAudit />} />
+              <Route path="/operations/exceptions" component={() => <EscalationCenter />} />
+              <Route path="/operations/readiness" component={() => <LiveReadiness />} />
               <Route path="/operations/metrics" component={() => <MetricsExplorer />} />
               <Route path="/operations/topology" component={() => <ServiceTopology />} />
               <Route path="/operations/logs" component={() => <LogExplorer />} />
