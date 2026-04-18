@@ -194,6 +194,11 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
     // approvals, audit trails, and agent memory survive restarts.
     await initDurablePersistence();
 
+    // Step 2b-2: Wire AI evaluation traces and review queue to Postgres so
+    // all AI ops data survives server restarts.
+    const { initAiEvalsPersistence } = await import("./lib/ai-evals-persistence.js");
+    await initAiEvalsPersistence();
+
     // Step 2c: Hydrate the shared Guardian decision engine from policy rows
     // and warm the Alloy RunManager singleton so any agent endpoint can
     // submit work as soon as the server starts accepting traffic.

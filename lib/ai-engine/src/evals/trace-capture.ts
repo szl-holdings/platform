@@ -104,9 +104,14 @@ const inMemoryTraces: AITrace[] = [];
 const MAX_IN_MEMORY_TRACES = 5000;
 
 let externalSink: ((trace: AITrace) => Promise<void>) | null = null;
+let externalUpdateSink: ((traceId: string, status: TraceStatus, evalScore?: number, evalPassed?: boolean) => Promise<void>) | null = null;
 
 export function registerTraceSink(sink: (trace: AITrace) => Promise<void>): void {
   externalSink = sink;
+}
+
+export function registerTraceUpdateSink(sink: (traceId: string, status: TraceStatus, evalScore?: number, evalPassed?: boolean) => Promise<void>): void {
+  externalUpdateSink = sink;
 }
 
 function computePromptHash(promptText: string): string {
@@ -167,10 +172,24 @@ export function captureTrace(input: TraceCaptureInput): AITrace {
   }
 
   if (externalSink) {
-    externalSink(trace).catch(() => {});
+    externalSink(trace).catch((err) => {
+      console.error("[ai-engine/trace-capture] sink write failed for traceId=%s: %s", trace.traceId, err instanceof Error ? err.message : String(err));
+    });
   }
 
   return trace;
+}
+
+export function hydrateTraces(traces: AITrace[]): void {
+  for (const trace of traces) {
+    if (!inMemoryTraces.find(t => t.traceId === trace.traceId)) {
+      inMemoryTraces.push(trace);
+    }
+  }
+  inMemoryTraces.sort((a, b) => new Date(b.capturedAt).getTime() - new Date(a.capturedAt).getTime());
+  if (inMemoryTraces.length > MAX_IN_MEMORY_TRACES) {
+    inMemoryTraces.length = MAX_IN_MEMORY_TRACES;
+  }
 }
 
 export function getTrace(traceId: string): AITrace | undefined {
@@ -183,6 +202,8 @@ export function listTraces(options: {
   requiresReview?: boolean;
   status?: TraceStatus;
   riskLevel?: string;
+  since?: Date;
+  until?: Date;
   limit?: number;
   offset?: number;
 } = {}): AITrace[] {
@@ -193,6 +214,8 @@ export function listTraces(options: {
   if (options.requiresReview != null) results = results.filter(t => t.requiresReview === options.requiresReview);
   if (options.status) results = results.filter(t => t.status === options.status);
   if (options.riskLevel) results = results.filter(t => t.riskLevel === options.riskLevel);
+  if (options.since) results = results.filter(t => new Date(t.capturedAt) >= options.since!);
+  if (options.until) results = results.filter(t => new Date(t.capturedAt) <= options.until!);
 
   const offset = options.offset ?? 0;
   const limit = options.limit ?? 100;
@@ -205,6 +228,13 @@ export function updateTraceStatus(traceId: string, status: TraceStatus, evalScor
   trace.status = status;
   if (evalScore != null) trace.evalScore = evalScore;
   if (evalPassed != null) trace.evalPassed = evalPassed;
+
+  if (externalUpdateSink) {
+    externalUpdateSink(traceId, status, evalScore, evalPassed).catch((err) => {
+      console.error("[ai-engine/trace-capture] update sink failed for traceId=%s: %s", traceId, err instanceof Error ? err.message : String(err));
+    });
+  }
+
   return true;
 }
 

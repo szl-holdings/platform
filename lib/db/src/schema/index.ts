@@ -128,6 +128,7 @@ export * from "./eval_os";
 export * from "./eval_forge";
 export * from "./deployments";
 export * from "./cognitive_runtime";
+export * from "./ai_evals";
 
 export * from "./skill_library";
 export * from "./signal_chain_executions";

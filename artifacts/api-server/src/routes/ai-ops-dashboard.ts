@@ -30,15 +30,15 @@ import { authMiddleware, requireRole } from "../middlewares/auth";
 import type { AuthenticatedUser } from "../middlewares/auth";
 import {
   captureTrace,
-  getTrace,
-  listTraces,
+  getTrace as getTraceMemory,
+  listTraces as listTracesMemory,
   updateTraceStatus,
-  aggregateTraces,
-  listReviewQueue,
-  getReviewItem,
+  aggregateTraces as aggregateTracesMemory,
+  listReviewQueue as listReviewQueueMemory,
+  getReviewItem as getReviewItemMemory,
   recordReviewDecision,
   markInReview,
-  getReviewQueueStats,
+  getReviewQueueStats as getReviewQueueStatsMemory,
   listEvaluatorHooks,
   aggregateHookStats,
   enqueueForReview,
@@ -46,12 +46,34 @@ import {
   type TraceStatus,
   type ReviewVerdict,
 } from "@szl-holdings/ai-engine";
+import {
+  isDbAvailable,
+  dbListTraces,
+  dbGetTrace,
+  dbAggregateTraces,
+  dbListReviewQueue,
+  dbGetReviewItem,
+  dbGetReviewQueueStats,
+  dbUpdateTraceStatus,
+  dbMarkInReview,
+  dbRecordReviewDecision,
+} from "../lib/ai-evals-db-reader";
 import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
 
 function getOrgId(user?: AuthenticatedUser): number | undefined {
   return user?.orgs?.[0]?.orgId ?? undefined;
+}
+
+function parsePaginationInt(raw: string | undefined, defaultValue: number, max: number): number {
+  if (raw == null || raw === "") return defaultValue;
+  const n = Number(raw);
+  if (!Number.isFinite(n) || Number.isNaN(n)) return defaultValue;
+  const floored = Math.floor(n);
+  if (floored < 0) return 0;
+  if (floored > max) return max;
+  return floored;
 }
 
 function isGlobalAdmin(user?: AuthenticatedUser): boolean {
@@ -75,7 +97,7 @@ router.get(
   "/ai/ops/summary",
   authMiddleware({ required: true }),
   requireRole("analyst", "operator", "admin", "super_admin"),
-  (req, res) => {
+  async (req, res) => {
     try {
       if (isMissingTenantScope(req.user)) {
         sendForbidden(res, "No organization context — cannot scope AI ops data");
@@ -84,8 +106,14 @@ router.get(
       const orgId = getOrgId(req.user);
       const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
-      const traceAggregates = aggregateTraces({ orgId, since });
-      const reviewStats = getReviewQueueStats(orgId);
+      const [traceAggregates, reviewStats] = await Promise.all([
+        isDbAvailable()
+          ? dbAggregateTraces({ orgId, since })
+          : Promise.resolve(aggregateTracesMemory({ orgId, since })),
+        isDbAvailable()
+          ? dbGetReviewQueueStats(orgId).then(s => s ?? getReviewQueueStatsMemory(orgId))
+          : Promise.resolve(getReviewQueueStatsMemory(orgId)),
+      ]);
       const hookStats = aggregateHookStats();
 
       const totalTraces = traceAggregates.reduce((s: number, a: typeof traceAggregates[0]) => s + a.totalTraces, 0);
@@ -144,7 +172,7 @@ router.get(
   "/ai/ops/traces",
   authMiddleware({ required: true }),
   requireRole("analyst", "operator", "admin", "super_admin"),
-  (req, res) => {
+  async (req, res) => {
     try {
       if (isMissingTenantScope(req.user)) {
         sendForbidden(res, "No organization context — cannot scope AI ops data");
@@ -155,20 +183,45 @@ router.get(
       const requiresReviewQ = req.query["requiresReview"] as string | undefined;
       const status = req.query["status"] as string | undefined;
       const riskLevel = req.query["riskLevel"] as string | undefined;
+      const sinceQ = req.query["since"] as string | undefined;
+      const untilQ = req.query["until"] as string | undefined;
       const limitQ = req.query["limit"] as string | undefined;
       const offsetQ = req.query["offset"] as string | undefined;
 
-      const traces = listTraces({
+      const since = sinceQ ? new Date(sinceQ) : undefined;
+      const until = untilQ ? new Date(untilQ) : undefined;
+
+      if (since && isNaN(since.getTime())) {
+        sendBadRequest(res, "Invalid 'since' date format — use ISO 8601");
+        return;
+      }
+      if (until && isNaN(until.getTime())) {
+        sendBadRequest(res, "Invalid 'until' date format — use ISO 8601");
+        return;
+      }
+
+      const limit = parsePaginationInt(limitQ, 50, 200);
+      const offset = parsePaginationInt(offsetQ, 0, Number.MAX_SAFE_INTEGER);
+      const queryOpts = {
         orgId,
         domain: domain as TraceDomain | undefined,
         requiresReview: requiresReviewQ === "true" ? true : requiresReviewQ === "false" ? false : undefined,
         status: status as TraceStatus | undefined,
         riskLevel: riskLevel || undefined,
-        limit: Math.min(Number(limitQ ?? "50"), 200),
-        offset: Number(offsetQ ?? "0"),
-      });
+        since,
+        until,
+        limit,
+        offset,
+      };
 
-      sendSuccess(res, { traces, count: traces.length });
+      if (isDbAvailable()) {
+        const { traces, total } = await dbListTraces(queryOpts);
+        sendSuccess(res, { traces, count: traces.length, total, limit, offset });
+        return;
+      }
+
+      const traces = listTracesMemory(queryOpts);
+      sendSuccess(res, { traces, count: traces.length, limit, offset });
     } catch (err) {
       handleRouteError(res, err, "GET /ai/ops/traces");
     }
@@ -208,9 +261,12 @@ router.get(
   "/ai/ops/traces/:traceId",
   authMiddleware({ required: true }),
   requireRole("analyst", "operator", "admin", "super_admin"),
-  (req, res) => {
+  async (req, res) => {
     try {
-      const trace = getTrace(String(req.params.traceId));
+      const traceId = String(req.params.traceId);
+      const trace = isDbAvailable()
+        ? (await dbGetTrace(traceId)) ?? getTraceMemory(traceId)
+        : getTraceMemory(traceId);
       if (!trace) {
         sendNotFound(res, "trace");
         return;
@@ -230,7 +286,7 @@ router.patch(
   "/ai/ops/traces/:traceId/status",
   authMiddleware({ required: true }),
   requireRole("operator", "admin", "super_admin"),
-  (req, res) => {
+  async (req, res) => {
     try {
       const body = req.body as { status?: TraceStatus; evalScore?: number; evalPassed?: boolean };
       if (!body.status) {
@@ -239,15 +295,26 @@ router.patch(
       }
 
       const traceId = String(req.params.traceId);
-      const existing = getTrace(traceId);
+      const existing = isDbAvailable()
+        ? (await dbGetTrace(traceId)) ?? getTraceMemory(traceId)
+        : getTraceMemory(traceId);
       if (!existing || !canAccessOrgResource(req.user, existing.orgId)) {
         sendNotFound(res, "trace");
         return;
       }
-      const updated = updateTraceStatus(traceId, body.status, body.evalScore, body.evalPassed);
-      if (!updated) {
-        sendNotFound(res, "trace");
-        return;
+
+      if (isDbAvailable()) {
+        const dbUpdated = await dbUpdateTraceStatus(traceId, body.status, body.evalScore, body.evalPassed);
+        if (!dbUpdated) {
+          sendNotFound(res, "trace");
+          return;
+        }
+      } else {
+        const memUpdated = updateTraceStatus(traceId, body.status, body.evalScore, body.evalPassed);
+        if (!memUpdated) {
+          sendNotFound(res, "trace");
+          return;
+        }
       }
 
       sendSuccess(res, { traceId, status: body.status });
@@ -261,14 +328,16 @@ router.get(
   "/ai/ops/review-queue/stats",
   authMiddleware({ required: true }),
   requireRole("analyst", "operator", "admin", "super_admin"),
-  (req, res) => {
+  async (req, res) => {
     try {
       if (isMissingTenantScope(req.user)) {
         sendForbidden(res, "No organization context — cannot scope review queue data");
         return;
       }
       const orgId = getOrgId(req.user);
-      const stats = getReviewQueueStats(orgId);
+      const stats = isDbAvailable()
+        ? (await dbGetReviewQueueStats(orgId)) ?? getReviewQueueStatsMemory(orgId)
+        : getReviewQueueStatsMemory(orgId);
       sendSuccess(res, stats);
     } catch (err) {
       handleRouteError(res, err, "GET /ai/ops/review-queue/stats");
@@ -280,7 +349,7 @@ router.get(
   "/ai/ops/review-queue",
   authMiddleware({ required: true }),
   requireRole("analyst", "operator", "admin", "super_admin"),
-  (req, res) => {
+  async (req, res) => {
     try {
       if (isMissingTenantScope(req.user)) {
         sendForbidden(res, "No organization context — cannot scope review queue data");
@@ -291,20 +360,45 @@ router.get(
       const status = req.query["status"] as ("pending" | "in_review" | "resolved" | "escalated") | undefined;
       const priority = req.query["priority"] as ("low" | "medium" | "high" | "critical") | undefined;
       const verdict = req.query["verdict"] as ReviewVerdict | undefined;
+      const sinceQ = req.query["since"] as string | undefined;
+      const untilQ = req.query["until"] as string | undefined;
       const limitQ = req.query["limit"] as string | undefined;
       const offsetQ = req.query["offset"] as string | undefined;
 
-      const items = listReviewQueue({
+      const since = sinceQ ? new Date(sinceQ) : undefined;
+      const until = untilQ ? new Date(untilQ) : undefined;
+
+      if (since && isNaN(since.getTime())) {
+        sendBadRequest(res, "Invalid 'since' date format — use ISO 8601");
+        return;
+      }
+      if (until && isNaN(until.getTime())) {
+        sendBadRequest(res, "Invalid 'until' date format — use ISO 8601");
+        return;
+      }
+
+      const limit = parsePaginationInt(limitQ, 50, 200);
+      const offset = parsePaginationInt(offsetQ, 0, Number.MAX_SAFE_INTEGER);
+      const queryOpts = {
         orgId,
         domain: domain || undefined,
         status,
         priority,
         verdict,
-        limit: Math.min(Number(limitQ ?? "50"), 200),
-        offset: Number(offsetQ ?? "0"),
-      });
+        since,
+        until,
+        limit,
+        offset,
+      };
 
-      sendSuccess(res, { items, count: items.length });
+      if (isDbAvailable()) {
+        const { items, total } = await dbListReviewQueue(queryOpts);
+        sendSuccess(res, { items, count: items.length, total, limit, offset });
+        return;
+      }
+
+      const items = listReviewQueueMemory(queryOpts);
+      sendSuccess(res, { items, count: items.length, limit, offset });
     } catch (err) {
       handleRouteError(res, err, "GET /ai/ops/review-queue");
     }
@@ -315,19 +409,29 @@ router.patch(
   "/ai/ops/review-queue/:reviewId/claim",
   authMiddleware({ required: true }),
   requireRole("analyst", "operator", "admin", "super_admin"),
-  (req, res) => {
+  async (req, res) => {
     try {
       const reviewId = String(req.params.reviewId);
-      const item = getReviewItem(reviewId);
+      const item = isDbAvailable()
+        ? (await dbGetReviewItem(reviewId)) ?? getReviewItemMemory(reviewId)
+        : getReviewItemMemory(reviewId);
       if (!item || !canAccessOrgResource(req.user, item.orgId)) {
         sendNotFound(res, "review item");
         return;
       }
 
-      const claimed = markInReview(reviewId);
-      if (!claimed) {
-        sendBadRequest(res, "Item cannot be claimed — it may already be in review or resolved");
-        return;
+      if (isDbAvailable()) {
+        const dbClaimed = await dbMarkInReview(reviewId);
+        if (!dbClaimed) {
+          sendBadRequest(res, "Item cannot be claimed — it may already be in review or resolved");
+          return;
+        }
+      } else {
+        const claimed = markInReview(reviewId);
+        if (!claimed) {
+          sendBadRequest(res, "Item cannot be claimed — it may already be in review or resolved");
+          return;
+        }
       }
       sendSuccess(res, { reviewId, status: "in_review" });
     } catch (err) {
@@ -340,7 +444,7 @@ router.patch(
   "/ai/ops/review-queue/:reviewId/decision",
   authMiddleware({ required: true }),
   requireRole("operator", "admin", "super_admin"),
-  (req, res) => {
+  async (req, res) => {
     try {
       const user = req.user;
       if (!user?.id) {
@@ -356,25 +460,42 @@ router.patch(
       }
 
       const reviewId = String(req.params.reviewId);
-      const existing = getReviewItem(reviewId);
+      const existing = isDbAvailable()
+        ? (await dbGetReviewItem(reviewId)) ?? getReviewItemMemory(reviewId)
+        : getReviewItemMemory(reviewId);
       if (!existing || !canAccessOrgResource(req.user, existing.orgId)) {
         sendNotFound(res, "review item");
         return;
       }
-      const updated = recordReviewDecision({
+
+      if (isDbAvailable()) {
+        const dbUpdated = await dbRecordReviewDecision({
+          reviewId,
+          verdict: body.verdict,
+          reviewedBy: user.id,
+          reviewNotes: body.reviewNotes,
+          escalatedTo: body.escalatedTo,
+        });
+        if (!dbUpdated) {
+          sendNotFound(res, "review item");
+          return;
+        }
+        sendSuccess(res, dbUpdated);
+        return;
+      }
+
+      const memUpdated = recordReviewDecision({
         reviewId,
         verdict: body.verdict,
         reviewedBy: user.id,
         reviewNotes: body.reviewNotes,
         escalatedTo: body.escalatedTo,
       });
-
-      if (!updated) {
+      if (!memUpdated) {
         sendNotFound(res, "review item");
         return;
       }
-
-      sendSuccess(res, updated);
+      sendSuccess(res, memUpdated);
     } catch (err) {
       handleRouteError(res, err, "PATCH /ai/ops/review-queue/:reviewId/decision");
     }
@@ -445,14 +566,16 @@ const MAX_FEEDBACK = 5000;
 router.post(
   "/ai/ops/traces/:id/feedback",
   authMiddleware({ required: true }),
-  (req, res) => {
+  async (req, res) => {
     try {
       const traceId = String(req.params.id ?? "").trim();
       if (!traceId) {
         sendBadRequest(res, "trace id required");
         return;
       }
-      const trace = getTrace(traceId);
+      const trace = isDbAvailable()
+        ? (await dbGetTrace(traceId)) ?? getTraceMemory(traceId)
+        : getTraceMemory(traceId);
       if (!trace) {
         sendNotFound(res, "trace not found");
         return;
@@ -485,8 +608,14 @@ router.post(
 
       let reviewQueued = false;
       if (sentiment === "down") {
-        updateTraceStatus(traceId, "flagged");
-        const existingQueueItems = listReviewQueue({ orgId: trace.orgId ?? undefined });
+        if (isDbAvailable()) {
+          await dbUpdateTraceStatus(traceId, "flagged");
+        } else {
+          updateTraceStatus(traceId, "flagged");
+        }
+        const existingQueueItems = isDbAvailable()
+          ? (await dbListReviewQueue({ orgId: trace.orgId ?? undefined, limit: 200, offset: 0 })).items
+          : listReviewQueueMemory({ orgId: trace.orgId ?? undefined });
         const alreadyInQueue = existingQueueItems.some(
           q => q.traceId === traceId && (q.status === "pending" || q.status === "in_review"),
         );
@@ -529,10 +658,12 @@ router.get(
   "/ai/ops/traces/:id/feedback",
   authMiddleware({ required: true }),
   requireRole("analyst", "operator", "admin", "super_admin"),
-  (req, res) => {
+  async (req, res) => {
     try {
       const traceId = String(req.params.id ?? "").trim();
-      const trace = getTrace(traceId);
+      const trace = isDbAvailable()
+        ? (await dbGetTrace(traceId)) ?? getTraceMemory(traceId)
+        : getTraceMemory(traceId);
       if (!trace) {
         sendNotFound(res, "trace not found");
         return;

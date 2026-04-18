@@ -56,6 +56,18 @@ export interface ReviewDecisionInput {
 const queue: ReviewQueueItem[] = [];
 const MAX_QUEUE_SIZE = 10000;
 
+type ReviewQueueWriteSink = {
+  onEnqueue?: (item: ReviewQueueItem) => Promise<void>;
+  onDecision?: (item: ReviewQueueItem) => Promise<void>;
+  onClaim?: (reviewId: string) => Promise<void>;
+};
+
+let reviewQueueSink: ReviewQueueWriteSink | null = null;
+
+export function registerReviewQueueSink(sink: ReviewQueueWriteSink): void {
+  reviewQueueSink = sink;
+}
+
 function computePriority(trace: AITrace): ReviewPriority {
   if (trace.riskLevel === "critical") return "critical";
   if (trace.riskLevel === "high") return "high";
@@ -94,6 +106,12 @@ export function enqueueForReview(input: EnqueueReviewInput): ReviewQueueItem {
   queue.unshift(item);
   if (queue.length > MAX_QUEUE_SIZE) queue.length = MAX_QUEUE_SIZE;
 
+  if (reviewQueueSink?.onEnqueue) {
+    reviewQueueSink.onEnqueue(item).catch((err) => {
+      console.error("[ai-engine/review-queue] onEnqueue sink failed for reviewId=%s: %s", item.reviewId, err instanceof Error ? err.message : String(err));
+    });
+  }
+
   return item;
 }
 
@@ -107,6 +125,8 @@ export function listReviewQueue(options: {
   status?: ReviewQueueItem["status"];
   priority?: ReviewPriority;
   verdict?: ReviewVerdict;
+  since?: Date;
+  until?: Date;
   limit?: number;
   offset?: number;
 } = {}): ReviewQueueItem[] {
@@ -117,6 +137,8 @@ export function listReviewQueue(options: {
   if (options.status) results = results.filter(i => i.status === options.status);
   if (options.priority) results = results.filter(i => i.priority === options.priority);
   if (options.verdict) results = results.filter(i => i.verdict === options.verdict);
+  if (options.since) results = results.filter(i => new Date(i.enqueuedAt) >= options.since!);
+  if (options.until) results = results.filter(i => new Date(i.enqueuedAt) <= options.until!);
 
   const offset = options.offset ?? 0;
   const limit = options.limit ?? 50;
@@ -134,6 +156,12 @@ export function recordReviewDecision(input: ReviewDecisionInput): ReviewQueueIte
   item.reviewedAt = new Date().toISOString();
   item.status = input.verdict === "escalated" ? "escalated" : "resolved";
 
+  if (reviewQueueSink?.onDecision) {
+    reviewQueueSink.onDecision(item).catch((err) => {
+      console.error("[ai-engine/review-queue] onDecision sink failed for reviewId=%s: %s", item.reviewId, err instanceof Error ? err.message : String(err));
+    });
+  }
+
   return item;
 }
 
@@ -141,7 +169,24 @@ export function markInReview(reviewId: string): boolean {
   const item = queue.find(i => i.reviewId === reviewId);
   if (!item || item.status !== "pending") return false;
   item.status = "in_review";
+
+  if (reviewQueueSink?.onClaim) {
+    reviewQueueSink.onClaim(reviewId).catch((err) => {
+      console.error("[ai-engine/review-queue] onClaim sink failed for reviewId=%s: %s", reviewId, err instanceof Error ? err.message : String(err));
+    });
+  }
+
   return true;
+}
+
+export function hydrateReviewQueue(items: ReviewQueueItem[]): void {
+  for (const item of items) {
+    if (!queue.find(q => q.reviewId === item.reviewId)) {
+      queue.push(item);
+    }
+  }
+  queue.sort((a, b) => new Date(b.enqueuedAt).getTime() - new Date(a.enqueuedAt).getTime());
+  if (queue.length > MAX_QUEUE_SIZE) queue.length = MAX_QUEUE_SIZE;
 }
 
 export interface ReviewQueueStats {
