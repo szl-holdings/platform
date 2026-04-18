@@ -18,6 +18,7 @@ import * as LocalAuthentication from "expo-local-authentication";
 import { useColors } from "@/hooks/useColors";
 import { apiFetch, apiFetchRaw } from "@/lib/apiClient";
 import { useSyncEngine } from "@szl-holdings/mobile-shared";
+import { cacheSet, cacheGetStale } from "@/lib/cache";
 
 interface IncidentDetail {
   id: number;
@@ -97,7 +98,17 @@ export default function IncidentDetailScreen() {
 
   const { data: incident, isLoading, error } = useQuery({
     queryKey: ["aegis-incident", id],
-    queryFn: () => fetchIncidentWithETag(id!, (etag) => { knownETagRef.current = etag; }),
+    queryFn: async () => {
+      try {
+        const detail = await fetchIncidentWithETag(id!, (etag) => { knownETagRef.current = etag; });
+        await cacheSet(`incident:${id}`, detail);
+        return detail;
+      } catch {
+        const cached = await cacheGetStale<IncidentDetail>(`incident:${id}`);
+        if (cached) return cached;
+        throw new Error("Incident not available offline");
+      }
+    },
     enabled: !!id && biometricPassed,
   });
 

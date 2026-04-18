@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import {
   View,
   Text,
@@ -12,10 +12,82 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useColors } from "@/hooks/useColors";
 import { apiGet, apiPut } from "@/lib/apiClient";
+import { useSyncEngine } from "@szl-holdings/mobile-shared";
+import { cacheSet, cacheGetStale } from "@/lib/cache";
+
+const TRADECRAFT_QUEUE_KEY = "defense:tradecraft-offline-queue";
+
+interface QueuedAction {
+  objectId: string;
+  decisionSummary: string;
+  action: "approve" | "reject";
+  queuedAt: string;
+}
+
+async function loadTradecraftQueue(): Promise<QueuedAction[]> {
+  try {
+    const AsyncStorage = (await import("@react-native-async-storage/async-storage")).default;
+    const raw = await AsyncStorage.getItem(TRADECRAFT_QUEUE_KEY);
+    return raw ? (JSON.parse(raw) as QueuedAction[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+async function saveTradecraftQueue(items: QueuedAction[]): Promise<void> {
+  try {
+    const AsyncStorage = (await import("@react-native-async-storage/async-storage")).default;
+    await AsyncStorage.setItem(TRADECRAFT_QUEUE_KEY, JSON.stringify(items));
+  } catch {}
+}
+
+function QueuedActionCard({
+  item, colors, onRetry, onDiscard,
+}: {
+  item: QueuedAction;
+  colors: ReturnType<typeof useColors>;
+  onRetry: (item: QueuedAction) => void;
+  onDiscard: (objectId: string) => void;
+}) {
+  const actionColor = item.action === "approve" ? "#22c55e" : "#ef4444";
+  return (
+    <View style={[styles.queuedCard, { backgroundColor: colors.navyLight, borderColor: "#f59e0b40" }]}>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 6 }}>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 7, paddingVertical: 3, borderRadius: 8, backgroundColor: "#f59e0b15", borderWidth: 1, borderColor: "#f59e0b40" }}>
+          <Feather name="clock" size={9} color="#f59e0b" />
+          <Text style={{ fontSize: 9, fontWeight: "700", color: "#f59e0b", letterSpacing: 0.5 }}>QUEUED OFFLINE</Text>
+        </View>
+        <View style={{ paddingHorizontal: 7, paddingVertical: 3, borderRadius: 8, backgroundColor: actionColor + "18", borderWidth: 1, borderColor: actionColor + "35" }}>
+          <Text style={{ fontSize: 9, fontWeight: "700", color: actionColor, letterSpacing: 0.5 }}>{item.action.toUpperCase()}</Text>
+        </View>
+      </View>
+      <Text style={{ fontSize: 13, fontFamily: "SpaceGrotesk_600SemiBold", color: colors.foreground, marginBottom: 4 }} numberOfLines={2}>
+        {item.decisionSummary}
+      </Text>
+      <Text style={{ fontSize: 10, color: colors.muted, marginBottom: 10 }}>{item.objectId.slice(0, 12)}</Text>
+      <View style={{ flexDirection: "row", gap: 10 }}>
+        <TouchableOpacity
+          onPress={() => onRetry(item)}
+          style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 5, paddingVertical: 8, borderRadius: 8, backgroundColor: "#c9a84c18", borderWidth: 1, borderColor: "#c9a84c40" }}
+        >
+          <Feather name="upload-cloud" size={11} color="#c9a84c" />
+          <Text style={{ fontSize: 11, fontWeight: "600", color: "#c9a84c" }}>Retry Now</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => onDiscard(item.objectId)}
+          style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 5, paddingVertical: 8, borderRadius: 8, backgroundColor: "#ef444418", borderWidth: 1, borderColor: "#ef444440" }}
+        >
+          <Feather name="trash-2" size={11} color="#ef4444" />
+          <Text style={{ fontSize: 11, fontWeight: "600", color: "#ef4444" }}>Discard</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+}
 
 interface Decision {
   id?: number;
@@ -162,20 +234,85 @@ export default function ApprovalsTab() {
   const insets = useSafeAreaInsets();
   const [approving, setApproving] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "pending" | "approved">("pending");
+  const [offlineQueue, setOfflineQueue] = useState<QueuedAction[]>([]);
+  const [queueLoaded, setQueueLoaded] = useState(false);
   const queryClient = useQueryClient();
+  const syncEngine = useSyncEngine();
+  const isOffline = !syncEngine.isOnline;
+
+  const CACHE_KEY = "cache_tradecraft_decisions";
+
+  useEffect(() => {
+    loadTradecraftQueue().then((items) => {
+      setOfflineQueue(items);
+      setQueueLoaded(true);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!queueLoaded) return;
+    saveTradecraftQueue(offlineQueue);
+  }, [offlineQueue, queueLoaded]);
+
+  const flushTradecraftQueue = useCallback(async () => {
+    const queue = await loadTradecraftQueue();
+    if (queue.length === 0) return;
+    const remaining: QueuedAction[] = [];
+    for (const item of queue) {
+      try {
+        await apiPut(`/api/firestorm/tradecraft/decisions/${item.objectId}`, { action: item.action });
+      } catch {
+        remaining.push(item);
+      }
+    }
+    setOfflineQueue(remaining);
+    if (remaining.length < queue.length) {
+      queryClient.invalidateQueries({ queryKey: ["tradecraft-decisions"] });
+    }
+  }, [queryClient]);
+
+  useEffect(() => {
+    if (!queueLoaded) return;
+    if (!isOffline && offlineQueue.length > 0) {
+      flushTradecraftQueue();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOffline, queueLoaded]);
 
   // Live backend routes — /api/firestorm/* paths are active api-server endpoints.
   // Follow-up task #1715 will rename them to /api/aegis/* once the server migration lands.
   const { data: apiDecisions, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ["tradecraft-decisions"],
-    queryFn: () => apiGet<Decision[]>("/api/firestorm/tradecraft/decisions"),
+    queryFn: async () => {
+      try {
+        const data = await apiGet<Decision[]>("/api/firestorm/tradecraft/decisions");
+        await cacheSet(CACHE_KEY, data);
+        return data;
+      } catch {
+        const cached = await cacheGetStale<Decision[]>(CACHE_KEY);
+        if (cached) return cached;
+        return [] as Decision[];
+      }
+    },
+    refetchInterval: isOffline ? false : 30000,
   });
 
   const decisions: Decision[] = Array.isArray(apiDecisions) ? apiDecisions : [];
-  const pendingCount = decisions.filter(d => needsReview(d)).length;
+  const queuedIds = new Set(offlineQueue.map((q) => q.objectId));
+  const pendingCount = decisions.filter(d => needsReview(d) && !queuedIds.has(d.objectId ?? String(d.id ?? ""))).length;
 
-  async function handleApprove(objectId: string) {
+  async function handleApprove(objectId: string, item: Decision) {
     if (Platform.OS !== "web") await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    if (isOffline) {
+      const entry: QueuedAction = {
+        objectId,
+        decisionSummary: item.recommendedAction ?? item.summary ?? objectId,
+        action: "approve",
+        queuedAt: new Date().toISOString(),
+      };
+      setOfflineQueue((prev) => [...prev.filter((q) => q.objectId !== objectId), entry]);
+      return;
+    }
     setApproving(objectId);
     try {
       await apiPut(`/api/firestorm/tradecraft/decisions/${objectId}`, { action: "approve" });
@@ -187,7 +324,7 @@ export default function ApprovalsTab() {
     }
   }
 
-  async function handleReject(objectId: string) {
+  async function handleReject(objectId: string, item: Decision) {
     if (Platform.OS !== "web") await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     Alert.alert("Reject Action", "Are you sure you want to reject this action?", [
       { text: "Cancel", style: "cancel" },
@@ -195,6 +332,16 @@ export default function ApprovalsTab() {
         text: "Reject",
         style: "destructive",
         onPress: async () => {
+          if (isOffline) {
+            const entry: QueuedAction = {
+              objectId,
+              decisionSummary: item.recommendedAction ?? item.summary ?? objectId,
+              action: "reject",
+              queuedAt: new Date().toISOString(),
+            };
+            setOfflineQueue((prev) => [...prev.filter((q) => q.objectId !== objectId), entry]);
+            return;
+          }
           try {
             await apiPut(`/api/firestorm/tradecraft/decisions/${objectId}`, { action: "reject" });
           } catch {
@@ -207,27 +354,60 @@ export default function ApprovalsTab() {
     ]);
   }
 
+  const retryQueuedItem = useCallback(async (item: QueuedAction) => {
+    try {
+      await apiPut(`/api/firestorm/tradecraft/decisions/${item.objectId}`, { action: item.action });
+      setOfflineQueue((prev) => prev.filter((q) => q.objectId !== item.objectId));
+      queryClient.invalidateQueries({ queryKey: ["tradecraft-decisions"] });
+      Alert.alert("Synced", "Queued action submitted successfully.");
+    } catch {
+      Alert.alert("Still offline", "Cannot reach the server. Action remains queued.");
+    }
+  }, [queryClient]);
+
+  const discardQueuedItem = useCallback((objectId: string) => {
+    Alert.alert("Discard Action", "Remove this queued decision? It will not be submitted.", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Discard",
+        style: "destructive",
+        onPress: () => setOfflineQueue((prev) => prev.filter((q) => q.objectId !== objectId)),
+      },
+    ]);
+  }, []);
+
   const displayed = decisions.filter(d => {
+    if (queuedIds.has(d.objectId ?? String(d.id ?? ""))) return false;
     const rs = getReviewStatus(d);
     if (filter === "pending") return rs === "pending" && needsReview(d);
     if (filter === "approved") return rs === "approved" || rs === "rejected";
     return true;
   });
 
+  const showQueue = offlineQueue.length > 0;
+
   return (
     <View style={[styles.container, { backgroundColor: colors.navy, paddingTop: insets.top }]}>
       <View style={[styles.header, { borderBottomColor: colors.border }]}>
-        <View>
+        <View style={{ flex: 1 }}>
           <Text style={[styles.headerTitle, { color: colors.foreground }]}>Approval Queue</Text>
           <Text style={[styles.headerSub, { color: colors.muted }]}>
-            {pendingCount} pending · Tap to approve or reject
+            {pendingCount} pending{offlineQueue.length > 0 ? ` · ${offlineQueue.length} queued` : ""} · Tap to act
           </Text>
         </View>
-        {pendingCount > 0 && (
-          <View style={[styles.badge, { backgroundColor: "#ef4444" }]}>
-            <Text style={[styles.badgeText, { color: "white" }]}>{pendingCount}</Text>
-          </View>
-        )}
+        <View style={{ flexDirection: "row", gap: 8, alignItems: "center" }}>
+          {isOffline && (
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 10, backgroundColor: "#f59e0b15", borderWidth: 1, borderColor: "#f59e0b30" }}>
+              <Feather name="wifi-off" size={10} color="#f59e0b" />
+              <Text style={{ fontSize: 9, fontWeight: "700", color: "#f59e0b", letterSpacing: 0.5 }}>OFFLINE</Text>
+            </View>
+          )}
+          {pendingCount > 0 && (
+            <View style={[styles.badge, { backgroundColor: "#ef4444" }]}>
+              <Text style={[styles.badgeText, { color: "white" }]}>{pendingCount}</Text>
+            </View>
+          )}
+        </View>
       </View>
 
       <View style={[styles.filterRow, { borderBottomColor: colors.border }]}>
@@ -245,12 +425,26 @@ export default function ApprovalsTab() {
         contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: insets.bottom + 80 }}
         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.amber} />}
       >
+        {showQueue && (
+          <View style={{ marginBottom: 4 }}>
+            <Text style={{ fontSize: 10, fontWeight: "700", color: "#f59e0b", letterSpacing: 1, marginBottom: 8 }}>PENDING SYNC ({offlineQueue.length})</Text>
+            {offlineQueue.map((q) => (
+              <QueuedActionCard
+                key={q.objectId}
+                item={q}
+                colors={colors}
+                onRetry={retryQueuedItem}
+                onDiscard={discardQueuedItem}
+              />
+            ))}
+          </View>
+        )}
         {isLoading && (
           <View style={styles.emptyState}>
             <ActivityIndicator color={colors.amber} />
           </View>
         )}
-        {!isLoading && displayed.length === 0 && (
+        {!isLoading && displayed.length === 0 && !showQueue && (
           <View style={styles.emptyState}>
             <Ionicons name="checkmark-circle-outline" size={40} color={colors.muted} />
             <Text style={[styles.emptyText, { color: colors.muted }]}>No approvals in this queue</Text>
@@ -260,8 +454,8 @@ export default function ApprovalsTab() {
           <ApprovalCard
             key={item.id ?? item.objectId}
             item={item}
-            onApprove={handleApprove}
-            onReject={handleReject}
+            onApprove={(id) => handleApprove(id, item)}
+            onReject={(id) => handleReject(id, item)}
             approving={approving}
           />
         ))}
@@ -298,4 +492,5 @@ const styles = StyleSheet.create({
   approveBtnText: { fontSize: 13, fontFamily: "Inter_600SemiBold", color: "white" },
   emptyState: { alignItems: "center", paddingTop: 60, gap: 12 },
   emptyText: { fontSize: 14, fontFamily: "Inter_400Regular" },
+  queuedCard: { borderRadius: 12, borderWidth: 1, padding: 12, marginBottom: 10 },
 });

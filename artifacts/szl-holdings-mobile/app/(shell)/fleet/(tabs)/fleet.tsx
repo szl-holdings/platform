@@ -53,6 +53,14 @@ const STATUS_LABELS: Record<string, string> = {
   active: "Active",
 };
 
+const DEMO_VESSELS: Vessel[] = [
+  { id: 1, name: "SZL Meridian", imo: "IMO9234512", flag: "MH", type: "bulk_carrier", status: "at_sea", dwt: 82400, yearBuilt: 2016, lastPort: "Rotterdam" },
+  { id: 2, name: "SZL Pacific Star", imo: "IMO9145823", flag: "PA", type: "tanker", status: "in_port", dwt: 115200, yearBuilt: 2014, lastPort: "Singapore" },
+  { id: 3, name: "SZL Aurora", imo: "IMO9387461", flag: "BS", type: "container", status: "at_sea", dwt: 68000, yearBuilt: 2018, lastPort: "Hamburg" },
+  { id: 4, name: "SZL Orion", imo: "IMO9512340", flag: "LR", type: "bulk_carrier", status: "anchored", dwt: 92600, yearBuilt: 2019, lastPort: "Port Said" },
+  { id: 5, name: "SZL Reliance", imo: "IMO9198234", flag: "MH", type: "general_cargo", status: "maintenance", dwt: 24800, yearBuilt: 2011, lastPort: "Piraeus" },
+];
+
 interface VoyageMilestone {
   label: string;
   port: string;
@@ -241,7 +249,22 @@ export default function FleetScreen() {
         setLastFetchedAt(new Date());
         return data;
       } catch {
-        return (await cacheGetStale<Vessel[]>(CACHE_KEYS.fleet)) ?? [];
+        const cached = await cacheGetStale<Vessel[]>(CACHE_KEYS.fleet);
+        if (cached && cached.length > 0) return cached;
+        Promise.all(
+          DEMO_VESSELS.map(v =>
+            cacheSet(`vessel:${v.id}`, {
+              vessel: { ...v, vesselType: v.type, port: v.lastPort },
+              position: null,
+              activeVoyage: null,
+              maintenance: [],
+              portCalls: [],
+              exceptions: [],
+              sanctions: null,
+            })
+          )
+        ).catch(() => {});
+        return DEMO_VESSELS;
       }
     },
     staleTime: 60_000,

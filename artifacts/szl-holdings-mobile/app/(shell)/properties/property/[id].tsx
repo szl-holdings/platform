@@ -15,6 +15,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { cacheSet, cacheGetStale } from "@/lib/cache";
 
 const API_BASE = process.env.EXPO_PUBLIC_DOMAIN
   ? "https://" + process.env.EXPO_PUBLIC_DOMAIN + "/api"
@@ -73,36 +74,45 @@ export default function PropertyDetail() {
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [watchlisted, setWatchlisted] = useState(false);
+  const PROPERTY_CACHE_KEY = `cache_property_detail_${id}`;
+
   const { data: apiData, isLoading: propertyLoading } = useQuery<PropertyDetail | null>({
     queryKey: ["terra-property", id],
     queryFn: async () => {
-      const res = await fetch(API_BASE + "/terra/distress/property/" + id);
-      if (!res.ok) return null;
-      const json = await res.json();
-      const raw = json.data?.property ?? json.property ?? json.data ?? json;
-      if (!raw || !raw.address) return null;
-      return {
-        id: raw.id ?? raw.externalId ?? id,
-        address: raw.address,
-        borough: raw.borough,
-        distressType: raw.distressType ?? raw.distress_type ?? "distress",
-        opportunityScore: raw.opportunityScore ?? raw.opportunity_score ?? 70,
-        estimatedValue: raw.estimatedValue ?? raw.estimated_value ?? 0,
-        ownerName: raw.ownerName ?? raw.owner_name ?? "Owner Unknown",
-        daysInDistress: raw.daysInDistress ?? raw.days_in_distress ?? 0,
-        confidenceLevel: raw.confidenceLevel ?? raw.confidence_level ?? "medium",
-        squareFeet: raw.squareFeet ?? raw.square_feet,
-        yearBuilt: raw.yearBuilt ?? raw.year_built,
-        lotSize: raw.lotSize ?? raw.lot_size,
-        zoning: raw.zoning,
-        taxId: raw.taxId ?? raw.tax_id,
-        debt: raw.debtAmount ?? raw.debt ?? raw.debt_amount,
-        equity: raw.equity,
-        thesis: raw.scoreRationale ?? raw.thesis ?? raw.score_rationale,
-        contacts: raw.contacts,
-        timeline: raw.timeline,
-        comparables: raw.comparables,
-      } as PropertyDetail;
+      try {
+        const res = await fetch(API_BASE + "/terra/distress/property/" + id);
+        if (!res.ok) throw new Error("fetch failed");
+        const json = await res.json();
+        const raw = json.data?.property ?? json.property ?? json.data ?? json;
+        if (!raw || !raw.address) throw new Error("no data");
+        const detail: PropertyDetail = {
+          id: raw.id ?? raw.externalId ?? id,
+          address: raw.address,
+          borough: raw.borough,
+          distressType: raw.distressType ?? raw.distress_type ?? "distress",
+          opportunityScore: raw.opportunityScore ?? raw.opportunity_score ?? 70,
+          estimatedValue: raw.estimatedValue ?? raw.estimated_value ?? 0,
+          ownerName: raw.ownerName ?? raw.owner_name ?? "Owner Unknown",
+          daysInDistress: raw.daysInDistress ?? raw.days_in_distress ?? 0,
+          confidenceLevel: raw.confidenceLevel ?? raw.confidence_level ?? "medium",
+          squareFeet: raw.squareFeet ?? raw.square_feet,
+          yearBuilt: raw.yearBuilt ?? raw.year_built,
+          lotSize: raw.lotSize ?? raw.lot_size,
+          zoning: raw.zoning,
+          taxId: raw.taxId ?? raw.tax_id,
+          debt: raw.debtAmount ?? raw.debt ?? raw.debt_amount,
+          equity: raw.equity,
+          thesis: raw.scoreRationale ?? raw.thesis ?? raw.score_rationale,
+          contacts: raw.contacts,
+          timeline: raw.timeline,
+          comparables: raw.comparables,
+        };
+        await cacheSet(PROPERTY_CACHE_KEY, detail);
+        return detail;
+      } catch {
+        const cached = await cacheGetStale<PropertyDetail>(PROPERTY_CACHE_KEY);
+        return cached ?? null;
+      }
     },
     retry: 1,
   });

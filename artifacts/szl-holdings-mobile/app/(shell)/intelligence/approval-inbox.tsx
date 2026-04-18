@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import {
   View, Text, ScrollView, StyleSheet, TouchableOpacity,
   RefreshControl, ActivityIndicator, TextInput, Alert, Modal,
@@ -9,6 +9,8 @@ import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useColors } from "@/hooks/useColors";
 import { apiFetch } from "@/lib/apiClient";
+import { useSyncEngine } from "@szl-holdings/mobile-shared";
+import { cacheSet, cacheGetStale, CACHE_KEYS } from "@/lib/cache";
 
 const ACCENT = "#c9a84c";
 
@@ -37,6 +39,14 @@ interface AuditEntry {
   actorRole?: string;
   note?: string;
   createdAt: string;
+}
+
+interface QueuedDecision {
+  approvalId: number;
+  approvalTitle: string;
+  decision: Decision;
+  note: string;
+  queuedAt: string;
 }
 
 const PRIORITY_COLORS: Record<Priority, string> = {
@@ -184,18 +194,77 @@ function ApprovalCard({
   );
 }
 
+function QueuedDecisionCard({
+  item,
+  colors,
+  onRetry,
+  onDiscard,
+}: {
+  item: QueuedDecision;
+  colors: ReturnType<typeof useColors>;
+  onRetry: (item: QueuedDecision) => void;
+  onDiscard: (approvalId: number) => void;
+}) {
+  const decisionColor =
+    item.decision === "approved" ? "#22c55e" : item.decision === "rejected" ? "#ef4444" : "#f59e0b";
+  return (
+    <View style={[styles.queuedCard, { backgroundColor: colors.card, borderColor: "#f59e0b40" }]}>
+      <View style={styles.queuedHeader}>
+        <View style={[styles.queuedBadge, { backgroundColor: "#f59e0b15", borderColor: "#f59e0b40" }]}>
+          <Feather name="clock" size={10} color="#f59e0b" />
+          <Text style={[styles.queuedBadgeText, { color: "#f59e0b" }]}>QUEUED OFFLINE</Text>
+        </View>
+        <Text style={[styles.queuedTime, { color: colors.mutedForeground }]}>
+          {formatRelative(item.queuedAt)}
+        </Text>
+      </View>
+      <Text style={[styles.queuedTitle, { color: colors.foreground }]} numberOfLines={2}>
+        {item.approvalTitle}
+      </Text>
+      <View style={styles.queuedDecisionRow}>
+        <View style={[styles.pill, { backgroundColor: decisionColor + "18", borderColor: decisionColor + "35" }]}>
+          <Text style={[styles.pillText, { color: decisionColor }]}>{item.decision.toUpperCase()}</Text>
+        </View>
+        {item.note ? (
+          <Text style={[styles.queuedNote, { color: colors.mutedForeground }]} numberOfLines={1}>
+            "{item.note}"
+          </Text>
+        ) : null}
+      </View>
+      <View style={styles.queuedActions}>
+        <TouchableOpacity
+          onPress={() => onRetry(item)}
+          style={[styles.queuedActionBtn, { backgroundColor: ACCENT + "18", borderColor: ACCENT + "40" }]}
+        >
+          <Feather name="upload-cloud" size={12} color={ACCENT} />
+          <Text style={[styles.queuedActionText, { color: ACCENT }]}>Retry Now</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => onDiscard(item.approvalId)}
+          style={[styles.queuedActionBtn, { backgroundColor: "#ef444418", borderColor: "#ef444440" }]}
+        >
+          <Feather name="trash-2" size={12} color="#ef4444" />
+          <Text style={[styles.queuedActionText, { color: "#ef4444" }]}>Discard</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+}
+
 function ReviewModal({
   approval,
   visible,
   onClose,
   onSubmit,
   isPending,
+  isOffline,
 }: {
   approval: Approval | null;
   visible: boolean;
   onClose: () => void;
   onSubmit: (decision: Decision, note: string) => void;
   isPending: boolean;
+  isOffline: boolean;
 }) {
   const [decision, setDecision] = useState<Decision | null>(null);
   const [note, setNote] = useState("");
@@ -231,6 +300,16 @@ function ReviewModal({
               <Feather name="x" size={18} color="#6b7280" />
             </TouchableOpacity>
           </View>
+
+          {isOffline && (
+            <View style={styles.offlineNotice}>
+              <Feather name="wifi-off" size={12} color="#f59e0b" />
+              <Text style={styles.offlineNoticeText}>
+                You're offline — this decision will be queued and synced when connectivity returns.
+              </Text>
+            </View>
+          )}
+
           {approval && (
             <>
               <Text style={styles.modalApprovalTitle} numberOfLines={2}>{approval.title}</Text>
@@ -283,7 +362,7 @@ function ReviewModal({
                   <ActivityIndicator size="small" color={ACCENT} />
                 ) : (
                   <Text style={[styles.submitBtnText, { color: decision ? ACCENT : "#6b7280" }]}>
-                    Submit Decision
+                    {isOffline ? "Queue Decision" : "Submit Decision"}
                   </Text>
                 )}
               </TouchableOpacity>
@@ -297,6 +376,25 @@ function ReviewModal({
 
 type StatusFilter = "pending" | "all" | "approved" | "rejected";
 
+const QUEUE_STORAGE_KEY = "cortex:approval-offline-queue";
+
+async function loadQueuedDecisions(): Promise<QueuedDecision[]> {
+  try {
+    const AsyncStorage = (await import("@react-native-async-storage/async-storage")).default;
+    const raw = await AsyncStorage.getItem(QUEUE_STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as QueuedDecision[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+async function saveQueuedDecisions(items: QueuedDecision[]): Promise<void> {
+  try {
+    const AsyncStorage = (await import("@react-native-async-storage/async-storage")).default;
+    await AsyncStorage.setItem(QUEUE_STORAGE_KEY, JSON.stringify(items));
+  } catch {}
+}
+
 export default function ApprovalInboxScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
@@ -304,24 +402,57 @@ export default function ApprovalInboxScreen() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("pending");
   const [reviewTarget, setReviewTarget] = useState<Approval | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [offlineQueue, setOfflineQueue] = useState<QueuedDecision[]>([]);
+  const [queueLoaded, setQueueLoaded] = useState(false);
 
-  const approvalsQuery = useQuery<{ data: Approval[] } | Approval[]>({
+  const syncEngine = useSyncEngine();
+  const isOffline = !syncEngine.isOnline;
+
+  useEffect(() => {
+    loadQueuedDecisions().then((items) => {
+      setOfflineQueue(items);
+      setQueueLoaded(true);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!queueLoaded) return;
+    saveQueuedDecisions(offlineQueue);
+  }, [offlineQueue, queueLoaded]);
+
+  useEffect(() => {
+    if (!queueLoaded) return;
+    if (!isOffline && offlineQueue.length > 0) {
+      flushOfflineQueue();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOffline, queueLoaded]);
+
+  const approvalsQuery = useQuery<Approval[]>({
     queryKey: ["cognitive-approvals", statusFilter],
-    queryFn: () =>
-      apiFetch<{ data: Approval[] } | Approval[]>(
-        `/api/approvals?status=${statusFilter === "pending" ? "pending" : statusFilter}`
-      ),
-    refetchInterval: 30000,
+    queryFn: async () => {
+      try {
+        const raw = await apiFetch<{ data: Approval[] } | Approval[]>(
+          `/api/approvals?status=${statusFilter === "pending" ? "pending" : statusFilter}`
+        );
+        const arr = Array.isArray(raw) ? raw : ((raw as { data: Approval[] }).data ?? []);
+        if (statusFilter === "pending") {
+          await cacheSet(CACHE_KEYS.APPROVALS, arr);
+        }
+        return arr;
+      } catch {
+        if (statusFilter === "pending") {
+          const cached = await cacheGetStale<Approval[]>(CACHE_KEYS.APPROVALS);
+          if (cached) return cached;
+        }
+        return [];
+      }
+    },
+    refetchInterval: isOffline ? false : 30000,
     staleTime: 15000,
   });
 
-  const normalizeApprovals = (raw: { data: Approval[] } | Approval[] | undefined): Approval[] => {
-    if (!raw) return [];
-    if (Array.isArray(raw)) return raw;
-    return (raw as { data: Approval[] }).data ?? [];
-  };
-
-  const approvals = normalizeApprovals(approvalsQuery.data);
+  const approvals = approvalsQuery.data ?? [];
 
   const reviewMutation = useMutation({
     mutationFn: async ({ id, decision, note }: { id: number; decision: Decision; note: string }) => {
@@ -341,17 +472,93 @@ export default function ApprovalInboxScreen() {
     },
   });
 
+  const enqueueDecisionOffline = useCallback(
+    async (approval: Approval, decision: Decision, note: string) => {
+      const entry: QueuedDecision = {
+        approvalId: approval.id,
+        approvalTitle: approval.title,
+        decision,
+        note,
+        queuedAt: new Date().toISOString(),
+      };
+      setOfflineQueue((prev) => {
+        const filtered = prev.filter((q) => q.approvalId !== approval.id);
+        return [...filtered, entry];
+      });
+    },
+    []
+  );
+
+  const flushOfflineQueue = useCallback(async () => {
+    const queue = await loadQueuedDecisions();
+    if (queue.length === 0) return;
+    const remaining: QueuedDecision[] = [];
+    for (const item of queue) {
+      try {
+        await apiFetch(`/api/approvals/${item.approvalId}/review`, {
+          method: "POST",
+          body: JSON.stringify({ decision: item.decision, note: item.note || undefined }),
+        });
+      } catch {
+        remaining.push(item);
+      }
+    }
+    setOfflineQueue(remaining);
+    if (remaining.length < queue.length) {
+      qc.invalidateQueries({ queryKey: ["cognitive-approvals"] });
+    }
+  }, [qc]);
+
+  const retryQueuedItem = useCallback(
+    async (item: QueuedDecision) => {
+      try {
+        await apiFetch(`/api/approvals/${item.approvalId}/review`, {
+          method: "POST",
+          body: JSON.stringify({ decision: item.decision, note: item.note || undefined }),
+        });
+        setOfflineQueue((prev) => prev.filter((q) => q.approvalId !== item.approvalId));
+        qc.invalidateQueries({ queryKey: ["cognitive-approvals"] });
+        Alert.alert("Synced", "Queued decision submitted successfully.");
+      } catch {
+        Alert.alert("Still offline", "Cannot reach the server. Decision remains queued.");
+      }
+    },
+    [qc]
+  );
+
+  const discardQueuedItem = useCallback((approvalId: number) => {
+    Alert.alert("Discard Decision", "Remove this queued decision? It will not be submitted.", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Discard",
+        style: "destructive",
+        onPress: () =>
+          setOfflineQueue((prev) => prev.filter((q) => q.approvalId !== approvalId)),
+      },
+    ]);
+  }, []);
+
   const openReview = useCallback((approval: Approval) => {
     setReviewTarget(approval);
     setModalVisible(true);
   }, []);
 
   const handleSubmitDecision = useCallback(
-    (decision: Decision, note: string) => {
+    async (decision: Decision, note: string) => {
       if (!reviewTarget) return;
+      if (isOffline) {
+        await enqueueDecisionOffline(reviewTarget, decision, note);
+        setModalVisible(false);
+        setReviewTarget(null);
+        Alert.alert(
+          "Decision Queued",
+          "You're offline. Your decision has been saved locally and will sync automatically when connectivity returns."
+        );
+        return;
+      }
       reviewMutation.mutate({ id: reviewTarget.id, decision, note });
     },
-    [reviewTarget, reviewMutation]
+    [reviewTarget, reviewMutation, isOffline, enqueueDecisionOffline]
   );
 
   const STATUS_FILTERS: Array<{ key: StatusFilter; label: string }> = [
@@ -360,6 +567,11 @@ export default function ApprovalInboxScreen() {
     { key: "approved", label: "Approved" },
     { key: "rejected", label: "Rejected" },
   ];
+
+  const queuedIdsForFilter = statusFilter === "pending"
+    ? new Set(offlineQueue.map((q) => q.approvalId))
+    : new Set<number>();
+  const pendingApprovals = approvals.filter((a) => !queuedIdsForFilter.has(a.id));
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
@@ -371,12 +583,36 @@ export default function ApprovalInboxScreen() {
           <Text style={[styles.headerTitle, { color: colors.foreground }]}>Approval Inbox</Text>
           <Text style={[styles.headerSub, { color: colors.mutedForeground }]}>
             Guardian-routed · {approvals.length} item{approvals.length !== 1 ? "s" : ""}
+            {offlineQueue.length > 0 ? ` · ${offlineQueue.length} queued` : ""}
           </Text>
         </View>
-        <TouchableOpacity onPress={() => approvalsQuery.refetch()} style={styles.refreshBtn}>
-          <Feather name="refresh-cw" size={16} color={colors.mutedForeground} />
-        </TouchableOpacity>
+        <View style={{ flexDirection: "row", gap: 6, alignItems: "center" }}>
+          {isOffline && (
+            <View style={[styles.offlinePill, { backgroundColor: "#f59e0b15", borderColor: "#f59e0b30" }]}>
+              <Feather name="wifi-off" size={11} color="#f59e0b" />
+              <Text style={[styles.offlinePillText, { color: "#f59e0b" }]}>OFFLINE</Text>
+            </View>
+          )}
+          <TouchableOpacity onPress={() => approvalsQuery.refetch()} style={styles.refreshBtn}>
+            <Feather name="refresh-cw" size={16} color={colors.mutedForeground} />
+          </TouchableOpacity>
+        </View>
       </View>
+
+      {offlineQueue.length > 0 && (
+        <View style={[styles.queueBanner, { backgroundColor: "#f59e0b10", borderBottomColor: "#f59e0b25" }]}>
+          <Feather name="clock" size={13} color="#f59e0b" />
+          <Text style={styles.queueBannerText}>
+            {offlineQueue.length} decision{offlineQueue.length !== 1 ? "s" : ""} queued offline
+            {!isOffline ? " — tap Retry Now to sync" : ""}
+          </Text>
+          {!isOffline && (
+            <TouchableOpacity onPress={flushOfflineQueue} style={styles.queueBannerBtn}>
+              <Text style={styles.queueBannerBtnText}>Sync All</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      )}
 
       <View style={[styles.filterBar, { borderBottomColor: colors.border }]}>
         {STATUS_FILTERS.map((f) => (
@@ -408,20 +644,35 @@ export default function ApprovalInboxScreen() {
           />
         }
       >
+        {offlineQueue.length > 0 && (
+          <View style={styles.queuedSection}>
+            <Text style={[styles.sectionLabel, { color: "#f59e0b" }]}>QUEUED OFFLINE</Text>
+            {offlineQueue.map((item) => (
+              <QueuedDecisionCard
+                key={item.approvalId}
+                item={item}
+                colors={colors}
+                onRetry={retryQueuedItem}
+                onDiscard={discardQueuedItem}
+              />
+            ))}
+          </View>
+        )}
+
         {approvalsQuery.isLoading ? (
           <ActivityIndicator color={ACCENT} style={{ marginTop: 32 }} />
-        ) : approvals.length === 0 ? (
+        ) : pendingApprovals.length === 0 && offlineQueue.length === 0 ? (
           <View style={styles.empty}>
             <Feather name="inbox" size={32} color={colors.mutedForeground} />
             <Text style={[styles.emptyText, { color: colors.mutedForeground }]}>
               {statusFilter === "pending" ? "No pending approvals" : "No approvals found"}
             </Text>
             <Text style={[styles.emptySub, { color: colors.mutedForeground }]}>
-              Guardian-routed items will appear here
+              {isOffline ? "Showing cached data — connect to refresh" : "Guardian-routed items will appear here"}
             </Text>
           </View>
         ) : (
-          approvals.map((approval) => (
+          pendingApprovals.map((approval) => (
             <ApprovalCard
               key={approval.id}
               approval={approval}
@@ -439,6 +690,7 @@ export default function ApprovalInboxScreen() {
         onClose={() => { setModalVisible(false); setReviewTarget(null); }}
         onSubmit={handleSubmitDecision}
         isPending={reviewMutation.isPending}
+        isOffline={isOffline}
       />
     </View>
   );
@@ -456,6 +708,23 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 17, fontWeight: "700", letterSpacing: -0.3 },
   headerSub: { fontSize: 11, marginTop: 1 },
   refreshBtn: { padding: 8 },
+  offlinePill: {
+    flexDirection: "row", alignItems: "center", gap: 4,
+    paddingHorizontal: 8, paddingVertical: 4,
+    borderRadius: 12, borderWidth: 1,
+  },
+  offlinePillText: { fontSize: 9, fontWeight: "700", letterSpacing: 0.5 },
+  queueBanner: {
+    flexDirection: "row", alignItems: "center", gap: 8,
+    paddingHorizontal: 16, paddingVertical: 10,
+    borderBottomWidth: 1,
+  },
+  queueBannerText: { flex: 1, fontSize: 12, color: "#f59e0b", fontWeight: "500" },
+  queueBannerBtn: {
+    paddingHorizontal: 10, paddingVertical: 4,
+    borderRadius: 6, backgroundColor: "#f59e0b18",
+  },
+  queueBannerBtnText: { fontSize: 11, color: "#f59e0b", fontWeight: "600" },
   filterBar: {
     flexDirection: "row", paddingHorizontal: 16, paddingVertical: 10,
     gap: 8, borderBottomWidth: 1,
@@ -467,6 +736,32 @@ const styles = StyleSheet.create({
   filterChipText: { fontSize: 12, fontWeight: "600" },
   scroll: { flex: 1 },
   scrollContent: { padding: 16, gap: 10 },
+  sectionLabel: {
+    fontSize: 9, fontWeight: "700", letterSpacing: 1.5,
+    textTransform: "uppercase", marginBottom: 8,
+  },
+  queuedSection: { marginBottom: 4, gap: 8 },
+  queuedCard: {
+    borderRadius: 10, borderWidth: 1, padding: 12,
+    gap: 8,
+  },
+  queuedHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  queuedBadge: {
+    flexDirection: "row", alignItems: "center", gap: 5,
+    paddingHorizontal: 7, paddingVertical: 3,
+    borderRadius: 6, borderWidth: 1,
+  },
+  queuedBadgeText: { fontSize: 9, fontWeight: "700", letterSpacing: 0.5 },
+  queuedTime: { fontSize: 10 },
+  queuedTitle: { fontSize: 13, fontWeight: "600", lineHeight: 18 },
+  queuedDecisionRow: { flexDirection: "row", alignItems: "center", gap: 8 },
+  queuedNote: { flex: 1, fontSize: 11, fontStyle: "italic" },
+  queuedActions: { flexDirection: "row", gap: 8 },
+  queuedActionBtn: {
+    flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center",
+    gap: 5, paddingVertical: 8, borderRadius: 8, borderWidth: 1,
+  },
+  queuedActionText: { fontSize: 11, fontWeight: "600" },
   card: {
     borderRadius: 10, borderWidth: 1, padding: 14,
     overflow: "hidden",
@@ -503,7 +798,7 @@ const styles = StyleSheet.create({
   reviewBtnText: { fontSize: 13, fontWeight: "600" },
   empty: { alignItems: "center", paddingTop: 60, gap: 10 },
   emptyText: { fontSize: 15, fontWeight: "500" },
-  emptySub: { fontSize: 12 },
+  emptySub: { fontSize: 12, textAlign: "center" },
   modalOverlay: {
     flex: 1, backgroundColor: "rgba(0,0,0,0.7)",
     justifyContent: "flex-end",
@@ -519,6 +814,12 @@ const styles = StyleSheet.create({
   },
   modalHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 14 },
   modalTitle: { fontSize: 16, fontWeight: "700", color: "#e8edf8" },
+  offlineNotice: {
+    flexDirection: "row", alignItems: "flex-start", gap: 8,
+    backgroundColor: "#f59e0b10", borderRadius: 8, padding: 10,
+    borderWidth: 1, borderColor: "#f59e0b30", marginBottom: 14,
+  },
+  offlineNoticeText: { flex: 1, fontSize: 12, color: "#f59e0b", lineHeight: 18 },
   modalApprovalTitle: { fontSize: 14, fontWeight: "600", color: "#e8edf8", lineHeight: 20 },
   modalApprovalSub: { fontSize: 11, color: "#6b7280", marginTop: 3, marginBottom: 16 },
   modalSectionLabel: { fontSize: 10, fontWeight: "700", color: "#6b7280", letterSpacing: 0.8, marginBottom: 8 },

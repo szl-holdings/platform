@@ -13,6 +13,7 @@ export const CACHE_KEYS = {
   LYTE_INCIDENTS: "cache_lyte_incidents",
   ADVISORY_SESSIONS: "cache_advisory_sessions",
   ADVISORY_DOCUMENTS: "cache_advisory_documents",
+  APPROVALS: "cache_approvals",
 } as const;
 
 export type CacheKey = (typeof CACHE_KEYS)[keyof typeof CACHE_KEYS];

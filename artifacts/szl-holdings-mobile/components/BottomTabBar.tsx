@@ -83,11 +83,29 @@ function useCortexBadge() {
     staleTime: 15000,
   });
 
+  const approvalsQuery = useQuery<{ data?: Array<{ id: number }>; count?: number } | Array<{ id: number }>>({
+    queryKey: ["bottom-tab-pending-approvals"],
+    queryFn: () =>
+      apiFetch<{ data?: Array<{ id: number }>; count?: number } | Array<{ id: number }>>(
+        "/api/approvals?status=pending&limit=99"
+      ),
+    refetchInterval: 30000,
+    staleTime: 15000,
+  });
+
   useEffect(() => {
     const critical = feedQuery.data?.stats?.critical ?? 0;
     const pending = draftsQuery.data?.pendingCount ?? 0;
-    setBadge("intelligence", critical + pending);
-  }, [feedQuery.data, draftsQuery.data, setBadge]);
+    const raw = approvalsQuery.data;
+    const approvalCount = raw
+      ? Array.isArray(raw)
+        ? raw.length
+        : ((raw as { data?: Array<{ id: number }>; count?: number }).count ??
+           (raw as { data?: Array<{ id: number }> }).data?.length ??
+           0)
+      : 0;
+    setBadge("intelligence", critical + pending + approvalCount);
+  }, [feedQuery.data, draftsQuery.data, approvalsQuery.data, setBadge]);
 }
 
 export function BottomTabBar() {
