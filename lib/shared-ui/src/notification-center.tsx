@@ -49,6 +49,7 @@ function apiToLive(n: ApiNotification, appName = "System"): LiveNotification {
 const WS_RECONNECT_BASE_MS = 2_000;
 const WS_RECONNECT_MAX_MS = 30_000;
 const WS_MAX_RECONNECT_ATTEMPTS = 8;
+const POLL_INTERVAL_MS = 30_000;
 
 function getWebSocketUrl(): string {
   if (typeof window === "undefined") return "";
@@ -71,12 +72,32 @@ export function useNotificationCenter(appName: string): NotificationCenterState 
   const reconnectAttemptsRef = useRef(0);
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const mountedRef = useRef(true);
+  const appNameRef = useRef(appName);
+  appNameRef.current = appName;
 
   useEffect(() => {
     mountedRef.current = true;
     return () => {
       mountedRef.current = false;
     };
+  }, []);
+
+  const fetchNotifications = useCallback(() => {
+    return fetch("/api/notifications", { credentials: "include" })
+      .then((r) => {
+        if (!r.ok) return;
+        return r.json();
+      })
+      .then((data: unknown) => {
+        if (!mountedRef.current) return;
+        if (data && typeof data === "object" && "data" in data) {
+          const list = (data as { data: ApiNotification[] }).data;
+          setNotifications(list.map((n) => apiToLive(n, appNameRef.current)));
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to load notifications:", err);
+      });
   }, []);
 
   useEffect(() => {
@@ -101,6 +122,32 @@ export function useNotificationCenter(appName: string): NotificationCenterState 
       cancelled = true;
     };
   }, [appName]);
+
+  useEffect(() => {
+    const poll = () => {
+      fetch("/api/notifications/count", { credentials: "include" })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((data: unknown) => {
+          if (!mountedRef.current || data === null) return;
+          const serverCount =
+            data && typeof data === "object" && "unreadCount" in data
+              ? Number((data as { unreadCount: number }).unreadCount)
+              : 0;
+          setNotifications((prev) => {
+            const localCount = prev.filter((n) => !n.read).length;
+            if (localCount !== serverCount) {
+              void fetchNotifications();
+            }
+            return prev;
+          });
+        })
+        .catch(() => {});
+    };
+
+    poll();
+    const intervalId = setInterval(poll, POLL_INTERVAL_MS);
+    return () => clearInterval(intervalId);
+  }, [fetchNotifications]);
 
   const connect = useCallback(() => {
     if (!mountedRef.current) return;

@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db, notificationsTable, notificationPreferencesTable } from "@szl-holdings/db";
-import { eq, desc, and, isNull } from "drizzle-orm";
+import { eq, desc, and, isNull, count as sqlCount } from "drizzle-orm";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, sendNoContent, sendError, handleRouteError, parsePagination } from "../lib/api-response";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 import { publish, WS_CHANNELS } from "../lib/websocket";
@@ -75,6 +75,23 @@ router.get("/notifications", authMiddleware({ required: false }), async (req, re
     sendSuccess(res, notifications, 200, { page, limit, offset });
   } catch (err) {
     handleRouteError(res, err, "Failed to list notifications");
+  }
+});
+
+router.get("/notifications/count", authMiddleware({ required: false }), async (req, res) => {
+  try {
+    if (!req.user) {
+      sendSuccess(res, { unreadCount: 0 });
+      return;
+    }
+    const userId = req.user.id;
+    const [row] = await db
+      .select({ unreadCount: sqlCount() })
+      .from(notificationsTable)
+      .where(and(eq(notificationsTable.userId, userId), eq(notificationsTable.isRead, false)));
+    sendSuccess(res, { unreadCount: Number(row?.unreadCount ?? 0) });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to get notification count");
   }
 });
 
