@@ -27,6 +27,7 @@ import {
   sendBadRequest,
   sendError,
   sendNoContent,
+  sendForbidden,
   handleRouteError,
   parsePagination,
 } from "../lib/api-response";
@@ -868,7 +869,17 @@ router.get("/alloy/runs", authMiddleware(), requireRole("super_admin", "admin", 
         : await db.select({ count: sql<number>`count(*)::int` }).from(alloyWorkflowRunsTable);
     }
 
-    sendSuccess(res, rows, 200, { page, limit, total: count });
+    const tenantOrgIdForSessions = resolveAlloyTenant(req);
+    const runtimeSessions = await import("@szl/alloy")
+      .then(m => {
+        if (typeof m.listSessions === "function") {
+          return (m.listSessions as (t?: number | null) => unknown[])(tenantOrgIdForSessions);
+        }
+        return [];
+      })
+      .catch(() => []);
+
+    sendSuccess(res, rows, 200, { page, limit, total: count, runtimeSessions });
   } catch (err) {
     handleRouteError(res, err, "Failed to list runs");
   }
@@ -1170,6 +1181,199 @@ router.get("/skills/:id/runs", platformAuth, validateQuery(listQuerySchema), asy
     return sendSuccess(res, rows, 200, { count: rows.length });
   } catch (err) {
     handleRouteError(res, err, "Failed to fetch skill runs");
+  }
+});
+
+const evidenceCreateSchema = z.object({
+  kind: z.enum(["signal", "memory", "document", "metric", "observation", "attestation", "policy", "trace"]),
+  label: z.string().min(1).max(500),
+  value: z.string().min(1),
+  source: z.string().min(1).max(200),
+  sourceId: z.string().optional(),
+  confidence: z.number().min(0).max(1).optional(),
+  weight: z.number().min(0).max(1).optional(),
+  maxAgeMs: z.number().positive().optional(),
+  metadata: z.record(z.unknown()).optional(),
+});
+
+const policySimulateSchema = z.object({
+  action: z.string().min(1),
+  domain: z.string().optional(),
+  tenantId: z.string().optional(),
+  actionClass: z.string().optional(),
+  subject: z.object({
+    id: z.string().optional(),
+    roles: z.array(z.string()),
+    tenantId: z.string().optional(),
+  }),
+  resource: z.object({
+    type: z.string(),
+    id: z.string().optional(),
+    domain: z.string().optional(),
+    attributes: z.record(z.unknown()).optional(),
+  }),
+  context: z.record(z.unknown()).optional(),
+  estimatedCostUsd: z.number().optional(),
+  confidence: z.number().min(0).max(1).optional(),
+  urgency: z.string().optional(),
+});
+
+const recommendBodySchema = z.object({
+  title: z.string().min(1).max(500),
+  summary: z.string().min(1),
+  reasoning: z.string().min(1),
+  domain: z.string().min(1),
+  value: z.unknown().optional(),
+  urgency: z.enum(["routine", "moderate", "urgent", "critical"]).optional(),
+  autonomyMode: z.enum(["observe", "recommend", "draft", "ask-to-act", "approved-act"]).optional(),
+  baseConfidence: z.number().min(0).max(1).optional(),
+  evidenceIds: z.array(z.string()).optional(),
+  supportingEvidenceIds: z.array(z.string()).optional(),
+  contradictingEvidenceIds: z.array(z.string()).optional(),
+  inlineEvidence: z.array(z.object({
+    kind: z.enum(["signal", "memory", "document", "metric", "observation", "attestation", "policy", "trace"]),
+    label: z.string(),
+    value: z.string(),
+    source: z.string(),
+    confidence: z.number().min(0).max(1).optional(),
+  })).optional(),
+  suggestedAction: z.string().optional(),
+  validForMs: z.number().positive().optional(),
+  metadata: z.record(z.unknown()).optional(),
+});
+
+function resolveAlloyTenant(req: Request): number | null {
+  const user = req.user;
+  if (isGlobalAdmin(user)) {
+    const orgIds = getUserOrgIds(user);
+    return orgIds[0] ?? null;
+  }
+  const orgIds = getUserOrgIds(user);
+  if (orgIds.length === 0) return null;
+  return orgIds[0]!;
+}
+
+function requireAlloyTenant(req: Request, res: Response): number | null {
+  const tenantOrgId = resolveAlloyTenant(req);
+  if (tenantOrgId === null) {
+    sendForbidden(res, "Tenant context required — user must belong to an org");
+    return null;
+  }
+  return tenantOrgId;
+}
+
+router.get("/alloy/evidence", authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
+  try {
+    const tenantOrgId = requireAlloyTenant(req, res);
+    if (tenantOrgId === null) return;
+    const { limit = 50 } = parsePagination(req.query as Record<string, unknown>);
+    const { listEvidence } = await import("@szl/alloy/evidence");
+    const items = listEvidence(undefined, tenantOrgId).slice(0, limit);
+    return sendSuccess(res, items, 200, { count: items.length });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to list evidence");
+  }
+});
+
+router.post("/alloy/evidence", authMiddleware(), validateBody(evidenceCreateSchema), async (req: Request, res: Response) => {
+  try {
+    const tenantOrgId = requireAlloyTenant(req, res);
+    if (tenantOrgId === null) return;
+    const { createEvidence } = await import("@szl/alloy/evidence");
+    const ev = createEvidence({
+      kind: req.body.kind,
+      label: req.body.label,
+      value: req.body.value,
+      source: req.body.source,
+      sourceId: req.body.sourceId,
+      confidence: req.body.confidence,
+      weight: req.body.weight,
+      maxAgeMs: req.body.maxAgeMs,
+      metadata: req.body.metadata,
+      tenantOrgId,
+    });
+    logger.info({ evidenceId: ev.id, kind: ev.kind, tenantOrgId }, "Evidence created via Alloy");
+    return sendCreated(res, ev);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to create evidence");
+  }
+});
+
+router.get("/alloy/evidence/:id", authMiddleware(), async (req: Request, res: Response) => {
+  try {
+    const tenantOrgId = requireAlloyTenant(req, res);
+    if (tenantOrgId === null) return;
+    const { getEvidence } = await import("@szl/alloy/evidence");
+    const ev = getEvidence(req.params.id, tenantOrgId);
+    if (!ev) return sendNotFound(res, "Evidence not found");
+    return sendSuccess(res, ev);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to fetch evidence");
+  }
+});
+
+router.post("/alloy/policy/simulate", authMiddleware(), validateBody(policySimulateSchema), async (req: Request, res: Response) => {
+  try {
+    const tenantOrgId = requireAlloyTenant(req, res);
+    if (tenantOrgId === null) return;
+    const { checkAction } = await import("@szl/alloy");
+    const result = checkAction({
+      action: req.body.action,
+      domain: req.body.domain,
+      tenantId: tenantOrgId != null ? String(tenantOrgId) : undefined,
+      actionClass: req.body.actionClass,
+      subject: req.body.subject,
+      resource: req.body.resource,
+      context: req.body.context,
+      estimatedCostUsd: req.body.estimatedCostUsd,
+      confidence: req.body.confidence,
+      urgency: req.body.urgency,
+    });
+    const policyState = result.allowed
+      ? (result.requiresApproval ? "requires_approval" : "allowed")
+      : "blocked";
+    logger.info({ action: req.body.action, policyState, tenantOrgId }, "Policy simulation run");
+    return sendSuccess(res, {
+      ...result,
+      policyState,
+      simulatedAt: Date.now(),
+      tenantOrgId,
+      request: req.body,
+    });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to simulate policy");
+  }
+});
+
+router.post("/alloy/recommend", authMiddleware(), validateBody(recommendBodySchema), async (req: Request, res: Response) => {
+  try {
+    const tenantOrgId = requireAlloyTenant(req, res);
+    if (tenantOrgId === null) return;
+    const { recommend: alloyRecommend } = await import("@szl/alloy");
+
+    const result = await alloyRecommend({
+      title: req.body.title,
+      summary: req.body.summary,
+      reasoning: req.body.reasoning,
+      domain: req.body.domain,
+      value: req.body.value,
+      urgency: req.body.urgency,
+      autonomyMode: req.body.autonomyMode,
+      baseConfidence: req.body.baseConfidence,
+      evidenceIds: req.body.evidenceIds,
+      supportingEvidenceIds: req.body.supportingEvidenceIds,
+      contradictingEvidenceIds: req.body.contradictingEvidenceIds,
+      inlineEvidence: req.body.inlineEvidence,
+      suggestedAction: req.body.suggestedAction,
+      validForMs: req.body.validForMs,
+      tenantOrgId,
+      metadata: { ...(req.body.metadata ?? {}), tenantOrgId },
+    });
+
+    logger.info({ recommendationId: result.id, domain: result.domain, confidence: result.confidence, tenantOrgId }, "Recommendation generated via Alloy");
+    return sendCreated(res, result);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to generate recommendation");
   }
 });
 

@@ -383,6 +383,9 @@ importers:
       '@szl-holdings/worldline':
         specifier: workspace:*
         version: link:../../lib/worldline
+      '@szl/alloy':
+        specifier: workspace:*
+        version: link:../../packages/szl-alloy
       '@types/archiver':
         specifier: ^7.0.0
         version: 7.0.0
@@ -2771,6 +2774,31 @@ importers:
       vitest:
         specifier: ^4.1.2
         version: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+
+  packages/szl-alloy:
+    dependencies:
+      '@szl-holdings/decision-engine':
+        specifier: workspace:*
+        version: link:../decision-engine
+      '@szl-holdings/policy-engine':
+        specifier: workspace:*
+        version: link:../policy-engine
+      '@workspace/alloy':
+        specifier: workspace:*
+        version: link:../alloy
+      '@workspace/memory-fabric':
+        specifier: workspace:*
+        version: link:../memory-fabric
+      '@workspace/trace-graph':
+        specifier: workspace:*
+        version: link:../trace-graph
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
 
   packages/telemetry-standards:
     devDependencies:
