@@ -75,27 +75,19 @@ export default function CompetitiveRadar() {
     async function loadData() {
       setLoading(true);
       try {
-        const [signalsRes, newsRes] = await Promise.allSettled([
-          fetch(`${API}/intelligence/signals?domain=carlota&limit=20`, { credentials: "include" }),
-          fetch(`${API}/carlota/live/strategic-news`, { credentials: "include" }),
-        ]);
-
-        if (signalsRes.status === "fulfilled" && signalsRes.value.ok) {
-          const json = await signalsRes.value.json();
-          const raw: CompetitorSignal[] = Array.isArray(json.signals) ? json.signals : Array.isArray(json.data) ? json.data : [];
-          setSignals(raw);
-        }
-
-        if (newsRes.status === "fulfilled" && newsRes.value.ok) {
-          const json = await newsRes.value.json();
-          const items: { source?: string; headline?: string; summary?: string; publishedAt?: string }[] = Array.isArray(json.articles) ? json.articles : [];
-          const derived: CompetitorEntry[] = items.slice(0, 5).map((item, i) => ({
-            name: item.source ?? `Source ${i + 1}`,
-            share: 0,
-            trend: "flat",
-            score: 50,
-          }));
-          if (derived.length > 0) setCompetitors(derived);
+        const radarRes = await fetch(`${API}/carlota/radar-signals`, { credentials: "include" });
+        if (radarRes.ok) {
+          const json = await radarRes.json();
+          const data = json.data ?? json;
+          if (Array.isArray(data.signals) && data.signals.length > 0) {
+            setSignals(data.signals);
+          }
+          if (Array.isArray(data.competitors) && data.competitors.length > 0) {
+            setCompetitors(data.competitors);
+          }
+          if (Array.isArray(data.marketTrend) && data.marketTrend.length > 0) {
+            setMarketTrend(data.marketTrend);
+          }
         }
       } catch {
       } finally {

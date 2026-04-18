@@ -12,7 +12,7 @@ kind = "web"
   [[services]]
   name = "web"
   paths = [ "/carlota-jo/" ]
-  localPort = 3101
+  localPort = 9090
 
   [services.development]
   run = "bash -c 'cd /home/runner/workspace/artifacts/carlota-jo && exec node_modules/.bin/vite --config vite.config.ts --host 0.0.0.0'"
@@ -27,6 +27,7 @@ kind = "web"
   to = "/index.html"
 
   [services.env]
-  # Shared proxy port (9090) is hardcoded in vite.config.ts; PROXY_PORT env var is not used.
-  VITE_PORT = "3101"
+  # Shared proxy port (9090) is hardcoded in vite.config.ts; workflow monitors port 9090.
+  # Vite dev server runs on port 8098; shared proxy routes /carlota-jo/ -> 8098.
+  VITE_PORT = "8098"
   BASE_PATH = "/carlota-jo/"

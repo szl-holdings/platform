@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
-import { FlaskConical, TrendingUp, TrendingDown, Minus, Loader2, Play, RotateCcw, ChevronDown, ChevronUp, DollarSign, Users, Shield, Zap } from "lucide-react";
+import { FlaskConical, TrendingUp, TrendingDown, Minus, Loader2, Play, RotateCcw, ChevronDown, ChevronUp, DollarSign, Users, Shield, Zap, Clock } from "lucide-react";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { RadarChart, PolarGrid, PolarAngleAxis, Radar as RadarPlot, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell } from "recharts";
 
@@ -65,6 +65,14 @@ function DeltaIcon({ delta }: { delta: number }) {
   return <Minus className="w-3.5 h-3.5 text-muted-foreground" />;
 }
 
+type HistoricScenario = {
+  id: string;
+  label: string;
+  details: string;
+  createdAt: string;
+  result: SimulationResult;
+};
+
 export default function ScenarioSimulator() {
   usePageMeta({
     title: "Strategy Scenario Simulator | Carlota Jo",
@@ -78,6 +86,41 @@ export default function ScenarioSimulator() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<SimulationResult | null>(null);
   const [expandedDim, setExpandedDim] = useState<string | null>(null);
+  const [history, setHistory] = useState<HistoricScenario[]>([]);
+  const [historyLoaded, setHistoryLoaded] = useState(false);
+
+  const BASE_URL_API = import.meta.env.BASE_URL + "api";
+
+  useEffect(() => {
+    fetch(`${BASE_URL_API}/carlota/scenarios`, { credentials: "include" })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data?.data?.scenarios) setHistory(data.data.scenarios as HistoricScenario[]);
+      })
+      .catch(() => {})
+      .finally(() => setHistoryLoaded(true));
+  }, [BASE_URL_API]);
+
+  const persistScenario = async (result: SimulationResult) => {
+    try {
+      const res = await fetch(`${BASE_URL_API}/carlota/scenarios`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          label: selectedScenario.label,
+          details,
+          context,
+          result,
+        }),
+      });
+      if (res.ok) {
+        const saved = await res.json() as { data: HistoricScenario };
+        if (saved.data) setHistory(h => [saved.data, ...h]);
+      }
+    } catch {
+    }
+  };
 
   const runSimulation = async () => {
     setLoading(true);
@@ -140,8 +183,9 @@ Return ONLY the JSON object, no markdown.`;
       }
       const parsed = JSON.parse(fullContent) as SimulationResult;
       setResult(parsed);
+      void persistScenario(parsed);
     } catch {
-      setResult({
+      const fallback: SimulationResult = {
         decisionSummary: `Strategic analysis of ${selectedScenario.label.toLowerCase()}: ${details}`,
         executiveTake: "This decision presents a compelling growth opportunity with manageable downside risk, provided execution conditions are met. The financial case is supported by market dynamics, though operational readiness requires validation before committing capital. A phased approach significantly improves risk-adjusted returns.",
         recommendation: "proceed-with-conditions",
@@ -165,7 +209,9 @@ Return ONLY the JSON object, no markdown.`;
           { dimension: "Execution Risk", baseCase: 100, projected: 145, delta: 45, narrative: "Elevated near-term execution risk. Recommend phased rollout with stage-gate governance to manage.", confidence: "medium" },
           { dimension: "Team Capacity Utilization", baseCase: 100, projected: 128, delta: 28, narrative: "Current team absorbs roughly 60% of new workload — remaining 40% requires 2–3 new hires.", confidence: "medium" },
         ],
-      });
+      };
+      setResult(fallback);
+      void persistScenario(fallback);
     } finally {
       setLoading(false);
     }
@@ -360,6 +406,36 @@ Return ONLY the JSON object, no markdown.`;
             </div>
           </div>
         </motion.div>
+      )}
+
+      {historyLoaded && history.length > 0 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Clock className="w-4 h-4" style={{ color: GOLD }} />
+              Past Simulations
+              <Badge variant="secondary" className="ml-auto text-xs">{history.length}</Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {history.slice(0, 5).map(h => {
+              const recStyle = RECOMMENDATION_STYLES[h.result?.recommendation ?? "defer"];
+              return (
+                <button key={h.id} onClick={() => setResult(h.result as SimulationResult)}
+                  className="w-full text-left px-3 py-2 rounded-lg border border-border hover:bg-muted transition-colors">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-sm font-medium">{h.label}</span>
+                    <span className="text-xs text-muted-foreground">{new Date(h.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
+                  </div>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    {recStyle && <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${recStyle.bg} ${recStyle.text}`}>{recStyle.label}</span>}
+                    {h.details && <p className="text-xs text-muted-foreground truncate">{h.details}</p>}
+                  </div>
+                </button>
+              );
+            })}
+          </CardContent>
+        </Card>
       )}
     </div>
   );

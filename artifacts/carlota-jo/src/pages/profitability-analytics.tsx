@@ -1,14 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import {
-  TrendingUp, DollarSign, AlertTriangle, CheckCircle, BarChart3,
-  ChevronDown, ChevronUp, Target, Clock, ArrowUp, ArrowDown, Zap
+  TrendingUp, AlertTriangle, CheckCircle, BarChart3,
+  ChevronDown, ChevronUp, Target, Loader2
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, ReferenceLine } from "recharts";
-import { ENGAGEMENTS, MARGIN_HISTORY } from "@/data/operationalData";
+import { ENGAGEMENTS as STATIC_ENGAGEMENTS, MARGIN_HISTORY as STATIC_MARGIN_HISTORY } from "@/data/operationalData";
+import type { EngagementPnL } from "@/data/operationalData";
 
 const GOLD = "var(--color-gold)";
+const API = import.meta.env.BASE_URL + "api";
 
 const STATUS_META = {
   active:   { label: "Active", color: "#0284C7", bg: "#EFF6FF" },
@@ -19,8 +21,6 @@ const STATUS_META = {
 const fmtGBP = (v: number) => v >= 1000 ? `£${(v / 1000).toFixed(0)}K` : `£${v}`;
 const calcMargin = (rev: number, cost: number) => rev > 0 ? Math.round(((rev - cost) / rev) * 100) : 0;
 
-const WRITE_OFF_DATA = ENGAGEMENTS.map(e => ({ name: e.client.split(" ")[0], writeOffs: e.writeOffs, scopeCreep: e.scopeCreepHours * 300 }));
-
 export default function ProfitabilityAnalytics() {
   usePageMeta({
     title: "Engagement Profitability Analytics | Carlota Jo",
@@ -29,13 +29,39 @@ export default function ProfitabilityAnalytics() {
   });
 
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [engagements, setEngagements] = useState<EngagementPnL[]>(STATIC_ENGAGEMENTS);
+  const [marginHistory, setMarginHistory] = useState<{ month: string; margin: number }[]>(STATIC_MARGIN_HISTORY);
+  const [loading, setLoading] = useState(true);
 
-  const totalContracted = ENGAGEMENTS.reduce((s, e) => s + e.contractedValue, 0);
-  const totalCollected = ENGAGEMENTS.reduce((s, e) => s + e.collected, 0);
-  const totalCost = ENGAGEMENTS.reduce((s, e) => s + e.costToDate, 0);
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const res = await fetch(`${API}/carlota/engagements`, { credentials: "include" });
+        if (res.ok) {
+          const json = await res.json();
+          if (Array.isArray(json.data?.engagements) && json.data.engagements.length > 0) {
+            setEngagements(json.data.engagements);
+          }
+          if (Array.isArray(json.data?.marginHistory) && json.data.marginHistory.length > 0) {
+            setMarginHistory(json.data.marginHistory);
+          }
+        }
+      } catch {
+      } finally {
+        setLoading(false);
+      }
+    }
+    void loadData();
+  }, []);
+
+  const totalContracted = engagements.reduce((s, e) => s + e.contractedValue, 0);
+  const totalCollected = engagements.reduce((s, e) => s + e.collected, 0);
+  const totalCost = engagements.reduce((s, e) => s + e.costToDate, 0);
   const overallMargin = calcMargin(totalCollected, totalCost);
-  const totalWriteOffs = ENGAGEMENTS.reduce((s, e) => s + e.writeOffs, 0);
-  const totalScopeHours = ENGAGEMENTS.reduce((s, e) => s + e.scopeCreepHours, 0);
+  const totalWriteOffs = engagements.reduce((s, e) => s + e.writeOffs, 0);
+  const totalScopeHours = engagements.reduce((s, e) => s + e.scopeCreepHours, 0);
+
+  const WRITE_OFF_DATA = engagements.map(e => ({ name: e.client.split(" ")[0], writeOffs: e.writeOffs, scopeCreep: e.scopeCreepHours * 300 }));
 
   return (
     <div style={{ minHeight: "100vh", background: "#FAFAF8", paddingTop: 64 }}>
@@ -47,6 +73,7 @@ export default function ProfitabilityAnalytics() {
                 <TrendingUp size={16} color="#34D399" />
               </div>
               <span style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.1em", color: "#34D399", textTransform: "uppercase" }}>Engagement Profitability Analytics</span>
+              {loading && <Loader2 size={14} color="#34D399" className="animate-spin" />}
             </div>
             <h1 style={{ fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 300, color: "#F5F0E8", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1.1, marginBottom: 12 }}>
               True Margins. Zero Surprises.<br /><em style={{ color: "#34D399" }}>P&L Visibility Per Engagement.</em>
@@ -56,11 +83,11 @@ export default function ProfitabilityAnalytics() {
             </p>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 16, maxWidth: 900 }}>
               {[
-                { label: "Portfolio Contracted", value: fmtGBP(totalContracted), sub: `${ENGAGEMENTS.length} engagements` },
+                { label: "Portfolio Contracted", value: fmtGBP(totalContracted), sub: `${engagements.length} engagements` },
                 { label: "Revenue Collected", value: fmtGBP(totalCollected), sub: "Cash received YTD" },
                 { label: "Blended Margin", value: `${overallMargin}%`, sub: "vs 38% target" },
                 { label: "Write-offs YTD", value: fmtGBP(totalWriteOffs), sub: `${totalScopeHours}h uncompensated` },
-                { label: "Avg Rate Realisation", value: `${Math.round(ENGAGEMENTS.reduce((s, e) => s + e.rateRealisationPct, 0) / ENGAGEMENTS.length)}%`, sub: "vs 100% target" },
+                { label: "Avg Rate Realisation", value: `${Math.round(engagements.reduce((s, e) => s + e.rateRealisationPct, 0) / Math.max(1, engagements.length))}%`, sub: "vs 100% target" },
               ].map(kpi => (
                 <div key={kpi.label} style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, padding: "14px 16px" }}>
                   <div style={{ fontSize: 22, fontWeight: 600, color: "#F5F0E8", fontFamily: "'Cormorant Garamond', serif" }}>{kpi.value}</div>
@@ -74,7 +101,6 @@ export default function ProfitabilityAnalytics() {
       </div>
 
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
-        {/* Charts */}
         <div style={{ padding: "32px 0 0", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 32 }}>
           <div style={{ background: "#fff", border: "1px solid #E8E2D6", borderRadius: 16, padding: 24 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
@@ -82,7 +108,7 @@ export default function ProfitabilityAnalytics() {
               <h2 style={{ fontSize: 14, fontWeight: 600, color: "#1A1A14" }}>Portfolio Margin — Monthly Trend</h2>
             </div>
             <ResponsiveContainer width="100%" height={180}>
-              <LineChart data={MARGIN_HISTORY}>
+              <LineChart data={marginHistory}>
                 <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#A89878" }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 11, fill: "#A89878" }} axisLine={false} tickLine={false} unit="%" domain={[30, 60]} />
                 <Tooltip formatter={(v: number) => [`${v}%`, "Margin"]} contentStyle={{ fontSize: 12, borderRadius: 8 }} />
@@ -109,18 +135,16 @@ export default function ProfitabilityAnalytics() {
           </div>
         </div>
 
-        {/* Engagement P&L cards */}
         <div style={{ marginBottom: 64 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
             <Target size={16} color={GOLD} />
             <h2 style={{ fontSize: 14, fontWeight: 600, color: "#1A1A14" }}>Engagement P&L — Real-Time</h2>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {ENGAGEMENTS.map((eng, i) => {
+            {engagements.map((eng, i) => {
               const statusMeta = STATUS_META[eng.status];
               const currentMargin = calcMargin(eng.invoiced, eng.costToDate);
               const forecastMargin = calcMargin(eng.contractedValue, eng.forecastedCost);
-              const marginDelta = forecastMargin - eng.marginTarget;
               const isExpanded = expandedId === eng.id;
 
               return (
@@ -137,8 +161,6 @@ export default function ProfitabilityAnalytics() {
                         {eng.alerts.length > 0 && <AlertTriangle size={13} color="#DC2626" />}
                       </div>
                       <div style={{ fontSize: 12, color: "#6B5E47", marginBottom: 8 }}>{eng.engagement} · {eng.phase}</div>
-
-                      {/* Mini P&L bar */}
                       <div style={{ marginBottom: 8 }}>
                         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
                           <span style={{ fontSize: 11, color: "#A89878" }}>Revenue progress</span>

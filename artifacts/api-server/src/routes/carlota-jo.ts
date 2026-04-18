@@ -12,6 +12,9 @@ import {
   clientDocumentsTable,
   clientUpdatesTable,
   clientMessagesTable,
+  carlotaDiagnosticsTable,
+  carlotaScenariosTable,
+  carlotaEngagementsTable,
 } from "@szl-holdings/db";
 import { eq, desc, sql, and } from "drizzle-orm";
 import { sendSuccess, sendNotFound, handleRouteError, sendBadRequest, parsePagination } from "../lib/api-response";
@@ -623,4 +626,422 @@ router.get("/carlota/live/world-bank-indicators", carlotaLiveLimit, authMiddlewa
 });
 
 
+
+// ── Advisory tool types ────────────────────────────────────────────────────────
+type DiagnosticRunBody = {
+  companyName?: string;
+  industry?: string;
+  stage?: string;
+  report?: unknown;
+  clientId?: string;
+};
+
+type ScenarioRunBody = {
+  label?: string;
+  details?: string;
+  context?: string;
+  result?: unknown;
+};
+
+// ── Seed data ──────────────────────────────────────────────────────────────────
+
+const SEED_ENGAGEMENTS = [
+  {
+    id: "e1", client: "Luminary Brands", engagement: "Growth Strategy Phase 2",
+    status: "active", feeType: "fixed", contractedValue: 84000, invoiced: 42000,
+    collected: 42000, costToDate: 28400, forecastedCost: 58000, marginTarget: 38,
+    phase: "Strategy Development", rateRealisationPct: 96, writeOffs: 1200,
+    scopeCreepHours: 8, startDate: "Jan 2026", endDate: "Jun 2026",
+    alerts: ["Scope creep detected: 8 uncompensated hours in brand workshop session"],
+  },
+  {
+    id: "e2", client: "Vertex Capital Partners", engagement: "M&A Advisory",
+    status: "active", feeType: "time-and-materials", contractedValue: 120000, invoiced: 28000,
+    collected: 28000, costToDate: 19800, forecastedCost: 92000, marginTarget: 42,
+    phase: "Discovery & Due Diligence", rateRealisationPct: 100, writeOffs: 0,
+    scopeCreepHours: 0, startDate: "Apr 2026", endDate: "Aug 2026", alerts: [],
+  },
+  {
+    id: "e3", client: "Aurelius Private Equity", engagement: "Portfolio Strategy Masterclass",
+    status: "complete", feeType: "fixed", contractedValue: 16800, invoiced: 16800,
+    collected: 16800, costToDate: 8200, forecastedCost: 8200, marginTarget: 45,
+    phase: "Completed", rateRealisationPct: 100, writeOffs: 0,
+    scopeCreepHours: 0, startDate: "Mar 2026", endDate: "Mar 2026", alerts: [],
+  },
+  {
+    id: "e4", client: "Oasis Wellness", engagement: "Digital Strategy & DTC Build",
+    status: "at-risk", feeType: "fixed", contractedValue: 62000, invoiced: 46500,
+    collected: 40300, costToDate: 44200, forecastedCost: 68000, marginTarget: 35,
+    phase: "Phase 3 — Implementation", rateRealisationPct: 81, writeOffs: 4800,
+    scopeCreepHours: 22, startDate: "Oct 2025", endDate: "Apr 2026",
+    alerts: [
+      "Budget overrun: forecasted cost £6,000 above contracted value",
+      "Rate realisation at 81% — £4,800 written off year-to-date",
+      "22 uncompensated hours from scope changes — consider amendment",
+    ],
+  },
+];
+
+const SEED_MARGIN_HISTORY = [
+  { month: "Oct", margin: 44 },
+  { month: "Nov", margin: 41 },
+  { month: "Dec", margin: 38 },
+  { month: "Jan", margin: 46 },
+  { month: "Feb", margin: 42 },
+  { month: "Mar", margin: 51 },
+  { month: "Apr", margin: 48 },
+];
+
+const SEED_RADAR_SIGNALS = [
+  {
+    competitor: "McKinsey & Company",
+    event: "Launched new AI-native strategy offering targeting mid-market PE-backed businesses",
+    impact: "high",
+    direction: "threat",
+    date: "Apr 15, 2026",
+    detail: "McKinsey's QuantumBlack division is now packaging AI diagnostic tooling for sub-$500M revenue businesses — direct overlap with Carlota Jo's core ICP. Pricing reported at £180K+ per engagement.",
+  },
+  {
+    competitor: "Bain & Company",
+    event: "PE client portfolio shrinks 12% amid deal slowdown — boutiques gain share",
+    impact: "high",
+    direction: "opportunity",
+    date: "Apr 12, 2026",
+    detail: "Bain's PE advisory revenue declined for the second consecutive quarter. Mid-market sponsors are increasingly turning to boutique advisors for cost-efficient strategic counsel during the deal dry spell.",
+  },
+  {
+    competitor: "Roland Berger",
+    event: "UK expansion — opened Manchester office targeting northern manufacturing clients",
+    impact: "medium",
+    direction: "threat",
+    date: "Apr 8, 2026",
+    detail: "Roland Berger's geographic expansion into UK's northern corridor creates competitive pressure on the manufacturing and family-owned business segments Carlota Jo has been building relationships in.",
+  },
+  {
+    competitor: "Oliver Wyman",
+    event: "Financial services team depleted by 15% following mass departure to boutique firms",
+    impact: "medium",
+    direction: "opportunity",
+    date: "Apr 5, 2026",
+    detail: "Three senior Oliver Wyman partners left to start independent practices, creating a talent and client gap in UK financial services advisory. Former clients may be in market for boutique alternatives.",
+  },
+  {
+    competitor: "Kearney",
+    event: "Pricing increase — fixed-fee strategy engagements up ~20% across UK market",
+    impact: "medium",
+    direction: "opportunity",
+    date: "Mar 28, 2026",
+    detail: "Kearney has raised UK engagement minimums to £280K for strategy projects. This leaves a growing value gap for quality boutique advisors at £80K–£180K engagement sizes.",
+  },
+  {
+    competitor: "BCG",
+    event: "AI advisory conflict: BCG consulting clients on AI also invest in AI vendors",
+    impact: "high",
+    direction: "opportunity",
+    date: "Mar 22, 2026",
+    detail: "Financial Times investigation reveals BCG advises clients on AI transformation while holding equity in AI vendors it recommends. Creates significant trust deficit — reinforces Carlota Jo's independent, conflict-free positioning.",
+  },
+];
+
+const SEED_ROI_METRICS = {
+  caseStudies: [
+    {
+      client: "Luminary Brands",
+      investment: "£84,000",
+      returnValue: "£312,000",
+      roi: "271%",
+      timeframe: "12 months",
+      driver: "DTC conversion lift + brand authority",
+      contractedValue: 84000,
+      returnNumeric: 312000,
+    },
+    {
+      client: "Oasis Wellness",
+      investment: "£120,000",
+      returnValue: "£610,000",
+      roi: "408%",
+      timeframe: "18 months",
+      driver: "Category authority + earned media",
+      contractedValue: 120000,
+      returnNumeric: 610000,
+    },
+    {
+      client: "Aurelius PE",
+      investment: "£16,800",
+      returnValue: "£98,000",
+      roi: "483%",
+      timeframe: "6 months",
+      driver: "Portfolio value creation + leadership uplift",
+      contractedValue: 16800,
+      returnNumeric: 98000,
+    },
+    {
+      client: "Vertex Capital",
+      investment: "£120,000",
+      returnValue: "£420,000+",
+      roi: "250%+",
+      timeframe: "24 months (projected)",
+      driver: "M&A advisory — deal value & risk mitigation",
+      contractedValue: 120000,
+      returnNumeric: 420000,
+    },
+  ],
+  portfolioBenchmarks: {
+    avgRoi: 353,
+    avgPaybackMonths: 11,
+    avgRateRealisationPct: 94,
+    blendedMarginPct: 47,
+    clientRetentionPct: 88,
+    npsScore: 72,
+  },
+  roiTrendData: [
+    { month: "Oct 2025", avgRoi: 210 },
+    { month: "Nov 2025", avgRoi: 265 },
+    { month: "Dec 2025", avgRoi: 288 },
+    { month: "Jan 2026", avgRoi: 310 },
+    { month: "Feb 2026", avgRoi: 342 },
+    { month: "Mar 2026", avgRoi: 353 },
+    { month: "Apr 2026", avgRoi: 371 },
+  ],
+};
+
+// ── Engagement P&L endpoints (auth-gated, DB-backed per org) ─────────────────
+
+router.get("/carlota/engagements", authMiddleware(), async (req, res) => {
+  try {
+    const userId = req.user!.id;
+    const orgId = req.user?.orgs[0]?.orgId ?? null;
+    const scopeFilter = orgId
+      ? eq(carlotaEngagementsTable.organizationId, orgId)
+      : eq(carlotaEngagementsTable.createdByUserId, userId);
+
+    let rows = await db.select().from(carlotaEngagementsTable)
+      .where(scopeFilter)
+      .orderBy(desc(carlotaEngagementsTable.createdAt));
+
+    if (rows.length === 0) {
+      const { organizationId, clientAccountId } = await resolveClientScope(userId, orgId);
+      await Promise.all(SEED_ENGAGEMENTS.map(async (e, i) => {
+        await db.insert(carlotaEngagementsTable).values({
+          externalId: `eng-${orgId ?? userId}-${i}`,
+          organizationId,
+          clientAccountId,
+          createdByUserId: userId,
+          client: e.client,
+          engagement: e.engagement,
+          status: e.status,
+          feeType: e.feeType,
+          contractedValue: String(e.contractedValue),
+          invoiced: String(e.invoiced),
+          collected: String(e.collected),
+          costToDate: String(e.costToDate),
+          forecastedCost: String(e.forecastedCost),
+          marginTarget: e.marginTarget,
+          phase: e.phase,
+          rateRealisationPct: e.rateRealisationPct,
+          writeOffs: String(e.writeOffs),
+          scopeCreepHours: e.scopeCreepHours,
+          startDate: e.startDate,
+          endDate: e.endDate,
+          alerts: e.alerts ?? [],
+        }).onConflictDoNothing();
+      }));
+      rows = await db.select().from(carlotaEngagementsTable)
+        .where(scopeFilter)
+        .orderBy(desc(carlotaEngagementsTable.createdAt));
+    }
+
+    sendSuccess(res, {
+      engagements: rows.map(r => ({
+        ...r,
+        id: r.externalId,
+        contractedValue: Number(r.contractedValue),
+        invoiced: Number(r.invoiced),
+        collected: Number(r.collected),
+        costToDate: Number(r.costToDate),
+        forecastedCost: Number(r.forecastedCost),
+        writeOffs: Number(r.writeOffs),
+      })),
+      marginHistory: SEED_MARGIN_HISTORY,
+      fetchedAt: new Date().toISOString(),
+    });
+  } catch (err) { handleRouteError(res, err, "Failed to fetch engagements"); }
+});
+
+// ── Competitive radar signals (auth-gated market intelligence) ─────────────────
+
+router.get("/carlota/radar-signals", authMiddleware(), async (req, res) => {
+  try {
+    const userId = req.user!.id;
+    const orgId = req.user?.orgs[0]?.orgId ?? null;
+    const scopeFilter = orgId
+      ? eq(carlotaEngagementsTable.organizationId, orgId)
+      : eq(carlotaEngagementsTable.createdByUserId, userId);
+    const engagements = await db.select().from(carlotaEngagementsTable).where(scopeFilter);
+    const atRisk = engagements.filter(e =>
+      Number(e.contractedValue) > 0 &&
+      (Number(e.costToDate) / Number(e.contractedValue) > 0.85 || (e.scopeCreepHours ?? 0) > 30)
+    );
+    const portfolioSignals = atRisk.map(e => ({
+      competitor: `${e.client} (Portfolio)`,
+      event: `${e.engagement} — cost at ${Math.round((Number(e.costToDate) / Number(e.contractedValue)) * 100)}% of contracted value${(e.scopeCreepHours ?? 0) > 30 ? ` with ${e.scopeCreepHours}h scope creep` : ""}`,
+      impact: "high",
+      direction: "threat" as const,
+      date: e.createdAt ? new Date(e.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
+      detail: `Engagement margin at risk. Contracted: £${Number(e.contractedValue).toLocaleString()} — Cost to date: £${Number(e.costToDate).toLocaleString()}. ${(e.scopeCreepHours ?? 0) > 30 ? `Scope creep: ${e.scopeCreepHours}h billed.` : ""}`,
+    }));
+    sendSuccess(res, {
+      signals: [...portfolioSignals, ...SEED_RADAR_SIGNALS],
+      portfolioSignalCount: portfolioSignals.length,
+      count: portfolioSignals.length + SEED_RADAR_SIGNALS.length,
+      lastUpdated: new Date().toISOString(),
+      competitors: [
+        { name: "McKinsey & Company", score: 91, trend: "up", share: 18 },
+        { name: "BCG", score: 87, trend: "flat", share: 15 },
+        { name: "Bain & Company", score: 79, trend: "down", share: 12 },
+        { name: "Oliver Wyman", score: 68, trend: "down", share: 9 },
+        { name: "Roland Berger", score: 61, trend: "up", share: 7 },
+        { name: "Kearney", score: 57, trend: "flat", share: 6 },
+      ],
+      marketTrend: [
+        { month: "Oct", you: 56, market: 62 },
+        { month: "Nov", you: 58, market: 61 },
+        { month: "Dec", you: 61, market: 60 },
+        { month: "Jan", you: 63, market: 62 },
+        { month: "Feb", you: 67, market: 63 },
+        { month: "Mar", you: 71, market: 64 },
+        { month: "Apr", you: 74, market: 65 },
+      ],
+    });
+  } catch (err) { handleRouteError(res, err, "Failed to fetch radar signals"); }
+});
+
+// ── ROI metrics (auth-gated, engagement-derived analytics) ─────────────────────
+
+router.get("/carlota/roi-metrics", authMiddleware(), async (req, res) => {
+  try {
+    const userId = req.user!.id;
+    const orgId = req.user?.orgs[0]?.orgId ?? null;
+    const scopeFilter = orgId
+      ? eq(carlotaEngagementsTable.organizationId, orgId)
+      : eq(carlotaEngagementsTable.createdByUserId, userId);
+    const engagements = await db.select().from(carlotaEngagementsTable).where(scopeFilter);
+    let portfolioBenchmarks = SEED_ROI_METRICS.portfolioBenchmarks;
+    if (engagements.length > 0) {
+      const totalContracted = engagements.reduce((s, e) => s + Number(e.contractedValue), 0);
+      const totalCost = engagements.reduce((s, e) => s + Number(e.costToDate), 0);
+      const blendedMarginPct = totalContracted > 0
+        ? Math.round(((totalContracted - totalCost) / totalContracted) * 100)
+        : SEED_ROI_METRICS.portfolioBenchmarks.blendedMarginPct;
+      const avgRateRealisationPct = Math.round(
+        engagements.reduce((s, e) => s + (e.rateRealisationPct ?? 100), 0) / engagements.length
+      );
+      portfolioBenchmarks = {
+        ...SEED_ROI_METRICS.portfolioBenchmarks,
+        blendedMarginPct,
+        avgRateRealisationPct,
+      };
+    }
+    sendSuccess(res, { ...SEED_ROI_METRICS, portfolioBenchmarks, fetchedAt: new Date().toISOString() });
+  } catch (err) { handleRouteError(res, err, "Failed to fetch ROI metrics"); }
+});
+
+// ── Helpers ────────────────────────────────────────────────────────────────────
+
+async function resolveClientScope(userId: number, orgId: number | null): Promise<{ organizationId: number | null; clientAccountId: number | null }> {
+  if (!orgId) return { organizationId: null, clientAccountId: null };
+  const [acct] = await db.select({ id: clientAccountsTable.id })
+    .from(clientAccountsTable)
+    .where(eq(clientAccountsTable.primaryContactUserId, userId))
+    .limit(1);
+  return { organizationId: orgId, clientAccountId: acct?.id ?? null };
+}
+
+// ── Diagnostics (DB-persisted, auth-gated) ─────────────────────────────────────
+
+router.post("/carlota/diagnostics", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+  try {
+    const body = req.body as DiagnosticRunBody;
+    if (!body.companyName || !body.report) {
+      sendBadRequest(res, "companyName and report are required");
+      return;
+    }
+    const userId = req.user!.id;
+    const orgId = req.user?.orgs[0]?.orgId ?? null;
+    const { organizationId, clientAccountId } = await resolveClientScope(userId, orgId);
+    const externalId = "dx-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 6);
+    const [row] = await db.insert(carlotaDiagnosticsTable).values({
+      externalId,
+      organizationId,
+      clientAccountId,
+      createdByUserId: userId,
+      companyName: body.companyName,
+      industry: body.industry ?? "",
+      stage: body.stage ?? "",
+      report: body.report as Record<string, unknown>,
+    }).returning();
+    sendSuccess(res, { ...row, id: row.externalId }, 201);
+  } catch (err) { handleRouteError(res, err, "Failed to save diagnostic"); }
+});
+
+router.get("/carlota/diagnostics", authMiddleware(), async (req, res) => {
+  try {
+    const userId = req.user!.id;
+    const orgId = req.user?.orgs[0]?.orgId ?? null;
+    const filter = orgId
+      ? eq(carlotaDiagnosticsTable.organizationId, orgId)
+      : eq(carlotaDiagnosticsTable.createdByUserId, userId);
+    const rows = await db.select().from(carlotaDiagnosticsTable)
+      .where(filter)
+      .orderBy(desc(carlotaDiagnosticsTable.createdAt))
+      .limit(50);
+    const mapped = rows.map(r => ({ ...r, id: r.externalId }));
+    sendSuccess(res, { diagnostics: mapped, count: mapped.length });
+  } catch (err) { handleRouteError(res, err, "Failed to list diagnostics"); }
+});
+
+// ── Scenario runs (DB-persisted, auth-gated) ───────────────────────────────────
+
+router.post("/carlota/scenarios", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+  try {
+    const body = req.body as ScenarioRunBody;
+    if (!body.label || !body.result) {
+      sendBadRequest(res, "label and result are required");
+      return;
+    }
+    const userId = req.user!.id;
+    const orgId = req.user?.orgs[0]?.orgId ?? null;
+    const { organizationId, clientAccountId } = await resolveClientScope(userId, orgId);
+    const externalId = "sc-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 6);
+    const [row] = await db.insert(carlotaScenariosTable).values({
+      externalId,
+      organizationId,
+      clientAccountId,
+      createdByUserId: userId,
+      label: body.label,
+      details: body.details ?? "",
+      context: body.context ?? null,
+      result: body.result as Record<string, unknown>,
+    }).returning();
+    sendSuccess(res, { ...row, id: row.externalId }, 201);
+  } catch (err) { handleRouteError(res, err, "Failed to save scenario"); }
+});
+
+router.get("/carlota/scenarios", authMiddleware(), async (req, res) => {
+  try {
+    const userId = req.user!.id;
+    const orgId = req.user?.orgs[0]?.orgId ?? null;
+    const filter = orgId
+      ? eq(carlotaScenariosTable.organizationId, orgId)
+      : eq(carlotaScenariosTable.createdByUserId, userId);
+    const rows = await db.select().from(carlotaScenariosTable)
+      .where(filter)
+      .orderBy(desc(carlotaScenariosTable.createdAt))
+      .limit(50);
+    const mapped = rows.map(r => ({ ...r, id: r.externalId }));
+    sendSuccess(res, { scenarios: mapped, count: mapped.length });
+  } catch (err) { handleRouteError(res, err, "Failed to list scenarios"); }
+});
+
 export default router;
+

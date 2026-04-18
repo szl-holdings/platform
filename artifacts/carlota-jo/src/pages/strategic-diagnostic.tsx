@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
-import { Brain, ChevronRight, CheckCircle, TrendingUp, Shield, Target, Map, Loader2, Download, BarChart2, AlertTriangle } from "lucide-react";
+import { Brain, ChevronRight, CheckCircle, TrendingUp, Shield, Target, Map, Loader2, Download, BarChart2, AlertTriangle, Clock } from "lucide-react";
 import { usePageMeta } from "@/hooks/usePageMeta";
 
 const GOLD = "var(--color-gold)";
@@ -50,6 +50,15 @@ function RiskBadge({ level }: { level: "critical" | "moderate" }) {
   );
 }
 
+type HistoricDiagnostic = {
+  id: string;
+  companyName: string;
+  industry: string;
+  stage: string;
+  createdAt: string;
+  report: DiagnosticReport;
+};
+
 export default function StrategicDiagnostic() {
   usePageMeta({
     title: "Strategic Diagnostic Engine | Carlota Jo",
@@ -60,6 +69,8 @@ export default function StrategicDiagnostic() {
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [report, setReport] = useState<DiagnosticReport | null>(null);
+  const [history, setHistory] = useState<HistoricDiagnostic[]>([]);
+  const [historyLoaded, setHistoryLoaded] = useState(false);
 
   const [form, setForm] = useState({
     companyName: "", industry: "", stage: "", revenue: "", employees: "",
@@ -70,6 +81,39 @@ export default function StrategicDiagnostic() {
 
   const update = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
     setForm(f => ({ ...f, [k]: e.target.value }));
+
+  const BASE_URL_API = import.meta.env.BASE_URL + "api";
+
+  useEffect(() => {
+    fetch(`${BASE_URL_API}/carlota/diagnostics`, { credentials: "include" })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data?.data?.diagnostics) setHistory(data.data.diagnostics as HistoricDiagnostic[]);
+      })
+      .catch(() => {})
+      .finally(() => setHistoryLoaded(true));
+  }, [BASE_URL_API]);
+
+  const persistDiagnostic = async (report: DiagnosticReport) => {
+    try {
+      const res = await fetch(`${BASE_URL_API}/carlota/diagnostics`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          companyName: form.companyName,
+          industry: form.industry,
+          stage: form.stage,
+          report,
+        }),
+      });
+      if (res.ok) {
+        const saved = await res.json() as { data: HistoricDiagnostic };
+        if (saved.data) setHistory(h => [saved.data, ...h]);
+      }
+    } catch {
+    }
+  };
 
   const runDiagnostic = async () => {
     setLoading(true);
@@ -153,15 +197,18 @@ Return ONLY valid JSON, no markdown, no explanation.`;
 
       const parsed = JSON.parse(fullContent) as DiagnosticReport;
       setReport(parsed);
+      void persistDiagnostic(parsed);
     } catch (err) {
       console.error("Diagnostic failed:", err);
-      setReport({
+      const fallback: DiagnosticReport = {
         executiveSummary: `${form.companyName} is positioned in a competitive market with meaningful differentiation opportunities. The diagnostic reveals a balanced risk profile with clear growth vectors in the primary segment.`,
         marketPosition: { score: 68, summary: `${form.companyName} holds a defensible position in ${form.industry} with early traction in ${form.primaryMarket}. The company's differentiation is partially established but requires reinforcement to resist competitive pressure over the ${form.horizon} horizon.`, strengths: ["Strong product-market fit signals in core segment", "Differentiated positioning vs. top competitors", "Management team with relevant domain expertise"], gaps: ["Market penetration below category benchmarks", "Brand recognition lagging primary competitors", "Operational scalability constraints emerging"] },
         competitiveLandscape: { dynamics: `The ${form.industry} market is experiencing consolidation pressure from well-capitalised incumbents while disruptive entrants challenge category conventions. ${form.topCompetitors} represent the primary competitive set, though adjacent-market players are increasingly entering the core segment.`, threats: ["Incumbent price compression in core segment", "Well-funded new entrant targeting same ICP", "Platform risk from dependency on third-party distribution"], whitespace: ["Underserved mid-market segment with budget and urgency", "Geographic expansion — low penetration in secondary markets", "Vertical specialization creating premium pricing power"] },
         growthOpportunities: { primary: "Double down on the highest-converting customer segment with a dedicated land-and-expand motion — current expansion revenue is the highest-ROI growth lever available.", secondary: "Develop a channel partnership program to access distribution networks without proportional CAC investment.", adjacent: "Adjacent market in ${form.industry} services layer where current customers show clear pull without dedicated offering.", timeframe: form.horizon || "12 months" },
         riskRegister: { critical: ["Key customer concentration — top 3 clients represent >40% of ARR, creating existential churn risk", "Cash runway may compress if growth targets missed and fundraise is delayed"], moderate: ["Regulatory changes in core market could impact go-to-market approach", "Talent retention in engineering — compensation uncompetitive vs. tech benchmarks", "Product roadmap over-stretched relative to team capacity"], mitigations: ["Accelerate customer diversification with dedicated SMB motion", "Secure 18-month runway buffer through strategic cost review or bridge", "Engage regulatory counsel proactively to monitor and anticipate changes"] },
-      });
+      };
+      setReport(fallback);
+      void persistDiagnostic(fallback);
     } finally {
       setLoading(false);
     }
@@ -388,6 +435,30 @@ Return ONLY valid JSON, no markdown, no explanation.`;
           <p className="text-sm" style={{ fontFamily: "var(--font-serif)" }}>Analysing your strategic position…</p>
           <p className="text-xs text-muted-foreground mt-1">Synthesising market intelligence, competitive dynamics, and growth vectors</p>
         </motion.div>
+      )}
+
+      {historyLoaded && history.length > 0 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Clock className="w-4 h-4" style={{ color: GOLD }} />
+              Previous Diagnostics
+              <Badge variant="secondary" className="ml-auto text-xs">{history.length}</Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {history.slice(0, 5).map(h => (
+              <button key={h.id} onClick={() => { setReport(h.report as DiagnosticReport); setForm(f => ({ ...f, companyName: h.companyName, industry: h.industry, stage: h.stage })); }}
+                className="w-full text-left px-3 py-2 rounded-lg border border-border hover:bg-muted transition-colors">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-sm font-medium">{h.companyName}</span>
+                  <span className="text-xs text-muted-foreground">{new Date(h.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-0.5">{h.industry}{h.stage ? ` · ${h.stage}` : ""}</p>
+              </button>
+            ))}
+          </CardContent>
+        </Card>
       )}
     </div>
   );

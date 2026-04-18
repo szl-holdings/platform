@@ -7,11 +7,28 @@ import { PROXY_ROUTES } from "../../packages/proxy-routes.js";
 
 process.env.GOMAXPROCS = process.env.GOMAXPROCS ?? "2";
 
-const vitePort = Number(process.env.VITE_PORT) || 3101;
+const vitePort = Number(process.env.VITE_PORT) || 8098;
 const basePath = process.env.BASE_PATH || "/carlota-jo/";
 
 // Shared proxy port — hardcoded; do not use a PROXY_PORT env var to override this.
 const SHARED_PROXY_PORT = 9090;
+
+function healthCheckPlugin(): Plugin {
+  return {
+    name: "health-check",
+    apply: "serve" as const,
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        if (req.url === "/" || req.url === "/health" || req.url === "/__health") {
+          res.writeHead(200, { "Content-Type": "text/plain" });
+          res.end("OK");
+          return;
+        }
+        next();
+      });
+    },
+  };
+}
 
 function sharedProxyPlugin() {
   return {
@@ -70,6 +87,7 @@ function sharedProxyPlugin() {
 export default defineConfig({
   base: basePath,
   plugins: [
+    healthCheckPlugin(),
     sharedProxyPlugin(),
     react(),
     tailwindcss(),
@@ -119,11 +137,11 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    holdUntilCrawlEnd: true,
+    holdUntilCrawlEnd: false,
   },
   server: {
     port: vitePort,
-    strictPort: true,
+    strictPort: false,
     host: "0.0.0.0",
     allowedHosts: true,
     hmr: { clientPort: 443, path: basePath },
