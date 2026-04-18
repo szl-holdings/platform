@@ -196,41 +196,22 @@ app.use(sessionRefreshPolicy());
 
 app.get("/api/health", async (_req: Request, res: Response) => {
   const memUsage = process.memoryUsage();
-  const dbUrl = process.env.DATABASE_URL;
   const uptimeSeconds = Math.floor(process.uptime());
 
-  // Check database connectivity
-  let dbStatus: "ok" | "degraded" | "not_configured" = dbUrl ? "ok" : "not_configured";
-  let dbLatencyMs: number | null = null;
-  if (dbUrl) {
-    const dbStart = Date.now();
-    try {
-      const { db } = await import("@szl-holdings/db");
-      const { sql } = await import("drizzle-orm");
-      await Promise.race([
-        db.execute(sql`SELECT 1`),
-        new Promise<never>((_, reject) => setTimeout(() => reject(new Error("timeout")), 3000)),
-      ]);
-      dbLatencyMs = Date.now() - dbStart;
-    } catch {
-      dbStatus = "degraded";
-      dbLatencyMs = Date.now() - dbStart;
-    }
-  }
+  const { getDetailedHealth } = await import("./lib/health-probes.js");
+  const probes = await getDetailedHealth();
 
-  // Check job queue
-  let queueStatus: "ok" | "backpressure" | "unavailable" = "unavailable";
-  let queueDepth = 0;
-  try {
-    const { durableJobQueue } = await import("@szl-holdings/forge-runtime");
-    const stats = await durableJobQueue.getStats();
-    queueDepth = stats.pending + stats.running;
-    queueStatus = queueDepth > 50 ? "backpressure" : "ok";
-  } catch { /* job queue may not be initialized yet */ }
-
+  const dbLatencyMs: number | null = probes.database.latencyMs ?? null;
+  const queueDepth = probes.queue.depth ?? 0;
   const hasSessionSecret = !!process.env.SESSION_SECRET;
-  const authOk = hasSessionSecret ? "ok" : "degraded";
-  const overallStatus = dbStatus === "degraded" || authOk === "degraded" ? "degraded" : "healthy";
+  const aiLatencyMs: number | null = probes.ai.latencyMs ?? null;
+  const aiMode = (process.env.AI_INTEGRATIONS_OPENAI_API_KEY || process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY || process.env.AI_INTEGRATIONS_GEMINI_API_KEY) ? "live" : "mock";
+
+  const isUnhealthy = (s: string) => s === "error" || s === "degraded";
+  const overallStatus =
+    isUnhealthy(probes.database.status) || isUnhealthy(probes.auth.status)
+      ? "degraded"
+      : "healthy";
 
   const platformApps = [
     { slug: "szl-holdings", name: "SZL Holdings Dashboard", type: "command_surface" },
@@ -267,11 +248,11 @@ app.get("/api/health", async (_req: Request, res: Response) => {
     },
     services: {
       server: { status: "ok" },
-      database: { status: dbStatus, latencyMs: dbLatencyMs },
-      job_queue: { status: queueStatus, depth: queueDepth },
+      database: { status: probes.database.status, latencyMs: dbLatencyMs },
+      job_queue: { status: probes.queue.status, depth: queueDepth },
       storage: { status: "ok", mode: process.env.OBJECT_STORAGE_BUCKET_ID ? "cloud" : "local" },
-      auth: { status: authOk, mode: hasSessionSecret ? "configured" : "missing_secret" },
-      ai: { status: "ok", mode: (process.env.AI_INTEGRATIONS_OPENAI_API_KEY || process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY || process.env.AI_INTEGRATIONS_GEMINI_API_KEY) ? "live" : "mock" },
+      auth: { status: probes.auth.status, mode: hasSessionSecret ? "configured" : "missing_secret" },
+      ai: { status: probes.ai.status, latencyMs: aiLatencyMs, mode: aiMode },
     },
     platform: {
       apps: platformApps,
