@@ -19,6 +19,7 @@
 
 import { Router, type IRouter, type Request, type Response } from "express";
 import { z } from "zod";
+import { createHash, randomUUID } from "crypto";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import {
   sendSuccess,
@@ -39,6 +40,8 @@ import {
   dbRecordRecommendations,
   dbRecordPolicyViolations,
 } from "../lib/decisioning-store";
+import { db, decisionReceipts } from "@szl-holdings/db";
+import { logActivity } from "@szl-holdings/audit";
 
 const router: IRouter = Router();
 
@@ -492,6 +495,67 @@ router.post(
         }).catch((err) => {
           logger.warn({ err }, "[Decisioning] decision.executed webhook delivery failed");
         });
+
+        (async () => {
+          if (!definition.requiresExplicitApproval) {
+            return;
+          }
+          try {
+            const rawUserId = req.user?.id;
+            const actorUserId: number | null = rawUserId != null ? Number(rawUserId) : null;
+            const actorName = req.user?.displayName ?? approvedBy ?? "system";
+            const actorRole = req.user?.roles?.[0] ?? "system";
+            const ts = new Date();
+            const dataSnapshot = {
+              workflowId,
+              workflowName: definition.name,
+              domain: definition.domain,
+              runId: result.run.runId,
+              steps: definition.steps.map(s => s.name),
+              metadata: metadata ?? {},
+            };
+            const canonicalStr = JSON.stringify({
+              actorUserId: actorUserId ?? "system",
+              timestamp: ts.toISOString(),
+              workflowId,
+              domain: definition.domain,
+              outcome: result.run.status,
+            });
+            const nonRepudiationHash = createHash("sha256").update(canonicalStr).digest("hex");
+            const receiptId = randomUUID();
+            await db.insert(decisionReceipts).values({
+              receiptId,
+              domain: definition.domain,
+              actionType: workflowId,
+              actionLabel: definition.name,
+              actorUserId,
+              actorName,
+              actorRole,
+              timestamp: ts,
+              dataSnapshot,
+              aiRecommendation: recommendationId ? { recommendationId } : null,
+              alternativesConsidered: [],
+              rationale: policyResult.reasoning ?? null,
+              outcome: result.run.status === "completed" ? "approved" : result.run.status,
+              riskLevel: "medium",
+              nonRepudiationHash,
+              hashAlgorithm: "sha256",
+              workflowId,
+              metadata: { isDryRun: result.run.isDryRun, isSimulation: result.run.isSimulation, policyEffect: policyResult.effect },
+            });
+            await logActivity({
+              userId: actorUserId,
+              action: "decision_receipt.created",
+              resource: "decision_receipt",
+              resourceId: receiptId,
+              outcome: "success",
+              metadata: { domain: definition.domain, workflowId, receiptId },
+            });
+            logger.info({ receiptId, workflowId, domain: definition.domain }, "[Decisioning] Decision receipt persisted");
+          } catch (receiptErr) {
+            logger.warn({ err: receiptErr }, "[Decisioning] Failed to persist decision receipt for workflow execution");
+          }
+        })();
       });
 
       return sendCreated(res, {

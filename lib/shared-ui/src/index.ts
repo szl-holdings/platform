@@ -386,3 +386,12 @@ export {
   type AuditActorType,
   type AuditActionType,
 } from "./admin-audit-trail";
+
+export {
+  DecisionReceiptCard,
+  DecisionReceiptBadge,
+  type DecisionReceiptData,
+  type DecisionReceiptCardProps,
+  type AiRecommendation as DecisionAiRecommendation,
+  type Alternative as DecisionAlternative,
+} from "./decision-receipt-card";

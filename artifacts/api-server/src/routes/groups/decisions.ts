@@ -3,6 +3,7 @@ import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../../midd
 import { tenantScope } from "../../middlewares/tenant-scope";
 import decisioningRouter from "../decisioning";
 import decisionFabricRouter from "../decision-fabric";
+import decisionsReceiptsRouter from "../decisions-receipts";
 
 export function register(router: IRouter): void {
   router.use("/decisioning", tenantScope({ required: true }));
@@ -12,4 +13,7 @@ export function register(router: IRouter): void {
   router.use(decisioningRouter);
   router.use("/decision-fabric", perUserApiSlidingLimiter);
   router.use(decisionFabricRouter);
+
+  router.use("/decisions", perUserWriteSlidingLimiter);
+  router.use(decisionsReceiptsRouter);
 }

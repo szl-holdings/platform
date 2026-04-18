@@ -135,3 +135,4 @@ export * from "./signal_chain_executions";
 export * from "./ot_ics";
 export * from "./page_view_events";
 export * from "./szl_decisioning";
+export * from "./decision_receipts";
