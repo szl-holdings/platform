@@ -26,6 +26,7 @@
     "seed:atlas:vessels": "pnpm --filter @workspace/scripts run seed:atlas:vessels",
     "seed:atlas:terra": "pnpm --filter @workspace/scripts run seed:atlas:terra",
     "seed:atlas:counsel": "pnpm --filter @workspace/scripts run seed:atlas:counsel",
+    "seed:tenant-health": "pnpm --filter @workspace/scripts run seed:tenant-health",
     "migrate": "pnpm --filter @szl-holdings/db run push-force",
     "db:migrate": "pnpm --filter @szl-holdings/db run migrate",
     "start": "pnpm -r --if-present run dev",
