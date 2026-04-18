@@ -204,6 +204,15 @@ const ECOSYSTEM_APPS: EcosystemApp[] = [
     description: "Premium Advisory — High-Trust Client Operations",
   },
   {
+    id: "prism-counsel",
+    name: "PRISM Counsel",
+    subtitle: "Domain Pack · Legal Command",
+    path: "/prism-counsel/",
+    accent: "#a78bfa",
+    icon: "⚖",
+    description: "Legal Command — Matter Intelligence, Obligation Graph & Proof Chain",
+  },
+  {
     id: "szl-leadership",
     name: "Leadership",
     subtitle: "Founder · SZL Holdings",
@@ -635,9 +644,9 @@ function NotificationsPanel({
   onMarkAllRead: () => void;
   onClose: () => void;
 }) {
-  const { prefs, setPrefs } = useUserPreferences();
+  const { prefs, setPreference } = useUserPreferences();
   const soundOn = prefs.notification_sound;
-  const setSoundOn = (on: boolean) => setPrefs({ notification_sound: on });
+  const setSoundOn = (on: boolean) => setPreference("notification_sound", on);
   const unread = notifications.filter((n) => !n.read);
   const recent = [...notifications].sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()).slice(0, 20);
 

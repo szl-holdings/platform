@@ -2,6 +2,7 @@ export * from "./types.js";
 export * from "./evaluator.js";
 export * from "./guardrails.js";
 export * from "./modes.js";
+export * from "./prism-counsel-policies.js";
 
 export const POLICY_ENGINE_VERSION = "1.1.0" as const;
 
@@ -10,8 +11,9 @@ import type { Policy, EvaluationRequest, PolicyEvaluationResult, PolicyEvaluatio
 import { evaluatePolicies } from "./evaluator.js";
 import { BUILT_IN_GUARDRAILS } from "./guardrails.js";
 import { defaultPolicyModeRegistry } from "./modes.js";
+import { PRISM_COUNSEL_POLICIES } from "./prism-counsel-policies.js";
 
-const registeredPolicies: Policy[] = [...BUILT_IN_GUARDRAILS];
+const registeredPolicies: Policy[] = [...BUILT_IN_GUARDRAILS, ...PRISM_COUNSEL_POLICIES];
 
 export function registerPolicy(policy: Policy): void {
   const idx = registeredPolicies.findIndex(p => p.id === policy.id);

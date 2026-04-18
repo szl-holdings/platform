@@ -5,6 +5,7 @@ export type PrismDomain =
   | "terra"
   | "carlota-jo"
   | "szl-holdings"
+  | "prism-counsel"
   | "stephen"
   | "cortex"
   | "global";

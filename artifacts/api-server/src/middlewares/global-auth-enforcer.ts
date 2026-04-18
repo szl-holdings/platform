@@ -55,6 +55,7 @@ const PUBLIC_EXACT_PATHS = new Set([
   "/api/federation/agents",
   "/api/prism-counsel/health",
   "/api/prism-counsel/readiness",
+  "/api/prism-counsel/privilege/check",
   // Self-healing orchestrator — read-only GET endpoints.
   // Exact-path matches ensure the mutating PATCH /policies/:id/toggle
   // (which requires auth) is NOT covered by these allowlist entries.

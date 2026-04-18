@@ -57,6 +57,12 @@ export const LANE_ACCENT_HEX = {
     accent: "#6080a5",
     muted: "rgba(138,154,176,0.10)",
   },
+  prismCounsel: {
+    primary: "#a78bfa",
+    primaryLight: "#c4b5fd",
+    accent: "#7c3aed",
+    muted: "rgba(167,139,250,0.10)",
+  },
 } as const;
 
 export type LaneName = keyof typeof LANE_ACCENT_HEX;

@@ -39,10 +39,30 @@ import { getDocumentPipelineStats, getDocumentsForMatter } from "../services/pri
 import { z } from "zod";
 import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
+const PC_MATTER_TYPES = ["auto_injury", "premises_liability", "insurance_coverage", "medical_malpractice", "product_liability", "wrongful_death", "workers_comp", "no_fault", "other"] as const;
+type PcMatterType = typeof PC_MATTER_TYPES[number];
+
+const PC_MATTER_STATUSES = ["intake", "investigation", "discovery", "pre_trial", "trial", "settlement", "closed", "archived"] as const;
+type PcMatterStatus = typeof PC_MATTER_STATUSES[number];
+
+const PC_PARTY_ROLES = ["plaintiff", "defendant", "carrier", "adjuster", "witness", "expert", "provider", "judge", "mediator", "opposing_counsel"] as const;
+
+const PC_DEADLINE_TYPES = ["statute_of_limitations", "discovery_cutoff", "deposition", "mediation", "trial", "motion", "filing", "response", "expert_disclosure", "settlement_conference", "notice_of_claim", "no_fault_ack", "no_fault_verify", "no_fault_pay_deny", "bill_submission", "other"] as const;
+type PcDeadlineType = typeof PC_DEADLINE_TYPES[number];
+
+const PC_APPROVAL_REQUEST_TYPES = ["demand_send", "settlement_acceptance", "external_communication", "expert_engagement", "filing", "client_disclosure", "fee_approval", "export_approval"] as const;
+type PcApprovalRequestType = typeof PC_APPROVAL_REQUEST_TYPES[number];
+
+const PC_EXPORT_TYPES = ["demand_packet", "review_packet", "audit_report", "matter_summary", "medical_chronology", "damages_summary", "bulk_export"] as const;
+type PcExportType = typeof PC_EXPORT_TYPES[number];
+
+const PC_EXPORT_FORMATS = ["pdf", "docx", "csv", "json"] as const;
+type PcExportFormat = typeof PC_EXPORT_FORMATS[number];
+
 const createMatterSchema = z.object({
   title: z.string().min(1).max(500),
-  matterType: z.enum(["litigation", "transactional", "advisory", "regulatory", "ip", "employment", "other"]),
-  status: z.enum(["intake", "active", "on-hold", "closed", "archived"]).optional(),
+  matterType: z.enum(PC_MATTER_TYPES),
+  status: z.enum(PC_MATTER_STATUSES).optional(),
   jurisdiction: z.string().max(200).optional(),
   notes: z.string().max(10000).optional(),
   caseNumber: z.string().max(200).optional(),
@@ -52,7 +72,7 @@ const createMatterSchema = z.object({
 
 const addPartySchema = z.object({
   name: z.string().min(1).max(500),
-  role: z.enum(["plaintiff", "defendant", "witness", "counsel", "expert", "other"]),
+  role: z.enum(PC_PARTY_ROLES),
   email: z.string().email().max(300).optional(),
   phone: z.string().max(50).optional(),
   notes: z.string().max(5000).optional(),
@@ -64,7 +84,7 @@ const addDeadlineSchema = z.object({
   dueDate: z.string().min(1),
   priority: z.enum(["low", "medium", "high", "critical"]).optional(),
   description: z.string().max(5000).optional(),
-  deadlineType: z.string().max(100).optional(),
+  deadlineType: z.enum(PC_DEADLINE_TYPES).optional(),
 });
 
 const createApprovalSchema = z.object({
@@ -73,20 +93,32 @@ const createApprovalSchema = z.object({
   requestedFrom: z.string().max(500).optional(),
   dueDate: z.string().optional(),
   matterId: z.number().int().positive().optional(),
-  requestType: z.string().max(200).optional(),
+  requestType: z.enum(PC_APPROVAL_REQUEST_TYPES).optional(),
   sourceBasis: z.string().max(1000).optional(),
 });
 
 const createExportSchema = z.object({
-  exportType: z.string().min(1).max(200),
-  format: z.enum(["pdf", "csv", "json", "xlsx", "docx"]),
+  exportType: z.enum(PC_EXPORT_TYPES),
+  format: z.enum(PC_EXPORT_FORMATS),
   matterId: z.number().int().positive().optional(),
+  externalMatterId: z.string().max(200).optional(),
 });
+
+function deriveMatterPrivilegeLevel(matterType: string | null | undefined): "public" | "confidential" | "privileged" | "restricted" {
+  switch (matterType) {
+    case "medical_malpractice": return "restricted";
+    case "wrongful_death":
+    case "product_liability":
+    case "workers_comp": return "privileged";
+    default: return "confidential";
+  }
+}
 
 const router: IRouter = Router();
 
 function getOrgId(req: Request): number {
-  return (req as any).tenantOrgId ?? req.user?.orgs?.[0]?.orgId ?? 1;
+  const r = req as Request & { tenantOrgId?: number };
+  return r.tenantOrgId ?? req.user?.orgs?.[0]?.orgId ?? 1;
 }
 
 function requireAuth(req: Request, res: Response): boolean {
@@ -167,20 +199,20 @@ router.get("/matters/:matterId", authMiddleware(), async (req, res) => {
 router.post("/matters", authMiddleware(), validateBody(createMatterSchema), async (req, res) => {
   try {
     const orgId = getOrgId(req);
-    const { title, matterType, jurisdiction } = req.body as z.infer<typeof createMatterSchema>;
-    const { caseNumber, courtName, filingDate } = req.body as { caseNumber?: string; courtName?: string; filingDate?: string };
+    const { title, matterType, status, jurisdiction, caseNumber, courtName, filingDate } = req.body as z.infer<typeof createMatterSchema>;
 
     const [matter] = await db.insert(pcMattersTable).values({
       orgId,
       title,
-      caseNumber,
       matterType,
-      jurisdiction,
-      courtName,
+      status: status ?? "intake",
+      caseNumber: caseNumber ?? null,
+      jurisdiction: jurisdiction ?? null,
+      courtName: courtName ?? null,
       filingDate: filingDate ? new Date(filingDate) : null,
-      createdBy: req.user?.id,
-      updatedBy: req.user?.id,
-    } as any).returning();
+      createdBy: req.user?.id ?? null,
+      updatedBy: req.user?.id ?? null,
+    }).returning();
 
     await db.insert(pcAuditEventsTable).values({
       orgId, matterId: matter.id, actorId: req.user?.id ?? null,
@@ -202,13 +234,24 @@ router.patch("/matters/:matterId", authMiddleware(), validateBody(jsonObjectBody
       .where(and(eq(pcMattersTable.id, matterId), eq(pcMattersTable.orgId, orgId)));
     if (!existing) return sendNotFound(res, "Matter not found");
 
-    const updates: Record<string, unknown> = { updatedAt: new Date(), updatedBy: req.user?.id };
-    const allowedFields = ["title", "caseNumber", "status", "stage", "jurisdiction", "courtName", "notes", "healthScore"];
-    for (const field of allowedFields) {
-      if (req.body[field] !== undefined) updates[field] = req.body[field];
-    }
+    const body = req.body as Partial<{
+      title: string; caseNumber: string; status: PcMatterStatus; stage: string;
+      jurisdiction: string; courtName: string; notes: string; healthScore: number;
+    }>;
+    const updates = {
+      updatedAt: new Date(),
+      updatedBy: req.user?.id ?? null,
+      ...(body.title !== undefined && { title: body.title }),
+      ...(body.caseNumber !== undefined && { caseNumber: body.caseNumber }),
+      ...(body.status !== undefined && { status: body.status }),
+      ...(body.stage !== undefined && { stage: body.stage }),
+      ...(body.jurisdiction !== undefined && { jurisdiction: body.jurisdiction }),
+      ...(body.courtName !== undefined && { courtName: body.courtName }),
+      ...(body.notes !== undefined && { notes: body.notes }),
+      ...(body.healthScore !== undefined && { healthScore: body.healthScore }),
+    };
 
-    const [updated] = await db.update(pcMattersTable).set(updates as any).where(eq(pcMattersTable.id, matterId)).returning();
+    const [updated] = await db.update(pcMattersTable).set(updates).where(eq(pcMattersTable.id, matterId)).returning();
 
     await db.insert(pcAuditEventsTable).values({
       orgId, matterId, actorId: req.user?.id ?? null,
@@ -236,7 +279,12 @@ router.post("/matters/:matterId/parties", authMiddleware(), validateBody(addPart
     const { role, name, email, phone } = req.body as z.infer<typeof addPartySchema>;
     const { organization } = req.body as { organization?: string };
 
-    const [party] = await db.insert(pcPartiesTable).values({ matterId, role, name, organization, email, phone } as any).returning();
+    const [party] = await db.insert(pcPartiesTable).values({
+      matterId, role, name,
+      organization: organization ?? null,
+      email: email ?? null,
+      phone: phone ?? null,
+    }).returning();
     sendSuccess(res, { party }, 201);
   } catch (err) { handleRouteError(res, err, "Failed to create party"); }
 });
@@ -254,13 +302,14 @@ router.post("/matters/:matterId/deadlines", authMiddleware(), validateBody(addDe
   try {
     const matterId = parseIdParam(req.params.matterId as string);
     if (!matterId) return sendBadRequest(res, "Invalid matter ID");
-    const { title, dueDate, priority } = req.body as z.infer<typeof addDeadlineSchema>;
-    const { deadlineType } = req.body as { deadlineType?: string };
+    const { title, dueDate, priority, deadlineType } = req.body as z.infer<typeof addDeadlineSchema>;
 
     const [deadline] = await db.insert(pcDeadlinesTable).values({
-      matterId, title, deadlineType: deadlineType ?? "other",
-      dueDate: new Date(dueDate), priority: priority ?? "medium",
-    } as any).returning();
+      matterId, title,
+      deadlineType: deadlineType ?? "other",
+      dueDate: new Date(dueDate),
+      priority: priority ?? "medium",
+    }).returning();
 
     await enqueuePrismJob(getOrgId(req), PRISM_JOB_TYPES.DEADLINE_EVALUATE, { matterId, deadlineId: deadline.id });
 
@@ -328,15 +377,17 @@ router.get("/approvals", authMiddleware(), validateQuery(listQuerySchema), async
 router.post("/approvals", authMiddleware(), validateBody(createApprovalSchema), async (req, res) => {
   try {
     const orgId = getOrgId(req);
-    const { title, description } = req.body as z.infer<typeof createApprovalSchema>;
-    const { matterId, requestType, sourceBasis } = req.body as { matterId?: number; requestType?: string; sourceBasis?: string };
+    const { title, description, matterId, requestType, sourceBasis } = req.body as z.infer<typeof createApprovalSchema>;
     if (!matterId || !requestType || !title) return sendBadRequest(res, "matterId, requestType, and title required");
 
     const [approval] = await db.insert(pcApprovalRequestsTable).values({
-      matterId, requestType, title, description,
-      sourceBasis: sourceBasis ?? null,
+      matterId,
+      requestType,
+      title,
+      description: description ?? null,
+      sourceBasis: sourceBasis ? { value: sourceBasis } : null,
       requestedBy: req.user?.id ?? null,
-    } as any).returning();
+    }).returning();
 
     await db.insert(pcAuditEventsTable).values({
       orgId, matterId, actorId: req.user?.id ?? null,
@@ -381,20 +432,105 @@ router.patch("/approvals/:approvalId/resolve", authMiddleware(), validateBody(js
 router.post("/exports", authMiddleware(), validateBody(createExportSchema), async (req, res) => {
   try {
     const orgId = getOrgId(req);
-    const { matterId, exportType, format } = req.body as z.infer<typeof createExportSchema>;
+    const { matterId, exportType, format, externalMatterId } = req.body as z.infer<typeof createExportSchema>;
+
+    const { checkAction } = await import("@szl-holdings/policy-engine");
+    const sessionRole: string = req.user?.orgs?.[0]?.role ?? "associate";
+
+    let derivedPrivilegeLevel: "public" | "confidential" | "privileged" | "restricted" = "privileged";
+    let resolvedMatter: { id: number; matterType: string | null } | null = null;
+
+    if (matterId) {
+      const [dbMatter] = await db
+        .select({ id: pcMattersTable.id, matterType: pcMattersTable.matterType })
+        .from(pcMattersTable)
+        .where(and(eq(pcMattersTable.id, matterId), eq(pcMattersTable.orgId, orgId)));
+      if (!dbMatter) {
+        return sendNotFound(res, "Matter not found or access denied");
+      }
+      resolvedMatter = dbMatter;
+      derivedPrivilegeLevel = deriveMatterPrivilegeLevel(dbMatter.matterType);
+    }
+
+    const userApprovedByRole = ["partner", "gc", "super_admin"].includes(sessionRole);
+
+    const policyResult = checkAction({
+      action: "prism-counsel:export",
+      domain: "prism-counsel",
+      subject: {
+        id: req.user?.id?.toString() ?? "unknown",
+        roles: [sessionRole],
+        tenantId: req.user?.orgs?.[0]?.orgId?.toString(),
+      },
+      resource: {
+        type: "prism-matter",
+        id: (resolvedMatter?.id ?? externalMatterId ?? "unknown").toString(),
+        domain: "prism-counsel",
+        attributes: {
+          privilegeLevel: derivedPrivilegeLevel,
+          wallEnabled: derivedPrivilegeLevel === "restricted",
+          userApproved: userApprovedByRole,
+        },
+      },
+      context: { userRole: sessionRole },
+      confidence: 1.0,
+    });
+
+    if (policyResult.effect === "block") {
+      return sendForbidden(res, `Export blocked by policy: ${policyResult.reasoning}`);
+    }
+
+    if (policyResult.effect === "require_approval") {
+      if (!resolvedMatter) {
+        return sendForbidden(res, `Export requires approval but no DB-resolved matter is available`);
+      }
+      const [approvalReq] = await db.insert(pcApprovalRequestsTable).values({
+        matterId: resolvedMatter.id,
+        requestType: "export_approval" as const,
+        title: `Export approval required — ${exportType}`,
+        description: `Policy requires approval before export. Reason: ${policyResult.reasoning}`,
+        sourceBasis: {
+          ruleViolations: policyResult.violations.map((v: { reason: string }) => v.reason),
+          requiredRole: policyResult.requiredApproverRole ?? "partner",
+          exportType,
+          format,
+          sessionRole,
+        },
+        requestedBy: req.user?.id ?? null,
+      }).returning();
+
+      void db.insert(pcAuditEventsTable).values({
+        orgId, matterId: resolvedMatter.id, actorId: req.user?.id ?? null,
+        action: "export_approval_required", entityType: "export", entityId: approvalReq.id,
+        details: { exportType, format, externalMatterId, privilegeLevel: derivedPrivilegeLevel, sessionRole, reasoning: policyResult.reasoning },
+      }).catch(() => {});
+
+      return res.status(202).json({
+        success: false,
+        status: "pending_approval",
+        approvalRequestId: approvalReq.id,
+        message: `Export requires ${policyResult.requiredApproverRole ?? "partner"} approval. A request has been created.`,
+        policyReasoning: policyResult.reasoning,
+      });
+    }
+
+    const resolvedMatterId = resolvedMatter?.id ?? null;
 
     const [exp] = await db.insert(pcExportsTable).values({
-      orgId, matterId: matterId ?? null, exportType, format,
+      orgId,
+      matterId: resolvedMatterId,
+      exportType,
+      format,
       exportedBy: req.user?.id ?? null,
-      status: "pending",
-    } as any).returning();
+      status: "pending" as const,
+    }).returning();
 
     await enqueuePrismJob(orgId, PRISM_JOB_TYPES.EXPORT_GENERATE, {
-      exportId: exp.id, matterId, exportType, format,
-    }, { matterId, actorId: req.user?.id });
+      exportId: exp.id, matterId: resolvedMatterId, exportType, format,
+    }, { matterId: resolvedMatterId, actorId: req.user?.id });
 
     await db.insert(pcAuditEventsTable).values({
-      orgId, matterId: matterId ?? null, actorId: req.user?.id ?? null,
+      orgId, matterId: resolvedMatterId, actorId: req.user?.id ?? null,
       action: "export_requested", entityType: "export", entityId: exp.id,
       details: { exportType, format },
     });
@@ -499,6 +635,73 @@ router.get("/audit", authMiddleware(), validateQuery(listQuerySchema), async (re
 
     sendSuccess(res, { events });
   } catch (err) { handleRouteError(res, err, "Failed to fetch audit events"); }
+});
+
+/* ── Policy-Backed Privilege Check ── */
+const privilegeCheckSchema = z.object({
+  matterId: z.string().optional(),
+  action: z.enum(["prism-counsel:access", "prism-counsel:export", "prism-counsel:view"]),
+  userRole: z.string().min(1).max(100),
+  privilegeLevel: z.string().optional(),
+  wallEnabled: z.boolean().optional(),
+  userApproved: z.boolean().optional(),
+});
+
+router.post("/privilege/check", validateBody(privilegeCheckSchema), async (req, res) => {
+  try {
+    const { checkAction } = await import("@szl-holdings/policy-engine");
+    const { matterId, action, userRole, privilegeLevel, wallEnabled, userApproved } =
+      req.body as z.infer<typeof privilegeCheckSchema>;
+
+    const result = checkAction({
+      action,
+      domain: "prism-counsel",
+      subject: {
+        id: req.user?.id?.toString() ?? "demo-user",
+        roles: [userRole],
+        tenantId: req.user?.orgs?.[0]?.orgId?.toString(),
+      },
+      resource: {
+        type: "prism-matter",
+        id: matterId,
+        domain: "prism-counsel",
+        attributes: {
+          privilegeLevel: privilegeLevel ?? "public",
+          wallEnabled: wallEnabled ?? false,
+          userApproved: userApproved ?? true,
+        },
+      },
+      context: {
+        userRole,
+      },
+      confidence: 1.0,
+    });
+
+    if (req.user) {
+      void db.insert(pcAuditEventsTable).values({
+        orgId: getOrgId(req),
+        actorId: req.user.id,
+        action: `privilege.check.${result.effect}`,
+        entityType: "matter",
+        entityId: matterId ? parseInt(matterId, 10) : null,
+        details: { action, userRole, privilegeLevel, wallEnabled, policyEffect: result.effect, reasoning: result.reasoning },
+      }).catch(() => {});
+    }
+
+    sendSuccess(res, {
+      allowed: result.allowed,
+      effect: result.effect,
+      requiresApproval: result.requiresApproval,
+      requiredApproverRole: result.requiredApproverRole ?? null,
+      escalationTarget: result.escalationTarget ?? null,
+      violations: result.violations,
+      reasoning: result.reasoning,
+      evaluatedAt: result.evaluatedAt,
+      policyEngine: "prism-counsel.matter-wall@1.0",
+    });
+  } catch (err) {
+    handleRouteError(res, err, "POST /prism-counsel/privilege/check");
+  }
 });
 
 router.get("/dashboard", authMiddleware({ required: false }), async (req, res) => {
