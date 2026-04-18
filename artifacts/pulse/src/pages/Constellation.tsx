@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ConstellationGraph } from "@szl-holdings/shared-ui";
+import { ConstellationGraph } from "@szl-holdings/shared-ui/constellation-graph";
 
 const ACCENT = "#c8a84b";
 const DOMAINS = ["terra", "vessels", "aegis", "prism", "lyte"] as const;

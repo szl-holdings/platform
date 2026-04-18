@@ -4,7 +4,9 @@ import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persist
 import { persistQueryClient } from "@tanstack/query-persist-client-core";
 import { Router as WouterRouter, Switch, Route, useLocation, Redirect } from "wouter";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
-import { SandboxModeProvider, SandboxModeBanner, AnalyticsProvider, CortexVoice, CortexVoiceTrigger, useCortexVoice, MultiplayerSessionBanner } from "@szl-holdings/shared-ui";
+import { SandboxModeProvider, SandboxModeBanner, AnalyticsProvider } from "@szl-holdings/shared-ui";
+import { CortexVoice, CortexVoiceTrigger, useCortexVoice } from "@szl-holdings/shared-ui/cortex-voice";
+import { MultiplayerSessionBanner } from "@szl-holdings/shared-ui/multiplayer-session";
 import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
 import { commandConfig } from "@szl-holdings/shared-ui/copilot-configs";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";

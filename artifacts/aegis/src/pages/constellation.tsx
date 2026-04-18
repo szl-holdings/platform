@@ -1,4 +1,4 @@
-import { ConstellationGraph } from "@szl-holdings/shared-ui";
+import { ConstellationGraph } from "@szl-holdings/shared-ui/constellation-graph";
 
 const ACCENT = "#ef4444";
 

@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { EcosystemMap } from "@szl-holdings/shared-ui";
+import { EcosystemMap } from "@szl-holdings/shared-ui/ecosystem-map";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 

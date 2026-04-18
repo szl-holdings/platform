@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ConstellationGraph } from "@szl-holdings/shared-ui";
+import { ConstellationGraph } from "@szl-holdings/shared-ui/constellation-graph";
 import { Network, Anchor, Building2, MapPin, Package, AlertTriangle, CheckCircle2, RefreshCw, Shield, Eye, Info, ChevronRight } from "lucide-react";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { cn } from "@szl-holdings/shared-ui/utils";

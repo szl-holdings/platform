@@ -8,19 +8,10 @@ import {
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { apiRequest } from "@/lib/api";
-import {
-  CortexIntelligenceFeed,
-  CortexEntityGraph,
-  CortexActionDrafts,
-  CortexWhatIf,
-} from "@szl-holdings/shared-ui";
-import type {
-  IntelligenceSignal,
-  EntityGraphNode,
-  EntityGraphEdge,
-  ActionDraft,
-  WhatIfResult,
-} from "@szl-holdings/shared-ui";
+import { CortexIntelligenceFeed, type IntelligenceSignal } from "@szl-holdings/shared-ui/cortex-intelligence-feed";
+import { CortexEntityGraph, type EntityGraphNode, type EntityGraphEdge } from "@szl-holdings/shared-ui/cortex-entity-graph";
+import { CortexActionDrafts, type ActionDraft } from "@szl-holdings/shared-ui/cortex-action-drafts";
+import { CortexWhatIf, type WhatIfResult } from "@szl-holdings/shared-ui/cortex-what-if";
 
 const ACCENT = "#c9a84c";
 
