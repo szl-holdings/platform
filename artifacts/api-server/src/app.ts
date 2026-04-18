@@ -13,7 +13,7 @@ import { dirname, join } from "path";
 import { randomBytes } from "crypto";
 import router from "./routes";
 import { logger } from "./lib/logger";
-import { sendError, sendNotFound, sendUnauthorized } from "./lib/api-response";
+import { sendError, sendForbidden, sendNotFound, sendUnauthorized } from "./lib/api-response";
 import { correlationMiddleware } from "./middlewares/correlation";
 import { globalLimiter } from "./middlewares/rate-limiters";
 import { telemetryMiddleware } from "./middlewares/telemetry";
@@ -321,9 +321,17 @@ app.get("/api/health/detailed", async (req: Request, res: Response) => {
         hasInternalAccess = timingSafeEqual(a, b);
       }
     }
-    if (!hasInternalAccess && !req.isAuthenticated()) {
-      sendUnauthorized(res, "Detailed health information is restricted to authenticated users");
-      return;
+    if (!hasInternalAccess) {
+      if (!req.isAuthenticated()) {
+        sendUnauthorized(res, "Detailed health information is restricted to authenticated users");
+        return;
+      }
+      const userRoles: string[] = (req.user as { roles?: string[] })?.roles ?? [];
+      const hasAdminRole = userRoles.some((r) => ["ops", "super_admin"].includes(r));
+      if (!hasAdminRole) {
+        sendForbidden(res, "Detailed health information requires ops or super_admin role");
+        return;
+      }
     }
   }
   const checks: Record<string, { status: string; latencyMs?: number; details?: string }> = {};
