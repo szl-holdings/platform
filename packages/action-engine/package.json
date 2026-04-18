@@ -4,11 +4,26 @@
   "private": false,
   "type": "module",
   "description": "SZL Action Engine — executable workflows with manual/semi-auto/autonomous modes, approval gates, rollback hooks, and immutable execution history",
+  "scripts": {
+    "build": "tsc --build"
+  },
   "exports": {
-    ".": "./src/index.ts",
-    "./types": "./src/types.ts",
-    "./executor": "./src/executor.ts",
-    "./history": "./src/history.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./src/index.ts"
+    },
+    "./types": {
+      "types": "./dist/types.d.ts",
+      "import": "./src/types.ts"
+    },
+    "./executor": {
+      "types": "./dist/executor.d.ts",
+      "import": "./src/executor.ts"
+    },
+    "./history": {
+      "types": "./dist/history.d.ts",
+      "import": "./src/history.ts"
+    }
   },
   "dependencies": {
     "@szl-holdings/atlas-core": "workspace:*",

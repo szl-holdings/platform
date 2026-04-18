@@ -4,11 +4,26 @@
   "private": false,
   "type": "module",
   "description": "SZL Policy Engine — hierarchical policy evaluation, guardrail enforcement, and governance rule management",
+  "scripts": {
+    "build": "tsc --build"
+  },
   "exports": {
-    ".": "./src/index.ts",
-    "./types": "./src/types.ts",
-    "./evaluator": "./src/evaluator.ts",
-    "./guardrails": "./src/guardrails.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./src/index.ts"
+    },
+    "./types": {
+      "types": "./dist/types.d.ts",
+      "import": "./src/types.ts"
+    },
+    "./evaluator": {
+      "types": "./dist/evaluator.d.ts",
+      "import": "./src/evaluator.ts"
+    },
+    "./guardrails": {
+      "types": "./dist/guardrails.d.ts",
+      "import": "./src/guardrails.ts"
+    }
   },
   "dependencies": {
     "@szl-holdings/atlas-core": "workspace:*",

@@ -4,11 +4,26 @@
   "private": false,
   "type": "module",
   "description": "SZL Decision Engine — signal ranking, business impact scoring, urgency/confidence weighting, and explainable recommendation output",
+  "scripts": {
+    "build": "tsc --build"
+  },
   "exports": {
-    ".": "./src/index.ts",
-    "./types": "./src/types.ts",
-    "./ranker": "./src/ranker.ts",
-    "./scorer": "./src/scorer.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./src/index.ts"
+    },
+    "./types": {
+      "types": "./dist/types.d.ts",
+      "import": "./src/types.ts"
+    },
+    "./ranker": {
+      "types": "./dist/ranker.d.ts",
+      "import": "./src/ranker.ts"
+    },
+    "./scorer": {
+      "types": "./dist/scorer.d.ts",
+      "import": "./src/scorer.ts"
+    }
   },
   "dependencies": {
     "@szl-holdings/atlas-core": "workspace:*",
