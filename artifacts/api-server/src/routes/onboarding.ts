@@ -223,7 +223,7 @@ router.get(
           .where(and(eq(orgMembersTable.orgId, org.id), eq(orgMembersTable.userId, user.id)))
           .limit(1);
         if (!membership || (ORG_ROLE_HIERARCHY[membership.role] ?? 0) < ORG_ROLE_HIERARCHY["admin"]) {
-          res.status(403).json({ error: "Admin access required" });
+          sendForbidden(res, "Admin access required");
           return;
         }
       }
@@ -283,7 +283,7 @@ router.put(
           .where(and(eq(orgMembersTable.orgId, org.id), eq(orgMembersTable.userId, user.id)))
           .limit(1);
         if (!membership || (ORG_ROLE_HIERARCHY[membership.role] ?? 0) < ORG_ROLE_HIERARCHY["admin"]) {
-          res.status(403).json({ error: "Admin access required" });
+          sendForbidden(res, "Admin access required");
           return;
         }
       }

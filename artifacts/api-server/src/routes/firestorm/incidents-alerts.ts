@@ -40,7 +40,7 @@ import {
 import { REFERENCE_COMPLIANCE_CONTROLS } from "../readiness.js";
 import { eq, desc, sql, inArray, and, or } from "drizzle-orm";
 import { z } from "zod";
-import { sendSuccess, sendCreated, sendNotFound, sendNoContent, handleRouteError } from "../../lib/api-response";
+import { sendSuccess, sendCreated, sendNotFound, sendNoContent, sendError, handleRouteError } from "../../lib/api-response";
 import { authMiddleware, parseIdParam } from "../../middlewares/auth";
 import { logger } from "../../lib/logger";
 import { validateIfMatch } from "../../middlewares/optimistic-concurrency";
@@ -103,7 +103,7 @@ router.put("/firestorm/incidents/:id", authMiddleware({ required: true }), async
 
     if ((effectiveSeverity === "critical" || effectiveSeverity === "high") && activeStatuses.includes(effectiveStatus)) {
       if (!effectiveAnalyst) {
-        res.status(422).json({ error: "Assigned analyst is required for critical/high severity incidents in active status." });
+        sendError(res, "Assigned analyst is required for critical/high severity incidents in active status.", 422, "UNPROCESSABLE_ENTITY");
         return;
       }
     }
@@ -195,15 +195,15 @@ router.put("/firestorm/vulnerabilities/:id", authMiddleware({ required: true }),
     const effectiveRecommendation = recommendedAction ?? recommendation ?? current.recommendation;
     if ((effectiveStatus === "confirmed" || effectiveStatus === "open") && (current.severity === "critical" || current.severity === "high")) {
       if (!effectiveOwner) {
-        res.status(422).json({ error: "Remediation owner is required for critical/high severity findings when status is confirmed or open." });
+        sendError(res, "Remediation owner is required for critical/high severity findings when status is confirmed or open.", 422, "UNPROCESSABLE_ENTITY");
         return;
       }
       if (!effectiveDueDate) {
-        res.status(422).json({ error: "Due date is required for critical/high severity findings when status is confirmed or open." });
+        sendError(res, "Due date is required for critical/high severity findings when status is confirmed or open.", 422, "UNPROCESSABLE_ENTITY");
         return;
       }
       if (!effectiveRecommendation) {
-        res.status(422).json({ error: "Recommended action is required for critical/high severity findings when status is confirmed or open." });
+        sendError(res, "Recommended action is required for critical/high severity findings when status is confirmed or open.", 422, "UNPROCESSABLE_ENTITY");
         return;
       }
     }
@@ -288,7 +288,7 @@ router.put("/firestorm/compliance/:controlId", authMiddleware({ required: true }
     const effectiveStatus = status ?? existing.status;
     const effectiveOwner = owner ?? existing.owner;
     if ((effectiveStatus === "not_implemented" || effectiveStatus === "partial") && !effectiveOwner) {
-      res.status(422).json({ error: "Owner assignment is required for non-compliant compliance controls to enable gap routing." });
+      sendError(res, "Owner assignment is required for non-compliant compliance controls to enable gap routing.", 422, "UNPROCESSABLE_ENTITY");
       return;
     }
 

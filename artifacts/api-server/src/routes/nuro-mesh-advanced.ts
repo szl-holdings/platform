@@ -12,6 +12,7 @@
 import { Router, type Request, type Response } from "express";
 import { authMiddleware } from "../middlewares/auth";
 import { tenantScope } from "../middlewares/tenant-scope";
+import { sendBadRequest, sendNotFound } from "../lib/api-response";
 import {
   getKernelAuditTrail,
   verifyAuditChainIntegrity,
@@ -65,7 +66,7 @@ router.post("/nuro-mesh/kernel/scope-certificate", (req: Request, res: Response)
   };
 
   if (!agentId || !allowedTools) {
-    res.status(400).json({ error: "agentId and allowedTools are required" });
+    sendBadRequest(res, "agentId and allowedTools are required");
     return;
   }
 
@@ -93,12 +94,12 @@ router.get("/nuro-mesh/flywheel/stats", (_req: Request, res: Response) => {
 router.post("/nuro-mesh/flywheel/feedback", (req: Request, res: Response) => {
   const { trajectoryId, score } = req.body as { trajectoryId?: string; score?: number };
   if (!trajectoryId || typeof score !== "number") {
-    res.status(400).json({ error: "trajectoryId and score (number -1 to 1) are required" });
+    sendBadRequest(res, "trajectoryId and score (number -1 to 1) are required");
     return;
   }
   const success = trajectoryStore.addUserFeedback(trajectoryId, score);
   if (!success) {
-    res.status(404).json({ error: "Trajectory not found", trajectoryId });
+    sendNotFound(res, "Trajectory");
     return;
   }
   res.json({ success: true, trajectoryId, score });
@@ -113,7 +114,7 @@ router.get("/nuro-mesh/observability/traces", (req: Request, res: Response) => {
 router.get("/nuro-mesh/observability/traces/:traceId", (req: Request, res: Response) => {
   const trace = behavioralTracer.getTrace(req.params.traceId as string);
   if (!trace) {
-    res.status(404).json({ error: "Trace not found", traceId: req.params.traceId });
+    sendNotFound(res, "Trace");
     return;
   }
   res.json(trace);
@@ -131,7 +132,7 @@ router.get("/nuro-mesh/cost/estimate", (req: Request, res: Response) => {
   };
 
   if (!query) {
-    res.status(400).json({ error: "query parameter is required" });
+    sendBadRequest(res, "query parameter is required");
     return;
   }
 
@@ -165,7 +166,7 @@ router.post("/nuro-mesh/cost/budget", (req: Request, res: Response) => {
   };
 
   if (!workflowId || !budgetUsd) {
-    res.status(400).json({ error: "workflowId and budgetUsd are required" });
+    sendBadRequest(res, "workflowId and budgetUsd are required");
     return;
   }
 
@@ -196,7 +197,7 @@ router.post("/nuro-mesh/memory/retrieve", async (req: Request, res: Response) =>
   };
 
   if (!agentId || !query) {
-    res.status(400).json({ error: "agentId and query are required" });
+    sendBadRequest(res, "agentId and query are required");
     return;
   }
 
@@ -212,7 +213,7 @@ router.post("/nuro-mesh/memory/retrieve", async (req: Request, res: Response) =>
 router.post("/nuro-mesh/memory/reward", (req: Request, res: Response) => {
   const { signals } = req.body as { signals?: Array<{ memoryId: string; taskSuccess: boolean; userFeedbackScore: number; confidenceDelta: number; latencyImpactMs: number }> };
   if (!signals || !Array.isArray(signals)) {
-    res.status(400).json({ error: "signals array is required" });
+    sendBadRequest(res, "signals array is required");
     return;
   }
   rlMemoryManager.applyRewardSignal(signals);

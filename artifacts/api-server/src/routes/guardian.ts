@@ -5,6 +5,8 @@ import {
   sendCreated,
   sendNotFound,
   sendBadRequest,
+  sendForbidden,
+  sendServiceUnavailable,
   handleRouteError,
   parsePagination,
 } from "../lib/api-response";
@@ -239,7 +241,7 @@ router.get("/policies", authMiddleware(), requireRole("super_admin", "admin", "o
     const conditions: Parameters<typeof and>[0][] = [];
     if (!isAdminUser(user)) {
       const orgId = userOrgId(user);
-      if (orgId === null) { res.status(403).json({ success: false, error: "No organization membership — cannot access governance records" }); return; }
+      if (orgId === null) { sendForbidden(res, "No organization membership — cannot access governance records"); return; }
       conditions.push(eq(guardianPoliciesTable.orgId, orgId));
     }
     if (tier) conditions.push(eq(guardianPoliciesTable.tier, tier as GuardianPolicy["tier"]));
@@ -281,7 +283,7 @@ router.get("/policies/:id", authMiddleware(), async (req: Request, res: Response
 
     if (!isAdminUser(req.user)) {
       const orgId = userOrgId(req.user);
-      if (orgId === null) { res.status(403).json({ success: false, error: "No organization membership — cannot access governance records" }); return; }
+      if (orgId === null) { sendForbidden(res, "No organization membership — cannot access governance records"); return; }
       if (row.orgId !== orgId) { sendNotFound(res, "Policy not found"); return; }
     }
 
@@ -329,7 +331,7 @@ router.patch("/policies/:id", authMiddleware(), requireRole("super_admin", "admi
 
     if (!isAdminUser(req.user)) {
       const orgId = userOrgId(req.user);
-      if (orgId === null) { res.status(403).json({ success: false, error: "No organization membership — cannot access governance records" }); return; }
+      if (orgId === null) { sendForbidden(res, "No organization membership — cannot access governance records"); return; }
       if (existing.orgId !== orgId) { sendNotFound(res, "Policy not found"); return; }
     }
 
@@ -637,7 +639,7 @@ router.get("/actions", authMiddleware(), requireRole("super_admin", "admin", "op
     const conditions: Parameters<typeof and>[0][] = [];
     if (!isAdminUser(user)) {
       const orgId = userOrgId(user);
-      if (orgId === null) { res.status(403).json({ success: false, error: "No organization membership — cannot access governance records" }); return; }
+      if (orgId === null) { sendForbidden(res, "No organization membership — cannot access governance records"); return; }
       conditions.push(eq(guardianActionsTable.orgId, orgId));
     }
     if (outcome) conditions.push(eq(guardianActionsTable.outcome, outcome));
@@ -666,7 +668,7 @@ router.get("/actions/:id", authMiddleware(), async (req: Request, res: Response)
     if (!action) { sendNotFound(res, "Guardian action not found"); return; }
     if (!isAdminUser(req.user)) {
       const orgId = userOrgId(req.user);
-      if (orgId === null) { res.status(403).json({ success: false, error: "No organization membership — cannot access governance records" }); return; }
+      if (orgId === null) { sendForbidden(res, "No organization membership — cannot access governance records"); return; }
       if (action.orgId !== orgId) { sendNotFound(res, "Guardian action not found"); return; }
     }
     sendSuccess(res, action);
@@ -748,7 +750,7 @@ router.get("/approvals", authMiddleware(), requireRole("super_admin", "admin", "
     const conditions: Parameters<typeof and>[0][] = [];
     if (!isAdminUser(user)) {
       const orgId = userOrgId(user);
-      if (orgId === null) { res.status(403).json({ success: false, error: "No organization membership — cannot access governance records" }); return; }
+      if (orgId === null) { sendForbidden(res, "No organization membership — cannot access governance records"); return; }
       conditions.push(eq(guardianApprovalRequestsTable.orgId, orgId));
     }
     if (status) conditions.push(eq(guardianApprovalRequestsTable.status, status));
@@ -775,7 +777,7 @@ router.get("/approvals/:requestId", authMiddleware(), requireRole("super_admin",
     if (!approval) { sendNotFound(res, "Guardian approval not found"); return; }
     if (!isAdminUser(req.user)) {
       const orgId = userOrgId(req.user);
-      if (orgId === null) { res.status(403).json({ success: false, error: "No organization membership — cannot access governance records" }); return; }
+      if (orgId === null) { sendForbidden(res, "No organization membership — cannot access governance records"); return; }
       if (approval.orgId !== orgId) { sendNotFound(res, "Guardian approval not found"); return; }
     }
     sendSuccess(res, approval);
@@ -796,7 +798,7 @@ router.post("/approvals/:requestId/review", authMiddleware(), requireRole("super
 
     if (!isAdminUser(req.user)) {
       const orgId = userOrgId(req.user);
-      if (orgId === null) { res.status(403).json({ success: false, error: "No organization membership — cannot access governance records" }); return; }
+      if (orgId === null) { sendForbidden(res, "No organization membership — cannot access governance records"); return; }
       if (existing.orgId !== orgId) { sendNotFound(res, "Guardian approval not found"); return; }
     }
 
@@ -859,7 +861,7 @@ router.get("/rollback-events", authMiddleware(), requireRole("super_admin", "adm
     const conditions: Parameters<typeof and>[0][] = [];
     if (!isAdminUser(user)) {
       const orgId = userOrgId(user);
-      if (orgId === null) { res.status(403).json({ success: false, error: "No organization membership — cannot access governance records" }); return; }
+      if (orgId === null) { sendForbidden(res, "No organization membership — cannot access governance records"); return; }
       conditions.push(eq(rollbackEventsTable.orgId, orgId));
     }
     if (status) conditions.push(eq(rollbackEventsTable.status, status));
@@ -887,7 +889,7 @@ router.get("/rollback-events/:id", authMiddleware(), async (req: Request, res: R
     if (!event) { sendNotFound(res, "Rollback event not found"); return; }
     if (!isAdminUser(req.user)) {
       const orgId = userOrgId(req.user);
-      if (orgId === null) { res.status(403).json({ success: false, error: "No organization membership — cannot access governance records" }); return; }
+      if (orgId === null) { sendForbidden(res, "No organization membership — cannot access governance records"); return; }
       if (event.orgId !== orgId) { sendNotFound(res, "Rollback event not found"); return; }
     }
     sendSuccess(res, event);
@@ -930,7 +932,7 @@ router.patch("/rollback-events/:id/status", authMiddleware(), requireRole("super
 
     if (!isAdminUser(req.user)) {
       const orgId = userOrgId(req.user);
-      if (orgId === null) { res.status(403).json({ success: false, error: "No organization membership — cannot access governance records" }); return; }
+      if (orgId === null) { sendForbidden(res, "No organization membership — cannot access governance records"); return; }
       if (existing.orgId !== orgId) { sendNotFound(res, "Rollback event not found"); return; }
     }
 
@@ -1020,7 +1022,7 @@ router.post("/guardian/evaluate", authMiddleware(), async (req: Request, res: Re
     } catch (dbErr) {
       logger.error({ err: dbErr, requestId }, "Failed to persist guardian action");
       if (isFailClosedOutcome) {
-        res.status(503).json({ success: false, error: "Governance persistence failed — action blocked for safety" });
+        sendServiceUnavailable(res, "Governance persistence failed — action blocked for safety");
         return;
       }
     }

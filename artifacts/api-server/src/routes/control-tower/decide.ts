@@ -1,6 +1,6 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { requireRole } from "../../middlewares/auth";
-import { sendSuccess, handleRouteError } from "../../lib/api-response";
+import { sendSuccess, sendBadRequest, sendNotFound, sendConflict, sendError, handleRouteError } from "../../lib/api-response";
 import { orchestrate, getOrchestratorCapabilities } from "../../lib/multi-agent-orchestrator";
 import { insertDecision, listDecisions, updateDecisionStatus, getDecision } from "../../lib/alloy-decision-store";
 import { logger } from "../../lib/logger";
@@ -96,7 +96,7 @@ router.post("/control-tower/decide/orchestrate", requireRole("super_admin", "ops
       depth?: "shallow" | "standard" | "deep"; sessionId?: string;
     };
     if (!query) {
-      res.status(400).json({ error: "query is required" });
+      sendBadRequest(res, "query is required");
       return;
     }
 
@@ -153,8 +153,7 @@ router.post("/control-tower/decide/orchestrate", requireRole("super_admin", "ops
     }
 
     if (!govCheck.allowed) {
-      res.status(403).json({
-        error: "Governance pre-flight failed: scope exceeded",
+      sendError(res, "Governance pre-flight failed: scope exceeded", 403, "FORBIDDEN", {
         blockedReason: govCheck.blockedReason,
         violatedPolicies: govCheck.violatedPolicies,
       });
@@ -222,15 +221,15 @@ router.post("/control-tower/decide/approve/:id", requireRole("super_admin", "ops
 
     const decision = await getDecision(id, null, true);
     if (!decision) {
-      res.status(404).json({ error: `Decision not found: ${id}` });
+      sendNotFound(res, `Decision ${id}`);
       return;
     }
     if (decision.status !== "proposed") {
-      res.status(409).json({ error: `Decision is already ${decision.status}; cannot re-approve` });
+      sendConflict(res, `Decision is already ${decision.status}; cannot re-approve`);
       return;
     }
     if (!decision.approvalRequired) {
-      res.status(400).json({ error: "This decision did not require approval" });
+      sendBadRequest(res, "This decision did not require approval");
       return;
     }
 
@@ -275,7 +274,7 @@ router.patch("/control-tower/decide/journal/:id", requireRole("super_admin", "op
     const { id } = req.params as Record<string, string>;
     const { outcome } = req.body as { outcome?: "accepted" | "rejected" | "overridden" };
     if (!outcome) {
-      res.status(400).json({ error: "outcome is required" });
+      sendBadRequest(res, "outcome is required");
       return;
     }
     const dbStatus = outcome === "accepted" ? "approved"

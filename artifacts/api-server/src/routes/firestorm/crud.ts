@@ -40,7 +40,7 @@ import {
 import { REFERENCE_COMPLIANCE_CONTROLS } from "../readiness.js";
 import { eq, desc, sql, inArray, and, or } from "drizzle-orm";
 import { z } from "zod";
-import { sendSuccess, sendCreated, sendNotFound, sendNoContent, handleRouteError } from "../../lib/api-response";
+import { sendSuccess, sendCreated, sendNotFound, sendNoContent, sendError, handleRouteError } from "../../lib/api-response";
 import { authMiddleware, parseIdParam } from "../../middlewares/auth";
 import { logger } from "../../lib/logger";
 import { validateIfMatch } from "../../middlewares/optimistic-concurrency";
@@ -239,15 +239,15 @@ router.post("/firestorm/findings", authMiddleware({ required: true }), async (re
     const confirmedOrOpen = data.status === "confirmed" || data.status === "open";
     if ((data.severity === "critical" || data.severity === "high") && confirmedOrOpen) {
       if (!data.remediationOwner) {
-        res.status(422).json({ error: "Remediation owner is required when creating a critical/high finding in confirmed or open status." });
+        sendError(res, "Remediation owner is required when creating a critical/high finding in confirmed or open status.", 422, "UNPROCESSABLE_ENTITY");
         return;
       }
       if (!data.dueDate) {
-        res.status(422).json({ error: "Due date is required when creating a critical/high finding in confirmed or open status." });
+        sendError(res, "Due date is required when creating a critical/high finding in confirmed or open status.", 422, "UNPROCESSABLE_ENTITY");
         return;
       }
       if (!data.recommendation) {
-        res.status(422).json({ error: "Recommended action is required when creating a critical/high finding in confirmed or open status." });
+        sendError(res, "Recommended action is required when creating a critical/high finding in confirmed or open status.", 422, "UNPROCESSABLE_ENTITY");
         return;
       }
     }

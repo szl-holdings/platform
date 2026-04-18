@@ -6,6 +6,7 @@ import { validateBody } from "../lib/validation";
 import { z } from "zod";
 import { eq, desc, and, inArray, isNull, or, ilike, sql } from "drizzle-orm";
 import { logger } from "../lib/logger";
+import { sendNotFound, sendBadRequest, sendForbidden, sendError } from "../lib/api-response";
 import { randomBytes } from "crypto";
 import {
   sendEmail,
@@ -86,7 +87,7 @@ router.get("/support/knowledge", async (req: Request, res: Response) => {
     res.json({ articles });
   } catch (err) {
     logger.error({ err }, "Failed to fetch KB articles");
-    res.status(500).json({ error: "Failed to fetch knowledge base articles" });
+    sendError(res, "Failed to fetch knowledge base articles");
   }
 });
 
@@ -104,7 +105,7 @@ router.get("/support/knowledge/:slug", async (req: Request, res: Response) => {
       .limit(1);
 
     if (!article) {
-      res.status(404).json({ error: "Article not found" });
+      sendNotFound(res, "Article");
       return;
     }
 
@@ -116,7 +117,7 @@ router.get("/support/knowledge/:slug", async (req: Request, res: Response) => {
     res.json({ article: { ...article, viewCount: article.viewCount + 1 } });
   } catch (err) {
     logger.error({ err }, "Failed to fetch KB article");
-    res.status(500).json({ error: "Failed to fetch article" });
+    sendError(res, "Failed to fetch article");
   }
 });
 
@@ -131,7 +132,7 @@ router.post("/support/tickets", authMiddleware(), validateBody(submitTicketSchem
 
     const privileged = user ? (isGlobalAdmin(user) || isSuperAdmin(user)) : false;
     if (user && !privileged && user.email && user.email.toLowerCase() !== submitterEmail.toLowerCase()) {
-      res.status(403).json({ error: "submitterEmail must match your account email address" });
+      sendForbidden(res, "submitterEmail must match your account email address");
       return;
     }
 
@@ -193,7 +194,7 @@ router.post("/support/tickets", authMiddleware(), validateBody(submitTicketSchem
     res.status(201).json({ ticket });
   } catch (err) {
     logger.error({ err }, "Failed to submit support ticket");
-    res.status(500).json({ error: "Failed to submit ticket" });
+    sendError(res, "Failed to submit ticket");
   }
 });
 
@@ -238,7 +239,7 @@ router.get("/support/tickets", authMiddleware(), async (req: Request, res: Respo
     res.json({ tickets });
   } catch (err) {
     logger.error({ err }, "Failed to fetch support tickets");
-    res.status(500).json({ error: "Failed to fetch tickets" });
+    sendError(res, "Failed to fetch tickets");
   }
 });
 
@@ -247,7 +248,7 @@ router.get("/support/tickets/:id", authMiddleware(), async (req: Request, res: R
     const user = req.user as AuthenticatedUser;
     const ticketId = parseInt(req.params["id"] as string);
     if (isNaN(ticketId)) {
-      res.status(400).json({ error: "Invalid ticket ID" });
+      sendBadRequest(res, "Invalid ticket ID");
       return;
     }
 
@@ -257,7 +258,7 @@ router.get("/support/tickets/:id", authMiddleware(), async (req: Request, res: R
     const [ticket] = await db.select().from(supportTicketsTable).where(eq(supportTicketsTable.id, ticketId)).limit(1);
 
     if (!ticket) {
-      res.status(404).json({ error: "Ticket not found" });
+      sendNotFound(res, "Ticket");
       return;
     }
 
@@ -266,11 +267,11 @@ router.get("/support/tickets/:id", authMiddleware(), async (req: Request, res: R
         const adminOrgIds = user.orgs.map((o) => o.orgId);
         const ticketOrgId = ticket.orgId;
         if (ticketOrgId !== null && !adminOrgIds.includes(ticketOrgId)) {
-          res.status(403).json({ error: "Access denied" });
+          sendForbidden(res, "Access denied");
           return;
         }
       } else if (ticket.userId !== user.id) {
-        res.status(403).json({ error: "Access denied" });
+        sendForbidden(res, "Access denied");
         return;
       }
     }
@@ -289,7 +290,7 @@ router.get("/support/tickets/:id", authMiddleware(), async (req: Request, res: R
     res.json({ ticket, comments });
   } catch (err) {
     logger.error({ err }, "Failed to fetch ticket detail");
-    res.status(500).json({ error: "Failed to fetch ticket" });
+    sendError(res, "Failed to fetch ticket");
   }
 });
 
@@ -298,7 +299,7 @@ router.post("/support/tickets/:id/comments", authMiddleware(), validateBody(addC
     const user = req.user as AuthenticatedUser;
     const ticketId = parseInt(req.params["id"] as string);
     if (isNaN(ticketId)) {
-      res.status(400).json({ error: "Invalid ticket ID" });
+      sendBadRequest(res, "Invalid ticket ID");
       return;
     }
 
@@ -309,7 +310,7 @@ router.post("/support/tickets/:id/comments", authMiddleware(), validateBody(addC
     const [ticket] = await db.select().from(supportTicketsTable).where(eq(supportTicketsTable.id, ticketId)).limit(1);
 
     if (!ticket) {
-      res.status(404).json({ error: "Ticket not found" });
+      sendNotFound(res, "Ticket");
       return;
     }
 
@@ -317,11 +318,11 @@ router.post("/support/tickets/:id/comments", authMiddleware(), validateBody(addC
       if (globalAdmin) {
         const adminOrgIds = user.orgs.map((o) => o.orgId);
         if (ticket.orgId !== null && !adminOrgIds.includes(ticket.orgId)) {
-          res.status(403).json({ error: "Access denied" });
+          sendForbidden(res, "Access denied");
           return;
         }
       } else if (ticket.userId !== user.id) {
-        res.status(403).json({ error: "Access denied" });
+        sendForbidden(res, "Access denied");
         return;
       }
     }
@@ -341,7 +342,7 @@ router.post("/support/tickets/:id/comments", authMiddleware(), validateBody(addC
     res.status(201).json({ comment });
   } catch (err) {
     logger.error({ err }, "Failed to add comment");
-    res.status(500).json({ error: "Failed to add comment" });
+    sendError(res, "Failed to add comment");
   }
 });
 
@@ -350,20 +351,20 @@ router.patch("/support/tickets/:id/status", authMiddleware(), requireRole("admin
     const user = req.user as AuthenticatedUser;
     const ticketId = parseInt(req.params["id"] as string);
     if (isNaN(ticketId)) {
-      res.status(400).json({ error: "Invalid ticket ID" });
+      sendBadRequest(res, "Invalid ticket ID");
       return;
     }
 
     const [existing] = await db.select().from(supportTicketsTable).where(eq(supportTicketsTable.id, ticketId)).limit(1);
     if (!existing) {
-      res.status(404).json({ error: "Ticket not found" });
+      sendNotFound(res, "Ticket");
       return;
     }
 
     if (!isSuperAdmin(user)) {
       const adminOrgIds = user.orgs.map((o) => o.orgId);
       if (existing.orgId !== null && !adminOrgIds.includes(existing.orgId)) {
-        res.status(403).json({ error: "Access denied" });
+        sendForbidden(res, "Access denied");
         return;
       }
     }
@@ -402,7 +403,7 @@ router.patch("/support/tickets/:id/status", authMiddleware(), requireRole("admin
     res.json({ ticket });
   } catch (err) {
     logger.error({ err }, "Failed to update ticket status");
-    res.status(500).json({ error: "Failed to update ticket" });
+    sendError(res, "Failed to update ticket");
   }
 });
 

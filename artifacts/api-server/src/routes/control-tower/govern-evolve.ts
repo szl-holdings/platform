@@ -1,6 +1,6 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { requireRole } from "../../middlewares/auth";
-import { sendSuccess, handleRouteError } from "../../lib/api-response";
+import { sendSuccess, sendBadRequest, sendNotFound, handleRouteError } from "../../lib/api-response";
 import {
   getKernelAuditTrail,
   verifyAuditChainIntegrity,
@@ -65,8 +65,7 @@ router.get("/control-tower/govern/certificates", requireRole("super_admin", "ops
 
     const unknownIds = agentIds.filter(id => !REGISTERED_AGENT_IDS.has(id));
     if (unknownIds.length > 0) {
-      res.status(400).json({
-        error: "Certificate issuance rejected: unregistered agent IDs",
+      sendBadRequest(res, "Certificate issuance rejected: unregistered agent IDs", {
         unknownIds,
         hint: "Only agents registered in the Control Tower manifest may receive certificates",
       });
@@ -108,11 +107,11 @@ router.post("/control-tower/govern/evaluate", requireRole("super_admin", "ops", 
       agentId?: string; action?: string; riskLevel?: string;
     };
     if (!agentId || !action || !riskLevel) {
-      res.status(400).json({ error: "agentId, action, and riskLevel are required" });
+      sendBadRequest(res, "agentId, action, and riskLevel are required");
       return;
     }
     if (!REGISTERED_AGENT_IDS.has(agentId)) {
-      res.status(400).json({ error: `Unknown agent: ${agentId}. Must be a registered Control Tower agent.` });
+      sendBadRequest(res, `Unknown agent: ${agentId}. Must be a registered Control Tower agent.`);
       return;
     }
     const evaluation = evaluatePolicies(agentId, action, riskLevel);
@@ -140,7 +139,7 @@ router.get("/control-tower/search", requireRole("super_admin", "ops", "exec"), a
     const limit = Math.min(50, parseInt(String(req.query.limit ?? "15"), 10));
 
     if (!query || query.trim().length === 0) {
-      res.status(400).json({ error: "q (query) parameter is required" });
+      sendBadRequest(res, "q (query) parameter is required");
       return;
     }
 
@@ -335,11 +334,11 @@ router.post("/control-tower/evolve/propose", requireRole("super_admin", "ops", "
       agentId?: string; description?: string; expectedImprovement?: string;
     };
     if (!agentId || !description) {
-      res.status(400).json({ error: "agentId and description are required" });
+      sendBadRequest(res, "agentId and description are required");
       return;
     }
     if (!REGISTERED_AGENT_IDS.has(agentId)) {
-      res.status(400).json({ error: `Unknown agent: ${agentId}` });
+      sendBadRequest(res, `Unknown agent: ${agentId}`);
       return;
     }
     const agentDef = CONTROL_TOWER_AGENT_REGISTRY.find(a => a.id === agentId)!;
@@ -365,7 +364,7 @@ router.patch("/control-tower/evolve/propose/:proposalId", requireRole("super_adm
     const { proposalId } = req.params as Record<string, string>;
     const { status } = req.body as { status?: "applied" | "rejected" };
     if (!status) {
-      res.status(400).json({ error: "status is required" });
+      sendBadRequest(res, "status is required");
       return;
     }
     let found = false;
@@ -378,7 +377,7 @@ router.patch("/control-tower/evolve/propose/:proposalId", requireRole("super_adm
       }
     }
     if (!found) {
-      res.status(404).json({ error: "Proposal not found" });
+      sendNotFound(res, "Proposal");
       return;
     }
     sendSuccess(res, { proposalId, status, updatedAt: new Date().toISOString() });

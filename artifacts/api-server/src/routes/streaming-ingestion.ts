@@ -20,6 +20,7 @@ import {
 import { z } from "zod";
 import { validateBody } from "../lib/validation";
 import { authMiddleware } from "../middlewares/auth";
+import { sendNotFound, sendBadRequest, sendError, sendUnauthorized } from "../lib/api-response";
 
 const ingestSchema = z.object({
   source: z.string().min(1).max(200),
@@ -190,13 +191,13 @@ streamingRouter.post("/stream/webhook/:sourceToken", async (req: Request, res: R
 
   const sources = listDataSources().filter(s => s.type === "webhook" && s.authToken === sourceToken);
   if (sources.length === 0) {
-    res.status(401).json({ error: "Unknown or unauthorized webhook source token" });
+    sendUnauthorized(res, "Unknown or unauthorized webhook source token");
     return;
   }
 
   const source = sources[0]!;
   if (!source.enabled) {
-    res.status(423).json({ error: "Data source is paused" });
+    sendError(res, "Data source is paused", 423, "LOCKED");
     return;
   }
 
@@ -313,36 +314,36 @@ streamingRouter.post("/stream/sources", authMiddleware(), validateBody(registerS
     res.status(201).json({ source: { ...source, authToken: authToken ? "***" : undefined }, timestamp: new Date().toISOString() });
   } catch (err) {
     logger.error({ err }, "[streaming] Failed to register source");
-    res.status(500).json({ error: "Failed to register data source" });
+    sendError(res, "Failed to register data source");
   }
 });
 
 streamingRouter.post("/stream/sources/:id/pause", authMiddleware(), async (req: Request, res: Response) => {
   const id = parseInt(String(req.params["id"]), 10);
-  if (isNaN(id)) { res.status(400).json({ error: "Invalid id" }); return; }
+  if (isNaN(id)) { sendBadRequest(res, "Invalid id"); return; }
   try {
     await pauseDataSource(id);
     res.json({ status: "paused", id, timestamp: new Date().toISOString() });
   } catch (err) {
-    res.status(404).json({ error: String(err) });
+    sendNotFound(res, "Data source");
   }
 });
 
 streamingRouter.post("/stream/sources/:id/resume", authMiddleware(), async (req: Request, res: Response) => {
   const id = parseInt(String(req.params["id"]), 10);
-  if (isNaN(id)) { res.status(400).json({ error: "Invalid id" }); return; }
+  if (isNaN(id)) { sendBadRequest(res, "Invalid id"); return; }
   try {
     await resumeDataSource(id);
     res.json({ status: "resumed", id, timestamp: new Date().toISOString() });
   } catch (err) {
-    res.status(404).json({ error: String(err) });
+    sendNotFound(res, "Data source");
   }
 });
 
 streamingRouter.get("/stream/sources/:id", (req: Request, res: Response) => {
   const id = parseInt(String(req.params["id"]), 10);
   const source = getDataSource(id);
-  if (!source) { res.status(404).json({ error: "Source not found" }); return; }
+  if (!source) { sendNotFound(res, "Source"); return; }
   res.json({ source: { ...source, authToken: source.authToken ? "***" : undefined } });
 });
 

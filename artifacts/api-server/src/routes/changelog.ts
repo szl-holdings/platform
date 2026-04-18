@@ -2,6 +2,7 @@ import { Router, type Request, type Response } from "express";
 import { db, changelogEntriesTable } from "@szl-holdings/db";
 import { desc, eq } from "drizzle-orm";
 import { logger } from "../lib/logger";
+import { sendCreated, sendError, sendBadRequest, sendForbidden } from "../lib/api-response";
 
 const changelogRouter = Router();
 
@@ -27,7 +28,7 @@ changelogRouter.get("/changelog", async (_req: Request, res: Response) => {
     });
   } catch (err) {
     logger.error({ err }, "[changelog] Failed to fetch entries");
-    res.status(500).json({ error: "Failed to fetch changelog" });
+    sendError(res, "Failed to fetch changelog");
   }
 });
 
@@ -36,7 +37,7 @@ changelogRouter.post("/changelog", async (req: Request, res: Response) => {
     const user = (req as Request & { user?: { roles?: string[] } }).user;
     const userRoles = user?.roles ?? [];
     if (!user || (!userRoles.includes("platform_owner") && !userRoles.includes("super_admin") && !userRoles.includes("admin"))) {
-      res.status(403).json({ error: "Admin access required" });
+      sendForbidden(res, "Admin access required");
       return;
     }
 
@@ -50,7 +51,7 @@ changelogRouter.post("/changelog", async (req: Request, res: Response) => {
     };
 
     if (!version || !title || !body) {
-      res.status(400).json({ error: "version, title, and body are required" });
+      sendBadRequest(res, "version, title, and body are required");
       return;
     }
 
@@ -72,10 +73,10 @@ changelogRouter.post("/changelog", async (req: Request, res: Response) => {
       })
       .returning();
 
-    res.status(201).json({ entry });
+    sendCreated(res, { entry });
   } catch (err) {
     logger.error({ err }, "[changelog] Failed to create entry");
-    res.status(500).json({ error: "Failed to create changelog entry" });
+    sendError(res, "Failed to create changelog entry");
   }
 });
 

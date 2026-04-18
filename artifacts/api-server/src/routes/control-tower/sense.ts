@@ -1,6 +1,6 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { requireRole } from "../../middlewares/auth";
-import { sendSuccess, handleRouteError } from "../../lib/api-response";
+import { sendSuccess, sendBadRequest, handleRouteError } from "../../lib/api-response";
 import { agentEventBus } from "../../lib/event-bus";
 import { buildSignalBusSnapshot } from "./shared";
 
@@ -30,7 +30,7 @@ router.post("/control-tower/sense/emit", requireRole("super_admin", "ops", "exec
       correlationId?: string;
     };
     if (!type || !sourceAgent || !sourceDomain) {
-      res.status(400).json({ error: "type, sourceAgent, and sourceDomain are required" });
+      sendBadRequest(res, "type, sourceAgent, and sourceDomain are required");
       return;
     }
     const event = await agentEventBus.publish({

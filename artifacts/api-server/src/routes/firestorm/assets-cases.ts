@@ -40,7 +40,7 @@ import {
 import { REFERENCE_COMPLIANCE_CONTROLS } from "../readiness.js";
 import { eq, desc, sql, inArray, and, or } from "drizzle-orm";
 import { z } from "zod";
-import { sendSuccess, sendCreated, sendNotFound, sendNoContent, handleRouteError } from "../../lib/api-response";
+import { sendSuccess, sendCreated, sendNotFound, sendNoContent, sendError, sendBadRequest, sendForbidden, handleRouteError } from "../../lib/api-response";
 import { authMiddleware, parseIdParam } from "../../middlewares/auth";
 import { logger } from "../../lib/logger";
 import { validateIfMatch } from "../../middlewares/optimistic-concurrency";
@@ -430,7 +430,7 @@ router.get("/firestorm/live/shodan-ip", authMiddleware(), async (req, res) => {
   try {
     const ip = (req.query.ip as string)?.trim();
     if (!ip || !/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(ip)) {
-      res.status(400).json({ error: "Valid IPv4 address required as ?ip= parameter" });
+      sendBadRequest(res, "Valid IPv4 address required as ?ip= parameter");
       return;
     }
     const result = await getThreatCached<any>(`shodan-ip-${ip}`, 3600000, async () => {
@@ -484,7 +484,7 @@ router.get("/firestorm/live/greynoise-ip", authMiddleware(), async (req, res) =>
   try {
     const ip = (req.query.ip as string)?.trim();
     if (!ip || !/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(ip)) {
-      res.status(400).json({ error: "Valid IPv4 address required as ?ip= parameter" });
+      sendBadRequest(res, "Valid IPv4 address required as ?ip= parameter");
       return;
     }
     const result = await getThreatCached(`greynoise-ip-${ip}`, 3600000, async () => {
@@ -847,13 +847,13 @@ router.post("/firestorm/tradecraft/decisions", authMiddleware({ required: true }
     const body = parsedDecision as Record<string, unknown>;
 
     if (!DECISION_TYPE_ENUM.has(parsedDecision.decisionType)) {
-      res.status(422).json({ error: "Invalid or missing decisionType. Must be one of the 8 supported decision object types." });
+      sendError(res, "Invalid or missing decisionType. Must be one of the 8 supported decision object types.", 422, "UNPROCESSABLE_ENTITY");
       return;
     }
     if (parsedDecision.confidence !== undefined) {
       const conf = parseFloat(String(parsedDecision.confidence));
       if (isNaN(conf) || conf < 0 || conf > 1) {
-        res.status(422).json({ error: "confidence must be a number between 0 and 1." });
+        sendError(res, "confidence must be a number between 0 and 1.", 422, "UNPROCESSABLE_ENTITY");
         return;
       }
     }
@@ -885,8 +885,7 @@ router.post("/firestorm/tradecraft/decisions", authMiddleware({ required: true }
       }).catch((auditErr) => {
         logger.warn({ auditErr }, "[tradecraft] Failed to persist validation audit record — non-fatal");
       });
-      res.status(422).json({
-        error: "Decision object failed structured validation. Payload does not satisfy the required schema for this decision type.",
+      sendError(res, "Decision object failed structured validation. Payload does not satisfy the required schema for this decision type.", 422, "UNPROCESSABLE_ENTITY", {
         decisionType: body.decisionType,
         validationErrors: validationResult.errors,
         rawOutput,
@@ -980,7 +979,7 @@ router.put("/firestorm/tradecraft/decisions/:objectId", authMiddleware({ require
         user.roles.includes("ops")
       );
       if (!canApprove) {
-        res.status(403).json({ error: "Forbidden: decision approval requires admin, super_admin, or ops role", code: "INSUFFICIENT_ROLE" });
+        sendForbidden(res, "Forbidden: decision approval requires admin, super_admin, or ops role");
         return;
       }
       const reviewerName = user.displayName ?? user.email ?? `user:${user.id}`;
@@ -1115,7 +1114,7 @@ router.post("/firestorm/tradecraft/notebook", authMiddleware({ required: true })
     const { randomUUID } = await import("crypto");
     const body = req.body as Record<string, unknown>;
     if (!body.content || typeof body.content !== "string" || body.content.trim().length < 3) {
-      res.status(422).json({ error: "content is required and must be at least 3 characters." });
+      sendError(res, "content is required and must be at least 3 characters.", 422, "UNPROCESSABLE_ENTITY");
       return;
     }
     const noteData = {
@@ -1265,7 +1264,7 @@ router.get("/firestorm/ai-governance/registry", authMiddleware(), async (req, re
     const { orgId, isPrivileged } = getSessionContext(req);
 
     if (orgId == null && !isPrivileged) {
-      res.status(403).json({ error: "Forbidden: org context required", code: "INSUFFICIENT_PERMISSIONS" });
+      sendForbidden(res, "Forbidden: org context required");
       return;
     }
 
@@ -1342,7 +1341,7 @@ router.get("/firestorm/ai-governance/log", authMiddleware(), async (req, res) =>
     const { orgId, isPrivileged } = getSessionContext(req);
 
     if (orgId == null && !isPrivileged) {
-      res.status(403).json({ error: "Forbidden: org context required", code: "INSUFFICIENT_PERMISSIONS" });
+      sendForbidden(res, "Forbidden: org context required");
       return;
     }
 

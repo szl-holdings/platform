@@ -19,6 +19,7 @@ import {
   holdingsMetricsTable,
 } from "@szl-holdings/db";
 import { authMiddleware, requireRole } from "../middlewares/auth";
+import { sendNotFound, sendUnauthorized, sendBadRequest } from "../lib/api-response";
 import { gatewayInfer } from "../lib/ai-gateway";
 import { logger } from "../lib/logger";
 import { services } from "@szl-holdings/services";
@@ -47,17 +48,17 @@ function hashPin(pin: string): Buffer {
 
 function verifyDemoPin(req: Request, res: Response): boolean {
   if (process.env.NODE_ENV === "production") {
-    res.status(404).json({ success: false, error: "not_found" });
+    sendNotFound(res);
     return false;
   }
   const pin = req.headers["x-demo-token"];
   const adminPin = process.env.ADMIN_PIN ?? process.env.VITE_ADMIN_PIN;
   if (typeof pin !== "string" || !adminPin) {
-    res.status(401).json({ success: false, error: "demo_pin_required" });
+    sendUnauthorized(res, "demo_pin_required");
     return false;
   }
   if (!timingSafeEqual(hashPin(adminPin), hashPin(pin))) {
-    res.status(401).json({ success: false, error: "invalid_demo_pin" });
+    sendUnauthorized(res, "invalid_demo_pin");
     return false;
   }
   return true;
@@ -1008,7 +1009,7 @@ router.get("/briefings", async (req: Request, res: Response): Promise<void> => {
 router.get("/briefings/:id", async (req: Request, res: Response): Promise<void> => {
   const brief = await getBriefingById(String(req.params.id));
   if (!brief) {
-    res.status(404).json({ success: false, error: "Briefing not found" });
+    sendNotFound(res, "Briefing");
     return;
   }
   res.json({ success: true, briefing: withAgentNames(brief) });
@@ -1193,7 +1194,7 @@ void seedDissentsIfEmpty();
 
 router.post("/custom", async (req: Request, res: Response): Promise<void> => {
   const { topic, entity, scenario, domains, agents } = req.body;
-  if (!topic) { res.status(400).json({ success: false, error: "topic is required" }); return; }
+  if (!topic) { sendBadRequest(res, "topic is required"); return; }
 
   const requestId = `custom-${Date.now()}`;
   const [row] = await db.insert(pulseCustomBriefsTable).values({
@@ -1244,7 +1245,7 @@ router.get("/dissents", async (_req: Request, res: Response): Promise<void> => {
 router.post("/dissents", async (req: Request, res: Response): Promise<void> => {
   const { briefingId, sectionId, sectionTitle, dissentingView, basis, impactIfCorrect } = req.body;
   if (!sectionTitle || !dissentingView || !basis) {
-    res.status(400).json({ success: false, error: "sectionTitle, dissentingView, and basis are required" });
+    sendBadRequest(res, "sectionTitle, dissentingView, and basis are required");
     return;
   }
 
@@ -1267,7 +1268,7 @@ router.post("/dissents", async (req: Request, res: Response): Promise<void> => {
 router.patch("/dissents/:id", requireRole("ops", "exec", "admin", "super_admin"), async (req: Request, res: Response): Promise<void> => {
   const dissentId: string = String(req.params.id ?? "");
   const existing = await db.select().from(pulseDissentsTable).where(eq(pulseDissentsTable.dissentId, dissentId)).limit(1);
-  if (existing.length === 0) { res.status(404).json({ success: false, error: "Dissent not found" }); return; }
+  if (existing.length === 0) { sendNotFound(res, "Dissent"); return; }
 
   const body = req.body as Partial<DissentRecord>;
   const updates: Partial<typeof pulseDissentsTable.$inferInsert> = { updatedAt: new Date() };
@@ -1288,7 +1289,7 @@ router.post("/export/pdf", async (req: Request, res: Response): Promise<void> =>
     ? await getBriefingById(briefingId)
     : await getLatestBriefing();
   if (!brief) {
-    res.status(404).json({ success: false, error: "Briefing not found" });
+    sendNotFound(res, "Briefing");
     return;
   }
   const enriched = withAgentNames(brief);

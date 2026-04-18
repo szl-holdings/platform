@@ -1,6 +1,6 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { requireRole } from "../../middlewares/auth";
-import { sendSuccess, handleRouteError } from "../../lib/api-response";
+import { sendSuccess, sendNotFound, sendBadRequest, sendError, handleRouteError } from "../../lib/api-response";
 import { listPipelines, executePipeline, getPipelineConfig, executeComposedPipeline } from "../../lib/intelligence-pipelines";
 import { insertDecision } from "../../lib/alloy-decision-store";
 import { logger } from "../../lib/logger";
@@ -31,7 +31,7 @@ router.get("/control-tower/act/pipelines/:id", (req: Request, res: Response) => 
   try {
     const config = getPipelineConfig(req.params.id as string);
     if (!config) {
-      res.status(404).json({ error: `Pipeline not found: ${req.params.id as string}` });
+      sendNotFound(res, `Pipeline ${req.params.id as string}`);
       return;
     }
     sendSuccess(res, { layer: "act", pipeline: config });
@@ -45,13 +45,13 @@ router.post("/control-tower/act/pipelines/:id/run", requireRole("super_admin", "
     const { id } = req.params as Record<string, string>;
     const { input, agentId } = req.body as { input?: string; agentId?: string };
     if (!input) {
-      res.status(400).json({ error: "input is required" });
+      sendBadRequest(res, "input is required");
       return;
     }
 
     const config = getPipelineConfig(id);
     if (!config) {
-      res.status(404).json({ error: `Pipeline not found: ${id}` });
+      sendNotFound(res, `Pipeline ${id}`);
       return;
     }
 
@@ -60,8 +60,7 @@ router.post("/control-tower/act/pipelines/:id/run", requireRole("super_admin", "
     const govCheck = evaluatePolicies(executingAgentId, `execute pipeline ${id}`, riskLevel);
 
     if (!govCheck.allowed) {
-      res.status(403).json({
-        error: "Governance pre-flight failed",
+      sendError(res, "Governance pre-flight failed", 403, "FORBIDDEN", {
         blockedReason: govCheck.blockedReason,
         violatedPolicies: govCheck.violatedPolicies,
         pipeline: id,
@@ -121,11 +120,11 @@ router.post("/control-tower/act/compose", requireRole("super_admin", "ops", "exe
     };
 
     if (!Array.isArray(stages) || stages.length === 0) {
-      res.status(400).json({ error: "stages array is required and must be non-empty" });
+      sendBadRequest(res, "stages array is required and must be non-empty");
       return;
     }
     if (typeof input !== "string" || !input.trim()) {
-      res.status(400).json({ error: "input string is required" });
+      sendBadRequest(res, "input string is required");
       return;
     }
 
@@ -133,7 +132,7 @@ router.post("/control-tower/act/compose", requireRole("super_admin", "ops", "exe
     type ValidType = typeof validStageTypes[number];
     const invalidStage = stages.find(s => !validStageTypes.includes(s.type as ValidType));
     if (invalidStage) {
-      res.status(400).json({ error: `Unknown stage type: ${invalidStage.type}. Valid types: ${validStageTypes.join(", ")}` });
+      sendBadRequest(res, `Unknown stage type: ${invalidStage.type}. Valid types: ${validStageTypes.join(", ")}`);
       return;
     }
 

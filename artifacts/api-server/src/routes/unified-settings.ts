@@ -20,7 +20,7 @@ import { Router, type IRouter, type Request, type Response } from "express";
 import { db, platformSettingsTable, tenantSettingsTable, userSettingsTable, settingsAuditLogTable, usersTable } from "@szl-holdings/db";
 import { hashIp } from "@szl-holdings/audit";
 import { eq, and, desc, asc, like, gte, lte } from "drizzle-orm";
-import { sendSuccess, sendCreated, sendNoContent, sendNotFound, sendBadRequest, handleRouteError } from "../lib/api-response";
+import { sendSuccess, sendCreated, sendNoContent, sendNotFound, sendBadRequest, sendForbidden, handleRouteError } from "../lib/api-response";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 import { assertTenantAccess } from "../middlewares/tenant-scope";
 
@@ -36,11 +36,11 @@ function assertTenantAdminAccess(req: Request, res: Response, orgId: number): bo
   if (user.roles.includes("super_admin") || user.roles.includes("admin")) return true;
   const membership = user.orgs.find((o) => o.orgId === orgId);
   if (!membership) {
-    res.status(403).json({ error: "Cross-tenant access denied" });
+    sendForbidden(res, "Cross-tenant access denied");
     return false;
   }
   if (!ORG_ADMIN_ROLES.has(membership.role)) {
-    res.status(403).json({ error: "Org admin role required to modify tenant settings" });
+    sendForbidden(res, "Org admin role required to modify tenant settings");
     return false;
   }
   return true;
@@ -502,7 +502,7 @@ router.delete(
 
       if (tier === "platform") {
         if (!user.roles.includes("super_admin")) {
-          res.status(403).json({ error: "super_admin required" });
+          sendForbidden(res, "super_admin required");
           return;
         }
         const [row] = await db.select().from(platformSettingsTable).where(eq(platformSettingsTable.id, id)).limit(1);
@@ -519,7 +519,7 @@ router.delete(
         const [row] = await db.select().from(userSettingsTable).where(eq(userSettingsTable.id, id)).limit(1);
         if (!row) { sendNotFound(res, "Setting"); return; }
         if (row.userId !== user.id && !user.roles.includes("super_admin")) {
-          res.status(403).json({ error: "Cannot delete another user's settings" });
+          sendForbidden(res, "Cannot delete another user's settings");
           return;
         }
         await db.delete(userSettingsTable).where(eq(userSettingsTable.id, id));

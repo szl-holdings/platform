@@ -12,6 +12,7 @@ import multer from "multer";
 import { z } from "zod";
 import { authMiddleware } from "../middlewares/auth";
 import { validateBody } from "../lib/validation";
+import { sendError, sendBadRequest } from "../lib/api-response";
 
 const trainingRouter: IRouter = Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 25 * 1024 * 1024 } });
@@ -70,7 +71,7 @@ trainingRouter.get("/agent-training/pairs/:agentId", async (req: Request, res: R
       .limit(100);
     res.json({ pairs });
   } catch {
-    res.status(500).json({ error: "Failed to load training pairs" });
+    sendError(res, "Failed to load training pairs");
   }
 });
 
@@ -83,7 +84,7 @@ trainingRouter.post("/agent-training/pairs", validateBody(trainingPairSchema), a
       .returning();
     res.status(201).json(pair);
   } catch {
-    res.status(500).json({ error: "Failed to create training pair" });
+    sendError(res, "Failed to create training pair");
   }
 });
 
@@ -96,7 +97,7 @@ trainingRouter.delete("/agent-training/pairs/:id", async (req: Request, res: Res
       .where(eq(agentTrainingPairs.id, id));
     res.json({ success: true });
   } catch {
-    res.status(500).json({ error: "Failed to delete training pair" });
+    sendError(res, "Failed to delete training pair");
   }
 });
 
@@ -110,7 +111,7 @@ trainingRouter.get("/agent-training/prefs/:agentId", async (req: Request, res: R
       .limit(1);
     res.json(prefs ?? { agentId, tone: "professional", detailLevel: "balanced", domainJargon: true, responseLength: "medium", customInstructions: "" });
   } catch {
-    res.status(500).json({ error: "Failed to load preferences" });
+    sendError(res, "Failed to load preferences");
   }
 });
 
@@ -139,7 +140,7 @@ trainingRouter.post("/agent-training/prefs/:agentId", validateBody(behaviorPrefS
       res.json(created);
     }
   } catch {
-    res.status(500).json({ error: "Failed to save preferences" });
+    sendError(res, "Failed to save preferences");
   }
 });
 
@@ -152,7 +153,7 @@ trainingRouter.post("/agent-training/feedback", validateBody(feedbackSchema), as
       .returning();
     res.status(201).json(fb);
   } catch {
-    res.status(500).json({ error: "Failed to save feedback" });
+    sendError(res, "Failed to save feedback");
   }
 });
 
@@ -188,7 +189,7 @@ trainingRouter.get("/agent-training/performance", async (_req: Request, res: Res
 
     res.json({ performance });
   } catch {
-    res.status(500).json({ error: "Failed to load performance data" });
+    sendError(res, "Failed to load performance data");
   }
 });
 
@@ -201,7 +202,7 @@ trainingRouter.get("/agent-training/advisory-audit", async (_req: Request, res: 
       .limit(100);
     res.json({ audits });
   } catch {
-    res.status(500).json({ error: "Failed to load advisory audit" });
+    sendError(res, "Failed to load advisory audit");
   }
 });
 
@@ -214,7 +215,7 @@ trainingRouter.post("/agent-training/advisory-audit", validateBody(advisoryAudit
       .returning();
     res.status(201).json(audit);
   } catch {
-    res.status(500).json({ error: "Failed to create advisory audit entry" });
+    sendError(res, "Failed to create advisory audit entry");
   }
 });
 
@@ -229,14 +230,14 @@ trainingRouter.patch("/agent-training/advisory-audit/:id/action", validateBody(a
       .returning();
     res.json(updated);
   } catch {
-    res.status(500).json({ error: "Failed to update advisory audit" });
+    sendError(res, "Failed to update advisory audit");
   }
 });
 
 trainingRouter.post("/agent-training/transcribe", upload.single("audio"), async (req: Request, res: Response) => {
   try {
     if (!req.file && !req.body.audio) {
-      res.status(400).json({ error: "No audio provided" });
+      sendBadRequest(res, "No audio provided");
       return;
     }
 
@@ -270,7 +271,7 @@ trainingRouter.post("/agent-training/transcribe", upload.single("audio"), async 
     res.json({ transcript: transcription.text });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Transcription failed";
-    res.status(500).json({ error: msg });
+    sendError(res, msg);
   }
 });
 
@@ -291,7 +292,7 @@ trainingRouter.post("/agent-training/tts", validateBody(ttsSchema), async (req: 
     res.send(buffer);
   } catch (err) {
     const msg = err instanceof Error ? err.message : "TTS failed";
-    res.status(500).json({ error: msg });
+    sendError(res, msg);
   }
 });
 

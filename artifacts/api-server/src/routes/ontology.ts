@@ -11,17 +11,17 @@ router.get("/ontology/stats", authMiddleware(), async (_req, res) => {
     const stats = await ontologyEngine.getGraphStats();
     res.json({ success: true, stats });
   } catch (err) {
-    res.status(500).json({ success: false, error: "Failed to fetch ontology stats" });
+    sendError(res, "Failed to fetch ontology stats");
   }
 });
 
 router.get("/ontology/entity/:id", authMiddleware(), async (req, res) => {
   try {
     const entity = await ontologyEngine.getEntity(req.params.id as string);
-    if (!entity) return sendError(res, "Entity not found", 404);
+    if (!entity) return sendError(res, "Entity not found", 404, "NOT_FOUND");
     res.json({ success: true, entity });
   } catch (err) {
-    res.status(500).json({ success: false, error: "Failed to fetch entity" });
+    sendError(res, "Failed to fetch entity");
   }
 });
 
@@ -30,7 +30,7 @@ router.get("/ontology/entity/:id/connections", authMiddleware(), async (req, res
     const connections = await ontologyEngine.getEntityConnections(req.params.id as string);
     res.json({ success: true, connections });
   } catch (err) {
-    res.status(500).json({ success: false, error: "Failed to fetch entity connections" });
+    sendError(res, "Failed to fetch entity connections");
   }
 });
 
@@ -40,7 +40,7 @@ router.get("/ontology/entity/:id/traverse", authMiddleware(), async (req, res) =
     const result = await ontologyEngine.traverseGraph(req.params.id as string, maxHops);
     res.json({ success: true, result });
   } catch (err) {
-    res.status(500).json({ success: false, error: "Failed to traverse graph" });
+    sendError(res, "Failed to traverse graph");
   }
 });
 
@@ -52,7 +52,7 @@ router.get("/ontology/search", authMiddleware(), async (req, res) => {
     const entities = await ontologyEngine.searchEntities(query, undefined, limit);
     res.json({ success: true, entities });
   } catch (err) {
-    res.status(500).json({ success: false, error: "Search failed" });
+    sendError(res, "Search failed");
   }
 });
 
@@ -62,7 +62,7 @@ router.get("/ontology/domain/:domain", authMiddleware(), async (req, res) => {
     const entities = await ontologyEngine.getDomainEntities(req.params.domain as string, limit);
     res.json({ success: true, entities });
   } catch (err) {
-    res.status(500).json({ success: false, error: "Failed to fetch domain entities" });
+    sendError(res, "Failed to fetch domain entities");
   }
 });
 
@@ -73,7 +73,7 @@ router.post("/ontology/entity", authMiddleware(), async (req, res) => {
     const entity = await ontologyEngine.upsertEntity({ type, name, domain, metadata, tags, riskScore, externalId });
     res.json({ success: true, entity });
   } catch (err) {
-    res.status(500).json({ success: false, error: "Failed to upsert entity" });
+    sendError(res, "Failed to upsert entity");
   }
 });
 
@@ -84,7 +84,7 @@ router.post("/ontology/relationship", authMiddleware(), async (req, res) => {
     const rel = await ontologyEngine.createRelationship(fromEntityId, toEntityId, type, strength, metadata);
     res.json({ success: true, relationship: rel });
   } catch (err) {
-    res.status(500).json({ success: false, error: "Failed to create relationship" });
+    sendError(res, "Failed to create relationship");
   }
 });
 
@@ -103,7 +103,7 @@ router.post("/ontology/graph-rag", authMiddleware(), async (req, res) => {
 
     res.json({ success: true, result });
   } catch (err) {
-    res.status(500).json({ success: false, error: "GraphRAG query failed" });
+    sendError(res, "GraphRAG query failed");
   }
 });
 

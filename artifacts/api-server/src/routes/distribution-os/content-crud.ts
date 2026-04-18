@@ -17,6 +17,7 @@ import {
 } from "@szl-holdings/db";
 import { eq, desc, asc, and, gte, count, sql } from "drizzle-orm";
 import { authMiddleware } from "../../middlewares/auth";
+import { sendNotFound, sendBadRequest, sendError } from "../../lib/api-response";
 
 const router = Router();
 const requireAuth = authMiddleware({ required: true });
@@ -28,13 +29,13 @@ router.get("/articles", async (_req: Request, res: Response): Promise<void> => {
 
 router.get("/articles/:id", async (req: Request, res: Response): Promise<void> => {
   const [article] = await db.select().from(dosArticlesTable).where(eq(dosArticlesTable.id, Number(req.params.id)));
-  if (!article) return void res.status(404).json({ error: "Article not found" });
+  if (!article) return void sendNotFound(res, "Article");
   res.json(article);
 });
 
 router.get("/articles/slug/:slug", async (req: Request, res: Response): Promise<void> => {
   const [article] = await db.select().from(dosArticlesTable).where(eq(dosArticlesTable.slug, req.params.slug as string));
-  if (!article) return void res.status(404).json({ error: "Article not found" });
+  if (!article) return void sendNotFound(res, "Article");
   res.json(article);
 });
 
@@ -45,7 +46,7 @@ router.post("/articles", requireAuth, async (req: Request, res: Response): Promi
 
 router.patch("/articles/:id", requireAuth, async (req: Request, res: Response): Promise<void> => {
   const [article] = await db.update(dosArticlesTable).set({ ...req.body, updatedAt: new Date() }).where(eq(dosArticlesTable.id, Number(req.params.id))).returning();
-  if (!article) return void res.status(404).json({ error: "Article not found" });
+  if (!article) return void sendNotFound(res, "Article");
   res.json(article);
 });
 
@@ -66,7 +67,7 @@ router.get("/newsletters", async (_req: Request, res: Response): Promise<void> =
 
 router.get("/newsletters/:id", async (req: Request, res: Response): Promise<void> => {
   const [nl] = await db.select().from(dosNewslettersTable).where(eq(dosNewslettersTable.id, Number(req.params.id)));
-  if (!nl) return void res.status(404).json({ error: "Newsletter not found" });
+  if (!nl) return void sendNotFound(res, "Newsletter");
   res.json(nl);
 });
 
@@ -77,7 +78,7 @@ router.post("/newsletters", requireAuth, async (req: Request, res: Response): Pr
 
 router.patch("/newsletters/:id", requireAuth, async (req: Request, res: Response): Promise<void> => {
   const [nl] = await db.update(dosNewslettersTable).set({ ...req.body, updatedAt: new Date() }).where(eq(dosNewslettersTable.id, Number(req.params.id))).returning();
-  if (!nl) return void res.status(404).json({ error: "Newsletter not found" });
+  if (!nl) return void sendNotFound(res, "Newsletter");
   res.json(nl);
 });
 
@@ -93,7 +94,7 @@ router.get("/carousels", async (_req: Request, res: Response): Promise<void> => 
 
 router.get("/carousels/:id", async (req: Request, res: Response): Promise<void> => {
   const [c] = await db.select().from(dosCarouselProjectsTable).where(eq(dosCarouselProjectsTable.id, Number(req.params.id)));
-  if (!c) return void res.status(404).json({ error: "Carousel not found" });
+  if (!c) return void sendNotFound(res, "Carousel");
   const slides = await db.select().from(dosCarouselSlidesTable).where(eq(dosCarouselSlidesTable.projectId, c.id)).orderBy(asc(dosCarouselSlidesTable.slideNumber));
   res.json({ ...c, slides });
 });
@@ -109,7 +110,7 @@ router.post("/carousels", requireAuth, async (req: Request, res: Response): Prom
 
 router.patch("/carousels/:id", requireAuth, async (req: Request, res: Response): Promise<void> => {
   const [c] = await db.update(dosCarouselProjectsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(dosCarouselProjectsTable.id, Number(req.params.id))).returning();
-  if (!c) return void res.status(404).json({ error: "Carousel not found" });
+  if (!c) return void sendNotFound(res, "Carousel");
   res.json(c);
 });
 
@@ -120,7 +121,7 @@ router.get("/x-posts", async (_req: Request, res: Response): Promise<void> => {
 
 router.get("/x-posts/:id", async (req: Request, res: Response): Promise<void> => {
   const [post] = await db.select().from(dosXPostsTable).where(eq(dosXPostsTable.id, Number(req.params.id)));
-  if (!post) return void res.status(404).json({ error: "X post not found" });
+  if (!post) return void sendNotFound(res, "X post");
   res.json(post);
 });
 
@@ -131,7 +132,7 @@ router.post("/x-posts", requireAuth, async (req: Request, res: Response): Promis
 
 router.patch("/x-posts/:id", requireAuth, async (req: Request, res: Response): Promise<void> => {
   const [post] = await db.update(dosXPostsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(dosXPostsTable.id, Number(req.params.id))).returning();
-  if (!post) return void res.status(404).json({ error: "X post not found" });
+  if (!post) return void sendNotFound(res, "X post");
   res.json(post);
 });
 
@@ -142,7 +143,7 @@ router.delete("/x-posts/:id", requireAuth, async (req: Request, res: Response): 
 
 router.post("/x-posts/:id/queue", requireAuth, async (req: Request, res: Response): Promise<void> => {
   const [post] = await db.update(dosXPostsTable).set({ status: "queued", scheduledFor: req.body.scheduledFor || new Date(), updatedAt: new Date() }).where(eq(dosXPostsTable.id, Number(req.params.id))).returning();
-  if (!post) return void res.status(404).json({ error: "X post not found" });
+  if (!post) return void sendNotFound(res, "X post");
   res.json(post);
 });
 
@@ -158,7 +159,7 @@ router.post("/campaigns", requireAuth, async (req: Request, res: Response): Prom
 
 router.patch("/campaigns/:id", requireAuth, async (req: Request, res: Response): Promise<void> => {
   const [c] = await db.update(dosCampaignsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(dosCampaignsTable.id, Number(req.params.id))).returning();
-  if (!c) return void res.status(404).json({ error: "Campaign not found" });
+  if (!c) return void sendNotFound(res, "Campaign");
   res.json(c);
 });
 
@@ -236,7 +237,7 @@ router.get("/leads", requireAuth, async (req: Request, res: Response): Promise<v
 
 router.post("/leads", async (req: Request, res: Response): Promise<void> => {
   const parsed = LeadCreateSchema.safeParse(req.body);
-  if (!parsed.success) return void res.status(400).json({ error: "Validation failed", details: parsed.error.flatten() });
+  if (!parsed.success) return void sendBadRequest(res, "Validation failed", parsed.error.flatten());
   const data = parsed.data;
   const score = computeLeadScore(data);
   const [lead] = await db.insert(dosLeadsTable).values({ ...data, score } as typeof dosLeadsTable.$inferInsert).returning();
@@ -245,7 +246,7 @@ router.post("/leads", async (req: Request, res: Response): Promise<void> => {
 
 router.patch("/leads/:id", requireAuth, async (req: Request, res: Response): Promise<void> => {
   const [existing] = await db.select().from(dosLeadsTable).where(eq(dosLeadsTable.id, Number(req.params.id)));
-  if (!existing) return void res.status(404).json({ error: "Lead not found" });
+  if (!existing) return void sendNotFound(res, "Lead");
 
   const merged = { ...existing, ...req.body };
   const score = computeLeadScore({
@@ -312,7 +313,7 @@ router.post("/calendar", requireAuth, async (req: Request, res: Response): Promi
 
 router.patch("/calendar/:id", requireAuth, async (req: Request, res: Response): Promise<void> => {
   const [item] = await db.update(dosContentCalendarItemsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(dosContentCalendarItemsTable.id, Number(req.params.id))).returning();
-  if (!item) return void res.status(404).json({ error: "Calendar item not found" });
+  if (!item) return void sendNotFound(res, "Calendar item");
   res.json(item);
 });
 
@@ -328,7 +329,7 @@ router.post("/distribution", requireAuth, async (req: Request, res: Response): P
 
 router.patch("/distribution/:id", requireAuth, async (req: Request, res: Response): Promise<void> => {
   const [t] = await db.update(dosDistributionTargetsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(dosDistributionTargetsTable.id, Number(req.params.id))).returning();
-  if (!t) return void res.status(404).json({ error: "Distribution target not found" });
+  if (!t) return void sendNotFound(res, "Distribution target");
   res.json(t);
 });
 
@@ -339,14 +340,14 @@ router.get("/settings", requireAuth, async (_req: Request, res: Response): Promi
 
 router.post("/settings", requireAuth, async (req: Request, res: Response): Promise<void> => {
   const parsed = SettingWriteSchema.safeParse(req.body);
-  if (!parsed.success) return void res.status(400).json({ error: "Validation failed", details: parsed.error.flatten() });
+  if (!parsed.success) return void sendBadRequest(res, "Validation failed", parsed.error.flatten());
   const [s] = await db.insert(dosSiteSettingsTable).values(parsed.data as typeof dosSiteSettingsTable.$inferInsert).returning();
   res.status(201).json(s);
 });
 
 router.patch("/settings/:key", requireAuth, async (req: Request, res: Response): Promise<void> => {
   const [s] = await db.update(dosSiteSettingsTable).set({ value: req.body.value, updatedAt: new Date() }).where(eq(dosSiteSettingsTable.key, req.params.key as string)).returning();
-  if (!s) return void res.status(404).json({ error: "Setting not found" });
+  if (!s) return void sendNotFound(res, "Setting");
   res.json(s);
 });
 
@@ -357,13 +358,13 @@ router.get("/integrations", requireAuth, async (_req: Request, res: Response): P
 
 router.post("/integrations/retry/:provider", requireAuth, async (req: Request, res: Response): Promise<void> => {
   const [i] = await db.update(dosIntegrationStatusTable).set({ status: "disconnected", lastError: null, updatedAt: new Date() }).where(eq(dosIntegrationStatusTable.provider, req.params.provider as string)).returning();
-  if (!i) return void res.status(404).json({ error: "Integration not found" });
+  if (!i) return void sendNotFound(res, "Integration");
   res.json(i);
 });
 
 router.patch("/integrations/:id", requireAuth, async (req: Request, res: Response): Promise<void> => {
   const [i] = await db.update(dosIntegrationStatusTable).set({ ...req.body, updatedAt: new Date() }).where(eq(dosIntegrationStatusTable.id, Number(req.params.id))).returning();
-  if (!i) return void res.status(404).json({ error: "Integration not found" });
+  if (!i) return void sendNotFound(res, "Integration");
   res.json(i);
 });
 
@@ -391,14 +392,14 @@ router.get("/linktree/admin", requireAuth, async (_req: Request, res: Response):
 
 router.post("/linktree", requireAuth, async (req: Request, res: Response): Promise<void> => {
   const parsed = LinktreeItemSchema.safeParse(req.body);
-  if (!parsed.success) return void res.status(400).json({ error: "Validation failed", details: parsed.error.flatten() });
+  if (!parsed.success) return void sendBadRequest(res, "Validation failed", parsed.error.flatten());
   const [item] = await db.insert(dosLinktreeConfigTable).values(parsed.data).returning();
   res.status(201).json(item);
 });
 
 router.patch("/linktree/:id", requireAuth, async (req: Request, res: Response): Promise<void> => {
   const [item] = await db.update(dosLinktreeConfigTable).set({ ...req.body, updatedAt: new Date() }).where(eq(dosLinktreeConfigTable.id, Number(req.params.id))).returning();
-  if (!item) return void res.status(404).json({ error: "Linktree item not found" });
+  if (!item) return void sendNotFound(res, "Linktree item");
   res.json(item);
 });
 
@@ -419,7 +420,7 @@ router.post("/automation-runs", requireAuth, async (req: Request, res: Response)
 
 router.patch("/automation-runs/:id", requireAuth, async (req: Request, res: Response): Promise<void> => {
   const [run] = await db.update(dosAutomationRunsTable).set(req.body).where(eq(dosAutomationRunsTable.id, Number(req.params.id))).returning();
-  if (!run) return void res.status(404).json({ error: "Run not found" });
+  if (!run) return void sendNotFound(res, "Run");
   res.json(run);
 });
 
@@ -553,7 +554,7 @@ router.post("/automation-runs/trigger/:jobType", requireAuth, async (req: Reques
       itemsCreated = 1;
 
     } else {
-      return void res.status(400).json({ error: `Unknown job type: ${jobType}` });
+      return void sendBadRequest(res, `Unknown job type: ${jobType}`);
     }
 
     // Write the completed run record — including serialized output for persistence
@@ -584,7 +585,7 @@ router.post("/automation-runs/trigger/:jobType", requireAuth, async (req: Reques
       itemsFailed: 1,
       errorLog: errorMessage,
     }).returning();
-    res.status(500).json({ error: errorMessage, run });
+    sendError(res, errorMessage, 500, "INTERNAL_ERROR", { run });
   }
 });
 

@@ -32,6 +32,7 @@ import {
 } from "@szl-holdings/ai-engine";
 import { z } from "zod";
 import { validateBody } from "../lib/validation";
+import { sendNotFound, sendError, sendBadRequest } from "../lib/api-response";
 
 const fineTuningRouter: IRouter = Router();
 
@@ -66,7 +67,7 @@ fineTuningRouter.get("/fine-tuning/jobs", async (req: Request, res: Response) =>
     res.json({ jobs, total: jobs.length });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Failed to list fine-tuning jobs";
-    res.status(500).json({ error: msg });
+    sendError(res, msg);
   }
 });
 
@@ -77,8 +78,8 @@ fineTuningRouter.get("/fine-tuning/jobs/:jobId", async (req: Request, res: Respo
     res.json(status);
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Failed to get job status";
-    const code = msg.includes("not found") ? 404 : 500;
-    res.status(code).json({ error: msg });
+    const statusCode = msg.includes("not found") ? 404 : 500;
+    sendError(res, msg, statusCode, statusCode === 404 ? "NOT_FOUND" : "INTERNAL_ERROR");
   }
 });
 
@@ -94,10 +95,7 @@ fineTuningRouter.post("/fine-tuning/jobs", validateBody(submitJobSchema), async 
 
     const supportedAgents = getAllSupportedAgents();
     if (!supportedAgents.includes(agentId)) {
-      res.status(400).json({
-        error: `Agent '${agentId}' not supported for fine-tuning`,
-        supportedAgents,
-      });
+      sendBadRequest(res, `Agent '${agentId}' not supported for fine-tuning`, { supportedAgents });
       return;
     }
 
@@ -120,8 +118,8 @@ fineTuningRouter.post("/fine-tuning/jobs", validateBody(submitJobSchema), async 
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Failed to submit fine-tuning job";
-    const code = msg.includes("Insufficient") ? 422 : 500;
-    res.status(code).json({ error: msg });
+    const statusCode = msg.includes("Insufficient") ? 422 : 500;
+    sendError(res, msg, statusCode, statusCode === 422 ? "UNPROCESSABLE_ENTITY" : "INTERNAL_ERROR");
   }
 });
 
@@ -132,7 +130,7 @@ fineTuningRouter.post("/fine-tuning/jobs/:jobId/cancel", async (req: Request, re
     res.json({ success: true, message: `Job ${jobId} cancelled` });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Failed to cancel job";
-    res.status(500).json({ error: msg });
+    sendError(res, msg);
   }
 });
 
@@ -142,7 +140,7 @@ fineTuningRouter.get("/fine-tuning/models", async (_req: Request, res: Response)
     res.json({ models, total: models.length });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Failed to list fine-tuned models";
-    res.status(500).json({ error: msg });
+    sendError(res, msg);
   }
 });
 
@@ -151,13 +149,13 @@ fineTuningRouter.get("/fine-tuning/models/:modelId/lineage", async (req: Request
     const modelId = decodeURIComponent(String(req.params["modelId"]));
     const lineage = await getModelLineage(modelId);
     if (!lineage.model) {
-      res.status(404).json({ error: "Model not found" });
+      sendNotFound(res, "Model");
       return;
     }
     res.json(lineage);
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Failed to get model lineage";
-    res.status(500).json({ error: msg });
+    sendError(res, msg);
   }
 });
 
@@ -171,7 +169,7 @@ fineTuningRouter.get("/fine-tuning/models/:modelId/evals", async (req: Request, 
       .limit(1);
 
     if (!model) {
-      res.status(404).json({ error: "Model not found" });
+      sendNotFound(res, "Model");
       return;
     }
 
@@ -195,7 +193,7 @@ fineTuningRouter.get("/fine-tuning/models/:modelId/evals", async (req: Request, 
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Failed to get eval scores";
-    res.status(500).json({ error: msg });
+    sendError(res, msg);
   }
 });
 
@@ -213,7 +211,7 @@ fineTuningRouter.patch("/fine-tuning/models/:modelId/lifecycle", validateBody(li
     res.json({ success: true, modelId, lifecycle });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Failed to update lifecycle";
-    res.status(500).json({ error: msg });
+    sendError(res, msg);
   }
 });
 
@@ -228,7 +226,7 @@ fineTuningRouter.get("/fine-tuning/datasets", async (req: Request, res: Response
     res.json({ datasets, total: datasets.length });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Failed to list datasets";
-    res.status(500).json({ error: msg });
+    sendError(res, msg);
   }
 });
 
@@ -253,7 +251,7 @@ fineTuningRouter.post("/fine-tuning/datasets/preview", validateBody(datasetPrevi
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Failed to generate dataset preview";
-    res.status(500).json({ error: msg });
+    sendError(res, msg);
   }
 });
 
@@ -277,7 +275,7 @@ fineTuningRouter.get("/fine-tuning/datasets/:agentId/export", async (req: Reques
     }
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Failed to export dataset";
-    res.status(500).json({ error: msg });
+    sendError(res, msg);
   }
 });
 
@@ -324,7 +322,7 @@ fineTuningRouter.get("/fine-tuning/costs", async (req: Request, res: Response) =
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Failed to get cost summary";
-    res.status(500).json({ error: msg });
+    sendError(res, msg);
   }
 });
 
@@ -350,7 +348,7 @@ fineTuningRouter.get("/fine-tuning/router/:agentId", async (req: Request, res: R
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Failed to resolve model";
-    res.status(500).json({ error: msg });
+    sendError(res, msg);
   }
 });
 
@@ -385,7 +383,7 @@ fineTuningRouter.get("/fine-tuning/summary", async (_req: Request, res: Response
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Failed to get summary";
-    res.status(500).json({ error: msg });
+    sendError(res, msg);
   }
 });
 

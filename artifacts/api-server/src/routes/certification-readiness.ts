@@ -16,7 +16,7 @@ import {
   featureFlagsTable,
 } from "@szl-holdings/db";
 import { eq, desc, sql, and, asc } from "drizzle-orm";
-import { sendSuccess, sendNotFound, handleRouteError, parsePagination } from "../lib/api-response";
+import { sendSuccess, sendNotFound, sendForbidden, handleRouteError, parsePagination } from "../lib/api-response";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 import { z } from "zod";
 import { validateBody } from "../lib/validation";
@@ -83,7 +83,7 @@ async function requireCertFlag(_req: Request, res: Response, next: NextFunction)
       .from(featureFlagsTable)
       .where(eq(featureFlagsTable.key, "certification_os_enabled"));
     if (flag && !flag.isEnabled) {
-      res.status(403).json({ error: "Certification Readiness OS is currently disabled" });
+      sendForbidden(res, "Certification Readiness OS is currently disabled");
       return;
     }
     next();
