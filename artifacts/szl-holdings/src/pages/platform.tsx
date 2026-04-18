@@ -4,6 +4,7 @@ import { Link } from "wouter";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
+import { GovernedLoopViz } from "@/components/GovernedLoopViz";
 
 const LAYERS = [
   {
@@ -69,23 +70,6 @@ const EXPANSION_VERTICALS = [
   },
 ];
 
-const HOW_IT_WORKS = [
-  {
-    step: "01",
-    heading: "Signal Ingestion",
-    body: "Signals arrive from domain-specific sources — AIS telemetry, threat feeds, court filings, market data. The Event Fabric normalizes and correlates them across domain packs, attaching source attribution, retrieval timestamps, and confidence metadata to every input.",
-  },
-  {
-    step: "02",
-    heading: "Risk Surface → Governed Decision",
-    body: "The Risk Surface maps signal severity, blast radius, and SLA proximity. For high-stakes decisions, the Monte Carlo engine models uncertainty before any recommendation surfaces. Covenant Policy then determines who can approve, what conditions apply, and whether human sign-off is required. Alloy orchestrates the approved action as a durable, auditable workflow.",
-  },
-  {
-    step: "03",
-    heading: "Proof Chain → Outcome Graph",
-    body: "The Proof Chain records the complete, immutable trail: signal, recommendation, simulation, policy decision, approval, execution. The Outcome Graph tracks the real-world result and feeds it back into simulation models and AI confidence calibration — closing the loop.",
-  },
-];
 
 export default function PlatformPage() {
   usePageMeta({
@@ -242,39 +226,28 @@ export default function PlatformPage() {
 
         <section style={{ padding: "clamp(4rem,7vw,6rem) 0", background: "hsl(210,12%,6%)", borderBottom: "1px solid hsla(0,0%,100%,0.04)" }}>
           <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
-            <m.p
+            <m.div
               initial={{ opacity: 0, y: 12 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
-              style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,40%)", marginBottom: "2.5rem" }}
+              style={{ marginBottom: "2.5rem" }}
             >
-              Governed Decision Loop
-            </m.p>
-            <div style={{ display: "grid", gap: "1.5rem", maxWidth: "52rem" }}>
-              {HOW_IT_WORKS.map((item, i) => (
-                <m.div
-                  key={item.step}
-                  initial={{ opacity: 0, y: 16 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
-                  style={{
-                    display: "grid", gridTemplateColumns: "3rem 1fr", gap: "1.25rem",
-                    padding: "1.5rem", borderRadius: "8px",
-                    background: "hsla(0,0%,100%,0.025)", border: "1px solid hsla(0,0%,100%,0.06)",
-                  }}
-                >
-                  <span style={{ fontSize: "12px", fontWeight: 700, color: "hsl(190,90%,55%)", fontFamily: "'JetBrains Mono', monospace", paddingTop: "2px" }}>
-                    {item.step}
-                  </span>
-                  <div>
-                    <p style={{ fontSize: "15px", fontWeight: 600, color: "hsl(38,12%,90%)", marginBottom: "0.5rem", letterSpacing: "-0.01em" }}>{item.heading}</p>
-                    <p style={{ fontSize: "14px", lineHeight: 1.65, color: "hsl(210,5%,58%)" }}>{item.body}</p>
-                  </div>
-                </m.div>
-              ))}
-            </div>
+              <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,40%)", marginBottom: "0.5rem" }}>
+                Governed Decision Loop
+              </p>
+              <p style={{ fontSize: "0.875rem", color: "hsl(210,5%,48%)", lineHeight: 1.6, maxWidth: "38rem" }}>
+                Every decision flows through nine governed steps — from raw signal to learned outcome. Click any step to explore what happens and which platform primitive governs it.
+              </p>
+            </m.div>
+            <m.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <GovernedLoopViz />
+            </m.div>
           </div>
         </section>
 
