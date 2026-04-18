@@ -115,17 +115,35 @@ test.describe("Correlation deep-links — drill-through to detail pages", () => 
     expect(matchesPropertyDomain, "terra detail page lacks property-domain content").toBe(true);
   });
 
-  // The valid productEntityUrl shapes any entity drill-through link in the
-  // command artifact may take. Anything outside this set is treated as a
-  // malformed link and FAILS the test (no pre-filtering).
-  const VALID_ENTITY_HREF =
-    /^\/(vessels\/vessels\/[^/?#]+|terra\/property\/[^/?#]+|carlota-jo\/inquiries(\/[^/?#]+|$|\?)|aegis(\/|\?|$)|operations\/prism(\/[^/?#]+|$|\?)|operations(\/[^/?#]+|$|\?))/;
+  // The valid drill-through URL shapes — covers BOTH productDashboardUrl()
+  // (e.g. /vessels/dashboard, /terra/dashboard, /carlota-jo/, /aegis/) AND
+  // productEntityUrl() (e.g. /vessels/vessels/:id, /terra/property/:id,
+  // /carlota-jo/inquiries?entity=, /aegis/?entity=, /operations/prism,
+  // /operations) as defined by
+  // artifacts/command/src/pages/cross-platform/product-links.ts.
+  const VALID_DRILLTHROUGH_HREF = new RegExp(
+    [
+      "^/vessels/dashboard(?:[/?#]|$)",
+      "^/vessels/vessels/[^/?#]+",
+      "^/terra/dashboard(?:[/?#]|$)",
+      "^/terra/property/[^/?#]+",
+      "^/carlota-jo(?:/.*)?$",
+      "^/carlota-jo/inquiries(?:\\?.*)?$",
+      "^/aegis(?:/.*)?(?:\\?.*)?$",
+      "^/operations(?:/prism)?(?:[/?#].*)?$",
+    ].join("|"),
+  );
 
-  // Anchors whose href looks like a product/entity drill-through link (i.e.
-  // points into another artifact via a top-level prefix). This intentionally
-  // captures EVERY artifact-prefixed href so that malformed links can fail.
+  // Captures every artifact-prefixed href so the test can detect malformed
+  // links (any captured href that does not match VALID_DRILLTHROUGH_HREF).
   const ARTIFACT_PREFIX =
-    /^\/(vessels|terra|carlota-jo|aegis|operations|sentra|counsel|pulse|lyte|prism-counsel)\b/;
+    /^\/(vessels|terra|carlota-jo|aegis|operations|sentra|counsel|pulse|lyte|prism-counsel)(?:\/|\?|$)/;
+
+  // Predicate: vessels/terra entity (NOT dashboard) drill-through. These are
+  // the click-through targets the task explicitly requires us to exercise.
+  function isVesselsOrTerraEntityHref(href: string): boolean {
+    return /^\/vessels\/vessels\/[^/?#]+/.test(href) || /^\/terra\/property\/[^/?#]+/.test(href);
+  }
 
   test("command: cross-platform evidence registry renders entity links shaped like productEntityUrl(...)", async ({ page }, testInfo) => {
     if (!commandAvailable) testInfo.skip();
@@ -147,53 +165,46 @@ test.describe("Correlation deep-links — drill-through to detail pages", () => 
 
     for (const href of artifactHrefs) {
       expect(href, `evidence registry rendered a malformed artifact link: ${href}`).toMatch(
-        VALID_ENTITY_HREF,
+        VALID_DRILLTHROUGH_HREF,
       );
     }
 
-    // Seeded-mode lower bound: the dev/preview environment ships with seed
-    // evidence rows. If we can see registry rows at all, there must be at
-    // least one entity drill-through link, otherwise something stripped them.
-    const bodyText = await page.locator("body").innerText();
-    const seededMode =
-      /evidence|signal|correlation/i.test(bodyText) &&
-      !/no evidence|empty|no correlations/i.test(bodyText);
-    if (seededMode) {
-      expect(
-        artifactHrefs.length,
-        `seeded evidence registry rendered no artifact drill-through links — productEntityUrl helper or registry rendering may be broken`,
-      ).toBeGreaterThan(0);
-    }
+    // Seeded-mode lower bound: in the dev/preview environment the registry
+    // ships seeded vessels + terra entity rows, so at least one vessels OR
+    // terra entity drill-through link MUST be present. A regression that
+    // drops them would otherwise pass silently.
+    const vesselsTerraEntityHrefs = artifactHrefs.filter(isVesselsOrTerraEntityHref);
+    expect(
+      vesselsTerraEntityHrefs.length,
+      `evidence registry rendered no vessels-or-terra entity drill-through links. ` +
+        `productEntityUrl helper or registry rendering may be broken. ` +
+        `All artifact-prefixed hrefs found: ${JSON.stringify(artifactHrefs)}`,
+    ).toBeGreaterThan(0);
 
-    // Click-through: pick the first vessels OR terra entity link, follow it
-    // (the registry uses target="_blank", so handle the popup), and assert
-    // the destination URL/page-content match. This is the true end-to-end
-    // signal the reviewer asked for.
-    const clickable = artifactHrefs.find(
-      (h) => h.startsWith("/vessels/vessels/") || h.startsWith("/terra/property/"),
-    );
-    if (clickable) {
-      const link = page.locator(`a[href="${clickable}"]`).first();
-      const popupPromise = page.context().waitForEvent("page", { timeout: 5_000 }).catch(() => null);
-      await link.click({ modifiers: [] });
-      const popup = await popupPromise;
-      const dest = popup ?? page;
-      await dest.waitForLoadState("domcontentloaded", { timeout: 15_000 }).catch(() => null);
-      await dest.waitForLoadState("networkidle", { timeout: 15_000 }).catch(() => null);
-      expect(dest.url(), `click-through landed on unexpected URL`).toContain(clickable);
-      const destText = await dest.locator("body").innerText().catch(() => "");
-      if (!/upstream not ready/i.test(destText)) {
-        await assertNotGenericNotFound(dest as Page, testInfo, destText);
-        const destDomain = clickable.startsWith("/vessels/")
-          ? /vessel|fleet|imo|mmsi|voyage|return to fleet/i
-          : /property|terra|portfolio|tower|leas|tenant/i;
-        expect(
-          destDomain.test(destText),
-          `click-through destination ${dest.url()} lacks expected domain content. Body:\n${destText.slice(0, 500)}`,
-        ).toBe(true);
-      }
-      if (popup) await popup.close().catch(() => null);
+    // Mandatory click-through: follow the first vessels/terra entity link,
+    // handle the registry's target="_blank" popup, and assert the destination
+    // URL + body match. This proves the full DOM → navigation → render path.
+    const clickable = vesselsTerraEntityHrefs[0];
+    const link = page.locator(`a[href="${clickable}"]`).first();
+    const popupPromise = page.context().waitForEvent("page", { timeout: 8_000 }).catch(() => null);
+    await link.click();
+    const popup = await popupPromise;
+    const dest: Page = popup ?? page;
+    await dest.waitForLoadState("domcontentloaded", { timeout: 20_000 }).catch(() => null);
+    await dest.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => null);
+    expect(dest.url(), `evidence-row click-through landed on unexpected URL`).toContain(clickable);
+    const destText = await dest.locator("body").innerText().catch(() => "");
+    if (!/upstream not ready/i.test(destText)) {
+      await assertNotGenericNotFound(dest, testInfo, destText);
+      const destDomain = clickable.startsWith("/vessels/")
+        ? /vessel|fleet|imo|mmsi|voyage|return to fleet/i
+        : /property|terra|portfolio|tower|leas|tenant/i;
+      expect(
+        destDomain.test(destText),
+        `evidence-row click-through destination ${dest.url()} lacks expected domain content. Body:\n${destText.slice(0, 500)}`,
+      ).toBe(true);
     }
+    if (popup) await popup.close().catch(() => null);
   });
 
   test("command: cross-platform correlation page wires real product drill-through links", async ({ page }, testInfo) => {
@@ -219,39 +230,41 @@ test.describe("Correlation deep-links — drill-through to detail pages", () => 
 
     for (const href of artifactHrefs) {
       expect(href, `correlation page rendered a malformed artifact link: ${href}`).toMatch(
-        VALID_ENTITY_HREF,
+        VALID_DRILLTHROUGH_HREF,
       );
     }
 
-    // Seeded-mode lower bound for correlation cards too — if the page shows
-    // any correlation rows, at least one card must wire a drill-through link.
-    const seededMode =
-      /correlation|signal/i.test(body) && !/no correlations detected|empty/i.test(body);
-    if (seededMode) {
-      expect(
-        artifactHrefs.length,
-        `seeded correlation page rendered no artifact drill-through links — card-link wiring or productEntityUrl may be broken`,
-      ).toBeGreaterThan(0);
-    }
+    // Seeded-mode lower bound: at least one vessels OR terra entity link
+    // must be wired into the correlation cards on the seeded preview env.
+    const vesselsTerraEntityHrefs = artifactHrefs.filter(isVesselsOrTerraEntityHref);
+    expect(
+      vesselsTerraEntityHrefs.length,
+      `correlation page rendered no vessels-or-terra entity drill-through links — ` +
+        `card-link wiring or productEntityUrl may be broken. ` +
+        `All artifact-prefixed hrefs found: ${JSON.stringify(artifactHrefs)}`,
+    ).toBeGreaterThan(0);
 
-    // Click-through one vessels or terra link from the correlation page.
-    const clickable = artifactHrefs.find(
-      (h) => h.startsWith("/vessels/vessels/") || h.startsWith("/terra/property/"),
-    );
-    if (clickable) {
-      const link = page.locator(`a[href="${clickable}"]`).first();
-      const popupPromise = page.context().waitForEvent("page", { timeout: 5_000 }).catch(() => null);
-      await link.click({ modifiers: [] });
-      const popup = await popupPromise;
-      const dest = popup ?? page;
-      await dest.waitForLoadState("domcontentloaded", { timeout: 15_000 }).catch(() => null);
-      await dest.waitForLoadState("networkidle", { timeout: 15_000 }).catch(() => null);
-      expect(dest.url(), `correlation card click landed on unexpected URL`).toContain(clickable);
-      const destText = await dest.locator("body").innerText().catch(() => "");
-      if (!/upstream not ready/i.test(destText)) {
-        await assertNotGenericNotFound(dest as Page, testInfo, destText);
-      }
-      if (popup) await popup.close().catch(() => null);
+    // Mandatory click-through.
+    const clickable = vesselsTerraEntityHrefs[0];
+    const link = page.locator(`a[href="${clickable}"]`).first();
+    const popupPromise = page.context().waitForEvent("page", { timeout: 8_000 }).catch(() => null);
+    await link.click();
+    const popup = await popupPromise;
+    const dest: Page = popup ?? page;
+    await dest.waitForLoadState("domcontentloaded", { timeout: 20_000 }).catch(() => null);
+    await dest.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => null);
+    expect(dest.url(), `correlation card click landed on unexpected URL`).toContain(clickable);
+    const destText = await dest.locator("body").innerText().catch(() => "");
+    if (!/upstream not ready/i.test(destText)) {
+      await assertNotGenericNotFound(dest, testInfo, destText);
+      const destDomain = clickable.startsWith("/vessels/")
+        ? /vessel|fleet|imo|mmsi|voyage|return to fleet/i
+        : /property|terra|portfolio|tower|leas|tenant/i;
+      expect(
+        destDomain.test(destText),
+        `correlation card click destination ${dest.url()} lacks expected domain content. Body:\n${destText.slice(0, 500)}`,
+      ).toBe(true);
     }
+    if (popup) await popup.close().catch(() => null);
   });
 });
