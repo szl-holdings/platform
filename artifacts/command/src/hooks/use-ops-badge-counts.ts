@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 
 export interface OpsBadgeCounts {
   alerts: number | null;
@@ -8,48 +8,72 @@ export interface OpsBadgeCounts {
 
 const POLL_INTERVAL_MS = 30_000;
 
-async function safeFetchJson<T = unknown>(url: string): Promise<T | null> {
+let snapshot: OpsBadgeCounts = {
+  alerts: null,
+  slaBreaches: null,
+  governancePending: null,
+};
+const subscribers = new Set<() => void>();
+let interval: ReturnType<typeof setInterval> | null = null;
+let inFlight = false;
+
+async function safeFetchCount(url: string): Promise<number | null> {
   try {
     const res = await fetch(url, { credentials: "include" });
     if (!res.ok) return null;
-    return (await res.json()) as T;
+    const body = (await res.json()) as { count?: number };
+    return typeof body.count === "number" ? body.count : null;
   } catch {
     return null;
   }
 }
 
+async function refresh(): Promise<void> {
+  if (inFlight) return;
+  inFlight = true;
+  try {
+    const [alerts, slaBreaches, governancePending] = await Promise.all([
+      safeFetchCount("/api/command/alerts/count"),
+      safeFetchCount("/api/command/sla/breaches"),
+      safeFetchCount("/api/governance/pending"),
+    ]);
+    snapshot = { alerts, slaBreaches, governancePending };
+    subscribers.forEach((cb) => cb());
+  } finally {
+    inFlight = false;
+  }
+}
+
+function ensurePolling(): void {
+  if (interval !== null) return;
+  void refresh();
+  interval = setInterval(() => { void refresh(); }, POLL_INTERVAL_MS);
+}
+
+function stopPolling(): void {
+  if (interval === null) return;
+  clearInterval(interval);
+  interval = null;
+}
+
+function subscribe(cb: () => void): () => void {
+  subscribers.add(cb);
+  ensurePolling();
+  return () => {
+    subscribers.delete(cb);
+    if (subscribers.size === 0) stopPolling();
+  };
+}
+
+function getSnapshot(): OpsBadgeCounts {
+  return snapshot;
+}
+
+/**
+ * Shared, deduplicated polling hook. Layout + grid + any other consumer
+ * share a single 30s polling loop and a single in-memory snapshot. The
+ * loop stops when no components are mounted.
+ */
 export function useOpsBadgeCounts(): OpsBadgeCounts {
-  const [counts, setCounts] = useState<OpsBadgeCounts>({
-    alerts: null,
-    slaBreaches: null,
-    governancePending: null,
-  });
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function refresh() {
-      const [alertsRes, slaRes, govRes] = await Promise.all([
-        safeFetchJson<{ counts?: { active?: number } }>("/api/command/alerts"),
-        safeFetchJson<{ summary?: { breaching?: number } }>("/api/command/sla"),
-        safeFetchJson<{ summary?: { pendingApprovals?: number } }>("/api/command/governance"),
-      ]);
-      if (cancelled) return;
-      setCounts({
-        alerts: typeof alertsRes?.counts?.active === "number" ? alertsRes.counts.active : null,
-        slaBreaches: typeof slaRes?.summary?.breaching === "number" ? slaRes.summary.breaching : null,
-        governancePending:
-          typeof govRes?.summary?.pendingApprovals === "number" ? govRes.summary.pendingApprovals : null,
-      });
-    }
-
-    refresh();
-    const interval = setInterval(refresh, POLL_INTERVAL_MS);
-    return () => {
-      cancelled = true;
-      clearInterval(interval);
-    };
-  }, []);
-
-  return counts;
+  return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 }

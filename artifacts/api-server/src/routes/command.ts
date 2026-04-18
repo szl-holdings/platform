@@ -787,6 +787,33 @@ router.get("/alerts", requireAnyAuth(), async (_req: Request, res: Response) => 
 });
 
 /**
+ * GET /api/command/alerts/count
+ *
+ * Lightweight count of currently-active alerts. Backed by the same data
+ * sources as /api/command/alerts but skips serializing the full payload
+ * so polling clients (badge counts) stay cheap.
+ */
+router.get("/alerts/count", requireAnyAuth(), async (_req: Request, res: Response) => {
+  try {
+    let active = 0;
+    try {
+      const [row] = await db.select().from(intelligenceCacheTable).where(eq(intelligenceCacheTable.key, "threats")).limit(1);
+      const threats = Array.isArray(row?.data) ? row.data.filter(isThreatItem) : [];
+      active += Math.min(threats.length, 6);
+    } catch { /* non-fatal */ }
+    try {
+      const [row] = await db.select().from(intelligenceCacheTable).where(eq(intelligenceCacheTable.key, "geopolitical")).limit(1);
+      const events = Array.isArray(row?.data) ? row.data.filter(isGeoEvent) : [];
+      active += events.filter((e) => e.severity === "high" || e.severity === "critical").slice(0, 4).length;
+    } catch { /* non-fatal */ }
+    sendSuccess(res, { count: active, generatedAt: new Date().toISOString() });
+  } catch (err) {
+    logger.error({ err }, "command alerts/count error");
+    handleRouteError(res, err, "Failed to load alert count");
+  }
+});
+
+/**
  * GET /api/command/costs
  *
  * Aggregates request volume across guardian actions and signals to derive
@@ -1033,6 +1060,40 @@ router.get("/sla", requireAnyAuth(), async (_req: Request, res: Response) => {
   } catch (err) {
     logger.error({ err }, "command sla error");
     handleRouteError(res, err, "Failed to load SLA dashboard");
+  }
+});
+
+/**
+ * GET /api/command/sla/breaches
+ *
+ * Lightweight count of currently-breaching SLAs. Polls cheaply for the
+ * SLA Dashboard nav badge.
+ */
+router.get("/sla/breaches", requireAnyAuth(), async (_req: Request, res: Response) => {
+  try {
+    const since24h = new Date(Date.now() - 86400000);
+    let metrics: Array<{ service: string; metricType: string; avg: number; p95: number }> = [];
+    try {
+      metrics = await db
+        .select({
+          service: lyteMetricsTable.service,
+          metricType: lyteMetricsTable.metricType,
+          avg: sql<number>`COALESCE(AVG(${lyteMetricsTable.value}), 0)::float`,
+          p95: sql<number>`COALESCE(PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY ${lyteMetricsTable.value}), 0)::float`,
+        })
+        .from(lyteMetricsTable)
+        .where(gte(lyteMetricsTable.recordedAt, since24h))
+        .groupBy(lyteMetricsTable.service, lyteMetricsTable.metricType);
+    } catch { /* non-fatal */ }
+    let breaching = 0;
+    for (const m of metrics) {
+      if (m.metricType === "p95_latency_ms" && m.p95 > 200) breaching += 1;
+      if (m.metricType === "throughput" && m.avg < 5) breaching += 1;
+    }
+    sendSuccess(res, { count: breaching, generatedAt: new Date().toISOString() });
+  } catch (err) {
+    logger.error({ err }, "command sla/breaches error");
+    handleRouteError(res, err, "Failed to load SLA breach count");
   }
 });
 
