@@ -10,7 +10,7 @@ export const PROXY_ROUTES: ProxyRoute[] = [
   { prefix: "/counsel/", port: 4199 },
   { prefix: "/lyte/", port: 7099 },
   { prefix: "/sentra/", port: 4099 },
-  { prefix: "/terra/", port: 6099 },
+  { prefix: "/terra/", port: 6000 },
   { prefix: "/vessels/", port: 8099 },
   { prefix: "/pulse/", port: 5201 },
   { prefix: "/prism-counsel/", port: 7099 },

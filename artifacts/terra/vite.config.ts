@@ -7,7 +7,7 @@ import { PROXY_ROUTES } from "../../packages/proxy-routes.js";
 
 process.env.GOMAXPROCS = process.env.GOMAXPROCS ?? "2";
 
-const vitePort = Number(process.env.VITE_PORT) || 6099;
+const vitePort = Number(process.env.VITE_PORT) || 6000;
 const basePath = process.env.BASE_PATH || "/terra/";
 
 // Shared proxy port — hardcoded; do not use a PROXY_PORT env var to override this.

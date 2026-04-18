@@ -15,7 +15,7 @@ kind = "web"
   localPort = 9090
 
   [services.development]
-  run = "bash -c 'cd /home/runner/workspace/artifacts/terra && exec node_modules/.bin/vite --config vite.config.ts --host ::'"
+  run = "bash -c 'cd /home/runner/workspace/artifacts/terra && exec node_modules/.bin/vite --config vite.config.ts --host 0.0.0.0'"
 
   [services.production]
   build = [ "pnpm", "--filter", "@workspace/terra", "run", "build" ]
@@ -27,5 +27,5 @@ kind = "web"
   to = "/index.html"
 
   [services.env]
-  VITE_PORT = "6099"
+  VITE_PORT = "6000"
   BASE_PATH = "/terra/"
