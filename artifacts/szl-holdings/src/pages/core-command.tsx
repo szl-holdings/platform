@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, lazy, Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useSearch, useLocation } from "wouter";
 import { m } from "framer-motion";
 import {
   Shield, Brain, Zap, Ship, Building, Activity,
@@ -280,8 +281,29 @@ function InvestorKPISection({ metricsLoading, metrics }: { metricsLoading: boole
   );
 }
 
+type CoreTab = "overview" | "decision-theater" | "recommendations" | "audit" | "services";
+const CORE_TABS: readonly CoreTab[] = ["overview", "decision-theater", "recommendations", "audit", "services"] as const;
+
+function parseTab(search: string): CoreTab {
+  const params = new URLSearchParams(search);
+  const value = params.get("tab");
+  return (CORE_TABS as readonly string[]).includes(value ?? "") ? (value as CoreTab) : "overview";
+}
+
 export default function CoreCommandCenter() {
-  const [tab, setTab] = useState<"overview" | "decision-theater" | "recommendations" | "audit" | "services">("overview");
+  const search = useSearch();
+  const [, navigate] = useLocation();
+  const tab: CoreTab = parseTab(search);
+  const setTab = (next: CoreTab) => {
+    const params = new URLSearchParams(search);
+    if (next === "overview") {
+      params.delete("tab");
+    } else {
+      params.set("tab", next);
+    }
+    const qs = params.toString();
+    navigate(`/core${qs ? `?${qs}` : ""}`);
+  };
 
   const { data: metrics, isLoading: metricsLoading, refetch } = useQuery<CoreMetrics>({
     queryKey: ["core-metrics"],
