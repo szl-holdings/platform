@@ -10,6 +10,12 @@ import { TwilioAdapter } from "@szl-holdings/services";
 
 const twilioAdapter = new TwilioAdapter();
 
+function maskPhone(num: string): string {
+  if (!num) return "";
+  if (num.length <= 4) return "***";
+  return `${num.slice(0, 2)}***${num.slice(-2)}`;
+}
+
 export const PLATFORM_JOB_TYPES = {
   LYTE_DIGEST: "lyte_digest",
   READINESS_DIGEST: "readiness_digest",
@@ -787,49 +793,119 @@ durableJobQueue.register(PLATFORM_JOB_TYPES.NOTIFICATION_DISPATCH, async (job) =
       }
     }
   } else if (payload.channel === "sms") {
-    // Look up active SMS-enabled phone numbers for this user
-    const recipients = await db
-      .select({ phoneNumber: notificationRecipientsTable.phoneNumber })
-      .from(notificationRecipientsTable)
-      .where(and(
-        eq(notificationRecipientsTable.userId, payload.userId),
-        eq(notificationRecipientsTable.isActive, true),
-        eq(notificationRecipientsTable.smsEnabled, true),
-      ));
+    // If the job payload carries a specific phoneNumbers list (a retry job
+    // for previously-failed recipients), send only to those. Otherwise look
+    // up active SMS-enabled phone numbers for this user.
+    const explicitNumbers = (payload as { phoneNumbers?: string[] }).phoneNumbers;
+    const attemptNumber = (payload as { attempt?: number }).attempt ?? 1;
+    const MAX_PER_RECIPIENT_ATTEMPTS = 3;
 
-    if (recipients.length === 0) {
+    let phoneNumbers: string[];
+    if (explicitNumbers && explicitNumbers.length > 0) {
+      phoneNumbers = explicitNumbers;
+    } else {
+      const recipients = await db
+        .select({ phoneNumber: notificationRecipientsTable.phoneNumber })
+        .from(notificationRecipientsTable)
+        .where(and(
+          eq(notificationRecipientsTable.userId, payload.userId),
+          eq(notificationRecipientsTable.isActive, true),
+          eq(notificationRecipientsTable.smsEnabled, true),
+        ));
+      phoneNumbers = recipients.map((r) => r.phoneNumber);
+    }
+
+    if (phoneNumbers.length === 0) {
       logger.info(
         { notificationId: payload.notificationId, userId: payload.userId },
         "[notification-dispatch] SMS skipped — no active SMS-enabled phone numbers for user",
       );
     } else {
-      // Twilio max single SMS body ~1600 chars; keep concise
       const smsBody = `${payload.title}\n${payload.message}`.slice(0, 1500);
       const results = await Promise.allSettled(
-        recipients.map((r) => twilioAdapter.sendSMS(r.phoneNumber, smsBody)),
+        phoneNumbers.map((num) => twilioAdapter.sendSMS(num, smsBody)),
       );
 
+      const failedNumbers: string[] = [];
+      const failureReasons: Array<{ phoneMasked: string; error: string }> = [];
       let sent = 0;
-      let failed = 0;
-      const errors: string[] = [];
-      for (const r of results) {
+      for (let i = 0; i < results.length; i++) {
+        const r = results[i];
+        const num = phoneNumbers[i];
         if (r.status === "fulfilled" && r.value.sent) {
           sent++;
         } else {
-          failed++;
-          if (r.status === "rejected") errors.push(String(r.reason?.message ?? r.reason));
+          failedNumbers.push(num);
+          const err = r.status === "rejected" ? String((r.reason as Error)?.message ?? r.reason) : "provider returned sent=false";
+          failureReasons.push({ phoneMasked: maskPhone(num), error: err });
         }
       }
 
       logger.info(
-        { channel: payload.channel, notificationId: payload.notificationId, userId: payload.userId, sent, failed, total: recipients.length },
+        {
+          channel: payload.channel,
+          notificationId: payload.notificationId,
+          userId: payload.userId,
+          attempt: attemptNumber,
+          sent,
+          failed: failedNumbers.length,
+          total: phoneNumbers.length,
+          failures: failureReasons,
+        },
         "[notification-dispatch] SMS dispatch complete",
       );
 
-      // If every recipient failed, throw so the durable queue retries the whole job.
-      // Partial success is treated as success (delivered to at least one).
-      if (sent === 0 && failed > 0) {
-        throw new Error(`SMS delivery failed for all ${failed} recipient(s): ${errors.join("; ")}`);
+      if (failedNumbers.length > 0) {
+        if (sent === 0) {
+          // Total failure — throw to let the durable queue retry the whole job
+          // with its standard backoff.
+          throw new Error(
+            `SMS delivery failed for all ${failedNumbers.length} recipient(s): ${failureReasons.map((f) => `${f.phoneMasked}: ${f.error}`).join("; ")}`,
+          );
+        }
+        // Partial failure — enqueue a follow-up retry job for just the failed
+        // numbers. Cap retries so we don't loop forever on a permanently bad
+        // number.
+        if (attemptNumber < MAX_PER_RECIPIENT_ATTEMPTS) {
+          void durableJobQueue
+            .enqueue(PLATFORM_JOB_TYPES.NOTIFICATION_DISPATCH, {
+              channel: "sms",
+              notificationId: payload.notificationId,
+              userId: payload.userId,
+              type: payload.type,
+              title: payload.title,
+              message: payload.message,
+              actionUrl: payload.actionUrl,
+              phoneNumbers: failedNumbers,
+              attempt: attemptNumber + 1,
+            })
+            .catch((err: unknown) => {
+              logger.error(
+                { err, notificationId: payload.notificationId, failedCount: failedNumbers.length },
+                "[notification-dispatch] Failed to enqueue SMS retry job",
+              );
+            });
+          logger.info(
+            {
+              notificationId: payload.notificationId,
+              userId: payload.userId,
+              retryCount: failedNumbers.length,
+              nextAttempt: attemptNumber + 1,
+            },
+            "[notification-dispatch] Enqueued SMS retry for failed recipients",
+          );
+        } else {
+          logger.warn(
+            {
+              notificationId: payload.notificationId,
+              userId: payload.userId,
+              failedCount: failedNumbers.length,
+              attempt: attemptNumber,
+              failures: failureReasons,
+            },
+            "[notification-dispatch] SMS retry budget exhausted — giving up on remaining recipients",
+          );
+        }
       }
     }
   }
