@@ -50,7 +50,7 @@ const DIFFERENTIATORS = [
   { title: "Signal → Action, not dashboards", desc: "Every screen moves from ingested signal to recommended action to governed execution. No static charts that require interpretation — the Governed Decision Loop is the interface." },
   { title: "One loop. Every domain pack.", desc: "The same Signal Ingestion → Risk Surface → Governed Decision → Proof Chain loop runs across every domain pack. Domain expertise — the signals, models, and actions specific to each industry — lives in the pack, not the platform primitives." },
   { title: "Traceable AI, not magic", desc: "Every AI output shows what informed it, which model processed it, and what confidence it carries. Covenant Policy determines what the AI can recommend and what a human must approve. When AI fails, you see why." },
-  { title: "Governance as a structural primitive", desc: "Governance isn't a feature — it's a structural constraint. Covenant Policy, Proof Chain, approval gates, and Outcome Graph are platform primitives, not bolt-ons. Domain packs inherit them without rebuilding them." },
+  { title: "Governance as a structural primitive", desc: "Governance isn't a feature — it's a structural constraint. The six platform primitives — Covenant Policy, Proof Chain, Outcome Graph, Alloy, Simulation Engine, and Event Fabric — are built-in infrastructure, not bolt-ons. Domain packs inherit them without rebuilding them." },
 ];
 
 export default function HowItWorksPage() {
@@ -73,7 +73,7 @@ export default function HowItWorksPage() {
           Signal Ingestion → Risk Surface → Governed Decision → Proof Chain.
         </h1>
         <p className="text-base text-slate-400 max-w-2xl leading-relaxed mb-3">
-          SZL is a governed decision system. The same four-step loop runs across every domain pack — security, real estate, maritime, legal — with purpose-built intelligence in each pack and shared Primitives (Covenant Policy, Proof Chain, Outcome Graph) at the platform layer.
+          SZL is a governed operational intelligence platform. The same four-step loop runs across every domain pack — security, real estate, maritime, legal — with purpose-built intelligence in each pack and six shared Primitives (Covenant Policy, Proof Chain, Outcome Graph, Alloy, Simulation Engine, and Event Fabric) at the platform layer.
         </p>
         <p className="text-sm text-slate-500 max-w-2xl leading-relaxed mb-8">
           This page explains what happens from the moment a data signal enters the platform to the moment a governed decision is recorded in the immutable Proof Chain.
@@ -105,7 +105,7 @@ export default function HowItWorksPage() {
       <section className="max-w-5xl mx-auto px-6 py-16 border-t border-white/[0.06]">
         <h2 className="text-xl font-semibold text-slate-100 mb-2">One Governed Decision Loop. Every Domain Pack.</h2>
         <p className="text-sm text-slate-400 max-w-2xl mb-8">
-          The same four-step Governed Decision Loop powers every domain pack. Domain expertise — the signals, models, risk surfaces, and governed actions specific to each industry — lives in the pack. Covenant Policy, Proof Chain, and Outcome Graph are shared platform Primitives that every pack inherits.
+          The same four-step Governed Decision Loop powers every domain pack. Domain expertise — the signals, models, risk surfaces, and governed actions specific to each industry — lives in the pack. The six platform Primitives — Covenant Policy, Proof Chain, Outcome Graph, Alloy, Simulation Engine, and Event Fabric — are shared infrastructure that every pack inherits.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {VERTICALS.map((v) => (

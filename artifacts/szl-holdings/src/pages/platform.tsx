@@ -133,7 +133,7 @@ export default function PlatformPage() {
                 fontSize: "1.0625rem", color: "hsl(210,5%,60%)", lineHeight: 1.65,
                 maxWidth: "44rem", marginBottom: "1rem",
               }}>
-                The SZL Holdings governed decision system has three structural tiers. The <strong style={{ color: "hsl(38,12%,80%)" }}>Platform</strong> provides the foundation. The <strong style={{ color: "hsl(38,12%,80%)" }}>Primitives</strong> layer — Covenant Policy, Proof Chain, Outcome Graph, and Alloy execution — governs every consequential action. <strong style={{ color: "hsl(38,12%,80%)" }}>Domain Packs</strong> extend the Primitives with purpose-built intelligence for each industry.
+                The SZL Holdings governed operational intelligence platform has three structural tiers. The <strong style={{ color: "hsl(38,12%,80%)" }}>Platform</strong> provides the foundation. The <strong style={{ color: "hsl(38,12%,80%)" }}>Primitives</strong> layer — six shared components: Covenant Policy, Proof Chain, Outcome Graph, Alloy, Simulation Engine, and Event Fabric — governs every consequential action. <strong style={{ color: "hsl(38,12%,80%)" }}>Domain Packs</strong> extend the Primitives with purpose-built intelligence for each industry.
               </p>
               <p style={{
                 fontSize: "0.9375rem", color: "hsl(210,5%,50%)", lineHeight: 1.65,

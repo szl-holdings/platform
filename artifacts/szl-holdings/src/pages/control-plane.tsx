@@ -13,7 +13,7 @@ const TABS = ["Registry", "Health", "Connectors", "Feature Flags", "Audit"] as c
 type Tab = typeof TABS[number];
 
 const platformRegistry = [
-  { name: "SZL Holdings", slug: "szl-holdings", type: "Parent Brand", tier: "Core", status: "operational", uptime: "99.97%", version: "4.2.1", env: "production", lastDeploy: "2026-03-28T14:22:00Z", owner: "Stephen Lutar" },
+  { name: "SZL Holdings", slug: "szl-holdings", type: "Governed Platform", tier: "Core", status: "operational", uptime: "99.97%", version: "4.2.1", env: "production", lastDeploy: "2026-03-28T14:22:00Z", owner: "Stephen Lutar" },
   { name: "Alloy", slug: "alloy", type: "Intelligence Engine", tier: "Flagship", status: "operational", uptime: "99.95%", version: "3.8.0", env: "production", lastDeploy: "2026-03-27T09:15:00Z", owner: "Platform Engineering" },
   { name: "Command", slug: "command", type: "Business Observability", tier: "Flagship", status: "operational", uptime: "99.92%", version: "2.6.3", env: "production", lastDeploy: "2026-03-26T11:45:00Z", owner: "Observability Team" },
   { name: "Vessels", slug: "vessels", type: "Maritime Command", tier: "Flagship", status: "operational", uptime: "99.98%", version: "3.1.2", env: "production", lastDeploy: "2026-03-29T08:30:00Z", owner: "Maritime Ops" },

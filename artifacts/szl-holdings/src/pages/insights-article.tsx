@@ -358,7 +358,7 @@ export default function InsightsArticlePage() {
                   </div>
                   <p className="text-xs font-semibold text-szl-text mb-1">About SZL Holdings</p>
                   <p className="text-[11px] text-szl-text-secondary leading-relaxed mb-3">
-                    A vertically-integrated technology holding company deploying capital across six frontier platforms.
+                    A governed operational intelligence platform — six domain packs built on a shared governed decision loop.
                   </p>
                   <button
                     onClick={() => navigate("/insights")}

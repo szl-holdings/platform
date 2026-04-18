@@ -168,7 +168,7 @@ function SectionHeader({ label, title, description }: { label: string; title: st
 export default function EcosystemPage() {
   usePageMeta({
     title: "Ecosystem — SZL Holdings",
-    description: "The SZL Holdings ecosystem: one parent company, one intelligence backbone, and purpose-built platforms across observability, maritime command, cybersecurity, AI research, and premium services.",
+    description: "The SZL Holdings ecosystem: one governed operational intelligence platform, one shared execution backbone, and purpose-built domain packs across observability, maritime command, cybersecurity, AI research, and premium services.",
     canonical: "https://szlholdings.com/ecosystem",
   });
 
@@ -183,7 +183,7 @@ export default function EcosystemPage() {
                 Product Registry
               </p>
               <h1 style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 700, letterSpacing: "-0.025em", color: "hsl(38,12%,94%)", lineHeight: 1.08, marginBottom: "1rem", fontFamily: "var(--font-display)" }}>
-                One holding company.<br />One architecture. Six platforms.
+                One governed platform.<br />One architecture. Six domain packs.
               </h1>
               <p style={{ fontSize: "1rem", lineHeight: 1.7, color: "hsl(210,5%,58%)", maxWidth: "40rem" }}>
                 Every entity in the SZL ecosystem has a defined role, a defined audience, and a defined relationship to the whole. Nothing competes. Everything compounds.
@@ -197,10 +197,10 @@ export default function EcosystemPage() {
               style={{ marginTop: "2rem", display: "flex", gap: "0.25rem", flexWrap: "wrap" }}
             >
               {[
-                { label: "SZL Holdings", desc: "Parent Brand", accent: "hsl(38,55%,60%)" },
-                { label: "Alloy", desc: "Engine", accent: "hsl(222,68%,58%)" },
-                { label: "3 Flagships", desc: "Alloy · Lyte · Vessels", accent: "hsl(218,72%,52%)" },
-                { label: "5 Platforms", desc: "Domain-specific", accent: "hsl(210,5%,54%)" },
+                { label: "SZL Holdings", desc: "Governed Platform", accent: "hsl(38,55%,60%)" },
+                { label: "Lyte", desc: "Flagship Command", accent: "hsl(192,80%,48%)" },
+                { label: "6 Domain Packs", desc: "Vertical intelligence", accent: "hsl(210,5%,54%)" },
+                { label: "Alloy", desc: "Execution Fabric", accent: "hsl(222,68%,58%)" },
                 { label: "2 Brands", desc: "Carlota Jo · Stephen Lutar", accent: "hsl(36,52%,54%)" },
               ].map((item, i) => (
                 <div key={item.label} style={{
@@ -226,9 +226,9 @@ export default function EcosystemPage() {
         <section style={{ padding: "2rem 0 3rem" }}>
           <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
             <SectionHeader
-              label="Tier 1 — Flagship Platforms"
-              title="Core infrastructure and primary command surfaces"
-              description="The three platforms that define the SZL operational model. Alloy is the engine; Lyte and Vessels are the first command surfaces built on top of it."
+              label="Platform Command — Core Layer"
+              title="Flagship command surface and execution fabric"
+              description="Lyte is the flagship governed command surface — signal stream, situation board, governed action panel. Alloy is the execution fabric underneath every domain pack. Vessels is the first commercial domain pack, shown here alongside the core platform."
             />
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
               {FLAGSHIP.map((p, i) => <PlatformCard key={p.name} p={p} i={i} />)}
