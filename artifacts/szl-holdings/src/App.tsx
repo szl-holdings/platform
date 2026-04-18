@@ -9,6 +9,7 @@ import { DemoModeProvider, SandboxModeProvider, CookieBanner, StatusBanner, Anal
 import { McpOverlay } from "@szl-holdings/mcp-client";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
 import { useAuth } from "@szl-holdings/replit-auth-web";
+import { identifyAnalyticsUser, resetAnalyticsUser, setUser as setSentryUser, clearUser as clearSentryUser } from "@szl-holdings/observability/react";
 import { AlloyLayout } from "@/alloy/components/alloy-layout";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
 import { Toaster } from "@szl-holdings/shared-ui/ui/sonner";
@@ -299,7 +300,20 @@ const queryClient = new QueryClient({
 });
 
 function RequireAuth({ children }: { children: ReactNode }) {
-  const { isLoading, isAuthenticated, login } = useAuth();
+  const { user, isLoading, isAuthenticated, login } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      const userId = String(user.id);
+      const email = user.email ?? undefined;
+      const name = user.name ?? user.displayName ?? user.username ?? undefined;
+      identifyAnalyticsUser({ id: userId, email, name });
+      setSentryUser({ id: userId, email, username: name });
+    } else {
+      resetAnalyticsUser();
+      clearSentryUser();
+    }
+  }, [user?.id]);
   if (isLoading) return <PageLoader />;
   if (!isAuthenticated) {
     return (

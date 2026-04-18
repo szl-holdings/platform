@@ -46,6 +46,8 @@ import atlasArtifactsRouter from "./atlas-artifacts";
 import outcomeGraphRouter from "./outcome-graph";
 import pageViewTrackingRouter from "./page-view-tracking";
 import newsletterRouter from "./newsletter";
+import debugRouter from "./debug";
+import mapsRouter from "./maps";
 
 const router: IRouter = Router();
 
@@ -128,5 +130,8 @@ router.use("/nexus", nexusRouter);
 router.use(cognitiveRuntimeRouter);
 router.use(atlasArtifactsRouter);
 router.use(outcomeGraphRouter);
+
+router.use(mapsRouter);
+router.use(debugRouter);
 
 export default router;

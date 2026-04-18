@@ -2,6 +2,7 @@ import { useState } from "react";
 import { CheckCircle, ArrowRight, Zap, Shield, Building2, X } from "lucide-react";
 import { Link } from "wouter";
 import { ContactModal, useContactModal } from "@szl-holdings/shared-ui";
+import { trackEvent } from "@szl-holdings/observability/react";
 
 const ACCENT = "#d4a054";
 const BG = "#0a0b0e";
@@ -90,9 +91,45 @@ const tiers = [
   },
 ];
 
+const TIER_PLAN_IDS: Record<string, { monthly: string; annual: string }> = {
+  Starter:      { monthly: "command-pro-monthly", annual: "command-pro-annual" },
+  Professional: { monthly: "command-pro-monthly", annual: "command-pro-annual" },
+};
+
+async function initiateCommandCheckout(planId: string): Promise<void> {
+  const origin = window.location.origin;
+  const res = await fetch(`${import.meta.env.BASE_URL}api/billing/command/subscribe`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      planId,
+      successUrl: `${origin}/command/pricing?checkout=success`,
+      cancelUrl: `${origin}/command/pricing`,
+    }),
+  });
+  const data = await res.json();
+  if (data?.data?.url) {
+    window.location.href = data.data.url;
+  }
+}
+
 export default function PricingPage() {
   const [annual, setAnnual] = useState(true);
+  const [loading, setLoading] = useState<string | null>(null);
   const { isOpen: contactOpen, open: openContact, close: closeContact } = useContactModal("demo");
+
+  async function handleStartTrial(tierName: string) {
+    const plans = TIER_PLAN_IDS[tierName];
+    if (!plans) return;
+    const planId = annual ? plans.annual : plans.monthly;
+    setLoading(tierName);
+    trackEvent("upgrade_clicked", { feature: "lyte_pricing", tier: tierName, plan: planId, billing: annual ? "annual" : "monthly" });
+    try {
+      await initiateCommandCheckout(planId);
+    } finally {
+      setLoading(null);
+    }
+  }
 
   return (
     <div className="min-h-screen" style={{ background: BG, color: "rgba(255,255,255,0.88)" }}>
@@ -186,7 +223,7 @@ export default function PricingPage() {
 
                 {tier.cta === "Contact Sales" ? (
                   <button
-                    onClick={() => openContact()}
+                    onClick={() => { openContact(); trackEvent("upgrade_clicked", { feature: "lyte_pricing", tier: tier.name, cta: "contact_sales" }); }}
                     className="w-full py-3 rounded-xl text-[13px] font-semibold flex items-center justify-center gap-2 transition-all mb-8"
                     style={{ background: "rgba(255,255,255,0.1)", color: "white", border: "1px solid rgba(255,255,255,0.15)" }}
                   >
@@ -194,14 +231,17 @@ export default function PricingPage() {
                   </button>
                 ) : (
                   <button
-                    className="w-full py-3 rounded-xl text-[13px] font-semibold flex items-center justify-center gap-2 transition-all mb-8"
+                    onClick={() => handleStartTrial(tier.name)}
+                    disabled={loading === tier.name}
+                    className="w-full py-3 rounded-xl text-[13px] font-semibold flex items-center justify-center gap-2 transition-all mb-8 disabled:opacity-60"
                     style={{
                       background: tier.highlight ? ACCENT : "rgba(255,255,255,0.1)",
                       color: tier.highlight ? "#000" : "white",
                       border: tier.highlight ? "none" : "1px solid rgba(255,255,255,0.15)",
                     }}
                   >
-                    {tier.cta} {tier.trialDays && `— ${tier.trialDays} days free`} <ArrowRight className="w-3.5 h-3.5" />
+                    {loading === tier.name ? "Redirecting…" : `${tier.cta}${tier.trialDays ? ` — ${tier.trialDays} days free` : ""}`}
+                    {loading !== tier.name && <ArrowRight className="w-3.5 h-3.5" />}
                   </button>
                 )}
 

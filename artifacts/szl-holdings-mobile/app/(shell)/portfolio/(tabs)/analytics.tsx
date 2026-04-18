@@ -1,4 +1,5 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useEffect } from "react";
+import { trackEvent } from "@/lib/analytics";
 import {
   View,
   Text,
@@ -284,6 +285,10 @@ export default function AnalyticsScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const [refreshing, setRefreshing] = useState(false);
+
+  useEffect(() => {
+    trackEvent("page_view", { page: "analytics", product: "szl-holdings-mobile" });
+  }, []);
 
   const {
     data: metrics,

@@ -3,9 +3,10 @@ import { motion as m, AnimatePresence } from "framer-motion";
 import {
   Box, Ruler, Paintbrush, Sofa, Camera, Layers, Eye, ChevronRight,
   Building2, Maximize2, RotateCcw, ZoomIn, ZoomOut, Move, Grid3X3,
-  Sun, Moon, ArrowRight, CheckCircle, DollarSign, Palette
+  Sun, Moon, ArrowRight, CheckCircle, DollarSign, Palette, Map, Zap
 } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { trackEvent } from "@szl-holdings/observability/react";
 
 interface Room {
   id: string;
@@ -140,22 +141,78 @@ const PROPERTY: PropertyWalkthrough = {
 
 const fmt = (n: number) => n >= 1000 ? `$${(n / 1000).toFixed(0)}K` : `$${n.toLocaleString()}`;
 
+const MAPS_SATELLITE_URL =
+  `${import.meta.env.BASE_URL}api/maps/static?center=425+Park+Ave+New+York+NY&zoom=17&size=900x220&maptype=satellite&markers=color:red|425+Park+Ave+New+York+NY`;
+
+async function initiateTerraCheckout(planId: string): Promise<void> {
+  const origin = window.location.origin;
+  const res = await fetch(`${import.meta.env.BASE_URL}api/billing/terra/subscribe`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      planId,
+      successUrl: `${origin}/terra?checkout=success`,
+      cancelUrl: `${origin}/terra/property`,
+    }),
+  });
+  const data = await res.json();
+  if (data?.data?.url) {
+    window.location.href = data.data.url;
+  }
+}
+
 export default function SpatialWalkthroughPage() {
   const [selectedRoom, setSelectedRoom] = useState(PROPERTY.rooms[0].id);
   const [showRenovation, setShowRenovation] = useState(false);
   const [selectedStaging, setSelectedStaging] = useState<string | null>(null);
+  const [upgradeLoading, setUpgradeLoading] = useState(false);
   const room = PROPERTY.rooms.find(r => r.id === selectedRoom)!;
 
   const totalRenovCost = PROPERTY.rooms.reduce((s, r) => s + r.renovationOptions.reduce((rs, o) => rs + o.cost, 0), 0);
   const totalValueAdd = PROPERTY.rooms.reduce((s, r) => s + r.renovationOptions.reduce((rs, o) => rs + o.valueAdd, 0), 0);
 
+  async function handleTerraUpgrade() {
+    setUpgradeLoading(true);
+    trackEvent("upgrade_clicked", { feature: "terra_walkthrough", plan: "terra-starter-monthly" });
+    try {
+      await initiateTerraCheckout("terra-starter-monthly");
+    } finally {
+      setUpgradeLoading(false);
+    }
+  }
+
   return (
     <div className="min-h-screen" style={{ background: "#0a0c10" }}>
       <div className="mx-auto max-w-7xl px-6 py-8 lg:px-8">
-        <div className="mb-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/35">Spatial Computing</p>
-          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-white">Interactive Property Walkthrough</h1>
-          <p className="mt-1 text-sm text-white/40">{PROPERTY.address} · {PROPERTY.type} · {PROPERTY.totalSqft.toLocaleString()} SF</p>
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-end gap-4 justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/35">Spatial Computing</p>
+            <h1 className="mt-2 text-2xl font-semibold tracking-tight text-white">Interactive Property Walkthrough</h1>
+            <p className="mt-1 text-sm text-white/40">{PROPERTY.address} · {PROPERTY.type} · {PROPERTY.totalSqft.toLocaleString()} SF</p>
+          </div>
+          <button
+            onClick={handleTerraUpgrade}
+            disabled={upgradeLoading}
+            className="flex shrink-0 items-center gap-2 rounded-xl px-4 py-2.5 text-[13px] font-semibold transition-all disabled:opacity-60"
+            style={{ background: "#2d6a4f", color: "#fff" }}
+          >
+            <Zap className="w-3.5 h-3.5" />
+            {upgradeLoading ? "Redirecting…" : "Upgrade to Terra Pro"}
+            {!upgradeLoading && <ArrowRight className="w-3.5 h-3.5" />}
+          </button>
+        </div>
+
+        <div className="mb-6 rounded-2xl overflow-hidden border border-white/[0.06] relative">
+          <img
+            src={MAPS_SATELLITE_URL}
+            alt={`Google Maps satellite view of ${PROPERTY.address}`}
+            className="w-full h-48 object-cover"
+            style={{ objectPosition: "center" }}
+          />
+          <div className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-medium" style={{ background: "rgba(0,0,0,0.7)", color: "rgba(255,255,255,0.8)" }}>
+            <Map className="w-3 h-3" />
+            Satellite · Google Maps · {PROPERTY.address}
+          </div>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5 mb-8">

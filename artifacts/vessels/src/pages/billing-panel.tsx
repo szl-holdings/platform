@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "@szl-holdings/shared-ui";
-import { CreditCard, CheckCircle2, Clock, AlertTriangle, FileText, RefreshCw, ExternalLink } from "lucide-react";
+import { CreditCard, CheckCircle2, Clock, AlertTriangle, FileText, RefreshCw, ExternalLink, Zap } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { trackEvent } from "@szl-holdings/observability/react";
 
 interface Subscription {
   id: number;
@@ -89,13 +90,37 @@ export default function BillingPanelPage() {
           <h1 className="font-display text-xl font-bold text-sky-50">Billing</h1>
           <p className="text-xs text-sky-400/50 mt-0.5">Manage your Vessels subscription and payment history</p>
         </div>
-        <button
-          onClick={() => { void refetchSubs(); void refetchInvoices(); }}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sky-500/10 border border-sky-500/20 text-sky-400 text-xs hover:bg-sky-500/15 transition-colors"
-        >
-          <RefreshCw className="w-3 h-3" />
-          Refresh
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => { void refetchSubs(); void refetchInvoices(); }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sky-500/10 border border-sky-500/20 text-sky-400 text-xs hover:bg-sky-500/15 transition-colors"
+          >
+            <RefreshCw className="w-3 h-3" />
+            Refresh
+          </button>
+          <button
+            onClick={async () => {
+              trackEvent("upgrade_clicked", { feature: "vessels_billing", plan: "fleet-enterprise" });
+              const origin = window.location.origin;
+              const res = await fetch(`${import.meta.env.BASE_URL}api/billing/checkout`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  priceId: import.meta.env.VITE_STRIPE_PRICE_VESSELS_ENTERPRISE ?? "price_vessels_enterprise",
+                  mode: "subscription",
+                  successUrl: `${origin}/vessels/billing?checkout=success`,
+                  cancelUrl: `${origin}/vessels/billing`,
+                }),
+              });
+              const data = await res.json();
+              if (data?.data?.url) window.location.href = data.data.url;
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sky-600/20 border border-sky-500/30 text-sky-300 text-xs hover:bg-sky-600/30 transition-colors font-semibold"
+          >
+            <Zap className="w-3 h-3" />
+            Upgrade Fleet
+          </button>
+        </div>
       </div>
 
       {/* Current Plan */}

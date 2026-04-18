@@ -10,6 +10,8 @@ import * as AuthSession from "expo-auth-session";
 import * as SecureStore from "expo-secure-store";
 import * as WebBrowser from "expo-web-browser";
 import { Platform } from "react-native";
+import { identifyUser, resetUser } from "@/lib/analytics";
+import { setSentryUser, clearSentryUser } from "@/lib/sentry";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -158,6 +160,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     fetchUser();
   }, [fetchUser]);
+
+  useEffect(() => {
+    if (user) {
+      identifyUser({ id: user.id, email: user.email ?? undefined, name: user.displayName ?? undefined });
+      setSentryUser({ id: user.id, email: user.email ?? undefined, username: user.displayName ?? undefined });
+    } else {
+      resetUser();
+      clearSentryUser();
+    }
+  }, [user]);
 
   useEffect(() => {
     if (!response || response.type !== "success" || !request) return;

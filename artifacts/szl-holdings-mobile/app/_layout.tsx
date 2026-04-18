@@ -39,6 +39,8 @@ import {
   ConflictResolutionModal,
   CopilotFab,
 } from "@szl-holdings/mobile-shared";
+import { trackEvent, isAnalyticsEnabled } from "@/lib/analytics";
+import { initSentryGlobalHandlers, captureException } from "@/lib/sentry";
 import {
   configurePushNotificationHandler,
   usePushNotificationsBase,
@@ -71,6 +73,13 @@ setAuthTokenGetter(getCortexAuthToken);
 setUploadAuthTokenGetter(getCortexAuthToken);
 
 configurePushNotificationHandler();
+initSentryGlobalHandlers();
+
+if (isAnalyticsEnabled()) {
+  trackEvent("app_launched", { platform: "mobile", app: "cortex" });
+} else {
+  console.debug("[analytics] Mobile analytics disabled — set EXPO_PUBLIC_POSTHOG_KEY and EXPO_PUBLIC_AMPLITUDE_API_KEY to enable");
+}
 
 // Maps a server `domain` (legacy per-app appIds plus unified workspace IDs) to
 // the matching Expo Router path inside the unified shell.

@@ -1,4 +1,4 @@
-import React, { lazy, Suspense } from "react";
+import React, { lazy, Suspense, useEffect } from "react";
 import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
@@ -14,6 +14,7 @@ import { beaconConfig } from "@szl-holdings/shared-ui/copilot-configs";
 import { CommandPalette, useCommandPalette, getEcosystemSwitchCommands, createBaselineWebActions, type CommandItem } from "@szl-holdings/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@szl-holdings/shared-ui/keyboard-shortcuts";
 import { useAuth } from "@szl-holdings/replit-auth-web";
+import { identifyAnalyticsUser, resetAnalyticsUser, setUser as setSentryUser, clearUser as clearSentryUser } from "@szl-holdings/observability/react";
 import { Shield } from "lucide-react";
 import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";
 import { DemoModeProvider } from "@lyte/lib/demo-mode";
@@ -395,7 +396,20 @@ function PrivateApp({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
 }
 
 function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v: boolean) => void }) {
-  const { isLoading, isAuthenticated, login } = useAuth();
+  const { user, isLoading, isAuthenticated, login } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      const userId = String(user.id);
+      const email = user.email ?? undefined;
+      const name = user.name ?? user.displayName ?? user.username ?? undefined;
+      identifyAnalyticsUser({ id: userId, email, name });
+      setSentryUser({ id: userId, email, username: name });
+    } else {
+      resetAnalyticsUser();
+      clearSentryUser();
+    }
+  }, [user?.id]);
   const [location] = useLocation();
 
   const params = new URLSearchParams(window.location.search);

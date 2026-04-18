@@ -141,6 +141,28 @@ router.post("/billing/customer-portal", validateBody(billingCustomerPortalSchema
   }
 });
 
+router.post("/billing/portal-session", authMiddleware(), async (req: Request, res: Response) => {
+  try {
+    const returnUrl = (req.body as { returnUrl?: string }).returnUrl ?? req.headers.referer ?? "/";
+    const user = (req as unknown as { user?: { email?: string; id?: string } }).user;
+    const userEmail = user?.email;
+    if (!userEmail) {
+      sendBadRequest(res, "Authenticated user email required for billing portal");
+      return;
+    }
+    const customer = await services.stripe.getCustomerByEmail(userEmail);
+    if (!customer) {
+      sendBadRequest(res, "No Stripe customer record found — complete a checkout first");
+      return;
+    }
+    const session = await services.stripe.createCustomerPortalSession(customer.id, returnUrl);
+    sendSuccess(res, { url: session.url });
+  } catch (err) {
+    logger.error({ err }, "Failed to create portal session");
+    handleRouteError(res, err, "Failed to create portal session");
+  }
+});
+
 router.get("/billing/checkout-session/:sessionId", async (req: Request, res: Response) => {
   try {
     const sessionId = req.params.sessionId as string;

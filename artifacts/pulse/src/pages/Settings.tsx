@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Bell, Clock, Globe, Shield, Zap, Check } from "lucide-react";
+import { Bell, Clock, Globe, Shield, Zap, Check, CreditCard, ArrowRight } from "lucide-react";
+import { trackEvent } from "@szl-holdings/observability/react";
 
 type Toggle = { key: string; label: string; description: string; value: boolean };
 
@@ -140,6 +141,74 @@ export default function Settings() {
               <div style={{ fontSize: "0.7rem", color: "var(--pulse-text-muted)" }}>{a.role}</div>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* Subscription & Billing */}
+      <div className="section-card" style={{ padding: "18px 20px", marginBottom: 16 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+          <CreditCard size={15} color="var(--pulse-text-muted)" />
+          <h3 style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--pulse-text)" }}>Subscription & Billing</h3>
+        </div>
+        <p style={{ fontSize: "0.78rem", color: "var(--pulse-text-muted)", marginBottom: 14 }}>
+          Pulse is included in your SZL Holdings Executive plan. Upgrade for additional briefing capacity, custom domains, and dedicated support.
+        </p>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button
+            onClick={async () => {
+              trackEvent("upgrade_clicked", { product: "pulse", source: "settings", plan: "pulse-executive-annual" });
+              const origin = window.location.origin;
+              const res = await fetch(`${import.meta.env.BASE_URL}api/billing/checkout`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({
+                  priceId: import.meta.env.VITE_STRIPE_PRICE_PULSE_EXECUTIVE ?? "price_pulse_executive",
+                  mode: "subscription",
+                  successUrl: `${origin}/pulse/settings?checkout=success`,
+                  cancelUrl: `${origin}/pulse/settings`,
+                }),
+              });
+              const data = await res.json();
+              const url = data?.data?.url ?? data?.url;
+              if (url) window.location.href = url;
+            }}
+            style={{
+              display: "flex", alignItems: "center", gap: 6,
+              padding: "8px 14px", borderRadius: 6,
+              background: "rgba(200,168,75,0.12)",
+              border: "1px solid rgba(200,168,75,0.35)",
+              color: "var(--pulse-gold)",
+              fontSize: "0.78rem", fontWeight: 600, cursor: "pointer",
+            }}
+          >
+            <Zap size={13} /> Upgrade Plan <ArrowRight size={11} />
+          </button>
+          <button
+            onClick={async () => {
+              trackEvent("billing_portal_opened", { product: "pulse", source: "settings" });
+              const origin = window.location.origin;
+              const res = await fetch(`${import.meta.env.BASE_URL}api/billing/portal-session`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({ returnUrl: `${origin}/pulse/settings` }),
+              });
+              const data = await res.json();
+              const url = data?.data?.url ?? data?.url;
+              if (url) window.location.href = url;
+            }}
+            style={{
+              display: "flex", alignItems: "center", gap: 6,
+              padding: "8px 14px", borderRadius: 6,
+              background: "rgba(255,255,255,0.04)",
+              border: "1px solid rgba(255,255,255,0.1)",
+              color: "var(--pulse-text-muted)",
+              fontSize: "0.78rem", fontWeight: 500, cursor: "pointer",
+            }}
+          >
+            <CreditCard size={13} /> Manage Billing
+          </button>
         </div>
       </div>
 

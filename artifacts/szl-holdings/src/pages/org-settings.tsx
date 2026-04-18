@@ -332,7 +332,18 @@ export default function OrgSettingsPage() {
                     <p className="text-sm font-semibold capitalize">{org?.plan ?? "—"} Plan</p>
                     <p className="text-xs text-white/40">Status: {org?.status ?? "—"}</p>
                   </div>
-                  <button className="text-xs px-3 py-1.5 border border-white/15 rounded-lg text-white/60 hover:text-white transition-colors">
+                  <button
+                    className="text-xs px-3 py-1.5 border border-white/15 rounded-lg text-white/60 hover:text-white transition-colors"
+                    onClick={async () => {
+                      const origin = window.location.origin;
+                      const data = await apiFetch<{ data?: { url?: string }; url?: string }>("/billing/portal-session", {
+                        method: "POST",
+                        body: JSON.stringify({ returnUrl: `${origin}/settings` }),
+                      });
+                      const url = data?.data?.url ?? data?.url;
+                      if (url) window.location.href = url;
+                    }}
+                  >
                     Manage Billing
                   </button>
                 </div>

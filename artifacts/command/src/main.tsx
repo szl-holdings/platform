@@ -1,11 +1,12 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { ErrorBoundary } from "@szl-holdings/shared-ui/error-boundary";
-import { initSentry } from "@szl-holdings/observability/react";
+import { initSentry, initAnalytics } from "@szl-holdings/observability/react";
 import App from "./App";
 import "./index.css";
 
 initSentry({ appSlug: "command", tracesSampleRate: 0.2 });
+initAnalytics({ appSlug: "command" });
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

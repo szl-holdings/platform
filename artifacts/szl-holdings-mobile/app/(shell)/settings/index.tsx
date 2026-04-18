@@ -1,15 +1,20 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Linking,
+  ActivityIndicator,
 } from "react-native";
 import { router } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
+import { getApiBaseUrl } from "@szl-holdings/api-client-react";
+import { trackEvent } from "@/lib/analytics";
+import { useAuth } from "@/context/AuthContext";
 
 const ACCENT = "#c9a84c";
 
@@ -65,6 +70,34 @@ const SETTINGS: SettingItem[] = [
 export default function SettingsIndexScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
+  const { user } = useAuth();
+  const [billingLoading, setBillingLoading] = useState(false);
+
+  async function handleUpgrade() {
+    setBillingLoading(true);
+    trackEvent("upgrade_clicked", { product: "szl-holdings-mobile", source: "settings" });
+    try {
+      const apiBase = getApiBaseUrl();
+      const res = await fetch(`${apiBase}/api/billing/checkout`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          priceId: process.env.EXPO_PUBLIC_STRIPE_PRICE_MOBILE ?? "price_szl_mobile_pro",
+          mode: "subscription",
+          successUrl: `${apiBase}/mobile?checkout=success`,
+          cancelUrl: `${apiBase}/mobile`,
+          customerEmail: user?.email ?? undefined,
+        }),
+      });
+      const data = await res.json();
+      const url = data?.data?.url ?? data?.url;
+      if (url) await Linking.openURL(url);
+    } catch {
+      // Silently fail — user remains on settings
+    } finally {
+      setBillingLoading(false);
+    }
+  }
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
@@ -109,6 +142,36 @@ export default function SettingsIndexScreen() {
               <Feather name="chevron-right" size={16} color={colors.mutedForeground} />
             </TouchableOpacity>
           ))}
+        </View>
+
+        <Text style={[styles.sectionLabel, { color: colors.mutedForeground, marginTop: 4 }]}>SUBSCRIPTION & BILLING</Text>
+        <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <View style={styles.settingRow}>
+            <View style={[styles.itemIcon, { backgroundColor: `${ACCENT}15` }]}>
+              <Feather name="credit-card" size={16} color={ACCENT} />
+            </View>
+            <View style={styles.itemText}>
+              <Text style={[styles.itemTitle, { color: colors.foreground }]}>SZL Holdings Pro</Text>
+              <Text style={[styles.itemDesc, { color: colors.mutedForeground }]}>
+                Upgrade for unlimited briefings, mobile command, and advanced analytics
+              </Text>
+            </View>
+          </View>
+          <View style={{ paddingHorizontal: 14, paddingBottom: 14, flexDirection: "row", gap: 8 }}>
+            <TouchableOpacity
+              onPress={handleUpgrade}
+              disabled={billingLoading}
+              style={[styles.billingBtn, { backgroundColor: `${ACCENT}15`, borderColor: `${ACCENT}35`, opacity: billingLoading ? 0.6 : 1 }]}
+              activeOpacity={0.8}
+            >
+              {billingLoading
+                ? <ActivityIndicator size="small" color={ACCENT} />
+                : <Feather name="zap" size={13} color={ACCENT} />}
+              <Text style={[styles.billingBtnText, { color: ACCENT }]}>
+                {billingLoading ? "Redirecting…" : "Upgrade Plan"}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </ScrollView>
     </View>
@@ -164,4 +227,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   tagText: { fontSize: 9, fontFamily: "Inter_600SemiBold", letterSpacing: 0.5 },
+  billingBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
+  billingBtnText: { fontSize: 12, fontFamily: "Inter_600SemiBold" },
 });

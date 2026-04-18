@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, lazy, Suspense } from "react";
+import { identifyAnalyticsUser, resetAnalyticsUser, setUser as setSentryUser, clearUser as clearSentryUser } from "@szl-holdings/observability/react";
 import { Switch, Route } from "wouter";
 import Constellation from "@/pages/Constellation";
 import Shell from "./components/Shell";
@@ -180,7 +181,20 @@ function PinModal({ onSuccess }: { onSuccess: () => void }) {
 }
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
-  const { isLoading, isAuthenticated, login, activateDemo } = useAuth();
+  const { user, isLoading, isAuthenticated, login, activateDemo } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      const userId = String(user.id);
+      const email = user.email ?? undefined;
+      const name = user.displayName ?? user.name ?? undefined;
+      identifyAnalyticsUser({ id: userId, email, name });
+      setSentryUser({ id: userId, email, username: name });
+    } else {
+      resetAnalyticsUser();
+      clearSentryUser();
+    }
+  }, [user?.id]);
   const [showPinModal, setShowPinModal] = useState(() => {
     if (!DEMO_ALLOWED) return false;
     const params = new URLSearchParams(window.location.search);

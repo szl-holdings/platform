@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import servicesData from "@/data/services.json";
 import tiersData from "@/data/tiers.json";
+import { trackEvent } from "@szl-holdings/observability/react";
 
 type Step = "service" | "tier" | "schedule" | "details" | "confirmation";
 
@@ -119,6 +120,11 @@ export default function BookingFlow() {
 
   const handlePayment = async () => {
     setStripeError("");
+    trackEvent("cta_clicked", {
+      feature: "carlota_booking_checkout",
+      service: booking.service,
+      tier: booking.tier,
+    });
     try {
       const selectedTier = tiersData.find((t) => t.id === booking.tier);
       const res = await fetch("/api/stripe/checkout", {
@@ -141,6 +147,11 @@ export default function BookingFlow() {
       if (res.ok) {
         const data = await res.json();
         if (data.url) {
+          trackEvent("conversion", {
+            feature: "carlota_booking_checkout",
+            service: booking.service,
+            tier: booking.tier,
+          });
           window.location.href = data.url;
           return;
         }

@@ -19,6 +19,7 @@ const portfolioCommands: SpotlightCommand[] = [
   { id: "nav-investors", label: "Investors", description: "Investor relations & reports", icon: "📈", group: "Navigate", action: () => router.push("/(shell)/portfolio/(tabs)/investor") },
   { id: "nav-analytics", label: "Analytics", description: "MRR, ARR, churn & funnel metrics", icon: "📊", group: "Navigate", action: () => router.push("/(shell)/portfolio/(tabs)/analytics") },
   { id: "nav-ai", label: "Navigator AI", description: "Executive intelligence assistant", icon: "🤖", group: "Navigate", action: () => router.push("/(shell)/portfolio/(tabs)/agent-chat") },
+  { id: "nav-map", label: "Portfolio Map", description: "View portfolio properties on satellite map", icon: "🗺️", group: "Navigate", action: () => router.push("/(shell)/portfolio/(tabs)/map") },
 ];
 
 function NativeTabLayout() {
@@ -51,6 +52,7 @@ function NativeTabLayout() {
       <NativeTabs.Trigger name="alloy" options={{  href: null } as any} />
       <NativeTabs.Trigger name="mcp-tools" options={{  href: null } as any} />
       <NativeTabs.Trigger name="profile" options={{  href: null } as any} />
+      <NativeTabs.Trigger name="map" options={{  href: null } as any} />
     </NativeTabs>
   );
 }
@@ -120,6 +122,7 @@ function ClassicTabLayout() {
       <Tabs.Screen name="alloy" options={{  href: null } as any} />
       <Tabs.Screen name="mcp-tools" options={{  href: null } as any} />
       <Tabs.Screen name="profile" options={{  href: null } as any} />
+      <Tabs.Screen name="map" options={{  href: null } as any} />
     </Tabs>
   );
 }

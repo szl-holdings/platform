@@ -82,6 +82,9 @@ importers:
 
   .:
     dependencies:
+      '@amplitude/analytics-browser':
+        specifier: ^2.40.0
+        version: 2.40.0
       '@replit/connectors-sdk':
         specifier: ^0.3.0
         version: 0.3.0
@@ -97,6 +100,9 @@ importers:
       nodemailer:
         specifier: ^8.0.5
         version: 8.0.5
+      posthog-js:
+        specifier: ^1.369.1
+        version: 1.369.1
       puppeteer-core:
         specifier: ^24.41.0
         version: 24.41.0
@@ -2030,6 +2036,9 @@ importers:
 
   lib/observability:
     dependencies:
+      '@amplitude/analytics-browser':
+        specifier: ^2.11.15
+        version: 2.40.0
       '@opentelemetry/api':
         specifier: ^1.9.1
         version: 1.9.1
@@ -2054,6 +2063,9 @@ importers:
       '@szl-holdings/db':
         specifier: workspace:*
         version: link:../db
+      posthog-js:
+        specifier: ^1.369.1
+        version: 1.369.1
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -2994,6 +3006,36 @@ packages:
 
   '@adobe/css-tools@4.4.4':
     resolution: {integrity: sha512-Elp+iwUx5rN5+Y8xLt5/GRoG20WGoDCQ/1Fb+1LiGtvwbDavuSk0jhD/eZdckHAuzcDzccnkv+rEjyWfRx18gg==}
+
+  '@amplitude/analytics-browser@2.40.0':
+    resolution: {integrity: sha512-4IWf1PVrJ70PUh+taep/UKQY0Sz0S/EkgErhDJfoLTV3GZ80MdPoyRIqE3N430y2vexCy8+hVv1WkZvya/Rs/Q==}
+
+  '@amplitude/analytics-connector@1.6.4':
+    resolution: {integrity: sha512-SpIv0IQMNIq6SH3UqFGiaZyGSc7PBZwRdq7lvP0pBxW8i4Ny+8zwI0pV+VMfMHQwWY3wdIbWw5WQphNjpdq1/Q==}
+
+  '@amplitude/analytics-core@2.46.0':
+    resolution: {integrity: sha512-Y3BVQqYZHN/3JoN+PBw9X31TNdd3YPpX2blQbQR9g53i+F8fkbKo/EocAwb7EC4O58w2iHbmL2NbPQTnLDYVHg==}
+
+  '@amplitude/plugin-autocapture-browser@1.25.3':
+    resolution: {integrity: sha512-qZ7RHGzu8k7ov2oRj41L6V0TnVZmYZsSyERLUZ5wtL41JJqZ9wDd1aUroIMSS+v4sprp2OxAuTXXpVNnOHJ1ww==}
+
+  '@amplitude/plugin-custom-enrichment-browser@0.1.5':
+    resolution: {integrity: sha512-MlcCuypxKYeHPhDqfvUnnngQ1JkwNHSq4flmlOwg1JSn7Wr2bGOJ8M9WL6TQUqmLXzGiNjjaqCVmGG/UJ7R57w==}
+
+  '@amplitude/plugin-event-property-attribution-browser@0.1.0':
+    resolution: {integrity: sha512-DVDXl9WegueE32W2VyVXdu+0GMXy5GYO38X5vxow+DmgV/qfMB6kbVV0MgLCOWtjkFxKnMhrGZ9e9s7So9SSMw==}
+
+  '@amplitude/plugin-network-capture-browser@1.9.14':
+    resolution: {integrity: sha512-5lwrG0zOrHfWXc8cH8Z7idhyNpk11dRiSSaDmm3ODiXlsWxokEkPBEDs58+0BfP6ueksRB9AtVX5vJ0z5NcKew==}
+
+  '@amplitude/plugin-page-url-enrichment-browser@0.7.6':
+    resolution: {integrity: sha512-UPC+oOQWhr6uDZqWd4HqpYFc6VeSxUTF5rQ+2BHKmEOaqJefpMTqcL7Ih2tDgoiUixjcLhAzDkGIdnbttjwfrw==}
+
+  '@amplitude/plugin-page-view-tracking-browser@2.10.0':
+    resolution: {integrity: sha512-XmoLhpg4CGDKT3xvD7aeqdFyrJaRrnI4gU3QniKoQJ+FpQXXJfqIxmm4vRPQhE/breGKElvLxizn9lKBjxhHkQ==}
+
+  '@amplitude/plugin-web-vitals-browser@1.1.29':
+    resolution: {integrity: sha512-ZU6pHHBJdI3BLlXVAXJJjNWoFa3grEd6vJaYU6ZXDmDNDIgrzmta4fCPE9zzIM40ikkIo34Iocu1yzh/5k9clQ==}
 
   '@anthropic-ai/sdk@0.78.0':
     resolution: {integrity: sha512-PzQhR715td/m1UaaN5hHXjYB8Gl2lF9UVhrrGrZeysiF6Rb74Wc9GCB8hzLdzmQtBd1qe89F9OptgB9Za1Ib5w==}
@@ -5570,14 +5612,10 @@ packages:
   '@react-native/babel-preset@0.81.5':
     resolution: {integrity: sha512-UoI/x/5tCmi+pZ3c1+Ypr1DaRMDLI3y+Q70pVLLVgrnC3DHsHRIbHcCHIeG/IJvoeFqFM2sTdhSOLJrf8lOPrA==}
     engines: {node: '>= 20.19.4'}
-    peerDependencies:
-      '@babel/core': '*'
 
   '@react-native/codegen@0.81.5':
     resolution: {integrity: sha512-a2TDA03Up8lpSa9sh5VRGCQDXgCTOyDOFH+aqyinxp1HChG8uk89/G+nkJ9FPd0rqgi25eCTR16TWdS3b+fA6g==}
     engines: {node: '>= 20.19.4'}
-    peerDependencies:
-      '@babel/core': '*'
 
   '@react-native/community-cli-plugin@0.81.5':
     resolution: {integrity: sha512-yWRlmEOtcyvSZ4+OvqPabt+NS36vg0K/WADTQLhrYrm9qdZSuXmq8PmdJWz/68wAqKQ+4KTILiq2kjRQwnyhQw==}
@@ -6512,6 +6550,9 @@ packages:
 
   '@types/yauzl@2.10.3':
     resolution: {integrity: sha512-oJoftv0LSuaDZE3Le4DbKX+KS9G36NzOeSap90UIK0yMA/NhKJhqlSGtNDORNRaIbQfzjXDrQa0ytJ6mNRGz/Q==}
+
+  '@types/zen-observable@0.8.3':
+    resolution: {integrity: sha512-fbF6oTd4sGGy0xjHPKAt+eS2CrxJ3+6gQ3FGcBoIJR2TLAyCkCyI8JqZNy+FeON0AhVgNJoUumVoZQjBFUqHkw==}
 
   '@typescript-eslint/eslint-plugin@8.58.0':
     resolution: {integrity: sha512-RLkVSiNuUP1C2ROIWfqX+YcUfLaSnxGE/8M+Y57lopVwg9VTYYfhuz15Yf1IzCKgZj6/rIbYTmJCUSqr76r0Wg==}
@@ -11354,6 +11395,9 @@ packages:
   safe-buffer@5.2.1:
     resolution: {integrity: sha512-rp3So07KcdmmKbGvgaNxQSJr7bGVSVk5S9Eq1F+ppbRo70+YeaDxkw5Dd8NPN+GD6bjnYm2VuPuCXmpuYvmCXQ==}
 
+  safe-json-stringify@1.2.0:
+    resolution: {integrity: sha512-gH8eh2nZudPQO6TytOvbxnuhYBOvDBBLW52tz5q6X58lJcd/tkmqFR+5Z9adS8aJtURSXWThWy/xJtJwixErvg==}
+
   safe-regex-test@1.1.0:
     resolution: {integrity: sha512-x/+Cz4YrimQxQccJf5mKEbIa1NzeCRNI5Ecl/ekmlYaampdNLPalVyIcCZNNH3MvmqBugV5TMYZXv0ljslUlaw==}
     engines: {node: '>= 0.4'}
@@ -12420,6 +12464,9 @@ packages:
     resolution: {integrity: sha512-d2JWLCivmZYTSIoge9MsgFCZrt571BikcWGYkjC1khllbTeDlGqZ2D8vD8E/lJa8WGWbb7Plm8/XJYV7IJHZZw==}
     engines: {node: '>= 8'}
 
+  web-vitals@5.1.0:
+    resolution: {integrity: sha512-ArI3kx5jI0atlTtmV0fWU3fjpLmq/nD3Zr1iFFlJLaqa5wLBkUSzINwBPySCX/8jRyjlmy1Volw1kz1g9XE4Jg==}
+
   web-vitals@5.2.0:
     resolution: {integrity: sha512-i2z98bEmaCqSDiHEDu+gHl/dmR4Q+TxFmG3/13KkMO+o8UxQzCqWaDRCiLgEa41nlO4VpXSI0ASa1xWmO9sBlA==}
 
@@ -12612,6 +12659,9 @@ packages:
   zen-observable-ts@1.2.5:
     resolution: {integrity: sha512-QZWQekv6iB72Naeake9hS1KxHlotfRpe+WGNbNx5/ta+R3DNjVO2bswf63gXlWDcs+EMd7XY8HfVQyP1X6T4Zg==}
 
+  zen-observable@0.10.0:
+    resolution: {integrity: sha512-iI3lT0iojZhKwT5DaFy2Ce42n3yFcLdFyOh01G7H0flMY60P8MJuVFEoJoNwXlmAyQ45GrjL6AcZmmlv8A5rbw==}
+
   zen-observable@0.8.15:
     resolution: {integrity: sha512-PQ2PC7R9rslx84ndNBZB/Dkv8V8fZEpk83RLgXtYd0fwUgEjseMn1Dgajh2x6S8QbZAFa9p2qVCEuYZNgve0dQ==}
 
@@ -12673,6 +12723,64 @@ snapshots:
       graphql: 16.13.2
 
   '@adobe/css-tools@4.4.4': {}
+
+  '@amplitude/analytics-browser@2.40.0':
+    dependencies:
+      '@amplitude/analytics-core': 2.46.0
+      '@amplitude/plugin-autocapture-browser': 1.25.3
+      '@amplitude/plugin-custom-enrichment-browser': 0.1.5
+      '@amplitude/plugin-event-property-attribution-browser': 0.1.0
+      '@amplitude/plugin-network-capture-browser': 1.9.14
+      '@amplitude/plugin-page-url-enrichment-browser': 0.7.6
+      '@amplitude/plugin-page-view-tracking-browser': 2.10.0
+      '@amplitude/plugin-web-vitals-browser': 1.1.29
+      tslib: 2.8.1
+
+  '@amplitude/analytics-connector@1.6.4': {}
+
+  '@amplitude/analytics-core@2.46.0':
+    dependencies:
+      '@amplitude/analytics-connector': 1.6.4
+      '@types/zen-observable': 0.8.3
+      safe-json-stringify: 1.2.0
+      tslib: 2.8.1
+      zen-observable: 0.10.0
+
+  '@amplitude/plugin-autocapture-browser@1.25.3':
+    dependencies:
+      '@amplitude/analytics-core': 2.46.0
+      tslib: 2.8.1
+
+  '@amplitude/plugin-custom-enrichment-browser@0.1.5':
+    dependencies:
+      '@amplitude/analytics-core': 2.46.0
+      tslib: 2.8.1
+
+  '@amplitude/plugin-event-property-attribution-browser@0.1.0':
+    dependencies:
+      '@amplitude/analytics-core': 2.46.0
+      tslib: 2.8.1
+
+  '@amplitude/plugin-network-capture-browser@1.9.14':
+    dependencies:
+      '@amplitude/analytics-core': 2.46.0
+      tslib: 2.8.1
+
+  '@amplitude/plugin-page-url-enrichment-browser@0.7.6':
+    dependencies:
+      '@amplitude/analytics-core': 2.46.0
+      tslib: 2.8.1
+
+  '@amplitude/plugin-page-view-tracking-browser@2.10.0':
+    dependencies:
+      '@amplitude/analytics-core': 2.46.0
+      tslib: 2.8.1
+
+  '@amplitude/plugin-web-vitals-browser@1.1.29':
+    dependencies:
+      '@amplitude/analytics-core': 2.46.0
+      tslib: 2.8.1
+      web-vitals: 5.1.0
 
   '@anthropic-ai/sdk@0.78.0(zod@4.3.6)':
     dependencies:
@@ -15859,15 +15967,14 @@ snapshots:
 
   '@react-native/assets-registry@0.81.5': {}
 
-  '@react-native/babel-plugin-codegen@0.81.5(@babel/core@7.29.0)':
+  '@react-native/babel-plugin-codegen@0.81.5':
     dependencies:
       '@babel/traverse': 7.29.0
-      '@react-native/codegen': 0.81.5(@babel/core@7.29.0)
+      '@react-native/codegen': 0.81.5
     transitivePeerDependencies:
-      - '@babel/core'
       - supports-color
 
-  '@react-native/babel-preset@0.81.5(@babel/core@7.29.0)':
+  '@react-native/babel-preset@0.81.5':
     dependencies:
       '@babel/core': 7.29.0
       '@babel/plugin-proposal-export-default-from': 7.27.1(@babel/core@7.29.0)
@@ -15910,14 +16017,14 @@ snapshots:
       '@babel/plugin-transform-typescript': 7.28.6(@babel/core@7.29.0)
       '@babel/plugin-transform-unicode-regex': 7.27.1(@babel/core@7.29.0)
       '@babel/template': 7.28.6
-      '@react-native/babel-plugin-codegen': 0.81.5(@babel/core@7.29.0)
+      '@react-native/babel-plugin-codegen': 0.81.5
       babel-plugin-syntax-hermes-parser: 0.29.1
       babel-plugin-transform-flow-enums: 0.0.2(@babel/core@7.29.0)
       react-refresh: 0.14.2
     transitivePeerDependencies:
       - supports-color
 
-  '@react-native/codegen@0.81.5(@babel/core@7.29.0)':
+  '@react-native/codegen@0.81.5':
     dependencies:
       '@babel/core': 7.29.0
       '@babel/parser': 7.29.0
@@ -15926,6 +16033,8 @@ snapshots:
       invariant: 2.2.4
       nullthrows: 1.1.1
       yargs: 17.7.2
+    transitivePeerDependencies:
+      - supports-color
 
   '@react-native/community-cli-plugin@0.81.5':
     dependencies:
@@ -16969,6 +17078,8 @@ snapshots:
       '@types/node': 25.3.5
     optional: true
 
+  '@types/zen-observable@0.8.3': {}
+
   '@typescript-eslint/eslint-plugin@8.58.0(@typescript-eslint/parser@8.58.0(eslint@9.39.4(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.4(jiti@2.6.1))(typescript@5.9.3)':
     dependencies:
       '@eslint-community/regexpp': 4.12.2
@@ -17716,7 +17827,7 @@ snapshots:
       '@babel/plugin-transform-runtime': 7.29.0(@babel/core@7.29.0)
       '@babel/preset-react': 7.28.5(@babel/core@7.29.0)
       '@babel/preset-typescript': 7.28.5(@babel/core@7.29.0)
-      '@react-native/babel-preset': 0.81.5(@babel/core@7.29.0)
+      '@react-native/babel-preset': 0.81.5
       babel-plugin-react-compiler: 1.0.0
       babel-plugin-react-native-web: 0.21.2
       babel-plugin-syntax-hermes-parser: 0.29.1
@@ -18844,7 +18955,7 @@ snapshots:
 
   expo-device@8.0.10(expo@54.0.33):
     dependencies:
-      expo: 54.0.33(@babel/core@7.29.0)(@expo/metro-runtime@6.1.2)(expo-router@6.0.23)(graphql@16.13.2)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.1.0))(react@19.1.0)
+      expo: 54.0.33(@babel/core@7.29.0)(@expo/metro-runtime@6.1.2)(expo-router@6.0.23)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.1.0))(react@19.1.0)
       ua-parser-js: 0.7.41
 
   expo-file-system@19.0.21(expo@54.0.33)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.1.0)):
@@ -18886,7 +18997,7 @@ snapshots:
 
   expo-local-authentication@17.0.8(expo@54.0.33):
     dependencies:
-      expo: 54.0.33(@babel/core@7.29.0)(@expo/metro-runtime@6.1.2)(expo-router@6.0.23)(graphql@16.13.2)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.1.0))(react@19.1.0)
+      expo: 54.0.33(@babel/core@7.29.0)(@expo/metro-runtime@6.1.2)(expo-router@6.0.23)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.1.0))(react@19.1.0)
       invariant: 2.2.4
 
   expo-modules-autolinking@3.0.24:
@@ -18983,7 +19094,7 @@ snapshots:
 
   expo-secure-store@15.0.8(expo@54.0.33):
     dependencies:
-      expo: 54.0.33(@babel/core@7.29.0)(@expo/metro-runtime@6.1.2)(expo-router@6.0.23)(graphql@16.13.2)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.1.0))(react@19.1.0)
+      expo: 54.0.33(@babel/core@7.29.0)(@expo/metro-runtime@6.1.2)(expo-router@6.0.23)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.1.0))(react@19.1.0)
 
   expo-server-sdk@6.1.0:
     dependencies:
@@ -22449,7 +22560,7 @@ snapshots:
     dependencies:
       '@jest/create-cache-key-function': 29.7.0
       '@react-native/assets-registry': 0.81.5
-      '@react-native/codegen': 0.81.5(@babel/core@7.29.0)
+      '@react-native/codegen': 0.81.5
       '@react-native/community-cli-plugin': 0.81.5
       '@react-native/gradle-plugin': 0.81.5
       '@react-native/js-polyfills': 0.81.5
@@ -22815,6 +22926,8 @@ snapshots:
   safe-buffer@5.1.2: {}
 
   safe-buffer@5.2.1: {}
+
+  safe-json-stringify@1.2.0: {}
 
   safe-regex-test@1.1.0:
     dependencies:
@@ -23938,6 +24051,8 @@ snapshots:
 
   web-streams-polyfill@3.3.3: {}
 
+  web-vitals@5.1.0: {}
+
   web-vitals@5.2.0: {}
 
   webdriver-bidi-protocol@0.4.1: {}
@@ -24087,6 +24202,8 @@ snapshots:
   zen-observable-ts@1.2.5:
     dependencies:
       zen-observable: 0.8.15
+
+  zen-observable@0.10.0: {}
 
   zen-observable@0.8.15: {}
 

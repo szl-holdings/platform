@@ -1,4 +1,5 @@
 import React, { useCallback, useState, useEffect, useRef } from "react";
+import { trackEvent } from "@/lib/analytics";
 import {
   View,
   Text,
@@ -374,6 +375,10 @@ export default function CommandScreen() {
   const { isOffline, isDegraded } = useApiStatus();
   const [refreshing, setRefreshing] = useState(false);
   const qc = useQueryClient();
+
+  useEffect(() => {
+    trackEvent("page_view", { page: "command", product: "szl-holdings-mobile" });
+  }, []);
 
   const {
     data: health,

@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useState, useEffect } from "react";
 import { Switch, Route, Router as WouterRouter, Link, Redirect, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
@@ -22,6 +22,7 @@ import { cn } from "@szl-holdings/shared-ui/utils";
 import { toAlpha } from "@szl-holdings/shared-ui/utils";
 import { AuthProvider, useAuth as useVesselsRoleAuth, roleLabels, type UserRole } from "@/contexts/auth-context";
 import { useAuth } from "@szl-holdings/replit-auth-web";
+import { identifyAnalyticsUser, resetAnalyticsUser, setUser as setSentryUser, clearUser as clearSentryUser } from "@szl-holdings/observability/react";
 import { PrivateAppGuard, useRealtimeChannel, RealtimeStatusIndicator, OnboardingWizard, GettingStartedChecklist, useOnboardingState, type OnboardingConfig, SyncStatusBadge, useWebSyncStatus } from "@szl-holdings/shared-ui";
 import { IndexedDBAdapter, CommandQueue, ConflictResolver } from "@szl-holdings/offline-engine";
 import { CommandPalette, useCommandPalette, getEcosystemSwitchCommands, createBaselineWebActions, type CommandItem } from "@szl-holdings/shared-ui/command-palette";
@@ -736,7 +737,21 @@ function VesselsDashboard({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpe
 }
 
 function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v: boolean) => void }) {
+  const { user } = useAuth();
   const [location] = useLocation();
+
+  useEffect(() => {
+    if (user) {
+      const userId = String(user.id);
+      const email = user.email ?? undefined;
+      const name = user.name ?? user.displayName ?? user.username ?? undefined;
+      identifyAnalyticsUser({ id: userId, email, name });
+      setSentryUser({ id: userId, email, username: name });
+    } else {
+      resetAnalyticsUser();
+      clearSentryUser();
+    }
+  }, [user?.id]);
   const isDashboard = location.startsWith("/dashboard") ||
     location.startsWith("/fleet") || location.startsWith("/vessel") ||
     location.startsWith("/exceptions") || location.startsWith("/economics") ||

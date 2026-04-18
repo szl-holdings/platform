@@ -1,4 +1,4 @@
-import { lazy, Suspense, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, type ReactNode } from "react";
 import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
 import { carlotaJoConfig } from "@szl-holdings/shared-ui/copilot-configs";
 import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
@@ -10,6 +10,7 @@ import { PowerUserProvider, type KeyboardShortcut } from "@szl-holdings/shared-u
 import { SandboxModeProvider, AnalyticsProvider } from "@szl-holdings/shared-ui";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
 import { useAuth } from "@szl-holdings/replit-auth-web";
+import { identifyAnalyticsUser, resetAnalyticsUser, setUser as setSentryUser, clearUser as clearSentryUser } from "@szl-holdings/observability/react";
 import { Users, MessageSquare } from "lucide-react";
 import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";
 
@@ -81,7 +82,20 @@ function PageLoader() {
 }
 
 function PortalAuthGuard({ children }: { children: ReactNode }) {
-  const { isLoading, isAuthenticated, login } = useAuth();
+  const { user, isLoading, isAuthenticated, login } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      const userId = String(user.id);
+      const email = user.email ?? undefined;
+      const name = user.name ?? user.displayName ?? user.username ?? undefined;
+      identifyAnalyticsUser({ id: userId, email, name });
+      setSentryUser({ id: userId, email, username: name });
+    } else {
+      resetAnalyticsUser();
+      clearSentryUser();
+    }
+  }, [user?.id]);
   if (isLoading) {
     return (
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "60vh" }}>

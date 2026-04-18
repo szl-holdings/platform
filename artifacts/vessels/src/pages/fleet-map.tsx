@@ -90,6 +90,22 @@ function VesselSidePanel({ vessel, onClose, exceptions }: { vessel: VesselProfil
           ))}
         </div>
 
+        {vessel.lat != null && vessel.lon != null && (
+          <div className="rounded-lg overflow-hidden border border-sky-500/10 relative">
+            <img
+              src={`${import.meta.env.BASE_URL}api/maps/static?center=${vessel.lat},${vessel.lon}&zoom=7&size=400x160&maptype=satellite&markers=color:cyan|${vessel.lat},${vessel.lon}`}
+              alt={`Satellite view of ${vessel.name} at ${vessel.lat.toFixed(2)}, ${vessel.lon.toFixed(2)}`}
+              className="w-full h-32 object-cover"
+              onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+            />
+            <div className="absolute bottom-2 left-2 flex items-center gap-1 rounded-md px-2 py-1 text-[10px]"
+              style={{ background: "rgba(0,0,0,0.65)", color: "rgba(148,220,255,0.8)" }}>
+              <MapPin className="w-2.5 h-2.5" />
+              Satellite · Google Maps
+            </div>
+          </div>
+        )}
+
         <div className="bg-sky-500/5 rounded-lg p-3 border border-sky-500/10 space-y-2">
           <p className="text-[9px] text-sky-400/40 uppercase tracking-wider">Route Progress</p>
           <div className="flex items-center gap-2 text-xs text-sky-400/60">

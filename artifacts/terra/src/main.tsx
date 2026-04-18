@@ -2,7 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { ErrorBoundary } from "@szl-holdings/shared-ui/error-boundary";
 import { configurePlausible } from "@szl-holdings/analytics";
-import { initSentry, initWebVitals } from "@szl-holdings/observability/react";
+import { initSentry, initWebVitals, initAnalytics } from "@szl-holdings/observability/react";
 import { GraphQLProvider } from "@szl-holdings/graphql-client/provider";
 import App from "./App";
 import "./index.css";
@@ -15,6 +15,7 @@ configurePlausible({
 
 initSentry({ appSlug: "terra", tracesSampleRate: 0.2 });
 initWebVitals("terra", "/api/");
+initAnalytics({ appSlug: "terra" });
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

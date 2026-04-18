@@ -14,6 +14,7 @@ import { PowerUserProvider, type KeyboardShortcut } from "@szl-holdings/shared-u
 import { TerraLayout } from "@/components/terra-layout";
 import { StaleIndicator } from "@szl-holdings/shared-ui/stale-indicator";
 import { useAuth } from "@szl-holdings/replit-auth-web";
+import { identifyAnalyticsUser, resetAnalyticsUser, setUser as setSentryUser, clearUser as clearSentryUser } from "@szl-holdings/observability/react";
 import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";
 import { Toaster } from "@szl-holdings/shared-ui/ui/sonner";
 
@@ -256,7 +257,7 @@ function PrivateApp({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
 }
 
 function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v: boolean) => void }) {
-  const { isLoading, isAuthenticated, login } = useAuth();
+  const { user, isLoading, isAuthenticated, login } = useAuth();
   const [location, navigate] = useLocation();
   const prevAuth = useRef(isAuthenticated);
 
@@ -269,6 +270,19 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
     }
     prevAuth.current = isAuthenticated;
   }, [isAuthenticated, navigate]);
+
+  useEffect(() => {
+    if (user) {
+      const userId = String(user.id);
+      const email = user.email ?? undefined;
+      const name = user.name ?? user.displayName ?? user.username ?? undefined;
+      identifyAnalyticsUser({ id: userId, email, name });
+      setSentryUser({ id: userId, email, username: name });
+    } else {
+      resetAnalyticsUser();
+      clearSentryUser();
+    }
+  }, [user?.id]);
 
   const normalizedPath = location.replace(/\/+$/, "") || "/";
   if (normalizedPath === "/pulse") {

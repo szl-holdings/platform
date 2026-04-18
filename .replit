@@ -26,6 +26,10 @@ author = "agent"
 task = "workflow.run"
 args = "check-deprecated-links"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "smoke-test-integrations"
+
 [[workflows.workflow]]
 name = "check-deprecated-links"
 author = "agent"
@@ -33,6 +37,17 @@ author = "agent"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "node scripts/qa/check-deprecated-links.js"
+
+[workflows.workflow.metadata]
+isValidation = true
+
+[[workflows.workflow]]
+name = "smoke-test-integrations"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "node scripts/qa/smoke-test-integrations.js"
 
 [workflows.workflow.metadata]
 isValidation = true
@@ -61,6 +76,7 @@ PUBLIC_APP_URL = "https://szlholdings.replit.app"
 [userenv.shared]
 VAPID_PUBLIC_KEY = "BIe1uJr8KS1Ilhz9KWTwRwfV_BC6C2FDdo6gbn-KDt1QS14KaOIMHuWVhzzJFUYIP0iKiWZOLh4xbcUiay2ZrEc"
 VAPID_SUBJECT = "mailto:platform@szlholdings.com"
+EXPO_PUBLIC_POSTHOG_HOST = "https://us.i.posthog.com"
 
 [userenv.development]
 

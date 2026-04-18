@@ -4,6 +4,7 @@ import {
   ExternalLink, RefreshCw, Loader2, ChevronDown, ChevronUp, FileText,
   TrendingUp, Calendar,
 } from "lucide-react";
+import { trackEvent } from "@szl-holdings/observability/react";
 
 interface Subscription {
   id: string;
@@ -120,16 +121,15 @@ export function SubscriptionManager({
   useEffect(() => { fetchStatus(); }, [customerEmail, customerId]);
 
   const openBillingPortal = async () => {
-    if (!subscription?.customerId) return;
     setPortalLoading(true);
     setActionMsg(null);
+    trackEvent("billing_portal_opened", { product: "szl-holdings", source: "subscription_manager" });
     try {
-      const res = await fetch(`${apiBase}/billing/customer-portal`, {
+      const res = await fetch(`${apiBase}/billing/portal-session`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          customerId: subscription.customerId,
           returnUrl: returnUrl ?? window.location.href,
         }),
       });
@@ -214,14 +214,43 @@ export function SubscriptionManager({
             <p className="text-xs text-muted-foreground mt-0.5">
               You don't have an active subscription. Choose a plan to get started.
             </p>
-            {onManageClick && (
+            <div className="flex items-center gap-2 mt-3">
+              {onManageClick && (
+                <button
+                  onClick={() => {
+                    trackEvent("upgrade_clicked", { product: "szl-holdings", source: "subscription_manager", cta: "view_plans" });
+                    onManageClick();
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-medium hover:bg-primary/90 transition-colors"
+                >
+                  View Plans
+                </button>
+              )}
               <button
-                onClick={onManageClick}
-                className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-medium hover:bg-primary/90 transition-colors"
+                onClick={async () => {
+                  trackEvent("upgrade_clicked", { product: "szl-holdings", source: "subscription_manager", cta: "start_trial" });
+                  const origin = window.location.origin;
+                  const res = await fetch(`${apiBase}/billing/checkout`, {
+                    method: "POST",
+                    credentials: "include",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      priceId: import.meta.env.VITE_STRIPE_PRICE_SZL_PRO ?? "price_szl_pro_monthly",
+                      mode: "subscription",
+                      customerEmail: customerEmail,
+                      successUrl: `${origin}/?checkout=success`,
+                      cancelUrl: `${origin}/?checkout=cancel`,
+                    }),
+                  });
+                  const json = await res.json();
+                  const url = json.data?.url ?? json.url;
+                  if (url) window.location.href = url;
+                }}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/30 text-primary text-xs font-medium hover:bg-primary/15 transition-colors"
               >
-                View Plans
+                Start Free Trial
               </button>
-            )}
+            </div>
           </div>
         </div>
       </div>
@@ -280,7 +309,7 @@ export function SubscriptionManager({
         <div className="px-5 py-4 border-t border-border flex items-center gap-3 flex-wrap">
           <button
             onClick={openBillingPortal}
-            disabled={portalLoading || !subscription.customerId}
+            disabled={portalLoading}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {portalLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ExternalLink className="w-3.5 h-3.5" />}
