@@ -82,6 +82,10 @@ const PUBLIC_PREFIXES = [
   // seed-based data per propertyId. Accessible without a session so the Terra demo shows
   // realistic intelligence results when navigating from the property detail page.
   "/api/terra/properties/",
+  // Terra portfolio-scoped intelligence modules — read-only GET routes serving deterministic
+  // seed-based portfolio/list data for the 6 intelligence modules. Public so the Terra demo
+  // shows realistic results without a session.
+  "/api/terra/portfolio/",
   // Carlota Jo time tracking & invoice persistence — publicly accessible from the
   // time-tracking page (which is unauthenticated like the rest of the marketing
   // demo). Backed by Postgres so the data syncs across devices.

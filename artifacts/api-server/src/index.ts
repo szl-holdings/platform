@@ -28,6 +28,7 @@ import { seedAiBudgetPolicies } from "./lib/seed-ai-budget";
 import { seedMspData } from "./lib/seed-msp";
 import { seedDreamscapeData } from "./lib/seed-dreamscape";
 import { seedLyteActions } from "./lib/seed-lyte-actions";
+import { seedTerraPortfolioModules } from "./routes/terra-portfolio-intel";
 import { isSeedDataAllowed, resolveRuntimeMode } from "@szl-holdings/config";
 import { buildGraphQLMiddleware } from "./graphql/index.js";
 import { registerGraphQLHandler, otelReady } from "./app.js";
@@ -277,6 +278,9 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
       });
       seedLyteActions().catch(err => {
         logger.warn({ err }, "[seed-lyte-actions] Lyte action queue seed failed (non-fatal)");
+      });
+      seedTerraPortfolioModules().catch(err => {
+        logger.warn({ err }, "[seed-terra-portfolio-modules] Terra portfolio module seed failed (non-fatal)");
       });
     } else {
       logger.info({ mode: currentMode }, "[seed] Demo seeds suppressed — runtime mode does not permit seed data. Set DEMO_MODE=true or ENABLE_DEMO_SEED=true to enable in non-production environments.");

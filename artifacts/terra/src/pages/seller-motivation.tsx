@@ -45,88 +45,6 @@ const CATEGORY_META: Record<AcceptanceCategory, { label: string; color: string; 
   "unlikely": { label: "Unlikely", color: "text-red-400", bg: "bg-red-400/10 border-red-400/20", description: "Seller has leverage — full-price or near-market required" },
 };
 
-const SELLERS: SellerProfile[] = [
-  {
-    id: "s-001", address: "211 Liberty Ave", neighborhood: "East New York",
-    ownerName: "Liberty RE Holdings LLC", ownerType: "LLC",
-    debtLoad: 920_000, estimatedEquity: 180_000, daysInDistress: 127, priorOffers: 0,
-    listingExpiry: null, acceptanceScore: 92, acceptanceCategory: "very-likely",
-    suggestedDiscount: 28, comparableAcceptances: 7,
-    aiInsight: "LLC in dissolution with cascading debt. Owner has no equity cushion and foreclosure is imminent. A cash offer with 15-day close will likely be accepted well below market. Comparable distress exits in this zip suggest 25-32% discount range.",
-    factors: [
-      { factor: "Tax delinquency severity", impact: "positive", weight: 0.92, description: "5 quarters unpaid — In Rem foreclosure imminent" },
-      { factor: "LLC dissolution filing", impact: "positive", weight: 0.87, description: "Entity unwinding — principals motivated to liquidate" },
-      { factor: "Days in distress", impact: "positive", weight: 0.81, description: "127 days — psychological exhaustion threshold exceeded" },
-      { factor: "Equity position", impact: "positive", weight: 0.76, description: "Only $180K equity — can close at significant discount" },
-      { factor: "No prior offer history", impact: "neutral", weight: 0.5, description: "No competing offers detected — no anchoring upward" },
-      { factor: "Multiple code violations", impact: "positive", weight: 0.68, description: "HPD emergency order adding pressure to resolve" },
-    ],
-  },
-  {
-    id: "s-002", address: "1847 Myrtle Ave", neighborhood: "Bushwick",
-    ownerName: "Myrtle Holdings LLC", ownerType: "LLC",
-    debtLoad: 1_420_000, estimatedEquity: 430_000, daysInDistress: 87, priorOffers: 1,
-    listingExpiry: "2026-05-30", acceptanceScore: 74, acceptanceCategory: "likely",
-    suggestedDiscount: 18, comparableAcceptances: 12,
-    aiInsight: "Motivated LLC with debt load at 77% LTV on declining NOI. One prior offer rejected — likely too low. Current window is a second approach at a 15-20% discount framed as certainty of execution vs. foreclosure risk. 60-day close preferred.",
-    factors: [
-      { factor: "Debt-to-equity ratio", impact: "positive", weight: 0.79, description: "77% LTV — high leverage amplifies distress" },
-      { factor: "Utility disconnections", impact: "positive", weight: 0.71, description: "Service interruptions — operational failure underway" },
-      { factor: "Code violations", impact: "positive", weight: 0.65, description: "Compounding liability risk motivating exit" },
-      { factor: "Prior rejected offer", impact: "negative", weight: 0.42, description: "One offer rejected — may have higher reservation price" },
-      { factor: "Listing expiry approaching", impact: "positive", weight: 0.69, description: "Agent contract expiring — increased willingness to deal direct" },
-      { factor: "Equity buffer", impact: "negative", weight: 0.38, description: "$430K equity gives seller patience — not desperate" },
-    ],
-  },
-  {
-    id: "s-003", address: "392 Nostrand Ave", neighborhood: "Crown Heights",
-    ownerName: "Crown Cap Partners", ownerType: "LLC",
-    debtLoad: 1_890_000, estimatedEquity: 510_000, daysInDistress: 64, priorOffers: 2,
-    listingExpiry: "2026-06-15", acceptanceScore: 61, acceptanceCategory: "possible",
-    suggestedDiscount: 12, comparableAcceptances: 4,
-    aiInsight: "Mixed motivation. Substantial equity creates patience, but permit liability ($240K) and LLC restructuring create urgency vectors. Two prior offers suggest an active market — differentiate on certainty and speed rather than just price.",
-    factors: [
-      { factor: "Permit lapse liability", impact: "positive", weight: 0.72, description: "$240K exposed construction liability — growing pressure" },
-      { factor: "LLC restructuring", impact: "positive", weight: 0.66, description: "Manager transfers suggest entity stress" },
-      { factor: "Tax delinquency", impact: "positive", weight: 0.64, description: "Lien filing imminent per DOF schedule" },
-      { factor: "Strong equity position", impact: "negative", weight: 0.61, description: "$510K equity — seller can afford to wait" },
-      { factor: "Prior offer competition", impact: "negative", weight: 0.55, description: "2 prior offers — seller has leverage & precedent" },
-      { factor: "Days in distress", impact: "neutral", weight: 0.44, description: "64 days — early enough that patience remains" },
-    ],
-  },
-  {
-    id: "s-004", address: "78 Covert St", neighborhood: "Ridgewood",
-    ownerName: "Covert Street Partners", ownerType: "LLC",
-    debtLoad: 980_000, estimatedEquity: 640_000, daysInDistress: 30, priorOffers: 3,
-    listingExpiry: "2026-07-01", acceptanceScore: 34, acceptanceCategory: "unlikely",
-    suggestedDiscount: 5, comparableAcceptances: 1,
-    aiInsight: "Seller has substantial equity and strong Ridgewood market tailwinds. Three prior offers demonstrate active demand at or near market. Below-market offer will likely be rejected. Monitor for 90 days — if NOD escalates, motivation will shift significantly.",
-    factors: [
-      { factor: "Equity position", impact: "negative", weight: 0.82, description: "$640K equity — no pressure to discount" },
-      { factor: "Strong market trajectory", impact: "negative", weight: 0.78, description: "Ridgewood accelerating — time is on seller's side" },
-      { factor: "Multiple competing offers", impact: "negative", weight: 0.74, description: "3 prior offers — seller knows market value" },
-      { factor: "Early distress stage", impact: "negative", weight: 0.61, description: "Only 30 days in distress — psychology intact" },
-      { factor: "Partial utility disruption", impact: "positive", weight: 0.32, description: "Minor cashflow signal — not yet motivating" },
-      { factor: "Lender NOD issued", impact: "positive", weight: 0.48, description: "Notice of default — escalating timeline if not resolved" },
-    ],
-  },
-  {
-    id: "s-005", address: "5519 Flatlands Ave", neighborhood: "East Flatbush",
-    ownerName: "Eugene Watts", ownerType: "individual",
-    debtLoad: 640_000, estimatedEquity: 250_000, daysInDistress: 45, priorOffers: 0,
-    listingExpiry: null, acceptanceScore: 67, acceptanceCategory: "likely",
-    suggestedDiscount: 15, comparableAcceptances: 3,
-    aiInsight: "Individual owner-occupant facing gas disconnection and code violations. Personal hardship signals are strong — utility shutoff in a residential context suggests payment inability. A compassionate direct outreach with a fair offer may be well-received.",
-    factors: [
-      { factor: "Gas service terminated", impact: "positive", weight: 0.81, description: "Owner-occupant hardship — personal motivation strong" },
-      { factor: "Code violations accumulating", impact: "positive", weight: 0.68, description: "Remediation cost exceeding owner capacity" },
-      { factor: "Individual owner psychology", impact: "positive", weight: 0.64, description: "No institutional sophistication — simpler negotiation" },
-      { factor: "No prior offers", impact: "neutral", weight: 0.5, description: "No market anchoring — clean slate for negotiation" },
-      { factor: "Declining neighborhood", impact: "positive", weight: 0.55, description: "East Flatbush declining — owner aware of trajectory" },
-      { factor: "Some equity cushion", impact: "negative", weight: 0.41, description: "$250K equity provides some patience" },
-    ],
-  },
-];
 
 function formatCurrency(n: number) {
   if (n >= 1e6) return `$${(n / 1e6).toFixed(1)}M`;
@@ -306,6 +224,15 @@ export default function SellerMotivation() {
     staleTime: 300_000,
   });
 
+  const { data: portfolioData, isLoading: portfolioLoading, isError: portfolioError } = useQuery({
+    queryKey: ["terra-portfolio-seller-motivation"],
+    queryFn: () => api.portfolio.sellerMotivation(),
+    enabled: !propertyId,
+    staleTime: 300_000,
+  });
+
+  const SELLERS: SellerProfile[] = (portfolioData?.sellers as SellerProfile[] | undefined) ?? [];
+
   const [selected, setSelected] = useState<SellerProfile | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<AcceptanceCategory | "all">("all");
 
@@ -313,13 +240,13 @@ export default function SellerMotivation() {
     return SELLERS
       .filter(s => categoryFilter === "all" || s.acceptanceCategory === categoryFilter)
       .sort((a, b) => b.acceptanceScore - a.acceptanceScore);
-  }, [categoryFilter]);
+  }, [categoryFilter, SELLERS]);
 
   const stats = {
     veryLikely: SELLERS.filter(s => s.acceptanceCategory === "very-likely").length,
     likely: SELLERS.filter(s => s.acceptanceCategory === "likely").length,
-    avgDiscount: Math.round(SELLERS.reduce((s, p) => s + p.suggestedDiscount, 0) / SELLERS.length),
-    avgScore: Math.round(SELLERS.reduce((s, p) => s + p.acceptanceScore, 0) / SELLERS.length),
+    avgDiscount: SELLERS.length ? Math.round(SELLERS.reduce((s, p) => s + p.suggestedDiscount, 0) / SELLERS.length) : 0,
+    avgScore: SELLERS.length ? Math.round(SELLERS.reduce((s, p) => s + p.acceptanceScore, 0) / SELLERS.length) : 0,
   };
 
   if (propertyId) {
@@ -406,6 +333,27 @@ export default function SellerMotivation() {
               </div>
             </>
           )}
+        </div>
+      </div>
+    );
+  }
+
+  if (portfolioLoading || (!portfolioData && !portfolioError)) {
+    return (
+      <div className="flex h-full items-center justify-center" style={{ background: "#0a0c10" }}>
+        <div className="flex items-center gap-3 px-6 py-4 rounded-xl" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
+          <Loader2 className="w-5 h-5 animate-spin" style={{ color: "#40856a" }} />
+          <p className="text-sm text-white/50">Loading seller portfolio…</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (portfolioError) {
+    return (
+      <div className="flex h-full items-center justify-center" style={{ background: "#0a0c10" }}>
+        <div className="px-6 py-4 rounded-xl" style={{ background: "rgba(239,68,68,0.05)", border: "1px solid rgba(239,68,68,0.15)" }}>
+          <p className="text-sm text-red-400">Unable to load seller portfolio.</p>
         </div>
       </div>
     );

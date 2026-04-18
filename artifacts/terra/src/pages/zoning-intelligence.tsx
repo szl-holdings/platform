@@ -52,56 +52,6 @@ interface VarianceRecord {
   conditions: string;
 }
 
-const PARCELS: ZoningParcel[] = [
-  {
-    id: "zp-1",
-    address: "2400 Market St, Philadelphia, PA 19103",
-    currentZoning: "CMX-3",
-    zoningDescription: "Commercial Mixed-Use (Medium Intensity)",
-    lotSizeSqft: 18500,
-    currentFar: 1.2,
-    maxFar: 5.0,
-    currentUnits: 0,
-    maxUnits: 92,
-    setbacks: { front: 0, side: 0, rear: 10 },
-    maxHeight: 85,
-    overlayDistricts: ["Transit-Oriented Development", "Opportunity Zone"],
-    scenarios: [
-      { id: "s1", name: "As-of-Right Mixed Use", type: "Mixed Use", units: 62, grossSqft: 82000, far: 4.4, stories: 6, parkingSpaces: 31, estimatedRevenue: 24800000, constructionCost: 18500000, landValue: 3200000, residualLandValue: 3100000, requiresVariance: false, varianceProbability: 100, timelineMonths: 24 },
-      { id: "s2", name: "Maximum Density Residential", type: "Multifamily", units: 92, grossSqft: 92500, far: 5.0, stories: 7, parkingSpaces: 46, estimatedRevenue: 31050000, constructionCost: 22800000, landValue: 3200000, residualLandValue: 5050000, requiresVariance: true, varianceProbability: 72, timelineMonths: 30 },
-      { id: "s3", name: "Office + Retail", type: "Commercial", units: 0, grossSqft: 75000, far: 4.0, stories: 5, parkingSpaces: 50, estimatedRevenue: 22500000, constructionCost: 19200000, landValue: 3200000, residualLandValue: 100000, requiresVariance: false, varianceProbability: 100, timelineMonths: 22 },
-      { id: "s4", name: "Boutique Hotel + Retail", type: "Hospitality", units: 85, grossSqft: 68000, far: 3.7, stories: 5, parkingSpaces: 20, estimatedRevenue: 28900000, constructionCost: 21600000, landValue: 3200000, residualLandValue: 4100000, requiresVariance: true, varianceProbability: 58, timelineMonths: 28 },
-    ],
-    varianceHistory: [
-      { year: 2023, type: "Height", requested: "95 ft (vs 85 ft max)", result: "approved", conditions: "Design review panel approval, enhanced streetscape" },
-      { year: 2022, type: "Parking", requested: "Reduce from 1:1 to 0.5:1 ratio", result: "approved", conditions: "Transit proximity, bike storage, TDM plan" },
-      { year: 2021, type: "Use", requested: "Outdoor dining in setback", result: "approved", conditions: "Seasonal only, noise mitigation" },
-      { year: 2020, type: "Density", requested: "110 units (vs 92 max)", result: "denied", conditions: "Exceeded community impact threshold" },
-    ],
-  },
-  {
-    id: "zp-2",
-    address: "800 Fulton St, Brooklyn, NY 11238",
-    currentZoning: "R7A/C2-4",
-    zoningDescription: "Medium-Density Residential / Commercial Overlay",
-    lotSizeSqft: 12000,
-    currentFar: 0.8,
-    maxFar: 4.0,
-    currentUnits: 4,
-    maxUnits: 48,
-    setbacks: { front: 15, side: 8, rear: 30 },
-    maxHeight: 75,
-    overlayDistricts: ["Inclusionary Housing", "Arts & Cultural District"],
-    scenarios: [
-      { id: "s5", name: "As-of-Right Residential", type: "Multifamily", units: 36, grossSqft: 42000, far: 3.5, stories: 5, parkingSpaces: 18, estimatedRevenue: 19800000, constructionCost: 14200000, landValue: 4100000, residualLandValue: 1500000, requiresVariance: false, varianceProbability: 100, timelineMonths: 20 },
-      { id: "s6", name: "Affordable Housing Bonus", type: "Multifamily", units: 48, grossSqft: 48000, far: 4.0, stories: 6, parkingSpaces: 12, estimatedRevenue: 18500000, constructionCost: 15800000, landValue: 4100000, residualLandValue: -1400000, requiresVariance: false, varianceProbability: 100, timelineMonths: 24 },
-    ],
-    varianceHistory: [
-      { year: 2024, type: "Rear Yard", requested: "20 ft (vs 30 ft)", result: "approved", conditions: "Community garden access easement" },
-      { year: 2022, type: "Height", requested: "85 ft (vs 75 ft)", result: "denied", conditions: "Contextual zoning district" },
-    ],
-  },
-];
 
 const fmt = (n: number) => n >= 1_000_000 ? `$${(n / 1_000_000).toFixed(1)}M` : n >= 1000 ? `$${(n / 1000).toFixed(0)}K` : `$${n}`;
 const fmtSqft = (n: number) => `${n.toLocaleString()} SF`;
@@ -117,12 +67,21 @@ export default function ZoningIntelligencePage() {
     staleTime: 300_000,
   });
 
-  const [selectedParcel, setSelectedParcel] = useState(PARCELS[0].id);
-  const [selectedScenario, setSelectedScenario] = useState<string | null>(null);
-  const parcel = PARCELS.find(p => p.id === selectedParcel)!;
-  const scenario = parcel.scenarios.find(s => s.id === selectedScenario);
+  const { data: portfolioData, isLoading: portfolioLoading, isError: portfolioError } = useQuery({
+    queryKey: ["terra-portfolio-zoning"],
+    queryFn: () => api.portfolio.zoning(),
+    enabled: !propertyId,
+    staleTime: 300_000,
+  });
 
-  const utilizationPct = Math.round((parcel.currentFar / parcel.maxFar) * 100);
+  const PARCELS: ZoningParcel[] = (portfolioData?.parcels as ZoningParcel[] | undefined) ?? [];
+
+  const [selectedParcel, setSelectedParcel] = useState<string | null>(null);
+  const [selectedScenario, setSelectedScenario] = useState<string | null>(null);
+  const parcel = PARCELS.find(p => p.id === (selectedParcel ?? PARCELS[0]?.id));
+  const scenario = parcel?.scenarios.find(s => s.id === selectedScenario);
+
+  const utilizationPct = parcel ? Math.round((parcel.currentFar / parcel.maxFar) * 100) : 0;
 
   if (propertyId) {
     const d = propertyData?.data;
@@ -215,6 +174,27 @@ export default function ZoningIntelligencePage() {
               </div>
             </>
           )}
+        </div>
+      </div>
+    );
+  }
+
+  if (portfolioLoading || (!parcel && !portfolioError)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#0a0c10" }}>
+        <div className="flex items-center gap-3 px-6 py-4 rounded-xl" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
+          <Loader2 className="w-5 h-5 animate-spin" style={{ color: "#2d6a4f" }} />
+          <p className="text-sm text-white/50">Loading zoning portfolio…</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (portfolioError || !parcel) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#0a0c10" }}>
+        <div className="px-6 py-4 rounded-xl" style={{ background: "rgba(239,68,68,0.05)", border: "1px solid rgba(239,68,68,0.15)" }}>
+          <p className="text-sm text-red-400">Unable to load zoning portfolio.</p>
         </div>
       </div>
     );

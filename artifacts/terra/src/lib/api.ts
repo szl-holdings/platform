@@ -327,6 +327,161 @@ export interface PropertyWaterfallData {
   generatedAt: string;
 }
 
+// Portfolio DTOs (typed mirrors of the persisted seed payloads).
+export interface PortfolioHazardRisk {
+  type: string;
+  current: string;
+  projected2030: string;
+  projected2050: string;
+  trend?: string;
+  detail?: string;
+}
+
+export interface PortfolioClimateProperty {
+  id: string;
+  name: string;
+  address: string;
+  location: string;
+  type: string;
+  value: number;
+  overallRiskScore: number;
+  overallGrade: string;
+  annualInsurance: number;
+  insuranceAdjustment: number;
+  valuationHaircut: number;
+  hazards: PortfolioHazardRisk[];
+  regulatoryFlags: string[];
+  adaptationCost: number;
+  thirtyYearExpectedLoss: number;
+}
+
+export interface PortfolioDevelopmentScenario {
+  id: string;
+  name: string;
+  type: string;
+  units: number;
+  grossSqft: number;
+  far: number;
+  stories: number;
+  parkingSpaces: number;
+  estimatedRevenue: number;
+  constructionCost: number;
+  landValue: number;
+  residualLandValue: number;
+  requiresVariance: boolean;
+  varianceProbability: number;
+  timelineMonths: number;
+}
+
+export interface PortfolioVarianceRecord {
+  year: number;
+  type: string;
+  requested: string;
+  result: "approved" | "denied" | "withdrawn";
+  conditions: string;
+}
+
+export interface PortfolioZoningParcel {
+  id: string;
+  address: string;
+  currentZoning: string;
+  zoningDescription: string;
+  lotSizeSqft: number;
+  currentFar: number;
+  maxFar: number;
+  currentUnits: number;
+  maxUnits: number;
+  scenarios: PortfolioDevelopmentScenario[];
+  varianceHistory: PortfolioVarianceRecord[];
+  overlayDistricts: string[];
+  setbacks: { front: number; side: number; rear: number };
+  maxHeight: number;
+}
+
+export interface PortfolioMicroMarket {
+  id: string;
+  name: string;
+  borough: string;
+  trajectory: "accelerating" | "gentrifying" | "stable" | "declining" | "distressed";
+  momentumScore: number;
+  priceChangePct: number;
+  permitActivity: number;
+  institutionalFlowM: number;
+  populationGrowthPct: number;
+  medianPrice: number;
+  capRateCompression: number;
+  topSignals: string[];
+  description: string;
+  lat: number;
+  lng: number;
+}
+
+export interface PortfolioMotivationFactor {
+  factor: string;
+  impact: "positive" | "negative" | "neutral";
+  weight: number;
+  description: string;
+}
+
+export interface PortfolioSellerProfile {
+  id: string;
+  address: string;
+  neighborhood: string;
+  ownerName: string;
+  ownerType: "individual" | "LLC" | "estate" | "institutional";
+  debtLoad: number;
+  estimatedEquity: number;
+  daysInDistress: number;
+  priorOffers: number;
+  listingExpiry: string | null;
+  acceptanceScore: number;
+  acceptanceCategory: "very-likely" | "likely" | "possible" | "unlikely";
+  suggestedDiscount: number;
+  factors: PortfolioMotivationFactor[];
+  aiInsight: string;
+  comparableAcceptances: number;
+}
+
+export interface PortfolioRoomRenovationOption {
+  name: string;
+  cost: number;
+  valueAdd: number;
+  timelineDays: number;
+  description: string;
+}
+
+export interface PortfolioRoom {
+  id: string;
+  name: string;
+  sqft: number;
+  ceiling: number;
+  condition: string;
+  features: string[];
+  measurements: { label: string; value: string }[];
+  renovationOptions: PortfolioRoomRenovationOption[];
+}
+
+export interface PortfolioStagingPreset {
+  id: string;
+  name: string;
+  style: string;
+  monthlyRent: number;
+  furnishingCost: number;
+  items: string[];
+}
+
+export interface PortfolioSpatialProperty {
+  id: string;
+  address: string;
+  type: string;
+  totalSqft: number;
+  bedrooms: number;
+  bathrooms: number;
+  stories: number;
+  rooms: PortfolioRoom[];
+  stagingPresets: PortfolioStagingPreset[];
+}
+
 export const api = {
   marketIntelligence: (market?: string) =>
     apiFetch<any>(`/terra/market-intelligence${market ? `?market=${encodeURIComponent(market)}` : ""}`),
@@ -429,5 +584,12 @@ export const api = {
     sellerMotivation: (id: string) => apiFetch<{ data: SellerMotivationData; propertyId: string; dataMode: string }>(`/terra/properties/${id}/seller-motivation`),
     spatialWalkthrough: (id: string) => apiFetch<{ data: SpatialWalkthroughData; propertyId: string; dataMode: string }>(`/terra/properties/${id}/spatial-walkthrough`),
     waterfall: (id: string) => apiFetch<{ data: PropertyWaterfallData; propertyId: string; dataMode: string }>(`/terra/properties/${id}/waterfall`),
+  },
+  portfolio: {
+    climateRisk: () => apiFetch<{ properties: PortfolioClimateProperty[]; dataMode: string; generatedAt: string }>(`/terra/portfolio/climate-risk`),
+    zoning: () => apiFetch<{ parcels: PortfolioZoningParcel[]; dataMode: string; generatedAt: string }>(`/terra/portfolio/zoning`),
+    neighborhoodMomentum: () => apiFetch<{ neighborhoods: PortfolioMicroMarket[]; dataMode: string; generatedAt: string }>(`/terra/portfolio/neighborhood-momentum`),
+    sellerMotivation: () => apiFetch<{ sellers: PortfolioSellerProfile[]; dataMode: string; generatedAt: string }>(`/terra/portfolio/seller-motivation`),
+    spatialWalkthrough: () => apiFetch<{ property: PortfolioSpatialProperty; dataMode: string; generatedAt: string }>(`/terra/portfolio/spatial-walkthrough`),
   },
 };

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion as m, AnimatePresence } from "framer-motion";
 import {
   Box, Ruler, Paintbrush, Sofa, Camera, Layers, Eye, ChevronRight,
@@ -55,92 +55,6 @@ const CONDITION_COLORS = {
   excellent: "#34d399", good: "#60a5fa", fair: "#fbbf24", poor: "#ef4444",
 };
 
-const PROPERTY: PropertyWalkthrough = {
-  id: "sw-1",
-  address: "425 Park Ave, New York, NY 10022",
-  type: "Luxury Penthouse",
-  totalSqft: 3850,
-  bedrooms: 3,
-  bathrooms: 3,
-  stories: 1,
-  rooms: [
-    {
-      id: "r1", name: "Living Room", sqft: 680, ceiling: 11.5, condition: "excellent",
-      features: ["Floor-to-ceiling windows (south exposure)", "White oak herringbone flooring", "Gas fireplace with marble surround", "Custom millwork paneling"],
-      measurements: [
-        { label: "Width", value: "26' 2\"" }, { label: "Length", value: "26' 0\"" },
-        { label: "Window Wall", value: "24' 8\"" }, { label: "Ceiling", value: "11' 6\"" },
-      ],
-      renovationOptions: [
-        { name: "Smart Home Integration", cost: 28000, valueAdd: 45000, timelineDays: 14, description: "Lutron HomeWorks whole-home automation — lighting, shades, climate, AV. Voice + app control." },
-        { name: "Window Treatment Upgrade", cost: 18500, valueAdd: 22000, timelineDays: 21, description: "Motorized blackout/sheer dual shades. Solar fabric for UV protection without blocking views." },
-      ],
-    },
-    {
-      id: "r2", name: "Primary Bedroom", sqft: 520, ceiling: 10, condition: "excellent",
-      features: ["Walk-in closet (120 SF)", "En-suite bathroom", "Blackout motorized shades", "Recessed accent lighting"],
-      measurements: [
-        { label: "Width", value: "22' 4\"" }, { label: "Length", value: "23' 3\"" },
-        { label: "Closet", value: "12' × 10'" }, { label: "Ceiling", value: "10' 0\"" },
-      ],
-      renovationOptions: [
-        { name: "Closet System", cost: 15000, valueAdd: 20000, timelineDays: 7, description: "Italian-made custom closet with LED lighting, island dresser, and jewelry drawers." },
-      ],
-    },
-    {
-      id: "r3", name: "Kitchen", sqft: 380, ceiling: 10, condition: "good",
-      features: ["Miele appliance package", "Calacatta marble countertops", "Custom Italian cabinetry", "Wine cooler (48 bottles)", "Pot filler"],
-      measurements: [
-        { label: "Width", value: "16' 8\"" }, { label: "Length", value: "22' 9\"" },
-        { label: "Island", value: "8' 6\" × 4' 2\"" }, { label: "Ceiling", value: "10' 0\"" },
-      ],
-      renovationOptions: [
-        { name: "Appliance Upgrade to Gaggenau", cost: 42000, valueAdd: 55000, timelineDays: 14, description: "Full Gaggenau 400 series. Steam oven, induction cooktop, speed microwave, column fridge/freezer." },
-        { name: "Backsplash Refresh", cost: 8500, valueAdd: 12000, timelineDays: 5, description: "Book-matched Calacatta slab backsplash replacing existing subway tile." },
-      ],
-    },
-    {
-      id: "r4", name: "Primary Bathroom", sqft: 240, ceiling: 10, condition: "fair",
-      features: ["Soaking tub", "Frameless glass shower", "Heated floors", "Double vanity"],
-      measurements: [
-        { label: "Width", value: "12' 0\"" }, { label: "Length", value: "20' 0\"" },
-        { label: "Shower", value: "5' × 4'" }, { label: "Tub", value: "6' freestanding" },
-      ],
-      renovationOptions: [
-        { name: "Full Bathroom Renovation", cost: 85000, valueAdd: 120000, timelineDays: 42, description: "Dornbracht fixtures. Heated towel bars. LED mirror. Re-tile in large-format porcelain. New stone counters." },
-        { name: "Fixture Upgrade Only", cost: 22000, valueAdd: 30000, timelineDays: 10, description: "Replace fixtures with Waterworks collection. Chrome to brushed nickel transition." },
-      ],
-    },
-    {
-      id: "r5", name: "Terrace", sqft: 450, ceiling: 0, condition: "good",
-      features: ["360° city views", "IPE wood decking", "Built-in planters", "Gas line for outdoor kitchen", "Drainage system"],
-      measurements: [
-        { label: "Width", value: "30' 0\"" }, { label: "Depth", value: "15' 0\"" },
-        { label: "Railing Height", value: "42\"" }, { label: "Weight Capacity", value: "100 PSF" },
-      ],
-      renovationOptions: [
-        { name: "Outdoor Kitchen Build-out", cost: 65000, valueAdd: 85000, timelineDays: 28, description: "Lynx professional grill, refrigerator, sink, and bar counter. Covered pergola with heaters." },
-      ],
-    },
-  ],
-  stagingPresets: [
-    {
-      id: "sp1", name: "Modern Minimalist", style: "Contemporary",
-      monthlyRent: 42000, furnishingCost: 185000,
-      items: ["B&B Italia sectional", "Minotti dining set", "Flos lighting collection", "Poliform bedroom suite", "Custom art curation"],
-    },
-    {
-      id: "sp2", name: "Classic Luxury", style: "Transitional",
-      monthlyRent: 45000, furnishingCost: 220000,
-      items: ["Ralph Lauren Home sofa", "Restoration Hardware dining", "Visual Comfort chandeliers", "Baker bedroom furniture", "Curated antiques"],
-    },
-    {
-      id: "sp3", name: "Tech Executive", style: "Modern Industrial",
-      monthlyRent: 40000, furnishingCost: 165000,
-      items: ["Herman Miller Eames collection", "CB2 dining ensemble", "Artemide task lighting", "Room & Board bedroom", "Abstract art selection"],
-    },
-  ],
-};
 
 const fmt = (n: number) => n >= 1000 ? `$${(n / 1000).toFixed(0)}K` : `$${n.toLocaleString()}`;
 
@@ -549,15 +463,31 @@ export default function SpatialWalkthroughPage() {
     staleTime: 300_000,
   });
 
-  const [selectedRoom, setSelectedRoom] = useState(PROPERTY.rooms[0].id);
+  const { data: portfolioData, isLoading: portfolioLoading, isError: portfolioError } = useQuery({
+    queryKey: ["terra-portfolio-spatial-walkthrough"],
+    queryFn: () => api.portfolio.spatialWalkthrough(),
+    enabled: !propertyId,
+    staleTime: 300_000,
+  });
+
+  const PROPERTY: PropertyWalkthrough | null = (portfolioData?.property as PropertyWalkthrough | undefined) ?? null;
+
+  const [selectedRoom, setSelectedRoom] = useState<string>("");
   const [showRenovation, setShowRenovation] = useState(false);
   const [selectedStaging, setSelectedStaging] = useState<string | null>(null);
   const [upgradeLoading, setUpgradeLoading] = useState(false);
   const [selectedPropRoom, setSelectedPropRoom] = useState<string | null>(null);
-  const room = PROPERTY.rooms.find(r => r.id === selectedRoom)!;
 
-  const totalRenovCost = PROPERTY.rooms.reduce((s, r) => s + r.renovationOptions.reduce((rs, o) => rs + o.cost, 0), 0);
-  const totalValueAdd = PROPERTY.rooms.reduce((s, r) => s + r.renovationOptions.reduce((rs, o) => rs + o.valueAdd, 0), 0);
+  useEffect(() => {
+    if (PROPERTY && !selectedRoom) {
+      setSelectedRoom(PROPERTY.rooms[0]?.id ?? "");
+    }
+  }, [PROPERTY, selectedRoom]);
+
+  const room = PROPERTY?.rooms.find(r => r.id === selectedRoom) ?? PROPERTY?.rooms[0];
+
+  const totalRenovCost = PROPERTY?.rooms.reduce((s, r) => s + r.renovationOptions.reduce((rs, o) => rs + o.cost, 0), 0) ?? 0;
+  const totalValueAdd = PROPERTY?.rooms.reduce((s, r) => s + r.renovationOptions.reduce((rs, o) => rs + o.valueAdd, 0), 0) ?? 0;
 
   async function handleTerraUpgrade() {
     setUpgradeLoading(true);
@@ -685,6 +615,27 @@ export default function SpatialWalkthroughPage() {
               <p className="text-[9px]" style={{ color: "rgba(255,255,255,0.2)" }}>Source: {d.dataSource}</p>
             </>
           )}
+        </div>
+      </div>
+    );
+  }
+
+  if (portfolioLoading || (!PROPERTY && !portfolioError)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#0a0c10" }}>
+        <div className="flex items-center gap-3 px-6 py-4 rounded-xl" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
+          <Loader2 className="w-5 h-5 animate-spin text-emerald-400" />
+          <p className="text-sm text-white/50">Loading walkthrough property…</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (portfolioError || !PROPERTY || !room) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#0a0c10" }}>
+        <div className="px-6 py-4 rounded-xl" style={{ background: "rgba(239,68,68,0.05)", border: "1px solid rgba(239,68,68,0.15)" }}>
+          <p className="text-sm text-red-400">Unable to load walkthrough property.</p>
         </div>
       </div>
     );

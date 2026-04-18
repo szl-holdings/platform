@@ -40,72 +40,6 @@ const TRAJECTORY_META: Record<Trajectory, { label: string; color: string; bg: st
   distressed: { label: "Distressed", color: "text-red-400", bg: "bg-red-400/10 border-red-400/20", barColor: "#f87171", icon: ArrowDownRight },
 };
 
-const NEIGHBORHOODS: MicroMarket[] = [
-  {
-    id: "n-01", name: "Bushwick", borough: "Brooklyn", trajectory: "accelerating",
-    momentumScore: 91, priceChangePct: 18.4, permitActivity: 87, institutionalFlowM: 142,
-    populationGrowthPct: 4.2, medianPrice: 1_250_000, capRateCompression: -1.8,
-    lat: 40.6958, lng: -73.9226,
-    topSignals: ["Institutional buyer volume +340%", "New restaurant permits +62%", "Median days-on-market: 9"],
-    description: "Strong acceleration driven by creative industry spillover from Williamsburg. Institutional capital rotating in at scale.",
-  },
-  {
-    id: "n-02", name: "Crown Heights", borough: "Brooklyn", trajectory: "gentrifying",
-    momentumScore: 78, priceChangePct: 11.2, permitActivity: 64, institutionalFlowM: 89,
-    populationGrowthPct: 2.8, medianPrice: 980_000, capRateCompression: -0.9,
-    lat: 40.6689, lng: -73.9503,
-    topSignals: ["Renovation permits up 48%", "Median HHI rising +$18K", "3 boutique hotels permitted"],
-    description: "Classic gentrification pattern: rising permits, demographic shift, early institutional interest. 3-5 year runway.",
-  },
-  {
-    id: "n-03", name: "East New York", borough: "Brooklyn", trajectory: "gentrifying",
-    momentumScore: 68, priceChangePct: 7.8, permitActivity: 52, institutionalFlowM: 61,
-    populationGrowthPct: 1.4, medianPrice: 710_000, capRateCompression: -0.4,
-    lat: 40.6643, lng: -73.8868,
-    topSignals: ["Rezoning 2025 activated", "Transit investment confirmed", "Land assemblage activity emerging"],
-    description: "City-driven rezoning catalyst. Earliest gentrification stage — highest upside, highest execution risk.",
-  },
-  {
-    id: "n-04", name: "Ridgewood", borough: "Queens", trajectory: "accelerating",
-    momentumScore: 84, priceChangePct: 14.6, permitActivity: 72, institutionalFlowM: 108,
-    populationGrowthPct: 3.1, medianPrice: 1_090_000, capRateCompression: -1.4,
-    lat: 40.7003, lng: -73.9044,
-    topSignals: ["Bushwick price compression driving demand", "L-train accessible corridor", "Multi-family conversion surge"],
-    description: "Overflow neighborhood from Bushwick hitting inflection. Buyers priced out of core are creating demand surge.",
-  },
-  {
-    id: "n-05", name: "Wakefield", borough: "Bronx", trajectory: "stable",
-    momentumScore: 48, priceChangePct: 3.1, permitActivity: 29, institutionalFlowM: 18,
-    populationGrowthPct: 0.4, medianPrice: 620_000, capRateCompression: 0.1,
-    lat: 40.8878, lng: -73.8643,
-    topSignals: ["Cash flow positive market", "Low competition, moderate demand", "No catalyst identified yet"],
-    description: "Income-stable, appreciation-limited. Good for yield-focused strategies; minimal appreciation expectation.",
-  },
-  {
-    id: "n-06", name: "East Flatbush", borough: "Brooklyn", trajectory: "declining",
-    momentumScore: 34, priceChangePct: -2.4, permitActivity: 15, institutionalFlowM: 8,
-    populationGrowthPct: -1.1, medianPrice: 780_000, capRateCompression: 0.6,
-    lat: 40.6312, lng: -73.9278,
-    topSignals: ["Days-on-market expanding (+34d)", "Landlord distress signals rising", "Retail vacancy increasing"],
-    description: "Micro-market losing momentum. Distress buying opportunity emerging, but appreciation thesis weak near-term.",
-  },
-  {
-    id: "n-07", name: "Brownsville", borough: "Brooklyn", trajectory: "distressed",
-    momentumScore: 19, priceChangePct: -6.8, permitActivity: 8, institutionalFlowM: 3,
-    populationGrowthPct: -2.4, medianPrice: 510_000, capRateCompression: 1.4,
-    lat: 40.6634, lng: -73.9138,
-    topSignals: ["Highest vacancy rate in borough", "Systematic landlord abandonment", "Insurance withdrawal risk"],
-    description: "Deep distress. Contra-cyclical opportunity only — requires patient capital and operational expertise.",
-  },
-  {
-    id: "n-08", name: "Long Island City", borough: "Queens", trajectory: "accelerating",
-    momentumScore: 89, priceChangePct: 16.1, permitActivity: 94, institutionalFlowM: 287,
-    populationGrowthPct: 6.8, medianPrice: 1_820_000, capRateCompression: -2.1,
-    lat: 40.7447, lng: -73.9484,
-    topSignals: ["Amazon HQ2 adjacent spillover", "Major office-to-resi conversion", "Transit megaproject activated"],
-    description: "Institutional-grade momentum. Cap rate compression accelerating. Prime entry window closing in 12-18 months.",
-  },
-];
 
 function formatCurrency(n: number) {
   if (n >= 1e6) return `$${(n / 1e6).toFixed(1)}M`;
@@ -339,6 +273,15 @@ export default function NeighborhoodMomentum() {
     staleTime: 300_000,
   });
 
+  const { data: portfolioData, isLoading: portfolioLoading, isError: portfolioError } = useQuery({
+    queryKey: ["terra-portfolio-neighborhood-momentum"],
+    queryFn: () => api.portfolio.neighborhoodMomentum(),
+    enabled: !propertyId,
+    staleTime: 300_000,
+  });
+
+  const NEIGHBORHOODS: MicroMarket[] = (portfolioData?.neighborhoods as MicroMarket[] | undefined) ?? [];
+
   const [selected, setSelected] = useState<MicroMarket | null>(null);
   const [trajectoryFilter, setTrajectoryFilter] = useState<Trajectory | "all">("all");
 
@@ -456,6 +399,27 @@ export default function NeighborhoodMomentum() {
               <p className="text-[9px] mt-3" style={{ color: "rgba(255,255,255,0.2)" }}>Source: {d.dataSource}</p>
             </>
           )}
+        </div>
+      </div>
+    );
+  }
+
+  if (portfolioLoading || (!portfolioData && !portfolioError)) {
+    return (
+      <div className="flex h-full items-center justify-center" style={{ background: "#0a0c10" }}>
+        <div className="flex items-center gap-3 px-6 py-4 rounded-xl" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
+          <Loader2 className="w-5 h-5 animate-spin text-emerald-400" />
+          <p className="text-sm text-white/50">Loading neighborhood portfolio…</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (portfolioError) {
+    return (
+      <div className="flex h-full items-center justify-center" style={{ background: "#0a0c10" }}>
+        <div className="px-6 py-4 rounded-xl" style={{ background: "rgba(239,68,68,0.05)", border: "1px solid rgba(239,68,68,0.15)" }}>
+          <p className="text-sm text-red-400">Unable to load neighborhood portfolio.</p>
         </div>
       </div>
     );

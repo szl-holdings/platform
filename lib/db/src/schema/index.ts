@@ -40,6 +40,7 @@ export * from "./entities";
 export * from "./platform_events";
 export * from "./alloy";
 export * from "./terra";
+export * from "./terra-portfolio-modules";
 export * from "./szl_canonical";
 export * from "./pulse";
 export * from "./canonical";

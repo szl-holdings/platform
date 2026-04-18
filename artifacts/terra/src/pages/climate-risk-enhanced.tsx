@@ -57,83 +57,6 @@ const HAZARD_META: Record<HazardType, { label: string; icon: typeof Droplets }> 
   seismic: { label: "Seismic", icon: Activity },
 };
 
-const PROPERTIES: ClimateProperty[] = [
-  {
-    id: "cp-1", name: "One Market Plaza", address: "1 Market Plaza", location: "San Francisco, CA",
-    type: "Commercial", value: 48_000_000, overallRiskScore: 62, overallGrade: "B",
-    annualInsurance: 2_100_000, insuranceAdjustment: 34, valuationHaircut: 8,
-    adaptationCost: 4_200_000, thirtyYearExpectedLoss: 6_100_000,
-    regulatoryFlags: ["SB 54 — Climate Disclosure (CA)", "SEC Climate Risk Rule (Final)"],
-    hazards: [
-      { type: "seismic", current: "High", projected2030: "High", projected2050: "High", trend: "stable", detail: "Located 0.8mi from Hayward Fault. Site class D soils. Estimated PML: 18%." },
-      { type: "flood", current: "Low", projected2030: "Low", projected2050: "Medium", trend: "increasing", detail: "Outside current SFHA. 2050 sea level rise projections push to marginal risk zone." },
-      { type: "heat", current: "Low", projected2030: "Low", projected2050: "Low", trend: "stable", detail: "Bay microclimate modulates heat exposure. Minimal risk through 2050." },
-      { type: "wildfire", current: "Medium", projected2030: "Medium", projected2050: "High", trend: "increasing", detail: "Wildland-urban interface risk via East Bay hills. Smoke exposure increasing." },
-      { type: "storm", current: "Low", projected2030: "Medium", projected2050: "Medium", trend: "increasing", detail: "Atmospheric river intensification projected. 100-year storm frequency compressing." },
-    ],
-  },
-  {
-    id: "cp-2", name: "South Beach Retail", address: "100 Ocean Dr", location: "Miami, FL",
-    type: "Retail", value: 12_000_000, overallRiskScore: 89, overallGrade: "D",
-    annualInsurance: 1_400_000, insuranceAdjustment: 87, valuationHaircut: 22,
-    adaptationCost: 3_800_000, thirtyYearExpectedLoss: 8_900_000,
-    regulatoryFlags: ["HB 1557 — Mandatory Flood Disclosure (FL)", "FEMA SFHA Zone AE", "Miami-Dade Sea Level Rise Ordinance"],
-    hazards: [
-      { type: "flood", current: "Critical", projected2030: "Critical", projected2050: "Critical", trend: "increasing", detail: "FEMA Zone AE. Street-level flooding now occurring during king tides. Annual flood probability >40% by 2035." },
-      { type: "sea-level", current: "High", projected2030: "Critical", projected2050: "Critical", trend: "increasing", detail: "2.1ft SLR projected by 2060. Property currently 3.4ft above mean sea level." },
-      { type: "storm", current: "High", projected2030: "High", projected2050: "Critical", trend: "increasing", detail: "Direct hurricane path exposure. Category 4+ wind zone. Insurance withdrawals accelerating." },
-      { type: "heat", current: "High", projected2030: "High", projected2050: "Critical", trend: "increasing", detail: "28+ days >95°F by 2040. Outdoor retail occupancy increasingly constrained." },
-      { type: "wildfire", current: "Negligible", projected2030: "Negligible", projected2050: "Negligible", trend: "stable", detail: "No significant wildfire exposure." },
-      { type: "seismic", current: "Negligible", projected2030: "Negligible", projected2050: "Negligible", trend: "stable", detail: "No significant seismic exposure." },
-    ],
-  },
-  {
-    id: "cp-3", name: "Austin Mixed-Use Tower", address: "400 Congress Ave", location: "Austin, TX",
-    type: "Mixed-Use", value: 31_000_000, overallRiskScore: 76, overallGrade: "C+",
-    annualInsurance: 1_200_000, insuranceAdjustment: 52, valuationHaircut: 12,
-    adaptationCost: 2_100_000, thirtyYearExpectedLoss: 5_200_000,
-    regulatoryFlags: ["SEC Climate Risk Rule (Final)", "Texas Grid Resilience Requirements"],
-    hazards: [
-      { type: "heat", current: "Critical", projected2030: "Critical", projected2050: "Critical", trend: "increasing", detail: "47+ days >100°F projected by 2045. Grid stress risk during peak demand. HVAC costs +68% by 2040." },
-      { type: "flood", current: "Medium", projected2030: "High", projected2050: "High", trend: "increasing", detail: "Shoal Creek 100-yr floodplain adjacent. 2021 freeze event highlighted infrastructure fragility." },
-      { type: "storm", current: "Medium", projected2030: "High", projected2050: "High", trend: "increasing", detail: "Severe convective storm frequency increasing. Hail, tornado risk elevated." },
-      { type: "wildfire", current: "Medium", projected2030: "High", projected2050: "High", trend: "increasing", detail: "Central Texas wildland-urban interface expanding rapidly." },
-      { type: "sea-level", current: "Negligible", projected2030: "Negligible", projected2050: "Negligible", trend: "stable", detail: "Inland location. No sea level exposure." },
-      { type: "seismic", current: "Low", projected2030: "Low", projected2050: "Low", trend: "stable", detail: "Low natural seismic risk. Induced seismicity from wastewater injection negligible at this location." },
-    ],
-  },
-  {
-    id: "cp-4", name: "Silicon Valley Industrial", address: "880 N McCarthy Blvd", location: "San Jose, CA",
-    type: "Industrial", value: 22_000_000, overallRiskScore: 71, overallGrade: "B-",
-    annualInsurance: 1_800_000, insuranceAdjustment: 41, valuationHaircut: 9,
-    adaptationCost: 1_600_000, thirtyYearExpectedLoss: 4_100_000,
-    regulatoryFlags: ["SB 54 — Climate Disclosure (CA)", "Santa Clara Valley Water District Flood Rules"],
-    hazards: [
-      { type: "seismic", current: "High", projected2030: "High", projected2050: "High", trend: "stable", detail: "0.3mi from Calaveras Fault. Soil liquefaction zone class C. PML: 22%." },
-      { type: "wildfire", current: "Medium", projected2030: "High", projected2050: "High", trend: "increasing", detail: "Diablo Range wildfire exposure increasing. 2020 fires directly impacted air quality significantly." },
-      { type: "flood", current: "Low", projected2030: "Medium", projected2050: "Medium", trend: "increasing", detail: "Guadalupe River 500-year flood zone. Climate amplification could increase frequency." },
-      { type: "heat", current: "Medium", projected2030: "Medium", projected2050: "High", trend: "increasing", detail: "Inland heat amplification. Data center cooling costs projected up 44%." },
-      { type: "storm", current: "Low", projected2030: "Low", projected2050: "Medium", trend: "increasing", detail: "Atmospheric river events increasing in intensity and frequency." },
-      { type: "sea-level", current: "Negligible", projected2030: "Low", projected2050: "Low", trend: "increasing", detail: "South Bay exposure marginal through 2050." },
-    ],
-  },
-  {
-    id: "cp-5", name: "Pacific Heights Apts", address: "2850 Broadway", location: "San Francisco, CA",
-    type: "Residential", value: 14_000_000, overallRiskScore: 58, overallGrade: "B+",
-    annualInsurance: 890_000, insuranceAdjustment: 28, valuationHaircut: 6,
-    adaptationCost: 980_000, thirtyYearExpectedLoss: 2_800_000,
-    regulatoryFlags: ["SB 54 — Climate Disclosure (CA)", "SF Mandatory Seismic Retrofit Ordinance"],
-    hazards: [
-      { type: "seismic", current: "High", projected2030: "High", projected2050: "High", trend: "stable", detail: "Pre-1978 wood-frame construction. Mandatory retrofit complete. Residual risk moderate." },
-      { type: "wildfire", current: "Medium", projected2030: "Medium", projected2050: "High", trend: "increasing", detail: "Smoke exposure risk increasing. Structure itself in low fire hazard zone." },
-      { type: "flood", current: "Low", projected2030: "Low", projected2050: "Low", trend: "stable", detail: "Elevated hilltop site. Minimal flood exposure through 2060." },
-      { type: "heat", current: "Low", projected2030: "Low", projected2050: "Low", trend: "stable", detail: "Bay fog belt location moderates heat. AC penetration <30% building stock." },
-      { type: "storm", current: "Low", projected2030: "Medium", projected2050: "Medium", trend: "increasing", detail: "Atmospheric river exposure. Ridge site has wind exposure." },
-      { type: "sea-level", current: "Negligible", projected2030: "Negligible", projected2050: "Negligible", trend: "stable", detail: "Hillside site. No direct sea level exposure." },
-    ],
-  },
-];
-
 const GRADE_COLOR: Record<string, string> = {
   "D": "text-red-400", "C": "text-orange-400", "C+": "text-orange-400",
   "B-": "text-amber-400", "B": "text-sky-400", "B+": "text-emerald-400", "A-": "text-emerald-400", "A": "text-emerald-400",
@@ -316,6 +239,15 @@ export default function ClimateRiskEnhanced() {
     staleTime: 300_000,
   });
 
+  const { data: portfolioData, isLoading: portfolioLoading, isError: portfolioError } = useQuery({
+    queryKey: ["terra-portfolio-climate-risk"],
+    queryFn: () => api.portfolio.climateRisk(),
+    enabled: !propertyId,
+    staleTime: 300_000,
+  });
+
+  const PROPERTIES: ClimateProperty[] = (portfolioData?.properties as ClimateProperty[] | undefined) ?? [];
+
   const [selected, setSelected] = useState<ClimateProperty | null>(null);
   const [gradeFilter, setGradeFilter] = useState<string>("all");
 
@@ -414,6 +346,27 @@ export default function ClimateRiskEnhanced() {
               )}
             </>
           )}
+        </div>
+      </div>
+    );
+  }
+
+  if (portfolioLoading || (!portfolioData && !portfolioError)) {
+    return (
+      <div className="flex h-full items-center justify-center" style={{ background: "#0a0c10" }}>
+        <div className="flex items-center gap-3 px-6 py-4 rounded-xl" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
+          <Loader2 className="w-5 h-5 animate-spin text-orange-400" />
+          <p className="text-sm text-white/50">Loading climate risk portfolio…</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (portfolioError) {
+    return (
+      <div className="flex h-full items-center justify-center" style={{ background: "#0a0c10" }}>
+        <div className="px-6 py-4 rounded-xl" style={{ background: "rgba(239,68,68,0.05)", border: "1px solid rgba(239,68,68,0.15)" }}>
+          <p className="text-sm text-red-400">Unable to load climate risk portfolio.</p>
         </div>
       </div>
     );
