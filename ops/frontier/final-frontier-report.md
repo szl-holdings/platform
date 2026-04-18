@@ -13,7 +13,7 @@ Covers: Phases 1–15 (complete platform build-out)
 |-----|------|--------|--------|
 | SZL Holdings Dashboard | `/` | Production | Executive portfolio, fund intelligence, CORTEX web, Forge, Nexus, Distribution OS |
 | API Server | `/api/` | Production | Express + Apollo GraphQL backend |
-| Aegis / Firestorm | `/firestorm/` | Production | Defense & security operations |
+| Aegis | `/aegis/` | Production | Defense & security operations |
 | Terra | `/terra/` | Production | Real estate field intelligence |
 | Vessels | `/vessels/` | Production | Maritime fleet intelligence |
 | Carlota Jo | `/carlota-jo/` | Production | Executive advisory consulting |
@@ -331,7 +331,7 @@ Mapping of each planned task to the concrete committed deliverables.
 | 6 | Create flagship-release-readiness.md, eas-and-store-secrets-matrix.md, store-asset-inventory.md, reviewer-notes-and-test-accounts.md | ✅ Done | All 4 files created at `ops/mobile/` |
 | 7 | Produce concrete production architecture at `/ops/infra/target-production-architecture.md` | ✅ Done | `ops/infra/target-production-architecture.md` — covers Replit current + Azure target (all required services) |
 | 8 | Create environment-matrix.md, recovery-and-backup-model.md, cost-and-complexity-notes.md | ✅ Done | All 3 files created at `ops/infra/` |
-| 9 | Archive stale/duplicate apps and docs with clear deprecation markers and README redirects | ✅ Done | `DEPRECATED.md` added to `artifacts/aegis/`, `artifacts/imperium/`, `artifacts/lyte-command-center/`; deprecation banners added to 7 root-level docs; README.md Products table updated to show deprecated apps with strikethrough |
+| 9 | Archive stale/duplicate apps and docs with clear deprecation markers and README redirects | ✅ Done | `DEPRECATED.md` / `ARCHIVED.md` added to 5 archived artifacts; deprecation banners added to 7 root-level docs; README.md Products table updated to show deprecated apps with strikethrough |
 | 10 | Collapse overlapping docs into canonical sources with index pages | ✅ Done | `ops/cleanup/canonical-source-map.md` — single lookup table mapping every topic to canonical source; README.md Operations section updated to point to canonical ops docs |
 | 11 | Remove or mark obsolete scripts and workflows | ✅ Done | Obsolete scripts and workflows documented in `ops/cleanup/archive-and-deprecate.md` Section "Script and Workflow Cleanup" |
 | 12 | Create archive-and-deprecate.md, canonical-source-map.md, readme-rewrite-plan.md | ✅ Done | All 3 files created at `ops/cleanup/` |

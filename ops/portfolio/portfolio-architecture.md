@@ -25,7 +25,7 @@ The SZL Holdings platform is organized into four canonical layers. Every surface
 ├──────────────────────────────────────────────────────────────────────────┤
 │  DOMAIN PACKS                                                             │
 │                                                                           │
-│  aegis/firestorm   vessels      terra        carlota-jo                  │
+│  aegis          vessels      terra        carlota-jo                     │
 │  Security &        Maritime     Real Estate  Premium Advisory            │
 │  Defense Intel     Intelligence Intelligence Services                    │
 ├──────────────────────────────────────────────────────────────────────────┤
@@ -62,7 +62,7 @@ The SZL Holdings platform is organized into four canonical layers. Every surface
 `szl-holdings` is the public-facing face of the entire platform. It serves marketing, trust documentation, developer portal, fund intelligence, investor relations, and the founder profile. It is the correct canonical flagship because:
 - It has the broadest scope of any web artifact (251 pages, 338 source files)
 - It directly tells the SZL platform story to investors, enterprise evaluators, and partners
-- Its `/founder` section subsumes what was formerly `stephen-site`
+- Its `/founder` section consolidates the founder profile (previously a separate surface)
 - Auth-gated sub-sections provide operators access to Forge, dashboards, and CORTEX intelligence without requiring a separate app
 - In production, it maps to the root domain (`szlholdings.com`) — every other surface is a subdomain or subpath
 
@@ -109,13 +109,13 @@ The SZL Holdings platform is organized into four canonical layers. Every surface
 **Designation Rationale:**
 `command` is the canonical operator command surface — the place where platform operators observe signals, review recommendations, manage approvals, and execute decisions. It is the correct designation because:
 - It is the largest and most feature-complete operator surface (213 files, 172 routes)
-- It has absorbed the functionality of both `lyte-command-center` (merged) and `imperium` (merged)
+- It has absorbed the functionality of two previously separate operator surfaces (both merged)
 - It is backed by live SSE streams, signal timelines, and approval queues from `api-server`
 - It maps cleanly to the "governed decision loop": Signal → Context → Recommendation → Approval → Execution → Proof
 
 **What was merged into it:**
-- **Lyte Command Center** — operations workflow, PRISM framework signal timeline. Merged. Redirect `/lyte-command-center/` → `/command/`
-- **IMPERIUM** — cloud sovereignty and infrastructure mode. Merged as `/command/infrastructure`. Redirect `/imperium/` → `/command/infrastructure`
+- Operations workflow surface (signal timeline, PRISM). Redirect → `/command/`
+- Cloud sovereignty and infrastructure mode. Merged as `/command/infrastructure`. Redirect → `/command/infrastructure`
 
 ---
 
@@ -145,14 +145,10 @@ See `ops/mobile/mobile-disposition.md` for deferral conditions and credential bl
 | `terra` | CANONICAL — Domain Pack | Keep; live data wiring | `/terra/` |
 | `vessels` | CANONICAL — Domain Pack | Keep; live data wiring | `/vessels/` |
 | `carlota-jo` | CANONICAL — Domain Pack | Keep; most production-ready | `/carlota-jo/` |
-| `command` | CANONICAL — Operator Surface | Keep; absorbed Lyte + Imperium | `/command/` |
+| `command` | CANONICAL — Operator Surface | Keep; absorbed merged operator surfaces | `/command/` |
 | `cortex-mobile` | CANONICAL-MOBILE — Primary | Keep; TestFlight next | Mobile |
 | `szl-holdings-mobile` | CANONICAL-MOBILE — Secondary | Defer; ship after CORTEX | Mobile |
-| `firestorm` | SECONDARY | 301 → `/aegis/`; deregister artifact | `/firestorm/` |
-| `lyte-command-center` | SECONDARY | 301 → `/command/`; deregister artifact | — |
-| `imperium` | SECONDARY | 301 → `/command/infrastructure`; deregister artifact | — |
-| `prism-counsel` | ARCHIVE-DEPRECATE | DEPRECATED.md exists (task #579); deregister | — |
-| `stephen-site` | ARCHIVE-DEPRECATE | DEPRECATED.md exists (task #579); content → `/founder` | — |
+| _(5 archived artifacts)_ | ARCHIVED/DEPRECATED | Deregistered — see ops/frontier/disposition-matrix.md | — |
 | `mockup-sandbox` | INTERNAL | Keep; never list in public docs | `/__mockup` |
 
 ---
@@ -174,8 +170,8 @@ See `ops/mobile/mobile-disposition.md` for deferral conditions and credential bl
 | Workflow | Action |
 |----------|--------|
 | `ci.yml` | Add all 7 canonical web apps to build matrix |
-| `e2e.yml` | Remove `lyte-command-center`; add `command` |
-| `prism-counsel-ci.yml` | Delete — deprecated app |
+| `e2e.yml` | Updated — archived specs removed; canonical command spec added |
+| legacy CI workflow | Archived — retained as archival record; disable triggers |
 | `deploy.yml` | Review — may be legacy duplicate of `deploy-staging.yml` + `deploy-production.yml` |
 | `npm-publish.yml` | Review — confirm still needed in pnpm workspace |
 

@@ -14,7 +14,7 @@ This document describes the concrete production infrastructure target for the SZ
 |----------|------|-------|
 | szl-holdings (web) | Autoscale deployment | Primary public web |
 | api-server | Reserved VM deployment | Always-on, WebSocket, background jobs |
-| firestorm / Aegis | Autoscale | Defense domain |
+| aegis | Autoscale | Defense domain |
 | terra | Autoscale | Real estate domain |
 | vessels | Autoscale | Maritime domain |
 | carlota-jo | Autoscale | Advisory domain |

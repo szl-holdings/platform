@@ -66,12 +66,11 @@ For each container image at `https://github.com/orgs/szl-holdings/packages?ecosy
 Images to connect (after first push):
 - [ ] `ghcr.io/szl-holdings/api-server`
 - [ ] `ghcr.io/szl-holdings/szl-holdings-web`
-- [ ] `ghcr.io/szl-holdings/lyte-command-center`
 - [ ] `ghcr.io/szl-holdings/vessels`
 - [ ] `ghcr.io/szl-holdings/terra`
 - [ ] `ghcr.io/szl-holdings/aegis`
 - [ ] `ghcr.io/szl-holdings/carlota-jo`
-- [ ] `ghcr.io/szl-holdings/stephen-site`
+- [ ] `ghcr.io/szl-holdings/command`
 
 ---
 

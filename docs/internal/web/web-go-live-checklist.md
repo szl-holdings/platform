@@ -2,7 +2,8 @@
 
 **Version:** 1.0  
 **Last Updated:** April 2026  
-**Applies to:** SZL Holdings (`szlholdings.com`) · Lyte Command Center (`/lyte-command-center`)  
+**Applies to:** SZL Holdings (`szlholdings.com`) · Aegis (`/aegis/`) · Terra (`/terra/`) · Vessels (`/vessels/`) · Carlota Jo (`/carlota-jo/`) · Command (`/command/`)
+**Note:** The standalone Lyte artifact is ARCHIVED — Lyte is now embedded in szl-holdings at `/lyte/` and Command at `/command/`.  
 **Owner:** Founder / Engineering
 
 ---
@@ -19,7 +20,7 @@ Work through each section before declaring a surface production-ready. Mark each
 
 - [ ] All routes in `sitemap.xml` resolve to real pages (no 404)
 - [ ] All redirect routes (`/ecosystem`, `/founder`, `/insights`, etc.) redirect correctly
-- [ ] `/lyte/demo` → redirects to `/lyte-command-center/?view=app`
+- [ ] `/lyte/demo` → redirects to `/lyte/` (Lyte is embedded in szl-holdings at `/lyte/`)
 - [ ] `/vessels/demo` → redirects to `/vessels/`
 - [ ] `/terra/demo` → redirects to `/terra/`
 - [ ] `/investors` → redirects to `/investor-relations`
@@ -27,17 +28,17 @@ Work through each section before declaring a surface production-ready. Mark each
 - [ ] 404 catch-all → redirects to `/` gracefully
 - [ ] Admin routes (`/admin/*`) require auth and return 403 for unauthorized users
 
-### Lyte Command Center
+### Lyte (in SZL Holdings)
 
-- [ ] `/` → loads Dashboard (authenticated) or marketing landing (unauthenticated)
-- [ ] `/signals` → Signal feed loads with data
-- [ ] `/prism` → PRISM Dashboard loads
-- [ ] `/alloy/intelligence` → Alloy Intelligence loads (Triage, Evidence, Audit tabs)
-- [ ] `/approvals` → Approvals Center loads with demo data
-- [ ] `/actions` → Action Center loads with demo data
-- [ ] `/readiness` → Readiness Module loads
-- [ ] `/admin/*` → gated to admin/ops roles only
-- [ ] `/pricing` → Pricing page loads
+- [ ] `/lyte/` → loads Dashboard (authenticated) or marketing landing (unauthenticated)
+- [ ] `/lyte/signals` → Signal feed loads with data
+- [ ] `/lyte/prism` → PRISM Dashboard loads
+- [ ] `/lyte/alloy/intelligence` → Alloy Intelligence loads (Triage, Evidence, Audit tabs)
+- [ ] `/lyte/approvals` → Approvals Center loads with demo data
+- [ ] `/lyte/actions` → Action Center loads with demo data
+- [ ] `/lyte/readiness` → Readiness Module loads
+- [ ] `/lyte/admin/*` → gated to admin/ops roles only
+- [ ] `/lyte/pricing` → Pricing page loads
 
 ---
 
@@ -85,7 +86,7 @@ Work through each section before declaring a surface production-ready. Mark each
 ### SZL Holdings
 
 - [ ] "Get Early Access" / "Book a session" → `/contact` or `/design-partners`
-- [ ] "See the Demo" → `/demo` or `/lyte-command-center/?view=app`
+- [ ] "See the Demo" → `/demo` (links to the integrated Lyte workspace at `/lyte/`)
 - [ ] "Read the investor story" → `/investor-story`
 - [ ] "Trust Center" → `/trust`
 - [ ] "Privacy Policy" → `/legal/privacy`

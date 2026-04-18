@@ -58,7 +58,7 @@ All API routes discovered from `artifacts/api-server/src/routes/index.ts` via `r
 | `/legal/privacy` | `200` | Privacy policy |
 | `/legal/terms` | `200` | Terms of service |
 
-### 2.2 Aegis / Firestorm (`/aegis/` or `/firestorm/`)
+### 2.2 Aegis (`/aegis/`)
 
 | Route | Expected | Notes |
 |-------|---------|-------|
@@ -106,15 +106,6 @@ All API routes discovered from `artifacts/api-server/src/routes/index.ts` via `r
 | `/about` | `200` | About page |
 | `/contact` | `200` | Contact page |
 
-### 2.7 Stephen Site (`/stephen-site/`)
-
-| Route | Expected | Notes |
-|-------|---------|-------|
-| `/` | `200` | Portfolio home |
-| `/projects` | `200` | Projects |
-| `/about` | `200` | About |
-| `/contact` | `200` | Contact |
-
 ---
 
 ## 3. Health Check Endpoints (All Apps)
@@ -133,9 +124,7 @@ Every deployable artifact must have a health check endpoint. This matrix documen
 | `artifacts/vessels` | `/` loads without error | Page | `200` HTML | ✅ Via E2E |
 | `artifacts/command` | `/` loads without error | Page | `200` HTML | ✅ Via E2E |
 | `artifacts/carlota-jo` | `/` loads without error | Page | `200` HTML | ✅ Via E2E |
-| `artifacts/stephen-site` | `/` loads without error | Page | `200` HTML | ✅ Via E2E |
-| `artifacts/firestorm` | `/` loads without error | Page | `200` HTML | ✅ Via E2E |
-| `artifacts/prism-counsel` | `/` loads without error | Page | `200` HTML | ✅ Via E2E |
+| _(3 archived artifacts)_ | No active source | — | — | ❌ Skip — see `ops/frontier/disposition-matrix.md` |
 
 **Note:** Frontend SPA artifacts do not have dedicated `/health` API endpoints — their health is validated via the E2E suite's first navigation step. Consider adding a simple `/health.json` static file to each frontend artifact as a future improvement.
 
@@ -186,7 +175,6 @@ The following routes have automated accessibility checks running on every CI pus
 | SZL Holdings | `/ecosystem` | MEDIUM | axe-core + Playwright | ✅ Running |
 | Carlota Jo | `/` | HIGH | axe-core + Playwright | ⚠️ Backlog (Task #912) |
 | Carlota Jo | `/contact` | HIGH | axe-core + Playwright | ⚠️ Backlog (Task #912) |
-| Stephen Site | `/` | HIGH | axe-core + Playwright | ⚠️ Backlog (Task #912) |
 | All apps | `/legal/privacy` | MEDIUM | axe-core + Playwright | ⚠️ Backlog (Task #912) |
 | All apps | `/legal/terms` | MEDIUM | axe-core + Playwright | ⚠️ Backlog (Task #912) |
 

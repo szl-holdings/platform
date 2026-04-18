@@ -26,7 +26,7 @@ curl -sf https://$DOMAIN/api/health | jq '{status: .status, version: .version, d
 
 **Web app availability:**
 ```bash
-for path in / /firestorm/ /terra/ /vessels/ /carlota-jo/ /command/; do
+for path in / /aegis/ /terra/ /vessels/ /carlota-jo/ /command/; do
   status=$(curl -sf -o /dev/null -w "%{http_code}" "https://$DOMAIN$path")
   echo "$path: $status"
 done

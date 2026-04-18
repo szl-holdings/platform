@@ -58,14 +58,8 @@ SZL Holdings is a pnpm monorepo containing a unified ecosystem of command-grade 
 - **Users:** Investors, fund managers, venture partners, design partners.
 - **Key dependencies:** `@szl-holdings/db`, `@szl-holdings/shared-ui`, `@szl-holdings/api-zod`, `@szl-holdings/prism-bus`.
 
-#### `artifacts/lyte-command-center` — Lyte Command Center
-- **Preview path:** `/lyte-command-center/`
-- **Purpose:** Executive observability and operational self-healing platform. Surfaces business metrics via the PRISM framework (Pulse / Risk / Intelligence / Signals / Motion). Includes an Autonomous NOC with AI-driven alert correlation, self-healing orchestration, and revenue impact mapping.
-- **Users:** CTOs, SRE/DevOps teams, operations executives, PMOs.
-- **Key dependencies:** `@szl-holdings/ai-engine`, `@szl-holdings/forge-runtime`, `@szl-holdings/observability`, `@szl-holdings/prism-bus`, `@szl-holdings/shared-ui`.
-
-#### `artifacts/firestorm` — Aegis — Unified Defense & Intelligence Command
-- **Preview path:** `/firestorm/`
+#### `artifacts/aegis` — Aegis — Unified Defense & Intelligence Command
+- **Preview path:** `/aegis/`
 - **Purpose:** SOC operations and autonomous cyber defense platform. Provides three unified workspaces: Defense (threat response, SOAR playbooks, deception grids), Command (managed services operations), and Intelligence (AI model governance, INCA analytics). Includes the Citadel crisis command war room.
 - **Users:** CISOs, SOC analysts, managed security providers, compliance officers.
 - **Key dependencies:** `@szl-holdings/ai-engine`, `@szl-holdings/intelligence-feeds`, `@szl-holdings/forge-runtime`, `@szl-holdings/proof-chain`, `@szl-holdings/shared-ui`.
@@ -82,33 +76,17 @@ SZL Holdings is a pnpm monorepo containing a unified ecosystem of command-grade 
 - **Users:** Fleet executives, maritime operations teams, commercial directors, insurers.
 - **Key dependencies:** `@szl-holdings/db`, `@szl-holdings/intelligence-feeds`, `@szl-holdings/worldline`, `@szl-holdings/shared-ui`.
 
-#### ~~`artifacts/prism-counsel`~~ — PRISM Counsel — **DEPRECATED**
-- **Status:** Archived — app source removed. No active workflow.
-- **Successor:** Legal capabilities consolidated into the **Aegis legal workspace** (`/aegis/`).
-- **Notes:** Matter Twin, document review, proof chain, and NY-specific practice modules are now part of Aegis. See `docs/architecture/prism-counsel-*.md` for historical architecture references (marked deprecated).
-
 #### `artifacts/carlota-jo` — Carlota Jo Consulting
 - **Preview path:** `/carlota-jo/`
 - **Purpose:** Premium advisory and strategic consulting platform. Provides strategic diagnostic engine, secure client portal, scenario simulator, and consulting OS for boutique advisory firms.
 - **Users:** Consultants, boutique advisory firms, and their clients.
 - **Key dependencies:** `@szl-holdings/ai-engine`, `@szl-holdings/shared-ui`, `@szl-holdings/db`.
 
-#### `artifacts/imperium` — IMPERIUM — Cloud Sovereignty Engine
-- **Preview path:** `/imperium/`
-- **Purpose:** Strategic command and intelligence briefing platform using a Roman-themed metaphor. Provides executive decision-support (Legatus Console), organizational asset visualization (Imperium Map), governance interface (Senate Chamber), and AI tactical insights (Centurion AI).
-- **Users:** Executive leadership, strategic planners, operations directors.
-- **Key dependencies:** `@szl-holdings/ai-engine`, `@szl-holdings/shared-ui`.
-
 #### `artifacts/command` — Ecosystem Command Portal
 - **Preview path:** `/command/`
 - **Purpose:** Central portal for ecosystem-wide management, cross-platform orchestration, and marketing. Acts as the internal operating system for the SZL ecosystem with simulation tools, briefing capabilities, and Cortex Voice AI assistant.
 - **Users:** Internal administrators, ecosystem operators, prospective clients.
 - **Key dependencies:** `@szl-holdings/shared-ui`, `@szl-holdings/prism-bus`.
-
-#### ~~`artifacts/stephen-site`~~ — Stephen Lutar Site — **DEPRECATED**
-- **Status:** Archived — app source removed. No active workflow.
-- **Successor:** Founder content consolidated into the **`/founder` page** in `artifacts/szl-holdings` (SZL Holdings web app).
-- **Notes:** All personal brand, media, and creator economy content is now served from the founder page within the main SZL Holdings site.
 
 #### `artifacts/api-server` — API Server
 - **Preview path:** `/api/`
@@ -163,11 +141,10 @@ All mobile apps depend on `@szl-holdings/mobile-shared` (verified across lyte-mo
 ┌─────────────────────────────────────────────────────────────────┐
 │  CLIENTS                                                        │
 │  Web (Vite + React)          Mobile (Expo + React Native)       │
-│  szl-holdings  lyte          lyte-mobile  aegis-mobile          │
-│  firestorm     terra         terra-mobile vessels-mobile        │
-│  vessels       carlota-jo-mobile szl-mobile                     │
-│  carlota-jo    command       stephen-mobile                     │
-│  imperium      [prism-counsel/stephen-site — ARCHIVED]          │
+│  szl-holdings  aegis         lyte-mobile  aegis-mobile          │
+│  terra         vessels       terra-mobile vessels-mobile        │
+│  carlota-jo    command       szl-mobile                         │
+│  _(5 archived surfaces — see ops/frontier/disposition-matrix)_  │
 └──────────────────┬──────────────────────┬───────────────────────┘
                    │  REST/JSON           │  REST/JSON
                    │  GraphQL             │  (EXPO_PUBLIC_API_URL)
@@ -189,10 +166,10 @@ All mobile apps depend on `@szl-holdings/mobile-shared` (verified across lyte-mo
 │  Key route groups:                                             │
 │    /api/auth          — Sessions, OIDC, WebSocket tickets      │
 │    /api/alloy         — Workflow engine, approvals, audit      │
-│    /api/firestorm     — SOC/security ops (Aegis)               │
+│    /api/aegis         — SOC/security ops (Aegis) [primary]     │
+│    /api/firestorm     — Backward-compat alias → /api/aegis     │
 │    /api/terra         — Property intelligence + CRM            │
 │    /api/vessels       — Fleet tracking + maritime ops          │
-│    /api/prism-counsel — Legal matter management                │
 │    /api/ai            — AI tool execution                      │
 │    /api/intelligence  — External intel feeds                   │
 │    /api/storage       — Object storage / file management       │

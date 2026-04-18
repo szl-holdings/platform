@@ -15,7 +15,7 @@
 | Lyte (Flagship) | `/api/lyte`, `/api/lyte/platform`, `/api/lyte-live` | Active |
 | Alloy (Execution) | `/api/alloy`, `/api/dreamscape` | Active |
 | AI Engine | `/api/ai/*` (14 endpoints) | Active |
-| Aegis SOC | `/api/firestorm`, `/api/inca`, `/api/msp` | Active |
+| Aegis SOC | `/api/aegis`, `/api/inca`, `/api/msp` | Active |
 | Terra RE | `/api/terra`, `/api/terra-distress`, `/api/terra-broker`, `/api/terra-live`, `/api/terra-crm` | Active |
 | Vessels | `/api/vessels`, `/api/vessels-platform`, `/api/vessels-live` | Active |
 | Carlota Jo | `/api/carlota-jo`, `/api/holdings` | Active |

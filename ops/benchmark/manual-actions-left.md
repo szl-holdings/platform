@@ -117,7 +117,7 @@ None of these can be automated. All require founder action and, in most cases, c
 |--------|---------|---------|-----------|
 | Publish GitHub Release v0.2.0 | Tag main; write substantive release notes covering Decision Theater, platform primitives, new security modules, vessels commercial modules, Command unification | P0 | 2 hours |
 | Set up GitHub branch protection rules | Require CI pass + review before merge to main | P1 | 30 min |
-| Deregister archived artifacts from Replit preview (firestorm, lyte-command-center, prism-counsel) | Cleanup step — artifacts are archived but still listed | P1 | 1 hour |
+| Deregister archived artifacts from Replit preview (see disposition-matrix.md) | Cleanup step — archived artifacts should not be listed in active preview routes | P1 | 1 hour |
 | Verify CI is green on main branch | Run typecheck + lint + build; confirm passing | P0 | 30 min |
 | Wire integration tests into CI pipeline | Currently runs manually; needs GitHub Actions step | P1 | 2 hours |
 

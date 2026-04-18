@@ -5,6 +5,11 @@
 **Classification:** Internal  
 **Owner:** Founder / Sales
 
+> **⚠️ IMPORTANT:** The standalone Lyte artifact is **ARCHIVED** (see `ops/frontier/disposition-matrix.md`).
+> Lyte functionality is now embedded in `artifacts/szl-holdings` (accessible at `/lyte/`) for internal operator use.
+> **Canonical buyer/investor demo surface:** use `/command/` (Unified Command portal) — see `docs/buyer/canonical-demo.md`.
+> All URLs in this internal runbook use the `/lyte/` path prefix in the szl-holdings workspace.
+
 ---
 
 ## Purpose
@@ -17,7 +22,7 @@ This runbook gives presenters everything they need to run the canonical Lyte + A
 
 ### Environment Setup (do before every demo)
 
-- [ ] Navigate to `/lyte-command-center/?demo=true` to force app mode
+- [ ] Navigate to `/lyte/?demo=true` to force app mode
 - [ ] Verify the "DEMO — SEEDED DATA" label is visible in the dashboard header
 - [ ] Confirm PRISM Dashboard loads with signals populated
 - [ ] Confirm Alloy Intelligence (`/alloy/intelligence`) loads the Triage Engine and Evidence panel
@@ -55,7 +60,7 @@ Or use the Admin Seeder at `/admin/seeder` (requires admin role).
 
 ### Scene 1: Signal Ingestion (1–2 min)
 
-**URL:** `/lyte-command-center/signals`
+**URL:** `/lyte/signals`
 
 **Steps:**
 1. Open Signals Feed
@@ -73,7 +78,7 @@ Or use the Admin Seeder at `/admin/seeder` (requires admin role).
 
 ### Scene 2: PRISM Dashboard (1 min)
 
-**URL:** `/lyte-command-center/prism`
+**URL:** `/lyte/prism`
 
 **Steps:**
 1. Open PRISM Dashboard
@@ -89,7 +94,7 @@ Or use the Admin Seeder at `/admin/seeder` (requires admin role).
 
 ### Scene 3: Alloy Evidence Retrieval (1–2 min)
 
-**URL:** `/lyte-command-center/alloy/intelligence` → Retrieval tab
+**URL:** `/lyte/alloy/intelligence` → Retrieval tab
 
 **Steps:**
 1. Navigate to Alloy Intelligence → Retrieval tab
@@ -110,7 +115,7 @@ Or use the Admin Seeder at `/admin/seeder` (requires admin role).
 
 ### Scene 4: Structured Decision Object (2–3 min)
 
-**URL:** `/lyte-command-center/alloy/intelligence` → Triage Engine
+**URL:** `/lyte/alloy/intelligence` → Triage Engine
 
 **Steps:**
 1. Click into the Triage Engine
@@ -137,7 +142,7 @@ Or use the Admin Seeder at `/admin/seeder` (requires admin role).
 
 ### Scene 5: Approval Gate (1–2 min)
 
-**URL:** `/lyte-command-center/approvals`
+**URL:** `/lyte/approvals`
 
 **Steps:**
 1. Open Approvals Center
@@ -157,7 +162,7 @@ Or use the Admin Seeder at `/admin/seeder` (requires admin role).
 
 ### Scene 6: Action Execution & Routing (1 min)
 
-**URL:** `/lyte-command-center/actions`
+**URL:** `/lyte/actions`
 
 **Steps:**
 1. Navigate to Action Center
@@ -177,7 +182,7 @@ Or use the Admin Seeder at `/admin/seeder` (requires admin role).
 
 ### Scene 7: Audit Trail (1–2 min)
 
-**URL:** `/lyte-command-center/alloy/intelligence` → Audit Trail tab
+**URL:** `/lyte/alloy/intelligence` → Audit Trail tab
 
 **Steps:**
 1. Open Audit Trail
@@ -198,7 +203,7 @@ Or use the Admin Seeder at `/admin/seeder` (requires admin role).
 
 ### Scene 8: Dashboard Resolution (1 min)
 
-**URL:** `/lyte-command-center/`
+**URL:** `/lyte/`
 
 **Steps:**
 1. Return to main Dashboard

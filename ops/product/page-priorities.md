@@ -30,7 +30,6 @@ Each domain pack page is an enterprise buyer entry point for its specific domain
 | Aegis | `/solutions/aegis` | Security & defense | Functional |
 | Vessels | `/solutions/vessels` | Maritime | Functional |
 | Terra | `/solutions/terra` | Real estate | Functional |
-| PRISM Counsel | `/solutions/prism-counsel` | Legal | Functional |
 | Carlota Jo | `/carlota-jo/` | Advisory | Functional |
 
 ---

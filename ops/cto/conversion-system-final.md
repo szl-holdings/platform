@@ -48,7 +48,7 @@ Organic / Referral Traffic
 | CTA | Event Name | Properties |
 |-----|-----------|------------|
 | Any nav link click | `nav_link_clicked` | `{ from: page, to: href }` |
-| Domain pack card click | `domain_pack_viewed` | `{ domain: "prism-counsel|vessels|aegis|terra" }` |
+| Domain pack card click | `domain_pack_viewed` | `{ domain: "vessels|aegis|terra|carlota-jo" }` |
 | Architecture section scroll | `architecture_section_reached` | `{ section: string }` |
 | Docs page visit | `docs_page_viewed` | `{ path: string }` |
 

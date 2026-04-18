@@ -142,10 +142,10 @@ Domain discovery → Feature fit → Workflow mapping → Pilot participation
 
 | Domain | Asset |
 |---|---|
-| Security (Aegis) | /firestorm demo, docs/buyer/aegis-governance-summary.md, executive-tour.md |
+| Security (Aegis) | /aegis demo, docs/buyer/aegis-governance-summary.md, executive-tour.md |
 | Maritime (Vessels) | /vessels demo, operator-tour.md |
 | Real Estate (Terra) | /terra demo |
-| Legal (PRISM Counsel) | docs/buyer/prism-counsel-executive-overview.md |
+| Legal | docs/buyer/prism-counsel-executive-overview.md |
 | Advisory (Carlota Jo) | /carlota-jo |
 
 **Practitioner-specific consideration:**

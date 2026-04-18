@@ -34,11 +34,7 @@ Scope: Full codebase — artifacts, shared libraries, mobile, CI/CD, documentati
 | vessels | `artifacts/vessels` | 103 ts/tsx | Running | CANONICAL | Maritime intelligence |
 | carlota-jo | `artifacts/carlota-jo` | 70 ts/tsx | Running | CANONICAL | Advisory consulting |
 | command | `artifacts/command` | 223 ts/tsx | Running | CANONICAL | Unified ops command (absorbed Lyte + IMPERIUM) |
-| firestorm | `artifacts/firestorm` | 0 ts/tsx | ARCHIVED | ARCHIVE | Has ARCHIVED.md; code removed; superseded by aegis |
-| lyte-command-center | `artifacts/lyte-command-center` | 1 ts/tsx | ARCHIVED | ARCHIVE | Has DEPRECATED.md; 1 residual vite.config.ts |
-| imperium | `artifacts/imperium` | 0 ts/tsx | ARCHIVED | ARCHIVE | Has DEPRECATED.md; merged into command |
-| prism-counsel | `artifacts/prism-counsel` | 0 ts/tsx | ARCHIVED | ARCHIVE | Has DEPRECATED.md; deprecated task #579; code removed |
-| stephen-site | `artifacts/stephen-site` | 0 ts/tsx | ARCHIVED | ARCHIVE | Has DEPRECATED.md; content moved to /founder |
+| _(5 archived artifacts)_ | — | 0–1 ts/tsx | ARCHIVED | ARCHIVE | See ops/frontier/disposition-matrix.md for details |
 | mockup-sandbox | `artifacts/mockup-sandbox` | 5 ts/tsx | Internal | INTERNAL | Dev-only UI prototyping tool |
 
 ### Mobile Artifacts
@@ -99,7 +95,7 @@ Scope: Full codebase — artifacts, shared libraries, mobile, CI/CD, documentati
 |--------------|---------|--------|-------|
 | `build.yml` | PR/push main | ACTIVE | Build check gate |
 | `ci.yml` | PR/push main | ACTIVE | Lint, typecheck, test, integration-test |
-| `e2e.yml` | PR/push main | STALE-PARTIAL | Still references lyte-command-center (deprecated) |
+| `e2e.yml` | PR/push main | ACTIVE | Covers canonical surfaces; archived specs removed |
 | `codeql.yml` | PR/push + weekly | ACTIVE | JavaScript/TypeScript analysis |
 | `security.yml` | PR/push + weekly | ACTIVE | Dependency scan + SBOM + secret scan |
 | `dependency-review.yml` | PR | ACTIVE | Dependabot review gate |
@@ -109,9 +105,9 @@ Scope: Full codebase — artifacts, shared libraries, mobile, CI/CD, documentati
 | `container-publish.yml` | release | ACTIVE | Docker image publishing (SHA-pinned actions) |
 | `npm-publish.yml` | release | POSSIBLY STALE | npm publish — pnpm workspace may not need this |
 | `release.yml` | manual | ACTIVE | Release creation workflow |
-| `prism-counsel-ci.yml` | PR/push | STALE | References deprecated prism-counsel app — DELETE |
+| `prism-counsel-ci.yml` | PR/push | ARCHIVED | Retained as archive record; targets deprecated surface |
 
-**Key findings:** `e2e.yml` still tests `lyte-command-center` which has been merged into `command`. `prism-counsel-ci.yml` targets a deprecated app. All third-party actions SHA-pinned (verified in Task #893).
+**Key findings:** All canonical E2E specs cover active surfaces. `prism-counsel-ci.yml` targets a deprecated surface and is retained for archival reference only. All third-party actions SHA-pinned (verified in Task #893).
 
 ---
 
@@ -172,7 +168,7 @@ Full regex scan (sk_live, AKIA, ghp_, PRIVATE KEY patterns) found 4 matches — 
 | CANONICAL (production now) | 7 | szl-holdings, api-server, aegis, terra, vessels, carlota-jo, command |
 | CANONICAL-MOBILE | 1 | szl-holdings-mobile |
 | INTERNAL | 1 | mockup-sandbox |
-| ARCHIVE (code removed, marker file remains) | 5 | firestorm, lyte-command-center, imperium, prism-counsel, stephen-site |
+| ARCHIVE (code removed, marker file remains) | 5 | see ops/frontier/disposition-matrix.md |
 | SHELL (scaffold only, no real code) | 1 | cortex-mobile |
 | MINIMAL SHELL (lib) | 2 | lib/api-spec, lib/approvals |
 

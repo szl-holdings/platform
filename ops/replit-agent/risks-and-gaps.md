@@ -21,11 +21,10 @@ Generated: 2026-04-15
 
 ## P1 — High Priority
 
-### 4. Duplicate/Overlapping Apps
-- `firestorm` and `aegis` serve the same app from different paths
-- `lyte-command-center` was merged into `command` but still runs separately
-- `prism-counsel` and `stephen-site` were deprecated (task #579) but re-registered (task #670)
-- **Fix**: Establish canonical topology and deregister duplicates
+### 4. Archived Apps — Deregistration Pending
+- 5 surfaces are classified ARCHIVE in `ops/frontier/disposition-matrix.md` but may still have registered artifacts
+- Canonical active surfaces: `szl-holdings`, `aegis` (`/aegis/`), `terra`, `vessels`, `carlota-jo`, `command`
+- **Fix**: Deregister archived artifact entries when Replit artifact limit allows
 
 ### 5. No Production Secret Rotation Documentation
 - No inventory of which secrets exist, which are rotatable, expiration dates

@@ -83,13 +83,11 @@ Deploy this to every material repo as `.github/CODEOWNERS` or `CODEOWNERS` at ro
 # Core platform
 artifacts/api-server/       @szl-holdings/platform
 artifacts/szl-holdings/     @szl-holdings/platform
-artifacts/lyte-command-center/ @szl-holdings/platform
-artifacts/firestorm/        @szl-holdings/platform
+artifacts/aegis/            @szl-holdings/platform
+artifacts/command/          @szl-holdings/platform
 artifacts/terra/            @szl-holdings/platform
 artifacts/vessels/          @szl-holdings/platform
 artifacts/carlota-jo/       @szl-holdings/platform
-artifacts/stephen-site/     @szl-holdings/platform
-
 # Mobile applications
 artifacts/*-mobile/         @szl-holdings/platform
 

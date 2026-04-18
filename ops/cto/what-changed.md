@@ -14,11 +14,11 @@ This document is the canonical record of everything that changed during the CTO 
 
 ## Phase A — Truth Audit & Repository Cleanup
 
-**Problem:** The repository contained 13+ empty stub artifact directories, orphaned CI files, and an incorrect canonical/deprecated classification for aegis vs. firestorm.
+**Problem:** The repository contained 13+ empty stub artifact directories, orphaned CI files, and an incorrect canonical/deprecated classification for the defense surface.
 
 **Changes made:**
 - Deleted 13 empty stub artifact directories: `aegis-mobile`, `alloy-mobile`, `carlota-jo-mobile`, `forge`, `inca-lab`, `lyte-mobile`, `nexus`, `partner-portal`, `stephen-mobile`, `terra-mobile`, `vessels-mobile`, `lib/integrations-anthropic-ai`, `lib/integrations-gemini-ai`, `lib/integrations-openai-ai-server`
-- Corrected app disposition matrix: `aegis` is canonical (164 src files, 158 pages); `firestorm` is the thin redirect wrapper (9 src files)
+- Corrected app disposition matrix: `aegis` is the canonical defense surface (164 src files, 158 pages); prior thin-wrapper artifact archived
 - Created `ops/portfolio/app-disposition-matrix.md` with authoritative classification of all apps
 
 **Outcome:** Clean repository; no phantom artifacts; correct canonical/deprecated designations.

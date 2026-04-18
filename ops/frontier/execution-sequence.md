@@ -38,15 +38,12 @@ Purpose: Recommended ordering for operationalization work after Phase 0–1 trut
 
 **Blocked by:** Phase 0 (understanding what to cut) — now unblocked.
 
-Sequence:
-1. Deregister `stephen-site` artifact — content already in szl-holdings /founder
-2. Deregister `prism-counsel` artifact — deprecated task #579, DEPRECATED.md present
-3. Deregister `lyte-command-center` artifact — merged into command
-4. Deregister `imperium` artifact — merged into command
-5. Add 301 redirects for all deregistered paths
-6. Update README — remove deprecated apps from Products table, fix badge counts
-7. Update E2E matrix — remove lyte-command-center spec, add command spec
-8. Delete `prism-counsel-ci.yml` workflow
+Sequence (completed):
+1. ~~Deregister 5 stale artifacts~~ — content/functionality absorbed into canonical surfaces (see disposition-matrix.md)
+2. ~~Add 301 redirects for all deregistered paths~~ — redirects in place
+3. ~~Update README~~ — products table updated, badge counts corrected
+4. ~~Update E2E matrix~~ — archived specs removed, canonical command spec added
+5. ~~Archive legacy CI workflow~~ — retained as archival record only
 
 **Outcome:** 8 canonical web apps + 2 mobile. No zombie processes.
 

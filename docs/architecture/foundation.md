@@ -46,8 +46,7 @@ The API exposes a projection endpoint per domain:
 GET /domains/{domain}/graph?includeCross=true&limit=100
 ```
 
-Supported domains: `terra`, `prism`, `vessels`, `aegis`, `lyte`, `imperium`,
-`carlota-jo`, `platform`.
+Supported domains: `terra`, `vessels`, `aegis`, `lyte`, `carlota-jo`, `platform`.
 
 The response contains:
 - `nodes[]` — all nodes for the requested domain (paginated)

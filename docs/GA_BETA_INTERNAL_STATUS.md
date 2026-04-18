@@ -61,19 +61,6 @@
 
 ---
 
-### Firestorm — Security Simulation
-| Field | Value |
-|---|---|
-| **Path** | `/firestorm/` |
-| **Artifact** | `artifacts/firestorm` |
-| **Status** | **Beta** |
-| **Demo safe** | Yes — with framing as simulation/scenario platform |
-| **Live data** | Structured scenario data: real. Live threat feeds: not yet wired. |
-| **Known gaps** | Not yet connected to Aegis live data |
-| **Disclaimer required** | "All scenarios are simulated; not connected to live threat intelligence" |
-
----
-
 ### Vessels — Maritime Intelligence
 | Field | Value |
 |---|---|
@@ -113,19 +100,6 @@
 
 ---
 
-### Prism Counsel — Matter Management
-| Field | Value |
-|---|---|
-| **Path** | `/prism-counsel/` |
-| **Artifact** | `artifacts/prism-counsel` |
-| **Status** | **Beta** |
-| **Demo safe** | Yes — with framing |
-| **Live data** | Matter management, search, and routing: functional. Recovery tables: seed script broken. |
-| **Known gaps** | Broken seed scripts for recovery tables; Zod validation missing on some API routes |
-| **Disclaimer required** | "Recovery module requires seed repair before production use" |
-
----
-
 ### Command Portal — Unified Command
 | Field | Value |
 |---|---|
@@ -138,17 +112,6 @@
 | **Disclaimer required** | "Aggregate KPIs reflect demonstration data across connected platforms" |
 
 ---
-
-### Stephen Site — Founder Profile
-| Field | Value |
-|---|---|
-| **Path** | `/stephen-site/` |
-| **Artifact** | `artifacts/stephen-site` |
-| **Status** | **GA** |
-| **Demo safe** | Yes |
-| **Live data** | Static content |
-| **Known gaps** | None |
-| **Disclaimer required** | None |
 
 ---
 
@@ -213,17 +176,15 @@
 | SZL Holdings Corporate | Beta | Yes |
 | Lyte (Business Observability) | Beta | Yes |
 | Aegis (Defense & Intelligence) | Beta | Yes |
-| Firestorm (Security Simulation) | Beta | With framing |
 | Vessels (Maritime Intelligence) | Beta | Yes |
 | Terra (Real Estate Intelligence) | Beta | Yes |
 | Carlota Jo (Advisory) | Beta | Yes |
-| Prism Counsel (Matter Management) | Beta | With framing |
 | Command Portal | Beta | Yes |
-| Stephen Site (Founder Profile) | GA | Yes |
 | CORTEX Mobile | Beta | With framing |
 | API Server | Internal | No |
 | Alloy | Internal | Via other surfaces |
 | Component Preview | Internal | No |
+| _(5 surfaces archived)_ | Archived | No — see `ops/frontier/disposition-matrix.md` |
 
 ---
 

@@ -32,7 +32,7 @@ For the general severity model and escalation contacts, see `docs/internal/ops/i
 
 Any of the following:
 - `GET /api/health/live` returns non-200 for > 2 minutes
-- All web app paths (/, /firestorm/, /terra/, /vessels/) return non-200
+- All web app paths (/, /aegis/, /terra/, /vessels/) return non-200
 - Uptime monitor fires (if configured)
 - User or partner reports the site is unreachable
 

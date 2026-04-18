@@ -79,22 +79,16 @@ Four-label canonical environment model per the [Environment Labeling Standard](.
 
 ---
 
-### Lyte Command Center (`artifacts/lyte-command-center`)
+### ~~Lyte Command Center~~ (`artifacts/lyte-command-center`) — ARCHIVED
+
+> **ARCHIVED.** Classification: ARCHIVE (see `ops/frontier/disposition-matrix.md`).
+> Lyte functionality merged into `artifacts/szl-holdings` (Lyte workspace at `/lyte/`) and `artifacts/command`.
+> This entry is preserved for historical reference.
 
 | Attribute | Value |
 |-----------|-------|
-| **Owner** | Stephen Lutar (Founder & CEO) |
-| **Route** | `/lyte-command-center/` |
-| **Platform** | React / Vite / TypeScript |
-| **Readiness** | Functional Alpha |
-| **Environment** | Seeded Data |
-| **Auth** | Yes — OIDC PKCE required for all routes |
-| **Payments** | Partial — Stripe routes defined in API; billing activation pending |
-| **Analytics** | Partial — event schema exists; no external analytics provider wired |
-| **Monitoring** | Partial — API health active; no frontend Sentry/APM yet |
-| **Last Build** | Running — all PRISM surfaces, action queue, approval center operational |
-| **Tier** | 1 — Flagship Now |
-| **Notes** | Primary commercial wedge. PRISM framework (Pulse/Risk/Intelligence/Signals/Motion). Approaching Pilot Ready. Highest engineering investment priority. |
+| **Status** | **ARCHIVED** — DEPRECATED.md present; code removed |
+| **Disposition** | Merged into `szl-holdings` and `command`. Do not deploy. |
 
 ---
 
@@ -117,12 +111,15 @@ Four-label canonical environment model per the [Environment Labeling Standard](.
 
 ---
 
-### Aegis — Unified Defense & Intelligence (`artifacts/firestorm`)
+### Aegis — Unified Defense & Intelligence (`artifacts/aegis`)
+
+> **Note:** Previously listed as `artifacts/firestorm` at `/firestorm/`. Firestorm is ARCHIVED.
+> Aegis is the current canonical artifact for Defense & Intelligence at `/aegis/`.
 
 | Attribute | Value |
 |-----------|-------|
 | **Owner** | Stephen Lutar (Founder & CEO) |
-| **Route** | `/firestorm/` |
+| **Route** | `/aegis/` |
 | **Platform** | React / Vite / TypeScript |
 | **Readiness** | Functional Alpha |
 | **Environment** | Demo (mix of seeded and simulated threat data) |
@@ -131,8 +128,8 @@ Four-label canonical environment model per the [Environment Labeling Standard](.
 | **Analytics** | No |
 | **Monitoring** | Partial — API health; no frontend error tracking |
 | **Last Build** | Running — SOC, Command, Intelligence workspaces operational |
-| **Tier** | 3 — Parked / Staged |
-| **Notes** | SOC operations, MITRE ATT&CK v14, SOAR playbooks, INCA AI research. Strong capability set. Parked pending Lyte/Alloy commercial validation. FedRAMP track medium-term. |
+| **Tier** | 2 — Active Domain Pack |
+| **Notes** | SOC operations, MITRE ATT&CK v14, SOAR playbooks, INCA AI research. `artifacts/firestorm` (ARCHIVED) is superseded by this artifact. |
 
 ---
 
@@ -193,22 +190,16 @@ Four-label canonical environment model per the [Environment Labeling Standard](.
 
 ---
 
-### Stephen Lutar — Founder Site (`artifacts/stephen-site`)
+### ~~Stephen Lutar — Founder Site~~ (`artifacts/stephen-site`) — ARCHIVED
+
+> **ARCHIVED.** Classification: ARCHIVE (see `ops/frontier/disposition-matrix.md`).
+> Content migrated to `/founder` route in `artifacts/szl-holdings`.
+> This entry is preserved for historical reference.
 
 | Attribute | Value |
 |-----------|-------|
-| **Owner** | Stephen Lutar (Founder & CEO) |
-| **Route** | `/stephen/` |
-| **Platform** | React / Vite / TypeScript |
-| **Readiness** | Functional Alpha |
-| **Environment** | Live (portfolio and founder content) |
-| **Auth** | No — public site |
-| **Payments** | No |
-| **Analytics** | No |
-| **Monitoring** | No |
-| **Last Build** | HTTP 200 (March 30, 2026) |
-| **Tier** | 3 — Parked / Staged |
-| **Notes** | Founder authority and personal brand. Separate from SZL Holdings corporate identity. Maintained; no active development investment. |
+| **Status** | **ARCHIVED** — DEPRECATED.md present; code removed |
+| **Disposition** | Content at `/founder` in `artifacts/szl-holdings`. Do not deploy. |
 
 ---
 
@@ -392,15 +383,15 @@ Four-label canonical environment model per the [Environment Labeling Standard](.
 | Artifact | Platform | Tier | Readiness | Environment | Auth | Payments | Monitoring |
 |----------|----------|------|-----------|-------------|------|----------|------------|
 | api-server | Node.js/Express | 1 | Functional Alpha | Seeded Data | Yes | Yes | Yes |
-| lyte-command-center | React/Vite | 1 | Functional Alpha | Seeded Data | Yes | Partial | Partial |
+| ~~lyte-command-center~~ | ARCHIVED | — | — | — | — | — | — |
 | szl-holdings | React/Vite | 1 | Functional Alpha | Live | Partial | No | No |
 | mockup-sandbox | React/Vite | 1 | Functional Alpha | Demo | No | No | No |
 | vessels | React/Vite | 2 | Functional Alpha | Demo | Yes | Partial | Partial |
 | lyte-mobile | Expo/RN | 2 | Prototype | Demo | Partial | No | No |
-| firestorm (Aegis) | React/Vite | 3 | Functional Alpha | Demo | Yes | No | Partial |
+| aegis | React/Vite | 2 | Functional Alpha | Demo | Yes | No | Partial |
 | terra | React/Vite | 3 | Functional Alpha | Seeded Data | Yes | Partial | Partial |
 | carlota-jo | React/Vite | 3 | Functional Alpha | Live | Partial | Partial | No |
-| stephen-site | React/Vite | 3 | Functional Alpha | Live | No | No | No |
+| ~~stephen-site~~ | ARCHIVED | — | — | — | — | — | — |
 | szl-holdings-mobile | Expo/RN | 3 | Prototype | Demo | Partial | No | No |
 | aegis-mobile | Expo/RN | 3 | Prototype | Demo | Partial | No | No |
 | vessels-mobile | Expo/RN | 3 | Prototype | Demo | Partial | No | No |

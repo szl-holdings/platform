@@ -21,17 +21,13 @@ Last updated: 2026-04-16
 | `api-server` | `artifacts/api-server` | **Reserved VM** | Always-on required: WebSocket connections, background job processing, GraphQL subscriptions |
 | `command` (Command Portal) | `artifacts/command` | **Autoscale** | Stateless React SPA |
 | `aegis` (Aegis / Defense) | `artifacts/aegis` | **Autoscale** | Stateless React SPA |
-| `firestorm` (legacy Aegis path) | `artifacts/firestorm` | **Autoscale** | Stateless React SPA; alias of aegis |
 | `terra` (Real Estate) | `artifacts/terra` | **Autoscale** | Stateless React SPA |
 | `vessels` (Maritime) | `artifacts/vessels` | **Autoscale** | Stateless React SPA |
-| `prism-counsel` (Legal) | `artifacts/prism-counsel` | **Autoscale** | Stateless React SPA |
 | `carlota-jo` (Advisory) | `artifacts/carlota-jo` | **Autoscale** | Stateless React SPA |
-| `stephen-site` (Founder) | `artifacts/stephen-site` | **Autoscale** | Stateless React SPA |
-| `lyte-command-center` | `artifacts/lyte-command-center` | **Autoscale** | Stateless React SPA |
-| `imperium` | `artifacts/imperium` | **Autoscale** | Stateless React SPA |
 | `szl-holdings-mobile` (CORTEX) | `artifacts/szl-holdings-mobile` | **N/A** | Distributed via Expo EAS / App Store / Google Play |
 | `cortex-mobile` | `artifacts/cortex-mobile` | **N/A** | Distributed via Expo EAS |
 | `mockup-sandbox` | `artifacts/mockup-sandbox` | **N/A** | Development-only component preview; never deployed |
+| 5 archived artifacts | (see `ops/frontier/disposition-matrix.md`) | **ARCHIVED** | All deregistered; ARCHIVED.md or DEPRECATED.md present. Do not deploy. |
 
 ---
 
@@ -88,13 +84,11 @@ All services in dev share the Replit proxy via path-based routing:
 | `/api/` | `api-server` |
 | `/command/` | `command` |
 | `/aegis/` | `aegis` |
-| `/firestorm/` | `firestorm` |
 | `/terra/` | `terra` |
 | `/vessels/` | `vessels` |
-| `/prism-counsel/` | `prism-counsel` |
 | `/carlota-jo/` | `carlota-jo` |
-| `/stephen-site/` | `stephen-site` |
 | `/__mockup` | `mockup-sandbox` (dev only) |
+| Archived routes (5 paths) | ARCHIVED — no active frontends; see `ops/frontier/disposition-matrix.md` |
 
 ---
 

@@ -119,7 +119,7 @@ test.describe("Ecosystem Command Portal — Dashboard Content", () => {
 
     const ecosystemLink = page
       .locator(
-        "a[href*='firestorm'], a[href*='vessels'], a[href*='terra'], a[href*='lyte'], a[href*='prism-counsel']"
+        "a[href*='aegis'], a[href*='vessels'], a[href*='terra'], a[href*='lyte']"
       )
       .first();
     const hasEcosystemLink = await ecosystemLink

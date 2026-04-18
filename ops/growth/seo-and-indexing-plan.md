@@ -66,7 +66,7 @@ Current `public/robots.txt` correctly blocks:
 - `/ops` — internal ops surfaces
 - `/kpi-dashboard` — internal metrics
 - `/investors` — private investor relations
-- `/alloy`, `/prism-counsel`, `/forge`, `/nexus`, `/oracle`, `/control-tower`, `/analyst` — internal
+- `/alloy`, `/forge`, `/nexus`, `/oracle`, `/control-tower`, `/analyst` — internal
 
 **Action**: Verify no new internal routes are added without updating `robots.txt`.
 
@@ -96,7 +96,6 @@ Current `public/robots.txt` correctly blocks:
 | Homepage | `/og/og-home.jpg` | Present |
 | Lyte | `/og/og-lyte.jpg` | Needed |
 | Alloy | `/og/og-alloy.jpg` | Needed |
-| PRISM Counsel | `/og/og-prism-counsel.jpg` | Needed |
 | Vessels | `/og/og-vessels.jpg` | Needed |
 | Terra | `/og/og-terra.jpg` | Needed |
 | Aegis | `/og/og-aegis.jpg` | Needed |

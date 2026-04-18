@@ -53,7 +53,7 @@ caught regressions in the last three founder-initiated changes.
 | `artifacts/szl-holdings-mobile` (CORTEX) | Built by EAS, distributed via TestFlight + Play Internal until store release (see `mobile-beta-ops.md`) |
 | `artifacts/cortex-mobile` | DEFERRED — never deployed (see `artifacts/cortex-mobile/DEFERRED.md`) |
 | `artifacts/mockup-sandbox` | INTERNAL — never deployed |
-| Archived artifacts (firestorm, lyte-command-center, imperium, prism-counsel, stephen-site) | NOT deployed; redirects only |
+| Archived artifacts (5 surfaces — see `ops/frontier/disposition-matrix.md`) | NOT deployed; redirects only |
 
 ## What Cannot Differ Between Tiers
 

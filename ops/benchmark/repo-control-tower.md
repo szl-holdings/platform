@@ -47,14 +47,9 @@ These are the active, maintained, investor-presentable surfaces:
 
 These artifacts exist in the repo but are not active. Each has an `ARCHIVED.md` or `DEPRECATED.md` notice.
 
-| Artifact | Path | Reason | Redirect |
-|----------|------|--------|----------|
-| Firestorm | `artifacts/firestorm` | Superseded by Aegis | → `/aegis/` |
-| Lyte Command Center | `artifacts/lyte-command-center` | Merged into Command | → `/command/` |
-| IMPERIUM | `artifacts/imperium` | Merged into Command | → `/command/infrastructure` |
-| Prism Counsel | `artifacts/prism-counsel` | Deprecated (task #579) | N/A |
-| Stephen Site | `artifacts/stephen-site` | Content in `/founder` | N/A |
-| Mockup Sandbox | `artifacts/mockup-sandbox` | Internal tool only | Never public |
+5 archived artifacts — see `ops/frontier/disposition-matrix.md` for full list, paths, and redirect dispositions.
+
+Mockup Sandbox (`artifacts/mockup-sandbox`) is an internal tool, never exposed publicly.
 
 ---
 
@@ -90,7 +85,7 @@ These artifacts exist in the repo but are not active. Each has an `ARCHIVED.md` 
 | Container Publish | `container-publish.yml` | ACTIVE | Docker image publishing |
 | Release | `release.yml` | ACTIVE | Release automation |
 | Deploy (legacy) | `deploy.yml` | DEPRECATED (no-op) | Replaced by deploy-staging/production |
-| PRISM Counsel CI | `prism-counsel-ci.yml` | ARCHIVED | Deprecated app; Azure infra no longer targeted |
+| Legacy archived CI | (see `ops/frontier/current-vs-target-architecture.md`) | ARCHIVED | Deprecated app; triggers disabled |
 | npm-publish | `npm-publish.yml` | REVIEW | Confirm needed for pnpm workspace |
 | maven-publish, rubygems-publish, nuget-publish | `*.yml` | REVIEW | Likely GitHub template artifacts; confirm if needed |
 

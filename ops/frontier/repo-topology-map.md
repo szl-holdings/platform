@@ -18,11 +18,7 @@ szl-holdings-platform/
 │   ├── command/                  # CANONICAL — Unified ops command (223 ts/tsx)
 │   ├── szl-holdings-mobile/      # CANONICAL MOBILE — Primary Expo app (167 ts/tsx)
 │   ├── cortex-mobile/            # SHELL — Expo scaffold only (2 ts/tsx)
-│   ├── firestorm/                # ARCHIVE — ARCHIVED.md; code removed; superseded by aegis
-│   ├── lyte-command-center/      # ARCHIVE — DEPRECATED.md; merged into command
-│   ├── imperium/                 # ARCHIVE — DEPRECATED.md; merged into command
-│   ├── prism-counsel/            # ARCHIVE — DEPRECATED.md; deprecated task #579
-│   ├── stephen-site/             # ARCHIVE — DEPRECATED.md; content moved to /founder
+│   ├── [5 archived artifacts]/   # ARCHIVE — see ops/frontier/disposition-matrix.md
 │   └── mockup-sandbox/           # INTERNAL — UI prototyping only (5 ts/tsx)
 │
 ├── lib/                          # 34 shared libraries (2 minimal shells)
@@ -88,7 +84,7 @@ szl-holdings-platform/
 │   ├── container-publish.yml     # Docker publish
 │   ├── release.yml               # Release creation
 │   ├── npm-publish.yml           # npm publish (possibly stale)
-│   └── prism-counsel-ci.yml      # STALE — deprecated app
+│   └── prism-counsel-ci.yml      # ARCHIVED — retained as archival record; targets deprecated surface
 │
 ├── .replit                       # Replit workspace config
 ├── .gitignore                    # Root gitignore
@@ -123,13 +119,10 @@ szl-holdings-platform/
     Web Apps (all consume API)
     ├── szl-holdings     (:21130 → :3001)
     ├── aegis            (:23933)
-    ├── firestorm        (:23932)
     ├── terra            (:25100)
     ├── vessels          (:18485)
     ├── carlota-jo       (:21200)
-    ├── command          (:25200)
-    ├── lyte-command-center (:19290)
-    └── [others]
+    └── command          (:25200)
     
     Mobile Apps (consume API via HTTPS)
     ├── cortex-mobile    (Expo, all 8 domains)
@@ -161,12 +154,8 @@ observability ◄─────────────  api-server + lib/* mon
 | 8080 | 80 | api-server | Main API entry |
 | 9090 | 3000 | (reserved) | Secondary API or staging |
 | 21130 | 3001 | szl-holdings | Flagship web |
-| 19290 | — | lyte-command-center | Legacy; merged into command |
 | 21200 | — | carlota-jo | Advisory |
-| 22100 | — | imperium | Secondary; merged into command |
-| 23932 | — | firestorm | Defense/Intel |
-| 23933 | — | aegis | Aegis alt entry |
+| 23933 | — | aegis | Defense/Intel (canonical) |
 | 25100 | — | terra | Real estate |
 | 25200 | — | command | Unified ops |
-| 26500 | — | prism-counsel | DEPRECATED |
-| 5173 | — | stephen-site | DEPRECATED |
+| _(various)_ | — | _(5 archived)_ | See disposition-matrix.md |

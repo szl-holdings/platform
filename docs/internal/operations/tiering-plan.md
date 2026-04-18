@@ -41,7 +41,7 @@ Tier 1 is the commercial wedge, the execution engine, and the corporate presence
 
 | Artifact | Role | Readiness | Notes |
 |----------|------|-----------|-------|
-| **Lyte** (`lyte-command-center`) | Market-facing software wedge | Functional Alpha → Pilot Ready (in progress) | Primary commercial entry point. PRISM framework, action queue, approval center, readiness module. All feature investment is Lyte-first. |
+| **Lyte** (embedded in `szl-holdings`) | Market-facing software wedge | Functional Alpha → Pilot Ready (in progress) | Primary commercial entry point. PRISM framework, action queue, approval center, readiness module. All feature investment is Lyte-first. |
 | **Alloy** (via `api-server`) | Execution fabric & shared backbone | Functional Alpha | Routes signals to auditable action. Workflow engine, AI decision engine, human-in-the-loop gates, audit trail. Not a standalone product — the engine beneath Lyte and all verticals. |
 | **API Server** (`api-server`) | Shared platform backend | Functional Alpha | Single Express process serving all platform backends. Auth, DB, Alloy, AI engine, audit trail. Backbone investment benefits all tiers. |
 | **SZL Holdings** (`szl-holdings`) | Corporate presence | Functional Alpha | Investor and enterprise evaluation destination. Top of brand hierarchy. Must reflect current readiness labels and tiering accurately. |
@@ -83,10 +83,10 @@ Tier 3 artifacts are built, operational, and maintained. They demonstrate ecosys
 
 | Artifact | Platform | Readiness | Deferred Until |
 |----------|----------|-----------|---------------|
-| **Aegis** (`firestorm`) | Defense & Intelligence web | Functional Alpha | Lyte/Alloy reach Pilot Ready and first commercial revenue exists. FedRAMP track requires dedicated compliance work. High capability, high market complexity. |
+| **Aegis** (`aegis`) | Defense & Intelligence web | Functional Alpha | Lyte/Alloy reach Pilot Ready and first commercial revenue exists. FedRAMP track requires dedicated compliance work. High capability, high market complexity. |
 | **Terra** (`terra`) | Real Estate Intelligence web | Functional Alpha | Lyte/Alloy commercial validation; NYC data pipeline validated with real broker use case. NYC expansion opportunity is real but requires dedicated sales motion. |
 | **Carlota Jo** (`carlota-jo`) | Advisory web app | Functional Alpha | Advisory revenue can be activated with minimal technical investment. Maintained as near-term revenue pathway; no feature investment. |
-| **Stephen Site** (`stephen-site`) | Founder site | Functional Alpha | No active development planned. Maintained for founder positioning. |
+| **SZL Holdings Founder** (route in `szl-holdings`) | Founder site | GA | Content live at `/founder` within the szl-holdings app. No separate artifact needed. |
 | **SZL Holdings Mobile** (`szl-holdings-mobile`) | Executive mobile | Prototype | Deferred. Activation requires Lyte Mobile reaching Pilot Ready first and confirmed executive mobile use case with a pilot partner. |
 | **Aegis Mobile** (`aegis-mobile`) | SOC mobile | Prototype | Follows Aegis web tier advancement. |
 | **Vessels Mobile** (`vessels-mobile`) | Fleet mobile | Prototype | Follows Vessels web commercial validation. |

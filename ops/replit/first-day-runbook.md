@@ -74,7 +74,7 @@ curl http://localhost:8080/api/health
 
 # Web apps (via Replit proxy)
 curl http://localhost:80/szl-holdings/
-curl http://localhost:80/firestorm/
+curl http://localhost:80/aegis/
 curl http://localhost:80/terra/
 curl http://localhost:80/vessels/
 ```
@@ -96,7 +96,7 @@ pnpm qa:site
 | App | Local URL |
 |-----|-----------|
 | SZL Holdings | `$REPLIT_DEV_DOMAIN/szl-holdings/` |
-| Aegis | `$REPLIT_DEV_DOMAIN/firestorm/` |
+| Aegis | `$REPLIT_DEV_DOMAIN/aegis/` |
 | Terra | `$REPLIT_DEV_DOMAIN/terra/` |
 | Vessels | `$REPLIT_DEV_DOMAIN/vessels/` |
 | Carlota Jo | `$REPLIT_DEV_DOMAIN/carlota-jo/` |

@@ -13,7 +13,7 @@ curl -sf https://$DOMAIN/api/health | jq '.status' | grep -q 'ok' || exit 1
 
 ### 2. Web App Loads
 ```bash
-for path in / /firestorm/ /terra/ /vessels/ /carlota-jo/ /command/; do
+for path in / /aegis/ /terra/ /vessels/ /carlota-jo/ /command/; do
   status=$(curl -sf -o /dev/null -w "%{http_code}" "https://$DOMAIN$path")
   [ "$status" = "200" ] || echo "FAIL: $path returned $status"
 done
@@ -45,7 +45,7 @@ curl -sf https://$DOMAIN/api/health | jq '.db.latencyMs' | awk '$1 > 500 { print
 1. Load SZL Holdings homepage — verify hero, nav, footer render correctly
 2. Navigate to Trust Center — verify security and compliance pages load
 3. Navigate to /demo — verify demo flow works
-4. Open Aegis (/firestorm/) — verify sidebar and workspace switching
+4. Open Aegis (/aegis/) — verify sidebar and workspace switching
 5. Open Terra (/terra/) — verify map and property views load
 6. Open Command Portal (/command/) — verify mode switching works
 7. Test login/logout cycle

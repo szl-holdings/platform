@@ -132,7 +132,7 @@ These gates run on every PR and push but do not block merge. Failures are review
 
 | Field | Value |
 |-------|-------|
-| **Check** | Lighthouse CI on szl-holdings, lyte-command-center, firestorm, stephen-site |
+| **Check** | Lighthouse CI on szl-holdings, aegis, terra, vessels, carlota-jo, command |
 | **Thresholds** | Performance > 80, Accessibility > 90, Best Practices > 90, SEO > 90 |
 | **Advisory reason** | Score regressions are visible and reviewed; score fluctuations are acceptable in development |
 | **Escalation trigger** | Accessibility drops below 85 on any public app → fix before release |

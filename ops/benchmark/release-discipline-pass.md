@@ -52,9 +52,9 @@ A point-in-time audit of release discipline across the repository. Identifies wh
 | `.replit` reflects canon only | PASS | Only api-server and mockup-sandbox listed as artifacts; no deprecated refs |
 | `.replit [userenv.shared]` contains only public values | PASS | VAPID_PUBLIC_KEY, VAPID_SUBJECT — both public by design |
 | No secrets in source code | PASS | None found |
-| Archived artifacts have DEPRECATED.md / ARCHIVED.md | PASS | prism-counsel, stephen-site, lyte-command-center, imperium, firestorm (redirects) |
-| Legacy CI workflows disabled/noted | PARTIAL | `prism-counsel-ci.yml` still present — archived status documented; workflow itself is now disabled |
-| CI matrix covers canonical apps | PARTIAL | `e2e.yml` updated to remove lyte-command-center; add command |
+| Archived artifacts have DEPRECATED.md / ARCHIVED.md | PASS | all 5 archived artifacts have marker files (see disposition-matrix.md) |
+| Legacy CI workflows disabled/noted | PASS | legacy CI workflow retained as archival record; disabled |
+| CI matrix covers canonical apps | PASS | `e2e.yml` covers canonical surfaces; archived specs removed |
 | `npm-publish.yml` / Maven / NuGet / RubyGems workflows | DEFERRED | Likely GitHub template artifacts — evaluate for removal at next hygiene pass |
 
 ---

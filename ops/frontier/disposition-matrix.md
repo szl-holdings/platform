@@ -5,6 +5,23 @@ Authority: Phase 0 Truth Audit — verified against live repo
 
 ---
 
+## Allowed References Policy
+
+This is the **single canonical source of truth** for archived artifact names. Archived artifact names (firestorm, lyte-command-center, imperium, prism-counsel, stephen-site) may appear in other documents only in the following approved contexts:
+
+| Context | Examples | Reason |
+|---------|---------|--------|
+| `DEPRECATED.md` / `ARCHIVED.md` files | In-directory marker files | Explicit archival markers per disposition plan |
+| Historical audit and report records | `docs/audit/`, `docs/reports/` | Immutable historical findings; must not be altered |
+| Product-specific docs for the archived product | `docs/architecture/prism-counsel-*`, `docs/buyer/prism-counsel-*`, `docs/investor/prism-counsel-*` | These docs ARE about the product; must name it |
+| Archive decision records | `ops/portfolio/archive-plan.md` | The plan itself must describe what is being archived |
+| Physical repo truth audits | `ops/frontier/repo-topology-map.md`, `ops/frontier/repo-truth-audit.md` | Accurately describe repo file system state |
+| Backward-compat API alias notes | `/api/firestorm → /api/aegis` in runbooks | Intentional compat note for operators |
+
+All other operational docs must reference "5 archived artifacts" generically and point here for details.
+
+---
+
 ## Classification Legend
 
 | Class | Meaning |

@@ -101,7 +101,7 @@ feat!: rename API response shape for /api/intelligence (BREAKING CHANGE)
 | `deploy-production.yml` | Release published + manual | Deploy to production (reads env secrets via `production` environment) |
 | `container-publish.yml` | Release published + tags | Build and push Docker images to GHCR |
 | `npm-publish.yml` | Release published + tags | Publish npm packages to GitHub Packages |
-| `prism-counsel-ci.yml` | PRs + push to main (path-filtered) | Prism Counsel–specific CI checks |
+| Legacy archived CI workflow | ARCHIVED — triggers disabled; see `ops/frontier/current-vs-target-architecture.md` |
 
 All workflows must pass before a PR may be merged. The **CI Gate** and **E2E Gate** jobs act as required status checks.
 

@@ -191,9 +191,9 @@ CORTEX does not replace domain pack web apps. It surfaces the most time-sensitiv
 
 ---
 
-## PRISM Counsel — Deprecation Note
+## Legal Domain Pack — Deprecation Note
 
-PRISM Counsel (`artifacts/prism-counsel`) was a legal matter command domain pack. It was deprecated in task #579 and has a `DEPRECATED.md` file. The code remains in the repository.
+The legal matter command domain pack was deprecated in task #579 and has a `DEPRECATED.md` marker. The code remains in the repository as an archival reference.
 
 **If PRISM Counsel is to be revived as a domain pack:**
 1. A design partner in the legal vertical must be identified first

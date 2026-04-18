@@ -237,8 +237,7 @@ Sliding-window 429s also include `Retry-After`, `X-RateLimit-Remaining`, and `X-
 |---|---|
 | Terra (Real Estate) | `/api/terra` |
 | Vessels (Maritime) | `/api/vessels` |
-| Aegis / Firestorm (Defense/Cyber) | `/api/firestorm` |
-| PRISM Counsel (Legal) | `/api/prism-counsel` |
+| Aegis (Defense/Cyber) | `/api/aegis` |
 | Lyte (E-commerce) | `/api/lyte` |
 | Holdings | `/api/holdings` |
 

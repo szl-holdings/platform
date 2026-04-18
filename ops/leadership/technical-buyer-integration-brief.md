@@ -55,7 +55,7 @@ The public API is organised under stable route prefixes. Anything **not** in thi
 - Admin routes (`/api/admin/*`)
 - Tenant provisioning (`/api/tenant-provisioning/*`)
 - Internal telemetry ingest (`/api/telemetry/*`, `/api/genai-telemetry/*`)
-- Live-data and demo routes (`/api/lyte-live/*`, `/api/firestorm-live/*`, `/api/terra-live/*`, `/api/vessels-live/*`, `/api/carlota-live/*`)
+- Live-data and demo routes (`/api/lyte-live/*`, `/api/aegis-live/*`, `/api/terra-live/*`, `/api/vessels-live/*`, `/api/carlota-live/*`)
 - AI runtime / agent gateway internals (`/api/ai-engine/*`, `/api/agent-os/*`, `/api/forge-runtime-api/*`)
 - Any route file suffixed `*-live.ts`, `*-extended.ts`, or under `routes/admin/` and `routes/tenant-provisioning/`
 

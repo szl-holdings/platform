@@ -42,9 +42,7 @@ Every domain pack must:
 | Aegis | Defense & Intelligence | IDS alerts, SCADA events, threat intel | Threat response cost, incident timeline | aegis, global |
 | Vessels | Maritime | AIS anomalies, sanctions hits, cargo events | Voyage cost, charter rate, fuel consumption | vessels, global |
 | Terra | Real Estate | Property filings, market data, distress signals | Acquisition cost, renovation timeline, IRR | terra, global |
-| PRISM Counsel | Legal & Compliance | Case filings, regulatory changes, compliance events | Legal cost, compliance timeline | prism, global |
 | Carlota Jo | Advisory Consulting | Client events, booking changes, deliverable status | Engagement cost, client satisfaction | carlota, global |
-| IMPERIUM | Infrastructure | System health, deployment events, capacity signals | Infrastructure cost, capacity planning | imperium, global |
 
 ---
 

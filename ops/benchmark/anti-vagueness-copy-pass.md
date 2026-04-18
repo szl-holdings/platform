@@ -38,7 +38,7 @@ Every public-facing page was audited against the governed decision infrastructur
 
 7. **about.tsx**: Full rewrite. Old page used deprecated `Navbar`/`Footer` components and described SZL as "strategic technology portfolio company". New page uses `SiteNav`/`SiteFooter`, governed decision infrastructure narrative, principles section, domain packs section, and CTA.
 
-8. **README.md**: Fixed dead paths (`/firestorm/` → `/aegis/`, `/lyte-command-center/` → `/command/`), updated product table terminology.
+8. **README.md**: Fixed dead paths (stale archived artifact paths updated to canonical surfaces `/aegis/` and `/command/`), updated product table terminology.
 
 ### Anti-vagueness rules applied
 

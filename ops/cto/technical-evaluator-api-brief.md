@@ -18,8 +18,7 @@ The DreamStack API is the unified backend for an enterprise AI platform that ser
 |---|---|---|
 | Terra | `/api/terra` | Real estate intelligence, distress signals, CRM |
 | Vessels | `/api/vessels` | Maritime tracking, voyage P&L, trading, insurance |
-| Aegis / Firestorm | `/api/firestorm` | Defense intelligence, SOC operations, cyber |
-| PRISM Counsel | `/api/prism-counsel` | Legal AI, matter management, court deadlines |
+| Aegis | `/api/aegis` | Defense intelligence, SOC operations, cyber |
 | Lyte | `/api/lyte` | E-commerce operations, billing, fulfilment |
 | Alloy | `/api/alloy` | AI engine, chat, research, digests, voice |
 | Holdings | `/api/holdings` | Fund ops, capital readiness, ownership |

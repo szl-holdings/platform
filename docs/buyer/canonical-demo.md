@@ -9,6 +9,8 @@
 
 ## Overview
 
+**Surface routing policy:** This buyer-facing demo uses the `/command/` portal (Unified Command artifact). Internal operator access to Lyte functionality uses `/lyte/` within `artifacts/szl-holdings` — see `docs/internal/demo/demo-runbook.md`. Both surfaces expose the same underlying Lyte workspace; `/command/` is the canonical path for all buyer-facing and investor demos.
+
 This is the single canonical demo flow for Lyte + Alloy. It walks through the complete operating loop:
 
 > Signal enters Lyte → PRISM scores and correlates it → Alloy retrieves evidence → Alloy produces a structured decision object → Approval gate assessed → Human approves or revises → Action created and routed → Audit trail closes the loop → Dashboard reflects resolution
@@ -19,8 +21,8 @@ Every step is reproducible using the seeded demo dataset. Every screen exists in
 
 ## Prerequisites
 
-- Lyte Command Center running at `/lyte-command-center`
-- Navigate to `/lyte-command-center/?demo=true` to activate demo mode
+- Command portal running at `/command`
+- Navigate to `/command/?demo=true` to activate demo mode
 - Verify "DEMO" label is visible in the header bar
 - API server running with demo data seeded (see Seeded Dataset section)
 - Screen resolution 1440×900 or higher
@@ -42,7 +44,7 @@ Every step is reproducible using the seeded demo dataset. Every screen exists in
 
 ### Scene 1: Signal Ingestion (1–2 minutes)
 
-**URL**: `/lyte-command-center/signals`
+**URL**: `/command/signals`
 
 **Narration**: *"Lyte watches your entire operational surface. When something changes — a new risk, a missed SLA, a compliance gap — Lyte catches it and structures it as a signal. Not a generic alert. A structured business event with context attached."*
 
@@ -65,7 +67,7 @@ Every step is reproducible using the seeded demo dataset. Every screen exists in
 
 ### Scene 2: PRISM Correlation (1 minute)
 
-**URL**: `/lyte-command-center/prism`
+**URL**: `/command/prism`
 
 **Narration**: *"PRISM is Lyte's intelligence framework. It doesn't just show you alerts — it correlates them. Let me show you what that means."*
 
@@ -86,7 +88,7 @@ Every step is reproducible using the seeded demo dataset. Every screen exists in
 
 ### Scene 3: Evidence Retrieval (1–2 minutes)
 
-**URL**: `/lyte-command-center/alloy/intelligence` → Retrieval tab
+**URL**: `/command/alloy/intelligence` → Retrieval tab
 
 **Narration**: *"Before Alloy makes any recommendation, it retrieves evidence. It searches your organization's actual knowledge — prior incidents, approval policies, owner metadata, connector context. Not generic AI. Your data."*
 
@@ -109,7 +111,7 @@ Every step is reproducible using the seeded demo dataset. Every screen exists in
 
 ### Scene 4: Structured Decision Object (2–3 minutes)
 
-**URL**: `/lyte-command-center/alloy/intelligence` → Triage Engine
+**URL**: `/command/alloy/intelligence` → Triage Engine
 
 **Narration**: *"Alloy doesn't give you a paragraph of AI text. It produces a structured decision object — validated against a schema, with typed fields, confidence scores, evidence references, and a clear recommended action."*
 
@@ -142,7 +144,7 @@ Every step is reproducible using the seeded demo dataset. Every screen exists in
 
 ### Scene 5: Approval Gate (1–2 minutes)
 
-**URL**: `/lyte-command-center/approvals`
+**URL**: `/command/approvals`
 
 **Narration**: *"This is a P1 action with $2.3M at stake. Alloy requires explicit human approval before anything executes. The approval gate is structural — enforced at the workflow layer, not just in the UI. It cannot be bypassed in code."*
 
@@ -167,7 +169,7 @@ Every step is reproducible using the seeded demo dataset. Every screen exists in
 
 ### Scene 6: Action Execution & Routing (1 minute)
 
-**URL**: `/lyte-command-center/actions`
+**URL**: `/command/actions`
 
 **Narration**: *"Once approved, Alloy creates the action item, routes it to the right owner, and attaches the full decision context. No copy-paste. No re-explanation. The owner gets everything they need to act."*
 
@@ -189,7 +191,7 @@ Every step is reproducible using the seeded demo dataset. Every screen exists in
 
 ### Scene 7: Audit Trail (1–2 minutes)
 
-**URL**: `/lyte-command-center/alloy/intelligence` → Audit Trail tab
+**URL**: `/command/alloy/intelligence` → Audit Trail tab
 
 **Narration**: *"Every step in this chain is permanently recorded in an immutable audit trail. Signal → retrieval → decision → approval → execution. This audit trail is designed for compliance review, LP reporting, and enterprise security diligence."*
 
@@ -214,7 +216,7 @@ Every step is reproducible using the seeded demo dataset. Every screen exists in
 
 ### Scene 8: Dashboard Resolution (1 minute)
 
-**URL**: `/lyte-command-center/`
+**URL**: `/command/`
 
 **Narration**: *"Back to the dashboard. The signal that was Critical and unassigned 10 minutes ago is now In Progress with an owner assigned and an action underway. This is Business Observability — not dashboards, not reports, not AI autopilot. Structured intelligence with human accountability at every step."*
 

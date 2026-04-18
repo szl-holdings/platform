@@ -332,7 +332,7 @@ check "API liveness" "curl -sf https://$DOMAIN/api/health/live | jq -r '.status'
 check "API readiness" "curl -sf https://$DOMAIN/api/health/ready | jq -r '.status'" "ready"
 
 # Web Apps
-for path in "/" "/firestorm/" "/terra/" "/vessels/" "/carlota-jo/" "/command/"; do
+for path in "/" "/aegis/" "/terra/" "/vessels/" "/carlota-jo/" "/command/"; do
   check "Web app $path" "curl -sf -o /dev/null -w '%{http_code}' https://$DOMAIN$path" "200"
 done
 

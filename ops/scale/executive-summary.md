@@ -76,8 +76,7 @@ Documented in `manual-actions-left.md`. Highlights:
   (`ops/frontier/disposition-matrix.md`)
 - No reopening of the mobile decision (`artifacts/cortex-mobile`
   remains DEFERRED; `artifacts/szl-holdings-mobile` is canonical CORTEX)
-- No reopening of archived artifacts (firestorm, lyte-command-center,
-  imperium, prism-counsel, stephen-site)
+- No reopening of archived artifacts (see ops/frontier/disposition-matrix.md)
 
 ## How to Read This Package
 

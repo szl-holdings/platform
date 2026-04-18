@@ -63,13 +63,11 @@ SERVICE              TYPE          VERSION          DEPLOYED         STATUS
 ─────────────────────────────────────────────────────────────────────────────
 api-server           Reserved VM   v1.4.2 (abc1234) Apr 15 14:32 UTC  LIVE ●
 szl-holdings (web)   Autoscale     v1.4.2 (abc1234) Apr 15 14:35 UTC  LIVE ●
-firestorm / Aegis    Autoscale     v1.4.2 (abc1234) Apr 15 14:35 UTC  LIVE ●
+aegis                Autoscale     v1.4.2 (abc1234) Apr 15 14:35 UTC  LIVE ●
 terra                Autoscale     v1.4.2 (abc1234) Apr 15 14:35 UTC  LIVE ●
 vessels              Autoscale     v1.4.2 (abc1234) Apr 15 14:35 UTC  LIVE ●
 carlota-jo           Autoscale     v1.4.2 (abc1234) Apr 15 14:35 UTC  LIVE ●
 command              Autoscale     v1.4.2 (abc1234) Apr 15 14:35 UTC  LIVE ●
-prism-counsel        Autoscale     v1.3.8 (def5678) Apr 10 09:12 UTC  LIVE ●
-stephen-site         Static        v1.0.1 (ghi9012) Mar 28 11:00 UTC  LIVE ●
 CORTEX mobile        EAS Build     v0.9.1 (build 44) Apr 12 16:00 UTC DISTRIBUTED
 ```
 
@@ -120,15 +118,15 @@ v1.4.1  |  Apr 14 09:15 UTC  |  Stephen  |  Fix auth session expiry bug
         |  Smoke tests: PASS  |  Known issues: none
 
 v1.4.0  |  Apr 12 16:00 UTC  |  Stephen  |  CORTEX mobile build 44, Aegis security modules
-        |  Services: firestorm, api-server, cortex-mobile
+        |  Services: aegis, api-server, cortex-mobile
         |  Smoke tests: PASS  |  Known issues: none
 
 v1.3.9  |  Apr 10 11:22 UTC  |  Stephen  |  Terra distress map improvements
         |  Services: terra, api-server
         |  Smoke tests: PASS  |  Known issues: none
 
-v1.3.8  |  Apr 08 09:00 UTC  |  Stephen  |  Prism Counsel security hardening
-        |  Services: prism-counsel, api-server
+v1.3.8  |  Apr 08 09:00 UTC  |  Stephen  |  Legal module security hardening
+        |  Services: api-server
         |  Smoke tests: PASS  |  Known issues: none
 ```
 

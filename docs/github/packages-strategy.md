@@ -88,13 +88,11 @@ pnpm add @szl-holdings/shared-ui
 |---------|-------|-----------|
 | API Server | `ghcr.io/szl-holdings/api-server` | `artifacts/api-server/Dockerfile` |
 | SZL Holdings Web | `ghcr.io/szl-holdings/szl-holdings-web` | `artifacts/szl-holdings/Dockerfile` |
-| Lyte Command Center | `ghcr.io/szl-holdings/lyte-command-center` | `artifacts/lyte-command-center/Dockerfile` |
 | Vessels | `ghcr.io/szl-holdings/vessels` | `artifacts/vessels/Dockerfile` |
 | Terra | `ghcr.io/szl-holdings/terra` | `artifacts/terra/Dockerfile` |
-| Aegis | `ghcr.io/szl-holdings/aegis` | `artifacts/firestorm/Dockerfile` |
+| Aegis | `ghcr.io/szl-holdings/aegis` | `artifacts/aegis/Dockerfile` |
 | Carlota Jo | `ghcr.io/szl-holdings/carlota-jo` | `artifacts/carlota-jo/Dockerfile` |
 | Command Portal | `ghcr.io/szl-holdings/command` | `artifacts/command/Dockerfile` |
-| IMPERIUM | `ghcr.io/szl-holdings/imperium` | `artifacts/imperium/Dockerfile` |
 
 ### Image Tagging Strategy
 
@@ -115,7 +113,7 @@ echo $GITHUB_TOKEN | docker login ghcr.io -u USERNAME --password-stdin
 
 # Pull
 docker pull ghcr.io/szl-holdings/api-server:latest
-docker pull ghcr.io/szl-holdings/lyte-command-center:1.2.3
+docker pull ghcr.io/szl-holdings/aegis:1.2.3
 ```
 
 ### Local development with Docker Compose

@@ -51,21 +51,6 @@
 
 ---
 
-### Firestorm — Security Simulation
-| Attribute | Value |
-|---|---|
-| **Artifact** | `artifacts/firestorm` |
-| **Package** | `@workspace/firestorm` |
-| **Status** | **Beta** |
-| **Audience** | Security teams, CISOs |
-| **URL** | `/firestorm/` |
-| **Authentication** | Yes — Replit OIDC |
-| **Live Data** | Threat feeds active; scenario/simulation data seeded |
-| **Blockers** | Integration tests for POST/mutation paths needed — see backlog |
-| **Notes** | Aegis simulation layer — tabletop exercises, scenario library, behavioral detection |
-
----
-
 ### Vessels — Maritime Intelligence
 | Attribute | Value |
 |---|---|
@@ -121,23 +106,10 @@
 | **URL** | `/command/` |
 | **Authentication** | Yes — Replit OIDC |
 | **Live Data** | Seeded/mocked |
-| **Blockers** | CORTEX cross-domain badge counts not wired to live API; new Vessels/Firestorm module KPIs not added to Command Overview |
+| **Blockers** | CORTEX cross-domain badge counts not wired to live API; new Vessels module KPIs not added to Command Overview |
 | **Notes** | CORTEX unified hub; recently scaffolded; push notification deep linking not yet implemented |
 
 ---
-
-### Prism Counsel — Legal Matter Management
-| Attribute | Value |
-|---|---|
-| **Artifact** | `artifacts/prism-counsel` |
-| **Package** | `@workspace/prism-counsel` |
-| **Status** | **Partial** |
-| **Audience** | Legal teams, compliance officers |
-| **URL** | `/prism-counsel/` |
-| **Authentication** | Yes — Replit OIDC |
-| **Live Data** | Matter management data partially real; NY court data live |
-| **Blockers** | Seed scripts for recovery tables broken — see backlog; Zod validation complete for these routes |
-| **Notes** | Most complete Zod validation coverage in the platform |
 
 ---
 
@@ -183,32 +155,18 @@
 
 ## Deprecated / Legacy
 
-### Stephen Site — Founder Portfolio (DEPRECATED)
-| Attribute | Value |
-|---|---|
-| **Artifact** | `artifacts/stephen-site` |
-| **Package** | `@workspace/stephen-site` |
-| **Status** | **Deprecated** |
-| **Disposition** | **Delete + Deregister** |
-| **Notes** | Content migrated to `/founder` route in `szl-holdings`. `DEPRECATED.md` confirms this. Workflow should be stopped and directory removed in Phase 2. |
+Five artifact directories are archived and no longer active. All are deregistered, marked with DEPRECATED.md or ARCHIVED.md, and have no active workflows.
 
-### Lyte Command Center (LEGACY BUILD ARTIFACT)
-| Attribute | Value |
-|---|---|
-| **Artifact** | `artifacts/lyte-command-center` |
-| **Package** | None |
-| **Status** | **Deprecated** |
-| **Disposition** | **Delete** |
-| **Notes** | No source files; only `dist/` and `vite.config.ts` remain. Lyte is now part of `szl-holdings`. Remove in Phase 2. |
+For full artifact-by-artifact disposition records, see [`ops/frontier/disposition-matrix.md`](../ops/frontier/disposition-matrix.md).
 
-### Imperium — Internal Command Tool (SKELETON)
-| Attribute | Value |
-|---|---|
-| **Artifact** | `artifacts/imperium` |
-| **Package** | None |
-| **Status** | **Concept** |
-| **Disposition** | **Delete** |
-| **Notes** | Only `node_modules/` directory; no source, no package.json. Remove in Phase 2 or scaffold properly. |
+**Summary of archived surfaces:**
+- Founder portfolio site → content at `/founder` in `szl-holdings`
+- Legacy ops command surface → functionality in `artifacts/command`
+- Unbuilt infrastructure tool stub → merged into `artifacts/command`
+- Legacy security entry point → superseded by `artifacts/aegis`
+- Legal matter management platform → deregistered; backend data retained in api-server
+
+No archived artifact should be deployed, registered, or referenced as an active product surface.
 
 ---
 
@@ -232,11 +190,11 @@
 | Status | Count | Artifacts |
 |---|---|---|
 | GA | 2 | Carlota Jo, API Server |
-| Beta | 5 | SZL Holdings, Aegis, Firestorm, Terra, SZL Holdings Mobile |
-| Partial | 3 | Vessels, Command, Prism Counsel |
+| Beta | 4 | SZL Holdings, Aegis, Terra, SZL Holdings Mobile |
+| Partial | 2 | Vessels, Command |
 | Internal | 1 | Mockup Sandbox |
-| Deprecated | 2 | Stephen Site, Lyte Command Center |
-| Concept / Skeleton | 2 | Cortex Mobile, Imperium |
+| Archived | 5 | Firestorm, Prism Counsel, Stephen Site, Lyte Command Center, Imperium |
+| Concept / Skeleton | 1 | Cortex Mobile |
 | **Total** | **15** | |
 
 ---

@@ -27,7 +27,7 @@ The development environment runs in a Replit workspace with path-based routing t
 | Artifact | Preview Path | Deployment Type |
 |---|---|---|
 | szl-holdings (public site) | / | Autoscale |
-| firestorm / Aegis | /firestorm/ | Autoscale |
+| aegis | /aegis/ | Autoscale |
 | terra / Terra | /terra/ | Autoscale |
 | vessels / Vessels | /vessels/ | Autoscale |
 | carlota-jo / Carlota Jo | /carlota-jo/ | Autoscale |

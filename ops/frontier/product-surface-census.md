@@ -42,7 +42,7 @@ Purpose: Complete inventory of all user-facing surfaces — real vs. aspirationa
 | Classification | CANONICAL |
 | Functionality | SOC command, MITRE ATT&CK mapping, SOAR playbooks, XDR console, Sentinel AI |
 | Backend-connected | Partially — threat intel feeds in demo/stub mode; core SOC UI real |
-| Notes | Full app at /aegis/; firestorm artifact archived (code removed, superseded by aegis) |
+| Notes | Full app at /aegis/; supersedes the previous thin-wrapper artifact (now archived) |
 
 ### 4. Terra — Real Estate Intelligence (`artifacts/terra`)
 
@@ -114,13 +114,7 @@ Purpose: Complete inventory of all user-facing surfaces — real vs. aspirationa
 
 All archived artifacts have 0 source files (code removed). Only marker files remain.
 
-| Artifact | Status | Original Purpose | Disposition |
-|----------|--------|-----------------|-------------|
-| firestorm | ARCHIVED.md | Defense entry point | Superseded by aegis |
-| lyte-command-center | DEPRECATED.md | Governed command | Merged into command |
-| imperium | DEPRECATED.md | Cloud infrastructure | Merged into command |
-| prism-counsel | DEPRECATED.md | Legal command | Deprecated task #579 |
-| stephen-site | DEPRECATED.md | Founder portfolio | Content moved to /founder |
+5 artifacts archived — see `ops/frontier/disposition-matrix.md` for full list and dispositions.
 
 ### Mockup Sandbox (`artifacts/mockup-sandbox`)
 - 5 src files — pure tooling
@@ -136,6 +130,6 @@ All archived artifacts have 0 source files (code removed). Only marker files rem
 | CANONICAL (web) | 7 | szl-holdings, api-server, aegis, terra, vessels, carlota-jo, command |
 | CANONICAL (mobile) | 1 | szl-holdings-mobile |
 | SHELL (scaffold only) | 1 | cortex-mobile |
-| ARCHIVE (code removed) | 5 | firestorm, lyte-command-center, imperium, prism-counsel, stephen-site |
+| ARCHIVE (code removed) | 5 | see ops/frontier/disposition-matrix.md |
 | INTERNAL | 1 | mockup-sandbox |
 | **TOTAL** | **15** (17 dirs total, some renamed/reclassified) |

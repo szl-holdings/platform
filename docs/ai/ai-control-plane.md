@@ -279,4 +279,3 @@ All control plane decisions are logged via `pino` at appropriate levels:
 *See also:*
 - *[NVIDIA Optional Runtime Strategy](nvidia-optional-runtime.md)*
 - *[Digital Twin and Simulation Strategy](../platform/digital-twin-and-simulation-strategy.md)*
-- *[Prism Counsel Model Routing](../architecture/prism-counsel-model-routing.md)*

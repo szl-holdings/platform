@@ -247,7 +247,6 @@ Path routing through the proxy:
 | `/aegis/` | `aegis` |
 | `/terra/` | `terra` |
 | `/vessels/` | `vessels` |
-| `/prism-counsel/` | `prism-counsel` |
 
 ---
 

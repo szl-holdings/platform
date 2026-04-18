@@ -45,7 +45,7 @@ curl -sf https://$DOMAIN/api/health | jq '{status: .status, version: .version, d
 ### Web App Availability
 
 ```bash
-for path in / /firestorm/ /terra/ /vessels/ /carlota-jo/ /command/; do
+for path in / /aegis/ /terra/ /vessels/ /carlota-jo/ /command/; do
   status=$(curl -sf -o /dev/null -w "%{http_code}" "https://$DOMAIN$path")
   if [ "$status" = "200" ]; then
     echo "PASS: $path ($status)"
@@ -93,7 +93,7 @@ After automated checks pass, run this manual spot-check. Takes 5–10 minutes.
 - [ ] Load SZL Holdings homepage — verify hero, nav, footer render correctly
 - [ ] Navigate to /trust — verify Trust Center loads
 - [ ] Navigate to /demo — verify demo request form renders
-- [ ] Open Aegis (/firestorm/) — verify sidebar and workspace switching
+- [ ] Open Aegis (/aegis/) — verify sidebar and workspace switching
 - [ ] Open Terra (/terra/) — verify map/property views load
 - [ ] Open Command Portal (/command/) — verify mode switching
 - [ ] Test login with smoke test credentials — verify session is created
@@ -110,7 +110,7 @@ After automated checks pass, run this manual spot-check. Takes 5–10 minutes.
 On first deployment to a new environment (e.g., first time deploying to production, or first staging deployment):
 
 **Frontend:**
-- [ ] All domain app paths load (/, /firestorm, /terra, /vessels, /carlota-jo, /command)
+- [ ] All domain app paths load (/, /aegis, /terra, /vessels, /carlota-jo, /command)
 - [ ] Navigation between domain apps works
 - [ ] Trust Center renders with correct content
 - [ ] Demo request form submits successfully (verify email received)

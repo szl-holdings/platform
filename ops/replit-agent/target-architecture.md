@@ -32,7 +32,7 @@ Generated: 2026-04-15
 |-----|---------|-------|
 | szl-holdings | Public web flagship | Primary entry point |
 | api-server | Backend API | Powers all apps |
-| firestorm (Aegis) | Defense & intel command | Aegis app at /firestorm/ |
+| aegis | Defense & intel command | Defense & Intelligence platform at /aegis/ |
 | terra | Real estate intelligence | Full feature set |
 | vessels | Maritime intelligence | Full feature set |
 | carlota-jo | Advisory consulting | Client-facing |
@@ -52,11 +52,7 @@ Generated: 2026-04-15
 ### Archive/Deprecate
 | App | Reason |
 |-----|--------|
-| aegis | Duplicate of firestorm (same code) |
-| imperium | Merged into command |
-| lyte-command-center | Merged into command |
-| prism-counsel | Deprecated (task #579), re-registered in error |
-| stephen-site | Deprecated (task #579), replaced by /founder in szl-holdings |
+| _(5 surfaces)_ | Archived — see `ops/frontier/disposition-matrix.md` |
 | aegis-mobile | Empty stub |
 | alloy-mobile | Empty stub |
 | carlota-jo-mobile | Empty stub |

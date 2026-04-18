@@ -37,7 +37,7 @@ Every release requires passing a verification gate before it is considered shipp
 ### Artifacts
 
 - [ ] All canonical artifacts build and load: szl-holdings, aegis, terra, vessels, carlota-jo, command, api-server
-- [ ] Deprecated artifacts (firestorm, lyte-command-center, imperium, prism-counsel, stephen-site) are not referenced in release notes
+- [ ] Archived/deprecated artifacts (see disposition-matrix.md) are not referenced in release notes
 
 ---
 

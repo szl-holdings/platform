@@ -5,7 +5,7 @@ Generated: 2026-04-16
 
 ## Overview
 
-The operator surface upgrade elevates lyte-command-center into a premium command model inspired by Linear's speed and Palantir's seriousness. Every interaction should feel intentional, fast, and trustworthy.
+The operator surface upgrade elevates the Command portal into a premium command model inspired by Linear's speed and Palantir's seriousness. Every interaction should feel intentional, fast, and trustworthy.
 
 ## Design Principles
 

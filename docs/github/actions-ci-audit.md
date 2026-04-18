@@ -17,7 +17,7 @@
 | `release.yml` | Release | Push `v*` tags | ✅ Hardened | Permissions added, softprops action SHA-pinned |
 | `lighthouse.yml` | Lighthouse CI | PR + push to master/main | ✅ Hardened | Permissions added, pnpm v4, treosh/lighthouse-ci-action SHA-pinned |
 | `e2e.yml` | E2E Tests | PR + push to master/main | ✅ Hardened | Permissions added, pnpm v4, matrix-based, gate job improved |
-| `prism-counsel-ci.yml` | PRISM Counsel CI/CD | Push/PR to main (path-filtered) | ✅ Hardened — Keep | Active Azure deployment pipeline for PRISM Counsel; relevant paths confirmed; permissions added; azure/login and azure/docker-login SHA-pinned |
+| `prism-counsel-ci.yml` | Matter Management CI/CD (legacy) | Push/PR to main (path-filtered) | ✅ Hardened — Legacy | Azure deployment pipeline hardened; SHA-pinned. Associated artifact archived — retain until Azure resources are decommissioned. |
 
 ---
 
@@ -25,13 +25,13 @@
 
 ### Finding 1: Missing Global Permissions Declaration — RESOLVED
 
-**Affected:** `ci.yml`, `build.yml`, `release.yml`, `lighthouse.yml`, `e2e.yml`, `prism-counsel-ci.yml`  
+**Affected:** `ci.yml`, `build.yml`, `release.yml`, `lighthouse.yml`, `e2e.yml` (and legacy `prism-counsel-ci.yml`)  
 **Risk:** Without explicit `permissions`, GitHub defaults to broad permissions for the GITHUB_TOKEN  
 **Fix applied:** Top-level `permissions: contents: read` added to all workflows. Jobs requiring elevated permissions declare them explicitly.
 
 ### Finding 2: Third-Party Actions Not Pinned to SHA — RESOLVED
 
-**Affected:** `release.yml` (softprops), `lighthouse.yml` (treosh), `prism-counsel-ci.yml` (azure/login, azure/docker-login)  
+**Affected:** `release.yml` (softprops), `lighthouse.yml` (treosh), legacy matter management workflow (azure/login, azure/docker-login)  
 **Risk:** A tag can be moved to point to malicious code — supply chain attack vector  
 **Fix applied:** All third-party actions pinned to full SHA (see pinning registry below)
 
@@ -46,9 +46,9 @@
 **Previous state:** Echoed a message, did nothing, no environment configured  
 **Fix applied:** Clarified as Replit-managed placeholder with proper environment input, production environment target, secret validation, and clear documentation of intent.
 
-### Finding 5: `prism-counsel-ci.yml` Relevance — RESOLVED (Keep)
+### Finding 5: Legacy Matter Management CI Relevance — RESOLVED (Retain Until Decommission)
 
-**Assessment:** Workflow is active, relevant, and path-filtered to PRISM Counsel-specific files and Azure infrastructure. Confirmed relevant. Hardened with permissions blocks and SHA-pinned Azure actions.
+**Assessment:** Workflow is path-filtered to matter management-specific files and Azure infrastructure. Associated artifact is archived — retain the CI workflow until Azure resources are decommissioned. Hardened with permissions blocks and SHA-pinned Azure actions.
 
 ---
 
@@ -150,12 +150,12 @@ jobs:
         with: { node-version: '20', cache: 'pnpm' }
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @workspace/szl-holdings run build
-      - run: pnpm --filter @workspace/lyte-command-center run build
-      - run: pnpm --filter @workspace/firestorm run build
+      - run: pnpm --filter @workspace/aegis run build
       - run: pnpm --filter @workspace/terra run build
       - run: pnpm --filter @workspace/vessels run build
       - run: pnpm --filter @workspace/carlota-jo run build
-      - run: pnpm --filter @workspace/stephen-site run build
+      - run: pnpm --filter @workspace/command run build
+      # 5 archived artifacts excluded from build matrix — see ops/frontier/disposition-matrix.md
 
   ci-gate:
     name: CI Gate

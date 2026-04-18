@@ -77,8 +77,7 @@ from Production." Run once. Every item is binary.
 - [ ] All seven canonical web artifacts (szl-holdings, api-server,
       aegis, terra, vessels, carlota-jo, command) build cleanly via
       their respective workflows
-- [ ] No archived artifact (firestorm, lyte-command-center, imperium,
-      prism-counsel, stephen-site) is registered to a production route
+- [ ] No archived artifact (see disposition-matrix.md) is registered to a production route
 - [ ] Mockup sandbox and any internal-only artifact are NOT exposed
       under any production path
 

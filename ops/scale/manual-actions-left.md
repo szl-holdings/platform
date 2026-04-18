@@ -50,7 +50,7 @@ Procedure: `production-cutover-checklist.md`.
       `REPLIT_STAGING_APP_ID`, `REPLIT_PROD_DEPLOY_TOKEN`,
       `REPLIT_PROD_APP_ID`
 - [ ] 🔴 Set `INTEGRATION_TEST_TOKEN` in GitHub Secrets
-- [ ] 🔴 Delete deprecated `prism-counsel-ci.yml` workflow
+- [ ] 🔴 Archive legacy CI workflow (retained as archival record; disable if still active)
 - [ ] 🔴 Update `e2e.yml` matrix to remove deprecated apps
 - [ ] 🔴 Verify `deploy-staging.yml` runs cleanly on next push to main
 - [ ] 🔴 Verify `deploy-production.yml` halts at confirm gate

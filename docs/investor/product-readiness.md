@@ -144,7 +144,7 @@
 | Background job infrastructure | ✅ Production-grade | Webhook delivery, reports, notifications, health scans, daily digest |
 | Notification dispatch | ✅ Production-grade | Rate-limited, templated, multi-channel (Slack, Teams, email, push) |
 | Analytics instrumentation | ✅ Operational | Core events: signup, login, dashboard view, signal view, approval decisions, billing events |
-| Admin diagnostics | ✅ Operational | Real-time system health at /lyte-command-center/admin/diagnostics |
+| Admin diagnostics | ✅ Operational | Real-time system health at /command/admin/diagnostics (Command is the canonical admin surface) |
 | OpenTelemetry | ✅ Integrated | Traces, metrics, configurable OTLP endpoint |
 | Stripe billing | 🔧 Built, not activated | Needs API key + price IDs configured |
 | Email (Resend/SendGrid) | 🔧 Built, not activated | Needs API key configured |

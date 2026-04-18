@@ -90,13 +90,12 @@ docs(ops): add incident response runbook
 | Artifact | Kind | Tech Stack | Deploy Command | Notes |
 |----------|------|-----------|----------------|-------|
 | API Server | API | Node.js / Express / TypeScript | `pnpm --filter api-server build` | Requires DATABASE_URL and all env secrets |
-| Lyte Command Center | Web | React / Vite | `pnpm --filter lyte-command-center build` | Requires API_URL env |
 | SZL Holdings (homepage) | Web | React / Vite | `pnpm --filter szl-holdings build` | Static, no backend dependency |
-| Aegis (Firestorm) | Web | React / Vite | `pnpm --filter firestorm build` | Requires API_URL env |
+| Aegis | Web | React / Vite | `pnpm --filter aegis build` | Requires API_URL env |
 | Terra | Web | React / Vite | `pnpm --filter terra build` | Requires API_URL env |
 | Vessels | Web | React / Vite | `pnpm --filter vessels build` | Requires API_URL env |
 | Carlota Jo | Web | React / Vite | `pnpm --filter carlota-jo build` | Requires API_URL env |
-| Stephen Site | Web | React / Vite | `pnpm --filter stephen-site build` | Partially static |
+| Command | Web | React / Vite | `pnpm --filter command build` | Requires API_URL env |
 | Lyte Mobile | Expo | React Native | `pnpm --filter lyte-mobile build` | EAS build for store submission |
 | Aegis Mobile | Expo | React Native | `pnpm --filter aegis-mobile build` | EAS build |
 | Vessels Mobile | Expo | React Native | `pnpm --filter vessels-mobile build` | EAS build |

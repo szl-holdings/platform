@@ -21,17 +21,13 @@ Generated: 2026-04-15
 
 | App | Path | Port | Status |
 |-----|------|------|--------|
-| szl-holdings | `/szl-holdings/` | 21130 | Production flagship |
-| firestorm (Aegis) | `/firestorm/` | 23932 | Defense/Intel command |
-| aegis | `/aegis/` | 23933 | Aegis alt entry |
+| szl-holdings | `/` | 21130 | Production flagship |
+| aegis | `/aegis/` | 23933 | Defense/Intel command |
 | terra | `/terra/` | 25100 | Real estate intel |
 | vessels | `/vessels/` | 18485 | Maritime intel |
 | carlota-jo | `/carlota-jo/` | 21200 | Advisory consulting |
 | command | `/command/` | 25200 | Unified ops command |
-| imperium | `/imperium/` | 22100 | Strategic command |
-| prism-counsel | `/prism-counsel/` | 26500 | Legal matter command |
-| stephen-site | `/stephen-site/` | 5173 | Founder profile |
-| lyte-command-center | `/lyte-command-center/` | 19290 | Lyte ops (merged into command) |
+| _(5 surfaces archived)_ | — | — | See `ops/frontier/disposition-matrix.md` |
 
 ## API Server
 
@@ -104,8 +100,8 @@ lyte-mobile, nexus, partner-portal, stephen-mobile, terra-mobile, vessels-mobile
 
 ci.yml, codeql.yml, container-publish.yml, dependency-review.yml,
 deploy.yml (deprecated), deploy-staging.yml, deploy-production.yml,
-e2e.yml, lighthouse.yml, npm-publish.yml, prism-counsel-ci.yml,
-release.yml, security.yml
+e2e.yml, lighthouse.yml, npm-publish.yml, release.yml, security.yml,
+plus 1 archived legacy CI workflow (triggers disabled — see ops/frontier/current-vs-target-architecture.md)
 
 ## Existing Documentation
 

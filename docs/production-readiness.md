@@ -257,7 +257,7 @@ All scripts are available via `pnpm` from the workspace root:
 - [x] .env.example sanitized for GitHub secret scanning
 - [x] Admin routes protected with RBAC middleware
 - [x] Quality audit scripts implemented and documented
-- [x] Ops Console available at `/lyte-command-center/admin/ops`
+- [x] Ops Console available at `/command/admin/ops`
 - [ ] CORS_ORIGINS configured for production domains
 - [ ] Rate limiting on public endpoints
 - [ ] Custom domain DNS configuration

@@ -40,16 +40,15 @@ The SZL Holdings platform is a pnpm monorepo with 16 deployable artifacts sharin
 
 ```
 szl-holdings-platform/
-├── artifacts/                  # 16 deployable applications
+├── artifacts/                  # Deployable applications
 │   ├── api-server/             # Centralized Express API server
-│   ├── lyte-command-center/    # Lyte web app
-│   ├── firestorm/              # Aegis web app
+│   ├── aegis/                  # Aegis Defense & Intelligence web app
+│   ├── command/                # Unified Command Portal web app
 │   ├── vessels/                # Vessels web app
 │   ├── terra/                  # Terra web app
 │   ├── carlota-jo/             # Carlota Jo web app
 │   ├── szl-holdings/           # SZL Holdings corporate site
-│   ├── stephen-site/           # Founder personal site
-│   └── *-mobile/               # 7 Expo/React Native mobile apps
+│   └── *-mobile/               # Expo/React Native mobile apps
 ├── lib/                        # Shared TypeScript libraries
 │   ├── shared-ui/              # Design system + component library
 │   ├── db/                     # Drizzle ORM schema + migrations

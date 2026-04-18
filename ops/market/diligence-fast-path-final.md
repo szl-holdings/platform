@@ -32,7 +32,7 @@ Four distinct diligence personas have distinct questions and distinct paths:
 |---|---|---|
 | 1 | Category positioning — what this is and why it matters | CATEGORY_POSITIONING.md, /trust, /platform |
 | 2 | Platform hierarchy — how products relate | COMPANY_FACT_SHEET.md, /platform |
-| 3 | Domain pack overview — which pack fits their domain | Domain pack pages (/firestorm, /vessels, /terra) |
+| 3 | Domain pack overview — which pack fits their domain | Domain pack pages (/aegis, /vessels, /terra) |
 | 4 | Design partner offer — what a pilot looks like | `design-partner-offer.md` |
 | 5 | Packaging model — commercial range | `packaging-model-final.md` |
 | 6 | Executive demo request | /demo |

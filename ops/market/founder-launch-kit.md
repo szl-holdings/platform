@@ -23,7 +23,7 @@ Five checklists:
 
 **Platform state:**
 - [ ] `/api/health` returns 200 and DB latency < 200ms
-- [ ] All demo paths load: /, /firestorm/, /terra/, /vessels/, /carlota-jo/, /command/
+- [ ] All demo paths load: /, /aegis/, /terra/, /vessels/, /carlota-jo/, /command/
 - [ ] Demo account credentials confirmed working (do not use real partner accounts for demos)
 - [ ] No pending deployments or migrations during the demo window
 
@@ -81,7 +81,7 @@ Five checklists:
 **Automated verification:**
 - [ ] `/api/health/live` returns 200
 - [ ] `/api/health/ready` returns 200
-- [ ] All web app paths return 200 (/, /firestorm/, /terra/, /vessels/, /carlota-jo/, /command/)
+- [ ] All web app paths return 200 (/, /aegis/, /terra/, /vessels/, /carlota-jo/, /command/)
 
 **Manual spot-check:**
 - [ ] Homepage loads with correct content

@@ -88,16 +88,9 @@ Run via: `pnpm test:e2e` (full) or per-spec in CI `e2e.yml`
 | `command.spec.ts` | Unified Command | `@workspace/command` | 3005 |
 | `a11y.spec.ts` | SZL Holdings (accessibility) | `@workspace/szl-holdings` | 3000 |
 
-### 4b. Explicitly Excluded from CI E2E Matrix — Documented Reasons
+### 4b. Explicitly Excluded from CI E2E Matrix
 
-| Spec | Reason for Exclusion |
-|------|---------------------|
-| `imperium.spec.ts` | IMPERIUM has no standalone build artifact registered in CI; spec uses `appAvailable` guard and self-skips gracefully. Add to CI when a dedicated artifact is promoted. |
-| `lyte.spec.ts` | Lyte Command Center is embedded within SZL Holdings routes, not a separately built artifact; spec self-skips when path unavailable. |
-| `prism-counsel.spec.ts` | PRISM Counsel has no standalone CI artifact; spec self-skips when path unavailable. |
-| `stephen-site.spec.ts` | Stephen Lutar personal site has no CI-registered artifact; spec self-skips when path unavailable. |
-
-All excluded specs use `appAvailable` guards and call `testInfo.skip()` when the target is not running — they will not cause false failures if inadvertently included.
+No specs are currently excluded. All archived-surface specs (for surfaces in `ops/frontier/disposition-matrix.md`) have been deleted. The `appAvailable` guard pattern is available for future use if new conditional specs are needed.
 
 ---
 

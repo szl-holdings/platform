@@ -19,7 +19,7 @@ Generated: 2026-04-15
 - [x] Deleted 11 empty artifact stubs (aegis-mobile, alloy-mobile, etc.)
 - [x] Deleted 3 zombie integration lib dirs (integrations-anthropic-ai, etc.)
 - [x] App disposition matrix → `ops/portfolio/app-disposition-matrix.md`
-- [ ] Deregister 5 deprecated artifacts (aegis, imperium, lyte, prism-counsel, stephen-site) — blocked by Replit artifact limit; deregister when ready to add new apps
+- [ ] Deregister 5 archived artifacts — blocked by Replit artifact limit; deregister when ready to add new apps (see `ops/frontier/disposition-matrix.md` for list)
 
 ## Phase 3: Replit Workflows & Deployment [COMPLETE]
 - [x] Deployment decisions → `ops/replit/deployment-decision.md`

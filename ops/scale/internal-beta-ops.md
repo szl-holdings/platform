@@ -38,10 +38,7 @@ Beta readiness is read off `ops/frontier/market-benchmark-gap-analysis.md`:
 
 ## Beta Discipline Rules
 
-1. **One canonical path per surface.** Archived artifacts (firestorm,
-   lyte-command-center, imperium, prism-counsel, stephen-site) do not
-   appear in any beta material. The disposition is final per
-   `ops/frontier/disposition-matrix.md`.
+1. **One canonical path per surface.** Archived artifacts do not appear in any beta material. The disposition is final per `ops/frontier/disposition-matrix.md`.
 
 2. **No beta surface is shown without honest status.** If Aegis is
    demoed to a partner, the demo includes "STIX/TAXII feeds are

@@ -147,24 +147,24 @@ function verifySignature(rawBody, signature, secret) {
 | `vessels.trading.order_placed` | Trade order submitted | Required | |
 | `vessels.insurance.claim_filed` | Insurance claim initiated | Required | |
 
-### 9. Aegis / Firestorm (Defense & Cybersecurity)
+### 9. Aegis (Defense & Cybersecurity)
 
 | Event | Trigger | Idempotency | Notes |
 |---|---|---|---|
-| `firestorm.incident.created` | Security incident logged | — | |
-| `firestorm.incident.resolved` | Incident closed | — | |
-| `firestorm.alert.triggered` | SOC alert fired | — | High-priority |
-| `firestorm.vulnerability.detected` | CVE scan finds new finding | — | |
-| `firestorm.compliance.violation` | Compliance check fails | — | |
+| `aegis.incident.created` | Security incident logged | — | |
+| `aegis.incident.resolved` | Incident closed | — | |
+| `aegis.alert.triggered` | SOC alert fired | — | High-priority |
+| `aegis.vulnerability.detected` | CVE scan finds new finding | — | |
+| `aegis.compliance.violation` | Compliance check fails | — | |
 
-### 10. PRISM Counsel (Legal)
+### 10. Legal & Compliance Events
 
 | Event | Trigger | Idempotency | Notes |
 |---|---|---|---|
-| `prism_counsel.matter.created` | New legal matter opened | Optional | |
-| `prism_counsel.document.filed` | Court document submitted | Required | |
-| `prism_counsel.deadline.approaching` | Court deadline within 48h | — | Automated calendar alert |
-| `prism_counsel.review.completed` | Document review finished | — | |
+| `legal.matter.created` | New legal matter opened | Optional | |
+| `legal.document.filed` | Court document submitted | Required | |
+| `legal.deadline.approaching` | Court deadline within 48h | — | Automated calendar alert |
+| `legal.review.completed` | Document review finished | — | |
 
 ### 11. Governance & Compliance
 
@@ -212,6 +212,6 @@ Wildcard `*` scopes to all events in a namespace. Omit `events` to receive all e
 
 | Priority | Events | Recommended Action |
 |---|---|---|
-| Critical | `firestorm.alert.triggered`, `billing.invoice.failed`, `prism_counsel.deadline.approaching` | Alert on-call immediately |
+| Critical | `aegis.alert.triggered`, `billing.invoice.failed`, `legal.deadline.approaching` | Alert on-call immediately |
 | High | `ai.job.failed`, `billing.subscription.cancelled`, `governance.policy.violated` | Queue for review within 1h |
 | Normal | All other events | Standard processing |

@@ -36,8 +36,8 @@ The discipline: every manual action either (a) gets automated or
 | G4 | Set GitHub Secret `REPLIT_PROD_APP_ID` | Once | Founder |
 | G5 | Set GitHub Secret `INTEGRATION_TEST_TOKEN` | Once + on rotation | Founder |
 | G6 | Tag a release `vX.Y.Z` and push | Per release | Founder |
-| G7 | Delete `prism-counsel-ci.yml` workflow | Once (pending) | Engineering |
-| G8 | Update `e2e.yml` matrix to remove deprecated apps | Once (pending) | Engineering |
+| G7 | Archive legacy CI workflow (retain as archival record; disable triggers) | Once — COMPLETED | Engineering |
+| G8 | Update `e2e.yml` matrix to remove archived app specs | Once — COMPLETED | Engineering |
 | G9 | Triage Dependabot PRs | Weekly | Founder + Engineering |
 | G10 | Triage CodeQL alerts | Weekly | Founder + Engineering |
 

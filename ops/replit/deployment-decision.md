@@ -7,7 +7,7 @@ Generated: 2026-04-15
 | Workload | Deployment Type | Reason |
 |----------|----------------|--------|
 | szl-holdings (web) | **Autoscale** | Public HTTP traffic, stateless, scales with demand |
-| firestorm/Aegis (web) | **Autoscale** | Standard web app, stateless rendering |
+| aegis (web) | **Autoscale** | Standard web app, stateless rendering |
 | terra (web) | **Autoscale** | Standard web app |
 | vessels (web) | **Autoscale** | Standard web app |
 | carlota-jo (web) | **Autoscale** | Standard web app |

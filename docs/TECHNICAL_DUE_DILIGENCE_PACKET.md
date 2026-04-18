@@ -33,7 +33,7 @@ SZL Holdings (corporate surface)
 │
 ├── Shared Database (PostgreSQL)
 │   ├── Shared schema (auth, audit, proof chain, signals, entities)
-│   └── Domain schemas (vessels, aegis, terra, lyte, prism-counsel)
+│   └── Domain schemas (vessels, aegis, terra, lyte)
 │
 ├── Frontend Applications (React + Vite + TypeScript)
 │   ├── SZL Holdings Corporate (/)
@@ -41,7 +41,6 @@ SZL Holdings (corporate surface)
 │   ├── Vessels (/vessels/)
 │   ├── Terra (/terra/)
 │   ├── Carlota Jo (/carlota-jo/)
-│   ├── Prism Counsel (/prism-counsel/)
 │   └── Command Portal (/command/)
 │
 ├── Mobile Application (Expo / React Native)

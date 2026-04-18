@@ -13,15 +13,11 @@ Generated: 2026-04-16 (updated)
 | szl-holdings | `/` | 21130 | Running — canonical flagship |
 | api-server | `/api/` | 8080 | Running — canonical backend |
 | aegis | `/aegis/` | 23933 | Running — canonical defense UI |
-| firestorm | `/firestorm/` | 23932 | Running — thin entry, same domain as aegis |
+| _(5 archived)_ | _(various)_ | — | Archived/deregistered — see disposition-matrix.md |
 | terra | `/terra/` | 25100 | Running — canonical |
 | vessels | `/vessels/` | 18485 | Running — canonical |
 | carlota-jo | `/carlota-jo/` | 21200 | Running — canonical |
 | command | `/command/` | 25200 | Running — canonical unified ops |
-| lyte-command-center | `/lyte-command-center/` | 19290 | Running — REDUNDANT (merged into command) |
-| imperium | `/imperium/` | 22100 | Running — REDUNDANT (merged into command) |
-| prism-counsel | `/prism-counsel/` | 26500 | Running — DEPRECATED, has DEPRECATED.md |
-| stephen-site | `/stephen-site/` | 5173 | Running — DEPRECATED, has DEPRECATED.md |
 | mockup-sandbox | `/__mockup/` | — | Internal tool only |
 
 **Problem:** 5 of 13 registered web apps are redundant or deprecated but still running, consuming resources and creating routing confusion.
@@ -38,7 +34,7 @@ Generated: 2026-04-16 (updated)
 - **Host:** Replit (Autoscale deployment)
 - **DB:** Replit-managed PostgreSQL 16 (561+ tables in `lib/db`)
 - **Secrets:** Mix of Replit Secrets panel + hardcoded values in `.replit [userenv.shared]` — **NON-COMPLIANT**
-- **CI/CD:** 13 GitHub workflows; 2 stale (prism-counsel-ci.yml, partially e2e.yml)
+- **CI/CD:** 13 GitHub workflows; 1 legacy (prism-counsel-ci.yml archived — retained as archival record)
 - **Credential files:** Both mobile Firebase configs are placeholder-only (compliant)
 
 ---
@@ -55,14 +51,9 @@ Generated: 2026-04-16 (updated)
 | terra | `/terra/` | Real estate intelligence |
 | vessels | `/vessels/` | Maritime intelligence |
 | carlota-jo | `/carlota-jo/` | Premium advisory |
-| command | `/command/` | Unified ops command (absorbs lyte + imperium) |
+| command | `/command/` | Unified ops command (merged operator surfaces) |
 
-**Eliminated:**
-- `firestorm` — route at /firestorm/ redirects to /aegis/
-- `lyte-command-center` — deregistered; /lyte-command-center/ redirects to /command/
-- `imperium` — deregistered; /imperium/ redirects to /command/infrastructure
-- `prism-counsel` — deregistered; archive code; /prism-counsel/ returns 410 or redirects
-- `stephen-site` — deregistered; /stephen-site/ redirects to /founder
+**Eliminated:** 5 archived artifacts deregistered — see `ops/frontier/disposition-matrix.md` for redirect and disposition details.
 
 ### Mobile Target Topology
 
@@ -86,7 +77,7 @@ Generated: 2026-04-16 (updated)
 | Workflow | Target State |
 |----------|-------------|
 | `ci.yml` | Keep — add new canonical apps to matrix |
-| `e2e.yml` | Update — remove lyte-command-center, add command |
+| `e2e.yml` | Updated — archived specs removed, command spec added |
 | `security.yml` | Keep as-is |
 | `codeql.yml` | Keep as-is |
 | `dependency-review.yml` | Keep as-is |
@@ -97,7 +88,7 @@ Generated: 2026-04-16 (updated)
 | `container-publish.yml` | Keep as-is |
 | `release.yml` | Keep as-is |
 | `npm-publish.yml` | Review — confirm if pnpm workspace still needs this |
-| `prism-counsel-ci.yml` | **DELETE** — deprecated app |
+| `prism-counsel-ci.yml` | ARCHIVED — retained as archival record; triggers **disabled** (do not re-enable) |
 
 ---
 
@@ -110,7 +101,6 @@ Generated: 2026-04-16 (updated)
 | VAPID_PRIVATE_KEY hardcoded in .replit | P0 | This task (Phase 1) |
 | Mobile Firebase configs need .gitignore protection | P0 | This task (Phase 1) |
 | README claims outdated (22 apps, 2331 endpoints, 644 tables, Node 20) | P1 | Product topology task |
-| `prism-counsel-ci.yml` workflow is stale | P2 | CI/CD cleanup task |
-| `e2e.yml` tests deprecated `lyte-command-center` | P2 | CI/CD cleanup task |
+| Legacy CI workflow archived | P2 — RESOLVED | CI/CD cleanup task |
 | api-spec and approvals lib packages are empty shells | P2 | Lib cleanup task |
 | CORTEX mobile not yet in app stores | P1 | Mobile task |

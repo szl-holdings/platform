@@ -125,13 +125,11 @@ Every workload has a designated deployment type. Choosing the wrong type wastes 
 |----------|----------|----------------|-----------|
 | `api-server` | `artifacts/api-server` | **Reserved VM** | Always-on, WebSocket connections, background job processing, scheduled jobs, GraphQL subscriptions — cannot tolerate cold starts |
 | `szl-holdings` (web) | `artifacts/szl-holdings` | **Autoscale** | Stateless React SPA, scales to zero when idle, handles traffic bursts |
-| `firestorm` / Aegis | `artifacts/firestorm` | **Autoscale** | Stateless web app |
+| `aegis` | `artifacts/aegis` | **Autoscale** | Stateless web app |
 | `terra` | `artifacts/terra` | **Autoscale** | Stateless web app |
 | `vessels` | `artifacts/vessels` | **Autoscale** | Stateless web app |
 | `carlota-jo` | `artifacts/carlota-jo` | **Autoscale** | Stateless web app |
 | `command` | `artifacts/command` | **Autoscale** | Stateless web app |
-| `prism-counsel` | `artifacts/prism-counsel` | **Autoscale** | Stateless web app |
-| `stephen-site` | `artifacts/stephen-site` | **Static** | Marketing/personal site — no server needed, served from CDN |
 | `szl-holdings-mobile` (Expo) | `artifacts/szl-holdings-mobile` | **EAS Build** | Mobile app — built via Expo Application Services, distributed via app stores; no Replit deployment |
 | CORTEX mobile | (future artifact) | **EAS Build** | Same as above |
 
@@ -159,14 +157,6 @@ pnpm --filter @workspace/szl-holdings run build
 # Health check: HTTP 200 on /
 ```
 
-### Static Site (stephen-site)
-
-```bash
-# Build
-pnpm --filter @workspace/stephen-site run build
-
-# Output: dist/ — deploy as static hosting, no server process
-```
 
 ---
 

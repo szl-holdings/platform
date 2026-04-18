@@ -17,7 +17,7 @@ Screenshots are located in `docs/screenshots/`:
 | `aegis-soc-dashboard.jpg` | Aegis | SOC command dashboard |
 | `terra-marketing.jpg` | Terra | Real Estate Intelligence marketing page |
 | `vessels-dashboard.jpg` | Vessels | Fleet command dashboard |
-| `stephen-site.jpg` | Stephen Lutar | Founder authority site |
+| `szl-holdings-founder.jpg` | SZL Holdings | Founder profile (`/founder` in szl-holdings) |
 
 ---
 
