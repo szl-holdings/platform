@@ -1159,49 +1159,63 @@ export function buildTransactionalNotificationEmail(params: {
 }
 
 export interface ScheduledReportEmailOptions {
+  recipientName?: string;
   reportTitle: string;
+  reportId: string;
   scheduleName: string;
   domain: string;
   frequency: string;
   generatedAt: string;
-  reportUrl?: string;
+  downloadUrl: string;
 }
 
 export function buildScheduledReportEmail(opts: ScheduledReportEmailOptions): { subject: string; html: string; text: string } {
-  const subject = `Scheduled Report: ${opts.reportTitle}`;
-  const frequencyLabel = opts.frequency.charAt(0).toUpperCase() + opts.frequency.slice(1).replace("_", " ");
+  const { recipientName, reportTitle, scheduleName, domain, frequency, generatedAt, downloadUrl } = opts;
+
+  const greeting = recipientName ? `Hello ${recipientName},` : "Hello,";
+  const domainLabel = domain.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  const frequencyLabel = frequency.charAt(0).toUpperCase() + frequency.slice(1);
+
+  const subject = `Your ${frequencyLabel} Report is Ready — ${reportTitle}`;
 
   const html = szlBrand(`
-    <h2>Your Scheduled Report Is Ready</h2>
-    <p>Your scheduled report has been generated and is attached to this email as a PDF.</p>
+    <h2>Your Scheduled Report is Ready</h2>
+    <p>${greeting}</p>
+    <p>Your <strong>${frequencyLabel.toLowerCase()} report</strong> has been generated and is ready for download.</p>
     <div class="highlight">
       <p class="label">Report</p>
-      <p style="font-weight:600;">${opts.reportTitle}</p>
+      <p style="font-weight:600;">${reportTitle}</p>
       <p class="label" style="margin-top:8px;">Schedule</p>
-      <p>${opts.scheduleName}</p>
-      <p class="label" style="margin-top:8px;">Frequency</p>
-      <p>${frequencyLabel}</p>
+      <p>${scheduleName}</p>
+      <p class="label" style="margin-top:8px;">Domain</p>
+      <p>${domainLabel}</p>
       <p class="label" style="margin-top:8px;">Generated</p>
-      <p>${opts.generatedAt}</p>
+      <p>${generatedAt}</p>
     </div>
-    <p>The full report PDF is attached. ${opts.reportUrl ? `You can also <a href="${opts.reportUrl}" style="color:#6366f1;">view it online</a>.` : ""}</p>
-    <p style="font-size:12px;color:#9ca3af;">This report was delivered automatically by the SZL Holdings reporting schedule. To modify or cancel this schedule, contact your administrator.</p>
+    <p>Click below to download the PDF report. The link requires authentication to your SZL Holdings account.</p>
+    <a class="cta" href="${downloadUrl}">Download Report PDF</a>
+    <p style="margin-top:20px;font-size:12px;color:#9ca3af;">This is an automated delivery from your scheduled report configuration. If you no longer wish to receive these reports, contact your administrator to update the distribution list.</p>
   `);
 
   const text = [
-    `Scheduled Report: ${opts.reportTitle}`,
+    `Your Scheduled Report is Ready`,
     ``,
-    `Your scheduled report has been generated and is attached to this email as a PDF.`,
+    greeting,
     ``,
-    `Report:    ${opts.reportTitle}`,
-    `Schedule:  ${opts.scheduleName}`,
-    `Frequency: ${frequencyLabel}`,
-    `Generated: ${opts.generatedAt}`,
+    `Your ${frequencyLabel.toLowerCase()} report has been generated and is ready for download.`,
     ``,
-    opts.reportUrl ? `View online: ${opts.reportUrl}` : "",
+    `Report:    ${reportTitle}`,
+    `Schedule:  ${scheduleName}`,
+    `Domain:    ${domainLabel}`,
+    `Generated: ${generatedAt}`,
     ``,
-    `This report was delivered automatically by the SZL Holdings reporting schedule.`,
-  ].filter(line => line !== undefined).join("\n");
+    `Download your report: ${downloadUrl}`,
+    ``,
+    `The download link requires authentication to your SZL Holdings account.`,
+    ``,
+    `This is an automated delivery from your scheduled report configuration.`,
+    `If you no longer wish to receive these reports, contact your administrator.`,
+  ].join("\n");
 
   return { subject, html, text };
 }

@@ -45,6 +45,70 @@ function getUserId(req: Request): number | null {
   return (req as ExtendedRequest).user?.id ?? null;
 }
 
+function buildReportDownloadUrl(reportId: string): string {
+  const base = process.env.APP_BASE_URL
+    || (process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}/api` : null)
+    || "https://szlholdings.com/api";
+  return `${base}/reports/${reportId}/pdf`;
+}
+
+async function sendReportEmails(params: {
+  reportId: string;
+  reportTitle: string;
+  scheduleName: string;
+  domain: string;
+  frequency: string;
+  generatedAt: Date;
+  recipientEmails: string[];
+  distributedByUserId?: number | null;
+}): Promise<{ sent: number; failed: number }> {
+  const downloadUrl = buildReportDownloadUrl(params.reportId);
+  const generatedAtStr = params.generatedAt.toLocaleString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZoneName: "short",
+  });
+
+  let sent = 0;
+  let failed = 0;
+
+  for (const email of params.recipientEmails) {
+    const distributionId = await createDistribution({
+      reportId: params.reportId,
+      recipientEmail: email,
+      channel: "email",
+      distributedByUserId: params.distributedByUserId ?? null,
+    });
+
+    const { subject, html, text } = buildScheduledReportEmail({
+      reportId: params.reportId,
+      reportTitle: params.reportTitle,
+      scheduleName: params.scheduleName,
+      domain: params.domain,
+      frequency: params.frequency,
+      generatedAt: generatedAtStr,
+      downloadUrl,
+    });
+
+    const result = await sendEmail({ to: email, subject, html, text });
+
+    if (result.success) {
+      await markDistributionSent(distributionId);
+      sent++;
+      logger.info({ reportId: params.reportId, email, messageId: result.messageId, provider: result.provider }, "Report email sent");
+    } else {
+      await markDistributionFailed(distributionId, result.error ?? "Email delivery failed");
+      failed++;
+      logger.warn({ reportId: params.reportId, email, error: result.error }, "Report email delivery failed");
+    }
+  }
+
+  return { sent, failed };
+}
+
 const router: IRouter = Router();
 
 // ─── Template Routes ──────────────────────────────────────────────────────────
@@ -607,7 +671,7 @@ router.post("/reports/schedules", authMiddleware(), requireRole("admin", "ops"),
 router.post("/reports/schedules/run-due", authMiddleware(), requireRole("admin"), async (req: Request, res: Response) => {
   try {
     const schedules = await getSchedulesDue();
-    const results: Array<{ scheduleId: string; status: string; reportId?: string; error?: string }> = [];
+    const results: Array<{ scheduleId: string; status: string; reportId?: string; error?: string; emailSent?: number; emailFailed?: number }> = [];
 
     for (const schedule of schedules) {
       try {
@@ -671,46 +735,30 @@ router.post("/reports/schedules/run-due", authMiddleware(), requireRole("admin")
         const runDueDataConfig = (schedule.dataConfig as Record<string, unknown> | null) ?? {};
         const runDueDeliveryMethod = (runDueDataConfig["deliveryMethod"] as string | undefined) ?? "email";
         const runDueEmails = (schedule.recipientEmails as string[] | null) ?? [];
-        const runDueReportTitle = `${template.name} — ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long" })}`;
-
-        for (const recipientEmail of runDueEmails) {
-          const channel = runDueDeliveryMethod === "download" ? "download" : "email";
-          const distributionId = await createDistribution({ reportId, recipientEmail, channel: channel as "email" | "webhook" | "dashboard" | "download" });
-
-          if (channel === "email") {
-            try {
-              const pdfData = await getReportPdfBuffer(reportId);
-              const emailContent = buildScheduledReportEmail({
-                reportTitle: runDueReportTitle,
-                scheduleName: schedule.name,
-                domain: schedule.domain,
-                frequency: schedule.frequency,
-                generatedAt: new Date().toLocaleString("en-US", { dateStyle: "long", timeStyle: "short" }),
-              });
-              const sendResult = await sendEmail({
-                to: recipientEmail,
-                subject: emailContent.subject,
-                html: emailContent.html,
-                text: emailContent.text,
-                attachments: pdfData ? [{ filename: `${runDueReportTitle}.pdf`, content: pdfData, contentType: "application/pdf" }] : undefined,
-              });
-              if (sendResult.success) {
-                await markDistributionSent(distributionId);
-                logger.info({ distributionId, reportId, recipientEmail }, "Scheduled report email sent");
-              } else {
-                await markDistributionFailed(distributionId, sendResult.error ?? "Send failed");
-                logger.warn({ distributionId, reportId, recipientEmail, error: sendResult.error }, "Scheduled report email failed (no provider)");
-              }
-            } catch (emailErr) {
-              const errMsg = String(emailErr);
-              await markDistributionFailed(distributionId, errMsg);
-              logger.error({ distributionId, reportId, recipientEmail, err: emailErr }, "Scheduled report email error");
+        let emailSent = 0;
+        let emailFailed = 0;
+        if (runDueEmails.length > 0) {
+          if (runDueDeliveryMethod === "download") {
+            for (const email of runDueEmails) {
+              await createDistribution({ reportId, recipientEmail: email, channel: "download" });
             }
+          } else {
+            const emailResults = await sendReportEmails({
+              reportId,
+              reportTitle: `${template.name} — ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long" })}`,
+              scheduleName: schedule.name,
+              domain: schedule.domain,
+              frequency: schedule.frequency,
+              generatedAt: new Date(),
+              recipientEmails: runDueEmails,
+            });
+            emailSent = emailResults.sent;
+            emailFailed = emailResults.failed;
           }
         }
 
-        results.push({ scheduleId: schedule.scheduleId, status: "completed", reportId });
-        logger.info({ scheduleId: schedule.scheduleId, reportId }, "Scheduled report generated");
+        results.push({ scheduleId: schedule.scheduleId, status: "completed", reportId, emailSent, emailFailed });
+        logger.info({ scheduleId: schedule.scheduleId, reportId, emailSent, emailFailed }, "Scheduled report generated and delivered");
       } catch (scheduleErr) {
         await markScheduleRun(schedule.scheduleId, "failed");
         results.push({ scheduleId: schedule.scheduleId, status: "failed", error: String(scheduleErr) });
@@ -814,48 +862,31 @@ router.post("/reports/schedules/:scheduleId/run", authMiddleware(), requireRole(
     const perRunDataConfig = (schedule.dataConfig as Record<string, unknown> | null) ?? {};
     const perRunDeliveryMethod = (perRunDataConfig["deliveryMethod"] as string | undefined) ?? "email";
     const perRunEmails = (schedule.recipientEmails as string[] | null) ?? [];
-    const perRunReportTitle = `${template.name} — ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long" })}`;
-    let perRunEmailsSent = 0;
-
-    for (const recipientEmail of perRunEmails) {
-      const channel = perRunDeliveryMethod === "download" ? "download" : "email";
-      const distributionId = await createDistribution({ reportId, recipientEmail, channel: channel as "email" | "webhook" | "dashboard" | "download", distributedByUserId: getUserId(req) });
-
-      if (channel === "email") {
-        try {
-          const pdfData = await getReportPdfBuffer(reportId);
-          const emailContent = buildScheduledReportEmail({
-            reportTitle: perRunReportTitle,
-            scheduleName: schedule.name,
-            domain: schedule.domain,
-            frequency: schedule.frequency,
-            generatedAt: new Date().toLocaleString("en-US", { dateStyle: "long", timeStyle: "short" }),
-          });
-          const sendResult = await sendEmail({
-            to: recipientEmail,
-            subject: emailContent.subject,
-            html: emailContent.html,
-            text: emailContent.text,
-            attachments: pdfData ? [{ filename: `${perRunReportTitle}.pdf`, content: pdfData, contentType: "application/pdf" }] : undefined,
-          });
-          if (sendResult.success) {
-            await markDistributionSent(distributionId);
-            perRunEmailsSent++;
-            logger.info({ distributionId, reportId, recipientEmail }, "Per-run scheduled report email sent");
-          } else {
-            await markDistributionFailed(distributionId, sendResult.error ?? "Send failed");
-            logger.warn({ distributionId, reportId, recipientEmail, error: sendResult.error }, "Per-run scheduled report email failed (no provider)");
-          }
-        } catch (emailErr) {
-          const errMsg = String(emailErr);
-          await markDistributionFailed(distributionId, errMsg);
-          logger.error({ distributionId, reportId, recipientEmail, err: emailErr }, "Per-run scheduled report email error");
+    let emailSent = 0;
+    let emailFailed = 0;
+    if (perRunEmails.length > 0) {
+      if (perRunDeliveryMethod === "download") {
+        for (const email of perRunEmails) {
+          await createDistribution({ reportId, recipientEmail: email, channel: "download", distributedByUserId: getUserId(req) });
         }
+      } else {
+        const emailResults = await sendReportEmails({
+          reportId,
+          reportTitle: `${template.name} — ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long" })}`,
+          scheduleName: schedule.name,
+          domain: schedule.domain,
+          frequency: schedule.frequency,
+          generatedAt: new Date(),
+          recipientEmails: perRunEmails,
+          distributedByUserId: getUserId(req),
+        });
+        emailSent = emailResults.sent;
+        emailFailed = emailResults.failed;
       }
     }
 
-    sendSuccess(res, { scheduleId, reportId, status: "completed", distributionCount: perRunEmails.length, emailsSent: perRunEmailsSent, deliveryMethod: perRunDeliveryMethod });
-    logger.info({ scheduleId, reportId }, "Per-schedule run completed");
+    sendSuccess(res, { scheduleId, reportId, status: "completed", distributionCount: perRunEmails.length, deliveryMethod: perRunDeliveryMethod, emailSent, emailFailed });
+    logger.info({ scheduleId, reportId, emailSent, emailFailed }, "Per-schedule run completed");
   } catch (err) {
     handleRouteError(res, err, "Failed to run schedule");
   }
