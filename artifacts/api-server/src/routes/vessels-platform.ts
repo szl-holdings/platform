@@ -18,6 +18,7 @@ import { eq, and, desc, sql, or } from "drizzle-orm";
 import { z } from "zod";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware, parseIdParam, canAccessOrgRecord } from "../middlewares/auth";
+import { tenantScope } from "../middlewares/tenant-scope";
 import { isFlagEnabled } from "../lib/platform-flags";
 import { anyQuerySchema, jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
@@ -398,9 +399,11 @@ function buildCorridorIntelligence(corridors: any[]) {
   };
 }
 
-router.get("/vessels/platform/dashboard", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
+router.get("/vessels/platform/dashboard", authMiddleware(), tenantScope(), validateQuery(listQuerySchema), async (req, res) => {
   try {
-    const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
+    // Non-elevated users get their org from auth (req.tenantOrgId).
+    // Elevated admins (tenantOrgId undefined) may pass ?orgId=N to view any org; defaults to 1.
+    const orgId = req.tenantOrgId ?? (req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1);
 
     const [vessels, ports, voyages, exceptions, readinessItems, corridors] = await Promise.all([
       db.select().from(maritimeVesselsTable).where(eq(maritimeVesselsTable.orgId, orgId)).orderBy(desc(maritimeVesselsTable.updatedAt)),
@@ -448,9 +451,9 @@ router.get("/vessels/platform/dashboard", authMiddleware({ required: false }), v
   }
 });
 
-router.get("/vessels/platform/fleet", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
+router.get("/vessels/platform/fleet", authMiddleware(), tenantScope(), validateQuery(listQuerySchema), async (req, res) => {
   try {
-    const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
+    const orgId = req.tenantOrgId ?? (req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1);
     const status = req.query.status as string | undefined;
 
     const vessels = await db.select().from(maritimeVesselsTable).where(
@@ -466,9 +469,9 @@ router.get("/vessels/platform/fleet", authMiddleware({ required: false }), valid
   }
 });
 
-router.get("/vessels/platform/map", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
+router.get("/vessels/platform/map", authMiddleware(), tenantScope(), validateQuery(listQuerySchema), async (req, res) => {
   try {
-    const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
+    const orgId = req.tenantOrgId ?? (req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1);
 
     const [vessels, ports, exceptions] = await Promise.all([
       db.select().from(maritimeVesselsTable).where(eq(maritimeVesselsTable.orgId, orgId)),
@@ -486,10 +489,10 @@ router.get("/vessels/platform/map", authMiddleware({ required: false }), validat
   }
 });
 
-router.get("/vessels/platform/vessels/:id", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
+router.get("/vessels/platform/vessels/:id", authMiddleware(), tenantScope(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
-    const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
+    const orgId = req.tenantOrgId ?? (req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1);
 
     const [vessel] = await db.select().from(maritimeVesselsTable).where(
       and(eq(maritimeVesselsTable.id, id), eq(maritimeVesselsTable.orgId, orgId))
@@ -593,9 +596,9 @@ router.patch("/vessels/platform/vessels/:id", validateQuery(anyQuerySchema), aut
   }
 });
 
-router.get("/vessels/platform/voyages", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
+router.get("/vessels/platform/voyages", authMiddleware(), tenantScope(), validateQuery(listQuerySchema), async (req, res) => {
   try {
-    const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
+    const orgId = req.tenantOrgId ?? (req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1);
     const vesselId = req.query.vesselId ? parseInt(req.query.vesselId as string, 10) : undefined;
     const status = req.query.status as string | undefined;
     const limit = Math.min(parseInt(req.query.limit as string || "50", 10), 200);
@@ -622,10 +625,10 @@ router.get("/vessels/platform/voyages", authMiddleware({ required: false }), val
   }
 });
 
-router.get("/vessels/platform/voyages/:id", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
+router.get("/vessels/platform/voyages/:id", authMiddleware(), tenantScope(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
-    const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
+    const orgId = req.tenantOrgId ?? (req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1);
 
     const [voyage] = await db.select().from(voyagesTable).where(
       and(eq(voyagesTable.id, id), eq(voyagesTable.orgId, orgId))
@@ -729,9 +732,9 @@ router.patch("/vessels/platform/voyages/:id", validateQuery(anyQuerySchema), aut
   }
 });
 
-router.get("/vessels/platform/exceptions", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
+router.get("/vessels/platform/exceptions", authMiddleware(), tenantScope(), validateQuery(listQuerySchema), async (req, res) => {
   try {
-    const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
+    const orgId = req.tenantOrgId ?? (req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1);
     const status = req.query.status as string | undefined;
     const severity = req.query.severity as string | undefined;
     const vesselId = req.query.vesselId ? parseInt(req.query.vesselId as string, 10) : undefined;
@@ -759,10 +762,10 @@ router.get("/vessels/platform/exceptions", authMiddleware({ required: false }), 
   }
 });
 
-router.get("/vessels/platform/exceptions/:id", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
+router.get("/vessels/platform/exceptions/:id", authMiddleware(), tenantScope(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
-    const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
+    const orgId = req.tenantOrgId ?? (req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1);
 
     const [exc] = await db.select().from(maritimeExceptionsTable).where(and(eq(maritimeExceptionsTable.id, id), eq(maritimeExceptionsTable.orgId, orgId)));
     if (!exc) { sendNotFound(res, "Exception"); return; }
@@ -928,9 +931,9 @@ router.post("/vessels/platform/exceptions", authMiddleware(), validateBody(jsonO
   }
 });
 
-router.get("/vessels/platform/routes", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
+router.get("/vessels/platform/routes", authMiddleware(), tenantScope(), validateQuery(listQuerySchema), async (req, res) => {
   try {
-    const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
+    const orgId = req.tenantOrgId ?? (req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1);
     const vesselId = req.query.vesselId ? parseInt(req.query.vesselId as string, 10) : undefined;
     const status = req.query.status as string | undefined;
 
@@ -954,10 +957,10 @@ router.get("/vessels/platform/routes", authMiddleware({ required: false }), vali
   }
 });
 
-router.get("/vessels/platform/routes/:id", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
+router.get("/vessels/platform/routes/:id", authMiddleware(), tenantScope(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
-    const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
+    const orgId = req.tenantOrgId ?? (req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1);
 
     const [voyage] = await db.select().from(voyagesTable).where(and(eq(voyagesTable.id, id), eq(voyagesTable.orgId, orgId)));
     if (!voyage) { sendNotFound(res, "Route"); return; }
@@ -1011,9 +1014,9 @@ router.get("/vessels/platform/corridors", authMiddleware({ required: false }), v
   }
 });
 
-router.get("/vessels/platform/readiness", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
+router.get("/vessels/platform/readiness", authMiddleware(), tenantScope(), validateQuery(listQuerySchema), async (req, res) => {
   try {
-    const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
+    const orgId = req.tenantOrgId ?? (req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1);
 
     const items = await db.select().from(readinessItemsTable).where(
       and(eq(readinessItemsTable.orgId, orgId), eq(readinessItemsTable.product, VESSELS_PRODUCT))
