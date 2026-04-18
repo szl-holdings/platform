@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from "react";
-import { Play, Pause, SkipBack, SkipForward, Clock, AlertTriangle, Shield, Network, Server, Zap, ChevronRight, Target, Lock } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { apiFetch } from "@szl-holdings/shared-ui";
+import { Play, Pause, SkipBack, SkipForward, Clock, AlertTriangle, Shield, Network, Server, Zap, ChevronRight, Target, Lock, Loader2 } from "lucide-react";
 import { ExecutiveSafeModeProvider, useExecutiveSafeMode } from "../lib/executive-safe-mode-context";
 
 type EventSeverity = "critical" | "high" | "medium" | "low";
@@ -14,6 +16,18 @@ interface ReplayEvent {
   description: string;
   mitre: string;
   evidence: string;
+}
+
+interface FirestormIncident {
+  id: number;
+  title: string;
+  severity: string;
+  status: string;
+  mitreTactic?: string | null;
+  mitreId?: string | null;
+  description?: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 const SEV_COLOR: Record<EventSeverity, string> = {
@@ -32,7 +46,7 @@ const TYPE_LABEL: Record<string, string> = {
   discovery: "Discovery", defense_evasion: "Defense Evasion",
 };
 
-const REPLAY_EVENTS: ReplayEvent[] = [
+const SEED_EVENTS: ReplayEvent[] = [
   { id: "e01", t: 0, type: "initial_access", severity: "critical", actor: "APT29", target: "mail.corp.internal", description: "Spear-phishing email delivers macro-laced Excel attachment to finance team", mitre: "T1566.001", evidence: "Email header analysis, sandbox detonation log" },
   { id: "e02", t: 3, type: "execution", severity: "critical", actor: "APT29", target: "WKSTN-FIN-042", description: "PowerShell encoded command executes in-memory shellcode loader", mitre: "T1059.001", evidence: "Process tree: EXCEL.EXE → powershell.exe -enc …" },
   { id: "e03", t: 7, type: "persistence", severity: "high", actor: "APT29", target: "WKSTN-FIN-042", description: "Scheduled task created for SYSTEM-level persistence under task svchost64", mitre: "T1053.005", evidence: "Registry key HKLM\\SOFTWARE\\Microsoft\\… captured" },
@@ -55,7 +69,7 @@ function formatTime(seconds: number) {
 function EventDot({ event, playhead, onClick }: { event: ReplayEvent; playhead: number; onClick: () => void }) {
   const pct = (event.t / TOTAL_DURATION) * 100;
   const isPast = playhead >= event.t;
-  const isCurrent = playhead >= event.t && (REPLAY_EVENTS.findIndex(e => e.t > playhead) === REPLAY_EVENTS.indexOf(event) + 1 || REPLAY_EVENTS.indexOf(event) === REPLAY_EVENTS.filter(e => e.t <= playhead).length - 1);
+  const isCurrent = playhead >= event.t && (SEED_EVENTS.findIndex(e => e.t > playhead) === SEED_EVENTS.indexOf(event) + 1 || SEED_EVENTS.indexOf(event) === SEED_EVENTS.filter(e => e.t <= playhead).length - 1);
   const color = TYPE_COLOR[event.type];
 
   return (
@@ -89,6 +103,32 @@ function AegisReplayContent() {
   const [selectedEvent, setSelectedEvent] = useState<ReplayEvent | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const safeMode = useExecutiveSafeMode();
+
+  const { data: incidentData, isLoading } = useQuery<FirestormIncident[]>({
+    queryKey: ["firestorm-incidents-replay"],
+    queryFn: () => apiFetch<FirestormIncident[]>("/firestorm/incidents"),
+    staleTime: 60000,
+    retry: 1,
+  });
+
+  const incidents = Array.isArray(incidentData) ? incidentData : [];
+  const latestIncident = incidents
+    .filter(i => ["critical", "high"].includes(i.severity))
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0] ?? null;
+
+  const incidentId = latestIncident
+    ? `INC-${String(latestIncident.id).padStart(7, "0")}`
+    : "INC-2024-0847";
+
+  const incidentSeverityLabel = latestIncident
+    ? `${latestIncident.severity.charAt(0).toUpperCase() + latestIncident.severity.slice(1)} Severity`
+    : "APT29 (Cozy Bear)";
+
+  const dwellTime = latestIncident
+    ? `${Math.round((Date.now() - new Date(latestIncident.createdAt).getTime()) / 60000)} min dwell`
+    : "52 minutes";
+
+  const REPLAY_EVENTS = SEED_EVENTS;
 
   const visibleEvents = REPLAY_EVENTS.filter(e => e.t <= playhead);
   const currentEvent = visibleEvents[visibleEvents.length - 1] ?? null;
@@ -136,7 +176,7 @@ function AegisReplayContent() {
             <div className="text-[11px] max-w-sm" style={{ color: "rgba(255,255,255,0.4)" }}>Attack path replay data contains unreviewed incident intelligence. All replay controls and event data are blocked in Executive Safe Mode.</div>
           </div>
           <div className="text-[9px] px-3 py-1.5 rounded-lg font-mono" style={{ color: "rgba(139,122,200,0.6)", background: "rgba(139,122,200,0.08)", border: "1px solid rgba(139,122,200,0.15)" }}>
-            Contact the SOC lead to release INC-2024-0847 for executive review
+            Contact the SOC lead to release {incidentId} for executive review
           </div>
         </div>
       </div>
@@ -149,6 +189,7 @@ function AegisReplayContent() {
         <div className="flex items-center gap-2 mb-1">
           <Play className="w-3.5 h-3.5" style={{ color: "#8b7ac8" }} />
           <span className="text-[10px] font-bold uppercase tracking-widest font-mono" style={{ color: "#8b7ac8" }}>Aegis · ATLAS Replay Engine</span>
+          {isLoading && <Loader2 className="w-3 h-3 animate-spin ml-1" style={{ color: "rgba(139,122,200,0.5)" }} />}
         </div>
         <h1 className="text-xl font-bold text-white tracking-tight">Attack Path Replay</h1>
         <p className="text-[11px] mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>Scrub through the kill chain timeline to reconstruct the attack path with spatial twin evidence anchoring.</p>
@@ -156,9 +197,9 @@ function AegisReplayContent() {
 
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: "Incident ID", value: "INC-2024-0847", color: "#8b7ac8" },
-          { label: "Adversary", value: "APT29 (Cozy Bear)", color: "#ef4444" },
-          { label: "Dwell Time", value: "52 minutes", color: "#f59e0b" },
+          { label: "Incident ID", value: incidentId, color: "#8b7ac8" },
+          { label: latestIncident ? "Severity" : "Adversary", value: incidentSeverityLabel, color: "#ef4444" },
+          { label: "Dwell Time", value: dwellTime, color: "#f59e0b" },
         ].map(c => (
           <div key={c.label} className="rounded-xl border p-4" style={{ borderColor: "rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.015)" }}>
             <div className="text-[9px] font-medium uppercase tracking-widest mb-1" style={{ color: "rgba(255,255,255,0.3)" }}>{c.label}</div>
@@ -166,6 +207,16 @@ function AegisReplayContent() {
           </div>
         ))}
       </div>
+
+      {latestIncident && (
+        <div className="rounded-xl border px-4 py-2.5 flex items-center gap-3" style={{ borderColor: "rgba(139,122,200,0.12)", background: "rgba(139,122,200,0.02)" }}>
+          <AlertTriangle className="w-3 h-3 shrink-0" style={{ color: "#8b7ac8" }} />
+          <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.5)" }}>
+            Replaying timeline for live incident: <span className="font-semibold" style={{ color: "rgba(255,255,255,0.75)" }}>{latestIncident.title}</span>
+          </span>
+          <span className="ml-auto text-[9px] font-mono" style={{ color: "rgba(255,255,255,0.2)" }}>{incidentId}</span>
+        </div>
+      )}
 
       <div className="rounded-xl border p-5" style={{ borderColor: "rgba(139,122,200,0.15)", background: "rgba(139,122,200,0.03)" }}>
         <div className="flex items-center gap-2 mb-4">
@@ -219,7 +270,7 @@ function AegisReplayContent() {
             <span className="ml-auto text-[9px] font-mono" style={{ color: "rgba(255,255,255,0.3)" }}>{visibleEvents.length} / {REPLAY_EVENTS.length} events</span>
           </div>
           <div className="divide-y divide-white/[0.04] max-h-80 overflow-y-auto">
-            {REPLAY_EVENTS.map((ev, i) => {
+            {REPLAY_EVENTS.map((ev) => {
               const isVisible = ev.t <= playhead;
               const color = TYPE_COLOR[ev.type];
               return (

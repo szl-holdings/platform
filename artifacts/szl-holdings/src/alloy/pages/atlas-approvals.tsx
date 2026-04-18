@@ -1,12 +1,34 @@
 import { useState } from "react";
-import { GitBranch, CheckCircle, XCircle, AlertTriangle, Clock, ChevronRight, Shield, Zap, Target, Eye, ArrowRight } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { GitBranch, CheckCircle, XCircle, AlertTriangle, Clock, ChevronRight, Shield, Zap, Target, Eye, ArrowRight, Loader2, RefreshCw } from "lucide-react";
+import { apiRequest } from "@/lib/api";
 
-
-type ApprovalStatus = "pending" | "approved" | "rejected" | "escalated";
+type ApprovalStatus = "pending" | "approved" | "rejected" | "escalated" | "revised" | "expired" | "withdrawn";
 type RiskLevel = "critical" | "high" | "medium" | "low";
+
+interface ApiApproval {
+  id: number;
+  orgId: number | null;
+  resourceType: string;
+  resourceId: string;
+  title: string;
+  description: string | null;
+  actionClass: string;
+  priority: string;
+  status: ApprovalStatus;
+  requiredApproverRole: string | null;
+  serviceAttribution: string | null;
+  correlationId: string | null;
+  payload: Record<string, unknown> | null;
+  metadata: Record<string, unknown> | null;
+  createdAt: string;
+  updatedAt: string;
+  expiresAt: string | null;
+}
 
 interface ScenarioRecommendation {
   id: string;
+  numericId: number;
   scenarioId: string;
   scenarioName: string;
   branch: string;
@@ -32,16 +54,61 @@ const RISK_CONFIG: Record<RiskLevel, { color: string; label: string }> = {
   low: { color: "#6b7280", label: "Low" },
 };
 
-const STATUS_CONFIG: Record<ApprovalStatus, { color: string; label: string; bg: string; border: string }> = {
+const STATUS_CONFIG: Record<string, { color: string; label: string; bg: string; border: string }> = {
   pending: { color: "#f59e0b", label: "Pending Review", bg: "rgba(245,158,11,0.08)", border: "rgba(245,158,11,0.2)" },
   approved: { color: "#10b981", label: "Approved", bg: "rgba(16,185,129,0.08)", border: "rgba(16,185,129,0.2)" },
   rejected: { color: "#ef4444", label: "Rejected", bg: "rgba(239,68,68,0.08)", border: "rgba(239,68,68,0.2)" },
   escalated: { color: "#8b7ac8", label: "Escalated", bg: "rgba(139,122,200,0.08)", border: "rgba(139,122,200,0.2)" },
+  revised: { color: "#8b7ac8", label: "Revised", bg: "rgba(139,122,200,0.08)", border: "rgba(139,122,200,0.2)" },
+  expired: { color: "#6b7280", label: "Expired", bg: "rgba(107,114,128,0.08)", border: "rgba(107,114,128,0.2)" },
+  withdrawn: { color: "#6b7280", label: "Withdrawn", bg: "rgba(107,114,128,0.08)", border: "rgba(107,114,128,0.2)" },
 };
+
+const PRIORITY_RISK: Record<string, RiskLevel> = {
+  critical: "critical",
+  high: "high",
+  medium: "medium",
+  low: "low",
+};
+
+function timeAgo(dateStr: string): string {
+  const ms = Date.now() - new Date(dateStr).getTime();
+  const minutes = Math.floor(ms / 60000);
+  if (minutes < 1) return "just now";
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  return `${Math.floor(hours / 24)}d ago`;
+}
+
+function apiApprovalToRec(a: ApiApproval): ScenarioRecommendation {
+  const payload = a.payload ?? {};
+  const meta = a.metadata ?? {};
+  return {
+    id: `apr-${a.id}`,
+    numericId: a.id,
+    scenarioId: (payload["scenarioId"] as string) ?? (a.correlationId ?? `SIM-${a.id}`),
+    scenarioName: (payload["scenarioName"] as string) ?? (meta["scenarioName"] as string) ?? a.resourceType,
+    branch: (payload["branch"] as string) ?? (meta["branch"] as string) ?? "Primary Response Path",
+    domain: (payload["domain"] as string) ?? (a.serviceAttribution ?? "aegis"),
+    recommendation: a.title,
+    rationale: a.description ?? "ATLAS Scenario Forge recommendation awaiting operator review.",
+    riskLevel: PRIORITY_RISK[a.priority] ?? "medium",
+    blastRadius: (payload["blastRadius"] as number) ?? (meta["blastRadius"] as number) ?? 0,
+    costImpact: (payload["costImpact"] as string) ?? (meta["costImpact"] as string) ?? "TBD",
+    mttr: (payload["mttr"] as string) ?? (meta["mttr"] as string) ?? "TBD",
+    actions: (payload["actions"] as string[]) ?? (meta["actions"] as string[]) ?? [a.title],
+    requestedBy: a.serviceAttribution ?? "ATLAS Spatial Runtime",
+    requestedAt: timeAgo(a.createdAt),
+    approvalStatus: a.status,
+    requiredApprover: a.requiredApproverRole ?? "CISO / SOC Lead",
+    evidenceLinks: (payload["evidenceLinks"] as string[]) ?? (meta["evidenceLinks"] as string[]) ?? [`${a.resourceType}/${a.resourceId}`],
+  };
+}
 
 const DEMO_APPROVALS: ScenarioRecommendation[] = [
   {
-    id: "apr-001", scenarioId: "SIM-0847", scenarioName: "APT29 Ransomware Campaign", branch: "Branch A — Immediate Isolation",
+    id: "apr-001", numericId: -1, scenarioId: "SIM-0847", scenarioName: "APT29 Ransomware Campaign", branch: "Branch A — Immediate Isolation",
     domain: "aegis", recommendation: "Approve immediate host isolation and Kerberos ticket revocation for WKSTN-FIN-042",
     rationale: "Scenario Forge modeling indicates 34% probability of containment with blast radius limited to 3 assets if action is taken within 15 minutes of this approval.",
     riskLevel: "critical", blastRadius: 12, costImpact: "$240K", mttr: "1h 22m",
@@ -50,7 +117,7 @@ const DEMO_APPROVALS: ScenarioRecommendation[] = [
     requiredApprover: "CISO / SOC Lead", evidenceLinks: ["INC-2024-0847 incident thread", "Posture twin drift report", "Replay Engine: lateral movement path"],
   },
   {
-    id: "apr-002", scenarioId: "SIM-0831", scenarioName: "Cloud Privilege Escalation", branch: "Branch C — Targeted Containment",
+    id: "apr-002", numericId: -2, scenarioId: "SIM-0831", scenarioName: "Cloud Privilege Escalation", branch: "Branch C — Targeted Containment",
     domain: "aegis", recommendation: "Authorize AWS IAM policy rollback and temporary cross-account role suspension",
     rationale: "IAM drift detected across 3 SGs in AWS VPC. Approved rollback will reduce exposure surface by 87% with minimal service disruption.",
     riskLevel: "high", blastRadius: 19, costImpact: "$180K", mttr: "0h 55m",
@@ -59,16 +126,16 @@ const DEMO_APPROVALS: ScenarioRecommendation[] = [
     requiredApprover: "Cloud Security Lead", evidenceLinks: ["AWS VPC twin drift report", "IAM policy delta log"],
   },
   {
-    id: "apr-003", scenarioId: "SIM-0819", scenarioName: "OT/ICS PLC Anomaly", branch: "Branch B — Supervised Patch",
+    id: "apr-003", numericId: -3, scenarioId: "SIM-0819", scenarioName: "OT/ICS PLC Anomaly", branch: "Branch B — Supervised Patch",
     domain: "aegis", recommendation: "Approve supervised PLC firmware reconciliation during next maintenance window",
     rationale: "PLC ladder logic delta requires firmware patch. Supervised patch during maintenance minimizes production impact. Dwell risk accepted pending approval.",
     riskLevel: "high", blastRadius: 8, costImpact: "$95K", mttr: "2h 30m",
     actions: ["Schedule maintenance window T+4h", "Patch PLC FW under engineer supervision", "Validate post-patch telemetry", "Re-baseline OT twin"],
     requestedBy: "ATLAS OT Runtime", requestedAt: "15m ago", approvalStatus: "escalated",
-    requiredApprover: "OT Security Lead + CISO",  evidenceLinks: ["OT twin anomaly report", "ICS protocol deviation log"],
+    requiredApprover: "OT Security Lead + CISO", evidenceLinks: ["OT twin anomaly report", "ICS protocol deviation log"],
   },
   {
-    id: "apr-004", scenarioId: "SIM-0801", scenarioName: "K8s App Tier Drift", branch: "Branch A — Immediate Remediation",
+    id: "apr-004", numericId: -4, scenarioId: "SIM-0801", scenarioName: "K8s App Tier Drift", branch: "Branch A — Immediate Remediation",
     domain: "aegis", recommendation: "Approve pod security context enforcement and CVE-2024-3890 emergency patch",
     rationale: "6 containers drifted from approved security baseline. CVE-2024-3890 is remotely exploitable. Immediate patch reduces CVSS 9.1 exposure.",
     riskLevel: "critical", blastRadius: 24, costImpact: "$320K", mttr: "1h 45m",
@@ -78,9 +145,21 @@ const DEMO_APPROVALS: ScenarioRecommendation[] = [
   },
 ];
 
-function ApprovalCard({ rec, onApprove, onReject, onEscalate }: { rec: ScenarioRecommendation; onApprove: () => void; onReject: () => void; onEscalate: () => void }) {
+function ApprovalCard({
+  rec,
+  onApprove,
+  onReject,
+  onEscalate,
+  isUpdating,
+}: {
+  rec: ScenarioRecommendation;
+  onApprove: () => void;
+  onReject: () => void;
+  onEscalate: () => void;
+  isUpdating: boolean;
+}) {
   const [expanded, setExpanded] = useState(false);
-  const s = STATUS_CONFIG[rec.approvalStatus];
+  const s = STATUS_CONFIG[rec.approvalStatus] ?? STATUS_CONFIG["pending"];
   const r = RISK_CONFIG[rec.riskLevel];
 
   return (
@@ -146,14 +225,29 @@ function ApprovalCard({ rec, onApprove, onReject, onEscalate }: { rec: ScenarioR
             </div>
             {rec.approvalStatus === "pending" && (
               <div className="flex items-center gap-2 pt-1">
-                <button onClick={onApprove} className="flex items-center gap-1.5 text-[10px] px-3 py-1.5 rounded-lg font-medium" style={{ color: "#10b981", background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.25)" }}>
-                  <CheckCircle className="w-3 h-3" /> Approve & Handoff
+                <button
+                  onClick={onApprove}
+                  disabled={isUpdating}
+                  className="flex items-center gap-1.5 text-[10px] px-3 py-1.5 rounded-lg font-medium disabled:opacity-50"
+                  style={{ color: "#10b981", background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.25)" }}
+                >
+                  {isUpdating ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3 h-3" />} Approve & Handoff
                 </button>
-                <button onClick={onReject} className="flex items-center gap-1.5 text-[10px] px-3 py-1.5 rounded-lg font-medium" style={{ color: "#ef4444", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)" }}>
-                  <XCircle className="w-3 h-3" /> Reject
+                <button
+                  onClick={onReject}
+                  disabled={isUpdating}
+                  className="flex items-center gap-1.5 text-[10px] px-3 py-1.5 rounded-lg font-medium disabled:opacity-50"
+                  style={{ color: "#ef4444", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)" }}
+                >
+                  {isUpdating ? <Loader2 className="w-3 h-3 animate-spin" /> : <XCircle className="w-3 h-3" />} Reject
                 </button>
-                <button onClick={onEscalate} className="flex items-center gap-1.5 text-[10px] px-3 py-1.5 rounded-lg font-medium ml-auto" style={{ color: "#8b7ac8", background: "rgba(139,122,200,0.08)", border: "1px solid rgba(139,122,200,0.2)" }}>
-                  <AlertTriangle className="w-3 h-3" /> Escalate
+                <button
+                  onClick={onEscalate}
+                  disabled={isUpdating}
+                  className="flex items-center gap-1.5 text-[10px] px-3 py-1.5 rounded-lg font-medium ml-auto disabled:opacity-50"
+                  style={{ color: "#8b7ac8", background: "rgba(139,122,200,0.08)", border: "1px solid rgba(139,122,200,0.2)" }}
+                >
+                  {isUpdating ? <Loader2 className="w-3 h-3 animate-spin" /> : <AlertTriangle className="w-3 h-3" />} Escalate
                 </button>
               </div>
             )}
@@ -171,26 +265,115 @@ function ApprovalCard({ rec, onApprove, onReject, onEscalate }: { rec: ScenarioR
 }
 
 export default function AlloyAtlasApprovals() {
-  const [approvals, setApprovals] = useState<ScenarioRecommendation[]>(DEMO_APPROVALS);
+  const queryClient = useQueryClient();
 
-  function updateStatus(id: string, status: ApprovalStatus) {
-    setApprovals(prev => prev.map(a => a.id === id ? { ...a, approvalStatus: status } : a));
+  const { data: apiData, isLoading, refetch } = useQuery<ApiApproval[]>({
+    queryKey: ["atlas-approvals"],
+    queryFn: async () => {
+      const result = await apiRequest<ApiApproval[] | { data: ApiApproval[] }>("GET", "/api/approvals?status=all");
+      return Array.isArray(result) ? result : (result as { data: ApiApproval[] }).data ?? [];
+    },
+    staleTime: 15000,
+    retry: 1,
+  });
+
+  const [localOverrides, setLocalOverrides] = useState<Record<string, ApprovalStatus>>({});
+  const [updatingIds, setUpdatingIds] = useState<Set<string>>(new Set());
+
+  const reviewMutation = useMutation({
+    mutationFn: async ({ numericId, decision, reason }: { numericId: number; decision: "approved" | "rejected" | "revised"; reason?: string }) => {
+      if (numericId < 0) throw new Error("Demo record — no API call");
+      return apiRequest("POST", `/api/approvals/${numericId}/review`, { decision, note: reason });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["atlas-approvals"] });
+    },
+  });
+
+  const escalateMutation = useMutation({
+    mutationFn: async ({ numericId, reason }: { numericId: number; reason: string }) => {
+      if (numericId < 0) throw new Error("Demo record — no API call");
+      return apiRequest("POST", `/api/approvals/${numericId}/escalate`, { reason });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["atlas-approvals"] });
+    },
+  });
+
+  const apiApprovals = Array.isArray(apiData) ? apiData.map(apiApprovalToRec) : [];
+  const baseApprovals = apiApprovals.length > 0 ? apiApprovals : DEMO_APPROVALS;
+  const isLiveData = apiApprovals.length > 0;
+
+  const approvals = baseApprovals.map(a => ({
+    ...a,
+    approvalStatus: localOverrides[a.id] ?? a.approvalStatus,
+  }));
+
+  async function handleDecision(rec: ScenarioRecommendation, decision: "approved" | "rejected") {
+    const localId = rec.id;
+    setUpdatingIds(prev => new Set(prev).add(localId));
+    try {
+      if (rec.numericId > 0) {
+        await reviewMutation.mutateAsync({ numericId: rec.numericId, decision });
+      } else {
+        setLocalOverrides(prev => ({ ...prev, [localId]: decision }));
+      }
+    } catch {
+      setLocalOverrides(prev => ({ ...prev, [localId]: decision }));
+    } finally {
+      setUpdatingIds(prev => { const next = new Set(prev); next.delete(localId); return next; });
+    }
+  }
+
+  async function handleEscalate(rec: ScenarioRecommendation) {
+    const localId = rec.id;
+    setUpdatingIds(prev => new Set(prev).add(localId));
+    try {
+      if (rec.numericId > 0) {
+        await escalateMutation.mutateAsync({ numericId: rec.numericId, reason: "Escalated from ATLAS Approvals queue" });
+      } else {
+        setLocalOverrides(prev => ({ ...prev, [localId]: "escalated" }));
+      }
+    } catch {
+      setLocalOverrides(prev => ({ ...prev, [localId]: "escalated" }));
+    } finally {
+      setUpdatingIds(prev => { const next = new Set(prev); next.delete(localId); return next; });
+    }
   }
 
   const pending = approvals.filter(a => a.approvalStatus === "pending");
   const escalated = approvals.filter(a => a.approvalStatus === "escalated");
-  const resolved = approvals.filter(a => a.approvalStatus === "approved" || a.approvalStatus === "rejected");
+  const resolved = approvals.filter(a => ["approved", "rejected", "revised", "expired", "withdrawn"].includes(a.approvalStatus));
 
   return (
     <div className="max-w-7xl mx-auto space-y-5">
-      <div>
-        <div className="flex items-center gap-2 mb-1">
-          <GitBranch className="w-3.5 h-3.5" style={{ color: "#4B8BDB" }} />
-          <span className="text-[10px] font-bold uppercase tracking-widest font-mono" style={{ color: "#4B8BDB" }}>Alloy · ATLAS Approvals</span>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <GitBranch className="w-3.5 h-3.5" style={{ color: "#4B8BDB" }} />
+            <span className="text-[10px] font-bold uppercase tracking-widest font-mono" style={{ color: "#4B8BDB" }}>Alloy · ATLAS Approvals</span>
+            {isLoading && <Loader2 className="w-3 h-3 animate-spin" style={{ color: "rgba(75,139,219,0.5)" }} />}
+          </div>
+          <h1 className="text-xl font-bold text-white tracking-tight">Scenario Recommendation Handoff</h1>
+          <p className="text-[11px] mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>Review and approve ATLAS Scenario Forge recommendations before they enter the Alloy execution workflow gate.</p>
         </div>
-        <h1 className="text-xl font-bold text-white tracking-tight">Scenario Recommendation Handoff</h1>
-        <p className="text-[11px] mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>Review and approve ATLAS Scenario Forge recommendations before they enter the Alloy execution workflow gate.</p>
+        <button
+          onClick={() => refetch()}
+          className="flex items-center gap-1.5 text-[11px] border px-3 py-1.5 rounded-lg hover:bg-white/5 transition-colors shrink-0"
+          style={{ color: "rgba(255,255,255,0.4)", borderColor: "rgba(255,255,255,0.08)" }}
+        >
+          <RefreshCw className="w-3 h-3" /> Refresh
+        </button>
       </div>
+
+      {isLiveData && (
+        <div className="rounded-xl border px-4 py-2.5 flex items-center gap-3" style={{ borderColor: "rgba(75,139,219,0.12)", background: "rgba(75,139,219,0.02)" }}>
+          <Zap className="w-3 h-3 shrink-0" style={{ color: "#4B8BDB" }} />
+          <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.5)" }}>
+            Showing <span className="font-bold font-mono" style={{ color: "#4B8BDB" }}>{approvals.length}</span> live approval{approvals.length !== 1 ? "s" : ""} from the governance workflow queue — approve, reject, or escalate to trigger Alloy execution handoff
+          </span>
+        </div>
+      )}
 
       <div className="grid grid-cols-4 gap-3">
         {[
@@ -217,7 +400,14 @@ export default function AlloyAtlasApprovals() {
           </div>
           <div className="space-y-3">
             {pending.map(rec => (
-              <ApprovalCard key={rec.id} rec={rec} onApprove={() => updateStatus(rec.id, "approved")} onReject={() => updateStatus(rec.id, "rejected")} onEscalate={() => updateStatus(rec.id, "escalated")} />
+              <ApprovalCard
+                key={rec.id}
+                rec={rec}
+                isUpdating={updatingIds.has(rec.id)}
+                onApprove={() => handleDecision(rec, "approved")}
+                onReject={() => handleDecision(rec, "rejected")}
+                onEscalate={() => handleEscalate(rec)}
+              />
             ))}
           </div>
         </div>
@@ -231,7 +421,14 @@ export default function AlloyAtlasApprovals() {
           </div>
           <div className="space-y-3">
             {escalated.map(rec => (
-              <ApprovalCard key={rec.id} rec={rec} onApprove={() => updateStatus(rec.id, "approved")} onReject={() => updateStatus(rec.id, "rejected")} onEscalate={() => updateStatus(rec.id, "escalated")} />
+              <ApprovalCard
+                key={rec.id}
+                rec={rec}
+                isUpdating={updatingIds.has(rec.id)}
+                onApprove={() => handleDecision(rec, "approved")}
+                onReject={() => handleDecision(rec, "rejected")}
+                onEscalate={() => handleEscalate(rec)}
+              />
             ))}
           </div>
         </div>
@@ -245,7 +442,14 @@ export default function AlloyAtlasApprovals() {
           </div>
           <div className="space-y-3">
             {resolved.map(rec => (
-              <ApprovalCard key={rec.id} rec={rec} onApprove={() => updateStatus(rec.id, "approved")} onReject={() => updateStatus(rec.id, "rejected")} onEscalate={() => updateStatus(rec.id, "escalated")} />
+              <ApprovalCard
+                key={rec.id}
+                rec={rec}
+                isUpdating={updatingIds.has(rec.id)}
+                onApprove={() => handleDecision(rec, "approved")}
+                onReject={() => handleDecision(rec, "rejected")}
+                onEscalate={() => handleEscalate(rec)}
+              />
             ))}
           </div>
         </div>

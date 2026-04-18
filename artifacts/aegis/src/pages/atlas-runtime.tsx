@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
-import { Layers, Activity, AlertTriangle, CheckCircle, Clock, Shield, Zap, Server, Network, Globe, Database, RefreshCw, ChevronRight, Eye, GitBranch, Radio, Lock } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { apiFetch } from "@szl-holdings/shared-ui";
+import { Layers, Activity, AlertTriangle, CheckCircle, Clock, Shield, Zap, Server, Network, Globe, Database, RefreshCw, ChevronRight, Eye, GitBranch, Radio, Lock, Loader2 } from "lucide-react";
 import { ExecutiveSafeModeProvider, useExecutiveSafeMode, useExecutiveSafeModeToggle } from "../lib/executive-safe-mode-context";
 
 type TwinHealth = "stable" | "degraded" | "awaiting_approval" | "offline";
@@ -28,7 +30,20 @@ interface ThreatEvent {
   mitre: string;
 }
 
-const TWINS: DigitalTwin[] = [
+interface FirestormIncident {
+  id: number;
+  title: string;
+  severity: string;
+  status: string;
+  mitreTactic?: string | null;
+  mitreId?: string | null;
+  assetId?: number | null;
+  description?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+const SEED_TWINS: DigitalTwin[] = [
   { id: "tw-001", name: "PROD-DC-CLUSTER", domain: "Endpoint", type: "endpoint", health: "stable", driftScore: 2, lastSync: "12s ago", proofState: "verified", incidents: 0, evidence: ["Config snapshot v4.2", "Baseline hash match", "Last audit: 6h ago"], worldline: "WL-ALPHA" },
   { id: "tw-002", name: "CORE-NETWORK-FABRIC", domain: "Network", type: "network", health: "stable", driftScore: 4, lastSync: "28s ago", proofState: "verified", incidents: 0, evidence: ["Flow telemetry active", "BGP routes nominal", "Topology hash: 9a3f"], worldline: "WL-ALPHA" },
   { id: "tw-003", name: "AWS-VPC-PROD", domain: "Cloud", type: "cloud", health: "degraded", driftScore: 31, lastSync: "4m ago", proofState: "pending", incidents: 2, evidence: ["IAM drift detected", "3 SGs misconfigured", "Pending operator review"], worldline: "WL-BETA" },
@@ -39,13 +54,34 @@ const TWINS: DigitalTwin[] = [
   { id: "tw-008", name: "PERIMETER-FW-CLUSTER", domain: "Network", type: "network", health: "stable", driftScore: 3, lastSync: "22s ago", proofState: "verified", incidents: 0, evidence: ["Ruleset v71 active", "GeoIP blocks active", "Zero policy gaps"], worldline: "WL-ALPHA" },
 ];
 
-const EVENTS: ThreatEvent[] = [
+const SEED_EVENTS: ThreatEvent[] = [
   { id: "evt-001", twinId: "tw-003", timestamp: "14:32:01", type: "privilege_escalation", severity: "critical", description: "IAM role chaining to cross-account admin detected in AWS VPC", mitre: "T1548.005" },
   { id: "evt-002", twinId: "tw-006", timestamp: "14:28:45", type: "lateral_move", severity: "high", description: "East-west movement via K8s service account token abuse", mitre: "T1552.007" },
   { id: "evt-003", twinId: "tw-004", timestamp: "14:21:12", type: "persistence", severity: "high", description: "Unauthorized PLC ladder logic modification attempt", mitre: "T0873" },
   { id: "evt-004", twinId: "tw-006", timestamp: "14:15:33", type: "exfil", severity: "medium", description: "Unusual egress from app tier to non-whitelisted endpoint", mitre: "T1048.003" },
   { id: "evt-005", twinId: "tw-003", timestamp: "14:08:22", type: "privilege_escalation", severity: "high", description: "Temporary security credentials escalated to persistent access", mitre: "T1078.004" },
 ];
+
+const SEVERITY_TYPE_MAP: Record<string, ThreatEvent["type"]> = {
+  critical: "privilege_escalation",
+  high: "lateral_move",
+  medium: "persistence",
+  low: "exfil",
+};
+
+function incidentToEvent(inc: FirestormIncident, idx: number): ThreatEvent {
+  const twinIds = ["tw-003", "tw-006", "tw-004", "tw-003", "tw-006"];
+  const sev = (["critical", "high", "medium"].includes(inc.severity) ? inc.severity : "medium") as ThreatEvent["severity"];
+  return {
+    id: `inc-${inc.id}`,
+    twinId: twinIds[idx % twinIds.length] ?? "tw-003",
+    timestamp: new Date(inc.createdAt).toLocaleTimeString("en-US", { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" }),
+    type: SEVERITY_TYPE_MAP[inc.severity] ?? "lateral_move",
+    severity: sev,
+    description: inc.title,
+    mitre: inc.mitreId ?? inc.mitreTactic ?? "T1000",
+  };
+}
 
 const HEALTH_CONFIG: Record<TwinHealth, { color: string; label: string; bg: string; border: string; dot?: boolean }> = {
   stable: { color: "#10b981", label: "Stable", bg: "rgba(16,185,129,0.08)", border: "rgba(16,185,129,0.2)", dot: false },
@@ -139,12 +175,39 @@ function AegisAtlasRuntimeContent() {
   const safeMode = useExecutiveSafeMode();
   const [, setSafeMode] = useExecutiveSafeModeToggle();
 
+  const { data: incidentData, isLoading: loadingIncidents, refetch } = useQuery<FirestormIncident[]>({
+    queryKey: ["firestorm-incidents-atlas"],
+    queryFn: () => apiFetch<FirestormIncident[]>("/firestorm/incidents"),
+    staleTime: 30000,
+    retry: 1,
+  });
+
+  const liveIncidents = Array.isArray(incidentData) ? incidentData : [];
+  const liveEvents: ThreatEvent[] = liveIncidents
+    .filter(inc => ["critical", "high", "medium"].includes(inc.severity) && inc.status !== "resolved")
+    .slice(0, 8)
+    .map((inc, idx) => incidentToEvent(inc, idx));
+
+  const events = liveEvents.length > 0 ? liveEvents : SEED_EVENTS;
+
+  const TWINS = SEED_TWINS.map(tw => ({
+    ...tw,
+    incidents: liveIncidents.filter(inc => inc.status !== "resolved" && ["critical", "high"].includes(inc.severity)).length > 0 && tw.health !== "stable"
+      ? tw.incidents + liveIncidents.filter(inc => inc.status !== "resolved").length
+      : tw.incidents,
+  }));
+
   const visibleTwins = safeMode ? TWINS.filter(t => t.health === "stable" && t.proofState === "verified") : TWINS;
-  const visibleEvents = safeMode ? [] : EVENTS;
+  const visibleEvents = safeMode ? [] : events;
 
   const stable = TWINS.filter(t => t.health === "stable");
   const degraded = TWINS.filter(t => t.health === "degraded");
   const awaiting = TWINS.filter(t => t.health === "awaiting_approval");
+
+  function handleSync() {
+    setLastRefresh(new Date());
+    refetch();
+  }
 
   useEffect(() => {
     const t = setInterval(() => { setPulse(p => !p); }, 1800);
@@ -170,8 +233,8 @@ function AegisAtlasRuntimeContent() {
           >
             <Lock className="w-3 h-3" /> {safeMode ? "Safe Mode ON" : "Safe Mode"}
           </button>
-          <button onClick={() => setLastRefresh(new Date())} className="flex items-center gap-1.5 text-[11px] border px-3 py-1.5 rounded-lg hover:bg-white/5 transition-colors" style={{ color: "rgba(255,255,255,0.4)", borderColor: "rgba(255,255,255,0.08)" }}>
-            <RefreshCw className="w-3 h-3" /> Sync
+          <button onClick={handleSync} className="flex items-center gap-1.5 text-[11px] border px-3 py-1.5 rounded-lg hover:bg-white/5 transition-colors shrink-0" style={{ color: "rgba(255,255,255,0.4)", borderColor: "rgba(255,255,255,0.08)" }}>
+            {loadingIncidents ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />} Sync
           </button>
         </div>
       </div>
@@ -192,6 +255,16 @@ function AegisAtlasRuntimeContent() {
           </div>
         ))}
       </div>
+
+      {liveIncidents.length > 0 && !safeMode && (
+        <div className="rounded-xl border px-4 py-2.5 flex items-center gap-3" style={{ borderColor: "rgba(239,68,68,0.12)", background: "rgba(239,68,68,0.02)" }}>
+          <Activity className="w-3 h-3 shrink-0" style={{ color: "#ef4444" }} />
+          <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.5)" }}>
+            <span className="font-bold font-mono" style={{ color: "#ef4444" }}>{liveIncidents.filter(i => i.status !== "resolved").length}</span> live incident{liveIncidents.filter(i => i.status !== "resolved").length !== 1 ? "s" : ""} ingested from Firestorm — Incident Theater shows real-time feed
+          </span>
+          <span className="ml-auto text-[9px] font-mono" style={{ color: "rgba(255,255,255,0.2)" }}>Updated {lastRefresh.toLocaleTimeString()}</span>
+        </div>
+      )}
 
       {safeMode && (
         <div className="rounded-xl border p-3 flex items-center gap-3" style={{ borderColor: "rgba(139,122,200,0.25)", background: "rgba(139,122,200,0.06)" }}>
@@ -265,7 +338,9 @@ function AegisAtlasRuntimeContent() {
           <div className="p-4 border-b flex items-center gap-2" style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.01)" }}>
             <Activity className="w-3.5 h-3.5" style={{ color: "#ef4444" }} />
             <span className="text-[11px] font-semibold text-white">Incident Theater</span>
-            <span className="ml-auto text-[9px] font-bold uppercase tracking-widest" style={{ color: "#ef4444" }}>LIVE</span>
+            <span className="ml-auto text-[9px] font-bold uppercase tracking-widest" style={{ color: liveEvents.length > 0 ? "#ef4444" : "rgba(255,255,255,0.3)" }}>
+              {liveEvents.length > 0 ? "LIVE" : "SEED"}
+            </span>
           </div>
           <div className="divide-y divide-white/[0.04]">
             {safeMode && visibleEvents.length === 0 && (

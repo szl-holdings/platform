@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Activity, AlertTriangle, CheckCircle, Clock, ChevronRight, Layers, Zap, Shield, TrendingUp, Filter, RefreshCw } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { Activity, AlertTriangle, CheckCircle, Clock, ChevronRight, Layers, Zap, Shield, Filter, RefreshCw, Loader2 } from "lucide-react";
 
 type ChangeType = "drift_resolved" | "drift_detected" | "approval_granted" | "approval_pending" | "incident_opened" | "incident_resolved" | "twin_synced" | "worldline_branched";
 type Domain = "aegis" | "terra" | "vessels" | "alloy" | "prism" | "lyte" | "all";
@@ -15,6 +16,18 @@ interface TwinChange {
   severity?: "critical" | "high" | "medium" | "low";
   worldline?: string;
   actor: string;
+}
+
+interface ApiChangeEvent {
+  id: number;
+  cursor: number;
+  entityType: string;
+  entityId: string;
+  actorId: string;
+  delta: Record<string, unknown>;
+  crdtClock: Record<string, unknown>;
+  appSource: string | null;
+  timestamp: string;
 }
 
 const CHANGE_CONFIG: Record<ChangeType, { label: string; color: string; icon: typeof Activity }> = {
@@ -33,7 +46,42 @@ const DOMAIN_COLORS: Record<Domain, string> = {
   prism: "#f59e0b", lyte: "#d4a054", all: "#8b7ac8",
 };
 
-const CHANGES: TwinChange[] = [
+const ENTITY_TYPE_CHANGE: Record<string, ChangeType> = {
+  twin: "twin_synced",
+  approval: "approval_pending",
+  incident: "incident_opened",
+  drift: "drift_detected",
+  worldline: "worldline_branched",
+};
+
+const ENTITY_TYPE_DOMAIN: Record<string, Domain> = {
+  aegis: "aegis", terra: "terra", vessels: "vessels", alloy: "alloy", prism: "prism", lyte: "lyte",
+};
+
+function apiChangeToTwinChange(ev: ApiChangeEvent): TwinChange {
+  const delta = ev.delta ?? {};
+  const source = ev.appSource ?? "";
+  const domain = (Object.keys(ENTITY_TYPE_DOMAIN).find(k => source.includes(k) || ev.entityType.includes(k)) as Domain) ?? "alloy";
+  const changeType: ChangeType = ENTITY_TYPE_CHANGE[ev.entityType] ??
+    (delta["status"] === "resolved" ? "drift_resolved" :
+     delta["status"] === "pending" ? "approval_pending" :
+     "twin_synced");
+
+  return {
+    id: `api-${ev.id}`,
+    timestamp: new Date(ev.timestamp).toLocaleTimeString("en-US", { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" }),
+    domain,
+    twinName: (delta["twinName"] as string) ?? (delta["name"] as string) ?? ev.entityId,
+    changeType,
+    summary: (delta["summary"] as string) ?? (delta["description"] as string) ?? `${ev.entityType} updated — actor: ${ev.actorId}`,
+    driftDelta: delta["driftScore"] as number | undefined,
+    severity: delta["severity"] as TwinChange["severity"] | undefined,
+    worldline: delta["worldline"] as string | undefined,
+    actor: ev.actorId,
+  };
+}
+
+const SEED_CHANGES: TwinChange[] = [
   { id: "c-001", timestamp: "14:38:12", domain: "aegis", twinName: "AWS-VPC-PROD", changeType: "drift_detected", summary: "IAM drift escalated — 3 security groups misconfigured vs. approved baseline. Blast radius: 47%.", driftDelta: 31, severity: "critical", worldline: "WL-BETA", actor: "ATLAS Spatial Runtime" },
   { id: "c-002", timestamp: "14:32:07", domain: "lyte", twinName: "Lyte AIOps Twin", changeType: "incident_opened", summary: "SLO breach on payment-api service. P95 latency 847ms vs. 200ms target. Autonomous NOC engaged.", severity: "high", actor: "Autonomous NOC Engine" },
   { id: "c-003", timestamp: "14:28:45", domain: "aegis", twinName: "APP-TIER-K8S", changeType: "drift_detected", summary: "6 pod security contexts drifted from approved spec. CVE-2024-3890 exposed on 2 containers.", driftDelta: 24, severity: "critical", worldline: "WL-BETA", actor: "ATLAS Spatial Runtime" },
@@ -62,14 +110,31 @@ export default function WhatChanged() {
   const [domainFilter, setDomainFilter] = useState<Domain | "all">("all");
   const [typeFilter, setTypeFilter] = useState<ChangeType | "all">("all");
 
-  const filtered = CHANGES.filter(c =>
+  const { data: changeData, isLoading, refetch } = useQuery<{ events: ApiChangeEvent[]; cursor: number; hasMore: boolean }>({
+    queryKey: ["twin-changes"],
+    queryFn: () => fetch("/api/changes?limit=50").then(r => {
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return r.json();
+    }).then(r => r.data ?? r),
+    staleTime: 15000,
+    retry: 1,
+  });
+
+  const apiChanges: TwinChange[] = (changeData?.events ?? []).map(apiChangeToTwinChange);
+  const allChanges = apiChanges.length > 0
+    ? [...apiChanges, ...SEED_CHANGES].slice(0, 30)
+    : SEED_CHANGES;
+
+  const isLiveData = apiChanges.length > 0;
+
+  const filtered = allChanges.filter(c =>
     (domainFilter === "all" || c.domain === domainFilter) &&
     (typeFilter === "all" || c.changeType === typeFilter)
   );
 
-  const driftEvents = CHANGES.filter(c => c.changeType === "drift_detected");
-  const pendingApprovals = CHANGES.filter(c => c.changeType === "approval_pending");
-  const resolvedToday = CHANGES.filter(c => c.changeType === "drift_resolved" || c.changeType === "incident_resolved");
+  const driftEvents = allChanges.filter(c => c.changeType === "drift_detected");
+  const pendingApprovals = allChanges.filter(c => c.changeType === "approval_pending");
+  const resolvedToday = allChanges.filter(c => c.changeType === "drift_resolved" || c.changeType === "incident_resolved");
 
   return (
     <div className="max-w-7xl mx-auto space-y-5">
@@ -78,14 +143,28 @@ export default function WhatChanged() {
           <div className="flex items-center gap-2 mb-1">
             <Activity className="w-3.5 h-3.5" style={{ color: "#d4a054" }} />
             <span className="text-[10px] font-bold uppercase tracking-widest font-mono" style={{ color: "#d4a054" }}>Lyte · What Changed</span>
+            {isLoading && <Loader2 className="w-3 h-3 animate-spin" style={{ color: "rgba(212,160,84,0.5)" }} />}
           </div>
           <h1 className="text-xl font-bold text-white tracking-tight">Twin State Change Feed</h1>
           <p className="text-[11px] mt-0.5" style={{ color: "rgba(255,255,255,0.4)" }}>A real-time summary of twin drift events, worldline branches, and approval decisions across all domains.</p>
         </div>
-        <button className="flex items-center gap-1.5 text-[11px] border px-3 py-1.5 rounded-lg hover:bg-white/5 transition-colors shrink-0" style={{ color: "rgba(255,255,255,0.4)", borderColor: "rgba(255,255,255,0.08)" }}>
+        <button
+          onClick={() => refetch()}
+          className="flex items-center gap-1.5 text-[11px] border px-3 py-1.5 rounded-lg hover:bg-white/5 transition-colors shrink-0"
+          style={{ color: "rgba(255,255,255,0.4)", borderColor: "rgba(255,255,255,0.08)" }}
+        >
           <RefreshCw className="w-3 h-3" /> Refresh
         </button>
       </div>
+
+      {isLiveData && (
+        <div className="rounded-xl border px-4 py-2.5 flex items-center gap-3" style={{ borderColor: "rgba(212,160,84,0.12)", background: "rgba(212,160,84,0.02)" }}>
+          <Zap className="w-3 h-3 shrink-0" style={{ color: "#d4a054" }} />
+          <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.5)" }}>
+            <span className="font-bold font-mono" style={{ color: "#d4a054" }}>{apiChanges.length}</span> live change event{apiChanges.length !== 1 ? "s" : ""} from the change feed — merged with historical context
+          </span>
+        </div>
+      )}
 
       <div className="grid grid-cols-3 gap-3">
         {[
@@ -114,7 +193,7 @@ export default function WhatChanged() {
             </button>
           ))}
         </div>
-        <span className="ml-auto text-[9px] font-mono" style={{ color: "rgba(255,255,255,0.25)" }}>{filtered.length} events</span>
+        <span className="ml-auto text-[9px] font-mono" style={{ color: "rgba(255,255,255,0.25)" }}>{filtered.length} events{isLiveData ? " · live" : ""}</span>
       </div>
 
       <div className="rounded-xl border overflow-hidden" style={{ borderColor: "rgba(255,255,255,0.07)" }}>

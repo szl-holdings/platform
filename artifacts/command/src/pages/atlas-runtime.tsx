@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useSafeMode } from "../lib/use-safe-mode";
 import { useQuery } from "@tanstack/react-query";
-import { Layers, Activity, AlertTriangle, CheckCircle, Clock, Shield, Globe, ChevronRight, X, GitBranch, Zap, Server, Network, Eye, Lock, RefreshCw } from "lucide-react";
+import { Layers, Activity, AlertTriangle, CheckCircle, Clock, Shield, Globe, ChevronRight, X, GitBranch, Zap, Server, Network, Eye, Lock, RefreshCw, Loader2 } from "lucide-react";
 
 type TwinState = "stable" | "degraded" | "awaiting_approval";
 type Domain = "aegis" | "terra" | "vessels" | "alloy" | "prism" | "lyte";
@@ -19,6 +19,14 @@ interface CrossDomainTwin {
   summary: string;
 }
 
+interface FirestormIncident {
+  id: number;
+  title: string;
+  severity: string;
+  status: string;
+  createdAt: string;
+}
+
 const DOMAIN_CONFIG: Record<Domain, { label: string; color: string; icon: typeof Globe }> = {
   aegis: { label: "Aegis — Defense", color: "#ef4444", icon: Shield },
   terra: { label: "Terra — Real Estate", color: "#10b981", icon: Globe },
@@ -34,7 +42,7 @@ const STATE_CONFIG: Record<TwinState, { color: string; label: string; bg: string
   awaiting_approval: { color: "#8b7ac8", label: "Awaiting Approval", bg: "rgba(139,122,200,0.08)", border: "rgba(139,122,200,0.2)" },
 };
 
-const TWINS: CrossDomainTwin[] = [
+const SEED_TWINS: CrossDomainTwin[] = [
   { id: "tw-aeg-001", name: "Aegis Posture Twin", domain: "aegis", state: "degraded", driftScore: 28, lastSync: "3m ago", proofState: "pending", pendingActions: 3, worldline: "WL-BETA", summary: "3 active incidents in AWS VPC, K8s app tier drifted from approved baseline" },
   { id: "tw-aeg-002", name: "Aegis OT/ICS Twin", domain: "aegis", state: "awaiting_approval", driftScore: 18, lastSync: "11m ago", proofState: "pending", pendingActions: 1, worldline: "WL-GAMMA", summary: "PLC firmware delta awaiting CISO approval before reconciliation" },
   { id: "tw-terra-001", name: "Terra Property Fabric", domain: "terra", state: "stable", driftScore: 4, lastSync: "45s ago", proofState: "verified", pendingActions: 0, worldline: "WL-ALPHA", summary: "All property twins synced, portfolio valuation current to market" },
@@ -45,7 +53,7 @@ const TWINS: CrossDomainTwin[] = [
   { id: "tw-lyte-001", name: "Lyte AIOps Twin", domain: "lyte", state: "degraded", driftScore: 21, lastSync: "6m ago", proofState: "pending", pendingActions: 4, worldline: "WL-BETA", summary: "4 SLO breaches active, autonomous NOC handling 3 incidents, 1 requires human escalation" },
 ];
 
-function WorldlineDrawer({ onClose }: { onClose: () => void }) {
+function WorldlineDrawer({ twins, onClose }: { twins: CrossDomainTwin[]; onClose: () => void }) {
   const worldlines = ["WL-ALPHA", "WL-BETA", "WL-GAMMA", "WL-DELTA"];
   return (
     <div className="fixed inset-0 z-50 flex" onClick={onClose}>
@@ -63,7 +71,8 @@ function WorldlineDrawer({ onClose }: { onClose: () => void }) {
         </div>
         <div className="p-5 space-y-4">
           {worldlines.map(wl => {
-            const wlTwins = TWINS.filter(t => t.worldline === wl);
+            const wlTwins = twins.filter(t => t.worldline === wl);
+            if (wlTwins.length === 0) return null;
             const degraded = wlTwins.filter(t => t.state !== "stable");
             const color = degraded.length === 0 ? "#10b981" : degraded.some(t => t.state === "awaiting_approval") ? "#8b7ac8" : "#f59e0b";
             return (
@@ -106,20 +115,55 @@ function useAtlasBranches() {
   });
 }
 
+function useFirestormIncidents() {
+  return useQuery<FirestormIncident[]>({
+    queryKey: ["command-firestorm-incidents"],
+    queryFn: () => fetch("/api/firestorm/incidents").then(r => {
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return r.json();
+    }).then(r => (Array.isArray(r.data) ? r.data : Array.isArray(r) ? r : [])),
+    staleTime: 30000,
+    retry: 1,
+  });
+}
+
 export function AtlasRuntimePage() {
   const [showWorldline, setShowWorldline] = useState(false);
   const [selectedTwin, setSelectedTwin] = useState<CrossDomainTwin | null>(null);
   const [safeMode, setSafeMode] = useSafeMode();
   const [lastRefresh, setLastRefresh] = useState(new Date());
-  const { data: branchData, isLoading: loadingBranches } = useAtlasBranches();
+
+  const { data: branchData, isLoading: loadingBranches, refetch: refetchBranches } = useAtlasBranches();
+  const { data: incidentData, isLoading: loadingIncidents, refetch: refetchIncidents } = useFirestormIncidents();
 
   const apiBranchCount = branchData?.count ?? 0;
+  const liveIncidents = Array.isArray(incidentData) ? incidentData : [];
+  const openIncidents = liveIncidents.filter(i => i.status !== "resolved");
+  const criticalIncidents = openIncidents.filter(i => i.severity === "critical");
+
+  const TWINS: CrossDomainTwin[] = SEED_TWINS.map(tw => {
+    if (tw.domain !== "aegis" || openIncidents.length === 0) return tw;
+    const extraPending = criticalIncidents.length > 0 ? Math.max(0, criticalIncidents.length - tw.pendingActions) : 0;
+    const liveState: TwinState = criticalIncidents.length >= 3 ? "degraded" : tw.state;
+    const liveSummary = openIncidents.length > 0 && tw.id === "tw-aeg-001"
+      ? `${openIncidents.length} open incident${openIncidents.length !== 1 ? "s" : ""} — ${criticalIncidents.length} critical — live from Firestorm`
+      : tw.summary;
+    return { ...tw, state: liveState, pendingActions: tw.pendingActions + extraPending, summary: liveSummary };
+  });
 
   const visibleTwins = safeMode ? TWINS.filter(t => t.state === "stable" && t.proofState === "verified") : TWINS;
   const stable = TWINS.filter(t => t.state === "stable");
   const degraded = TWINS.filter(t => t.state === "degraded");
   const awaiting = TWINS.filter(t => t.state === "awaiting_approval");
   const pendingTotal = TWINS.reduce((s, t) => s + t.pendingActions, 0);
+
+  const isLoading = loadingBranches || loadingIncidents;
+
+  function handleSync() {
+    setLastRefresh(new Date());
+    refetchBranches();
+    refetchIncidents();
+  }
 
   return (
     <div className="max-w-7xl mx-auto space-y-5">
@@ -141,11 +185,11 @@ export function AtlasRuntimePage() {
             <Lock className="w-3 h-3" /> {safeMode ? "Safe Mode ON" : "Safe Mode"}
           </button>
           <button
-            onClick={() => setLastRefresh(new Date())}
+            onClick={handleSync}
             className="flex items-center gap-1.5 text-[11px] border px-3 py-1.5 rounded-lg hover:bg-white/5 transition-colors"
             style={{ color: "rgba(255,255,255,0.35)", borderColor: "rgba(255,255,255,0.08)" }}
           >
-            <RefreshCw className="w-3 h-3" /> Sync
+            {isLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />} Sync
           </button>
           <button onClick={() => setShowWorldline(true)} className="flex items-center gap-1.5 text-[11px] border px-3 py-1.5 rounded-lg hover:bg-white/5 transition-colors" style={{ color: "#8b7ac8", borderColor: "rgba(139,122,200,0.3)", background: "rgba(139,122,200,0.06)" }}>
             <GitBranch className="w-3 h-3" /> Worldlines
@@ -169,6 +213,16 @@ export function AtlasRuntimePage() {
           </div>
         ))}
       </div>
+
+      {liveIncidents.length > 0 && !safeMode && (
+        <div className="rounded-xl border px-4 py-2.5 flex items-center gap-3" style={{ borderColor: "rgba(239,68,68,0.12)", background: "rgba(239,68,68,0.02)" }}>
+          <Activity className="w-3 h-3 shrink-0" style={{ color: "#ef4444" }} />
+          <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.5)" }}>
+            Firestorm live feed: <span className="font-bold font-mono" style={{ color: "#ef4444" }}>{openIncidents.length}</span> open incident{openIncidents.length !== 1 ? "s" : ""} · <span className="font-bold font-mono" style={{ color: criticalIncidents.length > 0 ? "#ef4444" : "rgba(255,255,255,0.5)" }}>{criticalIncidents.length}</span> critical — Aegis twins updated
+          </span>
+          <span className="ml-auto text-[9px] font-mono" style={{ color: "rgba(255,255,255,0.2)" }}>{lastRefresh.toLocaleTimeString()}</span>
+        </div>
+      )}
 
       {safeMode && (
         <div className="rounded-xl border p-3 flex items-center gap-3" style={{ borderColor: "rgba(139,122,200,0.25)", background: "rgba(139,122,200,0.06)" }}>
@@ -195,7 +249,7 @@ export function AtlasRuntimePage() {
         <div className="rounded-xl border px-4 py-2.5 flex items-center gap-3" style={{ borderColor: "rgba(139,122,200,0.12)", background: "rgba(139,122,200,0.02)" }}>
           <GitBranch className="w-3 h-3 shrink-0" style={{ color: "#8b7ac8" }} />
           <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.5)" }}>
-            <span className="font-bold font-mono" style={{ color: "#8b7ac8" }}>{apiBranchCount}</span> live scenario branch{apiBranchCount !== 1 ? "es" : ""} found in API — Worldline Overlay for details
+            <span className="font-bold font-mono" style={{ color: "#8b7ac8" }}>{apiBranchCount}</span> live scenario branch{apiBranchCount !== 1 ? "es" : ""} in ATLAS — open Worldline Overlay for details
           </span>
         </div>
       )}
@@ -259,7 +313,7 @@ export function AtlasRuntimePage() {
         })}
       </div>
 
-      {showWorldline && <WorldlineDrawer onClose={() => setShowWorldline(false)} />}
+      {showWorldline && <WorldlineDrawer twins={TWINS} onClose={() => setShowWorldline(false)} />}
     </div>
   );
 }
