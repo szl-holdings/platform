@@ -654,120 +654,133 @@ const DOMAIN_COLOR: Record<string, string> = {
  * Builds an alert inbox from real signals: OTX threats (Aegis), GDELT geopolitical
  * (Terra), upcoming PRISM legal deadlines, and Lyte runtime telemetry.
  */
+type CommandAlert = {
+  id: string; domain: string; domainColor: string; priority: "critical" | "high" | "medium" | "low";
+  title: string; description: string; time: string; status: "active" | "acknowledged" | "snoozed" | "resolved";
+  category: string; assignee?: string;
+};
+
+/**
+ * Build the alerts list from all live data sources. Used by both
+ * /api/command/alerts (full payload) and /api/command/alerts/count
+ * (badge count) so the two cannot drift.
+ */
+async function computeAlerts(): Promise<CommandAlert[]> {
+  const alerts: CommandAlert[] = [];
+
+  // Aegis threats from OTX
+  try {
+    const [row] = await db.select().from(intelligenceCacheTable).where(eq(intelligenceCacheTable.key, "threats")).limit(1);
+    const threats = Array.isArray(row?.data) ? row.data.filter(isThreatItem) : [];
+    threats.slice(0, 6).forEach((t, i) => {
+      const sev = t.severity === "critical" ? "critical" : t.severity === "high" ? "high" : "medium";
+      alerts.push({
+        id: `aegis-${i}`,
+        domain: "Aegis",
+        domainColor: DOMAIN_COLOR.Aegis,
+        priority: sev,
+        title: t.name ?? t.title ?? "Threat detected",
+        description: `${t.type ?? "Threat"} from ${t.country ?? "unknown"}. ${t.description?.slice(0, 140) ?? ""}`,
+        time: t.timestamp ? relTime(t.timestamp) : "recent",
+        status: "active",
+        category: "Security",
+        assignee: "Aegis SOC",
+      });
+    });
+  } catch { /* non-fatal */ }
+
+  // Terra geopolitical events
+  try {
+    const [row] = await db.select().from(intelligenceCacheTable).where(eq(intelligenceCacheTable.key, "geopolitical")).limit(1);
+    const events = Array.isArray(row?.data) ? row.data.filter(isGeoEvent) : [];
+    events.filter((e) => e.severity === "high" || e.severity === "critical").slice(0, 4).forEach((e, i) => {
+      alerts.push({
+        id: `terra-${i}`,
+        domain: "Terra",
+        domainColor: DOMAIN_COLOR.Terra,
+        priority: e.severity === "critical" ? "critical" : "high",
+        title: e.title ?? "Geopolitical event",
+        description: e.impact ?? e.description ?? e.source ?? "",
+        time: e.timestamp ? relTime(e.timestamp) : "recent",
+        status: "active",
+        category: "Market",
+      });
+    });
+  } catch { /* non-fatal */ }
+
+  // PRISM upcoming deadlines
+  try {
+    const now = new Date();
+    const in7Days = new Date(now.getTime() + 7 * 86400000);
+    const dls = await db.select().from(pcDeadlinesTable)
+      .where(and(gte(pcDeadlinesTable.dueDate, now), lte(pcDeadlinesTable.dueDate, in7Days)))
+      .limit(6);
+    dls.forEach((d, i) => {
+      const hoursUntil = (new Date(d.dueDate).getTime() - Date.now()) / 3600000;
+      const priority: "critical" | "high" | "medium" = hoursUntil < 24 ? "critical" : hoursUntil < 72 ? "high" : "medium";
+      alerts.push({
+        id: `prism-${d.id ?? i}`,
+        domain: "PRISM",
+        domainColor: DOMAIN_COLOR.PRISM,
+        priority,
+        title: d.title ?? "Legal deadline approaching",
+        description: `Due ${new Date(d.dueDate).toLocaleString()}.`,
+        time: relTime(now.toISOString()),
+        status: "active",
+        category: "Legal",
+      });
+    });
+  } catch { /* non-fatal */ }
+
+  // Lyte runtime telemetry
+  const lyte = await getLyteData();
+  if (lyte.heapPct > 80) {
+    alerts.push({
+      id: "lyte-heap",
+      domain: "Lyte",
+      domainColor: DOMAIN_COLOR.Lyte,
+      priority: lyte.heapPct > 90 ? "critical" : "high",
+      title: `Heap utilisation at ${lyte.heapPct}%`,
+      description: "Process heap pressure elevated. Investigate memory growth on api-server.",
+      time: "just now",
+      status: "active",
+      category: "Performance",
+      assignee: "Eng Team",
+    });
+  }
+  if (lyte.cpuLoad > 60) {
+    alerts.push({
+      id: "lyte-cpu",
+      domain: "Lyte",
+      domainColor: DOMAIN_COLOR.Lyte,
+      priority: lyte.cpuLoad > 80 ? "high" : "medium",
+      title: `CPU load at ${lyte.cpuLoad}%`,
+      description: "Sustained CPU pressure. Consider horizontal scaling.",
+      time: "just now",
+      status: "active",
+      category: "Performance",
+    });
+  }
+  if (lyte.recentRestart) {
+    alerts.push({
+      id: "lyte-restart",
+      domain: "Lyte",
+      domainColor: DOMAIN_COLOR.Lyte,
+      priority: "medium",
+      title: "API server restart detected",
+      description: `Process uptime ${Math.floor(lyte.uptimeSecs)}s — verify request stability.`,
+      time: "just now",
+      status: "active",
+      category: "Infrastructure",
+    });
+  }
+
+  return alerts;
+}
+
 router.get("/alerts", requireAnyAuth(), async (_req: Request, res: Response) => {
   try {
-    const alerts: Array<{
-      id: string; domain: string; domainColor: string; priority: "critical" | "high" | "medium" | "low";
-      title: string; description: string; time: string; status: "active" | "acknowledged" | "snoozed" | "resolved";
-      category: string; assignee?: string;
-    }> = [];
-
-    // Aegis threats from OTX
-    try {
-      const [row] = await db.select().from(intelligenceCacheTable).where(eq(intelligenceCacheTable.key, "threats")).limit(1);
-      const threats = Array.isArray(row?.data) ? row.data.filter(isThreatItem) : [];
-      threats.slice(0, 6).forEach((t, i) => {
-        const sev = t.severity === "critical" ? "critical" : t.severity === "high" ? "high" : "medium";
-        alerts.push({
-          id: `aegis-${i}`,
-          domain: "Aegis",
-          domainColor: DOMAIN_COLOR.Aegis,
-          priority: sev,
-          title: t.name ?? t.title ?? "Threat detected",
-          description: `${t.type ?? "Threat"} from ${t.country ?? "unknown"}. ${t.description?.slice(0, 140) ?? ""}`,
-          time: t.timestamp ? relTime(t.timestamp) : "recent",
-          status: "active",
-          category: "Security",
-          assignee: "Aegis SOC",
-        });
-      });
-    } catch { /* non-fatal */ }
-
-    // Terra geopolitical events
-    try {
-      const [row] = await db.select().from(intelligenceCacheTable).where(eq(intelligenceCacheTable.key, "geopolitical")).limit(1);
-      const events = Array.isArray(row?.data) ? row.data.filter(isGeoEvent) : [];
-      events.filter((e) => e.severity === "high" || e.severity === "critical").slice(0, 4).forEach((e, i) => {
-        alerts.push({
-          id: `terra-${i}`,
-          domain: "Terra",
-          domainColor: DOMAIN_COLOR.Terra,
-          priority: e.severity === "critical" ? "critical" : "high",
-          title: e.title ?? "Geopolitical event",
-          description: e.impact ?? e.description ?? e.source ?? "",
-          time: e.timestamp ? relTime(e.timestamp) : "recent",
-          status: "active",
-          category: "Market",
-        });
-      });
-    } catch { /* non-fatal */ }
-
-    // PRISM upcoming deadlines
-    try {
-      const now = new Date();
-      const in7Days = new Date(now.getTime() + 7 * 86400000);
-      const dls = await db.select().from(pcDeadlinesTable)
-        .where(and(gte(pcDeadlinesTable.dueDate, now), lte(pcDeadlinesTable.dueDate, in7Days)))
-        .limit(6);
-      dls.forEach((d, i) => {
-        const hoursUntil = (new Date(d.dueDate).getTime() - Date.now()) / 3600000;
-        const priority: "critical" | "high" | "medium" = hoursUntil < 24 ? "critical" : hoursUntil < 72 ? "high" : "medium";
-        alerts.push({
-          id: `prism-${d.id ?? i}`,
-          domain: "PRISM",
-          domainColor: DOMAIN_COLOR.PRISM,
-          priority,
-          title: d.title ?? "Legal deadline approaching",
-          description: `Due ${new Date(d.dueDate).toLocaleString()}.`,
-          time: relTime(now.toISOString()),
-          status: "active",
-          category: "Legal",
-        });
-      });
-    } catch { /* non-fatal */ }
-
-    // Lyte runtime telemetry
-    const lyte = await getLyteData();
-    if (lyte.heapPct > 80) {
-      alerts.push({
-        id: "lyte-heap",
-        domain: "Lyte",
-        domainColor: DOMAIN_COLOR.Lyte,
-        priority: lyte.heapPct > 90 ? "critical" : "high",
-        title: `Heap utilisation at ${lyte.heapPct}%`,
-        description: "Process heap pressure elevated. Investigate memory growth on api-server.",
-        time: "just now",
-        status: "active",
-        category: "Performance",
-        assignee: "Eng Team",
-      });
-    }
-    if (lyte.cpuLoad > 60) {
-      alerts.push({
-        id: "lyte-cpu",
-        domain: "Lyte",
-        domainColor: DOMAIN_COLOR.Lyte,
-        priority: lyte.cpuLoad > 80 ? "high" : "medium",
-        title: `CPU load at ${lyte.cpuLoad}%`,
-        description: "Sustained CPU pressure. Consider horizontal scaling.",
-        time: "just now",
-        status: "active",
-        category: "Performance",
-      });
-    }
-    if (lyte.recentRestart) {
-      alerts.push({
-        id: "lyte-restart",
-        domain: "Lyte",
-        domainColor: DOMAIN_COLOR.Lyte,
-        priority: "medium",
-        title: "API server restart detected",
-        description: `Process uptime ${Math.floor(lyte.uptimeSecs)}s — verify request stability.`,
-        time: "just now",
-        status: "active",
-        category: "Infrastructure",
-      });
-    }
+    const alerts = await computeAlerts();
 
     sendSuccess(res, {
       alerts,
@@ -795,17 +808,10 @@ router.get("/alerts", requireAnyAuth(), async (_req: Request, res: Response) => 
  */
 router.get("/alerts/count", requireAnyAuth(), async (_req: Request, res: Response) => {
   try {
-    let active = 0;
-    try {
-      const [row] = await db.select().from(intelligenceCacheTable).where(eq(intelligenceCacheTable.key, "threats")).limit(1);
-      const threats = Array.isArray(row?.data) ? row.data.filter(isThreatItem) : [];
-      active += Math.min(threats.length, 6);
-    } catch { /* non-fatal */ }
-    try {
-      const [row] = await db.select().from(intelligenceCacheTable).where(eq(intelligenceCacheTable.key, "geopolitical")).limit(1);
-      const events = Array.isArray(row?.data) ? row.data.filter(isGeoEvent) : [];
-      active += events.filter((e) => e.severity === "high" || e.severity === "critical").slice(0, 4).length;
-    } catch { /* non-fatal */ }
+    // Re-use the same builder as /alerts so the badge count cannot drift
+    // from the inbox total. Equivalent to alerts.counts.active.
+    const alerts = await computeAlerts();
+    const active = alerts.filter((a) => a.status === "active").length;
     sendSuccess(res, { count: active, generatedAt: new Date().toISOString() });
   } catch (err) {
     logger.error({ err }, "command alerts/count error");
@@ -937,56 +943,60 @@ router.get("/costs", requireAnyAuth(), async (_req: Request, res: Response) => {
  * Builds SLA dashboard from live runtime signals (Lyte CPU/heap/uptime) and
  * domain heuristics derived from real DB activity.
  */
-router.get("/sla", requireAnyAuth(), async (_req: Request, res: Response) => {
+type CommandSla = {
+  id: string; domain: string; domainColor: string; name: string; metric: string;
+  target: number; unit: string; current: number; compliance30d: number; breach: boolean;
+  window: string; owner: string; samples: number; source: string; lastBreach?: string;
+};
+
+/**
+ * Build the SLA dashboard rows. Used by both /api/command/sla (full
+ * payload) and /api/command/sla/breaches (badge count) so the breaching
+ * count cannot drift from sla.summary.breaching.
+ */
+async function computeSlas(): Promise<CommandSla[]> {
+  const since30d = new Date(Date.now() - 30 * 86400000);
+  const since24h = new Date(Date.now() - 86400000);
+
+  let metrics: Array<{ service: string; metricType: string; avg: number; p95: number; samples: number }> = [];
   try {
-    const since30d = new Date(Date.now() - 30 * 86400000);
-    const since24h = new Date(Date.now() - 86400000);
+    metrics = await db
+      .select({
+        service: lyteMetricsTable.service,
+        metricType: lyteMetricsTable.metricType,
+        avg: sql<number>`COALESCE(AVG(${lyteMetricsTable.value}), 0)::float`,
+        p95: sql<number>`COALESCE(PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY ${lyteMetricsTable.value}), 0)::float`,
+        samples: sql<number>`COUNT(*)::int`,
+      })
+      .from(lyteMetricsTable)
+      .where(gte(lyteMetricsTable.recordedAt, since24h))
+      .groupBy(lyteMetricsTable.service, lyteMetricsTable.metricType);
+  } catch { /* non-fatal */ }
 
-    // Real telemetry: aggregate Lyte metrics by service/metric_type for the last 24h.
-    let metrics: Array<{ service: string; metricType: string; avg: number; p95: number; samples: number }> = [];
-    try {
-      metrics = await db
-        .select({
-          service: lyteMetricsTable.service,
-          metricType: lyteMetricsTable.metricType,
-          avg: sql<number>`COALESCE(AVG(${lyteMetricsTable.value}), 0)::float`,
-          p95: sql<number>`COALESCE(PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY ${lyteMetricsTable.value}), 0)::float`,
-          samples: sql<number>`COUNT(*)::int`,
-        })
-        .from(lyteMetricsTable)
-        .where(gte(lyteMetricsTable.recordedAt, since24h))
-        .groupBy(lyteMetricsTable.service, lyteMetricsTable.metricType);
-    } catch { /* non-fatal */ }
+  let health: Array<{ service: string; pass: number; total: number }> = [];
+  try {
+    health = await db
+      .select({
+        service: healthChecksTable.service,
+        pass: sql<number>`SUM(CASE WHEN ${healthChecksTable.status} = 'healthy' THEN 1 ELSE 0 END)::int`,
+        total: sql<number>`COUNT(*)::int`,
+      })
+      .from(healthChecksTable)
+      .where(gte(healthChecksTable.checkedAt, since30d))
+      .groupBy(healthChecksTable.service);
+  } catch { /* non-fatal */ }
 
-    // Health-check pass rate per service (rolling 30d) — domain health endpoints.
-    let health: Array<{ service: string; pass: number; total: number }> = [];
-    try {
-      health = await db
-        .select({
-          service: healthChecksTable.service,
-          pass: sql<number>`SUM(CASE WHEN ${healthChecksTable.status} = 'healthy' THEN 1 ELSE 0 END)::int`,
-          total: sql<number>`COUNT(*)::int`,
-        })
-        .from(healthChecksTable)
-        .where(gte(healthChecksTable.checkedAt, since30d))
-        .groupBy(healthChecksTable.service);
-    } catch { /* non-fatal */ }
+  const metricFor = (service: string, metricType: string) =>
+    metrics.find((m) => m.service === service && m.metricType === metricType);
+  const uptimeFor = (service: string) => {
+    const h = health.find((x) => x.service === service);
+    if (!h || h.total === 0) return null;
+    return +(((h.pass / h.total) * 100).toFixed(2));
+  };
 
-    const metricFor = (service: string, metricType: string) =>
-      metrics.find((m) => m.service === service && m.metricType === metricType);
-    const uptimeFor = (service: string) => {
-      const h = health.find((x) => x.service === service);
-      if (!h || h.total === 0) return null;
-      return +(((h.pass / h.total) * 100).toFixed(2));
-    };
+  const slas: CommandSla[] = [];
 
-    const slas: Array<{
-      id: string; domain: string; domainColor: string; name: string; metric: string;
-      target: number; unit: string; current: number; compliance30d: number; breach: boolean;
-      window: string; owner: string; samples: number; source: string; lastBreach?: string;
-    }> = [];
-
-    const lyteLatency = metricFor("api-server", "latency");
+  const lyteLatency = metricFor("api-server", "latency");
     if (lyteLatency) {
       const breach = lyteLatency.p95 > 2000;
       slas.push({
@@ -1046,6 +1056,12 @@ router.get("/sla", requireAnyAuth(), async (_req: Request, res: Response) => {
       });
     }
 
+  return slas;
+}
+
+router.get("/sla", requireAnyAuth(), async (_req: Request, res: Response) => {
+  try {
+    const slas = await computeSlas();
     sendSuccess(res, {
       slas,
       summary: {
@@ -1066,30 +1082,13 @@ router.get("/sla", requireAnyAuth(), async (_req: Request, res: Response) => {
 /**
  * GET /api/command/sla/breaches
  *
- * Lightweight count of currently-breaching SLAs. Polls cheaply for the
- * SLA Dashboard nav badge.
+ * Lightweight count of currently-breaching SLAs. Re-uses computeSlas()
+ * so the badge count cannot drift from sla.summary.breaching.
  */
 router.get("/sla/breaches", requireAnyAuth(), async (_req: Request, res: Response) => {
   try {
-    const since24h = new Date(Date.now() - 86400000);
-    let metrics: Array<{ service: string; metricType: string; avg: number; p95: number }> = [];
-    try {
-      metrics = await db
-        .select({
-          service: lyteMetricsTable.service,
-          metricType: lyteMetricsTable.metricType,
-          avg: sql<number>`COALESCE(AVG(${lyteMetricsTable.value}), 0)::float`,
-          p95: sql<number>`COALESCE(PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY ${lyteMetricsTable.value}), 0)::float`,
-        })
-        .from(lyteMetricsTable)
-        .where(gte(lyteMetricsTable.recordedAt, since24h))
-        .groupBy(lyteMetricsTable.service, lyteMetricsTable.metricType);
-    } catch { /* non-fatal */ }
-    let breaching = 0;
-    for (const m of metrics) {
-      if (m.metricType === "p95_latency_ms" && m.p95 > 200) breaching += 1;
-      if (m.metricType === "throughput" && m.avg < 5) breaching += 1;
-    }
+    const slas = await computeSlas();
+    const breaching = slas.filter((s) => s.breach).length;
     sendSuccess(res, { count: breaching, generatedAt: new Date().toISOString() });
   } catch (err) {
     logger.error({ err }, "command sla/breaches error");

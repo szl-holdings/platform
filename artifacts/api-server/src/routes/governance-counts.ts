@@ -2,7 +2,7 @@ import { Router, type Request, type Response } from "express";
 import { sendSuccess, handleRouteError } from "../lib/api-response";
 import { requireAnyAuth } from "../middlewares/auth";
 import { db, approvalRequestsTable } from "@szl-holdings/db";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { logger } from "../lib/logger";
 
 const router = Router();
@@ -15,10 +15,15 @@ const router = Router();
  */
 router.get("/pending", requireAnyAuth(), async (_req: Request, res: Response) => {
   try {
+    // Match the scoping used by /api/command/governance — only policy
+    // approvals contribute to the Governance nav badge.
     const [row] = await db
       .select({ count: sql<number>`COUNT(*)::int` })
       .from(approvalRequestsTable)
-      .where(eq(approvalRequestsTable.status, "pending"));
+      .where(and(
+        eq(approvalRequestsTable.status, "pending"),
+        eq(approvalRequestsTable.resourceType, "policy"),
+      ));
     const count = Number(row?.count ?? 0);
     sendSuccess(res, { count, generatedAt: new Date().toISOString() });
   } catch (err) {
