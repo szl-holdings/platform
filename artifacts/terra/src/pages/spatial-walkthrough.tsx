@@ -208,6 +208,259 @@ const ROOM_FLOOR_PLANS: Record<string, {
   },
 };
 
+interface PropertyRoomRect {
+  id: string;
+  name: string;
+  sqft: number;
+  condition: string;
+  ceiling: number;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+function squarifyRooms(
+  rooms: { id: string; name: string; sqft: number; condition: string; ceiling: number }[],
+  W: number,
+  H: number,
+): PropertyRoomRect[] {
+  if (rooms.length === 0) return [];
+  const sorted = [...rooms].sort((a, b) => b.sqft - a.sqft);
+  const totalSqft = sorted.reduce((s, r) => s + r.sqft, 0) || 1;
+  const totalArea = W * H;
+  const scaled = sorted.map((r) => ({ ...r, area: (r.sqft / totalSqft) * totalArea }));
+
+  const placed: PropertyRoomRect[] = [];
+  let rect = { x: 0, y: 0, w: W, h: H };
+  let remaining = [...scaled];
+
+  const worstRatio = (row: typeof scaled, side: number) => {
+    const sum = row.reduce((s, r) => s + r.area, 0);
+    if (sum === 0 || side === 0) return Infinity;
+    let worst = 0;
+    for (const r of row) {
+      const a = r.area;
+      const ratio = Math.max((side * side * a) / (sum * sum), (sum * sum) / (side * side * a));
+      if (ratio > worst) worst = ratio;
+    }
+    return worst;
+  };
+
+  while (remaining.length > 0) {
+    const side = Math.min(rect.w, rect.h);
+    const row: typeof scaled = [];
+    let bestRatio = Infinity;
+    for (let i = 0; i < remaining.length; i++) {
+      const trial = [...row, remaining[i]];
+      const ratio = worstRatio(trial, side);
+      if (ratio <= bestRatio || row.length === 0) {
+        row.push(remaining[i]);
+        bestRatio = ratio;
+      } else {
+        break;
+      }
+    }
+    const rowSum = row.reduce((s, r) => s + r.area, 0);
+    if (rect.w >= rect.h) {
+      const rowW = rowSum / rect.h;
+      let yy = rect.y;
+      for (const r of row) {
+        const itemH = (r.area / rowSum) * rect.h;
+        placed.push({ id: r.id, name: r.name, sqft: r.sqft, condition: r.condition, ceiling: r.ceiling, x: rect.x, y: yy, w: rowW, h: itemH });
+        yy += itemH;
+      }
+      rect = { x: rect.x + rowW, y: rect.y, w: rect.w - rowW, h: rect.h };
+    } else {
+      const rowH = rowSum / rect.w;
+      let xx = rect.x;
+      for (const r of row) {
+        const itemW = (r.area / rowSum) * rect.w;
+        placed.push({ id: r.id, name: r.name, sqft: r.sqft, condition: r.condition, ceiling: r.ceiling, x: xx, y: rect.y, w: itemW, h: rowH });
+        xx += itemW;
+      }
+      rect = { x: rect.x, y: rect.y + rowH, w: rect.w, h: rect.h - rowH };
+    }
+    remaining = remaining.slice(row.length);
+  }
+  return placed;
+}
+
+function PropertyFloorPlanSVG({
+  rooms,
+  totalSqft,
+  bedrooms,
+  bathrooms,
+  selectedRoomId,
+  onSelectRoom,
+}: {
+  rooms: { id: string; name: string; sqft: number; condition: string; ceiling: number }[];
+  totalSqft: number;
+  bedrooms: number;
+  bathrooms: number;
+  selectedRoomId: string | null;
+  onSelectRoom: (id: string) => void;
+}) {
+  const W = 900;
+  const H = 420;
+  const padding = 24;
+  const innerW = W - padding * 2;
+  const innerH = H - padding * 2;
+
+  // Derive a rough footprint in feet from the actual property total sqft.
+  // Use a 16:9-ish aspect to match the canvas so the linear scale is consistent.
+  const aspect = innerW / innerH;
+  const footprintWidthFt = Math.sqrt(totalSqft * aspect);
+  const footprintDepthFt = totalSqft / Math.max(1, footprintWidthFt);
+
+  const placed = squarifyRooms(rooms, innerW, innerH).map((r) => ({
+    ...r,
+    x: r.x + padding,
+    y: r.y + padding,
+  }));
+
+  const onPerimeter = (r: PropertyRoomRect) => ({
+    top: Math.abs(r.y - padding) < 0.5,
+    bottom: Math.abs(r.y + r.h - (H - padding)) < 0.5,
+    left: Math.abs(r.x - padding) < 0.5,
+    right: Math.abs(r.x + r.w - (W - padding)) < 0.5,
+  });
+
+  // Doorway between two adjacent rooms — drop a small dashed gap on the shared wall midpoint.
+  const doorways: { x1: number; y1: number; x2: number; y2: number }[] = [];
+  for (let i = 0; i < placed.length; i++) {
+    for (let j = i + 1; j < placed.length; j++) {
+      const a = placed[i];
+      const b = placed[j];
+      // Vertical shared wall
+      const sharedX =
+        Math.abs(a.x + a.w - b.x) < 0.5 ? a.x + a.w :
+        Math.abs(b.x + b.w - a.x) < 0.5 ? b.x + b.w : null;
+      if (sharedX !== null) {
+        const yTop = Math.max(a.y, b.y);
+        const yBot = Math.min(a.y + a.h, b.y + b.h);
+        if (yBot - yTop > 30) {
+          const mid = (yTop + yBot) / 2;
+          doorways.push({ x1: sharedX, y1: mid - 12, x2: sharedX, y2: mid + 12 });
+        }
+        continue;
+      }
+      // Horizontal shared wall
+      const sharedY =
+        Math.abs(a.y + a.h - b.y) < 0.5 ? a.y + a.h :
+        Math.abs(b.y + b.h - a.y) < 0.5 ? b.y + b.h : null;
+      if (sharedY !== null) {
+        const xLeft = Math.max(a.x, b.x);
+        const xRight = Math.min(a.x + a.w, b.x + b.w);
+        if (xRight - xLeft > 30) {
+          const mid = (xLeft + xRight) / 2;
+          doorways.push({ x1: mid - 12, y1: sharedY, x2: mid + 12, y2: sharedY });
+        }
+      }
+    }
+  }
+
+  return (
+    <svg width="100%" height="100%" viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Property floor plan">
+      <defs>
+        <pattern id="prop-fp-grid" width="20" height="20" patternUnits="userSpaceOnUse">
+          <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="0.5" />
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#prop-fp-grid)" />
+
+      {/* Footprint dimension labels — derived from actual property sqft */}
+      <text x={W / 2} y={14} textAnchor="middle" fontSize="9" fill="rgba(255,255,255,0.32)" fontFamily="monospace">
+        {Math.round(footprintWidthFt)}'
+      </text>
+      <text x={12} y={H / 2} textAnchor="middle" fontSize="9" fill="rgba(255,255,255,0.32)" fontFamily="monospace" transform={`rotate(-90 12 ${H / 2})`}>
+        {Math.round(footprintDepthFt)}'
+      </text>
+
+      {/* Scale bar — length is proportional to actual footprint, so bigger properties show a shorter bar.
+          This gives a real visual sense of cross-property size, not just labels. */}
+      {(() => {
+        const scaleFeet = footprintWidthFt > 120 ? 25 : footprintWidthFt > 60 ? 10 : 5;
+        const pxPerFt = innerW / Math.max(1, footprintWidthFt);
+        const barLen = Math.max(20, Math.min(innerW * 0.4, scaleFeet * pxPerFt));
+        const baseX = padding + 6;
+        const baseY = H - 22;
+        return (
+          <g>
+            <line x1={baseX} y1={baseY} x2={baseX + barLen} y2={baseY} stroke="rgba(255,255,255,0.55)" strokeWidth="2" />
+            <line x1={baseX} y1={baseY - 4} x2={baseX} y2={baseY + 4} stroke="rgba(255,255,255,0.55)" strokeWidth="2" />
+            <line x1={baseX + barLen} y1={baseY - 4} x2={baseX + barLen} y2={baseY + 4} stroke="rgba(255,255,255,0.55)" strokeWidth="2" />
+            <text x={baseX + barLen / 2} y={baseY - 7} textAnchor="middle" fontSize="9" fill="rgba(255,255,255,0.55)" fontFamily="monospace">{scaleFeet}'</text>
+          </g>
+        );
+      })()}
+
+      {placed.map((r) => {
+        const condColor = CONDITION_COLORS[r.condition as keyof typeof CONDITION_COLORS] ?? "#94a3b8";
+        const isActive = selectedRoomId === r.id;
+        const perim = onPerimeter(r);
+        return (
+          <g key={r.id} style={{ cursor: "pointer" }} onClick={() => onSelectRoom(r.id)}>
+            <rect
+              x={r.x}
+              y={r.y}
+              width={r.w}
+              height={r.h}
+              fill={`${condColor}${isActive ? "30" : "14"}`}
+              stroke={isActive ? condColor : "rgba(255,255,255,0.55)"}
+              strokeWidth={isActive ? 2.5 : 1.8}
+            />
+            {/* Window markers on exterior walls */}
+            {perim.top && r.w > 70 && (
+              <line x1={r.x + r.w * 0.3} y1={r.y} x2={r.x + r.w * 0.7} y2={r.y} stroke="#38bdf8" strokeWidth="3" strokeLinecap="round" />
+            )}
+            {perim.bottom && r.w > 70 && (
+              <line x1={r.x + r.w * 0.3} y1={r.y + r.h} x2={r.x + r.w * 0.7} y2={r.y + r.h} stroke="#38bdf8" strokeWidth="3" strokeLinecap="round" />
+            )}
+            {perim.left && r.h > 70 && (
+              <line x1={r.x} y1={r.y + r.h * 0.3} x2={r.x} y2={r.y + r.h * 0.7} stroke="#38bdf8" strokeWidth="3" strokeLinecap="round" />
+            )}
+            {perim.right && r.h > 70 && (
+              <line x1={r.x + r.w} y1={r.y + r.h * 0.3} x2={r.x + r.w} y2={r.y + r.h * 0.7} stroke="#38bdf8" strokeWidth="3" strokeLinecap="round" />
+            )}
+            {/* Condition swatch */}
+            <circle cx={r.x + 12} cy={r.y + 12} r={4} fill={condColor} />
+            {/* Room label */}
+            {r.w > 60 && r.h > 40 && (
+              <>
+                <text x={r.x + r.w / 2} y={r.y + r.h / 2 - 6} textAnchor="middle" fontSize={r.w > 140 ? 13 : 11} fontWeight="600" fill="rgba(255,255,255,0.92)">{r.name}</text>
+                <text x={r.x + r.w / 2} y={r.y + r.h / 2 + 9} textAnchor="middle" fontSize="9" fill="rgba(255,255,255,0.5)" fontFamily="monospace">{r.sqft} SF</text>
+                {r.h > 70 && (
+                  <text x={r.x + r.w / 2} y={r.y + r.h / 2 + 22} textAnchor="middle" fontSize="8" fill={condColor} fontFamily="monospace" fontWeight="600">{String(r.condition).toUpperCase()}</text>
+                )}
+              </>
+            )}
+          </g>
+        );
+      })}
+
+      {/* Doorway gaps drawn over walls */}
+      {doorways.map((d, i) => (
+        <line key={i} x1={d.x1} y1={d.y1} x2={d.x2} y2={d.y2} stroke="#fbbf24" strokeWidth="3.5" strokeLinecap="round" strokeDasharray="6 3" />
+      ))}
+
+      {/* Outer wall outline */}
+      <rect x={padding} y={padding} width={innerW} height={innerH} fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2.5" />
+
+      {/* Footer summary */}
+      <text x={padding} y={H - 6} fontSize="8" fill="rgba(255,255,255,0.32)" fontFamily="monospace">
+        {totalSqft.toLocaleString()} SF · {bedrooms}BD / {bathrooms}BA · {rooms.length} rooms mapped
+      </text>
+      <g transform={`translate(${W - 240} ${H - 14})`}>
+        <circle cx={0} cy={-4} r={4} fill="#34d399" /><text x={8} y={-1} fontSize="8" fill="rgba(255,255,255,0.4)">excellent</text>
+        <circle cx={62} cy={-4} r={4} fill="#60a5fa" /><text x={70} y={-1} fontSize="8" fill="rgba(255,255,255,0.4)">good</text>
+        <circle cx={108} cy={-4} r={4} fill="#fbbf24" /><text x={116} y={-1} fontSize="8" fill="rgba(255,255,255,0.4)">fair</text>
+        <circle cx={146} cy={-4} r={4} fill="#ef4444" /><text x={154} y={-1} fontSize="8" fill="rgba(255,255,255,0.4)">poor</text>
+      </g>
+    </svg>
+  );
+}
+
 function FloorPlanSVG({ room }: { room: Room }) {
   const plan = ROOM_FLOOR_PLANS[room.id] ?? ROOM_FLOOR_PLANS.r1;
   const W = 600, H = 260;
@@ -319,7 +572,6 @@ export default function SpatialWalkthroughPage() {
   if (propertyId) {
     const d = propertyData?.data;
     const activePropRoom = d?.rooms.find(r => r.id === selectedPropRoom) ?? null;
-    const totalSqft = d?.rooms.reduce((s, r) => s + r.sqft, 0) ?? 1;
     return (
       <div className="min-h-screen" style={{ background: "#0a0c10" }}>
         <div className="mx-auto max-w-5xl px-6 py-8">
@@ -354,36 +606,21 @@ export default function SpatialWalkthroughPage() {
                 ))}
               </div>
 
-              {/* Visual Floor Plan Schematic */}
+              {/* Visual Floor Plan Schematic — adapts to this property's actual rooms, sqft, and conditions */}
               <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5 mb-6">
-                <p className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-3">Floor Plan — Click a Room to Inspect</p>
-                <div className="flex flex-wrap gap-2" style={{ minHeight: 120 }}>
-                  {d.rooms.map((r) => {
-                    const condColor = CONDITION_COLORS[r.condition as keyof typeof CONDITION_COLORS] ?? "#94a3b8";
-                    const pct = Math.max(10, Math.round((r.sqft / totalSqft) * 100));
-                    const isActive = selectedPropRoom === r.id;
-                    return (
-                      <button
-                        key={r.id}
-                        onClick={() => setSelectedPropRoom(isActive ? null : r.id)}
-                        style={{
-                          flexBasis: `${Math.max(12, pct * 1.5)}%`,
-                          minWidth: 80,
-                          background: isActive ? `${condColor}25` : "rgba(255,255,255,0.03)",
-                          border: `1.5px solid ${isActive ? condColor : "rgba(255,255,255,0.07)"}`,
-                          borderRadius: 10,
-                          padding: "10px 12px",
-                          cursor: "pointer",
-                          textAlign: "left",
-                          transition: "all 0.15s ease",
-                        }}
-                      >
-                        <div className="text-[9px] font-semibold uppercase tracking-wide" style={{ color: isActive ? condColor : "rgba(255,255,255,0.35)" }}>{r.condition}</div>
-                        <div className="text-xs font-semibold text-white mt-0.5 truncate">{r.name}</div>
-                        <div className="text-[9px] text-white/30 mt-0.5">{r.sqft} SF</div>
-                      </button>
-                    );
-                  })}
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-xs font-semibold text-white/50 uppercase tracking-wider">Floor Plan — Click a Room to Inspect</p>
+                  <p className="text-[10px] text-white/35 font-mono">Property <span style={{ color: "#2d6a4f" }}>{propertyId}</span> · scaled to {d.totalSqft.toLocaleString()} SF</p>
+                </div>
+                <div style={{ background: "#06090e", borderRadius: 10, padding: 8, width: "100%", aspectRatio: "900 / 420" }}>
+                  <PropertyFloorPlanSVG
+                    rooms={d.rooms}
+                    totalSqft={d.totalSqft}
+                    bedrooms={d.bedrooms}
+                    bathrooms={d.bathrooms}
+                    selectedRoomId={selectedPropRoom}
+                    onSelectRoom={(id) => setSelectedPropRoom(selectedPropRoom === id ? null : id)}
+                  />
                 </div>
 
                 {/* Room Detail Panel */}
