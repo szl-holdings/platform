@@ -138,13 +138,29 @@ test.describe("Correlation deep-links — drill-through to detail pages", () => 
         ),
     );
 
-    // If the registry has any entity rows, every entity link must match the
-    // productEntityUrl shape. If it has none (empty seed), the test passes
-    // because there is nothing to mis-route.
+    // Every entity link the page renders must match the productEntityUrl
+    // shape — that is the contract we are protecting.
     for (const href of entityHrefs) {
       expect(href, `unexpected entity-link shape: ${href}`).toMatch(
         /^\/(vessels\/vessels\/|terra\/property\/|carlota-jo\/inquiries|aegis\/|operations\/prism|operations)/,
       );
+    }
+
+    // When the page is in seeded mode (default for the dev/preview
+    // environment) there must be at least one entity drill-through link.
+    // A silent zero-link state would let a regression that strips all
+    // hrefs pass undetected. Detect seeded mode by looking for the
+    // registry's row count / table content; only enforce the lower bound
+    // when seed data is actually present.
+    const bodyText = await page.locator("body").innerText();
+    const seededMode =
+      /evidence|signal|correlation/i.test(bodyText) &&
+      !/no evidence|empty|no correlations/i.test(bodyText);
+    if (seededMode) {
+      expect(
+        entityHrefs.length,
+        `seeded evidence registry rendered no entity drill-through links — productEntityUrl helper or registry rendering may be broken`,
+      ).toBeGreaterThan(0);
     }
   });
 
