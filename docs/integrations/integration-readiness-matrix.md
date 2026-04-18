@@ -144,7 +144,8 @@
 
 | Integration | Env Variable | Class | Notes |
 |-------------|-------------|-------|-------|
-| Sentry | `SENTRY_DSN` | OPTIONAL/INACTIVE | Error reporting. Not configured — production errors log to Pino only (GAP-006). |
+| Sentry (API + web) | `SENTRY_DSN` / `VITE_SENTRY_DSN` | ACTIVE/REQUIRED | Error reporting for API server and all six web frontends. Both DSNs configured. SDK active: Express error handler, unhandled exceptions/rejections, PII scrubbing, browser tracing, session replay. GAP-006 closed April 18, 2026. Verify via `GET /api/healthz` → `services.errorTracking`. |
+| Sentry (mobile) | `EXPO_PUBLIC_SENTRY_DSN` | OPTIONAL/INACTIVE | Same Sentry project; custom Expo HTTP reporter wired but DSN not yet set. Required before mobile enters production (follow-up task #1753). |
 | Azure App Insights | `AZURE_APP_INSIGHTS_CONNECTION_STRING` | PLANNED/OOS | For Azure deployment path; not on current launch path. |
 | New Relic | `NEW_RELIC_LICENSE_KEY` | OPTIONAL/INACTIVE | APM alternative. Not configured. |
 
@@ -181,7 +182,7 @@
 
 | Class | Count |
 |-------|-------|
-| ACTIVE/REQUIRED | 10 |
+| ACTIVE/REQUIRED | 11 |
 | OPTIONAL/INACTIVE | 32 |
 | DEMO-BACKED | 3 |
 | ENTERPRISE-ONLY | 4 |

@@ -106,6 +106,7 @@
 | **Owner** | Platform Engineering |
 | **Target** | Before first paying tenant |
 | **Wave** | 3–4 |
+| **Status** | **CLOSED — April 18, 2026** — `SENTRY_DSN` (API server) and `VITE_SENTRY_DSN` (web frontends) configured as Replit secrets. Sentry SDK fully wired in codebase: Express error handler (`artifacts/api-server/src/lib/sentry.ts`), unhandled exception + rejection capture, PII scrubbing on Authorization/Cookie/x-internal-token headers, browser tracing + session replay (10% session / 100% on error) across all six web apps (`lib/observability/src/react/sentry.ts`), and custom lightweight HTTP reporter for Expo mobile (`artifacts/szl-holdings-mobile/lib/sentry.ts`). Global error boundaries with Sentry capture in `lib/shared-ui/src/error-boundary.tsx`. Sentry init status exposed in `/api/healthz` under `services.errorTracking` (dsnConfigured + initialized fields). Scope: web frontends + API server — mobile (`EXPO_PUBLIC_SENTRY_DSN`) tracked as a separate follow-up (task #1753). |
 
 ---
 
@@ -240,6 +241,7 @@
 
 | Gap ID | Description | Closed Date |
 |--------|-------------|------------|
+| GAP-006 | No external error monitoring (Sentry) | April 18, 2026 — SENTRY_DSN and VITE_SENTRY_DSN configured; SDK fully wired across API server and all six web apps; mobile (EXPO_PUBLIC_SENTRY_DSN) pending |
 | GAP-C001 | Secrets in source-controlled files | April 16, 2026 — None found |
 | GAP-C002 | GitHub Actions not pinned to SHAs | April 16, 2026 — All 13 workflows fully pinned (ci, e2e, build, deploy-staging, deploy-production, security, codeql, dependency-review, lighthouse, release, npm-publish, container-publish, prism-counsel-ci) |
 | GAP-C003 | Dormant maven/nuget/rubygems publish workflows | April 16, 2026 — These workflows do not exist |

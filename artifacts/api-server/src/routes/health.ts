@@ -3,6 +3,7 @@ import { HealthCheckResponse } from "@szl-holdings/api-zod";
 import { getBackupHealthStatus } from "../lib/backup-service";
 import { pool } from "@szl-holdings/db";
 import { adminGuard } from "../middlewares/admin-guard";
+import { Sentry } from "../lib/sentry";
 
 /**
  * Apply adminGuard in production environments.
@@ -47,6 +48,8 @@ router.get("/healthz", async (_req, res) => {
   const hasAiKey = !!(process.env.AI_INTEGRATIONS_OPENAI_API_KEY || process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY || process.env.AI_INTEGRATIONS_GEMINI_API_KEY);
   const hasCloudStorage = !!process.env.OBJECT_STORAGE_BUCKET_ID;
   const authStatus = hasSessionSecret ? "ok" : "degraded";
+  const sentryDsnConfigured = !!process.env.SENTRY_DSN;
+  const sentryInitialized = Sentry.isInitialized();
 
   const overallStatus = dbHealth.status === "ok" && authStatus === "ok" ? "ok" : "degraded";
 
@@ -62,6 +65,12 @@ router.get("/healthz", async (_req, res) => {
       storage: { status: "ok", mode: hasCloudStorage ? "cloud" : "local" },
       auth: { status: authStatus, mode: hasSessionSecret ? "configured" : "missing_secret" },
       ai: { status: "ok", mode: hasAiKey ? "live" : "mock" },
+      errorTracking: {
+        status: sentryInitialized ? "ok" : sentryDsnConfigured ? "degraded" : "unconfigured",
+        provider: "sentry",
+        dsnConfigured: sentryDsnConfigured,
+        initialized: sentryInitialized,
+      },
       backup: {
         status: backupHealth.status,
         lastBackupAt: backupHealth.lastBackupAt,
