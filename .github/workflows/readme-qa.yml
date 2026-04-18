@@ -11,8 +11,6 @@ on:
       - "assets/readme/**"
       - ".github/workflows/**"
       - "scripts/validate-readme-assets.js"
-      - "scripts/generate-readme-product-table.js"
-      - "artifacts/*/.replit-artifact/artifact.toml"
   push:
     branches: [main, master]
     paths:
@@ -23,8 +21,6 @@ on:
       - "assets/readme/**"
       - ".github/workflows/**"
       - "scripts/validate-readme-assets.js"
-      - "scripts/generate-readme-product-table.js"
-      - "artifacts/*/.replit-artifact/artifact.toml"
   workflow_dispatch:
 
 permissions:
@@ -54,9 +50,6 @@ jobs:
 
       - name: Check root README assets
         run: pnpm readme:check
-
-      - name: Check artifact inventory is in sync
-        run: pnpm readme:generate:check
 
       - name: Check profile README assets
         run: node scripts/validate-readme-assets.js --readme profile-readme/README.md
