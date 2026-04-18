@@ -97,8 +97,9 @@ export default function AdminDesignPartnersPage() {
       toast.success(`Marked as ${STATUS_META[args.status].label.toLowerCase()}`);
       queryClient.invalidateQueries({ queryKey: ["admin-design-partners", "partnership"] });
     },
-    onError: (err: any) => {
-      toast.error(err?.message ?? "Failed to update status");
+    onError: (err: unknown) => {
+      const message = err instanceof Error ? err.message : "Failed to update status";
+      toast.error(message);
     },
     onSettled: () => setUpdatingId(null),
   });

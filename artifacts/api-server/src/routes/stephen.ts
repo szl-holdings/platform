@@ -10,7 +10,7 @@ import {
   alloySignals,
 } from "@szl-holdings/db";
 import { z } from "zod";
-import { eq, desc, asc, and } from "drizzle-orm";
+import { eq, desc, asc, and, type SQL } from "drizzle-orm";
 
 const CONTENT_BLOCK_TYPES = ["achievement", "about", "service", "stat", "skill", "thesis", "doctrine"] as const;
 const BOOKING_TYPES = ["consultation", "project", "recruitment", "partnership", "investment", "speaking", "other"] as const;
@@ -352,15 +352,11 @@ const ListBookingRequestsQuery = z.object({
 router.get("/stephen/booking-requests", authMiddleware(), requireRole("ops"), async (req, res) => {
   try {
     const query = ListBookingRequestsQuery.parse(req.query);
-    const filters = [
-      query.type ? eq(stephenBookingRequestsTable.type, query.type as any) : undefined,
-      query.status ? eq(stephenBookingRequestsTable.status, query.status as any) : undefined,
-    ].filter(Boolean) as any[];
-    const whereClause = filters.length === 0
-      ? undefined
-      : filters.length === 1
-        ? filters[0]
-        : and(...filters);
+    const filters: SQL[] = [];
+    if (query.type) filters.push(eq(stephenBookingRequestsTable.type, query.type));
+    if (query.status) filters.push(eq(stephenBookingRequestsTable.status, query.status));
+    const whereClause: SQL | undefined =
+      filters.length === 0 ? undefined : filters.length === 1 ? filters[0] : and(...filters);
     const requests = whereClause
       ? await db.select().from(stephenBookingRequestsTable).where(whereClause).orderBy(desc(stephenBookingRequestsTable.createdAt))
       : await db.select().from(stephenBookingRequestsTable).orderBy(desc(stephenBookingRequestsTable.createdAt));
