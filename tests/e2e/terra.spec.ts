@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-const TERRA_PATH = process.env.TERRA_BASE_PATH ?? "/terra";
+const TERRA_PATH = process.env.TERRA_BASE_PATH ?? "/terra/";
 
 let appAvailable = true;
 test.beforeAll(async ({ browser }) => {

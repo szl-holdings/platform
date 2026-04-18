@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-const COMMAND_PATH = process.env.COMMAND_BASE_PATH ?? "/command";
+const COMMAND_PATH = process.env.COMMAND_BASE_PATH ?? "/command/";
 
 let appAvailable = true;
 test.beforeAll(async ({ browser }) => {

@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-const AEGIS_PATH = process.env.AEGIS_BASE_PATH ?? "/aegis";
+const AEGIS_PATH = process.env.AEGIS_BASE_PATH ?? "/aegis/";
 
 let appAvailable = true;
 test.beforeAll(async ({ browser }) => {

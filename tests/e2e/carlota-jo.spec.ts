@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
-const CARLOTA_PATH = process.env.CARLOTA_BASE_PATH ?? "/carlota-jo";
+const CARLOTA_PATH = process.env.CARLOTA_BASE_PATH ?? "/carlota-jo/";
 
 let appAvailable = true;
 test.beforeAll(async ({ browser }) => {

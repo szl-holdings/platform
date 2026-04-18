@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-const VESSELS_PATH = process.env.VESSELS_BASE_PATH ?? "/vessels";
+const VESSELS_PATH = process.env.VESSELS_BASE_PATH ?? "/vessels/";
 
 let appAvailable = true;
 test.beforeAll(async ({ browser }) => {
