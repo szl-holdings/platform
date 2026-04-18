@@ -19,7 +19,7 @@ All quantitative claims in this document were derived directly from source at th
 - **"Zod validation coverage"** = files containing `validateBody`, `validateQuery`, or `validateParams` from `lib/validation.ts`. **Count: 21 of 170 top-level route files.**
 - **"Auth enforcement coverage"** = files containing `authMiddleware`, `requireRole`, `requireAnyAuth`, or `adminGuard`. **Count: 155 of 170 top-level route files.**
 
-These counts should be re-verified as the platform grows. The route security matrix task will automate this tracking.
+These counts should be re-verified as the platform grows. The route security matrix script (`src/scripts/route-security-matrix.ts`) automates this tracking — run it with `--strict` to fail CI on any unclassified routes.
 
 ---
 
@@ -27,7 +27,7 @@ These counts should be re-verified as the platform grows. The route security mat
 
 | Area | Gap | Risk | Status |
 |------|-----|------|--------|
-| Security — Auth | Global hydrator ≠ global enforcer; most routes rely on per-route enforcement | High | In remediation |
+| Security — Auth | Global hydrator ≠ global enforcer; most routes rely on per-route enforcement | High | Closed — April 2026 |
 | Security — Auth | 2 routes lacked explicit auth enforcement (found via pen test, FINDING-001) | High | Resolved — May 2026 |
 | Security — Cross-Tenant | Cross-tenant ID enumeration on vessels and projects routes (pen test, FINDING-003) | High | Resolved — May 2026 |
 | Security — Validation | 21 of 170 top-level route files use Zod input validation helpers | High | In remediation |
@@ -129,27 +129,34 @@ Audited all routes with /:orgId or /:orgSlug params across all files under src/r
 
 ## Section 3: Security — Authentication & Authorization
 
-### 3.1 Global Auth Middleware Is a Hydrator, Not an Enforcer
+### 3.1 Global Auth Middleware Is a Hydrator, Not an Enforcer — CLOSED
 
-**Gap:** The global `authMiddleware` (`src/middlewares/authMiddleware.ts`) runs on every request but only populates `req.oidcUser` / `req.user` from the session. It does **not** reject unauthenticated requests. Route-level enforcement requires each router to explicitly call `authMiddleware()` from `src/middlewares/auth.ts` with `required: true`.
+**Gap (historical):** The global `authMiddleware` ran on every request but only populated `req.oidcUser` / `req.user` from the session — it never rejected unauthenticated requests. Route-level enforcement required each router to explicitly opt-in to auth.
 
-**Current State:** 155 of 170 top-level route files import auth-related middleware. The remaining 15 route files (health checks, public status, webhooks, contact forms, demo requests) are intentionally or incidentally public. The global hydrator never returns a 401 — it always calls `next()`.
+**Current State (closed — April 2026):** `src/middlewares/global-auth-enforcer.ts` adds a **deny-by-default** layer that runs on every `/api/*` request after session hydration. Unauthenticated requests are rejected with `401 Unauthorized` unless the path is in the explicit public allowlist (`PUBLIC_EXACT_PATHS` / `PUBLIC_PREFIXES`). The architectural pattern is now opt-out (public routes declare themselves) rather than opt-in (protected routes declare themselves).
 
-**Risk:** High. The architecture is correct as designed, but it creates a risk surface where a new route file added without explicit auth enforcement is publicly accessible by default. There is no deny-by-default enforcement at the framework level.
+**Allowlisted public routes (all intentional, documented in the enforcer):** health probes (`/api/health*`, `/api/ready`), auth/OIDC flows (`/api/auth/*`, `/api/oidc/*`), contact/demo-requests, CSRF token, SCIM (bearer token auth internally), webhooks (HMAC auth internally), streaming ingestion (source token auth internally), Carlota Jo time-tracking (marketing demo), LP portal read-only demo data, anonymous page-view tracking, newsletter subscribe, Terra Cognitive read routes (optional auth), federation agent discovery, DOS public API (`/api/v1/*` — API key gated), API docs.
 
-**Remediation:** Add a global deny-by-default guard that requires routes to opt-out of authentication (rather than opt-in). Companion tasks in progress: "Build an automated route security matrix to prevent future regressions" and "Connect the new security modules to live API data and case management workflows."
+**Regression guard:** Tests in `src/__tests__/security-hardening.test.ts` verify the enforcer blocks unauthenticated requests and passes authenticated and public requests.
+
+**Risk:** Closed. New route files added without auth middleware are blocked by the global enforcer, not silently passed through.
 
 ---
 
-### 3.2 No Route Security Matrix
+### 3.2 No Route Security Matrix — CLOSED
 
-**Gap:** There is no automated registry mapping every route to its auth enforcement level. It is not possible to audit at a glance which routes are public, which require any auth, and which require specific roles.
+**Gap (historical):** No automated registry mapped every route to its auth enforcement level. Auditing required manual code inspection.
 
-**Current State:** Auth enforcement is verified by code inspection only. No tooling generates a route→auth matrix.
+**Current State (closed — April 2026):** `src/scripts/route-security-matrix.ts` is an on-demand script that scans all route files under `src/routes/` and classifies each as:
+- `PROTECTED` — file imports an auth enforcement helper (`authMiddleware`, `requireRole`, `requireAnyAuth`, `adminGuard`, `tenantScope`, `scimBearerAuth`, `dosApiKeyAuth`, etc.)
+- `PUBLIC` — file is in the public allowlist and its unauthenticated access is intentional
+- `UNCLASSIFIED` — neither; requires immediate review
 
-**Risk:** Medium. As the route count grows (currently 173 total route files), manual auditing becomes impractical.
+Running with `--strict` returns exit code 1 if any `UNCLASSIFIED` routes exist, enabling enforcement in CI pipelines. Run with `--json` for machine-readable output.
 
-**Remediation:** Companion task in the backlog: "Build an automated route security matrix to prevent future regressions."
+**Usage:** `pnpm --filter @szl-holdings/api-server exec tsx src/scripts/route-security-matrix.ts [--strict] [--json]`
+
+**Risk:** Closed. The matrix script makes auth coverage auditable at any time and can block merges if new unclassified routes are introduced.
 
 ---
 

@@ -103,15 +103,17 @@ SZL Holdings does not inflate its current state to improve how it presents to in
 
 ---
 
-### 9. Auth Enforcement Coverage (Technical Debt)
+### 9. Auth Enforcement Coverage (Technical Debt) — CLOSED
 
-**Gap:** The API server uses a global session hydrator that populates user context on every request but does not enforce authentication. Route-level auth enforcement is applied per-router. Most routes have explicit auth middleware applied; however, there is no deny-by-default mechanism to prevent future routes from being inadvertently public.
+**Gap (historical):** The API server used a global session hydrator that populated user context on every request but did not enforce authentication. Route-level auth enforcement was applied per-router, meaning future routes could be accidentally created without auth.
 
-**Current state:** 155 of 170 top-level route files import auth enforcement middleware. The remaining 15 route files are intentionally or incidentally public. The global hydrator (`authMiddleware.ts`) never returns a 401 on its own — it always passes the request through. No automated route security matrix exists to audit auth coverage across all routes.
+**Current state (closed — April 2026):**
+- `src/middlewares/global-auth-enforcer.ts` implements a **deny-by-default** guard that runs on every `/api/*` request after session hydration. Unauthenticated requests receive `401 Unauthorized` unless the route path is in the explicit public allowlist.
+- All 15 previously unprotected routes have been audited: intentionally public routes (health probes, auth/OIDC flows, webhooks, contact forms, Carlota Jo demo, LP portal, page-view tracking, newsletter, DOS public API) are explicitly registered in `PUBLIC_EXACT_PATHS` / `PUBLIC_PREFIXES` in the enforcer. Every other route is protected by default.
+- An on-demand **route security matrix script** (`src/scripts/route-security-matrix.ts`) scans all route files and classifies each as `PROTECTED`, `PUBLIC`, or `UNCLASSIFIED`. Running with `--strict` exits non-zero if any unclassified routes exist, enabling CI enforcement.
+- Regression tests in `src/__tests__/security-hardening.test.ts` verify the enforcer blocks unauthenticated requests and allows public paths and valid sessions.
 
-**Path to close:** Add a global deny-by-default guard requiring routes to explicitly opt out of authentication. Add automated route security matrix generation to CI. Both are active remediation tasks. See `docs/known-gaps.md §3`.
-
-**Risk level:** High (structural). No evidence of active exploitation in current single-tenant demo environment, but the pattern creates a risk surface as route count grows.
+**Risk level:** Closed. The structural gap is eliminated. A new route file added without auth enforcement will be blocked at the enforcer level, not silently passed through. See `docs/known-gaps.md §3`.
 
 ---
 
@@ -163,7 +165,7 @@ SZL Holdings does not inflate its current state to improve how it presents to in
 | AIS data | Operational | Low | Subscription ($15–40K/year) |
 | CORS configuration | Security | Very Low | Environment variable |
 | Sentry / error tracking | Operations | Very Low | 1 day engineering |
-| Auth enforcement coverage (155/170 routes) | Technical — Security | High | Deny-by-default guard + route matrix (active) |
+| Auth enforcement coverage | Technical — Security | ~~High~~ Closed | Deny-by-default guard + route matrix — closed April 2026 |
 | Input validation coverage (21/170 routes) | Technical — Security | High | Zod expansion to remaining routes (active) |
 | Test coverage ratio (~27 tests / 173 routes) | Technical — Quality | High | Integration test expansion + CI wiring (active) |
 | In-memory session store | Technical — Infra | Very Low (now) / Medium (at scale) | Redis (revenue phase) |
