@@ -5,6 +5,9 @@ import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../middlew
 import { sendSuccess, sendError, handleRouteError } from "../lib/api-response";
 import { logger } from "../lib/logger";
 import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { gatewayInfer } from "../lib/ai-gateway";
+import { db, memoryRecordsTable } from "@szl-holdings/db";
+import { eq } from "drizzle-orm";
 
 const router = Router();
 router.use(authMiddleware({ required: false }));
@@ -712,61 +715,80 @@ function emitToClients(runId: string, event: string, data: unknown) {
   }
 }
 
+// ─── Memory DB persistence ────────────────────────────────────────────────────
+
+function nexusTierToDbTier(tier: string): "session" | "workflow" | "entity" | "artifact" | "executive" | "domain" | "operator-feedback" | "long-term" {
+  const map: Record<string, "session" | "workflow" | "entity" | "domain" | "long-term"> = {
+    working: "session",
+    session: "session",
+    episodic: "domain",
+    semantic: "long-term",
+  };
+  return map[tier] ?? "session";
+}
+
+async function persistMemoryToDB(item: MemoryItem): Promise<void> {
+  if (!db) return;
+  try {
+    await db
+      .insert(memoryRecordsTable)
+      .values({
+        externalId: item.id,
+        tier: nexusTierToDbTier(item.tier),
+        key: item.key,
+        value: { text: item.value, type: item.type, pinned: item.pinned },
+        confidence: String(item.confidence),
+        provenanceSource: item.source ?? "nexus-agent",
+        provenanceMethod: "agent",
+        tags: item.tags,
+        metadata: { updatedAt: item.updatedAt },
+      })
+      .onConflictDoUpdate({
+        target: memoryRecordsTable.externalId,
+        set: {
+          value: { text: item.value, type: item.type, pinned: item.pinned },
+          confidence: String(item.confidence),
+          tags: item.tags,
+          metadata: { updatedAt: item.updatedAt },
+          lastUpdatedAt: new Date(),
+        },
+      });
+  } catch (dbErr) {
+    logger.warn({ dbErr }, "Failed to persist memory item to DB (non-fatal)");
+  }
+}
+
+async function deleteMemoryFromDB(id: string): Promise<void> {
+  if (!db) return;
+  try {
+    await db.delete(memoryRecordsTable).where(eq(memoryRecordsTable.externalId, id));
+  } catch (dbErr) {
+    logger.warn({ dbErr }, "Failed to delete memory item from DB (non-fatal)");
+  }
+}
+
 // ─── AI helper ────────────────────────────────────────────────────────────────
 
-async function callLLM(prompt: string, system: string): Promise<string> {
-  const baseUrl = process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL
-    || process.env.AI_INTEGRATIONS_OPENAI_BASE_URL;
-  const apiKey = process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY
-    || process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
-
-  if (!baseUrl && !apiKey) {
-    // Return a convincing demo response
-    return generateDemoResponse(prompt, system);
-  }
-
+async function callLLM(
+  prompt: string,
+  system: string,
+  opts?: { agentId?: string; domain?: string },
+): Promise<string> {
   try {
-    const isAnthropic = (baseUrl?.includes("anthropic") || !!process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL);
-    if (isAnthropic) {
-      const res = await fetch(`${baseUrl || "https://api.anthropic.com"}/v1/messages`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": apiKey ?? "",
-          "anthropic-version": "2023-06-01",
-        },
-        body: JSON.stringify({
-          model: "claude-3-5-haiku-20241022",
-          max_tokens: 1024,
-          system,
-          messages: [{ role: "user", content: prompt }],
-        }),
-      });
-      if (!res.ok) throw new Error(`Anthropic API error: ${res.status}`);
-      const data = await res.json() as { content: Array<{ type: string; text: string }> };
-      return data.content[0]?.text ?? "";
-    } else {
-      const res = await fetch(`${baseUrl}/chat/completions`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: "gpt-4o-mini",
-          messages: [
-            { role: "system", content: system },
-            { role: "user", content: prompt },
-          ],
-          max_tokens: 1024,
-        }),
-      });
-      if (!res.ok) throw new Error(`OpenAI API error: ${res.status}`);
-      const data = await res.json() as { choices: Array<{ message: { content: string } }> };
-      return data.choices[0]?.message.content ?? "";
-    }
+    const response = await gatewayInfer({
+      messages: [
+        { role: "system", content: system },
+        { role: "user", content: prompt },
+      ],
+      agentId: opts?.agentId ?? "nexus-agent",
+      domain: opts?.domain ?? "platform",
+      strategy: "fastest",
+      maxTokens: 1024,
+      timeoutMs: 30_000,
+    });
+    return response.content;
   } catch (err) {
-    logger.warn({ err }, "LLM call failed; using demo response");
+    logger.warn({ err }, "gatewayInfer failed; using demo response");
     return generateDemoResponse(prompt, system);
   }
 }
@@ -1091,6 +1113,7 @@ router.post("/memory", perUserWriteSlidingLimiter, validateBody(jsonObjectBodySc
       tags: body.tags ?? [],
     };
     memoryStore.set(item.id, item);
+    void persistMemoryToDB(item);
     sendSuccess(res, item, undefined, 201);
   } catch (err) {
     handleRouteError(res, err, "POST /api/nexus/memory");
@@ -1104,6 +1127,7 @@ router.put("/memory/:id", perUserWriteSlidingLimiter, validateBody(jsonObjectBod
     const update = req.body as Partial<MemoryItem>;
     const updated: MemoryItem = { ...item, ...update, id: item.id, updatedAt: new Date().toISOString() };
     memoryStore.set(item.id, updated);
+    void persistMemoryToDB(updated);
     sendSuccess(res, updated);
   } catch (err) {
     handleRouteError(res, err, "PUT /api/nexus/memory/:id");
@@ -1114,6 +1138,7 @@ router.delete("/memory/:id", perUserWriteSlidingLimiter, async (req: Request, re
   try {
     if (!memoryStore.has(req.params.id)) { sendError(res, "Memory item not found", 404); return; }
     memoryStore.delete(req.params.id);
+    void deleteMemoryFromDB(req.params.id);
     sendSuccess(res, { ok: true });
   } catch (err) {
     handleRouteError(res, err, "DELETE /api/nexus/memory/:id");

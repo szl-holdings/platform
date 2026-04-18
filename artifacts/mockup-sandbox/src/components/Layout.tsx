@@ -17,6 +17,8 @@ import {
   Cpu,
   Globe,
   Palette,
+  BookOpen,
+  BarChart2,
 } from "lucide-react";
 
 const NAV_ITEMS: Array<{
@@ -24,6 +26,7 @@ const NAV_ITEMS: Array<{
   label: string;
   icon: React.ComponentType<{ className?: string }>;
   description: string;
+  group?: string;
 }> = [
   { id: "home", label: "NEXUS", icon: Home, description: "Home & Overview" },
   { id: "research", label: "Research", icon: FlaskConical, description: "Parallel Swarm" },
@@ -34,6 +37,9 @@ const NAV_ITEMS: Array<{
   { id: "orchestrator", label: "Orchestrate", icon: Workflow, description: "Cross-App Orchestrator" },
   { id: "ingest", label: "Ingest", icon: Download, description: "Repo Ingest" },
   { id: "design-system", label: "Design System", icon: Palette, description: "Governed-Intelligence Design Language" },
+  { id: "ai-quality", label: "AI Quality", icon: Activity, description: "AI Control Plane & Feedback", group: "control" },
+  { id: "prompt-registry", label: "Prompts", icon: BookOpen, description: "Prompt Registry", group: "control" },
+  { id: "eval-console", label: "Evals", icon: BarChart2, description: "Eval Console", group: "control" },
 ];
 
 const DEFAULT_STATUS: NexusStatus = {
@@ -94,33 +100,46 @@ export default function Layout({
           </div>
         </div>
 
-        <div className="flex-1 flex flex-col gap-0.5 py-3 px-1.5 overflow-hidden">
-          {NAV_ITEMS.map((item) => {
+        <div className="flex-1 flex flex-col gap-0.5 py-3 px-1.5 overflow-hidden overflow-y-auto">
+          {NAV_ITEMS.map((item, idx) => {
             const Icon = item.icon;
             const active = page === item.id;
+            const prevItem = NAV_ITEMS[idx - 1];
+            const showDivider = item.group === "control" && prevItem?.group !== "control";
             return (
-              <button
-                key={item.id}
-                onClick={() => navigate(item.id)}
-                title={expanded ? undefined : item.description}
-                className={`flex items-center gap-2.5 px-2 py-2 rounded-md text-left transition-all w-full group ${
-                  active
-                    ? "bg-[#00d4ff]/10 text-nexus-cyan"
-                    : "text-muted-foreground hover:text-foreground hover:bg-[#1a2535]/60"
-                }`}
-              >
-                <Icon
-                  className={`w-4 h-4 shrink-0 transition-colors ${
-                    active ? "text-nexus-cyan" : "group-hover:text-foreground"
+              <div key={item.id}>
+                {showDivider && (
+                  <div className={`mt-2 mb-1 ${expanded ? "px-2" : "px-1"}`}>
+                    <div className="border-t border-nexus/60" />
+                    {expanded && (
+                      <div className="text-[9px] text-muted-foreground/40 uppercase tracking-widest mt-1.5 px-1 font-mono">
+                        Control Plane
+                      </div>
+                    )}
+                  </div>
+                )}
+                <button
+                  onClick={() => navigate(item.id)}
+                  title={expanded ? undefined : item.description}
+                  className={`flex items-center gap-2.5 px-2 py-2 rounded-md text-left transition-all w-full group ${
+                    active
+                      ? "bg-[#00d4ff]/10 text-nexus-cyan"
+                      : "text-muted-foreground hover:text-foreground hover:bg-[#1a2535]/60"
                   }`}
-                />
-                {expanded && (
-                  <span className="text-xs font-medium truncate">{item.label}</span>
-                )}
-                {active && !expanded && (
-                  <div className="absolute left-0 w-0.5 h-6 bg-nexus-cyan rounded-r" />
-                )}
-              </button>
+                >
+                  <Icon
+                    className={`w-4 h-4 shrink-0 transition-colors ${
+                      active ? "text-nexus-cyan" : "group-hover:text-foreground"
+                    }`}
+                  />
+                  {expanded && (
+                    <span className="text-xs font-medium truncate">{item.label}</span>
+                  )}
+                  {active && !expanded && (
+                    <div className="absolute left-0 w-0.5 h-6 bg-nexus-cyan rounded-r" />
+                  )}
+                </button>
+              </div>
             );
           })}
         </div>

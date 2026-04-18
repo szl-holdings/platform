@@ -7,7 +7,10 @@ export type Page =
   | "bridge"
   | "orchestrator"
   | "ingest"
-  | "design-system";
+  | "design-system"
+  | "ai-quality"
+  | "prompt-registry"
+  | "eval-console";
 
 export interface NexusStatus {
   activeSwarms: number;

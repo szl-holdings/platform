@@ -9,11 +9,15 @@ import Bridge from "./pages/Bridge";
 import Orchestrator from "./pages/Orchestrator";
 import Ingest from "./pages/Ingest";
 import DesignSystemPage from "./pages/DesignSystemPage";
+import AIQuality from "./pages/AIQuality";
+import PromptRegistry from "./pages/PromptRegistry";
+import EvalConsole from "./pages/EvalConsole";
 import type { Page } from "./lib/types";
 
 const VALID_PAGES: Page[] = [
   "home", "research", "memory", "skills", "patterns",
   "bridge", "orchestrator", "ingest", "design-system",
+  "ai-quality", "prompt-registry", "eval-console",
 ];
 
 function getInitialPage(): Page {
@@ -49,6 +53,9 @@ export default function App() {
       {page === "orchestrator" && <Orchestrator />}
       {page === "ingest" && <Ingest />}
       {page === "design-system" && <DesignSystemPage />}
+      {page === "ai-quality" && <AIQuality />}
+      {page === "prompt-registry" && <PromptRegistry />}
+      {page === "eval-console" && <EvalConsole />}
     </Layout>
   );
 }

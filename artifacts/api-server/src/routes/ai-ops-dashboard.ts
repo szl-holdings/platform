@@ -64,6 +64,7 @@ import {
   fallbackEngine,
   modelRouter,
 } from "@szl-holdings/ai-control-plane";
+import { providerCircuitBreaker } from "../lib/ai-gateway";
 import { logger } from "../lib/logger";
 import {validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
@@ -832,6 +833,7 @@ router.get(
       const circuitStatus = modelRouter.getCircuitStatus();
       const openCircuits = circuitStatus.filter(s => s.open);
 
+      const providerStatuses = providerCircuitBreaker.getAllStatuses();
       sendSuccess(res, {
         orgId,
         totalRules: rules.length,
@@ -848,6 +850,7 @@ router.get(
           openCount: openCircuits.length,
           openEndpoints: openCircuits.map(s => s.key),
         },
+        circuits: providerStatuses,
         generatedAt: new Date().toISOString(),
       });
     } catch (err) {
