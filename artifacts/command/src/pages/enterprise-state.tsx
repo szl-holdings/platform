@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, createContext, useContext } from "react";
 import { OpsLayout } from "../components/ops-layout";
 import {
   Activity, AlertTriangle, ArrowLeft, ArrowRight, Brain, CheckCircle2,
@@ -86,10 +86,35 @@ const CROSS_DOMAIN_IMPACTS = [
   { source: "lyte", target: "aegis", label: "AI model ops dependency", type: "neutral" as const },
 ];
 
+// ── Live Data Types & Context ──────────────────────────────────────────────────
+
+type LiveKpiBoard = { id: string; label: string; value: string | number; unit: string; delta: string; trend: "up" | "down" | "flat"; color: string; causal: string };
+type LiveCausalEvent = { id: string; time: string; domain: string; title: string; description: string; severity: string; causedBy: string[]; causeOf: string[] };
+type LiveRecommendation = { id: string; rank: number; title: string; domain: string; impact: string; effort: string; why: string; signals: string[]; action: string };
+type LiveAction = { id: string; title: string; domain: string; priority: string; status: string; owner: string; approver: string; due: string; exposure: string; description: string; blockedReason?: string };
+type LiveHeatmapRisk = { id: string; title: string; domain: string; domainColor: string; probability: number; impact: number; level: string; mitigation: string; owner: string };
+type LiveHeatmapOpp = { id: string; title: string; domain: string; domainColor: string; probability: number; valueScore: number; level: string; action: string; owner: string };
+type LiveCrossDomainImpact = { source: string; target: string; label: string; type: "risk" | "positive" | "neutral" };
+type LiveEnterpriseState = {
+  stateBoardKpis: LiveKpiBoard[];
+  causalEvents: LiveCausalEvent[];
+  recommendations: LiveRecommendation[];
+  actions: LiveAction[];
+  heatmapRisks: LiveHeatmapRisk[];
+  heatmapOpps: LiveHeatmapOpp[];
+  crossDomainImpacts: LiveCrossDomainImpact[];
+  generatedAt: string;
+  dataSource: string;
+};
+
+const LiveCtx = createContext<LiveEnterpriseState | null>(null);
+function useLive() { return useContext(LiveCtx); }
+
 // ── Helper components ──────────────────────────────────────────────────────────
 
-function DomainBadge({ domain }: { domain: DomainKey }) {
-  const d = DOMAINS[domain];
+function DomainBadge({ domain }: { domain: string }) {
+  const d = DOMAINS[domain as DomainKey];
+  if (!d) return null;
   return (
     <span style={{ fontSize: "9px", fontWeight: 600, padding: "1px 6px", borderRadius: "3px", background: `${d.color}20`, color: d.color, flexShrink: 0 }}>
       {d.name}
@@ -116,9 +141,11 @@ function SmallCard({ children, accentColor }: { children: React.ReactNode; accen
 // ── Section: State Board KPIs ──────────────────────────────────────────────────
 
 function StateBoardSection() {
+  const live = useLive();
+  const kpis = (live?.stateBoardKpis ?? STATE_BOARD_KPIS) as typeof STATE_BOARD_KPIS;
   return (
     <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "0.75rem" }}>
-      {STATE_BOARD_KPIS.map(kpi => (
+      {kpis.map(kpi => (
         <div key={kpi.id} style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: "0.75rem", padding: "1rem", borderTop: `2px solid ${kpi.color}60` }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.5rem" }}>
             <span style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.07em", textTransform: "uppercase", color: FG_MUT }}>{kpi.label}</span>
@@ -141,20 +168,22 @@ function StateBoardSection() {
 // ── Section: Causal Timeline ───────────────────────────────────────────────────
 
 function CausalTimelineSection() {
+  const live = useLive();
+  const events = (live?.causalEvents ?? CAUSAL_EVENTS) as typeof CAUSAL_EVENTS;
   const [expanded, setExpanded] = useState<string[]>([]);
 
   return (
     <div style={{ position: "relative", paddingLeft: "1.25rem" }}>
       <div style={{ position: "absolute", left: "4px", top: 0, bottom: 0, width: "1px", background: `${BORDER}` }} />
 
-      {CAUSAL_EVENTS.map((event, i) => {
+      {events.map((event, i) => {
         const colors: Record<string, string> = { critical: "#ef4444", high: "#f97316", medium: "#f59e0b", low: "#22c55e", none: "#22c55e" };
         const color = colors[event.severity] ?? "#6b7280";
-        const domain = DOMAINS[event.domain];
+        const domain = DOMAINS[event.domain as DomainKey] ?? { name: event.domain, color: "#8b7ac8" };
         const isExp = expanded.includes(event.id);
 
         return (
-          <div key={event.id} style={{ marginBottom: i < CAUSAL_EVENTS.length - 1 ? "0.875rem" : 0, position: "relative" }}>
+          <div key={event.id} style={{ marginBottom: i < events.length - 1 ? "0.875rem" : 0, position: "relative" }}>
             <div style={{ position: "absolute", left: "-1.25rem", top: "4px", width: "9px", height: "9px", borderRadius: "50%", background: color, border: "2px solid #080c14", boxShadow: `0 0 7px ${color}60` }} />
 
             <div style={{ cursor: "pointer" }} onClick={() => setExpanded(prev => prev.includes(event.id) ? prev.filter(x => x !== event.id) : [...prev, event.id])}>
@@ -197,18 +226,19 @@ function CausalTimelineSection() {
 // ── Section: Recommendations ───────────────────────────────────────────────────
 
 function RecommendationQueueSection() {
+  const live = useLive();
+  const recs = (live?.recommendations ?? RECOMMENDATIONS) as typeof RECOMMENDATIONS;
   const [expanded, setExpanded] = useState<string[]>([]);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "0" }}>
-      {RECOMMENDATIONS.map((rec, i) => {
+      {recs.map((rec, i) => {
         const isExp = expanded.includes(rec.id);
-        const domain = DOMAINS[rec.domain];
         const impactColor = rec.impact === "high" ? "#22c55e" : "#f59e0b";
         const effortColor = rec.effort === "low" ? "#22c55e" : rec.effort === "medium" ? "#f59e0b" : "#ef4444";
 
         return (
-          <div key={rec.id} style={{ borderBottom: i < RECOMMENDATIONS.length - 1 ? `1px solid ${BORDER}` : "none" }}>
+          <div key={rec.id} style={{ borderBottom: i < recs.length - 1 ? `1px solid ${BORDER}` : "none" }}>
             <div style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem", padding: "0.875rem", cursor: "pointer" }} onClick={() => setExpanded(prev => prev.includes(rec.id) ? prev.filter(x => x !== rec.id) : [...prev, rec.id])}>
               <div style={{ width: 22, height: 22, borderRadius: "50%", background: "hsla(0,0%,100%,0.04)", border: `1px solid ${BORDER}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "9px", fontWeight: 800, color: FG_MUT, flexShrink: 0 }}>
                 {rec.rank}
@@ -250,8 +280,10 @@ function RecommendationQueueSection() {
 // ── Section: Action Control Center ────────────────────────────────────────────
 
 function ActionControlSection() {
+  const live = useLive();
+  const actionsData = (live?.actions ?? ACTIONS) as typeof ACTIONS;
   const [actionStates, setActionStates] = useState<Record<string, string>>({});
-  const pending = ACTIONS.filter(a => a.status === "pending").length;
+  const pending = actionsData.filter(a => a.status === "pending").length;
 
   function handleApprove(id: string) {
     setActionStates(prev => ({ ...prev, [id]: "approved" }));
@@ -267,8 +299,8 @@ function ActionControlSection() {
       <div style={{ display: "flex", gap: "0.75rem", marginBottom: "1rem" }}>
         {[
           { label: "Pending", count: pending, color: "#f59e0b" },
-          { label: "Blocked", count: ACTIONS.filter(a => a.status === "blocked").length, color: "#f97316" },
-          { label: "Auto-Executed", count: ACTIONS.filter(a => a.status === "auto-executed").length, color: ACCENT },
+          { label: "Blocked", count: actionsData.filter(a => a.status === "blocked").length, color: "#f97316" },
+          { label: "Auto-Executed", count: actionsData.filter(a => a.status === "auto-executed").length, color: ACCENT },
         ].map(s => (
           <div key={s.label} style={{ padding: "0.5rem 0.875rem", background: `${s.color}10`, border: `1px solid ${s.color}25`, borderRadius: "0.625rem", textAlign: "center" }}>
             <div style={{ fontSize: "1.25rem", fontWeight: 800, color: s.color }}>{s.count}</div>
@@ -278,16 +310,15 @@ function ActionControlSection() {
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: "0" }}>
-        {ACTIONS.map((action, i) => {
+        {actionsData.map((action, i) => {
           const overrideState = actionStates[action.id];
           const effectiveStatus = overrideState ?? action.status;
           const pColor = priorityColor(action.priority);
           const stColors: Record<string, string> = { pending: "#f59e0b", approved: "#22c55e", rejected: "#ef4444", blocked: "#f97316", "auto-executed": ACCENT };
           const stColor = stColors[effectiveStatus] ?? "#6b7280";
-          const domain = DOMAINS[action.domain];
 
           return (
-            <div key={action.id} style={{ padding: "0.875rem 1rem", borderBottom: i < ACTIONS.length - 1 ? `1px solid ${BORDER}` : "none", borderLeft: `3px solid ${pColor}60` }}>
+            <div key={action.id} style={{ padding: "0.875rem 1rem", borderBottom: i < actionsData.length - 1 ? `1px solid ${BORDER}` : "none", borderLeft: `3px solid ${pColor}60` }}>
               <div style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem" }}>
                 <div style={{ flex: 1 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.25rem" }}>
@@ -330,6 +361,8 @@ function ActionControlSection() {
 // ── Section: Cross-Domain Impact Map ──────────────────────────────────────────
 
 function CrossDomainImpactMap() {
+  const live = useLive();
+  const impacts = live?.crossDomainImpacts ?? CROSS_DOMAIN_IMPACTS;
   const domainKeys = Object.keys(DOMAINS) as DomainKey[];
 
   return (
@@ -345,12 +378,12 @@ function CrossDomainImpactMap() {
             </tr>
           </thead>
           <tbody>
-            {domainKeys.map((src, si) => (
+            {domainKeys.map((src) => (
               <tr key={src} style={{ borderTop: `1px solid ${BORDER}` }}>
                 <td style={{ padding: "0.5rem 0.75rem", fontSize: "10px", fontWeight: 700, color: DOMAINS[src].color, whiteSpace: "nowrap" }}>{DOMAINS[src].name}</td>
                 {domainKeys.map(tgt => {
                   if (src === tgt) return <td key={tgt} style={{ textAlign: "center", padding: "0.5rem" }}><span style={{ fontSize: "8px", color: FG_MUT }}>—</span></td>;
-                  const impact = CROSS_DOMAIN_IMPACTS.find(x => x.source === src && x.target === tgt);
+                  const impact = impacts.find(x => x.source === src && x.target === tgt);
                   if (!impact) return <td key={tgt} style={{ textAlign: "center", padding: "0.5rem" }} />;
                   const color = impact.type === "risk" ? "#ef4444" : impact.type === "positive" ? "#22c55e" : "#f59e0b";
                   return (
@@ -382,14 +415,18 @@ function CrossDomainImpactMap() {
 
       <div style={{ marginTop: "1rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
         <div style={{ fontSize: "10px", fontWeight: 700, color: FG_MUT, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: "0.25rem" }}>Active Impact Chains</div>
-        {CROSS_DOMAIN_IMPACTS.map((imp, i) => (
+        {impacts.map((imp, i) => {
+          const srcDomain = DOMAINS[imp.source as DomainKey];
+          const tgtDomain = DOMAINS[imp.target as DomainKey];
+          return (
           <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.625rem", fontSize: "11px" }}>
-            <span style={{ color: DOMAINS[imp.source as DomainKey].color }}>{DOMAINS[imp.source as DomainKey].name}</span>
+            <span style={{ color: srcDomain?.color ?? "#8b7ac8" }}>{srcDomain?.name ?? imp.source}</span>
             <ArrowRight style={{ width: 10, height: 10, color: imp.type === "risk" ? "#ef4444" : imp.type === "positive" ? "#22c55e" : "#f59e0b" }} />
-            <span style={{ color: DOMAINS[imp.target as DomainKey].color }}>{DOMAINS[imp.target as DomainKey].name}</span>
+            <span style={{ color: tgtDomain?.color ?? "#8b7ac8" }}>{tgtDomain?.name ?? imp.target}</span>
             <span style={{ color: FG_MUT }}>{imp.label}</span>
           </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
@@ -407,12 +444,15 @@ function riskLevelColor(level: string) {
 }
 
 function RiskOpportunityHeatmapSection() {
+  const live = useLive();
+  const heatRisks = (live?.heatmapRisks ?? HEATMAP_RISKS) as typeof HEATMAP_RISKS;
+  const heatOpps = (live?.heatmapOpps ?? HEATMAP_OPPS) as typeof HEATMAP_OPPS;
   const [hovered, setHovered] = useState<string | null>(null);
   const [view, setView] = useState<"both" | "risks" | "opps">("both");
   const [selected, setSelected] = useState<string | null>(null);
 
-  const selectedRisk = HEATMAP_RISKS.find(r => r.id === selected);
-  const selectedOpp = HEATMAP_OPPS.find(o => o.id === selected);
+  const selectedRisk = heatRisks.find(r => r.id === selected);
+  const selectedOpp = heatOpps.find(o => o.id === selected);
 
   return (
     <div>
@@ -466,7 +506,7 @@ function RiskOpportunityHeatmapSection() {
         <div style={{ position: "absolute", left: "8px", bottom: "8px", fontSize: "8px", fontWeight: 700, color: "rgba(34,197,94,0.4)", letterSpacing: "0.08em", textTransform: "uppercase" }}>Safe Zone</div>
 
         {/* Risk dots */}
-        {(view === "both" || view === "risks") && HEATMAP_RISKS.map(risk => {
+        {(view === "both" || view === "risks") && heatRisks.map(risk => {
           const x = risk.probability;
           const y = 1 - risk.impact;
           const color = riskLevelColor(risk.level);
@@ -499,7 +539,7 @@ function RiskOpportunityHeatmapSection() {
         })}
 
         {/* Opportunity diamonds */}
-        {(view === "both" || view === "opps") && HEATMAP_OPPS.map(opp => {
+        {(view === "both" || view === "opps") && heatOpps.map(opp => {
           const x = opp.probability;
           const y = 1 - opp.valueScore;
           const color = opp.level === "high" ? "#22c55e" : "#0ea5e9";
@@ -603,8 +643,8 @@ function RiskOpportunityHeatmapSection() {
       {(view === "both" || view === "risks") && (
         <div className="mb-4">
           <div className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: FG_MUT }}>Risks</div>
-          {HEATMAP_RISKS.map((risk, i) => (
-            <div key={risk.id} className="flex items-center gap-3 py-2 cursor-pointer" style={{ borderBottom: i < HEATMAP_RISKS.length - 1 ? `1px solid ${BORDER}` : "none", borderLeft: `3px solid ${riskLevelColor(risk.level)}50`, paddingLeft: "0.75rem" }} onClick={() => setSelected(selected === risk.id ? null : risk.id)}>
+          {heatRisks.map((risk, i) => (
+            <div key={risk.id} className="flex items-center gap-3 py-2 cursor-pointer" style={{ borderBottom: i < heatRisks.length - 1 ? `1px solid ${BORDER}` : "none", borderLeft: `3px solid ${riskLevelColor(risk.level)}50`, paddingLeft: "0.75rem" }} onClick={() => setSelected(selected === risk.id ? null : risk.id)}>
               <div style={{ width: 7, height: 7, borderRadius: "50%", background: riskLevelColor(risk.level), flexShrink: 0 }} />
               <span className="text-xs font-semibold flex-1" style={{ color: FG }}>{risk.title}</span>
               <DomainBadge domain={risk.domain} />
@@ -619,10 +659,10 @@ function RiskOpportunityHeatmapSection() {
       {(view === "both" || view === "opps") && (
         <div>
           <div className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: FG_MUT }}>Opportunities</div>
-          {HEATMAP_OPPS.map((opp, i) => {
+          {heatOpps.map((opp, i) => {
             const oppColor = opp.level === "high" ? "#22c55e" : "#0ea5e9";
             return (
-              <div key={opp.id} className="flex items-center gap-3 py-2 cursor-pointer" style={{ borderBottom: i < HEATMAP_OPPS.length - 1 ? `1px solid ${BORDER}` : "none", borderLeft: `3px solid ${oppColor}50`, paddingLeft: "0.75rem" }} onClick={() => setSelected(selected === opp.id ? null : opp.id)}>
+              <div key={opp.id} className="flex items-center gap-3 py-2 cursor-pointer" style={{ borderBottom: i < heatOpps.length - 1 ? `1px solid ${BORDER}` : "none", borderLeft: `3px solid ${oppColor}50`, paddingLeft: "0.75rem" }} onClick={() => setSelected(selected === opp.id ? null : opp.id)}>
                 <div style={{ width: 7, height: 7, borderRadius: "1px", background: oppColor, transform: "rotate(45deg)", flexShrink: 0 }} />
                 <span className="text-xs font-semibold flex-1" style={{ color: FG }}>{opp.title}</span>
                 <DomainBadge domain={opp.domain} />
@@ -697,9 +737,19 @@ type TabId = typeof TABS[number]["id"];
 
 export default function EnterpriseStatePage() {
   const [activeTab, setActiveTab] = useState<TabId>("board");
-  const pending = ACTIONS.filter(a => a.status === "pending").length;
+  const [liveData, setLiveData] = useState<LiveEnterpriseState | null>(null);
+
+  useEffect(() => {
+    fetch(`${BASE}/api/command/enterprise-state`)
+      .then(r => r.ok ? r.json() : null)
+      .then(json => { if (json?.data) setLiveData(json.data); })
+      .catch(() => {});
+  }, []);
+
+  const pending = liveData ? liveData.actions.filter(a => a.status === "pending").length : ACTIONS.filter(a => a.status === "pending").length;
 
   return (
+    <LiveCtx.Provider value={liveData}>
     <OpsLayout title="Enterprise State">
       <div className="flex flex-col gap-6">
         {/* Header note */}
@@ -815,5 +865,6 @@ export default function EnterpriseStatePage() {
         </div>
       </div>
     </OpsLayout>
+    </LiveCtx.Provider>
   );
 }

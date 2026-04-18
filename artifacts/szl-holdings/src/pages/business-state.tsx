@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, createContext, useContext } from "react";
 import { m, AnimatePresence } from "framer-motion";
 import {
   Activity, AlertTriangle, ArrowRight, BarChart3, Brain, CheckCircle2,
@@ -137,6 +137,41 @@ const MODULES = [
 
 type ModuleId = typeof MODULES[number]["id"];
 
+// ── Live Data Types & Context ──────────────────────────────────────────────────
+
+type LiveKpi = { id: string; domain: string; name: string; current: string; target: string; status: string; trend: "up" | "down" | "flat"; causal: string };
+type LiveRisk = { id: string; title: string; domain: string; probability: number; impact: string; level: string; owner: string; mitigation: string; trend: "up" | "down" | "flat" };
+type LiveOpp = { id: string; title: string; domain: string; probability: number; value: string; level: string; action: string; owner: string };
+type LiveValueItem = { id: string; type: "at-risk" | "protected" | "created"; label: string; amount: number; domain: string; note: string };
+type LivePolicy = { id: string; title: string; status: string; owner: string; domains: string[]; lastReview: string; enforcement: string };
+type LiveAgent = { id: string; agent: string; domain: string; trustScore: number; accuracy: number; actionsExecuted: number; humanOverrides: number; status: string };
+type LiveExecHealth = {
+  score: number;
+  delta: string;
+  trend: "up" | "down";
+  exposure: string;
+  topIssues: { title: string; severity: string; domain: string }[];
+  topOpps: { title: string; value: string; domain: string }[];
+  blockedActions: { title: string; reason: string; exposure: string }[];
+  changesYesterday: string[];
+  changesLastWeek: string[];
+};
+type LiveBusinessState = {
+  execHealth: LiveExecHealth;
+  kpiHealth: LiveKpi[];
+  riskRegister: LiveRisk[];
+  oppRegister: LiveOpp[];
+  valueLedger: LiveValueItem[];
+  policiesSummary: LivePolicy[];
+  agentTrust: LiveAgent[];
+  summary: { compositeScore: number; slaBreaching: number; firingAlerts: number };
+  generatedAt: string;
+  dataSource: string;
+};
+
+const LiveCtx = createContext<LiveBusinessState | null>(null);
+function useLive() { return useContext(LiveCtx); }
+
 // ── Helper Components ──────────────────────────────────────────────────────────
 
 function DomainTag({ domain }: { domain: DomainId }) {
@@ -191,8 +226,10 @@ function SectionCard({ title, icon: Icon, accent = ACCENT, children }: { title: 
 // ── Module: Executive Overview ─────────────────────────────────────────────────
 
 function ExecutiveOverviewModule({ executiveMode }: { executiveMode: boolean }) {
+  const live = useLive();
+  const health = live?.execHealth ?? EXEC_HEALTH;
   const [period, setPeriod] = useState<"24h" | "7d">("24h");
-  const healthColor = EXEC_HEALTH.score >= 80 ? "#22c55e" : EXEC_HEALTH.score >= 65 ? "#f59e0b" : "#ef4444";
+  const healthColor = health.score >= 80 ? "#22c55e" : health.score >= 65 ? "#f59e0b" : "#ef4444";
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
@@ -209,30 +246,30 @@ function ExecutiveOverviewModule({ executiveMode }: { executiveMode: boolean }) 
           minWidth: executiveMode ? "160px" : "130px",
         }}>
           <div style={{ fontSize: executiveMode ? "3.5rem" : "2.75rem", fontWeight: 900, color: healthColor, letterSpacing: "-0.05em", lineHeight: 1 }}>
-            {EXEC_HEALTH.score}
+            {health.score}
           </div>
           <div style={{ fontSize: "10px", fontWeight: 700, color: healthColor, opacity: 0.8, textTransform: "uppercase", letterSpacing: "0.08em", marginTop: "0.5rem" }}>
-            {EXEC_HEALTH.score >= 80 ? "Good" : EXEC_HEALTH.score >= 65 ? "Moderate" : "At Risk"}
+            {health.score >= 80 ? "Good" : health.score >= 65 ? "Moderate" : "At Risk"}
           </div>
           <div style={{ fontSize: "9px", color: "rgba(255,255,255,0.3)", marginTop: "0.25rem" }}>Business Health</div>
           <div style={{ display: "flex", alignItems: "center", gap: "4px", marginTop: "0.625rem", fontSize: "12px", fontWeight: 700, color: "#22c55e" }}>
             <TrendingUp style={{ width: 11, height: 11 }} />
-            {EXEC_HEALTH.delta}
+            {health.delta}
           </div>
         </div>
 
         <SectionCard title="Top Issues" icon={AlertTriangle} accent="#ef4444">
-          {EXEC_HEALTH.topIssues.map((issue, i) => (
+          {health.topIssues.map((issue, i) => (
             <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem", marginBottom: i < 2 ? "0.625rem" : 0 }}>
               <SeverityDot level={issue.severity} />
               <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.65)", lineHeight: 1.4, flex: 1 }}>{issue.title}</span>
-              <DomainTag domain={issue.domain} />
+              {DOMAINS[issue.domain as DomainId] && <DomainTag domain={issue.domain as DomainId} />}
             </div>
           ))}
         </SectionCard>
 
         <SectionCard title="Top Opportunities" icon={TrendingUp} accent="#22c55e">
-          {EXEC_HEALTH.topOpps.map((opp, i) => (
+          {health.topOpps.map((opp, i) => (
             <div key={i} style={{ marginBottom: i < 2 ? "0.625rem" : 0 }}>
               <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.65)", lineHeight: 1.4, marginBottom: "2px" }}>{opp.title}</div>
               <div style={{ fontSize: "10px", fontWeight: 700, color: "#22c55e" }}>{opp.value}</div>
@@ -241,7 +278,7 @@ function ExecutiveOverviewModule({ executiveMode }: { executiveMode: boolean }) 
         </SectionCard>
 
         <SectionCard title="Blocked Actions" icon={AlertTriangle} accent="#f97316">
-          {EXEC_HEALTH.blockedActions.map((action, i) => (
+          {health.blockedActions.map((action, i) => (
             <div key={i} style={{ marginBottom: i < 2 ? "0.625rem" : 0 }}>
               <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.65)" }}>{action.title}</div>
               <div style={{ fontSize: "9px", color: "rgba(255,255,255,0.3)", marginTop: "2px" }}>{action.reason}</div>
@@ -265,7 +302,7 @@ function ExecutiveOverviewModule({ executiveMode }: { executiveMode: boolean }) 
               ))}
             </div>
           </div>
-          {(period === "24h" ? EXEC_HEALTH.changesYesterday : EXEC_HEALTH.changesLastWeek).map((change, i) => (
+          {(period === "24h" ? health.changesYesterday : health.changesLastWeek).map((change, i) => (
             <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem", marginBottom: "0.375rem" }}>
               <ArrowRight style={{ width: 10, height: 10, color: "rgba(255,255,255,0.25)", flexShrink: 0, marginTop: 2 }} />
               <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.5)", lineHeight: 1.4 }}>{change}</span>
@@ -278,17 +315,13 @@ function ExecutiveOverviewModule({ executiveMode }: { executiveMode: boolean }) 
             Financial Exposure
           </div>
           <div style={{ fontSize: "2.25rem", fontWeight: 900, color: "#ef4444", letterSpacing: "-0.04em", marginBottom: "0.25rem" }}>
-            {EXEC_HEALTH.exposure}
+            {health.exposure}
           </div>
           <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)", marginBottom: "0.875rem" }}>Total value at risk this period</div>
-          {[
-            { label: "Carlota data pipeline", amount: "$380K", color: "#f59e0b" },
-            { label: "Lyte SLA penalties", amount: "$420K", color: "#ef4444" },
-            { label: "Aegis UX degradation", amount: "$280K", color: "#f97316" },
-          ].map((item, i) => (
+          {health.topIssues.slice(0, 3).map((issue, i) => (
             <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.625rem", padding: "0.375rem 0", borderBottom: i < 2 ? "1px solid hsla(0,0%,100%,0.04)" : "none" }}>
-              <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.5)", flex: 1 }}>{item.label}</span>
-              <span style={{ fontSize: "12px", fontWeight: 700, color: item.color }}>{item.amount}</span>
+              <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.5)", flex: 1 }}>{issue.title.slice(0, 32)}</span>
+              <span style={{ fontSize: "12px", fontWeight: 700, color: "#ef4444" }}>{issue.severity === "high" ? "High" : "Med"}</span>
             </div>
           ))}
         </div>
@@ -300,15 +333,17 @@ function ExecutiveOverviewModule({ executiveMode }: { executiveMode: boolean }) 
 // ── Module: KPI/SLO Health ─────────────────────────────────────────────────────
 
 function KPISLOModule() {
+  const live = useLive();
+  const kpiData = (live?.kpiHealth ?? KPI_HEALTH_DATA) as typeof KPI_HEALTH_DATA;
   const [domainFilter, setDomainFilter] = useState<DomainId | "all">("all");
   const [statusFilter, setStatusFilter] = useState<"all" | "breach" | "healthy">("all");
 
-  const filtered = KPI_HEALTH_DATA.filter(k =>
+  const filtered = kpiData.filter(k =>
     (domainFilter === "all" || k.domain === domainFilter) &&
     (statusFilter === "all" || k.status === statusFilter)
   );
 
-  const breachCount = KPI_HEALTH_DATA.filter(k => k.status === "breach").length;
+  const breachCount = kpiData.filter(k => k.status === "breach").length;
 
   return (
     <div>
@@ -331,14 +366,14 @@ function KPISLOModule() {
 
       <div style={{ display: "flex", flexDirection: "column", gap: "0" }}>
         {filtered.map((kpi, i) => {
-          const domain = DOMAINS[kpi.domain];
+          const domain = DOMAINS[kpi.domain as DomainId] ?? { name: kpi.domain, color: "#8b7ac8" };
           const isBreach = kpi.status === "breach";
           return (
             <div key={kpi.id} style={{ display: "grid", gridTemplateColumns: "1fr auto auto auto", gap: "1rem", alignItems: "center", padding: "0.75rem 0.875rem", background: isBreach ? "hsla(0,70%,5%,0.3)" : "transparent", borderBottom: i < filtered.length - 1 ? `1px solid ${BORDER}` : "none", borderLeft: isBreach ? "2px solid #ef444460" : `2px solid ${domain.color}40`, marginBottom: 0 }}>
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.25rem" }}>
                   <span style={{ fontSize: "12px", fontWeight: 600, color: "rgba(255,255,255,0.8)" }}>{kpi.name}</span>
-                  <DomainTag domain={kpi.domain} />
+                  {DOMAINS[kpi.domain as DomainId] && <DomainTag domain={kpi.domain as DomainId} />}
                   {isBreach && <span style={{ fontSize: "9px", fontWeight: 700, padding: "1px 6px", borderRadius: "3px", background: "hsla(0,70%,14%,0.6)", color: "#ef4444" }}>BREACH</span>}
                 </div>
                 <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.3)", lineHeight: 1.4, display: "flex", alignItems: "center", gap: "4px" }}>
@@ -414,22 +449,24 @@ function BusinessFlowModule() {
 // ── Module: Risk Register ──────────────────────────────────────────────────────
 
 function RiskRegisterModule() {
+  const live = useLive();
+  const risks = (live?.riskRegister ?? RISK_REGISTER) as typeof RISK_REGISTER;
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "0" }}>
-      {RISK_REGISTER.map((risk, i) => {
+      {risks.map((risk, i) => {
         const color = risk.level === "critical" ? "#ef4444" : risk.level === "high" ? "#f97316" : "#f59e0b";
         const isSelected = selectedId === risk.id;
         return (
-          <div key={risk.id} style={{ borderBottom: i < RISK_REGISTER.length - 1 ? `1px solid ${BORDER}` : "none" }}>
+          <div key={risk.id} style={{ borderBottom: i < risks.length - 1 ? `1px solid ${BORDER}` : "none" }}>
             <div
               style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.75rem 0.875rem", cursor: "pointer", borderLeft: `3px solid ${color}60` }}
               onClick={() => setSelectedId(isSelected ? null : risk.id)}
             >
               <SeverityDot level={risk.level} />
               <span style={{ fontSize: "12px", fontWeight: 600, color: "rgba(255,255,255,0.8)", flex: 1 }}>{risk.title}</span>
-              <DomainTag domain={risk.domain} />
+              {DOMAINS[risk.domain as DomainId] && <DomainTag domain={risk.domain as DomainId} />}
               <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.3)" }}>P: {Math.round(risk.probability * 100)}%</span>
               <span style={{ fontSize: "9px", fontWeight: 700, padding: "2px 7px", borderRadius: "3px", background: `${color}20`, color }}>{risk.level}</span>
               {isSelected ? <ChevronLeft style={{ width: 12, height: 12, color: "rgba(255,255,255,0.3)", transform: "rotate(90deg)" }} /> : <ChevronRight style={{ width: 12, height: 12, color: "rgba(255,255,255,0.3)" }} />}
@@ -469,16 +506,18 @@ function RiskRegisterModule() {
 // ── Module: Opportunity Register ──────────────────────────────────────────────
 
 function OpportunityModule() {
+  const live = useLive();
+  const opps = (live?.oppRegister ?? OPP_REGISTER) as typeof OPP_REGISTER;
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "0" }}>
-      {OPP_REGISTER.map((opp, i) => {
+      {opps.map((opp, i) => {
         const color = opp.level === "high" ? "#22c55e" : "#0ea5e9";
         return (
-          <div key={opp.id} style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: "1rem", alignItems: "start", padding: "0.875rem 0.875rem", borderBottom: i < OPP_REGISTER.length - 1 ? `1px solid ${BORDER}` : "none", borderLeft: `3px solid ${color}50` }}>
+          <div key={opp.id} style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: "1rem", alignItems: "start", padding: "0.875rem 0.875rem", borderBottom: i < opps.length - 1 ? `1px solid ${BORDER}` : "none", borderLeft: `3px solid ${color}50` }}>
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.375rem" }}>
                 <span style={{ fontSize: "12px", fontWeight: 700, color: "rgba(255,255,255,0.85)" }}>{opp.title}</span>
-                <DomainTag domain={opp.domain} />
+                {DOMAINS[opp.domain as DomainId] && <DomainTag domain={opp.domain as DomainId} />}
               </div>
               <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.35)", marginBottom: "0.25rem" }}>{opp.action}</div>
               <div style={{ fontSize: "9px", color: "rgba(255,255,255,0.25)" }}>Owner: {opp.owner} · P: {Math.round(opp.probability * 100)}%</div>
@@ -497,8 +536,10 @@ function OpportunityModule() {
 // ── Module: Policy & Compliance ────────────────────────────────────────────────
 
 function PolicyComplianceModule() {
-  const active = POLICIES_SUMMARY.filter(p => p.status === "active").length;
-  const pending = POLICIES_SUMMARY.filter(p => p.status === "pending").length;
+  const live = useLive();
+  const policies = (live?.policiesSummary ?? POLICIES_SUMMARY) as typeof POLICIES_SUMMARY;
+  const active = policies.filter(p => p.status === "active").length;
+  const pending = policies.filter(p => p.status === "pending").length;
 
   return (
     <div>
@@ -506,7 +547,7 @@ function PolicyComplianceModule() {
         {[
           { label: "Active", value: active, color: "#22c55e" },
           { label: "Pending", value: pending, color: "#f59e0b" },
-          { label: "Drafts", value: POLICIES_SUMMARY.filter(p => p.status === "draft").length, color: "rgba(255,255,255,0.4)" },
+          { label: "Drafts", value: policies.filter(p => p.status === "draft").length, color: "rgba(255,255,255,0.4)" },
         ].map(s => (
           <div key={s.label} style={{ background: BG_CARD, border: `1px solid ${BORDER}`, borderRadius: "0.625rem", padding: "0.75rem", textAlign: "center" }}>
             <div style={{ fontSize: "1.75rem", fontWeight: 800, color: s.color }}>{s.value}</div>
@@ -515,10 +556,10 @@ function PolicyComplianceModule() {
         ))}
       </div>
 
-      {POLICIES_SUMMARY.map((policy, i) => {
+      {policies.map((policy, i) => {
         const statusColor = policy.status === "active" ? "#22c55e" : policy.status === "pending" ? "#f59e0b" : "rgba(255,255,255,0.3)";
         return (
-          <div key={policy.id} style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.625rem 0.875rem", borderBottom: i < POLICIES_SUMMARY.length - 1 ? `1px solid ${BORDER}` : "none" }}>
+          <div key={policy.id} style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.625rem 0.875rem", borderBottom: i < policies.length - 1 ? `1px solid ${BORDER}` : "none" }}>
             <div style={{ width: 6, height: 6, borderRadius: "50%", background: statusColor, flexShrink: 0 }} />
             <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.7)", flex: 1 }}>{policy.title}</span>
             <div style={{ display: "flex", gap: "0.375rem", flexWrap: "wrap" }}>
@@ -536,9 +577,11 @@ function PolicyComplianceModule() {
 // ── Module: Value Ledger ───────────────────────────────────────────────────────
 
 function ValueLedgerModule() {
-  const atRisk = VALUE_LEDGER.filter(v => v.type === "at-risk").reduce((s, v) => s + v.amount, 0);
-  const protected_ = VALUE_LEDGER.filter(v => v.type === "protected").reduce((s, v) => s + v.amount, 0);
-  const created = VALUE_LEDGER.filter(v => v.type === "created").reduce((s, v) => s + v.amount, 0);
+  const live = useLive();
+  const ledger = (live?.valueLedger ?? VALUE_LEDGER) as typeof VALUE_LEDGER;
+  const atRisk = ledger.filter(v => v.type === "at-risk").reduce((s, v) => s + v.amount, 0);
+  const protected_ = ledger.filter(v => v.type === "protected").reduce((s, v) => s + v.amount, 0);
+  const created = ledger.filter(v => v.type === "created").reduce((s, v) => s + v.amount, 0);
 
   function fmt(n: number) {
     if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
@@ -567,16 +610,16 @@ function ValueLedgerModule() {
         })}
       </div>
 
-      {VALUE_LEDGER.map((entry, i) => {
-        const cfg = typeConfig[entry.type];
+      {ledger.map((entry, i) => {
+        const cfg = typeConfig[entry.type as keyof typeof typeConfig] ?? typeConfig["at-risk"];
         return (
-          <div key={entry.id} style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.5rem 0.75rem", borderBottom: i < VALUE_LEDGER.length - 1 ? `1px solid ${BORDER}` : "none" }}>
+          <div key={entry.id} style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.5rem 0.75rem", borderBottom: i < ledger.length - 1 ? `1px solid ${BORDER}` : "none" }}>
             <div style={{ width: 6, height: 6, borderRadius: "50%", background: cfg.color, flexShrink: 0 }} />
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.7)" }}>{entry.label}</div>
               {entry.note && <div style={{ fontSize: "9px", color: "rgba(255,255,255,0.3)", marginTop: "1px" }}>{entry.note}</div>}
             </div>
-            <DomainTag domain={entry.domain} />
+            {DOMAINS[entry.domain as DomainId] && <DomainTag domain={entry.domain as DomainId} />}
             <span style={{ fontSize: "12px", fontWeight: 700, color: cfg.color, flexShrink: 0 }}>{fmt(entry.amount)}</span>
           </div>
         );
@@ -624,9 +667,11 @@ function WorkflowPerformanceModule() {
 // ── Module: Agent Trust & Eval ────────────────────────────────────────────────
 
 function AgentTrustModule() {
-  const certified = AGENT_TRUST.filter(a => a.status === "certified").length;
-  const monitored = AGENT_TRUST.filter(a => a.status === "monitored").length;
-  const probation = AGENT_TRUST.filter(a => a.status === "probation").length;
+  const live = useLive();
+  const agents = (live?.agentTrust ?? AGENT_TRUST) as typeof AGENT_TRUST;
+  const certified = agents.filter(a => a.status === "certified").length;
+  const monitored = agents.filter(a => a.status === "monitored").length;
+  const probation = agents.filter(a => a.status === "probation").length;
 
   function statusColor(s: string) {
     if (s === "certified") return "#22c55e";
@@ -650,14 +695,14 @@ function AgentTrustModule() {
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: "0" }}>
-        {AGENT_TRUST.map((agent, i) => {
+        {agents.map((agent, i) => {
           const sc = statusColor(agent.status);
           return (
-            <div key={agent.id} style={{ display: "grid", gridTemplateColumns: "1fr auto auto auto auto", gap: "1rem", alignItems: "center", padding: "0.75rem 0.875rem", borderBottom: i < AGENT_TRUST.length - 1 ? `1px solid ${BORDER}` : "none" }}>
+            <div key={agent.id} style={{ display: "grid", gridTemplateColumns: "1fr auto auto auto auto", gap: "1rem", alignItems: "center", padding: "0.75rem 0.875rem", borderBottom: i < agents.length - 1 ? `1px solid ${BORDER}` : "none" }}>
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.25rem" }}>
                   <span style={{ fontSize: "12px", fontWeight: 600, color: "rgba(255,255,255,0.8)" }}>{agent.agent}</span>
-                  <DomainTag domain={agent.domain} />
+                  {DOMAINS[agent.domain as DomainId] && <DomainTag domain={agent.domain as DomainId} />}
                 </div>
                 <div style={{ fontSize: "9px", color: "rgba(255,255,255,0.3)" }}>{agent.actionsExecuted.toLocaleString()} actions · {agent.humanOverrides} overrides</div>
               </div>
@@ -686,14 +731,23 @@ function AgentTrustModule() {
 export default function BusinessStatePage() {
   const [activeModule, setActiveModule] = useState<ModuleId>("exec");
   const [executiveMode, setExecutiveMode] = useState(false);
+  const [liveData, setLiveData] = useState<LiveBusinessState | null>(null);
+
+  useEffect(() => {
+    fetch("/api/command/business-state")
+      .then(r => r.ok ? r.json() : null)
+      .then(json => { if (json?.data) setLiveData(json.data); })
+      .catch(() => {});
+  }, []);
 
   const activeModuleConfig = MODULES.find(m => m.id === activeModule)!;
   const ActiveIcon = activeModuleConfig.icon;
 
-  const breachKPIs = KPI_HEALTH_DATA.filter(k => k.status === "breach").length;
-  const criticalRisks = RISK_REGISTER.filter(r => r.level === "critical").length;
+  const breachKPIs = liveData ? liveData.kpiHealth.filter(k => k.status === "breach").length : KPI_HEALTH_DATA.filter(k => k.status === "breach").length;
+  const criticalRisks = liveData ? liveData.riskRegister.filter(r => r.level === "critical").length : RISK_REGISTER.filter(r => r.level === "critical").length;
 
   return (
+    <LiveCtx.Provider value={liveData}>
     <div style={{ minHeight: "100vh", background: "#0a0b10", color: "rgba(255,255,255,0.87)", fontFamily: "'Inter', system-ui, sans-serif" }}>
       <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "1.5rem 2rem" }}>
 
@@ -834,5 +888,6 @@ export default function BusinessStatePage() {
         </AnimatePresence>
       </div>
     </div>
+    </LiveCtx.Provider>
   );
 }
