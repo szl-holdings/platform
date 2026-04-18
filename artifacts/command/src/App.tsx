@@ -56,6 +56,7 @@ const MarketingStatus = lazy(() => import("./pages/marketing/status").then((m) =
 const MarketingVerifyEmail = lazy(() => import("./pages/marketing/verify-email").then((m) => ({ default: m.MarketingVerifyEmail })));
 
 const AtlasRuntimePage = lazy(() => import("./pages/atlas-runtime").then(m => ({ default: m.AtlasRuntimePage })));
+const WorldlineRegistryPage = lazy(() => import("./pages/worldline-registry"));
 const WhatChangedPage = lazy(() => import("./operations/pages/what-changed"));
 const DeploymentsPage = lazy(() => import("./operations/pages/deployments"));
 const ExecutiveCommand = lazy(() => import("@lyte/pages/executive-command"));
@@ -228,6 +229,7 @@ function AppShell() {
               <Route path="/strategy/signal-chains" component={() => <SignalChainsPage />} />
               <Route path="/strategy/enterprise-state" component={() => <EnterpriseStatePage />} />
               <Route path="/strategy/atlas-runtime" component={() => <AtlasRuntimePage />} />
+              <Route path="/strategy/worldline-registry" component={() => <WorldlineRegistryPage />} />
               <Route path="/cognitive" component={() => <CognitiveCommandCenter />} />
               <Route path="/cognitive/self-model" component={() => <SelfModelConsole />} />
               <Route path="/cognitive/world-model" component={() => <WorldModelExplorer />} />

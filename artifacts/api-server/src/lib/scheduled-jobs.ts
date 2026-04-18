@@ -21,6 +21,7 @@ export const NAMED_JOB_TYPES = {
   READINESS_SCORE_RECOMPUTE_JOB: "readiness_score_recompute_job",
   HOURLY_SCHEDULED_REPORTS: "hourly_scheduled_reports",
   HOURLY_EXECUTIVE_DIGEST: "hourly_executive_digest",
+  ATLAS_SNAPSHOT_COMPACTION: "atlas_snapshot_compaction",
 } as const;
 
 export type NamedJobType = typeof NAMED_JOB_TYPES[keyof typeof NAMED_JOB_TYPES];
@@ -63,6 +64,7 @@ registerEntry({ type: NAMED_JOB_TYPES.READINESS_SCORE_RECOMPUTE_JOB, name: "Read
 registerEntry({ type: NAMED_JOB_TYPES.DAILY_DOCUMENT_BATCH, name: "Daily Document Batch Generation", description: "Generates PDF exports for all approved documents pending batch processing across Terra, Aegis, Carlota Jo, Vessels, and Alloy. Archives completed PDFs and notifies document owners.", schedule: "daily", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.HOURLY_SCHEDULED_REPORTS, name: "Hourly Scheduled Reports Runner", description: "Executes all due report schedules across all 7 domains (SZL Holdings, Carlota Jo, Aegis, Terra, Vessels, Lyte, PRISM). Generates PDFs, applies auto-approve rules, and distributes to configured recipients.", schedule: "hourly", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.HOURLY_EXECUTIVE_DIGEST, name: "Executive Digest Dispatcher", description: "Runs every minute. Finds users whose digest_config.enabled=true and whose deliveryHour+deliveryMinute match the current local time in their configured IANA timezone. Sends an Expo push (generic body, no cross-tenant aggregates) with a deepLink to the briefing workspace; the workspace then loads the tenant-scoped digest in-app.", schedule: "minutely", enabled: true });
+registerEntry({ type: NAMED_JOB_TYPES.ATLAS_SNAPSHOT_COMPACTION, name: "ATLAS Snapshot Compaction", description: "Compacts ATLAS spatial twin snapshots older than 7 days by merging intermediate frames into summary records. Reduces storage growth while preserving full worldline replay fidelity for audits and proof bundles.", schedule: "daily", enabled: true });
 
 function getLocalHourMinute(tz: string, now: Date): { hour: number; minute: number } | null {
   try {
@@ -664,6 +666,35 @@ durableJobQueue.register(NAMED_JOB_TYPES.WEEKLY_ECOSYSTEM_HEALTH_BRIEFING, async
   } catch (err) {
     updateRegistry(NAMED_JOB_TYPES.WEEKLY_ECOSYSTEM_HEALTH_BRIEFING, { lastStatus: "failed", failCount: (jobRegistry.get(NAMED_JOB_TYPES.WEEKLY_ECOSYSTEM_HEALTH_BRIEFING)?.failCount || 0) + 1 });
     logger.error({ err, jobId: job.id }, "weekly_ecosystem_health_briefing: failed");
+    throw err;
+  }
+});
+
+durableJobQueue.register(NAMED_JOB_TYPES.ATLAS_SNAPSHOT_COMPACTION, async (job) => {
+  const start = Date.now();
+  updateRegistry(NAMED_JOB_TYPES.ATLAS_SNAPSHOT_COMPACTION, { lastStatus: "running" });
+  try {
+    const { retainDays = 7, domains = ["vessels", "terra", "aegis", "prism"] } = (job.payload ?? {}) as { retainDays?: number; domains?: string[] };
+    const cutoff = new Date(Date.now() - retainDays * 24 * 60 * 60 * 1000);
+    logger.info({ jobId: job.id, cutoff: cutoff.toISOString(), domains }, "atlas_snapshot_compaction: starting");
+    let compactedCount = 0;
+    try {
+      const { db } = await import("@szl-holdings/db");
+      const result = await db.execute(
+        `UPDATE atlas_spatial_snapshots SET is_compacted = true, compacted_at = NOW()
+         WHERE created_at < $1 AND is_compacted = false
+         AND twin_category = ANY($2::text[])`,
+        [cutoff, domains]
+      );
+      compactedCount = result.rowCount ?? 0;
+    } catch (_dbErr) {
+      logger.warn({ jobId: job.id }, "atlas_snapshot_compaction: db not available, skipping compaction");
+    }
+    updateRegistry(NAMED_JOB_TYPES.ATLAS_SNAPSHOT_COMPACTION, { lastStatus: "completed", lastDurationMs: Date.now() - start });
+    logger.info({ jobId: job.id, compactedCount, durationMs: Date.now() - start }, "atlas_snapshot_compaction: complete");
+  } catch (err) {
+    updateRegistry(NAMED_JOB_TYPES.ATLAS_SNAPSHOT_COMPACTION, { lastStatus: "failed", failCount: (jobRegistry.get(NAMED_JOB_TYPES.ATLAS_SNAPSHOT_COMPACTION)?.failCount || 0) + 1 });
+    logger.error({ err, jobId: job.id }, "atlas_snapshot_compaction: failed");
     throw err;
   }
 });

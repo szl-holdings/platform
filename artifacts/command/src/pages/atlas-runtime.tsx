@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Layers, Activity, AlertTriangle, CheckCircle, Clock, Shield, Globe, ChevronRight, X, GitBranch, Zap, Server, Network, Eye } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { Layers, Activity, AlertTriangle, CheckCircle, Clock, Shield, Globe, ChevronRight, X, GitBranch, Zap, Server, Network, Eye, Lock, RefreshCw } from "lucide-react";
 
 type TwinState = "stable" | "degraded" | "awaiting_approval";
 type Domain = "aegis" | "terra" | "vessels" | "alloy" | "prism" | "lyte";
@@ -92,10 +93,28 @@ function WorldlineDrawer({ onClose }: { onClose: () => void }) {
   );
 }
 
+function useAtlasBranches() {
+  return useQuery<{ branches: Array<{ id: string; branchName: string; status: string; twinCategory?: string }>; count: number }>({
+    queryKey: ["command-atlas-branches"],
+    queryFn: () => fetch("/api/atlas/spatial/branches?limit=20").then(r => {
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return r.json();
+    }).then(r => r.data ?? r),
+    staleTime: 30000,
+    retry: 1,
+  });
+}
+
 export function AtlasRuntimePage() {
   const [showWorldline, setShowWorldline] = useState(false);
   const [selectedTwin, setSelectedTwin] = useState<CrossDomainTwin | null>(null);
+  const [safeMode, setSafeMode] = useState(false);
+  const [lastRefresh, setLastRefresh] = useState(new Date());
+  const { data: branchData, isLoading: loadingBranches } = useAtlasBranches();
 
+  const apiBranchCount = branchData?.count ?? 0;
+
+  const visibleTwins = safeMode ? TWINS.filter(t => t.state === "stable" && t.proofState === "verified") : TWINS;
   const stable = TWINS.filter(t => t.state === "stable");
   const degraded = TWINS.filter(t => t.state === "degraded");
   const awaiting = TWINS.filter(t => t.state === "awaiting_approval");
@@ -112,9 +131,25 @@ export function AtlasRuntimePage() {
           <h1 className="text-xl font-bold text-white tracking-tight">Cross-Domain Atlas View</h1>
           <p className="text-[11px] mt-0.5" style={{ color: "rgba(255,255,255,0.4)" }}>Real-time spatial twin health across all domains with worldline registry and governed action handoff.</p>
         </div>
-        <button onClick={() => setShowWorldline(true)} className="flex items-center gap-1.5 text-[11px] border px-3 py-1.5 rounded-lg hover:bg-white/5 transition-colors shrink-0" style={{ color: "#8b7ac8", borderColor: "rgba(139,122,200,0.3)", background: "rgba(139,122,200,0.06)" }}>
-          <GitBranch className="w-3 h-3" /> Worldline Overlay
-        </button>
+        <div className="flex items-center gap-2 flex-wrap shrink-0">
+          <button
+            onClick={() => setSafeMode(m => !m)}
+            className="flex items-center gap-1.5 text-[11px] border px-3 py-1.5 rounded-lg hover:bg-white/5 transition-colors"
+            style={safeMode ? { color: "#8b7ac8", borderColor: "rgba(139,122,200,0.4)", background: "rgba(139,122,200,0.1)" } : { color: "rgba(255,255,255,0.35)", borderColor: "rgba(255,255,255,0.08)" }}
+          >
+            <Lock className="w-3 h-3" /> {safeMode ? "Safe Mode ON" : "Safe Mode"}
+          </button>
+          <button
+            onClick={() => setLastRefresh(new Date())}
+            className="flex items-center gap-1.5 text-[11px] border px-3 py-1.5 rounded-lg hover:bg-white/5 transition-colors"
+            style={{ color: "rgba(255,255,255,0.35)", borderColor: "rgba(255,255,255,0.08)" }}
+          >
+            <RefreshCw className="w-3 h-3" /> Sync
+          </button>
+          <button onClick={() => setShowWorldline(true)} className="flex items-center gap-1.5 text-[11px] border px-3 py-1.5 rounded-lg hover:bg-white/5 transition-colors" style={{ color: "#8b7ac8", borderColor: "rgba(139,122,200,0.3)", background: "rgba(139,122,200,0.06)" }}>
+            <GitBranch className="w-3 h-3" /> Worldlines
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -134,7 +169,17 @@ export function AtlasRuntimePage() {
         ))}
       </div>
 
-      {awaiting.length > 0 && (
+      {safeMode && (
+        <div className="rounded-xl border p-3 flex items-center gap-3" style={{ borderColor: "rgba(139,122,200,0.25)", background: "rgba(139,122,200,0.06)" }}>
+          <Lock className="w-3.5 h-3.5 shrink-0" style={{ color: "#8b7ac8" }} />
+          <div>
+            <div className="text-[10px] font-bold" style={{ color: "#8b7ac8" }}>Executive Safe Mode Active</div>
+            <div className="text-[9px]" style={{ color: "rgba(255,255,255,0.4)" }}>Only verified/stable twins shown. {TWINS.length - visibleTwins.length} degraded or unreviewed twin{TWINS.length - visibleTwins.length !== 1 ? "s" : ""} hidden.</div>
+          </div>
+        </div>
+      )}
+
+      {!safeMode && awaiting.length > 0 && (
         <div className="rounded-xl border p-4 flex items-center gap-3" style={{ borderColor: "rgba(139,122,200,0.2)", background: "rgba(139,122,200,0.04)" }}>
           <AlertTriangle className="w-4 h-4 shrink-0" style={{ color: "#8b7ac8" }} />
           <div className="flex-1">
@@ -145,8 +190,17 @@ export function AtlasRuntimePage() {
         </div>
       )}
 
+      {apiBranchCount > 0 && (
+        <div className="rounded-xl border px-4 py-2.5 flex items-center gap-3" style={{ borderColor: "rgba(139,122,200,0.12)", background: "rgba(139,122,200,0.02)" }}>
+          <GitBranch className="w-3 h-3 shrink-0" style={{ color: "#8b7ac8" }} />
+          <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.5)" }}>
+            <span className="font-bold font-mono" style={{ color: "#8b7ac8" }}>{apiBranchCount}</span> live scenario branch{apiBranchCount !== 1 ? "es" : ""} found in API — Worldline Overlay for details
+          </span>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-        {TWINS.map(tw => {
+        {visibleTwins.map(tw => {
           const s = STATE_CONFIG[tw.state];
           const d = DOMAIN_CONFIG[tw.domain];
           const DIcon = d.icon;

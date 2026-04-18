@@ -34,6 +34,7 @@ const STRATEGY_NAV: NavGroup[] = [
     section: "ATLAS Spatial Runtime",
     items: [
       { href: "/strategy/atlas-runtime", label: "Cross-Domain Twin View", icon: Layers },
+      { href: "/strategy/worldline-registry", label: "Worldline Registry", icon: GitBranch },
     ],
   },
   {

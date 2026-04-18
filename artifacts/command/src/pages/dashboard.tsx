@@ -18,6 +18,7 @@ import { ActivationBanner, useActivationState } from "@szl-holdings/shared-ui/on
 import type { ActivationStep } from "@szl-holdings/shared-ui/onboarding";
 import { GitBranch, Zap, Map } from "lucide-react";
 import { EcosystemAppsGrid } from "../components/ecosystem-apps-grid";
+import { AtlasKpiSection } from "../components/atlas-kpi-section";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -146,6 +147,8 @@ export function Dashboard() {
         <OpsCenterGrid />
 
         <EcosystemAppsGrid />
+
+        <AtlasKpiSection />
 
         <AmbientSignalRanker />
 

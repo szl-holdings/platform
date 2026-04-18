@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { GitBranch, Layers, MapPin, AlertTriangle, Activity, Navigation, Shield, CloudRain, RotateCcw, ChevronRight, Anchor, Radio, Clock, Zap } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { GitBranch, Layers, MapPin, AlertTriangle, Activity, Navigation, Shield, CloudRain, RotateCcw, ChevronRight, Anchor, Radio, Clock, Zap, Lock, RefreshCw } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 
@@ -128,6 +129,25 @@ function RouteMemoryCanvas({ vesselId }: { vesselId: string }) {
 export default function VesselsAtlasRuntimePage() {
   const [selectedVessel, setSelectedVessel] = useState(VESSELS[0]);
   const [overlays, setOverlays] = useState(OVERLAYS.map(o => ({ ...o })));
+  const [safeMode, setSafeMode] = useState(false);
+
+  const { data: driftData } = useQuery<{ twins: Array<{ twinId: string; driftScore: number; status: string }> }>({
+    queryKey: ["vessels-atlas-drift"],
+    queryFn: () => fetch("/api/atlas/spatial/drift?twinCategory=vessel").then(r => r.ok ? r.json() : Promise.reject(r.status)).then(r => r.data ?? r),
+    staleTime: 60000,
+    retry: 1,
+  });
+  const { data: branchData } = useQuery<{ count: number }>({
+    queryKey: ["vessels-atlas-branches"],
+    queryFn: () => fetch("/api/atlas/spatial/branches?twinCategory=vessel").then(r => r.ok ? r.json() : Promise.reject(r.status)).then(r => r.data ?? r),
+    staleTime: 60000,
+    retry: 1,
+  });
+
+  const liveDriftAvg = driftData?.twins?.length
+    ? (driftData.twins.reduce((s, t) => s + t.driftScore, 0) / driftData.twins.length).toFixed(2)
+    : null;
+  const liveBranchCount = branchData?.count ?? null;
 
   const toggleOverlay = (id: string) => {
     setOverlays(prev => prev.map(o => o.id === id ? { ...o, active: !o.active } : o));
@@ -151,12 +171,38 @@ export default function VesselsAtlasRuntimePage() {
           <p className="text-xs text-sky-400/40">Vessel digital twin with route memory, spatial overlays, and live worldline tracking</p>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => setSafeMode(m => !m)}
+            className={cn("flex items-center gap-1.5 text-[10px] px-2 py-1 rounded-lg border transition-colors", safeMode ? "text-violet-400 bg-violet-500/10 border-violet-500/30" : "text-sky-400/40 border-sky-500/10 hover:bg-sky-500/5")}
+          >
+            <Lock className="w-3 h-3" /> {safeMode ? "Safe Mode ON" : "Safe Mode"}
+          </button>
           <div className="flex items-center gap-1.5 text-[10px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-1 rounded-lg">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
             RUNTIME LIVE
           </div>
         </div>
       </div>
+
+      {(liveDriftAvg !== null || liveBranchCount !== null) && (
+        <div className="flex items-center gap-3 text-[10px] px-3 py-2 rounded-lg border border-sky-500/10 bg-sky-500/3">
+          {liveDriftAvg !== null && (
+            <span className="text-sky-400/50">Live Drift Avg: <span className="font-mono text-sky-300">{liveDriftAvg}σ</span></span>
+          )}
+          {liveBranchCount !== null && (
+            <>
+              <span className="text-sky-400/20">·</span>
+              <span className="flex items-center gap-1 text-sky-400/50"><GitBranch className="w-3 h-3" /> <span className="font-mono text-sky-300">{liveBranchCount}</span> scenario branch{liveBranchCount !== 1 ? "es" : ""}</span>
+            </>
+          )}
+        </div>
+      )}
+
+      {safeMode && (
+        <div className="flex items-center gap-2 text-[10px] px-3 py-2 rounded-lg border border-violet-500/20 bg-violet-500/5 text-violet-300">
+          <Lock className="w-3 h-3 shrink-0" /> Executive Safe Mode — only stable twin data shown; degraded signals suppressed.
+        </div>
+      )}
 
       {/* Twin Status Rail */}
       <div className="flex items-center gap-3 overflow-x-auto pb-1">

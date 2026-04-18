@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { Layers, Building2, TrendingUp, TrendingDown, Activity, MapPin, BarChart3, AlertTriangle, DollarSign, Shield, Clock, ChevronRight } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { Layers, Building2, TrendingUp, TrendingDown, Activity, MapPin, BarChart3, AlertTriangle, DollarSign, Shield, Clock, ChevronRight, Lock, GitBranch } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 
 const PROPERTIES = [
@@ -139,6 +140,25 @@ function PropertyTwinCanvas({ propertyId }: { propertyId: string }) {
 export default function TerraAtlasRuntimePage() {
   const [selected, setSelected] = useState(PROPERTIES[0]);
   const [overlays, setOverlays] = useState(OVERLAYS.map(o => ({ ...o })));
+  const [safeMode, setSafeMode] = useState(false);
+
+  const { data: driftData } = useQuery<{ twins: Array<{ twinId: string; driftScore: number; status: string }> }>({
+    queryKey: ["terra-atlas-drift"],
+    queryFn: () => fetch("/api/atlas/spatial/drift?twinCategory=property").then(r => r.ok ? r.json() : Promise.reject(r.status)).then(r => r.data ?? r),
+    staleTime: 60000,
+    retry: 1,
+  });
+  const { data: branchData } = useQuery<{ count: number }>({
+    queryKey: ["terra-atlas-branches"],
+    queryFn: () => fetch("/api/atlas/spatial/branches?twinCategory=property").then(r => r.ok ? r.json() : Promise.reject(r.status)).then(r => r.data ?? r),
+    staleTime: 60000,
+    retry: 1,
+  });
+
+  const liveDriftAvg = driftData?.twins?.length
+    ? (driftData.twins.reduce((s, t) => s + t.driftScore, 0) / driftData.twins.length).toFixed(2)
+    : null;
+  const liveBranchCount = branchData?.count ?? null;
 
   const toggleOverlay = (id: string) => setOverlays(prev => prev.map(o => o.id === id ? { ...o, active: !o.active } : o));
 
@@ -159,11 +179,40 @@ export default function TerraAtlasRuntimePage() {
           </div>
           <p className="text-xs" style={{ color: "rgba(255,255,255,0.28)" }}>Property + market pressure twin with spatial memory, submarket overlays, and drift monitoring</p>
         </div>
-        <div className="flex items-center gap-1.5 text-[10px] px-2 py-1 rounded-lg border" style={{ color: "#2d6a4f", borderColor: "rgba(45,106,79,0.25)", background: "rgba(45,106,79,0.06)" }}>
-          <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#2d6a4f" }} />
-          RUNTIME LIVE
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setSafeMode(m => !m)}
+            className="flex items-center gap-1.5 text-[10px] px-2 py-1 rounded-lg border transition-colors"
+            style={safeMode ? { color: "#8b7ac8", borderColor: "rgba(139,122,200,0.3)", background: "rgba(139,122,200,0.08)" } : { color: "rgba(255,255,255,0.3)", borderColor: "rgba(45,106,79,0.1)" }}
+          >
+            <Lock className="w-3 h-3" /> {safeMode ? "Safe Mode ON" : "Safe Mode"}
+          </button>
+          <div className="flex items-center gap-1.5 text-[10px] px-2 py-1 rounded-lg border" style={{ color: "#2d6a4f", borderColor: "rgba(45,106,79,0.25)", background: "rgba(45,106,79,0.06)" }}>
+            <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#2d6a4f" }} />
+            RUNTIME LIVE
+          </div>
         </div>
       </div>
+
+      {(liveDriftAvg !== null || liveBranchCount !== null) && (
+        <div className="flex items-center gap-3 text-[10px] px-3 py-2 rounded-lg border" style={{ borderColor: "rgba(45,106,79,0.12)", background: "rgba(45,106,79,0.03)" }}>
+          {liveDriftAvg !== null && (
+            <span style={{ color: "rgba(255,255,255,0.4)" }}>Live Drift Avg: <span className="font-mono" style={{ color: "rgba(255,255,255,0.7)" }}>{liveDriftAvg}σ</span></span>
+          )}
+          {liveBranchCount !== null && (
+            <>
+              <span style={{ color: "rgba(255,255,255,0.15)" }}>·</span>
+              <span className="flex items-center gap-1" style={{ color: "rgba(255,255,255,0.4)" }}><GitBranch className="w-3 h-3" /> <span className="font-mono" style={{ color: "rgba(255,255,255,0.7)" }}>{liveBranchCount}</span> scenario branch{liveBranchCount !== 1 ? "es" : ""}</span>
+            </>
+          )}
+        </div>
+      )}
+
+      {safeMode && (
+        <div className="flex items-center gap-2 text-[10px] px-3 py-2 rounded-lg border" style={{ color: "#8b7ac8", borderColor: "rgba(139,122,200,0.2)", background: "rgba(139,122,200,0.05)" }}>
+          <Lock className="w-3 h-3 shrink-0" /> Executive Safe Mode — only stable twin data shown; watch and distress signals suppressed.
+        </div>
+      )}
 
       {/* Twin Status Rail */}
       <div className="flex items-center gap-3 overflow-x-auto pb-1">
