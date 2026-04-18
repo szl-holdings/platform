@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import AxeBuilder from "@axe-core/playwright";
 
 const STEPHEN_PATH = process.env.STEPHEN_BASE_PATH ?? "/stephen";
 
@@ -143,5 +144,32 @@ test.describe("Stephen Lutar — Mobile Viewport", () => {
     expect(hasError).toBe(false);
     const body = await page.content();
     expect(body.length).toBeGreaterThan(200);
+  });
+});
+
+test.describe("Stephen Lutar — Accessibility (WCAG 2.1 AA)", () => {
+  test("homepage (/) passes WCAG 2.1 AA axe-core scan", async ({ page }, testInfo) => {
+    await page.goto(STEPHEN_PATH, {
+      waitUntil: "domcontentloaded",
+      timeout: 30000,
+    });
+    await page.waitForLoadState("networkidle", { timeout: 15000 }).catch(() => null);
+
+    const results = await new AxeBuilder({ page })
+      .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
+      .exclude("[data-testid='dev-only']")
+      .analyze();
+
+    await testInfo.attach("axe-results-home", {
+      body: JSON.stringify(results.violations, null, 2),
+      contentType: "application/json",
+    });
+
+    if (results.violations.length > 0) {
+      const summary = results.violations
+        .map((v) => `[${v.impact}] ${v.id}: ${v.description} (${v.nodes.length} node(s))`)
+        .join("\n");
+      expect(results.violations, `WCAG 2.1 AA violations on ${STEPHEN_PATH}:\n${summary}`).toHaveLength(0);
+    }
   });
 });

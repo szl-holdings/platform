@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import AxeBuilder from "@axe-core/playwright";
 
 const BASE_PATH = process.env.SZL_BASE_PATH ?? "/";
 
@@ -381,4 +382,40 @@ test.describe("SZL Holdings — Mobile Viewport", () => {
     const body = await page.content();
     expect(body.length).toBeGreaterThan(200);
   });
+});
+
+test.describe("SZL Holdings — Accessibility (WCAG 2.1 AA)", () => {
+  const a11yRoutes = [
+    { path: "/", label: "homepage" },
+    { path: "/platform", label: "platform" },
+    { path: "/contact", label: "contact" },
+    { path: "/trust-center", label: "trust center" },
+  ];
+
+  for (const route of a11yRoutes) {
+    test(`${route.label} (${route.path}) passes WCAG 2.1 AA axe-core scan`, async ({ page }, testInfo) => {
+      await page.goto(`${BASE_PATH}${route.path}`.replace(/([^:])\/\//g, "$1/"), {
+        waitUntil: "domcontentloaded",
+        timeout: 30000,
+      });
+      await page.waitForLoadState("networkidle", { timeout: 15000 }).catch(() => null);
+
+      const results = await new AxeBuilder({ page })
+        .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
+        .exclude("[data-testid='dev-only']")
+        .analyze();
+
+      await testInfo.attach(`axe-results${route.path.replace(/\//g, "-")}`, {
+        body: JSON.stringify(results.violations, null, 2),
+        contentType: "application/json",
+      });
+
+      if (results.violations.length > 0) {
+        const summary = results.violations
+          .map((v) => `[${v.impact}] ${v.id}: ${v.description} (${v.nodes.length} node(s))`)
+          .join("\n");
+        expect(results.violations, `WCAG 2.1 AA violations on ${route.path}:\n${summary}`).toHaveLength(0);
+      }
+    });
+  }
 });
