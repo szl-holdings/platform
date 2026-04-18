@@ -202,6 +202,7 @@ export default function DecisionTheater() {
 
       <div className="flex items-center justify-between mt-6 pt-4 border-t border-border/30">
         <button
+          data-testid="nav-prev"
           onClick={goPrev}
           disabled={currentStage === 0}
           className={cn(
@@ -228,6 +229,7 @@ export default function DecisionTheater() {
         </div>
 
         <button
+          data-testid="nav-next"
           onClick={goNext}
           disabled={currentStage === LOOP_STAGES.length - 1}
           className={cn(
