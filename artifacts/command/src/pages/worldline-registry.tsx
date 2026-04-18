@@ -16,6 +16,9 @@ import {
   Lock,
   Eye,
   Copy,
+  GitMerge,
+  X,
+  Send,
 } from "lucide-react";
 
 const BASE_URL = import.meta.env.BASE_URL?.replace(/\/$/, "") || "";
@@ -174,10 +177,97 @@ function useBranches() {
   });
 }
 
+type MergeStep = "idle" | "confirm" | "submitting" | "submitted";
+
+function RemergeModal({ worldline, onClose }: { worldline: Worldline; onClose: () => void }) {
+  const [step, setStep] = useState<MergeStep>("confirm");
+  const [justification, setJustification] = useState("");
+
+  const handleSubmit = () => {
+    if (!justification.trim()) return;
+    setStep("submitting");
+    setTimeout(() => setStep("submitted"), 1400);
+  };
+
+  const lineColor = "#8b7ac8";
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.7)" }} onClick={onClose}>
+      <div className="w-full max-w-md rounded-2xl border flex flex-col gap-0 overflow-hidden" style={{ background: "#0c1420", borderColor: "rgba(139,122,200,0.25)" }} onClick={e => e.stopPropagation()}>
+        <div className="p-4 border-b flex items-center gap-2" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
+          <GitMerge className="w-4 h-4" style={{ color: lineColor }} />
+          <span className="text-[11px] font-bold uppercase tracking-widest font-mono" style={{ color: lineColor }}>Re-merge Approval</span>
+          <button onClick={onClose} className="ml-auto p-1 rounded hover:bg-white/5 transition-colors" style={{ color: "rgba(255,255,255,0.4)" }}><X className="w-3.5 h-3.5" /></button>
+        </div>
+
+        {step === "submitted" ? (
+          <div className="p-6 flex flex-col items-center gap-3 text-center">
+            <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.25)" }}>
+              <CheckCircle className="w-5 h-5" style={{ color: "#10b981" }} />
+            </div>
+            <div className="text-sm font-bold text-white">Re-merge Request Submitted</div>
+            <div className="text-[11px]" style={{ color: "rgba(255,255,255,0.4)" }}>
+              The approval flow for <span className="font-mono" style={{ color: lineColor }}>{worldline.label}</span> has been initiated. Reviewers will be notified and can approve in the Policy Approvals queue.
+            </div>
+            <button onClick={onClose} className="mt-2 text-[10px] px-4 py-2 rounded-lg border hover:bg-white/5 transition-colors" style={{ color: "rgba(255,255,255,0.5)", borderColor: "rgba(255,255,255,0.1)" }}>Close</button>
+          </div>
+        ) : (
+          <div className="p-4 space-y-4">
+            <div className="rounded-xl border p-3 space-y-1" style={{ borderColor: "rgba(139,122,200,0.12)", background: "rgba(139,122,200,0.04)" }}>
+              <div className="text-[9px] font-bold uppercase tracking-widest font-mono mb-1" style={{ color: "rgba(255,255,255,0.3)" }}>Target Worldline</div>
+              <div className="text-[12px] font-bold font-mono" style={{ color: lineColor }}>{worldline.label}</div>
+              <div className="text-[10px]" style={{ color: "rgba(255,255,255,0.5)" }}>{worldline.description}</div>
+              {worldline.branchReason && <div className="text-[9px] italic" style={{ color: "rgba(255,255,255,0.3)" }}>Branch reason: {worldline.branchReason}</div>}
+            </div>
+
+            <div>
+              <div className="text-[9px] font-bold uppercase tracking-widest mb-1.5" style={{ color: "rgba(255,255,255,0.3)" }}>Re-merge Justification <span style={{ color: "#ef4444" }}>*</span></div>
+              <textarea
+                value={justification}
+                onChange={e => setJustification(e.target.value)}
+                placeholder="Describe the remediation steps taken and why this worldline is ready to merge back to WL-ALPHA baseline…"
+                rows={4}
+                className="w-full rounded-lg border p-3 text-[11px] resize-none outline-none focus:ring-1"
+                style={{ background: "rgba(255,255,255,0.03)", borderColor: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.8)", caretColor: lineColor }}
+              />
+            </div>
+
+            <div className="rounded-lg border p-3" style={{ borderColor: "rgba(245,158,11,0.15)", background: "rgba(245,158,11,0.04)" }}>
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="w-3 h-3 mt-0.5 shrink-0" style={{ color: "#f59e0b" }} />
+                <div className="text-[9px]" style={{ color: "rgba(255,255,255,0.45)" }}>
+                  Re-merging requires approval from a minimum of <strong className="text-white">2 reviewers</strong>. All affected twins will be reconciled back to the WL-ALPHA baseline and their proofs regenerated.
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 pt-1">
+              <button onClick={onClose} className="flex-1 text-[10px] px-3 py-2 rounded-lg border hover:bg-white/5 transition-colors" style={{ color: "rgba(255,255,255,0.4)", borderColor: "rgba(255,255,255,0.08)" }}>Cancel</button>
+              <button
+                onClick={handleSubmit}
+                disabled={!justification.trim() || step === "submitting"}
+                className="flex-1 flex items-center justify-center gap-1.5 text-[10px] font-bold px-3 py-2 rounded-lg border transition-colors disabled:opacity-40"
+                style={{ color: lineColor, borderColor: `${lineColor}40`, background: `${lineColor}10` }}
+              >
+                {step === "submitting" ? (
+                  <><RefreshCw className="w-3 h-3 animate-spin" /> Submitting…</>
+                ) : (
+                  <><Send className="w-3 h-3" /> Submit for Approval</>
+                )}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function WorldlineRegistryPage() {
   const [selected, setSelected] = useState<Worldline | null>(null);
   const [filter, setFilter] = useState<"all" | "active" | "simulation">("all");
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [mergeTarget, setMergeTarget] = useState<Worldline | null>(null);
   const { data: branchData, isLoading: loadingBranches } = useBranches();
 
   const apiBranches: ApiScenarioBranch[] = branchData?.branches ?? [];
@@ -370,7 +460,7 @@ export function WorldlineRegistryPage() {
                         );
                       })}
                     </div>
-                    <div className="flex items-center gap-2 pt-1">
+                    <div className="flex items-center gap-2 pt-1 flex-wrap">
                       <a
                         href={`${DOMAIN_CONFIG[wl.originDomain].appPath}/atlas-runtime`}
                         className="flex items-center gap-1.5 text-[10px] px-3 py-1.5 rounded-lg border transition-colors hover:bg-white/5"
@@ -380,8 +470,18 @@ export function WorldlineRegistryPage() {
                         <Eye className="w-3 h-3" />
                         Open Domain Runtime →
                       </a>
+                      {wl.id !== "WL-ALPHA" && wl.status !== "archived" && (
+                        <button
+                          className="flex items-center gap-1.5 text-[10px] px-3 py-1.5 rounded-lg border transition-colors hover:bg-white/5"
+                          style={{ color: "#10b981", borderColor: "rgba(16,185,129,0.25)", background: "rgba(16,185,129,0.06)" }}
+                          onClick={e => { e.stopPropagation(); setMergeTarget(wl); }}
+                        >
+                          <GitMerge className="w-3 h-3" />
+                          Re-merge to WL-ALPHA
+                        </button>
+                      )}
                       <button
-                        className="flex items-center gap-1.5 text-[10px] px-3 py-1.5 rounded-lg border transition-colors hover:bg-white/5"
+                        className="flex items-center gap-1.5 text-[10px] px-3 py-1.5 rounded-lg border transition-colors hover:bg-white/5 ml-auto"
                         style={{ color: "rgba(255,255,255,0.4)", borderColor: "rgba(255,255,255,0.07)" }}
                         onClick={e => { e.stopPropagation(); copyId(wl.id); }}
                       >
@@ -403,6 +503,8 @@ export function WorldlineRegistryPage() {
           <div className="text-[11px]" style={{ color: "rgba(255,255,255,0.3)" }}>No worldlines match the current filter.</div>
         </div>
       )}
+
+      {mergeTarget && <RemergeModal worldline={mergeTarget} onClose={() => setMergeTarget(null)} />}
     </div>
   );
 }

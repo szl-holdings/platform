@@ -292,6 +292,14 @@ export default function AegisAtlasRuntime() {
         <div className="flex items-center gap-2 mb-3">
           <GitBranch className="w-3.5 h-3.5" style={{ color: "#8b7ac8" }} />
           <span className="text-[11px] font-semibold text-white">Worldline Map</span>
+          <a
+            href="/command/strategy/worldline-registry"
+            className="ml-auto flex items-center gap-1 text-[9px] px-2 py-1 rounded-lg border transition-colors hover:bg-white/5"
+            style={{ color: "#8b7ac8", borderColor: "rgba(139,122,200,0.25)", background: "rgba(139,122,200,0.06)" }}
+          >
+            <Eye className="w-2.5 h-2.5" />
+            View Worldline Registry →
+          </a>
         </div>
         <div className="flex gap-4 flex-wrap">
           {["WL-ALPHA", "WL-BETA", "WL-GAMMA"].map(wl => {
@@ -299,11 +307,16 @@ export default function AegisAtlasRuntime() {
             const allStable = wlTwins.every(t => t.health === "stable");
             const color = allStable ? "#10b981" : wlTwins.some(t => t.health === "degraded") ? "#f59e0b" : "#8b7ac8";
             return (
-              <div key={wl} className="rounded-lg border px-4 py-3 flex-1 min-w-[160px]" style={{ borderColor: `${color}25`, background: `${color}08` }}>
+              <a
+                key={wl}
+                href="/command/strategy/worldline-registry"
+                className="rounded-lg border px-4 py-3 flex-1 min-w-[160px] block hover:brightness-110 transition-all cursor-pointer"
+                style={{ borderColor: `${color}25`, background: `${color}08`, textDecoration: "none" }}
+              >
                 <div className="text-[9px] font-bold uppercase tracking-widest mb-1 font-mono" style={{ color }}>{wl}</div>
                 <div className="text-lg font-bold" style={{ color }}>{wlTwins.length}</div>
                 <div className="text-[9px]" style={{ color: "rgba(255,255,255,0.3)" }}>twins · {allStable ? "All stable" : wlTwins.filter(t => t.health !== "stable").length + " need attention"}</div>
-              </div>
+              </a>
             );
           })}
         </div>
