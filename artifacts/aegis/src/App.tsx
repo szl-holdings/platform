@@ -1,21 +1,15 @@
 import { useState, useEffect, useCallback } from "react";
-import S01 from "./pages/slides/S01Title";
-import S02 from "./pages/slides/S02Problem";
-import S03 from "./pages/slides/S03Thesis";
-import S04 from "./pages/slides/S04Loop";
-import S05 from "./pages/slides/S05Architecture";
-import S06 from "./pages/slides/S06Primitives";
-import S07 from "./pages/slides/S07Domains";
-import S08 from "./pages/slides/S08DividerMoat";
-import S09 from "./pages/slides/S09Competitive";
-import S10 from "./pages/slides/S10Evidence";
-import S11 from "./pages/slides/S11Market";
-import S12 from "./pages/slides/S12GoToMarket";
-import S13 from "./pages/slides/S13DividerVerdict";
-import S14 from "./pages/slides/S14Commercial";
-import S15 from "./pages/slides/S15Closing";
+import S01Cover from "./pages/slides/S01Cover";
+import S02SeriesProblem from "./pages/slides/S02SeriesProblem";
+import S03Category from "./pages/slides/S03Category";
+import S04Product from "./pages/slides/S04Product";
+import S05Demo from "./pages/slides/S05Demo";
+import S06Market from "./pages/slides/S06Market";
+import S07SeriesDomains from "./pages/slides/S07SeriesDomains";
+import S08BusinessModel from "./pages/slides/S08BusinessModel";
+import S09Ask from "./pages/slides/S09Ask";
 
-const SLIDES = [S01, S02, S03, S04, S05, S06, S07, S08, S09, S10, S11, S12, S13, S14, S15];
+const SLIDES = [S01Cover, S02SeriesProblem, S03Category, S04Product, S05Demo, S06Market, S07SeriesDomains, S08BusinessModel, S09Ask];
 const TOTAL = SLIDES.length;
 
 function getInitialSlide(): number {
@@ -67,11 +61,11 @@ export default function App() {
       <div
         style={{
           position: "fixed",
-          bottom: "2vh",
+          bottom: "2.5vh",
           left: "50%",
           transform: "translateX(-50%)",
           display: "flex",
-          gap: "0.6vw",
+          gap: "0.5vw",
           zIndex: 100,
         }}
         onClick={(e) => e.stopPropagation()}
@@ -81,11 +75,11 @@ export default function App() {
             key={i}
             onClick={() => goTo(i + 1)}
             style={{
-              width: i + 1 === current ? "2vw" : "0.6vw",
-              height: "0.4vh",
+              width: i + 1 === current ? "2.2vw" : "0.55vw",
+              height: "0.35vh",
               minHeight: "3px",
               borderRadius: "2px",
-              background: i + 1 === current ? "#0cc8d9" : "rgba(255,255,255,0.2)",
+              background: i + 1 === current ? "#0cc8d9" : "rgba(255,255,255,0.18)",
               border: "none",
               cursor: "pointer",
               padding: 0,
@@ -96,11 +90,11 @@ export default function App() {
       <div
         style={{
           position: "fixed",
-          bottom: "2vh",
-          right: "2vw",
+          bottom: "2.5vh",
+          right: "2.5vw",
           fontFamily: "Inter, sans-serif",
-          fontSize: "clamp(10px, 1.1vw, 14px)",
-          color: "rgba(255,255,255,0.2)",
+          fontSize: "clamp(9px, 1vw, 13px)",
+          color: "rgba(255,255,255,0.18)",
           zIndex: 100,
         }}
       >
