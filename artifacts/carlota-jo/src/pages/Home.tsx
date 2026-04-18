@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import Services from "@/components/Services";
@@ -488,6 +489,92 @@ function PrivatePortalTeaser() {
   );
 }
 
+function SzlCommandSubscribeSection() {
+  const { t } = useTranslation();
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<"idle" | "loading" | "success">("idle");
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!email.trim()) return;
+    setStatus("loading");
+    try {
+      await fetch("/api/newsletter/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim(), utm_source: "carlota-jo" }),
+      });
+    } catch {}
+    setStatus("success");
+    setEmail("");
+  }
+
+  return (
+    <section className="py-20 lg:py-24" style={{ background: "var(--color-cream-warm)", borderTop: "1px solid var(--color-stone-200)" }}>
+      <div className="max-w-7xl mx-auto px-6 lg:px-12">
+        <div className="max-w-xl">
+          <p className="text-[11px] font-medium tracking-[0.35em] uppercase mb-4" style={{ color: "var(--color-gold)" }}>
+            SZL Command
+          </p>
+          <h2 className="font-serif text-2xl lg:text-3xl font-light mb-3" style={{ color: "var(--color-ink-900)", lineHeight: 1.35 }}>
+            Strategic intelligence, delivered weekly.
+          </h2>
+          <p className="text-sm font-light leading-relaxed mb-6" style={{ color: "var(--color-ink-600)" }}>
+            Essays on governed decision infrastructure, AI strategy, and operational design — from the founding team at SZL Holdings.
+          </p>
+          {status === "success" ? (
+            <p className="text-sm font-light" style={{ color: "var(--color-gold)" }}>
+              You're subscribed. Check your inbox to confirm.
+            </p>
+          ) : (
+            <form onSubmit={handleSubmit} className="flex gap-3 flex-wrap">
+              <input
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                placeholder="your@email.com"
+                required
+                className="flex-1"
+                style={{
+                  minWidth: "200px",
+                  padding: "0.625rem 0.875rem",
+                  border: "1px solid var(--color-stone-300)",
+                  background: "transparent",
+                  fontSize: "0.875rem",
+                  fontFamily: "inherit",
+                  color: "var(--color-ink-900)",
+                  outline: "none",
+                }}
+              />
+              <button
+                type="submit"
+                disabled={status === "loading"}
+                style={{
+                  padding: "0.625rem 1.5rem",
+                  background: "var(--color-gold)",
+                  color: "var(--color-cream)",
+                  fontSize: "0.75rem",
+                  fontWeight: 600,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  border: "none",
+                  cursor: status === "loading" ? "not-allowed" : "pointer",
+                  opacity: status === "loading" ? 0.7 : 1,
+                }}
+              >
+                {status === "loading" ? "Subscribing…" : "Subscribe"}
+              </button>
+            </form>
+          )}
+          <p className="text-[11px] mt-3 font-light" style={{ color: "var(--color-stone-400)" }}>
+            No spam. Unsubscribe any time. <a href="https://szlholdings.substack.com" target="_blank" rel="noopener noreferrer" style={{ color: "var(--color-ink-400)", textDecoration: "underline" }}>szlholdings.substack.com</a>
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function Home() {
   return (
     <div className="min-h-screen" style={{ background: "var(--color-cream-warm)" }}>
@@ -502,6 +589,7 @@ export default function Home() {
       <ProcessStrip />
       <PrivatePortalTeaser />
       <InquiryCard />
+      <SzlCommandSubscribeSection />
       <Footer />
     </div>
   );

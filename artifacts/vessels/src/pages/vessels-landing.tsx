@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "wouter";
 import { Ship, Navigation, AlertTriangle, Wrench, DollarSign, Activity, ChevronRight, MapPin, BarChart3, TrendingUp, Anchor } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
-import { ContactModal } from "@szl-holdings/shared-ui";
+import { ContactModal, NewsletterSubscribe } from "@szl-holdings/shared-ui";
 
 const CORE_VIEWS = [
   {
@@ -195,6 +195,17 @@ export default function VesselsLandingPage() {
               <p className="text-[9px] font-mono text-sky-400/30">{o.trend}</p>
             </div>
           ))}
+        </div>
+      </section>
+
+      <section className="px-6 py-16 bg-[#060e1a] border-t border-sky-500/5">
+        <div className="max-w-[560px] mx-auto">
+          <NewsletterSubscribe
+            utmSource="vessels"
+            variant="banner"
+            heading="Maritime intelligence, straight to your inbox"
+            subheading="SZL Command essays on fleet operations, maritime AI, and the decision infrastructure behind Vessels — delivered weekly."
+          />
         </div>
       </section>
 

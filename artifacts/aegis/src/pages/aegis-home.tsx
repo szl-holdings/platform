@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { ContactModal } from "@szl-holdings/shared-ui";
+import { ContactModal, NewsletterSubscribe } from "@szl-holdings/shared-ui";
 import { Link } from "wouter";
 import {
   Shield, ArrowRight, Layers, Server, Brain, Eye, Target,
@@ -428,6 +428,17 @@ export default function AegisHomePage() {
           </div>
         </section>
       </Reveal>
+
+      <section className="py-16 px-6 border-t border-white/[0.04]">
+        <div className="max-w-[560px] mx-auto">
+          <NewsletterSubscribe
+            utmSource="aegis"
+            variant="banner"
+            heading="Intelligence from the front line"
+            subheading="SZL Command essays on governed AI, defense operations, and the decision infrastructure behind Aegis — delivered weekly."
+          />
+        </div>
+      </section>
 
       <footer className="border-t border-white/[0.04] py-12 px-6 max-w-[1200px] mx-auto">
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
