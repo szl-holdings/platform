@@ -142,3 +142,4 @@ export * from "./replay_lab";
 export * from "./atlas_runs";
 export * from "./aegis_modules";
 export * from "./signal_mesh";
+export * from "./self_healing";

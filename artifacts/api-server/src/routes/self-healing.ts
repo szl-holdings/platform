@@ -1,6 +1,8 @@
 import { Router, type IRouter, type Request, type Response } from "express";
-import { sendSuccess, sendNotFound, sendBadRequest, handleRouteError } from "../lib/api-response";
+import { sendSuccess, sendNotFound, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
+import { db, selfHealingPatternsTable, selfHealingRunsTable } from "@szl-holdings/db";
+import { and, desc, eq, sql } from "drizzle-orm";
 
 import { anyQuerySchema, jsonObjectBodySchema, validateBody, validateQuery } from "../lib/validation";
 const router: IRouter = Router();
@@ -44,186 +46,382 @@ interface FailurePattern {
   runbook: string;
 }
 
-const PATTERNS: FailurePattern[] = [
-  { id: "p1", name: "Service Restart on OOM", type: "restart", matchCount: 142, successRate: 97.2, avgMttrSavedMins: 34, enabled: true, trigger: "OOM kill detected on pod", runbook: "RUNBOOK-001: Drain → Restart → Health-check → Reroute" },
-  { id: "p2", name: "Auto-Scale on CPU Saturation", type: "scale", matchCount: 89, successRate: 94.4, avgMttrSavedMins: 18, enabled: true, trigger: "CPU > 85% for 5 consecutive minutes", runbook: "RUNBOOK-002: Scale +2 replicas → Verify HPA → Alert" },
-  { id: "p3", name: "DB Failover on Primary Failure", type: "failover", matchCount: 12, successRate: 100, avgMttrSavedMins: 87, enabled: true, trigger: "Primary DB health check failures > 3", runbook: "RUNBOOK-003: Promote replica → Update DNS → Validate" },
-  { id: "p4", name: "Queue Drain on Backlog Overflow", type: "clear_queue", matchCount: 204, successRate: 88.7, avgMttrSavedMins: 12, enabled: true, trigger: "Queue depth > 50k messages for 3 min", runbook: "RUNBOOK-004: Pause producers → Drain → Flush DLQ → Resume" },
-  { id: "p5", name: "Canary Rollback on Error Spike", type: "rollback", matchCount: 28, successRate: 92.9, avgMttrSavedMins: 55, enabled: false, trigger: "Error rate delta > 5% vs baseline on new deploy", runbook: "RUNBOOK-005: Halt canary → Shift traffic → Rollback image" },
-];
-
-function buildRuns(): RemediationRun[] {
-  const now = Date.now();
-  return [
-    {
-      id: "REM-4821",
-      patternId: "p1",
-      patternName: "Service Restart on OOM",
-      patternType: "restart",
-      triggerSignal: "api-gateway pod OOM kill — 3 restarts in 10m",
-      service: "api-gateway",
-      detectedAt: now - 4 * 60000,
-      startedAt: now - 3.5 * 60000,
-      status: "executing",
-      steps: [
-        { id: "s1", action: "Drain existing connections", status: "done", durationMs: 1240 },
-        { id: "s2", action: "Signal graceful shutdown", status: "done", durationMs: 890 },
-        { id: "s3", action: "Restart pod & await ready state", status: "running" },
-        { id: "s4", action: "Run health check suite", status: "pending" },
-        { id: "s5", action: "Re-route traffic and verify", status: "pending" },
-      ],
-      mttrSavedMins: 34,
-      auditRef: "AUD-2024-4821",
-    },
-    {
-      id: "REM-4819",
-      patternId: "p4",
-      patternName: "Queue Drain on Backlog Overflow",
-      patternType: "clear_queue",
-      triggerSignal: "ml-inference queue depth 78k messages",
-      service: "ml-inference",
-      detectedAt: now - 22 * 60000,
-      startedAt: now - 21 * 60000,
-      completedAt: now - 14 * 60000,
-      status: "completed",
-      steps: [
-        { id: "s1", action: "Pause message producers", status: "done", durationMs: 320 },
-        { id: "s2", action: "Drain backlog queue", status: "done", durationMs: 4100 },
-        { id: "s3", action: "Flush dead letter queue", status: "done", durationMs: 880 },
-        { id: "s4", action: "Resume producers & validate", status: "done", durationMs: 540 },
-      ],
-      mttrSavedMins: 12,
-      auditRef: "AUD-2024-4819",
-    },
-    {
-      id: "REM-4817",
-      patternId: "p2",
-      patternName: "Auto-Scale on CPU Saturation",
-      patternType: "scale",
-      triggerSignal: "auth-service CPU at 91% for 6 consecutive minutes",
-      service: "auth-service",
-      detectedAt: now - 45 * 60000,
-      status: "pending_approval",
-      steps: [
-        { id: "s1", action: "Scale +2 replicas via HPA", status: "pending" },
-        { id: "s2", action: "Verify pod readiness", status: "pending" },
-        { id: "s3", action: "Alert on-call engineer", status: "pending" },
-      ],
-      mttrSavedMins: 18,
-      approver: "ops-manager",
-      auditRef: "AUD-2024-4817",
-    },
-    {
-      id: "REM-4815",
-      patternId: "p1",
-      patternName: "Service Restart on OOM",
-      patternType: "restart",
-      triggerSignal: "data-pipeline OOM kill",
-      service: "data-pipeline",
-      detectedAt: now - 3 * 3600000,
-      startedAt: now - 3 * 3600000 + 30000,
-      completedAt: now - 3 * 3600000 + 95000,
-      status: "completed",
-      steps: [
-        { id: "s1", action: "Drain existing connections", status: "done", durationMs: 980 },
-        { id: "s2", action: "Signal graceful shutdown", status: "done", durationMs: 720 },
-        { id: "s3", action: "Restart pod & await ready state", status: "done", durationMs: 28000 },
-        { id: "s4", action: "Run health check suite", status: "done", durationMs: 3200 },
-        { id: "s5", action: "Re-route traffic and verify", status: "done", durationMs: 1100 },
-      ],
-      mttrSavedMins: 34,
-      auditRef: "AUD-2024-4815",
-    },
-    {
-      id: "REM-4812",
-      patternId: "p3",
-      patternName: "DB Failover on Primary Failure",
-      patternType: "failover",
-      triggerSignal: "postgres-primary health check failed 4 times",
-      service: "postgres-primary",
-      detectedAt: now - 7 * 3600000,
-      startedAt: now - 7 * 3600000 + 5000,
-      completedAt: now - 7 * 3600000 + 92000,
-      status: "completed",
-      steps: [
-        { id: "s1", action: "Promote replica to primary", status: "done", durationMs: 18000 },
-        { id: "s2", action: "Update DNS records", status: "done", durationMs: 4200 },
-        { id: "s3", action: "Validate connection pool", status: "done", durationMs: 6700 },
-      ],
-      mttrSavedMins: 87,
-      auditRef: "AUD-2024-4812",
-    },
-  ];
+interface SeedPattern {
+  patternKey: string;
+  name: string;
+  type: PatternType;
+  trigger: string;
+  runbook: string;
+  enabled: boolean;
 }
 
-router.get("/self-healing/stats", authMiddleware({ required: false }), (_req: Request, res: Response) => {
+interface SeedRun {
+  runKey: string;
+  patternKey: string;
+  triggerSignal: string;
+  service: string;
+  detectedOffsetMs: number;
+  startedOffsetMs?: number;
+  completedOffsetMs?: number;
+  status: RemediationStatus;
+  steps: RemediationStep[];
+  mttrSavedMins: number;
+  approver?: string;
+  auditRef: string;
+}
+
+const SEED_PATTERNS: SeedPattern[] = [
+  { patternKey: "p1", name: "Service Restart on OOM", type: "restart", trigger: "OOM kill detected on pod", runbook: "RUNBOOK-001: Drain → Restart → Health-check → Reroute", enabled: true },
+  { patternKey: "p2", name: "Auto-Scale on CPU Saturation", type: "scale", trigger: "CPU > 85% for 5 consecutive minutes", runbook: "RUNBOOK-002: Scale +2 replicas → Verify HPA → Alert", enabled: true },
+  { patternKey: "p3", name: "DB Failover on Primary Failure", type: "failover", trigger: "Primary DB health check failures > 3", runbook: "RUNBOOK-003: Promote replica → Update DNS → Validate", enabled: true },
+  { patternKey: "p4", name: "Queue Drain on Backlog Overflow", type: "clear_queue", trigger: "Queue depth > 50k messages for 3 min", runbook: "RUNBOOK-004: Pause producers → Drain → Flush DLQ → Resume", enabled: true },
+  { patternKey: "p5", name: "Canary Rollback on Error Spike", type: "rollback", trigger: "Error rate delta > 5% vs baseline on new deploy", runbook: "RUNBOOK-005: Halt canary → Shift traffic → Rollback image", enabled: false },
+];
+
+const SEED_RUNS: SeedRun[] = [
+  {
+    runKey: "REM-4821",
+    patternKey: "p1",
+    triggerSignal: "api-gateway pod OOM kill — 3 restarts in 10m",
+    service: "api-gateway",
+    detectedOffsetMs: 4 * 60_000,
+    startedOffsetMs: 3.5 * 60_000,
+    status: "executing",
+    steps: [
+      { id: "s1", action: "Drain existing connections", status: "done", durationMs: 1240 },
+      { id: "s2", action: "Signal graceful shutdown", status: "done", durationMs: 890 },
+      { id: "s3", action: "Restart pod & await ready state", status: "running" },
+      { id: "s4", action: "Run health check suite", status: "pending" },
+      { id: "s5", action: "Re-route traffic and verify", status: "pending" },
+    ],
+    mttrSavedMins: 34,
+    auditRef: "AUD-2024-4821",
+  },
+  {
+    runKey: "REM-4819",
+    patternKey: "p4",
+    triggerSignal: "ml-inference queue depth 78k messages",
+    service: "ml-inference",
+    detectedOffsetMs: 22 * 60_000,
+    startedOffsetMs: 21 * 60_000,
+    completedOffsetMs: 14 * 60_000,
+    status: "completed",
+    steps: [
+      { id: "s1", action: "Pause message producers", status: "done", durationMs: 320 },
+      { id: "s2", action: "Drain backlog queue", status: "done", durationMs: 4100 },
+      { id: "s3", action: "Flush dead letter queue", status: "done", durationMs: 880 },
+      { id: "s4", action: "Resume producers & validate", status: "done", durationMs: 540 },
+    ],
+    mttrSavedMins: 12,
+    auditRef: "AUD-2024-4819",
+  },
+  {
+    runKey: "REM-4817",
+    patternKey: "p2",
+    triggerSignal: "auth-service CPU at 91% for 6 consecutive minutes",
+    service: "auth-service",
+    detectedOffsetMs: 45 * 60_000,
+    status: "pending_approval",
+    steps: [
+      { id: "s1", action: "Scale +2 replicas via HPA", status: "pending" },
+      { id: "s2", action: "Verify pod readiness", status: "pending" },
+      { id: "s3", action: "Alert on-call engineer", status: "pending" },
+    ],
+    mttrSavedMins: 18,
+    approver: "ops-manager",
+    auditRef: "AUD-2024-4817",
+  },
+  {
+    runKey: "REM-4815",
+    patternKey: "p1",
+    triggerSignal: "data-pipeline OOM kill",
+    service: "data-pipeline",
+    detectedOffsetMs: 3 * 3_600_000,
+    startedOffsetMs: 3 * 3_600_000 - 30_000,
+    completedOffsetMs: 3 * 3_600_000 - 95_000,
+    status: "completed",
+    steps: [
+      { id: "s1", action: "Drain existing connections", status: "done", durationMs: 980 },
+      { id: "s2", action: "Signal graceful shutdown", status: "done", durationMs: 720 },
+      { id: "s3", action: "Restart pod & await ready state", status: "done", durationMs: 28000 },
+      { id: "s4", action: "Run health check suite", status: "done", durationMs: 3200 },
+      { id: "s5", action: "Re-route traffic and verify", status: "done", durationMs: 1100 },
+    ],
+    mttrSavedMins: 34,
+    auditRef: "AUD-2024-4815",
+  },
+  {
+    runKey: "REM-4812",
+    patternKey: "p3",
+    triggerSignal: "postgres-primary health check failed 4 times",
+    service: "postgres-primary",
+    detectedOffsetMs: 7 * 3_600_000,
+    startedOffsetMs: 7 * 3_600_000 - 5_000,
+    completedOffsetMs: 7 * 3_600_000 - 92_000,
+    status: "completed",
+    steps: [
+      { id: "s1", action: "Promote replica to primary", status: "done", durationMs: 18000 },
+      { id: "s2", action: "Update DNS records", status: "done", durationMs: 4200 },
+      { id: "s3", action: "Validate connection pool", status: "done", durationMs: 6700 },
+    ],
+    mttrSavedMins: 87,
+    auditRef: "AUD-2024-4812",
+  },
+];
+
+// Demo seeding is intentionally gated behind a non-production environment
+// (or an explicit SELF_HEALING_DEMO_SEED=1 opt-in) so production deployments
+// only display real operational history written by the remediation runtime.
+// In production, an empty table simply yields zero stats and an empty list.
+let seedPromise: Promise<void> | null = null;
+
+function shouldSeedDemoData(): boolean {
+  if (process.env.SELF_HEALING_DEMO_SEED === "1") return true;
+  if (process.env.SELF_HEALING_DEMO_SEED === "0") return false;
+  return process.env.NODE_ENV !== "production";
+}
+
+async function ensureSeeded(): Promise<void> {
+  if (!shouldSeedDemoData()) return;
+  if (seedPromise) return seedPromise;
+  seedPromise = (async () => {
+    const existingPatterns = await db.select({ id: selfHealingPatternsTable.id }).from(selfHealingPatternsTable).limit(1);
+    if (existingPatterns.length === 0) {
+      await db.insert(selfHealingPatternsTable).values(SEED_PATTERNS).onConflictDoNothing();
+    }
+    const existingRuns = await db.select({ id: selfHealingRunsTable.id }).from(selfHealingRunsTable).limit(1);
+    if (existingRuns.length === 0) {
+      const now = Date.now();
+      await db.insert(selfHealingRunsTable).values(SEED_RUNS.map(r => ({
+        runKey: r.runKey,
+        patternKey: r.patternKey,
+        triggerSignal: r.triggerSignal,
+        service: r.service,
+        detectedAt: new Date(now - r.detectedOffsetMs),
+        startedAt: r.startedOffsetMs !== undefined ? new Date(now - r.startedOffsetMs) : null,
+        completedAt: r.completedOffsetMs !== undefined ? new Date(now - r.completedOffsetMs) : null,
+        status: r.status,
+        steps: r.steps,
+        mttrSavedMins: r.mttrSavedMins,
+        approver: r.approver ?? null,
+        auditRef: r.auditRef,
+      }))).onConflictDoNothing();
+    }
+  })().catch((err) => {
+    seedPromise = null;
+    throw err;
+  });
+  return seedPromise;
+}
+
+async function loadPatterns(): Promise<FailurePattern[]> {
+  const patternRows = await db.select().from(selfHealingPatternsTable).orderBy(selfHealingPatternsTable.id);
+
+  const aggRows = await db
+    .select({
+      patternKey: selfHealingRunsTable.patternKey,
+      total: sql<number>`COUNT(*)::int`,
+      completed: sql<number>`SUM(CASE WHEN ${selfHealingRunsTable.status} = 'completed' THEN 1 ELSE 0 END)::int`,
+      eligible: sql<number>`SUM(CASE WHEN ${selfHealingRunsTable.status} NOT IN ('pending_approval','queued') THEN 1 ELSE 0 END)::int`,
+      mttrSum: sql<number>`COALESCE(SUM(CASE WHEN ${selfHealingRunsTable.status} = 'completed' THEN ${selfHealingRunsTable.mttrSavedMins} ELSE 0 END), 0)::int`,
+      mttrCount: sql<number>`SUM(CASE WHEN ${selfHealingRunsTable.status} = 'completed' THEN 1 ELSE 0 END)::int`,
+    })
+    .from(selfHealingRunsTable)
+    .groupBy(selfHealingRunsTable.patternKey);
+
+  const aggByKey = new Map<string, typeof aggRows[number]>();
+  for (const a of aggRows) aggByKey.set(a.patternKey, a);
+
+  return patternRows.map(p => {
+    const a = aggByKey.get(p.patternKey);
+    const total = a?.total ?? 0;
+    const eligible = a?.eligible ?? 0;
+    const completed = a?.completed ?? 0;
+    const mttrSum = a?.mttrSum ?? 0;
+    const mttrCount = a?.mttrCount ?? 0;
+    const successRate = eligible > 0 ? Math.round((completed / eligible) * 1000) / 10 : 0;
+    const avgMttrSavedMins = mttrCount > 0 ? Math.round(mttrSum / mttrCount) : 0;
+    return {
+      id: p.patternKey,
+      name: p.name,
+      type: p.type as PatternType,
+      matchCount: total,
+      successRate,
+      avgMttrSavedMins,
+      enabled: p.enabled,
+      trigger: p.trigger,
+      runbook: p.runbook,
+    };
+  });
+}
+
+interface RunRowFilters {
+  status?: string;
+  patternKey?: string;
+  runKey?: string;
+  limit?: number;
+}
+
+async function countRuns(filters: Pick<RunRowFilters, "status" | "patternKey" | "runKey"> = {}): Promise<number> {
+  const conditions = [];
+  if (filters.status) conditions.push(eq(selfHealingRunsTable.status, filters.status as RemediationStatus));
+  if (filters.patternKey) conditions.push(eq(selfHealingRunsTable.patternKey, filters.patternKey));
+  if (filters.runKey) conditions.push(eq(selfHealingRunsTable.runKey, filters.runKey));
+
+  const base = db.select({ count: sql<number>`COUNT(*)::int` }).from(selfHealingRunsTable);
+  const rows = conditions.length > 0 ? await base.where(and(...conditions)) : await base;
+  return rows[0]?.count ?? 0;
+}
+
+async function loadRuns(filters: RunRowFilters = {}): Promise<RemediationRun[]> {
+  const patternRows = await db.select().from(selfHealingPatternsTable);
+  const patternByKey = new Map(patternRows.map(p => [p.patternKey, p]));
+
+  const conditions = [];
+  if (filters.status) conditions.push(eq(selfHealingRunsTable.status, filters.status as RemediationStatus));
+  if (filters.patternKey) conditions.push(eq(selfHealingRunsTable.patternKey, filters.patternKey));
+  if (filters.runKey) conditions.push(eq(selfHealingRunsTable.runKey, filters.runKey));
+
+  const baseQuery = db.select().from(selfHealingRunsTable);
+  const filteredQuery = conditions.length > 0 ? baseQuery.where(and(...conditions)) : baseQuery;
+  const orderedQuery = filteredQuery.orderBy(desc(selfHealingRunsTable.detectedAt));
+  const rows = filters.limit ? await orderedQuery.limit(filters.limit) : await orderedQuery;
+
+  return rows.map(r => {
+    const pattern = patternByKey.get(r.patternKey);
+    return {
+      id: r.runKey,
+      patternId: r.patternKey,
+      patternName: pattern?.name ?? r.patternKey,
+      patternType: (pattern?.type as PatternType | undefined) ?? "restart",
+      triggerSignal: r.triggerSignal,
+      service: r.service,
+      detectedAt: r.detectedAt.getTime(),
+      startedAt: r.startedAt ? r.startedAt.getTime() : undefined,
+      completedAt: r.completedAt ? r.completedAt.getTime() : undefined,
+      status: r.status as RemediationStatus,
+      steps: (r.steps ?? []) as RemediationStep[],
+      mttrSavedMins: r.mttrSavedMins,
+      approver: r.approver ?? undefined,
+      auditRef: r.auditRef,
+    };
+  });
+}
+
+router.get("/self-healing/stats", authMiddleware({ required: false }), async (_req: Request, res: Response) => {
   try {
-    const runs = buildRuns();
-    const completed = runs.filter(r => r.status === "completed");
-    const executing = runs.filter(r => r.status === "executing");
-    const pendingApproval = runs.filter(r => r.status === "pending_approval");
-    const totalMttrSaved = completed.reduce((s, r) => s + r.mttrSavedMins, 0);
-    const eligible = runs.filter(r => r.status !== "pending_approval" && r.status !== "queued");
-    const successRate = eligible.length > 0
-      ? Math.round((completed.length / eligible.length) * 100)
-      : 0;
+    await ensureSeeded();
+
+    const statusAgg = await db
+      .select({
+        status: selfHealingRunsTable.status,
+        count: sql<number>`COUNT(*)::int`,
+        mttrSum: sql<number>`COALESCE(SUM(${selfHealingRunsTable.mttrSavedMins}), 0)::int`,
+      })
+      .from(selfHealingRunsTable)
+      .groupBy(selfHealingRunsTable.status);
+
+    let totalRuns = 0;
+    let executing = 0;
+    let pendingApproval = 0;
+    let completed = 0;
+    let totalMttrSaved = 0;
+    let eligible = 0;
+    for (const row of statusAgg) {
+      totalRuns += row.count;
+      if (row.status === "executing") executing = row.count;
+      if (row.status === "pending_approval") pendingApproval = row.count;
+      if (row.status === "completed") {
+        completed = row.count;
+        totalMttrSaved = row.mttrSum;
+      }
+      if (row.status !== "pending_approval" && row.status !== "queued") eligible += row.count;
+    }
+    const successRate = eligible > 0 ? Math.round((completed / eligible) * 100) : 0;
+
+    const patternCounts = await db
+      .select({
+        total: sql<number>`COUNT(*)::int`,
+        active: sql<number>`SUM(CASE WHEN ${selfHealingPatternsTable.enabled} THEN 1 ELSE 0 END)::int`,
+      })
+      .from(selfHealingPatternsTable);
+    const patternsTotal = patternCounts[0]?.total ?? 0;
+    const patternsActive = patternCounts[0]?.active ?? 0;
 
     sendSuccess(res, {
-      totalRuns: runs.length,
-      executing: executing.length,
-      pendingApproval: pendingApproval.length,
-      completed: completed.length,
+      totalRuns,
+      executing,
+      pendingApproval,
+      completed,
       totalMttrSavedMins: totalMttrSaved,
       successRate,
-      patternsActive: PATTERNS.filter(p => p.enabled).length,
-      patternsTotal: PATTERNS.length,
+      patternsActive,
+      patternsTotal,
     });
   } catch (err) {
     handleRouteError(res, err, "Failed to fetch self-healing stats");
   }
 });
 
-router.get("/self-healing/policies", authMiddleware({ required: false }), (_req: Request, res: Response) => {
+router.get("/self-healing/policies", authMiddleware({ required: false }), async (_req: Request, res: Response) => {
   try {
-    sendSuccess(res, { policies: PATTERNS });
+    await ensureSeeded();
+    const policies = await loadPatterns();
+    sendSuccess(res, { policies });
   } catch (err) {
     handleRouteError(res, err, "Failed to fetch self-healing policies");
   }
 });
 
-router.patch("/self-healing/policies/:id/toggle", validateBody(jsonObjectBodySchema), authMiddleware({ required: true }), (req: Request, res: Response) => {
+router.patch("/self-healing/policies/:id/toggle", validateBody(jsonObjectBodySchema), authMiddleware({ required: true }), async (req: Request, res: Response) => {
   try {
+    await ensureSeeded();
     const { id } = req.params as { id: string };
-    const pattern = PATTERNS.find(p => p.id === id);
-    if (!pattern) {
+    const existing = await db
+      .select()
+      .from(selfHealingPatternsTable)
+      .where(eq(selfHealingPatternsTable.patternKey, id))
+      .limit(1);
+    if (existing.length === 0) {
       sendNotFound(res, "Policy");
       return;
     }
-    pattern.enabled = !pattern.enabled;
-    sendSuccess(res, { policy: pattern });
+    const next = !existing[0]!.enabled;
+    await db
+      .update(selfHealingPatternsTable)
+      .set({ enabled: next, updatedAt: new Date() })
+      .where(eq(selfHealingPatternsTable.patternKey, id));
+
+    const policies = await loadPatterns();
+    const policy = policies.find(p => p.id === id);
+    sendSuccess(res, { policy });
   } catch (err) {
     handleRouteError(res, err, "Failed to toggle self-healing policy");
   }
 });
 
-router.get("/self-healing/runs", validateQuery(anyQuerySchema), authMiddleware({ required: false }), (req: Request, res: Response) => {
+router.get("/self-healing/runs", validateQuery(anyQuerySchema), authMiddleware({ required: false }), async (req: Request, res: Response) => {
   try {
-    const runs = buildRuns();
+    await ensureSeeded();
     const { status, patternId, limit } = req.query as { status?: string; patternId?: string; limit?: string };
-    let filtered = runs;
-    if (status) filtered = filtered.filter(r => r.status === status);
-    if (patternId) filtered = filtered.filter(r => r.patternId === patternId);
     const take = Math.min(parseInt(limit ?? "50", 10) || 50, 100);
-    sendSuccess(res, { runs: filtered.slice(0, take), total: filtered.length });
+    const filters = { status, patternKey: patternId };
+    const [runs, total] = await Promise.all([
+      loadRuns({ ...filters, limit: take }),
+      countRuns(filters),
+    ]);
+    sendSuccess(res, { runs, total });
   } catch (err) {
     handleRouteError(res, err, "Failed to fetch self-healing runs");
   }
 });
 
-router.get("/self-healing/runs/:id", authMiddleware({ required: false }), (req: Request, res: Response) => {
+router.get("/self-healing/runs/:id", authMiddleware({ required: false }), async (req: Request, res: Response) => {
   try {
+    await ensureSeeded();
     const { id } = req.params as { id: string };
-    const run = buildRuns().find(r => r.id === id);
+    const runs = await loadRuns({ runKey: id, limit: 1 });
+    const run = runs[0];
     if (!run) { sendNotFound(res, "Run"); return; }
     sendSuccess(res, { run });
   } catch (err) {
