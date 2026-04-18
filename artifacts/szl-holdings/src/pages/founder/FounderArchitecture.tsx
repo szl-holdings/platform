@@ -1,9 +1,14 @@
 import { useState, useCallback } from "react";
 import { m, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
-import { ArrowRight, X } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Check, X } from "lucide-react";
 import { FounderLayout } from "./FounderLayout";
 import { registry } from "@szl-holdings/brand-registry";
+
+interface SecondaryLink {
+  label: string;
+  href: string;
+}
 
 interface GraphNode {
   id: string;
@@ -15,8 +20,71 @@ interface GraphNode {
   r: number;
   kind: "core" | "product";
   link?: string;
+  linkLabel?: string;
   description?: string;
+  capabilities?: string[];
+  secondaryLinks?: SecondaryLink[];
+  status?: "live" | "development";
 }
+
+const CAPABILITIES: Record<string, string[]> = {
+  alloy: [
+    "Workflow orchestration, connector management, and agent coordination across every vertical",
+    "Confidence scoring, evidence capture, and signal-to-action routing",
+    "Tamper-evident proof chain — every recommendation, approval, and override is recorded",
+    "Shared auth, audit, and approval surface so each product inherits governance for free",
+  ],
+  lyte: [
+    "Cross-system signal detection — converts raw operational data into actionable signals",
+    "Ownership-gap detection across teams, systems, and contracts",
+    "Routes signals to the right operator with the right context, with built-in approval surfaces",
+    "Built on the PRISM framework — Pulse, Risk, Intelligence, Signals, Motion",
+  ],
+  vessels: [
+    "Real-time AIS, satellite, and multi-source sensor fusion for global vessel tracking",
+    "Dark-vessel detection, route deviation alerts, and predictive risk analytics",
+    "Port-call intelligence, sanctions screening, and ownership-graph traversal",
+    "Operator workspace with investigation timelines and audit-grade evidence trail",
+  ],
+  aegis: [
+    "Three workspaces — Command, Defense, and Labs — under one operator surface",
+    "Cross-module correlations stitch incidents across security, operations, and intel",
+    "Severity tracking, investigation timelines, and approval-gated remediation",
+    "Threat-vector heatmaps and indicator-of-compromise correlation across feeds",
+  ],
+  terra: [
+    "Distress-property surfacing across NYC tax, lien, and ownership records",
+    "Ownership-graph traversal — entities, beneficial owners, and related-party links",
+    "Deal pipeline with stage tracking, broker activity, and document workflow",
+    "Market intelligence layer — comp data, neighborhood signals, and absorption trends",
+  ],
+  "prism-counsel": [
+    "Structured legal-matter command — every matter, document, and counsel decision in one place",
+    "Counsel intelligence with traceable advice records and matter-stage automation",
+    "Governance surfaces for outside counsel approval, conflicts, and budget control",
+    "Audit-grade event log so every legal decision is reconstructable",
+  ],
+  "carlota-jo": [
+    "Private advisory practice for principals who value discretion and precision",
+    "Curated, tailored support — calm execution rather than packaged products",
+    "Governed engagement records and confidential matter intake",
+    "Direct principal access; no account managers between the work and the client",
+  ],
+  rosie: [
+    "Threat detection and anomaly visibility across managed infrastructure",
+    "Government contract intelligence, FedRAMP and CMMC tracking for defense-aware operators",
+    "MSP-grade incident command — playbooks, evidence capture, and remediation routing",
+    "Evidence-backed alerts so every notification carries audit trail and confidence",
+  ],
+};
+
+const SECONDARY_LINKS: Record<string, SecondaryLink[]> = {
+  alloy: [
+    { label: "Trust & Governance", href: "/trust" },
+    { label: "Proof Chain", href: "/trust/proof-chain" },
+    { label: "Public Claims", href: "/trust/claims" },
+  ],
+};
 
 interface GraphEdge {
   from: string;
@@ -66,7 +134,11 @@ const NODES: GraphNode[] = [
     r: 38,
     kind: "core",
     link: alloyProduct.link ?? "/alloy",
+    linkLabel: "Open Alloy",
     description: alloyProduct.description,
+    capabilities: CAPABILITIES.alloy,
+    secondaryLinks: SECONDARY_LINKS.alloy,
+    status: alloyProduct.status,
   },
   ...peripheralProducts.map((p) => ({
     id: p.id,
@@ -76,7 +148,11 @@ const NODES: GraphNode[] = [
     ...PRODUCT_POSITIONS[p.id],
     kind: "product" as const,
     link: p.link,
+    linkLabel: p.link ? `View ${p.name}` : undefined,
     description: p.oneLiner,
+    capabilities: CAPABILITIES[p.id],
+    secondaryLinks: SECONDARY_LINKS[p.id],
+    status: p.status,
   })),
 ];
 
@@ -370,6 +446,7 @@ export default function FounderArchitecture() {
                       alignItems: "center",
                       gap: "0.625rem",
                       marginBottom: "0.5rem",
+                      flexWrap: "wrap",
                     }}
                   >
                     <span
@@ -396,17 +473,124 @@ export default function FounderArchitecture() {
                     >
                       — {selected.sublabel}
                     </span>
+                    {selected.status === "development" && (
+                      <span
+                        style={{
+                          fontSize: "0.65rem",
+                          letterSpacing: "0.08em",
+                          textTransform: "uppercase",
+                          padding: "0.15rem 0.5rem",
+                          borderRadius: "100px",
+                          border: "1px solid hsla(38,52%,58%,0.3)",
+                          background: "hsla(38,52%,58%,0.08)",
+                          color: "hsl(38, 52%, 65%)",
+                        }}
+                      >
+                        In development
+                      </span>
+                    )}
                   </div>
                   <p
                     style={{
                       fontSize: "0.9rem",
-                      color: "hsl(214, 7%, 64%)",
-                      lineHeight: 1.6,
-                      margin: 0,
+                      color: "hsl(214, 7%, 70%)",
+                      lineHeight: 1.55,
+                      margin: "0 0 0.875rem",
                     }}
                   >
                     {selected.description}
                   </p>
+                  {selected.capabilities && selected.capabilities.length > 0 && (
+                    <ul
+                      style={{
+                        listStyle: "none",
+                        padding: 0,
+                        margin: "0 0 1rem",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "0.45rem",
+                      }}
+                    >
+                      {selected.capabilities.map((cap) => (
+                        <li
+                          key={cap}
+                          style={{
+                            display: "flex",
+                            alignItems: "flex-start",
+                            gap: "0.55rem",
+                            fontSize: "0.8375rem",
+                            color: "hsl(214, 7%, 68%)",
+                            lineHeight: 1.5,
+                          }}
+                        >
+                          <Check
+                            size={13}
+                            style={{
+                              color: selected.color,
+                              flexShrink: 0,
+                              marginTop: "0.2rem",
+                            }}
+                          />
+                          <span>{cap}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.5rem",
+                      flexWrap: "wrap",
+                    }}
+                  >
+                    {selected.link && (
+                      <a
+                        href={selected.link}
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "0.35rem",
+                          padding: "0.4rem 0.8rem",
+                          fontSize: "0.8125rem",
+                          fontWeight: 500,
+                          color: "hsl(214, 14%, 6%)",
+                          background: selected.color,
+                          borderRadius: "6px",
+                          textDecoration: "none",
+                          fontFamily: "'Space Grotesk', system-ui, sans-serif",
+                        }}
+                        data-testid={`view-${selected.id}`}
+                      >
+                        {selected.linkLabel ?? `View ${selected.label}`}
+                        <ArrowUpRight size={13} />
+                      </a>
+                    )}
+                    {selected.secondaryLinks?.map((sl) => (
+                      <Link key={sl.href} href={sl.href}>
+                        <span
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "0.3rem",
+                            padding: "0.4rem 0.7rem",
+                            fontSize: "0.75rem",
+                            color: "hsl(214, 7%, 75%)",
+                            background: "hsla(0,0%,100%,0.04)",
+                            border: "1px solid hsla(0,0%,100%,0.07)",
+                            borderRadius: "6px",
+                            textDecoration: "none",
+                            cursor: "pointer",
+                            fontFamily: "'Space Grotesk', system-ui, sans-serif",
+                            letterSpacing: "0.02em",
+                          }}
+                        >
+                          {sl.label}
+                          <ArrowRight size={11} />
+                        </span>
+                      </Link>
+                    ))}
+                  </div>
                 </div>
                 <button
                   onClick={() => setSelected(null)}
