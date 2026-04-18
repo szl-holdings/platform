@@ -1,10 +1,10 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import { persistQueryClient } from "@tanstack/query-persist-client-core";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
-import { SandboxModeProvider, SandboxModeBanner, AnalyticsProvider, CookieBanner, OnboardingWizard } from "@szl-holdings/shared-ui";
+import { SandboxModeProvider, SandboxModeBanner, AnalyticsProvider, CookieBanner, OnboardingWizard, useSandboxMode } from "@szl-holdings/shared-ui";
 import { PRISM_ONBOARDING_CONFIG } from "@/onboarding-config";
 import { McpOverlay } from "@szl-holdings/mcp-client";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
@@ -93,9 +93,16 @@ const prismShortcuts: KeyboardShortcut[] = [
 
 function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v: boolean) => void }) {
   const { isAuthenticated, isLoading, login } = useAuth();
+  const { sandboxActive, enableSandbox } = useSandboxMode();
 
   const params = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
   const demoMode = params.get("view") === "app" || params.get("demo") === "true";
+
+  useEffect(() => {
+    if (demoMode && !sandboxActive) {
+      enableSandbox();
+    }
+  }, [demoMode, sandboxActive, enableSandbox]);
 
   if (demoMode) {
     return (

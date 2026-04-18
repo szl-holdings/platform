@@ -47,10 +47,6 @@ function getChecklistKey(appId: string) {
 export function useOnboardingState(appId: string) {
   const key = getOnboardingKey(appId);
 
-  const isDemoMode = typeof window !== "undefined" &&
-    (new URLSearchParams(window.location.search).get("demo") === "true" ||
-     new URLSearchParams(window.location.search).get("view") === "app");
-
   const [state, setState] = React.useState<{
     completed: boolean;
     currentStep: number;
@@ -67,9 +63,6 @@ export function useOnboardingState(appId: string) {
     // First-time visitor (whether demo or signed-in) — start the guided tour.
     return { completed: false, currentStep: 0, active: true };
   });
-  // isDemoMode is intentionally read but no longer used to short-circuit the
-  // wizard — demo prospects benefit most from the guided tour.
-  void isDemoMode;
 
   const markCompleted = React.useCallback(() => {
     try {
