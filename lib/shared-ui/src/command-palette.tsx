@@ -501,6 +501,7 @@ export function createBaselineWebActions(
       description: "Manage your profile, security, and preferences",
       icon: "⚙",
       group: "Actions",
+      shortcut: "⌥S",
       keywords: ["settings", "preferences", "configuration", "account", "profile"],
       action: () => { window.location.href = settingsPath; },
     },
@@ -510,6 +511,7 @@ export function createBaselineWebActions(
       description: "View all platform notifications across workspaces",
       icon: "🔔",
       group: "Actions",
+      shortcut: "⌥N",
       keywords: ["notifications", "alerts", "inbox", "messages"],
       action: () => { window.location.href = notificationsPath; },
     },
@@ -519,6 +521,7 @@ export function createBaselineWebActions(
       description: "View and edit your profile",
       icon: "👤",
       group: "Actions",
+      shortcut: "⌥P",
       keywords: ["profile", "account", "user"],
       action: () => { window.location.href = profilePath; },
     },
@@ -530,6 +533,7 @@ export function createBaselineWebActions(
       description: "Switch between light and dark color scheme",
       icon: "◑",
       group: "Actions",
+      shortcut: "⌥T",
       keywords: ["theme", "dark", "light", "color", "scheme", "appearance"],
       action: themeToggle.action,
     });
@@ -541,6 +545,7 @@ export function createBaselineWebActions(
       description: "Open documentation and support resources",
       icon: "?",
       group: "Actions",
+      shortcut: "⌥/",
       keywords: ["help", "docs", "documentation", "support"],
       action: () => { window.open(helpUrl, "_blank"); },
     });
@@ -549,14 +554,14 @@ export function createBaselineWebActions(
 }
 
 const ECOSYSTEM_APPS = [
-  { id: "szl-holdings", name: "SZL Holdings", path: "/", icon: "◆", description: "Premium Command Systems Ecosystem" },
-  { id: "alloy", name: "Alloy", path: "/alloy", icon: "⬡", description: "Execution Fabric & Orchestration Engine" },
-  { id: "command", name: "Command", path: "/command/", icon: "◆", description: "Unified Command — Strategy, Operations & Infrastructure" },
-  { id: "aegis", name: "Aegis", path: "/aegis/", icon: "🛡", description: "Unified Defense & Intelligence" },
-  { id: "vessels", name: "Vessels", path: "/vessels/", icon: "⚓", description: "Maritime Command Intelligence" },
-  { id: "terra", name: "Terra", path: "/terra/", icon: "⬢", description: "Real Estate Broker Command" },
-  { id: "nexus", name: "Nexus", path: "/nexus/timeline", icon: "🔮", description: "Intelligence Fusion & Command" },
-  { id: "carlota-jo", name: "Carlota Jo", path: "/carlota-jo/", icon: "◈", description: "Client & Residence Support" },
+  { id: "szl-holdings", name: "SZL Holdings", path: "/", icon: "◆", description: "Premium Command Systems Ecosystem", shortcut: "⌥H" },
+  { id: "alloy", name: "Alloy", path: "/alloy", icon: "⬡", description: "Execution Fabric & Orchestration Engine", shortcut: "⌥A" },
+  { id: "command", name: "Command", path: "/command/", icon: "◆", description: "Unified Command — Strategy, Operations & Infrastructure", shortcut: "⌥C" },
+  { id: "aegis", name: "Aegis", path: "/aegis/", icon: "🛡", description: "Unified Defense & Intelligence", shortcut: "⌥G" },
+  { id: "vessels", name: "Vessels", path: "/vessels/", icon: "⚓", description: "Maritime Command Intelligence", shortcut: "⌥V" },
+  { id: "terra", name: "Terra", path: "/terra/", icon: "⬢", description: "Real Estate Broker Command", shortcut: "⌥R" },
+  { id: "nexus", name: "Nexus", path: "/nexus/timeline", icon: "🔮", description: "Intelligence Fusion & Command", shortcut: "⌥X" },
+  { id: "carlota-jo", name: "Carlota Jo", path: "/carlota-jo/", icon: "◈", description: "Client & Residence Support", shortcut: "⌥J" },
 ];
 
 export function getEcosystemSwitchCommands(currentAppId?: string): CommandItem[] {
@@ -568,6 +573,7 @@ export function getEcosystemSwitchCommands(currentAppId?: string): CommandItem[]
       description: app.description,
       icon: app.icon,
       group: "Switch App",
+      shortcut: app.shortcut,
       keywords: ["app", "switch", "navigate", "ecosystem", app.name.toLowerCase()],
       action: () => { window.location.href = app.path; },
     }));
