@@ -16,7 +16,7 @@ import {
 } from "@szl-holdings/db";
 import { sql, desc, gte, eq, count } from "drizzle-orm";
 import { sendSuccess, sendError, handleRouteError } from "../lib/api-response";
-import { authMiddleware } from "../middlewares/auth";
+import { authMiddleware, requireRole } from "../middlewares/auth";
 import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
@@ -511,6 +511,63 @@ router.get("/core/metrics", async (_req, res) => {
     });
   } catch (err) {
     handleRouteError(res, err, "Failed to retrieve core metrics");
+  }
+});
+
+router.get("/core/audit", authMiddleware({ required: true }), requireRole("ops", "analyst", "admin", "super_admin"), async (req, res) => {
+  try {
+    const limit = Math.min(
+      50,
+      Math.max(1, parseInt(String(req.query.limit ?? "10"), 10) || 10),
+    );
+
+    let recentLogs: Array<{
+      id: number;
+      action_type: string;
+      entity_type: string;
+      entity_id: string | null;
+      created_at: Date;
+    }> = [];
+
+    try {
+      const rows = await db
+        .select({
+          id: auditLogsTable.id,
+          action_type: auditLogsTable.actionType,
+          entity_type: auditLogsTable.entityType,
+          entity_id: auditLogsTable.entityId,
+          created_at: auditLogsTable.createdAt,
+        })
+        .from(auditLogsTable)
+        .orderBy(desc(auditLogsTable.createdAt))
+        .limit(limit);
+      recentLogs = rows;
+    } catch { /* table may not exist yet */ }
+
+    const [totalCount] = await db
+      .select({ count: count() })
+      .from(auditLogsTable)
+      .catch(() => [{ count: 0 }]);
+
+    res.json({
+      success: true,
+      data: {
+        records: recentLogs.map((r) => ({
+          id: r.id,
+          action_type: r.action_type,
+          entity_type: r.entity_type,
+          entity_id: r.entity_id,
+          created_at: r.created_at,
+        })),
+        total: totalCount?.count ?? 0,
+      },
+      meta: {
+        limit,
+        generated_at: new Date().toISOString(),
+      },
+    });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to retrieve audit summary");
   }
 });
 

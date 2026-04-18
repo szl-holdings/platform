@@ -2,22 +2,27 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { m, AnimatePresence } from "framer-motion";
 import {
   ChevronRight, ChevronLeft, Pause, Play, RotateCcw,
-  AlertTriangle, Loader2,
+  AlertTriangle, Loader2, Database, Wifi,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useDecisionEngine } from "@/hooks/useDecisionEngine";
 import type { EngineState } from "@/hooks/useDecisionEngine";
+import { useLiveTheaterData } from "@/hooks/useLiveTheaterData";
+import type { LiveMetrics, LiveRecommendation, LiveAuditRecord } from "@/hooks/useLiveTheaterData";
 import { LOOP_STAGES, DEMO_SCENARIO } from "./scenarios";
 import type { StageId } from "./scenarios";
-import { SignalStage } from "./stages/signal";
-import { ContextStage } from "./stages/context";
-import { RecommendationStage } from "./stages/recommendation";
+import { SignalStage, LiveSignalStage } from "./stages/signal";
+import { ContextStage, LiveContextStage } from "./stages/context";
+import { RecommendationStage, LiveRecommendationStage } from "./stages/recommendation";
 import { SimulationStage } from "./stages/simulation";
 import { PolicyStage } from "./stages/policy";
 import { ExecutionStage } from "./stages/execution";
-import { ProofStage } from "./stages/proof";
+import { ProofStage, LiveProofStage } from "./stages/proof";
 import { OutcomeStage } from "./stages/outcome";
 import { LearningStage } from "./stages/learning";
+import { LiveDataBanner } from "./helpers";
+
+type DataMode = "demo" | "live";
 
 function StageProgressBar({ currentStage, stages, onStageClick }: {
   currentStage: number;
@@ -56,6 +61,37 @@ function StageProgressBar({ currentStage, stages, onStageClick }: {
   );
 }
 
+function LiveGenericStage({ stageId, metrics }: { stageId: StageId; metrics: LiveMetrics | null }) {
+  if (!metrics) return <p className="text-sm text-muted-foreground">Loading live data…</p>;
+  const metricItems = [
+    { label: "AI Recommendations", value: metrics.alloy.total_recommendations.toLocaleString(), color: "#ec4899" },
+    { label: "Workflow Runs (30d)", value: metrics.alloy.workflow_runs_30d.toLocaleString(), color: "#8b5cf6" },
+    { label: "Distress Properties", value: metrics.beacon.total_distress_properties.toLocaleString(), color: "#10b981" },
+    { label: "Open Vulnerabilities", value: metrics.firestorm.open_vulnerabilities.toLocaleString(), color: "#ef4444" },
+    { label: "Audit Events (30d)", value: metrics.platform.audit_events_30d.toLocaleString(), color: "#14b8a6" },
+    { label: "Active Leads", value: metrics.beacon.total_leads.toLocaleString(), color: "#f59e0b" },
+  ];
+  return (
+    <div className="space-y-4">
+      <p className="text-sm text-muted-foreground capitalize">Live platform telemetry for {stageId} stage — real metrics from the SZL Holdings platform.</p>
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        {metricItems.map((item, i) => (
+          <m.div
+            key={item.label}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.25, delay: i * 0.06 }}
+            className="rounded-xl border border-border/40 bg-card/60 p-4 text-center"
+          >
+            <p className="text-[10px] text-muted-foreground mb-1">{item.label}</p>
+            <p className="text-xl font-bold font-display" style={{ color: item.color }}>{item.value}</p>
+          </m.div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 const STAGE_COMPONENTS: Record<StageId, React.FC<{ engine: EngineState }>> = {
   signal: SignalStage,
   context: ContextStage,
@@ -68,11 +104,38 @@ const STAGE_COMPONENTS: Record<StageId, React.FC<{ engine: EngineState }>> = {
   learning: LearningStage,
 };
 
+function LiveStageRouter({ stageId, metrics, recommendations, auditRecords, auditTotal, engine }: {
+  stageId: StageId;
+  metrics: LiveMetrics | null;
+  recommendations: LiveRecommendation[];
+  auditRecords: LiveAuditRecord[];
+  auditTotal: number;
+  engine: EngineState;
+}) {
+  switch (stageId) {
+    case "signal":
+      return <LiveSignalStage metrics={metrics} />;
+    case "context":
+      return <LiveContextStage metrics={metrics} recommendations={recommendations} />;
+    case "recommendation":
+      return <LiveRecommendationStage recommendations={recommendations} />;
+    case "proof":
+      return <LiveProofStage auditRecords={auditRecords} auditTotal={auditTotal} metrics={metrics} />;
+    default: {
+      if (metrics) return <LiveGenericStage stageId={stageId} metrics={metrics} />;
+      const FallbackStage = STAGE_COMPONENTS[stageId];
+      return <FallbackStage engine={engine} />;
+    }
+  }
+}
+
 export default function DecisionTheater() {
   const [currentStage, setCurrentStage] = useState(0);
   const [demoMode, setDemoMode] = useState(false);
+  const [dataMode, setDataMode] = useState<DataMode>("demo");
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const engine = useDecisionEngine();
+  const liveData = useLiveTheaterData(dataMode === "live");
 
   const stage = LOOP_STAGES[currentStage]!;
   const StageComponent = STAGE_COMPONENTS[stage.id];
@@ -130,6 +193,34 @@ export default function DecisionTheater() {
                 Initializing engines...
               </span>
             )}
+
+            <div className="flex items-center rounded-lg border border-border/30 bg-muted/10 p-0.5 gap-0.5">
+              <button
+                onClick={() => setDataMode("demo")}
+                className={cn(
+                  "flex items-center gap-1 px-2.5 py-1.5 rounded-md text-[11px] font-semibold transition-all",
+                  dataMode === "demo"
+                    ? "bg-muted/40 text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <Database className="w-3 h-3" />
+                Demo
+              </button>
+              <button
+                onClick={() => setDataMode("live")}
+                className={cn(
+                  "flex items-center gap-1 px-2.5 py-1.5 rounded-md text-[11px] font-semibold transition-all",
+                  dataMode === "live"
+                    ? "bg-emerald-500/15 text-emerald-400 shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <Wifi className="w-3 h-3" />
+                Live
+              </button>
+            </div>
+
             <button
               onClick={() => {
                 if (demoMode) {
@@ -160,22 +251,32 @@ export default function DecisionTheater() {
           </div>
         </div>
 
-        <div className="rounded-xl border border-border/40 bg-card/40 p-4 mb-5">
-          <div className="flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="text-sm font-bold text-foreground">{DEMO_SCENARIO.title}</p>
-              <p className="text-[12px] text-muted-foreground mt-1">{DEMO_SCENARIO.description}</p>
+        {dataMode === "demo" && (
+          <div className="rounded-xl border border-border/40 bg-card/40 p-4 mb-5">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-bold text-foreground">{DEMO_SCENARIO.title}</p>
+                <p className="text-[12px] text-muted-foreground mt-1">{DEMO_SCENARIO.description}</p>
+              </div>
             </div>
           </div>
-        </div>
+        )}
+
+        {dataMode === "live" && (
+          <LiveDataBanner
+            status={liveData.status}
+            lastFetchedAt={liveData.lastFetchedAt}
+            onRefresh={liveData.refetch}
+          />
+        )}
 
         <StageProgressBar currentStage={currentStage} stages={LOOP_STAGES} onStageClick={setCurrentStage} />
       </div>
 
       <AnimatePresence mode="wait">
         <m.div
-          key={stage.id}
+          key={`${stage.id}-${dataMode}`}
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -20 }}
@@ -191,12 +292,32 @@ export default function DecisionTheater() {
                 {demoMode && (
                   <span className="text-[9px] text-muted-foreground animate-pulse">Auto-advancing in 6s…</span>
                 )}
+                {dataMode === "live" && liveData.status === "success" && (
+                  <m.span
+                    className="flex items-center gap-1 text-[9px] font-bold text-emerald-400"
+                    animate={{ opacity: [1, 0.5, 1] }}
+                    transition={{ duration: 1.8, repeat: Infinity }}
+                  >
+                    ● LIVE
+                  </m.span>
+                )}
               </div>
               <h3 className="text-lg font-bold font-display text-foreground">{stage.label}</h3>
             </div>
           </div>
 
-          <StageComponent engine={engine} />
+          {dataMode === "live" ? (
+            <LiveStageRouter
+              stageId={stage.id}
+              metrics={liveData.metrics}
+              recommendations={liveData.recommendations}
+              auditRecords={liveData.auditRecords}
+              auditTotal={liveData.auditTotal}
+              engine={engine}
+            />
+          ) : (
+            <StageComponent engine={engine} />
+          )}
         </m.div>
       </AnimatePresence>
 

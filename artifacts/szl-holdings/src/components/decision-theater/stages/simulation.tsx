@@ -1,4 +1,17 @@
+import { m } from "framer-motion";
 import type { EngineState } from "@/hooks/useDecisionEngine";
+
+function AnimatedBar({ fromPct, toPct, color, delay = 0 }: { fromPct: number; toPct: number; color: string; delay?: number }) {
+  return (
+    <m.div
+      className="absolute top-0 left-0 h-full rounded-md"
+      style={{ background: color }}
+      initial={{ width: `${fromPct}%` }}
+      animate={{ width: `${toPct}%` }}
+      transition={{ duration: 0.8, delay, ease: "easeOut" }}
+    />
+  );
+}
 
 export function SimulationStage({ engine }: { engine: EngineState }) {
   const mc = engine.monteCarloResult;
@@ -30,9 +43,14 @@ export function SimulationStage({ engine }: { engine: EngineState }) {
           Output Distributions — {mc.scenarioId}
         </h3>
         <div className="space-y-4">
-          {metricRows.map(({ label, m, isCurrency, isPercent }) => {
+          {metricRows.map(({ label, m, isCurrency, isPercent }, rowIdx) => {
             if (!m) return null;
             const fmt = (v: number) => isPercent ? `${(v * 100).toFixed(1)}%` : isCurrency ? `$${v.toFixed(0)}K` : v.toFixed(1);
+            const p95Pct = maxP95 > 0 ? (m.p95 / maxP95) * 100 : 0;
+            const p5Pct = maxP95 > 0 ? (m.p5 / maxP95) * 100 : 0;
+            const iqrPct = maxP95 > 0 ? ((m.p95 - m.p5) / maxP95) * 100 : 0;
+            const meanPct = maxP95 > 0 ? (m.mean / maxP95) * 100 : 0;
+            const delay = rowIdx * 0.12;
             return (
               <div key={label}>
                 <div className="flex items-center justify-between mb-1.5">
@@ -40,21 +58,19 @@ export function SimulationStage({ engine }: { engine: EngineState }) {
                   <span className="text-sm font-bold font-display text-foreground">{fmt(m.mean)} <span className="text-[10px] text-muted-foreground font-normal">(mean)</span></span>
                 </div>
                 <div className="relative h-6 rounded-md bg-muted/20 overflow-hidden">
-                  <div
-                    className="absolute top-0 left-0 h-full rounded-md opacity-20 bg-amber-400"
-                    style={{ width: `${maxP95 > 0 ? (m.p95 / maxP95) * 100 : 0}%` }}
+                  <AnimatedBar fromPct={0} toPct={p95Pct} color="rgba(251,191,36,0.2)" delay={delay} />
+                  <m.div
+                    className="absolute top-1 bottom-1 rounded-sm bg-amber-400/40"
+                    style={{ left: `${p5Pct}%` }}
+                    initial={{ width: 0 }}
+                    animate={{ width: `${iqrPct}%` }}
+                    transition={{ duration: 0.8, delay: delay + 0.1, ease: "easeOut" }}
                   />
-                  <div
-                    className="absolute top-1 bottom-1 rounded-sm bg-amber-400"
-                    style={{
-                      left: `${maxP95 > 0 ? (m.p5 / maxP95) * 100 : 0}%`,
-                      width: `${maxP95 > 0 ? ((m.p95 - m.p5) / maxP95) * 100 : 0}%`,
-                      opacity: 0.4,
-                    }}
-                  />
-                  <div
+                  <m.div
                     className="absolute top-0 bottom-0 w-0.5 bg-white"
-                    style={{ left: `${maxP95 > 0 ? (m.mean / maxP95) * 100 : 0}%` }}
+                    initial={{ left: 0, opacity: 0 }}
+                    animate={{ left: `${meanPct}%`, opacity: 1 }}
+                    transition={{ duration: 0.8, delay: delay + 0.2, ease: "easeOut" }}
                   />
                 </div>
                 <div className="flex justify-between text-[9px] text-muted-foreground mt-1 font-mono">
@@ -71,11 +87,16 @@ export function SimulationStage({ engine }: { engine: EngineState }) {
         <div className="rounded-xl border border-border/40 bg-card/60 p-4">
           <h4 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-3">Input Sensitivity (Correlation to Total Cost)</h4>
           <div className="space-y-2">
-            {mc.inputSensitivity.slice(0, 6).map((item) => (
+            {mc.inputSensitivity.slice(0, 6).map((item, i) => (
               <div key={item.inputId} className="flex items-center gap-2">
                 <span className="text-[11px] text-muted-foreground w-36 truncate flex-shrink-0">{item.label}</span>
                 <div className="flex-1 h-3 rounded-full bg-muted/20 overflow-hidden">
-                  <div className="h-full rounded-full bg-amber-400/60" style={{ width: `${item.impact * 100}%` }} />
+                  <m.div
+                    className="h-full rounded-full bg-amber-400/60"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${item.impact * 100}%` }}
+                    transition={{ duration: 0.6, delay: i * 0.08, ease: "easeOut" }}
+                  />
                 </div>
                 <span className="text-[10px] font-mono text-foreground w-8 text-right">{(item.impact * 100).toFixed(0)}%</span>
               </div>
