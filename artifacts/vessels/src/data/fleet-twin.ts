@@ -481,40 +481,43 @@ export const fleetWhatChanged: FleetWhatChangedEvent[] = [
   },
 ];
 
-export const fleetExceptions: FleetException[] = [
-  {
-    id: "exc-001",
-    vesselId: "vessel-002",
-    voyageId: "voyage-002",
-    entityName: "MT Zenith Carrier",
-    type: "port_detention",
-    severity: "critical",
-    status: "investigating",
-    description: "Emergency maintenance diversion to Fujairah. Technical superintendent dispatched. Estimated 3-5 day delay.",
-    detectedAt: hoursAgo(12),
-    assignedTo: "Fleet Ops Lead",
-  },
-  {
-    id: "exc-002",
-    vesselId: "vessel-002",
-    entityName: "MT Zenith Carrier",
-    type: "cert_expired",
-    severity: "high",
-    status: "open",
-    description: "ISPS SSAS certificate expiring in 5 days. Renewal in progress but not confirmed.",
-    detectedAt: daysAgo(2),
-    assignedTo: "Compliance Officer",
-  },
-  {
-    id: "exc-003",
-    vesselId: "vessel-001",
-    voyageId: "voyage-001",
-    entityName: "MV Avalon Spirit",
-    type: "route_deviation",
-    severity: "medium",
-    status: "investigating",
-    description: "Speed reduction causing ETA delay. Charterer notified.",
-    detectedAt: hoursAgo(36),
-    assignedTo: "Ops Controller",
-  },
+export interface PortTwin {
+  id: string;
+  name: string;
+  congestionLevel: "low" | "moderate" | "high";
+  waitHours: number;
+  status: "open" | "congested" | "restricted";
+}
+
+export interface RegulatoryZone {
+  id: string;
+  name: string;
+  riskLevel: RouteRiskLevel;
+  alertType: string;
+  activeRestrictions: string[];
+}
+
+export interface RouteTwin {
+  id: string;
+  name: string;
+  vesselId: string;
+  status: "normal" | "disrupted";
+  recommendedReroute?: string;
+}
+
+export const portTwins: PortTwin[] = [
+  { id: "port-fujairah", name: "Fujairah", congestionLevel: "high", waitHours: 28, status: "congested" },
+  { id: "port-rotterdam", name: "Rotterdam", congestionLevel: "moderate", waitHours: 12, status: "open" },
+];
+
+export const regulatoryZones: RegulatoryZone[] = [
+  { id: "zone-gulf-aden", name: "Gulf of Aden", riskLevel: "critical", alertType: "Piracy Advisory", activeRestrictions: ["Armed Guard Required", "Night Transit Restricted"] },
+  { id: "zone-strait-hormuz", name: "Strait of Hormuz", riskLevel: "elevated", alertType: "Geopolitical Tension", activeRestrictions: ["Pre-entry Reporting Required"] },
+  { id: "zone-english-channel", name: "English Channel", riskLevel: "low", alertType: "Traffic Separation", activeRestrictions: ["TSS Compliance"] },
+];
+
+export const routeTwins: RouteTwin[] = [
+  { id: "route-001", name: "Asia-Europe Express", vesselId: "vessel-001", status: "normal" },
+  { id: "route-002", name: "Gulf-Far East Lane", vesselId: "vessel-002", status: "normal" },
+  { id: "route-003", name: "Indo-Pacific Route", vesselId: "vessel-003", status: "normal" },
 ];

@@ -33,7 +33,7 @@ export const DOMAIN_LABELS: Record<Domain, string> = {
   pulse: "Executive Briefing",
   command: "Unified Command",
   lyte: "Business Observability",
-  sentra: "Sentra (Planned)",
+  sentra: "Cyber Resilience",
 };
 
 export function isDomain(value: unknown): value is Domain {

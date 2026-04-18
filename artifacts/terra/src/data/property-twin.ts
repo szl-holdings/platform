@@ -103,6 +103,33 @@ export interface PropertyAuditEntry {
   ipAddress?: string;
 }
 
+export interface ExternalConnector {
+  id: string;
+  name: string;
+  type: "zoning" | "permits" | "liens" | "flood_zone" | "market_comp" | "demographics" | "assessor" | "utility" | "environmental_risk";
+  status: "not_connected" | "connected" | "error";
+  lastSyncAt?: string;
+}
+
+export interface DistressSignalHistory {
+  id: string;
+  type: "vacancy" | "deferred_maintenance" | "tax_lien" | "debt_maturity" | "occupancy_drop";
+  severity: "info" | "warning" | "critical";
+  occurredAt: string;
+  summary: string;
+}
+
+export interface EscalationWorkflow {
+  id: string;
+  title: string;
+  recommendation: string;
+  evidence: string[];
+  confidence: number;
+  freshness: "live" | "recent" | "stale";
+  policyState: "allowed" | "requires-approval" | "blocked";
+  status: "pending" | "approved" | "rejected";
+}
+
 export interface PropertyTwin {
   id: string;
   propertyId: string;
@@ -118,6 +145,7 @@ export interface PropertyTwin {
   occupancy: number;
   status: PropertyTwinStatus;
   distressSignal: DistressSignal;
+  distressScore: number;
   diligenceStage: DiligenceStage;
   diligenceCompletionPct: number;
   readinessScore: number;
@@ -130,12 +158,9 @@ export interface PropertyTwin {
   createdAt: string;
   tags: string[];
   localContextNotes?: string;
-  externalDataConnectors: Array<{
-    name: string;
-    type: "zoning" | "permits" | "liens" | "flood_zone" | "market_comp" | "demographics";
-    status: "not_connected" | "connected" | "error";
-    lastSyncAt?: string;
-  }>;
+  externalDataConnectors: ExternalConnector[];
+  distressHistory?: DistressSignalHistory[];
+  escalationWorkflows?: EscalationWorkflow[];
 }
 
 const now = new Date();
@@ -158,6 +183,7 @@ export const propertyTwins: PropertyTwin[] = [
     occupancy: 94.2,
     status: "active",
     distressSignal: "none",
+    distressScore: 12,
     diligenceStage: "final_approval",
     diligenceCompletionPct: 92,
     readinessScore: 88,
@@ -201,10 +227,10 @@ export const propertyTwins: PropertyTwin[] = [
       { id: "aud-003", propertyId: "prop-001", action: "approval_requested", actor: "R. Adams", actorRole: "associate", at: hoursAgo(6) },
     ],
     externalDataConnectors: [
-      { name: "Miami-Dade Permits", type: "permits", status: "not_connected" },
-      { name: "FEMA Flood Zone", type: "flood_zone", status: "not_connected" },
-      { name: "CoStar Comps", type: "market_comp", status: "not_connected" },
-      { name: "Miami-Dade Zoning", type: "zoning", status: "not_connected" },
+      { id: "conn-9", name: "Miami-Dade Permits", type: "permits", status: "not_connected" },
+      { id: "conn-10", name: "FEMA Flood Zone", type: "flood_zone", status: "not_connected" },
+      { id: "conn-11", name: "CoStar Comps", type: "market_comp", status: "not_connected" },
+      { id: "conn-12", name: "Miami-Dade Zoning", type: "zoning", status: "not_connected" },
     ],
   },
   {
@@ -222,6 +248,7 @@ export const propertyTwins: PropertyTwin[] = [
     occupancy: 78.1,
     status: "distress_watch",
     distressSignal: "elevated",
+    distressScore: 68,
     diligenceStage: "pre_diligence",
     diligenceCompletionPct: 12,
     readinessScore: 34,
@@ -245,9 +272,9 @@ export const propertyTwins: PropertyTwin[] = [
       { id: "aud-010", propertyId: "prop-005", action: "distress_flag_raised", actor: "system", actorRole: "automation", at: hoursAgo(1), details: { signal: "elevated", trigger: "occupancy_drop + debt_maturity" } },
     ],
     externalDataConnectors: [
-      { name: "Davidson County Permits", type: "permits", status: "not_connected" },
-      { name: "FEMA Flood Zone", type: "flood_zone", status: "not_connected" },
-      { name: "CoStar Comps", type: "market_comp", status: "not_connected" },
+      { id: "conn-13", name: "Davidson County Permits", type: "permits", status: "not_connected" },
+      { id: "conn-14", name: "FEMA Flood Zone", type: "flood_zone", status: "not_connected" },
+      { id: "conn-15", name: "CoStar Comps", type: "market_comp", status: "not_connected" },
     ],
   },
   {
@@ -265,6 +292,7 @@ export const propertyTwins: PropertyTwin[] = [
     occupancy: 91.8,
     status: "under_review",
     distressSignal: "watch",
+    distressScore: 35,
     diligenceStage: "financial_audit",
     diligenceCompletionPct: 58,
     readinessScore: 62,
@@ -291,10 +319,63 @@ export const propertyTwins: PropertyTwin[] = [
       { id: "aud-020", propertyId: "prop-003", action: "watch_flag_set", actor: "system", actorRole: "automation", at: hoursAgo(8), details: { reason: "occupancy_decline_2pct_90d" } },
     ],
     externalDataConnectors: [
-      { name: "Travis County Permits", type: "permits", status: "not_connected" },
-      { name: "FEMA Flood Zone", type: "flood_zone", status: "not_connected" },
-      { name: "CoStar Comps", type: "market_comp", status: "not_connected" },
-      { name: "Austin Zoning DB", type: "zoning", status: "not_connected" },
+      { id: "conn-1", name: "Travis County Permits", type: "permits", status: "not_connected" },
+      { id: "conn-2", name: "FEMA Flood Zone", type: "flood_zone", status: "not_connected" },
+      { id: "conn-3", name: "CoStar Comps", type: "market_comp", status: "not_connected" },
+      { id: "conn-4", name: "Austin Zoning DB", type: "zoning", status: "not_connected" },
+    ],
+  },
+  {
+    id: "twin-004",
+    propertyId: "prop-004",
+    name: "147 W 57th St, Manhattan",
+    address: "147 W 57th St",
+    city: "New York",
+    state: "NY",
+    propertyType: "mixed-use",
+    sqft: 125000,
+    value: 8200000,
+    capRate: 4.2,
+    noi: 344400,
+    occupancy: 65,
+    status: "distress_watch",
+    distressSignal: "critical",
+    distressScore: 72,
+    diligenceStage: "pre_diligence",
+    diligenceCompletionPct: 5,
+    readinessScore: 28,
+    tags: ["distress", "manhattan", "billionaires-row"],
+    lastChangedAt: hoursAgo(2),
+    createdAt: daysAgo(300),
+    owners: [
+      { id: "own-006", name: "Empire State Holdings", type: "corporate", ownershipPct: 100, since: "2015-08-22" },
+    ],
+    documents: [],
+    diligenceTasks: [],
+    approvals: [],
+    auditTrail: [],
+    externalDataConnectors: [
+      { id: "conn-5", name: "City Assessor", type: "assessor", status: "connected", lastSyncAt: hoursAgo(1) },
+      { id: "conn-6", name: "ACRIS", type: "liens", status: "connected", lastSyncAt: hoursAgo(1) },
+      { id: "conn-7", name: "Utility Monitor", type: "utility", status: "not_connected" },
+      { id: "conn-8", name: "Environmental Risk API", type: "environmental_risk", status: "error" },
+    ],
+    distressHistory: [
+      { id: "ds-1", type: "vacancy", severity: "warning", occurredAt: daysAgo(45), summary: "Anchor tenant vacated 15,000 sqft" },
+      { id: "ds-2", type: "deferred_maintenance", severity: "warning", occurredAt: daysAgo(30), summary: "HVAC system failure reported in residential wing" },
+      { id: "ds-3", type: "tax_lien", severity: "critical", occurredAt: daysAgo(10), summary: "NYC Department of Finance filed $245k tax lien" },
+    ],
+    escalationWorkflows: [
+      {
+        id: "wf-1",
+        title: "Distress Escalation",
+        recommendation: "Initiate immediate debt restructuring and emergency maintenance funding to preserve asset value.",
+        evidence: ["Tax lien filed (critical)", "Occupancy dropped below 70%", "Deferred maintenance exceeding $500k"],
+        confidence: 0.89,
+        freshness: "recent",
+        policyState: "requires-approval",
+        status: "pending",
+      },
     ],
   },
 ];

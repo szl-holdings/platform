@@ -23,6 +23,7 @@ const ADVISORY: NavItem[] = [
   { href: "/competitive-radar", label: "Competitive Radar", icon: Radar },
   { href: "/scenario-simulator", label: "Scenario Simulator", icon: Activity },
   { href: "/client-health", label: "Client Health", icon: Heart },
+  { href: "/readiness-checklist", label: "Readiness Checklist", icon: CheckCircle },
   { href: "/proposal-generator", label: "Proposal Generator", icon: FileText },
   { href: "/knowledge-graph", label: "Knowledge Graph", icon: Network },
   { href: "/revenue-intelligence", label: "Revenue Intelligence", icon: TrendingUp },

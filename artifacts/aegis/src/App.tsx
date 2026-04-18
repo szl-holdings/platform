@@ -19,6 +19,7 @@ const AegisReplay = lazy(() => import("./pages/replay"));
 const AegisScenarioBranches = lazy(() => import("./pages/scenario-branches"));
 const AegisAtlasExecute = lazy(() => import("./pages/atlas-execute"));
 const GovernedCockpitPage = lazy(() => import("./pages/governed-cockpit"));
+const ThreatTwinView = lazy(() => import("./pages/threat-twin-view"));
 
 const SLIDES = [S01Cover, S02SeriesProblem, S03Category, S04Product, S05Demo, S06Market, S07SeriesDomains, S08BusinessModel, S09Ask];
 const TOTAL = SLIDES.length;
@@ -30,7 +31,8 @@ const queryClient = new QueryClient({
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 const ATLAS_NAV = [
-  { path: "/atlas-runtime", label: "Threat Twin", icon: Layers },
+  { path: "/atlas-runtime", label: "Threat Mesh", icon: Layers },
+  { path: "/threat-twin-view", label: "Threat Twin", icon: Shield },
   { path: "/replay", label: "Incident Replay", icon: RotateCcw },
   { path: "/scenario-branches", label: "Scenario Branches", icon: GitBranch },
   { path: "/atlas-execute", label: "ATLAS Execute", icon: Play },
@@ -241,6 +243,13 @@ function AppRoutes() {
         <AtlasDashboardLayout>
           <Suspense fallback={<PageLoader />}>
             <AegisAtlasRuntime />
+          </Suspense>
+        </AtlasDashboardLayout>
+      </Route>
+      <Route path="/threat-twin-view">
+        <AtlasDashboardLayout>
+          <Suspense fallback={<PageLoader />}>
+            <ThreatTwinView />
           </Suspense>
         </AtlasDashboardLayout>
       </Route>

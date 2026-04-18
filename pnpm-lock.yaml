@@ -868,6 +868,112 @@ importers:
         specifier: ^3.3.5
         version: 3.9.0(react@19.1.0)
 
+  artifacts/counsel:
+    dependencies:
+      '@szl-holdings/brand-registry':
+        specifier: workspace:*
+        version: link:../../packages/brand-registry
+      '@szl-holdings/design-system':
+        specifier: workspace:*
+        version: link:../../packages/design-system
+      '@szl-holdings/graphql-client':
+        specifier: workspace:*
+        version: link:../../lib/graphql-client
+      '@szl-holdings/observability':
+        specifier: workspace:*
+        version: link:../../lib/observability
+      '@szl-holdings/offline-engine':
+        specifier: workspace:*
+        version: link:../../lib/offline-engine
+      '@szl-holdings/prism-bus':
+        specifier: workspace:*
+        version: link:../../lib/prism-bus
+      '@szl-holdings/replit-auth-web':
+        specifier: workspace:*
+        version: link:../../lib/replit-auth-web
+      '@szl-holdings/services':
+        specifier: workspace:*
+        version: link:../../lib/services
+      '@tanstack/query-persist-client-core':
+        specifier: ^5.99.0
+        version: 5.99.0
+      '@tanstack/query-sync-storage-persister':
+        specifier: ^5.99.0
+        version: 5.99.0
+    devDependencies:
+      '@replit/vite-plugin-cartographer':
+        specifier: 'catalog:'
+        version: 0.5.1
+      '@replit/vite-plugin-dev-banner':
+        specifier: 'catalog:'
+        version: 0.1.2
+      '@replit/vite-plugin-runtime-error-modal':
+        specifier: 'catalog:'
+        version: 0.0.6
+      '@szl-holdings/analytics':
+        specifier: workspace:*
+        version: link:../../lib/analytics
+      '@szl-holdings/api-client-react':
+        specifier: workspace:*
+        version: link:../../lib/api-client-react
+      '@szl-holdings/mcp-client':
+        specifier: workspace:*
+        version: link:../../lib/mcp-client
+      '@szl-holdings/shared-ui':
+        specifier: workspace:*
+        version: link:../../lib/shared-ui
+      '@tailwindcss/typography':
+        specifier: ^0.5.15
+        version: 0.5.19(tailwindcss@4.2.1)
+      '@tailwindcss/vite':
+        specifier: 'catalog:'
+        version: 4.2.1(vite@7.3.2(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
+      '@tanstack/react-query':
+        specifier: 'catalog:'
+        version: 5.99.0(react@19.1.0)
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
+      '@types/react':
+        specifier: 19.2.14
+        version: 19.2.14
+      '@types/react-dom':
+        specifier: ^19.2.0
+        version: 19.2.3(@types/react@19.2.14)
+      '@vitejs/plugin-react':
+        specifier: 'catalog:'
+        version: 5.1.4(vite@7.3.2(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
+      framer-motion:
+        specifier: 'catalog:'
+        version: 12.35.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      lucide-react:
+        specifier: 'catalog:'
+        version: 0.545.0(react@19.1.0)
+      react:
+        specifier: 19.1.0
+        version: 19.1.0
+      react-dom:
+        specifier: 19.1.0
+        version: 19.1.0(react@19.1.0)
+      recharts:
+        specifier: 'catalog:'
+        version: 2.15.4(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      sonner:
+        specifier: ^2.0.7
+        version: 2.0.7(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      tailwindcss:
+        specifier: 'catalog:'
+        version: 4.2.1
+      tw-animate-css:
+        specifier: ^1.4.0
+        version: 1.4.0
+      vite:
+        specifier: 7.3.2
+        version: 7.3.2(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+      wouter:
+        specifier: ^3.3.5
+        version: 3.9.0(react@19.1.0)
+
   artifacts/lyte-command-center:
     dependencies:
       '@szl-holdings/brand-registry':
@@ -1299,6 +1405,112 @@ importers:
       tailwindcss:
         specifier: 'catalog:'
         version: 4.2.1
+      vite:
+        specifier: 7.3.2
+        version: 7.3.2(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+      wouter:
+        specifier: ^3.3.5
+        version: 3.9.0(react@19.1.0)
+
+  artifacts/sentra:
+    dependencies:
+      '@szl-holdings/brand-registry':
+        specifier: workspace:*
+        version: link:../../packages/brand-registry
+      '@szl-holdings/design-system':
+        specifier: workspace:*
+        version: link:../../packages/design-system
+      '@szl-holdings/graphql-client':
+        specifier: workspace:*
+        version: link:../../lib/graphql-client
+      '@szl-holdings/observability':
+        specifier: workspace:*
+        version: link:../../lib/observability
+      '@szl-holdings/offline-engine':
+        specifier: workspace:*
+        version: link:../../lib/offline-engine
+      '@szl-holdings/prism-bus':
+        specifier: workspace:*
+        version: link:../../lib/prism-bus
+      '@szl-holdings/replit-auth-web':
+        specifier: workspace:*
+        version: link:../../lib/replit-auth-web
+      '@szl-holdings/services':
+        specifier: workspace:*
+        version: link:../../lib/services
+      '@tanstack/query-persist-client-core':
+        specifier: ^5.99.0
+        version: 5.99.0
+      '@tanstack/query-sync-storage-persister':
+        specifier: ^5.99.0
+        version: 5.99.0
+    devDependencies:
+      '@replit/vite-plugin-cartographer':
+        specifier: 'catalog:'
+        version: 0.5.1
+      '@replit/vite-plugin-dev-banner':
+        specifier: 'catalog:'
+        version: 0.1.2
+      '@replit/vite-plugin-runtime-error-modal':
+        specifier: 'catalog:'
+        version: 0.0.6
+      '@szl-holdings/analytics':
+        specifier: workspace:*
+        version: link:../../lib/analytics
+      '@szl-holdings/api-client-react':
+        specifier: workspace:*
+        version: link:../../lib/api-client-react
+      '@szl-holdings/mcp-client':
+        specifier: workspace:*
+        version: link:../../lib/mcp-client
+      '@szl-holdings/shared-ui':
+        specifier: workspace:*
+        version: link:../../lib/shared-ui
+      '@tailwindcss/typography':
+        specifier: ^0.5.15
+        version: 0.5.19(tailwindcss@4.2.1)
+      '@tailwindcss/vite':
+        specifier: 'catalog:'
+        version: 4.2.1(vite@7.3.2(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
+      '@tanstack/react-query':
+        specifier: 'catalog:'
+        version: 5.99.0(react@19.1.0)
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
+      '@types/react':
+        specifier: 19.2.14
+        version: 19.2.14
+      '@types/react-dom':
+        specifier: ^19.2.0
+        version: 19.2.3(@types/react@19.2.14)
+      '@vitejs/plugin-react':
+        specifier: 'catalog:'
+        version: 5.1.4(vite@7.3.2(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
+      framer-motion:
+        specifier: 'catalog:'
+        version: 12.35.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      lucide-react:
+        specifier: 'catalog:'
+        version: 0.545.0(react@19.1.0)
+      react:
+        specifier: 19.1.0
+        version: 19.1.0
+      react-dom:
+        specifier: 19.1.0
+        version: 19.1.0(react@19.1.0)
+      recharts:
+        specifier: 'catalog:'
+        version: 2.15.4(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      sonner:
+        specifier: ^2.0.7
+        version: 2.0.7(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      tailwindcss:
+        specifier: 'catalog:'
+        version: 4.2.1
+      tw-animate-css:
+        specifier: ^1.4.0
+        version: 1.4.0
       vite:
         specifier: 7.3.2
         version: 7.3.2(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)

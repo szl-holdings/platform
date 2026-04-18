@@ -73,10 +73,18 @@ export type { CarlotaJoEstateNarrative } from "./narrative-carlota-jo-estate";
 export { SZL_TREASURY_NARRATIVE } from "./narrative-szl-treasury";
 export type { SzlTreasuryNarrative } from "./narrative-szl-treasury";
 
+export { COUNSEL_DEADLINE_NARRATIVE } from "./narrative-counsel-deadline";
+export type { CounselDeadlineNarrative } from "./narrative-counsel-deadline";
+
+export { SENTRA_RANSOMWARE_NARRATIVE } from "./narrative-sentra-ransomware";
+export type { SentraRansomwareNarrative } from "./narrative-sentra-ransomware";
+
 export { seedSignalMesh } from "./seed-signal-mesh";
 
 export const SIGNAL_MESH_NARRATIVES = [
   { id: "vessels-port-congestion", label: "Vessels — Port Congestion + Route Exception Cluster", domain: "maritime" },
   { id: "carlota-jo-estate", label: "Carlota Jo — Estate Readiness Gap Before VIP Arrival", domain: "real-estate" },
   { id: "szl-treasury", label: "SZL Holdings — Treasury Risk Cluster", domain: "finance" },
+  { id: "counsel-deadline", label: "Counsel — Looming Deadline + Dependency Conflict", domain: "counsel" },
+  { id: "sentra-ransomware", label: "Sentra — Ransomware-Adjacent OT Event + Recovery Posture Gap", domain: "security" },
 ] as const;

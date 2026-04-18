@@ -63,6 +63,7 @@ const DistressPipeline = lazy(() => import("@/pages/distress-pipeline"));
 const GovernedCockpitPage = lazy(() => import("@/pages/governed-cockpit"));
 const PropertyMapPage = lazy(() => import("@/pages/property-map-page"));
 const PropertyDetail = lazy(() => import("@/pages/property-detail"));
+const PropertyTwinView = lazy(() => import("@/pages/property-twin-view"));
 const PowerBiReport = lazy(() => import("@/pages/powerbi-report"));
 const DocumentEngine = lazy(() => import("@/pages/document-engine"));
 const InquiriesPage = lazy(() => import("@/pages/inquiries-command"));
@@ -157,6 +158,7 @@ function PrivateRouter() {
         <Route path="/pipeline" component={Pipeline} />
         <Route path="/property-map" component={PropertyMapPage} />
         <Route path="/property/:id" component={PropertyDetail} />
+        <Route path="/property-twin-view" component={PropertyTwinView} />
         <Route path="/powerbi" component={PowerBiReport} />
         <Route path="/document-engine" component={DocumentEngine} />
         <Route path="/document-engine/:sub" component={DocumentEngine} />

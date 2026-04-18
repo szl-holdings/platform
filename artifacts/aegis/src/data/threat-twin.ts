@@ -184,6 +184,40 @@ export interface ActionQueueItem {
   blocker?: string;
 }
 
+export interface ThreatActor {
+  id: string;
+  name: string;
+  alias: string;
+  affiliation: string;
+  motivation: string;
+  description: string;
+  ttps: string[];
+  confidence: number;
+  lastActivityAt: string;
+}
+
+export interface IndicatorTimeline {
+  id: string;
+  value: string;
+  type: "ip" | "domain" | "hash";
+  tlp: "white" | "green" | "amber" | "red";
+  firstSeenAt: string;
+  lastSeenAt: string;
+  description: string;
+}
+
+export interface ContainmentWorkflow {
+  id: string;
+  title: string;
+  steps: Array<{
+    action: string;
+    target: string;
+    description: string;
+  }>;
+  recommendedAt: string;
+  status: "pending" | "approved" | "rejected";
+}
+
 const now = new Date();
 const daysAgo = (n: number) => new Date(now.getTime() - n * 86400000).toISOString();
 const hoursAgo = (n: number) => new Date(now.getTime() - n * 3600000).toISOString();
@@ -576,3 +610,72 @@ export const actionQueue: ActionQueueItem[] = [
     dueDate: daysAgo(-14),
   },
 ];
+
+export const phantomClusterActor: ThreatActor = {
+  id: "actor-2891",
+  name: "TA-2891",
+  alias: "Phantom Cluster",
+  affiliation: "Nation-State",
+  motivation: "Financial / Strategic",
+  description: "Advanced persistent threat actor focusing on supply chain and financial systems. Known for stealthy lateral movement.",
+  ttps: ["DLL Search Order Hijacking", "Credential Dumping", "Lateral Movement via WMI", "C2 via DNS Tunneling", "Data Exfiltration via HTTP/S"],
+  confidence: 0.94,
+  lastActivityAt: hoursAgo(1),
+};
+
+export const phantomIndicators: IndicatorTimeline[] = [
+  {
+    id: "ioc-001",
+    value: "185.234.12.89",
+    type: "ip",
+    tlp: "red",
+    firstSeenAt: daysAgo(7),
+    lastSeenAt: hoursAgo(2),
+    description: "Known C2 IP address for Phantom Cluster",
+  },
+  {
+    id: "ioc-002",
+    value: "45.122.34.11",
+    type: "ip",
+    tlp: "red",
+    firstSeenAt: daysAgo(3),
+    lastSeenAt: hoursAgo(4),
+    description: "Anomalous connection source",
+  },
+  {
+    id: "ioc-003",
+    value: "update-server.phantom-net.org",
+    type: "domain",
+    tlp: "amber",
+    firstSeenAt: daysAgo(5),
+    lastSeenAt: hoursAgo(1),
+    description: "Suspicious domain beaconing",
+  },
+  {
+    id: "ioc-004",
+    value: "7d8f9a2b3c4d5e6f7g8h9i0j1k2l3m4n",
+    type: "hash",
+    tlp: "red",
+    firstSeenAt: daysAgo(10),
+    lastSeenAt: daysAgo(1),
+    description: "Malicious payload hash",
+  },
+];
+
+export const affectedSystems = [
+  { name: "Finance DB", type: "Database", status: "at_risk", criticality: "critical" },
+  { name: "Identity Provider", type: "Auth", status: "compromised", criticality: "critical" },
+  { name: "Mail Gateway", type: "Network", status: "beaconing", criticality: "high" },
+];
+
+export const containmentWorkflow: ContainmentWorkflow = {
+  id: "wf-contain-2891",
+  title: "Threat Containment: TA-2891",
+  steps: [
+    { action: "Isolate", target: "Finance DB", description: "Segment from production network to prevent exfiltration" },
+    { action: "Rotate", target: "Identity Provider", description: "Force credential rotation for all privileged accounts" },
+    { action: "Block", target: "Mail Gateway", description: "Disable outbound relay for suspicious SMTP traffic" },
+  ],
+  recommendedAt: minsAgo(15),
+  status: "pending",
+};

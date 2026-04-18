@@ -109,8 +109,12 @@ export const DOMAIN_ENTITY_TYPES = [
   // Security (Aegis / Sentra)
   "incident",
   "threat",
+  // Sentra-specific
+  "cyber_asset",
+  "control",
   // Counsel
   "matter",
+  "obligation",
   // Carlota Jo
   "engagement",
   // Pulse
@@ -144,8 +148,11 @@ export const ENTITY_TYPE_LABELS: Record<EntityType, string> = {
   deal: "Deal",
   incident: "Incident",
   threat: "Threat",
+  cyber_asset: "Cyber Asset",
+  control: "Control",
   engagement: "Engagement",
   matter: "Matter",
+  obligation: "Obligation",
   brief: "Brief",
 };
 
@@ -169,7 +176,10 @@ export const ENTITY_TYPE_DOMAINS: Record<EntityType, Domain[]> = {
   deal: ["terra"],
   incident: ["security", "sentra"],
   threat: ["security", "sentra"],
+  cyber_asset: ["sentra"],
+  control: ["sentra"],
   matter: ["counsel"],
+  obligation: ["counsel"],
   engagement: ["carlota"],
   brief: ["pulse"],
 };
@@ -250,7 +260,7 @@ export interface DealEntity extends BaseEntity {
 
 export interface IncidentEntity extends BaseEntity {
   entityType: "incident";
-  domain: "security";
+  domain: "security" | "sentra";
   severity: "critical" | "high" | "medium" | "low";
   status: "open" | "triaging" | "contained" | "resolved" | "closed";
   attackVector?: string | undefined;
@@ -259,11 +269,32 @@ export interface IncidentEntity extends BaseEntity {
 
 export interface ThreatEntity extends BaseEntity {
   entityType: "threat";
-  domain: "security";
+  domain: "security" | "sentra";
   indicatorType: "ip" | "domain" | "hash" | "url" | "email" | "actor" | "ttp";
   indicatorValue: string;
   tlpLevel: "white" | "green" | "amber" | "red";
   ttl?: Date | undefined;
+}
+
+export interface CyberAssetEntity extends BaseEntity {
+  entityType: "cyber_asset";
+  domain: "sentra";
+  assetType: "endpoint" | "server" | "network" | "cloud" | "ot" | "identity" | "data";
+  criticality: "critical" | "high" | "medium" | "low";
+  recoveryTimeObjectiveMins?: number | undefined;
+  backupStatus: "current" | "stale" | "missing" | "unknown";
+  controlGap?: boolean | undefined;
+  exposureScore?: number | undefined;
+}
+
+export interface ControlEntity extends BaseEntity {
+  entityType: "control";
+  domain: "sentra";
+  controlFamily: "identify" | "protect" | "detect" | "respond" | "recover";
+  status: "effective" | "partial" | "ineffective" | "not_tested";
+  driftDetected: boolean;
+  lastTestedAt?: Date | undefined;
+  framework?: string | undefined;
 }
 
 export interface MatterEntity extends BaseEntity {
@@ -273,6 +304,17 @@ export interface MatterEntity extends BaseEntity {
   status: "open" | "discovery" | "negotiation" | "closed" | "settled";
   clientId?: string | undefined;
   filingDeadline?: Date | undefined;
+}
+
+export interface ObligationEntity extends BaseEntity {
+  entityType: "obligation";
+  domain: "counsel";
+  matterId: string;
+  obligationType: "filing" | "discovery" | "response" | "hearing" | "contract" | "regulatory";
+  deadline: Date;
+  status: "open" | "in_progress" | "met" | "missed" | "waived";
+  dependsOn?: string[] | undefined;
+  riskIfMissed?: string | undefined;
 }
 
 export interface EngagementEntity extends BaseEntity {
@@ -299,7 +341,10 @@ export type DomainEntity =
   | DealEntity
   | IncidentEntity
   | ThreatEntity
+  | CyberAssetEntity
+  | ControlEntity
   | MatterEntity
+  | ObligationEntity
   | EngagementEntity
   | BriefEntity;
 

@@ -66,7 +66,8 @@ const NAV_SECTIONS: SidebarNavSection[] = [
     label: "ATLAS Spatial Runtime",
     items: [
       { id: "atlas-execute", href: "/atlas-execute", label: "Run Workflow", icon: <Zap className="w-full h-full" /> },
-      { id: "atlas-runtime", href: "/atlas-runtime", label: "Property Twin", icon: <Layers className="w-full h-full" /> },
+      { id: "property-twin-view", href: "/property-twin-view", label: "Property Twin", icon: <Layers className="w-full h-full" /> },
+      { id: "atlas-runtime", href: "/atlas-runtime", label: "Spatial Assets", icon: <MapPin className="w-full h-full" /> },
       { id: "property-replay", href: "/replay", label: "Property Replay", icon: <RefreshCw className="w-full h-full" /> },
       { id: "scenario-branches", href: "/scenario-branches", label: "Scenario Branches", icon: <GitBranch className="w-full h-full" /> },
       { id: "constellation", href: "/constellation", label: "Constellation", icon: <Network className="w-full h-full" /> },

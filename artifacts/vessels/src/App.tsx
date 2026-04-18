@@ -208,6 +208,7 @@ const SanctionsChainExplorerPage = lazy(() => import("@/pages/sanctions-chain-ex
 const CounterpartyRiskMapPage = lazy(() => import("@/pages/counterparty-risk-map"));
 const VoyageTwinPage = lazy(() => import("@/pages/voyage-twin"));
 const GovernedCockpitPage = lazy(() => import("@/pages/governed-cockpit"));
+const GeoDecisionCenterPage = lazy(() => import("@/pages/geo-decision-center"));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -356,6 +357,7 @@ function VesselsSidebarContent({ expanded, onMobileClose, onToggleCollapse }: { 
       label: "ATLAS Spatial Runtime",
       items: [
         { id: "atlas-execute", label: "Run Workflow", href: "/atlas-execute", icon: <Zap className="w-3.5 h-3.5" /> },
+        { id: "geo-decision-center", label: "Geo Decision Center", href: "/geo-decision-center", icon: <Navigation className="w-3.5 h-3.5" /> },
         { id: "atlas-runtime", label: "Route Memory Twin", href: "/atlas-runtime", icon: <Layers className="w-3.5 h-3.5" /> },
         { id: "voyage-replay", label: "Voyage Replay", href: "/replay", icon: <RotateCcw className="w-3.5 h-3.5" /> },
         { id: "scenario-branches", label: "Scenario Branches", href: "/scenario-branches", icon: <GitBranch className="w-3.5 h-3.5" /> },
@@ -635,6 +637,7 @@ function DashboardRouter() {
         <Route path="/counterparty-risk-map" component={CounterpartyRiskMapPage} />
         <Route path="/voyage-twin" component={VoyageTwinPage} />
         <Route path="/governed-cockpit" component={GovernedCockpitPage} />
+        <Route path="/geo-decision-center" component={GeoDecisionCenterPage} />
         <Route>
           <div className="flex items-center justify-center h-full">
             <p className="text-sky-400/40">Page not found</p>
