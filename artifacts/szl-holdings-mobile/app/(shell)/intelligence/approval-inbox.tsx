@@ -11,6 +11,7 @@ import { useColors } from "@/hooks/useColors";
 import { apiFetch } from "@/lib/apiClient";
 import { useSyncEngine } from "@szl-holdings/mobile-shared";
 import { cacheSet, cacheGetStale, CACHE_KEYS } from "@/lib/cache";
+import { OfflineQueuePanel } from "@/components/OfflineQueuePanel";
 
 const ACCENT = "#c9a84c";
 
@@ -644,6 +645,11 @@ export default function ApprovalInboxScreen() {
           />
         }
       >
+        <OfflineQueuePanel
+          isOffline={isOffline}
+          refreshKey={offlineQueue.length}
+          onChanged={() => loadQueuedDecisions().then(setOfflineQueue)}
+        />
         {offlineQueue.length > 0 && (
           <View style={styles.queuedSection}>
             <Text style={[styles.sectionLabel, { color: "#f59e0b" }]}>QUEUED OFFLINE</Text>

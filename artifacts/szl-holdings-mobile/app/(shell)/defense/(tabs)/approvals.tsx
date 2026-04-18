@@ -18,6 +18,7 @@ import { useColors } from "@/hooks/useColors";
 import { apiGet, apiPut } from "@/lib/apiClient";
 import { useSyncEngine } from "@szl-holdings/mobile-shared";
 import { cacheSet, cacheGetStale } from "@/lib/cache";
+import { OfflineQueuePanel } from "@/components/OfflineQueuePanel";
 
 const TRADECRAFT_QUEUE_KEY = "defense:tradecraft-offline-queue";
 
@@ -423,6 +424,11 @@ export default function ApprovalsTab() {
         contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: insets.bottom + 80 }}
         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.amber} />}
       >
+        <OfflineQueuePanel
+          isOffline={isOffline}
+          refreshKey={offlineQueue.length}
+          onChanged={() => loadTradecraftQueue().then(setOfflineQueue)}
+        />
         {showQueue && (
           <View style={{ marginBottom: 4 }}>
             <Text style={{ fontSize: 10, fontWeight: "700", color: "#f59e0b", letterSpacing: 1, marginBottom: 8 }}>PENDING SYNC ({offlineQueue.length})</Text>
