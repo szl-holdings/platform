@@ -5,7 +5,7 @@ import { z } from "zod";
 import { authMiddleware } from "../middlewares/auth";
 import { sendSuccess, sendBadRequest, sendNotFound, sendError, handleRouteError } from "../lib/api-response";
 import { logger } from "../lib/logger";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const webhookEndpointSchema = z.object({
   url: z.string().url("url must be a valid URL"),
@@ -290,7 +290,7 @@ router.patch("/webhooks/endpoints/:id", authMiddleware(), validateBody(jsonObjec
   }
 });
 
-router.delete("/webhooks/endpoints/:id", authMiddleware(), async (req: Request, res: Response) => {
+router.delete("/webhooks/endpoints/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req: Request, res: Response) => {
   try {
     if (!webhookEndpoints.has(String(req.params.id))) {
       sendNotFound(res, "Webhook endpoint");

@@ -53,7 +53,7 @@ import {
   ingestFirestormAlert,
 } from "@szl-holdings/ai-engine/domain-embedding-hooks";
 import { firestormLiveLimit, getFsCached, fetchFsJson, tradecraftDecisionInputSchema, tradecraftDecisionActionSchema, updateWorkflowActionSchema, updateHardeningControlSchema, pushTokenSchema, ingestSyslogSchema, updateCaseSchema, updateCaseMemorySchema, evidenceIndexQuerySchema } from "./shared";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../../lib/validation";
 const router = Router();
 
 router.get("/firestorm/assets", authMiddleware(), async (req, res) => {
@@ -384,7 +384,7 @@ router.get("/firestorm/mitre-detections/:techniqueId", authMiddleware(), async (
   } catch (err) { handleRouteError(res, err, "Failed to get MITRE detection"); }
 });
 
-router.post("/firestorm/seed", authMiddleware({ required: true }), async (_req, res) => {
+router.post("/firestorm/seed", validateBody(jsonObjectBodySchema), authMiddleware({ required: true }), async (_req, res) => {
   if (process.env.NODE_ENV === "production" || process.env.APP_ENV === "production") {
     res.status(404).json({ error: "Not found", code: "SEED_DISABLED_IN_PRODUCTION" });
     return;
@@ -1181,7 +1181,7 @@ router.put("/firestorm/tradecraft/notebook/:noteId", authMiddleware({ required: 
   } catch (err) { handleRouteError(res, err, "Failed to update analyst note"); }
 });
 
-router.delete("/firestorm/tradecraft/notebook/:noteId", authMiddleware({ required: true }), async (req, res) => {
+router.delete("/firestorm/tradecraft/notebook/:noteId", validateBody(jsonObjectBodySchema), authMiddleware({ required: true }), async (req, res) => {
   try {
     const [note] = await db.delete(firestormAnalystNotebookTable)
       .where(sql`${firestormAnalystNotebookTable.noteId} = ${req.params.noteId as string}`)

@@ -3,6 +3,7 @@ import { createHash, createHmac } from "crypto";
 import { authMiddleware } from "../middlewares/auth";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, handleRouteError } from "../lib/api-response";
 
+import { anyQuerySchema, jsonObjectBodySchema, validateBody, validateQuery } from "../lib/validation";
 const router: IRouter = Router();
 
 // ─── AIS Track Engine ─────────────────────────────────────────────────────────
@@ -304,7 +305,7 @@ async function fetchAisVesselMeta(mmsi: string): Promise<{ name: string | null; 
 }
 
 // GET — derive AIS track for a vessel + time window (standalone query endpoint)
-router.get("/vessels/modules/ais-track", authMiddleware(), async (req: Request, res) => {
+router.get("/vessels/modules/ais-track", validateQuery(anyQuerySchema), authMiddleware(), async (req: Request, res) => {
   try {
     const { mmsi, departedAt, arrivedAt } = req.query as { mmsi?: string; departedAt?: string; arrivedAt?: string };
     if (!mmsi || !departedAt) { sendBadRequest(res, "mmsi and departedAt are required"); return; }
@@ -327,7 +328,7 @@ router.get("/vessels/modules/ais-track", authMiddleware(), async (req: Request, 
 // When only user-supplied `distanceNm` is given (no mmsi), `trackSource` = "user-provided".
 //
 // The computed record with deterministic passportHash is persisted in the session store.
-router.post("/vessels/modules/voyages-emissions", authMiddleware(), async (req: Request, res) => {
+router.post("/vessels/modules/voyages-emissions", validateBody(jsonObjectBodySchema), authMiddleware(), async (req: Request, res) => {
   try {
     const body = req.body as {
       mmsi?: string;          // Triggers AIS track derivation + vessel metadata lookup
@@ -608,7 +609,7 @@ router.get("/vessels/modules/bills-of-lading/:id", authMiddleware(), (req: Reque
   }
 });
 
-router.post("/vessels/modules/bills-of-lading", authMiddleware(), (req: Request, res) => {
+router.post("/vessels/modules/bills-of-lading", validateBody(jsonObjectBodySchema), authMiddleware(), (req: Request, res) => {
   try {
     const { vesselName, imo, voyageId, shipper, consignee, notifyParty, cargo, quantityMt, unit, originPort, destinationPort, lcRef, lcIssuer, lcAmount } = req.body ?? {};
     if (!vesselName || !shipper || !consignee || !cargo || !originPort || !destinationPort) {
@@ -641,7 +642,7 @@ router.post("/vessels/modules/bills-of-lading", authMiddleware(), (req: Request,
 });
 
 // Transfer a BoL (add an endorsement event)
-router.post("/vessels/modules/bills-of-lading/:id/transfer", authMiddleware(), (req: Request, res) => {
+router.post("/vessels/modules/bills-of-lading/:id/transfer", validateBody(jsonObjectBodySchema), authMiddleware(), (req: Request, res) => {
   try {
     const doc = bolStore.get(req.params.id);
     if (!doc) { sendNotFound(res, "BillOfLading"); return; }

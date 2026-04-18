@@ -14,7 +14,7 @@ import {
 import { eq, desc, sql } from "drizzle-orm";
 import { sendSuccess, sendNotFound, sendError, handleRouteError, parsePagination } from "../lib/api-response";
 import { authMiddleware, parseIdParam } from "../middlewares/auth";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const programCreateSchema = z.object({
   name: z.string().min(1, "Name is required").max(200),
@@ -83,7 +83,7 @@ router.patch("/readiness/programs/:id", authMiddleware(), validateBody(jsonObjec
   }
 });
 
-router.delete("/readiness/programs/:id", authMiddleware(), async (req, res) => {
+router.delete("/readiness/programs/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(readinessProgramsTable).where(eq(readinessProgramsTable.id, id)).returning();
@@ -124,7 +124,7 @@ router.patch("/readiness/dimensions/:id", authMiddleware(), validateBody(jsonObj
   }
 });
 
-router.delete("/readiness/dimensions/:id", authMiddleware(), async (req, res) => {
+router.delete("/readiness/dimensions/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(readinessDimensionsTable).where(eq(readinessDimensionsTable.id, id)).returning();
@@ -184,7 +184,7 @@ router.patch("/readiness/milestones/:id", authMiddleware(), validateBody(jsonObj
   }
 });
 
-router.delete("/readiness/milestones/:id", authMiddleware(), async (req, res) => {
+router.delete("/readiness/milestones/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(readinessMilestonesTable).where(eq(readinessMilestonesTable.id, id)).returning();
@@ -225,7 +225,7 @@ router.patch("/readiness/risks/:id", authMiddleware(), validateBody(jsonObjectBo
   }
 });
 
-router.delete("/readiness/risks/:id", authMiddleware(), async (req, res) => {
+router.delete("/readiness/risks/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(readinessRisksTable).where(eq(readinessRisksTable.id, id)).returning();
@@ -266,7 +266,7 @@ router.patch("/readiness/alerts/:id", authMiddleware(), validateBody(jsonObjectB
   }
 });
 
-router.delete("/readiness/alerts/:id", authMiddleware(), async (req, res) => {
+router.delete("/readiness/alerts/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(readinessAlertsTable).where(eq(readinessAlertsTable.id, id)).returning();

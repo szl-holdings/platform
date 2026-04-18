@@ -14,7 +14,7 @@ import {
 import { isFlagEnabled } from "../lib/platform-flags";
 import { logger } from "../lib/logger";
 import { deliverWebhookEvent } from "./webhooks";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -145,7 +145,7 @@ router.get("/integrations/salesforce/query", authMiddleware(), requireRole("ops"
   }
 });
 
-router.post("/integrations/salesforce/sync", async (req, res, next) => {
+router.post("/integrations/salesforce/sync", validateBody(jsonObjectBodySchema), async (req, res, next) => {
   const secretValid = await validateSalesforceWebhookSecret(req);
   if (secretValid) { next(); return; }
   authMiddleware()(req, res, () => requireRole("ops", "super_admin", "admin")(req, res, next));
@@ -361,7 +361,7 @@ router.get("/integrations/jira/query", authMiddleware(), requireRole("ops", "ana
   }
 });
 
-router.post("/integrations/jira/sync", authMiddleware(), requireRole("ops", "super_admin", "admin"), async (_req, res) => {
+router.post("/integrations/jira/sync", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("ops", "super_admin", "admin"), async (_req, res) => {
   try {
     const enabled = await isFlagEnabled("jira_sync_enabled");
     if (!enabled) {
@@ -527,7 +527,7 @@ router.get("/integrations/health", authMiddleware(), async (_req, res) => {
   }
 });
 
-router.post("/integrations/salesforce/ingest-signals", authMiddleware(), requireRole("ops", "super_admin", "admin"), async (_req, res) => {
+router.post("/integrations/salesforce/ingest-signals", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("ops", "super_admin", "admin"), async (_req, res) => {
   try {
     const enabled = await isFlagEnabled("salesforce_sync_enabled");
     if (!enabled) {
@@ -554,7 +554,7 @@ router.post("/integrations/salesforce/ingest-signals", authMiddleware(), require
   }
 });
 
-router.post("/integrations/jira/ingest-signals", authMiddleware(), requireRole("ops", "super_admin", "admin"), async (_req, res) => {
+router.post("/integrations/jira/ingest-signals", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("ops", "super_admin", "admin"), async (_req, res) => {
   try {
     const enabled = await isFlagEnabled("jira_sync_enabled");
     if (!enabled) {
@@ -933,7 +933,7 @@ router.get("/integrations/atlassian/tenant/:clientKey", authMiddleware(), async 
   }
 });
 
-router.delete("/integrations/atlassian/tenant/:clientKey", authMiddleware(), async (req: Request, res: Response) => {
+router.delete("/integrations/atlassian/tenant/:clientKey", validateBody(jsonObjectBodySchema), authMiddleware(), async (req: Request, res: Response) => {
   try {
     const { clientKey } = req.params;
     await db

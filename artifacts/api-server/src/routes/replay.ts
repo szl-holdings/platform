@@ -2,7 +2,7 @@ import { Router, type IRouter } from "express";
 import { z } from "zod";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../middlewares/sliding-window-limiter";
-import { validateBody } from "../lib/validation";
+import { anyQuerySchema, validateBody, validateQuery } from "../lib/validation";
 import {
   listScenarios,
   getScenario,
@@ -140,7 +140,7 @@ seedScenariosIfEmpty(SEED_SCENARIOS).then(seeded => {
 }).catch(err => console.warn("[replay-seed] Failed to seed scenarios", err));
 
 router.get(
-  "/replay/scenarios",
+  "/replay/scenarios", validateQuery(anyQuerySchema),
   authMiddleware({ required: true }),
   requireRole("admin", "operator", "analyst"),
   perUserApiSlidingLimiter,
@@ -220,7 +220,7 @@ router.post(
 );
 
 router.get(
-  "/replay/snapshots",
+  "/replay/snapshots", validateQuery(anyQuerySchema),
   authMiddleware({ required: true }),
   requireRole("admin", "operator", "analyst"),
   perUserApiSlidingLimiter,
@@ -281,7 +281,7 @@ router.post(
 );
 
 router.get(
-  "/replay/runs",
+  "/replay/runs", validateQuery(anyQuerySchema),
   authMiddleware({ required: true }),
   requireRole("admin", "operator", "analyst"),
   perUserApiSlidingLimiter,

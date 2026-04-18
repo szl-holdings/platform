@@ -14,7 +14,7 @@ import { sendSuccess, sendNotFound, sendError, sendBadRequest, handleRouteError,
 import { authMiddleware, parseIdParam, denyIfReadOnly } from "../middlewares/auth";
 import { withDbSpan } from "../middlewares/telemetry";
 import crypto from "node:crypto";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -171,7 +171,7 @@ router.patch("/lyte/alerts/:id", authMiddleware(), denyIfReadOnly(), validateBod
   } catch (err) { handleRouteError(res, err, "Failed to update alert"); }
 });
 
-router.delete("/lyte/alerts/:id", authMiddleware(), denyIfReadOnly(), async (req, res) => {
+router.delete("/lyte/alerts/:id", validateBody(jsonObjectBodySchema), authMiddleware(), denyIfReadOnly(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(lyteAlertsTable).where(eq(lyteAlertsTable.id, id)).returning();
@@ -350,7 +350,7 @@ router.put("/lyte/dashboards/:id", authMiddleware(), denyIfReadOnly(), validateB
   } catch (err) { handleRouteError(res, err, "Failed to update dashboard"); }
 });
 
-router.delete("/lyte/dashboards/:id", authMiddleware(), denyIfReadOnly(), async (req, res) => {
+router.delete("/lyte/dashboards/:id", validateBody(jsonObjectBodySchema), authMiddleware(), denyIfReadOnly(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [existing] = await db.select().from(lyteDashboardsTable).where(eq(lyteDashboardsTable.id, id));

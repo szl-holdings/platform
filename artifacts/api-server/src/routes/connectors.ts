@@ -4,7 +4,7 @@ import { eq, desc } from "drizzle-orm";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, sendNoContent, sendError, handleRouteError } from "../lib/api-response";
 import { logActivity } from "../lib/activity-logger";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
-import { validateBody, connectorCreateSchema, connectorUpdateSchema } from "../lib/validation";
+import { connectorCreateSchema, connectorUpdateSchema, jsonObjectBodySchema, validateBody } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -75,7 +75,7 @@ router.patch("/connectors/:id", authMiddleware(), requireRole("ops", "super_admi
   }
 });
 
-router.delete("/connectors/:id", authMiddleware(), requireRole("ops", "super_admin"), async (req, res) => {
+router.delete("/connectors/:id", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("ops", "super_admin"), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [connector] = await db.delete(connectorsTable).where(eq(connectorsTable.id, id)).returning();

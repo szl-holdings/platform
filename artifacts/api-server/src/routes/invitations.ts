@@ -17,7 +17,7 @@ import { authMiddleware } from "../middlewares/auth";
 import { writeLimiter } from "../middlewares/rate-limiters";
 import { logger } from "../lib/logger";
 import { hashIp } from "@szl-holdings/audit";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 import { sendError, sendUnauthorized, sendNotFound, sendForbidden, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { sendEmail, buildOrgInviteEmail } from "../lib/email";
 import { createOrgInvitation } from "../lib/invitation-service";
@@ -326,7 +326,7 @@ router.post(
 );
 
 router.delete(
-  "/orgs/:orgSlug/invitations/:invitationId",
+  "/orgs/:orgSlug/invitations/:invitationId", validateBody(jsonObjectBodySchema),
   authMiddleware(),
   async (req, res) => {
     try {

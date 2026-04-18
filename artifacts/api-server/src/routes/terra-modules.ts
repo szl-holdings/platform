@@ -16,7 +16,7 @@ import { z } from "zod";
 import { randomUUID } from "crypto";
 import multer from "multer";
 import mammoth from "mammoth";
-import { validateBody, jsonObjectBodySchema } from "../lib/validation";
+import { jsonObjectBodySchema, validateBody } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -495,7 +495,7 @@ router.put("/terra/leases/:id", authWrite, validateBody(jsonObjectBodySchema), a
   } catch (err) { handleRouteError(res, err, "Failed to update lease"); }
 });
 
-router.delete("/terra/leases/:id", authWrite, async (req: Request, res: Response) => {
+router.delete("/terra/leases/:id", validateBody(jsonObjectBodySchema), authWrite, async (req: Request, res: Response) => {
   try {
     const leaseUserId = req.user?.id;
     const leaseWhere = leaseUserId != null
@@ -576,7 +576,7 @@ router.put("/terra/pro-forma-projects/:id", authWrite, validateBody(jsonObjectBo
   } catch (err) { handleRouteError(res, err, "Failed to update pro forma project"); }
 });
 
-router.delete("/terra/pro-forma-projects/:id", authWrite, async (req: Request, res: Response) => {
+router.delete("/terra/pro-forma-projects/:id", validateBody(jsonObjectBodySchema), authWrite, async (req: Request, res: Response) => {
   try {
     const conditions = [eq(terraProFormaProjectsTable.externalId, req.params.id as string)];
     if (req.user?.id) conditions.push(eq(terraProFormaProjectsTable.ownerUserId, req.user.id));
@@ -686,7 +686,7 @@ router.put("/terra/exchanges-1031/:id", authWrite, validateBody(jsonObjectBodySc
   } catch (err) { handleRouteError(res, err, "Failed to update exchange"); }
 });
 
-router.delete("/terra/exchanges-1031/:id", authWrite, async (req: Request, res: Response) => {
+router.delete("/terra/exchanges-1031/:id", validateBody(jsonObjectBodySchema), authWrite, async (req: Request, res: Response) => {
   try {
     const exUserId = req.user?.id;
     const exWhere = exUserId != null
@@ -803,7 +803,7 @@ router.put("/terra/tax-appeals/:id", authWrite, validateBody(jsonObjectBodySchem
   } catch (err) { handleRouteError(res, err, "Failed to update tax appeal"); }
 });
 
-router.delete("/terra/tax-appeals/:id", authWrite, async (req: Request, res: Response) => {
+router.delete("/terra/tax-appeals/:id", validateBody(jsonObjectBodySchema), authWrite, async (req: Request, res: Response) => {
   try {
     const taUserId = req.user?.id;
     const taWhere = taUserId != null
@@ -884,7 +884,7 @@ router.put("/terra/waterfall-structures/:id", authWrite, validateBody(jsonObject
   } catch (err) { handleRouteError(res, err, "Failed to update waterfall structure"); }
 });
 
-router.delete("/terra/waterfall-structures/:id", authWrite, async (req: Request, res: Response) => {
+router.delete("/terra/waterfall-structures/:id", validateBody(jsonObjectBodySchema), authWrite, async (req: Request, res: Response) => {
   try {
     const conditions = [eq(terraWaterfallStructuresTable.externalId, req.params.id as string)];
     if (req.user?.id) conditions.push(eq(terraWaterfallStructuresTable.ownerUserId, req.user.id));
@@ -1000,7 +1000,7 @@ router.put("/terra/construction-projects/:id", authWrite, validateBody(jsonObjec
   } catch (err) { handleRouteError(res, err, "Failed to update construction project"); }
 });
 
-router.delete("/terra/construction-projects/:id", authWrite, async (req: Request, res: Response) => {
+router.delete("/terra/construction-projects/:id", validateBody(jsonObjectBodySchema), authWrite, async (req: Request, res: Response) => {
   try {
     const cpUserId = req.user?.id;
     const cpWhere = cpUserId != null
@@ -1187,7 +1187,7 @@ router.put("/terra/tenant-applications/:id", authWrite, validateBody(jsonObjectB
   } catch (err) { handleRouteError(res, err, "Failed to update tenant application"); }
 });
 
-router.delete("/terra/tenant-applications/:id", authWrite, async (req: Request, res: Response) => {
+router.delete("/terra/tenant-applications/:id", validateBody(jsonObjectBodySchema), authWrite, async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
     const where = userId != null

@@ -65,7 +65,7 @@ import {
   buildStephenContactNotificationEmail,
   STEPHEN_ADMIN_EMAIL,
 } from "../lib/email";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -225,7 +225,7 @@ router.patch("/stephen/content-blocks/:id", validateBody(jsonObjectBodySchema), 
   }
 });
 
-router.delete("/stephen/content-blocks/:id", async (req, res) => {
+router.delete("/stephen/content-blocks/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { id } = DeleteStephenContentBlockParams.parse({ id: String(req.params.id) });
     const [deleted] = await db
@@ -325,7 +325,7 @@ router.patch("/stephen/portfolio-case-studies/:slug", validateBody(jsonObjectBod
   }
 });
 
-router.delete("/stephen/portfolio-case-studies/:slug", async (req, res) => {
+router.delete("/stephen/portfolio-case-studies/:slug", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { slug } = DeleteStephenPortfolioCaseStudyParams.parse({ slug: String(String(req.params.slug)) });
     const [deleted] = await db

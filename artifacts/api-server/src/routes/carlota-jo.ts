@@ -1,7 +1,7 @@
 import { Router, type IRouter, type Request, type Response, type RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
 import multer from "multer";
-import { validateBody, carlotaInquirySchema, carlotaInquiryUpdateSchema, carlotaReservationSchema, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { carlotaInquirySchema, carlotaInquiryUpdateSchema, carlotaReservationSchema, jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 import {
   db,
   carlotaInquiriesTable,
@@ -117,7 +117,7 @@ router.patch("/booking/inquiries/:id", authMiddleware(), validateBody(carlotaInq
   }
 });
 
-router.delete("/booking/inquiries/:id", authMiddleware(), async (req, res) => {
+router.delete("/booking/inquiries/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req, res) => {
   try {
     const id = parseInt(String(req.params.id), 10);
     const [row] = await db.delete(carlotaInquiriesTable).where(eq(carlotaInquiriesTable.id, id)).returning();
@@ -196,7 +196,7 @@ router.patch("/booking/reservations/:id", authMiddleware(), validateBody(jsonObj
   }
 });
 
-router.delete("/booking/reservations/:id", authMiddleware(), async (req, res) => {
+router.delete("/booking/reservations/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req, res) => {
   try {
     const id = parseInt(String(req.params.id), 10);
     const [row] = await db.delete(carlotaReservationsTable).where(eq(carlotaReservationsTable.id, id)).returning();
@@ -312,7 +312,7 @@ router.patch("/booking/services/:id", authMiddleware(), validateBody(jsonObjectB
   }
 });
 
-router.delete("/booking/services/:id", authMiddleware(), async (req, res) => {
+router.delete("/booking/services/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req, res) => {
   try {
     const id = parseInt(String(req.params.id), 10);
     const [row] = await db.delete(carlotaServicesTable).where(eq(carlotaServicesTable.id, id)).returning();

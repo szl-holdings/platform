@@ -6,7 +6,7 @@ import { services } from "@szl-holdings/services";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { sendSuccess, sendCreated, sendBadRequest, sendError, handleRouteError } from "../lib/api-response";
 import { logger } from "../lib/logger";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -206,7 +206,7 @@ router.patch("/alloy/integrations/connections/:id", authMiddleware(), requireRol
   }
 });
 
-router.delete("/alloy/integrations/connections/:id", authMiddleware(), requireRole("admin", "super_admin"), async (req: Request, res: Response) => {
+router.delete("/alloy/integrations/connections/:id", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("admin", "super_admin"), async (req: Request, res: Response) => {
   try {
     await pool.query(`DELETE FROM alloy_integration_connections WHERE id = $1`, [req.params.id]);
     sendSuccess(res, { deleted: true, id: req.params.id });
@@ -256,7 +256,7 @@ router.get("/alloy/integrations/webhooks/endpoints", authMiddleware(), requireRo
   }
 });
 
-router.post("/alloy/integrations/webhooks/receive/:endpointId", async (req: Request, res: Response) => {
+router.post("/alloy/integrations/webhooks/receive/:endpointId", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { endpointId } = req.params;
     const endpointResult = await pool.query(`SELECT * FROM alloy_webhook_endpoints WHERE id = $1 AND is_enabled = TRUE`, [endpointId]);

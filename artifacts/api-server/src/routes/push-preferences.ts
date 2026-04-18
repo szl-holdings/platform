@@ -3,7 +3,7 @@ import { db, pushNotificationPreferencesTable } from "@szl-holdings/db";
 import { eq, and } from "drizzle-orm";
 import { sendSuccess, sendBadRequest, sendNoContent, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
-import { validateBody, pushPreferenceUpdateSchema } from "../lib/validation";
+import { jsonObjectBodySchema, pushPreferenceUpdateSchema, validateBody } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -119,7 +119,7 @@ router.put("/push-preferences/:appId/:category", authMiddleware(), validateBody(
   }
 });
 
-router.delete("/push-preferences/:appId", authMiddleware(), async (req, res) => {
+router.delete("/push-preferences/:appId", validateBody(jsonObjectBodySchema), authMiddleware(), async (req, res) => {
   try {
     const userId = req.user!.id;
     const { appId } = req.params as { appId: string };

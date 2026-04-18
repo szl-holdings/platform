@@ -16,7 +16,7 @@ import {
   sendNotFound,
   sendBadRequest,
 } from "../lib/api-response";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -197,7 +197,7 @@ router.get("/verifier/:id", authMiddleware(), async (req, res) => {
 });
 
 router.delete(
-  "/verifier/:id",
+  "/verifier/:id", validateBody(jsonObjectBodySchema),
   authMiddleware(),
   requireRole("admin", "super_admin"),
   async (req, res) => {

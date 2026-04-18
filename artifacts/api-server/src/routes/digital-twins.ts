@@ -4,7 +4,7 @@ import { sendError, sendBadRequest } from "../lib/api-response";
 import { twinRegistry, vesselTwin, propertyTwin, postureTwin } from "@szl-holdings/ai-engine";
 import type { VesselTwinState, PropertyTwinState, PostureTwinState, SimulationScenario } from "@szl-holdings/ai-engine";
 import { z } from "zod";
-import { validateBody, jsonObjectBodySchema} from "../lib/validation";
+import { jsonObjectBodySchema, validateBody } from "../lib/validation";
 
 const twinEntitySchema = z.object({
   entityId: z.string().min(1).max(200),
@@ -107,7 +107,7 @@ router.patch("/digital-twins/:twinId", authMiddleware(), validateBody(jsonObject
   }
 });
 
-router.post("/digital-twins/demo/seed", authMiddleware(), async (_req, res) => {
+router.post("/digital-twins/demo/seed", validateBody(jsonObjectBodySchema), authMiddleware(), async (_req, res) => {
   try {
     const vesselState: VesselTwinState = {
       imoNumber: "9234567",

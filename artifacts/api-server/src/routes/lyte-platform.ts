@@ -21,7 +21,7 @@ import { logger } from "../lib/logger";
 import { authMiddleware, parseIdParam, canAccessOrgRecord } from "../middlewares/auth";
 import { isFlagEnabled } from "../lib/platform-flags";
 import { services } from "@szl-holdings/services";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { anyQuerySchema, jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -557,7 +557,7 @@ router.get("/lyte/platform/signals/:id", authMiddleware({ required: false }), va
   }
 });
 
-router.post("/lyte/platform/signals/:id/acknowledge", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/lyte/platform/signals/:id/acknowledge", validateQuery(anyQuerySchema), authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
@@ -580,7 +580,7 @@ router.post("/lyte/platform/signals/:id/acknowledge", authMiddleware(), validate
   }
 });
 
-router.post("/lyte/platform/signals/:id/assign", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/lyte/platform/signals/:id/assign", validateQuery(anyQuerySchema), authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
@@ -616,7 +616,7 @@ router.post("/lyte/platform/signals/:id/assign", authMiddleware(), validateBody(
   }
 });
 
-router.post("/lyte/platform/signals/:id/escalate", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/lyte/platform/signals/:id/escalate", validateQuery(anyQuerySchema), authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
@@ -641,7 +641,7 @@ router.post("/lyte/platform/signals/:id/escalate", authMiddleware(), validateBod
   }
 });
 
-router.post("/lyte/platform/signals/:id/resolve", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/lyte/platform/signals/:id/resolve", validateQuery(anyQuerySchema), authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
@@ -669,7 +669,7 @@ router.post("/lyte/platform/signals/:id/resolve", authMiddleware(), validateBody
   }
 });
 
-router.post("/lyte/platform/signals/:id/override", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/lyte/platform/signals/:id/override", validateQuery(anyQuerySchema), authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
@@ -799,8 +799,8 @@ async function updateActionStatus(req: import("express").Request, res: import("e
   }
 }
 
-router.patch("/lyte/platform/actions/:id/status", authMiddleware(), updateActionStatus);
-router.post("/lyte/platform/actions/:id/update-status", authMiddleware(), updateActionStatus);
+router.patch("/lyte/platform/actions/:id/status", validateBody(jsonObjectBodySchema), authMiddleware(), updateActionStatus);
+router.post("/lyte/platform/actions/:id/update-status", validateBody(jsonObjectBodySchema), authMiddleware(), updateActionStatus);
 
 router.get("/lyte/platform/readiness", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
@@ -881,7 +881,7 @@ router.post("/lyte/platform/readiness", authMiddleware(), validateBody(jsonObjec
   }
 });
 
-router.patch("/lyte/platform/readiness/:id", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/lyte/platform/readiness/:id", validateQuery(anyQuerySchema), authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
@@ -916,7 +916,7 @@ router.patch("/lyte/platform/readiness/:id", authMiddleware(), validateBody(json
   }
 });
 
-router.delete("/lyte/platform/readiness/:id", authMiddleware(), async (req, res) => {
+router.delete("/lyte/platform/readiness/:id", validateBody(jsonObjectBodySchema), validateQuery(anyQuerySchema), authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
@@ -993,7 +993,7 @@ router.post("/lyte/platform/views", authMiddleware(), validateBody(jsonObjectBod
   }
 });
 
-router.delete("/lyte/platform/views/:id", authMiddleware(), async (req, res) => {
+router.delete("/lyte/platform/views/:id", validateBody(jsonObjectBodySchema), validateQuery(anyQuerySchema), authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;

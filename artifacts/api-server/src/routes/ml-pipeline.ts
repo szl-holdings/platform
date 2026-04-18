@@ -15,7 +15,7 @@ import {
 } from "../lib/ml-pipeline-service";
 import type { ModelLifecycle } from "@szl-holdings/ai-engine";
 import { z } from "zod";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { anyQuerySchema, jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const router = Router();
 
@@ -202,7 +202,7 @@ router.post("/ml/datasets", authMiddleware(), validateBody(fullDatasetSchema), a
   }
 });
 
-router.post("/ml/datasets/bootstrap", authMiddleware(), async (_req, res) => {
+router.post("/ml/datasets/bootstrap", validateBody(jsonObjectBodySchema), authMiddleware(), async (_req, res) => {
   try {
     const datasets = await datasetService.bootstrap();
     res.status(201).json({ bootstrapped: datasets.length, datasets });
@@ -371,7 +371,7 @@ router.get("/ml/inference/stats", authMiddleware(), (_req, res) => {
   }
 });
 
-router.delete("/ml/inference/cache", authMiddleware(), (req, res) => {
+router.delete("/ml/inference/cache", validateBody(jsonObjectBodySchema), validateQuery(anyQuerySchema), authMiddleware(), (req, res) => {
   try {
     const { modelVersionId } = req.query as { modelVersionId?: string };
     const cleared = inferenceService.clearCache(modelVersionId);
@@ -419,7 +419,7 @@ router.post("/ml/monitoring/run/:modelVersionId", authMiddleware(), validateBody
   }
 });
 
-router.post("/ml/monitoring/run-all", authMiddleware(), async (_req, res) => {
+router.post("/ml/monitoring/run-all", validateBody(jsonObjectBodySchema), authMiddleware(), async (_req, res) => {
   try {
     const snapshots = await monitoringService.runAllProduction();
     res.status(201).json({ count: snapshots.length, snapshots });

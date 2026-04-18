@@ -16,7 +16,7 @@ import {
 } from "@szl-holdings/db";
 import { authMiddleware } from "../middlewares/auth";
 import { handleRouteError, sendSuccess, sendNotFound, sendBadRequest } from "../lib/api-response";
-import { validateBody, jsonObjectBodySchema } from "../lib/validation";
+import { anyQuerySchema, jsonObjectBodySchema, validateBody, validateQuery } from "../lib/validation";
 import rateLimit from "express-rate-limit";
 
 const router: IRouter = Router();
@@ -106,7 +106,7 @@ router.get("/aegis/digital-twin/topology", limiter, authMiddleware({ required: f
   }
 });
 
-router.post("/aegis/digital-twin/sync", limiter, authMiddleware({ required: true }), async (_req: Request, res: Response) => {
+router.post("/aegis/digital-twin/sync", validateBody(jsonObjectBodySchema), limiter, authMiddleware({ required: true }), async (_req: Request, res: Response) => {
   try {
     await db
       .update(aegisTwinNodesTable)
@@ -122,7 +122,7 @@ router.get("/aegis/digital-twin/scenarios", limiter, authMiddleware({ required: 
   sendSuccess(res, { scenarios: TWIN_SCENARIOS, fetchedAt: nowIso() });
 });
 
-router.post("/aegis/digital-twin/scenarios/:id/run", limiter, authMiddleware({ required: true }), (req: Request, res: Response) => {
+router.post("/aegis/digital-twin/scenarios/:id/run", validateBody(jsonObjectBodySchema), limiter, authMiddleware({ required: true }), (req: Request, res: Response) => {
   const scenario = TWIN_SCENARIOS.find(s => s.id === req.params.id);
   if (!scenario) { sendNotFound(res, "Scenario"); return; }
   sendSuccess(res, { message: `Red team scenario ${scenario.id} launched against digital twin — live infrastructure unaffected`, scenario: { ...scenario, status: "running", progress: 0, startedAt: nowIso() } });
@@ -179,7 +179,7 @@ router.get("/aegis/deception/events", limiter, authMiddleware({ required: false 
   sendSuccess(res, { events: DECEPTION_EVENTS, fetchedAt: nowIso() });
 });
 
-router.post("/aegis/deception/events/:id/push-ioc", limiter, authMiddleware({ required: true }), async (req: Request, res: Response) => {
+router.post("/aegis/deception/events/:id/push-ioc", validateBody(jsonObjectBodySchema), limiter, authMiddleware({ required: true }), async (req: Request, res: Response) => {
   try {
     const evtId = req.params.id;
     const evt = DECEPTION_EVENTS.find(e => e.id === evtId);
@@ -200,7 +200,7 @@ router.post("/aegis/deception/events/:id/push-ioc", limiter, authMiddleware({ re
 
 // ─── ACTION QUEUE ROUTES ──────────────────────────────────────────────────────
 
-router.get("/aegis/action-queue", limiter, authMiddleware({ required: false }), async (req: Request, res: Response) => {
+router.get("/aegis/action-queue", validateQuery(anyQuerySchema), limiter, authMiddleware({ required: false }), async (req: Request, res: Response) => {
   try {
     const { status, priority } = req.query as Record<string, string>;
     const conditions = [];
@@ -363,7 +363,7 @@ router.put("/aegis/soar-builder/playbooks/:id", limiter, authMiddleware({ requir
   }
 });
 
-router.delete("/aegis/soar-builder/playbooks/:id", limiter, authMiddleware({ required: true }), async (req: Request, res: Response) => {
+router.delete("/aegis/soar-builder/playbooks/:id", validateBody(jsonObjectBodySchema), limiter, authMiddleware({ required: true }), async (req: Request, res: Response) => {
   try {
     const [existing] = await db.select().from(aegisSoarPlaybooksTable).where(eq(aegisSoarPlaybooksTable.id, req.params.id)).limit(1);
     if (!existing) { sendNotFound(res, "Playbook"); return; }
@@ -374,7 +374,7 @@ router.delete("/aegis/soar-builder/playbooks/:id", limiter, authMiddleware({ req
   }
 });
 
-router.get("/aegis/soar-builder/runs", limiter, authMiddleware({ required: false }), async (req: Request, res: Response) => {
+router.get("/aegis/soar-builder/runs", validateQuery(anyQuerySchema), limiter, authMiddleware({ required: false }), async (req: Request, res: Response) => {
   try {
     const { playbookId } = req.query as Record<string, string>;
     const conditions = playbookId ? [eq(aegisSoarRunsTable.playbookId, playbookId)] : [];

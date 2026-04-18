@@ -29,7 +29,7 @@ import { authMiddleware } from "../middlewares/auth";
 import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../middlewares/sliding-window-limiter";
 import { publish } from "../lib/websocket";
 import { logger } from "../lib/logger";
-import {validateBody, commandSessionCreateSchema, sessionCommentCreateSchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { commandSessionCreateSchema, jsonObjectBodySchema, listQuerySchema, sessionCommentCreateSchema, validateBody, validateQuery } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -138,7 +138,7 @@ router.get(
 );
 
 router.delete(
-  "/sessions/command/:id",
+  "/sessions/command/:id", validateBody(jsonObjectBodySchema),
   authMiddleware({ required: false }),
   async (req, res) => {
     try {

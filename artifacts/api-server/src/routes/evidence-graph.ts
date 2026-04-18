@@ -22,11 +22,12 @@ import { authMiddleware } from "../middlewares/auth";
 import { perUserApiSlidingLimiter } from "../middlewares/sliding-window-limiter";
 import { sendSuccess, sendNotFound, handleRouteError } from "../lib/api-response";
 
+import { anyQuerySchema, validateQuery } from "../lib/validation";
 const router: IRouter = Router();
 const auth = authMiddleware();
 const rateLimit = perUserApiSlidingLimiter;
 
-router.get("/evidence-graph/recommendations", auth, rateLimit, (req, res) => {
+router.get("/evidence-graph/recommendations", validateQuery(anyQuerySchema), auth, rateLimit, (req, res) => {
   try {
     const { domain, status, limit, offset } = req.query as Record<string, string | undefined>;
 
@@ -79,7 +80,7 @@ router.get("/evidence-graph/why/:entityId", auth, rateLimit, (req, res) => {
   }
 });
 
-router.get("/evidence-graph/signals", auth, rateLimit, (req, res) => {
+router.get("/evidence-graph/signals", validateQuery(anyQuerySchema), auth, rateLimit, (req, res) => {
   try {
     const { domain, type, tenantId, limit } = req.query as Record<string, string | undefined>;
 
@@ -101,7 +102,7 @@ router.get("/evidence-graph/signals", auth, rateLimit, (req, res) => {
   }
 });
 
-router.get("/evidence-graph/entities", auth, rateLimit, (req, res) => {
+router.get("/evidence-graph/entities", validateQuery(anyQuerySchema), auth, rateLimit, (req, res) => {
   try {
     const { domain, entityType, health } = req.query as Record<string, string | undefined>;
 

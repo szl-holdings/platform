@@ -28,7 +28,7 @@ import type { PrismRole, PrismDomain } from "@szl-holdings/prism-bus";
 import { db, covenantSimulationRuns, policySimScenarios } from "@szl-holdings/db";
 import { and, desc, eq } from "drizzle-orm";
 import { logger } from "../lib/logger";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -216,7 +216,7 @@ router.post("/covenant/policies", authMiddleware(), requireRole("admin", "super_
   }
 });
 
-router.delete("/covenant/policies/:policyId", authMiddleware(), requireRole("super_admin", "admin"), async (req: Request, res: Response) => {
+router.delete("/covenant/policies/:policyId", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("super_admin", "admin"), async (req: Request, res: Response) => {
   try {
     const policyId = req.params.policyId as string;
     covenantEngine.unregister(policyId);
@@ -474,7 +474,7 @@ router.post("/covenant/scenarios/:id/run", authMiddleware(), validateBody(jsonOb
   }
 });
 
-router.delete("/covenant/scenarios/:id", authMiddleware(), requireRole("admin", "super_admin"), async (req: Request, res: Response) => {
+router.delete("/covenant/scenarios/:id", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("admin", "super_admin"), async (req: Request, res: Response) => {
   try {
     const id = parseInt(String(req.params["id"] ?? "0"), 10);
     const orgId = req.user?.orgs?.[0]?.orgId ?? null;

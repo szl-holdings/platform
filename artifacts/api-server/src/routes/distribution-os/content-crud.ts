@@ -23,7 +23,7 @@ import {
 import { eq, desc, asc, and, gte, count, sql } from "drizzle-orm";
 import { authMiddleware } from "../../middlewares/auth";
 import { sendNotFound, sendBadRequest, sendError } from "../../lib/api-response";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../../lib/validation";
 
 const router = Router();
 const requireAuth = authMiddleware({ required: true });
@@ -60,7 +60,7 @@ router.patch("/articles/:id", requireAuth, validateBody(jsonObjectBodySchema), a
   res.json(article);
 });
 
-router.delete("/articles/:id", requireAuth, async (req: Request, res: Response): Promise<void> => {
+router.delete("/articles/:id", validateBody(jsonObjectBodySchema), requireAuth, async (req: Request, res: Response): Promise<void> => {
   await db.delete(dosArticlesTable).where(eq(dosArticlesTable.id, Number(req.params.id)));
   res.json({ success: true });
 });
@@ -96,7 +96,7 @@ router.patch("/newsletters/:id", requireAuth, validateBody(jsonObjectBodySchema)
   res.json(nl);
 });
 
-router.delete("/newsletters/:id", requireAuth, async (req: Request, res: Response): Promise<void> => {
+router.delete("/newsletters/:id", validateBody(jsonObjectBodySchema), requireAuth, async (req: Request, res: Response): Promise<void> => {
   await db.delete(dosNewslettersTable).where(eq(dosNewslettersTable.id, Number(req.params.id)));
   res.json({ success: true });
 });
@@ -175,7 +175,7 @@ router.patch("/x-posts/:id", requireAuth, validateBody(jsonObjectBodySchema), as
   res.json(post);
 });
 
-router.delete("/x-posts/:id", requireAuth, async (req: Request, res: Response): Promise<void> => {
+router.delete("/x-posts/:id", validateBody(jsonObjectBodySchema), requireAuth, async (req: Request, res: Response): Promise<void> => {
   await db.delete(dosXPostsTable).where(eq(dosXPostsTable.id, Number(req.params.id)));
   res.json({ success: true });
 });
@@ -313,7 +313,7 @@ router.get("/leads", requireAuth, validateQuery(listQuerySchema), async (req: Re
   res.json(leads);
 });
 
-router.post("/leads", async (req: Request, res: Response): Promise<void> => {
+router.post("/leads", validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
   const parsed = LeadCreateSchema.safeParse(req.body);
   if (!parsed.success) return void sendBadRequest(res, "Validation failed", parsed.error.flatten());
   const data = parsed.data;
@@ -345,7 +345,7 @@ router.patch("/leads/:id", requireAuth, validateBody(jsonObjectBodySchema), asyn
   res.json(lead);
 });
 
-router.delete("/leads/:id", requireAuth, async (req: Request, res: Response): Promise<void> => {
+router.delete("/leads/:id", validateBody(jsonObjectBodySchema), requireAuth, async (req: Request, res: Response): Promise<void> => {
   const id = Number(req.params.id);
   await db.delete(dosLeadNotesTable).where(eq(dosLeadNotesTable.leadId, id));
   await db.delete(dosLeadsTable).where(eq(dosLeadsTable.id, id));
@@ -504,7 +504,7 @@ router.patch("/linktree/:id", requireAuth, validateBody(jsonObjectBodySchema), a
   res.json(item);
 });
 
-router.delete("/linktree/:id", requireAuth, async (req: Request, res: Response): Promise<void> => {
+router.delete("/linktree/:id", validateBody(jsonObjectBodySchema), requireAuth, async (req: Request, res: Response): Promise<void> => {
   await db.delete(dosLinktreeConfigTable).where(eq(dosLinktreeConfigTable.id, Number(req.params.id)));
   res.json({ success: true });
 });

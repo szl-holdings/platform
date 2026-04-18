@@ -3,7 +3,7 @@ import { pool } from "@szl-holdings/db";
 import { sendSuccess, sendError, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
 import { openai } from "@szl-holdings/ai-engine/providers/openai";
-import { validateBody, jsonObjectBodySchema } from "../lib/validation";
+import { jsonObjectBodySchema, validateBody } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -175,7 +175,7 @@ router.get("/alloy/research/spaces/:id", authMiddleware({ required: false }), as
   } catch (err) { handleRouteError(res, err, "Failed to get research space"); }
 });
 
-router.delete("/alloy/research/spaces/:id", authMiddleware({ required: false }), async (req: Request, res: Response) => {
+router.delete("/alloy/research/spaces/:id", validateBody(jsonObjectBodySchema), authMiddleware({ required: false }), async (req: Request, res: Response) => {
   try {
     const { id } = req.params as { id: string };
     await pool.query(`DELETE FROM alloy_research_spaces WHERE id = $1`, [id]);
@@ -297,7 +297,7 @@ router.post("/alloy/browser/allowlist", authMiddleware({ required: false }), val
   } catch (err) { handleRouteError(res, err, "Failed to add allowlist entry"); }
 });
 
-router.delete("/alloy/browser/allowlist/:id", authMiddleware({ required: false }), async (req: Request, res: Response) => {
+router.delete("/alloy/browser/allowlist/:id", validateBody(jsonObjectBodySchema), authMiddleware({ required: false }), async (req: Request, res: Response) => {
   try {
     const { id } = req.params as { id: string };
     await pool.query(`DELETE FROM alloy_url_allowlist WHERE id = $1`, [id]);

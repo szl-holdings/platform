@@ -34,7 +34,7 @@ import { eq, and, ne } from "drizzle-orm";
 import { authMiddleware } from "../middlewares/auth";
 import { writeLimiter, readLimiter } from "../middlewares/rate-limiters";
 import { hashIp } from "@szl-holdings/audit";
-import { validateBody, jsonObjectBodySchema} from "../lib/validation";
+import { jsonObjectBodySchema, validateBody } from "../lib/validation";
 import {
   sendSuccess,
   sendBadRequest,
@@ -252,7 +252,7 @@ router.get("/orgs/:orgSlug/members", readLimiter, authMiddleware(), async (req: 
 });
 
 router.delete(
-  "/orgs/:orgSlug/members/:userId",
+  "/orgs/:orgSlug/members/:userId", validateBody(jsonObjectBodySchema),
   writeLimiter,
   authMiddleware(),
   async (req: Request, res: Response) => {

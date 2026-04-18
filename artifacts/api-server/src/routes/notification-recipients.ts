@@ -10,7 +10,7 @@ import {
   handleRouteError,
 } from "../lib/api-response";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
-import { validateBody, notificationRecipientCreateSchema, notificationRecipientUpdateSchema } from "../lib/validation";
+import { jsonObjectBodySchema, notificationRecipientCreateSchema, notificationRecipientUpdateSchema, validateBody } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -108,7 +108,7 @@ router.patch("/notification-recipients/:id", authMiddleware(), requireRole("ops"
   }
 });
 
-router.delete("/notification-recipients/:id", authMiddleware(), requireRole("ops"), async (req, res) => {
+router.delete("/notification-recipients/:id", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("ops"), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [existing] = await db

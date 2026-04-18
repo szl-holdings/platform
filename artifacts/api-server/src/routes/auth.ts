@@ -10,7 +10,7 @@ import { issueWsTicket } from "../lib/websocket.js";
 import { getSessionToken, getSessionUser } from "../lib/auth";
 import { hashIp } from "@szl-holdings/audit";
 import { z } from "zod";
-import { validateBody, loginPasswordSchema, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, loginPasswordSchema, validateBody, validateQuery } from "../lib/validation";
 
 const router: IRouter = Router();
 const authService = createAuthService();
@@ -139,7 +139,7 @@ router.post("/auth/sessions", authMiddleware(), validateBody(jsonObjectBodySchem
   }
 });
 
-router.delete("/auth/sessions/current", authMiddleware(), async (req, res) => {
+router.delete("/auth/sessions/current", validateBody(jsonObjectBodySchema), authMiddleware(), async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader?.startsWith("Bearer ")) {
@@ -166,7 +166,7 @@ router.delete("/auth/sessions/current", authMiddleware(), async (req, res) => {
   }
 });
 
-router.delete("/auth/sessions/:id", authMiddleware(), async (req, res) => {
+router.delete("/auth/sessions/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req, res) => {
   try {
     const sessionId = parseIdParam(req.params.id);
     const [session] = await db

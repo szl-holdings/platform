@@ -11,7 +11,7 @@ import {
 } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
 import { getVapidPublicKey } from "../lib/web-push-sender";
-import { validateBody, jsonObjectBodySchema } from "../lib/validation";
+import { jsonObjectBodySchema, validateBody } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -87,7 +87,7 @@ router.post("/web-push/subscriptions", authMiddleware({ required: false }), vali
   }
 });
 
-router.delete("/web-push/subscriptions", authMiddleware({ required: false }), async (req, res) => {
+router.delete("/web-push/subscriptions", validateBody(jsonObjectBodySchema), authMiddleware({ required: false }), async (req, res) => {
   try {
     const { endpoint } = req.body as { endpoint?: string };
     if (!endpoint || typeof endpoint !== "string") {

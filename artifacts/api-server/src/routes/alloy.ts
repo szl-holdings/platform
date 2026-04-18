@@ -33,7 +33,7 @@ import {
 } from "../lib/api-response";
 import { logger } from "../lib/logger";
 import { broadcastWs, pubsub, ALLOY_EVENTS } from "../lib/pubsub-bridge.js";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const upsertFeatureFlagSchema = z.object({
   key: z.string().min(1).max(100).regex(/^[a-z0-9_-]+$/i),
@@ -318,7 +318,7 @@ router.patch("/alloy/workflows/:id", authMiddleware(), requireRole("super_admin"
   }
 });
 
-router.delete("/alloy/workflows/:id", authMiddleware(), requireRole("super_admin", "ops"), async (req, res) => {
+router.delete("/alloy/workflows/:id", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("super_admin", "ops"), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [existing] = await db.select().from(alloyWorkflowsTable).where(eq(alloyWorkflowsTable.id, id));

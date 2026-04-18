@@ -30,7 +30,7 @@ import {
   parsePagination,
 } from "../lib/api-response";
 import { z } from "zod";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 import { logger } from "../lib/logger";
 
 const updatePolicySchema = z.object({
@@ -245,7 +245,7 @@ router.patch("/alloy/policies/:id", authMiddleware(), requireRole("admin"), vali
   }
 });
 
-router.delete("/alloy/policies/:id", authMiddleware(), requireRole("admin"), async (req, res) => {
+router.delete("/alloy/policies/:id", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("admin"), async (req, res) => {
   try {
     const id = parseInt(String(req.params.id as string));
     if (isNaN(id)) return sendBadRequest(res, "Invalid policy ID");

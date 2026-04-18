@@ -4,7 +4,7 @@ import { authMiddleware } from "../middlewares/auth";
 import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../middlewares/sliding-window-limiter";
 import { sendSuccess, sendError, handleRouteError, sendCreated } from "../lib/api-response";
 import { logger } from "../lib/logger";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 import { gatewayInfer } from "../lib/ai-gateway";
 import { db, memoryRecordsTable } from "@szl-holdings/db";
 import { eq } from "drizzle-orm";
@@ -1134,7 +1134,7 @@ router.put("/memory/:id", perUserWriteSlidingLimiter, validateBody(jsonObjectBod
   }
 });
 
-router.delete("/memory/:id", perUserWriteSlidingLimiter, async (req: Request, res: Response) => {
+router.delete("/memory/:id", validateBody(jsonObjectBodySchema), perUserWriteSlidingLimiter, async (req: Request, res: Response) => {
   try {
     if (!memoryStore.has(req.params.id as string)) { sendError(res, "Memory item not found", 404); return; }
     memoryStore.delete(req.params.id as string);

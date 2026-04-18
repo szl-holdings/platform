@@ -10,7 +10,7 @@ import type { BlockNode } from "../../lib/pdf-renderer-types";
 import { ObjectStorageService, ObjectNotFoundError } from "../../lib/objectStorage";
 import { setObjectAclPolicy } from "../../lib/objectAcl";
 import { getRequestUserId, canAccessDocument, getUserRole, canMutateDocument, getRequestUserEmail } from "./shared";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../../lib/validation";
 
 interface AuthUser { id: number; role: string; email?: string; displayName?: string }
 type ExtendedRequest = Request & { user?: AuthUser }
@@ -141,7 +141,7 @@ router.put("/documents/:id", authMiddleware(), validateBody(jsonObjectBodySchema
   }
 });
 
-router.delete("/documents/:id", authMiddleware(), async (req: Request, res: Response) => {
+router.delete("/documents/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id as string, 10);
     if (isNaN(id)) return sendBadRequest(res, "Invalid document ID");

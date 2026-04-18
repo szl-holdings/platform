@@ -54,7 +54,7 @@ import {
   type ToolMeshActionApproval,
 } from "@szl-holdings/db";
 import { and, desc, eq, sql } from "drizzle-orm";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 import { sendEmail, hasEmailProviderConfigured } from "../lib/email";
 
 const router: IRouter = Router();
@@ -418,7 +418,7 @@ router.patch("/policies/:id", authMiddleware(), requireRole("super_admin", "admi
   }
 });
 
-router.delete("/policies/:id", authMiddleware(), requireRole("super_admin", "admin"), async (req: Request, res: Response) => {
+router.delete("/policies/:id", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("super_admin", "admin"), async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params["id"] as string, 10);
     if (isNaN(id)) { sendBadRequest(res, "Invalid policy ID"); return; }
@@ -473,7 +473,7 @@ router.post("/policies/:id/assignments", authMiddleware(), requireRole("super_ad
   }
 });
 
-router.delete("/policies/:id/assignments/:assignmentId", authMiddleware(), requireRole("super_admin", "admin", "ops"), async (req: Request, res: Response) => {
+router.delete("/policies/:id/assignments/:assignmentId", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("super_admin", "admin", "ops"), async (req: Request, res: Response) => {
   try {
     const policyId = parseInt(req.params["id"] as string, 10);
     const assignmentId = parseInt(req.params["assignmentId"] as string, 10);
@@ -671,7 +671,7 @@ router.post("/tools/:toolId/permissions", authMiddleware(), requireRole("super_a
   }
 });
 
-router.delete("/tools/:toolId/permissions/:permissionId", authMiddleware(), requireRole("super_admin", "admin"), async (req: Request, res: Response) => {
+router.delete("/tools/:toolId/permissions/:permissionId", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("super_admin", "admin"), async (req: Request, res: Response) => {
   try {
     const toolId = req.params["toolId"] as string;
     const permissionId = parseInt(req.params["permissionId"] as string, 10);

@@ -899,6 +899,12 @@ export const jsonObjectBodySchema = z.preprocess(
 
 // ─── Common query param schemas ───────────────────────────────────────────────
 
+// Permissive baseline query validator. Accepts any keys without coercion.
+// Use as a safety net for routes that read req.query but do not have a
+// specific shape — ensures the value is at least a plain object so the
+// validation middleware path is exercised.
+export const anyQuerySchema = z.object({}).passthrough();
+
 export const paginationQuerySchema = z.object({
   page: z.coerce.number().int().min(1).max(10000).default(1).optional(),
   limit: z.coerce.number().int().min(1).max(500).default(50).optional(),

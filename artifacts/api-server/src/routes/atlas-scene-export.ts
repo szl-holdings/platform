@@ -12,6 +12,7 @@ import {
 import type { SceneSnapshot, BranchPackage, ProofBundle } from "@szl-holdings/scene-export";
 import { sendSuccess, sendError, sendBadRequest, handleRouteError } from "../lib/api-response";
 
+import { anyQuerySchema, jsonObjectBodySchema, validateBody, validateQuery } from "../lib/validation";
 const router: IRouter = Router();
 
 const atlasExportRateLimit = rateLimit({
@@ -41,7 +42,7 @@ async function checkAtlasEnabled(res: Response): Promise<boolean> {
 }
 
 router.get(
-  "/atlas/snapshot/:sceneId",
+  "/atlas/snapshot/:sceneId", validateQuery(anyQuerySchema),
   authMiddleware(),
   requireRole("operator", "ops", "exec", "admin", "super_admin"),
   atlasExportRateLimit,
@@ -78,7 +79,7 @@ router.get(
 );
 
 router.post(
-  "/atlas/branch/export",
+  "/atlas/branch/export", validateBody(jsonObjectBodySchema),
   authMiddleware(),
   requireRole("operator", "ops", "exec", "admin", "super_admin"),
   atlasExportRateLimit,
@@ -128,7 +129,7 @@ router.post(
 );
 
 router.post(
-  "/atlas/proof-bundle/export",
+  "/atlas/proof-bundle/export", validateBody(jsonObjectBodySchema),
   authMiddleware(),
   requireRole("operator", "ops", "exec", "admin", "super_admin"),
   atlasExportRateLimit,
@@ -179,7 +180,7 @@ router.post(
 );
 
 router.get(
-  "/atlas/export/openusd/:sceneId",
+  "/atlas/export/openusd/:sceneId", validateQuery(anyQuerySchema),
   authMiddleware(),
   requireRole("operator", "ops", "exec", "admin", "super_admin"),
   atlasExportRateLimit,

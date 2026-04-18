@@ -2,6 +2,7 @@ import { Router, type IRouter, type Request, type Response } from "express";
 import { sendSuccess, sendNotFound, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
 
+import { anyQuerySchema, jsonObjectBodySchema, validateBody, validateQuery } from "../lib/validation";
 const router: IRouter = Router();
 
 type RemediationStatus = "executing" | "pending_approval" | "completed" | "failed" | "queued";
@@ -190,7 +191,7 @@ router.get("/self-healing/policies", authMiddleware({ required: false }), (_req:
   }
 });
 
-router.patch("/self-healing/policies/:id/toggle", authMiddleware({ required: true }), (req: Request, res: Response) => {
+router.patch("/self-healing/policies/:id/toggle", validateBody(jsonObjectBodySchema), authMiddleware({ required: true }), (req: Request, res: Response) => {
   try {
     const { id } = req.params as { id: string };
     const pattern = PATTERNS.find(p => p.id === id);
@@ -205,7 +206,7 @@ router.patch("/self-healing/policies/:id/toggle", authMiddleware({ required: tru
   }
 });
 
-router.get("/self-healing/runs", authMiddleware({ required: false }), (req: Request, res: Response) => {
+router.get("/self-healing/runs", validateQuery(anyQuerySchema), authMiddleware({ required: false }), (req: Request, res: Response) => {
   try {
     const runs = buildRuns();
     const { status, patternId, limit } = req.query as { status?: string; patternId?: string; limit?: string };

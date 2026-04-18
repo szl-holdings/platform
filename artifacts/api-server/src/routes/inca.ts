@@ -12,7 +12,7 @@ import {
 import { eq, desc, ilike, or, sql } from "drizzle-orm";
 import { sendSuccess, sendNotFound, handleRouteError, parsePagination } from "../lib/api-response";
 import { authMiddleware, parseIdParam } from "../middlewares/auth";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -86,7 +86,7 @@ router.patch("/inca/projects/:id", authMiddleware(), validateBody(jsonObjectBody
   }
 });
 
-router.delete("/inca/projects/:id", authMiddleware(), async (req, res) => {
+router.delete("/inca/projects/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(incaProjectsTable).where(eq(incaProjectsTable.id, id)).returning();
@@ -148,7 +148,7 @@ router.patch("/inca/experiments/:id", authMiddleware(), validateBody(jsonObjectB
   }
 });
 
-router.delete("/inca/experiments/:id", authMiddleware(), async (req, res) => {
+router.delete("/inca/experiments/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(incaExperimentsTable).where(eq(incaExperimentsTable.id, id)).returning();
@@ -190,7 +190,7 @@ router.patch("/inca/models/:id", authMiddleware(), validateBody(jsonObjectBodySc
   }
 });
 
-router.delete("/inca/models/:id", authMiddleware(), async (req, res) => {
+router.delete("/inca/models/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(incaModelsTable).where(eq(incaModelsTable.id, id)).returning();
@@ -221,7 +221,7 @@ router.post("/inca/insights", authMiddleware(), validateBody(jsonObjectBodySchem
   }
 });
 
-router.delete("/inca/insights/:id", authMiddleware(), async (req, res) => {
+router.delete("/inca/insights/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(incaInsightsTable).where(eq(incaInsightsTable.id, id)).returning();

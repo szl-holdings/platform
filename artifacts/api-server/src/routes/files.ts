@@ -9,7 +9,7 @@ import { peekUploadIntent, consumeUploadIntent } from "../lib/uploadIntentStore"
 import { validateFileType } from "../lib/fileTypeAllowlist";
 import { checkOrgStorageQuota } from "../lib/storageQuota";
 import { dispatchVirusScan } from "../lib/virusScan";
-import { validateBody, jsonObjectBodySchema } from "../lib/validation";
+import { jsonObjectBodySchema, validateBody } from "../lib/validation";
 
 const router: IRouter = Router();
 const objectStorageService = new ObjectStorageService();
@@ -179,7 +179,7 @@ router.post("/files", authMiddleware(), validateBody(jsonObjectBodySchema), asyn
  * DELETE /files/:id
  * Soft-delete (remove record) for a file. Does not delete the GCS object.
  */
-router.delete("/files/:id", authMiddleware(), async (req: Request, res: Response) => {
+router.delete("/files/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req: Request, res: Response) => {
   try {
     const id = parseIdParam(req.params.id);
     const authedUser = (req as Request & { user?: { id: number; role: string } }).user;

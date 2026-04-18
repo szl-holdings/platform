@@ -3,7 +3,7 @@ import { db, dosArticlesTable, dosLeadsTable } from "@szl-holdings/db";
 import { eq, desc, and, sql } from "drizzle-orm";
 import { dosApiKeyAuth } from "../middlewares/dos-api-key-auth";
 import { readLimiter } from "../middlewares/rate-limiters";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const router = Router();
 
@@ -55,7 +55,7 @@ router.get("/subscribers", validateQuery(listQuerySchema), async (req: Request, 
   res.json({ data: leads.map(l => ({ id: l.id, email: l.email, source: l.source || "direct", segment: l.stage, joinedAt: l.createdAt })), total: count ?? 0, limit: lim, offset: off });
 });
 
-router.post("/subscribers", async (req: Request, res: Response): Promise<void> => {
+router.post("/subscribers", validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
   const { email, source } = req.body;
   if (!email || typeof email !== "string" || !email.includes("@")) {
     res.status(400).json({ error: "valid email required" });

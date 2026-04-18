@@ -7,7 +7,7 @@ import { logger } from "../../lib/logger";
 import { createRmmProvider, setCachedProvider, getCachedProvider, clearProviderCache, type RmmProviderConfig } from "../../services/rmm-provider";
 import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from "crypto";
 import { auth, authWrite, roleAdmin, roleOperator, queryConnectors, queryConnectorById, stripSecrets, buildProviderConfig, isProviderSupported, type PlaybookRow } from "./shared";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../../lib/validation";
 
 const router: IRouter = Router();
 
@@ -217,7 +217,7 @@ router.patch("/rmm/org-site-mappings/:id", authWrite, roleAdmin, validateBody(js
   } catch (err) { handleRouteError(res, err, "Failed to update org/site mapping"); }
 });
 
-router.delete("/rmm/org-site-mappings/:id", authWrite, roleAdmin, async (req, res) => {
+router.delete("/rmm/org-site-mappings/:id", validateBody(jsonObjectBodySchema), authWrite, roleAdmin, async (req, res) => {
   try {
     const id = parseInt(String(req.params.id), 10);
     if (isNaN(id)) return sendBadRequest(res, "Invalid ID");

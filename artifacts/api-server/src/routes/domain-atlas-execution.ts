@@ -32,7 +32,7 @@ import { Router, type IRouter, type Request, type Response } from "express";
 import { z } from "zod";
 import { authMiddleware } from "../middlewares/auth.js";
 import { sendSuccess, sendCreated, sendBadRequest, sendNotFound, sendForbidden, handleRouteError } from "../lib/api-response.js";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation.js";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation.js";
 import { logger } from "../lib/logger.js";
 import {
   initializeAtlasExecutionEngine,
@@ -407,7 +407,7 @@ function buildDomainRoutes(domain: string): void {
   });
 
   // ── POST /:domain/atlas/runs/:runId/approve ─────────────────────────────────
-  router.post(`${prefix}/runs/:runId/approve`, authMiddleware({ required: true }), async (req: Request, res: Response) => {
+  router.post(`${prefix}/runs/:runId/approve`, validateBody(jsonObjectBodySchema), authMiddleware({ required: true }), async (req: Request, res: Response) => {
     try {
       const { runId } = req.params;
       const tenantId = req.user?.orgs?.[0]?.orgId?.toString();
@@ -461,7 +461,7 @@ function buildDomainRoutes(domain: string): void {
   });
 
   // ── POST /:domain/atlas/runs/:runId/cancel ──────────────────────────────────
-  router.post(`${prefix}/runs/:runId/cancel`, authMiddleware({ required: true }), async (req: Request, res: Response) => {
+  router.post(`${prefix}/runs/:runId/cancel`, validateBody(jsonObjectBodySchema), authMiddleware({ required: true }), async (req: Request, res: Response) => {
     try {
       const { runId } = req.params;
       const tenantId = req.user?.orgs?.[0]?.orgId?.toString();

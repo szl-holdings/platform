@@ -3,7 +3,7 @@ import { db, projectsTable, insertProjectSchema } from "@szl-holdings/db";
 import { eq, desc } from "drizzle-orm";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, sendNoContent, sendError, handleRouteError } from "../lib/api-response";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
-import { validateBody, jsonObjectBodySchema } from "../lib/validation";
+import { jsonObjectBodySchema, validateBody } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -116,7 +116,7 @@ router.patch("/projects/:id", authMiddleware(), requireRole("ops", "super_admin"
   }
 });
 
-router.delete("/projects/:id", authMiddleware(), requireRole("ops", "super_admin"), async (req, res) => {
+router.delete("/projects/:id", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("ops", "super_admin"), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [project] = await db

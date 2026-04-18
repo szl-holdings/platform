@@ -23,7 +23,7 @@ import {
 } from "@workspace/memory-fabric/behaviors";
 import { MemoryEntrySchema, MemoryTypeSchema } from "@workspace/memory-fabric/types";
 import type { MemoryEntry, MemoryType, SensitivityLevel } from "@workspace/memory-fabric/types";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -232,7 +232,7 @@ router.put("/memory/:id", authMiddleware(), validateBody(jsonObjectBodySchema), 
 });
 
 router.delete(
-  "/memory/:id",
+  "/memory/:id", validateBody(jsonObjectBodySchema),
   authMiddleware(),
   requireRole("admin", "super_admin"),
   async (req: Request, res: Response) => {
@@ -252,7 +252,7 @@ router.delete(
 );
 
 router.post(
-  "/memory/evict-expired",
+  "/memory/evict-expired", validateBody(jsonObjectBodySchema),
   authMiddleware(),
   requireRole("admin", "super_admin"),
   async (_req: Request, res: Response) => {
@@ -311,7 +311,7 @@ router.post(
 );
 
 router.post(
-  "/memory/behaviors/enforce-retention",
+  "/memory/behaviors/enforce-retention", validateBody(jsonObjectBodySchema),
   authMiddleware(),
   requireRole("admin", "super_admin"),
   async (_req: Request, res: Response) => {

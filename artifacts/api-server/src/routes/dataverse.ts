@@ -13,7 +13,7 @@ import { eq, and } from "drizzle-orm";
 import { services } from "@szl-holdings/services";
 import { getAzureTenantForUser } from "../lib/auth";
 import { decryptSecret } from "../lib/crypto";
-import {validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { anyQuerySchema, jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -641,7 +641,7 @@ router.patch(
 );
 
 router.delete(
-  "/contacts/:contactId",
+  "/contacts/:contactId", validateBody(jsonObjectBodySchema),
   dataverseRateLimit,
   authMiddleware(),
   requireRole("admin"),
@@ -782,7 +782,7 @@ router.patch(
 );
 
 router.delete(
-  "/leads/:leadId",
+  "/leads/:leadId", validateBody(jsonObjectBodySchema),
   dataverseRateLimit,
   authMiddleware(),
   requireRole("admin"),
@@ -883,7 +883,7 @@ router.patch(
 );
 
 router.delete(
-  "/opportunities/:opportunityId",
+  "/opportunities/:opportunityId", validateBody(jsonObjectBodySchema),
   dataverseRateLimit,
   authMiddleware(),
   requireRole("admin"),
@@ -949,7 +949,7 @@ router.get(
 );
 
 router.patch(
-  "/activities/:activityId",
+  "/activities/:activityId", validateQuery(anyQuerySchema),
   dataverseRateLimit,
   authMiddleware(),
   requireRole("analyst"),
@@ -986,7 +986,7 @@ router.patch(
 );
 
 router.delete(
-  "/activities/:activityId",
+  "/activities/:activityId", validateBody(jsonObjectBodySchema), validateQuery(anyQuerySchema),
   dataverseRateLimit,
   authMiddleware(),
   requireRole("admin"),

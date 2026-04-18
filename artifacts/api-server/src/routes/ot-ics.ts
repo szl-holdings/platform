@@ -15,7 +15,7 @@ import { z } from "zod";
 import { sendSuccess, sendCreated, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
 import { logger } from "../lib/logger";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -151,7 +151,7 @@ router.post("/aegis/ot-ics/anomaly-scores", authMiddleware({ required: true }), 
   }
 });
 
-router.post("/aegis/ot-ics/baseline/recompute", authMiddleware({ required: true }), async (_req, res) => {
+router.post("/aegis/ot-ics/baseline/recompute", validateBody(jsonObjectBodySchema), authMiddleware({ required: true }), async (_req, res) => {
   try {
     const result = await recomputeOtIcsBaselines();
     sendSuccess(res, result);
@@ -355,7 +355,7 @@ export async function ensureOtIcsDemoData(): Promise<void> {
   return _seedPromise;
 }
 
-router.post("/aegis/ot-ics/demo/seed", authMiddleware({ required: true }), async (_req, res) => {
+router.post("/aegis/ot-ics/demo/seed", validateBody(jsonObjectBodySchema), authMiddleware({ required: true }), async (_req, res) => {
   try {
     await ensureOtIcsDemoData();
     sendSuccess(res, { ok: true });

@@ -23,7 +23,7 @@ import {
 } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
 import { perUserApiSlidingLimiter } from "../middlewares/sliding-window-limiter";
-import { validateBody, jsonObjectBodySchema } from "../lib/validation";
+import { jsonObjectBodySchema, validateBody } from "../lib/validation";
 
 const router: IRouter = Router();
 router.use(authMiddleware({ required: false }));
@@ -164,7 +164,7 @@ router.get("/drift/:domain", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/drift/reset", async (_req: Request, res: Response) => {
+router.post("/drift/reset", validateBody(jsonObjectBodySchema), async (_req: Request, res: Response) => {
   try {
     driftHistory.length = 0;
     return sendSuccess(res, { reset: true, message: "Drift baseline reset. History cleared." });

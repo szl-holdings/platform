@@ -23,7 +23,7 @@ import {
 } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
 import { perUserApiSlidingLimiter } from "../middlewares/sliding-window-limiter";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const router: IRouter = Router();
 // Scope auth to /constellation paths only — this router is mounted without a path prefix
@@ -179,7 +179,7 @@ router.patch("/constellation/views/:id", validateBody(jsonObjectBodySchema), asy
   }
 });
 
-router.delete("/constellation/views/:id", async (req: Request, res: Response) => {
+router.delete("/constellation/views/:id", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
     if (!userId) {

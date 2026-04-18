@@ -6,7 +6,7 @@ import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 import { services } from "@szl-holdings/services";
 import { logger } from "../lib/logger";
 import { isFlagEnabled } from "../lib/platform-flags";
-import { validateBody, billingCheckoutSchema, billingCustomerPortalSchema, billingCommandSubscribeSchema, stripeCheckoutSchema, planSubscribeSchema, cancelSubscriptionSchema, updateSubscriptionSchema, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { billingCheckoutSchema, billingCommandSubscribeSchema, billingCustomerPortalSchema, cancelSubscriptionSchema, jsonObjectBodySchema, listQuerySchema, planSubscribeSchema, stripeCheckoutSchema, updateSubscriptionSchema, validateBody, validateQuery } from "../lib/validation";
 import { z } from "zod";
 
 const router: IRouter = Router();
@@ -141,7 +141,7 @@ router.post("/billing/customer-portal", validateBody(billingCustomerPortalSchema
   }
 });
 
-router.post("/billing/portal-session", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/billing/portal-session", validateBody(jsonObjectBodySchema), authMiddleware(), async (req: Request, res: Response) => {
   try {
     const returnUrl = (req.body as { returnUrl?: string }).returnUrl ?? req.headers.referer ?? "/";
     const user = (req as unknown as { user?: { email?: string; id?: string } }).user;
@@ -238,7 +238,7 @@ router.get("/billing/stripe-config", async (_req, res) => {
   }
 });
 
-router.post("/billing/webhooks", async (req: Request, res: Response) => {
+router.post("/billing/webhooks", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const signature = req.headers["stripe-signature"] as string | undefined;
     const rawBody = (req as Request & { rawBody?: Buffer }).rawBody?.toString("utf8") ?? JSON.stringify(req.body);
@@ -677,9 +677,9 @@ async function handleAegisEnterpriseQuote(req: Request, res: Response): Promise<
   }
 }
 
-router.post("/billing/aegis/enterprise-quote", authMiddleware({ required: false }), handleAegisEnterpriseQuote);
+router.post("/billing/aegis/enterprise-quote", validateBody(jsonObjectBodySchema), authMiddleware({ required: false }), handleAegisEnterpriseQuote);
 
-router.post("/billing/sync-plans", authMiddleware(), requireRole("admin", "super_admin"), async (_req: Request, res: Response) => {
+router.post("/billing/sync-plans", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("admin", "super_admin"), async (_req: Request, res: Response) => {
   try {
     if (!services.stripe.isLive) {
       sendBadRequest(res, "Stripe must be connected (STRIPE_SECRET_KEY set) to sync plans");

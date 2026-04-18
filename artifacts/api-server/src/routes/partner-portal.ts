@@ -37,7 +37,7 @@ import {
   sendNoContent, handleRouteError,
 } from "../lib/api-response";
 import { z } from "zod";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 import { parseIdParam } from "../middlewares/auth";
 
 const router: IRouter = Router();
@@ -445,7 +445,7 @@ router.post("/partner/accounts/:id/tenants/assign", authMiddleware(), validateBo
   }
 });
 
-router.delete("/partner/accounts/:id/tenants/:orgId", authMiddleware(), async (req: Request, res: Response) => {
+router.delete("/partner/accounts/:id/tenants/:orgId", validateBody(jsonObjectBodySchema), authMiddleware(), async (req: Request, res: Response) => {
   try {
     const partnerId = parseIdParam(req.params.id);
     const orgId = parseIdParam(req.params.orgId);
@@ -593,7 +593,7 @@ router.put("/orgs/:orgId/branding", authMiddleware(), validateBody(brandingSchem
   }
 });
 
-router.delete("/orgs/:orgId/branding", authMiddleware(), async (req: Request, res: Response) => {
+router.delete("/orgs/:orgId/branding", validateBody(jsonObjectBodySchema), authMiddleware(), async (req: Request, res: Response) => {
   try {
     const orgId = parseIdParam(req.params.orgId);
     if (isNaN(orgId)) { sendBadRequest(res, "Invalid org ID"); return; }
@@ -923,7 +923,7 @@ router.patch("/orgs/:orgId/custom-domains/:domainId", authMiddleware(), validate
   }
 });
 
-router.delete("/orgs/:orgId/custom-domains/:domainId", authMiddleware(), async (req: Request, res: Response) => {
+router.delete("/orgs/:orgId/custom-domains/:domainId", validateBody(jsonObjectBodySchema), authMiddleware(), async (req: Request, res: Response) => {
   try {
     const orgId = parseIdParam(req.params.orgId);
     const domainId = parseIdParam(req.params.domainId);

@@ -29,7 +29,7 @@ import { sendSuccess, sendCreated, sendNotFound, sendNoContent, handleRouteError
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 import { tenantScope } from "../middlewares/tenant-scope";
 import { broadcastWs, pubsub, VESSELS_EVENTS } from "../lib/pubsub-bridge.js";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema } from "../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -131,7 +131,7 @@ router.put("/vessels/fleets/:id", authMiddleware(), tenantScope(), requireRole("
   }
 });
 
-router.delete("/vessels/fleets/:id", authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin"), async (req: Request, res) => {
+router.delete("/vessels/fleets/:id", validateBody(jsonObjectBodySchema), authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin"), async (req: Request, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const condition = req.tenantOrgId !== undefined
@@ -285,7 +285,7 @@ router.put("/vessels/:id", authMiddleware(), tenantScope(), requireRole("ops", "
   }
 });
 
-router.delete("/vessels/:id", authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin"), async (req: Request, res) => {
+router.delete("/vessels/:id", validateBody(jsonObjectBodySchema), authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin"), async (req: Request, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const condition = req.tenantOrgId !== undefined
@@ -409,7 +409,7 @@ router.put("/vessels/routes/:id", authMiddleware(), tenantScope(), requireRole("
   }
 });
 
-router.delete("/vessels/routes/:id", authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin"), async (req: Request, res) => {
+router.delete("/vessels/routes/:id", validateBody(jsonObjectBodySchema), authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin"), async (req: Request, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [existing] = await db.select().from(vesselsRoutesTable).where(eq(vesselsRoutesTable.id, id));
@@ -469,7 +469,7 @@ router.put("/vessels/alert-rules/:id", authMiddleware(), tenantScope(), requireR
   }
 });
 
-router.delete("/vessels/alert-rules/:id", authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin"), async (req: Request, res) => {
+router.delete("/vessels/alert-rules/:id", validateBody(jsonObjectBodySchema), authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin"), async (req: Request, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const condition = req.tenantOrgId !== undefined
@@ -512,7 +512,7 @@ router.post("/vessels/alerts", authMiddleware(), tenantScope(), requireRole("ops
   }
 });
 
-router.delete("/vessels/alerts/:id", authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin"), async (req: Request, res) => {
+router.delete("/vessels/alerts/:id", validateBody(jsonObjectBodySchema), authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin"), async (req: Request, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [existing] = await db.select().from(vesselsAlertsTable).where(eq(vesselsAlertsTable.id, id));

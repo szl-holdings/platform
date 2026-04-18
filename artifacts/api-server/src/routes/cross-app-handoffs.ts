@@ -3,7 +3,7 @@ import { sendSuccess, sendCreated, sendBadRequest, handleRouteError } from "../l
 import { authMiddleware } from "../middlewares/auth";
 import { prismBus } from "@szl-holdings/prism-bus";
 import type { PrismDomain } from "@szl-holdings/prism-bus";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -302,7 +302,7 @@ router.post("/cross-app/recent-items", validateBody(jsonObjectBodySchema), (req:
   }
 });
 
-router.delete("/cross-app/recent-items", (req: Request, res: Response) => {
+router.delete("/cross-app/recent-items", validateBody(jsonObjectBodySchema), (req: Request, res: Response) => {
   try {
     const userId = (req.headers["x-user-id"] as string) || "anonymous";
     recentItemsByUser.delete(userId);

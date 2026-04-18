@@ -6,7 +6,7 @@ import { authMiddleware, requireRole } from "../middlewares/auth";
 import { sendPushToUser, sendPushToApp, sendPushBroadcast } from "../lib/expo-push";
 import { buildPushMessage, type NotificationTemplate } from "../lib/push-templates";
 import type { PushMessagePayload } from "../lib/expo-push";
-import { validateBody, pushNotificationSendSchema, pushNotificationScheduleSchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, pushNotificationScheduleSchema, pushNotificationSendSchema, validateBody, validateQuery } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -175,7 +175,7 @@ router.get("/push-notifications/scheduled", authMiddleware(), requireRole("ops")
   }
 });
 
-router.delete("/push-notifications/scheduled/:id", authMiddleware(), requireRole("ops"), async (req, res) => {
+router.delete("/push-notifications/scheduled/:id", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("ops"), async (req, res) => {
   try {
     const id = Number(req.params.id);
     if (isNaN(id)) {

@@ -18,7 +18,7 @@ import {
   getCached, aiRateLimit, intelRateLimit, fetchJson,
   type ThreatItem,
 } from "./shared";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
+import { anyQuerySchema, jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../../lib/validation";
 
 const router = Router();
 
@@ -116,7 +116,7 @@ router.get("/intelligence/ai/chat/:sessionId/history", aiRateLimit, authMiddlewa
   } catch (err) { handleRouteError(res, err, "Failed to get chat history"); }
 });
 
-router.delete("/intelligence/ai/chat/:sessionId", aiRateLimit, authMiddleware({ required: true }), async (req, res) => {
+router.delete("/intelligence/ai/chat/:sessionId", validateBody(jsonObjectBodySchema), aiRateLimit, authMiddleware({ required: true }), async (req, res) => {
   try {
     const requesterId: string = String(req.user?.id ?? "");
     const cleared = services.huggingface.clearChatSession(String(req.params.sessionId), requesterId);
@@ -134,7 +134,7 @@ router.post("/intelligence/ai/reason", aiRateLimit, authMiddleware(), validateBo
   } catch (err) { handleRouteError(res, err, "Failed to generate reasoning response"); }
 });
 
-router.post("/intelligence/ai/transcribe", express.raw({ type: ["audio/*", "application/octet-stream"], limit: "25mb" }), aiRateLimit, authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/intelligence/ai/transcribe", validateQuery(anyQuerySchema), express.raw({ type: ["audio/*", "application/octet-stream"], limit: "25mb" }), aiRateLimit, authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     if (!req.body || !Buffer.isBuffer(req.body) || req.body.length === 0) {
       sendError(res, "Audio data is required. Send raw audio bytes with Content-Type: audio/wav (or audio/mpeg, application/octet-stream). Max 25MB.", 400); return;

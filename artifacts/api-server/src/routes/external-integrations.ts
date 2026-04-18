@@ -4,7 +4,7 @@ import { services, type NormalizedSiemEvent } from "@szl-holdings/services";
 import { logger } from "../lib/logger";
 import { sendSuccess, sendError, handleRouteError } from "../lib/api-response";
 import { authMiddleware, requireRole } from "../middlewares/auth";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -160,7 +160,7 @@ router.get("/integrations/status/:adapter", async (req: Request, res: Response) 
   }
 });
 
-router.post("/integrations/status/refresh", authMiddleware(), requireRole("ops", "admin", "super_admin"), async (_req: Request, res: Response) => {
+router.post("/integrations/status/refresh", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("ops", "admin", "super_admin"), async (_req: Request, res: Response) => {
   try {
     const results: Array<{ adapter: string; success: boolean; responseTimeMs: number; error?: string }> = [];
 
@@ -196,7 +196,7 @@ router.post("/integrations/status/refresh", authMiddleware(), requireRole("ops",
 });
 
 
-router.post("/webhooks/inbound/jira", async (req: Request, res: Response) => {
+router.post("/webhooks/inbound/jira", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const rawBody = extractRawBody(req);
 
@@ -235,7 +235,7 @@ router.post("/webhooks/inbound/jira", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/webhooks/inbound/pagerduty", async (req: Request, res: Response) => {
+router.post("/webhooks/inbound/pagerduty", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const rawBody = extractRawBody(req);
 
@@ -276,7 +276,7 @@ router.post("/webhooks/inbound/pagerduty", async (req: Request, res: Response) =
   }
 });
 
-router.post("/webhooks/inbound/slack/events", async (req: Request, res: Response) => {
+router.post("/webhooks/inbound/slack/events", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const rawBody = extractRawBody(req);
 
@@ -314,7 +314,7 @@ router.post("/webhooks/inbound/slack/events", async (req: Request, res: Response
   }
 });
 
-router.post("/webhooks/inbound/slack/interactions", async (req: Request, res: Response) => {
+router.post("/webhooks/inbound/slack/interactions", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const rawBody = extractRawBody(req);
 
@@ -350,7 +350,7 @@ router.post("/webhooks/inbound/slack/interactions", async (req: Request, res: Re
   }
 });
 
-router.post("/webhooks/inbound/slack/commands", async (req: Request, res: Response) => {
+router.post("/webhooks/inbound/slack/commands", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const rawBody = (req as RequestWithRawBody).rawBody?.toString("utf-8")
       ?? (typeof req.body === "string" ? req.body : new URLSearchParams(req.body as Record<string, string>).toString());
@@ -382,7 +382,7 @@ router.post("/webhooks/inbound/slack/commands", async (req: Request, res: Respon
   }
 });
 
-router.post("/webhooks/inbound/salesforce/cdc", async (req: Request, res: Response) => {
+router.post("/webhooks/inbound/salesforce/cdc", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const rawBody = extractRawBody(req);
 
@@ -426,7 +426,7 @@ router.post("/webhooks/inbound/salesforce/cdc", async (req: Request, res: Respon
   }
 });
 
-router.post("/webhooks/inbound/siem/splunk", verifySiemToken, async (req: Request, res: Response) => {
+router.post("/webhooks/inbound/siem/splunk", validateBody(jsonObjectBodySchema), verifySiemToken, async (req: Request, res: Response) => {
   try {
     const payload = req.body as Record<string, unknown> | Array<Record<string, unknown>>;
     const result = services.siem.ingestSplunkHec(payload);
@@ -446,7 +446,7 @@ router.post("/webhooks/inbound/siem/splunk", verifySiemToken, async (req: Reques
   }
 });
 
-router.post("/webhooks/inbound/siem/sentinel", verifySiemToken, async (req: Request, res: Response) => {
+router.post("/webhooks/inbound/siem/sentinel", validateBody(jsonObjectBodySchema), verifySiemToken, async (req: Request, res: Response) => {
   try {
     const payload = req.body as Record<string, unknown>;
     const alerts = (payload["value"] as Array<Record<string, unknown>>) ?? [payload];
@@ -466,7 +466,7 @@ router.post("/webhooks/inbound/siem/sentinel", verifySiemToken, async (req: Requ
   }
 });
 
-router.post("/webhooks/inbound/siem/cef", verifySiemToken, async (req: Request, res: Response) => {
+router.post("/webhooks/inbound/siem/cef", validateBody(jsonObjectBodySchema), verifySiemToken, async (req: Request, res: Response) => {
   try {
     const rawBody = typeof req.body === "string" ? req.body : JSON.stringify(req.body);
     const lines = rawBody.split("\n").filter((l) => l.trim());
@@ -486,7 +486,7 @@ router.post("/webhooks/inbound/siem/cef", verifySiemToken, async (req: Request, 
   }
 });
 
-router.post("/webhooks/inbound/siem/syslog", verifySiemToken, async (req: Request, res: Response) => {
+router.post("/webhooks/inbound/siem/syslog", validateBody(jsonObjectBodySchema), verifySiemToken, async (req: Request, res: Response) => {
   try {
     const rawBody = typeof req.body === "string" ? req.body : JSON.stringify(req.body);
     const lines = rawBody.split("\n").filter((l) => l.trim());
@@ -504,7 +504,7 @@ router.post("/webhooks/inbound/siem/syslog", verifySiemToken, async (req: Reques
   }
 });
 
-router.post("/webhooks/inbound/siem/events", verifySiemToken, async (req: Request, res: Response) => {
+router.post("/webhooks/inbound/siem/events", validateBody(jsonObjectBodySchema), verifySiemToken, async (req: Request, res: Response) => {
   try {
     const payload = req.body as Array<Record<string, unknown>> | Record<string, unknown>;
     const events = Array.isArray(payload) ? payload : [payload];

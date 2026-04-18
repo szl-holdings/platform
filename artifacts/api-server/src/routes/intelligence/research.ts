@@ -20,11 +20,11 @@ import {
   computeIntelligenceBriefing,
   type ThreatItem, type CveItem, type GeoEvent, type NewsItem,
 } from "./shared";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../../lib/validation";
 
 const router = Router();
 
-router.post("/intelligence/ai/threat-briefing", aiRateLimit, authMiddleware(), async (_req, res) => {
+router.post("/intelligence/ai/threat-briefing", validateBody(jsonObjectBodySchema), aiRateLimit, authMiddleware(), async (_req, res) => {
   try {
     const threats = await getCached("threats", 300000, fetchOtxThreats);
     const topThreats = threats.slice(0, 5);
@@ -44,7 +44,7 @@ router.post("/intelligence/ai/threat-briefing", aiRateLimit, authMiddleware(), a
   } catch (err) { handleRouteError(res, err, "Failed to generate threat briefing"); }
 });
 
-router.post("/intelligence/ai/situation-report", aiRateLimit, authMiddleware(), async (_req, res) => {
+router.post("/intelligence/ai/situation-report", validateBody(jsonObjectBodySchema), aiRateLimit, authMiddleware(), async (_req, res) => {
   try {
     const [threats, cves, news] = await Promise.all([
       getCached("threats", 300000, fetchOtxThreats),

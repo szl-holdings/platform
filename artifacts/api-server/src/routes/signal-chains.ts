@@ -27,7 +27,7 @@ import {
   vesselsEventsTable,
 } from "@szl-holdings/db";
 import { eq, and, desc, count, sql, ne } from "drizzle-orm";
-import {validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -589,7 +589,7 @@ router.post(
 );
 
 router.post(
-  "/signal-chains/evaluate",
+  "/signal-chains/evaluate", validateBody(jsonObjectBodySchema),
   authMiddleware({ required: false }),
   perUserWriteSlidingLimiter,
   async (_req, res) => {

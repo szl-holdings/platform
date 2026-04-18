@@ -7,7 +7,7 @@ import { logger } from "../../lib/logger";
 import { createRmmProvider, setCachedProvider, getCachedProvider, clearProviderCache, type RmmProviderConfig } from "../../services/rmm-provider";
 import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from "crypto";
 import { auth, authWrite, roleAdmin, roleOperator, queryConnectors, queryConnectorById, stripSecrets, buildProviderConfig, isProviderSupported, decryptConfig, encryptConfig, SUPPORTED_PROVIDERS } from "./shared";
-import { validateBody, rmmProviderCreateSchema, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, rmmProviderCreateSchema, validateBody, validateQuery } from "../../lib/validation";
 
 const router: IRouter = Router();
 
@@ -77,7 +77,7 @@ router.patch("/rmm/providers/:id", authWrite, roleAdmin, validateBody(jsonObject
   } catch (err) { handleRouteError(res, err, "Failed to update RMM provider"); }
 });
 
-router.delete("/rmm/providers/:id", authWrite, roleAdmin, async (req, res) => {
+router.delete("/rmm/providers/:id", validateBody(jsonObjectBodySchema), authWrite, roleAdmin, async (req, res) => {
   try {
     const id = parseInt(String(req.params.id), 10);
     if (isNaN(id)) return sendBadRequest(res, "Invalid ID");

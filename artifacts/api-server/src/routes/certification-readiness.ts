@@ -19,7 +19,7 @@ import { eq, desc, sql, and, asc } from "drizzle-orm";
 import { sendSuccess, sendNotFound, sendForbidden, handleRouteError, parsePagination } from "../lib/api-response";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 import { z } from "zod";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const createProgramSchema = z.object({
   name: z.string().min(1).max(200),
@@ -143,7 +143,7 @@ router.patch("/certification/programs/:id", ...auth, validateBody(updateProgramS
   }
 });
 
-router.delete("/certification/programs/:id", ...auth, async (req, res) => {
+router.delete("/certification/programs/:id", validateBody(jsonObjectBodySchema), ...auth, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(certificationProgramsTable).set({ isActive: false, updatedAt: new Date() }).where(eq(certificationProgramsTable.id, id)).returning();
@@ -180,7 +180,7 @@ router.patch("/certification/requirements/:id", ...auth, validateBody(updateRequ
   }
 });
 
-router.delete("/certification/requirements/:id", ...auth, async (req, res) => {
+router.delete("/certification/requirements/:id", validateBody(jsonObjectBodySchema), ...auth, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(certificationRequirementsTable).where(eq(certificationRequirementsTable.id, id)).returning();
@@ -225,7 +225,7 @@ router.patch("/certification/status/:id", ...auth, validateBody(jsonObjectBodySc
   }
 });
 
-router.delete("/certification/status/:id", ...auth, async (req, res) => {
+router.delete("/certification/status/:id", validateBody(jsonObjectBodySchema), ...auth, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(certificationStatusTable).where(eq(certificationStatusTable.id, id)).returning();
@@ -272,7 +272,7 @@ router.patch("/certification/tasks/:id", ...auth, validateBody(updateCertTaskSch
   }
 });
 
-router.delete("/certification/tasks/:id", ...auth, async (req, res) => {
+router.delete("/certification/tasks/:id", validateBody(jsonObjectBodySchema), ...auth, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(certificationTasksTable).where(eq(certificationTasksTable.id, id)).returning();
@@ -317,7 +317,7 @@ router.patch("/certification/ownership-scenarios/:id", ...auth, validateBody(jso
   }
 });
 
-router.delete("/certification/ownership-scenarios/:id", ...auth, async (req, res) => {
+router.delete("/certification/ownership-scenarios/:id", validateBody(jsonObjectBodySchema), ...auth, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(ownershipScenariosTable).where(eq(ownershipScenariosTable.id, id)).returning();
@@ -362,7 +362,7 @@ router.patch("/certification/artifacts/:id", ...auth, validateBody(jsonObjectBod
   }
 });
 
-router.delete("/certification/artifacts/:id", ...auth, async (req, res) => {
+router.delete("/certification/artifacts/:id", validateBody(jsonObjectBodySchema), ...auth, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(applicationArtifactsTable).where(eq(applicationArtifactsTable.id, id)).returning();
@@ -409,7 +409,7 @@ router.patch("/certification/opportunities/:id", ...auth, validateBody(jsonObjec
   }
 });
 
-router.delete("/certification/opportunities/:id", ...auth, async (req, res) => {
+router.delete("/certification/opportunities/:id", validateBody(jsonObjectBodySchema), ...auth, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(opportunityPipelineTable).where(eq(opportunityPipelineTable.id, id)).returning();
@@ -454,7 +454,7 @@ router.patch("/certification/procurement-contacts/:id", ...auth, validateBody(js
   }
 });
 
-router.delete("/certification/procurement-contacts/:id", ...auth, async (req, res) => {
+router.delete("/certification/procurement-contacts/:id", validateBody(jsonObjectBodySchema), ...auth, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(procurementContactsTable).where(eq(procurementContactsTable.id, id)).returning();
@@ -499,7 +499,7 @@ router.patch("/certification/calendar/:id", ...auth, validateBody(jsonObjectBody
   }
 });
 
-router.delete("/certification/calendar/:id", ...auth, async (req, res) => {
+router.delete("/certification/calendar/:id", validateBody(jsonObjectBodySchema), ...auth, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(certificationCalendarTable).where(eq(certificationCalendarTable.id, id)).returning();
@@ -544,7 +544,7 @@ router.patch("/certification/legal-reviews/:id", ...auth, validateBody(jsonObjec
   }
 });
 
-router.delete("/certification/legal-reviews/:id", ...auth, async (req, res) => {
+router.delete("/certification/legal-reviews/:id", validateBody(jsonObjectBodySchema), ...auth, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(legalReviewCheckpointsTable).where(eq(legalReviewCheckpointsTable.id, id)).returning();

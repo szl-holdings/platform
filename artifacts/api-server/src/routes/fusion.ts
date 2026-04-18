@@ -3,7 +3,7 @@ import { authMiddleware } from "../middlewares/auth";
 import { sendBadRequest, sendError } from "../lib/api-response";
 import { fusionCortex, patternLibrary, predictiveCascadeEngine } from "@szl-holdings/ai-engine";
 import type { FusionAlertSeverity, FusionAlertCategory, DomainKey, CascadeHorizon } from "@szl-holdings/ai-engine";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { anyQuerySchema, jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const router = Router();
 
@@ -23,7 +23,7 @@ router.get("/fusion/stats", authMiddleware(), async (_req, res) => {
   res.json({ success: true, stats });
 });
 
-router.post("/fusion/scan", authMiddleware(), async (_req, res) => {
+router.post("/fusion/scan", validateBody(jsonObjectBodySchema), authMiddleware(), async (_req, res) => {
   try {
     const result = await fusionCortex.scan();
     res.json({ success: true, result });
@@ -66,19 +66,19 @@ router.post("/fusion/alerts/inject", authMiddleware(), validateBody(jsonObjectBo
   }
 });
 
-router.post("/fusion/demo/seed", authMiddleware(), async (_req, res) => {
+router.post("/fusion/demo/seed", validateBody(jsonObjectBodySchema), authMiddleware(), async (_req, res) => {
   fusionCortex.seedDemoAlerts();
   predictiveCascadeEngine.seedDemoAlerts();
   res.json({ success: true, message: "Demo fusion alerts seeded", alerts: fusionCortex.getAlerts({ limit: 10 }) });
 });
 
-router.post("/fusion/start-continuous", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/fusion/start-continuous", validateQuery(anyQuerySchema), authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   const intervalMs = parseInt(String(req.query.intervalMs ?? "300000"));
   fusionCortex.startContinuousScan(intervalMs);
   res.json({ success: true, message: "Fusion Cortex continuous scan started", intervalMs });
 });
 
-router.post("/fusion/stop-continuous", authMiddleware(), async (_req, res) => {
+router.post("/fusion/stop-continuous", validateBody(jsonObjectBodySchema), authMiddleware(), async (_req, res) => {
   fusionCortex.stopContinuousScan();
   res.json({ success: true, message: "Fusion Cortex continuous scan stopped" });
 });

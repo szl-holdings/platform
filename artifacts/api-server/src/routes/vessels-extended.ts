@@ -34,7 +34,7 @@ import { authMiddleware, parseIdParam } from "../middlewares/auth";
 import { adminGuard } from "../middlewares/admin-guard";
 import { logger } from "../lib/logger";
 import { seedVesselsData } from "../lib/seed-vessels";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -869,7 +869,7 @@ router.get("/vessels/readiness", authMiddleware(), async (_req, res) => {
 
 // ── Seed endpoint (admin-only) ────────────────────────────────────────────────
 
-router.post("/vessels/seed", authMiddleware(), adminGuard, async (_req, res) => {
+router.post("/vessels/seed", validateBody(jsonObjectBodySchema), authMiddleware(), adminGuard, async (_req, res) => {
   try {
     logger.info("Vessels seed triggered by admin");
     await seedVesselsData();

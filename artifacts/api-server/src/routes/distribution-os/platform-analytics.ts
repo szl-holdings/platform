@@ -17,7 +17,7 @@ import {
 } from "@szl-holdings/db";
 import { eq, desc, asc, and, gte, count, sql } from "drizzle-orm";
 import { authMiddleware } from "../../middlewares/auth";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../../lib/validation";
 
 const router = Router();
 const requireAuth = authMiddleware({ required: true });
@@ -87,7 +87,7 @@ router.post("/api-keys", requireAuth, validateBody(jsonObjectBodySchema), async 
   res.status(201).json({ id: setting.id, name, key, maskedKey, scopes: scopes || [], active: true, _note: "Store this key securely — it will not be shown again" });
 });
 
-router.delete("/api-keys/:id", requireAuth, async (req: Request, res: Response): Promise<void> => {
+router.delete("/api-keys/:id", validateBody(jsonObjectBodySchema), requireAuth, async (req: Request, res: Response): Promise<void> => {
   await db.delete(dosSiteSettingsTable).where(
     and(eq(dosSiteSettingsTable.id, Number(req.params.id)), eq(dosSiteSettingsTable.category, "integration"), sql`${dosSiteSettingsTable.key} LIKE 'apikey_%'`)
   );
@@ -121,7 +121,7 @@ router.post("/webhook-subscriptions", requireAuth, validateBody(jsonObjectBodySc
   res.status(201).json({ id: wh.id, name, url, events, secret, active: true, _note: "Store the signing secret securely — it will not be shown again" });
 });
 
-router.delete("/webhook-subscriptions/:id", requireAuth, async (req: Request, res: Response): Promise<void> => {
+router.delete("/webhook-subscriptions/:id", validateBody(jsonObjectBodySchema), requireAuth, async (req: Request, res: Response): Promise<void> => {
   await db.delete(dosSiteSettingsTable).where(
     and(eq(dosSiteSettingsTable.id, Number(req.params.id)), eq(dosSiteSettingsTable.category, "integration"), sql`${dosSiteSettingsTable.key} LIKE 'webhook_%'`)
   );

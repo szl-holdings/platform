@@ -40,7 +40,7 @@ import { orchestrate } from "../lib/multi-agent-orchestrator";
 import { fusionCortex } from "@szl-holdings/ai-engine";
 import { ontologyEngine } from "@szl-holdings/ai-engine";
 import { logger } from "../lib/logger";
-import {validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -1585,7 +1585,7 @@ router.get(
 );
 
 router.delete(
-  "/cortex/entity-graph/snapshot/:uuid",
+  "/cortex/entity-graph/snapshot/:uuid", validateBody(jsonObjectBodySchema),
   authMiddleware({ required: true }),
   perUserWriteSlidingLimiter,
   async (req, res) => {

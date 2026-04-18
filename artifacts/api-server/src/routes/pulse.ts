@@ -23,7 +23,7 @@ import { sendNotFound, sendUnauthorized, sendBadRequest } from "../lib/api-respo
 import { gatewayInfer } from "../lib/ai-gateway";
 import { logger } from "../lib/logger";
 import { services } from "@szl-holdings/services";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const router = Router();
 
@@ -68,7 +68,7 @@ function verifyDemoPin(req: Request, res: Response): boolean {
 if (process.env.NODE_ENV !== "production") {
   // Verify PIN and report valid/invalid — used by the client PIN modal before
   // opening demo mode. The PIN is sent in the request body (never in the URL).
-  router.post("/demo/verify", demoRateLimit, (req: Request, res: Response): void => {
+  router.post("/demo/verify", validateBody(jsonObjectBodySchema), demoRateLimit, (req: Request, res: Response): void => {
     const pin = req.body?.pin as string | undefined;
     const adminPin = process.env.ADMIN_PIN ?? process.env.VITE_ADMIN_PIN;
     if (!pin || !adminPin) { res.status(401).json({ valid: false }); return; }
@@ -1118,7 +1118,7 @@ router.get("/domain-panel/:domain", validateQuery(listQuerySchema), async (req: 
   });
 });
 
-router.post("/briefings/generate", async (_req: Request, res: Response): Promise<void> => {
+router.post("/briefings/generate", validateBody(jsonObjectBodySchema), async (_req: Request, res: Response): Promise<void> => {
   const now = new Date();
   const dateStr = now.toISOString().slice(0, 10);
 
@@ -1243,7 +1243,7 @@ async function seedDissentsIfEmpty(): Promise<void> {
 }
 void seedDissentsIfEmpty();
 
-router.post("/custom", async (req: Request, res: Response): Promise<void> => {
+router.post("/custom", validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
   const { topic, entity, scenario, domains, agents } = req.body;
   if (!topic) { sendBadRequest(res, "topic is required"); return; }
 
@@ -1293,7 +1293,7 @@ router.get("/dissents", validateQuery(listQuerySchema), async (_req: Request, re
   res.json({ success: true, dissents: rows.map(rowToDissent) });
 });
 
-router.post("/dissents", async (req: Request, res: Response): Promise<void> => {
+router.post("/dissents", validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
   const { briefingId, sectionId, sectionTitle, dissentingView, basis, impactIfCorrect } = req.body;
   if (!sectionTitle || !dissentingView || !basis) {
     sendBadRequest(res, "sectionTitle, dissentingView, and basis are required");
@@ -1316,7 +1316,7 @@ router.post("/dissents", async (req: Request, res: Response): Promise<void> => {
   res.json({ success: true, dissent: rowToDissent(row!), message: "Dissent filed and persisted." });
 });
 
-router.patch("/dissents/:id", requireRole("ops", "exec", "admin", "super_admin"), async (req: Request, res: Response): Promise<void> => {
+router.patch("/dissents/:id", validateBody(jsonObjectBodySchema), requireRole("ops", "exec", "admin", "super_admin"), async (req: Request, res: Response): Promise<void> => {
   const dissentId: string = String(req.params.id ?? "");
   const existing = await db.select().from(pulseDissentsTable).where(eq(pulseDissentsTable.dissentId, dissentId)).limit(1);
   if (existing.length === 0) { sendNotFound(res, "Dissent"); return; }
@@ -1334,7 +1334,7 @@ router.patch("/dissents/:id", requireRole("ops", "exec", "admin", "super_admin")
   res.json({ success: true, dissent: rowToDissent(row!) });
 });
 
-router.post("/export/pdf", async (req: Request, res: Response): Promise<void> => {
+router.post("/export/pdf", validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
   const briefingId: string | undefined = req.body?.briefingId;
   const brief = briefingId
     ? await getBriefingById(briefingId)

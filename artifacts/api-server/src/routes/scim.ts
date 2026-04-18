@@ -38,7 +38,7 @@ import {
   scimSyncLogsTable,
 } from "@szl-holdings/db";
 import { eq, and, or, ilike, desc, sql, inArray, count } from "drizzle-orm";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const router = Router();
 
@@ -714,7 +714,7 @@ router.patch("/scim/v2/Users/:id", scimBearerAuth, validateBody(jsonObjectBodySc
 });
 
 // DELETE /scim/v2/Users/:id — soft delete (deactivate)
-router.delete("/scim/v2/Users/:id", scimBearerAuth, async (req: Request, res: Response) => {
+router.delete("/scim/v2/Users/:id", validateBody(jsonObjectBodySchema), scimBearerAuth, async (req: Request, res: Response) => {
   try {
     const ctx = req.scimContext!;
     const userId = parseInt(String(req.params.id), 10);
@@ -1065,7 +1065,7 @@ router.patch("/scim/v2/Groups/:id", scimBearerAuth, validateBody(jsonObjectBodyS
 });
 
 // DELETE /scim/v2/Groups/:id
-router.delete("/scim/v2/Groups/:id", scimBearerAuth, async (req: Request, res: Response) => {
+router.delete("/scim/v2/Groups/:id", validateBody(jsonObjectBodySchema), scimBearerAuth, async (req: Request, res: Response) => {
   try {
     const ctx = req.scimContext!;
     const groupId = parseInt(String(req.params.id), 10);

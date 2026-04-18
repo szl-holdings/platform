@@ -53,7 +53,7 @@ import {
   ingestFirestormAlert,
 } from "@szl-holdings/ai-engine/domain-embedding-hooks";
 import { updateVulnerabilitySchema, updateComplianceControlSchema, getFirestormTenantId } from "./shared";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../../lib/validation";
 const router = Router();
 
 router.get("/firestorm/incidents", authMiddleware(), async (_req, res) => {
@@ -134,7 +134,7 @@ router.put("/firestorm/incidents/:id", authMiddleware({ required: true }), valid
   }
 });
 
-router.delete("/firestorm/incidents/:id", authMiddleware({ required: true }), async (req, res) => {
+router.delete("/firestorm/incidents/:id", validateBody(jsonObjectBodySchema), authMiddleware({ required: true }), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id as string);
     const [incident] = await db.delete(firestormIncidentsTable).where(eq(firestormIncidentsTable.id, id)).returning();

@@ -22,7 +22,7 @@ import {
 import { eq, desc, sql, and, asc } from "drizzle-orm";
 import { sendSuccess, sendNotFound, handleRouteError, parsePagination } from "../lib/api-response";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const router: IRouter = Router();
 const auth = [authMiddleware(), requireRole("ops", "exec", "admin")];
@@ -102,7 +102,7 @@ router.patch("/fund-ops/portfolio-financials/:id", ...auth, validateBody(jsonObj
   }
 });
 
-router.delete("/fund-ops/portfolio-financials/:id", ...auth, async (req, res) => {
+router.delete("/fund-ops/portfolio-financials/:id", validateBody(jsonObjectBodySchema), ...auth, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(fundPortfolioFinancialsTable).where(eq(fundPortfolioFinancialsTable.id, id)).returning();
@@ -152,7 +152,7 @@ router.patch("/fund-ops/portfolio-kpis/:id", ...auth, validateBody(jsonObjectBod
   }
 });
 
-router.delete("/fund-ops/portfolio-kpis/:id", ...auth, async (req, res) => {
+router.delete("/fund-ops/portfolio-kpis/:id", validateBody(jsonObjectBodySchema), ...auth, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(fundPortfolioKpisTable).where(eq(fundPortfolioKpisTable.id, id)).returning();
@@ -254,7 +254,7 @@ router.patch("/fund-ops/form-d-filings/:id", ...auth, validateBody(jsonObjectBod
   }
 });
 
-router.delete("/fund-ops/form-d-filings/:id", ...auth, async (req, res) => {
+router.delete("/fund-ops/form-d-filings/:id", validateBody(jsonObjectBodySchema), ...auth, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(fundFormDFilingsTable).where(eq(fundFormDFilingsTable.id, id)).returning();

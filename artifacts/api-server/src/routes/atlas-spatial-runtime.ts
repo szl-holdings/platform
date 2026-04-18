@@ -7,7 +7,7 @@ import {
   sendBadRequest,
   handleRouteError,
 } from "../lib/api-response";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -352,7 +352,7 @@ router.patch("/atlas/spatial/branches/:branchId", authMiddleware(), validateBody
   }
 });
 
-router.delete("/atlas/spatial/branches/:branchId", authMiddleware(), requireRole("super_admin", "admin", "ops"), async (req: Request, res: Response) => {
+router.delete("/atlas/spatial/branches/:branchId", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("super_admin", "admin", "ops"), async (req: Request, res: Response) => {
   try {
     const { branchId } = req.params as { branchId: string };
     const { deleteBranch } = await import("@szl-holdings/atlas-spatial-runtime");

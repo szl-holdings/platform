@@ -13,7 +13,7 @@ import {
 } from "@szl-holdings/db";
 import { eq, desc, and, or, ilike, sql, asc, gte, lte } from "drizzle-orm";
 import { z } from "zod";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -336,7 +336,7 @@ router.patch("/terra/broker/listings/:id", terraRateLimit, auth, validateBody(js
 
 // ─── DELETE /terra/broker/listings/:id ────────────────────────────────────────
 
-router.delete("/terra/broker/listings/:id", terraRateLimit, auth, async (req, res) => {
+router.delete("/terra/broker/listings/:id", validateBody(jsonObjectBodySchema), terraRateLimit, auth, async (req, res) => {
   try {
     const idN = Number(req.params.id);
     if (!Number.isInteger(idN) || idN < 1) { res.status(400).json({ error: "Invalid listing id" }); return; }

@@ -5,7 +5,7 @@ import { services } from "@szl-holdings/services";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { sendSuccess, sendCreated, sendBadRequest, sendError, handleRouteError } from "../lib/api-response";
 import { logger } from "../lib/logger";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -99,7 +99,7 @@ function detectSkillFromMessage(text: string): string | null {
   return null;
 }
 
-router.post("/alloy/channels/slack/webhook", async (req: Request, res: Response) => {
+router.post("/alloy/channels/slack/webhook", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     if (!verifySlackSignature(req)) {
       res.status(401).json({ error: "Invalid Slack signature" });
@@ -213,7 +213,7 @@ router.post("/alloy/channels/slack/webhook", async (req: Request, res: Response)
   }
 });
 
-router.post("/alloy/channels/slack/interactive", async (req: Request, res: Response) => {
+router.post("/alloy/channels/slack/interactive", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     if (!verifySlackSignature(req)) {
       res.status(401).json({ error: "Invalid Slack signature" });

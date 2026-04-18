@@ -5,7 +5,7 @@ import crypto from "crypto";
 import { sendSuccess, sendBadRequest, sendNotFound, sendForbidden, sendError, handleRouteError } from "../../lib/api-response";
 import { authMiddleware, requireRole } from "../../middlewares/auth";
 import { logActivity } from "../../lib/activity-logger";
-import { validateBody, tenantCreateSchema, tenantStatusSchema, jsonObjectBodySchema} from "../../lib/validation";
+import { jsonObjectBodySchema, tenantCreateSchema, tenantStatusSchema, validateBody } from "../../lib/validation";
 import { db } from "@szl-holdings/db";
 import {
   azureTenantsTable,
@@ -294,7 +294,7 @@ router.patch(
 );
 
 router.delete(
-  "/admin/tenants/:id",
+  "/admin/tenants/:id", validateBody(jsonObjectBodySchema),
   tenantRateLimit,
   authMiddleware(),
   requireRole("super_admin"),

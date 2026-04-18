@@ -3,7 +3,7 @@ import { pool } from "@szl-holdings/db";
 import { logger } from "../lib/logger";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { z } from "zod";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 import { sendEmail, buildAlertFiredEmail, hasEmailProviderConfigured } from "../lib/email";
 // Valid incident status transitions (state machine)
 const INCIDENT_TRANSITIONS: Record<string, string[]> = {
@@ -587,7 +587,7 @@ router.patch("/ops/incidents/:id", validateBody(updateIncidentSchema), async (re
   }
 });
 
-router.delete("/ops/incidents/:id", async (req, res) => {
+router.delete("/ops/incidents/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
   const id = parseInt(req.params["id"] as string);
   try {
     await pool.query(`DELETE FROM platform_incidents WHERE id = $1`, [id]);
@@ -665,7 +665,7 @@ router.patch("/ops/alert-rules/:id", validateBody(jsonObjectBodySchema), async (
   }
 });
 
-router.delete("/ops/alert-rules/:id", async (req, res) => {
+router.delete("/ops/alert-rules/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
   const id = parseInt(req.params["id"] as string);
   try {
     await pool.query(`DELETE FROM platform_alert_rules WHERE id = $1`, [id]);
@@ -810,7 +810,7 @@ export async function runAlertRuleEvaluation(): Promise<{
 }
 
 // Alert rule evaluation against current metrics
-router.post("/ops/alert-rules/evaluate", async (_req, res) => {
+router.post("/ops/alert-rules/evaluate", validateBody(jsonObjectBodySchema), async (_req, res) => {
   try {
     const result = await runAlertRuleEvaluation();
     res.json({ ok: true, ...result });
@@ -907,7 +907,7 @@ router.patch("/ops/runbooks/:id", validateBody(jsonObjectBodySchema), async (req
   }
 });
 
-router.delete("/ops/runbooks/:id", async (req, res) => {
+router.delete("/ops/runbooks/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
   const id = parseInt(req.params["id"] as string);
   try {
     await pool.query(`DELETE FROM platform_runbooks WHERE id = $1`, [id]);
@@ -985,7 +985,7 @@ router.post("/ops/service-deps", validateBody(jsonObjectBodySchema), async (req,
   }
 });
 
-router.delete("/ops/service-deps/:id", async (req, res) => {
+router.delete("/ops/service-deps/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
   const id = parseInt(req.params["id"] as string);
   try {
     await pool.query(`DELETE FROM platform_service_deps WHERE id = $1`, [id]);

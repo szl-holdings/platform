@@ -1,6 +1,7 @@
 import { Router, type Request, type Response } from "express";
 import rateLimit from "express-rate-limit";
 
+import { anyQuerySchema, validateQuery } from "../lib/validation";
 const mapsRateLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: 60,
@@ -11,7 +12,7 @@ const mapsRateLimiter = rateLimit({
 
 const router = Router();
 
-router.get("/maps/static", mapsRateLimiter, async (req: Request, res: Response) => {
+router.get("/maps/static", validateQuery(anyQuerySchema), mapsRateLimiter, async (req: Request, res: Response) => {
   const apiKey = process.env.GOOGLE_MAPS_API_KEY;
   if (!apiKey) {
     res.status(503).json({ error: "Google Maps not configured — set GOOGLE_MAPS_API_KEY" });
@@ -51,7 +52,7 @@ router.get("/maps/static", mapsRateLimiter, async (req: Request, res: Response) 
   }
 });
 
-router.get("/maps/geocode", mapsRateLimiter, async (req: Request, res: Response) => {
+router.get("/maps/geocode", validateQuery(anyQuerySchema), mapsRateLimiter, async (req: Request, res: Response) => {
   const apiKey = process.env.GOOGLE_MAPS_API_KEY;
   if (!apiKey) {
     res.status(503).json({ error: "Google Maps not configured — set GOOGLE_MAPS_API_KEY" });

@@ -3,7 +3,7 @@ import { LRUCache } from "lru-cache";
 import rateLimit from "express-rate-limit";
 import { sendSuccess, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -226,7 +226,7 @@ router.post("/vessels/trading/orders", tradingLimit, authMiddleware({ required: 
   } catch (err) { handleRouteError(res, err, "Failed to submit order"); }
 });
 
-router.delete("/vessels/trading/orders/:id", tradingLimit, authMiddleware({ required: false }), (req, res) => {
+router.delete("/vessels/trading/orders/:id", validateBody(jsonObjectBodySchema), tradingLimit, authMiddleware({ required: false }), (req, res) => {
   try {
     const id = parseInt(req.params.id as string);
     const idx = sessionOrders.findIndex(o => o.id === id);

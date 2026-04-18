@@ -25,7 +25,7 @@ import {
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../middlewares/sliding-window-limiter";
 import { logger } from "../lib/logger";
-import { validateBody, jsonObjectBodySchema } from "../lib/validation";
+import { jsonObjectBodySchema, validateBody } from "../lib/validation";
 
 const router: IRouter = Router();
 router.use(authMiddleware({ required: false }));
@@ -193,7 +193,7 @@ router.put("/briefings/:id/archive", authMiddleware({ required: true }), require
   }
 });
 
-router.post("/briefings/generate", async (_req: Request, res: Response) => {
+router.post("/briefings/generate", validateBody(jsonObjectBodySchema), async (_req: Request, res: Response) => {
   try {
     logger.info("Force-generating executive brief");
     const brief = await generateBrief([...KNOWN_DOMAINS]);

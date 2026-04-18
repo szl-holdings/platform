@@ -14,7 +14,7 @@ import {
   getAgentSelfReflectionHistory,
 } from "@szl-holdings/ai-engine/learning/self-improvement";
 import { getKnowledgeStoreStats, autoIngestFromDecisionStore } from "@szl-holdings/ai-engine/rag/knowledge-store";
-import { validateBody, jsonObjectBodySchema } from "../lib/validation";
+import { jsonObjectBodySchema, validateBody } from "../lib/validation";
 
 const router = Router();
 
@@ -164,7 +164,7 @@ router.get("/agent-autonomy/rag", async (_req, res) => {
   }
 });
 
-router.post("/agent-autonomy/rag/ingest", async (_req, res) => {
+router.post("/agent-autonomy/rag/ingest", validateBody(jsonObjectBodySchema), async (_req, res) => {
   try {
     const count = await autoIngestFromDecisionStore();
     sendSuccess(res, { ingested: count, message: `Ingested ${count} decisions into the knowledge store` });

@@ -23,7 +23,7 @@ import { eq, and, desc, asc, like, gte, lte } from "drizzle-orm";
 import { sendSuccess, sendCreated, sendNoContent, sendNotFound, sendBadRequest, sendForbidden, handleRouteError } from "../lib/api-response";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 import { assertTenantAccess } from "../middlewares/tenant-scope";
-import {validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -491,7 +491,7 @@ router.post(
 // ─────────────────────────────────────────────────────────────────────────────
 
 router.delete(
-  "/settings/:tier/:id",
+  "/settings/:tier/:id", validateBody(jsonObjectBodySchema),
   authMiddleware(),
   async (req: Request, res: Response) => {
     try {

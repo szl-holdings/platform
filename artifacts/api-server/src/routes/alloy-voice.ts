@@ -5,7 +5,7 @@ import { authMiddleware } from "../middlewares/auth";
 import { sendSuccess, sendCreated, sendBadRequest, sendError, handleRouteError } from "../lib/api-response";
 import { logger } from "../lib/logger";
 import multer from "multer";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const router: IRouter = Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 25 * 1024 * 1024 } });
@@ -226,7 +226,7 @@ router.get("/alloy/voice/notes/:id", authMiddleware(), async (req: Request, res:
   }
 });
 
-router.delete("/alloy/voice/notes/:id", authMiddleware(), async (req: Request, res: Response) => {
+router.delete("/alloy/voice/notes/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id ?? null;
     const result = await pool.query(

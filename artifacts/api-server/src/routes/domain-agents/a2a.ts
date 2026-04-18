@@ -10,7 +10,7 @@ import { delegateTask, getDelegationTask, getDelegationHistory } from "@szl-hold
 import { sendSuccess, sendError } from "../../lib/api-response";
 import { authMiddleware } from "../../middlewares/auth";
 import { logger } from "../../lib/logger";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../../lib/validation";
 
 const router = Router();
 
@@ -245,7 +245,7 @@ router.post("/a2a/heartbeat", a2aRateLimit, validateBody(jsonObjectBodySchema), 
   }
 });
 
-router.post("/a2a/sync", authMiddleware(), async (_req: Request, res: Response) => {
+router.post("/a2a/sync", validateBody(jsonObjectBodySchema), authMiddleware(), async (_req: Request, res: Response) => {
   try {
     await a2aRegistry.syncFromAgentRegistry();
     const cards = await a2aRegistry.getAllCards();

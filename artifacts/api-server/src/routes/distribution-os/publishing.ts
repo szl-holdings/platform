@@ -17,14 +17,14 @@ import {
 } from "@szl-holdings/db";
 import { eq, desc, asc, and, gte, count, sql } from "drizzle-orm";
 import { authMiddleware } from "../../middlewares/auth";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../../lib/validation";
 
 const router = Router();
 const requireAuth = authMiddleware({ required: true });
 
 // ─── Publishing Endpoints ─────────────────────────────────────────────────────
 
-router.post("/x-posts/:id/publish", requireAuth, async (req: Request, res: Response): Promise<void> => {
+router.post("/x-posts/:id/publish", validateBody(jsonObjectBodySchema), requireAuth, async (req: Request, res: Response): Promise<void> => {
   const [post] = await db.select().from(dosXPostsTable).where(eq(dosXPostsTable.id, Number(req.params.id)));
   if (!post) return void res.status(404).json({ error: "X post not found" });
   if (post.status === "sent") return void res.status(400).json({ error: "Already published" });
@@ -65,7 +65,7 @@ router.post("/x-posts/:id/publish", requireAuth, async (req: Request, res: Respo
   }
 });
 
-router.post("/articles/:id/publish-medium", requireAuth, async (req: Request, res: Response): Promise<void> => {
+router.post("/articles/:id/publish-medium", validateBody(jsonObjectBodySchema), requireAuth, async (req: Request, res: Response): Promise<void> => {
   const [article] = await db.select().from(dosArticlesTable).where(eq(dosArticlesTable.id, Number(req.params.id)));
   if (!article) return void res.status(404).json({ error: "Article not found" });
 
@@ -94,7 +94,7 @@ router.post("/articles/:id/publish-medium", requireAuth, async (req: Request, re
   }
 });
 
-router.post("/newsletters/:id/publish-substack", requireAuth, async (req: Request, res: Response): Promise<void> => {
+router.post("/newsletters/:id/publish-substack", validateBody(jsonObjectBodySchema), requireAuth, async (req: Request, res: Response): Promise<void> => {
   const [nl] = await db.select().from(dosNewslettersTable).where(eq(dosNewslettersTable.id, Number(req.params.id)));
   if (!nl) return void res.status(404).json({ error: "Newsletter not found" });
 
@@ -122,7 +122,7 @@ router.post("/newsletters/:id/publish-substack", requireAuth, async (req: Reques
   }
 });
 
-router.post("/carousels/:id/publish-linkedin", requireAuth, async (req: Request, res: Response): Promise<void> => {
+router.post("/carousels/:id/publish-linkedin", validateBody(jsonObjectBodySchema), requireAuth, async (req: Request, res: Response): Promise<void> => {
   const [carousel] = await db.select().from(dosCarouselProjectsTable).where(eq(dosCarouselProjectsTable.id, Number(req.params.id)));
   if (!carousel) return void res.status(404).json({ error: "Carousel not found" });
 
@@ -237,7 +237,7 @@ router.get("/carousels/:id/export-pdf", validateQuery(listQuerySchema), async (r
 
 // ─── Linktree Click Tracking ──────────────────────────────────────────────────
 
-router.post("/linktree/:id/click", async (req: Request, res: Response): Promise<void> => {
+router.post("/linktree/:id/click", validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
   const [item] = await db.select().from(dosLinktreeConfigTable).where(eq(dosLinktreeConfigTable.id, Number(req.params.id)));
   if (!item) return void res.status(404).json({ error: "Link not found" });
   await db.insert(dosAnalyticsEventsTable).values({
@@ -249,12 +249,12 @@ router.post("/linktree/:id/click", async (req: Request, res: Response): Promise<
   res.json({ ok: true });
 });
 
-router.post("/analytics/event", async (req: Request, res: Response): Promise<void> => {
+router.post("/analytics/event", validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
   const [event] = await db.insert(dosAnalyticsEventsTable).values(req.body).returning();
   res.status(201).json(event);
 });
 
-router.post("/analytics/pageview", async (req: Request, res: Response): Promise<void> => {
+router.post("/analytics/pageview", validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
   const [pv] = await db.insert(dosPageViewsTable).values(req.body).returning();
   res.status(201).json(pv);
 });
@@ -309,14 +309,14 @@ router.get("/analytics/dashboard", requireAuth, validateQuery(listQuerySchema), 
   });
 });
 
-router.delete("/campaigns/:id", requireAuth, async (req: Request, res: Response): Promise<void> => {
+router.delete("/campaigns/:id", validateBody(jsonObjectBodySchema), requireAuth, async (req: Request, res: Response): Promise<void> => {
   await db.delete(dosCampaignsTable).where(eq(dosCampaignsTable.id, Number(req.params.id)));
   res.json({ success: true });
 });
 
 // ─── Seed data ────────────────────────────────────────────────────────────────
 
-router.post("/seed", requireAuth, async (_req: Request, res: Response): Promise<void> => {
+router.post("/seed", validateBody(jsonObjectBodySchema), requireAuth, async (_req: Request, res: Response): Promise<void> => {
   const results: Record<string, unknown> = {};
 
   // Seed 3 campaigns (idempotent: skip if slugs exist)

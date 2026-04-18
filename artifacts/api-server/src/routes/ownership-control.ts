@@ -19,7 +19,7 @@ import { eq, desc, asc, and, sql } from "drizzle-orm";
 import { handleRouteError, sendSuccess, sendNotFound, parsePagination } from "../lib/api-response";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 import type { Request, Response, NextFunction } from "express";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -168,7 +168,7 @@ router.patch("/ownership/scenarios/:id", validateBody(jsonObjectBodySchema), asy
   }
 });
 
-router.delete("/ownership/scenarios/:id", async (req, res) => {
+router.delete("/ownership/scenarios/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(ownershipScenariosTable).where(eq(ownershipScenariosTable.id, id)).returning();
@@ -212,7 +212,7 @@ router.patch("/ownership/allocations/:id", validateBody(jsonObjectBodySchema), a
   }
 });
 
-router.delete("/ownership/allocations/:id", async (req, res) => {
+router.delete("/ownership/allocations/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(ownershipAllocationsTable).where(eq(ownershipAllocationsTable.id, id)).returning();
@@ -246,7 +246,7 @@ router.patch("/ownership/control-roles/:id", validateBody(jsonObjectBodySchema),
   }
 });
 
-router.delete("/ownership/control-roles/:id", async (req, res) => {
+router.delete("/ownership/control-roles/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(controlRolesTable).where(eq(controlRolesTable.id, id)).returning();
@@ -280,7 +280,7 @@ router.patch("/ownership/officer-roles/:id", validateBody(jsonObjectBodySchema),
   }
 });
 
-router.delete("/ownership/officer-roles/:id", async (req, res) => {
+router.delete("/ownership/officer-roles/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(officerRolesTable).where(eq(officerRolesTable.id, id)).returning();
@@ -314,7 +314,7 @@ router.patch("/ownership/manager-roles/:id", validateBody(jsonObjectBodySchema),
   }
 });
 
-router.delete("/ownership/manager-roles/:id", async (req, res) => {
+router.delete("/ownership/manager-roles/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(managerRolesTable).where(eq(managerRolesTable.id, id)).returning();
@@ -348,7 +348,7 @@ router.patch("/ownership/signature-authority/:id", validateBody(jsonObjectBodySc
   }
 });
 
-router.delete("/ownership/signature-authority/:id", async (req, res) => {
+router.delete("/ownership/signature-authority/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(signatureAuthorityRecordsTable).where(eq(signatureAuthorityRecordsTable.id, id)).returning();
@@ -382,7 +382,7 @@ router.patch("/ownership/capital-contributions/:id", validateBody(jsonObjectBody
   }
 });
 
-router.delete("/ownership/capital-contributions/:id", async (req, res) => {
+router.delete("/ownership/capital-contributions/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(capitalContributionsTable).where(eq(capitalContributionsTable.id, id)).returning();
@@ -416,7 +416,7 @@ router.patch("/ownership/voting-rights/:id", validateBody(jsonObjectBodySchema),
   }
 });
 
-router.delete("/ownership/voting-rights/:id", async (req, res) => {
+router.delete("/ownership/voting-rights/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(votingRightsTable).where(eq(votingRightsTable.id, id)).returning();
@@ -450,7 +450,7 @@ router.patch("/ownership/certification-readiness/:id", validateBody(jsonObjectBo
   }
 });
 
-router.delete("/ownership/certification-readiness/:id", async (req, res) => {
+router.delete("/ownership/certification-readiness/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(certificationReadinessRecordsTable).where(eq(certificationReadinessRecordsTable.id, id)).returning();
@@ -494,7 +494,7 @@ router.patch("/ownership/legal-flags/:id", validateBody(jsonObjectBodySchema), a
   }
 });
 
-router.delete("/ownership/legal-flags/:id", async (req, res) => {
+router.delete("/ownership/legal-flags/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(legalReviewFlagsTable).where(eq(legalReviewFlagsTable.id, id)).returning();
@@ -528,7 +528,7 @@ router.patch("/ownership/governance-documents/:id", validateBody(jsonObjectBodyS
   }
 });
 
-router.delete("/ownership/governance-documents/:id", async (req, res) => {
+router.delete("/ownership/governance-documents/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(governanceDocumentsTable).where(eq(governanceDocumentsTable.id, id)).returning();
@@ -568,7 +568,7 @@ router.post("/ownership/scenarios/:id/decision-log", validateBody(jsonObjectBody
   }
 });
 
-router.delete("/ownership/decision-log/:id", async (req, res) => {
+router.delete("/ownership/decision-log/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     await db.delete(ownershipDecisionLogsTable).where(eq(ownershipDecisionLogsTable.id, id));

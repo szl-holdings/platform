@@ -7,7 +7,7 @@ import { logger } from "../../lib/logger";
 import { createRmmProvider, setCachedProvider, getCachedProvider, clearProviderCache, type RmmProviderConfig } from "../../services/rmm-provider";
 import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from "crypto";
 import { auth, authWrite, roleAdmin, roleOperator, queryConnectors, queryConnectorById, stripSecrets, buildProviderConfig, isProviderSupported, type PlaybookRow, type HealingExecutionRow } from "./shared";
-import { validateBody, rmmPlaybookCreateSchema, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, rmmPlaybookCreateSchema, validateBody, validateQuery } from "../../lib/validation";
 
 const router: IRouter = Router();
 
@@ -86,7 +86,7 @@ router.patch("/rmm/playbooks/:id", authWrite, roleAdmin, validateBody(jsonObject
   } catch (err) { handleRouteError(res, err, "Failed to update playbook"); }
 });
 
-router.delete("/rmm/playbooks/:id", authWrite, roleAdmin, async (req, res) => {
+router.delete("/rmm/playbooks/:id", validateBody(jsonObjectBodySchema), authWrite, roleAdmin, async (req, res) => {
   try {
     const id = parseInt(String(req.params.id), 10);
     if (isNaN(id)) return sendBadRequest(res, "Invalid ID");

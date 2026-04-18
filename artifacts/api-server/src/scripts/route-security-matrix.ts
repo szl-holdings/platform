@@ -189,6 +189,78 @@ function collectRouteFiles(dir: string, files: string[] = [], base: string = dir
 
 type AuthStatus = "PROTECTED" | "PUBLIC" | "GROUP-PROTECTED" | "UNCLASSIFIED";
 
+// ---------------------------------------------------------------------------
+// Zod input validation tracking
+// Each top-level route file should run untrusted body / query input through
+// validateBody / validateQuery / validateParams. The codemod
+// (apply-validation-codemod.ts) can install a baseline `jsonObjectBodySchema`
+// + `anyQuerySchema` safety net for any route that lacks a specific schema.
+// ---------------------------------------------------------------------------
+const ROUTE_CALL_RE = /\b(?:router|app|r)\s*\.\s*(get|post|put|patch|delete|all)\s*\(/g;
+const MUTATING_METHODS = new Set(["post", "put", "patch", "delete"]);
+
+function findMatchingParen(src: string, openIdx: number): number {
+  let depth = 0, i = openIdx;
+  let inStr: string | null = null, inTpl = false, inLine = false, inBlock = false;
+  while (i < src.length) {
+    const c = src[i], n = src[i + 1];
+    if (inLine) { if (c === "\n") inLine = false; }
+    else if (inBlock) { if (c === "*" && n === "/") { inBlock = false; i++; } }
+    else if (inStr) { if (c === "\\") { i += 2; continue; } if (c === inStr) inStr = null; }
+    else if (inTpl) { if (c === "\\") { i += 2; continue; } if (c === "`") inTpl = false; }
+    else {
+      if (c === "/" && n === "/") { inLine = true; i++; }
+      else if (c === "/" && n === "*") { inBlock = true; i++; }
+      else if (c === "'" || c === '"') inStr = c;
+      else if (c === "`") inTpl = true;
+      else if (c === "(") depth++;
+      else if (c === ")") { depth--; if (depth === 0) return i; }
+    }
+    i++;
+  }
+  return -1;
+}
+
+interface ValidationStats {
+  totalRoutes: number;
+  unvalidatedBody: number;
+  unvalidatedQuery: number;
+  unvalidatedExamples: string[];
+}
+
+function analyzeValidation(content: string): ValidationStats {
+  const stats: ValidationStats = {
+    totalRoutes: 0,
+    unvalidatedBody: 0,
+    unvalidatedQuery: 0,
+    unvalidatedExamples: [],
+  };
+  ROUTE_CALL_RE.lastIndex = 0;
+  let m: RegExpExecArray | null;
+  while ((m = ROUTE_CALL_RE.exec(content)) !== null) {
+    const method = m[1].toLowerCase();
+    const openParen = m.index + m[0].length - 1;
+    const close = findMatchingParen(content, openParen);
+    if (close < 0) continue;
+    stats.totalRoutes++;
+    const block = content.slice(openParen + 1, close);
+    const hasBody = /\bvalidateBody\s*\(/.test(block);
+    const hasQuery = /\bvalidateQuery\s*\(/.test(block);
+    const usesQuery = /\breq\.query\b/.test(block);
+    const needsBody = MUTATING_METHODS.has(method) && !hasBody;
+    const needsQuery = usesQuery && !hasQuery;
+    if (needsBody) stats.unvalidatedBody++;
+    if (needsQuery) stats.unvalidatedQuery++;
+    if ((needsBody || needsQuery) && stats.unvalidatedExamples.length < 3) {
+      // Grab the first arg (path) for context
+      const pathMatch = block.match(/^\s*(["'`])([^"'`]{1,80})\1/);
+      const path = pathMatch?.[2] ?? "(unknown path)";
+      stats.unvalidatedExamples.push(`${method.toUpperCase()} ${path}`);
+    }
+  }
+  return stats;
+}
+
 interface RouteEntry {
   file: string;
   relPath: string;
@@ -196,6 +268,7 @@ interface RouteEntry {
   indicators: string[];
   isPublicAllowlisted: boolean;
   isGroupProtected: boolean;
+  validation: ValidationStats;
 }
 
 function analyzeFile(filePath: string): RouteEntry {
@@ -241,6 +314,7 @@ function analyzeFile(filePath: string): RouteEntry {
     indicators: allIndicators,
     isPublicAllowlisted,
     isGroupProtected,
+    validation: analyzeValidation(content),
   };
 }
 
@@ -260,6 +334,24 @@ const public_ = entries.filter(e => e.status === "PUBLIC");
 const groupProtected = entries.filter(e => e.status === "GROUP-PROTECTED");
 const unclassified = entries.filter(e => e.status === "UNCLASSIFIED");
 
+// Aggregate Zod input validation coverage across all route files.
+const validationTotals = entries.reduce(
+  (acc, e) => {
+    acc.totalRoutes += e.validation.totalRoutes;
+    acc.unvalidatedBody += e.validation.unvalidatedBody;
+    acc.unvalidatedQuery += e.validation.unvalidatedQuery;
+    return acc;
+  },
+  { totalRoutes: 0, unvalidatedBody: 0, unvalidatedQuery: 0 },
+);
+const filesWithUnvalidated = entries.filter(
+  e => e.validation.unvalidatedBody > 0 || e.validation.unvalidatedQuery > 0,
+);
+const filesWithValidation = entries.filter(e => {
+  const c = readFileSync(e.file, "utf-8");
+  return /\bvalidate(Body|Query|Params)\s*\(/.test(c);
+});
+
 if (jsonMode) {
   const output = {
     generatedAt: new Date().toISOString(),
@@ -270,6 +362,20 @@ if (jsonMode) {
       public: public_.length,
       unclassified: unclassified.length,
       coveragePct: Math.round(((protected_.length + groupProtected.length + public_.length) / entries.length) * 100),
+      validation: {
+        totalRoutes: validationTotals.totalRoutes,
+        filesWithValidation: filesWithValidation.length,
+        unvalidatedBodyRoutes: validationTotals.unvalidatedBody,
+        unvalidatedQueryRoutes: validationTotals.unvalidatedQuery,
+        filesWithUnvalidatedRoutes: filesWithUnvalidated.length,
+        validationCoveragePct: Math.round(
+          ((validationTotals.totalRoutes -
+            validationTotals.unvalidatedBody -
+            validationTotals.unvalidatedQuery) /
+            Math.max(1, validationTotals.totalRoutes)) *
+            100,
+        ),
+      },
     },
     note: "All /api/* routes not in the enforcer public allowlist are blocked by the global deny-by-default guard (src/middlewares/global-auth-enforcer.ts) regardless of file-level indicators.",
     routes: entries.map(e => ({
@@ -334,7 +440,21 @@ if (jsonMode) {
   console.log(`  GROUP-PROTECTED     : ${groupProtected.length} (auth applied at route-group registration level)`);
   console.log(`  PUBLIC              : ${public_.length} (intentionally unauthenticated, in enforcer allowlist)`);
   console.log(`  UNCLASSIFIED        : ${unclassified.length} (require review)`);
-  console.log(`  Total coverage      : ${Math.round(((protected_.length + groupProtected.length + public_.length) / entries.length) * 100)}%`);
+  console.log(`  Total auth coverage : ${Math.round(((protected_.length + groupProtected.length + public_.length) / entries.length) * 100)}%`);
+
+  console.log("\nZod input validation:");
+  console.log(`  Files with validation: ${filesWithValidation.length}/${entries.length}`);
+  console.log(`  Total route handlers : ${validationTotals.totalRoutes}`);
+  console.log(`  Unvalidated body     : ${validationTotals.unvalidatedBody} mutating routes (POST/PUT/PATCH/DELETE)`);
+  console.log(`  Unvalidated query    : ${validationTotals.unvalidatedQuery} routes reading req.query`);
+  console.log(`  Files needing fixes  : ${filesWithUnvalidated.length}`);
+  if (filesWithUnvalidated.length > 0 && filesWithUnvalidated.length <= 25) {
+    console.log("\n  Files with unvalidated handlers:");
+    for (const e of filesWithUnvalidated) {
+      const v = e.validation;
+      console.log(`    - ${e.relPath}  body=${v.unvalidatedBody} query=${v.unvalidatedQuery}  e.g. ${v.unvalidatedExamples.join("; ")}`);
+    }
+  }
 
   if (unclassified.length > 0) {
     console.log(`\n⚠  ${unclassified.length} route file(s) are UNCLASSIFIED:`);
@@ -357,6 +477,13 @@ if (jsonMode) {
   console.log();
 }
 
-if (strictMode && unclassified.length > 0) {
-  process.exit(1);
+// Strict mode fails if there are any UNCLASSIFIED auth routes OR any
+// unvalidated body / query handlers. Run apply-validation-codemod.ts to
+// install the baseline jsonObjectBodySchema / anyQuerySchema safety nets.
+if (strictMode) {
+  const hasIssues =
+    unclassified.length > 0 ||
+    validationTotals.unvalidatedBody > 0 ||
+    validationTotals.unvalidatedQuery > 0;
+  if (hasIssues) process.exit(1);
 }

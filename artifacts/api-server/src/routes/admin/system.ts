@@ -10,7 +10,7 @@ import { serverTelemetry } from "@szl-holdings/observability";
 import { durableJobQueue } from "@szl-holdings/forge-runtime";
 import { logger } from "../../lib/logger.js";
 import { isFlagEnabled } from "../../lib/platform-flags.js";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation.js";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../../lib/validation.js";
 import { sendError, sendNotFound, sendForbidden, sendBadRequest } from "../../lib/api-response.js";
 import { z } from "zod";
 import { services } from "@szl-holdings/services";
@@ -326,7 +326,7 @@ export function register(router: IRouter): void {
     res.json({ environment: process.env["NODE_ENV"] ?? "development", envVars, configured: envVars.filter((v) => v.configured).length, missing: envVars.filter((v) => !v.configured).length, total: envVars.length });
   });
 
-  router.post("/admin/seed", async (_req, res) => {
+  router.post("/admin/seed", validateBody(jsonObjectBodySchema), async (_req, res) => {
     try {
       const results = await seedLyteObservability();
       res.json({ success: true, seededAt: new Date().toISOString(), tables: Object.entries(results).map(([name, rows]) => ({ name, rows })) });
@@ -336,7 +336,7 @@ export function register(router: IRouter): void {
     }
   });
 
-  router.post("/admin/seed/reset", async (_req, res) => {
+  router.post("/admin/seed/reset", validateBody(jsonObjectBodySchema), async (_req, res) => {
     try {
       const results = await seedLyteObservability();
       res.json({ success: true, resetAt: new Date().toISOString(), message: "All observability data re-seeded", tables: Object.entries(results).map(([name, rows]) => ({ name, rows })) });

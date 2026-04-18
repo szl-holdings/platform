@@ -53,7 +53,7 @@ import {
   ingestFirestormAlert,
 } from "@szl-holdings/ai-engine/domain-embedding-hooks";
 import { firestormCrudLimit, getFirestormTenantId } from "./shared";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../../lib/validation";
 const router = Router();
 
 router.get("/firestorm/scenarios", firestormCrudLimit, authMiddleware(), async (_req, res) => {
@@ -100,7 +100,7 @@ router.put("/firestorm/scenarios/:id", authMiddleware({ required: true }), valid
   }
 });
 
-router.delete("/firestorm/scenarios/:id", authMiddleware({ required: true }), async (req, res) => {
+router.delete("/firestorm/scenarios/:id", validateBody(jsonObjectBodySchema), authMiddleware({ required: true }), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id as string);
     const [scenario] = await db.delete(firestormScenariosTable).where(eq(firestormScenariosTable.id, id)).returning();
@@ -153,7 +153,7 @@ router.put("/firestorm/assessments/:id", authMiddleware({ required: true }), val
   }
 });
 
-router.delete("/firestorm/assessments/:id", authMiddleware({ required: true }), async (req, res) => {
+router.delete("/firestorm/assessments/:id", validateBody(jsonObjectBodySchema), authMiddleware({ required: true }), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id as string);
     const [assessment] = await db.delete(firestormAssessmentsTable).where(eq(firestormAssessmentsTable.id, id)).returning();

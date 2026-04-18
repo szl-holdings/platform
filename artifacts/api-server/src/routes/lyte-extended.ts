@@ -28,7 +28,7 @@ import {
 } from "../lib/api-response";
 import { authMiddleware, parseIdParam } from "../middlewares/auth";
 import { requireFeatureFlag } from "../middlewares/feature-flag";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -204,7 +204,7 @@ router.patch("/actions/:id", authMiddleware(), validateBody(jsonObjectBodySchema
   }
 });
 
-router.delete("/actions/:id", authMiddleware(), async (req, res) => {
+router.delete("/actions/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(lyteActionsTable).where(eq(lyteActionsTable.id, id)).returning();
@@ -245,7 +245,7 @@ router.patch("/saved-views/:id", authMiddleware(), validateBody(jsonObjectBodySc
   }
 });
 
-router.delete("/saved-views/:id", authMiddleware(), async (req, res) => {
+router.delete("/saved-views/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(lyteSavedViewsTable).where(eq(lyteSavedViewsTable.id, id)).returning();

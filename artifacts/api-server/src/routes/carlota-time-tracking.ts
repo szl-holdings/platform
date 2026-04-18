@@ -11,7 +11,7 @@ import {
   sendNotFound,
   handleRouteError,
 } from "../lib/api-response";
-import { validateBody, jsonObjectBodySchema } from "../lib/validation";
+import { jsonObjectBodySchema, validateBody } from "../lib/validation";
 
 /* -----------------------------------------------------------------------
  * Carlota Jo — Time tracking & invoice persistence (public, cross-device)
@@ -154,7 +154,7 @@ router.patch("/booking/time-entries/:id", validateBody(jsonObjectBodySchema), as
   }
 });
 
-router.delete("/booking/time-entries/:id", async (req, res) => {
+router.delete("/booking/time-entries/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const [row] = await db
       .delete(carlotaTimeEntriesTable)
@@ -255,7 +255,7 @@ router.patch("/booking/time-invoices/:id", validateBody(jsonObjectBodySchema), a
   }
 });
 
-router.delete("/booking/time-invoices/:id", async (req, res) => {
+router.delete("/booking/time-invoices/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const [row] = await db
       .delete(carlotaInvoicesTable)

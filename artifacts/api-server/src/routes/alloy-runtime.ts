@@ -19,7 +19,7 @@ import { InMemoryCheckpointStore } from "@workspace/alloy/checkpoint";
 import { DefaultModelRouter } from "@workspace/alloy/model-router";
 import { ECHO_STEP } from "@workspace/alloy/workflow";
 import type { WorkflowStep, StepContext, StepResult, LedgerEntry, RunConfig } from "@workspace/alloy/types";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -151,7 +151,7 @@ router.patch("/workflows/:workflowId", authMiddleware(), validateBody(jsonObject
   }
 });
 
-router.delete("/workflows/:workflowId", authMiddleware(), requireRole("admin", "super_admin"), async (req: Request, res: Response) => {
+router.delete("/workflows/:workflowId", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("admin", "super_admin"), async (req: Request, res: Response) => {
   try {
     const { workflowId } = req.params as { workflowId: string };
     if (!inMemoryWorkflows.has(workflowId)) { sendNotFound(res, "Workflow"); return; }

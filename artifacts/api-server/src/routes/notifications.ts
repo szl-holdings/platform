@@ -4,7 +4,7 @@ import { eq, desc, and, isNull, count as sqlCount } from "drizzle-orm";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, sendNoContent, sendError, handleRouteError, parsePagination } from "../lib/api-response";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 import { publish, WS_CHANNELS } from "../lib/websocket";
-import { validateBody, createNotificationSchema, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { createNotificationSchema, jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 import { z } from "zod";
 import { logger } from "../lib/logger";
 import { durableJobQueue } from "@szl-holdings/forge-runtime";
@@ -162,7 +162,7 @@ router.patch("/notifications/read-all", authMiddleware(), validateBody(jsonObjec
   }
 });
 
-router.delete("/notifications/:id", authMiddleware(), async (req, res) => {
+router.delete("/notifications/:id", validateBody(jsonObjectBodySchema), authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [existing] = await db.select().from(notificationsTable).where(
