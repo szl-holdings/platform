@@ -1,32 +1,32 @@
 kind = "web"
-  previewPath = "/vessels/"
-  title = "Vessels Maritime Intelligence"
-  version = "1.0.0"
-  id = "artifacts/vessels"
-  router = "path"
+    previewPath = "/vessels/"
+    title = "Vessels Maritime Intelligence"
+    version = "1.0.0"
+    id = "artifacts/vessels"
+    router = "path"
 
-  [[integratedSkills]]
-  name = "react-vite"
-  version = "1.0.0"
+    [[integratedSkills]]
+    name = "react-vite"
+    version = "1.0.0"
 
-  [[services]]
-  name = "web"
-  paths = [ "/vessels/" ]
-  localPort = 6899
+    [[services]]
+    name = "web"
+    paths = [ "/vessels/" ]
+    localPort = 8099
 
-  [services.development]
-  run = "bash -c 'cd /home/runner/workspace/artifacts/vessels && exec node_modules/.bin/vite --config vite.config.ts --host 0.0.0.0'"
+    [services.development]
+    run = "bash -c 'cd /home/runner/workspace/artifacts/vessels && exec node_modules/.bin/vite --config vite.config.ts --host 0.0.0.0'"
 
-  [services.production]
-  build = [ "pnpm", "--filter", "@workspace/vessels", "run", "build" ]
-  publicDir = "artifacts/vessels/dist/public"
-  serve = "static"
+    [services.production]
+    build = [ "pnpm", "--filter", "@workspace/vessels", "run", "build" ]
+    publicDir = "artifacts/vessels/dist/public"
+    serve = "static"
 
-  [[services.production.rewrites]]
-  from = "/*"
-  to = "/index.html"
+    [[services.production.rewrites]]
+    from = "/*"
+    to = "/index.html"
 
-  [services.env]
-  # Shared proxy port (9090) is hardcoded in vite.config.ts; PROXY_PORT env var is not used.
-  VITE_PORT = "6899"
-  BASE_PATH = "/vessels/"
+    [services.env]
+    VITE_PORT = "8099"
+    BASE_PATH = "/vessels/"
+  

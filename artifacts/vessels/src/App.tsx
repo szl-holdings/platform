@@ -32,6 +32,7 @@ import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";
 import { SidebarNav, type SidebarNavSection } from "@szl-holdings/shared-ui/design-system";
 import { DashboardShell as SharedDashboardShell } from "@szl-holdings/shared-ui/design-system";
 import { StaleIndicator } from "@szl-holdings/shared-ui/stale-indicator";
+import MarketingHomePage from "@/pages/marketing-home";
 
 const VESSELS_ACCENT = LANE_ACCENT_HEX.vessels.primaryLight;
 
@@ -121,7 +122,6 @@ const VESSELS_ONBOARDING_CONFIG: OnboardingConfig = {
 // Marketing pages
 const VesselsPulse = lazy(() => import("@/pages/pulse"));
 const VesselsAtlasArtifactsPage = lazy(() => import("@/pages/atlas-artifacts"));
-const MarketingHomePage = lazy(() => import("@/pages/marketing-home"));
 const MarketingPlatformPage = lazy(() => import("@/pages/marketing-platform"));
 const MarketingCapabilitiesPage = lazy(() => import("@/pages/marketing-capabilities"));
 const MarketingUseCasesPage = lazy(() => import("@/pages/marketing-use-cases"));

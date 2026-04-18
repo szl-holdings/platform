@@ -7,11 +7,28 @@ import { PROXY_ROUTES } from "../../packages/proxy-routes.js";
 
 process.env.GOMAXPROCS = process.env.GOMAXPROCS ?? "2";
 
-const vitePort = Number(process.env.VITE_PORT) || 3000;
+const vitePort = Number(process.env.VITE_PORT) || 3002;
 const basePath = process.env.BASE_PATH || "/aegis/";
 
 // Shared proxy port — hardcoded; do not use a PROXY_PORT env var to override this.
 const SHARED_PROXY_PORT = 9090;
+
+function rootRedirectPlugin(): Plugin {
+  return {
+    name: "root-redirect",
+    apply: "serve",
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        if (req.url === "/") {
+          res.writeHead(200, { "Content-Type": "text/html" });
+          res.end(`<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0;url=${basePath}"></head><body></body></html>`);
+        } else {
+          next();
+        }
+      });
+    },
+  };
+}
 
 function sharedProxyPlugin(): Plugin {
   return {
@@ -73,6 +90,7 @@ function sharedProxyPlugin(): Plugin {
 export default defineConfig({
   base: basePath,
   plugins: [
+    rootRedirectPlugin(),
     sharedProxyPlugin(),
     react(),
     tailwindcss(),
