@@ -314,6 +314,24 @@ router.post("/ai/extract", async (req, res) => {
 
     writeAudit({ endpoint: "extract", model: completion.model, latencyMs: completion.latencyMs, entityCount: result.entities.length });
 
+    const extractTrace = captureTrace({
+      domain: "alloy",
+      recommendationType: "anomaly_detection",
+      model: completion.model,
+      modelProvider: completion.provider ?? "unknown",
+      orgId: getOrgId(req.user),
+      promptText: input.slice(0, 500),
+      latencyMs: completion.latencyMs,
+      promptTokens: completion.usage?.promptTokens,
+      completionTokens: completion.usage?.completionTokens,
+      confidence: result.confidence ?? 1.0,
+      outputSummary: `Extracted ${result.entities.length} entities`,
+    });
+    const extractCtx: DomainEvalContext = { domain: "alloy" };
+    autoEnqueueTrace(extractTrace);
+    logGuardrailIfTriggered(extractTrace, "auto_capture");
+    runAndPersistEval(extractTrace, extractCtx);
+
     res.json({ result, model: completion.model, latencyMs: completion.latencyMs });
   } catch (err) {
     logger.error({ err }, "AI extract error");
