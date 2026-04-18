@@ -33,6 +33,8 @@ const FRESHNESS_COLORS: Record<string, string> = {
 export default function IdentityBlastRadius() {
   const [selectedIdentity, setSelectedIdentity] = useState("j.smith@corp.com");
 
+  // Live backend route — /firestorm/* path is an active api-server endpoint.
+  // Follow-up task #1715 will rename it to /aegis/* once the server migration lands.
   const { data, isLoading, refetch, dataUpdatedAt } = useQuery({
     queryKey: ["identity-blast-radius", selectedIdentity],
     queryFn: async () => {

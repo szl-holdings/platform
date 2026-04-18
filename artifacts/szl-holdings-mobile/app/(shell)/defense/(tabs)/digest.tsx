@@ -72,6 +72,8 @@ export default function DigestTab() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
 
+  // Live backend routes — /api/firestorm/* paths are active api-server endpoints.
+  // Follow-up task #1715 will rename them to /api/aegis/* once the server migration lands.
   const { data: incidents, isLoading: incLoading, refetch: refetchInc, isRefetching: incRefetching } = useQuery({
     queryKey: ["incidents"],
     queryFn: () => apiGet<Incident[]>("/api/firestorm/incidents"),

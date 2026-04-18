@@ -2458,11 +2458,11 @@ paths:
                   cancelledSubscriptions: { type: integer }
         "403":
           $ref: "#/components/responses/Forbidden"
-  /billing/firestorm/invoice:
+  /billing/aegis/invoice:
     post:
-      operationId: createFirestormInvoice
+      operationId: createAegisInvoice
       tags: [billing]
-      summary: Create a Firestorm campaign invoice (admin)
+      summary: Create an Aegis invoice (admin)
       security:
         - sessionAuth: []
         - bearerAuth: []
@@ -2472,12 +2472,20 @@ paths:
           application/json:
             schema:
               type: object
-              required: [customerId, amount, description]
+              required: [customerId, lineItems]
               properties:
                 customerId: { type: string }
-                amount: { type: integer }
-                currency: { type: string, default: usd }
-                description: { type: string }
+                lineItems:
+                  type: array
+                  items:
+                    type: object
+                    required: [description, amount]
+                    properties:
+                      description: { type: string }
+                      amount: { type: integer }
+                      currency: { type: string }
+                dueDate: { type: integer }
+                notes: { type: string }
       responses:
         "201":
           description: Invoice created

@@ -9,9 +9,9 @@ admin, reports, exports, notifications, connectors, projects, files, observabili
  * OpenAPI spec version: 0.3.0
  */
 
-export type CreateFirestormInvoiceBody = {
+export type CreateAegisInvoiceBody = {
   customerId: string;
-  amount: number;
-  currency?: string;
-  description: string;
+  lineItems: { description: string; amount: number; currency?: string }[];
+  dueDate?: number;
+  notes?: string;
 };

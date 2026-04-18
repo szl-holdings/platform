@@ -24,6 +24,8 @@ interface MitreDetection {
   lastDetectedAt?: string;
 }
 
+// Live backend routes — /api/firestorm/* paths are active api-server endpoints.
+// Follow-up task #1715 will rename them to /api/aegis/* once the server migration lands.
 async function fetchMitreDetections(): Promise<MitreDetection[]> {
   try {
     return await apiGet<MitreDetection[]>("/api/firestorm/mitre-detections");

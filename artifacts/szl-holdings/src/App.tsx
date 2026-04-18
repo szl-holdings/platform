@@ -899,9 +899,6 @@ function App() {
             <Route path="/carlota-jo/services">
               <ExternalRedirect to="/carlota-jo/services" />
             </Route>
-            <Route path="/firestorm">
-              <ExternalRedirect to="/aegis/" />
-            </Route>
             <Route path="/inca">
               <ExternalRedirect to="/aegis/intel/dashboard" />
             </Route>

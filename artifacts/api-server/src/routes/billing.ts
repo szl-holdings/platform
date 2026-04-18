@@ -858,7 +858,7 @@ router.get("/billing/revenue-analytics", authMiddleware(), requireRole("ops", "a
   }
 });
 
-router.post("/billing/firestorm/invoice", authMiddleware(), requireRole("admin", "super_admin"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/billing/aegis/invoice", authMiddleware(), requireRole("admin", "super_admin"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { customerId, lineItems, dueDate, notes } = req.body as {
       customerId?: string;

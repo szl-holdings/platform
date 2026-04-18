@@ -294,6 +294,8 @@ function GovernanceLog({ entries, isLoading }: { entries: LogEntry[]; isLoading:
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function Models() {
+  // Live backend routes — /firestorm/* paths are active api-server endpoints.
+  // Follow-up task #1715 will rename them to /aegis/* once the server migration lands.
   const { data: registryData, isLoading: regLoading, isError: regError, refetch: refetchReg } = useQuery({
     queryKey: ["ai-governance-registry"],
     queryFn: () => apiFetch("/firestorm/ai-governance/registry"),

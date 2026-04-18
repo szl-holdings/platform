@@ -53,6 +53,8 @@ interface Incident {
 
 type IncidentUpdate = Partial<Pick<Incident, "status" | "severity" | "assignedAnalyst">>;
 
+// Live backend routes — /api/firestorm/* paths are active api-server endpoints.
+// Follow-up task #1715 will rename them to /api/aegis/* once the server migration lands.
 async function fetchIncidents(): Promise<Incident[]> {
   try {
     const data = await apiGet<Incident[]>("/api/firestorm/incidents");

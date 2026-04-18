@@ -43,6 +43,8 @@ export default function ControlEvidenceGraph() {
   const [expandedControl, setExpandedControl] = useState<number | null>(null);
   const [filterStatus, setFilterStatus] = useState<"all" | "effective" | "gap">("all");
 
+  // Live backend route — /firestorm/* path is an active api-server endpoint.
+  // Follow-up task #1715 will rename it to /aegis/* once the server migration lands.
   const { data, isLoading, refetch, dataUpdatedAt } = useQuery({
     queryKey: ["control-evidence-graph"],
     queryFn: async () => {

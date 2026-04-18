@@ -16,6 +16,8 @@ import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
+import { artifactUrl } from "../lib/artifact-ports.js";
+
 const TIMEOUT_MS = parseInt(process.env.SMOKE_TIMEOUT ?? "10000", 10);
 const CONCURRENCY = parseInt(process.env.SMOKE_CONCURRENCY ?? "5", 10);
 const API_ONLY = process.argv.includes("--api-only");
@@ -25,14 +27,15 @@ const JSON_OUTPUT = process.argv.includes("--json");
 const ROOT = join(__dirname, "../..");
 const ROUTES_INDEX = join(ROOT, "artifacts/api-server/src/routes/index.ts");
 
-// Per-app base URLs — read from env or use defaults matching artifact.toml localPort values
-const SZL_URL    = process.env.SZL_URL    || "http://localhost:21130";
-const AEGIS_URL  = process.env.AEGIS_URL  || "http://localhost:3000";
-const TERRA_URL  = process.env.TERRA_URL  || "http://localhost:6800";
-const VESSELS_URL= process.env.VESSELS_URL|| "http://localhost:8000";
-const CJ_URL     = process.env.CJ_URL     || "http://localhost:5000";
-const CMD_URL    = process.env.CMD_URL    || "http://localhost:8099";
-const API_URL    = process.env.API_URL    || "http://localhost:8080";
+// Per-app base URLs — env override takes priority; defaults from scripts/lib/artifact-ports.js.
+// To change a port, update artifact-ports.js — one change propagates to all QA scripts.
+const SZL_URL    = process.env.SZL_URL    || artifactUrl("szl-holdings");
+const AEGIS_URL  = process.env.AEGIS_URL  || artifactUrl("aegis");
+const TERRA_URL  = process.env.TERRA_URL  || artifactUrl("terra");
+const VESSELS_URL= process.env.VESSELS_URL|| artifactUrl("vessels");
+const CJ_URL     = process.env.CJ_URL     || artifactUrl("carlota-jo");
+const CMD_URL    = process.env.CMD_URL    || artifactUrl("command");
+const API_URL    = process.env.API_URL    || artifactUrl("api-server");
 
 // Legacy single-base-url override (used by external callers)
 const BASE_URL = process.env.BASE_URL || null;

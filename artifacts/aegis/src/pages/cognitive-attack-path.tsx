@@ -109,6 +109,8 @@ function AttackGraphCanvas({ nodes, edges }: { nodes: GraphNode[]; edges: GraphE
 }
 
 export default function CognitiveAttackPath() {
+  // Live backend route — /firestorm/* path is an active api-server endpoint.
+  // Follow-up task #1715 will rename it to /aegis/* once the server migration lands.
   const { data, isLoading, refetch, dataUpdatedAt } = useQuery({
     queryKey: ["cognitive-attack-path-graph"],
     queryFn: async () => {

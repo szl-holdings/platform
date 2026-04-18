@@ -164,6 +164,8 @@ export default function ApprovalsTab() {
   const [filter, setFilter] = useState<"all" | "pending" | "approved">("pending");
   const queryClient = useQueryClient();
 
+  // Live backend routes — /api/firestorm/* paths are active api-server endpoints.
+  // Follow-up task #1715 will rename them to /api/aegis/* once the server migration lands.
   const { data: apiDecisions, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ["tradecraft-decisions"],
     queryFn: () => apiGet<Decision[]>("/api/firestorm/tradecraft/decisions"),

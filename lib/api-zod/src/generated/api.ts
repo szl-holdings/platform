@@ -1895,15 +1895,19 @@ export const GetBillingRevenueAnalyticsResponse = zod.object({
 });
 
 /**
- * @summary Create a Firestorm campaign invoice (admin)
+ * @summary Create an Aegis invoice (admin)
  */
-export const createFirestormInvoiceBodyCurrencyDefault = `usd`;
-
-export const CreateFirestormInvoiceBody = zod.object({
+export const CreateAegisInvoiceBody = zod.object({
   customerId: zod.string(),
-  amount: zod.number(),
-  currency: zod.string().default(createFirestormInvoiceBodyCurrencyDefault),
-  description: zod.string(),
+  lineItems: zod.array(
+    zod.object({
+      description: zod.string(),
+      amount: zod.number(),
+      currency: zod.string().optional(),
+    }),
+  ),
+  dueDate: zod.number().optional(),
+  notes: zod.string().optional(),
 });
 
 /**

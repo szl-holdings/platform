@@ -65,7 +65,7 @@ import type {
   CreateDecision201,
   CreateDecisionBody,
   CreateFeatureFlag,
-  CreateFirestormInvoiceBody,
+  CreateAegisInvoiceBody,
   CreateHoldingsInquiryBody,
   CreateNotification,
   CreatePlatformDecisionBody,
@@ -8490,42 +8490,42 @@ export function useGetBillingRevenueAnalytics<
 }
 
 /**
- * @summary Create a Firestorm campaign invoice (admin)
+ * @summary Create a Aegis invoice (admin)
  */
-export const getCreateFirestormInvoiceUrl = () => {
-  return `/api/billing/firestorm/invoice`;
+export const getCreateAegisInvoiceUrl = () => {
+  return `/api/billing/aegis/invoice`;
 };
 
-export const createFirestormInvoice = async (
-  createFirestormInvoiceBody: CreateFirestormInvoiceBody,
+export const createAegisInvoice = async (
+  createAegisInvoiceBody: CreateAegisInvoiceBody,
   options?: RequestInit,
 ): Promise<void> => {
-  return customFetch<void>(getCreateFirestormInvoiceUrl(), {
+  return customFetch<void>(getCreateAegisInvoiceUrl(), {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(createFirestormInvoiceBody),
+    body: JSON.stringify(createAegisInvoiceBody),
   });
 };
 
-export const getCreateFirestormInvoiceMutationOptions = <
+export const getCreateAegisInvoiceMutationOptions = <
   TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof createFirestormInvoice>>,
+    Awaited<ReturnType<typeof createAegisInvoice>>,
     TError,
-    { data: BodyType<CreateFirestormInvoiceBody> },
+    { data: BodyType<CreateAegisInvoiceBody> },
     TContext
   >;
   request?: SecondParameter<typeof customFetch>;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof createFirestormInvoice>>,
+  Awaited<ReturnType<typeof createAegisInvoice>>,
   TError,
-  { data: BodyType<CreateFirestormInvoiceBody> },
+  { data: BodyType<CreateAegisInvoiceBody> },
   TContext
 > => {
-  const mutationKey = ['createFirestormInvoice'];
+  const mutationKey = ['createAegisInvoice'];
   const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
       ? options
@@ -8533,46 +8533,46 @@ export const getCreateFirestormInvoiceMutationOptions = <
     : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof createFirestormInvoice>>,
-    { data: BodyType<CreateFirestormInvoiceBody> }
+    Awaited<ReturnType<typeof createAegisInvoice>>,
+    { data: BodyType<CreateAegisInvoiceBody> }
   > = (props) => {
     const { data } = props ?? {};
 
-    return createFirestormInvoice(data, requestOptions);
+    return createAegisInvoice(data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type CreateFirestormInvoiceMutationResult = NonNullable<
-  Awaited<ReturnType<typeof createFirestormInvoice>>
+export type CreateAegisInvoiceMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createAegisInvoice>>
 >;
-export type CreateFirestormInvoiceMutationBody = BodyType<CreateFirestormInvoiceBody>;
-export type CreateFirestormInvoiceMutationError = ErrorType<
+export type CreateAegisInvoiceMutationBody = BodyType<CreateAegisInvoiceBody>;
+export type CreateAegisInvoiceMutationError = ErrorType<
   UnauthorizedResponse | ForbiddenResponse
 >;
 
 /**
- * @summary Create a Firestorm campaign invoice (admin)
+ * @summary Create a Aegis invoice (admin)
  */
-export const useCreateFirestormInvoice = <
+export const useCreateAegisInvoice = <
   TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof createFirestormInvoice>>,
+    Awaited<ReturnType<typeof createAegisInvoice>>,
     TError,
-    { data: BodyType<CreateFirestormInvoiceBody> },
+    { data: BodyType<CreateAegisInvoiceBody> },
     TContext
   >;
   request?: SecondParameter<typeof customFetch>;
 }): UseMutationResult<
-  Awaited<ReturnType<typeof createFirestormInvoice>>,
+  Awaited<ReturnType<typeof createAegisInvoice>>,
   TError,
-  { data: BodyType<CreateFirestormInvoiceBody> },
+  { data: BodyType<CreateAegisInvoiceBody> },
   TContext
 > => {
-  return useMutation(getCreateFirestormInvoiceMutationOptions(options));
+  return useMutation(getCreateAegisInvoiceMutationOptions(options));
 };
 
 /**

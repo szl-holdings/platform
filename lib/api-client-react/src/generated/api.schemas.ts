@@ -2398,11 +2398,11 @@ export type GetBillingRevenueAnalytics200 = {
   cancelledSubscriptions?: number;
 };
 
-export type CreateFirestormInvoiceBody = {
+export type CreateAegisInvoiceBody = {
   customerId: string;
-  amount: number;
-  currency?: string;
-  description: string;
+  lineItems: { description: string; amount: number; currency?: string }[];
+  dueDate?: number;
+  notes?: string;
 };
 
 export type GetTerraMarketIntelligence200 = {

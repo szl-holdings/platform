@@ -118,7 +118,7 @@ export * from './createDecision201';
 export * from './createDecisionBody';
 export * from './createDecisionBodyRiskLevel';
 export * from './createFeatureFlag';
-export * from './createFirestormInvoiceBody';
+export * from './createAegisInvoiceBody';
 export * from './createHoldingsInquiryBody';
 export * from './createHoldingsInquiryBodyType';
 export * from './createNotification';

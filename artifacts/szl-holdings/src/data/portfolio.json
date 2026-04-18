@@ -20,13 +20,13 @@
     "marketContext": "Maritime command and fleet visibility platform for modern operations"
   },
   {
-    "id": "inca",
-    "name": "INCA",
+    "id": "aegis-intel",
+    "name": "Aegis Intel",
     "tagline": "Intelligence and Visibility Platform",
     "description": "A secure intelligence layer built for visibility, triage, and more structured decision-making across complex operating environments.",
     "status": "In Development",
     "category": "Intelligence",
-    "link": "/firestorm/intel/dashboard",
+    "link": "/aegis/intel/dashboard",
     "icon": "BarChart3",
     "color": "#10b981",
     "cta": "View Aegis Intel",
@@ -104,7 +104,7 @@
     "description": "One platform, three workspaces — Command (managed operations), Defense (security operations), and Labs (intelligence engine). Unified operator overview with cross-module correlations, severity tracking, and investigation timelines.",
     "status": "Live",
     "category": "Defense & Intelligence",
-    "link": "/firestorm/",
+    "link": "/aegis/",
     "icon": "Shield",
     "color": "#6366f1",
     "cta": "View Aegis",
@@ -141,7 +141,7 @@
     "description": "Evidence-backed incident command platform delivering threat detection, anomaly visibility, and MSP-grade operational intelligence. Rosie integrates government contract intelligence, FedRAMP compliance tracking, and CMMC maturity scoring for defense-aware operators.",
     "status": "Live",
     "category": "Security",
-    "link": "/firestorm/ops/dashboard",
+    "link": "/aegis/ops/dashboard",
     "icon": "AlertTriangle",
     "color": "#ef4444",
     "metrics": [
@@ -191,8 +191,8 @@
     "marketContext": "Real estate intelligence and analytics market projected at $29B by 2027"
   },
   {
-    "id": "inca",
-    "name": "INCA",
+    "id": "aegis-research",
+    "name": "Aegis Research",
     "doctrineRole": "UNDERSTAND",
     "tagline": "AI Research Command Center",
     "description": "AI-native research platform transforming unstructured enterprise data into strategic intelligence — combining experiment tracking, model registry, LLM evaluation, and automated reporting for high-stakes decision environments.",

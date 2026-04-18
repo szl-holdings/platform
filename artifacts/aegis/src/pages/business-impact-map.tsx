@@ -47,6 +47,8 @@ function fmt(n: number | null | undefined) {
 export default function BusinessImpactMap() {
   const [expandedIncident, setExpandedIncident] = useState<number | null>(null);
 
+  // Live backend route — /firestorm/* path is an active api-server endpoint.
+  // Follow-up task #1715 will rename it to /aegis/* once the server migration lands.
   const { data, isLoading, refetch, dataUpdatedAt } = useQuery({
     queryKey: ["business-impact-map"],
     queryFn: async () => {

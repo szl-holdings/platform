@@ -62,7 +62,7 @@ Domain packs extend the same governance infrastructure into domain-specific inte
 | **Terra** | Real estate intelligence — distress pipeline, ownership graph, deal workflow, AI analysis | Active |
 | **PRISM Counsel** | Legal matter command — agentic matter management, court filings, recovery operations | Active |
 | **Carlota Jo** | Premium advisory operations — UHNW client portal, service catalog, engagement management | Active |
-| **IMPERIUM** | Cloud sovereignty — multi-cloud governance, policy enforcement, cloud estate visibility | Active |
+| **IMPERIUM** | Cloud sovereignty — multi-cloud governance, policy enforcement, cloud estate visibility | Archived |
 
 ### Command Portal
 
@@ -116,7 +116,7 @@ The six platform primitives define what is structurally different from dashboard
 +-----------------------------------------------------------------------+
 |  DOMAIN PACKS                                                         |
 |                                                                       |
-|  Aegis    Vessels    Terra    PRISM Counsel    Carlota Jo    IMPERIUM  |
+|  Aegis    Vessels    Terra    PRISM Counsel    Carlota Jo             |
 +-----------------------------------------------------------------------+
 |  GOVERNANCE INFRASTRUCTURE                                            |
 |                                                                       |

@@ -47,6 +47,8 @@ export default function IncidentProofChain() {
   const [selectedIncidentId, setSelectedIncidentId] = useState<number | null>(null);
   const [expandedEvent, setExpandedEvent] = useState<number | null>(null);
 
+  // Live backend route — /firestorm/* path is an active api-server endpoint.
+  // Follow-up task #1715 will rename it to /aegis/* once the server migration lands.
   const { data, isLoading, refetch, dataUpdatedAt } = useQuery({
     queryKey: ["incident-proof-chain", selectedIncidentId],
     queryFn: async () => {
