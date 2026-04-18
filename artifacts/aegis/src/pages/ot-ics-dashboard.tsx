@@ -757,7 +757,7 @@ export default function OtIcsDashboard() {
                         {cells.map((s, i) => (
                           <td key={i} className="px-0.5 py-1">
                             <div
-                              title={s ? `Score ${s.score} (baseline ${baseline})` : "no data"}
+                              title={s ? `Score ${s.score} (baseline ${baseline})` : "Score unavailable"}
                               className={`h-6 rounded border ${s ? heatColor(Number(s.score), baseline) : "bg-white/5 border-white/10"}`}
                             />
                           </td>

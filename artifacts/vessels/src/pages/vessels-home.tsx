@@ -1,6 +1,8 @@
 import { motion as m } from "framer-motion";
 import { ArrowRight, ArrowUpRight, ChevronRight, AlertTriangle, Anchor, Navigation, Activity } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
+import { useFleetExceptions, useVesselsDashboard } from "@/hooks/use-vessels-data";
+
 
 const navLinks = [
   { label: "Platform", href: "#platform" },
@@ -80,7 +82,15 @@ const FLEET_VESSELS = [
   { name: "CV AURORA BAY", type: "Container", status: "ok", x: 0.55, y: 0.58, heading: 222 },
 ];
 
-function FleetCommandVisual() {
+interface DemoAlert {
+  id: string;
+  severity: string;
+  msg: string;
+  vessel: string;
+  time: string;
+}
+
+function FleetCommandVisual({ alerts = LIVE_ALERTS, vesselCount = FLEET_VESSELS.length }: { alerts?: DemoAlert[]; vesselCount?: number }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -179,7 +189,7 @@ function FleetCommandVisual() {
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
             <span className="text-[9px] font-semibold text-emerald-400/80 tracking-widest uppercase">FLEET LIVE</span>
           </div>
-          <div className="text-[10px] text-sky-400/60 font-mono">{FLEET_VESSELS.length} vessels · {LIVE_ALERTS.filter(a => a.severity === "critical").length} critical</div>
+          <div className="text-[10px] text-sky-400/60 font-mono">{vesselCount} vessels · {alerts.filter(a => a.severity === "critical").length} critical</div>
         </div>
         <div className="bg-[#060e1a]/90 border border-sky-500/15 rounded px-3 py-2 backdrop-blur-sm">
           <div className="text-[9px] font-mono text-sky-400/40 mb-0.5">AIS FEED</div>
@@ -188,12 +198,12 @@ function FleetCommandVisual() {
       </div>
       {/* Alert feed */}
       <div className="absolute bottom-3 left-3 right-3 space-y-1 pointer-events-none">
-        {LIVE_ALERTS.slice(0, 3).map((a) => (
+        {alerts.slice(0, 3).map((a) => (
           <div key={a.id} className="flex items-center gap-2 bg-[#060e1a]/90 border border-sky-500/10 rounded px-3 py-1.5 backdrop-blur-sm">
             <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${a.severity === "critical" ? "bg-red-400 animate-pulse" : a.severity === "warn" ? "bg-amber-400" : "bg-emerald-400"}`} />
             <span className="text-[9px] font-mono text-sky-400/50 flex-shrink-0">{a.id}</span>
             <span className="text-[10px] text-sky-300/70 flex-1 truncate">{a.msg}</span>
-            <span className="text-[9px] text-sky-400/35 flex-shrink-0 font-mono">{a.vessel.split(" ")[1]}</span>
+            <span className="text-[9px] text-sky-400/35 flex-shrink-0 font-mono">{(a.vessel.split(" ")[1] ?? a.vessel)}</span>
           </div>
         ))}
       </div>
@@ -201,6 +211,24 @@ function FleetCommandVisual() {
       <div className="absolute top-3 right-3 pointer-events-none" style={{ display: "none" }} />
     </div>
   );
+}
+
+function LiveFleetCommandVisual() {
+  const { fleetExceptions } = useFleetExceptions({ status: "active" });
+  const { data: dashboard } = useVesselsDashboard();
+
+  const liveAlerts: DemoAlert[] = fleetExceptions.slice(0, 4).map((e, i) => ({
+    id: `ALT-${String(i + 1).padStart(3, "0")}`,
+    severity: (e.severity === "critical" || e.severity === "high") ? "critical" : (e.severity === "medium") ? "warn" : "info",
+    msg: e.title ?? "Fleet exception detected",
+    vessel: e.vesselName ?? "Unknown vessel",
+    time: e.detectedAt ? `${Math.max(1, Math.round((Date.now() - new Date(e.detectedAt).getTime()) / 60000))}m ago` : "—",
+  }));
+
+  const alerts = liveAlerts.length > 0 ? liveAlerts : LIVE_ALERTS;
+  const vesselCount = dashboard?.summary?.totalVessels ?? FLEET_VESSELS.length;
+
+  return <FleetCommandVisual alerts={alerts} vesselCount={vesselCount} />;
 }
 
 function Navbar() {
@@ -325,7 +353,7 @@ export default function VesselsHome() {
             className="mt-16 rounded-xl border border-sky-500/15 overflow-hidden max-w-3xl mx-auto"
             style={{ height: "320px" }}
           >
-            <FleetCommandVisual />
+            <LiveFleetCommandVisual />
           </m.div>
         </div>
       </section>
@@ -422,7 +450,7 @@ export default function VesselsHome() {
               </div>
             </div>
             <div className="rounded-xl border border-sky-500/15 overflow-hidden h-80">
-              <FleetCommandVisual />
+              <LiveFleetCommandVisual />
             </div>
           </m.div>
         </div>

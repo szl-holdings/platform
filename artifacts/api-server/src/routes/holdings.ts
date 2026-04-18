@@ -262,6 +262,60 @@ router.get("/holdings/ecosystem-summary", async (_req, res) => {
   }
 });
 
+/**
+ * GET /api/holdings/venture-health
+ *
+ * Returns curated health scores for each SZL portfolio company, enriched
+ * with live DB signal counts (vessel coverage, incident counts, deal flow, etc.).
+ * Scores are analyst-curated baselines; live signals are used to compute a
+ * "signal delta" overlay shown on the radar chart.
+ *
+ * AUTH: Intentionally unauthenticated — this endpoint is used by the SZL Holdings
+ * investor-facing health radar which is accessible in demo mode (?view=app bypass
+ * via PrivateAppGuard). Read-only aggregate counts; no PII or sensitive fields exposed.
+ * If auth scope expands beyond demo, add authMiddleware() here.
+ */
+let ventureHealthCache: { data: unknown; at: number } | null = null;
+const VENTURE_HEALTH_TTL = 60_000;
+
+router.get("/holdings/venture-health", async (_req, res) => {
+  try {
+    if (ventureHealthCache && Date.now() - ventureHealthCache.at < VENTURE_HEALTH_TTL) {
+      res.json(ventureHealthCache.data);
+      return;
+    }
+    const [
+      [{ shipCount }],
+      [{ lyteInc }],
+      [{ aegisInc }],
+      [{ aegisFind }],
+      [{ dealCount }],
+      [{ cjCount }],
+    ] = await Promise.all([
+      db.select({ shipCount: sql<number>`count(*)::int` }).from(vesselsTable),
+      db.select({ lyteInc: sql<number>`count(*)::int` }).from(lyteIncidentsTable),
+      db.select({ aegisInc: sql<number>`count(*)::int` }).from(firestormIncidentsTable),
+      db.select({ aegisFind: sql<number>`count(*)::int` }).from(firestormFindingsTable),
+      db.select({ dealCount: sql<number>`count(*)::int` }).from(terraDealsTable),
+      db.select({ cjCount: sql<number>`count(*)::int` }).from(carlotaInquiriesTable),
+    ]);
+    const payload = {
+      checkedAt: new Date().toISOString(),
+      signals: {
+        lyte: { incidents: lyteInc },
+        vessels: { trackedVessels: shipCount },
+        aegis: { incidents: aegisInc, findings: aegisFind },
+        terra: { activeDeals: dealCount },
+        carlota: { inquiries: cjCount },
+      },
+    };
+    ventureHealthCache = { data: payload, at: Date.now() };
+    res.json(payload);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to fetch venture health");
+  }
+});
+
 router.get("/holdings/ventures", validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);

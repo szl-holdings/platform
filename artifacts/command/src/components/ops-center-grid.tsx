@@ -2,7 +2,7 @@ import { useLocation } from "wouter";
 import { Bell, Users, DollarSign, GitCommit, Target, Shield, BarChart2, Zap, AlertTriangle, Rocket } from "lucide-react";
 import { useOpsBadgeCounts } from "../hooks/use-ops-badge-counts";
 
-type BadgeKey = "alerts" | "slaBreaches" | "governancePending";
+type BadgeKey = "alerts" | "slaBreaches" | "governancePending" | "costOverBudget";
 
 interface OpsItem {
   path: string;
@@ -39,7 +39,7 @@ const OPS_ITEMS: OpsItem[] = [
     description: "Resource consumption, API volumes, budget allocation, overage alerts",
     icon: DollarSign,
     color: "#22c55e",
-    badge: 2,
+    badgeKey: "costOverBudget",
     badgeLabel: "over budget",
     badgeColor: "var(--color-high)",
   },

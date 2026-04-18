@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { m } from "framer-motion";
 import { Link } from "wouter";
 import { ArrowLeft, Activity, TrendingUp, TrendingDown, Minus } from "lucide-react";
@@ -202,6 +203,19 @@ const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<
   );
 };
 
+const BASE = (typeof import.meta !== "undefined" ? (import.meta as { env?: { BASE_URL?: string } }).env?.BASE_URL : "") ?? "";
+const API_BASE = BASE.replace(/\/$/, "");
+
+interface VentureHealthSignals {
+  signals: {
+    lyte?: { incidents?: number };
+    vessels?: { trackedVessels?: number };
+    aegis?: { incidents?: number; findings?: number };
+    terra?: { activeDeals?: number };
+    carlota?: { inquiries?: number };
+  };
+}
+
 export default function HealthRadarPage() {
   usePageMeta({
     title: "Portfolio Health Radar — SZL Holdings Venture Intelligence",
@@ -209,8 +223,36 @@ export default function HealthRadarPage() {
     canonical: "https://szlholdings.com/venture-intelligence/health-radar",
   });
 
+  const { data: healthSignals } = useQuery<VentureHealthSignals>({
+    queryKey: ["venture-health-signals"],
+    queryFn: async () => {
+      const res = await fetch(`${API_BASE}/api/holdings/venture-health`, { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to fetch venture health");
+      return res.json();
+    },
+    staleTime: 60_000,
+    retry: false,
+  });
+
   const [selected, setSelected] = useState<string>("lyte");
   const company = COMPANIES.find(c => c.id === selected) ?? COMPANIES[0]!;
+
+  const liveKpiValue = (id: string, defaultValue: string): string => {
+    if (!healthSignals?.signals) return defaultValue;
+    const s = healthSignals.signals;
+    if (id === "vessels" && s.vessels?.trackedVessels != null) return `${s.vessels.trackedVessels.toLocaleString()}`;
+    if (id === "aegis" && s.aegis?.incidents != null) return `${s.aegis.incidents} active`;
+    if (id === "terra" && s.terra?.activeDeals != null) return `${s.terra.activeDeals} deals`;
+    if (id === "carlota" && s.carlota?.inquiries != null) return `${s.carlota.inquiries} inquiries`;
+    return defaultValue;
+  };
+
+  const companyKpis = company.kpis.map(kpi => {
+    if (kpi.label === "Vessel Coverage") return { ...kpi, value: liveKpiValue("vessels", kpi.value) };
+    if (kpi.label === "MTTR Improvement" && company.id === "aegis") return { ...kpi, value: liveKpiValue("aegis", kpi.value) };
+    if (kpi.label === "Data Source Coverage" && company.id === "terra") return { ...kpi, value: liveKpiValue("terra", kpi.value) };
+    return kpi;
+  });
 
   const radarData = RADAR_AXES.map(axis => ({
     axis: axis.label,
@@ -319,7 +361,7 @@ export default function HealthRadarPage() {
                 <div style={{ border: "1px solid hsla(0,0%,100%,0.06)", borderRadius: "8px", padding: "1.5rem" }}>
                   <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,40%)", marginBottom: "1rem", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>Key Performance Indicators</p>
                   <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}>
-                    {company.kpis.map(kpi => (
+                    {companyKpis.map(kpi => (
                       <div key={kpi.label} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.5rem 0.75rem", background: "hsla(0,0%,100%,0.02)", borderRadius: "4px" }}>
                         <span style={{ fontSize: "12px", color: "hsl(210,5%,55%)" }}>{kpi.label}</span>
                         <span style={{ fontSize: "13px", fontWeight: 700, color: kpi.good ? "hsl(38,12%,88%)" : "#e07070", fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif" }}>{kpi.value}</span>

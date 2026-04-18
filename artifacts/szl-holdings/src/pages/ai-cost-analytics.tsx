@@ -139,7 +139,7 @@ export default function AICostAnalyticsPage() {
         <MetricCard
           label="Top Spend Model"
           value={topModel?.[0] ?? "—"}
-          sub={topModel ? `$${topModel[1].spend.toFixed(4)}` : "No data"}
+          sub={topModel ? `$${topModel[1].spend.toFixed(4)}` : "—"}
           icon={TrendingUp}
           color="text-purple-400"
           bg="bg-purple-500/10"

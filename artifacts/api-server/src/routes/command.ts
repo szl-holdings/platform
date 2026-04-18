@@ -820,6 +820,29 @@ router.get("/alerts/count", requireAnyAuth(), async (_req: Request, res: Respons
   }
 });
 
+// ── Shared cost constants ─────────────────────────────────────────────────────
+// These are the single source of truth for unit costs and domain budgets.
+// Both /costs (full analytics) and /costs/over-budget (badge count) must
+// reference these constants so the badge and dashboard values cannot drift.
+const COST_RATE_CARD: Record<string, { unitCost: number; domain: string }> = {
+  "aegis.threat_lookup":    { unitCost: 0.012,  domain: "aegis" },
+  "aegis.alert_processed":  { unitCost: 0.008,  domain: "aegis" },
+  "vessels.ais_poll":       { unitCost: 0.0008, domain: "vessels" },
+  "vessels.tracking_request": { unitCost: 0.004, domain: "vessels" },
+  "terra.market_query":     { unitCost: 0.006,  domain: "terra" },
+  "terra.geopolitical_event": { unitCost: 0.003, domain: "terra" },
+  "lyte.metric_ingest":     { unitCost: 0.0002, domain: "lyte" },
+  "lyte.alert_eval":        { unitCost: 0.001,  domain: "lyte" },
+  "prism.matter_lookup":    { unitCost: 0.05,   domain: "prism" },
+  "prism.deadline_check":   { unitCost: 0.002,  domain: "prism" },
+  "szl.dashboard_view":     { unitCost: 0.0005, domain: "szl" },
+  "carlota.session":        { unitCost: 0.0015, domain: "carlota" },
+};
+const COST_DOMAIN_BUDGETS: Record<string, number> = {
+  aegis: 28000, vessels: 35000, terra: 18000, lyte: 22000,
+  prism: 12000, szl: 8000, carlota: 5000,
+};
+
 /**
  * GET /api/command/costs
  *
@@ -833,25 +856,8 @@ router.get("/costs", requireAnyAuth(), async (_req: Request, res: Response) => {
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
     const prevMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
 
-    // Per-feature unit cost rate card (USD per metered unit). Stable, source-attributed.
-    const RATE_CARD: Record<string, { unitCost: number; domain: string }> = {
-      "aegis.threat_lookup": { unitCost: 0.012, domain: "aegis" },
-      "aegis.alert_processed": { unitCost: 0.008, domain: "aegis" },
-      "vessels.ais_poll": { unitCost: 0.0008, domain: "vessels" },
-      "vessels.tracking_request": { unitCost: 0.004, domain: "vessels" },
-      "terra.market_query": { unitCost: 0.006, domain: "terra" },
-      "terra.geopolitical_event": { unitCost: 0.003, domain: "terra" },
-      "lyte.metric_ingest": { unitCost: 0.0002, domain: "lyte" },
-      "lyte.alert_eval": { unitCost: 0.001, domain: "lyte" },
-      "prism.matter_lookup": { unitCost: 0.05, domain: "prism" },
-      "prism.deadline_check": { unitCost: 0.002, domain: "prism" },
-      "szl.dashboard_view": { unitCost: 0.0005, domain: "szl" },
-      "carlota.session": { unitCost: 0.0015, domain: "carlota" },
-    };
-    const DOMAIN_BUDGETS: Record<string, number> = {
-      aegis: 28000, vessels: 35000, terra: 18000, lyte: 22000,
-      prism: 12000, szl: 8000, carlota: 5000,
-    };
+    const RATE_CARD = COST_RATE_CARD;
+    const DOMAIN_BUDGETS = COST_DOMAIN_BUDGETS;
     const DOMAIN_NAMES: Record<string, string> = {
       aegis: "Aegis", vessels: "Vessels", terra: "Terra", lyte: "Lyte",
       prism: "PRISM", szl: "SZL Holdings", carlota: "Carlota Jo",
@@ -935,6 +941,40 @@ router.get("/costs", requireAnyAuth(), async (_req: Request, res: Response) => {
   } catch (err) {
     logger.error({ err }, "command costs error");
     handleRouteError(res, err, "Failed to load cost analytics");
+  }
+});
+
+/**
+ * GET /api/command/costs/over-budget
+ *
+ * Lightweight badge count: returns the number of domains whose MTD spend
+ * exceeds their monthly budget. Used by the Ops Center grid badge.
+ */
+router.get("/costs/over-budget", requireAnyAuth(), async (_req: Request, res: Response) => {
+  try {
+    // Uses COST_RATE_CARD + COST_DOMAIN_BUDGETS (module-level constants shared with /costs)
+    // so badge count cannot drift from dashboard analytics.
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    let mtdEvents: Array<{ featureKey: string; total: number }> = [];
+    try {
+      mtdEvents = await db
+        .select({ featureKey: usageEventsTable.featureKey, total: sql<number>`COALESCE(SUM(${usageEventsTable.quantity}), 0)::int` })
+        .from(usageEventsTable)
+        .where(gte(usageEventsTable.recordedAt, monthStart))
+        .groupBy(usageEventsTable.featureKey);
+    } catch { /* non-fatal */ }
+    const domainSpend = new Map<string, number>();
+    Object.keys(COST_DOMAIN_BUDGETS).forEach((d) => domainSpend.set(d, 0));
+    for (const e of mtdEvents) {
+      const r = COST_RATE_CARD[e.featureKey];
+      if (!r) continue;
+      domainSpend.set(r.domain, (domainSpend.get(r.domain) ?? 0) + Number(e.total) * r.unitCost);
+    }
+    const count = Array.from(domainSpend.entries()).filter(([d, spent]) => spent > (COST_DOMAIN_BUDGETS[d] ?? Infinity)).length;
+    sendSuccess(res, { count });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to compute over-budget count");
   }
 });
 

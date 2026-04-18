@@ -203,7 +203,7 @@ export default function BrokerOverviewPage() {
                 <span className="text-[10px] text-terra-text-muted ml-auto">by distress count</span>
               </div>
               {topBoroughs.length === 0 ? (
-                <p className="text-xs text-terra-text-muted py-4 text-center">No data — run an ingestion to populate</p>
+                <p className="text-xs text-terra-text-muted py-4 text-center">No boroughs indexed — import property records to begin</p>
               ) : (
                 <div className="space-y-1">
                   {topBoroughs.map((b: any) => (
@@ -228,7 +228,7 @@ export default function BrokerOverviewPage() {
                 <span className="text-[10px] text-terra-text-muted ml-auto">opportunity scores</span>
               </div>
               {scoreDist.length === 0 ? (
-                <p className="text-xs text-terra-text-muted py-4 text-center">No data — run an ingestion to populate</p>
+                <p className="text-xs text-terra-text-muted py-4 text-center">No score data yet — import property records to populate</p>
               ) : (
                 <div className="space-y-3">
                   {scoreDist.map((s: any) => (

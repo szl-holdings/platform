@@ -390,7 +390,7 @@ export default function AegisUnifiedSettings() {
           accentColor={AEGIS_ACCENT}
           appName="Aegis MSP"
         >
-          {panels[activeSection] ?? <div className="p-6 text-sm text-muted-foreground">Coming soon.</div>}
+          {panels[activeSection] ?? <div className="p-6 text-sm text-muted-foreground">This section is not yet configured.</div>}
         </SettingsShell>
       </div>
     </div>

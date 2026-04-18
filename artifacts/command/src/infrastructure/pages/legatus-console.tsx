@@ -8,6 +8,7 @@ import {
 import { IMPERIUM_DATA, getAquilaColor, getAquilaLabel, getThreatColor, getClassificationColor, type Legion, type ThreatLevel } from "@imp/lib/imperium-data";
 import { ClassificationBadge } from "@imp/components/classification-badge";
 import { cn } from "@imp/lib/utils";
+import { useOpsBadgeCounts } from "../../hooks/use-ops-badge-counts";
 
 const THREAT_DISPLAY: Record<string, string> = { CLEAR: "CLEAR", ELEVATED: "ELEVATED", ACTIVE: "ACTIVE", CRITICAL: "CRITICAL" };
 
@@ -106,6 +107,7 @@ function StatCard({ icon: Icon, label, value, sub, color, href }: {
 export default function LegatusConsole() {
   const imperium = IMPERIUM_DATA;
   const [tick, setTick] = useState(0);
+  const badgeCounts = useOpsBadgeCounts();
 
   useEffect(() => {
     const t = setInterval(() => setTick((x) => x + 1), 5000);
@@ -230,7 +232,7 @@ export default function LegatusConsole() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
         {[
           { label: "RESOURCE MAP", sub: "Full hierarchy view", href: "/infrastructure/imperium-map", icon: Globe2 },
-          { label: "GOVERNANCE BOARD", sub: "3 proposals pending", href: "/infrastructure/senate", icon: AlertTriangle },
+          { label: "GOVERNANCE BOARD", sub: badgeCounts.governancePending != null ? `${badgeCounts.governancePending} approval${badgeCounts.governancePending === 1 ? "" : "s"} pending` : "Governance approvals", href: "/infrastructure/senate", icon: AlertTriangle },
           { label: "NETWORK TOPOLOGY", sub: "Service mesh routes", href: "/infrastructure/supply-lines", icon: Wifi },
           { label: "INTELLIGENCE", sub: "Signals briefing", href: "/infrastructure/intelligence", icon: Database },
         ].map((action) => {

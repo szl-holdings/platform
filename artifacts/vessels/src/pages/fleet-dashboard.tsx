@@ -583,36 +583,42 @@ function VesselDrawer({ vessel, onClose }: { vessel: RosterVessel; onClose: () =
   );
 }
 
-function DocumentValidationPanel() {
-  const docs = [
-    { vessel: "MV Caspian Star", doc: "P&I Certificate", status: "expired", expires: "2026-01-15", severity: "critical" },
-    { vessel: "MV Nordic Spirit", doc: "ISM Safety Certificate", status: "expiring", expires: "2026-04-10", severity: "high" },
-    { vessel: "MV Atlantic Runner", doc: "ISPS Certificate", status: "valid", expires: "2027-06-30", severity: "low" },
-    { vessel: "MV Orion Trader", doc: "Class Certificate", status: "expiring", expires: "2026-04-22", severity: "high" },
-    { vessel: "MV Pacific Horizon", doc: "CLC Certificate", status: "valid", expires: "2027-09-01", severity: "low" },
-  ];
-  const expired = docs.filter(d => d.status === "expired").length;
-  const expiring = docs.filter(d => d.status === "expiring").length;
+function DocumentValidationPanel({ exceptions }: { exceptions: ExceptionItem[] }) {
+  const complianceTypes = ["compliance_breach", "certification_lapse", "documentation_gap", "regulatory_breach", "inspection_fail"];
+  const items = exceptions.filter(e => complianceTypes.includes(e.type)).slice(0, 6);
 
+  if (items.length === 0) {
+    return (
+      <div className="bg-[#0a1628]/80 backdrop-blur border border-sky-500/10 rounded-xl">
+        <EmptyState
+          icon={Shield}
+          headline="All certificates nominal"
+          description="No compliance or documentation exceptions active. Certification status monitoring is running continuously."
+          compact
+          accentColor="#38bdf8"
+        />
+      </div>
+    );
+  }
+
+  const critical = items.filter(e => e.severity === "critical" || e.severity === "high");
   return (
     <div className="bg-[#0a1628]/80 backdrop-blur border border-sky-500/10 rounded-xl overflow-hidden">
       <div className="px-4 py-3 border-b border-sky-500/10 flex items-center gap-2">
         <Shield className="w-3.5 h-3.5 text-amber-400" />
         <span className="text-[11px] font-mono text-sky-300 uppercase tracking-wider">Document Validation</span>
-        {expired > 0 && <Badge variant="outline" className="ml-auto text-[9px] bg-red-500/10 text-red-400 border-red-500/20">{expired} Expired</Badge>}
-        {expiring > 0 && <Badge variant="outline" className="text-[9px] bg-amber-500/10 text-amber-400 border-amber-500/20">{expiring} Expiring</Badge>}
+        {critical.length > 0 && <Badge variant="outline" className="ml-auto text-[9px] bg-red-500/10 text-red-400 border-red-500/20">{critical.length} Critical</Badge>}
       </div>
       <div className="divide-y divide-sky-500/5">
-        {docs.map((d, i) => (
-          <div key={i} className="px-4 py-2.5 flex items-center gap-3 hover:bg-sky-500/5 transition-colors">
-            <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${d.status === "expired" ? "bg-red-400 animate-pulse" : d.status === "expiring" ? "bg-amber-400" : "bg-emerald-400"}`} />
+        {items.map((e) => (
+          <div key={e.id} className="px-4 py-2.5 flex items-center gap-3 hover:bg-sky-500/5 transition-colors">
+            <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${e.severity === "critical" ? "bg-red-400 animate-pulse" : e.severity === "high" ? "bg-orange-400" : "bg-amber-400"}`} />
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-sky-100">{d.vessel}</p>
-              <p className="text-[10px] text-sky-400/50">{d.doc}</p>
+              <p className="text-xs font-semibold text-sky-100 truncate">{e.vesselName}</p>
+              <p className="text-[10px] text-sky-400/50 truncate">{e.title}</p>
             </div>
             <div className="text-right shrink-0">
-              <span className={`text-[10px] font-bold uppercase ${d.status === "expired" ? "text-red-400" : d.status === "expiring" ? "text-amber-400" : "text-emerald-400"}`}>{d.status}</span>
-              <p className="text-[9px] text-sky-400/30 font-mono">{d.expires}</p>
+              <span className={`text-[10px] font-bold uppercase ${e.severity === "critical" ? "text-red-400" : e.severity === "high" ? "text-orange-400" : "text-amber-400"}`}>{e.severity}</span>
             </div>
           </div>
         ))}
@@ -621,33 +627,44 @@ function DocumentValidationPanel() {
   );
 }
 
-function RouteForecastPanel() {
-  const forecasts = [
-    { vessel: "MV Atlantic Runner", route: "Singapore → Rotterdam", eta: "Apr 12", delay: "+2.5d", cause: "Suez congestion", impact: "$84K", severity: "high" },
-    { vessel: "MV Caspian Star", route: "Houston → Yokohama", eta: "Apr 18", delay: "On time", cause: "—", impact: "—", severity: "low" },
-    { vessel: "MV Pacific Horizon", route: "Dubai → Shanghai", eta: "Apr 8", delay: "+1d", cause: "Weather", impact: "$32K", severity: "medium" },
-    { vessel: "MV Nordic Spirit", route: "Rotterdam → Singapore", eta: "Apr 25", delay: "+4d", cause: "Port strike", impact: "$156K", severity: "critical" },
-  ];
+function RouteForecastPanel({ exceptions }: { exceptions: ExceptionItem[] }) {
+  const delayTypes = ["delay_risk", "route_deviation", "port_congestion", "weather_delay", "schedule_variance"];
+  const items = exceptions.filter(e => delayTypes.includes(e.type)).slice(0, 6);
 
+  if (items.length === 0) {
+    return (
+      <div className="bg-[#0a1628]/80 backdrop-blur border border-sky-500/10 rounded-xl">
+        <EmptyState
+          icon={TrendingUp}
+          headline="All routes nominal"
+          description="No active route delays or deviations. Voyage tracking is running continuously across the fleet."
+          compact
+          accentColor="#38bdf8"
+        />
+      </div>
+    );
+  }
+
+  const delays = items.filter(e => e.severity !== "low");
   return (
     <div className="bg-[#0a1628]/80 backdrop-blur border border-sky-500/10 rounded-xl overflow-hidden">
       <div className="px-4 py-3 border-b border-sky-500/10 flex items-center gap-2">
         <TrendingUp className="w-3.5 h-3.5 text-sky-400" />
         <span className="text-[11px] font-mono text-sky-300 uppercase tracking-wider">Route Forecast & Delay Causes</span>
-        <Badge variant="outline" className="ml-auto text-[9px] bg-sky-500/10 text-sky-400 border-sky-500/20">{forecasts.filter(f => f.severity !== "low").length} Delays</Badge>
+        {delays.length > 0 && <Badge variant="outline" className="ml-auto text-[9px] bg-sky-500/10 text-sky-400 border-sky-500/20">{delays.length} Delay{delays.length !== 1 ? "s" : ""}</Badge>}
       </div>
       <div className="divide-y divide-sky-500/5">
-        {forecasts.map((f, i) => (
-          <div key={i} className="px-4 py-2.5 hover:bg-sky-500/5 transition-colors">
+        {items.map((e) => (
+          <div key={e.id} className="px-4 py-2.5 hover:bg-sky-500/5 transition-colors">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-xs font-semibold text-sky-100">{f.vessel}</span>
-              <span className={`text-[10px] font-bold ${f.severity === "critical" ? "text-red-400" : f.severity === "high" ? "text-orange-400" : f.severity === "medium" ? "text-amber-400" : "text-emerald-400"}`}>{f.delay}</span>
+              <span className="text-xs font-semibold text-sky-100">{e.vesselName}</span>
+              <span className={`text-[10px] font-bold ${e.severity === "critical" ? "text-red-400" : e.severity === "high" ? "text-orange-400" : e.severity === "medium" ? "text-amber-400" : "text-emerald-400"}`}>
+                {e.severity === "low" ? "On time" : e.type.replace(/_/g, " ")}
+              </span>
             </div>
             <div className="flex items-center gap-3 text-[10px] text-sky-400/50">
-              <span className="font-mono">{f.route}</span>
-              <span>ETA {f.eta}</span>
-              {f.cause !== "—" && <span className="text-amber-400/60">{f.cause}</span>}
-              {f.impact !== "—" && <span className="font-mono text-sky-400/30">impact {f.impact}</span>}
+              <span className="truncate">{e.title}</span>
+              {e.estimatedImpactUSD > 0 && <span className="font-mono text-sky-400/30 shrink-0">impact ${e.estimatedImpactUSD.toLocaleString()}</span>}
             </div>
           </div>
         ))}
@@ -945,8 +962,8 @@ export default function FleetDashboard() {
           {intelTab === "behavioral" && <BehavioralRiskPanel exceptions={fleetExceptions} />}
           {intelTab === "dark" && <DarkVesselPanel exceptions={fleetExceptions} />}
           {intelTab === "sanctions" && <SanctionsPanel exceptions={fleetExceptions} />}
-          {intelTab === "routes" && <RouteForecastPanel />}
-          {intelTab === "documents" && <DocumentValidationPanel />}
+          {intelTab === "routes" && <RouteForecastPanel exceptions={fleetExceptions} />}
+          {intelTab === "documents" && <DocumentValidationPanel exceptions={fleetExceptions} />}
           {intelTab === "cargo" && <CargoFlowPanel exceptions={fleetExceptions} />}
           {intelTab === "congestion" && <PortCongestionPanel exceptions={fleetExceptions} />}
         </div>

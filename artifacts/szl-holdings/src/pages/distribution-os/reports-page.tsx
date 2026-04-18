@@ -89,7 +89,7 @@ function SourceChart({ leads }: { leads: Lead[] }) {
           <MiniBar value={count} max={max} color={colors[i % colors.length]} />
         </div>
       ))}
-      {sorted.length === 0 && <p style={{ fontSize: "0.8125rem", color: "#4a4540" }}>No data yet.</p>}
+      {sorted.length === 0 && <p style={{ fontSize: "0.8125rem", color: "#4a4540" }}>No lead source activity recorded for this period.</p>}
     </div>
   );
 }
@@ -120,7 +120,7 @@ function StageChart({ leads }: { leads: Lead[] }) {
           <MiniBar value={count} max={max} color={stageColors[stage]} />
         </div>
       ))}
-      {counts.every(c => c.count === 0) && <p style={{ fontSize: "0.8125rem", color: "#4a4540" }}>No data yet.</p>}
+      {counts.every(c => c.count === 0) && <p style={{ fontSize: "0.8125rem", color: "#4a4540" }}>No pipeline stages have leads yet — add contacts to get started.</p>}
     </div>
   );
 }

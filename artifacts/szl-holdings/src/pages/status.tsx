@@ -156,7 +156,7 @@ function UptimeBar({ service, history }: { service: ServiceStatus; history: Reco
               )}
             </>
           ) : (
-            <div style={{ fontSize: 11, color: "hsl(210,5%,44%)" }}>No data</div>
+            <div style={{ fontSize: 11, color: "hsl(210,5%,44%)" }}>No metrics yet</div>
           )}
         </div>
       )}

@@ -349,7 +349,7 @@ ${report.disclaimers ? `<div class="disclaimer">${esc(report.disclaimers)}</div>
                   ) : (
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                       <MetricCard label="Portfolio Companies" value={PORTFOLIO_COMPANIES.length.toString()} icon={Building2} color="#d4a054" />
-                      <MetricCard label="Total Revenue" value={totalRevenue > 0 ? fmt(totalRevenue) : "No data"} icon={DollarSign} color="#4a90b8" />
+                      <MetricCard label="Total Revenue" value={totalRevenue > 0 ? fmt(totalRevenue) : "—"} icon={DollarSign} color="#4a90b8" />
                       <MetricCard label="Reporting Periods" value={String(chartData.length)} icon={Clock} color="#6aaa72" />
                       <MetricCard label="LP Reports Filed" value={String(summary?.compliance.lpReports ?? 0)} icon={FileText} color="#8b7ac8" />
                     </div>

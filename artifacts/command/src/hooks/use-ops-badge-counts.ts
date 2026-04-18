@@ -4,6 +4,7 @@ export interface OpsBadgeCounts {
   alerts: number | null;
   slaBreaches: number | null;
   governancePending: number | null;
+  costOverBudget: number | null;
 }
 
 const POLL_INTERVAL_MS = 30_000;
@@ -12,6 +13,7 @@ let snapshot: OpsBadgeCounts = {
   alerts: null,
   slaBreaches: null,
   governancePending: null,
+  costOverBudget: null,
 };
 const subscribers = new Set<() => void>();
 let interval: ReturnType<typeof setInterval> | null = null;
@@ -32,12 +34,13 @@ async function refresh(): Promise<void> {
   if (inFlight) return;
   inFlight = true;
   try {
-    const [alerts, slaBreaches, governancePending] = await Promise.all([
+    const [alerts, slaBreaches, governancePending, costOverBudget] = await Promise.all([
       safeFetchCount("/api/command/alerts/count"),
       safeFetchCount("/api/command/sla/breaches"),
       safeFetchCount("/api/governance/pending"),
+      safeFetchCount("/api/command/costs/over-budget"),
     ]);
-    snapshot = { alerts, slaBreaches, governancePending };
+    snapshot = { alerts, slaBreaches, governancePending, costOverBudget };
     subscribers.forEach((cb) => cb());
   } finally {
     inFlight = false;

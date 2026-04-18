@@ -432,6 +432,36 @@ export default function HomeScreen() {
 
   const base = useApiBase();
 
+  const { data: holdingsKpis } = useQuery<{
+    platforms?: {
+      vessels?: { trackedVessels?: number };
+      terra?: { distressProperties?: number; activeDeals?: number };
+    };
+  }>({
+    queryKey: ["founder-holdings-kpis"],
+    queryFn: async () => {
+      const res = await fetch(`${base}/api/holdings/kpis`, { credentials: "include" });
+      if (!res.ok) return {};
+      return res.json();
+    },
+    staleTime: 120_000,
+    retry: false,
+    enabled: !!base,
+  });
+
+  const liveVesselCount = holdingsKpis?.platforms?.vessels?.trackedVessels;
+
+  const ventures = VENTURES.map((v) => {
+    if (v.slug === "vessels" && liveVesselCount != null) {
+      return { ...v, metrics: v.metrics.map(m => m.label === "Vessels tracked" ? { ...m, value: liveVesselCount.toLocaleString() } : m) };
+    }
+    const liveDistress = holdingsKpis?.platforms?.terra?.distressProperties;
+    if (v.slug === "terra" && liveDistress != null) {
+      return { ...v, metrics: v.metrics.map(m => m.label === "Properties" ? { ...m, value: liveDistress.toLocaleString() } : m) };
+    }
+    return v;
+  });
+
   const thesisItems =
     thesisBlocks && thesisBlocks.length > 0
       ? thesisBlocks.map((b) => ({ label: b.title ?? "", content: b.body ?? "" }))
@@ -718,11 +748,11 @@ export default function HomeScreen() {
               const idx = Math.round(
                 e.nativeEvent.contentOffset.x / (VENTURE_CARD_WIDTH + 16)
               );
-              setActiveVentureIdx(Math.max(0, Math.min(idx, VENTURES.length - 1)));
+              setActiveVentureIdx(Math.max(0, Math.min(idx, ventures.length - 1)));
             }}
             nestedScrollEnabled
           >
-            {VENTURES.map((venture) => (
+            {ventures.map((venture) => (
               <VentureCard
                 key={venture.slug}
                 venture={venture}
@@ -733,7 +763,7 @@ export default function HomeScreen() {
             ))}
           </ScrollView>
           <View style={styles.dotIndicatorRow}>
-            {VENTURES.map((_, i) => (
+            {ventures.map((_, i) => (
               <View
                 key={i}
                 style={[

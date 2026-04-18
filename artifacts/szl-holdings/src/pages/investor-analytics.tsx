@@ -23,35 +23,35 @@ const AMBER = "#f59e0b";
 const MUTED = "#52525b";
 
 function fmt(n: number | null | undefined, prefix = "", suffix = "") {
-  if (n == null || !isFinite(n)) return "No data yet";
+  if (n == null || !isFinite(n)) return "—";
   if (n >= 1_000_000) return `${prefix}${(n / 1_000_000).toFixed(1)}M${suffix}`;
   if (n >= 1_000) return `${prefix}${(n / 1_000).toFixed(1)}K${suffix}`;
   return `${prefix}${n.toFixed(0)}${suffix}`;
 }
 
 function fmtCurrency(n: number | null | undefined) {
-  if (n == null || !isFinite(n)) return "No data yet";
+  if (n == null || !isFinite(n)) return "—";
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(2)}M`;
   if (n >= 1_000) return `$${(n / 1_000).toFixed(1)}K`;
   return `$${n.toFixed(2)}`;
 }
 
 function fmtPct(n: number | null | undefined, decimals = 1) {
-  if (n == null || !isFinite(n)) return "No data yet";
+  if (n == null || !isFinite(n)) return "—";
   return `${n.toFixed(decimals)}%`;
 }
 
 function fmtRatio(n: number | null | undefined, suffix = "x", decimals = 2) {
-  if (n == null || !isFinite(n)) return "No data yet";
+  if (n == null || !isFinite(n)) return "—";
   return `${n.toFixed(decimals)}${suffix}`;
 }
 
 function fmtMonths(n: number | null | undefined) {
-  if (n == null || !isFinite(n)) return "No data yet";
+  if (n == null || !isFinite(n)) return "—";
   return `${n.toFixed(1)} mo`;
 }
 
-const NO_DATA = "No data yet";
+const NO_DATA = "—";
 
 function MetricCard({
   label, value, sub, trend, trendUp, color = GOLD,
