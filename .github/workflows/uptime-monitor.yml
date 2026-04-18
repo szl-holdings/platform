@@ -1,0 +1,217 @@
+name: Uptime Monitor
+
+on:
+  schedule:
+    - cron: '* * * * *'
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: 'Health check URL to test (defaults to production)'
+        required: false
+        default: ''
+
+concurrency:
+  group: uptime-monitor
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  issues: write
+
+env:
+  HEALTH_CHECK_URL: https://szlholdings.com/api/health/live
+
+jobs:
+  health-check:
+    name: Check /api/health/live
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      status: ${{ steps.check.outputs.status }}
+      http_code: ${{ steps.check.outputs.http_code }}
+      response_time_ms: ${{ steps.check.outputs.response_time_ms }}
+      timestamp: ${{ steps.check.outputs.timestamp }}
+
+    steps:
+      - name: Probe health endpoint
+        id: check
+        env:
+          TARGET_URL: ${{ github.event.inputs.target_url || env.HEALTH_CHECK_URL }}
+        run: |
+          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          echo "timestamp=$TIMESTAMP" >> "$GITHUB_OUTPUT"
+
+          START=$(date +%s%3N)
+          HTTP_CODE=$(curl \
+            --silent \
+            --output /tmp/health_response.json \
+            --write-out "%{http_code}" \
+            --max-time 10 \
+            --retry 1 \
+            --retry-delay 5 \
+            "$TARGET_URL" || echo "000")
+          END=$(date +%s%3N)
+          ELAPSED=$((END - START))
+
+          echo "http_code=$HTTP_CODE" >> "$GITHUB_OUTPUT"
+          echo "response_time_ms=$ELAPSED" >> "$GITHUB_OUTPUT"
+
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "status=up" >> "$GITHUB_OUTPUT"
+            echo "✅ API UP — HTTP $HTTP_CODE in ${ELAPSED}ms"
+            cat /tmp/health_response.json || true
+          else
+            echo "status=down" >> "$GITHUB_OUTPUT"
+            echo "🔴 API DOWN — HTTP $HTTP_CODE after ${ELAPSED}ms"
+            cat /tmp/health_response.json || true
+          fi
+
+  alert-on-down:
+    name: Alert — API Down
+    runs-on: ubuntu-latest
+    needs: health-check
+    if: needs.health-check.outputs.status == 'down'
+
+    steps:
+      - name: Post Slack alert
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          HTTP_CODE: ${{ needs.health-check.outputs.http_code }}
+          RESPONSE_TIME: ${{ needs.health-check.outputs.response_time_ms }}
+          TIMESTAMP: ${{ needs.health-check.outputs.timestamp }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then
+            echo "⚠️  SLACK_WEBHOOK_URL secret not set — Slack/phone alerts are INACTIVE"
+            echo "    Add SLACK_WEBHOOK_URL to GitHub Secrets to enable founder phone alerts"
+            exit 0
+          fi
+          PAYLOAD=$(cat <<EOF
+          {
+            "text": "🔴 *SZL Holdings — Platform Down* — page the founder now",
+            "attachments": [
+              {
+                "color": "danger",
+                "fields": [
+                  { "title": "Endpoint", "value": "${HEALTH_CHECK_URL}", "short": false },
+                  { "title": "HTTP Status", "value": "$HTTP_CODE", "short": true },
+                  { "title": "Response Time", "value": "${RESPONSE_TIME}ms", "short": true },
+                  { "title": "Detected At", "value": "$TIMESTAMP UTC", "short": false },
+                  { "title": "Immediate action", "value": "1. Check Replit Deployments\n2. Run: \`curl -sf https://szlholdings.com/api/health/live\`\n3. Playbook: ops/cto/incident-and-support-playbook.md", "short": false }
+                ],
+                "footer": "<$RUN_URL|View GitHub Actions run>"
+              }
+            ]
+          }
+          EOF
+          )
+          curl -sf -X POST "$SLACK_WEBHOOK_URL" \
+            -H 'Content-Type: application/json' \
+            -d "$PAYLOAD" \
+            && echo "Slack alert sent" \
+            || echo "Slack post failed — check SLACK_WEBHOOK_URL"
+
+      - name: Open or update GitHub issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HTTP_CODE: ${{ needs.health-check.outputs.http_code }}
+          TIMESTAMP: ${{ needs.health-check.outputs.timestamp }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          REPO: ${{ github.repository }}
+        run: |
+          gh label create "uptime-incident" --color "d93f0b" --description "Platform downtime incident" --force 2>/dev/null || true
+          gh label create "P0" --color "e11d48" --description "Critical priority" --force 2>/dev/null || true
+
+          EXISTING=$(gh issue list \
+            --repo "$REPO" \
+            --label "uptime-incident" \
+            --state open \
+            --limit 1 \
+            --json number \
+            --jq '.[0].number' 2>/dev/null || echo "")
+
+          if [ -n "$EXISTING" ]; then
+            gh issue comment "$EXISTING" \
+              --body "⚠️ Still down at **$TIMESTAMP UTC** — HTTP $HTTP_CODE — [Run]($RUN_URL)"
+            echo "Updated existing incident issue #$EXISTING"
+          else
+            gh issue create \
+              --repo "$REPO" \
+              --title "🔴 Platform Down — API health check failing ($TIMESTAMP UTC)" \
+              --label "uptime-incident,P0" \
+              --body "## Platform Downtime Detected
+
+**Detected:** $TIMESTAMP UTC
+**Endpoint:** ${HEALTH_CHECK_URL}
+**HTTP Status:** $HTTP_CODE
+**Monitor run:** $RUN_URL
+
+## Immediate Actions
+
+1. Check [Replit Deployments](https://replit.com/deployments) — confirm if the API is deployed
+2. Test manually: \`curl -sf https://szlholdings.com/api/health/live\`
+3. Follow playbook: \`ops/cto/incident-and-support-playbook.md\`
+4. If recent deploy: consider rollback
+
+*This issue auto-closes when the API recovers.*"
+            echo "Opened new incident issue"
+          fi
+
+  alert-on-recovery:
+    name: Alert — API Recovered
+    runs-on: ubuntu-latest
+    needs: health-check
+    if: needs.health-check.outputs.status == 'up'
+
+    steps:
+      - name: Check for open incident and send recovery alert
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          TIMESTAMP: ${{ needs.health-check.outputs.timestamp }}
+          RESPONSE_TIME: ${{ needs.health-check.outputs.response_time_ms }}
+          REPO: ${{ github.repository }}
+        run: |
+          EXISTING=$(gh issue list \
+            --repo "$REPO" \
+            --label "uptime-incident" \
+            --state open \
+            --limit 1 \
+            --json number \
+            --jq '.[0].number' 2>/dev/null || echo "")
+
+          if [ -z "$EXISTING" ]; then
+            echo "No open incident issue — API was already up, skipping recovery alerts"
+            exit 0
+          fi
+
+          echo "Found open incident issue #$EXISTING — sending recovery alert and closing"
+
+          if [ -n "$SLACK_WEBHOOK_URL" ]; then
+            PAYLOAD=$(cat <<EOF
+          {
+            "text": "✅ *SZL Holdings — Platform Recovered*",
+            "attachments": [
+              {
+                "color": "good",
+                "fields": [
+                  { "title": "Endpoint", "value": "${HEALTH_CHECK_URL}", "short": false },
+                  { "title": "Recovered At", "value": "$TIMESTAMP UTC", "short": true },
+                  { "title": "Response Time", "value": "${RESPONSE_TIME}ms", "short": true }
+                ]
+              }
+            ]
+          }
+          EOF
+            )
+            curl -sf -X POST "$SLACK_WEBHOOK_URL" \
+              -H 'Content-Type: application/json' \
+              -d "$PAYLOAD" \
+              && echo "Recovery alert sent to Slack" \
+              || echo "Slack recovery post failed"
+          fi
+
+          gh issue comment "$EXISTING" \
+            --body "✅ **API recovered** at $TIMESTAMP UTC — response time ${RESPONSE_TIME}ms. Closing incident."
+          gh issue close "$EXISTING" --reason completed
+          echo "Closed incident issue #$EXISTING"

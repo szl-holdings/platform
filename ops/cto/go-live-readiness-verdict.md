@@ -63,7 +63,7 @@ These items are known and tracked. They do not block launch but should be resolv
 | Zod validation on remaining API routes | Medium | Day 30 |
 | Vessels + Firestorm integration tests (POST paths) | Medium | Day 30 |
 | Application Insights / OTLP wiring | Low | Day 60 |
-| External uptime monitoring (UptimeRobot) | Low | Day 7 |
+| External uptime monitoring | Low | ✅ GitHub Actions monitor deployed (`.github/workflows/uptime-monitor.yml`) — checks `/api/health/live` every minute, creates issues + Slack alerts on downtime (~2 min worst-case phone alert). Add `SLACK_WEBHOOK_URL` GitHub Secret to activate. |
 | Third-party penetration test | Medium | Pre-enterprise contract |
 | SOC 2 audit initiation | Medium | Pre-enterprise contract |
 

@@ -386,6 +386,28 @@ The control room does not require a custom-built UI to be operational. The data 
 
 ---
 
+## Uptime Monitor Status
+
+**Status: Active — GitHub Actions monitor deployed, running every minute.**
+
+A GitHub Actions workflow (`.github/workflows/uptime-monitor.yml`) checks `https://szlholdings.com/api/health/live` every minute from GitHub's infrastructure (external to Replit). On downtime, it creates a GitHub issue (`uptime-incident` label) and posts a Slack alert to `#ops-alerts`. Worst-case alert delivery to founder phone (Slack mobile push): ~2 minutes.
+
+**Required one-time setup (to activate phone alerts):**
+1. Create a Slack incoming webhook for `#ops-alerts`
+2. Add it as GitHub Secret `SLACK_WEBHOOK_URL`
+3. Enable Slack mobile notifications on your phone
+
+Full instructions: `ops/observability/uptime-monitoring-setup.md`
+
+**Upgrade path:** BetterStack Starter ($25/month) provides direct SMS with guaranteed sub-3-minute delivery independent of GitHub plan throttling.
+
+Status badge (paste here once BetterStack is configured):
+```
+[ STATUS BADGE — paste markdown badge from BetterStack after optional upgrade ]
+```
+
+---
+
 ## Bookmarks for Quick Access
 
 Save these for incident response:
@@ -394,6 +416,8 @@ Save these for incident response:
 API Health (live)     : https://szlholdings.com/api/health/live
 API Health (detailed) : https://szlholdings.com/api/health/detailed
                         Header: X-Internal-Token: $ALLOY_INTERNAL_TOKEN
+Uptime Dashboard      : https://uptime.betterstack.com (after setup)
+Status Page           : https://szlholdings.betteruptime.com (after setup)
 Replit Dashboard      : https://replit.com/deployments
 Stripe Dashboard      : https://dashboard.stripe.com
 OpenAI Status         : https://status.openai.com
