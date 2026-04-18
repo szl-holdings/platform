@@ -56,14 +56,7 @@ const CAPABILITY_CATEGORIES = [
   "Audit Logs",
 ];
 
-const GENOME: Record<string, Record<string, MaturityLevel>> = {
-  aegis:   { "Authentication": "best-in-class", "Dashboard": "polished",      "AI Copilot": "polished",     "Real-Time Data": "polished",   "Export / PDF": "functional",  "Notifications": "polished",    "Search": "functional",  "Analytics": "functional",  "Mobile": "polished",      "Webhooks": "functional",    "Multi-Tenant": "polished",     "Audit Logs": "best-in-class" },
-  terra:   { "Authentication": "polished",      "Dashboard": "polished",      "AI Copilot": "functional",   "Real-Time Data": "functional", "Export / PDF": "polished",    "Notifications": "functional",  "Search": "polished",    "Analytics": "functional",  "Mobile": "functional",    "Webhooks": "stub",          "Multi-Tenant": "functional",   "Audit Logs": "polished" },
-  vessels: { "Authentication": "polished",      "Dashboard": "best-in-class", "AI Copilot": "functional",   "Real-Time Data": "best-in-class","Export / PDF": "polished",  "Notifications": "polished",    "Search": "functional",  "Analytics": "polished",    "Mobile": "polished",      "Webhooks": "functional",    "Multi-Tenant": "functional",   "Audit Logs": "polished" },
-  lyte:    { "Authentication": "polished",      "Dashboard": "best-in-class", "AI Copilot": "best-in-class","Real-Time Data": "best-in-class","Export / PDF": "functional", "Notifications": "best-in-class","Search": "polished",   "Analytics": "best-in-class","Mobile": "polished",      "Webhooks": "polished",      "Multi-Tenant": "polished",     "Audit Logs": "polished" },
-  carlota: { "Authentication": "polished",      "Dashboard": "functional",    "AI Copilot": "functional",   "Real-Time Data": "stub",       "Export / PDF": "polished",    "Notifications": "functional",  "Search": "stub",        "Analytics": "stub",        "Mobile": "polished",      "Webhooks": "missing",       "Multi-Tenant": "stub",         "Audit Logs": "functional" },
-  prism:   { "Authentication": "polished",      "Dashboard": "polished",      "AI Copilot": "functional",   "Real-Time Data": "functional", "Export / PDF": "polished",    "Notifications": "polished",    "Search": "functional",  "Analytics": "functional",  "Mobile": "functional",    "Webhooks": "stub",          "Multi-Tenant": "functional",   "Audit Logs": "polished" },
-};
+const GENOME: Record<string, Record<string, MaturityLevel>> = {};
 
 const MATURITY_META: Record<MaturityLevel, { label: string; color: string; bg: string; score: number }> = {
   "missing":      { label: "Missing",       color: "#374151", bg: "hsla(220,15%,15%,0.4)",    score: 0 },
@@ -274,6 +267,13 @@ function GenomeTab() {
 
   const activeGenome = genomeApi?.genome ?? GENOME;
 
+  const liveApps = useMemo(() =>
+    genomeApi?.genome
+      ? APPS.filter(a => a.id in genomeApi.genome)
+      : APPS,
+    [genomeApi]
+  );
+
   const totalScore = useMemo(() => {
     if (genomeApi?.score !== undefined) return genomeApi.score;
     let total = 0;
@@ -284,7 +284,7 @@ function GenomeTab() {
         max += 4;
       });
     });
-    return Math.round((total / max) * 100);
+    return max > 0 ? Math.round((total / max) * 100) : 0;
   }, [activeGenome, genomeApi]);
 
   const gapCount = useMemo(() =>
@@ -297,7 +297,7 @@ function GenomeTab() {
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "0.75rem", marginBottom: "1.5rem" }}>
         {[
           { label: "Genome Score", value: `${totalScore}%`, sub: "weighted maturity", color: "#7c3aed" },
-          { label: "Capabilities", value: `${APPS.length * CAPABILITY_CATEGORIES.length}`, sub: "mapped data points", color: "#3b82f6" },
+          { label: "Capabilities", value: `${liveApps.length * CAPABILITY_CATEGORIES.length}`, sub: "mapped data points", color: "#3b82f6" },
           { label: "Gaps Found", value: `${gapCount}`, sub: "missing or stub", color: "#f43f5e" },
           { label: "Best-in-Class", value: `${genomeApi?.bestInClass ?? Object.values(activeGenome).flatMap(a => Object.values(a)).filter(l => l === "best-in-class").length}`, sub: "capabilities", color: "#10b981" },
         ].map(m => (
@@ -316,7 +316,7 @@ function GenomeTab() {
             <thead>
               <tr>
                 <th style={{ textAlign: "left", padding: "0.5rem 0.75rem", fontSize: "10px", fontWeight: 600, color: "hsl(210,5%,40%)", whiteSpace: "nowrap" }}>Capability</th>
-                {APPS.map(app => (
+                {liveApps.map(app => (
                   <th key={app.id} style={{ textAlign: "center", padding: "0.5rem 0.5rem", fontSize: "10px", fontWeight: 600, color: app.accent, whiteSpace: "nowrap" }}>
                     {app.name}
                   </th>
@@ -327,7 +327,7 @@ function GenomeTab() {
               {CAPABILITY_CATEGORIES.map((cap, ci) => (
                 <tr key={cap} style={{ borderTop: "1px solid hsla(0,0%,100%,0.04)" }}>
                   <td style={{ padding: "0.5rem 0.75rem", fontSize: "11.5px", color: "hsl(210,5%,62%)", whiteSpace: "nowrap" }}>{cap}</td>
-                  {APPS.map(app => {
+                  {liveApps.map(app => {
                     const level = activeGenome[app.id]?.[cap] ?? "missing";
                     const meta = MATURITY_META[level];
                     const isHov = hovered?.app === app.id && hovered?.cap === cap;

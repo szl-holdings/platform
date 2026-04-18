@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { m } from "framer-motion";
 import { Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import {
   FileText, ArrowLeft, ChevronRight, Zap, Download, Send,
   CheckCircle2, RefreshCw,
@@ -11,6 +12,31 @@ import {
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
+
+async function apiFetch<T>(path: string): Promise<T> {
+  const res = await fetch(`/api${path}`, {
+    credentials: "include",
+    headers: { "x-requested-with": "XMLHttpRequest" },
+  });
+  if (!res.ok) throw new Error(`${res.status}`);
+  const body = await res.json();
+  return body.data as T;
+}
+
+type ApiLpReport = {
+  id: number;
+  reportingPeriod: string;
+  status: string;
+  netIrr: string | null;
+  tvpi: string | null;
+  dpi: string | null;
+  grossIrr: string | null;
+};
+
+type FundSummary = {
+  compliance: { totalInvestors: number; lpReports: number };
+  fundAdmin: { latestNav: { totalNavCents: number; netIrr: string | null; tvpi: string | null; dpi: string | null } | null };
+};
 
 const REPORTS = [
   {
@@ -58,6 +84,46 @@ export default function LpReportsPage() {
   const [selectedId, setSelectedId] = useState("r1");
   const [generating, setGenerating] = useState(false);
 
+  const { data: apiReports } = useQuery({
+    queryKey: ["fund-ops", "lp-reports"],
+    queryFn: () => apiFetch<ApiLpReport[]>("/fund-ops/lp-reports"),
+    staleTime: 60_000,
+    refetchInterval: 120_000,
+  });
+
+  const { data: fundSummary } = useQuery({
+    queryKey: ["fund-ops", "summary"],
+    queryFn: () => apiFetch<FundSummary>("/fund-ops/summary"),
+    staleTime: 60_000,
+  });
+
+  const liveNav = fundSummary?.fundAdmin.latestNav;
+  const liveNetIrr = liveNav?.netIrr ? `${parseFloat(liveNav.netIrr).toFixed(1)}%` : "28.4%";
+  const liveTvpi = liveNav?.tvpi ? `${parseFloat(liveNav.tvpi).toFixed(2)}×` : "2.1×";
+  const liveDpi = liveNav?.dpi ? `${parseFloat(liveNav.dpi).toFixed(2)}×` : "0.62×";
+  const liveNavM = liveNav ? `$${(liveNav.totalNavCents / 100_000_000).toFixed(1)}M` : "$84.2M";
+  const liveLpCount = fundSummary?.compliance.totalInvestors ?? 23;
+
+  const activeReportList = apiReports && apiReports.length > 0
+    ? apiReports.map(r => ({
+        id: String(r.id),
+        period: r.reportingPeriod ?? "—",
+        type: "Quarterly",
+        status: r.status ?? "draft",
+        netIrr: r.netIrr ? `${parseFloat(r.netIrr).toFixed(1)}%` : "—",
+        tvpi: r.tvpi ? `${parseFloat(r.tvpi).toFixed(2)}×` : "—",
+        dpi: r.dpi ? `${parseFloat(r.dpi).toFixed(2)}×` : "—",
+        recipients: liveLpCount,
+      }))
+    : REPORTS;
+
+  const liveIrrData = apiReports && apiReports.length > 0
+    ? [...apiReports]
+        .filter(r => r.netIrr !== null)
+        .sort((a, b) => (a.reportingPeriod ?? "").localeCompare(b.reportingPeriod ?? ""))
+        .map(r => ({ q: r.reportingPeriod ?? "—", netIrr: parseFloat(r.netIrr!), tvpi: parseFloat(r.tvpi ?? "0") }))
+    : IRR_DATA;
+
   const report = REPORTS.find(r => r.id === selectedId) ?? REPORTS[0];
 
   const handleGenerate = () => {
@@ -82,16 +148,16 @@ export default function LpReportsPage() {
             </div>
             <div>
               <h1 className="text-2xl font-semibold text-white">Autonomous LP Report Generation</h1>
-              <p className="text-xs text-white/40">ILPA-compliant · AI narrative commentary · one-click delivery to 23 LPs</p>
+              <p className="text-xs text-white/40">ILPA-compliant · AI narrative commentary · one-click delivery to {liveLpCount} LPs</p>
             </div>
           </div>
 
           <div className="grid grid-cols-4 gap-3 mb-8">
             {[
-              { label: "Net IRR", value: "28.4%", sub: "Q1 2026", color: "#6aaa72" },
-              { label: "TVPI", value: "2.1×", sub: "Total value", color: "#d4a054" },
-              { label: "DPI", value: "0.62×", sub: "Realized", color: "#4a90b8" },
-              { label: "Fund NAV", value: "$84.2M", sub: "As of Mar 31", color: "#8b7ac8" },
+              { label: "Net IRR", value: liveNetIrr, sub: "Q1 2026", color: "#6aaa72" },
+              { label: "TVPI", value: liveTvpi, sub: "Total value", color: "#d4a054" },
+              { label: "DPI", value: liveDpi, sub: "Realized", color: "#4a90b8" },
+              { label: "Fund NAV", value: liveNavM, sub: "As of Mar 31", color: "#8b7ac8" },
             ].map(m => (
               <div key={m.label} className="rounded-2xl border border-white/[0.06] bg-white/[0.025] p-4">
                 <div className="text-2xl font-semibold mb-1" style={{ color: m.color }}>{m.value}</div>
@@ -105,7 +171,7 @@ export default function LpReportsPage() {
             <div className="text-xs font-semibold text-white/50 mb-4">Net IRR & TVPI Trajectory</div>
             <div className="h-40">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={IRR_DATA}>
+                <AreaChart data={liveIrrData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
                   <XAxis dataKey="q" tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 10 }} />
                   <YAxis tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 10 }} />
@@ -119,7 +185,7 @@ export default function LpReportsPage() {
           <div className="grid grid-cols-12 gap-5">
             <div className="col-span-4 space-y-3">
               <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/30 mb-2">Report History</div>
-              {REPORTS.map(r => (
+              {activeReportList.map(r => (
                 <button key={r.id} onClick={() => setSelectedId(r.id)}
                   className={`w-full text-left rounded-xl border p-4 transition-all ${selectedId === r.id ? "border-[#4a90b8]/40 bg-[#4a90b8]/[0.06]" : "border-white/[0.07] bg-white/[0.025] hover:border-white/[0.12]"}`}>
                   <div className="flex items-center justify-between mb-1">

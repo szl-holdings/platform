@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { m } from "framer-motion";
 import { Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { TrendingUp, ArrowLeft, ChevronRight, RefreshCw } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -8,6 +9,38 @@ import {
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
+
+async function apiFetch<T>(path: string): Promise<T> {
+  const res = await fetch(`/api${path}`, {
+    credentials: "include",
+    headers: { "x-requested-with": "XMLHttpRequest" },
+  });
+  if (!res.ok) throw new Error(`${res.status}`);
+  const body = await res.json();
+  return body.data as T;
+}
+
+type PortfolioFinancial = {
+  id: number;
+  companyName: string;
+  companySlug: string;
+  revenue: string | null;
+  burnRate: string | null;
+  cashAndEquivalents: string | null;
+  runwayMonths: string | null;
+  periodLabel: string | null;
+};
+
+type NavRecord = {
+  id: number;
+  navDate: string;
+  totalNavCents: number;
+  carryAccruedCents: number;
+  grossIrr: string | null;
+  netIrr: string | null;
+  tvpi: string | null;
+  dpi: string | null;
+};
 
 const PORTFOLIO = [
   { id: "lyte", name: "Lyte", color: "#6aaa72", costBasis: 12.4, currentFMV: 42.0, arrGrowth: 18, stage: "Series B", scenarios: { bear: 280, base: 440, bull: 680 }, timing: "18–30 mo", exitType: "Strategic Acquisition" },
@@ -36,6 +69,27 @@ export default function ExitModelingPage() {
   const [simCount] = useState(2000);
   const [running, setRunning] = useState(false);
   const [simSeed, setSimSeed] = useState(0);
+
+  const { data: portfolioFinancials } = useQuery({
+    queryKey: ["fund-ops", "portfolio-financials"],
+    queryFn: () => apiFetch<PortfolioFinancial[]>("/fund-ops/portfolio-financials"),
+    staleTime: 60_000,
+    refetchInterval: 120_000,
+  });
+
+  const { data: navRecords } = useQuery({
+    queryKey: ["fund-ops", "nav-records"],
+    queryFn: () => apiFetch<NavRecord[]>("/fund-ops/nav-records"),
+    staleTime: 60_000,
+  });
+
+  const liveCompanyCount = portfolioFinancials && portfolioFinancials.length > 0
+    ? new Set(portfolioFinancials.map(f => f.companySlug)).size
+    : PORTFOLIO.length;
+
+  const latestNav = navRecords && navRecords.length > 0
+    ? navRecords[0]
+    : null;
 
   const company = PORTFOLIO.find(p => p.id === selected) ?? PORTFOLIO[0];
   const baseReturn = company.scenarios.base / company.costBasis;
@@ -86,7 +140,7 @@ export default function ExitModelingPage() {
             </div>
             <div>
               <h1 className="text-2xl font-semibold text-white">Exit Modeling & Scenario Analysis</h1>
-              <p className="text-xs text-white/40">Monte Carlo simulation · {simCount.toLocaleString()} scenarios · optimal window identification</p>
+              <p className="text-xs text-white/40">Monte Carlo simulation · {simCount.toLocaleString()} scenarios · {liveCompanyCount} portfolio companies · optimal window identification</p>
             </div>
             <button onClick={handleRun} className="ml-auto flex items-center gap-1.5 rounded-xl bg-[#c45a4a] px-4 py-2 text-xs font-semibold text-white hover:bg-[#c45a4a]/80">
               {running ? <><RefreshCw className="h-3.5 w-3.5 animate-spin" /> Running…</> : <><RefreshCw className="h-3.5 w-3.5" /> Re-run Simulation</>}
@@ -94,12 +148,17 @@ export default function ExitModelingPage() {
           </div>
 
           <div className="grid grid-cols-4 gap-3 mb-6">
-            {[
+            {(latestNav ? [
+              { label: "Portfolio NAV", value: `$${(latestNav.totalNavCents / 100_000_000).toFixed(1)}M`, color: "#d4a054" },
+              { label: "Net IRR", value: latestNav.netIrr ? `${parseFloat(latestNav.netIrr).toFixed(1)}%` : "—", color: "#6aaa72" },
+              { label: "TVPI", value: latestNav.tvpi ? `${parseFloat(latestNav.tvpi).toFixed(2)}×` : `${(totalBase / PORTFOLIO.reduce((s, p) => s + p.costBasis, 0)).toFixed(1)}×`, color: "#8b7ac8" },
+              { label: "DPI", value: latestNav.dpi ? `${parseFloat(latestNav.dpi).toFixed(2)}×` : "—", color: "#4a90b8" },
+            ] : [
               { label: "Portfolio Bear Case", value: fmt(totalBear), color: "#c45a4a" },
               { label: "Portfolio Base Case", value: fmt(totalBase), color: "#d4a054" },
               { label: "Portfolio Bull Case", value: fmt(totalBull), color: "#6aaa72" },
               { label: "Avg Portfolio MOIC", value: `${(totalBase / PORTFOLIO.reduce((s, p) => s + p.costBasis, 0)).toFixed(1)}×`, color: "#8b7ac8" },
-            ].map(m => (
+            ]).map(m => (
               <div key={m.label} className="rounded-2xl border border-white/[0.06] bg-white/[0.025] p-4">
                 <div className="text-xl font-semibold mb-1" style={{ color: m.color }}>{m.value}</div>
                 <div className="text-xs text-white/40">{m.label}</div>

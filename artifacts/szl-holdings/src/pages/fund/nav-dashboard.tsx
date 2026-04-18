@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { m, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import {
   TrendingUp, ArrowLeft, ChevronRight, DollarSign, BarChart3,
   Calculator, Download, RefreshCw, ArrowUpRight, ArrowDownRight,
@@ -13,6 +14,27 @@ import {
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
+
+async function apiFetch<T>(path: string): Promise<T> {
+  const res = await fetch(`/api${path}`, {
+    credentials: "include",
+    headers: { "x-requested-with": "XMLHttpRequest" },
+  });
+  if (!res.ok) throw new Error(`${res.status}`);
+  const body = await res.json();
+  return body.data as T;
+}
+
+type NavRecord = {
+  id: number;
+  navDate: string;
+  totalNavCents: number;
+  carryAccruedCents: number;
+  grossIrr: string | null;
+  netIrr: string | null;
+  tvpi: string | null;
+  dpi: string | null;
+};
 
 function fmt(n: number, currency = true): string {
   const prefix = currency ? "$" : "";
@@ -101,12 +123,28 @@ export default function NavDashboardPage() {
   const [tab, setTab] = useState<"nav" | "companies" | "fees" | "reports">("nav");
   const [selectedPeriod, setSelectedPeriod] = useState("Q1 2026");
 
+  const { data: navRecords } = useQuery({
+    queryKey: ["fund-ops", "nav-records"],
+    queryFn: () => apiFetch<NavRecord[]>("/fund-ops/nav-records"),
+    staleTime: 60_000,
+    refetchInterval: 120_000,
+  });
+
+  const latestNav = navRecords?.[0] ?? null;
+
+  const liveNav = latestNav?.totalNavCents != null ? latestNav.totalNavCents / 100 : CURRENT_FUND.nav;
+  const liveNetIrr = latestNav?.netIrr != null ? parseFloat(latestNav.netIrr) : CURRENT_FUND.netIrr;
+  const liveGrossIrr = latestNav?.grossIrr != null ? parseFloat(latestNav.grossIrr) : CURRENT_FUND.grossIrr;
+  const liveTvpi = latestNav?.tvpi != null ? parseFloat(latestNav.tvpi) : CURRENT_FUND.tvpi;
+  const liveDpi = latestNav?.dpi != null ? parseFloat(latestNav.dpi) : CURRENT_FUND.dpi;
+  const liveCarry = latestNav?.carryAccruedCents != null ? latestNav.carryAccruedCents / 100 : FEE_SCHEDULE.reduce((s, f) => s + f.carryAccrual, 0);
+
   const currentNav = NAV_HISTORY[NAV_HISTORY.length - 1];
   const prevNav = NAV_HISTORY[NAV_HISTORY.length - 2];
-  const navChange = currentNav.nav - prevNav.nav;
+  const navChange = liveNav - prevNav.nav;
   const navChangePct = (navChange / prevNav.nav) * 100;
 
-  const totalCarry = FEE_SCHEDULE.reduce((s, f) => s + f.carryAccrual, 0);
+  const totalCarry = liveCarry;
   const totalMgmtFees = FEE_SCHEDULE.reduce((s, f) => s + f.managementFee, 0);
 
   const navChartData = NAV_HISTORY.map(n => ({
@@ -157,9 +195,9 @@ export default function NavDashboardPage() {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-            <KpiCard label="Fund NAV" value={fmt(CURRENT_FUND.nav)} sub={`${navChangePct > 0 ? "+" : ""}${navChangePct.toFixed(1)}% QoQ`} color="#6aaa72" trend="up" />
-            <KpiCard label="Net IRR" value={`${CURRENT_FUND.netIrr}%`} sub={`Gross: ${CURRENT_FUND.grossIrr}%`} color="#d4a054" trend="up" />
-            <KpiCard label="TVPI" value={`${CURRENT_FUND.tvpi}×`} sub={`DPI: ${CURRENT_FUND.dpi}× · RVPI: ${CURRENT_FUND.rvpi}×`} color="#4a90b8" trend="up" />
+            <KpiCard label="Fund NAV" value={fmt(liveNav)} sub={`${navChangePct > 0 ? "+" : ""}${navChangePct.toFixed(1)}% QoQ`} color="#6aaa72" trend="up" />
+            <KpiCard label="Net IRR" value={`${liveNetIrr.toFixed(1)}%`} sub={`Gross: ${liveGrossIrr.toFixed(1)}%`} color="#d4a054" trend="up" />
+            <KpiCard label="TVPI" value={`${liveTvpi.toFixed(2)}×`} sub={`DPI: ${liveDpi.toFixed(2)}× · RVPI: ${CURRENT_FUND.rvpi}×`} color="#4a90b8" trend="up" />
             <KpiCard label="Called Capital" value={fmt(CURRENT_FUND.calledCapital)} sub={`${((CURRENT_FUND.calledCapital / CURRENT_FUND.totalCommitments) * 100).toFixed(0)}% of ${fmt(CURRENT_FUND.totalCommitments)} committed`} color="#8b7ac8" />
           </div>
 

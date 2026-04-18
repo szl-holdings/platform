@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { getSubmittedDeals, loadSubmittedDeals, subscribeSubmittedDeals, type SubmittedDeal, type DealAttachmentRef } from "@/lib/dealSubmissions";
+
 import { m, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
 import {
@@ -11,6 +13,16 @@ import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tool
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
+
+async function apiFetch<T>(path: string): Promise<T> {
+  const res = await fetch(`/api${path}`, {
+    credentials: "include",
+    headers: { "x-requested-with": "XMLHttpRequest" },
+  });
+  if (!res.ok) throw new Error(`${res.status}`);
+  const body = await res.json();
+  return body.data as T;
+}
 
 type Deal = {
   id: string;
@@ -159,6 +171,12 @@ export default function DealScoringPage() {
   const [filter, setFilter] = useState<string>("all");
   const [submissions, setSubmissions] = useState<SubmittedDeal[]>(() => getSubmittedDeals());
 
+  const { data: inboundDeals } = useQuery({
+    queryKey: ["fund-inbound-deals"],
+    queryFn: () => apiFetch<Array<{ status: string; convictionScore: number }>>("/fund-inbound-deals"),
+    staleTime: 60_000,
+  });
+
   useEffect(() => {
     void loadSubmittedDeals().then(list => setSubmissions(list));
     return subscribeSubmittedDeals(() => setSubmissions(getSubmittedDeals()));
@@ -201,18 +219,18 @@ export default function DealScoringPage() {
 
           <div className="grid grid-cols-4 gap-3 mt-6 mb-8">
             {(() => {
-              const baseScored = 47;
-              const baseActive = 12;
-              const baseInvested = 3;
-              const totalScored = baseScored + allDeals.length - DEALS.length;
-              const activeCount = baseActive + allDeals.filter(d => d.status === "active").length - DEALS.filter(d => d.status === "active").length;
-              const avg = allDeals.length ? (allDeals.reduce((s, d) => s + d.convictionScore, 0) / allDeals.length).toFixed(1) : "0.0";
-              const investedCount = baseInvested + allDeals.filter(d => d.status === "invested").length - DEALS.filter(d => d.status === "invested").length;
+              const source = inboundDeals ?? allDeals;
+              const totalScored = source.length;
+              const activeCount = source.filter(d => d.status === "active").length;
+              const avg = source.length
+                ? (source.reduce((s, d) => s + (d.convictionScore ?? 0), 0) / source.length).toFixed(1)
+                : "0.0";
+              const investedCount = source.filter(d => d.status === "invested").length;
               return [
                 { label: "Deals Scored", value: String(totalScored), icon: FileText, color: "#d4a054" },
                 { label: "Active Pipeline", value: String(activeCount), icon: Target, color: "#4a90b8" },
                 { label: "Avg Conviction", value: avg, icon: Star, color: "#6aaa72" },
-                { label: "Invested", value: String(investedCount), icon: CheckCircle2, color: "#8b7ac8" },
+                { label: "Portfolio Cos.", value: String(investedCount), icon: CheckCircle2, color: "#8b7ac8" },
               ];
             })().map(m => (
               <div key={m.label} className="rounded-2xl border border-white/[0.06] bg-white/[0.025] p-4">

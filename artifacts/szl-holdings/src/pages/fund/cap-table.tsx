@@ -1,11 +1,28 @@
 import { useState, useMemo } from "react";
 import { m } from "framer-motion";
 import { Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { Layers, ArrowLeft, ChevronRight } from "lucide-react";
 import { PieChart as RePie, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
+
+async function apiFetch<T>(path: string): Promise<T> {
+  const res = await fetch(`/api${path}`, {
+    credentials: "include",
+    headers: { "x-requested-with": "XMLHttpRequest" },
+  });
+  if (!res.ok) throw new Error(`${res.status}`);
+  const body = await res.json();
+  return body.data as T;
+}
+
+type CapTableSummary = {
+  holders: Array<{ holder: { id: number; name: string }; totalShares: number; ownershipPct: number }>;
+  shareClasses: Array<{ id: number; name: string; isActive: boolean }>;
+  fullyDilutedTotal: number;
+};
 
 const SHARE_CLASSES = [
   { id: "cs", name: "Common Stock", type: "common", issued: 5200000, pref: null, multiple: null, participating: false, seniority: 4 },
@@ -43,6 +60,17 @@ export default function CapTablePage() {
   const [roundSize, setRoundSize] = useState(5_000_000);
   const [preMoney, setPreMoney] = useState(40_000_000);
   const [activeTab, setActiveTab] = useState<"captable" | "waterfall" | "modeling">("captable");
+
+  const { data: capTableSummary } = useQuery({
+    queryKey: ["fund-ops", "cap-table-summary"],
+    queryFn: () => apiFetch<CapTableSummary>("/fund-ops/cap-table-summary"),
+    staleTime: 60_000,
+    refetchInterval: 120_000,
+  });
+
+  const liveHolderCount = capTableSummary?.holders.length ?? HOLDERS.length;
+  const liveShareClassCount = capTableSummary?.shareClasses.length ?? SHARE_CLASSES.length;
+  const livefdso = capTableSummary?.fullyDilutedTotal ?? SHARE_CLASSES.reduce((s, c) => s + c.issued, 0);
 
   const fdso = SHARE_CLASSES.reduce((s, c) => s + c.issued, 0);
 
@@ -106,9 +134,9 @@ export default function CapTablePage() {
 
           <div className="grid grid-cols-4 gap-3 mb-6">
             {[
-              { label: "Fully Diluted Shares", value: fdso.toLocaleString(), color: "#8b7ac8" },
-              { label: "Share Classes", value: "5", color: "#d4a054" },
-              { label: "Total Holders", value: "9", color: "#4a90b8" },
+              { label: "Fully Diluted Shares", value: livefdso > 0 ? livefdso.toLocaleString() : fdso.toLocaleString(), color: "#8b7ac8" },
+              { label: "Share Classes", value: String(liveShareClassCount > 0 ? liveShareClassCount : SHARE_CLASSES.length), color: "#d4a054" },
+              { label: "Total Holders", value: String(liveHolderCount > 0 ? liveHolderCount : HOLDERS.length), color: "#4a90b8" },
               { label: "Option Pool %", value: "14.5%", color: "#6aaa72" },
             ].map(m => (
               <div key={m.label} className="rounded-2xl border border-white/[0.06] bg-white/[0.025] p-4">
