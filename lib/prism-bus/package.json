@@ -12,6 +12,9 @@
     "access": "public"
   },
   "type": "module",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
   "exports": {
     ".": "./src/index.ts",
     "./context": "./src/context.ts",
