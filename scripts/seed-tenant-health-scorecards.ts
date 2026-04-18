@@ -22,7 +22,7 @@ import {
   tenantHealthScorecardsTable,
   orgMembersTable,
 } from "@szl-holdings/db";
-import { count, eq, and } from "drizzle-orm";
+import { count, eq } from "drizzle-orm";
 
 type Tier = "critical" | "at_risk" | "healthy" | "champion";
 
@@ -253,13 +253,22 @@ async function main() {
   }
   console.log(`Seeding 3 months of scorecards for ${orgs.length} organization(s).\n`);
 
-  const tally: Record<Tier, number> = { critical: 0, at_risk: 0, healthy: 0, champion: 0 };
   for (const org of orgs) {
     await seedOrg(org.id, org.name);
-    tally[tierForOrgIdAndOffset(org.id, 0)]++;
   }
 
-  console.log("\nCurrent-period tier distribution (deterministic):");
+  // Tally actual persisted tiers for the current period rather than the
+  // deterministic base assignment, so the summary always matches the DB.
+  const currentStart = periodStart(0);
+  const persisted = await db
+    .select({ tier: tenantHealthScorecardsTable.healthTier, cnt: count() })
+    .from(tenantHealthScorecardsTable)
+    .where(eq(tenantHealthScorecardsTable.periodStart, currentStart))
+    .groupBy(tenantHealthScorecardsTable.healthTier);
+  const tally: Record<Tier, number> = { critical: 0, at_risk: 0, healthy: 0, champion: 0 };
+  for (const row of persisted) tally[row.tier as Tier] = row.cnt;
+
+  console.log("\nCurrent-period tier distribution (persisted):");
   console.log(`  champion: ${tally.champion}`);
   console.log(`  healthy:  ${tally.healthy}`);
   console.log(`  at_risk:  ${tally.at_risk}`);
