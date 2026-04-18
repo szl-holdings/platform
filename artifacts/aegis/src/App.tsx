@@ -18,6 +18,7 @@ const AegisAtlasRuntime = lazy(() => import("./pages/atlas-runtime"));
 const AegisReplay = lazy(() => import("./pages/replay"));
 const AegisScenarioBranches = lazy(() => import("./pages/scenario-branches"));
 const AegisAtlasExecute = lazy(() => import("./pages/atlas-execute"));
+const GovernedCockpitPage = lazy(() => import("./pages/governed-cockpit"));
 
 const SLIDES = [S01Cover, S02SeriesProblem, S03Category, S04Product, S05Demo, S06Market, S07SeriesDomains, S08BusinessModel, S09Ask];
 const TOTAL = SLIDES.length;
@@ -263,6 +264,11 @@ function AppRoutes() {
             <AegisAtlasExecute />
           </Suspense>
         </AtlasDashboardLayout>
+      </Route>
+      <Route path="/governed-cockpit">
+        <Suspense fallback={<PageLoader />}>
+          <GovernedCockpitPage />
+        </Suspense>
       </Route>
       <Route path="/slide:num">
         <SlideDeck />

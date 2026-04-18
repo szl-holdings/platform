@@ -271,7 +271,7 @@ export default function CharterPartyPage() {
             <FileText className="w-5 h-5 text-sky-400" />
             Charter Party Manager
           </h1>
-          <p className="text-xs text-sky-400/50 mt-0.5">Create, negotiate and track charter fixtures with AI-powered clause risk analysis</p>
+          <p className="text-xs text-sky-400/50 mt-0.5">Create, negotiate and track charter fixtures with Governed clause risk analysis</p>
         </div>
         <button className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg bg-sky-500/10 border border-sky-500/20 text-sky-300 hover:bg-sky-500/15 transition-colors">
           <Plus className="w-3.5 h-3.5" /> New Fixture

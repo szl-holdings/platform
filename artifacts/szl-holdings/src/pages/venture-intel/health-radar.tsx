@@ -135,7 +135,7 @@ const COMPANIES = [
       { label: "NRR", value: "116%", good: true },
       { label: "Matter Volume", value: "+22%", good: true },
     ],
-    sentiment: "Efficient burns and strong matter volume growth. AI-powered review backlog compression driving measurable attorney hours saved — key buyer ROI proof point.",
+    sentiment: "Efficient burns and strong matter volume growth. Governed review backlog compression driving measurable attorney hours saved — key buyer ROI proof point.",
   },
   {
     id: "carlota",

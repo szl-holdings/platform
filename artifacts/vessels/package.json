@@ -36,6 +36,7 @@
     "wouter": "^3.3.5"
   },
   "dependencies": {
+    "@szl-holdings/design-system": "workspace:*",
     "@szl-holdings/graphql-client": "workspace:*",
     "@szl-holdings/observability": "workspace:*",
     "@szl-holdings/prism-bus": "workspace:*",

@@ -184,7 +184,7 @@ export default function ComputerVisionPage() {
         <div className="mb-8">
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/35">Computer Vision</p>
           <h1 className="mt-2 text-2xl font-semibold tracking-tight text-white">Property Analysis & Condition Scoring</h1>
-          <p className="mt-1 text-sm text-white/40">AI-powered property photo analysis — condition grading, renovation estimates, hazard identification, and comparable quality adjustments.</p>
+          <p className="mt-1 text-sm text-white/40">Evidence-backed property photo analysis — condition grading, renovation estimates, hazard identification, and comparable quality adjustments.</p>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">

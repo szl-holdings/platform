@@ -140,7 +140,7 @@ export default function UnderwritingCopilotPage() {
             </h1>
           </div>
           <p className="text-sm" style={{ color: "#94a3b8" }}>
-            AI-powered underwriting flow — planner walks each analysis step, verifier checks each result with citation-backed evidence.
+            Governed underwriting flow — planner walks each analysis step, verifier checks each result with citation-backed evidence.
           </p>
         </div>
       </div>

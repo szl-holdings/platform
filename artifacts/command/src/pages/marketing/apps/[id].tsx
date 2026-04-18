@@ -17,7 +17,7 @@ const appData = {
     accentHex: "#40856a",
     bgGradient: "from-[#40856a]/20",
     icon: Building2,
-    description: "AI-powered property analytics, market forecasting, and deal pipeline management for institutional real estate investors.",
+    description: "Evidence-backed property analytics, market forecasting, and deal pipeline management for institutional real estate investors.",
     longDescription: "Terra aggregates geospatial signals, public record data, and proprietary market feeds to give institutional investors a comprehensive picture of any asset—before they commit capital. From underwriting to asset management, the entire real estate lifecycle lives in a single command interface.",
     features: [
       { title: "Market Forecasting", desc: "Predictive models for property value trajectories, cap rate compression, and rental yield forecasts at granular ZIP-code level. Updated daily from 500+ data sources." },
@@ -27,7 +27,7 @@ const appData = {
     integrations: ["CoStar", "LoopNet", "Yardi", "MRI Software", "ARGUS Enterprise", "Salesforce"],
     useCases: [
       { title: "Portfolio Rebalancing", desc: "Identify underperforming assets and surface reallocation opportunities across markets in real time." },
-      { title: "Acquisition Due Diligence", desc: "Generate AI-powered property reports with comps, zoning history, and market trend summaries in under 30 seconds." },
+      { title: "Acquisition Due Diligence", desc: "Generate Governed property reports with comps, zoning history, and market trend summaries in under 30 seconds." },
       { title: "Asset Management Dashboards", desc: "Monitor NOI, occupancy, and DSCR across your entire portfolio on one screen with variance alerting." },
     ],
     stats: [{ v: "12B+", l: "Data points indexed" }, { v: "3.2s", l: "Avg. report generation" }, { v: "94%", l: "Forecast accuracy (12mo)" }],
@@ -114,7 +114,7 @@ const appData = {
     ],
     integrations: ["Clio", "NetSuite", "DocuSign", "iManage", "Relativity", "LexisNexis"],
     useCases: [
-      { title: "M&A Due Diligence", desc: "Review 10,000+ documents in hours rather than weeks with AI-powered contract abstraction and risk flagging." },
+      { title: "M&A Due Diligence", desc: "Review 10,000+ documents in hours rather than weeks with Governed contract abstraction and risk flagging." },
       { title: "Regulatory Compliance", desc: "Continuously monitor contracts against evolving regulatory requirements and get alerted to compliance gaps." },
       { title: "Outside Counsel Management", desc: "Track billing, scope, and performance of external law firms against agreed budgets in real time." },
     ],

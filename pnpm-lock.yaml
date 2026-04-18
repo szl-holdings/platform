@@ -212,6 +212,9 @@ importers:
       '@szl-holdings/brand-registry':
         specifier: workspace:*
         version: link:../../packages/brand-registry
+      '@szl-holdings/design-system':
+        specifier: workspace:*
+        version: link:../../packages/design-system
       '@szl-holdings/graphql-client':
         specifier: workspace:*
         version: link:../../lib/graphql-client
@@ -631,6 +634,9 @@ importers:
       '@szl-holdings/brand-registry':
         specifier: workspace:*
         version: link:../../packages/brand-registry
+      '@szl-holdings/design-system':
+        specifier: workspace:*
+        version: link:../../packages/design-system
       '@szl-holdings/graphql-client':
         specifier: workspace:*
         version: link:../../lib/graphql-client
@@ -728,6 +734,9 @@ importers:
       '@szl-holdings/brand-registry':
         specifier: workspace:*
         version: link:../../packages/brand-registry
+      '@szl-holdings/design-system':
+        specifier: workspace:*
+        version: link:../../packages/design-system
       '@szl-holdings/ui-command':
         specifier: workspace:*
         version: link:../../packages/ui-command
@@ -1032,6 +1041,9 @@ importers:
       '@szl-holdings/brand-registry':
         specifier: workspace:*
         version: link:../../packages/brand-registry
+      '@szl-holdings/design-system':
+        specifier: workspace:*
+        version: link:../../packages/design-system
       '@szl-holdings/observability':
         specifier: workspace:*
         version: link:../../lib/observability
@@ -1186,6 +1198,9 @@ importers:
       '@szl-holdings/covenant-policy':
         specifier: workspace:*
         version: link:../../lib/covenant-policy
+      '@szl-holdings/design-system':
+        specifier: workspace:*
+        version: link:../../packages/design-system
       '@szl-holdings/graphql-client':
         specifier: workspace:*
         version: link:../../lib/graphql-client
@@ -1473,6 +1488,9 @@ importers:
       '@szl-holdings/brand-registry':
         specifier: workspace:*
         version: link:../../packages/brand-registry
+      '@szl-holdings/design-system':
+        specifier: workspace:*
+        version: link:../../packages/design-system
       '@szl-holdings/graphql-client':
         specifier: workspace:*
         version: link:../../lib/graphql-client
@@ -1573,6 +1591,9 @@ importers:
       '@szl-holdings/brand-registry':
         specifier: workspace:*
         version: link:../../packages/brand-registry
+      '@szl-holdings/design-system':
+        specifier: workspace:*
+        version: link:../../packages/design-system
       '@szl-holdings/graphql-client':
         specifier: workspace:*
         version: link:../../lib/graphql-client

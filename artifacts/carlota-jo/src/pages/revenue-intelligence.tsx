@@ -108,7 +108,7 @@ const weightedPipeline = DEALS.filter(d => !d.stage.includes("closed")).reduce((
 export default function RevenueIntelligence() {
   usePageMeta({
     title: "Revenue Intelligence | Carlota Jo",
-    description: "AI-powered pipeline management with close probability prediction, revenue forecasting, and utilisation optimisation.",
+    description: "Governed pipeline management with close probability prediction, revenue forecasting, and utilisation optimisation.",
     canonical: "https://szlholdings.com/carlota-jo/revenue-intelligence",
   });
 

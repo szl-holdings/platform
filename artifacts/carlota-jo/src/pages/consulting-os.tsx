@@ -4,6 +4,7 @@ import { Link } from "wouter";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { useConsultingMetrics } from "@/hooks/useConsultingMetrics";
 import { useCarlotaApiData } from "@/hooks/useCarlotaApiData";
+import { ProofEnvelope, type AutonomyMode } from "@szl-holdings/design-system";
 import {
   Sparkles, FileText, Network, Radar, Activity, Heart,
   TrendingUp, GraduationCap, Lightbulb, Users, FolderOpen,
@@ -163,7 +164,7 @@ const OS_MODULES = [
     icon: BookOpen,
     title: "Knowledge Vault & Methodology Library",
     subtitle: "Institutional intelligence. Always searchable.",
-    description: "Every framework, playbook, template, and case study — searchable, version-controlled, and growing with every engagement. AI-powered 'find me a similar engagement' search.",
+    description: "Every framework, playbook, template, and case study — searchable, version-controlled, and growing with every engagement. Governed engagement retrieval.",
     href: "/knowledge-vault",
     metric: "8 assets · 93 total uses",
     status: "active",
@@ -250,6 +251,7 @@ export default function ConsultingOS() {
   });
 
   const [hoveredModule, setHoveredModule] = useState<string | null>(null);
+  const [autonomyMode, setAutonomyMode] = useState<AutonomyMode>("recommend");
   const metrics = useConsultingMetrics();
   const apiData = useCarlotaApiData();
   const PLATFORM_METRICS = [
@@ -296,7 +298,7 @@ export default function ConsultingOS() {
               <em style={{ color: GOLD, fontStyle: "italic" }}>Boutique Excellence</em>
             </h1>
             <p style={{ fontSize: 17, color: "#A89878", maxWidth: 560, lineHeight: 1.7, marginBottom: 32 }}>
-              Ten AI-powered modules that replace a team of ops specialists — so Carlota Jo can deliver Fortune 500 quality with boutique precision.
+              Ten governed intelligence modules that replace a team of ops specialists — so Carlota Jo can deliver Fortune 500 quality with boutique precision.
             </p>
 
             {/* Platform metrics */}
@@ -323,26 +325,39 @@ export default function ConsultingOS() {
             <Sparkles size={16} color={GOLD} />
             <h2 style={{ fontSize: 13, fontWeight: 600, letterSpacing: "0.08em", color: "#6B5E47", textTransform: "uppercase" }}>AI Intelligence Briefing</h2>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 16, marginBottom: 48 }}>
-            {AI_INSIGHTS.map((insight, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1 }}
-                style={{ background: "#fff", border: "1px solid #E8E2D6", borderRadius: 16, padding: 24, position: "relative", overflow: "hidden" }}
-              >
-                <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${GOLD}, transparent)` }} />
-                <insight.icon size={18} color={GOLD} style={{ marginBottom: 12 }} />
-                <div style={{ fontSize: 13, fontWeight: 600, color: "#1A1A14", marginBottom: 8 }}>{insight.title}</div>
-                <div style={{ fontSize: 13, color: "#6B5E47", lineHeight: 1.6, marginBottom: 16 }}>{insight.body}</div>
-                <Link href={insight.href}>
-                  <a style={{ fontSize: 12, color: GOLD, fontWeight: 600, display: "flex", alignItems: "center", gap: 4, textDecoration: "none" }}>
-                    {insight.action} <ChevronRight size={12} />
-                  </a>
-                </Link>
-              </motion.div>
-            ))}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 16, marginBottom: 48 }}>
+            {AI_INSIGHTS.map((insight, i) => {
+              const insightEvidence = [
+                { id: `cjo-${i}-1`, label: "Alloy Pattern Engine — Engagement Similarity", type: "model" as const, excerpt: insight.body },
+                { id: `cjo-${i}-2`, label: "CRM Signal Aggregation", type: "api" as const, excerpt: "Client health, engagement momentum, and pipeline probability derived from live CRM data." },
+              ];
+              return (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                >
+                  <ProofEnvelope
+                    title={insight.title}
+                    confidence={i === 0 ? 78 : i === 1 ? 82 : 74}
+                    policyState="allowed"
+                    autonomyMode={autonomyMode}
+                    onAutonomyChange={setAutonomyMode}
+                    evidence={insightEvidence}
+                    accentColor={GOLD}
+                  >
+                    <insight.icon size={18} color={GOLD} style={{ marginBottom: 8 }} />
+                    <div style={{ fontSize: 13, color: "#6B5E47", lineHeight: 1.6, marginBottom: 12 }}>{insight.body}</div>
+                    <Link href={insight.href}>
+                      <a style={{ fontSize: 12, color: GOLD, fontWeight: 600, display: "flex", alignItems: "center", gap: 4, textDecoration: "none" }}>
+                        {insight.action} <ChevronRight size={12} />
+                      </a>
+                    </Link>
+                  </ProofEnvelope>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
 

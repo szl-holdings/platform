@@ -47,7 +47,7 @@ const QUARTERLY_NARRATIVES = [
 
 Vessels posted its strongest quarterly result since inception, driven by IMO compliance deadlines pulling forward enterprise contracts. The regulatory tailwind we identified in the Q4 2024 Atlas report is materializing on schedule.
 
-PRISM matter volume grew 22% quarter-over-quarter, driven by the AI-powered review backlog compression engine reducing attorney hours by an average of 31%. This created a new buyer motion we're tracking as "hours-freed budget transfer" — surplus attorney capacity being redirected to new PRISM capabilities.
+PRISM matter volume grew 22% quarter-over-quarter, driven by the Governed review backlog compression engine reducing attorney hours by an average of 31%. This created a new buyer motion we're tracking as "hours-freed budget transfer" — surplus attorney capacity being redirected to new PRISM capabilities.
 
 Capital efficiency remains a portfolio-wide concern for Aegis and Terra. Both companies are in the top quartile of their cohort for market position but are burning above plan. The cross-portfolio synergy initiatives with Vessels (cyber bundle) and PRISM (distress-to-litigation) are the highest-leverage CAC reduction plays available without additional capital.
 

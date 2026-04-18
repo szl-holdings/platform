@@ -29,7 +29,7 @@ const ventures = [
     valuation: "$18M",
     roi: "+328%",
     status: "Performing",
-    description: "AI-powered maritime intelligence platform for fleet management, route optimization, and compliance monitoring.",
+    description: "Governed maritime intelligence platform for fleet management, route optimization, and compliance monitoring.",
     synergies: ["Alloy powers route prediction", "Lyte monitors infrastructure", "Terra tracks portfolio economics"],
   },
   {

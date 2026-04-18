@@ -77,7 +77,7 @@ const initialHistory = [
 export default function AIAdvisory() {
   usePageMeta({
     title: "AI Advisory | Carlota Jo Consulting – Strategy Intelligence",
-    description: "AI-powered brand strategy advisory from Carlota Jo Consulting. Get instant market entry analysis, risk assessments, and competitive intelligence.",
+    description: "Evidence-backed brand strategy advisory from Carlota Jo Consulting. Get instant market entry analysis, risk assessments, and competitive intelligence.",
     canonical: "https://szlholdings.com/carlota-jo/ai-advisory",
   });
   const [input, setInput] = useState("");

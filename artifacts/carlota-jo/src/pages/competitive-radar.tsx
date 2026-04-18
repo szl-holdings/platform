@@ -57,7 +57,7 @@ const API = import.meta.env.BASE_URL + "api";
 export default function CompetitiveRadar() {
   usePageMeta({
     title: "Competitive Intelligence Radar | Carlota Jo",
-    description: "AI-powered competitive monitoring dashboard — track competitor moves, market shifts, and emerging threats in real time.",
+    description: "Evidence-backed competitive monitoring dashboard — track competitor moves, market shifts, and emerging threats in real time.",
     canonical: "https://szlholdings.com/carlota-jo/competitive-radar",
   });
 

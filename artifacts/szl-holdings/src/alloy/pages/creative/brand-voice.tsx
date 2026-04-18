@@ -111,7 +111,7 @@ export default function BrandVoiceEngine() {
           <Mic className="w-6 h-6 text-blue-400" />
           Brand Voice Engine
         </h1>
-        <p className="text-sm text-slate-400 mt-1">AI-powered brand voice calibration — consistent tone across all generated content</p>
+        <p className="text-sm text-slate-400 mt-1">Governed brand voice calibration — consistent tone across all generated content</p>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">

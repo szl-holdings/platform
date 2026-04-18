@@ -60,6 +60,7 @@ const MarketAnalytics = lazy(() => import("@/pages/market-analytics"));
 const ComparableSales = lazy(() => import("@/pages/comparable-sales"));
 const PortfolioDashboard = lazy(() => import("@/pages/portfolio-dashboard"));
 const DistressPipeline = lazy(() => import("@/pages/distress-pipeline"));
+const GovernedCockpitPage = lazy(() => import("@/pages/governed-cockpit"));
 const PropertyMapPage = lazy(() => import("@/pages/property-map-page"));
 const PropertyDetail = lazy(() => import("@/pages/property-detail"));
 const PowerBiReport = lazy(() => import("@/pages/powerbi-report"));
@@ -198,6 +199,7 @@ function PrivateRouter() {
         <Route path="/distress-forecast" component={DistressForecastPage} />
         <Route path="/underwriting-copilot" component={UnderwritingCopilotPage} />
         <Route path="/diligence-room" component={DiligenceRoomPage} />
+        <Route path="/governed-cockpit" component={GovernedCockpitPage} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>

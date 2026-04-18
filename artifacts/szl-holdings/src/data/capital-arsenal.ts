@@ -578,7 +578,7 @@ Lyte's differentiation:
         content: `Per-seat SaaS with three tiers:
 
 Essential ($150/seat/mo): Core process monitoring, up to 5 workflows, 30-day history
-Professional ($250/seat/mo): Unlimited workflows, AI-powered bottleneck detection, 90-day history, integrations
+Professional ($250/seat/mo): Unlimited workflows, governed bottleneck detection, 90-day history, integrations
 Enterprise ($400/seat/mo, custom): Full platform, custom SLA, dedicated support, audit compliance reporting
 
 Typical deployment: 10–50 seats. $18K–$240K ACV per customer.
@@ -2271,12 +2271,12 @@ NYSTAR SBRA ASSISTANCE: NY State provides free SBIR application assistance throu
 SBIR PROGRAM OFFICE: NSF SBIR/STTR America's Seed Fund
 
 RELEVANT TOPIC AREAS:
-• Phase I Topic: "Future of Work at the Human-Technology Frontier" — AI-powered workflow intelligence, human-centered process monitoring
+• Phase I Topic: "Future of Work at the Human-Technology Frontier" — governed workflow intelligence, human-centered process monitoring
 • Phase I Topic: "Intelligent Systems" — ML-powered business process optimization and anomaly detection
 • Phase I Topic: "Enterprise Software and Information Systems" — Business observability platforms for SMB market
 
 WHY NSF:
-NSF funds fundamental technology innovation. Lyte's AI-powered operational intelligence layer — the algorithm that identifies approval bottlenecks from organizational signal data — qualifies as "fundamental R&D" in applied AI/ML for organizational systems.
+NSF funds fundamental technology innovation. Lyte's governed operational intelligence layer — the algorithm that identifies approval bottlenecks from organizational signal data — qualifies as "fundamental R&D" in applied AI/ML for organizational systems.
 
 PHASE I PITCH (NSF format):
 Technical Innovation: Alloy-based ML model that learns organizational approval patterns and predicts bottleneck risk before failures occur. Current state of the art cannot do this without large proprietary training datasets. Lyte's approach uses federated learning across anonymized organizational signal data.
@@ -2306,7 +2306,7 @@ Total: ~$275,000`
 
 DOD RELEVANT TOPICS:
 • Navy SBIR: "Maritime Domain Awareness Technologies" — Commercial vessel tracking and intelligence for defense logistics planning
-• Navy SBIR: "Autonomous Logistics Systems" — AI-powered maritime logistics coordination
+• Navy SBIR: "Autonomous Logistics Systems" — governed maritime logistics coordination
 • DARPA: "Maritime Intelligence Systems" — Advanced commercial vessel behavior analysis
 
 DHS RELEVANT TOPICS:
@@ -2350,7 +2350,7 @@ While CISA does not directly run SBIR programs, Aegis aligns with CISA's Joint C
 • Critical infrastructure cyber resilience
 
 PHASE I PITCH (DHS format):
-Technical Innovation: AI-powered SOC command platform that reduces analyst-to-alert ratio by 10x through automated triage and context enrichment. Current federal SOC platforms require 5–8 analysts for 200-alert environments. Aegis reduces to 1–2 analysts with equivalent coverage.
+Technical Innovation: governed SOC command platform that reduces analyst-to-alert ratio by 10x through automated triage and context enrichment. Current federal SOC platforms require 5–8 analysts for 200-alert environments. Aegis reduces to 1–2 analysts with equivalent coverage.
 
 Commercial Potential: $35B+ global SIEM/SOAR/XDR market. Immediate commercial customers in MSP market (20,000+ US MSPs managing security for small businesses).`
       },

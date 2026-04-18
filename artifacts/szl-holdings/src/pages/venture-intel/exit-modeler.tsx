@@ -155,7 +155,7 @@ const COMPANIES = [
         acquirerProfile: "LegalTech platform (Clio, Thomson Reuters, LexisNexis, Relativity)",
         rationale: "LegalTech M&A is active and PRISM's AI-native matter intelligence layer is what legacy legal platforms lack. Thomson Reuters and LexisNexis have multi-billion acquisition capacity and active LegalTech acquisition mandates.",
         comparables: ["Thomson Reuters acquired CoCounsel", "Clio acquisition strategy at 15–25× ARR"],
-        keyDrivers: ["Matter volume growth >20% QoQ", "AI-powered review automation", "Enterprise law firm penetration"],
+        keyDrivers: ["Matter volume growth >20% QoQ", "Governed review automation", "Enterprise law firm penetration"],
       },
     ],
     optimalTiming: "Acquisition — 30 months",

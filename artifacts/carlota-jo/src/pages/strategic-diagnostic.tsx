@@ -53,7 +53,7 @@ function RiskBadge({ level }: { level: "critical" | "moderate" }) {
 export default function StrategicDiagnostic() {
   usePageMeta({
     title: "Strategic Diagnostic Engine | Carlota Jo",
-    description: "AI-powered strategic diagnostic — market position assessment, competitive landscape, growth opportunities, and risk register.",
+    description: "Governed strategic diagnostic — market position assessment, competitive landscape, growth opportunities, and risk register.",
     canonical: "https://szlholdings.com/carlota-jo/strategic-diagnostic",
   });
 

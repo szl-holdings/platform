@@ -70,6 +70,7 @@ const TimeTracking = lazy(() => import("@/pages/time-tracking"));
 const CapacityPlanner = lazy(() => import("@/pages/capacity-planner"));
 const KnowledgeVault = lazy(() => import("@/pages/knowledge-vault"));
 const BenchmarkDatabase = lazy(() => import("@/pages/benchmark-database"));
+const GovernedCockpitPage = lazy(() => import("@/pages/governed-cockpit"));
 const DeliverableWorkflow = lazy(() => import("@/pages/deliverable-workflow"));
 const ProfitabilityAnalytics = lazy(() => import("@/pages/profitability-analytics"));
 const CarlotaJoAtlasExecute = lazy(() => import("@/pages/atlas-execute"));
@@ -189,6 +190,7 @@ function Router() {
         <Route path="/deliverable-workflow" component={DeliverableWorkflow} />
         <Route path="/profitability-analytics" component={ProfitabilityAnalytics} />
         <Route path="/atlas-execute" component={CarlotaJoAtlasExecute} />
+        <Route path="/governed-cockpit" component={GovernedCockpitPage} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>

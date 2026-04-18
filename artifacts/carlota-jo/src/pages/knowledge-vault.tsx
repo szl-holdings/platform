@@ -102,7 +102,7 @@ type SearchResult = {
 export default function KnowledgeVault() {
   usePageMeta({
     title: "Knowledge Vault | Carlota Jo",
-    description: "Searchable repository of frameworks, playbooks, templates, and case studies. AI-powered similar engagement search.",
+    description: "Searchable repository of frameworks, playbooks, templates, and case studies. Governed engagement matching — find relevant precedents.",
     canonical: "https://szlholdings.com/carlota-jo/knowledge-vault",
   });
 

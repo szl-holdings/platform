@@ -176,7 +176,7 @@ Only respond with JSON, no markdown.`;
   const generateSummary = async (workshop: Workshop) => {
     setGeneratingSummary(workshop.id);
     try {
-      const prompt = `Generate a brief AI-powered post-session summary for a consulting workshop: "${workshop.title}" with ${workshop.participants} participants from ${workshop.client} (${workshop.industry}). Objectives: ${workshop.objectives.join(", ")}. ${workshop.outcomes ? `Outcomes: ${workshop.outcomes.join(", ")}` : ""}. Write a 3-4 sentence synthesis covering: key achievements, standout moments, one risk or challenge to address, and one recommendation for the next engagement. Be specific and professional.`;
+      const prompt = `Generate a brief Governed post-session synthesis for a consulting workshop: "${workshop.title}" with ${workshop.participants} participants from ${workshop.client} (${workshop.industry}). Objectives: ${workshop.objectives.join(", ")}. ${workshop.outcomes ? `Outcomes: ${workshop.outcomes.join(", ")}` : ""}. Write a 3-4 sentence synthesis covering: key achievements, standout moments, one risk or challenge to address, and one recommendation for the next engagement. Be specific and professional.`;
       const resp = await fetch("/api/intelligence/ai/advisory", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: [{ role: "user", content: prompt }], model: "openai/gpt-4o-mini" }),

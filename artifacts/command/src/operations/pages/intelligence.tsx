@@ -5,6 +5,7 @@ import { Brain, Activity, Globe, AlertTriangle, FileText, Radio, TrendingUp, Clo
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRealtimeChannel, AnimatedCounter} from "@szl-holdings/shared-ui";
 import { apiFetch } from "@szl-holdings/shared-ui";
+import { ProofEnvelope, type AutonomyMode } from "@szl-holdings/design-system";
 
 function LocalCounter({ value }: { value: number }) {
   const [display, setDisplay] = useState(0);
@@ -28,6 +29,7 @@ const severityColors: Record<string, string> = {
 };
 
 export default function IntelligencePage() {
+  const [autonomyMode, setAutonomyMode] = useState<AutonomyMode>("ask-to-act");
   const { data: anomalies = [] } = useQuery({ queryKey: ["intel-anomalies"], queryFn: () => apiFetch<any[]>("/intelligence/anomalies"), refetchInterval: 30000 });
   const { data: opsHeatmap = [] } = useQuery({ queryKey: ["intel-ops-heatmap"], queryFn: () => apiFetch<any[]>("/intelligence/ops-heatmap"), refetchInterval: 60000 });
   const { data: news = [] } = useQuery({ queryKey: ["intel-news"], queryFn: () => apiFetch<any[]>("/intelligence/news"), refetchInterval: 120000 });
@@ -50,7 +52,7 @@ export default function IntelligencePage() {
           <h2 className="text-3xl font-display font-bold text-white mb-2 flex items-center gap-3">
             <Brain className="w-8 h-8 text-cyan-400" /> Intelligence Center
           </h2>
-          <p className="text-slate-400 text-lg">AI-powered anomaly detection, predictive analytics, and real-time intelligence feeds.</p>
+          <p className="text-slate-400 text-lg">Evidence-backed anomaly detection, predictive analytics, and real-time intelligence feeds.</p>
         </div>
         <Badge className="bg-cyan-400/10 text-cyan-400 border-cyan-400/20 animate-pulse">
           <Radio className="w-3 h-3 mr-1" /> Live
@@ -158,21 +160,33 @@ export default function IntelligencePage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="bg-glass rounded-2xl p-6">
           <h3 className="text-lg font-display font-semibold text-white mb-4 flex items-center gap-2">
-            <Zap className="w-5 h-5 text-[#c8953c]" /> AI Anomaly Detection
+            <Zap className="w-5 h-5 text-[#c8953c]" /> Anomaly Detection
           </h3>
           <div className="space-y-3">
             {anomalies.map((a: any) => (
-              <div key={a.id} className={`p-4 rounded-xl border ${a.severity === "critical" ? "border-[#c45a4a]/20 bg-[#c45a4a]/5" : a.severity === "warning" ? "border-[#c8953c]/20 bg-[#c8953c]/5" : "border-white/5 bg-white/5"}`}>
-                <div className="flex items-center justify-between mb-2">
-                  <Badge className={`text-xs ${severityColors[a.severity] || ""}`}>{a.severity}</Badge>
-                  <Badge variant="outline" className={`text-xs ${severityColors[a.status] || "text-slate-400"}`}>{a.status}</Badge>
+              <ProofEnvelope
+                key={a.id}
+                title={a.description ?? "Anomaly Signal"}
+                timestamp={a.detectedAt}
+                confidence={Math.round((a.confidence ?? 0) * 100)}
+                policyState={a.severity === "critical" ? "requires-approval" : "allowed"}
+                policyReason={a.severity === "critical" ? "Critical anomalies require CRO sign-off before automated response" : undefined}
+                autonomyMode={autonomyMode}
+                onAutonomyChange={setAutonomyMode}
+                accentColor={a.severity === "critical" ? "#c45a4a" : a.severity === "warning" ? "#c8953c" : "#4a90b8"}
+                evidence={[{
+                  id: String(a.id),
+                  label: `${a.category ?? "Unified"} Signal — ${(a.severity ?? "info").toUpperCase()}`,
+                  type: "signal",
+                  timestamp: a.detectedAt,
+                  excerpt: a.description,
+                }]}
+              >
+                <div className="flex items-center gap-2 mt-1">
+                  <Badge className={`text-xs ${severityColors[a.status] || "text-slate-400"}`}>{a.status}</Badge>
+                  {a.source && <Badge variant="outline" className="text-xs">{a.source}</Badge>}
                 </div>
-                <p className="text-sm text-white">{a.description}</p>
-                <div className="flex items-center justify-between mt-2 text-xs text-slate-500">
-                  <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {new Date(a.detectedAt).toLocaleString()}</span>
-                  <span>Confidence: {(a.confidence * 100).toFixed(0)}%</span>
-                </div>
-              </div>
+              </ProofEnvelope>
             ))}
           </div>
         </div>

@@ -57,6 +57,7 @@ const NexusExplorerPage = lazy(() => import("@/pages/nexus-explorer"));
 const ControlTowerPage = lazy(() => import("@/pages/control-tower"));
 const BusinessStatePage = lazy(() => import("@/pages/business-state"));
 const IntelligenceFabricPage = lazy(() => import("@/pages/intelligence-fabric"));
+const GovernedCockpitPage = lazy(() => import("@/pages/governed-cockpit"));
 const CortexIntelligenceHubPage = lazy(() => import("@/pages/cortex-intelligence-hub"));
 const AnalystWorkspacePage = lazy(() => import("@/pages/analyst-workspace"));
 const OracleBriefingPage = lazy(() => import("@/pages/oracle-briefing"));
@@ -1427,6 +1428,11 @@ function App() {
             {/* ── Command — Newsletter Analytics ── */}
             <Route path="/command/newsletter">
               <Suspense fallback={<PageLoader />}><CommandNewsletterPage /></Suspense>
+            </Route>
+
+            {/* Governed Intelligence — Hero Proof Surface */}
+            <Route path="/governed-cockpit">
+              <Suspense fallback={<PageLoader />}><GovernedCockpitPage /></Suspense>
             </Route>
 
             {/* Catch-all → 404 */}

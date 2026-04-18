@@ -3,8 +3,10 @@ import { useState } from "react";
 import { Shield, AlertTriangle, Brain, Radio, Ship, Loader2, Navigation } from "lucide-react";
 import { NERHighlight, AnimatedGauge, SeverityMeter } from "@szl-holdings/shared-ui/ai-components";
 import { apiFetch } from "@szl-holdings/shared-ui";
+import { ProofEnvelope, type AutonomyMode } from "@szl-holdings/design-system";
 
 export default function VesselsIntelligence() {
+  const [autonomyMode, setAutonomyMode] = useState<AutonomyMode>("ask-to-act");
   const { data: sanctions } = useQuery({ queryKey: ["maritime-sanctions"], queryFn: () => apiFetch<any>("/intelligence/maritime/sanctions") });
   const { data: vessels = [] } = useQuery({ queryKey: ["maritime-vessels"], queryFn: () => apiFetch<any[]>("/intelligence/maritime/vessels") });
   const { data: chokepoints = [] } = useQuery({ queryKey: ["maritime-chokepoints"], queryFn: () => apiFetch<any[]>("/intelligence/maritime/chokepoints") });
@@ -60,10 +62,19 @@ export default function VesselsIntelligence() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white/[0.03] rounded-2xl border border-white/5 p-6">
-          <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-            <Shield className="w-5 h-5 text-red-400" /> AI Sanctions Monitor
-          </h3>
+        <ProofEnvelope
+          title="Sanctions Monitor — NER Entity Detection"
+          confidence={sanctionsArray.length > 0 ? 88 : 0}
+          policyState={allEntities.length > 0 ? "requires-approval" : "allowed"}
+          policyReason={allEntities.length > 0 ? "Sanctioned entity detection requires compliance officer review before action" : undefined}
+          autonomyMode={autonomyMode}
+          onAutonomyChange={setAutonomyMode}
+          accentColor="#ef4444"
+          evidence={[
+            { id: "v-sanc-1", label: "OFAC SDN List — Alloy Sync", type: "api", excerpt: `${allEntities.length} entity matches detected across ${sanctionsArray.length} vessels` },
+            { id: "v-sanc-2", label: "NER Classification Model", type: "model", excerpt: "Entity types: PER, ORG, LOC, MISC. Confidence threshold: 0.80." },
+          ]}
+        >
           <p className="text-xs text-slate-500 mb-3">NER-highlighted entities detected in sanctions data</p>
           <div className="bg-black/30 rounded-xl p-4 border border-white/5 max-h-[300px] overflow-y-auto">
             <NERHighlight text={sanctionText} entities={allEntities} className="text-sm text-slate-300" />
@@ -82,12 +93,20 @@ export default function VesselsIntelligence() {
               })}
             </div>
           )}
-        </div>
+        </ProofEnvelope>
 
-        <div className="bg-white/[0.03] rounded-2xl border border-white/5 p-6">
-          <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-            <Navigation className="w-5 h-5 text-cyan-400" /> AI Route Safety Analysis
-          </h3>
+        <ProofEnvelope
+          title={`Route Safety Analysis — ${selectedRoute}`}
+          confidence={routeAnalysis.data ? 81 : 0}
+          policyState="allowed"
+          autonomyMode={autonomyMode}
+          onAutonomyChange={setAutonomyMode}
+          accentColor="#22d3ee"
+          evidence={[
+            { id: "v-route-1", label: "Alloy Maritime Risk Classifier", type: "model", excerpt: "Composite score from piracy, weather, chokepoint, and sanctions data layers." },
+            { id: "v-route-2", label: "IMO Voyage Data Exchange", type: "api", excerpt: "Live AIS tracking and port congestion signals included in analysis." },
+          ]}
+        >
           <div className="space-y-3 mb-4">
             {routes.map((r) => (
               <button
@@ -111,10 +130,10 @@ export default function VesselsIntelligence() {
             ) : routeAnalysis.data ? (
               <p className="text-sm text-slate-300 whitespace-pre-wrap">{routeAnalysis.data.content}</p>
             ) : (
-              <p className="text-sm text-slate-500">Select a route to generate AI safety analysis</p>
+              <p className="text-sm text-slate-500">Select a route to generate a governed safety assessment</p>
             )}
           </div>
-        </div>
+        </ProofEnvelope>
       </div>
 
       <div className="bg-white/[0.03] rounded-2xl border border-white/5 p-6">

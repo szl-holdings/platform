@@ -4,6 +4,7 @@ import { getRiskColor, AGENTS, type BriefingSection, type RiskLevel } from "../l
 import { useTodaysBrief } from "../lib/api";
 import AgentBadge from "../components/AgentBadge";
 import ConfidenceChip from "../components/ConfidenceChip";
+import { ProofEnvelope, type AutonomyMode } from "@szl-holdings/design-system";
 
 function RiskBadge({ risk }: { risk: RiskLevel }) {
   const color = getRiskColor(risk);
@@ -22,10 +23,33 @@ function RiskBadge({ risk }: { risk: RiskLevel }) {
 
 function SectionCard({ section }: { section: BriefingSection }) {
   const [expanded, setExpanded] = useState(false);
+  const [autonomyMode, setAutonomyMode] = useState<AutonomyMode>("recommend");
   const agent = AGENTS[section.agentId];
 
+  const riskToPolicy = (r: RiskLevel): "allowed" | "requires-approval" | "blocked" =>
+    r === "CRITICAL" ? "requires-approval" : r === "HIGH" ? "requires-approval" : "allowed";
+
+  const proofEvidence = section.keyFindings.slice(0, 3).map((f, i) => ({
+    id: `${section.id}-f-${i}`,
+    label: `Key Finding ${i + 1} — ${section.agentId}`,
+    type: "signal" as const,
+    excerpt: f.finding,
+    timestamp: section.lastUpdated,
+  }));
+
   return (
-    <div className="section-card animate-fadeIn" style={{ marginBottom: 16 }}>
+    <ProofEnvelope
+      title={section.keyJudgment}
+      timestamp={section.lastUpdated}
+      confidence={section.confidence}
+      policyState={riskToPolicy(section.riskLevel)}
+      policyReason={section.riskLevel === "CRITICAL" || section.riskLevel === "HIGH" ? "High-risk intelligence requires principal review before autonomous action" : undefined}
+      autonomyMode={autonomyMode}
+      onAutonomyChange={setAutonomyMode}
+      accentColor={agent?.color ?? "#c8a84b"}
+      evidence={proofEvidence}
+    >
+    <div className="section-card animate-fadeIn" style={{ marginBottom: 0 }}>
       {/* Header */}
       <div
         style={{
@@ -118,6 +142,7 @@ function SectionCard({ section }: { section: BriefingSection }) {
         </div>
       )}
     </div>
+    </ProofEnvelope>
   );
 }
 

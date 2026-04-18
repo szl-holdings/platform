@@ -33,7 +33,7 @@ type GeneratedProposal = {
 export default function ProposalGenerator() {
   usePageMeta({
     title: "Proposal Generator | Carlota Jo",
-    description: "AI-powered consulting proposal generator — turn prospect enquiries into tailored, professional proposals in hours, not weeks.",
+    description: "Governed consulting proposal generator — turn prospect enquiries into tailored, professional proposals in hours, not weeks.",
     canonical: "https://szlholdings.com/carlota-jo/proposal-generator",
   });
 

@@ -117,7 +117,7 @@ export default function ZoningIntelligencePage() {
         <div className="mb-8">
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/35">Generative Zoning</p>
           <h1 className="mt-2 text-2xl font-semibold tracking-tight text-white">Zoning Intelligence & Development Scenarios</h1>
-          <p className="mt-1 text-sm text-white/40">AI-powered zoning code analysis, maximum-density development scenarios, revenue projections, and variance probability scoring.</p>
+          <p className="mt-1 text-sm text-white/40">Governed zoning code analysis, maximum-density development scenarios, revenue projections, and variance probability scoring.</p>
         </div>
 
         <div className="flex gap-3 mb-6 overflow-x-auto pb-2">

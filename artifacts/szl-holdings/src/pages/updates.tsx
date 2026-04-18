@@ -12,7 +12,7 @@ const updates = [
     date: "February 2026",
     tag: "Vessels",
     headline: "AI Route Optimization Engine — Q2 2026 development begins",
-    summary: "Development started on Vessels' AI-powered route optimization module. The engine will analyse historical voyage data, weather patterns, and port congestion to surface optimal routing recommendations for fleet operators.",
+    summary: "Development started on Vessels' governed route optimization module. The engine will analyse historical voyage data, weather patterns, and port congestion to surface optimal routing recommendations for fleet operators.",
   },
   {
     date: "February 2026",

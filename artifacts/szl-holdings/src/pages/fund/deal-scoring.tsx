@@ -64,7 +64,7 @@ const DEALS: Deal[] = [
     convictionScore: 67, founder: "Dr. James Okon (Stanford MD/MBA)", date: "Apr 3, 2026",
     scores: { team: 82, market: 90, product: 65, traction: 52, competitive: 58, financials: 44 },
     status: "screening",
-    summary: "AI-powered clinical decision support. Pre-revenue with 3 hospital LOIs. HIPAA-compliant architecture with FDA pathway scoped.",
+    summary: "Governed clinical decision support. Pre-revenue with 3 hospital LOIs. HIPAA-compliant architecture with FDA pathway scoped.",
     strengths: ["Massive TAM ($40B)", "Credentialed medical team", "Clear regulatory path"],
     risks: ["Pre-revenue risk", "Long sales cycles", "Regulatory uncertainty"],
   },

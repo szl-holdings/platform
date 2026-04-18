@@ -13,6 +13,7 @@ import BriefingDetail from "./pages/BriefingDetail";
 import SystemHealth from "./pages/SystemHealth";
 import BriefingEngine from "./pages/BriefingEngine";
 const DecisionCenterPage = lazy(() => import("@/pages/decision-center"));
+const GovernedCockpitPage = lazy(() => import("@/pages/governed-cockpit"));
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") || "/pulse";
 
@@ -288,6 +289,7 @@ export default function App() {
           <Route path={`${BASE}/constellation`} component={Constellation} />
           <Route path={`${BASE}/engine`} component={BriefingEngine} />
           <Route path={`${BASE}/decisions`}>{() => <Suspense fallback={null}><DecisionCenterPage /></Suspense>}</Route>
+          <Route path={`${BASE}/governed-cockpit`}>{() => <Suspense fallback={null}><GovernedCockpitPage /></Suspense>}</Route>
           <Route component={TodaysBrief} />
         </Switch>
       </Shell>

@@ -207,6 +207,7 @@ const RouteAnomalyEnginePage = lazy(() => import("@/pages/route-anomaly-engine")
 const SanctionsChainExplorerPage = lazy(() => import("@/pages/sanctions-chain-explorer"));
 const CounterpartyRiskMapPage = lazy(() => import("@/pages/counterparty-risk-map"));
 const VoyageTwinPage = lazy(() => import("@/pages/voyage-twin"));
+const GovernedCockpitPage = lazy(() => import("@/pages/governed-cockpit"));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -633,6 +634,7 @@ function DashboardRouter() {
         <Route path="/sanctions-chain-explorer" component={SanctionsChainExplorerPage} />
         <Route path="/counterparty-risk-map" component={CounterpartyRiskMapPage} />
         <Route path="/voyage-twin" component={VoyageTwinPage} />
+        <Route path="/governed-cockpit" component={GovernedCockpitPage} />
         <Route>
           <div className="flex items-center justify-center h-full">
             <p className="text-sky-400/40">Page not found</p>

@@ -34,6 +34,7 @@
   "dependencies": {
     "@szl-holdings/analytics": "workspace:*",
     "@szl-holdings/covenant-policy": "workspace:*",
+    "@szl-holdings/design-system": "workspace:*",
     "@szl-holdings/graphql-client": "workspace:*",
     "@szl-holdings/monte-carlo": "workspace:*",
     "@szl-holdings/observability": "workspace:*",

@@ -4,6 +4,7 @@ import { Link } from "wouter";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { apiRequest } from "@/lib/api";
+import { ProofEnvelope, type AutonomyMode, type EvidenceSource } from "@szl-holdings/design-system";
 import {
   Activity, AlertTriangle, Brain, ChevronDown,
   Clock, Filter, GitBranch, Globe, Layers, RefreshCw,
@@ -180,20 +181,48 @@ type CorrelationPattern = {
   feedbackAdjustment: number; tags: string[];
 };
 
-function FusionAlertCard({ alert, index, onFeedbackSubmit }: {
+function FusionAlertCard({ alert, index, onFeedbackSubmit, autonomyMode, onAutonomyChange }: {
   alert: FusionAlert; index: number;
   onFeedbackSubmit: (alertId: string, patternId: string | undefined, data: { rating: number; relevance: string; notes: string }) => void;
+  autonomyMode: AutonomyMode;
+  onAutonomyChange: (mode: AutonomyMode) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
   const sev = SEVERITY_META[alert.severity as keyof typeof SEVERITY_META] ?? SEVERITY_META.medium;
 
+  const proofEvidence: EvidenceSource[] = alert.evidenceChain.map((ev, i) => ({
+    id: `${alert.id}-ev-${i}`,
+    label: ev.source,
+    type: "signal" as const,
+    excerpt: ev.description,
+    timestamp: alert.generatedAt,
+  }));
+
+  const policyStateMap: Record<string, "allowed" | "requires-approval" | "blocked"> = {
+    critical: "requires-approval",
+    high: "requires-approval",
+    medium: "allowed",
+    low: "allowed",
+  };
+
   return (
+    <ProofEnvelope
+      title={alert.title}
+      timestamp={alert.generatedAt}
+      confidence={Math.round(alert.confidence * 100)}
+      policyState={policyStateMap[alert.severity] ?? "allowed"}
+      policyReason={alert.severity === "critical" || alert.severity === "high" ? "Multi-domain alert requires IC approval before automated response" : undefined}
+      autonomyMode={autonomyMode}
+      onAutonomyChange={onAutonomyChange}
+      evidence={proofEvidence}
+      accentColor={sev.color}
+    >
     <m.div
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, delay: index * 0.06, ease: [0.22, 1, 0.36, 1] }}
-      style={{ borderRadius: 12, border: `1px solid ${sev.border}`, background: sev.bg, overflow: "hidden" }}
+      style={{ overflow: "hidden" }}
     >
       <div style={{ padding: "14px 16px", cursor: "pointer" }} onClick={() => setExpanded(!expanded)}>
         <div style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 8 }}>
@@ -321,6 +350,7 @@ function FusionAlertCard({ alert, index, onFeedbackSubmit }: {
         )}
       </AnimatePresence>
     </m.div>
+    </ProofEnvelope>
   );
 }
 
@@ -440,6 +470,7 @@ export default function IntelligenceFabricPage() {
   const [severityFilter, setSeverityFilter] = useState<string>("all");
   const [isLive, setIsLive] = useState(true);
   const [lastRefresh, setLastRefresh] = useState(Date.now());
+  const [autonomyMode, setAutonomyMode] = useState<AutonomyMode>("ask-to-act");
 
   const [fusionAlerts, setFusionAlerts] = useState<FusionAlert[]>([]);
   const [predictiveAlerts, setPredictiveAlerts] = useState<PredictiveAlert[]>([]);
@@ -641,7 +672,7 @@ export default function IntelligenceFabricPage() {
                 {filteredAlerts.length === 0
                   ? <p style={{ fontSize: 13, color: "hsl(210,5%,45%)", textAlign: "center", padding: "24px 0" }}>No alerts match the selected filter.</p>
                   : filteredAlerts.map((alert, i) => (
-                      <FusionAlertCard key={alert.id} alert={alert} index={i} onFeedbackSubmit={handleFeedbackSubmit} />
+                      <FusionAlertCard key={alert.id} alert={alert} index={i} onFeedbackSubmit={handleFeedbackSubmit} autonomyMode={autonomyMode} onAutonomyChange={setAutonomyMode} />
                     ))
                 }
               </div>

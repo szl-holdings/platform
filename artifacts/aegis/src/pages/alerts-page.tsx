@@ -13,6 +13,7 @@ import { Bell, Plus, AlertTriangle, CheckCircle, Eye, XCircle, Clock } from "luc
 import { EmptyState } from "@szl-holdings/shared-ui/design-system";
 import { useState, useEffect, useRef } from "react";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
+import { ProofEnvelope, type AutonomyMode } from "@szl-holdings/design-system";
 
 const severityColors: Record<string, string> = {
   critical: "bg-red-500/10 text-red-400 border-red-500/20",
@@ -34,6 +35,7 @@ export default function AlertsPage() {
   const { data: alerts = [], isLoading } = useQuery({ queryKey: ["alerts"], queryFn: () => api.alerts.list() });
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState("all");
+  const [autonomyMode, setAutonomyMode] = useState<AutonomyMode>("ask-to-act");
   const [form, setForm] = useState({ title: "", description: "", severity: "medium", source: "manual", relatedCve: "" });
 
   const createMut = useMutation({
@@ -170,44 +172,52 @@ export default function AlertsPage() {
         <div className="space-y-3 animate-fade-in-up stagger-3">
           {filtered.map((alert: any) => {
             const isCritical = alert.severity === "critical" && alert.status !== "resolved" && alert.status !== "dismissed";
+            const severityToPolicy = (s: string): "allowed" | "requires-approval" | "blocked" =>
+              s === "critical" ? "requires-approval" : s === "high" ? "requires-approval" : "allowed";
+            const severityToConfidence: Record<string, number> = { critical: 92, high: 85, medium: 72, low: 60 };
+            const accentByLevel: Record<string, string> = { critical: "#ef4444", high: "#f97316", medium: "#eab308", low: "#10b981" };
             return (
-              <Card key={alert.id} className={`bg-card border-border hover:border-primary/20 transition-all duration-300 ${isCritical ? "ring-1 ring-red-500/10" : ""}`}>
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-semibold text-sm">{alert.title}</h3>
-                      </div>
-                      {alert.description && <p className="text-sm text-muted-foreground line-clamp-2 mb-2">{alert.description}</p>}
-                      <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
-                        <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {new Date(alert.createdAt).toLocaleString()}</span>
-                        {alert.source && <Badge variant="outline" className="text-xs">{alert.source.replace("_", " ")}</Badge>}
-                        {alert.relatedCve && <span className="font-mono bg-muted px-1.5 py-0.5 rounded">{alert.relatedCve}</span>}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 ml-4">
-                      <Badge variant="outline" className={`${severityColors[alert.severity] || ""} ${isCritical ? "animate-threat-pulse" : ""}`}>
-                        {alert.severity}
-                      </Badge>
-                      {alert.status === "new" && (
-                        <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => updateMut.mutate({ id: alert.id, data: { status: "acknowledged" } })}>
-                          <Eye className="w-3 h-3 mr-1" /> Acknowledge
-                        </Button>
-                      )}
-                      <Select value={alert.status} onValueChange={v => updateMut.mutate({ id: alert.id, data: { status: v } })}>
-                        <SelectTrigger className="w-36 h-7 text-xs"><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="new">New</SelectItem>
-                          <SelectItem value="acknowledged">Acknowledged</SelectItem>
-                          <SelectItem value="investigating">Investigating</SelectItem>
-                          <SelectItem value="resolved">Resolved</SelectItem>
-                          <SelectItem value="dismissed">Dismissed</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+              <ProofEnvelope
+                key={alert.id}
+                title={alert.title}
+                timestamp={alert.createdAt}
+                confidence={severityToConfidence[alert.severity] ?? 70}
+                policyState={severityToPolicy(alert.severity)}
+                policyReason={isCritical ? "Critical alerts require SOC lead acknowledgment before automated response" : undefined}
+                autonomyMode={autonomyMode}
+                onAutonomyChange={setAutonomyMode}
+                accentColor={accentByLevel[alert.severity] ?? "#8b7ac8"}
+                evidence={[
+                  { id: String(alert.id), label: alert.source?.replace("_", " ") ?? "Aegis Engine", type: "signal", timestamp: alert.createdAt, excerpt: alert.description },
+                  ...(alert.relatedCve ? [{ id: `${alert.id}-cve`, label: alert.relatedCve, type: "api" as const, excerpt: `CVE reference associated with this alert` }] : []),
+                ]}
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    {alert.description && <p className="text-sm text-muted-foreground line-clamp-2 mb-2">{alert.description}</p>}
                   </div>
-                </CardContent>
-              </Card>
+                  <div className="flex items-center gap-2 ml-4">
+                    <Badge variant="outline" className={`${severityColors[alert.severity] || ""} ${isCritical ? "animate-threat-pulse" : ""}`}>
+                      {alert.severity}
+                    </Badge>
+                    {alert.status === "new" && (
+                      <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => updateMut.mutate({ id: alert.id, data: { status: "acknowledged" } })}>
+                        <Eye className="w-3 h-3 mr-1" /> Acknowledge
+                      </Button>
+                    )}
+                    <Select value={alert.status} onValueChange={v => updateMut.mutate({ id: alert.id, data: { status: v } })}>
+                      <SelectTrigger className="w-36 h-7 text-xs"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="new">New</SelectItem>
+                        <SelectItem value="acknowledged">Acknowledged</SelectItem>
+                        <SelectItem value="investigating">Investigating</SelectItem>
+                        <SelectItem value="resolved">Resolved</SelectItem>
+                        <SelectItem value="dismissed">Dismissed</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </ProofEnvelope>
             );
           })}
         </div>

@@ -229,7 +229,7 @@ Return ONLY the JSON object, no markdown.`;
                     onChange={e => setDetails(e.target.value)}
                     placeholder={
                       selectedScenario.id === "market-entry" ? "e.g. Expand into the UK mid-market, targeting £5M–£50M revenue businesses in the professional services sector" :
-                      selectedScenario.id === "product-launch" ? "e.g. Launch an AI-powered diagnostics subscription at £1,500/month targeting existing mid-market clients" :
+                      selectedScenario.id === "product-launch" ? "e.g. Launch an governed diagnostics subscription at £1,500/month targeting existing mid-market clients" :
                       selectedScenario.id === "acquisition" ? "e.g. Acquire Meridian Strategy — 8-person boutique with £1.2M revenue and strong UK public sector client base" :
                       selectedScenario.id === "pricing-change" ? "e.g. Move from project-based billing to annual retainer model — minimum £36K/year per client" :
                       selectedScenario.id === "partnership" ? "e.g. Strategic distribution partnership with PwC — co-selling into their mid-market PE-backed portfolio" :

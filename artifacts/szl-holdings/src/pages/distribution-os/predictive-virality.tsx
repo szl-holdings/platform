@@ -122,7 +122,7 @@ export default function PredictiveViralityPage() {
             <h1 style={{ fontSize: "1.25rem", fontWeight: 700, color: DS.text.primary, letterSpacing: "-0.025em", display: "flex", alignItems: "center", gap: "0.5rem" }}>
               <Flame size={18} style={{ color: DS.accent }} /> Distribution Analytics Engine
             </h1>
-            <p style={{ fontSize: "0.75rem", color: DS.text.tertiary, marginTop: "0.25rem" }}>AI-powered pre-publish scoring — know what will perform before you hit publish</p>
+            <p style={{ fontSize: "0.75rem", color: DS.text.tertiary, marginTop: "0.25rem" }}>Evidence-backed pre-publish scoring — know what will perform before you hit publish</p>
           </div>
           <DataProvenance provenance={PROV} />
         </div>

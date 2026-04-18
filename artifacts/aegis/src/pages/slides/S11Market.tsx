@@ -1,7 +1,7 @@
 export default function S11Market() {
   const markets = [
     { domain: "AI Governance & Trust", size: "$28B", growth: "+38% CAGR", note: "Enterprise AI audit and explainability", color: "#0cc8d9" },
-    { domain: "Security Operations (SOC/XDR)", size: "$31B", growth: "+14% CAGR", note: "AI-powered threat detection and response", color: "#3b82f6" },
+    { domain: "Security Operations (SOC/XDR)", size: "$31B", growth: "+14% CAGR", note: "Governed threat detection and response", color: "#3b82f6" },
     { domain: "Maritime Intelligence", size: "$4.2B", growth: "+11% CAGR", note: "Fleet command, AIS, sanctions compliance", color: "#0ea5e9" },
     { domain: "Legal Tech", size: "$35B", growth: "+20% CAGR", note: "AI-governed matter and litigation management", color: "#a78bfa" },
     { domain: "Commercial Real Estate Tech", size: "$14B", growth: "+16% CAGR", note: "Distress detection and governed underwriting", color: "#22c55e" },
