@@ -43,19 +43,19 @@ export function SimulationStage({ engine }: { engine: EngineState }) {
           Output Distributions — {mc.scenarioId}
         </h3>
         <div className="space-y-4">
-          {metricRows.map(({ label, m, isCurrency, isPercent }, rowIdx) => {
-            if (!m) return null;
+          {metricRows.map(({ label, m: stat, isCurrency, isPercent }, rowIdx) => {
+            if (!stat) return null;
             const fmt = (v: number) => isPercent ? `${(v * 100).toFixed(1)}%` : isCurrency ? `$${v.toFixed(0)}K` : v.toFixed(1);
-            const p95Pct = maxP95 > 0 ? (m.p95 / maxP95) * 100 : 0;
-            const p5Pct = maxP95 > 0 ? (m.p5 / maxP95) * 100 : 0;
-            const iqrPct = maxP95 > 0 ? ((m.p95 - m.p5) / maxP95) * 100 : 0;
-            const meanPct = maxP95 > 0 ? (m.mean / maxP95) * 100 : 0;
+            const p95Pct = maxP95 > 0 ? (stat.p95 / maxP95) * 100 : 0;
+            const p5Pct = maxP95 > 0 ? (stat.p5 / maxP95) * 100 : 0;
+            const iqrPct = maxP95 > 0 ? ((stat.p95 - stat.p5) / maxP95) * 100 : 0;
+            const meanPct = maxP95 > 0 ? (stat.mean / maxP95) * 100 : 0;
             const delay = rowIdx * 0.12;
             return (
               <div key={label}>
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="text-[12px] font-semibold text-foreground">{label}</span>
-                  <span className="text-sm font-bold font-display text-foreground">{fmt(m.mean)} <span className="text-[10px] text-muted-foreground font-normal">(mean)</span></span>
+                  <span className="text-sm font-bold font-display text-foreground">{fmt(stat.mean)} <span className="text-[10px] text-muted-foreground font-normal">(mean)</span></span>
                 </div>
                 <div className="relative h-6 rounded-md bg-muted/20 overflow-hidden">
                   <AnimatedBar fromPct={0} toPct={p95Pct} color="rgba(251,191,36,0.2)" delay={delay} />
@@ -74,9 +74,9 @@ export function SimulationStage({ engine }: { engine: EngineState }) {
                   />
                 </div>
                 <div className="flex justify-between text-[9px] text-muted-foreground mt-1 font-mono">
-                  <span>P5: {fmt(m.p5)}</span>
-                  <span>P50: {fmt(m.p50)}</span>
-                  <span>P95: {fmt(m.p95)}</span>
+                  <span>P5: {fmt(stat.p5)}</span>
+                  <span>P50: {fmt(stat.p50)}</span>
+                  <span>P95: {fmt(stat.p95)}</span>
                 </div>
               </div>
             );

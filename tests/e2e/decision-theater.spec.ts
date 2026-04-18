@@ -73,15 +73,14 @@ async function goToTheater(page: Page) {
 }
 
 /**
- * Click a stage in the StageProgressBar by its visible label and wait for the
- * step header to update. Uses the first matching button to target the progress
- * bar (not the nav buttons at the bottom).
+ * Click a stage in the StageProgressBar by its data-testid attribute and wait
+ * for the step header to update. Uses data-testid="stage-btn-{stageId}" added
+ * to each progress bar button in DecisionTheater/index.tsx.
  */
 async function clickStage(page: Page, label: string, expectedStep: number) {
-  const btn = page
-    .locator("button")
-    .filter({ hasText: new RegExp(`^${label}$`, "i") })
-    .first();
+  const stageId = label.toLowerCase().replace(/\s+/g, "-");
+  const btn = page.locator(`[data-testid="stage-btn-${stageId}"]`);
+  await btn.waitFor({ state: "visible", timeout: 10000 });
   await btn.click();
   // Wait for the step header to reflect the new stage (deterministic state check)
   await expect(
@@ -91,15 +90,15 @@ async function clickStage(page: Page, label: string, expectedStep: number) {
 
 // Stage metadata mirrors LOOP_STAGES in DecisionTheater.tsx
 const STAGES = [
-  { label: "Signal",         step: 1 },
-  { label: "Context",        step: 2 },
-  { label: "Recommendation", step: 3 },
-  { label: "Simulation",     step: 4 },
-  { label: "Policy",         step: 5 },
-  { label: "Execution",      step: 6 },
-  { label: "Proof",          step: 7 },
-  { label: "Outcome",        step: 8 },
-  { label: "Learning",       step: 9 },
+  { label: "Signal",         step: 1, id: "signal" },
+  { label: "Context",        step: 2, id: "context" },
+  { label: "Recommendation", step: 3, id: "recommendation" },
+  { label: "Simulation",     step: 4, id: "simulation" },
+  { label: "Policy",         step: 5, id: "policy" },
+  { label: "Execution",      step: 6, id: "execution" },
+  { label: "Proof",          step: 7, id: "proof" },
+  { label: "Outcome",        step: 8, id: "outcome" },
+  { label: "Learning",       step: 9, id: "learning" },
 ] as const;
 
 // ---------------------------------------------------------------------------
@@ -573,7 +572,7 @@ test.describe("Decision Theater — Guided Demo controls", () => {
     await page.locator("button[title='Start guided demo']").click();
     await expect(page.locator("text=Auto-advancing").first()).toBeVisible({ timeout: 5000 });
     // Advance the clock by slightly more than the 6s interval
-    await page.clock.tickFor(6500);
+    await page.clock.tick(6500);
     // The stage should have advanced to step 2
     await expect(
       page.locator("text=Step 2 of 9").first()

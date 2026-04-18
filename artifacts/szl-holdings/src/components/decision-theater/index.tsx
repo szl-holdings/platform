@@ -38,6 +38,7 @@ function StageProgressBar({ currentStage, stages, onStageClick }: {
         return (
           <button
             key={stage.id}
+            data-testid={`stage-btn-${stage.id}`}
             onClick={() => onStageClick(idx)}
             className={cn(
               "flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-semibold transition-all flex-shrink-0 border",
