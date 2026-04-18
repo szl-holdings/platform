@@ -541,6 +541,7 @@ app.use((_req: Request, res: Response) => {
 
 interface HttpError extends Error {
   statusCode?: number;
+  code?: string;
 }
 
 function isHttpError(err: Error): err is HttpError {
@@ -557,8 +558,11 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
     logger.warn({ err, statusCode }, "Client error");
   }
 
-  const errorMessage = isServerError ? "Internal Server Error" : err.message;
-  const errorCode = isServerError ? "INTERNAL_ERROR" : "CLIENT_ERROR";
+  const typedCode = isHttpError(err) ? err.code : undefined;
+  const isTypedServiceError = typeof typedCode === "string" && typedCode !== "INTERNAL_ERROR";
+
+  const errorMessage = isTypedServiceError ? err.message : (isServerError ? "Internal Server Error" : err.message);
+  const errorCode = isTypedServiceError ? typedCode : (isServerError ? "INTERNAL_ERROR" : "CLIENT_ERROR");
   sendError(res, errorMessage, statusCode, errorCode);
 });
 

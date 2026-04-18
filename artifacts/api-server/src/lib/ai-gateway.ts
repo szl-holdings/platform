@@ -82,6 +82,133 @@ const PROVIDER_MODELS: Record<string, { provider: InferenceProvider; model: stri
   ],
 };
 
+// ---------------------------------------------------------------------------
+// Circuit Breaker
+// ---------------------------------------------------------------------------
+
+type CircuitState = "closed" | "open" | "half-open";
+
+export interface CircuitBreakerStatus {
+  provider: InferenceProvider;
+  state: CircuitState;
+  consecutiveFailures: number;
+  openedAt: number | null;
+  lastTestedAt: number | null;
+  totalTripped: number;
+}
+
+const CIRCUIT_FAILURE_THRESHOLD = 3;
+const CIRCUIT_RECOVERY_MS = 60_000;
+
+class ProviderCircuitBreaker {
+  private circuits: Map<InferenceProvider, {
+    state: CircuitState;
+    consecutiveFailures: number;
+    openedAt: number | null;
+    lastTestedAt: number | null;
+    totalTripped: number;
+    probing: boolean;
+  }> = new Map();
+
+  private getOrCreate(provider: InferenceProvider) {
+    let circuit = this.circuits.get(provider);
+    if (!circuit) {
+      circuit = {
+        state: "closed",
+        consecutiveFailures: 0,
+        openedAt: null,
+        lastTestedAt: null,
+        totalTripped: 0,
+        probing: false,
+      };
+      this.circuits.set(provider, circuit);
+    }
+    return circuit;
+  }
+
+  isOpen(provider: InferenceProvider): boolean {
+    const circuit = this.getOrCreate(provider);
+
+    if (circuit.state === "closed") return false;
+
+    if (circuit.state === "open") {
+      const elapsed = Date.now() - (circuit.openedAt ?? 0);
+      if (elapsed >= CIRCUIT_RECOVERY_MS) {
+        if (!circuit.probing) {
+          circuit.state = "half-open";
+          circuit.probing = true;
+          circuit.lastTestedAt = Date.now();
+          logger.info({ provider, elapsedMs: elapsed }, "Circuit breaker half-opening — allowing single probe request");
+          return false;
+        }
+        return true;
+      }
+      return true;
+    }
+
+    if (circuit.state === "half-open") {
+      return circuit.probing;
+    }
+
+    return false;
+  }
+
+  recordSuccess(provider: InferenceProvider): void {
+    const circuit = this.getOrCreate(provider);
+    const wasHalfOpen = circuit.state === "half-open";
+    circuit.state = "closed";
+    circuit.consecutiveFailures = 0;
+    circuit.probing = false;
+    if (wasHalfOpen) {
+      logger.info({ provider }, "Circuit breaker closed after successful probe");
+    }
+  }
+
+  recordFailure(provider: InferenceProvider): void {
+    const circuit = this.getOrCreate(provider);
+    circuit.consecutiveFailures++;
+    circuit.probing = false;
+
+    if (circuit.state === "half-open") {
+      circuit.state = "open";
+      circuit.openedAt = Date.now();
+      logger.warn({ provider }, "Circuit breaker re-opened after failed probe");
+      return;
+    }
+
+    if (circuit.state === "closed" && circuit.consecutiveFailures >= CIRCUIT_FAILURE_THRESHOLD) {
+      circuit.state = "open";
+      circuit.openedAt = Date.now();
+      circuit.totalTripped++;
+      logger.error(
+        { provider, consecutiveFailures: circuit.consecutiveFailures, totalTripped: circuit.totalTripped },
+        "Circuit breaker opened — provider will receive no traffic until recovery window expires"
+      );
+    }
+  }
+
+  getStatus(provider: InferenceProvider): CircuitBreakerStatus {
+    const circuit = this.getOrCreate(provider);
+    return {
+      provider,
+      state: circuit.state,
+      consecutiveFailures: circuit.consecutiveFailures,
+      openedAt: circuit.openedAt,
+      lastTestedAt: circuit.lastTestedAt,
+      totalTripped: circuit.totalTripped,
+    };
+  }
+
+  getAllStatuses(): CircuitBreakerStatus[] {
+    const providers: InferenceProvider[] = ["replit-proxy", "openai", "anthropic", "gemini", "huggingface"];
+    return providers.map(p => this.getStatus(p));
+  }
+}
+
+export const providerCircuitBreaker = new ProviderCircuitBreaker();
+
+// ---------------------------------------------------------------------------
+
 function isTargetableProvider(provider: InferenceProvider): provider is TargetableProvider {
   return provider !== "mock";
 }
@@ -105,7 +232,7 @@ function selectCandidates(request: GatewayRequest): ProviderCandidate[] {
       const model = request.model ?? preferredEntry?.model ?? modelList[0]?.model ?? "gpt-5.2";
       const health = providerHealth.getStatus(preferred);
 
-      if (health.status !== "down") {
+      if (health.status !== "down" && !providerCircuitBreaker.isOpen(preferred)) {
         candidates.push({
           provider: preferred,
           model,
@@ -122,6 +249,11 @@ function selectCandidates(request: GatewayRequest): ProviderCandidate[] {
 
     const health = providerHealth.getStatus(provider);
     if (health.status === "down") continue;
+
+    if (providerCircuitBreaker.isOpen(provider)) {
+      logger.debug({ provider }, "Circuit breaker open — skipping provider in candidate selection");
+      continue;
+    }
 
     let score = 100;
 
@@ -171,15 +303,37 @@ async function executeProviderInference(
     throw new Error(`Provider "${provider}" cannot be targeted for inference`);
   }
 
-  const inferencePromise = services.ai.chatCompletionForProvider(provider, messages, { model, maxTokens });
+  const controller = new AbortController();
+  const timer = setTimeout(() => {
+    controller.abort(new Error(`Inference timeout after ${timeoutMs}ms`));
+  }, timeoutMs);
 
-  const result = await Promise.race([
-    inferencePromise,
-    new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error(`Inference timeout after ${timeoutMs}ms`)), timeoutMs)
-    ),
-  ]);
-  return result;
+  try {
+    return await services.ai.chatCompletionForProvider(provider, messages, {
+      model,
+      maxTokens,
+      signal: controller.signal,
+    });
+  } catch (err) {
+    if (controller.signal.aborted) {
+      throw new Error(`Inference timeout after ${timeoutMs}ms`);
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+export class AiProviderUnavailableError extends Error {
+  readonly code = "AI_PROVIDER_UNAVAILABLE";
+  readonly provider: InferenceProvider;
+  readonly statusCode = 503;
+
+  constructor(provider: InferenceProvider) {
+    super(`AI provider "${provider}" is temporarily unavailable — circuit breaker is open`);
+    this.name = "AiProviderUnavailableError";
+    this.provider = provider;
+  }
 }
 
 export async function gatewayInfer(request: GatewayRequest): Promise<GatewayResponse> {
@@ -192,6 +346,13 @@ export async function gatewayInfer(request: GatewayRequest): Promise<GatewayResp
 
   const candidates = selectCandidates(request);
   if (candidates.length === 0) {
+    const targetable: TargetableProvider[] = ["replit-proxy", "openai", "anthropic", "gemini", "huggingface"];
+    const openCircuitProvider = targetable.find(
+      p => isProviderAvailable(p) && providerCircuitBreaker.getStatus(p).state !== "closed"
+    );
+    if (openCircuitProvider) {
+      throw new AiProviderUnavailableError(openCircuitProvider);
+    }
     throw new Error("No healthy providers available for inference");
   }
 
@@ -199,6 +360,12 @@ export async function gatewayInfer(request: GatewayRequest): Promise<GatewayResp
   let lastError: Error | null = null;
 
   for (const candidate of candidates) {
+    if (providerCircuitBreaker.isOpen(candidate.provider)) {
+      logger.warn({ provider: candidate.provider }, "Circuit breaker open at inference time — fast-failing provider");
+      lastError = new AiProviderUnavailableError(candidate.provider);
+      continue;
+    }
+
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       attemptedProviders.push(candidate.provider);
       const attemptStart = Date.now();
@@ -223,6 +390,8 @@ export async function gatewayInfer(request: GatewayRequest): Promise<GatewayResp
         }
 
         const actualProvider = result.provider as InferenceProvider;
+
+        providerCircuitBreaker.recordSuccess(actualProvider);
 
         const telemetryRecord = inferenceTelemetry.record({
           provider: actualProvider,
@@ -268,6 +437,8 @@ export async function gatewayInfer(request: GatewayRequest): Promise<GatewayResp
         lastError = err instanceof Error ? err : new Error(String(err));
         const latencyMs = Date.now() - attemptStart;
 
+        providerCircuitBreaker.recordFailure(candidate.provider);
+
         inferenceTelemetry.record({
           provider: candidate.provider,
           model: candidate.model,
@@ -285,6 +456,11 @@ export async function gatewayInfer(request: GatewayRequest): Promise<GatewayResp
 
         providerHealth.recordFailure(candidate.provider, lastError.message);
 
+        if (providerCircuitBreaker.isOpen(candidate.provider)) {
+          logger.warn({ provider: candidate.provider, attempt }, "Circuit breaker opened mid-retry — aborting retries for this provider");
+          break;
+        }
+
         if (attempt < maxRetries) {
           const backoffMs = Math.pow(2, attempt) * 500;
           logger.warn({ provider: candidate.provider, model: candidate.model, attempt, backoffMs, error: lastError.message }, "Gateway inference attempt failed, retrying");
@@ -295,11 +471,16 @@ export async function gatewayInfer(request: GatewayRequest): Promise<GatewayResp
   }
 
   logger.error({ agentId, domain, attemptedProviders, error: lastError?.message }, "All gateway inference attempts exhausted");
+
+  if (lastError instanceof AiProviderUnavailableError) {
+    throw lastError;
+  }
+
   throw new Error(`All providers exhausted after ${attemptedProviders.length} attempts: ${lastError?.message ?? "unknown error"}`);
 }
 
 export function getGatewayStatus(): {
-  availableProviders: Array<{ provider: InferenceProvider; status: string; configured: boolean; avgLatencyMs: number }>;
+  availableProviders: Array<{ provider: InferenceProvider; status: string; configured: boolean; avgLatencyMs: number; circuitState: string }>;
   defaultStrategy: RoutingStrategy;
   supportedStrategies: RoutingStrategy[];
   taskTypes: string[];
@@ -308,11 +489,13 @@ export function getGatewayStatus(): {
   const availableProviders = providers.map(p => {
     const health = providerHealth.getStatus(p);
     const stats = inferenceTelemetry.getProviderStats(300000).find(s => s.provider === p);
+    const circuit = providerCircuitBreaker.getStatus(p);
     return {
       provider: p as InferenceProvider,
       status: health.status,
       configured: services.ai.isProviderConfigured(p),
       avgLatencyMs: stats?.avgLatencyMs ?? 0,
+      circuitState: circuit.state,
     };
   });
 

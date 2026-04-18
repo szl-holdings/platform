@@ -1,5 +1,6 @@
 import { getAllAgentIds, getModelConfig, checkFreshness, getModelCard, type ModelCard } from "./model-registry";
 import { inferenceTelemetry } from "./inference-telemetry";
+import { providerCircuitBreaker, type CircuitBreakerStatus } from "./ai-gateway";
 
 export interface AiModelEntry {
   id: string;
@@ -109,6 +110,21 @@ export function getAiModelById(modelId: string): AiModelEntry | undefined {
   return getAiModels().find((m) => m.id === modelId);
 }
 
+export function getCircuitBreakerMetrics(): {
+  circuits: CircuitBreakerStatus[];
+  openCount: number;
+  halfOpenCount: number;
+  closedCount: number;
+} {
+  const circuits = providerCircuitBreaker.getAllStatuses();
+  return {
+    circuits,
+    openCount: circuits.filter(c => c.state === "open").length,
+    halfOpenCount: circuits.filter(c => c.state === "half-open").length,
+    closedCount: circuits.filter(c => c.state === "closed").length,
+  };
+}
+
 export function getModelObservabilitySummary(): {
   totalModels: number;
   activeModels: number;
@@ -117,6 +133,7 @@ export function getModelObservabilitySummary(): {
   driftAlerts: number;
   freshness: ReturnType<typeof checkFreshness>;
   telemetrySummary: ReturnType<typeof inferenceTelemetry.getSummary>;
+  circuitBreakers: ReturnType<typeof getCircuitBreakerMetrics>;
 } {
   const models = getAiModels();
   const active = models.filter((m) => m.status === "active");
@@ -132,5 +149,6 @@ export function getModelObservabilitySummary(): {
     driftAlerts,
     freshness: checkFreshness(),
     telemetrySummary: inferenceTelemetry.getSummary(),
+    circuitBreakers: getCircuitBreakerMetrics(),
   };
 }

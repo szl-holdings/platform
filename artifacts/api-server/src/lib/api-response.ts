@@ -105,6 +105,7 @@ export function handleRouteError(res: Response, err: unknown, fallbackMessage: s
   }
   if (err != null && typeof err === "object" && "statusCode" in err) {
     const statusCode = (err as { statusCode: unknown }).statusCode;
+    const code = "code" in err ? (err as { code: unknown }).code : undefined;
     if (statusCode === 403) {
       sendForbidden(res, (err instanceof Error ? err.message : null) ?? "Access denied");
       return;
@@ -115,6 +116,10 @@ export function handleRouteError(res: Response, err: unknown, fallbackMessage: s
     }
     if (statusCode === 409) {
       sendConflict(res, err instanceof Error ? err.message : "Resource conflict");
+      return;
+    }
+    if (statusCode === 503 && typeof code === "string") {
+      sendError(res, err instanceof Error ? err.message : "Service temporarily unavailable", 503, code);
       return;
     }
   }

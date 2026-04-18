@@ -104,7 +104,7 @@ export class AIAdapter extends ServiceAdapter {
   async chatCompletionForProvider(
     provider: "replit-proxy" | "openai" | "anthropic" | "gemini" | "huggingface",
     messages: ChatMessage[],
-    options?: { model?: string; maxTokens?: number },
+    options?: { model?: string; maxTokens?: number; signal?: AbortSignal },
   ): Promise<ChatCompletionResult> {
     if (!this.isLive && provider !== "gemini" && provider !== "huggingface") {
       const isProduction =
@@ -120,20 +120,22 @@ export class AIAdapter extends ServiceAdapter {
       return this.mockChatCompletion(messages);
     }
 
+    const { signal, ...completionOptions } = options ?? {};
+
     if (provider === "replit-proxy" && this.hasReplitProxy) {
-      return this.replitProxyCompletion(messages, options);
+      return this.replitProxyCompletion(messages, completionOptions, signal);
     }
     if (provider === "openai" && this.openaiKey) {
-      return this.openaiCompletion(messages, options);
+      return this.openaiCompletion(messages, completionOptions, signal);
     }
     if (provider === "anthropic" && this.anthropicKey) {
-      return this.anthropicCompletion(messages, options);
+      return this.anthropicCompletion(messages, completionOptions, signal);
     }
     if (provider === "gemini" && this.geminiKey) {
-      return this.geminiCompletion(messages, options);
+      return this.geminiCompletion(messages, completionOptions, signal);
     }
     if (provider === "huggingface" && this.huggingfaceKey) {
-      return this.huggingfaceCompletion(messages, options);
+      return this.huggingfaceCompletion(messages, completionOptions, signal);
     }
 
     throw new Error(`Provider "${provider}" is not configured or unavailable`);
@@ -229,6 +231,7 @@ export class AIAdapter extends ServiceAdapter {
   private async replitProxyCompletion(
     messages: ChatMessage[],
     options?: { model?: string; maxTokens?: number },
+    signal?: AbortSignal,
   ): Promise<ChatCompletionResult> {
     const model = options?.model ?? "gpt-5.2";
     const response = await fetch(
@@ -244,6 +247,7 @@ export class AIAdapter extends ServiceAdapter {
           messages,
           max_tokens: options?.maxTokens ?? 1024,
         }),
+        signal,
       },
     );
 
@@ -270,6 +274,7 @@ export class AIAdapter extends ServiceAdapter {
   private async openaiCompletion(
     messages: ChatMessage[],
     options?: { model?: string; maxTokens?: number },
+    signal?: AbortSignal,
   ): Promise<ChatCompletionResult> {
     const model = options?.model ?? "gpt-5.2";
     const response = await fetch(
@@ -285,6 +290,7 @@ export class AIAdapter extends ServiceAdapter {
           messages,
           max_tokens: options?.maxTokens ?? 1024,
         }),
+        signal,
       },
     );
 
@@ -311,6 +317,7 @@ export class AIAdapter extends ServiceAdapter {
   private async anthropicCompletion(
     messages: ChatMessage[],
     options?: { model?: string; maxTokens?: number },
+    signal?: AbortSignal,
   ): Promise<ChatCompletionResult> {
     const model = options?.model ?? "claude-sonnet-4-20250514";
     const systemMessage = messages.find((m) => m.role === "system");
@@ -333,6 +340,7 @@ export class AIAdapter extends ServiceAdapter {
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify(body),
+      signal,
     });
 
     if (!response.ok) {
@@ -358,6 +366,7 @@ export class AIAdapter extends ServiceAdapter {
   private async geminiCompletion(
     messages: ChatMessage[],
     options?: { model?: string; maxTokens?: number },
+    signal?: AbortSignal,
   ): Promise<ChatCompletionResult> {
     const model = options?.model ?? "gemini-2.0-flash";
     const systemMessage = messages.find((m) => m.role === "system");
@@ -382,6 +391,7 @@ export class AIAdapter extends ServiceAdapter {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
+        signal,
       },
     );
 
@@ -408,6 +418,7 @@ export class AIAdapter extends ServiceAdapter {
   private async huggingfaceCompletion(
     messages: ChatMessage[],
     options?: { model?: string; maxTokens?: number },
+    signal?: AbortSignal,
   ): Promise<ChatCompletionResult> {
     const model = options?.model ?? "mistralai/Mixtral-8x7B-Instruct-v0.1";
 
@@ -424,6 +435,7 @@ export class AIAdapter extends ServiceAdapter {
           messages,
           max_tokens: options?.maxTokens ?? 1024,
         }),
+        signal,
       },
     );
 

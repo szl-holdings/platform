@@ -17,7 +17,7 @@ Practical assessment against OWASP API Security Top 10 (2023 edition) for the `s
 | API7: Server-Side Request Forgery | Low Risk | High |
 | API8: Security Misconfiguration | Mitigated | High |
 | API9: Improper Inventory Management | Partial | Medium |
-| API10: Unsafe Consumption of APIs | Partial | Medium |
+| API10: Unsafe Consumption of APIs | Mitigated | High |
 
 ---
 
@@ -146,22 +146,22 @@ Practical assessment against OWASP API Security Top 10 (2023 edition) for the `s
 
 ---
 
-### API10: Unsafe Consumption of APIs — PARTIAL
+### API10: Unsafe Consumption of APIs — MITIGATED
 
 **Controls in place**:
 - AI provider calls use the `ai-gateway.ts` abstraction layer
 - `withExternalSpan` tracks external call latency
 - `ai-model-observability.ts` monitors provider health
+- `AbortController` enforces a 30s hard timeout on every provider `chatCompletionForProvider` call
+- Per-provider circuit breaker (`ProviderCircuitBreaker` in `ai-gateway.ts`):
+  - Opens after 3 consecutive failures
+  - Transitions to half-open after 60s recovery window
+  - Probe request on half-open: success → closed, failure → re-opens
+  - Open circuit fails fast with `503 AI_PROVIDER_UNAVAILABLE` (`AiProviderUnavailableError`)
+- Circuit breaker state exposed via `getCircuitBreakerMetrics()` in `ai-model-observability.ts`
+- `getGatewayStatus()` includes `circuitState` per provider
 
-**Gap**: No explicit timeout enforcement on AI provider calls; no circuit breaker to prevent cascading failure.
-
-**Action (Priority: High)**:
-1. Add `AbortController` timeout to all AI provider fetch calls (suggested: 30s)
-2. Implement circuit breaker pattern in `ai-gateway.ts`:
-   - Open after 3 consecutive failures
-   - Half-open after 60s
-   - Track per-provider state
-3. Add fallback response when circuit is open
+**Remaining risk**: Low — circuit breaker state is in-process memory only; a multi-replica deployment would need a shared state store (Redis) for full coordination.
 
 ---
 
@@ -171,6 +171,6 @@ Practical assessment against OWASP API Security Top 10 (2023 edition) for the `s
 |--------|---------------|----------|--------|
 | Response DTO serialization layer | API3 | High | Medium |
 | Extend idempotency to all financial flows | API6 | High | Low |
-| Add AI provider timeout + circuit breaker | API10 | High | Medium |
+| ~~Add AI provider timeout + circuit breaker~~ | API10 | ~~High~~ Done | Medium |
 | OpenAPI spec auto-generation | API9 | Medium | High |
 | BOLA guard linting rule | API1 | Low | Low |
