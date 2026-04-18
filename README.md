@@ -90,6 +90,27 @@ The Command Portal is the cross-domain real-time dashboard aggregating signals f
 
 ---
 
+## Archived front-end apps
+
+The following front-end artifacts have been archived. They have **no active
+workflow, no source on disk, and are not part of the build**. The marketing
+visuals above remain because the underlying *backend* domain APIs and shared
+libraries are still live and feed other surfaces (Aegis, Command, mobile).
+
+| Artifact | Status | Notes |
+|----------|--------|-------|
+| `firestorm/` | Archived (Task #920) | UI shell removed; `/firestorm/*` API routes still live |
+| `imperium/` | Archived (Task #920) | UI shell removed; backend domain still live |
+| `lyte-command-center/` | Archived (Task #920) | UI shell removed; backend domain still live |
+| `prism-counsel/` | Removed (Task #634) | Directory deleted; `/prism-counsel/*` API routes still live |
+| `stephen-site/` | Removed (Task #634) | Directory deleted; no remaining surface |
+
+If a future product decision brings any of these back, treat it as a fresh
+build via the artifact scaffold tooling — do not attempt to restore from the
+old `dist/` output.
+
+---
+
 ## Architecture
 
 The six platform primitives define what is structurally different from dashboards, copilots, and workflow tools:
