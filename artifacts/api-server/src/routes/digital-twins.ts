@@ -108,6 +108,10 @@ router.patch("/digital-twins/:twinId", authMiddleware(), validateBody(jsonObject
 });
 
 router.post("/digital-twins/demo/seed", validateBody(jsonObjectBodySchema), authMiddleware(), async (_req, res) => {
+  if (process.env.NODE_ENV === "production" || process.env.APP_ENV === "production") {
+    res.status(404).json({ error: "Not found", code: "SEED_DISABLED_IN_PRODUCTION" });
+    return;
+  }
   try {
     const vesselState: VesselTwinState = {
       imoNumber: "9234567",

@@ -1068,6 +1068,10 @@ router.post("/terra/cognitive/covenants/scan", cogLimit, auth, validateBody(json
 // ─── Seed covenants from distress registry (operator action, idempotent) ──────
 
 router.post("/terra/cognitive/covenants/seed", cogLimit, auth, validateBody(jsonObjectBodySchema), async (req, res) => {
+  if (process.env.NODE_ENV === "production" || process.env.APP_ENV === "production") {
+    res.status(404).json({ error: "Not found", code: "SEED_DISABLED_IN_PRODUCTION" });
+    return;
+  }
   try {
     const limit = Math.min(Number(req.body?.limit ?? 12), 50);
     const inserted = await seedCovenantsFromDistress(limit);

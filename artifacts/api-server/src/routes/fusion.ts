@@ -67,6 +67,10 @@ router.post("/fusion/alerts/inject", authMiddleware(), validateBody(jsonObjectBo
 });
 
 router.post("/fusion/demo/seed", validateBody(jsonObjectBodySchema), authMiddleware(), async (_req, res) => {
+  if (process.env.NODE_ENV === "production" || process.env.APP_ENV === "production") {
+    res.status(404).json({ error: "Not found", code: "SEED_DISABLED_IN_PRODUCTION" });
+    return;
+  }
   fusionCortex.seedDemoAlerts();
   predictiveCascadeEngine.seedDemoAlerts();
   res.json({ success: true, message: "Demo fusion alerts seeded", alerts: fusionCortex.getAlerts({ limit: 10 }) });
