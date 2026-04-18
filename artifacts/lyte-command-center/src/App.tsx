@@ -2,12 +2,24 @@ import { lazy, Suspense, useState } from "react";
 import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
-  LayoutDashboard, AlertTriangle, GitBranch, TrendingUp, Activity,
+  LayoutDashboard, AlertTriangle, GitBranch, Activity,
   Thermometer, Layers, ChevronRight, Menu, X, BookOpen, Brain,
-  ChevronDown, Zap, Shield, Users
+  ChevronDown, Zap, Shield, Users, Radio, Network, Workflow,
+  Terminal, Library, Lock, FlaskConical
 } from "lucide-react";
 
-const LandingPage = lazy(() => import("@/pages/landing"));
+// New 9 flagship surfaces
+const OverviewPage = lazy(() => import("@/pages/overview"));
+const SignalsConsolePage = lazy(() => import("@/pages/signals-console"));
+const EntityGraphPage = lazy(() => import("@/pages/entity-graph"));
+const DecisionCenterPage = lazy(() => import("@/pages/decision-center"));
+const WorkflowHealthPage = lazy(() => import("@/pages/workflow-health"));
+const RunConsolePage = lazy(() => import("@/pages/run-console"));
+const EvidenceExplorerPage = lazy(() => import("@/pages/evidence-explorer"));
+const PolicyCenterPage = lazy(() => import("@/pages/policy-center"));
+const EvalStudioPage = lazy(() => import("@/pages/eval-studio"));
+
+// Legacy surfaces (kept for historical nav)
 const OwnershipDriftPage = lazy(() => import("@/pages/ownership-drift"));
 const PressureMapPage = lazy(() => import("@/pages/pressure-map"));
 const ActionDebtPage = lazy(() => import("@/pages/action-debt"));
@@ -33,18 +45,61 @@ interface NavItem {
   href: string;
   icon: React.ReactNode;
   badge?: string;
+  badgeColor?: "red" | "amber" | "default";
 }
 
-const NAV_ITEMS: NavItem[] = [
-  { label: "Board View", href: "/board", icon: <LayoutDashboard className="w-3.5 h-3.5" />, badge: "6 risks" },
-  { label: "Ownership Drift", href: "/ownership-drift", icon: <GitBranch className="w-3.5 h-3.5" />, badge: "6" },
-  { label: "Pressure Map", href: "/pressure-map", icon: <Thermometer className="w-3.5 h-3.5" /> },
-  { label: "Action Debt Index", href: "/action-debt", icon: <Layers className="w-3.5 h-3.5" />, badge: "43" },
-  { label: "Decision Replay", href: "/decision-replay", icon: <Activity className="w-3.5 h-3.5" /> },
+interface NavGroup {
+  label: string;
+  items: NavItem[];
+}
+
+const NAV_GROUPS: NavGroup[] = [
+  {
+    label: "Command",
+    items: [
+      { label: "Overview", href: "/overview", icon: <LayoutDashboard className="w-3.5 h-3.5" />, badge: "6 critical", badgeColor: "red" },
+      { label: "Signals Console", href: "/signals", icon: <Radio className="w-3.5 h-3.5" />, badge: "47", badgeColor: "red" },
+      { label: "Entity Graph", href: "/entities", icon: <Network className="w-3.5 h-3.5" /> },
+      { label: "Decision Center", href: "/decisions", icon: <Brain className="w-3.5 h-3.5" />, badge: "3 rec", badgeColor: "amber" },
+    ],
+  },
+  {
+    label: "Operations",
+    items: [
+      { label: "Workflow Health", href: "/workflow-health", icon: <Workflow className="w-3.5 h-3.5" />, badge: "62%", badgeColor: "amber" },
+      { label: "Run Console", href: "/runs", icon: <Terminal className="w-3.5 h-3.5" /> },
+      { label: "Evidence Explorer", href: "/evidence", icon: <Library className="w-3.5 h-3.5" /> },
+    ],
+  },
+  {
+    label: "Governance",
+    items: [
+      { label: "Policy Center", href: "/policies", icon: <Lock className="w-3.5 h-3.5" /> },
+      { label: "Eval Studio", href: "/eval", icon: <FlaskConical className="w-3.5 h-3.5" /> },
+    ],
+  },
+  {
+    label: "Legacy",
+    items: [
+      { label: "Board View", href: "/board", icon: <LayoutDashboard className="w-3.5 h-3.5" /> },
+      { label: "Ownership Drift", href: "/ownership-drift", icon: <GitBranch className="w-3.5 h-3.5" /> },
+      { label: "Pressure Map", href: "/pressure-map", icon: <Thermometer className="w-3.5 h-3.5" /> },
+      { label: "Action Debt", href: "/action-debt", icon: <Layers className="w-3.5 h-3.5" /> },
+      { label: "Decision Replay", href: "/decision-replay", icon: <Activity className="w-3.5 h-3.5" /> },
+    ],
+  },
 ];
+
+const ALL_NAV_ITEMS = NAV_GROUPS.flatMap(g => g.items);
 
 function Sidebar({ expanded, onToggle }: { expanded: boolean; onToggle: () => void }) {
   const [location] = useLocation();
+
+  const BADGE_COLOR_MAP = {
+    red: "text-red-400 bg-red-500/8 border-red-500/20",
+    amber: "text-amber-400 bg-amber-500/8 border-amber-500/20",
+    default: "text-amber-400/60 bg-amber-500/8 border-amber-500/15",
+  };
 
   return (
     <aside
@@ -72,58 +127,47 @@ function Sidebar({ expanded, onToggle }: { expanded: boolean; onToggle: () => vo
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5">
-        {expanded && (
-          <p className="text-[9px] font-mono text-amber-400/30 uppercase tracking-widest px-2 pb-2">Surfaces</p>
-        )}
-        {NAV_ITEMS.map((item) => {
-          const href = `${BASE.replace(/\/$/, "")}${item.href}`;
-          const active = location === item.href || location.startsWith(item.href + "/");
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center gap-2.5 px-2 py-2 rounded-md text-xs transition-all group relative ${
-                active
-                  ? "bg-amber-500/10 text-amber-300 border border-amber-500/20"
-                  : "text-amber-400/50 hover:text-amber-200 hover:bg-amber-500/5"
-              }`}
-            >
-              <span className={active ? "text-amber-400" : "text-amber-400/40 group-hover:text-amber-400"}>
-                {item.icon}
-              </span>
-              {expanded && (
-                <>
-                  <span className="flex-1 truncate font-medium">{item.label}</span>
-                  {item.badge && (
-                    <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded-sm border ${
-                      active
-                        ? "bg-amber-500/15 border-amber-500/30 text-amber-300"
-                        : "bg-amber-500/8 border-amber-500/15 text-amber-400/60"
-                    }`}>
-                      {item.badge}
-                    </span>
+      <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-1">
+        {NAV_GROUPS.map(group => (
+          <div key={group.label}>
+            {expanded && (
+              <p className="text-[9px] font-mono text-amber-400/25 uppercase tracking-widest px-2 py-1.5">{group.label}</p>
+            )}
+            {!expanded && <div className="h-1" />}
+            {group.items.map(item => {
+              const active = location === item.href || location.startsWith(item.href + "/");
+              const badgeClass = BADGE_COLOR_MAP[item.badgeColor ?? "default"];
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex items-center gap-2.5 px-2 py-2 rounded-md text-xs transition-all group relative ${
+                    active
+                      ? "bg-amber-500/10 text-amber-300 border border-amber-500/20"
+                      : "text-amber-400/50 hover:text-amber-200 hover:bg-amber-500/5 border border-transparent"
+                  }`}
+                >
+                  <span className={active ? "text-amber-400" : "text-amber-400/40 group-hover:text-amber-400"}>
+                    {item.icon}
+                  </span>
+                  {expanded && (
+                    <>
+                      <span className="flex-1 truncate font-medium">{item.label}</span>
+                      {item.badge && (
+                        <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded border ${badgeClass}`}>
+                          {item.badge}
+                        </span>
+                      )}
+                    </>
                   )}
-                </>
-              )}
-              {!expanded && item.badge && (
-                <span className="absolute right-0.5 top-0.5 w-1.5 h-1.5 rounded-full bg-amber-400" />
-              )}
-            </Link>
-          );
-        })}
-
-        <div className="pt-3 mt-3 border-t border-amber-500/10" />
-        {expanded && (
-          <p className="text-[9px] font-mono text-amber-400/30 uppercase tracking-widest px-2 pb-2">Platform</p>
-        )}
-        <Link
-          href="/"
-          className="flex items-center gap-2.5 px-2 py-2 rounded-md text-xs text-amber-400/40 hover:text-amber-200 hover:bg-amber-500/5 transition-all"
-        >
-          <BookOpen className="w-3.5 h-3.5 shrink-0" />
-          {expanded && <span className="truncate">About Lyte</span>}
-        </Link>
+                  {!expanded && item.badge && item.badgeColor === "red" && (
+                    <span className="absolute right-0.5 top-0.5 w-1.5 h-1.5 rounded-full bg-red-400" />
+                  )}
+                </Link>
+              );
+            })}
+          </div>
+        ))}
       </nav>
 
       {/* Footer */}
@@ -135,7 +179,7 @@ function Sidebar({ expanded, onToggle }: { expanded: boolean; onToggle: () => vo
             </div>
             <div>
               <p className="text-[10px] text-amber-200/70">Demo Mode</p>
-              <p className="text-[9px] text-amber-400/40 font-mono">ALLOY-SEED-v1</p>
+              <p className="text-[9px] text-amber-400/40 font-mono">LYTE-SEED-v2</p>
             </div>
           </div>
         </div>
@@ -149,7 +193,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [location] = useLocation();
 
-  const currentPage = NAV_ITEMS.find(n => location === n.href || location.startsWith(n.href + "/"));
+  const currentPage = ALL_NAV_ITEMS.find(n => location === n.href || location.startsWith(n.href + "/"));
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
@@ -186,12 +230,12 @@ function AppShell({ children }: { children: React.ReactNode }) {
                 <span className="text-amber-300/70">{currentPage.label}</span>
               </>
             )}
-            {location === "/" && <span className="text-amber-300/70">Platform</span>}
+            {!currentPage && location === "/" && <span className="text-amber-300/70">Platform</span>}
           </div>
           <div className="ml-auto flex items-center gap-3">
             <div className="proof-badge">
               <Shield className="w-2.5 h-2.5" />
-              ALLOY-PROOF
+              LYTE-PROOF
             </div>
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded border border-amber-500/15 bg-amber-500/5">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
@@ -201,7 +245,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
         </header>
 
         {/* Content */}
-        <main className="flex-1 overflow-y-auto">
+        <main className={`flex-1 overflow-y-auto ${location === "/entities" ? "overflow-hidden flex flex-col" : ""}`}>
           <Suspense fallback={<PageLoader />}>
             {children}
           </Suspense>
@@ -215,13 +259,25 @@ function DashboardRoutes() {
   return (
     <AppShell>
       <Switch>
+        {/* 9 flagship surfaces */}
+        <Route path="/overview" component={OverviewPage} />
+        <Route path="/signals" component={SignalsConsolePage} />
+        <Route path="/entities" component={EntityGraphPage} />
+        <Route path="/decisions" component={DecisionCenterPage} />
+        <Route path="/workflow-health" component={WorkflowHealthPage} />
+        <Route path="/runs" component={RunConsolePage} />
+        <Route path="/evidence" component={EvidenceExplorerPage} />
+        <Route path="/policies" component={PolicyCenterPage} />
+        <Route path="/eval" component={EvalStudioPage} />
+        {/* Legacy surfaces */}
         <Route path="/board" component={BoardViewPage} />
         <Route path="/ownership-drift" component={OwnershipDriftPage} />
         <Route path="/pressure-map" component={PressureMapPage} />
         <Route path="/action-debt" component={ActionDebtPage} />
         <Route path="/decision-replay" component={DecisionReplayPage} />
         <Route path="/decision-replay/:id" component={DecisionReplayPage} />
-        <Route component={LandingPage} />
+        {/* Default: redirect to overview */}
+        <Route component={OverviewPage} />
       </Switch>
     </AppShell>
   );

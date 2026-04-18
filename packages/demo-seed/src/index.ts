@@ -88,3 +88,6 @@ export const SIGNAL_MESH_NARRATIVES = [
   { id: "counsel-deadline", label: "Counsel — Looming Deadline + Dependency Conflict", domain: "counsel" },
   { id: "sentra-ransomware", label: "Sentra — Ransomware-Adjacent OT Event + Recovery Posture Gap", domain: "security" },
 ] as const;
+
+export { LYTE_STALLED_APPROVAL_NARRATIVE } from "./narrative-lyte-stalled-approval";
+export type { LyteStalledApprovalNarrative, LyteRecommendation, LyteSignal, SimulationScenario } from "./narrative-lyte-stalled-approval";

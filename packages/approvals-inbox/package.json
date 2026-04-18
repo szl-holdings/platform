@@ -1,0 +1,19 @@
+{
+  "name": "@workspace/approvals-inbox",
+  "version": "0.0.0",
+  "private": false,
+  "type": "module",
+  "description": "Shared approvals inbox — receives approval actions from Decision Center and other surfaces, stores them with full provenance (verdict, proof ref, simulation ID, actor).",
+  "scripts": {
+    "build": "tsc --build"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./src/index.ts"
+    }
+  },
+  "devDependencies": {
+    "@types/node": "catalog:"
+  }
+}

@@ -119,6 +119,12 @@ export const DOMAIN_ENTITY_TYPES = [
   "engagement",
   // Pulse
   "brief",
+  // Lyte — Business Observability
+  "opportunity",
+  "project",
+  "approval_chain",
+  "stakeholder",
+  "deliverable",
 ] as const;
 
 export const ALL_ENTITY_TYPES = [
@@ -154,6 +160,11 @@ export const ENTITY_TYPE_LABELS: Record<EntityType, string> = {
   matter: "Matter",
   obligation: "Obligation",
   brief: "Brief",
+  opportunity: "Opportunity",
+  project: "Project",
+  approval_chain: "Approval Chain",
+  stakeholder: "Stakeholder",
+  deliverable: "Deliverable",
 };
 
 export const ENTITY_TYPE_DOMAINS: Record<EntityType, Domain[]> = {
@@ -182,6 +193,11 @@ export const ENTITY_TYPE_DOMAINS: Record<EntityType, Domain[]> = {
   obligation: ["counsel"],
   engagement: ["carlota"],
   brief: ["pulse"],
+  opportunity: ["lyte"],
+  project: ["lyte"],
+  approval_chain: ["lyte", "platform"],
+  stakeholder: ["lyte", "platform"],
+  deliverable: ["lyte"],
 };
 
 // ---------------------------------------------------------------------------
@@ -334,6 +350,69 @@ export interface BriefEntity extends BaseEntity {
   proofId?: string | undefined;
 }
 
+// ---------------------------------------------------------------------------
+// Lyte — Business Observability Entity Shapes
+// ---------------------------------------------------------------------------
+
+export interface OpportunityEntity extends BaseEntity {
+  entityType: "opportunity";
+  domain: "lyte";
+  stage: "identified" | "qualified" | "proposal" | "negotiation" | "closed_won" | "closed_lost" | "stalled";
+  estimatedValueUsd?: number | undefined;
+  closeProbability?: number | undefined;
+  daysInStage?: number | undefined;
+  ownerName?: string | undefined;
+  accountName?: string | undefined;
+  stalledDays?: number | undefined;
+  approvalChainId?: string | undefined;
+}
+
+export interface ProjectEntity extends BaseEntity {
+  entityType: "project";
+  domain: "lyte";
+  status: "active" | "blocked" | "stalled" | "at_risk" | "on_track" | "complete";
+  phase: string;
+  owner?: string | undefined;
+  dueDate?: Date | undefined;
+  valueAtRiskUsd?: number | undefined;
+  blockerCount?: number | undefined;
+}
+
+export interface ApprovalChainEntity extends BaseEntity {
+  entityType: "approval_chain";
+  domain: "lyte" | "platform";
+  linkedEntityId?: string | undefined;
+  linkedEntityType?: EntityType | undefined;
+  currentStep?: number | undefined;
+  totalSteps?: number | undefined;
+  stalledAtStepName?: string | undefined;
+  stalledDays?: number | undefined;
+  valueAtRiskUsd?: number | undefined;
+  status: "active" | "stalled" | "approved" | "rejected" | "escalated" | "void";
+}
+
+export interface StakeholderEntity extends BaseEntity {
+  entityType: "stakeholder";
+  domain: "lyte" | "platform";
+  role: string;
+  orgId: string;
+  email?: string | undefined;
+  engagementLevel?: "champion" | "supporter" | "neutral" | "skeptic" | "blocker" | undefined;
+  lastEngagedAt?: Date | undefined;
+  approvalAuthority?: boolean | undefined;
+}
+
+export interface DeliverableEntity extends BaseEntity {
+  entityType: "deliverable";
+  domain: "lyte";
+  type: "report" | "analysis" | "approval" | "contract" | "presentation" | "milestone";
+  linkedProjectId?: string | undefined;
+  owner?: string | undefined;
+  dueDate?: Date | undefined;
+  status: "not_started" | "in_progress" | "blocked" | "overdue" | "complete";
+  stalledDays?: number | undefined;
+}
+
 export type DomainEntity =
   | VesselEntity
   | VoyageEntity
@@ -346,7 +425,12 @@ export type DomainEntity =
   | MatterEntity
   | ObligationEntity
   | EngagementEntity
-  | BriefEntity;
+  | BriefEntity
+  | OpportunityEntity
+  | ProjectEntity
+  | ApprovalChainEntity
+  | StakeholderEntity
+  | DeliverableEntity;
 
 export function isEntityType(value: unknown): value is EntityType {
   return ALL_ENTITY_TYPES.includes(value as EntityType);
