@@ -18,6 +18,7 @@ const NAV_ITEMS = [
       { label: "Lyte", href: "/lyte", note: "Operational nerve center" },
       { label: "Lyte · Decision Theater", href: "/lyte/decision-theater", note: "Governed decision flow" },
       { label: "Lyte · Signal Fusion", href: "/lyte/signal-fusion", note: "Cross-domain signal aggregation" },
+      { label: "Lyte · Health & Freshness", href: "/lyte/health-freshness", note: "Connector freshness & data health" },
       { label: "Lyte · Decision Schemas", href: "/lyte/decision-schemas", note: "Reusable schema library" },
       { label: "Lyte · Governance Posture", href: "/lyte/governance-posture", note: "CISO-grade policy dashboard" },
       { label: "Alloy", href: "/alloy-fabric", note: "Governance execution fabric" },

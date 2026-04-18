@@ -5,7 +5,8 @@ import {
   Radio, Shield, Ship, Building2, Briefcase, Users, Zap, Layers,
   ArrowRight, AlertTriangle, CheckCircle2, Clock, Eye, Filter,
   GitBranch, Activity, TrendingUp, BarChart3, ChevronRight,
-  ArrowUpRight, RefreshCw, Circle, Dot,
+  ArrowUpRight, RefreshCw, Circle, Dot, CheckCheck, ArrowUpRightFromSquare,
+  UserPlus, PlusSquare, ChevronDown, Database,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -38,6 +39,28 @@ const SEV_COLOR: Record<string, string> = {
   medium: "hsl(48,90%,52%)",
   info: "hsl(192,72%,48%)",
 };
+
+const SOURCE_LABELS: Record<string, string> = {
+  threat_intelligence: "Threat Intel",
+  ais_telemetry: "AIS Feed",
+  deadline_monitor: "Deadline Monitor",
+  workflow_monitor: "Workflow Bus",
+  market_intelligence: "Market Intel",
+  cloud_policy: "Cloud Policy",
+  engagement_tracker: "CRM",
+};
+
+const SOURCE_FRESHNESS: Record<string, { age: string; status: "live" | "fresh" | "stale" }> = {
+  sf1: { age: "4m", status: "live" },
+  sf2: { age: "11m", status: "live" },
+  sf3: { age: "22m", status: "fresh" },
+  sf4: { age: "2h", status: "fresh" },
+  sf5: { age: "1h", status: "fresh" },
+  sf6: { age: "4h", status: "fresh" },
+  sf7: { age: "3h", status: "fresh" },
+};
+
+const FRESHNESS_COLORS = { live: "hsl(142,60%,50%)", fresh: "hsl(192,72%,48%)", stale: "hsl(48,90%,52%)" };
 
 interface FusionSignal {
   id: string;
@@ -199,7 +222,28 @@ function CorrelationTypeBadge({ type }: { type?: string }) {
   );
 }
 
-function SignalCard({ sig, active, onClick, highlight }: { sig: FusionSignal; active: boolean; onClick: () => void; highlight?: boolean }) {
+function FreshnessBadge({ id }: { id: string }) {
+  const f = SOURCE_FRESHNESS[id];
+  if (!f) return null;
+  const color = FRESHNESS_COLORS[f.status];
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: "3px", fontSize: "0.575rem", fontFamily: MONO, fontWeight: 600, letterSpacing: "0.08em", padding: "1px 5px", borderRadius: 3, background: `${color}15`, border: `1px solid ${color}28`, color }}>
+      <span style={{ width: 4, height: 4, borderRadius: "50%", background: color, display: "inline-block" }} />
+      {f.age}
+    </span>
+  );
+}
+
+function SourceBadge({ sourceType }: { sourceType: string }) {
+  const label = SOURCE_LABELS[sourceType] ?? sourceType.replace(/_/g, " ");
+  return (
+    <span style={{ fontSize: "0.575rem", fontFamily: MONO, color: TEXT_FAINT, background: "hsla(0,0%,100%,0.05)", border: `1px solid ${BORDER}`, padding: "1px 5px", borderRadius: 3 }}>
+      {label}
+    </span>
+  );
+}
+
+function SignalCard({ sig, active, onClick, highlight, acknowledged }: { sig: FusionSignal; active: boolean; onClick: () => void; highlight?: boolean; acknowledged?: boolean }) {
   const cfg = DOMAIN_CONFIG[sig.domain];
   const Icon = cfg?.icon ?? Radio;
   const dc = cfg?.color ?? LYTE;
@@ -209,7 +253,7 @@ function SignalCard({ sig, active, onClick, highlight }: { sig: FusionSignal; ac
     <m.button
       layout
       initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
+      animate={{ opacity: acknowledged ? 0.45 : 1, y: 0 }}
       onClick={onClick}
       style={{
         width: "100%",
@@ -220,6 +264,7 @@ function SignalCard({ sig, active, onClick, highlight }: { sig: FusionSignal; ac
         border: `1px solid ${active ? LYTE + "30" : highlight ? sc + "25" : BORDER}`,
         cursor: "pointer",
         transition: "all 0.15s ease",
+        opacity: acknowledged ? 0.5 : 1,
       }}
     >
       <div style={{ display: "flex", alignItems: "flex-start", gap: "0.625rem", marginBottom: "0.5rem" }}>
@@ -230,12 +275,19 @@ function SignalCard({ sig, active, onClick, highlight }: { sig: FusionSignal; ac
           <div style={{ display: "flex", gap: "0.375rem", marginBottom: "0.3rem", flexWrap: "wrap", alignItems: "center" }}>
             <span style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", fontFamily: MONO, color: dc }}>{sig.domain}</span>
             <SevBadge sev={sig.severity} />
+            <SourceBadge sourceType={sig.sourceType} />
+            <FreshnessBadge id={sig.id} />
             {sig.correlatedWith.length > 0 && (
               <span style={{ fontSize: "0.575rem", fontFamily: MONO, color: TEXT_FAINT, background: "hsla(0,0%,100%,0.06)", border: `1px solid ${BORDER}`, padding: "1px 4px", borderRadius: 3 }}>
                 {sig.correlatedWith.length} corr.
               </span>
             )}
             <CorrelationTypeBadge type={sig.correlationType} />
+            {acknowledged && (
+              <span style={{ fontSize: "0.575rem", fontFamily: MONO, color: "hsl(142,60%,50%)", display: "flex", alignItems: "center", gap: "2px" }}>
+                <CheckCheck size={9} /> ack
+              </span>
+            )}
           </div>
           <p style={{ fontSize: "0.8rem", fontWeight: 600, color: TEXT, lineHeight: 1.3, margin: "0 0 0.375rem" }}>{sig.title}</p>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -307,6 +359,9 @@ export default function SignalFusionPage() {
   const [filterDomain, setFilterDomain] = useState<string>("all");
   const [filterSev, setFilterSev] = useState<string>("all");
   const [tick, setTick] = useState(0);
+  const [acknowledged, setAcknowledged] = useState<Set<string>>(new Set());
+  const [escalated, setEscalated] = useState<Set<string>>(new Set());
+  const [showAcked, setShowAcked] = useState(false);
 
   useEffect(() => {
     const t = setInterval(() => setTick(n => n + 1), 6000);
@@ -437,16 +492,33 @@ export default function SignalFusionPage() {
 
               {/* Signal list */}
               <div>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.75rem" }}>
+                  <button
+                    onClick={() => setShowAcked(s => !s)}
+                    style={{ fontSize: "0.6875rem", fontFamily: MONO, color: TEXT_FAINT, background: "transparent", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "0.375rem" }}
+                  >
+                    <CheckCheck size={11} />
+                    {showAcked ? "Hide" : "Show"} acknowledged ({acknowledged.size})
+                  </button>
+                  {escalated.size > 0 && (
+                    <span style={{ fontSize: "0.6875rem", fontFamily: MONO, color: "hsl(30,90%,52%)" }}>
+                      {escalated.size} escalated
+                    </span>
+                  )}
+                </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                  {filteredSignals.map(s => (
-                    <SignalCard
-                      key={s.id}
-                      sig={s}
-                      active={activeSignal === s.id}
-                      highlight={sig.correlatedWith.includes(s.id) || s.correlatedWith.includes(sig.id)}
-                      onClick={() => setActiveSignal(s.id)}
-                    />
-                  ))}
+                  {filteredSignals
+                    .filter(s => showAcked || !acknowledged.has(s.id))
+                    .map(s => (
+                      <SignalCard
+                        key={s.id}
+                        sig={s}
+                        active={activeSignal === s.id}
+                        highlight={sig.correlatedWith.includes(s.id) || s.correlatedWith.includes(sig.id)}
+                        onClick={() => setActiveSignal(s.id)}
+                        acknowledged={acknowledged.has(s.id)}
+                      />
+                    ))}
                 </div>
               </div>
 
@@ -547,14 +619,45 @@ export default function SignalFusionPage() {
                       Actions
                     </p>
                     <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
-                      <button style={{ width: "100%", padding: "0.5rem 0.875rem", borderRadius: 5, background: `${LYTE}15`, border: `1px solid ${LYTE}30`, cursor: "pointer", fontSize: "0.75rem", fontWeight: 600, color: LYTE, textAlign: "left" }}>
+                      {/* Acknowledge */}
+                      <button
+                        onClick={() => {
+                          if (acknowledged.has(sig.id)) {
+                            setAcknowledged(prev => { const next = new Set(prev); next.delete(sig.id); return next; });
+                          } else {
+                            setAcknowledged(prev => new Set(prev).add(sig.id));
+                          }
+                        }}
+                        style={{ width: "100%", padding: "0.5rem 0.875rem", borderRadius: 5, background: acknowledged.has(sig.id) ? "hsla(142,60%,50%,0.12)" : "transparent", border: `1px solid ${acknowledged.has(sig.id) ? "hsla(142,60%,50%,0.3)" : BORDER}`, cursor: "pointer", fontSize: "0.75rem", fontWeight: 600, color: acknowledged.has(sig.id) ? "hsl(142,60%,50%)" : TEXT_SEC, textAlign: "left", display: "flex", alignItems: "center", gap: "0.5rem" }}
+                      >
+                        <CheckCheck size={13} />
+                        {acknowledged.has(sig.id) ? "Acknowledged — undo" : "Acknowledge signal"}
+                      </button>
+                      {/* Escalate */}
+                      <button
+                        onClick={() => {
+                          if (escalated.has(sig.id)) {
+                            setEscalated(prev => { const next = new Set(prev); next.delete(sig.id); return next; });
+                          } else {
+                            setEscalated(prev => new Set(prev).add(sig.id));
+                          }
+                        }}
+                        style={{ width: "100%", padding: "0.5rem 0.875rem", borderRadius: 5, background: escalated.has(sig.id) ? "hsla(30,90%,52%,0.12)" : "transparent", border: `1px solid ${escalated.has(sig.id) ? "hsla(30,90%,52%,0.3)" : BORDER}`, cursor: "pointer", fontSize: "0.75rem", fontWeight: 600, color: escalated.has(sig.id) ? "hsl(30,90%,52%)" : TEXT_SEC, textAlign: "left", display: "flex", alignItems: "center", gap: "0.5rem" }}
+                      >
+                        <ArrowUpRightFromSquare size={13} />
+                        {escalated.has(sig.id) ? "Escalated — undo" : "Escalate signal"}
+                      </button>
+                      <button style={{ width: "100%", padding: "0.5rem 0.875rem", borderRadius: 5, background: `${LYTE}12`, border: `1px solid ${LYTE}28`, cursor: "pointer", fontSize: "0.75rem", fontWeight: 600, color: LYTE, textAlign: "left", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                        <ArrowRight size={13} />
                         Route to Decision Theater
                       </button>
-                      <button style={{ width: "100%", padding: "0.5rem 0.875rem", borderRadius: 5, background: "transparent", border: `1px solid ${BORDER}`, cursor: "pointer", fontSize: "0.75rem", color: TEXT_SEC, textAlign: "left" }}>
-                        Assign to Alloy workflow
+                      <button style={{ width: "100%", padding: "0.5rem 0.875rem", borderRadius: 5, background: "transparent", border: `1px solid ${BORDER}`, cursor: "pointer", fontSize: "0.75rem", color: TEXT_SEC, textAlign: "left", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                        <UserPlus size={13} />
+                        Assign to analyst
                       </button>
-                      <button style={{ width: "100%", padding: "0.5rem 0.875rem", borderRadius: 5, background: "transparent", border: `1px solid ${BORDER}`, cursor: "pointer", fontSize: "0.75rem", color: TEXT_SEC, textAlign: "left" }}>
-                        Acknowledge signal
+                      <button style={{ width: "100%", padding: "0.5rem 0.875rem", borderRadius: 5, background: "transparent", border: `1px solid ${BORDER}`, cursor: "pointer", fontSize: "0.75rem", color: TEXT_SEC, textAlign: "left", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                        <PlusSquare size={13} />
+                        Create follow-up task
                       </button>
                     </div>
                   </div>

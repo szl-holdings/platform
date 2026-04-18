@@ -1,10 +1,99 @@
 import { useState } from "react";
 import { OpsLayout } from "../components/ops-layout";
 import { ServiceStatusPanel } from "../components/service-status-panel";
-import { BarChart2, Shield, Activity, DollarSign, CheckCircle2, AlertTriangle, Info } from "lucide-react";
+import { BarChart2, Shield, Activity, DollarSign, CheckCircle2, AlertTriangle, Info, Wifi, WifiOff, Clock, Database, RefreshCw, ChevronDown } from "lucide-react";
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer } from "recharts";
 import { useEcosystemData } from "../hooks/use-ecosystem-data";
 import { useQuery } from "@tanstack/react-query";
+
+const CONNECTOR_FRESHNESS = [
+  { id: "ais", label: "AIS / GNSS Feed", source: "ExactEarth + Spire", status: "live" as const, lastPoll: "12s ago", latency: 310, records: 14302, staleWindow: "5m", domain: "Vessels" },
+  { id: "alloy-kb", label: "Alloy Knowledge Base", source: "Internal", status: "live" as const, lastPoll: "1m ago", latency: 88, records: 4800, staleWindow: "10m", domain: "Platform" },
+  { id: "lyte-signals", label: "Lyte Signal Bus", source: "Internal", status: "fresh" as const, lastPoll: "4m ago", latency: 142, records: 871, staleWindow: "10m", domain: "Lyte" },
+  { id: "terra-propertydata", label: "Terra Property Records", source: "CoreLogic / MLS", status: "fresh" as const, lastPoll: "18m ago", latency: 1800, records: 92440, staleWindow: "60m", domain: "Terra" },
+  { id: "ofac", label: "OFAC SDN Screener", source: "US Treasury", status: "fresh" as const, lastPoll: "47m ago", latency: 4200, records: 18900, staleWindow: "12h", domain: "Compliance" },
+  { id: "weather", label: "Weather / Routing API", source: "Copernicus + Windy", status: "stale" as const, lastPoll: "3h ago", latency: 14000, records: 290, staleWindow: "30m", domain: "Vessels" },
+  { id: "eu-sanctions", label: "EU Sanctions Registry", source: "EUR-Lex", status: "stale" as const, lastPoll: "19h ago", latency: 48000, records: 5100, staleWindow: "6h", domain: "Compliance" },
+  { id: "swift", label: "SWIFT / Wire Monitor", source: "Internal", status: "error" as const, lastPoll: "—", latency: null, records: 0, staleWindow: "5m", domain: "Finance" },
+];
+
+type ConnectorStatus = "live" | "fresh" | "stale" | "error";
+
+const STATUS_STYLE: Record<ConnectorStatus, { dot: string; label: string; bg: string; border: string }> = {
+  live:   { dot: "bg-emerald-400 animate-pulse", label: "Live",   bg: "rgba(16,185,129,0.06)", border: "rgba(16,185,129,0.15)" },
+  fresh:  { dot: "bg-sky-400",                   label: "Fresh",  bg: "rgba(14,165,233,0.05)", border: "rgba(14,165,233,0.12)" },
+  stale:  { dot: "bg-amber-400",                  label: "Stale",  bg: "rgba(245,158,11,0.05)", border: "rgba(245,158,11,0.18)" },
+  error:  { dot: "bg-red-400 animate-pulse",       label: "Error",  bg: "rgba(239,68,68,0.05)",  border: "rgba(239,68,68,0.22)" },
+};
+
+function ConnectorFreshnessPanel() {
+  const [filter, setFilter] = useState<ConnectorStatus | "all">("all");
+  const visible = filter === "all" ? CONNECTOR_FRESHNESS : CONNECTOR_FRESHNESS.filter(c => c.status === filter);
+  const counts = { all: CONNECTOR_FRESHNESS.length, live: 0, fresh: 0, stale: 0, error: 0 } as Record<string, number>;
+  CONNECTOR_FRESHNESS.forEach(c => { counts[c.status]++; });
+
+  return (
+    <div className="rounded-xl overflow-hidden" style={{ border: "1px solid var(--color-surface-border)", backgroundColor: "var(--color-surface-base)" }}>
+      <div className="px-5 py-4 flex items-center justify-between gap-4 flex-wrap" style={{ borderBottom: "1px solid var(--color-surface-border)" }}>
+        <div className="flex items-center gap-2">
+          <Database className="w-4 h-4" style={{ color: "var(--color-fg-muted)" }} />
+          <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--color-fg-muted)" }}>Connector Freshness</span>
+        </div>
+        <div className="flex gap-1">
+          {(["all", "live", "fresh", "stale", "error"] as const).map(s => (
+            <button
+              key={s}
+              onClick={() => setFilter(s)}
+              className="text-[10px] font-mono px-2 py-1 rounded capitalize transition-colors"
+              style={{
+                background: filter === s ? (s === "all" ? "rgba(139,122,200,0.15)" : STATUS_STYLE[s as ConnectorStatus]?.bg) : "transparent",
+                border: filter === s ? `1px solid ${s === "all" ? "rgba(139,122,200,0.25)" : STATUS_STYLE[s as ConnectorStatus]?.border}` : "1px solid transparent",
+                color: filter === s ? "var(--color-fg-primary)" : "var(--color-fg-muted)",
+              }}
+            >
+              {s} {s !== "all" ? `(${counts[s]})` : `(${counts.all})`}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="divide-y" style={{ borderColor: "var(--color-surface-border)" }}>
+        {visible.map(c => {
+          const st = STATUS_STYLE[c.status];
+          return (
+            <div key={c.id} className="px-5 py-3 flex items-center gap-4" style={{ background: st.bg }}>
+              <span className={`w-2 h-2 rounded-full shrink-0 ${st.dot}`} />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-xs font-semibold" style={{ color: "var(--color-fg-primary)" }}>{c.label}</span>
+                  <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ background: "var(--color-bg-elevated)", color: "var(--color-fg-muted)" }}>{c.domain}</span>
+                </div>
+                <span className="text-[10px]" style={{ color: "var(--color-fg-muted)" }}>{c.source}</span>
+              </div>
+              <div className="flex items-center gap-4 shrink-0 text-[10px] font-mono">
+                <div className="flex items-center gap-1" style={{ color: "var(--color-fg-muted)" }}>
+                  <Clock className="w-3 h-3" />
+                  {c.lastPoll}
+                </div>
+                <div style={{ color: "var(--color-fg-muted)" }}>
+                  {c.latency != null ? `${c.latency < 1000 ? `${c.latency}ms` : `${(c.latency/1000).toFixed(1)}s`}` : "—"}
+                </div>
+                <div style={{ color: "var(--color-fg-muted)" }}>
+                  {c.records > 0 ? `${c.records.toLocaleString()} rec` : "no data"}
+                </div>
+                <div className="hidden md:block" style={{ color: "var(--color-fg-muted)" }}>
+                  stale &gt;{c.staleWindow}
+                </div>
+                <div className="px-2 py-0.5 rounded text-[9px] font-semibold capitalize" style={{ background: st.bg, border: `1px solid ${st.border}`, color: c.status === "live" ? "#34d399" : c.status === "fresh" ? "#38bdf8" : c.status === "stale" ? "#fbbf24" : "#f87171" }}>
+                  {st.label}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 interface ApiHealthResponse {
   compositeScore: number;
@@ -238,6 +327,9 @@ export default function HealthPage() {
 
         {/* Service Status */}
         <ServiceStatusPanel />
+
+        {/* Connector Freshness */}
+        <ConnectorFreshnessPanel />
 
         {/* Dimension Breakdown */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -1,15 +1,18 @@
 import { useState, useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { m } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import { HoldingsGraphQLPanel } from "@/components/graphql-data-panel";
 import {
   Search, Shield, Brain, Zap, Ship, Building, Palette, Activity, Globe, BarChart3,
   Laptop, Grid, List, ArrowUpRight, GitBranch, Map, TrendingUp, Radio, CheckCircle2,
   Clock, Layers, Cpu, Users, ArrowRight, ExternalLink, Wifi, WifiOff, AlertTriangle,
   ChevronRight, Circle, Star, Rocket, Eye, Target, RefreshCw, Bell,
+  TrendingDown, Minus, Database, TriangleAlert, Sparkles, FileText,
+  MessageSquare, ArrowUpDown, ChevronDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link } from "wouter";
+import { RecommendationExplainer, SAMPLE_RECOMMENDATIONS } from "@/components/RecommendationExplainer";
 
 
 const apps = [
@@ -122,6 +125,253 @@ const kpiStrip = [
   { label: "Deployed Capital", value: "$180M+", trend: "Since 2021", up: true },
   { label: "Continents Active", value: "3", trend: "DC · London · Singapore", up: true },
 ];
+
+const WATCHLIST_DELTAS = [
+  { entity: "MV Adriatic Star", domain: "Vessels", change: "AIS gap 6h20m", severity: "high", dir: "down", icon: Ship },
+  { entity: "CVE-2025-1337", domain: "Aegis", change: "KEV exploitation confirmed", severity: "critical", dir: "down", icon: Shield },
+  { entity: "NYC Portfolio Cluster A", domain: "Terra", change: "+2 properties at distress threshold", severity: "medium", dir: "down", icon: Building },
+  { entity: "Alloy Approval Queue", domain: "Platform", change: "14 pending, 6 exceed 72h SLA", severity: "high", dir: "down", icon: Zap },
+  { entity: "OFAC SDN List", domain: "Compliance", change: "Updated — 4 new designations", severity: "info", dir: "up", icon: CheckCircle2 },
+];
+
+const PENDING_ACTIONS = [
+  { id: "pa1", title: "Isolate auth-svc, api-gw, reporting hosts", domain: "Aegis", priority: "critical", due: "T+2h", owner: null },
+  { id: "pa2", title: "OFAC screening — MV Adriatic Star", domain: "Vessels", priority: "high", due: "T+6h", owner: "K. Vasile" },
+  { id: "pa3", title: "File HC-2025-0487 — owner unassigned", domain: "PRISM", priority: "high", due: "T+38h", owner: null },
+  { id: "pa4", title: "Remediate AWS egress rule sg-0xf823b1a", domain: "IMPERIUM", priority: "medium", due: "T+24h", owner: null },
+];
+
+const CROSS_DOMAIN_CORRELATIONS = [
+  { from: "Aegis", to: "IMPERIUM", type: "causal", label: "KEV exploit → cloud drift vector", strength: 0.87 },
+  { from: "Vessels", to: "Terra", type: "temporal", label: "Dark vessel ↔ portfolio exposure", strength: 0.54 },
+  { from: "Alloy", to: "Aegis", type: "causal", label: "Approval stall → incident response lag", strength: 0.63 },
+];
+
+const STALE_SOURCES = [
+  { source: "CoStar Market Data", domain: "Terra", staleFor: "5h", errorMsg: "Auth token expired" },
+  { source: "NVD CVE Feed", domain: "Aegis", staleFor: "3h", errorMsg: "Rate limit exceeded" },
+];
+
+const POSTURE_TREND = [71, 74, 73, 76, 74, 72, 75, 76, 75, 78, 76, 78];
+
+const AI_BRIEF_PARAGRAPHS = [
+  "The SZL ecosystem is operating at a composite posture of 76/100 — moderately elevated risk across security and operational dimensions. Two critical items require executive attention within the next two hours.",
+  "Aegis has confirmed active exploitation of CVE-2025-1337 across three internal hosts (auth-svc, api-gw, reporting). Correlated IMPERIUM drift confirms the attack vector was the unrestricted egress rule on sg-0xf823b1a. Isolation and remediation are the immediate priority.",
+  "Vessels flags MV Adriatic Star with a 6h20m AIS dark gap last fixed at Strait of Messina. OFAC screening is in progress. The temporal correlation with Terra's NYC portfolio distress cluster warrants monitoring but does not indicate direct causation.",
+  "Platform operations: 14 Alloy workflows are queued, six exceeding the 72-hour SLA threshold, which is compounding response latency in the Aegis incident stream. Escalation required.",
+];
+
+const SEV_COLORS: Record<string, string> = {
+  critical: "#ef4444", high: "#f97316", medium: "#eab308", info: "#38bdf8",
+};
+
+function PosturePanel({ score, trend }: { score: number; trend: number[] }) {
+  const prev = trend[trend.length - 2] ?? score;
+  const delta = score - prev;
+  const color = score >= 80 ? "#22c55e" : score >= 65 ? "#eab308" : "#ef4444";
+  const label = score >= 80 ? "Strong" : score >= 65 ? "Moderate Risk" : "Elevated Risk";
+
+  return (
+    <div className="bg-card border border-border rounded-xl p-4">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+          <Activity className="w-3.5 h-3.5 text-primary" />
+          Operational Posture
+        </h3>
+        <Link href="/command/health" className="text-[10px] text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
+          Details <ArrowRight className="w-2.5 h-2.5" />
+        </Link>
+      </div>
+      <div className="flex items-center gap-4">
+        <div className="relative w-14 h-14 shrink-0">
+          <svg className="w-14 h-14 -rotate-90" viewBox="0 0 56 56">
+            <circle cx="28" cy="28" r="22" fill="none" stroke="hsl(var(--border))" strokeWidth="4" />
+            <circle cx="28" cy="28" r="22" fill="none" stroke={color} strokeWidth="4"
+              strokeDasharray={`${(score / 100) * 138.2} 138.2`} strokeLinecap="round" />
+          </svg>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-sm font-bold font-mono" style={{ color }}>{score}</span>
+          </div>
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-bold" style={{ color }}>{label}</p>
+          <div className="flex items-center gap-1 mt-0.5">
+            {delta > 0 ? <TrendingUp className="w-3 h-3 text-emerald-500" /> :
+             delta < 0 ? <TrendingDown className="w-3 h-3 text-red-500" /> :
+             <Minus className="w-3 h-3 text-muted-foreground" />}
+            <span className={cn("text-[10px] font-mono", delta > 0 ? "text-emerald-500" : delta < 0 ? "text-red-500" : "text-muted-foreground")}>
+              {delta > 0 ? "+" : ""}{delta} vs prior
+            </span>
+          </div>
+          <div className="flex items-end gap-px h-6 mt-2">
+            {trend.map((v, i) => (
+              <div key={i} className="flex-1 rounded-sm" style={{
+                height: `${((v - 60) / 30) * 100}%`,
+                background: i === trend.length - 1 ? color : `${color}44`,
+              }} />
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function WatchlistPanel() {
+  return (
+    <div className="bg-card border border-border rounded-xl p-4">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+          <Eye className="w-3.5 h-3.5 text-primary" />
+          Watchlist Deltas
+        </h3>
+        <span className="text-[10px] text-muted-foreground">Session</span>
+      </div>
+      <div className="space-y-2">
+        {WATCHLIST_DELTAS.map((delta, i) => {
+          const Icon = delta.icon;
+          const sevColor = SEV_COLORS[delta.severity] ?? "#38bdf8";
+          return (
+            <div key={i} className="flex items-start gap-2">
+              <div className="w-5 h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5" style={{ background: `${sevColor}15` }}>
+                <Icon className="w-2.5 h-2.5" style={{ color: sevColor }} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[11px] font-semibold text-foreground leading-tight truncate">{delta.entity}</p>
+                <p className="text-[10px] text-muted-foreground truncate">{delta.change}</p>
+              </div>
+              <span className="text-[10px] font-mono font-bold shrink-0" style={{ color: sevColor }}>
+                {delta.severity.toUpperCase()}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function CrossDomainChips() {
+  return (
+    <div className="bg-card border border-border rounded-xl p-4">
+      <h3 className="text-xs font-semibold text-foreground mb-3 flex items-center gap-1.5">
+        <GitBranch className="w-3.5 h-3.5 text-primary" />
+        Cross-Domain Correlations
+      </h3>
+      <div className="space-y-2">
+        {CROSS_DOMAIN_CORRELATIONS.map((c, i) => (
+          <div key={i} className="flex items-center gap-2 py-1.5 border-b border-border/30 last:border-0">
+            <div className="flex items-center gap-1 shrink-0">
+              <span className="text-[10px] font-bold font-mono text-primary">{c.from}</span>
+              <ArrowRight className="w-2.5 h-2.5 text-muted-foreground" />
+              <span className="text-[10px] font-bold font-mono text-muted-foreground">{c.to}</span>
+            </div>
+            <p className="text-[10px] text-muted-foreground flex-1 truncate">{c.label}</p>
+            <span className="text-[10px] font-mono text-amber-500 shrink-0">{(c.strength * 100).toFixed(0)}%</span>
+          </div>
+        ))}
+        <Link href="/lyte/signal-fusion" className="text-[10px] text-primary hover:underline flex items-center gap-1 mt-1">
+          Signal Fusion Panel <ArrowRight className="w-2.5 h-2.5" />
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+function AIBriefPanel() {
+  const [expanded, setExpanded] = useState(false);
+  return (
+    <div className="bg-gradient-to-br from-primary/5 to-violet-500/5 border border-primary/20 rounded-xl p-4">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+          <Sparkles className="w-3.5 h-3.5 text-primary" />
+          AI Executive Brief
+        </h3>
+        <span className="text-[10px] text-muted-foreground font-mono">Alloy · 4m ago</span>
+      </div>
+      <div className="space-y-2">
+        {AI_BRIEF_PARAGRAPHS.slice(0, expanded ? undefined : 2).map((para, i) => (
+          <p key={i} className="text-[11px] text-muted-foreground leading-relaxed">{para}</p>
+        ))}
+      </div>
+      <div className="mt-3 flex items-center gap-3">
+        <button onClick={() => setExpanded(e => !e)} className="text-[10px] text-primary hover:underline flex items-center gap-1">
+          {expanded ? "Collapse" : "Read full brief"} <ChevronDown className={cn("w-3 h-3 transition-transform", expanded && "rotate-180")} />
+        </button>
+        <Link href="/pulse/" className="text-[10px] text-muted-foreground hover:text-primary transition-colors flex items-center gap-1 ml-auto">
+          Open Pulse <ArrowUpRight className="w-2.5 h-2.5" />
+        </Link>
+      </div>
+      <div className="mt-3 pt-3 border-t border-border/30">
+        <p className="text-[10px] text-muted-foreground mb-1.5 font-mono uppercase tracking-wide">Evidence sources</p>
+        <div className="flex flex-wrap gap-1">
+          {["Aegis SOC", "Vessels AIS", "OFAC SDN", "PRISM Calendar", "IMPERIUM Drift"].map(src => (
+            <span key={src} className="px-1.5 py-0.5 bg-muted/50 text-[9px] rounded font-mono text-muted-foreground border border-border/50">{src}</span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StaleSourcesWarning() {
+  if (STALE_SOURCES.length === 0) return null;
+  return (
+    <div className="bg-amber-500/5 border border-amber-500/20 rounded-xl p-4">
+      <div className="flex items-center gap-2 mb-2">
+        <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />
+        <span className="text-xs font-semibold text-amber-500">{STALE_SOURCES.length} Stale Data Sources</span>
+        <Link href="/lyte/health-freshness" className="text-[10px] text-amber-400 hover:underline ml-auto flex items-center gap-1">
+          Health & Freshness <ArrowRight className="w-2.5 h-2.5" />
+        </Link>
+      </div>
+      <div className="space-y-1.5">
+        {STALE_SOURCES.map((s, i) => (
+          <div key={i} className="flex items-start gap-2">
+            <Database className="w-3 h-3 text-amber-500/60 mt-0.5 shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-[11px] font-semibold text-foreground">{s.source}</p>
+              <p className="text-[10px] text-muted-foreground">{s.domain} · stale {s.staleFor} · {s.errorMsg}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function PendingActionsPanel() {
+  return (
+    <div className="bg-card border border-border rounded-xl p-4">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+          <Target className="w-3.5 h-3.5 text-primary" />
+          Pending Actions
+        </h3>
+        <span className="text-[10px] text-red-400 font-mono">{PENDING_ACTIONS.filter(a => !a.owner).length} unowned</span>
+      </div>
+      <div className="space-y-2">
+        {PENDING_ACTIONS.map(action => {
+          const sevColor = SEV_COLORS[action.priority] ?? "#38bdf8";
+          return (
+            <div key={action.id} className="flex items-start gap-2 py-1.5 border-b border-border/30 last:border-0">
+              <div className="w-1 h-1 rounded-full mt-1.5 shrink-0" style={{ background: sevColor }} />
+              <div className="flex-1 min-w-0">
+                <p className="text-[11px] text-foreground leading-tight">{action.title}</p>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <span className="text-[10px] font-mono text-muted-foreground">{action.domain}</span>
+                  <span className="text-[10px] font-mono" style={{ color: sevColor }}>{action.due}</span>
+                  {!action.owner && <span className="text-[10px] text-red-400">Unassigned</span>}
+                  {action.owner && <span className="text-[10px] text-muted-foreground">{action.owner}</span>}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 interface AppHealth {
   appSlug: string;
@@ -525,6 +775,39 @@ export default function CommandCenter() {
           </div>
 
           <aside className="space-y-4">
+            {/* Recommendations with explainability */}
+            <div className="bg-card border border-border rounded-xl p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <Target className="w-3.5 h-3.5 text-primary" />
+                <h3 className="text-xs font-semibold">Recommendations</h3>
+                <span className="ml-auto text-[10px] text-muted-foreground font-mono">Alloy v2.4.1</span>
+              </div>
+              <div className="space-y-2">
+                {SAMPLE_RECOMMENDATIONS.map(rec => (
+                  <RecommendationExplainer key={rec.id} rec={rec} />
+                ))}
+              </div>
+            </div>
+
+            {/* Posture Score */}
+            <PosturePanel score={health?.portfolioScore ?? 76} trend={POSTURE_TREND} />
+
+            {/* AI Executive Brief */}
+            <AIBriefPanel />
+
+            {/* Stale source warnings */}
+            <StaleSourcesWarning />
+
+            {/* Watchlist Deltas */}
+            <WatchlistPanel />
+
+            {/* Cross-Domain Correlations */}
+            <CrossDomainChips />
+
+            {/* Pending Actions */}
+            <PendingActionsPanel />
+
+            {/* Live event feed */}
             <div className="bg-card border border-border rounded-xl p-4">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-xs font-semibold text-foreground flex items-center gap-1.5">
@@ -556,11 +839,17 @@ export default function CommandCenter() {
               )}
             </div>
 
+            {/* Platform health mini-bar */}
             <div className="bg-card border border-border rounded-xl p-4">
-              <h3 className="text-xs font-semibold text-foreground mb-3 flex items-center gap-1.5">
-                <Activity className="w-3.5 h-3.5 text-primary" />
-                Platform Health
-              </h3>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                  <Activity className="w-3.5 h-3.5 text-primary" />
+                  Platform Health
+                </h3>
+                <Link href="/lyte/health-freshness" className="text-[10px] text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
+                  Freshness <ArrowRight className="w-2.5 h-2.5" />
+                </Link>
+              </div>
               <div className="space-y-2">
                 {apps.slice(0, 6).map(app => {
                   const AppIcon = app.icon;
@@ -604,11 +893,11 @@ export default function CommandCenter() {
               <div className="space-y-1">
                 {[
                   { label: "Notifications", href: "/notifications", icon: Bell },
-                  { label: "Account Settings", href: "/admin/platform-settings", icon: Users },
+                  { label: "Health & Freshness", href: "/lyte/health-freshness", icon: Database },
+                  { label: "Signal Fusion", href: "/lyte/signal-fusion", icon: Radio },
                   { label: "Investor Relations", href: "/ir", icon: TrendingUp },
                   { label: "Insights & Research", href: "/insights", icon: Eye },
                   { label: "Roadmap", href: "/roadmap", icon: Map },
-                  { label: "Changelog", href: "/changelog", icon: GitBranch },
                   { label: "Admin", href: "/admin", icon: Cpu },
                 ].map(({ label, href, icon: Icon }) => (
                   <Link key={href} href={href} className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-muted/50 transition-colors group">
@@ -617,28 +906,6 @@ export default function CommandCenter() {
                     <ArrowRight className="w-3 h-3 text-muted-foreground/40 group-hover:text-primary ml-auto transition-colors" />
                   </Link>
                 ))}
-              </div>
-            </div>
-
-            <div className="bg-gradient-to-br from-primary/10 to-violet-500/10 border border-primary/20 rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <Star className="w-3.5 h-3.5 text-primary" />
-                <span className="text-xs font-semibold text-primary">Ecosystem Score</span>
-              </div>
-              {health ? (
-                <>
-                  <p className={cn(
-                    "text-3xl font-bold font-display",
-                    health.portfolioScore >= 80 ? "text-emerald-500" :
-                    health.portfolioScore >= 60 ? "text-amber-500" : "text-red-500"
-                  )}>{health.portfolioScore}</p>
-                  <p className="text-[10px] text-muted-foreground mt-1">across {apps.length} platforms</p>
-                </>
-              ) : (
-                <div className="h-8 w-16 bg-muted/30 rounded animate-pulse mt-1" />
-              )}
-              <div className="mt-3 pt-3 border-t border-border/30">
-                <p className="text-[10px] text-muted-foreground">Updated {health ? new Date(health.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "—"}</p>
               </div>
             </div>
           </aside>

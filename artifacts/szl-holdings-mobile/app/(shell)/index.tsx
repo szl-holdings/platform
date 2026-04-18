@@ -403,6 +403,48 @@ export default function CommandFeedScreen() {
           })}
         </View>
 
+        {/* Posture Score Card */}
+        <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>GOVERNANCE POSTURE</Text>
+        <TouchableOpacity
+          onPress={() => router.navigate("/(shell)/operations" as never)}
+          activeOpacity={0.85}
+          style={{
+            marginHorizontal: 0,
+            marginBottom: 12,
+            borderRadius: 14,
+            backgroundColor: colors.card,
+            borderWidth: 1,
+            borderColor: "rgba(201,168,76,0.25)",
+            padding: 16,
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 16,
+          }}
+        >
+          {/* Ring */}
+          <View style={{ alignItems: "center", justifyContent: "center", width: 64, height: 64, borderRadius: 32, borderWidth: 4, borderColor: "rgba(201,168,76,0.35)", backgroundColor: "rgba(201,168,76,0.06)" }}>
+            <Text style={{ fontSize: 22, fontWeight: "900", color: ACCENT, fontFamily: "Inter_700Bold" }}>84</Text>
+            <Text style={{ fontSize: 8, color: "rgba(201,168,76,0.6)", fontFamily: "Inter_400Regular", letterSpacing: 0.5 }}>/ 100</Text>
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontSize: 13, fontWeight: "700", color: colors.foreground, fontFamily: "Inter_700Bold", marginBottom: 2 }}>
+              Board-Ready
+            </Text>
+            <Text style={{ fontSize: 11, color: colors.mutedForeground, fontFamily: "Inter_400Regular", lineHeight: 16 }}>
+              Security 82 · Operational 74 · Financial 71 · Compliance 88
+            </Text>
+            <View style={{ marginTop: 6, flexDirection: "row", gap: 6 }}>
+              <View style={{ paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, backgroundColor: "rgba(245,158,11,0.12)", borderWidth: 1, borderColor: "rgba(245,158,11,0.25)" }}>
+                <Text style={{ fontSize: 9, color: "#fbbf24", fontFamily: "Inter_600SemiBold" }}>2 WARN</Text>
+              </View>
+              <View style={{ paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, backgroundColor: "rgba(201,168,76,0.08)", borderWidth: 1, borderColor: "rgba(201,168,76,0.18)" }}>
+                <Text style={{ fontSize: 9, color: ACCENT, fontFamily: "Inter_600SemiBold" }}>↑ +1.4 vs last week</Text>
+              </View>
+            </View>
+          </View>
+          <Feather name="chevron-right" size={16} color={colors.mutedForeground} />
+        </TouchableOpacity>
+
         <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>DOMAINS</Text>
         {summaries.length === 0 ? (
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.domainRow}>

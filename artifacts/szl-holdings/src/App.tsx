@@ -105,6 +105,7 @@ const DecisioningCommandPage = lazy(() => import("@/pages/decisioning-command"))
 const DecisionCenterPage = lazy(() => import("@/pages/decision-center"));
 const LytePage = lazy(() => import("@/pages/lyte-page"));
 const SignalFusionPage = lazy(() => import("@/pages/signal-fusion"));
+const HealthFreshnessPage = lazy(() => import("@/pages/health-freshness"));
 const DecisionSchemaLibraryPage = lazy(() => import("@/pages/decision-schema-library"));
 const GovernancePosturePage = lazy(() => import("@/pages/governance-posture"));
 const AlloyPublicPage = lazy(() => import("@/pages/alloy-page"));
@@ -514,6 +515,9 @@ function App() {
             </Route>
             <Route path="/lyte/signal-fusion">
               <Suspense fallback={<PageLoader />}><SignalFusionPage /></Suspense>
+            </Route>
+            <Route path="/lyte/health-freshness">
+              <Suspense fallback={<PageLoader />}><HealthFreshnessPage /></Suspense>
             </Route>
             <Route path="/lyte/decision-schemas">
               <Suspense fallback={<PageLoader />}><DecisionSchemaLibraryPage /></Suspense>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "wouter";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { useAuth } from "@/contexts/auth-context";
@@ -6,7 +6,8 @@ import {
   Ship, AlertTriangle, Clock, Wrench, TrendingUp, TrendingDown,
   ChevronRight, Activity, DollarSign, Fuel, CloudLightning, BarChart3,
   CheckCircle2, XCircle, Minus, RefreshCw, EyeOff, ShieldAlert, Navigation,
-  FileSignature, Users, Shield, Anchor
+  FileSignature, Users, Shield, Anchor, Layers, Bookmark, BookmarkCheck,
+  CalendarRange, ChevronDown, Flame, Circle, Grid2X2, GitBranch,
 } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { CommandModeSurface, type CommandModeSignal, useRealtimeChannel } from "@szl-holdings/shared-ui";
@@ -270,6 +271,131 @@ function CommercialView({ voyageEconomics }: ViewProps) {
   );
 }
 
+const SAVED_VIEWS = [
+  { id: "default", label: "Default — All Fleet", description: "All vessels, all layers" },
+  { id: "at-risk", label: "Risk Watch", description: "Delayed, exception-active, AIS dark" },
+  { id: "sanctions", label: "Sanctions Screening", description: "OFAC/EU SDN candidates only" },
+  { id: "port-approach", label: "Port Approach", description: "Vessels within 50nm of major ports" },
+];
+
+const LAYER_CONFIG = [
+  { id: "points", label: "Vessel Positions", icon: Circle, defaultOn: true },
+  { id: "clusters", label: "Traffic Clusters", icon: Grid2X2, defaultOn: true },
+  { id: "heat", label: "Route Density Heat", icon: Flame, defaultOn: false },
+  { id: "arcs", label: "Active Route Arcs", icon: GitBranch, defaultOn: true },
+  { id: "risk-zones", label: "High-Risk Zones", icon: AlertTriangle, defaultOn: false },
+];
+
+const TIMELINE_PRESETS = [
+  { id: "1h", label: "1h" },
+  { id: "6h", label: "6h" },
+  { id: "24h", label: "24h" },
+  { id: "7d", label: "7d" },
+];
+
+function IntelControls({ timeRange, setTimeRange, savedView, setSavedView, layers, setLayers }: {
+  timeRange: string; setTimeRange: (t: string) => void;
+  savedView: string; setSavedView: (v: string) => void;
+  layers: Set<string>; setLayers: (l: Set<string>) => void;
+}) {
+  const [showViews, setShowViews] = useState(false);
+  const [showLayers, setShowLayers] = useState(false);
+  const currentView = SAVED_VIEWS.find(v => v.id === savedView) ?? SAVED_VIEWS[0];
+
+  return (
+    <div className="flex items-center gap-2 flex-wrap p-3 rounded-xl border border-sky-500/10 bg-sky-900/10">
+      {/* Timeline brush */}
+      <div className="flex items-center gap-1">
+        <CalendarRange className="w-3.5 h-3.5 text-sky-400/50" />
+        <span className="text-[10px] text-sky-400/50 font-mono uppercase tracking-wider mr-1">Window:</span>
+        <div className="flex gap-0.5">
+          {TIMELINE_PRESETS.map(p => (
+            <button
+              key={p.id}
+              onClick={() => setTimeRange(p.id)}
+              className={cn(
+                "px-2 py-1 rounded text-[10px] font-mono font-semibold transition-colors",
+                timeRange === p.id
+                  ? "bg-sky-500/20 text-sky-300 border border-sky-500/30"
+                  : "text-sky-400/40 hover:text-sky-300 hover:bg-sky-500/10"
+              )}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="w-px h-4 bg-sky-500/15 mx-1" />
+
+      {/* Saved views */}
+      <div className="relative">
+        <button
+          onClick={() => { setShowViews(v => !v); setShowLayers(false); }}
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-sky-500/15 bg-sky-500/5 text-[10px] text-sky-300/70 hover:text-sky-200 hover:bg-sky-500/10 transition-colors font-mono"
+        >
+          <BookmarkCheck className="w-3 h-3" />
+          {currentView.label}
+          <ChevronDown className={cn("w-3 h-3 transition-transform", showViews && "rotate-180")} />
+        </button>
+        {showViews && (
+          <div className="absolute top-full left-0 mt-1 w-56 rounded-xl border border-sky-500/15 bg-[#060e1e] shadow-xl shadow-black/40 z-20 overflow-hidden">
+            {SAVED_VIEWS.map(v => (
+              <button
+                key={v.id}
+                onClick={() => { setSavedView(v.id); setShowViews(false); }}
+                className={cn("w-full flex flex-col px-3 py-2.5 text-left transition-colors hover:bg-sky-500/10", savedView === v.id && "bg-sky-500/10")}
+              >
+                <span className="text-[11px] font-semibold text-sky-200">{v.label}</span>
+                <span className="text-[10px] text-sky-400/50">{v.description}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Layer control */}
+      <div className="relative">
+        <button
+          onClick={() => { setShowLayers(v => !v); setShowViews(false); }}
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-sky-500/15 bg-sky-500/5 text-[10px] text-sky-300/70 hover:text-sky-200 hover:bg-sky-500/10 transition-colors font-mono"
+        >
+          <Layers className="w-3 h-3" />
+          Layers ({layers.size}/{LAYER_CONFIG.length})
+          <ChevronDown className={cn("w-3 h-3 transition-transform", showLayers && "rotate-180")} />
+        </button>
+        {showLayers && (
+          <div className="absolute top-full right-0 mt-1 w-52 rounded-xl border border-sky-500/15 bg-[#060e1e] shadow-xl shadow-black/40 z-20 overflow-hidden p-1">
+            {LAYER_CONFIG.map(layer => {
+              const Icon = layer.icon;
+              const isOn = layers.has(layer.id);
+              return (
+                <button
+                  key={layer.id}
+                  onClick={() => {
+                    const next = new Set(layers);
+                    if (isOn) next.delete(layer.id); else next.add(layer.id);
+                    setLayers(next);
+                  }}
+                  className={cn("w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-left transition-colors hover:bg-sky-500/10", isOn && "bg-sky-500/5")}
+                >
+                  <div className={cn("w-4 h-4 rounded flex items-center justify-center", isOn ? "bg-sky-500/20" : "bg-transparent border border-sky-500/20")}>
+                    {isOn && <CheckCircle2 className="w-3 h-3 text-sky-400" />}
+                  </div>
+                  <Icon className={cn("w-3 h-3", isOn ? "text-sky-400/70" : "text-sky-400/30")} />
+                  <span className={cn("text-[11px] font-mono", isOn ? "text-sky-200" : "text-sky-400/40")}>{layer.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      <span className="ml-auto text-[10px] font-mono text-sky-400/30">Entities sync with timeline</span>
+    </div>
+  );
+}
+
 type TabId = "exec" | "ops" | "commercial";
 
 export default function CommandOverviewPage() {
@@ -290,6 +416,11 @@ export default function CommandOverviewPage() {
 
   const [activeTab, setActiveTab] = useState<TabId>(
     user.role === "exec" ? "exec" : user.role === "compliance" ? "commercial" : "ops"
+  );
+  const [timeRange, setTimeRange] = useState("24h");
+  const [savedView, setSavedView] = useState("default");
+  const [activeLayers, setActiveLayers] = useState<Set<string>>(
+    new Set(LAYER_CONFIG.filter(l => l.defaultOn).map(l => l.id))
   );
 
   const viewProps: ViewProps = { vessels, fleetExceptions, voyageEconomics, maintenanceItems };
@@ -371,6 +502,16 @@ export default function CommandOverviewPage() {
           ))}
         </div>
       </div>
+
+      {/* Intelligence controls */}
+      <IntelControls
+        timeRange={timeRange}
+        setTimeRange={setTimeRange}
+        savedView={savedView}
+        setSavedView={setSavedView}
+        layers={activeLayers}
+        setLayers={setActiveLayers}
+      />
 
       {/* Tabs */}
       <div className="flex items-center gap-1 border-b border-sky-500/10">
