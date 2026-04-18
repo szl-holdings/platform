@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link } from "wouter";
-import { m } from "framer-motion";
+import { m, useInView } from "framer-motion";
 import {
   ArrowRight, Eye, Zap, Shield, CheckCircle2, Activity, Lock,
   Database, Layers, Users, TrendingUp, Ship, Building2, Briefcase,
@@ -16,7 +16,6 @@ import { analytics } from "@/lib/analytics";
 const BG = "hsl(214,16%,4%)";
 const BORDER = "hsla(0,0%,100%,0.07)";
 const SURFACE = "hsla(0,0%,100%,0.035)";
-const SURFACE_HOVER = "hsla(0,0%,100%,0.055)";
 const TEXT = "hsl(38,8%,94%)";
 const TEXT_SEC = "hsl(214,7%,60%)";
 const TEXT_FAINT = "hsl(214,7%,38%)";
@@ -290,6 +289,33 @@ export default function HomePage() {
   });
 
   const [activeLoopStep, setActiveLoopStep] = useState(0);
+  const loopRef = useRef<HTMLDivElement>(null);
+  const loopIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const loopInView = useInView(loopRef, { once: true, amount: 0.25 });
+  const [hasAutoAdvanced, setHasAutoAdvanced] = useState(false);
+
+  const handleStepClick = (i: number) => {
+    if (loopIntervalRef.current) {
+      clearInterval(loopIntervalRef.current);
+      loopIntervalRef.current = null;
+    }
+    setActiveLoopStep(i);
+  };
+
+  useEffect(() => {
+    if (!loopInView || hasAutoAdvanced) return;
+    setHasAutoAdvanced(true);
+    let step = 0;
+    loopIntervalRef.current = setInterval(() => {
+      step += 1;
+      if (step >= LOOP_STEPS.length) {
+        if (loopIntervalRef.current) clearInterval(loopIntervalRef.current);
+        return;
+      }
+      setActiveLoopStep(step);
+    }, 480);
+    return () => { if (loopIntervalRef.current) clearInterval(loopIntervalRef.current); };
+  }, [loopInView, hasAutoAdvanced]);
 
   return (
     <div style={{ minHeight: "100vh", background: BG, color: TEXT }}>
@@ -303,8 +329,11 @@ export default function HomePage() {
             borderBottom: `1px solid ${BORDER}`,
             paddingTop: "var(--space-hero-pt)",
             paddingBottom: "clamp(5rem,9vw,7rem)",
+            position: "relative",
+            overflow: "hidden",
           }}
         >
+          <div style={{ position: "absolute", top: "-20%", left: "50%", transform: "translateX(-50%)", width: "900px", height: "500px", borderRadius: "50%", background: "radial-gradient(ellipse at center, hsla(192,72%,48%,0.07) 0%, transparent 70%)", pointerEvents: "none" }} />
           <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
             <m.div
               initial={{ opacity: 0, y: 20 }}
@@ -457,7 +486,16 @@ export default function HomePage() {
               {AUDIENCE_PATHS.map((path, i) => {
                 const Icon = path.icon;
                 return (
-                  <m.div key={path.label} custom={i} variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}>
+                  <m.div
+                    key={path.label}
+                    custom={i}
+                    variants={fadeUp}
+                    initial="hidden"
+                    whileInView="show"
+                    viewport={{ once: true, amount: 0.2 }}
+                    whileHover={{ y: -3, boxShadow: `0 8px 32px hsla(0,0%,0%,0.3), 0 0 0 1px ${path.accent}30`, transition: { duration: 0.15, ease: "easeOut" } }}
+                    transition={{ duration: 0.45, delay: i * 0.07, ease: [0.16, 1, 0.3, 1] }}
+                  >
                     <Link
                       href={path.href}
                       onClick={() => analytics.audiencePathClick(path.label, path.href)}
@@ -468,11 +506,7 @@ export default function HomePage() {
                         borderRadius: "0.75rem",
                         background: SURFACE,
                         border: `1px solid ${BORDER}`,
-                        transition: "border-color 0.2s ease, background 0.2s ease",
-                      }}
-                        onMouseEnter={(e) => { const el = e.currentTarget as HTMLElement; el.style.borderColor = `${path.accent}35`; el.style.background = `${path.accent}06`; }}
-                        onMouseLeave={(e) => { const el = e.currentTarget as HTMLElement; el.style.borderColor = BORDER; el.style.background = SURFACE; }}
-                      >
+                      }}>
                         <div style={{ width: 32, height: 32, borderRadius: "0.5rem", background: `${path.accent}14`, border: `1px solid ${path.accent}28`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "0.75rem" }}>
                           <Icon size={15} style={{ color: path.accent }} />
                         </div>
@@ -488,7 +522,7 @@ export default function HomePage() {
         </section>
 
         {/* ── Decision Loop Visualization ──────────────────────────── */}
-        <section style={{ borderBottom: `1px solid ${BORDER}`, padding: "clamp(4rem,8vw,5.5rem) 0" }}>
+        <section ref={loopRef} style={{ borderBottom: `1px solid ${BORDER}`, padding: "clamp(4rem,8vw,5.5rem) 0" }}>
           <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
             <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }} style={{ marginBottom: "3rem" }}>
               <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: LYTE, marginBottom: "0.75rem" }}>
@@ -502,6 +536,22 @@ export default function HomePage() {
               </p>
             </m.div>
 
+            {/* Step progress strip */}
+            <div style={{ display: "flex", gap: "3px", marginBottom: "1.75rem" }}>
+              {LOOP_STEPS.map((step, i) => (
+                <m.div
+                  key={step.n}
+                  onClick={() => handleStepClick(i)}
+                  style={{
+                    flex: 1, height: "3px", borderRadius: "2px", cursor: "pointer",
+                    background: i <= activeLoopStep ? step.color : "hsla(0,0%,100%,0.08)",
+                    transition: "background 0.3s ease",
+                  }}
+                  whileHover={{ scaleY: 1.5 }}
+                />
+              ))}
+            </div>
+
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem", alignItems: "start" }}>
               {/* Step selector */}
               <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
@@ -514,7 +564,7 @@ export default function HomePage() {
                       whileInView={{ opacity: 1, x: 0 }}
                       viewport={{ once: true }}
                       transition={{ duration: 0.35, delay: i * 0.04 }}
-                      onClick={() => setActiveLoopStep(i)}
+                      onClick={() => handleStepClick(i)}
                       style={{
                         display: "flex", alignItems: "center", gap: "0.75rem",
                         padding: "0.75rem 1rem",
@@ -567,12 +617,12 @@ export default function HomePage() {
                       <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: TEXT_SEC, marginBottom: "1.5rem" }}>{step.body}</p>
                       <div style={{ display: "flex", gap: "0.5rem" }}>
                         {activeLoopStep > 0 && (
-                          <button onClick={() => setActiveLoopStep(i => Math.max(0, i - 1))} style={{ padding: "0.375rem 0.75rem", borderRadius: 5, background: "transparent", border: `1px solid ${BORDER}`, cursor: "pointer", fontSize: "0.75rem", color: TEXT_FAINT }}>
+                          <button onClick={() => handleStepClick(Math.max(0, activeLoopStep - 1))} style={{ padding: "0.375rem 0.75rem", borderRadius: 5, background: "transparent", border: `1px solid ${BORDER}`, cursor: "pointer", fontSize: "0.75rem", color: TEXT_FAINT }}>
                             ← Previous
                           </button>
                         )}
                         {activeLoopStep < LOOP_STEPS.length - 1 && (
-                          <button onClick={() => setActiveLoopStep(i => Math.min(LOOP_STEPS.length - 1, i + 1))} style={{ padding: "0.375rem 0.75rem", borderRadius: 5, background: `${step.color}15`, border: `1px solid ${step.color}25`, cursor: "pointer", fontSize: "0.75rem", fontWeight: 600, color: step.color }}>
+                          <button onClick={() => handleStepClick(Math.min(LOOP_STEPS.length - 1, activeLoopStep + 1))} style={{ padding: "0.375rem 0.75rem", borderRadius: 5, background: `${step.color}15`, border: `1px solid ${step.color}25`, cursor: "pointer", fontSize: "0.75rem", fontWeight: 600, color: step.color }}>
                             Next: {LOOP_STEPS[activeLoopStep + 1].label} →
                           </button>
                         )}
@@ -655,21 +705,23 @@ export default function HomePage() {
                 return (
                   <m.div
                     key={pack.slug}
-                    initial={{ opacity: 0, y: 12 }}
+                    initial={{ opacity: 0, y: 18 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.4, delay: i * 0.05 }}
+                    viewport={{ once: true, amount: 0.15 }}
+                    whileHover={{ y: -4, boxShadow: `0 12px 40px hsla(0,0%,0%,0.35), 0 0 0 1px ${pack.color}25`, transition: { duration: 0.18, ease: "easeOut" } }}
+                    transition={{ duration: 0.38, delay: i * 0.055, ease: [0.16, 1, 0.3, 1] }}
                     style={{
                       padding: "1.5rem",
                       borderRadius: "10px",
                       background: SURFACE,
                       border: `1px solid ${BORDER}`,
                       display: "flex", flexDirection: "column",
-                      transition: "all 0.15s ease",
+                      cursor: "default",
+                      overflow: "hidden",
+                      position: "relative",
                     }}
-                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = SURFACE_HOVER; (e.currentTarget as HTMLElement).style.borderColor = `${pack.color}22`; }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = SURFACE; (e.currentTarget as HTMLElement).style.borderColor = BORDER; }}
                   >
+                    <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "2px", background: `linear-gradient(90deg, ${pack.color}90, ${pack.color}20)`, borderRadius: "10px 10px 0 0" }} />
                     <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1rem" }}>
                       <div style={{ width: 34, height: 34, borderRadius: 8, background: `${pack.color}18`, border: `1px solid ${pack.color}25`, display: "flex", alignItems: "center", justifyContent: "center" }}>
                         <Icon size={15} style={{ color: pack.color }} />
@@ -743,17 +795,34 @@ export default function HomePage() {
                   variants={fadeUp}
                   initial="hidden"
                   whileInView="show"
-                  viewport={{ once: true }}
-                  style={{ padding: "1.75rem", borderRadius: "0.875rem", background: SURFACE, border: `1px solid ${BORDER}` }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  whileHover={{ y: -4, boxShadow: `0 16px 48px hsla(0,0%,0%,0.4), 0 0 0 1px ${col.accent}22`, transition: { duration: 0.16, ease: "easeOut" } }}
+                  transition={{ duration: 0.45, delay: i * 0.07, ease: [0.16, 1, 0.3, 1] }}
+                  style={{
+                    padding: "1.75rem",
+                    borderRadius: "0.875rem",
+                    background: SURFACE,
+                    border: `1px solid ${BORDER}`,
+                    position: "relative",
+                    overflow: "hidden",
+                    cursor: "default",
+                  }}
                 >
-                  <p style={{ fontSize: "0.625rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: col.accent, fontFamily: MONO, marginBottom: "0.75rem" }}>
+                  <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "3px", background: `linear-gradient(90deg, ${col.accent}, ${col.accent}30)` }} />
+                  <p style={{ fontSize: "0.625rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: col.accent, fontFamily: MONO, marginBottom: "0.5rem" }}>
                     {col.category}
                   </p>
-                  <p style={{ fontSize: "0.6875rem", color: TEXT_FAINT, fontFamily: MONO, marginBottom: "1rem" }}>{col.examples}</p>
-                  <p style={{ fontSize: "0.8125rem", fontWeight: 600, color: TEXT, marginBottom: "0.375rem" }}>What they do</p>
-                  <p style={{ fontSize: "0.8125rem", lineHeight: 1.6, color: TEXT_SEC, marginBottom: "1rem" }}>{col.what}</p>
-                  <p style={{ fontSize: "0.8125rem", fontWeight: 600, color: "hsl(0,72%,68%)", marginBottom: "0.375rem" }}>What they miss</p>
-                  <p style={{ fontSize: "0.8125rem", lineHeight: 1.6, color: TEXT_SEC }}>{col.gap}</p>
+                  <p style={{ fontSize: "0.6875rem", color: TEXT_FAINT, fontFamily: MONO, marginBottom: "1.25rem" }}>{col.examples}</p>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
+                    <div style={{ padding: "0.875rem", borderRadius: "0.5rem", background: "hsla(0,0%,100%,0.025)", border: `1px solid ${BORDER}` }}>
+                      <p style={{ fontSize: "0.6875rem", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: TEXT_FAINT, fontFamily: MONO, marginBottom: "0.375rem" }}>What they do</p>
+                      <p style={{ fontSize: "0.8125rem", lineHeight: 1.62, color: TEXT_SEC, margin: 0 }}>{col.what}</p>
+                    </div>
+                    <div style={{ padding: "0.875rem", borderRadius: "0.5rem", background: "hsla(0,60%,40%,0.06)", border: "1px solid hsla(0,60%,50%,0.14)" }}>
+                      <p style={{ fontSize: "0.6875rem", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "hsl(0,72%,68%)", fontFamily: MONO, marginBottom: "0.375rem" }}>The gap</p>
+                      <p style={{ fontSize: "0.8125rem", lineHeight: 1.62, color: TEXT_SEC, margin: 0 }}>{col.gap}</p>
+                    </div>
+                  </div>
                 </m.div>
               ))}
             </div>
@@ -822,11 +891,12 @@ export default function HomePage() {
                   return (
                     <m.div
                       key={tp.title}
-                      initial={{ opacity: 0, x: 12 }}
+                      initial={{ opacity: 0, x: 14 }}
                       whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.4, delay: i * 0.07 }}
-                      style={{ display: "flex", alignItems: "flex-start", gap: "0.875rem", padding: "1.125rem 1.25rem", borderRadius: "8px", background: SURFACE, border: `1px solid ${BORDER}` }}
+                      viewport={{ once: true, amount: 0.2 }}
+                      whileHover={{ x: 3, boxShadow: "0 4px 24px hsla(0,0%,0%,0.25)", transition: { duration: 0.15, ease: "easeOut" } }}
+                      transition={{ duration: 0.4, delay: i * 0.07, ease: [0.16, 1, 0.3, 1] }}
+                      style={{ display: "flex", alignItems: "flex-start", gap: "0.875rem", padding: "1.125rem 1.25rem", borderRadius: "8px", background: SURFACE, border: `1px solid ${BORDER}`, cursor: "default" }}
                     >
                       <div style={{ width: 32, height: 32, borderRadius: 7, background: "hsla(142,60%,48%,0.12)", border: "1px solid hsla(142,60%,48%,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                         <Icon size={14} style={{ color: "hsl(142,60%,48%)" }} />
