@@ -56,7 +56,6 @@ const TABS: TabItem[] = [
 ];
 
 const HIDDEN_ROUTES = [
-  "/(shell)/quick-actions",
   "/(shell)/notifications",
   "/(shell)/usage",
 ];
@@ -111,6 +110,8 @@ export function BottomTabBar() {
 
   const isSettingsActive =
     pathname === "/(shell)/settings" || pathname.startsWith("/(shell)/settings/");
+  const isCommandDeckActive =
+    pathname === "/(shell)/quick-actions";
 
   return (
     <View
@@ -124,7 +125,7 @@ export function BottomTabBar() {
       ]}
     >
       {TABS.map((tab) => {
-        const isActive = !isSettingsActive && activeWorkspace === tab.id;
+        const isActive = !isSettingsActive && !isCommandDeckActive && activeWorkspace === tab.id;
         const badge = badges[tab.id] ?? 0;
         const color = isActive ? tab.accent : colors.mutedForeground;
 
@@ -173,6 +174,36 @@ export function BottomTabBar() {
           </TouchableOpacity>
         );
       })}
+
+      <TouchableOpacity
+        onPress={() => router.navigate("/(shell)/quick-actions" as never)}
+        style={styles.tab}
+        activeOpacity={0.7}
+      >
+        <View style={styles.tabInner}>
+          {isCommandDeckActive && (
+            <View style={[styles.activeIndicator, { backgroundColor: "#c9a84c" }]} />
+          )}
+          <View style={styles.iconWrap}>
+            <Feather
+              name="zap"
+              size={20}
+              color={isCommandDeckActive ? "#c9a84c" : colors.mutedForeground}
+            />
+          </View>
+          <Text
+            style={[
+              styles.label,
+              {
+                color: isCommandDeckActive ? "#c9a84c" : colors.mutedForeground,
+                fontFamily: isCommandDeckActive ? "Inter_600SemiBold" : "Inter_400Regular",
+              },
+            ]}
+          >
+            Deck
+          </Text>
+        </View>
+      </TouchableOpacity>
 
       <TouchableOpacity
         onPress={() => router.navigate("/(shell)/settings" as never)}

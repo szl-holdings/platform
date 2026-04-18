@@ -24,6 +24,7 @@ const NAV_ITEMS = [
       { label: "Alloy", href: "/alloy-fabric", note: "Governance execution fabric" },
       { label: "CORTEX", href: "https://cortex.szlholdings.com", note: "Mobile command" },
       { label: "Command Portal", href: "/command/", note: "Ecosystem overview" },
+      { label: "Business State", href: "/business-state", note: "Enterprise business overview" },
     ],
   },
   {
@@ -111,6 +112,7 @@ const NAV_LINKS_MOBILE = [
   { label: "Alloy", href: "/alloy-fabric", primary: false },
   { label: "CORTEX", href: "https://cortex.szlholdings.com", primary: false },
   { label: "Command Portal", href: "/command/", primary: false },
+  { label: "Business State", href: "/business-state", primary: false },
   { label: "— Primitives —", href: "/architecture", primary: false, section: true },
   { label: "Architecture", href: "/architecture", primary: false },
   { label: "Outcome Graph", href: "/docs/outcome-graph", primary: false },
