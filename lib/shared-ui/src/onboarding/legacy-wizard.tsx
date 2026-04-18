@@ -56,16 +56,20 @@ export function useOnboardingState(appId: string) {
     currentStep: number;
     active: boolean;
   }>(() => {
-    if (isDemoMode) return { completed: true, currentStep: 0, active: false };
     try {
       const stored = localStorage.getItem(key);
       if (stored) {
         const parsed = JSON.parse(stored);
-        return { completed: parsed.completed ?? false, currentStep: 0, active: !parsed.completed };
+        const completed = parsed.completed ?? false;
+        return { completed, currentStep: 0, active: !completed };
       }
     } catch {}
+    // First-time visitor (whether demo or signed-in) — start the guided tour.
     return { completed: false, currentStep: 0, active: true };
   });
+  // isDemoMode is intentionally read but no longer used to short-circuit the
+  // wizard — demo prospects benefit most from the guided tour.
+  void isDemoMode;
 
   const markCompleted = React.useCallback(() => {
     try {
