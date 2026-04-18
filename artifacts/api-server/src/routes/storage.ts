@@ -11,6 +11,7 @@ import type { AuthenticatedUser } from "../middlewares/auth";
 import { recordUploadIntent } from "../lib/uploadIntentStore";
 import { validateFileType } from "../lib/fileTypeAllowlist";
 import { checkOrgStorageQuota } from "../lib/storageQuota";
+import { validateBody, jsonObjectBodySchema } from "../lib/validation";
 
 const router: IRouter = Router();
 const objectStorageService = new ObjectStorageService();
@@ -29,7 +30,7 @@ type AuthRequest = Request & { user?: AuthenticatedUser };
  * The resolved org context and domain are bound to the upload intent so POST /files can
  * enforce them at finalization without trusting the client again.
  */
-router.post("/storage/uploads/request-url", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/storage/uploads/request-url", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   const parsed = RequestUploadUrlBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: "Missing or invalid required fields" });

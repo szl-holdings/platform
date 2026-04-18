@@ -4,7 +4,7 @@ import { APP_INTEGRATIONS, PLATFORM_APPS } from "@szl-holdings/config";
 import { db, invoicesTable, webhookEventsTable } from "@szl-holdings/db";
 import { desc, sql, eq } from "drizzle-orm";
 import { z } from "zod";
-import { validateBody } from "../../lib/validation.js";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation.js";
 import { sendError, sendNotFound } from "../../lib/api-response.js";
 import { getBillingConfig } from "./system.js";
 
@@ -76,7 +76,7 @@ export function register(router: IRouter): void {
     res.json({ connectors: connectorDetails, summary: matrix.summary });
   });
 
-  router.post("/admin/connectors/:name/test", async (req, res) => {
+  router.post("/admin/connectors/:name/test", validateBody(jsonObjectBodySchema), async (req, res) => {
     const result = await services.testConnection(req.params["name"]!);
     if (!result) { sendNotFound(res, "Connector"); return; }
     integrationActivityLog.unshift({ id: `act_${Date.now()}`, type: "connection_test", connector: result.name, app: null, status: result.success ? "success" : "error", message: result.message, timestamp: result.testedAt, responseTimeMs: result.responseTimeMs });
@@ -105,7 +105,7 @@ export function register(router: IRouter): void {
     res.json({ total: entries.length, configured, unconfigured, noKeyRequired: entries.filter((e) => !e.isLive && e.requiredEnvVars.length === 0).length, adapters: entries });
   });
 
-  router.post("/admin/connectors/:name/sync", async (req, res) => {
+  router.post("/admin/connectors/:name/sync", validateBody(jsonObjectBodySchema), async (req, res) => {
     const adapter = services.getAdapter(req.params["name"]!);
     if (!adapter) { sendNotFound(res, "Connector"); return; }
     const syncResult = { name: adapter.name, synced: true, syncedAt: new Date().toISOString(), itemsSynced: 0 };
@@ -133,7 +133,7 @@ export function register(router: IRouter): void {
     }
   });
 
-  router.get("/admin/webhooks", async (req, res) => {
+  router.get("/admin/webhooks", validateQuery(listQuerySchema), async (req, res) => {
     try {
       const limitParam = parseInt(req.query["limit"] as string ?? "50", 10);
       const limit = Math.min(isNaN(limitParam) ? 50 : limitParam, 200);
@@ -165,7 +165,7 @@ export function register(router: IRouter): void {
     res.json({ timestamp: new Date().toISOString(), overall: matrix, perApp: appHealth, alerts: { unhealthyCount: unhealthyConnectors.length, demoCount: demoConnectors.length, unhealthyConnectors: unhealthyConnectors.map((c) => c.name), demoConnectors: demoConnectors.map((c) => c.name) } });
   });
 
-  router.get("/admin/integration-activity", (req, res) => {
+  router.get("/admin/integration-activity", validateQuery(listQuerySchema), (req, res) => {
     let events = [...integrationActivityLog];
     const connector = req.query["connector"] as string | undefined;
     const app = req.query["app"] as string | undefined;

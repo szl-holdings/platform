@@ -3,6 +3,7 @@ import { authMiddleware } from "../middlewares/auth";
 import { sendError, sendBadRequest } from "../lib/api-response";
 import { ontologyEngine } from "@szl-holdings/ai-engine";
 import { graphRAGEngine } from "@szl-holdings/ai-engine";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router = Router();
 
@@ -34,7 +35,7 @@ router.get("/ontology/entity/:id/connections", authMiddleware(), async (req, res
   }
 });
 
-router.get("/ontology/entity/:id/traverse", authMiddleware(), async (req, res) => {
+router.get("/ontology/entity/:id/traverse", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const maxHops = Math.min(parseInt(String(req.query.hops ?? "2")), 4);
     const result = await ontologyEngine.traverseGraph(req.params.id as string, maxHops);
@@ -44,7 +45,7 @@ router.get("/ontology/entity/:id/traverse", authMiddleware(), async (req, res) =
   }
 });
 
-router.get("/ontology/search", authMiddleware(), async (req, res) => {
+router.get("/ontology/search", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const query = String(req.query.q ?? "");
     if (!query) return sendBadRequest(res, "Query parameter 'q' is required");
@@ -56,7 +57,7 @@ router.get("/ontology/search", authMiddleware(), async (req, res) => {
   }
 });
 
-router.get("/ontology/domain/:domain", authMiddleware(), async (req, res) => {
+router.get("/ontology/domain/:domain", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const limit = Math.min(parseInt(String(req.query.limit ?? "50")), 100);
     const entities = await ontologyEngine.getDomainEntities(req.params.domain as string, limit);
@@ -66,7 +67,7 @@ router.get("/ontology/domain/:domain", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/ontology/entity", authMiddleware(), async (req, res) => {
+router.post("/ontology/entity", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { type, name, domain, metadata = {}, tags = [], riskScore, externalId } = req.body;
     if (!type || !name || !domain) return sendBadRequest(res, "type, name, and domain are required");
@@ -77,7 +78,7 @@ router.post("/ontology/entity", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/ontology/relationship", authMiddleware(), async (req, res) => {
+router.post("/ontology/relationship", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { fromEntityId, toEntityId, type, strength = "moderate", metadata = {} } = req.body;
     if (!fromEntityId || !toEntityId || !type) return sendBadRequest(res, "fromEntityId, toEntityId, and type are required");
@@ -88,7 +89,7 @@ router.post("/ontology/relationship", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/ontology/graph-rag", authMiddleware(), async (req, res) => {
+router.post("/ontology/graph-rag", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { query, maxHops = 2, maxEntitiesPerHop = 5, topKChunksPerEntity = 3, domains } = req.body;
     if (!query) return sendBadRequest(res, "query is required");

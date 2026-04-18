@@ -6,6 +6,7 @@ import { authMiddleware, requireRole } from "../middlewares/auth";
 import { sendPushToUser, sendPushToApp, sendPushBroadcast } from "../lib/expo-push";
 import { buildPushMessage, type NotificationTemplate } from "../lib/push-templates";
 import type { PushMessagePayload } from "../lib/expo-push";
+import { validateBody, pushNotificationSendSchema, pushNotificationScheduleSchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -31,14 +32,9 @@ const VALID_TEMPLATES: NotificationTemplate[] = [
   "stephen_venture_update",
 ];
 
-router.post("/push-notifications/send", authMiddleware(), requireRole("ops"), async (req, res) => {
+router.post("/push-notifications/send", authMiddleware(), requireRole("ops"), validateBody(pushNotificationSendSchema), async (req, res) => {
   try {
     const { target, userId, appId, template, vars, title, body, data } = req.body;
-
-    if (!["user", "app", "broadcast"].includes(target)) {
-      sendBadRequest(res, "target must be one of: user, app, broadcast");
-      return;
-    }
 
     let payload: PushMessagePayload;
 
@@ -92,19 +88,9 @@ router.post("/push-notifications/send", authMiddleware(), requireRole("ops"), as
   }
 });
 
-router.post("/push-notifications/schedule", authMiddleware(), requireRole("ops"), async (req, res) => {
+router.post("/push-notifications/schedule", authMiddleware(), requireRole("ops"), validateBody(pushNotificationScheduleSchema), async (req, res) => {
   try {
     const { target, userId, appId, template, vars, title, body, data, sendAt } = req.body;
-
-    if (!["user", "app", "broadcast"].includes(target)) {
-      sendBadRequest(res, "target must be one of: user, app, broadcast");
-      return;
-    }
-
-    if (!sendAt) {
-      sendBadRequest(res, "sendAt timestamp is required");
-      return;
-    }
 
     const sendAtDate = new Date(sendAt);
     if (isNaN(sendAtDate.getTime()) || sendAtDate <= new Date()) {
@@ -159,7 +145,7 @@ router.post("/push-notifications/schedule", authMiddleware(), requireRole("ops")
   }
 });
 
-router.get("/push-notifications/scheduled", authMiddleware(), requireRole("ops"), async (req, res) => {
+router.get("/push-notifications/scheduled", authMiddleware(), requireRole("ops"), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { status } = req.query as { status?: string };
 

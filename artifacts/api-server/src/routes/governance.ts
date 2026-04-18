@@ -19,7 +19,7 @@ import {
   handleRouteError,
   parsePagination,
 } from "../lib/api-response";
-import { validateBody } from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema} from "../lib/validation";
 
 const createPolicySchema = z.object({
   name: z.string().min(1).max(200).trim(),
@@ -89,7 +89,7 @@ function isAdmin(user?: AuthenticatedUser): boolean {
   return user.roles.includes("super_admin") || user.roles.includes("admin");
 }
 
-router.get("/policies", authMiddleware(), async (req: Request, res: Response) => {
+router.get("/policies", authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { limit = 50, offset = 0 } = parsePagination(req.query as Record<string, unknown>);
     const policyType = req.query.policyType as string | undefined;
@@ -181,7 +181,7 @@ router.delete("/policies/:id", authMiddleware(), requireRole("super_admin", "adm
   }
 });
 
-router.get("/model-routing", authMiddleware(), async (req: Request, res: Response) => {
+router.get("/model-routing", authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { limit = 50, offset = 0 } = parsePagination(req.query as Record<string, unknown>);
     const provider = req.query.provider as string | undefined;
@@ -238,7 +238,7 @@ router.patch("/model-routing/:id", authMiddleware(), requireRole("super_admin", 
   }
 });
 
-router.get("/budgets", authMiddleware(), async (req: Request, res: Response) => {
+router.get("/budgets", authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { limit = 20, offset = 0 } = parsePagination(req.query as Record<string, unknown>);
     const rows = await db
@@ -273,7 +273,7 @@ router.post("/budgets", authMiddleware(), requireRole("super_admin", "admin"), v
   }
 });
 
-router.get("/cost-events", authMiddleware(), async (req: Request, res: Response) => {
+router.get("/cost-events", authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { limit = 50, offset = 0 } = parsePagination(req.query as Record<string, unknown>);
     const eventType = req.query.eventType as string | undefined;
@@ -365,7 +365,7 @@ router.get("/cost-summary", authMiddleware(), async (_req: Request, res: Respons
   }
 });
 
-router.get("/incidents", authMiddleware(), async (req: Request, res: Response) => {
+router.get("/incidents", authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { limit = 50, offset = 0 } = parsePagination(req.query as Record<string, unknown>);
     const severity = req.query.severity as string | undefined;

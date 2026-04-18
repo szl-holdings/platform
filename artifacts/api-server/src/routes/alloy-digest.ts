@@ -7,6 +7,7 @@ import { authMiddleware, requireRole } from "../middlewares/auth";
 import { sendSuccess, sendCreated, handleRouteError } from "../lib/api-response";
 import { logger } from "../lib/logger";
 import { tenantScope } from "../middlewares/tenant-scope";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -156,7 +157,7 @@ ${data.suggestedPriorities.map(p => `${p.rank}. **${p.action}** — ${p.reason}`
   }
 }
 
-router.post("/alloy/digest/generate", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/alloy/digest/generate", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { roleScope = "executive", digestDate, deliveryChannels = ["in_app"] } = req.body as {
       roleScope?: string;
@@ -249,7 +250,7 @@ router.post("/alloy/digest/generate", authMiddleware(), async (req: Request, res
   }
 });
 
-router.get("/alloy/digest/latest", authMiddleware(), async (req: Request, res: Response) => {
+router.get("/alloy/digest/latest", authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const roleScope = (req.query as Record<string, string>).roleScope ?? "executive";
     const userId = req.user?.id ?? null;
@@ -273,7 +274,7 @@ router.get("/alloy/digest/latest", authMiddleware(), async (req: Request, res: R
   }
 });
 
-router.get("/alloy/digest/history", authMiddleware(), async (req: Request, res: Response) => {
+router.get("/alloy/digest/history", authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { roleScope = "executive", limit: limitStr = "14" } = req.query as Record<string, string>;
     const limit = Math.min(parseInt(limitStr, 10), 90);

@@ -37,7 +37,7 @@ import { enqueuePrismJob, PRISM_JOB_TYPES, getJobStats, replayDeadLetterEvent } 
 import { getConnectorHealth, triggerSync, getConnectorSyncHistory } from "../services/prism-connectors";
 import { getDocumentPipelineStats, getDocumentsForMatter } from "../services/prism-document-pipeline";
 import { z } from "zod";
-import { validateBody } from "../lib/validation";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const createMatterSchema = z.object({
   title: z.string().min(1).max(500),
@@ -112,7 +112,7 @@ router.get("/readiness", async (_req, res) => {
   }
 });
 
-router.get("/matters", authMiddleware(), async (req, res) => {
+router.get("/matters", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const orgId = getOrgId(req);
     const status = req.query.status as string | undefined;
@@ -192,7 +192,7 @@ router.post("/matters", authMiddleware(), validateBody(createMatterSchema), asyn
   } catch (err) { handleRouteError(res, err, "Failed to create matter"); }
 });
 
-router.patch("/matters/:matterId", authMiddleware(), async (req, res) => {
+router.patch("/matters/:matterId", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const orgId = getOrgId(req);
     const matterId = parseIdParam(req.params.matterId as string);
@@ -305,7 +305,7 @@ router.get("/matters/:matterId/witnesses", authMiddleware(), async (req, res) =>
   } catch (err) { handleRouteError(res, err, "Failed to fetch witnesses"); }
 });
 
-router.get("/approvals", authMiddleware(), async (req, res) => {
+router.get("/approvals", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const orgId = getOrgId(req);
     const status = (req.query.status as string) ?? "pending";
@@ -352,7 +352,7 @@ router.post("/approvals", authMiddleware(), validateBody(createApprovalSchema), 
   } catch (err) { handleRouteError(res, err, "Failed to create approval"); }
 });
 
-router.patch("/approvals/:approvalId/resolve", authMiddleware(), async (req, res) => {
+router.patch("/approvals/:approvalId/resolve", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const orgId = getOrgId(req);
     const approvalId = parseIdParam(req.params.approvalId as string);
@@ -411,7 +411,7 @@ router.get("/connectors", authMiddleware(), async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to fetch connectors"); }
 });
 
-router.post("/connectors/:accountId/sync", authMiddleware(), async (req, res) => {
+router.post("/connectors/:accountId/sync", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const orgId = getOrgId(req);
     const accountId = parseIdParam(req.params.accountId as string);
@@ -451,7 +451,7 @@ router.get("/jobs/dead-letter", authMiddleware(), async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to fetch dead letter events"); }
 });
 
-router.post("/jobs/dead-letter/:eventId/replay", authMiddleware(), async (req, res) => {
+router.post("/jobs/dead-letter/:eventId/replay", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const eventId = parseIdParam(req.params.eventId as string);
     if (!eventId) return sendBadRequest(res, "Invalid event ID");
@@ -483,7 +483,7 @@ router.get("/notifications", authMiddleware(), async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to fetch notifications"); }
 });
 
-router.get("/audit", authMiddleware(), async (req, res) => {
+router.get("/audit", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const orgId = getOrgId(req);
     const matterId = req.query.matterId ? parseInt(req.query.matterId as string) : undefined;

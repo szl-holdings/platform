@@ -16,6 +16,7 @@ import {
   makeEvidenceRef,
   buildAgentRegistryWithHealth,
 } from "./shared";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
 
 const router = Router();
 
@@ -41,7 +42,7 @@ router.get("/control-tower/decide/agents", (_req: Request, res: Response) => {
   }
 });
 
-router.get("/control-tower/decide/journal", requireRole("super_admin", "ops", "exec"), async (req: Request, res: Response) => {
+router.get("/control-tower/decide/journal", requireRole("super_admin", "ops", "exec"), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const limit = Math.min(100, parseInt(String(req.query.limit ?? "20"), 10));
     const statusFilter = req.query.status as string | undefined;
@@ -89,7 +90,7 @@ router.get("/control-tower/decide/journal", requireRole("super_admin", "ops", "e
   }
 });
 
-router.post("/control-tower/decide/orchestrate", requireRole("super_admin", "ops", "exec"), async (req: Request, res: Response) => {
+router.post("/control-tower/decide/orchestrate", requireRole("super_admin", "ops", "exec"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { query, domains, depth, sessionId } = req.body as {
       query?: string; domains?: string[];
@@ -214,7 +215,7 @@ router.post("/control-tower/decide/orchestrate", requireRole("super_admin", "ops
   }
 });
 
-router.post("/control-tower/decide/approve/:id", requireRole("super_admin", "ops", "exec"), async (req: Request, res: Response) => {
+router.post("/control-tower/decide/approve/:id", requireRole("super_admin", "ops", "exec"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { id } = req.params as Record<string, string>;
     const { approvedBy, domains } = req.body as { approvedBy?: string; domains?: string[] };
@@ -269,7 +270,7 @@ router.post("/control-tower/decide/approve/:id", requireRole("super_admin", "ops
   }
 });
 
-router.patch("/control-tower/decide/journal/:id", requireRole("super_admin", "ops", "exec"), async (req: Request, res: Response) => {
+router.patch("/control-tower/decide/journal/:id", requireRole("super_admin", "ops", "exec"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { id } = req.params as Record<string, string>;
     const { outcome } = req.body as { outcome?: "accepted" | "rejected" | "overridden" };

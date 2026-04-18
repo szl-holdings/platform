@@ -25,6 +25,7 @@ import { db, intelligenceCacheTable, pcMattersTable, pcDeadlinesTable, fundNavRe
 import { eq, desc, count, sql, and, gte, lte } from "drizzle-orm";
 import { logger } from "../lib/logger";
 import os from "os";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -584,7 +585,7 @@ router.get("/snapshot/stream", (req: Request, res: Response) => {
  *
  * Full-text search across timeline events, domain names, and intelligence cards.
  */
-router.get("/search", async (req: Request, res: Response) => {
+router.get("/search", validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const q = String(req.query.q ?? "").toLowerCase().trim();
     if (!q) {
@@ -621,7 +622,7 @@ router.get("/search", async (req: Request, res: Response) => {
  * Records an action as resolved. Uses in-memory store (persists until server restart).
  * Requires an authenticated session — mutation operations must not be open to unauthenticated callers.
  */
-router.post("/actions/:id/resolve", requireAnyAuth(), async (req: Request, res: Response) => {
+router.post("/actions/:id/resolve", requireAnyAuth(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { id } = req.params as { id: string };
     if (!id) {
@@ -1447,7 +1448,7 @@ router.get("/health", requireAnyAuth(), async (_req: Request, res: Response) => 
  * health score, firing alerts, breached SLAs, budget burn, pending approvals,
  * and recent activity-log entries.
  */
-router.get("/digest", requireAnyAuth(), async (req: Request, res: Response) => {
+router.get("/digest", requireAnyAuth(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const role = (typeof req.query.role === "string" ? req.query.role : "executive") as
       "executive" | "security" | "operations" | "finance" | "legal";

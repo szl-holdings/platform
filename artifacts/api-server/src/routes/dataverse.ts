@@ -13,6 +13,7 @@ import { eq, and } from "drizzle-orm";
 import { services } from "@szl-holdings/services";
 import { getAzureTenantForUser } from "../lib/auth";
 import { decryptSecret } from "../lib/crypto";
+import {validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -253,7 +254,7 @@ router.post(
   dataverseRateLimit,
   authMiddleware(),
   requireRole("analyst"),
-  async (req: Request, res: Response) => {
+  validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
     try {
       const body = req.body ?? {};
       if (!body.firstName || !body.lastName) {
@@ -333,7 +334,7 @@ router.patch(
   dataverseRateLimit,
   authMiddleware(),
   requireRole("analyst"),
-  async (req: Request, res: Response) => {
+  validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
     try {
       const { opportunityId } = req.params as Record<string, string>;
       const { stageName } = req.body ?? {};
@@ -411,7 +412,7 @@ router.post(
   dataverseRateLimit,
   authMiddleware(),
   requireRole("analyst"),
-  async (req: Request, res: Response) => {
+  validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
     try {
       const body = req.body ?? {};
       if (!body.subject) {
@@ -464,7 +465,7 @@ router.post(
   dataverseRateLimit,
   authMiddleware(),
   requireRole("analyst"),
-  async (req: Request, res: Response) => {
+  validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
     try {
       const body = req.body ?? {};
       if (!body.noteText || !body.regardingObjectId || !body.regardingObjectType) {
@@ -610,7 +611,7 @@ router.patch(
   dataverseRateLimit,
   authMiddleware(),
   requireRole("analyst"),
-  async (req: Request, res: Response) => {
+  validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
     try {
       const adapter = services.dataverse;
       const connParams = await buildConnParams(req);
@@ -677,7 +678,7 @@ router.post(
   dataverseRateLimit,
   authMiddleware(),
   requireRole("analyst"),
-  async (req: Request, res: Response) => {
+  validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
     try {
       const body = req.body ?? {};
       if (!body.firstName || !body.lastName) {
@@ -751,7 +752,7 @@ router.patch(
   dataverseRateLimit,
   authMiddleware(),
   requireRole("analyst"),
-  async (req: Request, res: Response) => {
+  validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
     try {
       const adapter = services.dataverse;
       const connParams = await buildConnParams(req);
@@ -852,7 +853,7 @@ router.patch(
   dataverseRateLimit,
   authMiddleware(),
   requireRole("analyst"),
-  async (req: Request, res: Response) => {
+  validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
     try {
       const adapter = services.dataverse;
       const connParams = await buildConnParams(req);
@@ -918,6 +919,7 @@ router.get(
   "/activities/:activityId",
   dataverseRateLimit,
   authMiddleware(),
+  validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
       const activityType = String(req.query.activityType ?? "task");
@@ -951,7 +953,7 @@ router.patch(
   dataverseRateLimit,
   authMiddleware(),
   requireRole("analyst"),
-  async (req: Request, res: Response) => {
+  validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
     try {
       const body = req.body ?? {};
       const activityType = String(body.activityType ?? req.query.activityType ?? "task");
@@ -1066,6 +1068,7 @@ router.get(
   dataverseRateLimit,
   authMiddleware(),
   requireRole("analyst"),
+  validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
       let tenants;
@@ -1133,7 +1136,7 @@ router.post(
   dataverseRateLimit,
   authMiddleware(),
   requireRole("analyst"),
-  async (req: Request, res: Response) => {
+  validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
     try {
       const adapter = services.dataverse;
       const connParams = await buildConnParams(req);
@@ -1200,7 +1203,7 @@ router.post(
   dataverseRateLimit,
   authMiddleware(),
   requireRole("analyst"),
-  async (req: Request, res: Response) => {
+  validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
     try {
       const adapter = services.dataverse;
       const connParams = await buildConnParams(req);

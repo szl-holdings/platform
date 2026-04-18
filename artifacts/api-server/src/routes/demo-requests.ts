@@ -7,7 +7,8 @@ import { sendEmail, buildInquiryAckEmail, buildLeadNotificationEmail, INTERNAL_E
 import { logger } from "../lib/logger";
 import { desc, sql } from "drizzle-orm";
 import { publicSubmitLimiter } from "../middlewares/rate-limiters";
-import { validateQuery } from "../lib/validation";
+import { validateQuery, jsonObjectBodySchema} from "../lib/validation";
+import { validateBody, jsonObjectBodySchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -20,7 +21,7 @@ const demoRequestSchema = z.object({
   product: z.string().optional().default("vessels"),
 });
 
-router.post("/demo-requests", publicSubmitLimiter, async (req, res) => {
+router.post("/demo-requests", publicSubmitLimiter, validateBody(jsonObjectBodySchema), async (req, res) => {
   const parsed = demoRequestSchema.safeParse(req.body);
   if (!parsed.success) {
     sendError(res, parsed.error.errors.map(e => e.message).join(", "), 400);

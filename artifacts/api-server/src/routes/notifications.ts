@@ -4,7 +4,7 @@ import { eq, desc, and, isNull, count as sqlCount } from "drizzle-orm";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, sendNoContent, sendError, handleRouteError, parsePagination } from "../lib/api-response";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 import { publish, WS_CHANNELS } from "../lib/websocket";
-import { validateBody, createNotificationSchema } from "../lib/validation";
+import { validateBody, createNotificationSchema, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 import { z } from "zod";
 import { logger } from "../lib/logger";
 import { durableJobQueue } from "@szl-holdings/forge-runtime";
@@ -57,7 +57,7 @@ async function dispatchToExternalChannels(params: {
   }
 }
 
-router.get("/notifications", authMiddleware({ required: false }), async (req, res) => {
+router.get("/notifications", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     if (!req.user) {
       sendSuccess(res, []);
@@ -125,7 +125,7 @@ router.post("/notifications", authMiddleware(), requireRole("ops"), validateBody
   }
 });
 
-router.patch("/notifications/:id/read", authMiddleware(), async (req, res) => {
+router.patch("/notifications/:id/read", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [existing] = await db.select().from(notificationsTable).where(
@@ -146,7 +146,7 @@ router.patch("/notifications/:id/read", authMiddleware(), async (req, res) => {
   }
 });
 
-router.patch("/notifications/read-all", authMiddleware(), async (req, res) => {
+router.patch("/notifications/read-all", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const userId = req.user!.id;
     await db.update(notificationsTable).set({

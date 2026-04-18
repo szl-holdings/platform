@@ -2,7 +2,7 @@ import { Router, type IRouter, type Request, type Response } from "express";
 import { db } from "@szl-holdings/db";
 import { supportTicketsTable, supportTicketCommentsTable, supportKnowledgeArticlesTable } from "@szl-holdings/db";
 import { authMiddleware, requireRole, type AuthenticatedUser } from "../middlewares/auth";
-import { validateBody } from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema} from "../lib/validation";
 import { z } from "zod";
 import { eq, desc, and, inArray, isNull, or, ilike, sql } from "drizzle-orm";
 import { logger } from "../lib/logger";
@@ -58,7 +58,7 @@ const updateStatusSchema = z.object({
   assignedToName: z.string().max(200).optional(),
 });
 
-router.get("/support/knowledge", async (req: Request, res: Response) => {
+router.get("/support/knowledge", validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { q, category } = req.query as { q?: string; category?: string };
 
@@ -198,7 +198,7 @@ router.post("/support/tickets", authMiddleware(), validateBody(submitTicketSchem
   }
 });
 
-router.get("/support/tickets", authMiddleware(), async (req: Request, res: Response) => {
+router.get("/support/tickets", authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const user = req.user as AuthenticatedUser;
     const { status, category } = req.query as { status?: string; category?: string };

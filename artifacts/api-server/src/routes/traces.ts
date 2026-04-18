@@ -12,10 +12,11 @@ function replayFromTrace(_opts: Record<string, unknown>): { deterministic: boole
 }
 import { authMiddleware } from "../middlewares/auth";
 import { sendSuccess, handleRouteError, sendNotFound, sendBadRequest } from "../lib/api-response";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
-router.get("/traces", authMiddleware(), async (req, res) => {
+router.get("/traces", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const filter: TraceQueryFilter = {};
 
@@ -57,7 +58,7 @@ router.get("/traces", authMiddleware(), async (req, res) => {
   }
 });
 
-router.get("/traces/regressions", authMiddleware(), async (req, res) => {
+router.get("/traces/regressions", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const baselineId = req.query.baselineId as string | undefined;
     if (!baselineId) {
@@ -111,7 +112,7 @@ router.get("/traces/:id", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/traces/:id/replay", authMiddleware(), async (req, res) => {
+router.post("/traces/:id/replay", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const originalTraceId = req.params.id;
     const original = defaultTraceStore.get(originalTraceId);
@@ -203,7 +204,7 @@ router.post("/traces/:id/replay", authMiddleware(), async (req, res) => {
   }
 });
 
-router.get("/traces/:id/diff/:compareId", authMiddleware(), async (req, res) => {
+router.get("/traces/:id/diff/:compareId", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const traceA = defaultTraceStore.get(req.params.id);
     const traceB = defaultTraceStore.get(req.params.compareId);
@@ -243,7 +244,7 @@ router.get("/traces/:id/diff/:compareId", authMiddleware(), async (req, res) => 
   }
 });
 
-router.post("/traces/:id/grade", authMiddleware(), async (req, res) => {
+router.post("/traces/:id/grade", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const trace = defaultTraceStore.get(req.params.id);
     if (!trace) {
@@ -281,7 +282,7 @@ router.post("/traces/:id/grade", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/traces/:id/comment", authMiddleware(), async (req, res) => {
+router.post("/traces/:id/comment", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const trace = defaultTraceStore.get(req.params.id);
     if (!trace) {
@@ -315,7 +316,7 @@ router.post("/traces/:id/comment", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/traces/:id/link-entity", authMiddleware(), async (req, res) => {
+router.post("/traces/:id/link-entity", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { entityId, role } = req.body as { entityId?: string; role?: string };
     if (!entityId) {

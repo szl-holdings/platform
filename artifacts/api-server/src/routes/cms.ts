@@ -1,6 +1,6 @@
 import { Router, type IRouter, type Request, type Response, type NextFunction } from "express";
 import { z } from "zod";
-import { validateBody } from "../lib/validation";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 import multer from "multer";
 import {
   db, sitesTable, pagesTable, sectionsTable, venturesTable, servicesTable,
@@ -378,7 +378,7 @@ router.patch("/cms/sites/:id", requireCmsWrite, validateBody(patchSiteSchema), a
 
 // ─── Pages ───────────────────────────────────────────────────────────────────
 
-router.get("/cms/pages", authMiddleware({ required: false }), async (req, res) => {
+router.get("/cms/pages", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const siteSlug = req.query.site as string | undefined;
@@ -436,7 +436,7 @@ router.delete("/cms/pages/:id", requireCmsWrite, async (req, res) => {
 
 // ─── Sections ────────────────────────────────────────────────────────────────
 
-router.get("/cms/sections", async (req, res) => {
+router.get("/cms/sections", validateQuery(listQuerySchema), async (req, res) => {
   try {
     const pageId = req.query.page_id ? parseInt(req.query.page_id as string) : undefined;
     let query = db.select().from(sectionsTable).$dynamic();
@@ -513,7 +513,7 @@ router.delete("/cms/ventures/:id", requireCmsWrite, async (req, res) => {
 
 // ─── Articles ────────────────────────────────────────────────────────────────
 
-router.get("/cms/articles", authMiddleware({ required: false }), async (req, res) => {
+router.get("/cms/articles", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const isEditor = req.user && (req.user.roles.includes("admin") || req.user.roles.includes("super_admin") || req.user.roles.includes("editor"));
@@ -573,7 +573,7 @@ router.delete("/cms/articles/:id", requireCmsWrite, async (req, res) => {
 
 // ─── Case Studies ─────────────────────────────────────────────────────────────
 
-router.get("/cms/case-studies", authMiddleware({ required: false }), async (req, res) => {
+router.get("/cms/case-studies", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const isEditor = req.user && (req.user.roles.includes("admin") || req.user.roles.includes("super_admin") || req.user.roles.includes("editor"));
@@ -627,7 +627,7 @@ router.delete("/cms/case-studies/:id", requireCmsWrite, async (req, res) => {
 
 // ─── Navigation Items ─────────────────────────────────────────────────────────
 
-router.get("/cms/navigation-items", async (req, res) => {
+router.get("/cms/navigation-items", validateQuery(listQuerySchema), async (req, res) => {
   try {
     const siteId = req.query.site_id ? parseInt(req.query.site_id as string) : undefined;
     const navGroup = req.query.nav_group as string | undefined;
@@ -667,7 +667,7 @@ router.delete("/cms/navigation-items/:id", requireCmsWrite, async (req, res) => 
 
 // ─── Testimonials ─────────────────────────────────────────────────────────────
 
-router.get("/cms/testimonials", async (req, res) => {
+router.get("/cms/testimonials", validateQuery(listQuerySchema), async (req, res) => {
   try {
     const siteId = req.query.site_id ? parseInt(req.query.site_id as string) : undefined;
     let query = db.select().from(testimonialsTable).$dynamic();
@@ -703,7 +703,7 @@ router.delete("/cms/testimonials/:id", requireCmsWrite, async (req, res) => {
 
 // ─── FAQs ─────────────────────────────────────────────────────────────────────
 
-router.get("/cms/faqs", async (req, res) => {
+router.get("/cms/faqs", validateQuery(listQuerySchema), async (req, res) => {
   try {
     const siteId = req.query.site_id ? parseInt(req.query.site_id as string) : undefined;
     let query = db.select().from(faqsTable).$dynamic();
@@ -739,7 +739,7 @@ router.delete("/cms/faqs/:id", requireCmsWrite, async (req, res) => {
 
 // ─── CTAs ─────────────────────────────────────────────────────────────────────
 
-router.get("/cms/ctas", async (req, res) => {
+router.get("/cms/ctas", validateQuery(listQuerySchema), async (req, res) => {
   try {
     const siteId = req.query.site_id ? parseInt(req.query.site_id as string) : undefined;
     let query = db.select().from(ctasTable).$dynamic();
@@ -775,7 +775,7 @@ router.delete("/cms/ctas/:id", requireCmsWrite, async (req, res) => {
 
 // ─── Roadmap Items ────────────────────────────────────────────────────────────
 
-router.get("/cms/roadmap-items", async (req, res) => {
+router.get("/cms/roadmap-items", validateQuery(listQuerySchema), async (req, res) => {
   try {
     const siteId = req.query.site_id ? parseInt(req.query.site_id as string) : undefined;
     let query = db.select().from(roadmapItemsTable).$dynamic();
@@ -811,7 +811,7 @@ router.delete("/cms/roadmap-items/:id", requireCmsWrite, async (req, res) => {
 
 // ─── Services ─────────────────────────────────────────────────────────────────
 
-router.get("/cms/services-items", async (req, res) => {
+router.get("/cms/services-items", validateQuery(listQuerySchema), async (req, res) => {
   try {
     const siteId = req.query.site_id ? parseInt(req.query.site_id as string) : undefined;
     let query = db.select().from(servicesTable).$dynamic();
@@ -847,7 +847,7 @@ router.delete("/cms/services-items/:id", requireCmsWrite, async (req, res) => {
 
 // ─── Features ─────────────────────────────────────────────────────────────────
 
-router.get("/cms/features-items", async (req, res) => {
+router.get("/cms/features-items", validateQuery(listQuerySchema), async (req, res) => {
   try {
     const siteId = req.query.site_id ? parseInt(req.query.site_id as string) : undefined;
     let query = db.select().from(featuresTable).$dynamic();
@@ -866,7 +866,7 @@ router.post("/cms/features-items", requireCmsWrite, validateBody(createFeatureIt
 
 // ─── Use Cases ────────────────────────────────────────────────────────────────
 
-router.get("/cms/use-cases", async (req, res) => {
+router.get("/cms/use-cases", validateQuery(listQuerySchema), async (req, res) => {
   try {
     const siteId = req.query.site_id ? parseInt(req.query.site_id as string) : undefined;
     let query = db.select().from(useCasesTable).$dynamic();
@@ -885,7 +885,7 @@ router.post("/cms/use-cases", requireCmsWrite, validateBody(createUseCaseSchema)
 
 // ─── Updates ─────────────────────────────────────────────────────────────────
 
-router.get("/cms/updates", authMiddleware({ required: false }), async (req, res) => {
+router.get("/cms/updates", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const isEditor = req.user && (req.user.roles.includes("admin") || req.user.roles.includes("super_admin") || req.user.roles.includes("editor"));
@@ -927,7 +927,7 @@ router.post("/cms/contact-submissions", validateBody(contactSubmissionSchema), a
   } catch (err) { handleRouteError(res, err, "Failed to submit contact form"); }
 });
 
-router.get("/cms/contact-submissions", requireCmsWrite, async (req, res) => {
+router.get("/cms/contact-submissions", requireCmsWrite, validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const formKey = req.query.form_key as string | undefined;
@@ -959,7 +959,7 @@ router.patch("/cms/lead-status/:id", requireCmsWrite, validateBody(patchLeadStat
 
 // ─── Site Settings ────────────────────────────────────────────────────────────
 
-router.get("/cms/site-settings", async (req, res) => {
+router.get("/cms/site-settings", validateQuery(listQuerySchema), async (req, res) => {
   try {
     const siteId = req.query.site_id ? parseInt(req.query.site_id as string) : undefined;
     let query = db.select().from(siteSettingsTable).$dynamic();
@@ -1019,7 +1019,7 @@ router.delete("/cms/site-settings/:id", requireCmsWrite, async (req, res) => {
 
 // ─── Media Assets ─────────────────────────────────────────────────────────────
 
-router.get("/cms/media-assets", async (req, res) => {
+router.get("/cms/media-assets", validateQuery(listQuerySchema), async (req, res) => {
   try {
     const siteId = req.query.site_id ? parseInt(req.query.site_id as string) : undefined;
     let query = db.select().from(mediaAssetsTable).$dynamic();
@@ -1046,7 +1046,7 @@ router.delete("/cms/media-assets/:id", requireCmsWrite, async (req, res) => {
 
 // ─── Downloads ────────────────────────────────────────────────────────────────
 
-router.get("/cms/downloads", authMiddleware({ required: false }), async (req, res) => {
+router.get("/cms/downloads", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const isEditor = req.user && (req.user.roles.includes("admin") || req.user.roles.includes("super_admin") || req.user.roles.includes("editor"));
     const siteId = req.query.site_id ? parseInt(req.query.site_id as string) : undefined;
@@ -1105,7 +1105,7 @@ router.delete("/cms/redirects/:id", requireCmsWrite, async (req, res) => {
 const VALID_CONTENT_TYPES = ["blog", "case-study", "investor-letter", "update"] as const;
 type ContentType = typeof VALID_CONTENT_TYPES[number];
 
-router.get("/cms/posts", authMiddleware({ required: false }), async (req, res) => {
+router.get("/cms/posts", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const isEditor = req.user && (req.user.roles.includes("admin") || req.user.roles.includes("super_admin") || req.user.roles.includes("editor"));
@@ -1192,7 +1192,7 @@ router.delete("/cms/posts/:id", authMiddleware(), requireRole("admin", "editor")
   } catch (err) { handleRouteError(res, err, "Failed to delete CMS post"); }
 });
 
-router.post("/cms/posts/upload-image", authMiddleware(), requireRole("admin", "editor"), imageUpload.single("image"), async (req, res) => {
+router.post("/cms/posts/upload-image", authMiddleware(), requireRole("admin", "editor"), imageUpload.single("image"), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     if (!req.file) {
       res.status(400).json({ error: "No image file provided" });

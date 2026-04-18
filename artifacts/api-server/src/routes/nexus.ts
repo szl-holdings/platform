@@ -4,6 +4,7 @@ import { authMiddleware } from "../middlewares/auth";
 import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../middlewares/sliding-window-limiter";
 import { sendSuccess, sendError, handleRouteError } from "../lib/api-response";
 import { logger } from "../lib/logger";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router = Router();
 router.use(authMiddleware({ required: false }));
@@ -957,7 +958,7 @@ function sleep(ms: number): Promise<void> {
 
 // ─── Research Routes ──────────────────────────────────────────────────────────
 
-router.post("/research", perUserWriteSlidingLimiter, async (req: Request, res: Response) => {
+router.post("/research", perUserWriteSlidingLimiter, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { query } = req.body as { query?: string };
     if (!query?.trim()) {
@@ -1045,7 +1046,7 @@ router.get("/research/:id/stream", (req: Request, res: Response) => {
 
 // ─── Memory Routes ────────────────────────────────────────────────────────────
 
-router.get("/memory", async (req: Request, res: Response) => {
+router.get("/memory", validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { search, type, pinned } = req.query as Record<string, string>;
     let items = Array.from(memoryStore.values());
@@ -1069,7 +1070,7 @@ router.get("/memory", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/memory", perUserWriteSlidingLimiter, async (req: Request, res: Response) => {
+router.post("/memory", perUserWriteSlidingLimiter, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const body = req.body as Partial<MemoryItem>;
     if (!body.key?.trim() || !body.value?.trim()) {
@@ -1096,7 +1097,7 @@ router.post("/memory", perUserWriteSlidingLimiter, async (req: Request, res: Res
   }
 });
 
-router.put("/memory/:id", perUserWriteSlidingLimiter, async (req: Request, res: Response) => {
+router.put("/memory/:id", perUserWriteSlidingLimiter, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const item = memoryStore.get(req.params.id);
     if (!item) { sendError(res, "Memory item not found", 404); return; }
@@ -1121,7 +1122,7 @@ router.delete("/memory/:id", perUserWriteSlidingLimiter, async (req: Request, re
 
 // ─── Skills Routes ────────────────────────────────────────────────────────────
 
-router.get("/skills", async (req: Request, res: Response) => {
+router.get("/skills", validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { search, enabled, pattern } = req.query as Record<string, string>;
     let skills = Array.from(skillStore.values());
@@ -1142,7 +1143,7 @@ router.get("/skills", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/skills/:id/toggle", perUserWriteSlidingLimiter, async (req: Request, res: Response) => {
+router.post("/skills/:id/toggle", perUserWriteSlidingLimiter, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const skill = skillStore.get(req.params.id);
     if (!skill) { sendError(res, "Skill not found", 404); return; }
@@ -1167,7 +1168,7 @@ router.get("/patterns", async (_req: Request, res: Response) => {
 
 // ─── Protocol Bridge Routes ───────────────────────────────────────────────────
 
-router.get("/bridge/tools", async (req: Request, res: Response) => {
+router.get("/bridge/tools", validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { protocol } = req.query as { protocol?: string };
     let tools = Array.from(toolStore.values());
@@ -1178,7 +1179,7 @@ router.get("/bridge/tools", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/bridge/invoke", perUserWriteSlidingLimiter, async (req: Request, res: Response) => {
+router.post("/bridge/invoke", perUserWriteSlidingLimiter, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { protocol, toolId, args = {} } = req.body as { protocol?: string; toolId?: string; args?: Record<string, unknown> };
     if (!protocol || !toolId) { sendError(res, "protocol and toolId are required", 400); return; }
@@ -1340,7 +1341,7 @@ async function runOrchestration(planId: string, intent: string) {
   }
 }
 
-router.post("/orchestrate", perUserWriteSlidingLimiter, async (req: Request, res: Response) => {
+router.post("/orchestrate", perUserWriteSlidingLimiter, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { intent } = req.body as { intent?: string };
     if (!intent?.trim()) { sendError(res, "intent is required", 400); return; }
@@ -1475,7 +1476,7 @@ router.get("/ingest", async (_req: Request, res: Response) => {
   }
 });
 
-router.post("/ingest", perUserWriteSlidingLimiter, async (req: Request, res: Response) => {
+router.post("/ingest", perUserWriteSlidingLimiter, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { repoUrl } = req.body as { repoUrl?: string };
     if (!repoUrl?.trim()) { sendError(res, "repoUrl is required", 400); return; }

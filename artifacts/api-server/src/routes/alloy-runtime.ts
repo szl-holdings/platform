@@ -19,6 +19,7 @@ import { InMemoryCheckpointStore } from "@workspace/alloy/checkpoint";
 import { DefaultModelRouter } from "@workspace/alloy/model-router";
 import { ECHO_STEP } from "@workspace/alloy/workflow";
 import type { WorkflowStep, StepContext, StepResult, LedgerEntry, RunConfig } from "@workspace/alloy/types";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -100,7 +101,7 @@ function listFromMap(map: Map<string, Record<string, unknown>>, page: number, li
   return { data: all.slice(offset, offset + limit), total: all.length, page, limit };
 }
 
-router.get("/workflows", authMiddleware(), (req: Request, res: Response) => {
+router.get("/workflows", authMiddleware(), validateQuery(listQuerySchema), (req: Request, res: Response) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     sendSuccess(res, listFromMap(inMemoryWorkflows, page, limit, offset));
@@ -116,7 +117,7 @@ router.get("/workflows/:workflowId", authMiddleware(), (req: Request, res: Respo
   sendSuccess(res, wf);
 });
 
-router.post("/workflows", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/workflows", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const body = createWorkflowSchema.parse(req.body);
     const workflowId = randomUUID();
@@ -137,7 +138,7 @@ router.post("/workflows", authMiddleware(), async (req: Request, res: Response) 
   }
 });
 
-router.patch("/workflows/:workflowId", authMiddleware(), async (req: Request, res: Response) => {
+router.patch("/workflows/:workflowId", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { workflowId } = req.params as { workflowId: string };
     const existing = inMemoryWorkflows.get(workflowId);
@@ -161,7 +162,7 @@ router.delete("/workflows/:workflowId", authMiddleware(), requireRole("admin", "
   }
 });
 
-router.get("/workflow-runs", authMiddleware(), (req: Request, res: Response) => {
+router.get("/workflow-runs", authMiddleware(), validateQuery(listQuerySchema), (req: Request, res: Response) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const { workflowId } = req.query as { workflowId?: string };
@@ -184,7 +185,7 @@ router.get("/workflow-runs", authMiddleware(), (req: Request, res: Response) => 
   }
 });
 
-router.post("/workflow-runs", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/workflow-runs", authMiddleware(), validateBody(jsonObjectBodySchema), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const body = req.body as {
       workflowId?: string;
@@ -253,7 +254,7 @@ router.get("/workflow-runs/:runId", authMiddleware(), (req: Request, res: Respon
   });
 });
 
-router.post("/workflow-runs/:runId/replay", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/workflow-runs/:runId/replay", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { runId } = req.params as { runId: string };
     const existingState = runManager.getState(runId);
@@ -284,7 +285,7 @@ router.post("/workflow-runs/:runId/replay", authMiddleware(), async (req: Reques
   }
 });
 
-router.get("/agents", authMiddleware(), (req: Request, res: Response) => {
+router.get("/agents", authMiddleware(), validateQuery(listQuerySchema), (req: Request, res: Response) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     sendSuccess(res, listFromMap(inMemoryAgents, page, limit, offset));
@@ -300,7 +301,7 @@ router.get("/agents/:agentId", authMiddleware(), (req: Request, res: Response) =
   sendSuccess(res, agent);
 });
 
-router.post("/agents", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/agents", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const body = createAgentSchema.parse(req.body);
     const agentId = randomUUID();
@@ -333,7 +334,7 @@ router.get("/agents/:agentId/versions", authMiddleware(), (req: Request, res: Re
   }
 });
 
-router.post("/agents/:agentId/versions", authMiddleware(), requireRole("admin", "super_admin"), async (req: Request, res: Response) => {
+router.post("/agents/:agentId/versions", authMiddleware(), requireRole("admin", "super_admin"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { agentId } = req.params as { agentId: string };
     const existing = inMemoryAgents.get(agentId);
@@ -351,7 +352,7 @@ router.post("/agents/:agentId/versions", authMiddleware(), requireRole("admin", 
   }
 });
 
-router.get("/models", authMiddleware(), (req: Request, res: Response) => {
+router.get("/models", authMiddleware(), validateQuery(listQuerySchema), (req: Request, res: Response) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     sendSuccess(res, listFromMap(inMemoryModels, page, limit, offset));
@@ -367,7 +368,7 @@ router.get("/models/:modelId", authMiddleware(), (req: Request, res: Response) =
   sendSuccess(res, model);
 });
 
-router.post("/models", authMiddleware(), requireRole("admin", "super_admin"), async (req: Request, res: Response) => {
+router.post("/models", authMiddleware(), requireRole("admin", "super_admin"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const body = createModelSchema.parse(req.body);
     const modelId = randomUUID();
@@ -384,7 +385,7 @@ router.post("/models", authMiddleware(), requireRole("admin", "super_admin"), as
   }
 });
 
-router.post("/models/route", authMiddleware(), (req: Request, res: Response) => {
+router.post("/models/route", authMiddleware(), validateBody(jsonObjectBodySchema), (req: Request, res: Response) => {
   try {
     const { task, latencyBudgetMs, maxCostUsd, preferredModel } = req.body as {
       task?: string;
@@ -399,7 +400,7 @@ router.post("/models/route", authMiddleware(), (req: Request, res: Response) => 
   }
 });
 
-router.get("/prompts", authMiddleware(), (req: Request, res: Response) => {
+router.get("/prompts", authMiddleware(), validateQuery(listQuerySchema), (req: Request, res: Response) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     sendSuccess(res, listFromMap(inMemoryPrompts, page, limit, offset));
@@ -415,7 +416,7 @@ router.get("/prompts/:promptId", authMiddleware(), (req: Request, res: Response)
   sendSuccess(res, prompt);
 });
 
-router.post("/prompts", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/prompts", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const body = createPromptSchema.parse(req.body);
     const promptId = randomUUID();
@@ -444,7 +445,7 @@ router.get("/prompts/:promptId/versions", authMiddleware(), (req: Request, res: 
   }
 });
 
-router.get("/signals", authMiddleware(), (req: Request, res: Response) => {
+router.get("/signals", authMiddleware(), validateQuery(listQuerySchema), (req: Request, res: Response) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const { severity, status, domain } = req.query as { severity?: string; status?: string; domain?: string };
@@ -465,7 +466,7 @@ router.get("/signals/:signalId", authMiddleware(), (req: Request, res: Response)
   sendSuccess(res, signal);
 });
 
-router.post("/signals", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/signals", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const body = createSignalSchema.parse(req.body);
     const signalId = randomUUID();
@@ -482,7 +483,7 @@ router.post("/signals", authMiddleware(), async (req: Request, res: Response) =>
   }
 });
 
-router.patch("/signals/:signalId/status", authMiddleware(), async (req: Request, res: Response) => {
+router.patch("/signals/:signalId/status", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { signalId } = req.params as { signalId: string };
     const existing = inMemorySignals.get(signalId);
@@ -497,7 +498,7 @@ router.patch("/signals/:signalId/status", authMiddleware(), async (req: Request,
   }
 });
 
-router.get("/actions", authMiddleware(), (req: Request, res: Response) => {
+router.get("/actions", authMiddleware(), validateQuery(listQuerySchema), (req: Request, res: Response) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const { runId, type } = req.query as { runId?: string; type?: string };
@@ -511,7 +512,7 @@ router.get("/actions", authMiddleware(), (req: Request, res: Response) => {
   }
 });
 
-router.post("/actions", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/actions", authMiddleware(), validateBody(jsonObjectBodySchema), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { runId, stepId, type, description, metadata } = req.body as {
       runId?: string;
@@ -534,7 +535,7 @@ router.post("/actions", authMiddleware(), async (req: Request, res: Response) =>
   }
 });
 
-router.get("/recommendations", authMiddleware(), (req: Request, res: Response) => {
+router.get("/recommendations", authMiddleware(), validateQuery(listQuerySchema), (req: Request, res: Response) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const { domain, entityType, severity } = req.query as {

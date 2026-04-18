@@ -7,11 +7,12 @@ import { logger } from "../../lib/logger";
 import { createRmmProvider, setCachedProvider, getCachedProvider, clearProviderCache, type RmmProviderConfig } from "../../services/rmm-provider";
 import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from "crypto";
 import { auth, authWrite, roleAdmin, roleOperator, queryConnectors, queryConnectorById, stripSecrets, buildProviderConfig, isProviderSupported } from "./shared";
+import { validateBody, rmmActionCreateSchema, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
 
 const router: IRouter = Router();
 
 
-router.get("/rmm/actions", auth, async (req, res) => {
+router.get("/rmm/actions", auth, validateQuery(listQuerySchema), async (req, res) => {
   try {
     const status = req.query.status as string | undefined;
     const deviceId = req.query.deviceId ? parseInt(req.query.deviceId as string, 10) : null;
@@ -38,12 +39,10 @@ router.get("/rmm/actions", auth, async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to list remote actions"); }
 });
 
-router.post("/rmm/actions", authWrite, roleOperator, async (req, res) => {
+router.post("/rmm/actions", authWrite, roleOperator, validateBody(rmmActionCreateSchema), async (req, res) => {
   try {
     const { deviceId, actionType, target, parameters, requestedBy } = req.body;
     let { connectorId } = req.body;
-    if (!deviceId) return sendBadRequest(res, "deviceId is required");
-    if (!actionType) return sendBadRequest(res, "actionType is required");
 
     if (!connectorId) {
       const deviceRows = await db.select().from(mspDevicesTable).where(eq(mspDevicesTable.id, deviceId)).limit(1);
@@ -72,7 +71,7 @@ router.post("/rmm/actions", authWrite, roleOperator, async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to create remote action"); }
 });
 
-router.post("/rmm/actions/:id/approve", authWrite, roleOperator, async (req, res) => {
+router.post("/rmm/actions/:id/approve", authWrite, roleOperator, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseInt(String(req.params.id), 10);
     if (isNaN(id)) return sendBadRequest(res, "Invalid ID");
@@ -98,7 +97,7 @@ router.post("/rmm/actions/:id/approve", authWrite, roleOperator, async (req, res
   } catch (err) { handleRouteError(res, err, "Failed to approve action"); }
 });
 
-router.post("/rmm/actions/:id/cancel", authWrite, roleOperator, async (req, res) => {
+router.post("/rmm/actions/:id/cancel", authWrite, roleOperator, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseInt(String(req.params.id), 10);
     if (isNaN(id)) return sendBadRequest(res, "Invalid ID");

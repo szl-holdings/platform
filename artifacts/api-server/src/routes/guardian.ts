@@ -53,6 +53,7 @@ import {
   type ToolMeshActionApproval,
 } from "@szl-holdings/db";
 import { and, desc, eq, sql } from "drizzle-orm";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -231,7 +232,7 @@ function userOrgId(user: Request["user"]): number | null {
 // POLICIES
 // ============================================================
 
-router.get("/policies", authMiddleware(), requireRole("super_admin", "admin", "ops", "analyst"), async (req: Request, res: Response) => {
+router.get("/policies", authMiddleware(), requireRole("super_admin", "admin", "ops", "analyst"), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { page, limit } = parsePagination(req.query as Record<string, unknown>);
     const tier = req.query["tier"] as string | undefined;
@@ -293,7 +294,7 @@ router.get("/policies/:id", authMiddleware(), async (req: Request, res: Response
   }
 });
 
-router.post("/policies", authMiddleware(), requireRole("super_admin", "admin", "ops"), async (req: Request, res: Response) => {
+router.post("/policies", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const nowIso = new Date().toISOString();
     const parsed = GuardianRuleSchema.safeParse({ ...req.body, id: req.body.id ?? "policy-pending", createdAt: nowIso, updatedAt: nowIso });
@@ -321,7 +322,7 @@ router.post("/policies", authMiddleware(), requireRole("super_admin", "admin", "
   }
 });
 
-router.patch("/policies/:id", authMiddleware(), requireRole("super_admin", "admin", "ops"), async (req: Request, res: Response) => {
+router.patch("/policies/:id", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params["id"] as string, 10);
     if (isNaN(id)) { sendBadRequest(res, "Invalid policy ID"); return; }
@@ -385,7 +386,7 @@ router.get("/policies/:id/assignments", authMiddleware(), requireRole("super_adm
   }
 });
 
-router.post("/policies/:id/assignments", authMiddleware(), requireRole("super_admin", "admin", "ops"), async (req: Request, res: Response) => {
+router.post("/policies/:id/assignments", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const policyId = parseInt(req.params["id"] as string, 10);
     if (isNaN(policyId)) { sendBadRequest(res, "Invalid policy ID"); return; }
@@ -432,7 +433,7 @@ router.delete("/policies/:id/assignments/:assignmentId", authMiddleware(), requi
 // TOOL MESH — tools, versions, permissions
 // ============================================================
 
-router.get("/tools", authMiddleware(), async (req: Request, res: Response) => {
+router.get("/tools", authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { page, limit } = parsePagination(req.query as Record<string, unknown>);
     const domainTag = req.query["domainTag"] as string | undefined;
@@ -466,7 +467,7 @@ router.get("/tools/:toolId", authMiddleware(), async (req: Request, res: Respons
   }
 });
 
-router.post("/tools", authMiddleware(), requireRole("super_admin", "admin"), async (req: Request, res: Response) => {
+router.post("/tools", authMiddleware(), requireRole("super_admin", "admin"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const nowIso = new Date().toISOString();
     const parsed = ToolManifestSchema.safeParse({ ...req.body, createdAt: nowIso, updatedAt: nowIso });
@@ -502,7 +503,7 @@ router.post("/tools", authMiddleware(), requireRole("super_admin", "admin"), asy
   }
 });
 
-router.patch("/tools/:toolId", authMiddleware(), requireRole("super_admin", "admin"), async (req: Request, res: Response) => {
+router.patch("/tools/:toolId", authMiddleware(), requireRole("super_admin", "admin"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const toolId = req.params["toolId"] as string;
     const [existing] = await db.select().from(toolMeshToolsTable).where(eq(toolMeshToolsTable.toolId, toolId)).limit(1);
@@ -555,7 +556,7 @@ router.get("/tools/:toolId/versions", authMiddleware(), async (req: Request, res
   }
 });
 
-router.post("/tools/:toolId/versions", authMiddleware(), requireRole("super_admin", "admin"), async (req: Request, res: Response) => {
+router.post("/tools/:toolId/versions", authMiddleware(), requireRole("super_admin", "admin"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const toolId = req.params["toolId"] as string;
     const body = req.body as { version?: string; changelog?: string; schemaSnapshot?: Record<string, unknown> };
@@ -585,7 +586,7 @@ router.get("/tools/:toolId/permissions", authMiddleware(), requireRole("super_ad
   }
 });
 
-router.post("/tools/:toolId/permissions", authMiddleware(), requireRole("super_admin", "admin"), async (req: Request, res: Response) => {
+router.post("/tools/:toolId/permissions", authMiddleware(), requireRole("super_admin", "admin"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const toolId = req.params["toolId"] as string;
     const body = req.body as { subjectType?: ToolMeshToolPermission["subjectType"]; subjectId?: string; permission?: ToolMeshToolPermission["permission"]; expiresAt?: string };
@@ -628,7 +629,7 @@ router.delete("/tools/:toolId/permissions/:permissionId", authMiddleware(), requ
 // GUARDIAN ACTIONS (governance audit log)
 // ============================================================
 
-router.get("/actions", authMiddleware(), requireRole("super_admin", "admin", "ops", "analyst"), async (req: Request, res: Response) => {
+router.get("/actions", authMiddleware(), requireRole("super_admin", "admin", "ops", "analyst"), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { page, limit } = parsePagination(req.query as Record<string, unknown>);
     const outcome = req.query["outcome"] as string | undefined;
@@ -681,7 +682,7 @@ router.get("/actions/:id", authMiddleware(), async (req: Request, res: Response)
 // TOOL MESH ACTION APPROVALS (tool invocation approval workflow)
 // ============================================================
 
-router.post("/tool-approvals", authMiddleware(), requireRole("super_admin", "admin", "ops"), async (req: Request, res: Response) => {
+router.post("/tool-approvals", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { toolId, action, agentId, sessionId, workflowId, payload } = req.body as { toolId?: string; action?: string; agentId?: string; sessionId?: string; workflowId?: string; payload?: Record<string, unknown> };
     if (!toolId || !action) { sendBadRequest(res, "toolId and action are required"); return; }
@@ -700,7 +701,7 @@ router.post("/tool-approvals", authMiddleware(), requireRole("super_admin", "adm
   }
 });
 
-router.post("/tool-approvals/:id/approve", authMiddleware(), requireRole("super_admin", "admin", "ops"), async (req: Request, res: Response) => {
+router.post("/tool-approvals/:id/approve", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params["id"] as string, 10);
     if (isNaN(id)) { sendBadRequest(res, "Invalid action ID"); return; }
@@ -718,7 +719,7 @@ router.post("/tool-approvals/:id/approve", authMiddleware(), requireRole("super_
   }
 });
 
-router.post("/tool-approvals/:id/reject", authMiddleware(), requireRole("super_admin", "admin", "ops"), async (req: Request, res: Response) => {
+router.post("/tool-approvals/:id/reject", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params["id"] as string, 10);
     if (isNaN(id)) { sendBadRequest(res, "Invalid action ID"); return; }
@@ -740,7 +741,7 @@ router.post("/tool-approvals/:id/reject", authMiddleware(), requireRole("super_a
 // GUARDIAN APPROVAL REQUESTS (multi-tier governance approvals)
 // ============================================================
 
-router.get("/approvals", authMiddleware(), requireRole("super_admin", "admin", "ops", "analyst", "compliance", "executive"), async (req: Request, res: Response) => {
+router.get("/approvals", authMiddleware(), requireRole("super_admin", "admin", "ops", "analyst", "compliance", "executive"), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { page, limit } = parsePagination(req.query as Record<string, unknown>);
     const status = req.query["status"] as string | undefined;
@@ -786,7 +787,7 @@ router.get("/approvals/:requestId", authMiddleware(), requireRole("super_admin",
   }
 });
 
-router.post("/approvals/:requestId/review", authMiddleware(), requireRole("super_admin", "admin", "ops", "compliance", "executive"), async (req: Request, res: Response) => {
+router.post("/approvals/:requestId/review", authMiddleware(), requireRole("super_admin", "admin", "ops", "compliance", "executive"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const requestId = req.params["requestId"] as string;
     const { decision, note } = req.body as { decision?: string; note?: string };
@@ -851,7 +852,7 @@ router.post("/approvals/:requestId/review", authMiddleware(), requireRole("super
 // ROLLBACK EVENTS
 // ============================================================
 
-router.get("/rollback-events", authMiddleware(), requireRole("super_admin", "admin", "ops", "analyst"), async (req: Request, res: Response) => {
+router.get("/rollback-events", authMiddleware(), requireRole("super_admin", "admin", "ops", "analyst"), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { page, limit } = parsePagination(req.query as Record<string, unknown>);
     const status = req.query["status"] as string | undefined;
@@ -898,7 +899,7 @@ router.get("/rollback-events/:id", authMiddleware(), async (req: Request, res: R
   }
 });
 
-router.post("/rollback-events", authMiddleware(), requireRole("super_admin", "admin", "ops"), async (req: Request, res: Response) => {
+router.post("/rollback-events", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { actionId, requestId, agentId, tier, triggeredBy, reason, metadata } = req.body as { actionId?: string; requestId?: string; agentId?: string; tier?: string; triggeredBy?: string; reason?: string; metadata?: Record<string, unknown> };
     if (!actionId || !requestId || !tier || !triggeredBy || !reason) { sendBadRequest(res, "actionId, requestId, tier, triggeredBy, and reason are required"); return; }
@@ -919,7 +920,7 @@ router.post("/rollback-events", authMiddleware(), requireRole("super_admin", "ad
   }
 });
 
-router.patch("/rollback-events/:id/status", authMiddleware(), requireRole("super_admin", "admin", "ops"), async (req: Request, res: Response) => {
+router.patch("/rollback-events/:id/status", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params["id"] as string, 10);
     if (isNaN(id)) { sendBadRequest(res, "Invalid rollback event ID"); return; }
@@ -953,7 +954,7 @@ router.patch("/rollback-events/:id/status", authMiddleware(), requireRole("super
 // DECISION ENGINE — decide (legacy) + evaluate (full 6-tier)
 // ============================================================
 
-router.post("/guardian/decide", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/guardian/decide", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { requestId, agentId, sessionId, workflowId, action, domain, tier, context } = req.body as Partial<DecisionRequest>;
     if (!requestId || !action) { sendBadRequest(res, "requestId and action are required"); return; }
@@ -971,7 +972,7 @@ router.post("/guardian/decide", authMiddleware(), async (req: Request, res: Resp
   }
 });
 
-router.post("/guardian/evaluate", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/guardian/evaluate", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { requestId, agentId, sessionId, workflowId, action, domain, tier, model, toolId, actionCount, environment, memoryScope, isExternalComms, context } = req.body as Partial<DecisionRequest>;
 

@@ -12,6 +12,7 @@ import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, handleRouteErro
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { z } from "zod";
 import crypto from "crypto";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -122,7 +123,7 @@ router.get("/compliance/posture", authMiddleware(), async (req, res) => {
   }
 });
 
-router.get("/compliance/suitability", authMiddleware(), async (req, res) => {
+router.get("/compliance/suitability", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { status, advisorId, limit, offset } = req.query;
     const conditions = [];
@@ -146,7 +147,7 @@ router.get("/compliance/suitability", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/compliance/suitability", authMiddleware({ required: true }), async (req, res) => {
+router.post("/compliance/suitability", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const parsed = CreateSuitabilitySchema.safeParse(req.body ?? {});
     if (!parsed.success) {
@@ -170,7 +171,7 @@ router.post("/compliance/suitability", authMiddleware({ required: true }), async
   }
 });
 
-router.patch("/compliance/suitability/:id/review", authMiddleware({ required: true }), async (req, res) => {
+router.patch("/compliance/suitability/:id/review", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { id } = req.params as Record<string, string>;
     const { action, reviewNotes, reviewerId } = req.body as { action: "approve" | "reject"; reviewNotes?: string; reviewerId?: string };
@@ -201,7 +202,7 @@ router.patch("/compliance/suitability/:id/review", authMiddleware({ required: tr
   }
 });
 
-router.get("/compliance/archival", authMiddleware(), async (req, res) => {
+router.get("/compliance/archival", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { type, limit, offset } = req.query;
     const conditions = [];
@@ -229,7 +230,7 @@ router.get("/compliance/archival", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/compliance/archival", authMiddleware({ required: true }), async (req, res) => {
+router.post("/compliance/archival", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const parsed = CreateArchivalSchema.safeParse(req.body ?? {});
     if (!parsed.success) {
@@ -275,7 +276,7 @@ router.post("/compliance/archival", authMiddleware({ required: true }), async (r
   }
 });
 
-router.get("/compliance/supervision", authMiddleware(), async (req, res) => {
+router.get("/compliance/supervision", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { status, priority, category, limit, offset } = req.query;
     const conditions = [];
@@ -304,7 +305,7 @@ router.get("/compliance/supervision", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/compliance/supervision", authMiddleware({ required: true }), async (req, res) => {
+router.post("/compliance/supervision", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const parsed = CreateSupervisionSchema.safeParse(req.body ?? {});
     if (!parsed.success) {
@@ -337,7 +338,7 @@ router.post("/compliance/supervision", authMiddleware({ required: true }), async
   }
 });
 
-router.patch("/compliance/supervision/:itemId/action", authMiddleware({ required: true }), async (req, res) => {
+router.patch("/compliance/supervision/:itemId/action", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { itemId } = req.params as Record<string, string>;
     const { action, notes, assignedToId, assignedToName } = req.body as {
@@ -394,7 +395,7 @@ router.patch("/compliance/supervision/:itemId/action", authMiddleware({ required
   }
 });
 
-router.get("/compliance/calendar", authMiddleware(), async (req, res) => {
+router.get("/compliance/calendar", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { status, eventType, from, to } = req.query;
     const conditions = [];
@@ -420,7 +421,7 @@ router.get("/compliance/calendar", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/compliance/calendar", authMiddleware({ required: true }), async (req, res) => {
+router.post("/compliance/calendar", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const parsed = CreateCalendarSchema.safeParse(req.body ?? {});
     if (!parsed.success) {

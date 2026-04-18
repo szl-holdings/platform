@@ -10,7 +10,7 @@ import { serverTelemetry } from "@szl-holdings/observability";
 import { durableJobQueue } from "@szl-holdings/forge-runtime";
 import { logger } from "../../lib/logger.js";
 import { isFlagEnabled } from "../../lib/platform-flags.js";
-import { validateBody } from "../../lib/validation.js";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation.js";
 import { sendError, sendNotFound, sendForbidden, sendBadRequest } from "../../lib/api-response.js";
 import { z } from "zod";
 import { services } from "@szl-holdings/services";
@@ -346,7 +346,7 @@ export function register(router: IRouter): void {
     }
   });
 
-  router.get("/admin/workflow-runs", async (req, res) => {
+  router.get("/admin/workflow-runs", validateQuery(listQuerySchema), async (req, res) => {
     const domain = req.query["domain"] as string | undefined;
     const status = req.query["status"] as string | undefined;
     const workflowType = req.query["workflowType"] as string | undefined;
@@ -392,7 +392,7 @@ export function register(router: IRouter): void {
     }
   });
 
-  router.get("/admin/artifact-approvals", async (req, res) => {
+  router.get("/admin/artifact-approvals", validateQuery(listQuerySchema), async (req, res) => {
     const approvalsEnabled = await isFlagEnabled("alloy_artifact_approvals_enabled");
     if (!approvalsEnabled) { sendForbidden(res, "Feature not available: alloy_artifact_approvals_enabled"); return; }
     const status = req.query["status"] as string | undefined;
@@ -409,7 +409,7 @@ export function register(router: IRouter): void {
     }
   });
 
-  router.post("/admin/artifact-approvals/:id/approve", async (req, res) => {
+  router.post("/admin/artifact-approvals/:id/approve", validateBody(jsonObjectBodySchema), async (req, res) => {
     const approvalsEnabled = await isFlagEnabled("alloy_artifact_approvals_enabled");
     if (!approvalsEnabled) { sendForbidden(res, "Feature not available: alloy_artifact_approvals_enabled"); return; }
     const { id } = req.params as Record<string, string>;

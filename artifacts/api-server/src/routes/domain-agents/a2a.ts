@@ -10,6 +10,7 @@ import { delegateTask, getDelegationTask, getDelegationHistory } from "@szl-hold
 import { sendSuccess, sendError } from "../../lib/api-response";
 import { authMiddleware } from "../../middlewares/auth";
 import { logger } from "../../lib/logger";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
 
 const router = Router();
 
@@ -26,7 +27,7 @@ router.get("/a2a/health", (_req, res) => {
   res.json({ ok: true, protocol: "A2A", version: "1.0.0", timestamp: new Date().toISOString() });
 });
 
-router.post("/a2a/register", a2aRateLimit, authMiddleware(), async (req: Request, res: Response) => {
+router.post("/a2a/register", a2aRateLimit, authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   const body = req.body as {
     agentId?: string;
     name?: string;
@@ -104,7 +105,7 @@ router.get("/a2a/agents/:agentId", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/a2a/discover", a2aRateLimit, async (req: Request, res: Response) => {
+router.post("/a2a/discover", a2aRateLimit, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   const body = req.body as {
     requestingAgentId?: string;
     capability?: string;
@@ -141,7 +142,7 @@ router.post("/a2a/discover", a2aRateLimit, async (req: Request, res: Response) =
   }
 });
 
-router.post("/a2a/delegate", a2aRateLimit, authMiddleware(), async (req: Request, res: Response) => {
+router.post("/a2a/delegate", a2aRateLimit, authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   const body = req.body as {
     requestingAgentId?: string;
     targetAgentId?: string;
@@ -202,7 +203,7 @@ router.get("/a2a/delegate/:taskId", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/a2a/delegate", async (req: Request, res: Response) => {
+router.get("/a2a/delegate", validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   const { requestingAgentId, targetAgentId, limit } = req.query as Record<string, string>;
   try {
     const tasks = await getDelegationHistory({
@@ -217,7 +218,7 @@ router.get("/a2a/delegate", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/a2a/heartbeat", a2aRateLimit, async (req: Request, res: Response) => {
+router.post("/a2a/heartbeat", a2aRateLimit, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   const body = req.body as {
     agentId?: string;
     status?: string;

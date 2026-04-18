@@ -1,4 +1,5 @@
 import { Router, type Request, type Response } from "express";
+import { validateQuery, listQuerySchema } from "../lib/validation.js";
 import {
   captureConsciousnessSnapshot,
   metacognitiveMonitor,
@@ -62,7 +63,7 @@ router.get("/nuro-mesh/consciousness/self-model", ...adminOnly, safeHandler("sel
 
 router.get("/nuro-mesh/consciousness/workspace", ...adminOnly, safeHandler("workspace", () => cognitiveWorkspace.getState()));
 
-router.get("/nuro-mesh/consciousness/monologue", ...adminOnly, safeHandler("monologue", (req) => {
+router.get("/nuro-mesh/consciousness/monologue", ...adminOnly, safeHandler("monologue", validateQuery(listQuerySchema), (req) => {
   const limit = Math.min(50, parseInt(String(req.query?.limit ?? "20"), 10));
   const state = innerMonologue.getState();
   state.recentThoughts = state.recentThoughts.slice(0, limit);
@@ -84,12 +85,12 @@ function safeLimit(raw: unknown, fallback: number, max: number): number {
   return Number.isFinite(parsed) && parsed > 0 ? Math.min(parsed, max) : fallback;
 }
 
-router.get("/nuro-mesh/consciousness/history/snapshots", ...adminOnly, asyncHandler("history/snapshots", async (req) => {
+router.get("/nuro-mesh/consciousness/history/snapshots", ...adminOnly, asyncHandler("history/snapshots", validateQuery(listQuerySchema), async (req) => {
   const limit = safeLimit(req.query?.limit, 20, 100);
   return db.select().from(consciousnessSnapshotsTable).orderBy(desc(consciousnessSnapshotsTable.createdAt)).limit(limit);
 }));
 
-router.get("/nuro-mesh/consciousness/history/monologue", ...adminOnly, asyncHandler("history/monologue", async (req) => {
+router.get("/nuro-mesh/consciousness/history/monologue", ...adminOnly, asyncHandler("history/monologue", validateQuery(listQuerySchema), async (req) => {
   const limit = safeLimit(req.query?.limit, 50, 200);
   return db.select().from(consciousnessMonologueTable).orderBy(desc(consciousnessMonologueTable.createdAt)).limit(limit);
 }));
@@ -102,12 +103,12 @@ router.get("/nuro-mesh/consciousness/history/profiles", ...adminOnly, asyncHandl
   return db.select().from(consciousnessAgentProfilesTable).orderBy(desc(consciousnessAgentProfilesTable.updatedAt)).limit(50);
 }));
 
-router.get("/nuro-mesh/consciousness/history/emotions", ...adminOnly, asyncHandler("history/emotions", async (req) => {
+router.get("/nuro-mesh/consciousness/history/emotions", ...adminOnly, asyncHandler("history/emotions", validateQuery(listQuerySchema), async (req) => {
   const limit = safeLimit(req.query?.limit, 50, 200);
   return db.select().from(consciousnessEmotionalHistoryTable).orderBy(desc(consciousnessEmotionalHistoryTable.capturedAt)).limit(limit);
 }));
 
-router.get("/nuro-mesh/consciousness/history/temporal", ...adminOnly, asyncHandler("history/temporal", async (req) => {
+router.get("/nuro-mesh/consciousness/history/temporal", ...adminOnly, asyncHandler("history/temporal", validateQuery(listQuerySchema), async (req) => {
   const agentId = req.query?.agentId ? String(req.query.agentId) : undefined;
   const limit = safeLimit(req.query?.limit, 50, 200);
   const query = db.select().from(consciousnessTemporalMetricsTable);

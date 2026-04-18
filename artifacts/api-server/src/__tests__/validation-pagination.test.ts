@@ -543,11 +543,12 @@ describe("GET /billing/subscriptions — pagination metadata", () => {
     expect(body.meta.offset).toBe(40);
   });
 
-  it("clamps limit to 100 when an excessive value is supplied", async () => {
+  it("rejects an excessive limit with 400 (enforced by query validation)", async () => {
     const res = await request(app).get("/billing/subscriptions?limit=9999");
 
-    expect(res.status).toBe(200);
-    const body = res.body as PaginatedBody;
-    expect(body.meta.limit).toBeLessThanOrEqual(100);
+    expect(res.status).toBe(400);
+    const body = res.body as { error: string; details: { issues: unknown[] } };
+    expect(body.error).toBeTruthy();
+    expect(Array.isArray(body.details?.issues)).toBe(true);
   });
 });

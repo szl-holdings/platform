@@ -53,9 +53,10 @@ import {
   ingestFirestormAlert,
 } from "@szl-holdings/ai-engine/domain-embedding-hooks";
 import { firestormLiveLimit, getFsCached, fetchFsText, fetchFsJson } from "./shared";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
 const router = Router();
 
-router.get("/firestorm/live/mitre-attack", firestormLiveLimit, authMiddleware(), async (req, res) => {
+router.get("/firestorm/live/mitre-attack", firestormLiveLimit, authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const tactic = req.query.tactic as string;
     const techniques = await getFsCached("mitre-attack-live", 86400000, async () => {
@@ -75,7 +76,7 @@ router.get("/firestorm/live/mitre-attack", firestormLiveLimit, authMiddleware(),
   } catch (err) { handleRouteError(res, err, "Failed to fetch MITRE ATT&CK data"); }
 });
 
-router.get("/firestorm/live/cisa-kev", firestormLiveLimit, authMiddleware(), async (req, res) => {
+router.get("/firestorm/live/cisa-kev", firestormLiveLimit, authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const ransomwareOnly = req.query.ransomware === "true";
     const limit = Math.min(parseInt(req.query.limit as string) || 20, 50);
@@ -93,7 +94,7 @@ router.get("/firestorm/live/cisa-kev", firestormLiveLimit, authMiddleware(), asy
   } catch (err) { handleRouteError(res, err, "Failed to fetch CISA KEV for Firestorm"); }
 });
 
-router.get("/firestorm/live/nvd-cves", firestormLiveLimit, authMiddleware(), async (req, res) => {
+router.get("/firestorm/live/nvd-cves", firestormLiveLimit, authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const severity = (req.query.severity as string)?.toUpperCase();
     const keyword = req.query.keyword as string;
@@ -141,7 +142,7 @@ router.get("/firestorm/live/threat-news", firestormLiveLimit, authMiddleware(), 
 });
 
 
-router.get("/firestorm/live/threat-indicators", firestormLiveLimit, authMiddleware(), async (req, res) => {
+router.get("/firestorm/live/threat-indicators", firestormLiveLimit, authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const type = req.query.type as string;
     const data = await getFsCached("firestorm-threat-indicators", 3600000, async () => {
@@ -223,7 +224,7 @@ async function fetchCertAdvisories(feed: typeof CERT_FEEDS[0]): Promise<{ adviso
   } catch { return { advisories: [], liveData: false }; }
 }
 
-router.get("/firestorm/live/cert-advisories", firestormLiveLimit, authMiddleware(), async (req, res) => {
+router.get("/firestorm/live/cert-advisories", firestormLiveLimit, authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const certId = req.query.cert as string;
     const feedsToFetch = certId ? CERT_FEEDS.filter(f => f.id === certId) : CERT_FEEDS;
@@ -264,7 +265,7 @@ router.get("/firestorm/live/feed-status", firestormLiveLimit, authMiddleware(), 
   } catch (err) { handleRouteError(res, err, "Failed to fetch feed status"); }
 });
 
-router.post("/firestorm/ingest/webhook", authMiddleware({ required: true }), async (req, res) => {
+router.post("/firestorm/ingest/webhook", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const body = ingestWebhookSchema.parse(req.body ?? {});
     const source = (req.headers["x-firestorm-source"] as string) || body?.source || "webhook";

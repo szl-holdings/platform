@@ -14,10 +14,11 @@ import {
   sendNotFound,
   sendBadRequest,
 } from "../lib/api-response";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
-router.get("/reflections", authMiddleware(), async (req, res) => {
+router.get("/reflections", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const query: ReflectionStoreQuery = {};
 
@@ -65,7 +66,7 @@ router.get("/reflections/:id", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/reflections", authMiddleware(), async (req, res) => {
+router.post("/reflections", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { traceId } = req.body as { traceId?: string };
     if (!traceId) {

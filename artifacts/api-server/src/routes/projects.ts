@@ -3,6 +3,7 @@ import { db, projectsTable, insertProjectSchema } from "@szl-holdings/db";
 import { eq, desc } from "drizzle-orm";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, sendNoContent, sendError, handleRouteError } from "../lib/api-response";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
+import { validateBody, jsonObjectBodySchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -33,7 +34,7 @@ router.get("/projects", authMiddleware({ required: false }), async (req, res) =>
   }
 });
 
-router.post("/projects", authMiddleware(), requireRole("ops", "super_admin"), async (req, res) => {
+router.post("/projects", authMiddleware(), requireRole("ops", "super_admin"), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const body = insertProjectSchema.parse(req.body);
     const [project] = await db
@@ -76,7 +77,7 @@ router.get("/projects/:id", authMiddleware(), async (req, res) => {
   }
 });
 
-router.patch("/projects/:id", authMiddleware(), requireRole("ops", "super_admin"), async (req, res) => {
+router.patch("/projects/:id", authMiddleware(), requireRole("ops", "super_admin"), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const { name, description, status } = req.body;

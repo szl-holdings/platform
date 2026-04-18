@@ -34,7 +34,7 @@ import { eq, and, ne } from "drizzle-orm";
 import { authMiddleware } from "../middlewares/auth";
 import { writeLimiter, readLimiter } from "../middlewares/rate-limiters";
 import { hashIp } from "@szl-holdings/audit";
-import { validateBody } from "../lib/validation";
+import { validateBody, jsonObjectBodySchema} from "../lib/validation";
 import {
   sendSuccess,
   sendBadRequest,
@@ -585,7 +585,7 @@ router.put(
   },
 );
 
-router.post("/user/deactivate", writeLimiter, authMiddleware(), async (req: Request, res: Response) => {
+router.post("/user/deactivate", writeLimiter, authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const userId = req.user!.id;
     const { reason } = req.body as { reason?: string };
@@ -617,7 +617,7 @@ router.post("/user/deactivate", writeLimiter, authMiddleware(), async (req: Requ
   }
 });
 
-router.post("/user/password-reset", writeLimiter, async (req: Request, res: Response) => {
+router.post("/user/password-reset", writeLimiter, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { email } = req.body as { email?: string };
     if (!email || typeof email !== "string") {
@@ -675,7 +675,7 @@ router.post("/user/password-reset", writeLimiter, async (req: Request, res: Resp
   }
 });
 
-router.post("/user/password-reset/confirm", writeLimiter, async (req: Request, res: Response) => {
+router.post("/user/password-reset/confirm", writeLimiter, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { token, newPassword } = req.body as { token?: string; newPassword?: string };
     if (!token || typeof token !== "string") {

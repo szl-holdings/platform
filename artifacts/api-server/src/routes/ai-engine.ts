@@ -46,6 +46,7 @@ import {
   type AlloyDecision,
   type RiskLevel,
 } from "@szl-holdings/ai-engine";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 function getOrgId(user?: AuthenticatedUser): number | null {
   return user?.orgs?.[0]?.orgId ?? null;
@@ -151,7 +152,7 @@ router.get("/ai/models", (_req, res) => {
   });
 });
 
-router.post("/ai/respond", async (req, res) => {
+router.post("/ai/respond", validateBody(jsonObjectBodySchema), async (req, res) => {
   const start = Date.now();
   try {
     const { messages, model, maxTokens, routeClass } = req.body as {
@@ -225,7 +226,7 @@ router.post("/ai/respond", async (req, res) => {
   }
 });
 
-router.post("/ai/triage", async (req, res) => {
+router.post("/ai/triage", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { input, context } = req.body as { input?: string; context?: string };
     if (!input) { res.status(400).json({ error: "input required" }); return; }
@@ -307,7 +308,7 @@ router.post("/ai/triage", async (req, res) => {
   }
 });
 
-router.post("/ai/extract", async (req, res) => {
+router.post("/ai/extract", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { input, entityTypes } = req.body as { input?: string; entityTypes?: string[] };
     if (!input) { res.status(400).json({ error: "input required" }); return; }
@@ -363,7 +364,7 @@ router.post("/ai/extract", async (req, res) => {
   }
 });
 
-router.post("/ai/plan", async (req, res) => {
+router.post("/ai/plan", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { objective, context, constraints } = req.body as { objective?: string; context?: string; constraints?: string[] };
     if (!objective) { res.status(400).json({ error: "objective required" }); return; }
@@ -436,7 +437,7 @@ Consider constraints: ${constraints?.join("; ") || "none specified"}`,
   }
 });
 
-router.post("/ai/retrieve", authMiddleware({ required: true }), async (req, res) => {
+router.post("/ai/retrieve", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { query, topK, method } = req.body as { query?: string; topK?: number; method?: "semantic" | "keyword" | "hybrid" };
     if (!query) { res.status(400).json({ error: "query required" }); return; }
@@ -479,7 +480,7 @@ router.post("/ai/retrieve", authMiddleware({ required: true }), async (req, res)
   }
 });
 
-router.post("/ai/tools/preview", async (req, res) => {
+router.post("/ai/tools/preview", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { toolName, arguments: args } = req.body as { toolName?: string; arguments?: Record<string, unknown> };
     if (!toolName) { res.status(400).json({ error: "toolName required" }); return; }
@@ -505,7 +506,7 @@ router.post("/ai/tools/preview", async (req, res) => {
   }
 });
 
-router.post("/ai/tools/execute", authMiddleware({ required: true }), async (req, res) => {
+router.post("/ai/tools/execute", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { toolName, arguments: args, calledBy } = req.body as {
       toolName?: string;
@@ -532,7 +533,7 @@ router.post("/ai/tools/execute", authMiddleware({ required: true }), async (req,
   }
 });
 
-router.get("/ai/audit", authMiddleware({ required: true }), async (req, res) => {
+router.get("/ai/audit", authMiddleware({ required: true }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const limit = Math.min(parseInt(String(req.query.limit) || "50", 10), 200);
     const offset = parseInt(String(req.query.offset) || "0", 10);
@@ -559,7 +560,7 @@ router.get("/ai/tools", (_req, res) => {
   });
 });
 
-router.post("/ai/evals/run", authMiddleware({ required: true }), async (req, res) => {
+router.post("/ai/evals/run", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { categories, testIds } = req.body as { categories?: string[]; testIds?: string[] };
 
@@ -605,7 +606,7 @@ router.get("/ai/evals/golden-set", (_req, res) => {
   });
 });
 
-router.post("/ai/retrieval/ingest", authMiddleware({ required: true }), async (req, res) => {
+router.post("/ai/retrieval/ingest", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { content, source, sourceType, metadata } = req.body as {
       content?: string;
@@ -630,7 +631,7 @@ router.post("/ai/retrieval/ingest", authMiddleware({ required: true }), async (r
 
 // ─── Alloy Decision Store ─────────────────────────────────────────────────────
 
-router.get("/ai/decision", authMiddleware({ required: true }), async (req, res) => {
+router.get("/ai/decision", authMiddleware({ required: true }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const limit = Math.min(parseInt(String(req.query.limit) || "50", 10), 200);
     const offset = parseInt(String(req.query.offset) || "0", 10);
@@ -647,7 +648,7 @@ router.get("/ai/decision", authMiddleware({ required: true }), async (req, res) 
   }
 });
 
-router.post("/ai/decision", authMiddleware({ required: true }), async (req, res) => {
+router.post("/ai/decision", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const {
       recommendedAction,
@@ -763,6 +764,7 @@ router.post(
   "/ai/decision/:id/approve",
   authMiddleware({ required: true }),
   requireRole("exec", "ops", "admin", "super_admin"),
+  validateBody(jsonObjectBodySchema),
   async (req, res) => {
     try {
       const orgId = getOrgId(req.user);
@@ -817,6 +819,7 @@ router.post(
   "/ai/decision/:id/reject",
   authMiddleware({ required: true }),
   requireRole("exec", "ops", "admin", "super_admin"),
+  validateBody(jsonObjectBodySchema),
   async (req, res) => {
     try {
       const orgId = getOrgId(req.user);

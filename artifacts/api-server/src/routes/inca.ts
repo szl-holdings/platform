@@ -12,6 +12,7 @@ import {
 import { eq, desc, ilike, or, sql } from "drizzle-orm";
 import { sendSuccess, sendNotFound, handleRouteError, parsePagination } from "../lib/api-response";
 import { authMiddleware, parseIdParam } from "../middlewares/auth";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -43,7 +44,7 @@ router.get("/inca/dashboard", authMiddleware(), async (_req, res) => {
   }
 });
 
-router.get("/inca/projects", authMiddleware(), async (req, res) => {
+router.get("/inca/projects", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const rows = await db.select().from(incaProjectsTable).orderBy(desc(incaProjectsTable.updatedAt)).limit(limit).offset(offset);
@@ -65,7 +66,7 @@ router.get("/inca/projects/:id", async (req, res) => {
   }
 });
 
-router.post("/inca/projects", authMiddleware(), async (req, res) => {
+router.post("/inca/projects", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const [row] = await db.insert(incaProjectsTable).values(req.body).returning();
     sendSuccess(res, row, 201);
@@ -74,7 +75,7 @@ router.post("/inca/projects", authMiddleware(), async (req, res) => {
   }
 });
 
-router.patch("/inca/projects/:id", authMiddleware(), async (req, res) => {
+router.patch("/inca/projects/:id", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(incaProjectsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(incaProjectsTable.id, id)).returning();
@@ -116,7 +117,7 @@ router.get("/inca/projects/:id/models", async (req, res) => {
   }
 });
 
-router.get("/inca/experiments", authMiddleware(), async (req, res) => {
+router.get("/inca/experiments", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const rows = await db.select().from(incaExperimentsTable).orderBy(desc(incaExperimentsTable.createdAt)).limit(limit).offset(offset);
@@ -127,7 +128,7 @@ router.get("/inca/experiments", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/inca/experiments", authMiddleware(), async (req, res) => {
+router.post("/inca/experiments", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const [row] = await db.insert(incaExperimentsTable).values(req.body).returning();
     sendSuccess(res, row, 201);
@@ -136,7 +137,7 @@ router.post("/inca/experiments", authMiddleware(), async (req, res) => {
   }
 });
 
-router.patch("/inca/experiments/:id", authMiddleware(), async (req, res) => {
+router.patch("/inca/experiments/:id", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(incaExperimentsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(incaExperimentsTable.id, id)).returning();
@@ -158,7 +159,7 @@ router.delete("/inca/experiments/:id", authMiddleware(), async (req, res) => {
   }
 });
 
-router.get("/inca/models", async (req, res) => {
+router.get("/inca/models", validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const rows = await db.select().from(incaModelsTable).orderBy(desc(incaModelsTable.createdAt)).limit(limit).offset(offset);
@@ -169,7 +170,7 @@ router.get("/inca/models", async (req, res) => {
   }
 });
 
-router.post("/inca/models", authMiddleware(), async (req, res) => {
+router.post("/inca/models", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const [row] = await db.insert(incaModelsTable).values(req.body).returning();
     sendSuccess(res, row, 201);
@@ -178,7 +179,7 @@ router.post("/inca/models", authMiddleware(), async (req, res) => {
   }
 });
 
-router.patch("/inca/models/:id", authMiddleware(), async (req, res) => {
+router.patch("/inca/models/:id", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(incaModelsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(incaModelsTable.id, id)).returning();
@@ -200,7 +201,7 @@ router.delete("/inca/models/:id", authMiddleware(), async (req, res) => {
   }
 });
 
-router.get("/inca/insights", async (req, res) => {
+router.get("/inca/insights", validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const rows = await db.select().from(incaInsightsTable).orderBy(desc(incaInsightsTable.createdAt)).limit(limit).offset(offset);
@@ -211,7 +212,7 @@ router.get("/inca/insights", async (req, res) => {
   }
 });
 
-router.post("/inca/insights", authMiddleware(), async (req, res) => {
+router.post("/inca/insights", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const [row] = await db.insert(incaInsightsTable).values(req.body).returning();
     sendSuccess(res, row, 201);
@@ -231,7 +232,7 @@ router.delete("/inca/insights/:id", authMiddleware(), async (req, res) => {
   }
 });
 
-router.get("/inca/search", async (req, res) => {
+router.get("/inca/search", validateQuery(listQuerySchema), async (req, res) => {
   try {
     const query = (req.query.q as string) || "";
     if (!query) { sendSuccess(res, []); return; }
@@ -366,7 +367,7 @@ const FALLBACK_PAPERS = [
   { id: "2403.56789", title: "Mixture of Experts for Efficient Large Language Model Inference", authors: ["Fedus, W.", "Zoph, B."], abstract: "Novel routing mechanisms for sparse mixture of experts models.", categories: ["cs.LG", "cs.CL"], published: "2024-03-05", updated: "2024-03-08", pdfUrl: "https://arxiv.org/abs/2403.56789", source: "demo" },
 ];
 
-router.get("/inca/live/arxiv", incaLiveLimit, authMiddleware({ required: false }), async (req, res) => {
+router.get("/inca/live/arxiv", incaLiveLimit, authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const query = (req.query.q as string) || "large language model";
     const limit = Math.min(parseInt(req.query.limit as string) || 8, 15);
@@ -389,7 +390,7 @@ router.get("/inca/live/arxiv", incaLiveLimit, authMiddleware({ required: false }
   } catch (err) { handleRouteError(res, err, "Failed to fetch arXiv papers"); }
 });
 
-router.get("/inca/live/semantic-scholar", incaLiveLimit, authMiddleware({ required: false }), async (req, res) => {
+router.get("/inca/live/semantic-scholar", incaLiveLimit, authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const query = (req.query.q as string) || "transformer architecture";
     const limit = Math.min(parseInt(req.query.limit as string) || 8, 15);
@@ -433,7 +434,7 @@ router.get("/inca/live/semantic-scholar", incaLiveLimit, authMiddleware({ requir
   } catch (err) { handleRouteError(res, err, "Failed to fetch Semantic Scholar papers"); }
 });
 
-router.get("/inca/live/paperswithcode", incaLiveLimit, authMiddleware({ required: false }), async (req, res) => {
+router.get("/inca/live/paperswithcode", incaLiveLimit, authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const task = (req.query.task as string) || "image-classification";
     const leaderboard = await getCached(`inca-pwc-${task}`, 3600000, async () => {
@@ -472,7 +473,7 @@ router.get("/inca/live/paperswithcode", incaLiveLimit, authMiddleware({ required
   } catch (err) { handleRouteError(res, err, "Failed to fetch Papers With Code benchmarks"); }
 });
 
-router.get("/inca/live/huggingface-models", incaLiveLimit, authMiddleware({ required: false }), async (req, res) => {
+router.get("/inca/live/huggingface-models", incaLiveLimit, authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const task = (req.query.task as string) || "text-generation";
     const limit = Math.min(parseInt(req.query.limit as string) || 10, 20);

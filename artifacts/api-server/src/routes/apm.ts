@@ -1,11 +1,12 @@
 import { Router, type IRouter } from "express";
+import { validateQuery, listQuerySchema } from "../lib/validation.js";
 import { serverTelemetry } from "@szl-holdings/observability";
 import { authMiddleware } from "../middlewares/auth";
 import { sendSuccess, handleRouteError, sendBadRequest } from "../lib/api-response";
 
 const router: IRouter = Router();
 
-router.get("/apm/latency", authMiddleware(), async (req, res) => {
+router.get("/apm/latency", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const windowMs = req.query.windowMs ? parseInt(req.query.windowMs as string) : 300_000;
     if (windowMs < 0 || windowMs > 86_400_000) {
@@ -19,7 +20,7 @@ router.get("/apm/latency", authMiddleware(), async (req, res) => {
   }
 });
 
-router.get("/apm/spans", authMiddleware(), async (req, res) => {
+router.get("/apm/spans", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const windowMs = req.query.windowMs ? parseInt(req.query.windowMs as string) : 300_000;
     const limit = req.query.limit ? Math.min(parseInt(req.query.limit as string), 500) : 100;
@@ -34,7 +35,7 @@ router.get("/apm/spans", authMiddleware(), async (req, res) => {
   }
 });
 
-router.get("/apm/external-calls", authMiddleware(), async (req, res) => {
+router.get("/apm/external-calls", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const windowMs = req.query.windowMs ? parseInt(req.query.windowMs as string) : 300_000;
     const stats = serverTelemetry.getExternalCallStats(windowMs);

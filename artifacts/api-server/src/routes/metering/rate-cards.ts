@@ -25,6 +25,7 @@ import { authMiddleware, requireRole, parseIdParam } from "../../middlewares/aut
 import { tenantScope, assertTenantAccess } from "../../middlewares/tenant-scope";
 import { logger } from "../../lib/logger";
 import { periodBounds, meteringRateLimit, checkAndEnforceQuota } from "./shared";
+import {validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
 
 const router: IRouter = Router();
 const ADMIN_ROLES = ["admin", "super_admin", "ops"] as const;
@@ -38,6 +39,7 @@ router.get(
   "/metering/usage",
   authMiddleware(),
   requireRole(...READ_ROLES),
+  validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
       const period = (req.query.period as string) || "month";
@@ -77,6 +79,7 @@ router.get(
 router.get(
   "/metering/usage/:orgId",
   authMiddleware(),
+  validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
       const orgId = parseIdParam(req.params.orgId);
@@ -155,6 +158,7 @@ router.get(
   "/metering/rate-cards",
   authMiddleware(),
   requireRole(...READ_ROLES),
+  validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
       const featureKey = req.query.featureKey as string | undefined;
@@ -220,7 +224,7 @@ router.post(
   "/metering/rate-cards",
   authMiddleware(),
   requireRole(...ADMIN_ROLES),
-  async (req: Request, res: Response) => {
+  validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
     try {
       const { tiers, ...body } = req.body as {
         name: string;
@@ -278,7 +282,7 @@ router.put(
   "/metering/rate-cards/:id",
   authMiddleware(),
   requireRole(...ADMIN_ROLES),
-  async (req: Request, res: Response) => {
+  validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
     try {
       const id = parseIdParam(req.params.id);
       const { tiers, ...updates } = req.body as Record<string, unknown> & {
@@ -312,7 +316,7 @@ router.post(
   "/metering/rate-cards/:id/assign",
   authMiddleware(),
   requireRole(...ADMIN_ROLES),
-  async (req: Request, res: Response) => {
+  validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
     try {
       const rateCardId = parseIdParam(req.params.id);
       const { orgId, featureKey, expiresAt, notes, assignedBy } = req.body as {

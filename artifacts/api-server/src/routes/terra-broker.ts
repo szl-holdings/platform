@@ -13,6 +13,7 @@ import {
 } from "@szl-holdings/db";
 import { eq, desc, and, or, ilike, sql, asc, gte, lte } from "drizzle-orm";
 import { z } from "zod";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -72,7 +73,7 @@ const ListingPatchSchema = ListingCreateSchema.partial().omit({ propertyId: true
 
 // ─── GET /terra/broker/listings ────────────────────────────────────────────────
 
-router.get("/terra/broker/listings", terraRateLimit, auth, async (req, res) => {
+router.get("/terra/broker/listings", terraRateLimit, auth, validateQuery(listQuerySchema), async (req, res) => {
   try {
     const parsed = ListingsQuerySchema.safeParse(req.query);
     if (!parsed.success) { res.status(400).json({ error: "Invalid query parameters", issues: parsed.error.issues }); return; }
@@ -188,7 +189,7 @@ router.get("/terra/broker/listings", terraRateLimit, auth, async (req, res) => {
 
 // ─── POST /terra/broker/listings ───────────────────────────────────────────────
 
-router.post("/terra/broker/listings", terraRateLimit, auth, async (req, res) => {
+router.post("/terra/broker/listings", terraRateLimit, auth, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const parsed = ListingCreateSchema.safeParse(req.body);
     if (!parsed.success) { res.status(400).json({ error: "Invalid listing data", issues: parsed.error.issues }); return; }
@@ -313,7 +314,7 @@ router.get("/terra/broker/listings/:id", terraRateLimit, auth, async (req, res) 
 
 // ─── PATCH /terra/broker/listings/:id ─────────────────────────────────────────
 
-router.patch("/terra/broker/listings/:id", terraRateLimit, auth, async (req, res) => {
+router.patch("/terra/broker/listings/:id", terraRateLimit, auth, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const idN = Number(req.params.id);
     if (!Number.isInteger(idN) || idN < 1) { res.status(400).json({ error: "Invalid listing id" }); return; }
@@ -359,7 +360,7 @@ const InquiriesQuerySchema = z.object({
   sort: z.enum(["score_desc", "recent"]).optional(),
 });
 
-router.get("/terra/broker/inquiries", terraRateLimit, auth, async (req, res) => {
+router.get("/terra/broker/inquiries", terraRateLimit, auth, validateQuery(listQuerySchema), async (req, res) => {
   try {
     const parsed = InquiriesQuerySchema.safeParse(req.query);
     if (!parsed.success) { res.status(400).json({ error: "Invalid query parameters", issues: parsed.error.issues }); return; }
@@ -437,7 +438,7 @@ const InquiryCreateSchema = z.object({
   isDemo: z.boolean().default(false),
 });
 
-router.post("/terra/broker/inquiries", terraRateLimit, auth, async (req, res) => {
+router.post("/terra/broker/inquiries", terraRateLimit, auth, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const parsed = InquiryCreateSchema.safeParse(req.body);
     if (!parsed.success) { res.status(400).json({ error: "Invalid inquiry data", issues: parsed.error.issues }); return; }
@@ -449,7 +450,7 @@ router.post("/terra/broker/inquiries", terraRateLimit, auth, async (req, res) =>
 
 // ─── PATCH /terra/broker/inquiries/:id ────────────────────────────────────────
 
-router.patch("/terra/broker/inquiries/:id", terraRateLimit, auth, async (req, res) => {
+router.patch("/terra/broker/inquiries/:id", terraRateLimit, auth, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const idN = Number(req.params.id);
     if (!Number.isInteger(idN) || idN < 1) { res.status(400).json({ error: "Invalid inquiry id" }); return; }
@@ -478,7 +479,7 @@ const AgentsQuerySchema = z.object({
   sort: z.enum(["close_rate", "closed_ltm", "active_listings"]).optional(),
 });
 
-router.get("/terra/broker/agents", terraRateLimit, auth, async (req, res) => {
+router.get("/terra/broker/agents", terraRateLimit, auth, validateQuery(listQuerySchema), async (req, res) => {
   try {
     const parsed = AgentsQuerySchema.safeParse(req.query);
     if (!parsed.success) { res.status(400).json({ error: "Invalid query parameters", issues: parsed.error.issues }); return; }
@@ -673,7 +674,7 @@ const TxQuerySchema = z.object({
   status: z.enum(TX_STATUSES).optional(),
 });
 
-router.get("/terra/broker/transactions", terraRateLimit, auth, async (req, res) => {
+router.get("/terra/broker/transactions", terraRateLimit, auth, validateQuery(listQuerySchema), async (req, res) => {
   try {
     const parsed = TxQuerySchema.safeParse(req.query);
     if (!parsed.success) { res.status(400).json({ error: "Invalid query parameters", issues: parsed.error.issues }); return; }
@@ -759,7 +760,7 @@ const SearchSchema = z.object({
   maxDom: z.coerce.number().int().min(0).optional(),
 });
 
-router.get("/terra/broker/search", terraRateLimit, auth, async (req, res) => {
+router.get("/terra/broker/search", terraRateLimit, auth, validateQuery(listQuerySchema), async (req, res) => {
   try {
     const parsed = SearchSchema.safeParse(req.query);
     if (!parsed.success) { res.status(400).json({ error: "Invalid search parameters", issues: parsed.error.issues }); return; }

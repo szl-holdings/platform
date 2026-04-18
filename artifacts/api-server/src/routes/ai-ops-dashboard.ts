@@ -65,6 +65,7 @@ import {
   modelRouter,
 } from "@szl-holdings/ai-control-plane";
 import { logger } from "../lib/logger";
+import {validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -178,6 +179,7 @@ router.get(
   "/ai/ops/traces",
   authMiddleware({ required: true }),
   requireRole("analyst", "operator", "admin", "super_admin"),
+  validateQuery(listQuerySchema),
   async (req, res) => {
     try {
       if (isMissingTenantScope(req.user)) {
@@ -238,6 +240,7 @@ router.post(
   "/ai/ops/traces/capture",
   authMiddleware({ required: true }),
   requireRole("operator", "admin", "super_admin"),
+  validateBody(jsonObjectBodySchema),
   (req, res) => {
     try {
       const input = req.body as Record<string, unknown>;
@@ -292,6 +295,7 @@ router.patch(
   "/ai/ops/traces/:traceId/status",
   authMiddleware({ required: true }),
   requireRole("operator", "admin", "super_admin"),
+  validateBody(jsonObjectBodySchema),
   async (req, res) => {
     try {
       const body = req.body as { status?: TraceStatus; evalScore?: number; evalPassed?: boolean };
@@ -355,6 +359,7 @@ router.get(
   "/ai/ops/review-queue",
   authMiddleware({ required: true }),
   requireRole("analyst", "operator", "admin", "super_admin"),
+  validateQuery(listQuerySchema),
   async (req, res) => {
     try {
       if (isMissingTenantScope(req.user)) {
@@ -415,6 +420,7 @@ router.patch(
   "/ai/ops/review-queue/:reviewId/claim",
   authMiddleware({ required: true }),
   requireRole("analyst", "operator", "admin", "super_admin"),
+  validateBody(jsonObjectBodySchema),
   async (req, res) => {
     try {
       const reviewId = String(req.params.reviewId);
@@ -450,6 +456,7 @@ router.patch(
   "/ai/ops/review-queue/:reviewId/decision",
   authMiddleware({ required: true }),
   requireRole("operator", "admin", "super_admin"),
+  validateBody(jsonObjectBodySchema),
   async (req, res) => {
     try {
       const user = req.user;
@@ -572,6 +579,7 @@ const MAX_FEEDBACK = 5000;
 router.post(
   "/ai/ops/traces/:id/feedback",
   authMiddleware({ required: true }),
+  validateBody(jsonObjectBodySchema),
   async (req, res) => {
     try {
       const traceId = String(req.params.id ?? "").trim();
@@ -752,6 +760,7 @@ router.get(
   "/ai/ops/cost/records",
   authMiddleware({ required: true }),
   requireRole("operator", "admin", "super_admin"),
+  validateQuery(listQuerySchema),
   (req, res) => {
     try {
       const limitQ = req.query["limit"] as string | undefined;

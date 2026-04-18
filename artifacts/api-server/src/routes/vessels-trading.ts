@@ -3,6 +3,7 @@ import { LRUCache } from "lru-cache";
 import rateLimit from "express-rate-limit";
 import { sendSuccess, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -152,7 +153,7 @@ router.get("/vessels/trading/rates", tradingLimit, authMiddleware({ required: fa
   } catch (err) { handleRouteError(res, err, "Failed to fetch rates"); }
 });
 
-router.get("/vessels/trading/orders", tradingLimit, authMiddleware({ required: false }), (req, res) => {
+router.get("/vessels/trading/orders", tradingLimit, authMiddleware({ required: false }), validateQuery(listQuerySchema), (req, res) => {
   try {
     const status = req.query.status as string;
     const allOrders = [...DEMO_ORDERS, ...sessionOrders];
@@ -166,7 +167,7 @@ router.get("/vessels/trading/orders", tradingLimit, authMiddleware({ required: f
   } catch (err) { handleRouteError(res, err, "Failed to fetch orders"); }
 });
 
-router.post("/vessels/trading/orders", tradingLimit, authMiddleware({ required: false }), (req, res) => {
+router.post("/vessels/trading/orders", tradingLimit, authMiddleware({ required: false }), validateBody(jsonObjectBodySchema), (req, res) => {
   try {
     const { instrumentId, orderType, side, quantity, limitPrice, notes } = req.body;
     if (!instrumentId || !side || !quantity) {

@@ -2,7 +2,7 @@ import { Router, Request, Response } from "express";
 import { z } from "zod";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { tenantScope } from "../middlewares/tenant-scope";
-import { validateBody } from "../lib/validation";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 import { db } from "@szl-holdings/db";
 import { eq, and, desc, or, sql, isNull, not, gte } from "drizzle-orm";
 import {
@@ -181,7 +181,7 @@ function buildValidTransitions(): Record<string, string[]> {
   };
 }
 
-router.get("/review-desk/my-queue", async (req: Request, res: Response) => {
+router.get("/review-desk/my-queue", validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const userId = req.query.userId ? parseInt(req.query.userId as string) : null;
     const items = await db.select().from(pcManagedReviewItemsTable)
@@ -751,7 +751,7 @@ router.post("/review-desk/items/:id/actions/request-support", validateBody(Suppo
   }
 });
 
-router.post("/review-desk/items/:id/actions/generate-review-packet", async (req: Request, res: Response) => {
+router.post("/review-desk/items/:id/actions/generate-review-packet", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id as string);
     const actorId = req.user!.id;
@@ -773,7 +773,7 @@ router.post("/review-desk/items/:id/actions/generate-review-packet", async (req:
   }
 });
 
-router.post("/review-desk/items/:id/actions/export-packet", async (req: Request, res: Response) => {
+router.post("/review-desk/items/:id/actions/export-packet", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id as string);
     const actorId = req.user!.id;
@@ -820,7 +820,7 @@ router.post("/review-desk/items/:id/notes", validateBody(AddNoteSchema), async (
   }
 });
 
-router.get("/review-desk/metrics", async (req: Request, res: Response) => {
+router.get("/review-desk/metrics", validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const periodDays = parseInt(req.query.days as string ?? "30");
     const since = new Date(Date.now() - periodDays * 86400000);
@@ -943,7 +943,7 @@ router.get("/review-desk/admin", requireRole("super_admin", "admin"), async (req
   }
 });
 
-router.get("/review-desk/my-review", async (req: Request, res: Response) => {
+router.get("/review-desk/my-review", validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const userId = req.query.userId ? parseInt(req.query.userId as string) : null;
 

@@ -14,6 +14,7 @@ import {
 import { isFlagEnabled } from "../lib/platform-flags";
 import { logger } from "../lib/logger";
 import { deliverWebhookEvent } from "./webhooks";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -80,7 +81,7 @@ router.get("/integrations/salesforce/status", authMiddleware(), async (_req, res
   }
 });
 
-router.get("/integrations/salesforce/query", authMiddleware(), requireRole("ops", "analyst", "super_admin", "admin"), async (req: Request, res: Response) => {
+router.get("/integrations/salesforce/query", authMiddleware(), requireRole("ops", "analyst", "super_admin", "admin"), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const enabled = await isFlagEnabled("salesforce_sync_enabled");
     if (!enabled) {
@@ -188,7 +189,7 @@ router.post("/integrations/salesforce/sync", async (req, res, next) => {
   }
 });
 
-router.post("/integrations/salesforce/push/task", authMiddleware(), requireRole("ops", "super_admin", "admin"), async (req: Request, res: Response) => {
+router.post("/integrations/salesforce/push/task", authMiddleware(), requireRole("ops", "super_admin", "admin"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const enabled = await isFlagEnabled("salesforce_sync_enabled");
     if (!enabled) {
@@ -215,7 +216,7 @@ router.post("/integrations/salesforce/push/task", authMiddleware(), requireRole(
   }
 });
 
-router.post("/integrations/salesforce/push/case", authMiddleware(), requireRole("ops", "super_admin", "admin"), async (req: Request, res: Response) => {
+router.post("/integrations/salesforce/push/case", authMiddleware(), requireRole("ops", "super_admin", "admin"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const enabled = await isFlagEnabled("salesforce_sync_enabled");
     if (!enabled) {
@@ -242,7 +243,7 @@ router.post("/integrations/salesforce/push/case", authMiddleware(), requireRole(
   }
 });
 
-router.post("/integrations/salesforce/webhook", async (req: Request, res: Response) => {
+router.post("/integrations/salesforce/webhook", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const body = req.body as Record<string, unknown>;
     logger.info({ body }, "integrations: Salesforce outbound message received");
@@ -313,7 +314,7 @@ router.get("/integrations/jira/status", authMiddleware(), async (_req, res) => {
   }
 });
 
-router.get("/integrations/jira/query", authMiddleware(), requireRole("ops", "analyst", "super_admin", "admin"), async (req: Request, res: Response) => {
+router.get("/integrations/jira/query", authMiddleware(), requireRole("ops", "analyst", "super_admin", "admin"), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const enabled = await isFlagEnabled("jira_sync_enabled");
     if (!enabled) {
@@ -401,7 +402,7 @@ router.post("/integrations/jira/sync", authMiddleware(), requireRole("ops", "sup
   }
 });
 
-router.post("/integrations/jira/push/issue", authMiddleware(), requireRole("ops", "super_admin", "admin"), async (req: Request, res: Response) => {
+router.post("/integrations/jira/push/issue", authMiddleware(), requireRole("ops", "super_admin", "admin"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const enabled = await isFlagEnabled("jira_sync_enabled");
     if (!enabled) {
@@ -432,7 +433,7 @@ router.post("/integrations/jira/push/issue", authMiddleware(), requireRole("ops"
   }
 });
 
-router.post("/integrations/jira/webhook", async (req: Request, res: Response) => {
+router.post("/integrations/jira/webhook", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const body = req.body as Record<string, unknown>;
     logger.info({ webhookEvent: body["webhookEvent"], issueKey: (body["issue"] as Record<string, unknown>)?.["key"] }, "integrations: Jira webhook received");
@@ -642,7 +643,7 @@ router.get("/integrations/salesforce/oauth/authorize", (_req: Request, res: Resp
   }
 });
 
-router.get("/integrations/salesforce/oauth/callback", async (req: Request, res: Response) => {
+router.get("/integrations/salesforce/oauth/callback", validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { code, state, error, error_description } = req.query as Record<string, string>;
 
@@ -764,7 +765,7 @@ router.get("/integrations/jira/oauth/authorize", (_req: Request, res: Response) 
   }
 });
 
-router.get("/integrations/jira/oauth/callback", async (req: Request, res: Response) => {
+router.get("/integrations/jira/oauth/callback", validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { code, state, error, error_description } = req.query as Record<string, string>;
 
@@ -855,7 +856,7 @@ router.get("/integrations/atlassian/descriptor", (_req: Request, res: Response) 
   res.redirect(`${baseUrl}/atlassian-connect.json`);
 });
 
-router.put("/integrations/atlassian/tenant", authMiddleware(), async (req: Request, res: Response) => {
+router.put("/integrations/atlassian/tenant", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const tenant = req.body as {
       clientKey?: string;

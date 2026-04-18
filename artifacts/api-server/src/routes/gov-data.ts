@@ -1,4 +1,5 @@
 import { Router, type IRouter, type RequestHandler } from "express";
+import { validateQuery, listQuerySchema } from "../lib/validation.js";
 import rateLimit from "express-rate-limit";
 import { LRUCache } from "lru-cache";
 import { sendSuccess, sendError, handleRouteError } from "../lib/api-response";
@@ -164,7 +165,7 @@ router.get("/gov/cisa-kev", govRateLimit, authMiddleware(), async (req, res) => 
   } catch (err) { handleRouteError(res, err, "Failed to fetch CISA KEV data"); }
 });
 
-router.get("/gov/nvd-cves", govRateLimit, authMiddleware(), async (req, res) => {
+router.get("/gov/nvd-cves", govRateLimit, authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const severity = (req.query.severity as string)?.toUpperCase();
     const keyword = req.query.keyword as string;
@@ -227,7 +228,7 @@ router.get("/gov/nvd-cves", govRateLimit, authMiddleware(), async (req, res) => 
   } catch (err) { handleRouteError(res, err, "Failed to fetch NVD CVE data"); }
 });
 
-router.get("/gov/mitre-attack", govRateLimit, authMiddleware(), async (req, res) => {
+router.get("/gov/mitre-attack", govRateLimit, authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const tactic = req.query.tactic as string;
     const platform = req.query.platform as string;
@@ -268,7 +269,7 @@ router.get("/gov/mitre-attack", govRateLimit, authMiddleware(), async (req, res)
   } catch (err) { handleRouteError(res, err, "Failed to fetch MITRE ATT&CK data"); }
 });
 
-router.get("/gov/fedramp", govRateLimit, authMiddleware(), async (req, res) => {
+router.get("/gov/fedramp", govRateLimit, authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const impactLevel = req.query.impactLevel as string;
     const status = (req.query.status as string) || "Authorized";
@@ -363,7 +364,7 @@ router.get("/gov/bls-employment", govRateLimit, authMiddleware(), async (_req, r
   } catch (err) { handleRouteError(res, err, "Failed to fetch BLS employment data"); }
 });
 
-router.get("/gov/fema-risk", govRateLimit, authMiddleware(), async (req, res) => {
+router.get("/gov/fema-risk", govRateLimit, authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const region = req.query.region as string;
     sendSuccess(res, {
@@ -376,7 +377,7 @@ router.get("/gov/fema-risk", govRateLimit, authMiddleware(), async (req, res) =>
   } catch (err) { handleRouteError(res, err, "Failed to fetch FEMA risk data"); }
 });
 
-router.get("/gov/usaspending", govRateLimit, authMiddleware(), async (req, res) => {
+router.get("/gov/usaspending", govRateLimit, authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const agency = req.query.agency as string;
     const minAmount = parseFloat(req.query.minAmount as string) || 0;
@@ -502,7 +503,7 @@ router.get("/gov/noaa-marine", govRateLimit, authMiddleware(), async (_req, res)
   } catch (err) { handleRouteError(res, err, "Failed to fetch NOAA marine data"); }
 });
 
-router.get("/gov/arxiv", govRateLimit, authMiddleware(), async (req, res) => {
+router.get("/gov/arxiv", govRateLimit, authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const query = (req.query.q as string) || "machine learning";
     const limit = Math.min(parseInt(req.query.limit as string) || 8, 20);
@@ -518,7 +519,7 @@ router.get("/gov/arxiv", govRateLimit, authMiddleware(), async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to fetch arXiv papers"); }
 });
 
-router.get("/gov/pubmed", govRateLimit, authMiddleware(), async (req, res) => {
+router.get("/gov/pubmed", govRateLimit, authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const query = (req.query.q as string) || "artificial intelligence medicine";
     const papers = await getCached(`pubmed-${query}`, 3600000, async () => {
@@ -551,7 +552,7 @@ router.get("/gov/pubmed", govRateLimit, authMiddleware(), async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to fetch PubMed data"); }
 });
 
-router.get("/gov/sec-edgar", govRateLimit, authMiddleware(), async (req, res) => {
+router.get("/gov/sec-edgar", govRateLimit, authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const ticker = (req.query.ticker as string)?.toUpperCase() || "SPG";
     const formType = (req.query.formType as string) || "10-K";

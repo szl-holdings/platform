@@ -25,6 +25,7 @@ import {
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../middlewares/sliding-window-limiter";
 import { logger } from "../lib/logger";
+import {validateBody, auditChainEventSchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -63,6 +64,7 @@ router.get(
   "/audit-chain/events",
   authMiddleware({ required: false }),
   perUserApiSlidingLimiter,
+  validateQuery(listQuerySchema),
   async (req, res) => {
     try {
       const limit = Math.min(Number(req.query["limit"] ?? 50), 200);
@@ -123,25 +125,22 @@ router.post(
   "/audit-chain/events",
   authMiddleware({ required: false }),
   perUserWriteSlidingLimiter,
+  validateBody(auditChainEventSchema),
   async (req, res) => {
     const {
       action,
       actionType,
       domain,
-      actorLabel,
+      actor: actorLabel,
       entityId,
       entityType,
-      riskLevel,
-      complianceTags,
-      outcome,
-      details,
       metadata,
-    } = req.body ?? {};
+    } = req.body;
 
-    if (!action || !actionType || !domain) {
-      sendBadRequest(res, "action, actionType, and domain are required");
-      return;
-    }
+    const riskLevel = (req.body as Record<string, unknown>).riskLevel as string | undefined;
+    const complianceTags = (req.body as Record<string, unknown>).complianceTags;
+    const outcome = (req.body as Record<string, unknown>).outcome as string | undefined;
+    const details = (req.body as Record<string, unknown>).details;
 
     try {
       const orgId = (req.user?.orgs?.[0]?.orgId as number | undefined) ?? null;

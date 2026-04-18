@@ -14,6 +14,7 @@ import {
   getAgentSelfReflectionHistory,
 } from "@szl-holdings/ai-engine/learning/self-improvement";
 import { getKnowledgeStoreStats, autoIngestFromDecisionStore } from "@szl-holdings/ai-engine/rag/knowledge-store";
+import { validateBody, jsonObjectBodySchema } from "../lib/validation";
 
 const router = Router();
 
@@ -145,7 +146,7 @@ router.get("/agent-autonomy/connectors", async (_req, res) => {
   }
 });
 
-router.post("/agent-autonomy/connectors/:connectorId/health", async (req, res) => {
+router.post("/agent-autonomy/connectors/:connectorId/health", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const health = await connectorRegistry.checkHealth(req.params.connectorId!);
     sendSuccess(res, health);

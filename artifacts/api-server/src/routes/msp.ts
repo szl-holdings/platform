@@ -13,6 +13,7 @@ import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, handleRouteErro
 import { logger } from "../lib/logger";
 import { authMiddleware } from "../middlewares/auth";
 import { ingestAegisIncident } from "@szl-holdings/ai-engine/domain-embedding-hooks";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 const auth = authMiddleware({ required: false });
@@ -95,7 +96,7 @@ router.get("/msp/dashboard", auth, async (_req, res) => {
   }
 });
 
-router.get("/msp/clients", auth, async (req, res) => {
+router.get("/msp/clients", auth, validateQuery(listQuerySchema), async (req, res) => {
   try {
     const search = req.query.search as string | undefined;
     const status = req.query.status as string | undefined;
@@ -136,7 +137,7 @@ router.get("/msp/clients/:id", auth, async (req, res) => {
   }
 });
 
-router.get("/msp/tickets", auth, async (req, res) => {
+router.get("/msp/tickets", auth, validateQuery(listQuerySchema), async (req, res) => {
   try {
     const status = req.query.status as string | undefined;
     const priority = req.query.priority as string | undefined;
@@ -180,7 +181,7 @@ router.get("/msp/tickets/:id", auth, async (req, res) => {
   }
 });
 
-router.post("/msp/tickets", auth, async (req, res) => {
+router.post("/msp/tickets", auth, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { subject, description, clientId, clientName, priority, category, assigneeId, assigneeName } = req.body;
     if (!subject) return sendBadRequest(res, "subject is required");
@@ -221,7 +222,7 @@ router.post("/msp/tickets", auth, async (req, res) => {
   }
 });
 
-router.patch("/msp/tickets/:id", auth, async (req, res) => {
+router.patch("/msp/tickets/:id", auth, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseInt(String(req.params.id), 10);
     if (isNaN(id)) return sendBadRequest(res, "Invalid ticket ID");
@@ -251,7 +252,7 @@ router.patch("/msp/tickets/:id", auth, async (req, res) => {
   }
 });
 
-router.get("/msp/devices", auth, async (req, res) => {
+router.get("/msp/devices", auth, validateQuery(listQuerySchema), async (req, res) => {
   try {
     const type = req.query.type as string | undefined;
     const status = req.query.status as string | undefined;
@@ -283,7 +284,7 @@ router.get("/msp/devices", auth, async (req, res) => {
   }
 });
 
-router.get("/msp/contracts", auth, async (req, res) => {
+router.get("/msp/contracts", auth, validateQuery(listQuerySchema), async (req, res) => {
   try {
     const status = req.query.status as string | undefined;
     const search = req.query.search as string | undefined;
@@ -310,7 +311,7 @@ router.get("/msp/contracts", auth, async (req, res) => {
   }
 });
 
-router.get("/msp/technicians", auth, async (req, res) => {
+router.get("/msp/technicians", auth, validateQuery(listQuerySchema), async (req, res) => {
   try {
     const status = req.query.status as string | undefined;
     const conditions = [];

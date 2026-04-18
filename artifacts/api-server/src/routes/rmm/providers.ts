@@ -7,6 +7,7 @@ import { logger } from "../../lib/logger";
 import { createRmmProvider, setCachedProvider, getCachedProvider, clearProviderCache, type RmmProviderConfig } from "../../services/rmm-provider";
 import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from "crypto";
 import { auth, authWrite, roleAdmin, roleOperator, queryConnectors, queryConnectorById, stripSecrets, buildProviderConfig, isProviderSupported } from "./shared";
+import { validateBody, rmmProviderCreateSchema, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
 
 const router: IRouter = Router();
 
@@ -33,11 +34,9 @@ router.get("/rmm/providers/:id", auth, async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to get RMM provider"); }
 });
 
-router.post("/rmm/providers", authWrite, roleAdmin, async (req, res) => {
+router.post("/rmm/providers", authWrite, roleAdmin, validateBody(rmmProviderCreateSchema), async (req, res) => {
   try {
     const { name, provider, mode, authType, config, syncIntervalMinutes, notes } = req.body;
-    if (!name) return sendBadRequest(res, "name is required");
-    if (!provider) return sendBadRequest(res, "provider is required");
     const encryptedConfig = encryptConfig(config ?? {});
     const result = await db.execute(sql`
       INSERT INTO msp_rmm_connectors (name, provider, mode, auth_type, config, sync_interval_minutes, notes, status)
@@ -49,7 +48,7 @@ router.post("/rmm/providers", authWrite, roleAdmin, async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to create RMM provider"); }
 });
 
-router.patch("/rmm/providers/:id", authWrite, roleAdmin, async (req, res) => {
+router.patch("/rmm/providers/:id", authWrite, roleAdmin, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseInt(String(req.params.id), 10);
     if (isNaN(id)) return sendBadRequest(res, "Invalid ID");
@@ -88,7 +87,7 @@ router.delete("/rmm/providers/:id", authWrite, roleAdmin, async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to delete RMM provider"); }
 });
 
-router.post("/rmm/providers/:id/test", authWrite, roleAdmin, async (req, res) => {
+router.post("/rmm/providers/:id/test", authWrite, roleAdmin, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseInt(String(req.params.id), 10);
     if (isNaN(id)) return sendBadRequest(res, "Invalid ID");
@@ -107,7 +106,7 @@ router.post("/rmm/providers/:id/test", authWrite, roleAdmin, async (req, res) =>
   } catch (err) { handleRouteError(res, err, "Failed to test RMM provider"); }
 });
 
-router.post("/rmm/providers/:id/sync", authWrite, roleOperator, async (req, res) => {
+router.post("/rmm/providers/:id/sync", authWrite, roleOperator, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseInt(String(req.params.id), 10);
     if (isNaN(id)) return sendBadRequest(res, "Invalid ID");
@@ -164,7 +163,7 @@ router.post("/rmm/providers/:id/sync", authWrite, roleOperator, async (req, res)
   } catch (err) { handleRouteError(res, err, "Failed to sync RMM provider"); }
 });
 
-router.get("/rmm/devices", auth, async (req, res) => {
+router.get("/rmm/devices", auth, validateQuery(listQuerySchema), async (req, res) => {
   try {
     const connectorId = req.query.connectorId ? parseInt(req.query.connectorId as string, 10) : null;
 

@@ -1,4 +1,5 @@
 import { Router, type IRouter } from "express";
+import { validateQuery, listQuerySchema } from "../lib/validation.js";
 import { LRUCache } from "lru-cache";
 import { sendSuccess, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
@@ -258,7 +259,7 @@ router.get("/lyte/live/database-telemetry", authMiddleware({ required: false }),
   } catch (err) { handleRouteError(res, err, "Failed to fetch database telemetry"); }
 });
 
-router.get("/lyte/live/github-activity", authMiddleware({ required: false }), async (req, res) => {
+router.get("/lyte/live/github-activity", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const owner = (req.query.owner as string) ?? "SZL-Holdings";
     const repo = (req.query.repo as string) ?? "";

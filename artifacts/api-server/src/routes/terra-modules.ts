@@ -16,6 +16,7 @@ import { z } from "zod";
 import { randomUUID } from "crypto";
 import multer from "multer";
 import mammoth from "mammoth";
+import { validateBody, jsonObjectBodySchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -346,7 +347,7 @@ const LeaseCreateSchema = z.object({
   isDemo: z.boolean().optional(),
 });
 
-router.post("/terra/leases", authWrite, async (req: Request, res: Response) => {
+router.post("/terra/leases", authWrite, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const body = LeaseCreateSchema.safeParse(req.body);
     if (!body.success) return sendBadRequest(res, body.error.message);
@@ -380,7 +381,7 @@ router.post("/terra/leases", authWrite, async (req: Request, res: Response) => {
   } catch (err) { handleRouteError(res, err, "Failed to create lease"); }
 });
 
-router.post("/terra/leases/upload", authWrite, upload.single("file"), async (req: Request, res: Response) => {
+router.post("/terra/leases/upload", authWrite, upload.single("file"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     if (!req.file) return sendBadRequest(res, "No file uploaded. Use multipart/form-data with field name 'file'.");
     const { originalname, buffer, mimetype, size } = req.file;
@@ -472,7 +473,7 @@ router.post("/terra/leases/upload", authWrite, upload.single("file"), async (req
   } catch (err) { handleRouteError(res, err, "Failed to process lease upload"); }
 });
 
-router.put("/terra/leases/:id", authWrite, async (req: Request, res: Response) => {
+router.put("/terra/leases/:id", authWrite, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const body = LeaseCreateSchema.partial().safeParse(req.body);
     if (!body.success) return sendBadRequest(res, body.error.message);
@@ -539,7 +540,7 @@ const ProFormaProjectSchema = z.object({
   isDemo: z.boolean().optional(),
 });
 
-router.post("/terra/pro-forma-projects", authWrite, async (req: Request, res: Response) => {
+router.post("/terra/pro-forma-projects", authWrite, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const body = ProFormaProjectSchema.safeParse(req.body);
     if (!body.success) return sendBadRequest(res, body.error.message);
@@ -558,7 +559,7 @@ router.post("/terra/pro-forma-projects", authWrite, async (req: Request, res: Re
   } catch (err) { handleRouteError(res, err, "Failed to save pro forma project"); }
 });
 
-router.put("/terra/pro-forma-projects/:id", authWrite, async (req: Request, res: Response) => {
+router.put("/terra/pro-forma-projects/:id", authWrite, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const body = ProFormaProjectSchema.partial().safeParse(req.body);
     if (!body.success) return sendBadRequest(res, body.error.message);
@@ -637,7 +638,7 @@ const Exchange1031Schema = z.object({
   isDemo: z.boolean().optional(),
 });
 
-router.post("/terra/exchanges-1031", authWrite, async (req: Request, res: Response) => {
+router.post("/terra/exchanges-1031", authWrite, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const body = Exchange1031Schema.safeParse(req.body);
     if (!body.success) return sendBadRequest(res, body.error.message);
@@ -665,7 +666,7 @@ router.post("/terra/exchanges-1031", authWrite, async (req: Request, res: Respon
   } catch (err) { handleRouteError(res, err, "Failed to create exchange"); }
 });
 
-router.put("/terra/exchanges-1031/:id", authWrite, async (req: Request, res: Response) => {
+router.put("/terra/exchanges-1031/:id", authWrite, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const body = Exchange1031Schema.partial().safeParse(req.body);
     if (!body.success) return sendBadRequest(res, body.error.message);
@@ -753,7 +754,7 @@ const TaxAppealSchema = z.object({
   isDemo: z.boolean().optional(),
 });
 
-router.post("/terra/tax-appeals", authWrite, async (req: Request, res: Response) => {
+router.post("/terra/tax-appeals", authWrite, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const body = TaxAppealSchema.safeParse(req.body);
     if (!body.success) return sendBadRequest(res, body.error.message);
@@ -783,7 +784,7 @@ router.post("/terra/tax-appeals", authWrite, async (req: Request, res: Response)
   } catch (err) { handleRouteError(res, err, "Failed to create tax appeal"); }
 });
 
-router.put("/terra/tax-appeals/:id", authWrite, async (req: Request, res: Response) => {
+router.put("/terra/tax-appeals/:id", authWrite, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const body = TaxAppealSchema.partial().safeParse(req.body);
     if (!body.success) return sendBadRequest(res, body.error.message);
@@ -847,7 +848,7 @@ const WaterfallStructureSchema = z.object({
   isDemo: z.boolean().optional(),
 });
 
-router.post("/terra/waterfall-structures", authWrite, async (req: Request, res: Response) => {
+router.post("/terra/waterfall-structures", authWrite, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const body = WaterfallStructureSchema.safeParse(req.body);
     if (!body.success) return sendBadRequest(res, body.error.message);
@@ -866,7 +867,7 @@ router.post("/terra/waterfall-structures", authWrite, async (req: Request, res: 
   } catch (err) { handleRouteError(res, err, "Failed to save waterfall structure"); }
 });
 
-router.put("/terra/waterfall-structures/:id", authWrite, async (req: Request, res: Response) => {
+router.put("/terra/waterfall-structures/:id", authWrite, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const body = WaterfallStructureSchema.partial().safeParse(req.body);
     if (!body.success) return sendBadRequest(res, body.error.message);
@@ -946,7 +947,7 @@ const ConstructionProjectSchema = z.object({
   isDemo: z.boolean().optional(),
 });
 
-router.post("/terra/construction-projects", authWrite, async (req: Request, res: Response) => {
+router.post("/terra/construction-projects", authWrite, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const body = ConstructionProjectSchema.safeParse(req.body);
     if (!body.success) return sendBadRequest(res, body.error.message);
@@ -975,7 +976,7 @@ router.post("/terra/construction-projects", authWrite, async (req: Request, res:
   } catch (err) { handleRouteError(res, err, "Failed to create construction project"); }
 });
 
-router.put("/terra/construction-projects/:id", authWrite, async (req: Request, res: Response) => {
+router.put("/terra/construction-projects/:id", authWrite, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const body = ConstructionProjectSchema.partial().safeParse(req.body);
     if (!body.success) return sendBadRequest(res, body.error.message);
@@ -1073,7 +1074,7 @@ const TenantApplicationSchema = z.object({
   isDemo: z.boolean().optional(),
 });
 
-router.post("/terra/tenant-applications", authWrite, async (req: Request, res: Response) => {
+router.post("/terra/tenant-applications", authWrite, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const body = TenantApplicationSchema.safeParse(req.body);
     if (!body.success) return sendBadRequest(res, body.error.message);
@@ -1163,7 +1164,7 @@ router.post("/terra/tenant-applications", authWrite, async (req: Request, res: R
   } catch (err) { handleRouteError(res, err, "Failed to create tenant application"); }
 });
 
-router.put("/terra/tenant-applications/:id", authWrite, async (req: Request, res: Response) => {
+router.put("/terra/tenant-applications/:id", authWrite, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const body = TenantApplicationSchema.partial().safeParse(req.body);
     if (!body.success) return sendBadRequest(res, body.error.message);

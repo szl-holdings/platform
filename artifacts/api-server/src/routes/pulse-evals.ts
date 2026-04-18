@@ -14,6 +14,7 @@ import {
   type EvalSuiteReport,
 } from "@szl-holdings/pulse-evals";
 import { persistEvalBaseline, loadEvalBaselines } from "../lib/replay-store";
+import { validateBody, jsonObjectBodySchema } from "../lib/validation";
 
 loadEvalBaselines().then(rows => {
   for (const row of rows) {
@@ -70,6 +71,7 @@ router.post(
   "/pulse-evals/run",
   authMiddleware({ required: true }),
   requireRole("admin", "operator"),
+  validateBody(jsonObjectBodySchema),
   async (req, res) => {
     try {
       const {
@@ -115,6 +117,7 @@ router.post(
   "/pulse-evals/run-red-team",
   authMiddleware({ required: true }),
   requireRole("admin"),
+  validateBody(jsonObjectBodySchema),
   async (req, res) => {
     try {
       const { suiteId } = req.body;
@@ -166,6 +169,7 @@ router.post(
   "/pulse-evals/compare",
   authMiddleware({ required: true }),
   requireRole("admin", "operator"),
+  validateBody(jsonObjectBodySchema),
   (req, res) => {
     try {
       const { reports } = req.body;
@@ -185,6 +189,7 @@ router.post(
   "/pulse-evals/baseline",
   authMiddleware({ required: true }),
   requireRole("admin"),
+  validateBody(jsonObjectBodySchema),
   (req, res) => {
     try {
       const { report } = req.body;
@@ -215,6 +220,7 @@ router.post(
   "/pulse-evals/check-regression",
   authMiddleware({ required: true }),
   requireRole("admin", "operator"),
+  validateBody(jsonObjectBodySchema),
   (req, res) => {
     try {
       const { report, thresholdPct } = req.body;

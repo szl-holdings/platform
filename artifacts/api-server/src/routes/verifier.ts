@@ -16,6 +16,7 @@ import {
   sendNotFound,
   sendBadRequest,
 } from "../lib/api-response";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -60,7 +61,7 @@ function resolveSaveOrgId(req: Request, requested: number | null | undefined): n
   return user.orgs[0]?.orgId ?? null;
 }
 
-router.post("/verifier", authMiddleware(), async (req, res) => {
+router.post("/verifier", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const body = req.body as {
       target?: unknown;
@@ -109,7 +110,7 @@ router.post("/verifier", authMiddleware(), async (req, res) => {
   }
 });
 
-router.get("/verifier", authMiddleware(), async (req, res) => {
+router.get("/verifier", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const query: VerifierStoreQuery = {};
     if (req.query.targetType) {

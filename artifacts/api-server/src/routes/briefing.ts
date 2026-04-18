@@ -26,6 +26,7 @@ import { authMiddleware } from "../middlewares/auth";
 import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../middlewares/sliding-window-limiter";
 
 import { logger } from "../lib/logger";
+import {validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -234,6 +235,7 @@ router.post(
   "/briefing/generate",
   authMiddleware({ required: false }),
   perUserWriteSlidingLimiter,
+  validateBody(jsonObjectBodySchema),
   async (req, res) => {
     try {
       const orgId = (req.user?.orgs?.[0]?.orgId as number | undefined) ?? null;
@@ -249,6 +251,7 @@ router.get(
   "/briefing/history",
   authMiddleware({ required: false }),
   perUserApiSlidingLimiter,
+  validateQuery(listQuerySchema),
   async (req, res) => {
     try {
       const orgId = (req.user?.orgs?.[0]?.orgId as number | undefined) ?? null;

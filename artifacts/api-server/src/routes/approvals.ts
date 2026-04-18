@@ -1,5 +1,6 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { authMiddleware, requireRole } from "../middlewares/auth";
+import { validateBody, approvalCreateSchema, approvalReviewSchema, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 import {
   sendSuccess,
   sendCreated,
@@ -50,7 +51,7 @@ function callerOrgIdForGuard(req: Request): number | null {
   return user?.orgs?.[0]?.orgId ?? null;
 }
 
-router.post("/approvals", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/approvals", authMiddleware(), validateBody(approvalCreateSchema), async (req: Request, res: Response) => {
   try {
     const {
       resourceType,
@@ -108,7 +109,7 @@ router.post("/approvals", authMiddleware(), async (req: Request, res: Response) 
   }
 });
 
-router.get("/approvals", authMiddleware(), requireRole("super_admin", "admin", "ops", "compliance", "analyst"), async (req: Request, res: Response) => {
+router.get("/approvals", authMiddleware(), requireRole("super_admin", "admin", "ops", "compliance", "analyst"), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { page, limit } = parsePagination(req.query as Record<string, unknown>);
     const status = req.query["status"] as string | undefined;
@@ -152,7 +153,7 @@ router.get("/approvals/:id", authMiddleware(), async (req: Request, res: Respons
   }
 });
 
-router.post("/approvals/:id/review", authMiddleware(), requireRole("super_admin", "admin", "ops", "compliance"), async (req: Request, res: Response) => {
+router.post("/approvals/:id/review", authMiddleware(), requireRole("super_admin", "admin", "ops", "compliance"), validateBody(approvalReviewSchema), async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params["id"] as string, 10);
     if (isNaN(id)) { sendBadRequest(res, "Invalid approval ID"); return; }
@@ -213,7 +214,7 @@ router.post("/approvals/:id/review", authMiddleware(), requireRole("super_admin"
   }
 });
 
-router.post("/approvals/:id/escalate", authMiddleware(), requireRole("super_admin", "admin", "ops"), async (req: Request, res: Response) => {
+router.post("/approvals/:id/escalate", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params["id"] as string, 10);
     if (isNaN(id)) { sendBadRequest(res, "Invalid approval ID"); return; }
@@ -254,7 +255,7 @@ router.post("/approvals/:id/escalate", authMiddleware(), requireRole("super_admi
   }
 });
 
-router.post("/approvals/:id/comment", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/approvals/:id/comment", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params["id"] as string, 10);
     if (isNaN(id)) { sendBadRequest(res, "Invalid approval ID"); return; }
@@ -317,7 +318,7 @@ router.get("/approvals/by-resource/:resourceType/:resourceId", authMiddleware(),
   }
 });
 
-router.post("/audit-log/policy-appeal", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/audit-log/policy-appeal", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { requestId, action, justification } = req.body as {
       requestId?: string;

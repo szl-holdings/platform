@@ -7,10 +7,11 @@ import {
   sendBadRequest,
   handleRouteError,
 } from "../lib/api-response";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
-router.post("/proof-chain/tag", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/proof-chain/tag", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const {
       contentId,
@@ -104,7 +105,7 @@ router.get("/proof-chain/by-content/:contentType/:contentId", authMiddleware(), 
   }
 });
 
-router.post("/proof-chain/:id/review", authMiddleware(), requireRole("super_admin", "admin", "ops", "compliance"), async (req: Request, res: Response) => {
+router.post("/proof-chain/:id/review", authMiddleware(), requireRole("super_admin", "admin", "ops", "compliance"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params["id"] as string, 10);
     if (isNaN(id)) { sendBadRequest(res, "Invalid proof ID"); return; }
@@ -140,7 +141,7 @@ router.post("/proof-chain/:id/review", authMiddleware(), requireRole("super_admi
   }
 });
 
-router.get("/proof-chain", authMiddleware(), requireRole("super_admin", "admin", "ops", "analyst", "compliance"), async (req: Request, res: Response) => {
+router.get("/proof-chain", authMiddleware(), requireRole("super_admin", "admin", "ops", "analyst", "compliance"), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const user = req.user;
     const isAdmin = user?.roles?.some(r => ["super_admin", "admin"].includes(r)) ?? false;

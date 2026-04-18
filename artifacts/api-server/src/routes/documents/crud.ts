@@ -10,13 +10,14 @@ import type { BlockNode } from "../../lib/pdf-renderer-types";
 import { ObjectStorageService, ObjectNotFoundError } from "../../lib/objectStorage";
 import { setObjectAclPolicy } from "../../lib/objectAcl";
 import { getRequestUserId, canAccessDocument, getUserRole, canMutateDocument, getRequestUserEmail } from "./shared";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
 
 interface AuthUser { id: number; role: string; email?: string; displayName?: string }
 type ExtendedRequest = Request & { user?: AuthUser }
 const router: IRouter = Router();
 const objectStorageService = new ObjectStorageService();
 
-router.get("/documents", authMiddleware(), async (req, res) => {
+router.get("/documents", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const { appSource, status, entityType, entityId } = req.query as Record<string, string>;
@@ -56,7 +57,7 @@ router.get("/documents", authMiddleware(), async (req, res) => {
 // NOTE: GET /documents/:id is registered AFTER all literal-segment routes below
 // to prevent Express from matching e.g. /documents/templates as :id = "templates".
 
-router.post("/documents", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/documents", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { title, type, templateId, contentJson, appSource, entityType, entityId, mergeFieldValues } = req.body as {
       title?: string; type?: string; templateId?: string; contentJson?: object;
@@ -94,7 +95,7 @@ router.post("/documents", authMiddleware(), async (req: Request, res: Response) 
   }
 });
 
-router.put("/documents/:id", authMiddleware(), async (req: Request, res: Response) => {
+router.put("/documents/:id", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id as string, 10);
     if (isNaN(id)) return sendBadRequest(res, "Invalid document ID");
@@ -187,7 +188,7 @@ router.get("/documents/:id/versions", authMiddleware(), async (req: Request, res
   }
 });
 
-router.post("/documents/:id/restore", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/documents/:id/restore", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id as string, 10);
     const version = parseInt(req.body.version, 10);
@@ -226,7 +227,7 @@ router.post("/documents/:id/restore", authMiddleware(), async (req: Request, res
 
 // ─── Comments ────────────────────────────────────────────────────────────────
 
-router.post("/documents/:id/comments", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/documents/:id/comments", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id as string, 10);
     if (isNaN(id)) return sendBadRequest(res, "Invalid document ID");
@@ -259,7 +260,7 @@ router.post("/documents/:id/comments", authMiddleware(), async (req: Request, re
   }
 });
 
-router.patch("/documents/comments/:commentId/resolve", authMiddleware(), async (req: Request, res: Response) => {
+router.patch("/documents/comments/:commentId/resolve", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const commentId = parseInt(req.params.commentId as string, 10);
     const [comment] = await db.select().from(documentCommentsTable).where(eq(documentCommentsTable.id, commentId));
@@ -283,7 +284,7 @@ router.patch("/documents/comments/:commentId/resolve", authMiddleware(), async (
 
 // ─── Templates ───────────────────────────────────────────────────────────────
 
-router.get("/documents/templates", async (req, res) => {
+router.get("/documents/templates", validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { appSource } = req.query as { appSource?: string };
     const conditions = [eq(documentTemplatesTable.isActive, true)];
@@ -317,7 +318,7 @@ router.get("/documents/templates/:id", async (req, res) => {
 
 // ─── Content Library ─────────────────────────────────────────────────────────
 
-router.get("/documents/content-library", async (req, res) => {
+router.get("/documents/content-library", validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { category, appSource } = req.query as { category?: string; appSource?: string };
     const conditions = [eq(contentLibraryBlocksTable.isActive, true)];

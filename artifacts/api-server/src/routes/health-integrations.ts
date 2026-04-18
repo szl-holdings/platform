@@ -1,4 +1,5 @@
 import { Router, type IRouter } from "express";
+import { validateQuery, listQuerySchema } from "../lib/validation.js";
 import { LRUCache } from "lru-cache";
 import { services } from "@szl-holdings/services";
 import { db } from "@szl-holdings/db";
@@ -698,7 +699,7 @@ router.get("/integrations/health/:name", authMiddleware(), async (req, res) => {
 
 // ─── New Relic APM Endpoints ─────────────────────────────────────────────────
 
-router.get("/integrations/new-relic/apm", authMiddleware(), async (req, res) => {
+router.get("/integrations/new-relic/apm", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const metrics = await services.newRelic.getApmMetrics(
       req.query?.appName as string | undefined,
@@ -761,7 +762,7 @@ router.get("/integrations/misp-taxii/collections", authMiddleware(), async (_req
   }
 });
 
-router.get("/integrations/misp-taxii/indicators", authMiddleware(), async (req, res) => {
+router.get("/integrations/misp-taxii/indicators", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const collectionId = req.query.collectionId as string | undefined;
     const addedAfter = req.query.addedAfter as string | undefined;
@@ -776,7 +777,7 @@ router.get("/integrations/misp-taxii/indicators", authMiddleware(), async (req, 
 
 // ─── CISA KEV Enhanced Endpoints ────────────────────────────────────────────
 
-router.get("/integrations/cisa/kev", authMiddleware(), async (req, res) => {
+router.get("/integrations/cisa/kev", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 20;
     const vulns = await services.cisa.getKnownExploitedVulnerabilities(limit);
@@ -786,7 +787,7 @@ router.get("/integrations/cisa/kev", authMiddleware(), async (req, res) => {
   }
 });
 
-router.get("/integrations/cisa/kev/search", authMiddleware(), async (req, res) => {
+router.get("/integrations/cisa/kev/search", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const q = (req.query.q as string) ?? "";
     const results = await services.cisa.searchKev(q);
@@ -807,7 +808,7 @@ router.get("/integrations/cisa/kev/ransomware", authMiddleware(), async (_req, r
 
 // ─── NVD Enhanced Endpoints ─────────────────────────────────────────────────
 
-router.get("/integrations/nvd/cves", authMiddleware(), async (req, res) => {
+router.get("/integrations/nvd/cves", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const keyword = req.query.keyword as string | undefined;
     const severity = req.query.severity as string | undefined;

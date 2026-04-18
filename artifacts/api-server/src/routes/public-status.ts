@@ -1,6 +1,7 @@
 import { Router, type IRouter } from "express";
 import { pool } from "@szl-holdings/db";
 import { logger } from "../lib/logger";
+import { validateBody, jsonObjectBodySchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -172,7 +173,7 @@ router.get("/uptime-history", async (_req, res) => {
   }
 });
 
-router.post("/status/subscribe", async (req, res) => {
+router.post("/status/subscribe", validateBody(jsonObjectBodySchema), async (req, res) => {
   const { email } = req.body as { email?: string };
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     res.status(400).json({ error: "Valid email required" });
@@ -191,7 +192,7 @@ router.post("/status/subscribe", async (req, res) => {
   }
 });
 
-router.post("/incidents", async (req, res) => {
+router.post("/incidents", validateBody(jsonObjectBodySchema), async (req, res) => {
   const { title, severity, affected_services, description } = req.body as {
     title?: string; severity?: string; affected_services?: string[]; description?: string;
   };
@@ -218,7 +219,7 @@ router.post("/incidents", async (req, res) => {
   }
 });
 
-router.patch("/incidents/:id", async (req, res) => {
+router.patch("/incidents/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
   const id = parseInt(req.params["id"]!);
   const { status, message } = req.body as { status?: string; message?: string };
   if (!status || !message) {

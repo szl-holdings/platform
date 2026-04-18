@@ -43,6 +43,7 @@
  * Churned subscription — any subscription row where canceledAt IS NOT NULL.
  */
 import { Router, type IRouter, type Request, type Response } from "express";
+import { validateQuery, listQuerySchema } from "../lib/validation.js";
 import {
   db,
   subscriptionsTable,
@@ -477,6 +478,7 @@ router.get(
   "/investor-analytics/cohort",
   authMiddleware(),
   requireRole(...ALLOWED_ROLES),
+  validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
       const granularity = (req.query["granularity"] as string) || "month";
@@ -633,6 +635,7 @@ router.get(
   "/investor-analytics/audit-diffs",
   authMiddleware(),
   requireRole("admin", "ops", "compliance"),
+  validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
       const { limit = "50", offset = "0", entityType, dateFrom, dateTo } = req.query as Record<string, string>;

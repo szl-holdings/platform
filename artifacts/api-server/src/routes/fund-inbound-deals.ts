@@ -8,6 +8,7 @@ import { z } from "zod";
 import { sendSuccess, sendBadRequest, sendNotFound, handleRouteError } from "../lib/api-response";
 import { publicSubmitLimiter, publicUploadLimiter } from "../middlewares/rate-limiters";
 import { ObjectStorageService, ObjectNotFoundError } from "../lib/objectStorage";
+import { validateBody, jsonObjectBodySchema } from "../lib/validation";
 
 const router: IRouter = Router();
 const objectStorage = new ObjectStorageService();
@@ -121,6 +122,7 @@ router.post(
       next();
     });
   },
+  validateBody(jsonObjectBodySchema),
   async (req: Request, res: Response) => {
     try {
       const file = req.file;
@@ -203,7 +205,7 @@ async function verifyAndCanonicalizeAttachments(
   return { ok: true, attachments: verified };
 }
 
-router.post("/public/fund-inbound-deals", publicSubmitLimiter, async (req: Request, res: Response) => {
+router.post("/public/fund-inbound-deals", publicSubmitLimiter, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const parsed = submitSchema.safeParse(req.body);
     if (!parsed.success) {

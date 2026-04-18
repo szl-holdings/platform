@@ -21,6 +21,7 @@ import { logger } from "../lib/logger";
 import { authMiddleware, parseIdParam, canAccessOrgRecord } from "../middlewares/auth";
 import { isFlagEnabled } from "../lib/platform-flags";
 import { services } from "@szl-holdings/services";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -408,7 +409,7 @@ function buildLyteDashboard(role: string | null | undefined, signals: any[], act
   return base;
 }
 
-router.get("/lyte/platform/dashboard", authMiddleware({ required: false }), async (req, res) => {
+router.get("/lyte/platform/dashboard", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
     const roleParam = req.query.role as string | undefined;
@@ -443,7 +444,7 @@ router.get("/lyte/platform/dashboard", authMiddleware({ required: false }), asyn
   }
 });
 
-router.get("/lyte/platform/dashboard/executive", authMiddleware({ required: false }), async (req, res) => {
+router.get("/lyte/platform/dashboard/executive", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
     const [signals, actions, readinessItems] = await Promise.all([
@@ -455,7 +456,7 @@ router.get("/lyte/platform/dashboard/executive", authMiddleware({ required: fals
   } catch (err) { handleRouteError(res, err, "Failed to build executive dashboard"); }
 });
 
-router.get("/lyte/platform/dashboard/operations", authMiddleware({ required: false }), async (req, res) => {
+router.get("/lyte/platform/dashboard/operations", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
     const apmPromise = services.newRelic.getApmMetrics().catch(() => null);
@@ -488,7 +489,7 @@ router.get("/lyte/platform/dashboard/operations", authMiddleware({ required: fal
   } catch (err) { handleRouteError(res, err, "Failed to build operations dashboard"); }
 });
 
-router.get("/lyte/platform/dashboard/delivery", authMiddleware({ required: false }), async (req, res) => {
+router.get("/lyte/platform/dashboard/delivery", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
     const [signals, actions, readinessItems] = await Promise.all([
@@ -500,7 +501,7 @@ router.get("/lyte/platform/dashboard/delivery", authMiddleware({ required: false
   } catch (err) { handleRouteError(res, err, "Failed to build delivery dashboard"); }
 });
 
-router.get("/lyte/platform/signals", authMiddleware({ required: false }), async (req, res) => {
+router.get("/lyte/platform/signals", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
     const status = req.query.status as string | undefined;
@@ -531,7 +532,7 @@ router.get("/lyte/platform/signals", authMiddleware({ required: false }), async 
   }
 });
 
-router.get("/lyte/platform/signals/insights", authMiddleware({ required: false }), async (req, res) => {
+router.get("/lyte/platform/signals/insights", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
     const [signals, actions] = await Promise.all([
@@ -542,7 +543,7 @@ router.get("/lyte/platform/signals/insights", authMiddleware({ required: false }
   } catch (err) { handleRouteError(res, err, "Failed to build insight narratives"); }
 });
 
-router.get("/lyte/platform/signals/:id", authMiddleware({ required: false }), async (req, res) => {
+router.get("/lyte/platform/signals/:id", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
@@ -556,7 +557,7 @@ router.get("/lyte/platform/signals/:id", authMiddleware({ required: false }), as
   }
 });
 
-router.post("/lyte/platform/signals/:id/acknowledge", authMiddleware(), async (req, res) => {
+router.post("/lyte/platform/signals/:id/acknowledge", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
@@ -579,7 +580,7 @@ router.post("/lyte/platform/signals/:id/acknowledge", authMiddleware(), async (r
   }
 });
 
-router.post("/lyte/platform/signals/:id/assign", authMiddleware(), async (req, res) => {
+router.post("/lyte/platform/signals/:id/assign", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
@@ -615,7 +616,7 @@ router.post("/lyte/platform/signals/:id/assign", authMiddleware(), async (req, r
   }
 });
 
-router.post("/lyte/platform/signals/:id/escalate", authMiddleware(), async (req, res) => {
+router.post("/lyte/platform/signals/:id/escalate", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
@@ -640,7 +641,7 @@ router.post("/lyte/platform/signals/:id/escalate", authMiddleware(), async (req,
   }
 });
 
-router.post("/lyte/platform/signals/:id/resolve", authMiddleware(), async (req, res) => {
+router.post("/lyte/platform/signals/:id/resolve", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
@@ -668,7 +669,7 @@ router.post("/lyte/platform/signals/:id/resolve", authMiddleware(), async (req, 
   }
 });
 
-router.post("/lyte/platform/signals/:id/override", authMiddleware(), async (req, res) => {
+router.post("/lyte/platform/signals/:id/override", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
@@ -697,7 +698,7 @@ router.post("/lyte/platform/signals/:id/override", authMiddleware(), async (req,
   }
 });
 
-router.get("/lyte/platform/actions/queue", authMiddleware({ required: false }), async (req, res) => {
+router.get("/lyte/platform/actions/queue", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
     const actions = await db.select().from(actionsTable).where(and(eq(actionsTable.orgId, orgId), eq(actionsTable.product, LYTE_PRODUCT))).orderBy(desc(actionsTable.createdAt)).limit(200);
@@ -705,7 +706,7 @@ router.get("/lyte/platform/actions/queue", authMiddleware({ required: false }), 
   } catch (err) { handleRouteError(res, err, "Failed to build action queue"); }
 });
 
-router.get("/lyte/platform/actions", authMiddleware({ required: false }), async (req, res) => {
+router.get("/lyte/platform/actions", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
     const status = req.query.status as string | undefined;
@@ -727,7 +728,7 @@ router.get("/lyte/platform/actions", authMiddleware({ required: false }), async 
   }
 });
 
-router.get("/lyte/platform/actions/:id", authMiddleware({ required: false }), async (req, res) => {
+router.get("/lyte/platform/actions/:id", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
@@ -737,7 +738,7 @@ router.get("/lyte/platform/actions/:id", authMiddleware({ required: false }), as
   } catch (err) { handleRouteError(res, err, "Failed to get action"); }
 });
 
-router.post("/lyte/platform/actions", authMiddleware(), async (req, res) => {
+router.post("/lyte/platform/actions", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const parsed = CreateActionSchema.safeParse(req.body);
     if (!parsed.success) { sendBadRequest(res, "Invalid action data", parsed.error.flatten().fieldErrors); return; }
@@ -801,7 +802,7 @@ async function updateActionStatus(req: import("express").Request, res: import("e
 router.patch("/lyte/platform/actions/:id/status", authMiddleware(), updateActionStatus);
 router.post("/lyte/platform/actions/:id/update-status", authMiddleware(), updateActionStatus);
 
-router.get("/lyte/platform/readiness", authMiddleware({ required: false }), async (req, res) => {
+router.get("/lyte/platform/readiness", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const enabled = await isFlagEnabled("lyte_readiness_enabled");
     if (!enabled) {
@@ -839,7 +840,7 @@ router.get("/lyte/platform/readiness", authMiddleware({ required: false }), asyn
   }
 });
 
-router.get("/lyte/platform/readiness/:id", authMiddleware({ required: false }), async (req, res) => {
+router.get("/lyte/platform/readiness/:id", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
@@ -849,7 +850,7 @@ router.get("/lyte/platform/readiness/:id", authMiddleware({ required: false }), 
   } catch (err) { handleRouteError(res, err, "Failed to get readiness item"); }
 });
 
-router.post("/lyte/platform/readiness", authMiddleware(), async (req, res) => {
+router.post("/lyte/platform/readiness", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const parsed = CreateReadinessSchema.safeParse(req.body);
     if (!parsed.success) { sendBadRequest(res, "Invalid readiness data", parsed.error.flatten().fieldErrors); return; }
@@ -880,7 +881,7 @@ router.post("/lyte/platform/readiness", authMiddleware(), async (req, res) => {
   }
 });
 
-router.patch("/lyte/platform/readiness/:id", authMiddleware(), async (req, res) => {
+router.patch("/lyte/platform/readiness/:id", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
@@ -932,7 +933,7 @@ router.delete("/lyte/platform/readiness/:id", authMiddleware(), async (req, res)
   }
 });
 
-router.get("/lyte/platform/views", authMiddleware({ required: false }), async (req, res) => {
+router.get("/lyte/platform/views", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const roleViewsEnabled = await isFlagEnabled("lyte_role_views_enabled");
     if (!roleViewsEnabled) {
@@ -959,7 +960,7 @@ router.get("/lyte/platform/views", authMiddleware({ required: false }), async (r
   }
 });
 
-router.post("/lyte/platform/views", authMiddleware(), async (req, res) => {
+router.post("/lyte/platform/views", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const roleViewsEnabled = await isFlagEnabled("lyte_role_views_enabled");
     if (!roleViewsEnabled) {
@@ -1025,7 +1026,7 @@ router.get("/lyte/platform/signals/:id/comments", authMiddleware({ required: fal
   }
 });
 
-router.post("/lyte/platform/signals/:id/comments", authMiddleware(), async (req, res) => {
+router.post("/lyte/platform/signals/:id/comments", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const parsed = CreateCommentSchema.safeParse(req.body);
@@ -1070,7 +1071,7 @@ router.get("/lyte/platform/actions/:id/comments", authMiddleware({ required: fal
   }
 });
 
-router.post("/lyte/platform/actions/:id/comments", authMiddleware(), async (req, res) => {
+router.post("/lyte/platform/actions/:id/comments", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const parsed = CreateCommentSchema.safeParse(req.body);

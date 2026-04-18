@@ -3,6 +3,7 @@ import rateLimit from "express-rate-limit";
 import { sendSuccess, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
 import { services } from "@szl-holdings/services";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -47,7 +48,7 @@ router.get("/microsoft/status", msGraphLimit, authMiddleware({ required: false }
   } catch (err) { handleRouteError(res, err, "Failed to get Microsoft Graph status"); }
 });
 
-router.get("/microsoft/sharepoint/files", msGraphLimit, authMiddleware({ required: false }), async (req: Request, res: Response) => {
+router.get("/microsoft/sharepoint/files", msGraphLimit, authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const siteId = req.query.siteId as string | undefined;
     const libraryPath = (req.query.path as string) ?? "/Shared Documents";
@@ -65,7 +66,7 @@ router.get("/microsoft/sharepoint/files", msGraphLimit, authMiddleware({ require
   } catch (err) { handleRouteError(res, err, "Failed to list SharePoint files"); }
 });
 
-router.get("/microsoft/onedrive/files", msGraphLimit, authMiddleware({ required: false }), async (req: Request, res: Response) => {
+router.get("/microsoft/onedrive/files", msGraphLimit, authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const userId = req.query.userId as string | undefined;
     const adapter = services.microsoftGraph;
@@ -81,7 +82,7 @@ router.get("/microsoft/onedrive/files", msGraphLimit, authMiddleware({ required:
   } catch (err) { handleRouteError(res, err, "Failed to list OneDrive files"); }
 });
 
-router.get("/microsoft/calendar/events", msGraphLimit, authMiddleware({ required: false }), async (req: Request, res: Response) => {
+router.get("/microsoft/calendar/events", msGraphLimit, authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const userId = req.query.userId as string | undefined;
     const daysAhead = req.query.days ? Math.min(Number(req.query.days), 90) : 14;
@@ -99,7 +100,7 @@ router.get("/microsoft/calendar/events", msGraphLimit, authMiddleware({ required
   } catch (err) { handleRouteError(res, err, "Failed to list calendar events"); }
 });
 
-router.get("/microsoft/contacts", msGraphLimit, authMiddleware({ required: false }), async (req: Request, res: Response) => {
+router.get("/microsoft/contacts", msGraphLimit, authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const userId = req.query.userId as string | undefined;
     const adapter = services.microsoftGraph;
@@ -129,7 +130,7 @@ router.get("/microsoft/sharepoint/sites", msGraphLimit, authMiddleware({ require
   } catch (err) { handleRouteError(res, err, "Failed to list SharePoint sites"); }
 });
 
-router.post("/microsoft/teams/notify", msGraphLimit, authMiddleware({ required: false }), async (req: Request, res: Response) => {
+router.post("/microsoft/teams/notify", msGraphLimit, authMiddleware({ required: false }), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { text, title, color, channelId, webHookUrl } = req.body;
     if (!text || typeof text !== "string") {

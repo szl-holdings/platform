@@ -1,4 +1,5 @@
 import type { IRouter } from "express";
+import { validateQuery, listQuerySchema } from "../../lib/validation.js";
 import {
   db, terraDistressPropertiesTable,
   eq, and, sql, ilike, or,
@@ -6,7 +7,7 @@ import {
 } from "./_shared.js";
 
 export function register(router: IRouter): void {
-  router.get("/terra/distress/export/csv", authMiddleware({ required: false }), async (req, res) => {
+  router.get("/terra/distress/export/csv", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
     try {
       const { borough, distressType, minScore, q } = req.query;
       const str = (v: unknown) => typeof v === "string" ? v : undefined;

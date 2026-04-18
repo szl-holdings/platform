@@ -32,7 +32,7 @@ import {
 } from "../lib/api-response";
 import { logger } from "../lib/logger";
 import { broadcastWs, pubsub, ALLOY_EVENTS } from "../lib/pubsub-bridge.js";
-import { validateBody } from "../lib/validation";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const upsertFeatureFlagSchema = z.object({
   key: z.string().min(1).max(100).regex(/^[a-z0-9_-]+$/i),
@@ -165,7 +165,7 @@ function transitionRunState(
   return { valid: true };
 }
 
-router.post("/alloy/ingest/signal", authMiddleware(), async (req, res) => {
+router.post("/alloy/ingest/signal", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const payload = req.body;
     if (!payload.source || !payload.sourceType || !payload.title) {
@@ -208,7 +208,7 @@ router.post("/alloy/ingest/signal", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/alloy/ingest/batch", authMiddleware(), requireRole("super_admin", "ops", "analyst"), async (req, res) => {
+router.post("/alloy/ingest/batch", authMiddleware(), requireRole("super_admin", "ops", "analyst"), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const orgIds = getUserOrgIds(req.user);
     const isAdmin = isGlobalAdmin(req.user);
@@ -246,7 +246,7 @@ router.post("/alloy/ingest/batch", authMiddleware(), requireRole("super_admin", 
   }
 });
 
-router.get("/alloy/workflows", authMiddleware(), async (req, res) => {
+router.get("/alloy/workflows", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const orgIds = getUserOrgIds(req.user);
@@ -276,7 +276,7 @@ router.get("/alloy/workflows/:id", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/alloy/workflows", authMiddleware(), requireRole("super_admin", "ops", "analyst"), async (req, res) => {
+router.post("/alloy/workflows", authMiddleware(), requireRole("super_admin", "ops", "analyst"), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const data = insertAlloyWorkflowSchema.parse(req.body);
     const userOrgIds = getUserOrgIds(req.user);
@@ -301,7 +301,7 @@ router.post("/alloy/workflows", authMiddleware(), requireRole("super_admin", "op
   }
 });
 
-router.patch("/alloy/workflows/:id", authMiddleware(), requireRole("super_admin", "ops", "analyst"), async (req, res) => {
+router.patch("/alloy/workflows/:id", authMiddleware(), requireRole("super_admin", "ops", "analyst"), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [before] = await db.select().from(alloyWorkflowsTable).where(eq(alloyWorkflowsTable.id, id));
@@ -474,7 +474,7 @@ router.get("/alloy/runs/:id", authMiddleware(), requireRole("super_admin", "admi
   }
 });
 
-router.post("/alloy/runs/:id/retry", authMiddleware(), requireRole("super_admin", "ops"), async (req, res) => {
+router.post("/alloy/runs/:id/retry", authMiddleware(), requireRole("super_admin", "ops"), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [run] = await db.select().from(alloyWorkflowRunsTable).where(eq(alloyWorkflowRunsTable.id, id));
@@ -508,7 +508,7 @@ router.post("/alloy/runs/:id/retry", authMiddleware(), requireRole("super_admin"
   }
 });
 
-router.post("/alloy/runs/:id/cancel", authMiddleware(), requireRole("super_admin", "ops"), async (req, res) => {
+router.post("/alloy/runs/:id/cancel", authMiddleware(), requireRole("super_admin", "ops"), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [run] = await db.select().from(alloyWorkflowRunsTable).where(eq(alloyWorkflowRunsTable.id, id));
@@ -530,7 +530,7 @@ router.post("/alloy/runs/:id/cancel", authMiddleware(), requireRole("super_admin
   }
 });
 
-router.get("/alloy/artifacts", authMiddleware(), async (req, res) => {
+router.get("/alloy/artifacts", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const orgIds = getUserOrgIds(req.user);
@@ -668,7 +668,7 @@ router.patch("/alloy/admin/flags/:key", authMiddleware(), requireRole("super_adm
   }
 });
 
-router.get("/alloy/audit", authMiddleware(), requireRole("super_admin", "ops", "compliance"), async (req, res) => {
+router.get("/alloy/audit", authMiddleware(), requireRole("super_admin", "ops", "compliance"), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const orgIds = getUserOrgIds(req.user);
@@ -768,7 +768,7 @@ router.get("/alloy/factory-floor", authMiddleware(), async (req, res) => {
   }
 });
 
-router.get("/alloy/signals", authMiddleware(), async (req, res) => {
+router.get("/alloy/signals", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const source = typeof req.query.source === "string" ? req.query.source : null;
@@ -820,7 +820,7 @@ router.get("/alloy/runs/:id/steps", authMiddleware(), requireRole("super_admin",
   }
 });
 
-router.get("/alloy/runs", authMiddleware(), requireRole("super_admin", "admin", "ops"), async (req, res) => {
+router.get("/alloy/runs", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const stateFilter = typeof req.query.state === "string" ? req.query.state : null;
@@ -874,7 +874,7 @@ router.get("/alloy/runs", authMiddleware(), requireRole("super_admin", "admin", 
   }
 });
 
-router.get("/alloy/approvals", authMiddleware(), async (req, res) => {
+router.get("/alloy/approvals", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const orgIds = getUserOrgIds(req.user);
@@ -1006,7 +1006,7 @@ router.get("/alloy/dashboard", authMiddleware(), async (req, res) => {
 
 // ─── Decisions ────────────────────────────────────────────────────────────────
 
-router.get("/decisions", platformAuth, async (req: Request, res: Response) => {
+router.get("/decisions", platformAuth, validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { limit = 30, offset = 0 } = parsePagination(req.query as Record<string, unknown>);
     const status = req.query.status as string | undefined;
@@ -1055,7 +1055,7 @@ router.post("/decisions", platformAuth, validateBody(createDecisionSchema), asyn
   }
 });
 
-router.post("/decisions/:id/approve", platformAuth, async (req: Request, res: Response) => {
+router.post("/decisions/:id/approve", platformAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const id = parseIdParam(req.params.id);
     if (!id) return;
@@ -1071,7 +1071,7 @@ router.post("/decisions/:id/approve", platformAuth, async (req: Request, res: Re
   }
 });
 
-router.post("/decisions/:id/reject", platformAuth, async (req: Request, res: Response) => {
+router.post("/decisions/:id/reject", platformAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const id = parseIdParam(req.params.id);
     if (!id) return;
@@ -1089,7 +1089,7 @@ router.post("/decisions/:id/reject", platformAuth, async (req: Request, res: Res
 
 // ─── Skills ───────────────────────────────────────────────────────────────────
 
-router.get("/skills", platformAuth, async (req: Request, res: Response) => {
+router.get("/skills", platformAuth, validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { limit = 50, offset = 0 } = parsePagination(req.query as Record<string, unknown>);
     const category = req.query.category as string | undefined;
@@ -1158,7 +1158,7 @@ router.patch("/skills/:id", platformAuth, validateBody(patchSkillSchema), async 
   }
 });
 
-router.get("/skills/:id/runs", platformAuth, async (req: Request, res: Response) => {
+router.get("/skills/:id/runs", platformAuth, validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const id = parseIdParam(req.params.id);
     if (!id) return;

@@ -5,6 +5,7 @@ import { z } from "zod";
 import { authMiddleware } from "../middlewares/auth";
 import { sendSuccess, sendBadRequest, sendNotFound, sendError, handleRouteError } from "../lib/api-response";
 import { logger } from "../lib/logger";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const webhookEndpointSchema = z.object({
   url: z.string().url("url must be a valid URL"),
@@ -214,7 +215,7 @@ router.get("/webhooks/endpoints", authMiddleware(), async (_req, res) => {
   }
 });
 
-router.post("/webhooks/endpoints", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/webhooks/endpoints", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   const parsed = webhookEndpointSchema.safeParse(req.body);
   if (!parsed.success) {
     sendError(res, parsed.error.errors.map(e => e.message).join(", "), 400);
@@ -257,7 +258,7 @@ router.post("/webhooks/endpoints", authMiddleware(), async (req: Request, res: R
   }
 });
 
-router.patch("/webhooks/endpoints/:id", authMiddleware(), async (req: Request, res: Response) => {
+router.patch("/webhooks/endpoints/:id", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   const parsed = webhookEndpointUpdateSchema.safeParse(req.body);
   if (!parsed.success) {
     sendError(res, parsed.error.errors.map(e => e.message).join(", "), 400);
@@ -302,7 +303,7 @@ router.delete("/webhooks/endpoints/:id", authMiddleware(), async (req: Request, 
   }
 });
 
-router.post("/webhooks/endpoints/:id/ping", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/webhooks/endpoints/:id/ping", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const endpoint = webhookEndpoints.get(String(req.params.id));
     if (!endpoint) {
@@ -336,7 +337,7 @@ router.post("/webhooks/endpoints/:id/ping", authMiddleware(), async (req: Reques
   }
 });
 
-router.get("/webhooks/deliveries", authMiddleware(), async (req: Request, res: Response) => {
+router.get("/webhooks/deliveries", authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const endpointId = req.query.endpointId as string | undefined;
     const eventType = req.query.eventType as string | undefined;
@@ -368,7 +369,7 @@ router.get("/webhooks/deliveries", authMiddleware(), async (req: Request, res: R
   }
 });
 
-router.post("/webhooks", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/webhooks", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   const parsed = webhookEndpointSchema.safeParse(req.body);
   if (!parsed.success) {
     sendError(res, parsed.error.errors.map(e => e.message).join(", "), 400);

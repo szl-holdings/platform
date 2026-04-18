@@ -12,12 +12,13 @@
 import type { IRouter } from "express";
 import { logger } from "../../lib/logger.js";
 import { demoFixtureStore } from "../../lib/demo-fixture-store.js";
+import { validateBody, jsonObjectBodySchema } from "../../lib/validation";
 
 let resetCount = 0;
 let lastResetAt: string | null = null;
 
 export function register(router: IRouter): void {
-  router.post("/admin/seed/reset-demo", (_req, res) => {
+  router.post("/admin/seed/reset-demo", validateBody(jsonObjectBodySchema), (_req, res) => {
     const appMode = (process.env["APP_MODE"] ?? "sandbox").toLowerCase();
 
     demoFixtureStore.reset();

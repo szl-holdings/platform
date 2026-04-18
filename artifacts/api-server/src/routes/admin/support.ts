@@ -3,7 +3,7 @@ import { db } from "@szl-holdings/db";
 import { contactSubmissionsTable, leadStatusTable, supportKnowledgeArticlesTable } from "@szl-holdings/db";
 import { eq, desc, sql, ilike, or, and } from "drizzle-orm";
 import { z } from "zod";
-import { validateBody } from "../../lib/validation.js";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation.js";
 import { sendError, sendNotFound, sendBadRequest } from "../../lib/api-response.js";
 import { sendEmail, buildTicketStatusEmail } from "../../lib/email.js";
 import { logger } from "../../lib/logger.js";
@@ -85,7 +85,7 @@ function buildCsvRow(cells: string[]): string {
 }
 
 export function register(router: IRouter): void {
-  router.get("/admin/support-queue", async (req, res) => {
+  router.get("/admin/support-queue", validateQuery(listQuerySchema), async (req, res) => {
     try {
       const includeResolved = req.query.includeResolved === "true";
       const format = req.query.format as string | undefined;
@@ -272,7 +272,7 @@ export function register(router: IRouter): void {
     }
   });
 
-  router.post("/admin/support-queue/:id/resolve", async (req, res) => {
+  router.post("/admin/support-queue/:id/resolve", validateBody(jsonObjectBodySchema), async (req, res) => {
     try {
       const id = parseInt(req.params.id, 10);
       if (isNaN(id)) { sendBadRequest(res, "Invalid ticket ID"); return; }
@@ -292,7 +292,7 @@ export function register(router: IRouter): void {
     }
   });
 
-  router.post("/admin/support-queue/:id/reopen", async (req, res) => {
+  router.post("/admin/support-queue/:id/reopen", validateBody(jsonObjectBodySchema), async (req, res) => {
     try {
       const id = parseInt(req.params.id, 10);
       if (isNaN(id)) { sendBadRequest(res, "Invalid ticket ID"); return; }

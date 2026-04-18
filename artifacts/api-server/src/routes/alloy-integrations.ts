@@ -6,6 +6,7 @@ import { services } from "@szl-holdings/services";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { sendSuccess, sendCreated, sendBadRequest, sendError, handleRouteError } from "../lib/api-response";
 import { logger } from "../lib/logger";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -128,7 +129,7 @@ router.get("/alloy/integrations/registry", authMiddleware(), async (_req: Reques
   }
 });
 
-router.get("/alloy/integrations/connections", authMiddleware(), requireRole("ops", "admin", "super_admin"), async (req: Request, res: Response) => {
+router.get("/alloy/integrations/connections", authMiddleware(), requireRole("ops", "admin", "super_admin"), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { integrationType, status } = req.query as Record<string, string>;
     let q = `SELECT * FROM alloy_integration_connections WHERE 1=1`;
@@ -145,7 +146,7 @@ router.get("/alloy/integrations/connections", authMiddleware(), requireRole("ops
   }
 });
 
-router.post("/alloy/integrations/connections", authMiddleware(), requireRole("admin", "super_admin"), async (req: Request, res: Response) => {
+router.post("/alloy/integrations/connections", authMiddleware(), requireRole("admin", "super_admin"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { integrationType, displayName, tenantId, config, scope, approvalClass } = req.body as {
       integrationType: string;
@@ -182,7 +183,7 @@ router.post("/alloy/integrations/connections", authMiddleware(), requireRole("ad
   }
 });
 
-router.patch("/alloy/integrations/connections/:id", authMiddleware(), requireRole("admin", "super_admin"), async (req: Request, res: Response) => {
+router.patch("/alloy/integrations/connections/:id", authMiddleware(), requireRole("admin", "super_admin"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { status, isEnabled, config, displayName } = req.body as {
       status?: string;
@@ -214,7 +215,7 @@ router.delete("/alloy/integrations/connections/:id", authMiddleware(), requireRo
   }
 });
 
-router.post("/alloy/integrations/webhooks/endpoints", authMiddleware(), requireRole("admin", "super_admin"), async (req: Request, res: Response) => {
+router.post("/alloy/integrations/webhooks/endpoints", authMiddleware(), requireRole("admin", "super_admin"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { name, description, allowedEvents = ["*"], targetSkill, targetWorkflowType, metadata } = req.body as {
       name: string;
@@ -318,7 +319,7 @@ router.post("/alloy/integrations/webhooks/receive/:endpointId", async (req: Requ
   }
 });
 
-router.get("/alloy/integrations/events", authMiddleware(), requireRole("ops", "admin", "super_admin"), async (req: Request, res: Response) => {
+router.get("/alloy/integrations/events", authMiddleware(), requireRole("ops", "admin", "super_admin"), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { connectionId, integrationType, limit: limitStr = "50" } = req.query as Record<string, string>;
     const limit = Math.min(parseInt(limitStr, 10), 200);
@@ -336,7 +337,7 @@ router.get("/alloy/integrations/events", authMiddleware(), requireRole("ops", "a
   }
 });
 
-router.post("/alloy/integrations/connections/:id/test", authMiddleware(), requireRole("ops", "admin", "super_admin"), async (req: Request, res: Response) => {
+router.post("/alloy/integrations/connections/:id/test", authMiddleware(), requireRole("ops", "admin", "super_admin"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const result = await pool.query(`SELECT * FROM alloy_integration_connections WHERE id = $1`, [req.params.id]);
     if (!result.rows[0]) { sendError(res, "Connection not found", 404); return; }

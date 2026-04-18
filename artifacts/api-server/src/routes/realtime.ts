@@ -1,4 +1,5 @@
 import { Router, type Request, type Response } from "express";
+import { validateQuery, listQuerySchema } from "../lib/validation.js";
 import { handleSseConnection, getSseStats } from "../lib/sse-server";
 import { getWsStats, getPresence, getMessagesSince } from "../lib/websocket";
 import { getPrismBridgeStats } from "../lib/prism-bus-bridge";
@@ -63,7 +64,7 @@ router.get("/realtime/presence/:channel", authMiddleware({ required: false }), (
   });
 });
 
-router.get("/realtime/history/:channel", authMiddleware({ required: true }), (req: Request, res: Response) => {
+router.get("/realtime/history/:channel", authMiddleware({ required: true }), validateQuery(listQuerySchema), (req: Request, res: Response) => {
   const { channel } = req.params;
   const sinceSeq = parseInt(req.query["since"] as string ?? "0", 10);
   const limit = Math.min(parseInt(req.query["limit"] as string ?? "50", 10), 200);

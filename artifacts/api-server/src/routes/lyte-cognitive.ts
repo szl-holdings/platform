@@ -26,10 +26,11 @@ import {
   computeBottleneckUrgency,
   computeAccountabilityUrgency,
 } from "./lyte-cognitive-helpers.js";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
-router.post("/lyte/cognitive/signal-fusion/run", authMiddleware(), async (req, res) => {
+router.post("/lyte/cognitive/signal-fusion/run", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const [signals, alerts, escalations, metrics] = await Promise.all([
       db.select().from(lyteSignalsTable).orderBy(desc(lyteSignalsTable.receivedAt)).limit(200),
@@ -276,7 +277,7 @@ router.get("/lyte/cognitive/bottlenecks", authMiddleware(), async (req, res) => 
   }
 });
 
-router.get("/lyte/cognitive/interventions", authMiddleware(), async (req, res) => {
+router.get("/lyte/cognitive/interventions", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const limit = safeParseLimit(req.query.limit, 20, 50);
     const [activeSignals, stalledActions, blockedItems, openEscalations] = await Promise.all([
@@ -539,7 +540,7 @@ router.get("/lyte/cognitive/accountability-map", authMiddleware(), async (req, r
   }
 });
 
-router.get("/lyte/cognitive/value-at-risk", authMiddleware(), async (req, res) => {
+router.get("/lyte/cognitive/value-at-risk", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const periodDays = Math.min(Math.max(parseInt(String(req.query.days ?? "30"), 10) || 30, 1), 365);
     const cutoff = new Date(Date.now() - periodDays * 24 * 3600 * 1000);
@@ -628,7 +629,7 @@ router.get("/lyte/cognitive/value-at-risk", authMiddleware(), async (req, res) =
   }
 });
 
-router.get("/lyte/cognitive/executive-narrative", authMiddleware(), async (req, res) => {
+router.get("/lyte/cognitive/executive-narrative", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { fromDate, toDate } = parseTimeWindow(
       req.query.from as string | undefined,

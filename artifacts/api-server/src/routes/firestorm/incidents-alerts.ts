@@ -52,6 +52,7 @@ import {
   ingestFirestormScenario,
   ingestFirestormAlert,
 } from "@szl-holdings/ai-engine/domain-embedding-hooks";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
 const router = Router();
 
 router.get("/firestorm/incidents", authMiddleware(), async (_req, res) => {
@@ -74,7 +75,7 @@ router.get("/firestorm/incidents/:id", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/firestorm/incidents", authMiddleware({ required: true }), async (req, res) => {
+router.post("/firestorm/incidents", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const data = insertFirestormIncidentSchema.parse(req.body);
     const [incident] = await db.insert(firestormIncidentsTable).values(data).returning();
@@ -86,7 +87,7 @@ router.post("/firestorm/incidents", authMiddleware({ required: true }), async (r
   }
 });
 
-router.put("/firestorm/incidents/:id", authMiddleware({ required: true }), async (req, res) => {
+router.put("/firestorm/incidents/:id", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id as string);
     const data = insertFirestormIncidentSchema.partial().parse(req.body);
@@ -143,7 +144,7 @@ router.delete("/firestorm/incidents/:id", authMiddleware({ required: true }), as
   }
 });
 
-router.get("/firestorm/vulnerabilities", authMiddleware(), async (req, res) => {
+router.get("/firestorm/vulnerabilities", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const severityFilter = req.query.severity as string | undefined;
     const statusFilter = req.query.status as string | undefined;
@@ -181,7 +182,7 @@ router.get("/firestorm/vulnerabilities/:id", authMiddleware(), async (req, res) 
   }
 });
 
-router.put("/firestorm/vulnerabilities/:id", authMiddleware({ required: true }), async (req, res) => {
+router.put("/firestorm/vulnerabilities/:id", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id as string);
     const { status, remediationOwner, dueDate, recommendedAction, recommendation } = updateVulnerabilitySchema.parse(req.body);
@@ -263,7 +264,7 @@ async function ensureComplianceControlsSeeded(): Promise<void> {
 const VALID_COMPLIANCE_FRAMEWORKS = ["nist_csf", "fedramp", "fisma"] as const;
 type ComplianceFramework = typeof VALID_COMPLIANCE_FRAMEWORKS[number];
 
-router.get("/firestorm/compliance", authMiddleware(), async (req, res) => {
+router.get("/firestorm/compliance", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     await ensureComplianceControlsSeeded();
     const rawFramework = req.query.framework as string | undefined;
@@ -277,7 +278,7 @@ router.get("/firestorm/compliance", authMiddleware(), async (req, res) => {
   }
 });
 
-router.put("/firestorm/compliance/:controlId", authMiddleware({ required: true }), async (req, res) => {
+router.put("/firestorm/compliance/:controlId", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     await ensureComplianceControlsSeeded();
     const { controlId } = req.params as Record<string, string>;
@@ -318,7 +319,7 @@ router.put("/firestorm/compliance/:controlId", authMiddleware({ required: true }
   }
 });
 
-router.get("/firestorm/vulnerability-inventory", authMiddleware(), async (req, res) => {
+router.get("/firestorm/vulnerability-inventory", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const severityFilter = req.query.severity as string | undefined;
     const statusFilter = req.query.status as string | undefined;
@@ -368,7 +369,7 @@ router.get("/firestorm/vulnerability-inventory", authMiddleware(), async (req, r
   }
 });
 
-router.get("/firestorm/alerts", authMiddleware(), async (req, res) => {
+router.get("/firestorm/alerts", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const status = req.query.status as string | undefined;
     const query = status
@@ -381,7 +382,7 @@ router.get("/firestorm/alerts", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/firestorm/alerts", authMiddleware({ required: true }), async (req, res) => {
+router.post("/firestorm/alerts", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const data = insertFirestormAlertSchema.parse(req.body);
     const [alert] = await db.insert(firestormAlertsTable).values(data).returning();
@@ -393,7 +394,7 @@ router.post("/firestorm/alerts", authMiddleware({ required: true }), async (req,
   }
 });
 
-router.put("/firestorm/alerts/:id", authMiddleware({ required: true }), async (req, res) => {
+router.put("/firestorm/alerts/:id", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id as string);
     const data = insertFirestormAlertSchema.partial().parse(req.body);
@@ -473,7 +474,7 @@ router.get("/firestorm/soc-dashboard", authMiddleware(), async (_req, res) => {
   }
 });
 
-router.get("/firestorm/cves", authMiddleware(), async (req, res) => {
+router.get("/firestorm/cves", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const keyword = (req.query.keyword as string) || "";
     const resultsPerPage = 20;

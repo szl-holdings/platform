@@ -10,7 +10,7 @@ import { issueWsTicket } from "../lib/websocket.js";
 import { getSessionToken, getSessionUser } from "../lib/auth";
 import { hashIp } from "@szl-holdings/audit";
 import { z } from "zod";
-import { validateBody, loginPasswordSchema } from "../lib/validation";
+import { validateBody, loginPasswordSchema, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 const authService = createAuthService();
@@ -114,7 +114,7 @@ router.get("/auth/me", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/auth/sessions", authMiddleware(), async (req, res) => {
+router.post("/auth/sessions", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const token = randomBytes(32).toString("hex");
     const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
@@ -208,7 +208,7 @@ router.get("/auth/roles", authMiddleware(), requireRole("ops", "analyst"), async
   }
 });
 
-router.get("/auth/users", authMiddleware(), requireRole("ops"), async (req, res) => {
+router.get("/auth/users", authMiddleware(), requireRole("ops"), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { limit, offset, page } = parsePagination(req.query as Record<string, unknown>);
     const users = await db.select({
@@ -225,7 +225,7 @@ router.get("/auth/users", authMiddleware(), requireRole("ops"), async (req, res)
   }
 });
 
-router.post("/auth/ws-ticket", async (req, res) => {
+router.post("/auth/ws-ticket", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     let userId: number | undefined;
     let legacyRoles: RoleName[] = [];
@@ -330,7 +330,7 @@ router.post("/auth/register", validateBody(registerBodySchema), async (req, res)
   }
 });
 
-router.get("/auth/verify-email", async (req, res) => {
+router.get("/auth/verify-email", validateQuery(listQuerySchema), async (req, res) => {
   try {
     const token = typeof req.query.token === "string" ? req.query.token : null;
     if (!token) {

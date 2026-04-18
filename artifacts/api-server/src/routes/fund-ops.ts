@@ -22,6 +22,7 @@ import {
 import { eq, desc, sql, and, asc } from "drizzle-orm";
 import { sendSuccess, sendNotFound, handleRouteError, parsePagination } from "../lib/api-response";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 const auth = [authMiddleware(), requireRole("ops", "exec", "admin")];
@@ -48,7 +49,7 @@ async function auditFundOp(action: string, entity: string, entityId: string | nu
 
 // ─── PORTFOLIO FINANCIALS ─────────────────────────────────────────────────────
 
-router.get("/fund-ops/portfolio-financials", ...auth, async (req, res) => {
+router.get("/fund-ops/portfolio-financials", ...auth, validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const companySlug = req.query.companySlug as string | undefined;
@@ -76,7 +77,7 @@ router.get("/fund-ops/portfolio-financials/:id", ...auth, async (req, res) => {
   }
 });
 
-router.post("/fund-ops/portfolio-financials", ...auth, async (req, res) => {
+router.post("/fund-ops/portfolio-financials", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const [row] = await db.insert(fundPortfolioFinancialsTable).values(req.body).returning();
     await auditFundOp("create", "fund_portfolio_financial", row.id, req.body);
@@ -86,7 +87,7 @@ router.post("/fund-ops/portfolio-financials", ...auth, async (req, res) => {
   }
 });
 
-router.patch("/fund-ops/portfolio-financials/:id", ...auth, async (req, res) => {
+router.patch("/fund-ops/portfolio-financials/:id", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(fundPortfolioFinancialsTable)
@@ -115,7 +116,7 @@ router.delete("/fund-ops/portfolio-financials/:id", ...auth, async (req, res) =>
 
 // ─── PORTFOLIO KPIs ───────────────────────────────────────────────────────────
 
-router.get("/fund-ops/portfolio-kpis", ...auth, async (req, res) => {
+router.get("/fund-ops/portfolio-kpis", ...auth, validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const companySlug = req.query.companySlug as string | undefined;
@@ -129,7 +130,7 @@ router.get("/fund-ops/portfolio-kpis", ...auth, async (req, res) => {
   }
 });
 
-router.post("/fund-ops/portfolio-kpis", ...auth, async (req, res) => {
+router.post("/fund-ops/portfolio-kpis", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const [row] = await db.insert(fundPortfolioKpisTable).values(req.body).returning();
     await auditFundOp("create", "fund_portfolio_kpi", row.id, req.body);
@@ -139,7 +140,7 @@ router.post("/fund-ops/portfolio-kpis", ...auth, async (req, res) => {
   }
 });
 
-router.patch("/fund-ops/portfolio-kpis/:id", ...auth, async (req, res) => {
+router.patch("/fund-ops/portfolio-kpis/:id", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(fundPortfolioKpisTable).set({ ...req.body, updatedAt: new Date() }).where(eq(fundPortfolioKpisTable.id, id)).returning();
@@ -164,7 +165,7 @@ router.delete("/fund-ops/portfolio-kpis/:id", ...auth, async (req, res) => {
 
 // ─── PORTFOLIO AGGREGATE VIEW ─────────────────────────────────────────────────
 
-router.get("/fund-ops/portfolio-aggregate", ...auth, async (req, res) => {
+router.get("/fund-ops/portfolio-aggregate", ...auth, validateQuery(listQuerySchema), async (req, res) => {
   try {
     const periodLabel = req.query.periodLabel as string | undefined;
 
@@ -220,7 +221,7 @@ router.get("/fund-ops/portfolio-aggregate", ...auth, async (req, res) => {
 
 // ─── SEC COMPLIANCE — FORM D ──────────────────────────────────────────────────
 
-router.get("/fund-ops/form-d-filings", ...auth, async (req, res) => {
+router.get("/fund-ops/form-d-filings", ...auth, validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const rows = await db.select().from(fundFormDFilingsTable).orderBy(desc(fundFormDFilingsTable.createdAt)).limit(limit).offset(offset);
@@ -231,7 +232,7 @@ router.get("/fund-ops/form-d-filings", ...auth, async (req, res) => {
   }
 });
 
-router.post("/fund-ops/form-d-filings", ...auth, async (req, res) => {
+router.post("/fund-ops/form-d-filings", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const [row] = await db.insert(fundFormDFilingsTable).values(req.body).returning();
     await auditFundOp("create", "fund_form_d_filing", row.id, req.body);
@@ -241,7 +242,7 @@ router.post("/fund-ops/form-d-filings", ...auth, async (req, res) => {
   }
 });
 
-router.patch("/fund-ops/form-d-filings/:id", ...auth, async (req, res) => {
+router.patch("/fund-ops/form-d-filings/:id", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(fundFormDFilingsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(fundFormDFilingsTable.id, id)).returning();
@@ -266,7 +267,7 @@ router.delete("/fund-ops/form-d-filings/:id", ...auth, async (req, res) => {
 
 // ─── ACCREDITED INVESTORS ─────────────────────────────────────────────────────
 
-router.get("/fund-ops/accredited-investors", ...auth, async (req, res) => {
+router.get("/fund-ops/accredited-investors", ...auth, validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const rows = await db.select().from(fundAccreditedInvestorsTable).orderBy(desc(fundAccreditedInvestorsTable.createdAt)).limit(limit).offset(offset);
@@ -289,7 +290,7 @@ router.get("/fund-ops/accredited-investors/:id", ...auth, async (req, res) => {
   }
 });
 
-router.post("/fund-ops/accredited-investors", ...auth, async (req, res) => {
+router.post("/fund-ops/accredited-investors", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const [row] = await db.insert(fundAccreditedInvestorsTable).values(req.body).returning();
     await auditFundOp("create", "fund_accredited_investor", row.id, req.body);
@@ -299,7 +300,7 @@ router.post("/fund-ops/accredited-investors", ...auth, async (req, res) => {
   }
 });
 
-router.patch("/fund-ops/accredited-investors/:id", ...auth, async (req, res) => {
+router.patch("/fund-ops/accredited-investors/:id", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(fundAccreditedInvestorsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(fundAccreditedInvestorsTable.id, id)).returning();
@@ -313,7 +314,7 @@ router.patch("/fund-ops/accredited-investors/:id", ...auth, async (req, res) => 
 
 // ─── LP REPORTS ───────────────────────────────────────────────────────────────
 
-router.get("/fund-ops/lp-reports", ...auth, async (req, res) => {
+router.get("/fund-ops/lp-reports", ...auth, validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const rows = await db.select().from(fundLpReportsTable).orderBy(desc(fundLpReportsTable.createdAt)).limit(limit).offset(offset);
@@ -335,7 +336,7 @@ router.get("/fund-ops/lp-reports/:id", ...auth, async (req, res) => {
   }
 });
 
-router.post("/fund-ops/lp-reports", ...auth, async (req, res) => {
+router.post("/fund-ops/lp-reports", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const [row] = await db.insert(fundLpReportsTable).values(req.body).returning();
     await auditFundOp("create", "fund_lp_report", row.id, req.body);
@@ -345,7 +346,7 @@ router.post("/fund-ops/lp-reports", ...auth, async (req, res) => {
   }
 });
 
-router.patch("/fund-ops/lp-reports/:id", ...auth, async (req, res) => {
+router.patch("/fund-ops/lp-reports/:id", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const update: Record<string, unknown> = { ...req.body, updatedAt: new Date() };
@@ -371,7 +372,7 @@ router.get("/fund-ops/share-classes", ...auth, async (req, res) => {
   }
 });
 
-router.post("/fund-ops/share-classes", ...auth, async (req, res) => {
+router.post("/fund-ops/share-classes", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const [row] = await db.insert(fundShareClassesTable).values(req.body).returning();
     await auditFundOp("create", "fund_share_class", row.id, req.body);
@@ -381,7 +382,7 @@ router.post("/fund-ops/share-classes", ...auth, async (req, res) => {
   }
 });
 
-router.patch("/fund-ops/share-classes/:id", ...auth, async (req, res) => {
+router.patch("/fund-ops/share-classes/:id", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(fundShareClassesTable).set({ ...req.body, updatedAt: new Date() }).where(eq(fundShareClassesTable.id, id)).returning();
@@ -404,7 +405,7 @@ router.get("/fund-ops/cap-table-holders", ...auth, async (req, res) => {
   }
 });
 
-router.post("/fund-ops/cap-table-holders", ...auth, async (req, res) => {
+router.post("/fund-ops/cap-table-holders", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const [row] = await db.insert(fundCapTableHoldersTable).values(req.body).returning();
     await auditFundOp("create", "fund_cap_table_holder", row.id, req.body);
@@ -414,7 +415,7 @@ router.post("/fund-ops/cap-table-holders", ...auth, async (req, res) => {
   }
 });
 
-router.patch("/fund-ops/cap-table-holders/:id", ...auth, async (req, res) => {
+router.patch("/fund-ops/cap-table-holders/:id", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(fundCapTableHoldersTable).set({ ...req.body, updatedAt: new Date() }).where(eq(fundCapTableHoldersTable.id, id)).returning();
@@ -428,7 +429,7 @@ router.patch("/fund-ops/cap-table-holders/:id", ...auth, async (req, res) => {
 
 // ─── CAP TABLE — TRANSACTIONS ─────────────────────────────────────────────────
 
-router.get("/fund-ops/cap-table-transactions", ...auth, async (req, res) => {
+router.get("/fund-ops/cap-table-transactions", ...auth, validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const holderId = req.query.holderId ? parseInt(String(req.query.holderId), 10) : undefined;
@@ -442,7 +443,7 @@ router.get("/fund-ops/cap-table-transactions", ...auth, async (req, res) => {
   }
 });
 
-router.post("/fund-ops/cap-table-transactions", ...auth, async (req, res) => {
+router.post("/fund-ops/cap-table-transactions", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const body = { ...req.body, isAuditLocked: false };
     const [row] = await db.insert(fundCapTableTransactionsTable).values(body).returning();
@@ -516,7 +517,7 @@ router.get("/fund-ops/vesting-schedules", ...auth, async (req, res) => {
   }
 });
 
-router.post("/fund-ops/vesting-schedules", ...auth, async (req, res) => {
+router.post("/fund-ops/vesting-schedules", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const [row] = await db.insert(fundVestingSchedulesTable).values(req.body).returning();
     await auditFundOp("create", "fund_vesting_schedule", row.id, req.body);
@@ -526,7 +527,7 @@ router.post("/fund-ops/vesting-schedules", ...auth, async (req, res) => {
   }
 });
 
-router.patch("/fund-ops/vesting-schedules/:id", ...auth, async (req, res) => {
+router.patch("/fund-ops/vesting-schedules/:id", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(fundVestingSchedulesTable).set({ ...req.body, updatedAt: new Date() }).where(eq(fundVestingSchedulesTable.id, id)).returning();
@@ -540,7 +541,7 @@ router.patch("/fund-ops/vesting-schedules/:id", ...auth, async (req, res) => {
 
 // ─── CAPITAL CALLS ────────────────────────────────────────────────────────────
 
-router.get("/fund-ops/capital-calls", ...auth, async (req, res) => {
+router.get("/fund-ops/capital-calls", ...auth, validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const rows = await db.select().from(fundCapitalCallsTable).orderBy(desc(fundCapitalCallsTable.callDate)).limit(limit).offset(offset);
@@ -563,7 +564,7 @@ router.get("/fund-ops/capital-calls/:id", ...auth, async (req, res) => {
   }
 });
 
-router.post("/fund-ops/capital-calls", ...auth, async (req, res) => {
+router.post("/fund-ops/capital-calls", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const [row] = await db.insert(fundCapitalCallsTable).values(req.body).returning();
     await auditFundOp("create", "fund_capital_call", row.id, req.body);
@@ -573,7 +574,7 @@ router.post("/fund-ops/capital-calls", ...auth, async (req, res) => {
   }
 });
 
-router.patch("/fund-ops/capital-calls/:id", ...auth, async (req, res) => {
+router.patch("/fund-ops/capital-calls/:id", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const update = { ...req.body, updatedAt: new Date() };
@@ -587,7 +588,7 @@ router.patch("/fund-ops/capital-calls/:id", ...auth, async (req, res) => {
   }
 });
 
-router.post("/fund-ops/capital-call-lines", ...auth, async (req, res) => {
+router.post("/fund-ops/capital-call-lines", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const [row] = await db.insert(fundCapitalCallLinesTable).values(req.body).returning();
     sendSuccess(res, row, 201);
@@ -596,7 +597,7 @@ router.post("/fund-ops/capital-call-lines", ...auth, async (req, res) => {
   }
 });
 
-router.patch("/fund-ops/capital-call-lines/:id", ...auth, async (req, res) => {
+router.patch("/fund-ops/capital-call-lines/:id", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const update = { ...req.body, updatedAt: new Date() };
@@ -644,7 +645,7 @@ router.get("/fund-ops/lp-capital-accounts", ...auth, async (req, res) => {
   }
 });
 
-router.post("/fund-ops/lp-capital-accounts", ...auth, async (req, res) => {
+router.post("/fund-ops/lp-capital-accounts", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const body = {
       ...req.body,
@@ -658,7 +659,7 @@ router.post("/fund-ops/lp-capital-accounts", ...auth, async (req, res) => {
   }
 });
 
-router.patch("/fund-ops/lp-capital-accounts/:id", ...auth, async (req, res) => {
+router.patch("/fund-ops/lp-capital-accounts/:id", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(fundLpCapitalAccountsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(fundLpCapitalAccountsTable.id, id)).returning();
@@ -672,7 +673,7 @@ router.patch("/fund-ops/lp-capital-accounts/:id", ...auth, async (req, res) => {
 
 // ─── DISTRIBUTIONS ────────────────────────────────────────────────────────────
 
-router.get("/fund-ops/distributions", ...auth, async (req, res) => {
+router.get("/fund-ops/distributions", ...auth, validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const rows = await db.select().from(fundDistributionsTable).orderBy(desc(fundDistributionsTable.distributionDate)).limit(limit).offset(offset);
@@ -695,7 +696,7 @@ router.get("/fund-ops/distributions/:id", ...auth, async (req, res) => {
   }
 });
 
-router.post("/fund-ops/distributions", ...auth, async (req, res) => {
+router.post("/fund-ops/distributions", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const [row] = await db.insert(fundDistributionsTable).values(req.body).returning();
     await auditFundOp("create", "fund_distribution", row.id, req.body);
@@ -705,7 +706,7 @@ router.post("/fund-ops/distributions", ...auth, async (req, res) => {
   }
 });
 
-router.patch("/fund-ops/distributions/:id", ...auth, async (req, res) => {
+router.patch("/fund-ops/distributions/:id", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(fundDistributionsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(fundDistributionsTable.id, id)).returning();
@@ -728,7 +729,7 @@ router.get("/fund-ops/nav-records", ...auth, async (req, res) => {
   }
 });
 
-router.post("/fund-ops/nav-records", ...auth, async (req, res) => {
+router.post("/fund-ops/nav-records", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const [row] = await db.insert(fundNavRecordsTable).values(req.body).returning();
     await auditFundOp("create", "fund_nav_record", row.id, req.body);
@@ -740,7 +741,7 @@ router.post("/fund-ops/nav-records", ...auth, async (req, res) => {
 
 // ─── AUDIT LOG ────────────────────────────────────────────────────────────────
 
-router.get("/fund-ops/audit-log", ...auth, async (req, res) => {
+router.get("/fund-ops/audit-log", ...auth, validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const rows = await db.select().from(fundCapTableAuditLogTable).orderBy(desc(fundCapTableAuditLogTable.occurredAt)).limit(limit).offset(offset);

@@ -5,7 +5,7 @@ import { readFileSync } from "fs";
 import { join } from "path";
 import { logger } from "../lib/logger";
 import { generateInvestorDocPdf } from "../lib/investor-doc-pdf";
-import { validateBody } from "../lib/validation";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 import {
   db,
   holdingsVenturesTable,
@@ -262,7 +262,7 @@ router.get("/holdings/ecosystem-summary", async (_req, res) => {
   }
 });
 
-router.get("/holdings/ventures", async (req, res) => {
+router.get("/holdings/ventures", validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const rows = await db.select().from(holdingsVenturesTable).orderBy(desc(holdingsVenturesTable.createdAt)).limit(limit).offset(offset);
@@ -315,7 +315,7 @@ router.delete("/holdings/ventures/:id", authMiddleware(), async (req, res) => {
   }
 });
 
-router.get("/holdings/milestones", async (req, res) => {
+router.get("/holdings/milestones", validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const rows = await db.select().from(holdingsMilestonesTable).orderBy(desc(holdingsMilestonesTable.createdAt)).limit(limit).offset(offset);
@@ -346,7 +346,7 @@ router.delete("/holdings/milestones/:id", authMiddleware(), async (req, res) => 
   }
 });
 
-router.get("/holdings/metrics", async (req, res) => {
+router.get("/holdings/metrics", validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const ventureId = req.query.ventureId ? parseInt(String(req.query.ventureId), 10) : undefined;
@@ -385,7 +385,7 @@ router.delete("/holdings/metrics/:id", authMiddleware(), async (req, res) => {
   }
 });
 
-router.get("/holdings/leadership", async (req, res) => {
+router.get("/holdings/leadership", validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const rows = await db.select().from(holdingsLeadershipTable).orderBy(holdingsLeadershipTable.sortOrder).limit(limit).offset(offset);
@@ -416,7 +416,7 @@ router.delete("/holdings/leadership/:id", authMiddleware(), async (req, res) => 
   }
 });
 
-router.get("/holdings/inquiries", authMiddleware(), async (req, res) => {
+router.get("/holdings/inquiries", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const rows = await db.select().from(holdingsInquiriesTable).orderBy(desc(holdingsInquiriesTable.createdAt)).limit(limit).offset(offset);
@@ -496,7 +496,7 @@ router.delete("/holdings/inquiries/:id", authMiddleware(), async (req, res) => {
   }
 });
 
-router.get("/holdings/search", async (req, res) => {
+router.get("/holdings/search", validateQuery(listQuerySchema), async (req, res) => {
   try {
     const query = (req.query.q as string) || "";
     if (!query) { res.json({ data: [], meta: { page: 1, limit: 25, total: 0 } }); return; }
@@ -623,7 +623,7 @@ router.get("/investors/nda/status", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/investors/nda/accept", authMiddleware(), async (req, res) => {
+router.post("/investors/nda/accept", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const userId = req.user?.id;
     if (!userId) {

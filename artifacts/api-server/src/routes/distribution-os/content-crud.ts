@@ -18,22 +18,23 @@ import {
 import { eq, desc, asc, and, gte, count, sql } from "drizzle-orm";
 import { authMiddleware } from "../../middlewares/auth";
 import { sendNotFound, sendBadRequest, sendError } from "../../lib/api-response";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
 
 const router = Router();
 const requireAuth = authMiddleware({ required: true });
 
-router.get("/articles", async (_req: Request, res: Response): Promise<void> => {
+router.get("/articles", validateQuery(listQuerySchema), async (_req: Request, res: Response): Promise<void> => {
   const articles = await db.select().from(dosArticlesTable).orderBy(desc(dosArticlesTable.createdAt)).limit(100);
   res.json(articles);
 });
 
-router.get("/articles/:id", async (req: Request, res: Response): Promise<void> => {
+router.get("/articles/:id", validateQuery(listQuerySchema), async (req: Request, res: Response): Promise<void> => {
   const [article] = await db.select().from(dosArticlesTable).where(eq(dosArticlesTable.id, Number(req.params.id)));
   if (!article) return void sendNotFound(res, "Article");
   res.json(article);
 });
 
-router.get("/articles/slug/:slug", async (req: Request, res: Response): Promise<void> => {
+router.get("/articles/slug/:slug", validateQuery(listQuerySchema), async (req: Request, res: Response): Promise<void> => {
   const [article] = await db.select().from(dosArticlesTable).where(eq(dosArticlesTable.slug, req.params.slug as string));
   if (!article) return void sendNotFound(res, "Article");
   res.json(article);
@@ -55,17 +56,17 @@ router.delete("/articles/:id", requireAuth, async (req: Request, res: Response):
   res.json({ success: true });
 });
 
-router.get("/articles/:id/versions", async (req: Request, res: Response): Promise<void> => {
+router.get("/articles/:id/versions", validateQuery(listQuerySchema), async (req: Request, res: Response): Promise<void> => {
   const versions = await db.select().from(dosArticleVersionsTable).where(eq(dosArticleVersionsTable.articleId, Number(req.params.id))).orderBy(desc(dosArticleVersionsTable.createdAt));
   res.json(versions);
 });
 
-router.get("/newsletters", async (_req: Request, res: Response): Promise<void> => {
+router.get("/newsletters", validateQuery(listQuerySchema), async (_req: Request, res: Response): Promise<void> => {
   const newsletters = await db.select().from(dosNewslettersTable).orderBy(desc(dosNewslettersTable.createdAt)).limit(100);
   res.json(newsletters);
 });
 
-router.get("/newsletters/:id", async (req: Request, res: Response): Promise<void> => {
+router.get("/newsletters/:id", validateQuery(listQuerySchema), async (req: Request, res: Response): Promise<void> => {
   const [nl] = await db.select().from(dosNewslettersTable).where(eq(dosNewslettersTable.id, Number(req.params.id)));
   if (!nl) return void sendNotFound(res, "Newsletter");
   res.json(nl);
@@ -87,12 +88,12 @@ router.delete("/newsletters/:id", requireAuth, async (req: Request, res: Respons
   res.json({ success: true });
 });
 
-router.get("/carousels", async (_req: Request, res: Response): Promise<void> => {
+router.get("/carousels", validateQuery(listQuerySchema), async (_req: Request, res: Response): Promise<void> => {
   const carousels = await db.select().from(dosCarouselProjectsTable).orderBy(desc(dosCarouselProjectsTable.createdAt)).limit(100);
   res.json(carousels);
 });
 
-router.get("/carousels/:id", async (req: Request, res: Response): Promise<void> => {
+router.get("/carousels/:id", validateQuery(listQuerySchema), async (req: Request, res: Response): Promise<void> => {
   const [c] = await db.select().from(dosCarouselProjectsTable).where(eq(dosCarouselProjectsTable.id, Number(req.params.id)));
   if (!c) return void sendNotFound(res, "Carousel");
   const slides = await db.select().from(dosCarouselSlidesTable).where(eq(dosCarouselSlidesTable.projectId, c.id)).orderBy(asc(dosCarouselSlidesTable.slideNumber));
@@ -114,12 +115,12 @@ router.patch("/carousels/:id", requireAuth, async (req: Request, res: Response):
   res.json(c);
 });
 
-router.get("/x-posts", async (_req: Request, res: Response): Promise<void> => {
+router.get("/x-posts", validateQuery(listQuerySchema), async (_req: Request, res: Response): Promise<void> => {
   const posts = await db.select().from(dosXPostsTable).orderBy(desc(dosXPostsTable.createdAt)).limit(100);
   res.json(posts);
 });
 
-router.get("/x-posts/:id", async (req: Request, res: Response): Promise<void> => {
+router.get("/x-posts/:id", validateQuery(listQuerySchema), async (req: Request, res: Response): Promise<void> => {
   const [post] = await db.select().from(dosXPostsTable).where(eq(dosXPostsTable.id, Number(req.params.id)));
   if (!post) return void sendNotFound(res, "X post");
   res.json(post);
@@ -147,7 +148,7 @@ router.post("/x-posts/:id/queue", requireAuth, async (req: Request, res: Respons
   res.json(post);
 });
 
-router.get("/campaigns", requireAuth, async (_req: Request, res: Response): Promise<void> => {
+router.get("/campaigns", requireAuth, validateQuery(listQuerySchema), async (_req: Request, res: Response): Promise<void> => {
   const campaigns = await db.select().from(dosCampaignsTable).orderBy(desc(dosCampaignsTable.createdAt)).limit(100);
   res.json(campaigns);
 });
@@ -163,7 +164,7 @@ router.patch("/campaigns/:id", requireAuth, async (req: Request, res: Response):
   res.json(c);
 });
 
-router.get("/campaigns/:id/links", requireAuth, async (req: Request, res: Response): Promise<void> => {
+router.get("/campaigns/:id/links", requireAuth, validateQuery(listQuerySchema), async (req: Request, res: Response): Promise<void> => {
   const links = await db.select().from(dosCampaignLinksTable).where(eq(dosCampaignLinksTable.campaignId, Number(req.params.id)));
   res.json(links);
 });
@@ -217,7 +218,7 @@ const SettingWriteSchema = z.object({
 
 // ─── Lead routes ─────────────────────────────────────────────────────────────
 
-router.get("/leads", requireAuth, async (req: Request, res: Response): Promise<void> => {
+router.get("/leads", requireAuth, validateQuery(listQuerySchema), async (req: Request, res: Response): Promise<void> => {
   const stage = req.query.stage as string | undefined;
   const campaign = req.query.campaign as string | undefined;
   const period = req.query.period as string | undefined;
@@ -271,7 +272,7 @@ router.delete("/leads/:id", requireAuth, async (req: Request, res: Response): Pr
   res.json({ success: true });
 });
 
-router.get("/leads/:id/notes", requireAuth, async (req: Request, res: Response): Promise<void> => {
+router.get("/leads/:id/notes", requireAuth, validateQuery(listQuerySchema), async (req: Request, res: Response): Promise<void> => {
   const notes = await db.select().from(dosLeadNotesTable).where(eq(dosLeadNotesTable.leadId, Number(req.params.id))).orderBy(desc(dosLeadNotesTable.createdAt));
   res.json(notes);
 });
@@ -281,7 +282,7 @@ router.post("/leads/:id/notes", requireAuth, async (req: Request, res: Response)
   res.status(201).json(note);
 });
 
-router.get("/pillars", async (_req: Request, res: Response): Promise<void> => {
+router.get("/pillars", validateQuery(listQuerySchema), async (_req: Request, res: Response): Promise<void> => {
   const pillars = await db.select().from(dosEditorialPillarsTable).orderBy(asc(dosEditorialPillarsTable.sortOrder));
   res.json(pillars);
 });
@@ -291,7 +292,7 @@ router.post("/pillars", requireAuth, async (req: Request, res: Response): Promis
   res.status(201).json(p);
 });
 
-router.get("/cta-blocks", async (_req: Request, res: Response): Promise<void> => {
+router.get("/cta-blocks", validateQuery(listQuerySchema), async (_req: Request, res: Response): Promise<void> => {
   const blocks = await db.select().from(dosCtaBlocksTable).orderBy(desc(dosCtaBlocksTable.createdAt));
   res.json(blocks);
 });
@@ -301,7 +302,7 @@ router.post("/cta-blocks", requireAuth, async (req: Request, res: Response): Pro
   res.status(201).json(b);
 });
 
-router.get("/calendar", async (req: Request, res: Response): Promise<void> => {
+router.get("/calendar", validateQuery(listQuerySchema), async (req: Request, res: Response): Promise<void> => {
   const items = await db.select().from(dosContentCalendarItemsTable).orderBy(asc(dosContentCalendarItemsTable.scheduledDate)).limit(200);
   res.json(items);
 });
@@ -317,7 +318,7 @@ router.patch("/calendar/:id", requireAuth, async (req: Request, res: Response): 
   res.json(item);
 });
 
-router.get("/distribution", async (_req: Request, res: Response): Promise<void> => {
+router.get("/distribution", validateQuery(listQuerySchema), async (_req: Request, res: Response): Promise<void> => {
   const targets = await db.select().from(dosDistributionTargetsTable).orderBy(desc(dosDistributionTargetsTable.createdAt)).limit(200);
   res.json(targets);
 });
@@ -333,7 +334,7 @@ router.patch("/distribution/:id", requireAuth, async (req: Request, res: Respons
   res.json(t);
 });
 
-router.get("/settings", requireAuth, async (_req: Request, res: Response): Promise<void> => {
+router.get("/settings", requireAuth, validateQuery(listQuerySchema), async (_req: Request, res: Response): Promise<void> => {
   const settings = await db.select().from(dosSiteSettingsTable).orderBy(asc(dosSiteSettingsTable.category));
   res.json(settings);
 });
@@ -351,7 +352,7 @@ router.patch("/settings/:key", requireAuth, async (req: Request, res: Response):
   res.json(s);
 });
 
-router.get("/integrations", requireAuth, async (_req: Request, res: Response): Promise<void> => {
+router.get("/integrations", requireAuth, validateQuery(listQuerySchema), async (_req: Request, res: Response): Promise<void> => {
   const integrations = await db.select().from(dosIntegrationStatusTable).orderBy(asc(dosIntegrationStatusTable.provider));
   res.json(integrations);
 });
@@ -368,7 +369,7 @@ router.patch("/integrations/:id", requireAuth, async (req: Request, res: Respons
   res.json(i);
 });
 
-router.get("/authors", async (_req: Request, res: Response): Promise<void> => {
+router.get("/authors", validateQuery(listQuerySchema), async (_req: Request, res: Response): Promise<void> => {
   const authors = await db.select().from(dosAuthorProfilesTable);
   res.json(authors);
 });
@@ -378,13 +379,13 @@ router.post("/authors", requireAuth, async (req: Request, res: Response): Promis
   res.status(201).json(a);
 });
 
-router.get("/linktree", async (_req: Request, res: Response): Promise<void> => {
+router.get("/linktree", validateQuery(listQuerySchema), async (_req: Request, res: Response): Promise<void> => {
   // Public endpoint — active items only
   const items = await db.select().from(dosLinktreeConfigTable).where(eq(dosLinktreeConfigTable.isActive, true)).orderBy(asc(dosLinktreeConfigTable.sortOrder));
   res.json(items);
 });
 
-router.get("/linktree/admin", requireAuth, async (_req: Request, res: Response): Promise<void> => {
+router.get("/linktree/admin", requireAuth, validateQuery(listQuerySchema), async (_req: Request, res: Response): Promise<void> => {
   // Admin endpoint — all items including inactive
   const items = await db.select().from(dosLinktreeConfigTable).orderBy(asc(dosLinktreeConfigTable.sortOrder));
   res.json(items);
@@ -408,7 +409,7 @@ router.delete("/linktree/:id", requireAuth, async (req: Request, res: Response):
   res.json({ success: true });
 });
 
-router.get("/automation-runs", async (_req: Request, res: Response): Promise<void> => {
+router.get("/automation-runs", validateQuery(listQuerySchema), async (_req: Request, res: Response): Promise<void> => {
   const runs = await db.select().from(dosAutomationRunsTable).orderBy(desc(dosAutomationRunsTable.createdAt)).limit(50);
   res.json(runs);
 });

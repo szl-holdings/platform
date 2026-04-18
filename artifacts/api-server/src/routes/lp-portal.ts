@@ -20,6 +20,7 @@ import {
 } from "../lib/api-response";
 import { authMiddleware, parseIdParam } from "../middlewares/auth";
 import { hashIp } from "@szl-holdings/audit";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -183,7 +184,7 @@ router.get("/lp-portal/nav-history", optionalAuth, async (_req, res) => {
 
 // ─── DATA ROOM DOCUMENTS (server-side permission filtering) ──────────────────
 
-router.get("/lp-portal/lps/:id/documents", optionalAuth, async (req, res) => {
+router.get("/lp-portal/lps/:id/documents", optionalAuth, validateQuery(listQuerySchema), async (req, res) => {
   try {
     const lpId = parseIdParam(req.params.id);
     const scope = await resolveScope(req);
@@ -313,7 +314,7 @@ router.get("/lp-portal/lps/:id/activity", optionalAuth, async (req, res) => {
   }
 });
 
-router.post("/lp-portal/lps/:id/activity", optionalAuth, async (req, res) => {
+router.post("/lp-portal/lps/:id/activity", optionalAuth, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const lpId = parseIdParam(req.params.id);
     const scope = await resolveScope(req);
@@ -381,7 +382,7 @@ router.get("/lp-portal/lps/:id/messages", optionalAuth, async (req, res) => {
   }
 });
 
-router.post("/lp-portal/lps/:id/messages", optionalAuth, async (req, res) => {
+router.post("/lp-portal/lps/:id/messages", optionalAuth, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const lpId = parseIdParam(req.params.id);
     const scope = await resolveScope(req);

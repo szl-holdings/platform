@@ -17,6 +17,7 @@ import { pool } from "@szl-holdings/db";
 import { eq, and, gte, lte, ilike, or, sql, count } from "drizzle-orm";
 import { readLimiter } from "../../middlewares/rate-limiters.js";
 import { sendSuccess, handleRouteError, sendBadRequest, sendForbidden } from "../../lib/api-response.js";
+import { validateQuery, listQuerySchema } from "../../lib/validation.js";
 
 function requireSuperAdmin(req: Request, res: Response): boolean {
   if (!req.user?.roles.includes("super_admin")) {
@@ -41,7 +42,7 @@ function overage(value: number, limit: number): "none" | "warn" | "over" {
 }
 
 export function register(router: IRouter): void {
-  router.get("/admin/usage", readLimiter, async (req: Request, res: Response) => {
+  router.get("/admin/usage", readLimiter, validateQuery(listQuerySchema), async (req: Request, res: Response) => {
     try {
       if (!requireSuperAdmin(req, res)) return;
 

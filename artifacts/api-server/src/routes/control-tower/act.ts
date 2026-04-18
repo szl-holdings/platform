@@ -6,6 +6,7 @@ import { insertDecision } from "../../lib/alloy-decision-store";
 import { logger } from "../../lib/logger";
 import { randomUUID } from "crypto";
 import { evaluatePolicies, toRiskLevel, makeEvidenceRef } from "./shared";
+import { validateBody, jsonObjectBodySchema } from "../../lib/validation";
 
 const router = Router();
 
@@ -40,7 +41,7 @@ router.get("/control-tower/act/pipelines/:id", (req: Request, res: Response) => 
   }
 });
 
-router.post("/control-tower/act/pipelines/:id/run", requireRole("super_admin", "ops", "exec"), async (req: Request, res: Response) => {
+router.post("/control-tower/act/pipelines/:id/run", requireRole("super_admin", "ops", "exec"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { id } = req.params as Record<string, string>;
     const { input, agentId } = req.body as { input?: string; agentId?: string };
@@ -112,7 +113,7 @@ router.post("/control-tower/act/pipelines/:id/run", requireRole("super_admin", "
   }
 });
 
-router.post("/control-tower/act/compose", requireRole("super_admin", "ops", "exec"), async (req: Request, res: Response) => {
+router.post("/control-tower/act/compose", requireRole("super_admin", "ops", "exec"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { stages, input } = req.body as {
       stages: Array<{ id: string; type: string; name: string }>;

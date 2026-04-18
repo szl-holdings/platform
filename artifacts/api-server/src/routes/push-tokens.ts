@@ -4,6 +4,7 @@ import { eq, and } from "drizzle-orm";
 import { sendSuccess, sendCreated, sendBadRequest, sendNoContent, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
 import { Expo } from "expo-server-sdk";
+import { validateBody, pushTokenRegisterSchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -23,15 +24,10 @@ const router: IRouter = Router();
 // intelligence) also fall back to "cortex-mobile" until their hooks are set up.
 // Push fanout via sendPushToApp(appId, ...) targets tokens with the matching appId;
 // cross-workspace broadcasts use sendPushBroadcast or target "cortex-mobile".
-router.post("/push-tokens", authMiddleware({ required: false }), async (req, res) => {
+router.post("/push-tokens", authMiddleware({ required: false }), validateBody(pushTokenRegisterSchema), async (req, res) => {
   try {
     const { token, platform, appId } = req.body;
     const userId = req.user?.id ?? null;
-
-    if (!token || typeof token !== "string") {
-      sendBadRequest(res, "token is required");
-      return;
-    }
 
     if (!Expo.isExpoPushToken(token)) {
       sendBadRequest(res, "Invalid Expo push token format");
@@ -39,7 +35,7 @@ router.post("/push-tokens", authMiddleware({ required: false }), async (req, res
     }
 
     const validPlatforms = ["ios", "android", "web"] as const;
-    const resolvedPlatform: (typeof validPlatforms)[number] = validPlatforms.includes(platform) ? platform : "ios";
+    const resolvedPlatform: (typeof validPlatforms)[number] = validPlatforms.includes(platform as string) ? platform as (typeof validPlatforms)[number] : "ios";
 
     const existing = await db
       .select()

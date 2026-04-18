@@ -5,6 +5,7 @@ import { logger } from "../lib/logger";
 import { authMiddleware } from "../middlewares/auth";
 import { sendSuccess, handleRouteError } from "../lib/api-response";
 import { publish } from "../lib/websocket";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -12,7 +13,7 @@ const CRDT_SYNC_CHANNEL = "crdt-sync";
 const MAX_PAGE_SIZE = 500;
 const DEFAULT_PAGE_SIZE = 100;
 
-router.get("/changes", authMiddleware(), async (req: Request, res: Response) => {
+router.get("/changes", authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const cursor = req.query["cursor"] ? Number(req.query["cursor"]) : 0;
     const entityType = req.query["entity"] as string | undefined;
@@ -46,7 +47,7 @@ router.get("/changes", authMiddleware(), async (req: Request, res: Response) => 
   }
 });
 
-router.post("/changes", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/changes", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const body = req.body as Record<string, unknown>;
     const parsed = insertChangeEventSchema.safeParse({
@@ -87,7 +88,7 @@ router.post("/changes", authMiddleware(), async (req: Request, res: Response) =>
   }
 });
 
-router.get("/changes/replay", authMiddleware(), async (req: Request, res: Response) => {
+router.get("/changes/replay", authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const entityType = req.query["entity"] as string | undefined;
     const entityId = req.query["entityId"] as string | undefined;

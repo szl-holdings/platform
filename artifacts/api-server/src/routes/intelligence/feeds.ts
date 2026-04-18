@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import { validateQuery, listQuerySchema } from "../../lib/validation.js";
 import express, { Router, type IRouter, type RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
 import { LRUCache } from "lru-cache";
@@ -34,7 +35,7 @@ router.get("/intelligence/threats", intelRateLimit, authMiddleware(), async (_re
   } catch (err) { handleRouteError(res, err, "Failed to fetch threat data"); }
 });
 
-router.get("/intelligence/cves", intelRateLimit, authMiddleware(), async (req, res) => {
+router.get("/intelligence/cves", intelRateLimit, authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const severity = req.query.severity as string | undefined;
     const data = await getCached("cves", 600000, fetchNvdCves).catch((err) => {
@@ -96,7 +97,7 @@ router.get("/intelligence/maritime/sanctions", intelRateLimit, authMiddleware(),
   } catch (err) { handleRouteError(res, err, "Failed to fetch sanctions data"); }
 });
 
-router.get("/intelligence/news", intelRateLimit, authMiddleware(), async (req, res) => {
+router.get("/intelligence/news", intelRateLimit, authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const category = req.query.category as string | undefined;
     const data = await getCached("news", 300000, fetchRssNews).catch((err) => {

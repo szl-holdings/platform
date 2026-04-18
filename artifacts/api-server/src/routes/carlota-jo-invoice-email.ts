@@ -9,6 +9,7 @@ import {
   CARLOTA_ADMIN_EMAIL,
   type CarlotaInvoiceEmailData,
 } from "../lib/email";
+import { validateBody, jsonObjectBodySchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -25,7 +26,7 @@ router.post(
   "/booking/invoices/email",
   invoiceEmailLimit,
   authMiddleware(),
-  async (req: Request, res: Response) => {
+  validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
     try {
       const body = req.body as Partial<CarlotaInvoiceEmailData> & {
         recipientEmail?: string;

@@ -4,6 +4,7 @@ import { eq, desc } from "drizzle-orm";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, sendNoContent, sendError, handleRouteError } from "../lib/api-response";
 import { logActivity } from "../lib/activity-logger";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
+import { validateBody, connectorCreateSchema, connectorUpdateSchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -19,17 +20,9 @@ router.get("/connectors", authMiddleware(), async (_req, res) => {
   }
 });
 
-router.post("/connectors", authMiddleware(), requireRole("ops", "super_admin"), async (req, res) => {
+router.post("/connectors", authMiddleware(), requireRole("ops", "super_admin"), validateBody(connectorCreateSchema), async (req, res) => {
   try {
     const { name, type, config, orgId } = req.body;
-    if (!name || typeof name !== "string" || name.trim().length === 0) {
-      sendBadRequest(res, "Name is required and must be a non-empty string");
-      return;
-    }
-    if (!type || !validConnectorTypes.includes(type)) {
-      sendBadRequest(res, `Type must be one of: ${validConnectorTypes.join(", ")}`);
-      return;
-    }
     const [connector] = await db.insert(connectorsTable).values({
       name: name.trim(),
       type: type as any,
@@ -59,22 +52,10 @@ router.get("/connectors/:id", authMiddleware(), async (req, res) => {
   }
 });
 
-router.patch("/connectors/:id", authMiddleware(), requireRole("ops", "super_admin"), async (req, res) => {
+router.patch("/connectors/:id", authMiddleware(), requireRole("ops", "super_admin"), validateBody(connectorUpdateSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const { name, status, config, isEnabled } = req.body;
-    if (name !== undefined && (typeof name !== "string" || name.trim().length === 0)) {
-      sendBadRequest(res, "Name must be a non-empty string");
-      return;
-    }
-    if (status !== undefined && !validStatuses.includes(status)) {
-      sendBadRequest(res, `Status must be one of: ${validStatuses.join(", ")}`);
-      return;
-    }
-    if (isEnabled !== undefined && typeof isEnabled !== "boolean") {
-      sendBadRequest(res, "isEnabled must be a boolean");
-      return;
-    }
     const updateData: Record<string, unknown> = { updatedAt: new Date() };
     if (name !== undefined) updateData.name = name.trim();
     if (status !== undefined) updateData.status = status;

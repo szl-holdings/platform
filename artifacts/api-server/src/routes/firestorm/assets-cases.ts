@@ -53,6 +53,7 @@ import {
   ingestFirestormAlert,
 } from "@szl-holdings/ai-engine/domain-embedding-hooks";
 import { firestormLiveLimit, getFsCached, fetchFsJson, tradecraftDecisionInputSchema, tradecraftDecisionActionSchema } from "./shared";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
 const router = Router();
 
 router.get("/firestorm/assets", authMiddleware(), async (req, res) => {
@@ -75,7 +76,7 @@ router.get("/firestorm/assets/:id", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/firestorm/assets", authMiddleware({ required: true }), async (req, res) => {
+router.post("/firestorm/assets", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const data = insertFirestormAssetSchema.parse(req.body);
     const [asset] = await db.insert(firestormAssetsTable).values(data).returning();
@@ -85,7 +86,7 @@ router.post("/firestorm/assets", authMiddleware({ required: true }), async (req,
   }
 });
 
-router.put("/firestorm/assets/:id", authMiddleware({ required: true }), async (req, res) => {
+router.put("/firestorm/assets/:id", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id as string);
     const data = insertFirestormAssetSchema.partial().parse(req.body);
@@ -97,7 +98,7 @@ router.put("/firestorm/assets/:id", authMiddleware({ required: true }), async (r
   }
 });
 
-router.get("/firestorm/workflow-actions", authMiddleware(), async (req, res) => {
+router.get("/firestorm/workflow-actions", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const entityType = req.query.entityType as string | undefined;
     const entityId = req.query.entityId ? parseInt(req.query.entityId as string, 10) : undefined;
@@ -114,7 +115,7 @@ router.get("/firestorm/workflow-actions", authMiddleware(), async (req, res) => 
   }
 });
 
-router.post("/firestorm/workflow-actions", authMiddleware({ required: true }), async (req, res) => {
+router.post("/firestorm/workflow-actions", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const data = insertFirestormWorkflowActionSchema.parse(req.body);
     const [action] = await db.insert(firestormWorkflowActionsTable).values(data).returning();
@@ -124,7 +125,7 @@ router.post("/firestorm/workflow-actions", authMiddleware({ required: true }), a
   }
 });
 
-router.patch("/firestorm/workflow-actions/:id", authMiddleware({ required: true }), async (req, res) => {
+router.patch("/firestorm/workflow-actions/:id", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id as string);
     const { status, notes, assignedTo, completedAt } = updateWorkflowActionSchema.parse(req.body);
@@ -141,7 +142,7 @@ router.patch("/firestorm/workflow-actions/:id", authMiddleware({ required: true 
   }
 });
 
-router.get("/firestorm/hardening-controls", authMiddleware(), async (req, res) => {
+router.get("/firestorm/hardening-controls", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const categoryFilter = req.query.category as string | undefined;
     const statusFilter = req.query.status as string | undefined;
@@ -168,7 +169,7 @@ router.get("/firestorm/hardening-controls/:id", authMiddleware(), async (req, re
   }
 });
 
-router.put("/firestorm/hardening-controls/:id", authMiddleware({ required: true }), async (req, res) => {
+router.put("/firestorm/hardening-controls/:id", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id as string);
     const { status, owner, recommendedAction, dueDate, notes } = updateHardeningControlSchema.parse(req.body);
@@ -231,7 +232,7 @@ router.get("/firestorm/hardening-summary", authMiddleware(), async (_req, res) =
   }
 });
 
-router.post("/firestorm/push-token", authMiddleware({ required: true }), async (req, res) => {
+router.post("/firestorm/push-token", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { token, platform } = pushTokenSchema.parse(req.body);
     logger.info({ platform: platform ?? "unknown", tokenLength: token.length }, "[Push] Registered push token");
@@ -241,7 +242,7 @@ router.post("/firestorm/push-token", authMiddleware({ required: true }), async (
   }
 });
 
-router.post("/firestorm/ingest/syslog", authMiddleware({ required: true }), async (req, res) => {
+router.post("/firestorm/ingest/syslog", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const body = ingestSyslogSchema.parse(req.body ?? {});
     const rawMessage = body?.message || body?.raw || "";
@@ -261,7 +262,7 @@ router.post("/firestorm/ingest/syslog", authMiddleware({ required: true }), asyn
   } catch (err) { handleRouteError(res, err, "Failed to ingest syslog event"); }
 });
 
-router.get("/firestorm/cases", authMiddleware(), async (req, res) => {
+router.get("/firestorm/cases", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const statusFilter = req.query.status as string | undefined;
     const priorityFilter = req.query.priority as string | undefined;
@@ -284,7 +285,7 @@ router.get("/firestorm/cases/:id", authMiddleware(), async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to get case"); }
 });
 
-router.post("/firestorm/cases", authMiddleware({ required: true }), async (req, res) => {
+router.post("/firestorm/cases", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const data = insertFirestormCaseSchema.parse(req.body);
     const [c] = await db.insert(firestormCasesTable).values(data).returning();
@@ -292,7 +293,7 @@ router.post("/firestorm/cases", authMiddleware({ required: true }), async (req, 
   } catch (err) { handleRouteError(res, err, "Failed to create case"); }
 });
 
-router.patch("/firestorm/cases/:id", authMiddleware({ required: true }), async (req, res) => {
+router.patch("/firestorm/cases/:id", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id as string);
     const parsedCase = updateCaseSchema.parse(req.body);
@@ -426,7 +427,7 @@ async function fetchThreatJson(url: string, timeoutMs = 10000, extraHeaders: Rec
   }
 }
 
-router.get("/firestorm/live/shodan-ip", authMiddleware(), async (req, res) => {
+router.get("/firestorm/live/shodan-ip", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const ip = (req.query.ip as string)?.trim();
     if (!ip || !/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(ip)) {
@@ -480,7 +481,7 @@ router.get("/firestorm/live/shodan-ip", authMiddleware(), async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to query Shodan InternetDB"); }
 });
 
-router.get("/firestorm/live/greynoise-ip", authMiddleware(), async (req, res) => {
+router.get("/firestorm/live/greynoise-ip", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const ip = (req.query.ip as string)?.trim();
     if (!ip || !/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(ip)) {
@@ -803,7 +804,7 @@ async function upsertCaseMemoryFromDecision(
   }
 }
 
-router.get("/firestorm/tradecraft/decisions", authMiddleware({ required: true }), async (req, res) => {
+router.get("/firestorm/tradecraft/decisions", authMiddleware({ required: true }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const caseId = typeof req.query.caseId === "string" ? req.query.caseId : undefined;
     const incidentId = typeof req.query.incidentId === "string" ? req.query.incidentId : undefined;
@@ -840,7 +841,7 @@ router.get("/firestorm/tradecraft/decisions/:objectId", authMiddleware({ require
   } catch (err) { handleRouteError(res, err, "Failed to get tradecraft decision"); }
 });
 
-router.post("/firestorm/tradecraft/decisions", authMiddleware({ required: true }), async (req, res) => {
+router.post("/firestorm/tradecraft/decisions", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { randomUUID } = await import("crypto");
     const parsedDecision = tradecraftDecisionInputSchema.parse(req.body);
@@ -966,7 +967,7 @@ router.post("/firestorm/tradecraft/decisions", authMiddleware({ required: true }
   } catch (err) { handleRouteError(res, err, "Failed to create tradecraft decision"); }
 });
 
-router.put("/firestorm/tradecraft/decisions/:objectId", authMiddleware({ required: true }), async (req, res) => {
+router.put("/firestorm/tradecraft/decisions/:objectId", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const body = tradecraftDecisionActionSchema.parse(req.body) as Record<string, unknown>;
     const action = typeof body.action === "string" ? body.action : null;
@@ -1037,7 +1038,7 @@ router.get("/firestorm/tradecraft/case-memory/:caseId", authMiddleware({ require
   } catch (err) { handleRouteError(res, err, "Failed to get case memory"); }
 });
 
-router.post("/firestorm/tradecraft/case-memory", authMiddleware({ required: true }), async (req, res) => {
+router.post("/firestorm/tradecraft/case-memory", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const body = createCaseMemorySchema.parse(req.body);
     const caseId = body.caseId;
@@ -1065,7 +1066,7 @@ router.post("/firestorm/tradecraft/case-memory", authMiddleware({ required: true
   } catch (err) { handleRouteError(res, err, "Failed to create case memory"); }
 });
 
-router.put("/firestorm/tradecraft/case-memory/:caseId", authMiddleware({ required: true }), async (req, res) => {
+router.put("/firestorm/tradecraft/case-memory/:caseId", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const body = updateCaseMemorySchema.parse(req.body);
 
@@ -1090,7 +1091,7 @@ router.put("/firestorm/tradecraft/case-memory/:caseId", authMiddleware({ require
   } catch (err) { handleRouteError(res, err, "Failed to update case memory"); }
 });
 
-router.get("/firestorm/tradecraft/notebook", authMiddleware({ required: true }), async (req, res) => {
+router.get("/firestorm/tradecraft/notebook", authMiddleware({ required: true }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const caseId = typeof req.query.caseId === "string" ? req.query.caseId : undefined;
     const incidentId = typeof req.query.incidentId === "string" ? req.query.incidentId : undefined;
@@ -1109,7 +1110,7 @@ router.get("/firestorm/tradecraft/notebook", authMiddleware({ required: true }),
   } catch (err) { handleRouteError(res, err, "Failed to list analyst notes"); }
 });
 
-router.post("/firestorm/tradecraft/notebook", authMiddleware({ required: true }), async (req, res) => {
+router.post("/firestorm/tradecraft/notebook", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { randomUUID } = await import("crypto");
     const body = req.body as Record<string, unknown>;
@@ -1163,7 +1164,7 @@ router.post("/firestorm/tradecraft/notebook", authMiddleware({ required: true })
   } catch (err) { handleRouteError(res, err, "Failed to create analyst note"); }
 });
 
-router.put("/firestorm/tradecraft/notebook/:noteId", authMiddleware({ required: true }), async (req, res) => {
+router.put("/firestorm/tradecraft/notebook/:noteId", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const body = req.body as Record<string, unknown>;
     const data = insertFirestormAnalystNotebookSchema.partial().parse(body);
@@ -1186,7 +1187,7 @@ router.delete("/firestorm/tradecraft/notebook/:noteId", authMiddleware({ require
   } catch (err) { handleRouteError(res, err, "Failed to delete analyst note"); }
 });
 
-router.get("/firestorm/tradecraft/evidence-index", authMiddleware({ required: true }), async (req, res) => {
+router.get("/firestorm/tradecraft/evidence-index", authMiddleware({ required: true }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const query = typeof req.query.q === "string" ? req.query.q : "threat incident alert";
     const caseId = typeof req.query.caseId === "string" ? req.query.caseId : undefined;
@@ -1209,7 +1210,7 @@ router.get("/firestorm/tradecraft/evidence-index", authMiddleware({ required: tr
   } catch (err) { handleRouteError(res, err, "Failed to query evidence index"); }
 });
 
-router.post("/firestorm/tradecraft/evidence-index/query", authMiddleware({ required: true }), async (req, res) => {
+router.post("/firestorm/tradecraft/evidence-index/query", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const body = evidenceIndexQuerySchema.parse(req.body);
     const query = body.query.trim();
@@ -1333,7 +1334,7 @@ router.get("/firestorm/ai-governance/registry", authMiddleware(), async (req, re
   }
 });
 
-router.get("/firestorm/ai-governance/log", authMiddleware(), async (req, res) => {
+router.get("/firestorm/ai-governance/log", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const rawLimit = parseInt((req.query.limit as string) ?? "50", 10);
     const limit = isNaN(rawLimit) ? 50 : Math.max(1, Math.min(rawLimit, 200));

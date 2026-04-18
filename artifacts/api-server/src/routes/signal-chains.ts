@@ -27,6 +27,7 @@ import {
   vesselsEventsTable,
 } from "@szl-holdings/db";
 import { eq, and, desc, count, sql, ne } from "drizzle-orm";
+import {validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -462,6 +463,7 @@ router.get(
   "/signal-chains/audit-log",
   authMiddleware({ required: false }),
   perUserApiSlidingLimiter,
+  validateQuery(listQuerySchema),
   (req, res) => {
     const limit = Math.min(Number(req.query.limit ?? 50), 200);
     const log = auditLog.slice(-limit).reverse();
@@ -473,6 +475,7 @@ router.get(
   "/signal-chains/:id/audit",
   authMiddleware({ required: false }),
   perUserApiSlidingLimiter,
+  validateQuery(listQuerySchema),
   async (req, res) => {
     const { id } = req.params as { id: string };
     const chain = chainState.get(id);
@@ -534,6 +537,7 @@ router.post(
   "/signal-chains/:id/trigger",
   authMiddleware({ required: false }),
   perUserWriteSlidingLimiter,
+  validateBody(jsonObjectBodySchema),
   async (req, res) => {
     const chain = chainState.get(req.params.id as string);
     if (!chain) {

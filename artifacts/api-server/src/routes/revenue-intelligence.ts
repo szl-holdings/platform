@@ -15,6 +15,7 @@
  */
 
 import { Router, type IRouter } from "express";
+import { validateQuery, listQuerySchema } from "../lib/validation.js";
 import { db, revenueEventsTable } from "@szl-holdings/db";
 import { desc, gte, and, eq, sum, count } from "drizzle-orm";
 import {
@@ -151,6 +152,7 @@ router.get(
   "/revenue-intelligence/events",
   authMiddleware({ required: false }),
   perUserApiSlidingLimiter,
+  validateQuery(listQuerySchema),
   async (req, res) => {
     try {
       const limit = Math.min(Number(req.query["limit"] ?? 50), 200);

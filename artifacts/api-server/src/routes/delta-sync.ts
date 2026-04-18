@@ -1,4 +1,5 @@
 import { Router, type IRouter } from "express";
+import { validateQuery, listQuerySchema } from "../lib/validation.js";
 import { db } from "@szl-holdings/db";
 import {
   firestormIncidentsTable,
@@ -105,7 +106,7 @@ function buildNextCursor(
   return { hasMore: true, nextCursor: encodeCursor(cursors) };
 }
 
-router.get("/aegis/sync", authMiddleware(), async (req, res) => {
+router.get("/aegis/sync", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const snapshotTime = Date.now();
     const cursor = decodeCursor(req.query.cursor as string | undefined);
@@ -181,7 +182,7 @@ router.get("/aegis/sync", authMiddleware(), async (req, res) => {
   }
 });
 
-router.get("/vessels/sync", authMiddleware(), async (req, res) => {
+router.get("/vessels/sync", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const snapshotTime = Date.now();
     const cursor = decodeCursor(req.query.cursor as string | undefined);
@@ -267,7 +268,7 @@ router.get("/vessels/sync", authMiddleware(), async (req, res) => {
   }
 });
 
-router.get("/alloy/sync", authMiddleware(), async (req, res) => {
+router.get("/alloy/sync", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const snapshotTime = Date.now();
     const cursor = decodeCursor(req.query.cursor as string | undefined);

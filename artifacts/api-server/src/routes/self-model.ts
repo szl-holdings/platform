@@ -18,6 +18,7 @@ import {
   SELF_MODEL_VERSION,
 } from "@workspace/self-model";
 import { PoolSelfModelAdapter } from "../lib/self-model-db-adapter";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 /**
  * Wire the DB adapter into the store on first module import.
@@ -30,7 +31,7 @@ defaultSelfModelStore.setPersistenceAdapter(dbAdapter);
 
 const router: IRouter = Router();
 
-router.get("/self-model", authMiddleware(), async (req, res) => {
+router.get("/self-model", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { agentId } = req.query;
     if (agentId) {
@@ -59,7 +60,7 @@ router.get("/self-model", authMiddleware(), async (req, res) => {
   }
 });
 
-router.get("/self-model/history", authMiddleware(), async (req, res) => {
+router.get("/self-model/history", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { limit: parsedLimit, offset: parsedOffset } = parsePagination(req.query);
     const effectiveLimit = Math.min(parsedLimit, 200);
@@ -99,7 +100,7 @@ router.post(
   "/self-model",
   authMiddleware(),
   requireRole("admin", "super_admin"),
-  async (req, res) => {
+  validateBody(jsonObjectBodySchema), async (req, res) => {
     try {
       const parsed = CreateSelfModelSchema.safeParse(req.body);
       if (!parsed.success) {
@@ -125,7 +126,7 @@ router.post(
   "/self-model/run-outcome",
   authMiddleware(),
   requireRole("admin", "super_admin"),
-  async (req, res) => {
+  validateBody(jsonObjectBodySchema), async (req, res) => {
     try {
       const parsed = RunOutcomeSchema.safeParse(req.body);
       if (!parsed.success) {
@@ -160,7 +161,7 @@ router.post(
   "/self-model/check-threshold",
   authMiddleware(),
   requireRole("admin", "super_admin"),
-  async (req, res) => {
+  validateBody(jsonObjectBodySchema), async (req, res) => {
     try {
       const { agentId, metric } = req.body;
       if (!agentId || !metric) {

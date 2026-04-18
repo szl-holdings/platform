@@ -10,6 +10,7 @@ import type { BlockNode } from "../../lib/pdf-renderer-types";
 import { ObjectStorageService, ObjectNotFoundError } from "../../lib/objectStorage";
 import { setObjectAclPolicy } from "../../lib/objectAcl";
 import { getRequestUserId, canAccessDocument, getUserRole, canMutateDocument, getRequestUserEmail } from "./shared";
+import {validateBody, jsonObjectBodySchema} from "../../lib/validation";
 
 interface AuthUser { id: number; role: string; email?: string; displayName?: string }
 type ExtendedRequest = Request & { user?: AuthUser }
@@ -18,7 +19,7 @@ const objectStorageService = new ObjectStorageService();
 
 // ─── E-Signatures ────────────────────────────────────────────────────────────
 
-router.post("/documents/:id/sign", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/documents/:id/sign", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id as string, 10);
     if (isNaN(id)) return sendBadRequest(res, "Invalid document ID");
@@ -101,7 +102,7 @@ router.get("/documents/sign/:token", async (req, res) => {
   }
 });
 
-router.post("/documents/sign/:token/submit", async (req: Request, res: Response) => {
+router.post("/documents/sign/:token/submit", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { token } = req.params as Record<string, string>;
     const [sig] = await db.select().from(signaturesTable).where(eq(signaturesTable.signingToken, token));
@@ -180,7 +181,7 @@ router.post("/documents/sign/:token/submit", async (req: Request, res: Response)
 
 // Self-hosted embedded signing: authenticated signer submits signature image directly.
 // Authorization: Only the specific named signer (matched by email) or an admin/editor may submit.
-router.post("/documents/:id/sign/:sigId", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/documents/:id/sign/:sigId", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const docId = parseInt(req.params.id as string, 10);
     const sigId = parseInt(req.params.sigId as string, 10);
@@ -254,7 +255,7 @@ router.post("/documents/:id/sign/:sigId", authMiddleware(), async (req: Request,
 
 // Decline a signature request by sigId (authenticated).
 // Authorization: only the named signer or an admin/editor may decline.
-router.post("/documents/:id/signatures/:sigId/decline", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/documents/:id/signatures/:sigId/decline", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const docId = parseInt(req.params.id as string, 10);
     const sigId = parseInt(req.params.sigId as string, 10);
@@ -287,7 +288,7 @@ router.post("/documents/:id/signatures/:sigId/decline", authMiddleware(), async 
   }
 });
 
-router.post("/documents/sign/:token/decline", async (req: Request, res: Response) => {
+router.post("/documents/sign/:token/decline", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { token } = req.params as Record<string, string>;
     const { reason } = req.body as { reason?: string };
@@ -334,7 +335,7 @@ router.get("/documents/:id/signatures", authMiddleware(), async (req: Request, r
   }
 });
 
-router.post("/documents/:id/signatures/:sigId/remind", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/documents/:id/signatures/:sigId/remind", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const docId = parseInt(req.params.id as string, 10);
     const sigId = parseInt(req.params.sigId as string, 10);

@@ -7,6 +7,7 @@ import { logger } from "../../lib/logger";
 import { createRmmProvider, setCachedProvider, getCachedProvider, clearProviderCache, type RmmProviderConfig } from "../../services/rmm-provider";
 import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from "crypto";
 import { auth, authWrite, roleAdmin, roleOperator, queryConnectors, queryConnectorById, stripSecrets, buildProviderConfig, isProviderSupported } from "./shared";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
 
 const router: IRouter = Router();
 
@@ -113,7 +114,7 @@ router.get("/rmm/predictions", auth, async (_req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to generate predictions"); }
 });
 
-router.post("/rmm/psa/ticket", authWrite, roleOperator, async (req, res) => {
+router.post("/rmm/psa/ticket", authWrite, roleOperator, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { connectorId, subject, description, priority, deviceId } = req.body;
     if (!connectorId || !subject) return sendBadRequest(res, "connectorId and subject are required");
@@ -144,7 +145,7 @@ router.post("/rmm/psa/ticket", authWrite, roleOperator, async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to create PSA ticket"); }
 });
 
-router.post("/rmm/psa/ticket/:psaTicketId/close", authWrite, roleOperator, async (req, res) => {
+router.post("/rmm/psa/ticket/:psaTicketId/close", authWrite, roleOperator, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const psaTicketId = String(req.params.psaTicketId);
     const { connectorId, note } = req.body;
@@ -164,7 +165,7 @@ router.post("/rmm/psa/ticket/:psaTicketId/close", authWrite, roleOperator, async
   } catch (err) { handleRouteError(res, err, "Failed to close PSA ticket"); }
 });
 
-router.get("/rmm/org-site-mappings", auth, async (req, res) => {
+router.get("/rmm/org-site-mappings", auth, validateQuery(listQuerySchema), async (req, res) => {
   try {
     const connectorId = req.query.connectorId ? parseInt(req.query.connectorId as string, 10) : null;
     const mappings = await db.execute(sql`
@@ -183,7 +184,7 @@ router.get("/rmm/org-site-mappings", auth, async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to list org/site mappings"); }
 });
 
-router.post("/rmm/org-site-mappings", authWrite, roleAdmin, async (req, res) => {
+router.post("/rmm/org-site-mappings", authWrite, roleAdmin, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { connectorId, providerOrgId, providerOrgName, providerSiteId, providerSiteName, internalClientId, syncEnabled } = req.body;
     if (!connectorId || !providerOrgId) return sendBadRequest(res, "connectorId and providerOrgId are required");
@@ -198,7 +199,7 @@ router.post("/rmm/org-site-mappings", authWrite, roleAdmin, async (req, res) => 
   } catch (err) { handleRouteError(res, err, "Failed to create org/site mapping"); }
 });
 
-router.patch("/rmm/org-site-mappings/:id", authWrite, roleAdmin, async (req, res) => {
+router.patch("/rmm/org-site-mappings/:id", authWrite, roleAdmin, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseInt(String(req.params.id), 10);
     if (isNaN(id)) return sendBadRequest(res, "Invalid ID");
@@ -225,7 +226,7 @@ router.delete("/rmm/org-site-mappings/:id", authWrite, roleAdmin, async (req, re
   } catch (err) { handleRouteError(res, err, "Failed to delete org/site mapping"); }
 });
 
-router.post("/rmm/actions/bulk", authWrite, roleOperator, async (req, res) => {
+router.post("/rmm/actions/bulk", authWrite, roleOperator, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { deviceIds, actionType, target, parameters, requestedBy } = req.body;
     if (!Array.isArray(deviceIds) || deviceIds.length === 0) return sendBadRequest(res, "deviceIds array is required");

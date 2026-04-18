@@ -1,4 +1,5 @@
 import { Router, type IRouter } from "express";
+import { validateQuery, listQuerySchema } from "../lib/validation.js";
 import { db, pushNotificationHistoryTable } from "@szl-holdings/db";
 import { sql, gte, lte, and, eq } from "drizzle-orm";
 import { sendSuccess, sendBadRequest, handleRouteError } from "../lib/api-response";
@@ -6,7 +7,7 @@ import { authMiddleware, requireRole } from "../middlewares/auth";
 
 const router: IRouter = Router();
 
-router.get("/push-analytics", authMiddleware(), requireRole("ops"), async (req, res) => {
+router.get("/push-analytics", authMiddleware(), requireRole("ops"), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { appId, templateId, since, until } = req.query as Record<string, string | undefined>;
 

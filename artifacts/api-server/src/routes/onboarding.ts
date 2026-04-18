@@ -23,7 +23,7 @@ import { eq, and, gt } from "drizzle-orm";
 import { authMiddleware, isElevatedUser } from "../middlewares/auth";
 import { writeLimiter } from "../middlewares/rate-limiters";
 import { hashIp } from "@szl-holdings/audit";
-import { validateBody } from "../lib/validation";
+import { validateBody, jsonObjectBodySchema} from "../lib/validation";
 import { sendSuccess, sendCreated, sendBadRequest, sendForbidden, handleRouteError, sendNotFound } from "../lib/api-response";
 import { sendEmail, buildOrgInviteEmail } from "../lib/email";
 import { logger } from "../lib/logger";
@@ -329,6 +329,7 @@ router.post(
   "/onboarding/wizard/:orgSlug/complete",
   writeLimiter,
   authMiddleware(),
+  validateBody(jsonObjectBodySchema),
   async (req: Request, res: Response) => {
     try {
       const orgSlug = req.params["orgSlug"] as string;

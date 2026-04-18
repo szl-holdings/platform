@@ -49,7 +49,7 @@ vi.mock("@szl-holdings/db", () => ({
 // ---------------------------------------------------------------------------
 
 const { globalAuthEnforcer } = await import("../middlewares/global-auth-enforcer.js");
-const { validateBody } = await import("../lib/validation.js");
+const { validateBody, validateQuery, jsonObjectBodySchema, listQuerySchema } = await import("../lib/validation.js");
 const { tenantScope } = await import("../middlewares/tenant-scope.js");
 
 // ---------------------------------------------------------------------------
@@ -479,5 +479,157 @@ describe("tenantScope", () => {
 
     expect(res.status).toBe(403);
     expect((res.body as Record<string, unknown>).error).toContain("not a member of this organization");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 4. validateQuery
+// ---------------------------------------------------------------------------
+
+describe("validateQuery", () => {
+  const testQuerySchema = z.object({
+    page: z.coerce.number().int().min(1).max(1000).optional(),
+    limit: z.coerce.number().int().min(1).max(100).optional(),
+    status: z.enum(["active", "inactive", "pending"]).optional(),
+  });
+
+  function buildQueryApp(schema: z.ZodSchema<unknown>) {
+    const app = express();
+    app.use(express.json());
+    app.get("/items", validateQuery(schema) as express.RequestHandler, (_req, res) => {
+      res.json({ ok: true });
+    });
+    app.use((_err: unknown, _req: Request, res: Response, _next: NextFunction) => {
+      res.status(500).json({ error: "unexpected" });
+    });
+    return app;
+  }
+
+  it("calls next() for valid query params", async () => {
+    const res = await request(buildQueryApp(testQuerySchema)).get(
+      "/items?page=2&limit=10&status=active",
+    );
+    expect(res.status).toBe(200);
+    expect((res.body as { ok: boolean }).ok).toBe(true);
+  });
+
+  it("returns 400 with error message when a coerced number param is not numeric", async () => {
+    const res = await request(buildQueryApp(testQuerySchema)).get("/items?page=not-a-number");
+
+    expect(res.status).toBe(400);
+    const body = res.body as { error: string; code: string };
+    expect(body.code).toBe("BAD_REQUEST");
+    expect(body.error).toMatch(/Invalid query parameters/i);
+  });
+
+  it("returns 400 when an enum param has an invalid value", async () => {
+    const res = await request(buildQueryApp(testQuerySchema)).get("/items?status=unknown-status");
+
+    expect(res.status).toBe(400);
+    expect((res.body as { code: string }).code).toBe("BAD_REQUEST");
+  });
+
+  it("returns 400 when page exceeds the max bound", async () => {
+    const res = await request(buildQueryApp(testQuerySchema)).get("/items?page=99999");
+
+    expect(res.status).toBe(400);
+    expect((res.body as { code: string }).code).toBe("BAD_REQUEST");
+  });
+
+  it("listQuerySchema rejects an oversized limit", async () => {
+    const res = await request(buildQueryApp(listQuerySchema)).get("/items?limit=9999");
+
+    expect(res.status).toBe(400);
+    expect((res.body as { code: string }).code).toBe("BAD_REQUEST");
+  });
+
+  it("listQuerySchema accepts all standard search/filter fields without error", async () => {
+    const res = await request(buildQueryApp(listQuerySchema)).get(
+      "/items?page=1&limit=25&status=active&type=incident&q=test&order=desc",
+    );
+
+    expect(res.status).toBe(200);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 5. jsonObjectBodySchema — rejects non-object bodies
+// ---------------------------------------------------------------------------
+
+describe("jsonObjectBodySchema", () => {
+  it("accepts a plain object body and passes it through", async () => {
+    const app = express();
+    app.use(express.json());
+    app.post("/endpoint", validateBody(jsonObjectBodySchema), (req, res) => {
+      res.json({ received: req.body });
+    });
+
+    const res = await request(app).post("/endpoint").send({ foo: "bar", count: 3 });
+
+    expect(res.status).toBe(200);
+    expect((res.body as Record<string, unknown>).received).toMatchObject({ foo: "bar", count: 3 });
+  });
+
+  it("accepts a nested object body with arbitrary keys", async () => {
+    const app = express();
+    app.use(express.json());
+    app.post("/endpoint", validateBody(jsonObjectBodySchema), (req, res) => {
+      res.json({ received: req.body });
+    });
+
+    const res = await request(app)
+      .post("/endpoint")
+      .send({ type: "command", payload: { action: "restart", target: "pod-1" }, meta: { ts: 1234 } });
+
+    expect(res.status).toBe(200);
+    const body = res.body as { received: Record<string, unknown> };
+    expect(body.received.type).toBe("command");
+  });
+
+  it("returns 400 with BAD_REQUEST code when the body is a JSON array", async () => {
+    const app = express();
+    app.use(express.json());
+    app.post("/endpoint", validateBody(jsonObjectBodySchema), (_req, res) => {
+      res.json({ ok: true });
+    });
+
+    const res = await request(app)
+      .post("/endpoint")
+      .set("Content-Type", "application/json")
+      .send("[1,2,3]");
+
+    expect(res.status).toBe(400);
+    const body = res.body as { code?: string };
+    expect(body.code).toBe("BAD_REQUEST");
+  });
+
+  it("accepts an empty body (defaults to empty object)", async () => {
+    const app = express();
+    app.use(express.json());
+    app.post("/endpoint", validateBody(jsonObjectBodySchema), (_req, res) => {
+      res.json({ ok: true });
+    });
+
+    const res = await request(app).post("/endpoint");
+
+    expect(res.status).toBe(200);
+  });
+
+  it("returns 400 when the body is a primitive (handled at parser or middleware layer)", async () => {
+    const app = express();
+    app.use(express.json());
+    app.post("/endpoint", validateBody(jsonObjectBodySchema), (_req, res) => {
+      res.json({ ok: true });
+    });
+    app.use((_err: unknown, _req: Request, res: Response, _next: NextFunction) => {
+      res.status(400).json({ code: "BAD_REQUEST", error: "Invalid request body" });
+    });
+
+    const res = await request(app)
+      .post("/endpoint")
+      .set("Content-Type", "application/json")
+      .send("true");
+
+    expect(res.status).toBe(400);
   });
 });

@@ -23,6 +23,7 @@ import {
 } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
 import { perUserApiSlidingLimiter } from "../middlewares/sliding-window-limiter";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 // Scope auth to /constellation paths only — this router is mounted without a path prefix
@@ -68,7 +69,7 @@ function isUniqueViolation(err: unknown): boolean {
   return false;
 }
 
-router.get("/constellation/views", async (req: Request, res: Response) => {
+router.get("/constellation/views", validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
     if (!userId) {
@@ -91,7 +92,7 @@ router.get("/constellation/views", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/constellation/views", async (req: Request, res: Response) => {
+router.post("/constellation/views", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
     if (!userId) {
@@ -128,7 +129,7 @@ function parseId(raw: unknown): number | null {
   return Number.isFinite(n) && n > 0 ? n : null;
 }
 
-router.patch("/constellation/views/:id", async (req: Request, res: Response) => {
+router.patch("/constellation/views/:id", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
     if (!userId) {

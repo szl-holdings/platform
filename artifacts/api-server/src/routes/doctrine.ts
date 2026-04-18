@@ -4,6 +4,7 @@ import { desc, eq } from "drizzle-orm";
 import { sendSuccess, sendError, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
 import { readLimiter, writeLimiter } from "../middlewares/rate-limiters";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -13,7 +14,7 @@ function isDoctrineAction(action: string): boolean {
   return action.startsWith(DOCTRINE_ACTION_PREFIX);
 }
 
-router.post("/doctrine/events", writeLimiter, async (req, res) => {
+router.post("/doctrine/events", writeLimiter, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const body = req.body;
     if (!body || !body.type || !body.sourceApp || !body.layer || !body.title) {
@@ -50,7 +51,7 @@ router.post("/doctrine/events", writeLimiter, async (req, res) => {
   }
 });
 
-router.get("/doctrine/events", readLimiter, authMiddleware(), async (req, res) => {
+router.get("/doctrine/events", readLimiter, authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const limit = Math.min(Number(req.query.limit) || 50, 200);
     const layer = typeof req.query.layer === "string" ? req.query.layer : undefined;

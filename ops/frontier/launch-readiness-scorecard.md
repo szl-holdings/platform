@@ -26,7 +26,7 @@ Updated: 2026-04-16
 | Rate limiting | Production | ✅ | Per-route limits configured |
 | Audit logging | Production | ✅ | Full audit trail for sensitive actions |
 | Zod validation (core routes) | Production | ✅ | High-traffic routes validated |
-| Zod validation (remaining routes) | Partial | 🟡 | Outstanding task; non-blocking for demo |
+| Zod validation (remaining routes) | Production | ✅ | All 206 POST/PUT/PATCH routes validated; Task #973 complete |
 | CI/CD pipeline | Partial | 🟡 | Post-merge script; GitHub Actions lint/test |
 | Integration tests | Partial | 🟡 | Vessels + Firestorm POST paths outstanding |
 | Observability / APM | Partial | 🟡 | Pino logs; Application Insights not yet wired |

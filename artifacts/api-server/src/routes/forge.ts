@@ -5,6 +5,7 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { z } from "zod";
 import { db } from "@szl-holdings/db";
+import { validateQuery, listQuerySchema } from "../lib/validation.js";
 import {
   forgeAgentsTable,
   forgeAgentVersionsTable,
@@ -68,6 +69,7 @@ function validateBody<T extends z.ZodTypeAny>(schema: T) {
 }
 
 // ─── Schemas ──────────────────────────────────────────────────────────────
+const jsonObjectBodySchema = z.record(z.unknown());
 const envEnum = z.enum(ENV_TIERS);
 const riskEnum = z.enum(["low", "standard", "regulated", "executive"]);
 
@@ -129,7 +131,7 @@ const approveSchema = z.object({
 router.use(authMiddleware());
 
 // ─── Agents ───────────────────────────────────────────────────────────────
-router.get("/forge/agents", async (req: Request, res: Response) => {
+router.get("/forge/agents", validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const envFilter = req.query.env as EnvTier | undefined;
@@ -301,7 +303,7 @@ router.post("/forge/agents/:id/execute", validateBody(executeSchema), async (req
 });
 
 // ─── Promotions ──────────────────────────────────────────────────────────
-router.get("/forge/promotions", async (req, res) => {
+router.get("/forge/promotions", validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const status = req.query.status as string | undefined;
@@ -328,7 +330,7 @@ router.post("/forge/promotions/:id/approve", validateBody(approveSchema), async 
 });
 
 // ─── Drift ───────────────────────────────────────────────────────────────
-router.get("/forge/drift/events", async (req, res) => {
+router.get("/forge/drift/events", validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const rows = await db.select().from(forgeDriftEventsTable).orderBy(desc(forgeDriftEventsTable.detectedAt)).limit(limit).offset(offset);
@@ -354,7 +356,7 @@ router.get("/forge/drift/summary", async (_req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to compute drift summary"); }
 });
 
-router.post("/forge/drift/evaluate", async (req, res) => {
+router.post("/forge/drift/evaluate", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     if (!requireForgeOperator(req, res)) return;
     const { agentId, envId } = req.body as { agentId?: string; envId?: string };
@@ -366,7 +368,7 @@ router.post("/forge/drift/evaluate", async (req, res) => {
 });
 
 // ─── Executions / Telemetry ──────────────────────────────────────────────
-router.get("/forge/executions", async (req, res) => {
+router.get("/forge/executions", validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const agentId = req.query.agentId as string | undefined;

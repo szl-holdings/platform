@@ -41,7 +41,7 @@ import {
 import { authMiddleware, parseIdParam } from "../middlewares/auth";
 import { runAllForecasts, runSingleForecast, type ForecastType } from "../lib/ny-forecast-engine";
 import { z } from "zod";
-import { validateBody } from "../lib/validation";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const clockCreateSchema = z.object({
   clockType: z.string().min(1).max(100),
@@ -530,7 +530,7 @@ router.get("/prism-counsel/ny/insurer-profiles/:id", authMiddleware(), async (re
 });
 
 /* ── Forecast Engine ── */
-router.get("/prism-counsel/ny/matters/:matterId/forecasts", authMiddleware(), async (req, res) => {
+router.get("/prism-counsel/ny/matters/:matterId/forecasts", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const orgId = getAuthOrgId(req);
     if (!orgId) return sendForbidden(res, "Authentication required");
@@ -605,7 +605,7 @@ router.get("/prism-counsel/ny/matters/:matterId/ai-reviews", authMiddleware(), a
   }
 });
 
-router.patch("/prism-counsel/ny/ai-reviews/:id/approve", authMiddleware(), async (req, res) => {
+router.patch("/prism-counsel/ny/ai-reviews/:id/approve", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const orgId = getAuthOrgId(req);
     if (!orgId) return sendForbidden(res, "Authentication required");

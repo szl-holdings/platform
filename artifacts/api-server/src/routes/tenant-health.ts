@@ -29,6 +29,7 @@ import { eq, desc, asc, and, gte, lte, sql, count, avg } from "drizzle-orm";
 import { sendSuccess, sendNotFound, handleRouteError } from "../lib/api-response";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 import { assertTenantAccess } from "../middlewares/tenant-scope";
+import {validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 const ADMIN_ROLES = ["admin", "super_admin", "ops"] as const;
@@ -296,6 +297,7 @@ router.get(
   "/tenant-health",
   authMiddleware(),
   requireRole(...ADMIN_ROLES),
+  validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
       const tier = req.query.tier as string | undefined;
@@ -474,7 +476,7 @@ router.post(
   "/tenant-health/:orgId/compute",
   authMiddleware(),
   requireRole(...ADMIN_ROLES),
-  async (req: Request, res: Response) => {
+  validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
     try {
       const orgId = parseIdParam(req.params.orgId as string);
       const scorecard = await computeForOrg(orgId);

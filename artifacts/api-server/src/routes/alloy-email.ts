@@ -5,6 +5,7 @@ import { services } from "@szl-holdings/services";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { sendSuccess, sendCreated, sendBadRequest, sendError, handleRouteError } from "../lib/api-response";
 import { logger } from "../lib/logger";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -134,7 +135,7 @@ router.post("/alloy/email/ingest", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/alloy/email/triage", authMiddleware(), async (req: Request, res: Response) => {
+router.get("/alloy/email/triage", authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { status = "pending", priority, category, limit: limitStr = "50" } = req.query as Record<string, string>;
     const limit = Math.min(parseInt(limitStr, 10), 200);
@@ -172,7 +173,7 @@ router.get("/alloy/email/triage/:id", authMiddleware(), async (req: Request, res
   }
 });
 
-router.post("/alloy/email/triage/:id/draft", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/alloy/email/triage/:id/draft", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const emailResult = await pool.query(`SELECT * FROM alloy_email_triage WHERE id = $1`, [req.params.id]);
     if (!emailResult.rows[0]) { sendError(res, "Email not found", 404); return; }
@@ -198,7 +199,7 @@ router.post("/alloy/email/triage/:id/draft", authMiddleware(), async (req: Reque
   }
 });
 
-router.post("/alloy/email/triage/:id/route", authMiddleware(), requireRole("ops", "admin", "super_admin"), async (req: Request, res: Response) => {
+router.post("/alloy/email/triage/:id/route", authMiddleware(), requireRole("ops", "admin", "super_admin"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const emailResult = await pool.query(`SELECT * FROM alloy_email_triage WHERE id = $1`, [req.params.id]);
     if (!emailResult.rows[0]) { sendError(res, "Email not found", 404); return; }
@@ -217,7 +218,7 @@ router.post("/alloy/email/triage/:id/route", authMiddleware(), requireRole("ops"
   }
 });
 
-router.patch("/alloy/email/triage/:id", authMiddleware(), async (req: Request, res: Response) => {
+router.patch("/alloy/email/triage/:id", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { status, priority, labels } = req.body as { status?: string; priority?: string; labels?: string[] };
     const updates: string[] = ["updated_at = NOW()"];
@@ -243,7 +244,7 @@ router.get("/alloy/email/rules", authMiddleware(), requireRole("ops", "admin", "
   }
 });
 
-router.post("/alloy/email/rules", authMiddleware(), requireRole("admin", "super_admin"), async (req: Request, res: Response) => {
+router.post("/alloy/email/rules", authMiddleware(), requireRole("admin", "super_admin"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { name, description, conditions, action, actionParams, priority = 50 } = req.body as {
       name: string;

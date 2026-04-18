@@ -30,6 +30,7 @@ import {
 } from "../lib/terra-covenant-store";
 import { dispatchCovenantBreaches } from "../lib/agent-scheduler";
 import { logger } from "../lib/logger";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -67,7 +68,7 @@ function breachRequestId(propertyId: string, breachType: string): string {
 
 // ─── Ownership Graph ──────────────────────────────────────────────────────────
 
-router.get("/terra/cognitive/ownership-graph", cogLimit, auth, async (req, res) => {
+router.get("/terra/cognitive/ownership-graph", cogLimit, auth, validateQuery(listQuerySchema), async (req, res) => {
   try {
     const propertyId = req.query.propertyId as string | undefined;
     const trace = reqTraceRef(req);
@@ -1052,7 +1053,7 @@ router.get("/terra/cognitive/covenants", cogLimit, auth, async (req, res) => {
 // ─── Run-Now scan (operator-triggered) — re-evaluates all covenants and
 // dispatches guardian approvals for any new breaches.
 
-router.post("/terra/cognitive/covenants/scan", cogLimit, auth, async (req, res) => {
+router.post("/terra/cognitive/covenants/scan", cogLimit, auth, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const trace = reqTraceRef(req);
     const result = await dispatchCovenantBreaches();
@@ -1068,7 +1069,7 @@ router.post("/terra/cognitive/covenants/scan", cogLimit, auth, async (req, res) 
 
 // ─── Seed covenants from distress registry (operator action, idempotent) ──────
 
-router.post("/terra/cognitive/covenants/seed", cogLimit, auth, async (req, res) => {
+router.post("/terra/cognitive/covenants/seed", cogLimit, auth, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const limit = Math.min(Number(req.body?.limit ?? 12), 50);
     const inserted = await seedCovenantsFromDistress(limit);
@@ -1082,7 +1083,7 @@ router.post("/terra/cognitive/covenants/seed", cogLimit, auth, async (req, res) 
 // Called by the terra-covenant-monitor scheduler or by operators.
 // Uses deterministic requestId for idempotency — safe to call multiple times.
 
-router.post("/terra/cognitive/covenants/submit-review", cogLimit, async (req, res) => {
+router.post("/terra/cognitive/covenants/submit-review", cogLimit, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     // Internal-token auth: only agents/schedulers may call this mutation
     const envToken = process.env["ALLOY_INTERNAL_TOKEN"];
@@ -1162,7 +1163,7 @@ router.post("/terra/cognitive/covenants/submit-review", cogLimit, async (req, re
 
 // ─── Distress Forecast ───────────────────────────────────────────────────────
 
-router.get("/terra/cognitive/distress-forecast", cogLimit, auth, async (req, res) => {
+router.get("/terra/cognitive/distress-forecast", cogLimit, auth, validateQuery(listQuerySchema), async (req, res) => {
   try {
     const trace = reqTraceRef(req);
     const limitParam = Math.min(Number(req.query.limit ?? 20), 50);
@@ -1280,7 +1281,7 @@ router.get("/terra/cognitive/distress-forecast", cogLimit, auth, async (req, res
 
 // ─── Underwriting Copilot ────────────────────────────────────────────────────
 
-router.get("/terra/cognitive/underwriting-copilot", cogLimit, auth, async (req, res) => {
+router.get("/terra/cognitive/underwriting-copilot", cogLimit, auth, validateQuery(listQuerySchema), async (req, res) => {
   try {
     const propertyId = req.query.propertyId as string | undefined;
     const dealType = req.query.dealType as string | undefined;
@@ -1534,7 +1535,7 @@ function serializeMatter(matter: typeof terraDiligenceMattersTable.$inferSelect,
 }
 
 // POST: create new diligence matter
-router.post("/terra/cognitive/diligence-room/matters", cogLimit, authWrite, async (req: Request, res: Response) => {
+router.post("/terra/cognitive/diligence-room/matters", cogLimit, authWrite, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const parsed = createMatterSchema.safeParse(req.body);
     if (!parsed.success) return sendBadRequest(res, "Invalid matter payload", "VALIDATION_ERROR", parsed.error.flatten());
@@ -1561,7 +1562,7 @@ router.post("/terra/cognitive/diligence-room/matters", cogLimit, authWrite, asyn
 });
 
 // POST: attach/upload evidence to a matter (supports multipart file OR JSON with documentUrl)
-router.post("/terra/cognitive/diligence-room/matters/:matterId/evidence", cogLimit, authWrite, diligenceUpload.single("file"), async (req: Request, res: Response) => {
+router.post("/terra/cognitive/diligence-room/matters/:matterId/evidence", cogLimit, authWrite, diligenceUpload.single("file"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const matterId = req.params.matterId;
     const matterRows = await db
@@ -1633,7 +1634,7 @@ router.post("/terra/cognitive/diligence-room/matters/:matterId/evidence", cogLim
 });
 
 // PATCH: update evidence status / confidence / review fields
-router.patch("/terra/cognitive/diligence-room/evidence/:evidenceId", cogLimit, authWrite, async (req: Request, res: Response) => {
+router.patch("/terra/cognitive/diligence-room/evidence/:evidenceId", cogLimit, authWrite, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const parsed = patchEvidenceSchema.safeParse(req.body);
     if (!parsed.success) return sendBadRequest(res, "Invalid patch payload", "VALIDATION_ERROR", parsed.error.flatten());
@@ -1670,7 +1671,7 @@ router.patch("/terra/cognitive/diligence-room/evidence/:evidenceId", cogLimit, a
 });
 
 // GET: list/show diligence room — DB is primary source; falls back to graph/distress when empty
-router.get("/terra/cognitive/diligence-room", cogLimit, auth, async (req, res) => {
+router.get("/terra/cognitive/diligence-room", cogLimit, auth, validateQuery(listQuerySchema), async (req, res) => {
   try {
     const matterId = req.query.matterId as string | undefined;
     const trace = reqTraceRef(req);

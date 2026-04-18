@@ -11,6 +11,7 @@ import {
   sendNotFound,
   handleRouteError,
 } from "../lib/api-response";
+import { validateBody, jsonObjectBodySchema } from "../lib/validation";
 
 /* -----------------------------------------------------------------------
  * Carlota Jo — Time tracking & invoice persistence (public, cross-device)
@@ -76,7 +77,7 @@ router.get("/booking/time-entries", async (_req, res) => {
   }
 });
 
-router.post("/booking/time-entries", async (req, res) => {
+router.post("/booking/time-entries", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const b = req.body as Partial<TimeEntryRow> & { hours?: number | string };
     if (
@@ -120,7 +121,7 @@ router.post("/booking/time-entries", async (req, res) => {
   }
 });
 
-router.patch("/booking/time-entries/:id", async (req, res) => {
+router.patch("/booking/time-entries/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = String(req.params.id);
     const b = req.body as Partial<TimeEntryRow> & { hours?: number | string };
@@ -181,7 +182,7 @@ router.get("/booking/time-invoices", async (_req, res) => {
   }
 });
 
-router.post("/booking/time-invoices", async (req, res) => {
+router.post("/booking/time-invoices", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const b = req.body as Partial<InvoiceRow> & { amount?: number | string };
     if (
@@ -221,7 +222,7 @@ router.post("/booking/time-invoices", async (req, res) => {
   }
 });
 
-router.patch("/booking/time-invoices/:id", async (req, res) => {
+router.patch("/booking/time-invoices/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = String(req.params.id);
     const b = req.body as Partial<InvoiceRow> & {
@@ -271,7 +272,7 @@ router.delete("/booking/time-invoices/:id", async (req, res) => {
 });
 
 // Generate draft invoices from approved billable entries that aren't yet invoiced.
-router.post("/booking/time-invoices/generate", async (req, res) => {
+router.post("/booking/time-invoices/generate", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const body = (req.body ?? {}) as {
       engagementToClient?: Record<string, string>;

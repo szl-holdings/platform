@@ -18,10 +18,11 @@ import {
   getCached, aiRateLimit, intelRateLimit, fetchJson,
   type ThreatItem,
 } from "./shared";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
 
 const router = Router();
 
-router.post("/intelligence/ai/summarize", aiRateLimit, authMiddleware(), async (req, res) => {
+router.post("/intelligence/ai/summarize", aiRateLimit, authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { text } = req.body;
     if (!text) { sendError(res, "Text is required", 400); return; }
@@ -30,7 +31,7 @@ router.post("/intelligence/ai/summarize", aiRateLimit, authMiddleware(), async (
   } catch (err) { handleRouteError(res, err, "Failed to summarize text"); }
 });
 
-router.post("/intelligence/ai/sentiment", aiRateLimit, authMiddleware(), async (req, res) => {
+router.post("/intelligence/ai/sentiment", aiRateLimit, authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { text } = req.body;
     if (!text) { sendError(res, "Text is required", 400); return; }
@@ -39,7 +40,7 @@ router.post("/intelligence/ai/sentiment", aiRateLimit, authMiddleware(), async (
   } catch (err) { handleRouteError(res, err, "Failed to analyze sentiment"); }
 });
 
-router.post("/intelligence/ai/ner", aiRateLimit, authMiddleware(), async (req, res) => {
+router.post("/intelligence/ai/ner", aiRateLimit, authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { text } = req.body;
     if (!text) { sendError(res, "Text is required", 400); return; }
@@ -48,7 +49,7 @@ router.post("/intelligence/ai/ner", aiRateLimit, authMiddleware(), async (req, r
   } catch (err) { handleRouteError(res, err, "Failed to extract entities"); }
 });
 
-router.post("/intelligence/ai/classify", aiRateLimit, authMiddleware(), async (req, res) => {
+router.post("/intelligence/ai/classify", aiRateLimit, authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { text, labels } = req.body;
     if (!text || !labels) { sendError(res, "Text and labels are required", 400); return; }
@@ -57,7 +58,7 @@ router.post("/intelligence/ai/classify", aiRateLimit, authMiddleware(), async (r
   } catch (err) { handleRouteError(res, err, "Failed to classify text"); }
 });
 
-router.post("/intelligence/ai/translate", aiRateLimit, authMiddleware(), async (req, res) => {
+router.post("/intelligence/ai/translate", aiRateLimit, authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { text, sourceLang, targetLang } = req.body;
     if (!text) { sendError(res, "Text is required", 400); return; }
@@ -66,7 +67,7 @@ router.post("/intelligence/ai/translate", aiRateLimit, authMiddleware(), async (
   } catch (err) { handleRouteError(res, err, "Failed to translate text"); }
 });
 
-router.post("/intelligence/ai/generate-image", aiRateLimit, authMiddleware(), async (req, res) => {
+router.post("/intelligence/ai/generate-image", aiRateLimit, authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { prompt } = req.body;
     if (!prompt) { sendError(res, "Prompt is required", 400); return; }
@@ -75,7 +76,7 @@ router.post("/intelligence/ai/generate-image", aiRateLimit, authMiddleware(), as
   } catch (err) { handleRouteError(res, err, "Failed to generate image"); }
 });
 
-router.post("/intelligence/ai/chat", aiRateLimit, authMiddleware(), async (req, res) => {
+router.post("/intelligence/ai/chat", aiRateLimit, authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { sessionId, message, messages, systemPrompt, maxTokens } = req.body;
     const ownerId = req.user?.id;
@@ -124,7 +125,7 @@ router.delete("/intelligence/ai/chat/:sessionId", aiRateLimit, authMiddleware({ 
   } catch (err) { handleRouteError(res, err, "Failed to clear chat session"); }
 });
 
-router.post("/intelligence/ai/reason", aiRateLimit, authMiddleware(), async (req, res) => {
+router.post("/intelligence/ai/reason", aiRateLimit, authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { prompt, maxTokens, steps } = req.body;
     if (!prompt) { sendError(res, "Prompt is required", 400); return; }
@@ -133,7 +134,7 @@ router.post("/intelligence/ai/reason", aiRateLimit, authMiddleware(), async (req
   } catch (err) { handleRouteError(res, err, "Failed to generate reasoning response"); }
 });
 
-router.post("/intelligence/ai/transcribe", express.raw({ type: ["audio/*", "application/octet-stream"], limit: "25mb" }), aiRateLimit, authMiddleware(), async (req, res) => {
+router.post("/intelligence/ai/transcribe", express.raw({ type: ["audio/*", "application/octet-stream"], limit: "25mb" }), aiRateLimit, authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     if (!req.body || !Buffer.isBuffer(req.body) || req.body.length === 0) {
       sendError(res, "Audio data is required. Send raw audio bytes with Content-Type: audio/wav (or audio/mpeg, application/octet-stream). Max 25MB.", 400); return;
@@ -144,7 +145,7 @@ router.post("/intelligence/ai/transcribe", express.raw({ type: ["audio/*", "appl
   } catch (err) { handleRouteError(res, err, "Failed to transcribe audio"); }
 });
 
-router.post("/intelligence/ai/embed", aiRateLimit, authMiddleware(), async (req, res) => {
+router.post("/intelligence/ai/embed", aiRateLimit, authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { text } = req.body;
     if (!text) { sendError(res, "Text is required", 400); return; }
@@ -153,7 +154,7 @@ router.post("/intelligence/ai/embed", aiRateLimit, authMiddleware(), async (req,
   } catch (err) { handleRouteError(res, err, "Failed to generate embedding"); }
 });
 
-router.post("/intelligence/ai/semantic-search", aiRateLimit, authMiddleware(), async (req, res) => {
+router.post("/intelligence/ai/semantic-search", aiRateLimit, authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { query, documents, topK } = req.body;
     if (!query || !documents || !Array.isArray(documents)) {
@@ -164,7 +165,7 @@ router.post("/intelligence/ai/semantic-search", aiRateLimit, authMiddleware(), a
   } catch (err) { handleRouteError(res, err, "Failed to perform semantic search"); }
 });
 
-router.post("/intelligence/ai/analyze-document", aiRateLimit, authMiddleware(), async (req, res) => {
+router.post("/intelligence/ai/analyze-document", aiRateLimit, authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { text, classificationLabels } = req.body;
     if (!text) { sendError(res, "Text is required", 400); return; }
@@ -173,7 +174,7 @@ router.post("/intelligence/ai/analyze-document", aiRateLimit, authMiddleware(), 
   } catch (err) { handleRouteError(res, err, "Failed to analyze document"); }
 });
 
-router.get("/intelligence/ai/stream", aiRateLimit, authMiddleware(), async (req, res) => {
+router.get("/intelligence/ai/stream", aiRateLimit, authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   const prompt = (req.query.prompt as string) || "";
   if (!prompt) { sendError(res, "Prompt query parameter is required", 400); return; }
 
@@ -196,7 +197,7 @@ router.get("/intelligence/ai/stream", aiRateLimit, authMiddleware(), async (req,
   res.end();
 });
 
-router.get("/intelligence/ai/health", intelRateLimit, authMiddleware(), async (req, res) => {
+router.get("/intelligence/ai/health", intelRateLimit, authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const healthStatus = services.huggingface.getHealthStatus();
     const probe = (req.query as Record<string, string>).probe === "true";
@@ -209,7 +210,7 @@ router.get("/intelligence/ai/health", intelRateLimit, authMiddleware(), async (r
   } catch (err) { handleRouteError(res, err, "Failed to get AI health status"); }
 });
 
-router.post("/intelligence/ai/chat/stream", aiRateLimit, authMiddleware(), async (req, res) => {
+router.post("/intelligence/ai/chat/stream", aiRateLimit, authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { messages, model, maxTokens } = req.body;
     if (!messages || !Array.isArray(messages)) { sendError(res, "Messages array is required", 400); return; }

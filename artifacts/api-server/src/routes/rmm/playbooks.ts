@@ -7,6 +7,7 @@ import { logger } from "../../lib/logger";
 import { createRmmProvider, setCachedProvider, getCachedProvider, clearProviderCache, type RmmProviderConfig } from "../../services/rmm-provider";
 import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from "crypto";
 import { auth, authWrite, roleAdmin, roleOperator, queryConnectors, queryConnectorById, stripSecrets, buildProviderConfig, isProviderSupported } from "./shared";
+import { validateBody, rmmPlaybookCreateSchema, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
 
 const router: IRouter = Router();
 
@@ -28,10 +29,9 @@ router.get("/rmm/playbooks", auth, async (_req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to list healing playbooks"); }
 });
 
-router.post("/rmm/playbooks", authWrite, roleAdmin, async (req, res) => {
+router.post("/rmm/playbooks", authWrite, roleAdmin, validateBody(rmmPlaybookCreateSchema), async (req, res) => {
   try {
     const { name, description, executionMode, detectionRules, remediationActions, targetDeviceTypes, targetClientIds, confidenceThreshold } = req.body;
-    if (!name) return sendBadRequest(res, "name is required");
     const result = await db.execute(sql`
       INSERT INTO msp_healing_playbooks (name, description, execution_mode, detection_rules, remediation_actions, target_device_types, target_client_ids, confidence_threshold)
       VALUES (${name}, ${description ?? null}, ${executionMode ?? "human_gated"}, ${JSON.stringify(detectionRules ?? [])}::jsonb,
@@ -43,7 +43,7 @@ router.post("/rmm/playbooks", authWrite, roleAdmin, async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to create playbook"); }
 });
 
-router.patch("/rmm/playbooks/:id", authWrite, roleAdmin, async (req, res) => {
+router.patch("/rmm/playbooks/:id", authWrite, roleAdmin, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseInt(String(req.params.id), 10);
     if (isNaN(id)) return sendBadRequest(res, "Invalid ID");
@@ -95,7 +95,7 @@ router.delete("/rmm/playbooks/:id", authWrite, roleAdmin, async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to delete playbook"); }
 });
 
-router.get("/rmm/playbooks/executions", auth, async (req, res) => {
+router.get("/rmm/playbooks/executions", auth, validateQuery(listQuerySchema), async (req, res) => {
   try {
     const status = req.query.status as string | undefined;
     const limit = Math.min(parseInt(req.query.limit as string || "50", 10), 200);
@@ -121,7 +121,7 @@ router.get("/rmm/playbooks/executions", auth, async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to list healing executions"); }
 });
 
-router.post("/rmm/playbooks/:id/execute", authWrite, roleOperator, async (req, res) => {
+router.post("/rmm/playbooks/:id/execute", authWrite, roleOperator, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseInt(String(req.params.id), 10);
     if (isNaN(id)) return sendBadRequest(res, "Invalid ID");
@@ -169,7 +169,7 @@ router.post("/rmm/playbooks/:id/execute", authWrite, roleOperator, async (req, r
   } catch (err) { handleRouteError(res, err, "Failed to execute playbook"); }
 });
 
-router.post("/rmm/playbooks/executions/:id/approve", authWrite, roleOperator, async (req, res) => {
+router.post("/rmm/playbooks/executions/:id/approve", authWrite, roleOperator, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseInt(String(req.params.id), 10);
     if (isNaN(id)) return sendBadRequest(res, "Invalid ID");
@@ -208,7 +208,7 @@ router.post("/rmm/playbooks/executions/:id/approve", authWrite, roleOperator, as
   } catch (err) { handleRouteError(res, err, "Failed to approve execution"); }
 });
 
-router.post("/rmm/playbooks/executions/:id/reject", authWrite, roleOperator, async (req, res) => {
+router.post("/rmm/playbooks/executions/:id/reject", authWrite, roleOperator, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseInt(String(req.params.id), 10);
     if (isNaN(id)) return sendBadRequest(res, "Invalid ID");

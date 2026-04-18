@@ -1,6 +1,7 @@
 import { Router, type IRouter, type Request, type Response, type RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
 import multer from "multer";
+import { validateBody, carlotaInquirySchema, carlotaInquiryUpdateSchema, carlotaReservationSchema, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 import {
   db,
   carlotaInquiriesTable,
@@ -30,7 +31,7 @@ const portalUpload = multer({ storage: multer.memoryStorage(), limits: { fileSiz
 
 const router: IRouter = Router();
 
-router.get("/booking/inquiries", authMiddleware(), async (req, res) => {
+router.get("/booking/inquiries", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const rows = await db.select().from(carlotaInquiriesTable).orderBy(desc(carlotaInquiriesTable.createdAt)).limit(limit).offset(offset);
@@ -41,16 +42,9 @@ router.get("/booking/inquiries", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/booking/inquiries", async (req: Request, res: Response) => {
+router.post("/booking/inquiries", validateBody(carlotaInquirySchema), async (req: Request, res: Response) => {
   try {
-    const { name, email, company, phone, service, message } = req.body as {
-      name?: string; email?: string; company?: string; phone?: string; service?: string; message?: string;
-    };
-
-    if (!name || !email || !message) {
-      res.status(400).json({ error: "Name, email, and message are required" });
-      return;
-    }
+    const { name, email, company, phone, service, message } = req.body;
 
     const [row] = await db.insert(carlotaInquiriesTable).values({
       name, email, company: company || null, phone: phone || null, service: service || null, message,
@@ -108,7 +102,7 @@ router.get("/booking/inquiries/:id", authMiddleware(), async (req, res) => {
   }
 });
 
-router.patch("/booking/inquiries/:id", authMiddleware(), async (req, res) => {
+router.patch("/booking/inquiries/:id", authMiddleware(), validateBody(carlotaInquiryUpdateSchema), async (req, res) => {
   try {
     const id = parseInt(String(req.params.id), 10);
     const [row] = await db.update(carlotaInquiriesTable).set({ ...req.body, updatedAt: new Date() }).where(eq(carlotaInquiriesTable.id, id)).returning();
@@ -131,7 +125,7 @@ router.delete("/booking/inquiries/:id", authMiddleware(), async (req, res) => {
   }
 });
 
-router.get("/booking/reservations", authMiddleware(), async (req, res) => {
+router.get("/booking/reservations", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const rows = await db.select().from(carlotaReservationsTable).orderBy(desc(carlotaReservationsTable.createdAt)).limit(limit).offset(offset);
@@ -142,7 +136,7 @@ router.get("/booking/reservations", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/booking/reservations", async (req: Request, res: Response) => {
+router.post("/booking/reservations", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { service, tier, date, time, name, email, company, phone, notes } = req.body as {
       service?: string; tier?: string; date?: string; time?: string;
@@ -188,7 +182,7 @@ router.get("/booking/reservations/:id", authMiddleware(), async (req, res) => {
   }
 });
 
-router.patch("/booking/reservations/:id", authMiddleware(), async (req, res) => {
+router.patch("/booking/reservations/:id", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseInt(String(req.params.id), 10);
     const [row] = await db.update(carlotaReservationsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(carlotaReservationsTable.id, id)).returning();
@@ -228,7 +222,7 @@ router.get("/booking/availability", async (_req: Request, res: Response) => {
   });
 });
 
-router.post("/booking/invoices", async (req: Request, res: Response) => {
+router.post("/booking/invoices", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { confirmationId, tier, service, email } = req.body as {
       confirmationId?: string; tier?: string; service?: string; email?: string;
@@ -276,7 +270,7 @@ router.get("/booking/invoices/:invoiceId", async (req: Request, res: Response) =
   }
 });
 
-router.get("/booking/services", async (req, res) => {
+router.get("/booking/services", validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const rows = await db.select().from(carlotaServicesTable).orderBy(carlotaServicesTable.sortOrder).limit(limit).offset(offset);
@@ -287,7 +281,7 @@ router.get("/booking/services", async (req, res) => {
   }
 });
 
-router.post("/booking/services", authMiddleware(), async (req, res) => {
+router.post("/booking/services", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const [row] = await db.insert(carlotaServicesTable).values(req.body).returning();
     if (row) {
@@ -301,7 +295,7 @@ router.post("/booking/services", authMiddleware(), async (req, res) => {
   }
 });
 
-router.patch("/booking/services/:id", authMiddleware(), async (req, res) => {
+router.patch("/booking/services/:id", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseInt(String(req.params.id), 10);
     const [row] = await db.update(carlotaServicesTable).set({ ...req.body, updatedAt: new Date() }).where(eq(carlotaServicesTable.id, id)).returning();
@@ -326,7 +320,7 @@ router.delete("/booking/services/:id", authMiddleware(), async (req, res) => {
   }
 });
 
-router.get("/booking/clients", authMiddleware(), requireRole("admin", "editor", "exec"), async (req, res) => {
+router.get("/booking/clients", authMiddleware(), requireRole("admin", "editor", "exec"), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const rows = await db.select().from(carlotaClientProfilesTable).orderBy(desc(carlotaClientProfilesTable.createdAt)).limit(limit).offset(offset);
@@ -358,7 +352,7 @@ router.get("/portal/documents", authMiddleware(), async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to list client documents"); }
 });
 
-router.post("/portal/documents", authMiddleware(), portalUpload.single("file"), async (req, res) => {
+router.post("/portal/documents", authMiddleware(), portalUpload.single("file"), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const [account] = await db.select({ id: clientAccountsTable.id, organizationId: clientAccountsTable.organizationId }).from(clientAccountsTable)
       .where(eq(clientAccountsTable.primaryContactUserId, req.user!.id));
@@ -411,7 +405,7 @@ router.get("/portal/messages", authMiddleware(), async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to list client messages"); }
 });
 
-router.post("/portal/messages", authMiddleware(), async (req, res) => {
+router.post("/portal/messages", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const [account] = await db.select({ id: clientAccountsTable.id, organizationId: clientAccountsTable.organizationId }).from(clientAccountsTable)
       .where(eq(clientAccountsTable.primaryContactUserId, req.user!.id));
@@ -582,7 +576,7 @@ router.get("/carlota/live/consulting-trends", carlotaLiveLimit, authMiddleware({
   } catch (err) { handleRouteError(res, err, "Failed to fetch consulting trends"); }
 });
 
-router.get("/carlota/live/world-bank-indicators", carlotaLiveLimit, authMiddleware({ required: false }), async (req, res) => {
+router.get("/carlota/live/world-bank-indicators", carlotaLiveLimit, authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const indicator = (req.query.indicator as string) || "NY.GDP.MKTP.KD.ZG";
     const countries = (req.query.countries as string) || "US;CN;DE;JP;GB";

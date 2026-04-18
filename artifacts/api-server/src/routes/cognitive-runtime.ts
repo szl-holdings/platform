@@ -11,6 +11,7 @@ import {
 } from "@workspace/cognitive-runtime";
 import { defaultMemoryStore } from "@workspace/memory-fabric";
 import { defaultTraceStore } from "@workspace/trace-graph";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router = Router();
 
@@ -32,7 +33,7 @@ router.post(
   "/cognitive-runtime/run",
   authMiddleware(),
   requireRole(...ALLOWED_ROLES),
-  async (req, res) => {
+  validateBody(jsonObjectBodySchema), async (req, res) => {
     const {
       objective,
       context = {},
@@ -146,6 +147,7 @@ router.get(
   "/cognitive-runtime/checkpoints",
   authMiddleware(),
   requireRole(...ALLOWED_ROLES),
+  validateQuery(listQuerySchema),
   (req, res) => {
     const { runId } = req.query;
     const requesterId = toAgentId(req.user?.id);
@@ -175,7 +177,7 @@ router.post(
   "/cognitive-runtime/resume",
   authMiddleware(),
   requireRole(...ALLOWED_ROLES),
-  async (req, res) => {
+  validateBody(jsonObjectBodySchema), validateQuery(listQuerySchema), async (req, res) => {
     const {
       checkpointRef,
       objective,

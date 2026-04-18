@@ -19,6 +19,7 @@ import { eq, desc, asc, and, sql } from "drizzle-orm";
 import { handleRouteError, sendSuccess, sendNotFound, parsePagination } from "../lib/api-response";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 import type { Request, Response, NextFunction } from "express";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -52,7 +53,7 @@ router.get("/ownership/health", (_req, res) => {
 
 // ─── SCENARIOS ────────────────────────────────────────────────────────────────
 
-router.get("/ownership/scenarios", async (req, res) => {
+router.get("/ownership/scenarios", validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const rows = await db
@@ -107,7 +108,7 @@ router.get("/ownership/scenarios/:id", async (req, res) => {
   }
 });
 
-router.post("/ownership/scenarios", async (req, res) => {
+router.post("/ownership/scenarios", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const [row] = await db.insert(ownershipScenariosTable).values(req.body).returning();
     await db.insert(ownershipDecisionLogsTable).values({
@@ -122,7 +123,7 @@ router.post("/ownership/scenarios", async (req, res) => {
   }
 });
 
-router.patch("/ownership/scenarios/:id", async (req, res) => {
+router.patch("/ownership/scenarios/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db
@@ -190,7 +191,7 @@ router.get("/ownership/scenarios/:id/allocations", async (req, res) => {
   }
 });
 
-router.post("/ownership/scenarios/:id/allocations", async (req, res) => {
+router.post("/ownership/scenarios/:id/allocations", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const scenarioId = parseIdParam(req.params.id);
     const [row] = await db.insert(ownershipAllocationsTable).values({ ...req.body, scenarioId }).returning();
@@ -200,7 +201,7 @@ router.post("/ownership/scenarios/:id/allocations", async (req, res) => {
   }
 });
 
-router.patch("/ownership/allocations/:id", async (req, res) => {
+router.patch("/ownership/allocations/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(ownershipAllocationsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(ownershipAllocationsTable.id, id)).returning();
@@ -224,7 +225,7 @@ router.delete("/ownership/allocations/:id", async (req, res) => {
 
 // ─── CONTROL ROLES ────────────────────────────────────────────────────────────
 
-router.post("/ownership/scenarios/:id/control-roles", async (req, res) => {
+router.post("/ownership/scenarios/:id/control-roles", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const scenarioId = parseIdParam(req.params.id);
     const [row] = await db.insert(controlRolesTable).values({ ...req.body, scenarioId }).returning();
@@ -234,7 +235,7 @@ router.post("/ownership/scenarios/:id/control-roles", async (req, res) => {
   }
 });
 
-router.patch("/ownership/control-roles/:id", async (req, res) => {
+router.patch("/ownership/control-roles/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(controlRolesTable).set({ ...req.body, updatedAt: new Date() }).where(eq(controlRolesTable.id, id)).returning();
@@ -258,7 +259,7 @@ router.delete("/ownership/control-roles/:id", async (req, res) => {
 
 // ─── OFFICER ROLES ────────────────────────────────────────────────────────────
 
-router.post("/ownership/scenarios/:id/officer-roles", async (req, res) => {
+router.post("/ownership/scenarios/:id/officer-roles", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const scenarioId = parseIdParam(req.params.id);
     const [row] = await db.insert(officerRolesTable).values({ ...req.body, scenarioId }).returning();
@@ -268,7 +269,7 @@ router.post("/ownership/scenarios/:id/officer-roles", async (req, res) => {
   }
 });
 
-router.patch("/ownership/officer-roles/:id", async (req, res) => {
+router.patch("/ownership/officer-roles/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(officerRolesTable).set({ ...req.body, updatedAt: new Date() }).where(eq(officerRolesTable.id, id)).returning();
@@ -292,7 +293,7 @@ router.delete("/ownership/officer-roles/:id", async (req, res) => {
 
 // ─── MANAGER ROLES ────────────────────────────────────────────────────────────
 
-router.post("/ownership/scenarios/:id/manager-roles", async (req, res) => {
+router.post("/ownership/scenarios/:id/manager-roles", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const scenarioId = parseIdParam(req.params.id);
     const [row] = await db.insert(managerRolesTable).values({ ...req.body, scenarioId }).returning();
@@ -302,7 +303,7 @@ router.post("/ownership/scenarios/:id/manager-roles", async (req, res) => {
   }
 });
 
-router.patch("/ownership/manager-roles/:id", async (req, res) => {
+router.patch("/ownership/manager-roles/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(managerRolesTable).set({ ...req.body, updatedAt: new Date() }).where(eq(managerRolesTable.id, id)).returning();
@@ -326,7 +327,7 @@ router.delete("/ownership/manager-roles/:id", async (req, res) => {
 
 // ─── SIGNATURE AUTHORITY ──────────────────────────────────────────────────────
 
-router.post("/ownership/scenarios/:id/signature-authority", async (req, res) => {
+router.post("/ownership/scenarios/:id/signature-authority", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const scenarioId = parseIdParam(req.params.id);
     const [row] = await db.insert(signatureAuthorityRecordsTable).values({ ...req.body, scenarioId }).returning();
@@ -336,7 +337,7 @@ router.post("/ownership/scenarios/:id/signature-authority", async (req, res) => 
   }
 });
 
-router.patch("/ownership/signature-authority/:id", async (req, res) => {
+router.patch("/ownership/signature-authority/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(signatureAuthorityRecordsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(signatureAuthorityRecordsTable.id, id)).returning();
@@ -360,7 +361,7 @@ router.delete("/ownership/signature-authority/:id", async (req, res) => {
 
 // ─── CAPITAL CONTRIBUTIONS ────────────────────────────────────────────────────
 
-router.post("/ownership/scenarios/:id/capital-contributions", async (req, res) => {
+router.post("/ownership/scenarios/:id/capital-contributions", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const scenarioId = parseIdParam(req.params.id);
     const [row] = await db.insert(capitalContributionsTable).values({ ...req.body, scenarioId }).returning();
@@ -370,7 +371,7 @@ router.post("/ownership/scenarios/:id/capital-contributions", async (req, res) =
   }
 });
 
-router.patch("/ownership/capital-contributions/:id", async (req, res) => {
+router.patch("/ownership/capital-contributions/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(capitalContributionsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(capitalContributionsTable.id, id)).returning();
@@ -394,7 +395,7 @@ router.delete("/ownership/capital-contributions/:id", async (req, res) => {
 
 // ─── VOTING RIGHTS ────────────────────────────────────────────────────────────
 
-router.post("/ownership/scenarios/:id/voting-rights", async (req, res) => {
+router.post("/ownership/scenarios/:id/voting-rights", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const scenarioId = parseIdParam(req.params.id);
     const [row] = await db.insert(votingRightsTable).values({ ...req.body, scenarioId }).returning();
@@ -404,7 +405,7 @@ router.post("/ownership/scenarios/:id/voting-rights", async (req, res) => {
   }
 });
 
-router.patch("/ownership/voting-rights/:id", async (req, res) => {
+router.patch("/ownership/voting-rights/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(votingRightsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(votingRightsTable.id, id)).returning();
@@ -428,7 +429,7 @@ router.delete("/ownership/voting-rights/:id", async (req, res) => {
 
 // ─── CERTIFICATION READINESS ──────────────────────────────────────────────────
 
-router.post("/ownership/scenarios/:id/certification-readiness", async (req, res) => {
+router.post("/ownership/scenarios/:id/certification-readiness", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const scenarioId = parseIdParam(req.params.id);
     const [row] = await db.insert(certificationReadinessRecordsTable).values({ ...req.body, scenarioId }).returning();
@@ -438,7 +439,7 @@ router.post("/ownership/scenarios/:id/certification-readiness", async (req, res)
   }
 });
 
-router.patch("/ownership/certification-readiness/:id", async (req, res) => {
+router.patch("/ownership/certification-readiness/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(certificationReadinessRecordsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(certificationReadinessRecordsTable.id, id)).returning();
@@ -472,7 +473,7 @@ router.get("/ownership/scenarios/:id/legal-flags", async (req, res) => {
   }
 });
 
-router.post("/ownership/scenarios/:id/legal-flags", async (req, res) => {
+router.post("/ownership/scenarios/:id/legal-flags", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const scenarioId = parseIdParam(req.params.id);
     const [row] = await db.insert(legalReviewFlagsTable).values({ ...req.body, scenarioId }).returning();
@@ -482,7 +483,7 @@ router.post("/ownership/scenarios/:id/legal-flags", async (req, res) => {
   }
 });
 
-router.patch("/ownership/legal-flags/:id", async (req, res) => {
+router.patch("/ownership/legal-flags/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(legalReviewFlagsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(legalReviewFlagsTable.id, id)).returning();
@@ -506,7 +507,7 @@ router.delete("/ownership/legal-flags/:id", async (req, res) => {
 
 // ─── GOVERNANCE DOCUMENTS ─────────────────────────────────────────────────────
 
-router.post("/ownership/scenarios/:id/governance-documents", async (req, res) => {
+router.post("/ownership/scenarios/:id/governance-documents", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const scenarioId = parseIdParam(req.params.id);
     const [row] = await db.insert(governanceDocumentsTable).values({ ...req.body, scenarioId }).returning();
@@ -516,7 +517,7 @@ router.post("/ownership/scenarios/:id/governance-documents", async (req, res) =>
   }
 });
 
-router.patch("/ownership/governance-documents/:id", async (req, res) => {
+router.patch("/ownership/governance-documents/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(governanceDocumentsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(governanceDocumentsTable.id, id)).returning();
@@ -540,7 +541,7 @@ router.delete("/ownership/governance-documents/:id", async (req, res) => {
 
 // ─── DECISION LOG ─────────────────────────────────────────────────────────────
 
-router.get("/ownership/scenarios/:id/decision-log", async (req, res) => {
+router.get("/ownership/scenarios/:id/decision-log", validateQuery(listQuerySchema), async (req, res) => {
   try {
     const scenarioId = parseIdParam(req.params.id);
     const { limit, offset } = parsePagination(req.query as Record<string, unknown>);
@@ -557,7 +558,7 @@ router.get("/ownership/scenarios/:id/decision-log", async (req, res) => {
   }
 });
 
-router.post("/ownership/scenarios/:id/decision-log", async (req, res) => {
+router.post("/ownership/scenarios/:id/decision-log", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const scenarioId = parseIdParam(req.params.id);
     const [row] = await db.insert(ownershipDecisionLogsTable).values({ ...req.body, scenarioId }).returning();
@@ -579,7 +580,7 @@ router.delete("/ownership/decision-log/:id", async (req, res) => {
 
 // ─── SEED: Mom-Led Preferred Template ────────────────────────────────────────
 
-router.post("/ownership/seed-preferred-template", async (req, res) => {
+router.post("/ownership/seed-preferred-template", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const existing = await db
       .select()

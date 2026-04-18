@@ -41,6 +41,7 @@ import { logger } from "../lib/logger";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../middlewares/sliding-window-limiter";
 import { services } from "@szl-holdings/services";
+import {validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router = Router();
 
@@ -375,7 +376,7 @@ router.get("/executive", perUserApiSlidingLimiter, async (_req: Request, res: Re
   }
 });
 
-router.get("/executive/history", perUserApiSlidingLimiter, async (req: Request, res: Response): Promise<void> => {
+router.get("/executive/history", perUserApiSlidingLimiter, validateQuery(listQuerySchema), async (req: Request, res: Response): Promise<void> => {
   try {
     const limit = Math.min(Number(req.query["limit"] ?? 20), 90);
     const domain = typeof req.query["domain"] === "string" ? normalizeDomain(req.query["domain"]) : undefined;

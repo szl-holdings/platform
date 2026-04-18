@@ -15,6 +15,7 @@ import { Router, type IRouter, type Request, type Response } from "express";
 import { db, pageViewEventsTable } from "@szl-holdings/db";
 import { handleRouteError, sendSuccess, sendBadRequest } from "../lib/api-response";
 import { z } from "zod/v4";
+import { validateBody, jsonObjectBodySchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -29,7 +30,7 @@ const trackSchema = z.object({
   ipHash: z.string().max(128).optional().nullable(),
 });
 
-router.post("/track/page-view", async (req: Request, res: Response) => {
+router.post("/track/page-view", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const parsed = trackSchema.safeParse(req.body);
     if (!parsed.success) {

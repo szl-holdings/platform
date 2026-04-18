@@ -1,6 +1,7 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { sendSuccess, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
+import { validateQuery, listQuerySchema } from "../lib/validation.js";
 import {
   queryNodes,
   getNodeById,
@@ -18,7 +19,7 @@ const router: IRouter = Router();
 
 router.use(authMiddleware({ required: false }));
 
-router.get("/graph/entities", async (req: Request, res: Response) => {
+router.get("/graph/entities", validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const parsed = CstQueryFiltersSchema.safeParse({
       domain: req.query.domain,
@@ -105,7 +106,7 @@ router.get("/graph/entities/:id", async (req: Request, res: Response) => {
  * Query params:
  *   limit  max neighbors to return (default 25, max 200)
  */
-router.get("/graph/entities/:id/neighbors", async (req: Request, res: Response) => {
+router.get("/graph/entities/:id/neighbors", validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const rawLimit = parseInt((req.query.limit as string) ?? "25", 10);
@@ -192,7 +193,7 @@ router.get("/graph/entities/:id/neighbors", async (req: Request, res: Response) 
  * Response shape mirrors the /neighbors endpoint and adds `distances`
  * (id → hop count) plus `truncated` to flag when caps stopped expansion.
  */
-router.get("/graph/entities/:id/subgraph", async (req: Request, res: Response) => {
+router.get("/graph/entities/:id/subgraph", validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -348,7 +349,7 @@ router.get("/graph/entities/:id/subgraph", async (req: Request, res: Response) =
  *   maxNodes     soft cap on total nodes (default 75, max 300)
  *   perHopLimit  max edges examined per node per hop (default 25, max 100)
  */
-router.get("/graph/entities/:id/subgraph/export", async (req: Request, res: Response) => {
+router.get("/graph/entities/:id/subgraph/export", validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -720,7 +721,7 @@ router.get("/graph/entities/:id/subgraph/export", async (req: Request, res: Resp
  *   - crossDomainSteps: indices of edges whose endpoints span domains
  *   When no path exists within the depth cap, found=false and path=null.
  */
-router.get("/graph/entities/:fromId/path/:toId", async (req: Request, res: Response) => {
+router.get("/graph/entities/:fromId/path/:toId", validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const fromId = String(req.params.fromId);
     const toId = String(req.params.toId);
@@ -904,7 +905,7 @@ router.get("/graph/entities/:fromId/path/:toId", async (req: Request, res: Respo
   }
 });
 
-router.get("/graph/search", async (req: Request, res: Response) => {
+router.get("/graph/search", validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const parsed = CstSearchParamsSchema.safeParse({
       q: req.query.q,
@@ -950,7 +951,7 @@ router.get("/graph/search", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/graph/relationships", async (req: Request, res: Response) => {
+router.get("/graph/relationships", validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const parsed = CstRelationshipFiltersSchema.safeParse({
       fromNodeId: req.query.fromNodeId,

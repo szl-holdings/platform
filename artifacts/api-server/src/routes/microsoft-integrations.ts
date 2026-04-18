@@ -14,6 +14,7 @@ import {
   handleRouteError,
 } from "../lib/api-response";
 import { logger } from "../lib/logger";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -51,7 +52,7 @@ function validateHmacSignature(
   return crypto.timingSafeEqual(sigBuffer, expBuffer);
 }
 
-router.get("/integrations/dynamics/entities", authMiddleware(), async (req, res) => {
+router.get("/integrations/dynamics/entities", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const enabled = await isFlagEnabled("dynamics365_sync_enabled");
     if (!enabled) {
@@ -97,7 +98,7 @@ router.get("/integrations/dynamics/entities", authMiddleware(), async (req, res)
   }
 });
 
-router.post("/integrations/dynamics/sync", authMiddleware(), requireRole("super_admin", "ops"), async (req, res) => {
+router.post("/integrations/dynamics/sync", authMiddleware(), requireRole("super_admin", "ops"), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const enabled = await isFlagEnabled("dynamics365_sync_enabled");
     if (!enabled) {
@@ -146,7 +147,7 @@ router.post("/integrations/dynamics/sync", authMiddleware(), requireRole("super_
 router.post(
   "/integrations/dynamics/webhook",
   dynamicsWebhookLimit,
-  async (req, res) => {
+  validateBody(jsonObjectBodySchema), async (req, res) => {
     try {
       const enabled = await isFlagEnabled("dynamics365_sync_enabled");
       if (!enabled) {
@@ -211,7 +212,7 @@ router.post(
 router.post(
   "/integrations/power-automate/trigger",
   powerAutomateWebhookLimit,
-  async (req, res) => {
+  validateBody(jsonObjectBodySchema), async (req, res) => {
     try {
       const enabled = await isFlagEnabled("power_automate_webhook_enabled");
       if (!enabled) {

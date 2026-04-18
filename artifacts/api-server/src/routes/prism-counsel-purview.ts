@@ -13,7 +13,7 @@ import {
 import { eq, and, desc, sql } from "drizzle-orm";
 import { logger } from "../lib/logger";
 import { z } from "zod";
-import { validateBody } from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema} from "../lib/validation";
 
 const diagnosticsRunSchema = z.object({
   orgId: z.number().int().positive().optional(),
@@ -114,7 +114,7 @@ router.get("/purview/status", authMiddleware({ required: false }), async (_req: 
   } catch (err) { handleRouteError(res, err, "Failed to get Purview bridge status"); }
 });
 
-router.get("/purview/case-links", authMiddleware({ required: false }), async (req: Request, res: Response) => {
+router.get("/purview/case-links", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const orgId = Number(req.query.orgId ?? 1);
     let links: any[] = [];
@@ -126,7 +126,7 @@ router.get("/purview/case-links", authMiddleware({ required: false }), async (re
   } catch (err) { handleRouteError(res, err, "Failed to list Purview case links"); }
 });
 
-router.get("/purview/hold-awareness", authMiddleware({ required: false }), async (req: Request, res: Response) => {
+router.get("/purview/hold-awareness", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const orgId = Number(req.query.orgId ?? 1);
     let holds: any[] = [];
@@ -138,7 +138,7 @@ router.get("/purview/hold-awareness", authMiddleware({ required: false }), async
   } catch (err) { handleRouteError(res, err, "Failed to list hold awareness"); }
 });
 
-router.get("/purview/export-handoffs", authMiddleware({ required: false }), async (req: Request, res: Response) => {
+router.get("/purview/export-handoffs", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const orgId = Number(req.query.orgId ?? 1);
     let handoffs: any[] = [];
@@ -150,7 +150,7 @@ router.get("/purview/export-handoffs", authMiddleware({ required: false }), asyn
   } catch (err) { handleRouteError(res, err, "Failed to list export handoffs"); }
 });
 
-router.get("/purview/scope-links", authMiddleware({ required: false }), async (req: Request, res: Response) => {
+router.get("/purview/scope-links", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const orgId = Number(req.query.orgId ?? 1);
     const matterId = req.query.matterId ? Number(req.query.matterId) : undefined;
@@ -166,7 +166,7 @@ router.get("/purview/scope-links", authMiddleware({ required: false }), async (r
   } catch (err) { handleRouteError(res, err, "Failed to list scope links"); }
 });
 
-router.get("/purview/diagnostics", authMiddleware({ required: false }), async (req: Request, res: Response) => {
+router.get("/purview/diagnostics", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const orgId = Number(req.query.orgId ?? 1);
     let diagnostics: any[] = [];
@@ -213,7 +213,7 @@ router.post("/purview/export-handoffs/:id/confirm", authMiddleware({ required: f
   } catch (err) { handleRouteError(res, err, "Failed to confirm export handoff"); }
 });
 
-router.get("/purview/bridge-summary", authMiddleware({ required: false }), async (req: Request, res: Response) => {
+router.get("/purview/bridge-summary", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const orgId = Number(req.query.orgId ?? 1);
     let caseLinkCount = DEMO_CASE_LINKS.length;

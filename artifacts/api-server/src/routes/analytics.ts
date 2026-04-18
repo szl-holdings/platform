@@ -1,6 +1,7 @@
 import { Router, type Request, type Response } from "express";
 import { logger } from "../lib/logger";
 import { serverTelemetry } from "@szl-holdings/observability";
+import { validateBody, analyticsEventSchema } from "../lib/validation";
 
 const analyticsRouter = Router();
 
@@ -24,19 +25,9 @@ const ALLOWED_EVENTS = new Set([
 
 const ALLOWED_PLATFORMS = new Set(["lyte", "aegis", "terra", "vessels", "carlota_jo", "admin", "api", "szl"]);
 
-analyticsRouter.post("/analytics/event", (req: Request, res: Response) => {
+analyticsRouter.post("/analytics/event", validateBody(analyticsEventSchema), (req: Request, res: Response) => {
   try {
-    const { event, platform, timestamp, properties } = req.body as {
-      event?: string;
-      platform?: string;
-      timestamp?: string;
-      properties?: Record<string, unknown>;
-    };
-
-    if (!event || typeof event !== "string") {
-      res.status(400).json({ error: "event is required" });
-      return;
-    }
+    const { event, platform, timestamp, properties } = req.body;
 
     if (!ALLOWED_EVENTS.has(event)) {
       res.status(400).json({ error: "unknown event type" });

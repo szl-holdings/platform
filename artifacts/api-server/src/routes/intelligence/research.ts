@@ -21,6 +21,7 @@ import {
   type ThreatItem, type CveItem, type GeoEvent, type NewsItem,
   type AnthropicMessageParam,
 } from "./shared";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
 
 const router = Router();
 
@@ -78,7 +79,7 @@ router.post("/intelligence/ai/situation-report", aiRateLimit, authMiddleware(), 
   } catch (err) { handleRouteError(res, err, "Failed to generate situation report"); }
 });
 
-router.post("/intelligence/ai/risk-prediction", aiRateLimit, authMiddleware(), async (req, res) => {
+router.post("/intelligence/ai/risk-prediction", aiRateLimit, authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { scenario } = req.body;
     const predictions = [
@@ -103,7 +104,7 @@ router.post("/intelligence/ai/risk-prediction", aiRateLimit, authMiddleware(), a
   } catch (err) { handleRouteError(res, err, "Failed to generate risk prediction"); }
 });
 
-router.post("/intelligence/ai/content-ideas", aiRateLimit, authMiddleware(), async (req, res) => {
+router.post("/intelligence/ai/content-ideas", aiRateLimit, authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { topic } = req.body;
     const classification = await services.huggingface.zeroShotClassification(
@@ -274,7 +275,7 @@ router.get("/intelligence/mitre-attack/correlation", intelRateLimit, authMiddlew
   } catch (err) { handleRouteError(res, err, "Failed to fetch ATT&CK correlations"); }
 });
 
-router.get("/intelligence/ip-reputation", intelRateLimit, authMiddleware(), async (req, res) => {
+router.get("/intelligence/ip-reputation", intelRateLimit, authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const ipParam = req.query.ip as string;
     if (!ipParam) {
@@ -290,7 +291,7 @@ router.get("/intelligence/ip-reputation", intelRateLimit, authMiddleware(), asyn
   } catch (err) { handleRouteError(res, err, "Failed to check IP reputation"); }
 });
 
-router.get("/intelligence/research-papers", intelRateLimit, authMiddleware(), async (req, res) => {
+router.get("/intelligence/research-papers", intelRateLimit, authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const query = (req.query.q as string) || "artificial intelligence security";
     const limit = Math.min(parseInt(req.query.limit as string) || 8, 15);
@@ -306,7 +307,7 @@ router.get("/intelligence/research-papers", intelRateLimit, authMiddleware(), as
   } catch (err) { handleRouteError(res, err, "Failed to fetch research papers"); }
 });
 
-router.get("/intelligence/semantic-scholar", intelRateLimit, authMiddleware(), async (req, res) => {
+router.get("/intelligence/semantic-scholar", intelRateLimit, authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const query = (req.query.q as string) || "machine learning";
     const data = await getCached(`semantic-scholar-${query}`, 1800000, async () => {
@@ -344,7 +345,7 @@ router.get("/intelligence/semantic-scholar", intelRateLimit, authMiddleware(), a
   } catch (err) { handleRouteError(res, err, "Failed to fetch Semantic Scholar data"); }
 });
 
-router.get("/intelligence/paperswithcode", intelRateLimit, authMiddleware(), async (req, res) => {
+router.get("/intelligence/paperswithcode", intelRateLimit, authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const task = (req.query.task as string) || "image-classification";
     const data = await getCached(`pwc-${task}`, 3600000, async () => {
@@ -393,7 +394,7 @@ router.get("/intelligence/paperswithcode", intelRateLimit, authMiddleware(), asy
   } catch (err) { handleRouteError(res, err, "Failed to fetch Papers With Code data"); }
 });
 
-router.get("/intelligence/huggingface-hub", intelRateLimit, authMiddleware(), async (req, res) => {
+router.get("/intelligence/huggingface-hub", intelRateLimit, authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const task = (req.query.task as string) || "text-classification";
     const limit = Math.min(parseInt(req.query.limit as string) || 8, 20);
@@ -544,7 +545,7 @@ const DOMAIN_AGENTS: Record<string, { name: string; systemPrompt: string; model:
   },
 };
 
-router.post("/intelligence/ai/domain-agent", aiRateLimit, authMiddleware(), async (req, res) => {
+router.post("/intelligence/ai/domain-agent", aiRateLimit, authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { agentId, messages, maxTokens = 2048, stream = false } = req.body as {
       agentId: string;
@@ -640,7 +641,7 @@ router.post("/intelligence/ai/domain-agent", aiRateLimit, authMiddleware(), asyn
   } catch (err) { handleRouteError(res, err, "Domain agent inference failed"); }
 });
 
-router.post("/intelligence/ai/campaign-copy", aiRateLimit, authMiddleware(), async (req, res) => {
+router.post("/intelligence/ai/campaign-copy", aiRateLimit, authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { topic, tone = "professional", format = "full-campaign", brand } = req.body as {
       topic: string; tone?: string; format?: string; brand?: string;
@@ -697,7 +698,7 @@ Format as structured sections with clear headers.`;
   }
 });
 
-router.post("/intelligence/ai/risk-assessment", aiRateLimit, authMiddleware(), async (req, res) => {
+router.post("/intelligence/ai/risk-assessment", aiRateLimit, authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { context, frameworks = ["NIST CSF", "ISO 27001", "SOC 2"], dimension } = req.body as {
       context?: string; frameworks?: string[]; dimension?: string;
@@ -740,7 +741,7 @@ Use precise language with specific control references where applicable.`;
   } catch (err) { handleRouteError(res, err, "Risk assessment failed"); }
 });
 
-router.post("/intelligence/ai/advisory", aiRateLimit, authMiddleware(), async (req, res) => {
+router.post("/intelligence/ai/advisory", aiRateLimit, authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { messages, context } = req.body as {
       messages: Array<{ role: "user" | "assistant"; content: string }>;
@@ -777,7 +778,7 @@ router.post("/intelligence/ai/advisory", aiRateLimit, authMiddleware(), async (r
   }
 });
 
-router.post("/intelligence/ai/ticket-triage", aiRateLimit, authMiddleware(), async (req, res) => {
+router.post("/intelligence/ai/ticket-triage", aiRateLimit, authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { subject, description, client, category } = req.body as {
       subject: string; description?: string; client?: string; category?: string;
@@ -822,7 +823,7 @@ Be concise and action-oriented.`;
   } catch (err) { handleRouteError(res, err, "Ticket triage failed"); }
 });
 
-router.post("/intelligence/ai/readiness-summary", aiRateLimit, authMiddleware(), async (req, res) => {
+router.post("/intelligence/ai/readiness-summary", aiRateLimit, authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { scores, topGaps } = req.body as { scores?: Record<string, number>; topGaps?: string[] };
 
@@ -868,7 +869,7 @@ Use professional board-level language. Be specific about numbers and timelines.`
   }
 });
 
-router.post("/intelligence/ai/dark-vessel-analysis", aiRateLimit, authMiddleware(), async (req, res) => {
+router.post("/intelligence/ai/dark-vessel-analysis", aiRateLimit, authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { vessel, aiGapHours, behaviorPatterns, lastKnownPosition } = req.body as {
       vessel?: string; aiGapHours?: number; behaviorPatterns?: string[]; lastKnownPosition?: string;
@@ -913,7 +914,7 @@ Use IMCO and OFAC screening terminology.`;
   } catch (err) { handleRouteError(res, err, "Dark vessel analysis failed"); }
 });
 
-router.post("/intelligence/ai/threat-triage", aiRateLimit, authMiddleware(), async (req, res) => {
+router.post("/intelligence/ai/threat-triage", aiRateLimit, authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { threat, cveIds, affectedSystems, severity } = req.body as {
       threat?: string; cveIds?: string[]; affectedSystems?: string[]; severity?: string;
@@ -957,7 +958,7 @@ Be precise, tactical, and time-sensitive.`;
   } catch (err) { handleRouteError(res, err, "Threat triage failed"); }
 });
 
-router.post("/intelligence/ai/maritime-intelligence", aiRateLimit, authMiddleware(), async (req, res) => {
+router.post("/intelligence/ai/maritime-intelligence", aiRateLimit, authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { query, context } = req.body as { query?: string; context?: string };
     if (!query || typeof query !== "string") { sendError(res, "Query is required and must be a string", 400); return; }

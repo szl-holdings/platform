@@ -25,6 +25,7 @@ import { authMiddleware, requireRole, parseIdParam } from "../../middlewares/aut
 import { tenantScope, assertTenantAccess } from "../../middlewares/tenant-scope";
 import { logger } from "../../lib/logger";
 import { periodBounds, checkAndEnforceQuota, meteringRateLimit } from "./shared";
+import {validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
 
 const router: IRouter = Router();
 const ADMIN_ROLES = ["admin", "super_admin", "ops"] as const;
@@ -38,6 +39,7 @@ router.get(
   "/metering/cost-allocation",
   authMiddleware(),
   requireRole(...READ_ROLES),
+  validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
       const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : undefined;
@@ -95,7 +97,7 @@ router.post(
   "/metering/cost-allocation",
   authMiddleware(),
   requireRole(...ADMIN_ROLES),
-  async (req: Request, res: Response) => {
+  validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
     try {
       const { orgId, featureKey, product, periodStart, periodEnd, infraCost, billedAmount, currency, costDriver, notes } = req.body as {
         orgId: number;
@@ -142,6 +144,7 @@ router.get(
   "/metering/margin-analysis",
   authMiddleware(),
   requireRole(...READ_ROLES),
+  validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
       const product = req.query.product as string | undefined;
@@ -204,7 +207,7 @@ router.post(
   "/metering/invoices/generate",
   authMiddleware(),
   requireRole(...ADMIN_ROLES),
-  async (req: Request, res: Response) => {
+  validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
     try {
       const { orgId, periodStart, periodEnd, dryRun } = req.body as {
         orgId: number;
@@ -350,6 +353,7 @@ router.get(
   "/metering/line-items",
   authMiddleware(),
   requireRole(...READ_ROLES),
+  validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
       const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : undefined;
@@ -382,6 +386,7 @@ router.get(
   "/metering/quotas",
   authMiddleware(),
   requireRole(...READ_ROLES),
+  validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
       const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : undefined;
@@ -408,7 +413,7 @@ router.post(
   "/metering/quotas",
   authMiddleware(),
   requireRole(...ADMIN_ROLES),
-  async (req: Request, res: Response) => {
+  validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
     try {
       const {
         orgId, featureKey, product, periodType,
@@ -467,6 +472,7 @@ router.post(
 router.post(
   "/metering/check-quota",
   authMiddleware({ required: false }),
+  validateBody(jsonObjectBodySchema),
   async (req: Request, res: Response) => {
     try {
       const { orgId, featureKey, quantity } = req.body as {
@@ -498,6 +504,7 @@ router.get(
   "/metering/quota-violations",
   authMiddleware(),
   requireRole(...READ_ROLES),
+  validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
       const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : undefined;

@@ -6,6 +6,7 @@ import { authMiddleware, requireRole, type AuthenticatedUser } from "../middlewa
 import { logger } from "../lib/logger";
 import { AGENT_CONFIGS } from "./domain-agents/configs";
 import { logActivity } from "@szl-holdings/audit";
+import { validateBody, jsonObjectBodySchema } from "../lib/validation";
 
 const router = Router();
 
@@ -1075,7 +1076,7 @@ router.get("/mcp/health", (_req: Request, res: Response) => {
   });
 });
 
-router.post("/mcp", authMiddleware({ required: false }), async (req: Request, res: Response) => {
+router.post("/mcp", authMiddleware({ required: false }), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const body = req.body;
 

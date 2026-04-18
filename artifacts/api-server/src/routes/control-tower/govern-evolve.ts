@@ -26,6 +26,7 @@ import {
   agentPerformanceStore,
   getOrCreatePerf,
 } from "./shared";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
 
 const router = Router();
 
@@ -38,7 +39,7 @@ router.get("/control-tower/govern/compliance", (_req: Request, res: Response) =>
   }
 });
 
-router.get("/control-tower/govern/audit", (req: Request, res: Response) => {
+router.get("/control-tower/govern/audit", validateQuery(listQuerySchema), (req: Request, res: Response) => {
   try {
     const limit = Math.min(200, parseInt(String(req.query.limit ?? "50"), 10));
     const executionResult = req.query.result as string | undefined;
@@ -56,7 +57,7 @@ router.get("/control-tower/govern/audit", (req: Request, res: Response) => {
   }
 });
 
-router.get("/control-tower/govern/certificates", requireRole("super_admin", "ops", "exec"), (req: Request, res: Response) => {
+router.get("/control-tower/govern/certificates", requireRole("super_admin", "ops", "exec"), validateQuery(listQuerySchema), (req: Request, res: Response) => {
   try {
     const requestedIds = (req.query.agents as string)?.split(",").filter(Boolean);
     const agentIds = requestedIds && requestedIds.length > 0
@@ -101,7 +102,7 @@ router.get("/control-tower/govern/certificates", requireRole("super_admin", "ops
   }
 });
 
-router.post("/control-tower/govern/evaluate", requireRole("super_admin", "ops", "exec"), (req: Request, res: Response) => {
+router.post("/control-tower/govern/evaluate", requireRole("super_admin", "ops", "exec"), validateBody(jsonObjectBodySchema), (req: Request, res: Response) => {
   try {
     const { agentId, action, riskLevel } = req.body as {
       agentId?: string; action?: string; riskLevel?: string;
@@ -132,7 +133,7 @@ router.post("/control-tower/govern/evaluate", requireRole("super_admin", "ops", 
   }
 });
 
-router.get("/control-tower/search", requireRole("super_admin", "ops", "exec"), async (req: Request, res: Response) => {
+router.get("/control-tower/search", requireRole("super_admin", "ops", "exec"), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const query = req.query.q as string | undefined;
     const domainsParam = (req.query.domains as string)?.split(",").filter(Boolean);
@@ -328,7 +329,7 @@ router.get("/control-tower/evolve/metrics", async (req: Request, res: Response) 
   }
 });
 
-router.post("/control-tower/evolve/propose", requireRole("super_admin", "ops", "exec"), (req: Request, res: Response) => {
+router.post("/control-tower/evolve/propose", requireRole("super_admin", "ops", "exec"), validateBody(jsonObjectBodySchema), (req: Request, res: Response) => {
   try {
     const { agentId, description, expectedImprovement } = req.body as {
       agentId?: string; description?: string; expectedImprovement?: string;
@@ -359,7 +360,7 @@ router.post("/control-tower/evolve/propose", requireRole("super_admin", "ops", "
   }
 });
 
-router.patch("/control-tower/evolve/propose/:proposalId", requireRole("super_admin", "ops", "exec"), (req: Request, res: Response) => {
+router.patch("/control-tower/evolve/propose/:proposalId", requireRole("super_admin", "ops", "exec"), validateBody(jsonObjectBodySchema), (req: Request, res: Response) => {
   try {
     const { proposalId } = req.params as Record<string, string>;
     const { status } = req.body as { status?: "applied" | "rejected" };

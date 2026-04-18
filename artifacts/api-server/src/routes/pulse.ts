@@ -23,6 +23,7 @@ import { sendNotFound, sendUnauthorized, sendBadRequest } from "../lib/api-respo
 import { gatewayInfer } from "../lib/ai-gateway";
 import { logger } from "../lib/logger";
 import { services } from "@szl-holdings/services";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router = Router();
 
@@ -988,13 +989,13 @@ async function ensureTodaysBriefing(): Promise<Briefing | null> {
   }
 }
 
-router.get("/today", async (_req: Request, res: Response): Promise<void> => {
+router.get("/today", validateQuery(listQuerySchema), async (_req: Request, res: Response): Promise<void> => {
   const brief = await ensureTodaysBriefing();
   if (!brief) { res.json({ success: true, briefing: null }); return; }
   res.json({ success: true, briefing: withAgentNames(brief) });
 });
 
-router.get("/briefings", async (req: Request, res: Response): Promise<void> => {
+router.get("/briefings", validateQuery(listQuerySchema), async (req: Request, res: Response): Promise<void> => {
   const domain = req.query.domain as string | undefined;
   const risk = req.query.risk as string | undefined;
   const limit = parseInt(req.query.limit as string || "20");
@@ -1006,7 +1007,7 @@ router.get("/briefings", async (req: Request, res: Response): Promise<void> => {
   res.json({ success: true, briefings: briefings.slice(0, limit).map(withAgentNames), total: briefings.length });
 });
 
-router.get("/briefings/:id", async (req: Request, res: Response): Promise<void> => {
+router.get("/briefings/:id", validateQuery(listQuerySchema), async (req: Request, res: Response): Promise<void> => {
   const brief = await getBriefingById(String(req.params.id));
   if (!brief) {
     sendNotFound(res, "Briefing");
@@ -1015,7 +1016,7 @@ router.get("/briefings/:id", async (req: Request, res: Response): Promise<void> 
   res.json({ success: true, briefing: withAgentNames(brief) });
 });
 
-router.get("/domain-panel/:domain", async (req: Request, res: Response): Promise<void> => {
+router.get("/domain-panel/:domain", validateQuery(listQuerySchema), async (req: Request, res: Response): Promise<void> => {
   const domain: string = String(req.params.domain ?? "");
   const latest = await getLatestBriefing();
   if (!latest) { res.json({ success: true, panel: null }); return; }
@@ -1140,7 +1141,7 @@ router.post("/briefings/generate", async (_req: Request, res: Response): Promise
   });
 });
 
-router.get("/confidence", async (_req: Request, res: Response): Promise<void> => {
+router.get("/confidence", validateQuery(listQuerySchema), async (_req: Request, res: Response): Promise<void> => {
   try {
     const history = await buildConfidenceHistory();
     res.json({ success: true, history });
@@ -1221,7 +1222,7 @@ router.post("/custom", async (req: Request, res: Response): Promise<void> => {
   res.json({ success: true, request: entry, message: "Custom brief request persisted. Estimated completion: 4–8 minutes." });
 });
 
-router.get("/custom", async (_req: Request, res: Response): Promise<void> => {
+router.get("/custom", validateQuery(listQuerySchema), async (_req: Request, res: Response): Promise<void> => {
   const rows = await db.select().from(pulseCustomBriefsTable).orderBy(desc(pulseCustomBriefsTable.requestedAt));
   const requests: CustomBriefRequest[] = rows.map((r) => ({
     id: r.requestId,
@@ -1237,7 +1238,7 @@ router.get("/custom", async (_req: Request, res: Response): Promise<void> => {
   res.json({ success: true, requests });
 });
 
-router.get("/dissents", async (_req: Request, res: Response): Promise<void> => {
+router.get("/dissents", validateQuery(listQuerySchema), async (_req: Request, res: Response): Promise<void> => {
   const rows = await db.select().from(pulseDissentsTable).orderBy(desc(pulseDissentsTable.filedAt));
   res.json({ success: true, dissents: rows.map(rowToDissent) });
 });

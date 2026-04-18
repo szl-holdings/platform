@@ -21,10 +21,11 @@ import { randomUUID } from "crypto";
 import { authMiddleware, isElevatedUser } from "../middlewares/auth";
 import { sendSuccess, sendCreated, sendBadRequest, sendForbidden, handleRouteError } from "../lib/api-response";
 import { logger } from "../lib/logger";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
-router.post("/alloy/cognitive/outcomes", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/alloy/cognitive/outcomes", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const {
       decisionId,
@@ -157,7 +158,7 @@ router.get("/alloy/cognitive/evals/latest", authMiddleware(), async (req: Reques
   }
 });
 
-router.get("/alloy/cognitive/evals/history", authMiddleware(), async (req: Request, res: Response) => {
+router.get("/alloy/cognitive/evals/history", authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     if (!req.user || !isElevatedUser(req.user)) {
       sendForbidden(res, "Eval history requires elevated access");
@@ -191,7 +192,7 @@ router.get("/alloy/cognitive/evals/calibrations", authMiddleware(), async (req: 
   }
 });
 
-router.post("/alloy/cognitive/evals/run", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/alloy/cognitive/evals/run", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     if (!req.user || !isElevatedUser(req.user)) {
       sendForbidden(res, "Manual eval runs require elevated access");
@@ -247,7 +248,7 @@ router.post("/alloy/cognitive/evals/run", authMiddleware(), async (req: Request,
   }
 });
 
-router.get("/alloy/cognitive/corrections/:agentId", authMiddleware(), async (req: Request, res: Response) => {
+router.get("/alloy/cognitive/corrections/:agentId", authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     if (!req.user) {
       sendForbidden(res, "Authentication required");

@@ -2,7 +2,7 @@ import { Router, Request, Response } from "express";
 import { z } from "zod";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { tenantScope } from "../middlewares/tenant-scope";
-import { validateBody } from "../lib/validation";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 import { insurerPressureEngine } from "../services/prism-insurer-pressure";
 import { settlementFrictionEngine } from "../services/prism-settlement-friction";
 import { portfolioLearning } from "../services/prism-portfolio-learning";
@@ -48,7 +48,7 @@ function getOrgId(req: Request): number {
 
 /* ─── Insurer Pressure Engine ─────────────────────────────────────────── */
 
-router.post("/pressure/:matterId/compute", async (req: Request, res: Response) => {
+router.post("/pressure/:matterId/compute", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const matterId = parseInt(req.params.matterId as string);
     const { snapshotId, analysis } = await insurerPressureEngine.compute(getOrgId(req), matterId);
@@ -78,7 +78,7 @@ router.get("/pressure/portfolio/view", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/pressure/carrier/patterns", async (req: Request, res: Response) => {
+router.get("/pressure/carrier/patterns", validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const carrierName = req.query.carrier as string | undefined;
     const patterns = await insurerPressureEngine.getCarrierPatterns(getOrgId(req), carrierName);
@@ -88,7 +88,7 @@ router.get("/pressure/carrier/patterns", async (req: Request, res: Response) => 
   }
 });
 
-router.get("/pressure/silence-windows", async (req: Request, res: Response) => {
+router.get("/pressure/silence-windows", validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const matterId = req.query.matterId ? parseInt(req.query.matterId as string) : undefined;
     const windows = await insurerPressureEngine.getSilenceWindows(getOrgId(req), matterId);
@@ -110,7 +110,7 @@ router.post("/pressure/:matterId/events", validateBody(CarrierEventSchema), asyn
 
 /* ─── Settlement Friction Engine ──────────────────────────────────────── */
 
-router.post("/friction/:matterId/compute", async (req: Request, res: Response) => {
+router.post("/friction/:matterId/compute", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const matterId = parseInt(req.params.matterId as string);
     const { snapshotId, analysis } = await settlementFrictionEngine.compute(getOrgId(req), matterId);
@@ -150,7 +150,7 @@ router.get("/friction/:matterId/recommendations", async (req: Request, res: Resp
   }
 });
 
-router.post("/friction/recommendations/:id/accept", async (req: Request, res: Response) => {
+router.post("/friction/recommendations/:id/accept", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     await db.update(pcMovementRecommendationsTable)
       .set({ status: "accepted", acceptedBy: req.user!.id, acceptedAt: new Date() })
@@ -163,7 +163,7 @@ router.post("/friction/recommendations/:id/accept", async (req: Request, res: Re
 
 /* ─── Forecast Expansion ─────────────────────────────────────────────── */
 
-router.post("/forecasts/pilot-one/:matterId/compute", async (req: Request, res: Response) => {
+router.post("/forecasts/pilot-one/:matterId/compute", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const matterId = parseInt(req.params.matterId as string);
     const forecasts = await forecastExpanded.runForecastCycle(getOrgId(req), matterId);
@@ -186,7 +186,7 @@ router.get("/forecasts/pilot-one/:matterId/diff-view", async (req: Request, res:
 
 /* ─── Portfolio Learning ──────────────────────────────────────────────── */
 
-router.post("/portfolio/run-learning", async (req: Request, res: Response) => {
+router.post("/portfolio/run-learning", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     await portfolioLearning.runFullPortfolioLearning(getOrgId(req));
     res.json({ success: true, message: "Portfolio learning cycle complete" });
@@ -196,7 +196,7 @@ router.post("/portfolio/run-learning", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/portfolio/benchmarks", async (req: Request, res: Response) => {
+router.get("/portfolio/benchmarks", validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const benchmarkType = req.query.type as string | undefined;
     const benchmarks = await portfolioLearning.getBenchmarks(getOrgId(req), benchmarkType);
@@ -215,7 +215,7 @@ router.get("/portfolio/action-effectiveness", async (req: Request, res: Response
   }
 });
 
-router.get("/portfolio/cohorts", async (req: Request, res: Response) => {
+router.get("/portfolio/cohorts", validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const cohortType = req.query.type as string | undefined;
     const cohorts = await portfolioLearning.getMatterCohorts(getOrgId(req), cohortType);
@@ -244,7 +244,7 @@ router.get("/portfolio/best-next-30/:userId", async (req: Request, res: Response
   }
 });
 
-router.post("/portfolio/quiet-risk/:matterId", async (req: Request, res: Response) => {
+router.post("/portfolio/quiet-risk/:matterId", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const matterId = parseInt(req.params.matterId as string);
     const result = await portfolioLearning.detectQuietRisk(getOrgId(req), matterId);
@@ -390,7 +390,7 @@ router.get("/boards/today-enhanced", async (req: Request, res: Response) => {
 
 /* ─── Worldline V1 Expansion ─────────────────────────────────────────── */
 
-router.get("/worldline/signal-overlays", async (req: Request, res: Response) => {
+router.get("/worldline/signal-overlays", validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const matterId = req.query.matterId ? parseInt(req.query.matterId as string) : undefined;
     const conditions = matterId
@@ -425,7 +425,7 @@ router.get("/worldline/regulatory", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/worldline/recovery-markers", async (req: Request, res: Response) => {
+router.get("/worldline/recovery-markers", validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const matterId = req.query.matterId ? parseInt(req.query.matterId as string) : undefined;
     const conditions = matterId

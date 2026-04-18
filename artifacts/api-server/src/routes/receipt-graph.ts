@@ -16,12 +16,14 @@ import {
   type ReceiptClass,
   type ReceiptStatus,
 } from "@szl-holdings/receipt-graph";
+import {validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
 router.post(
   "/receipt-graph/receipts",
   authMiddleware({ required: true }),
+  validateBody(jsonObjectBodySchema),
   (req, res) => {
     try {
       const {
@@ -86,6 +88,7 @@ router.post(
 router.get(
   "/receipt-graph/receipts",
   authMiddleware({ required: true }),
+  validateQuery(listQuerySchema),
   (req, res) => {
     try {
       const {
@@ -146,6 +149,7 @@ router.get(
 router.get(
   "/receipt-graph/graph/:receiptId",
   authMiddleware({ required: true }),
+  validateQuery(listQuerySchema),
   (req, res) => {
     try {
       const maxDepth = req.query.maxDepth ? Number(req.query.maxDepth) : 5;
@@ -161,6 +165,7 @@ router.post(
   "/receipt-graph/receipts/:receiptId/approve",
   authMiddleware({ required: true }),
   requireRole("admin", "operator"),
+  validateBody(jsonObjectBodySchema),
   (req, res) => {
     try {
       const { approvalNote } = req.body;
@@ -185,6 +190,7 @@ router.post(
   "/receipt-graph/receipts/:receiptId/reject",
   authMiddleware({ required: true }),
   requireRole("admin", "operator"),
+  validateBody(jsonObjectBodySchema),
   (req, res) => {
     try {
       const { approvalNote } = req.body;
@@ -209,6 +215,7 @@ router.post(
   "/receipt-graph/receipts/:receiptId/retract",
   authMiddleware({ required: true }),
   requireRole("admin"),
+  validateBody(jsonObjectBodySchema),
   (req, res) => {
     try {
       const { approvalNote } = req.body;
@@ -232,6 +239,7 @@ router.post(
 router.post(
   "/receipt-graph/receipts/:receiptId/delta",
   authMiddleware({ required: true }),
+  validateBody(jsonObjectBodySchema),
   (req, res) => {
     try {
       const { field, before, after } = req.body;
@@ -262,6 +270,7 @@ router.post(
   "/receipt-graph/link",
   authMiddleware({ required: true }),
   requireRole("admin", "operator"),
+  validateBody(jsonObjectBodySchema),
   (req, res) => {
     try {
       const { parentId, childId, relationship } = req.body;
@@ -300,6 +309,7 @@ router.get(
   "/receipt-graph/executive-summary",
   authMiddleware({ required: true }),
   requireRole("admin", "operator", "viewer"),
+  validateQuery(listQuerySchema),
   (req, res) => {
     try {
       const { orgId, windowMs } = req.query;

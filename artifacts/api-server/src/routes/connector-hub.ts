@@ -3,6 +3,7 @@ import { connectorHub } from "@szl-holdings/services";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { sendSuccess, sendNotFound, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { logger } from "../lib/logger";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router = Router();
 
@@ -31,7 +32,7 @@ router.get("/connector-hub/registry/:connectorId", authMiddleware(), async (req,
   }
 });
 
-router.get("/connector-hub/capabilities", authMiddleware(), async (req, res) => {
+router.get("/connector-hub/capabilities", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { category, tags, connectorId, requiresAuth } = req.query;
 
@@ -86,7 +87,7 @@ router.get("/connector-hub/health/:connectorId", authMiddleware(), async (req, r
   }
 });
 
-router.post("/connector-hub/execute", authMiddleware(), async (req, res) => {
+router.post("/connector-hub/execute", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { connectorId, capabilityId, params } = req.body;
 
@@ -119,7 +120,7 @@ router.post("/connector-hub/execute", authMiddleware(), async (req, res) => {
   }
 });
 
-router.patch("/connector-hub/connectors/:connectorId/toggle", authMiddleware(), requireRole("ops", "super_admin"), async (req, res) => {
+router.patch("/connector-hub/connectors/:connectorId/toggle", authMiddleware(), requireRole("ops", "super_admin"), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { connectorId } = req.params;
     const { enabled } = req.body;

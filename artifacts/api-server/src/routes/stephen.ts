@@ -64,6 +64,7 @@ import {
   buildStephenContactNotificationEmail,
   STEPHEN_ADMIN_EMAIL,
 } from "../lib/email";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -76,7 +77,7 @@ router.get("/stephen/contacts", authMiddleware(), requireRole("ops"), async (_re
   }
 });
 
-router.post("/stephen/contacts", authMiddleware(), async (req, res) => {
+router.post("/stephen/contacts", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { name, email, company, message } = req.body;
     if (!name || typeof name !== "string" || name.trim().length === 0) {
@@ -151,7 +152,7 @@ router.get("/stephen/profile", async (_req, res) => {
   });
 });
 
-router.get("/stephen/content-blocks", async (req, res) => {
+router.get("/stephen/content-blocks", validateQuery(listQuerySchema), async (req, res) => {
   try {
     const query = ListStephenContentBlocksQueryParams.parse(req.query);
     if (query.type) {
@@ -173,7 +174,7 @@ router.get("/stephen/content-blocks", async (req, res) => {
   }
 });
 
-router.post("/stephen/content-blocks", async (req, res) => {
+router.post("/stephen/content-blocks", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const body = CreateStephenContentBlockBody.parse(req.body);
     const [block] = await db
@@ -195,7 +196,7 @@ router.post("/stephen/content-blocks", async (req, res) => {
   }
 });
 
-router.patch("/stephen/content-blocks/:id", async (req, res) => {
+router.patch("/stephen/content-blocks/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { id } = UpdateStephenContentBlockParams.parse({ id: String(req.params.id) });
     const body = UpdateStephenContentBlockBody.parse(req.body);
@@ -252,7 +253,7 @@ router.get("/stephen/portfolio-case-studies", async (_req, res) => {
   }
 });
 
-router.post("/stephen/portfolio-case-studies", async (req, res) => {
+router.post("/stephen/portfolio-case-studies", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const body = CreateStephenPortfolioCaseStudyBody.parse(req.body);
     const [study] = await db
@@ -293,7 +294,7 @@ router.get("/stephen/portfolio-case-studies/:slug", async (req, res) => {
   }
 });
 
-router.patch("/stephen/portfolio-case-studies/:slug", async (req, res) => {
+router.patch("/stephen/portfolio-case-studies/:slug", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { slug } = UpdateStephenPortfolioCaseStudyParams.parse({ slug: String(String(req.params.slug)) });
     const body = UpdateStephenPortfolioCaseStudyBody.parse(req.body);
@@ -352,7 +353,7 @@ router.get("/stephen/booking-requests", async (_req, res) => {
   }
 });
 
-router.post("/stephen/booking-requests", async (req, res) => {
+router.post("/stephen/booking-requests", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const body = CreateStephenBookingRequestBody.parse(req.body);
     const [request] = await db

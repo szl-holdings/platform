@@ -1,4 +1,5 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { validateQuery, listQuerySchema } from "../../lib/validation.js";
 import {
   db,
   meteringEventsTable,
@@ -156,6 +157,7 @@ router.get(
   "/metering/analytics/revenue-trend",
   authMiddleware(),
   requireRole(...READ_ROLES),
+  validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
       const months = Math.min(parseInt(String(req.query.months ?? "12"), 10), 24);
@@ -207,6 +209,7 @@ router.get(
   "/metering/analytics/tenant-leaderboard",
   authMiddleware(),
   requireRole(...READ_ROLES),
+  validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
       const limit = Math.min(parseInt(String(req.query.limit ?? "20"), 10), 100);

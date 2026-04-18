@@ -2,6 +2,7 @@ import { Router, type IRouter, type RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
 import { sendSuccess, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -157,7 +158,7 @@ router.get("/vessels/insurance/quotes", insLimit, authMiddleware({ required: fal
   } catch (err) { handleRouteError(res, err, "Failed to fetch quotes"); }
 });
 
-router.post("/vessels/insurance/quotes", insLimit, authMiddleware({ required: false }), (req, res) => {
+router.post("/vessels/insurance/quotes", insLimit, authMiddleware({ required: false }), validateBody(jsonObjectBodySchema), (req, res) => {
   try {
     const {
       vesselMmsi, vesselImo, vesselName, vesselType, vesselAge, vesselGrossTonnage, vesselFlag,
@@ -223,7 +224,7 @@ router.post("/vessels/insurance/quotes", insLimit, authMiddleware({ required: fa
   } catch (err) { handleRouteError(res, err, "Failed to generate quote"); }
 });
 
-router.post("/vessels/insurance/quotes/:id/bind", insLimit, authMiddleware({ required: false }), (req, res) => {
+router.post("/vessels/insurance/quotes/:id/bind", insLimit, authMiddleware({ required: false }), validateBody(jsonObjectBodySchema), (req, res) => {
   try {
     const id = parseInt(req.params.id as string);
     const allQuotes = [...demoQuotes, ...sessionQuotes];
@@ -288,7 +289,7 @@ router.get("/vessels/insurance/claims", insLimit, authMiddleware({ required: fal
   } catch (err) { handleRouteError(res, err, "Failed to fetch claims"); }
 });
 
-router.post("/vessels/insurance/claims", insLimit, authMiddleware({ required: false }), (req, res) => {
+router.post("/vessels/insurance/claims", insLimit, authMiddleware({ required: false }), validateBody(jsonObjectBodySchema), (req, res) => {
   try {
     const { policyId, vesselMmsi, vesselName, incidentType, incidentDescription, incidentAt, incidentLocation, claimedAmountUsd, linkedExceptionId } = req.body;
     if (!policyId || !incidentType || !claimedAmountUsd) {
@@ -327,7 +328,7 @@ router.post("/vessels/insurance/claims", insLimit, authMiddleware({ required: fa
   } catch (err) { handleRouteError(res, err, "Failed to file claim"); }
 });
 
-router.put("/vessels/insurance/claims/:id/status", insLimit, authMiddleware({ required: false }), (req, res) => {
+router.put("/vessels/insurance/claims/:id/status", insLimit, authMiddleware({ required: false }), validateBody(jsonObjectBodySchema), (req, res) => {
   try {
     const id = parseInt(req.params.id as string);
     const { status, adjustorNotes, approvedAmountUsd, settledAmountUsd } = req.body;
@@ -346,7 +347,7 @@ router.put("/vessels/insurance/claims/:id/status", insLimit, authMiddleware({ re
   } catch (err) { handleRouteError(res, err, "Failed to update claim status"); }
 });
 
-router.get("/vessels/insurance/risk-score", insLimit, authMiddleware({ required: false }), (req, res) => {
+router.get("/vessels/insurance/risk-score", insLimit, authMiddleware({ required: false }), validateQuery(listQuerySchema), (req, res) => {
   try {
     const { vesselAge, vesselGrossTonnage, cargoHazardClass, routeChokepoints, flagState, coverageType } = req.query;
     const chokepoints = routeChokepoints ? (Array.isArray(routeChokepoints) ? routeChokepoints : [routeChokepoints]) as string[] : [];

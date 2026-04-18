@@ -3,6 +3,7 @@ import { sendSuccess, sendCreated, sendBadRequest, handleRouteError } from "../l
 import { authMiddleware } from "../middlewares/auth";
 import { prismBus } from "@szl-holdings/prism-bus";
 import type { PrismDomain } from "@szl-holdings/prism-bus";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -101,7 +102,7 @@ router.get("/cross-app/handoffs/contracts", authMiddleware(), (_req: Request, re
   }
 });
 
-router.get("/cross-app/handoffs/history", authMiddleware(), (req: Request, res: Response) => {
+router.get("/cross-app/handoffs/history", authMiddleware(), validateQuery(listQuerySchema), (req: Request, res: Response) => {
   try {
     const { type, sourceDomain, targetDomain, limit } = req.query as Record<string, string>;
     let results = handoffHistory;
@@ -151,7 +152,7 @@ router.get("/cross-app/handoffs/stats", authMiddleware(), (_req: Request, res: R
   }
 });
 
-router.post("/cross-app/handoffs/trigger", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/cross-app/handoffs/trigger", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { type, payload, correlationId, severity } = req.body as {
       type?: string;
@@ -284,7 +285,7 @@ router.get("/cross-app/recent-items", (req: Request, res: Response) => {
   }
 });
 
-router.post("/cross-app/recent-items", (req: Request, res: Response) => {
+router.post("/cross-app/recent-items", validateBody(jsonObjectBodySchema), (req: Request, res: Response) => {
   try {
     const userId = (req.headers["x-user-id"] as string) || "anonymous";
     const item = req.body as Omit<RecentItem, "timestamp">;

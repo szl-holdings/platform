@@ -3,7 +3,7 @@ import { pool } from "@szl-holdings/db";
 import { logger } from "../lib/logger";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { z } from "zod";
-import { validateBody } from "../lib/validation";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 import { sendEmail, buildAlertFiredEmail, hasEmailProviderConfigured } from "../lib/email";
 // Valid incident status transitions (state machine)
 const INCIDENT_TRANSITIONS: Record<string, string[]> = {
@@ -441,7 +441,7 @@ setTimeout(() => { ensurePlatformAlertRules().catch(() => {}); }, 8000);
 // INCIDENTS
 // ──────────────────────────────────────────────────────────────────────────────
 
-router.get("/ops/incidents", async (req, res) => {
+router.get("/ops/incidents", validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { status, severity, limit = "50" } = req.query as Record<string, string>;
     let sql = `SELECT * FROM platform_incidents WHERE 1=1`;
@@ -639,7 +639,7 @@ router.post("/ops/alert-rules", validateBody(alertRuleSchema), async (req, res) 
   }
 });
 
-router.patch("/ops/alert-rules/:id", async (req, res) => {
+router.patch("/ops/alert-rules/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
   const id = parseInt(req.params["id"] as string);
   const b = req.body as Partial<z.infer<typeof alertRuleSchema>>;
   try {
@@ -675,7 +675,7 @@ router.delete("/ops/alert-rules/:id", async (req, res) => {
   }
 });
 
-router.get("/ops/alert-events", async (req, res) => {
+router.get("/ops/alert-events", validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { status, limit = "50" } = req.query as Record<string, string>;
     let sql = `SELECT * FROM platform_alert_events WHERE 1=1`;
@@ -690,7 +690,7 @@ router.get("/ops/alert-events", async (req, res) => {
   }
 });
 
-router.post("/ops/alert-events/:id/acknowledge", async (req, res) => {
+router.post("/ops/alert-events/:id/acknowledge", validateBody(jsonObjectBodySchema), async (req, res) => {
   const id = parseInt(req.params["id"] as string);
   const user = req.user;
   try {
@@ -824,7 +824,7 @@ router.post("/ops/alert-rules/evaluate", async (_req, res) => {
 // RUNBOOKS
 // ──────────────────────────────────────────────────────────────────────────────
 
-router.get("/ops/runbooks", async (req, res) => {
+router.get("/ops/runbooks", validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { category, severity, services } = req.query as Record<string, string>;
     let sql = `SELECT id, title, description, category, severity, tags, alert_rule_ids, incident_categories, affected_services, author, version, is_active, created_at, updated_at FROM platform_runbooks WHERE 1=1`;
@@ -882,7 +882,7 @@ router.post("/ops/runbooks", validateBody(runbookSchema), async (req, res) => {
   }
 });
 
-router.patch("/ops/runbooks/:id", async (req, res) => {
+router.patch("/ops/runbooks/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
   const id = parseInt(req.params["id"] as string);
   const b = req.body as Partial<z.infer<typeof runbookSchema>> & { isActive?: boolean };
   try {
@@ -963,7 +963,7 @@ router.get("/ops/service-deps", async (_req, res) => {
   }
 });
 
-router.post("/ops/service-deps", async (req, res) => {
+router.post("/ops/service-deps", validateBody(jsonObjectBodySchema), async (req, res) => {
   const b = req.body as {
     sourceId: string; sourceName: string; sourceCategory?: string;
     targetId: string; targetName: string; targetCategory?: string;
@@ -1196,7 +1196,7 @@ router.get("/ops/slo", async (_req, res) => {
   }
 });
 
-router.get("/ops/uptime-history", async (req, res) => {
+router.get("/ops/uptime-history", validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { serviceId, days = "30" } = req.query as Record<string, string>;
     let sql = `

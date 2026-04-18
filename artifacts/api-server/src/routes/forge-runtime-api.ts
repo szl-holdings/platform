@@ -11,6 +11,7 @@ import { forgeRuntime, forgeTimeline, forgeEvidenceStore } from "@szl-holdings/f
 import type { ForgeTask, ForgeTaskType, ForgeTenantPolicy } from "@szl-holdings/forge-runtime";
 import type { PrismDomain } from "@szl-holdings/prism-bus";
 import type { ApprovalClass } from "@szl-holdings/forge-runtime";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -23,7 +24,7 @@ router.get("/forge/status", authMiddleware(), async (_req: Request, res: Respons
   }
 });
 
-router.post("/forge/submit", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/forge/submit", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const {
       type,
@@ -130,7 +131,7 @@ router.get("/forge/executions/:executionId", authMiddleware(), async (req: Reque
   }
 });
 
-router.post("/forge/executions/:executionId/approve", authMiddleware(), requireRole("admin", "super_admin", "exec", "compliance", "ops"), async (req: Request, res: Response) => {
+router.post("/forge/executions/:executionId/approve", authMiddleware(), requireRole("admin", "super_admin", "exec", "compliance", "ops"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const executionId = req.params.executionId as string;
     const { approvalId } = req.body as { approvalId?: string };
@@ -164,7 +165,7 @@ router.post("/forge/executions/:executionId/approve", authMiddleware(), requireR
   }
 });
 
-router.get("/forge/history", authMiddleware(), async (req: Request, res: Response) => {
+router.get("/forge/history", authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { domain, status, limit } = req.query as {
       domain?: string;
@@ -191,7 +192,7 @@ router.get("/forge/history", authMiddleware(), async (req: Request, res: Respons
   }
 });
 
-router.get("/forge/timeline", authMiddleware(), async (req: Request, res: Response) => {
+router.get("/forge/timeline", authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { executionId, domain, limit } = req.query as {
       executionId?: string;
@@ -227,7 +228,7 @@ router.get("/forge/timeline", authMiddleware(), async (req: Request, res: Respon
   }
 });
 
-router.get("/forge/evidence", authMiddleware(), async (req: Request, res: Response) => {
+router.get("/forge/evidence", authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { executionId, domain, type, limit } = req.query as {
       executionId?: string;
@@ -266,7 +267,7 @@ router.get("/forge/evidence", authMiddleware(), async (req: Request, res: Respon
   }
 });
 
-router.post("/forge/tenant-policy", authMiddleware(), requireRole("admin", "super_admin", "exec"), async (req: Request, res: Response) => {
+router.post("/forge/tenant-policy", authMiddleware(), requireRole("admin", "super_admin", "exec"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const {
       tenantId: bodyTenantId,

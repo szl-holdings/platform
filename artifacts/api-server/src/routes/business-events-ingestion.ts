@@ -11,6 +11,7 @@ import type {
   DomainTransactionRecord,
   BatchIngestionResult,
 } from "@szl-holdings/business-events";
+import {validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -142,6 +143,7 @@ function domainTxToAtlasEvent(record: DomainTransactionRecord): ATLASEvent {
 router.post(
   "/business-events/kpi",
   authMiddleware({ required: false }),
+  validateBody(jsonObjectBodySchema),
   async (req, res) => {
     try {
       const body = req.body as {
@@ -185,6 +187,7 @@ router.post(
 router.post(
   "/business-events/transactions",
   authMiddleware({ required: false }),
+  validateBody(jsonObjectBodySchema),
   async (req, res) => {
     try {
       const body = req.body as {
@@ -226,6 +229,7 @@ router.post(
 router.post(
   "/business-events/emit",
   authMiddleware({ required: true }),
+  validateBody(jsonObjectBodySchema),
   async (req, res) => {
     try {
       const event = req.body as Partial<ATLASEvent>;
@@ -334,6 +338,7 @@ router.get(
   "/business-events/events",
   authMiddleware(),
   requireRole("ops", "admin"),
+  validateQuery(listQuerySchema),
   async (req, res) => {
     try {
       const limit = Math.min(Number(req.query.limit ?? 50), 500);

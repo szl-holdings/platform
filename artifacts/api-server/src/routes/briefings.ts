@@ -25,6 +25,7 @@ import {
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../middlewares/sliding-window-limiter";
 import { logger } from "../lib/logger";
+import { validateBody, jsonObjectBodySchema } from "../lib/validation";
 
 const router: IRouter = Router();
 router.use(authMiddleware({ required: false }));
@@ -154,7 +155,7 @@ router.get("/briefings/:domain", async (req: Request, res: Response) => {
   }
 });
 
-router.put("/briefings/:id/approve", authMiddleware({ required: true }), requireRole("ops", "exec", "admin", "super_admin"), perUserWriteSlidingLimiter, async (req: Request, res: Response) => {
+router.put("/briefings/:id/approve", authMiddleware({ required: true }), requireRole("ops", "exec", "admin", "super_admin"), perUserWriteSlidingLimiter, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const existing = await db.select().from(pulseBriefingsTable).where(eq(pulseBriefingsTable.id, id)).limit(1);
@@ -173,7 +174,7 @@ router.put("/briefings/:id/approve", authMiddleware({ required: true }), require
   }
 });
 
-router.put("/briefings/:id/archive", authMiddleware({ required: true }), requireRole("ops", "exec", "admin", "super_admin"), perUserWriteSlidingLimiter, async (req: Request, res: Response) => {
+router.put("/briefings/:id/archive", authMiddleware({ required: true }), requireRole("ops", "exec", "admin", "super_admin"), perUserWriteSlidingLimiter, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const existing = await db.select().from(pulseBriefingsTable).where(eq(pulseBriefingsTable.id, id)).limit(1);

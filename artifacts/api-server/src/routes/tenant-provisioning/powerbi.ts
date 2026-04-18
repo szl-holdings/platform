@@ -5,7 +5,7 @@ import crypto from "crypto";
 import { sendSuccess, sendBadRequest, sendNotFound, sendForbidden, sendError, handleRouteError } from "../../lib/api-response";
 import { authMiddleware, requireRole } from "../../middlewares/auth";
 import { logActivity } from "../../lib/activity-logger";
-import { validateBody, tenantCreateSchema, tenantStatusSchema } from "../../lib/validation";
+import { validateBody, tenantCreateSchema, tenantStatusSchema, jsonObjectBodySchema} from "../../lib/validation";
 import { db } from "@szl-holdings/db";
 import {
   azureTenantsTable,
@@ -159,6 +159,7 @@ router.put(
   tenantRateLimit,
   authMiddleware(),
   requireRole("admin"),
+  validateBody(jsonObjectBodySchema),
   async (req: Request, res: Response) => {
     try {
       const id = parseInt(String(req.params.id), 10);
@@ -230,6 +231,7 @@ router.put(
   tenantRateLimit,
   authMiddleware(),
   requireRole("admin"),
+  validateBody(jsonObjectBodySchema),
   async (req: Request, res: Response) => {
     try {
       const body = req.body ?? {};
@@ -279,6 +281,7 @@ router.post(
   tenantRateLimit,
   authMiddleware(),
   requireRole("admin"),
+  validateBody(jsonObjectBodySchema),
   async (req: Request, res: Response) => {
     try {
       const body = req.body ?? {};
@@ -358,6 +361,7 @@ router.post(
   tenantRateLimit,
   authMiddleware(),
   requireRole("viewer"),
+  validateBody(jsonObjectBodySchema),
   async (req: Request, res: Response) => {
     try {
       const reportKey = String(req.body?.reportKey ?? "").trim();

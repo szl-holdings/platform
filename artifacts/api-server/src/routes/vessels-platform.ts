@@ -19,6 +19,7 @@ import { z } from "zod";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware, parseIdParam, canAccessOrgRecord } from "../middlewares/auth";
 import { isFlagEnabled } from "../lib/platform-flags";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const VESSEL_TYPES = ["container", "tanker", "bulk", "cargo", "passenger", "ro-ro", "lpg", "lng", "chemical", "other"] as const;
 const VESSEL_STATUSES = ["active", "in_port", "at_sea", "anchored", "maintenance", "decommissioned", "off_hire"] as const;
@@ -397,7 +398,7 @@ function buildCorridorIntelligence(corridors: any[]) {
   };
 }
 
-router.get("/vessels/platform/dashboard", authMiddleware({ required: false }), async (req, res) => {
+router.get("/vessels/platform/dashboard", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
 
@@ -447,7 +448,7 @@ router.get("/vessels/platform/dashboard", authMiddleware({ required: false }), a
   }
 });
 
-router.get("/vessels/platform/fleet", authMiddleware({ required: false }), async (req, res) => {
+router.get("/vessels/platform/fleet", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
     const status = req.query.status as string | undefined;
@@ -465,7 +466,7 @@ router.get("/vessels/platform/fleet", authMiddleware({ required: false }), async
   }
 });
 
-router.get("/vessels/platform/map", authMiddleware({ required: false }), async (req, res) => {
+router.get("/vessels/platform/map", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
 
@@ -485,7 +486,7 @@ router.get("/vessels/platform/map", authMiddleware({ required: false }), async (
   }
 });
 
-router.get("/vessels/platform/vessels/:id", authMiddleware({ required: false }), async (req, res) => {
+router.get("/vessels/platform/vessels/:id", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
@@ -526,7 +527,7 @@ router.get("/vessels/platform/vessels/:id", authMiddleware({ required: false }),
   }
 });
 
-router.post("/vessels/platform/vessels", authMiddleware(), async (req, res) => {
+router.post("/vessels/platform/vessels", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const commandEnabled = await isFlagEnabled("vessels_command_mode_enabled");
     if (!commandEnabled) {
@@ -563,7 +564,7 @@ router.post("/vessels/platform/vessels", authMiddleware(), async (req, res) => {
   }
 });
 
-router.patch("/vessels/platform/vessels/:id", authMiddleware(), async (req, res) => {
+router.patch("/vessels/platform/vessels/:id", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
@@ -592,7 +593,7 @@ router.patch("/vessels/platform/vessels/:id", authMiddleware(), async (req, res)
   }
 });
 
-router.get("/vessels/platform/voyages", authMiddleware({ required: false }), async (req, res) => {
+router.get("/vessels/platform/voyages", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
     const vesselId = req.query.vesselId ? parseInt(req.query.vesselId as string, 10) : undefined;
@@ -621,7 +622,7 @@ router.get("/vessels/platform/voyages", authMiddleware({ required: false }), asy
   }
 });
 
-router.get("/vessels/platform/voyages/:id", authMiddleware({ required: false }), async (req, res) => {
+router.get("/vessels/platform/voyages/:id", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
@@ -646,7 +647,7 @@ router.get("/vessels/platform/voyages/:id", authMiddleware({ required: false }),
   }
 });
 
-router.post("/vessels/platform/voyages", authMiddleware(), async (req, res) => {
+router.post("/vessels/platform/voyages", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const parsed = CreateVoyageSchema.safeParse(req.body);
     if (!parsed.success) { sendBadRequest(res, "Invalid voyage data", parsed.error.flatten().fieldErrors); return; }
@@ -683,7 +684,7 @@ router.post("/vessels/platform/voyages", authMiddleware(), async (req, res) => {
   }
 });
 
-router.patch("/vessels/platform/voyages/:id", authMiddleware(), async (req, res) => {
+router.patch("/vessels/platform/voyages/:id", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
@@ -728,7 +729,7 @@ router.patch("/vessels/platform/voyages/:id", authMiddleware(), async (req, res)
   }
 });
 
-router.get("/vessels/platform/exceptions", authMiddleware({ required: false }), async (req, res) => {
+router.get("/vessels/platform/exceptions", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
     const status = req.query.status as string | undefined;
@@ -758,7 +759,7 @@ router.get("/vessels/platform/exceptions", authMiddleware({ required: false }), 
   }
 });
 
-router.get("/vessels/platform/exceptions/:id", authMiddleware({ required: false }), async (req, res) => {
+router.get("/vessels/platform/exceptions/:id", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
@@ -775,7 +776,7 @@ router.get("/vessels/platform/exceptions/:id", authMiddleware({ required: false 
   }
 });
 
-router.post("/vessels/platform/exceptions/:id/acknowledge", authMiddleware(), async (req, res) => {
+router.post("/vessels/platform/exceptions/:id/acknowledge", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
@@ -799,7 +800,7 @@ router.post("/vessels/platform/exceptions/:id/acknowledge", authMiddleware(), as
   }
 });
 
-router.post("/vessels/platform/exceptions/:id/assign", authMiddleware(), async (req, res) => {
+router.post("/vessels/platform/exceptions/:id/assign", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
@@ -827,7 +828,7 @@ router.post("/vessels/platform/exceptions/:id/assign", authMiddleware(), async (
   }
 });
 
-router.post("/vessels/platform/exceptions/:id/escalate", authMiddleware(), async (req, res) => {
+router.post("/vessels/platform/exceptions/:id/escalate", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
@@ -865,7 +866,7 @@ router.post("/vessels/platform/exceptions/:id/escalate", authMiddleware(), async
   }
 });
 
-router.post("/vessels/platform/exceptions/:id/resolve", authMiddleware(), async (req, res) => {
+router.post("/vessels/platform/exceptions/:id/resolve", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
@@ -894,7 +895,7 @@ router.post("/vessels/platform/exceptions/:id/resolve", authMiddleware(), async 
   }
 });
 
-router.post("/vessels/platform/exceptions", authMiddleware(), async (req, res) => {
+router.post("/vessels/platform/exceptions", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const parsed = CreateExceptionSchema.safeParse(req.body);
     if (!parsed.success) { sendBadRequest(res, "Invalid exception data", parsed.error.flatten().fieldErrors); return; }
@@ -927,7 +928,7 @@ router.post("/vessels/platform/exceptions", authMiddleware(), async (req, res) =
   }
 });
 
-router.get("/vessels/platform/routes", authMiddleware({ required: false }), async (req, res) => {
+router.get("/vessels/platform/routes", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
     const vesselId = req.query.vesselId ? parseInt(req.query.vesselId as string, 10) : undefined;
@@ -953,7 +954,7 @@ router.get("/vessels/platform/routes", authMiddleware({ required: false }), asyn
   }
 });
 
-router.get("/vessels/platform/routes/:id", authMiddleware({ required: false }), async (req, res) => {
+router.get("/vessels/platform/routes/:id", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
@@ -977,7 +978,7 @@ router.get("/vessels/platform/routes/:id", authMiddleware({ required: false }), 
   }
 });
 
-router.get("/vessels/platform/ports", authMiddleware({ required: false }), async (req, res) => {
+router.get("/vessels/platform/ports", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
 
@@ -991,7 +992,7 @@ router.get("/vessels/platform/ports", authMiddleware({ required: false }), async
   }
 });
 
-router.get("/vessels/platform/corridors", authMiddleware({ required: false }), async (req, res) => {
+router.get("/vessels/platform/corridors", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const corridorEnabled = await isFlagEnabled("vessels_corridor_intelligence_enabled");
     if (!corridorEnabled) {
@@ -1010,7 +1011,7 @@ router.get("/vessels/platform/corridors", authMiddleware({ required: false }), a
   }
 });
 
-router.get("/vessels/platform/readiness", authMiddleware({ required: false }), async (req, res) => {
+router.get("/vessels/platform/readiness", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
 
@@ -1034,7 +1035,7 @@ router.get("/vessels/platform/readiness", authMiddleware({ required: false }), a
   }
 });
 
-router.post("/vessels/platform/readiness", authMiddleware(), async (req, res) => {
+router.post("/vessels/platform/readiness", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const parsed = CreateVesselReadinessSchema.safeParse(req.body);
     if (!parsed.success) { sendBadRequest(res, "Invalid readiness data", parsed.error.flatten().fieldErrors); return; }

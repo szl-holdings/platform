@@ -7,10 +7,11 @@ import {
   sendBadRequest,
   handleRouteError,
 } from "../lib/api-response";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
-router.post("/worldline/sources", authMiddleware(), requireRole("super_admin", "admin", "ops"), async (req: Request, res: Response) => {
+router.post("/worldline/sources", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const {
       slug,
@@ -66,7 +67,7 @@ router.post("/worldline/sources", authMiddleware(), requireRole("super_admin", "
   }
 });
 
-router.get("/worldline/sources", authMiddleware(), async (req: Request, res: Response) => {
+router.get("/worldline/sources", authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const user = req.user;
     const isAdmin = user?.roles?.some(r => ["super_admin", "admin"].includes(r)) ?? false;
@@ -105,7 +106,7 @@ router.get("/worldline/sources/:slug", authMiddleware(), async (req: Request, re
   }
 });
 
-router.get("/worldline/sources/:slug/history", authMiddleware(), async (req: Request, res: Response) => {
+router.get("/worldline/sources/:slug/history", authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { slug } = req.params as { slug: string };
     const user = req.user;
@@ -123,7 +124,7 @@ router.get("/worldline/sources/:slug/history", authMiddleware(), async (req: Req
   }
 });
 
-router.post("/worldline/sources/:slug/fetch", authMiddleware(), requireRole("super_admin", "admin", "ops"), async (req: Request, res: Response) => {
+router.post("/worldline/sources/:slug/fetch", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { slug } = req.params as { slug: string };
     const user = req.user;

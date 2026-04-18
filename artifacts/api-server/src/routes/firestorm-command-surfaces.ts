@@ -38,6 +38,7 @@ import {
 } from "../middlewares/zero-trust";
 import { sendSuccess, handleRouteError } from "../lib/api-response";
 import { logger } from "../lib/logger";
+import {validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -239,6 +240,7 @@ router.post(
   ...ztRead,
   automationGate({ gate: "propose_only", actionClass: "analyst_note" }),
   dataControls({ sensitivity: "CONFIDENTIAL", retention: "IR-90D", exportRestricted: true }),
+  validateBody(jsonObjectBodySchema),
   async (req, res) => {
     try {
       const { type, content, caseId } = req.body as { type?: string; content?: string; caseId?: number };
@@ -388,6 +390,7 @@ router.post(
   requireStepUp(),
   automationGate({ gate: "approval_required", actionClass: "decision_approval" }),
   dataControls({ sensitivity: "RESTRICTED", retention: "COMPLIANCE-7Y", exportRestricted: true }),
+  validateBody(jsonObjectBodySchema),
   async (req, res) => {
     try {
       const rawId = Array.isArray(req.params["id"]) ? req.params["id"][0] : req.params["id"];
@@ -491,6 +494,7 @@ router.post(
   requireStepUp(),
   automationGate({ gate: "approved_execute", actionClass: "response_execution" }),
   dataControls({ sensitivity: "RESTRICTED", retention: "IR-90D", exportRestricted: true }),
+  validateBody(jsonObjectBodySchema),
   async (req, res) => {
     try {
       const { actionType, targetId, notes } = req.body as {
@@ -551,6 +555,7 @@ router.post(
   requireStepUp(),
   automationGate({ gate: "approval_required", actionClass: "containment" }),
   dataControls({ sensitivity: "RESTRICTED", retention: "COMPLIANCE-7Y", exportRestricted: true }),
+  validateBody(jsonObjectBodySchema),
   async (req, res) => {
     try {
       const { containmentType, assetId, justification } = req.body as {
@@ -750,6 +755,7 @@ router.get(
   environmentLabel(),
   identityAwareRoute({ require: "analyst" }),
   dataControls({ sensitivity: "CONFIDENTIAL", retention: "COMPLIANCE-7Y" }),
+  validateQuery(listQuerySchema),
   async (req, res) => {
     try {
       const user = req.user;

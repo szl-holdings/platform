@@ -3,6 +3,7 @@ import { db, pushNotificationPreferencesTable } from "@szl-holdings/db";
 import { eq, and } from "drizzle-orm";
 import { sendSuccess, sendBadRequest, sendNoContent, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
+import { validateBody, pushPreferenceUpdateSchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -64,7 +65,7 @@ router.get("/push-preferences/:appId", authMiddleware(), async (req, res) => {
   }
 });
 
-router.put("/push-preferences/:appId/:category", authMiddleware(), async (req, res) => {
+router.put("/push-preferences/:appId/:category", authMiddleware(), validateBody(pushPreferenceUpdateSchema), async (req, res) => {
   try {
     const userId = req.user!.id;
     const { appId, category } = req.params as { appId: string; category: string };
@@ -78,11 +79,6 @@ router.put("/push-preferences/:appId/:category", authMiddleware(), async (req, r
     const validCategories = CATEGORIES_BY_APP[appId] ?? [];
     if (!validCategories.includes(category)) {
       sendBadRequest(res, `Unknown category for ${appId}. Valid values: ${validCategories.join(", ")}`);
-      return;
-    }
-
-    if (typeof enabled !== "boolean") {
-      sendBadRequest(res, "enabled must be a boolean");
       return;
     }
 

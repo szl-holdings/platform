@@ -4,7 +4,7 @@ import { sendError, sendBadRequest } from "../lib/api-response";
 import { twinRegistry, vesselTwin, propertyTwin, postureTwin } from "@szl-holdings/ai-engine";
 import type { VesselTwinState, PropertyTwinState, PostureTwinState, SimulationScenario } from "@szl-holdings/ai-engine";
 import { z } from "zod";
-import { validateBody } from "../lib/validation";
+import { validateBody, jsonObjectBodySchema} from "../lib/validation";
 
 const twinEntitySchema = z.object({
   entityId: z.string().min(1).max(200),
@@ -97,7 +97,7 @@ router.post("/digital-twins/:twinId/simulate", authMiddleware(), validateBody(si
   }
 });
 
-router.patch("/digital-twins/:twinId", authMiddleware(), async (req, res) => {
+router.patch("/digital-twins/:twinId", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const updated = twinRegistry.update(req.params.twinId as string, req.body);
     if (!updated) return sendError(res, "Twin not found", 404);

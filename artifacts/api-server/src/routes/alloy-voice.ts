@@ -5,6 +5,7 @@ import { authMiddleware } from "../middlewares/auth";
 import { sendSuccess, sendCreated, sendBadRequest, sendError, handleRouteError } from "../lib/api-response";
 import { logger } from "../lib/logger";
 import multer from "multer";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 25 * 1024 * 1024 } });
@@ -58,7 +59,7 @@ async function transcribeAudio(buffer: Buffer, mimeType: string): Promise<{ text
   return { text: data.text, duration: data.duration };
 }
 
-router.post("/alloy/voice/transcribe", authMiddleware(), upload.single("audio"), async (req: Request, res: Response) => {
+router.post("/alloy/voice/transcribe", authMiddleware(), upload.single("audio"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const file = (req as Request & { file?: Express.Multer.File }).file;
     const { convertTo, title } = req.body as { convertTo?: string; title?: string };
@@ -153,7 +154,7 @@ router.post("/alloy/voice/transcribe", authMiddleware(), upload.single("audio"),
   }
 });
 
-router.post("/alloy/voice/transcribe-text", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/alloy/voice/transcribe-text", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { text, convertTo, title } = req.body as { text: string; convertTo?: string; title?: string };
     if (!text) { sendBadRequest(res, "text is required for text-based voice note"); return; }
@@ -192,7 +193,7 @@ router.post("/alloy/voice/transcribe-text", authMiddleware(), async (req: Reques
   }
 });
 
-router.get("/alloy/voice/notes", authMiddleware(), async (req: Request, res: Response) => {
+router.get("/alloy/voice/notes", authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { status, limit: limitStr = "20" } = req.query as Record<string, string>;
     const limit = Math.min(parseInt(limitStr, 10), 100);

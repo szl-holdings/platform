@@ -4,6 +4,7 @@ import { authMiddleware } from "../middlewares/auth";
 import { prismBus, prismConnectorRegistry } from "@szl-holdings/prism-bus";
 import { PRISM_BUILT_IN_TOOLS, PRISM_DOMAIN_TOOLS } from "@szl-holdings/prism-bus";
 import type { PrismDomain } from "@szl-holdings/prism-bus";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -26,7 +27,7 @@ router.get("/prism-bus/status", authMiddleware(), async (_req: Request, res: Res
   }
 });
 
-router.get("/prism-bus/events", authMiddleware(), async (req: Request, res: Response) => {
+router.get("/prism-bus/events", authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { domain, type, limit, since, correlationId } = req.query as {
       domain?: string;
@@ -57,7 +58,7 @@ router.get("/prism-bus/events", authMiddleware(), async (req: Request, res: Resp
   }
 });
 
-router.post("/prism-bus/publish", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/prism-bus/publish", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { type, domain, sourceId, payload, severity, correlationId, tenantId } = req.body as {
       type?: string;
@@ -97,7 +98,7 @@ router.post("/prism-bus/publish", authMiddleware(), async (req: Request, res: Re
   }
 });
 
-router.get("/prism-bus/tools", authMiddleware(), async (req: Request, res: Response) => {
+router.get("/prism-bus/tools", authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { domain } = req.query as { domain?: string };
     const tools = domain
@@ -118,7 +119,7 @@ router.get("/prism-bus/domain-tools", authMiddleware(), async (_req: Request, re
   }
 });
 
-router.get("/prism-bus/connectors", authMiddleware(), async (req: Request, res: Response) => {
+router.get("/prism-bus/connectors", authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { domain } = req.query as { domain?: string };
     const connectors = domain

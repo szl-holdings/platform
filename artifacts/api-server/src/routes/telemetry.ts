@@ -1,16 +1,13 @@
 import { Router, type IRouter } from "express";
 import { db, dosAnalyticsEventsTable } from "@szl-holdings/db";
 import { logger } from "../lib/logger";
+import { validateBody, telemetryEventSchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
-router.post("/telemetry/events", async (req, res) => {
+router.post("/telemetry/events", validateBody(telemetryEventSchema), async (req, res) => {
   try {
     const { app, events } = req.body;
-    if (!app || !Array.isArray(events) || events.length === 0) {
-      res.status(400).json({ error: "app and events[] required" });
-      return;
-    }
 
     const rows = events.slice(0, 50).map((e: { name: string; properties?: Record<string, unknown>; timestamp?: number }) => ({
       eventType: "page_view" as const,

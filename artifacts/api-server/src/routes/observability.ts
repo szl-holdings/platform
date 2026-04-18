@@ -7,6 +7,7 @@ import { ALL_CONFIGS, getConfigBySlug } from "@szl-holdings/observability/config
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { db, platformJobRunsTable, artifactApprovalsTable } from "@szl-holdings/db";
 import { sql, eq, and, gt } from "drizzle-orm";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -154,7 +155,7 @@ router.get("/observability", authMiddleware(), (req, res) => {
   });
 });
 
-router.post("/observability/vitals", (req, res) => {
+router.post("/observability/vitals", validateBody(jsonObjectBodySchema), (req, res) => {
   const body = req.body;
   if (!body || !body.appSlug) {
     res.status(400).json({ error: "appSlug is required" });
@@ -185,7 +186,7 @@ router.post("/observability/vitals", (req, res) => {
   res.status(204).end();
 });
 
-router.post("/observability/client-errors", (req, res) => {
+router.post("/observability/client-errors", validateBody(jsonObjectBodySchema), (req, res) => {
   const body = req.body;
   if (!body || !body.app) {
     res.status(400).json({ error: "app is required" });
@@ -207,7 +208,7 @@ router.post("/observability/client-errors", (req, res) => {
   res.status(204).end();
 });
 
-router.post("/observability/error-feedback", (req, res) => {
+router.post("/observability/error-feedback", validateBody(jsonObjectBodySchema), (req, res) => {
   const body = req.body;
   if (!body || !body.app) {
     res.status(400).json({ error: "app is required" });
@@ -229,7 +230,7 @@ router.post("/observability/error-feedback", (req, res) => {
   res.status(204).end();
 });
 
-router.get("/observability/alerts", authMiddleware(), requireRole("ops", "admin"), (req, res) => {
+router.get("/observability/alerts", authMiddleware(), requireRole("ops", "admin"), validateQuery(listQuerySchema), (req, res) => {
   const includeResolved = req.query["includeResolved"] === "true";
   const alerts = includeResolved
     ? serverTelemetry.getAllAlerts()
@@ -242,7 +243,7 @@ router.get("/observability/alerts", authMiddleware(), requireRole("ops", "admin"
   });
 });
 
-router.post("/observability/alerts/:id/resolve", authMiddleware(), requireRole("ops"), (req, res) => {
+router.post("/observability/alerts/:id/resolve", authMiddleware(), requireRole("ops"), validateBody(jsonObjectBodySchema), (req, res) => {
   const { id } = req.params;
   if (!id || typeof id !== "string") {
     res.status(400).json({ error: "Alert ID is required" });

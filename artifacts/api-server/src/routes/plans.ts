@@ -18,6 +18,7 @@ import {
   sendBadRequest,
   sendForbidden,
 } from "../lib/api-response";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -44,7 +45,7 @@ function requireUser(req: Request): AuthenticatedUser | null {
   return req.user ?? null;
 }
 
-router.get("/plans", authMiddleware(), async (req, res) => {
+router.get("/plans", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const user = requireUser(req);
     if (!user) {
@@ -131,7 +132,7 @@ router.get("/plans/:id", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/plans", authMiddleware(), async (req, res) => {
+router.post("/plans", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const user = requireUser(req);
     if (!user) {
@@ -173,7 +174,7 @@ router.post("/plans", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/plans/:id/replay", authMiddleware(), async (req, res) => {
+router.post("/plans/:id/replay", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const user = requireUser(req);
     if (!user) {

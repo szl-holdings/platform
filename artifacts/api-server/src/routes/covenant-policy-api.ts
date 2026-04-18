@@ -28,6 +28,7 @@ import type { PrismRole, PrismDomain } from "@szl-holdings/prism-bus";
 import { db, covenantSimulationRuns, policySimScenarios } from "@szl-holdings/db";
 import { and, desc, eq } from "drizzle-orm";
 import { logger } from "../lib/logger";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -70,7 +71,7 @@ router.get("/covenant/status", authMiddleware(), async (_req: Request, res: Resp
   }
 });
 
-router.post("/covenant/evaluate", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/covenant/evaluate", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { subject, resource, action, context } = req.body as {
       subject?: Partial<CovenantSubject>;
@@ -108,7 +109,7 @@ router.post("/covenant/evaluate", authMiddleware(), async (req: Request, res: Re
   }
 });
 
-router.post("/covenant/simulate", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/covenant/simulate", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { subject, resource, action, context } = req.body as {
       subject?: Partial<CovenantSubject>;
@@ -146,7 +147,7 @@ router.post("/covenant/simulate", authMiddleware(), async (req: Request, res: Re
   }
 });
 
-router.get("/covenant/check", authMiddleware(), async (req: Request, res: Response) => {
+router.get("/covenant/check", authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { action, resourceType, domain } = req.query as {
       action?: string;
@@ -185,7 +186,7 @@ router.get("/covenant/policies", authMiddleware(), async (_req: Request, res: Re
   }
 });
 
-router.post("/covenant/policies", authMiddleware(), requireRole("admin", "super_admin", "exec"), async (req: Request, res: Response) => {
+router.post("/covenant/policies", authMiddleware(), requireRole("admin", "super_admin", "exec"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const policy = req.body as Partial<CovenantPolicy>;
 
@@ -237,7 +238,7 @@ router.get("/covenant/templates", authMiddleware(), async (_req: Request, res: R
   }
 });
 
-router.post("/covenant/templates/:templateKey/instantiate", authMiddleware(), requireRole("admin", "super_admin", "exec"), async (req: Request, res: Response) => {
+router.post("/covenant/templates/:templateKey/instantiate", authMiddleware(), requireRole("admin", "super_admin", "exec"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { templateKey } = req.params;
     const { domains, conditions, expiresAt, id } = req.body as {
@@ -264,7 +265,7 @@ router.post("/covenant/templates/:templateKey/instantiate", authMiddleware(), re
   }
 });
 
-router.post("/covenant/domain-policy", authMiddleware(), requireRole("admin", "super_admin", "exec"), async (req: Request, res: Response) => {
+router.post("/covenant/domain-policy", authMiddleware(), requireRole("admin", "super_admin", "exec"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { templateKey, domains, id } = req.body as {
       templateKey?: string;
@@ -289,7 +290,7 @@ router.post("/covenant/domain-policy", authMiddleware(), requireRole("admin", "s
   }
 });
 
-router.get("/covenant/decisions", authMiddleware(), async (req: Request, res: Response) => {
+router.get("/covenant/decisions", authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { effect, action, limit } = req.query as {
       effect?: string;
@@ -357,7 +358,7 @@ router.get("/covenant/scenarios", authMiddleware(), async (req: Request, res: Re
   }
 });
 
-router.post("/covenant/scenarios", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/covenant/scenarios", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { name, description, subject, resource, action, context } = req.body as {
       name?: string;
@@ -434,7 +435,7 @@ router.get("/covenant/scenarios/:id", authMiddleware(), async (req: Request, res
   }
 });
 
-router.post("/covenant/scenarios/:id/run", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/covenant/scenarios/:id/run", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const id = parseInt(String(req.params["id"] ?? "0"), 10);
     const orgId = req.user?.orgs?.[0]?.orgId ?? null;

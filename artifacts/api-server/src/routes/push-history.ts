@@ -1,4 +1,5 @@
 import { Router, type IRouter } from "express";
+import { validateQuery, listQuerySchema } from "../lib/validation.js";
 import { db, pushNotificationHistoryTable, pushReceiptsTable } from "@szl-holdings/db";
 import { eq, desc, and, gte, lte, or, sql } from "drizzle-orm";
 import { sendSuccess, sendBadRequest, handleRouteError } from "../lib/api-response";
@@ -12,7 +13,7 @@ const MAX_PAGE_SIZE = 100;
 // /push-history/me — returns all history rows the authenticated user is a
 // recipient of: both direct user sends (userId = me) and app/broadcast sends
 // where the user's device had a receipt.
-router.get("/push-history/me", authMiddleware(), async (req, res) => {
+router.get("/push-history/me", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const userId = req.user!.id;
     const { appId, page, pageSize, since, until } = req.query as Record<string, string | undefined>;
@@ -69,7 +70,7 @@ router.get("/push-history/me", authMiddleware(), async (req, res) => {
 });
 
 // /push-history — ops-only full history view with optional filters
-router.get("/push-history", authMiddleware(), requireRole("ops"), async (req, res) => {
+router.get("/push-history", authMiddleware(), requireRole("ops"), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { userId, appId, templateId, page, pageSize, since, until } = req.query as Record<string, string | undefined>;
 

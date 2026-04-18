@@ -3,13 +3,14 @@ import { db, dosArticlesTable, dosLeadsTable } from "@szl-holdings/db";
 import { eq, desc, and, sql } from "drizzle-orm";
 import { dosApiKeyAuth } from "../middlewares/dos-api-key-auth";
 import { readLimiter } from "../middlewares/rate-limiters";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router = Router();
 
 router.use(dosApiKeyAuth);
 router.use(readLimiter);
 
-router.get("/content", async (req: Request, res: Response): Promise<void> => {
+router.get("/content", validateQuery(listQuerySchema), async (req: Request, res: Response): Promise<void> => {
   const { type = "article", limit = "20", offset = "0" } = req.query as Record<string, string>;
   const lim = Math.min(Number(limit) || 20, 100);
   const off = Math.max(Number(offset) || 0, 0);
@@ -34,7 +35,7 @@ router.get("/content", async (req: Request, res: Response): Promise<void> => {
   res.json({ data: articles.map(a => ({ ...a, type: "article" })), total: count ?? 0, limit: lim, offset: off });
 });
 
-router.get("/subscribers", async (req: Request, res: Response): Promise<void> => {
+router.get("/subscribers", validateQuery(listQuerySchema), async (req: Request, res: Response): Promise<void> => {
   const { segment, source, limit = "50", offset = "0" } = req.query as Record<string, string>;
   const lim = Math.min(Number(limit) || 50, 100);
   const off = Math.max(Number(offset) || 0, 0);
@@ -69,7 +70,7 @@ router.post("/subscribers", async (req: Request, res: Response): Promise<void> =
   res.status(201).json({ id: lead.id, email: lead.email, magicLinkSent: false });
 });
 
-router.get("/analytics/summary", async (req: Request, res: Response): Promise<void> => {
+router.get("/analytics/summary", validateQuery(listQuerySchema), async (req: Request, res: Response): Promise<void> => {
   const [articleCount] = await db.select({ count: sql<number>`count(*)::int` }).from(dosArticlesTable).where(eq(dosArticlesTable.siteStatus, "published"));
   const [subscriberCount] = await db.select({ count: sql<number>`count(*)::int` }).from(dosLeadsTable);
   res.json({

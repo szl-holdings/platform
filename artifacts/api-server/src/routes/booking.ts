@@ -1,5 +1,6 @@
 import { Router, type IRouter } from "express";
 import { authMiddleware } from "../middlewares/auth";
+import { validateQuery, listQuerySchema } from "../lib/validation.js";
 import {
   db,
   carlotaReservationsTable,
@@ -52,7 +53,7 @@ router.get("/booking/appointments/:id", async (req, res) => {
   res.json({ data: mapReservation(row) });
 });
 
-router.get("/booking/search", async (req, res) => {
+router.get("/booking/search", validateQuery(listQuerySchema), async (req, res) => {
   const query = (req.query.q as string) || "";
   const { ilike, or } = await import("drizzle-orm");
   const results = query

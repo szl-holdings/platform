@@ -34,6 +34,7 @@ import { authMiddleware, parseIdParam } from "../middlewares/auth";
 import { adminGuard } from "../middlewares/admin-guard";
 import { logger } from "../lib/logger";
 import { seedVesselsData } from "../lib/seed-vessels";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -354,7 +355,7 @@ router.get("/vessels/track/:vesselId", authMiddleware({ required: false }), asyn
 
 // ── Voyage Economics ─────────────────────────────────────────────────────────
 
-router.get("/vessels/voyage-economics", authMiddleware(), async (req, res) => {
+router.get("/vessels/voyage-economics", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const statusFilter = req.query["status"] as VesselVoyageEconomics["status"] | undefined;
@@ -433,7 +434,7 @@ router.get("/vessels/voyage-economics/:id", authMiddleware(), async (req, res) =
 
 // ── Legacy Voyages (maritime.ts voyagesTable) ────────────────────────────────
 
-router.get("/vessels/voyages", authMiddleware(), async (req, res) => {
+router.get("/vessels/voyages", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const [rows, [{ count }]] = await Promise.all([
@@ -459,7 +460,7 @@ router.get("/vessels/voyages/:id", authMiddleware(), async (req, res) => {
 
 // ── Exceptions ───────────────────────────────────────────────────────────────
 
-router.get("/vessels/exceptions", authMiddleware(), async (req, res) => {
+router.get("/vessels/exceptions", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const statusFilter = req.query["status"] as FleetException["status"] | undefined;
@@ -506,7 +507,7 @@ router.get("/vessels/exceptions/:id", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/vessels/exceptions", authMiddleware(), async (req, res) => {
+router.post("/vessels/exceptions", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const data = insertFleetExceptionSchema.parse(req.body);
     const [row] = await db.insert(fleetExceptionsTable).values(data).returning();
@@ -516,7 +517,7 @@ router.post("/vessels/exceptions", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/vessels/exceptions/:id/acknowledge", authMiddleware(), async (req, res) => {
+router.post("/vessels/exceptions/:id/acknowledge", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [exc] = await db.select().from(fleetExceptionsTable).where(eq(fleetExceptionsTable.id, id));
@@ -533,7 +534,7 @@ router.post("/vessels/exceptions/:id/acknowledge", authMiddleware(), async (req,
   }
 });
 
-router.post("/vessels/exceptions/:id/resolve", authMiddleware(), async (req, res) => {
+router.post("/vessels/exceptions/:id/resolve", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [exc] = await db.select().from(fleetExceptionsTable).where(eq(fleetExceptionsTable.id, id));
@@ -552,7 +553,7 @@ router.post("/vessels/exceptions/:id/resolve", authMiddleware(), async (req, res
   }
 });
 
-router.post("/vessels/exceptions/:id/escalate", authMiddleware(), async (req, res) => {
+router.post("/vessels/exceptions/:id/escalate", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [exc] = await db.select().from(fleetExceptionsTable).where(eq(fleetExceptionsTable.id, id));
@@ -580,7 +581,7 @@ router.post("/vessels/exceptions/:id/escalate", authMiddleware(), async (req, re
 
 // ── Corridors ────────────────────────────────────────────────────────────────
 
-router.get("/vessels/corridors", authMiddleware(), async (req, res) => {
+router.get("/vessels/corridors", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const [rows, [{ count }]] = await Promise.all([
@@ -606,7 +607,7 @@ router.get("/vessels/corridors/:id", authMiddleware(), async (req, res) => {
 
 // ── Maintenance ──────────────────────────────────────────────────────────────
 
-router.get("/vessels/maintenance", authMiddleware(), async (req, res) => {
+router.get("/vessels/maintenance", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const statusFilter = req.query["status"] as VesselMaintenance["status"] | undefined;
@@ -646,7 +647,7 @@ router.get("/vessels/maintenance", authMiddleware(), async (req, res) => {
 
 // ── Sanctions Screening ──────────────────────────────────────────────────────
 
-router.get("/vessels/sanctions", authMiddleware(), async (req, res) => {
+router.get("/vessels/sanctions", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const ofacStatusFilter = req.query["ofacStatus"] as VesselSanctionsScreening["ofacStatus"] | undefined;
@@ -735,7 +736,7 @@ router.get("/vessels/:id/sanctions", authMiddleware(), async (req, res) => {
 
 // ── Port Calls ───────────────────────────────────────────────────────────────
 
-router.get("/vessels/port-calls", authMiddleware(), async (req, res) => {
+router.get("/vessels/port-calls", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const vesselIdFilter = req.query["vesselId"] ? parseInt(req.query["vesselId"] as string, 10) : undefined;
@@ -824,7 +825,7 @@ router.get("/vessels/:id/exceptions", authMiddleware(), async (req, res) => {
 
 // ── Ports ────────────────────────────────────────────────────────────────────
 
-router.get("/vessels/ports", authMiddleware(), async (req, res) => {
+router.get("/vessels/ports", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const [rows, [{ count }]] = await Promise.all([

@@ -4,6 +4,7 @@ import { services, type NormalizedSiemEvent } from "@szl-holdings/services";
 import { logger } from "../lib/logger";
 import { sendSuccess, sendError, handleRouteError } from "../lib/api-response";
 import { authMiddleware, requireRole } from "../middlewares/auth";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -522,7 +523,7 @@ router.post("/webhooks/inbound/siem/events", verifySiemToken, async (req: Reques
 
 const opsAuth = [authMiddleware(), requireRole("ops", "admin", "super_admin")];
 
-router.get("/integrations/siem/events", ...opsAuth, async (req: Request, res: Response) => {
+router.get("/integrations/siem/events", ...opsAuth, validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const limit = Math.min(parseInt((req.query.limit as string) ?? "100", 10), 500);
     const severity = req.query.severity as NormalizedSiemEvent["severity"] | undefined;
@@ -534,7 +535,7 @@ router.get("/integrations/siem/events", ...opsAuth, async (req: Request, res: Re
   }
 });
 
-router.get("/integrations/siem/alerts", ...opsAuth, async (req: Request, res: Response) => {
+router.get("/integrations/siem/alerts", ...opsAuth, validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const limit = Math.min(parseInt((req.query.limit as string) ?? "50", 10), 200);
     const alerts = services.siem.getCorrelatedAlerts(limit);
@@ -554,7 +555,7 @@ router.get("/integrations/siem/rules", ...opsAuth, async (_req: Request, res: Re
   }
 });
 
-router.get("/integrations/pagerduty/incidents", ...opsAuth, async (req: Request, res: Response) => {
+router.get("/integrations/pagerduty/incidents", ...opsAuth, validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const status = req.query.status
       ? String(req.query.status).split(",") as Array<"triggered" | "acknowledged" | "resolved">
@@ -568,7 +569,7 @@ router.get("/integrations/pagerduty/incidents", ...opsAuth, async (req: Request,
   }
 });
 
-router.get("/integrations/pagerduty/oncall", ...opsAuth, async (req: Request, res: Response) => {
+router.get("/integrations/pagerduty/oncall", ...opsAuth, validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const policyId = req.query.policy as string | undefined;
     const oncall = await services.pagerduty.getOnCallSchedule(policyId);
@@ -579,7 +580,7 @@ router.get("/integrations/pagerduty/oncall", ...opsAuth, async (req: Request, re
   }
 });
 
-router.post("/integrations/pagerduty/incidents", ...opsAuth, async (req: Request, res: Response) => {
+router.post("/integrations/pagerduty/incidents", ...opsAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { title, serviceId, fromEmail, urgency, escalationPolicyId, body } = req.body as {
       title: string;
@@ -703,7 +704,7 @@ router.get("/integrations/jira/oauth/status", ...opsAuth, (_req: Request, res: R
   }
 });
 
-router.get("/integrations/jira/oauth/authorize", ...opsAuth, (req: Request, res: Response) => {
+router.get("/integrations/jira/oauth/authorize", ...opsAuth, validateQuery(listQuerySchema), (req: Request, res: Response) => {
   try {
     const redirectUri = req.query.redirect_uri as string;
     const state = req.query.state as string ?? crypto.randomUUID();
@@ -718,7 +719,7 @@ router.get("/integrations/jira/oauth/authorize", ...opsAuth, (req: Request, res:
   }
 });
 
-router.post("/integrations/jira/oauth/callback", ...opsAuth, async (req: Request, res: Response) => {
+router.post("/integrations/jira/oauth/callback", ...opsAuth, validateBody(jsonObjectBodySchema), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { code, redirect_uri: redirectUri } = req.body as { code: string; redirect_uri: string };
     if (!code || !redirectUri) {

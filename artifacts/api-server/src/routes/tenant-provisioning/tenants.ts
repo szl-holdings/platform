@@ -5,7 +5,7 @@ import crypto from "crypto";
 import { sendSuccess, sendBadRequest, sendNotFound, sendForbidden, sendError, handleRouteError } from "../../lib/api-response";
 import { authMiddleware, requireRole } from "../../middlewares/auth";
 import { logActivity } from "../../lib/activity-logger";
-import { validateBody, tenantCreateSchema, tenantStatusSchema } from "../../lib/validation";
+import { validateBody, tenantCreateSchema, tenantStatusSchema, jsonObjectBodySchema} from "../../lib/validation";
 import { db } from "@szl-holdings/db";
 import {
   azureTenantsTable,
@@ -538,6 +538,7 @@ router.post(
   tenantRateLimit,
   authMiddleware(),
   requireRole("admin"),
+  validateBody(jsonObjectBodySchema),
   async (req: Request, res: Response) => {
     try {
       const tenantId = parseInt(String(req.params.id), 10);
@@ -608,6 +609,7 @@ router.post(
   tenantRateLimit,
   authMiddleware(),
   requireRole("admin"),
+  validateBody(jsonObjectBodySchema),
   async (req: Request, res: Response) => {
     try {
       const tenantId = parseInt(String(req.params.id), 10);

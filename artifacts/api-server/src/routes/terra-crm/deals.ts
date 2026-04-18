@@ -8,9 +8,10 @@ import {
   logger, ingestTerraProperty,
 } from "./_shared.js";
 import type { InsertTerraDeal } from "@szl-holdings/db";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
 
 export function register(router: IRouter): void {
-  router.get("/terra/pipeline/deals", authMiddleware({ required: false }), async (req, res) => {
+  router.get("/terra/pipeline/deals", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
     try {
       const { stage, q, limit, offset } = req.query;
 
@@ -68,7 +69,7 @@ export function register(router: IRouter): void {
     } catch (err) { handleRouteError(res, err, "Failed to fetch deals"); }
   });
 
-  router.post("/terra/pipeline/deals", authMiddleware({ required: true }), async (req, res) => {
+  router.post("/terra/pipeline/deals", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
     try {
       const parsed = CreateDealSchema.safeParse(req.body ?? {});
       if (!parsed.success) {
@@ -159,7 +160,7 @@ export function register(router: IRouter): void {
     } catch (err) { handleRouteError(res, err, "Failed to create deal"); }
   });
 
-  router.patch("/terra/pipeline/deals/:id/stage", authMiddleware({ required: true }), async (req, res) => {
+  router.patch("/terra/pipeline/deals/:id/stage", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
     try {
       const { id } = req.params as Record<string, string>;
       const parsed = UpdateDealStageSchema.safeParse(req.body ?? {});

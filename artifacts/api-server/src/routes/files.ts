@@ -9,6 +9,7 @@ import { peekUploadIntent, consumeUploadIntent } from "../lib/uploadIntentStore"
 import { validateFileType } from "../lib/fileTypeAllowlist";
 import { checkOrgStorageQuota } from "../lib/storageQuota";
 import { dispatchVirusScan } from "../lib/virusScan";
+import { validateBody, jsonObjectBodySchema } from "../lib/validation";
 
 const router: IRouter = Router();
 const objectStorageService = new ObjectStorageService();
@@ -47,7 +48,7 @@ router.get("/files/:id", authMiddleware(), async (req, res) => {
  *   doesn't burn the one-time intent. The intent is consumed only after all validation passes,
  *   and the consumption result is checked — concurrent or stale finalizations are rejected.
  */
-router.post("/files", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/files", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { objectPath, originalName, category } = req.body as {
       objectPath?: string;

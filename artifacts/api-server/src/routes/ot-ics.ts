@@ -15,6 +15,7 @@ import { z } from "zod";
 import { sendSuccess, sendCreated, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
 import { logger } from "../lib/logger";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -48,7 +49,7 @@ router.get("/aegis/ot-ics/assets", authMiddleware(), async (_req, res) => {
   }
 });
 
-router.post("/aegis/ot-ics/assets", authMiddleware({ required: true }), async (req, res) => {
+router.post("/aegis/ot-ics/assets", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const data = insertOtIcsAssetSchema.parse(req.body);
     const [row] = await db.insert(otIcsAssetsTable).values(data).returning();
@@ -58,7 +59,7 @@ router.post("/aegis/ot-ics/assets", authMiddleware({ required: true }), async (r
   }
 });
 
-router.get("/aegis/ot-ics/frames", authMiddleware(), async (req, res) => {
+router.get("/aegis/ot-ics/frames", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const q = framesQuerySchema.parse(req.query);
     const conditions = [] as ReturnType<typeof eq>[];
@@ -80,7 +81,7 @@ router.get("/aegis/ot-ics/frames", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/aegis/ot-ics/frames", authMiddleware({ required: true }), async (req, res) => {
+router.post("/aegis/ot-ics/frames", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const data = insertOtIcsDecodedFrameSchema.parse(req.body);
     const [row] = await db.insert(otIcsDecodedFramesTable).values(data).returning();
@@ -90,7 +91,7 @@ router.post("/aegis/ot-ics/frames", authMiddleware({ required: true }), async (r
   }
 });
 
-router.get("/aegis/ot-ics/conversations", authMiddleware(), async (req, res) => {
+router.get("/aegis/ot-ics/conversations", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const q = conversationsQuerySchema.parse(req.query);
     const where = q.sessionId ? eq(otIcsConversationsTable.sessionId, q.sessionId) : undefined;
@@ -106,7 +107,7 @@ router.get("/aegis/ot-ics/conversations", authMiddleware(), async (req, res) => 
   }
 });
 
-router.post("/aegis/ot-ics/conversations", authMiddleware({ required: true }), async (req, res) => {
+router.post("/aegis/ot-ics/conversations", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const data = insertOtIcsConversationSchema.parse(req.body);
     const [row] = await db.insert(otIcsConversationsTable).values(data).returning();
@@ -116,7 +117,7 @@ router.post("/aegis/ot-ics/conversations", authMiddleware({ required: true }), a
   }
 });
 
-router.get("/aegis/ot-ics/anomaly-scores", authMiddleware(), async (req, res) => {
+router.get("/aegis/ot-ics/anomaly-scores", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const q = scoresQuerySchema.parse(req.query);
     const since = new Date(Date.now() - q.hours * 60 * 60 * 1000);
@@ -133,7 +134,7 @@ router.get("/aegis/ot-ics/anomaly-scores", authMiddleware(), async (req, res) =>
   }
 });
 
-router.post("/aegis/ot-ics/anomaly-scores", authMiddleware({ required: true }), async (req, res) => {
+router.post("/aegis/ot-ics/anomaly-scores", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const data = insertOtIcsAnomalyScoreSchema.parse(req.body);
     const [row] = await db

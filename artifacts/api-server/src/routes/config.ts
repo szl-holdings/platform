@@ -1,5 +1,6 @@
 import { Router, type IRouter, type Request, type Response, type RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
+import { validateBody, adminPinVerifySchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -19,7 +20,7 @@ const pinLimit = rateLimit({
   validate: { xForwardedForHeader: false, ip: false },
 }) as unknown as RequestHandler;
 
-router.post("/config/verify-admin-pin", pinLimit, (req: Request, res: Response) => {
+router.post("/config/verify-admin-pin", pinLimit, validateBody(adminPinVerifySchema), (req: Request, res: Response) => {
   if (!req.isAuthenticated()) {
     res.status(401).json({ ok: false, error: "authentication_required" });
     return;
@@ -31,11 +32,7 @@ router.post("/config/verify-admin-pin", pinLimit, (req: Request, res: Response) 
     res.status(403).json({ ok: false, error: "admin_role_required" });
     return;
   }
-  const { pin } = req.body as { pin?: string };
-  if (typeof pin !== "string" || pin.length === 0) {
-    res.status(400).json({ ok: false, error: "pin_required" });
-    return;
-  }
+  const { pin } = req.body;
   const adminPin = process.env.ADMIN_PIN;
   if (!adminPin) {
     res.status(503).json({ ok: false, error: "admin_pin_not_configured" });

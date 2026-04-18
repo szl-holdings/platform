@@ -13,6 +13,7 @@ import {
   promptEvaluator,
   type PromptStatus,
 } from "@szl-holdings/prompt-registry";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 // ─── Authorization helper ────────────────────────────────────────────────────
 const REGISTRY_WRITE_ROLES = new Set(["super_admin", "admin", "platform_operator"]);
@@ -307,7 +308,7 @@ seedRegistry();
  * GET /ai/prompts
  * List all prompts (with optional domain/routeClass/status filters).
  */
-router.get("/ai/prompts", authMiddleware, (req, res) => {
+router.get("/ai/prompts", authMiddleware, validateQuery(listQuerySchema), (req, res) => {
   try {
     const { domain, routeClass, status } = req.query as Record<string, string | undefined>;
     const prompts = promptRegistry.list({
@@ -386,7 +387,7 @@ router.get("/ai/prompts/:id", authMiddleware, (req, res) => {
  * Body: { versionId: string }
  * Promotes a version to active status. Requires admin or platform_operator role.
  */
-router.post("/ai/prompts/:id/promote", authMiddleware, (req, res) => {
+router.post("/ai/prompts/:id/promote", authMiddleware, validateBody(jsonObjectBodySchema), (req, res) => {
   try {
     if (!requireRegistryWrite(req, res)) return;
 
@@ -417,7 +418,7 @@ router.post("/ai/prompts/:id/promote", authMiddleware, (req, res) => {
  * Uses a keyword-matching executor so results reflect the actual scoring pipeline.
  * Requires admin or platform_operator role.
  */
-router.post("/ai/prompts/:id/versions/:versionId/eval", authMiddleware, async (req, res) => {
+router.post("/ai/prompts/:id/versions/:versionId/eval", authMiddleware, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     if (!requireRegistryWrite(req, res)) return;
 

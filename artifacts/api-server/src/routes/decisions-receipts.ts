@@ -31,7 +31,7 @@ import {
   sendForbidden,
   handleRouteError,
 } from "../lib/api-response";
-import { validateBody } from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema} from "../lib/validation";
 import { logActivity } from "@szl-holdings/audit";
 import { logger } from "../lib/logger";
 
@@ -156,7 +156,7 @@ router.post("/decisions/receipts", authMiddleware(), validateBody(CreateReceiptS
   }
 });
 
-router.get("/decisions/receipts", authMiddleware(), async (req: Request, res: Response) => {
+router.get("/decisions/receipts", authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const user = req.user!;
     const domain = req.query["domain"] as string | undefined;

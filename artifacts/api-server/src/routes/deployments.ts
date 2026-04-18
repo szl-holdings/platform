@@ -30,6 +30,7 @@ import {
 import { authMiddleware, denyIfReadOnly, requireRole } from "../middlewares/auth";
 import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../middlewares/sliding-window-limiter";
 import { logger } from "../lib/logger";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -176,7 +177,7 @@ async function getActive(appId: string, env: string): Promise<Deployment | undef
   return rows[0];
 }
 
-router.get("/deployments", authMiddleware({ required: false }), perUserApiSlidingLimiter, async (req: Request, res: Response) => {
+router.get("/deployments", authMiddleware({ required: false }), perUserApiSlidingLimiter, validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const env = (req.query.environment as string) ?? "production";
     const rows = await db
@@ -195,7 +196,7 @@ router.get("/deployments", authMiddleware({ required: false }), perUserApiSlidin
   }
 });
 
-router.get("/deployments/:appId", authMiddleware({ required: false }), perUserApiSlidingLimiter, async (req: Request, res: Response) => {
+router.get("/deployments/:appId", authMiddleware({ required: false }), perUserApiSlidingLimiter, validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { appId } = req.params;
     const env = (req.query.environment as string) ?? "production";
@@ -210,7 +211,7 @@ router.get("/deployments/:appId", authMiddleware({ required: false }), perUserAp
   }
 });
 
-router.get("/deployments/:appId/history", authMiddleware({ required: false }), perUserApiSlidingLimiter, async (req: Request, res: Response) => {
+router.get("/deployments/:appId/history", authMiddleware({ required: false }), perUserApiSlidingLimiter, validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { appId } = req.params;
     const env = (req.query.environment as string) ?? "production";
@@ -222,7 +223,7 @@ router.get("/deployments/:appId/history", authMiddleware({ required: false }), p
   }
 });
 
-router.post("/deployments", authMiddleware({ required: true }), denyIfReadOnly(), requireRole("ops", "exec", "admin", "super_admin"), perUserWriteSlidingLimiter, async (req: Request, res: Response) => {
+router.post("/deployments", authMiddleware({ required: true }), denyIfReadOnly(), requireRole("ops", "exec", "admin", "super_admin"), perUserWriteSlidingLimiter, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { appId, appName, version, environment, commitSha, notes, metadata } =
       req.body as Partial<DeploymentRecord>;
@@ -270,7 +271,7 @@ router.post("/deployments", authMiddleware({ required: true }), denyIfReadOnly()
   }
 });
 
-router.post("/deployments/:appId/rollback", authMiddleware({ required: true }), denyIfReadOnly(), requireRole("ops", "exec", "admin", "super_admin"), perUserWriteSlidingLimiter, async (req: Request, res: Response) => {
+router.post("/deployments/:appId/rollback", authMiddleware({ required: true }), denyIfReadOnly(), requireRole("ops", "exec", "admin", "super_admin"), perUserWriteSlidingLimiter, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { appId } = req.params;
     const env = (req.body.environment as string) ?? "production";

@@ -6,7 +6,7 @@ import { hashIp } from "@szl-holdings/audit";
 import { isFlagEnabled } from "../../lib/platform-flags.js";
 import { revokeUserSessionsOnRoleChange } from "../../middlewares/session-policy.js";
 import { z } from "zod";
-import { validateBody } from "../../lib/validation.js";
+import { validateBody, validateQuery, listQuerySchema} from "../../lib/validation.js";
 import { sendError, sendNotFound, sendForbidden, sendBadRequest } from "../../lib/api-response.js";
 
 const createUserSchema = z.object({
@@ -113,7 +113,7 @@ export function register(router: IRouter): void {
     res.status(201).json(newUser);
   });
 
-  router.get("/admin/audit-log", async (req, res) => {
+  router.get("/admin/audit-log", validateQuery(listQuerySchema), async (req, res) => {
     const enabled = await isFlagEnabled("internal_audit_console_enabled");
     if (!enabled) { sendForbidden(res, "Feature not available: internal_audit_console_enabled"); return; }
     try {
@@ -186,7 +186,7 @@ export function register(router: IRouter): void {
     }
   });
 
-  router.get("/admin/export-history", async (req, res) => {
+  router.get("/admin/export-history", validateQuery(listQuerySchema), async (req, res) => {
     try {
       const page = Math.max(1, parseInt(req.query["page"] as string ?? "1", 10));
       const limit = Math.min(parseInt(req.query["limit"] as string ?? "50", 10), 200);

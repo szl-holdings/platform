@@ -20,7 +20,7 @@ import { pool } from "@szl-holdings/db";
 import { eq, and, gte, lte, desc, sql, count, sum } from "drizzle-orm";
 import { authMiddleware } from "../middlewares/auth";
 import { writeLimiter, readLimiter } from "../middlewares/rate-limiters";
-import { validateBody } from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema} from "../lib/validation";
 import { sendSuccess, sendNotFound, sendBadRequest, handleRouteError, sendForbidden } from "../lib/api-response";
 import type { Request, Response } from "express";
 
@@ -56,7 +56,7 @@ const recordUsageSchema = z.object({
   metadata: z.record(z.unknown()).optional(),
 });
 
-router.get("/orgs/:orgSlug/usage", readLimiter, authMiddleware(), async (req: Request, res: Response) => {
+router.get("/orgs/:orgSlug/usage", readLimiter, authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const orgSlug = req.params["orgSlug"] as string;
     const { from, to } = req.query as { from?: string; to?: string };
@@ -147,7 +147,7 @@ router.get("/orgs/:orgSlug/usage", readLimiter, authMiddleware(), async (req: Re
   }
 });
 
-router.get("/orgs/:orgSlug/usage/history", readLimiter, authMiddleware(), async (req: Request, res: Response) => {
+router.get("/orgs/:orgSlug/usage/history", readLimiter, authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const orgSlug = req.params["orgSlug"] as string;
     const { days = "30" } = req.query as { days?: string };

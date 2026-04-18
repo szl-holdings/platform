@@ -19,6 +19,7 @@ import {
   isAzureAdConfigured,
   isProvisionedTenant,
 } from "../lib/auth";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -45,7 +46,7 @@ router.get("/auth/user", (req: Request, res: Response) => {
   });
 });
 
-router.get("/login", async (req: Request, res: Response) => {
+router.get("/login", validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   if (!isOidcConfigured()) {
     res.status(503).json({ error: "OIDC not configured" });
     return;
@@ -177,7 +178,7 @@ router.get("/logout", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/mobile-auth/token-exchange", async (req: Request, res: Response) => {
+router.post("/mobile-auth/token-exchange", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   const parsed = ExchangeMobileAuthorizationCodeBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: "Missing or invalid required parameters" });
@@ -226,7 +227,7 @@ router.post("/mobile-auth/token-exchange", async (req: Request, res: Response) =
   }
 });
 
-router.post("/mobile-auth/logout", async (req: Request, res: Response) => {
+router.post("/mobile-auth/logout", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   const token = getSessionToken(req);
   if (token) {
     await deleteOidcSession(token);
@@ -242,7 +243,7 @@ router.get("/auth/providers", (_req: Request, res: Response) => {
   res.json({ providers });
 });
 
-router.get("/azure-ad/login", async (req: Request, res: Response) => {
+router.get("/azure-ad/login", validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   if (!isAzureAdConfigured()) {
     res.status(503).json({ error: "Azure AD SSO not configured" });
     return;

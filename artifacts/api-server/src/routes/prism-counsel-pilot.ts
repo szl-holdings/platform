@@ -2,7 +2,7 @@ import { Router, Request, Response } from "express";
 import { z } from "zod";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { tenantScope } from "../middlewares/tenant-scope";
-import { validateBody } from "../lib/validation";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 import { pilotIngestion } from "../services/prism-pilot-ingestion";
 import { pilotChangeTracker } from "../services/prism-pilot-change-tracker";
 import { pilotReview, pilotSignoff } from "../services/prism-pilot-review";
@@ -181,7 +181,7 @@ router.get("/today/brief", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/today/brief/generate", async (req: Request, res: Response) => {
+router.post("/today/brief/generate", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const brief = await pilotChangeTracker.generateMorningBrief(getOrgId(req), req.user!.id);
     res.json({ brief });
@@ -199,7 +199,7 @@ router.get("/today/quiet-risks", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/today/detect-risks", async (req: Request, res: Response) => {
+router.post("/today/detect-risks", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const newRisks = await pilotChangeTracker.detectQuietRisks(getOrgId(req));
     res.json({ detected: newRisks.length, risks: newRisks });
@@ -208,7 +208,7 @@ router.post("/today/detect-risks", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/today/next-actions", async (req: Request, res: Response) => {
+router.get("/today/next-actions", validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const matterId = req.query.matterId ? parseInt(req.query.matterId as string) : undefined;
     const actions = await pilotChangeTracker.getNextActions(getOrgId(req), matterId);
@@ -218,7 +218,7 @@ router.get("/today/next-actions", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/today/next-actions/:id/complete", async (req: Request, res: Response) => {
+router.post("/today/next-actions/:id/complete", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const result = await pilotChangeTracker.completeAction(getOrgId(req), parseInt(req.params.id as string));
     res.json({ action: result[0] });
@@ -268,7 +268,7 @@ router.get("/matter-desk/:id", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/what-changed", async (req: Request, res: Response) => {
+router.get("/what-changed", validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const matterId = req.query.matterId ? parseInt(req.query.matterId as string) : undefined;
     const hours = parseInt(req.query.hours as string) || 24;
@@ -323,7 +323,7 @@ router.post("/what-changed/mark-read", validateBody(MarkReadSchema), async (req:
   }
 });
 
-router.get("/reviews", async (req: Request, res: Response) => {
+router.get("/reviews", validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const matterId = req.query.matterId ? parseInt(req.query.matterId as string) : undefined;
     const state = req.query.state as string | undefined;
@@ -363,7 +363,7 @@ router.patch("/reviews/:id/state", validateBody(ReviewStateSchema), async (req: 
   }
 });
 
-router.post("/reviews/:id/submit-signoff", async (req: Request, res: Response) => {
+router.post("/reviews/:id/submit-signoff", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const signoff = await pilotReview.submitForSignoff(getOrgId(req), parseInt(req.params.id as string), req.user!.id);
     res.json({ signoff });
@@ -372,7 +372,7 @@ router.post("/reviews/:id/submit-signoff", async (req: Request, res: Response) =
   }
 });
 
-router.get("/signoffs", async (req: Request, res: Response) => {
+router.get("/signoffs", validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const status = req.query.status as string | undefined;
     const signoffs = await pilotSignoff.getAll(getOrgId(req), { status });
@@ -401,7 +401,7 @@ router.post("/signoffs/:id/resolve", validateBody(SignoffResolveSchema), async (
   }
 });
 
-router.get("/exports", async (req: Request, res: Response) => {
+router.get("/exports", validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const matterId = req.query.matterId ? parseInt(req.query.matterId as string) : undefined;
     const exports = await pilotExport.getExports(getOrgId(req), { matterId });
@@ -458,7 +458,7 @@ router.post("/ingest/file", validateBody(IngestFileSchema), async (req: Request,
   }
 });
 
-router.get("/admin/jobs", requireRole("super_admin", "admin"), async (req: Request, res: Response) => {
+router.get("/admin/jobs", requireRole("super_admin", "admin"), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const status = req.query.status as string | undefined;
     const jobs = await pilotIngestion.getJobs(getOrgId(req), { status });

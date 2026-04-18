@@ -4,6 +4,7 @@ import { services } from "@szl-holdings/services";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { sendSuccess, sendCreated, sendBadRequest, sendError, handleRouteError } from "../lib/api-response";
 import { logger } from "../lib/logger";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -76,7 +77,7 @@ Respond in valid JSON with this exact structure:
   };
 }
 
-router.post("/alloy/meetings/capture", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/alloy/meetings/capture", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { title, transcript, recordingUrl, meetingDate, durationMinutes, attendees = [], metadata } = req.body as {
       title: string;
@@ -172,7 +173,7 @@ router.post("/alloy/meetings/capture", authMiddleware(), async (req: Request, re
   }
 });
 
-router.get("/alloy/meetings", authMiddleware(), async (req: Request, res: Response) => {
+router.get("/alloy/meetings", authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { status, limit: limitStr = "20" } = req.query as Record<string, string>;
     const limit = Math.min(parseInt(limitStr, 10), 100);
@@ -221,7 +222,7 @@ router.get("/alloy/meetings/:id/follow-up", authMiddleware(), async (req: Reques
   }
 });
 
-router.post("/alloy/meetings/prep", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/alloy/meetings/prep", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { title, attendees = [], scheduledFor, topics = [] } = req.body as {
       title: string;
@@ -274,7 +275,7 @@ Be concise and actionable.`;
   }
 });
 
-router.patch("/alloy/meetings/:id/action-items/:itemId", authMiddleware(), async (req: Request, res: Response) => {
+router.patch("/alloy/meetings/:id/action-items/:itemId", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { status, assignee, dueDate } = req.body as { status?: string; assignee?: string; dueDate?: string };
     const updates: string[] = ["updated_at = NOW()"];

@@ -32,7 +32,7 @@ import { Router, type IRouter, type Request, type Response } from "express";
 import { z } from "zod";
 import { authMiddleware } from "../middlewares/auth.js";
 import { sendSuccess, sendCreated, sendBadRequest, sendNotFound, handleRouteError } from "../lib/api-response.js";
-import { validateBody } from "../lib/validation.js";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation.js";
 import { logger } from "../lib/logger.js";
 import {
   initializeAtlasExecutionEngine,
@@ -233,7 +233,7 @@ function buildDomainRoutes(domain: string): void {
   );
 
   // ── GET /:domain/atlas/signals ──────────────────────────────────────────────
-  router.get(`${prefix}/signals`, authMiddleware({ required: false }), (req: Request, res: Response) => {
+  router.get(`${prefix}/signals`, authMiddleware({ required: false }), validateQuery(listQuerySchema), (req: Request, res: Response) => {
     try {
       const limit = Math.min(parseInt(String(req.query.limit ?? "50"), 10), 200);
       const signals = getSignals(domain, limit);
@@ -244,7 +244,7 @@ function buildDomainRoutes(domain: string): void {
   });
 
   // ── PATCH /:domain/atlas/signals/:signalId/status ───────────────────────────
-  router.patch(`${prefix}/signals/:signalId/status`, authMiddleware(), (req: Request, res: Response) => {
+  router.patch(`${prefix}/signals/:signalId/status`, authMiddleware(), validateBody(jsonObjectBodySchema), (req: Request, res: Response) => {
     try {
       const signalId = String(req.params["signalId"]);
       const { status } = req.body as { status?: AtlasSignalRecord["status"] };
@@ -266,6 +266,7 @@ function buildDomainRoutes(domain: string): void {
     `${prefix}/evaluate`,
     authMiddleware({ required: false }),
     validateBody(EvaluateSignalsSchema),
+    validateQuery(listQuerySchema),
     async (req: Request, res: Response) => {
       try {
         const body = req.body as z.infer<typeof EvaluateSignalsSchema>;
@@ -431,7 +432,7 @@ function buildDomainRoutes(domain: string): void {
   );
 
   // ── GET /:domain/atlas/evidence ─────────────────────────────────────────────
-  router.get(`${prefix}/evidence`, authMiddleware({ required: false }), (req: Request, res: Response) => {
+  router.get(`${prefix}/evidence`, authMiddleware({ required: false }), validateQuery(listQuerySchema), (req: Request, res: Response) => {
     try {
       const workflowId = req.query.workflowId as string | undefined;
       const evidence = getEvidence(domain, workflowId);
@@ -471,7 +472,7 @@ function buildDomainRoutes(domain: string): void {
   );
 
   // ── GET /:domain/atlas/outcomes ─────────────────────────────────────────────
-  router.get(`${prefix}/outcomes`, authMiddleware({ required: false }), (req: Request, res: Response) => {
+  router.get(`${prefix}/outcomes`, authMiddleware({ required: false }), validateQuery(listQuerySchema), (req: Request, res: Response) => {
     try {
       const limit = Math.min(parseInt(String(req.query.limit ?? "50"), 10), 200);
       const outcomes = getOutcomes(domain, limit);
@@ -506,7 +507,7 @@ function buildDomainRoutes(domain: string): void {
   });
 
   // ── POST /:domain/atlas/evaluation-hooks/replay ──────────────────────────────
-  router.post(`${prefix}/evaluation-hooks/replay`, authMiddleware({ required: false }), async (req: Request, res: Response) => {
+  router.post(`${prefix}/evaluation-hooks/replay`, authMiddleware({ required: false }), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
     try {
       const { hookId, isDryRun, isSimulation } = req.body as { hookId?: string; isDryRun?: boolean; isSimulation?: boolean };
       if (!hookId) { sendBadRequest(res, "hookId is required"); return; }

@@ -29,7 +29,7 @@ import {
   sendBadRequest,
   handleRouteError,
 } from "../lib/api-response";
-import { validateBody } from "../lib/validation";
+import {validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 import { logger } from "../lib/logger";
 import { deliverWebhookEvent } from "./webhooks";
 import {
@@ -929,6 +929,7 @@ router.get(
 router.get(
   "/decisioning/runs",
   authMiddleware(),
+  validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
       const status = req.query.status as string | undefined;
@@ -987,6 +988,7 @@ router.post(
   "/decisioning/policies",
   authMiddleware(),
   requireRole("super_admin", "admin"),
+  validateBody(jsonObjectBodySchema),
   (req: Request, res: Response) => {
     try {
       const parsed = PolicySchema.safeParse(req.body);
@@ -1060,6 +1062,7 @@ const ProveSchema = z.object({
 router.post(
   "/decisioning/runs/:runId/outcome",
   authMiddleware(),
+  validateBody(jsonObjectBodySchema),
   async (req: Request, res: Response) => {
     try {
       const runId = req.params.runId as string;
@@ -1110,6 +1113,7 @@ router.post(
 router.post(
   "/decisioning/runs/:runId/prove",
   authMiddleware(),
+  validateBody(jsonObjectBodySchema),
   async (req: Request, res: Response) => {
     try {
       const runId = req.params.runId as string;

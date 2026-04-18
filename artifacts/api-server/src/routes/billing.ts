@@ -6,7 +6,7 @@ import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 import { services } from "@szl-holdings/services";
 import { logger } from "../lib/logger";
 import { isFlagEnabled } from "../lib/platform-flags";
-import { validateBody, billingCheckoutSchema, billingCustomerPortalSchema, billingCommandSubscribeSchema, stripeCheckoutSchema, planSubscribeSchema, cancelSubscriptionSchema, updateSubscriptionSchema } from "../lib/validation";
+import { validateBody, billingCheckoutSchema, billingCustomerPortalSchema, billingCommandSubscribeSchema, stripeCheckoutSchema, planSubscribeSchema, cancelSubscriptionSchema, updateSubscriptionSchema, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 import { z } from "zod";
 
 const router: IRouter = Router();
@@ -34,7 +34,7 @@ router.get("/billing/plans/:id", authMiddleware(), async (req, res) => {
   }
 });
 
-router.get("/billing/subscriptions", authMiddleware(), requireRole("ops", "analyst"), async (req, res) => {
+router.get("/billing/subscriptions", authMiddleware(), requireRole("ops", "analyst"), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { limit, offset, page } = parsePagination(req.query as Record<string, unknown>);
     const subs = await db.select().from(subscriptionsTable).orderBy(desc(subscriptionsTable.createdAt)).limit(limit).offset(offset);
@@ -44,7 +44,7 @@ router.get("/billing/subscriptions", authMiddleware(), requireRole("ops", "analy
   }
 });
 
-router.get("/billing/invoices", authMiddleware(), requireRole("ops", "analyst"), async (req, res) => {
+router.get("/billing/invoices", authMiddleware(), requireRole("ops", "analyst"), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { limit, offset, page } = parsePagination(req.query as Record<string, unknown>);
     const invs = await db.select().from(invoicesTable).orderBy(desc(invoicesTable.createdAt)).limit(limit).offset(offset);
@@ -91,7 +91,7 @@ router.post("/billing/checkout", validateBody(billingCheckoutSchema), async (req
   }
 });
 
-router.get("/billing/subscription-status", async (req: Request, res: Response) => {
+router.get("/billing/subscription-status", validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const customerEmail = req.query.email as string | undefined;
     const customerId = req.query.customerId as string | undefined;
@@ -161,7 +161,7 @@ router.get("/billing/checkout-session/:sessionId", async (req: Request, res: Res
   }
 });
 
-router.get("/billing/stripe-invoices", async (req: Request, res: Response) => {
+router.get("/billing/stripe-invoices", validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const customerId = req.query.customerId as string | undefined;
     const invoices = await services.stripe.listInvoices(customerId);
@@ -537,7 +537,7 @@ router.post("/billing/terra/subscribe", authMiddleware({ required: false }), val
   }
 });
 
-router.post("/billing/terra/metered-usage", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/billing/terra/metered-usage", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { subscriptionItemId, quantity, action, timestamp } = req.body as {
       subscriptionItemId?: string;
@@ -858,7 +858,7 @@ router.get("/billing/revenue-analytics", authMiddleware(), requireRole("ops", "a
   }
 });
 
-router.post("/billing/firestorm/invoice", authMiddleware(), requireRole("admin", "super_admin"), async (req: Request, res: Response) => {
+router.post("/billing/firestorm/invoice", authMiddleware(), requireRole("admin", "super_admin"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { customerId, lineItems, dueDate, notes } = req.body as {
       customerId?: string;

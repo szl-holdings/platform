@@ -14,7 +14,7 @@ import { eq, desc, sql } from "drizzle-orm";
 import { sendSuccess, sendNotFound, sendError, handleRouteError, parsePagination } from "../lib/api-response";
 import { authMiddleware, parseIdParam } from "../middlewares/auth";
 import { z } from "zod";
-import { validateBody } from "../lib/validation";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const createCampaignSchema = z.object({
   name: z.string().min(1).max(200),
@@ -71,7 +71,7 @@ const updateReviewSchema = createReviewSchema.partial();
 
 const router: IRouter = Router();
 
-router.get("/dreamscape/campaigns", authMiddleware(), async (req, res) => {
+router.get("/dreamscape/campaigns", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const rows = await db.select().from(dreamscapeCampaignsTable).orderBy(desc(dreamscapeCampaignsTable.createdAt)).limit(limit).offset(offset);
@@ -236,7 +236,7 @@ router.post("/dreamscape/voice-assets", authMiddleware(), validateBody(createVoi
   }
 });
 
-router.patch("/dreamscape/voice-assets/:id", authMiddleware(), async (req, res) => {
+router.patch("/dreamscape/voice-assets/:id", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(dreamscapeVoiceAssetsTable).set(req.body).where(eq(dreamscapeVoiceAssetsTable.id, id)).returning();

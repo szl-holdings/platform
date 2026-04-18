@@ -17,6 +17,7 @@ import {
 } from "@szl-holdings/db";
 import { eq, desc, asc, and, gte, count, sql } from "drizzle-orm";
 import { authMiddleware } from "../../middlewares/auth";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
 
 const router = Router();
 const requireAuth = authMiddleware({ required: true });
@@ -149,7 +150,7 @@ router.post("/carousels/:id/publish-linkedin", requireAuth, async (req: Request,
 
 // ─── PDF Carousel Export ──────────────────────────────────────────────────────
 
-router.get("/carousels/:id/export-pdf", async (req: Request, res: Response): Promise<void> => {
+router.get("/carousels/:id/export-pdf", validateQuery(listQuerySchema), async (req: Request, res: Response): Promise<void> => {
   const [carousel] = await db.select().from(dosCarouselProjectsTable).where(eq(dosCarouselProjectsTable.id, Number(req.params.id)));
   if (!carousel) return void res.status(404).json({ error: "Carousel not found" });
 
@@ -258,7 +259,7 @@ router.post("/analytics/pageview", async (req: Request, res: Response): Promise<
   res.status(201).json(pv);
 });
 
-router.get("/analytics/dashboard", requireAuth, async (req: Request, res: Response): Promise<void> => {
+router.get("/analytics/dashboard", requireAuth, validateQuery(listQuerySchema), async (req: Request, res: Response): Promise<void> => {
   const period = req.query.period === "monthly" ? "monthly" : "weekly";
   const windowMs = period === "monthly" ? 30 * 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000;
   const windowStart = new Date(Date.now() - windowMs);

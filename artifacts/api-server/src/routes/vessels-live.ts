@@ -1,4 +1,5 @@
 import { Router, type IRouter, type RequestHandler } from "express";
+import { validateQuery, listQuerySchema } from "../lib/validation.js";
 import { LRUCache } from "lru-cache";
 import rateLimit from "express-rate-limit";
 import { sendSuccess, handleRouteError } from "../lib/api-response";
@@ -181,7 +182,7 @@ async function fetchBarentsWatchAis(): Promise<{ vessels: LiveVessel[]; source: 
   }
 }
 
-router.get("/vessels/live/ais", vesLiveLimit, authMiddleware({ required: false }), async (req, res) => {
+router.get("/vessels/live/ais", vesLiveLimit, authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const provider = (req.query.provider as string) ?? "digitraffic";
     const cacheKey = `ais-${provider}`;
@@ -291,7 +292,7 @@ router.get("/vessels/live/vessel-details/:mmsi", vesLiveLimit, authMiddleware({ 
   } catch (err) { handleRouteError(res, err, "Failed to fetch vessel details"); }
 });
 
-router.get("/vessels/live/weather", vesLiveLimit, authMiddleware({ required: false }), async (req, res) => {
+router.get("/vessels/live/weather", vesLiveLimit, authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const lat = parseFloat(req.query.lat as string) || 60.0;
     const lon = parseFloat(req.query.lon as string) || 25.0;

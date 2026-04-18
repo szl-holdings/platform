@@ -4,7 +4,7 @@ import type { RequestHandler } from "express";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
 import { z } from "zod";
-import { validateBody } from "../lib/validation";
+import { validateBody, jsonObjectBodySchema} from "../lib/validation";
 
 const simulateSchema = z.object({
   scenarioId: z.string().min(1).max(200),
@@ -343,7 +343,7 @@ router.post("/monte-carlo/compare", simulationLimiter, authMiddleware(), validat
   }
 });
 
-router.post("/monte-carlo/calibrate", authMiddleware(), (req, res) => {
+router.post("/monte-carlo/calibrate", authMiddleware(), validateBody(jsonObjectBodySchema), (req, res) => {
   try {
     const { scenarioId, historicalData, simulationJobId } = req.body ?? {};
     if (!scenarioId) { sendBadRequest(res, "scenarioId is required"); return; }
@@ -361,7 +361,7 @@ router.post("/monte-carlo/calibrate", authMiddleware(), (req, res) => {
   }
 });
 
-router.post("/monte-carlo/backtest", authMiddleware(), (req, res) => {
+router.post("/monte-carlo/backtest", authMiddleware(), validateBody(jsonObjectBodySchema), (req, res) => {
   try {
     const { scenarioId, historicalData, simulationJobId, outputId } = req.body ?? {};
     if (!scenarioId) { sendBadRequest(res, "scenarioId is required"); return; }
@@ -380,7 +380,7 @@ router.post("/monte-carlo/backtest", authMiddleware(), (req, res) => {
   }
 });
 
-router.post("/monte-carlo/cleanup", authMiddleware(), (req, res) => {
+router.post("/monte-carlo/cleanup", authMiddleware(), validateBody(jsonObjectBodySchema), (req, res) => {
   if (!isAdmin(req)) { res.status(403).json({ error: "Forbidden: admin role required" }); return; }
   try {
     cleanupOldJobs();

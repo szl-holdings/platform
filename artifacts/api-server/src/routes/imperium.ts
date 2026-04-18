@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { authMiddleware } from "../middlewares/auth";
+import { validateBody, jsonObjectBodySchema } from "../lib/validation";
 
 const router = Router();
 
@@ -234,7 +235,7 @@ router.get("/imperium/centurion/profiles", (_req, res) => {
   });
 });
 
-router.post("/imperium/centurion/query", (req, res) => {
+router.post("/imperium/centurion/query", validateBody(jsonObjectBodySchema), (req, res) => {
   const { query, centurionId, clearance } = req.body as {
     query?: string;
     centurionId?: string;

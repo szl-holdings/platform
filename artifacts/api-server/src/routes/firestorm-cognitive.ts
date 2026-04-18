@@ -13,6 +13,7 @@
  */
 
 import { Router, type IRouter } from "express";
+import { validateQuery, listQuerySchema } from "../lib/validation.js";
 import {
   db,
   firestormIncidentsTable,
@@ -211,6 +212,7 @@ router.get(
   "/firestorm/cognitive/identity-blast-radius",
   ...ztRead,
   dataControls({ sensitivity: "CONFIDENTIAL", retention: "IR-90D", exportRestricted: true }),
+  validateQuery(listQuerySchema),
   async (req, res) => {
     try {
       const identityId = (req.query["identityId"] as string | undefined) ?? "j.smith@corp.com";
@@ -379,6 +381,7 @@ router.get(
   "/firestorm/cognitive/incident-proof-chain",
   ...ztRead,
   dataControls({ sensitivity: "CONFIDENTIAL", retention: "IR-90D", exportRestricted: true }),
+  validateQuery(listQuerySchema),
   async (req, res) => {
     try {
       const rawId = req.query["incidentId"] as string | undefined;

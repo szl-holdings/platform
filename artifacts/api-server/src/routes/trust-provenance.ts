@@ -1,6 +1,7 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { sendSuccess, handleRouteError } from "../lib/api-response";
 import { randomUUID } from "crypto";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router = Router();
 
@@ -587,7 +588,7 @@ function simulationResults(domain: Domain) {
 
 const policyAppealLog: Array<{ id: string; requestId: string; action: string; justification?: string; recordedAt: string }> = [];
 
-router.get("/proof-chain", (req: Request, res: Response) => {
+router.get("/proof-chain", validateQuery(listQuerySchema), (req: Request, res: Response) => {
   try {
     const domain = normalizeDomain(req.query.domain);
     const records = proofChain(domain);
@@ -597,7 +598,7 @@ router.get("/proof-chain", (req: Request, res: Response) => {
   }
 });
 
-router.get("/audit-log", (req: Request, res: Response) => {
+router.get("/audit-log", validateQuery(listQuerySchema), (req: Request, res: Response) => {
   try {
     const domain = normalizeDomain(req.query.domain);
     const rawLimit = parseInt(String(req.query.limit ?? "50"), 10);
@@ -609,7 +610,7 @@ router.get("/audit-log", (req: Request, res: Response) => {
   }
 });
 
-router.post("/audit-log/policy-appeal", (req: Request, res: Response) => {
+router.post("/audit-log/policy-appeal", validateBody(jsonObjectBodySchema), (req: Request, res: Response) => {
   try {
     const { requestId, action, justification } = req.body as {
       requestId?: string;
@@ -635,7 +636,7 @@ router.post("/audit-log/policy-appeal", (req: Request, res: Response) => {
   }
 });
 
-router.get("/covenant/decisions", (req: Request, res: Response) => {
+router.get("/covenant/decisions", validateQuery(listQuerySchema), (req: Request, res: Response) => {
   try {
     const domain = normalizeDomain(req.query.domain);
     const decisions = covenantDecisions(domain);
@@ -645,7 +646,7 @@ router.get("/covenant/decisions", (req: Request, res: Response) => {
   }
 });
 
-router.get("/simulations/results", (req: Request, res: Response) => {
+router.get("/simulations/results", validateQuery(listQuerySchema), (req: Request, res: Response) => {
   try {
     const domain = normalizeDomain(req.query.domain);
     const result = simulationResults(domain);

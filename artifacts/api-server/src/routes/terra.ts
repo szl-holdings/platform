@@ -13,6 +13,7 @@ import {
   getEnterpriseFeatureFlags,
 } from "../lib/terra-enterprise-ingestion";
 import { services } from "@szl-holdings/services";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -138,7 +139,7 @@ router.get("/terra/sector-performance", terraRateLimit, authMiddleware({ require
   } catch (err) { handleRouteError(res, err, "Failed to fetch sector performance"); }
 });
 
-router.get("/terra/geocode", authMiddleware({ required: false }), async (req: Request, res: Response) => {
+router.get("/terra/geocode", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const address = req.query.address as string | undefined;
     if (!address) {
@@ -153,7 +154,7 @@ router.get("/terra/geocode", authMiddleware({ required: false }), async (req: Re
   }
 });
 
-router.get("/terra/reverse-geocode", authMiddleware({ required: false }), async (req: Request, res: Response) => {
+router.get("/terra/reverse-geocode", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const lat = parseFloat(req.query.lat as string);
     const lng = parseFloat(req.query.lng as string);
@@ -174,7 +175,7 @@ router.get("/terra/geocoding-status", async (_req: Request, res: Response) => {
   sendSuccess(res, getGeocodingProviderStatus());
 });
 
-router.get("/terra/mls/listings", terraRateLimit, authMiddleware({ required: false }), async (req: Request, res: Response) => {
+router.get("/terra/mls/listings", terraRateLimit, authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const status = req.query.status as string | undefined;
     const postalCode = req.query.postalCode as string | undefined;
@@ -198,7 +199,7 @@ router.get("/terra/mls/listings", terraRateLimit, authMiddleware({ required: fal
   }
 });
 
-router.get("/terra/commercial/properties", terraRateLimit, authMiddleware({ required: false }), async (req: Request, res: Response) => {
+router.get("/terra/commercial/properties", terraRateLimit, authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const propertyType = req.query.propertyType as string | undefined;
     const zipCode = req.query.zipCode as string | undefined;
@@ -222,7 +223,7 @@ router.get("/terra/commercial/properties", terraRateLimit, authMiddleware({ requ
   }
 });
 
-router.get("/terra/commercial/comps", terraRateLimit, authMiddleware({ required: false }), async (req: Request, res: Response) => {
+router.get("/terra/commercial/comps", terraRateLimit, authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const compType = req.query.compType as "lease" | "sale" | undefined;
     const propertyType = req.query.propertyType as string | undefined;

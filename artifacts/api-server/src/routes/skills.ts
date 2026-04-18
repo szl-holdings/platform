@@ -18,10 +18,11 @@ import {
   sendNotFound,
   sendBadRequest,
 } from "../lib/api-response";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
-router.get("/skills", authMiddleware(), async (req, res) => {
+router.get("/skills", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const query: SkillRegistryQuery = {};
 
@@ -74,7 +75,7 @@ router.get("/skills/:id", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/skills/:id/run", authMiddleware(), async (req, res) => {
+router.post("/skills/:id/run", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { inputs = {} } = req.body as { inputs?: Record<string, unknown> };
 
@@ -97,7 +98,7 @@ router.post("/skills/:id/run", authMiddleware(), async (req, res) => {
   }
 });
 
-router.get("/skills/:id/runs", authMiddleware(), async (req, res) => {
+router.get("/skills/:id/runs", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const skill = defaultSkillRegistry.getSkill(req.params.id);
     if (!skill) {

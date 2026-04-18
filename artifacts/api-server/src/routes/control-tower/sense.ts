@@ -3,10 +3,11 @@ import { requireRole } from "../../middlewares/auth";
 import { sendSuccess, sendBadRequest, handleRouteError } from "../../lib/api-response";
 import { agentEventBus } from "../../lib/event-bus";
 import { buildSignalBusSnapshot } from "./shared";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
 
 const router = Router();
 
-router.get("/control-tower/sense/signals", (req: Request, res: Response) => {
+router.get("/control-tower/sense/signals", validateQuery(listQuerySchema), (req: Request, res: Response) => {
   try {
     const domain = req.query.domain as string | undefined;
     const severity = req.query.severity as string | undefined;
@@ -22,7 +23,7 @@ router.get("/control-tower/sense/signals", (req: Request, res: Response) => {
   }
 });
 
-router.post("/control-tower/sense/emit", requireRole("super_admin", "ops", "exec"), async (req: Request, res: Response) => {
+router.post("/control-tower/sense/emit", requireRole("super_admin", "ops", "exec"), validateBody(jsonObjectBodySchema), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { type, sourceAgent, sourceDomain, payload, severity, correlationId } = req.body as {
       type?: string; sourceAgent?: string; sourceDomain?: string;

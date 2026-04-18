@@ -6,9 +6,10 @@ import {
   ConvertDistressToLeadSchema, ConvertLeadToDealSchema, auditLog, nowStr,
 } from "./_shared.js";
 import type { InsertTerraLead, InsertTerraDeal } from "@szl-holdings/db";
+import { validateBody, jsonObjectBodySchema } from "../../lib/validation";
 
 export function register(router: IRouter): void {
-  router.post("/terra/convert/distress-to-lead", authMiddleware({ required: true }), async (req, res) => {
+  router.post("/terra/convert/distress-to-lead", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
     try {
       const parsed = ConvertDistressToLeadSchema.safeParse(req.body ?? {});
       if (!parsed.success) {
@@ -85,7 +86,7 @@ export function register(router: IRouter): void {
     } catch (err) { handleRouteError(res, err, "Failed to convert distress property to lead"); }
   });
 
-  router.post("/terra/convert/lead-to-deal", authMiddleware({ required: true }), async (req, res) => {
+  router.post("/terra/convert/lead-to-deal", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
     try {
       const parsed = ConvertLeadToDealSchema.safeParse(req.body ?? {});
       if (!parsed.success) {

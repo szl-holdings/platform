@@ -16,7 +16,7 @@ import { privilegeEngine } from "../services/prism-privilege-engine";
 import { modelRouter } from "../services/prism-model-router";
 import { logger } from "../lib/logger";
 import { z } from "zod";
-import { validateBody } from "../lib/validation";
+import { validateBody, validateQuery, listQuerySchema} from "../lib/validation";
 
 const docketLinkSchema = z.object({
   docketEntryId: z.string().max(200).optional(),
@@ -166,7 +166,7 @@ const courtListenerLimiter = rateLimit({
 
 /* ━━━ CourtListener: Court Data Feed ━━━ */
 
-router.get("/court/filings/recent", authMiddleware(), courtListenerLimiter, async (req, res) => {
+router.get("/court/filings/recent", authMiddleware(), courtListenerLimiter, validateQuery(listQuerySchema), async (req, res) => {
   try {
     const court = req.query.court as string | undefined;
     const limit = Math.min(parseInt((req.query.limit as string) ?? "15", 10), 20);
@@ -177,7 +177,7 @@ router.get("/court/filings/recent", authMiddleware(), courtListenerLimiter, asyn
   }
 });
 
-router.get("/court/dockets/search", authMiddleware(), courtListenerLimiter, async (req, res) => {
+router.get("/court/dockets/search", authMiddleware(), courtListenerLimiter, validateQuery(listQuerySchema), async (req, res) => {
   try {
     const q = req.query.q as string;
     const court = req.query.court as string | undefined;
@@ -201,7 +201,7 @@ router.get("/court/dockets/:id", authMiddleware(), courtListenerLimiter, async (
   }
 });
 
-router.get("/court/opinions/search", authMiddleware(), courtListenerLimiter, async (req, res) => {
+router.get("/court/opinions/search", authMiddleware(), courtListenerLimiter, validateQuery(listQuerySchema), async (req, res) => {
   try {
     const q = req.query.q as string;
     const court = req.query.court as string | undefined;
@@ -214,7 +214,7 @@ router.get("/court/opinions/search", authMiddleware(), courtListenerLimiter, asy
   }
 });
 
-router.get("/court/judges/search", authMiddleware(), courtListenerLimiter, async (req, res) => {
+router.get("/court/judges/search", authMiddleware(), courtListenerLimiter, validateQuery(listQuerySchema), async (req, res) => {
   try {
     const q = req.query.q as string;
     const court = req.query.court as string | undefined;
@@ -329,7 +329,7 @@ router.get("/privilege/stats", authMiddleware(), async (req, res) => {
   }
 });
 
-router.get("/privilege/log", authMiddleware(), async (req, res) => {
+router.get("/privilege/log", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     if (!hasAttorneyRole(req)) return sendForbidden(res, "Attorney role required");
     const matterId = req.query.matterId ? parseInt(req.query.matterId as string, 10) : undefined;
@@ -357,7 +357,7 @@ router.get("/privilege/log/:matterId/production", authMiddleware(), async (req, 
   }
 });
 
-router.get("/privilege/review-queue", authMiddleware(), async (req, res) => {
+router.get("/privilege/review-queue", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     if (!hasAttorneyRole(req)) return sendForbidden(res, "Attorney role required");
     const matterId = req.query.matterId ? parseInt(req.query.matterId as string, 10) : undefined;
@@ -703,7 +703,7 @@ router.post("/copilot/drafts/:draftId/advance", authMiddleware(), validateBody(d
   }
 });
 
-router.get("/copilot/drafts", authMiddleware(), async (req, res) => {
+router.get("/copilot/drafts", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     if (!hasAttorneyRole(req)) return sendForbidden(res, "Attorney role required");
     const matterId = req.query.matterId ? parseInt(req.query.matterId as string, 10) : undefined;

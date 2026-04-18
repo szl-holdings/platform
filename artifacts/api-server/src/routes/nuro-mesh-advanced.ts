@@ -22,6 +22,7 @@ import { trajectoryStore } from "@szl-holdings/ai-engine";
 import { behavioralTracer } from "@szl-holdings/ai-engine";
 import { budgetManager, MODEL_PRICING } from "@szl-holdings/ai-engine";
 import { rlMemoryManager } from "@szl-holdings/ai-engine";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router = Router();
 
@@ -38,7 +39,7 @@ function getOrgId(req: Request): number {
   return orgId;
 }
 
-router.get("/nuro-mesh/kernel/audit-trail", (req: Request, res: Response) => {
+router.get("/nuro-mesh/kernel/audit-trail", validateQuery(listQuerySchema), (req: Request, res: Response) => {
   const limit = Math.min(500, parseInt(String(req.query.limit ?? "50"), 10));
   const all = getKernelAuditTrail();
   res.json({
@@ -57,7 +58,7 @@ router.get("/nuro-mesh/kernel/verify-integrity", (_req: Request, res: Response) 
   });
 });
 
-router.post("/nuro-mesh/kernel/scope-certificate", (req: Request, res: Response) => {
+router.post("/nuro-mesh/kernel/scope-certificate", validateBody(jsonObjectBodySchema), (req: Request, res: Response) => {
   const { agentId, allowedTools, maxRiskLevel, ttlMs } = req.body as {
     agentId?: string;
     allowedTools?: string[];
@@ -74,14 +75,14 @@ router.post("/nuro-mesh/kernel/scope-certificate", (req: Request, res: Response)
   res.json({ certificate: cert, issuedAt: cert.issuedAt, expiresAt: cert.expiresAt });
 });
 
-router.get("/nuro-mesh/flywheel/trajectories", (req: Request, res: Response) => {
+router.get("/nuro-mesh/flywheel/trajectories", validateQuery(listQuerySchema), (req: Request, res: Response) => {
   const limit = Math.min(200, parseInt(String(req.query.limit ?? "50"), 10));
   const status = req.query.status as string | undefined;
   const trajectories = trajectoryStore.getTrajectories(limit, status as Parameters<typeof trajectoryStore.getTrajectories>[1]);
   res.json({ trajectories, total: trajectories.length, limit });
 });
 
-router.get("/nuro-mesh/flywheel/golden-runs", (req: Request, res: Response) => {
+router.get("/nuro-mesh/flywheel/golden-runs", validateQuery(listQuerySchema), (req: Request, res: Response) => {
   const limit = Math.min(50, parseInt(String(req.query.limit ?? "20"), 10));
   const runs = trajectoryStore.getGoldenRuns(limit);
   res.json({ goldenRuns: runs, total: runs.length });
@@ -91,7 +92,7 @@ router.get("/nuro-mesh/flywheel/stats", (_req: Request, res: Response) => {
   res.json(trajectoryStore.getStats());
 });
 
-router.post("/nuro-mesh/flywheel/feedback", (req: Request, res: Response) => {
+router.post("/nuro-mesh/flywheel/feedback", validateBody(jsonObjectBodySchema), (req: Request, res: Response) => {
   const { trajectoryId, score } = req.body as { trajectoryId?: string; score?: number };
   if (!trajectoryId || typeof score !== "number") {
     sendBadRequest(res, "trajectoryId and score (number -1 to 1) are required");
@@ -105,7 +106,7 @@ router.post("/nuro-mesh/flywheel/feedback", (req: Request, res: Response) => {
   res.json({ success: true, trajectoryId, score });
 });
 
-router.get("/nuro-mesh/observability/traces", (req: Request, res: Response) => {
+router.get("/nuro-mesh/observability/traces", validateQuery(listQuerySchema), (req: Request, res: Response) => {
   const limit = Math.min(100, parseInt(String(req.query.limit ?? "20"), 10));
   const traces = behavioralTracer.getRecentTraces(limit, getOrgId(req));
   res.json({ traces, total: traces.length });
@@ -124,7 +125,7 @@ router.get("/nuro-mesh/observability/stats", (req: Request, res: Response) => {
   res.json(behavioralTracer.getObservabilityStats(getOrgId(req)));
 });
 
-router.get("/nuro-mesh/cost/estimate", (req: Request, res: Response) => {
+router.get("/nuro-mesh/cost/estimate", validateQuery(listQuerySchema), (req: Request, res: Response) => {
   const { query, agents, workflowId } = req.query as {
     query?: string;
     agents?: string;
@@ -141,7 +142,7 @@ router.get("/nuro-mesh/cost/estimate", (req: Request, res: Response) => {
   res.json(estimate);
 });
 
-router.get("/nuro-mesh/cost/analytics", (req: Request, res: Response) => {
+router.get("/nuro-mesh/cost/analytics", validateQuery(listQuerySchema), (req: Request, res: Response) => {
   const limit = Math.min(500, parseInt(String(req.query.limit ?? "100"), 10));
   const analytics = budgetManager.getSpendAnalytics(getOrgId(req), limit);
   res.json({
@@ -156,7 +157,7 @@ router.get("/nuro-mesh/cost/budget/:workflowId", (req: Request, res: Response) =
   res.json({ workflowId: req.params.workflowId, ...status });
 });
 
-router.post("/nuro-mesh/cost/budget", (req: Request, res: Response) => {
+router.post("/nuro-mesh/cost/budget", validateBody(jsonObjectBodySchema), (req: Request, res: Response) => {
   const { workflowId, budgetUsd, warningThreshold, hardCapThreshold, allowModelDowngrade } = req.body as {
     workflowId?: string;
     budgetUsd?: number;
@@ -188,7 +189,7 @@ router.get("/nuro-mesh/memory/stats/:agentId", (req: Request, res: Response) => 
   res.json({ agentId: req.params.agentId, ...stats, recentOperations: opLog });
 });
 
-router.post("/nuro-mesh/memory/retrieve", async (req: Request, res: Response) => {
+router.post("/nuro-mesh/memory/retrieve", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   const { agentId, query, tier, maxResults } = req.body as {
     agentId?: string;
     query?: string;
@@ -210,7 +211,7 @@ router.post("/nuro-mesh/memory/retrieve", async (req: Request, res: Response) =>
   res.json(result);
 });
 
-router.post("/nuro-mesh/memory/reward", (req: Request, res: Response) => {
+router.post("/nuro-mesh/memory/reward", validateBody(jsonObjectBodySchema), (req: Request, res: Response) => {
   const { signals } = req.body as { signals?: Array<{ memoryId: string; taskSuccess: boolean; userFeedbackScore: number; confidenceDelta: number; latencyImpactMs: number }> };
   if (!signals || !Array.isArray(signals)) {
     sendBadRequest(res, "signals array is required");

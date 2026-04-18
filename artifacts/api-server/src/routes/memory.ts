@@ -22,6 +22,7 @@ import {
 } from "@workspace/memory-fabric/behaviors";
 import { MemoryEntrySchema, MemoryTypeSchema } from "@workspace/memory-fabric/types";
 import type { MemoryEntry, MemoryType, SensitivityLevel } from "@workspace/memory-fabric/types";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -46,7 +47,7 @@ function getRequesterSensitivity(req: Request): SensitivityLevel {
   return "public";
 }
 
-router.get("/memory", authMiddleware(), async (req: Request, res: Response) => {
+router.get("/memory", authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { tier, key, scopeId, tags, includeStale, minConfidence, search, sortBy } = req.query as {
       tier?: string;
@@ -92,7 +93,7 @@ router.get("/memory", authMiddleware(), async (req: Request, res: Response) => {
   }
 });
 
-router.get("/memory/search", authMiddleware(), async (req: Request, res: Response) => {
+router.get("/memory/search", authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { q, tier } = req.query as { q?: string; tier?: string };
     if (!q) {
@@ -147,7 +148,7 @@ router.get("/memory/:id", authMiddleware(), async (req: Request, res: Response) 
   }
 });
 
-router.post("/memory", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/memory", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const now = new Date().toISOString();
     const body = req.body as Partial<MemoryEntry>;
@@ -199,7 +200,7 @@ router.post("/memory", authMiddleware(), async (req: Request, res: Response) => 
   }
 });
 
-router.put("/memory/:id", authMiddleware(), async (req: Request, res: Response) => {
+router.put("/memory/:id", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { id } = req.params as { id: string };
     const existing = memoryStore.get(id);
@@ -268,7 +269,7 @@ router.post(
   "/memory/behaviors/summarize-episodes",
   authMiddleware(),
   requireRole("admin", "super_admin"),
-  async (req: Request, res: Response) => {
+  validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
     try {
       const { scopeId, minEpisodes } = req.body as { scopeId: string; minEpisodes?: number };
       if (!scopeId) {
@@ -292,7 +293,7 @@ router.post(
   "/memory/behaviors/distill-lessons",
   authMiddleware(),
   requireRole("admin", "super_admin"),
-  async (req: Request, res: Response) => {
+  validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
     try {
       const { minFeedback } = req.body as { minFeedback?: number };
       const result = distillLessons(memoryStore, { minFeedback });

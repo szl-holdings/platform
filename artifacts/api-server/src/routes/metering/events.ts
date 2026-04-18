@@ -25,6 +25,7 @@ import { authMiddleware, requireRole, parseIdParam } from "../../middlewares/aut
 import { tenantScope, assertTenantAccess } from "../../middlewares/tenant-scope";
 import { logger } from "../../lib/logger";
 import { periodBounds, computeCharge, recomputeAggregate, checkAndEnforceQuota, meteringRateLimit } from "./shared";
+import {validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
 
 const router: IRouter = Router();
 const ADMIN_ROLES = ["admin", "super_admin", "ops"] as const;
@@ -37,6 +38,7 @@ const READ_ROLES = ["admin", "super_admin", "ops", "analyst"] as const;
 router.post(
   "/metering/events",
   authMiddleware({ required: false }),
+  validateBody(jsonObjectBodySchema),
   async (req: Request, res: Response) => {
     try {
       const {
@@ -118,6 +120,7 @@ router.post(
 router.post(
   "/metering/events/batch",
   authMiddleware({ required: false }),
+  validateBody(jsonObjectBodySchema),
   async (req: Request, res: Response) => {
     try {
       const { events } = req.body as {
@@ -192,6 +195,7 @@ router.get(
   "/metering/events",
   authMiddleware(),
   requireRole(...READ_ROLES),
+  validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
       const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : undefined;

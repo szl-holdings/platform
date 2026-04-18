@@ -6,6 +6,7 @@ import { agentScheduler } from "../lib/agent-scheduler";
 import { logger } from "../lib/logger";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { tenantScope } from "../middlewares/tenant-scope";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router = Router();
 
@@ -33,7 +34,7 @@ router.get("/agent-os/schedules", (_req, res) => {
   });
 });
 
-router.post("/agent-os/run/:agentId", authMiddleware(), requireRole("admin", "super_admin"), async (req, res) => {
+router.post("/agent-os/run/:agentId", authMiddleware(), requireRole("admin", "super_admin"), validateBody(jsonObjectBodySchema), async (req, res) => {
   const agentId = Array.isArray(req.params.agentId) ? req.params.agentId[0] : req.params.agentId;
   if (!agentId) {
     sendError(res, "agentId is required", 400);
@@ -49,7 +50,7 @@ router.post("/agent-os/run/:agentId", authMiddleware(), requireRole("admin", "su
   }
 });
 
-router.get("/agent-os/runs", (req, res) => {
+router.get("/agent-os/runs", validateQuery(listQuerySchema), (req, res) => {
   const { agentId, domain, limit } = req.query;
   const runs = agentScheduler.getRunHistory({
     agentId: agentId as string,
@@ -59,7 +60,7 @@ router.get("/agent-os/runs", (req, res) => {
   sendSuccess(res, { runs, total: runs.length });
 });
 
-router.get("/agent-os/knowledge", (req, res) => {
+router.get("/agent-os/knowledge", validateQuery(listQuerySchema), (req, res) => {
   const { domain, type, limit, since, minConfidence, tags } = req.query;
 
   const entries = knowledgeStore.query({
@@ -74,7 +75,7 @@ router.get("/agent-os/knowledge", (req, res) => {
   sendSuccess(res, { entries, total: entries.length, stats: knowledgeStore.getStats() });
 });
 
-router.get("/agent-os/events", (req, res) => {
+router.get("/agent-os/events", validateQuery(listQuerySchema), (req, res) => {
   const { type, sourceDomain, limit, since } = req.query;
   const events = agentEventBus.getHistory({
     type: type as unknown as undefined,
@@ -85,7 +86,7 @@ router.get("/agent-os/events", (req, res) => {
   sendSuccess(res, { events, stats: agentEventBus.getStats() });
 });
 
-router.get("/agent-os/feed/:domain", (req, res) => {
+router.get("/agent-os/feed/:domain", validateQuery(listQuerySchema), (req, res) => {
   const { domain } = req.params;
   const { limit } = req.query;
   const maxResults = limit ? parseInt(limit as string, 10) : 20;
@@ -137,7 +138,7 @@ router.get("/agent-os/feed/:domain", (req, res) => {
   });
 });
 
-router.get("/agent-os/feed", (req, res) => {
+router.get("/agent-os/feed", validateQuery(listQuerySchema), (req, res) => {
   const { limit } = req.query;
   const maxResults = limit ? parseInt(limit as string, 10) : 30;
 

@@ -17,13 +17,14 @@ import {
 } from "@szl-holdings/db";
 import { eq, desc, asc, and, gte, count, sql } from "drizzle-orm";
 import { authMiddleware } from "../../middlewares/auth";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
 
 const router = Router();
 const requireAuth = authMiddleware({ required: true });
 
 // ── Distribution OS Superengine: Extended Platform Connections ──
 
-router.get("/platform-connections", requireAuth, async (_req: Request, res: Response): Promise<void> => {
+router.get("/platform-connections", requireAuth, validateQuery(listQuerySchema), async (_req: Request, res: Response): Promise<void> => {
   const integrations = await db.select().from(dosIntegrationStatusTable).orderBy(asc(dosIntegrationStatusTable.provider));
   const ALL_PLATFORMS = [
     "x","linkedin","threads","bluesky","mastodon","instagram","medium","devto","hashnode","wordpress","ghost","substack","reddit"
@@ -54,7 +55,7 @@ router.post("/atomizer/atomize", requireAuth, async (req: Request, res: Response
   });
 });
 
-router.get("/atomizer/jobs/:jobId", requireAuth, async (req: Request, res: Response): Promise<void> => {
+router.get("/atomizer/jobs/:jobId", requireAuth, validateQuery(listQuerySchema), async (req: Request, res: Response): Promise<void> => {
   res.json({
     jobId: req.params.jobId,
     status: "completed",
@@ -64,7 +65,7 @@ router.get("/atomizer/jobs/:jobId", requireAuth, async (req: Request, res: Respo
 
 // ── Developer API: API Keys (mock persistence via settings) ──
 
-router.get("/api-keys", requireAuth, async (_req: Request, res: Response): Promise<void> => {
+router.get("/api-keys", requireAuth, validateQuery(listQuerySchema), async (_req: Request, res: Response): Promise<void> => {
   const settings = await db.select().from(dosSiteSettingsTable).where(
     and(eq(dosSiteSettingsTable.category, "integration"), sql`${dosSiteSettingsTable.key} LIKE 'apikey_%'`)
   );
@@ -95,7 +96,7 @@ router.delete("/api-keys/:id", requireAuth, async (req: Request, res: Response):
 
 // ── Webhook Management ──
 
-router.get("/webhook-subscriptions", requireAuth, async (_req: Request, res: Response): Promise<void> => {
+router.get("/webhook-subscriptions", requireAuth, validateQuery(listQuerySchema), async (_req: Request, res: Response): Promise<void> => {
   const webhooks = await db.select().from(dosSiteSettingsTable).where(
     and(eq(dosSiteSettingsTable.category, "integration"), sql`${dosSiteSettingsTable.key} LIKE 'webhook_%'`)
   );
@@ -133,7 +134,7 @@ router.post("/webhook-subscriptions/:id/test", requireAuth, async (req: Request,
 
 // ── oEmbed Provider ──
 
-router.get("/oembed", async (req: Request, res: Response): Promise<void> => {
+router.get("/oembed", validateQuery(listQuerySchema), async (req: Request, res: Response): Promise<void> => {
   const { url, format = "json" } = req.query as { url?: string; format?: string };
   if (!url) return void res.status(400).json({ error: "url parameter required" });
   const slug = String(url).split("/").pop() || "content";
@@ -162,7 +163,7 @@ router.get("/oembed", async (req: Request, res: Response): Promise<void> => {
 
 // ── RSS / Atom Feeds (stub responses) ──
 
-router.get("/feeds/articles.rss", async (_req: Request, res: Response): Promise<void> => {
+router.get("/feeds/articles.rss", validateQuery(listQuerySchema), async (_req: Request, res: Response): Promise<void> => {
   const articles = await db.select({
     title: dosArticlesTable.title, slug: dosArticlesTable.slug,
     excerpt: dosArticlesTable.excerpt, publishedSiteAt: dosArticlesTable.publishedSiteAt,
@@ -172,21 +173,21 @@ router.get("/feeds/articles.rss", async (_req: Request, res: Response): Promise<
   res.send(`<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>SZL Holdings — Articles</title><link>https://szlholdings.com/insights</link><description>Flagship essays and analysis from Stephen Lutar</description>${items}</channel></rss>`);
 });
 
-router.get("/feeds/newsletters.rss", async (_req: Request, res: Response): Promise<void> => {
+router.get("/feeds/newsletters.rss", validateQuery(listQuerySchema), async (_req: Request, res: Response): Promise<void> => {
   const newsletters = await db.select({ title: dosNewslettersTable.title, subtitle: dosNewslettersTable.subtitle, publishedAt: dosNewslettersTable.publishedAt }).from(dosNewslettersTable).where(eq(dosNewslettersTable.status, "published")).orderBy(desc(dosNewslettersTable.publishedAt)).limit(20);
   const items = newsletters.map(n => `<item><title><![CDATA[${n.subtitle || n.title}]]></title><link>https://szlholdings.com/newsletter</link><pubDate>${new Date(n.publishedAt || "").toUTCString()}</pubDate></item>`).join("\n");
   res.set("Content-Type", "application/rss+xml");
   res.send(`<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>SZL Holdings — Newsletter</title><link>https://szlholdings.com/newsletter</link><description>Weekly intelligence from Stephen Lutar</description>${items}</channel></rss>`);
 });
 
-router.get("/feeds/all.rss", async (_req: Request, res: Response): Promise<void> => {
+router.get("/feeds/all.rss", validateQuery(listQuerySchema), async (_req: Request, res: Response): Promise<void> => {
   res.set("Content-Type", "application/rss+xml");
   res.send(`<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>SZL Holdings — All Content</title><link>https://szlholdings.com</link><description>All published content from SZL Holdings</description></channel></rss>`);
 });
 
 // ── Growth Engine: Subscribers & Referrals ──
 
-router.get("/subscribers", requireAuth, async (req: Request, res: Response): Promise<void> => {
+router.get("/subscribers", requireAuth, validateQuery(listQuerySchema), async (req: Request, res: Response): Promise<void> => {
   const { segment, source } = req.query as { segment?: string; source?: string };
   const conditions = [];
   if (segment) conditions.push(sql`${dosLeadsTable.stage} = ${segment}`);
@@ -214,7 +215,7 @@ router.post("/subscribers/magic-link", async (req: Request, res: Response): Prom
   res.json({ success: true, magicLinkSent: true, expiresIn: 3600 });
 });
 
-router.get("/growth/referral-stats", requireAuth, async (_req: Request, res: Response): Promise<void> => {
+router.get("/growth/referral-stats", requireAuth, validateQuery(listQuerySchema), async (_req: Request, res: Response): Promise<void> => {
   const total = await db.select({ count: count() }).from(dosLeadsTable);
   const referrals = await db.select({ count: count() }).from(dosLeadsTable).where(eq(dosLeadsTable.source, "referral"));
   res.json({
@@ -231,7 +232,7 @@ router.get("/growth/referral-stats", requireAuth, async (_req: Request, res: Res
 
 // ── Cross-Platform Analytics ──
 
-router.get("/analytics/cross-platform", requireAuth, async (req: Request, res: Response): Promise<void> => {
+router.get("/analytics/cross-platform", requireAuth, validateQuery(listQuerySchema), async (req: Request, res: Response): Promise<void> => {
   const articles = await db.select({ id: dosArticlesTable.id, title: dosArticlesTable.title, slug: dosArticlesTable.slug, publishedSiteAt: dosArticlesTable.publishedSiteAt }).from(dosArticlesTable).where(eq(dosArticlesTable.siteStatus, "published")).orderBy(desc(dosArticlesTable.publishedSiteAt)).limit(20);
 
   function seededInt(seed: number, min: number, max: number): number {
@@ -276,7 +277,7 @@ router.get("/analytics/cross-platform", requireAuth, async (req: Request, res: R
   });
 });
 
-router.get("/articles/published/list", async (_req: Request, res: Response): Promise<void> => {
+router.get("/articles/published/list", validateQuery(listQuerySchema), async (_req: Request, res: Response): Promise<void> => {
   const articles = await db.select({
     id: dosArticlesTable.id,
     title: dosArticlesTable.title,
@@ -300,7 +301,7 @@ function seeded(seed: number, min: number, max: number): number {
 
 // ── Predictive Virality Engine ──
 
-router.get("/virality/scores", requireAuth, async (_req: Request, res: Response): Promise<void> => {
+router.get("/virality/scores", requireAuth, validateQuery(listQuerySchema), async (_req: Request, res: Response): Promise<void> => {
   const articles = await db.select({
     id: dosArticlesTable.id,
     title: dosArticlesTable.title,
@@ -375,7 +376,7 @@ router.post("/virality/score-content", requireAuth, async (req: Request, res: Re
 
 // ── Audience Genome Intelligence ──
 
-router.get("/audience/genome", requireAuth, async (_req: Request, res: Response): Promise<void> => {
+router.get("/audience/genome", requireAuth, validateQuery(listQuerySchema), async (_req: Request, res: Response): Promise<void> => {
   const segments = [
     { id: 1, name: "CTO / Engineering Leaders", slug: "cto-engineering", size: 2840, growthRate: 23, engagementScore: 87, conversionRate: 12, revenueContribution: 38, peakHour: 7, platforms: ["linkedin", "x"], topTopics: ["AI governance", "platform engineering", "team scaling"], psychographics: { primaryMotivation: "Staying ahead of technology shifts", contentPreference: "Data-driven frameworks", decisionStyle: "Evidence-based" } },
     { id: 2, name: "Founder / Operator", slug: "founder-operator", size: 1920, growthRate: 31, engagementScore: 92, conversionRate: 18, revenueContribution: 47, peakHour: 6, platforms: ["x", "newsletter"], topTopics: ["Business strategy", "AI tools", "Revenue growth"], psychographics: { primaryMotivation: "Scaling efficiently with less", contentPreference: "Actionable playbooks", decisionStyle: "Fast & intuitive" } },
@@ -386,7 +387,7 @@ router.get("/audience/genome", requireAuth, async (_req: Request, res: Response)
   res.json({ segments, totalAudience: segments.reduce((s, x) => s + x.size, 0), fastestGrowing: "Founder / Operator", highestRevenue: "Founder / Operator" });
 });
 
-router.get("/audience/migration", requireAuth, async (_req: Request, res: Response): Promise<void> => {
+router.get("/audience/migration", requireAuth, validateQuery(listQuerySchema), async (_req: Request, res: Response): Promise<void> => {
   res.json({
     flows: [
       { from: "X Followers", to: "Newsletter", count: 184, rate: 6.2 },
@@ -403,7 +404,7 @@ router.get("/audience/migration", requireAuth, async (_req: Request, res: Respon
 
 // ── Dynamic A/B Testing ──
 
-router.get("/ab-tests", requireAuth, async (_req: Request, res: Response): Promise<void> => {
+router.get("/ab-tests", requireAuth, validateQuery(listQuerySchema), async (_req: Request, res: Response): Promise<void> => {
   const tests = [
     { id: 1, name: "Newsletter Subject Line: AI Frameworks", testType: "headline", status: "winner-declared", winnerVariant: "B", currentSignificance: 97, totalImpressions: 4280, variants: [{ id: "A", label: "The 3-Layer AI Stack Every Operator Needs", openRate: 31.2, clicks: 148 }, { id: "B", label: "Your AI Stack Is Wrong. Here's the Fix.", openRate: 41.7, clicks: 219 }], uplift: "+33.7%", startedAt: "2026-04-01", concludedAt: "2026-04-08" },
     { id: 2, name: "Article CTA: Strategy Call vs. Newsletter", testType: "cta", status: "running", winnerVariant: null, currentSignificance: 78, totalImpressions: 2140, variants: [{ id: "A", label: "Book a Strategy Call →", clickRate: 2.8, conversions: 14 }, { id: "B", label: "Get the Weekly Intelligence Brief →", clickRate: 4.1, conversions: 21 }], uplift: "+46.4%", startedAt: "2026-04-10", concludedAt: null },
@@ -422,7 +423,7 @@ router.post("/ab-tests", requireAuth, async (req: Request, res: Response): Promi
 
 // ── Autonomous Monetization Optimizer ──
 
-router.get("/monetization/overview", requireAuth, async (_req: Request, res: Response): Promise<void> => {
+router.get("/monetization/overview", requireAuth, validateQuery(listQuerySchema), async (_req: Request, res: Response): Promise<void> => {
   res.json({
     monthlyRevenue: 28400,
     revenueGrowth: 22,
@@ -447,7 +448,7 @@ router.get("/monetization/overview", requireAuth, async (_req: Request, res: Res
   });
 });
 
-router.get("/monetization/attribution", requireAuth, async (_req: Request, res: Response): Promise<void> => {
+router.get("/monetization/attribution", requireAuth, validateQuery(listQuerySchema), async (_req: Request, res: Response): Promise<void> => {
   const articles = await db.select({ id: dosArticlesTable.id, title: dosArticlesTable.title }).from(dosArticlesTable).where(eq(dosArticlesTable.siteStatus, "published")).orderBy(desc(dosArticlesTable.createdAt)).limit(15);
   const attributed = articles.map(a => {
     const s = a.id;
@@ -467,7 +468,7 @@ router.get("/monetization/attribution", requireAuth, async (_req: Request, res: 
 
 // ── SEO Intelligence Command ──
 
-router.get("/seo/overview", requireAuth, async (_req: Request, res: Response): Promise<void> => {
+router.get("/seo/overview", requireAuth, validateQuery(listQuerySchema), async (_req: Request, res: Response): Promise<void> => {
   res.json({
     domainAuthority: 48,
     organicTraffic: 12400,
@@ -492,7 +493,7 @@ router.get("/seo/overview", requireAuth, async (_req: Request, res: Response): P
   });
 });
 
-router.get("/seo/keywords", requireAuth, async (_req: Request, res: Response): Promise<void> => {
+router.get("/seo/keywords", requireAuth, validateQuery(listQuerySchema), async (_req: Request, res: Response): Promise<void> => {
   const keywords = [
     { id: 1, keyword: "AI content strategy 2026", volume: 8400, difficulty: 42, currentRank: 18, trend: "rising", opportunityScore: 91 },
     { id: 2, keyword: "operator led growth", volume: 5200, difficulty: 38, currentRank: 12, trend: "rising", opportunityScore: 88 },
@@ -508,7 +509,7 @@ router.get("/seo/keywords", requireAuth, async (_req: Request, res: Response): P
 
 // ── Social Listening & Trend Radar ──
 
-router.get("/trends/radar", requireAuth, async (_req: Request, res: Response): Promise<void> => {
+router.get("/trends/radar", requireAuth, validateQuery(listQuerySchema), async (_req: Request, res: Response): Promise<void> => {
   res.json({
     signals: [
       { id: 1, topic: "AI agents replacing SDRs", platform: "x", velocityScore: 94, sentimentScore: 67, hoursToMainstream: 18, status: "emerging", opportunity: "Publish a founder perspective on AI-augmented sales within 12 hours to be a first mover", relatedKeywords: ["AI SDR", "sales automation", "GTM AI"] },
@@ -526,7 +527,7 @@ router.get("/trends/radar", requireAuth, async (_req: Request, res: Response): P
 
 // ── Content Performance Attribution ──
 
-router.get("/attribution/funnel", requireAuth, async (_req: Request, res: Response): Promise<void> => {
+router.get("/attribution/funnel", requireAuth, validateQuery(listQuerySchema), async (_req: Request, res: Response): Promise<void> => {
   const articles = await db.select({ id: dosArticlesTable.id, title: dosArticlesTable.title, publishedSiteAt: dosArticlesTable.publishedSiteAt }).from(dosArticlesTable).where(eq(dosArticlesTable.siteStatus, "published")).orderBy(desc(dosArticlesTable.publishedSiteAt)).limit(12);
 
   const content = articles.map(a => {
@@ -563,7 +564,7 @@ router.get("/attribution/funnel", requireAuth, async (_req: Request, res: Respon
 
 // ── Audience Segments & Personalization ──
 
-router.get("/audience/segments", requireAuth, async (_req: Request, res: Response): Promise<void> => {
+router.get("/audience/segments", requireAuth, validateQuery(listQuerySchema), async (_req: Request, res: Response): Promise<void> => {
   const segments = [
     { id: 1, name: "CTO / Engineering Leaders", size: 2840, growthRate: 23, engagementScore: 87, personalizedContent: ["AI governance deep-dives", "Platform engineering frameworks", "Team scaling playbooks"], recommendedSequence: "AI Governance → Platform Engineering → Team OS", nextAction: "Launch 4-email sequence on AI governance for CTOs", revenueContribution: 38 },
     { id: 2, name: "Founder / Operator", size: 1920, growthRate: 31, engagementScore: 92, personalizedContent: ["Revenue growth plays", "AI tool selection guides", "Operator OS frameworks"], recommendedSequence: "Revenue OS → AI Toolkit → Operator Playbook", nextAction: "Upsell $197 Operator Playbook to engaged subscribers", revenueContribution: 47 },
@@ -575,7 +576,7 @@ router.get("/audience/segments", requireAuth, async (_req: Request, res: Respons
 
 // ── Content Lifecycle Intelligence ──
 
-router.get("/lifecycle/overview", requireAuth, async (_req: Request, res: Response): Promise<void> => {
+router.get("/lifecycle/overview", requireAuth, validateQuery(listQuerySchema), async (_req: Request, res: Response): Promise<void> => {
   const articles = await db.select({ id: dosArticlesTable.id, title: dosArticlesTable.title, siteStatus: dosArticlesTable.siteStatus, publishedSiteAt: dosArticlesTable.publishedSiteAt, createdAt: dosArticlesTable.createdAt }).from(dosArticlesTable).orderBy(desc(dosArticlesTable.createdAt)).limit(25);
 
   const content = articles.map(a => {

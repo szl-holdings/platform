@@ -6,9 +6,10 @@ import {
   CreateLeadSchema, UpdateLeadSchema, auditLog, nowStr,
 } from "./_shared.js";
 import type { InsertTerraLead } from "@szl-holdings/db";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
 
 export function register(router: IRouter): void {
-  router.get("/terra/crm/leads", authMiddleware({ required: false }), async (req, res) => {
+  router.get("/terra/crm/leads", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
     try {
       const { stage, source, q, limit, offset } = req.query;
       const str = (v: unknown) => typeof v === "string" ? v : undefined;
@@ -140,7 +141,7 @@ export function register(router: IRouter): void {
     } catch (err) { handleRouteError(res, err, "Failed to fetch lead"); }
   });
 
-  router.post("/terra/crm/leads", authMiddleware({ required: true }), async (req, res) => {
+  router.post("/terra/crm/leads", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
     try {
       const parsed = CreateLeadSchema.safeParse(req.body ?? {});
       if (!parsed.success) {
@@ -182,7 +183,7 @@ export function register(router: IRouter): void {
     } catch (err) { handleRouteError(res, err, "Failed to create lead"); }
   });
 
-  router.patch("/terra/crm/leads/:id", authMiddleware({ required: true }), async (req, res) => {
+  router.patch("/terra/crm/leads/:id", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
     try {
       const { id } = req.params as Record<string, string>;
       const parsed = UpdateLeadSchema.safeParse(req.body ?? {});

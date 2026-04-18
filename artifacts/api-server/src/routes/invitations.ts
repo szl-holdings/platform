@@ -17,7 +17,7 @@ import { authMiddleware } from "../middlewares/auth";
 import { writeLimiter } from "../middlewares/rate-limiters";
 import { logger } from "../lib/logger";
 import { hashIp } from "@szl-holdings/audit";
-import { validateBody } from "../lib/validation";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 import { sendError, sendUnauthorized, sendNotFound, sendForbidden, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { sendEmail, buildOrgInviteEmail } from "../lib/email";
 import type { Request, Response } from "express";
@@ -190,7 +190,7 @@ router.post(
   },
 );
 
-router.get("/orgs/accept-invite", async (req, res) => {
+router.get("/orgs/accept-invite", validateQuery(listQuerySchema), async (req, res) => {
   try {
     const token = req.query["token"];
     if (!token || typeof token !== "string") {
@@ -258,6 +258,7 @@ router.get("/orgs/accept-invite", async (req, res) => {
 router.post(
   "/orgs/accept-invite",
   authMiddleware(),
+  validateBody(jsonObjectBodySchema),
   async (req, res) => {
     try {
       const { token } = req.body as { token?: string };

@@ -5,10 +5,11 @@ import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, sendNoContent, 
 import { logActivity } from "../lib/activity-logger";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 import { evaluateFlag, evaluateFlags, isFlagEnabled, PLATFORM_FLAGS, type PlatformFlagKey, type FlagEvaluationContext } from "../lib/platform-flags";
+import { validateBody, createFeatureFlagSchema, updateFeatureFlagSchema, featureFlagEvaluateSchema, featureFlagOverrideSchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
-router.get("/feature-flags", authMiddleware(), async (req, res) => {
+router.get("/feature-flags", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { limit, offset, page } = parsePagination(req.query as Record<string, unknown>);
     const flags = await db.select().from(featureFlagsTable).orderBy(featureFlagsTable.key).limit(limit).offset(offset);
@@ -42,12 +43,9 @@ router.get("/feature-flags/platform", authMiddleware(), requireRole("ops", "admi
   }
 });
 
-router.post("/feature-flags/evaluate", authMiddleware(), async (req, res) => {
+router.post("/feature-flags/evaluate", authMiddleware(), validateBody(featureFlagEvaluateSchema), async (req, res) => {
   try {
-    const { key, keys } = req.body as {
-      key?: string;
-      keys?: string[];
-    };
+    const { key, keys } = req.body;
 
     const userId = req.user!.id;
     let orgId: number | undefined;
@@ -71,9 +69,8 @@ router.post("/feature-flags/evaluate", authMiddleware(), async (req, res) => {
     if (key) {
       const result = await evaluateFlag(key, ctx);
       sendSuccess(res, result);
-    } else if (keys && Array.isArray(keys) && keys.length > 0) {
-      const flagKeys = keys.filter(k => typeof k === "string").slice(0, 50);
-      const results = await evaluateFlags(flagKeys, ctx);
+    } else if (keys && keys.length > 0) {
+      const results = await evaluateFlags(keys.slice(0, 50), ctx);
       sendSuccess(res, { results });
     } else {
       sendBadRequest(res, "Either 'key' (string) or 'keys' (string[]) is required");
@@ -83,25 +80,9 @@ router.post("/feature-flags/evaluate", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/feature-flags", authMiddleware(), requireRole("ops", "admin"), async (req, res) => {
+router.post("/feature-flags", authMiddleware(), requireRole("ops", "admin"), validateBody(createFeatureFlagSchema), async (req, res) => {
   try {
     const { key, name, description, isEnabled, rolloutPercentage, conditions } = req.body;
-    if (!key || typeof key !== "string" || key.trim().length === 0) {
-      sendBadRequest(res, "key is required and must be a non-empty string");
-      return;
-    }
-    if (!name || typeof name !== "string" || name.trim().length === 0) {
-      sendBadRequest(res, "name is required and must be a non-empty string");
-      return;
-    }
-    if (isEnabled !== undefined && typeof isEnabled !== "boolean") {
-      sendBadRequest(res, "isEnabled must be a boolean");
-      return;
-    }
-    if (rolloutPercentage !== undefined && (typeof rolloutPercentage !== "number" || rolloutPercentage < 0 || rolloutPercentage > 100)) {
-      sendBadRequest(res, "rolloutPercentage must be a number between 0 and 100");
-      return;
-    }
     const [flag] = await db.insert(featureFlagsTable).values({
       key: key.trim(),
       name: name.trim(),
@@ -118,26 +99,10 @@ router.post("/feature-flags", authMiddleware(), requireRole("ops", "admin"), asy
   }
 });
 
-router.patch("/feature-flags/:id", authMiddleware(), requireRole("ops", "admin"), async (req, res) => {
+router.patch("/feature-flags/:id", authMiddleware(), requireRole("ops", "admin"), validateBody(updateFeatureFlagSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const { name, description, isEnabled, rolloutPercentage, conditions } = req.body;
-    if (name !== undefined && (typeof name !== "string" || name.trim().length === 0)) {
-      sendBadRequest(res, "name must be a non-empty string");
-      return;
-    }
-    if (isEnabled !== undefined && typeof isEnabled !== "boolean") {
-      sendBadRequest(res, "isEnabled must be a boolean");
-      return;
-    }
-    if (rolloutPercentage !== undefined && (typeof rolloutPercentage !== "number" || rolloutPercentage < 0 || rolloutPercentage > 100)) {
-      sendBadRequest(res, "rolloutPercentage must be a number between 0 and 100");
-      return;
-    }
-    if (description !== undefined && typeof description !== "string") {
-      sendBadRequest(res, "description must be a string");
-      return;
-    }
     const updateData: Record<string, unknown> = { updatedAt: new Date() };
     if (name !== undefined) updateData.name = name.trim();
     if (description !== undefined) updateData.description = description;
@@ -187,23 +152,10 @@ router.get("/feature-flags/:id/overrides", authMiddleware(), requireRole("ops", 
   }
 });
 
-router.post("/feature-flags/:id/overrides", authMiddleware(), requireRole("ops", "admin"), async (req, res) => {
+router.post("/feature-flags/:id/overrides", authMiddleware(), requireRole("ops", "admin"), validateBody(featureFlagOverrideSchema), async (req, res) => {
   try {
     const flagId = parseIdParam(req.params.id);
     const { entityType, entityId, isEnabled } = req.body;
-
-    if (!entityType || !["user", "org", "role"].includes(entityType)) {
-      sendBadRequest(res, "entityType must be one of: user, org, role");
-      return;
-    }
-    if (!entityId || typeof entityId !== "string") {
-      sendBadRequest(res, "entityId is required");
-      return;
-    }
-    if (typeof isEnabled !== "boolean") {
-      sendBadRequest(res, "isEnabled must be a boolean");
-      return;
-    }
 
     const [override] = await db
       .insert(featureFlagOverridesTable)

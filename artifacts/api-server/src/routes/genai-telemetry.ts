@@ -1,19 +1,17 @@
 import { Router, type IRouter } from "express";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { genAITelemetry } from "@szl-holdings/observability";
+import {validateBody, genaiSpanSchema, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
 router.post(
   "/genai-telemetry/spans",
   authMiddleware({ required: true }),
+  validateBody(genaiSpanSchema),
   (req, res) => {
     try {
       const span = req.body;
-      if (!span || !span.kind) {
-        res.status(400).json({ error: "span.kind is required" });
-        return;
-      }
 
       switch (span.kind) {
         case "model_call":
@@ -145,6 +143,7 @@ router.post(
 router.post(
   "/genai-telemetry/spans/batch",
   authMiddleware({ required: true }),
+  validateBody(jsonObjectBodySchema),
   (req, res) => {
     try {
       const { spans } = req.body;
@@ -196,6 +195,7 @@ router.get(
   "/genai-telemetry/snapshot",
   authMiddleware({ required: true }),
   requireRole("admin", "operator", "viewer"),
+  validateQuery(listQuerySchema),
   (req, res) => {
     try {
       const windowMs = req.query.windowMs ? Number(req.query.windowMs) : 300_000;
@@ -211,6 +211,7 @@ router.get(
   "/genai-telemetry/spans",
   authMiddleware({ required: true }),
   requireRole("admin", "operator"),
+  validateQuery(listQuerySchema),
   (req, res) => {
     try {
       const windowMs = req.query.windowMs ? Number(req.query.windowMs) : 300_000;
@@ -242,6 +243,7 @@ router.get(
   "/genai-telemetry/langfuse/:traceId",
   authMiddleware({ required: true }),
   requireRole("admin", "operator"),
+  validateQuery(listQuerySchema),
   (req, res) => {
     try {
       const nameParam = req.query.name;
@@ -262,6 +264,7 @@ router.get(
   "/genai-telemetry/dashboard/:appSlug",
   authMiddleware({ required: true }),
   requireRole("admin", "operator", "viewer"),
+  validateQuery(listQuerySchema),
   (req, res) => {
     try {
       const windowMs = req.query.windowMs ? Number(req.query.windowMs) : 300_000;

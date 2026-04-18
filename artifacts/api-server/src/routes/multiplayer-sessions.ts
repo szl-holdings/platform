@@ -29,6 +29,7 @@ import { authMiddleware } from "../middlewares/auth";
 import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../middlewares/sliding-window-limiter";
 import { publish } from "../lib/websocket";
 import { logger } from "../lib/logger";
+import {validateBody, commandSessionCreateSchema, sessionCommentCreateSchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -36,6 +37,7 @@ router.get(
   "/sessions/command",
   authMiddleware({ required: false }),
   perUserApiSlidingLimiter,
+  validateQuery(listQuerySchema),
   async (req, res) => {
     try {
       const appId = req.query["appId"] as string | undefined;
@@ -60,8 +62,9 @@ router.post(
   "/sessions/command",
   authMiddleware({ required: false }),
   perUserWriteSlidingLimiter,
+  validateBody(commandSessionCreateSchema),
   async (req, res) => {
-    const { sessionId: requestedId, title, appId } = req.body ?? {};
+    const { sessionId: requestedId, title, appId } = req.body;
 
     try {
       const sessionId = requestedId ?? `cmd-${randomUUID().slice(0, 8)}`;
@@ -159,14 +162,10 @@ router.post(
   "/sessions/command/:sessionId/comments",
   authMiddleware({ required: false }),
   perUserWriteSlidingLimiter,
+  validateBody(sessionCommentCreateSchema),
   async (req, res) => {
     const { sessionId } = req.params as { sessionId: string };
-    const { body, authorLabel, entityId, entityType } = req.body ?? {};
-
-    if (!body || typeof body !== "string" || body.trim().length === 0) {
-      sendBadRequest(res, "body is required");
-      return;
-    }
+    const { body, authorLabel, entityId, entityType } = req.body;
 
     try {
       const [comment] = await db
@@ -199,6 +198,7 @@ router.get(
   "/sessions/command/:sessionId/comments",
   authMiddleware({ required: false }),
   perUserApiSlidingLimiter,
+  validateQuery(listQuerySchema),
   async (req, res) => {
     try {
       const { sessionId } = req.params as { sessionId: string };

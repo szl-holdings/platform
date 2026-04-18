@@ -5,6 +5,7 @@ import { sendSuccess, sendNotFound, sendError, sendBadRequest, handleRouteError 
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { services } from "@szl-holdings/services";
 import { logger } from "../lib/logger";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -76,7 +77,7 @@ router.get("/lyte/billing/plans", (_req, res) => {
   sendSuccess(res, plans);
 });
 
-router.post("/lyte/billing/pilot-checkout", authMiddleware({ required: false }), async (req: Request, res: Response) => {
+router.post("/lyte/billing/pilot-checkout", authMiddleware({ required: false }), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { planId, email, companyName, contactName, successUrl, cancelUrl } = req.body as {
       planId?: string;
@@ -152,7 +153,7 @@ router.post("/lyte/billing/pilot-checkout", authMiddleware({ required: false }),
   }
 });
 
-router.post("/lyte/billing/create-invoice", authMiddleware(), requireRole("admin", "super_admin", "ops"), async (req: Request, res: Response) => {
+router.post("/lyte/billing/create-invoice", authMiddleware(), requireRole("admin", "super_admin", "ops"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { customerId, email, companyName, lineItems, dueDate, notes } = req.body as {
       customerId?: string;
@@ -224,7 +225,7 @@ router.post("/lyte/billing/create-invoice", authMiddleware(), requireRole("admin
   }
 });
 
-router.get("/lyte/billing/revenue-events", authMiddleware(), requireRole("admin", "super_admin", "ops", "analyst"), async (req: Request, res: Response) => {
+router.get("/lyte/billing/revenue-events", authMiddleware(), requireRole("admin", "super_admin", "ops", "analyst"), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const limit = Math.min(parseInt(String(req.query.limit ?? "50"), 10), 200);
     const events = await db
@@ -272,7 +273,7 @@ router.get("/lyte/billing/pilot-metrics", authMiddleware(), requireRole("admin",
   }
 });
 
-router.post("/lyte/billing/webhooks/failed-payment", authMiddleware({ required: false }), async (req: Request, res: Response) => {
+router.post("/lyte/billing/webhooks/failed-payment", authMiddleware({ required: false }), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { subscriptionId, customerId, invoiceId, amount, currency } = req.body as {
       subscriptionId?: string;

@@ -18,6 +18,7 @@ import {
   persistEvalForgeRun,
   loadRecentRunsFromDb,
 } from "../lib/eval-forge-store";
+import {validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -133,6 +134,7 @@ router.get(
   authMiddleware({ required: true }),
   requireRole("admin", "operator", "analyst"),
   perUserApiSlidingLimiter,
+  validateQuery(listQuerySchema),
   (req, res) => {
     const domain = req.query.domain as string | undefined;
     const suites = domain
@@ -184,6 +186,7 @@ router.get(
   authMiddleware({ required: true }),
   requireRole("admin", "operator", "analyst"),
   perUserApiSlidingLimiter,
+  validateQuery(listQuerySchema),
   (req, res) => {
     const suiteId = req.query.suiteId as string | undefined;
     const domain = req.query.domain as string | undefined;
@@ -272,6 +275,7 @@ router.post(
   authMiddleware({ required: true }),
   requireRole("admin", "operator"),
   perUserWriteSlidingLimiter,
+  validateBody(jsonObjectBodySchema),
   async (req, res) => {
     try {
       const { suiteId, triggeredBy = "api" } = req.body as { suiteId?: string; triggeredBy?: string };
@@ -335,6 +339,7 @@ router.post(
   authMiddleware({ required: true }),
   requireRole("admin", "operator"),
   perUserWriteSlidingLimiter,
+  validateBody(jsonObjectBodySchema),
   async (req, res) => {
     try {
       const { triggeredBy = "api", domain } = req.body as { triggeredBy?: string; domain?: string };
@@ -395,6 +400,7 @@ router.patch(
   authMiddleware({ required: true }),
   requireRole("admin", "operator"),
   perUserWriteSlidingLimiter,
+  validateBody(jsonObjectBodySchema),
   (req, res) => {
     const { scoreId } = req.params;
     const { label, notes, labeledBy } = req.body as {

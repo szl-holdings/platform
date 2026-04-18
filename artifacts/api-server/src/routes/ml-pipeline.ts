@@ -15,7 +15,7 @@ import {
 } from "../lib/ml-pipeline-service";
 import type { ModelLifecycle } from "@szl-holdings/ai-engine";
 import { z } from "zod";
-import { validateBody } from "../lib/validation";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router = Router();
 
@@ -63,7 +63,7 @@ router.get("/ml/status", authMiddleware(), (_req, res) => {
 // Feature Store
 // ---------------------------------------------------------------------------
 
-router.get("/ml/features", authMiddleware(), (req, res) => {
+router.get("/ml/features", authMiddleware(), validateQuery(listQuerySchema), (req, res) => {
   try {
     const { domain } = req.query as { domain?: string };
     res.json(featureStoreService.getDefinitions(domain));
@@ -80,7 +80,7 @@ router.get("/ml/features/catalog", authMiddleware(), (_req, res) => {
   }
 });
 
-router.get("/ml/features/freshness", authMiddleware(), (req, res) => {
+router.get("/ml/features/freshness", authMiddleware(), validateQuery(listQuerySchema), (req, res) => {
   try {
     const { domain } = req.query as { domain?: string };
     res.json(featureStoreService.checkFreshness(domain));
@@ -152,7 +152,7 @@ router.get("/ml/templates/:domain/:modelType", authMiddleware(), (req, res) => {
 // Datasets
 // ---------------------------------------------------------------------------
 
-router.get("/ml/datasets", authMiddleware(), (req, res) => {
+router.get("/ml/datasets", authMiddleware(), validateQuery(listQuerySchema), (req, res) => {
   try {
     const { domain } = req.query as { domain?: string };
     res.json(datasetService.list(domain));
@@ -211,7 +211,7 @@ router.post("/ml/datasets/bootstrap", authMiddleware(), async (_req, res) => {
   }
 });
 
-router.post("/ml/datasets/:datasetId/refresh", authMiddleware(), async (req, res) => {
+router.post("/ml/datasets/:datasetId/refresh", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const ds = await datasetService.refresh(req.params.datasetId as string);
     res.json(ds);
@@ -224,7 +224,7 @@ router.post("/ml/datasets/:datasetId/refresh", authMiddleware(), async (req, res
 // Training Pipeline
 // ---------------------------------------------------------------------------
 
-router.get("/ml/training/runs", authMiddleware(), (req, res) => {
+router.get("/ml/training/runs", authMiddleware(), validateQuery(listQuerySchema), (req, res) => {
   try {
     const { domain } = req.query as { domain?: string };
     res.json(trainingService.listRuns(domain));
@@ -271,7 +271,7 @@ router.post("/ml/training/runs", authMiddleware(), validateBody(startTrainingRun
   }
 });
 
-router.post("/ml/training/trigger/:domain", authMiddleware(), async (req, res) => {
+router.post("/ml/training/trigger/:domain", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const runs = await trainingService.triggerDomain(req.params.domain as string);
     res.status(201).json({ triggered: runs.length, runs });
@@ -284,7 +284,7 @@ router.post("/ml/training/trigger/:domain", authMiddleware(), async (req, res) =
 // Model Registry
 // ---------------------------------------------------------------------------
 
-router.get("/ml/registry/models", authMiddleware(), (req, res) => {
+router.get("/ml/registry/models", authMiddleware(), validateQuery(listQuerySchema), (req, res) => {
   try {
     const { domain, lifecycle } = req.query as { domain?: string; lifecycle?: ModelLifecycle };
     res.json(modelRegistryService.listModels(domain, lifecycle));
@@ -321,7 +321,7 @@ router.get("/ml/registry/models/:modelVersionId/lineage", authMiddleware(), (req
   }
 });
 
-router.post("/ml/registry/models/:modelVersionId/promote", authMiddleware(), (req, res) => {
+router.post("/ml/registry/models/:modelVersionId/promote", authMiddleware(), validateBody(jsonObjectBodySchema), (req, res) => {
   try {
     const { lifecycle, promotedBy } = req.body;
     if (!lifecycle) return sendBadRequest(res, "lifecycle is required (experimental | staging | production | deprecated)");
@@ -337,7 +337,7 @@ router.post("/ml/registry/models/:modelVersionId/promote", authMiddleware(), (re
 // Inference
 // ---------------------------------------------------------------------------
 
-router.post("/ml/inference/predict", authMiddleware(), async (req, res) => {
+router.post("/ml/inference/predict", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { domain, modelType, entityId, entityType, inputFeatures, includeExplanation, forceRefresh } = req.body;
     if (!domain || !modelType || !entityId || !entityType) {
@@ -350,7 +350,7 @@ router.post("/ml/inference/predict", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/ml/inference/batch", authMiddleware(), async (req, res) => {
+router.post("/ml/inference/batch", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { domain, modelType, entities, includeExplanation } = req.body;
     if (!domain || !modelType || !Array.isArray(entities)) {
@@ -385,7 +385,7 @@ router.delete("/ml/inference/cache", authMiddleware(), (req, res) => {
 // Monitoring
 // ---------------------------------------------------------------------------
 
-router.get("/ml/monitoring/snapshots", authMiddleware(), (req, res) => {
+router.get("/ml/monitoring/snapshots", authMiddleware(), validateQuery(listQuerySchema), (req, res) => {
   try {
     const { modelVersionId } = req.query as { modelVersionId?: string };
     res.json(monitoringService.getSnapshots(modelVersionId));
@@ -410,7 +410,7 @@ router.get("/ml/monitoring/retraining-log", authMiddleware(), (_req, res) => {
   }
 });
 
-router.post("/ml/monitoring/run/:modelVersionId", authMiddleware(), async (req, res) => {
+router.post("/ml/monitoring/run/:modelVersionId", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const snapshot = await monitoringService.runCycle(req.params.modelVersionId as string);
     res.status(201).json(snapshot);
@@ -432,7 +432,7 @@ router.post("/ml/monitoring/run-all", authMiddleware(), async (_req, res) => {
 // A/B Testing
 // ---------------------------------------------------------------------------
 
-router.get("/ml/ab-tests", authMiddleware(), (req, res) => {
+router.get("/ml/ab-tests", authMiddleware(), validateQuery(listQuerySchema), (req, res) => {
   try {
     const { domain } = req.query as { domain?: string };
     res.json(abTestingService.list(domain));
@@ -449,7 +449,7 @@ router.get("/ml/ab-tests/summary", authMiddleware(), (_req, res) => {
   }
 });
 
-router.post("/ml/ab-tests", authMiddleware(), (req, res) => {
+router.post("/ml/ab-tests", authMiddleware(), validateBody(jsonObjectBodySchema), (req, res) => {
   try {
     const { name, domain, controlModelVersionId, treatmentModelVersionId, trafficSplitPct, primaryMetric, significanceThreshold, minSampleSize, description } = req.body;
     if (!name || !domain || !controlModelVersionId || !treatmentModelVersionId) {
@@ -462,7 +462,7 @@ router.post("/ml/ab-tests", authMiddleware(), (req, res) => {
   }
 });
 
-router.post("/ml/ab-tests/:testId/assign", authMiddleware(), (req, res) => {
+router.post("/ml/ab-tests/:testId/assign", authMiddleware(), validateBody(jsonObjectBodySchema), (req, res) => {
   try {
     const { entityId } = req.body;
     if (!entityId) return sendBadRequest(res, "entityId is required");
@@ -474,7 +474,7 @@ router.post("/ml/ab-tests/:testId/assign", authMiddleware(), (req, res) => {
   }
 });
 
-router.post("/ml/ab-tests/:testId/outcome", authMiddleware(), (req, res) => {
+router.post("/ml/ab-tests/:testId/outcome", authMiddleware(), validateBody(jsonObjectBodySchema), (req, res) => {
   try {
     const { variant, metricValue } = req.body;
     if (!variant || metricValue === undefined) return sendBadRequest(res, "variant and metricValue are required");
@@ -495,7 +495,7 @@ router.get("/ml/ab-tests/:testId/evaluate", authMiddleware(), async (req, res) =
   }
 });
 
-router.post("/ml/ab-tests/:testId/conclude", authMiddleware(), (req, res) => {
+router.post("/ml/ab-tests/:testId/conclude", authMiddleware(), validateBody(jsonObjectBodySchema), (req, res) => {
   try {
     const test = abTestingService.conclude(req.params.testId as string);
     if (!test) return sendNotFound(res, "A/B test not found or already concluded");
@@ -509,7 +509,7 @@ router.post("/ml/ab-tests/:testId/conclude", authMiddleware(), (req, res) => {
 // Explainability
 // ---------------------------------------------------------------------------
 
-router.post("/ml/explain", authMiddleware(), (req, res) => {
+router.post("/ml/explain", authMiddleware(), validateBody(jsonObjectBodySchema), (req, res) => {
   try {
     const { domain, modelType, prediction, featureImportance, featureValues } = req.body;
     if (!domain || !modelType || prediction === undefined || !featureImportance || !featureValues) {
@@ -521,7 +521,7 @@ router.post("/ml/explain", authMiddleware(), (req, res) => {
   }
 });
 
-router.post("/ml/explain/shap", authMiddleware(), (req, res) => {
+router.post("/ml/explain/shap", authMiddleware(), validateBody(jsonObjectBodySchema), (req, res) => {
   try {
     const { featureImportance, featureValues, prediction } = req.body;
     if (!featureImportance || !featureValues || prediction === undefined) {

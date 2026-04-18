@@ -14,6 +14,7 @@ import {
 import { eq, desc, sql } from "drizzle-orm";
 import { sendSuccess, sendNotFound, sendError, handleRouteError, parsePagination } from "../lib/api-response";
 import { authMiddleware, parseIdParam } from "../middlewares/auth";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const programCreateSchema = z.object({
   name: z.string().min(1, "Name is required").max(200),
@@ -36,7 +37,7 @@ const milestoneSchema = z.object({
 
 const router: IRouter = Router();
 
-router.get("/readiness/programs", authMiddleware(), async (req, res) => {
+router.get("/readiness/programs", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const rows = await db.select().from(readinessProgramsTable).orderBy(desc(readinessProgramsTable.createdAt)).limit(limit).offset(offset);
@@ -47,7 +48,7 @@ router.get("/readiness/programs", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/readiness/programs", authMiddleware(), async (req, res) => {
+router.post("/readiness/programs", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   const parsed = programCreateSchema.safeParse(req.body);
   if (!parsed.success) { sendError(res, parsed.error.errors.map(e => e.message).join(", "), 400); return; }
   try {
@@ -69,7 +70,7 @@ router.get("/readiness/programs/:id", authMiddleware(), async (req, res) => {
   }
 });
 
-router.patch("/readiness/programs/:id", authMiddleware(), async (req, res) => {
+router.patch("/readiness/programs/:id", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   const parsed = programUpdateSchema.safeParse(req.body);
   if (!parsed.success) { sendError(res, parsed.error.errors.map(e => e.message).join(", "), 400); return; }
   try {
@@ -103,7 +104,7 @@ router.get("/readiness/programs/:id/dimensions", authMiddleware(), async (req, r
   }
 });
 
-router.post("/readiness/dimensions", authMiddleware(), async (req, res) => {
+router.post("/readiness/dimensions", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const [row] = await db.insert(readinessDimensionsTable).values(req.body).returning();
     sendSuccess(res, row, 201);
@@ -112,7 +113,7 @@ router.post("/readiness/dimensions", authMiddleware(), async (req, res) => {
   }
 });
 
-router.patch("/readiness/dimensions/:id", authMiddleware(), async (req, res) => {
+router.patch("/readiness/dimensions/:id", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(readinessDimensionsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(readinessDimensionsTable.id, id)).returning();
@@ -144,7 +145,7 @@ router.get("/readiness/dimensions/:id/scores", authMiddleware(), async (req, res
   }
 });
 
-router.post("/readiness/scores", authMiddleware(), async (req, res) => {
+router.post("/readiness/scores", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const [row] = await db.insert(readinessScoreHistoryTable).values(req.body).returning();
     sendSuccess(res, row, 201);
@@ -163,7 +164,7 @@ router.get("/readiness/programs/:id/milestones", authMiddleware(), async (req, r
   }
 });
 
-router.post("/readiness/milestones", authMiddleware(), async (req, res) => {
+router.post("/readiness/milestones", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const [row] = await db.insert(readinessMilestonesTable).values(req.body).returning();
     sendSuccess(res, row, 201);
@@ -172,7 +173,7 @@ router.post("/readiness/milestones", authMiddleware(), async (req, res) => {
   }
 });
 
-router.patch("/readiness/milestones/:id", authMiddleware(), async (req, res) => {
+router.patch("/readiness/milestones/:id", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(readinessMilestonesTable).set({ ...req.body, updatedAt: new Date() }).where(eq(readinessMilestonesTable.id, id)).returning();
@@ -204,7 +205,7 @@ router.get("/readiness/programs/:id/risks", authMiddleware(), async (req, res) =
   }
 });
 
-router.post("/readiness/risks", authMiddleware(), async (req, res) => {
+router.post("/readiness/risks", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const [row] = await db.insert(readinessRisksTable).values(req.body).returning();
     sendSuccess(res, row, 201);
@@ -213,7 +214,7 @@ router.post("/readiness/risks", authMiddleware(), async (req, res) => {
   }
 });
 
-router.patch("/readiness/risks/:id", authMiddleware(), async (req, res) => {
+router.patch("/readiness/risks/:id", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(readinessRisksTable).set({ ...req.body, updatedAt: new Date() }).where(eq(readinessRisksTable.id, id)).returning();
@@ -245,7 +246,7 @@ router.get("/readiness/programs/:id/alerts", authMiddleware(), async (req, res) 
   }
 });
 
-router.post("/readiness/alerts", authMiddleware(), async (req, res) => {
+router.post("/readiness/alerts", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const [row] = await db.insert(readinessAlertsTable).values(req.body).returning();
     sendSuccess(res, row, 201);
@@ -254,7 +255,7 @@ router.post("/readiness/alerts", authMiddleware(), async (req, res) => {
   }
 });
 
-router.patch("/readiness/alerts/:id", authMiddleware(), async (req, res) => {
+router.patch("/readiness/alerts/:id", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(readinessAlertsTable).set(req.body).where(eq(readinessAlertsTable.id, id)).returning();
@@ -405,7 +406,7 @@ router.get("/readiness/live/nist-framework", readinessLiveRateLimit, authMiddlew
   } catch (err) { handleRouteError(res, err, "Failed to fetch NIST framework"); }
 });
 
-router.get("/readiness/live/controls", readinessLiveRateLimit, authMiddleware(), async (req, res) => {
+router.get("/readiness/live/controls", readinessLiveRateLimit, authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const func = req.query.function as string;
     const status = req.query.status as string;
@@ -428,7 +429,7 @@ router.get("/readiness/live/controls", readinessLiveRateLimit, authMiddleware(),
   } catch (err) { handleRouteError(res, err, "Failed to fetch compliance controls"); }
 });
 
-router.get("/readiness/live/audit-findings", readinessLiveRateLimit, authMiddleware(), async (req, res) => {
+router.get("/readiness/live/audit-findings", readinessLiveRateLimit, authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const severity = req.query.severity as string;
     let findings = REFERENCE_AUDIT_FINDINGS;

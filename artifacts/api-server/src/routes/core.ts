@@ -18,6 +18,7 @@ import { sql, desc, gte, eq, count } from "drizzle-orm";
 import { sendSuccess, sendError, handleRouteError } from "../lib/api-response";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { logger } from "../lib/logger";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -209,6 +210,7 @@ function scoreEntity(
 router.post(
   "/core/recommendations",
   authMiddleware({ required: true }),
+  validateBody(jsonObjectBodySchema),
   async (req, res) => {
     try {
       const {
@@ -295,6 +297,7 @@ router.post(
 router.get(
   "/core/recommendations",
   authMiddleware({ required: true }),
+  validateQuery(listQuerySchema),
   async (req, res) => {
     try {
       const limit = Math.min(
@@ -514,7 +517,7 @@ router.get("/core/metrics", async (_req, res) => {
   }
 });
 
-router.get("/core/audit", authMiddleware({ required: true }), requireRole("ops", "analyst", "admin", "super_admin"), async (req, res) => {
+router.get("/core/audit", authMiddleware({ required: true }), requireRole("ops", "analyst", "admin", "super_admin"), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const limit = Math.min(
       50,

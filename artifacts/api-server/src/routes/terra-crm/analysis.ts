@@ -6,9 +6,10 @@ import {
   sendSuccess, sendBadRequest, handleRouteError, authMiddleware,
   scoreDistressProperty,
 } from "./_shared.js";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
 
 export function register(router: IRouter): void {
-  router.post("/terra/distress/ai-score", authMiddleware({ required: true }), async (req, res) => {
+  router.post("/terra/distress/ai-score", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
     try {
       const body = req.body ?? {};
       const { propertyId } = body;
@@ -282,7 +283,7 @@ export function register(router: IRouter): void {
     } catch (err) { handleRouteError(res, err, "Failed to fetch distress dashboard"); }
   });
 
-  router.get("/terra/investor/opportunities", authMiddleware({ required: false }), async (req, res) => {
+  router.get("/terra/investor/opportunities", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
     try {
       const { minScore, borough, type, limit, offset } = req.query;
       const str = (v: unknown) => typeof v === "string" ? v : undefined;

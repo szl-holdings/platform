@@ -10,6 +10,7 @@ import {
   handleRouteError,
 } from "../lib/api-response";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
+import { validateBody, notificationRecipientCreateSchema, notificationRecipientUpdateSchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -27,25 +28,10 @@ router.get("/notification-recipients", authMiddleware(), requireRole("ops"), asy
   }
 });
 
-router.post("/notification-recipients", authMiddleware(), requireRole("ops"), async (req, res) => {
+router.post("/notification-recipients", authMiddleware(), requireRole("ops"), validateBody(notificationRecipientCreateSchema), async (req, res) => {
   try {
-    const { phoneNumber, label, smsEnabled, voiceEnabled, userId } = req.body as {
-      phoneNumber?: string;
-      label?: string;
-      smsEnabled?: boolean;
-      voiceEnabled?: boolean;
-      userId?: number;
-    };
-
-    if (!phoneNumber || typeof phoneNumber !== "string") {
-      sendBadRequest(res, "phoneNumber is required");
-      return;
-    }
+    const { phoneNumber, label, smsEnabled, voiceEnabled, userId } = req.body;
     const normalized = phoneNumber.trim().replace(/\s+/g, "");
-    if (!E164_REGEX.test(normalized)) {
-      sendBadRequest(res, "phoneNumber must be in E.164 format (e.g. +14155552671)");
-      return;
-    }
 
     const existing = await db
       .select()
@@ -90,14 +76,10 @@ router.post("/notification-recipients", authMiddleware(), requireRole("ops"), as
   }
 });
 
-router.patch("/notification-recipients/:id", authMiddleware(), requireRole("ops"), async (req, res) => {
+router.patch("/notification-recipients/:id", authMiddleware(), requireRole("ops"), validateBody(notificationRecipientUpdateSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
-    const { label, smsEnabled, voiceEnabled } = req.body as {
-      label?: string;
-      smsEnabled?: boolean;
-      voiceEnabled?: boolean;
-    };
+    const { label, smsEnabled, voiceEnabled } = req.body;
 
     const [existing] = await db
       .select()

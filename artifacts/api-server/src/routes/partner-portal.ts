@@ -37,7 +37,7 @@ import {
   sendNoContent, handleRouteError,
 } from "../lib/api-response";
 import { z } from "zod";
-import { validateBody } from "../lib/validation";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 import { parseIdParam } from "../middlewares/auth";
 
 const router: IRouter = Router();
@@ -259,7 +259,7 @@ router.get("/partner/accounts/:id", authMiddleware(), async (req: Request, res: 
   }
 });
 
-router.patch("/partner/accounts/:id", authMiddleware(), async (req: Request, res: Response) => {
+router.patch("/partner/accounts/:id", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const id = parseIdParam(req.params.id);
     if (isNaN(id)) { sendBadRequest(res, "Invalid partner ID"); return; }
@@ -387,7 +387,7 @@ router.post("/partner/accounts/:id/tenants", authMiddleware(), validateBody(prov
   }
 });
 
-router.post("/partner/accounts/:id/tenants/assign", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/partner/accounts/:id/tenants/assign", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const partnerId = parseIdParam(req.params.id);
     if (isNaN(partnerId)) { sendBadRequest(res, "Invalid partner ID"); return; }
@@ -640,7 +640,7 @@ router.get("/orgs/:orgId/custom-domains", authMiddleware(), async (req: Request,
   }
 });
 
-router.post("/orgs/:orgId/custom-domains", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/orgs/:orgId/custom-domains", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const orgId = parseIdParam(req.params.orgId);
     if (isNaN(orgId)) { sendBadRequest(res, "Invalid org ID"); return; }
@@ -710,7 +710,7 @@ router.post("/orgs/:orgId/custom-domains", authMiddleware(), async (req: Request
   }
 });
 
-router.post("/orgs/:orgId/custom-domains/:domainId/verify", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/orgs/:orgId/custom-domains/:domainId/verify", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const orgId = parseIdParam(req.params.orgId);
     const domainId = parseIdParam(req.params.domainId);
@@ -836,7 +836,7 @@ router.post("/orgs/:orgId/custom-domains/:domainId/verify", authMiddleware(), as
 // Must be called after successful /verify. Only org admins and platform admins
 // may activate. In production this would integrate with an SSL provisioning job.
 
-router.post("/orgs/:orgId/custom-domains/:domainId/activate", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/orgs/:orgId/custom-domains/:domainId/activate", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const orgId = parseIdParam(req.params.orgId);
     const domainId = parseIdParam(req.params.domainId);
@@ -885,7 +885,7 @@ router.post("/orgs/:orgId/custom-domains/:domainId/activate", authMiddleware(), 
   }
 });
 
-router.patch("/orgs/:orgId/custom-domains/:domainId", authMiddleware(), async (req: Request, res: Response) => {
+router.patch("/orgs/:orgId/custom-domains/:domainId", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const orgId = parseIdParam(req.params.orgId);
     const domainId = parseIdParam(req.params.domainId);
@@ -1006,7 +1006,7 @@ router.get("/partner/accounts/:id/usage", authMiddleware(), async (req: Request,
 
 // ─── Public: domain-to-org resolution (for host-header routing) ───────────────
 
-router.get("/resolve-domain", async (req: Request, res: Response) => {
+router.get("/resolve-domain", validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const domain = String(req.query.domain ?? "").toLowerCase();
     if (!domain) { sendBadRequest(res, "domain query param required"); return; }

@@ -1,4 +1,5 @@
 import { Router, type IRouter, type RequestHandler } from "express";
+import { validateQuery, listQuerySchema } from "../lib/validation.js";
 import rateLimit from "express-rate-limit";
 import os from "os";
 import { LRUCache } from "lru-cache";
@@ -80,7 +81,7 @@ const REFERENCE_CMMC_MATURITY = {
 };
 
 
-router.get("/msp/live/contracts", mspLiveRateLimit, authMiddleware(), async (req, res) => {
+router.get("/msp/live/contracts", mspLiveRateLimit, authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const fedramp = req.query.fedramp === "true";
     type ContractRecord = { id: string | number; agency: string; vendor: string; description: string; value: number; period: string; naicsCode: string; type: string; setAside: string; placeOfPerformance: string; fedrampRequired: boolean; cmmc: string };
@@ -124,7 +125,7 @@ router.get("/msp/live/contracts", mspLiveRateLimit, authMiddleware(), async (req
   } catch (err) { handleRouteError(res, err, "Failed to fetch federal contracts"); }
 });
 
-router.get("/msp/live/fedramp", mspLiveRateLimit, authMiddleware(), async (req, res) => {
+router.get("/msp/live/fedramp", mspLiveRateLimit, authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const impact = req.query.impact as string;
     const products = await getCached("msp-fedramp", 86400000, async () => {

@@ -31,7 +31,7 @@
 | Rollback capability | ✅ 5 | Documented procedure; previous deployment version accessible |
 | Smoke test suite | ✅ 5 | Automated + manual verification protocol in place |
 | Dependency audit (no high/critical CVEs) | 🟡 3 | Clean at time of pass; must re-run before each release |
-| Zod validation (all routes) | 🟡 3 | High-traffic routes covered; remaining routes have outstanding task |
+| Zod validation (all routes) | ✅ 5 | All 206 POST/PUT/PATCH routes validated with Zod; structured 400 errors with field-level detail |
 | Integration test coverage (POST paths) | 🟡 3 | Vessels and Firestorm POST paths outstanding |
 | Observability / APM wiring | 🟡 3 | Pino logs active; Application Insights / OTLP endpoint not yet wired |
 

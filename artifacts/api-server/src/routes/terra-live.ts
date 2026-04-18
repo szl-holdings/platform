@@ -1,4 +1,5 @@
 import { Router, type IRouter, type RequestHandler } from "express";
+import { validateQuery, listQuerySchema } from "../lib/validation.js";
 import { LRUCache } from "lru-cache";
 import rateLimit from "express-rate-limit";
 import { sendSuccess, handleRouteError } from "../lib/api-response";
@@ -74,7 +75,7 @@ const FALLBACK_HUD_FAIR_MARKET = [
   { area: "Seattle, WA MSA", year: 2025, studio: 1620, oneBed: 1890, twoBed: 2310, threeBed: 3120, fourBed: 3740, source: "fallback-api-unavailable" },
 ];
 
-router.get("/terra/live/census-housing", terraLiveLimit, authMiddleware({ required: false }), async (req, res) => {
+router.get("/terra/live/census-housing", terraLiveLimit, authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const msaCode = req.query.msa as string;
     const result = await getCached<any>(`terra-census-housing-${msaCode ?? "all"}`, 86400000, async () => {
@@ -257,7 +258,7 @@ router.get("/terra/live/bls-construction", terraLiveLimit, authMiddleware({ requ
   } catch (err) { handleRouteError(res, err, "Failed to fetch BLS construction employment"); }
 });
 
-router.get("/terra/live/fema-nri", terraLiveLimit, authMiddleware({ required: false }), async (req, res) => {
+router.get("/terra/live/fema-nri", terraLiveLimit, authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const stateAbbr = (req.query.state as string)?.toUpperCase() ?? "FL";
     const result = await getCached<any>(`terra-fema-nri-${stateAbbr}`, 86400000 * 30, async () => {
@@ -392,7 +393,7 @@ router.get("/terra/live/nyc-dashboard", terraLiveLimit, authMiddleware({ require
   } catch (err) { handleRouteError(res, err, "Failed to fetch NYC dashboard stats"); }
 });
 
-router.get("/terra/live/nyc-pluto", terraLiveLimit, authMiddleware({ required: false }), async (req, res) => {
+router.get("/terra/live/nyc-pluto", terraLiveLimit, authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const neighborhood = (req.query.neighborhood as string) ?? "Upper West Side";
     const zipcode = (req.query.zipcode as string) ?? "10024";
@@ -488,7 +489,7 @@ router.get("/terra/live/nyc-pluto", terraLiveLimit, authMiddleware({ required: f
   } catch (err) { handleRouteError(res, err, "Failed to fetch NYC PLUTO data"); }
 });
 
-router.get("/terra/live/nyc-311", terraLiveLimit, authMiddleware({ required: false }), async (req, res) => {
+router.get("/terra/live/nyc-311", terraLiveLimit, authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const neighborhood = (req.query.neighborhood as string) ?? "Upper West Side";
     const limit = Math.min(parseInt(req.query.limit as string) || 50, 200);
@@ -578,7 +579,7 @@ router.get("/terra/live/nyc-311", terraLiveLimit, authMiddleware({ required: fal
   } catch (err) { handleRouteError(res, err, "Failed to fetch NYC 311 data"); }
 });
 
-router.get("/terra/live/census-acs-demographics", terraLiveLimit, authMiddleware({ required: false }), async (req, res) => {
+router.get("/terra/live/census-acs-demographics", terraLiveLimit, authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const county = (req.query.county as string) ?? "061";
     const state = (req.query.state as string) ?? "36";

@@ -11,6 +11,7 @@ import {
 } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
 import { getVapidPublicKey } from "../lib/web-push-sender";
+import { validateBody, jsonObjectBodySchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -23,7 +24,7 @@ router.get("/web-push/vapid-public-key", (_req, res) => {
   sendSuccess(res, { publicKey });
 });
 
-router.post("/web-push/subscriptions", authMiddleware({ required: false }), async (req, res) => {
+router.post("/web-push/subscriptions", authMiddleware({ required: false }), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { endpoint, keys, appId } = req.body as {
       endpoint?: string;

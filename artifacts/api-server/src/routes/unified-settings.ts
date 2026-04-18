@@ -23,6 +23,7 @@ import { eq, and, desc, asc, like, gte, lte } from "drizzle-orm";
 import { sendSuccess, sendCreated, sendNoContent, sendNotFound, sendBadRequest, sendForbidden, handleRouteError } from "../lib/api-response";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 import { assertTenantAccess } from "../middlewares/tenant-scope";
+import {validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -90,6 +91,7 @@ async function writeAudit(params: {
 router.get(
   "/settings/resolve",
   authMiddleware(),
+  validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
       const user = req.user!;
@@ -166,6 +168,7 @@ router.get(
   "/settings/platform",
   authMiddleware(),
   requireRole(...SUPER_ADMIN_ROLES),
+  validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
       const namespace = req.query.namespace as string | undefined;
@@ -189,7 +192,7 @@ router.post(
   "/settings/platform",
   authMiddleware(),
   requireRole(...SUPER_ADMIN_ROLES),
-  async (req: Request, res: Response) => {
+  validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
     try {
       const { namespace, key, value, valueType, label, description, category, isPublic } = req.body as {
         namespace: string;
@@ -271,6 +274,7 @@ router.post(
 router.get(
   "/settings/tenant/:orgId",
   authMiddleware(),
+  validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
       const orgId = parseIdParam(req.params.orgId);
@@ -297,7 +301,7 @@ router.get(
 router.post(
   "/settings/tenant/:orgId",
   authMiddleware(),
-  async (req: Request, res: Response) => {
+  validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
     try {
       const orgId = parseIdParam(req.params.orgId);
       if (!assertTenantAdminAccess(req, res, orgId)) return;
@@ -377,6 +381,7 @@ router.post(
 router.get(
   "/settings/user",
   authMiddleware(),
+  validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
       const user = req.user!;
@@ -409,7 +414,7 @@ router.get(
 router.post(
   "/settings/user",
   authMiddleware(),
-  async (req: Request, res: Response) => {
+  validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
     try {
       const user = req.user!;
       const { namespace, key, value, valueType, orgId: bodyOrgId } = req.body as {
@@ -540,6 +545,7 @@ router.delete(
 router.get(
   "/settings/audit",
   authMiddleware(),
+  validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
       const user = req.user!;

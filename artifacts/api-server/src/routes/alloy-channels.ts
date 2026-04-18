@@ -5,6 +5,7 @@ import { services } from "@szl-holdings/services";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { sendSuccess, sendCreated, sendBadRequest, sendError, handleRouteError } from "../lib/api-response";
 import { logger } from "../lib/logger";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -315,7 +316,7 @@ router.post("/alloy/channels/slack/interactive", async (req: Request, res: Respo
   }
 });
 
-router.post("/alloy/channels/slack/send", authMiddleware(), requireRole("ops", "admin", "super_admin"), async (req: Request, res: Response) => {
+router.post("/alloy/channels/slack/send", authMiddleware(), requireRole("ops", "admin", "super_admin"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { channel, text, blocks } = req.body as { channel: string; text: string; blocks?: unknown[] };
     if (!channel || !text) {
@@ -338,7 +339,7 @@ router.get("/alloy/channels/config", authMiddleware(), requireRole("ops", "admin
   }
 });
 
-router.post("/alloy/channels/config", authMiddleware(), requireRole("admin", "super_admin"), async (req: Request, res: Response) => {
+router.post("/alloy/channels/config", authMiddleware(), requireRole("admin", "super_admin"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { channelType = "slack", channelId, channelName, workspaceId, trustLevel = "standard", allowedSkills, approvalClass } = req.body as {
       channelType?: string;
@@ -375,7 +376,7 @@ router.post("/alloy/channels/config", authMiddleware(), requireRole("admin", "su
   }
 });
 
-router.patch("/alloy/channels/config/:channelId", authMiddleware(), requireRole("admin", "super_admin"), async (req: Request, res: Response) => {
+router.patch("/alloy/channels/config/:channelId", authMiddleware(), requireRole("admin", "super_admin"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { channelId } = req.params;
     const { trustLevel, allowedSkills, isEnabled, approvalClass } = req.body as {
@@ -399,7 +400,7 @@ router.patch("/alloy/channels/config/:channelId", authMiddleware(), requireRole(
   }
 });
 
-router.get("/alloy/channels/audit", authMiddleware(), requireRole("ops", "admin", "super_admin"), async (req: Request, res: Response) => {
+router.get("/alloy/channels/audit", authMiddleware(), requireRole("ops", "admin", "super_admin"), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const limit = Math.min(parseInt((req.query as Record<string, string>).limit ?? "50", 10), 200);
     const channelType = (req.query as Record<string, string>).channelType;
@@ -420,7 +421,7 @@ router.get("/alloy/channels/audit", authMiddleware(), requireRole("ops", "admin"
   }
 });
 
-router.get("/alloy/channels/approvals", authMiddleware(), async (req: Request, res: Response) => {
+router.get("/alloy/channels/approvals", authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const status = (req.query as Record<string, string>).status ?? "pending";
     const result = await pool.query(
@@ -433,7 +434,7 @@ router.get("/alloy/channels/approvals", authMiddleware(), async (req: Request, r
   }
 });
 
-router.post("/alloy/channels/approvals/:id/decide", authMiddleware(), requireRole("ops", "admin", "super_admin"), async (req: Request, res: Response) => {
+router.post("/alloy/channels/approvals/:id/decide", authMiddleware(), requireRole("ops", "admin", "super_admin"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { decision, note } = req.body as { decision: "approved" | "rejected"; note?: string };

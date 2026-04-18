@@ -7,10 +7,11 @@ import {
   sendBadRequest,
   handleRouteError,
 } from "../lib/api-response";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 
-router.get("/atlas/spatial/snapshots/:twinId", authMiddleware(), async (req: Request, res: Response) => {
+router.get("/atlas/spatial/snapshots/:twinId", authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { twinId } = req.params as { twinId: string };
     const { limit } = req.query as { limit?: string };
@@ -30,7 +31,7 @@ router.get("/atlas/spatial/snapshots/:twinId", authMiddleware(), async (req: Req
   }
 });
 
-router.post("/atlas/spatial/snapshots/compare", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/atlas/spatial/snapshots/compare", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { snapshotIdA, snapshotIdB } = req.body as {
       snapshotIdA?: number;
@@ -53,7 +54,7 @@ router.post("/atlas/spatial/snapshots/compare", authMiddleware(), async (req: Re
   }
 });
 
-router.get("/atlas/spatial/memory/:twinId", authMiddleware(), async (req: Request, res: Response) => {
+router.get("/atlas/spatial/memory/:twinId", authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { twinId } = req.params as { twinId: string };
     const { limit, minCompositeScore, tags } = req.query as {
@@ -80,7 +81,7 @@ router.get("/atlas/spatial/memory/:twinId", authMiddleware(), async (req: Reques
   }
 });
 
-router.post("/atlas/spatial/memory/index", authMiddleware(), requireRole("super_admin", "admin", "ops"), async (req: Request, res: Response) => {
+router.post("/atlas/spatial/memory/index", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const {
       twinId,
@@ -132,7 +133,7 @@ router.post("/atlas/spatial/memory/index", authMiddleware(), requireRole("super_
   }
 });
 
-router.post("/atlas/spatial/drift/assess", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/atlas/spatial/drift/assess", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const {
       twinId,
@@ -199,7 +200,7 @@ router.get("/atlas/spatial/drift/:twinId/latest", authMiddleware(), async (req: 
   }
 });
 
-router.post("/atlas/spatial/branches", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/atlas/spatial/branches", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const {
       twinId,
@@ -249,7 +250,7 @@ router.post("/atlas/spatial/branches", authMiddleware(), async (req: Request, re
   }
 });
 
-router.get("/atlas/spatial/branches", authMiddleware(), async (req: Request, res: Response) => {
+router.get("/atlas/spatial/branches", authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { twinId, entityId, twinCategory, status, limit } = req.query as {
       twinId?: string;
@@ -278,7 +279,7 @@ router.get("/atlas/spatial/branches", authMiddleware(), async (req: Request, res
   }
 });
 
-router.get("/atlas/spatial/branches/compare", authMiddleware(), async (req: Request, res: Response) => {
+router.get("/atlas/spatial/branches/compare", authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { branchAId, branchBId } = req.query as { branchAId?: string; branchBId?: string };
 
@@ -316,7 +317,7 @@ router.get("/atlas/spatial/branches/:branchId", authMiddleware(), async (req: Re
   }
 });
 
-router.patch("/atlas/spatial/branches/:branchId", authMiddleware(), async (req: Request, res: Response) => {
+router.patch("/atlas/spatial/branches/:branchId", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { branchId } = req.params as { branchId: string };
     const { name, description, status, metadata } = req.body as {
@@ -369,7 +370,7 @@ router.delete("/atlas/spatial/branches/:branchId", authMiddleware(), requireRole
   }
 });
 
-router.get("/atlas/spatial/replay/:twinId/timeline", authMiddleware(), async (req: Request, res: Response) => {
+router.get("/atlas/spatial/replay/:twinId/timeline", authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { twinId } = req.params as { twinId: string };
     const { entityId, twinCategory, startAt, endAt, maxFrames, includeOverlays } = req.query as {
@@ -444,7 +445,7 @@ router.get("/atlas/spatial/proof-bundle/:contentType/:contentId", authMiddleware
   }
 });
 
-router.post("/atlas/spatial/proof-bundle/tag", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/atlas/spatial/proof-bundle/tag", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const {
       contentId,
@@ -515,7 +516,7 @@ router.post("/atlas/spatial/proof-bundle/tag", authMiddleware(), async (req: Req
   }
 });
 
-router.get("/atlas/spatial/worldline/overlays", authMiddleware(), async (req: Request, res: Response) => {
+router.get("/atlas/spatial/worldline/overlays", authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { signalType, sourceTrustClass, severity, isActive, entityId, twinCategory, limit } = req.query as {
       signalType?: string;
@@ -548,7 +549,7 @@ router.get("/atlas/spatial/worldline/overlays", authMiddleware(), async (req: Re
   }
 });
 
-router.post("/atlas/spatial/worldline/overlays", authMiddleware(), requireRole("super_admin", "admin", "ops"), async (req: Request, res: Response) => {
+router.post("/atlas/spatial/worldline/overlays", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const {
       signalType,
@@ -639,7 +640,7 @@ router.get("/atlas/spatial/worldline/overlays/:overlayId", authMiddleware(), asy
   }
 });
 
-router.patch("/atlas/spatial/worldline/overlays/:overlayId/expire", authMiddleware(), requireRole("super_admin", "admin", "ops"), async (req: Request, res: Response) => {
+router.patch("/atlas/spatial/worldline/overlays/:overlayId/expire", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { overlayId } = req.params as { overlayId: string };
     const { expireOverlay } = await import("@szl-holdings/worldline");
@@ -669,7 +670,7 @@ router.get("/atlas/spatial/model-lanes", authMiddleware(), async (_req: Request,
   }
 });
 
-router.post("/atlas/spatial/model-lanes/invoke", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/atlas/spatial/model-lanes/invoke", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { laneType, messages, correlationId, overrideModel, overrideMaxTokens } = req.body as {
       laneType?: string;
@@ -713,7 +714,7 @@ router.post("/atlas/spatial/model-lanes/invoke", authMiddleware(), async (req: R
   }
 });
 
-router.post("/atlas/spatial/twins/matter", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/atlas/spatial/twins/matter", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { entityId, state } = req.body as { entityId?: string; state?: Record<string, unknown> };
     if (!entityId || !state) {
@@ -728,7 +729,7 @@ router.post("/atlas/spatial/twins/matter", authMiddleware(), async (req: Request
   }
 });
 
-router.post("/atlas/spatial/twins/portfolio", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/atlas/spatial/twins/portfolio", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { entityId, state } = req.body as { entityId?: string; state?: Record<string, unknown> };
     if (!entityId || !state) {
@@ -743,7 +744,7 @@ router.post("/atlas/spatial/twins/portfolio", authMiddleware(), async (req: Requ
   }
 });
 
-router.post("/atlas/spatial/twins/incident", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/atlas/spatial/twins/incident", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { entityId, state } = req.body as { entityId?: string; state?: Record<string, unknown> };
     if (!entityId || !state) {
@@ -758,7 +759,7 @@ router.post("/atlas/spatial/twins/incident", authMiddleware(), async (req: Reque
   }
 });
 
-router.post("/atlas/spatial/twins/port", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/atlas/spatial/twins/port", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { entityId, state } = req.body as { entityId?: string; state?: Record<string, unknown> };
     if (!entityId || !state) {

@@ -18,6 +18,7 @@ import type {
   VesselUsdState,
   RouteSimulationParams,
 } from "@szl-holdings/openusd-export";
+import { validateBody, jsonObjectBodySchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -128,6 +129,7 @@ router.post(
   "/vessels/:imo/simulate",
   twinRateLimit,
   authMiddleware({ required: false }),
+  validateBody(jsonObjectBodySchema),
   async (req, res) => {
     try {
       const { imo } = req.params;

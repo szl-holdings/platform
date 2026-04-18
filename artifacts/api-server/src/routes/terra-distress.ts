@@ -14,6 +14,7 @@ import { ingestCsvBuffer } from "../lib/terra-csv-ingestion";
 import { durableJobQueue } from "@szl-holdings/forge-runtime";
 import { NYC_INGESTION_JOB_TYPE } from "../lib/terra-nyc-ingestion";
 import { NYC_EXTENDED_INGESTION_JOB_TYPE, type NycExtendedIngestionJobPayload } from "../lib/terra-nyc-extended-ingestion";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } });
@@ -38,7 +39,7 @@ async function auditLog(
   }
 }
 
-router.get("/terra/distress/search", authMiddleware({ required: false }), async (req, res) => {
+router.get("/terra/distress/search", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { borough, county, zip, propertyType, distressType, minValue, maxValue, sort, q, limit, offset } = req.query;
 
@@ -112,7 +113,7 @@ router.get("/terra/distress/property/:id", authMiddleware({ required: false }), 
   } catch (err) { handleRouteError(res, err, "Failed to fetch distress property detail"); }
 });
 
-router.get("/terra/distress/nearby", authMiddleware({ required: false }), async (req, res) => {
+router.get("/terra/distress/nearby", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { lat, lng, radiusMiles, limit } = req.query;
     const latNum = lat ? Number(lat) : NaN;
@@ -148,7 +149,7 @@ router.get("/terra/distress/nearby", authMiddleware({ required: false }), async 
   } catch (err) { handleRouteError(res, err, "Failed to fetch nearby distress properties"); }
 });
 
-router.get("/terra/distress/alerts", authMiddleware({ required: false }), async (req, res) => {
+router.get("/terra/distress/alerts", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { borough, type, severity, limit } = req.query;
 
@@ -174,7 +175,7 @@ router.get("/terra/distress/alerts", authMiddleware({ required: false }), async 
   } catch (err) { handleRouteError(res, err, "Failed to fetch distress alerts"); }
 });
 
-router.get("/terra/distress/score", authMiddleware({ required: false }), async (req, res) => {
+router.get("/terra/distress/score", authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { id } = req.query;
 
@@ -226,6 +227,7 @@ router.post(
   authMiddleware({ required: true }),
   requireRole("super_admin", "ops", "analyst", "seller"),
   upload.single("file"),
+  validateBody(jsonObjectBodySchema),
   async (req, res) => {
     try {
       if (!req.file) {
@@ -271,6 +273,7 @@ router.post(
   "/terra/distress/ingest/nyc-open-data",
   authMiddleware({ required: true }),
   requireRole("super_admin", "ops"),
+  validateBody(jsonObjectBodySchema),
   async (req, res) => {
     try {
       const ALL_SOURCES: Array<"acris" | "acris_master" | "foreclosure_filings" | "dof_liens" | "hpd_violations"> =
@@ -305,6 +308,7 @@ router.post(
   "/terra/distress/ingest/nyc-extended",
   authMiddleware({ required: true }),
   requireRole("super_admin", "ops"),
+  validateBody(jsonObjectBodySchema),
   async (req, res) => {
     try {
       const ALL_SOURCES: NycExtendedIngestionJobPayload["sources"] = [

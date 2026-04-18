@@ -15,6 +15,7 @@ import type {
   PropertyUsdState,
   PropertySimulationParams,
 } from "@szl-holdings/openusd-export";
+import { validateBody, jsonObjectBodySchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -106,6 +107,7 @@ router.post(
   "/terra/:propertyId/simulate",
   twinRateLimit,
   authMiddleware({ required: false }),
+  validateBody(jsonObjectBodySchema),
   async (req, res) => {
     try {
       const { propertyId } = req.params;
