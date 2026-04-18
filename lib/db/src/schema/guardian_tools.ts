@@ -276,3 +276,71 @@ export type InsertToolMeshToolPermission = typeof toolMeshToolPermissionsTable.$
 
 export type ToolMeshActionApproval = typeof toolMeshActionApprovalsTable.$inferSelect;
 export type InsertToolMeshActionApproval = typeof toolMeshActionApprovalsTable.$inferInsert;
+
+// ============================================================
+// GUARDIAN TIERS — persisted tier definitions (controls + risk)
+// Replaces in-memory `TIER_CONTROLS` constant when present.
+// orgId NULL = global default tier definition.
+// ============================================================
+
+export const guardianTiersTable = pgTable("guardian_tiers", {
+  id: serial("id").primaryKey(),
+  orgId: integer("org_id").references(() => organizationsTable.id, { onDelete: "cascade" }),
+  tier: text("tier", { enum: GUARDIAN_TIER_ENUM }).notNull(),
+  tierNumber: integer("tier_number").notNull(),
+  description: text("description").notNull(),
+  riskLevel: integer("risk_level").notNull(),
+  controls: jsonb("controls").notNull().default({}),
+  enabled: boolean("enabled").notNull().default(true),
+  updatedById: integer("updated_by_id").references(() => usersTable.id, { onDelete: "set null" }),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => [
+  uniqueIndex("guardian_tiers_org_tier_idx").on(table.orgId, table.tier),
+  index("guardian_tiers_enabled_idx").on(table.enabled),
+]);
+
+export type GuardianTier = typeof guardianTiersTable.$inferSelect;
+export type InsertGuardianTier = typeof guardianTiersTable.$inferInsert;
+
+// ============================================================
+// GUARDRAIL CONFIGS — persisted runtime guardrail configurations.
+// Each row is a configurable guardrail (content filter, rate limit,
+// tool restriction, DLP, model restriction, custom). Survives restart.
+// orgId NULL = global default guardrail.
+// ============================================================
+
+const GUARDRAIL_TYPE_ENUM = [
+  "content_filter",
+  "rate_limit",
+  "tool_restriction",
+  "data_loss_prevention",
+  "model_restriction",
+  "custom",
+] as const;
+
+const GUARDRAIL_ENFORCEMENT_ENUM = ["enforce", "monitor", "disabled"] as const;
+
+export const guardrailConfigsTable = pgTable("guardrail_configs", {
+  id: serial("id").primaryKey(),
+  orgId: integer("org_id").references(() => organizationsTable.id, { onDelete: "cascade" }),
+  guardrailId: text("guardrail_id").notNull(),
+  name: text("name").notNull(),
+  description: text("description"),
+  guardrailType: text("guardrail_type", { enum: GUARDRAIL_TYPE_ENUM }).notNull(),
+  config: jsonb("config").notNull().default({}),
+  appliesToTier: text("applies_to_tier", { enum: GUARDIAN_TIER_ENUM }),
+  enforcement: text("enforcement", { enum: GUARDRAIL_ENFORCEMENT_ENUM }).notNull().default("enforce"),
+  enabled: boolean("enabled").notNull().default(true),
+  createdById: integer("created_by_id").references(() => usersTable.id, { onDelete: "set null" }),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => [
+  uniqueIndex("guardrail_configs_org_guardrail_idx").on(table.orgId, table.guardrailId),
+  index("guardrail_configs_type_idx").on(table.guardrailType),
+  index("guardrail_configs_tier_idx").on(table.appliesToTier),
+  index("guardrail_configs_enabled_idx").on(table.enabled),
+]);
+
+export type GuardrailConfig = typeof guardrailConfigsTable.$inferSelect;
+export type InsertGuardrailConfig = typeof guardrailConfigsTable.$inferInsert;

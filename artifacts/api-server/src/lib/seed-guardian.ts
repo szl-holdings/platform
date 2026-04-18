@@ -1,6 +1,7 @@
 import {
   db,
   guardianPoliciesTable,
+  guardianTiersTable,
   toolMeshToolsTable,
   toolMeshToolVersionsTable,
 } from "@szl-holdings/db";
@@ -12,7 +13,14 @@ import {
   OPERATIONS_TOOL_MANIFESTS,
   type ToolManifest,
 } from "@workspace/tool-mesh";
-import { PolicyTierSchema } from "@workspace/guardian";
+import {
+  PolicyTierSchema,
+  POLICY_TIER_DESCRIPTIONS,
+  TIER_CONTROLS,
+  TIER_NUMBER,
+  TIER_RISK_LEVEL,
+  type PolicyTier,
+} from "@workspace/guardian";
 import { inArray, isNull, and } from "drizzle-orm";
 import { logger } from "./logger";
 
@@ -43,6 +51,41 @@ const ALL_TOOL_MANIFESTS: ToolManifest[] = [
   ...FINANCE_TOOL_MANIFESTS,
   ...OPERATIONS_TOOL_MANIFESTS,
 ];
+
+/**
+ * Seed the global tier definitions (orgId NULL) from the in-process
+ * `TIER_CONTROLS` constants so /policies/tiers can read from the DB and
+ * tier definitions survive restart. Idempotent — only inserts missing rows.
+ */
+export async function seedGuardianTiers(): Promise<void> {
+  try {
+    const tierNames = (PolicyTierSchema.options as PolicyTier[]);
+    const existing = await db
+      .select({ tier: guardianTiersTable.tier })
+      .from(guardianTiersTable)
+      .where(isNull(guardianTiersTable.orgId));
+    const existingSet = new Set(existing.map((r) => r.tier));
+    const missing = tierNames
+      .filter((t) => !existingSet.has(t))
+      .map((tier) => ({
+        orgId: null,
+        tier,
+        tierNumber: TIER_NUMBER[tier],
+        description: POLICY_TIER_DESCRIPTIONS[tier],
+        riskLevel: TIER_RISK_LEVEL[tier],
+        controls: TIER_CONTROLS[tier] as unknown as Record<string, unknown>,
+        enabled: true,
+      }));
+    if (missing.length > 0) {
+      await db.insert(guardianTiersTable).values(missing);
+      logger.info({ inserted: missing.length, alreadyPresent: existingSet.size }, "[seed-guardian] Default tier definitions seeded");
+    } else {
+      logger.info({ alreadyPresent: existingSet.size }, "[seed-guardian] All default tier definitions already present");
+    }
+  } catch (err) {
+    logger.warn({ err }, "[seed-guardian] Tier seed failed (non-fatal)");
+  }
+}
 
 export async function seedGuardianDefaults(): Promise<void> {
   try {

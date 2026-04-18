@@ -40,6 +40,8 @@ import {
   guardianPolicyAssignmentsTable,
   guardianActionsTable,
   guardianApprovalRequestsTable,
+  guardianTiersTable,
+  guardrailConfigsTable,
   rollbackEventsTable,
   toolMeshToolsTable,
   toolMeshToolVersionsTable,
@@ -48,12 +50,14 @@ import {
   auditEventsTable,
   type GuardianPolicy,
   type GuardianPolicyAssignment,
+  type GuardianTier,
+  type GuardrailConfig,
   type ToolMeshTool,
   type ToolMeshToolVersion,
   type ToolMeshToolPermission,
   type ToolMeshActionApproval,
 } from "@szl-holdings/db";
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, isNull, or, sql } from "drizzle-orm";
 import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 import { sendEmail, hasEmailProviderConfigured } from "../lib/email";
 
@@ -319,15 +323,85 @@ router.get("/policies", authMiddleware(), requireRole("super_admin", "admin", "o
   }
 });
 
-router.get("/policies/tiers", authMiddleware(), async (_req: Request, res: Response) => {
+router.get("/policies/tiers", authMiddleware(), async (req: Request, res: Response) => {
   try {
-    const tiers = (PolicyTierSchema.options as string[]).map(t => {
+    const orgId = userOrgId(req.user);
+
+    // Read persisted tier definitions from DB. Org-specific overrides win
+    // over global (org_id IS NULL) defaults; if neither is present, fall
+    // back to the in-process constants so callers always get a complete set.
+    const orgFilter = orgId !== null ? or(isNull(guardianTiersTable.orgId), eq(guardianTiersTable.orgId, orgId)) : isNull(guardianTiersTable.orgId);
+    const rows = await db
+      .select()
+      .from(guardianTiersTable)
+      .where(and(eq(guardianTiersTable.enabled, true), orgFilter));
+
+    const byTier = new Map<string, GuardianTier>();
+    for (const row of rows) {
+      // Prefer org-specific row over global default for the same tier name.
+      const existing = byTier.get(row.tier);
+      if (!existing || (existing.orgId === null && row.orgId !== null)) {
+        byTier.set(row.tier, row);
+      }
+    }
+
+    const tiers = (PolicyTierSchema.options as string[]).map((t) => {
       const tier = t as PolicyTier;
+      const persisted = byTier.get(tier);
+      if (persisted) {
+        return {
+          tier,
+          tierNumber: persisted.tierNumber,
+          description: persisted.description,
+          riskLevel: persisted.riskLevel,
+          controls: persisted.controls as Record<string, unknown>,
+        };
+      }
       return { tier, tierNumber: TIER_NUMBER[tier], description: POLICY_TIER_DESCRIPTIONS[tier], riskLevel: TIER_RISK_LEVEL[tier], controls: TIER_CONTROLS[tier] };
     });
     sendSuccess(res, tiers);
   } catch (err) {
     handleRouteError(res, err, "Failed to list policy tiers");
+  }
+});
+
+router.patch("/policies/tiers/:tier", authMiddleware(), requireRole("super_admin", "admin"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+  try {
+    const tierName = req.params["tier"] as string;
+    const tierParsed = PolicyTierSchema.safeParse(tierName);
+    if (!tierParsed.success) { sendBadRequest(res, "Invalid tier name"); return; }
+    const tier = tierParsed.data;
+    const body = req.body as Partial<{ description: string; controls: Record<string, unknown>; tierNumber: number; riskLevel: number; enabled: boolean }>;
+    const orgId = userOrgId(req.user);
+
+    const u: Record<string, unknown> = { updatedAt: new Date(), updatedById: req.user?.id ?? null };
+    if (body.description !== undefined) u.description = body.description;
+    if (body.controls !== undefined) u.controls = body.controls;
+    if (body.tierNumber !== undefined) u.tierNumber = body.tierNumber;
+    if (body.riskLevel !== undefined) u.riskLevel = body.riskLevel;
+    if (body.enabled !== undefined) u.enabled = body.enabled;
+
+    const [existing] = await db.select().from(guardianTiersTable).where(and(eq(guardianTiersTable.tier, tier), orgId !== null ? eq(guardianTiersTable.orgId, orgId) : isNull(guardianTiersTable.orgId))).limit(1);
+
+    if (!existing) {
+      const [inserted] = await db.insert(guardianTiersTable).values({
+        orgId,
+        tier,
+        tierNumber: body.tierNumber ?? TIER_NUMBER[tier],
+        description: body.description ?? POLICY_TIER_DESCRIPTIONS[tier],
+        riskLevel: body.riskLevel ?? TIER_RISK_LEVEL[tier],
+        controls: (body.controls ?? TIER_CONTROLS[tier]) as Record<string, unknown>,
+        enabled: body.enabled ?? true,
+        updatedById: req.user?.id ?? null,
+      }).returning();
+      sendCreated(res, inserted);
+      return;
+    }
+
+    const [updated] = await db.update(guardianTiersTable).set(u).where(eq(guardianTiersTable.id, existing.id)).returning();
+    sendSuccess(res, updated);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to update tier definition");
   }
 });
 
@@ -1104,6 +1178,145 @@ router.post("/guardian/evaluate", authMiddleware(), validateBody(jsonObjectBodyS
     sendSuccess(res, { ...result, redactedFields: redactedFields.length > 0 ? redactedFields : undefined });
   } catch (err) {
     handleRouteError(res, err, "Failed to evaluate guardian policy");
+  }
+});
+
+// ============================================================
+// GUARDRAIL CONFIGS — persisted runtime guardrail configurations
+// ============================================================
+
+function guardrailRowToApi(row: GuardrailConfig) {
+  return {
+    id: row.id,
+    orgId: row.orgId,
+    guardrailId: row.guardrailId,
+    name: row.name,
+    description: row.description ?? undefined,
+    guardrailType: row.guardrailType,
+    config: (row.config as Record<string, unknown>) ?? {},
+    appliesToTier: row.appliesToTier ?? undefined,
+    enforcement: row.enforcement,
+    enabled: row.enabled,
+    createdAt: row.createdAt instanceof Date ? row.createdAt.toISOString() : row.createdAt,
+    updatedAt: row.updatedAt instanceof Date ? row.updatedAt.toISOString() : row.updatedAt,
+  };
+}
+
+router.get("/guardrail-configs", authMiddleware(), requireRole("super_admin", "admin", "ops", "analyst"), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
+  try {
+    const { page, limit } = parsePagination(req.query as Record<string, unknown>);
+    const guardrailType = req.query["guardrailType"] as string | undefined;
+    const enabled = req.query["enabled"] as string | undefined;
+    const user = req.user;
+
+    const conditions: Parameters<typeof and>[0][] = [];
+    if (!isAdminUser(user)) {
+      const orgId = userOrgId(user);
+      if (orgId === null) { sendForbidden(res, "No organization membership — cannot access governance records"); return; }
+      // Tenant scope: org-specific rows OR global defaults (org_id IS NULL).
+      conditions.push(or(eq(guardrailConfigsTable.orgId, orgId), isNull(guardrailConfigsTable.orgId))!);
+    }
+    if (guardrailType) conditions.push(eq(guardrailConfigsTable.guardrailType, guardrailType as GuardrailConfig["guardrailType"]));
+    if (enabled !== undefined) conditions.push(eq(guardrailConfigsTable.enabled, enabled === "true"));
+
+    const where = conditions.length > 0 ? and(...conditions) : undefined;
+    const offset = (page - 1) * limit;
+
+    const [rows, totalRow] = await Promise.all([
+      db.select().from(guardrailConfigsTable).where(where as ReturnType<typeof and>).orderBy(desc(guardrailConfigsTable.id)).limit(limit).offset(offset),
+      db.select({ count: sql<number>`count(*)::int` }).from(guardrailConfigsTable).where(where as ReturnType<typeof and>),
+    ]);
+
+    sendSuccess(res, rows.map(guardrailRowToApi), 200, { page, limit, total: totalRow[0]?.count ?? 0 });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to list guardrail configs");
+  }
+});
+
+router.get("/guardrail-configs/:id", authMiddleware(), requireRole("super_admin", "admin", "ops", "analyst"), async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params["id"] as string, 10);
+    if (isNaN(id)) { sendBadRequest(res, "Invalid guardrail config ID"); return; }
+    const [row] = await db.select().from(guardrailConfigsTable).where(eq(guardrailConfigsTable.id, id)).limit(1);
+    if (!row) { sendNotFound(res, "Guardrail config not found"); return; }
+    if (!isAdminUser(req.user)) {
+      const orgId = userOrgId(req.user);
+      if (orgId === null) { sendForbidden(res, "No organization membership — cannot access governance records"); return; }
+      if (row.orgId !== null && row.orgId !== orgId) { sendNotFound(res, "Guardrail config not found"); return; }
+    }
+    sendSuccess(res, guardrailRowToApi(row));
+  } catch (err) {
+    handleRouteError(res, err, "Failed to get guardrail config");
+  }
+});
+
+router.post("/guardrail-configs", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+  try {
+    const body = req.body as { guardrailId?: string; name?: string; description?: string; guardrailType?: GuardrailConfig["guardrailType"]; config?: Record<string, unknown>; appliesToTier?: GuardrailConfig["appliesToTier"]; enforcement?: GuardrailConfig["enforcement"]; enabled?: boolean };
+    if (!body.guardrailId || !body.name || !body.guardrailType) { sendBadRequest(res, "guardrailId, name, and guardrailType are required"); return; }
+    const orgId = userOrgId(req.user);
+    const [inserted] = await db.insert(guardrailConfigsTable).values({
+      orgId,
+      guardrailId: body.guardrailId,
+      name: body.name,
+      description: body.description ?? null,
+      guardrailType: body.guardrailType,
+      config: body.config ?? {},
+      appliesToTier: body.appliesToTier ?? null,
+      enforcement: body.enforcement ?? "enforce",
+      enabled: body.enabled ?? true,
+      createdById: req.user?.id ?? null,
+    }).returning();
+    if (!inserted) { handleRouteError(res, new Error("insert returned no row"), "Failed to create guardrail config"); return; }
+    logger.info({ guardrailId: inserted.guardrailId, type: inserted.guardrailType }, "Guardrail config created");
+    sendCreated(res, guardrailRowToApi(inserted));
+  } catch (err) {
+    handleRouteError(res, err, "Failed to create guardrail config");
+  }
+});
+
+router.patch("/guardrail-configs/:id", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params["id"] as string, 10);
+    if (isNaN(id)) { sendBadRequest(res, "Invalid guardrail config ID"); return; }
+    const [existing] = await db.select().from(guardrailConfigsTable).where(eq(guardrailConfigsTable.id, id)).limit(1);
+    if (!existing) { sendNotFound(res, "Guardrail config not found"); return; }
+    if (!isAdminUser(req.user)) {
+      const orgId = userOrgId(req.user);
+      if (orgId === null) { sendForbidden(res, "No organization membership — cannot access governance records"); return; }
+      if (existing.orgId !== orgId) { sendNotFound(res, "Guardrail config not found"); return; }
+    }
+    const body = req.body as Partial<{ name: string; description: string | null; config: Record<string, unknown>; appliesToTier: GuardrailConfig["appliesToTier"]; enforcement: GuardrailConfig["enforcement"]; enabled: boolean }>;
+    const u: Record<string, unknown> = { updatedAt: new Date() };
+    if (body.name !== undefined) u.name = body.name;
+    if (body.description !== undefined) u.description = body.description;
+    if (body.config !== undefined) u.config = body.config;
+    if (body.appliesToTier !== undefined) u.appliesToTier = body.appliesToTier;
+    if (body.enforcement !== undefined) u.enforcement = body.enforcement;
+    if (body.enabled !== undefined) u.enabled = body.enabled;
+    const [updated] = await db.update(guardrailConfigsTable).set(u).where(eq(guardrailConfigsTable.id, id)).returning();
+    if (!updated) { sendNotFound(res, "Guardrail config not found"); return; }
+    sendSuccess(res, guardrailRowToApi(updated));
+  } catch (err) {
+    handleRouteError(res, err, "Failed to update guardrail config");
+  }
+});
+
+router.delete("/guardrail-configs/:id", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("super_admin", "admin"), async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params["id"] as string, 10);
+    if (isNaN(id)) { sendBadRequest(res, "Invalid guardrail config ID"); return; }
+    const [existing] = await db.select().from(guardrailConfigsTable).where(eq(guardrailConfigsTable.id, id)).limit(1);
+    if (!existing) { sendNotFound(res, "Guardrail config not found"); return; }
+    if (!isAdminUser(req.user)) {
+      const orgId = userOrgId(req.user);
+      if (orgId === null) { sendForbidden(res, "No organization membership — cannot access governance records"); return; }
+      if (existing.orgId !== orgId) { sendNotFound(res, "Guardrail config not found"); return; }
+    }
+    await db.delete(guardrailConfigsTable).where(eq(guardrailConfigsTable.id, id));
+    sendSuccess(res, { deleted: true });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to delete guardrail config");
   }
 });
 

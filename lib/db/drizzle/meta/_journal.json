@@ -379,6 +379,13 @@
       "when": 1776614400000,
       "tag": "0066_orchestration_checkpoints",
       "breakpoints": true
+    },
+    {
+      "idx": 67,
+      "version": "7",
+      "when": 1776620000000,
+      "tag": "0067_governance_persistence",
+      "breakpoints": true
     }
   ]
 }

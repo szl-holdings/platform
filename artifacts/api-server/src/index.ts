@@ -22,7 +22,7 @@ import "./lib/terra-nyc-extended-ingestion";
 import { scheduleNycExtendedIngestionJob } from "./lib/terra-nyc-extended-ingestion";
 import { seedPlatformData } from "./lib/seed-platform";
 import { seedConstellationData } from "./lib/seed-constellation";
-import { seedGuardianDefaults } from "./lib/seed-guardian";
+import { seedGuardianDefaults, seedGuardianTiers } from "./lib/seed-guardian";
 import { seedKnowledgeBase } from "./lib/seed-kb";
 import { seedAiBudgetPolicies } from "./lib/seed-ai-budget";
 import { seedMspData } from "./lib/seed-msp";
@@ -284,6 +284,9 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
     // Guardian default tier policies are operational data (not demo data) — always seed.
     seedGuardianDefaults().catch(err => {
       logger.warn({ err }, "[seed-guardian] Guardian defaults seed failed (non-fatal)");
+    });
+    seedGuardianTiers().catch(err => {
+      logger.warn({ err }, "[seed-guardian] Guardian tier seed failed (non-fatal)");
     });
     // Knowledge base articles are operational content — always seed if table is empty.
     seedKnowledgeBase().catch(err => {
