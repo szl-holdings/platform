@@ -1179,10 +1179,33 @@ export interface ScheduledReportEmailOptions {
   frequency: string;
   generatedAt: string;
   downloadUrl: string;
+  /**
+   * Selects the access copy used in the email body:
+   *   - "auth"      → "The link requires authentication" (default; for the
+   *                   /reports/:id/pdf endpoint).
+   *   - "presigned" → "This link is valid for 7 days and does not require
+   *                   sign-in" (for object-storage presigned GET URLs).
+   *   - "attachment" → "The PDF is attached to this email" (when the PDF
+   *                    is delivered as an email attachment).
+   */
+  linkMode?: "auth" | "presigned" | "attachment";
 }
 
 export function buildScheduledReportEmail(opts: ScheduledReportEmailOptions): { subject: string; html: string; text: string } {
   const { recipientName, reportTitle, scheduleName, domain, frequency, generatedAt, downloadUrl } = opts;
+  const linkMode = opts.linkMode ?? "auth";
+  const accessHtml =
+    linkMode === "attachment"
+      ? "The PDF report is attached to this email. You can also use the button below to access the latest version online."
+      : linkMode === "presigned"
+      ? "Click below to download the PDF. This link is valid for 7 days and does not require signing in."
+      : "Click below to download the PDF report. The link requires authentication to your SZL Holdings account.";
+  const accessText =
+    linkMode === "attachment"
+      ? "The PDF report is attached to this email."
+      : linkMode === "presigned"
+      ? "Download your report (link valid for 7 days, no sign-in required):"
+      : "Download your report (sign-in required):";
 
   const greeting = recipientName ? `Hello ${recipientName},` : "Hello,";
   const domainLabel = domain.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
@@ -1204,7 +1227,7 @@ export function buildScheduledReportEmail(opts: ScheduledReportEmailOptions): { 
       <p class="label" style="margin-top:8px;">Generated</p>
       <p>${generatedAt}</p>
     </div>
-    <p>Click below to download the PDF report. The link requires authentication to your SZL Holdings account.</p>
+    <p>${accessHtml}</p>
     <a class="cta" href="${downloadUrl}">Download Report PDF</a>
     <p style="margin-top:20px;font-size:12px;color:#9ca3af;">This is an automated delivery from your scheduled report configuration. If you no longer wish to receive these reports, contact your administrator to update the distribution list.</p>
   `);
@@ -1221,9 +1244,7 @@ export function buildScheduledReportEmail(opts: ScheduledReportEmailOptions): { 
     `Domain:    ${domainLabel}`,
     `Generated: ${generatedAt}`,
     ``,
-    `Download your report: ${downloadUrl}`,
-    ``,
-    `The download link requires authentication to your SZL Holdings account.`,
+    `${accessText} ${downloadUrl}`,
     ``,
     `This is an automated delivery from your scheduled report configuration.`,
     `If you no longer wish to receive these reports, contact your administrator.`,

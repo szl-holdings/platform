@@ -97,9 +97,13 @@ async function sendReportEmails(params: {
   downloadUrlOverride?: string;
   /** Distribution channel recorded in the report distribution table. */
   channel?: "email" | "download";
+  /** Selects the body copy used by buildScheduledReportEmail. */
+  linkMode?: "auth" | "presigned" | "attachment";
 }): Promise<{ sent: number; failed: number }> {
   const downloadUrl = params.downloadUrlOverride ?? buildReportDownloadUrl(params.reportId);
   const channel = params.channel ?? "email";
+  const linkMode: "auth" | "presigned" | "attachment" =
+    params.linkMode ?? (params.pdfBuffer ? "attachment" : "auth");
   const generatedAtStr = params.generatedAt.toLocaleString("en-US", {
     year: "numeric",
     month: "long",
@@ -136,6 +140,7 @@ async function sendReportEmails(params: {
       frequency: params.frequency,
       generatedAt: generatedAtStr,
       downloadUrl,
+      linkMode,
     });
 
     const result = await sendEmail({ to: email, subject, html, text, attachments });
@@ -789,19 +794,32 @@ router.post("/reports/schedules/run-due", authMiddleware(), requireRole("admin")
           const runDueTitle = `${template.name} — ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long" })}`;
           if (runDueDeliveryMethod === "download") {
             const presignedUrl = await uploadReportAndGetPresignedUrl(reportId, pdfBuffer);
-            const emailResults = await sendReportEmails({
-              reportId,
-              reportTitle: runDueTitle,
-              scheduleName: schedule.name,
-              domain: schedule.domain,
-              frequency: schedule.frequency,
-              generatedAt: new Date(),
-              recipientEmails: runDueEmails,
-              channel: "download",
-              downloadUrlOverride: presignedUrl ?? undefined,
-            });
-            emailSent = emailResults.sent;
-            emailFailed = emailResults.failed;
+            if (!presignedUrl) {
+              // Hard failure: download mode promises a no-auth presigned link.
+              // Record a failed distribution per recipient rather than silently
+              // emailing an auth-protected URL they can't open.
+              for (const email of runDueEmails) {
+                const distId = await createDistribution({ reportId, recipientEmail: email, channel: "download" });
+                await markDistributionFailed(distId, "Object storage unavailable — could not generate presigned download URL");
+              }
+              emailFailed = runDueEmails.length;
+              logger.warn({ reportId, scheduleId: schedule.scheduleId, recipientCount: runDueEmails.length }, "Download-mode delivery failed: no presigned URL");
+            } else {
+              const emailResults = await sendReportEmails({
+                reportId,
+                reportTitle: runDueTitle,
+                scheduleName: schedule.name,
+                domain: schedule.domain,
+                frequency: schedule.frequency,
+                generatedAt: new Date(),
+                recipientEmails: runDueEmails,
+                channel: "download",
+                downloadUrlOverride: presignedUrl,
+                linkMode: "presigned",
+              });
+              emailSent = emailResults.sent;
+              emailFailed = emailResults.failed;
+            }
           } else {
             const emailResults = await sendReportEmails({
               reportId,
@@ -929,20 +947,30 @@ router.post("/reports/schedules/:scheduleId/run", authMiddleware(), requireRole(
       const perRunTitle = `${template.name} — ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long" })}`;
       if (perRunDeliveryMethod === "download") {
         const presignedUrl = await uploadReportAndGetPresignedUrl(reportId, pdfBuffer);
-        const emailResults = await sendReportEmails({
-          reportId,
-          reportTitle: perRunTitle,
-          scheduleName: schedule.name,
-          domain: schedule.domain,
-          frequency: schedule.frequency,
-          generatedAt: new Date(),
-          recipientEmails: perRunEmails,
-          distributedByUserId: getUserId(req),
-          channel: "download",
-          downloadUrlOverride: presignedUrl ?? undefined,
-        });
-        emailSent = emailResults.sent;
-        emailFailed = emailResults.failed;
+        if (!presignedUrl) {
+          for (const email of perRunEmails) {
+            const distId = await createDistribution({ reportId, recipientEmail: email, channel: "download", distributedByUserId: getUserId(req) });
+            await markDistributionFailed(distId, "Object storage unavailable — could not generate presigned download URL");
+          }
+          emailFailed = perRunEmails.length;
+          logger.warn({ reportId, scheduleId, recipientCount: perRunEmails.length }, "Download-mode delivery failed: no presigned URL");
+        } else {
+          const emailResults = await sendReportEmails({
+            reportId,
+            reportTitle: perRunTitle,
+            scheduleName: schedule.name,
+            domain: schedule.domain,
+            frequency: schedule.frequency,
+            generatedAt: new Date(),
+            recipientEmails: perRunEmails,
+            distributedByUserId: getUserId(req),
+            channel: "download",
+            downloadUrlOverride: presignedUrl,
+            linkMode: "presigned",
+          });
+          emailSent = emailResults.sent;
+          emailFailed = emailResults.failed;
+        }
       } else {
         const emailResults = await sendReportEmails({
           reportId,
