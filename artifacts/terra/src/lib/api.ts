@@ -149,6 +149,184 @@ export interface TerraTenantApplication {
   isDemo: boolean;
 }
 
+export interface ClimateHazard {
+  type: string;
+  current: string;
+  projected2030: string;
+  projected2050: string;
+  trend: string;
+  detail: string;
+}
+
+export interface ClimateRiskData {
+  propertyId: string;
+  overallRiskScore: number;
+  overallGrade: string;
+  annualInsurance: number;
+  insuranceAdjustment: number;
+  valuationHaircut: number;
+  adaptationCost: number;
+  thirtyYearExpectedLoss: number;
+  regulatoryFlags: string[];
+  hazards: ClimateHazard[];
+  dataSource: string;
+  generatedAt: string;
+}
+
+export interface ZoningScenario {
+  id: string;
+  name: string;
+  type: string;
+  units: number;
+  grossSqft: number;
+  far: number;
+  stories: number;
+  parkingSpaces: number;
+  estimatedRevenue: number;
+  constructionCost: number;
+  landValue: number;
+  requiresVariance: boolean;
+  varianceProbability: number;
+  timelineMonths: number;
+}
+
+export interface ZoningData {
+  propertyId: string;
+  currentZoning: string;
+  zoningDescription: string;
+  lotSizeSqft: number;
+  currentFar: number;
+  maxFar: number;
+  currentUnits: number;
+  maxUnits: number;
+  maxHeight: number;
+  varianceProbability: number;
+  setbacks: { front: number; side: number; rear: number };
+  overlayDistricts: string[];
+  scenarios: ZoningScenario[];
+  aiSummary: string;
+  dataSource: string;
+  generatedAt: string;
+}
+
+export interface MicroMarket {
+  name: string;
+  score: number;
+  trajectory: string;
+  deltaQoQ: number;
+}
+
+export interface NeighborhoodMomentumData {
+  propertyId: string;
+  trajectory: string;
+  momentumScore: number;
+  institutionalFlowM: number;
+  capRateCompression: number;
+  priceAppreciation12m: number;
+  permitVolume3m: number;
+  permitVolumeChange: number;
+  restaurantOpenings3m: number;
+  retailVacancyPct: number;
+  walkScore: number;
+  transitScore: number;
+  medianHHIncome: number;
+  incomeGrowth5y: number;
+  topSignals: string[];
+  microMarkets: MicroMarket[];
+  dataSource: string;
+  generatedAt: string;
+}
+
+export interface MotivationFactor {
+  factor: string;
+  weight: number;
+}
+
+export interface SellerMotivationData {
+  propertyId: string;
+  acceptanceScore: number;
+  acceptanceCategory: string;
+  debtLoad: number;
+  estimatedEquity: number;
+  estimatedLTV: number;
+  suggestedDiscount: number;
+  ownershipYears: number;
+  daysOnMarket: number;
+  priorListings: number;
+  taxDelinquencyMonths: number;
+  motivationFactors: MotivationFactor[];
+  distressSignals: string[];
+  outreachScript: string;
+  dataSource: string;
+  generatedAt: string;
+}
+
+export interface RenovationOption {
+  name: string;
+  cost: number;
+  valueAdd: number;
+  timelineWeeks: number;
+}
+
+export interface RoomInspection {
+  id: string;
+  name: string;
+  sqft: number;
+  condition: string;
+  ceiling: number;
+  renovationOptions: RenovationOption[];
+}
+
+export interface StagingOption {
+  name: string;
+  description: string;
+  estimatedValue: number;
+}
+
+export interface SpatialWalkthroughData {
+  propertyId: string;
+  totalSqft: number;
+  yearBuilt: number;
+  bedrooms: number;
+  bathrooms: number;
+  levels: number;
+  overallConditionScore: number;
+  totalRenovationBudget: number;
+  totalValueAdd: number;
+  rooms: RoomInspection[];
+  stagingOptions: StagingOption[];
+  dataSource: string;
+  generatedAt: string;
+}
+
+export interface WaterfallTier {
+  description: string;
+  gpAmount: number;
+  lpAmount: number;
+}
+
+export interface PropertyWaterfallData {
+  propertyId: string;
+  totalEquity: number;
+  gpContributionPct: number;
+  preferredReturn: number;
+  catchUpPct: number;
+  promotePct: number;
+  holdMonths: number;
+  exitProceeds: number;
+  gpEquity: number;
+  lpEquity: number;
+  gpTotal: number;
+  lpTotal: number;
+  gpEM: number;
+  lpEM: number;
+  gpIRR: number;
+  lpIRR: number;
+  tiers: WaterfallTier[];
+  dataSource: string;
+  generatedAt: string;
+}
+
 export const api = {
   marketIntelligence: (market?: string) =>
     apiFetch<any>(`/terra/market-intelligence${market ? `?market=${encodeURIComponent(market)}` : ""}`),
@@ -243,5 +421,13 @@ export const api = {
       apiFetch<{ updated: boolean }>(`/terra/tenant-applications/${id}`, { method: "PUT", body: JSON.stringify(data) }),
     remove: (id: string) =>
       apiFetch<{ deleted: boolean }>(`/terra/tenant-applications/${id}`, { method: "DELETE" }),
+  },
+  properties: {
+    climateRisk: (id: string) => apiFetch<{ data: ClimateRiskData; propertyId: string; dataMode: string }>(`/terra/properties/${id}/climate-risk`),
+    zoning: (id: string) => apiFetch<{ data: ZoningData; propertyId: string; dataMode: string }>(`/terra/properties/${id}/zoning`),
+    neighborhoodMomentum: (id: string) => apiFetch<{ data: NeighborhoodMomentumData; propertyId: string; dataMode: string }>(`/terra/properties/${id}/neighborhood-momentum`),
+    sellerMotivation: (id: string) => apiFetch<{ data: SellerMotivationData; propertyId: string; dataMode: string }>(`/terra/properties/${id}/seller-motivation`),
+    spatialWalkthrough: (id: string) => apiFetch<{ data: SpatialWalkthroughData; propertyId: string; dataMode: string }>(`/terra/properties/${id}/spatial-walkthrough`),
+    waterfall: (id: string) => apiFetch<{ data: PropertyWaterfallData; propertyId: string; dataMode: string }>(`/terra/properties/${id}/waterfall`),
   },
 };

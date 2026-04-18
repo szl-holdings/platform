@@ -5,7 +5,8 @@ import { useRoute, Link } from "wouter";
 import {
   ArrowLeft, Building2, MapPin, Users, DollarSign, TrendingUp, Calendar,
   Wrench, User, AlertTriangle, Download, Loader2, CheckCircle, Clock,
-  FileText, Shield, Activity, Target, Tag, LayoutDashboard
+  FileText, Shield, Activity, Target, Tag, LayoutDashboard,
+  Thermometer, Layers, Calculator, Eye, BarChart3, Brain, ChevronRight
 } from "lucide-react";
 import { AtlasScenePanel } from "@/components/atlas-scene-panel";
 import { CommentThread, ActivityFeed } from "@szl-holdings/shared-ui/collaboration";
@@ -657,6 +658,87 @@ export default function PropertyDetailPage() {
             ) : (
               <p className="text-sm text-center py-4" style={{ color: "rgba(255,255,255,0.3)" }}>No lease documents abstracted — upload via Lease Abstraction module</p>
             )}
+          </motion.div>
+
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.29 }}
+            className="rounded-xl p-5" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.07)" }}>
+            <div className="flex items-center gap-2 mb-4">
+              <BarChart3 className="w-4 h-4" style={{ color: "#40856a" }} />
+              <h3 className="font-bold text-white text-sm">Intelligence Modules</h3>
+              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded" style={{ color: "#40856a", background: "rgba(64,133,106,0.08)", border: "1px solid rgba(64,133,106,0.2)" }}>AI-Powered</span>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {[
+                {
+                  href: `/climate-risk-enhanced/${property.id}`,
+                  icon: Thermometer,
+                  label: "Climate Risk Enhanced",
+                  desc: "30-yr flood, fire, heat & seismic scoring",
+                  badge: "FEMA · NOAA",
+                  color: "#f97316",
+                },
+                {
+                  href: `/zoning-intelligence/${property.id}`,
+                  icon: Layers,
+                  label: "Zoning Intelligence",
+                  desc: "FAR utilization, density scenarios & variance history",
+                  badge: "Municipal Records",
+                  color: "#60a5fa",
+                },
+                {
+                  href: `/waterfall-calculator/${property.id}`,
+                  icon: Calculator,
+                  label: "Waterfall Calculator",
+                  desc: "Preferred return, catch-up & promote tiers",
+                  badge: "GP / LP",
+                  color: "#b8943c",
+                },
+                {
+                  href: `/spatial-walkthrough/${property.id}`,
+                  icon: Eye,
+                  label: "Spatial Walkthrough",
+                  desc: "Room-by-room metrics, renovation options & staging",
+                  badge: "Computer Vision",
+                  color: "#a78bfa",
+                },
+                {
+                  href: `/neighborhood-momentum/${property.id}`,
+                  icon: BarChart3,
+                  label: "Neighborhood Momentum",
+                  desc: "Gentrification trajectory & institutional capital flows",
+                  badge: "MLS · Public Records",
+                  color: "#34d399",
+                },
+                {
+                  href: `/seller-motivation/${property.id}`,
+                  icon: Brain,
+                  label: "Seller Motivation",
+                  desc: "AI acceptance scoring across distress & equity signals",
+                  badge: "Distress Engine",
+                  color: "#40856a",
+                },
+              ].map(mod => {
+                const Icon = mod.icon;
+                return (
+                  <Link key={mod.href} href={mod.href}>
+                    <div
+                      className="group rounded-xl p-3.5 cursor-pointer transition-all"
+                      style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}
+                      onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.borderColor = `${mod.color}30`; (e.currentTarget as HTMLDivElement).style.background = `${mod.color}08`; }}
+                      onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.borderColor = "rgba(255,255,255,0.06)"; (e.currentTarget as HTMLDivElement).style.background = "rgba(255,255,255,0.02)"; }}
+                    >
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <Icon className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: mod.color }} />
+                        <ChevronRight className="w-3 h-3 flex-shrink-0 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: mod.color }} />
+                      </div>
+                      <p className="text-xs font-semibold text-white mb-0.5">{mod.label}</p>
+                      <p className="text-[10px] leading-relaxed mb-2" style={{ color: "rgba(255,255,255,0.35)" }}>{mod.desc}</p>
+                      <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full" style={{ color: mod.color, background: `${mod.color}12`, border: `1px solid ${mod.color}20` }}>{mod.badge}</span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}

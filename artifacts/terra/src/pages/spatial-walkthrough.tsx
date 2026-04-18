@@ -3,10 +3,13 @@ import { motion as m, AnimatePresence } from "framer-motion";
 import {
   Box, Ruler, Paintbrush, Sofa, Camera, Layers, Eye, ChevronRight,
   Building2, Maximize2, RotateCcw, ZoomIn, ZoomOut, Move, Grid3X3,
-  Sun, Moon, ArrowRight, CheckCircle, DollarSign, Palette, Map, Zap
+  Sun, Moon, ArrowRight, CheckCircle, DollarSign, Palette, Map, Zap, ArrowLeft, Loader2
 } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { trackEvent } from "@szl-holdings/observability/react";
+import { useRoute, Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/lib/api";
 
 interface Room {
   id: string;
@@ -141,6 +144,127 @@ const PROPERTY: PropertyWalkthrough = {
 
 const fmt = (n: number) => n >= 1000 ? `$${(n / 1000).toFixed(0)}K` : `$${n.toLocaleString()}`;
 
+const ROOM_FLOOR_PLANS: Record<string, {
+  walls: [number, number, number, number][];
+  windows: [number, number, number, number][];
+  doors: [number, number, number, number][];
+  furniture: { shape: "rect" | "circle"; x: number; y: number; w: number; h?: number; label: string }[];
+}> = {
+  r1: {
+    walls: [[20, 20, 580, 20], [580, 20, 580, 220], [580, 220, 20, 220], [20, 220, 20, 20]],
+    windows: [[80, 20, 200, 20], [300, 20, 460, 20]],
+    doors: [[540, 220, 580, 220]],
+    furniture: [
+      { shape: "rect", x: 150, y: 50, w: 200, h: 80, label: "Sofa" },
+      { shape: "rect", x: 190, y: 145, w: 120, h: 55, label: "Coffee Table" },
+      { shape: "rect", x: 420, y: 50, w: 140, h: 140, label: "Fireplace" },
+      { shape: "rect", x: 30, y: 50, w: 90, h: 90, label: "Armchair" },
+    ],
+  },
+  r2: {
+    walls: [[20, 20, 500, 20], [500, 20, 500, 240], [500, 240, 20, 240], [20, 240, 20, 20]],
+    windows: [[200, 20, 400, 20]],
+    doors: [[20, 180, 20, 240]],
+    furniture: [
+      { shape: "rect", x: 120, y: 60, w: 220, h: 140, label: "King Bed" },
+      { shape: "rect", x: 360, y: 60, w: 120, h: 60, label: "Dresser" },
+      { shape: "rect", x: 30, y: 60, w: 75, h: 55, label: "Nightstand" },
+      { shape: "rect", x: 360, y: 140, w: 120, h: 90, label: "Walk-in Closet" },
+    ],
+  },
+  r3: {
+    walls: [[20, 20, 560, 20], [560, 20, 560, 240], [560, 240, 20, 240], [20, 240, 20, 20]],
+    windows: [[300, 20, 480, 20]],
+    doors: [[500, 240, 560, 240]],
+    furniture: [
+      { shape: "rect", x: 30, y: 40, w: 240, h: 160, label: "Island" },
+      { shape: "rect", x: 290, y: 40, w: 80, h: 80, label: "Range" },
+      { shape: "rect", x: 390, y: 40, w: 60, h: 60, label: "Fridge" },
+      { shape: "rect", x: 460, y: 40, w: 80, h: 180, label: "Pantry" },
+      { shape: "rect", x: 290, y: 130, w: 160, h: 50, label: "Countertop" },
+    ],
+  },
+  r4: {
+    walls: [[20, 20, 440, 20], [440, 20, 440, 230], [440, 230, 20, 230], [20, 230, 20, 20]],
+    windows: [[160, 20, 340, 20]],
+    doors: [[380, 230, 440, 230]],
+    furniture: [
+      { shape: "rect", x: 30, y: 40, w: 160, h: 100, label: "Soaking Tub" },
+      { shape: "rect", x: 210, y: 40, w: 80, h: 90, label: "Shower" },
+      { shape: "rect", x: 310, y: 40, w: 120, h: 60, label: "Double Vanity" },
+      { shape: "rect", x: 30, y: 160, w: 120, h: 50, label: "Heated Floor" },
+    ],
+  },
+  r5: {
+    walls: [[20, 20, 580, 20], [580, 20, 580, 200], [580, 200, 20, 200], [20, 200, 20, 20]],
+    windows: [],
+    doors: [[20, 140, 20, 200]],
+    furniture: [
+      { shape: "rect", x: 30, y: 30, w: 200, h: 140, label: "Deck Area" },
+      { shape: "rect", x: 250, y: 30, w: 120, h: 80, label: "Outdoor Kitchen" },
+      { shape: "rect", x: 390, y: 30, w: 170, h: 140, label: "Planters" },
+      { shape: "circle", x: 310, y: 150, w: 30, label: "" },
+    ],
+  },
+};
+
+function FloorPlanSVG({ room }: { room: Room }) {
+  const plan = ROOM_FLOOR_PLANS[room.id] ?? ROOM_FLOOR_PLANS.r1;
+  const W = 600, H = 260;
+  const condColor = CONDITION_COLORS[room.condition];
+  return (
+    <svg width="100%" height="100%" viewBox={`0 0 ${W} ${H}`} style={{ position: "absolute", inset: 0 }}>
+      <defs>
+        <pattern id="fp-grid" width="20" height="20" patternUnits="userSpaceOnUse">
+          <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="0.5" />
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#fp-grid)" />
+      <rect x="18" y="18" width={W - 36} height={H - 36} fill="rgba(45,106,79,0.04)" />
+      {plan.furniture.map((f, i) => (
+        f.shape === "rect" ? (
+          <g key={i}>
+            <rect x={f.x} y={f.y} width={f.w} height={f.h ?? f.w} rx="3"
+              fill="rgba(45,106,79,0.12)" stroke="rgba(45,106,79,0.35)" strokeWidth="1" />
+            {f.label && (
+              <text x={f.x + f.w / 2} y={f.y + (f.h ?? f.w) / 2 + 3} textAnchor="middle"
+                fontSize="8" fill="rgba(255,255,255,0.4)" fontFamily="monospace">{f.label}</text>
+            )}
+          </g>
+        ) : (
+          <g key={i}>
+            <circle cx={f.x} cy={f.y} r={f.w}
+              fill="rgba(45,106,79,0.12)" stroke="rgba(45,106,79,0.35)" strokeWidth="1" />
+          </g>
+        )
+      ))}
+      {plan.walls.map(([x1, y1, x2, y2], i) => (
+        <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="rgba(255,255,255,0.6)" strokeWidth="2.5" strokeLinecap="square" />
+      ))}
+      {plan.windows.map(([x1, y1, x2, y2], i) => (
+        <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#38bdf8" strokeWidth="3" strokeLinecap="round" />
+      ))}
+      {plan.doors.map(([x1, y1, x2, y2], i) => (
+        <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#fbbf24" strokeWidth="3" strokeLinecap="round" strokeDasharray="6 3" />
+      ))}
+      <circle cx={W - 30} cy={H - 30} r={18} fill="rgba(0,0,0,0.5)" stroke={condColor} strokeWidth="1.5" />
+      <text x={W - 30} y={H - 26} textAnchor="middle" fontSize="7" fill="rgba(255,255,255,0.5)" fontFamily="monospace">COND</text>
+      <text x={W - 30} y={H - 17} textAnchor="middle" fontSize="8" fill={condColor} fontFamily="monospace" fontWeight="bold">{room.condition.toUpperCase().slice(0, 4)}</text>
+      <text x={W / 2} y={H - 8} textAnchor="middle" fontSize="8" fill="rgba(255,255,255,0.2)" fontFamily="monospace">
+        {room.sqft} SF · {room.ceiling > 0 ? `${room.ceiling}' ceiling` : "Open Air"}
+      </text>
+      <g>
+        <circle cx={35} cy={H - 18} r={6} fill="rgba(45,106,79,0.2)" stroke="#2d6a4f" strokeWidth="1" />
+        <text x={45} y={H - 14} fontSize="7" fill="rgba(255,255,255,0.3)">furniture</text>
+        <line x1={75} y1={H - 18} x2={95} y2={H - 18} stroke="#38bdf8" strokeWidth="2" />
+        <text x={99} y={H - 14} fontSize="7" fill="rgba(255,255,255,0.3)">window</text>
+        <line x1={135} y1={H - 18} x2={155} y2={H - 18} stroke="#fbbf24" strokeWidth="2" strokeDasharray="4 2" />
+        <text x={159} y={H - 14} fontSize="7" fill="rgba(255,255,255,0.3)">door</text>
+      </g>
+    </svg>
+  );
+}
+
 const MAPS_SATELLITE_URL =
   `${import.meta.env.BASE_URL}api/maps/static?center=425+Park+Ave+New+York+NY&zoom=17&size=900x220&maptype=satellite&markers=color:red|425+Park+Ave+New+York+NY`;
 
@@ -162,10 +286,21 @@ async function initiateTerraCheckout(planId: string): Promise<void> {
 }
 
 export default function SpatialWalkthroughPage() {
+  const [, params] = useRoute<{ propertyId: string }>("/spatial-walkthrough/:propertyId");
+  const propertyId = params?.propertyId;
+
+  const { data: propertyData, isLoading: propertyLoading } = useQuery({
+    queryKey: ["terra-spatial-walkthrough", propertyId],
+    queryFn: () => api.properties.spatialWalkthrough(propertyId!),
+    enabled: !!propertyId,
+    staleTime: 300_000,
+  });
+
   const [selectedRoom, setSelectedRoom] = useState(PROPERTY.rooms[0].id);
   const [showRenovation, setShowRenovation] = useState(false);
   const [selectedStaging, setSelectedStaging] = useState<string | null>(null);
   const [upgradeLoading, setUpgradeLoading] = useState(false);
+  const [selectedPropRoom, setSelectedPropRoom] = useState<string | null>(null);
   const room = PROPERTY.rooms.find(r => r.id === selectedRoom)!;
 
   const totalRenovCost = PROPERTY.rooms.reduce((s, r) => s + r.renovationOptions.reduce((rs, o) => rs + o.cost, 0), 0);
@@ -179,6 +314,143 @@ export default function SpatialWalkthroughPage() {
     } finally {
       setUpgradeLoading(false);
     }
+  }
+
+  if (propertyId) {
+    const d = propertyData?.data;
+    const activePropRoom = d?.rooms.find(r => r.id === selectedPropRoom) ?? null;
+    const totalSqft = d?.rooms.reduce((s, r) => s + r.sqft, 0) ?? 1;
+    return (
+      <div className="min-h-screen" style={{ background: "#0a0c10" }}>
+        <div className="mx-auto max-w-5xl px-6 py-8">
+          <Link href={`/property/${propertyId}`}>
+            <span className="inline-flex items-center gap-1 text-xs mb-5 cursor-pointer" style={{ color: "rgba(255,255,255,0.3)" }}>
+              <ArrowLeft className="w-3.5 h-3.5" /> Back to Property
+            </span>
+          </Link>
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/35">Spatial Computing</p>
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-white">Interactive Property Walkthrough</h1>
+          <p className="mt-1 text-sm mb-8" style={{ color: "rgba(255,255,255,0.4)" }}>AI-powered spatial analysis for property <code style={{ color: "#2d6a4f" }}>{propertyId}</code></p>
+
+          {propertyLoading || !d ? (
+            <div className="flex items-center gap-3 p-8 rounded-xl" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
+              <Loader2 className="w-5 h-5 animate-spin" style={{ color: "#2d6a4f" }} />
+              <p className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>Loading spatial data…</p>
+            </div>
+          ) : (
+            <>
+              {/* Stats */}
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
+                {[
+                  { label: "Total SF", value: `${d.totalSqft.toLocaleString()} SF`, color: "#2d6a4f" },
+                  { label: "Bed / Bath", value: `${d.bedrooms}BD / ${d.bathrooms}BA`, color: "#60a5fa" },
+                  { label: "Renovation Budget", value: fmt(d.totalRenovationBudget), color: "#fbbf24" },
+                  { label: "Value-Add Potential", value: fmt(d.totalValueAdd), color: "#34d399" },
+                ].map(mm => (
+                  <div key={mm.label} className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4">
+                    <div className="text-[10px] font-semibold uppercase tracking-wider text-white/35 mb-2">{mm.label}</div>
+                    <div className="text-xl font-semibold text-white">{mm.value}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Visual Floor Plan Schematic */}
+              <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5 mb-6">
+                <p className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-3">Floor Plan — Click a Room to Inspect</p>
+                <div className="flex flex-wrap gap-2" style={{ minHeight: 120 }}>
+                  {d.rooms.map((r) => {
+                    const condColor = CONDITION_COLORS[r.condition as keyof typeof CONDITION_COLORS] ?? "#94a3b8";
+                    const pct = Math.max(10, Math.round((r.sqft / totalSqft) * 100));
+                    const isActive = selectedPropRoom === r.id;
+                    return (
+                      <button
+                        key={r.id}
+                        onClick={() => setSelectedPropRoom(isActive ? null : r.id)}
+                        style={{
+                          flexBasis: `${Math.max(12, pct * 1.5)}%`,
+                          minWidth: 80,
+                          background: isActive ? `${condColor}25` : "rgba(255,255,255,0.03)",
+                          border: `1.5px solid ${isActive ? condColor : "rgba(255,255,255,0.07)"}`,
+                          borderRadius: 10,
+                          padding: "10px 12px",
+                          cursor: "pointer",
+                          textAlign: "left",
+                          transition: "all 0.15s ease",
+                        }}
+                      >
+                        <div className="text-[9px] font-semibold uppercase tracking-wide" style={{ color: isActive ? condColor : "rgba(255,255,255,0.35)" }}>{r.condition}</div>
+                        <div className="text-xs font-semibold text-white mt-0.5 truncate">{r.name}</div>
+                        <div className="text-[9px] text-white/30 mt-0.5">{r.sqft} SF</div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Room Detail Panel */}
+                {activePropRoom && (
+                  <div className="mt-4 rounded-xl border border-white/[0.06] bg-white/[0.03] p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <span className="text-sm font-semibold text-white">{activePropRoom.name}</span>
+                        <span className="ml-2 text-[9px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: `${CONDITION_COLORS[activePropRoom.condition as keyof typeof CONDITION_COLORS]}20`, color: CONDITION_COLORS[activePropRoom.condition as keyof typeof CONDITION_COLORS] }}>{activePropRoom.condition}</span>
+                      </div>
+                      <span className="text-[10px] text-white/30">{activePropRoom.sqft} SF · {activePropRoom.ceiling}' ceiling</span>
+                    </div>
+                    <p className="text-[10px] text-white/40 mb-3">Renovation Options</p>
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      {activePropRoom.renovationOptions.map((opt) => (
+                        <div key={opt.name} className="rounded-lg border border-white/[0.05] bg-white/[0.02] p-3">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-xs font-medium text-white">{opt.name}</span>
+                            <span className="text-[9px] font-semibold" style={{ color: "#fbbf24" }}>{fmt(opt.cost)}</span>
+                          </div>
+                          <div className="flex items-center gap-3 text-[9px] text-white/40">
+                            <span>Value add: <span className="text-emerald-400 font-semibold">{fmt(opt.valueAdd)}</span></span>
+                            <span>{opt.timelineWeeks}wk timeline</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Staging Options */}
+              <div className="grid gap-6 lg:grid-cols-2 mb-4">
+                <div>
+                  <h3 className="text-sm font-semibold text-white mb-3">Virtual Staging Options</h3>
+                  <div className="space-y-2">
+                    {d.stagingOptions.map((sp) => (
+                      <div key={sp.name} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium text-white">{sp.name}</span>
+                          <span className="text-xs font-semibold" style={{ color: "#2d6a4f" }}>{fmt(sp.estimatedValue)}</span>
+                        </div>
+                        <div className="text-[10px] text-white/40 mt-0.5">{sp.description}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-white mb-3">Room Condition Summary</h3>
+                  <div className="space-y-2">
+                    {d.rooms.map((r) => (
+                      <div key={r.id} className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-2">
+                        <div className="w-2 h-2 rounded-full" style={{ background: CONDITION_COLORS[r.condition as keyof typeof CONDITION_COLORS] ?? "#94a3b8" }} />
+                        <span className="text-xs text-white flex-1">{r.name}</span>
+                        <span className="text-[9px] text-white/30">{r.sqft} SF</span>
+                        <span className="text-[9px] font-semibold" style={{ color: CONDITION_COLORS[r.condition as keyof typeof CONDITION_COLORS] }}>{r.condition}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <p className="text-[9px]" style={{ color: "rgba(255,255,255,0.2)" }}>Source: {d.dataSource}</p>
+            </>
+          )}
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -275,29 +547,27 @@ export default function SpatialWalkthroughPage() {
             <AnimatePresence mode="wait">
               <m.div key={room.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                 <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] overflow-hidden mb-4">
-                  <div className="aspect-video bg-gradient-to-br from-white/[0.03] to-white/[0.01] flex items-center justify-center relative">
-                    <div className="text-center">
-                      <Box className="h-12 w-12 mx-auto mb-3" style={{ color: "#2d6a4f30" }} />
-                      <p className="text-sm text-white/20">3D Spatial View — {room.name}</p>
-                      <p className="text-[10px] text-white/10 mt-1">{room.sqft} SF · {room.measurements.map(m => `${m.label}: ${m.value}`).join(" · ")}</p>
-                    </div>
+                  <div className="relative" style={{ height: 260, background: "#06090e" }}>
+                    <FloorPlanSVG room={room} />
                     <div className="absolute bottom-3 right-3 flex gap-1.5">
                       {([
                         [Maximize2, "Fullscreen"],
-                        [RotateCcw, "Reset rotation"],
-                        [ZoomIn, "Zoom in"],
-                        [ZoomOut, "Zoom out"],
-                        [Move, "Pan view"],
                         [Grid3X3, "Toggle grid"],
+                        [RotateCcw, "Reset"],
                       ] as const).map(([Icon, label], i) => (
-                        <button key={i} aria-label={label} title={label} className="flex h-7 w-7 items-center justify-center rounded-lg bg-black/40 border border-white/10 text-white/30 hover:text-white/60 transition">
+                        <button key={i} aria-label={label} title={label} className="flex h-7 w-7 items-center justify-center rounded-lg bg-black/60 border border-white/10 text-white/30 hover:text-white/70 transition">
                           <Icon className="h-3.5 w-3.5" />
                         </button>
                       ))}
                     </div>
+                    <div className="absolute top-3 left-3">
+                      <span className="text-[9px] font-semibold px-2 py-1 rounded-lg" style={{ background: "rgba(0,0,0,0.6)", color: "#2d6a4f", border: "1px solid #2d6a4f30" }}>
+                        Floor Plan · {room.name} · {room.sqft} SF
+                      </span>
+                    </div>
                     <div className="absolute top-3 right-3 flex gap-1.5">
-                      <button className="flex items-center gap-1 rounded-lg bg-black/40 border border-white/10 px-2 py-1 text-[10px] text-white/40"><Sun className="h-3 w-3" /> Day</button>
-                      <button className="flex items-center gap-1 rounded-lg bg-black/40 border border-white/10 px-2 py-1 text-[10px] text-white/40"><Moon className="h-3 w-3" /> Night</button>
+                      <button className="flex items-center gap-1 rounded-lg bg-black/60 border border-white/10 px-2 py-1 text-[10px] text-amber-400"><Sun className="h-3 w-3" /> Day</button>
+                      <button className="flex items-center gap-1 rounded-lg bg-black/60 border border-white/10 px-2 py-1 text-[10px] text-blue-400"><Moon className="h-3 w-3" /> Night</button>
                     </div>
                   </div>
                 </div>

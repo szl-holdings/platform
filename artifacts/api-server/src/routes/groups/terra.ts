@@ -10,11 +10,17 @@ import terraLiveRouter from "../terra-live";
 import terraCognitiveRouter from "../terra-cognitive";
 import terraModulesRouter from "../terra-modules";
 import terraDigitalTwinRouter from "../terra-digital-twin";
+import terraPropertyIntelRouter from "../terra-property-intel";
 
 const _readLimiter = perUserApiSlidingLimiter;
 const _writeLimiter = perUserWriteSlidingLimiter;
 
 export function register(router: IRouter): void {
+  // Property intelligence module routes are public (demo-friendly, authOptional).
+  // They MUST be registered before the tenantScope middleware on "/terra" so
+  // unauthenticated visitors can access property-scoped intelligence data.
+  router.use(terraPropertyIntelRouter);
+
   router.use("/terra", tenantScope({ required: true }));
   router.use("/beacon", tenantScope({ required: true }));
 

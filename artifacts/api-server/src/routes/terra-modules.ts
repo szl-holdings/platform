@@ -1199,4 +1199,5 @@ router.delete("/terra/tenant-applications/:id", authWrite, async (req: Request, 
   } catch (err) { handleRouteError(res, err, "Failed to delete tenant application"); }
 });
 
+
 export default router;

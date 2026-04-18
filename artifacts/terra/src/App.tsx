@@ -170,21 +170,27 @@ function PrivateRouter() {
         <Route path="/approval-review" component={ApprovalReview} />
         <Route path="/trust-provenance" component={TrustProvenancePage} />
         <Route path="/distress-radar" component={DistressRadar} />
+        <Route path="/neighborhood-momentum/:propertyId" component={NeighborhoodMomentum} />
         <Route path="/neighborhood-momentum" component={NeighborhoodMomentum} />
+        <Route path="/seller-motivation/:propertyId" component={SellerMotivation} />
         <Route path="/seller-motivation" component={SellerMotivation} />
         <Route path="/portfolio-scenario" component={PortfolioScenario} />
+        <Route path="/climate-risk-enhanced/:propertyId" component={ClimateRiskEnhanced} />
         <Route path="/climate-risk-enhanced" component={ClimateRiskEnhanced} />
         <Route path="/computer-vision" component={ComputerVision} />
+        <Route path="/zoning-intelligence/:propertyId" component={ZoningIntelligence} />
         <Route path="/zoning-intelligence" component={ZoningIntelligence} />
         <Route path="/avm-engine" component={AvmEngine} />
         <Route path="/rent-roll" component={RentRoll} />
         <Route path="/title-intelligence" component={TitleIntelligence} />
         <Route path="/construction-cost" component={ConstructionCost} />
+        <Route path="/spatial-walkthrough/:propertyId" component={SpatialWalkthrough} />
         <Route path="/spatial-walkthrough" component={SpatialWalkthrough} />
         <Route path="/lease-abstraction" component={LeaseAbstraction} />
         <Route path="/pro-forma" component={ProForma} />
         <Route path="/exchange-1031" component={Exchange1031} />
         <Route path="/tax-appeal" component={TaxAppeal} />
+        <Route path="/waterfall-calculator/:propertyId" component={WaterfallCalculator} />
         <Route path="/waterfall-calculator" component={WaterfallCalculator} />
         <Route path="/construction-monitor" component={ConstructionMonitor} />
         <Route path="/tenant-screening" component={TenantScreening} />

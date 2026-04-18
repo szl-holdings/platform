@@ -77,6 +77,10 @@ const PUBLIC_PREFIXES = [
   // and are intentionally accessible without a session (richer context shown when authed).
   // The POST mutation /submit-review is NOT included here; it enforces its own auth.
   "/api/terra/cognitive/",
+  // Terra property-scoped intelligence modules — read-only GET routes serving deterministic
+  // seed-based data per propertyId. Accessible without a session so the Terra demo shows
+  // realistic intelligence results when navigating from the property detail page.
+  "/api/terra/properties/",
   // Carlota Jo time tracking & invoice persistence — publicly accessible from the
   // time-tracking page (which is unauthenticated like the rest of the marketing
   // demo). Backed by Postgres so the data syncs across devices.

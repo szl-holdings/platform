@@ -3,9 +3,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Thermometer, Droplets, Flame, Wind, Cloud, ShieldAlert, DollarSign,
   TrendingUp, AlertTriangle, X, ChevronRight, Building2, BarChart3,
-  Calendar, MapPin, Info, Eye, RefreshCw, Activity
+  Calendar, MapPin, Info, Eye, RefreshCw, Activity, ArrowLeft, Loader2
 } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { useRoute, Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/lib/api";
 
 type RiskLevel = "Critical" | "High" | "Medium" | "Low" | "Negligible";
 type HazardType = "flood" | "wildfire" | "heat" | "storm" | "sea-level" | "seismic";
@@ -303,6 +306,16 @@ function DetailPanel({ property, onClose }: { property: ClimateProperty; onClose
 }
 
 export default function ClimateRiskEnhanced() {
+  const [, params] = useRoute<{ propertyId: string }>("/climate-risk-enhanced/:propertyId");
+  const propertyId = params?.propertyId;
+
+  const { data: propertyData, isLoading: propertyLoading } = useQuery({
+    queryKey: ["terra-climate-risk", propertyId],
+    queryFn: () => api.properties.climateRisk(propertyId!),
+    enabled: !!propertyId,
+    staleTime: 300_000,
+  });
+
   const [selected, setSelected] = useState<ClimateProperty | null>(null);
   const [gradeFilter, setGradeFilter] = useState<string>("all");
 
@@ -317,6 +330,94 @@ export default function ClimateRiskEnhanced() {
     totalExpectedLoss: PROPERTIES.reduce((s, p) => s + p.thirtyYearExpectedLoss, 0),
     totalAdaptationCost: PROPERTIES.reduce((s, p) => s + p.adaptationCost, 0),
   };
+
+  if (propertyId) {
+    const d = propertyData?.data;
+    return (
+      <div className="min-h-screen p-6" style={{ background: "#0a0c10" }}>
+        <div className="max-w-5xl mx-auto">
+          <Link href={`/property/${propertyId}`}>
+            <span className="inline-flex items-center gap-1 text-xs mb-5 cursor-pointer transition-colors" style={{ color: "rgba(255,255,255,0.3)" }}>
+              <ArrowLeft className="w-3.5 h-3.5" /> Back to Property
+            </span>
+          </Link>
+          <div className="flex items-center gap-2 mb-1">
+            <Thermometer className="w-5 h-5 text-orange-400" />
+            <h1 className="text-xl font-bold text-white">Climate Risk Enhanced</h1>
+            <span className="text-[9px] font-semibold px-2 py-0.5 rounded uppercase tracking-wide" style={{ background: "rgba(249,115,22,0.1)", color: "#f97316", border: "1px solid rgba(249,115,22,0.2)" }}>
+              {d ? `Grade ${d.overallGrade}` : "Loading…"}
+            </span>
+          </div>
+          <p className="text-xs mb-6" style={{ color: "rgba(255,255,255,0.4)" }}>30-year physical climate risk — flood, fire, heat, storm, sea-level &amp; seismic scoring for property <code className="text-orange-400">{propertyId}</code></p>
+
+          {propertyLoading || !d ? (
+            <div className="flex items-center gap-3 p-8 rounded-xl" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
+              <Loader2 className="w-5 h-5 animate-spin" style={{ color: "#f97316" }} />
+              <p className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>Fetching climate risk data…</p>
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+                {[
+                  { label: "Overall Risk Score", value: d.overallRiskScore.toString(), color: d.overallRiskScore >= 75 ? "#ef4444" : d.overallRiskScore >= 55 ? "#f97316" : "#fbbf24", sub: `Grade ${d.overallGrade}` },
+                  { label: "Annual Insurance", value: formatCurrency(d.annualInsurance), color: "#fbbf24", sub: `+${d.insuranceAdjustment}% adj.` },
+                  { label: "Valuation Haircut", value: `−${d.valuationHaircut}%`, color: "#ef4444", sub: "climate-adjusted" },
+                  { label: "30yr Expected Loss", value: formatCurrency(d.thirtyYearExpectedLoss), color: "#ef4444", sub: "NPV exposure" },
+                ].map(m => (
+                  <div key={m.label} className="rounded-xl p-4" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                    <p className="text-[9px] uppercase tracking-wider mb-1" style={{ color: "rgba(255,255,255,0.3)" }}>{m.label}</p>
+                    <p className="text-lg font-bold" style={{ color: m.color }}>{m.value}</p>
+                    <p className="text-[10px] mt-0.5" style={{ color: "rgba(255,255,255,0.2)" }}>{m.sub}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="rounded-xl overflow-hidden mb-4" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                <div className="px-5 py-3 border-b" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
+                  <p className="text-sm font-semibold text-white">Hazard Assessment — Current &amp; Projected</p>
+                </div>
+                <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
+                  {(d.hazards as HazardRisk[]).map((h) => {
+                    const meta = HAZARD_META[h.type as HazardType];
+                    const Icon = meta?.icon ?? ShieldAlert;
+                    const c = RISK_COLORS[h.current as RiskLevel] ?? RISK_COLORS.Low;
+                    return (
+                      <div key={h.type} className="flex items-start gap-4 px-5 py-3.5">
+                        <div className="flex items-center gap-2 w-32 shrink-0">
+                          <Icon className="w-3.5 h-3.5" style={{ color: c.dot }} />
+                          <span className="text-xs font-medium text-white/70">{meta?.label ?? h.type}</span>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <RiskBadge level={h.current as RiskLevel} small />
+                          <span className="text-[9px] text-white/20">→2030</span>
+                          <RiskBadge level={h.projected2030 as RiskLevel} small />
+                          <span className="text-[9px] text-white/20">→2050</span>
+                          <RiskBadge level={h.projected2050 as RiskLevel} small />
+                        </div>
+                        <p className="text-[10px] flex-1" style={{ color: "rgba(255,255,255,0.4)" }}>{h.detail}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {d.regulatoryFlags?.length > 0 && (
+                <div className="rounded-xl p-4" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                  <p className="text-xs font-semibold text-white mb-2">Regulatory &amp; Disclosure Flags</p>
+                  <div className="flex flex-wrap gap-2">
+                    {(d.regulatoryFlags as string[]).map((f: string) => (
+                      <span key={f} className="text-[10px] px-2.5 py-1 rounded-full" style={{ background: "rgba(239,68,68,0.08)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.15)" }}>{f}</span>
+                    ))}
+                  </div>
+                  <p className="text-[9px] mt-3" style={{ color: "rgba(255,255,255,0.2)" }}>Source: {d.dataSource}</p>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-full overflow-hidden">

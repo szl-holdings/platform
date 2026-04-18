@@ -3,9 +3,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Brain, Target, TrendingDown, DollarSign, Clock, AlertTriangle,
   ChevronRight, X, BarChart3, Activity, ArrowUpRight, Users,
-  Zap, Shield, CheckCircle, Info, Loader2, Sliders
+  Zap, Shield, CheckCircle, Info, Loader2, Sliders, ArrowLeft
 } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { useRoute, Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/lib/api";
 
 type AcceptanceCategory = "very-likely" | "likely" | "possible" | "unlikely";
 
@@ -293,6 +296,16 @@ function DetailPanel({ seller, onClose }: { seller: SellerProfile; onClose: () =
 }
 
 export default function SellerMotivation() {
+  const [, params] = useRoute<{ propertyId: string }>("/seller-motivation/:propertyId");
+  const propertyId = params?.propertyId;
+
+  const { data: propertyData, isLoading: propertyLoading } = useQuery({
+    queryKey: ["terra-seller-motivation", propertyId],
+    queryFn: () => api.properties.sellerMotivation(propertyId!),
+    enabled: !!propertyId,
+    staleTime: 300_000,
+  });
+
   const [selected, setSelected] = useState<SellerProfile | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<AcceptanceCategory | "all">("all");
 
@@ -308,6 +321,95 @@ export default function SellerMotivation() {
     avgDiscount: Math.round(SELLERS.reduce((s, p) => s + p.suggestedDiscount, 0) / SELLERS.length),
     avgScore: Math.round(SELLERS.reduce((s, p) => s + p.acceptanceScore, 0) / SELLERS.length),
   };
+
+  if (propertyId) {
+    const d = propertyData?.data;
+    const catColors: Record<string, string> = {
+      "very-likely": "#34d399", "likely": "#60a5fa", "possible": "#fbbf24", "unlikely": "#f87171",
+    };
+    return (
+      <div className="min-h-screen p-6" style={{ background: "#0a0c10" }}>
+        <div className="max-w-5xl mx-auto">
+          <Link href={`/property/${propertyId}`}>
+            <span className="inline-flex items-center gap-1 text-xs mb-5 cursor-pointer" style={{ color: "rgba(255,255,255,0.3)" }}>
+              <ArrowLeft className="w-3.5 h-3.5" /> Back to Property
+            </span>
+          </Link>
+          <div className="flex items-center gap-2 mb-1">
+            <Brain className="w-5 h-5" style={{ color: "#40856a" }} />
+            <h1 className="text-xl font-bold text-white">Seller Motivation Predictor</h1>
+            {d && (
+              <span className="text-[9px] font-semibold px-2 py-0.5 rounded border uppercase tracking-wide" style={{ background: "rgba(64,133,106,0.1)", color: "#40856a", borderColor: "rgba(64,133,106,0.2)" }}>
+                Score {d.acceptanceScore}
+              </span>
+            )}
+          </div>
+          <p className="text-xs mb-6" style={{ color: "rgba(255,255,255,0.4)" }}>AI-scored below-market acceptance probability for property <code style={{ color: "#40856a" }}>{propertyId}</code></p>
+
+          {propertyLoading || !d ? (
+            <div className="flex items-center gap-3 p-8 rounded-xl" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
+              <Loader2 className="w-5 h-5 animate-spin" style={{ color: "#40856a" }} />
+              <p className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>Analysing seller motivation…</p>
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+                {[
+                  { label: "Acceptance Score", value: d.acceptanceScore.toString(), color: catColors[d.acceptanceCategory] ?? "#fff", sub: d.acceptanceCategory.replace("-", " ") },
+                  { label: "Target Discount", value: `−${d.suggestedDiscount}%`, color: "#40856a", sub: "below market ask" },
+                  { label: "Estimated Equity", value: formatCurrency(d.estimatedEquity), color: "#60a5fa", sub: "estimated" },
+                  { label: "Days on Market", value: d.daysOnMarket.toString(), color: d.daysOnMarket > 90 ? "#f97316" : "#34d399", sub: "DOM" },
+                ].map(m => (
+                  <div key={m.label} className="rounded-xl p-4" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                    <p className="text-[9px] uppercase tracking-wider mb-1" style={{ color: "rgba(255,255,255,0.3)" }}>{m.label}</p>
+                    <p className="text-xl font-bold" style={{ color: m.color }}>{m.value}</p>
+                    <p className="text-[10px] mt-0.5" style={{ color: "rgba(255,255,255,0.25)" }}>{m.sub}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="rounded-xl p-5 mb-4" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                <p className="text-sm font-semibold text-white mb-3">Motivation Factors</p>
+                <div className="space-y-2.5">
+                  {d.motivationFactors.map((f) => (
+                    <div key={f.factor} className="flex items-start gap-3">
+                      <div className="flex items-center gap-2 w-48 shrink-0">
+                        <CheckCircle className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                        <span className="text-xs text-white/70">{f.factor}</span>
+                      </div>
+                      <div className="flex-1 bg-white/5 rounded-full h-1.5 mt-1">
+                        <div className="h-1.5 rounded-full bg-emerald-500" style={{ width: `${f.weight * 100}%` }} />
+                      </div>
+                      <span className="text-[10px] font-semibold w-10 text-right" style={{ color: "#40856a" }}>{Math.round(f.weight * 100)}%</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="rounded-xl p-5" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                  <p className="text-xs font-semibold text-white mb-2">Outreach Script</p>
+                  <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>{d.outreachScript}</p>
+                </div>
+                <div className="rounded-xl p-5" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                  <p className="text-xs font-semibold text-white mb-2">Distress Signals</p>
+                  <div className="space-y-1.5">
+                    {(d.distressSignals as string[]).map((s: string) => (
+                      <div key={s} className="flex items-center gap-2">
+                        <AlertTriangle className="w-3 h-3 text-amber-400 shrink-0" />
+                        <span className="text-[11px] text-white/60">{s}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-[9px] mt-3" style={{ color: "rgba(255,255,255,0.2)" }}>Source: {d.dataSource}</p>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-full overflow-hidden">

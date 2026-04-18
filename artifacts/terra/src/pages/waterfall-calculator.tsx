@@ -1,12 +1,13 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
-  Layers, DollarSign, TrendingUp, Users, BarChart3, Calculator, ChevronDown, ArrowRight, Save, FolderOpen
+  Layers, DollarSign, TrendingUp, Users, BarChart3, Calculator, ChevronDown, ArrowRight, Save, FolderOpen, Download, ArrowLeft, Loader2
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../lib/api";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { useRoute, Link } from "wouter";
 
 interface TooltipPayloadEntry { name: string; value: number; color?: string; fill?: string; }
 interface ChartTooltipProps { active?: boolean; payload?: TooltipPayloadEntry[]; label?: string; }
@@ -138,7 +139,57 @@ const DEFAULT_WATERFALL_INPUTS: WaterfallInputs = {
   holdMonths: 48,
 };
 
+function exportWaterfallCSV(inputs: WaterfallInputs, r: ReturnType<typeof useWaterfall>, name: string) {
+  const rows = [
+    ["Terra — Investor Waterfall Export"],
+    ["Structure Name", name],
+    ["Export Date", new Date().toLocaleDateString()],
+    [],
+    ["=== INPUTS ==="],
+    ["Total Equity", inputs.totalEquity],
+    ["GP Contribution %", inputs.gpContributionPct],
+    ["Preferred Return % (p.a.)", inputs.preferredReturn],
+    ["GP Catch-Up %", inputs.catchUpPct],
+    ["GP Promote %", inputs.promotePct],
+    ["Exit Proceeds", inputs.exitProceeds],
+    ["Hold Period (months)", inputs.holdMonths],
+    [],
+    ["=== SUMMARY ==="],
+    ["", "GP", "LP"],
+    ["Equity Invested", r.gpEquity, r.lpEquity],
+    ["Total Distributions", r.gpTotal, r.lpTotal],
+    ["Equity Multiple", r.gpEM.toFixed(2) + "x", r.lpEM.toFixed(2) + "x"],
+    ["IRR", r.gpIRR.toFixed(2) + "%", r.lpIRR.toFixed(2) + "%"],
+    [],
+    ["=== WATERFALL TIERS ==="],
+    ["Tier", "Description", "GP Amount", "LP Amount", "Total", "GP %", "LP %"],
+    ...r.tiers.map(t => [t.tier, t.description, t.gpAmount, t.lpAmount, t.total, t.gpPct.toFixed(1) + "%", t.lpPct.toFixed(1) + "%"]),
+    [],
+    ["Total", "", r.gpTotal, r.lpTotal, inputs.exitProceeds,
+      ((r.gpTotal / inputs.exitProceeds) * 100).toFixed(1) + "%",
+      ((r.lpTotal / inputs.exitProceeds) * 100).toFixed(1) + "%"],
+  ];
+  const csv = rows.map(row => row.map(cell => `"${cell}"`).join(",")).join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `waterfall-${name.replace(/\s+/g, "-").toLowerCase()}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 export default function WaterfallCalculatorPage() {
+  const [, params] = useRoute<{ propertyId: string }>("/waterfall-calculator/:propertyId");
+  const propertyId = params?.propertyId;
+
+  const { data: propertyData, isLoading: propertyLoading } = useQuery({
+    queryKey: ["terra-waterfall", propertyId],
+    queryFn: () => api.properties.waterfall(propertyId!),
+    enabled: !!propertyId,
+    staleTime: 300_000,
+  });
+
   const queryClient = useQueryClient();
 
   const { data: savedStructures } = useQuery({
@@ -160,6 +211,24 @@ export default function WaterfallCalculatorPage() {
 
   const set = (k: keyof WaterfallInputs) => (v: number) => setInputs(prev => ({ ...prev, [k]: v }));
   const r = useWaterfall(inputs);
+
+  const d_prop = propertyData?.data;
+  const [propInputs, setPropInputs] = useState<WaterfallInputs | null>(null);
+  useEffect(() => {
+    if (d_prop && propInputs === null) {
+      setPropInputs({
+        totalEquity: d_prop.totalEquity,
+        gpContributionPct: d_prop.gpContributionPct,
+        preferredReturn: d_prop.preferredReturn,
+        catchUpPct: d_prop.catchUpPct,
+        promotePct: d_prop.promotePct,
+        exitProceeds: d_prop.exitProceeds,
+        holdMonths: d_prop.holdMonths,
+      });
+    }
+  }, [d_prop, propInputs]);
+  const setP = (k: keyof WaterfallInputs) => (v: number) => setPropInputs(prev => prev ? { ...prev, [k]: v } : null);
+  const propWaterfall = useWaterfall(propInputs ?? DEFAULT_WATERFALL_INPUTS);
 
   const barData = r.tiers.map((t) => ({ name: t.description.split(" (")[0], GP: t.gpAmount, LP: t.lpAmount }));
   const pieData = [
@@ -183,6 +252,105 @@ export default function WaterfallCalculatorPage() {
     setShowStructures(false);
   }
 
+  if (propertyId) {
+    return (
+      <div className="min-h-screen p-6" style={{ background: "#0a0c10" }}>
+        <div className="max-w-5xl mx-auto">
+          <Link href={`/property/${propertyId}`}>
+            <span className="inline-flex items-center gap-1 text-xs mb-5 cursor-pointer" style={{ color: "rgba(255,255,255,0.3)" }}>
+              <ArrowLeft className="w-3.5 h-3.5" /> Back to Property
+            </span>
+          </Link>
+          <div className="flex items-center justify-between gap-2.5 mb-1">
+            <div className="flex items-center gap-2.5">
+              <h1 className="text-xl font-bold text-white">Investor Waterfall Calculator</h1>
+              <span className="text-[9px] font-mono px-1.5 py-0.5 rounded uppercase tracking-wider font-bold" style={{ color: DS.accent.purple, background: `${DS.accent.purple}15`, border: `1px solid ${DS.accent.purple}25` }}>GP / LP</span>
+            </div>
+            {propInputs && (
+              <button
+                onClick={() => exportWaterfallCSV(propInputs, propWaterfall, `Property ${propertyId}`)}
+                className="flex items-center gap-1.5 text-xs rounded-lg px-3 py-1.5 font-medium"
+                style={{ background: DS.surface, border: `1px solid ${DS.border}`, color: DS.text.secondary }}
+              >
+                <Download className="w-3.5 h-3.5" /> Export CSV
+              </button>
+            )}
+          </div>
+          <p className="text-xs mb-6" style={{ color: "rgba(255,255,255,0.4)" }}>Property-scoped waterfall model for <code style={{ color: DS.accent.purple }}>{propertyId}</code> — edit inputs to model scenarios</p>
+
+          {propertyLoading || !propInputs ? (
+            <div className="flex items-center gap-3 p-8 rounded-xl" style={{ background: DS.surface, border: `1px solid ${DS.border}` }}>
+              <Loader2 className="w-5 h-5 animate-spin" style={{ color: DS.accent.purple }} />
+              <p className="text-sm" style={{ color: DS.text.secondary }}>Generating waterfall model…</p>
+            </div>
+          ) : (
+            <>
+              {/* Editable Inputs */}
+              <div className="rounded-xl border p-4 mb-5" style={{ borderColor: DS.border, background: DS.surface }}>
+                <p className="text-[9px] uppercase tracking-wider mb-3" style={{ color: DS.text.muted }}>Deal Parameters — Edit to Model Scenarios</p>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3">
+                  <NumInput label="Total Equity ($)" value={propInputs.totalEquity} onChange={setP("totalEquity")} prefix="$" step={100000} />
+                  <NumInput label="Exit Proceeds ($)" value={propInputs.exitProceeds} onChange={setP("exitProceeds")} prefix="$" step={100000} />
+                  <NumInput label="Hold Period (months)" value={propInputs.holdMonths} onChange={setP("holdMonths")} suffix="mo" />
+                  <NumInput label="GP Contribution %" value={propInputs.gpContributionPct} onChange={setP("gpContributionPct")} suffix="%" step={1} />
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  <NumInput label="Preferred Return (% p.a.)" value={propInputs.preferredReturn} onChange={setP("preferredReturn")} suffix="%" step={0.5} />
+                  <NumInput label="GP Catch-Up %" value={propInputs.catchUpPct} onChange={setP("catchUpPct")} suffix="%" step={5} />
+                  <NumInput label="GP Promote %" value={propInputs.promotePct} onChange={setP("promotePct")} suffix="%" step={1} />
+                </div>
+              </div>
+
+              {/* Summary Cards — computed from propInputs */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+                {[
+                  { label: "Total Equity", value: fmt(propInputs.totalEquity), color: DS.text.primary, sub: "deal size" },
+                  { label: "GP Returns", value: fmt(propWaterfall.gpTotal), color: DS.accent.gold, sub: `${propWaterfall.gpEM.toFixed(2)}× · ${pct(propWaterfall.gpIRR)} IRR` },
+                  { label: "LP Returns", value: fmt(propWaterfall.lpTotal), color: DS.accent.blue, sub: `${propWaterfall.lpEM.toFixed(2)}× · ${pct(propWaterfall.lpIRR)} IRR` },
+                  { label: "Exit Proceeds", value: fmt(propInputs.exitProceeds), color: DS.accent.green, sub: `${propInputs.holdMonths}mo hold` },
+                ].map(m => (
+                  <div key={m.label} className="rounded-xl border p-4" style={{ borderColor: DS.border, background: DS.surface }}>
+                    <p className="text-[9px] uppercase tracking-wider" style={{ color: DS.text.muted }}>{m.label}</p>
+                    <p className="text-xl font-bold font-mono mt-1" style={{ color: m.color }}>{m.value}</p>
+                    <p className="text-[9px] mt-0.5" style={{ color: DS.text.muted }}>{m.sub}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Waterfall Tiers — computed live */}
+              <div className="rounded-xl border overflow-hidden mb-4" style={{ borderColor: DS.border, background: DS.surface }}>
+                <div className="flex items-center gap-2 px-4 py-2.5 border-b" style={{ borderColor: DS.border }}>
+                  <Layers className="w-3.5 h-3.5" style={{ color: DS.accent.purple }} />
+                  <span className="text-xs font-semibold" style={{ color: DS.text.primary }}>Waterfall Tiers</span>
+                </div>
+                <div className="divide-y" style={{ borderColor: DS.border }}>
+                  {propWaterfall.tiers.map((t, i) => (
+                    <div key={i} className="flex items-center gap-4 px-4 py-3">
+                      <span className="text-[9px] font-mono w-4 text-center" style={{ color: DS.text.muted }}>{i + 1}</span>
+                      <span className="flex-1 text-xs" style={{ color: DS.text.secondary }}>{t.description}</span>
+                      <div className="grid grid-cols-2 gap-6 text-right">
+                        <div>
+                          <p className="text-[9px]" style={{ color: DS.text.muted }}>GP</p>
+                          <p className="text-sm font-mono font-bold" style={{ color: DS.accent.gold }}>{fmt(t.gpAmount)}</p>
+                        </div>
+                        <div>
+                          <p className="text-[9px]" style={{ color: DS.text.muted }}>LP</p>
+                          <p className="text-sm font-mono font-bold" style={{ color: DS.accent.blue }}>{fmt(t.lpAmount)}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <p className="text-[9px]" style={{ color: DS.text.muted }}>Source: {d_prop?.dataSource}</p>
+            </>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4 max-w-[1400px]">
       <div className="flex items-center justify-between">
@@ -202,6 +370,12 @@ export default function WaterfallCalculatorPage() {
             style={{ background: `${DS.accent.purple}15`, border: `1px solid ${DS.accent.purple}30`, color: DS.accent.purple }}>
             <Save className="w-3 h-3" />
             {savedMsg ?? (saveStructureMutation.isPending ? "Saving…" : "Save")}
+          </button>
+          <button onClick={() => exportWaterfallCSV(inputs, r, structureName)}
+            className="flex items-center gap-1.5 text-[10px] px-3 py-1.5 rounded-lg"
+            style={{ background: `${DS.accent.green}15`, border: `1px solid ${DS.accent.green}30`, color: DS.accent.green }}>
+            <Download className="w-3 h-3" />
+            Export CSV
           </button>
           <div className="relative">
             <button onClick={() => setShowStructures(v => !v)}

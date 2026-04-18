@@ -2,12 +2,15 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import {
   TrendingUp, TrendingDown, MapPin, BarChart3, ArrowUpRight, ArrowDownRight,
-  Building2, DollarSign, Users, Activity, Layers, Info, Target, Zap, Eye
+  Building2, DollarSign, Users, Activity, Layers, Info, Target, Zap, Eye, ArrowLeft, Loader2
 } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { AmbientBar, type AmbientSignal } from "@szl-holdings/shared-ui/ambient-intelligence";
 import { EnergyPulse, type EnergyMetrics } from "@szl-holdings/shared-ui/energy-heartbeat";
 import { CorrelationFeed, type CrossDomainCorrelation } from "@szl-holdings/shared-ui/cross-domain-correlation";
+import { useRoute, Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/lib/api";
 
 type Trajectory = "accelerating" | "gentrifying" | "stable" | "declining" | "distressed";
 
@@ -326,6 +329,16 @@ function DetailSidebar({ market, onClose }: { market: MicroMarket; onClose: () =
 }
 
 export default function NeighborhoodMomentum() {
+  const [, params] = useRoute<{ propertyId: string }>("/neighborhood-momentum/:propertyId");
+  const propertyId = params?.propertyId;
+
+  const { data: propertyData, isLoading: propertyLoading } = useQuery({
+    queryKey: ["terra-neighborhood-momentum", propertyId],
+    queryFn: () => api.properties.neighborhoodMomentum(propertyId!),
+    enabled: !!propertyId,
+    staleTime: 300_000,
+  });
+
   const [selected, setSelected] = useState<MicroMarket | null>(null);
   const [trajectoryFilter, setTrajectoryFilter] = useState<Trajectory | "all">("all");
 
@@ -347,6 +360,106 @@ export default function NeighborhoodMomentum() {
     declining: NEIGHBORHOODS.filter(n => n.trajectory === "declining" || n.trajectory === "distressed").length,
     totalInstitutional: NEIGHBORHOODS.reduce((s, n) => s + n.institutionalFlowM, 0),
   };
+
+  if (propertyId) {
+    const d = propertyData?.data;
+    const trajectoryMeta = d ? TRAJECTORY_META[d.trajectory as Trajectory] : null;
+    return (
+      <div className="min-h-screen p-6" style={{ background: "#0a0c10" }}>
+        <div className="max-w-5xl mx-auto">
+          <Link href={`/property/${propertyId}`}>
+            <span className="inline-flex items-center gap-1 text-xs mb-5 cursor-pointer" style={{ color: "rgba(255,255,255,0.3)" }}>
+              <ArrowLeft className="w-3.5 h-3.5" /> Back to Property
+            </span>
+          </Link>
+          <div className="flex items-center gap-2 mb-1">
+            <BarChart3 className="w-5 h-5 text-emerald-400" />
+            <h1 className="text-xl font-bold text-white">Neighborhood Momentum</h1>
+            {d && trajectoryMeta && (
+              <span className={cn("text-[9px] font-semibold px-2 py-0.5 rounded border uppercase tracking-wide", trajectoryMeta.bg, trajectoryMeta.color)}>
+                {trajectoryMeta.label}
+              </span>
+            )}
+          </div>
+          <p className="text-xs mb-6" style={{ color: "rgba(255,255,255,0.4)" }}>Micro-market trajectory &amp; institutional capital flow analysis for property <code className="text-emerald-400">{propertyId}</code></p>
+
+          {propertyLoading || !d ? (
+            <div className="flex items-center gap-3 p-8 rounded-xl" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
+              <Loader2 className="w-5 h-5 animate-spin text-emerald-400" />
+              <p className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>Fetching momentum data…</p>
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+                {[
+                  { label: "Momentum Score", value: d.momentumScore.toString(), color: d.momentumScore >= 70 ? "#34d399" : d.momentumScore >= 45 ? "#60a5fa" : "#f87171", sub: trajectoryMeta?.label ?? "" },
+                  { label: "Institutional Flow", value: `$${Math.abs(d.institutionalFlowM)}M`, color: d.institutionalFlowM >= 0 ? "#34d399" : "#ef4444", sub: d.institutionalFlowM >= 0 ? "inflows" : "outflows" },
+                  { label: "12m Price Growth", value: `${d.priceAppreciation12m > 0 ? "+" : ""}${d.priceAppreciation12m}%`, color: d.priceAppreciation12m >= 0 ? "#34d399" : "#ef4444", sub: "trailing 12 months" },
+                  { label: "Walk Score", value: d.walkScore.toString(), color: "#60a5fa", sub: `Transit: ${d.transitScore}` },
+                ].map(m => (
+                  <div key={m.label} className="rounded-xl p-4" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                    <p className="text-[9px] uppercase tracking-wider mb-1" style={{ color: "rgba(255,255,255,0.3)" }}>{m.label}</p>
+                    <p className="text-xl font-bold" style={{ color: m.color }}>{m.value}</p>
+                    <p className="text-[10px] mt-0.5" style={{ color: "rgba(255,255,255,0.25)" }}>{m.sub}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="rounded-xl p-5 mb-4" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                <p className="text-sm font-semibold text-white mb-3">Market Signals</p>
+                <div className="space-y-2">
+                  {(d.topSignals as string[]).map((sig: string, i: number) => (
+                    <div key={i} className="flex items-center gap-3">
+                      <Zap className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                      <p className="text-xs text-white/70">{sig}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rounded-xl p-5 mb-4" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                <p className="text-sm font-semibold text-white mb-3">Micro-Market Comparison</p>
+                <div className="space-y-3">
+                  {d.microMarkets.map((mm) => {
+                    const meta = TRAJECTORY_META[mm.trajectory as Trajectory];
+                    return (
+                      <div key={mm.name} className="flex items-center gap-4">
+                        <div className="w-36 shrink-0">
+                          <p className="text-xs text-white/70">{mm.name}</p>
+                          <span className={cn("text-[9px] font-semibold", meta?.color ?? "")}>{meta?.label}</span>
+                        </div>
+                        <div className="flex-1 bg-white/5 rounded-full h-1.5">
+                          <div className="h-1.5 rounded-full" style={{ width: `${mm.score}%`, background: meta?.barColor ?? "#94a3b8" }} />
+                        </div>
+                        <span className="text-xs font-bold text-white/70 w-8 text-right">{mm.score}</span>
+                        <span className={cn("text-[10px] w-12 text-right", mm.deltaQoQ >= 0 ? "text-emerald-400" : "text-red-400")}>
+                          {mm.deltaQoQ >= 0 ? "+" : ""}{mm.deltaQoQ}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { label: "Retail Vacancy", value: `${d.retailVacancyPct}%`, color: d.retailVacancyPct < 10 ? "#34d399" : "#f97316" },
+                  { label: "Median HH Income", value: formatCurrency(d.medianHHIncome), color: "#60a5fa" },
+                  { label: "Income Growth 5yr", value: `${d.incomeGrowth5y > 0 ? "+" : ""}${d.incomeGrowth5y}%`, color: d.incomeGrowth5y >= 0 ? "#34d399" : "#ef4444" },
+                ].map(m => (
+                  <div key={m.label} className="rounded-xl p-4" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                    <p className="text-[9px] uppercase tracking-wider mb-1" style={{ color: "rgba(255,255,255,0.3)" }}>{m.label}</p>
+                    <p className="text-base font-bold" style={{ color: m.color }}>{m.value}</p>
+                  </div>
+                ))}
+              </div>
+              <p className="text-[9px] mt-3" style={{ color: "rgba(255,255,255,0.2)" }}>Source: {d.dataSource}</p>
+            </>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-full overflow-hidden">
