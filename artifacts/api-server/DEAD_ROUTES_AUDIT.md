@@ -3,24 +3,26 @@
 **Audited:** 2026-04-16  
 **Method:** Static import analysis — all flat route `.ts` files cross-referenced against every `import` statement in `src/routes/groups/*.ts` and `src/index.ts`.
 
+**Cleaned up:** 2026-04-18 — Category A files deleted (see below).
+
 ---
 
 ## Findings
 
 ### Category A — Completely Unregistered (High Confidence Dead)
 
-These four route files exist in `src/routes/` but are **never imported** by any group file or `src/index.ts`. Their route handlers are unreachable by any HTTP client.
+~~These four route files existed in `src/routes/` but were **never imported** by any group file or `src/index.ts`. Their route handlers were unreachable by any HTTP client.~~
+
+**Status: DELETED on 2026-04-18.**
 
 | File | Lines | Route Handlers | Routes |
 |---|---|---|---|
-| `carlota-live.ts` | 32 | 2 | `GET /carlota/live/consulting`, `GET /carlota/live/brand-summary` |
-| `dreamscape-live.ts` | 36 | 3 | `GET /dreamscape/live/campaigns`, `GET /dreamscape/live/metrics`, `GET /dreamscape/live/campaign-summary` |
-| `inca-live.ts` | 31 | 2 | `GET /inca/live/reports`, `GET /inca/live/model-summary` |
-| `readiness-live.ts` | 37 | 3 | `GET /readiness/live/assessments`, `GET /readiness/live/metrics`, `GET /readiness/live/summary` |
+| ~~`carlota-live.ts`~~ | 32 | 2 | `GET /carlota/live/consulting`, `GET /carlota/live/brand-summary` |
+| ~~`dreamscape-live.ts`~~ | 36 | 3 | `GET /dreamscape/live/campaigns`, `GET /dreamscape/live/metrics`, `GET /dreamscape/live/campaign-summary` |
+| ~~`inca-live.ts`~~ | 31 | 2 | `GET /inca/live/reports`, `GET /inca/live/model-summary` |
+| ~~`readiness-live.ts`~~ | 37 | 3 | `GET /readiness/live/assessments`, `GET /readiness/live/metrics`, `GET /readiness/live/summary` |
 
-**Pattern:** All four are small "live data" companion files — each fetches external/public data and returns it in a simplified format. They appear to have been scaffolded alongside their parent modules but never wired into the route registry.
-
-**Recommendation:** Delete these four files. If the live-feed endpoints are needed, wire them into the appropriate group file (e.g., `groups/misc.ts` or their parent domain group).
+**Pattern:** All four were small "live data" companion files — each fetched external/public data and returned it in a simplified format. They appear to have been scaffolded alongside their parent modules but never wired into the route registry.
 
 ---
 
@@ -56,11 +58,11 @@ These four route files exist in `src/routes/` but are **never imported** by any 
 
 ## Summary
 
-| Category | Count | Action |
-|---|---|---|
-| Completely unregistered files | 4 | Delete |
-| Legacy-named but active | 1 | Rename |
-| Legacy section in active file | 1 | Review & prune |
-| Dev-only route exposed in prod | 1 | Guard or remove |
+| Category | Count | Action | Status |
+|---|---|---|---|
+| Completely unregistered files | 4 | Delete | **Done — deleted 2026-04-18** |
+| Legacy-named but active | 1 | Rename | Open |
+| Legacy section in active file | 1 | Review & prune | Open |
+| Dev-only route exposed in prod | 1 | Guard or remove | Open |
 
-**Total unreachable route handlers:** 10 (across the 4 unregistered files)
+**Total unreachable route handlers removed:** 10 (across the 4 deleted files)
