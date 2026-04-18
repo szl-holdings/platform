@@ -103,6 +103,26 @@ function isValidInternalToken(req: Request): boolean {
   return timingSafeEqual(a, b);
 }
 
+/**
+ * Trusted server-to-server token for POST /api/orgs/:orgSlug/usage/events.
+ * Lets internal collectors / background jobs record usage events without a
+ * user session. Scoped narrowly to that single route + method to avoid
+ * widening the bypass surface.
+ */
+function isValidUsageEventServiceToken(req: Request): boolean {
+  if (req.method !== "POST") return false;
+  // Match /api/orgs/<slug>/usage/events
+  if (!/^\/api\/orgs\/[^/]+\/usage\/events\/?$/.test(req.path)) return false;
+  const secret = process.env["USAGE_EVENT_SERVICE_TOKEN"];
+  if (!secret) return false;
+  const header = req.headers["x-service-token"];
+  if (typeof header !== "string") return false;
+  const a = Buffer.from(secret, "utf8");
+  const b = Buffer.from(header, "utf8");
+  if (a.length !== b.length) return false;
+  return timingSafeEqual(a, b);
+}
+
 export function globalAuthEnforcer(
   req: Request,
   res: Response,
@@ -119,6 +139,11 @@ export function globalAuthEnforcer(
   }
 
   if (isValidInternalToken(req)) {
+    next();
+    return;
+  }
+
+  if (isValidUsageEventServiceToken(req)) {
     next();
     return;
   }
