@@ -58,6 +58,12 @@ import {
   dbMarkInReview,
   dbRecordReviewDecision,
 } from "../lib/ai-evals-db-reader";
+import {
+  costController,
+  policyEngine,
+  fallbackEngine,
+  modelRouter,
+} from "@szl-holdings/ai-control-plane";
 import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
@@ -678,6 +684,165 @@ router.get(
       sendSuccess(res, { items, summary: { up, down, total: items.length } });
     } catch (err) {
       handleRouteError(res, err, "GET /ai/ops/traces/:id/feedback");
+    }
+  },
+);
+
+// ---------------------------------------------------------------------------
+// AI Control Plane — cost controller, budget status, and policy summary
+// ---------------------------------------------------------------------------
+
+/**
+ * GET /ai/ops/cost/summary
+ *
+ * Returns aggregated cost totals by provider, model, and route class.
+ * Scope: the calling user's org (admin users see org-level data).
+ */
+router.get(
+  "/ai/ops/cost/summary",
+  authMiddleware({ required: true }),
+  requireRole("analyst", "operator", "admin", "super_admin"),
+  (_req, res) => {
+    try {
+      const orgId = String(_req.user?.orgs?.[0]?.orgId ?? "default");
+      const summary = costController.summary(orgId);
+      sendSuccess(res, { orgId, ...summary });
+    } catch (err) {
+      handleRouteError(res, err, "GET /ai/ops/cost/summary");
+    }
+  },
+);
+
+/**
+ * GET /ai/ops/cost/budget
+ *
+ * Returns budget status across all configured budget periods for the org.
+ * Includes hard-stop and alert flags so the dashboard can surface warnings.
+ */
+router.get(
+  "/ai/ops/cost/budget",
+  authMiddleware({ required: true }),
+  requireRole("analyst", "operator", "admin", "super_admin"),
+  (_req, res) => {
+    try {
+      const orgId = String(_req.user?.orgs?.[0]?.orgId ?? "default");
+      const statuses = costController.checkBudget(orgId);
+      const hardStopActive = statuses.some(s => s.hardStopTriggered);
+      const anyAlert = statuses.some(s => s.alert);
+      sendSuccess(res, {
+        orgId,
+        hardStopActive,
+        anyAlert,
+        periods: statuses,
+        generatedAt: new Date().toISOString(),
+      });
+    } catch (err) {
+      handleRouteError(res, err, "GET /ai/ops/cost/budget");
+    }
+  },
+);
+
+/**
+ * GET /ai/ops/cost/records
+ *
+ * Returns the most recent raw cost records for the org.
+ * Limited to 200 records. Useful for debugging and charting.
+ */
+router.get(
+  "/ai/ops/cost/records",
+  authMiddleware({ required: true }),
+  requireRole("operator", "admin", "super_admin"),
+  (req, res) => {
+    try {
+      const limitQ = req.query["limit"] as string | undefined;
+      const limit = Math.min(limitQ ? parseInt(limitQ, 10) : 100, 200);
+      const orgId = String(req.user?.orgs?.[0]?.orgId ?? "default");
+      const all = costController.getRecords(limit);
+      const scoped = all.filter(r => !r.orgId || r.orgId === orgId);
+      sendSuccess(res, { orgId, count: scoped.length, records: scoped });
+    } catch (err) {
+      handleRouteError(res, err, "GET /ai/ops/cost/records");
+    }
+  },
+);
+
+/**
+ * GET /ai/ops/policy/rules
+ *
+ * Returns active policy rules registered in the policy engine.
+ * Useful for operators to understand what controls are in effect.
+ */
+router.get(
+  "/ai/ops/policy/rules",
+  authMiddleware({ required: true }),
+  requireRole("operator", "admin", "super_admin"),
+  (_req, res) => {
+    try {
+      const rules = policyEngine.listRules();
+      sendSuccess(res, {
+        count: rules.length,
+        rules: rules.map(r => ({
+          id: r.id,
+          description: r.description,
+          enabled: r.enabled,
+          violationCode: r.violation.code,
+          severity: r.violation.severity,
+        })),
+      });
+    } catch (err) {
+      handleRouteError(res, err, "GET /ai/ops/policy/rules");
+    }
+  },
+);
+
+/**
+ * GET /ai/ops/circuit-breaker
+ *
+ * Returns the current circuit-breaker / fallback rule configuration from the
+ * AI control plane's fallback engine, grouped by trigger condition.
+ * Includes budget status so operators can see whether budget-exceeded
+ * fallbacks are currently active.
+ */
+router.get(
+  "/ai/ops/circuit-breaker",
+  authMiddleware({ required: true }),
+  requireRole("analyst", "operator", "admin", "super_admin"),
+  (req, res) => {
+    try {
+      const orgId = String(req.user?.orgs?.[0]?.orgId ?? "default");
+      const rules = fallbackEngine.listRules();
+      const budgetStatuses = costController.checkBudget(orgId);
+      const budgetHardStopActive = budgetStatuses.some(s => s.hardStopTriggered);
+
+      const byCondition: Record<string, typeof rules> = {};
+      for (const rule of rules) {
+        if (!byCondition[rule.triggerCondition]) byCondition[rule.triggerCondition] = [];
+        byCondition[rule.triggerCondition]!.push(rule);
+      }
+
+      const circuitStatus = modelRouter.getCircuitStatus();
+      const openCircuits = circuitStatus.filter(s => s.open);
+
+      sendSuccess(res, {
+        orgId,
+        totalRules: rules.length,
+        enabledRules: rules.filter(r => r.enabled).length,
+        budgetHardStopActive,
+        byCondition,
+        budget: {
+          periods: budgetStatuses,
+          hardStopActive: budgetHardStopActive,
+          anyAlert: budgetStatuses.some(s => s.alert),
+        },
+        circuitBreakers: {
+          endpoints: circuitStatus,
+          openCount: openCircuits.length,
+          openEndpoints: openCircuits.map(s => s.key),
+        },
+        generatedAt: new Date().toISOString(),
+      });
+    } catch (err) {
+      handleRouteError(res, err, "GET /ai/ops/circuit-breaker");
     }
   },
 );

@@ -290,6 +290,9 @@ importers:
       '@szl-holdings/action-engine':
         specifier: workspace:*
         version: link:../../packages/action-engine
+      '@szl-holdings/ai-control-plane':
+        specifier: workspace:*
+        version: link:../../packages/ai-control-plane
       '@szl-holdings/ai-engine':
         specifier: workspace:*
         version: link:../../lib/ai-engine

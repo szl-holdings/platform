@@ -24,6 +24,7 @@ import { seedPlatformData } from "./lib/seed-platform";
 import { seedConstellationData } from "./lib/seed-constellation";
 import { seedGuardianDefaults } from "./lib/seed-guardian";
 import { seedKnowledgeBase } from "./lib/seed-kb";
+import { seedAiBudgetPolicies } from "./lib/seed-ai-budget";
 import { seedMspData } from "./lib/seed-msp";
 import { seedDreamscapeData } from "./lib/seed-dreamscape";
 import { seedLyteActions } from "./lib/seed-lyte-actions";
@@ -288,6 +289,8 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
     seedKnowledgeBase().catch(err => {
       logger.warn({ err }, "[seed-kb] Knowledge base seed failed (non-fatal)");
     });
+    // AI budget policies are operational controls — always register on startup.
+    seedAiBudgetPolicies();
     initIngestionFramework().catch(err => {
       logger.warn({ err }, "[ingestion] Framework init failed (non-fatal)");
     });

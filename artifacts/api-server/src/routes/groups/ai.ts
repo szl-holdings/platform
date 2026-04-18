@@ -2,6 +2,7 @@ import type { IRouter } from "express";
 import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../../middlewares/sliding-window-limiter";
 import { idempotencyMiddleware } from "../../middlewares/idempotency";
 import { tenantScope } from "../../middlewares/tenant-scope";
+import { aiControlPlane } from "../../middlewares/ai-control-plane";
 
 import aiEngineRouter from "../ai-engine";
 import aiOpsDashboardRouter from "../ai-ops-dashboard";
@@ -62,6 +63,17 @@ export function register(router: IRouter): void {
 
   router.use("/ai", _readLimiter);
   router.use("/ai/tools/execute", idempotencyMiddleware);
+  // Each endpoint uses an authoritative policyRouteClass (must be in tier allowedRouteClasses).
+  // costRouteClass is a descriptive label for cost tracking and may differ.
+  router.use("/ai/respond", aiControlPlane({ policyRouteClass: "reasoning", costRouteClass: "respond" }));
+  router.use("/ai/triage", aiControlPlane({ policyRouteClass: "triage", costRouteClass: "triage" }));
+  router.use("/ai/extract", aiControlPlane({ policyRouteClass: "extraction", costRouteClass: "extract" }));
+  router.use("/ai/plan", aiControlPlane({ policyRouteClass: "planning", costRouteClass: "plan" }));
+  // retrieval and tool_execution have no matching policy route class — skip routeClass policy check.
+  router.use("/ai/retrieve", aiControlPlane({ costRouteClass: "retrieval" }));
+  router.use("/ai/retrieval", aiControlPlane({ policyRouteClass: "classification", costRouteClass: "retrieval_ingest" }));
+  router.use("/ai/tools/execute", aiControlPlane({ costRouteClass: "tool_execution" }));
+  router.use("/ai/evals/run", aiControlPlane({ policyRouteClass: "classification", costRouteClass: "evals" }));
   router.use(aiEngineRouter);
 
   router.use("/ai/ops", _readLimiter);
@@ -124,6 +136,10 @@ export function register(router: IRouter): void {
 
   router.use("/ai-safety", _readLimiter);
   router.use(aiSafetyRouter);
+
+  router.use("/forge", _readLimiter);
+  router.use("/forge", _writeLimiter);
+  router.use("/forge", aiControlPlane({ policyRouteClass: "reasoning", costRouteClass: "forge" }));
   router.use(forgeRouter);
 
   router.use("/rag", _readLimiter);

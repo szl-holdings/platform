@@ -177,6 +177,14 @@ router.post("/ai/respond", async (req, res) => {
 
     const completion = await chatCompletionWithFallback(chatMessages, route);
 
+    res.locals["aiUsage"] = {
+      model: completion.model,
+      provider: completion.provider ?? "unknown",
+      promptTokens: completion.usage?.promptTokens,
+      completionTokens: completion.usage?.completionTokens,
+      routeClass: "respond",
+    };
+
     writeAudit({
       endpoint: "respond",
       model: completion.model,
@@ -243,6 +251,14 @@ router.post("/ai/triage", async (req, res) => {
     ];
 
     const { result, raw, completion } = await structuredCompletion<TriageDecision>(messages, route, validateTriageDecision);
+
+    res.locals["aiUsage"] = {
+      model: completion.model,
+      provider: completion.provider ?? "unknown",
+      promptTokens: completion.usage?.promptTokens,
+      completionTokens: completion.usage?.completionTokens,
+      routeClass: "triage",
+    };
 
     writeAudit({
       endpoint: "triage",
@@ -312,6 +328,14 @@ router.post("/ai/extract", async (req, res) => {
 
     const { result, completion } = await structuredCompletion<ExtractedEntities>(messages, route, validateExtractedEntities);
 
+    res.locals["aiUsage"] = {
+      model: completion.model,
+      provider: completion.provider ?? "unknown",
+      promptTokens: completion.usage?.promptTokens,
+      completionTokens: completion.usage?.completionTokens,
+      routeClass: "extract",
+    };
+
     writeAudit({ endpoint: "extract", model: completion.model, latencyMs: completion.latencyMs, entityCount: result.entities.length });
 
     const extractTrace = captureTrace({
@@ -367,6 +391,14 @@ Consider constraints: ${constraints?.join("; ") || "none specified"}`,
     ];
 
     const { result, raw, completion } = await structuredCompletion<ActionDecision>(messages, route, validateActionDecision);
+
+    res.locals["aiUsage"] = {
+      model: completion.model,
+      provider: completion.provider ?? "unknown",
+      promptTokens: completion.usage?.promptTokens,
+      completionTokens: completion.usage?.completionTokens,
+      routeClass: "plan",
+    };
 
     writeAudit({
       endpoint: "plan",
