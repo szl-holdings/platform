@@ -7,11 +7,29 @@ import {
   runRedTeamEvals,
   compareSuites,
   recordBaseline,
+  injectBaseline,
   checkRegression,
   getRegressionDashboard,
   type EvalDomain,
   type EvalSuiteReport,
 } from "@szl-holdings/pulse-evals";
+import { persistEvalBaseline, loadEvalBaselines } from "../lib/replay-store";
+
+loadEvalBaselines().then(rows => {
+  for (const row of rows) {
+    injectBaseline({
+      suiteId: row.suiteId,
+      model: row.model,
+      passRate: row.passRate,
+      avgLatencyMs: row.avgLatencyMs,
+      avgScore: row.avgScore,
+      recordedAt: row.recordedAt,
+    });
+  }
+  if (rows.length > 0) {
+    console.info(`[pulse-evals] Rehydrated ${rows.length} eval baselines from DB`);
+  }
+}).catch(err => console.warn("[pulse-evals] Failed to load eval baselines on startup", err));
 
 const router: IRouter = Router();
 
@@ -174,7 +192,18 @@ router.post(
         res.status(400).json({ error: "report is required" });
         return;
       }
-      const baseline = recordBaseline(report as EvalSuiteReport);
+      const typedReport = report as EvalSuiteReport;
+      const baseline = recordBaseline(typedReport);
+      persistEvalBaseline({
+        suiteId: baseline.suiteId,
+        model: baseline.model ?? "default",
+        passRate: baseline.passRate,
+        avgScore: baseline.avgScore,
+        avgLatencyMs: baseline.avgLatencyMs,
+        totalCostUsd: typedReport.totalCostUsd ?? 0,
+        version: "1.0",
+        recordedAt: baseline.recordedAt,
+      }).catch(() => {});
       res.json({ baseline });
     } catch (err) {
       res.status(500).json({ error: err instanceof Error ? err.message : String(err) });

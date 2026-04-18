@@ -34,6 +34,7 @@ export {
 export {
   compareSuites,
   recordBaseline,
+  injectBaseline,
   checkRegression,
   getRegressionBaselines,
   getRegressionDashboard,

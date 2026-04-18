@@ -35,6 +35,7 @@ import * as selfModel from "./groups/self-model";
 import * as verifier from "./groups/verifier";
 import * as skillLibrary from "./groups/skill-library";
 import nexusRouter from "./nexus";
+import replayRouter from "./replay";
 import cognitiveRuntimeRouter from "./cognitive-runtime";
 import execBriefingsRouter from "./executive-briefings";
 import fundInboundDealsRouter from "./fund-inbound-deals";
@@ -120,5 +121,6 @@ router.use(plansRouter);
 router.use(cognitiveRuntimeRouter);
 router.use(atlasArtifactsRouter);
 router.use(outcomeGraphRouter);
+router.use(replayRouter);
 
 export default router;

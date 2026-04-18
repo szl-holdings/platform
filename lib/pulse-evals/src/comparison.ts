@@ -52,6 +52,10 @@ export function recordBaseline(report: EvalSuiteReport): RegressionBaseline {
   return baseline;
 }
 
+export function injectBaseline(baseline: RegressionBaseline): void {
+  regressionBaselines.set(`${baseline.suiteId}:${baseline.model}`, baseline);
+}
+
 export function checkRegression(
   current: EvalSuiteReport,
   thresholdPct = 5,

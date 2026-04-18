@@ -140,6 +140,13 @@ export default defineConfig({
       strict: false,
       deny: ["**/.*"],
     },
+    proxy: {
+      [`${basePath}api`]: {
+        target: "http://localhost:8080",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(new RegExp(`^${basePath}api`), "/api"),
+      },
+    },
   },
   preview: {
     port: vitePort,
