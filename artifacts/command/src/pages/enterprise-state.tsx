@@ -1,11 +1,75 @@
-import { useState, useEffect, createContext, useContext } from "react";
+import { useState, useEffect, createContext, useContext, useCallback } from "react";
 import { OpsLayout } from "../components/ops-layout";
 import {
   Activity, AlertTriangle, ArrowLeft, ArrowRight, Brain, CheckCircle2,
   ChevronRight, Clock, DollarSign, Eye, FileText, GitBranch, Globe, Layers,
   Shield, Star, Target, TrendingDown, TrendingUp, Users, Zap, X, Info,
+  CheckCheck, BellOff, XCircle, UserCheck, RefreshCw, Ticket,
 } from "lucide-react";
 import { Link } from "wouter";
+
+// ── Shared Action Store (same localStorage key as szl-holdings) ───────────────
+
+const STORE_KEY = "szl:actionStore";
+
+type RecDecision = { decision: "accept" | "reject" | "snooze"; reason?: string; snoozeUntil?: string; at: string };
+
+interface ActionStore {
+  riskOwners: Record<string, string>;
+  riskActions: Record<string, { type: string; status: string; result?: string; ticketId?: string }>;
+  oppDecisions: Record<string, { decision: string; reason?: string; snoozeUntil?: string; at: string }>;
+  recDecisions: Record<string, RecDecision>;
+}
+
+function loadStore(): ActionStore {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return { riskOwners: {}, riskActions: {}, oppDecisions: {}, recDecisions: {} };
+}
+
+function saveStore(s: ActionStore) {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(s)); } catch {}
+}
+
+function useActionStore() {
+  const [store, setStore] = useState<ActionStore>(loadStore);
+  const update = useCallback((updater: (s: ActionStore) => ActionStore) => {
+    setStore(prev => { const next = updater(prev); saveStore(next); return next; });
+  }, []);
+  return { store, update };
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+
+type ToastMsg = { id: number; text: string; type: "success" | "info" | "error" };
+
+function ToastContainer({ toasts, onDismiss }: { toasts: ToastMsg[]; onDismiss: (id: number) => void }) {
+  return (
+    <div style={{ position: "fixed", bottom: "1.5rem", right: "1.5rem", zIndex: 9999, display: "flex", flexDirection: "column", gap: "0.5rem", pointerEvents: "none" }}>
+      {toasts.map(t => (
+        <div key={t.id} style={{ pointerEvents: "auto", display: "flex", alignItems: "center", gap: "0.625rem", padding: "0.625rem 1rem", borderRadius: "0.625rem", background: t.type === "success" ? "hsla(160,60%,8%,0.95)" : t.type === "error" ? "hsla(0,60%,8%,0.95)" : "hsla(265,30%,8%,0.95)", border: `1px solid ${t.type === "success" ? "#22c55e30" : t.type === "error" ? "#ef444430" : "#8b7ac830"}`, backdropFilter: "blur(8px)", maxWidth: "360px" }}>
+          {t.type === "success" ? <CheckCircle2 style={{ width: 13, height: 13, color: "#22c55e", flexShrink: 0 }} /> : t.type === "error" ? <XCircle style={{ width: 13, height: 13, color: "#ef4444", flexShrink: 0 }} /> : <Info style={{ width: 13, height: 13, color: "#8b7ac8", flexShrink: 0 }} />}
+          <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.8)", flex: 1, lineHeight: 1.4 }}>{t.text}</span>
+          <button onClick={() => onDismiss(t.id)} style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.3)", padding: 0 }}><X style={{ width: 11, height: 11 }} /></button>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function useToasts() {
+  const [toasts, setToasts] = useState<ToastMsg[]>([]);
+  const idRef = { current: 0 };
+  const show = useCallback((text: string, type: ToastMsg["type"] = "success", duration = 4000) => {
+    const id = ++idRef.current;
+    setToasts(p => [...p, { id, text, type }]);
+    setTimeout(() => setToasts(p => p.filter(t => t.id !== id)), duration);
+  }, []);
+  const dismiss = useCallback((id: number) => setToasts(p => p.filter(t => t.id !== id)), []);
+  return { toasts, show, dismiss };
+}
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -229,67 +293,168 @@ function RecommendationQueueSection() {
   const live = useLive();
   const recs = (live?.recommendations ?? RECOMMENDATIONS) as typeof RECOMMENDATIONS;
   const [expanded, setExpanded] = useState<string[]>([]);
+  const { store, update } = useActionStore();
+  const { toasts, show, dismiss } = useToasts();
+  const [snoozeTarget, setSnoozeTarget] = useState<string | null>(null);
+  const [snoozeInput, setSnoozeInput] = useState<{ reason: string; duration: string }>({ reason: "", duration: "7d" });
+  const [rejectTarget, setRejectTarget] = useState<string | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
+
+  function handleAccept(recId: string, title: string) {
+    update(s => ({ ...s, recDecisions: { ...s.recDecisions, [recId]: { decision: "accept", at: new Date().toISOString() } } }));
+    show(`Recommendation accepted — "${title}" queued for execution.`, "success");
+  }
+
+  function handleRejectSubmit(recId: string, title: string) {
+    if (!rejectReason.trim()) return;
+    update(s => ({ ...s, recDecisions: { ...s.recDecisions, [recId]: { decision: "reject", reason: rejectReason.trim(), at: new Date().toISOString() } } }));
+    show(`Recommendation rejected.`, "info");
+    setRejectTarget(null);
+    setRejectReason("");
+  }
+
+  function handleSnoozeSubmit(recId: string, title: string) {
+    update(s => ({ ...s, recDecisions: { ...s.recDecisions, [recId]: { decision: "snooze", reason: snoozeInput.reason, snoozeUntil: snoozeInput.duration, at: new Date().toISOString() } } }));
+    show(`Snoozed for ${snoozeInput.duration}${snoozeInput.reason ? ` — ${snoozeInput.reason}` : ""}.`, "info");
+    setSnoozeTarget(null);
+    setSnoozeInput({ reason: "", duration: "7d" });
+  }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "0" }}>
-      {recs.map((rec, i) => {
-        const isExp = expanded.includes(rec.id);
-        const impactColor = rec.impact === "high" ? "#22c55e" : "#f59e0b";
-        const effortColor = rec.effort === "low" ? "#22c55e" : rec.effort === "medium" ? "#f59e0b" : "#ef4444";
+    <>
+      <ToastContainer toasts={toasts} onDismiss={dismiss} />
+      <div style={{ display: "flex", flexDirection: "column", gap: "0" }}>
+        {recs.map((rec, i) => {
+          const isExp = expanded.includes(rec.id);
+          const impactColor = rec.impact === "high" ? "#22c55e" : "#f59e0b";
+          const effortColor = rec.effort === "low" ? "#22c55e" : rec.effort === "medium" ? "#f59e0b" : "#ef4444";
+          const decision = store.recDecisions[rec.id] as RecDecision | undefined;
+          const isSnoozing = snoozeTarget === rec.id;
+          const isRejecting = rejectTarget === rec.id;
 
-        return (
-          <div key={rec.id} style={{ borderBottom: i < recs.length - 1 ? `1px solid ${BORDER}` : "none" }}>
-            <div style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem", padding: "0.875rem", cursor: "pointer" }} onClick={() => setExpanded(prev => prev.includes(rec.id) ? prev.filter(x => x !== rec.id) : [...prev, rec.id])}>
-              <div style={{ width: 22, height: 22, borderRadius: "50%", background: "hsla(0,0%,100%,0.04)", border: `1px solid ${BORDER}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "9px", fontWeight: 800, color: FG_MUT, flexShrink: 0 }}>
-                {rec.rank}
-              </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.25rem" }}>
-                  <span style={{ fontSize: "12px", fontWeight: 700, color: FG }}>{rec.title}</span>
-                  <DomainBadge domain={rec.domain} />
+          return (
+            <div key={rec.id} style={{ borderBottom: i < recs.length - 1 ? `1px solid ${BORDER}` : "none", opacity: decision?.decision === "reject" ? 0.5 : 1 }}>
+              <div style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem", padding: "0.875rem", cursor: "pointer" }} onClick={() => setExpanded(prev => prev.includes(rec.id) ? prev.filter(x => x !== rec.id) : [...prev, rec.id])}>
+                <div style={{ width: 22, height: 22, borderRadius: "50%", background: decision?.decision === "accept" ? "#22c55e20" : "hsla(0,0%,100%,0.04)", border: `1px solid ${decision?.decision === "accept" ? "#22c55e40" : BORDER}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "9px", fontWeight: 800, color: decision?.decision === "accept" ? "#22c55e" : FG_MUT, flexShrink: 0 }}>
+                  {decision?.decision === "accept" ? <CheckCheck style={{ width: 10, height: 10 }} /> : rec.rank}
                 </div>
-                <div style={{ display: "flex", gap: "1rem", fontSize: "10px" }}>
-                  <span style={{ color: impactColor, fontWeight: 600 }}>{rec.impact} impact</span>
-                  <span style={{ color: effortColor, fontWeight: 600 }}>{rec.effort} effort</span>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.25rem" }}>
+                    <span style={{ fontSize: "12px", fontWeight: 700, color: FG }}>{rec.title}</span>
+                    <DomainBadge domain={rec.domain} />
+                    {decision && (
+                      <span style={{ fontSize: "9px", fontWeight: 700, padding: "1px 6px", borderRadius: "3px", background: decision.decision === "accept" ? "#22c55e20" : decision.decision === "reject" ? "#ef444420" : "#f59e0b20", color: decision.decision === "accept" ? "#22c55e" : decision.decision === "reject" ? "#ef4444" : "#f59e0b" }}>
+                        {decision.decision === "accept" ? "Accepted" : decision.decision === "reject" ? `Rejected${decision.reason ? ` — ${decision.reason}` : ""}` : `Snoozed ${decision.snoozeUntil}`}
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ display: "flex", gap: "1rem", fontSize: "10px" }}>
+                    <span style={{ color: impactColor, fontWeight: 600 }}>{rec.impact} impact</span>
+                    <span style={{ color: effortColor, fontWeight: 600 }}>{rec.effort} effort</span>
+                  </div>
                 </div>
+                <ChevronRight style={{ width: 12, height: 12, color: FG_MUT, transform: isExp ? "rotate(90deg)" : "none", transition: "transform 0.15s", flexShrink: 0 }} />
               </div>
-              <ChevronRight style={{ width: 12, height: 12, color: FG_MUT, transform: isExp ? "rotate(90deg)" : "none", transition: "transform 0.15s", flexShrink: 0 }} />
+              {isExp && (
+                <div style={{ padding: "0 0.875rem 0.875rem 3.5rem" }}>
+                  <p style={{ fontSize: "11px", color: FG_MUT, lineHeight: 1.6, marginBottom: "0.625rem" }}>
+                    <strong style={{ color: FG }}>Why now:</strong> {rec.why}
+                  </p>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "0.375rem", marginBottom: "0.75rem" }}>
+                    {rec.signals.map((s, si) => (
+                      <span key={si} style={{ fontSize: "9px", padding: "2px 7px", borderRadius: "4px", background: "hsla(0,0%,100%,0.03)", border: `1px solid ${BORDER}`, color: FG_MUT }}>{s}</span>
+                    ))}
+                  </div>
+
+                  {/* Primary action button */}
+                  {!decision && !isSnoozing && !isRejecting && (
+                    <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+                      <button onClick={(e) => { e.stopPropagation(); handleAccept(rec.id, rec.title); }} style={{ fontSize: "10px", fontWeight: 700, padding: "5px 14px", borderRadius: "6px", background: ACCENT, border: "none", color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", gap: "5px" }}>
+                        <CheckCheck style={{ width: 11, height: 11 }} /> Accept — {rec.action}
+                      </button>
+                      <button onClick={(e) => { e.stopPropagation(); setSnoozeTarget(rec.id); setRejectTarget(null); }} style={{ fontSize: "10px", fontWeight: 600, padding: "5px 12px", borderRadius: "6px", background: "#f59e0b10", border: "1px solid #f59e0b30", color: "#f59e0b", cursor: "pointer", display: "flex", alignItems: "center", gap: "5px" }}>
+                        <BellOff style={{ width: 11, height: 11 }} /> Snooze
+                      </button>
+                      <button onClick={(e) => { e.stopPropagation(); setRejectTarget(rec.id); setSnoozeTarget(null); }} style={{ fontSize: "10px", fontWeight: 600, padding: "5px 12px", borderRadius: "6px", background: "transparent", border: `1px solid ${BORDER}`, color: FG_MUT, cursor: "pointer", display: "flex", alignItems: "center", gap: "5px" }}>
+                        <XCircle style={{ width: 11, height: 11 }} /> Reject
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Snooze form */}
+                  {isSnoozing && (
+                    <div style={{ padding: "0.625rem", background: "hsla(38,80%,5%,0.5)", border: "1px solid #f59e0b20", borderRadius: "0.5rem", display: "flex", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
+                      <select value={snoozeInput.duration} onChange={e => setSnoozeInput(p => ({ ...p, duration: e.target.value }))} style={{ fontSize: "10px", background: "hsla(0,0%,100%,0.05)", border: `1px solid ${BORDER}`, borderRadius: "4px", padding: "3px 8px", color: "rgba(255,255,255,0.7)", cursor: "pointer" }}>
+                        <option value="3d">3 days</option><option value="7d">7 days</option><option value="14d">14 days</option><option value="30d">30 days</option>
+                      </select>
+                      <input value={snoozeInput.reason} onChange={e => setSnoozeInput(p => ({ ...p, reason: e.target.value }))} placeholder="Reason required…" autoFocus style={{ flex: 1, minWidth: "140px", fontSize: "10px", background: "hsla(0,0%,100%,0.04)", border: `1px solid ${snoozeInput.reason.trim() ? BORDER : "#f59e0b40"}`, borderRadius: "4px", padding: "3px 8px", color: "rgba(255,255,255,0.7)", outline: "none" }} />
+                      <button onClick={() => handleSnoozeSubmit(rec.id, rec.title)} disabled={!snoozeInput.reason.trim()} style={{ fontSize: "10px", fontWeight: 700, padding: "4px 12px", borderRadius: "5px", background: snoozeInput.reason.trim() ? "#f59e0b" : "#f59e0b50", border: "none", color: "#000", cursor: snoozeInput.reason.trim() ? "pointer" : "default" }}>Snooze</button>
+                      <button onClick={() => setSnoozeTarget(null)} style={{ fontSize: "10px", padding: "4px 10px", borderRadius: "5px", background: "transparent", border: `1px solid ${BORDER}`, color: FG_MUT, cursor: "pointer" }}>Cancel</button>
+                    </div>
+                  )}
+
+                  {/* Reject form */}
+                  {isRejecting && (
+                    <div style={{ padding: "0.625rem", background: "hsla(0,60%,5%,0.5)", border: "1px solid #ef444420", borderRadius: "0.5rem", display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                      <input value={rejectReason} onChange={e => setRejectReason(e.target.value)} placeholder="Reason for rejection…" autoFocus style={{ flex: 1, fontSize: "10px", background: "hsla(0,0%,100%,0.04)", border: `1px solid ${BORDER}`, borderRadius: "4px", padding: "3px 8px", color: "rgba(255,255,255,0.7)", outline: "none" }} />
+                      <button onClick={() => handleRejectSubmit(rec.id, rec.title)} disabled={!rejectReason.trim()} style={{ fontSize: "10px", fontWeight: 700, padding: "4px 12px", borderRadius: "5px", background: rejectReason.trim() ? "#ef4444" : "#ef444450", border: "none", color: "#fff", cursor: rejectReason.trim() ? "pointer" : "default" }}>Reject</button>
+                      <button onClick={() => setRejectTarget(null)} style={{ fontSize: "10px", padding: "4px 10px", borderRadius: "5px", background: "transparent", border: `1px solid ${BORDER}`, color: FG_MUT, cursor: "pointer" }}>Cancel</button>
+                    </div>
+                  )}
+
+                  {/* Already decided */}
+                  {decision && !isSnoozing && !isRejecting && (
+                    <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                      <span style={{ fontSize: "10px", color: FG_MUT }}>
+                        {decision.decision === "accept" ? "Accepted and queued." : decision.decision === "reject" ? `Rejected${decision.reason ? `: "${decision.reason}"` : ""}` : `Snoozed for ${decision.snoozeUntil}${decision.reason ? ` — ${decision.reason}` : ""}`}
+                      </span>
+                      <button onClick={() => update(s => { const next = { ...s.recDecisions }; delete next[rec.id]; return { ...s, recDecisions: next }; })} style={{ fontSize: "9px", padding: "2px 8px", borderRadius: "4px", background: "transparent", border: `1px solid ${BORDER}`, color: FG_MUT, cursor: "pointer" }}>Undo</button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
-            {isExp && (
-              <div style={{ padding: "0 0.875rem 0.875rem 3.5rem" }}>
-                <p style={{ fontSize: "11px", color: FG_MUT, lineHeight: 1.6, marginBottom: "0.625rem" }}>
-                  <strong style={{ color: FG }}>Why now:</strong> {rec.why}
-                </p>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.375rem", marginBottom: "0.75rem" }}>
-                  {rec.signals.map((s, si) => (
-                    <span key={si} style={{ fontSize: "9px", padding: "2px 7px", borderRadius: "4px", background: "hsla(0,0%,100%,0.03)", border: `1px solid ${BORDER}`, color: FG_MUT }}>{s}</span>
-                  ))}
-                </div>
-                <button style={{ fontSize: "10px", fontWeight: 700, padding: "5px 14px", borderRadius: "6px", background: ACCENT, border: "none", color: "#fff", cursor: "pointer" }}>
-                  {rec.action}
-                </button>
-              </div>
-            )}
-          </div>
-        );
-      })}
-    </div>
+          );
+        })}
+      </div>
+    </>
   );
 }
 
 // ── Section: Action Control Center ────────────────────────────────────────────
 
+const RISK_ID_TO_ACTION_ID: Record<string, string> = {
+  r1: "a1",
+  r2: "a2",
+};
+
 function ActionControlSection() {
   const live = useLive();
   const actionsData = (live?.actions ?? ACTIONS) as typeof ACTIONS;
   const [actionStates, setActionStates] = useState<Record<string, string>>({});
+  const { store } = useActionStore();
+  const { toasts, show, dismiss } = useToasts();
   const pending = actionsData.filter(a => a.status === "pending").length;
 
   function handleApprove(id: string) {
     setActionStates(prev => ({ ...prev, [id]: "approved" }));
+    show("Action approved and queued for execution.", "success");
   }
   function handleReject(id: string) {
     setActionStates(prev => ({ ...prev, [id]: "rejected" }));
+    show("Action rejected.", "info");
+  }
+
+  function getEffectiveOwner(action: typeof ACTIONS[number]) {
+    const riskId = Object.entries(RISK_ID_TO_ACTION_ID).find(([, aid]) => aid === action.id)?.[0];
+    if (riskId && store.riskOwners[riskId]) return { owner: store.riskOwners[riskId], synced: true };
+    return { owner: action.owner, synced: false };
+  }
+
+  function getSyncedRiskAction(action: typeof ACTIONS[number]) {
+    const riskId = Object.entries(RISK_ID_TO_ACTION_ID).find(([, aid]) => aid === action.id)?.[0];
+    if (!riskId) return null;
+    return store.riskActions[riskId] ?? null;
   }
 
   const priorityColor = (p: string) => p === "urgent" ? "#ef4444" : p === "high" ? "#f97316" : p === "medium" ? "#f59e0b" : "#6b7280";
@@ -309,13 +474,16 @@ function ActionControlSection() {
         ))}
       </div>
 
+      <ToastContainer toasts={toasts} onDismiss={dismiss} />
       <div style={{ display: "flex", flexDirection: "column", gap: "0" }}>
         {actionsData.map((action, i) => {
           const overrideState = actionStates[action.id];
-          const effectiveStatus = overrideState ?? action.status;
+          const syncedRiskAction = getSyncedRiskAction(action);
+          const effectiveStatus = syncedRiskAction?.status === "done" ? "resolved" : (overrideState ?? action.status);
           const pColor = priorityColor(action.priority);
-          const stColors: Record<string, string> = { pending: "#f59e0b", approved: "#22c55e", rejected: "#ef4444", blocked: "#f97316", "auto-executed": ACCENT };
+          const stColors: Record<string, string> = { pending: "#f59e0b", approved: "#22c55e", rejected: "#ef4444", blocked: "#f97316", "auto-executed": ACCENT, resolved: "#22c55e" };
           const stColor = stColors[effectiveStatus] ?? "#6b7280";
+          const ownerInfo = getEffectiveOwner(action);
 
           return (
             <div key={action.id} style={{ padding: "0.875rem 1rem", borderBottom: i < actionsData.length - 1 ? `1px solid ${BORDER}` : "none", borderLeft: `3px solid ${pColor}60` }}>
@@ -327,8 +495,23 @@ function ActionControlSection() {
                     <span style={{ marginLeft: "auto", fontSize: "9px", fontWeight: 700, padding: "1px 7px", borderRadius: "10px", background: `${stColor}18`, color: stColor, border: `1px solid ${stColor}25`, textTransform: "capitalize" }}>{effectiveStatus.replace("-", " ")}</span>
                   </div>
                   <p style={{ fontSize: "11px", color: FG_MUT, lineHeight: 1.5, marginBottom: "0.375rem" }}>{action.description}</p>
-                  <div style={{ display: "flex", gap: "1rem", fontSize: "10px", color: FG_MUT, marginBottom: action.status === "pending" && !overrideState ? "0.5rem" : 0 }}>
-                    {action.owner && <span>Owner: <span style={{ color: FG }}>{action.owner}</span></span>}
+
+                  {/* Synced risk action result */}
+                  {syncedRiskAction?.status === "done" && (
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.375rem 0.625rem", background: "hsla(160,60%,5%,0.5)", border: "1px solid #22c55e20", borderRadius: "0.375rem", fontSize: "10px", color: "#22c55e", marginBottom: "0.375rem" }}>
+                      <CheckCircle2 style={{ width: 11, height: 11, flexShrink: 0 }} />
+                      {syncedRiskAction.type === "playbook"
+                        ? `Playbook resolved: ${syncedRiskAction.result}`
+                        : `Ticket ${syncedRiskAction.ticketId} created from Business State`}
+                    </div>
+                  )}
+
+                  <div style={{ display: "flex", gap: "1rem", fontSize: "10px", color: FG_MUT, marginBottom: (action.status === "pending" && !overrideState && !syncedRiskAction?.status) ? "0.5rem" : 0, flexWrap: "wrap" }}>
+                    <span style={{ display: "flex", alignItems: "center", gap: "3px" }}>
+                      <UserCheck style={{ width: 9, height: 9 }} />
+                      Owner: <span style={{ color: ownerInfo.synced ? "#22c55e" : FG }}>{ownerInfo.owner}</span>
+                      {ownerInfo.synced && <span style={{ fontSize: "8px", color: "#22c55e", fontWeight: 600 }}>synced</span>}
+                    </span>
                     {action.approver && <span>Approver: <span style={{ color: FG }}>{action.approver}</span></span>}
                     {action.due && <span style={{ display: "flex", alignItems: "center", gap: "3px" }}><Clock style={{ width: 9, height: 9 }} /><span style={{ color: action.due.includes("Today") ? "#f59e0b" : FG }}>{action.due}</span></span>}
                     {action.exposure && <span style={{ color: "#f97316" }}>{action.exposure}</span>}
@@ -338,10 +521,10 @@ function ActionControlSection() {
                       Blocked: {action.blockedReason}
                     </div>
                   )}
-                  {action.status === "pending" && !overrideState && (
-                    <div style={{ display: "flex", gap: "0.5rem" }}>
+                  {action.status === "pending" && !overrideState && !syncedRiskAction?.status && (
+                    <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.375rem" }}>
                       <button onClick={() => handleApprove(action.id)} style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "10px", fontWeight: 700, padding: "4px 12px", borderRadius: "6px", background: "#22c55e", border: "none", color: "#fff", cursor: "pointer" }}>
-                        Approve
+                        <CheckCircle2 style={{ width: 11, height: 11 }} /> Approve
                       </button>
                       <button onClick={() => handleReject(action.id)} style={{ fontSize: "10px", fontWeight: 600, padding: "4px 12px", borderRadius: "6px", background: "hsla(0,0%,100%,0.04)", border: `1px solid ${BORDER}`, color: "#ef4444", cursor: "pointer" }}>
                         Reject

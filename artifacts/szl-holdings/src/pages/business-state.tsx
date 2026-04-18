@@ -1,10 +1,11 @@
-import { useState, useEffect, createContext, useContext } from "react";
+import { useState, useEffect, createContext, useContext, useCallback } from "react";
 import { m, AnimatePresence } from "framer-motion";
 import {
   Activity, AlertTriangle, ArrowRight, BarChart3, Brain, CheckCircle2,
   ChevronLeft, ChevronRight, Circle, Clock, DollarSign, Eye, FileText,
   Globe, Layers, Shield, Star, Target, TrendingDown, TrendingUp,
   Users, Zap, X, Play, Check, Info, Briefcase, GitBranch,
+  RefreshCw, Ticket, UserCheck, CheckCheck, BellOff, XCircle, ExternalLink,
 } from "lucide-react";
 import { Link } from "wouter";
 import { cn } from "@/lib/utils";
@@ -13,6 +14,80 @@ import { SiteNav } from "@/components/SiteNav";
 const ACCENT = "#8b7ac8";
 const BG_CARD = "hsla(0,0%,100%,0.025)";
 const BORDER = "hsla(0,0%,100%,0.07)";
+
+// ── Action Store (localStorage-backed shared state) ───────────────────────────
+
+const STORE_KEY = "szl:actionStore";
+
+type RiskActionState = { type: "playbook" | "ticket"; status: "running" | "done"; result?: string; ticketId?: string };
+type OppDecision = { decision: "accept" | "reject" | "snooze"; reason?: string; snoozeUntil?: string; at: string };
+type RecDecision = { decision: "accept" | "reject" | "snooze"; reason?: string; snoozeUntil?: string; at: string };
+
+interface ActionStore {
+  riskOwners: Record<string, string>;
+  riskActions: Record<string, RiskActionState>;
+  oppDecisions: Record<string, OppDecision>;
+  recDecisions: Record<string, RecDecision>;
+}
+
+function loadStore(): ActionStore {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return { riskOwners: {}, riskActions: {}, oppDecisions: {}, recDecisions: {} };
+}
+
+function saveStore(store: ActionStore) {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(store)); } catch {}
+}
+
+function useActionStore() {
+  const [store, setStore] = useState<ActionStore>(loadStore);
+  const update = useCallback((updater: (s: ActionStore) => ActionStore) => {
+    setStore(prev => {
+      const next = updater(prev);
+      saveStore(next);
+      return next;
+    });
+  }, []);
+  return { store, update };
+}
+
+// ── Toast Notification ─────────────────────────────────────────────────────────
+
+type ToastMsg = { id: number; text: string; type: "success" | "info" | "error" };
+
+function ToastContainer({ toasts, onDismiss }: { toasts: ToastMsg[]; onDismiss: (id: number) => void }) {
+  return (
+    <div style={{ position: "fixed", bottom: "1.5rem", right: "1.5rem", zIndex: 9999, display: "flex", flexDirection: "column", gap: "0.5rem", pointerEvents: "none" }}>
+      <AnimatePresence>
+        {toasts.map(t => (
+          <m.div key={t.id} initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 40 }} transition={{ duration: 0.2 }}
+            style={{ pointerEvents: "auto", display: "flex", alignItems: "center", gap: "0.625rem", padding: "0.625rem 1rem", borderRadius: "0.625rem", background: t.type === "success" ? "hsla(160,60%,8%,0.95)" : t.type === "error" ? "hsla(0,60%,8%,0.95)" : "hsla(265,30%,8%,0.95)", border: `1px solid ${t.type === "success" ? "#22c55e30" : t.type === "error" ? "#ef444430" : "#8b7ac830"}`, backdropFilter: "blur(8px)", maxWidth: "340px" }}>
+            {t.type === "success" ? <CheckCircle2 style={{ width: 13, height: 13, color: "#22c55e", flexShrink: 0 }} /> : t.type === "error" ? <XCircle style={{ width: 13, height: 13, color: "#ef4444", flexShrink: 0 }} /> : <Info style={{ width: 13, height: 13, color: ACCENT, flexShrink: 0 }} />}
+            <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.8)", flex: 1, lineHeight: 1.4 }}>{t.text}</span>
+            <button onClick={() => onDismiss(t.id)} style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.3)", padding: 0, flexShrink: 0 }}>
+              <X style={{ width: 11, height: 11 }} />
+            </button>
+          </m.div>
+        ))}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+function useToasts() {
+  const [toasts, setToasts] = useState<ToastMsg[]>([]);
+  const idRef = { current: 0 };
+  const show = useCallback((text: string, type: ToastMsg["type"] = "success", duration = 4000) => {
+    const id = ++idRef.current;
+    setToasts(p => [...p, { id, text, type }]);
+    setTimeout(() => setToasts(p => p.filter(t => t.id !== id)), duration);
+  }, []);
+  const dismiss = useCallback((id: number) => setToasts(p => p.filter(t => t.id !== id)), []);
+  return { toasts, show, dismiss };
+}
 
 // ── Data Models ────────────────────────────────────────────────────────────────
 
@@ -452,54 +527,150 @@ function RiskRegisterModule() {
   const live = useLive();
   const risks = (live?.riskRegister ?? RISK_REGISTER) as typeof RISK_REGISTER;
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [editingOwner, setEditingOwner] = useState<string | null>(null);
+  const [ownerInput, setOwnerInput] = useState("");
+  const { store, update } = useActionStore();
+  const { toasts, show, dismiss } = useToasts();
+
+  function handlePlaybook(riskId: string, riskTitle: string) {
+    update(s => ({ ...s, riskActions: { ...s.riskActions, [riskId]: { type: "playbook", status: "running" } } }));
+    show("Triggering credential rotation playbook…", "info", 2000);
+    setTimeout(() => {
+      update(s => ({ ...s, riskActions: { ...s.riskActions, [riskId]: { type: "playbook", status: "done", result: "Credentials rotated. Pipeline reconnected at 14:38. Freshness restored." } } }));
+      show("Playbook complete — Carlota CRM pipeline reconnected successfully.", "success");
+    }, 2500);
+  }
+
+  function handleTicket(riskId: string, risk: typeof RISK_REGISTER[number]) {
+    const ticketId = `ENG-${Math.floor(1000 + Math.random() * 9000)}`;
+    update(s => ({ ...s, riskActions: { ...s.riskActions, [riskId]: { type: "ticket", status: "done", ticketId } } }));
+    show(`Linear ticket ${ticketId} created — "Add index on distress_score + borough" assigned to ${risk.owner}.`, "success");
+  }
+
+  function handleSaveOwner(riskId: string) {
+    if (!ownerInput.trim()) return;
+    update(s => ({ ...s, riskOwners: { ...s.riskOwners, [riskId]: ownerInput.trim() } }));
+    show(`Owner updated to "${ownerInput.trim()}" — synced to Command Portal.`, "success");
+    setEditingOwner(null);
+    setOwnerInput("");
+  }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "0" }}>
-      {risks.map((risk, i) => {
-        const color = risk.level === "critical" ? "#ef4444" : risk.level === "high" ? "#f97316" : "#f59e0b";
-        const isSelected = selectedId === risk.id;
-        return (
-          <div key={risk.id} style={{ borderBottom: i < risks.length - 1 ? `1px solid ${BORDER}` : "none" }}>
-            <div
-              style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.75rem 0.875rem", cursor: "pointer", borderLeft: `3px solid ${color}60` }}
-              onClick={() => setSelectedId(isSelected ? null : risk.id)}
-            >
-              <SeverityDot level={risk.level} />
-              <span style={{ fontSize: "12px", fontWeight: 600, color: "rgba(255,255,255,0.8)", flex: 1 }}>{risk.title}</span>
-              {DOMAINS[risk.domain as DomainId] && <DomainTag domain={risk.domain as DomainId} />}
-              <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.3)" }}>P: {Math.round(risk.probability * 100)}%</span>
-              <span style={{ fontSize: "9px", fontWeight: 700, padding: "2px 7px", borderRadius: "3px", background: `${color}20`, color }}>{risk.level}</span>
-              {isSelected ? <ChevronLeft style={{ width: 12, height: 12, color: "rgba(255,255,255,0.3)", transform: "rotate(90deg)" }} /> : <ChevronRight style={{ width: 12, height: 12, color: "rgba(255,255,255,0.3)" }} />}
-            </div>
-            {isSelected && (
-              <div style={{ padding: "0 0.875rem 0.875rem 2rem" }}>
-                <div style={{ padding: "0.75rem", background: "hsla(0,0%,100%,0.02)", border: `1px solid ${BORDER}`, borderRadius: "0.5rem" }}>
-                  <div style={{ display: "flex", gap: "2rem", marginBottom: "0.5rem" }}>
-                    <div>
-                      <div style={{ fontSize: "9px", color: "rgba(255,255,255,0.3)", marginBottom: "2px" }}>Owner</div>
-                      <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.65)" }}>{risk.owner}</div>
-                    </div>
-                    <div>
-                      <div style={{ fontSize: "9px", color: "rgba(255,255,255,0.3)", marginBottom: "2px" }}>Impact</div>
-                      <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.65)" }}>{risk.impact}</div>
-                    </div>
-                    <div>
-                      <div style={{ fontSize: "9px", color: "rgba(255,255,255,0.3)", marginBottom: "2px" }}>Trend</div>
-                      <div style={{ display: "flex", alignItems: "center", gap: "3px" }}>
-                        {risk.trend === "up" ? <TrendingUp style={{ width: 11, height: 11, color: "#ef4444" }} /> : risk.trend === "down" ? <TrendingDown style={{ width: 11, height: 11, color: "#22c55e" }} /> : <div style={{ width: 11, height: 1, background: "rgba(255,255,255,0.2)" }} />}
-                        <span style={{ fontSize: "11px", color: risk.trend === "up" ? "#ef4444" : risk.trend === "down" ? "#22c55e" : "rgba(255,255,255,0.4)" }}>{risk.trend}</span>
+    <>
+      <ToastContainer toasts={toasts} onDismiss={dismiss} />
+      <div style={{ display: "flex", flexDirection: "column", gap: "0" }}>
+        {risks.map((risk, i) => {
+          const color = risk.level === "critical" ? "#ef4444" : risk.level === "high" ? "#f97316" : "#f59e0b";
+          const isSelected = selectedId === risk.id;
+          const riskAction = store.riskActions[risk.id];
+          const effectiveOwner = store.riskOwners[risk.id] ?? risk.owner;
+          const isEditingThisOwner = editingOwner === risk.id;
+
+          return (
+            <div key={risk.id} style={{ borderBottom: i < risks.length - 1 ? `1px solid ${BORDER}` : "none" }}>
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.75rem 0.875rem", cursor: "pointer", borderLeft: `3px solid ${color}60` }}
+                onClick={() => setSelectedId(isSelected ? null : risk.id)}
+              >
+                <SeverityDot level={risk.level} />
+                <span style={{ fontSize: "12px", fontWeight: 600, color: "rgba(255,255,255,0.8)", flex: 1 }}>{risk.title}</span>
+                {DOMAINS[risk.domain as DomainId] && <DomainTag domain={risk.domain as DomainId} />}
+                <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.3)" }}>P: {Math.round(risk.probability * 100)}%</span>
+                {riskAction?.status === "done" && (
+                  <span style={{ fontSize: "9px", fontWeight: 700, padding: "1px 6px", borderRadius: "3px", background: "#22c55e20", color: "#22c55e" }}>
+                    {riskAction.type === "playbook" ? "Resolved" : `Ticket ${riskAction.ticketId}`}
+                  </span>
+                )}
+                <span style={{ fontSize: "9px", fontWeight: 700, padding: "2px 7px", borderRadius: "3px", background: `${color}20`, color }}>{risk.level}</span>
+                {isSelected ? <ChevronLeft style={{ width: 12, height: 12, color: "rgba(255,255,255,0.3)", transform: "rotate(90deg)" }} /> : <ChevronRight style={{ width: 12, height: 12, color: "rgba(255,255,255,0.3)" }} />}
+              </div>
+              {isSelected && (
+                <div style={{ padding: "0 0.875rem 0.875rem 2rem" }}>
+                  <div style={{ padding: "0.75rem", background: "hsla(0,0%,100%,0.02)", border: `1px solid ${BORDER}`, borderRadius: "0.5rem" }}>
+                    <div style={{ display: "flex", gap: "2rem", marginBottom: "0.625rem", flexWrap: "wrap" }}>
+                      <div>
+                        <div style={{ fontSize: "9px", color: "rgba(255,255,255,0.3)", marginBottom: "2px" }}>Owner</div>
+                        {isEditingThisOwner ? (
+                          <div style={{ display: "flex", gap: "0.375rem", alignItems: "center" }}>
+                            <input
+                              value={ownerInput}
+                              onChange={e => setOwnerInput(e.target.value)}
+                              onKeyDown={e => { if (e.key === "Enter") handleSaveOwner(risk.id); if (e.key === "Escape") { setEditingOwner(null); setOwnerInput(""); } }}
+                              placeholder={effectiveOwner}
+                              autoFocus
+                              style={{ fontSize: "11px", background: "hsla(0,0%,100%,0.06)", border: `1px solid ${BORDER}`, borderRadius: "4px", padding: "2px 6px", color: "rgba(255,255,255,0.8)", outline: "none", width: "120px" }}
+                            />
+                            <button onClick={() => handleSaveOwner(risk.id)} style={{ fontSize: "9px", fontWeight: 700, padding: "2px 8px", borderRadius: "4px", background: "#22c55e", border: "none", color: "#fff", cursor: "pointer" }}>Save</button>
+                            <button onClick={() => { setEditingOwner(null); setOwnerInput(""); }} style={{ fontSize: "9px", padding: "2px 6px", borderRadius: "4px", background: "transparent", border: `1px solid ${BORDER}`, color: "rgba(255,255,255,0.3)", cursor: "pointer" }}>Cancel</button>
+                          </div>
+                        ) : (
+                          <div style={{ display: "flex", alignItems: "center", gap: "0.375rem" }}>
+                            <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.65)" }}>{effectiveOwner}</span>
+                            <button onClick={(e) => { e.stopPropagation(); setEditingOwner(risk.id); setOwnerInput(effectiveOwner); }} style={{ fontSize: "9px", padding: "1px 6px", borderRadius: "3px", background: "hsla(0,0%,100%,0.04)", border: `1px solid ${BORDER}`, color: "rgba(255,255,255,0.3)", cursor: "pointer", display: "flex", alignItems: "center", gap: "3px" }}>
+                              <UserCheck style={{ width: 8, height: 8 }} /> Reassign
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <div style={{ fontSize: "9px", color: "rgba(255,255,255,0.3)", marginBottom: "2px" }}>Impact</div>
+                        <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.65)" }}>{risk.impact}</div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: "9px", color: "rgba(255,255,255,0.3)", marginBottom: "2px" }}>Trend</div>
+                        <div style={{ display: "flex", alignItems: "center", gap: "3px" }}>
+                          {risk.trend === "up" ? <TrendingUp style={{ width: 11, height: 11, color: "#ef4444" }} /> : risk.trend === "down" ? <TrendingDown style={{ width: 11, height: 11, color: "#22c55e" }} /> : <div style={{ width: 11, height: 1, background: "rgba(255,255,255,0.2)" }} />}
+                          <span style={{ fontSize: "11px", color: risk.trend === "up" ? "#ef4444" : risk.trend === "down" ? "#22c55e" : "rgba(255,255,255,0.4)" }}>{risk.trend}</span>
+                        </div>
                       </div>
                     </div>
+                    <div style={{ fontSize: "9px", color: "rgba(255,255,255,0.3)", marginBottom: "3px" }}>Mitigation</div>
+                    <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.55)", lineHeight: 1.5, marginBottom: "0.75rem" }}>{risk.mitigation}</div>
+
+                    {/* Action buttons */}
+                    <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", borderTop: `1px solid ${BORDER}`, paddingTop: "0.625rem" }}>
+                      {risk.id === "r1" && (
+                        riskAction?.status === "running" ? (
+                          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "10px", color: "#f59e0b" }}>
+                            <RefreshCw style={{ width: 11, height: 11, animation: "spin 1s linear infinite" }} />
+                            Running credential rotation playbook…
+                          </div>
+                        ) : riskAction?.status === "done" ? (
+                          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "10px", color: "#22c55e" }}>
+                            <CheckCircle2 style={{ width: 11, height: 11 }} />
+                            {riskAction.result}
+                          </div>
+                        ) : (
+                          <button onClick={() => handlePlaybook(risk.id, risk.title)} style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "10px", fontWeight: 700, padding: "5px 12px", borderRadius: "6px", background: "#c2a55a20", border: "1px solid #c2a55a40", color: "#c2a55a", cursor: "pointer" }}>
+                            <RefreshCw style={{ width: 10, height: 10 }} /> Rotate Credentials &amp; Reconnect
+                          </button>
+                        )
+                      )}
+                      {risk.id === "r2" && (
+                        riskAction?.status === "done" ? (
+                          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "10px", color: "#22c55e" }}>
+                            <CheckCircle2 style={{ width: 11, height: 11 }} />
+                            Ticket <strong>{riskAction.ticketId}</strong> created — index migration queued.
+                          </div>
+                        ) : (
+                          <button onClick={() => handleTicket(risk.id, risk)} style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "10px", fontWeight: 700, padding: "5px 12px", borderRadius: "6px", background: "#f59e0b20", border: "1px solid #f59e0b40", color: "#f59e0b", cursor: "pointer" }}>
+                            <Ticket style={{ width: 10, height: 10 }} /> Create Linear Ticket
+                          </button>
+                        )
+                      )}
+                      <a href="/command" style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "10px", fontWeight: 600, padding: "5px 12px", borderRadius: "6px", background: `${ACCENT}15`, border: `1px solid ${ACCENT}30`, color: ACCENT, cursor: "pointer", textDecoration: "none" }}>
+                        <ExternalLink style={{ width: 10, height: 10 }} /> Escalate to Command
+                      </a>
+                    </div>
                   </div>
-                  <div style={{ fontSize: "9px", color: "rgba(255,255,255,0.3)", marginBottom: "3px" }}>Mitigation</div>
-                  <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.55)", lineHeight: 1.5 }}>{risk.mitigation}</div>
                 </div>
-              </div>
-            )}
-          </div>
-        );
-      })}
-    </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
+    </>
   );
 }
 
@@ -508,28 +679,107 @@ function RiskRegisterModule() {
 function OpportunityModule() {
   const live = useLive();
   const opps = (live?.oppRegister ?? OPP_REGISTER) as typeof OPP_REGISTER;
+  const { store, update } = useActionStore();
+  const { toasts, show, dismiss } = useToasts();
+  const [snoozeTarget, setSnoozeTarget] = useState<string | null>(null);
+  const [snoozeInput, setSnoozeInput] = useState<{ reason: string; duration: string }>({ reason: "", duration: "7d" });
+  const [rejectTarget, setRejectTarget] = useState<string | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
+
+  function handleAccept(oppId: string, title: string) {
+    update(s => ({ ...s, oppDecisions: { ...s.oppDecisions, [oppId]: { decision: "accept", at: new Date().toISOString() } } }));
+    show(`"${title}" accepted — added to sprint backlog.`, "success");
+  }
+
+  function handleRejectSubmit(oppId: string, title: string) {
+    if (!rejectReason.trim()) return;
+    update(s => ({ ...s, oppDecisions: { ...s.oppDecisions, [oppId]: { decision: "reject", reason: rejectReason.trim(), at: new Date().toISOString() } } }));
+    show(`"${title}" rejected.`, "info");
+    setRejectTarget(null);
+    setRejectReason("");
+  }
+
+  function handleSnoozeSubmit(oppId: string, title: string) {
+    update(s => ({ ...s, oppDecisions: { ...s.oppDecisions, [oppId]: { decision: "snooze", reason: snoozeInput.reason, snoozeUntil: snoozeInput.duration, at: new Date().toISOString() } } }));
+    show(`"${title}" snoozed for ${snoozeInput.duration}${snoozeInput.reason ? ` — ${snoozeInput.reason}` : ""}.`, "info");
+    setSnoozeTarget(null);
+    setSnoozeInput({ reason: "", duration: "7d" });
+  }
+
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "0" }}>
-      {opps.map((opp, i) => {
-        const color = opp.level === "high" ? "#22c55e" : "#0ea5e9";
-        return (
-          <div key={opp.id} style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: "1rem", alignItems: "start", padding: "0.875rem 0.875rem", borderBottom: i < opps.length - 1 ? `1px solid ${BORDER}` : "none", borderLeft: `3px solid ${color}50` }}>
-            <div>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.375rem" }}>
-                <span style={{ fontSize: "12px", fontWeight: 700, color: "rgba(255,255,255,0.85)" }}>{opp.title}</span>
-                {DOMAINS[opp.domain as DomainId] && <DomainTag domain={opp.domain as DomainId} />}
+    <>
+      <ToastContainer toasts={toasts} onDismiss={dismiss} />
+      <div style={{ display: "flex", flexDirection: "column", gap: "0" }}>
+        {opps.map((opp, i) => {
+          const color = opp.level === "high" ? "#22c55e" : "#0ea5e9";
+          const decision = store.oppDecisions[opp.id];
+          const isSnoozing = snoozeTarget === opp.id;
+          const isRejecting = rejectTarget === opp.id;
+
+          return (
+            <div key={opp.id} style={{ borderBottom: i < opps.length - 1 ? `1px solid ${BORDER}` : "none", borderLeft: `3px solid ${color}50`, opacity: decision?.decision === "reject" ? 0.5 : 1 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: "1rem", alignItems: "start", padding: "0.875rem 0.875rem" }}>
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.375rem" }}>
+                    <span style={{ fontSize: "12px", fontWeight: 700, color: "rgba(255,255,255,0.85)" }}>{opp.title}</span>
+                    {DOMAINS[opp.domain as DomainId] && <DomainTag domain={opp.domain as DomainId} />}
+                    {decision && (
+                      <span style={{ fontSize: "9px", fontWeight: 700, padding: "1px 6px", borderRadius: "3px", background: decision.decision === "accept" ? "#22c55e20" : decision.decision === "reject" ? "#ef444420" : "#f59e0b20", color: decision.decision === "accept" ? "#22c55e" : decision.decision === "reject" ? "#ef4444" : "#f59e0b" }}>
+                        {decision.decision === "accept" ? "Accepted" : decision.decision === "reject" ? "Rejected" : `Snoozed ${decision.snoozeUntil}`}
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.35)", marginBottom: "0.25rem" }}>{opp.action}</div>
+                  <div style={{ fontSize: "9px", color: "rgba(255,255,255,0.25)", marginBottom: decision ? 0 : "0.625rem" }}>Owner: {opp.owner} · P: {Math.round(opp.probability * 100)}%</div>
+
+                  {/* Action row */}
+                  {!decision && !isSnoozing && !isRejecting && (
+                    <div style={{ display: "flex", gap: "0.375rem", flexWrap: "wrap" }}>
+                      <button onClick={() => handleAccept(opp.id, opp.title)} style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "9px", fontWeight: 700, padding: "3px 9px", borderRadius: "4px", background: "#22c55e20", border: "1px solid #22c55e40", color: "#22c55e", cursor: "pointer" }}>
+                        <CheckCheck style={{ width: 9, height: 9 }} /> Accept
+                      </button>
+                      <button onClick={() => { setSnoozeTarget(opp.id); setRejectTarget(null); }} style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "9px", fontWeight: 700, padding: "3px 9px", borderRadius: "4px", background: "#f59e0b10", border: "1px solid #f59e0b30", color: "#f59e0b", cursor: "pointer" }}>
+                        <BellOff style={{ width: 9, height: 9 }} /> Snooze
+                      </button>
+                      <button onClick={() => { setRejectTarget(opp.id); setSnoozeTarget(null); }} style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "9px", fontWeight: 600, padding: "3px 9px", borderRadius: "4px", background: "transparent", border: `1px solid ${BORDER}`, color: "rgba(255,255,255,0.3)", cursor: "pointer" }}>
+                        <XCircle style={{ width: 9, height: 9 }} /> Reject
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Snooze form */}
+                  {isSnoozing && (
+                    <div style={{ marginTop: "0.5rem", padding: "0.625rem", background: "hsla(38,80%,5%,0.5)", border: "1px solid #f59e0b20", borderRadius: "0.5rem", display: "flex", flexDirection: "column", gap: "0.375rem" }}>
+                      <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                        <select value={snoozeInput.duration} onChange={e => setSnoozeInput(p => ({ ...p, duration: e.target.value }))} style={{ fontSize: "10px", background: "hsla(0,0%,100%,0.05)", border: `1px solid ${BORDER}`, borderRadius: "4px", padding: "2px 6px", color: "rgba(255,255,255,0.7)", cursor: "pointer" }}>
+                          <option value="3d">3 days</option><option value="7d">7 days</option><option value="14d">14 days</option><option value="30d">30 days</option>
+                        </select>
+                        <input value={snoozeInput.reason} onChange={e => setSnoozeInput(p => ({ ...p, reason: e.target.value }))} placeholder="Reason (optional)" style={{ flex: 1, fontSize: "10px", background: "hsla(0,0%,100%,0.04)", border: `1px solid ${BORDER}`, borderRadius: "4px", padding: "2px 6px", color: "rgba(255,255,255,0.7)", outline: "none" }} />
+                        <button onClick={() => handleSnoozeSubmit(opp.id, opp.title)} style={{ fontSize: "9px", fontWeight: 700, padding: "3px 10px", borderRadius: "4px", background: "#f59e0b", border: "none", color: "#000", cursor: "pointer" }}>Snooze</button>
+                        <button onClick={() => setSnoozeTarget(null)} style={{ fontSize: "9px", padding: "3px 8px", borderRadius: "4px", background: "transparent", border: `1px solid ${BORDER}`, color: "rgba(255,255,255,0.3)", cursor: "pointer" }}>Cancel</button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Reject form */}
+                  {isRejecting && (
+                    <div style={{ marginTop: "0.5rem", padding: "0.625rem", background: "hsla(0,60%,5%,0.5)", border: "1px solid #ef444420", borderRadius: "0.5rem", display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                      <input value={rejectReason} onChange={e => setRejectReason(e.target.value)} placeholder="Reason for rejection…" autoFocus style={{ flex: 1, fontSize: "10px", background: "hsla(0,0%,100%,0.04)", border: `1px solid ${BORDER}`, borderRadius: "4px", padding: "2px 6px", color: "rgba(255,255,255,0.7)", outline: "none" }} />
+                      <button onClick={() => handleRejectSubmit(opp.id, opp.title)} disabled={!rejectReason.trim()} style={{ fontSize: "9px", fontWeight: 700, padding: "3px 10px", borderRadius: "4px", background: rejectReason.trim() ? "#ef4444" : "#ef444450", border: "none", color: "#fff", cursor: rejectReason.trim() ? "pointer" : "default" }}>Reject</button>
+                      <button onClick={() => setRejectTarget(null)} style={{ fontSize: "9px", padding: "3px 8px", borderRadius: "4px", background: "transparent", border: `1px solid ${BORDER}`, color: "rgba(255,255,255,0.3)", cursor: "pointer" }}>Cancel</button>
+                    </div>
+                  )}
+                </div>
+                <div style={{ textAlign: "right" }}>
+                  <div style={{ fontSize: "14px", fontWeight: 800, color, letterSpacing: "-0.02em" }}>{opp.value}</div>
+                  <div style={{ fontSize: "9px", fontWeight: 700, padding: "2px 7px", borderRadius: "3px", background: `${color}20`, color, marginTop: "4px", display: "inline-block" }}>{opp.level}</div>
+                </div>
               </div>
-              <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.35)", marginBottom: "0.25rem" }}>{opp.action}</div>
-              <div style={{ fontSize: "9px", color: "rgba(255,255,255,0.25)" }}>Owner: {opp.owner} · P: {Math.round(opp.probability * 100)}%</div>
             </div>
-            <div style={{ textAlign: "right" }}>
-              <div style={{ fontSize: "14px", fontWeight: 800, color, letterSpacing: "-0.02em" }}>{opp.value}</div>
-              <div style={{ fontSize: "9px", fontWeight: 700, padding: "2px 7px", borderRadius: "3px", background: `${color}20`, color, marginTop: "4px", display: "inline-block" }}>{opp.level}</div>
-            </div>
-          </div>
-        );
-      })}
-    </div>
+          );
+        })}
+      </div>
+    </>
   );
 }
 
