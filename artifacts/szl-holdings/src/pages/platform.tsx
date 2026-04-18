@@ -72,18 +72,18 @@ const EXPANSION_VERTICALS = [
 const HOW_IT_WORKS = [
   {
     step: "01",
-    heading: "Signal → Context → Recommendation",
-    body: "Signals arrive from domain-specific sources — AIS telemetry, threat feeds, court filings, market data. The Event Fabric normalizes and correlates them across domains. An AI agent analyzes the signal and proposes an action with source citations, confidence score, and provenance metadata.",
+    heading: "Signal Ingestion",
+    body: "Signals arrive from domain-specific sources — AIS telemetry, threat feeds, court filings, market data. The Event Fabric normalizes and correlates them across domain packs, attaching source attribution, retrieval timestamps, and confidence metadata to every input.",
   },
   {
     step: "02",
-    heading: "Simulation → Policy → Execution",
-    body: "For high-stakes decisions, the Monte Carlo engine models risk and uncertainty before the recommendation surfaces. Covenant Policy checks who can approve and what conditions apply. Alloy orchestrates the approved action as a governed, durable workflow.",
+    heading: "Risk Surface → Governed Decision",
+    body: "The Risk Surface maps signal severity, blast radius, and SLA proximity. For high-stakes decisions, the Monte Carlo engine models uncertainty before any recommendation surfaces. Covenant Policy then determines who can approve, what conditions apply, and whether human sign-off is required. Alloy orchestrates the approved action as a durable, auditable workflow.",
   },
   {
     step: "03",
-    heading: "Proof → Outcome → Learning",
-    body: "The Proof Chain records the complete trail: signal, recommendation, simulation, policy decision, approval, execution. The Outcome Graph tracks the real-world result. Historical outcomes feed back into simulation models and AI confidence calibration.",
+    heading: "Proof Chain → Outcome Graph",
+    body: "The Proof Chain records the complete, immutable trail: signal, recommendation, simulation, policy decision, approval, execution. The Outcome Graph tracks the real-world result and feeds it back into simulation models and AI confidence calibration — closing the loop.",
   },
 ];
 
@@ -127,19 +127,19 @@ export default function PlatformPage() {
                 fontSize: "clamp(2rem,4vw,3rem)", fontWeight: 700, letterSpacing: "-0.025em",
                 lineHeight: 1.08, color: "hsl(38,12%,94%)", marginBottom: "1.25rem", maxWidth: "28rem",
               }}>
-                One governance infrastructure. Every high-consequence domain.
+                Platform → Primitives → Domain Packs.
               </h1>
               <p style={{
                 fontSize: "1.0625rem", color: "hsl(210,5%,60%)", lineHeight: 1.65,
                 maxWidth: "44rem", marginBottom: "1rem",
               }}>
-                The SZL Holdings platform is organized in three architectural layers: command surfaces where operators work, an execution fabric that governs every action, and domain packs that bring purpose-built intelligence to specific industries.
+                The SZL Holdings governed decision system has three structural tiers. The <strong style={{ color: "hsl(38,12%,80%)" }}>Platform</strong> provides the foundation. The <strong style={{ color: "hsl(38,12%,80%)" }}>Primitives</strong> layer — Covenant Policy, Proof Chain, Outcome Graph, and Alloy execution — governs every consequential action. <strong style={{ color: "hsl(38,12%,80%)" }}>Domain Packs</strong> extend the Primitives with purpose-built intelligence for each industry.
               </p>
               <p style={{
                 fontSize: "0.9375rem", color: "hsl(210,5%,50%)", lineHeight: 1.65,
                 maxWidth: "44rem", marginBottom: "2rem",
               }}>
-                Every layer shares one governance model, one audit trail, and one authentication model. Adding a new domain pack does not require rebuilding infrastructure — it inherits it.
+                Every domain pack inherits one governance model, one Proof Chain, and one Covenant Policy framework. Adding a new domain pack does not require rebuilding infrastructure — it inherits it.
               </p>
               <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
                 <Link
@@ -189,7 +189,7 @@ export default function PlatformPage() {
               transition={{ duration: 0.5 }}
               style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,40%)", marginBottom: "2.5rem" }}
             >
-              Governed command surfaces
+              Platform Primitives — governed infrastructure
             </m.p>
             <div className="grid md:grid-cols-2 gap-6">
               {LAYERS.map((layer, i) => {
@@ -249,7 +249,7 @@ export default function PlatformPage() {
               transition={{ duration: 0.5 }}
               style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,40%)", marginBottom: "2.5rem" }}
             >
-              How It Works
+              Governed Decision Loop
             </m.p>
             <div style={{ display: "grid", gap: "1.5rem", maxWidth: "52rem" }}>
               {HOW_IT_WORKS.map((item, i) => (

@@ -33,7 +33,7 @@ const OPERATING_LOOP = [
     phase: "Recommendation",
     step: "04",
     icon: Layers,
-    description: "Evaluated signals are scored, ranked, and assembled into prioritized action recommendations. Recommendation factors include severity, velocity, ownership gap, and portfolio-level impact. The action queue updates continuously as new signals arrive and conditions change.",
+    description: "Evaluated signals are scored, ranked, and assembled into prioritized action recommendations. Recommendation factors include severity, velocity, ownership gap, and cross-domain impact. The action queue updates continuously as new signals arrive and conditions change.",
   },
   {
     phase: "Routing",
@@ -48,22 +48,22 @@ const OPERATING_LOOP = [
     description: "Consequential actions pass through human approval gates before execution. Alloy tracks SLAs, escalates stalled approvals, and verifies that actions taken match actions authorized. Nothing executes without confirmation.",
   },
   {
-    phase: "Audit Preservation",
+    phase: "Proof Chain",
     step: "07",
     icon: FileText,
-    description: "Every stage — ingestion, evaluation, routing, approval, execution — is logged in a structured audit record. The record is attributed to real actors and exportable for compliance, capital review, or customer diligence.",
+    description: "Every stage — ingestion, evaluation, routing, approval, execution — is recorded in the Proof Chain: a SHA-256 hashed, tamper-evident audit record attributed to real actors. Exportable for compliance, capital review, or customer diligence. Covenant Policy violations are logged alongside approvals — nothing is hidden.",
   },
   {
-    phase: "Explainability",
+    phase: "Outcome Graph",
     step: "08",
     icon: BookOpen,
-    description: "Every signal evaluation, routing decision, and action outcome is explainable — who scored it, what criteria applied, what alternative paths existed, and why the chosen path was taken. No black boxes in a consequential workflow.",
+    description: "After execution, the Outcome Graph tracks the real-world result: did the action produce the expected outcome? Deviations surface as new signals. Outcomes feed back into simulation calibration and AI confidence scoring — closing the governed decision loop.",
   },
   {
     phase: "Extensibility",
     step: "09",
     icon: Puzzle,
-    description: "Alloy is designed to extend — new packs plug in via the connector mesh, new evaluation criteria can be configured without code changes, and new workflow types can be registered against existing approval infrastructure.",
+    description: "Alloy is designed to extend — new domain packs plug in via the connector mesh, new evaluation criteria can be configured without code changes, and new workflow types can be registered against existing approval infrastructure.",
   },
 ];
 
@@ -75,8 +75,8 @@ const CAPABILITIES = [
   },
   {
     icon: CheckSquare,
-    title: "Human-in-the-Loop Gates",
-    body: "Consequential actions require explicit human approval before execution. HITL gates are configurable by action type, risk level, and role — enforced as a structural constraint, not a policy afterthought.",
+    title: "Covenant Policy Enforcement",
+    body: "Covenant Policy governs every consequential action: who can approve, what conditions apply, and when human-in-the-loop is required. Policy gates are structural — not configurable away — and every Covenant Policy decision is recorded in the Proof Chain.",
   },
   {
     icon: AlertOctagon,
@@ -85,8 +85,8 @@ const CAPABILITIES = [
   },
   {
     icon: FileText,
-    title: "Immutable Audit Trail",
-    body: "Every action, decision, approval, and outcome is logged with full attribution — who acted, when, with what authority, and what changed. Structured, auditable, and exportable for compliance and capital review.",
+    title: "Proof Chain",
+    body: "Every action, decision, approval, and outcome is recorded in the Proof Chain — SHA-256 hashed, tamper-evident, and attributed to real actors. Covenant Policy decisions appear alongside execution records. Structured, exportable, and auditable for compliance and capital review.",
   },
   {
     icon: Download,
@@ -106,7 +106,7 @@ const CAPABILITIES = [
   {
     icon: RefreshCw,
     title: "Cross-Pack Orchestration",
-    body: "A single Alloy action can span multiple packs. An Aegis incident can trigger a Terra diligence hold. A PRISM Counsel approval can gate a Vessels cargo clearance. Alloy orchestrates across the portfolio.",
+    body: "A single Alloy action can span multiple domain packs. An Aegis incident can trigger a Terra diligence hold. A PRISM Counsel approval can gate a Vessels cargo clearance. Alloy orchestrates across the platform.",
   },
   {
     icon: Zap,
@@ -141,7 +141,7 @@ const PIPELINE_STEPS = [
 ];
 
 const EXPANSION_LANES = [
-  { name: "Lyte", desc: "Cross-pack executive command surfaces signals into Alloy for governed portfolio-level action routing." },
+  { name: "Lyte", desc: "The governed command surface routes signals from all domain packs into Alloy for cross-domain governed action." },
   { name: "PRISM Counsel", desc: "Legal workflow approvals, settlement decisions, and compliance filings run through Alloy approval gates." },
   { name: "Terra", desc: "Acquisition decisions, diligence approvals, and LP-ready exports governed through Alloy action chains." },
   { name: "Vessels", desc: "Rerouting decisions, port notifications, and regulatory filings routed with human approval and full audit record." },
@@ -152,7 +152,7 @@ const EXPANSION_LANES = [
 export default function AlloyPage() {
   usePageMeta({
     title: "Alloy — Execution Fabric & Action Spine | SZL Holdings",
-    description: "Alloy is the execution fabric beneath every SZL Holdings product. Ingestion, normalization, evaluation, ranking, routing, workflow execution, audit preservation, explainability, and extensibility.",
+    description: "Alloy is the execution Primitive beneath every SZL Holdings domain pack. Governed workflow orchestration, Covenant Policy enforcement, Proof Chain recording, and Outcome Graph tracking — from signal ingestion to verified execution.",
     canonical: "https://szlholdings.com/platform/alloy",
   });
 
@@ -200,7 +200,7 @@ export default function AlloyPage() {
                     marginBottom: "0.875rem",
                   }}
                 >
-                  Alloy is the execution fabric beneath every SZL Holdings product. Every signal — from Lyte, from any pack, or from any integration — enters Alloy's operating loop: ingestion, normalization, evaluation, ranking, routing, governed execution, and structured audit preservation.
+                  Alloy is the execution Primitive beneath every SZL Holdings domain pack. Every signal — from Lyte, from any domain pack, or from any integration — enters Alloy's operating loop: ingestion, normalization, evaluation, ranking, routing, governed execution, and Proof Chain recording.
                 </p>
                 <p
                   style={{
@@ -211,7 +211,7 @@ export default function AlloyPage() {
                     marginBottom: "2.25rem",
                   }}
                 >
-                  Signal to confirmed action. No black boxes. No autonomous execution without approval. Full explainability at every stage.
+                  Signal to confirmed action, with Covenant Policy gating every consequential step and the Outcome Graph tracking what actually happened. No black boxes. No autonomous execution without approval.
                 </p>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
                   <Link href="/demo" className="szl-btn-primary">
@@ -257,7 +257,7 @@ export default function AlloyPage() {
                 The Operating Loop
               </p>
               <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "34ch", marginBottom: "1.25rem" }}>
-                Every signal follows the same governed path — from ingestion to audit record.
+                Every signal follows the same governed path — from ingestion to Proof Chain record.
               </h2>
               <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,58%)", maxWidth: "52ch", marginBottom: "2.5rem" }}>
                 No stage is skipped. No signal bypasses evaluation or routing. Human approval gates are structural — not configurable away. The loop is the same for a legal approval, a security remediation, and a maritime rerouting decision.
@@ -315,13 +315,13 @@ export default function AlloyPage() {
           <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
             <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
               <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-alloy-light)", marginBottom: "1rem" }}>
-                Alloy Across the Portfolio
+                Alloy Across the Platform
               </p>
               <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "30ch", marginBottom: "1.25rem" }}>
-                One execution fabric. Every pack inherits it.
+                One execution fabric. Every domain pack inherits it.
               </h2>
               <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,58%)", maxWidth: "52ch", marginBottom: "2.5rem" }}>
-                Alloy is not built once per pack. It is the shared execution infrastructure that every pack — and every new lane — inherits. When a new vertical joins the platform, it gets Alloy's full approval, audit, routing, and governance stack from day one.
+                Alloy is not built once per pack. It is the shared execution Primitive that every domain pack inherits. When a new domain pack joins the platform, it gets Alloy's full approval, audit, routing, and governance stack from day one.
               </p>
             </m.div>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
@@ -569,7 +569,7 @@ export default function AlloyPage() {
                   Ready to add execution accountability to your workflows?
                 </h2>
                 <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,62%)", maxWidth: "48ch" }}>
-                  Talk to us about applying Alloy to one critical workflow — with Lyte for portfolio observability and Alloy for governed, auditable execution.
+                  Talk to us about applying Alloy to one critical workflow — with Lyte for cross-domain signal observability and Alloy for governed, auditable execution.
                 </p>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", flexShrink: 0 }}>

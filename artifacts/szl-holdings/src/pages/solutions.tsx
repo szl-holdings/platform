@@ -35,11 +35,11 @@ const SOLUTIONS = [
     name: "Terra",
     slug: "terra",
     domain: "Real Estate Intelligence",
-    tagline: "Distress tracking, deal pipeline, and market signal — Lyte + Alloy applied to a data-rich, execution-poor industry that desperately needs a command layer.",
+    tagline: "Distress tracking, deal pipeline, and market signal — the governed decision system applied to a data-rich, execution-poor industry that desperately needs a Covenant Policy layer.",
     color: "var(--color-terra)",
     colorMuted: "var(--color-terra-muted)",
     border: "hsla(140,50%,38%,0.18)",
-    capabilities: ["Distress property detection", "Deal pipeline command", "Market signal monitoring", "Broker workflow routing", "Acquisition approval gates", "Portfolio risk dashboard"],
+    capabilities: ["Distress property detection", "Deal pipeline command", "Market signal monitoring", "Broker workflow routing", "Acquisition approval gates", "Proof Chain diligence record"],
     href: "/solutions/terra",
   },
   {
@@ -80,7 +80,7 @@ export default function SolutionsPage() {
           <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
             <m.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
               <span className="szl-badge" style={{ borderRadius: "9999px", marginBottom: "1.75rem", display: "inline-block" }}>
-                Domain Solutions
+                Domain Packs
               </span>
             </m.div>
             <m.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.05 }}>
@@ -94,12 +94,12 @@ export default function SolutionsPage() {
                   marginBottom: "1.5rem",
                 }}
               >
-                One operating platform. Four domain packs.
+                One governed decision system. Four domain packs.
               </h1>
               <p style={{ fontSize: "clamp(1rem,1.8vw,1.125rem)", lineHeight: 1.72, color: "hsl(214,7%,62%)", maxWidth: "52ch" }}>
-                Each vertical pack extends the same Lyte + Alloy core into the specific signal
-                vocabulary, decision models, and audit requirements of its domain. Not separate
-                products — the same platform with domain-specific intelligence on top.
+                Domain packs are governed extensions of the platform — not peer products. Each pack inherits
+                the same Primitives layer (Covenant Policy, Proof Chain, Outcome Graph) and adds the signal
+                vocabulary, decision models, and domain intelligence specific to its industry.
               </p>
             </m.div>
           </div>
@@ -185,8 +185,9 @@ export default function SolutionsPage() {
                 Don't see your domain?
               </h2>
               <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,62%)", marginBottom: "1.75rem" }}>
-                The Lyte + Alloy platform is designed to be adapted to any operating environment
-                with complex signals, consequential decisions, and auditability requirements.
+                The governed decision system is designed to extend to any operating environment
+                with complex signals, consequential decisions, and auditability requirements. A new domain pack
+                inherits Covenant Policy, Proof Chain, and Outcome Graph from day one.
                 Let's talk about yours.
               </p>
               <Link href="/contact" className="szl-btn-primary">

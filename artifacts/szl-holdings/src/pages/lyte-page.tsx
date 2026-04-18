@@ -87,7 +87,7 @@ const SIGNAL_STREAM: SignalItem[] = [
   { id: "s1", domain: "Aegis", severity: "critical", title: "KEV CVE-2025-1337 — active exploitation confirmed", detail: "3 systems in scope · analyst queue empty · SLA T-2h", age: "4m", status: "new", correlatedTo: "sit1" },
   { id: "s2", domain: "Vessels", severity: "high", title: "Dark vessel detected — AIS signal gap 6h+", detail: "MV Adriatic Star · Last position: Strait of Messina · OFAC check pending", age: "11m", status: "acknowledged", correlatedTo: "sit2" },
   { id: "s3", domain: "PRISM Counsel", severity: "high", title: "Motion deadline in 38 hours — no filing draft", detail: "Matter HC-2025-0487 · No owner assigned · LP approval outstanding", age: "22m", status: "new" },
-  { id: "s4", domain: "Terra", severity: "medium", title: "Distress signal threshold breached — 12 properties", detail: "NYC portfolio · Ownership graph query triggered · Diligence checklist 34% complete", age: "1h", status: "acknowledged" },
+  { id: "s4", domain: "Terra", severity: "medium", title: "Distress signal threshold breached — 12 properties", detail: "NYC distress pipeline · Ownership graph query triggered · Diligence checklist 34% complete", age: "1h", status: "acknowledged" },
   { id: "s5", domain: "Alloy", severity: "medium", title: "Approval queue depth: 14 pending > 72h", detail: "6 workflows stalled · 2 require exec review · Escalation paths unset", age: "2h", status: "acknowledged" },
   { id: "s6", domain: "Carlota Jo", severity: "info", title: "Engagement milestone 3 delivered — awaiting confirmation", detail: "Client: Archipelago Capital · Delivery package sent · Response SLA: 48h", age: "3h", status: "acknowledged" },
   { id: "s7", domain: "IMPERIUM", severity: "info", title: "Configuration drift detected — 2 cloud assets", detail: "AWS us-east-1 · Policy violation: unrestricted egress rule · Auto-tagged", age: "4h", status: "new" },
@@ -408,14 +408,14 @@ const SIT_PROOF_RECORDS: Record<string, ProofRecord> = {
       { id: "c3", event: "Proof record opened — R. Chen assigned", actor: "R. Chen", timestamp: "16 Apr 2026 07:22:41", hash: "sha256:f6a8b2c4d..." },
       { id: "c4", event: "LP review package dispatched", actor: "R. Chen", timestamp: "16 Apr 2026 07:45:00", hash: "sha256:a8b4c6d2e..." },
     ],
-    metadata: { "Signal ID": "SIG-20260416-004", "Portfolio": "NYC distress", "Properties flagged": "12", "Diligence completion": "34%" },
+    metadata: { "Signal ID": "SIG-20260416-004", "Asset Set": "NYC distress pipeline", "Properties flagged": "12", "Diligence completion": "34%" },
   },
 };
 
 export default function LytePage() {
   usePageMeta({
     title: "Lyte — Operational Nerve Center | SZL Holdings",
-    description: "Lyte is the unified operational nerve center for governed enterprise decisions. Persistent signal stream, situation board, decision theater, and governed action panel — all in one command surface.",
+    description: "Lyte is the governed command surface where the Governed Decision Loop plays out: Signal Ingestion, Risk Surface, Governed Decision with Covenant Policy, and Proof Chain recording — all in one persistent operator interface.",
     canonical: "https://szlholdings.com/lyte",
   });
 
