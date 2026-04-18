@@ -2,10 +2,13 @@ import { logger } from "./logger";
 import { JOB_TYPES } from "./job-queue";
 import { durableJobQueue } from "@szl-holdings/forge-runtime";
 import { serverTelemetry } from "@szl-holdings/observability";
-import { db, pool, platformJobRunsTable, notificationsTable, notificationPreferencesTable, usersTable } from "@szl-holdings/db";
+import { db, pool, platformJobRunsTable, notificationsTable, notificationPreferencesTable, notificationRecipientsTable, usersTable } from "@szl-holdings/db";
 import { eq, and, gte, sql } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { sendEmail, buildNotificationDigestEmail, buildTransactionalNotificationEmail } from "./email";
+import { TwilioAdapter } from "@szl-holdings/services";
+
+const twilioAdapter = new TwilioAdapter();
 
 export const PLATFORM_JOB_TYPES = {
   LYTE_DIGEST: "lyte_digest",
@@ -781,6 +784,52 @@ durableJobQueue.register(PLATFORM_JOB_TYPES.NOTIFICATION_DISPATCH, async (job) =
           "[notification-dispatch] Email delivery failed — provider rejected",
         );
         throw new Error(`Email delivery failed: ${result.error}`);
+      }
+    }
+  } else if (payload.channel === "sms") {
+    // Look up active SMS-enabled phone numbers for this user
+    const recipients = await db
+      .select({ phoneNumber: notificationRecipientsTable.phoneNumber })
+      .from(notificationRecipientsTable)
+      .where(and(
+        eq(notificationRecipientsTable.userId, payload.userId),
+        eq(notificationRecipientsTable.isActive, true),
+        eq(notificationRecipientsTable.smsEnabled, true),
+      ));
+
+    if (recipients.length === 0) {
+      logger.info(
+        { notificationId: payload.notificationId, userId: payload.userId },
+        "[notification-dispatch] SMS skipped — no active SMS-enabled phone numbers for user",
+      );
+    } else {
+      // Twilio max single SMS body ~1600 chars; keep concise
+      const smsBody = `${payload.title}\n${payload.message}`.slice(0, 1500);
+      const results = await Promise.allSettled(
+        recipients.map((r) => twilioAdapter.sendSMS(r.phoneNumber, smsBody)),
+      );
+
+      let sent = 0;
+      let failed = 0;
+      const errors: string[] = [];
+      for (const r of results) {
+        if (r.status === "fulfilled" && r.value.sent) {
+          sent++;
+        } else {
+          failed++;
+          if (r.status === "rejected") errors.push(String(r.reason?.message ?? r.reason));
+        }
+      }
+
+      logger.info(
+        { channel: payload.channel, notificationId: payload.notificationId, userId: payload.userId, sent, failed, total: recipients.length },
+        "[notification-dispatch] SMS dispatch complete",
+      );
+
+      // If every recipient failed, throw so the durable queue retries the whole job.
+      // Partial success is treated as success (delivered to at least one).
+      if (sent === 0 && failed > 0) {
+        throw new Error(`SMS delivery failed for all ${failed} recipient(s): ${errors.join("; ")}`);
       }
     }
   }
