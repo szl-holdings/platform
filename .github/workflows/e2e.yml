@@ -61,6 +61,14 @@ jobs:
             dist: artifacts/command/dist/public
             port: 3005
             spec: command.spec.ts
+          # The governed-decision-loop spec targets the same command build
+          # but is kept as a separate matrix entry so it can fail independently
+          # and is easy to identify in CI run summaries.
+          - app: governed-decision-loop
+            filter: "@workspace/command"
+            dist: artifacts/command/dist/public
+            port: 3005
+            spec: governed-decision-loop.spec.ts
           # Specs excluded from this matrix (no standalone CI build artifact):
           #   - imperium.spec.ts  → IMPERIUM has no registered CI artifact; spec self-skips
           #   - lyte.spec.ts      → Lyte is embedded in SZL Holdings routes; spec self-skips

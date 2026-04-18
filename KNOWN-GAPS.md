@@ -39,13 +39,13 @@ Risk exposure, compliance posture, diligence readiness.
 | GAP-001 | Firebase & Google credentials require manual rotation | High | ⚠️ Open |
 | KG011 | No CodeQL SAST in CI pipeline | P1 | ✅ Resolved Apr-2026 |
 | KG012 | No automated dependency vulnerability review in CI | P1 | ✅ Resolved Apr-2026 |
-| KG010 | No automated E2E / integration test suite | P1 | ⚠️ Open — Sprint 3–4 |
+| KG010 | No automated E2E / integration test suite | P1 | ✅ Resolved Apr-2026 |
 | GAP-002 | No CI/CD automated secret scanning | Med | ✅ Resolved Apr-2026 |
 | GAP-003 | Android keystore not managed by EAS | Med | ✅ Resolved Apr-2026 |
 | VD1 | No responsible disclosure policy / `security.txt` | P2 | ⚠️ Open — Sprint 4 |
 | KG025 | WCAG accessibility not systematically audited | P2 | ⚠️ Open — Sprint 4 |
 
-**Diligence verdict:** All P0 security gaps identified in the pre-sprint audit are resolved. KG011 (CodeQL SAST), KG012 (dependency review), and GAP-002 (secret scanning) are now resolved — CI security gates are live. Remaining open items (P1–P2, High) are scoped, have remediation owners, and do not represent critical blockers for Series A close. The highest remaining enterprise risk is the absence of an automated E2E regression suite (KG010).
+**Diligence verdict:** All P0 security gaps identified in the pre-sprint audit are resolved. KG011 (CodeQL SAST), KG012 (dependency review), GAP-002 (secret scanning), and KG010 (E2E regression suite) are now resolved — CI security and quality gates are live. Remaining open items (P1–P2, High) are scoped, have remediation owners, and do not represent critical blockers for Series A close.
 
 ---
 
@@ -55,7 +55,7 @@ Operational gaps, process health, test coverage, observability, team ownership.
 | Gap ID | Description | Severity | Status |
 |--------|-------------|----------|--------|
 | KG009 | OpenTelemetry exporter not configured for production | P1 | ⚠️ Open — pre-deploy |
-| KG010 | No automated E2E / integration test suite | P1 | ⚠️ Open — Sprint 3–4 |
+| KG010 | No automated E2E / integration test suite | P1 | ✅ Resolved Apr-2026 |
 | KG011 | CodeQL SAST not configured in CI | P1 | ✅ Resolved Apr-2026 |
 | KG012 | Dependency review not in CI | P1 | ✅ Resolved Apr-2026 |
 | KG013 | No `CODEOWNERS` file | P1 | ✅ Resolved Apr-2026 |
@@ -65,7 +65,7 @@ Operational gaps, process health, test coverage, observability, team ownership.
 | KG023 | SLI/SLO definitions absent | P2 | ⚠️ Open — Sprint 4 |
 | KG024 | Large vendor bundle sizes on all web apps (1–1.7 MB) | P2 | ⚠️ Open — Sprint 4 |
 
-**VP Engineering verdict:** Core security hardening is complete. CI security gates (KG011/KG012) and code ownership (KG013) are now resolved. Highest-priority operational work for the new VP is: (1) wire OTEL exporter before first prod deploy (KG009), (2) build E2E regression suite (KG010), (3) define SLI/SLOs (KG023).
+**VP Engineering verdict:** Core security hardening is complete. CI security gates (KG011/KG012), code ownership (KG013), and E2E regression suite (KG010) are now resolved. Highest-priority operational work for the new VP is: (1) wire OTEL exporter before first prod deploy (KG009), (2) define SLI/SLOs (KG023).
 
 ---
 
@@ -94,7 +94,7 @@ Operational gaps, process health, test coverage, observability, team ownership.
 | ID | Gap | Area | Impact | Mitigation Plan | Owner |
 |----|-----|------|--------|-----------------|-------|
 | KG009 | OTEL exporter not configured for prod | Observability | No prod tracing | Configure OTLP endpoint before deploy | Platform |
-| KG010 | No automated E2E test suite | Quality | Regression risk | Build Playwright suite for critical flows | Engineering |
+| KG010 | No automated E2E test suite | Quality | Regression risk | ✅ Resolved Apr-2026. Playwright suite built for flagship governed decision loop — 14 test suites covering all nine steps (Signal → Outcome), navigation, and a full walk-through regression guard. CI matrix entry added for every PR. `tests/e2e/governed-decision-loop.spec.ts`. | Engineering |
 | KG011 | CodeQL SAST not in CI | Security / CI | SAST coverage gap | ✅ Resolved Apr-2026. `.github/workflows/codeql.yml` scans JS/TS on every PR and weekly schedule. | DevOps |
 | KG012 | Dependency review not in CI | Supply Chain | Vulnerable deps risk | ✅ Resolved Apr-2026. `.github/workflows/dependency-review.yml` blocks PRs introducing high/critical CVEs. | DevOps |
 | KG013 | No `CODEOWNERS` file | Process | No review ownership | ✅ Resolved Apr-2026. `CODEOWNERS` created mapping all artifacts and route directories to owning teams. | Eng Lead |
@@ -183,11 +183,11 @@ Operational gaps, process health, test coverage, observability, team ownership.
 | Severity | Total | Resolved | Open |
 |----------|-------|----------|------|
 | P0 — Critical / High | 11 | 10 | 1 |
-| P1 — High | 14 | 3 | 11 |
+| P1 — High | 14 | 4 | 10 |
 | P2 — Medium / Low | 30 | 9 | 21 |
 | Flow Audit Gaps (Phase 4–5) | 4 | 0 | 4 |
 | Test Quality Gaps (Phase 4–5) | 8 | 2 | 6 |
-| **Total** | **72** | **25** | **47** |
+| **Total** | **72** | **26** | **46** |
 
 > **April 2026 Phase 0–1 audit note:** Full operational audit (Phases 0–1) completed. Deliverables produced: FULL_SYSTEM_INVENTORY.md, AUDIT_FINDINGS_REGISTER.md, OUT_OF_SCOPE_REGISTER.md, ENVIRONMENT_VARIABLES.md, updated .env.example. KG018 (env var schema) resolved by ENVIRONMENT_VARIABLES.md. GAP-004 (.env.example) resolved by comprehensive update. KG029 (alloy-integrations test stub) newly cataloged. TD-004 remains re-opened. No new P0/P1 security findings discovered. No hardcoded credentials found in source. All GitHub Actions workflows remain SHA-pinned. Net P2 change: +2 gaps added, +2 resolved. See LAUNCH_BLOCKERS.md for the full pre-launch blocker register.
 >
