@@ -89,6 +89,7 @@ Run via: `pnpm test:e2e` (full) or per-spec in CI `e2e.yml`
 | `command.spec.ts` | Unified Command | `@workspace/command` | 3005 |
 | `governed-decision-loop.spec.ts` | Governed Decision Loop (within Command at `/operations/governed-decision-loop`) | `@workspace/command` | 3005 |
 | `imperium.spec.ts` | IMPERIUM Infrastructure Map (within Command at `/infrastructure/imperium-map`) | `@workspace/command` | 3005 |
+| `auth.spec.ts` | SZL Holdings (session-level auth flow) | `@workspace/szl-holdings` | 3000 |
 | `a11y.spec.ts` | SZL Holdings (accessibility) | `@workspace/szl-holdings` | 3000 |
 
 ### 4b. Explicitly Excluded from CI E2E Matrix
@@ -141,7 +142,6 @@ Previously excluded specs that have since been promoted to the CI matrix:
 
 | Gap | Severity | Notes |
 |-----|---------|-------|
-| No auth E2E flow test (login/logout cycle) | Sev 1 | Auth is tested at unit/middleware level; no Playwright session flow |
 | No mutation API E2E coverage for Forge, PRISM | Sev 2 | POST/mutation paths rely on unit + integration tests only |
 | No mobile E2E coverage (CORTEX) | Sev 2 | Expo app; Playwright cannot target RN; manual + unit coverage only |
 | No cross-browser E2E (only Chromium in CI) | Sev 3 | Firefox/WebKit excluded for CI speed |
