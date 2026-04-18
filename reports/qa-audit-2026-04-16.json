@@ -15,8 +15,8 @@
     "e2eVerifiedApps": {
       "szl-holdings": "31/35 pass (4 skip: API health ×2, protected route, nexus nav — nexus app not running). 0 failed.",
       "forge": "17/18 pass (1 skip: Forge Runtime API — no API_BASE_URL). 0 failed.",
-      "vessels": "Task #863 spot-validated — 3/3 sampled smoke tests pass (load, title, main content). Trailing-slash fix to *_BASE_PATH resolved silent SPA-shell-only renders. 11 tests total in spec.",
-      "command": "Task #863 spot-validated — 2/2 sampled smoke tests pass (title, main content). Same trailing-slash fix applied. 11 tests total in spec.",
+      "vessels": "Task #863 spot-validated — 5/5 sampled tests pass (smoke load/title/main, home route, fleet map route). URL-construction fixes (bare-base goto + empty home path) resolved silent SPA-shell-only renders. 11 tests total in spec.",
+      "command": "Task #863 spot-validated — 2/2 sampled smoke tests pass (title, main content). Same URL-construction fixes applied. 11 tests total in spec.",
       "a11y": "3/8 pass, 5 FAILED — color-contrast WCAG 2 AA violations (serious) on all 5 public routes"
     },
     "e2eGuardedSkipApps": {
@@ -29,7 +29,7 @@
       "lyte": "ALL SKIP — no standalone artifact",
       "imperium": "ALL SKIP — no artifact"
     },
-    "e2eNote": "Task #863 update: confirmed E2E spec coverage already exists for all 5 target apps (aegis, vessels, terra, carlota-jo, command) with smoke/route/mobile-viewport blocks and availability guards. Identified and fixed a real defect across all 5 specs: the *_BASE_PATH constants lacked a trailing slash, so playwright navigated to e.g. `/vessels` and the proxy returned a 103-byte vite redirect HTML instead of the SPA shell. Added trailing slash, re-ran vessels (3/3) and command (2/2) sampled smoke tests — all pass. Aegis/terra/carlota-jo specs are blocked from running by the same restart_workflow port-binding timeout that has persisted since Task #767 (now tracked as follow-up #1751). Once those workflows can stay up, all three specs will validate without further code changes.",
+    "e2eNote": "Task #863 update: confirmed E2E spec coverage already exists for all 5 target apps (aegis, vessels, terra, carlota-jo, command) with smoke/route/mobile-viewport blocks and availability guards. Identified and fixed two related defects: (a) bare `goto(VESSELS_PATH)` calls hit `/vessels` (no trailing slash) and Vite returned a 103-byte 'did you mean /vessels/?' error page; (b) the route smoke tables used `{ path: '', label: 'home' }` which produced the same bare URL when concatenated. Fix: kept BASE_PATH without trailing slash (so `${BASE}${route.path}` gives clean single-slash URLs for non-home routes), changed bare `goto(BASE)` to `goto(\\`${BASE}/\\`)`, and changed empty home paths to '/'. Re-ran vessels smoke + route tests (5/5 sampled passed) and command smoke (2/2 passed). Aegis/terra/carlota-jo specs are blocked from running by the restart_workflow port-binding timeout that has persisted since Task #767 (tracked as follow-up #1751). Once those workflows can stay up, all three specs will validate without further code changes.",
     "overallStatus": "AMBER",
     "amberReason": "API and component tests: fully GREEN. E2E: szl-holdings, forge, vessels, command specs verified. a11y: 5 serious color-contrast violations in SZL Holdings public routes (tracked in OPEN-006). 3 app workflows (aegis, terra, carlota-jo) still cannot start — restart_workflow port-binding timeout (tracked in follow-up #1751); their specs are ready and skip cleanly via availability guard. firestorm/prism-counsel/stephen-site are intentionally archived (Task #862)."
   },

@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-const COMMAND_PATH = process.env.COMMAND_BASE_PATH ?? "/command/";
+const COMMAND_PATH = process.env.COMMAND_BASE_PATH ?? "/command";
 
 let appAvailable = true;
 test.beforeAll(async ({ browser }) => {
@@ -19,7 +19,7 @@ test.beforeEach(async ({}, testInfo) => {
 
 test.describe("Ecosystem Command Portal — Smoke Tests", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(COMMAND_PATH);
+    await page.goto(`${COMMAND_PATH}/`);
   });
 
   test("loads Command Portal without fatal errors", async ({ page }) => {
@@ -49,7 +49,7 @@ test.describe("Ecosystem Command Portal — Smoke Tests", () => {
 
 test.describe("Ecosystem Command Portal — Dashboard Content", () => {
   test("ecosystem pulse or composite score is visible", async ({ page }) => {
-    await page.goto(COMMAND_PATH);
+    await page.goto(`${COMMAND_PATH}/`);
     await page.waitForLoadState("networkidle", { timeout: 20000 }).catch(() => null);
 
     const errorBoundary = page.locator("text=Something went wrong").first();
@@ -65,7 +65,7 @@ test.describe("Ecosystem Command Portal — Dashboard Content", () => {
   });
 
   test("domain grid or portfolio cards are visible", async ({ page }) => {
-    await page.goto(COMMAND_PATH);
+    await page.goto(`${COMMAND_PATH}/`);
     await page.waitForLoadState("networkidle", { timeout: 20000 }).catch(() => null);
 
     const errorBoundary = page.locator("text=Something went wrong").first();
@@ -81,7 +81,7 @@ test.describe("Ecosystem Command Portal — Dashboard Content", () => {
   });
 
   test("ecosystem navigation links are present", async ({ page }) => {
-    await page.goto(COMMAND_PATH);
+    await page.goto(`${COMMAND_PATH}/`);
     await page.waitForLoadState("networkidle", { timeout: 20000 }).catch(() => null);
 
     const errorBoundary = page.locator("text=Something went wrong").first();
@@ -94,7 +94,7 @@ test.describe("Ecosystem Command Portal — Dashboard Content", () => {
   });
 
   test("dashboard shows intelligence panel or command actions", async ({ page }) => {
-    await page.goto(COMMAND_PATH);
+    await page.goto(`${COMMAND_PATH}/`);
     await page.waitForLoadState("networkidle", { timeout: 20000 }).catch(() => null);
 
     const errorBoundary = page.locator("text=Something went wrong").first();
@@ -110,7 +110,7 @@ test.describe("Ecosystem Command Portal — Dashboard Content", () => {
   });
 
   test("cross-domain navigation links to known portals", async ({ page }) => {
-    await page.goto(COMMAND_PATH);
+    await page.goto(`${COMMAND_PATH}/`);
     await page.waitForLoadState("networkidle", { timeout: 20000 }).catch(() => null);
 
     const errorBoundary = page.locator("text=Something went wrong").first();
@@ -133,7 +133,7 @@ test.describe("Ecosystem Command Portal — Mobile Viewport", () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
   test("dashboard renders correctly on mobile without crash", async ({ page }) => {
-    await page.goto(COMMAND_PATH);
+    await page.goto(`${COMMAND_PATH}/`);
     await page.waitForLoadState("networkidle", { timeout: 20000 }).catch(() => null);
     const body = page.locator("body");
     await expect(body).toBeVisible();
@@ -143,7 +143,7 @@ test.describe("Ecosystem Command Portal — Mobile Viewport", () => {
   });
 
   test("ecosystem content is visible on mobile viewport", async ({ page }) => {
-    await page.goto(COMMAND_PATH);
+    await page.goto(`${COMMAND_PATH}/`);
     await page.waitForLoadState("networkidle", { timeout: 20000 }).catch(() => null);
     const errorBoundary = page.locator("text=Something went wrong").first();
     const hasError = await errorBoundary.isVisible().catch(() => false);

@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-const AEGIS_PATH = process.env.AEGIS_BASE_PATH ?? "/aegis/";
+const AEGIS_PATH = process.env.AEGIS_BASE_PATH ?? "/aegis";
 
 let appAvailable = true;
 test.beforeAll(async ({ browser }) => {
@@ -19,7 +19,7 @@ test.beforeEach(async ({}, testInfo) => {
 
 test.describe("Aegis — Smoke Tests", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(AEGIS_PATH);
+    await page.goto(`${AEGIS_PATH}/`);
   });
 
   test("loads the Aegis app without fatal errors", async ({ page }) => {
@@ -55,7 +55,7 @@ test.describe("Aegis — Smoke Tests", () => {
 
 test.describe("Aegis — Route Smoke Tests", () => {
   const routes = [
-    { path: "", label: "home" },
+    { path: "/", label: "home" },
     { path: "/incidents", label: "incidents" },
     { path: "/alerts", label: "alerts" },
     { path: "/cases", label: "cases" },
@@ -87,7 +87,7 @@ test.describe("Aegis — Route Smoke Tests", () => {
 
 test.describe("Aegis — User Journey: View Queue → Open Incident → Navigate to Findings", () => {
   test("user opens incidents page and Incident Response heading is visible", async ({ page }) => {
-    await page.goto(AEGIS_PATH);
+    await page.goto(`${AEGIS_PATH}/`);
     await page.waitForLoadState("networkidle", { timeout: 20000 }).catch(() => null);
 
     const nav = page.locator("nav, aside, [role='navigation']").first();
@@ -165,7 +165,7 @@ test.describe("Aegis — Mobile Viewport", () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
   test("SOC home renders on mobile without crash", async ({ page }) => {
-    await page.goto(AEGIS_PATH);
+    await page.goto(`${AEGIS_PATH}/`);
     await page.waitForLoadState("networkidle", { timeout: 20000 }).catch(() => null);
     const body = page.locator("body");
     await expect(body).toBeVisible();

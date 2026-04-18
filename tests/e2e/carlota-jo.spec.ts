@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
-const CARLOTA_PATH = process.env.CARLOTA_BASE_PATH ?? "/carlota-jo/";
+const CARLOTA_PATH = process.env.CARLOTA_BASE_PATH ?? "/carlota-jo";
 
 let appAvailable = true;
 test.beforeAll(async ({ browser }) => {
@@ -20,7 +20,7 @@ test.beforeEach(async ({}, testInfo) => {
 
 test.describe("Carlota Jo — Smoke Tests", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(CARLOTA_PATH);
+    await page.goto(`${CARLOTA_PATH}/`);
   });
 
   test("loads Carlota Jo app without fatal errors", async ({ page }) => {
@@ -57,7 +57,7 @@ test.describe("Carlota Jo — Smoke Tests", () => {
 
 test.describe("Carlota Jo — Route Smoke Tests", () => {
   const routes = [
-    { path: "", label: "home" },
+    { path: "/", label: "home" },
     { path: "/about", label: "about" },
     { path: "/approach", label: "approach" },
     { path: "/booking", label: "booking" },
@@ -86,7 +86,7 @@ test.describe("Carlota Jo — Route Smoke Tests", () => {
 
 test.describe("Carlota Jo — User Journey: Browse Services → Start Booking → View Contact", () => {
   test("user navigates to booking via nav and Practice Area step 1 is visible", async ({ page }) => {
-    await page.goto(CARLOTA_PATH);
+    await page.goto(`${CARLOTA_PATH}/`);
     await page.waitForLoadState("networkidle", { timeout: 20000 }).catch(() => null);
 
     const nav = page.locator("nav").first();
@@ -163,7 +163,7 @@ test.describe("Carlota Jo — Mobile Viewport", () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
   test("homepage renders correctly on mobile", async ({ page }) => {
-    await page.goto(CARLOTA_PATH);
+    await page.goto(`${CARLOTA_PATH}/`);
     await page.waitForLoadState("networkidle", { timeout: 20000 }).catch(() => null);
     const body = page.locator("body");
     await expect(body).toBeVisible();

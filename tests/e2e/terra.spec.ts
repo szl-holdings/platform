@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-const TERRA_PATH = process.env.TERRA_BASE_PATH ?? "/terra/";
+const TERRA_PATH = process.env.TERRA_BASE_PATH ?? "/terra";
 
 let appAvailable = true;
 test.beforeAll(async ({ browser }) => {
@@ -19,7 +19,7 @@ test.beforeEach(async ({}, testInfo) => {
 
 test.describe("Terra — Smoke Tests", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(TERRA_PATH);
+    await page.goto(`${TERRA_PATH}/`);
   });
 
   test("loads Terra app successfully", async ({ page }) => {
@@ -56,7 +56,7 @@ test.describe("Terra — Smoke Tests", () => {
 
 test.describe("Terra — Route Smoke Tests", () => {
   const routes = [
-    { path: "", label: "home" },
+    { path: "/", label: "home" },
     { path: "/dashboard", label: "dashboard" },
     { path: "/deals", label: "deals" },
     { path: "/documents", label: "documents" },
@@ -87,7 +87,7 @@ test.describe("Terra — Route Smoke Tests", () => {
 
 test.describe("Terra — User Journey: Browse Portfolio → View Asset → Create Action", () => {
   test("user navigates from dashboard to deals via nav and Deal Pipeline heading is visible", async ({ page }) => {
-    await page.goto(TERRA_PATH);
+    await page.goto(`${TERRA_PATH}/`);
     await page.waitForLoadState("networkidle", { timeout: 20000 }).catch(() => null);
 
     const nav = page.locator("nav, aside, [role='navigation']").first();
@@ -164,7 +164,7 @@ test.describe("Terra — Mobile Viewport", () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
   test("homepage renders correctly on mobile", async ({ page }) => {
-    await page.goto(TERRA_PATH);
+    await page.goto(`${TERRA_PATH}/`);
     await page.waitForLoadState("networkidle", { timeout: 20000 }).catch(() => null);
     const body = page.locator("body");
     await expect(body).toBeVisible();

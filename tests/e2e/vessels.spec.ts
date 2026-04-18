@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-const VESSELS_PATH = process.env.VESSELS_BASE_PATH ?? "/vessels/";
+const VESSELS_PATH = process.env.VESSELS_BASE_PATH ?? "/vessels";
 
 let appAvailable = true;
 test.beforeAll(async ({ browser }) => {
@@ -19,7 +19,7 @@ test.beforeEach(async ({}, testInfo) => {
 
 test.describe("Vessels — Smoke Tests", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(VESSELS_PATH);
+    await page.goto(`${VESSELS_PATH}/`);
   });
 
   test("loads Vessels app without fatal errors", async ({ page }) => {
@@ -55,7 +55,7 @@ test.describe("Vessels — Smoke Tests", () => {
 
 test.describe("Vessels — Route Smoke Tests", () => {
   const routes = [
-    { path: "", label: "home" },
+    { path: "/", label: "home" },
     { path: "/fleet-dashboard", label: "fleet dashboard" },
     { path: "/fleet-map", label: "fleet map" },
     { path: "/exceptions-center", label: "exceptions center" },
@@ -85,7 +85,7 @@ test.describe("Vessels — Route Smoke Tests", () => {
 
 test.describe("Vessels — User Journey: View Fleet → Open Exception → Review Alert", () => {
   test("user navigates to fleet dashboard via nav and Fleet Command KPI is visible", async ({ page }) => {
-    await page.goto(VESSELS_PATH);
+    await page.goto(`${VESSELS_PATH}/`);
     await page.waitForLoadState("networkidle", { timeout: 20000 }).catch(() => null);
 
     const nav = page.locator("nav, aside, [role='navigation']").first();
@@ -157,7 +157,7 @@ test.describe("Vessels — Mobile Viewport", () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
   test("home renders on mobile without crash", async ({ page }) => {
-    await page.goto(VESSELS_PATH);
+    await page.goto(`${VESSELS_PATH}/`);
     await page.waitForLoadState("networkidle", { timeout: 20000 }).catch(() => null);
     const body = page.locator("body");
     await expect(body).toBeVisible();
