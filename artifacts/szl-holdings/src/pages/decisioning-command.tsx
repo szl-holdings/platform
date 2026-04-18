@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
@@ -22,6 +22,8 @@ import {
   History,
   ChevronLeft,
   Filter,
+  Radio,
+  Database,
 } from "lucide-react";
 
 interface StoredRun {
@@ -684,6 +686,8 @@ function RunHistoryPanel({
   );
 }
 
+const AUTO_REFRESH_INTERVAL_MS = 90_000;
+
 export default function DecisioningCommandPage() {
   usePageMeta({
     title: "Decisioning Command — Lyte",
@@ -695,11 +699,14 @@ export default function DecisioningCommandPage() {
   const [loading, setLoading] = useState(false);
   const [executionResult, setExecutionResult] = useState<ExecutionResult | null>(null);
   const [lastEvaluated, setLastEvaluated] = useState<number | null>(null);
+  const [dataSource, setDataSource] = useState<"live" | "fallback" | null>(null);
+  const [signalDomains, setSignalDomains] = useState<string[]>([]);
   const [stats, setStats] = useState<{
     decisionEngine?: { version: string };
     policyEngine?: { registeredPolicies: number; activePolicies: number };
     actionEngine?: { registeredWorkflows: number; total: number };
   } | null>(null);
+  const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [historyRuns, setHistoryRuns] = useState<StoredRun[]>([]);
   const [historyTotal, setHistoryTotal] = useState(0);
@@ -712,23 +719,48 @@ export default function DecisioningCommandPage() {
   const evaluate = useCallback(async () => {
     setLoading(true);
     try {
+      let signalGroups = DEMO_SIGNAL_GROUPS;
+      let source: "live" | "fallback" = "fallback";
+      let domains: string[] = [];
+
+      try {
+        const signalsResp = await fetch(`${getApiBase()}/decisioning/signals`, {
+          credentials: "include",
+        });
+        if (signalsResp.ok) {
+          const signalsData = await signalsResp.json();
+          const fetchedGroups = signalsData.data?.groups ?? signalsData.groups ?? [];
+          if (fetchedGroups.length > 0) {
+            signalGroups = fetchedGroups;
+            source = signalsData.data?.source ?? signalsData.source ?? "fallback";
+            domains = signalsData.data?.domains ?? signalsData.domains ?? [];
+          }
+        }
+      } catch {
+        source = "fallback";
+      }
+
       const resp = await fetch(`${getApiBase()}/decisioning/evaluate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ groups: DEMO_SIGNAL_GROUPS }),
+        body: JSON.stringify({ groups: signalGroups }),
         credentials: "include",
       });
 
       if (resp.ok) {
         const data = await resp.json();
         setRecommendations(data.data?.recommendations ?? data.recommendations ?? []);
+        setDataSource(source);
+        setSignalDomains(domains);
         setLastEvaluated(Date.now());
       } else {
         setRecommendations(buildDemoRecs());
+        setDataSource("fallback");
         setLastEvaluated(Date.now());
       }
     } catch {
       setRecommendations(buildDemoRecs());
+      setDataSource("fallback");
       setLastEvaluated(Date.now());
     } finally {
       setLoading(false);
@@ -782,6 +814,15 @@ export default function DecisioningCommandPage() {
       fetchHistory(historyPage, historyStatusFilter, historyDomainFilter);
     }
   }, [activeTab, historyPage, historyStatusFilter, historyDomainFilter, fetchHistory]);
+
+  useEffect(() => {
+    refreshTimerRef.current = setInterval(() => {
+      evaluate();
+    }, AUTO_REFRESH_INTERVAL_MS);
+    return () => {
+      if (refreshTimerRef.current) clearInterval(refreshTimerRef.current);
+    };
+  }, [evaluate]);
 
   const handleExecute = async (recId: string) => {
     const rec = recommendations.find(r => r.id === recId);
@@ -959,6 +1000,35 @@ export default function DecisioningCommandPage() {
             </div>
           </div>
         )}
+
+        <div className="flex items-center justify-between mb-5">
+          <div>
+            <div className="flex items-center gap-2 mb-0.5">
+              <h2 className="text-base font-semibold text-white">Active Recommendations</h2>
+              {dataSource === "live" && (
+                <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-medium">
+                  <Radio className="w-3 h-3" />
+                  Live Feed
+                </span>
+              )}
+              {dataSource === "fallback" && (
+                <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-slate-700/50 border border-slate-600/50 text-slate-400 font-medium">
+                  <Database className="w-3 h-3" />
+                  Demo Mode
+                </span>
+              )}
+            </div>
+            {lastEvaluated && (
+              <p className="text-xs text-slate-500 mt-0.5">
+                Evaluated {new Date(lastEvaluated).toLocaleTimeString()} · {recommendations.length} ranked recommendations
+                {dataSource === "live" && signalDomains.length > 0 && (
+                  <span className="ml-1">· signals from {signalDomains.join(", ")}</span>
+                )}
+                {dataSource === "live" && <span className="ml-1">· auto-refreshes every 90s</span>}
+              </p>
+            )}
+          </div>
+        </div>
 
         <div className="flex items-center gap-1 mb-6 border-b border-slate-800">
           <button
