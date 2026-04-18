@@ -9,7 +9,7 @@ import { PROXY_ROUTES } from "../../packages/proxy-routes.js";
 
 process.env.GOMAXPROCS = process.env.GOMAXPROCS ?? "2";
 
-const vitePort = Number(process.env.VITE_PORT) || 3102;
+const vitePort = Number(process.env.VITE_PORT) || 5000;
 const basePath = process.env.BASE_PATH || "/command/";
 
 // Shared proxy port — hardcoded; do not use a PROXY_PORT env var to override this.
@@ -133,7 +133,7 @@ export default defineConfig({
   server: {
     port: vitePort,
     strictPort: true,
-    host: "0.0.0.0",
+    host: "::",
     allowedHosts: true,
     hmr: { clientPort: 443, path: basePath },
     fs: {
