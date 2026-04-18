@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { m } from "framer-motion";
 import { Link } from "wouter";
-import { ShieldCheck, Lock, Brain, Download, Settings, CheckSquare, ArrowRight, Layers, Database, Eye, Briefcase, Code2, UserCheck, BarChart2 } from "lucide-react";
+import { ShieldCheck, Lock, Brain, Download, Settings, CheckSquare, ArrowRight, Layers, Database, Eye, Briefcase, Code2, UserCheck, BarChart2, Github, Calendar, Key, FileOutput, GitBranch, ExternalLink } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
@@ -352,6 +352,304 @@ export default function TrustPage() {
                 );
               })}
             </div>
+          </div>
+        </section>
+
+        {/* Encryption Standards */}
+        <section style={{ padding: "var(--space-section-md) 0", borderBottom: "1px solid var(--color-szl-border)" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", marginBottom: "1rem" }}>Encryption & data protection</p>
+              <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "32ch", marginBottom: "0.75rem" }}>
+                Concrete standards, not vague promises.
+              </h2>
+              <p style={{ fontSize: "0.9375rem", lineHeight: 1.68, color: "hsl(214,7%,58%)", maxWidth: "52ch", marginBottom: "3rem" }}>
+                Every data path in the platform has a defined encryption standard. No implicit defaults.
+              </p>
+            </m.div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "1rem" }}>
+              {[
+                {
+                  icon: Lock,
+                  label: "Data in Transit",
+                  standard: "TLS 1.3",
+                  detail: "Enforced on all public-facing surfaces, API endpoints, WebSocket connections, and inter-service calls. No downgrade to TLS 1.2 in production.",
+                  color: "hsl(145,62%,46%)",
+                  colorMuted: "hsla(145,62%,40%,0.07)",
+                  colorBorder: "hsla(145,62%,40%,0.20)",
+                },
+                {
+                  icon: Database,
+                  label: "Data at Rest",
+                  standard: "AES-256-GCM",
+                  detail: "PostgreSQL encryption at rest (managed deployment). Sensitive fields encrypted at the application layer before storage. No plaintext PII in logs.",
+                  color: "hsl(210,80%,60%)",
+                  colorMuted: "hsla(210,80%,60%,0.07)",
+                  colorBorder: "hsla(210,80%,60%,0.20)",
+                },
+                {
+                  icon: Key,
+                  label: "Credential Management",
+                  standard: "Env-injected secrets",
+                  detail: "All secrets managed as environment variables. No credentials in source control, logs, or build artifacts. Azure Key Vault for production secret management.",
+                  color: "hsl(40,90%,54%)",
+                  colorMuted: "hsla(40,90%,54%,0.07)",
+                  colorBorder: "hsla(40,90%,54%,0.22)",
+                },
+                {
+                  icon: GitBranch,
+                  label: "Integrity & Audit",
+                  standard: "SHA-256 hashing",
+                  detail: "Every decision receipt, exported document, and audit log entry carries a SHA-256 content hash. Immutable append-only audit trail across all platform actions.",
+                  color: "hsl(258,55%,68%)",
+                  colorMuted: "hsla(258,55%,68%,0.07)",
+                  colorBorder: "hsla(258,55%,68%,0.20)",
+                },
+              ].map((item, i) => {
+                const Icon = item.icon;
+                return (
+                  <m.div
+                    key={item.label}
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.38, delay: i * 0.07 }}
+                    className="szl-card"
+                    style={{ borderRadius: "0.875rem", padding: "1.5rem" }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "1rem" }}>
+                      <div style={{ width: "32px", height: "32px", display: "flex", alignItems: "center", justifyContent: "center", background: item.colorMuted, border: `1px solid ${item.colorBorder}`, borderRadius: "0.375rem", flexShrink: 0 }}>
+                        <Icon size={15} color={item.color} />
+                      </div>
+                      <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: item.color }}>{item.label}</span>
+                    </div>
+                    <div style={{ fontFamily: "var(--font-mono)", fontSize: "1rem", fontWeight: 700, color: "hsl(38,8%,88%)", marginBottom: "0.5rem", letterSpacing: "-0.01em" }}>{item.standard}</div>
+                    <p style={{ fontSize: "0.8125rem", lineHeight: 1.6, color: "hsl(214,7%,54%)" }}>{item.detail}</p>
+                  </m.div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* Compliance Roadmap */}
+        <section style={{ padding: "var(--space-section-md) 0", borderBottom: "1px solid var(--color-szl-border)" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", marginBottom: "1rem" }}>Compliance roadmap</p>
+              <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "32ch", marginBottom: "0.75rem" }}>
+                Where we are. Where we're going.
+              </h2>
+              <p style={{ fontSize: "0.9375rem", lineHeight: 1.68, color: "hsl(214,7%,58%)", maxWidth: "56ch", marginBottom: "3rem" }}>
+                We don't claim certifications we don't hold. Here is the current compliance posture and the dated roadmap toward enterprise certification targets.
+              </p>
+            </m.div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem" }}>
+              {/* Current posture */}
+              <m.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.38 }} className="szl-card" style={{ borderRadius: "0.875rem", padding: "1.75rem" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1.5rem" }}>
+                  <div style={{ width: "32px", height: "32px", display: "flex", alignItems: "center", justifyContent: "center", background: "hsla(145,62%,40%,0.08)", border: "1px solid hsla(145,62%,40%,0.20)", borderRadius: "0.375rem" }}>
+                    <ShieldCheck size={15} color="hsl(145,62%,46%)" />
+                  </div>
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(145,62%,46%)" }}>Current Posture</span>
+                </div>
+                <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "0.625rem" }}>
+                  {[
+                    "TLS 1.3 enforced platform-wide",
+                    "AES-256-GCM encryption at rest",
+                    "Six-tier RBAC enforced server-side",
+                    "Immutable audit trail on all platform actions",
+                    "SHA-256 integrity hashing on all exports",
+                    "Penetration test completed — NCC Group (0 Critical, 3 High — all remediated)",
+                    "Automated dependency vulnerability scanning (blocks on high/critical)",
+                    "Secret scanning in CI pipeline",
+                    "Multi-tenant data isolation at DB + middleware layer",
+                  ].map((item) => (
+                    <li key={item} style={{ display: "flex", alignItems: "flex-start", gap: "0.625rem" }}>
+                      <CheckSquare size={13} color="hsl(145,62%,46%)" style={{ flexShrink: 0, marginTop: "2px" }} />
+                      <span style={{ fontSize: "0.8125rem", lineHeight: 1.55, color: "hsl(214,7%,66%)" }}>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </m.div>
+              {/* Roadmap */}
+              <m.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.38, delay: 0.07 }} className="szl-card" style={{ borderRadius: "0.875rem", padding: "1.75rem" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1.5rem" }}>
+                  <div style={{ width: "32px", height: "32px", display: "flex", alignItems: "center", justifyContent: "center", background: "hsla(40,90%,54%,0.08)", border: "1px solid hsla(40,90%,54%,0.22)", borderRadius: "0.375rem" }}>
+                    <Calendar size={15} color="hsl(40,90%,54%)" />
+                  </div>
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(40,90%,54%)" }}>Certification Roadmap</span>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                  {[
+                    { milestone: "SOC 2 Type I readiness audit", target: "Q3 2026", status: "Planned", color: "hsl(40,90%,54%)" },
+                    { milestone: "SOC 2 Type II certification", target: "Q1–Q2 2027", status: "Target", color: "hsl(40,90%,54%)" },
+                    { milestone: "Redis session store (scalability pre-req)", target: "Revenue activation phase", status: "Planned", color: "hsl(210,80%,60%)" },
+                    { milestone: "External uptime monitoring", target: "Pre-commercial launch", status: "Planned", color: "hsl(210,80%,60%)" },
+                    { milestone: "FedRAMP readiness assessment (Aegis)", target: "18–24 months post-revenue", status: "Roadmap", color: "hsl(258,55%,68%)" },
+                    { milestone: "ISO 27001 scoping", target: "Post Series A", status: "Roadmap", color: "hsl(258,55%,68%)" },
+                  ].map((row) => (
+                    <div key={row.milestone} style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "1rem", paddingBottom: "0.875rem", borderBottom: "1px solid var(--color-szl-border)" }}>
+                      <div>
+                        <p style={{ fontSize: "0.8125rem", fontWeight: 500, color: "hsl(38,8%,80%)", marginBottom: "0.2rem" }}>{row.milestone}</p>
+                        <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", color: "hsl(214,7%,48%)" }}>{row.target}</p>
+                      </div>
+                      <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: row.color, background: row.color + "14", border: `1px solid ${row.color}30`, borderRadius: "99px", padding: "0.2rem 0.6rem", whiteSpace: "nowrap", flexShrink: 0 }}>{row.status}</span>
+                    </div>
+                  ))}
+                </div>
+                <p style={{ fontSize: "0.75rem", lineHeight: 1.55, color: "hsl(214,7%,42%)", marginTop: "1rem" }}>
+                  SZL does not currently hold SOC 2 or ISO 27001 certification. This roadmap reflects the planned certification path. Gap register maintained at <code style={{ fontFamily: "var(--font-mono)", color: "hsl(214,7%,52%)" }}>docs/known-gaps.md</code>.
+                </p>
+              </m.div>
+            </div>
+          </div>
+        </section>
+
+        {/* Open-Source Governance Primitives */}
+        <section style={{ padding: "var(--space-section-md) 0", borderBottom: "1px solid var(--color-szl-border)" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", marginBottom: "1rem" }}>Open-source governance</p>
+              <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "34ch", marginBottom: "0.75rem" }}>
+                Governance primitives are public. Audit what you trust.
+              </h2>
+              <p style={{ fontSize: "0.9375rem", lineHeight: 1.68, color: "hsl(214,7%,58%)", maxWidth: "56ch", marginBottom: "3rem" }}>
+                The core governance architecture — Proof Chain, Covenant Policy, Outcome Graph, and Alloy's approval gate — is published on GitHub. Technical buyers can inspect the implementation before committing to a diligence conversation.
+              </p>
+            </m.div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "1rem" }}>
+              {[
+                {
+                  name: "Proof Chain",
+                  slug: "proof-chain",
+                  description: "Immutable decision lineage. Every AI recommendation carries source attribution, model ID, confidence score, and SHA-256 content hash — before any human action is taken.",
+                  tags: ["audit", "lineage", "attribution"],
+                  href: "https://github.com/szl-holdings/proof-chain",
+                },
+                {
+                  name: "Covenant Policy Engine",
+                  slug: "covenant-policy",
+                  description: "Declarative governance rules that gate every Alloy action. Policies are version-controlled, audited on change, and enforced at the workflow layer — not just the UI.",
+                  tags: ["policy", "governance", "workflow"],
+                  href: "https://github.com/szl-holdings/covenant-policy",
+                },
+                {
+                  name: "Outcome Graph",
+                  slug: "outcome-graph",
+                  description: "Tracks predicted versus actual outcomes for every AI-influenced decision. Variance is quantified, logged, and surfaced for compliance and model accountability.",
+                  tags: ["outcomes", "accountability", "variance"],
+                  href: "https://github.com/szl-holdings/outcome-graph",
+                },
+                {
+                  name: "Alloy Approval Gate",
+                  slug: "alloy-approval",
+                  description: "Human-in-the-loop enforcement at the execution fabric level. Consequential actions cannot bypass approval — enforced in code, not UI convention.",
+                  tags: ["hitl", "approvals", "enforcement"],
+                  href: "https://github.com/szl-holdings/alloy-approval",
+                },
+              ].map((lib, i) => (
+                <m.div
+                  key={lib.slug}
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.38, delay: i * 0.07 }}
+                >
+                  <a
+                    href={lib.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ display: "block", textDecoration: "none" }}
+                  >
+                    <div
+                      className="szl-card"
+                      style={{ borderRadius: "0.875rem", padding: "1.5rem", height: "100%", transition: "border-color 0.18s ease", cursor: "pointer" }}
+                      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "hsla(258,55%,68%,0.35)"; }}
+                      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = ""; }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
+                          <div style={{ width: "30px", height: "30px", display: "flex", alignItems: "center", justifyContent: "center", background: "hsla(258,55%,68%,0.08)", border: "1px solid hsla(258,55%,68%,0.20)", borderRadius: "0.375rem" }}>
+                            <Github size={14} color="hsl(258,55%,68%)" />
+                          </div>
+                          <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.10em", textTransform: "uppercase", color: "hsl(258,55%,68%)" }}>szl-holdings/{lib.slug}</span>
+                        </div>
+                        <ExternalLink size={13} color="hsl(214,7%,42%)" />
+                      </div>
+                      <p style={{ fontSize: "0.9rem", fontWeight: 600, color: "hsl(38,8%,85%)", marginBottom: "0.625rem", lineHeight: 1.4 }}>{lib.name}</p>
+                      <p style={{ fontSize: "0.8125rem", lineHeight: 1.6, color: "hsl(214,7%,54%)", marginBottom: "1rem" }}>{lib.description}</p>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.375rem" }}>
+                        {lib.tags.map((tag) => (
+                          <span key={tag} style={{ fontFamily: "var(--font-mono)", fontSize: "0.625rem", fontWeight: 600, letterSpacing: "0.08em", color: "hsl(214,7%,48%)", background: "hsla(214,12%,12%,0.70)", border: "1px solid var(--color-szl-border)", borderRadius: "99px", padding: "0.175rem 0.5rem" }}>{tag}</span>
+                        ))}
+                      </div>
+                    </div>
+                  </a>
+                </m.div>
+              ))}
+            </div>
+            <m.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 0.4, delay: 0.3 }} style={{ marginTop: "1.5rem" }}>
+              <a
+                href="https://github.com/szl-holdings"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", fontSize: "0.8125rem", fontWeight: 600, color: "hsl(258,55%,68%)", textDecoration: "none", opacity: 0.9, transition: "opacity 0.15s ease" }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = "0.9"; }}
+              >
+                <Github size={14} />
+                View all SZL open-source on GitHub
+                <ExternalLink size={11} />
+              </a>
+            </m.div>
+          </div>
+        </section>
+
+        {/* Decision Receipt Export */}
+        <section style={{ padding: "var(--space-section-md) 0", borderBottom: "1px solid var(--color-szl-border)" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+              <div className="szl-card" style={{ borderRadius: "1rem", padding: "clamp(2rem,4vw,3rem)" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: "2rem", alignItems: "center" }}>
+                  <div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "1rem" }}>
+                      <div style={{ width: "32px", height: "32px", display: "flex", alignItems: "center", justifyContent: "center", background: "hsla(210,80%,60%,0.08)", border: "1px solid hsla(210,80%,60%,0.20)", borderRadius: "0.4375rem" }}>
+                        <FileOutput size={15} color="hsl(210,80%,60%)" />
+                      </div>
+                      <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(210,80%,60%)" }}>Decision Receipt Export</span>
+                    </div>
+                    <h2 style={{ fontSize: "clamp(1.375rem,2.5vw,1.875rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.22, marginBottom: "0.875rem", maxWidth: "38ch" }}>
+                      Every AI decision is exportable proof — for your compliance team, your auditors, and your board.
+                    </h2>
+                    <p style={{ fontSize: "0.9375rem", lineHeight: 1.68, color: "hsl(214,7%,58%)", maxWidth: "54ch", marginBottom: "1.5rem" }}>
+                      Decision receipts capture the full lineage of every consequential action: signal source, model attribution, confidence score, approval chain, and SHA-256 integrity hash. Export as PDF for LP reporting, JSON for SIEM integration, or structured data for GRC frameworks.
+                    </p>
+                    <ul style={{ listStyle: "none", padding: 0, margin: "0 0 1.5rem 0", display: "flex", flexDirection: "column", gap: "0.4rem" }}>
+                      {[
+                        "PDF export — LP reporting, board packs, regulatory inquiry",
+                        "JSON export — SIEM, GRC, and compliance toolchain integration",
+                        "SHA-256 hash on every receipt — tamper-evident by design",
+                        "Full Proof Chain included — signal → recommendation → approval → execution → outcome",
+                      ].map((item) => (
+                        <li key={item} style={{ display: "flex", alignItems: "flex-start", gap: "0.625rem" }}>
+                          <div style={{ width: "4px", height: "4px", borderRadius: "50%", background: "hsl(210,80%,60%)", flexShrink: 0, marginTop: "8px" }} />
+                          <span style={{ fontSize: "0.8125rem", lineHeight: 1.55, color: "hsl(214,7%,60%)" }}>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div style={{ flexShrink: 0, display: "flex", flexDirection: "column", gap: "0.75rem", alignItems: "flex-end" }}>
+                    <Link href="/trust/exports" className="szl-btn-primary">
+                      View export model <ArrowRight size={14} />
+                    </Link>
+                    <Link href="/demos" className="szl-btn-secondary">
+                      See live demo
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </m.div>
           </div>
         </section>
 
