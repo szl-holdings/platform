@@ -1,6 +1,6 @@
 import { m } from "framer-motion";
 import { Link } from "wouter";
-import { ArrowRight, BookOpen, ShieldCheck, Eye, GitBranch, Layers, FileText, Cpu, Clock, Link2, Terminal } from "lucide-react";
+import { ArrowRight, BookOpen, ShieldCheck, Eye, GitBranch, Layers, FileText, Cpu, Clock, Link2, Network, FlaskConical, Scale } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
@@ -70,10 +70,28 @@ const TECHNICAL_DOCS = [
     href: "/docs/architecture",
   },
   {
-    icon: Terminal,
-    title: "Control plane",
-    desc: "GraphQL control plane API for tenant configuration, role management, observability access, and audit queries.",
-    href: "/docs/control-plane",
+    icon: Network,
+    title: "Outcome Graph",
+    desc: "The directed signal and state fabric connecting every input, inference, decision, and output in the platform.",
+    href: "/docs/outcome-graph",
+  },
+  {
+    icon: Link2,
+    title: "Proof Chain",
+    desc: "How every output traces every claim back to its source signal, model invocation, and human approval record.",
+    href: "/docs/proof-chain",
+  },
+  {
+    icon: Scale,
+    title: "Covenant Policy",
+    desc: "The governance rules engine defining what the platform is and is not permitted to do on behalf of any principal.",
+    href: "/docs/covenant-policy",
+  },
+  {
+    icon: FlaskConical,
+    title: "Simulation",
+    desc: "Forward-looking scenario modeling — project the effects of decisions and signal changes before committing.",
+    href: "/docs/simulation",
   },
   {
     icon: Clock,
@@ -82,14 +100,8 @@ const TECHNICAL_DOCS = [
     href: "/docs/worldline",
   },
   {
-    icon: Link2,
-    title: "Proof chain",
-    desc: "How every output traces every claim back to its source signal, model invocation, and human approval record.",
-    href: "/docs/proof-chain",
-  },
-  {
     icon: Cpu,
-    title: "Model mesh",
+    title: "Model Mesh",
     desc: "AI model routing, versioning, cost tracking, quality signals, and governance integration across all inference.",
     href: "/docs/model-mesh",
   },

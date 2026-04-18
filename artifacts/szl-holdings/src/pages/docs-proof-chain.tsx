@@ -70,10 +70,10 @@ export default function DocsProofChainPage() {
             </div>
             <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-white/50">
               <Link2 className="h-3 w-3" />
-              Proof chain system
+              Platform primitive
             </div>
             <h1 className="mt-5 max-w-3xl text-5xl font-semibold tracking-tight text-white md:text-6xl">
-              Proof chain.
+              Proof Chain.
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-white/65">
               Every output produced by Lyte + Alloy — a recommendation, an exported document, a governance
@@ -155,11 +155,11 @@ export default function DocsProofChainPage() {
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/40">Related documentation</p>
             <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {[
+                { label: "Outcome Graph", href: "/docs/outcome-graph", detail: "The graph from which proof chains are derived" },
                 { label: "Worldline", href: "/docs/worldline", detail: "The event timeline that proof chains reference" },
-                { label: "Model mesh", href: "/docs/model-mesh", detail: "Model invocations recorded in the proof chain" },
-                { label: "Trust", href: "/docs/trust", detail: "How proof chains support trust and governance requirements" },
-                { label: "Architecture", href: "/docs/architecture", detail: "Platform pipeline that produces proof chains" },
-                { label: "Control plane", href: "/docs/control-plane", detail: "API access to proof chain records" },
+                { label: "Model Mesh", href: "/docs/model-mesh", detail: "Model invocations recorded in the proof chain" },
+                { label: "Covenant Policy", href: "/docs/covenant-policy", detail: "Governance rules that authorize each proof chain step" },
+                { label: "Trust", href: "/docs/trust", detail: "How proof chains support trust and compliance requirements" },
                 { label: "Back to docs hub", href: "/docs", detail: "Full documentation index" },
               ].map((link) => (
                 <Link

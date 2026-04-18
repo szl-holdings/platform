@@ -117,6 +117,8 @@ const DocsProofChainPage = lazy(() => import("@/pages/docs-proof-chain"));
 const DocsModelMeshPage = lazy(() => import("@/pages/docs-model-mesh"));
 const DocsTrustPage = lazy(() => import("@/pages/docs-trust"));
 const DocsGithubPage = lazy(() => import("@/pages/docs-github"));
+const DocsOutcomeGraphPage = lazy(() => import("@/pages/docs-outcome-graph"));
+const DocsSimulationPage = lazy(() => import("@/pages/docs-simulation"));
 
 const SolutionsPrismCounselPage = lazy(() => import("@/pages/solutions-prism-counsel"));
 const SolutionsPrismCounselTrustPage = lazy(() => import("@/pages/solutions-prism-counsel-trust"));
@@ -667,6 +669,15 @@ function App() {
             </Route>
             <Route path="/docs/github">
               <Suspense fallback={<PageLoader />}><DocsGithubPage /></Suspense>
+            </Route>
+            <Route path="/docs/outcome-graph">
+              <Suspense fallback={<PageLoader />}><DocsOutcomeGraphPage /></Suspense>
+            </Route>
+            <Route path="/docs/simulation">
+              <Suspense fallback={<PageLoader />}><DocsSimulationPage /></Suspense>
+            </Route>
+            <Route path="/docs/covenant-policy">
+              <Suspense fallback={<PageLoader />}><DocsControlPlanePage /></Suspense>
             </Route>
             <Route path="/docs">
               <Suspense fallback={<PageLoader />}><DocsPage /></Suspense>

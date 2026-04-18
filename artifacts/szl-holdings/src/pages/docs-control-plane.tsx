@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { ArrowRight, Terminal, Lock, Settings, Users, BarChart3, RefreshCw } from "lucide-react";
+import { ArrowRight, Terminal, Lock, Settings, Users, BarChart3, RefreshCw, Scale } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
@@ -54,9 +54,9 @@ const SCHEMA_EXAMPLES = [
 
 export default function DocsControlPlanePage() {
   usePageMeta({
-    title: "Control Plane — Docs — SZL Holdings",
-    description: "GraphQL control plane documentation for Lyte + Alloy: tenant configuration, role management, observability, workflow control, and audit access.",
-    canonical: "https://szlholdings.com/docs/control-plane",
+    title: "Covenant Policy — Docs — SZL Holdings",
+    description: "Covenant Policy documentation for Lyte + Alloy: the governance rules engine that defines what the platform can and cannot do on behalf of any principal.",
+    canonical: "https://szlholdings.com/docs/covenant-policy",
   });
 
   return (
@@ -69,19 +69,21 @@ export default function DocsControlPlanePage() {
             <div className="flex items-center gap-2 text-sm text-white/40">
               <Link href="/docs" className="hover:text-white/70 transition">Docs</Link>
               <span>/</span>
-              <span className="text-white/60">Control Plane</span>
+              <span className="text-white/60">Covenant Policy</span>
             </div>
             <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-white/50">
-              <Terminal className="h-3 w-3" />
-              GraphQL control plane
+              <Scale className="h-3 w-3" />
+              Platform primitive
             </div>
             <h1 className="mt-5 max-w-3xl text-5xl font-semibold tracking-tight text-white md:text-6xl">
-              Control plane.
+              Covenant Policy.
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-white/65">
-              The Lyte + Alloy control plane is a GraphQL API surface for tenant configuration, role management,
-              observability, workflow orchestration control, and governed audit access. All operator-facing
-              configuration flows through the control plane — no direct system access required.
+              Covenant Policy is the governance rules engine in Lyte + Alloy. It defines — in explicit,
+              versioned, auditable form — what the platform is and is not permitted to do on behalf of any
+              principal. No model invocation, workflow action, or data export occurs outside the boundary
+              defined by the tenant's active Covenant. The control plane API is the surface through which
+              Covenants are configured, monitored, and enforced.
             </p>
           </div>
         </section>
@@ -89,8 +91,8 @@ export default function DocsControlPlanePage() {
         {/* Capabilities */}
         <section className="border-b border-white/10">
           <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/40">Control plane capabilities</p>
-            <h2 className="mt-3 text-2xl font-semibold text-white">What operators manage through the control plane</h2>
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/40">Covenant Policy capabilities</p>
+            <h2 className="mt-3 text-2xl font-semibold text-white">What operators govern through Covenant Policy</h2>
             <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
               {CAPABILITIES.map((cap) => {
                 const Icon = cap.icon;
@@ -111,11 +113,12 @@ export default function DocsControlPlanePage() {
         {/* Schema examples */}
         <section className="border-b border-white/10">
           <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/40">Schema examples</p>
-            <h2 className="mt-3 text-2xl font-semibold text-white">Representative GraphQL query shapes</h2>
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/40">Control plane API</p>
+            <h2 className="mt-3 text-2xl font-semibold text-white">Representative Covenant Policy query shapes</h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-white/55">
-              These examples represent the shape and style of control plane queries. Specific field availability
-              depends on the tenant configuration and role scope of the requesting principal.
+              These examples represent the shape and style of Covenant Policy queries through the GraphQL
+              control plane. Specific field availability depends on the tenant configuration and role scope
+              of the requesting principal.
             </p>
             <div className="mt-8 space-y-4">
               {SCHEMA_EXAMPLES.map((ex) => (
@@ -157,11 +160,11 @@ export default function DocsControlPlanePage() {
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/40">Related documentation</p>
             <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {[
-                { label: "Architecture", href: "/docs/architecture", detail: "How the full platform pipeline connects" },
+                { label: "Outcome Graph", href: "/docs/outcome-graph", detail: "The signal and state fabric governed by Covenant Policy" },
+                { label: "Proof Chain", href: "/docs/proof-chain", detail: "How outputs are traced to source signals" },
+                { label: "Simulation", href: "/docs/simulation", detail: "Test Covenant configurations before deploying" },
                 { label: "Worldline", href: "/docs/worldline", detail: "Chronological event and decision timeline" },
                 { label: "Trust", href: "/docs/trust", detail: "Trust controls and governance documentation" },
-                { label: "Proof chain", href: "/docs/proof-chain", detail: "How outputs are traced to source signals" },
-                { label: "Model mesh", href: "/docs/model-mesh", detail: "AI model routing and management" },
                 { label: "Back to docs hub", href: "/docs", detail: "Full documentation index" },
               ].map((link) => (
                 <Link
