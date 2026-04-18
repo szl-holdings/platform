@@ -1,13 +1,21 @@
 import { useLocation } from "wouter";
 import { Bell, Users, DollarSign, GitCommit, Target, Shield, BarChart2, Zap, ArrowLeft } from "lucide-react";
+import { useOpsBadgeCounts } from "../hooks/use-ops-badge-counts";
 
-const NAV_ITEMS = [
-  { path: "/alerts", label: "Alert Inbox", icon: Bell, badge: 7 },
+interface NavItem {
+  path: string;
+  label: string;
+  icon: typeof Bell;
+  badgeKey?: "alerts" | "slaBreaches" | "governancePending";
+}
+
+const NAV_ITEMS: NavItem[] = [
+  { path: "/alerts", label: "Alert Inbox", icon: Bell, badgeKey: "alerts" },
   { path: "/team", label: "Team & Users", icon: Users },
   { path: "/costs", label: "Cost Analytics", icon: DollarSign },
   { path: "/changelog", label: "Release Feed", icon: GitCommit },
-  { path: "/sla", label: "SLA Dashboard", icon: Target },
-  { path: "/governance", label: "Governance", icon: Shield },
+  { path: "/sla", label: "SLA Dashboard", icon: Target, badgeKey: "slaBreaches" },
+  { path: "/governance", label: "Governance", icon: Shield, badgeKey: "governancePending" },
   { path: "/health", label: "Health Score", icon: BarChart2 },
   { path: "/digest", label: "Daily Digest", icon: Zap },
 ];
@@ -19,6 +27,7 @@ interface OpsLayoutProps {
 
 export function OpsLayout({ children, title }: OpsLayoutProps) {
   const [location, navigate] = useLocation();
+  const counts = useOpsBadgeCounts();
 
   return (
     <div
@@ -50,6 +59,8 @@ export function OpsLayout({ children, title }: OpsLayoutProps) {
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
             const active = location === item.path;
+            const badge = item.badgeKey ? counts[item.badgeKey] : null;
+            const showBadge = typeof badge === "number" && badge > 0;
             return (
               <button
                 key={item.path}
@@ -63,12 +74,12 @@ export function OpsLayout({ children, title }: OpsLayoutProps) {
               >
                 <Icon className="w-3 h-3" />
                 <span className="hidden lg:inline">{item.label}</span>
-                {item.badge && (
+                {showBadge && (
                   <span
-                    className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full text-[8px] font-bold flex items-center justify-center"
+                    className="absolute -top-1 -right-1 min-w-3.5 h-3.5 px-1 rounded-full text-[8px] font-bold flex items-center justify-center"
                     style={{ backgroundColor: "var(--color-critical)", color: "#fff" }}
                   >
-                    {item.badge}
+                    {badge! > 99 ? "99+" : badge}
                   </span>
                 )}
               </button>

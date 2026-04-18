@@ -1,14 +1,29 @@
 import { useLocation } from "wouter";
 import { Bell, Users, DollarSign, GitCommit, Target, Shield, BarChart2, Zap, AlertTriangle, Rocket } from "lucide-react";
+import { useOpsBadgeCounts } from "../hooks/use-ops-badge-counts";
 
-const OPS_ITEMS = [
+type BadgeKey = "alerts" | "slaBreaches" | "governancePending";
+
+interface OpsItem {
+  path: string;
+  label: string;
+  description: string;
+  icon: typeof Bell;
+  color: string;
+  badge?: number;
+  badgeKey?: BadgeKey;
+  badgeLabel?: string;
+  badgeColor?: string;
+}
+
+const OPS_ITEMS: OpsItem[] = [
   {
     path: "/alerts",
     label: "Alert Inbox",
     description: "Unified alert inbox with priority ranking, snooze, acknowledge & escalate",
     icon: Bell,
     color: "#ef4444",
-    badge: 7,
+    badgeKey: "alerts",
     badgeLabel: "active",
   },
   {
@@ -48,7 +63,7 @@ const OPS_ITEMS = [
     description: "Cross-domain SLA compliance tracking with breach alerting",
     icon: Target,
     color: "#f97316",
-    badge: 3,
+    badgeKey: "slaBreaches",
     badgeLabel: "breaching",
     badgeColor: "var(--color-critical)",
   },
@@ -58,7 +73,7 @@ const OPS_ITEMS = [
     description: "Policy creation, approval chains, enforcement tracking, audit trail",
     icon: Shield,
     color: "#a855f7",
-    badge: 1,
+    badgeKey: "governancePending",
     badgeLabel: "needs approval",
     badgeColor: "var(--color-medium)",
   },
@@ -80,6 +95,7 @@ const OPS_ITEMS = [
 
 export function OpsCenterGrid() {
   const [, navigate] = useLocation();
+  const counts = useOpsBadgeCounts();
 
   return (
     <div className="flex flex-col gap-4">
@@ -94,6 +110,10 @@ export function OpsCenterGrid() {
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
         {OPS_ITEMS.map((item) => {
           const Icon = item.icon;
+          const liveBadge = item.badgeKey ? counts[item.badgeKey] : null;
+          const badgeValue =
+            typeof liveBadge === "number" ? liveBadge : item.badge;
+          const showBadge = typeof badgeValue === "number" && badgeValue > 0;
           return (
             <button
               key={item.path}
@@ -104,7 +124,7 @@ export function OpsCenterGrid() {
                 border: "1px solid var(--color-surface-border)",
               }}
             >
-              {item.badge !== undefined && (
+              {showBadge && (
                 <div
                   className="absolute top-3 right-3 flex items-center gap-1 px-1.5 py-0.5 rounded-full"
                   style={{
@@ -114,7 +134,7 @@ export function OpsCenterGrid() {
                 >
                   <AlertTriangle className="w-2.5 h-2.5" style={{ color: item.badgeColor ?? "var(--color-critical)" }} />
                   <span className="text-[9px] font-bold" style={{ color: item.badgeColor ?? "var(--color-critical)" }}>
-                    {item.badge} {item.badgeLabel}
+                    {badgeValue} {item.badgeLabel}
                   </span>
                 </div>
               )}
