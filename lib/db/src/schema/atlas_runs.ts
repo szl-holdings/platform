@@ -36,6 +36,7 @@ export const atlasEvidenceTable = pgTable("atlas_evidence", {
   source: text("source").notNull(),
   capturedBy: text("captured_by").notNull(),
   immutable: boolean("immutable").notNull().default(false),
+  tenantId: text("tenant_id"),
   capturedAt: timestamp("captured_at").notNull().defaultNow(),
 });
 
@@ -60,6 +61,7 @@ export const atlasOutcomesTable = pgTable("atlas_outcomes", {
   recordedBy: text("recorded_by").notNull(),
   evidence: jsonb("evidence").notNull().default([]),
   metadata: jsonb("metadata").default({}),
+  tenantId: text("tenant_id"),
   recordedAt: timestamp("recorded_at").notNull().defaultNow(),
 });
 
@@ -84,6 +86,7 @@ export const atlasRunsTable = pgTable("atlas_runs", {
   policyChecks: integer("policy_checks"),
   policiesBlocked: integer("policies_blocked"),
   evidenceCount: integer("evidence_count"),
+  tenantId: text("tenant_id"),
   snapshotAt: timestamp("snapshot_at").notNull().defaultNow(),
 });
 

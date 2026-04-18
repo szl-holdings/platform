@@ -386,6 +386,13 @@
       "when": 1776620000000,
       "tag": "0067_governance_persistence",
       "breakpoints": true
+    },
+    {
+      "idx": 68,
+      "version": "7",
+      "when": 1776634400000,
+      "tag": "0068_atlas_tenant_isolation",
+      "breakpoints": true
     }
   ]
 }

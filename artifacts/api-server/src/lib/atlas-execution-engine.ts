@@ -88,11 +88,14 @@ export async function ingestSignal(record: Omit<AtlasSignalRecord, "id" | "creat
   return signal;
 }
 
-export async function getSignals(domain: string, limit = 50): Promise<AtlasSignalRecord[]> {
+export async function getSignals(domain: string, limit = 50, tenantId?: string): Promise<AtlasSignalRecord[]> {
+  const where = tenantId
+    ? and(eq(atlasSignalsTable.domain, domain), eq(atlasSignalsTable.tenantId, tenantId))
+    : eq(atlasSignalsTable.domain, domain);
   const rows = await db
     .select()
     .from(atlasSignalsTable)
-    .where(eq(atlasSignalsTable.domain, domain))
+    .where(where)
     .orderBy(desc(atlasSignalsTable.createdAt))
     .limit(limit);
   return rows.map(rowToSignalRecord);
@@ -137,6 +140,7 @@ export interface AtlasEvidenceRecord {
   capturedBy: string;
   capturedAt: string;
   immutable: boolean;
+  tenantId?: string;
 }
 
 export async function captureEvidence(record: Omit<AtlasEvidenceRecord, "id" | "capturedAt">): Promise<AtlasEvidenceRecord> {
@@ -151,6 +155,7 @@ export async function captureEvidence(record: Omit<AtlasEvidenceRecord, "id" | "
     source: record.source,
     capturedBy: record.capturedBy,
     immutable: record.immutable,
+    tenantId: record.tenantId ?? null,
     capturedAt: now,
   });
   const ev: AtlasEvidenceRecord = { ...record, id, capturedAt: now.toISOString() };
@@ -158,11 +163,11 @@ export async function captureEvidence(record: Omit<AtlasEvidenceRecord, "id" | "
   return ev;
 }
 
-export async function getEvidence(domain: string, workflowId?: string): Promise<AtlasEvidenceRecord[]> {
-  const conditions = workflowId
-    ? and(eq(atlasEvidenceTable.domain, domain), eq(atlasEvidenceTable.workflowId, workflowId))
-    : eq(atlasEvidenceTable.domain, domain);
-  const rows = await db.select().from(atlasEvidenceTable).where(conditions);
+export async function getEvidence(domain: string, workflowId?: string, tenantId?: string): Promise<AtlasEvidenceRecord[]> {
+  const filters = [eq(atlasEvidenceTable.domain, domain)];
+  if (workflowId) filters.push(eq(atlasEvidenceTable.workflowId, workflowId));
+  if (tenantId) filters.push(eq(atlasEvidenceTable.tenantId, tenantId));
+  const rows = await db.select().from(atlasEvidenceTable).where(filters.length === 1 ? filters[0] : and(...filters));
   return rows.map(row => ({
     id: row.id,
     domain: row.domain,
@@ -172,6 +177,7 @@ export async function getEvidence(domain: string, workflowId?: string): Promise<
     source: row.source,
     capturedBy: row.capturedBy,
     immutable: row.immutable,
+    tenantId: row.tenantId ?? undefined,
     capturedAt: row.capturedAt.toISOString(),
   }));
 }
@@ -196,6 +202,7 @@ export interface AtlasOutcomeRecord {
   recordedAt: string;
   evidence: string[];
   metadata?: Record<string, unknown>;
+  tenantId?: string;
 }
 
 export async function recordOutcome(record: Omit<AtlasOutcomeRecord, "id" | "recordedAt">): Promise<AtlasOutcomeRecord> {
@@ -216,6 +223,7 @@ export async function recordOutcome(record: Omit<AtlasOutcomeRecord, "id" | "rec
     recordedBy: record.recordedBy,
     evidence: record.evidence,
     metadata: record.metadata ?? {},
+    tenantId: record.tenantId ?? null,
     recordedAt: now,
   });
   const outcome: AtlasOutcomeRecord = { ...record, id, recordedAt: now.toISOString() };
@@ -223,11 +231,14 @@ export async function recordOutcome(record: Omit<AtlasOutcomeRecord, "id" | "rec
   return outcome;
 }
 
-export async function getOutcomes(domain: string, limit = 50): Promise<AtlasOutcomeRecord[]> {
+export async function getOutcomes(domain: string, limit = 50, tenantId?: string): Promise<AtlasOutcomeRecord[]> {
+  const where = tenantId
+    ? and(eq(atlasOutcomesTable.domain, domain), eq(atlasOutcomesTable.tenantId, tenantId))
+    : eq(atlasOutcomesTable.domain, domain);
   const rows = await db
     .select()
     .from(atlasOutcomesTable)
-    .where(eq(atlasOutcomesTable.domain, domain))
+    .where(where)
     .orderBy(desc(atlasOutcomesTable.recordedAt))
     .limit(limit);
   return rows.map(row => ({
@@ -250,6 +261,7 @@ export async function getOutcomes(domain: string, limit = 50): Promise<AtlasOutc
     recordedAt: row.recordedAt.toISOString(),
     evidence: (row.evidence ?? []) as string[],
     metadata: (row.metadata ?? {}) as Record<string, unknown>,
+    tenantId: row.tenantId ?? undefined,
   }));
 }
 
@@ -273,6 +285,7 @@ export interface EvaluationHookRecord {
     policiesBlocked?: number;
     evidenceCount?: number;
   };
+  tenantId?: string;
 }
 
 export async function registerEvaluationHook(hook: Omit<EvaluationHookRecord, "id" | "snapshotAt">): Promise<EvaluationHookRecord> {
@@ -292,6 +305,7 @@ export async function registerEvaluationHook(hook: Omit<EvaluationHookRecord, "i
     policyChecks: hook.benchmarkMetrics?.policyChecks ?? null,
     policiesBlocked: hook.benchmarkMetrics?.policiesBlocked ?? null,
     evidenceCount: hook.benchmarkMetrics?.evidenceCount ?? null,
+    tenantId: hook.tenantId ?? null,
     snapshotAt: now,
   }).onConflictDoUpdate({
     target: atlasRunsTable.workflowId,
@@ -307,6 +321,7 @@ export async function registerEvaluationHook(hook: Omit<EvaluationHookRecord, "i
       policyChecks: hook.benchmarkMetrics?.policyChecks ?? null,
       policiesBlocked: hook.benchmarkMetrics?.policiesBlocked ?? null,
       evidenceCount: hook.benchmarkMetrics?.evidenceCount ?? null,
+      tenantId: hook.tenantId ?? null,
       snapshotAt: now,
     },
   }).returning({ id: atlasRunsTable.id, snapshotAt: atlasRunsTable.snapshotAt });
@@ -320,20 +335,26 @@ export async function registerEvaluationHook(hook: Omit<EvaluationHookRecord, "i
   return record;
 }
 
-export async function getEvaluationHooks(domain: string): Promise<EvaluationHookRecord[]> {
+export async function getEvaluationHooks(domain: string, tenantId?: string): Promise<EvaluationHookRecord[]> {
+  const where = tenantId
+    ? and(eq(atlasRunsTable.domain, domain), eq(atlasRunsTable.tenantId, tenantId))
+    : eq(atlasRunsTable.domain, domain);
   const rows = await db
     .select()
     .from(atlasRunsTable)
-    .where(eq(atlasRunsTable.domain, domain))
+    .where(where)
     .orderBy(desc(atlasRunsTable.snapshotAt));
   return rows.map(rowToHookRecord);
 }
 
-export async function getEvaluationHookById(hookId: string): Promise<EvaluationHookRecord | undefined> {
+export async function getEvaluationHookById(hookId: string, tenantId?: string): Promise<EvaluationHookRecord | undefined> {
+  const where = tenantId
+    ? and(eq(atlasRunsTable.id, hookId), eq(atlasRunsTable.tenantId, tenantId))
+    : eq(atlasRunsTable.id, hookId);
   const rows = await db
     .select()
     .from(atlasRunsTable)
-    .where(eq(atlasRunsTable.id, hookId))
+    .where(where)
     .limit(1);
   return rows[0] ? rowToHookRecord(rows[0]) : undefined;
 }
@@ -359,6 +380,7 @@ function rowToHookRecord(row: typeof atlasRunsTable.$inferSelect): EvaluationHoo
           evidenceCount: row.evidenceCount ?? undefined,
         }
       : undefined,
+    tenantId: row.tenantId ?? undefined,
   };
 }
 

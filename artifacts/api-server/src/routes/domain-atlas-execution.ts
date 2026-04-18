@@ -95,6 +95,41 @@ const DOMAIN_CONFIG: Record<string, { label: string; workflowKey: string; signal
 
 const SUPPORTED_DOMAINS = Object.keys(DOMAIN_CONFIG);
 
+function tenantIdFromReq(req: Request): string | undefined {
+  const orgId = req.user?.orgs?.[0]?.orgId;
+  return orgId != null ? String(orgId) : undefined;
+}
+
+/**
+ * Resolve the tenant context for a tenant-scoped ATLAS read/write.
+ *
+ * Fail-closed semantics:
+ *   - Internal agent calls (server-to-server with the internal token) are
+ *     allowed through with `tenantId = undefined` — they are trusted to
+ *     query across tenants for system workflows.
+ *   - Authenticated end users MUST belong to at least one organization;
+ *     if not, the request is denied with 403 so we never silently fall
+ *     back to a domain-wide read.
+ *   - Unauthenticated requests are rejected with 401.
+ *
+ * On denial this writes the response and returns null; callers must early-return.
+ */
+function resolveTenantContext(req: Request, res: Response): { tenantId: string | undefined } | null {
+  if (req.isInternalAgent) {
+    return { tenantId: undefined };
+  }
+  if (!req.user) {
+    res.status(401).json({ error: "Unauthorized", code: "UNAUTHORIZED" });
+    return null;
+  }
+  const tenantId = tenantIdFromReq(req);
+  if (!tenantId) {
+    res.status(403).json({ error: "Tenant context required", code: "TENANT_REQUIRED" });
+    return null;
+  }
+  return { tenantId };
+}
+
 // ─── Zod Schemas ──────────────────────────────────────────────────────────────
 
 const SignalIngestSchema = z.object({
@@ -207,11 +242,18 @@ function buildDomainRoutes(domain: string): void {
   // ── POST /:domain/atlas/signals ─────────────────────────────────────────────
   router.post(
     `${prefix}/signals`,
-    authMiddleware({ required: false }),
+    authMiddleware(),
     validateBody(SignalIngestSchema),
     async (req: Request, res: Response) => {
       try {
+        const ctx = resolveTenantContext(req, res);
+        if (!ctx) return;
         const body = req.body as z.infer<typeof SignalIngestSchema>;
+        // For end-user callers, derive tenantId from the session and ignore
+        // any body-supplied tenantId to prevent cross-tenant injection.
+        // Internal-agent (server-to-server) callers may set tenantId in the
+        // body since they legitimately ingest on behalf of any tenant.
+        const tenantId = req.isInternalAgent ? (body.tenantId ?? ctx.tenantId) : ctx.tenantId;
         const signal = await ingestSignal({
           domain,
           signalType: body.signalType,
@@ -222,7 +264,7 @@ function buildDomainRoutes(domain: string): void {
           source: body.source,
           payload: body.payload,
           status: "raw",
-          tenantId: body.tenantId,
+          tenantId,
         });
         logger.info({ domain, signalId: signal.id, signalType: body.signalType }, "domain-atlas:signal:ingested");
         sendCreated(res, signal);
@@ -233,10 +275,12 @@ function buildDomainRoutes(domain: string): void {
   );
 
   // ── GET /:domain/atlas/signals ──────────────────────────────────────────────
-  router.get(`${prefix}/signals`, authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
+  router.get(`${prefix}/signals`, authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
     try {
+      const ctx = resolveTenantContext(req, res);
+      if (!ctx) return;
       const limit = Math.min(parseInt(String(req.query.limit ?? "50"), 10), 200);
-      const signals = await getSignals(domain, limit);
+      const signals = await getSignals(domain, limit, ctx.tenantId);
       sendSuccess(res, { domain, signals, count: signals.length });
     } catch (err) {
       handleRouteError(res, err, "Failed to list signals");
@@ -269,8 +313,10 @@ function buildDomainRoutes(domain: string): void {
     validateQuery(listQuerySchema),
     async (req: Request, res: Response) => {
       try {
+        const ctx = resolveTenantContext(req, res);
+        if (!ctx) return;
         const body = req.body as z.infer<typeof EvaluateSignalsSchema>;
-        const allSignals = await getSignals(domain, 200);
+        const allSignals = await getSignals(domain, 200, ctx.tenantId);
         const targetSignals = allSignals.filter(s => body.signalIds.includes(s.id));
 
         if (targetSignals.length === 0) {
@@ -482,6 +528,8 @@ function buildDomainRoutes(domain: string): void {
     validateBody(EvidenceCaptureSchema),
     async (req: Request, res: Response) => {
       try {
+        const ctx = resolveTenantContext(req, res);
+        if (!ctx) return;
         const body = req.body as z.infer<typeof EvidenceCaptureSchema>;
         const evidence = await captureEvidence({
           domain,
@@ -491,6 +539,7 @@ function buildDomainRoutes(domain: string): void {
           source: body.source,
           capturedBy: body.capturedBy,
           immutable: body.immutable,
+          tenantId: ctx.tenantId,
         });
         logger.info({ domain, evidenceId: evidence.id, workflowId: body.workflowId }, "domain-atlas:evidence:captured");
         sendCreated(res, evidence);
@@ -501,10 +550,12 @@ function buildDomainRoutes(domain: string): void {
   );
 
   // ── GET /:domain/atlas/evidence ─────────────────────────────────────────────
-  router.get(`${prefix}/evidence`, authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
+  router.get(`${prefix}/evidence`, authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
     try {
+      const ctx = resolveTenantContext(req, res);
+      if (!ctx) return;
       const workflowId = req.query.workflowId as string | undefined;
-      const evidence = await getEvidence(domain, workflowId);
+      const evidence = await getEvidence(domain, workflowId, ctx.tenantId);
       sendSuccess(res, { domain, evidence, count: evidence.length });
     } catch (err) {
       handleRouteError(res, err, "Failed to list evidence");
@@ -518,6 +569,8 @@ function buildDomainRoutes(domain: string): void {
     validateBody(OutcomeRecordSchema),
     async (req: Request, res: Response) => {
       try {
+        const ctx = resolveTenantContext(req, res);
+        if (!ctx) return;
         const body = req.body as z.infer<typeof OutcomeRecordSchema>;
         const outcome = await recordOutcome({
           domain,
@@ -531,6 +584,7 @@ function buildDomainRoutes(domain: string): void {
           recordedBy: body.recordedBy,
           evidence: body.evidence,
           metadata: body.metadata,
+          tenantId: ctx.tenantId,
         });
         logger.info({ domain, outcomeId: outcome.id, workflowId: body.workflowId, status: body.status }, "domain-atlas:outcome:recorded");
         sendCreated(res, outcome);
@@ -541,10 +595,12 @@ function buildDomainRoutes(domain: string): void {
   );
 
   // ── GET /:domain/atlas/outcomes ─────────────────────────────────────────────
-  router.get(`${prefix}/outcomes`, authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
+  router.get(`${prefix}/outcomes`, authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
     try {
+      const ctx = resolveTenantContext(req, res);
+      if (!ctx) return;
       const limit = Math.min(parseInt(String(req.query.limit ?? "50"), 10), 200);
-      const outcomes = await getOutcomes(domain, limit);
+      const outcomes = await getOutcomes(domain, limit, ctx.tenantId);
       sendSuccess(res, { domain, outcomes, count: outcomes.length });
     } catch (err) {
       handleRouteError(res, err, "Failed to list outcomes");
@@ -552,9 +608,11 @@ function buildDomainRoutes(domain: string): void {
   });
 
   // ── GET /:domain/atlas/evaluation-hooks ─────────────────────────────────────
-  router.get(`${prefix}/evaluation-hooks`, authMiddleware({ required: false }), async (_req: Request, res: Response) => {
+  router.get(`${prefix}/evaluation-hooks`, authMiddleware(), async (req: Request, res: Response) => {
     try {
-      const hooks = await getEvaluationHooks(domain);
+      const ctx = resolveTenantContext(req, res);
+      if (!ctx) return;
+      const hooks = await getEvaluationHooks(domain, ctx.tenantId);
       sendSuccess(res, {
         domain,
         hooks: hooks.map(h => ({
@@ -578,17 +636,20 @@ function buildDomainRoutes(domain: string): void {
   // ── POST /:domain/atlas/evaluation-hooks/replay ──────────────────────────────
   router.post(`${prefix}/evaluation-hooks/replay`, authMiddleware({ required: false }), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
     try {
+      const ctx = resolveTenantContext(req, res);
+      if (!ctx) return;
       const { hookId, isDryRun, isSimulation } = req.body as { hookId?: string; isDryRun?: boolean; isSimulation?: boolean };
       if (!hookId) { sendBadRequest(res, "hookId is required"); return; }
 
-      const hook = await getEvaluationHookById(hookId);
+      const reqTenantId = ctx.tenantId;
+      const hook = await getEvaluationHookById(hookId, reqTenantId);
       if (!hook) { sendNotFound(res, "Evaluation hook not found"); return; }
       if (hook.domain !== domain) { res.status(403).json({ error: "Hook belongs to a different domain" }); return; }
       if (!hook.replayable) { res.status(422).json({ error: "This hook is not marked as replayable" }); return; }
 
       for (const signal of hook.signalSnapshot) {
         const { id: _id, createdAt: _c, updatedAt: _u, ...signalData } = signal;
-        await ingestSignal({ ...signalData, status: "raw" });
+        await ingestSignal({ ...signalData, status: "raw", tenantId: reqTenantId ?? signalData.tenantId });
       }
 
       const workflowKey = Object.keys(DOMAIN_WORKFLOWS).find(k => DOMAIN_WORKFLOWS[k].domain === domain) ?? config.workflowKey;
@@ -617,6 +678,7 @@ function buildDomainRoutes(domain: string): void {
           stepsCompleted: (result.run.steps as Array<{ status: string }>).filter(s => s.status === "completed").length,
           stepsFailed: (result.run.steps as Array<{ status: string }>).filter(s => s.status === "failed").length,
         },
+        tenantId: reqTenantId ?? hook.tenantId,
       });
 
       logger.info({ domain, hookId, replayHookId: replayHook.id, latencyMs }, "domain-atlas:replay:completed");
@@ -640,13 +702,16 @@ function buildDomainRoutes(domain: string): void {
   });
 
   // ── GET /:domain/atlas/status ───────────────────────────────────────────────
-  router.get(`${prefix}/status`, authMiddleware({ required: false }), async (_req: Request, res: Response) => {
+  router.get(`${prefix}/status`, authMiddleware(), async (req: Request, res: Response) => {
     try {
+      const ctx = resolveTenantContext(req, res);
+      if (!ctx) return;
+      const tenantId = ctx.tenantId;
       const [signals, evidence, outcomes, hooks] = await Promise.all([
-        getSignals(domain, 200),
-        getEvidence(domain),
-        getOutcomes(domain, 200),
-        getEvaluationHooks(domain),
+        getSignals(domain, 200, tenantId),
+        getEvidence(domain, undefined, tenantId),
+        getOutcomes(domain, 200, tenantId),
+        getEvaluationHooks(domain, tenantId),
       ]);
       const domainWorkflows = Object.values(DOMAIN_WORKFLOWS).filter(w => w.domain === domain);
 
