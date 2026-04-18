@@ -1196,6 +1196,9 @@ function App() {
             <Route path="/api">
               <Suspense fallback={<PageLoader />}><ApiPage /></Suspense>
             </Route>
+            <Route path="/investor/data-room">
+              <Redirect to="/investors/data-room" />
+            </Route>
             <Route path="/investor">
               <Suspense fallback={<PageLoader />}><InvestorPage /></Suspense>
             </Route>

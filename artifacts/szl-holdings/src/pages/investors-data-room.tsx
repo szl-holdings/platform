@@ -40,7 +40,7 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 // Special panel IDs (not fetched from API)
-const SPECIAL_IDS = ["executive-brief", "request-demo"] as const;
+const SPECIAL_IDS = ["executive-brief", "request-demo", "access-inquiry"] as const;
 type SpecialId = (typeof SPECIAL_IDS)[number];
 function isSpecialId(id: string): id is SpecialId {
   return (SPECIAL_IDS as readonly string[]).includes(id);
@@ -57,20 +57,52 @@ interface DocMeta {
 
 const DOC_META: DocMeta[] = [
   {
+    id: "platform-overview",
+    label: "Platform Overview",
+    subtitle: "What SZL Holdings builds and why the architecture is different",
+    icon: Globe,
+    color: "#d4a054",
+    category: "Overview",
+  },
+  {
+    id: "product-matrix",
+    label: "Product Matrix",
+    subtitle: "All domain platforms, audiences, and strategic roles",
+    icon: Layers,
+    color: "#4a90b8",
+    category: "Overview",
+  },
+  {
+    id: "founder-summary",
+    label: "Founder Summary",
+    subtitle: "Founder narrative, thesis, and Series A rationale",
+    icon: BookOpen,
+    color: "#8b7ac8",
+    category: "Overview",
+  },
+  {
+    id: "launch-readiness",
+    label: "Operational Readiness",
+    subtitle: "Scored readiness across 8 dimensions — before and after",
+    icon: CheckCircle2,
+    color: "#5a9a8a",
+    category: "Overview",
+  },
+  {
     id: "system-overview",
     label: "System Overview",
     subtitle: "Platform summary for technical evaluators",
-    icon: Globe,
+    icon: Monitor,
     color: "#d4a054",
-    category: "Platform",
+    category: "Architecture",
   },
   {
     id: "architecture",
-    label: "Architecture",
+    label: "Architecture Specs",
     subtitle: "Stack topology, service boundaries, data flows",
-    icon: Layers,
+    icon: Database,
     color: "#8b7ac8",
-    category: "Platform",
+    category: "Architecture",
   },
   {
     id: "product-surfaces",
@@ -78,7 +110,7 @@ const DOC_META: DocMeta[] = [
     subtitle: "All surfaces, their audiences, and feature sets",
     icon: Monitor,
     color: "#4a90b8",
-    category: "Platform",
+    category: "Architecture",
   },
   {
     id: "data-model",
@@ -102,7 +134,7 @@ const DOC_META: DocMeta[] = [
     subtitle: "Role definitions, permission boundaries, RBAC",
     icon: Shield,
     color: "#c878a8",
-    category: "Security",
+    category: "Security Posture",
   },
   {
     id: "security-checklist",
@@ -110,7 +142,7 @@ const DOC_META: DocMeta[] = [
     subtitle: "Hardening status, audit findings, compliance",
     icon: Lock,
     color: "#e07050",
-    category: "Security",
+    category: "Security Posture",
   },
   {
     id: "deployment-guide",
@@ -146,7 +178,20 @@ const DOC_META: DocMeta[] = [
   },
 ];
 
-const CATEGORIES = ["Platform", "Engineering", "Security", "Operations", "Data"];
+const CATEGORIES = ["Overview", "Architecture", "Security Posture", "Engineering", "Operations", "Data"];
+
+const DOWNLOADABLE_DOCS: Array<{ id: string; label: string; hint: string }> = [
+  {
+    id: "technical-due-diligence",
+    label: "Technical Due Diligence Packet",
+    hint: "Full architecture, security, and engineering assessment",
+  },
+  {
+    id: "launch-readiness",
+    label: "Launch Readiness Scorecard",
+    hint: "Scored readiness across 8 operational dimensions",
+  },
+];
 
 const DOMAIN_PRODUCTS = [
   {
@@ -753,10 +798,274 @@ function RequestDemoPanel() {
   );
 }
 
+interface InquiryFormState {
+  name: string;
+  email: string;
+  company: string;
+  role: string;
+  materialsRequested: string[];
+  context: string;
+}
+
+const DEEPER_MATERIALS = [
+  "Cap table",
+  "Financial model",
+  "Legal documents",
+  "Revenue projections",
+  "Reference calls",
+  "Technical architecture deep-dive",
+];
+
+function AccessInquiryPanel({ onBack }: { onBack?: () => void }) {
+  const [form, setForm] = useState<InquiryFormState>({
+    name: "",
+    email: "",
+    company: "",
+    role: "",
+    materialsRequested: [],
+    context: "",
+  });
+  const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const toggleMaterial = (material: string) => {
+    setForm((prev) => ({
+      ...prev,
+      materialsRequested: prev.materialsRequested.includes(material)
+        ? prev.materialsRequested.filter((m) => m !== material)
+        : [...prev.materialsRequested, material],
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      await apiFetch("/api/investors/inquiry", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      setSubmitted(true);
+    } catch {
+      const subject = encodeURIComponent("Deeper Access Request — SZL Holdings Data Room");
+      const body = encodeURIComponent(
+        `Name: ${form.name}\nEmail: ${form.email}\nCompany: ${form.company}\nRole: ${form.role}\nMaterials: ${form.materialsRequested.join(", ")}\n\n${form.context}`
+      );
+      window.location.href = `mailto:investors@szlholdings.com?subject=${subject}&body=${body}`;
+      setSubmitted(true);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const isValid = form.name.trim() && form.email.trim() && form.company.trim() && form.materialsRequested.length > 0;
+
+  if (submitted) {
+    return (
+      <div className="max-w-xl">
+        <div className="rounded-2xl border border-[#5a9a8a]/20 bg-[#5a9a8a]/08 p-8 text-center">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full border border-[#5a9a8a]/30 bg-[#5a9a8a]/15 mx-auto mb-5">
+            <CheckCircle2 className="h-7 w-7 text-[#5a9a8a]" />
+          </div>
+          <h2 className="text-xl font-semibold text-white mb-2 font-['Space_Grotesk']">
+            Access request received.
+          </h2>
+          <p className="text-sm leading-7 text-white/55 mb-6">
+            We'll review your request and reach out at <span className="text-white/75">{form.email}</span> within
+            one business day to coordinate the next steps.
+          </p>
+          {onBack && (
+            <button
+              onClick={onBack}
+              className="text-xs font-semibold text-white/40 hover:text-white/70 transition"
+            >
+              ← Back to data room
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-2xl">
+      <div className="flex items-start gap-4 mb-8">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-[#d4a054]/25 bg-[#d4a054]/10">
+          <FileText className="h-6 w-6 text-[#d4a054]" />
+        </div>
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/30 mb-1">
+            Deeper Access Request
+          </p>
+          <h1 className="text-2xl font-semibold tracking-tight text-white font-['Space_Grotesk']">
+            Request confidential materials
+          </h1>
+          <p className="text-sm text-white/45 mt-0.5">
+            Cap table, financials, and legal documents for qualified investors.
+          </p>
+        </div>
+      </div>
+
+      <p className="text-sm leading-7 text-white/60 mb-6">
+        The data room contains our technical and operational documentation. The next tier of materials —
+        including the full financial model, cap table, and legal diligence documents — is available
+        to qualified investors after a brief verification. Select what you need below and we'll
+        follow up within one business day.
+      </p>
+
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-[0.12em] text-white/40 mb-1.5">
+              Full Name <span className="text-[#e07050]">*</span>
+            </label>
+            <input
+              name="name"
+              value={form.name}
+              onChange={handleChange}
+              required
+              placeholder="Your name"
+              className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-2.5 text-sm text-white placeholder-white/25 focus:outline-none focus:border-white/20 focus:bg-white/[0.05] transition"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-[0.12em] text-white/40 mb-1.5">
+              Email <span className="text-[#e07050]">*</span>
+            </label>
+            <input
+              name="email"
+              type="email"
+              value={form.email}
+              onChange={handleChange}
+              required
+              placeholder="you@firm.com"
+              className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-2.5 text-sm text-white placeholder-white/25 focus:outline-none focus:border-white/20 focus:bg-white/[0.05] transition"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-[0.12em] text-white/40 mb-1.5">
+              Company / Fund <span className="text-[#e07050]">*</span>
+            </label>
+            <input
+              name="company"
+              value={form.company}
+              onChange={handleChange}
+              required
+              placeholder="Organization name"
+              className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-2.5 text-sm text-white placeholder-white/25 focus:outline-none focus:border-white/20 focus:bg-white/[0.05] transition"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-[0.12em] text-white/40 mb-1.5">
+              Role / Title
+            </label>
+            <select
+              name="role"
+              value={form.role}
+              onChange={handleChange}
+              className="w-full rounded-xl border border-white/[0.08] bg-[#0c1018] px-4 py-2.5 text-sm text-white/70 focus:outline-none focus:border-white/20 transition"
+            >
+              <option value="">Select a role…</option>
+              <option value="General Partner">General Partner</option>
+              <option value="Managing Director">Managing Director</option>
+              <option value="Principal / Associate">Principal / Associate</option>
+              <option value="Angel Investor">Angel Investor</option>
+              <option value="Strategic Partner">Strategic Partner</option>
+              <option value="Corporate Development">Corporate Development</option>
+              <option value="Advisor">Advisor</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold uppercase tracking-[0.12em] text-white/40 mb-2">
+            Materials Requested <span className="text-[#e07050]">*</span>
+          </label>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            {DEEPER_MATERIALS.map((material) => {
+              const selected = form.materialsRequested.includes(material);
+              return (
+                <button
+                  key={material}
+                  type="button"
+                  onClick={() => toggleMaterial(material)}
+                  className={`flex items-center gap-2 rounded-xl border px-3 py-2.5 text-left text-xs font-semibold transition ${
+                    selected
+                      ? "border-[#d4a054]/40 bg-[#d4a054]/10 text-[#d4a054]"
+                      : "border-white/[0.07] bg-white/[0.02] text-white/45 hover:text-white/70 hover:border-white/10"
+                  }`}
+                >
+                  <div
+                    className={`h-4 w-4 shrink-0 rounded border flex items-center justify-center transition ${
+                      selected ? "bg-[#d4a054] border-[#d4a054]" : "border-white/20 bg-transparent"
+                    }`}
+                  >
+                    {selected && <CheckCircle2 className="h-2.5 w-2.5 text-black" />}
+                  </div>
+                  {material}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold uppercase tracking-[0.12em] text-white/40 mb-1.5">
+            Context
+          </label>
+          <textarea
+            name="context"
+            value={form.context}
+            onChange={handleChange}
+            rows={3}
+            placeholder="Where are you in your diligence process? Any specific questions or timeline?"
+            className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-sm text-white placeholder-white/25 focus:outline-none focus:border-white/20 focus:bg-white/[0.05] transition resize-none"
+          />
+        </div>
+
+        <div className="flex flex-wrap items-center gap-4 pt-2">
+          <button
+            type="submit"
+            disabled={!isValid || submitting}
+            className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-2.5 text-sm font-semibold text-black hover:bg-white/90 transition disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            {submitting ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Sending…
+              </>
+            ) : (
+              <>
+                <Send className="h-4 w-4" />
+                Submit Request
+              </>
+            )}
+          </button>
+          <p className="text-xs text-white/30">
+            Or email:{" "}
+            <a href="mailto:investors@szlholdings.com" className="text-white/50 hover:text-white/70 transition">
+              investors@szlholdings.com
+            </a>
+          </p>
+        </div>
+      </form>
+    </div>
+  );
+}
+
 export default function InvestorsDataRoomPage() {
   const [ndaLoading, setNdaLoading] = useState(true);
   const [accepted, setAccepted] = useState(false);
-  const [activeDocId, setActiveDocId] = useState<string>("executive-brief");
+  const [activeDocId, setActiveDocId] = useState<string>("platform-overview");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [content, setContent] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -844,6 +1153,8 @@ export default function InvestorsDataRoomPage() {
       ? "Executive Brief"
       : activeDocId === "request-demo"
       ? "Request Demo"
+      : activeDocId === "access-inquiry"
+      ? "Request Deeper Access"
       : activeDoc?.label ?? activeDocId;
 
   return (
@@ -904,7 +1215,7 @@ export default function InvestorsDataRoomPage() {
             {/* Executive Brief — top CTA */}
             <div className="mb-5">
               <p className="mb-2 px-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/25">
-                Overview
+                Quick Access
               </p>
               <button
                 onClick={() => { setActiveDocId("executive-brief"); setSidebarOpen(false); }}
@@ -959,11 +1270,38 @@ export default function InvestorsDataRoomPage() {
                 </div>
                 {activeDocId === "request-demo" && <ChevronRight className="h-3.5 w-3.5 text-white/30 shrink-0" />}
               </button>
+
+              <button
+                onClick={() => { setActiveDocId("access-inquiry"); setSidebarOpen(false); }}
+                className={`w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition mt-0.5 ${
+                  activeDocId === "access-inquiry"
+                    ? "bg-white/[0.06] text-white"
+                    : "text-white/50 hover:bg-white/[0.03] hover:text-white/80"
+                }`}
+              >
+                <div
+                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-white/[0.08]"
+                  style={
+                    activeDocId === "access-inquiry"
+                      ? { background: "#d4a05418", borderColor: "#d4a05430", color: "#d4a054" }
+                      : { color: "#d4a05488" }
+                  }
+                >
+                  <Lock className="h-3.5 w-3.5" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className={`text-xs font-semibold truncate ${activeDocId === "access-inquiry" ? "text-white" : "text-white/60"}`}>
+                    Request Deeper Access
+                  </p>
+                  <p className="text-[11px] text-white/30 truncate">Cap table, financials & legal</p>
+                </div>
+                {activeDocId === "access-inquiry" && <ChevronRight className="h-3.5 w-3.5 text-white/30 shrink-0" />}
+              </button>
             </div>
 
             {/* Technical Documents */}
             <p className="mb-2 px-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/25">
-              {DOC_META.length} Technical Documents · Confidential
+              {DOC_META.length} Documents · Confidential
             </p>
 
             {CATEGORIES.map((cat) => {
@@ -1049,22 +1387,48 @@ export default function InvestorsDataRoomPage() {
               </div>
             </div>
 
+            {/* Downloads */}
+            <div className="mt-4 mb-2 rounded-xl border border-white/[0.05] bg-white/[0.02] p-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/30 mb-2">
+                Downloads
+              </p>
+              <div className="flex flex-col gap-2">
+                {DOWNLOADABLE_DOCS.map((doc) => (
+                  <a
+                    key={doc.id}
+                    href={`${BASE}/api/investors/docs/${doc.id}/download`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-start gap-2 group"
+                  >
+                    <Download className="h-3.5 w-3.5 text-[#5a9a8a] shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-xs font-semibold text-white/60 group-hover:text-white/90 transition leading-4">
+                        {doc.label}
+                      </p>
+                      <p className="text-[10px] text-white/25 leading-4">{doc.hint}</p>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </div>
+
             {/* Full Diligence Package */}
             <div className="mt-2 rounded-xl border border-white/[0.05] bg-white/[0.02] p-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/30 mb-2">
-                Full Diligence Package
+                Deeper Access
               </p>
               <p className="text-xs leading-5 text-white/40 mb-3">
-                Request the complete financial model, cap table, and legal documents with NDA countersignature.
+                Request the cap table, financial model, and legal diligence documents.
               </p>
               <div className="flex flex-col gap-2">
-                <a
-                  href="mailto:investors@szlholdings.com?subject=Full%20Diligence%20Package%20Request"
+                <button
+                  onClick={() => { setActiveDocId("access-inquiry"); setSidebarOpen(false); }}
                   className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#d4a054] hover:text-[#e4b064] transition"
                 >
                   <FileText className="h-3.5 w-3.5" />
-                  Request package
-                </a>
+                  Request access
+                </button>
                 <button
                   onClick={() => { setActiveDocId("request-demo"); setSidebarOpen(false); }}
                   className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#22d3ee] hover:text-[#32e3fe] transition"
@@ -1084,6 +1448,9 @@ export default function InvestorsDataRoomPage() {
             <div className="px-6 py-10 lg:px-10 lg:py-12">
               {activeDocId === "executive-brief" && <ExecutiveBriefPanel />}
               {activeDocId === "request-demo" && <RequestDemoPanel />}
+              {activeDocId === "access-inquiry" && (
+                <AccessInquiryPanel onBack={() => setActiveDocId("executive-brief")} />
+              )}
             </div>
           ) : (
             <>
@@ -1101,7 +1468,7 @@ export default function InvestorsDataRoomPage() {
                     >
                       <activeDoc.icon className="h-5 w-5" />
                     </div>
-                    <div>
+                    <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/30">
                           {activeDoc.category}
@@ -1114,6 +1481,21 @@ export default function InvestorsDataRoomPage() {
                       </h1>
                       <p className="text-sm text-white/45 mt-0.5">{activeDoc.subtitle}</p>
                     </div>
+                    {(() => {
+                      const dlDoc = DOWNLOADABLE_DOCS.find((d) => d.id === activeDocId);
+                      if (!dlDoc) return null;
+                      return (
+                        <a
+                          href={`${BASE}/api/investors/docs/${activeDocId}/download`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="shrink-0 inline-flex items-center gap-1.5 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-xs font-semibold text-white/60 hover:text-white/90 hover:border-white/15 transition"
+                        >
+                          <Download className="h-3.5 w-3.5" />
+                          Download
+                        </a>
+                      );
+                    })()}
                   </div>
 
                   {/* Doc navigation pills */}

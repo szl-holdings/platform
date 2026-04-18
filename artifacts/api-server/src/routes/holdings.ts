@@ -4,6 +4,7 @@ import { z } from "zod";
 import { readFileSync } from "fs";
 import { join } from "path";
 import { logger } from "../lib/logger";
+import { generateInvestorDocPdf } from "../lib/investor-doc-pdf";
 import { validateBody } from "../lib/validation";
 import {
   db,
@@ -511,18 +512,93 @@ router.get("/holdings/search", async (req, res) => {
 
 const INVESTOR_DOCS_DIR = join(__dirname, "../data/investor-docs");
 
-const INVESTOR_DOC_MANIFEST: Record<string, string> = {
-  "system-overview": "SYSTEM-OVERVIEW.md",
-  "architecture": "ARCHITECTURE.md",
-  "product-surfaces": "PRODUCT-SURFACES.md",
-  "data-model": "DATA-MODEL.md",
-  "api-spec": "API-SPEC.md",
-  "access-control": "ACCESS-CONTROL-MATRIX.md",
-  "security-checklist": "SECURITY-CHECKLIST.md",
-  "deployment-guide": "DEPLOYMENT-GUIDE.md",
-  "operations-runbook": "OPERATIONS-RUNBOOK.md",
-  "analytics-events": "ANALYTICS-EVENTS.md",
-  "known-gaps": "KNOWN-GAPS.md",
+interface InvestorDocMeta {
+  filename: string;
+  title: string;
+  subtitle: string;
+}
+
+const INVESTOR_DOC_MANIFEST: Record<string, InvestorDocMeta> = {
+  "platform-overview": {
+    filename: "PLATFORM-OVERVIEW.md",
+    title: "Platform Overview",
+    subtitle: "What SZL Holdings builds and why the architecture is different",
+  },
+  "product-matrix": {
+    filename: "PRODUCT-MATRIX.md",
+    title: "Product Matrix",
+    subtitle: "All domain platforms, audiences, and strategic roles",
+  },
+  "founder-summary": {
+    filename: "FOUNDER-SUMMARY.md",
+    title: "Founder Executive Summary",
+    subtitle: "Founder narrative, investment thesis, and Series A rationale",
+  },
+  "launch-readiness": {
+    filename: "LAUNCH-READINESS-SCORECARD.md",
+    title: "Launch Readiness Scorecard",
+    subtitle: "Scored readiness across 8 operational dimensions — before and after",
+  },
+  "system-overview": {
+    filename: "SYSTEM-OVERVIEW.md",
+    title: "System Overview",
+    subtitle: "Platform summary for technical evaluators",
+  },
+  "architecture": {
+    filename: "ARCHITECTURE.md",
+    title: "Architecture Specifications",
+    subtitle: "Stack topology, service boundaries, and data flows",
+  },
+  "product-surfaces": {
+    filename: "PRODUCT-SURFACES.md",
+    title: "Product Surfaces",
+    subtitle: "All surfaces, their audiences, and feature sets",
+  },
+  "data-model": {
+    filename: "DATA-MODEL.md",
+    title: "Data Model",
+    subtitle: "Schema domains, key tables, and tenant isolation",
+  },
+  "api-spec": {
+    filename: "API-SPEC.md",
+    title: "API Specification",
+    subtitle: "Endpoints, auth flows, and GraphQL schema",
+  },
+  "access-control": {
+    filename: "ACCESS-CONTROL-MATRIX.md",
+    title: "Access Control Matrix",
+    subtitle: "Role definitions, permission boundaries, and RBAC",
+  },
+  "security-checklist": {
+    filename: "SECURITY-CHECKLIST.md",
+    title: "Security Checklist",
+    subtitle: "Hardening status, audit findings, and compliance posture",
+  },
+  "deployment-guide": {
+    filename: "DEPLOYMENT-GUIDE.md",
+    title: "Deployment Guide",
+    subtitle: "Infrastructure, CI/CD, and environment configuration",
+  },
+  "operations-runbook": {
+    filename: "OPERATIONS-RUNBOOK.md",
+    title: "Operations Runbook",
+    subtitle: "Incident response, alerting, and on-call procedures",
+  },
+  "analytics-events": {
+    filename: "ANALYTICS-EVENTS.md",
+    title: "Analytics Events",
+    subtitle: "Event taxonomy, instrumentation, and tracking plan",
+  },
+  "known-gaps": {
+    filename: "KNOWN-GAPS.md",
+    title: "Known Gaps",
+    subtitle: "Open risks, remediation status, and sprint owners",
+  },
+  "technical-due-diligence": {
+    filename: "TECHNICAL-DUE-DILIGENCE-PACKET.md",
+    title: "Technical Due Diligence Packet",
+    subtitle: "Structured technical due diligence for Series A investors and institutional evaluators",
+  },
 };
 
 const INVESTOR_NDA_ACTION = "investor_nda_accepted";
@@ -586,7 +662,7 @@ router.get("/investors/docs", authMiddleware(), requireRole("admin", "exec", "an
       res.status(403).json({ error: "NDA acceptance required", code: "NDA_REQUIRED" });
       return;
     }
-    const docs = Object.entries(INVESTOR_DOC_MANIFEST).map(([id, filename]) => ({ id, filename }));
+    const docs = Object.entries(INVESTOR_DOC_MANIFEST).map(([id, meta]) => ({ id, filename: meta.filename, title: meta.title }));
     res.json({ data: docs });
   } catch (err) {
     logger.error({ err }, "Failed to list investor docs");
@@ -611,16 +687,147 @@ router.get("/investors/docs/:id", authMiddleware(), requireRole("admin", "exec",
       return;
     }
     const { id } = req.params;
-    const filename = INVESTOR_DOC_MANIFEST[id];
-    if (!filename) {
+    const meta = INVESTOR_DOC_MANIFEST[id];
+    if (!meta) {
       res.status(404).json({ error: "Document not found" });
       return;
     }
-    const content = readFileSync(join(INVESTOR_DOCS_DIR, filename), "utf-8");
-    res.json({ data: { id, filename, content } });
+    const content = readFileSync(join(INVESTOR_DOCS_DIR, meta.filename), "utf-8");
+    res.json({ data: { id, filename: meta.filename, content } });
   } catch (err) {
     logger.error({ err, id: req.params.id }, "Failed to read investor doc");
     res.status(500).json({ error: "Failed to read document" });
+  }
+});
+
+router.get("/investors/docs/:id/download", authMiddleware(), requireRole("admin", "exec", "analyst"), async (req, res) => {
+  const userId = req.user?.id;
+  if (!userId) {
+    res.status(401).json({ error: "Unauthenticated" });
+    return;
+  }
+  try {
+    const [ndaRecord] = await db
+      .select({ id: auditEventsTable.id })
+      .from(auditEventsTable)
+      .where(and(eq(auditEventsTable.userId, userId), eq(auditEventsTable.action, INVESTOR_NDA_ACTION)))
+      .limit(1);
+    if (!ndaRecord) {
+      res.status(403).json({ error: "NDA acceptance required", code: "NDA_REQUIRED" });
+      return;
+    }
+    const { id } = req.params;
+    const meta = INVESTOR_DOC_MANIFEST[id];
+    if (!meta) {
+      res.status(404).json({ error: "Document not found" });
+      return;
+    }
+    const content = readFileSync(join(INVESTOR_DOCS_DIR, meta.filename), "utf-8");
+    const downloadName = meta.filename.replace(".md", ".pdf");
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="${downloadName}"`);
+    await db.insert(auditEventsTable).values({
+      userId,
+      action: "investor_doc_downloaded",
+      entityType: "investor_data_room",
+      entityId: id,
+      ipAddress: hashIp(req.ip ?? null),
+      userAgent: req.headers["user-agent"] ?? null,
+      newValues: { docId: id, filename: meta.filename, format: "pdf" },
+    });
+    const pdfStream = generateInvestorDocPdf(content, meta.title, meta.subtitle);
+    pdfStream.pipe(res);
+    pdfStream.on("error", (err) => {
+      logger.error({ err, id }, "PDF generation stream error");
+      if (!res.headersSent) {
+        res.status(500).json({ error: "Failed to generate PDF" });
+      }
+    });
+  } catch (err) {
+    logger.error({ err, id: req.params.id }, "Failed to download investor doc");
+    if (!res.headersSent) {
+      res.status(500).json({ error: "Failed to download document" });
+    }
+  }
+});
+
+const demoRequestSchema = z.object({
+  name: z.string().min(1).max(200),
+  email: z.string().email().max(300),
+  company: z.string().min(1).max(300),
+  role: z.string().max(100).optional(),
+  message: z.string().max(2000).optional(),
+});
+
+router.post("/investors/demo-request", authMiddleware(), validateBody(demoRequestSchema), async (req, res) => {
+  const userId = req.user?.id;
+  if (!userId) {
+    res.status(401).json({ error: "Unauthenticated" });
+    return;
+  }
+  try {
+    await db.insert(auditEventsTable).values({
+      userId,
+      action: "investor_demo_requested",
+      entityType: "investor_data_room",
+      entityId: "demo-request",
+      ipAddress: hashIp(req.ip ?? null),
+      userAgent: req.headers["user-agent"] ?? null,
+      newValues: {
+        name: req.body.name,
+        email: req.body.email,
+        company: req.body.company,
+        role: req.body.role ?? null,
+        message: req.body.message ?? null,
+        requestedAt: new Date().toISOString(),
+      },
+    });
+    logger.info({ email: req.body.email, company: req.body.company }, "Investor demo request received");
+    res.json({ data: { submitted: true } });
+  } catch (err) {
+    logger.error({ err }, "Failed to record investor demo request");
+    res.status(500).json({ error: "Failed to submit demo request" });
+  }
+});
+
+const inquirySchema = z.object({
+  name: z.string().min(1).max(200),
+  email: z.string().email().max(300),
+  company: z.string().min(1).max(300),
+  role: z.string().max(100).optional(),
+  materialsRequested: z.array(z.string()).min(1),
+  context: z.string().max(2000).optional(),
+});
+
+router.post("/investors/inquiry", authMiddleware(), validateBody(inquirySchema), async (req, res) => {
+  const userId = req.user?.id;
+  if (!userId) {
+    res.status(401).json({ error: "Unauthenticated" });
+    return;
+  }
+  try {
+    await db.insert(auditEventsTable).values({
+      userId,
+      action: "investor_deeper_access_requested",
+      entityType: "investor_data_room",
+      entityId: "access-inquiry",
+      ipAddress: hashIp(req.ip ?? null),
+      userAgent: req.headers["user-agent"] ?? null,
+      newValues: {
+        name: req.body.name,
+        email: req.body.email,
+        company: req.body.company,
+        role: req.body.role ?? null,
+        materialsRequested: req.body.materialsRequested,
+        context: req.body.context ?? null,
+        requestedAt: new Date().toISOString(),
+      },
+    });
+    logger.info({ email: req.body.email, materials: req.body.materialsRequested }, "Investor deeper access inquiry received");
+    res.json({ data: { submitted: true } });
+  } catch (err) {
+    logger.error({ err }, "Failed to record investor inquiry");
+    res.status(500).json({ error: "Failed to submit inquiry" });
   }
 });
 
