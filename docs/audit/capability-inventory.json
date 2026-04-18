@@ -1,0 +1,176 @@
+{
+  "meta": {
+    "date": "2026-04-18",
+    "version": "1.0",
+    "totalCapabilities": 100,
+    "document": "CAPABILITY_INVENTORY.md"
+  },
+  "statusCounts": {
+    "live": 32,
+    "demo-ready": 41,
+    "partial": 8,
+    "stub": 19,
+    "planned": 0
+  },
+  "domains": {
+    "platform": {
+      "name": "Core Platform Primitives",
+      "capabilities": [
+        {"id": "P-001", "name": "Outcome Graph", "status": "live", "testCoverage": "partial"},
+        {"id": "P-002", "name": "Proof Chain", "status": "live", "testCoverage": "partial"},
+        {"id": "P-003", "name": "Covenant Policy", "status": "live", "testCoverage": "partial"},
+        {"id": "P-004", "name": "Decision Simulation (Monte Carlo)", "status": "live", "testCoverage": "partial"},
+        {"id": "P-005", "name": "Workflow Engine (Alloy)", "status": "live", "testCoverage": "partial"},
+        {"id": "P-006", "name": "Event Fabric (PRISM Bus)", "status": "live", "testCoverage": "partial"},
+        {"id": "P-007", "name": "Correlation ID propagation", "status": "live", "testCoverage": "covered"},
+        {"id": "P-008", "name": "Multi-tenant RBAC (11 roles)", "status": "live", "testCoverage": "partial"},
+        {"id": "P-009", "name": "Session-based OIDC authentication", "status": "live", "testCoverage": "covered"}
+      ]
+    },
+    "api-server": {
+      "name": "API Server",
+      "capabilities": [
+        {"id": "A-001", "name": "REST API (~170 route files)", "status": "live", "testCoverage": "partial"},
+        {"id": "A-002", "name": "GraphQL API", "status": "live", "testCoverage": "partial"},
+        {"id": "A-003", "name": "WebSocket real-time channels", "status": "live", "testCoverage": "partial"},
+        {"id": "A-004", "name": "Server-Sent Events (SSE)", "status": "live", "testCoverage": "none"},
+        {"id": "A-005", "name": "Health check endpoints (8)", "status": "live", "testCoverage": "covered"},
+        {"id": "A-006", "name": "Rate limiting (5 layers)", "status": "live", "testCoverage": "partial"},
+        {"id": "A-007", "name": "CSRF protection", "status": "live", "testCoverage": "partial"},
+        {"id": "A-008", "name": "Helmet.js CSP headers", "status": "live", "testCoverage": "partial"},
+        {"id": "A-009", "name": "Field-level encryption", "status": "live", "testCoverage": "none"},
+        {"id": "A-010", "name": "MCP Gateway", "status": "live", "testCoverage": "none"},
+        {"id": "A-011", "name": "OpenAPI documentation", "status": "partial", "testCoverage": "none"},
+        {"id": "A-012", "name": "Webhook receivers", "status": "live", "testCoverage": "partial"},
+        {"id": "A-013", "name": "Zod validation (84% coverage)", "status": "live", "testCoverage": "covered"},
+        {"id": "A-014", "name": "Structured logging (pino)", "status": "live", "testCoverage": "covered"},
+        {"id": "A-015", "name": "Sentry error tracking", "status": "live", "testCoverage": "partial"}
+      ]
+    },
+    "szl-holdings": {
+      "name": "SZL Holdings Dashboard",
+      "capabilities": [
+        {"id": "S-001", "name": "Corporate landing / investor hub", "status": "live", "testCoverage": "covered"},
+        {"id": "S-002", "name": "Trust Center", "status": "live", "testCoverage": "covered"},
+        {"id": "S-003", "name": "Legal pages", "status": "live", "testCoverage": "covered"},
+        {"id": "S-004", "name": "Lyte business observability", "status": "demo-ready", "testCoverage": "covered"},
+        {"id": "S-005", "name": "Decision Theater", "status": "demo-ready", "testCoverage": "partial"},
+        {"id": "S-006", "name": "ATLAS observability", "status": "demo-ready", "testCoverage": "partial"},
+        {"id": "S-007", "name": "Nuro Forge", "status": "demo-ready", "testCoverage": "covered"},
+        {"id": "S-008", "name": "Ecosystem navigation", "status": "live", "testCoverage": "covered"},
+        {"id": "S-009", "name": "Demo/Pilot/Live data state badges", "status": "live", "testCoverage": "partial"},
+        {"id": "S-010", "name": "Autopilot header", "status": "stub", "testCoverage": "none"},
+        {"id": "S-011", "name": "Founder/About pages", "status": "live", "testCoverage": "none"}
+      ]
+    },
+    "command": {
+      "name": "Unified Command",
+      "capabilities": [
+        {"id": "C-001", "name": "Strategy layer dashboard", "status": "demo-ready", "testCoverage": "covered"},
+        {"id": "C-002", "name": "Executive Briefing", "status": "demo-ready", "testCoverage": "partial"},
+        {"id": "C-003", "name": "Operations / Portfolio Health", "status": "demo-ready", "testCoverage": "covered"},
+        {"id": "C-004", "name": "Approvals queue", "status": "demo-ready", "testCoverage": "partial"},
+        {"id": "C-005", "name": "Blocker Board", "status": "demo-ready", "testCoverage": "partial"},
+        {"id": "C-006", "name": "Alloy Workflow Canvas", "status": "demo-ready", "testCoverage": "partial"},
+        {"id": "C-007", "name": "Infrastructure / IMPERIUM map", "status": "demo-ready", "testCoverage": "covered"},
+        {"id": "C-008", "name": "Analytics dashboard", "status": "demo-ready", "testCoverage": "none"},
+        {"id": "C-009", "name": "Demo Mode scenario engine", "status": "live", "testCoverage": "none"},
+        {"id": "C-010", "name": "Governed Decision Loop", "status": "demo-ready", "testCoverage": "covered"},
+        {"id": "C-011", "name": "Cognitive Consoles", "status": "demo-ready", "testCoverage": "none"},
+        {"id": "C-012", "name": "CORTEX badge counts", "status": "stub", "testCoverage": "none"}
+      ]
+    },
+    "vessels": {
+      "name": "Vessels Maritime Intelligence",
+      "capabilities": [
+        {"id": "V-001", "name": "Fleet management dashboard", "status": "demo-ready", "testCoverage": "covered"},
+        {"id": "V-002", "name": "Vessel tracking (map)", "status": "partial", "testCoverage": "partial", "demoblocker": "requires MAPBOX_ACCESS_TOKEN"},
+        {"id": "V-003", "name": "Maritime intelligence", "status": "demo-ready", "testCoverage": "partial"},
+        {"id": "V-004", "name": "Port analysis", "status": "demo-ready", "testCoverage": "none"},
+        {"id": "V-005", "name": "Live AIS positions", "status": "stub", "testCoverage": "none"},
+        {"id": "V-006", "name": "NOAA CO-OPS marine weather", "status": "live", "testCoverage": "none"},
+        {"id": "V-007", "name": "Open-Meteo marine forecast", "status": "live", "testCoverage": "none"},
+        {"id": "V-008", "name": "Decision Center", "status": "demo-ready", "testCoverage": "none"},
+        {"id": "V-009", "name": "Insurance module", "status": "stub", "testCoverage": "none"},
+        {"id": "V-010", "name": "Trading module", "status": "stub", "testCoverage": "none"},
+        {"id": "V-011", "name": "Platform module", "status": "stub", "testCoverage": "none"}
+      ]
+    },
+    "terra": {
+      "name": "Terra Real Estate Intelligence",
+      "capabilities": [
+        {"id": "T-001", "name": "Property intelligence dashboard", "status": "demo-ready", "testCoverage": "covered"},
+        {"id": "T-002", "name": "Portfolio view", "status": "demo-ready", "testCoverage": "partial"},
+        {"id": "T-003", "name": "Market analysis", "status": "demo-ready", "testCoverage": "partial"},
+        {"id": "T-004", "name": "NYC Open Data distress pipeline", "status": "live", "testCoverage": "none"},
+        {"id": "T-005", "name": "Valuation tools", "status": "demo-ready", "testCoverage": "none"},
+        {"id": "T-006", "name": "Map visualization", "status": "partial", "testCoverage": "none", "demoblocker": "requires MAPBOX_ACCESS_TOKEN"},
+        {"id": "T-007", "name": "Census ACS demographics", "status": "live", "testCoverage": "none"},
+        {"id": "T-008", "name": "FEMA National Risk Index", "status": "live", "testCoverage": "none"},
+        {"id": "T-009", "name": "SEC EDGAR REIT filings", "status": "live", "testCoverage": "none"},
+        {"id": "T-010", "name": "Decision Center", "status": "demo-ready", "testCoverage": "none"}
+      ]
+    },
+    "aegis": {
+      "name": "Aegis Defense Intelligence / Pitch Deck",
+      "capabilities": [
+        {"id": "AG-001", "name": "Investor pitch deck slides", "status": "live", "testCoverage": "partial"},
+        {"id": "AG-002", "name": "Threat intelligence dashboard", "status": "demo-ready", "testCoverage": "covered"},
+        {"id": "AG-003", "name": "Vulnerability management", "status": "demo-ready", "testCoverage": "partial"},
+        {"id": "AG-004", "name": "Incident response", "status": "demo-ready", "testCoverage": "partial"},
+        {"id": "AG-005", "name": "Compliance modules", "status": "demo-ready", "testCoverage": "partial"},
+        {"id": "AG-006", "name": "Network security", "status": "demo-ready", "testCoverage": "none"},
+        {"id": "AG-007", "name": "CISA KEV catalog (1,554+ entries)", "status": "live", "testCoverage": "none"},
+        {"id": "AG-008", "name": "NVD CVE database", "status": "live", "testCoverage": "none"},
+        {"id": "AG-009", "name": "MITRE ATT&CK Matrix v14", "status": "live", "testCoverage": "none"},
+        {"id": "AG-010", "name": "CISO Executive Dashboard", "status": "stub", "testCoverage": "none"},
+        {"id": "AG-011", "name": "8 new security modules", "status": "stub", "testCoverage": "none"}
+      ]
+    },
+    "carlota-jo": {
+      "name": "Carlota Jo Advisory",
+      "capabilities": [
+        {"id": "CJ-001", "name": "Advisory landing", "status": "live", "testCoverage": "covered"},
+        {"id": "CJ-002", "name": "Services page", "status": "live", "testCoverage": "partial"},
+        {"id": "CJ-003", "name": "About page", "status": "live", "testCoverage": "none"},
+        {"id": "CJ-004", "name": "Contact form", "status": "live", "testCoverage": "partial"},
+        {"id": "CJ-005", "name": "Client engagement history", "status": "demo-ready", "testCoverage": "none"},
+        {"id": "CJ-006", "name": "Advisory session notes", "status": "demo-ready", "testCoverage": "none"},
+        {"id": "CJ-007", "name": "Decision Center", "status": "demo-ready", "testCoverage": "none"},
+        {"id": "CJ-008", "name": "World Bank GDP indicators", "status": "live", "testCoverage": "none"},
+        {"id": "CJ-009", "name": "Microsoft Outlook Calendar connector", "status": "live", "testCoverage": "none"},
+        {"id": "CJ-010", "name": "Google OAuth", "status": "stub", "testCoverage": "none"}
+      ]
+    },
+    "pulse": {
+      "name": "Pulse AI Executive Briefing",
+      "capabilities": [
+        {"id": "PU-001", "name": "AI executive briefing reader", "status": "demo-ready", "testCoverage": "none"},
+        {"id": "PU-002", "name": "Morning briefing generation (AI)", "status": "stub", "testCoverage": "none"},
+        {"id": "PU-003", "name": "Decision summaries", "status": "demo-ready", "testCoverage": "none"},
+        {"id": "PU-004", "name": "PDF export", "status": "stub", "testCoverage": "none"},
+        {"id": "PU-005", "name": "Email subscription", "status": "stub", "testCoverage": "none"},
+        {"id": "PU-006", "name": "Decision Center view", "status": "demo-ready", "testCoverage": "none"}
+      ]
+    },
+    "nexus": {
+      "name": "NEXUS Agentic AI Layer",
+      "capabilities": [
+        {"id": "N-001", "name": "Parallel Research Swarm", "status": "demo-ready", "testCoverage": "none"},
+        {"id": "N-002", "name": "Persistent Memory + Skills Library", "status": "demo-ready", "testCoverage": "none"},
+        {"id": "N-003", "name": "Universal Protocol Bridge (MCP/A2A)", "status": "demo-ready", "testCoverage": "none"},
+        {"id": "N-004", "name": "Cross-App Orchestrator", "status": "demo-ready", "testCoverage": "none"},
+        {"id": "N-005", "name": "Design System preview", "status": "live", "testCoverage": "none"}
+      ]
+    },
+    "mobile": {
+      "name": "Mobile (szl-holdings-mobile)",
+      "capabilities": [
+        {"id": "M-001", "name": "Mobile command center (CORTEX)", "status": "demo-ready", "testCoverage": "none"},
+        {"id": "M-002", "name": "Decision Center mobile", "status": "demo-ready", "testCoverage": "none"},
+        {"id": "M-003", "name": "Push notifications", "status": "stub", "testCoverage": "none"},
+        {"id": "M-004", "name": "Sentry mobile monitoring", "status": "stub", "testCoverage": "none"}
+      ]
+    }
+  }
+}

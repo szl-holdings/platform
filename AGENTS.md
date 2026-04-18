@@ -1,7 +1,7 @@
 # AGENTS — SZL Holdings Platform
 
 **Scope:** Root rules — apply to every package, artifact, and agent in this monorepo.  
-**Date:** April 2026  
+**Date:** April 18, 2026 (updated: launch-readiness audit complete)  
 **Audience:** AI coding agents (Codex, Claude, Cursor, Copilot), human engineers, automated CI systems.
 
 > **Entry point:** Read [architecture.md](architecture.md) first, then [ontology.md](ontology.md), then this file. Subdirectory AGENTS.md files layer on top of these root rules — they narrow or extend, never contradict.
@@ -119,6 +119,28 @@ Files to maintain:
 - `packages/ontology/AGENTS.md` — Ontology package rules
 - `packages/alloy/AGENTS.md` — Cognitive runtime rules
 - `lib/db/AGENTS.md` — Database schema rules
+
+---
+
+## Audit Documentation (Launch-Readiness — April 18, 2026)
+
+The following canonical audit documents are maintained in `docs/audit/`:
+
+| Document | Purpose |
+|----------|---------|
+| `CAPABILITY_INVENTORY.md` + `capability-inventory.json` | 100 capabilities with status, coverage, and demo-blocker flags |
+| `SURFACE_MAP.md` | Route-by-route visibility audit (✅/⚠️/❌ per surface) |
+| `MOCK_AND_STUB_REGISTER.md` | Severity-tagged mock/stub register (`ship-blocker`/`demo-blocker`/`polish`/`acceptable`) |
+| `GAP_MATRIX.md` + `gap-matrix.json` | 20 open gaps with owners, targets, and waiver status |
+| `ENV_AND_SECRETS_REGISTER.md` | 156 env vars with tier, current state, and silent-fallback analysis |
+| `DB_SCHEMA_AND_MIGRATION_AUDIT.md` | 569-table schema review, seed scripts, data integrity |
+| `TEST_MATRIX.md` | Test pyramid, CI gates, coverage by layer |
+| `RELEASE_READINESS.md` | 5-gate release checklist (demo/Series A/pilot/revenue/GCA) |
+| `DEMO_SCRIPT.md` | Investor demo click-path with pre-demo checklist and avoidance guide |
+| `KNOWN_LIMITATIONS.md` | 19 documented limitations with remediation paths |
+| `EXECUTIVE_SUMMARY.md` | Top-level audit summary and recommended next actions |
+
+**Before any investor demo:** Configure `MAPBOX_ACCESS_TOKEN` in Replit Secrets (map views are blank without it).
 
 ---
 

@@ -12,7 +12,7 @@ kind = "web"
     [[services]]
     name = "web"
     paths = [ "/aegis/" ]
-    localPort = 3002
+    localPort = 9090
 
     [services.development]
     run = "bash -c 'cd /home/runner/workspace/artifacts/aegis && exec node_modules/.bin/vite --config vite.config.ts --host 0.0.0.0'"
@@ -29,4 +29,3 @@ kind = "web"
     [services.env]
     VITE_PORT = "3002"
     BASE_PATH = "/aegis/"
-  
