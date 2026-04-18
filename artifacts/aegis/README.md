@@ -2,8 +2,8 @@
 
 Interactive investor pitch deck and ATLAS runtime demonstration. Contains the Series A slides, market positioning, and the ATLAS execution engine replay and scenario-branching views.
 
-**Kind:** web  
-**Preview path:** `/aegis/`  
+**Kind:** web
+**Preview path:** `/aegis/`
 **Artifact dir:** `artifacts/aegis/`
 
 ## Local development
@@ -20,6 +20,25 @@ pnpm --filter @szl-holdings/aegis dev
 | `/aegis/atlas` | ATLAS execution runtime demo |
 | `/aegis/replay` | Execution replay viewer |
 | `/aegis/branches` | Scenario branch explorer |
+
+## Notable source paths
+
+| Path | Purpose |
+|------|---------|
+| `src/pages/` | Slide pages and ATLAS surfaces |
+| `src/components/` | Slide chrome and ATLAS UI components |
+| `src/data/` | Slide content and ATLAS demo data |
+| `src/lib/` | API client and helpers |
+| `docs/` | Pitch deck supporting docs |
+| `scripts/` | Build and content scripts |
+
+## Key environment variables
+
+| Variable | Purpose |
+|----------|---------|
+| `VITE_API_URL` | API server base URL (used by ATLAS replay views) |
+
+See `ops/infra/environment-matrix.md` for the full environment variable matrix.
 
 ## Notes
 

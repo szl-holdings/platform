@@ -2,8 +2,8 @@
 
 Domain pack for real estate intelligence. Surfaces distress pipeline monitoring, ownership graph, deal workflow, and AI-assisted lead scoring.
 
-**Kind:** web  
-**Preview path:** `/terra/`  
+**Kind:** web
+**Preview path:** `/terra/`
 **Artifact dir:** `artifacts/terra/`
 
 ## Local development
@@ -23,3 +23,20 @@ pnpm --filter @szl-holdings/terra dev
 | Lead Scoring | AI-assisted prospect ranking |
 
 See `PRODUCT_SURFACE_MAP.md` for the full module-to-primitive mapping.
+
+## Notable source paths
+
+| Path | Purpose |
+|------|---------|
+| `src/pages/` | Route-level views (pipeline, deals, ownership, etc.) |
+| `src/components/` | Shared Terra UI components |
+| `src/hooks/`, `src/lib/` | Data hooks and API client |
+| `src/data/` | Demo seed data |
+
+## Key environment variables
+
+| Variable | Purpose |
+|----------|---------|
+| `VITE_PLAUSIBLE_DOMAIN` | Plausible analytics domain |
+
+Terra reads its primary data from the API server via the shared API client; backend keys (e.g. records providers) live on `api-server`. See `ops/infra/environment-matrix.md` for the full environment variable matrix.
