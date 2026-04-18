@@ -193,7 +193,7 @@ export default function TerraAtlasRuntimePage() {
     staleTime: 60000,
     retry: 1,
   });
-  const { data: propertiesData } = useQuery<{ data: { properties: ApiProperty[] } }>({
+  const { data: propertiesData, isError: propertiesError, isLoading: propertiesLoading } = useQuery<{ data: { properties: ApiProperty[] } }>({
     queryKey: ["terra-properties-list"],
     queryFn: () => fetch("/api/terra/properties").then(r => r.ok ? r.json() : Promise.reject(r.status)),
     staleTime: 120000,
@@ -217,6 +217,14 @@ export default function TerraAtlasRuntimePage() {
   const displayProperties: DisplayProperty[] = apiProperties && apiProperties.length > 0
     ? apiProperties.slice(0, 6).map(mapApiProperty)
     : DEMO_PROPERTIES;
+
+  const dataMode: "loading" | "live" | "demo" | "error" = propertiesLoading
+    ? "loading"
+    : propertiesError
+    ? "error"
+    : (apiProperties && apiProperties.length > 0)
+    ? "live"
+    : "demo";
 
   useEffect(() => {
     if (displayProperties.length > 0 && !displayProperties.find(p => p.id === selectedId)) {
@@ -267,12 +275,51 @@ export default function TerraAtlasRuntimePage() {
           >
             <Lock className="w-3 h-3" /> {safeMode ? "Safe Mode ON" : "Safe Mode"}
           </button>
-          <div className="flex items-center gap-1.5 text-[10px] px-2 py-1 rounded-lg border" style={{ color: "#2d6a4f", borderColor: "rgba(45,106,79,0.25)", background: "rgba(45,106,79,0.06)" }}>
-            <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#2d6a4f" }} />
-            RUNTIME LIVE
-          </div>
+          {dataMode === "live" && (
+            <div className="flex items-center gap-1.5 text-[10px] px-2 py-1 rounded-lg border" style={{ color: "#2d6a4f", borderColor: "rgba(45,106,79,0.25)", background: "rgba(45,106,79,0.06)" }}>
+              <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#2d6a4f" }} />
+              LIVE
+            </div>
+          )}
+          {dataMode === "demo" && (
+            <div className="flex items-center gap-1.5 text-[10px] px-2 py-1 rounded-lg border border-amber-500/30 bg-amber-500/10 text-amber-400">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+              DEMO
+            </div>
+          )}
+          {dataMode === "error" && (
+            <div className="flex items-center gap-1.5 text-[10px] px-2 py-1 rounded-lg border border-red-500/30 bg-red-500/10 text-red-400">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
+              ERROR
+            </div>
+          )}
+          {dataMode === "loading" && (
+            <div className="flex items-center gap-1.5 text-[10px] px-2 py-1 rounded-lg border" style={{ color: "rgba(255,255,255,0.4)", borderColor: "rgba(255,255,255,0.15)", background: "rgba(255,255,255,0.03)" }}>
+              <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "rgba(255,255,255,0.4)" }} />
+              LOADING
+            </div>
+          )}
         </div>
       </div>
+
+      {dataMode === "demo" && (
+        <div className="flex items-start gap-2 text-[11px] px-3 py-2.5 rounded-lg border border-amber-500/30 bg-amber-500/8 text-amber-200">
+          <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5 text-amber-400" />
+          <div>
+            <p className="font-semibold text-amber-300">Demo data — no live records found</p>
+            <p className="text-amber-300/70 text-[10px] mt-0.5">The properties API responded successfully but returned no records. The page is showing illustrative demo content. It will switch to live data automatically once real records are available.</p>
+          </div>
+        </div>
+      )}
+      {dataMode === "error" && (
+        <div className="flex items-start gap-2 text-[11px] px-3 py-2.5 rounded-lg border border-red-500/30 bg-red-500/8 text-red-200">
+          <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5 text-red-400" />
+          <div>
+            <p className="font-semibold text-red-300">Live data unavailable</p>
+            <p className="text-red-300/70 text-[10px] mt-0.5">The properties API request failed. Showing demo content while the connection is restored.</p>
+          </div>
+        </div>
+      )}
 
       {(liveDriftAvg !== null || liveBranchCount !== null || isLiveProperty || liveMarket) && (
         <div className="flex items-center gap-3 text-[10px] px-3 py-2 rounded-lg border" style={{ borderColor: "rgba(45,106,79,0.12)", background: "rgba(45,106,79,0.03)" }}>

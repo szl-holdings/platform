@@ -140,7 +140,7 @@ export default function VesselsReplayPage() {
   const [cursor, setCursor] = useState(12);
   const [selectedVesselId, setSelectedVesselId] = useState<string | null>(null);
 
-  const { data: vesselsData } = useQuery<{ data: Array<{ id: number; name: string }> }>({
+  const { data: vesselsData, isError: vesselsListError } = useQuery<{ data: Array<{ id: number; name: string }> }>({
     queryKey: ["vessels-list-replay"],
     queryFn: () => fetch("/api/vessels").then(r => r.ok ? r.json() : Promise.reject(r.status)),
     staleTime: 120000,
@@ -150,7 +150,7 @@ export default function VesselsReplayPage() {
   const vessels = vesselsData?.data ?? [];
   const effectiveVesselId = selectedVesselId ?? (vessels[0] ? String(vessels[0].id) : null);
 
-  const { data: eventsData, isFetching: eventsFetching } = useQuery<{ data: ApiVesselEvent[] }>({
+  const { data: eventsData, isFetching: eventsFetching, isError: eventsError, isLoading: eventsLoading } = useQuery<{ data: ApiVesselEvent[] }>({
     queryKey: ["vessel-events", effectiveVesselId],
     queryFn: () => fetch(`/api/vessels/${effectiveVesselId}/events`).then(r => r.ok ? r.json() : Promise.reject(r.status)),
     staleTime: 60000,
@@ -162,6 +162,14 @@ export default function VesselsReplayPage() {
   const isLiveEvents = apiEvents && apiEvents.length > 0;
   const VOYAGE_EVENTS: VoyageEvent[] = isLiveEvents ? apiEvents.map(mapApiEvent) : DEMO_VOYAGE_EVENTS;
   const totalEvents = VOYAGE_EVENTS.length;
+
+  const dataMode: "loading" | "live" | "demo" | "error" = (eventsLoading || (eventsFetching && !eventsData))
+    ? "loading"
+    : (eventsError || vesselsListError)
+    ? "error"
+    : isLiveEvents
+    ? "live"
+    : "demo";
 
   useEffect(() => {
     setCursor(Math.min(12, totalEvents - 1));
@@ -203,6 +211,26 @@ export default function VesselsReplayPage() {
               ))}
             </select>
           )}
+          {dataMode === "live" && (
+            <div className="flex items-center gap-1.5 text-[10px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-1 rounded-lg">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />LIVE
+            </div>
+          )}
+          {dataMode === "demo" && (
+            <div className="flex items-center gap-1.5 text-[10px] text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2 py-1 rounded-lg">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />DEMO
+            </div>
+          )}
+          {dataMode === "error" && (
+            <div className="flex items-center gap-1.5 text-[10px] text-red-400 bg-red-500/10 border border-red-500/30 px-2 py-1 rounded-lg">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-400" />ERROR
+            </div>
+          )}
+          {dataMode === "loading" && (
+            <div className="flex items-center gap-1.5 text-[10px] text-sky-400/60 bg-sky-500/5 border border-sky-500/20 px-2 py-1 rounded-lg">
+              <span className="w-1.5 h-1.5 rounded-full bg-sky-400/60 animate-pulse" />LOADING
+            </div>
+          )}
           <div className="flex items-center gap-1.5 text-[10px] text-violet-400 bg-violet-500/10 border border-violet-500/20 px-2 py-1 rounded-lg">
             <Clock className="w-3 h-3" />
             {current.time}
@@ -210,10 +238,28 @@ export default function VesselsReplayPage() {
         </div>
       </div>
 
-      {isLiveEvents && (
+      {dataMode === "live" && (
         <div className="flex items-center gap-2 text-[10px] px-3 py-2 rounded-lg border border-emerald-500/20 bg-emerald-500/5 text-emerald-400/80">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
           Live events from {selectedVesselName ?? "vessel"} — {totalEvents} events loaded
+        </div>
+      )}
+      {dataMode === "demo" && (
+        <div className="flex items-start gap-2 text-[11px] px-3 py-2.5 rounded-lg border border-amber-500/30 bg-amber-500/8 text-amber-200">
+          <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5 text-amber-400" />
+          <div>
+            <p className="font-semibold text-amber-300">Demo data — no live records found</p>
+            <p className="text-amber-300/70 text-[10px] mt-0.5">No voyage events were returned for {selectedVesselName ?? "this vessel"}. Showing illustrative demo events. The page will switch to live data automatically once real events are recorded.</p>
+          </div>
+        </div>
+      )}
+      {dataMode === "error" && (
+        <div className="flex items-start gap-2 text-[11px] px-3 py-2.5 rounded-lg border border-red-500/30 bg-red-500/8 text-red-200">
+          <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5 text-red-400" />
+          <div>
+            <p className="font-semibold text-red-300">Live data unavailable</p>
+            <p className="text-red-300/70 text-[10px] mt-0.5">The voyage events API request failed. Showing demo content while the connection is restored.</p>
+          </div>
         </div>
       )}
 

@@ -198,7 +198,7 @@ function BranchDetail({ branch }: { branch: Branch }) {
 export default function TerraScenarioBranchesPage() {
   const [selected, setSelected] = useState<BranchId>("valuation-stress");
 
-  const { data: atlasData } = useQuery<{ data?: { count: number } }>({
+  const { data: atlasData, isError: atlasError, isLoading: atlasLoading } = useQuery<{ data?: { count: number } }>({
     queryKey: ["terra-atlas-scenario-branches"],
     queryFn: () => fetch("/api/atlas/spatial/branches?twinCategory=property").then(r => r.ok ? r.json() : Promise.reject(r.status)),
     staleTime: 60000,
@@ -206,6 +206,13 @@ export default function TerraScenarioBranchesPage() {
   });
 
   const liveBranchCount = atlasData?.data?.count ?? null;
+  const dataMode: "loading" | "live" | "demo" | "error" = atlasLoading
+    ? "loading"
+    : atlasError
+    ? "error"
+    : (liveBranchCount !== null && liveBranchCount > 0)
+    ? "live"
+    : "demo";
 
   const branch = BRANCHES.find(b => b.id === selected)!;
 
@@ -220,13 +227,48 @@ export default function TerraScenarioBranchesPage() {
           </div>
           <p className="text-xs" style={{ color: "rgba(255,255,255,0.28)" }}>Simulate diverging property worldlines — compare branch outcomes against baseline</p>
         </div>
-        {liveBranchCount !== null && (
-          <div className="flex items-center gap-1.5 text-[10px] px-2.5 py-1 rounded-lg border" style={{ color: "#2d6a4f", borderColor: "rgba(45,106,79,0.25)", background: "rgba(45,106,79,0.06)" }}>
-            <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#2d6a4f" }} />
-            {liveBranchCount} live branch{liveBranchCount !== 1 ? "es" : ""} in ATLAS
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          {dataMode === "live" && (
+            <div className="flex items-center gap-1.5 text-[10px] px-2.5 py-1 rounded-lg border" style={{ color: "#2d6a4f", borderColor: "rgba(45,106,79,0.3)", background: "rgba(45,106,79,0.08)" }}>
+              <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#2d6a4f" }} />LIVE · {liveBranchCount} branch{liveBranchCount !== 1 ? "es" : ""}
+            </div>
+          )}
+          {dataMode === "demo" && (
+            <div className="flex items-center gap-1.5 text-[10px] px-2.5 py-1 rounded-lg border border-amber-500/30 bg-amber-500/10 text-amber-400">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />DEMO
+            </div>
+          )}
+          {dataMode === "error" && (
+            <div className="flex items-center gap-1.5 text-[10px] px-2.5 py-1 rounded-lg border border-red-500/30 bg-red-500/10 text-red-400">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-400" />ERROR
+            </div>
+          )}
+          {dataMode === "loading" && (
+            <div className="flex items-center gap-1.5 text-[10px] px-2.5 py-1 rounded-lg border" style={{ color: "rgba(255,255,255,0.4)", borderColor: "rgba(255,255,255,0.15)", background: "rgba(255,255,255,0.03)" }}>
+              <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "rgba(255,255,255,0.4)" }} />LOADING
+            </div>
+          )}
+        </div>
       </div>
+
+      {dataMode === "demo" && (
+        <div className="flex items-start gap-2 text-[11px] px-3 py-2.5 rounded-lg border border-amber-500/30 bg-amber-500/8 text-amber-200">
+          <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5 text-amber-400" />
+          <div>
+            <p className="font-semibold text-amber-300">Demo data — no live records found</p>
+            <p className="text-amber-300/70 text-[10px] mt-0.5">No active scenario branches were returned by ATLAS. The branches below are illustrative demo content. The page will reflect live branches automatically once they are recorded.</p>
+          </div>
+        </div>
+      )}
+      {dataMode === "error" && (
+        <div className="flex items-start gap-2 text-[11px] px-3 py-2.5 rounded-lg border border-red-500/30 bg-red-500/8 text-red-200">
+          <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5 text-red-400" />
+          <div>
+            <p className="font-semibold text-red-300">Live data unavailable</p>
+            <p className="text-red-300/70 text-[10px] mt-0.5">The scenario branches API request failed. Showing demo content while the connection is restored.</p>
+          </div>
+        </div>
+      )}
 
       <div className="rounded-xl p-4" style={{ background: "rgba(5,10,8,0.8)", border: "1px solid rgba(45,106,79,0.15)" }}>
         <div className="flex items-center gap-2 mb-3">

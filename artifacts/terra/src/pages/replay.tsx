@@ -118,7 +118,7 @@ export default function TerraReplayPage() {
   const [cursor, setCursor] = useState(12);
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
 
-  const { data: propertiesData } = useQuery<{ data: { properties: Array<{ id: number; address: string }> } }>({
+  const { data: propertiesData, isError: propertiesListError } = useQuery<{ data: { properties: Array<{ id: number; address: string }> } }>({
     queryKey: ["terra-properties-replay-list"],
     queryFn: () => fetch("/api/terra/properties").then(r => r.ok ? r.json() : Promise.reject(r.status)),
     staleTime: 120000,
@@ -128,7 +128,7 @@ export default function TerraReplayPage() {
   const properties = propertiesData?.data?.properties ?? [];
   const effectivePropertyId = selectedPropertyId ?? (properties[0] ? String(properties[0].id) : null);
 
-  const { data: historyData } = useQuery<{ data: { events: ApiEvent[]; address: string } }>({
+  const { data: historyData, isError: historyError, isLoading: historyLoading, isFetching: historyFetching } = useQuery<{ data: { events: ApiEvent[]; address: string } }>({
     queryKey: ["terra-property-history", effectivePropertyId],
     queryFn: () => fetch(`/api/terra/properties/${effectivePropertyId}/history`).then(r => r.ok ? r.json() : Promise.reject(r.status)),
     staleTime: 60000,
@@ -140,6 +140,14 @@ export default function TerraReplayPage() {
   const isLiveEvents = apiEvents && apiEvents.length > 0;
   const PROPERTY_EVENTS: PropertyEvent[] = isLiveEvents ? apiEvents : DEMO_PROPERTY_EVENTS;
   const total = PROPERTY_EVENTS.length;
+
+  const dataMode: "loading" | "live" | "demo" | "error" = (historyLoading || (historyFetching && !historyData))
+    ? "loading"
+    : (historyError || propertiesListError)
+    ? "error"
+    : isLiveEvents
+    ? "live"
+    : "demo";
 
   useEffect(() => {
     setCursor(Math.min(12, total - 1));
@@ -182,6 +190,26 @@ export default function TerraReplayPage() {
               ))}
             </select>
           )}
+          {dataMode === "live" && (
+            <div className="flex items-center gap-1.5 text-[10px] px-2 py-1 rounded-lg border" style={{ color: "#2d6a4f", borderColor: "rgba(45,106,79,0.3)", background: "rgba(45,106,79,0.08)" }}>
+              <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#2d6a4f" }} />LIVE
+            </div>
+          )}
+          {dataMode === "demo" && (
+            <div className="flex items-center gap-1.5 text-[10px] px-2 py-1 rounded-lg border border-amber-500/30 bg-amber-500/10 text-amber-400">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />DEMO
+            </div>
+          )}
+          {dataMode === "error" && (
+            <div className="flex items-center gap-1.5 text-[10px] px-2 py-1 rounded-lg border border-red-500/30 bg-red-500/10 text-red-400">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-400" />ERROR
+            </div>
+          )}
+          {dataMode === "loading" && (
+            <div className="flex items-center gap-1.5 text-[10px] px-2 py-1 rounded-lg border" style={{ color: "rgba(255,255,255,0.4)", borderColor: "rgba(255,255,255,0.15)", background: "rgba(255,255,255,0.03)" }}>
+              <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "rgba(255,255,255,0.4)" }} />LOADING
+            </div>
+          )}
           <div className="flex items-center gap-1.5 text-[10px] px-2 py-1 rounded-lg border" style={{ color: "#8b7ac8", borderColor: "rgba(139,122,200,0.25)", background: "rgba(139,122,200,0.06)" }}>
             <Clock className="w-3 h-3" />
             {current.time}
@@ -189,10 +217,28 @@ export default function TerraReplayPage() {
         </div>
       </div>
 
-      {isLiveEvents && (
+      {dataMode === "live" && (
         <div className="flex items-center gap-2 text-[10px] px-3 py-2 rounded-lg border" style={{ borderColor: "rgba(45,106,79,0.2)", background: "rgba(45,106,79,0.04)", color: "#2d6a4f" }}>
           <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#2d6a4f" }} />
           Live history from {selectedAddress} — {total} events loaded
+        </div>
+      )}
+      {dataMode === "demo" && (
+        <div className="flex items-start gap-2 text-[11px] px-3 py-2.5 rounded-lg border border-amber-500/30 bg-amber-500/8 text-amber-200">
+          <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5 text-amber-400" />
+          <div>
+            <p className="font-semibold text-amber-300">Demo data — no live records found</p>
+            <p className="text-amber-300/70 text-[10px] mt-0.5">No property history was returned for {selectedAddress}. Showing illustrative demo events. The page will switch to live data automatically once real events are recorded.</p>
+          </div>
+        </div>
+      )}
+      {dataMode === "error" && (
+        <div className="flex items-start gap-2 text-[11px] px-3 py-2.5 rounded-lg border border-red-500/30 bg-red-500/8 text-red-200">
+          <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5 text-red-400" />
+          <div>
+            <p className="font-semibold text-red-300">Live data unavailable</p>
+            <p className="text-red-300/70 text-[10px] mt-0.5">The property history API request failed. Showing demo content while the connection is restored.</p>
+          </div>
         </div>
       )}
 

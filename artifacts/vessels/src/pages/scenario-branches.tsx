@@ -139,7 +139,7 @@ export default function VesselsScenarioBranchesPage() {
   const [selected, setSelected] = useState<BranchId>("reroute");
   const [comparing, setComparing] = useState<BranchId | null>(null);
 
-  const { data: atlasData } = useQuery<{ data?: { count: number; branches?: Array<{ twinId: string; probability?: number }> } }>({
+  const { data: atlasData, isError: atlasError, isLoading: atlasLoading } = useQuery<{ data?: { count: number; branches?: Array<{ twinId: string; probability?: number }> } }>({
     queryKey: ["vessels-atlas-scenario-branches"],
     queryFn: () => fetch("/api/atlas/spatial/branches?twinCategory=vessel").then(r => r.ok ? r.json() : Promise.reject(r.status)),
     staleTime: 60000,
@@ -147,6 +147,13 @@ export default function VesselsScenarioBranchesPage() {
   });
 
   const liveBranchCount = atlasData?.data?.count ?? null;
+  const dataMode: "loading" | "live" | "demo" | "error" = atlasLoading
+    ? "loading"
+    : atlasError
+    ? "error"
+    : (liveBranchCount !== null && liveBranchCount > 0)
+    ? "live"
+    : "demo";
 
   const branch = BRANCHES.find(b => b.id === selected)!;
   const compareBranch = comparing ? BRANCHES.find(b => b.id === comparing) : null;
@@ -162,13 +169,48 @@ export default function VesselsScenarioBranchesPage() {
           </div>
           <p className="text-xs text-sky-400/40">Simulate diverging voyage worldlines — compare branch outcomes against baseline</p>
         </div>
-        {liveBranchCount !== null && (
-          <div className="flex items-center gap-1.5 text-[10px] text-sky-400 bg-sky-500/8 border border-sky-500/20 px-2.5 py-1 rounded-lg">
-            <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse" />
-            {liveBranchCount} live branch{liveBranchCount !== 1 ? "es" : ""} in ATLAS
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          {dataMode === "live" && (
+            <div className="flex items-center gap-1.5 text-[10px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-1 rounded-lg">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />LIVE · {liveBranchCount} branch{liveBranchCount !== 1 ? "es" : ""}
+            </div>
+          )}
+          {dataMode === "demo" && (
+            <div className="flex items-center gap-1.5 text-[10px] text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2 py-1 rounded-lg">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />DEMO
+            </div>
+          )}
+          {dataMode === "error" && (
+            <div className="flex items-center gap-1.5 text-[10px] text-red-400 bg-red-500/10 border border-red-500/30 px-2 py-1 rounded-lg">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-400" />ERROR
+            </div>
+          )}
+          {dataMode === "loading" && (
+            <div className="flex items-center gap-1.5 text-[10px] text-sky-400/60 bg-sky-500/5 border border-sky-500/20 px-2 py-1 rounded-lg">
+              <span className="w-1.5 h-1.5 rounded-full bg-sky-400/60 animate-pulse" />LOADING
+            </div>
+          )}
+        </div>
       </div>
+
+      {dataMode === "demo" && (
+        <div className="flex items-start gap-2 text-[11px] px-3 py-2.5 rounded-lg border border-amber-500/30 bg-amber-500/8 text-amber-200">
+          <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5 text-amber-400" />
+          <div>
+            <p className="font-semibold text-amber-300">Demo data — no live records found</p>
+            <p className="text-amber-300/70 text-[10px] mt-0.5">No active scenario branches were returned by ATLAS. The branches below are illustrative demo content. The page will reflect live branches automatically once they are recorded.</p>
+          </div>
+        </div>
+      )}
+      {dataMode === "error" && (
+        <div className="flex items-start gap-2 text-[11px] px-3 py-2.5 rounded-lg border border-red-500/30 bg-red-500/8 text-red-200">
+          <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5 text-red-400" />
+          <div>
+            <p className="font-semibold text-red-300">Live data unavailable</p>
+            <p className="text-red-300/70 text-[10px] mt-0.5">The scenario branches API request failed. Showing demo content while the connection is restored.</p>
+          </div>
+        </div>
+      )}
 
       <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
         <div className="flex items-center gap-2 mb-3">
