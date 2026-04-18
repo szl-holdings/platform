@@ -24,6 +24,7 @@ import { AuthProvider, useAuth as useVesselsRoleAuth, roleLabels, type UserRole 
 import { useAuth } from "@szl-holdings/replit-auth-web";
 import { identifyAnalyticsUser, resetAnalyticsUser, setUser as setSentryUser, clearUser as clearSentryUser } from "@szl-holdings/observability/react";
 import { PrivateAppGuard, useRealtimeChannel, RealtimeStatusIndicator, OnboardingWizard, GettingStartedChecklist, useOnboardingState, type OnboardingConfig, SyncStatusBadge, useWebSyncStatus } from "@szl-holdings/shared-ui";
+import { useOnboardingAnalytics } from "@szl-holdings/shared-ui/onboarding";
 import { IndexedDBAdapter, CommandQueue, ConflictResolver } from "@szl-holdings/offline-engine";
 import { CommandPalette, useCommandPalette, getEcosystemSwitchCommands, createBaselineWebActions, type CommandItem } from "@szl-holdings/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@szl-holdings/shared-ui/keyboard-shortcuts";
@@ -667,6 +668,7 @@ const vesselsShortcuts: KeyboardShortcut[] = [
 ];
 
 function VesselsDashboard({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v: boolean) => void }) {
+  const { trackTourCompleted, trackTourSkipped } = useOnboardingAnalytics({ platform: "vessels", tourId: "vessels-tour" });
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarHovered, setSidebarHovered] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
@@ -731,7 +733,7 @@ function VesselsDashboard({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpe
         appName="Vessels"
         accentColor={VESSELS_ACCENT}
       />
-      <OnboardingWizard config={VESSELS_ONBOARDING_CONFIG} />
+      <OnboardingWizard config={VESSELS_ONBOARDING_CONFIG} onComplete={trackTourCompleted} onSkip={trackTourSkipped} />
     </PowerUserProvider>
   );
 }

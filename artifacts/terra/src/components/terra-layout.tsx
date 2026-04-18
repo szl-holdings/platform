@@ -14,6 +14,7 @@ import {
   Brain, GitMerge, AlertTriangle, Landmark, MapPin
 } from "lucide-react";
 import { useRealtimeChannel, RealtimeStatusIndicator, GettingStartedChecklist, OnboardingWizard, useOnboardingState, type OnboardingConfig } from "@szl-holdings/shared-ui";
+import { useOnboardingAnalytics } from "@szl-holdings/shared-ui/onboarding";
 import { SidebarNav, type SidebarNavSection, DashboardShell as SharedDashboardShell } from "@szl-holdings/shared-ui/design-system";
 import { useQuery } from "@tanstack/react-query";
 import { colors, spacing } from "@szl-holdings/shared-ui/tokens";
@@ -146,6 +147,7 @@ function readCollapsed(): boolean {
 }
 
 export function TerraLayout({ children }: { children: ReactNode }) {
+  const { trackTourCompleted, trackTourSkipped } = useOnboardingAnalytics({ platform: "terra", tourId: "terra-tour" });
   const [location, navigate] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(readCollapsed);
@@ -326,7 +328,7 @@ export function TerraLayout({ children }: { children: ReactNode }) {
           </SectionErrorBoundary>
         </main>
       </SharedDashboardShell>
-      <OnboardingWizard config={TERRA_ONBOARDING_CONFIG} />
+      <OnboardingWizard config={TERRA_ONBOARDING_CONFIG} onComplete={trackTourCompleted} onSkip={trackTourSkipped} />
     </>
   );
 }
