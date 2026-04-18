@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Layers, Building2, TrendingUp, TrendingDown, Activity, MapPin, BarChart3, AlertTriangle, DollarSign, Shield, Clock, ChevronRight, Lock, GitBranch } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 
-const PROPERTIES = [
+const DEMO_PROPERTIES = [
   { id: "p-001", address: "84 Grand St", neighborhood: "Williamsburg", type: "Multi-Family", units: 12, value: 3_800_000, noi: 228_000, ltv: 0.58, status: "stable" },
   { id: "p-002", address: "210 Kent Ave", neighborhood: "Williamsburg", type: "Mixed-Use", units: 18, value: 5_200_000, noi: 364_000, ltv: 0.62, status: "stable" },
   { id: "p-003", address: "1002 Myrtle Ave", neighborhood: "Bushwick", type: "Multi-Family", units: 8, value: 2_100_000, noi: 147_000, ltv: 0.71, status: "watch" },
@@ -26,7 +26,7 @@ const TWIN_STATUS = [
   { label: "Submarket Twin", value: "Active", status: "warn" },
 ];
 
-const MARKET_MEMORY = [
+const DEMO_MARKET_MEMORY = [
   { period: "Q1 2024", capRate: 5.8, rentGrowth: 3.2, vacancyRate: 4.1, submktPressure: 28 },
   { period: "Q2 2024", capRate: 6.1, rentGrowth: 2.4, vacancyRate: 5.0, submktPressure: 35 },
   { period: "Q3 2024", capRate: 6.4, rentGrowth: 1.8, vacancyRate: 5.8, submktPressure: 42 },
@@ -34,6 +34,52 @@ const MARKET_MEMORY = [
   { period: "Q1 2025", capRate: 6.3, rentGrowth: 2.1, vacancyRate: 5.4, submktPressure: 38 },
   { period: "Q2 2025", capRate: 6.0, rentGrowth: 2.8, vacancyRate: 4.8, submktPressure: 31 },
 ];
+
+interface DisplayProperty {
+  id: string;
+  address: string;
+  neighborhood: string;
+  type: string;
+  units: number;
+  value: number;
+  noi: number;
+  ltv: number;
+  status: string;
+}
+
+interface ApiProperty {
+  id: number;
+  address: string;
+  city: string | null;
+  propertyType: string;
+  units: number | null;
+  assessedValue: string | null;
+  capRate: string | null;
+  noi: string | null;
+  externalId: string | null;
+  kpis?: { value: number | null; noi: number | null; capRate: number | null };
+}
+
+interface MarketData {
+  totalProperties: number;
+  avgCapRate: string | null;
+  dataSource: string;
+}
+
+function mapApiProperty(p: ApiProperty, idx: number): DisplayProperty {
+  const demo = DEMO_PROPERTIES[idx % DEMO_PROPERTIES.length];
+  return {
+    id: String(p.id),
+    address: p.address,
+    neighborhood: p.city ?? demo.neighborhood,
+    type: p.propertyType,
+    units: p.units ?? demo.units,
+    value: (p.kpis?.value ?? Number(p.assessedValue ?? 0)) || demo.value,
+    noi: (p.kpis?.noi ?? Number(p.noi ?? 0)) || demo.noi,
+    ltv: demo.ltv,
+    status: "stable",
+  };
+}
 
 function fmt(n: number, compact = true) {
   if (compact) {
@@ -43,7 +89,7 @@ function fmt(n: number, compact = true) {
   return `$${n.toLocaleString()}`;
 }
 
-function PropertyTwinCanvas({ propertyId }: { propertyId: string }) {
+function PropertyTwinCanvas({ propertyId, capRate, noiDrift }: { propertyId: string; capRate: string; noiDrift: string }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -59,12 +105,10 @@ function PropertyTwinCanvas({ propertyId }: { propertyId: string }) {
       ctx.clearRect(0, 0, w, h);
       ctx.fillStyle = "#050a08";
       ctx.fillRect(0, 0, w, h);
-      // grid
       ctx.strokeStyle = "rgba(45,106,79,0.05)";
       ctx.lineWidth = 1;
       for (let x = 0; x < w; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
       for (let y = 0; y < h; y += 40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
-      // block map - 4x3 property grid
       const blockW = 72, blockH = 52, gap = 16;
       const startX = w / 2 - (2 * blockW + 1.5 * gap), startY = h / 2 - blockH;
       for (let row = 0; row < 2; row++) {
@@ -82,13 +126,11 @@ function PropertyTwinCanvas({ propertyId }: { propertyId: string }) {
           ctx.fill();
           ctx.stroke();
           if (isSubject) {
-            // Twin pulse rings
             ctx.beginPath();
             ctx.strokeStyle = `rgba(45,106,79,${0.3 * (1 - pulse)})`;
             ctx.lineWidth = 2;
             ctx.rect(bx - 6 - pulse * 4, by - 6 - pulse * 4, blockW + 12 + pulse * 8, blockH + 12 + pulse * 8);
             ctx.stroke();
-            // Label
             ctx.font = "bold 8px monospace";
             ctx.fillStyle = "rgba(45,106,79,1)";
             ctx.fillText("TWIN", bx + 4, by + 14);
@@ -96,7 +138,6 @@ function PropertyTwinCanvas({ propertyId }: { propertyId: string }) {
             ctx.fillStyle = "rgba(255,255,255,0.5)";
             ctx.fillText(propertyId, bx + 4, by + 26);
           }
-          // windows
           const winRows = 2, winCols = 3;
           for (let wr = 0; wr < winRows; wr++) {
             for (let wc = 0; wc < winCols; wc++) {
@@ -109,7 +150,6 @@ function PropertyTwinCanvas({ propertyId }: { propertyId: string }) {
           }
         }
       }
-      // overlay signal dots
       const dots = [[w * 0.15, h * 0.3], [w * 0.8, h * 0.25], [w * 0.65, h * 0.72], [w * 0.25, h * 0.75]];
       dots.forEach(([dx, dy], i) => {
         const p = (Math.sin(t * 2.5 + i * 0.8) + 1) / 2;
@@ -123,22 +163,21 @@ function PropertyTwinCanvas({ propertyId }: { propertyId: string }) {
         ctx.lineWidth = 1;
         ctx.stroke();
       });
-      // data overlay text
       ctx.font = "9px monospace";
       ctx.fillStyle = "rgba(45,106,79,0.3)";
-      [`PROPERTY_TWIN: ${propertyId}`, `AVM_SYNC: ${(Date.now() % 1000 / 10).toFixed(0)}ms`, `CAP_RATE: 5.8%`, `NOI_DRIFT: +0.08σ`].forEach((line, i) => {
+      [`PROPERTY_TWIN: ${propertyId}`, `AVM_SYNC: ${(Date.now() % 1000 / 10).toFixed(0)}ms`, `CAP_RATE: ${capRate}`, `NOI_DRIFT: ${noiDrift}`].forEach((line, i) => {
         ctx.fillText(line, 8, 16 + i * 14);
       });
       raf = requestAnimationFrame(draw);
     };
     draw();
     return () => cancelAnimationFrame(raf);
-  }, [propertyId]);
+  }, [propertyId, capRate, noiDrift]);
   return <canvas ref={canvasRef} width={520} height={220} className="w-full rounded-lg" />;
 }
 
 export default function TerraAtlasRuntimePage() {
-  const [selected, setSelected] = useState(PROPERTIES[0]);
+  const [selectedId, setSelectedId] = useState<string>(DEMO_PROPERTIES[0].id);
   const [overlays, setOverlays] = useState(OVERLAYS.map(o => ({ ...o })));
   const [safeMode, setSafeMode] = useState(false);
 
@@ -154,6 +193,47 @@ export default function TerraAtlasRuntimePage() {
     staleTime: 60000,
     retry: 1,
   });
+  const { data: propertiesData } = useQuery<{ data: { properties: ApiProperty[] } }>({
+    queryKey: ["terra-properties-list"],
+    queryFn: () => fetch("/api/terra/properties").then(r => r.ok ? r.json() : Promise.reject(r.status)),
+    staleTime: 120000,
+    retry: 1,
+  });
+  const { data: selectedPropData } = useQuery<{ data: ApiProperty }>({
+    queryKey: ["terra-property", selectedId],
+    queryFn: () => fetch(`/api/terra/properties/${selectedId}`).then(r => r.ok ? r.json() : Promise.reject(r.status)),
+    staleTime: 60000,
+    retry: 1,
+    enabled: !!selectedId,
+  });
+  const { data: marketData } = useQuery<{ data: MarketData }>({
+    queryKey: ["terra-market"],
+    queryFn: () => fetch("/api/terra/market").then(r => r.ok ? r.json() : Promise.reject(r.status)),
+    staleTime: 120000,
+    retry: 1,
+  });
+
+  const apiProperties = propertiesData?.data?.properties;
+  const displayProperties: DisplayProperty[] = apiProperties && apiProperties.length > 0
+    ? apiProperties.slice(0, 6).map(mapApiProperty)
+    : DEMO_PROPERTIES;
+
+  useEffect(() => {
+    if (displayProperties.length > 0 && !displayProperties.find(p => p.id === selectedId)) {
+      setSelectedId(displayProperties[0].id);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [apiProperties]);
+
+  const selected = displayProperties.find(p => p.id === selectedId) ?? displayProperties[0];
+  const isLiveProperty = !!selectedPropData?.data;
+
+  const liveProp = selectedPropData?.data;
+  const displayValue = (liveProp?.kpis?.value ?? Number(liveProp?.assessedValue ?? 0)) || selected.value;
+  const displayNoi = (liveProp?.kpis?.noi ?? Number(liveProp?.noi ?? 0)) || selected.noi;
+  const displayCapRate = liveProp?.kpis?.capRate ?? (displayNoi && displayValue ? (displayNoi / displayValue) * 100 : selected.noi / selected.value * 100);
+
+  const liveMarket = marketData?.data;
 
   const liveDriftAvg = driftData?.twins?.length
     ? (driftData.twins.reduce((s, t) => s + t.driftScore, 0) / driftData.twins.length).toFixed(2)
@@ -194,8 +274,14 @@ export default function TerraAtlasRuntimePage() {
         </div>
       </div>
 
-      {(liveDriftAvg !== null || liveBranchCount !== null) && (
+      {(liveDriftAvg !== null || liveBranchCount !== null || isLiveProperty || liveMarket) && (
         <div className="flex items-center gap-3 text-[10px] px-3 py-2 rounded-lg border" style={{ borderColor: "rgba(45,106,79,0.12)", background: "rgba(45,106,79,0.03)" }}>
+          {isLiveProperty && (
+            <span className="flex items-center gap-1" style={{ color: "#2d6a4f" }}><span className="w-1.5 h-1.5 rounded-full" style={{ background: "#2d6a4f" }} />Live property data</span>
+          )}
+          {liveMarket && liveMarket.totalProperties > 0 && (
+            <span style={{ color: "rgba(255,255,255,0.4)" }}>{liveMarket.totalProperties} properties · avg cap rate {liveMarket.avgCapRate ?? "N/A"}</span>
+          )}
           {liveDriftAvg !== null && (
             <span style={{ color: "rgba(255,255,255,0.4)" }}>Live Drift Avg: <span className="font-mono" style={{ color: "rgba(255,255,255,0.7)" }}>{liveDriftAvg}σ</span></span>
           )}
@@ -214,7 +300,6 @@ export default function TerraAtlasRuntimePage() {
         </div>
       )}
 
-      {/* Twin Status Rail */}
       <div className="flex items-center gap-3 overflow-x-auto pb-1">
         {TWIN_STATUS.map(s => (
           <div key={s.label} className={cn("flex items-center gap-2 px-3 py-1.5 rounded-lg border text-[10px] whitespace-nowrap shrink-0", s.status === "warn" ? "border-amber-500/25 bg-amber-500/5" : "")} style={s.status !== "warn" ? { borderColor: "rgba(45,106,79,0.12)", background: "rgba(5,10,8,0.6)" } : {}}>
@@ -225,44 +310,45 @@ export default function TerraAtlasRuntimePage() {
         ))}
       </div>
 
-      {/* Property selector */}
       <div className="flex gap-2 overflow-x-auto pb-1">
-        {PROPERTIES.map(p => (
-          <button key={p.id} onClick={() => setSelected(p)} className={cn("flex items-center gap-2 px-3 py-2 rounded-lg border text-xs whitespace-nowrap transition-all text-left")} style={selected.id === p.id ? { borderColor: "rgba(45,106,79,0.35)", background: "rgba(45,106,79,0.08)", color: "rgba(255,255,255,0.88)" } : { borderColor: "rgba(45,106,79,0.08)", background: "rgba(5,10,8,0.6)", color: "rgba(255,255,255,0.35)" }}>
+        {displayProperties.map(p => (
+          <button key={p.id} onClick={() => setSelectedId(p.id)} className={cn("flex items-center gap-2 px-3 py-2 rounded-lg border text-xs whitespace-nowrap transition-all text-left")} style={selected.id === p.id ? { borderColor: "rgba(45,106,79,0.35)", background: "rgba(45,106,79,0.08)", color: "rgba(255,255,255,0.88)" } : { borderColor: "rgba(45,106,79,0.08)", background: "rgba(5,10,8,0.6)", color: "rgba(255,255,255,0.35)" }}>
             <Building2 className="w-3.5 h-3.5 shrink-0" style={{ color: "#2d6a4f" }} />
             <div>
               <p className="font-medium">{p.address}</p>
               <p className="text-[9px] opacity-60">{p.neighborhood} · {p.type}</p>
             </div>
-            <span className={cn("text-[9px] ml-1", statusColors[p.status])}>{p.status}</span>
+            <span className={cn("text-[9px] ml-1", statusColors[p.status] ?? "text-emerald-400")}>{p.status}</span>
           </button>
         ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         <div className="lg:col-span-2 space-y-4">
-          {/* Twin Canvas */}
           <div className="rounded-xl overflow-hidden" style={{ background: "rgba(5,10,8,0.8)", border: "1px solid rgba(45,106,79,0.12)" }}>
             <div className="px-4 py-3 border-b flex items-center justify-between" style={{ borderColor: "rgba(45,106,79,0.1)" }}>
               <div>
                 <p className="text-sm font-semibold" style={{ color: "rgba(255,255,255,0.88)" }}>{selected.address} — Property Twin</p>
-                <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.28)" }}>{selected.neighborhood} · {selected.type} · {selected.units} units · {fmt(selected.value)}</p>
+                <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.28)" }}>{selected.neighborhood} · {selected.type} · {selected.units} units · {fmt(displayValue)}</p>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-mono" style={{ color: "rgba(45,106,79,0.6)" }}>AVM SYNC</span>
+                <span className="text-[10px] font-mono" style={{ color: "rgba(45,106,79,0.6)" }}>{isLiveProperty ? "LIVE AVM" : "AVM SYNC"}</span>
                 <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#2d6a4f" }} />
               </div>
             </div>
             <div className="p-4">
-              <PropertyTwinCanvas propertyId={selected.id} />
+              <PropertyTwinCanvas
+                propertyId={selected.id}
+                capRate={`${displayCapRate.toFixed(1)}%`}
+                noiDrift={isLiveProperty ? "+live" : "+0.08σ"}
+              />
             </div>
           </div>
 
-          {/* Market Memory */}
           <div className="rounded-xl overflow-hidden" style={{ background: "rgba(5,10,8,0.8)", border: "1px solid rgba(45,106,79,0.12)" }}>
             <div className="px-4 py-3 border-b flex items-center gap-2" style={{ borderColor: "rgba(45,106,79,0.1)" }}>
               <Clock className="w-3.5 h-3.5" style={{ color: "#2d6a4f" }} />
-              <span className="text-sm font-semibold" style={{ color: "rgba(255,255,255,0.88)" }}>Market Pressure Memory — Williamsburg Submarket</span>
+              <span className="text-sm font-semibold" style={{ color: "rgba(255,255,255,0.88)" }}>Market Pressure Memory — {selected.neighborhood} Submarket</span>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
@@ -274,8 +360,8 @@ export default function TerraAtlasRuntimePage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {MARKET_MEMORY.map((row, i) => {
-                    const isLatest = i === MARKET_MEMORY.length - 1;
+                  {DEMO_MARKET_MEMORY.map((row, i) => {
+                    const isLatest = i === DEMO_MARKET_MEMORY.length - 1;
                     return (
                       <tr key={i} className="border-b" style={{ borderColor: "rgba(45,106,79,0.05)", background: isLatest ? "rgba(45,106,79,0.04)" : undefined }}>
                         <td className="px-4 py-2.5 font-mono text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>{row.period}</td>
@@ -300,7 +386,6 @@ export default function TerraAtlasRuntimePage() {
         </div>
 
         <div className="space-y-4">
-          {/* Spatial Overlays */}
           <div className="rounded-xl p-4" style={{ background: "rgba(5,10,8,0.8)", border: "1px solid rgba(45,106,79,0.12)" }}>
             <p className="text-xs font-semibold mb-3 flex items-center gap-1.5" style={{ color: "rgba(255,255,255,0.88)" }}>
               <Layers className="w-3.5 h-3.5" style={{ color: "#2d6a4f" }} />
@@ -324,17 +409,17 @@ export default function TerraAtlasRuntimePage() {
             </div>
           </div>
 
-          {/* Property KPIs */}
           <div className="rounded-xl p-4" style={{ background: "rgba(5,10,8,0.8)", border: "1px solid rgba(45,106,79,0.12)" }}>
             <p className="text-xs font-semibold mb-3 flex items-center gap-1.5" style={{ color: "rgba(255,255,255,0.88)" }}>
               <BarChart3 className="w-3.5 h-3.5" style={{ color: "#2d6a4f" }} />
               Twin KPIs
+              {isLiveProperty && <span className="text-[9px] ml-auto" style={{ color: "#2d6a4f" }}>● live</span>}
             </p>
             {[
-              { label: "Estimated Value", val: fmt(selected.value), sub: "AVM — last sync 4h" },
-              { label: "Annual NOI", val: fmt(selected.noi), sub: "Stabilized" },
+              { label: "Estimated Value", val: fmt(displayValue), sub: isLiveProperty ? "AVM — live sync" : "AVM — last sync 4h" },
+              { label: "Annual NOI", val: fmt(displayNoi), sub: "Stabilized" },
               { label: "LTV Ratio", val: `${(selected.ltv * 100).toFixed(0)}%`, sub: selected.ltv > 0.7 ? "⚠ High" : "OK" },
-              { label: "Cap Rate", val: `${((selected.noi / selected.value) * 100).toFixed(1)}%`, sub: "Implied" },
+              { label: "Cap Rate", val: `${displayCapRate.toFixed(1)}%`, sub: "Implied" },
             ].map(m => (
               <div key={m.label} className="flex items-center justify-between py-2 border-b last:border-0" style={{ borderColor: "rgba(45,106,79,0.07)" }}>
                 <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>{m.label}</span>
@@ -346,7 +431,6 @@ export default function TerraAtlasRuntimePage() {
             ))}
           </div>
 
-          {/* Drift Badge */}
           <div className="rounded-xl p-4" style={{ background: "rgba(5,10,8,0.8)", border: "1px solid rgba(45,106,79,0.12)" }}>
             <p className="text-xs font-semibold mb-3 flex items-center gap-1.5" style={{ color: "rgba(255,255,255,0.88)" }}>
               <Activity className="w-3.5 h-3.5" style={{ color: "#2d6a4f" }} />

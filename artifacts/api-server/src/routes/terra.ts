@@ -1,7 +1,7 @@
 import { Router, type IRouter, type Request, type Response, type RequestHandler } from "express";
 import { LRUCache } from "lru-cache";
 import rateLimit from "express-rate-limit";
-import { sendSuccess, sendBadRequest, handleRouteError } from "../lib/api-response";
+import { sendSuccess, sendBadRequest, sendNotFound, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
 import { geocodeAddress, reverseGeocode, getGeocodingProviderStatus } from "../lib/geocoding";
 import {
@@ -14,6 +14,8 @@ import {
 } from "../lib/terra-enterprise-ingestion";
 import { services } from "@szl-holdings/services";
 import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { db, terraPropertiesTable, terraDistressPropertiesTable } from "@szl-holdings/db";
+import { eq, desc, sql } from "drizzle-orm";
 
 const router: IRouter = Router();
 
@@ -276,6 +278,94 @@ router.post("/terra/enterprise/sync/commercial", authMiddleware({ required: true
     sendSuccess(res, { message: "Commercial data refresh completed", ...result });
   } catch (err) {
     handleRouteError(res, err, "Commercial data refresh failed");
+  }
+});
+
+// ─── ATLAS Twin: Property endpoints ──────────────────────────────────────────
+
+router.get("/terra/properties", terraRateLimit, authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
+  try {
+    const limit = Math.min(Number(req.query.limit) || 50, 200);
+    const offset = Number(req.query.offset) || 0;
+    const properties = await db.select().from(terraPropertiesTable).orderBy(desc(terraPropertiesTable.createdAt)).limit(limit).offset(offset);
+    sendSuccess(res, { properties, count: properties.length });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to list properties");
+  }
+});
+
+router.get("/terra/market", terraRateLimit, authMiddleware({ required: false }), async (_req: Request, res: Response) => {
+  try {
+    const [capRateResult] = await db
+      .select({ avgCapRate: sql<string>`AVG(CAST(cap_rate AS NUMERIC))` })
+      .from(terraPropertiesTable);
+    const count = await db.select({ cnt: sql<number>`COUNT(*)` }).from(terraPropertiesTable);
+    const totalProperties = Number(count[0]?.cnt ?? 0);
+    const avgCapRate = capRateResult?.avgCapRate ? Number(capRateResult.avgCapRate).toFixed(2) : null;
+    sendSuccess(res, {
+      totalProperties,
+      avgCapRate: avgCapRate ? `${avgCapRate}%` : null,
+      dataSource: "live-db",
+      note: totalProperties === 0 ? "No property records found — showing demo data in UI" : null,
+    });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to fetch market data");
+  }
+});
+
+router.get("/terra/properties/:id", terraRateLimit, authMiddleware({ required: false }), async (req: Request, res: Response) => {
+  try {
+    const rawId = req.params.id;
+    const numericId = /^\d+$/.test(rawId) ? parseInt(rawId, 10) : null;
+    let property = null;
+    if (numericId !== null) {
+      [property] = await db.select().from(terraPropertiesTable).where(eq(terraPropertiesTable.id, numericId)).limit(1);
+    }
+    if (!property) {
+      const [byExternal] = await db.select().from(terraPropertiesTable).where(eq(terraPropertiesTable.externalId!, rawId)).limit(1);
+      property = byExternal ?? null;
+    }
+    if (!property) { sendNotFound(res, "Property"); return; }
+    const capRateNum = property.capRate ? Number(property.capRate) : null;
+    const noiNum = property.noi ? Number(property.noi) : null;
+    const valueNum = property.assessedValue ? Number(property.assessedValue) : null;
+    sendSuccess(res, {
+      ...property,
+      kpis: {
+        value: valueNum,
+        noi: noiNum,
+        capRate: capRateNum ?? (valueNum && noiNum ? ((noiNum / valueNum) * 100) : null),
+      },
+    });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to fetch property");
+  }
+});
+
+router.get("/terra/properties/:id/history", terraRateLimit, authMiddleware({ required: false }), async (req: Request, res: Response) => {
+  try {
+    const rawId = req.params.id;
+    const numericId = /^\d+$/.test(rawId) ? parseInt(rawId, 10) : null;
+    let propertyDbId: number | null = numericId;
+    if (!propertyDbId) {
+      const [byExternal] = await db.select({ id: terraPropertiesTable.id }).from(terraPropertiesTable).where(eq(terraPropertiesTable.externalId!, rawId)).limit(1);
+      propertyDbId = byExternal?.id ?? null;
+    }
+    if (!propertyDbId) { sendNotFound(res, "Property"); return; }
+    const distressSignals = await db.select().from(terraDistressPropertiesTable)
+      .where(sql`LOWER(${terraDistressPropertiesTable.address}) = (SELECT LOWER(address) FROM terra_properties WHERE id = ${propertyDbId} LIMIT 1)`)
+      .orderBy(desc(terraDistressPropertiesTable.createdAt))
+      .limit(50);
+    const events = distressSignals.map((s, i) => ({
+      time: s.createdAt ? new Date(s.createdAt).toLocaleDateString("en-US", { month: "short", year: "numeric" }) : "Unknown",
+      type: i === 0 ? "distress" : "market",
+      label: `Distress signal recorded — ${s.borough ?? ""}`,
+      detail: `Estimated value: $${Number(s.estimatedValue ?? 0).toLocaleString()} — ${s.propertyType ?? ""}`,
+      severity: "warn" as const,
+    }));
+    sendSuccess(res, { events, propertyId: propertyDbId });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to fetch property history");
   }
 });
 

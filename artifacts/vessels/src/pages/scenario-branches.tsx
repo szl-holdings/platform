@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { GitBranch, TrendingDown, TrendingUp, AlertTriangle, Shield, Activity, Clock, DollarSign, Fuel, ChevronRight, RotateCcw, CheckCircle2, XCircle, Zap } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
@@ -138,6 +139,15 @@ export default function VesselsScenarioBranchesPage() {
   const [selected, setSelected] = useState<BranchId>("reroute");
   const [comparing, setComparing] = useState<BranchId | null>(null);
 
+  const { data: atlasData } = useQuery<{ data?: { count: number; branches?: Array<{ twinId: string; probability?: number }> } }>({
+    queryKey: ["vessels-atlas-scenario-branches"],
+    queryFn: () => fetch("/api/atlas/spatial/branches?twinCategory=vessel").then(r => r.ok ? r.json() : Promise.reject(r.status)),
+    staleTime: 60000,
+    retry: 1,
+  });
+
+  const liveBranchCount = atlasData?.data?.count ?? null;
+
   const branch = BRANCHES.find(b => b.id === selected)!;
   const compareBranch = comparing ? BRANCHES.find(b => b.id === comparing) : null;
 
@@ -152,9 +162,14 @@ export default function VesselsScenarioBranchesPage() {
           </div>
           <p className="text-xs text-sky-400/40">Simulate diverging voyage worldlines — compare branch outcomes against baseline</p>
         </div>
+        {liveBranchCount !== null && (
+          <div className="flex items-center gap-1.5 text-[10px] text-sky-400 bg-sky-500/8 border border-sky-500/20 px-2.5 py-1 rounded-lg">
+            <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse" />
+            {liveBranchCount} live branch{liveBranchCount !== 1 ? "es" : ""} in ATLAS
+          </div>
+        )}
       </div>
 
-      {/* Baseline */}
       <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
         <div className="flex items-center gap-2 mb-3">
           <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
@@ -182,7 +197,6 @@ export default function VesselsScenarioBranchesPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-5">
-        {/* Branch selector */}
         <div className="space-y-2">
           <p className="text-[10px] text-sky-400/40 uppercase tracking-wider mb-3">Scenario Branches</p>
           {BRANCHES.map(b => {
@@ -213,12 +227,10 @@ export default function VesselsScenarioBranchesPage() {
           })}
         </div>
 
-        {/* Branch detail */}
         <div className={cn("space-y-4", compareBranch ? "lg:col-span-2" : "lg:col-span-3")}>
           <BranchDetail branch={branch} color={branch.color} label="Selected Branch" />
         </div>
 
-        {/* Compare panel */}
         {compareBranch && (
           <div className="space-y-4">
             <BranchDetail branch={compareBranch} color="#8b7ac8" label="Comparison Branch" />

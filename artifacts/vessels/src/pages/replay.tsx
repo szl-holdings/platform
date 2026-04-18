@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Play, Pause, SkipBack, SkipForward, RotateCcw, Clock, MapPin, Fuel, Wind, AlertTriangle, Activity, ChevronRight, Zap } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 
-const VOYAGE_EVENTS = [
+const DEMO_VOYAGE_EVENTS = [
   { time: "Apr 8 06:00", type: "departure", label: "Departed Ras Tanura (SATANK)", detail: "Cargo: 280,000t crude", severity: "info", lat: 26.6, lon: 50.2 },
   { time: "Apr 8 14:30", type: "waypoint", label: "Strait of Hormuz transit", detail: "Passage: 2h 14m, no incidents", severity: "info", lat: 26.6, lon: 56.5 },
   { time: "Apr 9 09:15", type: "weather", label: "Beaufort 6 sea state encountered", detail: "Speed reduced to 11.2 kts", severity: "warn", lat: 23.0, lon: 58.5 },
@@ -39,7 +40,48 @@ const typeIcons: Record<string, React.ReactNode> = {
   ais: <Activity className="w-3 h-3 text-violet-400" />,
   anomaly: <AlertTriangle className="w-3 h-3 text-red-400" />,
   inspection: <Zap className="w-3 h-3 text-sky-400" />,
+  ais_dark: <Activity className="w-3 h-3 text-violet-400" />,
+  status_change: <ChevronRight className="w-3 h-3 text-sky-400" />,
+  route_deviation: <AlertTriangle className="w-3 h-3 text-amber-400" />,
+  weather_pressure: <Wind className="w-3 h-3 text-amber-400" />,
+  eta_drift: <Clock className="w-3 h-3 text-orange-400" />,
+  speed_anomaly: <Zap className="w-3 h-3 text-amber-400" />,
+  sanctions_flag: <AlertTriangle className="w-3 h-3 text-red-400" />,
 };
+
+interface ApiVesselEvent {
+  id: number;
+  occurredAt: string | null;
+  eventType: string;
+  description: string | null;
+  status: string;
+  severity: string | null;
+  latitude: string | null;
+  longitude: string | null;
+}
+
+interface VoyageEvent {
+  time: string;
+  type: string;
+  label: string;
+  detail: string;
+  severity: string;
+  lat: number;
+  lon: number;
+}
+
+function mapApiEvent(e: ApiVesselEvent): VoyageEvent {
+  const d = e.occurredAt ? new Date(e.occurredAt) : null;
+  return {
+    time: d ? d.toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "Unknown",
+    type: e.eventType,
+    label: e.description ?? e.eventType.replace(/_/g, " "),
+    detail: `Status: ${e.status}`,
+    severity: e.severity ?? (e.status === "open" ? "warn" : "info"),
+    lat: e.latitude ? Number(e.latitude) : 0,
+    lon: e.longitude ? Number(e.longitude) : 0,
+  };
+}
 
 function ScrubberChart({ data, cursor }: { data: typeof METRICS_TIMELINE; cursor: number }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -71,7 +113,6 @@ function ScrubberChart({ data, cursor }: { data: typeof METRICS_TIMELINE; cursor
     drawLine(data.map(d => d.speed), 16, "rgba(56,189,248,0.7)");
     drawLine(data.map(d => d.fuel), 100, "rgba(251,191,36,0.5)");
     drawLine(data.map(d => d.risk), 100, "rgba(248,113,113,0.45)");
-    // cursor line
     const cx = pad.l + cursor * stepX;
     ctx.beginPath();
     ctx.strokeStyle = "rgba(139,122,200,0.8)";
@@ -85,7 +126,6 @@ function ScrubberChart({ data, cursor }: { data: typeof METRICS_TIMELINE; cursor
     ctx.arc(cx, pad.t + chartH / 2, 4, 0, Math.PI * 2);
     ctx.fillStyle = "#8b7ac8";
     ctx.fill();
-    // x labels
     ctx.font = "8px monospace";
     ctx.fillStyle = "rgba(255,255,255,0.25)";
     data.forEach((d, i) => {
@@ -98,7 +138,34 @@ function ScrubberChart({ data, cursor }: { data: typeof METRICS_TIMELINE; cursor
 export default function VesselsReplayPage() {
   const [playing, setPlaying] = useState(false);
   const [cursor, setCursor] = useState(12);
+  const [selectedVesselId, setSelectedVesselId] = useState<string | null>(null);
+
+  const { data: vesselsData } = useQuery<{ data: Array<{ id: number; name: string }> }>({
+    queryKey: ["vessels-list-replay"],
+    queryFn: () => fetch("/api/vessels").then(r => r.ok ? r.json() : Promise.reject(r.status)),
+    staleTime: 120000,
+    retry: 1,
+  });
+
+  const vessels = vesselsData?.data ?? [];
+  const effectiveVesselId = selectedVesselId ?? (vessels[0] ? String(vessels[0].id) : null);
+
+  const { data: eventsData, isFetching: eventsFetching } = useQuery<{ data: ApiVesselEvent[] }>({
+    queryKey: ["vessel-events", effectiveVesselId],
+    queryFn: () => fetch(`/api/vessels/${effectiveVesselId}/events`).then(r => r.ok ? r.json() : Promise.reject(r.status)),
+    staleTime: 60000,
+    retry: 1,
+    enabled: !!effectiveVesselId,
+  });
+
+  const apiEvents = eventsData?.data;
+  const isLiveEvents = apiEvents && apiEvents.length > 0;
+  const VOYAGE_EVENTS: VoyageEvent[] = isLiveEvents ? apiEvents.map(mapApiEvent) : DEMO_VOYAGE_EVENTS;
   const totalEvents = VOYAGE_EVENTS.length;
+
+  useEffect(() => {
+    setCursor(Math.min(12, totalEvents - 1));
+  }, [totalEvents]);
 
   useEffect(() => {
     if (!playing) return;
@@ -107,9 +174,11 @@ export default function VesselsReplayPage() {
     return () => clearTimeout(t);
   }, [playing, cursor, totalEvents]);
 
-  const metricCursor = Math.floor((cursor / (totalEvents - 1)) * (METRICS_TIMELINE.length - 1));
-  const current = VOYAGE_EVENTS[cursor];
+  const metricCursor = Math.floor((cursor / Math.max(totalEvents - 1, 1)) * (METRICS_TIMELINE.length - 1));
+  const current = VOYAGE_EVENTS[Math.min(cursor, totalEvents - 1)] ?? VOYAGE_EVENTS[0];
   const sevColor: Record<string, string> = { info: "text-sky-400/60", warn: "text-amber-400", crit: "text-red-400" };
+
+  const selectedVesselName = vessels.find(v => String(v.id) === effectiveVesselId)?.name;
 
   return (
     <div className="p-6 space-y-6">
@@ -122,13 +191,32 @@ export default function VesselsReplayPage() {
           </div>
           <p className="text-xs text-sky-400/40">Step through the voyage worldline — every event, anomaly, and decision point</p>
         </div>
-        <div className="flex items-center gap-1.5 text-[10px] text-violet-400 bg-violet-500/10 border border-violet-500/20 px-2 py-1 rounded-lg">
-          <Clock className="w-3 h-3" />
-          {current.time}
+        <div className="flex items-center gap-2">
+          {vessels.length > 0 && (
+            <select
+              value={effectiveVesselId ?? ""}
+              onChange={e => { setSelectedVesselId(e.target.value); setCursor(0); setPlaying(false); }}
+              className="text-[10px] bg-[#0a1628] border border-sky-500/20 text-sky-300 rounded-lg px-2 py-1 outline-none"
+            >
+              {vessels.map(v => (
+                <option key={v.id} value={String(v.id)}>{v.name}</option>
+              ))}
+            </select>
+          )}
+          <div className="flex items-center gap-1.5 text-[10px] text-violet-400 bg-violet-500/10 border border-violet-500/20 px-2 py-1 rounded-lg">
+            <Clock className="w-3 h-3" />
+            {current.time}
+          </div>
         </div>
       </div>
 
-      {/* Current event spotlight */}
+      {isLiveEvents && (
+        <div className="flex items-center gap-2 text-[10px] px-3 py-2 rounded-lg border border-emerald-500/20 bg-emerald-500/5 text-emerald-400/80">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          Live events from {selectedVesselName ?? "vessel"} — {totalEvents} events loaded
+        </div>
+      )}
+
       <div className="bg-[#0a1628]/90 border border-violet-500/20 rounded-xl p-4 flex items-start gap-4">
         <div className="w-8 h-8 rounded-lg bg-violet-500/10 border border-violet-500/20 flex items-center justify-center shrink-0">
           {typeIcons[current.type] ?? <Activity className="w-3.5 h-3.5 text-sky-400" />}
@@ -142,11 +230,12 @@ export default function VesselsReplayPage() {
         </div>
         <div className="text-right shrink-0">
           <p className="text-[10px] text-sky-400/40 font-mono">Event {cursor + 1} / {totalEvents}</p>
-          <p className="text-[10px] text-sky-400/30 font-mono">{current.lat.toFixed(1)}°N {Math.abs(current.lon).toFixed(1)}°{current.lon >= 0 ? "E" : "W"}</p>
+          {(current.lat !== 0 || current.lon !== 0) && (
+            <p className="text-[10px] text-sky-400/30 font-mono">{current.lat.toFixed(1)}°N {Math.abs(current.lon).toFixed(1)}°{current.lon >= 0 ? "E" : "W"}</p>
+          )}
         </div>
       </div>
 
-      {/* Scrubber + controls */}
       <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4 space-y-3">
         <div className="flex items-center justify-between mb-1">
           <span className="text-[10px] text-sky-400/50 uppercase tracking-wider">Voyage Timeline</span>
@@ -180,7 +269,6 @@ export default function VesselsReplayPage() {
         </div>
       </div>
 
-      {/* Event log */}
       <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl overflow-hidden">
         <div className="px-4 py-3 border-b border-sky-500/10">
           <p className="text-sm font-semibold text-sky-100">Voyage Event Log</p>
@@ -199,7 +287,7 @@ export default function VesselsReplayPage() {
                 </div>
                 <div className="flex-1 min-w-0 pb-1">
                   <div className="flex items-center gap-2 mb-0.5">
-                    <span>{typeIcons[ev.type]}</span>
+                    <span>{typeIcons[ev.type] ?? <Activity className="w-3 h-3 text-sky-400" />}</span>
                     <p className={cn("text-[11px] font-medium", isCurrent ? "text-sky-100" : "text-sky-300")}>{ev.label}</p>
                     {ev.severity === "warn" && <span className="text-[9px] text-amber-400">⚠</span>}
                   </div>

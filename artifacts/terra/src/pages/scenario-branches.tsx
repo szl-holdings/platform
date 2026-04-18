@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { GitBranch, TrendingDown, TrendingUp, AlertTriangle, Droplets, DollarSign, Clock, Building2, CheckCircle2, XCircle, Shield, BarChart3 } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 
@@ -196,6 +197,16 @@ function BranchDetail({ branch }: { branch: Branch }) {
 
 export default function TerraScenarioBranchesPage() {
   const [selected, setSelected] = useState<BranchId>("valuation-stress");
+
+  const { data: atlasData } = useQuery<{ data?: { count: number } }>({
+    queryKey: ["terra-atlas-scenario-branches"],
+    queryFn: () => fetch("/api/atlas/spatial/branches?twinCategory=property").then(r => r.ok ? r.json() : Promise.reject(r.status)),
+    staleTime: 60000,
+    retry: 1,
+  });
+
+  const liveBranchCount = atlasData?.data?.count ?? null;
+
   const branch = BRANCHES.find(b => b.id === selected)!;
 
   return (
@@ -209,9 +220,14 @@ export default function TerraScenarioBranchesPage() {
           </div>
           <p className="text-xs" style={{ color: "rgba(255,255,255,0.28)" }}>Simulate diverging property worldlines — compare branch outcomes against baseline</p>
         </div>
+        {liveBranchCount !== null && (
+          <div className="flex items-center gap-1.5 text-[10px] px-2.5 py-1 rounded-lg border" style={{ color: "#2d6a4f", borderColor: "rgba(45,106,79,0.25)", background: "rgba(45,106,79,0.06)" }}>
+            <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#2d6a4f" }} />
+            {liveBranchCount} live branch{liveBranchCount !== 1 ? "es" : ""} in ATLAS
+          </div>
+        )}
       </div>
 
-      {/* Baseline */}
       <div className="rounded-xl p-4" style={{ background: "rgba(5,10,8,0.8)", border: "1px solid rgba(45,106,79,0.15)" }}>
         <div className="flex items-center gap-2 mb-3">
           <div className="w-1.5 h-1.5 rounded-full" style={{ background: "#2d6a4f" }} />
@@ -231,7 +247,6 @@ export default function TerraScenarioBranchesPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-5">
-        {/* Branch selector */}
         <div className="space-y-2">
           <p className="text-[10px] uppercase tracking-wider mb-3" style={{ color: "rgba(255,255,255,0.28)" }}>Scenario Branches</p>
           {BRANCHES.map(b => {
@@ -258,7 +273,6 @@ export default function TerraScenarioBranchesPage() {
           })}
         </div>
 
-        {/* Branch detail */}
         <div className="lg:col-span-3">
           <BranchDetail branch={branch} />
         </div>

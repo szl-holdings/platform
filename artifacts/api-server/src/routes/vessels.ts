@@ -354,6 +354,30 @@ router.get("/vessels/:id/routes", authMiddleware(), tenantScope(), async (req: R
   }
 });
 
+router.get("/vessels/:id/route", authMiddleware(), tenantScope(), async (req: Request, res) => {
+  try {
+    const id = parseIdParam(req.params.id);
+    const vessel = await getVesselInOrg(id, req.tenantOrgId);
+    if (!vessel) { sendNotFound(res, "Vessel"); return; }
+    const [latestPosition] = await db.select().from(vesselsPositionsTable)
+      .where(eq(vesselsPositionsTable.vesselId, id))
+      .orderBy(desc(vesselsPositionsTable.recordedAt))
+      .limit(1);
+    const [latestRoute] = await db.select().from(vesselsRoutesTable)
+      .where(eq(vesselsRoutesTable.vesselId, id))
+      .orderBy(desc(vesselsRoutesTable.createdAt))
+      .limit(1);
+    sendSuccess(res, {
+      vessel,
+      position: latestPosition ?? null,
+      waypoints: Array.isArray(latestRoute?.waypoints) ? latestRoute.waypoints : [],
+      route: latestRoute ?? null,
+    });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to get vessel active route");
+  }
+});
+
 router.post("/vessels/routes", authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin", "editor"), validateBody(jsonObjectBodySchema), async (req: Request, res) => {
   try {
     const data = insertVesselRouteSchema.parse(req.body);

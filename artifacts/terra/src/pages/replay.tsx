@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Play, Pause, SkipBack, SkipForward, RotateCcw, Clock, Building2, TrendingDown, TrendingUp, DollarSign, AlertTriangle, Activity, ChevronRight } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 
-const PROPERTY_EVENTS = [
+const DEMO_PROPERTY_EVENTS = [
   { time: "Jan 2023", type: "acquisition", label: "Property acquired at $3.2M", detail: "Cap rate 6.4% — below market comp avg of 7.1%", severity: "info" },
   { time: "Mar 2023", type: "market", label: "Interest rate environment tightened", detail: "10-yr Treasury crossed 4.0% — cap rate expansion pressure begins", severity: "warn" },
   { time: "Jun 2023", type: "tenant", label: "3-unit vacancy — tenant churn", detail: "Vacancy rate rose from 0% to 25%", severity: "warn" },
@@ -27,6 +28,22 @@ const VALUATION_TIMELINE = [
   { label: "Jan'25", value: 3800, noi: 228, occupancy: 100 },
   { label: "Apr'26", value: 3800, noi: 228, occupancy: 100 },
 ];
+
+interface PropertyEvent {
+  time: string;
+  type: string;
+  label: string;
+  detail: string;
+  severity: string;
+}
+
+interface ApiEvent {
+  time: string;
+  type: string;
+  label: string;
+  detail: string;
+  severity: string;
+}
 
 function ValuationChart({ data, cursor }: { data: typeof VALUATION_TIMELINE; cursor: number }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -93,12 +110,40 @@ const typeIcon: Record<string, React.ReactNode> = {
   valuation: <TrendingUp className="w-3 h-3" style={{ color: "#2d6a4f" }} />,
   filing: <AlertTriangle className="w-3 h-3 text-orange-400" />,
   current: <ChevronRight className="w-3 h-3 text-violet-400" />,
+  distress: <AlertTriangle className="w-3 h-3 text-red-400" />,
 };
 
 export default function TerraReplayPage() {
   const [playing, setPlaying] = useState(false);
   const [cursor, setCursor] = useState(12);
+  const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
+
+  const { data: propertiesData } = useQuery<{ data: { properties: Array<{ id: number; address: string }> } }>({
+    queryKey: ["terra-properties-replay-list"],
+    queryFn: () => fetch("/api/terra/properties").then(r => r.ok ? r.json() : Promise.reject(r.status)),
+    staleTime: 120000,
+    retry: 1,
+  });
+
+  const properties = propertiesData?.data?.properties ?? [];
+  const effectivePropertyId = selectedPropertyId ?? (properties[0] ? String(properties[0].id) : null);
+
+  const { data: historyData } = useQuery<{ data: { events: ApiEvent[]; address: string } }>({
+    queryKey: ["terra-property-history", effectivePropertyId],
+    queryFn: () => fetch(`/api/terra/properties/${effectivePropertyId}/history`).then(r => r.ok ? r.json() : Promise.reject(r.status)),
+    staleTime: 60000,
+    retry: 1,
+    enabled: !!effectivePropertyId,
+  });
+
+  const apiEvents = historyData?.data?.events;
+  const isLiveEvents = apiEvents && apiEvents.length > 0;
+  const PROPERTY_EVENTS: PropertyEvent[] = isLiveEvents ? apiEvents : DEMO_PROPERTY_EVENTS;
   const total = PROPERTY_EVENTS.length;
+
+  useEffect(() => {
+    setCursor(Math.min(12, total - 1));
+  }, [total]);
 
   useEffect(() => {
     if (!playing) return;
@@ -107,9 +152,11 @@ export default function TerraReplayPage() {
     return () => clearTimeout(t);
   }, [playing, cursor, total]);
 
-  const valCursor = Math.min(VALUATION_TIMELINE.length - 1, Math.floor((cursor / (total - 1)) * (VALUATION_TIMELINE.length - 1)));
-  const current = PROPERTY_EVENTS[cursor];
+  const valCursor = Math.min(VALUATION_TIMELINE.length - 1, Math.floor((cursor / Math.max(total - 1, 1)) * (VALUATION_TIMELINE.length - 1)));
+  const current = PROPERTY_EVENTS[Math.min(cursor, total - 1)] ?? PROPERTY_EVENTS[0];
   const valAtCursor = VALUATION_TIMELINE[valCursor];
+
+  const selectedAddress = properties.find(p => String(p.id) === effectivePropertyId)?.address ?? historyData?.data?.address ?? "84 Grand St";
 
   return (
     <div className="p-6 space-y-6">
@@ -122,13 +169,33 @@ export default function TerraReplayPage() {
           </div>
           <p className="text-xs" style={{ color: "rgba(255,255,255,0.28)" }}>Step through the property worldline — every valuation shift, market event, and tenant change</p>
         </div>
-        <div className="flex items-center gap-1.5 text-[10px] px-2 py-1 rounded-lg border" style={{ color: "#8b7ac8", borderColor: "rgba(139,122,200,0.25)", background: "rgba(139,122,200,0.06)" }}>
-          <Clock className="w-3 h-3" />
-          {current.time}
+        <div className="flex items-center gap-2">
+          {properties.length > 0 && (
+            <select
+              value={effectivePropertyId ?? ""}
+              onChange={e => { setSelectedPropertyId(e.target.value); setCursor(0); setPlaying(false); }}
+              className="text-[10px] rounded-lg px-2 py-1 outline-none"
+              style={{ background: "rgba(5,10,8,0.8)", border: "1px solid rgba(45,106,79,0.2)", color: "rgba(255,255,255,0.7)" }}
+            >
+              {properties.slice(0, 20).map(p => (
+                <option key={p.id} value={String(p.id)}>{p.address}</option>
+              ))}
+            </select>
+          )}
+          <div className="flex items-center gap-1.5 text-[10px] px-2 py-1 rounded-lg border" style={{ color: "#8b7ac8", borderColor: "rgba(139,122,200,0.25)", background: "rgba(139,122,200,0.06)" }}>
+            <Clock className="w-3 h-3" />
+            {current.time}
+          </div>
         </div>
       </div>
 
-      {/* Current event spotlight */}
+      {isLiveEvents && (
+        <div className="flex items-center gap-2 text-[10px] px-3 py-2 rounded-lg border" style={{ borderColor: "rgba(45,106,79,0.2)", background: "rgba(45,106,79,0.04)", color: "#2d6a4f" }}>
+          <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#2d6a4f" }} />
+          Live history from {selectedAddress} — {total} events loaded
+        </div>
+      )}
+
       <div className="rounded-xl p-4 flex items-start gap-4" style={{ background: "rgba(5,10,8,0.9)", border: "1px solid rgba(139,122,200,0.2)" }}>
         <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(139,122,200,0.08)", border: "1px solid rgba(139,122,200,0.2)" }}>
           {typeIcon[current.type] ?? <Activity className="w-3.5 h-3.5" />}
@@ -146,7 +213,6 @@ export default function TerraReplayPage() {
         </div>
       </div>
 
-      {/* Scrubber */}
       <div className="rounded-xl p-4 space-y-3" style={{ background: "rgba(5,10,8,0.8)", border: "1px solid rgba(45,106,79,0.12)" }}>
         <div className="flex items-center justify-between mb-1">
           <span className="text-[10px] uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.25)" }}>Property Valuation Timeline</span>
@@ -181,10 +247,9 @@ export default function TerraReplayPage() {
         </div>
       </div>
 
-      {/* Event log */}
       <div className="rounded-xl overflow-hidden" style={{ background: "rgba(5,10,8,0.8)", border: "1px solid rgba(45,106,79,0.12)" }}>
         <div className="px-4 py-3 border-b" style={{ borderColor: "rgba(45,106,79,0.1)" }}>
-          <p className="text-sm font-semibold" style={{ color: "rgba(255,255,255,0.88)" }}>Property History — 84 Grand St, Williamsburg</p>
+          <p className="text-sm font-semibold" style={{ color: "rgba(255,255,255,0.88)" }}>Property History — {selectedAddress}</p>
           <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.28)" }}>Click any event to jump to that point in the worldline</p>
         </div>
         <div className="max-h-80 overflow-y-auto">
@@ -199,7 +264,7 @@ export default function TerraReplayPage() {
                 </div>
                 <div className="flex-1 min-w-0 pb-1">
                   <div className="flex items-center gap-2 mb-0.5">
-                    {typeIcon[ev.type]}
+                    {typeIcon[ev.type] ?? <Activity className="w-3 h-3" style={{ color: "rgba(255,255,255,0.4)" }} />}
                     <p className="text-[11px] font-medium" style={{ color: isCurrent ? "rgba(255,255,255,0.88)" : "rgba(255,255,255,0.6)" }}>{ev.label}</p>
                     {ev.severity === "warn" && <span className="text-[9px] text-amber-400">⚠</span>}
                   </div>

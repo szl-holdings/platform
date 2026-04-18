@@ -4,14 +4,14 @@ import { GitBranch, Layers, MapPin, AlertTriangle, Activity, Navigation, Shield,
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 
-const VESSELS = [
+const DEMO_VESSELS = [
   { id: "MV-001", name: "Pacific Navigator", type: "VLCC Tanker", flag: "🇱🇷", lat: 24.5, lon: 55.2, status: "at_sea", heading: 278, speed: 13.4 },
   { id: "MV-002", name: "Arctic Breeze", type: "LNG Carrier", flag: "🇬🇷", lat: 1.3, lon: 103.8, status: "in_port", heading: 0, speed: 0 },
   { id: "MV-003", name: "Meridian Bulk", type: "Capesize Bulker", flag: "🇲🇭", lat: -33.8, lon: 18.4, status: "at_sea", heading: 192, speed: 11.8 },
   { id: "MV-004", name: "Cape Resolute", type: "Panamax Bulk", flag: "🇵🇦", lat: 29.9, lon: 32.5, status: "anchored", heading: 45, speed: 0 },
 ];
 
-const ROUTE_WAYPOINTS = [
+const DEMO_ROUTE_WAYPOINTS = [
   { id: "wp1", label: "Rotterdam", lat: 51.9, lon: 4.5, eta: "Apr 20", type: "destination" },
   { id: "wp2", label: "Gibraltar", lat: 36.1, lon: -5.3, eta: "Apr 17", type: "waypoint" },
   { id: "wp3", label: "Suez Canal", lat: 30.0, lon: 32.5, eta: "Apr 15", type: "chokepoint" },
@@ -26,7 +26,7 @@ const OVERLAYS = [
   { id: "route-anomaly", label: "Route Anomalies", icon: Navigation, active: false, color: "#8b7ac8", severity: "moderate" },
 ];
 
-const ROUTE_MEMORY = [
+const DEMO_ROUTE_MEMORY = [
   { date: "Apr 8–10", segment: "Persian Gulf → Indian Ocean", avgSpeed: 13.8, fuelBurn: 72.4, incidents: 0, aisGap: false },
   { date: "Apr 10–12", segment: "Indian Ocean transit", avgSpeed: 12.9, fuelBurn: 68.1, incidents: 1, aisGap: false },
   { date: "Apr 12–14", segment: "Bab-el-Mandeb crossing", avgSpeed: 11.2, fuelBurn: 61.0, incidents: 0, aisGap: true },
@@ -42,7 +42,51 @@ const TWIN_STATUS = [
   { label: "Twin Worldline", value: "Active", status: "ok" },
 ];
 
-function RouteMemoryCanvas({ vesselId }: { vesselId: string }) {
+interface ApiVessel {
+  id: number;
+  name: string;
+  vesselType: string;
+  flag: string | null;
+  status: string;
+}
+
+interface Waypoint {
+  id: string;
+  label: string;
+  lat: number;
+  lon: number;
+  eta: string;
+  type: string;
+}
+
+interface DisplayVessel {
+  id: string;
+  name: string;
+  type: string;
+  flag: string;
+  lat: number;
+  lon: number;
+  status: string;
+  heading: number;
+  speed: number;
+}
+
+function mapApiVessel(v: ApiVessel, idx: number): DisplayVessel {
+  const demo = DEMO_VESSELS[idx % DEMO_VESSELS.length];
+  return {
+    id: String(v.id),
+    name: v.name,
+    type: v.vesselType,
+    flag: v.flag ?? "🚢",
+    lat: demo.lat,
+    lon: demo.lon,
+    status: v.status,
+    heading: demo.heading,
+    speed: demo.speed,
+  };
+}
+
+function RouteMemoryCanvas({ vesselId, waypoints }: { vesselId: string; waypoints: Waypoint[] }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -58,12 +102,10 @@ function RouteMemoryCanvas({ vesselId }: { vesselId: string }) {
       ctx.clearRect(0, 0, w, h);
       ctx.fillStyle = "#060d1a";
       ctx.fillRect(0, 0, w, h);
-      // grid
       ctx.strokeStyle = "rgba(56,189,248,0.04)";
       ctx.lineWidth = 1;
       for (let x = 0; x < w; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
       for (let y = 0; y < h; y += 40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
-      // route trail
       const pts: [number, number][] = [[w * 0.85, h * 0.65], [w * 0.72, h * 0.60], [w * 0.58, h * 0.52], [w * 0.45, h * 0.42], [w * 0.28, h * 0.38], [w * 0.14, h * 0.32]];
       ctx.beginPath();
       ctx.strokeStyle = "rgba(56,189,248,0.18)";
@@ -72,17 +114,15 @@ function RouteMemoryCanvas({ vesselId }: { vesselId: string }) {
       pts.forEach(([x, y], i) => { if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); });
       ctx.stroke();
       ctx.setLineDash([]);
-      // active portion
       ctx.beginPath();
       ctx.strokeStyle = "rgba(56,189,248,0.6)";
       ctx.lineWidth = 2;
       const activePts = pts.slice(2);
       activePts.forEach(([x, y], i) => { if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); });
       ctx.stroke();
-      // waypoints
       const wpColors: Record<string, string> = { origin: "#6b8f71", waypoint: "#4a90b8", chokepoint: "#c8953c", destination: "#8b7ac8" };
       pts.forEach(([x, y], i) => {
-        const wp = ROUTE_WAYPOINTS[i];
+        const wp = waypoints[i];
         if (!wp) return;
         const pulse = (Math.sin(t * 2 + i) + 1) / 2;
         const c = wpColors[wp.type] ?? "#4a90b8";
@@ -101,7 +141,6 @@ function RouteMemoryCanvas({ vesselId }: { vesselId: string }) {
         ctx.fillStyle = "rgba(255,255,255,0.3)";
         ctx.fillText(wp.eta, x + 8, y + 7);
       });
-      // vessel position (at index 3)
       const [vx, vy] = pts[3];
       const pulse2 = (Math.sin(t * 3) + 1) / 2;
       ctx.beginPath();
@@ -122,12 +161,12 @@ function RouteMemoryCanvas({ vesselId }: { vesselId: string }) {
     };
     draw();
     return () => cancelAnimationFrame(raf);
-  }, [vesselId]);
+  }, [vesselId, waypoints]);
   return <canvas ref={canvasRef} width={520} height={240} className="w-full rounded-lg" />;
 }
 
 export default function VesselsAtlasRuntimePage() {
-  const [selectedVessel, setSelectedVessel] = useState(VESSELS[0]);
+  const [selectedVesselId, setSelectedVesselId] = useState<string>(DEMO_VESSELS[0].id);
   const [overlays, setOverlays] = useState(OVERLAYS.map(o => ({ ...o })));
   const [safeMode, setSafeMode] = useState(false);
 
@@ -143,6 +182,41 @@ export default function VesselsAtlasRuntimePage() {
     staleTime: 60000,
     retry: 1,
   });
+  const { data: liveVesselsData } = useQuery<{ data: ApiVessel[] }>({
+    queryKey: ["vessels-list"],
+    queryFn: () => fetch("/api/vessels").then(r => r.ok ? r.json() : Promise.reject(r.status)),
+    staleTime: 120000,
+    retry: 1,
+  });
+  const { data: liveRouteData } = useQuery<{ data: { vessel: ApiVessel; position: { latitude: string; longitude: string; heading: string; speed: string } | null; waypoints: Waypoint[] } }>({
+    queryKey: ["vessels-route", selectedVesselId],
+    queryFn: () => fetch(`/api/vessels/${selectedVesselId}/route`).then(r => r.ok ? r.json() : Promise.reject(r.status)),
+    staleTime: 30000,
+    retry: 1,
+    enabled: !!selectedVesselId,
+  });
+
+  const apiVessels = liveVesselsData?.data;
+  const displayVessels: DisplayVessel[] = apiVessels && apiVessels.length > 0
+    ? apiVessels.slice(0, 6).map(mapApiVessel)
+    : DEMO_VESSELS;
+
+  useEffect(() => {
+    if (displayVessels.length > 0 && !displayVessels.find(v => v.id === selectedVesselId)) {
+      setSelectedVesselId(displayVessels[0].id);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [apiVessels]);
+
+  const selectedVessel = displayVessels.find(v => v.id === selectedVesselId) ?? displayVessels[0];
+
+  const liveWaypoints = liveRouteData?.data?.waypoints;
+  const waypoints: Waypoint[] = (liveWaypoints && liveWaypoints.length > 0) ? liveWaypoints : DEMO_ROUTE_WAYPOINTS;
+  const isLiveWaypoints = liveWaypoints && liveWaypoints.length > 0;
+
+  const livePosition = liveRouteData?.data?.position;
+  const displayHeading = livePosition?.heading ? Number(livePosition.heading) : selectedVessel.heading;
+  const displaySpeed = livePosition?.speed ? Number(livePosition.speed) : selectedVessel.speed;
 
   const liveDriftAvg = driftData?.twins?.length
     ? (driftData.twins.reduce((s, t) => s + t.driftScore, 0) / driftData.twins.length).toFixed(2)
@@ -157,6 +231,7 @@ export default function VesselsAtlasRuntimePage() {
     at_sea: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
     in_port: "text-sky-400 bg-sky-500/10 border-sky-500/20",
     anchored: "text-amber-400 bg-amber-500/10 border-amber-500/20",
+    active: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
   };
 
   return (
@@ -184,8 +259,11 @@ export default function VesselsAtlasRuntimePage() {
         </div>
       </div>
 
-      {(liveDriftAvg !== null || liveBranchCount !== null) && (
+      {(liveDriftAvg !== null || liveBranchCount !== null || isLiveWaypoints) && (
         <div className="flex items-center gap-3 text-[10px] px-3 py-2 rounded-lg border border-sky-500/10 bg-sky-500/3">
+          {isLiveWaypoints && (
+            <span className="text-emerald-400/70 flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />Live route data</span>
+          )}
           {liveDriftAvg !== null && (
             <span className="text-sky-400/50">Live Drift Avg: <span className="font-mono text-sky-300">{liveDriftAvg}σ</span></span>
           )}
@@ -204,7 +282,6 @@ export default function VesselsAtlasRuntimePage() {
         </div>
       )}
 
-      {/* Twin Status Rail */}
       <div className="flex items-center gap-3 overflow-x-auto pb-1">
         {TWIN_STATUS.map(s => (
           <div key={s.label} className={cn("flex items-center gap-2 px-3 py-1.5 rounded-lg border text-[10px] whitespace-nowrap shrink-0", s.status === "warn" ? "border-amber-500/25 bg-amber-500/5" : "border-sky-500/10 bg-[#0a1628]/60")}>
@@ -215,10 +292,9 @@ export default function VesselsAtlasRuntimePage() {
         ))}
       </div>
 
-      {/* Vessel selector */}
       <div className="flex gap-2 overflow-x-auto pb-1">
-        {VESSELS.map(v => (
-          <button key={v.id} onClick={() => setSelectedVessel(v)} className={cn("flex items-center gap-2 px-3 py-2 rounded-lg border text-xs whitespace-nowrap transition-all", selectedVessel.id === v.id ? "bg-sky-500/10 border-sky-500/30 text-sky-300" : "bg-[#0a1628]/60 border-sky-500/10 text-sky-400/50 hover:text-sky-300")}>
+        {displayVessels.map(v => (
+          <button key={v.id} onClick={() => setSelectedVesselId(v.id)} className={cn("flex items-center gap-2 px-3 py-2 rounded-lg border text-xs whitespace-nowrap transition-all", selectedVessel.id === v.id ? "bg-sky-500/10 border-sky-500/30 text-sky-300" : "bg-[#0a1628]/60 border-sky-500/10 text-sky-400/50 hover:text-sky-300")}>
             <span>{v.flag}</span>
             <div className="text-left">
               <p className="font-medium">{v.name}</p>
@@ -231,12 +307,11 @@ export default function VesselsAtlasRuntimePage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         <div className="lg:col-span-2 space-y-4">
-          {/* Route Memory Canvas */}
           <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl overflow-hidden">
             <div className="px-4 py-3 border-b border-sky-500/10 flex items-center justify-between">
               <div>
                 <p className="text-sm font-semibold text-sky-100">{selectedVessel.name} — Route Memory Twin</p>
-                <p className="text-[10px] text-sky-400/40">{selectedVessel.type} · Live spatial worldline · {selectedVessel.heading}° heading · {selectedVessel.speed} kts</p>
+                <p className="text-[10px] text-sky-400/40">{selectedVessel.type} · Live spatial worldline · {displayHeading}° heading · {displaySpeed} kts</p>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-[10px] text-sky-400/50 font-mono">SYNC 48ms</span>
@@ -244,11 +319,10 @@ export default function VesselsAtlasRuntimePage() {
               </div>
             </div>
             <div className="p-4">
-              <RouteMemoryCanvas vesselId={selectedVessel.id} />
+              <RouteMemoryCanvas vesselId={selectedVessel.id} waypoints={waypoints} />
             </div>
           </div>
 
-          {/* Route Memory Table */}
           <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl overflow-hidden">
             <div className="px-4 py-3 border-b border-sky-500/10 flex items-center gap-2">
               <Clock className="w-3.5 h-3.5 text-violet-400" />
@@ -264,7 +338,7 @@ export default function VesselsAtlasRuntimePage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {ROUTE_MEMORY.map((row, i) => (
+                  {DEMO_ROUTE_MEMORY.map((row, i) => (
                     <tr key={i} className="border-b border-sky-500/5 hover:bg-sky-500/5 transition-colors">
                       <td className="px-4 py-2.5 text-sky-400/60 font-mono text-[10px]">{row.date}</td>
                       <td className="px-4 py-2.5 text-sky-200">{row.segment}</td>
@@ -289,7 +363,6 @@ export default function VesselsAtlasRuntimePage() {
         </div>
 
         <div className="space-y-4">
-          {/* Spatial Overlays */}
           <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
             <p className="text-xs font-semibold text-sky-200 mb-3 flex items-center gap-1.5">
               <Layers className="w-3.5 h-3.5 text-sky-400" />
@@ -316,14 +389,14 @@ export default function VesselsAtlasRuntimePage() {
             </div>
           </div>
 
-          {/* Waypoint ETA Rail */}
           <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
             <p className="text-xs font-semibold text-sky-200 mb-3 flex items-center gap-1.5">
               <Navigation className="w-3.5 h-3.5 text-sky-400" />
               Waypoint Sequence
+              {isLiveWaypoints && <span className="text-[9px] text-emerald-400/70 ml-auto">● live</span>}
             </p>
             <div className="space-y-0">
-              {ROUTE_WAYPOINTS.slice().reverse().map((wp, i, arr) => {
+              {waypoints.slice().reverse().map((wp, i, arr) => {
                 const typeColors: Record<string, string> = { origin: "bg-emerald-400", waypoint: "bg-sky-400", chokepoint: "bg-amber-400", destination: "bg-violet-400" };
                 const isActive = i === 2;
                 return (
@@ -343,7 +416,6 @@ export default function VesselsAtlasRuntimePage() {
             </div>
           </div>
 
-          {/* Drift Badge */}
           <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
             <p className="text-xs font-semibold text-sky-200 mb-3 flex items-center gap-1.5">
               <Activity className="w-3.5 h-3.5 text-emerald-400" />
