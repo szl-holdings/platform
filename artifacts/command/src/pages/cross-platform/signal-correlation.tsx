@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
-import { ArrowLeft, GitMerge, RefreshCw, ChevronRight, AlertCircle, CheckCircle, Clock } from "lucide-react";
+import { ArrowLeft, GitMerge, RefreshCw, ChevronRight, AlertCircle, CheckCircle, Clock, ExternalLink } from "lucide-react";
 import { apiUrl, fetchJson } from "../cognitive/shared";
+import { productDashboardUrl, productEntityUrl, inferProductForEntity } from "./product-links";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -169,20 +170,36 @@ export function SignalCorrelationPage() {
                   borderColor: isOpen ? "rgba(139,122,200,0.2)" : "rgba(255,255,255,0.06)",
                 }}
               >
-                <button
-                  className="w-full text-left px-4 py-3 flex items-start gap-3"
+                <div
+                  role="button"
+                  tabIndex={0}
+                  className="w-full text-left px-4 py-3 flex items-start gap-3 cursor-pointer"
                   onClick={() => setExpanded(isOpen ? null : c.correlationId)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setExpanded(isOpen ? null : c.correlationId);
+                    }
+                  }}
                 >
                   <div className="flex items-center gap-1.5 shrink-0 mt-0.5">
-                    {c.products.map((p) => (
-                      <span
-                        key={p}
-                        className="text-[8px] font-mono font-bold px-1.5 py-0.5 rounded uppercase"
-                        style={{ color: PRODUCT_COLORS[p] ?? "#8b7ac8", background: `${PRODUCT_COLORS[p] ?? "#8b7ac8"}12`, border: `1px solid ${PRODUCT_COLORS[p] ?? "#8b7ac8"}25` }}
-                      >
-                        {p}
-                      </span>
-                    ))}
+                    {c.products.map((p) => {
+                      const color = PRODUCT_COLORS[p] ?? "#8b7ac8";
+                      return (
+                        <a
+                          key={p}
+                          href={productDashboardUrl(p)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          title={`Open ${p} dashboard`}
+                          className="text-[8px] font-mono font-bold px-1.5 py-0.5 rounded uppercase hover:opacity-80 transition-opacity"
+                          style={{ color, background: `${color}12`, border: `1px solid ${color}25` }}
+                        >
+                          {p}
+                        </a>
+                      );
+                    })}
                   </div>
 
                   <div className="flex-1 min-w-0">
@@ -201,7 +218,7 @@ export function SignalCorrelationPage() {
                     </span>
                     <ChevronRight className="w-3.5 h-3.5 transition-transform" style={{ color: "rgba(255,255,255,0.2)", transform: isOpen ? "rotate(90deg)" : "rotate(0deg)" }} />
                   </div>
-                </button>
+                </div>
 
                 {isOpen && (
                   <div className="px-4 pb-4 border-t" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
@@ -211,9 +228,31 @@ export function SignalCorrelationPage() {
                           <>
                             <div className="text-[9px] uppercase tracking-widest font-mono mb-2" style={{ color: "rgba(255,255,255,0.2)" }}>Shared Entities</div>
                             <div className="flex flex-wrap gap-1.5 mb-3">
-                              {c.entityIds.map((e) => (
-                                <span key={e} className="text-[10px] font-mono px-2 py-0.5 rounded" style={{ color: "#8b7ac8", background: "rgba(139,122,200,0.1)", border: "1px solid rgba(139,122,200,0.2)" }}>{e}</span>
-                              ))}
+                              {c.entityIds.map((e) => {
+                                const owner = inferProductForEntity(e, c.products);
+                                const url = productEntityUrl(owner, e);
+                                const ownerColor = PRODUCT_COLORS[owner] ?? "#8b7ac8";
+                                if (!url) {
+                                  return (
+                                    <span key={e} className="text-[10px] font-mono px-2 py-0.5 rounded" style={{ color: "#8b7ac8", background: "rgba(139,122,200,0.1)", border: "1px solid rgba(139,122,200,0.2)" }}>{e}</span>
+                                  );
+                                }
+                                return (
+                                  <a
+                                    key={e}
+                                    href={url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    title={`Open ${e} in ${owner}`}
+                                    className="group flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded hover:opacity-80 transition-opacity"
+                                    style={{ color: ownerColor, background: `${ownerColor}10`, border: `1px solid ${ownerColor}30` }}
+                                  >
+                                    <span className="text-[8px] uppercase opacity-70">{owner}</span>
+                                    <span>{e}</span>
+                                    <ExternalLink className="w-2.5 h-2.5 opacity-60 group-hover:opacity-100" />
+                                  </a>
+                                );
+                              })}
                             </div>
                           </>
                         )}

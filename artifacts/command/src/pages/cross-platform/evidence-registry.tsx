@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
-import { ArrowLeft, Database, Search, X } from "lucide-react";
+import { ArrowLeft, Database, Search, X, ExternalLink } from "lucide-react";
 import { apiUrl, fetchJson } from "../cognitive/shared";
+import { productDashboardUrl, productEntityUrl, inferProductForEntity } from "./product-links";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -158,12 +159,16 @@ export function EvidenceRegistryPage() {
                 style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}
               >
                 <div className="shrink-0 flex flex-col gap-1.5 items-start">
-                  <span
-                    className="text-[8px] font-mono font-bold px-1.5 py-0.5 rounded uppercase"
+                  <a
+                    href={productDashboardUrl(node.product)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title={`Open ${node.product} dashboard`}
+                    className="text-[8px] font-mono font-bold px-1.5 py-0.5 rounded uppercase hover:opacity-80 transition-opacity"
                     style={{ color: prodColor, background: `${prodColor}12`, border: `1px solid ${prodColor}25` }}
                   >
                     {node.product}
-                  </span>
+                  </a>
                   <span
                     className="text-[8px] font-mono px-1.5 py-0.5 rounded"
                     style={{ color: kindColor, background: `${kindColor}10`, border: `1px solid ${kindColor}20` }}
@@ -174,7 +179,30 @@ export function EvidenceRegistryPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap mb-0.5">
                     <span className="text-[10px] font-mono font-bold" style={{ color: "#8b7ac8" }}>{node.ref}</span>
-                    <span className="text-[9px] font-mono" style={{ color: "rgba(255,255,255,0.2)" }}>→ {node.entityId}</span>
+                    {(() => {
+                      const owner = inferProductForEntity(node.entityId, [node.product]);
+                      const entityUrl = productEntityUrl(owner, node.entityId);
+                      const ownerColor = PRODUCT_COLORS[owner] ?? "#8b7ac8";
+                      if (!entityUrl) {
+                        return (
+                          <span className="text-[9px] font-mono" style={{ color: "rgba(255,255,255,0.2)" }}>→ {node.entityId}</span>
+                        );
+                      }
+                      return (
+                        <a
+                          href={entityUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title={`Open ${node.entityId} in ${owner}`}
+                          className="group flex items-center gap-1 text-[9px] font-mono hover:opacity-80 transition-opacity"
+                          style={{ color: ownerColor }}
+                        >
+                          <span style={{ color: "rgba(255,255,255,0.2)" }}>→</span>
+                          <span>{node.entityId}</span>
+                          <ExternalLink className="w-2.5 h-2.5 opacity-60 group-hover:opacity-100" />
+                        </a>
+                      );
+                    })()}
                   </div>
                   <p className="text-[11px] leading-relaxed" style={{ color: "rgba(255,255,255,0.65)" }}>{node.summary}</p>
                   <div className="mt-1.5 flex items-center gap-2 flex-wrap">
