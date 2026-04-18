@@ -71,6 +71,7 @@ const TenantHealthScorecardsPage = lazy(() => import("@/pages/tenant-health-scor
 const UnifiedSettingsPage = lazy(() => import("@/pages/unified-settings-page"));
 const NotificationsInboxPage = lazy(() => import("@/pages/notifications-inbox"));
 const AdminCommandCenterPage = lazy(() => import("@/pages/admin-command-center"));
+const AdminGrowthCommandPage = lazy(() => import("@/pages/admin-growth-command"));
 const OpsPage = lazy(() => import("@/pages/ops"));
 const AzureTenantOnboardingPage = lazy(() => import("@/pages/azure-tenant-onboarding"));
 const AzureTenantDashboardPage = lazy(() => import("@/pages/azure-tenant-dashboard"));
@@ -1008,6 +1009,9 @@ function App() {
             </Route>
             <Route path="/admin/data-retention">
               <RequireAuth><Suspense fallback={<PageLoader />}><AdminDataRetentionPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/admin/growth-command">
+              <RequireAuth><RequireAdmin><Suspense fallback={<PageLoader />}><AdminGrowthCommandPage /></Suspense></RequireAdmin></RequireAuth>
             </Route>
             <Route path="/admin/command-center">
               <RequireAuth><RequireAdmin><Suspense fallback={<PageLoader />}><AdminCommandCenterPage /></Suspense></RequireAdmin></RequireAuth>

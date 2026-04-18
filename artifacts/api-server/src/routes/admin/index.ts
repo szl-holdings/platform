@@ -7,6 +7,7 @@ import { register as registerIntegrations, integrationActivityLog, type Integrat
 import { register as registerSupport } from "./support.js";
 import { register as registerUsage } from "./usage.js";
 import { register as registerSeed } from "./seed.js";
+import { register as registerGrowth } from "./growth.js";
 
 const adminRouter: IRouter = Router();
 
@@ -20,6 +21,7 @@ registerIntegrations(adminRouter);
 registerSupport(adminRouter);
 registerUsage(adminRouter);
 registerSeed(adminRouter);
+registerGrowth(adminRouter);
 
 export { integrationActivityLog, type IntegrationActivity };
 export default adminRouter;
