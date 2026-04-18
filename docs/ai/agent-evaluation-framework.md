@@ -87,10 +87,15 @@ console.log(report.groundTruthMatchRate); // e.g. 0.87
 
 ### Seeded Scenarios
 
-Two production-grade scenarios are registered on package load:
+Seven production-grade scenarios are registered on package load across four domains:
 
 1. **`aegis-soc-threat-triage-v1`** — Ransomware lateral movement across 14 endpoints with 3 snapshots covering initial alert, T2 analyst override, and post-incident artifact generation.
-2. **`vessels-voyage-pnl-optimization-v1`** — Voyage route optimization under cyclone constraints with 1 decision snapshot.
+2. **`vessels-voyage-pnl-optimization-v1`** — Voyage route optimization under cyclone constraints with 2 snapshots covering the diversion decision and post-voyage P&L reconciliation.
+3. **`vessels-charter-rate-negotiation-v1`** — Competing charter party offer analysis for a handymax vessel with 2 snapshots covering offer comparison and fixture recap clause audit.
+4. **`terra-portfolio-stress-test-v1`** — 200bps rate shock impact across a 12-asset mixed-use portfolio with 3 snapshots covering stress modeling, disposition decision, and board-level report generation.
+5. **`terra-asset-valuation-override-v1`** — 12% valuation discrepancy reconciliation for a Grade-A London office asset with 2 snapshots covering cap rate analysis and RICS compliance audit.
+6. **`prism-sar-filing-workflow-v1`** — AML structuring/layering detection with 3 snapshots covering suspicious activity classification, SAR narrative drafting, and tipping-off guardrail enforcement.
+7. **`prism-compliance-breach-response-v1`** — GDPR data breach notification workflow with 3 snapshots covering breach severity classification, ICO Article 33 notification drafting, and Article 34 data subject notification decision.
 
 ---
 
@@ -231,6 +236,9 @@ The Trust Console tracks these key production signals:
 |---|---|---|---|---|
 | Signal Ranking Accuracy | pulse | 42 | 8 | gpt-4o-base, gpt-4o-finetuned, claude-3-5-sonnet |
 | SOC Triage Decision Quality | aegis | 28 | 5 | gpt-4o-base, gpt-4o-rlhf, claude-3-5-sonnet |
+| Voyage & Charter Commercial Reasoning | vessels | 18 | 3 | gpt-4o-base, gpt-4o-finetuned |
+| Portfolio Stress & Valuation | terra | 22 | 4 | gpt-4o-base, gpt-4o-finetuned, claude-3-5-sonnet |
+| AML & Compliance Breach Response | prism | 24 | 6 | gpt-4o-base, gpt-4o-finetuned |
 | Policy Compliance & Safety | cross | 55 | 20 | gpt-4o-base, gpt-4o-finetuned |
 | Artifact Generation Quality | cross | 35 | 0 | gpt-4o-base, gpt-4o-finetuned, claude-3-5-sonnet |
 | Hallucination & Calibration | cross | 30 | 0 | gpt-4o-base, gpt-4o-finetuned |
@@ -256,7 +264,62 @@ Three snapshots covering the full lifecycle of a real SOC incident:
 
 **Tags:** maritime, voyage, pnl, optimization, routing
 
-One decision snapshot: MV Poseidon route optimization under cyclone constraint. Ground truth confirms Cape of Good Hope diversion as the correct recommendation.
+Two snapshots covering voyage optimization and post-voyage validation:
+1. Optimization decision: MV Poseidon route optimization under cyclone constraint; ground truth confirms Cape of Good Hope diversion as the correct recommendation
+2. Post-diversion reconciliation: actual voyage P&L audit validates the diversion decision and quantifies net diversion cost vs avoided cyclone risk
+
+### `vessels-charter-rate-negotiation-v1`
+
+**Tags:** maritime, charter, negotiation, commercial, fixture, ground-truth
+
+Two snapshots covering the full charter fixture lifecycle:
+1. Offer comparison: two competing charter party offers (grain vs fertilizer) evaluated against Baltic Handymax Index; ground truth recommends CTR-A due to absence of deviation clause and hold-cleaning risk
+2. Fixture recap audit: laytime and demurrage clause review of the signed charter; ground truth flags WIBON weather exposure and recommends amendment
+
+**Ground truth provided:** yes. Suitable for commercial reasoning and clause-risk benchmarking.
+
+### `terra-portfolio-stress-test-v1`
+
+**Tags:** real-estate, stress-test, portfolio, rate-shock, dcf, ground-truth
+
+Three snapshots covering a full fund-level stress event:
+1. Rate shock modeling: 200bps shock applied to a 12-asset portfolio; agent identifies two covenant-breach assets and a disposition priority ranking
+2. Disposition decision: three options evaluated for a Manchester retail park breaching 70% LTV covenant; ground truth recommends immediate sale over refinance or JV
+3. Board report generation: artifact generation for AIFMD/Basel-III audience including heat map, disposition plan, and sensitivity table
+
+**Ground truth provided:** yes. Suitable for DCF reasoning, covenant detection, and artifact-generation benchmarking.
+
+### `terra-asset-valuation-override-v1`
+
+**Tags:** real-estate, valuation, appraisal, dispute, office, ground-truth
+
+Two snapshots covering an appraisal discrepancy resolution:
+1. Valuation reconciliation: 13.2% gap between internal model (£96.2M) and third-party appraisal (£85M) for a Grade-A London office; ground truth identifies cap rate assumption as primary driver and recommends revising internal cap rate to 5.2%
+2. RICS compliance audit: methodology audit against RICS Red Book 2024; ground truth confirms report is NAV-ready with one minor deficiency (missing downside sensitivity scenario)
+
+**Ground truth provided:** yes. Suitable for valuation methodology reasoning and compliance audit benchmarking.
+
+### `prism-sar-filing-workflow-v1`
+
+**Tags:** compliance, aml, sar, fincen, suspicious-activity, ground-truth
+
+Three snapshots covering end-to-end SAR filing:
+1. Suspicious activity detection: structuring (ACCT-0471) and layering (ACCT-1882) patterns identified across two accounts; ground truth requires SAR filing for both within 30 days
+2. SAR narrative drafting: FinCEN-compliant narrative for ACCT-0471 structuring case; ground truth validates required narrative elements, word count, and PII handling
+3. Post-SAR guardrail: tipping-off prohibition check blocks proposed client closure notice; agent correctly permits account freeze and law enforcement escalation only
+
+**Ground truth provided:** yes. Suitable for AML reasoning, regulatory drafting quality, and compliance guardrail benchmarking.
+
+### `prism-compliance-breach-response-v1`
+
+**Tags:** compliance, gdpr, data-breach, notification, regulatory, ground-truth
+
+Three snapshots covering the GDPR breach notification lifecycle:
+1. Breach classification: 2,400-record exfiltration including national IDs; agent classifies as high severity, starts 72-hour ICO notification clock, and mandates data subject notification
+2. ICO Article 33 notification draft: structured report to supervisory authority with all required GDPR sections; ground truth validates completeness and factual tone
+3. Article 34 threshold decision: agent correctly rejects the "sufficient technical measures" exception because encryption was not in place at breach time, making data subject notification mandatory
+
+**Ground truth provided:** yes. Suitable for regulatory deadline reasoning, notification quality, and exception-logic benchmarking.
 
 ---
 
