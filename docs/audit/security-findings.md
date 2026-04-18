@@ -63,8 +63,8 @@ Scanned all tracked files using pattern matching for:
 | `actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02` (v4.6.2) | ci.yml, e2e.yml, security.yml | ✅ Pinned |
 | `actions/dependency-review-action@2031cfc080254a8a887f58cffee85186f0e49e48` (v4.9.0) | dependency-review.yml | ✅ Pinned |
 | `github/codeql-action/*@ce64ddcb0d8d890d2df4a9d1c04ff297367dea2a` (v3.35.2) | codeql.yml | ✅ Pinned |
-| `treosh/lighthouse-ci-action@1b0e7c33270fbba31a18a0fca0bc3d8ea4ae3e79` | lighthouse.yml | ✅ Pinned |
-| `softprops/action-gh-release@c062e08bd532815e2082a7e09ce9571a6d1f0e80` | release.yml | ✅ Pinned |
+| `treosh/lighthouse-ci-action@3e7e23fb74242897f95c0ba9cabad3d0227b9b18` (v12.6.2) | lighthouse.yml | ✅ Pinned |
+| `softprops/action-gh-release@da05d552573ad5aba039eaac05058a918a7bf631` (v2.2.2) | release.yml | ✅ Pinned |
 
 **Result: All third-party GitHub Actions are fully pinned to exact commit SHAs.** Dependabot (`package-ecosystem: github-actions` in `.github/dependabot.yml`) will automatically create PRs to update these SHAs when new versions are released.
 
