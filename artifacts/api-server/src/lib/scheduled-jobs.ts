@@ -22,6 +22,7 @@ export const NAMED_JOB_TYPES = {
   HOURLY_SCHEDULED_REPORTS: "hourly_scheduled_reports",
   HOURLY_EXECUTIVE_DIGEST: "hourly_executive_digest",
   ATLAS_SNAPSHOT_COMPACTION: "atlas_snapshot_compaction",
+  ATLAS_RETENTION_PRUNE: "atlas_retention_prune",
 } as const;
 
 export type NamedJobType = typeof NAMED_JOB_TYPES[keyof typeof NAMED_JOB_TYPES];
@@ -65,6 +66,7 @@ registerEntry({ type: NAMED_JOB_TYPES.DAILY_DOCUMENT_BATCH, name: "Daily Documen
 registerEntry({ type: NAMED_JOB_TYPES.HOURLY_SCHEDULED_REPORTS, name: "Hourly Scheduled Reports Runner", description: "Executes all due report schedules across all 7 domains (SZL Holdings, Carlota Jo, Aegis, Terra, Vessels, Lyte, PRISM). Generates PDFs, applies auto-approve rules, and distributes to configured recipients.", schedule: "hourly", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.HOURLY_EXECUTIVE_DIGEST, name: "Executive Digest Dispatcher", description: "Runs every minute. Finds users whose digest_config.enabled=true and whose deliveryHour+deliveryMinute match the current local time in their configured IANA timezone. Sends an Expo push (generic body, no cross-tenant aggregates) with a deepLink to the briefing workspace; the workspace then loads the tenant-scoped digest in-app.", schedule: "minutely", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.ATLAS_SNAPSHOT_COMPACTION, name: "ATLAS Snapshot Compaction", description: "Compacts ATLAS spatial twin snapshots older than 7 days by merging intermediate frames into summary records. Reduces storage growth while preserving full worldline replay fidelity for audits and proof bundles.", schedule: "daily", enabled: true });
+registerEntry({ type: NAMED_JOB_TYPES.ATLAS_RETENTION_PRUNE, name: "ATLAS Retention Prune", description: "Deletes records from atlas_signals, atlas_evidence, atlas_outcomes, and atlas_runs older than the configured retention threshold (defaults to 90 days, override via ATLAS_RETENTION_DAYS env var or job payload retainDays). Prevents unbounded growth of ATLAS persistence tables.", schedule: "daily", enabled: true });
 
 function getLocalHourMinute(tz: string, now: Date): { hour: number; minute: number } | null {
   try {
@@ -697,6 +699,94 @@ durableJobQueue.register(NAMED_JOB_TYPES.ATLAS_SNAPSHOT_COMPACTION, async (job) 
     logger.error({ err, jobId: job.id }, "atlas_snapshot_compaction: failed");
     throw err;
   }
+});
+
+durableJobQueue.register(NAMED_JOB_TYPES.ATLAS_RETENTION_PRUNE, async (job) => {
+  const start = Date.now();
+  updateRegistry(NAMED_JOB_TYPES.ATLAS_RETENTION_PRUNE, { lastStatus: "running", lastRunAt: Date.now() });
+
+  const payload = (job.payload ?? {}) as { retainDays?: number; dryRun?: boolean; batchSize?: number };
+  const envDays = Number(process.env.ATLAS_RETENTION_DAYS);
+  const retainDays = Number.isFinite(payload.retainDays) && (payload.retainDays as number) > 0
+    ? Math.floor(payload.retainDays as number)
+    : (Number.isFinite(envDays) && envDays > 0 ? Math.floor(envDays) : 90);
+  const dryRun = payload.dryRun === true;
+  const batchSize = Number.isFinite(payload.batchSize) && (payload.batchSize as number) > 0
+    ? Math.min(Math.floor(payload.batchSize as number), 50_000)
+    : 5_000;
+  const cutoff = new Date(Date.now() - retainDays * 24 * 60 * 60 * 1000);
+
+  const tableTargets: Array<{ table: string; column: string }> = [
+    { table: "atlas_signals", column: "created_at" },
+    { table: "atlas_evidence", column: "captured_at" },
+    { table: "atlas_outcomes", column: "recorded_at" },
+    { table: "atlas_runs", column: "snapshot_at" },
+  ];
+
+  const counts: Record<string, number> = {};
+  let totalDeleted = 0;
+  let failed = 0;
+
+  try {
+    const { pool } = await import("@szl-holdings/db");
+    const MAX_BATCHES_PER_TABLE = 1_000;
+    for (const target of tableTargets) {
+      try {
+        if (dryRun) {
+          const result = await pool.query(
+            `SELECT COUNT(*)::int AS cnt FROM "${target.table}" WHERE "${target.column}" < $1`,
+            [cutoff],
+          );
+          const cnt = (result.rows[0]?.cnt as number) ?? 0;
+          counts[target.table] = cnt;
+        } else {
+          // Batched delete using a CTE to limit lock duration on large tables.
+          let tableDeleted = 0;
+          for (let batch = 0; batch < MAX_BATCHES_PER_TABLE; batch++) {
+            const result = await pool.query(
+              `WITH victims AS (
+                 SELECT ctid FROM "${target.table}"
+                 WHERE "${target.column}" < $1
+                 LIMIT $2
+               )
+               DELETE FROM "${target.table}" t USING victims v WHERE t.ctid = v.ctid`,
+              [cutoff, batchSize],
+            );
+            const rows = result.rowCount ?? 0;
+            tableDeleted += rows;
+            if (rows < batchSize) break;
+          }
+          counts[target.table] = tableDeleted;
+          totalDeleted += tableDeleted;
+        }
+      } catch (err) {
+        failed++;
+        logger.warn({ err, table: target.table }, "atlas_retention_prune: table prune failed");
+      }
+    }
+  } catch (err) {
+    logger.error({ err, jobId: job.id }, "atlas_retention_prune: fatal — db not available");
+    updateRegistry(NAMED_JOB_TYPES.ATLAS_RETENTION_PRUNE, {
+      lastStatus: "failed",
+      lastDurationMs: Date.now() - start,
+      failCount: (jobRegistry.get(NAMED_JOB_TYPES.ATLAS_RETENTION_PRUNE)?.failCount || 0) + 1,
+    });
+    throw err;
+  }
+
+  serverTelemetry.recordBusinessEvent({
+    type: "atlas_retention_prune_completed",
+    domain: "atlas",
+    durationMs: Date.now() - start,
+    success: failed === 0,
+    metadata: { retainDays, cutoff: cutoff.toISOString(), dryRun, counts, totalDeleted, failed },
+  });
+  updateRegistry(NAMED_JOB_TYPES.ATLAS_RETENTION_PRUNE, {
+    lastStatus: failed === 0 ? "completed" : "failed",
+    lastDurationMs: Date.now() - start,
+    ...(failed > 0 ? { failCount: (jobRegistry.get(NAMED_JOB_TYPES.ATLAS_RETENTION_PRUNE)?.failCount || 0) + 1 } : {}),
+  });
+  logger.info({ jobId: job.id, retainDays, cutoff: cutoff.toISOString(), dryRun, counts, totalDeleted, failed }, "atlas_retention_prune: complete");
 });
 
 let namedJobsStarted = false;
