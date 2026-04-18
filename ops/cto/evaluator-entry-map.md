@@ -56,10 +56,14 @@ A reference map of every entry point, route, and material destination for evalua
 |---------|---------|-------------|----------|
 | Hero | "Start a diligence conversation" | `/contact` | All |
 | Hero | "System architecture →" | `/architecture` | Technical |
-| Diligence paths (#evaluators) | Executive Buyer card | Inline links | Executive |
-| Diligence paths (#evaluators) | Technical Evaluator card | Inline links | Technical |
-| Diligence paths (#evaluators) | Security Reviewer card | Inline links | Security |
-| Diligence paths (#evaluators) | Investor card | Inline links | Investor |
+| Diligence paths (#evaluators) | Executive Buyer card | Inline links + brief CTA | Executive |
+| Diligence paths (#evaluators) | Technical Evaluator card | Inline links + brief CTA | Technical |
+| Diligence paths (#evaluators) | Security Reviewer card | Inline links + brief CTA | Security |
+| Diligence paths (#evaluators) | Investor card | Inline links + brief CTA | Investor |
+| Diligence paths (#evaluators) | "Download one-page brief" (Executive) | `/trust/diligence/executive` | Executive |
+| Diligence paths (#evaluators) | "Download one-page brief" (Technical) | `/trust/diligence/technical` | Technical |
+| Diligence paths (#evaluators) | "Download one-page brief" (Security) | `/trust/diligence/security` | Security |
+| Diligence paths (#evaluators) | "Download one-page brief" (Investor) | `/trust/diligence/investor` | Investor |
 | Coverage grid | Security card | `/trust/security` | Security |
 | Coverage grid | Governance card | `/trust/governance` | Executive |
 | Coverage grid | AI Policy card | `/trust/ai` | Compliance |
@@ -82,9 +86,10 @@ A reference map of every entry point, route, and material destination for evalua
 | HITL approval model | `/trust/approvals` | Web page | Live |
 | System architecture overview | `/architecture` | Web page | Live |
 | Operating doctrine | `/operating-doctrine` | Web page | Live |
+| One-page diligence brief | `/trust/diligence/executive` | Printable web page (Save as PDF) | Live |
 | Demo request | `/demo` | Form | Live |
 
-**Gaps:** No one-page executive summary PDF. Recommend adding for Phase D.
+**Gaps:** None for core executive diligence flow. Pen test summary and audited financials are intentionally absent at this stage.
 
 ---
 
@@ -98,6 +103,7 @@ A reference map of every entry point, route, and material destination for evalua
 | Control plane docs | `/docs/control-plane` | Web page | Live |
 | Proof chain docs | `/docs/proof-chain` | Web page | Live |
 | API overview | `/api` | Web page | Live |
+| One-page diligence brief | `/trust/diligence/technical` | Printable web page (Save as PDF) | Live |
 
 **Gaps:** No integration spec download. No API reference (OpenAPI). Recommend for Phase C/D.
 
@@ -111,6 +117,7 @@ A reference map of every entry point, route, and material destination for evalua
 | AI governance | `/trust/governance` | Web page | Live |
 | Responsible disclosure | `/legal/security-disclosure` | Web page | Live |
 | Architecture trust layer | `/trust/architecture` | Web page | Live |
+| One-page diligence brief | `/trust/diligence/security` | Printable web page (Save as PDF) | Live |
 
 **Gaps:** No pen test summary. No CVE history. No security questionnaire template. These are appropriate gaps for current stage — do not claim they exist.
 
@@ -125,6 +132,7 @@ A reference map of every entry point, route, and material destination for evalua
 | Investor relations hub | `/investor-relations` | Web page | Live |
 | Governance audit trail | `/trust/governance` | Web page | Live |
 | Founder page | `/founder` | Web page | Live |
+| One-page diligence brief | `/trust/diligence/investor` | Printable web page (Save as PDF) | Live |
 
 **Gaps:** No investor data room (appropriate for current stage). No audited financials (appropriate for current stage).
 

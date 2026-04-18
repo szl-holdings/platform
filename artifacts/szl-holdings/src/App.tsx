@@ -33,6 +33,10 @@ const TrustAIPage = lazy(() => import("@/pages/trust-ai"));
 const TrustApprovalsPage = lazy(() => import("@/pages/trust-approvals"));
 const TrustExportsPage = lazy(() => import("@/pages/trust-exports"));
 const TrustOperationsPage = lazy(() => import("@/pages/trust-operations"));
+const DiligenceExecutivePage = lazy(() => import("@/pages/trust-diligence-executive"));
+const DiligenceTechnicalPage = lazy(() => import("@/pages/trust-diligence-technical"));
+const DiligenceSecurityPage = lazy(() => import("@/pages/trust-diligence-security"));
+const DiligenceInvestorPage = lazy(() => import("@/pages/trust-diligence-investor"));
 const InvestorsHubPage = lazy(() => import("@/pages/investors-hub"));
 const InvestorsOverviewPage = lazy(() => import("@/pages/investors-overview-v2"));
 const ArchitecturePage = lazy(() => import("@/pages/architecture-page"));
@@ -584,6 +588,18 @@ function App() {
             </Route>
             <Route path="/trust/operations">
               <Suspense fallback={<PageLoader />}><TrustOperationsPage /></Suspense>
+            </Route>
+            <Route path="/trust/diligence/executive">
+              <Suspense fallback={<PageLoader />}><DiligenceExecutivePage /></Suspense>
+            </Route>
+            <Route path="/trust/diligence/technical">
+              <Suspense fallback={<PageLoader />}><DiligenceTechnicalPage /></Suspense>
+            </Route>
+            <Route path="/trust/diligence/security">
+              <Suspense fallback={<PageLoader />}><DiligenceSecurityPage /></Suspense>
+            </Route>
+            <Route path="/trust/diligence/investor">
+              <Suspense fallback={<PageLoader />}><DiligenceInvestorPage /></Suspense>
             </Route>
             <Route path="/trust">
               <Suspense fallback={<PageLoader />}><TrustPage /></Suspense>

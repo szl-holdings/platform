@@ -17,6 +17,7 @@ const DILIGENCE_PATHS = [
     audience: "Executive Buyer",
     question: "Is this safe to operate at scale?",
     summary: "Governance model, risk surface, audit readiness, and operational accountability.",
+    briefHref: "/trust/diligence/executive",
     links: [
       { label: "AI Governance model", href: "/trust/governance" },
       { label: "Approval & HITL gates", href: "/trust/approvals" },
@@ -33,6 +34,7 @@ const DILIGENCE_PATHS = [
     audience: "Technical Evaluator",
     question: "How is this actually built?",
     summary: "Architecture layers, integration surface, control plane, proof chain, and data handling.",
+    briefHref: "/trust/diligence/technical",
     links: [
       { label: "Platform architecture", href: "/architecture" },
       { label: "Security controls", href: "/trust/security" },
@@ -49,6 +51,7 @@ const DILIGENCE_PATHS = [
     audience: "Security Reviewer",
     question: "What controls are actually in place today?",
     summary: "RBAC, data isolation, credential management, disclosure policy, and threat posture — current state, not roadmap.",
+    briefHref: "/trust/diligence/security",
     links: [
       { label: "Security posture", href: "/trust/security" },
       { label: "AI governance", href: "/trust/governance" },
@@ -65,6 +68,7 @@ const DILIGENCE_PATHS = [
     audience: "Investor",
     question: "What makes this defensible?",
     summary: "Architecture moat, operating doctrine, audit-grade governance, and the thesis behind the platform.",
+    briefHref: "/trust/diligence/investor",
     links: [
       { label: "Architecture defensibility", href: "/architecture" },
       { label: "Operating doctrine", href: "/operating-doctrine" },
@@ -281,6 +285,17 @@ export default function TrustPage() {
                         </li>
                       ))}
                     </ul>
+                    <div style={{ borderTop: `1px solid ${path.colorBorder}`, paddingTop: "0.875rem", marginTop: "0.25rem" }}>
+                      <Link
+                        href={path.briefHref}
+                        style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem", fontSize: "0.75rem", fontWeight: 600, color: path.color, textDecoration: "none", padding: "0.375rem 0.75rem", borderRadius: "0.4375rem", background: path.colorMuted, border: `1px solid ${path.colorBorder}`, transition: "opacity 0.15s ease" }}
+                        onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.opacity = "0.8"; }}
+                        onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
+                      >
+                        <Download size={11} />
+                        Download one-page brief
+                      </Link>
+                    </div>
                   </m.div>
                 );
               })}

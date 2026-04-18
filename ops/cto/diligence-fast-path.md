@@ -35,6 +35,7 @@ In practice, prepared evaluators who know what they want get there in 1–2 clic
 - Approval & HITL gates → `/trust/approvals`
 - System architecture → `/architecture`
 - Operating doctrine → `/operating-doctrine`
+- **One-page brief (printable/PDF):** `/trust/diligence/executive` — covers governance model, risk surface, audit readiness, and operational accountability
 
 **What they care about:** Will this create liability? Who is accountable when something goes wrong? Can I explain this to my board?
 
@@ -49,6 +50,7 @@ In practice, prepared evaluators who know what they want get there in 1–2 clic
 - Security controls → `/trust/security`
 - Control plane docs → `/docs/control-plane`
 - Proof chain docs → `/docs/proof-chain`
+- **One-page brief (printable/PDF):** `/trust/diligence/technical` — covers architecture layers, data isolation, control plane, model mesh, and integration surface
 
 **What they care about:** How is this built? What does the data model look like? How do integrations work? Where are the trust boundaries?
 
@@ -63,6 +65,7 @@ In practice, prepared evaluators who know what they want get there in 1–2 clic
 - AI governance → `/trust/governance`
 - Responsible disclosure → `/legal/security-disclosure`
 - Architecture trust layer → `/trust/architecture`
+- **One-page brief (printable/PDF):** `/trust/diligence/security` — covers RBAC, data isolation, credential management, disclosure policy, and threat posture (current state only)
 
 **What they care about:** RBAC model, data isolation, credential handling, encryption in use, what happens when a vulnerability is found.
 
@@ -77,6 +80,7 @@ In practice, prepared evaluators who know what they want get there in 1–2 clic
 - Operating doctrine → `/operating-doctrine`
 - Investor relations → `/investor-relations`
 - Governance audit trail → `/trust/governance`
+- **One-page brief (printable/PDF):** `/trust/diligence/investor` — covers architecture moat, governance advantage, operating doctrine, and defensibility thesis
 
 **What they care about:** Why is this architecture hard to replicate? What is the governance moat? How does this scale across domains?
 
