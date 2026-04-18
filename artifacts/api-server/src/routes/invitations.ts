@@ -20,6 +20,7 @@ import { hashIp } from "@szl-holdings/audit";
 import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 import { sendError, sendUnauthorized, sendNotFound, sendForbidden, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { sendEmail, buildOrgInviteEmail } from "../lib/email";
+import { createOrgInvitation } from "../lib/invitation-service";
 import type { Request, Response } from "express";
 
 const router = Router();
@@ -110,79 +111,30 @@ router.post(
       const org = await resolveOrgAndCheckAdminRole(req, res, orgSlug);
       if (!org) return;
 
-      const existing = await db
-        .select({ id: orgInvitationsTable.id })
-        .from(orgInvitationsTable)
-        .where(
-          and(
-            eq(orgInvitationsTable.orgId, org.id),
-            eq(orgInvitationsTable.email, email.toLowerCase()),
-            eq(orgInvitationsTable.status, "pending"),
-            gt(orgInvitationsTable.expiresAt, new Date()),
-          ),
-        )
-        .limit(1);
+      // Delegate to the canonical invitation service. Org-settings uses
+      // "reject" so a duplicate pending invite returns 409 instead of
+      // silently superseding (matches the previous explicit-conflict UX).
+      const result = await createOrgInvitation({
+        orgId: org.id,
+        orgName: org.name,
+        email,
+        role: role as "admin" | "member" | "viewer",
+        invitedByUserId: req.user!.id,
+        ipAddress: req.ip,
+        conflictMode: "reject",
+      });
 
-      if (existing.length > 0) {
+      if (result.conflict) {
         sendError(res, "A pending invitation already exists for this email", 409, "CONFLICT");
         return;
       }
 
-      const token = crypto.randomBytes(32).toString("hex");
-      const expiresAt = new Date(Date.now() + INVITE_TTL);
-
-      const [invitation] = await db
-        .insert(orgInvitationsTable)
-        .values({
-          orgId: org.id,
-          invitedByUserId: req.user!.id,
-          email: email.toLowerCase(),
-          role: role as "admin" | "member" | "viewer",
-          token,
-          status: "pending",
-          expiresAt,
-        })
-        .returning();
-
-      await writeAuditEvent({
-        userId: req.user!.id,
-        action: "invitation_sent",
-        entityType: "org_invitation",
-        entityId: String(invitation.id),
-        ipAddress: req.ip,
-        newValues: { orgId: org.id, email: email.toLowerCase(), role, expiresAt: expiresAt.toISOString() },
-      });
-
-      const [inviter] = await db
-        .select({ displayName: usersTable.displayName, email: usersTable.email })
-        .from(usersTable)
-        .where(eq(usersTable.id, req.user!.id))
-        .limit(1);
-
-      const appUrl = process.env.APP_URL || process.env.VITE_APP_URL || "https://szlholdings.com";
-      const inviteUrl = `${appUrl}/accept-invite?token=${token}`;
-
-      sendEmail({
-        to: email.toLowerCase(),
-        subject: `You've been invited to join ${org.name} on SZL Holdings`,
-        html: buildOrgInviteEmail({
-          orgName: org.name,
-          inviteUrl,
-          role,
-          expiresAt: expiresAt.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
-          invitedByName: inviter?.displayName || inviter?.email || undefined,
-        }),
-        text: `You've been invited to join ${org.name} as a ${role}. Accept your invitation here: ${inviteUrl} (expires ${expiresAt.toLocaleDateString()})`,
-      }).then(result => {
-        if (!result.success) logger.warn({ error: result.error, email: email.toLowerCase() }, "[invitations] Email provider rejected invite email");
-      }).catch(err => logger.warn({ err, email: email.toLowerCase() }, "[invitations] Failed to send invite email"));
-
       res.status(201).json({
-        id: invitation.id,
-        email: invitation.email,
-        role: invitation.role,
-        expiresAt: invitation.expiresAt,
-        inviteUrl: `/accept-invite?token=${token}`,
+        id: result.invitation.id,
+        email: result.invitation.email,
+        role: result.invitation.role,
+        expiresAt: result.invitation.expiresAt,
+        inviteUrl: result.invitation.inviteUrl,
       });
     } catch (err) {
       handleRouteError(res, err, "Failed to create invitation");

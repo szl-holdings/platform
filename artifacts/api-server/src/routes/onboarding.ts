@@ -24,8 +24,9 @@ import { authMiddleware, isElevatedUser } from "../middlewares/auth";
 import { writeLimiter } from "../middlewares/rate-limiters";
 import { hashIp } from "@szl-holdings/audit";
 import { validateBody, jsonObjectBodySchema} from "../lib/validation";
-import { sendSuccess, sendCreated, sendBadRequest, sendForbidden, handleRouteError, sendNotFound } from "../lib/api-response";
+import { sendSuccess, sendCreated, sendBadRequest, sendForbidden, sendError, handleRouteError, sendNotFound } from "../lib/api-response";
 import { sendEmail, buildOrgInviteEmail } from "../lib/email";
+import { createOrgInvitation } from "../lib/invitation-service";
 import { logger } from "../lib/logger";
 import type { Request, Response } from "express";
 
@@ -423,65 +424,33 @@ router.post(
         }
       }
 
-      const token = crypto.randomBytes(32).toString("hex");
-      const expiresAt = new Date(Date.now() + INVITE_TTL);
+      // Delegate to the canonical invitation service. Onboarding's
+      // resend-invite uses "replace" conflict mode so re-issuing supersedes
+      // any prior pending token for the same email.
+      const result = await createOrgInvitation({
+        orgId: org.id,
+        orgName: org.name,
+        email,
+        role,
+        invitedByUserId: user.id,
+        ipAddress: req.ip,
+        conflictMode: "replace",
+      });
 
-      await db
-        .update(orgInvitationsTable)
-        .set({ status: "expired" })
-        .where(
-          and(
-            eq(orgInvitationsTable.orgId, org.id),
-            eq(orgInvitationsTable.email, email.toLowerCase()),
-            eq(orgInvitationsTable.status, "pending"),
-          ),
-        );
-
-      const [invitation] = await db
-        .insert(orgInvitationsTable)
-        .values({
-          orgId: org.id,
-          invitedByUserId: user.id,
-          email: email.toLowerCase(),
-          role,
-          token,
-          status: "pending",
-          expiresAt,
-        })
-        .returning();
+      if (result.conflict) {
+        // "replace" mode never returns conflict, but typescript narrowing.
+        sendError(res, "Invitation conflict", 409, "CONFLICT");
+        return;
+      }
 
       logger.info({ userId: user.id, orgId: org.id, email }, "[onboarding] Invite sent");
 
-      const appUrl = process.env.APP_URL || process.env.VITE_APP_URL || "https://szlholdings.com";
-      const inviteUrl = `${appUrl}/accept-invite?token=${token}`;
-
-      const [inviter] = await db
-        .select({ displayName: usersTable.displayName, email: usersTable.email })
-        .from(usersTable)
-        .where(eq(usersTable.id, user.id))
-        .limit(1);
-
-      sendEmail({
-        to: email.toLowerCase(),
-        subject: `You've been invited to join ${org.name} on SZL Holdings`,
-        html: buildOrgInviteEmail({
-          orgName: org.name,
-          inviteUrl,
-          role,
-          expiresAt: expiresAt.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
-          invitedByName: inviter?.displayName || inviter?.email || undefined,
-        }),
-        text: `You've been invited to join ${org.name} as a ${role}. Accept your invitation here: ${inviteUrl} (expires ${expiresAt.toLocaleDateString()})`,
-      }).then(result => {
-        if (!result.success) logger.warn({ error: result.error, email: email.toLowerCase() }, "[onboarding] Email provider rejected invite email");
-      }).catch(err => logger.warn({ err, email: email.toLowerCase() }, "[onboarding] Failed to send invite email"));
-
       sendCreated(res, {
-        invitationId: invitation.id,
-        email: invitation.email,
-        role: invitation.role,
-        expiresAt: invitation.expiresAt,
-        inviteUrl: `/accept-invite?token=${token}`,
+        invitationId: result.invitation.id,
+        email: result.invitation.email,
+        role: result.invitation.role,
+        expiresAt: result.invitation.expiresAt,
+        inviteUrl: result.invitation.inviteUrl,
       });
     } catch (err) {
       handleRouteError(res, err, "Failed to send invitation");

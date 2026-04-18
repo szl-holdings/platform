@@ -202,26 +202,72 @@ router.get("/orgs/:orgSlug/usage/history", readLimiter, authMiddleware(), valida
   }
 });
 
+/**
+ * Trusted service token (set USAGE_EVENT_SERVICE_TOKEN in env) — allows
+ * server-to-server callers (background jobs, internal collectors) to record
+ * usage events without an authenticated session. The token must be sent in
+ * `x-service-token` and a constant-time compare is used.
+ */
+function hasValidServiceToken(req: Request): boolean {
+  const expected = process.env.USAGE_EVENT_SERVICE_TOKEN;
+  if (!expected) return false;
+  const provided = req.header("x-service-token");
+  if (!provided || provided.length !== expected.length) return false;
+  let mismatch = 0;
+  for (let i = 0; i < expected.length; i++) {
+    mismatch |= expected.charCodeAt(i) ^ provided.charCodeAt(i);
+  }
+  return mismatch === 0;
+}
+
 router.post(
   "/orgs/:orgSlug/usage/events",
   writeLimiter,
-  authMiddleware(),
+  authMiddleware({ required: false }),
   validateBody(recordUsageSchema),
   async (req: Request, res: Response) => {
     try {
       const orgSlug = req.params["orgSlug"] as string;
       const { featureKey, quantity, metadata } = req.body as z.infer<typeof recordUsageSchema>;
 
-      const { org, membership } = await resolveOrgAndCheckMembership(orgSlug, req.user!.id);
+      // Allow trusted server-to-server callers (background jobs, collectors)
+      // even without a user session.
+      const serviceToken = hasValidServiceToken(req);
+
+      if (!serviceToken && !req.user) {
+        sendForbidden(res, "Authentication required");
+        return;
+      }
+
+      // Resolve org. For service-token callers we still need to ensure the
+      // org exists, but skip membership checks.
+      const [org] = await db
+        .select()
+        .from(organizationsTable)
+        .where(eq(organizationsTable.slug, orgSlug))
+        .limit(1);
 
       if (!org) {
         sendNotFound(res, "Organization");
         return;
       }
 
-      if (!isElevated(req) && !membership) {
-        sendForbidden(res, "Not a member of this organization");
-        return;
+      if (!serviceToken) {
+        const { membership } = await resolveOrgAndCheckMembership(orgSlug, req.user!.id);
+
+        // Restrict member-driven writes to org admins/owners (or platform
+        // elevated roles). Without this, any org member could spam usage
+        // events and skew tenant metrics.
+        if (!isElevated(req)) {
+          if (!membership) {
+            sendForbidden(res, "Not a member of this organization");
+            return;
+          }
+          if ((ORG_ROLE_HIERARCHY[membership.role] ?? 0) < ORG_ROLE_HIERARCHY["admin"]) {
+            sendForbidden(res, "Org admin role required to record usage events");
+            return;
+          }
+        }
       }
 
       await db.insert(usageEventsTable).values({
