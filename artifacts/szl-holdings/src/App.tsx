@@ -1,10 +1,11 @@
-import { lazy, Suspense, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, type ReactNode } from "react";
+import { apiRequest, registerProductionConfirmFn } from "@/lib/api";
 import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
 import { navigatorConfig } from "@szl-holdings/shared-ui/copilot-configs";
 import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LazyMotion, domMax } from "framer-motion";
-import { DemoModeProvider, SandboxModeProvider, CookieBanner, StatusBanner, AnalyticsProvider, type StatusBannerConfig, useRole } from "@szl-holdings/shared-ui";
+import { DemoModeProvider, SandboxModeProvider, CookieBanner, StatusBanner, AnalyticsProvider, type StatusBannerConfig, useRole, AppModeBanner, AppModeProvider, ProductionConfirmProvider, useProductionConfirm } from "@szl-holdings/shared-ui";
 import { McpOverlay } from "@szl-holdings/mcp-client";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
 import { useAuth } from "@szl-holdings/replit-auth-web";
@@ -391,15 +392,38 @@ function PageLoader() {
   );
 }
 
+function ProductionConfirmRegistrar() {
+  const { confirm } = useProductionConfirm();
+  useEffect(() => {
+    registerProductionConfirmFn(confirm);
+    return () => { registerProductionConfirmFn(null); };
+  }, [confirm]);
+  return null;
+}
+
+async function handleDemoReset() {
+  try {
+    await apiRequest("POST", "/api/admin/seed/reset-demo");
+    window.location.reload();
+  } catch (err) {
+    console.error("[demo-reset] Failed to reset demo state:", err);
+    alert("Demo reset failed. Please check your connection and try again.");
+  }
+}
+
 function App() {
   return (
+    <AppModeProvider>
     <AnalyticsProvider appName="szl-holdings">
     <PrismBusProvider domain="szl-holdings">
     <SandboxModeProvider>
     <DemoModeProvider>
     <QueryClientProvider client={queryClient}>
+      <ProductionConfirmProvider>
+      <ProductionConfirmRegistrar />
       <LazyMotion features={domMax} strict>
         <StatusBanner config={SZL_STATUS_CONFIG} dismissible />
+        <AppModeBanner onResetDemo={handleDemoReset} />
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
           <EcosystemNav currentAppId="szl-holdings" currentAppName="SZL Holdings" accentColor={SZL_ACCENT} />
           <Switch>
@@ -1363,11 +1387,13 @@ function App() {
       <McpOverlay domain="szl-holdings" />
       <AgentCopilot config={navigatorConfig} />
       <CookieBanner privacyUrl="/legal/privacy" accentColor={SZL_ACCENT} />
+      </ProductionConfirmProvider>
     </QueryClientProvider>
     </DemoModeProvider>
     </SandboxModeProvider>
     </PrismBusProvider>
     </AnalyticsProvider>
+    </AppModeProvider>
   );
 }
 

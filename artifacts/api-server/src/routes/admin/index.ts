@@ -6,6 +6,7 @@ import { register as registerFlags } from "./flags.js";
 import { register as registerIntegrations, integrationActivityLog, type IntegrationActivity } from "./integrations.js";
 import { register as registerSupport } from "./support.js";
 import { register as registerUsage } from "./usage.js";
+import { register as registerSeed } from "./seed.js";
 
 const adminRouter: IRouter = Router();
 
@@ -18,6 +19,7 @@ registerFlags(adminRouter);
 registerIntegrations(adminRouter);
 registerSupport(adminRouter);
 registerUsage(adminRouter);
+registerSeed(adminRouter);
 
 export { integrationActivityLog, type IntegrationActivity };
 export default adminRouter;

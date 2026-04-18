@@ -21,7 +21,7 @@
 // Mode definitions
 // ---------------------------------------------------------------------------
 
-export const RUNTIME_MODES = ["local-dev", "internal-preview", "demo", "production"] as const;
+export const RUNTIME_MODES = ["local-dev", "internal-preview", "sandbox", "demo", "production"] as const;
 export type RuntimeMode = (typeof RUNTIME_MODES)[number];
 
 /**
@@ -56,6 +56,20 @@ export interface RuntimeModeProfile {
 }
 
 export const RUNTIME_MODE_PROFILES: Record<RuntimeMode, RuntimeModeProfile> = {
+  sandbox: {
+    mode: "sandbox",
+    label: "Sandbox",
+    auth: "dev-oidc",
+    allowSeedData: true,
+    allowConnectorFallback: true,
+    allowAiFallback: true,
+    billingActive: false,
+    notificationsActive: false,
+    analyticsActive: true,
+    verboseErrors: true,
+    destructiveOpsAllowed: true,
+    requireDemoLabels: true,
+  },
   "local-dev": {
     mode: "local-dev",
     label: "Local Dev",
@@ -142,6 +156,11 @@ export function resolveRuntimeMode(): RuntimeMode {
     return explicit as RuntimeMode;
   }
 
+  const appMode = (process.env["APP_MODE"] ?? "").toLowerCase().trim();
+  if (appMode === "demo") return "demo";
+  if (appMode === "sandbox") return "sandbox";
+  if (appMode === "production") return "production";
+
   const demoMode = process.env["DEMO_MODE"];
   if (demoMode === "true" || demoMode === "1") {
     return "demo";
@@ -156,6 +175,7 @@ export function resolveRuntimeMode(): RuntimeMode {
   const nodeEnv = process.env["NODE_ENV"];
 
   if (appEnv === "demo") return "demo";
+  if (appEnv === "sandbox") return "sandbox";
   if (appEnv === "production" || nodeEnv === "production") return "production";
   if (appEnv === "staging" || appEnv === "internal-preview") return "internal-preview";
 
@@ -194,6 +214,10 @@ export function isInternalPreviewMode(): boolean {
 
 export function isLocalDevMode(): boolean {
   return resolveRuntimeMode() === "local-dev";
+}
+
+export function isSandboxMode(): boolean {
+  return resolveRuntimeMode() === "sandbox";
 }
 
 /** True when the mode allows seeded/demo data to masquerade as live records. */
@@ -241,11 +265,11 @@ export function areDemoLabelsRequired(): boolean {
  *   MODE              — Vite's built-in mode (development | production)
  */
 export function getClientRuntimeMode(env: Record<string, string | undefined>): RuntimeMode {
-  const explicit = env["VITE_RUNTIME_MODE"];
+  const explicit = env["VITE_RUNTIME_MODE"] ?? env["VITE_APP_MODE"];
   if (explicit) {
     if (!RUNTIME_MODES.includes(explicit as RuntimeMode)) {
       console.error(
-        `[runtime-mode] Invalid VITE_RUNTIME_MODE value: "${explicit}". ` +
+        `[runtime-mode] Invalid VITE_RUNTIME_MODE/VITE_APP_MODE value: "${explicit}". ` +
           `Valid values: ${RUNTIME_MODES.join(", ")}. Falling back to derived mode.`,
       );
     } else {
@@ -262,6 +286,7 @@ export function getClientRuntimeMode(env: Record<string, string | undefined>): R
   const mode = env["MODE"];
 
   if (appEnv === "demo") return "demo";
+  if (appEnv === "sandbox") return "sandbox";
   if (appEnv === "production" || mode === "production") return "production";
   if (appEnv === "staging" || appEnv === "internal-preview") return "internal-preview";
 

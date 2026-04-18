@@ -44,6 +44,7 @@ import {
   usePushNotificationsBase,
 } from "@szl-holdings/mobile-shared/notifications";
 import { ErrorFallback } from "@/components/ErrorFallback";
+import { AppModeBanner } from "@/components/AppModeBanner";
 import { AuthProvider, AUTH_TOKEN_KEY } from "@/context/AuthContext";
 import { WorkspaceProvider } from "@/context/WorkspaceContext";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
@@ -250,6 +251,7 @@ export default function RootLayout() {
                       <GestureHandlerRootView style={{ flex: 1 }}>
                         <ThemeProvider defaultMode="dark" storageKey="cortex-theme-mode">
                           <View style={{ flex: 1 }}>
+                            <AppModeBanner />
                             <AppShell />
                             <OfflineBanner accentColor="#c9a84c" />
                             <SyncStatusBanner accentColor="#c9a84c" />

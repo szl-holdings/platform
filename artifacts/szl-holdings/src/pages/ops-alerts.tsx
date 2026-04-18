@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Bell, Plus, X, RefreshCw, PlayCircle, CheckCircle, AlertTriangle, Zap } from "lucide-react";
+import { useProductionConfirm } from "@szl-holdings/shared-ui";
 
 const BASE = "/api";
 
@@ -200,6 +201,7 @@ export default function OpsAlertsPage() {
   const [evaluating, setEvaluating] = useState(false);
   const [evalResult, setEvalResult] = useState<{ evaluated: number; fired: number; metrics: Record<string, number> } | null>(null);
   const [activeTab, setActiveTab] = useState<"rules" | "events">("rules");
+  const { confirm: productionConfirm } = useProductionConfirm();
 
   const load = useCallback(async () => {
     const [rRes, eRes] = await Promise.all([
@@ -235,7 +237,14 @@ export default function OpsAlertsPage() {
   };
 
   const deleteRule = async (id: number) => {
-    if (!confirm("Delete this alert rule?")) return;
+    const rule = rules.find(r => r.id === id);
+    const confirmed = await productionConfirm({
+      action: "Delete Alert Rule",
+      title: `Delete "${rule?.name ?? "this rule"}"?`,
+      description: "This alert rule will be permanently removed. Any active alerts from this rule will stop firing.",
+      confirmText: "DELETE",
+    });
+    if (!confirmed) return;
     await fetch(`${BASE}/ops/alert-rules/${id}`, { method: "DELETE", credentials: "include" });
     await load();
   };

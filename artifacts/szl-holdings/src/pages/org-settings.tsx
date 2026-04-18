@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useProductionConfirm } from "@szl-holdings/shared-ui";
 import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { m, AnimatePresence } from "framer-motion";
@@ -65,6 +66,7 @@ export default function OrgSettingsPage() {
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const qc = useQueryClient();
+  const { confirm: productionConfirm } = useProductionConfirm();
 
   const resolvedOrgQuery = useQuery<{ orgs?: { slug: string }[] }>({
     queryKey: ["me-orgs"],
@@ -402,7 +404,17 @@ export default function OrgSettingsPage() {
                         {m.role !== "owner" && (
                           <button
                             className="p-1.5 text-white/30 hover:text-red-400 transition-colors"
-                            onClick={() => { setRemovingUserId(m.userId); removeMemberMutation.mutate(m.userId); }}
+                            onClick={async () => {
+                              const confirmed = await productionConfirm({
+                                action: "Remove Organization Member",
+                                title: `Remove member from organization?`,
+                                description: "This member will lose access to all organization resources immediately.",
+                                confirmText: "REMOVE",
+                              });
+                              if (!confirmed) return;
+                              setRemovingUserId(m.userId);
+                              removeMemberMutation.mutate(m.userId);
+                            }}
                             disabled={removingUserId === m.userId}
                           >
                             {removingUserId === m.userId

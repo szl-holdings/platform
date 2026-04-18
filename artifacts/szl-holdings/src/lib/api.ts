@@ -1,4 +1,10 @@
-const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
+const VITE_APP_MODE = (import.meta.env.VITE_APP_MODE ?? "").toLowerCase();
+const VITE_SANDBOX_API_BASE = (import.meta.env.VITE_SANDBOX_API_BASE ?? "").replace(/\/$/, "");
+
+const BASE =
+  VITE_APP_MODE === "sandbox" && VITE_SANDBOX_API_BASE
+    ? VITE_SANDBOX_API_BASE
+    : (import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "");
 
 function getCsrfTokenFromCookie(): string {
   if (typeof document === "undefined") return "";
@@ -6,11 +12,47 @@ function getCsrfTokenFromCookie(): string {
   return match ? decodeURIComponent(match[1]!) : "";
 }
 
+type ProductionConfirmFn = (opts: {
+  action: string;
+  confirmText?: string;
+  description?: string;
+  title?: string;
+}) => Promise<boolean>;
+
+let _productionConfirmFn: ProductionConfirmFn | null = null;
+
+/**
+ * Register a production confirmation handler.
+ * Called once by <ProductionConfirmRegistrar /> inside the provider tree.
+ * apiRequest automatically invokes this for DELETE requests to /api/admin/
+ * when APP_MODE is production — enforcing the double-confirmation invariant
+ * at the API call level rather than requiring each caller to opt in.
+ */
+export function registerProductionConfirmFn(fn: ProductionConfirmFn | null): void {
+  _productionConfirmFn = fn;
+}
+
+const PRODUCTION_CONFIRM_PATHS = ["/api/admin/"];
+
 export async function apiRequest<T = unknown>(
   method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE",
   path: string,
   body?: unknown,
 ): Promise<T> {
+  if (
+    method === "DELETE" &&
+    VITE_APP_MODE === "production" &&
+    PRODUCTION_CONFIRM_PATHS.some((p) => path.startsWith(p)) &&
+    _productionConfirmFn
+  ) {
+    const confirmed = await _productionConfirmFn({
+      action: "Destructive operation",
+      confirmText: "CONFIRM",
+      description: `This will permanently execute: DELETE ${path}. This action cannot be undone.`,
+    });
+    if (!confirmed) throw new Error("Operation cancelled");
+  }
+
   const url = path.startsWith("http") ? path : `${BASE}${path}`;
   const needsCsrf = ["POST", "PUT", "PATCH", "DELETE"].includes(method);
   let csrfToken = needsCsrf ? getCsrfTokenFromCookie() : "";

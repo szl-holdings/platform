@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { useDestructiveAction } from "@szl-holdings/shared-ui";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { m, AnimatePresence } from "framer-motion";
 import {
@@ -547,6 +548,20 @@ function AzureTenantsPanel() {
   const [consentCopied, setConsentCopied] = useState<number | null>(null);
   const [expandedTenant, setExpandedTenant] = useState<number | null>(null);
   const qc = useQueryClient();
+  const pendingDeleteId = useRef<number | null>(null);
+  const doDeleteTenant = useDestructiveAction(
+    useCallback(async () => {
+      const id = pendingDeleteId.current;
+      if (id == null) return;
+      await apiFetch(`/admin/tenants/${id}`, { method: "DELETE" });
+      qc.invalidateQueries({ queryKey: ["azure-tenants"] });
+    }, [qc]),
+    {
+      action: "Deprovision & delete tenant",
+      confirmText: "DELETE",
+      description: "All user access and data for this tenant will be permanently removed. This cannot be undone.",
+    },
+  );
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["azure-tenants"],
@@ -589,13 +604,14 @@ function AzureTenantsPanel() {
   }
 
   async function handleDelete(id: number) {
-    if (!confirm("Deprovision and delete this tenant? This cannot be undone.")) return;
     setActionError("");
+    pendingDeleteId.current = id;
     try {
-      await apiFetch(`/admin/tenants/${id}`, { method: "DELETE" });
-      qc.invalidateQueries({ queryKey: ["azure-tenants"] });
+      await doDeleteTenant();
     } catch (err) {
       setActionError(err instanceof Error ? err.message : "Failed to delete tenant");
+    } finally {
+      pendingDeleteId.current = null;
     }
   }
 

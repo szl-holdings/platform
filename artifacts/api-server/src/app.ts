@@ -26,6 +26,7 @@ import { apiVersionMiddleware } from "./middlewares/api-version";
 import { etagMiddleware } from "./middlewares/optimistic-concurrency";
 import { ENV_SPECS } from "./lib/startup-validation";
 import { resolveRuntimeMode } from "@szl-holdings/config";
+import { appModeMiddleware } from "./middlewares/app-mode.js";
 
 const app: Express = express();
 
@@ -38,6 +39,7 @@ const __dirname = dirname(__filename);
 
 app.use(correlationMiddleware);
 app.use(apiVersionMiddleware);
+app.use(appModeMiddleware);
 
 app.use(helmet({
   contentSecurityPolicy: isProduction ? {
