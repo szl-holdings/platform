@@ -26,7 +26,7 @@ architectural decision. See `mobile-disposition.md` for full context.
 | Android Package | `com.szlholdings.executive.mobile` |
 | Version | 2.0.0 |
 | Build Number | 1 (auto-increments via EAS `autoIncrement: true`) |
-| Deep Link Scheme | `szl-holdings://` |
+| Deep Link Scheme | `cortex://` (configured in `app.json` as `"scheme": "cortex"`) |
 
 ---
 
@@ -71,6 +71,8 @@ See `artifacts/szl-holdings-mobile/SETUP.md` for the step-by-step walkthrough.
 |------|-----------|----------------|
 | EAS project UUID | Yes | Run `eas init` in app dir; set UUID in `app.json` |
 | OTA updates enabled | No (post-UUID) | Set `updates.enabled: true` after UUID is set |
+| `EXPO_PUBLIC_DOMAIN` EAS secret | Yes | `eas secret:create` with Replit production domain |
+| `EXPO_PUBLIC_REPL_ID` EAS secret | Yes | `eas secret:create` with Replit project ID |
 | Firebase `google-services.json` | Yes | Download from Firebase Console → replace placeholder |
 | Firebase `GoogleService-Info.plist` | Yes | Download from Firebase Console → replace placeholder |
 | APNs Auth Key | Yes (iOS push) | Create in Apple Developer portal → upload to Firebase |
@@ -95,15 +97,19 @@ See `artifacts/szl-holdings-mobile/SETUP.md` for the step-by-step walkthrough.
 ## Go / No-Go Checklist (Alpha Gate)
 
 - [ ] `eas init` completed; real UUID in `app.json`; `updates.enabled: true`
+- [ ] `EXPO_PUBLIC_DOMAIN` set via `eas secret:create` (Replit production domain)
+- [ ] `EXPO_PUBLIC_REPL_ID` set via `eas secret:create` (Replit project ID)
 - [ ] Real `google-services.json` in place (not placeholder)
 - [ ] Real `GoogleService-Info.plist` in place (not placeholder)
 - [ ] APNs key uploaded to Firebase Console
-- [ ] `eas build --profile preview --platform ios` succeeds
+- [ ] `eas.json` submit fields filled in (`appleId`, `ascAppId`, `appleTeamId`)
+- [ ] `eas build --profile testflight --platform ios` succeeds
 - [ ] `eas build --profile preview --platform android` succeeds
-- [ ] Biometric + PIN auth verified on physical iOS and Android device
+- [ ] Biometric + PIN auth verified on physical iOS device
 - [ ] Push notification received end-to-end (requires push token backend route)
 - [ ] Offline banner shows; sync restores on reconnect
 - [ ] TestFlight internal build accepted by App Store Connect
+- [ ] Internal testing group created in App Store Connect → TestFlight
 
 ---
 
@@ -114,6 +120,9 @@ See `artifacts/szl-holdings-mobile/SETUP.md` for the step-by-step walkthrough.
 2. **Screen capture prevention** — `expo-screen-capture` is installed; not yet invoked
    on sensitive workspace screens.
 3. **Sentry crash reporting** — Not yet integrated. Add `@sentry/react-native` before Beta.
+4. **EAS env vars** — `EXPO_PUBLIC_DOMAIN` and `EXPO_PUBLIC_REPL_ID` must be set as
+   EAS secrets before the first device build or API calls will fail silently.
+   See Step 5b in `artifacts/szl-holdings-mobile/SETUP.md`.
 
 ---
 

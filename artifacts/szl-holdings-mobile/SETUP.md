@@ -94,12 +94,42 @@ To get `ascAppId`, first create the app record in App Store Connect:
 
 ---
 
+## Step 5b — Set EAS Build Environment Variables
+
+The app needs two runtime environment variables to reach the backend API and
+authenticate users. These must be set as **EAS secrets** so they are baked into
+the binary at build time.
+
+```bash
+cd artifacts/szl-holdings-mobile
+
+# The production Replit domain (no https://, no trailing slash)
+# Example: "myapp.replit.app" or the custom domain you have configured
+eas secret:create --scope project --name EXPO_PUBLIC_DOMAIN --value "YOUR_REPLIT_DEV_DOMAIN"
+
+# The Replit app / OAuth client ID (shown in the Replit project settings)
+eas secret:create --scope project --name EXPO_PUBLIC_REPL_ID --value "YOUR_REPL_ID"
+```
+
+Without `EXPO_PUBLIC_DOMAIN` the app will start but all API calls will fail
+silently. Without `EXPO_PUBLIC_REPL_ID` the OAuth login flow will not work.
+Both are required for a functional investor demo.
+
+> **Finding these values on Replit:**
+> - `EXPO_PUBLIC_DOMAIN`: the public preview URL hostname, e.g. `your-project.username.repl.co`
+> - `EXPO_PUBLIC_REPL_ID`: visible in the URL bar of the Replit editor, or via `echo $REPL_ID` in the shell
+
+---
+
 ## Step 6 — First Build (Preview / Internal Distribution)
 
 ```bash
 cd artifacts/szl-holdings-mobile
 
-# Internal iOS build (device, no simulator) + Android APK
+# Recommended: use the dedicated TestFlight profile
+eas build --profile testflight --platform ios
+
+# Or build for both platforms at once (preview profile)
 eas build --profile preview --platform all
 
 # This is the TestFlight / Play internal testing build.
@@ -110,9 +140,26 @@ eas build --profile preview --platform all
 
 ## Step 7 — Submit to TestFlight
 
+Before running `eas submit`, ensure the submit fields in `eas.json` are filled in
+under `submit.testflight.ios` (not `submit.production.ios`):
+
+```json
+"submit": {
+  "testflight": {
+    "ios": {
+      "appleId": "your-apple-id@example.com",
+      "ascAppId": "1234567890",
+      "appleTeamId": "XXXXXXXXXX"
+    }
+  }
+}
+```
+
+Then submit:
+
 ```bash
-# After the preview build completes:
-eas submit --profile production --platform ios --latest
+# Submit the testflight build to App Store Connect for internal testing
+eas submit --profile testflight --platform ios --latest
 ```
 
 Go to App Store Connect → TestFlight → add internal testers.
@@ -135,16 +182,19 @@ Before running Step 6:
 
 - [ ] Real EAS project UUID in `app.json` (`extra.eas.projectId` and `updates.url`)
 - [ ] `updates.enabled` set to `true` in `app.json`
+- [ ] `EXPO_PUBLIC_DOMAIN` EAS secret set to the Replit production domain
+- [ ] `EXPO_PUBLIC_REPL_ID` EAS secret set to the Replit project ID
 - [ ] `google-services.json` is the real Firebase file (not the placeholder)
 - [ ] `GoogleService-Info.plist` is the real Firebase file (not the placeholder)
 - [ ] APNs key uploaded to Firebase Console
-- [ ] `eas.json` Apple fields filled in (for `eas submit` only; not needed for build)
+- [ ] `eas.json` Apple fields filled in (`appleId`, `ascAppId`, `appleTeamId`)
 - [ ] `google-play-service-account.json` is the real Play Console service account key
 
 ---
 
 ## Reference
 
+- **Investor demo preflight**: `ops/mobile/testflight-investor-demo-preflight.md`
 - Full readiness matrix: `ops/mobile/flagship-release-readiness.md`
 - EAS secrets inventory: `ops/mobile/eas-and-store-secrets-matrix.md`
 - Push notification setup: `ops/mobile/push-notification-setup.md`

@@ -18,6 +18,29 @@
         "EXPO_PUBLIC_APP_ENV": "development"
       }
     },
+    "device-development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "ios": {
+        "simulator": false
+      },
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_APP_ENV": "development"
+      }
+    },
+    "testflight": {
+      "channel": "preview",
+      "ios": {
+        "simulator": false,
+        "credentialsSource": "remote"
+      },
+      "env": {
+        "EXPO_PUBLIC_APP_ENV": "preview"
+      }
+    },
     "preview": {
       "distribution": "internal",
       "channel": "preview",
@@ -59,6 +82,15 @@
       "android": {
         "track": "internal",
         "releaseStatus": "completed"
+      }
+    },
+    "testflight": {
+      "ios": {
+        "appleId": "FILL_IN_APPLE_ID_EMAIL",
+        "ascAppId": "FILL_IN_APP_STORE_CONNECT_APP_ID",
+        "appleTeamId": "FILL_IN_APPLE_TEAM_ID",
+        "language": "en-US",
+        "sku": "com.szlholdings.executive.mobile"
       }
     }
   }

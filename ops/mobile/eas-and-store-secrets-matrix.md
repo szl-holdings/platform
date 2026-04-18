@@ -14,11 +14,18 @@ build config; it is not covered here.
 
 Defined in `artifacts/szl-holdings-mobile/eas.json`:
 
-| Profile | Distribution | iOS | Android | API Env |
-|---------|-------------|-----|---------|---------|
-| development | internal | Simulator | APK | `EXPO_PUBLIC_APP_ENV=development` |
-| preview | internal | Device | APK | `EXPO_PUBLIC_APP_ENV=preview` |
-| production | store | Device (remote creds) | AAB (remote creds) | `EXPO_PUBLIC_APP_ENV=production` |
+| Profile | Distribution | iOS | Android | API Env | Purpose |
+|---------|-------------|-----|---------|---------|---------|
+| development | internal (ad hoc) | Simulator | APK | `EXPO_PUBLIC_APP_ENV=development` | Local simulator development |
+| device-development | internal (ad hoc) | Device | APK | `EXPO_PUBLIC_APP_ENV=development` | Dev build on physical device |
+| testflight | store (App Store) | Device (remote creds) | — | `EXPO_PUBLIC_APP_ENV=preview` | **TestFlight submission** (produces App Store-signed IPA) |
+| preview | internal (ad hoc) | Device | APK | `EXPO_PUBLIC_APP_ENV=preview` | Direct ad hoc install via URL or QR code |
+| production | store (App Store) | Device (remote creds) | AAB (remote creds) | `EXPO_PUBLIC_APP_ENV=production` | App Store / Play Store release |
+
+> **Key distinction**: The `testflight` profile uses App Store distribution (no `distribution: internal`)
+> so EAS generates an App Store provisioning profile — required for TestFlight submission.
+> The `preview` profile uses ad hoc distribution, which installs directly on registered devices
+> but cannot be submitted to TestFlight.
 
 Key settings:
 - `credentialsSource: "remote"` on production (EAS manages signing; no local keystore needed)
@@ -56,7 +63,18 @@ Before the first EAS build, update these placeholders:
 | Secret Name | Required | Purpose |
 |-------------|----------|---------|
 | `EXPO_TOKEN` | Yes | Automated EAS builds from CI |
+| `EXPO_PUBLIC_DOMAIN` | Yes | Replit production domain — used for all API calls (`https://$EXPO_PUBLIC_DOMAIN/api/...`) |
+| `EXPO_PUBLIC_REPL_ID` | Yes | Replit project ID — used as OAuth client ID in the auth flow |
 | `SENTRY_DSN` | Recommended | Crash reporting (once Sentry is integrated) |
+
+> Set `EXPO_PUBLIC_DOMAIN` to the hostname only, without `https://` and without a
+> trailing slash. Example: `my-project.username.repl.co`
+>
+> Set `EXPO_PUBLIC_REPL_ID` to the Replit project ID (run `echo $REPL_ID` in the
+> Replit shell to get it).
+>
+> Both values are baked into the binary at EAS build time. Without them the app
+> will launch but all API calls will fail and OAuth login will not work.
 
 ### Apple / iOS
 

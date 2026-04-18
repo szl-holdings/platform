@@ -43,12 +43,19 @@ cd artifacts/szl-holdings-mobile
 # 1. Link project to expo.dev (first time only)
 eas init
 
-# 2. Build preview build for internal distribution
-eas build --profile preview --platform ios
+# 2. Build for TestFlight (App Store distribution — required for TestFlight)
+eas build --profile testflight --platform ios
 
 # 3. Submit to TestFlight
-eas submit --profile production --platform ios --latest
+#    Ensure submit.testflight.ios in eas.json is filled in (appleId, ascAppId, appleTeamId)
+eas submit --profile testflight --platform ios --latest
 ```
+
+> **Why `--profile testflight` and not `--profile preview`?**
+> The `preview` profile uses `distribution: internal` (ad hoc signing), which enables
+> direct device installs but cannot be submitted to TestFlight. The `testflight` profile
+> uses App Store distribution so EAS generates an App Store provisioning profile — the
+> type required by App Store Connect for TestFlight internal testing.
 
 ### TestFlight Internal Testing Configuration
 
@@ -162,6 +169,7 @@ eas update --channel production --message "Fix: [description]"
 
 ## Related Documentation
 
+- **Investor demo preflight**: `ops/mobile/testflight-investor-demo-preflight.md`
 - Operator setup steps: `artifacts/szl-holdings-mobile/SETUP.md`
 - Release readiness matrix: `ops/mobile/flagship-release-readiness.md`
 - EAS secrets inventory: `ops/mobile/eas-and-store-secrets-matrix.md`
