@@ -26,6 +26,7 @@ import * as decisions from "./groups/decisions";
 import * as domainAtlas from "./groups/domain-atlas";
 import * as graph from "./groups/graph";
 import * as guardian from "./groups/guardian";
+import trustProvenanceRouter from "./trust-provenance";
 import tracesRouter from "./traces";
 import reflectionsRouter from "./reflections";
 import plansRouter from "./plans";
@@ -106,6 +107,7 @@ skillLibrary.register(router);
 
 router.use("/nexus", nexusRouter);
 
+router.use(trustProvenanceRouter);
 router.use(tracesRouter);
 router.use(reflectionsRouter);
 router.use(plansRouter);
