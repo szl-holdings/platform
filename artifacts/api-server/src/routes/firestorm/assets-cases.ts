@@ -54,6 +54,7 @@ import {
 } from "@szl-holdings/ai-engine/domain-embedding-hooks";
 import { firestormLiveLimit, getFsCached, fetchFsJson, tradecraftDecisionInputSchema, tradecraftDecisionActionSchema, updateWorkflowActionSchema, updateHardeningControlSchema, pushTokenSchema, ingestSyslogSchema, updateCaseSchema, updateCaseMemorySchema, evidenceIndexQuerySchema } from "./shared";
 import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../../lib/validation";
+import { guardSeedInProduction } from "../../lib/seed-guard";
 const router = Router();
 
 router.get("/firestorm/assets", authMiddleware(), async (req, res) => {
@@ -385,10 +386,7 @@ router.get("/firestorm/mitre-detections/:techniqueId", authMiddleware(), async (
 });
 
 router.post("/firestorm/seed", validateBody(jsonObjectBodySchema), authMiddleware({ required: true }), async (_req, res) => {
-  if (process.env.NODE_ENV === "production" || process.env.APP_ENV === "production") {
-    res.status(404).json({ error: "Not found", code: "SEED_DISABLED_IN_PRODUCTION" });
-    return;
-  }
+  if (guardSeedInProduction(res)) return;
   try {
     // @ts-ignore
     const { seedAegis } = await import("../scripts/seed-aegis.js");

@@ -5,6 +5,7 @@ import { twinRegistry, vesselTwin, propertyTwin, postureTwin } from "@szl-holdin
 import type { VesselTwinState, PropertyTwinState, PostureTwinState, SimulationScenario } from "@szl-holdings/ai-engine";
 import { z } from "zod";
 import { jsonObjectBodySchema, validateBody } from "../lib/validation";
+import { guardSeedInProduction } from "../lib/seed-guard";
 
 const twinEntitySchema = z.object({
   entityId: z.string().min(1).max(200),
@@ -108,10 +109,7 @@ router.patch("/digital-twins/:twinId", authMiddleware(), validateBody(jsonObject
 });
 
 router.post("/digital-twins/demo/seed", validateBody(jsonObjectBodySchema), authMiddleware(), async (_req, res) => {
-  if (process.env.NODE_ENV === "production" || process.env.APP_ENV === "production") {
-    res.status(404).json({ error: "Not found", code: "SEED_DISABLED_IN_PRODUCTION" });
-    return;
-  }
+  if (guardSeedInProduction(res)) return;
   try {
     const vesselState: VesselTwinState = {
       imoNumber: "9234567",

@@ -16,6 +16,7 @@ import { sendSuccess, sendCreated, handleRouteError } from "../lib/api-response"
 import { authMiddleware } from "../middlewares/auth";
 import { logger } from "../lib/logger";
 import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { guardSeedInProduction } from "../lib/seed-guard";
 
 const router: IRouter = Router();
 
@@ -356,10 +357,7 @@ export async function ensureOtIcsDemoData(): Promise<void> {
 }
 
 router.post("/aegis/ot-ics/demo/seed", validateBody(jsonObjectBodySchema), authMiddleware({ required: true }), async (_req, res) => {
-  if (process.env.NODE_ENV === "production" || process.env.APP_ENV === "production") {
-    res.status(404).json({ error: "Not found", code: "SEED_DISABLED_IN_PRODUCTION" });
-    return;
-  }
+  if (guardSeedInProduction(res)) return;
   try {
     await ensureOtIcsDemoData();
     sendSuccess(res, { ok: true });

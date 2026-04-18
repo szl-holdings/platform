@@ -20,6 +20,7 @@ import { sendSuccess, sendNotFound, sendForbidden, handleRouteError, parsePagina
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 import { z } from "zod";
 import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { guardSeedInProduction } from "../lib/seed-guard";
 
 const createProgramSchema = z.object({
   name: z.string().min(1).max(200),
@@ -579,10 +580,7 @@ router.post("/certification/naics", ...auth, validateBody(jsonObjectBodySchema),
 // ─── SEED CERTIFICATION PROGRAMS ─────────────────────────────────────────────
 
 router.post("/certification/seed", ...auth, validateBody(jsonObjectBodySchema), async (req, res) => {
-  if (process.env.NODE_ENV === "production" || process.env.APP_ENV === "production") {
-    res.status(404).json({ error: "Not found", code: "SEED_DISABLED_IN_PRODUCTION" });
-    return;
-  }
+  if (guardSeedInProduction(res)) return;
   try {
     const [{ count: existing }] = await db.select({ count: sql<number>`count(*)::int` }).from(certificationProgramsTable);
     if (existing > 0) {

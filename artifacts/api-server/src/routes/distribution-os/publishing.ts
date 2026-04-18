@@ -18,6 +18,7 @@ import {
 import { eq, desc, asc, and, gte, count, sql } from "drizzle-orm";
 import { authMiddleware } from "../../middlewares/auth";
 import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../../lib/validation";
+import { guardSeedInProduction } from "../../lib/seed-guard";
 
 const router = Router();
 const requireAuth = authMiddleware({ required: true });
@@ -317,10 +318,7 @@ router.delete("/campaigns/:id", validateBody(jsonObjectBodySchema), requireAuth,
 // ─── Seed data ────────────────────────────────────────────────────────────────
 
 router.post("/seed", validateBody(jsonObjectBodySchema), requireAuth, async (_req: Request, res: Response): Promise<void> => {
-  if (process.env.NODE_ENV === "production" || process.env.APP_ENV === "production") {
-    res.status(404).json({ error: "Not found", code: "SEED_DISABLED_IN_PRODUCTION" });
-    return;
-  }
+  if (guardSeedInProduction(res)) return;
   const results: Record<string, unknown> = {};
 
   // Seed 3 campaigns (idempotent: skip if slugs exist)

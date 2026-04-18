@@ -4,6 +4,7 @@ import { sendBadRequest, sendError } from "../lib/api-response";
 import { fusionCortex, patternLibrary, predictiveCascadeEngine } from "@szl-holdings/ai-engine";
 import type { FusionAlertSeverity, FusionAlertCategory, DomainKey, CascadeHorizon } from "@szl-holdings/ai-engine";
 import { anyQuerySchema, jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { guardSeedInProduction } from "../lib/seed-guard";
 
 const router = Router();
 
@@ -67,10 +68,7 @@ router.post("/fusion/alerts/inject", authMiddleware(), validateBody(jsonObjectBo
 });
 
 router.post("/fusion/demo/seed", validateBody(jsonObjectBodySchema), authMiddleware(), async (_req, res) => {
-  if (process.env.NODE_ENV === "production" || process.env.APP_ENV === "production") {
-    res.status(404).json({ error: "Not found", code: "SEED_DISABLED_IN_PRODUCTION" });
-    return;
-  }
+  if (guardSeedInProduction(res)) return;
   fusionCortex.seedDemoAlerts();
   predictiveCascadeEngine.seedDemoAlerts();
   res.json({ success: true, message: "Demo fusion alerts seeded", alerts: fusionCortex.getAlerts({ limit: 10 }) });

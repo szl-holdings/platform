@@ -36,6 +36,7 @@ import { tenantScope } from "../middlewares/tenant-scope";
 import { logger } from "../lib/logger";
 import { seedVesselsData } from "../lib/seed-vessels";
 import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { guardSeedInProduction } from "../lib/seed-guard";
 
 const router: IRouter = Router();
 
@@ -1081,10 +1082,7 @@ router.get("/vessels/readiness", authMiddleware(), tenantScope(), async (req, re
 // ── Seed endpoint (admin-only) ────────────────────────────────────────────────
 
 router.post("/vessels/seed", validateBody(jsonObjectBodySchema), authMiddleware(), adminGuard, async (_req, res) => {
-  if (process.env.NODE_ENV === "production" || process.env.APP_ENV === "production") {
-    res.status(404).json({ error: "Not found", code: "SEED_DISABLED_IN_PRODUCTION" });
-    return;
-  }
+  if (guardSeedInProduction(res)) return;
   try {
     logger.info("Vessels seed triggered by admin");
     await seedVesselsData();
