@@ -346,31 +346,82 @@ function HeaderStatusPills() {
   );
 }
 
+interface LiveApiProbeResult {
+  selfHealing: boolean;
+  simulation: boolean;
+  infrastructure: boolean;
+  allLive: boolean;
+  liveCount: number;
+}
+
+async function probeEndpoint(method: "GET" | "POST", path: string, body?: unknown): Promise<boolean> {
+  try {
+    const res = await fetch(path, {
+      method,
+      credentials: "include",
+      headers: body ? { "Content-Type": "application/json" } : undefined,
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+async function probeLiveApis(): Promise<LiveApiProbeResult> {
+  const [selfHealing, simulation, infrastructure] = await Promise.all([
+    probeEndpoint("GET", "/api/self-healing/stats"),
+    probeEndpoint("POST", "/api/simulation/what-if", { variables: {}, iterations: 1 }),
+    probeEndpoint("GET", "/api/infrastructure/status"),
+  ]);
+  const liveCount = [selfHealing, simulation, infrastructure].filter(Boolean).length;
+  return { selfHealing, simulation, infrastructure, allLive: liveCount === 3, liveCount };
+}
+
 function DemoEnvironmentBanner({ environment }: { environment: string }) {
   const [dismissed, setDismissed] = useState(false);
   const isDemo = environment === "demo" || environment === "simulated";
+
+  const { data: probe } = useQuery<LiveApiProbeResult>({
+    queryKey: ["command-live-api-probe"],
+    queryFn: probeLiveApis,
+    refetchInterval: 60_000,
+    staleTime: 30_000,
+    retry: 0,
+    enabled: isDemo && !dismissed,
+  });
+
   if (!isDemo || dismissed) return null;
+  if (probe?.allLive) return null;
+
+  const partial = (probe?.liveCount ?? 0) > 0;
+  const accent = partial ? "#c9a227" : "#d4a054";
+  const message = partial
+    ? `Hybrid mode · ${probe?.liveCount}/3 live API connections · Remaining surfaces use synthetic data`
+    : "Synthetic data · No live systems connected · All actions are safe";
+  const label = partial ? "Hybrid Mode" : "Demo Mode";
+
   return (
     <div
       className="flex items-center justify-between gap-2 px-4 py-1.5 shrink-0"
       style={{
-        background: "linear-gradient(90deg, rgba(212,160,84,0.08) 0%, rgba(212,160,84,0.04) 100%)",
-        borderBottom: "1px solid rgba(212,160,84,0.14)",
+        background: `linear-gradient(90deg, ${accent}14 0%, ${accent}0a 100%)`,
+        borderBottom: `1px solid ${accent}24`,
       }}
     >
       <div className="flex items-center gap-2.5">
-        <FlaskConical className="w-3 h-3 shrink-0" style={{ color: "#d4a054" }} />
-        <span className="text-[9px] font-mono font-bold uppercase tracking-widest" style={{ color: "#d4a054" }}>
-          Demo Mode
+        <FlaskConical className="w-3 h-3 shrink-0" style={{ color: accent }} />
+        <span className="text-[9px] font-mono font-bold uppercase tracking-widest" style={{ color: accent }}>
+          {label}
         </span>
-        <span className="hidden sm:inline text-[9px] font-mono" style={{ color: "rgba(212,160,84,0.50)" }}>
-          Synthetic data · No live systems connected · All actions are safe
+        <span className="hidden sm:inline text-[9px] font-mono" style={{ color: `${accent}80` }}>
+          {message}
         </span>
       </div>
       <button
         onClick={() => setDismissed(true)}
         className="text-[9px] font-mono hover:opacity-80 transition-opacity shrink-0"
-        style={{ color: "rgba(212,160,84,0.4)" }}
+        style={{ color: `${accent}66` }}
         aria-label="Dismiss demo banner"
       >
         dismiss
