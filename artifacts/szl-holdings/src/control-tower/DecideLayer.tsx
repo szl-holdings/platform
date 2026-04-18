@@ -10,9 +10,10 @@ import { API_BASE, DOMAIN_COLORS } from "./constants";
 
 import { SectionCard, StatusDot, ConfidenceBadge, TimeAgo } from "./components";
 
+type OrchestrateForm = { query: string; depth: "shallow" | "standard" | "deep" };
+
 export function DecideLayer() {
-  const [orchestrateQuery, setOrchestrateQuery] = useState("");
-  const [orchestrateDepth, setOrchestrateDepth] = useState<"shallow" | "standard" | "deep">("standard");
+  const [orchestrateForm, setOrchestrateForm] = useState<OrchestrateForm>({ query: "", depth: "standard" });
   const [expandedDecision, setExpandedDecision] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
@@ -103,22 +104,22 @@ export function DecideLayer() {
                 className="w-full text-xs bg-muted/20 border border-border rounded-lg p-2.5 text-foreground placeholder:text-muted-foreground/50 resize-none focus:outline-none focus:border-primary/40"
                 rows={3}
                 placeholder="What cross-domain intelligence do you need?"
-                value={orchestrateQuery}
-                onChange={e => setOrchestrateQuery(e.target.value)}
+                value={orchestrateForm.query}
+                onChange={e => setOrchestrateForm(f => ({ ...f, query: e.target.value }))}
               />
               <div className="flex items-center gap-2">
                 <select
                   className="text-xs bg-muted/30 border border-border rounded px-2 py-1 text-foreground flex-1"
-                  value={orchestrateDepth}
-                  onChange={e => setOrchestrateDepth(e.target.value as "shallow" | "standard" | "deep")}
+                  value={orchestrateForm.depth}
+                  onChange={e => setOrchestrateForm(f => ({ ...f, depth: e.target.value as OrchestrateForm["depth"] }))}
                 >
                   <option value="shallow">Shallow</option>
                   <option value="standard">Standard</option>
                   <option value="deep">Deep</option>
                 </select>
                 <button
-                  onClick={() => orchestrateQuery && orchestrateMutation.mutate({ query: orchestrateQuery, depth: orchestrateDepth })}
-                  disabled={!orchestrateQuery || orchestrateMutation.isPending}
+                  onClick={() => orchestrateForm.query && orchestrateMutation.mutate({ query: orchestrateForm.query, depth: orchestrateForm.depth })}
+                  disabled={!orchestrateForm.query || orchestrateMutation.isPending}
                   className="flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 rounded-lg text-xs font-medium transition-colors disabled:opacity-50"
                 >
                   <Play className="w-3 h-3" />

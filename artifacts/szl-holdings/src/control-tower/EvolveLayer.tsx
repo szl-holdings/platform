@@ -10,10 +10,10 @@ import { API_BASE, DOMAIN_COLORS } from "./constants";
 
 import { SectionCard, StatusDot, ConfidenceBadge } from "./components";
 
+type ProposeForm = { agentId: string; description: string; expectedImprovement: string };
+
 export function EvolveLayer() {
-  const [proposeAgentId, setProposeAgentId] = useState("");
-  const [proposeDescription, setProposeDescription] = useState("");
-  const [proposeExpected, setProposeExpected] = useState("");
+  const [proposeForm, setProposeForm] = useState<ProposeForm>({ agentId: "", description: "", expectedImprovement: "" });
   const queryClient = useQueryClient();
 
   const { data: metricsData, isLoading: metricsLoading } = useQuery<{ data: Record<string, unknown> }>({
@@ -30,8 +30,7 @@ export function EvolveLayer() {
         body: JSON.stringify(body),
       }).then(r => r.json()),
     onSuccess: () => {
-      setProposeDescription("");
-      setProposeExpected("");
+      setProposeForm(f => ({ ...f, description: "", expectedImprovement: "" }));
       queryClient.invalidateQueries({ queryKey: ["ct-evolve-metrics"] });
     },
   });
@@ -136,8 +135,8 @@ export function EvolveLayer() {
             <div className="space-y-2">
               <select
                 className="w-full text-xs bg-muted/30 border border-border rounded px-2 py-1.5 text-foreground"
-                value={proposeAgentId}
-                onChange={e => setProposeAgentId(e.target.value)}
+                value={proposeForm.agentId}
+                onChange={e => setProposeForm(f => ({ ...f, agentId: e.target.value }))}
               >
                 <option value="">Select agent…</option>
                 {agentMetrics.map((a: unknown) => {
@@ -149,22 +148,22 @@ export function EvolveLayer() {
                 className="w-full text-xs bg-muted/20 border border-border rounded-lg p-2 text-foreground placeholder:text-muted-foreground/50 resize-none focus:outline-none focus:border-primary/40"
                 rows={2}
                 placeholder="Describe the optimization…"
-                value={proposeDescription}
-                onChange={e => setProposeDescription(e.target.value)}
+                value={proposeForm.description}
+                onChange={e => setProposeForm(f => ({ ...f, description: e.target.value }))}
               />
               <input
                 className="w-full text-xs bg-muted/20 border border-border rounded-lg px-2 py-1.5 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/40"
                 placeholder="Expected improvement…"
-                value={proposeExpected}
-                onChange={e => setProposeExpected(e.target.value)}
+                value={proposeForm.expectedImprovement}
+                onChange={e => setProposeForm(f => ({ ...f, expectedImprovement: e.target.value }))}
               />
               <button
-                onClick={() => proposeAgentId && proposeDescription && proposeMutation.mutate({
-                  agentId: proposeAgentId,
-                  description: proposeDescription,
-                  expectedImprovement: proposeExpected,
+                onClick={() => proposeForm.agentId && proposeForm.description && proposeMutation.mutate({
+                  agentId: proposeForm.agentId,
+                  description: proposeForm.description,
+                  expectedImprovement: proposeForm.expectedImprovement,
                 })}
-                disabled={!proposeAgentId || !proposeDescription || proposeMutation.isPending}
+                disabled={!proposeForm.agentId || !proposeForm.description || proposeMutation.isPending}
                 className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 bg-fuchsia-500/10 hover:bg-fuchsia-500/20 text-fuchsia-400 border border-fuchsia-500/30 rounded-lg text-xs font-medium transition-colors disabled:opacity-50"
               >
                 <Sparkles className="w-3 h-3" />
