@@ -10,7 +10,7 @@ function startServer() {
   const child = spawn("node", [
     "--max-old-space-size=512",
     "--enable-source-maps",
-    resolve(__dirname, "fast-start.mjs"),
+    resolve(__dirname, "dist/index.mjs"),
   ], {
     cwd: __dirname,
     stdio: "inherit",
