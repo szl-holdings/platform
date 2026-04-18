@@ -16,6 +16,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Notifications from "expo-notifications";
 import { useColors } from "@/hooks/useColors";
 import { WORKSPACES } from "@/context/WorkspaceContext";
+import { apiFetch } from "@/lib/apiClient";
 
 const ACCENT = "#c9a84c";
 const STORAGE_KEY = "cortex_digest_config";
@@ -183,6 +184,15 @@ export default function DigestConfigScreen() {
     try {
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(config));
       await scheduleDigestNotification(config);
+      try {
+        await apiFetch("/api/alloy/digest/config", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(config),
+        });
+      } catch (apiErr) {
+        console.warn("[CORTEX Digest] API sync failed (config saved locally):", apiErr);
+      }
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
     } finally {

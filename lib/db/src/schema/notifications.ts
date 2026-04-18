@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp, integer, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, integer, boolean, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { usersTable } from "./auth";
@@ -23,6 +23,7 @@ export const notificationPreferencesTable = pgTable("notification_preferences", 
   smsEnabled: boolean("sms_enabled").notNull().default(false),
   slackEnabled: boolean("slack_enabled").notNull().default(false),
   inAppEnabled: boolean("in_app_enabled").notNull().default(true),
+  digestConfig: jsonb("digest_config"),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 

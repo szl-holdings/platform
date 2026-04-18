@@ -1,13 +1,14 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { pool, db } from "@szl-holdings/db";
-import { alloyWorkflows, alloyApprovals, alloySignals, alloyActions } from "@szl-holdings/db";
+import { alloyWorkflows, alloyApprovals, alloySignals, alloyActions, notificationPreferencesTable } from "@szl-holdings/db";
 import { eq, desc, gte, count, and } from "drizzle-orm";
 import { services } from "@szl-holdings/services";
 import { authMiddleware, requireRole } from "../middlewares/auth";
-import { sendSuccess, sendCreated, handleRouteError } from "../lib/api-response";
+import { sendSuccess, sendCreated, handleRouteError, sendBadRequest } from "../lib/api-response";
 import { logger } from "../lib/logger";
 import { tenantScope } from "../middlewares/tenant-scope";
 import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { z } from "zod";
 
 const router: IRouter = Router();
 
@@ -286,6 +287,45 @@ router.get("/alloy/digest/history", authMiddleware(), validateQuery(listQuerySch
     sendSuccess(res, { digests: result.rows, total: result.rowCount });
   } catch (err) {
     handleRouteError(res, err, "Failed to get digest history");
+  }
+});
+
+const digestConfigSchema = z.object({
+  enabled: z.boolean(),
+  deliveryHour: z.number().int().min(0).max(23),
+  deliveryMinute: z.number().int().min(0).max(59),
+  includedDomains: z.array(z.string()).max(64),
+  sections: z.record(z.string(), z.boolean()),
+  digestFormat: z.enum(["concise", "detailed"]),
+});
+
+router.get("/alloy/digest/config", authMiddleware(), async (req: Request, res: Response) => {
+  try {
+    if (!req.user?.id) { sendBadRequest(res, "Authentication required"); return; }
+    const rows = await db.select({ digestConfig: notificationPreferencesTable.digestConfig })
+      .from(notificationPreferencesTable)
+      .where(eq(notificationPreferencesTable.userId, req.user.id))
+      .limit(1);
+    sendSuccess(res, { config: rows[0]?.digestConfig ?? null });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to load digest config");
+  }
+});
+
+router.put("/alloy/digest/config", authMiddleware(), validateBody(digestConfigSchema), async (req: Request, res: Response) => {
+  try {
+    if (!req.user?.id) { sendBadRequest(res, "Authentication required"); return; }
+    const config = req.body as z.infer<typeof digestConfigSchema>;
+    await pool.query(
+      `INSERT INTO notification_preferences (user_id, digest_config, updated_at)
+       VALUES ($1, $2::jsonb, NOW())
+       ON CONFLICT (user_id) DO UPDATE
+       SET digest_config = EXCLUDED.digest_config, updated_at = NOW()`,
+      [req.user.id, JSON.stringify(config)],
+    );
+    sendSuccess(res, { config, savedAt: new Date().toISOString() });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to save digest config");
   }
 });
 

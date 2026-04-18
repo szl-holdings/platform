@@ -150,7 +150,19 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
             await registerPushTokenWithBackend(token);
           } catch {}
           listenerRef.current = Notifications.addNotificationReceivedListener(() => {});
-          responseListenerRef.current = Notifications.addNotificationResponseReceivedListener(() => {});
+          responseListenerRef.current = Notifications.addNotificationResponseReceivedListener((response) => {
+            try {
+              const data = (response.notification.request.content.data ?? {}) as Record<string, unknown>;
+              const type = typeof data.type === "string" ? data.type : null;
+              const deepLink = typeof data.deepLink === "string" ? data.deepLink : null;
+              const { router } = require("expo-router");
+              if (deepLink) {
+                router.push(deepLink);
+              } else if (type === "daily_digest") {
+                router.push("/(shell)/intelligence/pulse");
+              }
+            } catch {}
+          });
         }
       } catch {}
     };
