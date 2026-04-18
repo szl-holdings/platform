@@ -107,7 +107,7 @@ const governanceToCommercial = [
   },
   {
     governance: "Export safety layer",
-    commercial: "Privilege protection for legal teams, PII handling for regulated verticals",
+    commercial: "Privilege protection for legal teams, PII handling for regulated domain packs",
   },
   {
     governance: "Tenant isolation",
@@ -123,7 +123,7 @@ export default function InvestorsTrustPage() {
   usePageMeta({
     title: "Trust & Governance — Investor Relations — SZL Holdings",
     description:
-      "How SZL Holdings governance model connects to enterprise buyer readiness — proof chain, source grounding, audit infrastructure, and tenant isolation.",
+      "How the governed decision operating system's governance primitives — Proof Chain, Covenant Policy, human-in-the-loop enforcement, and immutable audit trail — connect to enterprise buyer requirements.",
     canonical: "https://szlholdings.com/investors/trust",
   });
 
@@ -139,14 +139,16 @@ export default function InvestorsTrustPage() {
               Trust & Governance
             </div>
             <h1 className="mt-6 max-w-4xl text-5xl font-semibold tracking-tight text-white md:text-6xl">
-              Trust is the product boundary,
+              Governance built in.
               <br />
-              not a feature.
+              Not bolted on.
             </h1>
             <p className="mt-6 max-w-3xl text-lg leading-8 text-white/70">
-              Governance, audit trails, source grounding, and AI accountability are not added on top
-              of the platform. They are structural constraints built into the architecture from the
-              beginning. Enterprise buyers don't negotiate on these. We never had to retrofit them.
+              The governed decision operating system is structurally compliant by design — not retrofitted.
+              Proof Chain, Covenant Policy enforcement, human-in-the-loop approval gates, and immutable
+              audit trails are governance primitives, not features. As the EU AI Act, SEC AI governance
+              guidelines, and financial services regulators tighten requirements, the platform's
+              architectural compliance is a compounding strategic advantage.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link

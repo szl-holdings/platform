@@ -1,135 +1,51 @@
 import { Link } from "wouter";
-import {
-  Building2,
-  ArrowRight,
-  Layers,
-  Shield,
-  Target,
-  Clock,
-  Users,
-  Zap,
-  Map,
-  Ship,
-  ShieldCheck,
-  Home,
-  BriefcaseBusiness,
-  CheckCircle2,
-} from "lucide-react";
+import { Building2, ArrowRight, Layers, Shield, Target, TrendingUp, Users, Cpu, GitMerge, Map } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
 
+const platformMap = [
+  { name: "Lyte", role: "Flagship command surface — PRISM framework, signal-to-action loop, five-pillar intelligence", color: "#d4a054", href: "/lyte" },
+  { name: "Alloy", role: "Execution fabric — workflow orchestration, approval gates, immutable audit trail", color: "#8b7ac8", href: "/alloy-fabric" },
+  { name: "CORTEX", role: "Unified mobile command — all domain workspaces, biometric auth, offline sync", color: "#4a90b8", href: "/cortex" },
+  { name: "Aegis", role: "Domain pack — Security & defense intelligence, SOC command, threat governance", color: "#c45a4a", href: "/solutions/aegis" },
+  { name: "Vessels", role: "Domain pack — Maritime intelligence, voyage twins, route risk, sanctions compliance", color: "#4a90b8", href: "/solutions/vessels" },
+  { name: "Terra", role: "Domain pack — Real estate intelligence, distress pipeline, ownership graph, deal workflow", color: "#c8953c", href: "/solutions/terra" },
+  { name: "PRISM Counsel", role: "Domain pack — Legal matter command, deadlines, proof chain, export safety", color: "#6aaa72", href: "/solutions/prism-counsel" },
+  { name: "Carlota Jo", role: "Domain pack — Premium advisory, client portal, structured delivery model", color: "#a0a0c0", href: "/carlota-jo" },
+];
+
 const whyNow = [
   {
-    icon: Zap,
-    title: "AI adoption without governance",
-    body: "Organizations are adopting AI at the process level, but most have no infrastructure for tracking what the AI recommended, who approved it, and what actually happened. That gap is the product.",
+    icon: Cpu,
+    title: "AI capability has crossed the inference threshold",
+    body: "Modern LLMs can reason across complex, multi-domain operational data with sufficient reliability for enterprise action — accurately enough that operators would act on recommendations if they were governed. The problem is not AI capability. The problem is the absence of infrastructure to govern what AI recommends.",
   },
   {
-    icon: Clock,
-    title: "Execution latency is invisible",
-    body: "Most leadership teams can see their metrics. Almost none can see why approvals are stalling, where ownership drifted, or which signals were missed before a decision was made. Dashboards show what happened. Observability shows what needs to happen next.",
+    icon: Shield,
+    title: "Enterprise tolerance for AI black boxes is collapsing",
+    body: "The EU AI Act, SEC AI governance guidelines, and financial services regulators in multiple jurisdictions are converging on explainable, auditable, human-in-the-loop AI. Every major enterprise deploying AI copilots today faces the same governance gap: recommendations without attribution, actions without approval gates, decisions without audit trails.",
   },
   {
-    icon: Users,
-    title: "Enterprise workflow is still unstructured",
-    body: "Email, meetings, and spreadsheets still govern most high-stakes operational decisions. The market for structured, auditable, AI-assisted workflow is large and underpenetrated.",
+    icon: TrendingUp,
+    title: "The observability category proved the market exists",
+    body: "Datadog reached $1B ARR by making infrastructure observable. The question SZL Holdings answers is whether that model extends to the operational decision layer. Every signal says it does — at significantly higher stakes, with significantly stronger structural moats.",
   },
 ];
 
-const whyArchitecture = [
-  {
-    title: "Build once, deploy everywhere",
-    body: "The Alloy execution fabric — connector mesh, workflow engine, approval gates, audit infrastructure — is built once and shared across every vertical. Each new domain pack inherits the full platform instead of rebuilding from scratch.",
-  },
-  {
-    title: "Trust is a first-class layer",
-    body: "Source grounding, proof chains, export safety, and human-in-the-loop approval are architectural constraints, not features. Enterprise buyers don't negotiate on these. We never had to retrofit them.",
-  },
-  {
-    title: "GraphQL control plane",
-    body: "A unified API layer means cross-vertical analytics, cross-domain queries, and future integrations are structurally possible without new backend work per use case.",
-  },
-];
-
-const verticals = [
-  {
-    icon: Target,
-    name: "PRISM Counsel",
-    wedge: true,
-    color: "#d4a054",
-    body: "Legal matter observability — deadlines, exposure tracking, approval governance, export safety. The commercial wedge. First vertical entering design-partner engagement.",
-  },
-  {
-    icon: Ship,
-    name: "Vessels",
-    color: "#4a90b8",
-    body: "Maritime intelligence — voyage twins, AIS monitoring, route risk, port congestion, sanctions compliance. Second vertical. Infrastructure ready.",
-  },
-  {
-    icon: ShieldCheck,
-    name: "Aegis",
-    color: "#c45a4a",
-    body: "Security and defense observability — threat twins, incident workflows, exposure prioritization. Third vertical. Architecture shared.",
-  },
-  {
-    icon: Home,
-    name: "Terra",
-    color: "#c8953c",
-    body: "Real estate intelligence — property twins, diligence workflows, distress scoring. Fourth vertical. Same execution model.",
-  },
-  {
-    icon: BriefcaseBusiness,
-    name: "Carlota Jo",
-    color: "#8b7ac8",
-    body: "Advisory and consulting intelligence. Premium client-facing layer. Near-term revenue opportunity while the software matures.",
-  },
-];
-
-const rolloutPath = [
-  {
-    phase: "Phase 1",
-    label: "Flagship pack",
-    items: [
-      "PRISM Counsel in active design-partner engagement",
-      "Lyte + Alloy as the product narrative in every investor conversation",
-      "Live demo as primary proof vehicle",
-      "3–5 design-partner agreements targeting paid pilot",
-    ],
-  },
-  {
-    phase: "Phase 2",
-    label: "Expansion",
-    items: [
-      "Vessels enters design-partner phase",
-      "Aegis architecture finalized for enterprise pilot",
-      "Cross-vertical analytics via Lyte command layer",
-      "First operating proof objects published",
-    ],
-  },
-  {
-    phase: "Phase 3",
-    label: "Portfolio maturity",
-    items: [
-      "Terra and Carlota Jo enter commercial stage",
-      "Shared platform proves unit economics across multiple verticals",
-      "Enterprise GTM with Microsoft 365 integration as distribution lever",
-    ],
-  },
-];
-
-const designPartnerStrategy = [
-  "Target organizations with complex, high-stakes operational workflows",
-  "Prioritize teams that feel the execution latency and ownership drift problem today",
-  "Use paid pilots to generate proof objects — real data, real outcomes, real testimonials",
-  "Every design-partner engagement becomes a reference architecture for the next vertical",
+const primitives = [
+  { name: "Outcome Graph", desc: "Tracks recommendation → decision → outcome. Closed-loop AI calibration." },
+  { name: "Proof Chain", desc: "Immutable audit trail with full AI output provenance. Cryptographically verifiable." },
+  { name: "Covenant Policy", desc: "Human-in-the-loop enforcement at the policy layer — agents cannot bypass it." },
+  { name: "Decision Simulation", desc: "Monte Carlo risk modeling before action. Calibrated against real outcome data." },
+  { name: "Workflow Engine", desc: "Durable multi-step process orchestration with approval gates built in." },
+  { name: "Event Fabric", desc: "Cross-domain signal backbone. Correlation value compounds with each domain pack." },
 ];
 
 export default function InvestorsOverviewPage() {
   usePageMeta({
     title: "Investor Overview — SZL Holdings",
-    description:
-      "SZL Holdings company overview for investors — category definition, why now, architecture rationale, vertical strategy, and rollout path.",
+    description: "SZL Holdings builds the governed decision operating system — the platform layer between signal detection and action execution that enforces governance, attribution, and outcome tracking on every consequential enterprise decision.",
     canonical: "https://szlholdings.com/investors/overview",
   });
 
@@ -142,288 +58,166 @@ export default function InvestorsOverviewPage() {
           <div className="mx-auto max-w-6xl px-6 py-20 lg:px-8 lg:py-28">
             <div className="inline-flex items-center gap-2 rounded-full border border-[#d4a054]/20 bg-[#d4a054]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-[#d4a054]">
               <Building2 className="h-3.5 w-3.5" />
-              Company Overview
+              Investor Overview
             </div>
             <h1 className="mt-6 max-w-4xl text-5xl font-semibold tracking-tight text-white md:text-6xl">
-              One architecture.
-              <br />
-              Multiple verticals.
-              <br />
-              Operational proof first.
+              The governed decision operating system.
             </h1>
-            <p className="mt-6 max-w-3xl text-lg leading-8 text-white/70">
-              SZL Holdings is building the business observability category — software that connects
-              signal detection, action routing, and outcome verification into a single accountable
-              workflow. The company is not pitching a feature. It is building the infrastructure
-              layer for how governed organizations make and audit operational decisions.
+            <p className="mt-6 max-w-3xl text-lg leading-8 text-white/72">
+              SZL Holdings builds the platform layer between signal detection and action execution —
+              enforcing governance, attribution, and outcome tracking on every consequential enterprise
+              decision. The governance is the OS. Domain packs are the applications.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                href="/demo"
-                className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-white/90"
-              >
-                See the live product
-                <ArrowRight className="h-4 w-4" />
+              <Link href="/demo" className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-white/90">
+                See the live product <ArrowRight className="h-4 w-4" />
               </Link>
-              <Link
-                href="/investors/architecture"
-                className="inline-flex items-center gap-2 rounded-xl border border-white/12 bg-white/[0.04] px-5 py-3 text-sm font-semibold text-white/80 transition hover:bg-white/[0.08]"
-              >
+              <Link href="/investors/architecture" className="inline-flex items-center gap-2 rounded-xl border border-white/12 bg-white/[0.04] px-5 py-3 text-sm font-semibold text-white/80 transition hover:bg-white/[0.08]">
                 Architecture deep dive
               </Link>
             </div>
           </div>
         </section>
 
-        {/* Category definition */}
+        {/* Why Now */}
         <section className="border-b border-white/10">
           <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
-            <div className="grid gap-10 lg:grid-cols-[1fr_1.5fr]">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/40">
-                  Category definition
-                </p>
-                <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">
-                  Business observability is not a dashboard.
-                </h2>
-                <p className="mt-4 text-sm leading-7 text-white/60">
-                  Dashboards show what happened. Observability shows what needs to happen next — and
-                  verifies that it did. The category connects signal detection to action routing to
-                  outcome verification in one auditable workflow. That is not a feature set. It is a
-                  new software layer.
-                </p>
-              </div>
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-                {[
-                  { label: "What dashboards do", value: "Show historical state" },
-                  { label: "What observability does", value: "Surface next actions" },
-                  { label: "What dashboards miss", value: "Ownership and accountability" },
-                  { label: "What observability adds", value: "Audit trail and proof chain" },
-                ].map((item) => (
-                  <div
-                    key={item.label}
-                    className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4"
-                  >
-                    <p className="text-xs text-white/40">{item.label}</p>
-                    <p className="mt-1 text-sm font-semibold text-white">{item.value}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Why now */}
-        <section className="border-b border-white/10">
-          <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/40">
-              Why now
-            </p>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">
-              Three converging conditions create the window.
-            </h2>
-            <div className="mt-10 grid gap-6 md:grid-cols-3">
-              {whyNow.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <div
-                    key={item.title}
-                    className="rounded-2xl border border-white/[0.06] bg-white/[0.025] p-6"
-                  >
-                    <div className="mb-4 flex h-9 w-9 items-center justify-center rounded-lg border border-white/[0.08] bg-black/20">
-                      <Icon className="h-4.5 w-4.5 text-[#d4a054]" />
-                    </div>
-                    <h3 className="text-base font-semibold text-white">{item.title}</h3>
-                    <p className="mt-3 text-sm leading-6 text-white/55">{item.body}</p>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* Why this architecture */}
-        <section className="border-b border-white/10">
-          <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/40">
-              Why this architecture
-            </p>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">
-              The shared spine is the strategic asset.
-            </h2>
-            <div className="mt-10 grid gap-6 md:grid-cols-3">
-              {whyArchitecture.map((item) => (
-                <div
-                  key={item.title}
-                  className="rounded-2xl border border-white/[0.06] bg-white/[0.025] p-6"
-                >
-                  <h3 className="text-base font-semibold text-white">{item.title}</h3>
-                  <p className="mt-3 text-sm leading-6 text-white/55">{item.body}</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/40">Why now</p>
+            <h2 className="mt-3 text-2xl font-semibold text-white">Three forces have converged.</h2>
+            <div className="mt-8 grid gap-6 md:grid-cols-3">
+              {whyNow.map((item) => (
+                <div key={item.title} className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6">
+                  <item.icon className="h-5 w-5 text-[#d4a054]" />
+                  <h3 className="mt-4 text-base font-semibold text-white">{item.title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-white/60">{item.body}</p>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* Why the demo matters */}
+        {/* Category positioning */}
         <section className="border-b border-white/10">
           <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
-            <div className="rounded-[2rem] border border-[#4a90b8]/15 bg-[#4a90b8]/[0.06] p-8 lg:p-10">
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#4a90b8]/70">
-                Why the demo matters
-              </p>
-              <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">
-                The product is not a pitch. It is running code.
-              </h2>
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-white/60">
-                Every claim in this investor surface is backed by a running product. Live dashboards,
-                real workflow execution, actual data ingestion. The strategy is: demo first, then
-                architecture, then GitHub if needed. Proof beats narrative at every stage.
-              </p>
-              <div className="mt-6">
-                <Link
-                  href="/demo"
-                  className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-white/90"
-                >
-                  Open the live product
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </div>
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/40">Category</p>
+            <h2 className="mt-3 text-2xl font-semibold text-white">A new category, not an adjacent feature.</h2>
+            <p className="mt-4 max-w-3xl text-sm leading-7 text-white/60">
+              The governed decision operating system sits at the intersection of operational signal detection,
+              AI-assisted reasoning, and structured action execution under governance. It is distinct from
+              every existing category: BI shows what happened; AI copilots generate recommendations without
+              approval gates; workflow tools automate without policy enforcement; AIOps is domain-specific
+              without cross-domain governance. The market does not yet have a dominant platform in this
+              category. SZL Holdings is building it from first principles.
+            </p>
+            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {primitives.map((p) => (
+                <div key={p.name} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5">
+                  <div className="text-sm font-semibold text-[#d4a054]">{p.name}</div>
+                  <div className="mt-1.5 text-xs leading-5 text-white/55">{p.desc}</div>
+                </div>
+              ))}
             </div>
+            <p className="mt-4 text-xs text-white/35">Six shared governance primitives — not features. The structural abstractions that separate the platform from dashboards, copilots, and workflow tools.</p>
           </div>
         </section>
 
-        {/* Vertical strategy */}
+        {/* Platform map */}
         <section className="border-b border-white/10">
           <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/40">
-              Vertical strategy
-            </p>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">
-              Five operating domains. One shared execution fabric.
-            </h2>
-            <p className="mt-4 max-w-2xl text-sm leading-7 text-white/55">
-              Vertical packs are not separate products — they are domain-specific configurations of
-              the same architecture. Each one inherits signal ingestion, AI governance, workflow
-              orchestration, and audit infrastructure.
-            </p>
-            <div className="mt-10 space-y-3">
-              {verticals.map((v) => {
-                const Icon = v.icon;
-                return (
-                  <div
-                    key={v.name}
-                    className="flex items-start gap-5 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5"
-                  >
-                    <div
-                      className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/[0.08] bg-black/20"
-                      style={{ color: v.color }}
-                    >
-                      <Icon className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-3">
-                        <span className="text-sm font-semibold text-white">{v.name}</span>
-                        {v.wedge && (
-                          <span className="rounded-full border border-[#d4a054]/25 bg-[#d4a054]/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#d4a054]">
-                            Commercial wedge
-                          </span>
-                        )}
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/40">Platform map</p>
+            <h2 className="mt-3 text-2xl font-semibold text-white">One OS. Six domain packs. Shared governance.</h2>
+            <div className="mt-8 space-y-3">
+              {platformMap.map((p) => (
+                <Link key={p.name} href={p.href}>
+                  <div className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.02] px-6 py-4 transition hover:bg-white/[0.04] cursor-pointer">
+                    <div className="flex items-center gap-4">
+                      <div className="h-2 w-2 rounded-full" style={{ background: p.color }} />
+                      <div>
+                        <div className="text-sm font-semibold text-white">{p.name}</div>
+                        <div className="text-xs text-white/56">{p.role}</div>
                       </div>
-                      <p className="mt-1.5 text-sm leading-6 text-white/55">{v.body}</p>
                     </div>
+                    <ArrowRight className="h-4 w-4 text-white/32" />
                   </div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* Rollout path */}
-        <section className="border-b border-white/10">
-          <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/40">
-              Rollout path
-            </p>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">
-              Three phases. One escalating evidence chain.
-            </h2>
-            <div className="mt-10 grid gap-6 md:grid-cols-3">
-              {rolloutPath.map((phase, i) => (
-                <div
-                  key={phase.phase}
-                  className="rounded-2xl border border-white/[0.06] bg-white/[0.025] p-6"
-                >
-                  <p
-                    className="text-xs font-semibold uppercase tracking-[0.2em]"
-                    style={{
-                      color: i === 0 ? "#d4a054" : i === 1 ? "#4a90b8" : "#8b7ac8",
-                    }}
-                  >
-                    {phase.phase}
-                  </p>
-                  <h3 className="mt-2 text-base font-semibold text-white">{phase.label}</h3>
-                  <ul className="mt-4 space-y-2.5">
-                    {phase.items.map((item) => (
-                      <li key={item} className="flex items-start gap-2.5 text-sm text-white/55">
-                        <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-white/25" />
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                </Link>
               ))}
             </div>
           </div>
         </section>
 
-        {/* Design-partner strategy */}
+        {/* Stage and status */}
         <section className="border-b border-white/10">
           <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
-            <div className="grid gap-10 lg:grid-cols-[1fr_1.5fr]">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/40">
-                  Design-partner strategy
-                </p>
-                <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">
-                  Proof is the go-to-market strategy.
-                </h2>
-                <p className="mt-4 text-sm leading-7 text-white/60">
-                  Design partners are not beta customers. They are proof-generation partners. Each
-                  engagement creates reference architecture, operating evidence, and the beginning of
-                  a customer reference network.
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/40">Stage and status</p>
+            <h2 className="mt-3 text-2xl font-semibold text-white">Functional Alpha. Pre-commercial. Design partner ready.</h2>
+            <div className="mt-8 grid gap-6 md:grid-cols-3">
+              <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6">
+                <Target className="h-5 w-5 text-[#d4a054]" />
+                <h3 className="mt-4 text-base font-semibold text-white">Current stage</h3>
+                <p className="mt-2 text-sm leading-6 text-white/60">
+                  Functional Alpha — full feature sets across all platforms with seeded and demo data. Carlota
+                  Jo is live. The platform is pre-commercial; no paying customers as of April 2026.
                 </p>
               </div>
-              <div className="space-y-3">
-                {designPartnerStrategy.map((item) => (
-                  <div
-                    key={item}
-                    className="flex items-start gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4"
-                  >
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[#d4a054]" />
-                    <p className="text-sm leading-6 text-white/70">{item}</p>
+              <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6">
+                <Users className="h-5 w-5 text-[#8b7ac8]" />
+                <h3 className="mt-4 text-base font-semibold text-white">Entry motion</h3>
+                <p className="mt-2 text-sm leading-6 text-white/60">
+                  Design partner program — 3–6 partners per domain, co-designing the product in exchange for
+                  early access and preferred pricing. Primary domains: maritime (Vessels), security (Aegis),
+                  real estate (Terra).
+                </p>
+              </div>
+              <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6">
+                <GitMerge className="h-5 w-5 text-[#4a90b8]" />
+                <h3 className="mt-4 text-base font-semibold text-white">Expansion model</h3>
+                <p className="mt-2 text-sm leading-6 text-white/60">
+                  Single-domain → multi-domain → platform-wide. Each domain pack added increases ACV without
+                  proportional CAC increase. Governance infrastructure is amortized across all packs.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Investor case */}
+        <section className="border-b border-white/10">
+          <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/40">The investor case</p>
+            <h2 className="mt-3 text-2xl font-semibold text-white">Five points. Eight moats.</h2>
+            <div className="mt-8 space-y-4">
+              {[
+                { n: "1", title: "The category is real and undefended.", body: "Enterprise AI governance is a regulatory and operational requirement. The tools that come closest (Palantir, ServiceNow, Datadog) serve adjacent problems without the cross-domain, governed decision architecture." },
+                { n: "2", title: "The architecture compounds.", body: "Eight structural moats grow stronger with every decision made on the platform. Decision memory, proof history, calibrated simulations, cross-domain correlation, and enterprise trust all compound over time in ways that a faster competitor cannot shortcut." },
+                { n: "3", title: "The domain-pack model scales efficiently.", body: "Governance infrastructure is amortized across all domain packs. Each new pack expands ACV per customer, reduces procurement friction (trust review already done), and adds cross-domain signal value to all existing packs." },
+                { n: "4", title: "The technical foundation is production-grade.", body: "450,000+ lines of TypeScript, 2,331 endpoints, 700+ database tables, 37 shared packages, multi-tenant isolation, OIDC auth, SCIM 2.0, Azure Bicep IaC. This is not a prototype — it is an enterprise platform at Functional Alpha." },
+                { n: "5", title: "The timing is right.", body: "AI capability has crossed the inference threshold. Regulatory pressure is forcing governance. The observability category has proven enterprise willingness to pay for operational clarity. The category of governed decision operating system is being created now." },
+              ].map((item) => (
+                <div key={item.n} className="flex items-start gap-5 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6">
+                  <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-[#d4a054]/30 bg-[#d4a054]/10 text-xs font-bold text-[#d4a054]">{item.n}</span>
+                  <div>
+                    <h3 className="text-sm font-semibold text-white">{item.title}</h3>
+                    <p className="mt-1.5 text-sm leading-6 text-white/60">{item.body}</p>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
           </div>
         </section>
 
         {/* Explore further */}
         <section>
-          <div className="mx-auto max-w-6xl px-6 py-14 lg:px-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/40">
-              Explore further
-            </p>
+          <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
+            <h2 className="text-2xl font-semibold text-white">Explore further</h2>
             <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {[
                 { label: "Architecture", href: "/investors/architecture", icon: Layers },
                 { label: "Moat & Defensibility", href: "/investors/moat", icon: Shield },
                 { label: "Roadmap", href: "/investors/roadmap", icon: Map },
-                { label: "Founder", href: "/investors/founder", icon: Building2 },
+                { label: "Founder", href: "/investors/founder", icon: Users },
               ].map((item) => (
                 <Link key={item.label} href={item.href}>
-                  <div className="flex cursor-pointer items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-4 transition hover:bg-white/[0.04]">
+                  <div className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-4 transition hover:bg-white/[0.04] cursor-pointer">
                     <item.icon className="h-4 w-4 text-[#d4a054]" />
                     <span className="text-sm font-medium text-white/80">{item.label}</span>
                   </div>
