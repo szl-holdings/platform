@@ -21,12 +21,30 @@ import {
   ArrowLeft,
   Loader2,
   AlertCircle,
+  BookOpen,
+  ExternalLink,
+  Ship,
+  ShieldCheck,
+  Home,
+  BriefcaseBusiness,
+  Target,
+  Send,
+  Calendar,
+  ArrowRight,
+  Download,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+
+// Special panel IDs (not fetched from API)
+const SPECIAL_IDS = ["executive-brief", "request-demo"] as const;
+type SpecialId = (typeof SPECIAL_IDS)[number];
+function isSpecialId(id: string): id is SpecialId {
+  return (SPECIAL_IDS as readonly string[]).includes(id);
+}
 
 interface DocMeta {
   id: string;
@@ -129,6 +147,44 @@ const DOC_META: DocMeta[] = [
 ];
 
 const CATEGORIES = ["Platform", "Engineering", "Security", "Operations", "Data"];
+
+const DOMAIN_PRODUCTS = [
+  {
+    icon: Target,
+    name: "PRISM Counsel",
+    tagline: "Legal matter observability",
+    color: "#d4a054",
+    href: `${BASE}/solutions/prism-counsel`,
+  },
+  {
+    icon: Ship,
+    name: "Vessels",
+    tagline: "Maritime intelligence",
+    color: "#4a90b8",
+    href: `${BASE}/solutions/vessels`,
+  },
+  {
+    icon: ShieldCheck,
+    name: "Aegis",
+    tagline: "Security & defense observability",
+    color: "#c45a4a",
+    href: `${BASE}/solutions/aegis`,
+  },
+  {
+    icon: Home,
+    name: "Terra",
+    tagline: "Real estate intelligence",
+    color: "#c8953c",
+    href: `${BASE}/solutions/terra`,
+  },
+  {
+    icon: BriefcaseBusiness,
+    name: "Carlota Jo",
+    tagline: "Advisory & consulting intelligence",
+    color: "#8b7ac8",
+    href: `${BASE}/carlota-jo-public`,
+  },
+];
 
 async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
@@ -356,10 +412,351 @@ function MarkdownRenderer({ content }: { content: string }) {
   );
 }
 
+function ExecutiveBriefPanel() {
+  const PULSE_URL = "/pulse/";
+  const highlights = [
+    "Platform architecture & 9-stage decision loop",
+    "Five domain verticals and go-to-market sequencing",
+    "Wedge + platform logic — one engine, multiple domains",
+    "Competitive moat: signal-to-action governance layer",
+    "Investment thesis, milestones, and honest status",
+  ];
+
+  return (
+    <div className="max-w-3xl">
+      <div className="mb-8">
+        <div className="flex items-start gap-4 mb-6">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-[#d4a054]/25 bg-[#d4a054]/10">
+            <BookOpen className="h-6 w-6 text-[#d4a054]" />
+          </div>
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/30 mb-1">
+              Executive Brief · Confidential
+            </p>
+            <h1 className="text-2xl font-semibold tracking-tight text-white font-['Space_Grotesk']">
+              SZL Holdings — Executive Brief
+            </h1>
+            <p className="text-sm text-white/45 mt-0.5">
+              Full platform narrative, investment thesis, and domain product depth
+            </p>
+          </div>
+        </div>
+
+        <p className="text-sm leading-7 text-white/60 mb-6">
+          The SZL Holdings executive brief covers the full platform depth — market positioning,
+          architectural overview, vertical expansion strategy, and the core investment thesis.
+          Designed for investors, partners, and evaluators who need structured context before
+          a deeper diligence conversation.
+        </p>
+
+        <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5 mb-6">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/30 mb-3">
+            What this brief covers
+          </p>
+          <div className="space-y-2">
+            {highlights.map((h) => (
+              <div key={h} className="flex items-start gap-2.5">
+                <CheckCircle2 className="h-4 w-4 shrink-0 mt-0.5 text-[#5a9a8a]" />
+                <p className="text-sm leading-6 text-white/60">{h}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-3">
+          <a
+            href={PULSE_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-black hover:bg-white/90 transition"
+          >
+            <BookOpen className="h-4 w-4" />
+            Open Executive Briefing
+            <ExternalLink className="h-3.5 w-3.5 opacity-60" />
+          </a>
+          <a
+            href="mailto:investors@szlholdings.com?subject=Executive%20Brief%20PDF%20Request"
+            className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-semibold text-white/70 hover:text-white hover:border-white/20 transition"
+          >
+            <Download className="h-4 w-4" />
+            Request PDF Download
+          </a>
+        </div>
+      </div>
+
+      <div className="border-t border-white/[0.05] pt-8">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/30 mb-4">
+          Domain Products — Quick Links
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {DOMAIN_PRODUCTS.map((p) => {
+            const Icon = p.icon;
+            return (
+              <a
+                key={p.name}
+                href={p.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 hover:bg-white/[0.05] hover:border-white/10 transition group"
+              >
+                <div
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border"
+                  style={{ background: `${p.color}14`, borderColor: `${p.color}28`, color: p.color }}
+                >
+                  <Icon className="h-4 w-4" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-white/80 group-hover:text-white transition truncate">
+                    {p.name}
+                  </p>
+                  <p className="text-xs text-white/35 truncate">{p.tagline}</p>
+                </div>
+                <ExternalLink className="h-3.5 w-3.5 text-white/20 group-hover:text-white/40 transition shrink-0" />
+              </a>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+interface DemoFormState {
+  name: string;
+  email: string;
+  company: string;
+  role: string;
+  message: string;
+}
+
+function RequestDemoPanel() {
+  const [form, setForm] = useState<DemoFormState>({
+    name: "",
+    email: "",
+    company: "",
+    role: "",
+    message: "",
+  });
+  const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      await apiFetch("/api/investors/demo-request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      setSubmitted(true);
+    } catch {
+      const subject = encodeURIComponent("Demo Request — SZL Holdings Data Room");
+      const body = encodeURIComponent(
+        `Name: ${form.name}\nEmail: ${form.email}\nCompany: ${form.company}\nRole: ${form.role}\n\n${form.message}`
+      );
+      window.location.href = `mailto:investors@szlholdings.com?subject=${subject}&body=${body}`;
+      setSubmitted(true);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const isValid = form.name.trim() && form.email.trim() && form.company.trim();
+
+  if (submitted) {
+    return (
+      <div className="max-w-xl">
+        <div className="rounded-2xl border border-[#5a9a8a]/20 bg-[#5a9a8a]/08 p-8 text-center">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full border border-[#5a9a8a]/30 bg-[#5a9a8a]/15 mx-auto mb-5">
+            <CheckCircle2 className="h-7 w-7 text-[#5a9a8a]" />
+          </div>
+          <h2 className="text-xl font-semibold text-white mb-2 font-['Space_Grotesk']">
+            Request received.
+          </h2>
+          <p className="text-sm leading-7 text-white/55 mb-6">
+            We'll be in touch at <span className="text-white/75">{form.email}</span> within one
+            business day to schedule a session that fits your evaluation timeline.
+          </p>
+          <button
+            onClick={() => { setSubmitted(false); setForm({ name: "", email: "", company: "", role: "", message: "" }); }}
+            className="text-xs font-semibold text-white/40 hover:text-white/70 transition"
+          >
+            Submit another request
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-2xl">
+      <div className="flex items-start gap-4 mb-8">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-[#22d3ee]/25 bg-[#22d3ee]/10">
+          <Calendar className="h-6 w-6 text-[#22d3ee]" />
+        </div>
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/30 mb-1">
+            Demo Request
+          </p>
+          <h1 className="text-2xl font-semibold tracking-tight text-white font-['Space_Grotesk']">
+            Schedule a live walkthrough
+          </h1>
+          <p className="text-sm text-white/45 mt-0.5">
+            Every investor conversation starts with the live product, not a slide deck.
+          </p>
+        </div>
+      </div>
+
+      <p className="text-sm leading-7 text-white/60 mb-8">
+        The SZL Holdings demo covers the full decision workflow — from signal detection through
+        recommendation, approval, execution, and audit trail. We'll walk through a live vertical
+        (PRISM Counsel, Vessels, or Aegis) and show the shared Alloy execution layer.
+        Sessions are 30–45 minutes.
+      </p>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-[0.12em] text-white/40 mb-1.5">
+              Full Name <span className="text-[#e07050]">*</span>
+            </label>
+            <input
+              name="name"
+              value={form.name}
+              onChange={handleChange}
+              required
+              placeholder="Your name"
+              className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-2.5 text-sm text-white placeholder-white/25 focus:outline-none focus:border-white/20 focus:bg-white/[0.05] transition"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-[0.12em] text-white/40 mb-1.5">
+              Email <span className="text-[#e07050]">*</span>
+            </label>
+            <input
+              name="email"
+              type="email"
+              value={form.email}
+              onChange={handleChange}
+              required
+              placeholder="you@firm.com"
+              className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-2.5 text-sm text-white placeholder-white/25 focus:outline-none focus:border-white/20 focus:bg-white/[0.05] transition"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-[0.12em] text-white/40 mb-1.5">
+              Company / Fund <span className="text-[#e07050]">*</span>
+            </label>
+            <input
+              name="company"
+              value={form.company}
+              onChange={handleChange}
+              required
+              placeholder="Organization name"
+              className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-2.5 text-sm text-white placeholder-white/25 focus:outline-none focus:border-white/20 focus:bg-white/[0.05] transition"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-[0.12em] text-white/40 mb-1.5">
+              Role / Title
+            </label>
+            <select
+              name="role"
+              value={form.role}
+              onChange={handleChange}
+              className="w-full rounded-xl border border-white/[0.08] bg-[#0c1018] px-4 py-2.5 text-sm text-white/70 focus:outline-none focus:border-white/20 transition"
+            >
+              <option value="">Select a role…</option>
+              <option value="General Partner">General Partner</option>
+              <option value="Managing Director">Managing Director</option>
+              <option value="Principal / Associate">Principal / Associate</option>
+              <option value="Angel Investor">Angel Investor</option>
+              <option value="Strategic Partner">Strategic Partner</option>
+              <option value="Corporate Development">Corporate Development</option>
+              <option value="Advisor">Advisor</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold uppercase tracking-[0.12em] text-white/40 mb-1.5">
+            Context / Notes
+          </label>
+          <textarea
+            name="message"
+            value={form.message}
+            onChange={handleChange}
+            rows={4}
+            placeholder="What are you most interested in exploring? Any specific vertical or use case you'd like to focus on?"
+            className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-sm text-white placeholder-white/25 focus:outline-none focus:border-white/20 focus:bg-white/[0.05] transition resize-none"
+          />
+        </div>
+
+        <div className="flex flex-wrap items-center gap-4 pt-2">
+          <button
+            type="submit"
+            disabled={!isValid || submitting}
+            className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-2.5 text-sm font-semibold text-black hover:bg-white/90 transition disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            {submitting ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Sending…
+              </>
+            ) : (
+              <>
+                <Send className="h-4 w-4" />
+                Request Demo
+              </>
+            )}
+          </button>
+          <p className="text-xs text-white/30">
+            Or email directly:{" "}
+            <a
+              href="mailto:investors@szlholdings.com"
+              className="text-white/50 hover:text-white/70 transition"
+            >
+              investors@szlholdings.com
+            </a>
+          </p>
+        </div>
+      </form>
+
+      <div className="mt-10 border-t border-white/[0.05] pt-8">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/30 mb-4">
+          What to expect
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {[
+            { step: "01", label: "Live product walk", body: "No decks — we start with the running platform." },
+            { step: "02", label: "Your questions", body: "Architecture, governance, sequencing — whatever matters to you." },
+            { step: "03", label: "Next steps", body: "Full diligence package, reference calls, or follow-on access." },
+          ].map((s) => (
+            <div key={s.step} className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-4">
+              <p className="font-['JetBrains_Mono'] text-[11px] font-semibold text-white/25 mb-1">{s.step}</p>
+              <p className="text-sm font-semibold text-white/80 mb-1">{s.label}</p>
+              <p className="text-xs leading-5 text-white/40">{s.body}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function InvestorsDataRoomPage() {
   const [ndaLoading, setNdaLoading] = useState(true);
   const [accepted, setAccepted] = useState(false);
-  const [activeDocId, setActiveDocId] = useState(DOC_META[0].id);
+  const [activeDocId, setActiveDocId] = useState<string>("executive-brief");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [content, setContent] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -369,7 +766,7 @@ export default function InvestorsDataRoomPage() {
   usePageMeta({
     title: "Data Room — Investor Relations — SZL Holdings",
     description:
-      "Technical diligence data room for qualified SZL Holdings investors — architecture, data model, security, and operational documentation.",
+      "Technical diligence data room for qualified SZL Holdings investors — executive brief, architecture, data model, security, and operational documentation.",
     canonical: "https://szlholdings.com/investors/data-room",
   });
 
@@ -381,6 +778,7 @@ export default function InvestorsDataRoomPage() {
   }, []);
 
   const loadDoc = useCallback(async (id: string) => {
+    if (isSpecialId(id)) return;
     setLoading(true);
     setError(null);
     setContent(null);
@@ -422,7 +820,7 @@ export default function InvestorsDataRoomPage() {
     }
   }, []);
 
-  const activeDoc = DOC_META.find((d) => d.id === activeDocId) ?? DOC_META[0];
+  const activeDoc = DOC_META.find((d) => d.id === activeDocId);
 
   if (ndaLoading) {
     return (
@@ -440,6 +838,13 @@ export default function InvestorsDataRoomPage() {
       </div>
     );
   }
+
+  const activeLabel =
+    activeDocId === "executive-brief"
+      ? "Executive Brief"
+      : activeDocId === "request-demo"
+      ? "Request Demo"
+      : activeDoc?.label ?? activeDocId;
 
   return (
     <div className="min-h-screen bg-[#070a10] text-white flex flex-col">
@@ -460,7 +865,7 @@ export default function InvestorsDataRoomPage() {
               Data Room
             </p>
             <ChevronRight className="h-3 w-3 text-white/20" />
-            <p className="text-xs font-semibold text-white/70">{activeDoc.label}</p>
+            <p className="text-xs font-semibold text-white/70">{activeLabel}</p>
           </div>
           <div className="ml-auto flex items-center gap-2">
             <span className="hidden sm:flex items-center gap-1.5 rounded-full border border-[#5a9a8a]/20 bg-[#5a9a8a]/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#5a9a8a]">
@@ -495,8 +900,70 @@ export default function InvestorsDataRoomPage() {
           `}
         >
           <div className="px-4 py-5">
-            <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/30">
-              {DOC_META.length} Documents · Confidential
+
+            {/* Executive Brief — top CTA */}
+            <div className="mb-5">
+              <p className="mb-2 px-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/25">
+                Overview
+              </p>
+              <button
+                onClick={() => { setActiveDocId("executive-brief"); setSidebarOpen(false); }}
+                className={`w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition ${
+                  activeDocId === "executive-brief"
+                    ? "bg-white/[0.06] text-white"
+                    : "text-white/50 hover:bg-white/[0.03] hover:text-white/80"
+                }`}
+              >
+                <div
+                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-white/[0.08]"
+                  style={
+                    activeDocId === "executive-brief"
+                      ? { background: "#d4a05418", borderColor: "#d4a05430", color: "#d4a054" }
+                      : { color: "#d4a05488" }
+                  }
+                >
+                  <BookOpen className="h-3.5 w-3.5" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className={`text-xs font-semibold truncate ${activeDocId === "executive-brief" ? "text-white" : "text-white/60"}`}>
+                    Executive Brief
+                  </p>
+                  <p className="text-[11px] text-white/30 truncate">Platform narrative & thesis</p>
+                </div>
+                {activeDocId === "executive-brief" && <ChevronRight className="h-3.5 w-3.5 text-white/30 shrink-0" />}
+              </button>
+
+              <button
+                onClick={() => { setActiveDocId("request-demo"); setSidebarOpen(false); }}
+                className={`w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition mt-0.5 ${
+                  activeDocId === "request-demo"
+                    ? "bg-white/[0.06] text-white"
+                    : "text-white/50 hover:bg-white/[0.03] hover:text-white/80"
+                }`}
+              >
+                <div
+                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-white/[0.08]"
+                  style={
+                    activeDocId === "request-demo"
+                      ? { background: "#22d3ee18", borderColor: "#22d3ee30", color: "#22d3ee" }
+                      : { color: "#22d3ee88" }
+                  }
+                >
+                  <Calendar className="h-3.5 w-3.5" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className={`text-xs font-semibold truncate ${activeDocId === "request-demo" ? "text-white" : "text-white/60"}`}>
+                    Request a Demo
+                  </p>
+                  <p className="text-[11px] text-white/30 truncate">Schedule a live walkthrough</p>
+                </div>
+                {activeDocId === "request-demo" && <ChevronRight className="h-3.5 w-3.5 text-white/30 shrink-0" />}
+              </button>
+            </div>
+
+            {/* Technical Documents */}
+            <p className="mb-2 px-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/25">
+              {DOC_META.length} Technical Documents · Confidential
             </p>
 
             {CATEGORIES.map((cat) => {
@@ -548,146 +1015,202 @@ export default function InvestorsDataRoomPage() {
               );
             })}
 
-            <div className="mt-6 rounded-xl border border-white/[0.05] bg-white/[0.02] p-4">
+            {/* Domain Products */}
+            <div className="mt-4 mb-5">
+              <p className="mb-2 px-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/25">
+                Domain Products
+              </p>
+              <div className="space-y-0.5">
+                {DOMAIN_PRODUCTS.map((p) => {
+                  const Icon = p.icon;
+                  return (
+                    <a
+                      key={p.name}
+                      href={p.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition text-white/50 hover:bg-white/[0.03] hover:text-white/80 group"
+                    >
+                      <div
+                        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-white/[0.08]"
+                        style={{ color: p.color + "88" }}
+                      >
+                        <Icon className="h-3.5 w-3.5" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs font-semibold truncate text-white/60 group-hover:text-white/80 transition">
+                          {p.name}
+                        </p>
+                      </div>
+                      <ExternalLink className="h-3 w-3 text-white/20 group-hover:text-white/40 transition shrink-0" />
+                    </a>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Full Diligence Package */}
+            <div className="mt-2 rounded-xl border border-white/[0.05] bg-white/[0.02] p-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/30 mb-2">
                 Full Diligence Package
               </p>
               <p className="text-xs leading-5 text-white/40 mb-3">
                 Request the complete financial model, cap table, and legal documents with NDA countersignature.
               </p>
-              <a
-                href="mailto:investors@szlholdings.com?subject=Full%20Diligence%20Package%20Request"
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#d4a054] hover:text-[#e4b064] transition"
-              >
-                <FileText className="h-3.5 w-3.5" />
-                Request package
-              </a>
+              <div className="flex flex-col gap-2">
+                <a
+                  href="mailto:investors@szlholdings.com?subject=Full%20Diligence%20Package%20Request"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#d4a054] hover:text-[#e4b064] transition"
+                >
+                  <FileText className="h-3.5 w-3.5" />
+                  Request package
+                </a>
+                <button
+                  onClick={() => { setActiveDocId("request-demo"); setSidebarOpen(false); }}
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#22d3ee] hover:text-[#32e3fe] transition"
+                >
+                  <ArrowRight className="h-3.5 w-3.5" />
+                  Schedule a demo
+                </button>
+              </div>
             </div>
           </div>
         </aside>
 
         {/* Main content */}
         <main className="flex-1 min-w-0 overflow-y-auto">
-          {/* Doc header */}
-          <div className="border-b border-white/[0.05] px-6 py-6 lg:px-10">
-            <div className="flex items-start gap-4">
-              <div
-                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border"
-                style={{
-                  background: `${activeDoc.color}15`,
-                  borderColor: `${activeDoc.color}25`,
-                  color: activeDoc.color,
-                }}
-              >
-                <activeDoc.icon className="h-5 w-5" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/30">
-                    {activeDoc.category}
-                  </span>
-                  <span className="text-white/15">·</span>
-                  <span className="text-[11px] text-white/25">Confidential</span>
+          {/* Special panels — no doc header or nav pills */}
+          {isSpecialId(activeDocId) ? (
+            <div className="px-6 py-10 lg:px-10 lg:py-12">
+              {activeDocId === "executive-brief" && <ExecutiveBriefPanel />}
+              {activeDocId === "request-demo" && <RequestDemoPanel />}
+            </div>
+          ) : (
+            <>
+              {/* Doc header */}
+              {activeDoc && (
+                <div className="border-b border-white/[0.05] px-6 py-6 lg:px-10">
+                  <div className="flex items-start gap-4">
+                    <div
+                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border"
+                      style={{
+                        background: `${activeDoc.color}15`,
+                        borderColor: `${activeDoc.color}25`,
+                        color: activeDoc.color,
+                      }}
+                    >
+                      <activeDoc.icon className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/30">
+                          {activeDoc.category}
+                        </span>
+                        <span className="text-white/15">·</span>
+                        <span className="text-[11px] text-white/25">Confidential</span>
+                      </div>
+                      <h1 className="text-xl font-semibold tracking-tight text-white font-['Space_Grotesk']">
+                        {activeDoc.label}
+                      </h1>
+                      <p className="text-sm text-white/45 mt-0.5">{activeDoc.subtitle}</p>
+                    </div>
+                  </div>
+
+                  {/* Doc navigation pills */}
+                  <div className="mt-5 flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+                    {DOC_META.map((doc, i) => {
+                      const isActive = doc.id === activeDocId;
+                      return (
+                        <button
+                          key={doc.id}
+                          onClick={() => setActiveDocId(doc.id)}
+                          className={`shrink-0 flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-semibold transition ${
+                            isActive
+                              ? "border-white/20 bg-white/[0.07] text-white"
+                              : "border-white/[0.06] bg-transparent text-white/35 hover:text-white/60 hover:border-white/10"
+                          }`}
+                        >
+                          <span className="text-white/25">{String(i + 1).padStart(2, "0")}</span>
+                          {doc.label}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-                <h1 className="text-xl font-semibold tracking-tight text-white font-['Space_Grotesk']">
-                  {activeDoc.label}
-                </h1>
-                <p className="text-sm text-white/45 mt-0.5">{activeDoc.subtitle}</p>
-              </div>
-            </div>
+              )}
 
-            {/* Doc navigation pills */}
-            <div className="mt-5 flex gap-2 overflow-x-auto pb-1 scrollbar-none">
-              {DOC_META.map((doc, i) => {
-                const isActive = doc.id === activeDocId;
-                return (
-                  <button
-                    key={doc.id}
-                    onClick={() => setActiveDocId(doc.id)}
-                    className={`shrink-0 flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-semibold transition ${
-                      isActive
-                        ? "border-white/20 bg-white/[0.07] text-white"
-                        : "border-white/[0.06] bg-transparent text-white/35 hover:text-white/60 hover:border-white/10"
-                    }`}
-                  >
-                    <span className="text-white/25">{String(i + 1).padStart(2, "0")}</span>
-                    {doc.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Document content */}
-          <div className="px-6 py-10 lg:px-10 lg:py-12 max-w-4xl">
-            {loading && (
-              <div className="flex items-center gap-3 text-white/40 py-8">
-                <Loader2 className="h-5 w-5 animate-spin" />
-                <p className="text-sm">Loading document…</p>
+              {/* Document content */}
+              <div className="px-6 py-10 lg:px-10 lg:py-12 max-w-4xl">
+                {loading && (
+                  <div className="flex items-center gap-3 text-white/40 py-8">
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <p className="text-sm">Loading document…</p>
+                  </div>
+                )}
+                {error && !loading && (
+                  <div className="flex items-start gap-3 rounded-xl border border-[#e07050]/20 bg-[#e07050]/10 p-5">
+                    <AlertCircle className="h-5 w-5 text-[#e07050] shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-semibold text-white">Failed to load document</p>
+                      <p className="text-sm text-white/55 mt-1">{error}</p>
+                      <button
+                        onClick={() => loadDoc(activeDocId)}
+                        className="mt-3 text-xs font-semibold text-[#e07050] hover:text-[#f08060] transition"
+                      >
+                        Retry
+                      </button>
+                    </div>
+                  </div>
+                )}
+                {content && !loading && !error && (
+                  <MarkdownRenderer content={content} />
+                )}
               </div>
-            )}
-            {error && !loading && (
-              <div className="flex items-start gap-3 rounded-xl border border-[#e07050]/20 bg-[#e07050]/10 p-5">
-                <AlertCircle className="h-5 w-5 text-[#e07050] shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-sm font-semibold text-white">Failed to load document</p>
-                  <p className="text-sm text-white/55 mt-1">{error}</p>
-                  <button
-                    onClick={() => loadDoc(activeDocId)}
-                    className="mt-3 text-xs font-semibold text-[#e07050] hover:text-[#f08060] transition"
-                  >
-                    Retry
-                  </button>
+
+              {/* Doc navigation footer */}
+              <div className="border-t border-white/[0.05] px-6 py-6 lg:px-10">
+                <div className="flex items-center justify-between">
+                  {(() => {
+                    const idx = DOC_META.findIndex((d) => d.id === activeDocId);
+                    const prev = DOC_META[idx - 1];
+                    const next = DOC_META[idx + 1];
+                    return (
+                      <>
+                        {prev ? (
+                          <button
+                            onClick={() => setActiveDocId(prev.id)}
+                            className="flex items-center gap-2 text-sm text-white/45 hover:text-white/80 transition"
+                          >
+                            <ArrowLeft className="h-4 w-4" />
+                            <div className="text-left">
+                              <p className="text-[11px] text-white/25 uppercase tracking-[0.1em]">Previous</p>
+                              <p className="font-semibold">{prev.label}</p>
+                            </div>
+                          </button>
+                        ) : (
+                          <div />
+                        )}
+                        {next ? (
+                          <button
+                            onClick={() => setActiveDocId(next.id)}
+                            className="flex items-center gap-2 text-sm text-white/45 hover:text-white/80 transition text-right"
+                          >
+                            <div>
+                              <p className="text-[11px] text-white/25 uppercase tracking-[0.1em]">Next</p>
+                              <p className="font-semibold">{next.label}</p>
+                            </div>
+                            <ChevronRight className="h-4 w-4" />
+                          </button>
+                        ) : (
+                          <div />
+                        )}
+                      </>
+                    );
+                  })()}
                 </div>
               </div>
-            )}
-            {content && !loading && !error && (
-              <MarkdownRenderer content={content} />
-            )}
-          </div>
-
-          {/* Doc navigation footer */}
-          <div className="border-t border-white/[0.05] px-6 py-6 lg:px-10">
-            <div className="flex items-center justify-between">
-              {(() => {
-                const idx = DOC_META.findIndex((d) => d.id === activeDocId);
-                const prev = DOC_META[idx - 1];
-                const next = DOC_META[idx + 1];
-                return (
-                  <>
-                    {prev ? (
-                      <button
-                        onClick={() => setActiveDocId(prev.id)}
-                        className="flex items-center gap-2 text-sm text-white/45 hover:text-white/80 transition"
-                      >
-                        <ArrowLeft className="h-4 w-4" />
-                        <div className="text-left">
-                          <p className="text-[11px] text-white/25 uppercase tracking-[0.1em]">Previous</p>
-                          <p className="font-semibold">{prev.label}</p>
-                        </div>
-                      </button>
-                    ) : (
-                      <div />
-                    )}
-                    {next ? (
-                      <button
-                        onClick={() => setActiveDocId(next.id)}
-                        className="flex items-center gap-2 text-sm text-white/45 hover:text-white/80 transition text-right"
-                      >
-                        <div>
-                          <p className="text-[11px] text-white/25 uppercase tracking-[0.1em]">Next</p>
-                          <p className="font-semibold">{next.label}</p>
-                        </div>
-                        <ChevronRight className="h-4 w-4" />
-                      </button>
-                    ) : (
-                      <div />
-                    )}
-                  </>
-                );
-              })()}
-            </div>
-          </div>
+            </>
+          )}
         </main>
       </div>
 
