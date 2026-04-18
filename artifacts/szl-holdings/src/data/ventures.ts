@@ -1,3 +1,27 @@
+/**
+ * Ventures data — public-facing metric values are sourced from the platform
+ * claims registry (@szl-holdings/config/public-claims) via the local claims
+ * adapter (src/lib/claims.ts). Hardcoded values were replaced as part of the
+ * April 2026 audit proof-point migration (task-1786).
+ *
+ * Rules:
+ *   - Claims with truthValue !== "verified" must use metricDisplay() so the
+ *     [Demo] or [Projected] label is appended automatically.
+ *   - Do not add new metric values as bare strings. Add to public-claims.ts
+ *     first, then reference via the claims adapter.
+ *
+ * Audit ref: docs/audit/2026-04/public-claims-registry.md
+ */
+import {
+  LYTE_SIGNAL_DETECTION_TIME,
+  LYTE_SIGNALS_PER_DAY,
+  LYTE_FALSE_POSITIVE_RATE,
+  VESSELS_COUNT,
+  VESSELS_DARK_DETECTION_LEAD,
+  AEGIS_SIMULATIONS,
+  metricDisplay,
+} from "../lib/claims";
+
 export type VentureStatus =
   | "Live"
   | "Pilot Ready"
@@ -72,10 +96,10 @@ export const ventures: Venture[] = [
     painSolved:
       "Executives are drowning in dashboards that show data but don't show problems. Lyte bridges the gap between raw metrics and actionable intelligence, applying severity-ranked signal detection, explainability, and autonomous playbooks that close the loop from observation to resolution.",
     metrics: [
-      { label: "Avg. Signal Detection Time", value: "< 4 min", trend: "up" },
-      { label: "False Positive Rate", value: "< 3%", trend: "up" },
+      { label: "Avg. Signal Detection Time", value: metricDisplay(LYTE_SIGNAL_DETECTION_TIME), trend: "up" },
+      { label: "False Positive Rate", value: metricDisplay(LYTE_FALSE_POSITIVE_RATE), trend: "up" },
       { label: "Playbooks Available", value: "120+", trend: "up" },
-      { label: "Signals Processed / Day", value: "2.4M+", trend: "up" },
+      { label: "Signals Processed / Day", value: metricDisplay(LYTE_SIGNALS_PER_DAY), trend: "up" },
     ],
     milestones: [
       { date: "Q1 2024", event: "Core signal engine launched", outcome: "Detection latency under 4 minutes" },
@@ -131,9 +155,9 @@ export const ventures: Venture[] = [
     painSolved:
       "Maritime oversight was designed for a different era. AIS alone can be spoofed, disabled, or laundered. Vessels applies multi-source signal fusion and behavioral modeling to detect what compliant-looking vessels are actually doing — and what the financial exposure is.",
     metrics: [
-      { label: "Vessels Monitored", value: "52,000+", trend: "up" },
+      { label: "Vessels Monitored", value: metricDisplay(VESSELS_COUNT), trend: "up" },
       { label: "Shipping Lanes", value: "340+", trend: "neutral" },
-      { label: "Dark Vessel Detections (Avg Lead)", value: "34 days pre-designation", trend: "up" },
+      { label: "Dark Vessel Detections (Avg Lead)", value: metricDisplay(VESSELS_DARK_DETECTION_LEAD), trend: "up" },
       { label: "Addressable Market", value: "$15.4B", trend: "up" },
     ],
     milestones: [
@@ -243,7 +267,7 @@ export const ventures: Venture[] = [
     painSolved:
       "The annual pen test is a snapshot of a system that no longer exists. Adversaries operate continuously; defenders should too. Aegis makes continuous security validation economically viable by automating the full ATT&CK matrix coverage at machine speed.",
     metrics: [
-      { label: "Simulations Executed", value: "31,200+", trend: "up" },
+      { label: "Simulations Executed", value: metricDisplay(AEGIS_SIMULATIONS), trend: "up" },
       { label: "ATT&CK Techniques Covered", value: "200+", trend: "neutral" },
       { label: "Avg Detection Lead Time", value: "vs. annual: +340 days", trend: "up" },
       { label: "Fortune 500 Clients", value: "3", trend: "up" },

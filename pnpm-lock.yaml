@@ -353,7 +353,7 @@ importers:
         version: link:../../packages/business-events
       '@szl-holdings/config':
         specifier: workspace:*
-        version: link:../../lib/config
+        version: link:../../packages/config
       '@szl-holdings/connectors':
         specifier: workspace:*
         version: link:../../packages/connectors
@@ -1207,6 +1207,9 @@ importers:
       '@szl-holdings/brand-registry':
         specifier: workspace:*
         version: link:../../packages/brand-registry
+      '@szl-holdings/config':
+        specifier: workspace:*
+        version: link:../../packages/config
       '@szl-holdings/covenant-policy':
         specifier: workspace:*
         version: link:../../lib/covenant-policy
@@ -2603,6 +2606,12 @@ importers:
       vitest:
         specifier: ^4.1.2
         version: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+
+  packages/config:
+    devDependencies:
+      typescript:
+        specifier: ^5.4.5
+        version: 5.9.3
 
   packages/connectors:
     dependencies:

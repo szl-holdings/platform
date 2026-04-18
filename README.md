@@ -8,6 +8,21 @@
 
 ---
 
+## Canonical Entry Points
+
+New to the codebase? Start here.
+
+| Document | Purpose |
+|---|---|
+| **[docs/INDEX.md](./docs/INDEX.md)** | Master index of all documentation, audit reports, and doctrine |
+| **[docs/audit/2026-04/README.md](./docs/audit/2026-04/README.md)** | April 2026 operational audit — executive summary and findings |
+| **[docs/doctrine/szl-doctrine.md](./docs/doctrine/szl-doctrine.md)** | The SZL point of view: four pillars, voice rules, anti-patterns |
+| **[packages/config/](./packages/config/)** | Single source of truth: platform registry, claims, feature flags, env contract |
+| **[docs/APP_STATUS.md](./docs/APP_STATUS.md)** | Authoritative artifact readiness register (GA / Beta / Partial / Archived) |
+| **[docs/known-gaps.md](./docs/known-gaps.md)** | Honest inventory of technical debt and remediation paths |
+
+---
+
 ## Trust
 
 An AI-assisted operations platform carries a distinct trust burden. The platform addresses it structurally, not through policy documents alone.
