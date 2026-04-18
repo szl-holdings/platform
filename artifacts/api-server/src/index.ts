@@ -24,13 +24,12 @@ import { seedPlatformData } from "./lib/seed-platform";
 import { seedConstellationData } from "./lib/seed-constellation";
 import { seedGuardianDefaults } from "./lib/seed-guardian";
 import { seedKnowledgeBase } from "./lib/seed-kb";
-import { initializeOpenTelemetry } from "@szl-holdings/observability";
 import { seedMspData } from "./lib/seed-msp";
 import { seedDreamscapeData } from "./lib/seed-dreamscape";
 import { seedLyteActions } from "./lib/seed-lyte-actions";
 import { isSeedDataAllowed, resolveRuntimeMode } from "@szl-holdings/config";
 import { buildGraphQLMiddleware } from "./graphql/index.js";
-import { registerGraphQLHandler } from "./app.js";
+import { registerGraphQLHandler, otelReady } from "./app.js";
 import { prewarmIntelligenceCache, scheduleIntelligenceRefresh, scheduleIntelligenceCachePruning } from "./routes/intelligence/index.js";
 import { pingRedis } from "./lib/redis-client.js";
 import { registerAllPrismJobHandlers } from "./services/prism-job-handlers";
@@ -55,16 +54,6 @@ initializeAlloyDomainEventSubscriptions();
 
 registerGenAITelemetryBridge();
 
-initializeOpenTelemetry({
-  serviceName: process.env.OTEL_SERVICE_NAME ?? "szl-api",
-  serviceVersion: process.env.npm_package_version ?? "1.0.0",
-  otlpEndpoint: process.env.OTLP_ENDPOINT ?? process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
-  exportToAzureMonitor: !!process.env.AZURE_APP_INSIGHTS_CONNECTION_STRING,
-  exportToNewRelic: !!process.env.NEW_RELIC_LICENSE_KEY,
-  exportToConsole: process.env.OTEL_CONSOLE_EXPORT === "true",
-}).catch(err => {
-  logger.warn({ err }, "OpenTelemetry initialization failed — continuing without OTel");
-});
 
 const HEAP_LIMIT_MB = 512;
 const HEAP_CRITICAL_THRESHOLD_MB = Math.round(HEAP_LIMIT_MB * 0.92);
@@ -76,6 +65,8 @@ export { getAlloyRunManager } from "./lib/alloy-run-manager-singleton";
 export { getGuardianEngine, syncGuardianPolicies, recordGuardianAction } from "./lib/guardian-engine";
 
 export async function bootstrap(server: http.Server, port: number): Promise<http.RequestListener> {
+  await otelReady;
+
   buildGraphQLMiddleware(server)
     .then(middleware => {
       registerGraphQLHandler(middleware);

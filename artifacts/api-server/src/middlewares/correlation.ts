@@ -11,7 +11,8 @@ declare global {
   }
 }
 
-const CORRELATION_HEADER = "x-correlation-id";
+const SZL_CORRELATION_HEADER = "x-szl-correlation-id";
+const LEGACY_CORRELATION_HEADER = "x-correlation-id";
 const REQUEST_ID_HEADER = "x-request-id";
 const TRACE_PARENT_HEADER = "traceparent";
 
@@ -19,17 +20,20 @@ const VALID_ID_PATTERN = /^[\w\-.:]{1,128}$/;
 
 export function correlationMiddleware(req: Request, res: Response, next: NextFunction) {
   const inboundRequestId = req.headers[REQUEST_ID_HEADER] as string | undefined;
-  const inboundCorrelationId = req.headers[CORRELATION_HEADER] as string | undefined;
+
+  const inboundSzlCorrelationId = req.headers[SZL_CORRELATION_HEADER] as string | undefined;
+  const inboundLegacyCorrelationId = req.headers[LEGACY_CORRELATION_HEADER] as string | undefined;
   const traceParent = req.headers[TRACE_PARENT_HEADER] as string | undefined;
 
-  const inbound = inboundRequestId || inboundCorrelationId;
-  const correlationId = inbound && VALID_ID_PATTERN.test(inbound) ? inbound : randomUUID();
+  const inboundCorrelation = inboundSzlCorrelationId || inboundLegacyCorrelationId || inboundRequestId;
+  const correlationId = inboundCorrelation && VALID_ID_PATTERN.test(inboundCorrelation) ? inboundCorrelation : randomUUID();
   const requestId = randomUUID();
 
   req.correlationId = correlationId;
   req.requestId = requestId;
 
-  res.setHeader(CORRELATION_HEADER, correlationId);
+  res.setHeader(SZL_CORRELATION_HEADER, correlationId);
+  res.setHeader(LEGACY_CORRELATION_HEADER, correlationId);
   res.setHeader(REQUEST_ID_HEADER, requestId);
 
   if (traceParent) {

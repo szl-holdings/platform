@@ -5,8 +5,8 @@ export { ServerTelemetryCollector, ClientTelemetryCollector, serverTelemetry, cl
 export type { TelemetryEvent, RequestTelemetry, WebVitalsReport, BusinessEvent, AlertRecord, ApmSpan, ExternalCallRecord } from "./telemetry.js";
 export { doctrineEventBus, seedDoctrineEvents } from "./event-bus.js";
 export type { CorrelatedEventGroup } from "./event-bus.js";
-export { initializeOpenTelemetry, getTracer, getOtelConfig, isOtelInitialized } from "./otel.js";
-export type { OtelConfig, Span } from "./otel.js";
+export { initializeOpenTelemetry, getTracer, getOtelConfig, isOtelInitialized, getInMemorySpans, flushInMemorySpans, buildActorAttributes, buildContextAttributes } from "./otel.js";
+export type { OtelConfig, Span, ActorContext, SpanContext } from "./otel.js";
 export { genAITelemetry } from "./genai-telemetry.js";
 export { livingMesh, seedLivingMeshData } from "./living-mesh.js";
 export type {

@@ -336,6 +336,107 @@ async function seedAlertRules(): Promise<void> {
 }
 setTimeout(() => { seedAlertRules().catch(() => {}); }, 7000);
 
+// Ensure P0/P1 platform alert rules per SLOS_AND_ALERTS.md spec exist —
+// uses WHERE NOT EXISTS on name so they are never duplicated.
+async function ensurePlatformAlertRules(): Promise<void> {
+  const platformRules = [
+    // P0 — Platform Down
+    {
+      name: "[P0] API Unavailable",
+      description: "Health check fails 3 consecutive times — immediate page (per SLOS_AND_ALERTS.md)",
+      metric_name: "api.health_consecutive_failures",
+      condition: "gte",
+      threshold: 3,
+      window_minutes: 2,
+      severity: "critical",
+    },
+    {
+      name: "[P0] Database Connection Lost",
+      description: "Database connection pool exhausted or unreachable — immediate page",
+      metric_name: "db.pool_utilization",
+      condition: "gte",
+      threshold: 99,
+      window_minutes: 1,
+      severity: "critical",
+    },
+    {
+      name: "[P0] Alloy Workflow Engine Crash",
+      description: "Alloy job error rate exceeds 95% — workflow engine is down",
+      metric_name: "ai.failure_rate",
+      condition: "gte",
+      threshold: 95,
+      window_minutes: 2,
+      severity: "critical",
+    },
+    // P1 — Degraded
+    {
+      name: "[P1] API Error Rate Elevated",
+      description: "5xx response rate > 2% for 5 minutes (SLO: < 0.5%)",
+      metric_name: "api.error_rate",
+      condition: "gt",
+      threshold: 2,
+      window_minutes: 5,
+      severity: "critical",
+    },
+    {
+      name: "[P1] API Latency Degraded",
+      description: "P95 latency > 1000ms for 10 minutes (2× the 500ms GET SLO target)",
+      metric_name: "api.latency_p95",
+      condition: "gt",
+      threshold: 1000,
+      window_minutes: 10,
+      severity: "critical",
+    },
+    {
+      name: "[P1] Database Latency Elevated",
+      description: "P95 query latency > 500ms for 5 minutes (SLO: < 50ms P95 per SLOS_AND_ALERTS.md)",
+      metric_name: "db.latency_p95",
+      condition: "gt",
+      threshold: 500,
+      window_minutes: 5,
+      severity: "major",
+    },
+    {
+      name: "[P1] Job Queue Depth High",
+      description: "Pending job queue depth > 100 for 10 minutes",
+      metric_name: "queue.depth",
+      condition: "gt",
+      threshold: 100,
+      window_minutes: 10,
+      severity: "major",
+    },
+    // P2 — SLO at Risk
+    {
+      name: "[P2] AI Inference Latency Elevated",
+      description: "AI inference P95 > 10 seconds for 10 minutes (SLO: < 8s per SLOS_AND_ALERTS.md)",
+      metric_name: "ai.latency_p95",
+      condition: "gt",
+      threshold: 10000,
+      window_minutes: 10,
+      severity: "warning",
+    },
+    {
+      name: "[P3] Memory Usage High",
+      description: "Heap usage > 85% for 15 minutes — P3 alert per SLOS_AND_ALERTS.md",
+      metric_name: "system.memory_pct",
+      condition: "gt",
+      threshold: 85,
+      window_minutes: 15,
+      severity: "warning",
+    },
+  ];
+
+  for (const r of platformRules) {
+    await pool.query(
+      `INSERT INTO platform_alert_rules (name, description, metric_name, condition, threshold, window_minutes, severity)
+       SELECT $1,$2,$3,$4,$5,$6,$7
+       WHERE NOT EXISTS (SELECT 1 FROM platform_alert_rules WHERE name = $1)`,
+      [r.name, r.description, r.metric_name, r.condition, r.threshold, r.window_minutes, r.severity]
+    ).catch(() => {});
+  }
+}
+setTimeout(() => { ensurePlatformAlertRules().catch(() => {}); }, 8000);
+
 // ──────────────────────────────────────────────────────────────────────────────
 // INCIDENTS
 // ──────────────────────────────────────────────────────────────────────────────
@@ -901,6 +1002,199 @@ router.delete("/ops/service-deps/:id", async (req, res) => {
 // The PUBLIC /api/public/uptime-history (public-status.ts) is what the /status
 // page UptimeBar component uses; it requires no auth and returns a nested map.
 // ──────────────────────────────────────────────────────────────────────────────
+
+// ──────────────────────────────────────────────────────────────────────────────
+// SLO METRICS DASHBOARD ENDPOINT
+// Returns real-time SLO data per docs/SLOS_AND_ALERTS.md
+// ──────────────────────────────────────────────────────────────────────────────
+
+router.get("/ops/slo", async (_req, res) => {
+  try {
+    const { serverTelemetry } = await import("@szl-holdings/observability");
+
+    type QueryResult<T> = { rows: T[]; dataAvailable: boolean };
+
+    async function tryQuery<T>(p: Promise<{ rows: T[] }>, fallback: T[]): Promise<QueryResult<T>> {
+      try {
+        const result = await p;
+        return { rows: result.rows, dataAvailable: true };
+      } catch (err) {
+        logger.warn({ err }, "[ops/slo] Query failed — returning fallback");
+        return { rows: fallback, dataAvailable: false };
+      }
+    }
+
+    const [
+      availabilityRes,
+      activeAlertsRes,
+      approvalLatencyRes,
+      queueDepthRes,
+      workflowCompletionRes,
+    ] = await Promise.all([
+      tryQuery(pool.query<{ uptime_pct: string | null; total_checks: string }>(`
+        SELECT
+          ROUND(COUNT(*) FILTER (WHERE status = 'operational')::numeric / NULLIF(COUNT(*), 0) * 100, 3)::text AS uptime_pct,
+          COUNT(*)::text AS total_checks
+        FROM platform_status_checks
+        WHERE checked_at > NOW() - INTERVAL '30 days'
+          AND service_id = 'api'
+      `), [{ uptime_pct: null, total_checks: "0" }]),
+
+      tryQuery(pool.query<{ id: number; rule_name: string; severity: string; metric_name: string; metric_value: number; threshold: number; message: string; created_at: string }>(`
+        SELECT id, rule_name, severity, metric_name, metric_value, threshold, message, created_at
+        FROM platform_alert_events
+        WHERE status = 'firing'
+        ORDER BY created_at DESC
+        LIMIT 20
+      `), []),
+
+      tryQuery(pool.query<{ severity: string; count: string; avg_pending_minutes: string; max_pending_minutes: string }>(`
+        SELECT
+          severity,
+          COUNT(*)::text AS count,
+          ROUND(AVG(EXTRACT(EPOCH FROM (NOW() - created_at)) / 60), 1)::text AS avg_pending_minutes,
+          ROUND(MAX(EXTRACT(EPOCH FROM (NOW() - created_at)) / 60), 1)::text AS max_pending_minutes
+        FROM alloy_approval_requests
+        WHERE status = 'pending'
+        GROUP BY severity
+      `), []),
+
+      tryQuery(pool.query<{ depth: string }>(`
+        SELECT COUNT(*)::text AS depth FROM durable_jobs WHERE status = 'pending'
+      `), [{ depth: "0" }]),
+
+      tryQuery(pool.query<{ total: string; failed: string; completion_rate: string }>(`
+        SELECT
+          COUNT(*)::text AS total,
+          COUNT(*) FILTER (WHERE status = 'failed')::text AS failed,
+          ROUND(COUNT(*) FILTER (WHERE status != 'failed')::numeric / NULLIF(COUNT(*), 0) * 100, 2)::text AS completion_rate
+        FROM durable_jobs
+        WHERE created_at > NOW() - INTERVAL '24 hours'
+      `), [{ total: "0", failed: "0", completion_rate: "100" }]),
+    ]);
+
+    const snapshot = serverTelemetry.getSnapshot();
+    const latencyP50 = snapshot.p50Latency ?? 0;
+    const latencyP95 = snapshot.p95Latency ?? 0;
+    const latencyP99 = snapshot.p99Latency ?? 0;
+    const errorRate = snapshot.errorRate ?? 0;
+
+    const AVAILABILITY_SLO = 99.5;
+    const MONTHLY_MINUTES = 43_200;
+    const errorBudgetTotalMinutes = (1 - AVAILABILITY_SLO / 100) * MONTHLY_MINUTES;
+
+    const availabilityRaw = availabilityRes.rows[0]?.uptime_pct;
+    const availability30d = availabilityRaw != null ? parseFloat(availabilityRaw) : null;
+    const hasAvailabilityData = availabilityRaw != null && parseInt(availabilityRes.rows[0]?.total_checks ?? "0") > 0;
+
+    let errorBudgetConsumedMinutes = 0;
+    let errorBudgetRemainingPct = 100;
+
+    if (hasAvailabilityData && availability30d !== null) {
+      const downtimePct = Math.max(0, AVAILABILITY_SLO / 100 - availability30d / 100);
+      errorBudgetConsumedMinutes = Math.min(downtimePct * MONTHLY_MINUTES, errorBudgetTotalMinutes);
+      errorBudgetRemainingPct = Math.max(0, ((errorBudgetTotalMinutes - errorBudgetConsumedMinutes) / errorBudgetTotalMinutes) * 100);
+    }
+
+    const approvalLatencyBySeverity: Record<string, { count: number; avgMinutes: number; maxMinutes: number; slaTarget: number; alertThreshold: number }> = {
+      emergency: { count: 0, avgMinutes: 0, maxMinutes: 0, slaTarget: 15, alertThreshold: 10 },
+      critical: { count: 0, avgMinutes: 0, maxMinutes: 0, slaTarget: 60, alertThreshold: 45 },
+      high: { count: 0, avgMinutes: 0, maxMinutes: 0, slaTarget: 240, alertThreshold: 180 },
+      medium: { count: 0, avgMinutes: 0, maxMinutes: 0, slaTarget: 1440, alertThreshold: 1200 },
+      low: { count: 0, avgMinutes: 0, maxMinutes: 0, slaTarget: 4320, alertThreshold: 3600 },
+    };
+
+    for (const row of approvalLatencyRes.rows) {
+      const sev = row.severity?.toLowerCase() ?? "medium";
+      if (approvalLatencyBySeverity[sev]) {
+        approvalLatencyBySeverity[sev] = {
+          ...approvalLatencyBySeverity[sev],
+          count: parseInt(row.count ?? "0"),
+          avgMinutes: parseFloat(row.avg_pending_minutes ?? "0"),
+          maxMinutes: parseFloat(row.max_pending_minutes ?? "0"),
+        };
+      }
+    }
+
+    const p0ActiveAlerts = activeAlertsRes.rows.filter(a =>
+      a.rule_name.startsWith("[P0]") || (a.severity === "critical" && a.metric_value >= 99)
+    );
+    const p1ActiveAlerts = activeAlertsRes.rows.filter(a =>
+      a.rule_name.startsWith("[P1]") ||
+      (a.severity === "critical" && !a.rule_name.startsWith("[P0]"))
+    );
+
+    const latencySlos = {
+      read: { p50Target: 100, p95Target: 500, p99Target: 1000, p50Current: Math.round(latencyP50), p95Current: Math.round(latencyP95), p99Current: Math.round(latencyP99) },
+      write: { p50Target: 200, p95Target: 800, p99Target: 2000 },
+      aiInference: { p95Target: 8000 },
+    };
+
+    const partialSections: string[] = [];
+    if (!availabilityRes.dataAvailable) partialSections.push("availability");
+    if (!activeAlertsRes.dataAvailable) partialSections.push("activeAlerts");
+    if (!approvalLatencyRes.dataAvailable) partialSections.push("approvalLatency");
+    if (!queueDepthRes.dataAvailable) partialSections.push("workflowEngine.queueDepth");
+    if (!workflowCompletionRes.dataAvailable) partialSections.push("workflowEngine.completionRate");
+
+    res.json({
+      ok: true,
+      generatedAt: new Date().toISOString(),
+      dataSource: partialSections.length === 0 ? "live" : "live-partial",
+      partialData: {
+        hasPartialData: partialSections.length > 0,
+        unavailableSections: partialSections,
+      },
+      availability: {
+        target: AVAILABILITY_SLO,
+        current: availability30d,
+        hasData: hasAvailabilityData,
+        _dataAvailable: availabilityRes.dataAvailable,
+        windowDays: 30,
+      },
+      errorBudget: {
+        totalMinutes: Math.round(errorBudgetTotalMinutes),
+        consumedMinutes: Math.round(errorBudgetConsumedMinutes),
+        remainingMinutes: Math.round(errorBudgetTotalMinutes - errorBudgetConsumedMinutes),
+        remainingPct: parseFloat(errorBudgetRemainingPct.toFixed(1)),
+        policy: errorBudgetRemainingPct > 50 ? "normal" : errorBudgetRemainingPct > 25 ? "caution" : errorBudgetRemainingPct > 10 ? "freeze-non-critical" : "full-freeze",
+        _dataAvailable: availabilityRes.dataAvailable,
+      },
+      errorRate: {
+        current: parseFloat(errorRate.toFixed(2)),
+        target: 0.5,
+        sloMet: errorRate <= 0.5,
+      },
+      latency: latencySlos,
+      workflowEngine: {
+        queueDepth: parseInt(queueDepthRes.rows[0]?.depth ?? "0"),
+        queueDepthThreshold: 100,
+        completionRate24h: parseFloat(workflowCompletionRes.rows[0]?.completion_rate ?? "100"),
+        completionRateTarget: 99,
+        _queueDataAvailable: queueDepthRes.dataAvailable,
+        _completionDataAvailable: workflowCompletionRes.dataAvailable,
+      },
+      approvalLatency: {
+        ...approvalLatencyBySeverity,
+        _dataAvailable: approvalLatencyRes.dataAvailable,
+      },
+      activeAlerts: {
+        p0: p0ActiveAlerts,
+        p1: p1ActiveAlerts,
+        all: activeAlertsRes.rows,
+        totalFiring: activeAlertsRes.rows.length,
+        _dataAvailable: activeAlertsRes.dataAvailable,
+      },
+      uptimeSample: {
+        requestCount: snapshot.requestCount ?? 0,
+        uptimeSeconds: snapshot.uptimeSeconds ?? 0,
+      },
+    });
+  } catch (err) {
+    logger.error({ err }, "[ops/slo] Failed to compute SLO metrics");
+    res.status(500).json({ error: "Failed to compute SLO metrics" });
+  }
+});
 
 router.get("/ops/uptime-history", async (req, res) => {
   try {

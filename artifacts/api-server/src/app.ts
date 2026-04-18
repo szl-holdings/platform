@@ -18,6 +18,8 @@ import { correlationMiddleware } from "./middlewares/correlation";
 import { globalLimiter } from "./middlewares/rate-limiters";
 import { telemetryMiddleware } from "./middlewares/telemetry";
 import { traceEmitMiddleware } from "./middlewares/trace-emit";
+import { otelSpanMiddleware } from "./middlewares/otel-span";
+import { initializeOpenTelemetry } from "@szl-holdings/observability";
 import { authMiddleware } from "./middlewares/authMiddleware";
 import { globalAuthEnforcer } from "./middlewares/global-auth-enforcer";
 import { csrfMiddleware } from "./middlewares/csrf";
@@ -37,7 +39,15 @@ const isProduction = process.env.NODE_ENV === "production";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+export const otelReady = initializeOpenTelemetry({
+  serviceName: process.env.OTEL_SERVICE_NAME ?? "szl-api-server",
+  serviceVersion: process.env.npm_package_version ?? "0.0.0",
+  otlpEndpoint: process.env.OTLP_ENDPOINT ?? process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
+  exportToConsole: process.env.OTEL_CONSOLE_EXPORT === "true",
+}).catch((e) => console.warn("[otel] Initialization warning:", e));
+
 app.use(correlationMiddleware);
+app.use(otelSpanMiddleware);
 app.use(apiVersionMiddleware);
 app.use(appModeMiddleware);
 
@@ -114,8 +124,8 @@ app.use(cors({
   origin: corsOriginFn,
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "X-Correlation-Id", "X-Request-Id", "X-CSRF-Token", "X-Api-Version"],
-  exposedHeaders: ["X-Correlation-Id", "X-Request-Id", "X-Api-Version", "X-Api-Versions-Supported", "Deprecation", "Sunset", "X-Api-Deprecated", "X-Api-Deprecation-Notice"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "X-Correlation-Id", "X-SZL-Correlation-ID", "X-Request-Id", "X-CSRF-Token", "X-Api-Version", "traceparent", "tracestate"],
+  exposedHeaders: ["X-Correlation-Id", "X-SZL-Correlation-ID", "X-Request-Id", "X-Api-Version", "X-Api-Versions-Supported", "Deprecation", "Sunset", "X-Api-Deprecated", "X-Api-Deprecation-Notice", "traceparent"],
   maxAge: 86400,
 }));
 
