@@ -3,6 +3,7 @@ import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { ShieldAlert, AlertTriangle, CheckCircle, Search, Clock, Ship, Loader2, Eye } from "lucide-react";
 import { useSanctions, useSanctionsSummary } from "@/hooks/use-vessels-data";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { HelpTip } from "@szl-holdings/shared-ui/onboarding";
 
 type OfacDistEntry = { status: string; count: number };
 type PscDistEntry = { result: string; count: number; avgDeficiencies: number };
@@ -68,6 +69,14 @@ export default function SanctionsScreeningPage() {
           <h1 className="font-display text-xl font-bold text-sky-50 flex items-center gap-2">
             <ShieldAlert className="w-5 h-5 text-red-400" />
             Sanctions & Compliance Screening
+            <HelpTip
+              tipId="vessels.sanctions-screening"
+              platform="vessels"
+              title="Sanctions & Compliance Screening"
+              content="Continuously screens vessels, owners, and beneficial owners against OFAC, UN, EU, and UK consolidated sanctions lists. Hits create governed approvals with citation-backed evidence — never silent blocks."
+              accentColor="#0ea5e9"
+              iconSize={13}
+            />
           </h1>
           <p className="text-xs text-sky-400/50 mt-0.5">
             {isLive ? `${screenings.length} vessels screened — live database` : "Vessel, owner, and beneficial owner screening against global sanctions lists"}

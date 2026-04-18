@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Shield, AlertTriangle, CheckCircle, Clock, FileText, Tag, RefreshCw, Bell, GitMerge, ChevronDown, ChevronUp } from "lucide-react";
+import { HelpTip } from "@szl-holdings/shared-ui/onboarding";
 
 const ACCENT = "#40856a";
 const API = "/api";
@@ -153,7 +154,17 @@ export default function CovenantMonitoringPage() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Shield className="w-4 h-4" style={{ color: ACCENT }} />
-            <h1 className="text-xl font-semibold" style={{ color: "#e8edf8" }}>Covenant Monitoring</h1>
+            <h1 className="text-xl font-semibold flex items-center gap-1.5" style={{ color: "#e8edf8" }}>
+              Covenant Monitoring
+              <HelpTip
+                tipId="terra.covenant-monitoring"
+                platform="terra"
+                title="Covenant Monitoring"
+                content="A scheduled skill that re-evaluates loan covenants — DSCR, LTV, occupancy, payment status — across every active position. Any breach automatically opens a guardian approval, never a silent override."
+                accentColor="#84cc16"
+                iconSize={13}
+              />
+            </h1>
           </div>
           <p className="text-sm" style={{ color: "#94a3b8" }}>
             Scheduled skill tracks loan covenants across all active positions. Violations automatically create guardian approvals.

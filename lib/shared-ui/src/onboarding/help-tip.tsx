@@ -11,6 +11,28 @@ export interface HelpTipProps {
   accentColor?: string;
   className?: string;
   iconSize?: number;
+  /** Stable identifier for analytics. When set together with `platform`, opening
+   *  the tip emits a `help_tip_opened` event to /api/analytics/event. */
+  tipId?: string;
+  /** Platform/app slug for analytics (e.g. "szl", "aegis", "vessels", "terra"). */
+  platform?: string;
+  /** Optional callback invoked the first time the tip is opened in this mount. */
+  onOpen?: () => void;
+}
+
+function fireHelpTipAnalytics(tipId: string, platform: string) {
+  try {
+    fetch("/api/analytics/event", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        event: "help_tip_opened",
+        platform,
+        timestamp: new Date().toISOString(),
+        properties: { platform, tipId },
+      }),
+    }).catch(() => {});
+  } catch {}
 }
 
 export function HelpTip({
@@ -22,9 +44,25 @@ export function HelpTip({
   accentColor = "#8b7ac8",
   className,
   iconSize = 14,
+  tipId,
+  platform,
+  onOpen,
 }: HelpTipProps) {
   const [open, setOpen] = React.useState(false);
+  const trackedRef = React.useRef(false);
   const containerRef = React.useRef<HTMLDivElement>(null);
+
+  const handleToggle = React.useCallback(() => {
+    setOpen((prev) => {
+      const next = !prev;
+      if (next && !trackedRef.current) {
+        trackedRef.current = true;
+        if (tipId && platform) fireHelpTipAnalytics(tipId, platform);
+        onOpen?.();
+      }
+      return next;
+    });
+  }, [tipId, platform, onOpen]);
 
   React.useEffect(() => {
     if (!open) return;
@@ -59,7 +97,7 @@ export function HelpTip({
   return (
     <div ref={containerRef} className={cn("relative inline-flex", className)}>
       <button
-        onClick={() => setOpen(!open)}
+        onClick={handleToggle}
         className={cn(
           "rounded-full p-0.5 transition-colors",
           open

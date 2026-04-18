@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { Brain, CheckCircle, AlertTriangle, XCircle, FileText, Tag, ChevronDown, ChevronUp, Play, Shield } from "lucide-react";
+import { HelpTip } from "@szl-holdings/shared-ui/onboarding";
 
 const ACCENT = "#40856a";
 const API = "/api";
@@ -126,7 +127,17 @@ export default function UnderwritingCopilotPage() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Brain className="w-4 h-4" style={{ color: ACCENT }} />
-            <h1 className="text-xl font-semibold" style={{ color: "#e8edf8" }}>Underwriting Copilot</h1>
+            <h1 className="text-xl font-semibold flex items-center gap-1.5" style={{ color: "#e8edf8" }}>
+              Underwriting Copilot
+              <HelpTip
+                tipId="terra.underwriting-copilot"
+                platform="terra"
+                title="Underwriting Copilot"
+                content="A planner walks each underwriting step (sponsor, market, debt service, sensitivity); a verifier checks every result with citation-backed evidence. Outputs land in the proof chain so the file is review-ready."
+                accentColor="#84cc16"
+                iconSize={13}
+              />
+            </h1>
           </div>
           <p className="text-sm" style={{ color: "#94a3b8" }}>
             AI-powered underwriting flow — planner walks each analysis step, verifier checks each result with citation-backed evidence.

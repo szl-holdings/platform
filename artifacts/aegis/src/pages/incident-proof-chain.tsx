@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link2, Shield, AlertTriangle, Clock, RefreshCw, ChevronDown, Activity, FileText, CheckCircle, Target } from "lucide-react";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { HelpTip } from "@szl-holdings/shared-ui/onboarding";
 
 const API = import.meta.env.VITE_API_URL ?? "/api";
 
@@ -81,6 +82,14 @@ export default function IncidentProofChain() {
           <h1 className="text-xl font-bold flex items-center gap-2" style={{ color: DS.text.primary }}>
             <Link2 className="w-5 h-5 text-blue-400"/>
             Incident Proof Chain
+            <HelpTip
+              tipId="aegis.incident-proof-chain"
+              platform="aegis"
+              title="Incident Proof Chain"
+              content="A citation-backed timeline for each incident. Every detection, enrichment, model output, and analyst decision is recorded with its source, confidence, and verifier approval — so the response is fully auditable."
+              accentColor="#3b82f6"
+              iconSize={13}
+            />
           </h1>
           <p className="text-sm mt-1" style={{ color: DS.text.secondary }}>
             Citation-backed timeline per incident through the cognitive trace-graph with verifier approval.

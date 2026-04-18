@@ -11,6 +11,7 @@ import {
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
+import { HelpTip } from "@szl-holdings/shared-ui/onboarding";
 
 const BG = "hsl(214,16%,4%)";
 const BORDER = "hsla(0,0%,100%,0.07)";
@@ -239,6 +240,12 @@ export default function GovernancePosturePage() {
                 <Link href="/lyte" style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: TEXT_FAINT, textDecoration: "none" }}>Lyte</Link>
                 <ChevronRight size={10} style={{ color: TEXT_FAINT }} />
                 <span style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: LYTE }}>Governance Posture</span>
+                <HelpTip
+                  tipId="szl.governance-posture.overview"
+                  platform="szl"
+                  title="Governance Posture Score"
+                  content="A continuous, weighted score across policy coverage, approval throughput, override rate, and trust health for every domain pack. Updated as decisions and overrides flow through the platform — not assembled on demand."
+                />
               </div>
               <h1 style={{ fontSize: "clamp(2rem,4.5vw,3.25rem)", fontWeight: 700, letterSpacing: "-0.028em", lineHeight: 1.08, maxWidth: "26ch", marginBottom: "1rem", color: TEXT }}>
                 Governance posture across every domain pack. Continuously.

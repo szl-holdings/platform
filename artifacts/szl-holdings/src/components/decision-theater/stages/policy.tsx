@@ -1,6 +1,7 @@
 import { CheckCircle2, User, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { EngineState } from "@/hooks/useDecisionEngine";
+import { HelpTip } from "@szl-holdings/shared-ui/onboarding";
 
 export function PolicyStage({ engine }: { engine: EngineState }) {
   const decision = engine.policyDecision;
@@ -21,7 +22,16 @@ export function PolicyStage({ engine }: { engine: EngineState }) {
       <div className="rounded-xl border border-border/40 bg-card/60 p-5">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h3 className="text-sm font-bold text-foreground">Policy Evaluation</h3>
+            <h3 className="text-sm font-bold text-foreground flex items-center gap-1.5">
+              Policy Evaluation
+              <HelpTip
+                tipId="szl.decision-theater.covenant-policy"
+                platform="szl"
+                title="Covenant Policy Engine"
+                content="Evaluates the proposed action against organizational covenants — role requirements, escalation thresholds, segregation-of-duties rules — and returns ALLOW or DENY with the matching policy id and an evaluation trace."
+                iconSize={12}
+              />
+            </h3>
             <p className="text-[10px] text-muted-foreground font-mono mt-0.5">{decision.matchedPolicies[0] ?? "default-deny"}</p>
           </div>
           <span className={cn(

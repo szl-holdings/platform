@@ -13,6 +13,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Link } from "wouter";
 import { RecommendationExplainer, SAMPLE_RECOMMENDATIONS } from "@/components/RecommendationExplainer";
+import { HelpTip } from "@szl-holdings/shared-ui/onboarding";
 
 
 const apps = [
@@ -347,6 +348,13 @@ function PendingActionsPanel() {
         <h3 className="text-xs font-semibold text-foreground flex items-center gap-1.5">
           <Target className="w-3.5 h-3.5 text-primary" />
           Pending Actions
+          <HelpTip
+            tipId="szl.command-center.pending-actions"
+            platform="szl"
+            title="Pending Actions"
+            content="Decisions waiting on a human approver. Each row shows the affected domain, due window, and severity. Unowned actions are highlighted so they don't sit in the queue."
+            iconSize={12}
+          />
         </h3>
         <span className="text-[10px] text-red-400 font-mono">{PENDING_ACTIONS.filter(a => !a.owner).length} unowned</span>
       </div>

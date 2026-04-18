@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-u
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Eye, EyeOff, AlertTriangle, Shield, Radio, Ship, MapPin, Clock, Filter, Search, RefreshCw, Sparkles, Loader2 } from "lucide-react";
 import { MicroFeedbackWidget } from "@szl-holdings/shared-ui";
+import { HelpTip } from "@szl-holdings/shared-ui/onboarding";
 
 const darkVessels = [
   { id: "DV-001", name: "PACIFIC MERIDIAN", imo: "9821045", flag: "Unknown", lat: 25.4, lon: 56.2, lastAIS: "14h ago", gapDuration: "14h 22m", suspicionScore: 94, reason: "AIS disabled near Iran — sanctions zone transit", priorCalls: ["Bandar Abbas", "Jebel Ali"], ownerChain: "Obscured via 3 shell co.", status: "Critical" },
@@ -89,6 +90,14 @@ export default function DarkVesselDetection() {
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <EyeOff className="w-6 h-6 text-red-400" />
             Dark Vessel Detection
+            <HelpTip
+              tipId="vessels.dark-vessel-detection"
+              platform="vessels"
+              title="Dark Vessel Detection"
+              content="Behavioral models flag vessels that have disabled AIS transponders, performed suspicious ship-to-ship transfers, or show IUU-fishing patterns. Each alert includes the inferred behavior class and supporting track evidence."
+              accentColor="#0ea5e9"
+              iconSize={14}
+            />
           </h1>
           <p className="text-sm text-muted-foreground mt-1">AIS manipulation, ship-to-ship transfers, and IUU fishing alerts — powered by behavioral AI</p>
         </div>

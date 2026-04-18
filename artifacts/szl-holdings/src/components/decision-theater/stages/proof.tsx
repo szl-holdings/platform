@@ -2,6 +2,7 @@ import { m } from "framer-motion";
 import { Fingerprint, Clock, User } from "lucide-react";
 import type { EngineState } from "@/hooks/useDecisionEngine";
 import type { LiveAuditRecord } from "@/hooks/useLiveTheaterData";
+import { HelpTip } from "@szl-holdings/shared-ui/onboarding";
 
 export function ProofStage({ engine }: { engine: EngineState }) {
   const pr = engine.proofRecord;
@@ -12,7 +13,16 @@ export function ProofStage({ engine }: { engine: EngineState }) {
       <p className="text-sm text-muted-foreground">The Proof Chain records immutable attribution for every AI output, human decision, and data source used in this decision.</p>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="rounded-xl border border-border/40 bg-card/60 p-5">
-          <h3 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-3">Proof Chain Record</h3>
+          <h3 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-1.5">
+            Proof Chain Record
+            <HelpTip
+              tipId="szl.decision-theater.proof-chain"
+              platform="szl"
+              title="Proof Chain"
+              content="An immutable, citation-backed record for each decision: model + prompt hash, source class, confidence, reviewer, correlation id, and export-safety state. Lets auditors replay how every output was produced."
+              iconSize={11}
+            />
+          </h3>
           <div className="space-y-2.5">
             {[
               { label: "Chain ID", value: pr.proofChainId },

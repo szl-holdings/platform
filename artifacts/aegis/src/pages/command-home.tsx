@@ -11,7 +11,7 @@ import {
   Radio,
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
-import { ActivationBanner, useActivationState, useOnboardingAnalytics } from "@szl-holdings/shared-ui/onboarding";
+import { ActivationBanner, useActivationState, useOnboardingAnalytics, HelpTip } from "@szl-holdings/shared-ui/onboarding";
 import type { ActivationStep } from "@szl-holdings/shared-ui/onboarding";
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
@@ -328,7 +328,17 @@ export default function CommandHome() {
             <Hexagon className="w-3.5 h-3.5 text-blue-400" />
           </div>
           <div>
-            <h1 className="text-sm font-bold tracking-tight text-white">Command Home</h1>
+            <h1 className="text-sm font-bold tracking-tight text-white flex items-center gap-1.5">
+              Command Home
+              <HelpTip
+                tipId="aegis.command-home.posture"
+                platform="aegis"
+                title="Command Home"
+                content="Single-pane operational view of cyber posture: live risk score, open incidents, critical alerts, and the approval queue. Every tile links to a deeper drill-down with the underlying evidence."
+                accentColor="#3b82f6"
+                iconSize={11}
+              />
+            </h1>
             <p className="text-[9px] font-mono uppercase tracking-[0.15em]" style={{ color: DS.text.muted }}>Aegis Cyber-Resilience Platform</p>
           </div>
         </div>
