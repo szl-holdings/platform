@@ -198,13 +198,13 @@ function resolveUrl(url) {
       const match = art.regexes.find((r) => r.rx.test(rel));
       let matchedPattern = match?.pattern ?? null;
       let ok = Boolean(match);
-      // A bare <Route> (no path attribute) is wouter's catch-all and renders
-      // for any unmatched path inside the artifact. We accept it as a valid
-      // landing target — but flag it so the report shows the URL is only
-      // satisfied by the catch-all rather than a dedicated route.
+      // If only a bare <Route> (catch-all / 404 sink) would satisfy the URL,
+      // record that explicitly and FAIL the check — the requirement is that
+      // generated deep-links land on a dedicated detail page, not a generic
+      // fallback. The catch-all signal is reported so it is obvious why the
+      // check failed.
       if (!ok && art.hasCatchAll) {
-        ok = true;
-        matchedPattern = "<catch-all>";
+        matchedPattern = "<catch-all-only>";
       }
       return { artifact: art.product, relPath: rel, ok, matchedPattern };
     }
