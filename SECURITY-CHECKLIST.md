@@ -1,6 +1,6 @@
 # SZL Holdings — Security Checklist (API & Credentials)
 
-**Last updated:** 2026-04-17
+**Last updated:** 2026-04-18
 **Audience:** Enterprise architects, Series A technical advisors, security reviewers, compliance officers
 **Scope:** `artifacts/api-server` — multi-tenant Express/Node.js API
 
@@ -176,6 +176,10 @@ Every commit and pull request runs:
 | TypeScript typecheck | `tsc --noEmit` | Block on type errors |
 | Lint | ESLint | Block on errors |
 | Build validation | `pnpm -r build` | Block on any build failure |
+| Secret scanning | Gitleaks v8.21 + custom pattern scanner | Block on any detected secret or credential (GAP-002 resolved) |
+| CodeQL SAST | `github/codeql-action` (JS/TS) | Block on code-level security vulnerabilities (KG011 resolved) |
+| Dependency review | `actions/dependency-review-action` | Block PRs introducing high/critical CVEs or GPL-3.0/AGPL-3.0 deps (KG012 resolved) |
+| Lockfile integrity | `pnpm install --frozen-lockfile --dry-run` | Block if lockfile is out of sync |
 
 ---
 
@@ -208,8 +212,8 @@ The following gaps were identified in the Phase 2–3 Architecture, Auth & Tenan
 | KG026 | MFA not implemented | P1 | Enterprise tier launch | **Formally Accepted Apr-2026.** IdP-level MFA (Replit OIDC / Azure AD) is the current control. Platform-native MFA on roadmap for enterprise tier. Risk accepted with IdP enforcement requirement for enterprise pilots. |
 | KG027 | External uptime monitoring absent | P1 | Pre-deploy | 🔴 Hard blocker (LB-002) |
 | KG028 | Sentry / error tracking not in production | P1 | Pre-deploy | 🔴 Hard blocker (LB-003) |
-| KG011 | CodeQL scanning not configured in CI | P1 | Sprint 3 | 🟡 Conditional (LC-002) |
-| KG012 | Dependency review not configured in CI | P1 | Sprint 3 | 🟡 Conditional (LC-003) |
+| KG011 | CodeQL scanning not configured in CI | P1 | ✅ Resolved Apr-2026 | `.github/workflows/codeql.yml` scans JS/TS on every PR and push to main |
+| KG012 | Dependency review not configured in CI | P1 | ✅ Resolved Apr-2026 | `.github/workflows/dependency-review.yml` blocks PRs with high/critical CVEs |
 | KG020b | Webhook delivery URL SSRF validation absent | P1 | Sprint 3 | 🟡 Conditional (LC-004) |
 | KG020c | No virus scanning on uploaded files | P2 | Sprint 4 | 🟢 Not blocking |
 | GAP-002 | No CI/CD automated secret scanning | Med | Sprint 3 | ✅ Resolved Apr-2026 (LC-001) |
