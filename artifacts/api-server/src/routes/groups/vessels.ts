@@ -9,6 +9,7 @@ import vesselsExtendedRouter from "../vessels-extended";
 import vesselsTradingRouter from "../vessels-trading";
 import vesselsInsuranceRouter from "../vessels-insurance";
 import vesselsCognitiveRouter from "../vessels-cognitive";
+import vesselsDigitalTwinRouter from "../vessels-digital-twin";
 
 const _readLimiter = perUserApiSlidingLimiter;
 
@@ -35,4 +36,7 @@ export function register(router: IRouter): void {
 
   router.use("/vessels/cognitive", _readLimiter);
   router.use(vesselsCognitiveRouter);
+
+  router.use("/vessels", _readLimiter);
+  router.use(vesselsDigitalTwinRouter);
 }

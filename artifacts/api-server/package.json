@@ -36,6 +36,7 @@
     "@sentry/node": "^10.49.0",
     "@swc/helpers": "^0.5.20",
     "@szl-holdings/action-engine": "workspace:*",
+    "@szl-holdings/openusd-export": "workspace:*",
     "@szl-holdings/ai-engine": "workspace:*",
     "@szl-holdings/api-zod": "workspace:*",
     "@szl-holdings/atlas-artifacts": "workspace:*",

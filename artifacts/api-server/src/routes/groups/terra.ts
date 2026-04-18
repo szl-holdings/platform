@@ -9,6 +9,7 @@ import terraBrokerRouter from "../terra-broker";
 import terraLiveRouter from "../terra-live";
 import terraCognitiveRouter from "../terra-cognitive";
 import terraModulesRouter from "../terra-modules";
+import terraDigitalTwinRouter from "../terra-digital-twin";
 
 const _readLimiter = perUserApiSlidingLimiter;
 const _writeLimiter = perUserWriteSlidingLimiter;
@@ -49,4 +50,7 @@ export function register(router: IRouter): void {
   router.use(terraModulesRouter);
   router.use("/beacon", _writeLimiter);
   router.use(terraModulesRouter);
+
+  router.use("/terra", _readLimiter);
+  router.use(terraDigitalTwinRouter);
 }
