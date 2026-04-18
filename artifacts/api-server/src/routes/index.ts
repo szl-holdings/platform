@@ -53,6 +53,7 @@ import debugRouter from "./debug";
 import mapsRouter from "./maps";
 import atlasSceneExportRouter from "./atlas-scene-export";
 import preferencesRouter from "./preferences";
+import evidenceGraphRouter from "./evidence-graph";
 
 const router: IRouter = Router();
 
@@ -153,6 +154,7 @@ router.use(atlasArtifactsRouter);
 router.use(atlasSceneExportRouter);
 router.use(outcomeGraphRouter);
 
+router.use(evidenceGraphRouter);
 router.use(mapsRouter);
 router.use(debugRouter);
 router.use(preferencesRouter);

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": false,
   "type": "module",
-  "description": "Canonical entity, entity-link, entity-snapshot, and signal type definitions for the SZL Holdings platform. Every package that emits, stores, or reasons about governed intelligence concepts imports from here.",
+  "description": "Canonical entity, entity-link, entity-snapshot, signal, and evidence type definitions for the SZL Holdings platform. Also provides Zod-validated Signal, EvidenceItem, and Recommendation contracts for the living signal mesh.",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -32,6 +32,14 @@
     "./domains": {
       "types": "./dist/domains.d.ts",
       "import": "./src/domains.ts"
+    },
+    "./signal": {
+      "types": "./dist/signal.d.ts",
+      "import": "./src/signal.ts"
+    },
+    "./entity": {
+      "types": "./dist/entity.d.ts",
+      "import": "./src/entity.ts"
     }
   },
   "scripts": {

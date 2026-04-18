@@ -1,0 +1,28 @@
+{
+  "name": "@szl-holdings/signal-mesh",
+  "version": "0.0.0",
+  "private": false,
+  "type": "module",
+  "description": "9-stage signal pipeline worker: intake → normalize → enrich → entity-resolve → correlate → score → recommend → policy-evaluate → telemetry-writeback",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./src/index.ts"
+    },
+    "./bus": {
+      "types": "./dist/bus.d.ts",
+      "import": "./src/bus.ts"
+    },
+    "./pipeline": {
+      "types": "./dist/pipeline.d.ts",
+      "import": "./src/pipeline.ts"
+    }
+  },
+  "dependencies": {
+    "@workspace/ontology": "workspace:*",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:"
+  }
+}

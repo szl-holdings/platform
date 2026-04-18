@@ -63,3 +63,20 @@ export const DEMO_SUMMARY = {
 export { seedAllNarratives, seedNarrative, clearDemoData } from "./seed-runner";
 
 export { seedConstellation, CONSTELLATION_NODES, CONSTELLATION_EDGES } from "./seed-constellation";
+
+export { VESSELS_PORT_CONGESTION_NARRATIVE } from "./narrative-vessels-port-congestion";
+export type { VesselsPortCongestionNarrative } from "./narrative-vessels-port-congestion";
+
+export { CARLOTA_JO_ESTATE_NARRATIVE } from "./narrative-carlota-jo-estate";
+export type { CarlotaJoEstateNarrative } from "./narrative-carlota-jo-estate";
+
+export { SZL_TREASURY_NARRATIVE } from "./narrative-szl-treasury";
+export type { SzlTreasuryNarrative } from "./narrative-szl-treasury";
+
+export { seedSignalMesh } from "./seed-signal-mesh";
+
+export const SIGNAL_MESH_NARRATIVES = [
+  { id: "vessels-port-congestion", label: "Vessels — Port Congestion + Route Exception Cluster", domain: "maritime" },
+  { id: "carlota-jo-estate", label: "Carlota Jo — Estate Readiness Gap Before VIP Arrival", domain: "real-estate" },
+  { id: "szl-treasury", label: "SZL Holdings — Treasury Risk Cluster", domain: "finance" },
+] as const;

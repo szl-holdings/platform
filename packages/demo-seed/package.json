@@ -9,10 +9,15 @@
     "seed:business": "tsx src/seed-runner.ts business",
     "seed:security": "tsx src/seed-runner.ts security",
     "seed:maritime": "tsx src/seed-runner.ts maritime",
-    "seed:legal": "tsx src/seed-runner.ts legal"
+    "seed:legal": "tsx src/seed-runner.ts legal",
+    "seed:mesh": "tsx src/seed-mesh-cli.ts"
   },
   "dependencies": {
-    "@szl-holdings/db": "workspace:*"
+    "@szl-holdings/db": "workspace:*",
+    "@workspace/ontology": "workspace:*",
+    "@szl-holdings/signal-mesh": "workspace:*",
+    "@szl-holdings/evidence-graph": "workspace:*",
+    "@szl-holdings/connectors": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "catalog:",
