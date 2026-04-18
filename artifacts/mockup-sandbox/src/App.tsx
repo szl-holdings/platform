@@ -8,15 +8,17 @@ import PatternAtlas from "./pages/PatternAtlas";
 import Bridge from "./pages/Bridge";
 import Orchestrator from "./pages/Orchestrator";
 import Ingest from "./pages/Ingest";
+import DesignSystemPage from "./pages/DesignSystemPage";
 import type { Page } from "./lib/types";
+
+const VALID_PAGES: Page[] = [
+  "home", "research", "memory", "skills", "patterns",
+  "bridge", "orchestrator", "ingest", "design-system",
+];
 
 function getInitialPage(): Page {
   const hash = window.location.hash.replace("#", "") as Page;
-  const valid: Page[] = [
-    "home", "research", "memory", "skills", "patterns",
-    "bridge", "orchestrator", "ingest",
-  ];
-  return valid.includes(hash) ? hash : "home";
+  return VALID_PAGES.includes(hash) ? hash : "home";
 }
 
 export default function App() {
@@ -25,11 +27,7 @@ export default function App() {
   useEffect(() => {
     const handler = () => {
       const hash = window.location.hash.replace("#", "") as Page;
-      const valid: Page[] = [
-        "home", "research", "memory", "skills", "patterns",
-        "bridge", "orchestrator", "ingest",
-      ];
-      if (valid.includes(hash)) setPage(hash);
+      if (VALID_PAGES.includes(hash)) setPage(hash);
     };
     window.addEventListener("hashchange", handler);
     return () => window.removeEventListener("hashchange", handler);
@@ -50,6 +48,7 @@ export default function App() {
       {page === "bridge" && <Bridge />}
       {page === "orchestrator" && <Orchestrator />}
       {page === "ingest" && <Ingest />}
+      {page === "design-system" && <DesignSystemPage />}
     </Layout>
   );
 }

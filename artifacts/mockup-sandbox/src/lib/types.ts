@@ -6,7 +6,8 @@ export type Page =
   | "patterns"
   | "bridge"
   | "orchestrator"
-  | "ingest";
+  | "ingest"
+  | "design-system";
 
 export interface NexusStatus {
   activeSwarms: number;

@@ -43,7 +43,7 @@ The platform is a pnpm monorepo utilizing TypeScript 5.9, React 19, Vite, and No
 
 **AI Control Plane & NVIDIA-Ready Packages:** Five packages (`@szl-holdings/ai-control-plane`, `@szl-holdings/prompt-registry`, `@szl-holdings/tool-registry`, `@szl-holdings/nvidia-adapters`, `@szl-holdings/openusd-export`) provide provider-agnostic AI infrastructure for model routing, prompt/tool management, NVIDIA integration, and OpenUSD digital twin export for simulations.
 
-**UI/UX and Design System:** A premium, SZL-branded, dark-first design system is used, incorporating typography like Space Grotesk, Inter, and JetBrains Mono.
+**UI/UX and Design System:** A premium, SZL-branded, dark-first governed-intelligence design language ships via `@szl-holdings/design-system` (`packages/design-system`). It provides: proof-envelope primitives (`EvidenceBadge`, `FreshnessChip`, `ConfidenceMeter`, `PolicyStateChip`, `AutonomyModeToggle`, `ProofEnvelope`) and cockpit primitives (`DenseTable`, `TimelineLane`, `GraphCanvas`, `MapSurface`, `NarrativePanel`). Dark-first tokens (color, type, spacing, motion, elevation) are defined in `src/tokens/index.ts`. A Storybook-style preview lives at `/nexus/#design-system` inside the mockup-sandbox artifact. A forbidden-copy linter at `scripts/lint-copy.sh` blocks banned phrases ("sentient", "AI magic", etc.) and enforces "governed intelligence", "evidence-backed", and "traceable autonomy" vocabulary. The existing `@szl-holdings/ui-command` package (`packages/ui-command`) provides higher-level business components (KPIBlock, CausalTimeline, RecommendationQueue, etc.).
 
 **API Layers:** Features a REST API, a GraphQL API using Apollo Server, and an MCP Gateway (Model Context Protocol) for tool integration.
 

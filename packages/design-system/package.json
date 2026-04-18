@@ -1,0 +1,41 @@
+{
+  "name": "@szl-holdings/design-system",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Governed-intelligence design language — proof envelope primitives, cockpit primitives, dark-first tokens, and copy-linting for SZL Holdings surfaces.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./tokens": "./src/tokens/index.ts",
+    "./proof": "./src/proof/index.ts",
+    "./cockpit": "./src/cockpit/index.ts",
+    "./proof/evidence-badge": "./src/proof/EvidenceBadge.tsx",
+    "./proof/freshness-chip": "./src/proof/FreshnessChip.tsx",
+    "./proof/confidence-meter": "./src/proof/ConfidenceMeter.tsx",
+    "./proof/policy-state-chip": "./src/proof/PolicyStateChip.tsx",
+    "./proof/autonomy-mode-toggle": "./src/proof/AutonomyModeToggle.tsx",
+    "./proof/proof-envelope": "./src/proof/ProofEnvelope.tsx",
+    "./cockpit/dense-table": "./src/cockpit/DenseTable.tsx",
+    "./cockpit/timeline-lane": "./src/cockpit/TimelineLane.tsx",
+    "./cockpit/graph-canvas": "./src/cockpit/GraphCanvas.tsx",
+    "./cockpit/map-surface": "./src/cockpit/MapSurface.tsx",
+    "./cockpit/narrative-panel": "./src/cockpit/NarrativePanel.tsx",
+    "./alloy-bridge": "./src/alloy-bridge.ts"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "typescript": "catalog:"
+  },
+  "dependencies": {
+    "clsx": "catalog:",
+    "framer-motion": "catalog:",
+    "lucide-react": "catalog:",
+    "tailwind-merge": "catalog:",
+    "@workspace/alloy": "workspace:*"
+  }
+}

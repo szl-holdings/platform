@@ -16,6 +16,7 @@ import {
   Database,
   Cpu,
   Globe,
+  Palette,
 } from "lucide-react";
 
 const NAV_ITEMS: Array<{
@@ -32,6 +33,7 @@ const NAV_ITEMS: Array<{
   { id: "bridge", label: "Bridge", icon: Network, description: "Protocol Bridge" },
   { id: "orchestrator", label: "Orchestrate", icon: Workflow, description: "Cross-App Orchestrator" },
   { id: "ingest", label: "Ingest", icon: Download, description: "Repo Ingest" },
+  { id: "design-system", label: "Design System", icon: Palette, description: "Governed-Intelligence Design Language" },
 ];
 
 const DEFAULT_STATUS: NexusStatus = {
