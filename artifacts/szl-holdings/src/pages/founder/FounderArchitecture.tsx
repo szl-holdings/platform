@@ -86,6 +86,10 @@ const SECONDARY_LINKS: Record<string, SecondaryLink[]> = {
   ],
 };
 
+const FALLBACK_LINKS: Record<string, string> = {
+  "prism-counsel": "/prism-counsel/",
+};
+
 interface GraphEdge {
   from: string;
   to: string;
@@ -140,20 +144,23 @@ const NODES: GraphNode[] = [
     secondaryLinks: SECONDARY_LINKS.alloy,
     status: alloyProduct.status,
   },
-  ...peripheralProducts.map((p) => ({
-    id: p.id,
-    label: p.name,
-    sublabel: p.tagline,
-    color: hexToHsl(p.color ?? FALLBACK_COLOR),
-    ...PRODUCT_POSITIONS[p.id],
-    kind: "product" as const,
-    link: p.link,
-    linkLabel: p.link ? `View ${p.name}` : undefined,
-    description: p.oneLiner,
-    capabilities: CAPABILITIES[p.id],
-    secondaryLinks: SECONDARY_LINKS[p.id],
-    status: p.status,
-  })),
+  ...peripheralProducts.map((p) => {
+    const link = p.link ?? FALLBACK_LINKS[p.id];
+    return {
+      id: p.id,
+      label: p.name,
+      sublabel: p.tagline,
+      color: hexToHsl(p.color ?? FALLBACK_COLOR),
+      ...PRODUCT_POSITIONS[p.id],
+      kind: "product" as const,
+      link,
+      linkLabel: link ? `View ${p.name}` : undefined,
+      description: p.oneLiner,
+      capabilities: CAPABILITIES[p.id],
+      secondaryLinks: SECONDARY_LINKS[p.id],
+      status: p.status,
+    };
+  }),
 ];
 
 const EDGES: GraphEdge[] = peripheralProducts.map((p) => ({ from: p.id, to: "alloy" }));
