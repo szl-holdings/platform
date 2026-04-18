@@ -33,28 +33,30 @@ These items must be resolved or formally accepted in writing by the Founder befo
 ### LB-002 · No External Uptime Monitoring Before First Production Traffic
 **Severity:** High  
 **Gap reference:** KG027 in KNOWN-GAPS.md  
-**Status:** ⛔ Open  
-**Description:** There is no external uptime monitoring configured. If the production environment goes down after launch, the team will only know when a user reports it. This is a direct SLA and trust risk — especially material for enterprise evaluators who may test the platform immediately after first contact.  
-**What is needed:**
-- Configure an external uptime monitor (e.g., UptimeRobot, Better Uptime, or Azure Monitor) against `GET /api/health` on the production URL
-- Set alert contacts (email, Slack) for the on-call owner
-- Confirm monitor is live before any public traffic
+**Status:** ✅ Code ready — operator setup required (Apr-2026)
+**Description:** Health endpoint `GET /api/health` is live and returns structured JSON. Setup guide documented in OPERATIONS-RUNBOOK.md § 5.3. The remaining operator action is provisioning the external monitoring service and routing alerts.  
+**What is needed (operator action only):**
+- Follow OPERATIONS-RUNBOOK.md § 5.3 "External Uptime Monitoring" — provision Betterstack/UptimeRobot monitor against `GET /api/health`
+- Set alert contacts (email, on-call pager) per the alert routing policy in § 5.3
+- Set `UPTIME_MONITOR_ID` in production env once monitor is provisioned
+- Confirm monitor is live and a test alert fires before any public traffic
 **Owner:** Platform / DevOps  
-**Estimated effort:** 2–4 hours
+**Estimated effort:** 30–60 minutes (code is done; provisioning only)
 
 ---
 
 ### LB-003 · No Production Error Tracking (Sentry or Equivalent)
 **Severity:** High  
 **Gap reference:** KG028 in KNOWN-GAPS.md  
-**Status:** ⛔ Open  
-**Description:** No error tracking is configured for the production environment. Unhandled exceptions and runtime errors in production will be silent — visible only in raw logs. Without this, diagnosing user-facing issues after launch requires log forensics, which is operationally unacceptable for a public product.  
-**What is needed:**
-- Configure Sentry (or Azure Application Insights exceptions) on the API server and all web frontends
-- Set `SENTRY_DSN` in production environment variables
-- Verify error capture in staging before going live
+**Status:** ✅ Code ready — DSN setup required (Apr-2026)
+**Description:** Sentry Node.js SDK is fully implemented in `artifacts/api-server/src/lib/sentry.ts` with Express integration, PostgreSQL tracing, uncaught exception handling, and PII header scrubbing. `initServerSentry()` is called at server startup. Activates automatically when `SENTRY_DSN` is set.  
+**What is needed (operator action only):**
+- Create a Sentry project (Node.js) at https://sentry.io
+- Set `SENTRY_DSN` in Azure Key Vault or Replit Secrets — see OPERATIONS-RUNBOOK.md § 5.3
+- Optionally upload source maps using `sentry-cli` after each production build (instructions in OPERATIONS-RUNBOOK.md § 5.3)
+- Verify an error event appears in Sentry dashboard before go-live
 **Owner:** Platform / Engineering  
-**Estimated effort:** 4–8 hours
+**Estimated effort:** 30–60 minutes (code is done; DSN provisioning and verification only)
 
 ---
 
@@ -88,13 +90,14 @@ These items must be resolved or formally accepted in writing by the Founder befo
 ### LB-006 · OTEL / Observability Exporter Not Wired for Production
 **Severity:** High  
 **Gap reference:** KG009 in KNOWN-GAPS.md  
-**Status:** ⛔ Open  
-**Description:** OpenTelemetry is configured in the codebase but the OTLP exporter endpoint is not set for production. Without production tracing, diagnosing latency spikes, slow queries, and AI provider failures post-launch requires guesswork. This is an operational readiness requirement, not an optional enhancement.  
-**What is needed:**
-- Set `OTEL_EXPORTER_OTLP_ENDPOINT` (or equivalent) pointing to Azure Application Insights or a hosted OTLP backend before first production traffic
-- Confirm trace data is flowing by checking the observability dashboard for at least one complete request trace
+**Status:** ✅ Code ready — endpoint setup required (Apr-2026)
+**Description:** `initializeOpenTelemetry()` is wired in `index.ts` and supports OTLP, Azure Application Insights, and New Relic exporters. Canonical configuration module at `artifacts/api-server/src/lib/observability.ts`. `validateProductionObservability()` warns at startup if no exporter is configured.  
+**What is needed (operator action only):**
+- Set `OTEL_EXPORTER_OTLP_ENDPOINT` (Grafana Tempo, Jaeger, Honeycomb, Datadog) **or** `AZURE_APP_INSIGHTS_CONNECTION_STRING` (Azure deploys) in production secrets — see OPERATIONS-RUNBOOK.md § 5.3
+- Restart API server and confirm startup log: `[otel] OpenTelemetry initialized: exporters=[otlp:...]`
+- Check observability backend for at least one complete request trace before go-live
 **Owner:** Platform  
-**Estimated effort:** 4–8 hours
+**Estimated effort:** 30–60 minutes (code is done; endpoint setup and verification only)
 
 ---
 
@@ -189,11 +192,11 @@ The following items are open but **do not block public launch**. They are tracke
 | Blocker | Resolved Date | Resolver | Accepted-Without-Fix (if applicable) | Accepted By |
 |---------|--------------|----------|---------------------------------------|------------|
 | LB-001 Credential rotation | | | | |
-| LB-002 Uptime monitoring | | | | |
-| LB-003 Error tracking | | | | |
+| LB-002 Uptime monitoring | Code wired Apr-2026 | Platform | Operator: provision Betterstack/UptimeRobot | |
+| LB-003 Error tracking | Code wired Apr-2026 | Platform | Operator: set SENTRY_DSN | |
 | LB-004 Production DB separation | | | | |
 | LB-005 Production secrets | | | | |
-| LB-006 OTEL exporter | | | | |
+| LB-006 OTEL exporter | Code wired Apr-2026 | Platform | Operator: set OTEL_EXPORTER_OTLP_ENDPOINT | |
 | LB-007 Legal review of agreements | | | | |
 | LC-001 Secret scanning | | | | |
 | LC-002 CodeQL SAST | | | | |

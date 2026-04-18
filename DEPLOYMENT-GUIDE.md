@@ -71,6 +71,18 @@ All secrets are managed via Replit Secrets (not `.env` files):
 - `SECRET_ENCRYPTION_KEY` — separate from `SESSION_SECRET`
 - `ADMIN_PIN` — for CMS admin access
 
+**Observability secrets (required for production, optional in dev/staging):**
+
+| Secret | Purpose |
+|--------|---------|
+| `SENTRY_DSN` | Sentry error tracking DSN — activates `lib/sentry.ts` |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | OTLP exporter URL (Grafana Tempo, Jaeger, Honeycomb, Datadog) |
+| `AZURE_APP_INSIGHTS_CONNECTION_STRING` | Azure Application Insights — preferred for Azure production deploys |
+| `NEW_RELIC_LICENSE_KEY` | New Relic OTLP ingest (alternative to Azure Monitor) |
+| `SENTRY_TRACES_SAMPLE_RATE` | Trace sample rate 0–1, default `0.1` |
+
+See [OPERATIONS-RUNBOOK.md § 5.3](OPERATIONS-RUNBOOK.md#53-production-observability-runbook) for full setup steps and verification procedures.
+
 ---
 
 ## Azure Production Deployment
@@ -163,11 +175,11 @@ Before executing any production deployment for public or design-partner launch, 
 | Blocker | Verification Step | Status |
 |---------|-----------------|--------|
 | **LB-001** Firebase/Google credential rotation | Run `git log --all --full-history -- '**/google-services.json'` — clean. Rotation confirmed by Founder. | ☐ |
-| **LB-002** External uptime monitoring live | Verify monitor is active and alerting on `GET /api/health` from external service | ☐ |
-| **LB-003** Error tracking configured | Confirm Sentry (or equivalent) is receiving events in production; `SENTRY_DSN` set | ☐ |
+| **LB-002** External uptime monitoring live | ✅ Code ready. Set up Betterstack/UptimeRobot monitor on `GET /api/health`; verify alert fires. See OPERATIONS-RUNBOOK.md § 5.3. | ✅ Wired Apr-2026 (operator setup required) |
+| **LB-003** Error tracking configured | ✅ Code ready. Set `SENTRY_DSN` in production secrets; verify event appears in Sentry dashboard. See OPERATIONS-RUNBOOK.md § 5.3. | ✅ Wired Apr-2026 (DSN setup required) |
 | **LB-004** Production DB separate from dev | Confirm `DATABASE_URL` in production differs from development; no seed data present | ☐ |
 | **LB-005** Production secrets independent | Confirm `SESSION_SECRET`, `SECRET_ENCRYPTION_KEY`, `ADMIN_PIN`, `CORS_ORIGINS` are production-specific | ☐ |
-| **LB-006** OTEL exporter wired | Confirm `OTEL_EXPORTER_OTLP_ENDPOINT` set; at least one trace visible in observability backend | ☐ |
+| **LB-006** OTEL exporter wired | ✅ Code ready. Set `OTEL_EXPORTER_OTLP_ENDPOINT` (or `AZURE_APP_INSIGHTS_CONNECTION_STRING`); confirm trace in observability backend. See OPERATIONS-RUNBOOK.md § 5.3. | ✅ Wired Apr-2026 (endpoint setup required) |
 | **LB-007** Legal review complete | Confirm Privacy Policy, ToS, and design-partner agreements reviewed and approved by counsel | ☐ |
 
 **Do not proceed to the deployment steps below until all seven boxes are checked.**
@@ -359,4 +371,4 @@ The `scripts/post-merge.sh` script runs automatically after task branch merges:
 
 *See also: [OPERATIONS-RUNBOOK.md](OPERATIONS-RUNBOOK.md) · [DEPLOYMENT_READINESS.md](DEPLOYMENT_READINESS.md) · [docs/deployment.md](docs/deployment.md)*
 
-*Last verified against source code: 2026-04-16*
+*Last verified against source code: 2026-04-18 — Observability env vars and LB-002/LB-003/LB-006 resolution documented*

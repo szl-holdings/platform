@@ -58,6 +58,17 @@ export const ENV_SPECS: EnvVarSpec[] = [
   { key: "ALLOY_REQUIRE_APPROVAL_CRITICAL", required: false, description: "Set to 'true' to require human approval for critical operations (cannot be false in production)", defaultValue: "true", group: "alloy" },
   { key: "ALLOY_WORKFLOW_AUTO_RUN", required: false, description: "Set to 'true' to auto-run scheduled workflows on server startup", defaultValue: "true", group: "alloy" },
   { key: "ALLOY_MAX_BATCH_SIZE", required: false, description: "Maximum number of items processed in a single workflow batch", defaultValue: "100", group: "alloy" },
+
+  { key: "SENTRY_DSN", required: false, description: "Sentry DSN for error tracking — activates lib/sentry.ts when set. Required in production (KG028).", sensitive: true, group: "observability" },
+  { key: "SENTRY_TRACES_SAMPLE_RATE", required: false, description: "Sentry trace sample rate (0–1). Default: 0.1", defaultValue: "0.1", group: "observability" },
+  { key: "SENTRY_PROFILES_SAMPLE_RATE", required: false, description: "Sentry profile sample rate (0–1). Default: 0.1", defaultValue: "0.1", group: "observability" },
+  { key: "OTEL_EXPORTER_OTLP_ENDPOINT", required: false, description: "OTLP exporter URL for distributed tracing (Grafana Tempo, Jaeger, Honeycomb, Datadog). Required in production (KG009).", group: "observability" },
+  { key: "OTLP_ENDPOINT", required: false, description: "Alias for OTEL_EXPORTER_OTLP_ENDPOINT", group: "observability" },
+  { key: "OTEL_SERVICE_NAME", required: false, description: "OpenTelemetry service name tag. Default: szl-api", defaultValue: "szl-api", group: "observability" },
+  { key: "OTEL_CONSOLE_EXPORT", required: false, description: "Set to 'true' to log OTel spans to stdout (development/debug only)", defaultValue: "false", group: "observability" },
+  { key: "AZURE_APP_INSIGHTS_CONNECTION_STRING", required: false, description: "Azure Application Insights connection string — enables Azure Monitor OTLP export. Preferred exporter for Azure production deploys.", sensitive: true, group: "observability" },
+  { key: "NEW_RELIC_LICENSE_KEY", required: false, description: "New Relic license key — enables New Relic OTLP ingest", sensitive: true, group: "observability" },
+  { key: "UPTIME_MONITOR_ID", required: false, description: "External uptime monitor ID (Betterstack/UptimeRobot) — informational; used in health status reporting", group: "observability" },
 ];
 
 export interface ValidationResult {
@@ -130,6 +141,21 @@ export function validateStartupConfig(): ValidationResult {
 
   if (isProduction && !process.env.SERVICE_ROLE_KEY) {
     warnings.push("SERVICE_ROLE_KEY not set — machine-to-machine calls requiring admin bypass will fail");
+  }
+
+  if (isProduction && !process.env.SENTRY_DSN) {
+    warnings.push("SENTRY_DSN not set — error tracking is disabled in production (KG028). Set SENTRY_DSN in Key Vault before first production traffic.");
+  }
+
+  if (
+    isProduction &&
+    !process.env.OTEL_EXPORTER_OTLP_ENDPOINT &&
+    !process.env.OTLP_ENDPOINT &&
+    !process.env.AZURE_APP_INSIGHTS_CONNECTION_STRING
+  ) {
+    warnings.push(
+      "No OTEL exporter configured in production (KG009). Set OTEL_EXPORTER_OTLP_ENDPOINT or AZURE_APP_INSIGHTS_CONNECTION_STRING in Key Vault before first production traffic."
+    );
   }
 
   const alloyToken = process.env.ALLOY_INTERNAL_TOKEN;

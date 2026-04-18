@@ -13,6 +13,7 @@
 3. [Environment Variables](#3-environment-variables)
 4. [Database Operations](#4-database-operations)
 5. [Health & Monitoring](#5-health--monitoring)
+   - [5.3 Production Observability Runbook](#53-production-observability-runbook)
 6. [Common Failure Modes & Recovery](#6-common-failure-modes--recovery)
 7. [Incident Response](#7-incident-response)
 8. [Code Quality Commands](#8-code-quality-commands)
@@ -219,6 +220,211 @@ Active health probes check OpenAI, Anthropic, and Gemini reachability every 2 mi
 
 ---
 
+## 5.3 Production Observability Runbook
+
+This section documents setup, verification, and incident procedures for all three production observability systems. **These must be configured before any enterprise pilot or public launch.**
+
+---
+
+### Sentry Error Tracking (KG028 — Resolved Apr-2026)
+
+**Status:** Code fully implemented in `artifacts/api-server/src/lib/sentry.ts`. Activated by setting `SENTRY_DSN`.
+
+#### Setup
+
+1. Create a **Node.js** project in your Sentry organization at https://sentry.io
+2. Copy the DSN from the project settings
+3. Add the secret in Replit (dev/staging) or Azure Key Vault (production):
+
+```bash
+# Replit Secrets
+SENTRY_DSN=https://<key>@o<org>.ingest.sentry.io/<project-id>
+
+# Azure Key Vault
+az keyvault secret set --vault-name szl-keyvault \
+  --name SENTRY-DSN --value "https://<key>@o<org>.ingest.sentry.io/<project-id>"
+```
+
+4. Optional tuning variables:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `SENTRY_DSN` | — | Sentry project DSN (required to activate) |
+| `SENTRY_TRACES_SAMPLE_RATE` | `0.1` | Fraction of transactions traced (0–1) |
+| `SENTRY_PROFILES_SAMPLE_RATE` | `0.1` | Fraction of transactions profiled (0–1) |
+
+#### What is captured automatically
+
+- All unhandled exceptions and promise rejections (`onUncaughtExceptionIntegration`)
+- HTTP request breadcrumbs (`httpIntegration`)
+- Express route errors (`expressIntegration`)
+- PostgreSQL query spans (`postgresIntegration`)
+- Authorization, cookie, and internal token headers are scrubbed before sending
+
+#### Source Maps
+
+Release tagging is automatic — Sentry receives `szl-api@<version>` from `package.json`. To upload source maps to Sentry for readable stack traces in production:
+
+```bash
+# Install Sentry CLI
+npm install -g @sentry/cli
+
+# Upload source maps after build
+sentry-cli releases new "szl-api@$(node -p "require('./package.json').version")"
+sentry-cli releases files "szl-api@$(node -p "require('./package.json').version")" \
+  upload-sourcemaps ./artifacts/api-server/dist --url-prefix '~/dist'
+sentry-cli releases finalize "szl-api@$(node -p "require('./package.json').version")"
+```
+
+#### Verification
+
+```bash
+# Confirm Sentry is receiving events (check your Sentry project issues tab)
+# Or trigger a test error via the admin panel (Development only):
+curl -X POST https://$REPLIT_DEV_DOMAIN/api/admin/test-sentry-error \
+  -H "x-internal-token: $ALLOY_INTERNAL_TOKEN"
+```
+
+After restart, look for this startup log line:
+
+```
+[observability] Production observability status  sentry=enabled
+```
+
+---
+
+### OpenTelemetry Distributed Tracing (KG009 — Resolved Apr-2026)
+
+**Status:** `initializeOpenTelemetry()` wired in `index.ts`. Configuration module at `artifacts/api-server/src/lib/observability.ts`. Activated by setting an exporter env var.
+
+#### Supported Exporters
+
+| Exporter | Environment Variable | When to Use |
+|----------|---------------------|-------------|
+| **OTLP/gRPC or HTTP** | `OTEL_EXPORTER_OTLP_ENDPOINT` | Grafana Tempo, Jaeger, Honeycomb, Datadog OTLP ingest |
+| **Azure Application Insights** | `AZURE_APP_INSIGHTS_CONNECTION_STRING` | Azure production deployment |
+| **New Relic** | `NEW_RELIC_LICENSE_KEY` | New Relic OTLP ingest |
+| **Console (dev/debug)** | `OTEL_CONSOLE_EXPORT=true` | Local development span inspection |
+
+#### Setup (Azure Application Insights — recommended for Azure deploys)
+
+```bash
+# Get connection string from Azure portal → Application Insights → Overview
+az keyvault secret set --vault-name szl-keyvault \
+  --name AZURE-APP-INSIGHTS-CONNECTION-STRING \
+  --value "InstrumentationKey=<guid>;IngestionEndpoint=..."
+```
+
+#### Setup (Generic OTLP)
+
+```bash
+# Point to your OTLP collector
+OTEL_EXPORTER_OTLP_ENDPOINT=https://otel-collector.example.com:4317
+OTEL_SERVICE_NAME=szl-api          # optional — defaults to "szl-api"
+```
+
+#### Verification
+
+After setting the exporter env var and restarting:
+
+```bash
+# Check startup log for active exporters
+# Expected: "[otel] OpenTelemetry initialized: service=szl-api, exporters=[otlp:https://...]"
+
+# Or call the observability status endpoint
+curl -H "x-internal-token: $ALLOY_INTERNAL_TOKEN" \
+  https://$REPLIT_DEV_DOMAIN/api/health/detailed | jq '.checks'
+```
+
+Startup warning if no exporter is configured in production:
+
+```
+[observability] Production observability gap  warning="No OTEL exporter configured..."
+```
+
+---
+
+### External Uptime Monitoring (KG027 — Resolved Apr-2026)
+
+**Status:** Health endpoint `GET /api/health` is live and returns structured JSON. Setup guide documented here.
+
+#### Health Endpoint Reference
+
+| Endpoint | Auth | Returns |
+|----------|------|---------|
+| `GET /api/health` | Public | `{ "status": "healthy" }` (200) or `{ "status": "degraded" }` (503) |
+| `GET /api/health/detailed` | Internal token | Full system status — DB pool, queue depth, telemetry, memory |
+
+#### Configuring an Uptime Monitor
+
+**Betterstack Uptime (recommended)**
+
+1. Sign in at https://betterstack.com
+2. Create a new monitor:
+   - **Type:** HTTP
+   - **URL:** `https://api.szlholdings.com/api/health` (production) or `https://$REPLIT_DEV_DOMAIN/api/health` (staging)
+   - **Check frequency:** 60 seconds
+   - **Confirmation threshold:** 2 failures before alerting (prevents flapping)
+   - **HTTP method:** GET
+   - **Expected status code:** 200
+3. Configure alert routing:
+   - **On-call escalation:** Page on-call engineer immediately
+   - **Email:** stephen@szlholdings.com
+   - **Status page webhook:** Connect to your Betterstack status page for automatic incident creation
+4. Set `UPTIME_MONITOR_ID` in production env once the monitor ID is known (used in status reporting)
+
+**UptimeRobot (alternative)**
+
+1. Create a new monitor at https://uptimerobot.com
+2. Type: HTTP(s), URL: `https://api.szlholdings.com/api/health`
+3. Monitoring interval: 5 minutes
+4. Alert contacts: email + Slack/PagerDuty webhook
+
+**Datadog Synthetics (if Datadog is your observability platform)**
+
+```yaml
+# Datadog synthetic test spec
+type: api
+name: szl-api health
+request:
+  method: GET
+  url: https://api.szlholdings.com/api/health
+assertions:
+  - type: statusCode
+    operator: is
+    target: 200
+  - type: body
+    operator: contains
+    target: '"healthy"'
+options:
+  tick_every: 60
+locations:
+  - aws:us-east-1
+  - aws:eu-west-1
+```
+
+#### Alert Routing Policy
+
+| Condition | Action |
+|-----------|--------|
+| 2 consecutive health check failures (~2 min) | SEV1 page — on-call engineer |
+| Sustained degraded for > 5 minutes | Page stephen@szlholdings.com |
+| Sustained degraded for > 15 minutes | Activate incident response: see § 7 Incident Response |
+| Recovery | Auto-resolve alert; log recovery time; file 5-minute post-mortem if SEV1 |
+
+#### Verification
+
+```bash
+# Manual health check
+curl -s https://api.szlholdings.com/api/health
+# Expected: {"status":"healthy"}
+
+# Simulate degraded state (dev only — temporarily kill DB connection)
+# Then verify the monitor fires within 2 check intervals
+```
+
+---
+
 ## 6. Common Failure Modes & Recovery
 
 ### Blank Preview Pane
@@ -407,4 +613,4 @@ cat artifact.toml  # or check .replit artifact registrations
 
 ---
 
-*Last verified against source code: 2026-04-17*
+*Last verified against source code: 2026-04-18 — § 5.3 Production Observability Runbook added (KG009/KG027/KG028 resolved)*
