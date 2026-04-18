@@ -181,11 +181,19 @@ test.describe("Correlation deep-links — drill-through to detail pages", () => 
         `All artifact-prefixed hrefs found: ${JSON.stringify(artifactHrefs)}`,
     ).toBeGreaterThan(0);
 
-    // Mandatory click-through: follow the first vessels/terra entity link,
-    // handle the registry's target="_blank" popup, and assert the destination
-    // URL + body match. This proves the full DOM → navigation → render path.
+    // Mandatory click-through: follow the first vessels/terra entity link
+    // rendered inside the registry rows (target="_blank" + title="Open ... in
+    // <product>" is the canonical entity-chip in evidence-registry.tsx),
+    // handle the popup, and assert the destination URL + body match. This
+    // proves the full DOM → navigation → render path AND scopes the click to
+    // the actual entity chip rather than a generic anchor anywhere on page.
     const clickable = vesselsTerraEntityHrefs[0];
-    const link = page.locator(`a[href="${clickable}"]`).first();
+    const entityChip = page
+      .locator(`a[href="${clickable}"][target="_blank"][title^="Open "]`)
+      .first();
+    const link = (await entityChip.count()) > 0
+      ? entityChip
+      : page.locator(`a[href="${clickable}"]`).first();
     const popupPromise = page.context().waitForEvent("page", { timeout: 8_000 }).catch(() => null);
     await link.click();
     const popup = await popupPromise;
