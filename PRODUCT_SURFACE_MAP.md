@@ -1,6 +1,6 @@
 # Product Surface Map — SZL Holdings
 
-**Version:** 2.0 · **Last updated:** April 2026
+**Version:** 2.1 · **Last updated:** April 2026
 
 ---
 
@@ -13,6 +13,7 @@ SZL Holdings Platform
 │   ├── Command ────────── Unified ops command (strategy, operations, infrastructure)
 │   ├── Alloy ────────────── Execution fabric (workflows, approvals, audit)
 │   ├── CORTEX ───────────── Unified mobile command (all domains)
+│   ├── Pulse ────────────── AI executive briefing (narrative intelligence reports)
 │   └── SZL Holdings ─────── Corporate, marketing, trust center, investor hub
 │
 ├── PRIMITIVES (invisible to users, visible in every interaction)
@@ -40,6 +41,7 @@ Which primitives each product surface uses:
 | **Command** | ● | ● | ● | ● | ● |
 | **Alloy** | ● | ● | ● | | ● |
 | **CORTEX** | ● | ● | ● | ● | |
+| **Pulse** | ● | ● | | | |
 | **SZL Holdings** | | | | | |
 | **Aegis** | ● | ● | ● | ● | ● |
 | **Vessels** | ● | ● | ● | ● | ● |
@@ -106,6 +108,8 @@ The governance layer. Users don't "use Alloy" directly — they use Command, and
 
 ### Domain Pack: Aegis
 
+> **Note:** The Aegis domain pack backend and API routes are active. The web UI (`artifacts/firestorm/`) is archived (Task #920) — source is on disk but the artifact is not registered or deployed. The `/aegis/` path currently hosts the investor pitch deck; it is not the Aegis defense surface.
+
 | Module | Purpose | Primitives Used |
 |--------|---------|----------------|
 | SOC Dashboard | Security operations command | Outcome Graph |
@@ -144,6 +148,16 @@ The governance layer. Users don't "use Alloy" directly — they use Command, and
 | Booking System | Appointment scheduling | |
 | Document Delivery | Secure document sharing | Proof Chain, Covenant Policy |
 
+### Pulse — AI Executive Briefing
+
+Pulse generates narrative intelligence briefings synthesized from live platform signals across all domains. It surfaces trend analysis, risk summaries, and opportunity highlights in a readable report format.
+
+| Module | Purpose | Primitives Used |
+|--------|---------|----------------|
+| Briefing Reader | Structured narrative intelligence reports | Outcome Graph, Proof Chain |
+| Signal Synthesis | Cross-domain signal aggregation and summarization | Outcome Graph |
+| Briefing Archive | Historical briefing index | Proof Chain |
+
 ---
 
 ## Mobile Surface: CORTEX
@@ -163,17 +177,24 @@ Cross-domain badge counts on the workspace switcher show active signals per doma
 
 ---
 
-## Archived Surfaces
+## Archived and Removed Surfaces
 
-The following surfaces have been deprecated and their code removed. See `ops/frontier/disposition-matrix.md` for full details.
+See `ops/frontier/disposition-matrix.md` for full disposition decisions.
 
-| Surface | Disposition |
-|---------|-------------|
-| Lyte Command Center | Merged into Command |
-| Firestorm | Superseded by Aegis |
-| IMPERIUM | Merged into Command (infrastructure mode) |
-| PRISM Counsel | Deprecated (task #579) |
-| Stephen Site | Content moved to `/founder` route in SZL Holdings |
+**Archived** (source on disk, no active workflow or artifact registration):
+
+| Surface | Artifact Dir | Notes | Task |
+|---------|-------------|-------|------|
+| Lyte Command Center | `artifacts/lyte-command-center/` | Merged into Command | Task #920 |
+| Firestorm | `artifacts/firestorm/` | Aegis defense UI; `/firestorm/*` API routes still live | Task #920 |
+| IMPERIUM | `artifacts/imperium/` | Merged into Command (infrastructure module) | Task #920 |
+
+**Removed** (directory deleted, no code on disk):
+
+| Surface | Notes | Task |
+|---------|-------|------|
+| PRISM Counsel | `/prism-counsel/*` API routes still live on the API server | Task #634 |
+| Stephen Site | Content moved to `/founder` route in SZL Holdings | Task #634 |
 
 ---
 
