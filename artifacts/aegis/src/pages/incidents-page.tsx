@@ -8,7 +8,8 @@ import { Input } from "@szl-holdings/shared-ui/ui/input";
 import { Label } from "@szl-holdings/shared-ui/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@szl-holdings/shared-ui/ui/select";
 import { Textarea } from "@szl-holdings/shared-ui/ui/textarea";
-import { Plus, AlertTriangle, Shield, Clock, Users, Trash2, ArrowRight, FileText, Loader2, X, ChevronUp, ChevronDown } from "lucide-react";
+import { Plus, AlertTriangle, Shield, Clock, Users, Trash2, ArrowRight, FileText, Loader2, X, ChevronUp, ChevronDown, Activity } from "lucide-react";
+import { AtlasScenePanel } from "@/components/atlas-scene-panel";
 import { EmptyState } from "@szl-holdings/shared-ui/design-system";
 import { CommentThread, ActivityFeed } from "@szl-holdings/shared-ui/collaboration";
 import { useState, useEffect, useRef } from "react";
@@ -213,6 +214,8 @@ function IncidentDetailSidePane({ incident, onClose, onUpdate }: {
   onUpdate: (id: number, data: any) => void;
 }) {
   const entity = buildIncidentEntity(incident);
+  const [paneTab, setPaneTab] = useState<"detail" | "atlas">("detail");
+  const isDemoIncident = !incident.id || String(incident.externalId ?? incident.id).startsWith("INC-2026");
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-end bg-black/60 backdrop-blur-sm" onClick={onClose}>
@@ -230,18 +233,37 @@ function IncidentDetailSidePane({ incident, onClose, onUpdate }: {
           </button>
         </div>
 
+        <div className="flex border-b border-white/10 px-5">
+          <button
+            onClick={() => setPaneTab("detail")}
+            className={`flex items-center gap-1.5 px-0 py-2.5 mr-5 text-xs font-medium border-b-2 -mb-px transition-all ${paneTab === "detail" ? "border-red-500 text-red-300" : "border-transparent text-white/40 hover:text-white/60"}`}
+          >
+            <FileText className="w-3 h-3" /> Detail
+          </button>
+          <button
+            onClick={() => setPaneTab("atlas")}
+            className={`flex items-center gap-1.5 px-0 py-2.5 text-xs font-medium border-b-2 -mb-px transition-all ${paneTab === "atlas" ? "border-red-500 text-red-300" : "border-transparent text-white/40 hover:text-white/60"}`}
+          >
+            <Activity className="w-3 h-3" /> ATLAS Scene
+          </button>
+        </div>
+
         <div className="p-5">
-          <OperationalDetailPane entity={entity}>
-            <div>
-              <p className="text-[9px] uppercase tracking-wider font-semibold mb-2" style={{ color: "rgba(255,255,255,0.28)" }}>Investigation Thread</p>
-              <CommentThread
-                entityType="incident"
-                entityId={String(incident.id)}
-                title=""
-                collapsible={false}
-              />
-            </div>
-          </OperationalDetailPane>
+          {paneTab === "detail" ? (
+            <OperationalDetailPane entity={entity}>
+              <div>
+                <p className="text-[9px] uppercase tracking-wider font-semibold mb-2" style={{ color: "rgba(255,255,255,0.28)" }}>Investigation Thread</p>
+                <CommentThread
+                  entityType="incident"
+                  entityId={String(incident.id)}
+                  title=""
+                  collapsible={false}
+                />
+              </div>
+            </OperationalDetailPane>
+          ) : (
+            <AtlasScenePanel incidentId={incident.id} isDemo={isDemoIncident} />
+          )}
         </div>
       </div>
     </div>

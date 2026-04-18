@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Scale, AlertTriangle, Clock, DollarSign, ShieldCheck, FileText, ArrowRight, ChevronRight, Wifi, WifiOff, TrendingUp } from "lucide-react";
 import { Link } from "wouter";
+import { AtlasPrismCounselPanel } from "@/components/atlas-prism-counsel-panel";
 
 const DEMO_MATTERS = [
   {
@@ -284,6 +285,10 @@ export default function LegalWorkspacePage() {
                 </div>
               ))}
             </div>
+          </div>
+
+          <div className="rounded-lg border border-white/[0.06] p-4" style={{ background: "#0c1220" }}>
+            <AtlasPrismCounselPanel matterId="MTR-2026-0891" isDemo={true} />
           </div>
         </div>
       </div>

@@ -8,6 +8,7 @@ import {
   DollarSign, Activity, TrendingUp, TrendingDown, ChevronRight,
   Fuel, Shield, Radio, RefreshCw, Package, Globe, History
 } from "lucide-react";
+import { AtlasScenePanel } from "@/components/atlas-scene-panel";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import {
   OperationalAuditTimeline,
@@ -57,7 +58,7 @@ export default function VesselDetailEnhancedPage() {
   const [matchLong, paramsLong] = useRoute("/vessels/:id");
   const params = paramsShort ?? paramsLong;
   const vesselId = Number(params?.id);
-  const [tab, setTab] = useState<"overview" | "voyage" | "maintenance" | "portcalls" | "history" | "audit">("overview");
+  const [tab, setTab] = useState<"overview" | "voyage" | "maintenance" | "portcalls" | "history" | "audit" | "atlas">("overview");
 
   const { detail, isLoading, refetch } = useVesselDetail(vesselId);
 
@@ -92,6 +93,7 @@ export default function VesselDetailEnhancedPage() {
     { id: "portcalls" as const, label: "Port Calls" },
     { id: "history" as const, label: "Voyage History" },
     { id: "audit" as const, label: "Event History" },
+    { id: "atlas" as const, label: "ATLAS Scene" },
   ];
 
   const now = new Date().toISOString();
@@ -611,6 +613,12 @@ export default function VesselDetailEnhancedPage() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {tab === "atlas" && (
+        <div className="p-4">
+          <AtlasScenePanel vesselId={vesselId} isDemo={true} />
         </div>
       )}
     </div>

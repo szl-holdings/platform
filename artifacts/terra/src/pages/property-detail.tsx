@@ -7,6 +7,7 @@ import {
   Wrench, User, AlertTriangle, Download, Loader2, CheckCircle, Clock,
   FileText, Shield, Activity, Target, Tag, LayoutDashboard
 } from "lucide-react";
+import { AtlasScenePanel } from "@/components/atlas-scene-panel";
 import { CommentThread, ActivityFeed } from "@szl-holdings/shared-ui/collaboration";
 import { OperationalQueueRow, type OperationalEntity } from "@szl-holdings/shared-ui";
 import { properties, tenants, alerts } from "@/data/portfolio";
@@ -254,7 +255,7 @@ function ActionSeverityBadge({ severity }: { severity: string }) {
   );
 }
 
-type DetailTab = "overview" | "ownership" | "diligence" | "actions";
+type DetailTab = "overview" | "ownership" | "diligence" | "actions" | "atlas";
 
 const GQL_ACTION_ITEMS = `
   query TerraActionItems($propertyId: String) {
@@ -387,6 +388,7 @@ export default function PropertyDetailPage() {
     { id: "ownership", label: "Ownership & Debt", icon: Shield },
     { id: "diligence", label: "Diligence", icon: FileText, count: diligence.filter(d => d.status === "flagged").length || undefined },
     { id: "actions", label: "Action Routing", icon: Target, count: actionItems.filter(a => a.status !== "resolved").length || undefined },
+    { id: "atlas", label: "ATLAS Scene", icon: Activity },
   ];
 
   return (
@@ -896,6 +898,12 @@ export default function PropertyDetailPage() {
               <p className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>No open action items for this asset</p>
             </div>
           )}
+        </motion.div>
+      )}
+
+      {activeTab === "atlas" && (
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="p-4">
+          <AtlasScenePanel propertyId={params?.id} isDemo={true} />
         </motion.div>
       )}
     </div>
