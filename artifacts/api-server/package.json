@@ -65,6 +65,7 @@
     "@szl-holdings/proof-chain": "workspace:*",
     "@szl-holdings/pulse-evals": "workspace:*",
     "@szl-holdings/receipt-graph": "workspace:*",
+    "@szl-holdings/scene-export": "workspace:*",
     "@szl-holdings/services": "workspace:*",
     "@szl-holdings/telemetry-standards": "workspace:*",
     "@szl-holdings/worldline": "workspace:*",

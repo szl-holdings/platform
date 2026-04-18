@@ -408,6 +408,9 @@ importers:
       '@szl-holdings/receipt-graph':
         specifier: workspace:*
         version: link:../../lib/receipt-graph
+      '@szl-holdings/scene-export':
+        specifier: workspace:*
+        version: link:../../lib/scene-export
       '@szl-holdings/services':
         specifier: workspace:*
         version: link:../../lib/services

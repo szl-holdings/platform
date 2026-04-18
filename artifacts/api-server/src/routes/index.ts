@@ -48,6 +48,7 @@ import pageViewTrackingRouter from "./page-view-tracking";
 import newsletterRouter from "./newsletter";
 import debugRouter from "./debug";
 import mapsRouter from "./maps";
+import atlasSceneExportRouter from "./atlas-scene-export";
 
 const router: IRouter = Router();
 
@@ -129,6 +130,7 @@ router.use("/nexus", nexusRouter);
 
 router.use(cognitiveRuntimeRouter);
 router.use(atlasArtifactsRouter);
+router.use(atlasSceneExportRouter);
 router.use(outcomeGraphRouter);
 
 router.use(mapsRouter);

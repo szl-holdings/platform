@@ -115,6 +115,17 @@ export function csrfMiddleware(req: Request, res: Response, next: NextFunction):
     }
   }
 
+  // API clients (mobile apps, CLI tools) that authenticate via bearer token do
+  // not use browser cookies, so CSRF double-submit protection does not apply.
+  // CSRF attacks rely on the browser automatically attaching session cookies to
+  // cross-origin requests; bearer tokens must be explicitly included and cannot
+  // be forged this way. Requests that carry a bearer token are still subject to
+  // full authMiddleware() + requireRole() checks in each route handler.
+  const authHeader = req.headers["authorization"] as string | undefined;
+  if (authHeader?.startsWith("Bearer ")) {
+    return next();
+  }
+
   if (SAFE_METHODS.has(req.method)) {
     if (!req.cookies?.[CSRF_COOKIE]) {
       const token = generateToken();
