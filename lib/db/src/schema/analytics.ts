@@ -82,6 +82,7 @@ export const analyticsEventsTable = pgTable(
     index("analytics_events_tenant_idx").on(t.tenantId),
     index("analytics_events_occurred_idx").on(t.occurredAt),
     index("analytics_events_session_idx").on(t.sessionId),
+    index("analytics_events_domain_class_ts_idx").on(t.domain, t.eventName, t.occurredAt),
   ]
 );
 

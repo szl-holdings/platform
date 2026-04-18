@@ -344,6 +344,13 @@
       "when": 1776475200000,
       "tag": "0058_holdings_inquiries_utm",
       "breakpoints": true
+    },
+    {
+      "idx": 60,
+      "version": "7",
+      "when": 1776482738821,
+      "tag": "0060_business_events_composite_idx",
+      "breakpoints": true
     }
   ]
 }

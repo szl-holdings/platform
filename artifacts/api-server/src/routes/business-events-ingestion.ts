@@ -2,6 +2,9 @@ import { Router, type IRouter } from "express";
 import { randomUUID } from "crypto";
 import { logger } from "../lib/logger";
 import { authMiddleware, requireRole } from "../middlewares/auth";
+import { db } from "@szl-holdings/db";
+import { analyticsEventsTable } from "@szl-holdings/db/schema";
+import { eq, and, gte, desc, sql } from "drizzle-orm";
 import type {
   ATLASEvent,
   KPIIngestionRecord,
@@ -11,54 +14,36 @@ import type {
 
 const router: IRouter = Router();
 
-class InMemoryEventStore {
-  private events: ATLASEvent[] = [];
-  private readonly MAX_EVENTS = 5000;
-  private readonly WINDOW_MS = 24 * 60 * 60 * 1000;
+const SOURCE_APP = "business-events";
+const WINDOW_MS = 24 * 60 * 60 * 1000;
 
-  push(event: ATLASEvent): void {
-    this.events.push(event);
-    if (this.events.length > this.MAX_EVENTS) {
-      this.events.shift();
-    }
-  }
-
-  getWindow(): ATLASEvent[] {
-    const cutoff = Date.now() - this.WINDOW_MS;
-    return this.events.filter((e) => e.timestamp >= cutoff);
-  }
-
-  countByClass(windowMs: number = this.WINDOW_MS): Record<string, number> {
-    const cutoff = Date.now() - windowMs;
-    const result: Record<string, number> = {};
-    for (const event of this.events.filter((e) => e.timestamp >= cutoff)) {
-      result[event.eventClass] = (result[event.eventClass] ?? 0) + 1;
-    }
-    return result;
-  }
-
-  countByDomain(windowMs: number = this.WINDOW_MS): Record<string, number> {
-    const cutoff = Date.now() - windowMs;
-    const result: Record<string, number> = {};
-    for (const event of this.events.filter((e) => e.timestamp >= cutoff)) {
-      result[event.domain] = (result[event.domain] ?? 0) + 1;
-    }
-    return result;
-  }
-
-  getRecent(limit: number, domain?: string): ATLASEvent[] {
-    const all = domain
-      ? this.events.filter((e) => e.domain === domain)
-      : this.events;
-    return all.slice(-limit).reverse();
-  }
-
-  clear(): void {
-    this.events = [];
-  }
+function atlasEventToRow(event: ATLASEvent) {
+  const { eventId, eventClass, domain, tenantId, timestamp, ...rest } = event;
+  return {
+    eventId,
+    eventName: eventClass,
+    domain,
+    sourceApp: SOURCE_APP,
+    tenantId: tenantId ?? null,
+    occurredAt: new Date(timestamp),
+    serverSide: true as const,
+    properties: rest as Record<string, unknown>,
+    dimensions: {} as Record<string, string>,
+  };
 }
 
-const eventStore = new InMemoryEventStore();
+function rowToAtlasEvent(row: typeof analyticsEventsTable.$inferSelect): ATLASEvent {
+  const props = (row.properties ?? {}) as Record<string, unknown>;
+  return {
+    eventId: row.eventId,
+    eventClass: row.eventName as ATLASEvent["eventClass"],
+    domain: row.domain,
+    tenantId: row.tenantId ?? undefined,
+    timestamp: row.occurredAt.getTime(),
+    schemaVersion: (props.schemaVersion as string | undefined) ?? "1.0",
+    ...props,
+  } as ATLASEvent;
+}
 
 function kpiToAtlasEvent(record: KPIIngestionRecord): ATLASEvent {
   const name = record.kpiName.toLowerCase();
@@ -181,7 +166,7 @@ router.post(
             throw new Error("domain and kpiName required");
           }
           const event = kpiToAtlasEvent(record);
-          eventStore.push(event);
+          await db.insert(analyticsEventsTable).values(atlasEventToRow(event));
           result.succeeded++;
         } catch (err) {
           result.failed++;
@@ -220,7 +205,7 @@ router.post(
             throw new Error("domain and transactionType required");
           }
           const event = domainTxToAtlasEvent(tx);
-          eventStore.push(event);
+          await db.insert(analyticsEventsTable).values(atlasEventToRow(event));
           succeeded++;
         } catch (err) {
           errors.push(err instanceof Error ? err.message : String(err));
@@ -257,7 +242,7 @@ router.post(
         schemaVersion: "1.0",
       } as ATLASEvent;
 
-      eventStore.push(complete);
+      await db.insert(analyticsEventsTable).values(atlasEventToRow(complete));
       res.status(201).json({ ok: true, eventId: complete.eventId });
     } catch (err) {
       logger.error({ err }, "[business-events] emit error");
@@ -270,22 +255,73 @@ router.get(
   "/business-events/summary",
   authMiddleware(),
   requireRole("ops", "admin", "viewer"),
-  (_req, res) => {
+  async (_req, res) => {
     try {
-      const windowMs = 24 * 60 * 60 * 1000;
-      const byClass = eventStore.countByClass(windowMs);
-      const byDomain = eventStore.countByDomain(windowMs);
-      const recent = eventStore.getRecent(20);
-      const totalInWindow = Object.values(byClass).reduce((s, v) => s + v, 0);
+      const cutoff = new Date(Date.now() - WINDOW_MS);
+
+      const [byClassRows, byDomainRows, recentRows] = await Promise.all([
+        db
+          .select({
+            eventClass: analyticsEventsTable.eventName,
+            count: sql<number>`cast(count(*) as int)`,
+          })
+          .from(analyticsEventsTable)
+          .where(
+            and(
+              eq(analyticsEventsTable.sourceApp, SOURCE_APP),
+              gte(analyticsEventsTable.occurredAt, cutoff),
+            ),
+          )
+          .groupBy(analyticsEventsTable.eventName),
+
+        db
+          .select({
+            domain: analyticsEventsTable.domain,
+            count: sql<number>`cast(count(*) as int)`,
+          })
+          .from(analyticsEventsTable)
+          .where(
+            and(
+              eq(analyticsEventsTable.sourceApp, SOURCE_APP),
+              gte(analyticsEventsTable.occurredAt, cutoff),
+            ),
+          )
+          .groupBy(analyticsEventsTable.domain),
+
+        db
+          .select()
+          .from(analyticsEventsTable)
+          .where(
+            and(
+              eq(analyticsEventsTable.sourceApp, SOURCE_APP),
+              gte(analyticsEventsTable.occurredAt, cutoff),
+            ),
+          )
+          .orderBy(desc(analyticsEventsTable.occurredAt))
+          .limit(20),
+      ]);
+
+      const byEventClass: Record<string, number> = {};
+      for (const row of byClassRows) {
+        byEventClass[row.eventClass] = row.count;
+      }
+
+      const byDomain: Record<string, number> = {};
+      for (const row of byDomainRows) {
+        byDomain[row.domain] = row.count;
+      }
+
+      const totalEvents = Object.values(byEventClass).reduce((s, v) => s + v, 0);
+      const recentEvents = recentRows.map(rowToAtlasEvent);
 
       res.setHeader("Cache-Control", "no-store");
       res.json({
         timestamp: new Date().toISOString(),
         windowHours: 24,
-        totalEvents: totalInWindow,
-        byEventClass: byClass,
+        totalEvents,
+        byEventClass,
         byDomain,
-        recentEvents: recent,
+        recentEvents,
       });
     } catch (err) {
       logger.error({ err }, "[business-events] summary error");
@@ -298,11 +334,24 @@ router.get(
   "/business-events/events",
   authMiddleware(),
   requireRole("ops", "admin"),
-  (req, res) => {
+  async (req, res) => {
     try {
       const limit = Math.min(Number(req.query.limit ?? 50), 500);
       const domain = req.query.domain as string | undefined;
-      const events = eventStore.getRecent(limit, domain);
+
+      const conditions = [eq(analyticsEventsTable.sourceApp, SOURCE_APP)];
+      if (domain) {
+        conditions.push(eq(analyticsEventsTable.domain, domain));
+      }
+
+      const rows = await db
+        .select()
+        .from(analyticsEventsTable)
+        .where(and(...conditions))
+        .orderBy(desc(analyticsEventsTable.occurredAt))
+        .limit(limit);
+
+      const events = rows.map(rowToAtlasEvent);
       res.setHeader("Cache-Control", "no-store");
       res.json({ events, count: events.length });
     } catch (err) {
