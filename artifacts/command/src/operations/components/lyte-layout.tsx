@@ -111,6 +111,7 @@ const NAV_GROUPS = [
       { href: "/operations/prism/signals", label: "Signals Feed", icon: Radio },
       { href: "/operations/prism/motion", label: "Motion", icon: Workflow },
       { href: "/operations/living-topology", label: "Living Topology", icon: Network },
+      { href: "/operations/ai-ops", label: "AI Quality Dashboard", icon: Brain },
       { href: "/operations/gpu-observatory", label: "GPU & AI Observatory", icon: Cpu },
       { href: "/operations/business-signals", label: "Business Signals", icon: DollarSign },
       { href: "/operations/predictive-intelligence", label: "Predictive Intel", icon: TrendingUp },

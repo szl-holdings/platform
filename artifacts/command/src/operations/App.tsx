@@ -142,6 +142,8 @@ const ClientValue = lazy(() => import("@/pages/client-value"));
 const OpsSavings = lazy(() => import("@/pages/ops-savings"));
 const EscalationIntelligence = lazy(() => import("@/pages/escalation-intelligence"));
 
+const AIQualityDashboard = lazy(() => import("@/pages/ai-quality-dashboard"));
+
 // ─── Autonomous NOC & AIOps 2.0 ───────────────────────────────────────────────
 const AutonomousNOC = lazy(() => import("@/pages/autonomous-noc"));
 const DEXScoring = lazy(() => import("@/pages/dex-scoring"));
@@ -264,6 +266,7 @@ function PrivateRouter() {
         <Route path="/defer-lane" component={DeferLane} />
         <Route path="/shadow-mode" component={ShadowMode} />
         <Route path="/atlas-artifacts" component={LyteAtlasArtifactsPage} />
+        <Route path="/ai-ops" component={AIQualityDashboard} />
         {/* Living Intelligence Platform */}
         <Route path="/living-topology" component={LivingTopology} />
         <Route path="/gpu-observatory" component={GpuComputeObservatory} />
@@ -318,6 +321,7 @@ const lyteCommands: CommandItem[] = [
   { id: "nav-alloy-simulate", label: "Policy Simulation Console", icon: "🧪", group: "Alloy", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/alloy/simulate"); } },
   { id: "nav-alloy-handoffs", label: "Agent Handoffs (A2A)", icon: "🔗", group: "Alloy", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/alloy/handoffs"); } },
   { id: "nav-alloy-receipts", label: "Trust Receipts", icon: "🛡️", group: "Alloy", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/alloy/receipts"); } },
+  { id: "nav-ai-ops", label: "AI Quality Dashboard", icon: "🧠", group: "AI Ops", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/ai-ops"); } },
   { id: "nav-living-topology", label: "Living Topology", icon: "🔗", group: "Living Intelligence", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/living-topology"); } },
   { id: "nav-gpu-observatory", label: "GPU & AI Observatory", icon: "🖥️", group: "Living Intelligence", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/gpu-observatory"); } },
   { id: "nav-business-signals", label: "Business Signal Intelligence", icon: "💰", group: "Living Intelligence", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/business-signals"); } },
