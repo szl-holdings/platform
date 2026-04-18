@@ -362,6 +362,9 @@ importers:
       '@szl-holdings/prism-bus':
         specifier: workspace:*
         version: link:../../lib/prism-bus
+      '@szl-holdings/prompt-registry':
+        specifier: workspace:*
+        version: link:../../packages/prompt-registry
       '@szl-holdings/proof-chain':
         specifier: workspace:*
         version: link:../../lib/proof-chain

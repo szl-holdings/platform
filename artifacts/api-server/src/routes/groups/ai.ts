@@ -31,6 +31,7 @@ import connectorHubRouter from "../connector-hub";
 import a2aRouter from "../a2a";
 import jobsRouter from "../jobs";
 import atlasSpatialRuntimeRouter from "../atlas-spatial-runtime";
+import promptRegistryRouter from "../prompt-registry";
 
 const _readLimiter = perUserApiSlidingLimiter;
 const _writeLimiter = perUserWriteSlidingLimiter;
@@ -162,4 +163,8 @@ export function register(router: IRouter): void {
   router.use("/atlas/spatial", _readLimiter);
   router.use("/atlas/spatial", _writeLimiter);
   router.use(atlasSpatialRuntimeRouter);
+
+  router.use("/ai/prompts", _readLimiter);
+  router.use("/ai/prompts", _writeLimiter);
+  router.use(promptRegistryRouter);
 }

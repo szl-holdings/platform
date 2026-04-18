@@ -189,6 +189,7 @@ const NuroForgePrompts = lazy(() => import("@/pages/nuro-forge/prompts"));
 const NuroForgeObservatory = lazy(() => import("@/pages/nuro-forge/observatory"));
 const NuroForgeBlueprints = lazy(() => import("@/pages/nuro-forge/blueprints"));
 const NuroForgeSelfHealing = lazy(() => import("@/pages/nuro-forge/self-healing"));
+const PromptRegistryPage = lazy(() => import("@/pages/prompt-registry"));
 
 const RevenueFusionPage = lazy(() => import("@/pages/revenue-fusion"));
 const PulsePage = lazy(() => import("@/pages/pulse"));
@@ -982,6 +983,9 @@ function App() {
             </Route>
             <Route path="/ai-cost-analytics">
               <RequireAuth><Suspense fallback={<PageLoader />}><AICostAnalyticsPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/prompt-registry">
+              <RequireAuth><Suspense fallback={<PageLoader />}><PromptRegistryPage /></Suspense></RequireAuth>
             </Route>
             <Route path="/admin/azure-onboarding">
               <RequireAuth><Suspense fallback={<PageLoader />}><AzureTenantOnboardingPage /></Suspense></RequireAuth>
