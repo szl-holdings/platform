@@ -209,10 +209,10 @@ function buildDomainRoutes(domain: string): void {
     `${prefix}/signals`,
     authMiddleware({ required: false }),
     validateBody(SignalIngestSchema),
-    (req: Request, res: Response) => {
+    async (req: Request, res: Response) => {
       try {
         const body = req.body as z.infer<typeof SignalIngestSchema>;
-        const signal = ingestSignal({
+        const signal = await ingestSignal({
           domain,
           signalType: body.signalType,
           severity: body.severity,
@@ -233,10 +233,10 @@ function buildDomainRoutes(domain: string): void {
   );
 
   // ── GET /:domain/atlas/signals ──────────────────────────────────────────────
-  router.get(`${prefix}/signals`, authMiddleware({ required: false }), validateQuery(listQuerySchema), (req: Request, res: Response) => {
+  router.get(`${prefix}/signals`, authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
     try {
       const limit = Math.min(parseInt(String(req.query.limit ?? "50"), 10), 200);
-      const signals = getSignals(domain, limit);
+      const signals = await getSignals(domain, limit);
       sendSuccess(res, { domain, signals, count: signals.length });
     } catch (err) {
       handleRouteError(res, err, "Failed to list signals");
@@ -244,7 +244,7 @@ function buildDomainRoutes(domain: string): void {
   });
 
   // ── PATCH /:domain/atlas/signals/:signalId/status ───────────────────────────
-  router.patch(`${prefix}/signals/:signalId/status`, authMiddleware(), validateBody(jsonObjectBodySchema), (req: Request, res: Response) => {
+  router.patch(`${prefix}/signals/:signalId/status`, authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
     try {
       const signalId = String(req.params["signalId"]);
       const { status } = req.body as { status?: AtlasSignalRecord["status"] };
@@ -253,7 +253,7 @@ function buildDomainRoutes(domain: string): void {
         sendBadRequest(res, `status must be one of: ${validStatuses.join(", ")}`);
         return;
       }
-      const updated = updateSignalStatus(domain, signalId, status);
+      const updated = await updateSignalStatus(domain, signalId, status);
       if (!updated) { sendNotFound(res, "Signal not found"); return; }
       sendSuccess(res, { domain, signalId, status, updatedAt: new Date().toISOString() });
     } catch (err) {
@@ -270,7 +270,7 @@ function buildDomainRoutes(domain: string): void {
     async (req: Request, res: Response) => {
       try {
         const body = req.body as z.infer<typeof EvaluateSignalsSchema>;
-        const allSignals = getSignals(domain, 200);
+        const allSignals = await getSignals(domain, 200);
         const targetSignals = allSignals.filter(s => body.signalIds.includes(s.id));
 
         if (targetSignals.length === 0) {
@@ -281,7 +281,7 @@ function buildDomainRoutes(domain: string): void {
         const recommendations = await evaluateSignalsForDomain(domain, targetSignals, body.context);
 
         for (const id of body.signalIds) {
-          updateSignalStatus(domain, id, "processed");
+          await updateSignalStatus(domain, id, "processed");
         }
 
         logger.info({ domain, signalCount: targetSignals.length, recommendationCount: recommendations.length }, "domain-atlas:evaluate:completed");
@@ -480,10 +480,10 @@ function buildDomainRoutes(domain: string): void {
     `${prefix}/evidence`,
     authMiddleware({ required: false }),
     validateBody(EvidenceCaptureSchema),
-    (req: Request, res: Response) => {
+    async (req: Request, res: Response) => {
       try {
         const body = req.body as z.infer<typeof EvidenceCaptureSchema>;
-        const evidence = captureEvidence({
+        const evidence = await captureEvidence({
           domain,
           workflowId: body.workflowId,
           label: body.label,
@@ -501,10 +501,10 @@ function buildDomainRoutes(domain: string): void {
   );
 
   // ── GET /:domain/atlas/evidence ─────────────────────────────────────────────
-  router.get(`${prefix}/evidence`, authMiddleware({ required: false }), validateQuery(listQuerySchema), (req: Request, res: Response) => {
+  router.get(`${prefix}/evidence`, authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
     try {
       const workflowId = req.query.workflowId as string | undefined;
-      const evidence = getEvidence(domain, workflowId);
+      const evidence = await getEvidence(domain, workflowId);
       sendSuccess(res, { domain, evidence, count: evidence.length });
     } catch (err) {
       handleRouteError(res, err, "Failed to list evidence");
@@ -516,10 +516,10 @@ function buildDomainRoutes(domain: string): void {
     `${prefix}/outcome`,
     authMiddleware({ required: false }),
     validateBody(OutcomeRecordSchema),
-    (req: Request, res: Response) => {
+    async (req: Request, res: Response) => {
       try {
         const body = req.body as z.infer<typeof OutcomeRecordSchema>;
-        const outcome = recordOutcome({
+        const outcome = await recordOutcome({
           domain,
           workflowId: body.workflowId,
           signalId: body.signalId,
@@ -541,10 +541,10 @@ function buildDomainRoutes(domain: string): void {
   );
 
   // ── GET /:domain/atlas/outcomes ─────────────────────────────────────────────
-  router.get(`${prefix}/outcomes`, authMiddleware({ required: false }), validateQuery(listQuerySchema), (req: Request, res: Response) => {
+  router.get(`${prefix}/outcomes`, authMiddleware({ required: false }), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
     try {
       const limit = Math.min(parseInt(String(req.query.limit ?? "50"), 10), 200);
-      const outcomes = getOutcomes(domain, limit);
+      const outcomes = await getOutcomes(domain, limit);
       sendSuccess(res, { domain, outcomes, count: outcomes.length });
     } catch (err) {
       handleRouteError(res, err, "Failed to list outcomes");
@@ -552,9 +552,9 @@ function buildDomainRoutes(domain: string): void {
   });
 
   // ── GET /:domain/atlas/evaluation-hooks ─────────────────────────────────────
-  router.get(`${prefix}/evaluation-hooks`, authMiddleware({ required: false }), (_req: Request, res: Response) => {
+  router.get(`${prefix}/evaluation-hooks`, authMiddleware({ required: false }), async (_req: Request, res: Response) => {
     try {
-      const hooks = getEvaluationHooks(domain);
+      const hooks = await getEvaluationHooks(domain);
       sendSuccess(res, {
         domain,
         hooks: hooks.map(h => ({
@@ -581,14 +581,14 @@ function buildDomainRoutes(domain: string): void {
       const { hookId, isDryRun, isSimulation } = req.body as { hookId?: string; isDryRun?: boolean; isSimulation?: boolean };
       if (!hookId) { sendBadRequest(res, "hookId is required"); return; }
 
-      const hook = getEvaluationHookById(hookId);
+      const hook = await getEvaluationHookById(hookId);
       if (!hook) { sendNotFound(res, "Evaluation hook not found"); return; }
       if (hook.domain !== domain) { res.status(403).json({ error: "Hook belongs to a different domain" }); return; }
       if (!hook.replayable) { res.status(422).json({ error: "This hook is not marked as replayable" }); return; }
 
       for (const signal of hook.signalSnapshot) {
         const { id: _id, createdAt: _c, updatedAt: _u, ...signalData } = signal;
-        ingestSignal({ ...signalData, status: "raw" });
+        await ingestSignal({ ...signalData, status: "raw" });
       }
 
       const workflowKey = Object.keys(DOMAIN_WORKFLOWS).find(k => DOMAIN_WORKFLOWS[k].domain === domain) ?? config.workflowKey;
@@ -604,7 +604,7 @@ function buildDomainRoutes(domain: string): void {
       });
       const latencyMs = Date.now() - startedAt;
 
-      const replayHook = registerEvaluationHook({
+      const replayHook = await registerEvaluationHook({
         domain,
         workflowId: result.run.runId,
         workflowName: `[REPLAY] ${hook.workflowName}`,
@@ -640,12 +640,14 @@ function buildDomainRoutes(domain: string): void {
   });
 
   // ── GET /:domain/atlas/status ───────────────────────────────────────────────
-  router.get(`${prefix}/status`, authMiddleware({ required: false }), (_req: Request, res: Response) => {
+  router.get(`${prefix}/status`, authMiddleware({ required: false }), async (_req: Request, res: Response) => {
     try {
-      const signals = getSignals(domain, 200);
-      const evidence = getEvidence(domain);
-      const outcomes = getOutcomes(domain, 200);
-      const hooks = getEvaluationHooks(domain);
+      const [signals, evidence, outcomes, hooks] = await Promise.all([
+        getSignals(domain, 200),
+        getEvidence(domain),
+        getOutcomes(domain, 200),
+        getEvaluationHooks(domain),
+      ]);
       const domainWorkflows = Object.values(DOMAIN_WORKFLOWS).filter(w => w.domain === domain);
 
       sendSuccess(res, {

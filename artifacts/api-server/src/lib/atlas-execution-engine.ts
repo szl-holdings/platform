@@ -2,7 +2,7 @@
  * ATLAS Execution Engine — Shared Domain Execution Pattern
  *
  * Provides domain-specific workflow definitions, step handlers, policy
- * registrations, and in-memory signal/evidence/outcome stores for all
+ * registrations, and DB-backed signal/evidence/outcome stores for all
  * six SZL domain packs:
  *
  *   Aegis (Firestorm)  — security incident response
@@ -41,12 +41,11 @@ import {
   type WorkflowRun,
   type ActionEngineResult,
 } from "@szl-holdings/action-engine";
+import { db, atlasSignalsTable, atlasEvidenceTable, atlasOutcomesTable, atlasRunsTable } from "@szl-holdings/db";
+import { eq, and, desc } from "drizzle-orm";
 import { logger } from "./logger.js";
 
-// ─── In-Memory Signal Store (per-domain ring buffer) ─────────────────────────
-
-const MAX_SIGNALS = 500;
-const domainSignalStore: Map<string, AtlasSignalRecord[]> = new Map();
+// ─── Signal Store (DB-backed) ─────────────────────────────────────────────────
 
 export interface AtlasSignalRecord {
   id: string;
@@ -65,32 +64,68 @@ export interface AtlasSignalRecord {
   updatedAt: string;
 }
 
-export function ingestSignal(record: Omit<AtlasSignalRecord, "id" | "createdAt" | "updatedAt">): AtlasSignalRecord {
-  const now = new Date().toISOString();
-  const signal: AtlasSignalRecord = { ...record, id: randomUUID(), createdAt: now, updatedAt: now };
-  const bucket = domainSignalStore.get(record.domain) ?? [];
-  bucket.push(signal);
-  if (bucket.length > MAX_SIGNALS) bucket.shift();
-  domainSignalStore.set(record.domain, bucket);
+export async function ingestSignal(record: Omit<AtlasSignalRecord, "id" | "createdAt" | "updatedAt">): Promise<AtlasSignalRecord> {
+  const now = new Date();
+  const id = randomUUID();
+  await db.insert(atlasSignalsTable).values({
+    id,
+    domain: record.domain,
+    signalType: record.signalType,
+    severity: record.severity,
+    title: record.title,
+    description: record.description,
+    confidence: record.confidence,
+    source: record.source,
+    payload: record.payload,
+    status: record.status,
+    tenantId: record.tenantId,
+    workflowId: record.workflowId ?? null,
+    createdAt: now,
+    updatedAt: now,
+  });
+  const signal: AtlasSignalRecord = { ...record, id, createdAt: now.toISOString(), updatedAt: now.toISOString() };
   logger.info({ domain: record.domain, signalId: signal.id, signalType: record.signalType }, "atlas:signal ingested");
   return signal;
 }
 
-export function getSignals(domain: string, limit = 50): AtlasSignalRecord[] {
-  const bucket = domainSignalStore.get(domain) ?? [];
-  return bucket.slice(-limit).reverse();
+export async function getSignals(domain: string, limit = 50): Promise<AtlasSignalRecord[]> {
+  const rows = await db
+    .select()
+    .from(atlasSignalsTable)
+    .where(eq(atlasSignalsTable.domain, domain))
+    .orderBy(desc(atlasSignalsTable.createdAt))
+    .limit(limit);
+  return rows.map(rowToSignalRecord);
 }
 
-export function updateSignalStatus(domain: string, signalId: string, status: AtlasSignalRecord["status"]): boolean {
-  const bucket = domainSignalStore.get(domain) ?? [];
-  const signal = bucket.find(s => s.id === signalId);
-  if (!signal) return false;
-  signal.status = status;
-  signal.updatedAt = new Date().toISOString();
-  return true;
+export async function updateSignalStatus(domain: string, signalId: string, status: AtlasSignalRecord["status"]): Promise<boolean> {
+  const result = await db
+    .update(atlasSignalsTable)
+    .set({ status, updatedAt: new Date() })
+    .where(and(eq(atlasSignalsTable.id, signalId), eq(atlasSignalsTable.domain, domain)));
+  return (result.rowCount ?? 0) > 0;
 }
 
-// ─── In-Memory Evidence Store ─────────────────────────────────────────────────
+function rowToSignalRecord(row: typeof atlasSignalsTable.$inferSelect): AtlasSignalRecord {
+  return {
+    id: row.id,
+    domain: row.domain,
+    signalType: row.signalType,
+    severity: row.severity,
+    title: row.title,
+    description: row.description,
+    confidence: row.confidence,
+    source: row.source,
+    payload: (row.payload ?? {}) as Record<string, unknown>,
+    status: row.status,
+    tenantId: row.tenantId,
+    workflowId: row.workflowId ?? undefined,
+    createdAt: row.createdAt.toISOString(),
+    updatedAt: row.updatedAt.toISOString(),
+  };
+}
+
+// ─── Evidence Store (DB-backed) ───────────────────────────────────────────────
 
 export interface AtlasEvidenceRecord {
   id: string;
@@ -104,20 +139,44 @@ export interface AtlasEvidenceRecord {
   immutable: boolean;
 }
 
-const evidenceStore: AtlasEvidenceRecord[] = [];
-
-export function captureEvidence(record: Omit<AtlasEvidenceRecord, "id" | "capturedAt">): AtlasEvidenceRecord {
-  const ev: AtlasEvidenceRecord = { ...record, id: randomUUID(), capturedAt: new Date().toISOString() };
-  evidenceStore.push(ev);
+export async function captureEvidence(record: Omit<AtlasEvidenceRecord, "id" | "capturedAt">): Promise<AtlasEvidenceRecord> {
+  const now = new Date();
+  const id = randomUUID();
+  await db.insert(atlasEvidenceTable).values({
+    id,
+    domain: record.domain,
+    workflowId: record.workflowId,
+    label: record.label,
+    value: record.value,
+    source: record.source,
+    capturedBy: record.capturedBy,
+    immutable: record.immutable,
+    capturedAt: now,
+  });
+  const ev: AtlasEvidenceRecord = { ...record, id, capturedAt: now.toISOString() };
   logger.info({ domain: record.domain, workflowId: record.workflowId, evidenceId: ev.id }, "atlas:evidence captured");
   return ev;
 }
 
-export function getEvidence(domain: string, workflowId?: string): AtlasEvidenceRecord[] {
-  return evidenceStore.filter(e => e.domain === domain && (!workflowId || e.workflowId === workflowId));
+export async function getEvidence(domain: string, workflowId?: string): Promise<AtlasEvidenceRecord[]> {
+  const conditions = workflowId
+    ? and(eq(atlasEvidenceTable.domain, domain), eq(atlasEvidenceTable.workflowId, workflowId))
+    : eq(atlasEvidenceTable.domain, domain);
+  const rows = await db.select().from(atlasEvidenceTable).where(conditions);
+  return rows.map(row => ({
+    id: row.id,
+    domain: row.domain,
+    workflowId: row.workflowId,
+    label: row.label,
+    value: row.value,
+    source: row.source,
+    capturedBy: row.capturedBy,
+    immutable: row.immutable,
+    capturedAt: row.capturedAt.toISOString(),
+  }));
 }
 
-// ─── In-Memory Outcome Store ──────────────────────────────────────────────────
+// ─── Outcome Store (DB-backed) ────────────────────────────────────────────────
 
 export interface AtlasOutcomeRecord {
   id: string;
@@ -139,20 +198,62 @@ export interface AtlasOutcomeRecord {
   metadata?: Record<string, unknown>;
 }
 
-const outcomeStore: AtlasOutcomeRecord[] = [];
-
-export function recordOutcome(record: Omit<AtlasOutcomeRecord, "id" | "recordedAt">): AtlasOutcomeRecord {
-  const outcome: AtlasOutcomeRecord = { ...record, id: randomUUID(), recordedAt: new Date().toISOString() };
-  outcomeStore.push(outcome);
+export async function recordOutcome(record: Omit<AtlasOutcomeRecord, "id" | "recordedAt">): Promise<AtlasOutcomeRecord> {
+  const now = new Date();
+  const id = randomUUID();
+  await db.insert(atlasOutcomesTable).values({
+    id,
+    domain: record.domain,
+    workflowId: record.workflowId,
+    signalId: record.signalId ?? null,
+    recommendationId: record.recommendationId ?? null,
+    title: record.title,
+    summary: record.summary,
+    status: record.status,
+    financialImpactUsd: record.businessImpact?.financialImpactUsd ?? null,
+    operationalSeverity: record.businessImpact?.operationalSeverity ?? null,
+    entitiesAffected: record.businessImpact?.entitiesAffected ?? null,
+    recordedBy: record.recordedBy,
+    evidence: record.evidence,
+    metadata: record.metadata ?? {},
+    recordedAt: now,
+  });
+  const outcome: AtlasOutcomeRecord = { ...record, id, recordedAt: now.toISOString() };
   logger.info({ domain: record.domain, workflowId: record.workflowId, outcomeId: outcome.id, status: record.status }, "atlas:outcome recorded");
   return outcome;
 }
 
-export function getOutcomes(domain: string, limit = 50): AtlasOutcomeRecord[] {
-  return outcomeStore.filter(o => o.domain === domain).slice(-limit).reverse();
+export async function getOutcomes(domain: string, limit = 50): Promise<AtlasOutcomeRecord[]> {
+  const rows = await db
+    .select()
+    .from(atlasOutcomesTable)
+    .where(eq(atlasOutcomesTable.domain, domain))
+    .orderBy(desc(atlasOutcomesTable.recordedAt))
+    .limit(limit);
+  return rows.map(row => ({
+    id: row.id,
+    domain: row.domain,
+    workflowId: row.workflowId,
+    signalId: row.signalId ?? undefined,
+    recommendationId: row.recommendationId ?? undefined,
+    title: row.title,
+    summary: row.summary,
+    status: row.status,
+    businessImpact: (row.financialImpactUsd != null || row.operationalSeverity != null || row.entitiesAffected != null)
+      ? {
+          financialImpactUsd: row.financialImpactUsd ?? undefined,
+          operationalSeverity: row.operationalSeverity ?? undefined,
+          entitiesAffected: row.entitiesAffected ?? undefined,
+        }
+      : undefined,
+    recordedBy: row.recordedBy,
+    recordedAt: row.recordedAt.toISOString(),
+    evidence: (row.evidence ?? []) as string[],
+    metadata: (row.metadata ?? {}) as Record<string, unknown>,
+  }));
 }
 
-// ─── Evaluation Hook Store ────────────────────────────────────────────────────
+// ─── Evaluation Hook Store (DB-backed via atlas_runs) ─────────────────────────
 
 export interface EvaluationHookRecord {
   id: string;
@@ -174,21 +275,91 @@ export interface EvaluationHookRecord {
   };
 }
 
-const evaluationHookStore: EvaluationHookRecord[] = [];
-
-export function registerEvaluationHook(hook: Omit<EvaluationHookRecord, "id" | "snapshotAt">): EvaluationHookRecord {
-  const record: EvaluationHookRecord = { ...hook, id: randomUUID(), snapshotAt: new Date().toISOString() };
-  evaluationHookStore.push(record);
+export async function registerEvaluationHook(hook: Omit<EvaluationHookRecord, "id" | "snapshotAt">): Promise<EvaluationHookRecord> {
+  const now = new Date();
+  const rows = await db.insert(atlasRunsTable).values({
+    id: randomUUID(),
+    domain: hook.domain,
+    workflowId: hook.workflowId,
+    workflowName: hook.workflowName,
+    triggerSignalId: hook.triggerSignalId ?? null,
+    replayable: hook.replayable,
+    signalSnapshot: hook.signalSnapshot as unknown as Record<string, unknown>[],
+    runSnapshot: hook.runSnapshot as unknown as Record<string, unknown>,
+    latencyMs: hook.benchmarkMetrics?.latencyMs ?? null,
+    stepsCompleted: hook.benchmarkMetrics?.stepsCompleted ?? null,
+    stepsFailed: hook.benchmarkMetrics?.stepsFailed ?? null,
+    policyChecks: hook.benchmarkMetrics?.policyChecks ?? null,
+    policiesBlocked: hook.benchmarkMetrics?.policiesBlocked ?? null,
+    evidenceCount: hook.benchmarkMetrics?.evidenceCount ?? null,
+    snapshotAt: now,
+  }).onConflictDoUpdate({
+    target: atlasRunsTable.workflowId,
+    set: {
+      workflowName: hook.workflowName,
+      triggerSignalId: hook.triggerSignalId ?? null,
+      replayable: hook.replayable,
+      signalSnapshot: hook.signalSnapshot as unknown as Record<string, unknown>[],
+      runSnapshot: hook.runSnapshot as unknown as Record<string, unknown>,
+      latencyMs: hook.benchmarkMetrics?.latencyMs ?? null,
+      stepsCompleted: hook.benchmarkMetrics?.stepsCompleted ?? null,
+      stepsFailed: hook.benchmarkMetrics?.stepsFailed ?? null,
+      policyChecks: hook.benchmarkMetrics?.policyChecks ?? null,
+      policiesBlocked: hook.benchmarkMetrics?.policiesBlocked ?? null,
+      evidenceCount: hook.benchmarkMetrics?.evidenceCount ?? null,
+      snapshotAt: now,
+    },
+  }).returning({ id: atlasRunsTable.id, snapshotAt: atlasRunsTable.snapshotAt });
+  const persisted = rows[0];
+  const record: EvaluationHookRecord = {
+    ...hook,
+    id: persisted.id,
+    snapshotAt: persisted.snapshotAt.toISOString(),
+  };
   logger.info({ domain: hook.domain, hookId: record.id, workflowId: hook.workflowId }, "atlas:evaluation-hook registered");
   return record;
 }
 
-export function getEvaluationHooks(domain: string): EvaluationHookRecord[] {
-  return evaluationHookStore.filter(h => h.domain === domain);
+export async function getEvaluationHooks(domain: string): Promise<EvaluationHookRecord[]> {
+  const rows = await db
+    .select()
+    .from(atlasRunsTable)
+    .where(eq(atlasRunsTable.domain, domain))
+    .orderBy(desc(atlasRunsTable.snapshotAt));
+  return rows.map(rowToHookRecord);
 }
 
-export function getEvaluationHookById(hookId: string): EvaluationHookRecord | undefined {
-  return evaluationHookStore.find(h => h.id === hookId);
+export async function getEvaluationHookById(hookId: string): Promise<EvaluationHookRecord | undefined> {
+  const rows = await db
+    .select()
+    .from(atlasRunsTable)
+    .where(eq(atlasRunsTable.id, hookId))
+    .limit(1);
+  return rows[0] ? rowToHookRecord(rows[0]) : undefined;
+}
+
+function rowToHookRecord(row: typeof atlasRunsTable.$inferSelect): EvaluationHookRecord {
+  return {
+    id: row.id,
+    domain: row.domain,
+    workflowId: row.workflowId,
+    workflowName: row.workflowName,
+    triggerSignalId: row.triggerSignalId ?? undefined,
+    replayable: row.replayable,
+    snapshotAt: row.snapshotAt.toISOString(),
+    signalSnapshot: (row.signalSnapshot ?? []) as unknown as AtlasSignalRecord[],
+    runSnapshot: (row.runSnapshot ?? {}) as unknown as WorkflowRun,
+    benchmarkMetrics: (row.latencyMs != null || row.stepsCompleted != null || row.stepsFailed != null)
+      ? {
+          latencyMs: row.latencyMs ?? undefined,
+          stepsCompleted: row.stepsCompleted ?? undefined,
+          stepsFailed: row.stepsFailed ?? undefined,
+          policyChecks: row.policyChecks ?? undefined,
+          policiesBlocked: row.policiesBlocked ?? undefined,
+          evidenceCount: row.evidenceCount ?? undefined,
+        }
+      : undefined,
+  };
 }
 
 // ─── Domain Signal → Decision Engine Bridge ───────────────────────────────────
@@ -526,27 +697,28 @@ export const DOMAIN_WORKFLOWS: Record<string, WorkflowDefinition> = {
       { id: "signal-ingest", name: "Signal Ingestion", handler: "terra.ingest-signal", executionMode: "semi_auto", requiresApproval: false, description: "Normalize property/ownership/distress signal." },
       { id: "deal-thesis", name: "Deal Thesis Generation", handler: "terra.generate-thesis", executionMode: "semi_auto", requiresApproval: false, description: "Generate investment thesis with pro forma and IRR projections." },
       { id: "underwriting", name: "Underwriting Workflow", handler: "terra.underwrite", executionMode: "semi_auto", requiresApproval: false, description: "Run automated underwriting checks and stress tests." },
-      { id: "legal-review", name: "Legal & Compliance Review", handler: "terra.legal-review", executionMode: "manual", requiresApproval: true, approverRole: "admin", description: "Legal and compliance review gate for the deal." },
-      { id: "approve", name: "Deal Approval", handler: "terra.approve-deal", executionMode: "manual", requiresApproval: true, approverRole: "exec", description: "Executive approval to proceed with the deal." },
-      { id: "execute-action", name: "Action Execution", handler: "terra.execute-action", executionMode: "semi_auto", requiresApproval: false, rollbackHandler: "terra.rollback-action", description: "Execute the approved deal action (LOI, offer, acquisition)." },
-      { id: "evidence", name: "Evidence Capture", handler: "terra.capture-evidence", executionMode: "semi_auto", requiresApproval: false, description: "Capture executed documents, title searches, and appraisals." },
-      { id: "outcome", name: "Outcome Recording", handler: "terra.record-outcome", executionMode: "semi_auto", requiresApproval: false, description: "Record deal outcome, acquisition cost, and projected returns." },
+      { id: "legal-review", name: "Legal Review Gate", handler: "terra.legal-review", executionMode: "manual", requiresApproval: true, approverRole: "admin", description: "Legal and compliance review of the deal thesis." },
+      { id: "approve-deal", name: "Deal Approval Gate", handler: "terra.approve-deal", executionMode: "manual", requiresApproval: true, approverRole: "exec", description: "Executive approval of deal commitment." },
+      { id: "execute-action", name: "Deal Action Execution", handler: "terra.execute-action", executionMode: "semi_auto", requiresApproval: false, rollbackHandler: "terra.rollback-action", description: "Execute approved deal action (offer, LOI, or close)." },
+      { id: "evidence", name: "Deal Record Capture", handler: "terra.capture-evidence", executionMode: "semi_auto", requiresApproval: false, description: "Capture executed documents, title reports, and appraisals." },
+      { id: "outcome", name: "Outcome Recording", handler: "terra.record-outcome", executionMode: "semi_auto", requiresApproval: false, description: "Record deal outcome, IRR, and capital deployment." },
     ],
-    metadata: { domain: "terra", category: "deal-execution", atlasVersion: "1.0" },
+    metadata: { domain: "terra", category: "deal-underwriting", atlasVersion: "1.0" },
   },
 
   "prism-matter-execution": {
     id: "prism-matter-execution",
-    name: "PRISM Counsel Matter Execution",
-    description: "Matter/filing/compliance event → recommendation → legal review → execution trail → outcome.",
+    name: "PRISM Counsel Legal Matter Execution",
+    description: "Legal matter signal → strategy recommendation → counsel review → client approval → filing → outcome.",
     domain: "prism-counsel",
-    executionMode: "manual",
+    executionMode: "semi_auto",
     requiresExplicitApproval: true,
     isDryRunCapable: true,
-    isSimulationCapable: false,
-    rollbackPolicy: "none",
+    isSimulationCapable: true,
+    rollbackPolicy: "step",
     steps: [
-      { id: "signal-ingest", name: "Matter Event Ingestion", handler: "prism.ingest-event", executionMode: "manual", requiresApproval: false, description: "Normalize matter filing or compliance event." },
+      { id: "ingest-event", name: "Matter Event Ingestion", handler: "prism.ingest-event", executionMode: "semi_auto", requiresApproval: false, description: "Normalize legal matter event (filing deadline, discovery, hearing)." },
+      { id: "enrich", name: "Matter Context Enrichment", handler: "prism.enrich", executionMode: "semi_auto", requiresApproval: false, description: "Enrich with docket data, precedent search, and exposure analysis." },
       { id: "recommend", name: "Recommendation Generation", handler: "prism.generate-recommendation", executionMode: "semi_auto", requiresApproval: false, description: "Generate legal strategy recommendations with precedent analysis." },
       { id: "legal-review", name: "Legal Review Gate", handler: "prism.legal-review", executionMode: "manual", requiresApproval: true, approverRole: "admin", description: "Counsel reviews and approves recommended legal strategy." },
       { id: "client-approval", name: "Client Approval Gate", handler: "prism.client-approval", executionMode: "manual", requiresApproval: true, approverRole: "client", description: "Client approval of legal strategy before execution." },
@@ -630,7 +802,7 @@ export function registerDomainStepHandlers(): void {
     ["aegis", ["triage", "enrich", "recommend", "approve", "contain", "eradicate", "recover", "capture-evidence", "record-outcome", "rollback-contain"]],
     ["vessels", ["ingest-signal", "estimate-risk", "sanctions-check", "build-action-plan", "approve", "execute-voyage", "capture-evidence", "record-outcome", "rollback-voyage"]],
     ["terra", ["ingest-signal", "generate-thesis", "underwrite", "legal-review", "approve-deal", "execute-action", "capture-evidence", "record-outcome", "rollback-action"]],
-    ["prism", ["ingest-event", "generate-recommendation", "legal-review", "client-approval", "execute-filing", "capture-trail", "record-outcome"]],
+    ["prism", ["ingest-event", "enrich", "generate-recommendation", "legal-review", "client-approval", "execute-filing", "capture-trail", "record-outcome"]],
     ["carlota", ["ingest-request", "enrich-request", "plan-workflow", "approve", "vendor-commit", "execute-service", "capture-proof", "record-outcome", "rollback-vendor"]],
     ["imperium", ["ingest-signal", "enrich", "plan-remediation", "approve", "automate", "verify", "capture-evidence", "record-outcome", "rollback"]],
   ];
@@ -682,8 +854,10 @@ export async function executedomainWorkflow(req: DomainExecutionRequest): Promis
   await recordRun(result.run);
 
   if (!req.isDryRun && !req.isSimulation) {
-    const signals = req.signalIds ? getSignals(req.domain, 100).filter(s => req.signalIds!.includes(s.id)) : [];
-    registerEvaluationHook({
+    const signals = req.signalIds
+      ? (await getSignals(req.domain, 100)).filter(s => req.signalIds!.includes(s.id))
+      : [];
+    await registerEvaluationHook({
       domain: req.domain,
       workflowId: result.run.runId,
       workflowName: definition.name,
