@@ -64,12 +64,23 @@ registerEntry({ type: NAMED_JOB_TYPES.DAILY_DOCUMENT_BATCH, name: "Daily Documen
 registerEntry({ type: NAMED_JOB_TYPES.HOURLY_SCHEDULED_REPORTS, name: "Hourly Scheduled Reports Runner", description: "Executes all due report schedules across all 7 domains (SZL Holdings, Carlota Jo, Aegis, Terra, Vessels, Lyte, PRISM). Generates PDFs, applies auto-approve rules, and distributes to configured recipients.", schedule: "hourly", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.HOURLY_EXECUTIVE_DIGEST, name: "Hourly Executive Digest Dispatcher", description: "Runs every hour, finds users whose digest_config.enabled=true and deliveryHour matches the current UTC hour, generates a per-role cross-domain briefing, and sends it via Expo push with a deepLink to the briefing workspace.", schedule: "hourly", enabled: true });
 
+function getLocalHourMinute(tz: string, now: Date): { hour: number; minute: number } | null {
+  try {
+    const fmt = new Intl.DateTimeFormat("en-US", { timeZone: tz, hour: "2-digit", minute: "2-digit", hour12: false });
+    const parts = fmt.formatToParts(now);
+    const h = parts.find((p) => p.type === "hour")?.value;
+    const m = parts.find((p) => p.type === "minute")?.value;
+    if (!h || !m) return null;
+    return { hour: parseInt(h, 10) % 24, minute: parseInt(m, 10) };
+  } catch {
+    return null;
+  }
+}
+
 durableJobQueue.register(NAMED_JOB_TYPES.HOURLY_EXECUTIVE_DIGEST, async (job) => {
   const start = Date.now();
-  const payload = (job.payload ?? {}) as { forceHour?: number; forceMinute?: number; testUserId?: number };
+  const payload = (job.payload ?? {}) as { forceHour?: number; forceMinute?: number; forceTimezone?: string; testUserId?: number };
   const now = new Date();
-  const currentHour = typeof payload.forceHour === "number" ? payload.forceHour : now.getUTCHours();
-  const currentMinute = typeof payload.forceMinute === "number" ? payload.forceMinute : now.getUTCMinutes();
   let dispatched = 0;
   let skipped = 0;
   let failed = 0;
@@ -78,7 +89,7 @@ durableJobQueue.register(NAMED_JOB_TYPES.HOURLY_EXECUTIVE_DIGEST, async (job) =>
     const { pool } = await import("@szl-holdings/db");
     const { sendPushToUser } = await import("./expo-push");
 
-    const recipients = payload.testUserId
+    const candidates = payload.testUserId
       ? await pool.query(
           `SELECT user_id, digest_config FROM notification_preferences WHERE user_id = $1`,
           [payload.testUserId],
@@ -86,22 +97,30 @@ durableJobQueue.register(NAMED_JOB_TYPES.HOURLY_EXECUTIVE_DIGEST, async (job) =>
       : await pool.query(
           `SELECT user_id, digest_config FROM notification_preferences
            WHERE digest_config IS NOT NULL
-             AND (digest_config->>'enabled')::boolean = true
-             AND (digest_config->>'deliveryHour')::int = $1
-             AND (digest_config->>'deliveryMinute')::int = $2`,
-          [currentHour, currentMinute],
+             AND (digest_config->>'enabled')::boolean = true`,
         );
 
-    if (recipients.rows.length === 0) {
+    type Row = { user_id: number; digest_config: Record<string, unknown> };
+    const recipients: Row[] = (candidates.rows as Row[]).filter((row) => {
+      const cfg = row.digest_config ?? {};
+      const targetHour = typeof payload.forceHour === "number" ? payload.forceHour : Number(cfg.deliveryHour);
+      const targetMinute = typeof payload.forceMinute === "number" ? payload.forceMinute : Number(cfg.deliveryMinute);
+      if (Number.isNaN(targetHour) || Number.isNaN(targetMinute)) return false;
+      const tz = payload.forceTimezone || (typeof cfg.timezone === "string" && cfg.timezone) || "UTC";
+      const local = getLocalHourMinute(tz, now) ?? { hour: now.getUTCHours(), minute: now.getUTCMinutes() };
+      return local.hour === targetHour && local.minute === targetMinute;
+    });
+
+    if (recipients.length === 0) {
       updateRegistry(NAMED_JOB_TYPES.HOURLY_EXECUTIVE_DIGEST, { lastStatus: "completed", lastDurationMs: Date.now() - start });
       return;
     }
 
-    logger.info({ jobId: job.id, currentHour, currentMinute, recipientCount: recipients.rows.length }, "hourly_executive_digest: dispatching");
+    logger.info({ jobId: job.id, recipientCount: recipients.length }, "hourly_executive_digest: dispatching");
 
     const date = now.toISOString().slice(0, 10);
 
-    for (const row of recipients.rows as Array<{ user_id: number; digest_config: Record<string, unknown> }>) {
+    for (const row of recipients) {
       try {
         const cfg = row.digest_config ?? {};
         const fmt = (cfg.digestFormat as string) ?? "concise";
@@ -130,9 +149,9 @@ durableJobQueue.register(NAMED_JOB_TYPES.HOURLY_EXECUTIVE_DIGEST, async (job) =>
     return;
   }
 
-  serverTelemetry.recordBusinessEvent({ type: "hourly_executive_digest_completed", durationMs: Date.now() - start, success: true, metadata: { currentHour, currentMinute, dispatched, skipped, failed } });
+  serverTelemetry.recordBusinessEvent({ type: "hourly_executive_digest_completed", durationMs: Date.now() - start, success: true, metadata: { dispatched, skipped, failed } });
   updateRegistry(NAMED_JOB_TYPES.HOURLY_EXECUTIVE_DIGEST, { lastStatus: "completed", lastDurationMs: Date.now() - start });
-  logger.info({ jobId: job.id, currentHour, currentMinute, dispatched, skipped, failed }, "hourly_executive_digest: complete");
+  logger.info({ jobId: job.id, dispatched, skipped, failed }, "hourly_executive_digest: complete");
 });
 
 function updateRegistry(type: NamedJobType, update: Partial<JobScheduleEntry>) {

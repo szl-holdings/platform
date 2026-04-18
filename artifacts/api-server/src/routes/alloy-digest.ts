@@ -294,6 +294,7 @@ const digestConfigSchema = z.object({
   enabled: z.boolean(),
   deliveryHour: z.number().int().min(0).max(23),
   deliveryMinute: z.number().int().min(0).max(59),
+  timezone: z.string().min(1).max(64).default("UTC"),
   includedDomains: z.array(z.string()).max(64),
   sections: z.record(z.string(), z.boolean()),
   digestFormat: z.enum(["concise", "detailed"]),

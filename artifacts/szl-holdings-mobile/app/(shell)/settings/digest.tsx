@@ -26,6 +26,7 @@ interface DigestConfig {
   enabled: boolean;
   deliveryHour: number;
   deliveryMinute: number;
+  timezone: string;
   includedDomains: string[];
   sections: {
     overnightAlerts: boolean;
@@ -38,10 +39,19 @@ interface DigestConfig {
   digestFormat: "concise" | "detailed";
 }
 
+function getDeviceTimezone(): string {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+  } catch {
+    return "UTC";
+  }
+}
+
 const DEFAULT_CONFIG: DigestConfig = {
   enabled: true,
   deliveryHour: 6,
   deliveryMinute: 30,
+  timezone: getDeviceTimezone(),
   includedDomains: ["command", "defense", "portfolio", "fleet"],
   sections: {
     overnightAlerts: true,
@@ -182,19 +192,28 @@ export default function DigestConfigScreen() {
     if (saving) return;
     setSaving(true);
     try {
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(config));
-      await scheduleDigestNotification(config);
+      const payload = { ...config, timezone: config.timezone || getDeviceTimezone() };
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      await scheduleDigestNotification(payload);
+      let apiOk = true;
       try {
         await apiFetch("/api/alloy/digest/config", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(config),
+          body: JSON.stringify(payload),
         });
       } catch (apiErr) {
+        apiOk = false;
         console.warn("[CORTEX Digest] API sync failed (config saved locally):", apiErr);
+        Alert.alert(
+          "Saved locally",
+          "We couldn't sync your digest schedule with the server, so push delivery may not run at your chosen time. Your phone will still fire the local reminder. Try saving again when you're online."
+        );
       }
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2500);
+      if (apiOk) {
+        setSaved(true);
+        setTimeout(() => setSaved(false), 2500);
+      }
     } finally {
       setSaving(false);
     }
