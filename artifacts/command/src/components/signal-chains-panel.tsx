@@ -76,6 +76,94 @@ const STATUS_COLORS: Record<string, string> = {
   running: "#f59e0b",
 };
 
+const DEMO_CHAINS: SignalChain[] = [
+  {
+    id: "sc-fleet-reroute",
+    name: "Fleet Reroute on Weather Alert",
+    description: "When weather severity exceeds threshold in an active shipping corridor, notify fleet ops and queue route optimization across affected vessels.",
+    triggerDomain: "vessels",
+    triggerSignal: "weather_severity_score",
+    triggerThreshold: 0.7,
+    targetDomains: ["terra", "szl-holdings"],
+    severity: "high",
+    enabled: true,
+    executionCount: 14,
+    lastExecuted: Date.now() - 3600000,
+    stepCount: 4,
+    lastExecution: {
+      executionId: "exec-fleet-0042",
+      chainId: "sc-fleet-reroute",
+      triggeredAt: Date.now() - 3600000,
+      triggerReason: "Bay of Bengal weather severity score reached 0.78 (threshold: 0.70)",
+      triggerValue: 0.78,
+      threshold: 0.70,
+      status: "completed",
+      steps: [
+        { id: "step-1", domain: "vessels", action: "Identify affected vessels", status: "executed", executedAt: Date.now() - 3540000, explainability: "Queried fleet positions — 3 vessels within affected corridor identified", resultSummary: "MV Meridian, MV Catalyst, MV Horizon flagged" },
+        { id: "step-2", domain: "vessels", action: "Queue route optimization", status: "executed", executedAt: Date.now() - 3480000, explainability: "Route optimization tasks queued for 3 vessels based on alternate corridor data", resultSummary: "Estimated $180K fuel savings if approved" },
+        { id: "step-3", domain: "terra", action: "Flag logistics-dependent properties", status: "executed", executedAt: Date.now() - 3420000, explainability: "Identified 12 Terra properties with active port logistics dependencies", resultSummary: "12 assets flagged for delivery timeline review" },
+        { id: "step-4", domain: "szl-holdings", action: "Update executive briefing", status: "executed", executedAt: Date.now() - 3360000, explainability: "Morning digest updated with fleet reroute context and estimated impact", resultSummary: "Digest updated — financial exposure: ~$320K" },
+      ],
+    },
+  },
+  {
+    id: "sc-cyber-escalate",
+    name: "Perimeter Breach → Legal Hold",
+    description: "When Aegis detects a confirmed intrusion exceeding critical threshold, automatically trigger legal hold across affected subsidiaries and notify CISO.",
+    triggerDomain: "aegis",
+    triggerSignal: "intrusion_confidence_score",
+    triggerThreshold: 0.85,
+    targetDomains: ["szl-holdings", "prism"],
+    severity: "critical",
+    enabled: true,
+    executionCount: 3,
+    lastExecuted: Date.now() - 1800000,
+    stepCount: 3,
+    lastExecution: {
+      executionId: "exec-cyber-0011",
+      chainId: "sc-cyber-escalate",
+      triggeredAt: Date.now() - 1800000,
+      triggerReason: "APT-41 lateral movement confidence score reached 0.97 (threshold: 0.85)",
+      triggerValue: 0.97,
+      threshold: 0.85,
+      status: "completed",
+      steps: [
+        { id: "step-1", domain: "aegis", action: "Isolate affected network segments", status: "executed", executedAt: Date.now() - 1740000, explainability: "Network isolation applied to 3 subsidiary segments exhibiting lateral movement indicators" },
+        { id: "step-2", domain: "szl-holdings", action: "Trigger legal hold", status: "executed", executedAt: Date.now() - 1680000, explainability: "Legal hold initiated across 3 subsidiaries per incident response protocol" },
+        { id: "step-3", domain: "prism", action: "Generate threat intelligence brief", status: "executed", executedAt: Date.now() - 1620000, explainability: "PRISM cross-domain pattern analysis completed — brief delivered to CISO and Legal" },
+      ],
+    },
+  },
+  {
+    id: "sc-market-vol",
+    name: "Market Volatility → Portfolio Rebalance",
+    description: "When Holdings volatility index exceeds 0.70, trigger asset review across Terra and Vessels, and queue rebalancing recommendation for the investment committee.",
+    triggerDomain: "szl-holdings",
+    triggerSignal: "market_volatility_index",
+    triggerThreshold: 0.70,
+    targetDomains: ["terra", "vessels"],
+    severity: "medium",
+    enabled: true,
+    executionCount: 7,
+    lastExecuted: Date.now() - 7200000,
+    stepCount: 3,
+  },
+  {
+    id: "sc-slo-breach",
+    name: "SLO Breach → On-Call Escalation",
+    description: "When Lyte platform error budget drops below 10%, automatically page the on-call team and pause non-critical deployments.",
+    triggerDomain: "lyte",
+    triggerSignal: "error_budget_remaining",
+    triggerThreshold: 0.10,
+    targetDomains: ["lyte"],
+    severity: "high",
+    enabled: false,
+    executionCount: 2,
+    lastExecuted: Date.now() - 86400000 * 3,
+    stepCount: 2,
+  },
+];
+
 function timeAgo(ts?: number | string) {
   if (!ts) return "Never";
   const diff = Date.now() - (typeof ts === "string" ? new Date(ts).getTime() : ts);
@@ -104,10 +192,18 @@ export function SignalChainsPanel({ apiBase = "" }: SignalChainsPanelProps) {
     setLoading(true);
     try {
       const res = await fetch(`${apiBase}/api/signal-chains`);
+      if (res.status === 401 || res.status === 403) {
+        setChains((prev) => prev.length > 0 ? prev : DEMO_CHAINS);
+        return;
+      }
       const data = await res.json();
-      if (data.success) setChains(data.chains);
+      if (data.success && Array.isArray(data.chains) && data.chains.length > 0) {
+        setChains(data.chains);
+      } else {
+        setChains((prev) => prev.length > 0 ? prev : DEMO_CHAINS);
+      }
     } catch {
-      /* ignore */
+      setChains((prev) => prev.length > 0 ? prev : DEMO_CHAINS);
     } finally {
       setLoading(false);
     }

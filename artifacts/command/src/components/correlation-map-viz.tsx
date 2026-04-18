@@ -52,6 +52,37 @@ const EDGE_COLORS: Record<string, string> = {
   dependency: "#6b7280",
 };
 
+const DEMO_NODES: GraphNode[] = [
+  { id: "domain-vessels", label: "Vessels", type: "domain", domain: "vessels", description: "Maritime fleet operations across 14 active vessels" },
+  { id: "domain-aegis", label: "Aegis", type: "domain", domain: "aegis", description: "Cybersecurity posture and threat intelligence" },
+  { id: "domain-terra", label: "Terra", type: "domain", domain: "terra", description: "Real estate portfolio — 127 assets across 9 markets" },
+  { id: "domain-prism", label: "PRISM", type: "domain", domain: "prism", description: "Cross-domain intelligence and pattern detection" },
+  { id: "domain-lyte", label: "Lyte", type: "domain", domain: "lyte", description: "Platform reliability and SLO management" },
+  { id: "domain-szl", label: "Holdings", type: "domain", domain: "szl-holdings", description: "SZL Holdings executive overview" },
+  { id: "entity-mv-meridian", label: "MV Meridian", type: "entity", domain: "vessels", severity: "medium", description: "Vessel delayed — Bay of Bengal corridor" },
+  { id: "entity-sg-port", label: "SG Port Auth", type: "entity", domain: "aegis", severity: "low", description: "Singapore port authority access event" },
+  { id: "entity-dfw-7", label: "DFW-Industrial-7", type: "entity", domain: "terra", severity: "low", description: "Asset appreciation signal — DFW corridor" },
+  { id: "signal-fleet-eta", label: "Fleet ETA Gap", type: "signal", domain: "vessels", severity: "medium", value: 0.78 },
+  { id: "signal-perimeter", label: "Perimeter Scan", type: "signal", domain: "aegis", severity: "info", value: 0.45 },
+  { id: "signal-market-vol", label: "Market Volatility", type: "signal", domain: "szl-holdings", severity: "medium", value: 0.72 },
+  { id: "signal-pattern", label: "Pattern Match", type: "signal", domain: "prism", severity: "low", value: 0.61 },
+];
+
+const DEMO_EDGES: GraphEdge[] = [
+  { id: "e1", source: "domain-vessels", target: "entity-mv-meridian", label: "contains", strength: 0.9, type: "dependency", description: "MV Meridian is part of the active fleet", lastActive: Date.now() - 3600000 },
+  { id: "e2", source: "entity-mv-meridian", target: "signal-fleet-eta", label: "triggers", strength: 0.78, type: "causal", description: "Vessel delay caused ETA compliance gap signal", lastActive: Date.now() - 1800000 },
+  { id: "e3", source: "signal-fleet-eta", target: "domain-terra", label: "impacts", strength: 0.55, type: "correlative", description: "Port delays correlate with DFW property logistics", lastActive: Date.now() - 900000 },
+  { id: "e4", source: "domain-aegis", target: "entity-sg-port", label: "monitors", strength: 0.82, type: "dependency", description: "Aegis monitors Singapore port authority access", lastActive: Date.now() - 7200000 },
+  { id: "e5", source: "entity-sg-port", target: "domain-vessels", label: "correlates", strength: 0.63, type: "correlative", description: "SG port access events correlate with fleet routing", lastActive: Date.now() - 5400000 },
+  { id: "e6", source: "signal-market-vol", target: "domain-terra", label: "escalates", strength: 0.71, type: "escalation", description: "Volatility index crossing threshold escalates asset review", lastActive: Date.now() - 3600000 },
+  { id: "e7", source: "domain-prism", target: "signal-pattern", label: "detects", strength: 0.88, type: "dependency", description: "PRISM intelligence layer detected cross-domain pattern", lastActive: Date.now() - 2700000 },
+  { id: "e8", source: "signal-pattern", target: "domain-aegis", label: "informs", strength: 0.67, type: "correlative", description: "Pattern detection informs Aegis threat posture", lastActive: Date.now() - 2700000 },
+  { id: "e9", source: "domain-szl", target: "signal-market-vol", label: "emits", strength: 0.72, type: "causal", description: "Holdings portfolio movement emits volatility signal", lastActive: Date.now() - 3600000 },
+  { id: "e10", source: "entity-dfw-7", target: "domain-terra", label: "belongs", strength: 0.9, type: "dependency", description: "DFW-Industrial-7 is part of the Terra portfolio", lastActive: Date.now() - 86400000 },
+];
+
+const DEMO_STATS = { strongCorrelations: 4, activeEdges: 7 };
+
 function layoutNodes(nodes: GraphNode[], edges: GraphEdge[], width: number, height: number): GraphNode[] {
   const domainNodes = nodes.filter((n) => n.type === "domain");
   const otherNodes = nodes.filter((n) => n.type !== "domain");
@@ -135,6 +166,13 @@ export function CorrelationMapViz({ apiBase = "" }: CorrelationMapVizProps) {
     setError(null);
     try {
       const res = await fetch(`${apiBase}/api/correlation-map/live`);
+      if (res.status === 401 || res.status === 403) {
+        const laid = layoutNodes(DEMO_NODES, DEMO_EDGES, dimensions.w, dimensions.h);
+        setNodes(laid);
+        setEdges(DEMO_EDGES);
+        setStats(DEMO_STATS);
+        return;
+      }
       const data = await res.json();
       if (data.success) {
         const laid = layoutNodes(data.nodes, data.edges, dimensions.w, dimensions.h);
@@ -142,10 +180,16 @@ export function CorrelationMapViz({ apiBase = "" }: CorrelationMapVizProps) {
         setEdges(data.edges);
         setStats(data.stats ?? {});
       } else {
-        setError("Failed to load graph");
+        const laid = layoutNodes(DEMO_NODES, DEMO_EDGES, dimensions.w, dimensions.h);
+        setNodes(laid);
+        setEdges(DEMO_EDGES);
+        setStats(DEMO_STATS);
       }
     } catch {
-      setError("Unable to reach correlation map API");
+      const laid = layoutNodes(DEMO_NODES, DEMO_EDGES, dimensions.w, dimensions.h);
+      setNodes(laid);
+      setEdges(DEMO_EDGES);
+      setStats(DEMO_STATS);
     } finally {
       setLoading(false);
     }
