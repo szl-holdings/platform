@@ -205,6 +205,209 @@ export function OutcomeFeedbackCard({ outcomeId, recommendationText, recommendat
   );
 }
 
+export interface InlineFeedbackBarProps {
+  recommendationKey: string;
+  domain?: string;
+  recommendationText: string;
+  apiBaseUrl?: string;
+  className?: string;
+}
+
+const LS_PREFIX = "inline_feedback_";
+
+function getCsrfToken(): string {
+  if (typeof document === "undefined") return "";
+  const match = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
+  return match ? decodeURIComponent(match[1] ?? "") : "";
+}
+
+async function ensureCsrfToken(apiBaseUrl: string): Promise<string> {
+  const existing = getCsrfToken();
+  if (existing) return existing;
+  try {
+    await fetch(`${apiBaseUrl}/csrf-token`, { credentials: "include" });
+  } catch {
+    return "";
+  }
+  return getCsrfToken();
+}
+
+function loadFeedbackState(key: string): { vote: "up" | "down"; comment?: string } | null {
+  try {
+    const raw = localStorage.getItem(LS_PREFIX + key);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveFeedbackState(key: string, vote: "up" | "down", comment?: string) {
+  try {
+    localStorage.setItem(LS_PREFIX + key, JSON.stringify({ vote, comment }));
+  } catch {
+  }
+}
+
+export function InlineFeedbackBar({
+  recommendationKey,
+  domain = "general",
+  recommendationText,
+  apiBaseUrl = "/api",
+  className,
+}: InlineFeedbackBarProps) {
+  const [submitted, setSubmitted] = React.useState<"up" | "down" | null>(() => loadFeedbackState(recommendationKey)?.vote ?? null);
+  const [submittedComment, setSubmittedComment] = React.useState<string | undefined>(() => loadFeedbackState(recommendationKey)?.comment);
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState(false);
+  const [showComment, setShowComment] = React.useState(false);
+  const [pendingVote, setPendingVote] = React.useState<"up" | "down" | null>(null);
+  const [comment, setComment] = React.useState("");
+
+  React.useEffect(() => {
+    const state = loadFeedbackState(recommendationKey);
+    setSubmitted(state?.vote ?? null);
+    setSubmittedComment(state?.comment);
+    setLoading(false);
+    setError(false);
+    setShowComment(false);
+    setPendingVote(null);
+    setComment("");
+  }, [recommendationKey]);
+
+  const handleVoteClick = (vote: "up" | "down") => {
+    if (submitted || loading) return;
+    setError(false);
+    setPendingVote(vote);
+    setShowComment(true);
+  };
+
+  const handleSubmit = React.useCallback(async (vote: "up" | "down", c?: string) => {
+    if (loading || submitted) return;
+    setLoading(true);
+    setError(false);
+    try {
+      const csrfToken = await ensureCsrfToken(apiBaseUrl);
+      const res = await fetch(`${apiBaseUrl}/outcome-graph/feedback`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(csrfToken ? { "x-csrf-token": csrfToken } : {}),
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          recommendationKey,
+          domain,
+          recommendationText,
+          vote,
+          comment: c || undefined,
+        }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      saveFeedbackState(recommendationKey, vote, c);
+      setSubmitted(vote);
+      setSubmittedComment(c || undefined);
+      setShowComment(false);
+    } catch {
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  }, [loading, submitted, apiBaseUrl, recommendationKey, domain, recommendationText]);
+
+  if (submitted) {
+    return (
+      <div className={className} style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 0" }}>
+        <span style={{ fontSize: 11, color: TEXT.tertiary }}>Your feedback:</span>
+        <span style={{
+          fontSize: 13,
+          color: submitted === "up" ? ACCENT.green : ACCENT.red,
+          lineHeight: 1,
+        }}>
+          {submitted === "up" ? "👍" : "👎"}
+        </span>
+        {submittedComment && (
+          <span style={{ fontSize: 11, color: TEXT.secondary, fontStyle: "italic" }}>"{submittedComment}"</span>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className={className} style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <span style={{ fontSize: 11, color: TEXT.tertiary }}>Was this recommendation helpful?</span>
+        <button
+          onClick={() => handleVoteClick("up")}
+          disabled={loading}
+          title="Thumbs up — helpful"
+          style={{
+            padding: "2px 8px", borderRadius: 5,
+            border: `1px solid ${ACCENT.green}40`,
+            background: pendingVote === "up" ? `${ACCENT.green}20` : `${ACCENT.green}08`,
+            color: ACCENT.green, fontSize: 14, cursor: "pointer",
+            opacity: loading ? 0.5 : 1, lineHeight: 1.6,
+          }}
+        >👍</button>
+        <button
+          onClick={() => handleVoteClick("down")}
+          disabled={loading}
+          title="Thumbs down — not helpful"
+          style={{
+            padding: "2px 8px", borderRadius: 5,
+            border: `1px solid ${ACCENT.red}40`,
+            background: pendingVote === "down" ? `${ACCENT.red}20` : `${ACCENT.red}08`,
+            color: ACCENT.red, fontSize: 14, cursor: "pointer",
+            opacity: loading ? 0.5 : 1, lineHeight: 1.6,
+          }}
+        >👎</button>
+        {error && (
+          <span style={{ fontSize: 11, color: ACCENT.red }}>Failed to submit — please try again.</span>
+        )}
+      </div>
+      {showComment && pendingVote && (
+        <div style={{ display: "flex", gap: 6 }}>
+          <input
+            autoFocus
+            value={comment}
+            onChange={e => setComment(e.target.value)}
+            placeholder="Add a comment (optional)"
+            style={{
+              flex: 1, padding: "4px 8px", borderRadius: 5,
+              border: `1px solid ${BORDER.muted}`,
+              background: BG.surface, color: TEXT.primary, fontSize: 11, outline: "none",
+            }}
+            onKeyDown={e => {
+              if (e.key === "Enter") handleSubmit(pendingVote, comment);
+              if (e.key === "Escape") { setShowComment(false); setPendingVote(null); }
+            }}
+          />
+          <button
+            onClick={() => handleSubmit(pendingVote, comment)}
+            disabled={loading}
+            style={{
+              padding: "4px 10px", borderRadius: 5,
+              border: `1px solid ${pendingVote === "up" ? ACCENT.green : ACCENT.red}40`,
+              background: `${pendingVote === "up" ? ACCENT.green : ACCENT.red}18`,
+              color: pendingVote === "up" ? ACCENT.green : ACCENT.red,
+              fontSize: 11, cursor: "pointer",
+            }}
+          >Submit</button>
+          <button
+            onClick={() => handleSubmit(pendingVote)}
+            disabled={loading}
+            style={{
+              padding: "4px 8px", borderRadius: 5,
+              border: `1px solid ${BORDER.muted}`,
+              background: BG.elevated, color: TEXT.tertiary, fontSize: 11, cursor: "pointer",
+              opacity: loading ? 0.5 : 1,
+            }}
+          >Skip comment</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export interface OutcomeDashboardProps {
   orgId?: number;
   domain?: string;

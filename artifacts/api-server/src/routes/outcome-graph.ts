@@ -282,4 +282,47 @@ outcomeGraphRouter.get(
   },
 );
 
+const inlineFeedbackSchema = z.object({
+  recommendationKey: z.string().min(1),
+  domain: domainEnum.default("general"),
+  recommendationText: z.string().min(1),
+  vote: z.enum(["up", "down"]),
+  comment: z.string().optional(),
+});
+
+outcomeGraphRouter.post("/outcome-graph/feedback", async (req: Request, res: Response) => {
+  try {
+    const parsed = inlineFeedbackSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return void res.status(400).json({ error: "Validation failed", details: parsed.error.issues });
+    }
+
+    const user = (req as any).user;
+    const { recommendationKey, domain, recommendationText, vote, comment } = parsed.data;
+
+    const row = await recordRecommendation({
+      orgId: user?.orgId ?? null,
+      domain,
+      entityType: "inline_feedback",
+      entityId: recommendationKey,
+      recommendationId: recommendationKey,
+      recommendationText,
+      agentId: "inline",
+      confidence: undefined,
+    });
+
+    const decision = await recordDecision({
+      outcomeId: row.id,
+      userDecision: vote === "up" ? "accepted" : "rejected",
+      decidedByUserId: user?.id,
+      overrideReason: comment,
+    });
+
+    return void res.status(201).json({ success: true, data: { id: row.id, vote, decision } });
+  } catch (err) {
+    logger.error({ err }, "POST /outcome-graph/feedback error:");
+    return void res.status(500).json({ error: "Failed to record inline feedback" });
+  }
+});
+
 export default outcomeGraphRouter;

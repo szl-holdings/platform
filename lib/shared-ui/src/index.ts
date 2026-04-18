@@ -91,10 +91,12 @@ export {
   OutcomeFeedbackBar,
   OutcomeFeedbackCard,
   OutcomeDashboard,
+  InlineFeedbackBar,
   type OutcomeDecision,
   type OutcomeFeedbackProps,
   type OutcomeFeedbackBarProps,
   type OutcomeDashboardProps,
+  type InlineFeedbackBarProps,
 } from "./outcome-feedback";
 
 export {

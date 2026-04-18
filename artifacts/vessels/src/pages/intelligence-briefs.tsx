@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { consumeBriefSignal, getAutonomousSignal } from "../lib/briefSignal";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { InlineFeedbackBar } from "@szl-holdings/shared-ui";
 import {
   FileText, AlertTriangle, Globe, DollarSign, Shield, Ship,
   Clock, Users, ChevronRight, Zap, ArrowRight, CheckCircle2,
@@ -237,6 +238,16 @@ function BriefCard({ brief }: { brief: typeof BRIEFS[0] }) {
                 <span key={i} className="text-[9px] text-sky-400/40 px-2 py-0.5 rounded border border-sky-500/10 bg-sky-500/3">{s}</span>
               ))}
             </div>
+          </div>
+
+          {/* Inline feedback */}
+          <div className="px-5 py-3 border-t border-sky-500/10 bg-sky-500/2">
+            <InlineFeedbackBar
+              recommendationKey={`vessels-intel-brief-${brief.id}`}
+              domain="maritime"
+              recommendationText={brief.recommendations[0] ?? brief.title}
+              apiBaseUrl="/api"
+            />
           </div>
         </div>
       )}

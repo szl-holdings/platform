@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { InlineFeedbackBar } from "@szl-holdings/shared-ui";
 import { Zap, Users, Globe, Shield, Target, TrendingUp, CheckCircle, Clock, AlertTriangle, ArrowRight, Eye } from "lucide-react";
 
 const ACCENT = "#f59e0b";
@@ -122,6 +123,14 @@ export default function DecisionSupportPage() {
                     className="text-[8px] font-semibold rounded px-2.5 py-1 hover:brightness-125 transition" style={{ background: "rgba(255,255,255,0.04)", color: DS.text.muted }}>Reject</button>
                 </div>
               )}
+            </div>
+            <div style={{ borderTop: "1px solid rgba(255,255,255,0.04)", paddingTop: 10, marginTop: 4 }}>
+              <InlineFeedbackBar
+                recommendationKey={`aegis-decision-support-${rec.id}`}
+                domain="security"
+                recommendationText={rec.action}
+                apiBaseUrl="/api"
+              />
             </div>
           </div>
         ))}

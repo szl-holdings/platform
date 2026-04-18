@@ -3,6 +3,7 @@ import { Brain, TrendingUp, AlertTriangle, Activity, Shield, ChevronDown, Chevro
 import { predictions, type Prediction } from "@/data/brokerage";
 import { RiskBadge, ConfidenceBadge, formatCurrency } from "@/components/brokerage-ui";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { InlineFeedbackBar } from "@szl-holdings/shared-ui";
 import { useState } from "react";
 
 function ProbabilityRing({ value, size = 80 }: { value: number; size?: number }) {
@@ -78,6 +79,14 @@ function CloseLikelihoodPanel({ pred }: { pred: Prediction }) {
             </div>
           </div>
           <ConfidenceBadge value={cl.probability} />
+          <div className="pt-2 border-t border-terra-border/40">
+            <InlineFeedbackBar
+              recommendationKey={`terra-close-likelihood-${pred.id}`}
+              domain="real_estate"
+              recommendationText={cl.nextAction}
+              apiBaseUrl="/api"
+            />
+          </div>
         </div>
       )}
     </div>
@@ -130,6 +139,14 @@ function PricingConfidencePanel({ pred }: { pred: Prediction }) {
             <p className="text-xs text-terra-text-secondary leading-relaxed">{pc.rationale}</p>
           </div>
           <AssumptionList items={pc.assumptions} label="Assumptions" />
+          <div className="pt-2 border-t border-terra-border/40">
+            <InlineFeedbackBar
+              recommendationKey={`terra-pricing-confidence-${pred.id}`}
+              domain="real_estate"
+              recommendationText={pc.recommendation}
+              apiBaseUrl="/api"
+            />
+          </div>
         </div>
       )}
     </div>
@@ -183,6 +200,14 @@ function StallRiskPanel({ pred }: { pred: Prediction }) {
             <p className="text-xs text-terra-text-secondary leading-relaxed">{sr.rationale}</p>
           </div>
           <AssumptionList items={sr.triggerFactors} label="Trigger Factors" />
+          <div className="pt-2 border-t border-terra-border/40">
+            <InlineFeedbackBar
+              recommendationKey={`terra-stall-risk-${pred.id ?? pred.dealAddress}`}
+              domain="real_estate"
+              recommendationText={sr.recoveryRecommendation}
+              apiBaseUrl="/api"
+            />
+          </div>
         </div>
       )}
     </div>
