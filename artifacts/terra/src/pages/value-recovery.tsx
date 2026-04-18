@@ -27,7 +27,7 @@ export default function ValueRecovery() {
       <div>
         <div className="flex items-center gap-2 mb-1">
           <TrendingDown className="w-4 h-4" style={{ color: "#10b981" }} />
-          <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "#0ea5e9" }}>Beacon · Value Recovery</span>
+          <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "#0ea5e9" }}>Lyte · Value Recovery</span>
         </div>
         <h1 className="text-2xl font-bold text-white">Value Recovery View</h1>
         <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>Risk estimation, intervention impact, and before/after recovery comparison. Phase: VERIFY.</p>

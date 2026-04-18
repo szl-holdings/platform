@@ -19,10 +19,10 @@ interface TopologyResponse {
 }
 
 const PLATFORM_NODES = [
-  { id: "api-gateway",      label: "API Gateway",      icon: Shield,   connects: ["lyte-core", "alloy-engine", "terra-beacon", "vessels-intel", "firestorm-soc"], platform: "Core" },
+  { id: "api-gateway",      label: "API Gateway",      icon: Shield,   connects: ["lyte-core", "alloy-engine", "terra-lyte", "vessels-intel", "firestorm-soc"], platform: "Core" },
   { id: "lyte-core",        label: "Lyte Core",        icon: Zap,      connects: ["signal-bus", "action-router", "prism-engine"], platform: "Lyte" },
   { id: "alloy-engine",     label: "Alloy Engine",     icon: Layers,   connects: ["signal-bus", "workflow-exec", "ml-inference"], platform: "Alloy" },
-  { id: "terra-beacon",     label: "Terra Beacon",     icon: Globe,    connects: ["signal-bus", "geo-index", "crm-sync"], platform: "Terra" },
+  { id: "terra-lyte",     label: "Terra Lyte",     icon: Globe,    connects: ["signal-bus", "geo-index", "crm-sync"], platform: "Terra" },
   { id: "vessels-intel",    label: "Vessels Intel",    icon: Activity, connects: ["signal-bus", "ais-stream", "port-api"], platform: "Vessels" },
   { id: "firestorm-soc",    label: "Aegis SOC",    icon: Shield,   connects: ["signal-bus", "threat-db", "vuln-scan"], platform: "Aegis" },
   { id: "signal-bus",       label: "Signal Bus",       icon: Activity, connects: ["prism-engine", "alert-engine", "escalation-mgr"], platform: "Core" },

@@ -22,7 +22,7 @@ const AGENT_DEFS = [
   { id: "alloy", name: "Alloy", domain: "Orchestration", color: ACCENT, icon: "git-merge", model: "gpt-5.2" },
   { id: "sentinel", name: "Sentinel", domain: "Security", color: RED, icon: "shield", model: "claude-sonnet-4-6" },
   { id: "helmsman", name: "Helmsman", domain: "Maritime", color: "#0ea5e9", icon: "anchor", model: "claude-sonnet-4-6" },
-  { id: "inca", name: "INCA", domain: "Research", color: "#8b5cf6", icon: "cpu", model: "gemini-3.1-pro" },
+  { id: "eval", name: "Eval Engine", domain: "Research", color: "#8b5cf6", icon: "cpu", model: "gemini-3.1-pro" },
   { id: "beacon", name: "Terra Analytics", domain: "Analytics", color: GREEN, icon: "bar-chart-2", model: "gpt-5.2" },
   { id: "zeus", name: "Zeus", domain: "Infrastructure", color: "#6366f1", icon: "server", model: "gpt-5.2" },
   { id: "compass", name: "Compass", domain: "Readiness", color: AMBER, icon: "compass", model: "claude-sonnet-4-6" },
@@ -74,7 +74,7 @@ function AgentCard({ agent, live }: { agent: typeof AGENT_DEFS[0]; live?: { stat
 const DELEGATION_CHAIN = [
   { from: "User", to: "Alloy", action: "Query: threat landscape", ts: "14:32:01" },
   { from: "Alloy", to: "Sentinel", action: "Route: security analysis", ts: "14:32:02" },
-  { from: "Sentinel", to: "INCA", action: "Delegate: CVE research", ts: "14:32:03" },
+  { from: "Sentinel", to: "Eval Engine", action: "Delegate: CVE research", ts: "14:32:03" },
   { from: "Sentinel", to: "Alloy", action: "Return: enriched response", ts: "14:32:05" },
   { from: "Alloy", to: "User", action: "Synthesized answer", ts: "14:32:06" },
 ];
@@ -119,7 +119,7 @@ export default function AgentsScreen() {
     <View style={[styles.root, { paddingTop: insets.top }]}>
       <View style={styles.header}>
         <Text style={styles.title}>Agent Operations</Text>
-        <Text style={styles.subtitle}>Nuro Mesh · Real-time autonomy</Text>
+        <Text style={styles.subtitle}>Alloy · Real-time autonomy</Text>
       </View>
 
       <View style={styles.statsRow}>

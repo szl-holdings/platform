@@ -42,6 +42,7 @@
     "@tanstack/query-persist-client-core": "^5.99.0",
     "@tanstack/query-sync-storage-persister": "^5.99.0",
     "@types/mapbox-gl": "^3.5.0",
-    "mapbox-gl": "^3.20.0"
+    "mapbox-gl": "^3.20.0",
+    "@szl-holdings/brand-registry": "workspace:*"
   }
 }

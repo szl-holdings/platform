@@ -108,7 +108,7 @@ export default function Shell({ children }: { children: ReactNode }) {
             <Shield size={11} color="var(--pulse-gold)" />
             <span style={{ fontSize: "0.65rem", color: "var(--pulse-gold)", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}>SZL-EXEC-RESTRICTED · NOFORN · PROPRIETARY INTELLIGENCE</span>
           </div>
-          <span style={{ fontSize: "0.62rem", color: "var(--pulse-text-muted)" }}>Nuro Mesh v3.1 · Multi-Agent Synthesis</span>
+          <span style={{ fontSize: "0.62rem", color: "var(--pulse-text-muted)" }}>Alloy v3.1 · Multi-Agent Synthesis</span>
         </div>
 
         {/* Page content */}

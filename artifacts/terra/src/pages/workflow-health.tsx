@@ -40,7 +40,7 @@ export default function WorkflowHealth() {
       <div>
         <div className="flex items-center gap-2 mb-1">
           <Activity className="w-4 h-4" style={{ color: "#0ea5e9" }} />
-          <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "#0ea5e9" }}>Beacon · Workflow Health</span>
+          <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "#0ea5e9" }}>Lyte · Workflow Health</span>
         </div>
         <h1 className="text-2xl font-bold text-white">Workflow Health Monitor</h1>
         <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>Latency indicators, blocked steps, ownership gaps, and intervention status across all active workflows.</p>

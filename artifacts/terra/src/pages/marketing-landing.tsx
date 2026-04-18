@@ -1,3 +1,4 @@
+import { copyrightLine, aboutSzlParagraph } from "@szl-holdings/brand-registry";
 import { useState, useEffect, useRef } from "react";
 import {
   ArrowRight, Building2, MapPin, TrendingUp, DollarSign, Flame,
@@ -555,9 +556,12 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
               ))}
             </div>
           </div>
+          <p className="text-[10px] leading-relaxed mb-4 max-w-[540px]" style={{ color: "rgba(255,255,255,0.12)" }}>
+            {aboutSzlParagraph()}
+          </p>
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
             <p className="text-[11px] text-center sm:text-left" style={{ color: "rgba(255,255,255,0.12)" }}>
-              &copy; {new Date().getFullYear()} SZL Holdings. All rights reserved.
+              {copyrightLine()}
             </p>
             <div className="flex items-center gap-4">
               <a href="https://x.com/szlholdings" target="_blank" rel="noopener noreferrer" className="text-[10px] transition-colors" style={{ color: "rgba(255,255,255,0.15)" }} onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.4)")} onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.15)")}>X</a>

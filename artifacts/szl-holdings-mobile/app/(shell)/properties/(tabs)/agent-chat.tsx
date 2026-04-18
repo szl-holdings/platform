@@ -18,7 +18,7 @@ const TEXT_DIM = "rgba(245,240,232,0.35)";
 const AGENTS = [
   { id: "beacon", name: "Terra Analytics", role: "Real Estate Intelligence", icon: "home", color: "#b8943c" },
   { id: "alloy", name: "Alloy", role: "Orchestration", icon: "git-merge", color: "#c9a84c" },
-  { id: "inca", name: "INCA", role: "Research", icon: "search", color: "#8b5cf6" },
+  { id: "eval", name: "Eval Engine", role: "Research", icon: "search", color: "#8b5cf6" },
 ];
 
 interface Message {

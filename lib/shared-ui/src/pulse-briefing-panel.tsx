@@ -260,7 +260,7 @@ export function PulseBriefingPanel({
         display: "flex", alignItems: "center", justifyContent: "space-between",
       }}>
         <span style={{ fontSize: "0.62rem", color: "#394560" }}>
-          Nuro Mesh · {section?.agentName ?? "Alloy"} · {new Date(section?.lastUpdated ?? data.briefingDate).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
+          Alloy · {section?.agentName ?? "Alloy"} · {new Date(section?.lastUpdated ?? data.briefingDate).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
         </span>
         <a
           href={pulseUrl}

@@ -1,3 +1,4 @@
+import { copyrightLine } from "@szl-holdings/brand-registry";
 import { useState, useEffect, useRef } from "react";
 import { ContactModal, NewsletterSubscribe } from "@szl-holdings/shared-ui";
 import { Link } from "wouter";
@@ -447,7 +448,7 @@ export default function AegisHomePage() {
             <span className="text-[12px] font-semibold text-white/25">Aegis</span>
             <span className="text-[10px] text-white/15 font-mono">by SZL Holdings</span>
           </div>
-          <p className="text-[10px] text-white/15">&copy; {new Date().getFullYear()} SZL Holdings. All rights reserved.</p>
+          <p className="text-[10px] text-white/15">{copyrightLine()}</p>
         </div>
       </footer>
 

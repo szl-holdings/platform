@@ -364,7 +364,7 @@ export const ventures: Venture[] = [
       {
         title: "Portfolio Climate Exposure Audit",
         problem: "An institutional manager needed to assess climate risk across a 140-asset portfolio for a regulatory disclosure.",
-        solution: "Beacon ran a full climate overlay across the portfolio in 48 hours — flood, heat, and transition risk scored per asset.",
+        solution: "Lyte ran a full climate overlay across the portfolio in 48 hours — flood, heat, and transition risk scored per asset.",
         result: "Regulatory disclosure completed on schedule. 12 assets flagged for remediation planning.",
       },
     ],
@@ -435,7 +435,7 @@ export const ventures: Venture[] = [
       "Multi-agent coordination and policy enforcement",
       "DAG execution engine with retry and escalation",
       "Performance attribution per model variant",
-      "Integration with SZL Cortex, Beacon, Aegis, Lyte, and Vessels",
+      "Integration with SZL Cortex, Aegis, Lyte, and Vessels",
     ],
     nextMilestone: "Alloy Scenario Model Library public launch (Q2 2026)",
     path: "/ventures/alloy",

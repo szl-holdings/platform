@@ -5,7 +5,7 @@ const DOMAIN_AGENT_MAP: Record<string, string> = {
   terra: "Terra",
   vessels: "Helmsman",
   aegis: "Sentinel",
-  lyte: "Beacon",
+  lyte: "Lyte",
   prism: "Lexis",
   "szl-holdings": "Atlas",
   carlota: "Alloy",

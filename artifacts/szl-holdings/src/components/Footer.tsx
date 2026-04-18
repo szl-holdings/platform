@@ -1,4 +1,5 @@
 import { Link } from "wouter";
+import { copyrightLine, aboutSzlParagraph } from "@szl-holdings/brand-registry";
 
 const nav = [
   { label: "Ecosystem", href: "/ecosystem", external: false },
@@ -46,7 +47,7 @@ export function Footer() {
               <span style={{ color: "hsl(38,12%,88%)", fontWeight: "600", fontSize: "13px", letterSpacing: "-0.01em" }}>SZL Holdings</span>
             </Link>
             <p style={{ fontSize: "12px", lineHeight: "1.6", color: "hsl(210,5%,44%)", maxWidth: "22rem" }}>
-              Premium command systems across observability, operations, and specialized platforms.
+              {aboutSzlParagraph()}
             </p>
           </div>
 
@@ -84,7 +85,7 @@ export function Footer() {
 
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
           <p style={{ fontSize: "11.5px", color: "hsl(210,5%,38%)" }}>
-            © {new Date().getFullYear()} SZL Holdings. All rights reserved.
+            {copyrightLine()}
           </p>
           <div style={{ display: "flex", gap: "1.25rem" }}>
             {legal.map((item) => (

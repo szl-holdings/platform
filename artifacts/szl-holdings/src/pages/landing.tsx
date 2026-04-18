@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Link } from "wouter";
+import { getProduct } from "@szl-holdings/brand-registry";
 import { m, useInView } from "framer-motion";
 import {
   ArrowRight, Eye, Zap, Shield, CheckCircle2, Activity, Lock,
@@ -50,7 +51,7 @@ const PLATFORM_TIERS = [
     color: LYTE,
     note: "Operator-facing command surfaces",
     items: [
-      { name: "Lyte", note: "Operational nerve center — signal stream, situation board, governed action panel" },
+      { name: getProduct("lyte")?.name ?? "Lyte", note: "Operational nerve center — signal stream, situation board, governed action panel" },
       { name: "CORTEX", note: "Mobile command — all domains, biometric auth, iOS + Android" },
       { name: "Command Portal", note: "Ecosystem hub — cross-domain oversight" },
     ],
@@ -61,7 +62,7 @@ const PLATFORM_TIERS = [
     color: "hsl(215,72%,58%)",
     note: "Shared governance infrastructure",
     items: [
-      { name: "Alloy", note: "Workflow orchestration and governed execution" },
+      { name: getProduct("alloy")?.name ?? "Alloy", note: "Workflow orchestration and governed execution" },
       { name: "Outcome Graph", note: "Decision lifecycle and consequence measurement" },
       { name: "Proof Chain", note: "Immutable AI provenance and audit trail" },
       { name: "Covenant Policy", note: "Human-in-the-loop governance at the platform layer" },
@@ -88,8 +89,8 @@ const PLATFORM_TIERS = [
 const DOMAIN_PACKS = [
   {
     icon: ShieldCheck,
-    slug: "Aegis",
-    category: "Security & Defense",
+    slug: getProduct("aegis")?.name ?? "Aegis",
+    category: getProduct("aegis")?.tagline ?? "Security & Defense",
     desc: "SOC command, threat intelligence, MITRE ATT&CK mapping, and SOAR playbooks for environments where every decision has consequence. Policy-gated, fully audited.",
     color: "hsl(222,60%,60%)",
     href: "/solutions/aegis",
@@ -97,8 +98,8 @@ const DOMAIN_PACKS = [
   },
   {
     icon: Ship,
-    slug: "Vessels",
-    category: "Maritime Intelligence",
+    slug: getProduct("vessels")?.name ?? "Vessels",
+    category: getProduct("vessels")?.tagline ?? "Maritime Intelligence",
     desc: "Fleet command, AIS telemetry, voyage economics, dark vessel detection, and sanctions screening for fleet operators. Same proof chain, maritime intelligence layer.",
     color: "hsl(206,72%,54%)",
     href: "/solutions/vessels",
@@ -106,8 +107,8 @@ const DOMAIN_PACKS = [
   },
   {
     icon: Building2,
-    slug: "Terra",
-    category: "Real Estate Intelligence",
+    slug: getProduct("terra")?.name ?? "Terra",
+    category: getProduct("terra")?.tagline ?? "Real Estate Intelligence",
     desc: "NYC distress property pipeline, ownership entity graph, deal pipeline, and broker workflow. Data-rich intelligence with a governed underwriting flow.",
     color: "hsl(142,52%,48%)",
     href: "/solutions/terra",
@@ -115,8 +116,8 @@ const DOMAIN_PACKS = [
   },
   {
     icon: Briefcase,
-    slug: "PRISM Counsel",
-    category: "Legal Intelligence",
+    slug: getProduct("prism-counsel")?.name ?? "PRISM Counsel",
+    category: getProduct("prism-counsel")?.tagline ?? "Legal Intelligence",
     desc: "Matter twins, deadline tracking, and governed demand workflows for litigation teams. Governed legal operations with approval gates and Proof Chain.",
     color: "hsl(260,60%,65%)",
     href: "/solutions/prism-counsel",
@@ -124,8 +125,8 @@ const DOMAIN_PACKS = [
   },
   {
     icon: Users,
-    slug: "Carlota Jo",
-    category: "Premium Advisory",
+    slug: getProduct("carlota-jo")?.name ?? "Carlota Jo",
+    category: getProduct("carlota-jo")?.tagline ?? "Premium Advisory",
     desc: "Discreet client intake, managed service delivery, and advisory operations for UHNW principals. Governance-grade document handling and audit trail.",
     color: "hsl(340,52%,60%)",
     href: "/solutions/carlota-jo",

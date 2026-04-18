@@ -1,4 +1,5 @@
 import { Link } from "wouter";
+import { copyrightLine, aboutSzlParagraph } from "@szl-holdings/brand-registry";
 
 export function MarketingFooter() {
   return (
@@ -9,9 +10,9 @@ export function MarketingFooter() {
             SZL<span className="text-white/50">/COMMAND</span>
           </Link>
           <p className="max-w-sm mb-6 leading-relaxed">
-            A sophisticated multi-domain intelligence ecosystem. Nine specialized AI-powered command platforms covering maritime, real estate, defense, and beyond.
+            {aboutSzlParagraph()}
           </p>
-          <p>© {new Date().getFullYear()} SZL Holdings. All rights reserved.</p>
+          <p>{copyrightLine()}</p>
         </div>
         
         <div>

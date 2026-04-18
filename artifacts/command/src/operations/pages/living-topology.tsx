@@ -42,11 +42,11 @@ interface Particle {
 }
 
 const PLATFORM_NODES = [
-  { id: "api-gateway",      label: "API Gateway",      platform: "Core",      connects: ["lyte-core", "alloy-engine", "firestorm-soc", "terra-beacon"] },
+  { id: "api-gateway",      label: "API Gateway",      platform: "Core",      connects: ["lyte-core", "alloy-engine", "firestorm-soc", "terra-lyte"] },
   { id: "lyte-core",        label: "Lyte Core",        platform: "Lyte",      connects: ["signal-bus", "action-router", "prism-engine"] },
   { id: "alloy-engine",     label: "Alloy Engine",     platform: "Alloy",     connects: ["signal-bus", "workflow-exec", "ml-inference"] },
   { id: "firestorm-soc",    label: "Aegis SOC",    platform: "Aegis", connects: ["signal-bus", "threat-db"] },
-  { id: "terra-beacon",     label: "Terra Beacon",     platform: "Terra",     connects: ["signal-bus", "geo-index"] },
+  { id: "terra-lyte",     label: "Terra Lyte",     platform: "Terra",     connects: ["signal-bus", "geo-index"] },
   { id: "signal-bus",       label: "Signal Bus",       platform: "Core",      connects: ["prism-engine", "alert-engine", "escalation-mgr"] },
   { id: "ml-inference",     label: "ML Inference",     platform: "Alloy",     connects: ["metrics-store"] },
   { id: "workflow-exec",    label: "Workflow Exec",    platform: "Alloy",     connects: ["metrics-store", "action-router"] },
@@ -75,7 +75,7 @@ function initNodes(w: number, h: number): NodeState[] {
   const centerX = w / 2, centerY = h / 2;
   const rings = [
     ["api-gateway"],
-    ["lyte-core", "alloy-engine", "firestorm-soc", "terra-beacon"],
+    ["lyte-core", "alloy-engine", "firestorm-soc", "terra-lyte"],
     ["signal-bus", "ml-inference", "workflow-exec", "prism-engine", "threat-db", "geo-index"],
     ["alert-engine", "escalation-mgr", "action-router", "metrics-store", "notification-svc"],
   ];

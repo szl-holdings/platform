@@ -35,16 +35,17 @@ import * as Haptics from "expo-haptics";
 import { useQuery } from "@tanstack/react-query";
 import { useColors } from "@/hooks/useColors";
 import { SectionNav, Section } from "@/components/founder/SectionNav";
+import { mobile } from "@szl-holdings/brand-registry/mobile";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 const PROFILE = {
-  name: "Stephen Lutar",
-  title: "Founder & CEO",
-  company: "SZL Holdings",
+  name: mobile.founderName,
+  title: mobile.founderTitle,
+  company: mobile.companyName,
   thesis:
     "I build the systems that power enterprises — from fintech platforms processing millions in transactions to maritime intelligence tracking global fleets.",
-  email: "stephen@szlholdings.com",
+  email: mobile.email,
   phone: "+1 (202) 555-0100",
   linkedin: "https://linkedin.com/in/stephenlutar",
   location: "Washington, D.C. Metro",
@@ -194,7 +195,7 @@ const MILESTONES = [
     logoInitials: "AG",
     logoColor: "#6366f1",
     detail:
-      "Shipped unified cybersecurity command surface converging SOC operations (Firestorm), Managed Services (Aegis Operations), and Intelligence Engine (INCA).",
+      "Shipped unified cybersecurity command surface converging SOC operations (Firestorm), Managed Services (Aegis Operations), and Intelligence Engine (Aegis Labs).",
     achievement: "MITRE ATT&CK mapping, <1 min automated response",
     highlight: false,
   },
@@ -238,7 +239,7 @@ const CASE_STUDIES_FALLBACK: CaseStudy[] = [
     title: "Unified SOC Command Surface — Aegis",
     slug: "aegis-soc-command",
     summary:
-      "Converged three disparate security toolsets (Firestorm incident response, Aegis Operations MSP management, and INCA threat intelligence) into a single operator command surface mapped to the MITRE ATT&CK framework.",
+      "Converged three disparate security toolsets (Firestorm incident response, Aegis Operations MSP management, and Aegis Labs threat intelligence) into a single operator command surface mapped to the MITRE ATT&CK framework.",
     outcome: "Mean time to containment reduced from 18 minutes to under 60 seconds.",
   },
   {

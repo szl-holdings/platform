@@ -1,5 +1,6 @@
 import { Ship } from "lucide-react";
 import { Link } from "wouter";
+import { copyrightLine, aboutSzlParagraph } from "@szl-holdings/brand-registry";
 
 const productLinks = [
   { label: "Platform", href: "/platform" },
@@ -32,7 +33,7 @@ export function MarketingFooter() {
               <span className="font-bold text-[14px] text-sky-50">Vessels</span>
             </div>
             <p className="text-sky-300/30 text-[13px] leading-relaxed max-w-xs mb-3">
-              Maritime intelligence platform for fleet executives, operations, and commercial teams. Built by SZL Holdings.
+              {aboutSzlParagraph()}
             </p>
           </div>
 
@@ -65,7 +66,7 @@ export function MarketingFooter() {
 
         <div className="pt-6 border-t border-sky-500/10 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-sky-400/20 text-[12px]">
-            &copy; {new Date().getFullYear()} Vessels · SZL Holdings. All rights reserved.
+            {copyrightLine()}
           </p>
           <div className="flex items-center gap-4">
             <a href="https://x.com/szlholdings" target="_blank" rel="noopener noreferrer" className="text-sky-400/20 text-[12px] hover:text-sky-300/50 transition-colors">X</a>

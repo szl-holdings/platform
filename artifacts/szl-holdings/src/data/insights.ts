@@ -58,11 +58,11 @@ These numbers are real. They are also, frankly, the least interesting part of th
 
 ## What We Got Right
 
-**Vertical integration compounds differently than we expected.** When we wrote the original thesis, we modeled the shared infrastructure savings (40% lower cloud spend, unified security overhead) and the data network effects (models trained in one vertical improving adjacent predictions). What we didn't model accurately enough was the *talent* compounding. When you build six platforms under one holding structure, elite engineers and operators see a career trajectory, not a job. Our retention rate across portfolio companies is 91% — a full 23 points above comparable-stage venture-backed companies. The talent moat is real and it was underestimated.
+**Vertical integration compounds differently than we expected.** When we wrote the original thesis, we modeled the shared infrastructure savings (unified security overhead, shared intelligence infrastructure) and the data network effects (models trained in one vertical improving adjacent predictions). What we didn't model accurately enough was the *talent* compounding. When you build six platforms under one holding structure, elite engineers and operators see a career trajectory, not a job. Our retention rate across portfolio companies is 91% — a full 23 points above comparable-stage venture-backed companies. The talent moat is real and it was underestimated.
 
 **Domain specificity is a durable moat against foundational model commoditization.** The last 18 months produced the loudest chorus yet: "foundation models will commoditize everything." And yet Vessels Maritime Intelligence closed its largest enterprise contract in February — specifically because its AIS anomaly detection understands *why* a vessel deviates from its route, not just that it did. SZL Cortex's model evaluation platform expanded its enterprise footprint by 340% because it can assess model behavior on proprietary, domain-specific data distributions that general benchmarks cannot touch. The world has access to GPT-4 and Claude. It does not have access to five years of maritime routing signals, cybersecurity red team playbooks, and CRE portfolio analytics — all interconnected. That is the moat.
 
-**The holding company structure gives portfolio companies access to credibility and distribution they cannot buy.** When Aegis Security closed its third Fortune 500 client, the conversation began not with a product demo but with a briefing on SZL's broader thesis for enterprise security architecture. When Beacon was shortlisted for a $50M AUM advisory mandate, the due diligence team asked to meet the holding company first. The platform brand is an accelerant.
+**The holding company structure gives portfolio companies access to credibility and distribution they cannot buy.** When Aegis Security closed its third Fortune 500 client, the conversation began not with a product demo but with a briefing on SZL's broader thesis for enterprise security architecture. When Lyte was shortlisted for a $50M AUM advisory mandate, the due diligence team asked to meet the holding company first. The platform brand is an accelerant.
 
 ## Where The Work Remains Harder
 
@@ -86,8 +86,8 @@ $14M Series A closed February 2026. The LLM evaluation market is nascent and wil
 ### Vessels Maritime Intelligence — Maritime
 Vessels has the most patient capital profile in our portfolio and the largest long-term opportunity. AIS anomaly detection, dark vessel tracking, sanctions compliance, and climate routing overlays are each significant markets. Combined, with the geopolitical volatility of 2024–2026 driving maritime intelligence demand, we see Vessels as the eventual flagship platform of the ecosystem.
 
-### Beacon — Business Telemetry · OBSERVE
-$3.1M ARR. 34 enterprise clients. The business observability market is undergoing its most significant technology adoption cycle since Splunk. Beacon's continuous telemetry and anomaly detection suite are genuinely differentiated. The pipeline for 2026 includes a Business Telemetry API public launch and two potential platform license deals with institutional operators.
+### Lyte — Business Telemetry · OBSERVE
+$3.1M ARR. 34 enterprise clients. The business observability market is undergoing its most significant technology adoption cycle since Splunk. Lyte's operational intelligence and anomaly detection suite are genuinely differentiated. The pipeline for 2026 includes a Business Telemetry API public launch and two potential platform license deals with institutional operators.
 
 ### Alloy — Execution Fabric · ENGINE
 Alloy is the platform backbone powering Lyte, Vessels, and every SZL subsidiary — orchestrating connectors, DAGs, automations, and the predictive intelligence layer. Scenario modeling, confidence scoring, and agent coordination are core capabilities embedded directly into the execution layer.
@@ -329,7 +329,7 @@ The commercial real estate market is not ignoring climate risk. Every major CRE 
 
 ## What AI-Native Intelligence Changes
 
-Beacon integrates physical climate risk data — flood maps, sea level projections, wildfire risk modeling, heat stress analysis, storm surge scenarios — with the operational and financial data that fund managers actually use to make decisions.
+Lyte integrates physical climate risk data — flood maps, sea level projections, wildfire risk modeling, heat stress analysis, storm surge scenarios — with the operational and financial data that fund managers actually use to make decisions.
 
 This is not climate reporting bolted onto a separate data source. It is a unified intelligence layer where every financial metric has a climate-adjusted variant: climate-adjusted NOI, climate-adjusted cap rate, climate-adjusted LTV, insurance-adjusted free cash flow. When a portfolio manager is reviewing an acquisition model, the climate risk variables are embedded in the same interface, the same workflow, the same financial model — not in a separate PDF report from a third-party consultant.
 

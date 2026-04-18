@@ -24,21 +24,21 @@ const DEFAULT_AGENTS: AgentDef[] = [
   {
     id: "alloy", name: "Alloy", domain: "orchestration",
     preferredModel: "gpt-5.2", preferredProvider: "openai",
-    systemPrompt: "You are Alloy, the central orchestration intelligence of the Nuro Mesh — SZL Holdings' unified multi-agent AI system. You coordinate specialized domain agents, aggregate their insights, and provide unified intelligence across the entire SZL platform.",
+    systemPrompt: "You are Alloy, the central orchestration intelligence of the Alloy — SZL Holdings' unified multi-agent AI system. You coordinate specialized domain agents, aggregate their insights, and provide unified intelligence across the entire SZL platform.",
     tools: ["system_health", "admin_overview"], highStakesDomains: [],
     confidenceThreshold: 0.7, active: true,
   },
   {
     id: "sentinel", name: "Sentinel", domain: "security",
     preferredModel: "claude-sonnet-4-6", preferredProvider: "anthropic",
-    systemPrompt: "You are Sentinel, the cybersecurity intelligence agent within the Nuro Mesh. You specialize in threat analysis, CVE assessment, incident response, and security posture evaluation. You also serve as the maker-checker validator for other agents' high-stakes recommendations.",
+    systemPrompt: "You are Sentinel, the cybersecurity intelligence agent within the Alloy. You specialize in threat analysis, CVE assessment, incident response, and security posture evaluation. You also serve as the maker-checker validator for other agents' high-stakes recommendations.",
     tools: ["threat_feeds", "cve_database", "nvd_api"], highStakesDomains: ["critical_vulnerability", "incident_response", "breach_detected"],
     confidenceThreshold: 0.85, active: true,
   },
   {
     id: "helmsman", name: "Helmsman", domain: "maritime",
     preferredModel: "claude-sonnet-4-6", preferredProvider: "anthropic",
-    systemPrompt: "You are Helmsman, the maritime intelligence agent within the Nuro Mesh. You specialize in fleet operations, AIS tracking, maritime security, route risk assessment, and sanctions compliance.",
+    systemPrompt: "You are Helmsman, the maritime intelligence agent within the Alloy. You specialize in fleet operations, AIS tracking, maritime security, route risk assessment, and sanctions compliance.",
     tools: ["maritime_data", "ais_positions", "weather_marine"], highStakesDomains: ["route_risk", "sanctions", "fleet_emergency"],
     confidenceThreshold: 0.8, active: true,
   },
@@ -52,21 +52,21 @@ const DEFAULT_AGENTS: AgentDef[] = [
   {
     id: "beacon", name: "Terra Analytics", domain: "analytics",
     preferredModel: "gpt-5.2", preferredProvider: "openai",
-    systemPrompt: "You are Terra Analytics, the analytics and operations intelligence agent within the Nuro Mesh. You specialize in signal analysis, anomaly detection, platform performance, and operational intelligence.",
+    systemPrompt: "You are Terra Analytics, the analytics and operations intelligence agent within the Alloy. You specialize in signal analysis, anomaly detection, platform performance, and operational intelligence.",
     tools: ["system_health", "platform_stats", "ecosystem_health"], highStakesDomains: ["financial_alert", "ops_critical"],
     confidenceThreshold: 0.75, active: true,
   },
   {
     id: "zeus", name: "Zeus", domain: "infrastructure",
     preferredModel: "gpt-5.2", preferredProvider: "openai",
-    systemPrompt: "You are Zeus, the infrastructure intelligence agent within the Nuro Mesh. You specialize in cloud infrastructure, system health, resource optimization, and incident detection.",
+    systemPrompt: "You are Zeus, the infrastructure intelligence agent within the Alloy. You specialize in cloud infrastructure, system health, resource optimization, and incident detection.",
     tools: ["system_health", "admin_overview"], highStakesDomains: ["infrastructure_failure", "security_breach"],
     confidenceThreshold: 0.8, active: true,
   },
   {
     id: "muse", name: "Muse", domain: "creative",
     preferredModel: "gemini-3-flash-preview", preferredProvider: "gemini",
-    systemPrompt: "You are Muse, the creative intelligence agent within the Nuro Mesh. You specialize in content strategy, campaign ideation, creative briefs, and brand voice.",
+    systemPrompt: "You are Muse, the creative intelligence agent within the Alloy. You specialize in content strategy, campaign ideation, creative briefs, and brand voice.",
     tools: ["content_strategy"], highStakesDomains: [],
     confidenceThreshold: 0.65, active: true,
   },
@@ -244,12 +244,12 @@ export default function AgentConfigPage() {
               <Brain size={22} className="text-amber-400" />
               <h1 className="text-xl font-bold text-white font-mono tracking-tight">Agent Configuration</h1>
             </div>
-            <p className="text-xs text-[#8b9ab0] font-mono">Edit system prompts, model routing, confidence thresholds, tool permissions, and governance escalation rules for all Nuro Mesh agents</p>
+            <p className="text-xs text-[#8b9ab0] font-mono">Edit system prompts, model routing, confidence thresholds, tool permissions, and governance escalation rules for all Alloy agents</p>
           </div>
           <div className="flex items-center gap-3">
             <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-mono ${isLoading ? "bg-amber-400/10 text-amber-400" : "bg-green-500/10 text-green-400"} border ${isLoading ? "border-amber-400/20" : "border-green-500/20"}`}>
               <Cpu size={12} />
-              {isLoading ? "Connecting…" : "Nuro Mesh Connected"}
+              {isLoading ? "Connecting…" : "Alloy Connected"}
             </div>
           </div>
         </div>

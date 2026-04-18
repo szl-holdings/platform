@@ -54,7 +54,7 @@ const entries = [
     highlight: "Performance fixes and accessibility improvements",
     changes: [
       { type: "fix", text: "Lyte: Command Center dashboard infinite scroll on Firefox fixed" },
-      { type: "fix", text: "Beacon: Property detail map failing to load on slow connections" },
+      { type: "fix", text: "Lyte: Property detail map failing to load on slow connections" },
       { type: "fix", text: "Vessels: Port analytics chart tooltip overlap on dense datasets" },
       { type: "improvement", text: "All apps: ARIA labels and keyboard navigation improvements across navigation" },
       { type: "improvement", text: "All apps: Dark mode contrast ratio improved to meet WCAG AA standards" },

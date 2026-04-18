@@ -12,6 +12,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
+import { getProduct } from "@szl-holdings/brand-registry/mobile";
 
 const ACCENT = "#6366f1";
 const BG = "#0a0a0a";
@@ -22,8 +23,8 @@ const TEXT_DIM = "rgba(255,255,255,0.45)";
 const VENTURES = [
   {
     slug: "vessels",
-    name: "Vessels",
-    tagline: "Maritime Intelligence",
+    name: getProduct("vessels")?.name ?? "Vessels",
+    tagline: getProduct("vessels")?.tagline ?? "Maritime Intelligence",
     description:
       "AIS fleet tracking, voyage economics, and sanctions screening covering global shipping routes.",
     url: "https://vessels.szlholdings.com",
@@ -36,8 +37,8 @@ const VENTURES = [
   },
   {
     slug: "aegis",
-    name: "Aegis",
-    tagline: "Defense & Intelligence",
+    name: getProduct("aegis")?.name ?? "Aegis",
+    tagline: getProduct("aegis")?.tagline ?? "Defense & Intelligence",
     description:
       "Unified cybersecurity command converging SOC operations, threat intel, and MSP management.",
     url: "https://aegis.szlholdings.com",
@@ -50,8 +51,8 @@ const VENTURES = [
   },
   {
     slug: "terra",
-    name: "Terra",
-    tagline: "Real Estate Intelligence",
+    name: getProduct("terra")?.name ?? "Terra",
+    tagline: getProduct("terra")?.tagline ?? "Real Estate Intelligence",
     description:
       "Distress-first real estate platform covering all five NYC boroughs with multi-factor scoring.",
     url: "https://terra.szlholdings.com",
@@ -64,8 +65,8 @@ const VENTURES = [
   },
   {
     slug: "lyte",
-    name: "Lyte",
-    tagline: "Business Observability",
+    name: getProduct("lyte")?.name ?? "Lyte",
+    tagline: getProduct("lyte")?.tagline ?? "Business Observability",
     description:
       "AI ops dashboard with multi-model routing, cross-portfolio signal aggregation, and observability.",
     url: "https://lyte.szlholdings.com",
@@ -78,8 +79,8 @@ const VENTURES = [
   },
   {
     slug: "carlota-jo",
-    name: "Carlota Jo",
-    tagline: "Private Advisory",
+    name: getProduct("carlota-jo")?.name ?? "Carlota Jo",
+    tagline: getProduct("carlota-jo")?.tagline ?? "Private Advisory",
     description:
       "Strategic advisory platform for high-net-worth clients with secure communication and portal.",
     url: "https://carlota-jo.szlholdings.com",

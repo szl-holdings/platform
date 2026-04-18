@@ -349,7 +349,7 @@ export default function LeadershipPage() {
             </svg>
           </div>
           <p style={{ marginTop: "1rem", fontSize: "0.8125rem", color: "rgba(255,255,255,0.25)", fontFamily: "var(--font-mono)", letterSpacing: "0.02em" }}>
-            Seven platforms. One intelligence layer. All sovereign.
+            Six platforms. One intelligence layer. All sovereign.
           </p>
         </div>
       </section>

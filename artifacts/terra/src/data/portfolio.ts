@@ -85,7 +85,7 @@ export const properties: Property[] = [
     purchasePrice: 48200000, purchaseDate: "2022-01-10", status: "performing", latitude: 30.2672, longitude: -97.7431,
   },
   {
-    id: "prop-004", name: "Beacon Industrial Park", type: "industrial", address: "7700 Distribution Dr", city: "Dallas", state: "TX",
+    id: "prop-004", name: "Summit Industrial Park", type: "industrial", address: "7700 Distribution Dr", city: "Dallas", state: "TX",
     units: 12, sqft: 420000, occupancy: 96.7, monthlyRevenue: 315000, annualNOI: 2780000, capRate: 6.8, value: 40900000,
     purchasePrice: 35000000, purchaseDate: "2019-09-05", status: "performing", latitude: 32.7767, longitude: -96.797,
   },

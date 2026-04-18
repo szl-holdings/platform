@@ -1,3 +1,4 @@
+import { copyrightLine, brand, aboutSzlParagraph } from "@szl-holdings/brand-registry";
 import { Link } from "wouter";
 import { Shield, ChevronRight, Activity, AlertTriangle, Target, Eye, Flame, Zap, BarChart3, Lock, ArrowRight, Layers, Users, Brain } from "lucide-react";
 import { motion as m } from "framer-motion";
@@ -321,7 +322,7 @@ export default function AegisMarketingHome() {
                 </div>
                 <span className="font-bold text-[14px]">Aegis</span>
               </div>
-              <p className="text-[12px] text-gray-500 leading-relaxed">Unified defense and intelligence command by SZL Holdings.</p>
+              <p className="text-[12px] text-gray-500 leading-relaxed">{brand.products.find(p => p.id === "aegis")?.oneLiner ?? "Unified defense & intelligence command."}</p>
             </div>
             <div>
               <p className="text-[11px] font-semibold text-gray-400 tracking-[0.1em] uppercase mb-4">Platform</p>
@@ -354,8 +355,9 @@ export default function AegisMarketingHome() {
               </div>
             </div>
           </div>
+          <p className="text-[11px] leading-relaxed mb-6 max-w-[540px] text-gray-600">{aboutSzlParagraph()}</p>
           <div className="border-t border-white/5 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-[11px] text-gray-600">&copy; {new Date().getFullYear()} SZL Holdings. All rights reserved.</p>
+            <p className="text-[11px] text-gray-600">{copyrightLine()}</p>
             <div className="flex gap-6">
               <a href="https://x.com/szlholdings" target="_blank" rel="noopener noreferrer" className="text-[11px] text-gray-600 hover:text-gray-400 transition-colors">X</a>
               <a href="https://linkedin.com/company/szlholdings" target="_blank" rel="noopener noreferrer" className="text-[11px] text-gray-600 hover:text-gray-400 transition-colors">LinkedIn</a>

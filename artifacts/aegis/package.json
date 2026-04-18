@@ -17,7 +17,8 @@
     "@szl-holdings/shared-ui": "workspace:*",
     "@tanstack/react-query": "catalog:",
     "framer-motion": "catalog:",
-    "recharts": "catalog:"
+    "recharts": "catalog:",
+    "@szl-holdings/brand-registry": "workspace:*"
   },
   "devDependencies": {
     "@replit/vite-plugin-cartographer": "catalog:",

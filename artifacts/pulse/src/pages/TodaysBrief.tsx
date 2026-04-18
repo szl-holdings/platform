@@ -282,7 +282,7 @@ export default function TodaysBrief() {
           display: "flex", alignItems: "center", justifyContent: "space-between",
         }}>
           <div style={{ fontSize: "0.72rem", color: "var(--pulse-text-muted)" }}>
-            <strong style={{ color: "var(--pulse-text-dim)" }}>Brief ID:</strong> {brief.id} · Generated {new Date(brief.generatedAt).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })} UTC · <strong style={{ color: "var(--pulse-text-dim)" }}>Nuro Mesh</strong> Multi-Agent Synthesis
+            <strong style={{ color: "var(--pulse-text-dim)" }}>Brief ID:</strong> {brief.id} · Generated {new Date(brief.generatedAt).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })} UTC · <strong style={{ color: "var(--pulse-text-dim)" }}>Alloy</strong> Multi-Agent Synthesis
           </div>
           <a
             href="#"

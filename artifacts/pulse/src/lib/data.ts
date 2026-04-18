@@ -17,7 +17,7 @@ export const AGENTS: Record<string, Agent> = {
   terra: { id: "terra", name: "Terra", domain: "real_estate", color: "#4eca8b", borderColor: "rgba(78,202,139,0.4)", bgColor: "rgba(78,202,139,0.1)" },
   lexis: { id: "lexis", name: "Lexis", domain: "legal", color: "#9b70e8", borderColor: "rgba(155,112,232,0.4)", bgColor: "rgba(155,112,232,0.1)" },
   atlas: { id: "atlas", name: "Atlas", domain: "financial", color: "#e08c40", borderColor: "rgba(224,140,64,0.4)", bgColor: "rgba(224,140,64,0.1)" },
-  beacon: { id: "beacon", name: "Beacon", domain: "platform", color: "#40c8d8", borderColor: "rgba(64,200,216,0.4)", bgColor: "rgba(64,200,216,0.1)" },
+  lyte: { id: "lyte", name: "Lyte", domain: "platform", color: "#40c8d8", borderColor: "rgba(64,200,216,0.4)", bgColor: "rgba(64,200,216,0.1)" },
   alloy: { id: "alloy", name: "Alloy", domain: "executive", color: "#c8a84b", borderColor: "rgba(200,168,75,0.4)", bgColor: "rgba(200,168,75,0.1)" },
 };
 

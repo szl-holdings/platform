@@ -23,7 +23,7 @@ const ENDPOINTS: Endpoint[] = [
   { method: "GET", path: "/api/msp/tickets", summary: "MSP ticket queue and SLA status", tag: "Security", auth: true },
   { method: "GET", path: "/api/intelligence/model-registry", summary: "Intelligence engine model registry", tag: "Security", auth: true },
 
-  { method: "GET", path: "/api/beacon/health", summary: "Beacon analytics health", tag: "Analytics", auth: false },
+  { method: "GET", path: "/api/lyte/health", summary: "Lyte analytics health", tag: "Analytics", auth: false },
   { method: "GET", path: "/api/beacon/metrics", summary: "Decision analytics metrics", tag: "Analytics", auth: true },
   { method: "GET", path: "/api/beacon/projects", summary: "Tracked project metrics", tag: "Analytics", auth: true },
   { method: "GET", path: "/api/lyte/health", summary: "Lyte observability health", tag: "Analytics", auth: false },

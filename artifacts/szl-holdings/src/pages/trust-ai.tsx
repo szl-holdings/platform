@@ -48,17 +48,17 @@ const MODEL_MESH_ROWS = [
 ];
 
 const DOMAIN_AGENTS = [
-  { name: "Nuro Mesh", domain: "Platform", role: "General-purpose orchestration and routing across all domain packs", color: "hsl(258,55%,68%)" },
+  { name: "Alloy", domain: "Platform", role: "Execution fabric and orchestration layer routing signals across all domain packs", color: "hsl(258,55%,68%)" },
   { name: "Helmsman", domain: "Maritime — Vessels", role: "Voyage risk, sanctions screening, route optimization, and regulatory compliance", color: "hsl(200,65%,52%)" },
   { name: "Sentinel", domain: "Security — Aegis", role: "Threat triage, playbook recommendation, and security incident classification", color: "hsl(145,62%,46%)" },
-  { name: "INCA", domain: "Evaluation", role: "Model confidence calibration, output scoring, drift detection, and adversarial resistance testing", color: "hsl(38,80%,56%)" },
+  { name: "Eval Engine", domain: "Evaluation", role: "Model confidence calibration, output scoring, drift detection, and adversarial resistance testing", color: "hsl(38,80%,56%)" },
 ];
 
-const INCA_CAPABILITIES = [
+const EVAL_CAPABILITIES = [
   { label: "Confidence calibration", desc: "Calibrates AI confidence scores using historical outcome data from the Outcome Graph — so accuracy improves as real-world results accumulate." },
   { label: "Agent benchmarking", desc: "Benchmarks each domain agent's performance by action type. Regressions surface automatically before they reach production." },
   { label: "Adversarial resistance", desc: "Tests prompt injection resistance and evaluates whether outputs remain within governed bounds under adversarial inputs." },
-  { label: "Drift detection", desc: "Monitors long-running agent processes for output drift — when a model's behavior shifts materially, INCA flags it before operators notice degradation." },
+  { label: "Drift detection", desc: "Monitors long-running agent processes for output drift — when a model's behavior shifts materially, the eval engine flags it before operators notice degradation." },
 ];
 
 const HARD_BOUNDARIES = [
@@ -284,23 +284,23 @@ export default function TrustAIPage() {
           </div>
         </section>
 
-        {/* INCA evaluation framework */}
+        {/* AI evaluation framework */}
         <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
           <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
             <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
               <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
                 <BarChart2 size={14} color="hsl(38,80%,56%)" />
-                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "hsl(38,80%,56%)" }}>INCA Evaluation Framework</p>
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "hsl(38,80%,56%)" }}>AI Evaluation Framework</p>
               </div>
               <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "32ch", marginBottom: "0.75rem" }}>
                 Intelligence, Normalization, Confidence, Accuracy.
               </h2>
               <p style={{ fontSize: "0.9375rem", lineHeight: 1.68, color: "hsl(214,7%,58%)", maxWidth: "56ch", marginBottom: "2.5rem" }}>
-                INCA is the platform's AI evaluation agent — responsible for measuring, calibrating, and monitoring the quality of every other agent's output. It is not a UI feature; it runs continuously in the background.
+                The Eval Engine is the platform's AI evaluation agent — responsible for measuring, calibrating, and monitoring the quality of every other agent's output. It is not a UI feature; it runs continuously in the background.
               </p>
             </m.div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px,1fr))", gap: "0.875rem" }}>
-              {INCA_CAPABILITIES.map((cap, i) => (
+              {EVAL_CAPABILITIES.map((cap, i) => (
                 <m.div key={cap.label} initial={{ opacity: 0, y: 8 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.35, delay: i * 0.06 }} className="szl-card" style={{ borderRadius: "0.75rem", padding: "1.125rem 1.25rem" }}>
                   <div style={{ fontSize: "12px", fontWeight: 700, color: "hsl(38,80%,56%)", letterSpacing: "0.04em", textTransform: "uppercase" as const, marginBottom: "0.5rem" }}>{cap.label}</div>
                   <p style={{ fontSize: "0.8125rem", lineHeight: 1.65, color: "hsl(214,7%,54%)" }}>{cap.desc}</p>
@@ -324,7 +324,7 @@ export default function TrustAIPage() {
             </m.div>
             <div style={{ display: "flex", flexWrap: "wrap" as const, gap: "0.875rem" }}>
               {[
-                { label: "Technical Diligence Brief", desc: "AI agent architecture, governance primitives, multi-provider model stack, MCP gateway, and INCA evaluation", href: "/trust/diligence/technical" },
+                { label: "Technical Diligence Brief", desc: "AI agent architecture, governance primitives, multi-provider model stack, MCP gateway, and AI evaluation", href: "/trust/diligence/technical" },
                 { label: "Executive Diligence Brief", desc: "AI oversight posture, HITL enforcement, approval workflows, and decision accountability", href: "/trust/diligence/executive" },
               ].map((item, i) => (
                 <m.div key={item.label} initial={{ opacity: 0, y: 8 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.35, delay: i * 0.07 }} className="szl-card" style={{ borderRadius: "0.75rem", padding: "1.125rem 1.375rem", flex: "1 1 220px" }}>

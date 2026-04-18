@@ -289,11 +289,11 @@ export default function Settings() {
         </div>
       </div>
 
-      {/* Nuro Mesh agents info */}
+      {/* Alloy agents info */}
       <div className="section-card" style={{ padding: "18px 20px", marginBottom: 20 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
           <Zap size={15} color="var(--pulse-text-muted)" />
-          <h3 style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--pulse-text)" }}>Nuro Mesh Agents</h3>
+          <h3 style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--pulse-text)" }}>Alloy Agents</h3>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
           {[
@@ -303,7 +303,7 @@ export default function Settings() {
             { agent: "Terra", role: "Real estate analytics", domain: "Property" },
             { agent: "Lexis", role: "Legal & compliance", domain: "Counsel" },
             { agent: "Atlas", role: "Financial & portfolio", domain: "Holdings" },
-            { agent: "Beacon", role: "Platform health", domain: "Operations" },
+            { agent: "Lyte", role: "Platform health", domain: "Operations" },
           ].map(a => (
             <div key={a.agent} style={{ padding: "8px 12px", borderRadius: 6, background: "rgba(0,0,0,0.2)", border: "1px solid var(--pulse-border)" }}>
               <div style={{ fontSize: "0.78rem", fontWeight: 600, color: "var(--pulse-text)", marginBottom: 2 }}>{a.agent}</div>

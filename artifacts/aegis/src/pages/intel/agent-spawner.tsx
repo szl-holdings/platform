@@ -25,10 +25,10 @@ const DOMAIN_TEMPLATES = [
     capabilities: ["Off-market opportunity detection", "Market shift prediction", "Yield scoring", "Comparable analysis"],
   },
   {
-    id: "creative-dir", name: "Alloy Predictor", icon: Zap, color: "text-violet-400", bg: "bg-violet-400/10",
+    id: "creative-dir", name: "Alloy Engine", icon: Zap, color: "text-violet-400", bg: "bg-violet-400/10",
     description: "Surfaces prediction scenarios, models confidence distributions, and generates forecast briefs via Alloy's predictive intelligence engine.",
     defaultInstruction: "Analyze signal data, model forward-looking scenarios, and generate confidence-weighted recommendations based on Alloy's predictive models.",
-    domain: "Alloy Predict", systemType: "fast" as const,
+    domain: "Alloy", systemType: "fast" as const,
     capabilities: ["Scenario modeling", "Confidence scoring", "Risk analysis", "Opportunity surfacing"],
   },
   {
@@ -65,7 +65,7 @@ const LIVE_AGENTS = [
   { name: "Maritime Analyst", domain: "Vessels", status: "active", uptime: "14d 6h", actions: 1240, lastAction: "2m ago" },
   { name: "IT Sentinel", domain: "Aegis Operations", status: "active", uptime: "7d 2h", actions: 3847, lastAction: "30s ago" },
   { name: "Deal Scout", domain: "Terra", status: "active", uptime: "21d 0h", actions: 892, lastAction: "5m ago" },
-  { name: "Alloy Predictor", domain: "Alloy Predict", status: "active", uptime: "3d 18h", actions: 445, lastAction: "8m ago" },
+  { name: "Alloy Engine", domain: "Alloy", status: "active", uptime: "3d 18h", actions: 445, lastAction: "8m ago" },
   { name: "Advisory Agent", domain: "Carlota Jo", status: "monitoring", uptime: "10d 4h", actions: 312, lastAction: "1h ago" },
   { name: "Security Sentinel", domain: "Aegis", status: "active", uptime: "30d 0h", actions: 7234, lastAction: "1s ago" },
   { name: "Intelligence Router", domain: "Lyte", status: "active", uptime: "30d 0h", actions: 52843, lastAction: "1s ago" },

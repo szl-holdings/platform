@@ -968,7 +968,7 @@ function SupportPanel() {
   const formKeyLabel: Record<string, { label: string; variant: "blue" | "green" | "amber" | "neutral" }> = {
     szl_contact: { label: "General", variant: "blue" },
     vessels_demo: { label: "Vessels Demo", variant: "green" },
-    inca_access: { label: "INCA Access", variant: "amber" },
+    prism_counsel_access: { label: "PRISM Counsel Access", variant: "amber" },
     carlota_private_inquiry: { label: "Carlota Jo", variant: "neutral" },
     stephen_contact: { label: "Stephen", variant: "neutral" },
   };

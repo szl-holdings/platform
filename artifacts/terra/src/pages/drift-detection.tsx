@@ -13,10 +13,10 @@ export default function DriftDetection() {
       <div>
         <div className="flex items-center gap-2 mb-1">
           <Radar className="w-4 h-4" style={{ color: "#0ea5e9" }} />
-          <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "#0ea5e9" }}>Beacon · Drift Detection</span>
+          <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "#0ea5e9" }}>Lyte · Drift Detection</span>
         </div>
         <h1 className="text-2xl font-bold text-white">Drift Detection</h1>
-        <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>Unexpected changes, timing anomalies, contributing factors, and affected workflows. Beacon surfaces drift before it becomes a crisis.</p>
+        <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>Unexpected changes, timing anomalies, contributing factors, and affected workflows. Lyte surfaces drift before it becomes a crisis.</p>
       </div>
 
       <div className="grid grid-cols-4 gap-3">

@@ -73,9 +73,9 @@ const scenarios = await client.security.getScenarios();`,
             name: "Analytics",
             icon: Globe,
             color: "text-tag-analytics",
-            code: `// Beacon decision analytics
-const metrics = await client.analytics.getBeaconMetrics();
-const projects = await client.analytics.getBeaconProjects();
+            code: `// Lyte analytics
+const metrics = await client.analytics.getLyteMetrics();
+const projects = await client.analytics.getLyteProjects();
 
 // Lyte observability
 const services = await client.analytics.getLyteServices();

@@ -42,9 +42,9 @@ const DEMO_CONFIGS: Record<DemoId, {
       },
       {
         id: 2, label: "Agent Processes", phase: "agent",
-        description: "Alloy routes to Finance agent (Beacon). Cross-references vendor history, contract terms, and similar invoices. Identifies: no corresponding PO, vendor flagged for duplicate billing in Q1.",
+        description: "Alloy routes to Finance agent (Lyte). Cross-references vendor history, contract terms, and similar invoices. Identifies: no corresponding PO, vendor flagged for duplicate billing in Q1.",
         icon: <Zap className="w-3.5 h-3.5" />, durationMs: 1800,
-        evidence: "Beacon confidence: 88% · 3 evidence sources · Maker-checker: Sentinel validated",
+        evidence: "Lyte confidence: 88% · 3 evidence sources · Maker-checker: Sentinel validated",
       },
       {
         id: 3, label: "Decision Object Produced", phase: "decision",
@@ -130,13 +130,13 @@ const DEMO_CONFIGS: Record<DemoId, {
         id: 1, label: "Research Query", phase: "signal",
         description: "User asks: 'Summarize the market for B2B workflow automation in 2026. Include key vendors, funding trends, and customer pain points.'",
         icon: <Eye className="w-3.5 h-3.5" />, durationMs: 400,
-        evidence: "Query source: Alloy console · Agent routing: AI research agent + Beacon (analytics)",
+        evidence: "Query source: Alloy console · Agent routing: AI research agent + Lyte (analytics)",
       },
       {
         id: 2, label: "Multi-Source Synthesis", phase: "agent",
-        description: "AI research agent queries Arxiv, HuggingFace, web sources, and internal knowledge. Beacon correlates with platform metrics. Responses synthesized by Alloy orchestrator.",
+        description: "AI research agent queries Arxiv, HuggingFace, web sources, and internal knowledge. Lyte correlates with platform metrics. Responses synthesized by Alloy orchestrator.",
         icon: <Zap className="w-3.5 h-3.5" />, durationMs: 2400,
-        evidence: "Agents: SZL Cortex + Beacon · Sources: 11 · Avg confidence: 82%",
+        evidence: "Agents: SZL Cortex + Lyte · Sources: 11 · Avg confidence: 82%",
       },
       {
         id: 3, label: "Artifact Generated", phase: "action",

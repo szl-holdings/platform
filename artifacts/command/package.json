@@ -50,6 +50,7 @@
     "@tanstack/query-sync-storage-persister": "^5.99.0",
     "@types/leaflet": "^1.9.21",
     "leaflet": "^1.9.4",
-    "react-leaflet": "^5.0.0"
+    "react-leaflet": "^5.0.0",
+    "@szl-holdings/brand-registry": "workspace:*"
   }
 }

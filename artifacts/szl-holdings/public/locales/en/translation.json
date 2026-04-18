@@ -8,7 +8,7 @@
   },
   "hero": {
     "headline": "Observe. Decide. Compound.",
-    "description": "Five platforms. One architecture. Command systems for observability, defense, and enterprise operations — built to compound.",
+    "description": "Six platforms. One architecture. Command systems for observability, defense, and enterprise operations — built to compound.",
     "doctrine": {
       "observe": "Observe",
       "interpret": "Interpret",
@@ -18,7 +18,7 @@
     }
   },
   "ecosystem": {
-    "heading": "Five Platforms. One Architecture.",
+    "heading": "Six Platforms. One Architecture.",
     "description": "Each platform operates independently and compounds with the others through shared infrastructure, shared intelligence, and shared command doctrine."
   },
   "ventures": {

@@ -28,7 +28,7 @@ async function ensureDailyBriefNotification(): Promise<void> {
     const id = await Notifications.scheduleNotificationAsync({
       content: {
         title: "Pulse — today's brief is ready",
-        body: "Your 06:00 executive briefing from Nuro Mesh is available to read.",
+        body: "Your 06:00 executive briefing from Alloy is available to read.",
         data: { route: "/intelligence/pulse" },
         sound: true,
       },
@@ -360,7 +360,7 @@ export default function PulseScreen() {
               <Text style={styles.classifText}>EXEC-RESTRICTED</Text>
             </View>
           </View>
-          <Text style={styles.headerSub}>AI Executive Briefing · Nuro Mesh</Text>
+          <Text style={styles.headerSub}>AI Executive Briefing · Alloy</Text>
         </View>
         <TouchableOpacity
           onPress={() => {

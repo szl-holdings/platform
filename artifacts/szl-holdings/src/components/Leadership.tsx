@@ -19,7 +19,7 @@ const principles = [
   {
     number: "04",
     title: "Capital Efficiency",
-    body: "Shared infrastructure across six verticals means 40% lower cloud spend, unified security, and engineering leverage that standalone companies cannot replicate.",
+    body: "Shared infrastructure across six verticals means unified security, compounding data advantages, and engineering leverage that standalone companies cannot replicate.",
   },
 ];
 

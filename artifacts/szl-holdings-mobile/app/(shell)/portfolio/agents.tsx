@@ -23,7 +23,7 @@ const AGENT_DEFS = [
   { id: "beacon", name: "Terra Analytics", domain: "Analytics", color: GREEN, icon: "bar-chart-2", model: "gpt-5.2" },
   { id: "sentinel", name: "Sentinel", domain: "Security", color: RED, icon: "shield", model: "claude-sonnet-4-6" },
   { id: "helmsman", name: "Helmsman", domain: "Maritime", color: "#0ea5e9", icon: "anchor", model: "claude-sonnet-4-6" },
-  { id: "inca", name: "INCA", domain: "Research", color: "#8b5cf6", icon: "cpu", model: "gemini-3.1-pro" },
+  { id: "eval", name: "Eval Engine", domain: "Research", color: "#8b5cf6", icon: "cpu", model: "gemini-3.1-pro" },
   { id: "muse", name: "Muse", domain: "Creative", color: "#d946ef", icon: "pen-tool", model: "gemini-3-flash" },
   { id: "compass", name: "Compass", domain: "Readiness", color: AMBER, icon: "compass", model: "claude-sonnet-4-6" },
 ];
@@ -32,7 +32,7 @@ const SKILL_GRAPH = [
   { agent: "Alloy", skills: ["orchestration", "synthesis", "routing", "coordination"], score: 97 },
   { agent: "Sentinel", skills: ["threat-analysis", "CVE", "incident-response", "MITRE"], score: 94 },
   { agent: "Helmsman", skills: ["AIS", "route-risk", "sanctions", "maritime-law"], score: 91 },
-  { agent: "INCA", skills: ["RAG", "research", "HuggingFace", "arxiv"], score: 88 },
+  { agent: "Eval Engine", skills: ["RAG", "research", "HuggingFace", "arxiv"], score: 88 },
   { agent: "Analytics", skills: ["anomaly-detection", "SLO", "metrics", "forecasting"], score: 90 },
 ];
 
@@ -79,7 +79,7 @@ export default function AgentsScreen() {
     <View style={[styles.root, { paddingTop: insets.top }]}>
       <View style={styles.header}>
         <View>
-          <Text style={styles.title}>Nuro Mesh Agents</Text>
+          <Text style={styles.title}>Alloy Agents</Text>
           <Text style={styles.subtitle}>Autonomous operations · {AGENT_DEFS.length} agents active</Text>
         </View>
         <View style={styles.meshBadge}>

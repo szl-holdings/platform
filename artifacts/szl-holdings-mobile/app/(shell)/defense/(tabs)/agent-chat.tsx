@@ -20,7 +20,7 @@ const AGENTS = [
   { id: "alloy", name: "Alloy", role: "Orchestration", icon: "git-merge", color: "#F97316" },
   { id: "sentinel", name: "Sentinel", role: "Security", icon: "shield", color: "#EF4444" },
   { id: "helmsman", name: "Helmsman", role: "Maritime", icon: "anchor", color: "#0ea5e9" },
-  { id: "inca", name: "INCA", role: "Research", icon: "cpu", color: "#8b5cf6" },
+  { id: "eval", name: "Eval Engine", role: "Research", icon: "cpu", color: "#8b5cf6" },
   { id: "compass", name: "Compass", role: "Readiness", icon: "compass", color: "#22c55e" },
 ];
 

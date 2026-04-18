@@ -65,6 +65,7 @@
     "expo-screen-capture": "^8.0.9",
     "expo-speech": "^14.0.8",
     "graphql": "^16.13.2",
-    "urql": "^5.0.1"
+    "urql": "^5.0.1",
+    "@szl-holdings/brand-registry": "workspace:*"
   }
 }

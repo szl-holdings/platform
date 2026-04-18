@@ -2488,7 +2488,7 @@ The wedge architecture works like this:
 ALLOY = THE ENGINE
 Alloy is the shared intelligence and automation backbone. It handles workflow orchestration, AI processing, signal collection, document generation, and API connectivity. It is not sold externally. It is the infrastructure that makes every platform faster to build and more valuable to customers.
 
-Why this matters for investors: A single-product company with $1M in ARR has one moat. SZL with $1M in ARR across five platforms has five moats — and each moat feeds the engine that strengthens all others. This is structurally different from a portfolio of unrelated businesses.
+Why this matters for investors: A single-product company with $1M in ARR has one moat. SZL with $1M in ARR across six platforms has six moats — and each moat feeds the engine that strengthens all others. This is structurally different from a portfolio of unrelated businesses.
 
 LYTE = THE HORIZONTAL WEDGE
 Lyte's horizontal position — applicable to any organization with operational complexity — establishes SZL in the mid-market SaaS tier. Success with Lyte proves the engine works across diverse customers and validates the observability thesis in the market where it's easiest to test.

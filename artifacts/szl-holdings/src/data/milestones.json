@@ -26,8 +26,8 @@
   {
     "year": "2022",
     "quarter": "Q4",
-    "title": "Aegis & Alloy Creative Engine Launch",
-    "description": "Simultaneously launched Aegis cybersecurity and defense intelligence platform (securing a DoD subcontractor pilot) and the Alloy Creative Engine for campaign production and brand workflows. Team expanded to 45 engineers across three time zones.",
+    "title": "Aegis & Alloy Execution Fabric Launch",
+    "description": "Simultaneously launched Aegis cybersecurity and defense intelligence platform (securing a DoD subcontractor pilot) and the Alloy execution fabric for workflow orchestration and automation. Team expanded to 45 engineers across three time zones.",
     "highlight": "2 New Platforms",
     "metric": { "label": "Team Size", "value": "45" }
   },
@@ -74,8 +74,8 @@
   {
     "year": "2025",
     "quarter": "Q3",
-    "title": "INCA & Carlota Jo Enter Alpha",
-    "description": "Two new portfolio companies entered private alpha: INCA (AI-native consulting analytics) and Carlota Jo (brand intelligence platform). Combined 20 pilot clients signed before public launch.",
+    "title": "PRISM Counsel & Carlota Jo Enter Alpha",
+    "description": "Two new portfolio companies entered private alpha: PRISM Counsel (legal matter intelligence) and Carlota Jo (brand intelligence platform). Combined 20 pilot clients signed before public launch.",
     "highlight": "6 Portfolio Companies",
     "metric": { "label": "Pilot Clients", "value": "20" }
   },
@@ -83,7 +83,7 @@
     "year": "2026",
     "quarter": "Q1",
     "title": "Series B & Global Scale",
-    "description": "Targeting $45M Series B to fund international expansion, accelerate INCA and Carlota Jo to general availability, and triple Aegis's defense sector presence. Portfolio ARR exceeding $35M with a path to profitability.",
+    "description": "Targeting $45M Series B to fund international expansion, accelerate PRISM Counsel and Carlota Jo to general availability, and triple Aegis's defense sector presence. Portfolio ARR exceeding $35M with a path to profitability.",
     "highlight": "Series B Target · $45M",
     "metric": { "label": "Target ARR", "value": "$35M+" }
   }

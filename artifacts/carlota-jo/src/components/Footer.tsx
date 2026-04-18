@@ -1,5 +1,6 @@
 import { Link } from "wouter";
 import { useTranslation } from "react-i18next";
+import { subsidiaryCopyrightLine, getProduct } from "@szl-holdings/brand-registry";
 
 const ecosystemLinks = [
   { label: "SZL Holdings", href: "/" },
@@ -140,7 +141,7 @@ export default function Footer() {
 
         <div className="mt-12 pt-7 border-t flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4" style={{ borderColor: "var(--color-stone-200)" }}>
           <p className="text-[11px] tracking-wider" style={{ color: "var(--color-stone-400)" }}>
-            {t("footer.copyright", { year: new Date().getFullYear() })}
+            {subsidiaryCopyrightLine(getProduct("carlota-jo")?.name ?? "Carlota Jo")}
           </p>
           <div className="flex items-center gap-6">
             <a href="https://x.com/szlholdings" target="_blank" rel="noopener noreferrer" className="text-[11px] tracking-wider transition-colors" style={{ color: "var(--color-stone-400)", textDecoration: "none" }}

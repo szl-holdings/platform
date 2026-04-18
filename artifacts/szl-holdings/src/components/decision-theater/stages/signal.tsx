@@ -90,7 +90,7 @@ export function LiveSignalStage({ metrics }: { metrics: LiveMetrics | null }) {
       ],
     },
     {
-      domain: "Beacon / Terra",
+      domain: "Lyte / Terra",
       color: "#10b981",
       icon: BarChart2,
       title: "Real Estate Signal — Distress Portfolio Active",

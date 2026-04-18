@@ -1,5 +1,6 @@
 import { Link } from "wouter";
 import { NewsletterSubscribe } from "@szl-holdings/shared-ui";
+import { copyrightLine, copyrightLineShort, brand } from "@szl-holdings/brand-registry";
 
 const FOOTER_COLS = [
   {
@@ -135,7 +136,7 @@ export function SiteFooter() {
               </span>
             </div>
             <p style={{ color: "var(--color-szl-text-secondary)", fontSize: "0.8125rem", lineHeight: 1.65, maxWidth: "16rem", marginBottom: "1rem" }}>
-              Governed decision operating system. Signal to action, under governance, with full attribution.
+              {brand.boilerplate.governancePhilosophy}
             </p>
             <p style={{ color: "var(--color-szl-text-faint)", fontSize: "0.6875rem", fontFamily: "var(--font-mono)", letterSpacing: "0.04em", marginBottom: "0.2rem" }}>
               Washington, D.C. · London · Singapore
@@ -222,7 +223,7 @@ export function SiteFooter() {
         }}>
           <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", alignItems: "center" }}>
             <p style={{ color: "var(--color-szl-text-faint)", fontSize: "0.6875rem", fontFamily: "var(--font-mono)", marginRight: "0.5rem" }}>
-              &copy; {new Date().getFullYear()} SZL Holdings
+              {copyrightLineShort()}
             </p>
             <span aria-hidden="true" style={{ color: "var(--color-szl-text-faint)", fontSize: "0.6875rem", fontFamily: "var(--font-mono)", opacity: 0.5 }}>·</span>
             <p style={{ color: "var(--color-szl-text-faint)", fontSize: "0.6875rem", fontFamily: "var(--font-mono)" }}>

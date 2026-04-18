@@ -23,8 +23,8 @@ const milestones = [
   },
   {
     date: "Q4 2023",
-    title: "Beacon enters production",
-    description: "Business telemetry platform operational, delivering continuous KPI observability for enterprise clients.",
+    title: "Lyte enters production",
+    description: "Lyte decision intelligence platform operational, delivering continuous operational observability and risk detection for enterprise clients.",
   },
   {
     date: "2024–2025",

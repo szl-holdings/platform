@@ -65,7 +65,7 @@ export default function CustomBrief() {
       <div style={{ marginBottom: 24 }}>
         <h1 style={{ fontSize: "1.4rem", fontWeight: 600, color: "var(--pulse-text)", marginBottom: 6 }}>Custom Brief Builder</h1>
         <p style={{ fontSize: "0.85rem", color: "var(--pulse-text-muted)" }}>
-          Request a focused intelligence briefing on any entity, topic, or scenario. Nuro Mesh agents will synthesize a tailored brief.
+          Request a focused intelligence briefing on any entity, topic, or scenario. Alloy agents will synthesize a tailored brief.
         </p>
       </div>
 

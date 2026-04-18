@@ -74,7 +74,7 @@ export function LiveContextStage({ metrics, recommendations }: { metrics: LiveMe
 
   const domainSummary = [
     { domain: "Alloy", count: recommendations.filter(r => r.domain === "alloy").length },
-    { domain: "Beacon", count: recommendations.filter(r => r.domain === "beacon" || r.domain === "terra").length },
+    { domain: "Lyte", count: recommendations.filter(r => r.domain === "beacon" || r.domain === "terra").length },
     { domain: "Firestorm", count: recommendations.filter(r => r.domain === "firestorm" || r.domain === "aegis").length },
     { domain: "Vessels", count: recommendations.filter(r => r.domain === "vessels").length },
   ].filter(d => d.count > 0);

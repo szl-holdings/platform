@@ -59,7 +59,7 @@ export const BUSINESS_REVOPS_NARRATIVE = {
     },
     recommendation: {
       id: "demo-rec-biz-001",
-      agent: "Beacon",
+      agent: "Lyte",
       action: "Escalate deal to CFO for emergency ownership reassignment and buyer re-engagement",
       rationale:
         "Deal is past recovery threshold without executive intervention. Buyer last engaged 14 days ago — window is closing. Reassignment to VP of BD with direct CFO sponsorship has 78% historical close rate in comparable situations.",
@@ -80,7 +80,7 @@ export const BUSINESS_REVOPS_NARRATIVE = {
       id: "demo-execution-biz-001",
       steps: [
         { step: 1, action: "Ownership reassigned to Sarah Kim — Alloy workflow triggered" },
-        { step: 2, action: "Buyer re-engagement email drafted by Beacon and queued for review" },
+        { step: 2, action: "Buyer re-engagement email drafted by Lyte and queued for review" },
         { step: 3, action: "CFO calendar block created for buyer call (2026-04-16 14:00)" },
         { step: 4, action: "Deal velocity monitoring reactivated — alert threshold: 7 days" },
       ],
@@ -121,7 +121,7 @@ export const BUSINESS_REVOPS_NARRATIVE = {
       step: "AI Recommendation",
       duration: "2 min",
       narrative:
-        "Beacon has already generated a recommendation: escalate to CFO, reassign to VP BD, re-engage buyer. Confidence: 87%. The rationale cites historical close rates for comparable situations.",
+        "Lyte has already generated a recommendation: escalate to CFO, reassign to VP BD, re-engage buyer. Confidence: 87%. The rationale cites historical close rates for comparable situations.",
       showIn: ["lyte/command-inbox/detail", "lyte/evidence"],
     },
     {

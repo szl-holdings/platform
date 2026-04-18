@@ -53,7 +53,7 @@ const LENDERS = [
   { name: "JPMorgan Chase Real Estate", property: "Pacific Heights Plaza", balance: 63800000, maturity: "2027-03-20", ltv: "59%", dscr: "1.22x", status: "current" },
   { name: "Signature Bank RE", property: "Skyline Lofts", balance: 16800000, maturity: "2026-09-14", ltv: "78%", dscr: "0.94x", status: "watch" },
   { name: "Berkadia Multifamily", property: "Harborview Residences", balance: 49200000, maturity: "2029-04-22", ltv: "58%", dscr: "1.51x", status: "current" },
-  { name: "CBRE Capital Markets", property: "Beacon Industrial Park", balance: 22500000, maturity: "2027-09-05", ltv: "55%", dscr: "1.74x", status: "current" },
+  { name: "CBRE Capital Markets", property: "Summit Industrial Park", balance: 22500000, maturity: "2027-09-05", ltv: "55%", dscr: "1.74x", status: "current" },
 ];
 
 const DISTRIBUTIONS = [

@@ -81,7 +81,7 @@
     "name": "Alloy",
     "doctrineRole": "EXECUTE",
     "tagline": "Execution Fabric & Predictive Intelligence Engine",
-    "description": "Alloy is the execution engine of the SZL platform — orchestrating connectors, DAGs, automations, and the predictive intelligence layer across every subsidiary. Scenario modeling, confidence scoring, agent coordination, and workflow automation (35+ connectors, 4,800+ workflows/day) are embedded capabilities, not bolted-on tools.",
+    "description": "Alloy is the shared intelligence and automation backbone that handles workflow orchestration, AI processing, and signal collection across the SZL ecosystem — connectors, and the predictive intelligence layer across every subsidiary. Scenario modeling, confidence scoring, agent coordination, and workflow automation (35+ connectors, high-volume orchestration) are embedded capabilities, not bolted-on tools.",
     "status": "Live",
     "category": "Execution Fabric",
     "link": "/alloy/",
