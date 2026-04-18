@@ -31,6 +31,7 @@ export const usersTable = pgTable("users", {
   passwordResetTokenExpiresAt: timestamp("password_reset_token_expires_at", { withTimezone: true }),
   isActive: boolean("is_active").notNull().default(true),
   lastLoginAt: timestamp("last_login_at"),
+  sessionVersion: integer("session_version").notNull().default(1),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
@@ -75,6 +76,13 @@ export const sessionsTable = pgTable("sessions", {
   expiresAt: timestamp("expires_at").notNull(),
   ipAddress: text("ip_address"),
   userAgent: text("user_agent"),
+  sessionVersion: integer("session_version").notNull().default(1),
+  refreshToken: text("refresh_token").unique(),
+  refreshTokenExpiresAt: timestamp("refresh_token_expires_at"),
+  refreshTokenUsedAt: timestamp("refresh_token_used_at"),
+  replacedBySessionId: integer("replaced_by_session_id"),
+  revokedAt: timestamp("revoked_at"),
+  revokedReason: text("revoked_reason"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

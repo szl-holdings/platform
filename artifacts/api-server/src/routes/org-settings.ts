@@ -32,6 +32,7 @@ import {
 } from "@szl-holdings/db";
 import { eq, and, ne } from "drizzle-orm";
 import { authMiddleware } from "../middlewares/auth";
+import { revokeUserSessionsOnRoleChange } from "../middlewares/session-policy";
 import { writeLimiter, readLimiter } from "../middlewares/rate-limiters";
 import { hashIp } from "@szl-holdings/audit";
 import { jsonObjectBodySchema, validateBody } from "../lib/validation";
@@ -323,6 +324,16 @@ router.delete(
         newValues: { orgId: org.id, targetUserId },
       });
 
+      // Org membership change ⇒ revoke target user's existing sessions so
+      // their access reflects the new membership within ≤30s.
+      await revokeUserSessionsOnRoleChange({
+        userId: targetUserId,
+        changedByUserId: req.user!.id,
+        reason: "org_member_removed",
+        ipAddress: req.ip ?? null,
+        userAgent: req.headers["user-agent"] ?? null,
+      });
+
       sendNoContent(res);
     } catch (err) {
       handleRouteError(res, err, "Failed to remove member");
@@ -399,6 +410,14 @@ router.put(
         entityId: String(targetMembership.id),
         ipAddress: hashIp(req.ip ?? null),
         newValues: { orgId: org.id, targetUserId, oldRole: targetMembership.role, newRole: role },
+      });
+
+      await revokeUserSessionsOnRoleChange({
+        userId: targetUserId,
+        changedByUserId: req.user!.id,
+        reason: "org_member_role_updated",
+        ipAddress: req.ip ?? null,
+        userAgent: req.headers["user-agent"] ?? null,
       });
 
       sendSuccess(res, updated);

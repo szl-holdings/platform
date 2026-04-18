@@ -15,7 +15,7 @@
 import type { Request, Response, NextFunction } from "express";
 import crypto from "crypto";
 import { db, sessionsTable, usersTable, auditEventsTable, userRolesTable, rolesTable } from "@szl-holdings/db";
-import { eq, and, gt, desc } from "drizzle-orm";
+import { eq, and, gt, desc, isNull, sql } from "drizzle-orm";
 import { SESSION_COOKIE, SESSION_TTL, setSessionCookie } from "../lib/auth";
 import { logger } from "../lib/logger";
 import { hashIp } from "@szl-holdings/audit";
@@ -121,7 +121,7 @@ function extractBearerToken(req: Request): string | undefined {
  */
 type AuditInsert = typeof auditEventsTable.$inferInsert;
 
-async function writeAuditEvent(params: {
+export async function writeAuditEvent(params: {
   userId: number | null;
   action: string;
   entityType: string;
@@ -147,6 +147,22 @@ async function writeAuditEvent(params: {
 }
 
 /**
+ * Bump a user's session_version. All sessions whose stored sessionVersion is
+ * less than the new value are considered revoked by the auth middleware on the
+ * next request (≤30s convergence is bounded by request frequency, not a TTL).
+ *
+ * Returns the new session_version.
+ */
+export async function bumpUserSessionVersion(userId: number): Promise<number> {
+  const [row] = await db
+    .update(usersTable)
+    .set({ sessionVersion: sql`${usersTable.sessionVersion} + 1`, updatedAt: new Date() })
+    .where(eq(usersTable.id, userId))
+    .returning({ sessionVersion: usersTable.sessionVersion });
+  return row?.sessionVersion ?? 0;
+}
+
+/**
  * Revoke all active sessions for a user after a role change.
  *
  * Call this whenever a user's roles are assigned, updated, or removed so that
@@ -159,38 +175,298 @@ export async function revokeUserSessionsOnRoleChange(params: {
   userId: number;
   changedByUserId: number | null;
   reason?: string;
+  ipAddress?: string | null;
+  userAgent?: string | null;
 }): Promise<{ revokedCount: number }> {
-  const { userId, changedByUserId, reason } = params;
+  const { userId, changedByUserId, reason, ipAddress = null, userAgent = null } = params;
+
+  // Bump session_version first — ensures even sessions resolved between the
+  // bump and the delete will fail the version check on their next request.
+  const newVersion = await bumpUserSessionVersion(userId);
 
   const sessions = await db
     .select({ id: sessionsTable.id })
     .from(sessionsTable)
-    .where(eq(sessionsTable.userId, userId));
+    .where(and(eq(sessionsTable.userId, userId), isNull(sessionsTable.revokedAt)));
 
+  const now = new Date();
   if (sessions.length > 0) {
-    for (const s of sessions) {
-      await db.delete(sessionsTable).where(eq(sessionsTable.id, s.id));
-    }
+    await db
+      .update(sessionsTable)
+      .set({ revokedAt: now, revokedReason: reason ?? "role_change" })
+      .where(and(eq(sessionsTable.userId, userId), isNull(sessionsTable.revokedAt)));
+  }
+
+  await writeAuditEvent({
+    userId: changedByUserId,
+    action: "session.invalidate",
+    entityType: "user",
+    entityId: String(userId),
+    ipAddress,
+    userAgent,
+    newValues: {
+      targetUserId: userId,
+      revokedSessionCount: sessions.length,
+      newSessionVersion: newVersion,
+      reason: reason ?? "role change",
+    },
+  });
+
+  logger.info(
+    { userId, changedByUserId, revokedCount: sessions.length, newSessionVersion: newVersion },
+    "Sessions revoked on role change",
+  );
+
+  return { revokedCount: sessions.length };
+}
+
+/**
+ * Default refresh-token TTL — 30 days, matching the access-session TTL ceiling.
+ */
+export const REFRESH_TOKEN_TTL = 30 * 24 * 60 * 60 * 1000;
+
+/**
+ * Generate a fresh access + refresh token pair for a new session.
+ */
+export function generateTokenPair(): { token: string; refreshToken: string } {
+  return {
+    token: crypto.randomBytes(32).toString("hex"),
+    refreshToken: `rt_${crypto.randomBytes(32).toString("hex")}`,
+  };
+}
+
+export interface CreatedSession {
+  sessionId: number;
+  token: string;
+  refreshToken: string;
+  expiresAt: Date;
+  refreshTokenExpiresAt: Date;
+  sessionVersion: number;
+}
+
+/**
+ * Create a session with a rotating refresh token. Writes a `session.create`
+ * audit event tied to the operator id, IP, and user agent.
+ */
+export async function createSessionWithRefresh(params: {
+  userId: number;
+  ipAddress: string | null;
+  userAgent: string | null;
+  reason?: string;
+  ttlMs?: number;
+}): Promise<CreatedSession> {
+  const ttl = params.ttlMs ?? SESSION_TTL;
+  const { token, refreshToken } = generateTokenPair();
+  const expiresAt = new Date(Date.now() + ttl);
+  const refreshTokenExpiresAt = new Date(Date.now() + REFRESH_TOKEN_TTL);
+
+  const [user] = await db
+    .select({ sessionVersion: usersTable.sessionVersion })
+    .from(usersTable)
+    .where(eq(usersTable.id, params.userId))
+    .limit(1);
+
+  const sessionVersion = user?.sessionVersion ?? 1;
+
+  const [row] = await db
+    .insert(sessionsTable)
+    .values({
+      userId: params.userId,
+      token,
+      expiresAt,
+      ipAddress: hashIp(params.ipAddress),
+      userAgent: params.userAgent,
+      sessionVersion,
+      refreshToken,
+      refreshTokenExpiresAt,
+    })
+    .returning({ id: sessionsTable.id });
+
+  await writeAuditEvent({
+    userId: params.userId,
+    action: "session.create",
+    entityType: "session",
+    entityId: String(row.id),
+    ipAddress: params.ipAddress,
+    userAgent: params.userAgent,
+    newValues: {
+      reason: params.reason ?? "login",
+      sessionVersion,
+      tokenPrefix: token.slice(0, 8),
+    },
+  });
+
+  return {
+    sessionId: row.id,
+    token,
+    refreshToken,
+    expiresAt,
+    refreshTokenExpiresAt,
+    sessionVersion,
+  };
+}
+
+export class RefreshTokenReplayError extends Error {
+  constructor() {
+    super("Refresh token replay detected");
+    this.name = "RefreshTokenReplayError";
+  }
+}
+
+export class RefreshTokenInvalidError extends Error {
+  constructor(message = "Invalid or expired refresh token") {
+    super(message);
+    this.name = "RefreshTokenInvalidError";
+  }
+}
+
+/**
+ * Single-use refresh-token rotation.
+ *
+ * - The presented refresh token must exist, not be expired, not previously
+ *   used, and the parent session must not have been revoked.
+ * - On success: the parent session is revoked (replaced), a new session +
+ *   refresh token are issued, and a `session.refresh` audit event is written.
+ * - Replay (presenting an already-used refresh token) revokes ALL of that
+ *   user's active sessions and writes a `session.refresh.replay` audit event,
+ *   matching standard rotating-refresh-token theft response.
+ */
+export async function rotateRefreshToken(params: {
+  refreshToken: string;
+  ipAddress: string | null;
+  userAgent: string | null;
+}): Promise<CreatedSession> {
+  const { refreshToken, ipAddress, userAgent } = params;
+
+  const [session] = await db
+    .select()
+    .from(sessionsTable)
+    .where(eq(sessionsTable.refreshToken, refreshToken))
+    .limit(1);
+
+  if (!session) {
+    throw new RefreshTokenInvalidError();
+  }
+
+  // Replay detection: a refresh token that was already consumed signals theft.
+  if (session.refreshTokenUsedAt) {
+    const now = new Date();
+    await db
+      .update(sessionsTable)
+      .set({ revokedAt: now, revokedReason: "refresh_token_replay" })
+      .where(and(eq(sessionsTable.userId, session.userId), isNull(sessionsTable.revokedAt)));
+
+    await bumpUserSessionVersion(session.userId);
 
     await writeAuditEvent({
-      userId: changedByUserId,
-      action: "role_change_session_revocation",
-      entityType: "user",
-      entityId: String(userId),
+      userId: session.userId,
+      action: "session.refresh.replay",
+      entityType: "session",
+      entityId: String(session.id),
+      ipAddress,
+      userAgent,
       newValues: {
-        targetUserId: userId,
-        revokedSessionCount: sessions.length,
-        reason: reason ?? "role change",
+        replayedRefreshTokenPrefix: refreshToken.slice(0, 8),
+        originalUsedAt: session.refreshTokenUsedAt.toISOString(),
       },
     });
 
-    logger.info(
-      { userId, changedByUserId, revokedCount: sessions.length },
-      "Sessions revoked on role change",
-    );
+    throw new RefreshTokenReplayError();
   }
 
-  return { revokedCount: sessions.length };
+  if (session.revokedAt) {
+    throw new RefreshTokenInvalidError("Session has been revoked");
+  }
+
+  if (session.refreshTokenExpiresAt && session.refreshTokenExpiresAt.getTime() < Date.now()) {
+    throw new RefreshTokenInvalidError("Refresh token expired");
+  }
+
+  // Confirm the user is still active and pull the live session_version so
+  // the new session reflects any role changes that occurred during the old
+  // session's lifetime.
+  const [user] = await db
+    .select({ id: usersTable.id, isActive: usersTable.isActive, sessionVersion: usersTable.sessionVersion })
+    .from(usersTable)
+    .where(eq(usersTable.id, session.userId))
+    .limit(1);
+
+  if (!user || !user.isActive) {
+    throw new RefreshTokenInvalidError("User is not active");
+  }
+
+  // Atomically CLAIM the refresh token before minting anything new. The
+  // conditional WHERE means only one of N concurrent rotations can succeed;
+  // the others see 0 rows updated and fail closed. This is what makes the
+  // refresh token genuinely single-use under load, independent of the
+  // surrounding transaction isolation level.
+  const usedAt = new Date();
+  const claimed = await db
+    .update(sessionsTable)
+    .set({
+      refreshTokenUsedAt: usedAt,
+      revokedAt: usedAt,
+      revokedReason: "rotated",
+    })
+    .where(
+      and(
+        eq(sessionsTable.id, session.id),
+        isNull(sessionsTable.refreshTokenUsedAt),
+        isNull(sessionsTable.revokedAt),
+      ),
+    )
+    .returning({ id: sessionsTable.id });
+
+  if (claimed.length === 0) {
+    // Lost the race — another concurrent rotation already consumed this
+    // token. Treat as replay so the second attempt is rejected without
+    // minting a duplicate session. We do NOT cascade-revoke here (a brief
+    // double-click on a flaky network shouldn't sign every device out); a
+    // subsequent reuse of the same token will hit the early replay check
+    // above and trigger the full session-version bump.
+    await writeAuditEvent({
+      userId: session.userId,
+      action: "session.refresh.replay",
+      entityType: "session",
+      entityId: String(session.id),
+      ipAddress,
+      userAgent,
+      newValues: {
+        replayedRefreshTokenPrefix: refreshToken.slice(0, 8),
+        cause: "concurrent_rotation_race",
+      },
+    });
+    throw new RefreshTokenReplayError();
+  }
+
+  const next = await createSessionWithRefresh({
+    userId: session.userId,
+    ipAddress,
+    userAgent,
+    reason: "refresh",
+  });
+
+  // Backfill the replaced_by pointer now that the new session id is known.
+  await db
+    .update(sessionsTable)
+    .set({ replacedBySessionId: next.sessionId })
+    .where(eq(sessionsTable.id, session.id));
+
+  await writeAuditEvent({
+    userId: session.userId,
+    action: "session.refresh",
+    entityType: "session",
+    entityId: String(next.sessionId),
+    ipAddress,
+    userAgent,
+    newValues: {
+      previousSessionId: session.id,
+      newSessionId: next.sessionId,
+      sessionVersion: next.sessionVersion,
+    },
+  });
+
+  return next;
 }
 
 /**

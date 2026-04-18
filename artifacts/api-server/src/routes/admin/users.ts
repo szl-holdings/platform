@@ -81,6 +81,15 @@ export function register(router: IRouter): void {
         await db.delete(userRolesTable).where(and(eq(userRolesTable.userId, userId), eq(userRolesTable.roleId, roleId)));
       }
       await db.insert(auditEventsTable).values({ userId: req.user?.id ?? null, action: action === "add" ? "user.role.assigned" : "user.role.removed", entityType: "user", entityId: String(userId), newValues: { roleName: role.name, roleId, targetUserEmail: targetUser.email, action }, ipAddress: hashIp(req.ip ?? null), userAgent: req.headers["user-agent"] ?? null });
+      // Permission set changed — invalidate the target user's existing
+      // sessions so the new role takes effect on the next request (≤30s).
+      await revokeUserSessionsOnRoleChange({
+        userId,
+        changedByUserId: req.user?.id ?? null,
+        reason: action === "add" ? "admin_role_added" : "admin_role_removed",
+        ipAddress: req.ip ?? null,
+        userAgent: req.headers["user-agent"] ?? null,
+      });
       res.json({ ok: true, userId, roleId, roleName: role.name, action });
     } catch {
       sendError(res, "Failed to update user role", 500, "INTERNAL_ERROR");
@@ -282,6 +291,8 @@ export function register(router: IRouter): void {
         userId: targetUserId,
         changedByUserId: req.user!.id,
         reason: reason ?? "admin_role_assignment",
+        ipAddress: req.ip ?? null,
+        userAgent: req.headers["user-agent"] ?? null,
       });
 
       res.status(200).json({

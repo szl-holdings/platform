@@ -9,6 +9,13 @@ import { createAuthService } from "@szl-holdings/auth";
 import { issueWsTicket } from "../lib/websocket.js";
 import { getSessionToken, getSessionUser } from "../lib/auth";
 import { hashIp } from "@szl-holdings/audit";
+import {
+  createSessionWithRefresh,
+  rotateRefreshToken,
+  writeAuditEvent,
+  RefreshTokenInvalidError,
+  RefreshTokenReplayError,
+} from "../middlewares/session-policy";
 import { z } from "zod";
 import { jsonObjectBodySchema, listQuerySchema, loginPasswordSchema, validateBody, validateQuery } from "../lib/validation";
 
@@ -45,16 +52,12 @@ router.post("/auth/login", validateBody(loginBodySchema), async (req, res) => {
       return;
     }
 
-    const token = randomBytes(32).toString("hex");
-    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-
-    const [session] = await db.insert(sessionsTable).values({
+    const created = await createSessionWithRefresh({
       userId: user.id,
-      token,
-      expiresAt,
-      ipAddress: hashIp(req.ip ?? null),
+      ipAddress: req.ip ?? null,
       userAgent: req.headers["user-agent"] ?? null,
-    }).returning();
+      reason: "login",
+    });
 
     const userRoles = await db
       .select({ roleName: rolesTable.name })
@@ -63,8 +66,10 @@ router.post("/auth/login", validateBody(loginBodySchema), async (req, res) => {
       .where(eq(userRolesTable.userId, user.id));
 
     sendCreated(res, {
-      token,
-      expiresAt: expiresAt.toISOString(),
+      token: created.token,
+      refreshToken: created.refreshToken,
+      expiresAt: created.expiresAt.toISOString(),
+      refreshTokenExpiresAt: created.refreshTokenExpiresAt.toISOString(),
       user: {
         id: user.id,
         displayName: user.displayName,
@@ -116,26 +121,62 @@ router.get("/auth/me", authMiddleware(), async (req, res) => {
 
 router.post("/auth/sessions", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
-    const token = randomBytes(32).toString("hex");
-    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-
-    const [session] = await db.insert(sessionsTable).values({
+    const created = await createSessionWithRefresh({
       userId: req.user!.id,
-      token,
-      expiresAt,
-      ipAddress: hashIp(req.ip ?? null),
+      ipAddress: req.ip ?? null,
       userAgent: req.headers["user-agent"] ?? null,
-    }).returning();
+      reason: "manual_session_create",
+    });
 
-    await logActivity(req, "create", "session", String(session.id));
+    await logActivity(req, "create", "session", String(created.sessionId));
 
     sendCreated(res, {
-      token,
-      expiresAt: expiresAt.toISOString(),
+      token: created.token,
+      refreshToken: created.refreshToken,
+      expiresAt: created.expiresAt.toISOString(),
+      refreshTokenExpiresAt: created.refreshTokenExpiresAt.toISOString(),
     });
   } catch (err) {
     req.log?.error({ err }, "Failed to create session");
     handleRouteError(res, err, "Failed to create session");
+  }
+});
+
+const refreshBodySchema = z.object({
+  refreshToken: z.string().min(1, "refreshToken is required"),
+});
+
+/**
+ * Rotate a refresh token. Returns a new access token + refresh token pair.
+ * Old refresh token is single-use and replay attempts revoke all sessions
+ * for the user.
+ */
+router.post("/auth/refresh", validateBody(refreshBodySchema), async (req, res) => {
+  try {
+    const { refreshToken } = req.body as z.infer<typeof refreshBodySchema>;
+    const next = await rotateRefreshToken({
+      refreshToken,
+      ipAddress: req.ip ?? null,
+      userAgent: req.headers["user-agent"] ?? null,
+    });
+
+    sendSuccess(res, {
+      token: next.token,
+      refreshToken: next.refreshToken,
+      expiresAt: next.expiresAt.toISOString(),
+      refreshTokenExpiresAt: next.refreshTokenExpiresAt.toISOString(),
+    });
+  } catch (err) {
+    if (err instanceof RefreshTokenReplayError) {
+      sendError(res, "Refresh token replay detected. All sessions revoked.", 401, "REFRESH_TOKEN_REPLAY");
+      return;
+    }
+    if (err instanceof RefreshTokenInvalidError) {
+      sendError(res, err.message, 401, "REFRESH_TOKEN_INVALID");
+      return;
+    }
+    req.log?.error({ err }, "Refresh token rotation failed");
+    handleRouteError(res, err, "Failed to refresh session");
   }
 });
 
@@ -159,6 +200,15 @@ router.delete("/auth/sessions/current", validateBody(jsonObjectBodySchema), auth
 
     await db.delete(sessionsTable).where(eq(sessionsTable.token, token));
     await logActivity(req, "delete", "session", String(session.id));
+    await writeAuditEvent({
+      userId: req.user!.id,
+      action: "session.invalidate",
+      entityType: "session",
+      entityId: String(session.id),
+      ipAddress: req.ip ?? null,
+      userAgent: req.headers["user-agent"] ?? null,
+      newValues: { reason: "user_logout" },
+    });
     sendNoContent(res);
   } catch (err) {
     req.log?.error({ err }, "Failed to delete session");
@@ -188,6 +238,19 @@ router.delete("/auth/sessions/:id", validateBody(jsonObjectBodySchema), authMidd
 
     await db.delete(sessionsTable).where(eq(sessionsTable.id, sessionId));
     await logActivity(req, "delete", "session", String(session.id));
+    await writeAuditEvent({
+      userId: req.user!.id,
+      action: "session.invalidate",
+      entityType: "session",
+      entityId: String(session.id),
+      ipAddress: req.ip ?? null,
+      userAgent: req.headers["user-agent"] ?? null,
+      newValues: {
+        reason: "session_delete_by_id",
+        targetUserId: session.userId,
+        invokedBy: req.user!.id,
+      },
+    });
     sendNoContent(res);
   } catch (err) {
     req.log?.error({ err }, "Failed to delete session");
@@ -365,21 +428,19 @@ router.get("/auth/verify-email", validateQuery(listQuerySchema), async (req, res
       })
       .where(eq(usersTable.id, user.id));
 
-    const sessionToken = randomBytes(32).toString("hex");
-    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-
-    await db.insert(sessionsTable).values({
+    const created = await createSessionWithRefresh({
       userId: user.id,
-      token: sessionToken,
-      expiresAt,
-      ipAddress: hashIp(req.ip ?? null),
+      ipAddress: req.ip ?? null,
       userAgent: req.headers["user-agent"] ?? null,
+      reason: "email_verification",
     });
 
     sendSuccess(res, {
       verified: true,
-      token: sessionToken,
-      expiresAt: expiresAt.toISOString(),
+      token: created.token,
+      refreshToken: created.refreshToken,
+      expiresAt: created.expiresAt.toISOString(),
+      refreshTokenExpiresAt: created.refreshTokenExpiresAt.toISOString(),
       user: {
         id: user.id,
         displayName: user.displayName,
@@ -426,22 +487,20 @@ router.post("/auth/login-password", validateBody(loginPasswordSchema), async (re
       return;
     }
 
-    const sessionToken = randomBytes(32).toString("hex");
-    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-
-    await db.insert(sessionsTable).values({
+    const created = await createSessionWithRefresh({
       userId: user.id,
-      token: sessionToken,
-      expiresAt,
-      ipAddress: hashIp(req.ip ?? null),
+      ipAddress: req.ip ?? null,
       userAgent: req.headers["user-agent"] ?? null,
+      reason: "password_login",
     });
 
     await db.update(usersTable).set({ lastLoginAt: new Date(), updatedAt: new Date() }).where(eq(usersTable.id, user.id));
 
     sendSuccess(res, {
-      token: sessionToken,
-      expiresAt: expiresAt.toISOString(),
+      token: created.token,
+      refreshToken: created.refreshToken,
+      expiresAt: created.expiresAt.toISOString(),
+      refreshTokenExpiresAt: created.refreshTokenExpiresAt.toISOString(),
       user: { id: user.id, displayName: user.displayName, email: user.email },
     });
   } catch (err) {

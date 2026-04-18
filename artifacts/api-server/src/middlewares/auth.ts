@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import { sendUnauthorized, sendForbidden, sendError } from "../lib/api-response";
 import { db, usersTable, sessionsTable, userRolesTable, rolesTable, orgMembersTable, organizationsTable } from "@szl-holdings/db";
-import { eq, and, gt } from "drizzle-orm";
+import { eq, and, gt, isNull } from "drizzle-orm";
 import type { RoleName } from "@szl-holdings/db";
 import { ROLE_HIERARCHY, isReadOnlyRole, toCanonicalRole } from "@szl-holdings/db";
 import { serverTelemetry } from "@szl-holdings/observability";
@@ -74,25 +74,48 @@ function checkInternalToken(req: Request): boolean {
   return matched;
 }
 
-async function resolveUserFromToken(token: string): Promise<AuthenticatedUser | null> {
+type SessionResolution =
+  | { kind: "ok"; user: AuthenticatedUser }
+  | { kind: "revoked"; reason: "session_version_mismatch" | "session_revoked" }
+  | { kind: "missing" };
+
+async function resolveUserFromToken(token: string): Promise<SessionResolution> {
   const [session] = await db
     .select()
     .from(sessionsTable)
     .where(
       and(
         eq(sessionsTable.token, token),
-        gt(sessionsTable.expiresAt, new Date())
+        gt(sessionsTable.expiresAt, new Date()),
+        isNull(sessionsTable.revokedAt),
       )
     );
 
-  if (!session) return null;
+  if (!session) {
+    // Disambiguate: if a row exists but is revoked, surface SESSION_REVOKED
+    // instead of a generic 401 so the client knows to drop the session.
+    const [revoked] = await db
+      .select({ id: sessionsTable.id })
+      .from(sessionsTable)
+      .where(eq(sessionsTable.token, token))
+      .limit(1);
+    if (revoked) {
+      return { kind: "revoked", reason: "session_revoked" };
+    }
+    return { kind: "missing" };
+  }
 
   const [user] = await db
     .select()
     .from(usersTable)
     .where(eq(usersTable.id, session.userId));
 
-  if (!user || !user.isActive) return null;
+  if (!user || !user.isActive) return { kind: "missing" };
+
+  // Session-version check — bumped on role/org-membership change.
+  if (typeof user.sessionVersion === "number" && session.sessionVersion !== user.sessionVersion) {
+    return { kind: "revoked", reason: "session_version_mismatch" };
+  }
 
   const [userRoles, orgMemberships] = await Promise.all([
     db
@@ -113,16 +136,19 @@ async function resolveUserFromToken(token: string): Promise<AuthenticatedUser | 
   ]);
 
   return {
-    id: user.id,
-    displayName: user.displayName,
-    email: user.email,
-    roles: userRoles.map((r) => r.roleName) as RoleName[],
-    orgs: orgMemberships.map((m) => ({
-      orgId: m.orgId,
-      orgSlug: m.orgSlug,
-      orgName: m.orgName,
-      role: m.role,
-    })),
+    kind: "ok",
+    user: {
+      id: user.id,
+      displayName: user.displayName,
+      email: user.email,
+      roles: userRoles.map((r) => r.roleName) as RoleName[],
+      orgs: orgMemberships.map((m) => ({
+        orgId: m.orgId,
+        orgSlug: m.orgSlug,
+        orgName: m.orgName,
+        role: m.role,
+      })),
+    },
   };
 }
 
@@ -139,6 +165,7 @@ export function authMiddleware(options: { required?: boolean } = {}) {
       }
 
       let user: AuthenticatedUser | null = null;
+      let revokedReason: "session_version_mismatch" | "session_revoked" | null = null;
 
       const SESSION_COOKIE = "sid";
       let token: string | undefined;
@@ -149,11 +176,25 @@ export function authMiddleware(options: { required?: boolean } = {}) {
         token = req.cookies[SESSION_COOKIE] as string;
       }
       if (token) {
-        user = await resolveUserFromToken(token);
+        const resolved = await resolveUserFromToken(token);
+        if (resolved.kind === "ok") {
+          user = resolved.user;
+        } else if (resolved.kind === "revoked") {
+          revokedReason = resolved.reason;
+        }
       }
 
       if (!user && required) {
         serverTelemetry.recordAuthFailure();
+        if (revokedReason) {
+          sendError(
+            res,
+            "Session has been revoked. Please sign in again.",
+            401,
+            "SESSION_REVOKED",
+          );
+          return;
+        }
         sendUnauthorized(res);
         return;
       }
