@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
 
 const ACCENT = "#8b7ac8";
@@ -140,6 +140,36 @@ export default function SimulationPage() {
   const [running, setRunning] = useState(false);
   const [impacts, setImpacts] = useState<DomainImpact[]>([]);
   const [iterations] = useState(10000);
+  const [resultSource, setResultSource] = useState<"api" | "local" | null>(null);
+  const [sourceError, setSourceError] = useState<string | null>(null);
+  const [csrfReady, setCsrfReady] = useState(false);
+  const [csrfError, setCsrfError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const hasCookie = document.cookie.split(";").some((c) => c.trim().startsWith("csrf_token="));
+    if (hasCookie) {
+      setCsrfReady(true);
+      return;
+    }
+    (async () => {
+      try {
+        const res = await fetch("/api/csrf-token", { credentials: "include" });
+        if (!res.ok) throw new Error(`csrf-token request failed: ${res.status}`);
+        if (!cancelled) {
+          setCsrfReady(true);
+          setCsrfError(null);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setCsrfError(err instanceof Error ? err.message : "Unable to initialize CSRF token");
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   const [savedScenarios] = useState([
     { id: "s1", label: "Oil Shock +30%", date: "Apr 14", variables: { "oil-price": 30 } },
     { id: "s2", label: "Rate Cut -100bps", date: "Apr 12", variables: { "interest-rate": -100 } },
@@ -148,6 +178,7 @@ export default function SimulationPage() {
 
   const runSimulation = useCallback(async () => {
     setRunning(true);
+    setSourceError(null);
     try {
       const csrfMatch = document.cookie.split(";").find((c) => c.trim().startsWith("csrf_token="));
       const csrfToken = csrfMatch ? decodeURIComponent(csrfMatch.split("=")[1]!) : undefined;
@@ -165,15 +196,20 @@ export default function SimulationPage() {
         const apiImpacts = json.domainImpacts;
         if (Array.isArray(apiImpacts) && apiImpacts.length > 0) {
           setImpacts(apiImpacts);
+          setResultSource("api");
           setHasRun(true);
           setRunning(false);
           return;
         }
+        throw new Error("API returned no domain impacts");
       }
-    } catch {
+      throw new Error(`API returned HTTP ${res.status}`);
+    } catch (err) {
+      setSourceError(err instanceof Error ? err.message : "API request failed");
     }
     await new Promise((r) => setTimeout(r, 400));
     setImpacts(computeImpact(values));
+    setResultSource("local");
     setHasRun(true);
     setRunning(false);
   }, [values, iterations]);
@@ -291,17 +327,18 @@ export default function SimulationPage() {
               <div style={{ padding: "12px 16px", borderTop: "1px solid rgba(255,255,255,0.06)", display: "flex", gap: "8px" }}>
                 <button
                   onClick={runSimulation}
-                  disabled={running}
+                  disabled={running || !csrfReady}
+                  title={!csrfReady ? (csrfError ?? "Initializing secure session…") : undefined}
                   style={{
                     flex: 1,
                     padding: "10px",
                     borderRadius: "10px",
                     border: "none",
-                    background: hasChanges ? ACCENT : "rgba(255,255,255,0.08)",
-                    color: hasChanges ? "#fff" : "rgba(255,255,255,0.4)",
+                    background: hasChanges && csrfReady ? ACCENT : "rgba(255,255,255,0.08)",
+                    color: hasChanges && csrfReady ? "#fff" : "rgba(255,255,255,0.4)",
                     fontSize: "13px",
                     fontWeight: 700,
-                    cursor: hasChanges ? "pointer" : "default",
+                    cursor: hasChanges && csrfReady && !running ? "pointer" : "default",
                     fontFamily: "system-ui, sans-serif",
                     display: "flex",
                     alignItems: "center",
@@ -349,12 +386,35 @@ export default function SimulationPage() {
 
             {hasRun && !running && (
               <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "4px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "4px", flexWrap: "wrap" }}>
                   <span style={{ fontSize: "12px", fontWeight: 700, color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: "1px" }}>Domain Impact Analysis</span>
                   <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.25)", background: "rgba(255,255,255,0.05)", borderRadius: "5px", padding: "2px 8px", border: "1px solid rgba(255,255,255,0.08)" }}>
                     {iterations.toLocaleString()} iterations
                   </span>
+                  {resultSource === "api" && (
+                    <span
+                      title="Computed by the live simulation API"
+                      style={{ fontSize: "11px", fontWeight: 700, color: "#22c55e", background: "rgba(34,197,94,0.1)", borderRadius: "5px", padding: "2px 8px", border: "1px solid rgba(34,197,94,0.35)", textTransform: "uppercase", letterSpacing: "0.5px", display: "inline-flex", alignItems: "center", gap: "5px" }}
+                    >
+                      <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#22c55e" }} />
+                      Source: Live API
+                    </span>
+                  )}
+                  {resultSource === "local" && (
+                    <span
+                      title={sourceError ? `API call failed (${sourceError}). Showing in-browser estimate.` : "Showing in-browser estimate"}
+                      style={{ fontSize: "11px", fontWeight: 700, color: "#f59e0b", background: "rgba(245,158,11,0.1)", borderRadius: "5px", padding: "2px 8px", border: "1px solid rgba(245,158,11,0.4)", textTransform: "uppercase", letterSpacing: "0.5px", display: "inline-flex", alignItems: "center", gap: "5px" }}
+                    >
+                      <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#f59e0b" }} />
+                      Source: Local estimate (offline)
+                    </span>
+                  )}
                 </div>
+                {resultSource === "local" && sourceError && (
+                  <div style={{ fontSize: "11px", color: "rgba(245,158,11,0.85)", background: "rgba(245,158,11,0.06)", border: "1px solid rgba(245,158,11,0.25)", borderRadius: "8px", padding: "8px 12px", marginBottom: "4px" }}>
+                    Live simulation API unavailable: {sourceError}. Displaying in-browser estimate as a fallback.
+                  </div>
+                )}
                 {impacts.map((impact) => (
                   <div
                     key={impact.domain}
