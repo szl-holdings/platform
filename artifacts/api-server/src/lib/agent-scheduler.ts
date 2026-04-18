@@ -14,6 +14,7 @@ import {
   recordCovenantEvaluation,
   seedCovenantsFromDistress,
 } from "./terra-covenant-store";
+import { runAtlasCompaction } from "../jobs/atlas-compaction";
 import { logger } from "./logger";
 
 const BASE_URL = `http://localhost:${process.env["PORT"] || 3000}`;
@@ -372,11 +373,39 @@ export async function registerDefaultSchedules(): Promise<void> {
     });
   }
 
+  agentExecutionRuntime.registerAgent(
+    {
+      agentId: "atlas-snapshot-compactor",
+      name: "ATLAS Snapshot Compactor",
+      domain: "system",
+      jobType: "atlas_snapshot_compact",
+      queue: "maintenance",
+      maxRetries: 1,
+    },
+    async (_job, ctx) => {
+      const result = await runAtlasCompaction();
+      await ctx.saveState({
+        lastRunAt: new Date().toISOString(),
+        runCount: ctx.runCount + 1,
+        lastResult: result,
+      });
+    },
+  );
+
+  durableScheduleEntries.push({
+    name: "atlas_snapshot_compactor",
+    jobType: "atlas_snapshot_compact",
+    cronExpression: "0 * * * *",
+    payload: {},
+    queue: "maintenance",
+    maxRetries: 1,
+  });
+
   agentScheduler.startDurableMode();
 
   try {
     await seedDefaultSchedules(durableScheduleEntries);
-    logger.info({ agentCount: schedules.length }, "Default agent schedules registered and started");
+    logger.info({ agentCount: schedules.length + 1 }, "Default agent schedules registered and started");
   } catch (err) {
     logger.warn({ err }, "Agent durable schedule seeding failed (non-fatal)");
   }
