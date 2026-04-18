@@ -17,6 +17,7 @@ import {
 import { authMiddleware } from "../middlewares/auth";
 import { handleRouteError, sendSuccess, sendNotFound, sendBadRequest } from "../lib/api-response";
 import { anyQuerySchema, jsonObjectBodySchema, validateBody, validateQuery } from "../lib/validation";
+import { broadcastWs } from "../lib/pubsub-bridge";
 import rateLimit from "express-rate-limit";
 
 const router: IRouter = Router();
@@ -275,6 +276,19 @@ router.post("/aegis/action-queue", limiter, authMiddleware({ required: true }), 
       playbookRef: body.playbookRef,
       auditTrail: initAudit,
     }).returning();
+    const serialized = serializeQueueItem(inserted);
+    broadcastWs("aegis-incidents", "action-created", {
+      id: serialized.id,
+      title: serialized.title,
+      description: serialized.description,
+      priority: serialized.priority,
+      status: serialized.status,
+      assignedTo: serialized.assignedTo ?? null,
+      dueDate: serialized.dueDate,
+      incidentId: serialized.incidentId ?? null,
+      source: serialized.source ?? "manual",
+      createdAt: serialized.createdAt,
+    });
     sendSuccess(res, { item: inserted, message: "Action created" });
   } catch (err) {
     handleRouteError(res, err, "Failed to create action");

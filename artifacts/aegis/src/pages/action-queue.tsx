@@ -1,12 +1,27 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, CheckCircle, Clock, User, Shield, ArrowUpRight, Target, RefreshCw } from "lucide-react";
+import { AlertTriangle, CheckCircle, Clock, User, Shield, ArrowUpRight, Target, RefreshCw, Bell, X } from "lucide-react";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
+import { useRealtimeChannel } from "@szl-holdings/shared-ui";
+import { LiveDataBadge } from "@/lib/live-badge";
 import { api } from "../lib/api";
 
 type ActionQueuePriority = "critical" | "high" | "medium" | "low";
 type ActionQueueStatus = "open" | "in_progress" | "blocked" | "escalated" | "completed";
+
+interface ActionCreatedPayload {
+  id: string;
+  title: string;
+  description?: string;
+  priority: ActionQueuePriority;
+  status: ActionQueueStatus;
+  assignedTo?: string | null;
+  dueDate?: string | null;
+  incidentId?: string | null;
+  source?: string;
+  createdAt: string;
+}
 
 interface AuditEntry { actor: string; action: string; at: string; note?: string }
 
@@ -168,6 +183,51 @@ export default function ActionQueue() {
     refetchInterval: 15000,
   });
 
+  const [liveAlert, setLiveAlert] = useState<ActionCreatedPayload | null>(null);
+  const [newCount, setNewCount] = useState(0);
+  const liveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const seenIdsRef = useRef<Set<string>>(new Set());
+
+  const { lastMessage, isConnected, status } = useRealtimeChannel<ActionCreatedPayload>("aegis-incidents");
+
+  useEffect(() => {
+    if (!lastMessage) return;
+    if (lastMessage.event !== "action-created") return;
+    const payload = lastMessage.data;
+    if (!payload?.id || seenIdsRef.current.has(payload.id)) return;
+    seenIdsRef.current.add(payload.id);
+
+    qc.invalidateQueries({ queryKey: ["action-queue"] });
+    setNewCount((c) => c + 1);
+
+    const isUrgent = payload.priority === "critical" || payload.status === "blocked";
+    if (isUrgent) {
+      setLiveAlert(payload);
+      if (liveTimerRef.current) clearTimeout(liveTimerRef.current);
+      liveTimerRef.current = setTimeout(() => setLiveAlert(null), 12000);
+      toast.error(`${payload.priority === "critical" ? "Critical" : "Blocked"} action: ${payload.title}`, {
+        description: payload.description,
+        action: {
+          label: "View",
+          onClick: () => {
+            setFilter(payload.status === "blocked" ? "blocked" : "open");
+            setNewCount(0);
+          },
+        },
+      });
+    } else {
+      toast.success(`New action queued: ${payload.title}`);
+    }
+  }, [lastMessage, qc]);
+
+  useEffect(() => {
+    return () => {
+      if (liveTimerRef.current) clearTimeout(liveTimerRef.current);
+    };
+  }, []);
+
+  const dismissNewBadge = () => setNewCount(0);
+
   const completeMutation = useMutation({
     mutationFn: (id: string) => api.actionQueue.complete(id, "Executed via Action Queue"),
     onSuccess: (data: { data?: { message?: string } }) => {
@@ -218,6 +278,21 @@ export default function ActionQueue() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <LiveDataBadge
+            isLive={isConnected}
+            isLoading={status === "reconnecting"}
+            label={isConnected ? "Live" : status === "reconnecting" ? "Reconnecting" : "Offline"}
+          />
+          {newCount > 0 && (
+            <button
+              onClick={() => { dismissNewBadge(); qc.invalidateQueries({ queryKey: ["action-queue"] }); }}
+              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full transition-colors"
+              style={{ background: "hsl(220 72% 56% / 0.15)", color: ACCENT, border: "1px solid hsl(220 72% 56% / 0.4)" }}
+              title="Dismiss and refresh"
+            >
+              <Bell size={12} className="animate-pulse" /> {newCount} new
+            </button>
+          )}
           {blockedCount > 0 && (
             <span className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full" style={{ background: "#9b1c1c20", color: "#f87171", border: "1px solid #9b1c1c40" }}>
               <AlertTriangle size={12} /> {blockedCount} blocked
@@ -231,6 +306,64 @@ export default function ActionQueue() {
           </button>
         </div>
       </div>
+
+      {liveAlert && (
+        <div
+          className="mb-4 rounded-xl border p-4 flex items-start gap-3"
+          style={{
+            background: liveAlert.priority === "critical" ? "#9b1c1c12" : "#c08a2c12",
+            borderColor: liveAlert.priority === "critical" ? "#9b1c1c50" : "#c08a2c50",
+          }}
+        >
+          <div
+            className="p-2 rounded-lg flex-shrink-0"
+            style={{ background: liveAlert.priority === "critical" ? "#9b1c1c25" : "#c08a2c25" }}
+          >
+            <AlertTriangle
+              size={16}
+              style={{ color: liveAlert.priority === "critical" ? "#f87171" : "#fbbf24" }}
+              className="animate-pulse"
+            />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <span
+                className="text-[10px] uppercase tracking-wide font-semibold px-2 py-0.5 rounded"
+                style={{
+                  background: liveAlert.priority === "critical" ? "#9b1c1c30" : "#c08a2c30",
+                  color: liveAlert.priority === "critical" ? "#f87171" : "#fbbf24",
+                }}
+              >
+                {liveAlert.priority === "critical" ? "Critical" : "Blocked"} · New
+              </span>
+              <span className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>just now</span>
+            </div>
+            <div className="text-sm font-semibold" style={{ color: "rgba(255,255,255,0.95)" }}>{liveAlert.title}</div>
+            {liveAlert.description && (
+              <div className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.55)" }}>{liveAlert.description}</div>
+            )}
+            <button
+              onClick={() => {
+                setFilter(liveAlert.status === "blocked" ? "blocked" : "open");
+                dismissNewBadge();
+                setLiveAlert(null);
+              }}
+              className="text-xs mt-2 inline-flex items-center gap-1 hover:underline"
+              style={{ color: ACCENT }}
+            >
+              Jump to action <ArrowUpRight size={11} />
+            </button>
+          </div>
+          <button
+            onClick={() => setLiveAlert(null)}
+            className="p-1 rounded hover:bg-white/5 flex-shrink-0"
+            style={{ color: "rgba(255,255,255,0.4)" }}
+            aria-label="Dismiss alert"
+          >
+            <X size={14} />
+          </button>
+        </div>
+      )}
 
       <div className="grid grid-cols-4 gap-4 mb-6">
         {[
