@@ -42,6 +42,7 @@ import carlotaTimeTrackingRouter from "./carlota-time-tracking";
 import lpPortalRouter from "./lp-portal";
 import atlasArtifactsRouter from "./atlas-artifacts";
 import outcomeGraphRouter from "./outcome-graph";
+import pageViewTrackingRouter from "./page-view-tracking";
 
 const router: IRouter = Router();
 
@@ -52,6 +53,11 @@ const router: IRouter = Router();
 // and return 401 before the handlers run. See carlota-time-tracking.ts for the
 // matching PUBLIC_PREFIXES allowlist in global-auth-enforcer.ts.
 router.use(carlotaTimeTrackingRouter);
+
+// Anonymous page-view tracking — public, unauthenticated.  Must be mounted
+// BEFORE guardianPolicyCheck so pre-login visitors can POST without a session.
+// The /api/track/ prefix is also in PUBLIC_PREFIXES in global-auth-enforcer.ts.
+router.use(pageViewTrackingRouter);
 
 // Global Guardian policy check — derives category from request path and
 // applies to every agent-facing route family. Read-only methods skip

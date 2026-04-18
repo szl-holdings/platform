@@ -58,6 +58,9 @@ const EXEMPT_PATHS = new Set([
   "/api/analytics/event",
   "/api/public/fund-inbound-deals",
   "/api/public/fund-inbound-deals/upload",
+  // Anonymous page-view tracking — called from any page (including pre-login) without a
+  // browser session/cookie, so CSRF double-submit is not applicable.
+  "/api/track/page-view",
 ]);
 
 const GRAPHQL_PATHS = ["/api/graphql", "/graphql"];

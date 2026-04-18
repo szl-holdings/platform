@@ -84,6 +84,9 @@ const PUBLIC_PREFIXES = [
   // marketing demo at /fund/lp-portal can showcase seeded data, while authenticated
   // LPs see only their own real records (matched by contact email).
   "/api/lp-portal/",
+  // Anonymous page-view tracking — public endpoint that captures pre-login
+  // site traffic so the investor funnel Visitor stage reflects real visitors.
+  "/api/track/",
 ];
 
 function isValidInternalToken(req: Request): boolean {

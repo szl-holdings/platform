@@ -52,6 +52,7 @@ import {
   usersTable,
   revenueEventsTable,
   auditEventsTable,
+  pageViewEventsTable,
 } from "@szl-holdings/db";
 import { desc, asc, and, gte, lte, eq, sql, or, isNotNull, inArray } from "drizzle-orm";
 import { authMiddleware, requireRole } from "../middlewares/auth";
@@ -362,13 +363,26 @@ router.get(
     try {
       // Compute from real data: visitors (unique IPs) → signups → activation → trial → paid
 
-      // Visitor count: distinct IPs in audit events = sessions that accessed the system
-      // This is a real-data proxy — not synthetic multiplication
-      const [visitorStats] = await db
+      // Visitor count: distinct session IDs in page_view_events = real anonymous visitor sessions.
+      // Falls back to audit-events unique IPs when no page_view_events exist (e.g. fresh env).
+      const [pageViewStats] = await db
         .select({
-          uniqueIps: sql<number>`count(distinct ip_address) filter (where ip_address is not null)::int`,
+          uniqueSessions: sql<number>`count(distinct session_id)::int`,
         })
-        .from(auditEventsTable);
+        .from(pageViewEventsTable);
+
+      const pageViewVisitors = pageViewStats?.uniqueSessions ?? 0;
+
+      // Fallback: distinct IPs in audit events (authenticated sessions only)
+      let auditVisitors = 0;
+      if (pageViewVisitors === 0) {
+        const [visitorStats] = await db
+          .select({
+            uniqueIps: sql<number>`count(distinct ip_address) filter (where ip_address is not null)::int`,
+          })
+          .from(auditEventsTable);
+        auditVisitors = visitorStats?.uniqueIps ?? 0;
+      }
 
       const [userCounts] = await db
         .select({
@@ -387,7 +401,10 @@ router.get(
         .from(subscriptionsTable)
         .where(or(eq(subscriptionsTable.status, "active"), eq(subscriptionsTable.status, "trialing")));
 
-      const visitors = visitorStats?.uniqueIps ?? 0;
+      // Resolve final visitor count: prefer page_view_events, fall back to audit_events IPs, then signups
+      const visitors = pageViewVisitors > 0 ? pageViewVisitors : auditVisitors;
+      const visitorDataSource = pageViewVisitors > 0 ? "visitor_events" : auditVisitors > 0 ? "audit_events" : "signups_fallback";
+
       const totalUsers = userCounts?.total ?? 0;
       const activatedCount = userCounts?.activated ?? 0;
       // Paid = active but NOT trialing
@@ -398,11 +415,11 @@ router.get(
 
       // Signups = all registered users (real DB count)
       const signups = totalUsers;
-      // Funnel top: visitor count from audit events (unique IPs), or signups if no audit data
+      // Funnel top: visitor count from page_view_events (or fallback), or signups if no visitor data
       const funnelTop = Math.max(visitors, signups);
 
       const stages = [
-        { stage: "Visitor", count: funnelTop, rate: 100, dropOff: 0, dataSource: visitors > 0 ? "audit_events" : "signups_fallback" },
+        { stage: "Visitor", count: funnelTop, rate: 100, dropOff: 0, dataSource: visitorDataSource },
         { stage: "Signup", count: signups, rate: parseFloat((signups / Math.max(funnelTop, 1) * 100).toFixed(1)), dropOff: funnelTop - signups },
         { stage: "Activated", count: activatedCount, rate: parseFloat((activatedCount / Math.max(signups, 1) * 100).toFixed(1)), dropOff: signups - activatedCount },
         { stage: "Trial / Active", count: trials, rate: parseFloat((trials / Math.max(activatedCount, 1) * 100).toFixed(1)), dropOff: activatedCount - trials },
