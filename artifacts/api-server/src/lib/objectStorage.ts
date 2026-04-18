@@ -223,6 +223,22 @@ export class ObjectStorageService {
   }
 
   /**
+   * Generate a time-limited presigned GET URL for an already-uploaded
+   * object. Useful for emailing recipients a download link that does not
+   * require an authenticated session.
+   *
+   * @param subPath - Same relative subPath that was passed to uploadBuffer
+   *                  (e.g. "reports/scheduled/<reportId>.pdf")
+   * @param ttlSec  - URL validity window (default 7 days)
+   */
+  async getPresignedDownloadUrl(subPath: string, ttlSec: number = 7 * 24 * 3600): Promise<string> {
+    const privateObjectDir = this.getPrivateObjectDir();
+    const fullPath = `${privateObjectDir}/${subPath}`;
+    const { bucketName, objectName } = parseObjectPath(fullPath);
+    return signObjectURL({ bucketName, objectName, method: "GET", ttlSec });
+  }
+
+  /**
    * Download an object by normalized path and return its Buffer.
    * @param objectPath - Normalized path (e.g. "/objects/pdfs/my-doc.pdf")
    */

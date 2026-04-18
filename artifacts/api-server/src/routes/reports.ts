@@ -36,6 +36,7 @@ import {
 } from "../lib/report-store";
 import { generateReportNarrative } from "../lib/report-narrative";
 import { sendEmail, buildScheduledReportEmail } from "../lib/email";
+import { ObjectStorageService } from "../lib/objectStorage";
 import { logger } from "../lib/logger";
 import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
@@ -53,6 +54,30 @@ function buildReportDownloadUrl(reportId: string): string {
   return `${base}/reports/${reportId}/pdf`;
 }
 
+/**
+ * Upload the rendered PDF for a scheduled report into private object
+ * storage and return a time-limited presigned download URL the recipient
+ * can open without authenticating to the platform.
+ *
+ * Returns null when object storage is not configured (PRIVATE_OBJECT_DIR
+ * unset) — callers should fall back to the auth-protected download URL.
+ */
+async function uploadReportAndGetPresignedUrl(
+  reportId: string,
+  pdfBuffer: Buffer,
+): Promise<string | null> {
+  if (!process.env.PRIVATE_OBJECT_DIR) return null;
+  try {
+    const storage = new ObjectStorageService();
+    const subPath = `reports/scheduled/${reportId}.pdf`;
+    await storage.uploadBuffer(pdfBuffer, subPath, "application/pdf");
+    return await storage.getPresignedDownloadUrl(subPath, 7 * 24 * 3600);
+  } catch (err) {
+    logger.warn({ reportId, err }, "Failed to upload report for presigned download URL");
+    return null;
+  }
+}
+
 async function sendReportEmails(params: {
   reportId: string;
   reportTitle: string;
@@ -62,8 +87,19 @@ async function sendReportEmails(params: {
   generatedAt: Date;
   recipientEmails: string[];
   distributedByUserId?: number | null;
+  /** When provided, the PDF is attached to each email. */
+  pdfBuffer?: Buffer | null;
+  /**
+   * Override the download URL embedded in the email body. Used by the
+   * "download" delivery method to surface a presigned object-storage URL
+   * instead of the auth-protected /reports/:id/pdf endpoint.
+   */
+  downloadUrlOverride?: string;
+  /** Distribution channel recorded in the report distribution table. */
+  channel?: "email" | "download";
 }): Promise<{ sent: number; failed: number }> {
-  const downloadUrl = buildReportDownloadUrl(params.reportId);
+  const downloadUrl = params.downloadUrlOverride ?? buildReportDownloadUrl(params.reportId);
+  const channel = params.channel ?? "email";
   const generatedAtStr = params.generatedAt.toLocaleString("en-US", {
     year: "numeric",
     month: "long",
@@ -73,6 +109,14 @@ async function sendReportEmails(params: {
     timeZoneName: "short",
   });
 
+  const attachments = params.pdfBuffer
+    ? [{
+        filename: `${params.reportTitle.replace(/[^a-z0-9-_ ]/gi, "_").slice(0, 80)}.pdf`,
+        content: params.pdfBuffer,
+        contentType: "application/pdf",
+      }]
+    : undefined;
+
   let sent = 0;
   let failed = 0;
 
@@ -80,7 +124,7 @@ async function sendReportEmails(params: {
     const distributionId = await createDistribution({
       reportId: params.reportId,
       recipientEmail: email,
-      channel: "email",
+      channel,
       distributedByUserId: params.distributedByUserId ?? null,
     });
 
@@ -94,16 +138,19 @@ async function sendReportEmails(params: {
       downloadUrl,
     });
 
-    const result = await sendEmail({ to: email, subject, html, text });
+    const result = await sendEmail({ to: email, subject, html, text, attachments });
 
     if (result.success) {
       await markDistributionSent(distributionId);
       sent++;
-      logger.info({ reportId: params.reportId, email, messageId: result.messageId, provider: result.provider }, "Report email sent");
+      logger.info(
+        { reportId: params.reportId, email, channel, attached: !!attachments, messageId: result.messageId, provider: result.provider },
+        "Report email sent",
+      );
     } else {
       await markDistributionFailed(distributionId, result.error ?? "Email delivery failed");
       failed++;
-      logger.warn({ reportId: params.reportId, email, error: result.error }, "Report email delivery failed");
+      logger.warn({ reportId: params.reportId, email, channel, error: result.error }, "Report email delivery failed");
     }
   }
 
@@ -739,19 +786,32 @@ router.post("/reports/schedules/run-due", authMiddleware(), requireRole("admin")
         let emailSent = 0;
         let emailFailed = 0;
         if (runDueEmails.length > 0) {
+          const runDueTitle = `${template.name} — ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long" })}`;
           if (runDueDeliveryMethod === "download") {
-            for (const email of runDueEmails) {
-              await createDistribution({ reportId, recipientEmail: email, channel: "download" });
-            }
-          } else {
+            const presignedUrl = await uploadReportAndGetPresignedUrl(reportId, pdfBuffer);
             const emailResults = await sendReportEmails({
               reportId,
-              reportTitle: `${template.name} — ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long" })}`,
+              reportTitle: runDueTitle,
               scheduleName: schedule.name,
               domain: schedule.domain,
               frequency: schedule.frequency,
               generatedAt: new Date(),
               recipientEmails: runDueEmails,
+              channel: "download",
+              downloadUrlOverride: presignedUrl ?? undefined,
+            });
+            emailSent = emailResults.sent;
+            emailFailed = emailResults.failed;
+          } else {
+            const emailResults = await sendReportEmails({
+              reportId,
+              reportTitle: runDueTitle,
+              scheduleName: schedule.name,
+              domain: schedule.domain,
+              frequency: schedule.frequency,
+              generatedAt: new Date(),
+              recipientEmails: runDueEmails,
+              pdfBuffer,
             });
             emailSent = emailResults.sent;
             emailFailed = emailResults.failed;
@@ -866,20 +926,34 @@ router.post("/reports/schedules/:scheduleId/run", authMiddleware(), requireRole(
     let emailSent = 0;
     let emailFailed = 0;
     if (perRunEmails.length > 0) {
+      const perRunTitle = `${template.name} — ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long" })}`;
       if (perRunDeliveryMethod === "download") {
-        for (const email of perRunEmails) {
-          await createDistribution({ reportId, recipientEmail: email, channel: "download", distributedByUserId: getUserId(req) });
-        }
-      } else {
+        const presignedUrl = await uploadReportAndGetPresignedUrl(reportId, pdfBuffer);
         const emailResults = await sendReportEmails({
           reportId,
-          reportTitle: `${template.name} — ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long" })}`,
+          reportTitle: perRunTitle,
           scheduleName: schedule.name,
           domain: schedule.domain,
           frequency: schedule.frequency,
           generatedAt: new Date(),
           recipientEmails: perRunEmails,
           distributedByUserId: getUserId(req),
+          channel: "download",
+          downloadUrlOverride: presignedUrl ?? undefined,
+        });
+        emailSent = emailResults.sent;
+        emailFailed = emailResults.failed;
+      } else {
+        const emailResults = await sendReportEmails({
+          reportId,
+          reportTitle: perRunTitle,
+          scheduleName: schedule.name,
+          domain: schedule.domain,
+          frequency: schedule.frequency,
+          generatedAt: new Date(),
+          recipientEmails: perRunEmails,
+          distributedByUserId: getUserId(req),
+          pdfBuffer,
         });
         emailSent = emailResults.sent;
         emailFailed = emailResults.failed;
