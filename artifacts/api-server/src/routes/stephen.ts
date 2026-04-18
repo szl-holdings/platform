@@ -392,7 +392,10 @@ router.patch(
         return;
       }
 
-      if (body.status === "confirmed" || body.status === "declined" || body.status === "completed") {
+      const shouldNotify =
+        updated.type === "partnership" &&
+        (body.status === "confirmed" || body.status === "declined" || body.status === "completed");
+      if (shouldNotify) {
         sendEmail({
           to: updated.email,
           subject: body.status === "confirmed"
