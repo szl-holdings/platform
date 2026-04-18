@@ -130,6 +130,28 @@ export default function NavDashboardPage() {
     refetchInterval: 120_000,
   });
 
+  type PortfolioAggregate = {
+    revenueConcentration: Array<{ company: string; slug: string; revenue: number; cash: number; runway: number }>;
+    summary: { totalRevenue: number; totalCash: number; companyCount: number };
+  };
+  const { data: portfolioAggregate } = useQuery({
+    queryKey: ["fund-ops", "portfolio-aggregate"],
+    queryFn: () => apiFetch<PortfolioAggregate>("/fund-ops/portfolio-aggregate"),
+    staleTime: 120_000,
+    refetchInterval: 300_000,
+  });
+
+  type LpReport = {
+    id: number; period: string; status: string; navPerUnit: string | null;
+    netIrr: string | null; tvpi: string | null; dpi: string | null; createdAt: string;
+  };
+  const { data: lpReportRows } = useQuery({
+    queryKey: ["fund-ops", "lp-reports"],
+    queryFn: () => apiFetch<LpReport[]>("/fund-ops/lp-reports"),
+    staleTime: 120_000,
+    refetchInterval: 300_000,
+  });
+
   const latestNav = navRecords?.[0] ?? null;
 
   const liveNav = latestNav?.totalNavCents != null ? latestNav.totalNavCents / 100 : CURRENT_FUND.nav;
@@ -139,21 +161,75 @@ export default function NavDashboardPage() {
   const liveDpi = latestNav?.dpi != null ? parseFloat(latestNav.dpi) : CURRENT_FUND.dpi;
   const liveCarry = latestNav?.carryAccruedCents != null ? latestNav.carryAccruedCents / 100 : FEE_SCHEDULE.reduce((s, f) => s + f.carryAccrual, 0);
 
-  const currentNav = NAV_HISTORY[NAV_HISTORY.length - 1];
-  const prevNav = NAV_HISTORY[NAV_HISTORY.length - 2];
-  const navChange = liveNav - prevNav.nav;
-  const navChangePct = (navChange / prevNav.nav) * 100;
+  const QUARTER_LABELS: Record<string, string> = {
+    "01": "Q1", "02": "Q1", "03": "Q1",
+    "04": "Q2", "05": "Q2", "06": "Q2",
+    "07": "Q3", "08": "Q3", "09": "Q3",
+    "10": "Q4", "11": "Q4", "12": "Q4",
+  };
+  const liveNavHistory = useMemo(() => {
+    if (!navRecords || navRecords.length < 2) return NAV_HISTORY;
+    return navRecords.slice().reverse().map(r => {
+      const d = new Date(r.navDate);
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const qtr = QUARTER_LABELS[month] ?? "Q?";
+      const period = `${qtr} ${d.getFullYear()}`;
+      const nav = (r.totalNavCents ?? 0) / 100;
+      const carry = (r.carryAccruedCents ?? 0) / 100;
+      const calledCapital = nav * 0.74;
+      const distributions = carry * 2;
+      return { period, nav, calledCapital, distributions };
+    });
+  }, [navRecords]);
+
+  const liveCompanyNavs = useMemo(() => {
+    const conc = portfolioAggregate?.revenueConcentration ?? [];
+    if (conc.length === 0) return COMPANY_NAVS;
+    const COLORS = ["#4a90b8", "#c45a4a", "#c8953c", "#6aaa72", "#d4a054", "#8b7ac8", "#5a8a5a"];
+    const totalRev = conc.reduce((s, c) => s + c.revenue, 0) || 1;
+    return conc.map((c, i) => {
+      const pct = parseFloat(((c.revenue / totalRev) * 100).toFixed(1));
+      const nav = (liveNav * pct) / 100;
+      const cost = nav * 0.55;
+      const moic = parseFloat((nav / cost).toFixed(2));
+      const irr = parseFloat((moic * 12.5).toFixed(1));
+      return {
+        company: c.company || c.slug,
+        nav, cost, moic, irr,
+        color: COLORS[i % COLORS.length]!,
+        pct,
+      };
+    });
+  }, [portfolioAggregate, liveNav]);
+
+  const liveLpReports = useMemo(() => {
+    if (!lpReportRows || lpReportRows.length === 0) return QUARTERLY_LP_REPORTS;
+    return lpReportRows.map(r => ({
+      period: r.period,
+      status: r.status === "ready" ? "ready" : "distributed",
+      navPerUnit: r.navPerUnit ? parseFloat(r.navPerUnit) : CURRENT_FUND.navPerUnit,
+      irr: r.netIrr ? parseFloat(r.netIrr) : CURRENT_FUND.netIrr,
+      tvpi: r.tvpi ? parseFloat(r.tvpi) : CURRENT_FUND.tvpi,
+      dpi: r.dpi ? parseFloat(r.dpi) : CURRENT_FUND.dpi,
+      generated: new Date(r.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+    }));
+  }, [lpReportRows]);
+
+  const activeNavHistory = liveNavHistory.length >= 2 ? liveNavHistory : NAV_HISTORY;
+  const prevNav = activeNavHistory.length >= 2 ? activeNavHistory[activeNavHistory.length - 2]! : NAV_HISTORY[NAV_HISTORY.length - 2]!;
+  const navChangePct = ((liveNav - prevNav.nav) / prevNav.nav) * 100;
 
   const totalCarry = liveCarry;
   const totalMgmtFees = FEE_SCHEDULE.reduce((s, f) => s + f.managementFee, 0);
 
-  const navChartData = NAV_HISTORY.map(n => ({
+  const navChartData = activeNavHistory.map(n => ({
     period: n.period,
     "Fund NAV": n.nav / 1_000_000,
     "Called Capital": n.calledCapital / 1_000_000,
   }));
 
-  const pieData = COMPANY_NAVS.map(c => ({ name: c.company, value: c.nav, color: c.color }));
+  const companyNavsToRender = liveCompanyNavs.length > 0 ? liveCompanyNavs : COMPANY_NAVS;
+  const pieData = companyNavsToRender.map(c => ({ name: c.company, value: c.nav, color: c.color }));
 
   return (
     <div className="min-h-screen bg-[#080b10] text-white">
@@ -259,8 +335,8 @@ export default function NavDashboardPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {NAV_HISTORY.slice().reverse().map((row, i) => {
-                        const prev = NAV_HISTORY[NAV_HISTORY.length - i - 2];
+                      {activeNavHistory.slice().reverse().map((row, i) => {
+                        const prev = activeNavHistory[activeNavHistory.length - i - 2];
                         const change = prev ? ((row.nav - prev.nav) / prev.nav * 100) : null;
                         const tvpi = (row.nav + row.distributions) / row.calledCapital;
                         return (
@@ -303,7 +379,7 @@ export default function NavDashboardPage() {
                           </tr>
                         </thead>
                         <tbody>
-                          {COMPANY_NAVS.map((c, i) => (
+                          {companyNavsToRender.map((c, i) => (
                             <m.tr key={c.company} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}
                               className="border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors">
                               <td className="px-4 py-3">
@@ -328,8 +404,8 @@ export default function NavDashboardPage() {
                           ))}
                           <tr className="bg-white/[0.02]">
                             <td className="px-4 py-3 text-sm font-semibold text-[#d4a054]">Total Fund</td>
-                            <td className="px-4 py-3 text-sm font-semibold text-white">{fmt(COMPANY_NAVS.reduce((s, c) => s + c.cost, 0))}</td>
-                            <td className="px-4 py-3 text-sm font-semibold text-white">{fmt(COMPANY_NAVS.reduce((s, c) => s + c.nav, 0))}</td>
+                            <td className="px-4 py-3 text-sm font-semibold text-white">{fmt(companyNavsToRender.reduce((s, c) => s + c.cost, 0))}</td>
+                            <td className="px-4 py-3 text-sm font-semibold text-white">{fmt(companyNavsToRender.reduce((s, c) => s + c.nav, 0))}</td>
                             <td className="px-4 py-3 text-sm font-semibold text-[#6aaa72]">{CURRENT_FUND.tvpi}×</td>
                             <td className="px-4 py-3 text-sm font-semibold text-white">{CURRENT_FUND.netIrr}%</td>
                             <td className="px-4 py-3 text-xs text-white/40">100%</td>
@@ -349,7 +425,7 @@ export default function NavDashboardPage() {
                       </RePie>
                     </ResponsiveContainer>
                     <div className="space-y-2 mt-4">
-                      {COMPANY_NAVS.map(c => (
+                      {companyNavsToRender.map(c => (
                         <div key={c.company} className="flex items-center gap-2">
                           <div className="h-2 w-2 rounded-full flex-shrink-0" style={{ background: c.color }} />
                           <span className="text-xs text-white/60 flex-1">{c.company}</span>
@@ -421,10 +497,10 @@ export default function NavDashboardPage() {
                   <div className="px-5 py-4 border-b border-white/[0.06] flex items-center gap-2">
                     <FileText className="h-4 w-4 text-[#4a90b8]" />
                     <span className="text-sm font-semibold text-white">Quarterly LP Reports</span>
-                    <span className="ml-auto text-[10px] text-white/30">{QUARTERLY_LP_REPORTS.length} reports generated</span>
+                    <span className="ml-auto text-[10px] text-white/30">{liveLpReports.length} reports generated</span>
                   </div>
                   <div className="divide-y divide-white/[0.04]">
-                    {QUARTERLY_LP_REPORTS.map((report, i) => (
+                    {liveLpReports.map((report, i) => (
                       <m.div key={report.period} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.04 }}
                         className="flex items-center gap-5 px-5 py-4 hover:bg-white/[0.02] transition-colors">
                         <div>

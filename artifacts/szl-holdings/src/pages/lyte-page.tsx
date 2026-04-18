@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { m, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import {
   Eye, Radio, AlertTriangle, CheckCircle2, Clock, ArrowRight,
   Shield, Ship, Building2, Briefcase, Activity, Filter,
@@ -14,6 +15,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { ProofDrawer, SAMPLE_PROOF_RECORD } from "@/components/ProofDrawer";
 import type { ProofRecord } from "@/components/ProofDrawer";
+import { apiRequest } from "@/lib/api";
 
 const BG = "hsl(214,16%,4%)";
 const BORDER = "hsla(0,0%,100%,0.07)";
@@ -60,6 +62,103 @@ const DOMAIN_ICON: Record<string, typeof Shield> = {
   Alloy: Zap,
   IMPERIUM: Layers,
 };
+
+const SOURCE_TO_DOMAIN: Record<string, string> = {
+  terra: "Terra", vessels: "Vessels", firestorm: "Aegis",
+  prism: "PRISM Counsel", alloy: "Alloy", "carlota-jo": "Carlota Jo",
+  carlota: "Carlota Jo", manual: "IMPERIUM", monitor: "IMPERIUM",
+  api: "Alloy", scheduler: "Alloy",
+};
+
+interface ApiSignal {
+  id: number | string;
+  title: string;
+  body?: string | null;
+  severity: string;
+  source?: string | null;
+  status: string;
+  metadata?: Record<string, unknown> | null;
+  receivedAt: string;
+}
+
+interface ApiIncident {
+  id: number | string;
+  title: string;
+  severity?: string | null;
+  status: string;
+  domain?: string | null;
+  metadata?: Record<string, unknown> | null;
+  updatedAt?: string | null;
+  createdAt: string;
+}
+
+interface ApiGovPosture {
+  pendingApprovals: number;
+  slaBreach24h: number;
+  overrideRate7d: number;
+  proofCoverage: number | null;
+  totalSignals: number;
+  newSignals: number;
+  openIncidents: number;
+  dataAvailable?: boolean;
+}
+
+function formatAge(dateStr: string): string {
+  const ms = Date.now() - new Date(dateStr).getTime();
+  if (ms < 60000) return `${Math.floor(ms / 1000)}s`;
+  if (ms < 3600000) return `${Math.floor(ms / 60000)}m`;
+  if (ms < 86400000) return `${Math.floor(ms / 3600000)}h`;
+  return `${Math.floor(ms / 86400000)}d`;
+}
+
+function mapApiSignal(s: ApiSignal, idx: number): SignalItem {
+  const meta = (s.metadata ?? {}) as Record<string, unknown>;
+  const domain = SOURCE_TO_DOMAIN[s.source ?? ""] ?? "IMPERIUM";
+  const sevMap: Record<string, SignalSeverity> = { critical: "critical", high: "high", medium: "medium", low: "info", info: "info", warning: "medium" };
+  const sev: SignalSeverity = sevMap[s.severity] ?? "info";
+  return {
+    id: String(s.id),
+    domain,
+    severity: sev,
+    title: s.title,
+    detail: s.body ?? `${domain} signal · ${(meta.signalType as string) ?? "alert"}`,
+    age: formatAge(s.receivedAt),
+    status: s.status === "new" ? "new" : s.status === "escalated" ? "escalated" : "acknowledged",
+  };
+}
+
+const STATUS_TO_STAGE: Record<string, string> = {
+  open: "Signal", new: "Signal", in_progress: "Context",
+  acknowledged: "Recommendation", escalated: "Simulation",
+  investigating: "Policy", resolved: "Proof", closed: "Outcome",
+};
+
+function mapApiIncident(inc: ApiIncident): SituationItem {
+  const meta = (inc.metadata ?? {}) as Record<string, unknown>;
+  const stage = (meta.stage as string) ?? STATUS_TO_STAGE[inc.status] ?? "Signal";
+  const updated = inc.updatedAt ? formatAge(inc.updatedAt) + " ago" : formatAge(inc.createdAt) + " ago";
+  const sev: SignalSeverity = (["critical", "high", "medium", "info"].includes(inc.severity ?? "") ? inc.severity : "info") as SignalSeverity;
+  return {
+    id: String(inc.id),
+    title: inc.title,
+    domain: inc.domain ?? (meta.domain as string) ?? "IMPERIUM",
+    severity: sev,
+    stage,
+    owner: (meta.owner as string) ?? (meta.assignedTo as string) ?? "Unassigned",
+    pending: (meta.pending as string) ?? getPendingForStage(stage),
+    updated,
+  };
+}
+
+function getPendingForStage(stage: string): string {
+  const map: Record<string, string> = {
+    Signal: "Context enrichment", Context: "AI recommendation",
+    Recommendation: "Simulation run", Simulation: "Policy approval",
+    Policy: "Owner assignment", Execution: "Outcome confirmation",
+    Proof: "LP review", Outcome: "Closed",
+  };
+  return map[stage] ?? "Pending review";
+}
 
 interface SignalItem {
   id: string;
@@ -195,13 +294,16 @@ function DomainChip({ domain }: { domain: string }) {
   );
 }
 
-function LivePulse() {
+function LivePulse({ healthy = true }: { healthy?: boolean }) {
+  const color = healthy ? "hsl(142,60%,48%)" : "hsl(30,90%,52%)";
+  const textColor = healthy ? "hsl(142,60%,58%)" : "hsl(30,90%,62%)";
+  const label = healthy ? "LIVE" : "DEGRADED";
   return (
     <span style={{ position: "relative", display: "inline-flex", alignItems: "center", gap: "0.375rem" }}>
       <span style={{
         width: 6, height: 6, borderRadius: "50%",
-        background: "hsl(142,60%,48%)",
-        boxShadow: "0 0 6px hsl(142,60%,48%)",
+        background: color,
+        boxShadow: `0 0 6px ${color}`,
       }} />
       <span style={{
         fontSize: "0.6rem",
@@ -209,9 +311,9 @@ function LivePulse() {
         fontWeight: 700,
         letterSpacing: "0.12em",
         textTransform: "uppercase",
-        color: "hsl(142,60%,58%)",
+        color: textColor,
       }}>
-        LIVE
+        {label}
       </span>
     </span>
   );
@@ -422,19 +524,68 @@ export default function LytePage() {
   const [activeSignal, setActiveSignal] = useState<string>("s1");
   const [activeSit, setActiveSit] = useState<string>("sit1");
   const [filterSev, setFilterSev] = useState<string>("all");
-  const [tick, setTick] = useState(0);
 
-  useEffect(() => {
-    const t = setInterval(() => setTick(n => n + 1), 8000);
-    return () => clearInterval(t);
-  }, []);
+  const signalsQuery = useQuery<SignalItem[]>({
+    queryKey: ["lyte", "signals"],
+    queryFn: async () => {
+      const res = await apiRequest<{ success: boolean; data: ApiSignal[] }>("GET", "/api/lyte/signals?limit=20");
+      return (res.data ?? []).map((s, i) => mapApiSignal(s, i));
+    },
+    refetchInterval: 30000,
+    staleTime: 20000,
+    placeholderData: SIGNAL_STREAM,
+  });
 
-  const sig = SIGNAL_STREAM.find(s => s.id === activeSignal) ?? SIGNAL_STREAM[0];
-  const sit = SITUATION_BOARD.find(s => s.id === activeSit) ?? SITUATION_BOARD[0];
+  const incidentsQuery = useQuery<SituationItem[]>({
+    queryKey: ["lyte", "incidents"],
+    queryFn: async () => {
+      const res = await apiRequest<{ success: boolean; data: ApiIncident[] }>("GET", "/api/lyte/incidents?limit=10");
+      return (res.data ?? []).map(mapApiIncident);
+    },
+    refetchInterval: 30000,
+    staleTime: 20000,
+    placeholderData: SITUATION_BOARD,
+  });
+
+  const govQuery = useQuery<ApiGovPosture>({
+    queryKey: ["lyte", "governance-posture"],
+    queryFn: async () => {
+      const res = await apiRequest<{ success: boolean; data: ApiGovPosture }>("GET", "/api/lyte/governance-posture");
+      return res.data;
+    },
+    refetchInterval: 60000,
+    staleTime: 50000,
+  });
+
+  const liveSignals: SignalItem[] = signalsQuery.data ?? SIGNAL_STREAM;
+  const liveSituations: SituationItem[] = incidentsQuery.data ?? SITUATION_BOARD;
+  const govData = govQuery.data;
+
+  const STALE_THRESHOLD_MS = 90_000;
+  const lastFetchedAt = signalsQuery.dataUpdatedAt ?? 0;
+  const isStreamHealthy = !signalsQuery.isError && (
+    !signalsQuery.isFetched || (Date.now() - lastFetchedAt) < STALE_THRESHOLD_MS
+  );
+
+  const liveGovStats = govData ? [
+    { label: "Pending approvals", value: String(govData.pendingApprovals), delta: `of ${govData.totalSignals} total signals`, color: "hsl(30,90%,52%)" },
+    { label: "SLA breaches (24h)", value: String(govData.slaBreach24h), delta: "escalated signals", color: "hsl(0,72%,54%)" },
+    { label: "Override rate (7d)", value: `${govData.overrideRate7d}%`, delta: "of governed actions", color: "hsl(48,90%,52%)" },
+    {
+      label: "Proof coverage", color: "hsl(142,60%,48%)",
+      value: govData.proofCoverage !== null ? `${govData.proofCoverage}%` : "—",
+      delta: govData.proofCoverage !== null ? `${govData.openIncidents} open incidents` : "No incident data yet",
+    },
+  ] : GOV_STATS;
+
+  const sig = liveSignals.find(s => s.id === activeSignal) ?? liveSignals[0] ?? SIGNAL_STREAM[0]!;
+  const sit = liveSituations.find(s => s.id === activeSit) ?? liveSituations[0] ?? SITUATION_BOARD[0]!;
 
   const filteredSignals = filterSev === "all"
-    ? SIGNAL_STREAM
-    : SIGNAL_STREAM.filter(s => s.severity === filterSev);
+    ? liveSignals
+    : liveSignals.filter(s => s.severity === filterSev);
+
+  const unacknowledgedCount = liveSignals.filter(s => s.status === "new").length;
 
   const stgIdx = STAGE_FLOW.findIndex(s => s.id === sit.stage);
 
@@ -460,7 +611,7 @@ export default function LytePage() {
                   Lyte · Operational Nerve Center
                 </span>
                 <span style={{ width: 1, height: 12, background: BORDER }} />
-                <LivePulse />
+                <LivePulse healthy={isStreamHealthy} />
               </div>
 
               <h1 style={{
@@ -586,7 +737,7 @@ export default function LytePage() {
                       Signal Stream
                     </span>
                   </div>
-                  <LivePulse />
+                  <LivePulse healthy={isStreamHealthy} />
                 </div>
 
                 <div style={{ padding: "0.5rem", display: "flex", flexDirection: "column", gap: "0.25rem", overflowY: "auto", flex: 1 }}>
@@ -605,7 +756,7 @@ export default function LytePage() {
 
                 <div style={{ padding: "0.75rem", borderTop: `1px solid ${BORDER}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <span style={{ fontSize: "0.6rem", fontFamily: MONO, color: TEXT_FAINT }}>{filteredSignals.length} signals</span>
-                  <span style={{ fontSize: "0.6rem", fontFamily: MONO, color: "hsl(0,72%,54%)" }}>2 unacknowledged</span>
+                  <span style={{ fontSize: "0.6rem", fontFamily: MONO, color: "hsl(0,72%,54%)" }}>{unacknowledgedCount} unacknowledged</span>
                 </div>
               </div>
 
@@ -703,7 +854,7 @@ export default function LytePage() {
                     Active Situation Board · All Domains
                   </p>
                   <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                    {SITUATION_BOARD.map(s => (
+                    {liveSituations.map(s => (
                       <SituationCard
                         key={s.id}
                         sit={s}
@@ -763,7 +914,7 @@ export default function LytePage() {
                     Governance Posture
                   </p>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem" }}>
-                    {GOV_STATS.map(stat => (
+                    {liveGovStats.map(stat => (
                       <div key={stat.label} style={{ padding: "0.625rem", borderRadius: 6, background: SURFACE, border: `1px solid ${BORDER}` }}>
                         <p style={{ fontSize: "1.0625rem", fontWeight: 700, color: stat.color, margin: "0 0 0.1rem", fontFamily: MONO }}>{stat.value}</p>
                         <p style={{ fontSize: "0.6rem", color: TEXT_FAINT, margin: "0 0 0.15rem", lineHeight: 1.3 }}>{stat.label}</p>

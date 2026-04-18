@@ -320,6 +320,59 @@ router.get("/lyte/executive-summary", authMiddleware(), async (_req, res) => {
   }
 });
 
+router.get("/lyte/governance-posture", authMiddleware(), async (_req, res) => {
+  try {
+    const twentyFourHoursAgo = new Date(Date.now() - 86400000);
+    const sevenDaysAgo = new Date(Date.now() - 7 * 86400000);
+    const [signalStats, incidentStats, actionStats, actionStats7d] = await Promise.all([
+      db.select({
+        total: sql<number>`count(*)::int`,
+        newCount: sql<number>`count(*) filter (where status = 'new')::int`,
+        slaBreaches: sql<number>`count(*) filter (where status = 'new' and received_at <= ${twentyFourHoursAgo})::int`,
+      }).from(lyteSignalsTable).catch(() => [{ total: 0, newCount: 0, slaBreaches: 0 }]),
+      db.select({
+        total: sql<number>`count(*)::int`,
+        open: sql<number>`count(*) filter (where status not in ('resolved', 'closed'))::int`,
+      }).from(lyteIncidentsTable).catch(() => [{ total: 0, open: 0 }]),
+      db.select({
+        total: sql<number>`count(*)::int`,
+        pending: sql<number>`count(*) filter (where state in ('new', 'assigned'))::int`,
+        dismissed: sql<number>`count(*) filter (where state = 'dismissed')::int`,
+      }).from(lyteActionsTable).catch(() => [{ total: 0, pending: 0, dismissed: 0 }]),
+      db.select({
+        total: sql<number>`count(*)::int`,
+        dismissed: sql<number>`count(*) filter (where state = 'dismissed')::int`,
+      }).from(lyteActionsTable).where(sql`created_at >= ${sevenDaysAgo}`).catch(() => [{ total: 0, dismissed: 0 }]),
+    ]);
+
+    const sig = signalStats[0] ?? { total: 0, newCount: 0, slaBreaches: 0 };
+    const inc = incidentStats[0] ?? { total: 0, open: 0 };
+    const act = actionStats[0] ?? { total: 0, pending: 0, dismissed: 0 };
+    const act7d = actionStats7d[0] ?? { total: 0, dismissed: 0 };
+
+    const overrideRate7d = act7d.total > 0
+      ? parseFloat(((act7d.dismissed / act7d.total) * 100).toFixed(1))
+      : 0;
+    const proofCoverage = inc.total > 0
+      ? parseFloat((((inc.total - inc.open) / inc.total) * 100).toFixed(1))
+      : null;
+
+    sendSuccess(res, {
+      pendingApprovals: act.pending ?? 0,
+      slaBreach24h: sig.slaBreaches ?? 0,
+      overrideRate7d,
+      proofCoverage,
+      totalSignals: sig.total ?? 0,
+      newSignals: sig.newCount ?? 0,
+      openIncidents: inc.open ?? 0,
+      resolvedIncidents: inc.total > 0 ? inc.total - inc.open : 0,
+      dataAvailable: sig.total > 0,
+    });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to fetch governance posture");
+  }
+});
+
 function formatActionRow(r: typeof lyteActionsTable.$inferSelect) {
   const meta = (r.metadata as Record<string, unknown>) ?? {};
   const stateHistory = (r.stateHistory as Array<{ id?: string; action: string; actor: string; actorType: string; timestamp: string; notes?: string }>) ?? [];

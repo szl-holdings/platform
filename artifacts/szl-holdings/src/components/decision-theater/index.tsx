@@ -132,7 +132,7 @@ function LiveStageRouter({ stageId, metrics, recommendations, auditRecords, audi
 export default function DecisionTheater() {
   const [currentStage, setCurrentStage] = useState(0);
   const [demoMode, setDemoMode] = useState(false);
-  const [dataMode, setDataMode] = useState<DataMode>("demo");
+  const [dataMode, setDataMode] = useState<DataMode>("live");
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const engine = useDecisionEngine();
   const liveData = useLiveTheaterData(dataMode === "live");

@@ -613,4 +613,51 @@ router.get("/lifecycle/overview", requireAuth, validateQuery(listQuerySchema), a
 
 
 
+router.get("/analytics/dashboard", requireAuth, async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 3600 * 1000);
+    const [
+      articleStats, xPostStats, newsletterStats,
+      automationStats, leadStats, pageViewStats,
+    ] = await Promise.all([
+      db.select({
+        published: sql<number>`count(*) filter (where site_status = 'published')::int`,
+        total: sql<number>`count(*)::int`,
+      }).from(dosArticlesTable).catch(() => [{ published: 0, total: 0 }]),
+      db.select({
+        queued: sql<number>`count(*) filter (where status = 'queued')::int`,
+        sent: sql<number>`count(*) filter (where status = 'sent')::int`,
+        failed: sql<number>`count(*) filter (where status = 'failed')::int`,
+      }).from(dosXPostsTable).catch(() => [{ queued: 0, sent: 0, failed: 0 }]),
+      db.select({
+        ready: sql<number>`count(*) filter (where status = 'approved')::int`,
+      }).from(dosNewslettersTable).catch(() => [{ ready: 0 }]),
+      db.select({
+        completed: sql<number>`count(*)::int`,
+      }).from(dosAutomationRunsTable).where(
+        sql`completed_at >= ${sevenDaysAgo}`,
+      ).catch(() => [{ completed: 0 }]),
+      db.select({
+        thisWeek: sql<number>`count(*) filter (where created_at >= ${sevenDaysAgo})::int`,
+      }).from(dosLeadsTable).catch(() => [{ thisWeek: 0 }]),
+      db.select({
+        thisWeek: sql<number>`count(*) filter (where created_at >= ${sevenDaysAgo})::int`,
+      }).from(dosPageViewsTable).catch(() => [{ thisWeek: 0 }]),
+    ]);
+
+    res.json({
+      visitsThisWeek: pageViewStats[0]?.thisWeek ?? 0,
+      leadsThisWeek: leadStats[0]?.thisWeek ?? 0,
+      publishedArticles: articleStats[0]?.published ?? 0,
+      xQueued: xPostStats[0]?.queued ?? 0,
+      xSentTotal: xPostStats[0]?.sent ?? 0,
+      xFailed: xPostStats[0]?.failed ?? 0,
+      newslettersReady: newsletterStats[0]?.ready ?? 0,
+      automationsCompletedThisWeek: automationStats[0]?.completed ?? 0,
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch analytics dashboard" });
+  }
+});
+
 export function register(r: IRouter): void { r.use(router); }
