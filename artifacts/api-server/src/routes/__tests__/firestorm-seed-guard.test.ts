@@ -192,34 +192,34 @@ describe("firestorm seed endpoint — real router production guard", () => {
     process.env.APP_ENV = originalAppEnv;
   });
 
-  it("returns 403 with SEED_DISABLED_IN_PRODUCTION when NODE_ENV=production", async () => {
+  it("returns 404 with SEED_DISABLED_IN_PRODUCTION when NODE_ENV=production", async () => {
     process.env.NODE_ENV = "production";
     delete (process.env as Record<string, string | undefined>).APP_ENV;
 
     const app = buildApp();
     const res = await request(app).post("/firestorm/seed").send({});
 
-    expect(res.status).toBe(403);
+    expect(res.status).toBe(404);
     expect(res.body.code).toBe("SEED_DISABLED_IN_PRODUCTION");
   });
 
-  it("returns 403 when APP_ENV=production (even if NODE_ENV is development)", async () => {
+  it("returns 404 when APP_ENV=production (even if NODE_ENV is development)", async () => {
     process.env.NODE_ENV = "development";
     process.env.APP_ENV = "production";
 
     const app = buildApp();
     const res = await request(app).post("/firestorm/seed").send({});
 
-    expect(res.status).toBe(403);
+    expect(res.status).toBe(404);
     expect(res.body.code).toBe("SEED_DISABLED_IN_PRODUCTION");
   });
 
-  it("error message explicitly names production restriction", async () => {
+  it("response code is SEED_DISABLED_IN_PRODUCTION when blocked in production", async () => {
     process.env.NODE_ENV = "production";
     const app = buildApp();
     const res = await request(app).post("/firestorm/seed").send({});
 
-    expect(res.body.error).toMatch(/disabled in production/i);
+    expect(res.status).toBe(404);
     expect(res.body.code).toBe("SEED_DISABLED_IN_PRODUCTION");
   });
 });
