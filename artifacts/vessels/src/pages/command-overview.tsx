@@ -14,6 +14,7 @@ import { CommandModeSurface, type CommandModeSignal, useRealtimeChannel } from "
 import { useVessels, useFleetExceptions, useVoyages, useMaintenance } from "@/hooks/use-vessels-data";
 import { useQueryClient } from "@tanstack/react-query";
 import { PackBanner } from "@szl-holdings/shared-ui";
+import { PolicyModeBadge } from "@/components/policy-mode-badge";
 
 const statusConfig: Record<string, { label: string; color: string; dot: string }> = {
   at_sea: { label: "At Sea", color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20", dot: "bg-emerald-400" },
@@ -456,6 +457,7 @@ export default function CommandOverviewPage() {
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
+          <PolicyModeBadge product="vessels" />
           {!isLive && (
             <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">DEMO</span>
           )}

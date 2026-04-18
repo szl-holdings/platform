@@ -15,6 +15,7 @@ import { properties } from "@/data/portfolio";
 import { useMapboxToken } from "@/hooks/use-mapbox-token";
 import { PackBanner } from "@szl-holdings/shared-ui";
 import { TERRA_PORTFOLIO_AUM, metricDisplay } from "@/lib/claims";
+import { PolicyModeBadge } from "@/components/policy-mode-badge";
 
 const PropertyMap = lazy(() => import("@/components/property-map"));
 
@@ -176,6 +177,7 @@ export default function TerraIntelligence() {
           </p>
         </div>
         <div className="flex items-center gap-2.5">
+          <PolicyModeBadge product="terra" />
           <DataStateBadge state={dataMode} label={dataMode === "live" ? "Live" : "Demo"} />
           {criticalSignals.length > 0 && (
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-semibold" style={{ color: DS.accent.red, background: `${DS.accent.red}09`, border: `1px solid ${DS.accent.red}18`, animation: "pulse 2s infinite" }}>

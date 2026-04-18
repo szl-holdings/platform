@@ -1,5 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useSearch } from "wouter";
 import {
   ShieldCheck,
   Plus,
@@ -328,6 +329,16 @@ export default function PolicyManagerPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const qc = useQueryClient();
 
+  const search = useSearch();
+  const initialProductFilter = useMemo(() => {
+    const params = new URLSearchParams(search);
+    return params.get("product") ?? "";
+  }, [search]);
+  const [productFilter, setProductFilter] = useState<string>(initialProductFilter);
+  useEffect(() => {
+    setProductFilter(initialProductFilter);
+  }, [initialProductFilter]);
+
   const modesQ = useQuery<ApiResponse<PolicyModeConfig[]>>({
     queryKey: ["policy-modes"],
     queryFn: () => fetchJson<ApiResponse<PolicyModeConfig[]>>("/api/policy-modes"),
@@ -361,7 +372,12 @@ export default function PolicyManagerPage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["policy-modes"] }),
   });
 
-  const configs = modesQ.data?.data ?? [];
+  const allConfigs = modesQ.data?.data ?? [];
+  const configs = useMemo(() => {
+    if (!productFilter) return allConfigs;
+    const needle = productFilter.toLowerCase();
+    return allConfigs.filter(c => c.scope.product.toLowerCase() === needle);
+  }, [allConfigs, productFilter]);
   const busy = createMut.isPending || updateMut.isPending || deleteMut.isPending;
 
   function handleCreate(form: typeof EMPTY_FORM) {
@@ -450,6 +466,30 @@ export default function PolicyManagerPage() {
         </div>
       </div>
 
+      {productFilter && (
+        <div
+          className="rounded p-2.5 mb-4 flex items-center gap-2 text-[11px]"
+          style={{ background: `${ACCENT}10`, border: `1px solid ${ACCENT}30`, color: "rgba(255,255,255,0.85)" }}
+          data-testid="policy-product-filter-banner"
+        >
+          <ShieldCheck className="w-3.5 h-3.5" style={{ color: ACCENT }} />
+          <span>
+            Filtered by product: <span className="font-mono font-semibold" style={{ color: ACCENT }}>{productFilter}</span>
+            <span className="ml-2" style={{ color: "rgba(255,255,255,0.4)" }}>
+              ({configs.length} of {allConfigs.length} rule{allConfigs.length === 1 ? "" : "s"})
+            </span>
+          </span>
+          <button
+            onClick={() => setProductFilter("")}
+            className="ml-auto flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono hover:bg-white/5"
+            style={{ color: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.10)" }}
+            data-testid="policy-product-filter-clear"
+          >
+            <X className="w-3 h-3" /> Clear filter
+          </button>
+        </div>
+      )}
+
       <div className="grid grid-cols-5 gap-2 mb-5">
         {(Object.keys(MODE_META) as PolicyMode[]).map(m => {
           const meta = MODE_META[m];
@@ -488,6 +528,7 @@ export default function PolicyManagerPage() {
       {creating && (
         <div className="mb-3">
           <ModeForm
+            initial={productFilter ? { ...EMPTY_FORM, product: productFilter } : undefined}
             onSubmit={handleCreate}
             onCancel={() => setCreating(false)}
             busy={createMut.isPending}

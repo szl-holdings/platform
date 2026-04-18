@@ -5,6 +5,7 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 import { useConsultingMetrics } from "@/hooks/useConsultingMetrics";
 import { useCarlotaApiData } from "@/hooks/useCarlotaApiData";
 import { ProofEnvelope, type AutonomyMode } from "@szl-holdings/design-system";
+import { PolicyModeBadge } from "@/components/policy-mode-badge";
 import {
   Sparkles, FileText, Network, Radar, Activity, Heart,
   TrendingUp, GraduationCap, Lightbulb, Users, FolderOpen,
@@ -287,11 +288,12 @@ export default function ConsultingOS() {
       <div style={{ background: "linear-gradient(135deg, #0F0F0D 0%, #1A1A14 50%, #0A0A08 100%)", padding: "64px 0 48px" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16, flexWrap: "wrap" }}>
               <div style={{ width: 32, height: 32, borderRadius: 8, background: `${GOLD}20`, border: `1px solid ${GOLD}40`, display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <Cpu size={16} color={GOLD} />
               </div>
               <span style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.1em", color: GOLD, textTransform: "uppercase" }}>Consulting Operating System</span>
+              <PolicyModeBadge product="carlota-jo" variant="light" />
             </div>
             <h1 style={{ fontSize: "clamp(32px, 5vw, 52px)", fontWeight: 300, color: "#F5F0E8", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1.1, marginBottom: 16, letterSpacing: "-0.02em" }}>
               The AI-Native Platform for<br />
