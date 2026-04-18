@@ -69,9 +69,21 @@ jobs:
             dist: artifacts/command/dist/public
             port: 3005
             spec: governed-decision-loop.spec.ts
+          # IMPERIUM is embedded in the command artifact at /infrastructure/imperium-map.
+          # Runs against the same @workspace/command build as command.spec.ts.
+          - app: imperium
+            filter: "@workspace/command"
+            dist: artifacts/command/dist/public
+            port: 3005
+            spec: imperium.spec.ts
+          # Lyte Command Center is embedded in the szl-holdings artifact at /lyte.
+          # Runs against the same @workspace/szl-holdings build as szl-holdings.spec.ts.
+          - app: lyte
+            filter: "@workspace/szl-holdings"
+            dist: artifacts/szl-holdings/dist/public
+            port: 3000
+            spec: lyte.spec.ts
           # Specs excluded from this matrix (no standalone CI build artifact):
-          #   - imperium.spec.ts  → IMPERIUM has no registered CI artifact; spec self-skips
-          #   - lyte.spec.ts      → Lyte is embedded in SZL Holdings routes; spec self-skips
           #   - prism-counsel.spec.ts → PRISM Counsel has no standalone CI artifact; spec self-skips
           #   - stephen-site.spec.ts  → Personal site; no CI artifact; spec self-skips
           # All excluded specs use appAvailable guards and call testInfo.skip() when
@@ -114,6 +126,8 @@ jobs:
           VESSELS_BASE_PATH: /
           CARLOTA_BASE_PATH: /
           COMMAND_BASE_PATH: /
+          LYTE_BASE_PATH: /
+          IMPERIUM_BASE_PATH: /
 
       - name: Upload HTML report
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

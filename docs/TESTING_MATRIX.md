@@ -81,16 +81,26 @@ Run via: `pnpm test:e2e` (full) or per-spec in CI `e2e.yml`
 |------|---------------|----------------|---------|
 | `szl-holdings.spec.ts` | SZL Holdings Dashboard | `@workspace/szl-holdings` | 3000 |
 | `forge.spec.ts` | Nuro Forge (within SZL Holdings at `/nuro-forge`) | `@workspace/szl-holdings` | 3000 |
+| `lyte.spec.ts` | Lyte Command Center (within SZL Holdings at `/lyte`) | `@workspace/szl-holdings` | 3000 |
 | `aegis.spec.ts` | Aegis — Defense & Intelligence | `@workspace/aegis` | 3001 |
 | `terra.spec.ts` | Terra — Real Estate Intelligence | `@workspace/terra` | 3002 |
 | `vessels.spec.ts` | Vessels Maritime Intelligence | `@workspace/vessels` | 3003 |
 | `carlota-jo.spec.ts` | Carlota Jo Consulting | `@workspace/carlota-jo` | 3004 |
 | `command.spec.ts` | Unified Command | `@workspace/command` | 3005 |
+| `governed-decision-loop.spec.ts` | Governed Decision Loop (within Command at `/operations/governed-decision-loop`) | `@workspace/command` | 3005 |
+| `imperium.spec.ts` | IMPERIUM Infrastructure Map (within Command at `/infrastructure/imperium-map`) | `@workspace/command` | 3005 |
 | `a11y.spec.ts` | SZL Holdings (accessibility) | `@workspace/szl-holdings` | 3000 |
 
 ### 4b. Explicitly Excluded from CI E2E Matrix
 
-No specs are currently excluded. All archived-surface specs (for surfaces in `ops/frontier/disposition-matrix.md`) have been deleted. The `appAvailable` guard pattern is available for future use if new conditional specs are needed.
+| Spec | Reason | Status |
+|------|--------|--------|
+| `prism-counsel.spec.ts` | PRISM Counsel has no standalone CI build artifact; spec uses `appAvailable` guard and self-skips | Excluded — no artifact |
+| `stephen-site.spec.ts` | Personal site; no CI build artifact; spec uses `appAvailable` guard and self-skips | Excluded — no artifact |
+
+Previously excluded specs that have since been promoted to the CI matrix:
+- `imperium.spec.ts` — promoted April 2026; runs against `@workspace/command` build
+- `lyte.spec.ts` — promoted April 2026; runs against `@workspace/szl-holdings` build
 
 ---
 
@@ -136,7 +146,7 @@ No specs are currently excluded. All archived-surface specs (for surfaces in `op
 | No mobile E2E coverage (CORTEX) | Sev 2 | Expo app; Playwright cannot target RN; manual + unit coverage only |
 | No cross-browser E2E (only Chromium in CI) | Sev 3 | Firefox/WebKit excluded for CI speed |
 | No performance regression testing | Sev 3 | Lighthouse is manual only |
-| IMPERIUM, Lyte, PRISM, Stephen E2E not in CI | Sev 2 | No standalone CI artifact; specs exist and self-skip |
+| PRISM Counsel, Stephen Site E2E not in CI | Sev 2 | No standalone CI artifact; specs exist and self-skip via `appAvailable` guard |
 
 ---
 
