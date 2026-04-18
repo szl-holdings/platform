@@ -1,5 +1,7 @@
+import { DataStateBadge } from "@szl-holdings/shared-ui/data-state-badge";
+import { isAuthError } from "@szl-holdings/shared-ui/api-fetch";
 import { useQuery } from "@tanstack/react-query";
-import { apiFetch, DataStateBadge, isAuthError } from "@szl-holdings/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { CheckCircle, XCircle, Clock, Activity, ChevronLeft, RotateCcw, AlertTriangle, Terminal, GitBranch } from "lucide-react";
 import { useLocation } from "wouter";
 import { useState } from "react";

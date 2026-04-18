@@ -1,7 +1,8 @@
+import { BatchPdfPanel, SigningDashboard } from "@szl-holdings/shared-ui/document-engine";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { FileText, Layers, Pen, BookOpen } from "lucide-react";
-import { DocumentEnginePanel, BatchPdfPanel, SigningDashboard } from "@szl-holdings/shared-ui";
+import { DocumentEnginePanel } from "@szl-holdings/shared-ui/document-engine";
 import { cn } from "@szl-holdings/shared-ui/utils";
 
 const TABS = [

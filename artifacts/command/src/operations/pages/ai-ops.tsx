@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Brain, Activity, AlertTriangle, Radio, Loader2, Zap, TrendingUp, FileText } from "lucide-react";
 import { AnomalySparkline, SeverityMeter, TypewriterText, AnimatedGauge } from "@szl-holdings/shared-ui/ai-components";
-import { apiFetch } from "@szl-holdings/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 
 export default function AIOps() {
   const { data: anomalies = [] } = useQuery({ queryKey: ["lyte-anomalies"], queryFn: () => apiFetch<any[]>("/intelligence/anomalies") });

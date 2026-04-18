@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from "react";
+import { PolicyResult } from "@szl-holdings/shared-ui/policy-result";
+import { AdminAuditTrail } from "@szl-holdings/shared-ui/admin-audit-trail";
+import { SimulationCockpit } from "@szl-holdings/shared-ui/simulation-cockpit";
 import { Building2, FileSearch, Shield, Clock, TrendingUp, AlertCircle, Loader2 } from "lucide-react";
-import { ProofPanel, PolicyResult, AdminAuditTrail, SimulationCockpit } from "@szl-holdings/shared-ui";
-import type { ProofPanelData, PolicyDecisionRecord, AuditTrailEntry, SimulationScenario } from "@szl-holdings/shared-ui";
+import { ProofPanel } from "@szl-holdings/shared-ui/proof-panel";
+import { type ProofPanelData } from "@szl-holdings/shared-ui/proof-panel";
+import { type PolicyDecisionRecord } from "@szl-holdings/shared-ui/policy-result";
+import { type AuditTrailEntry } from "@szl-holdings/shared-ui/admin-audit-trail";
+import { type SimulationScenario } from "@szl-holdings/shared-ui/simulation-cockpit";
 
 const ACCENT = "#f59e0b";
 const DOMAIN = "terra";

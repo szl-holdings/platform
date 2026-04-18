@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Network, Activity, AlertTriangle, Zap, RefreshCw, ChevronRight, Cpu, Radio, Eye } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { apiFetch } from "@szl-holdings/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 
 interface TopologyNode {
   service: string;

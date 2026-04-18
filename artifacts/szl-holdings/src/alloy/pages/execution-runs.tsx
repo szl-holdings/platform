@@ -1,5 +1,9 @@
+import { isAuthError } from "@szl-holdings/shared-ui/api-fetch";
+import { DataStateBadge } from "@szl-holdings/shared-ui/data-state-badge";
+import { useRealtimeChannel } from "@szl-holdings/shared-ui/use-realtime-channel";
+import { LiveClock } from "@szl-holdings/shared-ui/live-clock";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiFetch, isAuthError, DataStateBadge, useRealtimeChannel, LiveClock} from "@szl-holdings/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { Activity, Clock, CheckCircle, XCircle, RotateCcw, RefreshCw, AlertTriangle, Zap, Terminal, ChevronRight, Play, Filter } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 

@@ -1,19 +1,15 @@
+import { useRealtimeChannel } from "@szl-holdings/shared-ui/use-realtime-channel";
 import { useState, useEffect, useRef } from "react";
 import { Link } from "wouter";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { useAuth } from "@/contexts/auth-context";
 import {
-  Ship, AlertTriangle, Clock, Wrench, TrendingUp, TrendingDown,
-  ChevronRight, Activity, DollarSign, Fuel, CloudLightning, BarChart3,
-  CheckCircle2, XCircle, Minus, RefreshCw, EyeOff, ShieldAlert, Navigation,
-  FileSignature, Users, Shield, Anchor, Layers, Bookmark, BookmarkCheck,
-  CalendarRange, ChevronDown, Flame, Circle, Grid2X2, GitBranch,
-} from "lucide-react";
+  Ship, AlertTriangle, Clock, Wrench, TrendingUp, TrendingDown, ChevronRight, Activity, DollarSign, Fuel, CloudLightning, BarChart3, CheckCircle2, XCircle, Minus, RefreshCw, EyeOff, ShieldAlert, Navigation, FileSignature, Users, Shield, Anchor, Layers, Bookmark, BookmarkCheck, CalendarRange, ChevronDown, Flame, Circle, Grid2X2, GitBranch, } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
-import { CommandModeSurface, type CommandModeSignal, useRealtimeChannel } from "@szl-holdings/shared-ui";
+import { CommandModeSurface, type CommandModeSignal } from "@szl-holdings/shared-ui";
 import { useVessels, useFleetExceptions, useVoyages, useMaintenance } from "@/hooks/use-vessels-data";
 import { useQueryClient } from "@tanstack/react-query";
-import { PackBanner } from "@szl-holdings/shared-ui";
+import { PackBanner } from "@szl-holdings/shared-ui/pack-banner";
 import { PolicyModeBadge } from "@/components/policy-mode-badge";
 
 const statusConfig: Record<string, { label: string; color: string; dot: string }> = {

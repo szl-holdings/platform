@@ -5,7 +5,7 @@ import {
   ChevronLeft, ChevronRight, Scale, Bell, Search, Menu, X
 } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
-import { GettingStartedChecklist } from "@szl-holdings/shared-ui";
+import { GettingStartedChecklist } from "@szl-holdings/shared-ui/onboarding";
 import { PRISM_ONBOARDING_CONFIG } from "@/onboarding-config";
 
 const ACCENT = "#a78bfa";

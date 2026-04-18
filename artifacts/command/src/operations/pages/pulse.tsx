@@ -1,7 +1,8 @@
+import { PulseMetricCard, PulseThroughputChart, PulseHeader, PulseHealthGrid, PulseEventFeed, PulseFlowDiagram, PulseTechStack } from "@szl-holdings/shared-ui/pulse";
 import { useState, useEffect } from "react";
 import { motion as m } from "framer-motion";
 import { Activity, Zap, AlertTriangle, CheckCircle, Clock, BarChart3, Workflow, Bell, Cpu, Eye, Gauge, ArrowUpRight } from "lucide-react";
-import { ParticleField, PulseMetricCard, PulseThroughputChart, PulseHeader, PulseHealthGrid, PulseEventFeed, PulseFlowDiagram, PulseTechStack } from "@szl-holdings/shared-ui";
+import { ParticleField } from "@szl-holdings/shared-ui/pulse";
 import { PulseBriefingPanel } from "@szl-holdings/shared-ui/pulse-briefing-panel";
 
 const AGENTS = [

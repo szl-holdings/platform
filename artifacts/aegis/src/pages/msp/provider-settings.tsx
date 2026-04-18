@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Button } from "@szl-holdings/shared-ui/ui/button";
-import { apiFetch } from "@szl-holdings/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import {
   Settings, Plus, RefreshCw, Trash2, CheckCircle, XCircle, Activity,
   AlertTriangle, Loader2, Wifi, ChevronDown, ChevronUp, X, Clock,

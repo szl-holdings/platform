@@ -1,10 +1,12 @@
+import { CookieBanner } from "@szl-holdings/shared-ui/cookie-banner";
+import { OnboardingWizard } from "@szl-holdings/shared-ui/onboarding";
 import { lazy, Suspense, useEffect } from "react";
 import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import { persistQueryClient } from "@tanstack/query-persist-client-core";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
-import { SandboxModeProvider, SandboxModeBanner, AnalyticsProvider, CookieBanner, OnboardingWizard, useSandboxMode } from "@szl-holdings/shared-ui";
+import { SandboxModeProvider, SandboxModeBanner, AnalyticsProvider, useSandboxMode } from "@szl-holdings/shared-ui";
 import { PRISM_ONBOARDING_CONFIG } from "@/onboarding-config";
 import { McpOverlay } from "@szl-holdings/mcp-client";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";

@@ -4,7 +4,7 @@ import { DollarSign, TrendingUp, TrendingDown, Users, Clock, BarChart3, RefreshC
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, BarChart, Bar } from "recharts";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@szl-holdings/shared-ui/ui/skeleton";
-import { apiFetch } from "@szl-holdings/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 
 interface RevenueData {
   summary: {

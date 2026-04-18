@@ -1,7 +1,10 @@
+import { ActionLoop, RoleSelector } from "@szl-holdings/shared-ui/data-provenance";
+import { AnimatedCounter } from "@szl-holdings/shared-ui/animated-counter";
+import { LiveClock } from "@szl-holdings/shared-ui/live-clock";
 import { useState, useEffect, useRef } from "react";
 import { cn } from "@szl-holdings/shared-ui/utils";
-import { DataProvenance, ActionLoop, RoleSelector, AnimatedCounter, LiveClock} from "@szl-holdings/shared-ui";
-import type { DataProvenanceInfo } from "@szl-holdings/shared-ui";
+import { DataProvenance } from "@szl-holdings/shared-ui/data-provenance";
+import { type DataProvenanceInfo } from "@szl-holdings/shared-ui/ontology";
 import { Link } from "wouter";
 import {
   Shield, Server, Brain, AlertTriangle, Activity, Clock,
@@ -11,7 +14,7 @@ import {
   GitBranch, Lock, Search, ListChecks, UserCheck, Grid,
   DollarSign, ArrowUpRight,
 } from "lucide-react";
-import { PackBanner } from "@szl-holdings/shared-ui";
+import { PackBanner } from "@szl-holdings/shared-ui/pack-banner";
 import { ThreatFeedSimulator } from "@szl-holdings/observability";
 
 const _threatSim = new ThreatFeedSimulator(0xfeed1337);

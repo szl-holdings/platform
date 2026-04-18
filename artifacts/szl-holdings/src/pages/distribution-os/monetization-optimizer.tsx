@@ -3,8 +3,8 @@ import { useLocation } from "wouter";
 import { m } from "framer-motion";
 import { DollarSign, TrendingUp, Target, Zap, ArrowUpRight, BarChart2, Package, Link2, Megaphone } from "lucide-react";
 import { DistributionOsLayout } from "./admin-dashboard";
-import { DataProvenance } from "@szl-holdings/shared-ui";
-import type { DataProvenanceInfo } from "@szl-holdings/shared-ui";
+import { DataProvenance } from "@szl-holdings/shared-ui/data-provenance";
+import { type DataProvenanceInfo } from "@szl-holdings/shared-ui/ontology";
 
 const API = import.meta.env.VITE_API_URL || "";
 

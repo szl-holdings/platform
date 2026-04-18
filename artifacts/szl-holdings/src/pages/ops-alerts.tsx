@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Bell, Plus, X, RefreshCw, PlayCircle, CheckCircle, AlertTriangle, Zap } from "lucide-react";
-import { useProductionConfirm } from "@szl-holdings/shared-ui";
+import { useProductionConfirm } from "@szl-holdings/shared-ui/production-confirm";
 
 const BASE = "/api";
 

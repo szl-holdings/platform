@@ -4,9 +4,9 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@szl-holdings/shared-ui/ui/skeleton";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
-import { DataStateBadge } from "@szl-holdings/shared-ui";
+import { DataStateBadge } from "@szl-holdings/shared-ui/data-state-badge";
 import { AegisGraphQLPanel } from "@/components/graphql-data-panel";
-import { apiFetch } from "@szl-holdings/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 
 interface DashboardMetrics {
   metrics: {

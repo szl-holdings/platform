@@ -1,19 +1,12 @@
+import { SettingsSectionPanel, SettingsCard, SettingsRow, type SettingsSection } from "@szl-holdings/shared-ui/settings-shell";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  SettingsShell,
-  SettingsSectionPanel,
-  SettingsCard,
-  SettingsRow,
-  type SettingsSection,
-} from "@szl-holdings/shared-ui/settings-shell";
+  SettingsShell, } from "@szl-holdings/shared-ui/settings-shell";
 import {
-  Bell, BellOff, Shield, Key, Lock, Users, Loader2, Globe, Mail,
-  Building2, RefreshCw, Layers, FileText, Save, CheckCircle, AlertTriangle,
-  PanelLeftClose, PanelLeftOpen, PanelLeft, Volume2, VolumeX,
-} from "lucide-react";
+  Bell, BellOff, Shield, Key, Lock, Users, Loader2, Globe, Mail, Building2, RefreshCw, Layers, FileText, Save, CheckCircle, AlertTriangle, PanelLeftClose, PanelLeftOpen, PanelLeft, Volume2, VolumeX, } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useUserPreferences } from "@szl-holdings/shared-ui";
+import { useUserPreferences } from "@szl-holdings/shared-ui/use-user-preferences";
 
 const API = "/api";
 

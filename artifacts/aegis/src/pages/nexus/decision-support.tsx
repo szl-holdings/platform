@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { InlineFeedbackBar } from "@szl-holdings/shared-ui";
+import { InlineFeedbackBar } from "@szl-holdings/shared-ui/outcome-feedback";
 import { Zap, Users, Globe, Shield, Target, TrendingUp, CheckCircle, Clock, AlertTriangle, ArrowRight, Eye } from "lucide-react";
 
 const ACCENT = "#f59e0b";

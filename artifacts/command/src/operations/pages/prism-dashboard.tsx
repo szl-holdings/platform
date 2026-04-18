@@ -1,6 +1,7 @@
+import { MicroFeedbackWidget } from "@szl-holdings/shared-ui/micro-feedback-widget";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { apiFetch, MicroFeedbackWidget } from "@szl-holdings/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { TrendingUp, TrendingDown, Minus, BarChart3, ChevronRight, Zap, AlertTriangle, RefreshCw, ArrowRight, CheckCircle2, Clock, Target, UserCheck, Shield } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 

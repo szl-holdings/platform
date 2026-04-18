@@ -12,7 +12,7 @@ import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 import { Skeleton } from "@szl-holdings/shared-ui/ui/skeleton";
 import { useMapboxToken } from "@/hooks/use-mapbox-token";
 import { Link } from "wouter";
-import { apiFetch } from "@szl-holdings/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 
 const PropertyMap = lazy(() => import("@/components/property-map"));
 

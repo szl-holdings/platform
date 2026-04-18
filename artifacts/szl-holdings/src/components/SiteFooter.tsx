@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { NewsletterSubscribe } from "@szl-holdings/shared-ui";
+import { NewsletterSubscribe } from "@szl-holdings/shared-ui/newsletter-subscribe";
 import { copyrightLine, copyrightLineShort, brand } from "@szl-holdings/brand-registry";
 
 const FOOTER_COLS = [

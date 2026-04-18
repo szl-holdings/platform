@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiFetch } from "@szl-holdings/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import {
   Brain, Activity, AlertTriangle, CheckCircle, DollarSign,
   RefreshCw, ChevronRight, Shield, Zap, BarChart3, Radio, Filter,

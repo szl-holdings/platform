@@ -6,7 +6,7 @@ import {
   Building2, Users, Bell, Plug, CheckCircle2, ArrowRight, ArrowLeft,
   Loader2, AlertCircle, ChevronRight,
 } from "lucide-react";
-import { apiFetch } from "@szl-holdings/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { markActivationEvent } from "@szl-holdings/shared-ui/onboarding";
 
 const API = "/api";

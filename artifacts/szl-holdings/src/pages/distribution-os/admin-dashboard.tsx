@@ -1,17 +1,12 @@
+import { DataProvenance, ActionLoop } from "@szl-holdings/shared-ui/data-provenance";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { m } from "framer-motion";
 import {
-  LayoutDashboard, FileText, Mail, Image, Twitter, Users, Megaphone,
-  Calendar, BarChart3, Settings, Zap, TrendingUp, Eye, UserPlus, Send,
-  AlertCircle, ChevronRight, Globe, Link2, Target, Clock, CheckCircle2,
-  Activity, RefreshCw, LineChart, ArrowUpRight, ArrowDownRight, Minus,
-  Atom, Code2, Rss, Gift, Layers,
-  Flame, Dna, FlaskConical, DollarSign, Search, Radio, GitBranch, Shuffle, Recycle,
-} from "lucide-react";
+  LayoutDashboard, FileText, Mail, Image, Twitter, Users, Megaphone, Calendar, BarChart3, Settings, Zap, TrendingUp, Eye, UserPlus, Send, AlertCircle, ChevronRight, Globe, Link2, Target, Clock, CheckCircle2, Activity, RefreshCw, LineChart, ArrowUpRight, ArrowDownRight, Minus, Atom, Code2, Rss, Gift, Layers, Flame, Dna, FlaskConical, DollarSign, Search, Radio, GitBranch, Shuffle, Recycle, } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
-import { RoleSelector, DataProvenance, ActionLoop } from "@szl-holdings/shared-ui";
-import type { DataProvenanceInfo } from "@szl-holdings/shared-ui";
+import { RoleSelector } from "@szl-holdings/shared-ui/data-provenance";
+import { type DataProvenanceInfo } from "@szl-holdings/shared-ui/ontology";
 
 const API = import.meta.env.VITE_API_URL || "";
 

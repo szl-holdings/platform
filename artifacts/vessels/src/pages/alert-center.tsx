@@ -1,3 +1,4 @@
+import { AnimatedCounter } from "@szl-holdings/shared-ui/animated-counter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { Card, CardContent } from "@szl-holdings/shared-ui/ui/card";
@@ -13,7 +14,7 @@ import { useState, useEffect, useRef } from "react";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 import { doctrineEventBus } from "@szl-holdings/observability";
 import { DoctrineLayerBadge } from "@szl-holdings/shared-ui/doctrine-layer-badge";
-import { DataStateBadge, AnimatedCounter} from "@szl-holdings/shared-ui";
+import { DataStateBadge } from "@szl-holdings/shared-ui/data-state-badge";
 import { EmptyState } from "@szl-holdings/shared-ui/design-system";
 
 interface FleetAlert {

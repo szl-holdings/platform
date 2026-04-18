@@ -2,7 +2,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { Shield, AlertTriangle, Brain, Radio, Ship, Loader2, Navigation } from "lucide-react";
 import { NERHighlight, AnimatedGauge, SeverityMeter } from "@szl-holdings/shared-ui/ai-components";
-import { apiFetch } from "@szl-holdings/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { ProofEnvelope, type AutonomyMode } from "@szl-holdings/design-system";
 
 export default function VesselsIntelligence() {

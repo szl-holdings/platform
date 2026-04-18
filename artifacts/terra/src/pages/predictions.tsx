@@ -3,7 +3,7 @@ import { Brain, TrendingUp, AlertTriangle, Activity, Shield, ChevronDown, Chevro
 import { predictions, type Prediction } from "@/data/brokerage";
 import { RiskBadge, ConfidenceBadge, formatCurrency } from "@/components/brokerage-ui";
 import { cn } from "@szl-holdings/shared-ui/utils";
-import { InlineFeedbackBar } from "@szl-holdings/shared-ui";
+import { InlineFeedbackBar } from "@szl-holdings/shared-ui/outcome-feedback";
 import { useState } from "react";
 
 function ProbabilityRing({ value, size = 80 }: { value: number; size?: number }) {

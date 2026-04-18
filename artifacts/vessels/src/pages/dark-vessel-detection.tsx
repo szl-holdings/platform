@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Eye, EyeOff, AlertTriangle, Shield, Radio, Ship, MapPin, Clock, Filter, Search, RefreshCw, Sparkles, Loader2 } from "lucide-react";
-import { MicroFeedbackWidget } from "@szl-holdings/shared-ui";
+import { MicroFeedbackWidget } from "@szl-holdings/shared-ui/micro-feedback-widget";
 import { HelpTip } from "@szl-holdings/shared-ui/onboarding";
 
 const darkVessels = [

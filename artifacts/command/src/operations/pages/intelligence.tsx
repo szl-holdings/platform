@@ -1,10 +1,11 @@
+import { AnimatedCounter } from "@szl-holdings/shared-ui/animated-counter";
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Brain, Activity, Globe, AlertTriangle, FileText, Radio, TrendingUp, Clock, Newspaper, Zap, Shield } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRealtimeChannel, AnimatedCounter} from "@szl-holdings/shared-ui";
-import { apiFetch } from "@szl-holdings/shared-ui";
+import { useRealtimeChannel } from "@szl-holdings/shared-ui/use-realtime-channel";
+import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { ProofEnvelope, type AutonomyMode } from "@szl-holdings/design-system";
 
 function LocalCounter({ value }: { value: number }) {

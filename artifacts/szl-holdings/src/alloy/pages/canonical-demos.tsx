@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { DataStateBadge } from "@szl-holdings/shared-ui";
+import { DataStateBadge } from "@szl-holdings/shared-ui/data-state-badge";
 import {
   Play, CheckCircle, Clock, AlertTriangle, FileText, Zap, Shield,
   User, ArrowRight, Eye, RefreshCw, Radio, Layers, Globe, Smartphone

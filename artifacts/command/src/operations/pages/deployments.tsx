@@ -1,6 +1,7 @@
+import { ApiError } from "@szl-holdings/shared-ui/api-fetch";
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiFetch, ApiError } from "@szl-holdings/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import {
   Rocket,
   History,

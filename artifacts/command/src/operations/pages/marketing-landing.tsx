@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { ContactModal } from "@szl-holdings/shared-ui";
+import { ContactModal } from "@szl-holdings/shared-ui/contact-modal";
 import {
   ArrowRight, Activity, Eye, TrendingUp, Radio, Gauge,
   Target, Users, Shield, Zap, CheckCircle,

@@ -1,5 +1,5 @@
 import { TrendingUp, DollarSign, Building2, BarChart3, ArrowUp, ArrowDown, Target, PieChart, Calculator, Lock } from "lucide-react";
-import { useRole } from "@szl-holdings/shared-ui";
+import { useRole } from "@szl-holdings/shared-ui/use-role";
 
 const investmentMetrics = [
   { label: "Portfolio Value", value: "$47.2M", change: "+8.4%", trend: "up" },

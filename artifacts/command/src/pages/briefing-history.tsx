@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
+import { MorningBriefingCard, DEMO_BRIEFING_HISTORY } from "@szl-holdings/shared-ui/morning-briefing";
+import { PageDataSkeleton } from "@szl-holdings/shared-ui/page-data-skeleton";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
-import { BriefingHistory, MorningBriefingCard, DEMO_BRIEFING_HISTORY, PageDataSkeleton } from "@szl-holdings/shared-ui";
+import { BriefingHistory } from "@szl-holdings/shared-ui/morning-briefing";
 
 const ACCENT = "#8b7ac8";
 

@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import type { SupportedLocale } from "@szl-holdings/shared-ui";
+import { type SupportedLocale } from "@szl-holdings/shared-ui/language-switcher";
 
 export function useLocale(): SupportedLocale {
   const { i18n } = useTranslation();

@@ -1,3 +1,4 @@
+import { DEMO_BRIEFING_HISTORY } from "@szl-holdings/shared-ui/morning-briefing";
 import { useState, useCallback } from "react";
 import { Link, useLocation } from "wouter";
 import { Header } from "../components/header";
@@ -13,7 +14,7 @@ import { AmbientSignalRanker } from "../components/ambient-signal-ranker";
 import { CorrelationMapViz } from "../components/correlation-map-viz";
 import { SignalChainsPanel } from "../components/signal-chains-panel";
 import { useEcosystemData } from "../hooks/use-ecosystem-data";
-import { MorningBriefingCard, DEMO_BRIEFING_HISTORY } from "@szl-holdings/shared-ui";
+import { MorningBriefingCard } from "@szl-holdings/shared-ui/morning-briefing";
 import { ActivationBanner, useActivationState } from "@szl-holdings/shared-ui/onboarding";
 import type { ActivationStep } from "@szl-holdings/shared-ui/onboarding";
 import { GitBranch, Zap, Map } from "lucide-react";

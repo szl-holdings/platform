@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, CheckCircle, Clock, User, Shield, ArrowUpRight, Target, RefreshCw } from "lucide-react";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
-import { EmptyState } from "@szl-holdings/shared-ui";
+import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
 import { api } from "../lib/api";
 
 type ActionQueuePriority = "critical" | "high" | "medium" | "low";

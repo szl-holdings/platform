@@ -1,10 +1,11 @@
+import { useInterval } from "@szl-holdings/shared-ui/use-interval";
 import { useState, useEffect, useMemo } from "react";
 import { Brain, FlaskConical, Cpu, Lightbulb, Activity, TrendingUp, TrendingDown, ArrowRight, Radio, Shield, Zap, ChevronUp, ChevronDown, ArrowUpDown, GitBranch, BarChart3, Layers, CheckCircle, AlertCircle, Clock, DollarSign, GitMerge, Users } from "lucide-react";
 import { ActivityFeed } from "@szl-holdings/shared-ui/collaboration";
 import { Link } from "wouter";
 import { projects, experiments, models, insights, getResearchHealthScore } from "@/data/seed-data";
 import { cn } from "@szl-holdings/shared-ui/utils";
-import { DataStateBadge, useInterval} from "@szl-holdings/shared-ui";
+import { DataStateBadge } from "@szl-holdings/shared-ui/data-state-badge";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from "recharts";
 
 function LiveClock() {

@@ -1,3 +1,4 @@
+import { ActionLoop, RoleSelector } from "@szl-holdings/shared-ui/data-provenance";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { useRoster, useFleetExceptions, useSanctions } from "@/hooks/use-vessels-data";
@@ -12,8 +13,8 @@ import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { ExportButton } from "@szl-holdings/shared-ui/data-export";
 import { ActivityFeed } from "@szl-holdings/shared-ui/collaboration";
-import { DataProvenance, ActionLoop, RoleSelector } from "@szl-holdings/shared-ui";
-import type { DataProvenanceInfo } from "@szl-holdings/shared-ui";
+import { DataProvenance } from "@szl-holdings/shared-ui/data-provenance";
+import { type DataProvenanceInfo } from "@szl-holdings/shared-ui/ontology";
 import { ActivationBanner, useActivationState } from "@szl-holdings/shared-ui/onboarding";
 import type { ActivationStep } from "@szl-holdings/shared-ui/onboarding";
 

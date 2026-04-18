@@ -1,5 +1,7 @@
+import { DataStateBadge } from "@szl-holdings/shared-ui/data-state-badge";
+import { isAuthError } from "@szl-holdings/shared-ui/api-fetch";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiFetch, DataStateBadge, isAuthError } from "@szl-holdings/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { Shield, CheckCircle, Clock, XCircle, AlertTriangle, RefreshCw, ChevronDown, ChevronUp, FileText, Radio } from "lucide-react";
 import { AlloyGraphQLPanel } from "../components/graphql-data-panel";
 import { useState } from "react";

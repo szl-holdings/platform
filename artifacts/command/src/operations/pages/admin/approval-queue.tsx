@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, XCircle, AlertTriangle, Clock, FileText, RefreshCw, Lock } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@lyte/lib/utils";
-import { apiFetch } from "@szl-holdings/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 
 interface Approval {
   id: number;

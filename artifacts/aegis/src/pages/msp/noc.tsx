@@ -5,7 +5,7 @@ import { useEffect, useState, useCallback } from "react";
 import { doctrineEventBus } from "@szl-holdings/observability";
 import { DoctrineLayerBadge } from "@szl-holdings/shared-ui/doctrine-layer-badge";
 import { Skeleton } from "@szl-holdings/shared-ui/ui/skeleton";
-import { apiFetch } from "@szl-holdings/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 
 interface SystemMetrics {
   device: { id: string; hostname: string; platform: string; status: string };

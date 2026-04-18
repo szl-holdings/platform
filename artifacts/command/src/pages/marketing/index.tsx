@@ -2,7 +2,7 @@ import { MarketingNav } from "../../components/marketing/MarketingNav";
 import { MarketingFooter } from "../../components/marketing/MarketingFooter";
 import { motion } from "framer-motion";
 import { Button } from "@szl-holdings/shared-ui/ui/button";
-import { NewsletterSubscribe } from "@szl-holdings/shared-ui";
+import { NewsletterSubscribe } from "@szl-holdings/shared-ui/newsletter-subscribe";
 import { Link } from "wouter";
 import { Shield, Activity, Anchor, Building2, Gavel, Users, BrainCircuit, Command as CmdIcon, Briefcase, ArrowRight } from "lucide-react";
 import { OPS_FEATURE_LIST } from "./ops/data";

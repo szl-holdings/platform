@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ExportButton } from "@szl-holdings/shared-ui/data-export";
 import { Skeleton } from "@szl-holdings/shared-ui/ui/skeleton";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts";
-import { apiFetch } from "@szl-holdings/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 
 interface RevenueData {
   summary: {

@@ -5,7 +5,7 @@ import {
   FileText, User, Activity, Wind
 } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
-import { EmptyState } from "@szl-holdings/shared-ui";
+import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
 import {
   vesselTwins, voyageTwins,
   type VesselTwin, type VoyageTwin

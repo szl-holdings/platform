@@ -1,9 +1,9 @@
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import { CrdtEntityPanel } from "@szl-holdings/shared-ui";
+import { CrdtEntityPanel } from "@szl-holdings/shared-ui/crdt-entity-panel";
 import { EmptyState } from "@szl-holdings/shared-ui/design-system";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRealtimeChannel } from "@szl-holdings/shared-ui";
+import { useRealtimeChannel } from "@szl-holdings/shared-ui/use-realtime-channel";
 import { Activity, AlertTriangle, RefreshCw, Plus, X } from "lucide-react";
 import { RiskBadge, StageBadge, DealHealthCard, ProbabilityBar, formatCurrency, AgentAvatar } from "@/components/brokerage-ui";
 import { cn } from "@szl-holdings/shared-ui/utils";

@@ -1,8 +1,10 @@
+import { AnimatedCounter } from "@szl-holdings/shared-ui/animated-counter";
+import { NewsletterSubscribe } from "@szl-holdings/shared-ui/newsletter-subscribe";
 import { Link } from "wouter";
 import { Ship, ChevronRight, Shield, BarChart3, AlertTriangle, Activity, Globe, Anchor, Navigation, DollarSign, ArrowRight, Eye, TrendingUp, Zap, Clock, Waves, MapPin, Lock } from "lucide-react";
 import { MarketingNav } from "@/components/MarketingNav";
 import { MarketingFooter } from "@/components/MarketingFooter";
-import { ContactModal, AnimatedCounter, NewsletterSubscribe } from "@szl-holdings/shared-ui";
+import { ContactModal } from "@szl-holdings/shared-ui/contact-modal";
 import { motion as m, useMotionValue, useTransform, animate } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { VESSELS_UPTIME_SLA, metricDisplay } from "@/lib/claims";

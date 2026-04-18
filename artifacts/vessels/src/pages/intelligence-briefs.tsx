@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { consumeBriefSignal, getAutonomousSignal } from "../lib/briefSignal";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { cn } from "@szl-holdings/shared-ui/utils";
-import { InlineFeedbackBar } from "@szl-holdings/shared-ui";
+import { InlineFeedbackBar } from "@szl-holdings/shared-ui/outcome-feedback";
 import {
   FileText, AlertTriangle, Globe, DollarSign, Shield, Ship,
   Clock, Users, ChevronRight, Zap, ArrowRight, CheckCircle2,

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Building2, MapPin, Search, TrendingUp, DollarSign, Users, Filter, BarChart3, RefreshCw, ChevronRight, Layers, ArrowRight, Badge } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
-import { DataStateBadge } from "@szl-holdings/shared-ui";
+import { DataStateBadge } from "@szl-holdings/shared-ui/data-state-badge";
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
 async function apiFetch(path: string) {

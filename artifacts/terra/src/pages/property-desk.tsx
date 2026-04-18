@@ -6,7 +6,7 @@ import {
   BarChart3, Plug, Info, ArrowRight, Plus, Eye, RefreshCw
 } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
-import { EmptyState } from "@szl-holdings/shared-ui";
+import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
 import { propertyTwins, whatChangedFeed, type PropertyTwin, type DiligenceTask } from "@/data/property-twin";
 
 const ACCENT = "#40856a";

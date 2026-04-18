@@ -1,3 +1,4 @@
+import { AnimatedCounter } from "@szl-holdings/shared-ui/animated-counter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
@@ -13,7 +14,7 @@ import { useState, useEffect, useRef } from "react";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 import { doctrineEventBus } from "@szl-holdings/observability";
 import { DoctrineLayerBadge } from "@szl-holdings/shared-ui/doctrine-layer-badge";
-import { useRole, AnimatedCounter} from "@szl-holdings/shared-ui";
+import { useRole } from "@szl-holdings/shared-ui/use-role";
 import { Lock } from "lucide-react";
 
 const statusColors: Record<string, string> = {

@@ -4,12 +4,99 @@ export { FunnelChart, type FunnelChartProps } from "./analytics/index";
 export { CohortMatrix, type CohortMatrixProps } from "./analytics/index";
 export { AnomalyFeed, type AnomalyFeedProps } from "./analytics/index";
 export { MetricsDashboard, MetricSummaryRow, type MetricsDashboardProps, type MetricSummaryRowProps, type DashboardWidgetConfig, type DashboardWidgetType } from "./analytics/index";
-export * from "./pulse";
-export * from "./tokens";
-export * from "./animations";
-export * from "./utils";
-export * from "./components";
-export * from "./themes";
+export {
+  ParticleField,
+  PulseMetricCard,
+  PulseThroughputChart,
+  PulseHeader,
+  PulseHealthGrid,
+  PulseEventFeed,
+  generatePulseEvent,
+  PulseFlowDiagram,
+  PulseTechStack,
+  type PulseEvent,
+} from "./pulse";
+export {
+  colors,
+  typography,
+  spacing,
+  effects,
+  motion,
+  breakpoints,
+  zIndex,
+  iconography,
+} from "./tokens";
+export {
+  fadeIn,
+  fadeInUp,
+  fadeInDown,
+  fadeInLeft,
+  fadeInRight,
+  scaleIn,
+  slideUp,
+  slideInRight,
+  panelReveal,
+  staggerContainer,
+  staggerContainerFast,
+  staggerItem,
+  staggerItemFast,
+  staggerItemLeft,
+  scrollReveal,
+  scrollRevealLeft,
+  scrollRevealRight,
+  hoverLift,
+  hoverLiftSlight,
+  hoverScale,
+  navReveal,
+  shimmer,
+  pulseSubtle,
+  nodePulse,
+  signalPulse,
+  ambientDrift,
+  sectionReveal,
+  cardReveal,
+  parallaxSlow,
+  parallaxMedium,
+  parallaxFast,
+} from "./animations";
+export { cn, formatDate, formatCurrency, formatNumber, getApiUrl, toAlpha } from "./utils";
+export {
+  surfaceCard,
+  premiumCard,
+  glassCard,
+  premiumButton,
+  premiumBadge,
+  dataUI,
+  dashboardLayout,
+  setupLayout,
+  emptyState,
+  statCard,
+  hierarchy,
+} from "./components";
+export {
+  szlHoldingsTheme,
+  vesselsTheme,
+  carlotaJoTheme,
+  carlotaJoLuxuryTheme,
+  stephenLutarTheme,
+  stephenTheme,
+  alloyCreativeTheme,
+  terraTheme,
+  lyteTheme,
+  aegisTheme,
+  alloyTheme,
+  firestormTheme,
+  incaTheme,
+  mspTheme,
+  dreamscapeTheme,
+  brandThemes,
+  getBrandTheme,
+  getBrandGradientCSS,
+  getBrandSurface,
+  getBrandAccentCSS,
+  type BrandTheme,
+  type BrandSlug,
+} from "./themes";
 export * from "./lane-colors";
 export * from "./powerbi-embed";
 export * from "./premium-components";
@@ -36,13 +123,41 @@ export { EcosystemMap, ECOSYSTEM_NODES, LAYER_CONFIG, CONNECTION_PAIRS, type Eco
 export { CompanyKPIDashboard, DEMO_COMPANY_KPIS, type CompanyKPI, type CompanyKPIDashboardProps } from "./company-kpi-dashboard";
 export { DataStateBadge, DataStateBanner, type DataState } from "./data-state-badge";
 export { EmptyState, type EmptyStateProps } from "./EmptyState";
-export { ErrorState, type ErrorStateProps } from "./design-system/ErrorState";
+export { ErrorState, type ErrorStateProps } from "./design-system";
 export { PageDataSkeleton, InlineDataSkeleton } from "./page-data-skeleton";
 export { useRealtimeChannel, type RealtimeConnectionStatus, type RealtimeTransport, type RealtimeChannelMessage, type UseRealtimeChannelOptions, type UseRealtimeChannelResult } from "./use-realtime-channel";
 export { usePresence, useRealtimePresence, type PresenceUser, type PresenceState, type UsePresenceOptions, type UsePresenceResult } from "./use-presence";
 export { RealtimeStatusIndicator } from "./realtime-status-indicator";
-export * from "./document-engine";
-export * from "./ontology";
+export {
+  DocumentEditor,
+  createEmptyDocument,
+  applyMergeFields,
+  MERGE_FIELD_SUGGESTIONS,
+  DocumentEnginePanel,
+  BatchPdfPanel,
+  SigningDashboard,
+  EmbeddedSigner,
+  DOCUMENT_TEMPLATES,
+  getTemplatesByApp,
+  getTemplateBySlug,
+} from "./document-engine";
+export {
+  SEVERITY_CONFIG,
+  CONFIDENCE_CONFIG,
+  FRESHNESS_CONFIG,
+  type SignalSeverity,
+  type SignalSource,
+  type ConfidenceLevel,
+  type FreshnessWindow,
+  type WorkflowState,
+  type ActionType,
+  type BusinessImpact,
+  type SZLSignal,
+  type SZLRisk,
+  type SZLAction,
+  type SZLOutcome,
+  type DataProvenanceInfo,
+} from "./ontology";
 export { DataProvenance, ActionLoop, RoleSelector } from "./data-provenance";
 export {
   ReceiptDrawer,
@@ -344,9 +459,58 @@ export {
   type WhatIfResult,
   type WhatIfCascade,
 } from "./cortex-what-if";
-export * from "./settings-shell";
+export {
+  SettingsShell,
+  SettingsPage,
+  SettingsSectionPanel,
+  SettingsRow,
+  SettingsCard,
+  SETTINGS_SECTIONS_CONFIG,
+  type SettingsSection,
+  type SettingsShellProps,
+  type SettingsPageProps,
+  type SettingsSectionPanelProps,
+  type SettingsRowProps,
+  type SettingsCardProps,
+} from "./settings-shell";
 export * from "./use-user-prefs";
-export * from "./onboarding";
+export {
+  OnboardingWizard,
+  GettingStartedChecklist,
+  OnboardingReplayButton,
+  useOnboardingState,
+  useChecklistState,
+  ProductTour,
+  useProductTour,
+  OnboardingChecklist,
+  HelpTip,
+  ChangelogPage,
+  useOnboardingAnalytics,
+  ActivationBanner,
+  SetupAlert,
+  PaywallGate,
+  TrialBanner,
+  useActivationState,
+  markActivationEvent,
+  type OnboardingStep,
+  type OnboardingChecklistItem,
+  type OnboardingConfig,
+  type OnboardingWizardProps,
+  type GettingStartedChecklistProps,
+  type ProductTourStep,
+  type ProductTourProps,
+  type ChecklistItem,
+  type OnboardingChecklistProps,
+  type HelpTipProps,
+  type ChangelogEntry,
+  type ActivationStep,
+  type ActivationBannerProps,
+  type SetupAlertProps,
+  type PaywallGateProps,
+  type TrialBannerProps,
+  type ActivationState,
+  type ActivationStateOptions,
+} from "./onboarding";
 export { LiveClock, type LiveClockProps } from "./live-clock";
 export { AnimatedCounter, type AnimatedCounterProps } from "./animated-counter";
 export { useInterval } from "./use-interval";
@@ -400,7 +564,26 @@ export {
 } from "./decision-receipt-card";
 
 // ─── OS Layer ────────────────────────────────────────────────────────────────
-export * from "./os-layer";
+export {
+  AUTONOMY_LABELS,
+  AUTONOMY_DESCRIPTIONS,
+  POLICY_VERDICT_LABELS,
+  POLICY_VERDICT_DESCRIPTIONS,
+  type AutonomyMode,
+  type PolicyVerdict,
+  type PolicyVerdictDetail,
+  type EvidenceRecord,
+  type SourceHealthStatus,
+  type SourceHealthRecord,
+  type RecommendationAction,
+  type Recommendation,
+  type RunStatus,
+  type RunEffort,
+  type ToolCall,
+  type Run,
+  type AuditAction,
+  type OSAuditEntry,
+} from "./os-layer";
 export {
   PolicyVerdictBadge,
   type PolicyVerdictBadgeProps,

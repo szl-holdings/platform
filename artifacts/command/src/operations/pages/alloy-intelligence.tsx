@@ -1,24 +1,12 @@
 // @ts-nocheck
+import { EvidencePanel, ApprovalBadge, DegradedModeBanner, HumanReviewBadge, PriorityBadge, ActionTypeBadge, EnvironmentLabel } from "@szl-holdings/shared-ui/alloy-decision-card";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@lyte/lib/api";
 import type { AlloyAIHealth, AlloyAIModels, AlloyAIAuditResult } from "@lyte/lib/api";
 import {
-  Brain, Cpu, Shield, Activity, Search, FileText,
-  CheckCircle, AlertTriangle, Clock, Zap, Eye,
-  ChevronRight, RefreshCw, Crosshair, UserCheck,
-  Database, BarChart3, Lock, GitBranch, Info, X,
-} from "lucide-react";
-import {
-  ConfidenceBand,
-  EvidencePanel,
-  ApprovalBadge,
-  DegradedModeBanner,
-  HumanReviewBadge,
-  PriorityBadge,
-  ActionTypeBadge,
-  EnvironmentLabel,
-} from "@szl-holdings/shared-ui";
+  Brain, Cpu, Shield, Activity, Search, FileText, CheckCircle, AlertTriangle, Clock, Zap, Eye, ChevronRight, RefreshCw, Crosshair, UserCheck, Database, BarChart3, Lock, GitBranch, Info, X, } from "lucide-react";
+import { ConfidenceBand } from "@szl-holdings/shared-ui/alloy-decision-card";
 
 const BG = { page: "#080c14", surface: "#0c1018", elevated: "#10141e" };
 const BORDER = { subtle: "rgba(255,255,255,0.04)", muted: "rgba(255,255,255,0.07)" };

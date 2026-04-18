@@ -1,4 +1,4 @@
-import { apiFetch, graphqlRequest } from "@szl-holdings/shared-ui";
+import { apiFetch, graphqlRequest } from "@szl-holdings/shared-ui/api-fetch";
 
 export async function gqlFetch<T>(query: string, variables?: Record<string, unknown>): Promise<T> {
   return graphqlRequest<T>(query, variables);

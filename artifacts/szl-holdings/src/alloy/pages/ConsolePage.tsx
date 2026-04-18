@@ -1,12 +1,11 @@
+import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { alloyApi, type AlloyWorkflow, type AlloyWorkflowRun, type AlloyArtifact, type AlloySignal, type FeatureFlag } from "../lib/api";
 import {
-  Play, RefreshCw, CheckCircle, XCircle, Clock, AlertTriangle, Zap,
-  ChevronDown, ChevronRight, Eye, CheckCheck, X as XIcon, ToggleRight, FileText, Users, Flag,
-} from "lucide-react";
+  Play, RefreshCw, CheckCircle, XCircle, Clock, AlertTriangle, Zap, ChevronDown, ChevronRight, Eye, CheckCheck, X as XIcon, ToggleRight, FileText, Users, Flag, } from "lucide-react";
 import { cn } from "../lib/utils";
-import { isAuthError, EmptyState } from "@szl-holdings/shared-ui";
+import { isAuthError } from "@szl-holdings/shared-ui/api-fetch";
 
 function noRetryOn401(failureCount: number, error: unknown): boolean {
   if (isAuthError(error)) return false;

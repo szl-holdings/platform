@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { DollarSign, Shield, AlertTriangle, Users, TrendingDown, Activity, Clock, FileText } from "lucide-react";
-import { MicroFeedbackWidget } from "@szl-holdings/shared-ui";
+import { MicroFeedbackWidget } from "@szl-holdings/shared-ui/micro-feedback-widget";
 
 const ACCENT = "#ef4444";
 const DS = {

@@ -1,5 +1,5 @@
 import { LayoutDashboard, Network, BarChart3, FileStack, Shield, Scale } from "lucide-react";
-import type { OnboardingConfig } from "@szl-holdings/shared-ui";
+import { type OnboardingConfig } from "@szl-holdings/shared-ui/onboarding";
 import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";
 
 const PRISM_ACCENT = LANE_ACCENT_HEX.prismCounsel.primary;

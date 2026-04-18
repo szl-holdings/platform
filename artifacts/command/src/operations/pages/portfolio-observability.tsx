@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { type AppObservabilityState, type LensId, LENSES } from "@szl-holdings/observability";
 import { ALL_CONFIGS } from "@szl-holdings/observability/configs";
-import { PageDataSkeleton } from "@szl-holdings/shared-ui";
+import { PageDataSkeleton } from "@szl-holdings/shared-ui/page-data-skeleton";
 
 const LENS_ICONS: Record<string, string> = {
   signal: "◎",

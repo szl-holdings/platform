@@ -3,7 +3,7 @@ import {
   Shield, AlertTriangle, CheckCircle, Clock, User, Target,
   Plug, ArrowUpRight, RefreshCw, FileText, BarChart3, Eye
 } from "lucide-react";
-import { EmptyState } from "@szl-holdings/shared-ui";
+import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
 import {
   threatTwins, assetTwins, exposureTwins,
   type ThreatTwin, type AssetTwin

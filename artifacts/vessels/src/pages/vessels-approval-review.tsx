@@ -1,9 +1,11 @@
+import { PolicyResultBanner } from "@szl-holdings/shared-ui/policy-result";
+import { DecisionReceiptCard, type DecisionReceiptData } from "@szl-holdings/shared-ui/decision-receipt-card";
+import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { useState } from "react";
 import {
-  Shield, CheckCircle, X, AlertTriangle, MessageSquare,
-  ChevronRight, ArrowUpRight, Download, Anchor, Receipt
+  Shield, CheckCircle, X, AlertTriangle, MessageSquare, ChevronRight, ArrowUpRight, Download, Anchor, Receipt
 } from "lucide-react";
-import { EmptyState, PolicyResultBanner, DecisionReceiptCard, apiFetch, type DecisionReceiptData } from "@szl-holdings/shared-ui";
+import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
 import { voyageTwins, type VoyageApproval } from "@/data/fleet-twin";
 
 const ACCENT = "hsl(205 70% 50%)";

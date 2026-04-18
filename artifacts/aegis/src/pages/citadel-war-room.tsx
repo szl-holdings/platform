@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { LiveClock } from "@szl-holdings/shared-ui";
+import { LiveClock } from "@szl-holdings/shared-ui/live-clock";
 import {
   Shield, AlertTriangle, Clock, Users, FileText, Radio, Zap,
   ChevronRight, CheckCircle, Circle, XCircle, Play, Pause,

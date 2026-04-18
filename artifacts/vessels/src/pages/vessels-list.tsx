@@ -1,9 +1,10 @@
+import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
 import { useState } from "react";
 import { Link } from "wouter";
 import { useRoster } from "@/hooks/use-vessels-data";
 import { type RosterVessel } from "@/lib/api";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
-import { PageDataSkeleton, EmptyState } from "@szl-holdings/shared-ui";
+import { PageDataSkeleton } from "@szl-holdings/shared-ui/page-data-skeleton";
 import { Ship, ChevronRight, AlertTriangle, Search, RefreshCw, MapPin, Clock, TrendingUp } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 

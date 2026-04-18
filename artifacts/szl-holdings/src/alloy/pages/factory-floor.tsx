@@ -1,6 +1,10 @@
+import { DataStateBadge } from "@szl-holdings/shared-ui/data-state-badge";
+import { isAuthError } from "@szl-holdings/shared-ui/api-fetch";
+import { DataProvenance, ActionLoop, RoleSelector } from "@szl-holdings/shared-ui/data-provenance";
+import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
 import { useQuery } from "@tanstack/react-query";
-import { apiFetch, DataStateBadge, isAuthError, DataProvenance, ActionLoop, RoleSelector, EmptyState } from "@szl-holdings/shared-ui";
-import type { DataProvenanceInfo } from "@szl-holdings/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
+import { type DataProvenanceInfo } from "@szl-holdings/shared-ui/ontology";
 import { Activity, CheckCircle, XCircle, Clock, AlertTriangle, ChevronRight, Zap, TrendingUp, Timer } from "lucide-react";
 import { useState } from "react";
 import { useLocation } from "wouter";

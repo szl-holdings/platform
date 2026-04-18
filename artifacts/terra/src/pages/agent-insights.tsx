@@ -1,5 +1,5 @@
 import { AgentInsightsWidget } from "@szl-holdings/shared-ui/agent-insights-widget";
-import { MicroFeedbackWidget } from "@szl-holdings/shared-ui";
+import { MicroFeedbackWidget } from "@szl-holdings/shared-ui/micro-feedback-widget";
 import { useQuery } from "@tanstack/react-query";
 import { Brain, Zap, Radio, Building2 } from "lucide-react";
 

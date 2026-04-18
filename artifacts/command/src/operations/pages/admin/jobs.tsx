@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Play, Clock, CheckCircle, XCircle, AlertTriangle, RefreshCw, Zap, Calendar, RotateCcw } from "lucide-react";
 import { useState } from "react";
-import { apiFetch } from "@szl-holdings/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 
 interface JobRegistryEntry {
   type: string;

@@ -1,8 +1,10 @@
+import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
+import { ErrorState } from "@szl-holdings/shared-ui/design-system";
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Bell, Check, CheckCheck, Filter, RefreshCw, Trash2, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { PageDataSkeleton, EmptyState, ErrorState } from "@szl-holdings/shared-ui";
+import { PageDataSkeleton } from "@szl-holdings/shared-ui/page-data-skeleton";
 
 interface Notification {
   id: number;

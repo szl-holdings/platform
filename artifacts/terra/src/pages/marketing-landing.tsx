@@ -1,11 +1,9 @@
+import { NewsletterSubscribe } from "@szl-holdings/shared-ui/newsletter-subscribe";
 import { copyrightLine, aboutSzlParagraph } from "@szl-holdings/brand-registry";
 import { useState, useEffect, useRef } from "react";
 import {
-  ArrowRight, Building2, MapPin, TrendingUp, DollarSign, Flame,
-  BarChart3, Users, Search, FileText, Shield, Layers,
-  CheckCircle, Menu, X, Eye, Activity,
-} from "lucide-react";
-import { ContactModal, NewsletterSubscribe } from "@szl-holdings/shared-ui";
+  ArrowRight, Building2, MapPin, TrendingUp, DollarSign, Flame, BarChart3, Users, Search, FileText, Shield, Layers, CheckCircle, Menu, X, Eye, Activity, } from "lucide-react";
+import { ContactModal } from "@szl-holdings/shared-ui/contact-modal";
 
 const ACCENT = "#2d6a4f";
 const ACCENT_LIGHT = "#40856a";

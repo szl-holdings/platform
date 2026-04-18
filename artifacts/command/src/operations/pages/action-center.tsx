@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Zap, Clock, ChevronDown, ChevronRight, CheckCircle2, AlertTriangle, Users, DollarSign, ArrowRight, RefreshCw } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRealtimeChannel } from "@szl-holdings/shared-ui";
+import { useRealtimeChannel } from "@szl-holdings/shared-ui/use-realtime-channel";
 import { doctrineEventBus } from "@szl-holdings/observability";
 import { DoctrineLayerBadge } from "@szl-holdings/shared-ui/doctrine-layer-badge";
 import { cn } from "@lyte/lib/utils";

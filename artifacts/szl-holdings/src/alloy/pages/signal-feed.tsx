@@ -1,5 +1,8 @@
+import { DataStateBadge } from "@szl-holdings/shared-ui/data-state-badge";
+import { isAuthError } from "@szl-holdings/shared-ui/api-fetch";
+import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
 import { useQuery } from "@tanstack/react-query";
-import { apiFetch, DataStateBadge, isAuthError, EmptyState } from "@szl-holdings/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { Radio, AlertTriangle, Info, ChevronRight, Filter, RefreshCw } from "lucide-react";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";

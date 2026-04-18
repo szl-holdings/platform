@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "wouter";
 import { ArrowRight, Clock, AlertTriangle, TrendingUp, Users, BarChart3, DollarSign, Zap, Target, Activity, Eye } from "lucide-react";
 import { cn } from "@lyte/lib/utils";
-import { ContactModal } from "@szl-holdings/shared-ui";
+import { ContactModal } from "@szl-holdings/shared-ui/contact-modal";
 
 const HOW_LYTE_WORKS = [
   {

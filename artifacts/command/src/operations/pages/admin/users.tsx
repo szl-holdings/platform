@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Users, UserPlus, Mail, Shield, Clock, AlertTriangle } from "lucide-react";
 import { useState } from "react";
-import { apiFetch } from "@szl-holdings/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 
 interface UserInfo {
   id: number;

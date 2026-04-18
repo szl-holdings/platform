@@ -5,7 +5,7 @@ import {
   Calendar, BarChart3, TrendingUp, TrendingDown, Activity, ChevronRight,
   Plus, RefreshCw, Eye, AlertCircle, Building2, DollarSign, Zap
 } from "lucide-react";
-import { apiFetch } from "@szl-holdings/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { motion } from "framer-motion";
 
 interface CompliancePosture {

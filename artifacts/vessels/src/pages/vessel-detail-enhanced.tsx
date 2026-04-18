@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useRoute, Link } from "wouter";
-import { CrdtEntityPanel } from "@szl-holdings/shared-ui";
+import { CrdtEntityPanel } from "@szl-holdings/shared-ui/crdt-entity-panel";
 import { useVesselDetail, useFleetExceptions } from "@/hooks/use-vessels-data";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import {

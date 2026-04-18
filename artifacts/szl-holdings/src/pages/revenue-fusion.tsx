@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { TimeSeriesChart } from "@szl-holdings/shared-ui";
+import { TimeSeriesChart } from "@szl-holdings/shared-ui/analytics";
 import { DashboardShell } from "@szl-holdings/shared-ui/design-system";
 import { TrendingUp, TrendingDown, DollarSign, BarChart3, Activity, Layers } from "lucide-react";
 import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";

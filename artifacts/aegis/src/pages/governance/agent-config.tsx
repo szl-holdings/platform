@@ -5,7 +5,7 @@ import {
   AlertTriangle, CheckCircle2, RefreshCw, Zap, ToggleLeft, ToggleRight,
   Cpu, Lock, Wrench, SlidersHorizontal, Eye, EyeOff, Info,
 } from "lucide-react";
-import { apiFetch } from "@szl-holdings/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 
 interface AgentDef {
   id: string;

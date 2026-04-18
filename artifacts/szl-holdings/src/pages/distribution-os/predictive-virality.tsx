@@ -3,8 +3,8 @@ import { useLocation } from "wouter";
 import { m } from "framer-motion";
 import { Flame, TrendingUp, Eye, Target, Zap, ArrowUpRight, RefreshCw, Sparkles, AlertCircle, CheckCircle2, BarChart2 } from "lucide-react";
 import { DistributionOsLayout } from "./admin-dashboard";
-import { DataProvenance } from "@szl-holdings/shared-ui";
-import type { DataProvenanceInfo } from "@szl-holdings/shared-ui";
+import { DataProvenance } from "@szl-holdings/shared-ui/data-provenance";
+import { type DataProvenanceInfo } from "@szl-holdings/shared-ui/ontology";
 
 const API = import.meta.env.VITE_API_URL || "";
 

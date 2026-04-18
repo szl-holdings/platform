@@ -4,7 +4,7 @@ import {
   AlertTriangle, CheckCircle, Pause, Play, Edit, Trash2, ArrowRight,
   Moon, Sun, Calendar, Shield, Zap, RefreshCw, MoreHorizontal, User, Globe
 } from "lucide-react";
-import { MicroFeedbackWidget } from "@szl-holdings/shared-ui";
+import { MicroFeedbackWidget } from "@szl-holdings/shared-ui/micro-feedback-widget";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 

@@ -1,3 +1,8 @@
+import { CookieBanner } from "@szl-holdings/shared-ui/cookie-banner";
+import { StatusBanner, type StatusBannerConfig } from "@szl-holdings/shared-ui/status-banner";
+import { useRole } from "@szl-holdings/shared-ui/use-role";
+import { AppModeBanner, AppModeProvider } from "@szl-holdings/shared-ui/app-mode-banner";
+import { ProductionConfirmProvider, useProductionConfirm } from "@szl-holdings/shared-ui/production-confirm";
 import { lazy, Suspense, useEffect, type ReactNode } from "react";
 import { apiRequest, registerProductionConfirmFn } from "@/lib/api";
 import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
@@ -5,7 +10,7 @@ import { navigatorConfig } from "@szl-holdings/shared-ui/copilot-configs";
 import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LazyMotion, domMax } from "framer-motion";
-import { DemoModeProvider, SandboxModeProvider, CookieBanner, StatusBanner, AnalyticsProvider, type StatusBannerConfig, useRole, AppModeBanner, AppModeProvider, ProductionConfirmProvider, useProductionConfirm } from "@szl-holdings/shared-ui";
+import { DemoModeProvider, SandboxModeProvider, AnalyticsProvider } from "@szl-holdings/shared-ui";
 import { McpOverlay } from "@szl-holdings/mcp-client";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
 import { useAuth } from "@szl-holdings/replit-auth-web";

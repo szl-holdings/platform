@@ -2,7 +2,7 @@ import { useListProjects, Project } from "@szl-holdings/api-client-react";
 import { useState } from "react";
 import { BarChart3, Filter, Grid3X3, TrendingUp, Eye, ArrowUp, ArrowDown, Search, Layers, Zap, RefreshCw, AlertCircle, Clock } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
-import { PageDataSkeleton } from "@szl-holdings/shared-ui";
+import { PageDataSkeleton } from "@szl-holdings/shared-ui/page-data-skeleton";
 import { usePageMeta } from "@/hooks/usePageMeta";
 
 const healthDimensions = ["Performance", "Security", "Reliability", "Scalability", "Maintainability"];

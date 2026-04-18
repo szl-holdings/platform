@@ -1,19 +1,18 @@
 // @ts-nocheck
+import { useRealtimeChannel } from "@szl-holdings/shared-ui/use-realtime-channel";
+import { ActionLoop, RoleSelector, DataProvenance } from "@szl-holdings/shared-ui/data-provenance";
 import { useState, useEffect, lazy, Suspense } from "react";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
-import { DataStateBadge, useRealtimeChannel, ActionLoop, RoleSelector, DataProvenance } from "@szl-holdings/shared-ui";
-import type { DataProvenanceInfo } from "@szl-holdings/shared-ui";
-import {
-  Building2, MapPin, TrendingUp, Users, Activity,
-  ArrowRight, AlertTriangle, Eye, Globe, Map, Shield, BarChart3,
-  ChevronRight, Layers, FileText, CheckCircle, ArrowUpRight, Circle,
-} from "lucide-react";
+import { DataStateBadge } from "@szl-holdings/shared-ui/data-state-badge";
+import { type DataProvenanceInfo } from "@szl-holdings/shared-ui/ontology";
+import { formatCurrency } from "@szl-holdings/shared-ui/utils";
+import { Building2, MapPin, TrendingUp, Users, Activity, ArrowRight, AlertTriangle, Eye, Globe, Map, Shield, BarChart3, ChevronRight, Layers, FileText, CheckCircle, ArrowUpRight, Circle, } from "lucide-react";
 import { agents } from "@/data/brokerage";
-import { RiskBadge, StageBadge, formatCurrency, AgentAvatar } from "@/components/brokerage-ui";
+import { RiskBadge, StageBadge, AgentAvatar } from "@/components/brokerage-ui";
 import { properties } from "@/data/portfolio";
 import { useMapboxToken } from "@/hooks/use-mapbox-token";
-import { PackBanner } from "@szl-holdings/shared-ui";
+import { PackBanner } from "@szl-holdings/shared-ui/pack-banner";
 import { TERRA_PORTFOLIO_AUM, metricDisplay } from "@/lib/claims";
 import { PolicyModeBadge } from "@/components/policy-mode-badge";
 

@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
-import { LiveClock } from "@szl-holdings/shared-ui";
+import { LiveClock } from "@szl-holdings/shared-ui/live-clock";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { cn } from "@szl-holdings/shared-ui/utils";

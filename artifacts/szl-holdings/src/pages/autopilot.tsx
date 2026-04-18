@@ -11,7 +11,7 @@ import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { cn } from "@/lib/utils";
-import { MicroFeedbackWidget } from "@szl-holdings/shared-ui";
+import { MicroFeedbackWidget } from "@szl-holdings/shared-ui/micro-feedback-widget";
 
 async function apiFetch<T>(path: string): Promise<T> {
   const res = await fetch(`/api${path}`, {

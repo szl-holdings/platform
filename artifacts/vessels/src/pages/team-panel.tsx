@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { apiFetch } from "@szl-holdings/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { Users, UserCheck, Shield, Crown, Wrench, Eye, MoreHorizontal, Mail, RefreshCw } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 

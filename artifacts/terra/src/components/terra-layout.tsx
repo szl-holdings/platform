@@ -1,3 +1,6 @@
+import { RealtimeStatusIndicator } from "@szl-holdings/shared-ui/realtime-status-indicator";
+import { GettingStartedChecklist, OnboardingWizard, useOnboardingState, type OnboardingConfig } from "@szl-holdings/shared-ui/onboarding";
+import { useUserPreferences } from "@szl-holdings/shared-ui/use-user-preferences";
 import { Link, useLocation } from "wouter";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { toAlpha } from "@szl-holdings/shared-ui/utils";
@@ -5,15 +8,9 @@ import { SectionErrorBoundary } from "@szl-holdings/shared-ui/error-boundary";
 import { ReactNode, useState, useCallback, useEffect, useRef } from "react";
 import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";
 import {
-  Building2, LayoutDashboard, Eye, Activity,
-  BarChart3, Users, FileText, CheckSquare,
-  Bell, Menu, X, Briefcase, Map, Globe, TrendingUp, BookOpen,
-  Shield, Layers, Radio, Search, PieChart, PanelLeftClose, PanelLeftOpen,
-  Camera, Hammer, Box, DollarSign, Scale, Ruler, FileSearch,
-  ClipboardList, TrendingDown, RefreshCw, Calculator, Percent, UserCheck, HardHat, GitBranch, Network,
-  Brain, GitMerge, AlertTriangle, Landmark, MapPin, Zap
+  Building2, LayoutDashboard, Eye, Activity, BarChart3, Users, FileText, CheckSquare, Bell, Menu, X, Briefcase, Map, Globe, TrendingUp, BookOpen, Shield, Layers, Radio, Search, PieChart, PanelLeftClose, PanelLeftOpen, Camera, Hammer, Box, DollarSign, Scale, Ruler, FileSearch, ClipboardList, TrendingDown, RefreshCw, Calculator, Percent, UserCheck, HardHat, GitBranch, Network, Brain, GitMerge, AlertTriangle, Landmark, MapPin, Zap
 } from "lucide-react";
-import { useRealtimeChannel, RealtimeStatusIndicator, GettingStartedChecklist, OnboardingWizard, useOnboardingState, type OnboardingConfig, useUserPreferences } from "@szl-holdings/shared-ui";
+import { useRealtimeChannel } from "@szl-holdings/shared-ui/use-realtime-channel";
 import { useOnboardingAnalytics } from "@szl-holdings/shared-ui/onboarding";
 import { SidebarNav, type SidebarNavSection, DashboardShell as SharedDashboardShell } from "@szl-holdings/shared-ui/design-system";
 import { useQuery } from "@tanstack/react-query";

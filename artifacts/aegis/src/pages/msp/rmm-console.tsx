@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Button } from "@szl-holdings/shared-ui/ui/button";
-import { apiFetch } from "@szl-holdings/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import {
   Monitor, AlertTriangle, CheckCircle, RefreshCw, Shield, Package, Terminal, Cpu,
   HardDrive, MemoryStick, Activity, Play, RotateCcw, Zap, ChevronRight, X,

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiFetch } from "@szl-holdings/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { EmptyState } from "@szl-holdings/shared-ui/design-system";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import {

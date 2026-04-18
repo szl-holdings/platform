@@ -1,7 +1,7 @@
 import { User, MapPin, Clock, CheckCircle, AlertTriangle, Wrench, Calendar, Navigation, RefreshCw } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@szl-holdings/shared-ui/ui/skeleton";
-import { apiFetch } from "@szl-holdings/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 
 interface Technician {
   id: number;

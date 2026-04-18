@@ -13,7 +13,7 @@ import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { analytics } from "@/lib/analytics";
-import { NewsletterSubscribe } from "@szl-holdings/shared-ui";
+import { NewsletterSubscribe } from "@szl-holdings/shared-ui/newsletter-subscribe";
 
 const BG = "hsl(214,16%,4%)";
 const BORDER = "hsla(0,0%,100%,0.07)";

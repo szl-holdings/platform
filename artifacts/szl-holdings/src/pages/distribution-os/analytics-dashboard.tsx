@@ -1,10 +1,11 @@
+import { DataProvenance } from "@szl-holdings/shared-ui/data-provenance";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { m } from "framer-motion";
 import { BarChart3, Eye, UserPlus, FileText, Send, CheckCircle2, AlertCircle, Zap, ArrowUpRight } from "lucide-react";
 import { DistributionOsLayout } from "./admin-dashboard";
-import { RoleSelector, DataProvenance } from "@szl-holdings/shared-ui";
-import type { DataProvenanceInfo } from "@szl-holdings/shared-ui";
+import { RoleSelector } from "@szl-holdings/shared-ui/data-provenance";
+import { type DataProvenanceInfo } from "@szl-holdings/shared-ui/ontology";
 
 const API = import.meta.env.VITE_API_URL || "";
 

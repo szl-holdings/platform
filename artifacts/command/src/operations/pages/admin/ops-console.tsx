@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { apiFetch } from "@szl-holdings/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import {
   Server, Database, HardDrive, Users, Zap, Activity, CheckCircle,
   AlertTriangle, WifiOff, RefreshCw, Clock, Shield, Cpu, BarChart3,

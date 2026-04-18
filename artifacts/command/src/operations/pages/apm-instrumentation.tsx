@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Activity, Database, Zap, TrendingUp, Clock, AlertTriangle } from "lucide-react";
 import { cn } from "@lyte/lib/utils";
-import { apiFetch } from "@szl-holdings/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 
 interface RouteBreakdown {
   route: string;

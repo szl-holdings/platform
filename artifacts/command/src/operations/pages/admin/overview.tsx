@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Server, Database, HardDrive, Users, Layers, Zap, Activity, CheckCircle, AlertTriangle, Clock } from "lucide-react";
-import { apiFetch } from "@szl-holdings/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 
 interface AdminOverview {
   timestamp: string;

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { AlertTriangle, Anchor, Shield, Clock, User, CheckCircle, ArrowUpRight } from "lucide-react";
-import { EmptyState } from "@szl-holdings/shared-ui";
+import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
 import { fleetExceptions, type FleetException } from "@/data/fleet-twin";
 
 const ACCENT = "hsl(205 70% 50%)";

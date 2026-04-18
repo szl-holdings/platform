@@ -1,5 +1,7 @@
+import { isAuthError } from "@szl-holdings/shared-ui/api-fetch";
+import { DataStateBadge } from "@szl-holdings/shared-ui/data-state-badge";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiFetch, isAuthError, DataStateBadge } from "@szl-holdings/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { Activity, Clock, CheckCircle, XCircle, RotateCcw, RefreshCw, AlertTriangle, Filter, Download, ChevronRight, Play } from "lucide-react";
 import { useState } from "react";
 import { useLocation } from "wouter";

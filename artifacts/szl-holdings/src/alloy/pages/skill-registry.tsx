@@ -1,5 +1,6 @@
+import { DataStateBadge } from "@szl-holdings/shared-ui/data-state-badge";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiFetch, DataStateBadge } from "@szl-holdings/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { useState } from "react";
 import {
   Layers, RefreshCw, CheckCircle, AlertTriangle, Shield, Filter,

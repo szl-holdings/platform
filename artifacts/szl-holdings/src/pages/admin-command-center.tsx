@@ -1,18 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useUserPreferences } from "@szl-holdings/shared-ui/use-user-preferences";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { m, AnimatePresence } from "framer-motion";
 import {
-  LayoutDashboard, Users, Building2, Shield, Flag, Activity, HeadphonesIcon,
-  Search, RefreshCw, ChevronRight, CheckCircle2, AlertCircle, XCircle,
-  Loader2, Download, ToggleLeft, ToggleRight, UserX, UserCheck, Plus,
-  Filter, Clock, Mail, ChevronDown, ChevronUp, X, Eye, Settings,
-  BarChart3, TrendingUp, Database, Globe, Zap, Lock, ExternalLink,
-  Terminal, AlertTriangle, CheckSquare, Circle, UserCog, Sliders,
-  DollarSign, Tag, Trash2, Edit2, ChevronLeft, ShieldCheck,
-} from "lucide-react";
+  LayoutDashboard, Users, Building2, Shield, Flag, Activity, HeadphonesIcon, Search, RefreshCw, ChevronRight, CheckCircle2, AlertCircle, XCircle, Loader2, Download, ToggleLeft, ToggleRight, UserX, UserCheck, Plus, Filter, Clock, Mail, ChevronDown, ChevronUp, X, Eye, Settings, BarChart3, TrendingUp, Database, Globe, Zap, Lock, ExternalLink, Terminal, AlertTriangle, CheckSquare, Circle, UserCog, Sliders, DollarSign, Tag, Trash2, Edit2, ChevronLeft, ShieldCheck, } from "lucide-react";
 import { Link } from "wouter";
 import { cn } from "@/lib/utils";
-import { useRole, useUserPreferences } from "@szl-holdings/shared-ui";
+import { useRole } from "@szl-holdings/shared-ui/use-role";
 import { EmptyState as SharedEmptyState } from "@szl-holdings/shared-ui/EmptyState";
 
 const API = "/api";

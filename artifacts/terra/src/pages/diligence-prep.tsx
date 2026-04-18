@@ -4,7 +4,7 @@ import {
   ChevronRight, Building2, ArrowRight, BarChart3, Shield
 } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
-import { EmptyState } from "@szl-holdings/shared-ui";
+import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
 import { propertyTwins, type PropertyTwin, type DiligenceTask } from "@/data/property-twin";
 
 const ACCENT = "#40856a";

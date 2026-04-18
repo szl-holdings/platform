@@ -1,5 +1,6 @@
+import { type ApiFetchOptions } from "@szl-holdings/shared-ui/api-fetch";
 import { useState, useEffect, useCallback } from "react";
-import { apiFetch, type ApiFetchOptions } from "@szl-holdings/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import {
   Zap, RefreshCw, CheckCircle, Clock, AlertTriangle, Shield, ChevronRight,
   Play, FileText, Activity, Layers, XCircle, Info, ChevronDown, ChevronUp, Scale

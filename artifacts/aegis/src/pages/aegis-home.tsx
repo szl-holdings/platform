@@ -1,6 +1,7 @@
+import { NewsletterSubscribe } from "@szl-holdings/shared-ui/newsletter-subscribe";
 import { copyrightLine } from "@szl-holdings/brand-registry";
 import { useState, useEffect, useRef } from "react";
-import { ContactModal, NewsletterSubscribe } from "@szl-holdings/shared-ui";
+import { ContactModal } from "@szl-holdings/shared-ui/contact-modal";
 import { Link } from "wouter";
 import {
   Shield, ArrowRight, Layers, Server, Brain, Eye, Target,

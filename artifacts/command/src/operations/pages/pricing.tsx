@@ -1,7 +1,8 @@
+import { useContactModal } from "@szl-holdings/shared-ui/contact-modal";
 import { useState } from "react";
 import { CheckCircle, ArrowRight, Zap, Shield, Building2, X } from "lucide-react";
 import { Link } from "wouter";
-import { ContactModal, useContactModal } from "@szl-holdings/shared-ui";
+import { ContactModal } from "@szl-holdings/shared-ui/contact-modal";
 import { trackEvent } from "@szl-holdings/observability/react";
 
 const ACCENT = "#d4a054";

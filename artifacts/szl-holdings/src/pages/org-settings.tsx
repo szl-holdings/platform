@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useProductionConfirm } from "@szl-holdings/shared-ui";
+import { useProductionConfirm } from "@szl-holdings/shared-ui/production-confirm";
 import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { m, AnimatePresence } from "framer-motion";

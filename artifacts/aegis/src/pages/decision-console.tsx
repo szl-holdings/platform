@@ -1,9 +1,10 @@
+import { PolicyResultBanner } from "@szl-holdings/shared-ui/policy-result";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { useStepUp } from "@/lib/use-step-up";
 import { cn } from "@szl-holdings/shared-ui/utils";
-import { ProofPanel, PolicyResultBanner } from "@szl-holdings/shared-ui";
+import { ProofPanel } from "@szl-holdings/shared-ui/proof-panel";
 import {
   CheckCircle2, XCircle, Clock, AlertTriangle, FileText, Lock,
   ChevronDown, ChevronRight, Eye, Shield, UserCheck, Activity,

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { apiFetch } from "@szl-holdings/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { Layers, Activity, AlertTriangle, CheckCircle, Clock, Shield, Zap, Server, Network, Globe, Database, RefreshCw, ChevronRight, Eye, GitBranch, Radio, Lock, Loader2 } from "lucide-react";
 import { ExecutiveSafeModeProvider, useExecutiveSafeMode, useExecutiveSafeModeToggle } from "../lib/executive-safe-mode-context";
 

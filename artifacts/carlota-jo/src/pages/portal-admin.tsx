@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { TenantBrandProvider, useTenantBrand } from "@szl-holdings/shared-ui";
+import { TenantBrandProvider, useTenantBrand } from "@szl-holdings/shared-ui/use-tenant-brand";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
 import { Settings, Users, Eye, Plus, Save, Globe, Palette, Lock } from "lucide-react";
 import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";

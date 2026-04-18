@@ -5,7 +5,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { DataStateBadge } from "@/components/DataStateBadge";
 import { useAuth } from "@szl-holdings/replit-auth-web";
 import { Lock, TrendingUp, Ship, Layers, Eye, Shield, Sparkles, BarChart3, ArrowUpRight, RefreshCw, Activity, Zap, Play, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
-import { PageDataSkeleton } from "@szl-holdings/shared-ui";
+import { PageDataSkeleton } from "@szl-holdings/shared-ui/page-data-skeleton";
 
 interface KpiData {
   checkedAt: string;

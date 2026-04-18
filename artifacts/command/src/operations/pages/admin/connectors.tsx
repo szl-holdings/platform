@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Wifi, WifiOff, AlertTriangle, Play, RefreshCw, CheckCircle } from "lucide-react";
 import { useState } from "react";
-import { apiFetch } from "@szl-holdings/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 
 interface ServiceHealth {
   name: string;

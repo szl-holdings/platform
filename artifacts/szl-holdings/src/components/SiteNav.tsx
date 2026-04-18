@@ -6,7 +6,7 @@ import { analytics } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 import { UserButton } from "@szl-holdings/shared-ui/UserButton";
 import { useAuth } from "@szl-holdings/replit-auth-web";
-import { useRole } from "@szl-holdings/shared-ui";
+import { useRole } from "@szl-holdings/shared-ui/use-role";
 
 const NAV_ITEMS = [
   {

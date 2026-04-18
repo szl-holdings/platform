@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@szl-holdings/shared-ui/ui/skeleton";
 import { clients as fallbackClients, type Client } from "@/data/seed-data";
 import { ExportButton } from "@szl-holdings/shared-ui/data-export";
-import { apiFetch } from "@szl-holdings/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 
 interface ApiClient {
   id: number;

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Users, DollarSign, FileText, TrendingUp, Download, Mail, Clock, Lock } from "lucide-react";
-import { useRole } from "@szl-holdings/shared-ui";
+import { useRole } from "@szl-holdings/shared-ui/use-role";
 
 const lpInvestors = [
   { name: "Sovereign Capital Partners", commitment: "$45M", deployed: "$38M", distributions: "$12.4M", netIRR: 19.2, moic: 1.68, tier: "Anchor LP" },

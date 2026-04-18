@@ -14,7 +14,7 @@ import {
   AlertTriangle, Anchor, Wrench, Activity, TrendingUp, TrendingDown, Layers, Play, Pause
 } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
-import { useRealtimeChannel } from "@szl-holdings/shared-ui";
+import { useRealtimeChannel } from "@szl-holdings/shared-ui/use-realtime-channel";
 import { EmptyState } from "@szl-holdings/shared-ui/design-system";
 import { useQueryClient } from "@tanstack/react-query";
 

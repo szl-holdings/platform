@@ -1,18 +1,16 @@
+import { RealtimeStatusIndicator } from "@szl-holdings/shared-ui/realtime-status-indicator";
+import { GettingStartedChecklist, OnboardingWizard, useOnboardingState, type OnboardingConfig } from "@szl-holdings/shared-ui/onboarding";
+import { EnvironmentLabel } from "@szl-holdings/shared-ui/alloy-decision-card";
 import { Link, useLocation } from "wouter";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { SectionErrorBoundary } from "@szl-holdings/shared-ui/error-boundary";
 import { ReactNode, useState } from "react";
 import { ServiceStatusRail } from "./service-status-rail";
 import {
-  Zap, Menu, X, ChevronDown, Bell, Settings, Users, Flag, FileText,
-  Database, Play, Activity, CheckSquare, Shield, Network, Heart,
-  AlertTriangle, Brain, Radio, Workflow, Inbox, Search, UserCheck,
-  ChevronRight, Gauge, BarChart3, LayoutDashboard, Download, Clapperboard, Power,
-  GitBranch, Send, Cpu, TrendingUp, DollarSign, RotateCcw, Calculator,
-  Bot, Monitor, Building, BookOpen, Layers, Calendar, BellOff, Code,
-  Target, Globe, Phone, Scale
+  Zap, Menu, X, ChevronDown, Bell, Settings, Users, Flag, FileText, Database, Play, Activity, CheckSquare, Shield, Network, Heart, AlertTriangle, Brain, Radio, Workflow, Inbox, Search, UserCheck, ChevronRight, Gauge, BarChart3, LayoutDashboard, Download, Clapperboard, Power, GitBranch, Send, Cpu, TrendingUp, DollarSign, RotateCcw, Calculator, Bot, Monitor, Building, BookOpen, Layers, Calendar, BellOff, Code, Target, Globe, Phone, Scale
 } from "lucide-react";
-import { useRealtimeChannel, RealtimeStatusIndicator, GettingStartedChecklist, OnboardingWizard, useOnboardingState, useSandboxMode, EnvironmentLabel, type OnboardingConfig } from "@szl-holdings/shared-ui";
+import { useRealtimeChannel } from "@szl-holdings/shared-ui/use-realtime-channel";
+import { useSandboxMode } from "@szl-holdings/shared-ui";
 import { useDemoMode } from "@lyte/lib/demo-mode";
 
 const LYTE_ONBOARDING_CONFIG: OnboardingConfig = {

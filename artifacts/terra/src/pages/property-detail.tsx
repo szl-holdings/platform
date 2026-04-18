@@ -1,16 +1,14 @@
+import { type OperationalEntity } from "@szl-holdings/shared-ui/operational-primitives";
 import { useState, useEffect, useCallback } from "react";
 import type { ComponentType, CSSProperties } from "react";
 import { motion } from "framer-motion";
 import { useRoute, Link } from "wouter";
 import {
-  ArrowLeft, Building2, MapPin, Users, DollarSign, TrendingUp, Calendar,
-  Wrench, User, AlertTriangle, Download, Loader2, CheckCircle, Clock,
-  FileText, Shield, Activity, Target, Tag, LayoutDashboard,
-  Thermometer, Layers, Calculator, Eye, BarChart3, Brain, ChevronRight
+  ArrowLeft, Building2, MapPin, Users, DollarSign, TrendingUp, Calendar, Wrench, User, AlertTriangle, Download, Loader2, CheckCircle, Clock, FileText, Shield, Activity, Target, Tag, LayoutDashboard, Thermometer, Layers, Calculator, Eye, BarChart3, Brain, ChevronRight
 } from "lucide-react";
 import { AtlasScenePanel } from "@/components/atlas-scene-panel";
 import { CommentThread, ActivityFeed } from "@szl-holdings/shared-ui/collaboration";
-import { OperationalQueueRow, type OperationalEntity } from "@szl-holdings/shared-ui";
+import { OperationalQueueRow } from "@szl-holdings/shared-ui/operational-primitives";
 import { properties, tenants, alerts } from "@/data/portfolio";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { gqlFetch, type GqlTerraActionItem } from "@/lib/api";

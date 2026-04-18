@@ -4,7 +4,7 @@ import { Link } from "wouter";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useEffect, useRef } from "react";
-import { NewsletterSubscribe } from "@szl-holdings/shared-ui";
+import { NewsletterSubscribe } from "@szl-holdings/shared-ui/newsletter-subscribe";
 import {
   CARLOTA_JO_RETENTION,
   CARLOTA_JO_YEARS_EXPERIENCE,

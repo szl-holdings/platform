@@ -1,9 +1,15 @@
 import React, { useState, useEffect } from "react";
+import { PolicyResult } from "@szl-holdings/shared-ui/policy-result";
+import { AdminAuditTrail } from "@szl-holdings/shared-ui/admin-audit-trail";
+import { SimulationCockpit } from "@szl-holdings/shared-ui/simulation-cockpit";
 import { DashboardShell, SidebarNav } from "@szl-holdings/shared-ui/design-system";
 import { Shield, FileSearch, AlertCircle, CheckCircle, Clock, Loader2 } from "lucide-react";
 import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";
-import { ProofPanel, PolicyResult, AdminAuditTrail, SimulationCockpit } from "@szl-holdings/shared-ui";
-import type { ProofPanelData, PolicyDecisionRecord, AuditTrailEntry, SimulationScenario, PredictedVsActual } from "@szl-holdings/shared-ui";
+import { ProofPanel } from "@szl-holdings/shared-ui/proof-panel";
+import { type ProofPanelData } from "@szl-holdings/shared-ui/proof-panel";
+import { type PolicyDecisionRecord } from "@szl-holdings/shared-ui/policy-result";
+import { type AuditTrailEntry } from "@szl-holdings/shared-ui/admin-audit-trail";
+import { type SimulationScenario, type PredictedVsActual } from "@szl-holdings/shared-ui/simulation-cockpit";
 
 function getCsrfToken(): string {
   const match = typeof document !== "undefined"

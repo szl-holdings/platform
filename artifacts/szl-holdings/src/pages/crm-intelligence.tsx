@@ -5,7 +5,7 @@ import {
   ChevronRight, DollarSign, Target, Clock, CheckCircle2, AlertTriangle,
   Link2, Layers, Zap, Globe, Plus, ArrowUpRight
 } from "lucide-react";
-import { apiFetch } from "@szl-holdings/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { motion } from "framer-motion";
 
 interface SalesforceOpportunity {

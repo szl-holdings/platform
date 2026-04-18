@@ -1,9 +1,10 @@
 // @ts-nocheck
+import { ActionLoop, RoleSelector } from "@szl-holdings/shared-ui/data-provenance";
 import { useState, useEffect } from "react";
 import React from "react";
 import { analytics } from "@lyte/lib/analytics";
-import { DataProvenance, ActionLoop, RoleSelector } from "@szl-holdings/shared-ui";
-import type { DataProvenanceInfo } from "@szl-holdings/shared-ui";
+import { DataProvenance } from "@szl-holdings/shared-ui/data-provenance";
+import { type DataProvenanceInfo } from "@szl-holdings/shared-ui/ontology";
 import { Link } from "wouter";
 import {
   ChevronRight, Zap, Target, Activity,

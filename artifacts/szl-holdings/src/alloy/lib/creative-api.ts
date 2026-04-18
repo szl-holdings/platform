@@ -1,4 +1,4 @@
-import { apiFetch, type PaginatedResponse } from "@szl-holdings/shared-ui";
+import { apiFetch, type PaginatedResponse } from "@szl-holdings/shared-ui/api-fetch";
 
 async function apiFetchList<T>(path: string): Promise<T[]> {
   const json = await apiFetch<T[] | PaginatedResponse<T>>(path);

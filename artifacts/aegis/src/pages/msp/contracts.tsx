@@ -4,7 +4,7 @@ import { FileText, Calendar, AlertTriangle, CheckCircle2, Clock, DollarSign, Shi
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@szl-holdings/shared-ui/ui/skeleton";
-import { apiFetch } from "@szl-holdings/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 
 interface Contract {
   id: number;

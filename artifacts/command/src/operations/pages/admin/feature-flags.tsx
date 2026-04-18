@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Flag, AlertTriangle, ToggleLeft, ToggleRight, Search } from "lucide-react";
 import { useState } from "react";
-import { apiFetch } from "@szl-holdings/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 
 interface FeatureFlag {
   key: string;

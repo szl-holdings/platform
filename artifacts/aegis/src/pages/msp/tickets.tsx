@@ -5,7 +5,7 @@ import { ExportButton } from "@szl-holdings/shared-ui/data-export";
 import { CommentThread, ActivityFeed } from "@szl-holdings/shared-ui/collaboration";
 import { Skeleton } from "@szl-holdings/shared-ui/ui/skeleton";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
-import { apiFetch } from "@szl-holdings/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 
 const API_BASE = "/api";
 

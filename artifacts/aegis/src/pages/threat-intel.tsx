@@ -1,8 +1,10 @@
+import { PageDataSkeleton } from "@szl-holdings/shared-ui/page-data-skeleton";
+import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Shield, AlertTriangle, Brain, Radio, Crosshair, Activity, Loader2, Zap, FileText } from "lucide-react";
 import { SeverityMeter, TypewriterText, AnomalySparkline } from "@szl-holdings/shared-ui/ai-components";
-import { apiFetch, PageDataSkeleton, EmptyState } from "@szl-holdings/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 
 export default function ThreatIntelAI() {
   const { data: cves = [], isLoading: cvesLoading } = useQuery({ queryKey: ["threat-cves"], queryFn: () => apiFetch<any[]>("/intelligence/cves") });

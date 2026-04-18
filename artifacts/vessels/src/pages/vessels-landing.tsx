@@ -1,8 +1,9 @@
+import { NewsletterSubscribe } from "@szl-holdings/shared-ui/newsletter-subscribe";
 import { useState } from "react";
 import { Link } from "wouter";
 import { Ship, Navigation, AlertTriangle, Wrench, DollarSign, Activity, ChevronRight, MapPin, BarChart3, TrendingUp, Anchor } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
-import { ContactModal, NewsletterSubscribe } from "@szl-holdings/shared-ui";
+import { ContactModal } from "@szl-holdings/shared-ui/contact-modal";
 
 const CORE_VIEWS = [
   {

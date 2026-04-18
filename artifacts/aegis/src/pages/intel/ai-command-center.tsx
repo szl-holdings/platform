@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useInterval } from "@szl-holdings/shared-ui";
+import { useInterval } from "@szl-holdings/shared-ui/use-interval";
 import { Activity, Brain, Cpu, Globe, Shield, Zap, ChevronRight, Circle, Radio, TrendingUp, AlertCircle, CheckCircle2, Clock } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { Link } from "wouter";

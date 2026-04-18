@@ -14,7 +14,7 @@ import { EmptyState } from "@szl-holdings/shared-ui/design-system";
 import { CommentThread, ActivityFeed } from "@szl-holdings/shared-ui/collaboration";
 import { useState, useEffect, useRef } from "react";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
-import { useRealtimeChannel } from "@szl-holdings/shared-ui";
+import { useRealtimeChannel } from "@szl-holdings/shared-ui/use-realtime-channel";
 import { ExportButton } from "@szl-holdings/shared-ui/data-export";
 import {
   OperationalDetailPane,

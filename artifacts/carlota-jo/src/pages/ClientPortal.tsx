@@ -1,12 +1,12 @@
+import { RealtimeStatusIndicator } from "@szl-holdings/shared-ui/realtime-status-indicator";
 import { useState, useCallback, useEffect } from "react";
 import { useLocation, Link } from "wouter";
 import {
-  LayoutDashboard, FileText, MessageSquare, Bell, LogOut,
-  CheckCircle2, Clock, ArrowRight, Download, Eye, Upload, CreditCard, Lock
+  LayoutDashboard, FileText, MessageSquare, Bell, LogOut, CheckCircle2, Clock, ArrowRight, Download, Eye, Upload, CreditCard, Lock
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@szl-holdings/replit-auth-web";
-import { useRealtimeChannel, RealtimeStatusIndicator } from "@szl-holdings/shared-ui";
+import { useRealtimeChannel } from "@szl-holdings/shared-ui/use-realtime-channel";
 
 const portalNav = [
   { label: "Overview", href: "/client-portal", icon: LayoutDashboard },

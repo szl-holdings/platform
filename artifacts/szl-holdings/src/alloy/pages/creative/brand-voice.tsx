@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Mic, RefreshCw, CheckCircle, Star, Copy, Sparkles, Loader2 } from "lucide-react";
-import { apiFetch } from "@szl-holdings/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 
 interface VoiceProfile {
   id: string;

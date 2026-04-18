@@ -1,7 +1,7 @@
 import type { JSX } from "react";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiFetch } from "@szl-holdings/shared-ui";
+import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import {
   Brain, Layers, GitBranch, Users, TrendingDown, FileText,
   RefreshCw, AlertTriangle, CheckCircle, Clock, DollarSign,

@@ -7,13 +7,15 @@ import { Toaster } from "@szl-holdings/shared-ui/ui/sonner";
 import { McpOverlay } from "@szl-holdings/mcp-client";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
 import { AnalyticsProvider } from "@szl-holdings/shared-ui";
+import { useRealtimeChannel } from "@szl-holdings/shared-ui/use-realtime-channel";
+import { RealtimeStatusIndicator } from "@szl-holdings/shared-ui/realtime-status-indicator";
+import { OnboardingWizard, GettingStartedChecklist, useOnboardingState, type OnboardingConfig } from "@szl-holdings/shared-ui/onboarding";
+import { SyncStatusBadge } from "@szl-holdings/shared-ui/sync-status-badge";
+import { useWebSyncStatus } from "@szl-holdings/shared-ui/use-web-sync-status";
+import { useUserPreferences } from "@szl-holdings/shared-ui/use-user-preferences";
 import { UserButton } from "@szl-holdings/shared-ui/UserButton";
 import {
-  Ship, AlertTriangle, Activity, LayoutDashboard, WifiOff,
-  BarChart3, ChevronDown, User, ChevronRight, DollarSign, Wrench,
-  MapPin, Radio, List, Globe, Navigation, EyeOff, ShieldAlert, Shield, Anchor, Brain, Menu, FileText,
-  TrendingUp, Calculator, Zap, Cpu, Leaf, Waves, Fuel, Layers, RotateCcw, GitBranch,
-  Network, Users, Link2
+  Ship, AlertTriangle, Activity, LayoutDashboard, WifiOff, BarChart3, ChevronDown, User, ChevronRight, DollarSign, Wrench, MapPin, Radio, List, Globe, Navigation, EyeOff, ShieldAlert, Shield, Anchor, Brain, Menu, FileText, TrendingUp, Calculator, Zap, Cpu, Leaf, Waves, Fuel, Layers, RotateCcw, GitBranch, Network, Users, Link2
 } from "lucide-react";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
 import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
@@ -23,13 +25,14 @@ import { toAlpha } from "@szl-holdings/shared-ui/utils";
 import { AuthProvider, useAuth as useVesselsRoleAuth, roleLabels, type UserRole } from "@/contexts/auth-context";
 import { useAuth } from "@szl-holdings/replit-auth-web";
 import { identifyAnalyticsUser, resetAnalyticsUser, setUser as setSentryUser, clearUser as clearSentryUser } from "@szl-holdings/observability/react";
-import { PrivateAppGuard, useRealtimeChannel, RealtimeStatusIndicator, OnboardingWizard, GettingStartedChecklist, useOnboardingState, type OnboardingConfig, SyncStatusBadge, useWebSyncStatus, useUserPreferences } from "@szl-holdings/shared-ui";
+import { PrivateAppGuard } from "@szl-holdings/shared-ui/PrivateAppGuard";
+import { CookieBanner } from "@szl-holdings/shared-ui/cookie-banner";
 import { useOnboardingAnalytics } from "@szl-holdings/shared-ui/onboarding";
 import { IndexedDBAdapter, CommandQueue, ConflictResolver } from "@szl-holdings/offline-engine";
 import { CommandPalette, useCommandPalette, getEcosystemSwitchCommands, createBaselineWebActions, type CommandItem } from "@szl-holdings/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@szl-holdings/shared-ui/keyboard-shortcuts";
-import { DemoModeProvider, SandboxModeProvider, SandboxModeBanner, CookieBanner } from "@szl-holdings/shared-ui";
-import { PackBanner } from "@szl-holdings/shared-ui";
+import { DemoModeProvider, SandboxModeProvider, SandboxModeBanner } from "@szl-holdings/shared-ui";
+import { PackBanner } from "@szl-holdings/shared-ui/pack-banner";
 import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";
 import { SidebarNav, type SidebarNavSection } from "@szl-holdings/shared-ui/design-system";
 import { DashboardShell as SharedDashboardShell } from "@szl-holdings/shared-ui/design-system";

@@ -6,7 +6,7 @@ import {
   Target, Percent, Calculator, Scale
 } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
-import { MicroFeedbackWidget } from "@szl-holdings/shared-ui";
+import { MicroFeedbackWidget } from "@szl-holdings/shared-ui/micro-feedback-widget";
 
 type Approach = "sales_comparison" | "income" | "cost" | "dcf";
 

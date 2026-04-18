@@ -1,11 +1,10 @@
+import { PolicyResultBanner } from "@szl-holdings/shared-ui/policy-result";
 import { useState } from "react";
 import {
-  Shield, CheckCircle, X, Clock, AlertTriangle,
-  ChevronRight, User, Building2, FileText, MessageSquare,
-  ArrowUpRight, Download
+  Shield, CheckCircle, X, Clock, AlertTriangle, ChevronRight, User, Building2, FileText, MessageSquare, ArrowUpRight, Download
 } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
-import { EmptyState, PolicyResultBanner } from "@szl-holdings/shared-ui";
+import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
 import { propertyTwins, type PropertyApproval } from "@/data/property-twin";
 
 const ACCENT = "#40856a";
