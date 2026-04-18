@@ -12,7 +12,7 @@ These capabilities are live, data-seeded, and suitable for prospect, partner, an
 ### Lyte (Business Observability)
 - Command Inbox with pending approval items
 - PRISM framework — all five dimensions (Pulse, Risk, Intelligence, Signals, Motion)
-- Signal lifecycle: signal → context → recommendation → approval → execution
+- Signal lifecycle: signal → context → recommendation → simulation → policy → execution
 - Approval gateway with human-in-the-loop enforcement
 - Decision Ledger / audit trail with actor attribution
 - Readiness module with SLA tracking

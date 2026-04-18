@@ -175,7 +175,7 @@ Or use the Admin Seeder at `/admin/seeder` (requires admin role).
 
 **Talking points:**
 - From signal to assigned action — no manual triage
-- Full lineage: signal → evidence → decision → approval → action
+- Full lineage: signal → context → recommendation → simulation → policy → execution → proof → outcome → learning
 - Owner accountability built in
 
 ---

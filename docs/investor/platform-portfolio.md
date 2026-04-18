@@ -6,7 +6,7 @@
 
 ## Portfolio Overview
 
-SZL Holdings operates a governed decision operating system with **three command surfaces** (Lyte, CORTEX, Command Portal), one execution fabric (Alloy), and **six domain packs** (Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM) — all sharing one governance infrastructure, one design system, and one data layer. This is not a portfolio of unrelated products — it is a compounding system where each domain pack strengthens the architectural investment shared by all. Six platform primitives (Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine, Event Fabric) run across every surface.
+SZL Holdings operates a governed decision infrastructure with **three command surfaces** (Lyte, CORTEX, Command Portal), one execution fabric (Alloy), and **six domain packs** (Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM) — all sharing one governance infrastructure, one design system, and one data layer. This is not a portfolio of unrelated products — it is a compounding system where each domain pack strengthens the architectural investment shared by all. Six platform primitives (Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine, Event Fabric) run across every surface.
 
 ![SZL Holdings ecosystem map — how command surfaces, execution fabric, domain packs, and external signal sources interconnect](../../assets/readme/architecture/ecosystem-map.svg)
 
@@ -16,7 +16,7 @@ SZL Holdings operates a governed decision operating system with **three command 
 
 ![Unified Command portal — cross-domain ecosystem hub aggregating signals from every domain pack](../../assets/readme/products/command-portal.jpg)
 
-**Category:** Governed Decision Operating System  
+**Category:** Governed Decision Infrastructure  
 **Layer:** Observe / Decide / Act  
 **Readiness:** Functional Alpha  
 
@@ -39,7 +39,7 @@ The flagship command surface and commercial operating wedge. Lyte makes every op
 - Role-aware dashboards (exec, ops, compliance, maintenance)
 - Alloy integration: every Lyte signal can become an Alloy workflow
 
-**Strategic position:** Operating wedge. The primary commercial entry point. Establishes the Governed Decision Operating System category.
+**Strategic position:** Operating wedge. The primary commercial entry point. Establishes the Governed Decision Infrastructure category.
 
 ---
 

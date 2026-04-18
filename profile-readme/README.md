@@ -2,7 +2,7 @@
 
 **Founder and CEO — SZL Holdings**
 
-Building governed operational intelligence software. Systems where AI-assisted decisions require human accountability, and where observability connects to action — not just visualization.
+Building governed decision infrastructure software. Systems where AI-assisted decisions require human accountability, and where observability connects to action — not just visualization.
 
 ---
 

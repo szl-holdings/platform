@@ -22,7 +22,7 @@ A dashboard tells you something is broken. A command layer tells you who owns it
 
 That gap is what Lyte + Alloy is built to close.
 
-Signal → interpretation → recommendation → approval → action → audit.
+Signal → context → recommendation → simulation → policy → execution → proof → outcome → learning.
 
 Business observability with execution accountability.
 

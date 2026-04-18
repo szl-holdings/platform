@@ -142,7 +142,7 @@ Adjust emphasis by audience. The script covers all angles.
 > "Once approved, the action is created and routed. Here it is — assigned to Fleet Ops, with the source signal, the decision rationale, the approval reference, and the status."
 
 **Point to the lineage:**
-> "Signal → evidence → recommendation → approval → action. You can traverse the entire chain from this record. No broken links."
+> "Signal → context → recommendation → simulation → policy → execution → proof → outcome → learning. You can traverse the entire chain from this record. No broken links."
 
 **If VP Operations in the room:**
 > "From the operator's perspective: they get an action in their queue with full context attached. They don't need to go hunting for why this task exists. The context travels with the work."

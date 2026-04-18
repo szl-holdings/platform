@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <em>Governed operational intelligence for enterprises that cannot afford silent failures, invisible risk, or unaccountable AI.</em>
+  <em>Governed decision infrastructure for enterprises that cannot afford silent failures, invisible risk, or unaccountable AI.</em>
 </p>
 
 <p align="center">
@@ -35,7 +35,7 @@
 
 ## What We Build
 
-SZL Holdings builds the **governed operational intelligence layer** — the platform that connects what's observable to what's executable, under governance, with full attribution.
+SZL Holdings builds the **governed decision infrastructure layer** — the platform that connects what's observable to what's executable, under governance, with full attribution.
 
 **Lyte** is the command surface. **Alloy** is the execution fabric. **CORTEX** is the unified mobile command center. Domain intelligence packs extend the same system into cybersecurity, maritime, real estate, legal, and private advisory.
 

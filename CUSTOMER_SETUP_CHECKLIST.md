@@ -62,7 +62,7 @@
 - [ ] Review deployed workflow in Alloy (Factory Floor)
 - [ ] Verify workflow is connected to your signal source
 - [ ] Walk the Governed Decision Loop at least once:
-  - Signal received → context enriched → recommendation generated → simulation run → policy gate evaluated → approval → execution → Proof Chain entry created → Outcome Graph updated
+  - Signal received → context enriched → recommendation generated → simulation run → policy gate evaluated → execution → Proof Chain entry created → Outcome Graph updated → Learning
 - [ ] Review the Proof Chain entry for your first governed action
 
 ---

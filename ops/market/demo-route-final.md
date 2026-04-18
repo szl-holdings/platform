@@ -2,7 +2,7 @@
 
 ## Overview
 
-The canonical demo surfaces the governed execution loop: **Signal → Evaluation → Recommendation → Approval → Action → Proof**. Every step is observable, every decision has a receipt, every action is reversible with a full audit trail.
+The canonical demo surfaces the governed execution loop: **Signal → Context → Recommendation → Simulation → Policy → Execution → Proof → Outcome → Learning**. Every step is observable, every decision has a receipt, every action is reversible with a full audit trail.
 
 Two routes are defined: a 5-minute executive route and a 15-minute operator route. Both start in the same place — the Governed Decision Loop on the Strategy tab.
 
@@ -31,7 +31,7 @@ The Governed Decision Loop is the centerpiece of the demo. It walks through a ma
 | 5 | Outcome tab | 0:30 | SLA breach avoided, $2.1M protected — outcome logged and feedback loop closed |
 | Wrap | — | 0:30 | "Every decision is auditable, every action is reversible, every outcome is measured" |
 
-**Navigation path**: `/strategy` → (walk through 9-step panel: Signal → Context → Recommendation → Simulation → Policy Gate → Approval → Execution → Proof Chain → Outcome)
+**Navigation path**: `/strategy` → (walk through 9-step panel: Signal → Context → Recommendation → Simulation → Policy → Execution → Proof → Outcome → Learning)
 
 ---
 

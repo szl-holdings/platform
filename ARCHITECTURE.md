@@ -8,7 +8,7 @@
 
 ## Architectural Thesis
 
-SZL Holdings is a **pnpm monorepo** hosting the governed operational intelligence platform and its domain extensions. Every surface shares one API server, one PostgreSQL database, one design system, and one authentication model. Domain packs extend this shared governance core — they do not replace it.
+SZL Holdings is a **pnpm monorepo** hosting the governed decision infrastructure platform and its domain extensions. Every surface shares one API server, one PostgreSQL database, one design system, and one authentication model. Domain packs extend this shared governance core — they do not replace it.
 
 The platform hierarchy: SZL Holdings (platform) → Lyte (flagship command surface) → Alloy (execution fabric) → CORTEX (mobile command) → Domain packs.
 
@@ -21,7 +21,7 @@ The defining architectural commitment: **governed decision execution as a platfo
 ```
 ┌──────────────────────────────────────────────────────────────────┐
 │  PLATFORM                                                        │
-│  SZL Holdings — Governed Operational Intelligence                │
+│  SZL Holdings — Governed Decision Infrastructure                │
 │  The governed decision layer for consequential operations        │
 ├──────────────────────────────────────────────────────────────────┤
 │  COMMAND SURFACES                                                │
@@ -140,7 +140,7 @@ Raw Signal (domain-specific)
 [EXECUTE] — Human-confirmed action via Alloy
     │   Approval workflow routing
     │   Human-in-the-loop gate (required for consequential ops)
-    │   Immutable audit trail: signal → recommendation → approval → action
+    │   Immutable audit trail: signal → context → recommendation → simulation → policy → execution → proof → outcome → learning
     │
     ▼
 Confirmed Action + Full Audit Trail

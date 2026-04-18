@@ -111,7 +111,7 @@ The SZL Holdings platform is organized into four canonical layers. Every surface
 - It is the largest and most feature-complete operator surface (213 files, 172 routes)
 - It has absorbed the functionality of two previously separate operator surfaces (both merged)
 - It is backed by live SSE streams, signal timelines, and approval queues from `api-server`
-- It maps cleanly to the "governed decision loop": Signal → Context → Recommendation → Approval → Execution → Proof
+- It maps cleanly to the "governed decision loop": Signal → Context → Recommendation → Simulation → Policy → Execution → Proof → Outcome → Learning
 
 **What was merged into it:**
 - Operations workflow surface (signal timeline, PRISM). Redirect → `/command/`

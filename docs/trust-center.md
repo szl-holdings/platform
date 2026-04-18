@@ -58,7 +58,7 @@ Every significant action across the SZL platform generates an immutable audit ev
 - **Tamper-resistant** — Audit logs are append-only. Events cannot be edited or deleted by platform users.
 - **Searchable** — Audit records are queryable by actor, action type, affected entity, and time range.
 
-AI agent outputs are audit-logged alongside human actions. When an agent recommendation leads to a human-confirmed action, the chain is preserved: recommendation → review → approval → execution.
+AI agent outputs are audit-logged alongside human actions. When an agent recommendation leads to a human-confirmed action, the chain is preserved: signal → context → recommendation → simulation → policy → execution → proof → outcome → learning.
 
 ---
 

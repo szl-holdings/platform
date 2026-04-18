@@ -56,7 +56,7 @@ When a signal arrives — a risk indicator, an anomaly, a threshold breach — L
 4. Covenant Policy checks whether human approval is required and from whom.
 5. The operator reviews and decides — approve, reject, or override.
 6. The Workflow Engine executes the decision as a governed, durable process.
-7. The Proof Chain records the full trail: signal → recommendation → approval → execution → outcome.
+7. The Proof Chain records the full trail: signal → context → recommendation → simulation → policy → execution → proof → outcome → learning.
 8. The Outcome Graph tracks the result and feeds it back into agent calibration.
 
 Lyte is not a dashboard that shows what happened. It is a governed decision surface that connects what is observable to what is executable.

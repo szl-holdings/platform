@@ -55,7 +55,7 @@ The org profile README appears on `https://github.com/szl-holdings` when visitor
 ```markdown
 # SZL Holdings
 
-Governed operational intelligence software — built for operators who need signal to become action.
+Governed decision infrastructure software — built for operators who need signal to become action.
 
 **Products:** Lyte · Alloy · Aegis · Vessels · Terra · Carlota Jo
 
@@ -99,7 +99,7 @@ Transferring repos moves them from personal account to org. This changes all URL
 Go to: `https://github.com/organizations/szl-holdings/settings`
 
 - [ ] **Org name:** SZL Holdings
-- [ ] **Bio/Description:** "Governed operational intelligence software"
+- [ ] **Bio/Description:** "Governed decision infrastructure software"
 - [ ] **URL:** `https://szlholdings.com`
 - [ ] **Location:** New York, NY
 - [ ] **Member privileges:** Review defaults

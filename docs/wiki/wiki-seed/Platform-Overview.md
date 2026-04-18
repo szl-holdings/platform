@@ -1,6 +1,6 @@
 # Platform Overview
 
-SZL Holdings builds governed operational intelligence software. The platform connects observability to action through a governed signal pipeline — surfacing risk, routing decisions, enforcing approval gates, and generating immutable audit trails.
+SZL Holdings builds governed decision infrastructure software. The platform connects observability to action through a governed signal pipeline — surfacing risk, routing decisions, enforcing approval gates, and generating immutable audit trails.
 
 ---
 

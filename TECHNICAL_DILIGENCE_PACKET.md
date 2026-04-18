@@ -10,7 +10,7 @@
 
 ## Executive Summary
 
-SZL Holdings has built a production-grade, enterprise-ready governed operational intelligence platform. As of April 2026:
+SZL Holdings has built a production-grade, enterprise-ready governed decision infrastructure platform. As of April 2026:
 
 - **Full-stack TypeScript monorepo** — 40+ packages, single API server, unified design system
 - **2,331 API endpoints** across 172 route files with deny-by-default global auth enforcement
@@ -29,7 +29,7 @@ SZL Holdings has built a production-grade, enterprise-ready governed operational
 The platform is organized around one principle: **every consequential decision follows the same governed loop, regardless of domain**.
 
 ```
-Signal → Context → Recommendation → Simulation → Policy → Approval → Execution → Proof → Outcome
+Signal → Context → Recommendation → Simulation → Policy → Execution → Proof → Outcome → Learning
 ```
 
 This loop is not replicated per domain — it is implemented once in shared infrastructure and inherited by every domain pack.
@@ -40,7 +40,7 @@ This loop is not replicated per domain — it is implemented once in shared infr
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
-│  PLATFORM: SZL Holdings — Governed Decision Operating System     │
+│  PLATFORM: SZL Holdings — Governed Decision Infrastructure     │
 ├──────────────────────────────────────────────────────────────────┤
 │  COMMAND SURFACES                                                │
 │  Lyte (flagship)    CORTEX (mobile)    Command Portal (hub)      │
@@ -544,4 +544,4 @@ Three new P1 gaps were discovered in the Phase 2–3 architecture and tenancy ha
 
 ---
 
-*Last verified against source code: 2026-04-17. Full 13-phase audit complete (Phases 0–13). All P0 security gaps resolved. 3 new P1 gaps (AF-001, AF-003, AF-007) and multiple P2 gaps tracked in AUDIT_FINDINGS_REGISTER.md. Phase 10–11 Category Leadership & Diligence review completed. Seven stakeholder lens audit conducted — findings documented in KNOWN-GAPS.md §Phase 10–11 audit note. TD-004 (TRUST_CENTER_INDEX.md model transparency) resolved. Category updated to Governed Decision Operating System. INVESTOR_NARRATIVE.md v3.0, MOAT_MAP.md v2.0, CATEGORY_POSITIONING.md v2.1 all current.*
+*Last verified against source code: 2026-04-17. Full 13-phase audit complete (Phases 0–13). All P0 security gaps resolved. 3 new P1 gaps (AF-001, AF-003, AF-007) and multiple P2 gaps tracked in AUDIT_FINDINGS_REGISTER.md. Phase 10–11 Category Leadership & Diligence review completed. Seven stakeholder lens audit conducted — findings documented in KNOWN-GAPS.md §Phase 10–11 audit note. TD-004 (TRUST_CENTER_INDEX.md model transparency) resolved. Category updated to Governed Decision Infrastructure. INVESTOR_NARRATIVE.md v3.0, MOAT_MAP.md v2.0, CATEGORY_POSITIONING.md v2.1 all current.*

@@ -193,7 +193,7 @@ Every step is reproducible using the seeded demo dataset. Every screen exists in
 
 **URL**: `/command/alloy/intelligence` → Audit Trail tab
 
-**Narration**: *"Every step in this chain is permanently recorded in an immutable audit trail. Signal → retrieval → decision → approval → execution. This audit trail is designed for compliance review, LP reporting, and enterprise security diligence."*
+**Narration**: *"Every step in this chain is permanently recorded in an immutable audit trail. Signal → context → recommendation → simulation → policy → execution → proof → outcome. This audit trail is designed for compliance review, LP reporting, and enterprise security diligence."*
 
 **Show**:
 1. Open Audit Trail
@@ -209,7 +209,7 @@ Every step is reproducible using the seeded demo dataset. Every screen exists in
 **Key messages**:
 - Immutable — cannot be edited or deleted by any user, including admins
 - Every AI output is attributed (model version, confidence, latency)
-- The full chain: `recommendation → review → approval → execution → outcome`
+- The full chain: `recommendation → simulation → policy → execution → proof → outcome`
 - Designed for auditors, compliance officers, and LP due diligence
 
 ---

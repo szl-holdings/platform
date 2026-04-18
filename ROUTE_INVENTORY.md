@@ -24,7 +24,7 @@ Last updated: 2026-04-16
 
 | Route | Title | Flag | Notes |
 |-------|-------|------|-------|
-| `/` | SZL Holdings — Governed Operational Intelligence | PUBLIC | Main landing |
+| `/` | SZL Holdings — Governed Decision Infrastructure | PUBLIC | Main landing |
 | `/platform` | Platform | PUBLIC | Platform overview |
 | `/lyte` | Lyte — Business Observability | PUBLIC | Product page |
 | `/alloy-fabric` | Alloy — Execution Fabric | PUBLIC | Product page |

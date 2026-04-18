@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-SZL Holdings is a technology holding company building a unified governed operational intelligence platform. The technical architecture reflects a deliberate, compounding design: one execution fabric (Alloy), one design system, one authentication model, and one data layer — shared across five domain-specific platforms.
+SZL Holdings is a technology holding company building a unified governed decision infrastructure platform. The technical architecture reflects a deliberate, compounding design: one execution fabric (Alloy), one design system, one authentication model, and one data layer — shared across five domain-specific platforms.
 
 The platform is production-grade in architecture. It is pre-revenue by choice (billing infrastructure is built; activation is awaiting commercial milestone). The Series A proceeds will fund: live data feed integration at enterprise tier, team growth (3–5 engineers), and the first revenue-generating customer deployments.
 

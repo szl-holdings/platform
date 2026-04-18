@@ -138,7 +138,7 @@ Domain packs are vertical intelligence extensions. They share the Alloy executio
 | Signal-to-action lifecycle | "signal to confirmed action" | "automated workflow" |
 | Accountability record | "audit trail" or "proof chain" | "logs" |
 | Human approval requirements | "human-in-the-loop gates" | "manual review step" |
-| Platform overall | "governed operational intelligence" | "AI platform" or "dashboard suite" |
+| Platform overall | "governed decision infrastructure" | "AI platform" or "dashboard suite" |
 | Domain packs | "domain packs" or "vertical intelligence" | "modules" or "plugins" |
 | Alloy | "execution fabric" | "workflow tool" |
 | Lyte | "command surface" | "main dashboard" |
@@ -211,7 +211,7 @@ Never: "AI decided," "automated by AI," "AI executed," or similar phrasing that 
 When presenting to investors, the messaging sequence is:
 
 1. **Category:** Business Observability — the missing layer between data and accountable action.
-2. **Thesis:** Governed operational intelligence — one backbone, N verticals.
+2. **Thesis:** Governed decision infrastructure — one backbone, N verticals.
 3. **Architecture:** Observe (domain packs) → Alloy (govern) → Confirm (HITL) → Record (proof chain).
 4. **Evidence:** Real data pipelines, real approval trails, real audit logs — not a prototype.
 5. **Moat:** Shared event model, entity graph, agent governance framework — these cannot be replicated quickly.

@@ -2,7 +2,7 @@
 
 *Version: 1.0 | Last updated: April 2026*
 
-This document describes the four polished demo narratives for SZL Holdings prospect, partner, and investor demonstrations. Each narrative walks through the complete **Signal → Context → Recommendation → Approval → Execution → Outcome → Executive Summary** flow.
+This document describes the four polished demo narratives for SZL Holdings prospect, partner, and investor demonstrations. Each narrative walks through the complete **Signal → Context → Recommendation → Simulation → Policy → Execution → Proof → Outcome → Learning** flow.
 
 ---
 

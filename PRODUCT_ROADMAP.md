@@ -147,7 +147,7 @@ First 3–6 design partners, one per domain: maritime (Vessels), security (Aegis
 The absence of automated E2E testing (KG010) is the highest-priority quality gap for long-term platform health.
 
 **M3-A: Critical path E2E suite**
-- Test the governed decision loop end-to-end: signal → recommendation → approval → execution → proof recording
+- Test the governed decision loop end-to-end: signal → recommendation → simulation → policy → execution → proof recording
 - Cover: auth flow, Lyte action queue, Alloy approval gate, CORTEX mobile approval
 - Framework: Playwright (web) + Detox (mobile)
 

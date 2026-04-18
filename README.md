@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/ci.yml) [![CodeQL](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/codeql.yml/badge.svg)](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/codeql.yml) [![Security](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/security.yml/badge.svg)](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/security.yml) [![License](https://img.shields.io/badge/license-UNLICENSED-lightgrey)](./LICENSE) [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)](https://www.typescriptlang.org/) [![pnpm](https://img.shields.io/badge/pnpm-monorepo-orange)](https://pnpm.io/) [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791)](https://www.postgresql.org/)
 
-**Governed operational intelligence — connecting what is observable to what is executable, with full attribution.**
+**Governed decision infrastructure — connecting what is observable to what is executable, with full attribution.**
 
 [Architecture](./ARCHITECTURE.md) · [Platform Primitives](./PLATFORM_PRIMITIVES.md) · [Trust Center](./docs/trust/trust-center.md) · [Security](./SECURITY.md) · [Investor Docs](./docs/investor/platform-thesis.md)
 
@@ -108,7 +108,7 @@ The six platform primitives define what is structurally different from dashboard
 ```
 +-----------------------------------------------------------------------+
 |  SZL HOLDINGS                                                         |
-|  Governed operational intelligence layer                              |
+|  Governed decision infrastructure layer                              |
 +-----------------------------------------------------------------------+
 |  Lyte                  — Flagship command surface (PRISM framework)   |
 |  Alloy                 — Execution fabric (workflows, approvals, audit)|

@@ -78,7 +78,7 @@ Raw Signal (domain-specific)
 [EXECUTE] — Human-confirmed action via Alloy
     │   Approval workflow routing
     │   Human-in-the-loop gate (required for consequential ops)
-    │   Immutable audit trail: recommendation → approval → action
+    │   Immutable audit trail: signal → context → recommendation → simulation → policy → execution → proof → outcome → learning
     │
     ▼
 Confirmed Action + Full Audit Trail

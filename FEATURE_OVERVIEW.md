@@ -150,7 +150,7 @@ This document is the complete feature map across all SZL Holdings platform surfa
 ### Exception-Based Workflow
 - Exception queue: ETA deviations, sanctions flags, dark vessel alerts, port congestion
 - Exception severity classification with SLA-based response time
-- Governed exception response: recommendation → approval → execution
+- Governed exception response: recommendation → simulation → policy → execution
 - Exception resolution tracking and outcome recording
 
 ### AIS Intelligence

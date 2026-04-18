@@ -28,7 +28,7 @@ These terms are locked. Use exactly as specified. Do not improvise equivalents.
 
 ## Tagline
 
-**Primary:** Governed Operational Intelligence  
+**Primary:** Governed Decision Infrastructure  
 **Brand promise:** Enterprise operators get clarity on what is happening, what to do next, who is responsible, and whether the action is safe — all in one governed decision surface.
 
 Do not use "business observability" as the primary company positioning. It is accurate for Lyte specifically but undersells the platform company story.
@@ -132,7 +132,7 @@ Lead with what is enforced architecturally, not what is aspirational.
 ### Homepage
 
 The homepage is for the enterprise buyer, security reviewer, investor, and design partner simultaneously. It must communicate:
-1. **Company** — SZL Holdings is a platform company building governed operational intelligence
+1. **Company** — SZL Holdings is a platform company building governed decision infrastructure
 2. **Platform** — Alloy is the intelligence backbone; Lyte is the command surface
 3. **Products** — Domain packs extend the same governance layer to specific domains
 

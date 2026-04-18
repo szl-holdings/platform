@@ -36,7 +36,7 @@ SZL Holdings (Corporate)
 |-----------|--------|
 | **Audience** | Series A investors · Enterprise evaluators · Strategic partners · Press |
 | **Primary job** | Convert informed evaluation into a conversation |
-| **Story it tells** | "SZL Holdings is the company that built the governed operational intelligence layer. Here is the full platform, the trust posture, the team, and the investment case." |
+| **Story it tells** | "SZL Holdings is the company that built the governed decision infrastructure layer. Here is the full platform, the trust posture, the team, and the investment case." |
 | **Tone** | Authoritative · Sparse · Evidence-forward |
 | **Key sections** | Product hierarchy · Trust center · Investor docs · Developer portal · Founder profile (`/founder`) |
 | **Call to action** | Design partner inquiry · Investment conversation · Enterprise evaluation |

@@ -19,7 +19,7 @@ Use this checklist when performing GitHub operations manually through the web in
 
 - [ ] **Description:** Set to:
   ```
-  Governed operational intelligence software — Lyte · Alloy · Aegis · Vessels · Terra
+  Governed decision infrastructure software — Lyte · Alloy · Aegis · Vessels · Terra
   ```
 - [ ] **Website:** Set to: `https://szlholdings.com`
 - [ ] **Topics:** Add all of the following (see `ops/github/recommended-topics.md` for rationale):

@@ -109,7 +109,7 @@ Ask in this order:
 [2–3 sentences on the pilot scope — which domain, which workflow, how it was instrumented.]
 
 ## The Operating Loop in Action
-[1–2 paragraphs walking through signal → evaluation → decision → approval → action → proof in their context.]
+[1–2 paragraphs walking through signal → context → recommendation → simulation → policy → execution → proof → outcome → learning in their context.]
 
 ## The Results
 | Metric | Before | After | Change |

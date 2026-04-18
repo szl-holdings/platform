@@ -69,7 +69,7 @@ Every public resource carries:
 - A **provenance object** (`source`, `sourceType`, `confidence`, `ingestedAt`).
 - An **audit pointer** (`auditIds: string[]`) listing the audit rows produced by mutations to that resource.
 
-Recommendation resources additionally carry a **receipt** (`scoringFactors[]`, `evidence[]`, `alternatives[]`). Action resources carry their **decision pointer** (`decisionId`) so the chain `signal → decision → approval → action → audit` is reconstructible from the API alone.
+Recommendation resources additionally carry a **receipt** (`scoringFactors[]`, `evidence[]`, `alternatives[]`). Action resources carry their **decision pointer** (`decisionId`) so the chain `signal → context → recommendation → simulation → policy → execution → proof → outcome` is reconstructible from the API alone.
 
 ## 6. Idempotency & retries
 

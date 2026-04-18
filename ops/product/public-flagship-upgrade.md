@@ -12,7 +12,7 @@
 
 The previous hero ("Business observability with explainable execution") over-indexed on Lyte and failed to communicate the platform company story. The new hero:
 
-- Positions SZL Holdings at the company level with the correct tagline: "Governed Operational Intelligence"
+- Positions SZL Holdings at the company level with the correct tagline: "Governed Decision Infrastructure"
 - Communicates the platform architecture (Alloy → Lyte → Domain Packs) as a visual inline hierarchy
 - Uses the tagline from BRAND_GUIDELINES.md as the primary position signal
 - Hero headline: "The governed decision layer for enterprise operations."
@@ -76,7 +76,7 @@ New: three clear paths at the bottom — Request a Demo, Design Partner Inquiry,
 ### 9. SEO / metadata
 
 Updated:
-- Title: "SZL Holdings — Governed Operational Intelligence"
+- Title: "SZL Holdings — Governed Decision Infrastructure"
 - Description aligned with SEO_MAP.md
 - OG title, description, image path updated
 - Twitter card updated

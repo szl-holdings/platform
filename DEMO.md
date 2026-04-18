@@ -77,7 +77,7 @@ The admin account has `platform_owner` role with full access to all domain packs
 ### 3. Platform Overview (2 minutes)
 Walk through the SZL Holdings dashboard at `/szl-holdings/`:
 - Portfolio metrics and active domain packs
-- The governed operational intelligence narrative
+- The governed decision infrastructure narrative
 - Leadership and milestone data
 
 ### 4. Domain Packs (5 minutes)
@@ -92,7 +92,7 @@ Walk through each domain pack to demonstrate the breadth of the platform:
 ### 5. Canonical Decision Loop (2 minutes)
 Demonstrate the governed decision loop that powers all domain packs:
 ```
-Signal → Context → Recommendation → Simulation → Policy → Approval → Execution → Proof → Outcome
+Signal → Context → Recommendation → Simulation → Policy → Execution → Proof → Outcome → Learning
 ```
 Show how signals in Vessels (fleet exceptions) flow through the same governance framework as signals in Aegis (threat intelligence).
 

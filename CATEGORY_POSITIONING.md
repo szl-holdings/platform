@@ -6,7 +6,7 @@
 
 ## The Category SZL Creates
 
-**Governed Decision Operating System.**
+**Governed Decision Infrastructure.**
 
 A new class of enterprise software — the operating layer that sits between observation and execution in every consequential operational decision. It enforces governance, attribution, and outcome tracking structurally, at the platform layer, so that every decision has a verifiable signal source, cross-domain context, a simulation result, a policy gate, an immutable audit trail, and a recorded outcome.
 
@@ -20,7 +20,7 @@ The term *operating system* is precise: SZL Holdings provides the base layer —
 
 ## What This Platform Is
 
-SZL Holdings builds the governed decision operating system. It ingests signals from across an organization's operational surface — security events, fleet telemetry, property data, legal filings, financial metrics — and routes them through a structured decision pipeline:
+SZL Holdings builds the governed decision infrastructure. It ingests signals from across an organization's operational surface — security events, fleet telemetry, property data, legal filings, financial metrics — and routes them through a structured decision pipeline:
 
 ```
 Signal → Context → Recommendation → Simulation → Policy → Execution → Proof → Outcome → Learning
@@ -167,7 +167,7 @@ The result is automation without accountability — processes that execute witho
 
 ## One-Sentence Positioning
 
-> SZL Holdings builds the governed decision operating system — the platform layer between signal detection and action execution that enforces governance, attribution, and outcome tracking on every consequential decision.
+> SZL Holdings builds the governed decision infrastructure — the platform layer between signal detection and action execution that enforces governance, attribution, and outcome tracking on every consequential decision.
 
 ---
 

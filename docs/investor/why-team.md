@@ -21,7 +21,7 @@ This is not a team of specialists operating in silos. It is a single founder wit
 
 **Why this matters:**
 
-**Architectural coherence.** The SZL platform has a unity of purpose that multi-person teams often lack. Every product surface reflects the same architectural thesis, the same design principles, and the same conviction about what a governed decision operating system requires. This is not a portfolio of features assembled by committee.
+**Architectural coherence.** The SZL platform has a unity of purpose that multi-person teams often lack. Every product surface reflects the same architectural thesis, the same design principles, and the same conviction about what a governed decision infrastructure requires. This is not a portfolio of features assembled by committee.
 
 **Speed without debt.** The codebase reflects deliberate architectural investment — shared libraries, typed APIs, monorepo discipline — rather than the accumulation of shortcuts taken under deadline pressure. This is a speed advantage that compounds.
 

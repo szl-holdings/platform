@@ -201,8 +201,8 @@ The two primitives form a trust sandwich:
 5. Covenant Policy checks `vessel_sanctions_response` → result: `ESCALATE`
 6. Compliance officer receives approval in CORTEX mobile
 7. Compliance officer approves → action executes
-8. Proof Chain records: signal → simulation → recommendation → approval → execution
-9. Outcome tracked: was the sanctions concern valid?
+8. Proof Chain records the full trail with actor attribution, timestamps, and evidence references
+9. Outcome tracked: was the sanctions concern valid? Outcome Graph records the result and feeds back into agent calibration
 
 ---
 

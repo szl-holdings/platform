@@ -18,8 +18,8 @@
 | **Type** | Technology holding company |
 | **Stage** | Pre-revenue — Functional Alpha across all platforms |
 | **Founder** | Stephen Lutar |
-| **Model** | Governed decision operating system — six primitives shared across domain packs |
-| **Primary Surface** | Lyte command surface + Alloy execution fabric (governed decision operating system) |
+| **Model** | Governed decision infrastructure — six primitives shared across domain packs |
+| **Primary Surface** | Lyte command surface + Alloy execution fabric (governed decision infrastructure) |
 | **Command Surfaces** | Lyte (web), CORTEX (unified iOS/Android mobile across all domains), Command Portal (cross-domain ecosystem hub) |
 | **Domain Packs** | Security (Aegis), Maritime (Vessels), Real Estate (Terra), Legal (PRISM Counsel), Advisory (Carlota Jo), Cloud (IMPERIUM) |
 | **Revenue Model** | SaaS subscriptions, usage-based billing, enterprise contracts |
@@ -31,7 +31,7 @@
 
 ![SZL Holdings platform map — command surfaces, execution fabric, domain packs, and shared governance primitives](../../assets/readme/architecture/platform-map.svg)
 
-SZL Holdings is building the **governed decision operating system** — the platform layer that connects what is observable to what is executable, under governance, with full attribution. This is a structurally distinct category from dashboards, AI copilots, and workflow tools.
+SZL Holdings is building the **governed decision infrastructure** — the platform layer that connects what is observable to what is executable, under governance, with full attribution. This is a structurally distinct category from dashboards, AI copilots, and workflow tools.
 
 The architecture is unique: six platform primitives (Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine, Event Fabric) shared by every product surface. Domain packs (Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM) add domain-specific intelligence on shared governance infrastructure. This is not a portfolio play — it is a compounding system. Every new domain pack adds domain-specific signal sources; the governance infrastructure does not need to be rebuilt.
 
@@ -41,7 +41,7 @@ The architecture is unique: six platform primitives (Outcome Graph, Proof Chain,
 
 - AI quality has crossed the inference threshold — LLMs can now reason across complex operational data reliably enough to surface meaningful recommendations, not just correlate fields
 - Enterprise tolerance for AI black boxes is declining — regulatory pressure is pushing demand toward explainable, auditable, human-in-the-loop AI systems. Covenant Policy and Proof Chain address this structurally.
-- The governed decision operating system category is emerging but has no dominant platform — the architectural moment to establish category leadership is now
+- The governed decision infrastructure category is emerging but has no dominant platform — the architectural moment to establish category leadership is now
 
 ---
 
@@ -106,7 +106,7 @@ The documentation in this repository presents the platform honestly. Platform re
 ## Recommended Evaluation Path
 
 1. **Review `README.md`** — Platform thesis, six primitives, governed decision loop
-2. **Review `CATEGORY_POSITIONING.md`** — What "governed decision operating system" means and why it matters
+2. **Review `CATEGORY_POSITIONING.md`** — What "governed decision infrastructure" means and why it matters
 3. **Review `PLATFORM_PRIMITIVES.md`** — The six architectural abstractions that define the platform
 4. **Review `/docs/trust/`** — Security posture, AI governance, deployment model
 5. **Review `/docs/investor/product-readiness.md`** — Honest readiness labels per product

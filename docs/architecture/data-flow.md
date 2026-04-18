@@ -150,7 +150,7 @@ Action Execution
     ▼
 Outcome Recording
     │   Result logged with full attribution
-    │   Recommendation chain preserved: signal → finding → recommendation → approval → action → outcome
+    │   Recommendation chain preserved: signal → context → recommendation → simulation → policy → execution → proof → outcome → learning
 ```
 
 ---

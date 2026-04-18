@@ -102,7 +102,7 @@ BASELINE  →  SIGNALS  →  DECISIONS  →  ACTIONS  →  DELTA  →  LESSONS
 
 1. Switch from propose-only to approval-required mode
 2. Confirm approval chain configuration is correct for the partner's org structure
-3. Run one full operating loop cycle: signal → recommendation → approval → action → receipt
+3. Run one full operating loop cycle: signal → context → recommendation → simulation → policy → execution → proof → outcome → learning
 4. Record the approval chain traversal time — compare to baseline
 5. Track action completion rate and time-to-close
 

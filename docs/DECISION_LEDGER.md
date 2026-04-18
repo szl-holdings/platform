@@ -26,9 +26,9 @@ Every entry in the Decision Ledger is a complete provenance record — a full ch
 ## The Provenance Chain
 
 ```
-SIGNAL → INFERENCE → POLICY → ACTION → APPROVAL → EXECUTION → RESULT
-   ↑                                                               ↓
-   └──────────────── FOLLOW-UP SIGNALS ───────────────────────────┘
+SIGNAL → CONTEXT → RECOMMENDATION → SIMULATION → POLICY → EXECUTION → PROOF → OUTCOME → LEARNING
+   ↑                                                                                          ↓
+   └─────────────────────────────── FOLLOW-UP SIGNALS ──────────────────────────────────────┘
 ```
 
 Each step in the chain is a discrete, versioned, immutable record. The chain is forward-linked (each step references the IDs of preceding steps) and cross-referenced (related chains can be joined via shared signal IDs or entity IDs).
@@ -247,7 +247,7 @@ Every ledger entry is written once and never modified. If a correction is needed
 
 ### Completeness Requirement
 
-A provenance chain is considered **complete** if it contains entries for all seven steps: signal → inference → policy → action → approval → execution → result.
+A provenance chain is considered **complete** if it contains entries for all nine steps: signal → context → recommendation → simulation → policy → execution → proof → outcome → learning.
 
 An **incomplete chain** (missing one or more steps) is flagged for audit review. Common causes:
 - Action rejected at approval step (chain ends at Step 5 with `status: rejected`)

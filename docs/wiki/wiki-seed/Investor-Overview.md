@@ -1,6 +1,6 @@
 # Investor Overview
 
-SZL Holdings is building the governed operational intelligence layer for enterprises where AI-assisted decisions require human accountability. The platform is at functional alpha stage across all major products.
+SZL Holdings is building the governed decision infrastructure layer for enterprises where AI-assisted decisions require human accountability. The platform is at functional alpha stage across all major products.
 
 ---
 

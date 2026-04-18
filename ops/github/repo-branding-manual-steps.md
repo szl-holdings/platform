@@ -12,7 +12,7 @@ The About section (visible on the repository homepage) controls the description,
 2. Click the **gear icon (⚙)** next to "About" (top-right of the repo summary panel)
 3. Set **Description** to:
    ```
-   Governed operational intelligence software — Lyte · Alloy · Aegis · Vessels · Terra
+   Governed decision infrastructure software — Lyte · Alloy · Aegis · Vessels · Terra
    ```
 4. Set **Website** to: `https://szlholdings.com`
 5. Leave "Include in the home page" unchecked (this is for special repos like profile READMEs)
@@ -109,7 +109,7 @@ The wiki is part of the platform's public documentation layer. If not yet enable
 
 After applying all branding steps, the repository should present as:
 
-- **What it is:** Governed operational intelligence platform — not a boilerplate, demo, or open-source project
+- **What it is:** Governed decision infrastructure platform — not a boilerplate, demo, or open-source project
 - **Who built it:** Stephen Lutar, SZL Holdings — proprietary, founder-led
 - **Who it's for:** Enterprise buyers, investors, technical reviewers
 - **What to do next:** README directs clearly to the right starting point for each audience

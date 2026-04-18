@@ -7,7 +7,7 @@ Audience: Investors, buyers, enterprise prospects conducting technical due dilig
 
 ## 1. Company & Platform Overview
 
-**SZL Holdings** builds Lyte and Alloy — a governed operational intelligence platform for enterprise operations. Lyte surfaces revenue stalls, approval gaps, and ownership drift. Alloy routes the governed action through structured workflows with full audit attribution.
+**SZL Holdings** builds Lyte and Alloy — a governed decision infrastructure platform for enterprise operations. Lyte surfaces revenue stalls, approval gaps, and ownership drift. Alloy routes the governed action through structured workflows with full audit attribution.
 
 **Deployment model**: SaaS, cloud-hosted on Replit infrastructure (US-East). On-premise deployment roadmap: Q4 2026.
 

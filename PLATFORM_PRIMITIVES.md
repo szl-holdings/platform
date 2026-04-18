@@ -355,19 +355,19 @@ All six primitives work together in a single governed decision loop:
 ```
 1. Signal arrives (via Event Fabric / Prism Bus)
        │
-2. Workflow Engine starts a decision process
+2. Context assembled — cross-domain enrichment (Outcome Graph)
        │
-3. Monte Carlo Engine simulates possible outcomes
+3. Agent generates recommendation (recorded in Outcome Graph)
        │
-4. Agent generates recommendation (recorded in Outcome Graph)
+4. Monte Carlo Engine simulates possible outcomes
        │
-5. Covenant Policy checks permission and approval requirements
+5. Covenant Policy evaluates permission and enforcement requirements
        │
-6. If approval required → Human reviews in Lyte/CORTEX
+6. Action executes — Workflow Engine routes execution
        │
-7. Action executes → Proof Chain records the full trail
+7. Proof Chain records the full trail
        │
-8. Outcome is observed → Outcome Graph records the result
+8. Outcome is observed — Outcome Graph records the result
        │
 9. Learning job calibrates future simulations and confidence
        │

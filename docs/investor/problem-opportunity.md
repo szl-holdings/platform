@@ -69,13 +69,13 @@ This is not a data problem. Organizations have more data than they can use. It i
 
 ## The Opportunity
 
-The Governed Decision Operating System market is an emerging category without a dominant player. Point solutions are abundant. Platform solutions that provide the full governed decision loop — Signal → Context → Recommendation → Simulation → Policy → Approval → Execution → Proof → Outcome — do not exist.
+The Governed Decision Infrastructure market is an emerging category without a dominant player. Point solutions are abundant. Platform solutions that provide the full governed decision loop — Signal → Context → Recommendation → Simulation → Policy → Execution → Proof → Outcome → Learning — do not exist.
 
 **Market size estimates (indicative):**
 
 | Segment | SAM (Indicative) | Key Players (Point Solutions) |
 |---------|-----------------|-------------------------------|
-| Governed Decision Operating System | $8–12B growing to $30B+ by 2030 | PagerDuty, Datadog (infra), Splunk (security) |
+| Governed Decision Infrastructure | $8–12B growing to $30B+ by 2030 | PagerDuty, Datadog (infra), Splunk (security) |
 | Maritime Intelligence | $2–4B | Veson, AMOS, specialized data providers |
 | Real Estate Intelligence | $3–5B (NYC alone is $500M+ TAM) | CoStar, Crexi, scattered data providers |
 | Security Operations (SOC tooling) | $15–20B | IBM QRadar, Palo Alto XSOAR, Splunk SIEM |

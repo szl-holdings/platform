@@ -157,7 +157,7 @@ For board presentations or investor meetings where time is constrained:
 ## Common Questions and Responses
 
 **Q: How is this different from a recommendation engine?**  
-A: A recommendation engine makes suggestions. ATLAS makes suggestions, holds them at an approval gate, records who approved what and why, and tracks whether the approved action worked. That loop — proposal → approval → execution → outcome — is what makes it governance infrastructure.
+A: A recommendation engine makes suggestions. ATLAS makes suggestions, holds them at an approval gate, records who approved what and why, and tracks whether the approved action worked. That loop — recommendation → simulation → policy → execution → proof → outcome → learning — is what makes it governance infrastructure.
 
 **Q: What if the AI branch is wrong?**  
 A: Every branch is labeled with a confidence score. The human approval gate exists precisely because AI can be wrong. The proof chain records the human's decision to approve or reject. If a branch performs poorly, the Outcome Graph records it, and future calibration improves.

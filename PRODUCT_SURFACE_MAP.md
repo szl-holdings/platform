@@ -88,7 +88,7 @@ The primary interface for operators. Everything converges here. Absorbs the form
 | Approvals Center | Human-in-the-loop approval queue across all domains | Covenant Policy, Proof Chain |
 | Operations | AI-assisted operations management | Outcome Graph, Workflow Engine |
 | Infrastructure | Cloud sovereignty and platform infrastructure | Workflow Engine |
-| **Governed Decision Loop** | **Flagship end-to-end loop: Signal → Context → Recommendation → Simulation → Policy → Approval → Execution → Proof → Outcome** | **All 5** |
+| **Governed Decision Loop** | **Flagship end-to-end loop: Signal → Context → Recommendation → Simulation → Policy → Execution → Proof → Outcome → Learning** | **All 5** |
 | Decision Receipts | Immutable record of past governed decisions | Proof Chain, Outcome Graph |
 | Outcome Loop | Aggregate outcome graph and learning loop view | Outcome Graph |
 

@@ -30,13 +30,13 @@ The same anchor (a signal ID, a decision ID, an action ID) must be addressable f
 - **To:** `/operations/decision-receipts`, anchored on the recommendation generated from that signal.
 - **Rule:** A signal with no decision yet shows a "pending recommendation" state with a timestamp; never a blank.
 
-### 3. Decision → Approval chain
+### 3. Decision → Policy chain
 - **From:** Decision receipt — Policy gate row.
 - **To:** `/operations/approvals` highlighted on the relevant chain.
 - **Rule:** The chain shows the policy that triggered the gate, the tier required, and the named approver(s). Override is a visible button, not a hidden API.
 
-### 4. Approval → Action
-- **From:** Approval chain — final approver action.
+### 4. Policy Gate → Action
+- **From:** Policy chain — final policy/approval resolution.
 - **To:** `/operations/action-queue` with the resulting action card already in the correct urgency tier.
 - **Rule:** The action card carries the decision ID and signal ID forward. Provenance never restarts.
 

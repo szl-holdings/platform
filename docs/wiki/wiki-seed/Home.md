@@ -1,6 +1,6 @@
 # SZL Holdings Platform — Wiki Home
 
-SZL Holdings builds **governed operational intelligence software**. This wiki is the extended reference layer for the platform repository. For the executive overview, see the [README](https://github.com/stephenlutar2-hash/szl-holdings-platform#readme).
+SZL Holdings builds **governed decision infrastructure software**. This wiki is the extended reference layer for the platform repository. For the executive overview, see the [README](https://github.com/stephenlutar2-hash/szl-holdings-platform#readme).
 
 ---
 

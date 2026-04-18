@@ -1,6 +1,6 @@
 # SZL Holdings — Product Mode Positioning
 
-**Thesis:** SZL Holdings is a governed operational intelligence platform — not a dashboard company, not a generic agent company.
+**Thesis:** SZL Holdings is a governed decision infrastructure platform — not a dashboard company, not a generic agent company.
 
 **For:** Founders, sales, investor relations, product leadership
 **As of:** April 2026
@@ -9,7 +9,7 @@
 
 ## The One-Line Positioning
 
-**SZL Holdings builds governed operational intelligence — the infrastructure layer that connects business signals to confirmed, accountable action across complex enterprises.**
+**SZL Holdings builds governed decision infrastructure — the infrastructure layer that connects business signals to confirmed, accountable action across complex enterprises.**
 
 ---
 
@@ -36,7 +36,7 @@ This is not a compliance add-on. It is the product. The enterprises that trust S
 
 **The test:** Can a customer produce a full provenance chain from business signal through AI inference through human approval through executed action through measurable outcome? On SZL: yes. On a generic agent platform: rarely.
 
-### We Are a Governed Operational Intelligence Platform
+### We Are a Governed Decision Infrastructure Platform
 
 Governed: every signal, inference, recommendation, and action is attributable, auditable, and policy-constrained.
 
@@ -137,7 +137,7 @@ Carlota Jo demonstrates the advisory model that every SZL vertical eventually su
 
 ## Messaging Hierarchy
 
-1. **Top-level:** Governed operational intelligence — SZL connects business signals to confirmed, accountable action.
+1. **Top-level:** Governed decision infrastructure — SZL connects business signals to confirmed, accountable action.
 2. **Category:** Business Observability — see across your operation, not just into one component of it.
 3. **Differentiation:** Governance architecture — AI agents advise; humans confirm; the platform remembers everything.
 4. **Expansion logic:** One intelligence backbone, infinite domain applicability — each vertical compounds the shared investment.

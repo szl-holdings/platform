@@ -30,7 +30,7 @@ Enterprise operations have an **accountability gap**:
 
 ## The Solution
 
-SZL Holdings builds the **governed decision operating system** — the platform layer between signal detection and action execution that enforces governance, attribution, and outcome tracking on every consequential decision.
+SZL Holdings builds the **governed decision infrastructure** — the platform layer between signal detection and action execution that enforces governance, attribution, and outcome tracking on every consequential decision.
 
 The platform is not a dashboard. Not an AI copilot. Not a workflow tool. It is the **operating system for governed decisions** — the shared governance infrastructure on which domain-specific intelligence runs.
 

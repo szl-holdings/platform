@@ -35,7 +35,7 @@ This is not a "click through the features" tour. It is a guided path to first va
 
 **What the user sees:**
 - Clean signup form — email, password, or SSO (Google, Microsoft)
-- Brief three-word value proposition: "Governed operational intelligence"
+- Brief three-word value proposition: "Governed decision infrastructure"
 - No marketing clutter on the signup page itself
 
 **What happens in the background:**

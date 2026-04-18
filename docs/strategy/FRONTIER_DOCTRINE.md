@@ -14,7 +14,7 @@ Every "SZL evolution" claim below is tagged with one of:
 
 ## Purpose
 
-SZL's category — **Governed Decision Operating System (GDOS)** — is novel as a packaged offering, but its constituent doctrines are not invented from scratch. Each of SZL's 10 shared layers (`docs/PLATFORM_CANONICAL.md`) corresponds to a publicly documented architectural pattern at a frontier vendor. This document maps those patterns 1:1, cites the public source, and states the SZL-specific evolution.
+SZL's category — **Governed Decision Infrastructure (GDI)** — is novel as a packaged offering, but its constituent doctrines are not invented from scratch. Each of SZL's 10 shared layers (`docs/PLATFORM_CANONICAL.md`) corresponds to a publicly documented architectural pattern at a frontier vendor. This document maps those patterns 1:1, cites the public source, and states the SZL-specific evolution.
 
 We **steal architectural patterns, not branding**. We do not borrow product names, marketing claims, or proprietary code. All references below are to public technical documentation, vendor blogs, peer-reviewed research, or open standards.
 

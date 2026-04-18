@@ -36,7 +36,7 @@ As AI permeates operations, decision volume increases without a commensurate inc
 **Proof points:**
 - Every AI recommendation on the platform carries model attribution, source citations, and a confidence score
 - Covenant Policy enforces human approval before any consequential action executes — AI cannot bypass it
-- The Proof Chain creates an immutable record: signal → recommendation → approval → execution → outcome
+- The Proof Chain creates an immutable record: signal → context → recommendation → simulation → policy → execution → proof → outcome → learning
 
 ---
 

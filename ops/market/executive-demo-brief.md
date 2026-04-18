@@ -81,7 +81,7 @@ Click to the Outcome step:
 
 ## Closing Frame (30 seconds)
 
-> "What you just saw is the full governed execution loop: Signal → Context → Recommendation → Simulation → Policy Gate → Approval → Execution → Proof → Outcome. Every step is transparent, every decision is traceable, and every action is reversible. That's the platform."
+> "What you just saw is the full governed execution loop: Signal → Context → Recommendation → Simulation → Policy → Execution → Proof → Outcome → Learning. Every step is transparent, every decision is traceable, and every action is reversible. That's the platform."
 
 **Transition to**: questions, pricing discussion, or next steps
 

@@ -8,7 +8,7 @@
 
 ## What We Built
 
-SZL Holdings is a governed operational intelligence platform — the infrastructure layer that connects business signals to confirmed, accountable action across complex enterprises.
+SZL Holdings is a governed decision infrastructure platform — the infrastructure layer that connects business signals to confirmed, accountable action across complex enterprises.
 
 Over the past 18 months, I built five domain-specific platforms on a single shared architecture: Lyte (business observability), Aegis (defense and intelligence), Vessels (maritime), Terra (real estate), and Carlota Jo (advisory). Every platform shares one execution fabric (Alloy), one design system, one authentication model, and one data layer.
 

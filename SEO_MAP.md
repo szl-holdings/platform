@@ -10,11 +10,11 @@
 
 | Route | Title | Meta Description | OG Image |
 |-------|-------|-----------------|---------|
-| `/` | SZL Holdings — Governed Operational Intelligence | The governed operational intelligence platform. Connect what's observable to what's executable, under governance, with full attribution. | `og-home.jpg` |
+| `/` | SZL Holdings — Governed Decision Infrastructure | The governed decision infrastructure platform. Connect what's observable to what's executable, under governance, with full attribution. | `og-home.jpg` |
 | `/platform` | Platform — SZL Holdings | The SZL Holdings platform: Lyte observability, Alloy execution fabric, and domain packs for security, maritime, and real estate. | `og-platform.jpg` |
 | `/lyte` | Lyte — Business Observability | Lyte is the command surface for operators. PRISM framework: signals, routing, priority action queue, and execution accountability. | `og-lyte.jpg` |
 | `/alloy-fabric` | Alloy — Execution Fabric | Signal normalization, workflow orchestration, approval controls, and immutable audit trail. The governance layer for AI-assisted operations. | `og-alloy.jpg` |
-| `/solutions` | Solutions — SZL Holdings | Governed operational intelligence for security, maritime, real estate, and professional services. | `og-solutions.jpg` |
+| `/solutions` | Solutions — SZL Holdings | Governed decision infrastructure for security, maritime, real estate, and professional services. | `og-solutions.jpg` |
 | `/solutions/aegis` | Aegis — Security & Defense Intelligence | SOC command, MITRE ATT&CK mapping, SOAR playbooks, AI triage with human approval gates. | `og-aegis.jpg` |
 | `/solutions/vessels` | Vessels — Maritime Intelligence | Fleet command, AIS telemetry, sanctions screening, dark vessel detection, exception-based workflows. | `og-vessels.jpg` |
 | `/solutions/terra` | Terra — Real Estate Intelligence | NYC distress property pipeline, ownership entity graph, deal pipeline, broker workflow. | `og-terra.jpg` |
@@ -22,7 +22,7 @@
 | `/pricing` | Pricing — SZL Holdings | Transparent pricing for Lyte, Alloy, and domain pack products. Design partner pricing available. | `og-pricing.jpg` |
 | `/contact` | Contact — SZL Holdings | Enterprise inquiries, design partner opportunities, and investment conversations. | `og-contact.jpg` |
 | `/design-partners` | Design Partners — SZL Holdings | Join the SZL Holdings design partner program. Shape the governed intelligence platform alongside the founding team. | `og-design-partners.jpg` |
-| `/how-it-works` | How It Works — SZL Holdings | How the SZL Holdings governed operational intelligence platform connects signals to accountable action. | `og-how-it-works.jpg` |
+| `/how-it-works` | How It Works — SZL Holdings | How the SZL Holdings governed decision infrastructure platform connects signals to accountable action. | `og-how-it-works.jpg` |
 
 ### Trust Routes
 

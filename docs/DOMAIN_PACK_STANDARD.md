@@ -28,7 +28,7 @@ The domain pack standard defines what every pack must implement, what it may cus
 │  Domain Observation → Domain Inference → Domain Actions     │
 ├─────────────────────────────────────────────────────────────┤
 │                   ALLOY EXECUTION LAYER                     │
-│  Signal Routing → Policy Gate → Approval → Execution → Log  │
+│  Signal Routing → Policy Gate → Execution → Proof → Learning  │
 ├─────────────────────────────────────────────────────────────┤
 │                  SZL PLATFORM LAYER                         │
 │  Entity Model · Event Schema · Auth · Design System · DB    │

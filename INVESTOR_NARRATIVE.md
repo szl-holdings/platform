@@ -8,7 +8,7 @@
 
 ## The Thesis, One Sentence
 
-SZL Holdings builds the **governed decision operating system** — the platform layer between signal detection and action execution that enforces governance, attribution, and outcome tracking on every consequential enterprise decision.
+SZL Holdings builds the **governed decision infrastructure** — the platform layer between signal detection and action execution that enforces governance, attribution, and outcome tracking on every consequential enterprise decision.
 
 The term *operating system* is deliberate: SZL provides shared governance primitives, a cross-domain event kernel, and policy enforcement infrastructure on which domain-specific intelligence runs. Domain packs are applications. The governance is the OS.
 
@@ -36,9 +36,9 @@ The success of Datadog, New Relic, and Grafana in DevOps observability demonstra
 
 ---
 
-## The Category: Governed Decision Operating System
+## The Category: Governed Decision Infrastructure
 
-The governed decision operating system is the emerging category at the intersection of:
+The governed decision infrastructure is the emerging category at the intersection of:
 - **Operational signal detection** — what is happening across the organization
 - **AI-assisted reasoning** — what to do about it
 - **Structured action execution** — doing it under governance, with attribution
@@ -89,7 +89,7 @@ See [MOAT_MAP.md](MOAT_MAP.md) for the complete moat analysis with codebase evid
 The platform hierarchy:
 
 ```
-SZL Holdings (governed decision operating system)
+SZL Holdings (governed decision infrastructure)
     │
     ├── Lyte — Flagship command surface (PRISM framework)
     │   Five-pillar intelligence: Pulse · Risk · Intelligence · Signals · Motion
@@ -164,7 +164,7 @@ Every consequential operation in the platform follows the same nine-step loop:
 5. Policy is checked       — Covenant Policy determines approval requirements
 6. Operator decides        — approve, reject, or override in Lyte (web) or CORTEX (mobile)
 7. Action executes         — Workflow Engine runs action as governed, durable process
-8. Proof is recorded       — Proof Chain captures full trail: signal → approval → outcome
+8. Proof is recorded       — Proof Chain captures full trail: signal → context → recommendation → simulation → policy → execution → proof → outcome → learning
 9. Outcome is tracked      — Outcome Graph records result and feeds AI calibration
 ```
 
@@ -220,7 +220,7 @@ See [TECHNICAL_DILIGENCE_PACKET.md](TECHNICAL_DILIGENCE_PACKET.md) for the full 
 
 **4. The technical foundation is production-grade.** 450,000+ lines of TypeScript, 2,331 endpoints, 700+ database tables, 37 shared packages, multi-tenant isolation, OIDC auth, SCIM 2.0, Azure Bicep IaC. This is not a prototype — it is an enterprise platform at Functional Alpha.
 
-**5. The timing is right.** AI capability has crossed the inference threshold. Regulatory pressure is forcing governance. The observability category has proven enterprise willingness to pay for operational clarity. The category of governed decision operating system is being created now.
+**5. The timing is right.** AI capability has crossed the inference threshold. Regulatory pressure is forcing governance. The observability category has proven enterprise willingness to pay for operational clarity. The category of governed decision infrastructure is being created now.
 
 ---
 
@@ -241,4 +241,4 @@ See [TECHNICAL_DILIGENCE_PACKET.md](TECHNICAL_DILIGENCE_PACKET.md) for the full 
 ---
 
 *Stephen Lutar — Founder & CEO, SZL Holdings*  
-*Last updated: April 2026. Version 3.0 — Phase 10–11 elevation complete. Category renamed to Governed Decision Operating System. Forge and Decision Fabric sections added. All investor doc primitive counts corrected to six.*
+*Last updated: April 2026. Version 3.0 — Phase 10–11 elevation complete. Category renamed to Governed Decision Infrastructure. Forge and Decision Fabric sections added. All investor doc primitive counts corrected to six.*

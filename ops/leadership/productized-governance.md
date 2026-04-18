@@ -57,7 +57,7 @@ Productized governance is the basis on which we **refuse to compete on AI featur
 To make this credible, every screen in the operator command center must:
 
 1. Show the artifact for the step it represents.
-2. Carry the IDs forward (signal → decision → approval → action → audit).
+2. Carry the IDs forward (signal → context → recommendation → simulation → policy → execution → proof → outcome).
 3. Refuse to render data without provenance.
 4. Treat override as a first-class, attributed action — not an admin escape hatch.
 

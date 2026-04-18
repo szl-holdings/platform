@@ -15,19 +15,19 @@ SZL Holdings is building the platform that makes that possible. We are doing it 
 
 ---
 
-## The Category: Governed Decision Operating System
+## The Category: Governed Decision Infrastructure
 
-Governed Decision Operating System is the emerging category at the intersection of operational signal detection, AI-assisted reasoning, and structured action execution — under governance, with full attribution. The term *operating system* is precise: the platform provides shared governance primitives, a cross-domain event kernel (Event Fabric), and policy enforcement infrastructure on which domain-specific intelligence runs.
+Governed Decision Infrastructure is the emerging category at the intersection of operational signal detection, AI-assisted reasoning, and structured action execution — under governance, with full attribution. The term *operating system* is precise: the platform provides shared governance primitives, a cross-domain event kernel (Event Fabric), and policy enforcement infrastructure on which domain-specific intelligence runs.
 
 It is distinct from:
 
-**Business Intelligence (BI):** BI answers "what happened?" The Governed Decision Operating System answers "what is happening, what should we do, and can we prove the decision chain?"
+**Business Intelligence (BI):** BI answers "what happened?" The Governed Decision Infrastructure answers "what is happening, what should we do, and can we prove the decision chain?"
 
 **AI Copilots:** Copilots add recommendation volume without governance. This platform enforces human approval gates (Covenant Policy), tracks decision outcomes (Outcome Graph), and records immutable audit trails (Proof Chain).
 
-**AIOps / MLOps:** These optimize specific technical systems. The Governed Decision Operating System spans the full operational layer — commercial, logistics, security, people, and financial systems — with structural governance.
+**AIOps / MLOps:** These optimize specific technical systems. The Governed Decision Infrastructure spans the full operational layer — commercial, logistics, security, people, and financial systems — with structural governance.
 
-**ERP / Workflow Platforms:** These execute processes. The Governed Decision Operating System surfaces the signals that should inform whether and how those processes run, adds simulation (Monte Carlo) before action, and records the full decision chain.
+**ERP / Workflow Platforms:** These execute processes. The Governed Decision Infrastructure surfaces the signals that should inform whether and how those processes run, adds simulation (Monte Carlo) before action, and records the full decision chain.
 
 The market does not yet have a dominant platform in this category. The tools that come closest — Datadog (infrastructure observability), Splunk (security intelligence), Palantir (government analytics) — serve specific domains without the cross-domain governance architecture that this category requires.
 
@@ -52,7 +52,7 @@ Three forces have converged to make this architecture feasible and valuable:
 Every consequential decision in the platform follows the same loop:
 
 ```
-Signal → Context → Recommendation → Simulation → Policy → Approval → Execution → Proof → Outcome
+Signal → Context → Recommendation → Simulation → Policy → Execution → Proof → Outcome → Learning
 ```
 
 This loop is powered by six **platform primitives** — architectural abstractions shared by every product surface:

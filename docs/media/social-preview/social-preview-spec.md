@@ -36,7 +36,7 @@ Given the platform's dark-first design aesthetic and command-center density, the
 │                                                                │
 │   SZL Holdings                          [screenshot crop:      │
 │                                          Lyte command surface  │
-│   Governed Operational Intelligence      right half of card]   │
+│   Governed Decision Infrastructure      right half of card]   │
 │   Software                                                     │
 │                                                                │
 │   ─────────────────────────                                   │

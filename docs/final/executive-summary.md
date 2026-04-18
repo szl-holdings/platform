@@ -65,14 +65,14 @@ The following canonical documents were created or significantly updated across t
 
 ## 2. Category Positioning
 
-**Category:** Governed Operational Intelligence
+**Category:** Governed Decision Infrastructure
 
 SZL Holdings is not a dashboard, AI copilot, or workflow tool. It is the **governed decision layer** that sits between signal detection and action execution — ensuring every consequential decision has a signal source, a routing path, a simulation result, an approval gate, and an immutable audit trail.
 
 The one-sentence position:
-> *SZL Holdings is the governed operational intelligence layer that connects business signals to accountable action — under governance, with full attribution and an immutable audit trail.*
+> *SZL Holdings is the governed decision infrastructure layer that connects business signals to accountable action — under governance, with full attribution and an immutable audit trail.*
 
-The category is structurally defined by what none of the competitors provide: the full Signal → Context → Recommendation → Simulation → Policy → Approval → Execution → Proof → Outcome loop on shared governance infrastructure. Dashboards stop at visualization. Copilots stop at recommendation. Workflow tools stop at automation. SZL closes the loop.
+The category is structurally defined by what none of the competitors provide: the full Signal → Context → Recommendation → Simulation → Policy → Execution → Proof → Outcome → Learning loop on shared governance infrastructure. Dashboards stop at visualization. Copilots stop at recommendation. Workflow tools stop at automation. SZL closes the loop.
 
 **Category verdict:** Clean. Consistent across README, CATEGORY_POSITIONING.md, SYSTEM-OVERVIEW.md, ARCHITECTURE.md, PRODUCT-SURFACES.md, BRAND_GUIDELINES.md, DEMO_GUIDE.md, and the investor docs. No competing brand claims or confused positioning found.
 
@@ -81,7 +81,7 @@ The category is structurally defined by what none of the competitors provide: th
 ## 3. Product Hierarchy
 
 ```
-SZL Holdings (governed operational intelligence platform)
+SZL Holdings (governed decision infrastructure platform)
 │
 ├── Lyte — flagship command surface (PRISM framework, signal-to-action)
 ├── Alloy — execution fabric (workflows, approvals, audit trail)
@@ -216,7 +216,7 @@ For an enterprise technical advisor or Series A diligence reviewer:
 | Step | Document | Purpose | Time |
 |------|----------|---------|------|
 | 1 | `README.md` | Platform orientation — hierarchy, primitives, flagship loop | 5 min |
-| 2 | `CATEGORY_POSITIONING.md` | Why "governed operational intelligence" is a category, not a product | 5 min |
+| 2 | `CATEGORY_POSITIONING.md` | Why "governed decision infrastructure" is a category, not a product | 5 min |
 | 3 | `PLATFORM_PRIMITIVES.md` | The six structural abstractions — what makes this different | 10 min |
 | 4 | `SYSTEM-OVERVIEW.md` | Full platform architecture for non-technical stakeholders | 10 min |
 | 5 | `ARCHITECTURE.md` | Technical depth — topology, stack, monorepo, design principles | 10 min |
@@ -256,7 +256,7 @@ Highest-ROI work for the next 30 days, in priority order:
 These are the five structural advantages that enterprise buyers and Series A investors cannot replicate from competing products:
 
 ### 1. The Governed Decision Loop — Complete and Instrumented
-Every consequential decision follows a nine-step loop: Signal → Context → Recommendation → Simulation → Policy → Approval → Execution → Proof → Outcome. No competitor closes this loop end-to-end. Dashboards stop at signal. Copilots stop at recommendation. Workflow tools stop at execution. SZL closes the loop with attribution at every step.
+Every consequential decision follows a nine-step loop: Signal → Context → Recommendation → Simulation → Policy → Execution → Proof → Outcome → Learning. No competitor closes this loop end-to-end. Dashboards stop at signal. Copilots stop at recommendation. Workflow tools stop at execution. SZL closes the loop with attribution at every step.
 
 ### 2. Decision Simulation Before Action
 Before any high-stakes approval request is surfaced, the Monte Carlo engine runs probabilistic simulations showing operators not just *what to do* but *what could happen* — with confidence intervals and sensitivity rankings. This transforms "AI-recommended" into "risk-quantified."

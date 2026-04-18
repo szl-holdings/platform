@@ -9,7 +9,7 @@
 
 ## What SZL Holdings Builds
 
-SZL Holdings builds the governed operational intelligence layer for enterprise operators — connecting what is observable to what is executable, under governance, with full attribution.
+SZL Holdings builds the governed decision infrastructure layer for enterprise operators — connecting what is observable to what is executable, under governance, with full attribution.
 
 The platform is organized in a clear hierarchy: SZL Holdings (platform) → Lyte (flagship command surface) → Alloy (execution fabric) → CORTEX (mobile command) → Domain packs (Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM).
 
@@ -27,7 +27,7 @@ Enterprise operations have an accountability gap:
 
 AI tools compound the problem: they add recommendation volume without adding governance. Operators end up with more data, more noise, and more untracked decisions running in parallel.
 
-SZL Holdings builds the **governed operational intelligence layer** — the platform that connects what is observable to what is executable, under governance, with full attribution.
+SZL Holdings builds the **governed decision infrastructure layer** — the platform that connects what is observable to what is executable, under governance, with full attribution.
 
 ---
 
@@ -36,7 +36,7 @@ SZL Holdings builds the **governed operational intelligence layer** — the plat
 The SZL Holdings platform is organized around a single architectural principle: **every consequential decision follows the same governed loop**, regardless of which domain it originates in.
 
 ```
-Signal → Context → Recommendation → Simulation → Policy → Approval → Execution → Proof → Outcome
+Signal → Context → Recommendation → Simulation → Policy → Execution → Proof → Outcome → Learning
 ```
 
 The platform provides the infrastructure for this loop. Domain packs provide the signal sources, analysis models, and action vocabularies. The loop itself — the governance — is shared.
@@ -184,7 +184,7 @@ The Workflow Engine (`@szl-holdings/workflow-engine`) executes the action as a d
 
 ### Step 8: Proof Recording
 
-The Proof Chain (`@szl-holdings/proof-chain`) records the complete audit trail: signal → recommendation → simulation → policy decision → approval → execution → outcome. Every entry includes actor attribution, timestamp, and evidence references.
+The Proof Chain (`@szl-holdings/proof-chain`) records the complete audit trail: signal → context → recommendation → simulation → policy → execution → proof → outcome → learning. Every entry includes actor attribution, timestamp, and evidence references.
 
 ### Step 9: Outcome Tracking
 
@@ -201,7 +201,7 @@ Every consequential operation in the SZL ecosystem follows this path, regardless
 3. **Recommendation is routed** — Alloy routes the recommendation to the right operator
 4. **Human reviews and approves** — in `controlled` mode (the default), the operator confirms or rejects the recommendation before execution. Alloy also supports `full` and `automated` workflow modes where execution proceeds without a manual approval step.
 5. **Action executes** — the confirmed action runs
-6. **Audit event is created** — an immutable record captures the full chain: signal → recommendation → approval → action
+6. **Audit event is created** — an immutable record captures the full chain: signal → context → recommendation → simulation → policy → execution → proof
 
 ---
 

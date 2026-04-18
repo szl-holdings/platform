@@ -2,7 +2,7 @@
 
 > [Platform Repo](https://github.com/szl-holdings/szl-holdings-platform) | [Security](./SECURITY.md) | [Code of Conduct](./CODE_OF_CONDUCT.md) | [Architecture](./ARCHITECTURE.md) | [Contact](https://szlholdings.com)
 
-The SZL Holdings platform is a **proprietary, founder-led governed operational intelligence platform**. This repository is a public mirror for evaluation, transparency, and technical review purposes — not an open-source project accepting community contributions.
+The SZL Holdings platform is a **proprietary, founder-led governed decision infrastructure platform**. This repository is a public mirror for evaluation, transparency, and technical review purposes — not an open-source project accepting community contributions.
 
 All participants in SZL Holdings spaces are expected to follow our [Code of Conduct](./CODE_OF_CONDUCT.md).
 

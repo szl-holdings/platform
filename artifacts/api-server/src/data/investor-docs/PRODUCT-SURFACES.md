@@ -32,7 +32,7 @@ A domain pack is not a standalone product. It contributes domain-specific signal
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │  PLATFORM                                                       │
-│  SZL Holdings — Governed Operational Intelligence               │
+│  SZL Holdings — Governed Decision Infrastructure               │
 ├─────────────────────────────────────────────────────────────────┤
 │  COMMAND SURFACES                                               │
 │  Lyte (flagship)   Command Portal (hub)   CORTEX (mobile)      │

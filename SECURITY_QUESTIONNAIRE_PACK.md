@@ -13,7 +13,7 @@
 ## 1. Company and Product Information
 
 **Q: What is the product and who is the vendor?**  
-SZL Holdings operates a governed operational intelligence platform covering maritime, defense/intelligence, real estate, legal matter management, and advisory domains. The platform is a multi-tenant SaaS built on a TypeScript/Node.js monorepo with PostgreSQL.
+SZL Holdings operates a governed decision infrastructure platform covering maritime, defense/intelligence, real estate, legal matter management, and advisory domains. The platform is a multi-tenant SaaS built on a TypeScript/Node.js monorepo with PostgreSQL.
 
 **Q: What is the current commercial status?**  
 Design partner / alpha phase as of April 2026. Not yet commercially deployed at scale. First production customers targeted for GA.
