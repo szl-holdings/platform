@@ -12,12 +12,13 @@ import DesignSystemPage from "./pages/DesignSystemPage";
 import AIQuality from "./pages/AIQuality";
 import PromptRegistry from "./pages/PromptRegistry";
 import EvalConsole from "./pages/EvalConsole";
+import AuditTrail from "./pages/AuditTrail";
 import type { Page } from "./lib/types";
 
 const VALID_PAGES: Page[] = [
   "home", "research", "memory", "skills", "patterns",
   "bridge", "orchestrator", "ingest", "design-system",
-  "ai-quality", "prompt-registry", "eval-console",
+  "ai-quality", "prompt-registry", "eval-console", "audit",
 ];
 
 function getInitialPage(): Page {
@@ -56,6 +57,7 @@ export default function App() {
       {page === "ai-quality" && <AIQuality />}
       {page === "prompt-registry" && <PromptRegistry />}
       {page === "eval-console" && <EvalConsole />}
+      {page === "audit" && <AuditTrail />}
     </Layout>
   );
 }

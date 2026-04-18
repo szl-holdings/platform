@@ -19,6 +19,7 @@ import {
   Palette,
   BookOpen,
   BarChart2,
+  Shield,
 } from "lucide-react";
 
 const NAV_ITEMS: Array<{
@@ -36,6 +37,7 @@ const NAV_ITEMS: Array<{
   { id: "bridge", label: "Bridge", icon: Network, description: "Protocol Bridge" },
   { id: "orchestrator", label: "Orchestrate", icon: Workflow, description: "Cross-App Orchestrator" },
   { id: "ingest", label: "Ingest", icon: Download, description: "Repo Ingest" },
+  { id: "audit", label: "Audit", icon: Shield, description: "Agent Run Audit Trail" },
   { id: "design-system", label: "Design System", icon: Palette, description: "Governed-Intelligence Design Language" },
   { id: "ai-quality", label: "AI Quality", icon: Activity, description: "AI Control Plane & Feedback", group: "control" },
   { id: "prompt-registry", label: "Prompts", icon: BookOpen, description: "Prompt Registry", group: "control" },

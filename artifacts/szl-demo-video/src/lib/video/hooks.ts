@@ -24,6 +24,8 @@ export interface UseVideoPlayerReturn {
   totalScenes: number;
   currentSceneKey: string;
   hasEnded: boolean;
+  totalElapsedMs: number;
+  sceneElapsedMs: number;
 }
 
 export function useVideoPlayer(options: UseVideoPlayerOptions): UseVideoPlayerReturn {
@@ -36,11 +38,27 @@ export function useVideoPlayer(options: UseVideoPlayerOptions): UseVideoPlayerRe
 
   const [currentScene, setCurrentScene] = useState(0);
   const [hasEnded, setHasEnded] = useState(false);
+  const [sceneElapsedMs, setSceneElapsedMs] = useState(0);
+
+  const sceneStartRef = useRef(Date.now());
+  const globalStartRef = useRef(Date.now());
+  const [totalElapsedMs, setTotalElapsedMs] = useState(0);
 
   // Start recording on mount
   useEffect(() => {
     window.startRecording?.();
+    globalStartRef.current = Date.now();
   }, []);
+
+  // Track elapsed time within current scene and total
+  useEffect(() => {
+    sceneStartRef.current = Date.now();
+    const id = setInterval(() => {
+      setSceneElapsedMs(Date.now() - sceneStartRef.current);
+      setTotalElapsedMs(Date.now() - globalStartRef.current);
+    }, 100);
+    return () => clearInterval(id);
+  }, [currentScene]);
 
   // Scene advancement -- loops independently of recording
   useEffect(() => {
@@ -58,6 +76,7 @@ export function useVideoPlayer(options: UseVideoPlayerOptions): UseVideoPlayerRe
         }
         if (loop) {
           setCurrentScene(0);
+          globalStartRef.current = Date.now();
         }
       } else {
         setCurrentScene(prev => prev + 1);
@@ -72,6 +91,8 @@ export function useVideoPlayer(options: UseVideoPlayerOptions): UseVideoPlayerRe
     totalScenes,
     currentSceneKey: sceneKeys[currentScene],
     hasEnded,
+    totalElapsedMs,
+    sceneElapsedMs,
   };
 }
 

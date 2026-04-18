@@ -11,6 +11,10 @@ import {
   Clock,
   Zap,
   Play,
+  Lightbulb,
+  ChevronRight,
+  X,
+  Gauge,
 } from "lucide-react";
 
 const EXAMPLE_INTENTS = [
@@ -44,8 +48,218 @@ const APP_COLORS: Record<string, string> = {
   imperium: "#34d399",
 };
 
-function StepCard({ step }: { step: OrchestrationStep }) {
+const RATE_LIMITS: Record<string, { rpm: number; used: number; tpm: number; tUsed: number }> = {
+  aegis: { rpm: 60, used: 14, tpm: 150000, tUsed: 28400 },
+  vessels: { rpm: 60, used: 7, tpm: 150000, tUsed: 12800 },
+  terra: { rpm: 60, used: 22, tpm: 150000, tUsed: 41200 },
+  pulse: { rpm: 60, used: 4, tpm: 150000, tUsed: 8100 },
+  command: { rpm: 60, used: 31, tpm: 150000, tUsed: 59600 },
+  "szl-holdings": { rpm: 60, used: 9, tpm: 150000, tUsed: 17300 },
+  "carlota-jo": { rpm: 60, used: 3, tpm: 150000, tUsed: 5200 },
+  "prism-counsel": { rpm: 60, used: 18, tpm: 150000, tUsed: 34800 },
+  lyte: { rpm: 60, used: 11, tpm: 150000, tUsed: 21900 },
+  imperium: { rpm: 60, used: 5, tpm: 150000, tUsed: 9700 },
+};
+
+const STEP_EXPLANATIONS: Record<string, {
+  why: string;
+  how: string;
+  alternatives: string[];
+  confidence: number;
+}> = {
+  aegis: {
+    why: "Aegis was selected first because the intent mentions threat risk — Aegis owns the threat-intelligence domain and its output is required by the Pulse stitching step.",
+    how: "Dispatched `GET /api/aegis/threat-summary` with tenant-scoped auth. Response includes CVSS-weighted top threats, active incident count, and MITRE technique coverage.",
+    alternatives: ["Pull from Vessels first (rejected — no threat context dependency)", "Use cached threat snapshot (rejected — staleness > 15 min at call time)"],
+    confidence: 0.94,
+  },
+  vessels: {
+    why: "Vessels was included because maritime risk is part of the SZL cross-portfolio surface area and the Fleet Command module has recent high-severity alerts.",
+    how: "Called `GET /api/vessels/fleet-risk` returning per-vessel risk scores and one port-call flag. Result fed into Pulse stitching alongside Aegis output.",
+    alternatives: ["Skip Vessels (rejected — user's portfolio includes maritime exposure)", "Use AIS snapshot (rejected — live position data available within rate limit)"],
+    confidence: 0.88,
+  },
+  terra: {
+    why: "Terra distress signals are part of the SZL portfolio KPI roll-up. 3 properties crossed the distress threshold since last brief.",
+    how: "Called `GET /api/terra/distress-summary` with `?top=5&since=24h`. Returns property IDs, distress scores, and recommended actions.",
+    alternatives: ["Use cached portfolio snapshot (rejected — 3 new distress signals since cache)", "Only return properties in active deal pipeline (rejected — monitors all holdings)"],
+    confidence: 0.91,
+  },
+  pulse: {
+    why: "Pulse is the final stitching step — it takes structured outputs from all domain agents and compiles the executive brief format.",
+    how: "Called `POST /api/pulse/compile` with the structured domain outputs. Pulse applies BLUF ranking, deduplication, and the user's preferred brief format.",
+    alternatives: ["Stitch inline in orchestrator (rejected — Pulse has the briefing schema and user preference model)", "Skip Pulse and return raw domain outputs (rejected — not exec-readable)"],
+    confidence: 0.96,
+  },
+  command: {
+    why: "Command provides the cross-domain correlation layer — it detects when signals from Aegis and Vessels share a threat actor or geo region.",
+    how: "Called `GET /api/command/correlations?domains=aegis,vessels` with the current run ID. Returns correlated events with confidence scores.",
+    alternatives: ["Manual correlation in stitching step (rejected — Command has pre-built correlation graph)", "Skip correlation (rejected — cross-domain insight is the core value here)"],
+    confidence: 0.89,
+  },
+  "szl-holdings": {
+    why: "SZL Holdings contains the consolidated KPI store — governance score, Alloy run metrics, and portfolio health index.",
+    how: "Called `GET /api/holdings/kpi-snapshot` returning the 12 canonical KPIs with trend deltas. Snapshot is tenant-scoped and auth-gated.",
+    alternatives: ["Pull KPIs from individual domain APIs (rejected — Holdings aggregates and normalizes units)", "Use investor-facing snapshot (rejected — too high-level for operational brief)"],
+    confidence: 0.93,
+  },
+  "carlota-jo": {
+    why: "Carlota Jo client engagement data was requested as part of the advisory portfolio snapshot.",
+    how: "Called `GET /api/carlota-jo/engagement-summary` returning active engagements, upcoming deliverables, and open invoices.",
+    alternatives: ["Skip (rejected — user explicitly requested advisory portfolio data)", "Use CRM export (rejected — less structured than the API response)"],
+    confidence: 0.82,
+  },
+  "prism-counsel": {
+    why: "Prism Counsel legal matters were included because the compliance check intent requires open matter cross-reference.",
+    how: "Called `GET /api/prism/matters?status=open` returning matter IDs, risk classifications, and associated entities.",
+    alternatives: ["Use matter summary only (rejected — entity list needed for cross-reference)", "Pull full matter text (rejected — exceeds token budget; entity list is sufficient)"],
+    confidence: 0.87,
+  },
+};
+
+function RateLimitMiniBar({ used, total }: { used: number; total: number }) {
+  const pct = (used / total) * 100;
+  const color = pct >= 95 ? "#ff4455" : pct >= 80 ? "#ffb700" : "#00ff88";
+  return (
+    <div className="flex items-center gap-1.5">
+      <div className="h-1 w-12 rounded-full bg-nexus-bg overflow-hidden">
+        <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: color }} />
+      </div>
+      <span className="text-[9px] font-mono" style={{ color }}>{Math.round(pct)}%</span>
+    </div>
+  );
+}
+
+function ExplainPanel({
+  step,
+  onClose,
+}: {
+  step: OrchestrationStep;
+  onClose: () => void;
+}) {
+  const explanation = STEP_EXPLANATIONS[step.appSlug];
+  const rl = RATE_LIMITS[step.appSlug];
   const color = APP_COLORS[step.appSlug] ?? "#8896aa";
+
+  return (
+    <div className="fixed inset-y-0 right-0 w-96 bg-nexus-surface border-l border-[#a3e635]/20 z-50 flex flex-col shadow-2xl overflow-hidden">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-nexus">
+        <div className="flex items-center gap-2">
+          <Lightbulb className="w-4 h-4 text-[#a3e635]" />
+          <span className="text-sm font-semibold">Explain this Decision</span>
+        </div>
+        <button
+          onClick={onClose}
+          className="w-6 h-6 rounded flex items-center justify-center text-muted-foreground/40 hover:text-muted-foreground hover:bg-nexus-bg transition-colors"
+        >
+          <X className="w-3.5 h-3.5" />
+        </button>
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-5 space-y-4">
+        <div className="flex items-center gap-3">
+          <div
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-[11px] font-mono font-bold shrink-0"
+            style={{ backgroundColor: `${color}20`, color }}
+          >
+            {step.appSlug.slice(0, 3).toUpperCase()}
+          </div>
+          <div>
+            <div className="text-sm font-semibold" style={{ color }}>{step.app}</div>
+            <div className="text-[10px] font-mono text-muted-foreground/50">{step.action}</div>
+          </div>
+        </div>
+
+        {explanation ? (
+          <>
+            <div className="bg-nexus-bg rounded-lg p-3">
+              <div className="text-[10px] font-mono text-[#a3e635] mb-1.5 uppercase tracking-widest">Why chosen</div>
+              <p className="text-xs text-muted-foreground leading-relaxed">{explanation.why}</p>
+            </div>
+
+            <div className="bg-nexus-bg rounded-lg p-3">
+              <div className="text-[10px] font-mono text-nexus-cyan mb-1.5 uppercase tracking-widest">How it ran</div>
+              <p className="text-xs text-muted-foreground leading-relaxed">{explanation.how}</p>
+            </div>
+
+            <div className="bg-nexus-bg rounded-lg p-3">
+              <div className="text-[10px] font-mono text-muted-foreground/40 mb-1.5 uppercase tracking-widest">Alternatives rejected</div>
+              <ul className="space-y-1.5">
+                {explanation.alternatives.map((alt, i) => (
+                  <li key={i} className="flex items-start gap-2">
+                    <XCircle className="w-3 h-3 text-nexus-red/50 mt-0.5 shrink-0" />
+                    <span className="text-[10px] text-muted-foreground/60 leading-relaxed">{alt}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="bg-nexus-bg rounded-lg p-3">
+              <div className="text-[10px] font-mono text-[#ffb700] mb-1.5 uppercase tracking-widest">Confidence</div>
+              <div className="flex items-center gap-3">
+                <div className="flex-1 h-2 bg-nexus-surface rounded-full overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-[#00ff88]"
+                    style={{ width: `${explanation.confidence * 100}%` }}
+                  />
+                </div>
+                <span className="text-xs font-mono text-nexus-green">{(explanation.confidence * 100).toFixed(0)}%</span>
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="bg-nexus-bg rounded-lg p-3">
+            <p className="text-xs text-muted-foreground/50">No reasoning trace available for this step.</p>
+          </div>
+        )}
+
+        {rl && (
+          <div className="bg-nexus-bg rounded-lg p-3">
+            <div className="flex items-center gap-1.5 mb-2">
+              <Gauge className="w-3 h-3 text-[#ffb700]" />
+              <span className="text-[10px] font-mono text-[#ffb700] uppercase tracking-widest">Rate Limits</span>
+            </div>
+            <div className="space-y-2">
+              <div>
+                <div className="flex justify-between mb-0.5">
+                  <span className="text-[9px] font-mono text-muted-foreground/40">Requests / min</span>
+                  <span className="text-[9px] font-mono text-muted-foreground/60">{rl.used} / {rl.rpm}</span>
+                </div>
+                <RateLimitMiniBar used={rl.used} total={rl.rpm} />
+              </div>
+              <div>
+                <div className="flex justify-between mb-0.5">
+                  <span className="text-[9px] font-mono text-muted-foreground/40">Tokens / min</span>
+                  <span className="text-[9px] font-mono text-muted-foreground/60">{rl.tUsed.toLocaleString()} / {rl.tpm.toLocaleString()}</span>
+                </div>
+                <RateLimitMiniBar used={rl.tUsed} total={rl.tpm} />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {step.output && (
+          <div className="bg-nexus-bg rounded-lg p-3">
+            <div className="text-[10px] font-mono text-nexus-green mb-1.5 uppercase tracking-widest">Output</div>
+            <p className="text-[10px] text-muted-foreground leading-relaxed">{step.output}</p>
+            {step.durationMs !== undefined && (
+              <div className="text-[9px] font-mono text-muted-foreground/30 mt-2">{step.durationMs}ms</div>
+            )}
+          </div>
+        )}
+
+        <div className="text-[9px] font-mono text-muted-foreground/30 space-y-0.5">
+          <div>STEP ID: {step.id}</div>
+          <div>ENDPOINT: {step.endpoint}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StepCard({ step, onExplain }: { step: OrchestrationStep; onExplain: (s: OrchestrationStep) => void }) {
+  const color = APP_COLORS[step.appSlug] ?? "#8896aa";
+  const rl = RATE_LIMITS[step.appSlug];
   return (
     <div className={`rounded-lg border p-3 ${
       step.status === "running"
@@ -88,6 +302,22 @@ function StepCard({ step }: { step: OrchestrationStep }) {
       {step.durationMs !== undefined && step.status === "done" && (
         <div className="text-[9px] font-mono text-muted-foreground/40 mt-1">{step.durationMs}ms</div>
       )}
+
+      {rl && (
+        <div className="flex items-center gap-2 mt-2 pt-2 border-t border-nexus">
+          <Gauge className="w-2.5 h-2.5 text-muted-foreground/30" />
+          <RateLimitMiniBar used={rl.used} total={rl.rpm} />
+        </div>
+      )}
+
+      <button
+        onClick={() => onExplain(step)}
+        className="mt-2 flex items-center gap-1 text-[9px] font-mono text-[#a3e635]/60 hover:text-[#a3e635] transition-colors"
+      >
+        <Lightbulb className="w-2.5 h-2.5" />
+        Explain this decision
+        <ChevronRight className="w-2.5 h-2.5" />
+      </button>
     </div>
   );
 }
@@ -98,6 +328,7 @@ export default function Orchestrator() {
   const [history, setHistory] = useState<OrchestrationPlan[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [explainStep, setExplainStep] = useState<OrchestrationStep | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
@@ -129,6 +360,7 @@ export default function Orchestrator() {
     setError(null);
     setLoading(true);
     setPlan(null);
+    setExplainStep(null);
     if (pollRef.current) clearInterval(pollRef.current);
 
     try {
@@ -144,13 +376,13 @@ export default function Orchestrator() {
 
   return (
     <div className="min-h-full bg-nexus-bg p-6">
-      <div className="max-w-5xl mx-auto">
+      <div className={`max-w-5xl mx-auto transition-all duration-200 ${explainStep ? "mr-[24rem]" : ""}`}>
         <div className="flex items-center gap-3 mb-6">
           <Workflow className="w-5 h-5 text-[#ffb700]" />
           <div>
             <h1 className="text-lg font-semibold">Cross-App Orchestrator</h1>
             <p className="text-xs text-muted-foreground">
-              Agent of agents · Routes to 10 SZL artifacts · Stitches results
+              Agent of agents · Routes to 10 SZL artifacts · Stitches results · Click any step to explain
             </p>
           </div>
         </div>
@@ -231,7 +463,7 @@ export default function Orchestrator() {
 
             <div className="grid grid-cols-2 gap-3">
               {plan.steps.map((step) => (
-                <StepCard key={step.id} step={step} />
+                <StepCard key={step.id} step={step} onExplain={setExplainStep} />
               ))}
             </div>
 
@@ -292,6 +524,10 @@ export default function Orchestrator() {
           </div>
         )}
       </div>
+
+      {explainStep && (
+        <ExplainPanel step={explainStep} onClose={() => setExplainStep(null)} />
+      )}
     </div>
   );
 }

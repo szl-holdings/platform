@@ -10,7 +10,8 @@ export type Page =
   | "design-system"
   | "ai-quality"
   | "prompt-registry"
-  | "eval-console";
+  | "eval-console"
+  | "audit";
 
 export interface NexusStatus {
   activeSwarms: number;
@@ -138,6 +139,33 @@ export interface PlanNode {
   label: string;
   type: "start" | "app" | "stitch" | "end";
   dependsOn: string[];
+}
+
+export interface AuditEntry {
+  id: string;
+  runId: string;
+  agentSlug: string;
+  agentName: string;
+  intent: string;
+  action: string;
+  endpoint: string;
+  status: "success" | "error" | "skipped";
+  durationMs: number;
+  reasoning: string;
+  alternativesConsidered: string[];
+  outputSummary: string;
+  rateLimit: AgentRateLimit;
+  startedAt: string;
+  completedAt: string;
+}
+
+export interface AgentRateLimit {
+  agentSlug: string;
+  requestsPerMinute: number;
+  requestsUsedThisMinute: number;
+  tokensPerMinute: number;
+  tokensUsedThisMinute: number;
+  cooldownUntil?: string;
 }
 
 export interface IngestJob {
