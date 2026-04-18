@@ -14,6 +14,7 @@ export function register(router: IRouter): void {
   router.use("/decision-fabric", perUserApiSlidingLimiter);
   router.use(decisionFabricRouter);
 
+  router.use("/decisions", tenantScope({ required: true }));
   router.use("/decisions", perUserWriteSlidingLimiter);
   router.use(decisionsReceiptsRouter);
 }

@@ -277,7 +277,7 @@ router.get("/lyte/cognitive/bottlenecks", authMiddleware(), async (req, res) => 
   }
 });
 
-router.get("/lyte/cognitive/interventions", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
+router.get("/lyte/cognitive/interventions", authMiddleware(), async (req, res) => {
   try {
     const limit = safeParseLimit(req.query.limit, 20, 50);
     const [activeSignals, stalledActions, blockedItems, openEscalations] = await Promise.all([
