@@ -2,6 +2,8 @@ import { Router, type IRouter, type Request } from "express";
 import { createHash, createHmac } from "crypto";
 import { authMiddleware } from "../middlewares/auth";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, handleRouteError } from "../lib/api-response";
+import { db, vesselsBillsOfLadingTable, vesselsBolChainEventsTable } from "@szl-holdings/db";
+import { eq, asc, desc, sql } from "drizzle-orm";
 
 import { anyQuerySchema, jsonObjectBodySchema, validateBody, validateQuery } from "../lib/validation";
 const router: IRouter = Router();
@@ -504,11 +506,202 @@ function buildChain(events: Array<{ eventType: string; actor: string; timestamp:
   return chain;
 }
 
-// Mutable in-memory store — seeded with demo data, accepts creates
-const bolStore = new Map<string, BolDocument>();
+// ── Persistence helpers ──────────────────────────────────────────────────────
+//
+// BoL documents and chain events are stored in Postgres so they survive server
+// restarts. Hashes (genesisHash / headHash / per-event hash + signature) are NOT
+// persisted — they are recomputed deterministically from the persisted event
+// stream via buildChain() at read time, which both saves storage and lets us
+// verify that the stored event sequence has not been tampered with on disk.
 
-function seedBol() {
-  const docs: Array<Omit<BolDocument, "chain" | "genesisHash" | "headHash">> = [
+interface PersistedEventInput { eventType: string; actor: string; timestamp: string; confirmed: boolean; }
+
+interface BolRow {
+  id: string;
+  vesselName: string;
+  imo: string | null;
+  voyageId: string | null;
+  shipper: string;
+  consignee: string;
+  notifyParty: string | null;
+  cargo: string;
+  quantity: string | null;
+  quantityMt: string;
+  unit: string | null;
+  originPort: string;
+  destinationPort: string;
+  status: string;
+  lcRef: string | null;
+  lcIssuer: string | null;
+  lcAmount: string;
+  lcStatus: string;
+  autoLcRelease: boolean;
+  transferCount: number;
+  deliveryConfirmed: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+function rowToDocument(row: BolRow, events: PersistedEventInput[]): BolDocument {
+  const chain = buildChain(events);
+  return {
+    id: row.id,
+    vesselName: row.vesselName,
+    imo: row.imo ?? "",
+    voyageId: row.voyageId ?? "",
+    shipper: row.shipper,
+    consignee: row.consignee,
+    notifyParty: row.notifyParty ?? "",
+    cargo: row.cargo,
+    quantity: row.quantity ?? "",
+    quantityMt: Number(row.quantityMt ?? 0),
+    unit: row.unit ?? "MT",
+    originPort: row.originPort,
+    destinationPort: row.destinationPort,
+    status: row.status as BolDocument["status"],
+    lcRef: row.lcRef ?? "",
+    lcIssuer: row.lcIssuer ?? "",
+    lcAmount: Number(row.lcAmount ?? 0),
+    lcStatus: row.lcStatus as BolDocument["lcStatus"],
+    autoLcRelease: row.autoLcRelease,
+    transferCount: row.transferCount,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    deliveryConfirmed: row.deliveryConfirmed,
+    chain,
+    genesisHash: chain[0]?.hash ?? "",
+    headHash: chain[chain.length - 1]?.hash ?? "",
+  };
+}
+
+async function loadEventsFor(bolId: string): Promise<PersistedEventInput[]> {
+  const rows = await db
+    .select({
+      eventType: vesselsBolChainEventsTable.eventType,
+      actor: vesselsBolChainEventsTable.actor,
+      eventTimestamp: vesselsBolChainEventsTable.eventTimestamp,
+      confirmed: vesselsBolChainEventsTable.confirmed,
+    })
+    .from(vesselsBolChainEventsTable)
+    .where(eq(vesselsBolChainEventsTable.bolId, bolId))
+    .orderBy(asc(vesselsBolChainEventsTable.sequence));
+  return rows.map((r) => ({ eventType: r.eventType, actor: r.actor, timestamp: r.eventTimestamp, confirmed: r.confirmed }));
+}
+
+async function loadBolById(id: string): Promise<BolDocument | null> {
+  const rows = await db.select().from(vesselsBillsOfLadingTable).where(eq(vesselsBillsOfLadingTable.id, id)).limit(1);
+  if (rows.length === 0) return null;
+  const events = await loadEventsFor(id);
+  return rowToDocument(rows[0] as BolRow, events);
+}
+
+async function loadAllBols(): Promise<BolDocument[]> {
+  const rows = await db.select().from(vesselsBillsOfLadingTable).orderBy(desc(vesselsBillsOfLadingTable.createdAt));
+  if (rows.length === 0) return [];
+  const allEvents = await db
+    .select()
+    .from(vesselsBolChainEventsTable)
+    .orderBy(asc(vesselsBolChainEventsTable.bolId), asc(vesselsBolChainEventsTable.sequence));
+  const grouped = new Map<string, PersistedEventInput[]>();
+  for (const e of allEvents) {
+    const list = grouped.get(e.bolId) ?? [];
+    list.push({ eventType: e.eventType, actor: e.actor, timestamp: e.eventTimestamp, confirmed: e.confirmed });
+    grouped.set(e.bolId, list);
+  }
+  return rows.map((r) => rowToDocument(r as BolRow, grouped.get((r as BolRow).id) ?? []));
+}
+
+async function insertBol(doc: BolDocument, events: PersistedEventInput[]): Promise<void> {
+  await db.transaction(async (tx) => {
+    await tx.insert(vesselsBillsOfLadingTable).values({
+      id: doc.id,
+      vesselName: doc.vesselName,
+      imo: doc.imo,
+      voyageId: doc.voyageId,
+      shipper: doc.shipper,
+      consignee: doc.consignee,
+      notifyParty: doc.notifyParty,
+      cargo: doc.cargo,
+      quantity: doc.quantity,
+      quantityMt: String(doc.quantityMt),
+      unit: doc.unit,
+      originPort: doc.originPort,
+      destinationPort: doc.destinationPort,
+      status: doc.status,
+      lcRef: doc.lcRef,
+      lcIssuer: doc.lcIssuer,
+      lcAmount: String(doc.lcAmount),
+      lcStatus: doc.lcStatus,
+      autoLcRelease: doc.autoLcRelease,
+      transferCount: doc.transferCount,
+      deliveryConfirmed: doc.deliveryConfirmed,
+      createdAt: doc.createdAt,
+      updatedAt: doc.updatedAt,
+    });
+    if (events.length > 0) {
+      await tx.insert(vesselsBolChainEventsTable).values(
+        events.map((e, i) => ({
+          bolId: doc.id,
+          sequence: i + 1,
+          eventType: e.eventType,
+          actor: e.actor,
+          eventTimestamp: e.timestamp,
+          confirmed: e.confirmed,
+        })),
+      );
+    }
+  });
+}
+
+async function appendChainEvent(
+  bolId: string,
+  event: PersistedEventInput,
+  patch: Partial<{ consignee: string; status: string; transferCount: number; updatedAt: string; deliveryConfirmed: boolean }>,
+): Promise<void> {
+  await db.transaction(async (tx) => {
+    const existing = await tx
+      .select({ maxSeq: sql<number>`COALESCE(MAX(${vesselsBolChainEventsTable.sequence}), 0)` })
+      .from(vesselsBolChainEventsTable)
+      .where(eq(vesselsBolChainEventsTable.bolId, bolId));
+    const nextSeq = (existing[0]?.maxSeq ?? 0) + 1;
+    await tx.insert(vesselsBolChainEventsTable).values({
+      bolId,
+      sequence: nextSeq,
+      eventType: event.eventType,
+      actor: event.actor,
+      eventTimestamp: event.timestamp,
+      confirmed: event.confirmed,
+    });
+    if (Object.keys(patch).length > 0) {
+      await tx.update(vesselsBillsOfLadingTable).set(patch).where(eq(vesselsBillsOfLadingTable.id, bolId));
+    }
+  });
+}
+
+// First-run seed — inserts the demo BoLs only when the table is empty.
+// Idempotent across restarts: subsequent boots see existing rows and skip.
+// We cache the in-flight promise to avoid concurrent seed races, but clear it
+// on failure so that the next request retries (the BoL tables may not exist
+// yet during the brief window between server boot and runMigrations completing).
+let seedPromise: Promise<void> | null = null;
+function ensureBolSeed(): Promise<void> {
+  if (!seedPromise) {
+    seedPromise = seedBolIfEmpty().catch((err) => {
+      seedPromise = null;
+      throw err;
+    });
+  }
+  return seedPromise;
+}
+
+async function seedBolIfEmpty(): Promise<void> {
+  try {
+    const existing = await db
+      .select({ count: sql<number>`COUNT(*)::int` })
+      .from(vesselsBillsOfLadingTable);
+    if ((existing[0]?.count ?? 0) > 0) return;
+
+    const docs: Array<Omit<BolDocument, "chain" | "genesisHash" | "headHash">> = [
     {
       id: "BOL-2026-4471",
       vesselName: "Pacific Navigator", imo: "9234891", voyageId: "VOY-2026-018",
@@ -568,25 +761,35 @@ function seedBol() {
     ],
   };
 
-  for (const doc of docs) {
-    const events = chainEvents[doc.id] ?? [];
-    const chain = buildChain(events);
-    bolStore.set(doc.id, {
-      ...doc,
-      chain,
-      genesisHash: chain[0]?.hash ?? "",
-      headHash: chain[chain.length - 1]?.hash ?? "",
-    });
+    for (const doc of docs) {
+      const events = chainEvents[doc.id] ?? [];
+      const chain = buildChain(events);
+      const seedDoc: BolDocument = {
+        ...doc,
+        chain,
+        genesisHash: chain[0]?.hash ?? "",
+        headHash: chain[chain.length - 1]?.hash ?? "",
+      };
+      try {
+        await insertBol(seedDoc, events);
+      } catch (err) {
+        // Concurrent boots may race; ignore unique-violation duplicates.
+        const code = (err as { code?: string }).code;
+        if (code !== "23505") throw err;
+      }
+    }
+  } catch (err) {
+    // Surface seed errors so callers can retry (e.g. when the table does not
+    // exist yet at boot, runMigrations will create it before the next request).
+    console.error("[vessels-modules] BoL seed failed:", err);
+    throw err;
   }
 }
 
-seedBol();
-
-router.get("/vessels/modules/bills-of-lading", authMiddleware(), (_req, res) => {
+router.get("/vessels/modules/bills-of-lading", authMiddleware(), async (_req, res) => {
   try {
-    const list = Array.from(bolStore.values()).sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
+    await ensureBolSeed();
+    const list = await loadAllBols();
     const totals = {
       count: list.length,
       totalTradeValue: list.reduce((s, d) => s + d.lcAmount, 0),
@@ -599,9 +802,10 @@ router.get("/vessels/modules/bills-of-lading", authMiddleware(), (_req, res) => 
   }
 });
 
-router.get("/vessels/modules/bills-of-lading/:id", authMiddleware(), (req: Request, res) => {
+router.get("/vessels/modules/bills-of-lading/:id", authMiddleware(), async (req: Request, res) => {
   try {
-    const doc = bolStore.get(req.params.id);
+    await ensureBolSeed();
+    const doc = await loadBolById(req.params.id as string);
     if (!doc) { sendNotFound(res, "BillOfLading"); return; }
     sendSuccess(res, doc);
   } catch (err) {
@@ -609,8 +813,9 @@ router.get("/vessels/modules/bills-of-lading/:id", authMiddleware(), (req: Reque
   }
 });
 
-router.post("/vessels/modules/bills-of-lading", validateBody(jsonObjectBodySchema), authMiddleware(), (req: Request, res) => {
+router.post("/vessels/modules/bills-of-lading", validateBody(jsonObjectBodySchema), authMiddleware(), async (req: Request, res) => {
   try {
+    await ensureBolSeed();
     const { vesselName, imo, voyageId, shipper, consignee, notifyParty, cargo, quantityMt, unit, originPort, destinationPort, lcRef, lcIssuer, lcAmount } = req.body ?? {};
     if (!vesselName || !shipper || !consignee || !cargo || !originPort || !destinationPort) {
       sendBadRequest(res, "Missing required fields: vesselName, shipper, consignee, cargo, originPort, destinationPort");
@@ -618,7 +823,7 @@ router.post("/vessels/modules/bills-of-lading", validateBody(jsonObjectBodySchem
     }
     const id = `BOL-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
     const now = new Date().toISOString();
-    const events = [{ eventType: "BoL Created", actor: shipper, timestamp: now, confirmed: true }];
+    const events: PersistedEventInput[] = [{ eventType: "BoL Created", actor: shipper, timestamp: now, confirmed: true }];
     const chain = buildChain(events);
     const doc: BolDocument = {
       id, vesselName, imo: imo ?? "", voyageId: voyageId ?? "",
@@ -634,7 +839,7 @@ router.post("/vessels/modules/bills-of-lading", validateBody(jsonObjectBodySchem
       deliveryConfirmed: false,
       chain, genesisHash: chain[0]?.hash ?? "", headHash: chain[0]?.hash ?? "",
     };
-    bolStore.set(id, doc);
+    await insertBol(doc, events);
     sendCreated(res, doc);
   } catch (err) {
     handleRouteError(res, err, "Failed to create bill of lading");
@@ -642,27 +847,23 @@ router.post("/vessels/modules/bills-of-lading", validateBody(jsonObjectBodySchem
 });
 
 // Transfer a BoL (add an endorsement event)
-router.post("/vessels/modules/bills-of-lading/:id/transfer", validateBody(jsonObjectBodySchema), authMiddleware(), (req: Request, res) => {
+router.post("/vessels/modules/bills-of-lading/:id/transfer", validateBody(jsonObjectBodySchema), authMiddleware(), async (req: Request, res) => {
   try {
-    const doc = bolStore.get(req.params.id);
-    if (!doc) { sendNotFound(res, "BillOfLading"); return; }
+    await ensureBolSeed();
+    const existing = await loadBolById(req.params.id as string);
+    if (!existing) { sendNotFound(res, "BillOfLading"); return; }
     const { newConsignee, actor } = req.body ?? {};
     if (!newConsignee || !actor) { sendBadRequest(res, "Missing newConsignee or actor"); return; }
     const now = new Date().toISOString();
-    const newEvent = { eventType: "BoL Transferred", actor, timestamp: now, confirmed: true };
-    const updatedEvents = doc.chain.map(e => ({ eventType: e.eventType, actor: e.actor, timestamp: e.timestamp, confirmed: e.confirmed }));
-    updatedEvents.push(newEvent);
-    const newChain = buildChain(updatedEvents);
-    const updated: BolDocument = {
-      ...doc,
+    const newEvent: PersistedEventInput = { eventType: "BoL Transferred", actor, timestamp: now, confirmed: true };
+    await appendChainEvent(existing.id, newEvent, {
       consignee: newConsignee,
       status: "transferred",
-      transferCount: doc.transferCount + 1,
+      transferCount: existing.transferCount + 1,
       updatedAt: now,
-      chain: newChain,
-      headHash: newChain[newChain.length - 1]?.hash ?? doc.headHash,
-    };
-    bolStore.set(doc.id, updated);
+    });
+    const updated = await loadBolById(existing.id);
+    if (!updated) { sendNotFound(res, "BillOfLading"); return; }
     sendSuccess(res, updated);
   } catch (err) {
     handleRouteError(res, err, "Failed to transfer bill of lading");
@@ -670,9 +871,10 @@ router.post("/vessels/modules/bills-of-lading/:id/transfer", validateBody(jsonOb
 });
 
 // Verify a BoL's chain integrity
-router.get("/vessels/modules/bills-of-lading/:id/verify", authMiddleware(), (req: Request, res) => {
+router.get("/vessels/modules/bills-of-lading/:id/verify", authMiddleware(), async (req: Request, res) => {
   try {
-    const doc = bolStore.get(req.params.id);
+    await ensureBolSeed();
+    const doc = await loadBolById(req.params.id as string);
     if (!doc) { sendNotFound(res, "BillOfLading"); return; }
     let valid = true;
     let prevHash = "0000000000000000000000000000000000000000000000000000000000000000";

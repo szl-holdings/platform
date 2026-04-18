@@ -14,6 +14,7 @@ export * from "./apps_registry";
 export * from "./stephen_site";
 export * from "./stephen";
 export * from "./vessels";
+export * from "./vessels_bol";
 export * from "./firestorm";
 export * from "./lyte";
 export * from "./dreamscape";
