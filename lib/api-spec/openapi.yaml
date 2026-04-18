@@ -2516,7 +2516,7 @@ paths:
                   daysOnMarket: { type: number }
                   updatedAt: { type: string, format: date-time }
         "429":
-          description: Rate limit exceeded
+          $ref: "#/components/responses/RateLimited"
   /terra/reit-filings:
     get:
       operationId: getTerraReitFilings
@@ -2540,7 +2540,7 @@ paths:
                     filedAt: { type: string, format: date-time }
                     url: { type: string }
         "429":
-          description: Rate limit exceeded
+          $ref: "#/components/responses/RateLimited"
   /terra/demographics:
     get:
       operationId: getTerraDemographics
@@ -2558,7 +2558,7 @@ paths:
                 type: object
                 additionalProperties: true
         "429":
-          description: Rate limit exceeded
+          $ref: "#/components/responses/RateLimited"
   /terra/property-risk:
     get:
       operationId: getTerraPropertyRisk
@@ -2576,7 +2576,7 @@ paths:
                 type: object
                 additionalProperties: true
         "429":
-          description: Rate limit exceeded
+          $ref: "#/components/responses/RateLimited"
   /terra/employment-outlook:
     get:
       operationId: getTerraEmploymentOutlook
@@ -2602,7 +2602,7 @@ paths:
                   jobGrowthRate: { type: number }
                   topEmployers: { type: array, items: { type: string } }
         "429":
-          description: Rate limit exceeded
+          $ref: "#/components/responses/RateLimited"
   /terra/sector-performance:
     get:
       operationId: getTerraSectorPerformance
@@ -2625,7 +2625,7 @@ paths:
                     capRate: { type: number }
                     vacancyRate: { type: number }
         "429":
-          description: Rate limit exceeded
+          $ref: "#/components/responses/RateLimited"
   /terra/geocode:
     get:
       operationId: terraGeocode
@@ -2750,7 +2750,7 @@ paths:
                     items:
                       $ref: "#/components/schemas/MLSListing"
         "429":
-          description: Rate limit exceeded
+          $ref: "#/components/responses/RateLimited"
   /terra/commercial/properties:
     get:
       operationId: getTerraCommercialProperties
@@ -2792,7 +2792,7 @@ paths:
                     items:
                       $ref: "#/components/schemas/CommercialProperty"
         "429":
-          description: Rate limit exceeded
+          $ref: "#/components/responses/RateLimited"
   /terra/commercial/comps:
     get:
       operationId: getTerraCommercialComps
@@ -2832,7 +2832,7 @@ paths:
                         pricePerSqft: { type: number }
                         soldAt: { type: string, format: date-time }
         "429":
-          description: Rate limit exceeded
+          $ref: "#/components/responses/RateLimited"
   /terra/enterprise/flags:
     get:
       operationId: getTerraEnterpriseFlags
@@ -3449,7 +3449,7 @@ paths:
                     vessels: { type: integer }
                     avgDelayHours: { type: number }
         "429":
-          description: Rate limit exceeded
+          $ref: "#/components/responses/RateLimited"
   /vessels/live/geopolitical-events:
     get:
       operationId: getVesselLiveGeopoliticalEvents
@@ -3475,7 +3475,7 @@ paths:
                     affectedRoutes: { type: array, items: { type: string } }
                     startedAt: { type: string, format: date-time }
         "429":
-          description: Rate limit exceeded
+          $ref: "#/components/responses/RateLimited"
   /vessels/live/port-congestion:
     get:
       operationId: getVesselLivePortCongestion
@@ -3500,7 +3500,7 @@ paths:
                     anchoredVessels: { type: integer }
                     avgWaitHours: { type: number }
         "429":
-          description: Rate limit exceeded
+          $ref: "#/components/responses/RateLimited"
   /vessels/live/weather-marine:
     get:
       operationId: getVesselLiveMarineWeather
@@ -3536,7 +3536,7 @@ paths:
                     items:
                       type: object
         "429":
-          description: Rate limit exceeded
+          $ref: "#/components/responses/RateLimited"
   /vessels/events:
     get:
       operationId: listVesselEvents
@@ -5147,7 +5147,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/HoldingsInquiry"
         "429":
-          description: Rate limit exceeded
+          $ref: "#/components/responses/RateLimited"
   /holdings/inquiries/{id}:
     delete:
       operationId: deleteHoldingsInquiry
@@ -7256,7 +7256,7 @@ paths:
         "400":
           $ref: "#/components/responses/BadRequest"
         "429":
-          description: Rate limit exceeded
+          $ref: "#/components/responses/RateLimited"
 
   /webhooks:
     post:
@@ -7748,6 +7748,43 @@ components:
               message: { type: string }
               statusCode: { type: integer }
               code: { type: string }
+    RateLimited:
+      description: |
+        Rate limit exceeded. Clients should back off until the time indicated
+        by the `Retry-After` header (seconds) or the `X-RateLimit-Reset`
+        header (Unix epoch seconds).
+      headers:
+        X-RateLimit-Limit:
+          description: Maximum number of requests allowed in the current window.
+          schema: { type: integer }
+        X-RateLimit-Remaining:
+          description: Requests remaining in the current window.
+          schema: { type: integer }
+        X-RateLimit-Reset:
+          description: Unix epoch (seconds) when the current window resets.
+          schema: { type: integer }
+        Retry-After:
+          description: Seconds the client should wait before retrying.
+          schema: { type: integer }
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error: { type: string }
+              message: { type: string }
+              statusCode: { type: integer, example: 429 }
+              code: { type: string, example: RATE_LIMITED }
+  headers:
+    XRateLimitLimit:
+      description: Maximum number of requests allowed in the current window.
+      schema: { type: integer }
+    XRateLimitRemaining:
+      description: Requests remaining in the current window.
+      schema: { type: integer }
+    XRateLimitReset:
+      description: Unix epoch (seconds) when the current window resets.
+      schema: { type: integer }
   schemas:
     UploadUrlRequest:
       type: object

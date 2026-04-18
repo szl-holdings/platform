@@ -30,8 +30,13 @@ function makeServiceUnavailableHandler(message: string) {
 export const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: isProduction ? 200 : 1000,
+  // Emit BOTH the IETF draft `RateLimit-*` headers (standard) and the
+  // widely-implemented legacy `X-RateLimit-Limit/Remaining/Reset` headers.
+  // Legacy headers are what most SDKs and our public OpenAPI documents,
+  // so we keep them on by default. `Retry-After` is added automatically
+  // by express-rate-limit on 429 responses.
   standardHeaders: true,
-  legacyHeaders: false,
+  legacyHeaders: true,
   handler: makeRateLimitHandler("Too many requests, please try again later."),
   skip: (req) =>
     req.path === "/api/health" ||
@@ -44,7 +49,7 @@ export const writeLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: isProduction ? 100 : 500,
   standardHeaders: true,
-  legacyHeaders: false,
+  legacyHeaders: true,
   handler: makeRateLimitHandler("Too many write requests, please try again later."),
 }) as unknown as RequestHandler;
 
@@ -52,7 +57,7 @@ export const readLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: isProduction ? 600 : 2000,
   standardHeaders: true,
-  legacyHeaders: false,
+  legacyHeaders: true,
   handler: makeRateLimitHandler("Too many requests, please try again later."),
 }) as unknown as RequestHandler;
 
@@ -60,7 +65,7 @@ export const publicSubmitLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   max: isProduction ? 5 : 50,
   standardHeaders: true,
-  legacyHeaders: false,
+  legacyHeaders: true,
   handler: makeRateLimitHandler("Too many submissions from this IP. Please try again in an hour."),
 }) as unknown as RequestHandler;
 
@@ -74,7 +79,7 @@ export const publicUploadLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   max: isProduction ? 60 : 300,
   standardHeaders: true,
-  legacyHeaders: false,
+  legacyHeaders: true,
   handler: makeRateLimitHandler("Too many file uploads from this IP. Please try again in an hour."),
 }) as unknown as RequestHandler;
 
@@ -82,7 +87,7 @@ export const gdprLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   max: isProduction ? 3 : 30,
   standardHeaders: true,
-  legacyHeaders: false,
+  legacyHeaders: true,
   handler: makeRateLimitHandler("Too many data requests from this IP. Please try again in an hour."),
 }) as unknown as RequestHandler;
 

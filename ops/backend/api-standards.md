@@ -77,6 +77,23 @@ Generated: 2026-04-15
 | Public submissions | 5 requests | 1 hour | Per IP for contact/demo endpoints |
 | AI/billing mutations | — | — | Idempotency enforced; subject to write limits |
 
+### Rate Limit Headers
+
+Every response from a rate-limited route advertises remaining quota so clients
+can pace themselves and avoid 429s. The following headers are emitted on **all**
+responses (2xx and 4xx alike):
+
+| Header | Description |
+|--------|-------------|
+| `X-RateLimit-Limit` | Maximum requests allowed in the current window. |
+| `X-RateLimit-Remaining` | Requests remaining in the current window. |
+| `X-RateLimit-Reset` | Unix epoch (seconds) when the window resets. |
+| `RateLimit-Policy` | IETF draft policy descriptor, e.g. `100;w=60;sliding`. |
+
+On 429 responses an additional `Retry-After` header (seconds) is included.
+The OpenAPI spec documents this contract via the shared
+`#/components/responses/RateLimited` response object.
+
 ## Authentication
 
 ### Cookie Sessions
