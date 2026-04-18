@@ -97,6 +97,8 @@ const WorldModelExplorer = lazy(() => import("./pages/cognitive/world-model"));
 const ReplayLab = lazy(() => import("./pages/replay-lab"));
 const EvalLab = lazy(() => import("./pages/eval-lab"));
 const RunConsole = lazy(() => import("./pages/run-console").then((m) => ({ default: m.RunConsole })));
+const EvidenceExplorer = lazy(() => import("./pages/evidence-explorer"));
+const EvalStudio = lazy(() => import("./pages/eval-studio"));
 const TrustConsole = lazy(() => import("./pages/trust-console"));
 const CognitiveMemory = lazy(() => import("./pages/cognitive/memory"));
 const CognitivePlanner = lazy(() => import("./pages/cognitive/planner"));
@@ -325,6 +327,8 @@ function AppShell() {
               <Route path="/operations/alloy/replay-lab" component={() => <ReplayLab />} />
               <Route path="/operations/alloy/eval-lab" component={() => <EvalLab />} />
               <Route path="/operations/runs" component={() => <RunConsole />} />
+              <Route path="/operations/evidence-explorer" component={() => <EvidenceExplorer />} />
+              <Route path="/operations/eval-studio" component={() => <EvalStudio />} />
               <Route path="/operations/alloy/trust-console" component={() => <TrustConsole />} />
               <Route path="/operations/alloy/proof" component={() => <AlloyProofPage />} />
               <Route path="/governed-cockpit" component={() => <GovernedCockpitPage />} />

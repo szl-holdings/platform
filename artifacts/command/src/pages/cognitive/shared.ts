@@ -38,6 +38,81 @@ export async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> 
   return res.json() as Promise<T>;
 }
 
+export interface OtelSpan {
+  name: string;
+  attributes: Record<string, unknown>;
+  durationMs: number;
+  status: "ok" | "error";
+  errorMessage?: string;
+  traceId?: string;
+  timestamp: number;
+}
+
+let _spanBuffer: OtelSpan[] = [];
+let _flushTimer: ReturnType<typeof setTimeout> | null = null;
+
+function scheduleFlush() {
+  if (_flushTimer) return;
+  _flushTimer = setTimeout(() => {
+    _flushTimer = null;
+    const batch = _spanBuffer.splice(0);
+    if (batch.length === 0) return;
+    const url = apiUrl("/telemetry/events");
+    fetch(url, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        app: "command",
+        events: batch.map((s) => ({
+          name: s.name,
+          timestamp: s.timestamp,
+          properties: {
+            ...s.attributes,
+            duration_ms: s.durationMs,
+            status: s.status,
+            ...(s.errorMessage ? { error: s.errorMessage } : {}),
+            ...(s.traceId ? { trace_id: s.traceId } : {}),
+          },
+        })),
+      }),
+    }).catch(() => {});
+  }, 300);
+}
+
+export function emitSpan(span: Omit<OtelSpan, "timestamp">) {
+  _spanBuffer.push({ ...span, timestamp: Date.now() });
+  scheduleFlush();
+}
+
+export async function tracedFetch<T>(
+  name: string,
+  url: string,
+  attributes: Record<string, unknown>,
+  init?: RequestInit
+): Promise<T> {
+  const start = performance.now();
+  try {
+    const result = await fetchJson<T>(url, init);
+    emitSpan({
+      name,
+      attributes: { ...attributes, "app.api_call.path": url, "app.api_call.method": init?.method ?? "GET", "app.api_call.status": 200 },
+      durationMs: performance.now() - start,
+      status: "ok",
+    });
+    return result;
+  } catch (err) {
+    emitSpan({
+      name,
+      attributes: { ...attributes, "app.api_call.path": url, "app.api_call.method": init?.method ?? "GET", "app.api_call.status": 0 },
+      durationMs: performance.now() - start,
+      status: "error",
+      errorMessage: err instanceof Error ? err.message : String(err),
+    });
+    throw err;
+  }
+}
+
 export const OUTCOME_COLORS: Record<string, string> = {
   success: "#22c55e",
   pass: "#22c55e",

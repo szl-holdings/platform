@@ -175,3 +175,146 @@ export interface GenAIRetrievalContract {
   correlationId?: string;
   timestamp: number;
 }
+
+export const AGENT_RUN_ATTRS = {
+  RUN_ID:                "agent.run.id",
+  RUN_OBJECTIVE:         "agent.run.objective",
+  RUN_OUTCOME:           "agent.run.outcome",
+  RUN_AUTONOMY_MODE:     "agent.run.autonomy_mode",
+  RUN_LATENCY_MS:        "agent.run.latency_ms",
+  RUN_COST_USD:          "agent.run.cost_usd",
+  RUN_TOTAL_TOKENS:      "agent.run.total_tokens",
+  RUN_TOOL_CALL_COUNT:   "agent.run.tool_call_count",
+  RUN_EVIDENCE_COUNT:    "agent.run.evidence_count",
+  RUN_POLICY_GATE_COUNT: "agent.run.policy_gate_count",
+  RUN_APPROVAL_COUNT:    "agent.run.approval_count",
+  RUN_RETRY_COUNT:       "agent.run.retry_count",
+  RUN_HAS_FAILURE:       "agent.run.has_failure",
+  RUN_FAILURE_POINT:     "agent.run.failure_point",
+  RUN_HUMAN_HANDOFF:     "agent.run.human_handoff",
+  RUN_DOMAIN:            "agent.run.domain",
+  RUN_USER_ID:           "agent.run.user_id",
+  RUN_SESSION_ID:        "agent.run.session_id",
+
+  POLICY_GATE_ID:        "agent.policy_gate.id",
+  POLICY_GATE_DECISION:  "agent.policy_gate.decision",
+  POLICY_GATE_REASON:    "agent.policy_gate.reason",
+  POLICY_GATE_TIER:      "agent.policy_gate.tier",
+
+  EVIDENCE_ID:           "agent.evidence.id",
+  EVIDENCE_SOURCE:       "agent.evidence.source",
+  EVIDENCE_KIND:         "agent.evidence.kind",
+  EVIDENCE_CONFIDENCE:   "agent.evidence.confidence",
+  EVIDENCE_ENTITY_ID:    "agent.evidence.entity_id",
+
+  HANDOFF_TYPE:          "agent.handoff.type",
+  HANDOFF_TO:            "agent.handoff.to",
+  HANDOFF_REASON:        "agent.handoff.reason",
+
+  EVAL_SUITE_ID:         "agent.eval.suite_id",
+  EVAL_RUN_ID:           "agent.eval.run_id",
+  EVAL_PASS_RATE:        "agent.eval.pass_rate",
+  EVAL_AVG_SCORE:        "agent.eval.avg_score",
+  EVAL_HAS_REGRESSION:   "agent.eval.has_regression",
+  EVAL_VARIANT_MODEL:    "agent.eval.variant_model",
+  EVAL_VARIANT_STRATEGY: "agent.eval.variant_strategy",
+  EVAL_VARIANT_PROMPT:   "agent.eval.variant_prompt",
+
+  PAGE_LOAD_PATH:        "app.page_load.path",
+  PAGE_LOAD_LATENCY_MS:  "app.page_load.latency_ms",
+  API_CALL_PATH:         "app.api_call.path",
+  API_CALL_METHOD:       "app.api_call.method",
+  API_CALL_STATUS:       "app.api_call.status",
+  API_CALL_LATENCY_MS:   "app.api_call.latency_ms",
+  CACHE_HIT:             "app.cache.hit",
+  CACHE_KEY:             "app.cache.key",
+} as const;
+
+export type AgentRunAttrKey = (typeof AGENT_RUN_ATTRS)[keyof typeof AGENT_RUN_ATTRS];
+
+export interface AgentRunContract {
+  traceId: string;
+  spanId?: string;
+  runId: string;
+  agentId: string;
+  agentName?: string;
+  domain: string;
+  userId?: string;
+  sessionId?: string;
+  objective: string;
+  autonomyMode: "autonomous" | "supervised" | "advisory" | "read-only";
+  outcome: "success" | "partial" | "blocked" | "failed";
+  latencyMs: number;
+  costUsd?: number;
+  totalTokens?: number;
+  toolCallCount?: number;
+  evidenceCount?: number;
+  policyGateCount?: number;
+  approvalCount?: number;
+  retryCount?: number;
+  hasFailure?: boolean;
+  failurePoint?: string;
+  humanHandoff?: boolean;
+  correlationId?: string;
+  timestamp: number;
+}
+
+export interface AgentEvalRunContract {
+  traceId?: string;
+  spanId?: string;
+  evalSuiteId: string;
+  evalRunId: string;
+  domain?: string;
+  passRate: number;
+  avgScore: number;
+  totalCases: number;
+  passed: number;
+  failed: number;
+  hasRegression: boolean;
+  regressionSeverity: "none" | "minor" | "major" | "critical";
+  triggeredBy?: string;
+  avgLatencyMs?: number;
+  totalCostUsd?: number;
+  variantModel?: string;
+  variantStrategy?: string;
+  variantPrompt?: string;
+  timestamp: number;
+}
+
+export interface AgentEvidenceAccessContract {
+  traceId: string;
+  spanId?: string;
+  runId: string;
+  evidenceId: string;
+  source: string;
+  kind: "raw" | "normalized" | "derived";
+  entityId?: string;
+  confidence?: number;
+  accessType: "read" | "write";
+  latencyMs?: number;
+  cacheHit?: boolean;
+  timestamp: number;
+}
+
+export interface AgentPolicyGateContract {
+  traceId: string;
+  spanId?: string;
+  runId: string;
+  policyId: string;
+  decision: "allow" | "block" | "escalate" | "require_approval";
+  tier?: string;
+  reason?: string;
+  latencyMs?: number;
+  timestamp: number;
+}
+
+export interface AgentHandoffContract {
+  traceId: string;
+  spanId?: string;
+  runId: string;
+  handoffType: "human" | "agent" | "queue";
+  handoffTo: string;
+  reason?: string;
+  priority?: "low" | "medium" | "high" | "critical";
+  timestamp: number;
+}

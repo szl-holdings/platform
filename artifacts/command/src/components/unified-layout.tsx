@@ -103,6 +103,8 @@ const OPERATIONS_NAV: NavGroup[] = [
       { href: "/operations/alloy/intelligence", label: "Intelligence", icon: Brain },
       { href: "/operations/alloy/traces", label: "Execution Traces", icon: GitBranch },
       { href: "/operations/runs", label: "Run Console", icon: Play },
+      { href: "/operations/evidence-explorer", label: "Evidence Explorer", icon: Database },
+      { href: "/operations/eval-studio", label: "Eval Studio", icon: FlaskConical },
       { href: "/operations/ownership", label: "Ownership Map", icon: Users },
     ],
   },

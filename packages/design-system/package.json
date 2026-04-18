@@ -20,6 +20,11 @@
     "./cockpit/graph-canvas": "./src/cockpit/GraphCanvas.tsx",
     "./cockpit/map-surface": "./src/cockpit/MapSurface.tsx",
     "./cockpit/narrative-panel": "./src/cockpit/NarrativePanel.tsx",
+    "./cockpit/run-timeline": "./src/cockpit/RunTimeline.tsx",
+    "./cockpit/evidence-drawer": "./src/cockpit/EvidenceDrawer.tsx",
+    "./cockpit/recommendation-card": "./src/cockpit/RecommendationCard.tsx",
+    "./cockpit/approval-dialog": "./src/cockpit/ApprovalDialog.tsx",
+    "./cockpit/audit-rail": "./src/cockpit/AuditRail.tsx",
     "./alloy-bridge": "./src/alloy-bridge.ts"
   },
   "peerDependencies": {
