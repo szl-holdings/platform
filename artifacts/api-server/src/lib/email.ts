@@ -724,6 +724,29 @@ export function buildStephenContactAckEmail(name: string, inquiryType: string): 
   `);
 }
 
+export function buildStephenStatusUpdateEmail(args: {
+  name: string;
+  status: "confirmed" | "declined" | "completed";
+  note?: string;
+}): string {
+  const headlines: Record<typeof args.status, string> = {
+    confirmed: "Design partner application accepted",
+    declined: "Design partner application update",
+    completed: "Design partner engagement complete",
+  };
+  const bodies: Record<typeof args.status, string> = {
+    confirmed: `Thank you, ${args.name}. Your application has been accepted. I'll follow up shortly to schedule a working session and share the design partner brief.`,
+    declined: `Thank you, ${args.name}, for your interest in becoming a design partner. After review, we are not moving this conversation forward at this time. I appreciate the time you took to write in and wish you the very best.`,
+    completed: `Thank you, ${args.name}. Marking our design partner engagement as complete. It has been a pleasure to build alongside your team.`,
+  };
+  return stephenBrand(`
+    <h2>${headlines[args.status]}</h2>
+    <p>${bodies[args.status]}</p>
+    ${args.note ? `<div class="highlight"><p class="label">A note from Stephen</p><p>${args.note.replace(/\n/g, "<br />")}</p></div>` : ""}
+    <p>If you'd like to follow up directly, just reply to this email.</p>
+  `);
+}
+
 export function buildStephenContactNotificationEmail(inquiry: {
   name: string;
   email: string;

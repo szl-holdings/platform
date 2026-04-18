@@ -10,7 +10,7 @@ import {
   alloySignals,
 } from "@szl-holdings/db";
 import { z } from "zod";
-import { eq, desc, asc } from "drizzle-orm";
+import { eq, desc, asc, and } from "drizzle-orm";
 
 const CONTENT_BLOCK_TYPES = ["achievement", "about", "service", "stat", "skill", "thesis", "doctrine"] as const;
 const BOOKING_TYPES = ["consultation", "project", "recruitment", "partnership", "investment", "speaking", "other"] as const;
@@ -63,6 +63,7 @@ import {
   sendEmail,
   buildStephenContactAckEmail,
   buildStephenContactNotificationEmail,
+  buildStephenStatusUpdateEmail,
   STEPHEN_ADMIN_EMAIL,
 } from "../lib/email";
 import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
@@ -342,17 +343,88 @@ router.delete("/stephen/portfolio-case-studies/:slug", validateBody(jsonObjectBo
   }
 });
 
-router.get("/stephen/booking-requests", async (_req, res) => {
+const BOOKING_STATUSES = ["pending", "confirmed", "declined", "completed"] as const;
+const ListBookingRequestsQuery = z.object({
+  type: z.enum(BOOKING_TYPES).optional(),
+  status: z.enum(BOOKING_STATUSES).optional(),
+});
+
+router.get("/stephen/booking-requests", authMiddleware(), requireRole("ops"), async (req, res) => {
   try {
-    const requests = await db
-      .select()
-      .from(stephenBookingRequestsTable)
-      .orderBy(desc(stephenBookingRequestsTable.createdAt));
+    const query = ListBookingRequestsQuery.parse(req.query);
+    const filters = [
+      query.type ? eq(stephenBookingRequestsTable.type, query.type as any) : undefined,
+      query.status ? eq(stephenBookingRequestsTable.status, query.status as any) : undefined,
+    ].filter(Boolean) as any[];
+    const whereClause = filters.length === 0
+      ? undefined
+      : filters.length === 1
+        ? filters[0]
+        : and(...filters);
+    const requests = whereClause
+      ? await db.select().from(stephenBookingRequestsTable).where(whereClause).orderBy(desc(stephenBookingRequestsTable.createdAt))
+      : await db.select().from(stephenBookingRequestsTable).orderBy(desc(stephenBookingRequestsTable.createdAt));
     res.json(requests.map(serializeBookingRequest));
   } catch (err) {
-    res.status(500).json({ error: "Failed to list booking requests" });
+    handleError(err, req, res, "Failed to list booking requests");
   }
 });
+
+const UpdateBookingRequestParams = z.object({ id: z.coerce.number().int().positive() });
+const UpdateBookingRequestBody = z.object({
+  status: z.enum(BOOKING_STATUSES),
+  note: z.string().max(2000).optional(),
+});
+
+router.patch(
+  "/stephen/booking-requests/:id",
+  authMiddleware(),
+  requireRole("ops"),
+  validateBody(jsonObjectBodySchema),
+  async (req, res) => {
+    try {
+      const { id } = UpdateBookingRequestParams.parse({ id: req.params.id });
+      const body = UpdateBookingRequestBody.parse(req.body);
+
+      const [updated] = await db
+        .update(stephenBookingRequestsTable)
+        .set({ status: body.status })
+        .where(eq(stephenBookingRequestsTable.id, id))
+        .returning();
+      if (!updated) {
+        sendNotFound(res, "Booking request");
+        return;
+      }
+
+      if (body.status === "confirmed" || body.status === "declined" || body.status === "completed") {
+        sendEmail({
+          to: updated.email,
+          subject: body.status === "confirmed"
+            ? "Design partner application accepted — Stephen Lutar"
+            : body.status === "declined"
+              ? "Design partner application update — Stephen Lutar"
+              : "Design partner engagement complete — Stephen Lutar",
+          html: buildStephenStatusUpdateEmail({
+            name: updated.name,
+            status: body.status,
+            note: body.note,
+          }),
+          replyTo: STEPHEN_ADMIN_EMAIL,
+        }).then((result) => {
+          if (!result.success) {
+            logger.warn({ error: result.error, id }, "[email] Stephen status update delivery failed");
+          }
+        }).catch((err) => {
+          logger.warn({ err, id }, "[email] Stephen status update threw");
+        });
+      }
+
+      sendSuccess(res, serializeBookingRequest(updated));
+    } catch (err) {
+      handleError(err, req, res, "Failed to update booking request");
+    }
+  },
+);
 
 router.post("/stephen/booking-requests", validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
