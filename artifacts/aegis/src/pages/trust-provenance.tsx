@@ -3,7 +3,7 @@ import { DashboardShell, SidebarNav } from "@szl-holdings/shared-ui/design-syste
 import { Shield, FileSearch, AlertCircle, CheckCircle, Clock, Loader2 } from "lucide-react";
 import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";
 import { ProofPanel, PolicyResult, AdminAuditTrail, SimulationCockpit } from "@szl-holdings/shared-ui";
-import type { ProofPanelData, PolicyDecisionRecord, AuditTrailEntry, SimulationScenario } from "@szl-holdings/shared-ui";
+import type { ProofPanelData, PolicyDecisionRecord, AuditTrailEntry, SimulationScenario, PredictedVsActual } from "@szl-holdings/shared-ui";
 
 function getCsrfToken(): string {
   const match = typeof document !== "undefined"
@@ -62,7 +62,7 @@ interface SimulationData {
   iterationsRun: number;
   confidenceLevel: number;
   lastRunAt: string;
-  predictedVsActual: Array<{ label: string; predicted: number; actual: number; format: string; unit: string; at: string; delta: number }>;
+  predictedVsActual: PredictedVsActual[];
   scenarios: SimulationScenario[];
 }
 

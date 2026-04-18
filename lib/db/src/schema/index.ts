@@ -138,3 +138,4 @@ export * from "./szl_decisioning";
 export * from "./decision_receipts";
 export * from "./replay_lab";
 export * from "./atlas_runs";
+export * from "./aegis_modules";

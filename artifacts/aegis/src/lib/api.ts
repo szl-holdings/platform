@@ -213,6 +213,40 @@ export const api = {
         { method: "POST" },
       ),
   },
+  digitalTwin: {
+    topology: () => apiFetch<any>("/aegis/digital-twin/topology"),
+    sync: () => apiFetch<any>("/aegis/digital-twin/sync", { method: "POST" }),
+    scenarios: () => apiFetch<any>("/aegis/digital-twin/scenarios"),
+    runScenario: (id: string) => apiFetch<any>(`/aegis/digital-twin/scenarios/${id}/run`, { method: "POST" }),
+  },
+  deception: {
+    honeypots: () => apiFetch<any>("/aegis/deception/honeypots"),
+    deployHoneypot: (data?: any) => apiFetch<any>("/aegis/deception/honeypots", { method: "POST", body: JSON.stringify(data ?? {}) }),
+    events: () => apiFetch<any>("/aegis/deception/events"),
+    pushIoc: (eventId: string) => apiFetch<any>(`/aegis/deception/events/${eventId}/push-ioc`, { method: "POST", body: JSON.stringify({}) }),
+  },
+  actionQueue: {
+    list: (params?: { status?: string; priority?: string; type?: string }) => {
+      const q = new URLSearchParams();
+      if (params?.status) q.set("status", params.status);
+      if (params?.priority) q.set("priority", params.priority);
+      if (params?.type) q.set("type", params.type);
+      return apiFetch<any>(`/aegis/action-queue${q.toString() ? `?${q}` : ""}`);
+    },
+    complete: (id: string, note?: string) => apiFetch<any>(`/aegis/action-queue/${id}/complete`, { method: "POST", body: JSON.stringify({ note }) }),
+    escalate: (id: string, note?: string) => apiFetch<any>(`/aegis/action-queue/${id}/escalate`, { method: "POST", body: JSON.stringify({ note }) }),
+    create: (data: any) => apiFetch<any>("/aegis/action-queue", { method: "POST", body: JSON.stringify(data) }),
+  },
+  soarBuilder: {
+    playbooks: () => apiFetch<any>("/aegis/soar-builder/playbooks"),
+    getPlaybook: (id: string) => apiFetch<any>(`/aegis/soar-builder/playbooks/${id}`),
+    createPlaybook: (data: any) => apiFetch<any>("/aegis/soar-builder/playbooks", { method: "POST", body: JSON.stringify(data) }),
+    updatePlaybook: (id: string, data: any) => apiFetch<any>(`/aegis/soar-builder/playbooks/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+    deletePlaybook: (id: string) => apiFetch<void>(`/aegis/soar-builder/playbooks/${id}`, { method: "DELETE" }),
+    runs: (playbookId?: string) => apiFetch<any>(`/aegis/soar-builder/runs${playbookId ? `?playbookId=${playbookId}` : ""}`),
+    execute: (playbookId: string, incidentId?: string, triggeredBy?: string) =>
+      apiFetch<any>("/aegis/soar-builder/execute", { method: "POST", body: JSON.stringify({ playbookId, incidentId, triggeredBy }) }),
+  },
   command: {
     posture: () => apiFetch<any>("/aegis/command/posture"),
     investigations: () => apiFetch<any>("/aegis/command/investigations"),

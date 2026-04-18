@@ -15,6 +15,7 @@ import aegisOpsRouter from "../msp";
 import * as rmm from "../rmm";
 import otIcsRouter from "../ot-ics";
 import aegisDigitalTwinRouter from "../aegis-digital-twin";
+import aegisModulesRouter from "../aegis-modules";
 
 const _readLimiter = perUserApiSlidingLimiter;
 
@@ -81,4 +82,5 @@ export function register(router: IRouter): void {
 
   router.use("/aegis", _readLimiter);
   router.use(aegisDigitalTwinRouter);
+  router.use(aegisModulesRouter);
 }
