@@ -3,6 +3,7 @@ import { motion as m } from "framer-motion";
 import { Sparkles, Users, Calendar, TrendingUp, BarChart3, MessageSquare, Target, Heart, Star, Award, Activity, Briefcase } from "lucide-react";
 import { ParticleField, PulseMetricCard, PulseThroughputChart, PulseHeader, PulseHealthGrid, PulseEventFeed, PulseFlowDiagram, PulseTechStack } from "@szl-holdings/shared-ui";
 import { PulseBriefingPanel } from "@szl-holdings/shared-ui/pulse-briefing-panel";
+import { CARLOTA_JO_RETENTION, metricDisplay } from "@/lib/claims";
 
 const AGENTS = [
   { name: "Compass CJ", domain: "strategy" },
@@ -123,7 +124,7 @@ export default function CarlotaJoPulse() {
           { label: "Engagements", value: "Active", color: "#10b981" },
           { label: "NPS", value: "92", color: "#ec4899" },
           { label: "Revenue", value: "$2.1M", color: "#d4a054" },
-          { label: "Retention", value: "98%", color: "#3b82f6" },
+          { label: "Retention", value: metricDisplay(CARLOTA_JO_RETENTION), color: "#3b82f6" },
           { label: "Referral", value: "67%", color: "#f59e0b" },
           { label: "CSAT", value: "4.9", color: "#8b5cf6" },
           { label: "Deliverables", value: "On Time", color: "#64748b" },

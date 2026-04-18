@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { AlertTriangle, ChevronDown, ChevronUp, Download, ExternalLink, Clock, Shield, Zap } from "lucide-react";
 import { getRiskColor, AGENTS, type BriefingSection, type RiskLevel } from "../lib/data";
-import { useTodaysBrief } from "../lib/api";
+import { useTodaysBrief, isDemoMode } from "../lib/api";
 import AgentBadge from "../components/AgentBadge";
 import ConfidenceChip from "../components/ConfidenceChip";
 import { ProofEnvelope, type AutonomyMode } from "@szl-holdings/design-system";
+import { PULSE_SYNTHESIZED_LABEL } from "../lib/claims";
 
 function RiskBadge({ risk }: { risk: RiskLevel }) {
   const color = getRiskColor(risk);
@@ -201,6 +202,27 @@ export default function TodaysBrief() {
               <div className="font-mono" style={{ fontSize: "0.65rem", color: "var(--pulse-text-muted)", letterSpacing: "0.05em" }}>
                 {new Date(brief.date).toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
               </div>
+              {isDemoMode() && (
+                <>
+                  <div style={{ width: 4, height: 4, borderRadius: "50%", background: "var(--pulse-border-bright)" }} />
+                  <div
+                    className="font-mono"
+                    title="This briefing is rendered from a synthesized fixture, not a freshly produced live agent response."
+                    style={{
+                      fontSize: "0.62rem",
+                      color: "var(--pulse-gold)",
+                      fontWeight: 600,
+                      letterSpacing: "0.08em",
+                      padding: "1px 6px",
+                      border: "1px solid var(--pulse-border-bright)",
+                      borderRadius: 3,
+                      textTransform: "none",
+                    }}
+                  >
+                    {PULSE_SYNTHESIZED_LABEL}
+                  </div>
+                </>
+              )}
             </div>
             <h1 className="font-serif" style={{ fontSize: "1.6rem", fontWeight: 500, color: "var(--pulse-text)", lineHeight: 1.35, maxWidth: 700, marginBottom: 10 }}>
               {brief.headline}

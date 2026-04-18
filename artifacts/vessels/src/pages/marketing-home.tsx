@@ -5,6 +5,7 @@ import { MarketingFooter } from "@/components/MarketingFooter";
 import { ContactModal, AnimatedCounter, NewsletterSubscribe } from "@szl-holdings/shared-ui";
 import { motion as m, useMotionValue, useTransform, animate } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
+import { VESSELS_UPTIME_SLA, metricDisplay } from "@/lib/claims";
 
 function OceanCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -412,7 +413,7 @@ export default function MarketingHomePage() {
                   { icon: Zap, label: "Real-time AIS ingestion", desc: "Sub-minute vessel positions with 90-day historical replay and anomaly detection." },
                   { icon: Lock, label: "Enterprise security", desc: "SOC 2 Type II. End-to-end encryption. Role-based access control. Full audit logging." },
                   { icon: Activity, label: "API-first architecture", desc: "REST and webhook APIs for every data point. Integrate with your existing stack." },
-                  { icon: Clock, label: "99.97% uptime SLA", desc: "Multi-region deployment with automatic failover and zero-downtime updates." },
+                  { icon: Clock, label: metricDisplay(VESSELS_UPTIME_SLA), desc: "Multi-region deployment with automatic failover and zero-downtime updates." },
                 ].map((item, i) => (
                   <m.div
                     key={item.label}

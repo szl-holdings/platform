@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { TrendingUp, Users, Star, BarChart3, Lightbulb, BookOpen, Award, ArrowUpRight } from "lucide-react";
+import { CARLOTA_JO_RETENTION, metricDisplay } from "@/lib/claims";
 
 const ACCENT_COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#8b5cf6"];
 
 const advisoryMetrics = [
   { label: "Active Engagements", value: "12", change: "+3 this quarter", icon: Users, accent: "#3b82f6" },
-  { label: "Client Retention", value: "98%", change: "Industry leading", icon: Star, accent: "#10b981" },
+  { label: "Client Retention", value: metricDisplay(CARLOTA_JO_RETENTION), change: "Industry leading", icon: Star, accent: "#10b981" },
   { label: "Avg Engagement Score", value: "9.4/10", change: "+0.3 vs last quarter", icon: Award, accent: "#f59e0b" },
   { label: "Revenue Growth", value: "+34%", change: "Year over year", icon: TrendingUp, accent: "#8b5cf6" },
 ];

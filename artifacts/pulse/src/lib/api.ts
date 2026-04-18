@@ -7,7 +7,7 @@ import type { Briefing, DissentRecord, CustomBriefRequest, DomainKey, RiskLevel 
 const DEMO_TOKEN_KEY = "pulse-demo-token";
 const DEMO_ALLOWED = import.meta.env.DEV || import.meta.env.VITE_DEMO_ALLOWED === "true";
 
-function isDemoMode(): boolean {
+export function isDemoMode(): boolean {
   if (!DEMO_ALLOWED) return false;
   return !!sessionStorage.getItem(DEMO_TOKEN_KEY);
 }

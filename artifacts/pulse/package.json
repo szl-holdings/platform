@@ -37,6 +37,7 @@
     "date-fns": "^3.6.0",
     "sonner": "^2.0.7",
     "zod": "catalog:",
-    "@szl-holdings/brand-registry": "workspace:*"
+    "@szl-holdings/brand-registry": "workspace:*",
+    "@szl-holdings/config": "workspace:*"
   }
 }

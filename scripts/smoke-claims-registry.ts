@@ -101,10 +101,15 @@ const expectedClaimIds = [
   "lyte-false-positive-rate",
   "vessels-count",
   "vessels-dark-detection-lead",
+  "vessels-uptime-sla",
   "aegis-simulations",
   "carlota-jo-retention",
   "carlota-jo-experience",
   "uptime-claim",
+  "command-uptime-30day",
+  "command-uptime-90day",
+  "pulse-fallback-briefing",
+  "terra-portfolio-aum",
 ];
 
 for (const id of expectedClaimIds) {
@@ -280,6 +285,207 @@ check(
   "claims.ts exports metricDisplay",
   claimsAdapterSource.includes("metricDisplay")
 );
+
+// ─── 7b. Per-artifact claims.ts adapter wiring check ─────────────────────────
+//
+// Verifies each migrated artifact has a claims.ts adapter that imports from
+// the central config package and exports the expected named constants.
+
+console.log("\n[7b] Per-artifact claims.ts adapters\n");
+
+const perArtifactAdapters: Array<{
+  artifact: string;
+  exports: string[];
+}> = [
+  {
+    artifact: "command",
+    exports: [
+      "COMMAND_UPTIME_30DAY",
+      "COMMAND_UPTIME_90DAY",
+      "COMMAND_UPTIME_OVERALL",
+      "metricDisplay",
+    ],
+  },
+  {
+    artifact: "carlota-jo",
+    exports: [
+      "CARLOTA_JO_RETENTION",
+      "CARLOTA_JO_YEARS_EXPERIENCE",
+      "metricDisplay",
+    ],
+  },
+  {
+    artifact: "vessels",
+    exports: [
+      "VESSELS_COUNT",
+      "VESSELS_DARK_DETECTION_LEAD",
+      "VESSELS_UPTIME_SLA",
+      "metricDisplay",
+    ],
+  },
+  {
+    artifact: "aegis",
+    exports: [
+      "AEGIS_SIMULATIONS",
+      "AEGIS_MITRE_COVERAGE",
+      "AEGIS_MARKET_MARITIME",
+      "AEGIS_MARKET_GOVERNED_DECISION",
+      "metricDisplay",
+    ],
+  },
+  {
+    artifact: "pulse",
+    exports: [
+      "PULSE_FALLBACK_BRIEFING",
+      "PULSE_SYNTHESIZED_LABEL",
+      "metricDisplay",
+    ],
+  },
+  {
+    artifact: "terra",
+    exports: ["TERRA_PORTFOLIO_AUM", "metricDisplay"],
+  },
+];
+
+for (const { artifact, exports } of perArtifactAdapters) {
+  const adapterPath = resolve(
+    __dirname,
+    `../artifacts/${artifact}/src/lib/claims.ts`
+  );
+  let adapterSource = "";
+  try {
+    adapterSource = readFileSync(adapterPath, "utf8");
+  } catch {
+    check(`${artifact}/src/lib/claims.ts exists`, false, adapterPath);
+    continue;
+  }
+  check(`${artifact}/src/lib/claims.ts exists`, true);
+  check(
+    `${artifact}/claims.ts imports from "@szl-holdings/config/public-claims"`,
+    adapterSource.includes("@szl-holdings/config/public-claims")
+  );
+  for (const exp of exports) {
+    check(
+      `${artifact}/claims.ts exports "${exp}"`,
+      new RegExp(`\\b${exp}\\b`).test(adapterSource)
+    );
+  }
+}
+
+// ─── 7c. Per-artifact adapter consumption check ──────────────────────────────
+//
+// "Adapter added but unused" is a regression — the adapter file exists but no
+// page actually imports the registry-backed constants. This check asserts that
+// each artifact has at least one consumer file outside lib/claims.ts.
+
+console.log("\n[7c] Per-artifact adapter consumption (UI wiring)\n");
+
+const adapterConsumptionChecks: Array<{
+  artifact: string;
+  // At least one of these files must import from "@/lib/claims" or "../../lib/claims"
+  // and reference the named symbol below.
+  consumers: Array<{ file: string; symbol: string }>;
+}> = [
+  {
+    artifact: "command",
+    consumers: [
+      {
+        file: "artifacts/command/src/pages/marketing/status.tsx",
+        symbol: "COMMAND_UPTIME_30DAY",
+      },
+    ],
+  },
+  {
+    artifact: "carlota-jo",
+    consumers: [
+      {
+        file: "artifacts/carlota-jo/src/pages/PremiumHome.tsx",
+        symbol: "CARLOTA_JO_RETENTION",
+      },
+      {
+        file: "artifacts/carlota-jo/src/pages/AdvisoryIntel.tsx",
+        symbol: "CARLOTA_JO_RETENTION",
+      },
+      {
+        file: "artifacts/carlota-jo/src/pages/pulse.tsx",
+        symbol: "CARLOTA_JO_RETENTION",
+      },
+    ],
+  },
+  {
+    artifact: "vessels",
+    consumers: [
+      {
+        file: "artifacts/vessels/src/pages/vessels-home.tsx",
+        symbol: "VESSELS_COUNT",
+      },
+      {
+        file: "artifacts/vessels/src/pages/vessels-home.tsx",
+        symbol: "VESSELS_DARK_DETECTION_LEAD",
+      },
+      {
+        file: "artifacts/vessels/src/pages/vessels-home.tsx",
+        symbol: "VESSELS_UPTIME_SLA",
+      },
+      {
+        file: "artifacts/vessels/src/pages/marketing-home.tsx",
+        symbol: "VESSELS_UPTIME_SLA",
+      },
+    ],
+  },
+  {
+    artifact: "aegis",
+    consumers: [
+      {
+        file: "artifacts/aegis/src/pages/digital-twin.tsx",
+        symbol: "AEGIS_MITRE_COVERAGE",
+      },
+    ],
+  },
+  {
+    artifact: "pulse",
+    consumers: [
+      {
+        file: "artifacts/pulse/src/pages/TodaysBrief.tsx",
+        symbol: "PULSE_SYNTHESIZED_LABEL",
+      },
+    ],
+  },
+  {
+    artifact: "terra",
+    consumers: [
+      {
+        file: "artifacts/terra/src/pages/dashboard.tsx",
+        symbol: "TERRA_PORTFOLIO_AUM",
+      },
+    ],
+  },
+];
+
+for (const { artifact, consumers } of adapterConsumptionChecks) {
+  for (const { file, symbol } of consumers) {
+    const consumerPath = resolve(__dirname, "..", file);
+    let source = "";
+    try {
+      source = readFileSync(consumerPath, "utf8");
+    } catch {
+      check(`${file} exists for ${artifact} consumption`, false, consumerPath);
+      continue;
+    }
+    const importsFromClaims =
+      source.includes('"@/lib/claims"') ||
+      source.includes('"../lib/claims"') ||
+      source.includes('"../../lib/claims"');
+    check(
+      `${file} imports from its claims adapter`,
+      importsFromClaims
+    );
+    check(
+      `${file} references ${symbol} (registry-backed claim is wired in)`,
+      new RegExp(`\\b${symbol}\\b`).test(source)
+    );
+  }
+}
 
 // ─── 8. Data-layer render assertion (subprocess) ─────────────────────────────
 //

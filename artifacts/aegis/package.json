@@ -19,7 +19,8 @@
     "@tanstack/react-query": "catalog:",
     "framer-motion": "catalog:",
     "recharts": "catalog:",
-    "@szl-holdings/brand-registry": "workspace:*"
+    "@szl-holdings/brand-registry": "workspace:*",
+    "@szl-holdings/config": "workspace:*"
   },
   "devDependencies": {
     "@replit/vite-plugin-cartographer": "catalog:",

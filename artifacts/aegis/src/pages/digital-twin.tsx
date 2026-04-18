@@ -3,6 +3,7 @@ import { Layers, Play, RefreshCw, Shield, AlertTriangle, CheckCircle, Target, Ac
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 import { api } from "../lib/api";
+import { AEGIS_MITRE_COVERAGE, metricDisplay } from "../lib/claims";
 
 interface TwinNode {
   id: string;
@@ -183,7 +184,7 @@ export default function DigitalTwin() {
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Red Team Scenarios</h2>
             <button
-              onClick={() => toast.success("Scenario library opened — 200+ MITRE ATT&CK attack chains available")}
+              onClick={() => toast.success(`Scenario library opened — ${metricDisplay(AEGIS_MITRE_COVERAGE)}`)}
               className="text-[10px] text-cyan-400 hover:text-cyan-300"
             >
               Browse Library →

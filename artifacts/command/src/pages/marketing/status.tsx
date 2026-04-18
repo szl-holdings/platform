@@ -6,6 +6,11 @@ import { useEffect, useState } from "react";
 import { Button } from "@szl-holdings/shared-ui/ui/button";
 import { Input } from "@szl-holdings/shared-ui/ui/input";
 import { toast } from "sonner";
+import {
+  COMMAND_UPTIME_30DAY,
+  COMMAND_UPTIME_90DAY,
+  metricDisplay,
+} from "../../lib/claims";
 
 type ServiceStatus = "operational" | "degraded" | "partial_outage" | "major_outage";
 
@@ -197,7 +202,7 @@ export function MarketingStatus() {
               {allOperational ? "All Systems Operational" : "Service Disruption Detected"}
             </h2>
             <p className="text-xs text-white/40">
-              99.97% average uptime across all services, last 90 days
+              {metricDisplay(COMMAND_UPTIME_90DAY)} average uptime across all services, last 90 days
               {apiLatencyMs !== null && ` · Live API response: ${apiLatencyMs}ms`}
             </p>
           </div>
@@ -241,8 +246,8 @@ export function MarketingStatus() {
         {/* Metrics */}
         <div className="grid grid-cols-3 gap-4 mb-12">
           {[
-            { label: "30-day Uptime", value: "99.98%" },
-            { label: "90-day Uptime", value: "99.97%" },
+            { label: "30-day Uptime", value: metricDisplay(COMMAND_UPTIME_30DAY) },
+            { label: "90-day Uptime", value: metricDisplay(COMMAND_UPTIME_90DAY) },
             { label: "Incidents (90d)", value: `${INCIDENTS.length} resolved` },
           ].map(({ label, value }, i) => (
             <div key={i} className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] text-center">

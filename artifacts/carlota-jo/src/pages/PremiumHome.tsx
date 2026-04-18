@@ -5,6 +5,11 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useEffect, useRef } from "react";
 import { NewsletterSubscribe } from "@szl-holdings/shared-ui";
+import {
+  CARLOTA_JO_RETENTION,
+  CARLOTA_JO_YEARS_EXPERIENCE,
+  metricDisplay,
+} from "@/lib/claims";
 
 const GOLD = "var(--color-gold)";
 const GOLD_DIM = "var(--color-gold-dim)";
@@ -170,7 +175,7 @@ function LuxuryHero() {
               </div>
               <div className="px-8 py-5 flex items-center gap-6">
                 {[
-                  { value: "98%", label: "Client Retention" },
+                  { value: metricDisplay(CARLOTA_JO_RETENTION), label: "Client Retention" },
                   { value: "24h", label: "Response SLA" },
                   { value: "Private", label: "Engagement Model" },
                 ].map((s, i) => (
@@ -354,7 +359,7 @@ function RosaIntro() {
           </div>
           <div className="lg:col-span-5">
             <p className="text-[14px] font-light leading-[1.8] mb-5" style={{ color: INK_600 }}>
-              Rosa brings 18 years of private advisory experience to a highly selective roster of clients. Her work spans primary residence management, international household operations, special projects, and long-term advisory continuity.
+              Rosa brings {metricDisplay(CARLOTA_JO_YEARS_EXPERIENCE)} of private advisory experience to a highly selective roster of clients. Her work spans primary residence management, international household operations, special projects, and long-term advisory continuity.
             </p>
             <p className="text-[13px] font-light leading-[1.8]" style={{ color: INK_500 }}>
               Every client engagement is handled by Rosa personally. There are no associates, no delivery teams, and no templated service models. This is a deliberate choice — and the foundation of the trust her clients place in her.

@@ -14,6 +14,7 @@ import { RiskBadge, StageBadge, formatCurrency, AgentAvatar } from "@/components
 import { properties } from "@/data/portfolio";
 import { useMapboxToken } from "@/hooks/use-mapbox-token";
 import { PackBanner } from "@szl-holdings/shared-ui";
+import { TERRA_PORTFOLIO_AUM, metricDisplay } from "@/lib/claims";
 
 const PropertyMap = lazy(() => import("@/components/property-map"));
 
@@ -219,7 +220,7 @@ export default function TerraIntelligence() {
             {activeRole === "buyer" && "Demo View"}
           </div>
           <div className="text-[11px] leading-relaxed" style={{ color: "rgba(255,255,255,0.65)" }}>
-            {activeRole === "executive" && `${liveListingCount} active listings · ${OPPORTUNITY_QUEUE.length} live acquisition targets · ${OPPORTUNITY_QUEUE.filter(o => o.flag === "urgent").length} urgent. Distress cluster activity detected. Total portfolio tracked: ${portfolioLabel}.`}
+            {activeRole === "executive" && `${liveListingCount} active listings · ${OPPORTUNITY_QUEUE.length} live acquisition targets · ${OPPORTUNITY_QUEUE.filter(o => o.flag === "urgent").length} urgent. Distress cluster activity detected. Total portfolio tracked: ${portfolioLabel}. ${metricDisplay(TERRA_PORTFOLIO_AUM)}.`}
             {activeRole === "operator" && `${criticalSignals.length} critical market signals active. ${OPPORTUNITY_QUEUE.filter(o => o.stage === "Distress" || o.stage === "distress" || o.stage === "lead").length} distress opportunities require outreach. Confidence-weighted queue ready for review.`}
             {activeRole === "analyst" && `${topDeals.length} deals in pipeline. ${topAgents.length} active brokers. ${OPPORTUNITY_QUEUE.filter(o => o.flag === "urgent").length} inquiries require same-day response. Broker SLA warning on aging inquiries.`}
             {activeRole === "admin" && `Data mode: ${dataMode}. All Terra intelligence sources connected. Property map token: ${mapToken ? "Active" : "Inactive"}.`}

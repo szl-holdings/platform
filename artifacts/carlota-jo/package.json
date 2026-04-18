@@ -41,6 +41,7 @@
     "i18next-browser-languagedetector": "^8.2.1",
     "jspdf": "^4.2.1",
     "react-i18next": "^17.0.2",
-    "@szl-holdings/brand-registry": "workspace:*"
+    "@szl-holdings/brand-registry": "workspace:*",
+    "@szl-holdings/config": "workspace:*"
   }
 }

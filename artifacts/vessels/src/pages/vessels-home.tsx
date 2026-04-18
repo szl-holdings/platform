@@ -2,6 +2,12 @@ import { motion as m } from "framer-motion";
 import { ArrowRight, ArrowUpRight, ChevronRight, AlertTriangle, Anchor, Navigation, Activity } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useFleetExceptions, useVesselsDashboard } from "@/hooks/use-vessels-data";
+import {
+  VESSELS_COUNT,
+  VESSELS_DARK_DETECTION_LEAD,
+  VESSELS_UPTIME_SLA,
+  metricDisplay,
+} from "@/lib/claims";
 
 
 const navLinks = [
@@ -12,9 +18,9 @@ const navLinks = [
 ];
 
 const kpis = [
-  { value: "40,000+", label: "Vessels tracked" },
+  { value: metricDisplay(VESSELS_COUNT), label: "Vessels tracked" },
   { value: "< 90s", label: "Alert response time" },
-  { value: "99.97%", label: "Platform uptime" },
+  { value: metricDisplay(VESSELS_UPTIME_SLA), label: "Platform uptime" },
   { value: "180+", label: "Ports monitored" },
 ];
 
@@ -513,7 +519,7 @@ export default function VesselsHome() {
                 { title: "End-to-end encryption", description: "All data in transit and at rest is encrypted to enterprise standards." },
                 { title: "Role-based access control", description: "Granular permissions for exec, ops, compliance, and maintenance roles." },
                 { title: "Audit trails", description: "Full record of system actions, alerts, and configuration changes." },
-                { title: "99.97% uptime SLA", description: "Built on resilient infrastructure with redundant data ingestion." },
+                { title: metricDisplay(VESSELS_UPTIME_SLA), description: "Built on resilient infrastructure with redundant data ingestion." },
               ].map((f, i) => (
                 <m.div
                   key={f.title}
@@ -550,9 +556,9 @@ export default function VesselsHome() {
           </m.div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[
-              { metric: "34 days", label: "Pre-designation lead time", detail: "AIS-dark vessel activity flagged before formal OFAC listing", accent: "#3b82f6" },
+              { metric: metricDisplay(VESSELS_DARK_DETECTION_LEAD), label: "Pre-designation lead time", detail: "AIS-dark vessel activity flagged before formal OFAC listing", accent: "#3b82f6" },
               { metric: "94%", label: "Confidence score", detail: "Security AI v4 behavioral signature accuracy on pre-designation case", accent: "#0ea5e9" },
-              { metric: "40K+", label: "Vessels monitored", detail: "Continuous autonomous intelligence across global maritime corridors", accent: "#38bdf8" },
+              { metric: metricDisplay(VESSELS_COUNT), label: "Vessels monitored", detail: "Continuous autonomous intelligence across global maritime corridors", accent: "#38bdf8" },
               { metric: "0", label: "Compliance breaches", detail: "Fleet operators cleared exposure window before formal designation", accent: "#22d3ee" },
               { metric: "< 2h", label: "P&I notification time", detail: "From autonomous alert to insurer notification — same monitoring cycle", accent: "#67e8f9" },
               { metric: "72h", label: "Dark period detected", detail: "Near known STS transfer zone, part of 90-day behavioral pattern", accent: "#a5f3fc" },

@@ -212,6 +212,9 @@ importers:
       '@szl-holdings/brand-registry':
         specifier: workspace:*
         version: link:../../packages/brand-registry
+      '@szl-holdings/config':
+        specifier: workspace:*
+        version: link:../../packages/config
       '@szl-holdings/design-system':
         specifier: workspace:*
         version: link:../../packages/design-system
@@ -646,6 +649,9 @@ importers:
       '@szl-holdings/brand-registry':
         specifier: workspace:*
         version: link:../../packages/brand-registry
+      '@szl-holdings/config':
+        specifier: workspace:*
+        version: link:../../packages/config
       '@szl-holdings/design-system':
         specifier: workspace:*
         version: link:../../packages/design-system
@@ -746,6 +752,9 @@ importers:
       '@szl-holdings/brand-registry':
         specifier: workspace:*
         version: link:../../packages/brand-registry
+      '@szl-holdings/config':
+        specifier: workspace:*
+        version: link:../../packages/config
       '@szl-holdings/design-system':
         specifier: workspace:*
         version: link:../../packages/design-system
@@ -1126,6 +1135,9 @@ importers:
       '@szl-holdings/brand-registry':
         specifier: workspace:*
         version: link:../../packages/brand-registry
+      '@szl-holdings/config':
+        specifier: workspace:*
+        version: link:../../packages/config
       '@szl-holdings/design-system':
         specifier: workspace:*
         version: link:../../packages/design-system
@@ -1579,6 +1591,9 @@ importers:
       '@szl-holdings/brand-registry':
         specifier: workspace:*
         version: link:../../packages/brand-registry
+      '@szl-holdings/config':
+        specifier: workspace:*
+        version: link:../../packages/config
       '@szl-holdings/design-system':
         specifier: workspace:*
         version: link:../../packages/design-system
@@ -1682,6 +1697,9 @@ importers:
       '@szl-holdings/brand-registry':
         specifier: workspace:*
         version: link:../../packages/brand-registry
+      '@szl-holdings/config':
+        specifier: workspace:*
+        version: link:../../packages/config
       '@szl-holdings/design-system':
         specifier: workspace:*
         version: link:../../packages/design-system

@@ -185,6 +185,60 @@ export const PUBLIC_CLAIMS: PublicClaim[] = [
     notes:
       "Hardcoded in static data file. No real uptime monitor. Must show [Demo] or be removed.",
   },
+  {
+    id: "command-uptime-30day",
+    surface: "command marketing/status page — 30-day metric",
+    claim: "99.98%",
+    truthValue: "demo-data",
+    source: "artifacts/command/src/pages/marketing/status.tsx",
+    displayLabel: "[Demo]",
+    notes:
+      "30-day uptime metric. No live uptime monitor wired. Must show [Demo].",
+  },
+  {
+    id: "command-uptime-90day",
+    surface: "command marketing/status page — 90-day metric",
+    claim: "99.97%",
+    truthValue: "demo-data",
+    source: "artifacts/command/src/pages/marketing/status.tsx",
+    displayLabel: "[Demo]",
+    notes:
+      "90-day uptime metric. No live uptime monitor wired. Must show [Demo].",
+  },
+  {
+    id: "vessels-uptime-sla",
+    surface: "vessels marketing-home, vessels-home",
+    claim: "99.97% uptime SLA",
+    truthValue: "aspirational",
+    source: "artifacts/vessels/src/pages/marketing-home.tsx, vessels-home.tsx",
+    displayLabel: "[Target SLA]",
+    notes:
+      "Stated SLA target; no historical uptime measurement. Display as target.",
+  },
+
+  // Pulse claims
+  {
+    id: "pulse-fallback-briefing",
+    surface: "pulse — fallback brief renderer",
+    claim: "Synthesized briefing",
+    truthValue: "demo-data",
+    source: "artifacts/pulse/src/lib/claims.ts",
+    displayLabel: "[Synthesized]",
+    notes:
+      "When live agents have not produced a brief, the renderer must label content as Synthesized so readers know it is not freshly generated.",
+  },
+
+  // Terra claims
+  {
+    id: "terra-portfolio-aum",
+    surface: "terra dashboard, carlota-jo case studies",
+    claim: "$4.2B+ assets under analysis",
+    truthValue: "demo-data",
+    source: "artifacts/terra/src/data, artifacts/carlota-jo case-studies",
+    displayLabel: "[Demo]",
+    notes:
+      "Seed portfolio data. Used in demo views; must surface a Demo provenance label.",
+  },
 ];
 
 export const FOUNDER_START_YEAR = 2007;
