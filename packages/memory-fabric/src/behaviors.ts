@@ -159,6 +159,64 @@ export function enforceRetention(store: MemoryStore): RetentionEnforcementResult
   return { evicted, pinned, markedStale };
 }
 
+export interface FreshnessDecayResult {
+  decayed: number;
+  markedStale: number;
+}
+
+/**
+ * Apply time-based freshness decay to all in-store entries.
+ *
+ * An entry's freshness decreases linearly from 1.0 (at creation) to 0.0
+ * (at maxAgeDays). Entries whose freshness drops below `staleThreshold`
+ * are marked stale. Pinned entries are skipped.
+ *
+ * @param halfLifeDays  Age (in days) at which freshness reaches 0.5 (default: 7)
+ * @param staleThreshold  Freshness below this value marks an entry stale (default: 0.2)
+ */
+export function applyFreshnessDecay(
+  store: MemoryStore,
+  options: { halfLifeDays?: number; staleThreshold?: number } = {}
+): FreshnessDecayResult {
+  const { halfLifeDays = 7, staleThreshold = 0.2 } = options;
+  const now = new Date();
+  const halfLifeMs = halfLifeDays * 24 * 60 * 60 * 1000;
+
+  const all = store.list({ includeStale: true });
+  let decayed = 0;
+  let markedStale = 0;
+
+  for (const entry of all) {
+    if (entry.retention.pinned) continue;
+
+    const lastUpdated = new Date(entry.freshness.lastUpdatedAt);
+    const ageMs = now.getTime() - lastUpdated.getTime();
+
+    if (ageMs <= 0) continue;
+
+    const decayFactor = Math.pow(0.5, ageMs / halfLifeMs);
+    const newConfidence = Math.max(0, Math.min(1, entry.confidence * decayFactor));
+
+    if (Math.abs(newConfidence - entry.confidence) < 0.001) continue;
+
+    const willBeStale = newConfidence < staleThreshold;
+    const updated: MemoryEntry = {
+      ...entry,
+      confidence: newConfidence,
+      freshness: {
+        ...entry.freshness,
+        isStale: willBeStale || entry.freshness.isStale,
+      },
+    };
+
+    store.put(updated);
+    decayed++;
+    if (willBeStale && !entry.freshness.isStale) markedStale++;
+  }
+
+  return { decayed, markedStale };
+}
+
 function defaultEpisodeSummarizer(entries: MemoryEntry[]): string {
   const keys = entries.map((e) => e.key).join(", ");
   return `Episodic summary of ${entries.length} episodes: ${keys}`;

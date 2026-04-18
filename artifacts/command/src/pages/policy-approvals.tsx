@@ -11,6 +11,13 @@ import {
   ChevronDown,
   ChevronRight,
   RefreshCw,
+  TrendingUp,
+  TrendingDown,
+  Database,
+  Eye,
+  Hand,
+  FileText,
+  Zap,
 } from "lucide-react";
 
 const ACCENT = "#d4a054";
@@ -44,6 +51,28 @@ interface ToolManifest {
 }
 
 type Tab = "pending" | "history";
+
+type PolicyMode = "observe" | "recommend" | "draft" | "approval-required" | "auto-within-guardrails";
+
+interface MemoryRef {
+  tier: string;
+  key: string;
+  freshness?: number;
+  confidence?: number;
+  summary?: string;
+}
+
+interface PolicyEvaluation {
+  evaluationId: string;
+  resolvedMode: PolicyMode;
+  confidence?: number;
+  blockedReason?: string;
+  approvalRequired?: boolean;
+  projectedImpact?: { severity: string; reversible: boolean; estimatedCostUsd?: number; affectedEntityIds?: string[] };
+  projectedRisk?: { level: string; factors: string[] };
+  memoryRefs?: MemoryRef[];
+  evaluatedAt: number;
+}
 
 interface ListResponse<T> {
   data: T[];
@@ -105,6 +134,183 @@ function StatusPill({ status }: { status: ApprovalStatus }) {
     <span className="text-[9px] font-mono font-semibold tracking-wider px-1.5 py-0.5 rounded" style={{ color: s.fg, background: s.bg, border: `1px solid ${s.border}` }}>
       {s.label}
     </span>
+  );
+}
+
+const MODE_COLORS: Record<PolicyMode, string> = {
+  "observe":                "#7c8a9a",
+  "recommend":              "#8b7ac8",
+  "draft":                  "#0ea5e9",
+  "approval-required":      "#d4a054",
+  "auto-within-guardrails": "#22c55e",
+};
+
+const MODE_ICONS: Record<PolicyMode, React.FC<{ className?: string }>> = {
+  "observe":                Eye,
+  "recommend":              FileText,
+  "draft":                  FileText,
+  "approval-required":      Hand,
+  "auto-within-guardrails": Zap,
+};
+
+const RISK_COLOR: Record<string, string> = {
+  low: "#22c55e", medium: "#d4a054", high: "#f97316", critical: "#ef4444",
+};
+
+const TIER_BADGE_COLORS: Record<string, string> = {
+  working:          "#7c8a9a",
+  session:          "#8b7ac8",
+  episodic:         "#0ea5e9",
+  semantic:         "#22c55e",
+  workflow:         "#d4a054",
+  entity:           "#c9a227",
+  artifact:         "#6b8f71",
+  executive:        "#ef4444",
+  "operator-feedback": "#d4a054",
+  "long-term":      "#22c55e",
+};
+
+function FreshnessBar({ value }: { value: number }) {
+  const pct = Math.round(value * 100);
+  const color = pct > 70 ? "#22c55e" : pct > 40 ? "#d4a054" : "#ef4444";
+  return (
+    <div className="flex items-center gap-1.5">
+      <div className="w-12 h-1 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
+        <div style={{ width: `${pct}%`, background: color, height: "100%" }} />
+      </div>
+      <span className="text-[9px] font-mono" style={{ color }}>{pct}%</span>
+    </div>
+  );
+}
+
+function PolicyEvaluationPanel({ evaluation }: { evaluation?: PolicyEvaluation }) {
+  if (!evaluation) return null;
+
+  const ModeIcon = MODE_ICONS[evaluation.resolvedMode] ?? Hand;
+  const modeColor = MODE_COLORS[evaluation.resolvedMode] ?? "#d4a054";
+  const conf = evaluation.confidence ?? 0;
+  const confColor = conf >= 0.8 ? "#22c55e" : conf >= 0.5 ? "#d4a054" : "#ef4444";
+
+  return (
+    <div className="mt-3 rounded" style={{ background: "rgba(212,160,84,0.04)", border: "1px solid rgba(212,160,84,0.15)" }}>
+      <div className="px-3 py-2 flex items-center gap-2" style={{ borderBottom: "1px solid rgba(212,160,84,0.10)" }}>
+        <ShieldCheck className="w-3.5 h-3.5" style={{ color: ACCENT }} />
+        <span className="text-[10px] font-mono font-semibold tracking-wider uppercase" style={{ color: ACCENT }}>
+          Policy Evaluation
+        </span>
+        <span className="ml-auto text-[9px] font-mono" style={{ color: "rgba(255,255,255,0.3)" }}>
+          {evaluation.evaluationId?.substring(0, 20)}…
+        </span>
+      </div>
+
+      <div className="px-3 py-2 grid grid-cols-2 gap-x-4 gap-y-1.5 text-[10px] font-mono">
+        <div>
+          <span style={{ color: "rgba(255,255,255,0.4)" }}>Resolved Mode</span>{" "}
+          <span className="inline-flex items-center gap-1 ml-1" style={{ color: modeColor }}>
+            <ModeIcon className="w-3 h-3" />
+            {evaluation.resolvedMode}
+          </span>
+        </div>
+        <div>
+          <span style={{ color: "rgba(255,255,255,0.4)" }}>Confidence</span>{" "}
+          <span style={{ color: confColor }}>{(conf * 100).toFixed(0)}%</span>
+        </div>
+        {evaluation.projectedImpact && (
+          <>
+            <div>
+              <span style={{ color: "rgba(255,255,255,0.4)" }}>Impact Severity</span>{" "}
+              <span style={{ color: RISK_COLOR[evaluation.projectedImpact.severity] ?? "#d4a054" }}>
+                {evaluation.projectedImpact.severity}
+              </span>
+            </div>
+            <div>
+              <span style={{ color: "rgba(255,255,255,0.4)" }}>Reversible</span>{" "}
+              <span style={{ color: evaluation.projectedImpact.reversible ? "#22c55e" : "#ef4444" }}>
+                {evaluation.projectedImpact.reversible ? "yes" : "no"}
+              </span>
+            </div>
+            {evaluation.projectedImpact.estimatedCostUsd !== undefined && (
+              <div>
+                <span style={{ color: "rgba(255,255,255,0.4)" }}>Est. Cost</span>{" "}
+                <span style={{ color: "rgba(255,255,255,0.75)" }}>${evaluation.projectedImpact.estimatedCostUsd.toLocaleString()}</span>
+              </div>
+            )}
+            {(evaluation.projectedImpact.affectedEntityIds?.length ?? 0) > 0 && (
+              <div>
+                <span style={{ color: "rgba(255,255,255,0.4)" }}>Entities</span>{" "}
+                <span style={{ color: "rgba(255,255,255,0.65)" }}>
+                  {evaluation.projectedImpact.affectedEntityIds!.slice(0, 3).join(", ")}
+                  {evaluation.projectedImpact.affectedEntityIds!.length > 3 ? " …" : ""}
+                </span>
+              </div>
+            )}
+          </>
+        )}
+        {evaluation.projectedRisk && (
+          <div className="col-span-2">
+            <span style={{ color: "rgba(255,255,255,0.4)" }}>Risk Level</span>{" "}
+            <span style={{ color: RISK_COLOR[evaluation.projectedRisk.level] ?? "#d4a054" }}>
+              {evaluation.projectedRisk.level}
+            </span>
+            {evaluation.projectedRisk.factors.length > 0 && (
+              <span className="ml-2 text-[9px]" style={{ color: "rgba(255,255,255,0.35)" }}>
+                ({evaluation.projectedRisk.factors.join(" · ")})
+              </span>
+            )}
+          </div>
+        )}
+        {evaluation.blockedReason && (
+          <div className="col-span-2 flex items-start gap-1.5 mt-0.5">
+            <AlertTriangle className="w-3 h-3 mt-0.5 shrink-0" style={{ color: "#f97316" }} />
+            <span style={{ color: "#f97316" }}>{evaluation.blockedReason}</span>
+          </div>
+        )}
+      </div>
+
+      {(evaluation.memoryRefs?.length ?? 0) > 0 && (
+        <div className="px-3 pb-2.5" style={{ borderTop: "1px solid rgba(212,160,84,0.08)" }}>
+          <div className="text-[9px] uppercase tracking-widest font-mono mt-2 mb-1.5 flex items-center gap-1.5" style={{ color: "rgba(255,255,255,0.35)" }}>
+            <Database className="w-2.5 h-2.5" /> Evidence Chain — Memory Sources ({evaluation.memoryRefs!.length})
+          </div>
+          <div className="flex flex-col gap-1.5">
+            {evaluation.memoryRefs!.map((ref, i) => {
+              const tierColor = TIER_BADGE_COLORS[ref.tier] ?? "#7c8a9a";
+              return (
+                <div
+                  key={i}
+                  className="flex items-start gap-2 rounded px-2 py-1.5 text-[10px]"
+                  style={{ background: "rgba(0,0,0,0.2)", border: "1px solid rgba(255,255,255,0.04)" }}
+                >
+                  <div
+                    className="shrink-0 mt-0.5 px-1 py-px rounded text-[8px] font-mono font-semibold"
+                    style={{ color: tierColor, background: `${tierColor}18`, border: `1px solid ${tierColor}35` }}
+                  >
+                    {ref.tier}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-mono truncate" style={{ color: "rgba(255,255,255,0.7)" }}>{ref.key}</div>
+                    {ref.summary && (
+                      <div className="text-[9px] mt-0.5" style={{ color: "rgba(255,255,255,0.4)" }}>{ref.summary}</div>
+                    )}
+                  </div>
+                  {ref.freshness !== undefined && (
+                    <div className="shrink-0 flex flex-col items-end gap-0.5">
+                      <div className="text-[9px] font-mono" style={{ color: "rgba(255,255,255,0.3)" }}>freshness</div>
+                      <FreshnessBar value={ref.freshness} />
+                    </div>
+                  )}
+                  {ref.confidence !== undefined && (
+                    <div className="shrink-0 text-[9px] font-mono" style={{ color: "rgba(255,255,255,0.35)" }}>
+                      conf {(ref.confidence * 100).toFixed(0)}%
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -175,11 +381,13 @@ function ApprovalRow({
 
       {expanded && (
         <div className="px-3 pb-3 pt-1" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-          <div className="text-[9px] uppercase tracking-widest font-mono mb-1.5 mt-2" style={{ color: "rgba(255,255,255,0.3)" }}>
+          <PolicyEvaluationPanel evaluation={approval.payload?.policyEvaluation as PolicyEvaluation | undefined} />
+
+          <div className="text-[9px] uppercase tracking-widest font-mono mb-1.5 mt-3" style={{ color: "rgba(255,255,255,0.3)" }}>
             Payload
           </div>
           <pre
-            className="text-[10px] font-mono p-2 rounded overflow-auto max-h-48"
+            className="text-[10px] font-mono p-2 rounded overflow-auto max-h-40"
             style={{ background: "rgba(0,0,0,0.35)", color: "rgba(200,210,225,0.85)", border: "1px solid rgba(255,255,255,0.04)" }}
           >
             {JSON.stringify(approval.payload ?? {}, null, 2)}

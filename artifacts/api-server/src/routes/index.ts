@@ -55,6 +55,8 @@ import mapsRouter from "./maps";
 import atlasSceneExportRouter from "./atlas-scene-export";
 import preferencesRouter from "./preferences";
 import evidenceGraphRouter from "./evidence-graph";
+import policyModesRouter from "./policy-modes";
+import demoGovernedScenariosRouter from "./demo-governed-scenarios";
 
 const router: IRouter = Router();
 
@@ -165,5 +167,7 @@ router.use(evidenceGraphRouter);
 router.use(mapsRouter);
 router.use(debugRouter);
 router.use(preferencesRouter);
+router.use(policyModesRouter);
+router.use(demoGovernedScenariosRouter);
 
 export default router;

@@ -6,6 +6,7 @@ import type {
   StepExecutionRecord,
   ActionEngineResult,
 } from "./types.js";
+import type { PolicyEvaluation } from "@szl-holdings/policy-engine";
 
 export type StepHandler = (
   parameters: Record<string, unknown>,
@@ -38,6 +39,13 @@ function appendAudit(run: WorkflowRun, actor: string | undefined, action: string
   });
 }
 
+/**
+ * Every call to executeWorkflow MUST supply either:
+ *   (a) a fully-formed PolicyEvaluation produced by buildPolicyEvaluation(), or
+ *   (b) explicitly set policyEvaluationOverride = true to bypass (test/demo only).
+ *
+ * If neither is provided the call will throw immediately — there is no silent fallback.
+ */
 export async function executeWorkflow(params: {
   definition: WorkflowDefinition;
   initiatedBy?: string;
@@ -46,7 +54,10 @@ export async function executeWorkflow(params: {
   isDryRun?: boolean;
   isSimulation?: boolean;
   approvedBy?: string;
-  policyEvaluation?: Record<string, unknown>;
+  /** Structured PolicyEvaluation — required for live execution */
+  policyEvaluation?: PolicyEvaluation | Record<string, unknown>;
+  /** Set true in tests/demos to bypass the policy-evaluation requirement */
+  policyEvaluationOverride?: boolean;
   metadata?: Record<string, unknown>;
 }): Promise<ActionEngineResult> {
   const {
@@ -58,11 +69,56 @@ export async function executeWorkflow(params: {
     isSimulation = false,
     approvedBy,
     policyEvaluation,
+    policyEvaluationOverride = false,
     metadata,
   } = params;
 
+  if (!policyEvaluation && !policyEvaluationOverride && !isDryRun && !isSimulation) {
+    throw new Error(
+      `executeWorkflow: policyEvaluation is required for workflow '${definition.id}'. ` +
+      `Call buildPolicyEvaluation() from @workspace/policy-engine and pass the result, ` +
+      `or set policyEvaluationOverride=true for test/demo usage.`
+    );
+  }
+
+  const pe = policyEvaluation as PolicyEvaluation | undefined;
+
+  if (pe && pe.blockedReason && !isDryRun && !isSimulation) {
+    const blockedRun: WorkflowRun = {
+      runId: randomUUID(),
+      workflowId: definition.id,
+      workflowName: definition.name,
+      recommendationId,
+      tenantId,
+      initiatedBy,
+      executionMode: definition.executionMode ?? "manual",
+      isDryRun,
+      isSimulation,
+      status: "cancelled",
+      currentStepIndex: 0,
+      steps: definition.steps.map((s: WorkflowStep) => ({ stepId: s.id, stepName: s.name, startedAt: 0, status: "pending" })),
+      approvalState: "none",
+      policyEvaluation: policyEvaluation as Record<string, unknown>,
+      auditTrail: [{
+        at: Date.now(),
+        actor: initiatedBy,
+        action: "workflow.policy_blocked",
+        detail: pe.blockedReason,
+        immutable: true,
+      }],
+      startedAt: Date.now(),
+      completedAt: Date.now(),
+      metadata,
+    };
+    return { run: blockedRun, requiresApproval: false };
+  }
+
   const runId = randomUUID();
-  const needsApproval = definition.requiresExplicitApproval && !approvedBy && !isDryRun && !isSimulation;
+  const needsApproval =
+    (definition.requiresExplicitApproval || pe?.mode === "approval-required") &&
+    !approvedBy &&
+    !isDryRun &&
+    !isSimulation;
   const executionMode = definition.executionMode ?? "manual";
 
   const initialStatus: WorkflowRun["status"] = needsApproval ? "pending_approval" : "running";

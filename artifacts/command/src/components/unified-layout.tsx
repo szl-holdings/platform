@@ -88,6 +88,7 @@ const OPERATIONS_NAV: NavGroup[] = [
       { href: "/operations/blocker-board", label: "Blocker Board", icon: AlertTriangle },
       { href: "/operations/approvals", label: "Approvals", icon: CheckSquare },
       { href: "/operations/policy-approvals", label: "Policy Approvals", icon: ShieldCheck },
+      { href: "/operations/policy-manager", label: "Policy Manager", icon: ShieldCheck },
       { href: "/operations/trust-audit", label: "Proof Chain Audit", icon: Shield },
       { href: "/operations/inbox", label: "Command Inbox", icon: Inbox },
     ],

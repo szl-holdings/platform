@@ -76,3 +76,36 @@ export interface PolicyEvaluationResult {
   reasoning: string;
   evaluatedAt: number;
 }
+
+/**
+ * Full PolicyEvaluation that MUST accompany every action-engine draft/execute call.
+ * Captures every input used in the evaluation decision so the record is self-contained
+ * and can be reproduced, audited, or appealed without external state.
+ */
+export interface PolicyEvaluation {
+  evaluationId: string;
+  mode: string;
+  action: string;
+  actionType?: string;
+  product?: string;
+  workspace?: string;
+  subjectRoles: string[];
+  entitySensitivity: "public" | "internal" | "confidential" | "restricted";
+  confidence: number;
+  freshnessScore: number;
+  environment: "development" | "staging" | "production";
+  windowValid: boolean;
+  projectedCostUsd?: number;
+  projectedImpact?: string;
+  projectedRisk?: string;
+  evidenceChain: Array<{
+    source: string;
+    summary: string;
+    confidence: number;
+    freshness: number;
+  }>;
+  policyResult: PolicyEvaluationResult;
+  blockedReason?: string;
+  evaluatedAt: number;
+  evaluatedBy?: string;
+}

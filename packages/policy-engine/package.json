@@ -23,6 +23,10 @@
     "./guardrails": {
       "types": "./dist/guardrails.d.ts",
       "import": "./src/guardrails.ts"
+    },
+    "./modes": {
+      "types": "./dist/modes.d.ts",
+      "import": "./src/modes.ts"
     }
   },
   "dependencies": {

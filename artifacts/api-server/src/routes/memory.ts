@@ -19,6 +19,7 @@ import {
   summarizeEpisodes,
   distillLessons,
   enforceRetention,
+  applyFreshnessDecay,
 } from "@workspace/memory-fabric/behaviors";
 import { MemoryEntrySchema, MemoryTypeSchema } from "@workspace/memory-fabric/types";
 import type { MemoryEntry, MemoryType, SensitivityLevel } from "@workspace/memory-fabric/types";
@@ -320,6 +321,95 @@ router.post(
       sendSuccess(res, result);
     } catch (err) {
       handleRouteError(res, err, "memory:enforce-retention");
+    }
+  }
+);
+
+router.post(
+  "/memory/behaviors/decay-freshness",
+  authMiddleware(),
+  requireRole("admin", "super_admin"),
+  validateBody(jsonObjectBodySchema),
+  async (req: Request, res: Response) => {
+    try {
+      const { halfLifeDays, staleThreshold } = req.body as { halfLifeDays?: number; staleThreshold?: number };
+      const result = applyFreshnessDecay(memoryStore, { halfLifeDays, staleThreshold });
+      logger.info(result, "Freshness decay applied");
+      sendSuccess(res, result);
+    } catch (err) {
+      handleRouteError(res, err, "memory:decay-freshness");
+    }
+  }
+);
+
+router.post(
+  "/memory/:id/pin",
+  authMiddleware(),
+  requireRole("admin", "super_admin", "ops"),
+  async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params as { id: string };
+      const entry = memoryStore.get(id);
+      if (!entry) { sendNotFound(res, "MemoryEntry"); return; }
+
+      const pinned = { ...entry, retention: { ...entry.retention, pinned: true } };
+      memoryStore.put(pinned);
+      logger.info({ id }, "Memory entry pinned");
+      sendSuccess(res, pinned);
+    } catch (err) {
+      handleRouteError(res, err, "memory:pin");
+    }
+  }
+);
+
+router.delete(
+  "/memory/:id/pin",
+  authMiddleware(),
+  requireRole("admin", "super_admin"),
+  async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params as { id: string };
+      const entry = memoryStore.get(id);
+      if (!entry) { sendNotFound(res, "MemoryEntry"); return; }
+
+      const unpinned = { ...entry, retention: { ...entry.retention, pinned: false } };
+      memoryStore.put(unpinned);
+      logger.info({ id }, "Memory entry unpinned");
+      sendSuccess(res, unpinned);
+    } catch (err) {
+      handleRouteError(res, err, "memory:unpin");
+    }
+  }
+);
+
+router.get(
+  "/memory/tiers/overview",
+  authMiddleware(),
+  async (_req: Request, res: Response) => {
+    try {
+      const TIER_DEFS: Array<{ tier: MemoryType; label: string; description: string; retentionPolicy: string }> = [
+        { tier: "working", label: "Ephemeral Run", description: "In-flight data for a single agent run; discarded when the run completes.", retentionPolicy: "ephemeral" },
+        { tier: "session", label: "Session", description: "Context shared across steps within a user or agent session.", retentionPolicy: "session-scoped" },
+        { tier: "episodic", label: "Workspace Episodes", description: "Event records and observations scoped to a workspace; compacted into semantic memory.", retentionPolicy: "workflow-scoped" },
+        { tier: "entity", label: "Entity", description: "Durable facts about specific entities (vessels, properties, clients, assets).", retentionPolicy: "persistent" },
+        { tier: "skill", label: "Long-term Pattern", description: "Distilled lessons and playbooks derived from high-confidence episodic evidence.", retentionPolicy: "archival" },
+        { tier: "semantic", label: "Semantic", description: "Summarised knowledge extracted from episodes.", retentionPolicy: "persistent" },
+        { tier: "workflow", label: "Workflow", description: "Workflow execution state and cross-step context.", retentionPolicy: "workflow-scoped" },
+        { tier: "artifact", label: "Artifact", description: "Generated artifacts (documents, drafts) linked to actions.", retentionPolicy: "persistent" },
+        { tier: "operator-feedback", label: "Operator Feedback", description: "Structured feedback from operators used to distill lessons.", retentionPolicy: "persistent" },
+        { tier: "executive", label: "Executive", description: "High-level summaries surfaced in executive briefings.", retentionPolicy: "persistent" },
+      ];
+
+      const overview = TIER_DEFS.map(def => ({
+        ...def,
+        count: memoryStore.count(def.tier),
+        pinnedCount: memoryStore.list({ tier: def.tier, includeStale: true }).filter(e => e.retention.pinned).length,
+        staleCount: memoryStore.list({ tier: def.tier, includeStale: true }).filter(e => e.freshness.isStale).length,
+      }));
+
+      sendSuccess(res, { tiers: overview, totalEntries: memoryStore.count() });
+    } catch (err) {
+      handleRouteError(res, err, "memory:tiers-overview");
     }
   }
 );
