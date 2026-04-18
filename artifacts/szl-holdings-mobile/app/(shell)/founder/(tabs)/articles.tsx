@@ -50,6 +50,49 @@ function useArticles() {
   });
 }
 
+const ARTICLES_FALLBACK: Article[] = [
+  {
+    id: -1,
+    title: "Infrastructure First: Why I Build Shared Platforms Before Products",
+    slug: "infrastructure-first",
+    excerpt:
+      "The conventional wisdom is to build an MVP and iterate. I do the opposite — I build the infrastructure layer first. Here's why that compound investment changes everything.",
+    publishedAt: "2025-01-15T00:00:00Z",
+    readingTime: 6,
+    tags: ["architecture", "strategy"],
+  },
+  {
+    id: -2,
+    title: "Governed Autonomy: The AI Governance Model That Actually Works in Enterprise",
+    slug: "governed-autonomy",
+    excerpt:
+      "AI agents that act without approval are a liability. AI agents that require approval for everything are useless. The answer is a tiered guardian model — and it's the core of how CORTEX operates.",
+    publishedAt: "2025-03-01T00:00:00Z",
+    readingTime: 8,
+    tags: ["AI", "governance"],
+  },
+  {
+    id: -3,
+    title: "What Maritime Intelligence Taught Me About Enterprise Data Architecture",
+    slug: "maritime-intelligence-data",
+    excerpt:
+      "Tracking 50,000 vessels in real time across global shipping lanes is a data architecture problem before it's anything else. Here's what I learned building Vessels.",
+    publishedAt: "2024-11-10T00:00:00Z",
+    readingTime: 7,
+    tags: ["data", "maritime"],
+  },
+  {
+    id: -4,
+    title: "The Compound Architecture Thesis: One Platform, Six Products",
+    slug: "compound-architecture-thesis",
+    excerpt:
+      "When you build the authentication layer once and deploy it six times, the math changes. This is the thesis behind SZL Holdings and why every platform we ship gets cheaper to build.",
+    publishedAt: "2024-08-20T00:00:00Z",
+    readingTime: 5,
+    tags: ["strategy", "architecture"],
+  },
+];
+
 function formatDate(iso?: string | null) {
   if (!iso) return "";
   try {
@@ -66,7 +109,9 @@ function formatDate(iso?: string | null) {
 export default function ArticlesScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { data: articles, isLoading, error, refetch } = useArticles();
+  const { data: articles, isLoading } = useArticles();
+
+  const displayArticles = articles && articles.length > 0 ? articles : ARTICLES_FALLBACK;
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -90,25 +135,12 @@ export default function ArticlesScreen() {
             <Text style={styles.stateText}>Loading articles…</Text>
           </View>
         )}
-        {!isLoading && (error || !articles || articles.length === 0) && (
-          <View style={styles.centerState}>
-            <Feather name="file-text" size={32} color={TEXT_DIM} />
-            <Text style={styles.stateText}>
-              {error ? "Could not load articles" : "No articles yet"}
-            </Text>
-            {!!error && (
-              <TouchableOpacity onPress={() => refetch()} style={styles.retryBtn}>
-                <Text style={styles.retryText}>Retry</Text>
-              </TouchableOpacity>
-            )}
-          </View>
-        )}
-        {articles && articles.length > 0 &&
-          articles.map((article, i) => (
+        {!isLoading &&
+          displayArticles.map((article, i) => (
             <TouchableOpacity
               key={article.id}
               activeOpacity={0.85}
-              style={[styles.articleRow, i === articles.length - 1 && styles.lastRow]}
+              style={[styles.articleRow, i === displayArticles.length - 1 && styles.lastRow]}
               onPress={() => router.push({ pathname: "/article/[slug]", params: { slug: article.slug } } as any)}
             >
               <View style={styles.articleContent}>

@@ -224,6 +224,72 @@ const MILESTONES = [
   },
 ];
 
+const CASE_STUDIES_FALLBACK: CaseStudy[] = [
+  {
+    id: -1,
+    title: "Maritime Sanctions Screening at Scale — Vessels",
+    slug: "vessels-sanctions-screening",
+    summary:
+      "Designed and shipped a real-time OFAC/UN sanctions screening pipeline processing 2M+ AIS data points per day across 50K+ tracked vessels. Integrated automated exception management and voyage economics for enterprise logistics operators.",
+    outcome: "Zero sanctions violations missed across 18 months of live production operation.",
+  },
+  {
+    id: -2,
+    title: "Unified SOC Command Surface — Aegis",
+    slug: "aegis-soc-command",
+    summary:
+      "Converged three disparate security toolsets (Firestorm incident response, Aegis Operations MSP management, and INCA threat intelligence) into a single operator command surface mapped to the MITRE ATT&CK framework.",
+    outcome: "Mean time to containment reduced from 18 minutes to under 60 seconds.",
+  },
+  {
+    id: -3,
+    title: "Distress-First Real Estate Intelligence — Terra",
+    slug: "terra-distress-signals",
+    summary:
+      "Built a multi-factor distress scoring engine across all five NYC boroughs aggregating 12+ public data sources — including tax liens, foreclosure filings, HPD violations, and zoning changes — to surface acquisition targets 6–18 months before market-wide discovery.",
+    outcome: "500K+ properties indexed. First-mover advantage on distress pipeline delivered to institutional clients.",
+  },
+];
+
+const ARTICLES_FALLBACK: Article[] = [
+  {
+    id: -1,
+    title: "Infrastructure First: Why I Build Shared Platforms Before Products",
+    slug: "infrastructure-first",
+    excerpt:
+      "The conventional wisdom is to build an MVP and iterate. I do the opposite — I build the infrastructure layer first. Here's why that compound investment changes everything.",
+    summary:
+      "The conventional wisdom is to build an MVP and iterate. I do the opposite — I build the infrastructure layer first.",
+    publishedAt: "2025-01-15T00:00:00Z",
+    readingTime: 6,
+    tags: ["architecture", "strategy"],
+  },
+  {
+    id: -2,
+    title: "Governed Autonomy: The AI Governance Model That Actually Works in Enterprise",
+    slug: "governed-autonomy",
+    excerpt:
+      "AI agents that act without approval are a liability. AI agents that require approval for everything are useless. The answer is a tiered guardian model — and it's the core of how CORTEX operates.",
+    summary:
+      "AI agents that act without approval are a liability. AI agents that require approval for everything are useless. The answer is a tiered guardian model.",
+    publishedAt: "2025-03-01T00:00:00Z",
+    readingTime: 8,
+    tags: ["AI", "governance"],
+  },
+  {
+    id: -3,
+    title: "What Maritime Intelligence Taught Me About Enterprise Data Architecture",
+    slug: "maritime-intelligence-data",
+    excerpt:
+      "Tracking 50,000 vessels in real time across global shipping lanes is a data architecture problem before it's anything else. Here's what I learned building Vessels.",
+    summary:
+      "Tracking 50,000 vessels in real time across global shipping lanes is a data architecture problem before it's anything else.",
+    publishedAt: "2024-11-10T00:00:00Z",
+    readingTime: 7,
+    tags: ["data", "maritime"],
+  },
+];
+
 const THESIS_FALLBACK = [
   {
     label: "Infrastructure First",
@@ -303,9 +369,9 @@ function useApiBase() {
 function useCaseStudies() {
   const base = useApiBase();
   return useQuery<CaseStudy[]>({
-    queryKey: ["stephen-case-studies"],
+    queryKey: ["cms-case-studies"],
     queryFn: async () => {
-      const res = await fetch(`${base}/api/stephen/portfolio-case-studies`);
+      const res = await fetch(`${base}/api/cms/case-studies?limit=10`);
       if (!res.ok) throw new Error("Failed");
       const json = await res.json();
       return (json.data ?? json) as CaseStudy[];
@@ -688,7 +754,7 @@ export default function HomeScreen() {
             <View style={styles.loadingRow}>
               <ActivityIndicator size="small" color={colors.silver} />
             </View>
-          ) : caseStudies && caseStudies.length > 0 ? (
+          ) : (
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
@@ -698,7 +764,7 @@ export default function HomeScreen() {
               snapToAlignment="start"
               nestedScrollEnabled
             >
-              {caseStudies.map((cs) => (
+              {(caseStudies && caseStudies.length > 0 ? caseStudies : CASE_STUDIES_FALLBACK).map((cs) => (
                 <CaseStudyCard
                   key={cs.id}
                   study={cs}
@@ -707,13 +773,6 @@ export default function HomeScreen() {
                 />
               ))}
             </ScrollView>
-          ) : (
-            <View style={[styles.emptyState, { borderColor: colors.border }]}>
-              <Feather name="briefcase" size={28} color={colors.border} style={{ marginBottom: 8 }} />
-              <Text style={[styles.emptyText, { color: colors.mutedForeground }]}>
-                Case studies coming soon
-              </Text>
-            </View>
           )}
         </View>
 
@@ -760,9 +819,9 @@ export default function HomeScreen() {
             <View style={styles.loadingRow}>
               <ActivityIndicator size="small" color={colors.silver} />
             </View>
-          ) : articles && articles.length > 0 ? (
+          ) : (
             <View style={{ paddingHorizontal: 20, gap: 12 }}>
-              {articles.slice(0, 5).map((article) => (
+              {(articles && articles.length > 0 ? articles : ARTICLES_FALLBACK).slice(0, 5).map((article) => (
                 <ArticleRow
                   key={article.id}
                   article={article}
@@ -770,13 +829,6 @@ export default function HomeScreen() {
                   onPress={() => handleArticleDetail(article.slug)}
                 />
               ))}
-            </View>
-          ) : (
-            <View style={[styles.emptyState, { borderColor: colors.border }]}>
-              <Feather name="edit-3" size={28} color={colors.border} style={{ marginBottom: 8 }} />
-              <Text style={[styles.emptyText, { color: colors.mutedForeground }]}>
-                Articles coming soon
-              </Text>
             </View>
           )}
         </View>
