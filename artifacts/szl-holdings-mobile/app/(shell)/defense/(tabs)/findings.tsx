@@ -30,8 +30,6 @@ interface Finding {
   cveId?: string;
 }
 
-// Live backend routes — /api/firestorm/* paths are active api-server endpoints.
-// Follow-up task #1715 will rename them to /api/aegis/* once the server migration lands.
 async function fetchFindings(): Promise<Finding[]> {
   return apiGet<Finding[]>("/api/firestorm/findings");
 }

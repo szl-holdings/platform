@@ -61,8 +61,6 @@ const DEMO_INCIDENTS: Incident[] = [
   { id: 1005, title: "AIS spoofing signal detected — Port Approach", severity: "medium", status: "triage", assignedAnalyst: "Nakamura", affectedAsset: "AIS Receiver", detectedAt: new Date(Date.now() - 172800000).toISOString() },
 ];
 
-// Live backend routes — /api/firestorm/* paths are active api-server endpoints.
-// Follow-up task #1715 will rename them to /api/aegis/* once the server migration lands.
 async function fetchIncidents(): Promise<Incident[]> {
   try {
     const data = await apiGet<Incident[]>("/api/firestorm/incidents");

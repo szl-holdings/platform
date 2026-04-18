@@ -174,8 +174,6 @@ function SkeletonBlock({ width, height, style }: { width: number | `${number}%`;
   );
 }
 
-// Live backend routes — /api/firestorm/* paths are active api-server endpoints.
-// Follow-up task #1715 will rename them to /api/aegis/* once the server migration lands.
 async function fetchIncidents(): Promise<Incident[]> {
   return apiGet<Incident[]>("/api/firestorm/incidents");
 }

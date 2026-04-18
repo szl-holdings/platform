@@ -72,8 +72,6 @@ export default function DigestTab() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
 
-  // Live backend routes — /api/firestorm/* paths are active api-server endpoints.
-  // Follow-up task #1715 will rename them to /api/aegis/* once the server migration lands.
   const { data: incidents, isLoading: incLoading, refetch: refetchInc, isRefetching: incRefetching } = useQuery({
     queryKey: ["incidents"],
     queryFn: () => apiGet<Incident[]>("/api/firestorm/incidents"),
@@ -91,7 +89,7 @@ export default function DigestTab() {
 
   const { data: decisions, isLoading: decLoading, refetch: refetchDec, isRefetching: decRefetching } = useQuery({
     queryKey: ["tradecraft-decisions"],
-    queryFn: () => apiGet<Decision[]>("/api/firestorm/tradecraft/decisions"),
+    queryFn: () => apiGet<Decision[]>("/api/aegis/tradecraft/decisions"),
   });
 
   const activeIncidents = Array.isArray(incidents) ? incidents.filter(i => i.status !== "closed") : [];

@@ -260,7 +260,7 @@ export default function ApprovalsTab() {
     const remaining: QueuedAction[] = [];
     for (const item of queue) {
       try {
-        await apiPut(`/api/firestorm/tradecraft/decisions/${item.objectId}`, { action: item.action });
+        await apiPut(`/api/aegis/tradecraft/decisions/${item.objectId}`, { action: item.action });
       } catch {
         remaining.push(item);
       }
@@ -279,13 +279,11 @@ export default function ApprovalsTab() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOffline, queueLoaded]);
 
-  // Live backend routes — /api/firestorm/* paths are active api-server endpoints.
-  // Follow-up task #1715 will rename them to /api/aegis/* once the server migration lands.
   const { data: apiDecisions, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ["tradecraft-decisions"],
     queryFn: async () => {
       try {
-        const data = await apiGet<Decision[]>("/api/firestorm/tradecraft/decisions");
+        const data = await apiGet<Decision[]>("/api/aegis/tradecraft/decisions");
         await cacheSet(CACHE_KEY, data);
         return data;
       } catch {
@@ -315,7 +313,7 @@ export default function ApprovalsTab() {
     }
     setApproving(objectId);
     try {
-      await apiPut(`/api/firestorm/tradecraft/decisions/${objectId}`, { action: "approve" });
+      await apiPut(`/api/aegis/tradecraft/decisions/${objectId}`, { action: "approve" });
     } catch {
       Alert.alert("Approval failed", "Could not submit approval. Please try again or check your connection.");
     } finally {
@@ -343,7 +341,7 @@ export default function ApprovalsTab() {
             return;
           }
           try {
-            await apiPut(`/api/firestorm/tradecraft/decisions/${objectId}`, { action: "reject" });
+            await apiPut(`/api/aegis/tradecraft/decisions/${objectId}`, { action: "reject" });
           } catch {
             Alert.alert("Rejection failed", "Could not submit rejection. Please try again or check your connection.");
           } finally {
@@ -356,7 +354,7 @@ export default function ApprovalsTab() {
 
   const retryQueuedItem = useCallback(async (item: QueuedAction) => {
     try {
-      await apiPut(`/api/firestorm/tradecraft/decisions/${item.objectId}`, { action: item.action });
+      await apiPut(`/api/aegis/tradecraft/decisions/${item.objectId}`, { action: item.action });
       setOfflineQueue((prev) => prev.filter((q) => q.objectId !== item.objectId));
       queryClient.invalidateQueries({ queryKey: ["tradecraft-decisions"] });
       Alert.alert("Synced", "Queued action submitted successfully.");
