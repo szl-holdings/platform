@@ -2,6 +2,8 @@
 
 **Version:** 1.0 · **Last updated:** April 2026
 
+> **⚠ Canonical replacement:** [policy-model.md](policy-model.md) (April 2026) supersedes the governance model sections of this document. This file is retained for the UI component shapes (ProofPanel, PolicyResult, AdminAuditTrail, SimulationCockpit) which are not duplicated elsewhere. See [docs/CANONICAL_INDEX.md](docs/CANONICAL_INDEX.md).
+
 ---
 
 ## Overview

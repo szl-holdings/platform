@@ -1,5 +1,7 @@
 # Observability Architecture
 
+> **⚠ Canonical replacement:** [telemetry-model.md](telemetry-model.md) (April 2026) supersedes this document as the source of truth for the telemetry model, observability surfaces, and correlation contract. This file is retained for historical reference. See [docs/CANONICAL_INDEX.md](docs/CANONICAL_INDEX.md).
+
 > **Truth-pass rule:** every observability surface listed here is *enforced
 > at the API layer through `@szl-holdings/decision-fabric` queries against
 > the `decision_fabric_*` and primitive tables; bypass requires an explicit,

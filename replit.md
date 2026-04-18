@@ -1,5 +1,22 @@
 # SZL Holdings Platform
 
+## Canonical Architecture Docs (Read These First)
+
+> These five documents are the authoritative source of truth for the platform. All other architecture docs link forward to these. See [docs/CANONICAL_INDEX.md](docs/CANONICAL_INDEX.md) for the full legacy doc → canonical doc mapping.
+
+| Document | What It Covers |
+|----------|---------------|
+| [architecture.md](architecture.md) | Platform layer model, monorepo structure, package concept ownership |
+| [ontology.md](ontology.md) | Entity types, signal types, freshness, confidence, policy state |
+| [policy-model.md](policy-model.md) | Covenant Policy, Proof Chain, approval flows, trust guarantees |
+| [telemetry-model.md](telemetry-model.md) | Telemetry layers, semantic conventions, correlation contract, observability surfaces |
+| [app-moats.md](app-moats.md) | Canonical product map (Lyte, Vessels, Carlota, Sentra, Counsel → artifacts), structural moats |
+
+**For AI agents / Codex:** Start with [AGENTS.md](AGENTS.md) and [CODEX_HANDOFF.md](CODEX_HANDOFF.md).  
+**Ontology types:** `packages/ontology` (`@workspace/ontology`).
+
+---
+
 ## Overview
 The SZL Holdings Platform is a governed decision infrastructure designed to enforce governance, attribution, and outcome tracking for critical decisions. It integrates signal detection with action execution through a canonical nine-step loop: Signal → Context → Recommendation → Simulation → Policy → Execution → Proof → Outcome → Learning. The platform is a pnpm monorepo consisting of web and mobile applications, an API, a design system, and a development sandbox. Its core capabilities are built around six platform primitives: Outcome Graph, Proof Chain, Covenant Policy, Decision Simulation, Workflow Engine, and Event Fabric. The project aims to provide comprehensive decision-making support with robust governance and observability.
 

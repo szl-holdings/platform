@@ -2,6 +2,8 @@
 
 **Version:** 3.0 | **Date:** April 2026 | **Audience:** Technical advisors, engineers, enterprise evaluators
 
+> **⚠ Canonical replacement:** [architecture.md](architecture.md) (April 2026, v4.0) supersedes this document as the source of truth. This file is retained for historical detail. For the authoritative architecture spec, read [architecture.md](architecture.md). See [docs/CANONICAL_INDEX.md](docs/CANONICAL_INDEX.md).
+
 **Related:** [SYSTEM-OVERVIEW.md](SYSTEM-OVERVIEW.md) · [PRODUCT-SURFACES.md](PRODUCT-SURFACES.md) · [DATA-MODEL.md](DATA-MODEL.md) · [API-SPEC.md](API-SPEC.md) · [OPERATIONS-RUNBOOK.md](OPERATIONS-RUNBOOK.md) · [DEPENDENCY_MAP.md](DEPENDENCY_MAP.md) · [CONTROL_PLANE_ARCHITECTURE.md](CONTROL_PLANE_ARCHITECTURE.md) · [AUDIT_FINDINGS_REGISTER.md](AUDIT_FINDINGS_REGISTER.md)
 
 ---

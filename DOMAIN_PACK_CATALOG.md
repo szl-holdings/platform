@@ -4,6 +4,8 @@
 **Audience:** Buyers, partners, sales, product, engineering
 **Companion docs:** [PRODUCT_PACKAGING.md](PRODUCT_PACKAGING.md) · [PLATFORM_PRIMITIVES.md](PLATFORM_PRIMITIVES.md) · [CATEGORY_POSITIONING.md](CATEGORY_POSITIONING.md)
 
+> **Product naming:** The canonical product name → artifact map is now in [app-moats.md](app-moats.md). This document retains the domain pack anatomy, agent lists, action vocabulary, and scenario library. See [docs/CANONICAL_INDEX.md](docs/CANONICAL_INDEX.md).
+
 ---
 
 ## What a Domain Pack Is

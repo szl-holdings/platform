@@ -1,0 +1,50 @@
+{
+  "name": "@workspace/ontology",
+  "version": "1.0.0",
+  "private": false,
+  "type": "module",
+  "description": "Canonical entity, entity-link, entity-snapshot, and signal type definitions for the SZL Holdings platform. Every package that emits, stores, or reasons about governed intelligence concepts imports from here.",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./src/index.ts"
+    },
+    "./entities": {
+      "types": "./dist/entities.d.ts",
+      "import": "./src/entities.ts"
+    },
+    "./signals": {
+      "types": "./dist/signals.d.ts",
+      "import": "./src/signals.ts"
+    },
+    "./entity-links": {
+      "types": "./dist/entity-links.d.ts",
+      "import": "./src/entity-links.ts"
+    },
+    "./entity-snapshot": {
+      "types": "./dist/entity-snapshot.d.ts",
+      "import": "./src/entity-snapshot.ts"
+    },
+    "./evidence": {
+      "types": "./dist/evidence.d.ts",
+      "import": "./src/evidence.ts"
+    },
+    "./domains": {
+      "types": "./dist/domains.d.ts",
+      "import": "./src/domains.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "^4.1.2"
+  }
+}

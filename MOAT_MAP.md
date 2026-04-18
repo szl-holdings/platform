@@ -4,6 +4,8 @@
 **Audience:** Series A investors, strategic advisors, enterprise evaluators  
 **Classification:** Confidential — NDA required
 
+> **Product naming:** For the canonical product map (which names resolve to which artifacts), see [app-moats.md](app-moats.md). This document retains the full moat analysis with code evidence. See [docs/CANONICAL_INDEX.md](docs/CANONICAL_INDEX.md).
+
 > This document defines the eight structural moats of the SZL Holdings platform — the architectural and network properties that compound in value over time and are difficult to replicate without years of accumulated context.
 
 ---
