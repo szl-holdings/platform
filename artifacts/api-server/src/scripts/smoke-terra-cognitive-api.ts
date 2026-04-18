@@ -18,6 +18,7 @@
 const BASE = `http://localhost:${process.env["PORT"] ?? 8080}`;
 const TOKEN = process.env["ALLOY_INTERNAL_TOKEN"] ?? "";
 
+export {};
 const errors: string[] = [];
 let passed = 0;
 

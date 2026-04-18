@@ -93,13 +93,13 @@ function deriveTier(req: Request, defaultTier: PolicyTier): PolicyTier {
   const user = req.user;
   const roles = user?.roles ?? [];
 
-  if (roles.includes("system") || roles.includes("internal-service")) {
+  if ((roles as string[]).includes("system") || (roles as string[]).includes("internal-service")) {
     return "operator-approved";
   }
   if (roles.includes("admin") || roles.includes("operator")) {
     return "operator-approved";
   }
-  if (roles.includes("supervisor")) {
+  if ((roles as string[]).includes("supervisor")) {
     return "supervised";
   }
   return defaultTier;

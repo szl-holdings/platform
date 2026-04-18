@@ -55,7 +55,7 @@ router.get("/reflections", authMiddleware(), validateQuery(listQuerySchema), asy
 
 router.get("/reflections/:id", authMiddleware(), async (req, res) => {
   try {
-    const reflection = defaultReflectionStore.get(req.params.id);
+    const reflection = defaultReflectionStore.get(req.params.id as string);
     if (!reflection) {
       sendNotFound(res, "Reflection not found");
       return;
@@ -87,7 +87,7 @@ router.post("/reflections", authMiddleware(), validateBody(jsonObjectBodySchema)
 
 router.get("/reflections/by-trace/:traceId", authMiddleware(), async (req, res) => {
   try {
-    const reflection = defaultReflectionStore.getByTrace(req.params.traceId);
+    const reflection = defaultReflectionStore.getByTrace(req.params.traceId as string);
     if (!reflection) {
       sendNotFound(res, "No reflection found for this trace");
       return;

@@ -198,7 +198,7 @@ router.get("/deployments", authMiddleware({ required: false }), perUserApiSlidin
 
 router.get("/deployments/:appId", authMiddleware({ required: false }), perUserApiSlidingLimiter, validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
-    const { appId } = req.params;
+    const { appId } = req.params as { appId: string };
     const env = (req.query.environment as string) ?? "production";
     const active = await getActive(appId, env);
     if (!active) {
@@ -213,7 +213,7 @@ router.get("/deployments/:appId", authMiddleware({ required: false }), perUserAp
 
 router.get("/deployments/:appId/history", authMiddleware({ required: false }), perUserApiSlidingLimiter, validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
-    const { appId } = req.params;
+    const { appId } = req.params as { appId: string };
     const env = (req.query.environment as string) ?? "production";
     const rows = await getHistory(appId, env);
     const history = await recordsWithUsers(rows);
@@ -273,7 +273,7 @@ router.post("/deployments", authMiddleware({ required: true }), denyIfReadOnly()
 
 router.post("/deployments/:appId/rollback", authMiddleware({ required: true }), denyIfReadOnly(), requireRole("ops", "exec", "admin", "super_admin"), perUserWriteSlidingLimiter, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
-    const { appId } = req.params;
+    const { appId } = req.params as { appId: string };
     const env = (req.body.environment as string) ?? "production";
     const targetVersion = req.body.version as string | undefined;
     const deployedBy = principalFor(req);
@@ -301,9 +301,7 @@ router.post("/deployments/:appId/rollback", authMiddleware({ required: true }), 
 
       let targetIdx: number;
       if (targetVersion) {
-        targetIdx = history.findLastIndex(
-          (r) => r.version === targetVersion && r.status !== "active",
-        );
+        targetIdx = history.reduce((found: number, r: any, i: number) => (r.version === targetVersion && r.status !== "active") ? i : found, -1);
         if (targetIdx < 0) {
           return { error: `Version '${targetVersion}' not found in history` } as const;
         }
@@ -342,7 +340,7 @@ router.post("/deployments/:appId/rollback", authMiddleware({ required: true }), 
     });
 
     if ("error" in result) {
-      return sendBadRequest(res, result.error);
+      return sendBadRequest(res, result.error ?? "Unknown rollback error");
     }
 
     logger.info(

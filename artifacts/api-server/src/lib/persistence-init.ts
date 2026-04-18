@@ -97,13 +97,13 @@ export async function initDurablePersistence(): Promise<void> {
 
       const pgSkillRegistry = new PostgresSkillRegistry({
         db,
-        skillsTable,
+        skillsTable: skillsTable as any,
         logger,
       });
 
       const pgSkillRunStore = new PostgresSkillRunStore({
         db,
-        skillRunsTable,
+        skillRunsTable: skillRunsTable as any,
         hydrateLimit: 2000,
       });
 

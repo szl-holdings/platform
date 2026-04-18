@@ -208,7 +208,7 @@ const mockAuthUser = {
 
 vi.mock("../middlewares/auth.js", () => ({
   authMiddleware: (_opts?: unknown) => (req: Request, _res: Response, next: NextFunction) => {
-    (req as Request & { user: typeof mockAuthUser }).user = mockAuthUser;
+    (req as any).user = mockAuthUser;
     next();
   },
   parseIdParam: (_paramName: string) => (req: Request, res: Response, next: NextFunction) => {

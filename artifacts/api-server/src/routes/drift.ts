@@ -153,7 +153,7 @@ router.get("/drift/history", async (_req: Request, res: Response) => {
 
 router.get("/drift/:domain", async (req: Request, res: Response) => {
   try {
-    const { domain } = req.params;
+    const { domain } = req.params as { domain: string };
     if (!KNOWN_DOMAINS.includes(domain as typeof KNOWN_DOMAINS[number])) {
       return sendBadRequest(res, `Unknown domain '${domain}'. Valid: ${KNOWN_DOMAINS.join(", ")}`);
     }

@@ -16,6 +16,7 @@
  * Run:  pnpm --filter @workspace/api-server test:cognitive-contracts
  */
 
+export {};
 const errors: string[] = [];
 let passed = 0;
 

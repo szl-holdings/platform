@@ -2,7 +2,7 @@ import { Router, type IRouter, type RequestHandler, type Request, type Response 
 import { randomUUID, createHash } from "crypto";
 import rateLimit from "express-rate-limit";
 import multer from "multer";
-import { sendSuccess, sendBadRequest, sendUnauthorized, sendCreated, handleRouteError } from "../lib/api-response";
+import { sendSuccess, sendError, sendBadRequest, sendUnauthorized, sendCreated, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
 import {
   queryNodes,
@@ -275,7 +275,7 @@ router.get("/terra/cognitive/ownership-graph", cogLimit, auth, validateQuery(lis
             riskFlag: null,
             meta: {
               source: p.connectorSource,
-              lenderType: p.distressType === "tax-lien" ? "tax_lien" : "senior_mortgage",
+              lenderType: p.distressType === "tax-lien" ? "tax-lien" : "senior_mortgage",
             },
           });
         }
@@ -285,7 +285,7 @@ router.get("/terra/cognitive/ownership-graph", cogLimit, auth, validateQuery(lis
           id: `db_edge_lien_${p.id}`,
           from: lenderId,
           to: propNodeId,
-          label: p.distressType === "tax-lien" ? "tax_lien" : "lien",
+          label: p.distressType === "tax-lien" ? "tax-lien" : "lien",
           weight: ltv > 0 ? +ltv.toFixed(3) : 0.5,
         });
       }
@@ -306,13 +306,13 @@ router.get("/terra/cognitive/ownership-graph", cogLimit, auth, validateQuery(lis
 
       nodes = allNodes.map(n => ({
         id: n.id,
-        label: n.label,
+        label: (n as any).label ?? (n as any).labels?.[0] ?? n.name,
         type: n.entityType,
         entityType: n.entityType,
         domain: n.domain,
         confidence: n.confidence,
         riskFlag: n.confidence < 0.6 ? "low_confidence" : null,
-        meta: n.meta ?? {},
+        meta: (n as any).meta ?? {},
       }));
 
       const filteredNodes = (propertyId && nodes.some(n => n.id === propertyId))
@@ -336,7 +336,7 @@ router.get("/terra/cognitive/ownership-graph", cogLimit, auth, validateQuery(lis
         .filter(n => n.riskFlag)
         .map(n => ({
           entityId: n.id,
-          entity: n.label,
+          entity: (n as any).label ?? (n as any).labels?.[0] ?? n.name,
           flag: n.riskFlag,
           severity: n.riskFlag === "offshore" || n.riskFlag === "high_distress" ? "medium" : "high",
         }));
@@ -346,20 +346,20 @@ router.get("/terra/cognitive/ownership-graph", cogLimit, auth, validateQuery(lis
         return s + (p.debtAmount !== null ? Number(p.debtAmount) : 0) + (p.lienAmount !== null ? Number(p.lienAmount) : 0);
       }, 0);
       const totalDebt = lenderMetas.reduce((s, ln) => {
-        const m = (ln.meta as Record<string, number> | null) ?? {};
+        const m = ((ln as any).meta as Record<string, number> | null) ?? {};
         return s + (m.loanAmount ?? 0);
       }, 0) + dbLenderDebt;
       const propNodes = nodes.filter(n => n.type === "property");
-      const totalValue = propNodes.reduce((s, n) => s + ((n.meta as Record<string, number> | null)?.value ?? 0), 0);
+      const totalValue = propNodes.reduce((s, n) => s + (((n as any).meta as Record<string, number> | null)?.value ?? 0), 0);
       const combinedLtv = totalValue > 0 ? Math.min(1.0, totalDebt / totalValue) : 0;
 
       // Always provide UBO array (empty if none resolved). Add real-DB persons too.
       const uboNodes = [
-        ...ownerNodes.nodes.filter(n => n.entityType === "person" || (n.meta as Record<string, unknown> | null)?.role === "beneficial_owner"),
+        ...ownerNodes.nodes.filter(n => n.entityType === "person" || ((n as any).meta as any | null)?.role === "beneficial_owner"),
       ];
       const dbPersonOwners = dbNodes
-        .filter(n => n.type === "person" && !((n.meta as Record<string, unknown> | null)?.placeholder))
-        .map(n => ({ id: n.id, label: n.label, meta: n.meta }));
+        .filter(n => n.type === "person" && !(((n as any).meta as any | null)?.placeholder))
+        .map(n => ({ id: n.id, label: (n as any).label ?? (n as any).labels?.[0] ?? n.name, meta: n.meta }));
 
       summary = {
         totalEntities: ownerNodes.nodes.length + lenderNodes.nodes.length + ownerKeyToId.size,
@@ -368,8 +368,8 @@ router.get("/terra/cognitive/ownership-graph", cogLimit, auth, validateQuery(lis
         ultimateBeneficialOwners: [
           ...uboNodes.map(n => ({
             id: n.id,
-            name: n.label,
-            pct: (n.meta as Record<string, number> | null)?.ownershipPct ?? null,
+            name: (n as any).label ?? (n as any).labels?.[0] ?? n.name,
+            pct: ((n as any).meta as Record<string, number> | null)?.ownershipPct ?? null,
           })),
           ...dbPersonOwners.map(n => ({ id: n.id as string, name: n.label as string, pct: null })),
         ],
@@ -569,7 +569,7 @@ router.get("/terra/cognitive/lender-exposure", cogLimit, auth, async (req, res) 
       }> = {};
 
       for (const lenderNode of graphLenders) {
-        const meta = (lenderNode.meta as Record<string, unknown> | null) ?? {};
+        const meta = ((lenderNode as any).meta as any | null) ?? {};
         graphLenderMap[lenderNode.id] = {
           node: lenderNode,
           loanAmount: (meta.loanAmount as number) ?? 0,
@@ -584,7 +584,7 @@ router.get("/terra/cognitive/lender-exposure", cogLimit, auth, async (req, res) 
         const propId = edge.fromNodeId === lenderSide.node.id ? edge.toNodeId : edge.fromNodeId;
         if (!lenderSide.connectedProps.includes(propId)) {
           lenderSide.connectedProps.push(propId);
-          const edgeMeta = (edge.meta ?? {}) as Record<string, unknown>;
+          const edgeMeta = (edge.meta ?? {}) as any;
           const edgeLoan = (edgeMeta.loanAmount as number) ?? 0;
           if (edgeLoan > 0) lenderSide.loanAmount += edgeLoan;
         }
@@ -646,10 +646,8 @@ router.get("/terra/cognitive/lender-exposure", cogLimit, auth, async (req, res) 
       // hyphenated (DB enum: "pre-foreclosure") and underscored variants.
       const typeToLenderMeta: Record<string, { lenderType: string; avgRate: number }> = {
         "foreclosure": { lenderType: "senior_mortgage", avgRate: 7.10 },
-        "tax-lien": { lenderType: "tax_lien", avgRate: 5.00 },
-        "tax_lien": { lenderType: "tax_lien", avgRate: 5.00 },
+        "tax-lien": { lenderType: "tax-lien", avgRate: 5.00 },
         "pre-foreclosure": { lenderType: "bridge", avgRate: 8.75 },
-        "pre_foreclosure": { lenderType: "bridge", avgRate: 8.75 },
         "lis-pendens": { lenderType: "cmbs", avgRate: 6.95 },
         "lis_pendens": { lenderType: "cmbs", avgRate: 6.95 },
         "reo": { lenderType: "life_co", avgRate: 6.50 },
@@ -664,16 +662,16 @@ router.get("/terra/cognitive/lender-exposure", cogLimit, auth, async (req, res) 
       // Graph-derived lenders
       const graphLenderEntries = Object.values(graphLenderMap);
       for (const gl of graphLenderEntries) {
-        const meta = (gl.node.meta as Record<string, unknown> | null) ?? {};
+        const meta = ((gl.node as any).meta as any | null) ?? {};
         const loanAmt = gl.loanAmount;
         const lenderType = (meta.lenderType as string) ?? "other";
-        const matchedMeta = typeToLenderMeta[lenderType] ?? { name: gl.node.label, lenderType, avgRate: 7.25 };
+        const matchedMeta = typeToLenderMeta[lenderType] ?? { name: (gl.node as any).label ?? gl.node.labels?.[0] ?? gl.node.name, lenderType, avgRate: 7.25 };
         const avgLtv = (meta.ltv as number) ?? (loanAmt > 0 ? 0.65 : 0);
         const riskScore = Math.round(30 + (avgLtv * 60));
         riskIdx++;
         lenders.push({
           id: `ldr_g${String(riskIdx).padStart(3, "0")}`,
-          name: gl.node.label,
+          name: (gl.node as any).label ?? gl.node.labels?.[0] ?? gl.node.name,
           type: matchedMeta.lenderType,
           distressType: lenderType,
           totalExposure: loanAmt,
@@ -819,10 +817,10 @@ router.get("/terra/cognitive/lender-exposure", cogLimit, auth, async (req, res) 
         enrichedPropertyCount: propertyEnrichment.size,
         highestSingleExposure: lenders.length > 0 ? Math.max(...lenders.map(l => l.totalExposure as number)) : 0,
         byType: byTypeSummary,
-        nearTermMaturities: lenders.reduce((s, l) => s + ((l.maturities as Record<string, number>).within90d), 0),
-        covenantBreachCount: lenders.reduce((s, l) => s + ((l.covenantBreaches as number) ?? 0), 0),
-        watchlistCount: lenders.reduce((s, l) => s + ((l.watchlistProperties as number) ?? 0), 0),
-        concentrationRisk: totalExposure > 0 && (byTypeSummary["bridge"] ?? 0) / totalExposure > 0.35 ? "elevated" : "acceptable",
+        nearTermMaturities: lenders.reduce((s, l) => s + ((l as any).maturities?.within90d ?? 0), 0),
+        covenantBreachCount: lenders.reduce((s, l) => s + ((l as any).covenantBreaches ?? 0), 0),
+        watchlistCount: lenders.reduce((s, l) => s + ((l as any).watchlistProperties ?? 0), 0),
+        concentrationRisk: totalExposure > 0 && ((byTypeSummary as any)["bridge"] ?? 0) / totalExposure > 0.35 ? "elevated" : "acceptable",
         source: dataSource,
       };
     } else {
@@ -918,7 +916,7 @@ router.get("/terra/cognitive/covenants", cogLimit, auth, async (req, res) => {
             .where(eq(guardianActionsTable.requestId, reqId))
             .limit(1);
           if (existing[0]) {
-            guardianActionId = existing[0].id;
+            guardianActionId = String(existing[0].id);
             pendingApproval = existing[0].outcome === "require-approval";
           }
         } catch { /* non-fatal */ }
@@ -968,7 +966,7 @@ router.get("/terra/cognitive/covenants", cogLimit, auth, async (req, res) => {
         const isBreach = score >= 70 || impliedDscr < 1.2 || impliedLtv > 0.80;
         const isWatch = !isBreach && (score >= 50 || impliedLtv > 0.65);
 
-        const covenantType = prop.distressType === "tax_lien" ? "ltv" :
+        const covenantType = prop.distressType === "tax-lien" ? "ltv" :
           impliedDscr < 1.2 ? "dscr" : "occupancy";
 
         // Look up existing guardian action (read-only — no writes in GET)
@@ -983,7 +981,7 @@ router.get("/terra/cognitive/covenants", cogLimit, auth, async (req, res) => {
               .where(eq(guardianActionsTable.requestId, reqId))
               .limit(1);
             if (existing[0]) {
-              guardianActionId = existing[0].id;
+              guardianActionId = String(existing[0].id);
               pendingApproval = existing[0].outcome === "require-approval";
             }
           } catch { /* non-fatal lookup */ }
@@ -1116,7 +1114,7 @@ router.post("/terra/cognitive/covenants/submit-review", cogLimit, validateBody(j
       agentId: "terra-covenant-monitor",
       sessionId: trace,
       orgId: null,
-      tier: "t1",
+      tier: "supervised",
       action: "covenant_breach_review",
       toolId: "covenant-monitor",
       model: "terra-cognitive-v1",
@@ -1138,7 +1136,7 @@ router.post("/terra/cognitive/covenants/submit-review", cogLimit, validateBody(j
         agentId: "terra-covenant-monitor",
         sessionId: trace,
         orgId: null,
-        tier: "t1",
+        tier: "supervised",
         action: "covenant_breach_review",
         toolId: "covenant-monitor",
         approvalType: "single",
@@ -1190,11 +1188,11 @@ router.get("/terra/cognitive/distress-forecast", cogLimit, auth, validateQuery(l
         const confidence = confidenceLevel === "high" ? 0.91 : confidenceLevel === "medium" ? 0.78 : 0.62;
 
         const signals: Array<Record<string, unknown>> = [];
-        if (p.distressType === "foreclosure" || p.distressType === "pre_foreclosure") {
+        if (p.distressType === "foreclosure" || p.distressType === "pre-foreclosure") {
           signals.push({ type: "foreclosure_risk", label: `${p.distressType} filing — ${daysInDistress} days in process`, severity: score >= 75 ? "critical" : "high", confidence: 0.91 });
         }
-        if (p.distressType === "tax_lien") {
-          signals.push({ type: "tax_lien", label: `Tax lien delinquency — ${daysInDistress} days outstanding`, severity: "high", confidence: 0.88 });
+        if (p.distressType === "tax-lien") {
+          signals.push({ type: "tax-lien", label: `Tax lien delinquency — ${daysInDistress} days outstanding`, severity: "high", confidence: 0.88 });
         }
         if (impliedLtv > 0.75) {
           signals.push({ type: "high_ltv", label: `LTV at ${(impliedLtv * 100).toFixed(0)}% — refinancing pressure elevated`, severity: impliedLtv > 0.90 ? "critical" : "high", confidence: 0.82 });
@@ -1538,7 +1536,7 @@ function serializeMatter(matter: typeof terraDiligenceMattersTable.$inferSelect,
 router.post("/terra/cognitive/diligence-room/matters", cogLimit, authWrite, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const parsed = createMatterSchema.safeParse(req.body);
-    if (!parsed.success) return sendBadRequest(res, "Invalid matter payload", "VALIDATION_ERROR", parsed.error.flatten());
+    if (!parsed.success) return sendError(res, "Invalid matter payload", 400, "VALIDATION_ERROR", parsed.error.flatten());
     const userId = (req as Request & { user?: { id?: string | number; name?: string } }).user;
     const id = `matter_${randomUUID().slice(0, 8)}`;
     const inserted = await db
@@ -1564,7 +1562,7 @@ router.post("/terra/cognitive/diligence-room/matters", cogLimit, authWrite, vali
 // POST: attach/upload evidence to a matter (supports multipart file OR JSON with documentUrl)
 router.post("/terra/cognitive/diligence-room/matters/:matterId/evidence", cogLimit, authWrite, diligenceUpload.single("file"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
-    const matterId = req.params.matterId;
+    const matterId = req.params.matterId as string;
     const matterRows = await db
       .select({ id: terraDiligenceMattersTable.id })
       .from(terraDiligenceMattersTable)
@@ -1581,7 +1579,7 @@ router.post("/terra/cognitive/diligence-room/matters/:matterId/evidence", cogLim
     if (typeof body.documentSize === "string") body.documentSize = Number(body.documentSize);
 
     const parsed = createEvidenceSchema.safeParse(body);
-    if (!parsed.success) return sendBadRequest(res, "Invalid evidence payload", "VALIDATION_ERROR", parsed.error.flatten());
+    if (!parsed.success) return sendError(res, "Invalid evidence payload", 400, "VALIDATION_ERROR", parsed.error.flatten());
 
     let documentUrl = parsed.data.documentUrl ?? null;
     let documentName = parsed.data.documentName ?? null;
@@ -1637,11 +1635,11 @@ router.post("/terra/cognitive/diligence-room/matters/:matterId/evidence", cogLim
 router.patch("/terra/cognitive/diligence-room/evidence/:evidenceId", cogLimit, authWrite, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const parsed = patchEvidenceSchema.safeParse(req.body);
-    if (!parsed.success) return sendBadRequest(res, "Invalid patch payload", "VALIDATION_ERROR", parsed.error.flatten());
+    if (!parsed.success) return sendError(res, "Invalid patch payload", 400, "VALIDATION_ERROR", parsed.error.flatten());
     const existing = await db
       .select()
       .from(terraDiligenceEvidenceTable)
-      .where(eq(terraDiligenceEvidenceTable.id, req.params.evidenceId))
+      .where(eq(terraDiligenceEvidenceTable.id, req.params.evidenceId as string))
       .limit(1);
     if (!existing[0]) return sendBadRequest(res, "Evidence not found", "NOT_FOUND");
 
@@ -1662,7 +1660,7 @@ router.patch("/terra/cognitive/diligence-room/evidence/:evidenceId", cogLimit, a
     const updated = await db
       .update(terraDiligenceEvidenceTable)
       .set(updates)
-      .where(eq(terraDiligenceEvidenceTable.id, req.params.evidenceId))
+      .where(eq(terraDiligenceEvidenceTable.id, req.params.evidenceId as string))
       .returning();
 
     await recomputeMatterCompletion(existing[0].matterId);
@@ -1743,7 +1741,7 @@ router.get("/terra/cognitive/diligence-room", cogLimit, auth, validateQuery(list
     if (matterNodes.length > 0) {
       matters = matterNodes.map(n => ({
         id: n.id,
-        title: `${n.label} — Diligence`,
+        title: `${(n as any).label ?? n.labels?.[0] ?? n.name} — Diligence`,
         status: "in_progress",
         stage: "due_diligence",
         completionPct: Math.round(50 + (n.confidence ?? 0.7) * 30),
@@ -1756,7 +1754,7 @@ router.get("/terra/cognitive/diligence-room", cogLimit, auth, validateQuery(list
             source: "CONSTELLATION — Terra Entity Record", date: new Date(n.freshness).toISOString().split("T")[0],
             freshness: `${Math.ceil((Date.now() - new Date(n.freshness).getTime()) / 86400000)}d`,
             status: "verified", confidence: n.confidence ?? 0.85,
-            summary: `Entity node confirmed: ${n.label}. Confidence: ${((n.confidence ?? 0.85) * 100).toFixed(0)}%.`,
+            summary: `Entity node confirmed: ${(n as any).label ?? n.labels?.[0] ?? n.name}. Confidence: ${((n.confidence ?? 0.85) * 100).toFixed(0)}%.`,
             citations: [{ ref: `CST-NODE-${n.id}`, page: 1, excerpt: `CONSTELLATION entity confirmed with ${((n.confidence ?? 0.85) * 100).toFixed(0)}% confidence` }],
           },
         ],
@@ -1855,7 +1853,7 @@ router.get("/terra/cognitive/diligence-room", cogLimit, auth, validateQuery(list
       documents: matters.map(m => ({
         id: m.id, title: m.title, status: m.status, stage: m.stage,
         completionPct: m.completionPct, targetClose: m.targetClose,
-        distressScore: (m as Record<string, unknown>).distressScore ?? null,
+        distressScore: (m as any).distressScore ?? null,
         source: m.source,
       })),
       matter: {
@@ -1865,7 +1863,7 @@ router.get("/terra/cognitive/diligence-room", cogLimit, auth, validateQuery(list
       allMatters: matters.map(m => ({
         id: m.id, title: m.title, status: m.status, stage: m.stage,
         completionPct: m.completionPct, targetClose: m.targetClose,
-        distressScore: (m as Record<string, unknown>).distressScore ?? null,
+        distressScore: (m as any).distressScore ?? null,
         source: m.source,
       })),
       provenance: provenance(

@@ -66,7 +66,7 @@ async function fetchWorldModelEntities(domain: string): Promise<WorldModelEntity
         entityType: cstNodes.entityType,
         domain: cstNodes.domain,
         confidence: cstNodes.confidence,
-        attributes: cstNodes.attributes,
+        attributes: (cstNodes as any).attributes,
         freshness: cstNodes.freshness,
         isActive: cstNodes.isActive,
       })
@@ -396,7 +396,7 @@ router.get("/executive/history", perUserApiSlidingLimiter, validateQuery(listQue
 
 router.get("/executive/brief/:id", perUserApiSlidingLimiter, async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = req.params["id"] as string;
     const [row] = await db
       .select()
       .from(pulseExecBriefsTable)
@@ -415,7 +415,7 @@ router.get("/executive/brief/:id", perUserApiSlidingLimiter, async (req: Request
 
 router.get("/executive/:domain", perUserApiSlidingLimiter, async (req: Request, res: Response): Promise<void> => {
   try {
-    const rawDomain = req.params.domain ?? "";
+    const rawDomain = (req.params.domain ?? "") as string;
     const domain = normalizeDomain(rawDomain);
 
     if (!KNOWN_EXEC_DOMAINS.includes(domain as SupportedDomain) && domain !== "consolidated") {
@@ -447,7 +447,7 @@ router.post("/executive/generate", perUserWriteSlidingLimiter, async (_req: Requ
 
 router.post("/executive/generate/:domain", perUserWriteSlidingLimiter, async (req: Request, res: Response): Promise<void> => {
   try {
-    const rawDomain = req.params.domain ?? "";
+    const rawDomain = (req.params.domain ?? "") as string;
     const domain = normalizeDomain(rawDomain);
 
     if (!KNOWN_EXEC_DOMAINS.includes(domain as SupportedDomain) && domain !== "consolidated") {

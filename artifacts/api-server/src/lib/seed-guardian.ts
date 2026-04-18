@@ -93,7 +93,7 @@ export async function seedGuardianDefaults(): Promise<void> {
     if (toolRows.length > 0) {
       const inserted = await db
         .insert(toolMeshToolsTable)
-        .values(toolRows)
+        .values(toolRows as any)
         .onConflictDoNothing({ target: toolMeshToolsTable.toolId })
         .returning({ id: toolMeshToolsTable.id, toolId: toolMeshToolsTable.toolId, version: toolMeshToolsTable.version });
 

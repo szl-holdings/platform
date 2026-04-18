@@ -29,7 +29,7 @@ function printList(): void {
   for (const s of FORGE_SUITES) {
     const redTeam = s.cases.filter((c) => c.isRedTeam).length;
     console.log(
-      `${s.suiteId.padEnd(36)} ${s.evalType.padEnd(24)} ${s.domain.padEnd(16)} ${String(s.cases.length).padEnd(7)} ${redTeam > 0 ? `${redTeam} red-team` : "-"}`,
+      `${s.suiteId.padEnd(36)} ${(s.evalType ?? "").padEnd(24)} ${s.domain.padEnd(16)} ${String(s.cases.length).padEnd(7)} ${redTeam > 0 ? `${redTeam} red-team` : "-"}`,
     );
   }
 }

@@ -90,7 +90,7 @@ export async function runNightlyEvals(opts: NightlyRunOptions = {}): Promise<Nig
       if (regression.hasRegression) {
         regressionDetails.push({
           suiteId: suite.suiteId,
-          evalType: suite.evalType,
+          evalType: suite.evalType ?? "unknown",
           severity: regression.severity,
           notes: regression.regressionNotes,
         });

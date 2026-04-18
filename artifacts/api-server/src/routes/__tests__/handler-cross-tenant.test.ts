@@ -142,7 +142,7 @@ function makeOrgAUser() {
 
 function injectUser(userFactory: () => ReturnType<typeof makeOrgAUser>) {
   return (req: Request, _res: Response, next: NextFunction) => {
-    (req as Request & { user: unknown }).user = userFactory();
+    (req as any).user = userFactory();
     next();
   };
 }

@@ -107,7 +107,7 @@ router.get(
   authMiddleware(),
   requireRole(...ALLOWED_ROLES),
   (req, res) => {
-    const ref = req.params.ref;
+    const ref = req.params.ref as string;
     if (!ref) {
       sendError(res, "checkpoint ref required", 400);
       return;

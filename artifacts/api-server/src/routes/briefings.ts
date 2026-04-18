@@ -144,7 +144,7 @@ router.get("/briefings", async (_req: Request, res: Response) => {
 
 router.get("/briefings/:domain", async (req: Request, res: Response) => {
   try {
-    const { domain } = req.params;
+    const { domain } = req.params as { domain: string };
     if (!KNOWN_DOMAINS.includes(domain as KnownDomain)) {
       return sendBadRequest(res, `Unknown domain '${domain}'. Valid: ${KNOWN_DOMAINS.join(", ")}`);
     }
@@ -157,7 +157,7 @@ router.get("/briefings/:domain", async (req: Request, res: Response) => {
 
 router.put("/briefings/:id/approve", authMiddleware({ required: true }), requireRole("ops", "exec", "admin", "super_admin"), perUserWriteSlidingLimiter, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const { id } = req.params as { id: string };
     const existing = await db.select().from(pulseBriefingsTable).where(eq(pulseBriefingsTable.id, id)).limit(1);
     if (existing.length === 0) {
       return sendNotFound(res, `Briefing '${id}' not found`);
@@ -176,7 +176,7 @@ router.put("/briefings/:id/approve", authMiddleware({ required: true }), require
 
 router.put("/briefings/:id/archive", authMiddleware({ required: true }), requireRole("ops", "exec", "admin", "super_admin"), perUserWriteSlidingLimiter, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const { id } = req.params as { id: string };
     const existing = await db.select().from(pulseBriefingsTable).where(eq(pulseBriefingsTable.id, id)).limit(1);
     if (existing.length === 0) {
       return sendNotFound(res, `Briefing '${id}' not found`);

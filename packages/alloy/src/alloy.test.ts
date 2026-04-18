@@ -151,7 +151,7 @@ describe("Approval gating", () => {
   it("Guardian approval gate pauses run with awaiting-approval status", async () => {
     const manager = new RunManager();
     const config = makeConfig({
-      policyTier: "human-approval-mandatory",
+      policyTier: "operator-approved",
       agentId: "test-agent",
     });
     manager.createRun(config);
@@ -197,7 +197,7 @@ describe("Approval gating", () => {
       },
     };
 
-    const config = makeConfig({ policyTier: "human-approval-mandatory" });
+    const config = makeConfig({ policyTier: "operator-approved" });
     manager.createRun(config);
     const parked = await manager.executeSteps(config.runId, [stepA, stepB], config);
 
@@ -235,7 +235,7 @@ describe("Approval gating", () => {
       },
     };
     const manager = new RunManager({ approvalGate });
-    const config = makeConfig({ policyTier: "human-approval-mandatory" });
+    const config = makeConfig({ policyTier: "operator-approved" });
     manager.createRun(config);
     await manager.executeSteps(config.runId, [ECHO_STEP], config);
 

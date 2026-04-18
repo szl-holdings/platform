@@ -773,7 +773,7 @@ durableJobQueue.register(PLATFORM_JOB_TYPES.NOTIFICATION_DISPATCH, async (job) =
       const text = `${payload.title}\n\n${payload.message}${actionUrl ? `\n\n${actionUrl}` : ""}`;
 
       const result = await sendEmail({
-        to: user.email,
+        to: user.email ?? "",
         subject: payload.title,
         html,
         text,
@@ -995,7 +995,7 @@ durableJobQueue.register(PLATFORM_JOB_TYPES.NOTIFICATION_DIGEST, async (job) => 
     const subject = `Your ${hours >= 24 ? "daily" : `${hours}-hour`} digest — ${row.count} unread notification${row.count !== 1 ? "s" : ""}`;
 
     const result = await sendEmail({
-      to: user.email,
+      to: user.email ?? "",
       subject,
       html,
       text: `You have ${row.count} unread notification${row.count !== 1 ? "s" : ""} in the last ${hours} hours. Visit ${appUrl} to view them.`,

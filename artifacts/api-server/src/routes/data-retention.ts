@@ -344,7 +344,7 @@ router.get("/data-retention/sweep-status", async (req: Request, res: Response) =
     let scheduleInfo: { name: string; cronExpression: string; enabled: boolean; lastRunAt: string | null; nextRunAt: string | null } | null = null;
     try {
       const schedules = await durableScheduler.getSchedules();
-      const sweepSchedule = schedules.find((s: { name: string }) => s.name === "data_retention_sweep_weekly");
+      const sweepSchedule = schedules.find((s: { name: string }) => s.name === "data_retention_sweep_weekly") as any;
       if (sweepSchedule) {
         scheduleInfo = {
           name: sweepSchedule.name,

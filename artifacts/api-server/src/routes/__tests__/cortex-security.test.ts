@@ -127,7 +127,7 @@ vi.mock("drizzle-orm", () => ({
 
 vi.mock("../../middlewares/auth", () => ({
   authMiddleware: (_opts?: unknown) => (req: Request, _res: Response, next: NextFunction) => {
-    (req as Request & { user: unknown }).user = _currentUser;
+    (req as any).user = _currentUser;
     next();
   },
   requireRole: () => (_req: Request, _res: Response, next: NextFunction) => next(),

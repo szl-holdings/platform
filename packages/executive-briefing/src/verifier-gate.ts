@@ -50,7 +50,7 @@ export function gateBrief(brief: Omit<StructuredExecutiveBrief, "id" | "generate
   const blocked = decision.action === "block" || decision.action === "escalate";
 
   const feedbackParts: string[] = [];
-  for (const r of decision.results) {
+  for (const r of (decision as any).results ?? []) {
     if (r.outcome === "fail" || r.outcome === "blocked") {
       feedbackParts.push(`[${r.check}] ${r.reasoning ?? r.outcome}`);
     }

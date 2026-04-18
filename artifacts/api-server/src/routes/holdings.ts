@@ -740,7 +740,7 @@ router.get("/investors/docs/:id", authMiddleware(), requireRole("admin", "exec",
       res.status(403).json({ error: "NDA acceptance required", code: "NDA_REQUIRED" });
       return;
     }
-    const { id } = req.params;
+    const id = req.params["id"] as string;
     const meta = INVESTOR_DOC_MANIFEST[id];
     if (!meta) {
       res.status(404).json({ error: "Document not found" });
@@ -770,7 +770,7 @@ router.get("/investors/docs/:id/download", authMiddleware(), requireRole("admin"
       res.status(403).json({ error: "NDA acceptance required", code: "NDA_REQUIRED" });
       return;
     }
-    const { id } = req.params;
+    const id = req.params["id"] as string;
     const meta = INVESTOR_DOC_MANIFEST[id];
     if (!meta) {
       res.status(404).json({ error: "Document not found" });

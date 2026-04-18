@@ -658,9 +658,9 @@ router.post("/user/password-reset", writeLimiter, validateBody(jsonObjectBodySch
         .limit(1);
 
       sendEmail({
-        to: user.email,
+        to: user.email ?? "",
         subject: "Reset your SZL Holdings password",
-        html: buildPasswordResetEmail(userDetails?.displayName || user.email, resetUrl),
+        html: buildPasswordResetEmail(userDetails?.displayName || (user.email ?? ""), resetUrl),
         text: `Reset your SZL Holdings password by visiting: ${resetUrl} — This link expires in 1 hour.`,
       }).then(result => {
         if (!result.success) logger.warn({ error: result.error, userId: user.id }, "[user-lifecycle] Email provider rejected password reset email");

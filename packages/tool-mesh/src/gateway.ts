@@ -4,13 +4,14 @@ import { defaultToolRegistry } from "./registry.js";
 import { ToolRateLimiter } from "./rate-limiter.js";
 import { validateAgainstSchema } from "./schema-validator.js";
 import { GuardianDecisionEngine } from "@workspace/guardian/decision-engine";
+import type { PolicyTier } from "@workspace/guardian";
 import { InMemoryTraceStore } from "@workspace/trace-graph/store";
 import { TraceWriter } from "@workspace/trace-graph/writer";
 import { globalCollector } from "@workspace/cognitive-observability";
 
 export type ToolHandler = (input: unknown, manifest: ToolManifest) => Promise<unknown>;
 
-const TOOL_TIER_TO_GUARDIAN_TIER: Record<ToolPolicyTier, string> = {
+const TOOL_TIER_TO_GUARDIAN_TIER: Record<ToolPolicyTier, PolicyTier> = {
   "advisory-only": "advisory",
   "internal-workflow": "supervised",
   "operator-assisted": "operator-approved",

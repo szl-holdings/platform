@@ -94,7 +94,7 @@ function buildApp(prefix: string, userFactory: () => ReturnType<typeof makeUser>
   app.use(express.json());
 
   app.use((req: Request, _res: Response, next: NextFunction) => {
-    (req as Request & { user: unknown; isInternalAgent: boolean }).user = userFactory();
+    (req as any).user = userFactory();
     (req as Request & { isInternalAgent: boolean }).isInternalAgent = false;
     next();
   });
@@ -180,7 +180,7 @@ describe("Tenant isolation — middleware gate on domain route prefix", () => {
       app.use(express.json());
 
       app.use((req: Request, _res: Response, next: NextFunction) => {
-        (req as Request & { user: unknown; isInternalAgent: boolean }).user = userFactory();
+        (req as any).user = userFactory();
         (req as Request & { isInternalAgent: boolean }).isInternalAgent = false;
         next();
       });
@@ -242,7 +242,7 @@ describe("Tenant isolation — middleware gate on domain route prefix", () => {
       const app = express();
       app.use(express.json());
       app.use((req: Request, _res: Response, next: NextFunction) => {
-        (req as Request & { user: unknown; isInternalAgent: boolean }).user = userFactory();
+        (req as any).user = userFactory();
         (req as Request & { isInternalAgent: boolean }).isInternalAgent = false;
         next();
       });

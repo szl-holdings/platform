@@ -216,7 +216,7 @@ export async function evaluateAllCovenants(): Promise<Array<CovenantMeasurement 
       continue;
     }
     const m = measureCovenant(cov, prop);
-    out.push({ ...m, propertyData: prop });
+    out.push({ ...m, propertyData: prop as Record<string, unknown> });
     void propIds; // keep TS happy if unused
   }
   return out;

@@ -19,7 +19,7 @@ const BORDER = "hsla(0,0%,100%,0.07)";
 const SURFACE = "hsla(0,0%,100%,0.035)";
 const TEXT = "hsl(38,8%,94%)";
 const TEXT_SEC = "hsl(214,7%,60%)";
-const TEXT_FAINT = "hsl(214,7%,38%)";
+const TEXT_FAINT = "hsl(214,7%,57%)";
 const LYTE = "hsl(192,72%,48%)";
 const MONO = "var(--font-mono)";
 

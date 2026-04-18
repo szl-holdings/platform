@@ -1,9 +1,9 @@
 export * from "./schema.js";
-export * from "./types.ts";
-export * from "./adapter.ts";
+export * from "./types.js";
+export * from "./adapter.js";
 export * from "./store.js";
-export * from "./registry.ts";
-export * from "./query.ts";
+export * from "./registry.js";
+export * from "./query.js";
 export * from "./entity-resolution.js";
 export * from "./relationship-inference.js";
 export * from "./contradiction-detection.js";
@@ -16,24 +16,24 @@ export { ATLAS_CORE_VERSION } from "@szl-holdings/atlas-core";
 
 export {
   terraAdapter,
-} from "./adapters/terra.ts";
+} from "./adapters/terra.js";
 export {
   prismAdapter,
-} from "./adapters/prism.ts";
+} from "./adapters/prism.js";
 export {
   vesselsAdapter,
-} from "./adapters/vessels.ts";
+} from "./adapters/vessels.js";
 export {
   aegisAdapter,
-} from "./adapters/aegis.ts";
+} from "./adapters/aegis.js";
 export {
   lyteAdapter,
-} from "./adapters/lyte.ts";
+} from "./adapters/lyte.js";
 export {
   imperiumAdapter,
-} from "./adapters/imperium.ts";
+} from "./adapters/imperium.js";
 export {
   carlotaJoAdapter,
-} from "./adapters/carlota-jo.ts";
+} from "./adapters/carlota-jo.js";
 
 export const CONSTELLATION_VERSION = "2.0.0" as const;

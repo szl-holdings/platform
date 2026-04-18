@@ -115,7 +115,7 @@ router.get(
           type: "incident", severity: (inc.severity as string) ?? "medium",
           x: 200 + i * 40, y: 150 + i * 80,
           compromised: inc.status !== "closed",
-          technique: (inc.mitreTag as string) ?? "T1059",
+          technique: ((inc as any).mitreTag as string) ?? "T1059",
           evidence: [`case:${inc.id}`, `alert:linked`],
           provenance: makeProvenance("Firestorm SIEM"),
         });
@@ -124,7 +124,7 @@ router.get(
 
       assets.slice(0, 6).forEach((asset, i) => {
         const id = `asset-${asset.id}`;
-        const riskScore = (asset.riskScore as number) ?? 50;
+        const riskScore = (asset.riskScore as unknown as number) ?? 50;
         nodes.push({
           id, label: asset.name ?? `Asset-${asset.id}`,
           type: "asset", severity: riskScore > 75 ? "critical" : riskScore > 50 ? "high" : "medium",
@@ -157,7 +157,7 @@ router.get(
         const id = `control-${ctrl.id}`;
         const isEffective = (ctrl.status as string) === "pass" || (ctrl.status as string) === "compliant";
         nodes.push({
-          id, label: ctrl.name ?? `CTRL-${ctrl.id}`,
+          id, label: ctrl.controlName ?? `CTRL-${ctrl.id}`,
           type: "control", severity: isEffective ? "low" : "high",
           x: 760 + i * 40, y: 160 + i * 80,
           compromised: !isEffective,
@@ -248,7 +248,7 @@ router.get(
         type: a.assetType ?? "server",
         accessPath: i < 3 ? "direct-permission" : i < 7 ? "group-membership" : "transitive-trust",
         permission: i < 2 ? "write" : i < 5 ? "read-write" : "read",
-        riskScore: (a.riskScore as number) ?? 50,
+        riskScore: (a.riskScore as unknown as number) ?? 50,
         evidence: [`AD:group-${profile.groups[i % profile.groups.length]}`, `audit-log:${a.id}`],
         freshness: i < 4 ? "current" : "stale-90d",
         provenance: makeProvenance("Active Directory / IAM Service"),
@@ -320,7 +320,7 @@ router.get(
         const evidenceItems = Array.from({ length: 2 + (i % 3) }, (_, j) => ({
           id: `EV-${ctrl.id}-${j + 1}`,
           type: EVIDENCE_TYPES[(i + j) % EVIDENCE_TYPES.length],
-          description: `${EVIDENCE_TYPES[(i + j) % EVIDENCE_TYPES.length].replace(/-/g, " ")} for ${ctrl.name ?? `Control ${ctrl.id}`}`,
+          description: `${EVIDENCE_TYPES[(i + j) % EVIDENCE_TYPES.length].replace(/-/g, " ")} for ${ctrl.controlName ?? `Control ${ctrl.id}`}`,
           collectedAt: new Date(Date.now() - daysSinceCheck * 86400_000).toISOString(),
           collectedBy: j % 2 === 0 ? "automated" : "analyst",
           freshnessDays: daysSinceCheck,
@@ -333,7 +333,7 @@ router.get(
 
         return {
           controlId: ctrl.id,
-          name: ctrl.name ?? `Control ${ctrl.id}`,
+          name: ctrl.controlName ?? `Control ${ctrl.id}`,
           framework: FRAMEWORKS[i % FRAMEWORKS.length],
           category: ctrl.category ?? "Access Control",
           status: isEffective ? "effective" : "gap",

@@ -731,7 +731,7 @@ describe("Integration — /domains/:domain/graph", () => {
       // Domain isn't projected onto the response shape, but the node ids are
       // sourced from the domain-filtered query, so an empty/non-throwing
       // response is the correctness guarantee here.
-      expect(typeof node.id).toBe("number");
+      expect(typeof node.id).toBe("string");
       expect(typeof node.entityType).toBe("string");
     }
   });

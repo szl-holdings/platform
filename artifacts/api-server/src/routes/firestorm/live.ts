@@ -52,7 +52,7 @@ import {
   ingestFirestormScenario,
   ingestFirestormAlert,
 } from "@szl-holdings/ai-engine/domain-embedding-hooks";
-import { firestormLiveLimit, getFsCached, fetchFsText, fetchFsJson } from "./shared";
+import { firestormLiveLimit, getFsCached, fetchFsText, fetchFsJson, fsCache, ingestWebhookSchema } from "./shared";
 import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
 const router = Router();
 
@@ -61,17 +61,17 @@ router.get("/firestorm/live/mitre-attack", firestormLiveLimit, authMiddleware(),
     const tactic = req.query.tactic as string;
     const techniques = await getFsCached("mitre-attack-live", 86400000, async () => {
       try {
-        const data = await fetchFsJson("https://raw.githubusercontent.com/mitre/cti/master/enterprise-attack/enterprise-attack.json", 20000) as Record<string, unknown>;
-        const attackPatterns = data?.objects?.filter((o: Record<string, unknown>) => o.type === "attack-pattern" && !o.revoked && !o.x_mitre_deprecated);
+        const data = await fetchFsJson("https://raw.githubusercontent.com/mitre/cti/master/enterprise-attack/enterprise-attack.json", 20000) as any;
+        const attackPatterns = data?.objects?.filter((o: any) => o.type === "attack-pattern" && !o.revoked && !o.x_mitre_deprecated);
         if (!Array.isArray(attackPatterns) || attackPatterns.length === 0) throw new Error("No ATT&CK data");
-        return (attackPatterns as Record<string, unknown>[]).slice(0, 50).map((t) => {
-          const extRef = (t.external_references as Record<string, unknown>[] | undefined)?.find((r) => r.source_name === "mitre-attack");
-          const tacticsPhases = (t.kill_chain_phases as Record<string, unknown>[] | undefined)?.map((p) => p.phase_name.replace(/-/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase())) ?? [];
+        return (attackPatterns as any[]).slice(0, 50).map((t) => {
+          const extRef = (t.external_references as any[] | undefined)?.find((r) => r.source_name === "mitre-attack");
+          const tacticsPhases = (t.kill_chain_phases as any[] | undefined)?.map((p) => p.phase_name.replace(/-/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase())) ?? [];
           return { id: extRef?.external_id ?? "T????", name: t.name, tactic: tacticsPhases[0] ?? "Unknown", tactics: tacticsPhases, platforms: t.x_mitre_platforms ?? [], subtechnique: t.x_mitre_is_subtechnique ?? false, description: t.description?.slice(0, 300)?.replace(/\n/g, " ") ?? "", detection: t.x_mitre_detection?.slice(0, 200)?.replace(/\n/g, " ") ?? "Monitor for suspicious activity", mitigation: "Apply principle of least privilege and monitor for anomalous behavior", version: t.x_mitre_version ?? "1.0", dataSourcesCount: t.x_mitre_data_sources?.length ?? 0 };
         });
       } catch { return []; }
     });
-    const filtered = tactic ? (techniques as Record<string, unknown>[]).filter((t) => t.tactic?.toLowerCase().includes(tactic.toLowerCase()) || t.tactics?.some((ta: string) => ta.toLowerCase().includes(tactic.toLowerCase()))) : techniques;
+    const filtered = tactic ? (techniques as any[]).filter((t) => t.tactic?.toLowerCase().includes(tactic.toLowerCase()) || t.tactics?.some((ta: string) => ta.toLowerCase().includes(tactic.toLowerCase()))) : techniques;
     sendSuccess(res, { source: "MITRE ATT&CK Enterprise Matrix v14", url: "https://attack.mitre.org/", count: filtered.length, techniques: filtered, fetchedAt: new Date().toISOString() });
   } catch (err) { handleRouteError(res, err, "Failed to fetch MITRE ATT&CK data"); }
 });
@@ -82,13 +82,13 @@ router.get("/firestorm/live/cisa-kev", firestormLiveLimit, authMiddleware(), val
     const limit = Math.min(parseInt(req.query.limit as string) || 20, 50);
     const data = await getFsCached("firestorm-cisa-kev", 3600000, async () => {
       try {
-        const json = await fetchFsJson("https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json", 12000) as Record<string, unknown>;
+        const json = await fetchFsJson("https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json", 12000) as any;
         if (!Array.isArray(json?.vulnerabilities)) throw new Error("No KEV data");
         return { vulnerabilities: json.vulnerabilities, catalogVersion: json.catalogVersion, count: json.count, dateReleased: json.dateReleased };
       } catch { return { vulnerabilities: null, catalogVersion: "fallback", count: 0, dateReleased: new Date().toISOString().slice(0, 10) }; }
     });
     const vulns = (data.vulnerabilities ?? []).slice(-100).reverse().slice(0, limit);
-    const ransomwareKnown = ((data.vulnerabilities as Record<string, unknown>[] | undefined) ?? []).filter((v) => v.knownRansomwareCampaignUse === "Known").slice(-20).reverse();
+    const ransomwareKnown = ((data.vulnerabilities as any[] | undefined) ?? []).filter((v) => v.knownRansomwareCampaignUse === "Known").slice(-20).reverse();
     const result = ransomwareOnly ? ransomwareKnown : vulns;
     sendSuccess(res, { source: "CISA Known Exploited Vulnerabilities (KEV) Catalog", url: "https://www.cisa.gov/known-exploited-vulnerabilities-catalog", catalogVersion: data.catalogVersion, dateReleased: data.dateReleased, totalKevCount: data.count, ransomwareKnownCount: ransomwareKnown.length, count: result.length, vulnerabilities: result, liveFeed: data.vulnerabilities !== null, fetchedAt: new Date().toISOString() });
   } catch (err) { handleRouteError(res, err, "Failed to fetch CISA KEV for Firestorm"); }
@@ -105,13 +105,13 @@ router.get("/firestorm/live/nvd-cves", firestormLiveLimit, authMiddleware(), val
         const params = new URLSearchParams({ resultsPerPage: String(limit), startIndex: "0" });
         if (severity && ["CRITICAL", "HIGH", "MEDIUM", "LOW"].includes(severity)) params.set("cvssV3Severity", severity);
         if (keyword) params.set("keywordSearch", keyword);
-        const raw = await fetchFsJson(`https://services.nvd.nist.gov/rest/json/cves/2.0?${params.toString()}`, 15000) as Record<string, unknown>;
+        const raw = await fetchFsJson(`https://services.nvd.nist.gov/rest/json/cves/2.0?${params.toString()}`, 15000) as any;
         if (!Array.isArray(raw?.vulnerabilities)) throw new Error("No NVD data");
-        return (raw.vulnerabilities as Record<string, unknown>[]).map((v) => {
+        return (raw.vulnerabilities as any[]).map((v) => {
           const cve = v.cve; const m31 = cve?.metrics?.cvssMetricV31?.[0]; const m30 = cve?.metrics?.cvssMetricV30?.[0]; const m = m31 || m30;
           const score = m?.cvssData?.baseScore ?? null;
           const sev = score ? (score >= 9 ? "CRITICAL" : score >= 7 ? "HIGH" : score >= 4 ? "MEDIUM" : "LOW") : "UNKNOWN";
-          return { id: cve.id, description: (cve.descriptions as Record<string, unknown>[] | undefined)?.find((d) => d.lang === "en")?.value?.slice(0, 300) ?? "", severity: sev, cvssScore: score, cvssVector: m?.cvssData?.vectorString ?? null, attackVector: m?.cvssData?.attackVector ?? null, exploitabilityScore: m?.exploitabilityScore ?? null, impactScore: m?.impactScore ?? null, vendor: cve.configurations?.[0]?.nodes?.[0]?.cpeMatch?.[0]?.criteria?.split(":")?.[3] ?? "Various", product: cve.configurations?.[0]?.nodes?.[0]?.cpeMatch?.[0]?.criteria?.split(":")?.[4] ?? "Multiple", published: cve.published, lastModified: cve.lastModified, cisaExploited: !!cve.cisaExploitAdd, cisaDueDate: cve.cisaActionDue ?? null, cwe: cve.weaknesses?.[0]?.description?.[0]?.value ?? null };
+          return { id: cve.id, description: (cve.descriptions as any[] | undefined)?.find((d) => d.lang === "en")?.value?.slice(0, 300) ?? "", severity: sev, cvssScore: score, cvssVector: m?.cvssData?.vectorString ?? null, attackVector: m?.cvssData?.attackVector ?? null, exploitabilityScore: m?.exploitabilityScore ?? null, impactScore: m?.impactScore ?? null, vendor: cve.configurations?.[0]?.nodes?.[0]?.cpeMatch?.[0]?.criteria?.split(":")?.[3] ?? "Various", product: cve.configurations?.[0]?.nodes?.[0]?.cpeMatch?.[0]?.criteria?.split(":")?.[4] ?? "Multiple", published: cve.published, lastModified: cve.lastModified, cisaExploited: !!cve.cisaExploitAdd, cisaDueDate: cve.cisaActionDue ?? null, cwe: cve.weaknesses?.[0]?.description?.[0]?.value ?? null };
         });
       } catch { return null; }
     });
@@ -147,9 +147,9 @@ router.get("/firestorm/live/threat-indicators", firestormLiveLimit, authMiddlewa
     const type = req.query.type as string;
     const data = await getFsCached("firestorm-threat-indicators", 3600000, async () => {
       try {
-        const abuseCh = await fetchFsJson("https://urlhaus-api.abuse.ch/v1/urls/recent/", 10000) as Record<string, unknown>;
+        const abuseCh = await fetchFsJson("https://urlhaus-api.abuse.ch/v1/urls/recent/", 10000) as any;
         const urls = abuseCh?.urls ?? [];
-        const indicators = (urls as Record<string, unknown>[]).slice(0, 20).map((u, i) => ({
+        const indicators = (urls as any[]).slice(0, 20).map((u, i) => ({
           id: `ABUSE-${i}`,
           type: "url",
           value: u.url ?? "",
@@ -183,9 +183,9 @@ const CERT_FEEDS = [
 async function fetchCertAdvisories(feed: typeof CERT_FEEDS[0]): Promise<{ advisories: Record<string, unknown>[]; liveData: boolean }> {
   try {
     if (feed.id === "cisa-us") {
-      const json = await fetchFsJson(feed.url, 12000) as Record<string, unknown>;
+      const json = await fetchFsJson(feed.url, 12000) as any;
       const vulns = json?.vulnerabilities ?? [];
-      const advisories = vulns.slice(-10).reverse().map((v: Record<string, unknown>) => ({
+      const advisories = vulns.slice(-10).reverse().map((v: any) => ({
         id: v.cveID ?? `CISA-${Math.random()}`,
         title: v.vulnerabilityName ?? v.cveID,
         summary: `${v.shortDescription ?? ""} — Vendor: ${v.vendorProject ?? "N/A"}, Product: ${v.product ?? "N/A"}`,
@@ -236,7 +236,7 @@ router.get("/firestorm/live/cert-advisories", firestormLiveLimit, authMiddleware
         return { feedId: feed.id, feedName: feed.name, country: feed.country, region: feed.region, advisories, liveData, advisoryCount: advisories.length, fetchedAt: new Date().toISOString() };
       });
     });
-    sendSuccess(res, { feeds: results, totalAdvisories: results.reduce((s: number, f: Record<string, unknown>) => s + f.advisoryCount, 0), liveFeeds: results.filter((f: Record<string, unknown>) => f.liveData).length, totalFeeds: CERT_FEEDS.length, fetchedAt: new Date().toISOString() });
+    sendSuccess(res, { feeds: results, totalAdvisories: results.reduce((s: number, f: any) => s + f.advisoryCount, 0), liveFeeds: results.filter((f: any) => f.liveData).length, totalFeeds: CERT_FEEDS.length, fetchedAt: new Date().toISOString() });
   } catch (err) { handleRouteError(res, err, "Failed to fetch CERT advisories"); }
 });
 

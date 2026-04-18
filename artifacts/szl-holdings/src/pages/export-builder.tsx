@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") || "";
@@ -49,7 +49,7 @@ const DATA_SOURCE_TO_DOMAIN: Record<string, DataDomain> = {
   invoices: "revenue_events",
 };
 
-async function fetchExportHistory(): Promise<ExportHistoryItem[]> {
+async function fetchExportHistoryItems(): Promise<ExportHistoryItem[]> {
   const res = await fetch(`${API}/exports/history?limit=10`, { credentials: "include" });
   if (!res.ok) {
     if (res.status === 403) return [];
@@ -60,7 +60,7 @@ async function fetchExportHistory(): Promise<ExportHistoryItem[]> {
 }
 
 function formatBytes(bytes: number | null): string {
-  if (!bytes) return "";
+  if (!bytes) return "—";
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
@@ -240,13 +240,6 @@ interface ActiveExport {
   startedAt: number;
 }
 
-function formatBytes(bytes: number | null): string {
-  if (!bytes) return "—";
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
 function formatRelative(iso: string | null): string {
   if (!iso) return "—";
   const diff = Date.now() - new Date(iso).getTime();
@@ -340,8 +333,8 @@ export default function ExportBuilder() {
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   const { data: exportHistory, isLoading: historyLoading, isError: historyError } = useQuery({
-    queryKey: ["export-history"],
-    queryFn: fetchExportHistory,
+    queryKey: ["export-history-items"],
+    queryFn: fetchExportHistoryItems,
     refetchInterval: 30_000,
     retry: 1,
   });

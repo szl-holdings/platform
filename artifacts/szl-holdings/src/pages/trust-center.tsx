@@ -209,17 +209,19 @@ function DisclosureForm() {
       <h3 style={{ fontSize: "0.9375rem", fontWeight: "700", color: "hsl(38,12%,92%)", marginBottom: "0.25rem" }}>Submit a vulnerability report</h3>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.875rem" }}>
         <div>
-          <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "hsl(210,5%,52%)", textTransform: "uppercase" as const, letterSpacing: "0.06em", marginBottom: "0.375rem" }}>Name</label>
-          <input style={inputStyle} required value={form.name} onChange={(e) => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Your name" />
+          <label htmlFor="tc-name" style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "hsl(210,5%,52%)", textTransform: "uppercase" as const, letterSpacing: "0.06em", marginBottom: "0.375rem" }}>Name</label>
+          <input id="tc-name" style={inputStyle} required value={form.name} onChange={(e) => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Your name" />
         </div>
         <div>
-          <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "hsl(210,5%,52%)", textTransform: "uppercase" as const, letterSpacing: "0.06em", marginBottom: "0.375rem" }}>Email</label>
-          <input style={inputStyle} type="email" required value={form.email} onChange={(e) => setForm(f => ({ ...f, email: e.target.value }))} placeholder="you@example.com" />
+          <label htmlFor="tc-email" style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "hsl(210,5%,52%)", textTransform: "uppercase" as const, letterSpacing: "0.06em", marginBottom: "0.375rem" }}>Email</label>
+          <input id="tc-email" style={inputStyle} type="email" required value={form.email} onChange={(e) => setForm(f => ({ ...f, email: e.target.value }))} placeholder="you@example.com" />
         </div>
       </div>
       <div>
-        <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "hsl(210,5%,52%)", textTransform: "uppercase" as const, letterSpacing: "0.06em", marginBottom: "0.375rem" }}>Severity</label>
+        <label htmlFor="tc-severity" style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "hsl(210,5%,52%)", textTransform: "uppercase" as const, letterSpacing: "0.06em", marginBottom: "0.375rem" }}>Severity</label>
         <select
+          id="tc-severity"
+          aria-label="Severity level"
           style={{ ...inputStyle, appearance: "none" as const, cursor: "pointer" }}
           value={form.severity}
           onChange={(e) => setForm(f => ({ ...f, severity: e.target.value }))}
@@ -253,8 +255,8 @@ function DisclosureForm() {
       >
         {state === "loading" ? "Submitting..." : "Submit Report"}
       </button>
-      <p style={{ fontSize: "11.5px", color: "hsl(210,5%,42%)", lineHeight: 1.5 }}>
-        Prefer email? Send to <a href="mailto:security@szlholdings.com" style={{ color: "hsl(210,55%,52%)", textDecoration: "none" }}>security@szlholdings.com</a>. Subject line: <code style={{ fontFamily: "monospace", fontSize: "11px", background: "hsla(0,0%,100%,0.05)", padding: "1px 5px", borderRadius: "3px" }}>[SECURITY] Brief description</code>. PGP key available on request.
+      <p style={{ fontSize: "11.5px", color: "hsl(210,5%,57%)", lineHeight: 1.5 }}>
+        Prefer email? Send to <a href="mailto:security@stephenl.dev" style={{ color: "hsl(210,55%,65%)", textDecoration: "underline" }}>security@stephenl.dev</a>. PGP key available on request.
       </p>
     </form>
   );
@@ -285,7 +287,7 @@ export default function TrustCenter() {
           >
             <span style={{
               display: "inline-block", fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em",
-              textTransform: "uppercase", color: "hsl(210,5%,42%)", marginBottom: "1.5rem",
+              textTransform: "uppercase", color: "hsl(210,5%,57%)", marginBottom: "1.5rem",
             }}>
               Trust
             </span>

@@ -100,12 +100,12 @@ router.get("/traces/regressions", authMiddleware(), validateQuery(listQuerySchem
 
 router.get("/traces/:id", authMiddleware(), async (req, res) => {
   try {
-    const trace = defaultTraceStore.get(req.params.id);
+    const trace = defaultTraceStore.get(req.params.id as string);
     if (!trace) {
       sendNotFound(res, "Trace not found");
       return;
     }
-    const entityIds = defaultQueryEngine.getEntitiesForTrace(req.params.id);
+    const entityIds = defaultQueryEngine.getEntitiesForTrace(req.params.id as string);
     sendSuccess(res, { trace, entityIds });
   } catch (err) {
     handleRouteError(res, err, "Failed to get trace");
@@ -114,7 +114,7 @@ router.get("/traces/:id", authMiddleware(), async (req, res) => {
 
 router.post("/traces/:id/replay", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
-    const originalTraceId = req.params.id;
+    const originalTraceId = req.params.id as string;
     const original = defaultTraceStore.get(originalTraceId);
     if (!original) {
       sendNotFound(res, "Trace not found");
@@ -191,13 +191,13 @@ router.post("/traces/:id/replay", authMiddleware(), validateBody(jsonObjectBodyS
 
     sendSuccess(res, {
       originalTraceId,
-      replayedAt: deterministicResult.replayedAt,
-      deterministicScore: deterministicResult.deterministicScore,
+      replayedAt: (deterministicResult as any).replayedAt,
+      deterministicScore: (deterministicResult as any).deterministicScore,
       deterministicSteps: deterministicResult.steps,
       steps: replaySteps,
       summary,
       spanTree: tree?.spans ?? [],
-      errors: deterministicResult.errors,
+      errors: (deterministicResult as any).errors,
     });
   } catch (err) {
     handleRouteError(res, err, "Failed to replay trace");
@@ -206,8 +206,8 @@ router.post("/traces/:id/replay", authMiddleware(), validateBody(jsonObjectBodyS
 
 router.get("/traces/:id/diff/:compareId", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
-    const traceA = defaultTraceStore.get(req.params.id);
-    const traceB = defaultTraceStore.get(req.params.compareId);
+    const traceA = defaultTraceStore.get(req.params.id as string);
+    const traceB = defaultTraceStore.get(req.params.compareId as string);
     if (!traceA) {
       sendNotFound(res, `Trace ${req.params.id} not found`);
       return;
@@ -231,7 +231,7 @@ router.get("/traces/:id/diff/:compareId", authMiddleware(), validateQuery(listQu
       : undefined;
 
     const replayer = new TraceReplayer(defaultTraceStore);
-    const diff = replayer.compareTraces(req.params.id, req.params.compareId, {
+    const diff = replayer.compareTraces(req.params.id as string, req.params.compareId as string, {
       latencyRegressionMs: latencyMs,
       costRegressionUsd: costUsd,
       errorCountIncrease: errorCount,
@@ -246,7 +246,7 @@ router.get("/traces/:id/diff/:compareId", authMiddleware(), validateQuery(listQu
 
 router.post("/traces/:id/grade", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
-    const trace = defaultTraceStore.get(req.params.id);
+    const trace = defaultTraceStore.get(req.params.id as string);
     if (!trace) {
       sendNotFound(res, "Trace not found");
       return;
@@ -269,7 +269,7 @@ router.post("/traces/:id/grade", authMiddleware(), validateBody(jsonObjectBodySc
     }
 
     const writer = new TraceWriter(defaultTraceStore);
-    const grade = writer.gradeRun(req.params.id, {
+    const grade = writer.gradeRun(req.params.id as string, {
       gradedBy: body.gradedBy ?? "operator",
       score: body.score,
       rubric: body.rubric ?? {},
@@ -284,7 +284,7 @@ router.post("/traces/:id/grade", authMiddleware(), validateBody(jsonObjectBodySc
 
 router.post("/traces/:id/comment", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
-    const trace = defaultTraceStore.get(req.params.id);
+    const trace = defaultTraceStore.get(req.params.id as string);
     if (!trace) {
       sendNotFound(res, "Trace not found");
       return;
@@ -304,7 +304,7 @@ router.post("/traces/:id/comment", authMiddleware(), validateBody(jsonObjectBody
 
     const writer = new TraceWriter(defaultTraceStore);
     const comment = writer.addOperatorComment(
-      req.params.id,
+      req.params.id as string,
       body.operatorId ?? "anonymous",
       body.content.trim(),
       { spanId: body.spanId, tags: body.tags },
@@ -323,12 +323,12 @@ router.post("/traces/:id/link-entity", authMiddleware(), validateBody(jsonObject
       sendBadRequest(res, "entityId is required");
       return;
     }
-    const trace = defaultTraceStore.get(req.params.id);
+    const trace = defaultTraceStore.get(req.params.id as string);
     if (!trace) {
       sendNotFound(res, "Trace not found");
       return;
     }
-    defaultQueryEngine.linkEntityToTrace(req.params.id, entityId);
+    defaultQueryEngine.linkEntityToTrace(req.params.id as string, entityId);
     sendSuccess(res, { traceId: req.params.id, entityId, role: role ?? "touched" });
   } catch (err) {
     handleRouteError(res, err, "Failed to link entity to trace");

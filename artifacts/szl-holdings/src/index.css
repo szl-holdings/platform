@@ -24,8 +24,8 @@
   /* ── Text hierarchy ── */
   --color-szl-text:           hsl(38, 8%, 95%);
   --color-szl-text-secondary: hsl(214, 7%, 64%);
-  --color-szl-text-muted:     hsl(214, 6%, 42%);
-  --color-szl-text-faint:     hsl(214, 5%, 30%);
+  --color-szl-text-muted:     hsl(214, 6%, 57%);
+  --color-szl-text-faint:     hsl(214, 6%, 55%);
 
   /* ── SZL Holdings parent brand (gold/platinum) ── */
   --color-szl-accent:         hsl(38, 52%, 58%);

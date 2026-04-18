@@ -42,7 +42,7 @@ export default defineConfig({
     // Locally: only retain traces on failures to keep disk usage low.
     trace: isCI ? "on-first-retry" : "retain-on-failure",
     screenshot: "only-on-failure",
-    video: isCI ? "on-first-retry" : "retain-on-failure",
+    video: isCI ? "on-first-retry" : "off",
     actionTimeout: 10000,
     navigationTimeout: 30000,
   },

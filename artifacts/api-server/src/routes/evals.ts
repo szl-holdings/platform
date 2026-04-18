@@ -24,7 +24,7 @@ const router: IRouter = Router();
 
 const runStore = new Map<string, EvalRunReport>();
 const suiteStore = new Map<string, EvalSuiteDef>(
-  ALL_SUITES.map((s) => [s.suiteId, s]),
+  ALL_SUITES.map((s: any) => [s.suiteId, s]),
 );
 
 upsertEvalForgeSuites(ALL_SUITES).catch(() => {});
@@ -61,13 +61,13 @@ async function runAndPersistNightly(): Promise<void> {
 }
 
 scheduleNightlyRun(2, { triggeredBy: "nightly-cron", verbose: false })
-  .then(({ unschedule }) => {
+  .then(({ unschedule }: { unschedule: () => void }) => {
     process.once("SIGTERM", unschedule);
     process.once("SIGINT", unschedule);
   })
   .catch(() => {});
 
-function defaultExecutor(input: Record<string, unknown>, caseId: string, domain: string) {
+function defaultExecutor(input: any, caseId: string, domain: string) {
   const start = Date.now();
   return Promise.resolve({
     output: { ...input, _stub: true, caseId, domain },
@@ -93,8 +93,8 @@ router.get(
       version: s.version,
       tags: s.tags,
       caseCount: s.cases.length,
-      redTeamCount: s.cases.filter((c) => c.isRedTeam).length,
-      graderTypes: [...new Set(s.cases.map((c) => c.graderType))],
+      redTeamCount: s.cases.filter((c: any) => c.isRedTeam).length,
+      graderTypes: [...new Set(s.cases.map((c: any) => c.graderType))],
     }));
 
     const runs = Array.from(runStore.values())
@@ -151,8 +151,8 @@ router.get(
         version: s.version,
         tags: s.tags,
         caseCount: s.cases.length,
-        redTeamCount: s.cases.filter((c) => c.isRedTeam).length,
-        graderTypes: [...new Set(s.cases.map((c) => c.graderType))],
+        redTeamCount: s.cases.filter((c: any) => c.isRedTeam).length,
+        graderTypes: [...new Set(s.cases.map((c: any) => c.graderType))],
       })),
       total: suites.length,
     });
@@ -353,11 +353,11 @@ router.post(
         return;
       }
 
-      const baselineStore = new Map(
+      const baselineStore = new Map<string, EvalRunReport>(
         Array.from(runStore.values())
-          .filter((r) => suitesToRun.some((s) => s.suiteId === r.suiteId))
-          .reduce((acc, run) => {
-            if (!acc.has(run.suiteId) || acc.get(run.suiteId)!.runAt < run.runAt) {
+          .filter((r) => suitesToRun.some((s: any) => s.suiteId === r.suiteId))
+          .reduce((acc: any, run: any) => {
+            if (!acc.has(run.suiteId) || (acc.get(run.suiteId) as any)!.runAt < run.runAt) {
               acc.set(run.suiteId, run);
             }
             return acc;
@@ -387,7 +387,7 @@ router.post(
         criticalRegressions: summary.criticalRegressions,
         regressionDetails: summary.regressionDetails,
         durationMs: summary.durationMs,
-        runIds: summary.suiteReports.map((r) => r.runId),
+        runIds: summary.suiteReports.map((r: any) => r.runId),
       });
     } catch (err) {
       res.status(500).json({ error: err instanceof Error ? err.message : "Internal error" });
@@ -415,7 +415,7 @@ router.patch(
     }
 
     for (const run of runStore.values()) {
-      const result = run.caseResults.find((r) => r.caseId === scoreId);
+      const result = run.caseResults.find((r: any) => r.caseId === scoreId);
       if (result) {
         result.graderDetails = {
           ...result.graderDetails,

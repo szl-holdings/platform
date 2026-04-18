@@ -232,7 +232,7 @@ router.get("/domains/aegis/graph", domainHandler("aegis"));
 router.get("/domains/lyte/graph", domainHandler("lyte"));
 
 router.get("/domains/:domain/graph", async (req: Request, res: Response) => {
-  const { domain } = req.params;
+  const { domain } = req.params as { domain: string };
   if (!KNOWN_DOMAINS.includes(domain as KnownDomain)) {
     return sendBadRequest(res, `Unknown domain '${domain}'. Known: ${KNOWN_DOMAINS.join(", ")}`);
   }

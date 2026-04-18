@@ -169,7 +169,7 @@ vi.mock("drizzle-orm", () => ({
 
 vi.mock("../../middlewares/auth", () => ({
   authMiddleware: (_opts?: unknown) => (req: Request, _res: Response, next: NextFunction) => {
-    (req as Request & { user: unknown }).user = _currentUser;
+    (req as any).user = _currentUser;
     next();
   },
   isElevatedUser: (user: { roles: string[] }) =>
@@ -425,7 +425,7 @@ describe("GET /onboarding/wizard/:orgSlug — wizard state", () => {
   });
 
   it("super_admin can access wizard without org membership", async () => {
-    _currentUser = { ..._currentUser, roles: ["super_admin"], orgs: [] };
+    _currentUser = { ..._currentUser, roles: ["super_admin"], orgs: [] } as any;
     _selectQueue = [[ORG]];
     _poolQueryQueue = [{ rows: wizardStateRows() }];
 

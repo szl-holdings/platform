@@ -64,7 +64,7 @@ router.get("/skills", authMiddleware(), validateQuery(listQuerySchema), async (r
 
 router.get("/skills/:id", authMiddleware(), async (req, res) => {
   try {
-    const skill = defaultSkillRegistry.getSkill(req.params.id);
+    const skill = defaultSkillRegistry.getSkill(req.params.id as string);
     if (!skill) {
       sendNotFound(res, `Skill '${req.params.id}' not found`);
       return;
@@ -79,7 +79,7 @@ router.post("/skills/:id/run", authMiddleware(), validateBody(jsonObjectBodySche
   try {
     const { inputs = {} } = req.body as { inputs?: Record<string, unknown> };
 
-    const run = await runSkill(req.params.id, inputs, {
+    const run = await runSkill(req.params.id as string, inputs, {
       registry: defaultSkillRegistry,
       runStore: defaultSkillRunStore,
     });
@@ -100,7 +100,7 @@ router.post("/skills/:id/run", authMiddleware(), validateBody(jsonObjectBodySche
 
 router.get("/skills/:id/runs", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
-    const skill = defaultSkillRegistry.getSkill(req.params.id);
+    const skill = defaultSkillRegistry.getSkill(req.params.id as string);
     if (!skill) {
       sendNotFound(res, `Skill '${req.params.id}' not found`);
       return;
@@ -120,12 +120,12 @@ router.get("/skills/:id/runs", authMiddleware(), validateQuery(listQuerySchema),
     }
 
     const runs = defaultSkillRunStore.listRuns({
-      skillId: req.params.id,
+      skillId: req.params.id as string,
       limit: rawLimit,
       offset: rawOffset,
     });
 
-    const total = defaultSkillRunStore.countRuns({ skillId: req.params.id });
+    const total = defaultSkillRunStore.countRuns({ skillId: req.params.id as string });
     sendSuccess(res, { items: runs, total, limit: rawLimit, offset: rawOffset });
   } catch (err) {
     handleRouteError(res, err, "Failed to list skill runs");
@@ -134,7 +134,7 @@ router.get("/skills/:id/runs", authMiddleware(), validateQuery(listQuerySchema),
 
 router.get("/skill-runs/:runId", authMiddleware(), async (req, res) => {
   try {
-    const run = defaultSkillRunStore.getRun(req.params.runId);
+    const run = defaultSkillRunStore.getRun(req.params.runId as string);
     if (!run) {
       sendNotFound(res, `Skill run '${req.params.runId}' not found`);
       return;

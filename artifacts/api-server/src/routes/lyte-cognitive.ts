@@ -53,7 +53,7 @@ router.post("/lyte/cognitive/signal-fusion/run", authMiddleware(), validateBody(
           entityType: "signal",
           name: sig.title,
           description: sig.body ?? undefined,
-          provenance: { sourceId: String(sig.id), sourceType: "integration", sourceLabel: `lyte:${sig.sourceType}` },
+          provenance: { sourceId: String(sig.id), sourceType: "api", sourceLabel: `lyte:${sig.sourceType}` },
           confidence: sig.severity === "critical" ? 1.0 : sig.severity === "high" ? 0.85 : 0.7,
           labels: [sig.severity, sig.status, sig.sourceType],
           extensions: { signalId: sig.id, severity: sig.severity, status: sig.status, source: sig.source },
@@ -71,7 +71,7 @@ router.post("/lyte/cognitive/signal-fusion/run", authMiddleware(), validateBody(
           entityType: "signal",
           name: alert.name,
           description: alert.description ?? undefined,
-          provenance: { sourceId: String(alert.id), sourceType: "integration", sourceLabel: `lyte:alert` },
+          provenance: { sourceId: String(alert.id), sourceType: "api", sourceLabel: `lyte:alert` },
           confidence: 0.9,
           labels: ["alert", alert.severity, alert.status],
           extensions: { alertId: alert.id, severity: alert.severity, service: alert.service },
@@ -105,14 +105,14 @@ router.post("/lyte/cognitive/signal-fusion/run", authMiddleware(), validateBody(
         const node = await lyteAdapter.upsertEntity({
           domain: "lyte",
           entityType: "metric",
-          name: `${metric.name} [anomaly]`,
-          description: metric.description ?? undefined,
+          name: `${metric.metricName} [anomaly]`,
+          description: (metric as any).description ?? undefined,
           provenance: { sourceId: String(metric.id), sourceType: "system", sourceLabel: "lyte:metric-anomaly" },
           confidence: 0.75,
           labels: ["metric", "anomaly"],
-          extensions: { metricId: metric.id, name: metric.name, value: metric.value },
+          extensions: { metricId: metric.id, name: metric.metricName, value: metric.value },
         });
-        fusedNodes.push({ id: node.id, entityType: "metric-anomaly", name: `${metric.name} [anomaly]`, source: "lyte:metric-anomaly", domain: "lyte" });
+        fusedNodes.push({ id: node.id, entityType: "metric-anomaly", name: `${metric.metricName} [anomaly]`, source: "lyte:metric-anomaly", domain: "lyte" });
       } catch (e) {
         errors.push(`metric:${metric.id}`);
       }
@@ -296,7 +296,7 @@ router.get("/lyte/cognitive/interventions", authMiddleware(), validateQuery(list
 
     const signalsByCategory: Record<string, typeof activeSignals> = {};
     for (const s of activeSignals) {
-      const cat = (s.metadata as Record<string, unknown> | null)?.category as string ?? s.sourceType;
+      const cat = (s.metadata as any | null)?.category as string ?? s.sourceType;
       if (!signalsByCategory[cat]) signalsByCategory[cat] = [];
       signalsByCategory[cat].push(s);
     }
@@ -318,7 +318,7 @@ router.get("/lyte/cognitive/interventions", authMiddleware(), validateQuery(list
           source: s.source,
           sourceId: String(s.id),
           timestamp: s.receivedAt.getTime(),
-          metadata: (s.metadata as Record<string, unknown> | null) ?? undefined,
+          metadata: (s.metadata as any | null) ?? undefined,
         })),
         businessImpact: {
           financialExposureUsd: totalVar,
@@ -331,7 +331,7 @@ router.get("/lyte/cognitive/interventions", authMiddleware(), validateQuery(list
         suggestedAction: criticalCount > 0
           ? `Immediate escalation required for ${criticalCount} critical ${cat} signals`
           : `Review and resolve ${sigs.length} active ${cat} signals`,
-        suggestedOwner: sigs[0] ? ((sigs[0].metadata as Record<string, unknown> | null)?.assignee as string ?? undefined) : undefined,
+        suggestedOwner: sigs[0] ? ((sigs[0].metadata as any | null)?.assignee as string ?? undefined) : undefined,
         estimatedCostUsd: totalVar * 0.15,
         evidence: [
           { label: "Signal Count", value: String(sigs.length), source: "lyte:signals" },

@@ -85,7 +85,7 @@ router.get("/graph/entities", validateQuery(listQuerySchema), async (req: Reques
 
 router.get("/graph/entities/:id", async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const { id } = req.params as { id: string };
     const node = await getNodeById(id);
     if (!node) {
       return res.status(404).json({ error: "Entity not found", id });
@@ -108,7 +108,7 @@ router.get("/graph/entities/:id", async (req: Request, res: Response) => {
  */
 router.get("/graph/entities/:id/neighbors", validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const { id } = req.params as { id: string };
     const rawLimit = parseInt((req.query.limit as string) ?? "25", 10);
     if (isNaN(rawLimit) || rawLimit < 1 || rawLimit > 200) {
       return sendBadRequest(res, "limit must be 1–200");
@@ -195,7 +195,7 @@ router.get("/graph/entities/:id/neighbors", validateQuery(listQuerySchema), asyn
  */
 router.get("/graph/entities/:id/subgraph", validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const { id } = req.params as { id: string };
 
     const depth = parseInt((req.query.depth as string) ?? "2", 10);
     if (isNaN(depth) || depth < 1 || depth > 4) {
@@ -351,7 +351,7 @@ router.get("/graph/entities/:id/subgraph", validateQuery(listQuerySchema), async
  */
 router.get("/graph/entities/:id/subgraph/export", validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const { id } = req.params as { id: string };
 
     const format = String(req.query.format ?? "json").toLowerCase();
     if (format !== "json" && format !== "csv") {

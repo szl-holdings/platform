@@ -245,7 +245,7 @@ async function buildGroupApp(
   app.use(express.json());
 
   app.use((req: Request, _res: Response, next: NextFunction) => {
-    (req as Request & { user: unknown; isInternalAgent: boolean }).user = userFactory();
+    (req as any).user = userFactory();
     (req as Request & { isInternalAgent: boolean }).isInternalAgent = false;
     next();
   });

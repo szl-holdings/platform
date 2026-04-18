@@ -188,7 +188,7 @@ export function register(router: IRouter): void {
 
   router.post("/admin/support-queue/:id/status", validateBody(updateStatusSchema), async (req, res) => {
     try {
-      const id = parseInt(req.params.id, 10);
+      const id = parseInt(req.params.id as string, 10);
       if (isNaN(id)) { sendBadRequest(res, "Invalid ticket ID"); return; }
 
       const [submission] = await db
@@ -274,7 +274,7 @@ export function register(router: IRouter): void {
 
   router.post("/admin/support-queue/:id/resolve", validateBody(jsonObjectBodySchema), async (req, res) => {
     try {
-      const id = parseInt(req.params.id, 10);
+      const id = parseInt(req.params.id as string, 10);
       if (isNaN(id)) { sendBadRequest(res, "Invalid ticket ID"); return; }
 
       const [updated] = await db
@@ -294,7 +294,7 @@ export function register(router: IRouter): void {
 
   router.post("/admin/support-queue/:id/reopen", validateBody(jsonObjectBodySchema), async (req, res) => {
     try {
-      const id = parseInt(req.params.id, 10);
+      const id = parseInt(req.params.id as string, 10);
       if (isNaN(id)) { sendBadRequest(res, "Invalid ticket ID"); return; }
 
       const [updated] = await db
@@ -314,7 +314,7 @@ export function register(router: IRouter): void {
 
   router.post("/admin/support-queue/:id/reply", validateBody(replySchema), async (req, res) => {
     try {
-      const id = parseInt(req.params.id, 10);
+      const id = parseInt(req.params.id as string, 10);
       if (isNaN(id)) { sendBadRequest(res, "Invalid ticket ID"); return; }
 
       const [submission] = await db
@@ -385,7 +385,7 @@ export function register(router: IRouter): void {
 
   router.patch("/admin/kb-articles/:id", validateBody(kbArticleUpdateSchema), async (req, res) => {
     try {
-      const id = parseInt(req.params.id, 10);
+      const id = parseInt(req.params.id as string, 10);
       if (isNaN(id)) { sendBadRequest(res, "Invalid article ID"); return; }
 
       const data = req.body as z.infer<typeof kbArticleUpdateSchema>;
@@ -417,7 +417,7 @@ export function register(router: IRouter): void {
 
   router.delete("/admin/kb-articles/:id", async (req, res) => {
     try {
-      const id = parseInt(req.params.id, 10);
+      const id = parseInt(req.params.id as string, 10);
       if (isNaN(id)) { sendBadRequest(res, "Invalid article ID"); return; }
 
       const [article] = await db

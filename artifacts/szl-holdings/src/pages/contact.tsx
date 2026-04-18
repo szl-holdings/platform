@@ -336,7 +336,7 @@ export default function ContactPage() {
                       />
                     </div>
 
-                    <p style={{ fontSize: "0.75rem", color: "hsl(214,7%,48%)", lineHeight: 1.55 }}>
+                    <p style={{ fontSize: "0.75rem", color: "hsl(214,7%,57%)", lineHeight: 1.55 }}>
                       By submitting this form you agree to our{" "}
                       <Link href="/legal/privacy" style={{ color: "hsl(214,7%,58%)", textDecoration: "underline" }}>Privacy Policy</Link>.
                       We don't sell your information or add you to marketing lists.
@@ -424,7 +424,7 @@ export default function ContactPage() {
                   <p style={{ fontSize: "0.875rem", color: "hsl(214,7%,62%)", marginBottom: "0.375rem" }}>
                     hello@szlholdings.com
                   </p>
-                  <p style={{ fontSize: "0.75rem", color: "hsl(214,7%,48%)", lineHeight: 1.55 }}>
+                  <p style={{ fontSize: "0.75rem", color: "hsl(214,7%,57%)", lineHeight: 1.55 }}>
                     Washington, D.C. · London · Singapore
                   </p>
                 </div>

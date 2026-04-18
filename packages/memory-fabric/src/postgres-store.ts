@@ -124,6 +124,7 @@ function rowToEntry(raw: unknown): MemoryEntry | undefined {
       policy: row.retentionPolicy as MemoryEntry["retention"]["policy"],
       expiresAt: row.expiresAt ? new Date(row.expiresAt).toISOString() : undefined,
       maxAgeDays: row.maxAgeDays ?? undefined,
+      pinned: false,
     },
     linkedEntities: Array.isArray(row.linkedEntities) ? row.linkedEntities : [],
     linkedTraces: Array.isArray(row.linkedTraces) ? row.linkedTraces : [],
@@ -202,10 +203,22 @@ export class PostgresMemoryStore implements MemoryStore {
     if (query?.tags?.length) {
       results = results.filter((e) => query.tags!.every((t) => e.tags.includes(t)));
     }
+    if (query?.search) {
+      const needle = query.search.toLowerCase();
+      results = results.filter((e) =>
+        e.key.toLowerCase().includes(needle) ||
+        (typeof e.value === "string" && e.value.toLowerCase().includes(needle)) ||
+        e.tags.some((t) => t.toLowerCase().includes(needle)),
+      );
+    }
     if (!query?.includeStale) {
       results = results.filter((e) => !e.freshness.isStale);
     }
     return results;
+  }
+
+  search(query: string, tier?: MemoryTier): MemoryEntry[] {
+    return this.list({ search: query, tier, includeStale: false });
   }
 
   delete(id: string): boolean {

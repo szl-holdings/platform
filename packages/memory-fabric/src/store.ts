@@ -1,6 +1,6 @@
 import type { MemoryEntry, MemoryType } from "./types.js";
 
-export type MemoryTier = MemoryType;
+type MemoryTier = MemoryType;
 
 export interface MemoryStoreQuery {
   tier?: MemoryType;
@@ -169,6 +169,7 @@ export class MutableMemoryStore implements MemoryStore {
     return this.backend.getByKey(tier, key, scopeId);
   }
   list(query?: MemoryStoreQuery): MemoryEntry[] { return this.backend.list(query); }
+  search(query: string, tier?: MemoryType): MemoryEntry[] { return this.backend.search(query, tier); }
   delete(id: string): boolean { return this.backend.delete(id); }
   evictExpired(): number { return this.backend.evictExpired(); }
   count(tier?: MemoryTier): number { return this.backend.count(tier); }

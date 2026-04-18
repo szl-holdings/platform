@@ -1,7 +1,7 @@
-import type { ConstellationAdapter } from "../adapter.ts";
-import type { CstNodeTypeRegistration, CreateCstNode, CstNode } from "../types.ts";
-import { upsertNode, upsertNodeAlias, lookupNodeByAlias } from "../query.ts";
-import { registerAdapter } from "../registry.ts";
+import type { ConstellationAdapter } from "../adapter.js";
+import type { CstNodeTypeRegistration, CreateCstNode, CstNode } from "../types.js";
+import { upsertNode, upsertNodeAlias, lookupNodeByAlias } from "../query.js";
+import { registerAdapter } from "../registry.js";
 
 const PRISM_NODE_TYPES: CstNodeTypeRegistration[] = [
   {

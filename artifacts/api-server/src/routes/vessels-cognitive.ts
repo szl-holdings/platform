@@ -208,7 +208,7 @@ router.get("/vessels/cognitive/owner-graph", cogLimit, authMiddleware({ required
   try {
     let dbVessels: DbVessel[] = [];
     try {
-      dbVessels = await db.select().from(vesselsTable).limit(30) as DbVessel[];
+      dbVessels = await db.select().from(vesselsTable).limit(30) as unknown as DbVessel[];
     } catch { dbVessels = []; }
 
     const rng = seedRng(Math.floor(Date.now() / 86400000) + 99);
@@ -466,14 +466,14 @@ const DEFAULT_CHAIN: OwnershipHop[] = [
 
 router.get("/vessels/cognitive/sanctions-chain/:vesselImo", cogLimit, authMiddleware({ required: false }), async (req, res) => {
   try {
-    const { vesselImo } = req.params;
+    const vesselImo = req.params["vesselImo"] as string;
     const chain = OWNERSHIP_CHAINS[vesselImo] ?? DEFAULT_CHAIN;
     const vessel = SAMPLE_VESSELS_GRAPH.find(v => v.imo === vesselImo) ?? { name: "Unknown Vessel", flag: "PA", type: "Unknown" };
 
-    const sanctionedHops = chain.filter(h => h.sanctioned);
+    const sanctionedHops = chain.filter((h: any) => h.sanctioned);
     const maxDepth = chain.length;
     const overallRisk = sanctionedHops.length > 1 ? "critical" : sanctionedHops.length === 1 ? "high" : "low";
-    const allLists = [...new Set(sanctionedHops.flatMap(h => h.sanctionListMatches ?? []))];
+    const allLists = [...new Set(sanctionedHops.flatMap((h: any) => h.sanctionListMatches ?? []))];
 
     sendSuccess(res, {
       vesselImo,
@@ -488,7 +488,7 @@ router.get("/vessels/cognitive/sanctions-chain/:vesselImo", cogLimit, authMiddle
         sanctionListExposure: allLists,
         reachesTopLevel: maxDepth >= 3,
         ultimateBeneficialOwnerFound: maxDepth >= 3,
-        averageConfidence: Math.round(chain.reduce((s, h) => s + h.confidence, 0) / chain.length * 100) / 100,
+        averageConfidence: Math.round(chain.reduce((s: any, h: any) => s + h.confidence, 0) / chain.length * 100) / 100,
       },
       sanctionLists: SANCTION_LISTS,
       recommendation: sanctionedHops.length > 0
@@ -586,14 +586,14 @@ const WHAT_IF_SCENARIOS: WhatIfScenario[] = [
 
 router.get("/vessels/cognitive/voyage-twin/:voyageRef", cogLimit, authMiddleware({ required: false }), async (req, res) => {
   try {
-    const { voyageRef } = req.params;
+    const voyageRef = req.params["voyageRef"] as string;
     const normalizedRef = voyageRef === "latest" ? "VOY-2026-001" : voyageRef;
     const snapshots = VOYAGE_SNAPSHOTS[normalizedRef] ?? VOYAGE_SNAPSHOTS["VOY-2026-001"];
 
     const vessel = SAMPLE_VESSELS_GRAPH[0];
     const firstSnap = snapshots[0];
     const lastSnap = snapshots[snapshots.length - 1];
-    const anomalies = snapshots.filter(s => s.anomaly);
+    const anomalies = snapshots.filter((s: any) => s.anomaly);
 
     const etaOriginal = new Date(firstSnap.etaOriginal);
     const etaFinal = new Date(lastSnap.etaCurrent);
@@ -616,10 +616,10 @@ router.get("/vessels/cognitive/voyage-twin/:voyageRef", cogLimit, authMiddleware
       },
       performance: {
         totalFuelConsumedMt: totalFuelMt,
-        avgSpeedKnots: Math.round(snapshots.filter(s => s.speed > 0).reduce((s, snap) => s + snap.speed, 0) / snapshots.filter(s => s.speed > 0).length * 10) / 10,
+        avgSpeedKnots: Math.round(snapshots.filter((s: any) => s.speed > 0).reduce((s: any, snap: any) => s + snap.speed, 0) / snapshots.filter((s: any) => s.speed > 0).length * 10) / 10,
         anomalyCount: anomalies.length,
-        anomalies: anomalies.map(s => ({ snapshotId: s.snapshotId, timestamp: s.timestamp, description: s.anomaly })),
-        cargoIntegrityMaintained: snapshots.every(s => s.cargoIntact),
+        anomalies: anomalies.map((s: any) => ({ snapshotId: s.snapshotId, timestamp: s.timestamp, description: s.anomaly })),
+        cargoIntegrityMaintained: snapshots.every((s: any) => s.cargoIntact),
       },
       whatIfScenarios: WHAT_IF_SCENARIOS,
       knownVoyageRefs: Object.keys(VOYAGE_SNAPSHOTS),

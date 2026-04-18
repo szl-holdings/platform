@@ -224,12 +224,12 @@ export function SiteFooter() {
             <p style={{ color: "var(--color-szl-text-faint)", fontSize: "0.6875rem", fontFamily: "var(--font-mono)", marginRight: "0.5rem" }}>
               &copy; {new Date().getFullYear()} SZL Holdings
             </p>
-            <span style={{ color: "var(--color-szl-text-faint)", fontSize: "0.6875rem", fontFamily: "var(--font-mono)", opacity: 0.5 }}>·</span>
-            <p style={{ color: "var(--color-szl-text-faint)", fontSize: "0.6875rem", fontFamily: "var(--font-mono)", opacity: 0.65 }}>
+            <span aria-hidden="true" style={{ color: "var(--color-szl-text-faint)", fontSize: "0.6875rem", fontFamily: "var(--font-mono)", opacity: 0.5 }}>·</span>
+            <p style={{ color: "var(--color-szl-text-faint)", fontSize: "0.6875rem", fontFamily: "var(--font-mono)" }}>
               Stephen Lutar, Founder
             </p>
-            <span style={{ color: "var(--color-szl-text-faint)", fontSize: "0.6875rem", fontFamily: "var(--font-mono)", opacity: 0.5 }}>·</span>
-            <p style={{ color: "var(--color-szl-text-faint)", fontSize: "0.6875rem", fontFamily: "var(--font-mono)", opacity: 0.5 }}>
+            <span aria-hidden="true" style={{ color: "var(--color-szl-text-faint)", fontSize: "0.6875rem", fontFamily: "var(--font-mono)", opacity: 0.5 }}>·</span>
+            <p style={{ color: "var(--color-szl-text-faint)", fontSize: "0.6875rem", fontFamily: "var(--font-mono)" }}>
               {VERSION}
             </p>
           </div>

@@ -205,7 +205,7 @@ function mapApiToProjects(raw: unknown): ConstructionProject[] | null {
     id: String(p.id ?? idx),
     name: String(p.name ?? p.projectName ?? "Unknown Project"),
     property: String(p.property ?? ""),
-    status: (["on-track", "at-risk", "delayed", "complete"].includes(String(p.status)) ? p.status : "on-track") as ConstructionProject["status"],
+    status: (["on-track", "at-risk", "delayed", "complete"].includes(String(p.status)) ? p.status : "on-track") as any,
     startDate: String(p.startDate ?? ""),
     expectedCompletion: String(p.expectedCompletion ?? p.completionDate ?? ""),
     totalBudget: Number(p.totalBudget ?? 0),
@@ -230,7 +230,7 @@ function mapApiToProjects(raw: unknown): ConstructionProject[] | null {
           actual: Number(b.actual ?? 0),
         }))
       : [],
-  }));
+  })) as unknown as ConstructionProject[];
 }
 
 export default function ConstructionMonitorScreen() {

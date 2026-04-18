@@ -177,9 +177,9 @@ export default function ConstructionMonitorPage() {
           totalBudget: p.totalBudget, totalSpent: p.totalSpent, overallPct: p.overallPct,
           startDate: p.startDate, projectedCompletion: p.projectedCompletion, revisedCompletion: p.revisedCompletion,
           status: p.status, gc: p.gc, architect: p.architect,
-          milestones: p.milestones as Array<Record<string, unknown>>,
-          budgetLines: p.budgetLines as Array<Record<string, unknown>>,
-          photos: p.photos as Array<Record<string, unknown>>,
+          milestones: p.milestones as unknown as Array<Record<string, unknown>>,
+          budgetLines: p.budgetLines as unknown as Array<Record<string, unknown>>,
+          photos: p.photos as unknown as Array<Record<string, unknown>>,
           isDemo: true,
         });
       }

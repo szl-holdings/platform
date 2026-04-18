@@ -52,7 +52,7 @@ import {
   ingestFirestormScenario,
   ingestFirestormAlert,
 } from "@szl-holdings/ai-engine/domain-embedding-hooks";
-import { firestormLiveLimit, getFsCached, fetchFsJson, tradecraftDecisionInputSchema, tradecraftDecisionActionSchema } from "./shared";
+import { firestormLiveLimit, getFsCached, fetchFsJson, tradecraftDecisionInputSchema, tradecraftDecisionActionSchema, updateWorkflowActionSchema, updateHardeningControlSchema, pushTokenSchema, ingestSyslogSchema, updateCaseSchema, updateCaseMemorySchema, evidenceIndexQuerySchema } from "./shared";
 import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
 const router = Router();
 
@@ -341,7 +341,7 @@ router.patch("/firestorm/cases/:id", authMiddleware({ required: true }), validat
         const v = ev[key];
         return typeof v === "number" ? v : undefined;
       };
-      const origin = (ev.origin && typeof ev.origin === "object") ? ev.origin as Record<string, unknown> : {};
+      const origin = (ev.origin && typeof ev.origin === "object") ? ev.origin as any : {};
       const originName = typeof origin.name === "string" ? origin.name : undefined;
       const originId = typeof origin.id === "string" || typeof origin.id === "number" ? String(origin.id) : undefined;
 
@@ -436,7 +436,7 @@ router.get("/firestorm/live/shodan-ip", authMiddleware(), validateQuery(listQuer
     }
     const result = await getThreatCached<any>(`shodan-ip-${ip}`, 3600000, async () => {
       try {
-        const raw = await fetchThreatJson(`https://internetdb.shodan.io/${ip}`, 8000) as Record<string, unknown>;
+        const raw = await fetchThreatJson(`https://internetdb.shodan.io/${ip}`, 8000) as any;
         if (!raw?.ip) throw new Error("No Shodan data");
         return {
           data: {
@@ -490,7 +490,7 @@ router.get("/firestorm/live/greynoise-ip", authMiddleware(), validateQuery(listQ
     }
     const result = await getThreatCached(`greynoise-ip-${ip}`, 3600000, async () => {
       try {
-        const raw = await fetchThreatJson(`https://api.greynoise.io/v3/community/${ip}`, 8000) as Record<string, unknown>;
+        const raw = await fetchThreatJson(`https://api.greynoise.io/v3/community/${ip}`, 8000) as any;
         return {
           data: {
             ip,
@@ -550,11 +550,11 @@ router.get("/firestorm/live/malware-bazaar", authMiddleware(), async (_req, res)
         });
         clearTimeout(timer);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const raw = await response.json() as Record<string, unknown>;
+        const raw = await response.json() as any;
 
         if (raw.query_status !== "ok" || !Array.isArray(raw.data)) throw new Error("MalwareBazaar error");
 
-        const samples = raw.data.slice(0, 20).map((s: Record<string, unknown>) => ({
+        const samples = raw.data.slice(0, 20).map((s: any) => ({
           sha256: s.sha256_hash,
           md5: s.md5_hash,
           fileName: s.file_name,
@@ -569,12 +569,12 @@ router.get("/firestorm/live/malware-bazaar", authMiddleware(), async (_req, res)
           originCountry: s.origin_country ?? null,
         }));
 
-        const tagCounts = samples.reduce((acc: Record<string, number>, s: Record<string, unknown>) => {
+        const tagCounts = samples.reduce((acc: Record<string, number>, s: any) => {
           (s.tags ?? []).forEach((t: string) => { acc[t] = (acc[t] ?? 0) + 1; });
           return acc;
         }, {});
 
-        const fileTypeCounts = samples.reduce((acc: Record<string, number>, s: Record<string, unknown>) => {
+        const fileTypeCounts = samples.reduce((acc: Record<string, number>, s: any) => {
           if (s.fileType) acc[s.fileType] = (acc[s.fileType] ?? 0) + 1;
           return acc;
         }, {});
@@ -628,10 +628,10 @@ router.get("/firestorm/live/threat-aggregator", authMiddleware(), async (_req, r
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded", "User-Agent": "SZL-Aegis/1.0" },
             body: "query=get_recent&selector=100",
-          }).then(r => r.json()) as Promise<Record<string, unknown>>,
-          fetchThreatJson("https://urlhaus-api.abuse.ch/v1/urls/recent/limit/100/", 10000) as Promise<Record<string, unknown>>,
-          fetchThreatJson("https://services.nvd.nist.gov/rest/json/cves/2.0?resultsPerPage=10&pubStartDate=" + new Date(Date.now() - 7 * 86400000).toISOString().split("T")[0] + "T00:00:00.000", 12000) as Promise<Record<string, unknown>>,
-          fetchThreatJson("https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json", 10000) as Promise<Record<string, unknown>>,
+          }).then(r => r.json()) as Promise<any>,
+          fetchThreatJson("https://urlhaus-api.abuse.ch/v1/urls/recent/limit/100/", 10000) as Promise<any>,
+          fetchThreatJson("https://services.nvd.nist.gov/rest/json/cves/2.0?resultsPerPage=10&pubStartDate=" + new Date(Date.now() - 7 * 86400000).toISOString().split("T")[0] + "T00:00:00.000", 12000) as Promise<any>,
+          fetchThreatJson("https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json", 10000) as Promise<any>,
         ]);
 
         const mb = mbResult.status === "fulfilled" ? mbResult.value : null;
@@ -640,27 +640,27 @@ router.get("/firestorm/live/threat-aggregator", authMiddleware(), async (_req, r
         const cisa = cisaResult.status === "fulfilled" ? cisaResult.value : null;
 
         const mbSamples = mb?.data?.slice(0, 5) ?? [];
-        const mbTopFamily = mb?.data?.reduce((acc: Record<string, number>, s: Record<string, unknown>) => {
+        const mbTopFamily = mb?.data?.reduce((acc: Record<string, number>, s: any) => {
           if (s.signature) acc[s.signature] = (acc[s.signature] ?? 0) + 1;
           return acc;
         }, {});
         const mbTopFamilySorted = mbTopFamily ? Object.entries(mbTopFamily as Record<string, number>).sort((a, b) => b[1] - a[1]).slice(0, 5) : [];
 
         const urlhausUrls = urlhaus?.urls?.slice(0, 5) ?? [];
-        const urlhausThreatTypes = urlhaus?.urls?.reduce((acc: Record<string, number>, u: Record<string, unknown>) => {
+        const urlhausThreatTypes = urlhaus?.urls?.reduce((acc: Record<string, number>, u: any) => {
           if (u.threat) acc[u.threat] = (acc[u.threat] ?? 0) + 1;
           return acc;
         }, {});
 
-        const nvdCves = nvd?.vulnerabilities?.slice(0, 5).map((v: Record<string, unknown>) => ({
+        const nvdCves = nvd?.vulnerabilities?.slice(0, 5).map((v: any) => ({
           cveId: v.cve?.id,
-          description: v.cve?.descriptions?.find((d: Record<string, unknown>) => d.lang === "en")?.value?.slice(0, 120),
+          description: v.cve?.descriptions?.find((d: any) => d.lang === "en")?.value?.slice(0, 120),
           severity: v.cve?.metrics?.cvssMetricV31?.[0]?.cvssData?.baseSeverity ?? "Unknown",
           score: v.cve?.metrics?.cvssMetricV31?.[0]?.cvssData?.baseScore ?? null,
           published: v.cve?.published,
         })) ?? [];
 
-        const cisaLatest = cisa?.vulnerabilities?.slice(0, 5).map((v: Record<string, unknown>) => ({
+        const cisaLatest = cisa?.vulnerabilities?.slice(0, 5).map((v: any) => ({
           cveId: v.cveID,
           vendorProject: v.vendorProject,
           product: v.product,
@@ -670,24 +670,24 @@ router.get("/firestorm/live/threat-aggregator", authMiddleware(), async (_req, r
 
         return {
           data: {
-            threatLevel: nvdCves.filter((c: Record<string, unknown>) => c.severity === "CRITICAL").length > 2 ? "elevated" : "moderate",
+            threatLevel: nvdCves.filter((c: any) => c.severity === "CRITICAL").length > 2 ? "elevated" : "moderate",
             feeds: {
               malwareBazaar: {
                 status: mb?.query_status === "ok" ? "live" : "unavailable",
                 recentSamplesCount: mb?.data?.length ?? 0,
                 topMalwareFamilies: mbTopFamilySorted.map(([family, count]) => ({ family, count })),
-                recentSamples: mbSamples.map((s: Record<string, unknown>) => ({ sha256: s.sha256_hash, fileName: s.file_name, signature: s.signature, tags: s.tags, firstSeen: s.first_seen })),
+                recentSamples: mbSamples.map((s: any) => ({ sha256: s.sha256_hash, fileName: s.file_name, signature: s.signature, tags: s.tags, firstSeen: s.first_seen })),
               },
               urlhaus: {
                 status: urlhaus?.query_status === "isok" ? "live" : "unavailable",
                 recentUrlsCount: urlhaus?.urls?.length ?? 0,
                 threatTypes: urlhausThreatTypes ?? {},
-                recentUrls: urlhausUrls.map((u: Record<string, unknown>) => ({ url: u.url, threat: u.threat, dateAdded: u.date_added, urlStatus: u.url_status })),
+                recentUrls: urlhausUrls.map((u: any) => ({ url: u.url, threat: u.threat, dateAdded: u.date_added, urlStatus: u.url_status })),
               },
               nvd: {
                 status: nvd?.totalResults !== undefined ? "live" : "unavailable",
                 recentCvesCount: nvd?.totalResults ?? 0,
-                criticalCount: nvdCves.filter((c: Record<string, unknown>) => c.severity === "CRITICAL").length,
+                criticalCount: nvdCves.filter((c: any) => c.severity === "CRITICAL").length,
                 recentCves: nvdCves,
               },
               cisa: {
@@ -845,7 +845,7 @@ router.post("/firestorm/tradecraft/decisions", authMiddleware({ required: true }
   try {
     const { randomUUID } = await import("crypto");
     const parsedDecision = tradecraftDecisionInputSchema.parse(req.body);
-    const body = parsedDecision as Record<string, unknown>;
+    const body = parsedDecision as any;
 
     if (!DECISION_TYPE_ENUM.has(parsedDecision.decisionType)) {
       sendError(res, "Invalid or missing decisionType. Must be one of the 8 supported decision object types.", 422, "UNPROCESSABLE_ENTITY");
@@ -928,7 +928,7 @@ router.post("/firestorm/tradecraft/decisions", authMiddleware({ required: true }
       humanReviewReason: validated.humanReviewReason,
       modelRoute: validated.modelRoute,
       rawOutput: validated.rawOutput,
-      decisionPayload: body as Record<string, unknown>,
+      decisionPayload: body as any,
       status: "active",
       validationErrors,
     });
@@ -969,7 +969,7 @@ router.post("/firestorm/tradecraft/decisions", authMiddleware({ required: true }
 
 router.put("/firestorm/tradecraft/decisions/:objectId", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
-    const body = tradecraftDecisionActionSchema.parse(req.body) as Record<string, unknown>;
+    const body = tradecraftDecisionActionSchema.parse(req.body) as any;
     const action = typeof body.action === "string" ? body.action : null;
     const user = req.user;
 
@@ -1040,7 +1040,7 @@ router.get("/firestorm/tradecraft/case-memory/:caseId", authMiddleware({ require
 
 router.post("/firestorm/tradecraft/case-memory", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
-    const body = createCaseMemorySchema.parse(req.body);
+    const body = updateCaseMemorySchema.parse(req.body) as any;
     const caseId = body.caseId;
     const incidentId = body.incidentId ?? null;
     const existing = await db.select().from(firestormCaseMemoryTable).where(sql`${firestormCaseMemoryTable.caseId} = ${caseId}`);
@@ -1113,7 +1113,7 @@ router.get("/firestorm/tradecraft/notebook", authMiddleware({ required: true }),
 router.post("/firestorm/tradecraft/notebook", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const { randomUUID } = await import("crypto");
-    const body = req.body as Record<string, unknown>;
+    const body = req.body as any;
     if (!body.content || typeof body.content !== "string" || body.content.trim().length < 3) {
       sendError(res, "content is required and must be at least 3 characters.", 422, "UNPROCESSABLE_ENTITY");
       return;
@@ -1153,7 +1153,7 @@ router.post("/firestorm/tradecraft/notebook", authMiddleware({ required: true })
           evidenceSnapshots: [],
           analystNotes: [noteSnapshot],
           changeLog: [changeEntry],
-          summary: { totalDecisions: 0, lastDecisionAt: null, currentRiskLevel: "medium", pendingApprovals: 0, humanReviewRequired: false } as unknown as Record<string, unknown>,
+          summary: { totalDecisions: 0, lastDecisionAt: null, currentRiskLevel: "medium", pendingApprovals: 0, humanReviewRequired: false } as unknown as any,
           openedAt: nowNote,
           lastUpdatedAt: nowNote,
         }).catch((err: unknown) => { logger.warn({ err }, "[tradecraft] Failed to create case memory for note — non-fatal"); });
@@ -1166,7 +1166,7 @@ router.post("/firestorm/tradecraft/notebook", authMiddleware({ required: true })
 
 router.put("/firestorm/tradecraft/notebook/:noteId", authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
-    const body = req.body as Record<string, unknown>;
+    const body = req.body as any;
     const data = insertFirestormAnalystNotebookSchema.partial().parse(body);
     const [note] = await db.update(firestormAnalystNotebookTable)
       .set({ ...data, updatedAt: new Date() })
@@ -1240,7 +1240,7 @@ function getSessionContext(req: import("express").Request): {
   orgId: number | undefined;
   isPrivileged: boolean;
 } {
-  const user = (req as unknown as Record<string, unknown>).user as {
+  const user = (req as unknown as any).user as {
     id?: unknown;
     roles?: string[];
     orgs?: Array<{ orgId?: unknown }>;
@@ -1305,7 +1305,7 @@ router.get("/firestorm/ai-governance/registry", authMiddleware(), async (req, re
     }
 
     const registry = agents.map((agent) => {
-      const meta = (agent.metadata ?? {}) as Record<string, unknown>;
+      const meta = (agent.metadata ?? {}) as any;
       const version = versionByAgent[agent.agentId];
       const rawModel = agent.defaultModel ?? "";
       const [providerSlug, ...modelParts] = rawModel.includes("/") ? rawModel.split("/") : ["internal", rawModel];
@@ -1376,7 +1376,7 @@ router.get("/firestorm/ai-governance/log", authMiddleware(), validateQuery(listQ
       .limit(limit);
 
     const log = events.map((e) => {
-      const vals = (e.newValues ?? {}) as Record<string, unknown>;
+      const vals = (e.newValues ?? {}) as any;
       // Prefer explicit model fields; fall back to "unknown" only for known inference entity types
       const model = (vals["model"] ?? vals["modelId"] ?? vals["defaultModel"] ?? (
         INFERENCE_ENTITY_TYPES.has(e.entityType) ? "unknown" : null

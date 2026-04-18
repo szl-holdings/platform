@@ -54,7 +54,7 @@ import {
 } from "@szl-holdings/ai-engine/domain-embedding-hooks";
 
 
-const updateVulnerabilitySchema = z.object({
+export const updateVulnerabilitySchema = z.object({
   status: z.string().min(1).max(50).optional(),
   remediationOwner: z.string().max(200).trim().optional(),
   dueDate: z.string().max(100).optional().nullable(),
@@ -62,21 +62,21 @@ const updateVulnerabilitySchema = z.object({
   recommendation: z.string().max(5000).trim().optional(),
 }).strict();
 
-const updateComplianceControlSchema = z.object({
+export const updateComplianceControlSchema = z.object({
   status: z.string().min(1).max(50).optional(),
   owner: z.string().max(200).trim().optional(),
   dueDate: z.string().max(100).optional().nullable(),
   notes: z.string().max(5000).trim().optional(),
 }).strict();
 
-const updateWorkflowActionSchema = z.object({
+export const updateWorkflowActionSchema = z.object({
   status: z.string().min(1).max(50).optional(),
   notes: z.string().max(5000).trim().optional(),
   assignedTo: z.string().max(200).trim().optional(),
   completedAt: z.union([z.string().datetime({ offset: true }), z.date()]).optional(),
 }).strict();
 
-const updateHardeningControlSchema = z.object({
+export const updateHardeningControlSchema = z.object({
   status: z.string().min(1).max(50).optional(),
   owner: z.string().max(200).trim().optional(),
   recommendedAction: z.string().max(5000).trim().optional(),
@@ -84,12 +84,12 @@ const updateHardeningControlSchema = z.object({
   notes: z.string().max(5000).trim().optional(),
 }).strict();
 
-const pushTokenSchema = z.object({
+export const pushTokenSchema = z.object({
   token: z.string().min(1, "token is required").max(4096),
   platform: z.string().max(50).trim().optional(),
 }).strict();
 
-const ingestWebhookSchema = z.object({
+export const ingestWebhookSchema = z.object({
   source: z.string().max(200).optional(),
   severity: z.string().max(50).optional(),
   level: z.string().max(50).optional(),
@@ -98,14 +98,14 @@ const ingestWebhookSchema = z.object({
   summary: z.string().max(2000).optional(),
 }).passthrough();
 
-const ingestSyslogSchema = z.object({
+export const ingestSyslogSchema = z.object({
   message: z.string().max(10000).optional(),
   raw: z.string().max(10000).optional(),
   host: z.string().max(255).optional(),
   hostname: z.string().max(255).optional(),
 }).passthrough();
 
-const updateCaseSchema = z.object({
+export const updateCaseSchema = z.object({
   status: z.string().min(1).max(50).optional(),
   priority: z.string().min(1).max(50).optional(),
   assignedAnalyst: z.string().max(200).trim().optional().nullable(),
@@ -124,7 +124,7 @@ const createCaseMemorySchema = z.object({
 
 const CASE_MEMORY_PHASE_ENUM = ["detection", "triage", "investigation", "containment", "eradication", "recovery", "closed"] as const;
 
-const updateCaseMemorySchema = z.object({
+export const updateCaseMemorySchema = z.object({
   phase: z.enum(CASE_MEMORY_PHASE_ENUM).optional(),
   phaseHistory: z.array(z.object({
     phase: z.string().max(50),
@@ -156,7 +156,7 @@ export const tradecraftDecisionInputSchema = z.object({
   objectId: z.string().max(200).optional(),
 }).passthrough();
 
-const evidenceIndexQuerySchema = z.object({
+export const evidenceIndexQuerySchema = z.object({
   query: z.string().min(1).max(2000),
   caseId: z.string().max(200).optional(),
   incidentId: z.string().max(200).optional(),
@@ -176,7 +176,7 @@ export const firestormCrudLimit = rateLimit({
   validate: { xForwardedForHeader: false, ip: false },
 }) as unknown as RequestHandler;
 
-function getFirestormTenantId(req: import("express").Request): string | undefined {
+export function getFirestormTenantId(req: import("express").Request): string | undefined {
   const user = (req as unknown as Record<string, unknown>).user as { orgs?: Array<{ orgId?: unknown }> } | undefined;
   return user?.orgs?.[0]?.orgId != null ? String(user.orgs[0].orgId) : undefined;
 }
@@ -187,7 +187,7 @@ export const firestormLiveLimit = rateLimit({
   validate: { xForwardedForHeader: false, ip: false },
 }) as unknown as RequestHandler;
 
-const fsCache = new LRUCache<string, { data: unknown; expiry: number }>({ max: 300 });
+export const fsCache = new LRUCache<string, { data: unknown; expiry: number }>({ max: 300 });
 export function getFsCached<T>(key: string, ttlMs: number, fetcher: () => Promise<T>): Promise<T> {
   const c = fsCache.get(key);
   if (c && c.expiry > Date.now()) return Promise.resolve(c.data as T);

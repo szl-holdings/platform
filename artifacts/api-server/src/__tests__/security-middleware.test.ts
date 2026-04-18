@@ -89,7 +89,7 @@ describe("globalAuthEnforcer", () => {
     const app = express();
     app.use(express.json());
     app.use((req, _res, next) => {
-      (req as Request & { user: unknown }).user = { id: 1, email: "user@example.com", roles: ["member"], orgs: [] };
+      (req as Request & { user: unknown }).user = { id: 1, displayName: "Test User", email: "user@example.com", roles: ["member"], orgs: [] };
       next();
     });
     app.use(globalAuthEnforcer as express.RequestHandler);
@@ -336,9 +336,9 @@ describe("tenantScope", () => {
     };
   }
 
-  function injectUser(user: unknown) {
+  function injectUser(user: any) {
     return (req: Request, _res: Response, next: NextFunction) => {
-      (req as Request & { user: unknown }).user = user;
+      (req as any).user = user;
       next();
     };
   }

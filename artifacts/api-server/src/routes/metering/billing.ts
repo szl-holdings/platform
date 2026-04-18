@@ -24,7 +24,7 @@ import {
 import { authMiddleware, requireRole, parseIdParam } from "../../middlewares/auth";
 import { tenantScope, assertTenantAccess } from "../../middlewares/tenant-scope";
 import { logger } from "../../lib/logger";
-import { periodBounds, checkAndEnforceQuota, meteringRateLimit } from "./shared";
+import { periodBounds, checkAndEnforceQuota, meteringRateLimit, computeCharge } from "./shared";
 import {validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
 
 const router: IRouter = Router();

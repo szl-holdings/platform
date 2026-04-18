@@ -260,7 +260,7 @@ function mapApiToApplications(raw: unknown): ScreeningApplication[] | null {
   const r = raw as Record<string, unknown>;
   const list = (r.data as Record<string, unknown>)?.applications ?? r.applications;
   if (!Array.isArray(list) || list.length === 0) return null;
-  return list.map((a: Record<string, unknown>, idx: number) => ({
+  return (list.map((a: Record<string, unknown>, idx: number) => ({
     id: String(a.id ?? idx),
     name: String(a.name ?? a.applicantName ?? "Applicant"),
     property: String(a.property ?? ""),
@@ -273,10 +273,10 @@ function mapApiToApplications(raw: unknown): ScreeningApplication[] | null {
     creditScore: Number(a.creditScore ?? 0),
     creditGrade: (["A", "B", "C", "D", "F"].includes(String(a.creditGrade)) ? a.creditGrade : "B") as ScreeningApplication["creditGrade"],
     backgroundCheck: (["clear", "reviewing", "flagged"].includes(String(a.backgroundCheck)) ? a.backgroundCheck : "reviewing") as ScreeningApplication["backgroundCheck"],
-    incomeVerification: (["verified", "pending", "failed"].includes(String(a.incomeVerification)) ? a.incomeVerification : "pending") as ScreeningApplication["incomeVerification"],
-    rentalHistory: (["excellent", "good", "fair", "poor"].includes(String(a.rentalHistory)) ? a.rentalHistory : "good") as ScreeningApplication["rentalHistory"],
+    incomeVerification: (["verified", "pending", "failed"].includes(String(a.incomeVerification)) ? a.incomeVerification : "pending") as any,
+    rentalHistory: (["excellent", "good", "fair", "poor"].includes(String(a.rentalHistory)) ? a.rentalHistory : "good") as any,
     notes: a.notes != null ? String(a.notes) : undefined,
-  }));
+  })) as unknown as ScreeningApplication[]);
 }
 
 export default function TenantScreeningScreen() {

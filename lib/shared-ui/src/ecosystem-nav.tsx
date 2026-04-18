@@ -1465,7 +1465,7 @@ export function EcosystemNav({
               border: "1px solid rgba(255,255,255,0.09)",
               borderRadius: "8px",
               padding: "5px 10px 5px 8px",
-              color: "rgba(255,255,255,0.45)",
+              color: "rgba(255,255,255,0.72)",
               cursor: "pointer",
               fontSize: "12px",
               fontFamily: typography.fontFamily.body,
@@ -1473,11 +1473,11 @@ export function EcosystemNav({
             }}
             onMouseEnter={(e) => {
               (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.08)";
-              (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.65)";
+              (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.88)";
             }}
             onMouseLeave={(e) => {
               (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)";
-              (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.45)";
+              (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.72)";
             }}
           >
             <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">

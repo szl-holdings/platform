@@ -203,9 +203,27 @@ importers:
 
   artifacts/aegis:
     dependencies:
+      '@szl-holdings/graphql-client':
+        specifier: workspace:*
+        version: link:../../lib/graphql-client
       '@szl-holdings/observability':
         specifier: workspace:*
         version: link:../../lib/observability
+      '@szl-holdings/services':
+        specifier: workspace:*
+        version: link:../../lib/services
+      '@szl-holdings/shared-ui':
+        specifier: workspace:*
+        version: link:../../lib/shared-ui
+      '@tanstack/react-query':
+        specifier: 'catalog:'
+        version: 5.99.0(react@19.1.0)
+      framer-motion:
+        specifier: 'catalog:'
+        version: 12.35.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      recharts:
+        specifier: 'catalog:'
+        version: 2.15.4(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
     devDependencies:
       '@replit/vite-plugin-cartographer':
         specifier: 'catalog:'
@@ -996,6 +1014,9 @@ importers:
       '@szl-holdings/observability':
         specifier: workspace:*
         version: link:../../lib/observability
+      '@szl-holdings/shared-ui':
+        specifier: workspace:*
+        version: link:../../lib/shared-ui
       clsx:
         specifier: 'catalog:'
         version: 2.1.1
@@ -2608,6 +2629,9 @@ importers:
       '@szl-holdings/evals-core':
         specifier: workspace:*
         version: link:../evals-core
+      '@workspace/eval-forge':
+        specifier: workspace:*
+        version: link:../eval-forge
       zod:
         specifier: 'catalog:'
         version: 3.25.76

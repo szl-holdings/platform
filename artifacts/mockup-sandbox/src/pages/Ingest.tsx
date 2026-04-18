@@ -30,7 +30,7 @@ const SEED_REPOS = [
 
 const STATUS_META: Record<
   IngestJob["status"],
-  { color: string; label: string; icon: React.ComponentType<{ className?: string }> }
+  { color: string; label: string; icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }> }
 > = {
   queued: { color: "#8896aa", label: "Queued", icon: Clock },
   fetching: { color: "#00d4ff", label: "Fetching", icon: Download },

@@ -7,7 +7,7 @@ import { logger } from "../../lib/logger";
 import { createRmmProvider, setCachedProvider, getCachedProvider, clearProviderCache, type RmmProviderConfig } from "../../services/rmm-provider";
 import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from "crypto";
 
-const SUPPORTED_PROVIDERS = ["ninjaone", "connectwise_automate", "connectwise_manage", "halopsa", "datto_rmm", "autotask_psa"] as const;
+export const SUPPORTED_PROVIDERS = ["ninjaone", "connectwise_automate", "connectwise_manage", "halopsa", "datto_rmm", "autotask_psa"] as const;
 
 const ENCRYPTION_KEY = (() => {
   const key = process.env.CONNECTOR_ENCRYPTION_KEY;
@@ -21,7 +21,7 @@ const ENCRYPTION_KEY = (() => {
   return scryptSync(key, "rmm-connector-salt", 32);
 })();
 
-function encryptConfig(config: Record<string, unknown>): string {
+export function encryptConfig(config: Record<string, unknown>): string {
   const iv = randomBytes(16);
   const cipher = createCipheriv("aes-256-gcm", ENCRYPTION_KEY, iv);
   const plaintext = JSON.stringify(config);
@@ -30,7 +30,7 @@ function encryptConfig(config: Record<string, unknown>): string {
   return `enc:${iv.toString("hex")}:${tag.toString("hex")}:${encrypted.toString("hex")}`;
 }
 
-function decryptConfig(data: unknown): Record<string, unknown> {
+export function decryptConfig(data: unknown): Record<string, unknown> {
   if (typeof data === "string" && data.startsWith("enc:")) {
     const parts = data.split(":");
     if (parts.length !== 4) return {};
@@ -69,7 +69,7 @@ type ConnectorRow = {
   updatedAt: Date;
 };
 
-type PlaybookRow = {
+export type PlaybookRow = {
   id: number;
   name: string;
   description: string | null;
@@ -86,7 +86,7 @@ type PlaybookRow = {
   updatedAt: Date;
 };
 
-type RemoteActionRow = {
+export type RemoteActionRow = {
   id: number;
   deviceId: number | null;
   connectorId: number | null;
@@ -107,7 +107,7 @@ type RemoteActionRow = {
   updatedAt: Date;
 };
 
-type HealingExecutionRow = {
+export type HealingExecutionRow = {
   id: number;
   playbookId: number | null;
   deviceId: number | null;

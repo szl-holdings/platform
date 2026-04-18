@@ -52,6 +52,7 @@ import {
   ingestFirestormScenario,
   ingestFirestormAlert,
 } from "@szl-holdings/ai-engine/domain-embedding-hooks";
+import { updateVulnerabilitySchema, updateComplianceControlSchema, getFirestormTenantId } from "./shared";
 import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
 const router = Router();
 
@@ -398,10 +399,10 @@ router.put("/firestorm/alerts/:id", authMiddleware({ required: true }), validate
   try {
     const id = parseIdParam(req.params.id as string);
     const data = insertFirestormAlertSchema.partial().parse(req.body);
-    const updates: Partial<typeof firestormAlertsTable.$inferInsert> & { acknowledgedAt?: Date; resolvedAt?: Date } = { ...data };
+    const updates: any = { ...data };
     if (data.status === "acknowledged") updates.acknowledgedAt = new Date();
     if (data.status === "resolved" || data.status === "dismissed") updates.resolvedAt = new Date();
-    const [alert] = await db.update(firestormAlertsTable).set(updates).where(eq(firestormAlertsTable.id, id)).returning();
+    const [alert] = await db.update(firestormAlertsTable).set(updates as any).where(eq(firestormAlertsTable.id, id)).returning();
     if (!alert) { sendNotFound(res, "Alert"); return; }
     broadcastWs("aegis-incidents", "alert-updated", { id: alert.id, severity: alert.severity, status: alert.status, title: alert.title });
     void ingestFirestormAlert(alert, getFirestormTenantId(req));

@@ -65,7 +65,7 @@ export async function reflect(
   const episodicId = `reflection-episodic-${traceId}`;
   const episodicEntry: MemoryEntry = {
     id: episodicId,
-    tier: "long-term",
+    tier: "episodic",
     key: `reflection:${traceId}`,
     value: {
       traceId,
@@ -87,7 +87,7 @@ export async function reflect(
       isStale: false,
     },
     confidence: score.overall,
-    retention: { policy: "persistent" },
+    retention: { policy: "persistent", pinned: false },
     sensitivity: "internal",
     linkedEntities: [],
     linkedTraces: [traceId],
@@ -102,7 +102,7 @@ export async function reflect(
     const skillMemoryId = `reflection-skill-${candidateSkill.skillId}`;
     const skillEntry: MemoryEntry = {
       id: skillMemoryId,
-      tier: "domain",
+      tier: "skill",
       key: `candidate-skill:${candidateSkill.skillId}`,
       value: candidateSkill,
       provenance: {
@@ -116,7 +116,7 @@ export async function reflect(
         isStale: false,
       },
       confidence: score.overall,
-      retention: { policy: "persistent" },
+      retention: { policy: "persistent", pinned: false },
       sensitivity: "internal",
       linkedEntities: [],
       linkedTraces: [traceId],

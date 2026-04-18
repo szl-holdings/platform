@@ -83,17 +83,17 @@ function formatRelativeTime(date: Date): string {
   return `${Math.floor(diffHours / 24)}d ago`;
 }
 
-function callerEmail(req: Record<string, unknown>): string {
+function callerEmail(req: any): string {
   const user = (req as { user?: { email?: string; id?: number } }).user;
   return user?.email ?? "operator";
 }
 
-function callerOrgId(req: Record<string, unknown>): number | undefined {
+function callerOrgId(req: any): number | undefined {
   const user = (req as { user?: { orgs?: Array<{ orgId: number }> } }).user;
   return user?.orgs?.[0]?.orgId;
 }
 
-function callerOrgIds(req: Record<string, unknown>): number[] {
+function callerOrgIds(req: any): number[] {
   const user = (req as { user?: { orgs?: Array<{ orgId: number }> } }).user;
   return user?.orgs?.map((o) => o.orgId) ?? [];
 }
@@ -225,7 +225,7 @@ router.get(
 
       const stats = fusionCortex.getStats();
 
-      const callerOrgIdsArr = callerOrgIds(req as unknown as Record<string, unknown>);
+      const callerOrgIdsArr = callerOrgIds(req as unknown as any);
       const existingDrafts = await db
         .select({ alertId: cortexActionDraftsTable.alertId })
         .from(cortexActionDraftsTable)
@@ -512,7 +512,7 @@ async function buildOrgScopedContext(orgId: number): Promise<string> {
     if (latestSnapshot) {
       const nodes = (latestSnapshot.nodes as GraphSnapshotNode[] | null) ?? [];
       const edges = (latestSnapshot.edges as GraphSnapshotEdge[] | null) ?? [];
-      const meta = latestSnapshot.meta as Record<string, unknown> | null;
+      const meta = latestSnapshot.meta as any | null;
 
       context += `=== ENTITY GRAPH SNAPSHOT (${latestSnapshot.snapshotAt.toISOString()}) ===\n`;
       context += `Nodes: ${nodes.length}, Edges: ${edges.length}`;
@@ -809,7 +809,7 @@ router.post(
     }
 
     try {
-      const orgId = callerOrgId(req as unknown as Record<string, unknown>);
+      const orgId = callerOrgId(req as unknown as any);
       const llmResult = await callWhatIfLLM(query.trim(), orgId);
 
       if (llmResult) {
@@ -1039,7 +1039,7 @@ router.get(
         const urgency = (approval.priority ?? "medium") as "critical" | "high" | "medium" | "low";
         const { approveLabel, denyLabel } = inferLabels(actionType, domain);
 
-        const payload = (approval.payload ?? {}) as Record<string, unknown>;
+        const payload = (approval.payload ?? {}) as any;
         const amount = typeof payload.amount === "string" ? payload.amount : undefined;
         const dueBy = approval.expiresAt
           ? new Date(approval.expiresAt).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })
@@ -1138,7 +1138,7 @@ router.get(
     try {
       const statusFilter = req.query.status ? String(req.query.status) : undefined;
       const domainFilter = req.query.domain ? String(req.query.domain) : undefined;
-      const orgIds = callerOrgIds(req as unknown as Record<string, unknown>);
+      const orgIds = callerOrgIds(req as unknown as any);
 
       // Deny-by-default: a user with no org memberships has no scope and cannot
       // see any drafts. Return an empty result rather than falling back to an
@@ -1208,8 +1208,8 @@ router.post(
     }
 
     try {
-      const orgId = callerOrgId(req as unknown as Record<string, unknown>);
-      const orgIds = callerOrgIds(req as unknown as Record<string, unknown>);
+      const orgId = callerOrgId(req as unknown as any);
+      const orgIds = callerOrgIds(req as unknown as any);
 
       const dupWhere = orgIds.length > 0
         ? and(eq(cortexActionDraftsTable.alertId, String(alertId)), eq(cortexActionDraftsTable.status, "pending"), inArray(cortexActionDraftsTable.orgId, orgIds))
@@ -1276,8 +1276,8 @@ router.post(
   validateBody(jsonObjectBodySchema),
   async (req, res) => {
     try {
-      const caller = callerEmail(req as unknown as Record<string, unknown>);
-      const orgIds = callerOrgIds(req as unknown as Record<string, unknown>);
+      const caller = callerEmail(req as unknown as any);
+      const orgIds = callerOrgIds(req as unknown as any);
       const now = new Date();
 
       // Deny-by-default: no org membership → no scope → 404 (no existence leak).
@@ -1340,8 +1340,8 @@ router.post(
   validateBody(jsonObjectBodySchema),
   async (req, res) => {
     try {
-      const caller = callerEmail(req as unknown as Record<string, unknown>);
-      const orgIds = callerOrgIds(req as unknown as Record<string, unknown>);
+      const caller = callerEmail(req as unknown as any);
+      const orgIds = callerOrgIds(req as unknown as any);
 
       // Deny-by-default: no org membership → no scope → 404 (no existence leak).
       if (orgIds.length === 0) {
@@ -1387,7 +1387,7 @@ router.post(
   validateBody(jsonObjectBodySchema),
   async (req, res) => {
     try {
-      const orgId = callerOrgId(req as Record<string, unknown>);
+      const orgId = callerOrgId(req as any);
       if (!orgId) {
         sendBadRequest(res, "An organisation context is required to create a graph snapshot");
         return;
@@ -1454,15 +1454,15 @@ router.post(
           snapshotUuid: crypto.randomUUID(),
           orgId: orgId,
           label: label ?? null,
-          nodes: nodes as unknown as Record<string, unknown>[],
-          edges: edges as unknown as Record<string, unknown>[],
+          nodes: nodes as unknown as any[],
+          edges: edges as unknown as any[],
           meta: {
             totalNodes: nodes.length,
             totalEdges: edges.length,
             domain: domain ?? "all",
             minRisk,
             graphStats,
-          } as Record<string, unknown>,
+          } as any,
           retentionDays,
           expiresAt,
         })
@@ -1494,7 +1494,7 @@ router.get(
   validateQuery(listQuerySchema),
   async (req, res) => {
     try {
-      const orgIds = callerOrgIds(req as Record<string, unknown>);
+      const orgIds = callerOrgIds(req as any);
       if (orgIds.length === 0) {
         sendSuccess(res, { snapshots: [], total: 0 });
         return;
@@ -1541,8 +1541,8 @@ router.get(
   perUserApiSlidingLimiter,
   async (req, res) => {
     try {
-      const { uuid } = req.params;
-      const orgIds = callerOrgIds(req as Record<string, unknown>);
+      const uuid = req.params["uuid"] as string;
+      const orgIds = callerOrgIds(req as any);
 
       const rows = await db
         .select()
@@ -1590,8 +1590,8 @@ router.delete(
   perUserWriteSlidingLimiter,
   async (req, res) => {
     try {
-      const { uuid } = req.params;
-      const orgIds = callerOrgIds(req as Record<string, unknown>);
+      const uuid = req.params["uuid"] as string;
+      const orgIds = callerOrgIds(req as any);
 
       const rows = await db
         .select({ id: cortexGraphSnapshotsTable.id, orgId: cortexGraphSnapshotsTable.orgId })

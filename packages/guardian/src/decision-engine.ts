@@ -123,6 +123,20 @@ export class GuardianDecisionEngine {
       }
     }
 
+    const tierParsed = PolicyTierSchema.safeParse(request.tier);
+    if (tierParsed.success) {
+      const tierControls = TIER_CONTROLS[tierParsed.data];
+      if (tierControls.approvalGate === "single") {
+        return {
+          requestId: request.requestId,
+          outcome: "require-approval",
+          reason: `Tier '${request.tier}' requires operator approval for unmatched actions`,
+          requiredApprovers: ["operator"],
+          decidedAt,
+        };
+      }
+    }
+
     return {
       requestId: request.requestId,
       outcome: "deny",

@@ -38,7 +38,15 @@ import {
 import { authMiddleware, requireRole, parseIdParam } from "../../middlewares/auth";
 import { tenantScope, assertTenantAccess } from "../../middlewares/tenant-scope";
 import { logger } from "../../lib/logger";
+import rateLimit from "express-rate-limit";
+import type { RequestHandler } from "express";
 
+
+export const meteringRateLimit = rateLimit({
+  windowMs: 15 * 60 * 1000, max: 500, standardHeaders: true, legacyHeaders: false,
+  message: { error: "Metering rate limit exceeded." },
+  validate: { xForwardedForHeader: false, ip: false },
+}) as unknown as RequestHandler;
 
 const ADMIN_ROLES = ["admin", "super_admin", "ops"] as const;
 const READ_ROLES = ["admin", "super_admin", "ops", "analyst"] as const;
@@ -66,7 +74,7 @@ export function periodBounds(period: "month" | "day" | "year" = "month", refDate
   };
 }
 
-function computeCharge(
+export function computeCharge(
   quantity: number,
   card: { pricingModel: string; unitAmount: string | null; flatAmount: string | null; freeUnits: number },
   tiers: Array<{ fromUnit: number; toUnit: number | null; unitAmount: string; flatAmount: string | null; order: number }>,

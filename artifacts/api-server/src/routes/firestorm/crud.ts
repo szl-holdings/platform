@@ -52,7 +52,7 @@ import {
   ingestFirestormScenario,
   ingestFirestormAlert,
 } from "@szl-holdings/ai-engine/domain-embedding-hooks";
-import { firestormCrudLimit } from "./shared";
+import { firestormCrudLimit, getFirestormTenantId } from "./shared";
 import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
 const router = Router();
 

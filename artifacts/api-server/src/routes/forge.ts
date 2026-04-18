@@ -19,6 +19,7 @@ import {
   forgePromptVersionsTable,
   forgeEnvironmentProfilesTable,
   forgeRollbackEventsTable,
+  forgeToolsTable,
 } from "@szl-holdings/db";
 import { eq, desc, and, sql } from "drizzle-orm";
 import { authMiddleware } from "../middlewares/auth";
@@ -162,7 +163,7 @@ router.post("/forge/agents", validateBody(createAgentSchema), async (req: Reques
 
 router.get("/forge/agents/:id", async (req, res) => {
   try {
-    const [agent] = await db.select().from(forgeAgentsTable).where(eq(forgeAgentsTable.id, req.params.id!)).limit(1);
+    const [agent] = await db.select().from(forgeAgentsTable).where(eq(forgeAgentsTable.id, req.params.id as string)).limit(1);
     if (!agent) return sendNotFound(res, "Agent not found");
     const versions = await db.select().from(forgeAgentVersionsTable).where(eq(forgeAgentVersionsTable.agentId, agent.id)).orderBy(desc(forgeAgentVersionsTable.version));
     const promotions = await db.select().from(forgePromotionsTable).where(eq(forgePromotionsTable.agentId, agent.id)).orderBy(desc(forgePromotionsTable.createdAt)).limit(20);
@@ -175,7 +176,7 @@ router.get("/forge/agents/:id", async (req, res) => {
 router.get("/forge/agents/:id/versions", async (req, res) => {
   try {
     const versions = await db.select().from(forgeAgentVersionsTable)
-      .where(eq(forgeAgentVersionsTable.agentId, req.params.id!))
+      .where(eq(forgeAgentVersionsTable.agentId, req.params.id as string))
       .orderBy(desc(forgeAgentVersionsTable.version));
     sendSuccess(res, versions);
   } catch (err) { handleRouteError(res, err, "Failed to list versions"); }
@@ -184,7 +185,7 @@ router.get("/forge/agents/:id/versions", async (req, res) => {
 router.post("/forge/agents/:id/versions", validateBody(createVersionSchema), async (req, res) => {
   try {
     if (!requireForgeOperator(req, res)) return;
-    const agentId = req.params.id!;
+    const agentId = req.params.id as string;
     const [last] = await db.select({ v: sql<number>`coalesce(max(${forgeAgentVersionsTable.version}), 0)` })
       .from(forgeAgentVersionsTable).where(eq(forgeAgentVersionsTable.agentId, agentId));
     const nextVersion = (last?.v ?? 0) + 1;
@@ -204,7 +205,7 @@ router.post("/forge/agents/:id/versions", validateBody(createVersionSchema), asy
 router.post("/forge/agents/:id/promote", validateBody(promoteSchema), async (req, res) => {
   try {
     if (!requireForgeOperator(req, res)) return;
-    const agentId = req.params.id!;
+    const agentId = req.params.id as string;
     const [agent] = await db.select().from(forgeAgentsTable).where(eq(forgeAgentsTable.id, agentId)).limit(1);
     if (!agent) return sendNotFound(res, "Agent not found");
     const data = req.body as z.infer<typeof promoteSchema>;
@@ -250,7 +251,7 @@ router.post("/forge/agents/:id/rollback", validateBody(rollbackSchema), async (r
   try {
     if (!requireForgeOperator(req, res)) return;
     const data = req.body as z.infer<typeof rollbackSchema>;
-    const agentId = req.params.id!;
+    const agentId = req.params.id as string;
     // Integrity: target version must belong to this agent
     const [target] = await db.select().from(forgeAgentVersionsTable)
       .where(eq(forgeAgentVersionsTable.id, data.toVersionId)).limit(1);
@@ -273,7 +274,7 @@ router.post("/forge/agents/:id/rollback", validateBody(rollbackSchema), async (r
 router.post("/forge/agents/:id/execute", validateBody(executeSchema), async (req, res) => {
   try {
     if (!requireForgeOperator(req, res)) return;
-    const agentId = req.params.id!;
+    const agentId = req.params.id as string;
     const [agent] = await db.select().from(forgeAgentsTable).where(eq(forgeAgentsTable.id, agentId)).limit(1);
     if (!agent || !agent.activeVersionId) return sendBadRequest(res, "Agent has no active version");
     const [version] = await db.select().from(forgeAgentVersionsTable).where(eq(forgeAgentVersionsTable.id, agent.activeVersionId)).limit(1);
@@ -318,11 +319,11 @@ router.post("/forge/promotions/:id/approve", validateBody(approveSchema), async 
     if (!requireForgeOperator(req, res)) return;
     const data = req.body as z.infer<typeof approveSchema>;
     const result = await recordPromotionApproval({
-      promotionId: req.params.id!, approverUserId: req.user?.id,
+      promotionId: req.params.id as string, approverUserId: req.user?.id,
       approverRole: req.user?.roles?.[0], decision: data.decision, note: data.note,
     });
     if (data.decision === "approved") {
-      const executed = await executePromotion({ promotionId: req.params.id!, approverUserId: req.user?.id });
+      const executed = await executePromotion({ promotionId: req.params.id as string, approverUserId: req.user?.id });
       return sendSuccess(res, { approval: result, promotion: executed });
     }
     sendSuccess(res, { approval: result });
@@ -380,7 +381,7 @@ router.get("/forge/executions", validateQuery(listQuerySchema), async (req, res)
 
 router.get("/forge/executions/:id", async (req, res) => {
   try {
-    const [run] = await db.select().from(forgeExecutionRunsTable).where(eq(forgeExecutionRunsTable.id, req.params.id!)).limit(1);
+    const [run] = await db.select().from(forgeExecutionRunsTable).where(eq(forgeExecutionRunsTable.id, req.params.id as string)).limit(1);
     if (!run) return sendNotFound(res, "Execution not found");
     sendSuccess(res, run);
   } catch (err) { handleRouteError(res, err, "Failed to fetch execution"); }

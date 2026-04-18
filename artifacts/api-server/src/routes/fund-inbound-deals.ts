@@ -324,7 +324,7 @@ router.get("/fund-inbound-deals", async (_req: Request, res: Response) => {
  */
 router.get("/fund-inbound-deals/:pipelineId/attachments/:idx", async (req: Request, res: Response) => {
   try {
-    const idx = Number.parseInt(req.params.idx, 10);
+    const idx = Number.parseInt(req.params.idx as string, 10);
     if (!Number.isInteger(idx) || idx < 0) {
       sendBadRequest(res, "Invalid attachment index");
       return;
@@ -332,7 +332,7 @@ router.get("/fund-inbound-deals/:pipelineId/attachments/:idx", async (req: Reque
     const [row] = await db
       .select()
       .from(fundInboundDealsTable)
-      .where(eq(fundInboundDealsTable.pipelineId, req.params.pipelineId))
+      .where(eq(fundInboundDealsTable.pipelineId, req.params.pipelineId as string))
       .limit(1);
     if (!row) {
       sendNotFound(res, "Deal not found");

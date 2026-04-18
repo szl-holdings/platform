@@ -1226,7 +1226,7 @@ router.get("/governance", requireAnyAuth(), async (_req: Request, res: Response)
         lastUpdated: new Date(p.updatedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
         effectiveDate: new Date(p.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }),
         description: p.description ?? `Tier ${p.tier} policy. Action: ${p.action}.`,
-        enforcement: p.action === "block" ? "auto" : p.action === "approve" ? "manual" : "advisory",
+        enforcement: p.action === "block" ? "auto" : p.action === "require-approval" ? "manual" : "advisory",
         approvalChain,
         auditLog,
       };

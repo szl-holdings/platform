@@ -19,7 +19,6 @@ import {
   fetchOtxThreats, fetchNvdCves, fetchRssNews, fetchGdeltGeopolitical,
   computeIntelligenceBriefing,
   type ThreatItem, type CveItem, type GeoEvent, type NewsItem,
-  type AnthropicMessageParam,
 } from "./shared";
 import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../../lib/validation";
 
@@ -579,7 +578,7 @@ router.post("/intelligence/ai/domain-agent", aiRateLimit, authMiddleware(), vali
             model: agent.model,
             max_tokens: maxTokens,
             system: agent.systemPrompt,
-            messages: nonSystem as AnthropicMessageParam[],
+            messages: nonSystem as unknown as any[],
           });
           for await (const event of streamResp) {
             if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
@@ -617,7 +616,7 @@ router.post("/intelligence/ai/domain-agent", aiRateLimit, authMiddleware(), vali
         model: agent.model,
         max_tokens: maxTokens,
         system: agent.systemPrompt,
-        messages: nonSystem as AnthropicMessageParam[],
+        messages: nonSystem as unknown as any[],
       });
       content = result.content[0]?.type === "text" ? result.content[0].text : "";
     } else {
@@ -761,7 +760,7 @@ router.post("/intelligence/ai/advisory", aiRateLimit, authMiddleware(), validate
       model: "claude-sonnet-4-6",
       max_tokens: 2048,
       system: systemPrompt,
-      messages: messages as AnthropicMessageParam[],
+      messages: messages as unknown as any[],
     });
 
     for await (const event of stream) {

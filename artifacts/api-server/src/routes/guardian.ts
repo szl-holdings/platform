@@ -513,7 +513,7 @@ router.post("/tools", authMiddleware(), requireRole("super_admin", "admin"), val
     const m = parsed.data;
     const [inserted] = await db.insert(toolMeshToolsTable).values({
       toolId: m.id, name: m.name, version: m.version, description: m.description,
-      domainTags: m.domainTags, policyTier: m.policyTier, allowedEnvironments: m.allowedEnvironments,
+      domainTags: m.domainTags, policyTier: m.policyTier as any, allowedEnvironments: m.allowedEnvironments,
       inputSchema: m.inputSchema ?? null, outputSchema: m.outputSchema ?? null,
       rateLimits: m.rateLimits, timeoutMs: m.timeoutMs, failureModes: m.failureModes,
       approvalRequired: m.approvalRequired, owner: m.owner ?? null,
@@ -552,7 +552,7 @@ router.patch("/tools/:toolId", authMiddleware(), requireRole("super_admin", "adm
 
     const [updated] = await db.update(toolMeshToolsTable).set({
       name: m.name, version: m.version, description: m.description,
-      domainTags: m.domainTags, policyTier: m.policyTier, allowedEnvironments: m.allowedEnvironments,
+      domainTags: m.domainTags, policyTier: m.policyTier as any, allowedEnvironments: m.allowedEnvironments,
       inputSchema: m.inputSchema ?? null, outputSchema: m.outputSchema ?? null,
       rateLimits: m.rateLimits, timeoutMs: m.timeoutMs, failureModes: m.failureModes,
       approvalRequired: m.approvalRequired, owner: m.owner ?? null,
@@ -677,8 +677,8 @@ router.get("/actions", authMiddleware(), requireRole("super_admin", "admin", "op
       if (orgId === null) { sendForbidden(res, "No organization membership — cannot access governance records"); return; }
       conditions.push(eq(guardianActionsTable.orgId, orgId));
     }
-    if (outcome) conditions.push(eq(guardianActionsTable.outcome, outcome));
-    if (tier) conditions.push(eq(guardianActionsTable.tier, tier));
+    if (outcome) conditions.push(eq(guardianActionsTable.outcome, outcome as any));
+    if (tier) conditions.push(eq(guardianActionsTable.tier, tier as any));
     if (agentId) conditions.push(eq(guardianActionsTable.agentId, agentId));
 
     const where = conditions.length > 0 ? and(...conditions) : undefined;
@@ -775,7 +775,7 @@ router.post("/tool-approvals/:id/reject", authMiddleware(), requireRole("super_a
 // GUARDIAN APPROVAL REQUESTS (multi-tier governance approvals)
 // ============================================================
 
-router.get("/approvals", authMiddleware(), requireRole("super_admin", "admin", "ops", "analyst", "compliance", "executive"), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
+router.get("/approvals", authMiddleware(), requireRole("super_admin", "admin", "ops", "analyst", "compliance", "exec"), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { page, limit } = parsePagination(req.query as Record<string, unknown>);
     const status = req.query["status"] as string | undefined;
@@ -788,8 +788,8 @@ router.get("/approvals", authMiddleware(), requireRole("super_admin", "admin", "
       if (orgId === null) { sendForbidden(res, "No organization membership — cannot access governance records"); return; }
       conditions.push(eq(guardianApprovalRequestsTable.orgId, orgId));
     }
-    if (status) conditions.push(eq(guardianApprovalRequestsTable.status, status));
-    if (tier) conditions.push(eq(guardianApprovalRequestsTable.tier, tier));
+    if (status) conditions.push(eq(guardianApprovalRequestsTable.status, status as any));
+    if (tier) conditions.push(eq(guardianApprovalRequestsTable.tier, tier as any));
 
     const where = conditions.length > 0 ? and(...conditions) : undefined;
     const offset = (page - 1) * limit;
@@ -805,7 +805,7 @@ router.get("/approvals", authMiddleware(), requireRole("super_admin", "admin", "
   }
 });
 
-router.get("/approvals/:requestId", authMiddleware(), requireRole("super_admin", "admin", "ops", "compliance", "executive"), async (req: Request, res: Response) => {
+router.get("/approvals/:requestId", authMiddleware(), requireRole("super_admin", "admin", "ops", "compliance", "exec"), async (req: Request, res: Response) => {
   try {
     const requestId = req.params["requestId"] as string;
     const [approval] = await db.select().from(guardianApprovalRequestsTable).where(eq(guardianApprovalRequestsTable.requestId, requestId)).limit(1);
@@ -821,7 +821,7 @@ router.get("/approvals/:requestId", authMiddleware(), requireRole("super_admin",
   }
 });
 
-router.post("/approvals/:requestId/review", authMiddleware(), requireRole("super_admin", "admin", "ops", "compliance", "executive"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/approvals/:requestId/review", authMiddleware(), requireRole("super_admin", "admin", "ops", "compliance", "exec"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const requestId = req.params["requestId"] as string;
     const { decision, note } = req.body as { decision?: string; note?: string };
@@ -899,8 +899,8 @@ router.get("/rollback-events", authMiddleware(), requireRole("super_admin", "adm
       if (orgId === null) { sendForbidden(res, "No organization membership — cannot access governance records"); return; }
       conditions.push(eq(rollbackEventsTable.orgId, orgId));
     }
-    if (status) conditions.push(eq(rollbackEventsTable.status, status));
-    if (tier) conditions.push(eq(rollbackEventsTable.tier, tier));
+    if (status) conditions.push(eq(rollbackEventsTable.status, status as any));
+    if (tier) conditions.push(eq(rollbackEventsTable.tier, tier as any));
 
     const where = conditions.length > 0 ? and(...conditions) : undefined;
     const offset = (page - 1) * limit;
@@ -1030,7 +1030,7 @@ router.post("/guardian/evaluate", authMiddleware(), validateBody(jsonObjectBodyS
 
     try {
       const tierParsed = tier ? PolicyTierSchema.safeParse(tier) : { success: false as const };
-      const tierValue = tierParsed.success ? tierParsed.data : (tier ?? "unknown");
+      const tierValue = (tierParsed.success ? tierParsed.data : (tier ?? "advisory")) as PolicyTier;
 
       const [actionRecord] = await db.insert(guardianActionsTable).values({
         requestId, agentId, sessionId, workflowId, orgId,

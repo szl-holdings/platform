@@ -32,7 +32,7 @@ export default function NotFoundPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <p style={{ fontFamily: "var(--font-mono)", fontSize: "clamp(4rem,10vw,8rem)", fontWeight: 700, letterSpacing: "-0.04em", color: "hsla(0,0%,100%,0.04)", lineHeight: 1, marginBottom: "1rem", userSelect: "none" }}>
+              <p aria-hidden="true" style={{ fontFamily: "var(--font-mono)", fontSize: "clamp(4rem,10vw,8rem)", fontWeight: 700, letterSpacing: "-0.04em", color: "hsla(0,0%,100%,0.04)", lineHeight: 1, marginBottom: "1rem", userSelect: "none" }}>
                 404
               </p>
               <p style={{ fontSize: "0.6875rem", fontFamily: "var(--font-mono)", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-faint)", marginBottom: "1rem" }}>

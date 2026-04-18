@@ -186,7 +186,7 @@ export default function TaxAppealPage() {
           assessedValue: p.assessedValue, avmValue: p.avmValue, taxRate: p.taxRate,
           overAssessedPct: p.overAssessedPct, annualTax: p.annualTax, potentialSavings: p.potentialSavings,
           appealDeadline: p.appealDeadline, appealStatus: p.appealStatus, juris: p.juris,
-          comparables: p.comparables as Array<Record<string, unknown>>, appealStrength: p.appealStrength,
+          comparables: p.comparables as unknown as Array<Record<string, unknown>>, appealStrength: p.appealStrength,
           notes: p.notes, isDemo: true,
         });
       }

@@ -2,7 +2,7 @@ import { Router, type Request, type Response } from "express";
 import { randomUUID } from "crypto";
 import { authMiddleware } from "../middlewares/auth";
 import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../middlewares/sliding-window-limiter";
-import { sendSuccess, sendError, handleRouteError } from "../lib/api-response";
+import { sendSuccess, sendError, handleRouteError, sendCreated } from "../lib/api-response";
 import { logger } from "../lib/logger";
 import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 import { gatewayInfer } from "../lib/ai-gateway";
@@ -1026,7 +1026,7 @@ router.get("/research", async (_req: Request, res: Response) => {
 
 router.get("/research/:id", async (req: Request, res: Response) => {
   try {
-    const run = researchStore.get(req.params.id);
+    const run = researchStore.get(req.params.id as string);
     if (!run) { sendError(res, "Research run not found", 404); return; }
     sendSuccess(res, run);
   } catch (err) {
@@ -1035,7 +1035,7 @@ router.get("/research/:id", async (req: Request, res: Response) => {
 });
 
 router.get("/research/:id/stream", (req: Request, res: Response) => {
-  const runId = req.params.id;
+  const runId = req.params.id as string;
   res.setHeader("Content-Type", "text/event-stream");
   res.setHeader("Cache-Control", "no-cache");
   res.setHeader("Connection", "keep-alive");
@@ -1114,7 +1114,7 @@ router.post("/memory", perUserWriteSlidingLimiter, validateBody(jsonObjectBodySc
     };
     memoryStore.set(item.id, item);
     void persistMemoryToDB(item);
-    sendSuccess(res, item, undefined, 201);
+    sendCreated(res, item);
   } catch (err) {
     handleRouteError(res, err, "POST /api/nexus/memory");
   }
@@ -1122,7 +1122,7 @@ router.post("/memory", perUserWriteSlidingLimiter, validateBody(jsonObjectBodySc
 
 router.put("/memory/:id", perUserWriteSlidingLimiter, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
-    const item = memoryStore.get(req.params.id);
+    const item = memoryStore.get(req.params.id as string);
     if (!item) { sendError(res, "Memory item not found", 404); return; }
     const update = req.body as Partial<MemoryItem>;
     const updated: MemoryItem = { ...item, ...update, id: item.id, updatedAt: new Date().toISOString() };
@@ -1136,9 +1136,9 @@ router.put("/memory/:id", perUserWriteSlidingLimiter, validateBody(jsonObjectBod
 
 router.delete("/memory/:id", perUserWriteSlidingLimiter, async (req: Request, res: Response) => {
   try {
-    if (!memoryStore.has(req.params.id)) { sendError(res, "Memory item not found", 404); return; }
-    memoryStore.delete(req.params.id);
-    void deleteMemoryFromDB(req.params.id);
+    if (!memoryStore.has(req.params.id as string)) { sendError(res, "Memory item not found", 404); return; }
+    memoryStore.delete(req.params.id as string);
+    void deleteMemoryFromDB(req.params.id as string);
     sendSuccess(res, { ok: true });
   } catch (err) {
     handleRouteError(res, err, "DELETE /api/nexus/memory/:id");
@@ -1170,7 +1170,7 @@ router.get("/skills", validateQuery(listQuerySchema), async (req: Request, res: 
 
 router.post("/skills/:id/toggle", perUserWriteSlidingLimiter, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
-    const skill = skillStore.get(req.params.id);
+    const skill = skillStore.get(req.params.id as string);
     if (!skill) { sendError(res, "Skill not found", 404); return; }
     const { enabled } = req.body as { enabled?: boolean };
     skill.enabled = enabled ?? !skill.enabled;
@@ -1400,7 +1400,7 @@ router.get("/orchestrate", async (_req: Request, res: Response) => {
 
 router.get("/orchestrate/:id", async (req: Request, res: Response) => {
   try {
-    const plan = orchestrationStore.get(req.params.id);
+    const plan = orchestrationStore.get(req.params.id as string);
     if (!plan) { sendError(res, "Orchestration not found", 404); return; }
     sendSuccess(res, plan);
   } catch (err) {
@@ -1520,7 +1520,7 @@ router.post("/ingest", perUserWriteSlidingLimiter, validateBody(jsonObjectBodySc
     };
     ingestStore.set(id, job);
     void runIngest(id, repoUrl.trim());
-    sendSuccess(res, { id }, undefined, 201);
+    sendCreated(res, { id });
   } catch (err) {
     handleRouteError(res, err, "POST /api/nexus/ingest");
   }
@@ -1528,7 +1528,7 @@ router.post("/ingest", perUserWriteSlidingLimiter, validateBody(jsonObjectBodySc
 
 router.get("/ingest/:id", async (req: Request, res: Response) => {
   try {
-    const job = ingestStore.get(req.params.id);
+    const job = ingestStore.get(req.params.id as string);
     if (!job) { sendError(res, "Ingest job not found", 404); return; }
     sendSuccess(res, job);
   } catch (err) {

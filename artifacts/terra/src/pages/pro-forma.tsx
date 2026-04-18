@@ -320,7 +320,7 @@ function ScenarioComparisonPanel({ scenarios }: { scenarios: Scenario[] }) {
           </thead>
           <tbody>
             {metrics.map(m => {
-              const values = results.map(s => (s.r as Record<string, number>)[m.key]);
+              const values = results.map(s => (s.r as unknown as Record<string, number>)[m.key]);
               const best = m.key === "totalProjectCost" ? Math.min(...values) : Math.max(...values);
               return (
                 <tr key={m.key} className="border-t" style={{ borderColor: DS.border }}>

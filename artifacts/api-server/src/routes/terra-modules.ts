@@ -151,8 +151,8 @@ class EquifaxScreeningProvider implements ScreeningProvider {
       body: JSON.stringify({ applicantName: input.name, product: "consumer-credit-report", consent: true }),
     });
     if (!resp.ok) throw new Error(`Equifax API error ${resp.status}`);
-    const raw = await resp.json() as Record<string, unknown>;
-    const credit = (raw.creditScore as Record<string, unknown>) ?? {};
+    const raw = await resp.json() as any;
+    const credit = (raw.creditScore as any) ?? {};
     const creditScore = (credit.score as number) ?? 0;
     return {
       providerName: this.name,
@@ -404,6 +404,7 @@ router.post("/terra/leases/upload", authWrite, upload.single("file"), validateBo
       }
     } else if (ext === "pdf") {
       try {
+        // @ts-ignore -- no type declarations for pdf-parse
         const pdfParse = await import("pdf-parse").catch(() => null);
         if (pdfParse) {
           const parsed = await pdfParse.default(buffer);
@@ -486,8 +487,8 @@ router.put("/terra/leases/:id", authWrite, validateBody(jsonObjectBodySchema), a
     if (d.confidence != null) update.confidence = d.confidence;
     const leaseUserId = req.user?.id;
     const leaseWhere = leaseUserId != null
-      ? and(eq(terraLeasesTable.externalId, req.params.id), or(eq(terraLeasesTable.ownerUserId, leaseUserId), isNull(terraLeasesTable.ownerUserId)))
-      : eq(terraLeasesTable.externalId, req.params.id);
+      ? and(eq(terraLeasesTable.externalId, req.params.id as string), or(eq(terraLeasesTable.ownerUserId, leaseUserId), isNull(terraLeasesTable.ownerUserId)))
+      : eq(terraLeasesTable.externalId, req.params.id as string);
     const [leaseUpdated] = await db.update(terraLeasesTable).set(update).where(leaseWhere).returning({ id: terraLeasesTable.id });
     if (!leaseUpdated) return sendUnauthorized(res, "You do not have permission to update this record");
     sendSuccess(res, { updated: true });
@@ -498,8 +499,8 @@ router.delete("/terra/leases/:id", authWrite, async (req: Request, res: Response
   try {
     const leaseUserId = req.user?.id;
     const leaseWhere = leaseUserId != null
-      ? and(eq(terraLeasesTable.externalId, req.params.id), or(eq(terraLeasesTable.ownerUserId, leaseUserId), isNull(terraLeasesTable.ownerUserId)))
-      : eq(terraLeasesTable.externalId, req.params.id);
+      ? and(eq(terraLeasesTable.externalId, req.params.id as string), or(eq(terraLeasesTable.ownerUserId, leaseUserId), isNull(terraLeasesTable.ownerUserId)))
+      : eq(terraLeasesTable.externalId, req.params.id as string);
     const [leaseDeleted] = await db.delete(terraLeasesTable).where(leaseWhere).returning({ id: terraLeasesTable.id });
     if (!leaseDeleted) return sendUnauthorized(res, "You do not have permission to delete this record");
     sendSuccess(res, { deleted: true });
@@ -522,8 +523,8 @@ router.get("/terra/pro-forma-projects", authRead, async (req: Request, res: Resp
       id: r.externalId ?? String(r.id),
       projectName: r.projectName,
       propertyType: r.propertyType ?? "",
-      inputs: r.inputs as Record<string, unknown>,
-      results: r.results as Record<string, unknown> | null,
+      inputs: r.inputs as any,
+      results: r.results as any | null,
       updatedAt: r.updatedAt.toISOString(),
       isDemo: r.isDemo,
     }));
@@ -568,7 +569,7 @@ router.put("/terra/pro-forma-projects/:id", authWrite, validateBody(jsonObjectBo
     if (d.projectName) update.projectName = d.projectName;
     if (d.inputs) update.inputs = d.inputs;
     if (d.results) update.results = d.results;
-    const conditions = [eq(terraProFormaProjectsTable.externalId, req.params.id)];
+    const conditions = [eq(terraProFormaProjectsTable.externalId, req.params.id as string)];
     if (req.user?.id) conditions.push(eq(terraProFormaProjectsTable.ownerUserId, req.user.id));
     await db.update(terraProFormaProjectsTable).set(update).where(and(...conditions));
     sendSuccess(res, { updated: true });
@@ -577,7 +578,7 @@ router.put("/terra/pro-forma-projects/:id", authWrite, validateBody(jsonObjectBo
 
 router.delete("/terra/pro-forma-projects/:id", authWrite, async (req: Request, res: Response) => {
   try {
-    const conditions = [eq(terraProFormaProjectsTable.externalId, req.params.id)];
+    const conditions = [eq(terraProFormaProjectsTable.externalId, req.params.id as string)];
     if (req.user?.id) conditions.push(eq(terraProFormaProjectsTable.ownerUserId, req.user.id));
     await db.delete(terraProFormaProjectsTable).where(and(...conditions));
     sendSuccess(res, { deleted: true });
@@ -677,8 +678,8 @@ router.put("/terra/exchanges-1031/:id", authWrite, validateBody(jsonObjectBodySc
     if (d.complianceItems) update.complianceItems = d.complianceItems;
     const exUserId = req.user?.id;
     const exWhere = exUserId != null
-      ? and(eq(terraExchanges1031Table.externalId, req.params.id), or(eq(terraExchanges1031Table.ownerUserId, exUserId), isNull(terraExchanges1031Table.ownerUserId)))
-      : eq(terraExchanges1031Table.externalId, req.params.id);
+      ? and(eq(terraExchanges1031Table.externalId, req.params.id as string), or(eq(terraExchanges1031Table.ownerUserId, exUserId), isNull(terraExchanges1031Table.ownerUserId)))
+      : eq(terraExchanges1031Table.externalId, req.params.id as string);
     const [exUpdated] = await db.update(terraExchanges1031Table).set(update).where(exWhere).returning({ id: terraExchanges1031Table.id });
     if (!exUpdated) return sendUnauthorized(res, "You do not have permission to update this record");
     sendSuccess(res, { updated: true });
@@ -689,8 +690,8 @@ router.delete("/terra/exchanges-1031/:id", authWrite, async (req: Request, res: 
   try {
     const exUserId = req.user?.id;
     const exWhere = exUserId != null
-      ? and(eq(terraExchanges1031Table.externalId, req.params.id), or(eq(terraExchanges1031Table.ownerUserId, exUserId), isNull(terraExchanges1031Table.ownerUserId)))
-      : eq(terraExchanges1031Table.externalId, req.params.id);
+      ? and(eq(terraExchanges1031Table.externalId, req.params.id as string), or(eq(terraExchanges1031Table.ownerUserId, exUserId), isNull(terraExchanges1031Table.ownerUserId)))
+      : eq(terraExchanges1031Table.externalId, req.params.id as string);
     const [exDeleted] = await db.delete(terraExchanges1031Table).where(exWhere).returning({ id: terraExchanges1031Table.id });
     if (!exDeleted) return sendUnauthorized(res, "You do not have permission to delete this record");
     sendSuccess(res, { deleted: true });
@@ -794,8 +795,8 @@ router.put("/terra/tax-appeals/:id", authWrite, validateBody(jsonObjectBodySchem
     if (d.notes) update.notes = d.notes;
     const taUserId = req.user?.id;
     const taWhere = taUserId != null
-      ? and(eq(terraTaxAppealsTable.externalId, req.params.id), or(eq(terraTaxAppealsTable.ownerUserId, taUserId), isNull(terraTaxAppealsTable.ownerUserId)))
-      : eq(terraTaxAppealsTable.externalId, req.params.id);
+      ? and(eq(terraTaxAppealsTable.externalId, req.params.id as string), or(eq(terraTaxAppealsTable.ownerUserId, taUserId), isNull(terraTaxAppealsTable.ownerUserId)))
+      : eq(terraTaxAppealsTable.externalId, req.params.id as string);
     const [taUpdated] = await db.update(terraTaxAppealsTable).set(update).where(taWhere).returning({ id: terraTaxAppealsTable.id });
     if (!taUpdated) return sendUnauthorized(res, "You do not have permission to update this record");
     sendSuccess(res, { updated: true });
@@ -806,8 +807,8 @@ router.delete("/terra/tax-appeals/:id", authWrite, async (req: Request, res: Res
   try {
     const taUserId = req.user?.id;
     const taWhere = taUserId != null
-      ? and(eq(terraTaxAppealsTable.externalId, req.params.id), or(eq(terraTaxAppealsTable.ownerUserId, taUserId), isNull(terraTaxAppealsTable.ownerUserId)))
-      : eq(terraTaxAppealsTable.externalId, req.params.id);
+      ? and(eq(terraTaxAppealsTable.externalId, req.params.id as string), or(eq(terraTaxAppealsTable.ownerUserId, taUserId), isNull(terraTaxAppealsTable.ownerUserId)))
+      : eq(terraTaxAppealsTable.externalId, req.params.id as string);
     const [taDeleted] = await db.delete(terraTaxAppealsTable).where(taWhere).returning({ id: terraTaxAppealsTable.id });
     if (!taDeleted) return sendUnauthorized(res, "You do not have permission to delete this record");
     sendSuccess(res, { deleted: true });
@@ -830,8 +831,8 @@ router.get("/terra/waterfall-structures", authRead, async (req: Request, res: Re
       id: r.externalId ?? String(r.id),
       name: r.name,
       description: r.description ?? "",
-      inputs: r.inputs as Record<string, unknown>,
-      results: r.results as Record<string, unknown> | null,
+      inputs: r.inputs as any,
+      results: r.results as any | null,
       updatedAt: r.updatedAt.toISOString(),
       isDemo: r.isDemo,
     }));
@@ -876,7 +877,7 @@ router.put("/terra/waterfall-structures/:id", authWrite, validateBody(jsonObject
     if (d.name) update.name = d.name;
     if (d.inputs) update.inputs = d.inputs;
     if (d.results) update.results = d.results;
-    const conditions = [eq(terraWaterfallStructuresTable.externalId, req.params.id)];
+    const conditions = [eq(terraWaterfallStructuresTable.externalId, req.params.id as string)];
     if (req.user?.id) conditions.push(eq(terraWaterfallStructuresTable.ownerUserId, req.user.id));
     await db.update(terraWaterfallStructuresTable).set(update).where(and(...conditions));
     sendSuccess(res, { updated: true });
@@ -885,7 +886,7 @@ router.put("/terra/waterfall-structures/:id", authWrite, validateBody(jsonObject
 
 router.delete("/terra/waterfall-structures/:id", authWrite, async (req: Request, res: Response) => {
   try {
-    const conditions = [eq(terraWaterfallStructuresTable.externalId, req.params.id)];
+    const conditions = [eq(terraWaterfallStructuresTable.externalId, req.params.id as string)];
     if (req.user?.id) conditions.push(eq(terraWaterfallStructuresTable.ownerUserId, req.user.id));
     await db.delete(terraWaterfallStructuresTable).where(and(...conditions));
     sendSuccess(res, { deleted: true });
@@ -991,8 +992,8 @@ router.put("/terra/construction-projects/:id", authWrite, validateBody(jsonObjec
     if (d.revisedCompletion) update.revisedCompletion = d.revisedCompletion;
     const cpUserId = req.user?.id;
     const cpWhere = cpUserId != null
-      ? and(eq(terraConstructionProjectsTable.externalId, req.params.id), or(eq(terraConstructionProjectsTable.ownerUserId, cpUserId), isNull(terraConstructionProjectsTable.ownerUserId)))
-      : eq(terraConstructionProjectsTable.externalId, req.params.id);
+      ? and(eq(terraConstructionProjectsTable.externalId, req.params.id as string), or(eq(terraConstructionProjectsTable.ownerUserId, cpUserId), isNull(terraConstructionProjectsTable.ownerUserId)))
+      : eq(terraConstructionProjectsTable.externalId, req.params.id as string);
     const [cpUpdated] = await db.update(terraConstructionProjectsTable).set(update).where(cpWhere).returning({ id: terraConstructionProjectsTable.id });
     if (!cpUpdated) return sendUnauthorized(res, "You do not have permission to update this record");
     sendSuccess(res, { updated: true });
@@ -1003,8 +1004,8 @@ router.delete("/terra/construction-projects/:id", authWrite, async (req: Request
   try {
     const cpUserId = req.user?.id;
     const cpWhere = cpUserId != null
-      ? and(eq(terraConstructionProjectsTable.externalId, req.params.id), or(eq(terraConstructionProjectsTable.ownerUserId, cpUserId), isNull(terraConstructionProjectsTable.ownerUserId)))
-      : eq(terraConstructionProjectsTable.externalId, req.params.id);
+      ? and(eq(terraConstructionProjectsTable.externalId, req.params.id as string), or(eq(terraConstructionProjectsTable.ownerUserId, cpUserId), isNull(terraConstructionProjectsTable.ownerUserId)))
+      : eq(terraConstructionProjectsTable.externalId, req.params.id as string);
     const [cpDeleted] = await db.delete(terraConstructionProjectsTable).where(cpWhere).returning({ id: terraConstructionProjectsTable.id });
     if (!cpDeleted) return sendUnauthorized(res, "You do not have permission to delete this record");
     sendSuccess(res, { deleted: true });
@@ -1016,7 +1017,7 @@ router.delete("/terra/construction-projects/:id", authWrite, async (req: Request
 // ---------------------------------------------------------------------------
 
 function rowToTenantApplication(r: typeof terraTenantApplicationsTable.$inferSelect) {
-  const screening = (r.screeningData as Record<string, unknown>) ?? {};
+  const screening = (r.screeningData as any) ?? {};
   return {
     id: r.externalId ?? String(r.id),
     name: r.name,
@@ -1130,7 +1131,7 @@ router.post("/terra/tenant-applications", authWrite, validateBody(jsonObjectBody
     };
 
     const flags: Array<{ type: "warning" | "info" | "error"; text: string }> = [
-      ...(d.flags ?? [] as Array<{ type: "warning" | "info" | "error"; text: string }>),
+      ...((d.flags ?? []) as Array<{ type: "warning" | "info" | "error"; text: string }>),
       ...(screeningResult?.flags.map(f => ({ type: severityToType(f.severity), text: f.note })) ?? []),
     ];
 
@@ -1178,8 +1179,8 @@ router.put("/terra/tenant-applications/:id", authWrite, validateBody(jsonObjectB
     if (d.flags) update.flags = d.flags;
     const userId = req.user?.id;
     const where = userId != null
-      ? and(eq(terraTenantApplicationsTable.externalId, req.params.id), or(eq(terraTenantApplicationsTable.ownerUserId, userId), isNull(terraTenantApplicationsTable.ownerUserId)))
-      : eq(terraTenantApplicationsTable.externalId, req.params.id);
+      ? and(eq(terraTenantApplicationsTable.externalId, req.params.id as string), or(eq(terraTenantApplicationsTable.ownerUserId, userId), isNull(terraTenantApplicationsTable.ownerUserId)))
+      : eq(terraTenantApplicationsTable.externalId, req.params.id as string);
     const [updated] = await db.update(terraTenantApplicationsTable).set(update).where(where).returning({ id: terraTenantApplicationsTable.id });
     if (!updated) return sendUnauthorized(res, "You do not have permission to update this record");
     sendSuccess(res, { updated: true });
@@ -1190,8 +1191,8 @@ router.delete("/terra/tenant-applications/:id", authWrite, async (req: Request, 
   try {
     const userId = req.user?.id;
     const where = userId != null
-      ? and(eq(terraTenantApplicationsTable.externalId, req.params.id), or(eq(terraTenantApplicationsTable.ownerUserId, userId), isNull(terraTenantApplicationsTable.ownerUserId)))
-      : eq(terraTenantApplicationsTable.externalId, req.params.id);
+      ? and(eq(terraTenantApplicationsTable.externalId, req.params.id as string), or(eq(terraTenantApplicationsTable.ownerUserId, userId), isNull(terraTenantApplicationsTable.ownerUserId)))
+      : eq(terraTenantApplicationsTable.externalId, req.params.id as string);
     const [deleted] = await db.delete(terraTenantApplicationsTable).where(where).returning({ id: terraTenantApplicationsTable.id });
     if (!deleted) return sendUnauthorized(res, "You do not have permission to delete this record");
     sendSuccess(res, { deleted: true });

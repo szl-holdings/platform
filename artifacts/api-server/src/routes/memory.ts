@@ -40,7 +40,7 @@ function validateTier(tier: string | undefined): MemoryType | undefined | "inval
 }
 
 function getRequesterSensitivity(req: Request): SensitivityLevel {
-  const role = req.user?.role ?? "user";
+  const role = req.user?.roles?.[0] ?? "user";
   if (role === "super_admin" || role === "admin") return "restricted";
   if (role === "analyst") return "confidential";
   if (role === "operator") return "internal";

@@ -20,7 +20,7 @@ const FLAGSHIP: Platform[] = [
     name: "Alloy",
     role: "Intelligence & Orchestration Engine",
     description: "The systems backbone. Workflow orchestration, signal processing, multi-agent execution, and Creative Workflows. Every platform in the ecosystem runs through Alloy.",
-    accent: "hsl(222,68%,58%)",
+    accent: "hsl(222,68%,67%)",
     href: "/alloy/",
     icon: Zap,
     serves: "Platform operators, engineering teams",
@@ -40,7 +40,7 @@ const FLAGSHIP: Platform[] = [
     name: "Vessels",
     role: "Maritime Command Platform",
     description: "Fleet visibility, voyage performance, and operational exception management. Connects vessel movement to operational consequence and commercial outcome.",
-    accent: "hsl(210,78%,44%)",
+    accent: "hsl(210,78%,54%)",
     href: "/vessels/",
     icon: Ship,
     serves: "Fleet operators, maritime logistics, charterers",
@@ -53,7 +53,7 @@ const OPERATIONS: Platform[] = [
     name: "Aegis",
     role: "Unified Defense & Intelligence Command",
     description: "Consolidated security, managed operations, and AI intelligence in one platform. SOC command, XDR, adversary emulation, MSP operations, client management, AI research, model registry, and agentic cortex — for operators who need everything in one place.",
-    accent: "hsl(232,68%,60%)",
+    accent: "hsl(232,68%,64%)",
     href: "/aegis/",
     icon: Shield,
     serves: "Security teams, SOC analysts, MSP operators, AI researchers, CISOs",
@@ -136,12 +136,12 @@ function PlatformCard({ p, i }: { p: Platform; i: number }) {
             <p style={{ fontSize: "11px", fontWeight: 500, color: p.accent, letterSpacing: "0.01em" }}>{p.role}</p>
           </div>
         </div>
-        <ArrowUpRight size={14} style={{ color: "hsl(210,5%,32%)" }} />
+        <ArrowUpRight size={14} style={{ color: "hsl(210,5%,57%)" }} />
       </div>
       <p style={{ fontSize: "12.5px", lineHeight: 1.6, color: "hsl(210,5%,54%)", marginBottom: "1rem" }}>{p.description}</p>
       <div style={{ marginBottom: "0.75rem" }}>
-        <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: "hsl(210,5%,38%)", marginBottom: "0.375rem" }}>Serves</p>
-        <p style={{ fontSize: "11.5px", color: "hsl(210,5%,48%)" }}>{p.serves}</p>
+        <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: "hsl(210,5%,57%)", marginBottom: "0.375rem" }}>Serves</p>
+        <p style={{ fontSize: "11.5px", color: "hsl(210,5%,57%)" }}>{p.serves}</p>
       </div>
       <div style={{ display: "flex", flexWrap: "wrap", gap: "0.375rem" }}>
         {p.capabilities.map(c => (
@@ -158,9 +158,9 @@ function PlatformCard({ p, i }: { p: Platform; i: number }) {
 function SectionHeader({ label, title, description }: { label: string; title: string; description: string }) {
   return (
     <div style={{ marginBottom: "1.5rem" }}>
-      <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(210,5%,38%)", marginBottom: "0.5rem" }}>{label}</p>
+      <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(210,5%,57%)", marginBottom: "0.5rem" }}>{label}</p>
       <h2 style={{ fontSize: "clamp(1.25rem, 2.5vw, 1.625rem)", fontWeight: 700, letterSpacing: "-0.02em", color: "hsl(38,12%,92%)", marginBottom: "0.375rem", fontFamily: "var(--font-display)" }}>{title}</h2>
-      <p style={{ fontSize: "13px", lineHeight: 1.6, color: "hsl(210,5%,50%)", maxWidth: "36rem" }}>{description}</p>
+      <p style={{ fontSize: "13px", lineHeight: 1.6, color: "hsl(210,5%,57%)", maxWidth: "36rem" }}>{description}</p>
     </div>
   );
 }
@@ -179,7 +179,7 @@ export default function EcosystemPage() {
         <section style={{ padding: "4rem 0 3rem" }}>
           <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
             <m.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}>
-              <p style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,42%)", marginBottom: "0.75rem" }}>
+              <p style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,57%)", marginBottom: "0.75rem" }}>
                 Product Registry
               </p>
               <h1 style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 700, letterSpacing: "-0.025em", color: "hsl(38,12%,94%)", lineHeight: 1.08, marginBottom: "1rem", fontFamily: "var(--font-display)" }}>
@@ -200,7 +200,7 @@ export default function EcosystemPage() {
                 { label: "SZL Holdings", desc: "Governed Platform", accent: "hsl(38,55%,60%)" },
                 { label: "Lyte", desc: "Flagship Command", accent: "hsl(192,80%,48%)" },
                 { label: "6 Domain Packs", desc: "Vertical intelligence", accent: "hsl(210,5%,54%)" },
-                { label: "Alloy", desc: "Execution Fabric", accent: "hsl(222,68%,58%)" },
+                { label: "Alloy", desc: "Execution Fabric", accent: "hsl(222,68%,67%)" },
                 { label: "2 Brands", desc: "Carlota Jo · Stephen Lutar", accent: "hsl(36,52%,54%)" },
               ].map((item, i) => (
                 <div key={item.label} style={{
@@ -215,7 +215,7 @@ export default function EcosystemPage() {
                   <div style={{ width: "4px", height: "20px", borderRadius: "2px", background: item.accent, opacity: 0.7 }} />
                   <div>
                     <p style={{ fontSize: "11.5px", fontWeight: 600, color: "hsl(38,12%,88%)" }}>{item.label}</p>
-                    <p style={{ fontSize: "10px", color: "hsl(210,5%,42%)" }}>{item.desc}</p>
+                    <p style={{ fontSize: "10px", color: "hsl(210,5%,57%)" }}>{item.desc}</p>
                   </div>
                 </div>
               ))}
@@ -299,8 +299,8 @@ export default function EcosystemPage() {
                     <div style={{ width: "3px", height: "16px", borderRadius: "2px", background: item.accent, opacity: 0.5 }} />
                     <p style={{ fontSize: "13px", fontWeight: 600, color: "hsl(38,12%,78%)" }}>{item.name}</p>
                   </div>
-                  <p style={{ fontSize: "10.5px", fontWeight: 500, color: "hsl(210,5%,42%)", marginBottom: "0.375rem", letterSpacing: "0.02em" }}>{item.role}</p>
-                  <p style={{ fontSize: "12px", lineHeight: 1.55, color: "hsl(210,5%,48%)" }}>{item.description}</p>
+                  <p style={{ fontSize: "10.5px", fontWeight: 500, color: "hsl(210,5%,57%)", marginBottom: "0.375rem", letterSpacing: "0.02em" }}>{item.role}</p>
+                  <p style={{ fontSize: "12px", lineHeight: 1.55, color: "hsl(210,5%,57%)" }}>{item.description}</p>
                 </m.a>
               ))}
             </div>

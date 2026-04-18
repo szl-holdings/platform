@@ -116,7 +116,7 @@ router.get("/plans/:id", authMiddleware(), async (req, res) => {
       sendForbidden(res, "authentication required");
       return;
     }
-    const plan = await defaultPlanStore.get(req.params.id);
+    const plan = await defaultPlanStore.get(req.params.id as string);
     if (!plan) {
       sendNotFound(res, "Plan not found");
       return;
@@ -181,7 +181,7 @@ router.post("/plans/:id/replay", authMiddleware(), validateBody(jsonObjectBodySc
       sendForbidden(res, "authentication required");
       return;
     }
-    const plan = await defaultPlanStore.get(req.params.id);
+    const plan = await defaultPlanStore.get(req.params.id as string);
     if (!plan) {
       sendNotFound(res, "Plan not found");
       return;
@@ -190,7 +190,7 @@ router.post("/plans/:id/replay", authMiddleware(), validateBody(jsonObjectBodySc
       sendNotFound(res, "Plan not found");
       return;
     }
-    const result = await replayPlan(req.params.id);
+    const result = await replayPlan(req.params.id as string);
     sendSuccess(res, result);
   } catch (err) {
     if (err instanceof PlanNotFoundError) {

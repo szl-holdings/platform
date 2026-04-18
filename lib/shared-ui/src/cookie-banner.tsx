@@ -91,7 +91,7 @@ export function CookieBanner({ privacyUrl = "/legal/privacy", accentColor = "#d4
             borderRadius: "0.375rem",
             fontSize: "0.75rem",
             fontWeight: 600,
-            color: "rgba(255,255,255,0.45)",
+            color: "rgba(255,255,255,0.62)",
             cursor: "pointer",
             fontFamily: "Inter, system-ui, sans-serif",
             transition: "all 0.15s",
