@@ -21,6 +21,8 @@ export interface GraphEdge {
   color?: string;
   dashed?: boolean;
   weight?: number;
+  /** Render an arrowhead at the target end. */
+  directed?: boolean;
 }
 
 export interface GraphCanvasProps {
@@ -74,14 +76,51 @@ export function GraphCanvas({
       const tx = tgt.x * W;
       const ty = tgt.y * H;
 
+      // If directed, stop the line short of the target node so the arrowhead
+      // sits at the node's edge rather than under it.
+      const tgtR = (tgt.radius ?? 8) + (tgt.ringColor ? 4 : 0);
+      let endX = tx;
+      let endY = ty;
+      if (edge.directed) {
+        const dx = tx - sx;
+        const dy = ty - sy;
+        const len = Math.hypot(dx, dy) || 1;
+        endX = tx - (dx / len) * (tgtR + 2);
+        endY = ty - (dy / len) * (tgtR + 2);
+      }
+
+      const stroke = edge.color ?? "#243040";
       ctx.beginPath();
       ctx.moveTo(sx, sy);
-      ctx.lineTo(tx, ty);
-      ctx.strokeStyle = edge.color ?? "#243040";
+      ctx.lineTo(endX, endY);
+      ctx.strokeStyle = stroke;
       ctx.lineWidth = edge.weight ?? 1;
       if (edge.dashed) ctx.setLineDash([4, 4]);
       else ctx.setLineDash([]);
       ctx.stroke();
+
+      if (edge.directed) {
+        // Arrowhead — solid triangle, never dashed
+        ctx.setLineDash([]);
+        const dx = endX - sx;
+        const dy = endY - sy;
+        const angle = Math.atan2(dy, dx);
+        const headLen = Math.max(7, (edge.weight ?? 1) * 4 + 4);
+        const headWidth = headLen * 0.55;
+        const baseX = endX - Math.cos(angle) * headLen;
+        const baseY = endY - Math.sin(angle) * headLen;
+        const leftX = baseX + Math.cos(angle + Math.PI / 2) * headWidth;
+        const leftY = baseY + Math.sin(angle + Math.PI / 2) * headWidth;
+        const rightX = baseX + Math.cos(angle - Math.PI / 2) * headWidth;
+        const rightY = baseY + Math.sin(angle - Math.PI / 2) * headWidth;
+        ctx.beginPath();
+        ctx.moveTo(endX, endY);
+        ctx.lineTo(leftX, leftY);
+        ctx.lineTo(rightX, rightY);
+        ctx.closePath();
+        ctx.fillStyle = stroke;
+        ctx.fill();
+      }
 
       if (edge.label) {
         const mx = (sx + tx) / 2;
