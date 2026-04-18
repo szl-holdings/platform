@@ -128,12 +128,12 @@ export default function SolutionsPrismCounselPage() {
           A command layer above case management, email, documents, claims feeds, and Microsoft 365. Not a chatbot. Not a case management clone. A matter command system.
         </p>
         <div className="flex items-center gap-3">
-          <a href="/prism-counsel">
+          <a href="/aegis/">
             <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium bg-[#d4a054]/10 text-[#d4a054] border border-[#d4a054]/20 hover:bg-[#d4a054]/20 transition-colors cursor-pointer">
               Enter Command Center <ArrowRight className="w-4 h-4" />
             </span>
           </a>
-          <a href="/prism-counsel/ny">
+          <a href="/aegis/">
             <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium bg-white/[0.04] text-slate-300 border border-white/[0.08] hover:bg-white/[0.08] transition-colors cursor-pointer">
               NY Litigation Command
             </span>

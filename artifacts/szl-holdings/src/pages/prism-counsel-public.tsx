@@ -275,7 +275,7 @@ export default function PrismCounselPublicPage() {
                   Built for NY insurance litigation — no-fault, bodily injury, premises liability — on top of Microsoft 365 and the Alloy control plane. Human approval on every consequential action. Source-grounded AI. Immutable audit trail.
                 </p>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
-                  <Link href="/prism-counsel" className="szl-btn-primary">
+                  <Link href="/aegis/" className="szl-btn-primary">
                     Enter command center <ArrowRight size={15} />
                   </Link>
                   <Link href="/contact" className="szl-btn-secondary">
@@ -456,7 +456,7 @@ export default function PrismCounselPublicPage() {
               transition={{ duration: 0.4, delay: 0.2 }}
               style={{ marginTop: "1.5rem", textAlign: "center" }}
             >
-              <Link href="/prism-counsel" className="szl-btn-primary">
+              <Link href="/aegis/" className="szl-btn-primary">
                 Enter command center — see the full system <ArrowRight size={15} />
               </Link>
             </m.div>
@@ -815,7 +815,7 @@ export default function PrismCounselPublicPage() {
                 </p>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", flexShrink: 0 }}>
-                <Link href="/prism-counsel" className="szl-btn-primary">
+                <Link href="/aegis/" className="szl-btn-primary">
                   Enter command center <ArrowRight size={15} />
                 </Link>
                 <Link href="/contact" className="szl-btn-secondary">

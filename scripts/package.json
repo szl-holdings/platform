@@ -25,7 +25,8 @@
     "seed:atlas:vessels": "tsx ./seed-atlas.ts vessels",
     "seed:atlas:terra": "tsx ./seed-atlas.ts terra",
     "seed:atlas:counsel": "tsx ./seed-atlas.ts counsel",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "qa:check-deprecated-links": "node ./qa/check-deprecated-links.js"
   },
   "dependencies": {
     "@szl-holdings/db": "workspace:*"
