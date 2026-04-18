@@ -44,6 +44,7 @@ import lpPortalRouter from "./lp-portal";
 import atlasArtifactsRouter from "./atlas-artifacts";
 import outcomeGraphRouter from "./outcome-graph";
 import pageViewTrackingRouter from "./page-view-tracking";
+import newsletterRouter from "./newsletter";
 
 const router: IRouter = Router();
 
@@ -59,6 +60,11 @@ router.use(carlotaTimeTrackingRouter);
 // BEFORE guardianPolicyCheck so pre-login visitors can POST without a session.
 // The /api/track/ prefix is also in PUBLIC_PREFIXES in global-auth-enforcer.ts.
 router.use(pageViewTrackingRouter);
+
+// Newsletter subscribe proxy — public, unauthenticated. Forwards email
+// subscriptions to the Substack API on behalf of all portfolio sites.
+// /api/newsletter/ is in PUBLIC_PREFIXES in global-auth-enforcer.ts.
+router.use(newsletterRouter);
 
 // Global Guardian policy check — derives category from request path and
 // applies to every agent-facing route family. Read-only methods skip

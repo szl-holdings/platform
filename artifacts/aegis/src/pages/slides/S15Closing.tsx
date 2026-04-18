@@ -1,3 +1,100 @@
+import { useState } from "react";
+
+/**
+ * AegisNewsletterWidget — intentionally standalone (not using the shared
+ * NewsletterSubscribe component from @szl-holdings/shared-ui).
+ *
+ * Reason: Aegis is a slide deck rendered at full viewport size. All layout
+ * and typography use viewport-relative units (vw/vh) to maintain proportional
+ * sizing across screen dimensions — a requirement that Tailwind-based shared
+ * components cannot satisfy. The API contract (POST /api/newsletter/subscribe
+ * with { email, utm_source }) is identical; only the presentation layer differs.
+ */
+function AegisNewsletterWidget() {
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) return;
+    setStatus("loading");
+    try {
+      const res = await fetch("/api/newsletter/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim(), utm_source: "aegis" }),
+      });
+      setStatus(res.ok ? "success" : "error");
+      if (res.ok) setEmail("");
+    } catch {
+      setStatus("error");
+    }
+  }
+
+  return (
+    <div style={{ fontFamily: "'Inter', sans-serif" }}>
+      <div style={{ fontSize: "0.7vw", fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(245,166,35,0.6)", marginBottom: "0.6vh" }}>
+        SZL Command Newsletter
+      </div>
+      <div style={{ fontSize: "1vw", color: "rgba(240,236,230,0.55)", marginBottom: "1.2vh", lineHeight: 1.3 }}>
+        Governed intelligence, direct to your inbox.
+      </div>
+      {status === "success" ? (
+        <div style={{ fontSize: "0.85vw", color: "#4ade80", padding: "0.5vh 1vw", background: "rgba(74,222,128,0.08)", border: "1px solid rgba(74,222,128,0.2)", borderRadius: "0.3vw" }}>
+          Subscribed — check your inbox to confirm.
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit} style={{ display: "flex", gap: "0.5vw" }} onClick={(e) => e.stopPropagation()}>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="your@email.com"
+            disabled={status === "loading"}
+            style={{
+              flex: 1,
+              padding: "0.5vh 0.8vw",
+              background: "rgba(10,20,35,0.7)",
+              border: "1px solid rgba(245,166,35,0.2)",
+              borderRadius: "0.3vw",
+              color: "#f0ece6",
+              fontSize: "0.85vw",
+              outline: "none",
+              fontFamily: "'Inter', sans-serif",
+            }}
+            onFocus={(e) => { (e.target as HTMLInputElement).style.borderColor = "rgba(245,166,35,0.5)"; }}
+            onBlur={(e) => { (e.target as HTMLInputElement).style.borderColor = "rgba(245,166,35,0.2)"; }}
+          />
+          <button
+            type="submit"
+            disabled={status === "loading" || !email.trim()}
+            style={{
+              padding: "0.5vh 1vw",
+              background: "rgba(245,166,35,0.75)",
+              border: "none",
+              borderRadius: "0.3vw",
+              color: "#07090d",
+              fontWeight: 700,
+              fontSize: "0.75vw",
+              letterSpacing: "0.06em",
+              cursor: "pointer",
+              whiteSpace: "nowrap",
+              fontFamily: "'Inter', sans-serif",
+            }}
+          >
+            {status === "loading" ? "…" : "Subscribe"}
+          </button>
+        </form>
+      )}
+      {status === "error" && (
+        <div style={{ fontSize: "0.75vw", color: "rgba(255,100,100,0.7)", marginTop: "0.4vh" }}>
+          Something went wrong. Please try again.
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function S15Closing() {
   return (
     <div
@@ -90,6 +187,16 @@ export default function S15Closing() {
             "Every consequential decision follows the same nine-step loop: signal, context, recommendation, simulation, policy, execution, proof, outcome, learning. Governance is an architecture primitive, not a compliance afterthought."
           </div>
         </div>
+      </div>
+      <div
+        style={{
+          position: "absolute",
+          bottom: "5vh",
+          left: "7vw",
+          maxWidth: "28vw",
+        }}
+      >
+        <AegisNewsletterWidget />
       </div>
       <div
         style={{

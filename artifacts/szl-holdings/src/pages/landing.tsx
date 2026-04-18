@@ -12,6 +12,7 @@ import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { analytics } from "@/lib/analytics";
+import { NewsletterSubscribe } from "@szl-holdings/shared-ui";
 
 const BG = "hsl(214,16%,4%)";
 const BORDER = "hsla(0,0%,100%,0.07)";
@@ -166,44 +167,6 @@ const AUDIENCE_PATHS = [
 ];
 
 function NewsletterSection() {
-  const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
-  const [errorMsg, setErrorMsg] = useState("");
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setErrorMsg("Please enter a valid email address.");
-      setStatus("error");
-      return;
-    }
-    setStatus("submitting");
-    setErrorMsg("");
-    try {
-      const res = await fetch("/api/contact/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type: "newsletter",
-          name: email.split("@")[0],
-          email,
-          app: "szl-holdings",
-          message: "Newsletter signup from homepage",
-          metadata: { source: "homepage-newsletter-cta" },
-        }),
-      });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error((data as { message?: string }).message || "Submission failed");
-      }
-      setStatus("success");
-      setEmail("");
-    } catch (err) {
-      setStatus("error");
-      setErrorMsg(err instanceof Error ? err.message : "Something went wrong. Please try again.");
-    }
-  };
-
   return (
     <section style={{ borderBottom: `1px solid ${BORDER}` }}>
       <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "clamp(3rem,6vw,4rem) var(--space-content-x)" }}>
@@ -212,69 +175,13 @@ function NewsletterSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          style={{
-            display: "flex", flexWrap: "wrap", gap: "2rem", alignItems: "center", justifyContent: "space-between",
-            padding: "2rem 2.5rem",
-            borderRadius: "0.875rem",
-            background: SURFACE,
-            border: `1px solid ${BORDER}`,
-          }}
         >
-          <div style={{ maxWidth: "32rem" }}>
-            <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: TEXT_FAINT, fontFamily: MONO, marginBottom: "0.5rem" }}>
-              Insights & analysis
-            </p>
-            <h3 style={{ fontSize: "clamp(1.1rem,2vw,1.4rem)", fontWeight: 700, letterSpacing: "-0.018em", color: TEXT, marginBottom: "0.5rem" }}>
-              Governed intelligence, operational AI, and the SZL thesis.
-            </h3>
-            <p style={{ fontSize: "0.875rem", color: TEXT_SEC, lineHeight: 1.6 }}>
-              Founder-written analysis on the ideas shaping enterprise operations. No digest, no filler — published when it's worth reading.
-            </p>
-          </div>
-          <div style={{ minWidth: "280px", flex: "1 1 280px", maxWidth: "420px" }}>
-            {status === "success" ? (
-              <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.875rem 1.125rem", borderRadius: "0.5rem", background: "hsla(145,60%,46%,0.12)", border: "1px solid hsla(145,60%,46%,0.25)" }}>
-                <CheckCircle2 size={18} style={{ color: "hsl(145,60%,58%)", flexShrink: 0 }} />
-                <div>
-                  <p style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(145,60%,72%)", margin: 0 }}>You're on the list.</p>
-                  <p style={{ fontSize: "0.8125rem", color: TEXT_SEC, margin: "0.15rem 0 0" }}>We'll reach out when something worth reading is published.</p>
-                </div>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} noValidate>
-                <label htmlFor="newsletter-email" style={{ display: "block", fontSize: "0.75rem", fontWeight: 500, color: TEXT_SEC, marginBottom: "0.5rem" }}>
-                  Email address
-                </label>
-                <div style={{ display: "flex", gap: "0.5rem" }}>
-                  <input
-                    id="newsletter-email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => { setEmail(e.target.value); if (status === "error") { setStatus("idle"); setErrorMsg(""); } }}
-                    placeholder="you@company.com"
-                    disabled={status === "submitting"}
-                    style={{
-                      flex: 1, padding: "0.625rem 0.875rem",
-                      background: "hsla(0,0%,100%,0.06)",
-                      border: `1px solid ${status === "error" ? "hsla(0,72%,60%,0.6)" : "hsla(0,0%,100%,0.14)"}`,
-                      borderRadius: "0.375rem",
-                      color: TEXT, fontSize: "0.875rem", outline: "none",
-                    }}
-                    onFocus={(e) => { e.currentTarget.style.borderColor = "hsla(192,72%,48%,0.7)"; }}
-                    onBlur={(e) => { e.currentTarget.style.borderColor = status === "error" ? "hsla(0,72%,60%,0.6)" : "hsla(0,0%,100%,0.14)"; }}
-                  />
-                  <button
-                    type="submit"
-                    disabled={status === "submitting"}
-                    style={{ padding: "0.625rem 1rem", background: LYTE, color: "hsl(214,18%,4%)", borderRadius: "0.375rem", border: "none", fontWeight: 600, fontSize: "0.875rem", cursor: "pointer" }}
-                  >
-                    {status === "submitting" ? "..." : "Subscribe"}
-                  </button>
-                </div>
-                {errorMsg && <p style={{ fontSize: "0.75rem", color: "hsl(0,72%,60%)", marginTop: "0.4rem" }}>{errorMsg}</p>}
-              </form>
-            )}
-          </div>
+          <NewsletterSubscribe
+            variant="banner"
+            utmSource="szl-holdings"
+            heading="Governed intelligence, operational AI, and the SZL thesis."
+            subheading="Founder-written analysis on the ideas shaping enterprise operations. No digest, no filler — published when it's worth reading."
+          />
         </m.div>
       </div>
     </section>

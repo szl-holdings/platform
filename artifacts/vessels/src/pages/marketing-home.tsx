@@ -2,7 +2,7 @@ import { Link } from "wouter";
 import { Ship, ChevronRight, Shield, BarChart3, AlertTriangle, Activity, Globe, Anchor, Navigation, DollarSign, ArrowRight, Eye, TrendingUp, Zap, Clock, Waves, MapPin, Lock } from "lucide-react";
 import { MarketingNav } from "@/components/MarketingNav";
 import { MarketingFooter } from "@/components/MarketingFooter";
-import { ContactModal, AnimatedCounter} from "@szl-holdings/shared-ui";
+import { ContactModal, AnimatedCounter, NewsletterSubscribe } from "@szl-holdings/shared-ui";
 import { motion as m, useMotionValue, useTransform, animate } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 
@@ -523,6 +523,19 @@ export default function MarketingHomePage() {
                 Request a private demo <ArrowRight className="w-3.5 h-3.5 inline ml-1" />
               </button>
             </div>
+          </m.div>
+        </div>
+      </section>
+
+      <section className="py-20 sm:py-24 border-t border-sky-500/[0.06] bg-[#050c17]">
+        <div className="max-w-2xl mx-auto px-5 sm:px-6">
+          <m.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+            <NewsletterSubscribe
+              utmSource="vessels"
+              variant="inline"
+              heading="Intelligence briefings from SZL Command"
+              subheading="Insights on governed AI, maritime intelligence, and operational decision-making — straight from the founding team."
+            />
           </m.div>
         </div>
       </section>

@@ -87,6 +87,9 @@ const PUBLIC_PREFIXES = [
   // Anonymous page-view tracking — public endpoint that captures pre-login
   // site traffic so the investor funnel Visitor stage reflects real visitors.
   "/api/track/",
+  // Newsletter subscribe proxy — public, unauthenticated. Visitors on any
+  // portfolio marketing page can subscribe to SZL Command without logging in.
+  "/api/newsletter/",
 ];
 
 function isValidInternalToken(req: Request): boolean {

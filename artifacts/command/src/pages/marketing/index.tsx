@@ -2,6 +2,7 @@ import { MarketingNav } from "../../components/marketing/MarketingNav";
 import { MarketingFooter } from "../../components/marketing/MarketingFooter";
 import { motion } from "framer-motion";
 import { Button } from "@szl-holdings/shared-ui/ui/button";
+import { NewsletterSubscribe } from "@szl-holdings/shared-ui";
 import { Link } from "wouter";
 import { Shield, Activity, Anchor, Building2, Gavel, Users, BrainCircuit, Command as CmdIcon, Briefcase, ArrowRight } from "lucide-react";
 import { OPS_FEATURE_LIST } from "./ops/data";
@@ -181,6 +182,19 @@ export function MarketingHome() {
               <div className="text-white/50 font-medium tracking-wide uppercase text-sm">Global Latency</div>
             </motion.div>
           </div>
+        </div>
+      </section>
+
+      <section className="py-24 bg-zinc-950 border-t border-white/5">
+        <div className="max-w-2xl mx-auto px-6">
+          <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+            <NewsletterSubscribe
+              utmSource="command"
+              variant="inline"
+              heading="Intelligence briefings from SZL Command"
+              subheading="Insights on governed AI, unified operations, and the platform powering high-consequence decisions — direct from the founding team."
+            />
+          </motion.div>
         </div>
       </section>
 

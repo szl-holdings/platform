@@ -1,4 +1,5 @@
 import { Link } from "wouter";
+import { NewsletterSubscribe } from "@szl-holdings/shared-ui";
 
 const FOOTER_COLS = [
   {
@@ -197,6 +198,16 @@ export function SiteFooter() {
               </ul>
             </div>
           ))}
+        </div>
+
+        {/* Newsletter subscribe */}
+        <div style={{ marginBottom: "3rem", paddingBottom: "2.5rem", borderBottom: "1px solid var(--color-szl-border)" }}>
+          <NewsletterSubscribe
+            variant="compact"
+            utmSource="szl-holdings"
+            heading="Stay ahead with SZL Command"
+            subheading="Weekly intelligence briefings on governed AI, portfolio operations, and domain insights."
+          />
         </div>
 
         {/* Bottom bar */}

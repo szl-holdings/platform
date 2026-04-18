@@ -1,3 +1,4 @@
+export { NewsletterSubscribe, type NewsletterSubscribeProps, type NewsletterSubscribeVariant } from "./newsletter-subscribe";
 export { TimeSeriesChart, type TimeSeriesChartProps } from "./analytics/index";
 export { FunnelChart, type FunnelChartProps } from "./analytics/index";
 export { CohortMatrix, type CohortMatrixProps } from "./analytics/index";

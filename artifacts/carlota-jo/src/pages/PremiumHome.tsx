@@ -4,6 +4,7 @@ import { Link } from "wouter";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useEffect, useRef } from "react";
+import { NewsletterSubscribe } from "@szl-holdings/shared-ui";
 
 const GOLD = "var(--color-gold)";
 const GOLD_DIM = "var(--color-gold-dim)";
@@ -515,6 +516,17 @@ export default function PremiumHomePage() {
       <RosaIntro />
       <ClientExperienceStrip />
       <SZLPlatformNote />
+      <section style={{ background: "#18150f", borderTop: "1px solid rgba(196,170,126,0.08)", padding: "4rem 1.5rem" }}>
+        <div style={{ maxWidth: "36rem", margin: "0 auto" }}>
+          <NewsletterSubscribe
+            utmSource="carlota-jo"
+            variant="inline"
+            accentColor="hsl(36, 48%, 52%)"
+            heading="Stay ahead with SZL Command"
+            subheading="Founder-written intelligence on governed AI, advisory practice, and strategic operations — no filler."
+          />
+        </div>
+      </section>
       <ClosingCTA />
       <Footer />
     </div>

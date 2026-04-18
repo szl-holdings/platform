@@ -61,6 +61,9 @@ const EXEMPT_PATHS = new Set([
   // Anonymous page-view tracking — called from any page (including pre-login) without a
   // browser session/cookie, so CSRF double-submit is not applicable.
   "/api/track/page-view",
+  // Newsletter subscription — public anonymous marketing form embedded across portfolio
+  // sites; no session or user state is modified, CSRF double-submit not applicable.
+  "/api/newsletter/subscribe",
 ]);
 
 const GRAPHQL_PATHS = ["/api/graphql", "/graphql"];

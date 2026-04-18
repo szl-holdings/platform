@@ -4,7 +4,7 @@ import {
   BarChart3, Users, Search, FileText, Shield, Layers,
   CheckCircle, Menu, X, Eye, Activity,
 } from "lucide-react";
-import { ContactModal } from "@szl-holdings/shared-ui";
+import { ContactModal, NewsletterSubscribe } from "@szl-holdings/shared-ui";
 
 const ACCENT = "#2d6a4f";
 const ACCENT_LIGHT = "#40856a";
@@ -517,6 +517,18 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
               ))}
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* NEWSLETTER */}
+      <section className="py-20 sm:py-24 border-t px-6" style={{ borderColor: "rgba(255,255,255,0.05)", background: "#080d12" }}>
+        <div className="max-w-2xl mx-auto">
+          <NewsletterSubscribe
+            utmSource="terra"
+            variant="inline"
+            heading="Intelligence briefings from SZL Command"
+            subheading="Insights on governed AI, real estate intelligence, and operational decision-making — straight from the founding team."
+          />
         </div>
       </section>
 
