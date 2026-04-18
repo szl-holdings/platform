@@ -403,7 +403,7 @@ export default function TrustPage() {
             <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
               <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", marginBottom: "1rem" }}>Legal & policy documents</p>
               <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "32ch", marginBottom: "0.75rem" }}>
-                The legal page, next to the technical controls.
+                Legal documents, next to the technical controls.
               </h2>
               <p style={{ fontSize: "0.9375rem", lineHeight: 1.68, color: "hsl(214,7%,58%)", maxWidth: "56ch", marginBottom: "3rem" }}>
                 Compliance reviewers expect the legal documents to live alongside the security and governance controls — not buried in a footer. Privacy, terms, acceptable use, cookies, security disclosure, and accessibility, all from one place.
