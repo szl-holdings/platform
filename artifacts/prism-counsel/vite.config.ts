@@ -7,7 +7,7 @@ import { PROXY_ROUTES } from "../../packages/proxy-routes.js";
 
 process.env.GOMAXPROCS = process.env.GOMAXPROCS ?? "2";
 
-const vitePort = Number(process.env.VITE_PORT) || 7099;
+const vitePort = Number(process.env.VITE_PORT) || 7100;
 const basePath = process.env.BASE_PATH || "/prism-counsel/";
 
 const SHARED_PROXY_PORT = 9090;

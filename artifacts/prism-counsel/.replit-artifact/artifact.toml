@@ -27,5 +27,5 @@ from = "/*"
 to = "/index.html"
 
 [services.env]
-VITE_PORT = "7099"
+VITE_PORT = "7100"
 BASE_PATH = "/prism-counsel/"
