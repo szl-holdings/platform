@@ -52,7 +52,7 @@ import {
   DOMAIN_WORKFLOWS,
   type AtlasSignalRecord,
 } from "../lib/atlas-execution-engine.js";
-import { listRuns, getRunById } from "@szl-holdings/action-engine";
+import { dbListRuns, dbGetRunById } from "../lib/decisioning-store.js";
 
 initializeAtlasExecutionEngine();
 
@@ -383,20 +383,21 @@ function buildDomainRoutes(domain: string): void {
   );
 
   // ── GET /:domain/atlas/runs ─────────────────────────────────────────────────
-  router.get(`${prefix}/runs`, authMiddleware({ required: false }), async (_req: Request, res: Response) => {
+  router.get(`${prefix}/runs`, authMiddleware(), async (req: Request, res: Response) => {
     try {
-      const runs = await listRuns() as Array<{ metadata?: Record<string, unknown> }>;
-      const domainRuns = runs.filter((r: { metadata?: Record<string, unknown> }) => (r.metadata?.domain as string | undefined) === domain || !r.metadata?.domain);
-      sendSuccess(res, { domain, runs: domainRuns, count: domainRuns.length });
+      const tenantId = req.user?.orgs?.[0]?.orgId?.toString();
+      const result = await dbListRuns({ domain, tenantId, onlyNullTenant: !tenantId });
+      sendSuccess(res, { domain, runs: result.runs, count: result.total });
     } catch (err) {
       handleRouteError(res, err, "Failed to list runs");
     }
   });
 
   // ── GET /:domain/atlas/runs/:runId ──────────────────────────────────────────
-  router.get(`${prefix}/runs/:runId`, authMiddleware({ required: false }), async (req: Request, res: Response) => {
+  router.get(`${prefix}/runs/:runId`, authMiddleware(), async (req: Request, res: Response) => {
     try {
-      const run = await getRunById(req.params.runId as string);
+      const tenantId = req.user?.orgs?.[0]?.orgId?.toString();
+      const run = await dbGetRunById(req.params.runId as string, tenantId);
       if (!run) { sendNotFound(res, "Run not found"); return; }
       sendSuccess(res, { domain, run });
     } catch (err) {

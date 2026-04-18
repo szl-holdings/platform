@@ -141,6 +141,95 @@ export async function initDurablePersistence(): Promise<void> {
       logger.warn({ err }, "[persistence] Skill Library DB store init failed — staying in-memory");
     }
 
+    try {
+      const { setHistoryAdapter } = await import("@szl-holdings/action-engine");
+      const { dbRecordRun, dbListRuns, dbGetRunById, dbGetHistoryStats } = await import("./decisioning-store");
+      type WorkflowRun = import("@szl-holdings/action-engine").WorkflowRun;
+      type StoredRun = import("./decisioning-store").StoredRun;
+
+      /** Convert a WorkflowRun (action-engine shape) to a StoredRun (DB shape). */
+      function workflowRunToStored(run: WorkflowRun): StoredRun {
+        return {
+          runId: run.runId,
+          workflowId: run.workflowId,
+          workflowName: run.workflowName,
+          domain: (run.metadata?.domain as string | undefined) ?? "unknown",
+          status: run.status,
+          initiatedBy: run.initiatedBy,
+          approvedBy: run.approvedBy,
+          tenantId: run.tenantId,
+          recommendationId: run.recommendationId,
+          isDryRun: run.isDryRun ?? false,
+          isSimulation: run.isSimulation ?? false,
+          requiresApproval: run.approvalState === "pending" || (run.steps ?? []).some((s: { requiresApproval?: boolean }) => s.requiresApproval),
+          durationMs: run.completedAt != null ? run.completedAt - run.startedAt : undefined,
+          steps: run.steps ?? [],
+          auditTrail: run.auditTrail ?? [],
+          policyEvaluation: run.policyEvaluation,
+          cost: { estimated: run.estimatedCostUsd, actual: run.actualCostUsd },
+          metadata: run.metadata ?? {},
+          startedAt: new Date(run.startedAt).toISOString(),
+          completedAt: run.completedAt != null ? new Date(run.completedAt).toISOString() : null,
+        };
+      }
+
+      /** Convert a StoredRun (DB shape) to a WorkflowRun (action-engine shape). */
+      function storedToWorkflowRun(stored: StoredRun): WorkflowRun {
+        const startedAt = typeof stored.startedAt === "string"
+          ? new Date(stored.startedAt).getTime()
+          : Number(stored.startedAt);
+        const completedAt = stored.completedAt != null
+          ? new Date(stored.completedAt).getTime()
+          : undefined;
+        return {
+          runId: stored.runId,
+          workflowId: stored.workflowId,
+          workflowName: stored.workflowName,
+          tenantId: stored.tenantId,
+          initiatedBy: stored.initiatedBy,
+          approvedBy: stored.approvedBy,
+          recommendationId: stored.recommendationId,
+          executionMode: "manual" as const,
+          isDryRun: stored.isDryRun,
+          isSimulation: stored.isSimulation,
+          status: stored.status as WorkflowRun["status"],
+          currentStepIndex: 0,
+          steps: (stored.steps ?? []) as WorkflowRun["steps"],
+          approvalState: stored.approvedBy ? "approved" as const : "none" as const,
+          policyEvaluation: stored.policyEvaluation as Record<string, unknown> | undefined,
+          auditTrail: (stored.auditTrail ?? []) as WorkflowRun["auditTrail"],
+          startedAt,
+          completedAt,
+          metadata: stored.metadata as Record<string, unknown> | undefined,
+        };
+      }
+
+      setHistoryAdapter({
+        recordRun: async (run) => { await dbRecordRun(workflowRunToStored(run)); },
+        getRunById: async (runId, tenantId) => {
+          const stored = await dbGetRunById(runId, tenantId);
+          return stored ? storedToWorkflowRun(stored) : undefined;
+        },
+        listRuns: async (options) => {
+          const result = await dbListRuns({ ...options, status: options?.status as string | undefined });
+          return result.runs.map(storedToWorkflowRun);
+        },
+        getHistoryStats: async () => {
+          const stats = await dbGetHistoryStats();
+          return {
+            total: stats.totalRuns,
+            completed: (stats.byStatus["completed"] ?? 0) as number,
+            failed: (stats.byStatus["failed"] ?? 0) as number,
+            rolledBack: (stats.byStatus["rolled_back"] ?? 0) as number,
+            pendingApproval: (stats.byStatus["pending_approval"] ?? 0) as number,
+          };
+        },
+      });
+      logger.info("[persistence] Action Engine history store backed by PostgreSQL (szl_decisioning_runs)");
+    } catch (err) {
+      logger.warn({ err }, "[persistence] Action Engine DB adapter init failed — staying in-memory");
+    }
+
     logger.info(
       {
         tracesLoaded,

@@ -30,6 +30,15 @@ import {
 import { validateBody } from "../lib/validation";
 import { logger } from "../lib/logger";
 import { deliverWebhookEvent } from "./webhooks";
+import {
+  dbRecordRun,
+  dbListRuns,
+  dbGetRunById,
+  dbUpdateRunOutcome,
+  dbGetHistoryStats,
+  dbRecordRecommendations,
+  dbRecordPolicyViolations,
+} from "../lib/decisioning-store";
 
 const router: IRouter = Router();
 
@@ -303,12 +312,31 @@ router.post(
       });
 
       const evaluatedAt = Date.now();
+      const sessionId = `sess-${evaluatedAt}-${Math.random().toString(36).slice(2, 8)}`;
       const payload = {
+        sessionId,
         recommendations: withPolicies,
         totalSignalsEvaluated: groups.reduce((sum: number, g: SignalGroup) => sum + g.signals.length, 0),
         evaluatedAt,
         engineVersion: "1.0.0",
       };
+
+      setImmediate(async () => {
+        await dbRecordRecommendations(sessionId, withPolicies, {
+          tenantId: req.user?.orgs?.[0]?.orgId?.toString(),
+          initiatedBy: req.user?.id?.toString() ?? "api",
+        });
+
+        const allViolations = withPolicies.flatMap((r: Recommendation) =>
+          (r.policyEvaluation?.violations ?? []).map((v: unknown) => ({ ...v as Record<string, unknown>, runId: undefined, recommendationId: r.id }))
+        );
+        if (allViolations.length > 0) {
+          await dbRecordPolicyViolations(allViolations, {
+            action: "evaluate",
+            tenantId: req.user?.orgs?.[0]?.orgId?.toString(),
+          });
+        }
+      });
 
       setImmediate(() => {
         deliverWebhookEvent("decision.created", {
@@ -386,7 +414,47 @@ router.post(
         metadata,
       });
 
-      recordRun(result.run);
+      void recordRun(result.run);
+
+      setImmediate(async () => {
+        await dbRecordRun({
+          runId: result.run.runId,
+          workflowId,
+          workflowName: definition.name,
+          domain: definition.domain,
+          status: result.run.status,
+          initiatedBy: result.run.initiatedBy,
+          approvedBy: result.run.approvedBy,
+          tenantId: result.run.tenantId,
+          recommendationId,
+          isDryRun: result.run.isDryRun ?? false,
+          isSimulation: result.run.isSimulation ?? false,
+          requiresApproval: result.requiresApproval ?? false,
+          durationMs: result.run.durationMs ?? 0,
+          steps: result.run.steps ?? [],
+          auditTrail: result.run.auditTrail ?? [],
+          policyEvaluation: result.run.policyEvaluation ?? policyResult,
+          cost: result.run.cost ?? {},
+          metadata: metadata ?? {},
+          startedAt: result.run.startedAt,
+          completedAt: result.run.completedAt ?? null,
+        });
+
+        if (policyResult.violations?.length) {
+          await dbRecordPolicyViolations(policyResult.violations, {
+            action: workflowId,
+            domain: definition.domain,
+            subjectId: req.user?.id?.toString(),
+            subjectRoles: req.user?.roles ?? ["analyst"],
+            resourceType: "workflow",
+            resourceId: workflowId,
+            runId: result.run.runId,
+            recommendationId,
+            tenantId: req.user?.orgs?.[0]?.orgId?.toString(),
+            estimatedCostUsd: definition.estimatedCostUsd,
+          });
+        }
+      });
 
       logger.info({ runId: result.run.runId, workflowId, status: result.run.status }, "[Decisioning] Workflow executed");
 
@@ -460,23 +528,27 @@ router.get(
 
 router.get(
   "/decisioning/runs",
-  authMiddleware({ required: false }),
-  (req: Request, res: Response) => {
+  authMiddleware(),
+  async (req: Request, res: Response) => {
     try {
       const status = req.query.status as string | undefined;
       const workflowId = req.query.workflowId as string | undefined;
+      const domain = req.query.domain as string | undefined;
       const limit = Math.min(Number(req.query.limit ?? 50), 200);
       const offset = Number(req.query.offset ?? 0);
 
-      const runs = listRuns({
+      const tenantId = req.user?.orgs?.[0]?.orgId?.toString();
+      const result = await dbListRuns({
         workflowId,
-        status: status as any,
+        status,
+        domain,
         limit,
         offset,
-        tenantId: req.user?.orgs?.[0]?.orgId?.toString(),
+        tenantId,
+        onlyNullTenant: !tenantId,
       });
 
-      return sendSuccess(res, { runs, total: runs.length });
+      return sendSuccess(res, { runs: result.runs, total: result.total, limit, offset });
     } catch (err) {
       handleRouteError(res, err, "Failed to list runs");
     }
@@ -485,10 +557,11 @@ router.get(
 
 router.get(
   "/decisioning/runs/:runId",
-  authMiddleware({ required: false }),
-  (req: Request, res: Response) => {
+  authMiddleware(),
+  async (req: Request, res: Response) => {
     try {
-      const run = getRunById(req.params.runId as string);
+      const tenantId = req.user?.orgs?.[0]?.orgId?.toString();
+      const run = await dbGetRunById(req.params.runId as string, tenantId);
       if (!run) return sendNotFound(res, "Run not found");
       return sendSuccess(res, run);
     } catch (err) {
@@ -529,11 +602,13 @@ router.post(
 router.get(
   "/decisioning/stats",
   authMiddleware({ required: false }),
-  (_req: Request, res: Response) => {
+  async (_req: Request, res: Response) => {
     try {
-      const historyStats = getHistoryStats();
-      const policies = getRegisteredPolicies();
-      const workflows = Array.from(workflowRegistry.values());
+      const [historyStats, policies, workflows] = await Promise.all([
+        dbGetHistoryStats(),
+        Promise.resolve(getRegisteredPolicies()),
+        Promise.resolve(Array.from(workflowRegistry.values())),
+      ]);
 
       return sendSuccess(res, {
         decisionEngine: { version: "1.0.0", status: "active" },
@@ -545,7 +620,15 @@ router.get(
         actionEngine: {
           version: "1.0.0",
           registeredWorkflows: workflows.length,
-          ...historyStats,
+          total: historyStats.totalRuns,
+          totalRuns: historyStats.totalRuns,
+          completed: historyStats.byStatus["completed"] ?? 0,
+          failed: historyStats.byStatus["failed"] ?? 0,
+          rolledBack: historyStats.byStatus["rolled_back"] ?? 0,
+          pendingApproval: historyStats.byStatus["pending_approval"] ?? 0,
+          byStatus: historyStats.byStatus,
+          averageDurationMs: historyStats.averageDurationMs,
+          lastRunAt: historyStats.lastRunAt,
         },
         evaluatedAt: Date.now(),
       });
@@ -576,10 +659,12 @@ const ProveSchema = z.object({
 
 router.post(
   "/decisioning/runs/:runId/outcome",
-  authMiddleware({ required: false }),
+  authMiddleware(),
   async (req: Request, res: Response) => {
     try {
-      const run = getRunById(req.params.runId as string);
+      const runId = req.params.runId as string;
+      const tenantId = req.user?.orgs?.[0]?.orgId?.toString();
+      const run = await dbGetRunById(runId, tenantId);
       if (!run) return sendNotFound(res, "Run not found");
 
       const parsed = OutcomeSchema.safeParse(req.body);
@@ -588,6 +673,8 @@ router.post(
       const { outcome, summary, impact, metadata } = parsed.data;
       const recordedAt = Date.now();
       const recordedBy = req.user?.displayName ?? req.user?.id?.toString() ?? "api";
+
+      await dbUpdateRunOutcome(runId, outcome, summary, impact, recordedBy, tenantId);
 
       logger.info({ runId: req.params.runId, outcome, recordedBy }, "[Decisioning] Outcome recorded");
 
@@ -622,10 +709,12 @@ router.post(
 
 router.post(
   "/decisioning/runs/:runId/prove",
-  authMiddleware({ required: false }),
+  authMiddleware(),
   async (req: Request, res: Response) => {
     try {
-      const run = getRunById(req.params.runId as string);
+      const runId = req.params.runId as string;
+      const tenantId = req.user?.orgs?.[0]?.orgId?.toString();
+      const run = await dbGetRunById(runId, tenantId);
       if (!run) return sendNotFound(res, "Run not found");
 
       const parsed = ProveSchema.safeParse(req.body);

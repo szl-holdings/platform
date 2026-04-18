@@ -9,7 +9,6 @@ import {
   CheckCircle2,
   XCircle,
   Clock,
-  AlertTriangle,
   User,
   ChevronDown,
   ChevronRight,
@@ -20,7 +19,29 @@ import {
   TrendingUp,
   Lock,
   Unlock,
+  History,
+  ChevronLeft,
+  Filter,
 } from "lucide-react";
+
+interface StoredRun {
+  runId: string;
+  workflowId: string;
+  workflowName: string;
+  domain: string;
+  status: string;
+  initiatedBy?: string;
+  approvedBy?: string;
+  isDryRun: boolean;
+  isSimulation: boolean;
+  requiresApproval: boolean;
+  durationMs?: number;
+  recommendationId?: string;
+  outcome?: string;
+  outcomeSummary?: string;
+  startedAt: string;
+  completedAt?: string | null;
+}
 
 interface Evidence {
   label: string;
@@ -470,12 +491,206 @@ function ExecutionResultPanel({ result, onClose }: { result: ExecutionResult; on
   );
 }
 
+const STATUS_COLORS: Record<string, string> = {
+  completed: "text-emerald-400",
+  dry_run: "text-sky-400",
+  simulated: "text-violet-400",
+  pending_approval: "text-yellow-400",
+  failed: "text-red-400",
+  rolled_back: "text-orange-400",
+};
+
+function RunHistoryPanel({
+  runs,
+  total,
+  page,
+  pageSize,
+  loading,
+  statusFilter,
+  domainFilter,
+  onStatusChange,
+  onDomainChange,
+  onPageChange,
+  onRefresh,
+}: {
+  runs: StoredRun[];
+  total: number;
+  page: number;
+  pageSize: number;
+  loading: boolean;
+  statusFilter: string;
+  domainFilter: string;
+  onStatusChange: (s: string) => void;
+  onDomainChange: (d: string) => void;
+  onPageChange: (p: number) => void;
+  onRefresh: () => void;
+}) {
+  const totalPages = Math.ceil(total / pageSize);
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h2 className="text-base font-semibold text-white">Execution Run History</h2>
+          <p className="text-xs text-slate-500 mt-0.5">{total} total runs persisted in the database</p>
+        </div>
+        <button
+          onClick={onRefresh}
+          disabled={loading}
+          className="text-xs px-3 py-1.5 rounded border border-slate-600 text-slate-300 hover:text-white hover:border-slate-400 transition-all flex items-center gap-1.5 disabled:opacity-50"
+        >
+          <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
+          Refresh
+        </button>
+      </div>
+
+      <div className="flex items-center gap-3 mb-4">
+        <div className="flex items-center gap-1.5 text-slate-400">
+          <Filter className="w-3.5 h-3.5" />
+          <span className="text-xs">Filter:</span>
+        </div>
+        <select
+          value={statusFilter}
+          onChange={(e) => onStatusChange(e.target.value)}
+          className="text-xs bg-slate-800 border border-slate-700 text-slate-300 rounded px-2 py-1.5 focus:outline-none focus:border-slate-500"
+        >
+          <option value="">All statuses</option>
+          <option value="completed">Completed</option>
+          <option value="dry_run">Dry Run</option>
+          <option value="simulated">Simulated</option>
+          <option value="pending_approval">Pending Approval</option>
+          <option value="failed">Failed</option>
+          <option value="rolled_back">Rolled Back</option>
+        </select>
+        <select
+          value={domainFilter}
+          onChange={(e) => onDomainChange(e.target.value)}
+          className="text-xs bg-slate-800 border border-slate-700 text-slate-300 rounded px-2 py-1.5 focus:outline-none focus:border-slate-500"
+        >
+          <option value="">All domains</option>
+          <option value="szl-holdings">SZL Holdings</option>
+          <option value="aegis">Aegis</option>
+          <option value="vessels">Vessels</option>
+          <option value="terra">Terra</option>
+        </select>
+      </div>
+
+      {loading ? (
+        <div className="text-center py-12 text-slate-500">
+          <History className="w-6 h-6 mx-auto mb-2 animate-pulse" />
+          <p className="text-sm">Loading run history…</p>
+        </div>
+      ) : runs.length === 0 ? (
+        <div className="text-center py-12 text-slate-600 border border-slate-800 rounded-lg">
+          <History className="w-8 h-8 mx-auto mb-3 opacity-40" />
+          <p className="text-sm text-slate-500">No runs found</p>
+          <p className="text-xs text-slate-600 mt-1">Execute a workflow from the Recommendations tab to generate history.</p>
+        </div>
+      ) : (
+        <>
+          <div className="rounded-lg border border-slate-800 overflow-hidden">
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="border-b border-slate-800 bg-slate-900/60">
+                  <th className="text-left px-4 py-2.5 text-slate-400 font-medium">Run ID</th>
+                  <th className="text-left px-4 py-2.5 text-slate-400 font-medium">Workflow</th>
+                  <th className="text-left px-4 py-2.5 text-slate-400 font-medium">Domain</th>
+                  <th className="text-left px-4 py-2.5 text-slate-400 font-medium">Status</th>
+                  <th className="text-left px-4 py-2.5 text-slate-400 font-medium">Mode</th>
+                  <th className="text-left px-4 py-2.5 text-slate-400 font-medium">Initiated By</th>
+                  <th className="text-left px-4 py-2.5 text-slate-400 font-medium">Started</th>
+                  <th className="text-left px-4 py-2.5 text-slate-400 font-medium">Outcome</th>
+                </tr>
+              </thead>
+              <tbody>
+                {runs.map((run, i) => (
+                  <tr
+                    key={run.runId}
+                    className={`border-b border-slate-800/50 ${i % 2 === 0 ? "bg-slate-900/20" : ""} hover:bg-slate-800/30 transition-colors`}
+                  >
+                    <td className="px-4 py-2.5 font-mono text-slate-400 max-w-[140px] truncate" title={run.runId}>
+                      {run.runId.slice(0, 18)}…
+                    </td>
+                    <td className="px-4 py-2.5 text-slate-200 max-w-[180px]">
+                      <span className="truncate block">{run.workflowName}</span>
+                    </td>
+                    <td className="px-4 py-2.5">
+                      <span className="px-1.5 py-0.5 rounded bg-indigo-500/15 text-indigo-300 border border-indigo-500/20">
+                        {run.domain}
+                      </span>
+                    </td>
+                    <td className="px-4 py-2.5">
+                      <span className={`font-medium capitalize ${STATUS_COLORS[run.status] ?? "text-slate-400"}`}>
+                        {run.status.replace("_", " ")}
+                      </span>
+                    </td>
+                    <td className="px-4 py-2.5 text-slate-400">
+                      {run.isDryRun ? "Dry Run" : run.isSimulation ? "Simulation" : "Live"}
+                    </td>
+                    <td className="px-4 py-2.5 text-slate-400 max-w-[120px] truncate">
+                      {run.initiatedBy ?? "—"}
+                    </td>
+                    <td className="px-4 py-2.5 text-slate-500 whitespace-nowrap">
+                      {new Date(run.startedAt).toLocaleString(undefined, {
+                        month: "short",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </td>
+                    <td className="px-4 py-2.5">
+                      {run.outcome ? (
+                        <span className={`capitalize ${
+                          run.outcome === "success" ? "text-emerald-400" :
+                          run.outcome === "failed" ? "text-red-400" :
+                          run.outcome === "partial" ? "text-yellow-400" : "text-slate-400"
+                        }`}>{run.outcome}</span>
+                      ) : (
+                        <span className="text-slate-600">—</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between mt-4">
+              <span className="text-xs text-slate-500">
+                Page {page + 1} of {totalPages} · {total} total runs
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => onPageChange(Math.max(0, page - 1))}
+                  disabled={page === 0}
+                  className="text-xs px-2.5 py-1.5 rounded border border-slate-700 text-slate-300 hover:border-slate-500 disabled:opacity-40 flex items-center gap-1 transition-colors"
+                >
+                  <ChevronLeft className="w-3 h-3" /> Prev
+                </button>
+                <button
+                  onClick={() => onPageChange(Math.min(totalPages - 1, page + 1))}
+                  disabled={page >= totalPages - 1}
+                  className="text-xs px-2.5 py-1.5 rounded border border-slate-700 text-slate-300 hover:border-slate-500 disabled:opacity-40 flex items-center gap-1 transition-colors"
+                >
+                  Next <ChevronRight className="w-3 h-3" />
+                </button>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
 export default function DecisioningCommandPage() {
   usePageMeta({
     title: "Decisioning Command — Lyte",
     description: "SZL unified Decision, Policy & Action Engine surface — turn signals into governed, explainable, executable action.",
   });
 
+  const [activeTab, setActiveTab] = useState<"recommendations" | "history">("recommendations");
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [loading, setLoading] = useState(false);
   const [executionResult, setExecutionResult] = useState<ExecutionResult | null>(null);
@@ -485,6 +700,14 @@ export default function DecisioningCommandPage() {
     policyEngine?: { registeredPolicies: number; activePolicies: number };
     actionEngine?: { registeredWorkflows: number; total: number };
   } | null>(null);
+
+  const [historyRuns, setHistoryRuns] = useState<StoredRun[]>([]);
+  const [historyTotal, setHistoryTotal] = useState(0);
+  const [historyPage, setHistoryPage] = useState(0);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyStatusFilter, setHistoryStatusFilter] = useState("");
+  const [historyDomainFilter, setHistoryDomainFilter] = useState("");
+  const HISTORY_PAGE_SIZE = 10;
 
   const evaluate = useCallback(async () => {
     setLoading(true);
@@ -522,10 +745,43 @@ export default function DecisioningCommandPage() {
     } catch {}
   }, []);
 
+  const fetchHistory = useCallback(async (page: number, status: string, domain: string) => {
+    setHistoryLoading(true);
+    try {
+      const params = new URLSearchParams({
+        limit: String(HISTORY_PAGE_SIZE),
+        offset: String(page * HISTORY_PAGE_SIZE),
+      });
+      if (status) params.set("status", status);
+      if (domain) params.set("domain", domain);
+      const resp = await fetch(`${getApiBase()}/decisioning/runs?${params}`, { credentials: "include" });
+      if (resp.ok) {
+        const data = await resp.json();
+        const payload = data.data ?? data;
+        setHistoryRuns(payload.runs ?? []);
+        setHistoryTotal(payload.total ?? 0);
+      } else {
+        setHistoryRuns([]);
+        setHistoryTotal(0);
+      }
+    } catch {
+      setHistoryRuns([]);
+      setHistoryTotal(0);
+    } finally {
+      setHistoryLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     evaluate();
     fetchStats();
   }, [evaluate, fetchStats]);
+
+  useEffect(() => {
+    if (activeTab === "history") {
+      fetchHistory(historyPage, historyStatusFilter, historyDomainFilter);
+    }
+  }, [activeTab, historyPage, historyStatusFilter, historyDomainFilter, fetchHistory]);
 
   const handleExecute = async (recId: string) => {
     const rec = recommendations.find(r => r.id === recId);
@@ -704,41 +960,89 @@ export default function DecisioningCommandPage() {
           </div>
         )}
 
-        <div className="flex items-center justify-between mb-5">
-          <div>
-            <h2 className="text-base font-semibold text-white">Active Recommendations</h2>
-            {lastEvaluated && (
-              <p className="text-xs text-slate-500 mt-0.5">
-                Evaluated {new Date(lastEvaluated).toLocaleTimeString()} · {recommendations.length} ranked recommendations
-              </p>
-            )}
-          </div>
+        <div className="flex items-center gap-1 mb-6 border-b border-slate-800">
           <button
-            onClick={evaluate}
-            disabled={loading}
-            className="text-xs px-3 py-1.5 rounded border border-slate-600 text-slate-300 hover:text-white hover:border-slate-400 transition-all flex items-center gap-1.5 disabled:opacity-50"
+            onClick={() => setActiveTab("recommendations")}
+            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px ${
+              activeTab === "recommendations"
+                ? "border-indigo-500 text-white"
+                : "border-transparent text-slate-400 hover:text-slate-200"
+            }`}
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
-            Re-evaluate
+            <Brain className="w-4 h-4" />
+            Recommendations
+          </button>
+          <button
+            onClick={() => setActiveTab("history")}
+            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px ${
+              activeTab === "history"
+                ? "border-indigo-500 text-white"
+                : "border-transparent text-slate-400 hover:text-slate-200"
+            }`}
+          >
+            <History className="w-4 h-4" />
+            Run History
+            {historyTotal > 0 && (
+              <span className="text-xs bg-slate-700 text-slate-300 rounded-full px-1.5 py-0.5">{historyTotal}</span>
+            )}
           </button>
         </div>
 
-        {loading && recommendations.length === 0 ? (
-          <div className="text-center py-16 text-slate-500">
-            <Brain className="w-8 h-8 mx-auto mb-3 animate-pulse" />
-            <p className="text-sm">Evaluating signals…</p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {recommendations.map(rec => (
-              <RecommendationCard
-                key={rec.id}
-                rec={rec}
-                onExecute={handleExecute}
-                onDryRun={handleDryRun}
-              />
-            ))}
-          </div>
+        {activeTab === "recommendations" && (
+          <>
+            <div className="flex items-center justify-between mb-5">
+              <div>
+                <h2 className="text-base font-semibold text-white">Active Recommendations</h2>
+                {lastEvaluated && (
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Evaluated {new Date(lastEvaluated).toLocaleTimeString()} · {recommendations.length} ranked recommendations
+                  </p>
+                )}
+              </div>
+              <button
+                onClick={evaluate}
+                disabled={loading}
+                className="text-xs px-3 py-1.5 rounded border border-slate-600 text-slate-300 hover:text-white hover:border-slate-400 transition-all flex items-center gap-1.5 disabled:opacity-50"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
+                Re-evaluate
+              </button>
+            </div>
+
+            {loading && recommendations.length === 0 ? (
+              <div className="text-center py-16 text-slate-500">
+                <Brain className="w-8 h-8 mx-auto mb-3 animate-pulse" />
+                <p className="text-sm">Evaluating signals…</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {recommendations.map(rec => (
+                  <RecommendationCard
+                    key={rec.id}
+                    rec={rec}
+                    onExecute={handleExecute}
+                    onDryRun={handleDryRun}
+                  />
+                ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {activeTab === "history" && (
+          <RunHistoryPanel
+            runs={historyRuns}
+            total={historyTotal}
+            page={historyPage}
+            pageSize={HISTORY_PAGE_SIZE}
+            loading={historyLoading}
+            statusFilter={historyStatusFilter}
+            domainFilter={historyDomainFilter}
+            onStatusChange={(s) => { setHistoryStatusFilter(s); setHistoryPage(0); }}
+            onDomainChange={(d) => { setHistoryDomainFilter(d); setHistoryPage(0); }}
+            onPageChange={setHistoryPage}
+            onRefresh={() => fetchHistory(historyPage, historyStatusFilter, historyDomainFilter)}
+          />
         )}
 
         <div className="mt-12 border-t border-slate-800 pt-8">
