@@ -249,13 +249,23 @@ export default function ActionQueuePage() {
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [expandedId, setExpandedId] = useState<number | null>(null);
 
-  const { data: rawActions } = useQuery({
+  const IS_DEMO = import.meta.env.VITE_IS_DEMO === "true";
+
+  const { data: rawActions } = useQuery<any[]>({
     queryKey: ["lyte-actions", role],
-    queryFn: () => apiFetch<any[]>(`/lyte/actions?role=${role}`),
-    placeholderData: DEMO_ACTIONS as any,
+    queryFn: async () => {
+      const json = await apiFetch<{ data: any[] } | any[]>(`/lyte/actions?role=${role}`);
+      return Array.isArray(json) ? json : ((json as { data: any[] }).data ?? []);
+    },
+    placeholderData: IS_DEMO ? DEMO_ACTIONS : undefined,
+    refetchInterval: 30000,
+    refetchOnWindowFocus: true,
+    retry: 2,
   });
 
-  const actions: any[] = (rawActions && Array.isArray(rawActions) && rawActions.length > 0) ? rawActions : DEMO_ACTIONS;
+  const actions: any[] = rawActions && rawActions.length > 0
+    ? rawActions
+    : (IS_DEMO ? DEMO_ACTIONS : []);
 
   const transition = useMutation({
     mutationFn: ({ id, state, assignedTo }: { id: number; state: string; assignedTo?: string }) =>

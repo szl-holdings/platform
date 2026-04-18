@@ -13,7 +13,7 @@ import {
   lyteSavedViewsTable,
   lyteReadinessItemsTable,
 } from "@szl-holdings/db";
-import { eq, desc, sql } from "drizzle-orm";
+import { eq, desc, sql, and } from "drizzle-orm";
 import { sendSuccess, sendNotFound, sendError, handleRouteError, parsePagination } from "../lib/api-response";
 import { authMiddleware, parseIdParam, denyIfReadOnly, requireRole } from "../middlewares/auth";
 import { broadcastWs } from "../lib/pubsub-bridge.js";
@@ -310,29 +310,44 @@ router.get("/lyte/executive-summary", authMiddleware(), async (_req, res) => {
   }
 });
 
+function formatActionRow(r: typeof lyteActionsTable.$inferSelect) {
+  const meta = (r.metadata as Record<string, unknown>) ?? {};
+  const stateHistory = (r.stateHistory as Array<{ id?: string; action: string; actor: string; actorType: string; timestamp: string; notes?: string }>) ?? [];
+  return {
+    ...r,
+    dueDate: r.dueAt?.toISOString() ?? null,
+    workflowStage: (meta.workflowStage as string) ?? null,
+    evidence: (meta.evidence as unknown[]) ?? [],
+    auditHistory: stateHistory.length > 0 ? stateHistory : ((meta.auditHistory as unknown[]) ?? []),
+  };
+}
+
 router.get("/lyte/actions", authMiddleware(), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const role = req.query.role as string | undefined;
-    const state = req.query.state as string | undefined;
-    const rows = await db.select().from(lyteActionsTable).orderBy(desc(lyteActionsTable.createdAt)).limit(limit).offset(offset);
-    const [{ count }] = await db.select({ count: sql<number>`count(*)::int` }).from(lyteActionsTable);
-    const filtered = rows.filter(r => {
-      if (state && r.state !== state) return false;
-      if (role) {
-        const rv = r.roleVisibility as Record<string, boolean> | null;
-        if (rv && !rv[role]) return false;
-      }
-      return true;
-    });
-    sendSuccess(res, filtered, 200, { page, limit, total: count });
+    const stateFilter = req.query.state as string | undefined;
+    const categoryFilter = req.query.category as string | undefined;
+
+    const whereConditions = and(
+      stateFilter ? eq(lyteActionsTable.state, stateFilter as typeof lyteActionsTable.state._.data) : undefined,
+      categoryFilter ? eq(lyteActionsTable.signalCategory, categoryFilter as typeof lyteActionsTable.signalCategory._.data) : undefined,
+      role ? sql`(${lyteActionsTable.roleVisibility} IS NULL OR (${lyteActionsTable.roleVisibility}->>${role})::boolean IS NOT FALSE)` : undefined,
+    );
+
+    const [rows, [{ count }]] = await Promise.all([
+      db.select().from(lyteActionsTable).where(whereConditions).orderBy(desc(lyteActionsTable.createdAt)).limit(limit).offset(offset),
+      db.select({ count: sql<number>`count(*)::int` }).from(lyteActionsTable).where(whereConditions),
+    ]);
+
+    sendSuccess(res, rows.map(formatActionRow), 200, { page, limit, total: count });
   } catch (err) { handleRouteError(res, err, "Failed to list actions"); }
 });
 
 router.post("/lyte/actions", authMiddleware(), denyIfReadOnly(), async (req, res) => {
   try {
     const [row] = await db.insert(lyteActionsTable).values(req.body).returning();
-    sendSuccess(res, row, 201);
+    sendSuccess(res, formatActionRow(row), 201);
   } catch (err) { handleRouteError(res, err, "Failed to create action"); }
 });
 
@@ -342,22 +357,34 @@ router.patch("/lyte/actions/:id", authMiddleware(), denyIfReadOnly(), async (req
     const current = await db.select().from(lyteActionsTable).where(eq(lyteActionsTable.id, id)).limit(1);
     if (!current[0]) { sendNotFound(res, "Action"); return; }
 
-    const { state, assignedTo, notes, ...rest } = req.body;
-    const stateHistory = (current[0].stateHistory as Array<{ from: string; to: string; at: string }>) ?? [];
+    const { state, assignedTo, notes } = req.body as { state?: string; assignedTo?: string; notes?: string };
+    const actor = req.user?.displayName ?? "operator";
+
+    type AuditEntry = { id: string; action: string; actor: string; actorType: string; timestamp: string; notes?: string };
+    const stateHistory: AuditEntry[] = Array.isArray(current[0].stateHistory)
+      ? (current[0].stateHistory as AuditEntry[])
+      : [];
+
     if (state && state !== current[0].state) {
-      stateHistory.push({ from: current[0].state, to: state, at: new Date().toISOString() });
+      stateHistory.push({
+        id: `sh-${Date.now()}`,
+        action: `Transitioned to ${state}`,
+        actor,
+        actorType: req.user ? "user" : "operator",
+        timestamp: new Date().toISOString(),
+        ...(notes ? { notes } : {}),
+      });
     }
 
     const [row] = await db.update(lyteActionsTable).set({
-      ...rest,
-      ...(state ? { state } : {}),
+      ...(state ? { state: state as typeof lyteActionsTable.state._.data } : {}),
       ...(assignedTo !== undefined ? { assignedTo } : {}),
       ...(notes !== undefined ? { notes } : {}),
       stateHistory,
       updatedAt: new Date(),
       ...(state === "resolved" ? { resolvedAt: new Date() } : {}),
     }).where(eq(lyteActionsTable.id, id)).returning();
-    sendSuccess(res, row);
+    sendSuccess(res, formatActionRow(row));
   } catch (err) { handleRouteError(res, err, "Failed to update action"); }
 });
 
