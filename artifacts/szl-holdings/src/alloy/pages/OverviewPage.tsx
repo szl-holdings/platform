@@ -37,7 +37,7 @@ const WHAT_ALLOY_IS = [
 ];
 
 const WHAT_ALLOY_POWERS = [
-  { platform: "Lyte", accent: "#06b6d4", desc: "Business observability — signals classified, incidents triaged, and operators alerted with context, not noise.", href: "/command/operations/" },
+  { platform: "Lyte", accent: "#06b6d4", desc: "Decision intelligence — signals classified, incidents triaged, and operators alerted with context, not noise.", href: "/command/operations/" },
   { platform: "Vessels", accent: "#3b82f6", desc: "Maritime intelligence — AIS signal interpretation, deviation detection, and fleet briefings for operations teams.", href: "/vessels/" },
   { platform: "Terra", accent: "#a07848", desc: "Real estate broker platform — deal conversion, lead routing, and distress property workflows for active pipelines.", href: "/terra/" },
   { platform: "Carlota Jo", accent: "#d97706", desc: "High-trust service coordination — vendor orchestration, residence logistics, and cross-border operational workflows.", href: "/carlota-jo/" },

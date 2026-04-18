@@ -12,7 +12,7 @@ const PLATFORM_DOCS = [
     desc: "What Lyte + Alloy is, how the signal-to-action pipeline works, and where it fits in your operating environment.",
     links: [
       { label: "Platform overview", href: "/platform" },
-      { label: "Lyte — Business Observability", href: "/lyte" },
+      { label: "Lyte — Decision Intelligence", href: "/lyte" },
       { label: "Alloy — Execution Fabric", href: "/alloy-fabric" },
     ],
     color: "var(--color-lyte)",

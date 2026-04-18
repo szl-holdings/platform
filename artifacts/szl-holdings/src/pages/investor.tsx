@@ -85,7 +85,7 @@ export default function InvestorPage() {
                 <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "hsl(38,52%,58%)" }}>Investor</span>
               </div>
               <h1 style={{ fontSize: "clamp(2.25rem,5vw,3.75rem)", fontWeight: 600, letterSpacing: "-0.03em", lineHeight: 1.06, maxWidth: "22ch", marginBottom: "1.5rem" }}>
-                Business observability infrastructure. One architecture. Multiple domains.
+                Governed decision infrastructure. One 9-step loop. Multiple domains.
               </h1>
               <p style={{ fontSize: "clamp(1rem,1.8vw,1.125rem)", lineHeight: 1.72, color: "hsl(214,7%,64%)", maxWidth: "56ch", marginBottom: "2rem" }}>
                 SZL Holdings is building the infrastructure layer for how governed organizations
@@ -115,10 +115,11 @@ export default function InvestorPage() {
                 Dashboards show what happened. We show what needs to happen next.
               </h2>
               <p style={{ fontSize: "clamp(1rem,1.8vw,1.0625rem)", lineHeight: 1.72, color: "hsl(214,7%,60%)", maxWidth: "58ch" }}>
-                Business observability is not a dashboard category. It is signal detection to action
-                routing to outcome verification — in one accountable, auditable workflow. Every
-                vertical we build inherits the same governance infrastructure. This is not a feature
-                set. It is a new software layer.
+                Governed decision infrastructure is not a dashboard category. It is the structural
+                layer between signal detection and action execution — nine governed stages, full AI
+                provenance, policy gates that cannot be bypassed, and an immutable proof chain on
+                every consequential decision. Every domain pack inherits this. This is architecture,
+                not a feature set.
               </p>
             </m.div>
           </div>

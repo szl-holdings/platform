@@ -8,7 +8,7 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 const VENTURES = [
   {
     name: "Lyte",
-    tagline: "Business Observability Platform",
+    tagline: "Decision Intelligence Platform",
     category: "Enterprise Software",
     stage: "Growth",
     description: "The operational intelligence layer that surfaces critical business signals, routes action, and verifies follow-through across the workflows that break between systems. Comparable category to Datadog — applied to operational risk rather than infrastructure.",

@@ -79,7 +79,7 @@ const PORTFOLIO_COLUMNS = [
     label: "Commercial Wedge",
     color: ACCENT,
     items: [
-      { name: "Lyte", desc: "Business observability command center" },
+      { name: "Lyte", desc: "Governed decision command layer" },
       { name: "Alloy Engine", desc: "Execution and orchestration fabric" },
     ],
   },

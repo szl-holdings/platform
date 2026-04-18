@@ -74,7 +74,7 @@ const PLATFORMS = [
   },
   {
     name: "Lyte",
-    role: "Business Observability",
+    role: "Decision Intelligence",
     description: "Role-based visibility into risk, latency, ownership gaps, and workflow friction. Executive, operations, and delivery views that surface problems before they hit execution.",
     accent: "hsl(190,90%,55%)",
     href: "/command/operations/",

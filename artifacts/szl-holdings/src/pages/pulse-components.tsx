@@ -8,7 +8,7 @@ import {
 
 export const PLATFORM_APPS = [
   { id: "szl-holdings", name: "SZL Holdings", icon: Building2, color: "#d4a054", domain: "holdings", orbit: 1, angle: 0, desc: "Governed operational intelligence platform" },
-  { id: "lyte", name: "Lyte", icon: () => null, color: "#f59e0b", domain: "observability", orbit: 2, angle: 0, desc: "Business observability engine" },
+  { id: "lyte", name: "Lyte", icon: () => null, color: "#f59e0b", domain: "observability", orbit: 2, angle: 0, desc: "Decision intelligence engine" },
   { id: "aegis", name: "Aegis", icon: Shield, color: "#3b82f6", domain: "security", orbit: 2, angle: 72, desc: "Unified defense & intelligence" },
   { id: "vessels", name: "Vessels", icon: Anchor, color: "#06b6d4", domain: "maritime", orbit: 2, angle: 144, desc: "Fleet command intelligence" },
   { id: "terra", name: "Terra", icon: Globe, color: "#10b981", domain: "real-estate", orbit: 2, angle: 216, desc: "Real estate portfolio intel" },

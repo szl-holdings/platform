@@ -39,8 +39,8 @@ const INSIGHTS_LD = {
 
 export default function InsightsPage() {
   usePageMeta({
-    title: "Insights — SZL Holdings | Business Observability & Enterprise AI Analysis",
-    description: "Founder-written analysis on business observability, AI operations, maritime intelligence, cybersecurity, and enterprise architecture — from SZL Holdings.",
+    title: "Insights — SZL Holdings | Governed Decision Infrastructure & Enterprise AI",
+    description: "Founder-written analysis on governed decision infrastructure, AI governance, maritime intelligence, cybersecurity, and enterprise architecture — from SZL Holdings.",
     canonical: "https://szlholdings.com/insights",
   });
 

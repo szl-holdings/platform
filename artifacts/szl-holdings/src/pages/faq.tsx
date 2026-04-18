@@ -13,7 +13,7 @@ const FAQ_GROUPS = [
     questions: [
       {
         q: "What is SZL Holdings?",
-        a: "SZL Holdings is building a governed operational intelligence platform — the business observability category. The core platform — Lyte + Alloy — is a shared execution fabric deployed across multiple domain-specific packs: PRISM Counsel (legal operations), Vessels (maritime), Aegis (security and defense), and Terra (real estate).",
+        a: "SZL Holdings is building governed decision infrastructure — the structural layer between signal detection and action execution. The core platform — Lyte + Alloy — is a shared execution fabric deployed across multiple domain-specific packs: PRISM Counsel (legal operations), Vessels (maritime), Aegis (security and defense), and Terra (real estate).",
       },
       {
         q: "What is business observability?",

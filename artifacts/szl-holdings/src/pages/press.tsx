@@ -8,7 +8,7 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 const PRODUCT_ONELINERS = [
   {
     product: "SZL Holdings",
-    oneliner: "Business observability infrastructure — signal detection, action routing, and outcome verification across multiple operating domains.",
+    oneliner: "Governed decision infrastructure — the structural layer between signal detection and action execution, with AI provenance, policy gates, and immutable proof on every consequential decision.",
   },
   {
     product: "Lyte",
@@ -82,11 +82,11 @@ export default function PressPage() {
             <div className="szl-card" style={{ borderRadius: "0.875rem", padding: "var(--space-card-pad)" }}>
               <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", marginBottom: "1rem" }}>Short (1 sentence)</p>
               <p style={{ fontSize: "1rem", lineHeight: 1.72, color: "hsl(38,8%,82%)", marginBottom: "2rem", paddingBottom: "2rem", borderBottom: "1px solid var(--color-szl-border)" }}>
-                SZL Holdings is building the business observability category — software that connects signal detection, action routing, and outcome verification into a single accountable workflow across multiple operating domains.
+                SZL Holdings builds governed decision infrastructure — the structural layer between signal detection and action execution, with a nine-step governance loop, full AI provenance, and an immutable proof chain on every consequential enterprise decision.
               </p>
               <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", marginBottom: "1rem" }}>Full (3 sentences)</p>
               <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "hsl(38,8%,78%)" }}>
-                SZL Holdings is building the business observability category — software that connects signal detection, action routing, and outcome verification into a single accountable workflow. The company's Lyte + Alloy platform serves as a shared execution fabric across multiple domain-specific products: PRISM Counsel for legal operations, Vessels for maritime intelligence, Aegis for security and defense, and Terra for real estate. SZL is led by founder Stephen Lutar and is in active design-partner engagement with enterprise teams.
+                SZL Holdings builds governed decision infrastructure — the structural layer between signal detection and action execution. The platform enforces a nine-step governance loop (Signal → Context → Recommendation → Simulation → Policy → Execution → Proof → Outcome → Learning) across every domain pack: Vessels for maritime intelligence, Aegis for security and defense, Terra for real estate, PRISM Counsel for legal operations, and Carlota Jo for premium advisory. SZL is led by founder Stephen Lutar and is in active design-partner engagement with enterprise teams ahead of a Series A raise in 2026.
               </p>
             </div>
           </div>

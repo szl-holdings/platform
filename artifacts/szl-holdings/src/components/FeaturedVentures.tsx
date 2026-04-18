@@ -4,7 +4,7 @@ import { ArrowUpRight } from "lucide-react";
 const featured = [
   {
     name: "Lyte",
-    category: "Business Observability",
+    category: "Decision Intelligence",
     description: "Enterprise-grade platform for operational observability, risk detection, and accountability. Signal cards surface anomalies with action ownership and consequence framing.",
     capabilities: ["KPI drift detection", "Workflow friction analysis", "Role-based insight rail", "Executive dashboards"],
     href: "/command/operations/",

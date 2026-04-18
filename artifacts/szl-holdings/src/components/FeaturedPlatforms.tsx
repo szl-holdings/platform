@@ -13,7 +13,7 @@ interface EcosystemSummary {
 const PLATFORM_DEFS = [
   {
     name: "Lyte",
-    label: "Business Observability Platform",
+    label: "Operational Decision Intelligence",
     copy: "See risk, latency, ownership gaps, and workflow friction before they hit execution.",
     cta: "Explore Lyte",
     href: "/command/operations/",

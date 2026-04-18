@@ -524,6 +524,72 @@ export default function TrustCenter() {
         </div>
       </section>
 
+      {/* Legal & Compliance Pages */}
+      <section style={{
+        paddingTop: "clamp(3.5rem,6vw,5rem)", paddingBottom: "clamp(3rem,5vw,4rem)",
+        borderTop: "1px solid hsla(0,0%,100%,0.05)", borderBottom: "1px solid hsla(0,0%,100%,0.05)",
+        background: "hsla(0,0%,100%,0.012)",
+      }}>
+        <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
+          <m.div
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            style={{ marginBottom: "2rem" }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "1rem" }}>
+              <FileText size={14} style={{ color: "hsl(210,55%,58%)" }} />
+              <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: "hsl(210,55%,58%)" }}>Legal & Compliance</p>
+            </div>
+            <h2 style={{ fontSize: "clamp(1.375rem,2.5vw,1.75rem)", fontWeight: 700, letterSpacing: "-0.02em", color: "hsl(38,12%,92%)", marginBottom: "0.875rem", maxWidth: "32rem" }}>
+              Legal documentation for compliance reviewers
+            </h2>
+            <p style={{ fontSize: "0.9375rem", color: "hsl(210,5%,56%)", lineHeight: 1.65, maxWidth: "52ch" }}>
+              All legal agreements, privacy policies, and compliance documents in one place. For enterprise procurement teams and legal reviewers.
+            </p>
+          </m.div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "0.75rem" }}>
+            {[
+              { label: "Privacy Policy", desc: "Data collection, processing, and user rights under GDPR/CCPA", href: "/legal/privacy", accent: "#3b82f6" },
+              { label: "Terms of Service", desc: "Platform usage terms, acceptable conduct, and service boundaries", href: "/legal/terms", accent: "#8b5cf6" },
+              { label: "Cookie Policy", desc: "Cookie types, consent management, and opt-out instructions", href: "/legal/cookies", accent: "#10b981" },
+              { label: "Acceptable Use Policy", desc: "Permitted use cases, prohibited activity, and enforcement", href: "/legal/acceptable-use", accent: "#f59e0b" },
+              { label: "Security Disclosure", desc: "Responsible disclosure program, scope, and contact", href: "/legal/security-disclosure", accent: "#ef4444" },
+              { label: "Data Processing Agreement", desc: "DPA template for enterprise customers. Request via security@szlholdings.com", href: "mailto:security@szlholdings.com?subject=DPA%20Request", accent: "#6366f1" },
+            ].map((doc, i) => (
+              <m.div
+                key={doc.label}
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <a
+                  href={doc.href}
+                  style={{
+                    display: "block",
+                    padding: "1.125rem 1.375rem",
+                    borderRadius: "8px",
+                    background: "hsla(0,0%,100%,0.02)",
+                    border: `1px solid hsla(0,0%,100%,0.07)`,
+                    borderLeft: `3px solid ${doc.accent}`,
+                    textDecoration: "none",
+                    transition: "background 0.18s",
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.375rem" }}>
+                    <span style={{ fontSize: "13px", fontWeight: 700, color: "hsl(38,12%,90%)", letterSpacing: "-0.01em" }}>{doc.label}</span>
+                    <ExternalLink size={11} style={{ color: doc.accent, opacity: 0.7 }} />
+                  </div>
+                  <p style={{ fontSize: "12px", lineHeight: 1.6, color: "hsl(210,5%,52%)" }}>{doc.desc}</p>
+                </a>
+              </m.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section style={{ paddingTop: "clamp(4rem,7vw,6rem)", paddingBottom: "clamp(4rem,7vw,6rem)" }}>
         <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16">

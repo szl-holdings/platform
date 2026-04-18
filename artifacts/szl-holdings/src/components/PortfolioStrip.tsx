@@ -13,8 +13,8 @@ const ventures = [
   },
   {
     name: "Lyte",
-    tagline: "Business observability and operational intelligence.",
-    category: "Observability Platform",
+    tagline: "Operational decision intelligence for enterprise operations.",
+    category: "Decision Intelligence",
     status: "Live",
     href: "/command/operations/",
     accent: "hsl(192,70%,46%)",

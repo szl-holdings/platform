@@ -28,7 +28,7 @@ const FLAGSHIP: Platform[] = [
   },
   {
     name: "Lyte",
-    role: "Business Observability Platform",
+    role: "Operational Decision Intelligence",
     description: "Role-based visibility into risk, latency, ownership gaps, and workflow friction. Executive, operations, and delivery views — before problems hit execution.",
     accent: "hsl(192,80%,48%)",
     href: "/command/operations/",

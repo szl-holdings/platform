@@ -1,7 +1,7 @@
 import { m } from "framer-motion";
 
 const PROOF_ITEMS = [
-  { label: "Approval latency detection", sublabel: "Lyte · Business observability", accent: "hsl(192,80%,48%)", accentRgb: "6,182,212" },
+  { label: "Approval latency detection", sublabel: "Lyte · Operational decision intelligence", accent: "hsl(192,80%,48%)", accentRgb: "6,182,212" },
   { label: "Dark vessel pre-detection", sublabel: "Vessels · Before formal designation", accent: "hsl(210,78%,44%)", accentRgb: "34,104,175" },
   { label: "Decision velocity", sublabel: "Alloy · Workflow orchestration", accent: "hsl(222,68%,58%)", accentRgb: "86,122,214" },
   { label: "Shared infrastructure advantage", sublabel: "Ecosystem · Architecture leverage", accent: "hsl(38,55%,58%)", accentRgb: "191,152,82" },

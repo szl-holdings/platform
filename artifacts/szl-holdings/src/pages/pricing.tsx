@@ -29,7 +29,7 @@ const ENGAGEMENT_TIMELINE = [
 export default function PricingPage() {
   usePageMeta({
     title: "Pilot Program — Lyte + Alloy | SZL Holdings",
-    description: "3-month design partner engagement: Lyte + Alloy instrumented against your operational data. Business observability and execution accountability, live in your environment.",
+    description: "3-month design partner engagement: Lyte + Alloy instrumented against your operational data. Governed decision intelligence and execution accountability, live in your environment.",
     canonical: "https://szlholdings.com/pricing",
   });
 

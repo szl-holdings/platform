@@ -7,7 +7,7 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 const core = [
   {
     name: "Lyte",
-    type: "Business Observability Platform",
+    type: "Decision Intelligence Platform",
     stage: "Core now",
     href: "/command/operations/",
     body: "The market-facing software wedge: execution visibility, risk surfacing, ownership clarity, and next action in one command surface.",

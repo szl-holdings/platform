@@ -118,7 +118,7 @@ export default function SolutionsPrismCounselPage() {
           <span style={{ display: "inline-flex", alignItems: "center", padding: "0.125rem 0.5rem", borderRadius: "0.25rem", background: "rgba(212,160,84,0.12)", border: "1px solid rgba(212,160,84,0.25)", fontFamily: "var(--font-mono, monospace)", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#d4a054" }}>Beta</span>
         </div>
         <h1 className="text-4xl font-bold text-slate-100 leading-tight mb-4">
-          Legal Business Observability.<br />
+          Legal Decision Intelligence.<br />
           Governed Matter Execution.
         </h1>
         <p className="text-base text-slate-400 max-w-2xl leading-relaxed mb-3">

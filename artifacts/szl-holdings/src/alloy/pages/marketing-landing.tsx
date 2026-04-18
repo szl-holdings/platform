@@ -11,7 +11,7 @@ const agentRoles = [
 ];
 
 const powers = [
-  { name: "Lyte", desc: "Business observability and command. Alloy drives signal ingestion, anomaly classification, and workflow routing.", accent: "#f59e0b" },
+  { name: "Lyte", desc: "Decision intelligence and command. Alloy drives signal ingestion, anomaly classification, and workflow routing.", accent: "#f59e0b" },
   { name: "Vessels", desc: "Maritime intelligence. Alloy processes voyage data, fleet exceptions, and regulatory signals into command-ready output.", accent: "#3b82f6" },
   { name: "Creative Workflows", desc: "AI-powered creative orchestration. Alloy sequences campaign production — scripts, storyboards, voice assets, and approvals — from brief to final delivery.", accent: "#4B8BDB" },
 ];
@@ -167,7 +167,7 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
                 Alloy operates as the intelligence backbone of SZL Holdings. It processes signals from across operational systems, applies reasoning to classify and contextualize them, and then sequences the right actions — without humans manually routing every decision.
               </p>
               <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "#64748b" }}>
-                Every platform in the SZL ecosystem — Lyte for business observability, Vessels for maritime command, and Creative Workflows for AI-powered campaign production — is powered by Alloy's orchestration layer. The platforms are the interface. Alloy is the engine.
+                Every platform in the SZL ecosystem — Lyte for decision intelligence, Vessels for maritime command, and Creative Workflows for AI-powered campaign production — is powered by Alloy's orchestration layer. The platforms are the interface. Alloy is the engine.
               </p>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>

@@ -118,9 +118,9 @@ We are raising a combination of non-dilutive capital (SBA, bank, government gran
         title: "Market Opportunity",
         content: `The SZL portfolio addresses five distinct markets, each with compelling structural dynamics:
 
-BUSINESS OBSERVABILITY (Lyte)
+OPERATIONAL DECISION INTELLIGENCE (Lyte)
 TAM: $12B+ | SAM: $2.1B | SOM (3yr): $45M
-The market for "business observability" — making organizational operations legible in real time — is nascent but rapidly forming. Existing tools (Datadog, ServiceNow, PagerDuty) address IT and infrastructure observability. Lyte addresses business process observability: approval latency, ownership gaps, handoff failures, and workflow friction that compound into organizational breakdown. No incumbent owns this category at the SMB-to-mid-market layer.
+The market for governed operational decision intelligence — making organizational decisions legible, traceable, and policy-gated in real time — is nascent but rapidly forming. Existing tools (Datadog, ServiceNow, PagerDuty) address IT and infrastructure observability. Lyte addresses decision layer intelligence: approval latency, ownership gaps, handoff failures, and workflow friction that compound into organizational breakdown. No incumbent owns this category at the SMB-to-mid-market layer.
 
 MARITIME INTELLIGENCE (Vessels)
 TAM: $8B+ | SAM: $1.4B | SOM (3yr): $30M

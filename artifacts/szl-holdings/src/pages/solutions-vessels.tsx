@@ -132,7 +132,7 @@ export default function SolutionsVesselsPage() {
                 </div>
               </div>
               <p style={{ fontSize: "clamp(1rem,1.8vw,1.125rem)", lineHeight: 1.72, color: "hsl(214,7%,64%)", maxWidth: "52ch", marginBottom: "2.25rem" }}>
-                Business observability for assets underway. Fleet visibility, voyage performance,
+                Decision intelligence for assets underway. Fleet visibility, voyage performance,
                 and operational exception management — for the teams that run complex, distributed
                 maritime operations.
               </p>

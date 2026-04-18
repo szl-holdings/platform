@@ -22,7 +22,7 @@ const hubPages = [
     label: "Overview",
     title: "Company & Category",
     description:
-      "Why now, why this architecture, why these verticals, and why the demo matters more than the pitch.",
+      "Why governed decision infrastructure is a new category, why the timing is now, and why the architecture is different from everything adjacent.",
   },
   {
     href: "/investors/architecture",
@@ -70,6 +70,16 @@ const hubPages = [
       "Structured materials for qualified investors. Company overview, product architecture, commercial strategy, and operating plan.",
   },
   {
+    href: "/aegis/",
+    icon: Building2,
+    color: "#0cc8d9",
+    label: "Series A Deck",
+    title: "Live Pitch Presentation",
+    description:
+      "The Series A pitch deck — governed decision infrastructure, 9-step loop, competitive moat, and ask. Live presentation format.",
+    external: true,
+  },
+  {
     href: "/investors/founder",
     icon: User,
     color: "#a07a5a",
@@ -88,23 +98,23 @@ const fundamentals = [
   },
   {
     label: "Category",
-    value: "Business observability",
-    note: "Signal detection → action routing → outcome verification",
+    value: "Governed decision infrastructure",
+    note: "The structural layer between signal detection and action execution",
   },
   {
     label: "Architecture",
     value: "Shared spine, vertical packs",
-    note: "One platform, multiple domain-specific products",
+    note: "One governed platform, multiple domain-specific products",
   },
   {
     label: "Wedge",
-    value: "Lyte + Alloy → PRISM Counsel",
-    note: "Legal operations is the first commercial vertical",
+    value: "Vessels, Aegis, Terra → platform",
+    note: "Maritime, security, and real estate entering design-partner phase",
   },
   {
     label: "Expansion logic",
-    value: "Vessels, Aegis, Terra",
-    note: "Same architecture, new operating domains",
+    value: "9-step loop × 6 domain packs",
+    note: "Each pack inherits governance, proof chain, and simulation engine",
   },
   {
     label: "Edge",
@@ -138,9 +148,9 @@ export default function InvestorsHubPage() {
               Investor Hub.
             </h1>
             <p className="mt-6 max-w-3xl text-lg leading-8 text-white/70">
-              Business observability infrastructure for organizations that need to see execution risk,
-              workflow latency, and ownership gaps — and close them. One architecture. Multiple
-              domain-specific packs. Operational proof first.
+              Governed decision infrastructure — the structural layer between signal detection and
+              action execution. Nine governed stages, full AI provenance, immutable proof chain.
+              One architecture. Multiple domain packs. Series A, 2026.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
@@ -192,29 +202,36 @@ export default function InvestorsHubPage() {
             <div className="mt-8 grid gap-4 md:grid-cols-2">
               {hubPages.map((page) => {
                 const Icon = page.icon;
-                return (
-                  <Link key={page.href} href={page.href}>
-                    <div className="group flex cursor-pointer items-start gap-5 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6 transition hover:border-white/10 hover:bg-white/[0.04]">
-                      <div
-                        className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/[0.08] bg-black/25"
-                        style={{ color: page.color }}
-                      >
-                        <Icon className="h-5 w-5" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <p
-                            className="text-xs font-semibold uppercase tracking-[0.18em]"
-                            style={{ color: page.color }}
-                          >
-                            {page.label}
-                          </p>
-                        </div>
-                        <p className="mt-1 text-base font-semibold text-white">{page.title}</p>
-                        <p className="mt-2 text-sm leading-6 text-white/55">{page.description}</p>
-                      </div>
-                      <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-white/25 transition group-hover:text-white/45" />
+                const cardContent = (
+                  <div className="group flex cursor-pointer items-start gap-5 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6 transition hover:border-white/10 hover:bg-white/[0.04]">
+                    <div
+                      className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/[0.08] bg-black/25"
+                      style={{ color: page.color }}
+                    >
+                      <Icon className="h-5 w-5" />
                     </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p
+                          className="text-xs font-semibold uppercase tracking-[0.18em]"
+                          style={{ color: page.color }}
+                        >
+                          {page.label}
+                        </p>
+                      </div>
+                      <p className="mt-1 text-base font-semibold text-white">{page.title}</p>
+                      <p className="mt-2 text-sm leading-6 text-white/55">{page.description}</p>
+                    </div>
+                    <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-white/25 transition group-hover:text-white/45" />
+                  </div>
+                );
+                return page.external ? (
+                  <a key={page.href} href={page.href} style={{ textDecoration: "none" }}>
+                    {cardContent}
+                  </a>
+                ) : (
+                  <Link key={page.href} href={page.href}>
+                    {cardContent}
                   </Link>
                 );
               })}

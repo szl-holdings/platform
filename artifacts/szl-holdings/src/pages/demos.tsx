@@ -8,7 +8,7 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 const DEMOS = [
   {
     id: "lyte",
-    title: "Lyte Business Observability",
+    title: "Lyte Decision Intelligence",
     subtitle: "See what's invisible before it costs you",
     description: "Revenue stall detection, approval aging, ownership drift, KPI monitoring — all surfaced in a single command layer with governed action routing.",
     icon: BarChart3,

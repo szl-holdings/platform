@@ -26,7 +26,7 @@ export default function InvestorsFounderPage() {
             </h1>
             <p className="mt-2 text-lg text-[#d4a054]">Founder & CEO, SZL Holdings</p>
             <p className="mt-6 max-w-3xl text-lg leading-8 text-white/72">
-              Founder building Lyte, Alloy, and Vessels at SZL Holdings. Business observability,
+              Founder building Lyte, Alloy, and Vessels at SZL Holdings. Governed decision infrastructure,
               AI systems, and secure operations. Based in New York, NY.
             </p>
           </div>

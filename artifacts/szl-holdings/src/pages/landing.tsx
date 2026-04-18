@@ -166,6 +166,81 @@ const AUDIENCE_PATHS = [
   { icon: BarChart3, label: "Investor", desc: "Market thesis, moat, and data room.", href: "/investor", accent: "hsl(145,60%,50%)" },
 ];
 
+const TICKER_ITEMS = [
+  { label: "Signal", color: "#0ea5e9" },
+  { label: "→", color: "hsla(0,0%,100%,0.2)" },
+  { label: "Context", color: "#8b5cf6" },
+  { label: "→", color: "hsla(0,0%,100%,0.2)" },
+  { label: "Recommendation", color: "#ec4899" },
+  { label: "→", color: "hsla(0,0%,100%,0.2)" },
+  { label: "Simulation", color: "#f59e0b" },
+  { label: "→", color: "hsla(0,0%,100%,0.2)" },
+  { label: "Policy", color: "#10b981" },
+  { label: "→", color: "hsla(0,0%,100%,0.2)" },
+  { label: "Execution", color: "#6366f1" },
+  { label: "→", color: "hsla(0,0%,100%,0.2)" },
+  { label: "Proof", color: "#14b8a6" },
+  { label: "→", color: "hsla(0,0%,100%,0.2)" },
+  { label: "Outcome", color: "#ef4444" },
+  { label: "→", color: "hsla(0,0%,100%,0.2)" },
+  { label: "Learning", color: "#f97316" },
+  { label: "·", color: "hsla(0,0%,100%,0.15)" },
+  { label: "Nine stages", color: "hsla(0,0%,100%,0.35)", mono: true },
+  { label: "·", color: "hsla(0,0%,100%,0.15)" },
+  { label: "Every decision", color: "hsla(0,0%,100%,0.35)", mono: true },
+  { label: "·", color: "hsla(0,0%,100%,0.15)" },
+  { label: "Fully traced", color: "hsla(0,0%,100%,0.35)", mono: true },
+  { label: "·", color: "hsla(0,0%,100%,0.15)" },
+];
+
+function LoopTicker() {
+  const items = [...TICKER_ITEMS, ...TICKER_ITEMS];
+  return (
+    <div style={{
+      borderTop: `1px solid ${BORDER}`,
+      borderBottom: `1px solid ${BORDER}`,
+      background: "hsla(0,0%,100%,0.018)",
+      overflow: "hidden",
+      position: "relative",
+    }}>
+      <style>{`
+        @keyframes szl-ticker-scroll {
+          from { transform: translateX(0); }
+          to { transform: translateX(-50%); }
+        }
+        .szl-ticker-track {
+          display: flex;
+          align-items: center;
+          animation: szl-ticker-scroll 28s linear infinite;
+          width: max-content;
+        }
+        .szl-ticker-track:hover {
+          animation-play-state: paused;
+        }
+      `}</style>
+      <div className="szl-ticker-track" style={{ padding: "0.625rem 0", gap: "1.25rem" }}>
+        {items.map((item, i) => (
+          <span
+            key={i}
+            style={{
+              fontSize: item.mono ? "0.6rem" : "0.6875rem",
+              fontFamily: item.mono ? MONO : "inherit",
+              fontWeight: item.mono ? 500 : 600,
+              letterSpacing: item.mono ? "0.10em" : "0.04em",
+              textTransform: item.mono ? "uppercase" : "none",
+              color: item.color,
+              whiteSpace: "nowrap",
+              flexShrink: 0,
+            }}
+          >
+            {item.label}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function NewsletterSection() {
   return (
     <section style={{ borderBottom: `1px solid ${BORDER}` }}>
@@ -427,6 +502,9 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
+        {/* ── Loop Ticker ─────────────────────────────────────────── */}
+        <LoopTicker />
 
         {/* ── Decision Loop Visualization ──────────────────────────── */}
         <section ref={loopRef} style={{ borderBottom: `1px solid ${BORDER}`, padding: "clamp(4rem,8vw,5.5rem) 0" }}>

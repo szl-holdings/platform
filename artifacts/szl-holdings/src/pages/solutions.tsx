@@ -23,7 +23,7 @@ const SOLUTIONS = [
     name: "Vessels",
     slug: "vessels",
     domain: "Maritime Intelligence",
-    tagline: "Fleet visibility, voyage performance, and operational exceptions — business observability for assets underway in complex, distributed environments.",
+    tagline: "Fleet visibility, voyage performance, and operational exceptions — decision intelligence for assets underway in complex, distributed environments.",
     color: "var(--color-vessels)",
     colorMuted: "var(--color-vessels-muted)",
     border: "hsla(206,72%,40%,0.18)",

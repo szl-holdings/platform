@@ -27,7 +27,7 @@ const differentiators = [
   },
   {
     title: "Category clarity",
-    body: "The company is not pitching five simultaneous products. It is pitching a focused business observability company with a visible platform expansion path.",
+    body: "The company is not pitching five simultaneous products. It is pitching governed decision infrastructure — a new category, not an adjacent feature — with a visible domain-pack expansion path.",
   },
   {
     title: "Compounding expansion logic",
@@ -42,8 +42,8 @@ const differentiators = [
 const nowThen = [
   {
     label: "Now",
-    title: "Commercial wedge",
-    body: "Sell and fund Lyte + Alloy as a business observability platform for organizations that need visibility into latency, risk, ownership drift, and execution.",
+    title: "Design-partner phase",
+    body: "Work with 3–6 design partners per domain — maritime, security, real estate — on governed decision infrastructure in their actual operating environment. Proof before scale.",
   },
   {
     label: "Next",
@@ -104,10 +104,10 @@ export default function InvestorStoryPage() {
               A broader platform later.
             </h1>
             <p className="mt-6 max-w-3xl text-lg leading-8 text-white/72">
-              SZL Holdings should be financed and sold as a business observability company with one
-              clear software wedge. Lyte is the market-facing product. Alloy is the execution,
-              workflow, and audit fabric beneath it. The wider ecosystem is real, but it belongs in
-              expansion logic, not in the center of the raise story.
+              SZL Holdings should be financed as a governed decision infrastructure company with a
+              clear domain-pack expansion logic. Lyte is the command surface. Alloy is the governance
+              execution fabric. The 9-step loop is the architecture. Domain packs are the expansion
+              model — not the pitch.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
@@ -154,8 +154,7 @@ export default function InvestorStoryPage() {
                 </div>
                 <h3 className="text-xl font-semibold text-white">Lyte</h3>
                 <p className="mt-3 text-sm leading-7 text-white/78">
-                  Business observability software for teams that need to see execution risk, ownership
-                  drift, operational latency, and next-best action in one place.
+                  The governed command surface — surfaces execution risk, approval latency, ownership gaps, and next-best action across the 9-step decision loop in one place.
                 </p>
               </div>
               <div className="rounded-3xl border border-[#4a90b8]/25 bg-[#4a90b8]/10 p-6">

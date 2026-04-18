@@ -114,7 +114,7 @@ export function Hero() {
               className="flex flex-wrap gap-8 sm:gap-10"
             >
               {[
-                { value: "Lyte", label: "Business Observability" },
+                { value: "Lyte", label: "Decision Intelligence" },
                 { value: "Alloy", label: "Execution Orchestration" },
                 { value: "One", label: "Unified Operating Layer" },
               ].map((stat) => (
