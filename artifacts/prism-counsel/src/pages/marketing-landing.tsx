@@ -105,7 +105,7 @@ export default function MarketingLanding({ onSignIn }: MarketingLandingProps) {
             <ArrowRight className="w-4 h-4" />
           </button>
           <button
-            onClick={() => { window.location.href = "?demo=true"; }}
+            onClick={() => { window.location.href = "?view=app"; }}
             className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-medium transition-all"
             style={{ background: "rgba(167,139,250,0.08)", border: "1px solid rgba(167,139,250,0.2)", color: "rgba(167,139,250,0.8)" }}
           >

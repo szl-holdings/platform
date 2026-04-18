@@ -5,6 +5,8 @@ import {
   ChevronLeft, ChevronRight, Scale, Bell, Search, Menu, X
 } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { GettingStartedChecklist } from "@szl-holdings/shared-ui";
+import { PRISM_ONBOARDING_CONFIG } from "@/onboarding-config";
 
 const ACCENT = "#a78bfa";
 
@@ -129,6 +131,18 @@ export function PrismLayout({ children }: { children: React.ReactNode }) {
           </div>
         ))}
       </nav>
+
+      {!collapsed && PRISM_ONBOARDING_CONFIG.checklist && (
+        <div className="shrink-0 px-3 pt-2 pb-1 border-t border-white/5">
+          <GettingStartedChecklist
+            appId={PRISM_ONBOARDING_CONFIG.appId}
+            appName={PRISM_ONBOARDING_CONFIG.appName}
+            items={PRISM_ONBOARDING_CONFIG.checklist}
+            accentColor={PRISM_ONBOARDING_CONFIG.accentColor}
+            collapsed
+          />
+        </div>
+      )}
 
       <div className="shrink-0 p-3 border-t border-white/5">
         <button

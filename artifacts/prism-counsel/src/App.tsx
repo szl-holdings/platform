@@ -4,7 +4,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import { persistQueryClient } from "@tanstack/query-persist-client-core";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
-import { SandboxModeProvider, SandboxModeBanner, AnalyticsProvider, CookieBanner } from "@szl-holdings/shared-ui";
+import { SandboxModeProvider, SandboxModeBanner, AnalyticsProvider, CookieBanner, OnboardingWizard } from "@szl-holdings/shared-ui";
+import { PRISM_ONBOARDING_CONFIG } from "@/onboarding-config";
 import { McpOverlay } from "@szl-holdings/mcp-client";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
 import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
@@ -107,6 +108,7 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
           </div>
         </div>
         <CommandPalette open={cmdOpen} onClose={() => setCmdOpen(false)} commands={prismCommands} appName="PRISM Counsel" accentColor={PRISM_ACCENT} />
+        <OnboardingWizard config={PRISM_ONBOARDING_CONFIG} />
       </PowerUserProvider>
     );
   }
@@ -137,6 +139,7 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
         </div>
       </div>
       <CommandPalette open={cmdOpen} onClose={() => setCmdOpen(false)} commands={prismCommands} appName="PRISM Counsel" accentColor={PRISM_ACCENT} />
+      <OnboardingWizard config={PRISM_ONBOARDING_CONFIG} />
     </PowerUserProvider>
   );
 }
