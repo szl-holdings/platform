@@ -329,6 +329,13 @@ export async function markDistributionSent(distributionId: string) {
     .where(eq(reportDistributionsTable.distributionId, distributionId));
 }
 
+export async function markDistributionFailed(distributionId: string, errorMessage: string) {
+  await db
+    .update(reportDistributionsTable)
+    .set({ status: "failed", errorMessage })
+    .where(eq(reportDistributionsTable.distributionId, distributionId));
+}
+
 export async function markDistributionOpened(distributionId: string) {
   await db
     .update(reportDistributionsTable)

@@ -1,12 +1,19 @@
 import nodemailer from "nodemailer";
 import { logger } from "./logger";
 
+interface EmailAttachment {
+  filename: string;
+  content: Buffer;
+  contentType: string;
+}
+
 interface EmailOptions {
   to: string;
   subject: string;
   html: string;
   text?: string;
   replyTo?: string;
+  attachments?: EmailAttachment[];
 }
 
 interface SendResult {
@@ -25,6 +32,13 @@ async function sendViaSendGrid(options: EmailOptions): Promise<SendResult> {
   const apiKey = process.env.SENDGRID_API_KEY;
   if (!apiKey) throw new Error("SENDGRID_API_KEY not configured");
 
+  const sgAttachments = options.attachments?.map(a => ({
+    content: a.content.toString("base64"),
+    filename: a.filename,
+    type: a.contentType,
+    disposition: "attachment",
+  }));
+
   const res = await fetch("https://api.sendgrid.com/v3/mail/send", {
     method: "POST",
     headers: {
@@ -40,6 +54,7 @@ async function sendViaSendGrid(options: EmailOptions): Promise<SendResult> {
         { type: "text/html", value: options.html },
         ...(options.text ? [{ type: "text/plain", value: options.text }] : []),
       ],
+      ...(sgAttachments?.length ? { attachments: sgAttachments } : {}),
     }),
   });
 
@@ -56,6 +71,11 @@ async function sendViaResend(options: EmailOptions): Promise<SendResult> {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) throw new Error("RESEND_API_KEY not configured");
 
+  const resendAttachments = options.attachments?.map(a => ({
+    filename: a.filename,
+    content: a.content.toString("base64"),
+  }));
+
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
@@ -69,6 +89,7 @@ async function sendViaResend(options: EmailOptions): Promise<SendResult> {
       html: options.html,
       text: options.text,
       reply_to: options.replyTo,
+      ...(resendAttachments?.length ? { attachments: resendAttachments } : {}),
     }),
   });
 
@@ -98,6 +119,12 @@ async function sendViaSMTP(options: EmailOptions): Promise<SendResult> {
     auth: { user: smtpUser, pass: smtpPass },
   });
 
+  const smtpAttachments = options.attachments?.map(a => ({
+    filename: a.filename,
+    content: a.content,
+    contentType: a.contentType,
+  }));
+
   const info = await transporter.sendMail({
     from: FROM_ADDRESS,
     to: options.to,
@@ -105,6 +132,7 @@ async function sendViaSMTP(options: EmailOptions): Promise<SendResult> {
     html: options.html,
     text: options.text,
     replyTo: options.replyTo,
+    attachments: smtpAttachments,
   });
 
   return { success: true, messageId: info.messageId, provider: "smtp" };
@@ -1128,5 +1156,53 @@ export function buildTransactionalNotificationEmail(params: {
     ${actionUrl ? `<a class="cta" href="${actionUrl}" style="background:${color};">View Details</a>` : ""}
     <p style="margin-top:20px;font-size:12px;color:#9ca3af;">This is a notification from the SZL Holdings platform. To manage your notification preferences, visit your account settings.</p>
   `);
+}
+
+export interface ScheduledReportEmailOptions {
+  reportTitle: string;
+  scheduleName: string;
+  domain: string;
+  frequency: string;
+  generatedAt: string;
+  reportUrl?: string;
+}
+
+export function buildScheduledReportEmail(opts: ScheduledReportEmailOptions): { subject: string; html: string; text: string } {
+  const subject = `Scheduled Report: ${opts.reportTitle}`;
+  const frequencyLabel = opts.frequency.charAt(0).toUpperCase() + opts.frequency.slice(1).replace("_", " ");
+
+  const html = szlBrand(`
+    <h2>Your Scheduled Report Is Ready</h2>
+    <p>Your scheduled report has been generated and is attached to this email as a PDF.</p>
+    <div class="highlight">
+      <p class="label">Report</p>
+      <p style="font-weight:600;">${opts.reportTitle}</p>
+      <p class="label" style="margin-top:8px;">Schedule</p>
+      <p>${opts.scheduleName}</p>
+      <p class="label" style="margin-top:8px;">Frequency</p>
+      <p>${frequencyLabel}</p>
+      <p class="label" style="margin-top:8px;">Generated</p>
+      <p>${opts.generatedAt}</p>
+    </div>
+    <p>The full report PDF is attached. ${opts.reportUrl ? `You can also <a href="${opts.reportUrl}" style="color:#6366f1;">view it online</a>.` : ""}</p>
+    <p style="font-size:12px;color:#9ca3af;">This report was delivered automatically by the SZL Holdings reporting schedule. To modify or cancel this schedule, contact your administrator.</p>
+  `);
+
+  const text = [
+    `Scheduled Report: ${opts.reportTitle}`,
+    ``,
+    `Your scheduled report has been generated and is attached to this email as a PDF.`,
+    ``,
+    `Report:    ${opts.reportTitle}`,
+    `Schedule:  ${opts.scheduleName}`,
+    `Frequency: ${frequencyLabel}`,
+    `Generated: ${opts.generatedAt}`,
+    ``,
+    opts.reportUrl ? `View online: ${opts.reportUrl}` : "",
+    ``,
+    `This report was delivered automatically by the SZL Holdings reporting schedule.`,
+  ].filter(line => line !== undefined).join("\n");
+
+  return { subject, html, text };
 }
 
