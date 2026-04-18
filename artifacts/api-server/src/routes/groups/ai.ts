@@ -9,7 +9,7 @@ import copilotRouter from "../copilot";
 import mcpRouter from "../mcp";
 import nueroMeshRouter from "../nuro-mesh";
 import nueroMeshAdvancedRouter from "../nuro-mesh-advanced";
-import controlTowerRouter from "../control-tower";
+import * as controlTower from "../control-tower";
 import domainAgentsRouter from "../domain-agents/index";
 import agentOsRouter from "../agent-os";
 import agentTrainingRouter from "../agent-training";
@@ -79,7 +79,7 @@ export function register(router: IRouter): void {
 
   router.use("/control-tower", _readLimiter);
   router.use("/control-tower", _writeLimiter);
-  router.use(controlTowerRouter);
+  controlTower.register(router);
 
   router.use("/domain-agents", _readLimiter);
   router.use(domainAgentsRouter);

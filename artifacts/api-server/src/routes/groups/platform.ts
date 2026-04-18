@@ -2,7 +2,7 @@ import type { IRouter } from "express";
 import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../../middlewares/sliding-window-limiter";
 import { tenantScope } from "../../middlewares/tenant-scope";
 
-import tenantProvisioningRouter from "../tenant-provisioning";
+import * as tenantProvisioning from "../tenant-provisioning";
 import dataverseRouter from "../dataverse";
 import scimRouter from "../scim";
 import orgSettingsRouter from "../org-settings";
@@ -53,7 +53,7 @@ export function register(router: IRouter): void {
   router.use(auditRouter);
 
   router.use("/admin/tenants", _writeLimiter);
-  router.use(tenantProvisioningRouter);
+  tenantProvisioning.register(router);
 
   router.use("/dataverse", _readLimiter);
   router.use("/dataverse", dataverseRouter);

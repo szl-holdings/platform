@@ -249,7 +249,9 @@ describe("Handler-level cross-tenant isolation — real domain handlers", () => 
 
   describe("metering — GET /metering/rate-cards/assignments/:orgId", () => {
     async function buildMeteringApp(userFactory: () => ReturnType<typeof makeOrgAUser>) {
-      const { default: router } = await import("../metering/routes");
+      const { register } = await import("../metering/index.js");
+      const router = express.Router();
+      register(router);
       return buildApp(router as express.Router, userFactory);
     }
 

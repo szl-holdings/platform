@@ -2,7 +2,7 @@ import type { IRouter } from "express";
 import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../../middlewares/sliding-window-limiter";
 import { tenantScope } from "../../middlewares/tenant-scope";
 
-import documentsRouter from "../documents";
+import * as documents from "../documents";
 import cmsRouter from "../cms";
 import exportsRouter from "../exports";
 import reportsRouter from "../reports";
@@ -39,7 +39,7 @@ export function register(router: IRouter): void {
   router.use("/revenue-intelligence", tenantScope({ required: true }));
 
   router.use("/documents", _writeLimiter);
-  router.use(documentsRouter);
+  documents.register(router);
 
   router.use("/cms", _readLimiter);
   router.use(cmsRouter);

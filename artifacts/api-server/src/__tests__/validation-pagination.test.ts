@@ -255,7 +255,9 @@ vi.mock("../middlewares/auth.js", () => ({
 const { default: billingRouter } = await import("../routes/billing.js");
 const { default: authRouter } = await import("../routes/auth.js");
 const { default: notificationsRouter } = await import("../routes/notifications.js");
-const { default: tenantProvisioningRouter } = await import("../routes/tenant-provisioning/index.js");
+const { register: registerTenantProvisioning } = await import("../routes/tenant-provisioning/index.js");
+const tenantProvisioningRouter = express.Router();
+registerTenantProvisioning(tenantProvisioningRouter);
 
 // ---------------------------------------------------------------------------
 // Helper types

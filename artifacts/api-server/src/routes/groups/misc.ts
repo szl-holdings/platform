@@ -1,4 +1,4 @@
-import type { IRouter } from "express";
+import { Router, type IRouter } from "express";
 import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../../middlewares/sliding-window-limiter";
 import { tenantScope } from "../../middlewares/tenant-scope";
 
@@ -28,7 +28,7 @@ import prismBusApiRouter from "../prism-bus-api";
 import forgeRuntimeApiRouter from "../forge-runtime-api";
 import covenantPolicyApiRouter from "../covenant-policy-api";
 import imperiumRouter from "../imperium";
-import distributionOsRouter from "../distribution-os";
+import * as distributionOs from "../distribution-os";
 import dosPublicApiRouter from "../dos-public-api";
 import integrationsRouter from "../integrations";
 import microsoftGraphRouter from "../microsoft-graph";
@@ -175,7 +175,9 @@ export function register(router: IRouter): void {
   router.use(imperiumRouter);
 
   router.use("/distribution-os", _writeLimiter);
-  router.use("/distribution-os", distributionOsRouter);
+  const dosRouter = Router();
+  distributionOs.register(dosRouter);
+  router.use("/distribution-os", dosRouter);
   // /v1 — public API gated by dosApiKeyAuth (API key), not user session. Exempt from tenantScope by design.
   router.use("/v1", dosPublicApiRouter);
 

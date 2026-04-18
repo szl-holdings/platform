@@ -15,6 +15,7 @@ const _writeLimiter = perUserWriteSlidingLimiter;
 
 export function register(router: IRouter): void {
   router.use("/observability", tenantScope({ required: true }));
+  router.use("/governance", tenantScope({ required: true }));
   router.use("/business-events", tenantScope({ required: true }));
 
   router.use("/admin", adminGuard);

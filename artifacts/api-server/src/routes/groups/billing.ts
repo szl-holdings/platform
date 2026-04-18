@@ -4,7 +4,7 @@ import { idempotencyMiddleware, optionalIdempotencyMiddleware } from "../../midd
 import { tenantScope } from "../../middlewares/tenant-scope";
 
 import billingRouter from "../billing";
-import meteringRouter from "../metering";
+import * as metering from "../metering";
 import usageRouter from "../usage";
 import partnerPortalRouter from "../partner-portal";
 import featureFlagsRouter from "../feature-flags";
@@ -37,7 +37,7 @@ export function register(router: IRouter): void {
 
   router.use("/metering", _readLimiter);
   router.use("/metering", _writeLimiter);
-  router.use(meteringRouter);
+  metering.register(router);
 
   router.use(usageRouter);
 

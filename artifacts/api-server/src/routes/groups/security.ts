@@ -1,18 +1,18 @@
-import type { IRouter } from "express";
+import { Router, type IRouter } from "express";
 import { perUserApiSlidingLimiter } from "../../middlewares/sliding-window-limiter";
 import { tenantScope } from "../../middlewares/tenant-scope";
 
-import aegisSocRouter from "../firestorm";
+import * as aegisSoc from "../firestorm";
 import aegisSocLiveRouter from "../firestorm-live";
 import firestormCommandRouter from "../firestorm-command-surfaces";
 import firestormCognitiveRouter from "../firestorm-cognitive";
-import intelligenceRouter from "../intelligence";
+import * as intelligence from "../intelligence";
 import aegisIntelRouter from "../inca";
 import govDataRouter from "../gov-data";
 import readinessRouter from "../readiness";
 import aegisOpsLiveRouter from "../msp-live";
 import aegisOpsRouter from "../msp";
-import rmmRouter from "../rmm";
+import * as rmm from "../rmm";
 import otIcsRouter from "../ot-ics";
 
 const _readLimiter = perUserApiSlidingLimiter;
@@ -47,7 +47,7 @@ export function register(router: IRouter): void {
     next();
   });
 
-  router.use(aegisSocRouter);
+  aegisSoc.register(router);
   router.use(aegisSocLiveRouter);
 
   router.use("/command", _readLimiter);
@@ -57,7 +57,7 @@ export function register(router: IRouter): void {
   router.use("/firestorm/cognitive", _readLimiter);
   router.use(firestormCognitiveRouter);
 
-  router.use(intelligenceRouter);
+  intelligence.register(router);
   router.use(aegisIntelRouter);
 
   router.use("/gov", _readLimiter);
@@ -72,7 +72,9 @@ export function register(router: IRouter): void {
   router.use(aegisOpsRouter);
 
   router.use("/msp", _readLimiter);
-  router.use("/msp", rmmRouter);
+  const mspRouter = Router();
+  rmm.register(mspRouter);
+  router.use("/msp", mspRouter);
 
   router.use(otIcsRouter);
 }
