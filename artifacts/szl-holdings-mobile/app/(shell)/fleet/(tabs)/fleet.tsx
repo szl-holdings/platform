@@ -8,7 +8,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import * as Haptics from "expo-haptics";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { VesselIcon, featherIcon } from "@/components/VesselIcon";
 import { useColors } from "@/hooks/useColors";
 import { api, type Vessel, CACHE_KEYS, cacheSet, cacheGetStale } from "@/lib/fleet/api";
@@ -220,6 +220,7 @@ export default function FleetScreen() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [refreshing, setRefreshing] = useState(false);
   const { wsStatus } = useVesselsWebSocket();
+  const queryClient = useQueryClient();
 
   const [lastFetchedAt, setLastFetchedAt] = useState<Date | null>(null);
   const [livePositions, setLivePositions] = useState<Record<string, { speed: string; lat: number; lon: number }>>({});
@@ -235,6 +236,12 @@ export default function FleetScreen() {
             [vessel]: { speed: String(speed ?? 0), lat, lon },
           }));
           setLastFetchedAt(new Date());
+          queryClient.setQueryData<Vessel[]>(["vessels-roster"], (prev) => {
+            if (!prev) return prev;
+            return prev.map((v) =>
+              v.name === vessel ? { ...v, speed: String(speed ?? 0) } : v
+            );
+          });
         }
       }
     },
@@ -286,9 +293,13 @@ export default function FleetScreen() {
   }, {});
 
   const onRefresh = useCallback(async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
     setRefreshing(true);
-    await refetch();
-    setRefreshing(false);
+    try {
+      await refetch();
+    } finally {
+      setRefreshing(false);
+    }
   }, [refetch]);
 
   const filterOptions = [

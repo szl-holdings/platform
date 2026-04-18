@@ -17,7 +17,7 @@ import Reanimated, { useSharedValue, useAnimatedStyle, withSpring, runOnJS } fro
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { useColors } from "@/hooks/useColors";
 import { useQuery } from "@tanstack/react-query";
-import { usePropertyAlertsWebSocket } from "@/hooks/usePropertyAlertsWebSocket";
+import { usePropertyAlertsWebSocket } from "@/hooks/properties/usePropertyAlertsWebSocket";
 import { useFuzzySearch } from "@szl-holdings/mobile-shared";
 import { cacheSet, cacheGetStale, CACHE_KEYS } from "@/lib/cache";
 
@@ -264,9 +264,13 @@ export default function PropertiesTab() {
     });
 
   const handleRefresh = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
     setRefreshing(true);
-    await refetch();
-    setRefreshing(false);
+    try {
+      await refetch();
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   return (
