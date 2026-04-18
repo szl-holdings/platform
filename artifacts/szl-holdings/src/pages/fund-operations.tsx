@@ -1,14 +1,14 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo } from "react";
 import { m, AnimatePresence } from "framer-motion";
 import {
   TrendingUp, DollarSign, Users, FileText, BarChart3, ShieldCheck,
-  AlertCircle, CheckCircle2, Clock, ArrowUpRight, ArrowDownRight,
+  AlertCircle, CheckCircle2, Clock, ArrowUpRight,
   PieChart, Activity, Building2, ChevronRight, RefreshCw,
-  Plus, X, Briefcase, Scale, Calculator, Download, Layers,
+  Plus, Briefcase, Scale, Calculator, Download, Layers,
 } from "lucide-react";
 import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer, PieChart as RePie, Pie, Cell, Legend,
+  Tooltip, ResponsiveContainer, PieChart as RePie, Pie, Cell,
 } from "recharts";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -30,9 +30,9 @@ export default function FundOperationsPage() {
   const [showEntry, setShowEntry] = useState(false);
   const [seeding, setSeeding] = useState(false);
 
-  const { data: summary, loading: summaryLoading, reload: reloadSummary } = useApiFetch<SummaryData>("/fund-ops/summary");
-  const { data: rawFinancials, loading: finLoading, reload: reloadFin } = useApiFetch<PortfolioFinancial[]>("/fund-ops/portfolio-financials?limit=100");
-  const { data: capTable, loading: capLoading, reload: reloadCap } = useApiFetch<CapTableSummary>("/fund-ops/cap-table-summary");
+  const { data: summary, reload: reloadSummary } = useApiFetch<SummaryData>("/fund-ops/summary");
+  const { data: rawFinancials, reload: reloadFin } = useApiFetch<PortfolioFinancial[]>("/fund-ops/portfolio-financials?limit=100");
+  const { data: capTable, reload: reloadCap } = useApiFetch<CapTableSummary>("/fund-ops/cap-table-summary");
   const { data: rawLpReports, reload: reloadLp } = useApiFetch<LpReport[]>("/fund-ops/lp-reports?limit=20");
   const { data: rawCapCalls, reload: reloadCalls } = useApiFetch<CapitalCall[]>("/fund-ops/capital-calls?limit=20");
   const { data: rawInvestors, reload: reloadInvestors } = useApiFetch<AccreditedInvestor[]>("/fund-ops/accredited-investors?limit=50");
@@ -266,7 +266,6 @@ ${report.disclaimers ? `<div class="disclaimer">${esc(report.disclaimers)}</div>
   }, [lpReports, formDFilings, investors, capCalls]);
 
   const reloadAll = () => { reloadSummary(); reloadFin(); reloadCap(); reloadLp(); reloadCalls(); reloadInvestors(); reloadFormD(); };
-  const isLoading = summaryLoading || finLoading || capLoading;
 
   const TABS: { id: Tab; label: string; icon: React.ElementType }[] = [
     { id: "portfolio", label: "Portfolio Financials", icon: BarChart3 },

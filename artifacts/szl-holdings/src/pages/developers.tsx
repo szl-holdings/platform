@@ -8,7 +8,6 @@ import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { NAV } from "@/developers/constants";
-import type { NavSection } from "@/developers/constants";
 import { OverviewSection } from "@/developers/OverviewSection";
 import { AuthSection } from "@/developers/AuthSection";
 import { RestApiSection } from "@/developers/RestApiSection";
