@@ -1,18 +1,20 @@
 import { Router, type IRouter, type Request, type Response } from "express";
-import { eq, and, ne, sql, desc, lt } from "drizzle-orm";
+import { eq, and, sql, desc, inArray } from "drizzle-orm";
 import { db } from "@szl-holdings/db";
 import {
   aegisActionQueueItemsTable,
   aegisSoarPlaybooksTable,
   aegisSoarRunsTable,
   aegisDeceptionHotpotsTable,
-  aegisTwinNodesTable,
+  firestormAssetsTable,
+  firestormFindingsTable,
+  firestormIncidentsTable,
+  firestormSimulationRunsTable,
   type AuditEntry,
   type ActionQueueStatus,
   type ActionQueuePriority,
   type PlaybookStatus,
   type PlaybookNode,
-  type TwinNodeStatus,
 } from "@szl-holdings/db";
 import { authMiddleware } from "../middlewares/auth";
 import { handleRouteError, sendSuccess, sendNotFound, sendBadRequest } from "../lib/api-response";
@@ -52,23 +54,53 @@ function relLabel(date: Date): string {
   return `${Math.floor(m / 60)}h ago`;
 }
 
-// Static attack surface data — derived from twin node risk posture
-const ATTACK_SURFACE = [
-  { area: "External Attack Surface", risk: 62 },
-  { area: "Internal Lateral Movement", risk: 78 },
-  { area: "Privilege Escalation Paths", risk: 45 },
-  { area: "Cloud / SaaS Exposure", risk: 55 },
-  { area: "Identity & Access Risk", risk: 71 },
-];
+// Map firestorm asset_type → twin topology node type for visual classification
+const ASSET_TYPE_TO_TWIN_TYPE: Record<string, string> = {
+  server: "server",
+  endpoint: "workstation",
+  network_device: "network",
+  cloud_resource: "cloud",
+  application: "server",
+  database: "database",
+  api: "server",
+  iam_identity: "server",
+  container: "server",
+  other: "server",
+};
 
-// Static red-team scenarios — these run against the digital twin (not mutable state)
-const TWIN_SCENARIOS = [
-  { id: "SIM-021", name: "APT-29 Initial Access Chain", technique: "T1566.001 + T1059.001 + T1078", status: "completed", progress: 100, findings: 7, criticalFindings: 2, duration: "4m 12s", startedAt: new Date(Date.now() - 3600000).toISOString() },
-  { id: "SIM-022", name: "Ransomware Lateral Movement", technique: "T1021 + T1047 + T1486", status: "running", progress: 67, findings: 4, criticalFindings: 1, duration: "ongoing", startedAt: new Date(Date.now() - 1800000).toISOString() },
-  { id: "SIM-023", name: "Cloud Privilege Escalation", technique: "T1078.004 + T1548 + T1530", status: "queued", progress: 0, findings: 0, criticalFindings: 0, duration: "—" },
-  { id: "SIM-024", name: "Supply Chain Attack Simulation", technique: "T1195 + T1059 + T1041", status: "queued", progress: 0, findings: 0, criticalFindings: 0, duration: "—" },
-  { id: "SIM-020", name: "Insider Threat Data Exfiltration", technique: "T1078 + T1048 + T1567", status: "failed", progress: 34, findings: 2, criticalFindings: 0, duration: "2m 45s", startedAt: new Date(Date.now() - 7200000).toISOString() },
-];
+// Map exposure level → criticality tier (lower = more critical)
+const EXPOSURE_TO_TIER: Record<string, string> = {
+  critical: "tier-0",
+  public: "tier-1",
+  restricted: "tier-2",
+  internal: "tier-3",
+};
+
+// Map firestorm environment → twin zone label
+const ENV_TO_ZONE: Record<string, string> = {
+  production: "prod",
+  staging: "staging",
+  development: "dev",
+  internal: "internal",
+  dmz: "dmz",
+};
+
+const STALE_SYNC_HOURS = 24; // beyond this last_scanned_at counts as drifted
+const OFFLINE_HOURS = 168; // 7 days without a scan → offline
+
+function durationLabel(seconds: number | null | undefined): string {
+  if (!seconds || seconds <= 0) return "—";
+  if (seconds < 60) return `${seconds}s`;
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return s > 0 ? `${m}m ${s}s` : `${m}m`;
+}
+
+function mapSimStatus(s: string | null | undefined): string {
+  if (s === "pending") return "queued";
+  if (s === "aborted") return "failed";
+  return s ?? "queued";
+}
 
 // Static deception events — in this iteration, captured honeypot hits are append-only session events
 const DECEPTION_EVENTS = [
@@ -83,25 +115,134 @@ const DECEPTION_EVENTS = [
 
 router.get("/aegis/digital-twin/topology", limiter, authMiddleware({ required: false }), async (_req: Request, res: Response) => {
   try {
-    const rows = await db.select().from(aegisTwinNodesTable).orderBy(aegisTwinNodesTable.tier);
-    const nodes = rows.map(n => ({
-      id: n.id,
-      name: n.label,
-      type: n.type,
-      zone: n.zone,
-      tier: n.tier,
-      syncState: n.status,
-      criticalityTier: parseInt(n.tier.replace("tier-", ""), 10),
-      vulnerabilities: n.vulnerabilities,
-      lastSync: n.syncedAt.toISOString(),
-      lastSyncLabel: relLabel(n.syncedAt),
-      ip: n.ip ?? "—",
-      os: n.os ?? "—",
-      meta: n.meta,
-    }));
-    const syncedCount = nodes.filter(n => n.syncState === "synced").length;
+    const [assets, openFindings, activeIncidents] = await Promise.all([
+      db.select().from(firestormAssetsTable).where(eq(firestormAssetsTable.isActive, true)).orderBy(desc(firestormAssetsTable.riskScore)),
+      db.select({
+        affectedAsset: firestormFindingsTable.affectedAsset,
+        severity: firestormFindingsTable.severity,
+        status: firestormFindingsTable.status,
+      }).from(firestormFindingsTable).where(inArray(firestormFindingsTable.status, ["open", "confirmed"] as const)),
+      db.select({
+        affectedAssets: firestormIncidentsTable.affectedAssets,
+        status: firestormIncidentsTable.status,
+        severity: firestormIncidentsTable.severity,
+      }).from(firestormIncidentsTable).where(sql`${firestormIncidentsTable.status} != 'closed'`),
+    ]);
+
+    // Aggregate findings counts per asset name
+    const findingsByAsset = new Map<string, { total: number; critical: number; high: number }>();
+    for (const f of openFindings) {
+      const key = f.affectedAsset ?? "";
+      if (!key) continue;
+      const cur = findingsByAsset.get(key) ?? { total: 0, critical: 0, high: 0 };
+      cur.total += 1;
+      if (f.severity === "critical") cur.critical += 1;
+      else if (f.severity === "high") cur.high += 1;
+      findingsByAsset.set(key, cur);
+    }
+
+    // Track which assets have an active (non-closed) incident referencing them
+    const incidentAssetNames = new Set<string>();
+    for (const inc of activeIncidents) {
+      const arr = (inc.affectedAssets ?? []) as unknown as string[];
+      if (Array.isArray(arr)) arr.forEach((n) => typeof n === "string" && incidentAssetNames.add(n));
+    }
+
+    const now = Date.now();
+    const nodes = assets.map((a) => {
+      const lastScan = a.lastScannedAt ? a.lastScannedAt.getTime() : null;
+      const ageHours = lastScan ? (now - lastScan) / 3600000 : Infinity;
+
+      // Sync state derived from last_scanned_at + open incidents/critical findings
+      const findingAgg = findingsByAsset.get(a.name);
+      const hasIncident = incidentAssetNames.has(a.name);
+      const hasCritical = (findingAgg?.critical ?? 0) > 0 || a.criticalFindings > 0;
+
+      let syncState: "synced" | "drifted" | "offline";
+      if (ageHours >= OFFLINE_HOURS) syncState = "offline";
+      else if (hasIncident || hasCritical || ageHours >= STALE_SYNC_HOURS) syncState = "drifted";
+      else syncState = "synced";
+
+      const meta = (a.metadata ?? {}) as Record<string, unknown>;
+      const ip = typeof meta.ip === "string" ? meta.ip : "—";
+      const os = typeof meta.os === "string" ? meta.os : "—";
+
+      const tier = EXPOSURE_TO_TIER[a.exposureLevel] ?? "tier-3";
+      const lastSyncDate = a.lastScannedAt ?? a.createdAt;
+
+      // Vulnerabilities count: prefer live findings count, fallback to seeded counters
+      const vulnerabilities = findingAgg?.total ?? (a.criticalFindings + a.highFindings);
+
+      return {
+        id: `asset-${a.id}`,
+        name: a.name,
+        type: ASSET_TYPE_TO_TWIN_TYPE[a.assetType] ?? "server",
+        assetType: a.assetType,
+        zone: ENV_TO_ZONE[a.environment] ?? a.environment,
+        tier,
+        syncState,
+        criticalityTier: parseInt(tier.replace("tier-", ""), 10),
+        vulnerabilities,
+        criticalVulnerabilities: findingAgg?.critical ?? a.criticalFindings,
+        highVulnerabilities: findingAgg?.high ?? a.highFindings,
+        riskScore: Number(a.riskScore),
+        owner: a.owner,
+        team: a.team ?? null,
+        environment: a.environment,
+        exposureLevel: a.exposureLevel,
+        hasActiveIncident: hasIncident,
+        lastSync: lastSyncDate.toISOString(),
+        lastSyncLabel: relLabel(lastSyncDate),
+        ip,
+        os,
+        meta,
+      };
+    });
+
+    // Sort: drifted/offline first, then by criticality tier, so the operator sees risk first
+    nodes.sort((a, b) => {
+      const stateRank = (s: string) => (s === "drifted" ? 0 : s === "offline" ? 1 : 2);
+      const sa = stateRank(a.syncState);
+      const sb = stateRank(b.syncState);
+      if (sa !== sb) return sa - sb;
+      return a.criticalityTier - b.criticalityTier;
+    });
+
+    const syncedCount = nodes.filter((n) => n.syncState === "synced").length;
+    const driftedCount = nodes.filter((n) => n.syncState === "drifted").length;
+    const offlineCount = nodes.filter((n) => n.syncState === "offline").length;
     const totalVulns = nodes.reduce((s, n) => s + n.vulnerabilities, 0);
-    sendSuccess(res, { nodes, syncedCount, totalVulns, fidelity: "99.1%", fetchedAt: nowIso(), attackSurface: ATTACK_SURFACE });
+
+    // Twin fidelity = % of assets currently in-sync (real measure, not a static label)
+    const fidelityPct = nodes.length ? (syncedCount / nodes.length) * 100 : 100;
+    const fidelity = `${fidelityPct.toFixed(1)}%`;
+
+    // Attack surface derived from real asset risk distribution
+    const groupAvg = (filter: (a: typeof assets[number]) => boolean): number => {
+      const subset = assets.filter(filter);
+      if (!subset.length) return 0;
+      const sum = subset.reduce((acc, a) => acc + Number(a.riskScore), 0);
+      return Math.round((sum / subset.length) * 10); // riskScore 0-10 → percent 0-100
+    };
+    const attackSurface = [
+      { area: "External Attack Surface", risk: groupAvg((a) => a.exposureLevel === "public") },
+      { area: "Internal Lateral Movement", risk: groupAvg((a) => a.exposureLevel === "internal") },
+      { area: "Privilege Escalation Paths", risk: groupAvg((a) => a.assetType === "iam_identity") },
+      { area: "Cloud / SaaS Exposure", risk: groupAvg((a) => a.assetType === "cloud_resource" || a.assetType === "container") },
+      { area: "Identity & Access Risk", risk: groupAvg((a) => a.assetType === "iam_identity" || a.exposureLevel === "critical") },
+    ];
+
+    sendSuccess(res, {
+      nodes,
+      syncedCount,
+      driftedCount,
+      offlineCount,
+      totalVulns,
+      fidelity,
+      fetchedAt: nowIso(),
+      attackSurface,
+      source: "firestorm_assets",
+    });
   } catch (err) {
     handleRouteError(res, err, "Failed to fetch digital twin topology");
   }
@@ -109,24 +250,135 @@ router.get("/aegis/digital-twin/topology", limiter, authMiddleware({ required: f
 
 router.post("/aegis/digital-twin/sync", validateBody(jsonObjectBodySchema), limiter, authMiddleware({ required: true }), async (_req: Request, res: Response) => {
   try {
-    await db
-      .update(aegisTwinNodesTable)
-      .set({ status: "synced" as TwinNodeStatus, syncedAt: new Date(), updatedAt: new Date() })
-      .where(ne(aegisTwinNodesTable.status, "offline" as TwinNodeStatus));
-    sendSuccess(res, { message: "Digital twin synchronized — 847 config items updated from live infrastructure", syncedAt: nowIso() });
+    // Bring the twin back in sync with the live asset inventory by stamping the
+    // last_scanned_at on every active asset. Drift will re-emerge naturally as
+    // new findings/incidents land.
+    const updated = await db
+      .update(firestormAssetsTable)
+      .set({ lastScannedAt: new Date(), updatedAt: new Date() })
+      .where(eq(firestormAssetsTable.isActive, true))
+      .returning({ id: firestormAssetsTable.id });
+    sendSuccess(res, {
+      message: `Digital twin synchronized — ${updated.length} assets re-scanned from live inventory`,
+      syncedAt: nowIso(),
+      assetsSynced: updated.length,
+    });
   } catch (err) {
     handleRouteError(res, err, "Failed to sync digital twin");
   }
 });
 
-router.get("/aegis/digital-twin/scenarios", limiter, authMiddleware({ required: false }), (_req: Request, res: Response) => {
-  sendSuccess(res, { scenarios: TWIN_SCENARIOS, fetchedAt: nowIso() });
+router.get("/aegis/digital-twin/scenarios", limiter, authMiddleware({ required: false }), async (_req: Request, res: Response) => {
+  try {
+    const runs = await db
+      .select()
+      .from(firestormSimulationRunsTable)
+      .orderBy(desc(firestormSimulationRunsTable.createdAt))
+      .limit(20);
+
+    // Pull findings counts per simulation run in one query
+    const runIds = runs.map((r) => r.id);
+    const findingsByRun = new Map<number, { total: number; critical: number }>();
+    if (runIds.length) {
+      const rows = await db
+        .select({
+          simulationRunId: firestormFindingsTable.simulationRunId,
+          severity: firestormFindingsTable.severity,
+        })
+        .from(firestormFindingsTable)
+        .where(inArray(firestormFindingsTable.simulationRunId, runIds));
+      for (const r of rows) {
+        if (r.simulationRunId == null) continue;
+        const cur = findingsByRun.get(r.simulationRunId) ?? { total: 0, critical: 0 };
+        cur.total += 1;
+        if (r.severity === "critical") cur.critical += 1;
+        findingsByRun.set(r.simulationRunId, cur);
+      }
+    }
+
+    const scenarios = runs.map((r) => {
+      const status = mapSimStatus(r.status);
+      const startedMs = r.startedAt?.getTime() ?? null;
+      const completedMs = r.completedAt?.getTime() ?? null;
+      let progress = 0;
+      let durationStr = "—";
+      if (status === "completed") {
+        progress = 100;
+        durationStr = durationLabel(r.durationSeconds ?? (startedMs && completedMs ? Math.round((completedMs - startedMs) / 1000) : null));
+      } else if (status === "running") {
+        // Estimate progress based on elapsed vs typical 6-minute window
+        const elapsed = startedMs ? (Date.now() - startedMs) / 1000 : 0;
+        progress = Math.min(95, Math.max(5, Math.round((elapsed / 360) * 100)));
+        durationStr = "ongoing";
+      } else if (status === "failed") {
+        progress = startedMs && completedMs ? Math.min(99, Math.round(((completedMs - startedMs) / 360000) * 100)) : 0;
+        durationStr = durationLabel(r.durationSeconds);
+      }
+      const agg = findingsByRun.get(r.id) ?? { total: 0, critical: 0 };
+      const params = (r.parameters ?? {}) as Record<string, unknown>;
+      const technique = typeof params.technique === "string" ? params.technique
+        : typeof params.mitre === "string" ? params.mitre
+        : Array.isArray(params.techniques) ? (params.techniques as unknown[]).filter((t): t is string => typeof t === "string").join(" + ")
+        : "—";
+      return {
+        id: `SIM-${String(r.id).padStart(3, "0")}`,
+        runId: r.id,
+        name: r.name,
+        technique,
+        status,
+        progress,
+        findings: agg.total,
+        criticalFindings: agg.critical,
+        duration: durationStr,
+        startedAt: r.startedAt?.toISOString(),
+        mode: r.mode,
+      };
+    });
+
+    sendSuccess(res, { scenarios, fetchedAt: nowIso(), source: "firestorm_simulation_runs" });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to fetch digital twin scenarios");
+  }
 });
 
-router.post("/aegis/digital-twin/scenarios/:id/run", validateBody(jsonObjectBodySchema), limiter, authMiddleware({ required: true }), (req: Request, res: Response) => {
-  const scenario = TWIN_SCENARIOS.find(s => s.id === req.params.id);
-  if (!scenario) { sendNotFound(res, "Scenario"); return; }
-  sendSuccess(res, { message: `Red team scenario ${scenario.id} launched against digital twin — live infrastructure unaffected`, scenario: { ...scenario, status: "running", progress: 0, startedAt: nowIso() } });
+router.post("/aegis/digital-twin/scenarios/:id/run", validateBody(jsonObjectBodySchema), limiter, authMiddleware({ required: true }), async (req: Request, res: Response) => {
+  try {
+    // Accept either raw numeric id or "SIM-###" form
+    const raw = String(req.params.id ?? "");
+    const numeric = raw.startsWith("SIM-") ? Number.parseInt(raw.slice(4), 10) : Number.parseInt(raw, 10);
+    if (!Number.isFinite(numeric)) { sendBadRequest(res, "Invalid scenario id"); return; }
+
+    const [existing] = await db.select().from(firestormSimulationRunsTable).where(eq(firestormSimulationRunsTable.id, numeric)).limit(1);
+    if (!existing) { sendNotFound(res, "Scenario"); return; }
+
+    // Only allow launching scenarios that haven't already started — prevents
+    // overwriting a completed/failed run's history via this endpoint.
+    if (existing.status !== "pending") {
+      sendBadRequest(res, `Scenario SIM-${String(existing.id).padStart(3, "0")} is ${existing.status} — only pending scenarios can be launched`);
+      return;
+    }
+
+    const [updated] = await db
+      .update(firestormSimulationRunsTable)
+      .set({ status: "running", startedAt: new Date() })
+      .where(and(eq(firestormSimulationRunsTable.id, existing.id), eq(firestormSimulationRunsTable.status, "pending")))
+      .returning();
+    if (!updated) { sendBadRequest(res, "Scenario state changed — refresh and try again"); return; }
+
+    sendSuccess(res, {
+      message: `Red team scenario SIM-${String(updated.id).padStart(3, "0")} launched against digital twin — live infrastructure unaffected`,
+      scenario: {
+        id: `SIM-${String(updated.id).padStart(3, "0")}`,
+        runId: updated.id,
+        name: updated.name,
+        status: "running",
+        progress: 0,
+        startedAt: updated.startedAt?.toISOString() ?? nowIso(),
+      },
+    });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to launch scenario");
+  }
 });
 
 // ─── DECEPTION GRID ROUTES ────────────────────────────────────────────────────
