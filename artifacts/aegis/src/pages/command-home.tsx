@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { LiveClock } from "@szl-holdings/shared-ui";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
@@ -11,7 +11,7 @@ import {
   Radio,
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
-import { ActivationBanner, useActivationState } from "@szl-holdings/shared-ui/onboarding";
+import { ActivationBanner, useActivationState, useOnboardingAnalytics } from "@szl-holdings/shared-ui/onboarding";
 import type { ActivationStep } from "@szl-holdings/shared-ui/onboarding";
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
@@ -200,6 +200,10 @@ export default function CommandHome() {
   const [, navigate] = useLocation();
 
   const activation = useActivationState({ apiBaseUrl: `${BASE}/api`, pollIntervalMs: 60_000 });
+  const { trackChecklistItemCompleted, trackChecklistDismissed, trackTourCompleted } = useOnboardingAnalytics({
+    platform: "aegis",
+    tourId: "aegis-activation",
+  });
 
   const handleNavigate = useCallback(
     (href: string) => {
@@ -208,6 +212,28 @@ export default function CommandHome() {
     },
     [navigate],
   );
+
+  const trackedAllCompleteRef = useRef(false);
+  useEffect(() => {
+    if (activation.isLoading) return;
+    if (trackedAllCompleteRef.current) return;
+    if (
+      activation.signalSourceConnected &&
+      activation.workflowDeployed &&
+      activation.actionTriaged &&
+      activation.teamMemberInvited
+    ) {
+      trackedAllCompleteRef.current = true;
+      trackTourCompleted();
+    }
+  }, [
+    activation.isLoading,
+    activation.signalSourceConnected,
+    activation.workflowDeployed,
+    activation.actionTriaged,
+    activation.teamMemberInvited,
+    trackTourCompleted,
+  ]);
 
   const activationSteps: ActivationStep[] = [
     {
@@ -313,11 +339,18 @@ export default function CommandHome() {
       {!activation.isLoading && (
         <div style={{ padding: "0.5rem 1.5rem", borderBottom: `1px solid ${DS.border}` }}>
           <ActivationBanner
-            steps={activationSteps}
+            steps={activationSteps.map((s) => ({
+              ...s,
+              action: () => {
+                s.action?.();
+                trackChecklistItemCompleted(s.id);
+              },
+            }))}
             accentColor="#3b82f6"
             storageKey="aegis_activation_banner"
             variant="banner"
             onNavigate={handleNavigate}
+            onDismiss={trackChecklistDismissed}
           />
         </div>
       )}
