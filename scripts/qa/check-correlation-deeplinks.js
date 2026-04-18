@@ -364,6 +364,14 @@ if (unexpected.length > 0) {
   process.exit(1);
 }
 
-console.log(
-  `\n✓ All ${results.length} correlation deep-links resolve to a registered route in their target artifact.`,
-);
+const passing = results.length - expected.length;
+if (expected.length > 0) {
+  console.log(
+    `\n✓ ${passing} / ${results.length} correlation deep-links resolve to a registered route ` +
+      `(${expected.length} known failure${expected.length === 1 ? "" : "s"} allow-listed; see KNOWN_FAILURES above).`,
+  );
+} else {
+  console.log(
+    `\n✓ All ${results.length} correlation deep-links resolve to a registered route in their target artifact.`,
+  );
+}

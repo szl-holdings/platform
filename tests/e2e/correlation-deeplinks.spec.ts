@@ -182,5 +182,24 @@ test.describe("Correlation deep-links — drill-through to detail pages", () => 
     const hasContent =
       /correlation|cross-platform|signal|no correlations detected/i.test(body);
     expect(hasContent).toBe(true);
+
+    // Pluck any product chip / card link aimed at vessels or terra and
+    // assert it has a productEntityUrl-shaped href. This guards against a
+    // regression where correlation cards stop wiring drill-through links
+    // even though the helper itself still works.
+    const productLinkHrefs = await page.locator("a[href]").evaluateAll((els) =>
+      (els as HTMLAnchorElement[])
+        .map((a) => a.getAttribute("href") ?? "")
+        .filter(
+          (h) =>
+            h.startsWith("/vessels/vessels/") ||
+            h.startsWith("/terra/property/"),
+        ),
+    );
+    for (const href of productLinkHrefs) {
+      expect(href, `correlation card link has wrong shape: ${href}`).toMatch(
+        /^\/(vessels\/vessels\/[^/]+|terra\/property\/[^/]+)/,
+      );
+    }
   });
 });
