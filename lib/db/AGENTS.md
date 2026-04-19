@@ -9,6 +9,10 @@
 ## Before You Change Anything
 
 1. Understand the migration strategy: **forward-only** (`drizzle-kit push`). There are no rollback migrations.
+   - **Run migrations via `pnpm migrate` from the repo root.** That script invokes `push-non-interactive`, which wraps `drizzle-kit push --force` in a non-TTY-safe runner that auto-answers rename-vs-create prompts (always picks "create new") and enforces a hard wall-clock timeout. See `lib/db/scripts/non-interactive-migrate.mjs`.
+   - **Do NOT run `pnpm --filter @szl-holdings/db push-force` directly** in workflows or CI — it will hang forever on the prompts emitted by our 700+ table schema.
+   - The package-level `pnpm --filter @szl-holdings/db migrate` script is reserved for the future SQL-file-based path (`drizzle-kit migrate`) and is **not** the same as the root `pnpm migrate` today. Use the root command unless you know exactly why you want the package-level one.
+   - In production / CI, set `DB_MIGRATE_FAIL_ON_PROMPT=1` to make the wrapper abort (exit 65) instead of silently auto-answering, so unexpected schema diffs get human review.
 2. Understand the naming convention: tables are namespaced by domain (e.g. `vessels_*`, `alloy_*`, `auth_*`).
 3. Check whether your new table concept is already represented in an existing table before creating a new one. 799 tables means there is a high chance something relevant already exists.
 
