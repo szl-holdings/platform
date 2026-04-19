@@ -1,7 +1,7 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { db, pcGcMattersTable, pcGcObligationsTable, pcGcAuditEntriesTable, pcGcProofChainEntriesTable } from "@szl-holdings/db";
 import { eq, asc, desc, and } from "drizzle-orm";
-import { sendSuccess, sendNotFound, sendBadRequest, handleRouteError } from "../lib/api-response";
+import { sendSuccess, sendNotFound, sendBadRequest, sendForbidden, handleRouteError } from "../lib/api-response";
 import { z } from "zod";
 import { validateBody } from "../lib/validation";
 
@@ -317,7 +317,22 @@ const SEED_MATTERS: SeedMatter[] = [
   },
 ];
 
-async function ensureSeeded(orgId: string): Promise<void> {
+/**
+ * Demo seeding is gated:
+ *   1. Only triggers for orgs that have no existing matters (preserves real data).
+ *   2. Requires either PRISM_COUNSEL_SEED_DEMO=1 (dev/admin flag) or an
+ *      admin/super_admin caller. In production with neither, new orgs simply
+ *      see an empty matter list.
+ */
+function seedingAllowed(req: Request): boolean {
+  if (process.env["PRISM_COUNSEL_SEED_DEMO"] === "1") return true;
+  if (process.env.NODE_ENV !== "production") return true;
+  const roles = (req.user?.roles ?? []) as string[];
+  return roles.some((r) => r === "admin" || r === "super_admin");
+}
+
+async function ensureSeeded(orgId: string, req: Request): Promise<void> {
+  if (!seedingAllowed(req)) return;
   const existing = await db.select({ id: pcGcMattersTable.id }).from(pcGcMattersTable).where(eq(pcGcMattersTable.orgId, orgId)).limit(1);
   if (existing.length > 0) return;
   for (const m of SEED_MATTERS) {
@@ -359,10 +374,24 @@ async function ensureSeeded(orgId: string): Promise<void> {
   }
 }
 
-function getOrgId(req: Request): string {
-  const u = req.user;
-  if (u?.orgs?.[0]?.orgId) return String(u.orgs[0].orgId);
-  return "demo";
+/**
+ * Resolves the org scope for a request from the authenticated session.
+ * Returns null when the caller has no org membership; callers MUST surface
+ * a 403 in that case so cross-org data is never leaked.
+ */
+function getOrgId(req: Request): string | null {
+  const orgId = req.user?.orgs?.[0]?.orgId;
+  if (orgId != null) return String(orgId);
+  return null;
+}
+
+function requireOrgId(req: Request, res: Response): string | null {
+  const orgId = getOrgId(req);
+  if (!orgId) {
+    sendForbidden(res, "Organization membership required to access PRISM Counsel matters");
+    return null;
+  }
+  return orgId;
 }
 
 async function loadMatter(matterId: string, orgId: string) {
@@ -412,8 +441,9 @@ async function loadMatter(matterId: string, orgId: string) {
 
 router.get("/counsel/matters", async (req: Request, res: Response) => {
   try {
-    const orgId = getOrgId(req);
-    await ensureSeeded(orgId);
+    const orgId = requireOrgId(req, res);
+    if (!orgId) return;
+    await ensureSeeded(orgId, req);
     const ids = await db.select({ id: pcGcMattersTable.id }).from(pcGcMattersTable)
       .where(eq(pcGcMattersTable.orgId, orgId));
     const matters = [];
@@ -475,7 +505,8 @@ function genMatterId(): string {
 
 router.post("/counsel/matters", validateBody(matterCreateSchema), async (req: Request, res: Response) => {
   try {
-    const orgId = getOrgId(req);
+    const orgId = requireOrgId(req, res);
+    if (!orgId) return;
     const body = req.body as z.infer<typeof matterCreateSchema>;
     const id = body.id ?? genMatterId();
     const existing = await db.select({ id: pcGcMattersTable.id }).from(pcGcMattersTable)
@@ -500,7 +531,8 @@ router.post("/counsel/matters", validateBody(matterCreateSchema), async (req: Re
 
 router.patch("/counsel/matters/:id", validateBody(matterPatchSchema), async (req: Request, res: Response) => {
   try {
-    const orgId = getOrgId(req);
+    const orgId = requireOrgId(req, res);
+    if (!orgId) return;
     const id = req.params.id as string;
     const body = req.body as z.infer<typeof matterPatchSchema>;
     const patch: Record<string, unknown> = { updatedAt: new Date() };
@@ -525,7 +557,8 @@ router.patch("/counsel/matters/:id", validateBody(matterPatchSchema), async (req
 
 router.delete("/counsel/matters/:id", async (req: Request, res: Response) => {
   try {
-    const orgId = getOrgId(req);
+    const orgId = requireOrgId(req, res);
+    if (!orgId) return;
     const id = req.params.id as string;
     const [deleted] = await db.delete(pcGcMattersTable)
       .where(and(eq(pcGcMattersTable.id, id), eq(pcGcMattersTable.orgId, orgId))).returning();
@@ -541,8 +574,9 @@ router.delete("/counsel/matters/:id", async (req: Request, res: Response) => {
 
 router.get("/counsel/matters/:id", async (req: Request, res: Response) => {
   try {
-    const orgId = getOrgId(req);
-    await ensureSeeded(orgId);
+    const orgId = requireOrgId(req, res);
+    if (!orgId) return;
+    await ensureSeeded(orgId, req);
     const m = await loadMatter(req.params.id as string, orgId);
     if (!m) { sendNotFound(res, "Matter"); return; }
     sendSuccess(res, m);
@@ -561,7 +595,8 @@ const obligationPatchSchema = z.object({
 
 router.patch("/counsel/obligations/:id", validateBody(obligationPatchSchema), async (req: Request, res: Response) => {
   try {
-    const orgId = getOrgId(req);
+    const orgId = requireOrgId(req, res);
+    if (!orgId) return;
     const obligationId = req.params.id as string;
     const body = req.body as z.infer<typeof obligationPatchSchema>;
     const [matter] = await db.select({ id: pcGcMattersTable.id }).from(pcGcMattersTable)
@@ -601,7 +636,8 @@ const auditAppendSchema = z.object({
 
 router.post("/counsel/audit-trail", validateBody(auditAppendSchema), async (req: Request, res: Response) => {
   try {
-    const orgId = getOrgId(req);
+    const orgId = requireOrgId(req, res);
+    if (!orgId) return;
     const body = req.body as z.infer<typeof auditAppendSchema>;
     const [matter] = await db.select({ id: pcGcMattersTable.id }).from(pcGcMattersTable)
       .where(and(eq(pcGcMattersTable.id, body.matterId), eq(pcGcMattersTable.orgId, orgId)));
@@ -623,8 +659,9 @@ router.post("/counsel/audit-trail", validateBody(auditAppendSchema), async (req:
 
 router.get("/counsel/audit-trail", async (req: Request, res: Response) => {
   try {
-    const orgId = getOrgId(req);
-    await ensureSeeded(orgId);
+    const orgId = requireOrgId(req, res);
+    if (!orgId) return;
+    await ensureSeeded(orgId, req);
     const matterId = typeof req.query["matterId"] === "string" ? req.query["matterId"] : null;
     const matterIds = await db.select({ id: pcGcMattersTable.id }).from(pcGcMattersTable)
       .where(eq(pcGcMattersTable.orgId, orgId));
@@ -662,7 +699,8 @@ const proofAppendSchema = z.object({
 
 router.post("/counsel/proof-chain", validateBody(proofAppendSchema), async (req: Request, res: Response) => {
   try {
-    const orgId = getOrgId(req);
+    const orgId = requireOrgId(req, res);
+    if (!orgId) return;
     const body = req.body as z.infer<typeof proofAppendSchema>;
     const [matter] = await db.select({ id: pcGcMattersTable.id }).from(pcGcMattersTable)
       .where(and(eq(pcGcMattersTable.id, body.matterId), eq(pcGcMattersTable.orgId, orgId)));
@@ -689,8 +727,9 @@ router.post("/counsel/proof-chain", validateBody(proofAppendSchema), async (req:
 
 router.get("/counsel/proof-chain", async (req: Request, res: Response) => {
   try {
-    const orgId = getOrgId(req);
-    await ensureSeeded(orgId);
+    const orgId = requireOrgId(req, res);
+    if (!orgId) return;
+    await ensureSeeded(orgId, req);
     const matterId = typeof req.query["matterId"] === "string" ? req.query["matterId"] : null;
     if (!matterId) { sendBadRequest(res, "matterId query parameter is required"); return; }
     const [matter] = await db.select({ id: pcGcMattersTable.id }).from(pcGcMattersTable)
