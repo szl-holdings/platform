@@ -30,8 +30,20 @@ interface WorkerRequest {
   iterations: number;
 }
 type WorkerResponse =
-  | { requestId: number; ok: true; result: MonteCarloResult }
-  | { requestId: number; ok: false; error: string };
+  | {
+      requestId: number;
+      type: "progress";
+      completed: number;
+      total: number;
+      validIterations: number;
+    }
+  | { requestId: number; type: "result"; ok: true; result: MonteCarloResult }
+  | { requestId: number; type: "error"; ok: false; error: string };
+
+interface SimulationProgressState {
+  completed: number;
+  total: number;
+}
 
 function formatValue(value: number, format?: string): string {
   if (!isFinite(value)) return "—";
@@ -84,6 +96,7 @@ export function RiskSimulationPanel({
   const [result, setResult] = useState<MonteCarloResult | null>(null);
   const [iterCount, setIterCount] = useState<number>(iterations);
   const [running, setRunning] = useState<boolean>(true);
+  const [progress, setProgress] = useState<SimulationProgressState | null>(null);
   const [runKey, setRunKey] = useState<number>(0);
   const workerRef = useRef<Worker | null>(null);
   const requestIdRef = useRef<number>(0);
@@ -125,6 +138,7 @@ export function RiskSimulationPanel({
 
   useEffect(() => {
     setRunning(true);
+    setProgress(null);
     const requestId = ++requestIdRef.current;
     const worker = workerRef.current;
     const tweaksActive = modifiedIds.size > 0;
@@ -135,9 +149,17 @@ export function RiskSimulationPanel({
     if (worker && !tweaksActive) {
       const handler = (event: MessageEvent<WorkerResponse>) => {
         if (event.data.requestId !== requestId) return;
+        if (event.data.type === "progress") {
+          setProgress({
+            completed: event.data.completed,
+            total: event.data.total,
+          });
+          return;
+        }
         worker.removeEventListener("message", handler);
-        if (event.data.ok) {
+        if (event.data.type === "result") {
           setResult(event.data.result);
+          setProgress(null);
           setRunning(false);
         } else {
           // Worker reported an error (e.g. unknown scenario id) — fall
@@ -149,7 +171,10 @@ export function RiskSimulationPanel({
             const r = runScenarioSimulationSync(effectiveScenario, iterCount);
             if (requestId === requestIdRef.current) setResult(r);
           } finally {
-            if (requestId === requestIdRef.current) setRunning(false);
+            if (requestId === requestIdRef.current) {
+              setProgress(null);
+              setRunning(false);
+            }
           }
         }
       };
@@ -168,7 +193,10 @@ export function RiskSimulationPanel({
         const r = runScenarioSimulationSync(effectiveScenario, iterCount);
         if (requestId === requestIdRef.current) setResult(r);
       } finally {
-        if (requestId === requestIdRef.current) setRunning(false);
+        if (requestId === requestIdRef.current) {
+          setProgress(null);
+          setRunning(false);
+        }
       }
     }, 30);
     return () => window.clearTimeout(handle);
@@ -297,7 +325,11 @@ export function RiskSimulationPanel({
             aria-label="Re-run simulation"
           >
             <RefreshCw className={`w-3 h-3 ${running ? "animate-spin" : ""}`} />
-            {running ? "Running…" : "Re-run"}
+            {running
+              ? progress
+                ? `Running ${Math.round((progress.completed / progress.total) * 100)}%`
+                : "Running…"
+              : "Re-run"}
           </button>
           {baseline ? (
             <button
@@ -390,7 +422,30 @@ export function RiskSimulationPanel({
       <div className="rounded-xl border p-4 grid grid-cols-2 md:grid-cols-4 gap-4" style={{ borderColor: "rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.02)" }}>
         <div>
           <div className="text-[9px] uppercase tracking-wider mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>Iterations</div>
-          <div className="text-sm font-mono text-white">{result?.iterations.toLocaleString() ?? "—"}</div>
+          <div className="text-sm font-mono text-white">
+            {running && progress
+              ? `${progress.completed.toLocaleString()} / ${progress.total.toLocaleString()}`
+              : result?.iterations.toLocaleString() ?? "—"}
+          </div>
+          {running && progress && (
+            <div
+              className="mt-1.5 h-1 rounded-full overflow-hidden"
+              style={{ background: "rgba(255,255,255,0.06)" }}
+              role="progressbar"
+              aria-label="Simulation progress"
+              aria-valuemin={0}
+              aria-valuemax={progress.total}
+              aria-valuenow={progress.completed}
+            >
+              <div
+                className="h-full rounded-full transition-[width] duration-200 ease-out"
+                style={{
+                  width: `${Math.min(100, (progress.completed / progress.total) * 100)}%`,
+                  background: accentColor,
+                }}
+              />
+            </div>
+          )}
         </div>
         <div>
           <div className="text-[9px] uppercase tracking-wider mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>Valid Runs</div>

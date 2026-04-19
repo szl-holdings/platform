@@ -9,8 +9,17 @@ export interface ScenarioSimulationRequest {
 }
 
 export type ScenarioSimulationResponse =
-  | { requestId: number; ok: true; result: MonteCarloResult }
-  | { requestId: number; ok: false; error: string };
+  | {
+      requestId: number;
+      type: "progress";
+      completed: number;
+      total: number;
+      validIterations: number;
+    }
+  | { requestId: number; type: "result"; ok: true; result: MonteCarloResult }
+  | { requestId: number; type: "error"; ok: false; error: string };
+
+const PROGRESS_THRESHOLD = 10000;
 
 const ctx = self as unknown as DedicatedWorkerGlobalScope;
 
@@ -21,18 +30,39 @@ ctx.addEventListener("message", (event: MessageEvent<ScenarioSimulationRequest>)
     if (!scenario) {
       const response: ScenarioSimulationResponse = {
         requestId,
+        type: "error",
         ok: false,
         error: `Unknown scenario: ${scenarioId}`,
       };
       ctx.postMessage(response);
       return;
     }
-    const result = runScenarioSimulation(scenario, iterations);
-    const response: ScenarioSimulationResponse = { requestId, ok: true, result };
+    const emitProgress = iterations >= PROGRESS_THRESHOLD;
+    const result = runScenarioSimulation(scenario, iterations, {
+      onProgress: emitProgress
+        ? (p) => {
+            const msg: ScenarioSimulationResponse = {
+              requestId,
+              type: "progress",
+              completed: p.completed,
+              total: p.total,
+              validIterations: p.validIterations,
+            };
+            ctx.postMessage(msg);
+          }
+        : undefined,
+    });
+    const response: ScenarioSimulationResponse = {
+      requestId,
+      type: "result",
+      ok: true,
+      result,
+    };
     ctx.postMessage(response);
   } catch (err) {
     const response: ScenarioSimulationResponse = {
       requestId,
+      type: "error",
       ok: false,
       error: err instanceof Error ? err.message : String(err),
     };

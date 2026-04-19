@@ -41,10 +41,27 @@ function computeStdDev(values: number[], mean: number): number {
   return Math.sqrt(variance);
 }
 
+export interface SimulationProgress {
+  completed: number;
+  total: number;
+  validIterations: number;
+}
+
+export interface RunScenarioOptions {
+  onProgress?: (progress: SimulationProgress) => void;
+  progressInterval?: number;
+}
+
 export function runScenarioSimulation(
   scenario: ScenarioDefinition,
-  iterations: number
+  iterations: number,
+  options: RunScenarioOptions = {}
 ): MonteCarloResult {
+  const { onProgress } = options;
+  const progressInterval =
+    onProgress && iterations > 0
+      ? Math.max(1, options.progressInterval ?? Math.floor(iterations / 20))
+      : 0;
   const start =
     typeof performance !== "undefined" && typeof performance.now === "function"
       ? performance.now()
@@ -75,14 +92,26 @@ export function runScenarioSimulation(
           }
         }
       }
-      if (!valid) continue;
-      validIterations++;
-      for (const out of scenario.outputs) {
-        const v = outputs[out.id];
-        if (v !== undefined && isFinite(v)) outputAccum[out.id]!.push(v);
+      if (valid) {
+        validIterations++;
+        for (const out of scenario.outputs) {
+          const v = outputs[out.id];
+          if (v !== undefined && isFinite(v)) outputAccum[out.id]!.push(v);
+        }
       }
     } catch {
       /* constraint or calculation violation */
+    }
+    if (
+      progressInterval > 0 &&
+      (i + 1) % progressInterval === 0 &&
+      i + 1 < iterations
+    ) {
+      onProgress!({
+        completed: i + 1,
+        total: iterations,
+        validIterations,
+      });
     }
   }
 
