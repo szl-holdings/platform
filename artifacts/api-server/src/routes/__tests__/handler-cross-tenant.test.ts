@@ -99,12 +99,14 @@ vi.mock("../../lib/ssrf-guard", () => ({
   assertExternalUrl: vi.fn(),
 }));
 
-vi.mock("../../lib/validation", () => ({
-  validateBody: (_schema: unknown) => (_req: Request, _res: Response, next: NextFunction) => next(),
-  jsonObjectBodySchema: {},
-  validateQuery: (_schema: unknown) => (_req: Request, _res: Response, next: NextFunction) => next(),
-  listQuerySchema: {},
-}));
+vi.mock("../../lib/validation", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../lib/validation")>();
+  return {
+    ...actual,
+    validateBody: (_schema: unknown) => (_req: Request, _res: Response, next: NextFunction) => next(),
+    validateQuery: (_schema: unknown) => (_req: Request, _res: Response, next: NextFunction) => next(),
+  };
+});
 
 vi.mock("dns", () => ({
   promises: {

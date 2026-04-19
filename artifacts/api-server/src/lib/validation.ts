@@ -983,3 +983,155 @@ export function validateParams<T>(schema: z.ZodSchema<T>) {
     next();
   };
 }
+
+// ─── Strict route schemas (replacing generic placeholders) ────────────────────
+// These schemas tighten body / query validation on routes that previously used
+// jsonObjectBodySchema / listQuerySchema as a baseline. They enforce typed
+// fields, enums, and length limits so that malformed payloads are rejected at
+// the edge instead of being passed through to the handler.
+
+const optionalEmptyBody = (schema: z.ZodTypeAny) =>
+  z.preprocess((val) => (val == null ? {} : val), schema);
+
+// admin/users: POST /admin/users/:id/revoke-sessions
+export const revokeSessionsBodySchema = optionalEmptyBody(
+  z.object({
+    reason: z.string().min(1).max(500).trim().optional(),
+  }).strict(),
+);
+
+// alloy: GET /alloy/autonomy-mode (query: domain)
+export const autonomyModeQuerySchema = z.object({
+  domain: z.string().min(1).max(120).trim().optional(),
+}).strict();
+
+// carlota-jo: GET /carlota/radar-signals (query: competitors, clientId)
+export const carlotaRadarSignalsQuerySchema = z.object({
+  competitors: z.string().max(1000).optional(),
+  clientId: z.string().max(100).optional(),
+}).strict();
+
+// counsel: DELETE /counsel/matters/:id (no body)
+export const counselDeleteMatterBodySchema = optionalEmptyBody(
+  z.object({}).strict(),
+);
+
+// counsel: GET /counsel/audit-trail (query: matterId)
+export const counselAuditTrailQuerySchema = z.object({
+  matterId: z.string().min(1).max(200).optional(),
+}).strict();
+
+// counsel: GET /counsel/proof-chain (query: matterId required)
+export const counselProofChainQuerySchema = z.object({
+  matterId: z.string().min(1).max(200),
+}).strict();
+
+// demo-governed-scenarios: POST /demo/seed-governed-scenarios (no body)
+export const demoSeedGovernedScenariosBodySchema = optionalEmptyBody(
+  z.object({}).strict(),
+);
+
+// lyte: GET /lyte/interventions (query)
+const LYTE_INTERVENTION_TYPES = ["claim", "resolve", "reassign", "address"] as const;
+const LYTE_ITEM_KINDS = ["drift", "debt"] as const;
+
+export const lyteInterventionsQuerySchema = z.object({
+  itemKind: z.enum(LYTE_ITEM_KINDS).optional(),
+  itemId: z.string().min(1).max(200).optional(),
+  type: z.enum(LYTE_INTERVENTION_TYPES).optional(),
+}).strict();
+
+// lyte: POST /lyte/interventions (body) — promote manual checks into schema
+export const lyteInterventionCreateSchema = z.object({
+  itemId: z.string().min(1, "itemId is required").max(200),
+  itemKind: z.enum(LYTE_ITEM_KINDS),
+  itemTitle: z.string().min(1, "itemTitle is required").max(500),
+  type: z.enum(LYTE_INTERVENTION_TYPES),
+  notes: z.string().max(5000).optional(),
+  newOwner: z.string().min(1).max(200).trim().optional(),
+}).superRefine((val, ctx) => {
+  if (val.type === "reassign" && (!val.newOwner || !val.newOwner.trim())) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["newOwner"],
+      message: "newOwner is required for reassign",
+    });
+  }
+  if (val.type === "address" && (!val.notes || !val.notes.trim())) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["notes"],
+      message: "notes (evidence) is required for address",
+    });
+  }
+});
+
+// lyte-cognitive: GET /lyte/cognitive/interventions (query: limit)
+// Route handler uses safeParseLimit() which gracefully handles NaN / oversize
+// values, so the schema only enforces shape and a sane string length.
+export const lyteCognitiveInterventionsQuerySchema = z.object({
+  limit: z.string().max(20).optional(),
+}).strict();
+
+// memory: POST /memory/:id/pin and DELETE /memory/:id/pin (no body)
+export const memoryPinBodySchema = optionalEmptyBody(
+  z.object({}).strict(),
+);
+
+// policy-modes: GET /policy-modes/resolve (query)
+export const policyModesResolveQuerySchema = z.object({
+  product: z.string().min(1).max(100).optional(),
+  actionType: z.string().min(1).max(200).optional(),
+  workspace: z.string().min(1).max(100).optional(),
+}).strict().refine(
+  (q) => !!(q.product || q.actionType || q.workspace),
+  { message: "At least one of product, actionType, or workspace is required" },
+);
+
+// policy-modes: DELETE /policy-modes/:id (no body)
+export const policyModesDeleteBodySchema = optionalEmptyBody(
+  z.object({}).strict(),
+);
+
+// stephen: GET /stephen/booking-requests (query)
+const STEPHEN_BOOKING_TYPES = ["consultation", "project", "recruitment", "partnership", "investment", "speaking", "other"] as const;
+const STEPHEN_BOOKING_STATUSES = ["pending", "confirmed", "declined", "completed"] as const;
+
+export const stephenBookingRequestsQuerySchema = z.object({
+  type: z.enum(STEPHEN_BOOKING_TYPES).optional(),
+  status: z.enum(STEPHEN_BOOKING_STATUSES).optional(),
+}).strict();
+
+// vessels-voyage-risk: POST /vessels/voyage-risk/score
+export const voyageRiskScoreRequestSchema = z.object({
+  vesselImo: z.string().max(20).optional(),
+  vesselName: z.string().max(200).optional(),
+  origin: z.string().min(1, "origin is required").max(200),
+  destination: z.string().min(1, "destination is required").max(200),
+  routeVariant: z.string().min(1, "routeVariant is required").max(100),
+  cargoType: z.string().max(200).optional(),
+  chartererName: z.string().max(200).optional(),
+}).strict();
+
+// vessels-voyage-risk: POST /vessels/voyage-risk/sanctions/refresh
+export const sanctionsRefreshBodySchema = optionalEmptyBody(
+  z.object({
+    sourceId: z.string().min(1).max(100).optional(),
+  }).strict(),
+);
+
+// vessels-voyage-risk: POST /vessels/voyage-risk/memo/pdf
+// Payload is a previously-computed VoyageRiskScore object — large nested
+// structure. Enforce the top-level shape (scenarioId required, route + risk +
+// economics objects present) but allow nested fields through passthrough so
+// the PDF renderer receives the full computed shape.
+export const voyageRiskMemoPdfBodySchema = z.object({
+  scenarioId: z.string().min(1, "scenarioId is required").max(200),
+  vessel: z.object({}).passthrough(),
+  route: z.object({}).passthrough(),
+  risk: z.object({}).passthrough(),
+  economics: z.object({}).passthrough(),
+  counterparty: z.object({}).passthrough(),
+  sanctionsRefresh: z.object({}).passthrough().optional(),
+  provenance: z.object({}).passthrough().optional(),
+}).passthrough();

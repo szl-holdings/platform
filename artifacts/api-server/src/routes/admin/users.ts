@@ -6,7 +6,7 @@ import { hashIp } from "@szl-holdings/audit";
 import { isFlagEnabled } from "../../lib/platform-flags.js";
 import { revokeUserSessionsOnRoleChange } from "../../middlewares/session-policy.js";
 import { z } from "zod";
-import { validateBody, validateQuery, listQuerySchema, jsonObjectBodySchema } from "../../lib/validation.js";
+import { validateBody, validateQuery, listQuerySchema, revokeSessionsBodySchema } from "../../lib/validation.js";
 import { sendError, sendNotFound, sendForbidden, sendBadRequest } from "../../lib/api-response.js";
 
 const createUserSchema = z.object({
@@ -234,7 +234,7 @@ export function register(router: IRouter): void {
     }
   });
 
-  router.post("/admin/users/:id/revoke-sessions", requireRole("admin"), validateBody(jsonObjectBodySchema), async (req, res) => {
+  router.post("/admin/users/:id/revoke-sessions", requireRole("admin"), validateBody(revokeSessionsBodySchema), async (req, res) => {
     try {
       const targetUserId = parseInt(req.params["id"] as string, 10);
       if (isNaN(targetUserId) || targetUserId < 1) { sendBadRequest(res, "Invalid user ID"); return; }

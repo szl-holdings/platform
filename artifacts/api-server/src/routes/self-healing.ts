@@ -510,7 +510,7 @@ router.put("/self-healing/policies/:id", validateBody(jsonObjectBodySchema), aut
   }
 });
 
-router.delete("/self-healing/policies/:id", authMiddleware({ required: true }), requireRole("admin"), async (req: Request, res: Response) => {
+router.delete("/self-healing/policies/:id", validateBody(jsonObjectBodySchema), authMiddleware({ required: true }), requireRole("admin"), async (req: Request, res: Response) => {
   try {
     await ensureSeeded();
     const { id } = req.params as { id: string };

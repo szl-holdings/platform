@@ -113,12 +113,14 @@ vi.mock("../../lib/pubsub-bridge.js", () => ({
   VESSELS_EVENTS: { POSITION_UPDATED: "position_updated" },
 }));
 
-vi.mock("../../lib/validation", () => ({
-  validateBody: (_schema: unknown) => (_req: Request, _res: Response, next: NextFunction) => next(),
-  jsonObjectBodySchema: {},
-  validateQuery: (_schema: unknown) => (_req: Request, _res: Response, next: NextFunction) => next(),
-  listQuerySchema: {},
-}));
+vi.mock("../../lib/validation", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../lib/validation")>();
+  return {
+    ...actual,
+    validateBody: (_schema: unknown) => (_req: Request, _res: Response, next: NextFunction) => next(),
+    validateQuery: (_schema: unknown) => (_req: Request, _res: Response, next: NextFunction) => next(),
+  };
+});
 
 vi.mock("../../middlewares/auth", () => ({
   authMiddleware: () => (_req: Request, _res: Response, next: NextFunction) => next(),

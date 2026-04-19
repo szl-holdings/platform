@@ -23,7 +23,7 @@ import {
 } from "@workspace/memory-fabric/behaviors";
 import { MemoryEntrySchema, MemoryTypeSchema } from "@workspace/memory-fabric/types";
 import type { MemoryEntry, MemoryType, SensitivityLevel } from "@workspace/memory-fabric/types";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery, memoryPinBodySchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -346,7 +346,7 @@ router.post(
   "/memory/:id/pin",
   authMiddleware(),
   requireRole("admin", "super_admin", "ops"),
-  validateBody(jsonObjectBodySchema),
+  validateBody(memoryPinBodySchema),
   async (req: Request, res: Response) => {
     try {
       const { id } = req.params as { id: string };
@@ -367,7 +367,7 @@ router.delete(
   "/memory/:id/pin",
   authMiddleware(),
   requireRole("admin", "super_admin"),
-  validateBody(jsonObjectBodySchema),
+  validateBody(memoryPinBodySchema),
   async (req: Request, res: Response) => {
     try {
       const { id } = req.params as { id: string };

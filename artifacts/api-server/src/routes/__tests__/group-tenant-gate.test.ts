@@ -49,13 +49,14 @@ vi.mock("../../middlewares/auth", () => ({
   InvalidIdError: class InvalidIdError extends Error {},
 }));
 
-vi.mock("../../lib/validation", () => ({
-  validateBody: () => (_req: Request, _res: Response, next: NextFunction) => next(),
-  jsonObjectBodySchema: {},
-  validateQuery: () => (_req: Request, _res: Response, next: NextFunction) => next(),
-  listQuerySchema: {},
-  anyQuerySchema: {},
-}));
+vi.mock("../../lib/validation", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../lib/validation")>();
+  return {
+    ...actual,
+    validateBody: () => (_req: Request, _res: Response, next: NextFunction) => next(),
+    validateQuery: () => (_req: Request, _res: Response, next: NextFunction) => next(),
+  };
+});
 
 const stubRouter = () => {
   const r = Router();

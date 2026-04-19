@@ -22,7 +22,8 @@ import {
   insertLyteSavedViewSchema,
   insertLyteReadinessItemSchema,
 } from "@szl-holdings/db";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery, lyteInterventionsQuerySchema, lyteInterventionCreateSchema } from "../lib/validation";
+import { z } from "zod";
 import { eq, desc, sql, and } from "drizzle-orm";
 import { sendSuccess, sendNotFound, sendError, handleRouteError, parsePagination } from "../lib/api-response";
 import { authMiddleware, parseIdParam, denyIfReadOnly, requireRole } from "../middlewares/auth";
@@ -735,7 +736,7 @@ function nextInterventionProofRef(): string {
   return `ALLOY-INT-${String(interventionSeq).padStart(4, "0")}`;
 }
 
-router.get("/lyte/interventions", authMiddleware(), validateQuery(listQuerySchema), (req, res) => {
+router.get("/lyte/interventions", authMiddleware(), validateQuery(lyteInterventionsQuerySchema), (req, res) => {
   try {
     const { itemKind, itemId, type } = req.query as { itemKind?: string; itemId?: string; type?: string };
     let rows = interventionLedger.slice();
@@ -749,35 +750,9 @@ router.get("/lyte/interventions", authMiddleware(), validateQuery(listQuerySchem
   } catch (err) { handleRouteError(res, err, "Failed to list interventions"); }
 });
 
-router.post("/lyte/interventions", authMiddleware({ required: true }), denyIfReadOnly(), validateBody(jsonObjectBodySchema), (req, res) => {
+router.post("/lyte/interventions", authMiddleware({ required: true }), denyIfReadOnly(), validateBody(lyteInterventionCreateSchema), (req, res) => {
   try {
-    const body = (req.body ?? {}) as Partial<LyteInterventionRecord>;
-    const validTypes: LyteInterventionType[] = ["claim", "resolve", "reassign", "address"];
-    const validKinds: LyteItemKind[] = ["drift", "debt"];
-    if (!body.itemId || typeof body.itemId !== "string") {
-      sendError(res, "itemId is required", 400);
-      return;
-    }
-    if (!body.itemTitle || typeof body.itemTitle !== "string") {
-      sendError(res, "itemTitle is required", 400);
-      return;
-    }
-    if (!body.type || !validTypes.includes(body.type as LyteInterventionType)) {
-      sendError(res, `type must be one of ${validTypes.join(", ")}`, 400);
-      return;
-    }
-    if (!body.itemKind || !validKinds.includes(body.itemKind as LyteItemKind)) {
-      sendError(res, `itemKind must be one of ${validKinds.join(", ")}`, 400);
-      return;
-    }
-    if (body.type === "reassign" && (!body.newOwner || typeof body.newOwner !== "string" || !body.newOwner.trim())) {
-      sendError(res, "newOwner is required for reassign", 400);
-      return;
-    }
-    if (body.type === "address" && (typeof body.notes !== "string" || !body.notes.trim())) {
-      sendError(res, "notes (evidence) is required for address", 400);
-      return;
-    }
+    const body = req.body as z.infer<typeof lyteInterventionCreateSchema>;
 
     // Audit-integrity: actor MUST be derived from the authenticated session.
     // Never trust a client-supplied actor — that would allow forging the

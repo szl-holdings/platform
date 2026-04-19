@@ -33,7 +33,7 @@ import {
 } from "../lib/api-response";
 import { logger } from "../lib/logger";
 import { broadcastWs, pubsub, ALLOY_EVENTS } from "../lib/pubsub-bridge.js";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery, autonomyModeQuerySchema } from "../lib/validation";
 import {
   AUTONOMY_MODES,
   evaluateAutonomyForAction,
@@ -1538,7 +1538,7 @@ const autonomyModeSchema = z.object({
   reason: z.string().max(2000).trim().optional().nullable(),
 });
 
-router.get("/alloy/autonomy-mode", authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
+router.get("/alloy/autonomy-mode", authMiddleware(), validateQuery(autonomyModeQuerySchema), async (req: Request, res: Response) => {
   try {
     const tenantOrgId = resolveAlloyTenant(req);
     const domain = (req.query.domain as string | undefined)?.trim();

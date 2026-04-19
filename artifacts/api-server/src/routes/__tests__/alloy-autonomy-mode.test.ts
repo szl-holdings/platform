@@ -62,9 +62,16 @@ vi.mock("@szl-holdings/db", () => {
             if (table?._name === "alloy_audit_log") {
               _auditInserts.push(row);
             }
-            return {
+            const result = {
               returning: () => Promise.resolve([row]),
+              onConflictDoUpdate: (_args: unknown) => ({
+                returning: () => Promise.resolve([row]),
+              }),
+              onConflictDoNothing: (_args?: unknown) => ({
+                returning: () => Promise.resolve([row]),
+              }),
             };
+            return result;
           },
         };
       },
@@ -106,6 +113,17 @@ vi.mock("@szl-holdings/db", () => {
     alloyDecisions: {},
     alloySkills: {},
     alloySkillRuns: {},
+    alloyAutonomyModesTable: Object.assign({ _name: "alloy_autonomy_modes" }, {
+      id: col("id"),
+      tenantOrgId: col("tenant_org_id"),
+      domain: col("domain"),
+      mode: col("mode"),
+      updatedBy: col("updated_by"),
+      reason: col("reason"),
+      createdAt: col("created_at"),
+      updatedAt: col("updated_at"),
+      $inferSelect: undefined,
+    }),
   };
 });
 

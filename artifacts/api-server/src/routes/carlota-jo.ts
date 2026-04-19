@@ -1,7 +1,7 @@
 import { Router, type IRouter, type Request, type Response, type RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
 import multer from "multer";
-import { carlotaInquirySchema, carlotaInquiryUpdateSchema, carlotaReservationSchema, jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { carlotaInquirySchema, carlotaInquiryUpdateSchema, carlotaReservationSchema, jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery, carlotaRadarSignalsQuerySchema } from "../lib/validation";
 import {
   db,
   carlotaInquiriesTable,
@@ -1136,7 +1136,7 @@ async function fetchCompetitorNews(competitor: string, max = 5): Promise<Array<{
   }
 }
 
-router.get("/carlota/radar-signals", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
+router.get("/carlota/radar-signals", authMiddleware(), validateQuery(carlotaRadarSignalsQuerySchema), async (req, res) => {
   try {
     const userId = req.user!.id;
     const orgId = req.user?.orgs[0]?.orgId ?? null;

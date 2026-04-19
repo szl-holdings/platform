@@ -66,7 +66,7 @@ import {
   buildStephenStatusUpdateEmail,
   STEPHEN_ADMIN_EMAIL,
 } from "../lib/email";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery, stephenBookingRequestsQuerySchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -349,7 +349,7 @@ const ListBookingRequestsQuery = z.object({
   status: z.enum(BOOKING_STATUSES).optional(),
 });
 
-router.get("/stephen/booking-requests", authMiddleware(), requireRole("ops"), validateQuery(listQuerySchema), async (req, res) => {
+router.get("/stephen/booking-requests", authMiddleware(), requireRole("ops"), validateQuery(stephenBookingRequestsQuerySchema), async (req, res) => {
   try {
     const query = ListBookingRequestsQuery.parse(req.query);
     const filters: SQL[] = [];
