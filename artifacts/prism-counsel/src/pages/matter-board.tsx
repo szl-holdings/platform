@@ -1,8 +1,10 @@
 import { useState, useMemo } from "react";
 import { useLocation } from "wouter";
-import { Scale, AlertTriangle, Clock, Filter, ChevronDown, Lock, Shield, Eye } from "lucide-react";
+import { Scale, AlertTriangle, Clock, Filter, ChevronDown, Lock, Shield, Eye, Network } from "lucide-react";
+import { GraphCanvas } from "@szl-holdings/design-system";
 import { useMatters, getPressureColor, getPressureLabel, getStatusColor, getPrivilegeColor, formatCurrency, formatDeadline, daysUntil } from "@/data/matters";
-import type { MatterStatus, MatterType, PrivilegeLevel } from "@/data/matters";
+import type { Matter, MatterStatus, MatterType, PrivilegeLevel } from "@/data/matters";
+import { buildGraph } from "@/lib/obligation-graph-builder";
 
 const ACCENT = "#a78bfa";
 
@@ -25,6 +27,44 @@ const TYPE_OPTIONS: { value: MatterType | "all"; label: string }[] = [
   { value: "contract", label: "Contract" },
   { value: "real-estate", label: "Real Estate" },
 ];
+
+const thumbnailLayoutCache = new Map<string, ReturnType<typeof buildGraph>>();
+
+function getThumbnailGraph(matter: Matter) {
+  const cached = thumbnailLayoutCache.get(matter.id);
+  if (cached) return cached;
+  const built = buildGraph(matter, { compact: true });
+  thumbnailLayoutCache.set(matter.id, built);
+  return built;
+}
+
+function MatterGraphThumbnail({ matter, onOpen }: { matter: Matter; onOpen: () => void }) {
+  const { graphNodes, graphEdges } = useMemo(() => getThumbnailGraph(matter), [matter]);
+  return (
+    <button
+      type="button"
+      onClick={(e) => { e.stopPropagation(); onOpen(); }}
+      className="block w-full text-left relative rounded-lg overflow-hidden border border-white/5 hover:border-white/15 focus:outline-none focus:border-purple-500/40 transition-colors"
+      style={{ background: "rgba(255,255,255,0.015)" }}
+      aria-label={`Open obligation graph for ${matter.name}`}
+    >
+      <div className="pointer-events-none">
+        <GraphCanvas
+          nodes={graphNodes}
+          edges={graphEdges}
+          height={92}
+          background="transparent"
+          showLabels={false}
+          className="border-0 rounded-none"
+        />
+      </div>
+      <div className="absolute top-1.5 left-2 flex items-center gap-1 text-[9px] uppercase tracking-wider text-white/30 pointer-events-none">
+        <Network className="w-2.5 h-2.5" />
+        <span>Obligation Graph</span>
+      </div>
+    </button>
+  );
+}
 
 function PressureMeter({ score }: { score: number }) {
   const color = getPressureColor(score);
@@ -181,6 +221,13 @@ export default function MatterBoard() {
               </div>
 
               <PressureMeter score={matter.pressureScore} />
+
+              <div className="mt-4">
+                <MatterGraphThumbnail
+                  matter={matter}
+                  onOpen={() => navigate(`/obligation-graph/${matter.id}`)}
+                />
+              </div>
 
               <div className="mt-4 pt-3 border-t border-white/5 space-y-2">
                 <div className="flex items-center gap-1.5 text-[10px]">
