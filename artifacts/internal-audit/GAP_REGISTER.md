@@ -10,7 +10,7 @@
 | GAP-001 | Email delivery not activated | Platform | P1 | Open | Low (minutes) | Add RESEND_API_KEY |
 | GAP-002 | Carlota Jo Stripe checkout not wired | Carlota Jo | P1 | Open | Low (1 day) | Build `/checkout` → Stripe session |
 | GAP-003 | Vessels AIS is demo-only | Vessels | P1 | Open | Low (2 hrs) | Add MARINETRAFFIC_API_KEY |
-| GAP-004 | DB tables missing (platform_settings, eval_forge_*) | Platform | P2 | Open | Low | Run `pnpm seed:all` post-migration |
+| GAP-004 | DB tables missing (eval_forge_*) | Platform | P2 | Open | Low | platform_settings fixed 2026-04-19; eval_forge tables still need migration |
 | GAP-005 | SSO/SCIM not configured | Platform | P2 | Open | Medium | Configure IdP credentials |
 | GAP-006 | Pulse briefings not AI-generated live | Pulse | P2 | Open | Medium | Connect AI provider to briefing pipeline |
 | GAP-007 | Terra ETL has no health monitor UI | Terra | P2 | Open | Low (1 day) | Build ingestion status page |
@@ -53,3 +53,6 @@
 | GAP-CLOSED-005 | No founder review pack | 13 docs created |
 | GAP-CLOSED-006 | No demo script | Created with 10/20/45 min tracks |
 | GAP-CLOSED-007 | Demo Launchpad not in Command nav | Added to Strategy section |
+| GAP-CLOSED-008 | platform_settings table missing from DB | Created via SQL + added migration 0079_platform_settings.sql |
+| GAP-CLOSED-009 | governance-persistence test beforeAll hook timeout (10s) | Raised hookTimeout to 30s in vitest.config.ts |
+| GAP-CLOSED-010 | runtime-crash-resume child poll window too tight (5s vs ~10s tsx startup) | Raised crash-child Postgres poll timeout to 20s |

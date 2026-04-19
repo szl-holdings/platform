@@ -87,13 +87,16 @@ async function main(): Promise<void> {
       const found = await pollForDurableCheckpoint(
         agentId,
         2,
-        // Allow up to 5s for one flush tick + DB round-trip. The flush
-        // interval is 1s, so this comfortably exercises the budget.
-        5_000,
+        // Allow up to 20s: tsx startup + module imports can consume 8-12s
+        // before steps even begin, leaving the 1s flush interval precious
+        // little room. 20s gives ≥8 flush cycles after steps 0-2 complete
+        // while still catching genuine flush failures within a reasonable
+        // wall-clock budget.
+        20_000,
       );
       if (!found) {
         process.stderr.write(
-          `[crash-child] no i>=2 checkpoint observed in Postgres for agent ${agentId} within 5s\n`,
+          `[crash-child] no i>=2 checkpoint observed in Postgres for agent ${agentId} within 20s\n`,
         );
         process.exit(3);
       }
