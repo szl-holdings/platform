@@ -48,6 +48,11 @@ const EXEMPT_PATHS = new Set([
   "/api/observability/error-feedback",
   "/api/telemetry/events",
   "/api/analytics/event",
+  // Public-site funnel analytics ingest. Anonymous client-side events posted
+  // from any marketing page (often pre-session); CSRF double-submit is not
+  // applicable. Server still validates eventName / domain / sourceApp shape.
+  "/api/analytics-engine/events",
+  "/api/analytics-engine/events/batch",
   "/api/public/fund-inbound-deals",
   "/api/public/fund-inbound-deals/upload",
   // Anonymous page-view tracking — called from any page (including pre-login) without a

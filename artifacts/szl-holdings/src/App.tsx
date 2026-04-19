@@ -7,7 +7,8 @@ import { lazy, Suspense, useEffect, type ReactNode } from "react";
 import { apiRequest, registerProductionConfirmFn } from "@/lib/api";
 import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
 import { navigatorConfig } from "@szl-holdings/shared-ui/copilot-configs";
-import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
+import { Switch, Route, Router as WouterRouter, Redirect, useLocation } from "wouter";
+import { analytics as szlAnalytics } from "@/lib/analytics";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LazyMotion, domMax } from "framer-motion";
 import { DemoModeProvider } from "@szl-holdings/shared-ui/demo-mode";
@@ -444,6 +445,14 @@ function ProductionConfirmRegistrar() {
   return null;
 }
 
+function PageViewTracker() {
+  const [location] = useLocation();
+  useEffect(() => {
+    szlAnalytics.pageView(location || "/");
+  }, [location]);
+  return null;
+}
+
 async function handleDemoReset() {
   try {
     await apiRequest("POST", "/api/admin/seed/reset-demo");
@@ -468,6 +477,7 @@ function App() {
         <StatusBanner config={SZL_STATUS_CONFIG} dismissible />
         <AppModeBanner onResetDemo={handleDemoReset} />
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+          <PageViewTracker />
           <EcosystemNav currentAppId="szl-holdings" currentAppName="SZL Holdings" accentColor={SZL_ACCENT} />
           <Switch>
             {/* ── Public marketing routes ── */}

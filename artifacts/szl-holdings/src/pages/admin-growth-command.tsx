@@ -163,13 +163,21 @@ function SectionHeader({ title, sub }: { title: string; sub?: string }) {
 
 const PLAUSIBLE_SHARED_URL = import.meta.env.VITE_PLAUSIBLE_SHARED_URL as string | undefined;
 
-const FUNNEL_STAGES = [
-  { label: "Site Visits", key: "visits", pct: null },
-  { label: "Solution Pages", key: "solutions", pct: 52 },
-  { label: "Demo / Pricing", key: "demo", pct: 17 },
-  { label: "Form Submit", key: "form", pct: 5.5 },
-  { label: "Confirmed", key: "done", pct: 1.5 },
-];
+interface FunnelStageRow {
+  key: string;
+  label: string;
+  count: number;
+  conversionFromPrev: number | null;
+  conversionFromTop: number | null;
+}
+
+interface FunnelData {
+  window: string;
+  windowStart: string;
+  stages: FunnelStageRow[];
+  hasClientData: boolean;
+  hasServerData: boolean;
+}
 
 const TOP_CONTENT = [
   { path: "/platform", views: 540 },
@@ -189,6 +197,12 @@ export default function AdminGrowthCommandPage() {
     refetchInterval: 60_000,
   });
 
+  const funnelQuery = useQuery<FunnelData>({
+    queryKey: ["admin-funnel", refreshKey],
+    queryFn: () => adminFetch<FunnelData>("/admin/analytics/funnel?window=7d"),
+    refetchInterval: 60_000,
+  });
+
   const healthQuery = useQuery<HealthData>({
     queryKey: ["admin-health-detailed", refreshKey],
     queryFn: () => adminFetch<HealthData>("/health/detailed"),
@@ -197,6 +211,7 @@ export default function AdminGrowthCommandPage() {
 
   const growth = growthQuery.data;
   const health = healthQuery.data;
+  const funnel = funnelQuery.data;
 
   const telemetry = parseTelemetryDetail(health?.checks?.telemetry?.details);
   const queue = parseQueueDetail(health?.checks?.job_queue?.details);
@@ -446,31 +461,59 @@ export default function AdminGrowthCommandPage() {
         <div className="rounded-xl border border-zinc-800/60 bg-zinc-900/40 p-5">
           <SectionHeader
             title="Funnel Breakdown"
-            sub="Illustrative funnel — connect Plausible to show live data"
+            sub={
+              funnelQuery.isLoading
+                ? "Loading…"
+                : funnel
+                ? `Visits → Product → Trust → Demo CTA → Form Submit → Confirmed · last 7 days${
+                    !funnel.hasClientData
+                      ? " · waiting for first client-side events"
+                      : ""
+                  }`
+                : "Funnel data unavailable"
+            }
           />
-          <div className="flex items-end gap-1 overflow-x-auto pb-1">
-            {FUNNEL_STAGES.map((stage, i) => {
-              const widthPct = stage.pct ?? 100;
-              return (
-                <React.Fragment key={stage.key}>
-                  <div className="flex flex-col items-center gap-2 min-w-[100px] flex-1">
-                    <div className="text-xs font-medium text-zinc-400 text-center">{stage.label}</div>
-                    <div
-                      className="w-full rounded-lg bg-sky-600/30 border border-sky-600/20 flex items-center justify-center"
-                      style={{ height: `${Math.max(widthPct * 0.8, 20)}px` }}
-                    >
-                      {stage.pct != null && (
-                        <span className="text-xs text-sky-400 font-semibold">{stage.pct}%</span>
+          {funnelQuery.isLoading ? (
+            <div className="h-32 rounded-lg bg-zinc-800/40 animate-pulse" />
+          ) : !funnel || funnel.stages.length === 0 ? (
+            <p className="text-xs text-zinc-500">No funnel data yet.</p>
+          ) : (
+            <div className="flex items-end gap-1 overflow-x-auto pb-1">
+              {funnel.stages.map((stage, i) => {
+                const top = funnel.stages[0]?.count ?? 0;
+                const heightPct = top > 0 ? (stage.count / top) * 100 : 0;
+                return (
+                  <React.Fragment key={stage.key}>
+                    <div className="flex flex-col items-center gap-2 min-w-[100px] flex-1">
+                      <div className="text-xs font-medium text-zinc-400 text-center">{stage.label}</div>
+                      <div
+                        className="w-full rounded-lg bg-sky-600/30 border border-sky-600/20 flex flex-col items-center justify-center px-2 py-1"
+                        style={{ height: `${Math.max(heightPct * 0.9, 28)}px` }}
+                        title={`${stage.count.toLocaleString()} sessions`}
+                      >
+                        <span className="text-sm text-sky-300 font-semibold tabular-nums">
+                          {stage.count.toLocaleString()}
+                        </span>
+                        {stage.conversionFromPrev != null && i > 0 && (
+                          <span className="text-[10px] text-sky-400/80 tabular-nums">
+                            {stage.conversionFromPrev}% step
+                          </span>
+                        )}
+                      </div>
+                      {stage.conversionFromTop != null && i > 0 && (
+                        <span className="text-[10px] text-zinc-500 tabular-nums">
+                          {stage.conversionFromTop}% of top
+                        </span>
                       )}
                     </div>
-                  </div>
-                  {i < FUNNEL_STAGES.length - 1 && (
-                    <ChevronRight className="w-4 h-4 text-zinc-600 mb-3 shrink-0" />
-                  )}
-                </React.Fragment>
-              );
-            })}
-          </div>
+                    {i < funnel.stages.length - 1 && (
+                      <ChevronRight className="w-4 h-4 text-zinc-600 mb-6 shrink-0" />
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* ── Top content + Unresponded ─────────────────────────── */}

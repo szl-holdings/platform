@@ -46,6 +46,7 @@ import lpPortalRouter from "./lp-portal";
 import atlasArtifactsRouter from "./atlas-artifacts";
 import outcomeGraphRouter from "./outcome-graph";
 import pageViewTrackingRouter from "./page-view-tracking";
+import analyticsEnginePublicRouter from "./analytics-engine-public";
 import newsletterRouter from "./newsletter";
 import selfHealingRouter from "./self-healing";
 import simulationWhatIfRouter from "./simulation-whatif";
@@ -79,6 +80,13 @@ router.use(carlotaTimeTrackingRouter);
 // BEFORE guardianPolicyCheck so pre-login visitors can POST without a session.
 // The /api/track/ prefix is also in PUBLIC_PREFIXES in global-auth-enforcer.ts.
 router.use(pageViewTrackingRouter);
+
+// Public anonymous analytics-engine ingest — backs the conversion funnel
+// for the szl-holdings marketing site. Mounted BEFORE guardianPolicyCheck and
+// the data-services tenantScope guard. /api/analytics-engine/events is in
+// PUBLIC_EXACT_PATHS / PUBLIC_PREFIXES allow-lists; the client sanitises all
+// properties through a strict allow-list (no PII forwarded).
+router.use(analyticsEnginePublicRouter);
 
 // Newsletter subscribe proxy — public, unauthenticated. Forwards email
 // subscriptions to the Substack API on behalf of all portfolio sites.

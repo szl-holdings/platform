@@ -1,5 +1,100 @@
 import posthog from "posthog-js";
 
+const ANALYTICS_INGEST_URL = "/api/analytics-engine/events";
+const SOURCE_APP = "szl-holdings";
+const DOMAIN = "szl-holdings";
+
+const SESSION_STORAGE_KEY = "szl_analytics_session_id";
+
+function getSessionId(): string | undefined {
+  if (typeof window === "undefined") return undefined;
+  try {
+    let id = window.sessionStorage.getItem(SESSION_STORAGE_KEY);
+    if (!id) {
+      id = `s_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
+      window.sessionStorage.setItem(SESSION_STORAGE_KEY, id);
+    }
+    return id;
+  } catch {
+    return undefined;
+  }
+}
+
+// Strict allow-list of property keys that may be forwarded to the server-side
+// funnel store. Anything not on this list is dropped to keep PII out of the
+// analytics events table (no email, name, message, phone, address, etc.).
+const SAFE_PROPERTY_KEYS = new Set([
+  "site",
+  "page",
+  "section",
+  "cta_label",
+  "form_key",
+  "product_key",
+  "plan_key",
+  "content_slug",
+  "source",
+  "depth",
+  "label",
+  "href",
+  "venture_id",
+  "venture_name",
+  "node_id",
+  "filter_type",
+  "filter_value",
+  "title",
+  "inquiry_type",
+]);
+
+function sanitizeProperties(
+  properties: EventProperties | undefined,
+): Record<string, string | number | boolean> {
+  if (!properties) return {};
+  const out: Record<string, string | number | boolean> = {};
+  for (const [k, v] of Object.entries(properties)) {
+    if (v === undefined || v === null) continue;
+    if (!SAFE_PROPERTY_KEYS.has(k)) continue;
+    if (typeof v === "string" || typeof v === "number" || typeof v === "boolean") {
+      out[k] = v;
+    }
+  }
+  return out;
+}
+
+function sendToFunnelStore(event: string, properties?: EventProperties): void {
+  if (typeof window === "undefined") return;
+  try {
+    const payload = {
+      eventName: event,
+      domain: DOMAIN,
+      sourceApp: SOURCE_APP,
+      properties: sanitizeProperties(properties),
+      occurredAt: new Date().toISOString(),
+      context: {
+        sessionId: getSessionId(),
+        url: window.location.pathname,
+        platform: "web",
+      },
+    };
+    const body = JSON.stringify(payload);
+    if (typeof navigator !== "undefined" && typeof navigator.sendBeacon === "function") {
+      const blob = new Blob([body], { type: "application/json" });
+      const sent = navigator.sendBeacon(ANALYTICS_INGEST_URL, blob);
+      if (sent) return;
+    }
+    void fetch(ANALYTICS_INGEST_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body,
+      keepalive: true,
+      credentials: "include",
+    }).catch(() => {});
+  } catch (err) {
+    if (import.meta.env.DEV) {
+      console.warn("[analytics] funnel store forward failed:", err);
+    }
+  }
+}
+
 type EventName =
   | "page_view"
   | "cta_click"
@@ -62,6 +157,9 @@ function track(event: EventName, properties?: EventProperties): void {
       console.warn("[analytics] posthog.capture failed:", err);
     }
   }
+  // Persist to the in-app funnel store so the founder dashboard works even
+  // without a configured external analytics provider.
+  sendToFunnelStore(event, properties);
   if (import.meta.env.DEV) {
     console.debug(`[analytics] ${event}`, properties);
   }

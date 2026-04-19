@@ -133,6 +133,11 @@ const PUBLIC_PREFIXES = [
   // Anonymous page-view tracking — public endpoint that captures pre-login
   // site traffic so the investor funnel Visitor stage reflects real visitors.
   "/api/track/",
+  // Public-site funnel analytics ingest. Anonymous client-side events posted
+  // from any marketing page (often pre-session). Server validates eventName /
+  // domain / sourceApp shape and writes to the analytics_events table; no PII
+  // is forwarded by the client (property allow-list in lib/analytics.ts).
+  "/api/analytics-engine/events",
   // Newsletter subscribe proxy — public, unauthenticated. Visitors on any
   // portfolio marketing page can subscribe to SZL Command without logging in.
   "/api/newsletter/",
