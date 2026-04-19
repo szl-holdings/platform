@@ -73,6 +73,10 @@ test.describe("IMPERIUM — Infrastructure Route Smoke Tests", () => {
     { path: `${COMMAND_BASE}/infrastructure/supply-lines`, label: "network topology" },
     { path: `${COMMAND_BASE}/infrastructure/centurion`, label: "AI operations" },
     { path: `${COMMAND_BASE}/infrastructure/intelligence`, label: "intelligence" },
+    { path: `${COMMAND_BASE}/infrastructure/geospatial`, label: "geospatial" },
+    { path: `${COMMAND_BASE}/infrastructure/directives`, label: "directive cascade" },
+    { path: `${COMMAND_BASE}/infrastructure/coalition`, label: "coalition" },
+    { path: `${COMMAND_BASE}/infrastructure/reserves`, label: "strategic reserves" },
   ];
 
   for (const route of routes) {
@@ -136,6 +140,64 @@ test.describe("IMPERIUM — Content Validation", () => {
       .first();
     await expect(content).toBeVisible({ timeout: 15000 });
   });
+
+  const subRouteContent = [
+    {
+      path: `${COMMAND_BASE}/infrastructure/senate`,
+      label: "governance board",
+      keywords: ["Senate", "Governance", "Proposal", "Vote", "Charter", "Tribune", "Approver"],
+    },
+    {
+      path: `${COMMAND_BASE}/infrastructure/supply-lines`,
+      label: "network topology",
+      keywords: ["Supply", "Route", "Topology", "Latency", "Throughput", "Error Rate", "Mesh"],
+    },
+    {
+      path: `${COMMAND_BASE}/infrastructure/centurion`,
+      label: "AI operations",
+      keywords: ["Centurion", "Agent", "AI", "Recommendation", "Battle Readiness", "Failure", "Metrics"],
+    },
+    {
+      path: `${COMMAND_BASE}/infrastructure/intelligence`,
+      label: "intelligence briefing",
+      keywords: ["Intelligence", "Briefing", "Signals", "Operational", "Bottlenecks", "Cost"],
+    },
+    {
+      path: `${COMMAND_BASE}/infrastructure/geospatial`,
+      label: "geospatial",
+      keywords: ["Geospatial", "Threat Legend", "CARTO", "OpenStreetMap", "Layer", "Source"],
+    },
+    {
+      path: `${COMMAND_BASE}/infrastructure/directives`,
+      label: "directive cascade",
+      keywords: ["Directive", "Cascade", "Classification", "Priority", "Issue New", "Cascaded"],
+    },
+    {
+      path: `${COMMAND_BASE}/infrastructure/coalition`,
+      label: "coalition",
+      keywords: ["Coalition", "Partner", "Trust Score", "Domain", "Status", "Stakeholder"],
+    },
+    {
+      path: `${COMMAND_BASE}/infrastructure/reserves`,
+      label: "strategic reserves",
+      keywords: ["Reserve", "Drawdown", "Awaiting Approval", "Strategic", "Pool", "Decided"],
+    },
+  ];
+
+  for (const route of subRouteContent) {
+    test(`${route.label} page renders meaningful content`, async ({ page }) => {
+      await page.goto(route.path);
+      await page.waitForLoadState("networkidle", { timeout: 20000 }).catch(() => null);
+
+      const errorBoundary = page.locator("text=Something went wrong").first();
+      const hasError = await errorBoundary.isVisible().catch(() => false);
+      expect(hasError).toBe(false);
+
+      const selector = route.keywords.map((k) => `:text('${k}')`).join(", ");
+      const content = page.locator(selector).first();
+      await expect(content).toBeVisible({ timeout: 15000 });
+    });
+  }
 
   test("IMPERIUM nav sidebar is present", async ({ page }) => {
     await page.goto(IMPERIUM_PATH);
