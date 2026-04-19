@@ -8,6 +8,7 @@ import { useWorkspace, type WorkspaceDomain } from "@/context/WorkspaceContext";
 import { useColors } from "@/hooks/useColors";
 import { apiFetch } from "@/lib/apiClient";
 import { useNotificationCountContext } from "@/context/NotificationCountContext";
+import { OfflineQueueLauncher } from "@/components/OfflineQueueLauncher";
 
 interface TabItem {
   id: WorkspaceDomain;
@@ -222,6 +223,8 @@ export function BottomTabBar() {
           </Text>
         </View>
       </TouchableOpacity>
+
+      <OfflineQueueLauncher />
 
       <TouchableOpacity
         onPress={() => router.navigate("/(shell)/settings" as never)}

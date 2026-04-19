@@ -96,7 +96,7 @@ function relative(ts: number): string {
   return `${Math.floor(hrs / 24)}d ago`;
 }
 
-async function loadAllQueued(): Promise<UnifiedQueuedItem[]> {
+export async function loadAllQueued(): Promise<UnifiedQueuedItem[]> {
   const [cortex, defense, shared] = await Promise.all([
     readJson<CortexQueued[]>(CORTEX_QUEUE_KEY, []),
     readJson<DefenseQueued[]>(TRADECRAFT_QUEUE_KEY, []),
