@@ -1283,7 +1283,7 @@ function playNotificationBeep(): void {
 export function EcosystemNav({
   currentAppId,
   currentAppName,
-  accentColor = "#8b7ac8",
+  accentColor: accentColorProp = "#8b7ac8",
   notifications: notificationsProp,
   onNotificationRead,
   onSearch,
@@ -1298,6 +1298,9 @@ export function EcosystemNav({
   const notificationCenter = useNotificationCenter(appData?.name ?? currentAppName);
   const recentItems = useRecentItems();
   const { prefs } = useUserPreferences();
+  // User's accent_color preference overrides the workspace's default accent
+  // so personal theming travels across every product surface.
+  const accentColor = prefs.accent_color ?? accentColorProp;
 
   const [showAppSwitcher, setShowAppSwitcher] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);

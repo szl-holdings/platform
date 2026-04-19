@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   SettingsShell, } from "@szl-holdings/shared-ui/settings-shell";
 import {
-  Bell, BellOff, Shield, Key, Lock, Users, Loader2, Globe, Mail, Building2, RefreshCw, Layers, FileText, Save, CheckCircle, AlertTriangle, PanelLeftClose, PanelLeftOpen, PanelLeft, Volume2, VolumeX, } from "lucide-react";
+  Bell, BellOff, Shield, Key, Lock, Users, Loader2, Globe, Mail, Building2, RefreshCw, Layers, FileText, Save, CheckCircle, AlertTriangle, PanelLeftClose, PanelLeftOpen, PanelLeft, Volume2, VolumeX, Palette, Rows3, Maximize2, Clock, X, } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUserPreferences } from "@szl-holdings/shared-ui/use-user-preferences";
 
@@ -456,10 +456,183 @@ function AuditLogPanel() {
 // App Preferences Panel — user-level UI preferences persisted to the API
 // ─────────────────────────────────────────────────────────────────────────────
 
+const ACCENT_COLOR_PRESETS: Array<{ value: string; label: string }> = [
+  { value: "#f59e0b", label: "Amber" },
+  { value: "#8b5cf6", label: "Violet" },
+  { value: "#38bdf8", label: "Sky" },
+  { value: "#22c55e", label: "Emerald" },
+  { value: "#ef4444", label: "Crimson" },
+  { value: "#ec4899", label: "Rose" },
+  { value: "#14b8a6", label: "Teal" },
+  { value: "#94a3b8", label: "Slate" },
+];
+
+const HEX_COLOR_RE = /^#[0-9a-fA-F]{6}$/;
+
+const COMMON_TIME_ZONES: Array<{ value: string; label: string }> = [
+  { value: "America/New_York", label: "New York (Eastern)" },
+  { value: "America/Chicago", label: "Chicago (Central)" },
+  { value: "America/Denver", label: "Denver (Mountain)" },
+  { value: "America/Los_Angeles", label: "Los Angeles (Pacific)" },
+  { value: "America/Sao_Paulo", label: "São Paulo" },
+  { value: "Europe/London", label: "London" },
+  { value: "Europe/Paris", label: "Paris" },
+  { value: "Europe/Berlin", label: "Berlin" },
+  { value: "Europe/Madrid", label: "Madrid" },
+  { value: "Asia/Dubai", label: "Dubai" },
+  { value: "Asia/Singapore", label: "Singapore" },
+  { value: "Asia/Tokyo", label: "Tokyo" },
+  { value: "Asia/Hong_Kong", label: "Hong Kong" },
+  { value: "Australia/Sydney", label: "Sydney" },
+  { value: "UTC", label: "UTC" },
+];
+
+function AccentColorControl({
+  value,
+  onChange,
+}: {
+  value: string | null;
+  onChange: (next: string | null) => void;
+}) {
+  const browserAccent = "#8b7ac8";
+  const current = value ?? "";
+  return (
+    <div className="flex flex-col gap-2 items-end">
+      <div className="flex flex-wrap gap-1.5 justify-end max-w-[260px]">
+        {ACCENT_COLOR_PRESETS.map((p) => {
+          const active = value === p.value;
+          return (
+            <button
+              key={p.value}
+              type="button"
+              onClick={() => onChange(p.value)}
+              title={p.label}
+              aria-label={`Set accent color to ${p.label}`}
+              aria-pressed={active}
+              className={cn(
+                "w-6 h-6 rounded-md border transition-all",
+                active ? "ring-2 ring-offset-2 ring-offset-background ring-foreground/40 scale-110" : "border-border/60 hover:scale-105",
+              )}
+              style={{ background: p.value }}
+            />
+          );
+        })}
+        <button
+          type="button"
+          onClick={() => onChange(null)}
+          title={`Use workspace default (${browserAccent})`}
+          aria-label="Reset accent color to workspace default"
+          aria-pressed={value === null}
+          className={cn(
+            "h-6 px-2 inline-flex items-center gap-1 rounded-md border text-[10px] font-medium transition-colors",
+            value === null
+              ? "bg-muted border-border text-foreground"
+              : "border-border/60 text-muted-foreground hover:text-foreground",
+          )}
+        >
+          <X className="w-2.5 h-2.5" /> Default
+        </button>
+      </div>
+      <div className="flex items-center gap-1.5">
+        <input
+          type="color"
+          value={current || browserAccent}
+          onChange={(e) => onChange(e.target.value.toLowerCase())}
+          className="w-7 h-7 p-0 border border-border rounded cursor-pointer bg-transparent"
+          aria-label="Custom accent color"
+        />
+        <input
+          type="text"
+          value={current}
+          onChange={(e) => {
+            const v = e.target.value.trim();
+            if (v === "") {
+              onChange(null);
+            } else if (HEX_COLOR_RE.test(v)) {
+              onChange(v.toLowerCase());
+            }
+          }}
+          placeholder="#rrggbb"
+          maxLength={7}
+          className="w-[88px] px-2 py-1 text-[11px] font-mono bg-muted rounded-lg border border-border focus:outline-none focus:border-amber-500/50"
+        />
+      </div>
+    </div>
+  );
+}
+
+function DensityControl({
+  value,
+  onChange,
+}: {
+  value: "comfortable" | "compact";
+  onChange: (next: "comfortable" | "compact") => void;
+}) {
+  const opts: Array<{ value: "comfortable" | "compact"; label: string; icon: React.ReactNode }> = [
+    { value: "comfortable", label: "Comfortable", icon: <Maximize2 className="w-3 h-3" /> },
+    { value: "compact", label: "Compact", icon: <Rows3 className="w-3 h-3" /> },
+  ];
+  return (
+    <div className="inline-flex p-0.5 rounded-lg bg-muted border border-border">
+      {opts.map((o) => {
+        const active = value === o.value;
+        return (
+          <button
+            key={o.value}
+            type="button"
+            onClick={() => onChange(o.value)}
+            aria-pressed={active}
+            className={cn(
+              "flex items-center gap-1.5 px-3 py-1 rounded text-xs font-medium transition-colors",
+              active ? "bg-amber-500/15 text-amber-400" : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {o.icon}
+            {o.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function TimeZoneControl({
+  value,
+  onChange,
+}: {
+  value: string | null;
+  onChange: (next: string | null) => void;
+}) {
+  const browserZone = (() => {
+    try {
+      return Intl.DateTimeFormat().resolvedOptions().timeZone;
+    } catch {
+      return "UTC";
+    }
+  })();
+  const current = value ?? "";
+  return (
+    <select
+      value={current}
+      onChange={(e) => {
+        const v = e.target.value;
+        onChange(v === "" ? null : v);
+      }}
+      className="px-3 py-1.5 text-xs bg-muted border border-border rounded-lg focus:outline-none focus:border-amber-500/50 max-w-[260px]"
+      aria-label="Select preferred time zone"
+    >
+      <option value="">Browser default ({browserZone})</option>
+      {COMMON_TIME_ZONES.map((z) => (
+        <option key={z.value} value={z.value}>{z.label}</option>
+      ))}
+    </select>
+  );
+}
+
 function AppPreferencesPanel() {
   const { prefs, setPreference, isLoaded } = useUserPreferences();
 
-  const items = [
+  const toggles = [
     {
       key: "sidebar_collapsed" as const,
       label: "Collapsed Sidebar",
@@ -487,31 +660,74 @@ function AppPreferencesPanel() {
     >
       <SettingsCard title="Layout & Sound">
         {isLoaded ? (
-          items.map(({ key, label, description, onIcon, offIcon, onLabel, offLabel }) => {
-            const enabled = prefs[key];
-            return (
-              <SettingsRow key={key} label={label} description={description}>
-                <button
-                  onClick={() => setPreference(key, !enabled)}
-                  className={cn(
-                    "flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors",
-                    enabled
-                      ? "bg-amber-500/10 border-amber-500/20 text-amber-400"
-                      : "bg-muted border-border text-muted-foreground hover:text-foreground",
-                  )}
-                >
-                  {enabled ? onIcon : offIcon}
-                  {enabled ? onLabel : offLabel}
-                </button>
-              </SettingsRow>
-            );
-          })
+          <>
+            {toggles.map(({ key, label, description, onIcon, offIcon, onLabel, offLabel }) => {
+              const enabled = prefs[key];
+              return (
+                <SettingsRow key={key} label={label} description={description}>
+                  <button
+                    onClick={() => setPreference(key, !enabled)}
+                    className={cn(
+                      "flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors",
+                      enabled
+                        ? "bg-amber-500/10 border-amber-500/20 text-amber-400"
+                        : "bg-muted border-border text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    {enabled ? onIcon : offIcon}
+                    {enabled ? onLabel : offLabel}
+                  </button>
+                </SettingsRow>
+              );
+            })}
+            <SettingsRow
+              label="Density"
+              description="Tighten or relax spacing across every workspace"
+            >
+              <DensityControl
+                value={prefs.density}
+                onChange={(v) => setPreference("density", v)}
+              />
+            </SettingsRow>
+          </>
         ) : (
           <div className="space-y-2 py-2">
-            {[1, 2].map((i) => (
+            {[1, 2, 3].map((i) => (
               <div key={i} className="h-10 bg-muted animate-pulse rounded-lg" />
             ))}
           </div>
+        )}
+      </SettingsCard>
+
+      <SettingsCard title="Theme" className="mt-4">
+        {isLoaded ? (
+          <SettingsRow
+            label="Accent Color"
+            description="Override the workspace accent with your own color across the navigation chrome"
+          >
+            <AccentColorControl
+              value={prefs.accent_color}
+              onChange={(v) => setPreference("accent_color", v)}
+            />
+          </SettingsRow>
+        ) : (
+          <div className="h-12 bg-muted animate-pulse rounded-lg" />
+        )}
+      </SettingsCard>
+
+      <SettingsCard title="Localization" className="mt-4">
+        {isLoaded ? (
+          <SettingsRow
+            label="Time Zone"
+            description="Used to format timestamps consistently across every workspace"
+          >
+            <TimeZoneControl
+              value={prefs.time_zone}
+              onChange={(v) => setPreference("time_zone", v)}
+            />
+          </SettingsRow>
+        ) : (
+          <div className="h-12 bg-muted animate-pulse rounded-lg" />
         )}
       </SettingsCard>
 
