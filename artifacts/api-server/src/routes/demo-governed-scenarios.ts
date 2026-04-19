@@ -2,6 +2,7 @@ import { Router, type IRouter, type Request, type Response } from "express";
 import { randomUUID } from "crypto";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { sendCreated, handleRouteError } from "../lib/api-response";
+import { validateBody, jsonObjectBodySchema } from "../lib/validation";
 import { logger } from "../lib/logger";
 import {
   defaultPolicyModeRegistry,
@@ -40,6 +41,7 @@ router.post(
   "/demo/seed-governed-scenarios",
   authMiddleware(),
   requireRole("super_admin", "admin"),
+  validateBody(jsonObjectBodySchema),
   async (_req: Request, res: Response) => {
     try {
       const results: Record<string, unknown> = {};

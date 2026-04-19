@@ -735,7 +735,7 @@ function nextInterventionProofRef(): string {
   return `ALLOY-INT-${String(interventionSeq).padStart(4, "0")}`;
 }
 
-router.get("/lyte/interventions", authMiddleware(), (req, res) => {
+router.get("/lyte/interventions", authMiddleware(), validateQuery(listQuerySchema), (req, res) => {
   try {
     const { itemKind, itemId, type } = req.query as { itemKind?: string; itemId?: string; type?: string };
     let rows = interventionLedger.slice();
@@ -749,7 +749,7 @@ router.get("/lyte/interventions", authMiddleware(), (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to list interventions"); }
 });
 
-router.post("/lyte/interventions", authMiddleware({ required: true }), denyIfReadOnly(), (req, res) => {
+router.post("/lyte/interventions", authMiddleware({ required: true }), denyIfReadOnly(), validateBody(jsonObjectBodySchema), (req, res) => {
   try {
     const body = (req.body ?? {}) as Partial<LyteInterventionRecord>;
     const validTypes: LyteInterventionType[] = ["claim", "resolve", "reassign", "address"];

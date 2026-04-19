@@ -9,7 +9,7 @@ import {
   handleRouteError,
 } from "../lib/api-response";
 import { logger } from "../lib/logger";
-import { validateBody, jsonObjectBodySchema } from "../lib/validation";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema } from "../lib/validation";
 import {
   defaultPolicyModeRegistry,
   PolicyModeConfigSchema,
@@ -41,7 +41,7 @@ router.get("/policy-modes/meta", authMiddleware(), async (_req: Request, res: Re
   }
 });
 
-router.get("/policy-modes/resolve", authMiddleware(), async (req: Request, res: Response) => {
+router.get("/policy-modes/resolve", authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { product, actionType, workspace } = req.query as {
       product?: string;
@@ -130,7 +130,7 @@ router.patch("/policy-modes/:id", authMiddleware(), requireRole("super_admin", "
   }
 });
 
-router.delete("/policy-modes/:id", authMiddleware(), requireRole("super_admin", "admin"), async (req: Request, res: Response) => {
+router.delete("/policy-modes/:id", authMiddleware(), requireRole("super_admin", "admin"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { id } = req.params as { id: string };
     const deleted = defaultPolicyModeRegistry.unregister(id);

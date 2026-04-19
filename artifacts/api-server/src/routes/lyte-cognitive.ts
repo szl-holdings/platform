@@ -26,7 +26,7 @@ import {
   computeBottleneckUrgency,
   computeAccountabilityUrgency,
 } from "./lyte-cognitive-helpers.js";
-import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema, anyQuerySchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -277,7 +277,7 @@ router.get("/lyte/cognitive/bottlenecks", authMiddleware(), async (req, res) => 
   }
 });
 
-router.get("/lyte/cognitive/interventions", authMiddleware(), async (req, res) => {
+router.get("/lyte/cognitive/interventions", authMiddleware(), validateQuery(anyQuerySchema), async (req, res) => {
   try {
     const limit = safeParseLimit(req.query.limit, 20, 50);
     const [activeSignals, stalledActions, blockedItems, openEscalations] = await Promise.all([

@@ -1422,7 +1422,7 @@ const autonomyModeSchema = z.object({
   reason: z.string().max(2000).trim().optional().nullable(),
 });
 
-router.get("/alloy/autonomy-mode", authMiddleware(), async (req: Request, res: Response) => {
+router.get("/alloy/autonomy-mode", authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const tenantOrgId = resolveAlloyTenant(req);
     const domain = (req.query.domain as string | undefined)?.trim();

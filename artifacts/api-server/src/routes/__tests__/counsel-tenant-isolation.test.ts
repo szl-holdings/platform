@@ -79,9 +79,16 @@ vi.mock("drizzle-orm", () => ({
   asc: (_col: unknown) => ({ op: "asc" }),
 }));
 
-vi.mock("../../lib/validation", () => ({
-  validateBody: (_schema: unknown) => (_req: Request, _res: Response, next: NextFunction) => next(),
-}));
+vi.mock("../../lib/validation", async () => {
+  const { z } = await import("zod");
+  return {
+    validateBody: (_schema: unknown) => (_req: Request, _res: Response, next: NextFunction) => next(),
+    validateQuery: (_schema: unknown) => (_req: Request, _res: Response, next: NextFunction) => next(),
+    jsonObjectBodySchema: z.record(z.unknown()),
+    listQuerySchema: z.object({}).passthrough(),
+    anyQuerySchema: z.object({}).passthrough(),
+  };
+});
 
 function makeOrgAUser() {
   return {

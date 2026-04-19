@@ -349,7 +349,7 @@ const ListBookingRequestsQuery = z.object({
   status: z.enum(BOOKING_STATUSES).optional(),
 });
 
-router.get("/stephen/booking-requests", authMiddleware(), requireRole("ops"), async (req, res) => {
+router.get("/stephen/booking-requests", authMiddleware(), requireRole("ops"), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const query = ListBookingRequestsQuery.parse(req.query);
     const filters: SQL[] = [];

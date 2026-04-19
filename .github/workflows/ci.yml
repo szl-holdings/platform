@@ -315,8 +315,8 @@ jobs:
       # attributable to a route losing its auth classification.
       # See artifacts/api-server/src/scripts/route-security-matrix.ts
       # and docs/known-gaps.md §3.2.
-      - name: Audit API route auth classification (--strict-auth)
-        run: pnpm --filter @workspace/api-server run audit:route-security:strict-auth
+      - name: Audit API route auth + input validation (--strict)
+        run: pnpm --filter @workspace/api-server run audit:route-security:strict
 
   ci-gate:
     name: CI Gate

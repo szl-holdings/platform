@@ -346,6 +346,7 @@ router.post(
   "/memory/:id/pin",
   authMiddleware(),
   requireRole("admin", "super_admin", "ops"),
+  validateBody(jsonObjectBodySchema),
   async (req: Request, res: Response) => {
     try {
       const { id } = req.params as { id: string };
@@ -366,6 +367,7 @@ router.delete(
   "/memory/:id/pin",
   authMiddleware(),
   requireRole("admin", "super_admin"),
+  validateBody(jsonObjectBodySchema),
   async (req: Request, res: Response) => {
     try {
       const { id } = req.params as { id: string };

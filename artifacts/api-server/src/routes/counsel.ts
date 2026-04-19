@@ -3,7 +3,7 @@ import { db, pcGcMattersTable, pcGcObligationsTable, pcGcAuditEntriesTable, pcGc
 import { eq, asc, desc, and } from "drizzle-orm";
 import { sendSuccess, sendNotFound, sendBadRequest, sendForbidden, handleRouteError } from "../lib/api-response";
 import { z } from "zod";
-import { validateBody } from "../lib/validation";
+import { validateBody, validateQuery, jsonObjectBodySchema, listQuerySchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -555,7 +555,7 @@ router.patch("/counsel/matters/:id", validateBody(matterPatchSchema), async (req
   }
 });
 
-router.delete("/counsel/matters/:id", async (req: Request, res: Response) => {
+router.delete("/counsel/matters/:id", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const orgId = requireOrgId(req, res);
     if (!orgId) return;
@@ -657,7 +657,7 @@ router.post("/counsel/audit-trail", validateBody(auditAppendSchema), async (req:
   }
 });
 
-router.get("/counsel/audit-trail", async (req: Request, res: Response) => {
+router.get("/counsel/audit-trail", validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const orgId = requireOrgId(req, res);
     if (!orgId) return;
@@ -725,7 +725,7 @@ router.post("/counsel/proof-chain", validateBody(proofAppendSchema), async (req:
   }
 });
 
-router.get("/counsel/proof-chain", async (req: Request, res: Response) => {
+router.get("/counsel/proof-chain", validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const orgId = requireOrgId(req, res);
     if (!orgId) return;

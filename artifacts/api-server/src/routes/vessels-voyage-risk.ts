@@ -19,7 +19,7 @@ import React from "react";
 import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
 import { sendSuccess, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
-import { validateQuery, listQuerySchema } from "../lib/validation";
+import { validateBody, validateQuery, jsonObjectBodySchema, listQuerySchema } from "../lib/validation";
 import { getSanctionsSources, runSanctionsRefresh, getSanctionsStoreSnapshot, startSanctionsRefreshJob } from "../jobs/vessels-sanctions-refresh";
 
 startSanctionsRefreshJob();
@@ -509,6 +509,7 @@ router.post(
   "/vessels/voyage-risk/score",
   riskLimit,
   authMiddleware({ required: false }),
+  validateBody(jsonObjectBodySchema),
   async (req, res) => {
     try {
       const body = req.body as VoyageRiskRequest;
@@ -660,6 +661,7 @@ router.post(
   "/vessels/voyage-risk/sanctions/refresh",
   riskLimit,
   authMiddleware({ required: false }),
+  validateBody(jsonObjectBodySchema),
   (req, res) => {
     try {
       const targetId = (req.body as { sourceId?: string }).sourceId;
@@ -857,6 +859,7 @@ router.post(
   "/vessels/voyage-risk/memo/pdf",
   riskLimit,
   authMiddleware({ required: false }),
+  validateBody(jsonObjectBodySchema),
   async (req, res) => {
     try {
       const score = req.body as VoyageRiskScore;

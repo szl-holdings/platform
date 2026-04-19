@@ -1136,7 +1136,7 @@ async function fetchCompetitorNews(competitor: string, max = 5): Promise<Array<{
   }
 }
 
-router.get("/carlota/radar-signals", authMiddleware(), async (req, res) => {
+router.get("/carlota/radar-signals", authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const userId = req.user!.id;
     const orgId = req.user?.orgs[0]?.orgId ?? null;
