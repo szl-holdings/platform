@@ -27,11 +27,17 @@
  * intent auditable — they do NOT replace the global enforcer.
  *
  * Usage:
- *   pnpm --filter @szl-holdings/api-server exec tsx src/scripts/route-security-matrix.ts
+ *   pnpm --filter @workspace/api-server exec tsx src/scripts/route-security-matrix.ts
  *   # JSON output:
- *   pnpm --filter @szl-holdings/api-server exec tsx src/scripts/route-security-matrix.ts --json
- *   # Fail with exit code 1 if any UNCLASSIFIED routes exist:
- *   pnpm --filter @szl-holdings/api-server exec tsx src/scripts/route-security-matrix.ts --strict
+ *   pnpm --filter @workspace/api-server exec tsx src/scripts/route-security-matrix.ts --json
+ *   # Fail with exit code 1 if any UNCLASSIFIED routes exist OR any
+ *   # mutating/query handler is missing Zod validation:
+ *   pnpm --filter @workspace/api-server exec tsx src/scripts/route-security-matrix.ts --strict
+ *   # Fail with exit code 1 ONLY if any UNCLASSIFIED routes exist (used by
+ *   # the route-security-matrix CI gate so merges are blocked the moment a
+ *   # new route file ships without auth enforcement; does NOT fail on the
+ *   # broader Zod validation gap):
+ *   pnpm --filter @workspace/api-server exec tsx src/scripts/route-security-matrix.ts --strict-auth
  */
 
 import { readFileSync, readdirSync, statSync } from "fs";
@@ -325,6 +331,7 @@ function analyzeFile(filePath: string): RouteEntry {
 const args = process.argv.slice(2);
 const jsonMode = args.includes("--json");
 const strictMode = args.includes("--strict");
+const strictAuthMode = args.includes("--strict-auth");
 
 const routeFiles = collectRouteFiles(ROUTES_DIR);
 const entries = routeFiles.map(analyzeFile);
@@ -486,4 +493,21 @@ if (strictMode) {
     validationTotals.unvalidatedBody > 0 ||
     validationTotals.unvalidatedQuery > 0;
   if (hasIssues) process.exit(1);
+}
+
+// --strict-auth is the CI-gate flag: it fails ONLY when one or more route
+// files are UNCLASSIFIED. This is the merge-blocking signal for the
+// "Route Security Matrix" CI job in .github/workflows/ci.yml — it stays
+// green as long as every route is PROTECTED, GROUP-PROTECTED, or in the
+// explicit PUBLIC allowlist, and is independent of the broader Zod
+// validation backlog tracked separately.
+if (strictAuthMode) {
+  if (unclassified.length > 0) {
+    console.error(
+      `\n✗  Route Security Matrix: ${unclassified.length} route file(s) are UNCLASSIFIED. ` +
+        `Add explicit auth enforcement, register the file in a group with auth ` +
+        `middleware, or add it to the PUBLIC allowlist in global-auth-enforcer.ts.`,
+    );
+    process.exit(1);
+  }
 }

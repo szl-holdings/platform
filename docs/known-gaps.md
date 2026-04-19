@@ -152,11 +152,13 @@ Audited all routes with /:orgId or /:orgSlug params across all files under src/r
 - `PUBLIC` — file is in the public allowlist and its unauthenticated access is intentional
 - `UNCLASSIFIED` — neither; requires immediate review
 
-Running with `--strict` returns exit code 1 if any `UNCLASSIFIED` routes exist, enabling enforcement in CI pipelines. Run with `--json` for machine-readable output.
+Running with `--strict` returns exit code 1 if any `UNCLASSIFIED` routes exist OR any mutating/query handler is missing Zod validation. Running with `--strict-auth` returns exit code 1 only on `UNCLASSIFIED` routes (this is the flag wired into CI so the gate is scoped to auth-classification regressions). Run with `--json` for machine-readable output.
 
-**Usage:** `pnpm --filter @szl-holdings/api-server exec tsx src/scripts/route-security-matrix.ts [--strict] [--json]`
+**Usage:** `pnpm --filter @workspace/api-server run audit:route-security[:strict|:strict-auth] [-- --json]`
 
-**Risk:** Closed. The matrix script makes auth coverage auditable at any time and can block merges if new unclassified routes are introduced.
+**CI enforcement (April 2026):** The `Route Security Matrix (blocking)` job in `.github/workflows/ci.yml` runs `audit:route-security:strict-auth` on every PR and is part of the `CI Gate` aggregate, so any merge that introduces an `UNCLASSIFIED` route is blocked automatically. The job is named distinctly from SAST and dependency-audit jobs so failures are unambiguously attributable to route auth coverage.
+
+**Risk:** Closed. The matrix script makes auth coverage auditable at any time and merges are blocked automatically if new unclassified routes are introduced.
 
 ---
 
