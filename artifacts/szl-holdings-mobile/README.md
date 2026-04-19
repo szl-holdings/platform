@@ -1,24 +1,48 @@
 # SZL Holdings — Mobile Command
 
-Secondary mobile app for the SZL Holdings platform. Status: **deferred** until the CORTEX mobile flagship ships.
+> Expo / React Native mobile companion app for the SZL Holdings platform.
 
-**Kind:** mobile (Expo / React Native)
-**Preview path:** `/szl-holdings-mobile/`
-**Artifact dir:** `artifacts/szl-holdings-mobile/`
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Expo](https://img.shields.io/badge/Expo-SDK_53-000020?style=flat-square&logo=expo&logoColor=white)](https://expo.dev/)
+[![License](https://img.shields.io/badge/license-Proprietary-red?style=flat-square)](../../LICENSE.md)
+
+---
 
 ## Status
 
-This app is deferred. The primary mobile surface is `artifacts/cortex-mobile/` (CORTEX — Unified Command). Do not invest in new features here until CORTEX reaches the App Store.
+**Deferred.** This app is the secondary mobile surface. The primary mobile flagship is `artifacts/cortex-mobile/` (CORTEX — Unified Command). Do not invest in new features here until CORTEX ships to the App Store.
 
-See `ops/mobile/flagship-release-readiness.md` for the CORTEX release status and criteria.
+See [`ops/mobile/flagship-release-readiness.md`](../../ops/mobile/flagship-release-readiness.md) for the CORTEX release status and readiness criteria.
 
-## Local development
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| **Framework** | Expo SDK 53, React Native |
+| **Language** | TypeScript (strict mode) |
+| **Navigation** | Expo Router (file-based routing) |
+| **Styling** | NativeWind (Tailwind CSS for React Native) |
+| **Auth** | OIDC/PKCE with biometric unlock |
+| **State** | TanStack Query v5 |
+| **Analytics** | Amplitude, PostHog |
+| **Error Reporting** | Sentry |
+| **Builds** | Expo Application Services (EAS) |
+
+## Local Development
 
 ```bash
+# From the monorepo root
+pnpm install
 pnpm --filter @szl-holdings/szl-holdings-mobile dev
 ```
 
-## Notable source paths
+Requires the API server running:
+
+```bash
+pnpm --filter @szl-holdings/api-server dev
+```
+
+## Notable Source Paths
 
 | Path | Purpose |
 |------|---------|
@@ -31,7 +55,7 @@ pnpm --filter @szl-holdings/szl-holdings-mobile dev
 | `app.config.js`, `app.json`, `eas.json` | Expo / EAS configuration |
 | `scripts/` | Build and release helper scripts |
 
-## Key environment variables
+## Environment Variables
 
 All client-side variables use the `EXPO_PUBLIC_` prefix.
 
@@ -49,4 +73,8 @@ All client-side variables use the `EXPO_PUBLIC_` prefix.
 | `EXPO_PUBLIC_SENTRY_DSN` | Sentry error reporting |
 | `EXPO_PUBLIC_STRIPE_PRICE_MOBILE` | Stripe price ID for mobile tier |
 
-EAS build/store secrets (Apple, Google Play, Firebase) are managed in `eas.json` and the EAS secrets matrix — see `ops/mobile/eas-and-store-secrets-matrix.md`.
+EAS build and App Store secrets are managed in `eas.json` and the EAS secrets matrix — see [`ops/mobile/eas-and-store-secrets-matrix.md`](../../ops/mobile/eas-and-store-secrets-matrix.md).
+
+---
+
+**SZL Holdings** · [szlholdings.com](https://szlholdings.com) · [inquiries@szlholdings.com](mailto:inquiries@szlholdings.com)

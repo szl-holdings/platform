@@ -101,7 +101,7 @@ All 8 domain workspaces in a single Expo/React Native app. Biometric auth, cross
 ### SZL Holdings — Command Surface
 | Platform Hero | Ecosystem Architecture |
 |---|---|
-| ![SZL Holdings](./assets/screenshots/szl-holdings-dashboard-fresh.jpg) | ![SZL Holdings Ecosystem](./assets/screenshots/szl-holdings-ecosystem-fresh.jpg) |
+| ![SZL Holdings](../assets/screenshots/szl-holdings-dashboard-fresh.jpg) | ![SZL Holdings Ecosystem](../assets/screenshots/szl-holdings-ecosystem-fresh.jpg) |
 
 *Business observability with explainable execution — Observe, Understand, Decide, Execute. One holding company. One architecture. Six platforms. Everything compounds.*
 
@@ -110,7 +110,7 @@ All 8 domain workspaces in a single Expo/React Native app. Biometric auth, cross
 ### Aegis — Security & Defense Intelligence
 | Landing — Four Workspaces, One Intelligence Layer | SOC Command Center |
 |---|---|
-| ![Aegis Home](./assets/screenshots/aegis-home-fresh.jpg) | ![Aegis SOC](./assets/screenshots/aegis-soc-dashboard.jpg) |
+| ![Aegis Home](../assets/screenshots/aegis-home-fresh.jpg) | ![Aegis SOC](../assets/screenshots/aegis-soc-dashboard.jpg) |
 | *Aegis unifies defense, legal, command, and labs workspaces on a shared correlation engine* | *MITRE ATT&CK v14 mapping, SOAR playbooks, STIX/TAXII threat intel, XDR console, Sentinel AI agent* |
 
 ---
@@ -118,7 +118,7 @@ All 8 domain workspaces in a single Expo/React Native app. Biometric auth, cross
 ### Vessels — Maritime Fleet Intelligence
 | Fleet Command | Mobile Fleet Tracking |
 |---|---|
-| ![Vessels Fleet](./assets/screenshots/vessels-fresh.jpg) | ![Vessels Mobile](./assets/screenshots/vessels-mobile-fleet.jpg) |
+| ![Vessels Fleet](../assets/screenshots/vessels-fresh.jpg) | ![Vessels Mobile](../assets/screenshots/vessels-mobile-fleet.jpg) |
 
 *AIS telemetry, sanctions screening, dark vessel detection, voyage economics, commodity trading, and marine insurance — all in one command surface. Helmsman AI agent. 83 components.*
 
@@ -127,7 +127,7 @@ All 8 domain workspaces in a single Expo/React Native app. Biometric auth, cross
 ### Terra — Real Estate Intelligence
 | Property Intelligence | Mobile Property View |
 |---|---|
-| ![Terra Dashboard](./assets/screenshots/terra-fresh.jpg) | ![Terra Mobile](./assets/screenshots/terra-mobile-home.jpg) |
+| ![Terra Dashboard](../assets/screenshots/terra-fresh.jpg) | ![Terra Mobile](../assets/screenshots/terra-mobile-home.jpg) |
 
 *NYC distress property pipeline, ownership entity graph, deal pipeline, MLS ingestion, broker workflow, and market signal intelligence. 77 components.*
 
@@ -136,26 +136,26 @@ All 8 domain workspaces in a single Expo/React Native app. Biometric auth, cross
 ### Lyte — Business Observability
 | Command Center | Executive Action Queue |
 |---|---|
-| ![Lyte Command](./assets/screenshots/lyte-command-center-hero.jpg) | ![Lyte Executive](./assets/screenshots/lyte-executive-command.jpg) |
+| ![Lyte Command](../assets/screenshots/lyte-command-center-hero.jpg) | ![Lyte Executive](../assets/screenshots/lyte-executive-command.jpg) |
 
 *PRISM framework — People, Revenue, Infrastructure, Security, Market. Signal timeline, correlation engine, priority action queue, and AIOps. 142 components.*
 
 ---
 
 ### PRISM Counsel — Legal Matter Command
-![PRISM Counsel](./assets/screenshots/prism-counsel-hero.jpg)
+![PRISM Counsel](../assets/screenshots/prism-counsel-hero.jpg)
 *Full matter management with court filing integration, multi-jurisdictional support, recovery tracking, and approval chains. 127 components. Rivals standalone LegalTech platforms with cross-domain intelligence from defense and maritime verticals.*
 
 ---
 
 ### Command Portal — Ecosystem Intelligence Hub
-![Command Portal](./assets/screenshots/command-fresh.jpg)
+![Command Portal](../assets/screenshots/command-fresh.jpg)
 *Real-time 8-domain dashboard with SSE updates, composite health scoring, global Cmd+K search, and executive briefing view. The cross-domain nerve center of the platform.*
 
 ---
 
 ### Carlota Jo — Premium Advisory
-![Carlota Jo](./assets/screenshots/carlota-jo-fresh.jpg)
+![Carlota Jo](../assets/screenshots/carlota-jo-fresh.jpg)
 *White-glove advisory operations for UHNW clients. Private intake, client portal, service catalog, booking, document delivery, and client messaging. 60 components.*
 
 ---
