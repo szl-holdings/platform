@@ -27,6 +27,7 @@
     "seed:atlas:counsel": "tsx ./seed-atlas.ts counsel",
     "seed:atlas-twins": "tsx ./seed-atlas-twins.ts",
     "seed:tenant-health": "tsx ./seed-tenant-health-scorecards.ts",
+    "seed:deployments": "tsx ./seed-deployments.ts",
     "generate:demo-briefs": "tsx ./src/generate-demo-brief-pdfs.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "qa:check-deprecated-links": "node ./qa/check-deprecated-links.js"

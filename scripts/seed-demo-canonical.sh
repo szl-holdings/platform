@@ -64,4 +64,7 @@ pnpm --filter @workspace/scripts run seed:distribution-os || echo "[demo-seed] D
 echo "[demo-seed] Step 13: Forge — agents, models, prompts, tools, drift, promotions, executions"
 pnpm --filter @workspace/scripts run seed:forge || echo "[demo-seed] Forge seed skipped (already seeded)"
 
+echo "[demo-seed] Step 14: Deployment registry — historical + active versions per platform app"
+pnpm --filter @workspace/scripts run seed:deployments || echo "[demo-seed] Deployments seed skipped (already seeded)"
+
 echo "[demo-seed] All demo seed packs complete."
