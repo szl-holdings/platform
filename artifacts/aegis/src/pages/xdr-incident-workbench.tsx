@@ -4,12 +4,14 @@ import {
   AlertTriangle, Shield, Users, Clock, ChevronRight, X, Activity, Tag,
   MessageSquare, FileText, Link2, Target, Cpu, Globe, Database, User,
   CheckCircle, Play, Pause, Zap, ArrowRight, Eye, Search, Filter, Plus,
-  TrendingUp, Network, Server, Lock, Unlock, MoreHorizontal, Bell
+  TrendingUp, Network, Server, Lock, Unlock, MoreHorizontal, Bell,
+  BookOpen, Brain, ChevronDown, Info, Terminal, Flag,
 } from "lucide-react";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Button } from "@szl-holdings/shared-ui/ui/button";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { api } from "@/lib/api";
+import { NARRATIVE_INCIDENTS, type MitreStageCoverage } from "./adversary-narrative-engine";
 
 const SEVERITY_CONFIG = {
   critical: { label: "Critical", color: "#ef4444", bg: "rgba(239,68,68,0.1)", border: "rgba(239,68,68,0.25)" },
@@ -217,12 +219,25 @@ const DOMAIN_LABELS: Record<string, string> = {
   network: "Network",
 };
 
+const NARRATIVE_COVERAGE_CONFIG: Record<MitreStageCoverage, { color: string; bg: string; border: string; label: string; icon: typeof CheckCircle }> = {
+  evidenced: { color: "#10b981", bg: "rgba(16,185,129,0.08)", border: "rgba(16,185,129,0.25)", label: "Evidenced", icon: CheckCircle },
+  inferred:  { color: "#f59e0b", bg: "rgba(245,158,11,0.08)", border: "rgba(245,158,11,0.25)", label: "Inferred",  icon: Brain },
+  missing:   { color: "#64748b", bg: "rgba(100,116,139,0.05)", border: "rgba(100,116,139,0.15)", label: "Missing", icon: Info },
+};
+
+const NARRATIVE_OBS_CONFIG: Record<string, string> = {
+  log: "#60a5fa", alert: "#f87171", network: "#34d399",
+  file: "#fbbf24", process: "#a78bfa", identity: "#38bdf8",
+};
+
 export default function XDRIncidentWorkbench() {
   const [selectedId, setSelectedId] = useState<string>(XDR_INCIDENTS[0].id);
   const [filterSeverity, setFilterSeverity] = useState<string>("all");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [newNote, setNewNote] = useState("");
+  const [activeDetailTab, setActiveDetailTab] = useState<"overview" | "narrative">("overview");
+  const [expandedNarrativeStep, setExpandedNarrativeStep] = useState<number | null>(null);
 
   const selected = XDR_INCIDENTS.find(i => i.id === selectedId) ?? XDR_INCIDENTS[0];
 
@@ -301,7 +316,7 @@ export default function XDRIncidentWorkbench() {
               return (
                 <button
                   key={inc.id}
-                  onClick={() => setSelectedId(inc.id)}
+                  onClick={() => { setSelectedId(inc.id); setActiveDetailTab("overview"); setExpandedNarrativeStep(null); }}
                   className="w-full text-left p-3 border-b transition-all"
                   style={{
                     borderColor: "rgba(255,255,255,0.04)",
@@ -377,6 +392,36 @@ export default function XDRIncidentWorkbench() {
               ))}
             </div>
 
+            {/* Detail Tab Bar */}
+            <div className="flex items-center gap-1 border-b pb-3" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
+              {([
+                { id: "overview" as const, label: "Overview", icon: Activity },
+                { id: "narrative" as const, label: "Narrative", icon: BookOpen },
+              ]).map(tab => {
+                const isActive = activeDetailTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => { setActiveDetailTab(tab.id); setExpandedNarrativeStep(null); }}
+                    className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium border transition-all", isActive ? "text-violet-300" : "text-white/35 hover:text-white/55 border-transparent")}
+                    style={isActive ? { background: "rgba(139,92,246,0.1)", borderColor: "rgba(139,92,246,0.25)" } : {}}>
+                    <tab.icon className="w-3 h-3" />
+                    {tab.label}
+                    {tab.id === "narrative" && (() => {
+                      const narInc = NARRATIVE_INCIDENTS.find(n => n.id === selected.id);
+                      if (!narInc) return null;
+                      return (
+                        <span className="px-1 py-0.5 rounded text-[9px] font-bold" style={{ background: "rgba(139,92,246,0.15)", color: "#a78bfa" }}>
+                          {narInc.steps.length}
+                        </span>
+                      );
+                    })()}
+                  </button>
+                );
+              })}
+            </div>
+
+            {activeDetailTab === "overview" && <>
             {/* Tactics + Domains */}
             <div className="flex items-center gap-4">
               <div>
@@ -536,6 +581,146 @@ export default function XDRIncidentWorkbench() {
                 ))}
               </div>
             </div>
+            </>}
+
+            {/* Narrative Tab Panel */}
+            {activeDetailTab === "narrative" && (() => {
+              const narInc = NARRATIVE_INCIDENTS.find(n => n.id === selected.id);
+              if (!narInc) return (
+                <div className="rounded-xl border p-8 text-center" style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.01)" }}>
+                  <Brain className="w-8 h-8 mx-auto mb-3 text-white/10" />
+                  <p className="text-xs text-white/30 font-medium">Narrative not yet synthesized</p>
+                  <p className="text-[10px] text-white/15 mt-1">Aegis is correlating evidence streams for this incident.</p>
+                </div>
+              );
+              const evidencedCount = narInc.steps.filter(s => s.coverage === "evidenced").length;
+              const inferredCount  = narInc.steps.filter(s => s.coverage === "inferred").length;
+              const missingCount   = narInc.steps.filter(s => s.coverage === "missing").length;
+              const stagesByStep = narInc.steps.map(s => ({ stage: s.mitreStage, coverage: s.coverage }));
+              return (
+                <div className="space-y-4">
+                  {/* Narrative Meta Bar */}
+                  <div className="rounded-xl border p-3 flex items-center gap-4 flex-wrap" style={{ borderColor: "rgba(139,92,246,0.15)", background: "rgba(139,92,246,0.04)" }}>
+                    <div className="flex items-center gap-2">
+                      <Brain className="w-3.5 h-3.5 text-violet-400" />
+                      <span className="text-[10px] font-bold text-violet-300">{narInc.actor}</span>
+                    </div>
+                    <div className="h-3 w-px bg-white/10" />
+                    <span className="text-[9px] text-white/40">Confidence <span className="text-white/70 font-medium">{narInc.confidence}%</span></span>
+                    <div className="h-3 w-px bg-white/10" />
+                    <span className="text-[9px] text-white/40">{narInc.steps.length} narrative steps</span>
+                    <div className="h-3 w-px bg-white/10" />
+                    <div className="flex items-center gap-2">
+                      <span className="text-[9px] px-1.5 py-0.5 rounded border" style={{ color: "#10b981", borderColor: "rgba(16,185,129,0.25)", background: "rgba(16,185,129,0.08)" }}>{evidencedCount} evidenced</span>
+                      <span className="text-[9px] px-1.5 py-0.5 rounded border" style={{ color: "#f59e0b", borderColor: "rgba(245,158,11,0.25)", background: "rgba(245,158,11,0.08)" }}>{inferredCount} inferred</span>
+                      <span className="text-[9px] px-1.5 py-0.5 rounded border" style={{ color: "#64748b", borderColor: "rgba(100,116,139,0.2)", background: "rgba(100,116,139,0.05)" }}>{missingCount} missing</span>
+                    </div>
+                    <div className="ml-auto">
+                      <a
+                        href={`/adversary-narrative?incident=${narInc.id}`}
+                        className="flex items-center gap-1.5 text-[10px] font-medium px-2.5 py-1 rounded-lg border transition-all hover:brightness-110"
+                        style={{ color: "#a78bfa", borderColor: "rgba(139,92,246,0.25)", background: "rgba(139,92,246,0.1)" }}
+                      >
+                        <BookOpen className="w-3 h-3" />
+                        Full Narrative Engine
+                      </a>
+                    </div>
+                  </div>
+
+                  {/* MITRE Coverage Strip */}
+                  <div className="rounded-xl border p-3" style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.01)" }}>
+                    <p className="text-[9px] uppercase tracking-widest text-white/25 font-bold mb-2">MITRE ATT&CK Coverage</p>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      {stagesByStep.map((m, mi) => {
+                        const cfg = NARRATIVE_COVERAGE_CONFIG[m.coverage];
+                        const CovIcon = cfg.icon;
+                        return (
+                          <div key={`${m.stage}-${mi}`} className="flex items-center gap-1 px-2 py-1 rounded-lg border text-[9px]" style={{ color: cfg.color, borderColor: cfg.border, background: cfg.bg }}>
+                            <CovIcon className="w-2.5 h-2.5" />
+                            <span className="font-medium">{m.stage}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Narrative Steps */}
+                  <div className="rounded-xl border overflow-hidden" style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.01)" }}>
+                    <div className="px-4 py-3 border-b" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
+                      <h3 className="text-xs font-bold text-white flex items-center gap-2">
+                        <BookOpen className="w-3.5 h-3.5 text-violet-400" /> Attack Narrative — Chronological Steps
+                      </h3>
+                    </div>
+                    <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
+                      {narInc.steps.map((step, idx) => {
+                        const isExpanded = expandedNarrativeStep === idx;
+                        const confidenceColor = step.confidence >= 85 ? "#10b981" : step.confidence >= 65 ? "#f59e0b" : "#ef4444";
+                        return (
+                          <div key={step.seq} className="divide-y" style={{ borderColor: "rgba(255,255,255,0.03)" }}>
+                            <button
+                              onClick={() => setExpandedNarrativeStep(isExpanded ? null : idx)}
+                              className="w-full text-left px-4 py-3 flex items-start gap-3 hover:bg-white/[0.01] transition-colors">
+                              <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 text-[9px] font-bold" style={{ background: "rgba(139,92,246,0.15)", color: "#a78bfa", border: "1px solid rgba(139,92,246,0.25)" }}>
+                                {step.seq}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                                  <span className="text-[10px] font-bold text-white">{step.title}</span>
+                                  <span className="text-[8px] font-mono text-white/25">{step.timestamp}</span>
+                                  <span className="text-[8px] px-1.5 py-0.5 rounded" style={{ background: `${confidenceColor}15`, color: confidenceColor }}>
+                                    {step.confidence}% confidence
+                                  </span>
+                                  {step.mitreTechniqueId && (
+                                    <span className="text-[8px] font-mono px-1.5 py-0.5 rounded" style={{ background: "rgba(167,139,250,0.1)", color: "#a78bfa" }}>
+                                      {step.mitreTechniqueId}
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-[10px] text-white/40 leading-relaxed line-clamp-2">{step.description}</p>
+                              </div>
+                              <ChevronDown className={cn("w-3.5 h-3.5 text-white/30 shrink-0 mt-1 transition-transform", isExpanded && "rotate-180")} />
+                            </button>
+                            {isExpanded && (
+                              <div className="px-4 py-3 space-y-3" style={{ background: "rgba(0,0,0,0.2)" }}>
+                                <p className="text-[10px] text-white/55 leading-relaxed">{step.description}</p>
+                                {step.observables.length > 0 && (
+                                  <div>
+                                    <p className="text-[9px] uppercase tracking-widest text-white/20 font-bold mb-2">Evidence Observables</p>
+                                    <div className="space-y-1.5">
+                                      {step.observables.map((obs, oi) => {
+                                        const obColor = NARRATIVE_OBS_CONFIG[obs.type] ?? "#94a3b8";
+                                        return (
+                                          <div key={oi} className="flex items-center gap-2 p-2 rounded-lg" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)" }}>
+                                            <Terminal className="w-3 h-3 shrink-0" style={{ color: obColor }} />
+                                            <span className="text-[9px] font-mono" style={{ color: obColor }}>{obs.type}</span>
+                                            <span className="text-[9px] font-mono text-white/50 truncate">{obs.excerpt}</span>
+                                            <span className="ml-auto text-[8px] text-white/25">{obs.source}</span>
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+                                  </div>
+                                )}
+                                {step.iocs.length > 0 && (
+                                  <div>
+                                    <p className="text-[9px] uppercase tracking-widest text-white/20 font-bold mb-2">IOCs</p>
+                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                      {step.iocs.map((ioc, ii) => (
+                                        <span key={ii} className="text-[8px] font-mono px-2 py-0.5 rounded border" style={{ color: "#fbbf24", borderColor: "rgba(251,191,36,0.2)", background: "rgba(251,191,36,0.06)" }}>{ioc}</span>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         </div>
       </div>

@@ -114,6 +114,7 @@ const NAV_SECTIONS: NavSection[] = [
       { path: "/attack-path", label: "Attack Paths", icon: GitBranch, comp: L(() => import("./pages/attack-path-viz")) },
       { path: "/cognitive-attack-path", label: "Cognitive Attack Path", icon: Brain, comp: L(() => import("./pages/cognitive-attack-path")) },
       { path: "/adversary", label: "Adversary Engine", icon: Crosshair, comp: L(() => import("./pages/adversary-engine")) },
+      { path: "/adversary-narrative", label: "Narrative Engine", icon: BookOpen, comp: L(() => import("./pages/adversary-narrative-engine")) },
       { path: "/autonomous-threat", label: "Autonomous Threat", icon: Bot, comp: L(() => import("./pages/autonomous-threat-engine")) },
       { path: "/mtd", label: "MTD Engine", icon: Atom, comp: L(() => import("./pages/mtd-engine")) },
       { path: "/tradecraft", label: "Tradecraft Engine", icon: Wrench, comp: L(() => import("./pages/tradecraft-engine")) },
