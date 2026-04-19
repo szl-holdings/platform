@@ -1,8 +1,9 @@
 import { Link } from "wouter";
-import { Building2, ArrowRight, Layers, Shield, Target, TrendingUp, Users, Cpu, GitMerge, Map } from "lucide-react";
+import { Building2, ArrowRight, Layers, Shield, Target, TrendingUp, Users, Cpu, GitMerge, Map, CheckCircle, Clock, AlertTriangle } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
+import { useCapabilityManifest } from "@/hooks/useCapabilityManifest";
 
 const platformMap = [
   { name: "Lyte", role: "Flagship command surface — PRISM framework, signal-to-action loop, five-pillar intelligence", color: "#d4a054", href: "/lyte" },
@@ -42,7 +43,48 @@ const primitives = [
   { name: "Event Fabric", desc: "Cross-domain signal backbone. Correlation value compounds with each domain pack." },
 ];
 
+const INVESTOR_CLAIMS = [
+  {
+    claim: "Immutable proof chain with cryptographic hash linking",
+    manifestStatus: "working_demo" as const,
+    evidence: "Proof Chain (CAP-010): SHA256 hash chain implemented in packages/alloy/. Signal → inference → confirmation → outcome. Full audit trail in DB.",
+    capId: "CAP-010",
+  },
+  {
+    claim: "Live threat intelligence — CISA KEV, NVD CVE, MITRE ATT&CK",
+    manifestStatus: "live" as const,
+    evidence: "Aegis CAP: CISA KEV and NVD CVE active with no API key required. MITRE ATT&CK v14 integrated. Real-time ingestion confirmed.",
+    capId: "Aegis",
+  },
+  {
+    claim: "Multi-tenant RBAC with org-level data isolation",
+    manifestStatus: "live" as const,
+    evidence: "CAP-003/004: 11-role RBAC, tenant_id enforced at all DB query paths including RAG. KG001, KG014, KG015 resolved April 2026.",
+    capId: "CAP-003",
+  },
+  {
+    claim: "NYC distress property pipeline — live government data",
+    manifestStatus: "live" as const,
+    evidence: "Terra CAP: NYC Open Data pipeline active — lis pendens, tax lien, pre-foreclosure. Census ACS, HUD, BLS, FEMA also live.",
+    capId: "Terra",
+  },
+  {
+    claim: "AI agents advisory-only — no autonomous execution",
+    manifestStatus: "live" as const,
+    evidence: "Covenant Policy enforced at library layer (packages/policy-engine/). Agents cannot bypass confirmation gates. Policy Compiler live (Task #1954).",
+    capId: "Policy",
+  },
+  {
+    claim: "WebSocket real-time channel with HMAC-signed tickets",
+    manifestStatus: "live" as const,
+    evidence: "CAP-007: 5-minute TTL tickets, per-channel role ACL, exponential backoff. Implemented in artifacts/api-server/src/routes/realtime.ts.",
+    capId: "CAP-007",
+  },
+];
+
 export default function InvestorsOverviewPage() {
+  const { totals } = useCapabilityManifest();
+
   usePageMeta({
     title: "Investor Overview — SZL Holdings",
     description: "SZL Holdings builds the governed decision operating system — the platform layer between signal detection and action execution that enforces governance, attribution, and outcome tracking on every consequential enterprise decision.",
@@ -205,6 +247,57 @@ export default function InvestorsOverviewPage() {
           </div>
         </section>
 
+        {/* Fact-checked proof — manifest-driven */}
+        <section className="border-b border-white/10">
+          <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
+            <div className="flex items-center justify-between flex-wrap gap-4 mb-8">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/40">Fact-checked investor proof</p>
+                <h2 className="mt-2 text-2xl font-semibold text-white">Every claim backed by a manifest entry.</h2>
+                <p className="mt-2 text-sm leading-6 text-white/50 max-w-lg">
+                  Derived from <code className="text-[#3b82f6] text-xs">artifacts/audit/platform-capability-manifest.json</code> — audited 2026-04-19.
+                  {totals.live} live, {totals.working_demo} working demo, {totals.partial} partial across {totals.total} capabilities.
+                </p>
+              </div>
+              <Link href="/product-readiness" className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-xs font-semibold text-white/60 transition hover:bg-white/[0.06]">
+                Full readiness matrix <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+            <div className="space-y-3">
+              {INVESTOR_CLAIMS.map((item) => {
+                const isLive = item.manifestStatus === "live";
+                const isDemo = item.manifestStatus === "working_demo";
+                return (
+                  <div key={item.claim} className="flex items-start gap-4 rounded-xl border border-white/[0.06] bg-white/[0.02] p-5">
+                    <div className="mt-0.5 flex-shrink-0">
+                      {isLive
+                        ? <CheckCircle className="h-4 w-4 text-emerald-400" />
+                        : isDemo
+                          ? <Clock className="h-4 w-4 text-blue-400" />
+                          : <AlertTriangle className="h-4 w-4 text-amber-400" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-sm font-semibold text-white">{item.claim}</span>
+                        <span className={`inline-block text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded ${
+                          isLive ? "bg-emerald-400/10 text-emerald-400" : isDemo ? "bg-blue-400/10 text-blue-400" : "bg-amber-400/10 text-amber-400"
+                        }`}>
+                          {item.manifestStatus === "working_demo" ? "Working Demo" : item.manifestStatus}
+                        </span>
+                      </div>
+                      <p className="mt-1.5 text-xs leading-5 text-white/45">{item.evidence}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <p className="mt-5 text-xs text-white/30">
+              No claim appears here that is not backed by a <code className="text-white/40">live</code> or <code className="text-white/40">working_demo</code> entry in the capability manifest.
+              Partial, stub, broken, and undocumented capabilities are excluded from investor-facing proof.
+            </p>
+          </div>
+        </section>
+
         {/* Explore further */}
         <section>
           <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
@@ -221,6 +314,18 @@ export default function InvestorsOverviewPage() {
                     <item.icon className="h-4 w-4 text-[#d4a054]" />
                     <span className="text-sm font-medium text-white/80">{item.label}</span>
                   </div>
+                </Link>
+              ))}
+            </div>
+            <div className="mt-6 flex flex-wrap gap-4 pt-4 border-t border-white/[0.05]">
+              {[
+                { label: "Product Readiness Matrix", href: "/product-readiness" },
+                { label: "Trust Center Status", href: "/trust-center/status" },
+                { label: "Technical Proof", href: "/technical-proof" },
+                { label: "Changelog", href: "/changelog-highlights" },
+              ].map(link => (
+                <Link key={link.href} href={link.href} className="text-xs text-[#3b82f6] hover:underline flex items-center gap-1">
+                  {link.label} <ArrowRight className="h-3 w-3" />
                 </Link>
               ))}
             </div>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { m } from "framer-motion";
-import { Shield, Lock, Eye, Activity, Database, Server, CheckCircle, FileText, ArrowRight, ExternalLink } from "lucide-react";
+import { Shield, Lock, Eye, Activity, Database, Server, CheckCircle, FileText, ArrowRight, ExternalLink, BarChart2, GitBranch, Code2 } from "lucide-react";
 import { Link } from "wouter";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -642,6 +642,82 @@ export default function TrustCenter() {
               </m.p>
               <DisclosureForm />
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Proof & Evidence Navigation */}
+      <section style={{
+        paddingTop: "clamp(3rem,5vw,4rem)", paddingBottom: "clamp(3rem,5vw,4rem)",
+        borderTop: "1px solid hsla(0,0%,100%,0.05)",
+        background: "hsla(0,0%,100%,0.01)",
+      }}>
+        <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
+          <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+            <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: "hsl(210,5%,38%)", marginBottom: "1.25rem" }}>
+              Proof &amp; Evidence
+            </p>
+          </m.div>
+          <div className="grid sm:grid-cols-3 gap-3">
+            {[
+              {
+                label: "Product Readiness Matrix",
+                description: "Every capability status derived from the platform manifest — no hand-edited claims.",
+                href: "/product-readiness",
+                Icon: BarChart2,
+                accent: "#3b82f6",
+              },
+              {
+                label: "Live Status",
+                description: "Uptime probe, database health, security posture, and SOC 2 progress — live data.",
+                href: "/trust-center/status",
+                Icon: Activity,
+                accent: "#10b981",
+              },
+              {
+                label: "Technical Proof",
+                description: "Architecture layers, real API shapes, and audit-trail record samples. Citation-linked.",
+                href: "/technical-proof",
+                Icon: Code2,
+                accent: "#8b5cf6",
+              },
+              {
+                label: "Changelog",
+                description: "Material capabilities shipped, derived from real git commit history.",
+                href: "/changelog-highlights",
+                Icon: GitBranch,
+                accent: "#f59e0b",
+              },
+            ].map((item, i) => (
+              <m.div
+                key={item.label}
+                initial={{ opacity: 0, y: 8 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.35, delay: i * 0.06 }}
+              >
+                <Link
+                  href={item.href}
+                  style={{
+                    display: "flex", flexDirection: "column" as const, gap: "0.5rem",
+                    padding: "1.125rem 1.375rem",
+                    borderRadius: "10px",
+                    background: "hsla(0,0%,100%,0.02)",
+                    border: "1px solid hsla(0,0%,100%,0.06)",
+                    borderTop: `2px solid ${item.accent}`,
+                    textDecoration: "none",
+                    transition: "background 0.15s",
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <item.Icon size={14} style={{ color: item.accent }} />
+                    <ArrowRight size={12} style={{ color: "hsl(210,5%,38%)" }} />
+                  </div>
+                  <span style={{ fontSize: "13px", fontWeight: 700, color: "hsl(38,12%,88%)" }}>{item.label}</span>
+                  <span style={{ fontSize: "12px", lineHeight: 1.55, color: "hsl(210,5%,48%)" }}>{item.description}</span>
+                </Link>
+              </m.div>
+            ))}
           </div>
         </div>
       </section>

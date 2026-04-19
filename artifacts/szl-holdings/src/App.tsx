@@ -309,6 +309,10 @@ const AcademyPage = lazy(() => import("@/pages/academy"));
 const HelpPage = lazy(() => import("@/pages/help"));
 const DemosPage = lazy(() => import("@/pages/demos"));
 const ChangelogPage = lazy(() => import("@/pages/changelog"));
+const ChangelogHighlightsPage = lazy(() => import("@/pages/changelog-highlights"));
+const ProductReadinessPage = lazy(() => import("@/pages/product-readiness"));
+const TrustStatusPage = lazy(() => import("@/pages/trust-status"));
+const TechnicalProofPage = lazy(() => import("@/pages/technical-proof"));
 const LPSentimentPulse = lazy(() => import("@/pages/lp-sentiment-pulse"));
 const CommandNewsletterPage = lazy(() => import("@/pages/command-newsletter"));
 
@@ -700,8 +704,20 @@ function App() {
             <Route path="/trust-center">
               <Suspense fallback={<PageLoader />}><TrustCenterPage /></Suspense>
             </Route>
+            <Route path="/trust-center/status">
+              <Suspense fallback={<PageLoader />}><TrustStatusPage /></Suspense>
+            </Route>
             <Route path="/trust">
               <Suspense fallback={<PageLoader />}><TrustPage /></Suspense>
+            </Route>
+            <Route path="/product-readiness">
+              <Suspense fallback={<PageLoader />}><ProductReadinessPage /></Suspense>
+            </Route>
+            <Route path="/technical-proof">
+              <Suspense fallback={<PageLoader />}><TechnicalProofPage /></Suspense>
+            </Route>
+            <Route path="/changelog-highlights">
+              <Suspense fallback={<PageLoader />}><ChangelogHighlightsPage /></Suspense>
             </Route>
 
             {/* ── Academy, Help, Demos ── */}
