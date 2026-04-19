@@ -21,121 +21,24 @@ import { describe, it, expect, vi, beforeAll } from "vitest";
 import express from "express";
 import type { Router as ExpressRouter } from "express";
 import request from "supertest";
-import type { Request, Response, NextFunction } from "express";
 
 // ---------------------------------------------------------------------------
 // Module mocks — declared before any dynamic imports (Vitest hoists these)
 // ---------------------------------------------------------------------------
 
-vi.mock("drizzle-orm", async (importOriginal) => {
-  const noop = (..._args: unknown[]) => ({});
-  return {
-    eq: noop,
-    ne: noop,
-    and: noop,
-    or: noop,
-    desc: noop,
-    asc: noop,
-    isNull: noop,
-    isNotNull: noop,
-    inArray: noop,
-    notInArray: noop,
-    sql: noop,
-    count: noop,
-    gt: noop,
-    gte: noop,
-    lt: noop,
-    lte: noop,
-    like: noop,
-    ilike: noop,
-    not: noop,
-  };
+vi.mock("drizzle-orm", async () => {
+  const m = await import("./helpers/mocks.js");
+  return m.createDrizzleOrmMock();
 });
 
-vi.mock("@szl-holdings/observability", () => ({
-  serverTelemetry: {
-    recordAuthFailure: vi.fn(),
-    recordRequest: vi.fn(),
-    recordError: vi.fn(),
-    recordLatency: vi.fn(),
-    recordMutation: vi.fn(),
-  },
-}));
+vi.mock("@szl-holdings/observability", async () => {
+  const m = await import("./helpers/mocks.js");
+  return m.createObservabilityMock();
+});
 
-vi.mock("@szl-holdings/db", () => {
-  const makeChain: () => Record<string, unknown> = () => ({
-    from: makeChain,
-    innerJoin: makeChain,
-    leftJoin: makeChain,
-    where: () => ({
-      orderBy: () => ({
-        limit: () => ({
-          offset: () => Promise.resolve([]),
-        }),
-      }),
-      limit: () => ({
-        offset: () => Promise.resolve([]),
-      }),
-    }),
-    orderBy: () => ({
-      limit: () => ({
-        offset: () => Promise.resolve([]),
-      }),
-    }),
-    limit: () => ({ offset: () => Promise.resolve([]) }),
-    offset: () => Promise.resolve([]),
-    execute: () => Promise.resolve([]),
-    then: (res: (v: unknown[]) => void, _rej?: unknown) => Promise.resolve([]).then(res),
-  });
-
-  const db = {
-    select: makeChain,
-    insert: () => ({
-      values: () => ({
-        returning: () => Promise.resolve([{ id: 1 }]),
-        onConflictDoNothing: () => ({ returning: () => Promise.resolve([]) }),
-      }),
-    }),
-    update: () => ({ set: () => ({ where: () => ({ returning: () => Promise.resolve([]) }) }) }),
-    delete: () => ({ where: () => Promise.resolve([]) }),
-    transaction: (fn: (tx: unknown) => Promise<unknown>) => fn(db),
-  };
-
-  const stubTable = {};
-
-  return new Proxy(
-    {
-      db,
-      ROLE_HIERARCHY: {},
-      isReadOnlyRole: () => false,
-      toCanonicalRole: (r: string) => r,
-      notificationsTable: stubTable,
-      notificationPreferencesTable: stubTable,
-      subscriptionsTable: stubTable,
-      invoicesTable: stubTable,
-      billingPlansTable: stubTable,
-      revenueEventsTable: stubTable,
-      organizationsTable: stubTable,
-      usersTable: stubTable,
-      sessionsTable: stubTable,
-      rolesTable: stubTable,
-      userRolesTable: stubTable,
-      orgMembersTable: stubTable,
-      azureTenantsTable: stubTable,
-      auditLogsTable: stubTable,
-      dataverseConnectionsTable: stubTable,
-      scimTokensTable: stubTable,
-      scimProvisionedUsersTable: stubTable,
-      scimSyncLogsTable: stubTable,
-      tenantBrandingTable: stubTable,
-    } as Record<string, unknown>,
-    {
-      get(target, prop) {
-        if (prop in target) return target[prop as string];
-        return {};
-      },
-    },
-  );
+vi.mock("@szl-holdings/db", async () => {
+  const m = await import("./helpers/mocks.js");
+  return m.createDbMock();
 });
 
 vi.mock("@szl-holdings/services", () => ({
@@ -156,32 +59,20 @@ vi.mock("@szl-holdings/auth", () => ({
   }),
 }));
 
-vi.mock("@szl-holdings/forge-runtime", () => ({
-  forgeRuntime: { execute: vi.fn(async () => ({})), isAvailable: () => false },
-  durableJobQueue: {
-    enqueue: vi.fn(async () => ({ id: "job-1" })),
-  },
-}));
+vi.mock("@szl-holdings/forge-runtime", async () => {
+  const m = await import("./helpers/mocks.js");
+  return m.createForgeRuntimeMock();
+});
 
 vi.mock("@szl-holdings/config", () => ({
   config: {},
   getConfig: () => ({}),
 }));
 
-vi.mock("../lib/logger.js", () => ({
-  logger: {
-    info: vi.fn(),
-    warn: vi.fn(),
-    error: vi.fn(),
-    debug: vi.fn(),
-    child: vi.fn(() => ({
-      info: vi.fn(),
-      warn: vi.fn(),
-      error: vi.fn(),
-      debug: vi.fn(),
-    })),
-  },
-}));
+vi.mock("../lib/logger.js", async () => {
+  const m = await import("./helpers/mocks.js");
+  return m.createLoggerMock();
+});
 
 vi.mock("../lib/activity-logger.js", () => ({
   logActivity: vi.fn(async () => undefined),
@@ -192,16 +83,10 @@ vi.mock("../lib/auth.js", () => ({
   getSessionUser: vi.fn(async () => null),
 }));
 
-vi.mock("../lib/websocket.js", () => ({
-  WS_CHANNELS: {
-    NOTIFICATIONS: "notifications",
-    GENERAL: "general",
-  },
-  publish: vi.fn(),
-  getMessagesSince: vi.fn(() => []),
-  getPresence: vi.fn(() => []),
-  issueWsTicket: vi.fn(() => "ticket-mock"),
-}));
+vi.mock("../lib/websocket.js", async () => {
+  const m = await import("./helpers/mocks.js");
+  return m.createWebsocketMock();
+});
 
 vi.mock("../lib/platform-flags.js", () => ({
   isFlagEnabled: vi.fn(() => false),
@@ -222,31 +107,15 @@ vi.mock("../lib/crypto.js", () => ({
 // authMiddleware mock — injects a valid user so validation fires (not auth)
 // ---------------------------------------------------------------------------
 
-const mockAuthUser = {
-  id: 99,
-  email: "tester@example.com",
-  roles: ["admin"],
-  orgs: [{ orgId: 1, orgSlug: "test-org", orgName: "Test Org", role: "admin" }],
-};
-
-vi.mock("../middlewares/auth.js", () => ({
-  authMiddleware: (_opts?: unknown) => (req: Request, _res: Response, next: NextFunction) => {
-    (req as any).user = mockAuthUser;
-    next();
-  },
-  parseIdParam: (paramName: string) => (req: Request, res: Response, next: NextFunction) => {
-    const val = req.params[paramName];
-    if (!val || isNaN(Number(val))) {
-      res.status(400).json({ error: "Invalid ID" });
-      return;
-    }
-    next();
-  },
-  requireRole: () => (_req: Request, _res: Response, next: NextFunction) => next(),
-  requireOrgMembership: () => (_req: Request, _res: Response, next: NextFunction) => next(),
-  denyIfReadOnly: () => (_req: Request, _res: Response, next: NextFunction) => next(),
-  InvalidIdError: class extends Error {},
-}));
+vi.mock("../middlewares/auth.js", async () => {
+  const m = await import("./helpers/mocks.js");
+  return m.createAuthMiddlewareMock({
+    id: 99,
+    email: "tester@example.com",
+    roles: ["admin"],
+    orgs: [{ orgId: 1, orgSlug: "test-org", orgName: "Test Org", role: "admin" }],
+  });
+});
 
 // ---------------------------------------------------------------------------
 // Dynamic imports (after all mocks are registered)
