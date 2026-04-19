@@ -24,6 +24,7 @@ import {
   type PolicyTier,
 } from "@workspace/guardian";
 import { getGuardianEngine, syncGuardianPolicies } from "../lib/guardian-engine";
+import { getAllEffectiveTiers, invalidateEffectiveTierCache } from "../lib/effective-tiers";
 import {
   defaultToolRegistry,
   ToolManifestSchema,
@@ -50,7 +51,6 @@ import {
   auditEventsTable,
   type GuardianPolicy,
   type GuardianPolicyAssignment,
-  type GuardianTier,
   type GuardrailConfig,
   type ToolMeshTool,
   type ToolMeshToolVersion,
@@ -627,40 +627,17 @@ router.get("/policies", authMiddleware(), requireRole("super_admin", "admin", "o
 router.get("/policies/tiers", authMiddleware(), async (req: Request, res: Response) => {
   try {
     const orgId = userOrgId(req.user);
-
-    // Read persisted tier definitions from DB. Org-specific overrides win
-    // over global (org_id IS NULL) defaults; if neither is present, fall
-    // back to the in-process constants so callers always get a complete set.
-    const orgFilter = orgId !== null ? or(isNull(guardianTiersTable.orgId), eq(guardianTiersTable.orgId, orgId)) : isNull(guardianTiersTable.orgId);
-    const rows = await db
-      .select()
-      .from(guardianTiersTable)
-      .where(and(eq(guardianTiersTable.enabled, true), orgFilter));
-
-    const byTier = new Map<string, GuardianTier>();
-    for (const row of rows) {
-      // Prefer org-specific row over global default for the same tier name.
-      const existing = byTier.get(row.tier);
-      if (!existing || (existing.orgId === null && row.orgId !== null)) {
-        byTier.set(row.tier, row);
-      }
-    }
-
-    const tiers = (PolicyTierSchema.options as string[]).map((t) => {
-      const tier = t as PolicyTier;
-      const persisted = byTier.get(tier);
-      if (persisted) {
-        return {
-          tier,
-          tierNumber: persisted.tierNumber,
-          description: persisted.description,
-          riskLevel: persisted.riskLevel,
-          controls: persisted.controls as Record<string, unknown>,
-        };
-      }
-      return { tier, tierNumber: TIER_NUMBER[tier], description: POLICY_TIER_DESCRIPTIONS[tier], riskLevel: TIER_RISK_LEVEL[tier], controls: TIER_CONTROLS[tier] };
-    });
-    sendSuccess(res, tiers);
+    const tiers = await getAllEffectiveTiers(orgId);
+    sendSuccess(
+      res,
+      tiers.map((t) => ({
+        tier: t.tier,
+        tierNumber: t.tierNumber,
+        description: t.description,
+        riskLevel: t.riskLevel,
+        controls: t.controls as unknown as Record<string, unknown>,
+      })),
+    );
   } catch (err) {
     handleRouteError(res, err, "Failed to list policy tiers");
   }
@@ -695,11 +672,13 @@ router.patch("/policies/tiers/:tier", authMiddleware(), requireRole("super_admin
         enabled: body.enabled ?? true,
         updatedById: req.user?.id ?? null,
       }).returning();
+      invalidateEffectiveTierCache(orgId);
       sendCreated(res, inserted);
       return;
     }
 
     const [updated] = await db.update(guardianTiersTable).set(u).where(eq(guardianTiersTable.id, existing.id)).returning();
+    invalidateEffectiveTierCache(orgId);
     sendSuccess(res, updated);
   } catch (err) {
     handleRouteError(res, err, "Failed to update tier definition");

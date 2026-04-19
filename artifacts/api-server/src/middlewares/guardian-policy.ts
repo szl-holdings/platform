@@ -7,6 +7,7 @@ import {
   recordGuardianAction,
   makeGuardianRequestId,
 } from "../lib/guardian-engine";
+import { getEffectiveTierOverride } from "../lib/effective-tiers";
 import { logger } from "../lib/logger";
 
 export interface GuardianPolicyOptions {
@@ -148,6 +149,19 @@ export function guardianPolicyCheck(options: GuardianPolicyOptions = {}) {
       (req as Request & { correlationId?: string }).correlationId ?? undefined;
     const traceId = (req as Request & { _traceId?: string })._traceId;
 
+    // Resolve org-scoped tier overrides synchronously off the cache so a
+    // single decide() call sees the same tier metadata as the rest of the
+    // platform. Falls back to constants if the lookup fails.
+    void runDecision();
+
+    async function runDecision(): Promise<void> {
+    let tierOverride: { controls: import("@workspace/guardian").TierControlSet; riskLevel: number } | undefined;
+    try {
+      tierOverride = await getEffectiveTierOverride(orgId, tier);
+    } catch (err) {
+      logger.debug({ err, orgId, tier }, "[guardian] tier override lookup failed; using constants");
+    }
+
     const decisionStartedAt = new Date().toISOString();
     const t0 = process.hrtime.bigint();
 
@@ -164,7 +178,7 @@ export function guardianPolicyCheck(options: GuardianPolicyOptions = {}) {
         userId: user?.id ?? null,
         roles: user?.roles ?? [],
       },
-    });
+    }, tierOverride);
 
     const latencyMs = Number(process.hrtime.bigint() - t0) / 1e6;
 
@@ -276,5 +290,6 @@ export function guardianPolicyCheck(options: GuardianPolicyOptions = {}) {
       requiredApprovers: decision.requiredApprovers ?? [],
       matchedRuleId: decision.matchedRuleId,
     });
+    }
   };
 }

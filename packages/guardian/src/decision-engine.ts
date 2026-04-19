@@ -1,5 +1,26 @@
 import type { GuardianRule, DecisionRequest, DecisionResult, RuleCondition, EvaluateResult } from "./schema.js";
-import { TIER_RISK_LEVEL, TIER_CONTROLS, type PolicyTier, PolicyTierSchema } from "./tiers.js";
+import { TIER_RISK_LEVEL, TIER_CONTROLS, type PolicyTier, PolicyTierSchema, type TierControlSet } from "./tiers.js";
+
+/**
+ * Per-call override of the tier metadata the engine uses for a single
+ * decision. Lets callers (e.g. the api-server) supply org-specific tier
+ * controls and risk level resolved from the persisted `guardian_tiers`
+ * table, overriding the in-process constants in `tiers.ts`.
+ *
+ * Either field may be omitted; missing fields fall back to the constant.
+ */
+export interface TierOverride {
+  controls?: TierControlSet;
+  riskLevel?: number;
+}
+
+function resolveControls(tier: PolicyTier, override?: TierOverride): TierControlSet {
+  return override?.controls ?? TIER_CONTROLS[tier];
+}
+
+function resolveRiskLevel(tier: PolicyTier, override?: TierOverride): number {
+  return override?.riskLevel ?? TIER_RISK_LEVEL[tier];
+}
 
 function evaluateCondition(condition: RuleCondition, context: Record<string, unknown>): boolean {
   const actual = context[condition.field];
@@ -71,7 +92,7 @@ export class GuardianDecisionEngine {
     return [...this.rules];
   }
 
-  decide(request: DecisionRequest): DecisionResult {
+  decide(request: DecisionRequest, override?: TierOverride): DecisionResult {
     const decidedAt = new Date().toISOString();
 
     if (!request.tier) {
@@ -84,9 +105,9 @@ export class GuardianDecisionEngine {
       };
     }
 
-    const tierRisk = TIER_RISK_LEVEL[request.tier as PolicyTier];
+    const tierRisk = resolveRiskLevel(request.tier as PolicyTier, override);
     if (tierRisk >= 4) {
-      const controls = TIER_CONTROLS[request.tier as PolicyTier];
+      const controls = resolveControls(request.tier as PolicyTier, override);
       if (controls.approvalGate === "dual") {
         return {
           requestId: request.requestId,
@@ -125,7 +146,7 @@ export class GuardianDecisionEngine {
 
     const tierParsed = PolicyTierSchema.safeParse(request.tier);
     if (tierParsed.success) {
-      const tierControls = TIER_CONTROLS[tierParsed.data];
+      const tierControls = resolveControls(tierParsed.data, override);
       if (tierControls.approvalGate === "single") {
         return {
           requestId: request.requestId,
@@ -146,7 +167,7 @@ export class GuardianDecisionEngine {
     };
   }
 
-  evaluate(request: DecisionRequest): EvaluateResult {
+  evaluate(request: DecisionRequest, override?: TierOverride): EvaluateResult {
     const decidedAt = new Date().toISOString();
     const controlViolations: string[] = [];
     let rollbackRequired = false;
@@ -180,7 +201,7 @@ export class GuardianDecisionEngine {
     }
 
     const tier = tierParsed.data;
-    const controls = TIER_CONTROLS[tier];
+    const controls = resolveControls(tier, override);
 
     rollbackRequired = controls.requiresRollback;
     redactApplied = controls.redactPII;
