@@ -1,41 +1,157 @@
 import { useState, useMemo } from "react";
-import { Shield, AlertTriangle, Filter, Search, ChevronDown, ChevronUp, Clock, ExternalLink } from "lucide-react";
+import { Shield, AlertTriangle, Search, ChevronDown, ChevronUp, GitBranch, ExternalLink } from "lucide-react";
+import { Link } from "wouter";
 import { signalItems, type SignalItem, type Severity } from "@/data/seed";
+import {
+  runDecisionTwin,
+  getBestScenario,
+  runAllDecisionTwinScenarios,
+  riskLabel,
+  deltaLabel,
+  PRISM_DIMENSION_LABELS,
+  DECISION_TWIN_ACTION_LABELS,
+  DECISION_TWIN_ENGINE_VERSION,
+  type PRISMDimension,
+  type SignalProfile,
+} from "@workspace/simulation";
 
 const SEV_CONFIG: Record<Severity, { label: string; color: string; bg: string; border: string }> = {
-  critical: { label: "CRITICAL", color: "text-red-400", bg: "bg-red-500/8", border: "border-red-500/25" },
-  high: { label: "HIGH", color: "text-orange-400", bg: "bg-orange-500/8", border: "border-orange-500/25" },
-  medium: { label: "MEDIUM", color: "text-amber-400", bg: "bg-amber-500/8", border: "border-amber-500/25" },
-  low: { label: "LOW", color: "text-sky-400", bg: "bg-sky-500/8", border: "border-sky-500/25" },
+  critical: { label: "CRITICAL", color: "text-red-400",    bg: "bg-red-500/8",    border: "border-red-500/25" },
+  high:     { label: "HIGH",     color: "text-orange-400", bg: "bg-orange-500/8", border: "border-orange-500/25" },
+  medium:   { label: "MEDIUM",   color: "text-amber-400",  bg: "bg-amber-500/8",  border: "border-amber-500/25" },
+  low:      { label: "LOW",      color: "text-sky-400",    bg: "bg-sky-500/8",    border: "border-sky-500/25" },
 };
 
 const POLICY_COLORS: Record<string, string> = {
-  cleared: "text-emerald-400",
+  cleared:     "text-emerald-400",
   conditional: "text-amber-400",
-  blocked: "text-red-400",
-  flagged: "text-orange-400",
-  pending: "text-sky-400",
+  blocked:     "text-red-400",
+  flagged:     "text-orange-400",
+  pending:     "text-sky-400",
 };
 
 const FRESHNESS_COLORS: Record<string, string> = {
-  live: "text-emerald-400",
-  recent: "text-amber-400",
-  stale: "text-orange-400",
+  live:    "text-emerald-400",
+  recent:  "text-amber-400",
+  stale:   "text-orange-400",
   expired: "text-red-400",
 };
 
 const SIGNAL_TYPE_LABELS: Record<string, string> = {
-  approval_chain_stall: "Approval Chain Stall",
-  revenue_risk: "Revenue Risk",
-  deliverable_overdue: "Deliverable Overdue",
-  ownership_gap: "Ownership Gap",
-  buyer_engagement_decay: "Buyer Engagement Decay",
-  workflow_bottleneck: "Workflow Bottleneck",
-  policy_violation: "Policy Violation",
-  escalation_blocked: "Escalation Blocked",
-  stakeholder_churn: "Stakeholder Churn",
-  budget_leakage: "Budget Leakage",
+  approval_chain_stall:    "Approval Chain Stall",
+  revenue_risk:            "Revenue Risk",
+  deliverable_overdue:     "Deliverable Overdue",
+  ownership_gap:           "Ownership Gap",
+  buyer_engagement_decay:  "Buyer Engagement Decay",
+  workflow_bottleneck:     "Workflow Bottleneck",
+  policy_violation:        "Policy Violation",
+  escalation_blocked:      "Escalation Blocked",
+  stakeholder_churn:       "Stakeholder Churn",
+  budget_leakage:          "Budget Leakage",
 };
+
+function toSignalProfile(sig: SignalItem): SignalProfile {
+  return {
+    id: sig.id,
+    severity: sig.severity,
+    type: sig.type,
+    confidence: sig.confidence,
+    hasOwnershipGap: sig.type === "ownership_gap" || sig.type === "approval_chain_stall",
+    isPolicyBlocked: sig.policyState === "blocked",
+    hasBuyerEngagementRisk: sig.type === "buyer_engagement_decay",
+    isSecurityRelated: sig.type === "policy_violation" || sig.type === "escalation_blocked",
+    stalledDays: sig.type === "approval_chain_stall" ? 47
+      : sig.type === "deliverable_overdue" ? 22
+      : sig.type === "ownership_gap" ? 28
+      : undefined,
+    financialExposureUsd: sig.type === "revenue_risk" ? 4_200_000
+      : sig.type === "workflow_bottleneck" ? 7_800_000
+      : sig.type === "policy_violation" ? 3_400_000
+      : sig.type === "budget_leakage" ? 340_000
+      : sig.type === "approval_chain_stall" ? 1_800_000
+      : undefined,
+    affectedStakeholders: 3,
+  };
+}
+
+const PRISM_DIMS = ["revenue", "staffing", "infrastructure", "security", "market_timing"] as PRISMDimension[];
+
+function PRISMImpactMini({ sig }: { sig: SignalItem }) {
+  const profile = useMemo(() => toSignalProfile(sig), [sig]);
+  const scenarios = useMemo(() => runAllDecisionTwinScenarios(profile), [profile]);
+  const best = useMemo(() => getBestScenario(scenarios), [scenarios]);
+
+  if (!best) return null;
+
+  return (
+    <div className="rounded bg-amber-500/4 border border-amber-500/12 p-3 space-y-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <GitBranch className="w-3 h-3 text-amber-400/50" />
+          <p className="text-[9px] font-mono text-amber-400/40 uppercase">PRISM Impact Simulation</p>
+          <span className="text-[8px] font-mono text-amber-400/20">v{DECISION_TWIN_ENGINE_VERSION}</span>
+          {sig.confidence < 0.85 && (
+            <span className="text-[8px] font-mono px-1 py-0.5 rounded border text-amber-400/35 bg-amber-500/5 border-amber-500/12">DEMO</span>
+          )}
+        </div>
+        <Link
+          href={`/decision-twin?signal=${sig.id}`}
+          className="flex items-center gap-1 text-[9px] font-mono text-amber-400/40 hover:text-amber-300 transition-colors"
+        >
+          Full Analysis <ExternalLink className="w-2.5 h-2.5" />
+        </Link>
+      </div>
+
+      <div className="grid grid-cols-4 gap-2">
+        {scenarios.map(s => {
+          const d = deltaLabel(s.overallDelta);
+          const isBest = best.action === s.action;
+          return (
+            <div
+              key={s.action}
+              className={`rounded border p-2 ${
+                isBest
+                  ? "border-emerald-500/25 bg-emerald-500/5"
+                  : s.action === "delay"
+                  ? "border-red-500/15 bg-red-500/3"
+                  : "border-amber-500/10 bg-amber-500/3"
+              }`}
+            >
+              <p className={`text-[9px] font-mono mb-0.5 ${isBest ? "text-emerald-400" : "text-amber-400/40"}`}>
+                {DECISION_TWIN_ACTION_LABELS[s.action]}
+                {isBest && " ★"}
+              </p>
+              <p className={`text-[10px] font-mono font-semibold ${d.color}`}>{d.label}</p>
+              <p className="text-[8px] text-amber-400/25 mt-0.5">{s.overallRiskBefore}→{s.overallRiskAfter}</p>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="grid grid-cols-5 gap-1">
+        {PRISM_DIMS.map(dim => {
+          const bestImpact = best.prismImpacts.find(i => i.dimension === dim);
+          if (!bestImpact) return null;
+          const d = deltaLabel(bestImpact.delta);
+          return (
+            <div key={dim} className="text-center">
+              <p className="text-[7px] font-mono text-amber-400/25 truncate mb-0.5">
+                {dim.replace("_", " ").toUpperCase().slice(0, 6)}
+              </p>
+              <p className={`text-[9px] font-mono font-semibold ${d.color}`}>{d.label}</p>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="flex items-center justify-between text-[9px] font-mono text-amber-400/30">
+        <span>Recommended: <span className="text-emerald-400">{DECISION_TWIN_ACTION_LABELS[best.action]}</span></span>
+        <span>Impact: {best.timeToImpact}</span>
+        <span>Confidence: {Math.round(best.overallConfidence.mid * 100)}%</span>
+      </div>
+    </div>
+  );
+}
 
 function SignalCard({ sig, expanded, onToggle }: { sig: SignalItem; expanded: boolean; onToggle: () => void }) {
   const cfg = SEV_CONFIG[sig.severity];
@@ -86,11 +202,21 @@ function SignalCard({ sig, expanded, onToggle }: { sig: SignalItem; expanded: bo
               </div>
             </div>
           </div>
+
+          <PRISMImpactMini sig={sig} />
+
           <div className="flex items-center justify-between">
             <span className="proof-badge">
               <Shield className="w-2 h-2" />
               {sig.proofRef}
             </span>
+            <Link
+              href={`/decision-twin?signal=${sig.id}`}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-amber-500/8 border border-amber-500/20 text-amber-300 text-[10px] font-mono hover:bg-amber-500/12 transition-colors"
+            >
+              <GitBranch className="w-3 h-3" />
+              Open Decision Twin
+            </Link>
           </div>
         </div>
       )}
@@ -113,26 +239,33 @@ export default function SignalsConsolePage() {
 
   const counts = useMemo(() => ({
     critical: signalItems.filter(s => s.severity === "critical").length,
-    high: signalItems.filter(s => s.severity === "high").length,
-    medium: signalItems.filter(s => s.severity === "medium").length,
-    low: signalItems.filter(s => s.severity === "low").length,
+    high:     signalItems.filter(s => s.severity === "high").length,
+    medium:   signalItems.filter(s => s.severity === "medium").length,
+    low:      signalItems.filter(s => s.severity === "low").length,
   }), []);
 
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-5">
-      {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-lg font-semibold text-amber-100 font-display">Signals Console</h1>
           <p className="text-xs text-amber-400/50 mt-0.5">{signalItems.length} active signals across all workflows — sorted by severity</p>
         </div>
-        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded border border-emerald-500/20 bg-emerald-500/5">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-[10px] text-emerald-400/70 font-mono">LIVE FEED</span>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/decision-twin"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-amber-500/8 border border-amber-500/20 text-amber-300 text-xs font-medium hover:bg-amber-500/12 transition-colors"
+          >
+            <GitBranch className="w-3.5 h-3.5" />
+            Decision Twin
+          </Link>
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded border border-emerald-500/20 bg-emerald-500/5">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-[10px] text-emerald-400/70 font-mono">LIVE FEED</span>
+          </div>
         </div>
       </div>
 
-      {/* Severity summary pills */}
       <div className="flex flex-wrap gap-2">
         {(["all", "critical", "high", "medium", "low"] as const).map(sev => {
           const count = sev === "all" ? signalItems.length : counts[sev];
@@ -155,7 +288,6 @@ export default function SignalsConsolePage() {
         })}
       </div>
 
-      {/* Search */}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-amber-400/30" />
         <input
@@ -167,7 +299,6 @@ export default function SignalsConsolePage() {
         />
       </div>
 
-      {/* Signal list */}
       <div className="space-y-3">
         {filtered.length === 0 && (
           <div className="cockpit-panel p-8 text-center">

@@ -9,9 +9,11 @@ import {
   Terminal, Library, Lock, FlaskConical
 } from "lucide-react";
 
-// New 9 flagship surfaces
+
+// New 9 flagship surfaces + Decision Twin
 const OverviewPage = lazy(() => import("@/pages/overview"));
 const SignalsConsolePage = lazy(() => import("@/pages/signals-console"));
+const DecisionTwinPage = lazy(() => import("@/pages/decision-twin"));
 const EntityGraphPage = lazy(() => import("@/pages/entity-graph"));
 const DecisionCenterPage = lazy(() => import("@/pages/decision-center"));
 const WorkflowHealthPage = lazy(() => import("@/pages/workflow-health"));
@@ -62,6 +64,7 @@ const NAV_GROUPS: NavGroup[] = [
       { label: "Signals Console", href: "/signals", icon: <Radio className="w-3.5 h-3.5" />, badge: "47", badgeColor: "red" },
       { label: "Entity Graph", href: "/entities", icon: <Network className="w-3.5 h-3.5" /> },
       { label: "Decision Center", href: "/decisions", icon: <Brain className="w-3.5 h-3.5" />, badge: "3 rec", badgeColor: "amber" },
+      { label: "Decision Twin", href: "/decision-twin", icon: <GitBranch className="w-3.5 h-3.5" />, badge: "NEW", badgeColor: "amber" },
     ],
   },
   {
@@ -282,6 +285,7 @@ function DashboardRoutes() {
         <Route path="/signals" component={SignalsConsolePage} />
         <Route path="/entities" component={EntityGraphPage} />
         <Route path="/decisions" component={DecisionCenterPage} />
+        <Route path="/decision-twin" component={DecisionTwinPage} />
         <Route path="/workflow-health" component={WorkflowHealthPage} />
         <Route path="/runs" component={RunConsolePage} />
         <Route path="/evidence" component={EvidenceExplorerPage} />
