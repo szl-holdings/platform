@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   Boxes,
@@ -10,6 +10,9 @@ import {
   Plus,
   Trash2,
   X,
+  History,
+  ChevronDown,
+  ChevronRight,
 } from "lucide-react";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
@@ -24,6 +27,31 @@ interface AppRow {
 
 interface AppsResponse {
   apps: AppRow[];
+}
+
+interface ActivityEntry {
+  id: number;
+  action: string;
+  slug: string | null;
+  description: string | null;
+  createdAt: string;
+  actor: string;
+}
+
+interface ActivityResponse {
+  entries: ActivityEntry[];
+}
+
+const ACTION_COLORS: Record<string, string> = {
+  create: "text-[#6b8f71] bg-[#6b8f71]/10 border-[#6b8f71]/30",
+  update: "text-[#4a90b8] bg-[#4a90b8]/10 border-[#4a90b8]/30",
+  delete: "text-[#c45a4a] bg-[#c45a4a]/10 border-[#c45a4a]/30",
+};
+
+function formatTimestamp(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleString();
 }
 
 const STATUS_OPTIONS = [
@@ -62,14 +90,27 @@ export default function AppsRegistryAdmin() {
   const [showNewForm, setShowNewForm] = useState(false);
   const [newApp, setNewApp] = useState<NewAppDraft>(EMPTY_NEW_APP);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [showHistory, setShowHistory] = useState(false);
+  const [expandedHistorySlug, setExpandedHistorySlug] = useState<string | null>(null);
 
   const { data, isLoading, error } = useStandardQuery<AppsResponse>({
     queryKey: ["admin-apps-registry"],
     queryFn: () => apiFetch<AppsResponse>("/admin/apps"),
   });
 
+  const {
+    data: activityData,
+    isLoading: activityLoading,
+    error: activityError,
+  } = useStandardQuery<ActivityResponse>({
+    queryKey: ["admin-apps-registry-activity"],
+    queryFn: () => apiFetch<ActivityResponse>("/admin/apps/activity?limit=100"),
+    enabled: !error,
+  });
+
   const invalidate = () => {
     qc.invalidateQueries({ queryKey: ["admin-apps-registry"] });
+    qc.invalidateQueries({ queryKey: ["admin-apps-registry-activity"] });
     qc.invalidateQueries({ queryKey: ["deployments"] });
   };
 
@@ -145,6 +186,18 @@ export default function AppsRegistryAdmin() {
     return Array.from(set).sort();
   }, [apps]);
 
+  const activityEntries = activityData?.entries ?? [];
+  const activityBySlug = useMemo(() => {
+    const map = new Map<string, ActivityEntry[]>();
+    for (const entry of activityEntries) {
+      if (!entry.slug) continue;
+      const list = map.get(entry.slug) ?? [];
+      list.push(entry);
+      map.set(entry.slug, list);
+    }
+    return map;
+  }, [activityEntries]);
+
   const slugLooksValid = /^[a-z0-9][a-z0-9-]*$/.test(newApp.slug.trim());
   const canCreate =
     newApp.slug.trim().length >= 2 &&
@@ -166,16 +219,30 @@ export default function AppsRegistryAdmin() {
           </p>
         </div>
         {!error && (
-          <button
-            onClick={() => {
-              setShowNewForm((s) => !s);
-              setNewApp(EMPTY_NEW_APP);
-            }}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono uppercase tracking-wider rounded-md bg-primary/15 border border-primary/30 text-primary hover:bg-primary/25"
-          >
-            {showNewForm ? <X className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
-            {showNewForm ? "Cancel" : "New App"}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowHistory((s) => !s)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono uppercase tracking-wider rounded-md border border-border text-muted-foreground hover:text-primary hover:border-primary/40"
+            >
+              {showHistory ? (
+                <ChevronDown className="w-3.5 h-3.5" />
+              ) : (
+                <ChevronRight className="w-3.5 h-3.5" />
+              )}
+              <History className="w-3.5 h-3.5" />
+              History
+            </button>
+            <button
+              onClick={() => {
+                setShowNewForm((s) => !s);
+                setNewApp(EMPTY_NEW_APP);
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono uppercase tracking-wider rounded-md bg-primary/15 border border-primary/30 text-primary hover:bg-primary/25"
+            >
+              {showNewForm ? <X className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
+              {showNewForm ? "Cancel" : "New App"}
+            </button>
+          </div>
         )}
       </div>
 
@@ -275,6 +342,64 @@ export default function AppsRegistryAdmin() {
             </div>
           )}
 
+          {showHistory && (
+            <div className="rounded-xl border border-border bg-card p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="text-xs font-mono uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                  <History className="w-3.5 h-3.5" />
+                  Recent registry changes
+                </div>
+                <span className="text-[10px] text-muted-foreground">
+                  Last {activityEntries.length} entries
+                </span>
+              </div>
+              {activityError ? (
+                <div className="text-xs text-[#c45a4a]">
+                  Failed to load history: {(activityError as Error).message}
+                </div>
+              ) : activityLoading ? (
+                <div className="flex items-center gap-2 text-xs text-muted-foreground py-2">
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  Loading…
+                </div>
+              ) : activityEntries.length === 0 ? (
+                <div className="text-xs text-muted-foreground py-2">
+                  No registry changes recorded yet. New entries appear here as
+                  admins add, remove, or update apps.
+                </div>
+              ) : (
+                <ul className="space-y-1.5 max-h-72 overflow-auto">
+                  {activityEntries.map((entry) => (
+                    <li key={entry.id} className="flex items-start gap-2 text-xs">
+                      <span
+                        className={`inline-flex items-center px-1.5 py-0.5 rounded font-mono text-[10px] uppercase tracking-wider border ${
+                          ACTION_COLORS[entry.action] ??
+                          "text-muted-foreground bg-muted border-border"
+                        }`}
+                      >
+                        {entry.action}
+                      </span>
+                      {entry.slug && (
+                        <code className="text-[10px] text-muted-foreground font-mono pt-0.5">
+                          {entry.slug}
+                        </code>
+                      )}
+                      <span className="flex-1">
+                        <span className="text-foreground">
+                          {entry.description ?? "(no description)"}
+                        </span>
+                        <span className="text-muted-foreground"> — {entry.actor}</span>
+                      </span>
+                      <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                        {formatTimestamp(entry.createdAt)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+
           <div className="relative max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
             <input
@@ -315,7 +440,8 @@ export default function AppsRegistryAdmin() {
                     const deleting =
                       deleteMutation.isPending && deleteMutation.variables === app.slug;
                     return (
-                      <tr key={app.slug} className="hover:bg-muted/30">
+                      <Fragment key={app.slug}>
+                      <tr className="hover:bg-muted/30">
                         <td className="px-4 py-3">
                           <div className="font-medium">{app.name}</div>
                           <code className="text-[10px] text-muted-foreground font-mono">
@@ -416,9 +542,77 @@ export default function AppsRegistryAdmin() {
                                 <Trash2 className="w-3 h-3" />
                               </button>
                             )}
+                            <button
+                              onClick={() =>
+                                setExpandedHistorySlug((s) =>
+                                  s === app.slug ? null : app.slug,
+                                )
+                              }
+                              title="Show change history"
+                              className={`inline-flex items-center gap-1 px-2 py-1.5 text-[11px] font-mono uppercase tracking-wider rounded-md border ${
+                                expandedHistorySlug === app.slug
+                                  ? "border-primary/40 text-primary bg-primary/10"
+                                  : "border-border text-muted-foreground hover:text-primary hover:border-primary/40"
+                              }`}
+                            >
+                              <History className="w-3 h-3" />
+                              {(activityBySlug.get(app.slug)?.length ?? 0) > 0
+                                ? activityBySlug.get(app.slug)!.length
+                                : ""}
+                            </button>
                           </div>
                         </td>
                       </tr>
+                      {expandedHistorySlug === app.slug && (
+                        <tr key={`${app.slug}-history`} className="bg-muted/20">
+                          <td colSpan={4} className="px-4 py-3">
+                            <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1.5">
+                              <History className="w-3 h-3" />
+                              Change history for{" "}
+                              <code className="font-mono">{app.slug}</code>
+                            </div>
+                            {activityLoading ? (
+                              <div className="text-xs text-muted-foreground py-2">
+                                Loading history…
+                              </div>
+                            ) : (activityBySlug.get(app.slug)?.length ?? 0) === 0 ? (
+                              <div className="text-xs text-muted-foreground py-2">
+                                No recorded changes yet for this app.
+                              </div>
+                            ) : (
+                              <ul className="space-y-1.5">
+                                {activityBySlug.get(app.slug)!.map((entry) => (
+                                  <li
+                                    key={entry.id}
+                                    className="flex items-start gap-2 text-xs"
+                                  >
+                                    <span
+                                      className={`inline-flex items-center px-1.5 py-0.5 rounded font-mono text-[10px] uppercase tracking-wider border ${
+                                        ACTION_COLORS[entry.action] ??
+                                        "text-muted-foreground bg-muted border-border"
+                                      }`}
+                                    >
+                                      {entry.action}
+                                    </span>
+                                    <span className="flex-1">
+                                      <span className="text-foreground">
+                                        {entry.description ?? "(no description)"}
+                                      </span>
+                                      <span className="text-muted-foreground">
+                                        {" "}— {entry.actor}
+                                      </span>
+                                    </span>
+                                    <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                                      {formatTimestamp(entry.createdAt)}
+                                    </span>
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                          </td>
+                        </tr>
+                      )}
+                      </Fragment>
                     );
                   })}
                   {filtered.length === 0 && (

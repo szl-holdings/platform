@@ -10,8 +10,8 @@
  */
 
 import type { IRouter } from "express";
-import { db, appsRegistryTable } from "@szl-holdings/db";
-import { asc, eq } from "drizzle-orm";
+import { db, appsRegistryTable, activityLogTable, usersTable } from "@szl-holdings/db";
+import { and, asc, desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { logActivity } from "../../lib/activity-logger.js";
 import { validateBody } from "../../lib/validation.js";
@@ -77,6 +77,48 @@ function serialize(row: {
 }
 
 export function register(router: IRouter): void {
+  router.get("/admin/apps/activity", async (req, res) => {
+    try {
+      const slug = typeof req.query["slug"] === "string" ? req.query["slug"] : undefined;
+      const limitRaw = Number(req.query["limit"] ?? 50);
+      const limit = Math.min(Math.max(Number.isFinite(limitRaw) ? limitRaw : 50, 1), 200);
+
+      const conditions = [eq(activityLogTable.resource, "app_registry")];
+      if (slug) conditions.push(eq(activityLogTable.resourceId, slug));
+
+      const rows = await db
+        .select({
+          id: activityLogTable.id,
+          action: activityLogTable.action,
+          resourceId: activityLogTable.resourceId,
+          description: activityLogTable.description,
+          createdAt: activityLogTable.createdAt,
+          userId: activityLogTable.userId,
+          actorEmail: usersTable.email,
+          actorDisplayName: usersTable.displayName,
+        })
+        .from(activityLogTable)
+        .leftJoin(usersTable, eq(activityLogTable.userId, usersTable.id))
+        .where(conditions.length === 1 ? conditions[0] : and(...conditions))
+        .orderBy(desc(activityLogTable.createdAt))
+        .limit(limit);
+
+      res.json({
+        entries: rows.map((r) => ({
+          id: r.id,
+          action: r.action,
+          slug: r.resourceId,
+          description: r.description,
+          createdAt: r.createdAt.toISOString(),
+          actor:
+            r.actorDisplayName || r.actorEmail || (r.userId ? `user #${r.userId}` : "system"),
+        })),
+      });
+    } catch {
+      sendError(res, "Failed to fetch app registry activity", 500, "INTERNAL_ERROR");
+    }
+  });
+
   router.get("/admin/apps", async (_req, res) => {
     try {
       const rows = await db
