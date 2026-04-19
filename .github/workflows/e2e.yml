@@ -83,6 +83,15 @@ jobs:
             dist: artifacts/szl-holdings/dist/public
             port: 3000
             spec: lyte.spec.ts
+          # Lyte onboarding wizard E2E. Targets the standalone
+          # @workspace/lyte-command-center build (which owns /onboarding and
+          # /overview), served on its own port so the wizard's localStorage
+          # state cannot collide with the szl-holdings smoke tests.
+          - app: lyte-onboarding
+            filter: "@workspace/lyte-command-center"
+            dist: artifacts/lyte-command-center/dist/public
+            port: 3007
+            spec: lyte-onboarding.spec.ts
           # Auth E2E: tests the full client-side session cycle (login wall,
           # Sign In redirect, session persistence, logout) via page.route()
           # interception against the SZL Holdings static build.  No live API
