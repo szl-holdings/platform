@@ -83,6 +83,19 @@ This is the equivalent of "the alarm wiring is in place, but the alarm itself wa
 - The vulnerable-dep commit on the verification branch was reverted (the branch was rolled back to the original `package.json` content).
 - The verification branch was deleted via `DELETE /repos/.../git/refs/heads/verify/security-gates-2026-04-19` → 204.
 
+### Re-check attempted (task #2188, 2026-04-19)
+
+Task #2188 was opened to re-run the verification end-to-end once the security workflow files were pushed to the remote. Re-checking the prerequisite today:
+
+| Probe | Result |
+|---|---|
+| `GET /repos/szl-holdings/szl-holdings-platform/contents/.github/workflows` | `404 Not Found` |
+| `GET /repos/szl-holdings/szl-holdings-platform/actions/workflows` | `total_count: 1` — only `Dependabot Updates` (auto-generated) |
+| `master` branch tip | `660b308` @ `2026-04-15T20:56:01Z` (unchanged since the original verification) |
+| Replit GitHub connector OAuth scopes | `read:org, read:project, read:user, repo, user:email` — still **no `workflow` scope** |
+
+**Conclusion:** The precondition for this task — security workflow files actually present on the remote — has not changed since 2026-04-19's original attempt. The positive case (Dependency Review reporting `conclusion: failure` on a known CVE) still cannot be proven from this environment. Re-running the vulnerable-PR test is deferred until the "Push the security workflow files to GitHub" follow-up is completed (requires a local `git push` from a clone with normal credentials, or a re-issued connector token that includes the `workflow` scope). The "Unblock playbook" steps 1–6 above remain the procedure to execute once that prerequisite is met.
+
 ### Why the positive case could not be completed from this environment
 
 We attempted a second variant — a single PR adding *both* the workflow YAML files (so they would run from the PR head) *and* the vulnerable dependencies. GitHub rejected the writes with `404 Not Found` on `PUT /repos/.../contents/.github/workflows/dependency-review.yml`. The Replit GitHub connector's OAuth token holds scopes `read:org, read:project, read:user, repo, user:email` — it does **not** hold the `workflow` scope, and GitHub blocks any API write that touches `.github/workflows/*` without that scope. The fallback branch was deleted; no workflow files were left in the repo.
