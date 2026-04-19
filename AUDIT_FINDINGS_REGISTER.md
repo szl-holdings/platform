@@ -119,8 +119,8 @@ This register catalogs every finding from all operational audit phases (Phase 0�
 | AF-007 | Tenancy / DB | P1 | `lib/db/src/schema/vessels.ts` | `vessels.*` tables missing `org_id` | ✅ Resolved (Task #1048) | No | Conditional |
 | AF-004 | Admin / Privileged | P2 | `routes/backup.ts` | Backup export lacks orgId authority check | ⚠️ Open | No | No |
 | AF-008 | Tenancy / DB | P2 | `lib/db/src/schema/conversations.ts` | `conversations` table missing `org_id` | ⚠️ Open | No | No |
-| AF-010 | Auth / Session | P2 | `lib/auth/` | Sessions not invalidated on role change | ⚠️ Open | No | No |
-| AF-012 | Auth / Session | P2 | `lib/auth/` | Sessions not invalidated on `SESSION_SECRET` rotation | ⚠️ Open | No | No |
+| AF-010 | Auth / Session | P2 | `lib/auth/` | Sessions not invalidated on role change | ✅ Resolved (Task #1049) | No | No |
+| AF-012 | Auth / Session | P2 | `lib/auth/` | Sessions not invalidated on `SESSION_SECRET` rotation | ✅ Resolved (Task #1049) | No | No |
 | AF-013 | Architecture | P2 | `middlewares/` | Duplicate divergent internal token verification | ⚠️ Open | No | No |
 | AF-014 | Tenancy | P2 | ORM layer | No cross-tenant query guard at ORM layer | ⚠️ Open | No | No |
 
@@ -409,33 +409,26 @@ The original vessels product schema defines `vessels_fleets`, `vessels`, `vessel
 
 ---
 
-### AF-010: Sessions Not Revoked on Role Change
+### AF-010: Sessions Not Revoked on Role Change — ✅ Resolved (Task #1049, 2026-04-19)
 
-| Field | Value |
-|-------|-------|
-| **ID** | AF-010 |
-| **Severity** | P2 — Medium |
-| **Area** | Auth / Session Lifecycle |
-| **Status** | ⚠️ Open |
+**Resolution:** A `session_version` integer column on both `users` and `sessions` (lib/db/src/schema/auth.ts:34, 79) gives every session an authoritative version stamp. `bumpUserSessionVersion()` and `revokeUserSessionsOnRoleChange()` (artifacts/api-server/src/middlewares/session-policy.ts:198, 217) increment the user's version, mark every active session's `revoked_at = now`, and write a `session.invalidate` audit event. Every role-mutation endpoint already calls the helper:
+- `PATCH /admin/users/:id/role` (admin/users.ts:86)
+- `PUT  /admin/users/:userId/roles` (admin/users.ts:243, 310)
+- `PUT  /api/orgs/:slug/members/:userId/role` (org-settings.ts:469)
+- `DELETE /api/orgs/:slug/members/:userId` (org-settings.ts:555)
+- SCIM group add/remove/replace (scim.ts:1008, 1019, 1035)
 
-**Finding:** When a user's role is changed or revoked, active sessions remain valid for up to 30 days (credential login TTL).
+`resolveUserFromToken` (artifacts/api-server/src/middlewares/auth.ts:116) compares `session.sessionVersion` against `user.sessionVersion` on every request and returns `revoked / session_version_mismatch` on drift. Convergence is bounded by request frequency (no TTL wait); the client receives a 401 with `code: SESSION_REVOKED` and is redirected to login.
 
-**Recommendation:** Invalidate all active sessions for a user when their role changes. Or re-validate roles from DB on each request instead of trusting session-cached roles.
+#### Original finding
 
 ---
 
-### AF-012: No Session Invalidation on `SESSION_SECRET` Rotation
+### AF-012: No Session Invalidation on `SESSION_SECRET` Rotation — ✅ Resolved (Task #1049, 2026-04-19)
 
-| Field | Value |
-|-------|-------|
-| **ID** | AF-012 |
-| **Severity** | P2 — Medium |
-| **Area** | Auth / Session Security |
-| **Status** | ⚠️ Open |
+**Resolution:** Server-issued tokens are opaque random strings stored in the `sessions` table — they are not signed with `SESSION_SECRET`, so rotating the secret alone has no effect on existing sessions. To force a global re-authentication after a secret rotation (or any other "log everyone out now" event), operators set the new env var `SESSION_MIN_CREATED_AT` to an ISO-8601 timestamp at or after the rotation moment. `getSessionMinCreatedAt()` (artifacts/api-server/src/middlewares/session-policy.ts:152-187) parses and caches the value; `resolveUserFromToken` (artifacts/api-server/src/middlewares/auth.ts:117-125) compares `session.createdAt` against the cutoff and returns `revoked / session_pre_secret_rotation` for any session that predates it. The cutoff is defensive: malformed values are logged and ignored so a misconfig cannot lock out future logins. Verified by `artifacts/api-server/src/__tests__/session-secret-rotation.test.ts` (7/7 passing). Recommended runbook: rotate `SESSION_SECRET`, then set `SESSION_MIN_CREATED_AT=$(date -u +%FT%TZ)` and redeploy.
 
-**Finding:** Rotating `SESSION_SECRET` does not invalidate existing sessions. Sessions signed with the old secret remain valid until they expire naturally.
-
-**Recommendation:** Implement a session version counter; increment on rotation to force re-authentication.
+#### Original finding
 
 ---
 

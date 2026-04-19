@@ -147,6 +147,51 @@ export async function writeAuditEvent(params: {
 }
 
 /**
+ * Global session cutoff for SESSION_SECRET rotation (AF-012).
+ *
+ * Tokens issued by this server are opaque random strings stored in the
+ * `sessions` table — they are NOT signed with SESSION_SECRET, so rotating
+ * SESSION_SECRET alone does not invalidate any existing sessions. To force
+ * a global re-authentication after a secret rotation (or any other "log
+ * everyone out now" event), set `SESSION_MIN_CREATED_AT` to an ISO-8601
+ * timestamp at or after the rotation moment. Any session with
+ * `created_at < SESSION_MIN_CREATED_AT` will be treated as revoked by
+ * `resolveUserFromToken` on the next request.
+ *
+ * Returns null when the env var is unset, malformed, or in the future
+ * relative to deployment (defensive — we never want a misconfig to lock
+ * out future logins).
+ */
+let _cachedCutoff: { raw: string; value: Date | null } | null = null;
+export function getSessionMinCreatedAt(): Date | null {
+  const raw = process.env["SESSION_MIN_CREATED_AT"]?.trim();
+  if (!raw) {
+    _cachedCutoff = null;
+    return null;
+  }
+  if (_cachedCutoff && _cachedCutoff.raw === raw) return _cachedCutoff.value;
+  const parsed = new Date(raw);
+  if (Number.isNaN(parsed.getTime())) {
+    logger.warn(
+      { rawValue: raw },
+      "SESSION_MIN_CREATED_AT is set but not a valid ISO-8601 timestamp — ignoring",
+    );
+    _cachedCutoff = { raw, value: null };
+    return null;
+  }
+  _cachedCutoff = { raw, value: parsed };
+  return parsed;
+}
+
+/**
+ * Test-only helper to clear the cached cutoff so unit tests can mutate
+ * SESSION_MIN_CREATED_AT between cases.
+ */
+export function _resetSessionMinCreatedAtCache(): void {
+  _cachedCutoff = null;
+}
+
+/**
  * Bump a user's session_version. All sessions whose stored sessionVersion is
  * less than the new value are considered revoked by the auth middleware on the
  * next request (≤30s convergence is bounded by request frequency, not a TTL).

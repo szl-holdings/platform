@@ -6,6 +6,7 @@ import type { RoleName } from "@szl-holdings/db";
 import { ROLE_HIERARCHY, isReadOnlyRole, toCanonicalRole } from "@szl-holdings/db";
 import { serverTelemetry } from "@szl-holdings/observability";
 import { logger } from "../lib/logger";
+import { getSessionMinCreatedAt } from "./session-policy";
 
 export interface OrgMembership {
   orgId: number;
@@ -76,7 +77,13 @@ function checkInternalToken(req: Request): boolean {
 
 type SessionResolution =
   | { kind: "ok"; user: AuthenticatedUser }
-  | { kind: "revoked"; reason: "session_version_mismatch" | "session_revoked" }
+  | {
+      kind: "revoked";
+      reason:
+        | "session_version_mismatch"
+        | "session_revoked"
+        | "session_pre_secret_rotation";
+    }
   | { kind: "missing" };
 
 async function resolveUserFromToken(token: string): Promise<SessionResolution> {
@@ -103,6 +110,16 @@ async function resolveUserFromToken(token: string): Promise<SessionResolution> {
       return { kind: "revoked", reason: "session_revoked" };
     }
     return { kind: "missing" };
+  }
+
+  // Global SESSION_SECRET-rotation cutoff (AF-012). Any session created before
+  // SESSION_MIN_CREATED_AT is treated as revoked. Operators set this env when
+  // rotating SESSION_SECRET (or any other "force-logout-everyone" event) so
+  // that long-lived opaque tokens issued before the rotation can no longer be
+  // exchanged for an authenticated request.
+  const cutoff = getSessionMinCreatedAt();
+  if (cutoff && session.createdAt < cutoff) {
+    return { kind: "revoked", reason: "session_pre_secret_rotation" };
   }
 
   const [user] = await db
@@ -165,7 +182,11 @@ export function authMiddleware(options: { required?: boolean } = {}) {
       }
 
       let user: AuthenticatedUser | null = null;
-      let revokedReason: "session_version_mismatch" | "session_revoked" | null = null;
+      let revokedReason:
+        | "session_version_mismatch"
+        | "session_revoked"
+        | "session_pre_secret_rotation"
+        | null = null;
 
       const SESSION_COOKIE = "sid";
       let token: string | undefined;
