@@ -65,6 +65,7 @@ interface ConversationFrame {
   bytes: number;
   anomalous: boolean;
   frameId: string | null;
+  payloadHex: string;
 }
 
 const HOST_IP: Record<string, string> = {
@@ -257,7 +258,13 @@ export default function OtIcsDashboard() {
       else setPcapngDownloading(true);
       setPcapError(null);
       try {
-        const rawHexById = new Map(frames.map((d) => [d.frameId, d.rawHex] as const));
+        // Each conversation frame ships its own authoritative payload hex, so the exported
+        // capture carries real protocol bytes for every packet rather than zero-padding to
+        // the reported byte count. Decoded frames continue to share the same bytes for the
+        // anomalous packets, keeping the decoder tab consistent with the capture. The
+        // pcapng path additionally enriches each packet with a per-frame comment, an
+        // anomaly note, and the forensic event link so analysts can pivot from Wireshark
+        // back into Aegis.
         const forensicById = new Map(frames.map((d) => [d.frameId, d.forensicEventId] as const));
         const framesPayload = filteredConversation.map((f) => {
           const fid = f.frameId;
@@ -267,7 +274,7 @@ export default function OtIcsDashboard() {
             srcIp: HOST_IP[f.src] ?? "10.4.99.1",
             dstIp: HOST_IP[f.dst] ?? "10.4.99.2",
             protocol: f.protocol.toLowerCase() as "modbus" | "dnp3" | "s7",
-            payloadHex: fid ? rawHexById.get(fid) : undefined,
+            payloadHex: f.payloadHex ?? "",
             bytes: f.bytes,
             comment: format === "pcapng"
               ? `${f.protocol} #${f.seq} ${f.src} ${f.direction} ${f.dst} — ${f.summary}`

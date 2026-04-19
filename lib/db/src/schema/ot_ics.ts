@@ -62,6 +62,7 @@ export const otIcsConversationsTable = pgTable("ot_ics_conversations", {
   bytes: integer("bytes").notNull().default(0),
   anomalous: boolean("anomalous").notNull().default(false),
   frameId: text("frame_id"),
+  payloadHex: text("payload_hex").notNull().default(""),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 }, (t) => ({
   sessionSeqUnique: uniqueIndex("ot_ics_conv_session_seq_unique").on(t.sessionId, t.seq),

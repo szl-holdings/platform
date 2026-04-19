@@ -305,17 +305,20 @@ export async function ensureOtIcsDemoData(): Promise<void> {
     ];
     await db.insert(otIcsDecodedFramesTable).values(seedFrames).onConflictDoNothing();
 
+    // Each conversation frame carries an authoritative payload_hex (application-layer bytes
+     // that ride on top of the synthetic Ethernet+IPv4+TCP envelope produced by the PCAP
+     // exporter). Bytes is the full on-wire size (54-byte L2/L3/L4 envelope + payload).
     const seedConversation: Array<typeof otIcsConversationsTable.$inferInsert> = [
-      { sessionId: "INC-2024-0329", seq: 1, observedAt: observed(170_000), direction: "→", src: "ENG-WS-3", dst: "S7-CPU-413", protocol: "S7", summary: "TCP SYN — Port 102", bytes: 60, anomalous: false },
-      { sessionId: "INC-2024-0329", seq: 2, observedAt: observed(169_000), direction: "←", src: "S7-CPU-413", dst: "ENG-WS-3", protocol: "S7", summary: "SYN/ACK", bytes: 60, anomalous: false },
-      { sessionId: "INC-2024-0329", seq: 3, observedAt: observed(168_000), direction: "→", src: "ENG-WS-3", dst: "S7-CPU-413", protocol: "S7", summary: "COTP CR Connect Request", bytes: 22, anomalous: false },
-      { sessionId: "INC-2024-0329", seq: 4, observedAt: observed(167_000), direction: "←", src: "S7-CPU-413", dst: "ENG-WS-3", protocol: "S7", summary: "COTP CC Connect Confirm", bytes: 22, anomalous: false },
-      { sessionId: "INC-2024-0329", seq: 5, observedAt: observed(165_000), direction: "→", src: "ENG-WS-3", dst: "S7-CPU-413", protocol: "S7", summary: "Setup Communication", bytes: 25, anomalous: false },
-      { sessionId: "INC-2024-0329", seq: 6, observedAt: observed(110_000), direction: "→", src: "ENG-WS-3", dst: "S7-CPU-413", protocol: "S7", summary: "PLC STOP — UNAUTHORIZED", bytes: 33, anomalous: true, frameId: "PKT-S7-0911" },
-      { sessionId: "INC-2024-0329", seq: 7, observedAt: observed(95_000), direction: "→", src: "HMI-A", dst: "PLC-Boiler-2", protocol: "Modbus", summary: "Read Holding 40000-40020 (baseline scan)", bytes: 12, anomalous: false },
-      { sessionId: "INC-2024-0329", seq: 8, observedAt: observed(75_000), direction: "←", src: "PLC-Boiler-2", dst: "HMI-A", protocol: "DNP3", summary: "AI #12 reading anomalous (1418 psi)", bytes: 26, anomalous: true, frameId: "PKT-DNP-1188" },
-      { sessionId: "INC-2024-0329", seq: 9, observedAt: observed(60_000), direction: "→", src: "HMI-A", dst: "PLC-Boiler-2", protocol: "Modbus", summary: "Write 40021 = 2000 (override setpoint)", bytes: 12, anomalous: true, frameId: "PKT-MB-2031" },
-      { sessionId: "INC-2024-0329", seq: 10, observedAt: observed(45_000), direction: "→", src: "HMI-A", dst: "PLC-Boiler-2", protocol: "Modbus", summary: "Read-back 40021 (confirm tamper)", bytes: 12, anomalous: false, frameId: "PKT-MB-2032" },
+      { sessionId: "INC-2024-0329", seq: 1, observedAt: observed(170_000), direction: "→", src: "ENG-WS-3", dst: "S7-CPU-413", protocol: "S7", summary: "TCP SYN — Port 102", bytes: 54, anomalous: false, payloadHex: "" },
+      { sessionId: "INC-2024-0329", seq: 2, observedAt: observed(169_000), direction: "←", src: "S7-CPU-413", dst: "ENG-WS-3", protocol: "S7", summary: "SYN/ACK", bytes: 54, anomalous: false, payloadHex: "" },
+      { sessionId: "INC-2024-0329", seq: 3, observedAt: observed(168_000), direction: "→", src: "ENG-WS-3", dst: "S7-CPU-413", protocol: "S7", summary: "COTP CR Connect Request", bytes: 76, anomalous: false, payloadHex: "03 00 00 16 11 E0 00 00 00 01 00 C0 01 0A C1 02 01 00 C2 02 01 02" },
+      { sessionId: "INC-2024-0329", seq: 4, observedAt: observed(167_000), direction: "←", src: "S7-CPU-413", dst: "ENG-WS-3", protocol: "S7", summary: "COTP CC Connect Confirm", bytes: 76, anomalous: false, payloadHex: "03 00 00 16 11 D0 00 01 00 01 00 C0 01 0A C1 02 01 00 C2 02 01 02" },
+      { sessionId: "INC-2024-0329", seq: 5, observedAt: observed(165_000), direction: "→", src: "ENG-WS-3", dst: "S7-CPU-413", protocol: "S7", summary: "Setup Communication", bytes: 79, anomalous: false, payloadHex: "03 00 00 19 02 F0 80 32 01 00 00 00 00 00 08 00 00 F0 00 00 03 00 03 01 E0" },
+      { sessionId: "INC-2024-0329", seq: 6, observedAt: observed(110_000), direction: "→", src: "ENG-WS-3", dst: "S7-CPU-413", protocol: "S7", summary: "PLC STOP — UNAUTHORIZED", bytes: 87, anomalous: true, frameId: "PKT-S7-0911", payloadHex: "03 00 00 21 02 F0 80 32 01 00 00 04 00 00 0E 00 00 05 01 12 04 11 44 01 00 FF 09 00 04 00 01 00 00" },
+      { sessionId: "INC-2024-0329", seq: 7, observedAt: observed(95_000), direction: "→", src: "HMI-A", dst: "PLC-Boiler-2", protocol: "Modbus", summary: "Read Holding 40000-40020 (baseline scan)", bytes: 66, anomalous: false, payloadHex: "00 17 00 00 00 06 01 03 00 00 00 15" },
+      { sessionId: "INC-2024-0329", seq: 8, observedAt: observed(75_000), direction: "←", src: "PLC-Boiler-2", dst: "HMI-A", protocol: "DNP3", summary: "AI #12 reading anomalous (1418 psi)", bytes: 77, anomalous: true, frameId: "PKT-DNP-1188", payloadHex: "05 64 1A 44 03 00 04 00 BD 71 C0 C7 81 00 00 1E 02 00 00 00 00 8A 05" },
+      { sessionId: "INC-2024-0329", seq: 9, observedAt: observed(60_000), direction: "→", src: "HMI-A", dst: "PLC-Boiler-2", protocol: "Modbus", summary: "Write 40021 = 2000 (override setpoint)", bytes: 66, anomalous: true, frameId: "PKT-MB-2031", payloadHex: "00 19 00 00 00 06 01 06 00 14 07 D0" },
+      { sessionId: "INC-2024-0329", seq: 10, observedAt: observed(45_000), direction: "→", src: "HMI-A", dst: "PLC-Boiler-2", protocol: "Modbus", summary: "Read-back 40021 (confirm tamper)", bytes: 66, anomalous: false, frameId: "PKT-MB-2032", payloadHex: "00 1A 00 00 00 06 01 03 00 14 00 01" },
     ];
     await db.insert(otIcsConversationsTable).values(seedConversation).onConflictDoNothing();
 
