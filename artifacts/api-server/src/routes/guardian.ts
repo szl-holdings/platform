@@ -1404,6 +1404,85 @@ router.get(
       }
 
       const where = and(...conditions);
+      const format = (req.query["format"] as string | undefined)?.toLowerCase();
+
+      if (format === "csv") {
+        res.setHeader("Content-Type", "text/csv; charset=utf-8");
+        res.setHeader(
+          "Content-Disposition",
+          `attachment; filename="proof-chain-audit-${new Date().toISOString().substring(0, 10)}.csv"`,
+        );
+        res.setHeader("Cache-Control", "no-store");
+
+        const header = [
+          "timestamp",
+          "user_id",
+          "action",
+          "product",
+          "decision",
+          "resolved_mode",
+          "confidence",
+          "blocked_reason",
+          "projected_impact_severity",
+          "policy_evaluation_id",
+          "entity_id",
+        ];
+        const csvEscape = (v: unknown): string => {
+          if (v === null || v === undefined) return "";
+          let s = String(v);
+          // Neutralize CSV formula injection: prefix cells starting with =, +, -, @, tab, or CR
+          // with a single quote so spreadsheet apps treat them as literal text.
+          if (s.length > 0 && /^[=+\-@\t\r]/.test(s)) s = "'" + s;
+          if (/[",\n\r]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+          return s;
+        };
+        const writeLine = async (line: string): Promise<void> => {
+          if (!res.write(line)) {
+            await new Promise<void>(resolve => res.once("drain", () => resolve()));
+          }
+        };
+        await writeLine(header.join(",") + "\n");
+
+        const CHUNK = 500;
+        let offset = 0;
+        while (true) {
+          const batch = await db
+            .select()
+            .from(auditEventsTable)
+            .where(where as ReturnType<typeof and>)
+            .orderBy(desc(auditEventsTable.createdAt))
+            .limit(CHUNK)
+            .offset(offset);
+          if (batch.length === 0) break;
+          for (const row of batch) {
+            const newValues = (row.newValues as Record<string, unknown> | null) ?? {};
+            const action = typeof newValues["action"] === "string" ? (newValues["action"] as string) : "";
+            const impact = (row.projectedImpact as Record<string, unknown> | null) ?? {};
+            const severity = typeof impact["severity"] === "string" ? (impact["severity"] as string) : "";
+            const ts = row.createdAt instanceof Date ? row.createdAt.toISOString() : String(row.createdAt ?? "");
+            await writeLine(
+              [
+                csvEscape(ts),
+                csvEscape(row.userId ?? ""),
+                csvEscape(action),
+                csvEscape(row.product ?? ""),
+                csvEscape(row.decision ?? ""),
+                csvEscape(row.resolvedMode ?? ""),
+                csvEscape(row.confidence ?? ""),
+                csvEscape(row.blockedReason ?? ""),
+                csvEscape(severity),
+                csvEscape(row.policyEvaluationId ?? ""),
+                csvEscape(row.entityId ?? ""),
+              ].join(",") + "\n",
+            );
+          }
+          if (batch.length < CHUNK) break;
+          offset += CHUNK;
+        }
+        res.end();
+        return;
+      }
+
       const offset = (page - 1) * limit;
 
       const [rows, totalRow] = await Promise.all([

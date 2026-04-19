@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Shield, Clock, User, Filter, Activity, CheckCircle2, AlertTriangle, Eye, RefreshCw } from "lucide-react";
+import { Shield, Clock, User, Filter, Activity, CheckCircle2, AlertTriangle, Eye, RefreshCw, Download } from "lucide-react";
 
 const BG = { page: "#080c14", surface: "#0c1018", elevated: "#10141e" };
 const BORDER = { subtle: "rgba(255,255,255,0.04)", muted: "rgba(255,255,255,0.06)" };
@@ -178,13 +178,23 @@ export default function TrustAuditPage() {
           <option value="all">All modes</option>
           {modeOptions.map(m => <option key={m} value={m}>{m}</option>)}
         </select>
-        <button
-          onClick={() => auditQ.refetch()}
-          className="ml-auto flex items-center gap-1.5 px-2 py-1 rounded text-[9px] font-mono"
-          style={{ color: TEXT.secondary, border: `1px solid ${BORDER.subtle}` }}
-        >
-          <RefreshCw className={`w-3 h-3 ${auditQ.isFetching ? "animate-spin" : ""}`} /> Refresh
-        </button>
+        <div className="ml-auto flex items-center gap-2">
+          <a
+            href={`/api/guardian/audit/policy-decisions?${(() => { const p = new URLSearchParams(); if (filterDecision !== "all") p.set("decision", filterDecision); if (filterProduct !== "all") p.set("product", filterProduct); if (filterMode !== "all") p.set("mode", filterMode); p.set("format", "csv"); return p.toString(); })()}`}
+            className="flex items-center gap-1.5 px-2 py-1 rounded text-[9px] font-mono"
+            style={{ color: ELECTRIC, border: `1px solid rgba(45,212,191,0.25)`, background: "rgba(45,212,191,0.06)" }}
+            title="Download the currently filtered policy decisions as a CSV file"
+          >
+            <Download className="w-3 h-3" /> Export CSV
+          </a>
+          <button
+            onClick={() => auditQ.refetch()}
+            className="flex items-center gap-1.5 px-2 py-1 rounded text-[9px] font-mono"
+            style={{ color: TEXT.secondary, border: `1px solid ${BORDER.subtle}` }}
+          >
+            <RefreshCw className={`w-3 h-3 ${auditQ.isFetching ? "animate-spin" : ""}`} /> Refresh
+          </button>
+        </div>
       </div>
 
       {/* Audit log */}
