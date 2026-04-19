@@ -142,7 +142,13 @@ function ensureApiFetch(): void {
 // Cross-tab synchronization via storage events
 if (typeof window !== "undefined") {
   window.addEventListener("storage", (e) => {
-    if (e.key !== LS_KEY || e.newValue == null) return;
+    if (e.key !== LS_KEY) return;
+    if (e.newValue == null) {
+      // Key was removed/cleared in another tab — reset to defaults
+      _prefs = { ...DEFAULTS };
+      notifyListeners();
+      return;
+    }
     try {
       const updated = JSON.parse(e.newValue) as Partial<UserPreferences>;
       _prefs = mergePrefs(DEFAULTS, updated);
