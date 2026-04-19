@@ -1,6 +1,13 @@
 import { useState, useEffect, useCallback, lazy, Suspense } from "react";
 import { identifyAnalyticsUser, resetAnalyticsUser, setUser as setSentryUser, clearUser as clearSentryUser } from "@szl-holdings/observability/react";
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
+import {
+  CommandPalette,
+  useCommandPalette,
+  getEcosystemSwitchCommands,
+  createBaselineWebActions,
+  type CommandItem,
+} from "@szl-holdings/shared-ui/command-palette";
 import Constellation from "@/pages/Constellation";
 import Shell from "./components/Shell";
 import TodaysBrief from "./pages/TodaysBrief";
@@ -272,9 +279,40 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
 }
 
 
+function PulsePalette() {
+  const [, navigate] = useLocation();
+  const commands: CommandItem[] = [
+    ...createBaselineWebActions(navigate),
+    ...getEcosystemSwitchCommands("pulse"),
+    { id: "nav-today", label: "Today's Brief", group: "Navigate", action: () => navigate(`${BASE}/`) },
+    { id: "nav-library", label: "Briefing Library", group: "Navigate", action: () => navigate(`${BASE}/library`) },
+    { id: "nav-engine", label: "Brief Engine", group: "Navigate", action: () => navigate(`${BASE}/engine`) },
+    { id: "nav-confidence", label: "Confidence Dashboard", group: "Navigate", action: () => navigate(`${BASE}/confidence`) },
+    { id: "nav-custom", label: "Custom Brief", group: "Navigate", action: () => navigate(`${BASE}/custom`) },
+    { id: "nav-dissent", label: "Dissent Channel", group: "Navigate", action: () => navigate(`${BASE}/dissent`) },
+    { id: "nav-constellation", label: "Constellation", group: "Navigate", action: () => navigate(`${BASE}/constellation`) },
+    { id: "nav-governed", label: "Governed Intelligence", group: "Navigate", action: () => navigate(`${BASE}/governed-cockpit`) },
+    { id: "nav-decisions", label: "Decision Center", group: "Navigate", action: () => navigate(`${BASE}/decisions`) },
+    { id: "nav-system", label: "System Health", group: "Navigate", action: () => navigate(`${BASE}/system`) },
+    { id: "nav-settings", label: "Settings", group: "Navigate", action: () => navigate(`${BASE}/settings`) },
+  ];
+  const { open, setOpen } = useCommandPalette(commands);
+  return (
+    <CommandPalette
+      open={open}
+      onClose={() => setOpen(false)}
+      commands={commands}
+      appName="Pulse"
+      accentColor="#c8a84b"
+      placeholder="Search Pulse — briefs, library, actions..."
+    />
+  );
+}
+
 export default function App() {
   return (
     <RequireAuth>
+      <PulsePalette />
       <Shell>
         <Switch>
           <Route path={`${BASE}/`} component={TodaysBrief} />

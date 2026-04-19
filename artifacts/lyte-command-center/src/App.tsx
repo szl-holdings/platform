@@ -10,6 +10,13 @@ import {
   type SentientCrossLink,
 } from "@szl-holdings/shared-ui/sentient-layer";
 import {
+  CommandPalette,
+  useCommandPalette,
+  getEcosystemSwitchCommands,
+  createBaselineWebActions,
+  type CommandItem,
+} from "@szl-holdings/shared-ui/command-palette";
+import {
   LayoutDashboard, AlertTriangle, GitBranch, Activity,
   Thermometer, Layers, ChevronRight, Menu, X, BookOpen, Brain,
   ChevronDown, Zap, Shield, Users, Radio, Network, Workflow,
@@ -229,9 +236,21 @@ function AppShell({ children }: { children: React.ReactNode }) {
   const { prefs, setPreference, isLoaded } = useUserPreferences();
   const [sidebarExpanded, setSidebarExpanded] = useState(() => !prefs.sidebar_collapsed);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [location] = useLocation();
+  const [location, navigate] = useLocation();
   const userOverriddenSidebarRef = useRef(false);
   const { open: sentientOpen, show: sentientShow, hide: sentientHide } = useSentientLayer();
+
+  const paletteCommands: CommandItem[] = [
+    ...createBaselineWebActions(navigate),
+    ...getEcosystemSwitchCommands("lyte"),
+    ...ALL_NAV_ITEMS.map((item) => ({
+      id: `nav-${item.href}`,
+      label: item.label,
+      group: "Navigate",
+      action: () => navigate(item.href),
+    })),
+  ];
+  const { open: paletteOpen, setOpen: setPaletteOpen } = useCommandPalette(paletteCommands);
 
   useEffect(() => {
     if (isLoaded && !userOverriddenSidebarRef.current) {
@@ -320,6 +339,14 @@ function AppShell({ children }: { children: React.ReactNode }) {
         updates={SENTIENT_UPDATES}
         actions={SENTIENT_ACTIONS}
         crossLinks={SENTIENT_CROSS_LINKS}
+      />
+      <CommandPalette
+        open={paletteOpen}
+        onClose={() => setPaletteOpen(false)}
+        commands={paletteCommands}
+        appName="Lyte"
+        accentColor={LYTE_ACCENT}
+        placeholder="Search Lyte — pages, decisions, actions..."
       />
     </div>
   );

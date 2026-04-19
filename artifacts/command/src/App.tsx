@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState, useEffect } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import { persistQueryClient } from "@tanstack/query-persist-client-core";
@@ -11,7 +11,13 @@ import { MultiplayerSessionBanner } from "@szl-holdings/shared-ui/multiplayer-se
 import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
 import { commandConfig } from "@szl-holdings/shared-ui/copilot-configs";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
-import { CommandBar } from "./components/command-bar";
+import {
+  CommandPalette,
+  useCommandPalette,
+  getEcosystemSwitchCommands,
+  createBaselineWebActions,
+  type CommandItem,
+} from "@szl-holdings/shared-ui/command-palette";
 import { UnifiedLayout, type WorkspaceMode } from "./components/unified-layout";
 import { recordPageLoad } from "./pages/cognitive/shared";
 import { DemoModeProvider } from "@lyte/lib/demo-mode";
@@ -177,25 +183,134 @@ function getMode(location: string): WorkspaceMode {
 
 const OPS_ROUTES = ["/alerts", "/team", "/costs", "/changelog", "/sla", "/governance", "/health", "/digest"];
 
+const COMMAND_NAV_ROUTES: Array<{ href: string; label: string; group: string }> = [
+  { href: "/strategy", label: "Strategy Dashboard", group: "Strategy" },
+  { href: "/strategy/executive-briefing", label: "Executive Briefing", group: "Strategy" },
+  { href: "/strategy/simulation", label: "Simulation", group: "Strategy" },
+  { href: "/strategy/briefing", label: "Briefing History", group: "Strategy" },
+  { href: "/strategy/correlation-map", label: "Correlation Map", group: "Strategy" },
+  { href: "/strategy/signal-chains", label: "Signal Chains", group: "Strategy" },
+  { href: "/strategy/enterprise-state", label: "Enterprise State", group: "Strategy" },
+  { href: "/strategy/atlas-runtime", label: "Atlas Runtime", group: "Strategy" },
+  { href: "/strategy/worldline-registry", label: "Worldline Registry", group: "Strategy" },
+  { href: "/strategy/cross-platform/hub", label: "Cross-Platform Hub", group: "Strategy" },
+  { href: "/strategy/cross-platform", label: "Signal Correlation", group: "Strategy" },
+  { href: "/strategy/cross-platform/evidence", label: "Evidence Registry", group: "Strategy" },
+  { href: "/strategy/cross-platform/run-health", label: "Run Health", group: "Strategy" },
+  { href: "/strategy/cross-platform/pilots", label: "Pilot Intelligence", group: "Strategy" },
+  { href: "/strategy/competitive-atlas", label: "Competitive Atlas", group: "Strategy" },
+  { href: "/decisions", label: "Decision Center", group: "Strategy" },
+  { href: "/intelligence/evidence", label: "Evidence Explorer", group: "Strategy" },
+  { href: "/operations", label: "Executive Command", group: "Operations" },
+  { href: "/operations/pulse", label: "Pulse", group: "Operations" },
+  { href: "/operations/prism", label: "PRISM Dashboard", group: "Operations" },
+  { href: "/operations/prism/signals", label: "Signals Feed", group: "Operations" },
+  { href: "/operations/prism/motion", label: "Motion / Action Queue", group: "Operations" },
+  { href: "/operations/blocker-board", label: "Blocker Board", group: "Operations" },
+  { href: "/operations/what-changed", label: "What Changed", group: "Operations" },
+  { href: "/operations/deployments", label: "Deployments", group: "Operations" },
+  { href: "/operations/digest", label: "Digest Center", group: "Operations" },
+  { href: "/operations/trust-audit", label: "Trust & Audit", group: "Operations" },
+  { href: "/operations/approvals", label: "Approvals Center", group: "Operations" },
+  { href: "/operations/policy-approvals", label: "Policy Approvals", group: "Operations" },
+  { href: "/operations/policy-manager", label: "Policy Manager", group: "Operations" },
+  { href: "/operations/governance-tiers", label: "Governance Tiers", group: "Operations" },
+  { href: "/operations/guardrail-configs", label: "Guardrail Configs", group: "Operations" },
+  { href: "/operations/inbox", label: "Command Inbox", group: "Operations" },
+  { href: "/operations/ownership", label: "Ownership Map", group: "Operations" },
+  { href: "/operations/escalation", label: "Escalation Center", group: "Operations" },
+  { href: "/operations/queue", label: "Operational Queue", group: "Operations" },
+  { href: "/operations/action-queue", label: "Action Queue", group: "Operations" },
+  { href: "/operations/signals", label: "Live Signals", group: "Operations" },
+  { href: "/operations/alerts", label: "Alert Management", group: "Operations" },
+  { href: "/operations/recommendations", label: "Recommendations", group: "Operations" },
+  { href: "/operations/readiness", label: "Readiness", group: "Operations" },
+  { href: "/operations/metrics", label: "Metrics Explorer", group: "Operations" },
+  { href: "/operations/topology", label: "Service Topology", group: "Operations" },
+  { href: "/operations/logs", label: "Log Explorer", group: "Operations" },
+  { href: "/operations/autonomous-noc", label: "Autonomous NOC", group: "Operations" },
+  { href: "/operations/dex", label: "DEX Scoring", group: "Operations" },
+  { href: "/operations/runbook-studio", label: "Runbook Studio", group: "Operations" },
+  { href: "/operations/knowledge-graph", label: "Knowledge Graph", group: "Operations" },
+  { href: "/operations/self-healing", label: "Self-Healing", group: "Operations" },
+  { href: "/operations/slo", label: "SLO Management", group: "Operations" },
+  { href: "/operations/finops", label: "FinOps", group: "Operations" },
+  { href: "/operations/tracing", label: "Distributed Tracing", group: "Operations" },
+  { href: "/operations/on-call", label: "On-Call Center", group: "Operations" },
+  { href: "/operations/noise-reduction", label: "Noise Reduction", group: "Operations" },
+  { href: "/operations/capacity-planning", label: "Capacity Planning", group: "Operations" },
+  { href: "/operations/change-management", label: "Change Management", group: "Operations" },
+  { href: "/operations/synthetic", label: "Synthetic Monitoring", group: "Operations" },
+  { href: "/operations/revenue-impact", label: "Revenue Impact", group: "Operations" },
+  { href: "/operations/business-signals", label: "Business Signals", group: "Operations" },
+  { href: "/operations/predictive-intelligence", label: "Predictive Intelligence", group: "Operations" },
+  { href: "/operations/living-topology", label: "Living Topology", group: "Operations" },
+  { href: "/operations/governed-decision-loop", label: "Governed Decision Loop", group: "Operations" },
+  { href: "/operations/cognitive-runtime", label: "Cognitive Runtime", group: "Operations" },
+  { href: "/operations/ai-ops", label: "AI Quality Dashboard", group: "Operations" },
+  { href: "/operations/fabric", label: "Global Fabric", group: "Operations" },
+  { href: "/operations/alloy/canvas", label: "Alloy Workflow Canvas", group: "Alloy" },
+  { href: "/operations/alloy/actions", label: "Alloy Action Console", group: "Alloy" },
+  { href: "/operations/alloy/templates", label: "Alloy Templates", group: "Alloy" },
+  { href: "/operations/alloy/intelligence", label: "Alloy Intelligence", group: "Alloy" },
+  { href: "/operations/alloy/governance", label: "Alloy Governance", group: "Alloy" },
+  { href: "/operations/alloy/agents", label: "Alloy Agent Monitor", group: "Alloy" },
+  { href: "/operations/alloy/traces", label: "Alloy Execution Traces", group: "Alloy" },
+  { href: "/operations/alloy/replay", label: "Alloy Replay Timeline", group: "Alloy" },
+  { href: "/operations/alloy/simulate", label: "Alloy Policy Sim", group: "Alloy" },
+  { href: "/operations/alloy/handoffs", label: "Alloy Agent Handoffs", group: "Alloy" },
+  { href: "/operations/alloy/receipts", label: "Alloy Trust Receipts", group: "Alloy" },
+  { href: "/operations/alloy/integrations", label: "Alloy Integration Health", group: "Alloy" },
+  { href: "/operations/alloy/compiler", label: "Alloy Graph Compiler", group: "Alloy" },
+  { href: "/operations/alloy/policy-compiler", label: "Alloy Policy Compiler", group: "Alloy" },
+  { href: "/operations/alloy/proof", label: "Alloy Proof", group: "Alloy" },
+  { href: "/operations/runs", label: "Run Console", group: "Operations" },
+  { href: "/operations/evidence-explorer", label: "Evidence Explorer", group: "Operations" },
+  { href: "/operations/eval-studio", label: "Eval Studio", group: "Operations" },
+  { href: "/eval-forge", label: "Eval Forge", group: "Operations" },
+  { href: "/governed-cockpit", label: "Governed Cockpit", group: "Operations" },
+  { href: "/demo", label: "Demo Launchpad", group: "Operations" },
+  { href: "/cognitive", label: "Cognitive Command Center", group: "Cognitive" },
+  { href: "/cognitive/self-model", label: "Self-Model Console", group: "Cognitive" },
+  { href: "/cognitive/world-model", label: "World-Model Explorer", group: "Cognitive" },
+  { href: "/cognitive/memory", label: "Memory", group: "Cognitive" },
+  { href: "/cognitive/planner", label: "Planner", group: "Cognitive" },
+  { href: "/cognitive/verifier", label: "Verifier", group: "Cognitive" },
+  { href: "/cognitive/reflection", label: "Reflection", group: "Cognitive" },
+  { href: "/cognitive/traces", label: "Traces", group: "Cognitive" },
+  { href: "/cognitive/evals", label: "Evals", group: "Cognitive" },
+  { href: "/cognitive/policies", label: "Policies", group: "Cognitive" },
+  { href: "/infrastructure", label: "Legatus Console", group: "Infrastructure" },
+  { href: "/infrastructure/imperium-map", label: "Imperium Map", group: "Infrastructure" },
+  { href: "/infrastructure/praetorian", label: "Praetorian Guard", group: "Infrastructure" },
+  { href: "/infrastructure/senate", label: "Senate Chamber", group: "Infrastructure" },
+  { href: "/infrastructure/supply-lines", label: "Supply Lines", group: "Infrastructure" },
+  { href: "/infrastructure/centurion", label: "Centurion AI", group: "Infrastructure" },
+  { href: "/infrastructure/intelligence", label: "Intelligence Briefing", group: "Infrastructure" },
+  { href: "/infrastructure/geospatial", label: "Geospatial Intelligence", group: "Infrastructure" },
+  { href: "/infrastructure/directives", label: "Directive Cascade", group: "Infrastructure" },
+  { href: "/infrastructure/coalition", label: "Coalition", group: "Infrastructure" },
+  { href: "/infrastructure/reserves", label: "Strategic Reserves", group: "Infrastructure" },
+];
+
 function AppShell() {
   const [location, navigate] = useLocation();
   const { open: cortexOpen, setOpen: setCortexOpen } = useCortexVoice();
-  const [searchOpen, setSearchOpen] = useState(false);
-
   const isMarketing = location.startsWith("/marketing");
 
   const mode = getMode(location);
 
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-        e.preventDefault();
-        setSearchOpen((v) => !v);
-      }
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, []);
+  const paletteCommands: CommandItem[] = [
+    ...createBaselineWebActions(navigate),
+    ...getEcosystemSwitchCommands("command"),
+    ...COMMAND_NAV_ROUTES.map((r) => ({
+      id: `nav-${r.href}`,
+      label: r.label,
+      group: r.group,
+      action: () => navigate(r.href),
+    })),
+  ];
+  const { open: paletteOpen, setOpen: setPaletteOpen } = useCommandPalette(paletteCommands);
 
   useEffect(() => {
     const start = performance.now();
@@ -229,7 +344,14 @@ function AppShell() {
     <>
       <MultiplayerSessionBanner sessionId="cmd-unified" currentUserName="You" accentColor={accent} />
       <EcosystemNav currentAppId="command" currentAppName="Unified Command" accentColor={accent} />
-      <CommandBar open={searchOpen} onClose={() => setSearchOpen(false)} />
+      <CommandPalette
+        open={paletteOpen}
+        onClose={() => setPaletteOpen(false)}
+        commands={paletteCommands}
+        appName="Command"
+        accentColor={accent}
+        placeholder="Search Command — pages, ops, infrastructure..."
+      />
       <CortexVoice open={cortexOpen} onClose={() => setCortexOpen(false)} accentColor={accent} appName="Command" />
       <div style={{ position: "fixed", bottom: "24px", right: "24px", zIndex: 9990 }}>
         <CortexVoiceTrigger accentColor={accent} onClick={() => setCortexOpen(true)} />
