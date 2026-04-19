@@ -9,6 +9,7 @@ export * from "./feature_flags";
 export * from "./billing";
 export * from "./files";
 export * from "./health_checks";
+export * from "./drift_snapshots";
 export * from "./webhook_events";
 export * from "./apps_registry";
 export * from "./stephen_site";

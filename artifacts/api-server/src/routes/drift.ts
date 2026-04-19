@@ -8,14 +8,16 @@
  * Routes:
  *   GET  /drift                  — overall drift summary
  *   GET  /drift/:domain          — per-domain drift breakdown
- *   GET  /drift/history          — last N drift snapshots (in-memory, resets on restart)
- *   POST /drift/reset            — mark current state as the new baseline
+ *   GET  /drift/history          — most recent drift snapshots (persisted in
+ *                                  the `drift_snapshots` table; survives
+ *                                  restarts; pruned to the last 500)
+ *   POST /drift/reset            — clear persisted history / new baseline
  */
 
 import { Router, type IRouter, type Request, type Response } from "express";
 import { db } from "@szl-holdings/db";
-import { cstNodes } from "@szl-holdings/db";
-import { eq, sql, and, lt } from "drizzle-orm";
+import { cstNodes, driftSnapshotsTable } from "@szl-holdings/db";
+import { eq, sql, and, lt, desc } from "drizzle-orm";
 import {
   sendSuccess,
   sendBadRequest,
@@ -56,7 +58,8 @@ interface DriftSummary {
 }
 
 const BASELINE_CONFIDENCE = 0.85;
-const driftHistory: DriftSummary[] = [];
+const HISTORY_RETENTION_LIMIT = 500;
+const HISTORY_PAGE_SIZE = 20;
 
 async function measureDomainDrift(domain: string): Promise<DomainDrift> {
   const now = new Date();
@@ -132,11 +135,35 @@ async function buildDriftSummary(): Promise<DriftSummary> {
   };
 }
 
+async function persistSnapshot(summary: DriftSummary): Promise<void> {
+  await db.insert(driftSnapshotsTable).values({
+    measuredAt: new Date(summary.measuredAt),
+    overallDriftScore: summary.overallDriftScore,
+    status: summary.status,
+    summary,
+  });
+
+  // Retention: keep only the most recent HISTORY_RETENTION_LIMIT snapshots.
+  // Delete anything older than the cutoff row (cheap with the measured_at index).
+  await db.execute(sql`
+    DELETE FROM ${driftSnapshotsTable}
+    WHERE id NOT IN (
+      SELECT id FROM ${driftSnapshotsTable}
+      ORDER BY measured_at DESC
+      LIMIT ${HISTORY_RETENTION_LIMIT}
+    )
+  `);
+}
+
 router.get("/drift", async (_req: Request, res: Response) => {
   try {
     const summary = await buildDriftSummary();
-    driftHistory.push(summary);
-    if (driftHistory.length > 100) driftHistory.shift();
+    try {
+      await persistSnapshot(summary);
+    } catch (persistErr) {
+      // Don't fail the request if persistence has a transient hiccup.
+      console.error("[drift] failed to persist snapshot:", persistErr);
+    }
     return sendSuccess(res, summary);
   } catch (err) {
     return handleRouteError(res, err, "GET /drift");
@@ -145,7 +172,17 @@ router.get("/drift", async (_req: Request, res: Response) => {
 
 router.get("/drift/history", async (_req: Request, res: Response) => {
   try {
-    return sendSuccess(res, { snapshots: driftHistory.slice(-20), count: driftHistory.length });
+    const rows = await db
+      .select({ summary: driftSnapshotsTable.summary, measuredAt: driftSnapshotsTable.measuredAt })
+      .from(driftSnapshotsTable)
+      .orderBy(desc(driftSnapshotsTable.measuredAt))
+      .limit(HISTORY_PAGE_SIZE);
+    const [countRow] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(driftSnapshotsTable);
+    // Return oldest -> newest so the chart renders left-to-right.
+    const snapshots = rows.map((r) => r.summary as DriftSummary).reverse();
+    return sendSuccess(res, { snapshots, count: countRow?.count ?? snapshots.length });
   } catch (err) {
     return handleRouteError(res, err, "GET /drift/history");
   }
@@ -166,7 +203,7 @@ router.get("/drift/:domain", async (req: Request, res: Response) => {
 
 router.post("/drift/reset", validateBody(jsonObjectBodySchema), async (_req: Request, res: Response) => {
   try {
-    driftHistory.length = 0;
+    await db.delete(driftSnapshotsTable);
     return sendSuccess(res, { reset: true, message: "Drift baseline reset. History cleared." });
   } catch (err) {
     return handleRouteError(res, err, "POST /drift/reset");
