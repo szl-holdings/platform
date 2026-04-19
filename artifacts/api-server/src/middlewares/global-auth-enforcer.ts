@@ -174,6 +174,12 @@ const PUBLIC_PREFIXES = [
   // 401 for unauthenticated requests; in sandbox/demo mode it serves synthetic
   // seed data publicly. Never exposes live production signals to anonymous users.
   "/api/fabric/",
+  // Competitive Intel monitor — backs the Command Competitive Atlas page with
+  // RSS-derived "Intel Update" alerts about tracked champions (CrowdStrike,
+  // Clio, CoStar, Windward, Palantir, ThoughtSpot). The Atlas page is internal-
+  // facing but unauthenticated like the rest of the Command demo surface; the
+  // underlying data is sourced exclusively from public product blogs / RSS feeds.
+  "/api/competitive-intel/",
 ];
 
 function isValidInternalToken(req: Request): boolean {

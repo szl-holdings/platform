@@ -65,6 +65,7 @@ import actionStoreRouter from "./action-store";
 import lyteSurfacesRouter from "./lyte-surfaces";
 import lyteIntelRouter from "./lyte-intel";
 import riskEvidenceRouter from "./risk-evidence";
+import competitiveIntelTopRouter from "./competitive-intel";
 
 const router: IRouter = Router();
 
@@ -135,6 +136,15 @@ router.use(narrativesRouter);
 // unauthenticated; mounted BEFORE guardianPolicyCheck and exempted in the
 // global-auth-enforcer / csrf middleware allowlists.
 router.use(actionStoreRouter);
+
+// Competitive Intel monitor — backs the Command Competitive Atlas page with
+// RSS-derived "Intel Update" alerts about tracked champions. Mounted at the
+// TOP of the /api router (BEFORE any group register call that mounts a
+// sub-router at root with router-level authMiddleware/tenantScope) so the
+// public Atlas demo surface can fetch alerts without a session. The
+// /api/competitive-intel/ prefix is also in PUBLIC_PREFIXES in
+// global-auth-enforcer.ts.
+router.use("/competitive-intel", competitiveIntelTopRouter);
 
 // Shared risk evidence store — persists "Save run as evidence" Monte Carlo
 // runs so external reviewers and lender briefings see the same cited

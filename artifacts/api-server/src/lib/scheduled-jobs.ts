@@ -25,6 +25,7 @@ export const NAMED_JOB_TYPES = {
   ATLAS_SNAPSHOT_COMPACTION: "atlas_snapshot_compaction",
   ATLAS_RETENTION_PRUNE: "atlas_retention_prune",
   DAILY_PULSE_BRIEFING_DIGEST: "daily_pulse_briefing_digest",
+  DAILY_COMPETITIVE_INTEL_POLL: "daily_competitive_intel_poll",
 } as const;
 
 export type NamedJobType = typeof NAMED_JOB_TYPES[keyof typeof NAMED_JOB_TYPES];
@@ -71,6 +72,22 @@ registerEntry({ type: NAMED_JOB_TYPES.DAILY_PROOF_CHAIN_DIGEST, name: "Daily Pro
 registerEntry({ type: NAMED_JOB_TYPES.HOURLY_EXECUTIVE_DIGEST, name: "Executive Digest Dispatcher", description: "Runs every minute. Finds users whose digest_config.enabled=true and whose deliveryHour+deliveryMinute match the current local time in their configured IANA timezone. Sends an Expo push (generic body, no cross-tenant aggregates) with a deepLink to the briefing workspace; the workspace then loads the tenant-scoped digest in-app.", schedule: "minutely", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.ATLAS_SNAPSHOT_COMPACTION, name: "ATLAS Snapshot Compaction", description: "Compacts ATLAS spatial twin snapshots older than 7 days by merging intermediate frames into summary records. Reduces storage growth while preserving full worldline replay fidelity for audits and proof bundles.", schedule: "daily", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.ATLAS_RETENTION_PRUNE, name: "ATLAS Retention Prune", description: "Deletes records from atlas_signals, atlas_evidence, atlas_outcomes, and atlas_runs older than the configured retention threshold (defaults to 90 days, override via ATLAS_RETENTION_DAYS env var or job payload retainDays). Prevents unbounded growth of ATLAS persistence tables.", schedule: "daily", enabled: true });
+registerEntry({ type: NAMED_JOB_TYPES.DAILY_COMPETITIVE_INTEL_POLL, name: "Daily Competitive Intel Poll", description: "Polls product blogs / RSS feeds for the champions tracked in the SZL Competitive Atlas (CrowdStrike, Clio, CoStar, Windward, Palantir, ThoughtSpot, Darktrace) and surfaces new major-feature announcements as Intel Update alerts in the Command Competitive Atlas page with adopt/counter/monitor recommendations.", schedule: "daily", enabled: true });
+
+durableJobQueue.register(NAMED_JOB_TYPES.DAILY_COMPETITIVE_INTEL_POLL, async (job) => {
+  const start = Date.now();
+  logger.info({ jobId: job.id }, "daily_competitive_intel_poll: starting feed poll");
+  try {
+    const { pollAllFeeds } = await import("../jobs/competitive-intel-monitor");
+    const result = await pollAllFeeds();
+    serverTelemetry.recordBusinessEvent({ type: "daily_competitive_intel_poll_completed", domain: "command", durationMs: Date.now() - start, success: true, metadata: { ...result } });
+    updateRegistry(NAMED_JOB_TYPES.DAILY_COMPETITIVE_INTEL_POLL, { lastStatus: "completed", lastDurationMs: Date.now() - start });
+    logger.info({ jobId: job.id, ...result }, "daily_competitive_intel_poll: complete");
+  } catch (err) {
+    logger.error({ err, jobId: job.id }, "daily_competitive_intel_poll: fatal");
+    updateRegistry(NAMED_JOB_TYPES.DAILY_COMPETITIVE_INTEL_POLL, { lastStatus: "failed", lastDurationMs: Date.now() - start, failCount: (jobRegistry.get(NAMED_JOB_TYPES.DAILY_COMPETITIVE_INTEL_POLL)?.failCount || 0) + 1 });
+  }
+});
 
 function getLocalHourMinute(tz: string, now: Date): { hour: number; minute: number } | null {
   try {

@@ -1,7 +1,32 @@
-import { useState, useEffect, useMemo } from "react";
-import { ExternalLink, TrendingUp, Zap, CheckCircle2, Circle, ChevronDown, ChevronRight, Target, Shield, Scale, Building2, Ship, Brain, BarChart3, Cpu, Star, XCircle, Clock, PauseCircle, Download, StickyNote } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { ExternalLink, TrendingUp, Zap, CheckCircle2, Circle, ChevronDown, ChevronRight, Target, Shield, Scale, Building2, Ship, Brain, BarChart3, Cpu, Star, XCircle, Clock, PauseCircle, Download, StickyNote, Radio, X, RefreshCw, ArrowUpRight } from "lucide-react";
 
 type AdoptionStatus = "adopted" | "in-progress" | "evaluating" | "rejected" | "deferred";
+
+type Recommendation = "adopt" | "counter" | "monitor";
+
+interface IntelAlert {
+  id: string;
+  laneId: string;
+  champion: string;
+  title: string;
+  summary: string;
+  link: string;
+  publishedAt: string;
+  detectedAt: string;
+  recommendation: Recommendation;
+  recommendationReason: string;
+  dismissed: boolean;
+  source: "rss" | "seed";
+}
+
+interface IntelStatus {
+  lastFullPollAt: string | null;
+  pollRunCount: number;
+  totalAlerts: number;
+  activeAlerts: number;
+  feeds: Array<{ feedId: string; champion: string; laneId: string; lastSuccessAt: string | null; lastError: string | null }>;
+}
 
 interface Champion {
   name: string;
@@ -666,18 +691,77 @@ function AdoptionRow({ adoption, effectiveStatus, notes, onStatusChange, onNotes
   );
 }
 
+const REC_CONFIG: Record<Recommendation, { label: string; color: string; bg: string; border: string }> = {
+  adopt: { label: "Adopt", color: "text-emerald-300", bg: "bg-emerald-500/10", border: "border-emerald-500/30" },
+  counter: { label: "Counter", color: "text-rose-300", bg: "bg-rose-500/10", border: "border-rose-500/30" },
+  monitor: { label: "Monitor", color: "text-sky-300", bg: "bg-sky-500/10", border: "border-sky-500/30" },
+};
+
+function timeAgo(iso: string): string {
+  const ms = Date.now() - new Date(iso).getTime();
+  if (!Number.isFinite(ms) || ms < 0) return "just now";
+  const m = Math.floor(ms / 60000);
+  if (m < 1) return "just now";
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  const d = Math.floor(h / 24);
+  return `${d}d ago`;
+}
+
+function IntelUpdateCard({ alert, onDismiss, accentColor }: { alert: IntelAlert; onDismiss: (id: string) => void; accentColor: string }) {
+  const cfg = REC_CONFIG[alert.recommendation];
+  return (
+    <div className="rounded-lg p-3.5 space-y-2.5" style={{ background: `${accentColor}06`, border: `1px solid ${accentColor}22` }}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="flex items-center gap-1.5 px-1.5 py-0.5 rounded" style={{ background: `${accentColor}14`, border: `1px solid ${accentColor}28` }}>
+            <Radio className="w-2.5 h-2.5" style={{ color: accentColor }} />
+            <span className="text-[9px] font-mono uppercase tracking-wider" style={{ color: accentColor }}>Intel Update</span>
+          </div>
+          <span className="text-[10px] font-mono text-white/40 truncate">{alert.champion}</span>
+          <span className="text-[10px] text-white/20">·</span>
+          <span className="text-[10px] text-white/30 whitespace-nowrap">{timeAgo(alert.publishedAt)}</span>
+        </div>
+        <button
+          onClick={() => onDismiss(alert.id)}
+          className="flex-shrink-0 p-1 rounded hover:bg-white/10 text-white/30 hover:text-white/70 transition-colors"
+          aria-label="Dismiss alert"
+          title="Dismiss"
+        >
+          <X className="w-3 h-3" />
+        </button>
+      </div>
+      <div className="text-sm font-semibold text-white/85 leading-snug">{alert.title}</div>
+      {alert.summary && <div className="text-xs text-white/50 leading-relaxed line-clamp-3">{alert.summary}</div>}
+      <div className="flex items-center justify-between gap-3 pt-1">
+        <div className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full ${cfg.bg} border ${cfg.border}`}>
+          <span className={`text-[9px] font-mono uppercase tracking-wider ${cfg.color}`}>{cfg.label}</span>
+          <span className={`text-[10px] ${cfg.color} opacity-80`}>· {alert.recommendationReason}</span>
+        </div>
+        <a href={alert.link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[10px] text-white/40 hover:text-white/70 transition-colors flex-shrink-0">
+          source <ArrowUpRight className="w-2.5 h-2.5" />
+        </a>
+      </div>
+    </div>
+  );
+}
+
 interface LaneSectionProps {
   lane: Lane;
   overrides: OverridesMap;
+  alerts: IntelAlert[];
   onStatusChange: (laneId: string, idea: string, status: AdoptionStatus) => void;
   onNotesChange: (laneId: string, idea: string, notes: string) => void;
+  onDismiss: (id: string) => void;
 }
 
-function LaneSection({ lane, overrides, onStatusChange, onNotesChange }: LaneSectionProps) {
+function LaneSection({ lane, overrides, alerts, onStatusChange, onNotesChange, onDismiss }: LaneSectionProps) {
   const [open, setOpen] = useState(false);
   const Icon = lane.icon;
   const effective = lane.stealThis.map((a) => overrides[ideaKey(lane.id, a.idea)]?.status ?? a.status);
   const adoptedCount = effective.filter((s) => s === "adopted").length;
+  const activeAlerts = alerts.filter(a => !a.dismissed);
 
   return (
     <div className="rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.015)" }}>
@@ -700,6 +784,15 @@ function LaneSection({ lane, overrides, onStatusChange, onNotesChange }: LaneSec
               <span className="text-[10px] text-white/30">{lane.champions.length} champions researched</span>
               <span className="text-[10px] text-white/20">·</span>
               <span className="text-[10px]" style={{ color: `${lane.accentColor}aa` }}>{adoptedCount}/{lane.stealThis.length} ideas adopted</span>
+              {activeAlerts.length > 0 && (
+                <>
+                  <span className="text-[10px] text-white/20">·</span>
+                  <span className="inline-flex items-center gap-1 text-[10px]" style={{ color: lane.accentColor }}>
+                    <Radio className="w-2.5 h-2.5" />
+                    {activeAlerts.length} live intel
+                  </span>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -717,6 +810,22 @@ function LaneSection({ lane, overrides, onStatusChange, onNotesChange }: LaneSec
 
       {open && (
         <div className="border-t border-white/5 p-5 space-y-6">
+          {activeAlerts.length > 0 && (
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="text-[10px] font-mono uppercase tracking-widest" style={{ color: lane.accentColor }}>
+                  Live Intel Updates · {activeAlerts.length}
+                </div>
+                <div className="text-[9px] font-mono text-white/25">Polled daily · dismissible</div>
+              </div>
+              <div className="space-y-2">
+                {activeAlerts.map(a => (
+                  <IntelUpdateCard key={a.id} alert={a} onDismiss={onDismiss} accentColor={lane.accentColor} />
+                ))}
+              </div>
+            </div>
+          )}
+
           <div>
             <div className="text-[10px] font-mono uppercase tracking-widest text-white/25 mb-3">Champions — What They Do Best</div>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
@@ -820,6 +929,80 @@ function buildMarkdownExport(overrides: OverridesMap): string {
   return lines.join("\n");
 }
 
+function useIntelMonitor() {
+  const [alerts, setAlerts] = useState<IntelAlert[]>([]);
+  const [status, setStatus] = useState<IntelStatus | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function loadAlerts() {
+    try {
+      const [aRes, sRes] = await Promise.all([
+        fetch("/api/competitive-intel/alerts", { credentials: "include" }),
+        fetch("/api/competitive-intel/status", { credentials: "include" }),
+      ]);
+      if (!aRes.ok) throw new Error(`alerts: HTTP ${aRes.status}`);
+      const aJson = await aRes.json();
+      setAlerts(Array.isArray(aJson?.alerts) ? aJson.alerts : []);
+      if (sRes.ok) setStatus(await sRes.json());
+      setError(null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to load intel");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => { void loadAlerts(); }, []);
+
+  function readCsrfToken(): string | null {
+    const m = document.cookie.split(";").find(c => c.trim().startsWith("csrf_token="));
+    return m ? decodeURIComponent(m.split("=")[1] ?? "") : null;
+  }
+
+  async function ensureCsrfToken(): Promise<string | null> {
+    let t = readCsrfToken();
+    if (t) return t;
+    try {
+      await fetch("/api/csrf-token", { credentials: "include" });
+      t = readCsrfToken();
+    } catch { /* ignore */ }
+    return t;
+  }
+
+  async function dismiss(id: string) {
+    setAlerts(prev => prev.filter(a => a.id !== id));
+    try {
+      const csrf = await ensureCsrfToken();
+      await fetch(`/api/competitive-intel/alerts/${encodeURIComponent(id)}/dismiss`, {
+        method: "POST",
+        credentials: "include",
+        headers: csrf ? { "X-CSRF-Token": csrf } : {},
+      });
+    } catch {
+      void loadAlerts();
+    }
+  }
+
+  async function refresh() {
+    setRefreshing(true);
+    try {
+      const csrf = await ensureCsrfToken();
+      await fetch("/api/competitive-intel/refresh", {
+        method: "POST",
+        credentials: "include",
+        headers: csrf ? { "X-CSRF-Token": csrf } : {},
+      });
+      await loadAlerts();
+    } finally {
+      setRefreshing(false);
+    }
+  }
+
+  return { alerts, status, loading, refreshing, error, dismiss, refresh };
+}
+
 export function CompetitiveAtlasPage() {
   const [overrides, setOverrides] = useState<OverridesMap>(() => loadOverrides());
 
@@ -874,6 +1057,19 @@ export function CompetitiveAtlasPage() {
 
   const overrideCount = Object.keys(overrides).length;
 
+  const { alerts, status, refreshing, dismiss, refresh } = useIntelMonitor();
+  const alertsByLane = useMemo(() => {
+    const map = new Map<string, IntelAlert[]>();
+    for (const a of alerts) {
+      const arr = map.get(a.laneId) ?? [];
+      arr.push(a);
+      map.set(a.laneId, arr);
+    }
+    return map;
+  }, [alerts]);
+  const activeIntelCount = alerts.filter(a => !a.dismissed).length;
+  const lastPolled = status?.lastFullPollAt ? timeAgo(status.lastFullPollAt) : "never";
+
   return (
     <div className="min-h-screen p-6 lg:p-8" style={{ background: "#070b12", color: "#c8d8e8" }}>
       <div className="max-w-6xl mx-auto space-y-8">
@@ -910,12 +1106,36 @@ export function CompetitiveAtlasPage() {
           </div>
         </header>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="rounded-xl p-4 flex flex-wrap items-center justify-between gap-3" style={{ background: "rgba(120,180,255,0.04)", border: "1px solid rgba(120,180,255,0.15)" }}>
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(120,180,255,0.1)", border: "1px solid rgba(120,180,255,0.25)" }}>
+              <Radio className="w-4 h-4 text-sky-300" />
+            </div>
+            <div>
+              <div className="text-sm font-semibold text-white/85">Live Competitive Signal Monitor</div>
+              <div className="text-[11px] text-white/45 mt-0.5">
+                {activeIntelCount} active intel update{activeIntelCount === 1 ? "" : "s"} across {status?.feeds?.length ?? 8} tracked feeds · last poll {lastPolled}
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={() => void refresh()}
+            disabled={refreshing}
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-[11px] font-mono uppercase tracking-wider disabled:opacity-50"
+            style={{ background: "rgba(120,180,255,0.08)", border: "1px solid rgba(120,180,255,0.25)", color: "rgb(125,211,252)" }}
+          >
+            <RefreshCw className={`w-3 h-3 ${refreshing ? "animate-spin" : ""}`} />
+            {refreshing ? "Polling…" : "Poll feeds"}
+          </button>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
           {[
             { label: "Lanes Researched", value: LANES.length.toString() },
             { label: "Champions Studied", value: LANES.flatMap(l => l.champions).length.toString() },
             { label: "Ideas Adopted", value: `${stats.counts.adopted}/${stats.total}` },
             { label: "One-of-One Theses", value: LANES.length.toString() },
+            { label: "Live Intel Updates", value: activeIntelCount.toString() },
           ].map(m => (
             <div key={m.label} className="rounded-lg p-4" style={{ background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.06)" }}>
               <div className="text-2xl font-bold text-white/90 tabular-nums">{m.value}</div>
@@ -946,6 +1166,8 @@ export function CompetitiveAtlasPage() {
               overrides={overrides}
               onStatusChange={handleStatusChange}
               onNotesChange={handleNotesChange}
+              alerts={alertsByLane.get(lane.id) ?? []}
+              onDismiss={dismiss}
             />
           ))}
         </div>

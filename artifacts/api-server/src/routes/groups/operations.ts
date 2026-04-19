@@ -31,6 +31,11 @@ export function register(router: IRouter): void {
   router.use("/command", _writeLimiter);
   router.use("/command", commandRouter);
 
+  // Note: /competitive-intel is mounted at the TOP of routes/index.ts (BEFORE
+  // any router that applies blanket auth/tenantScope at "/") so the public
+  // Atlas demo surface can fetch alerts without a session. The top-level mount
+  // owns the handler chain; this group register intentionally does NOT remount it.
+
   router.use("/governance", _readLimiter);
   router.use("/governance", governanceCountsRouter);
 
