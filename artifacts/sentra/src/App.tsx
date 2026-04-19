@@ -6,7 +6,8 @@ import { AnalyticsProvider } from "@szl-holdings/shared-ui/analytics-provider";
 import { useUserPreferences, useEffectiveAccent } from "@szl-holdings/shared-ui/use-user-preferences";
 import {
   LayoutDashboard, ShieldAlert, Shield, Activity, Zap, Cpu,
-  AlertTriangle, RotateCcw, BarChart3, Lock, ShieldCheck, Menu
+  AlertTriangle, RotateCcw, BarChart3, Lock, ShieldCheck, Menu,
+  Network, Eye, BookLock, GitBranch, Plug
 } from "lucide-react";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
 import { cn } from "@szl-holdings/shared-ui/utils";
@@ -26,6 +27,11 @@ const TrustProvenancePage = lazy(() => import("@/pages/trust-provenance"));
 const AlertsPage = lazy(() => import("@/pages/alerts"));
 const ApprovalsPage = lazy(() => import("@/pages/approvals"));
 const SentraLandingPage = lazy(() => import("@/pages/sentra-landing"));
+const MeshMapPage = lazy(() => import("@/pages/mesh-map"));
+const MeshExposuresPage = lazy(() => import("@/pages/mesh-exposures"));
+const ContainmentRulesPage = lazy(() => import("@/pages/containment-rules"));
+const MeshDriftPage = lazy(() => import("@/pages/mesh-drift"));
+const MeshConnectorsPage = lazy(() => import("@/pages/mesh-connectors"));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -72,6 +78,17 @@ function SentraSidebarContent({
         { id: "/incident", label: "Incident Commander", href: "/incident", icon: <Activity className="w-3.5 h-3.5" /> },
         { id: "/exposure", label: "Exposure Board", href: "/exposure", icon: <BarChart3 className="w-3.5 h-3.5" /> },
         { id: "/controls", label: "Control Drift", href: "/controls", icon: <ShieldCheck className="w-3.5 h-3.5" /> },
+      ],
+    },
+    {
+      id: "agent-mesh",
+      label: "Agent Mesh",
+      items: [
+        { id: "/mesh/map", label: "Mesh Map", href: "/mesh/map", icon: <Network className="w-3.5 h-3.5" /> },
+        { id: "/mesh/exposures", label: "Exposures", href: "/mesh/exposures", icon: <Eye className="w-3.5 h-3.5" /> },
+        { id: "/mesh/containment", label: "Containment Rules", href: "/mesh/containment", icon: <BookLock className="w-3.5 h-3.5" /> },
+        { id: "/mesh/drift", label: "Mesh Drift", href: "/mesh/drift", icon: <GitBranch className="w-3.5 h-3.5" /> },
+        { id: "/mesh/connectors", label: "Connectors", href: "/mesh/connectors", icon: <Plug className="w-3.5 h-3.5" /> },
       ],
     },
     {
@@ -183,6 +200,11 @@ function DashboardRouter() {
         <Route path="/trust" component={TrustProvenancePage} />
         <Route path="/alerts" component={AlertsPage} />
         <Route path="/approvals" component={ApprovalsPage} />
+        <Route path="/mesh/map" component={MeshMapPage} />
+        <Route path="/mesh/exposures" component={MeshExposuresPage} />
+        <Route path="/mesh/containment" component={ContainmentRulesPage} />
+        <Route path="/mesh/drift" component={MeshDriftPage} />
+        <Route path="/mesh/connectors" component={MeshConnectorsPage} />
         <Route path="/" component={SentraLandingPage} />
         <Route>
           <div className="flex items-center justify-center h-full">

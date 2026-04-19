@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { AlertTriangle, ChevronDown, ChevronUp, ExternalLink, Clock, Shield, Zap, Sparkles, Download } from "lucide-react";
+import MeshCard from "../components/MeshCard";
 import { getRiskColor, AGENTS, type BriefingSection, type RiskLevel } from "../lib/data";
 import { useTodaysBrief, useGenerateBriefing, isDemoMode, exportBriefingPdf } from "../lib/api";
 import AgentBadge from "../components/AgentBadge";
@@ -320,6 +321,17 @@ export default function TodaysBrief() {
               );
             })}
           </div>
+        </div>
+
+        {/* Agent Mesh Status */}
+        <div style={{ marginBottom: 28 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
+            <Shield size={14} color="#e05050" />
+            <h2 style={{ fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--pulse-text-muted)" }}>
+              Agent Mesh · AI Supply Chain Status
+            </h2>
+          </div>
+          <MeshCard />
         </div>
 
         {/* Domain sections */}
