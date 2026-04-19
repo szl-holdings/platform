@@ -13,7 +13,12 @@ import {
   approveRemediation,
   failRemediation,
   findActiveByRunKey,
+  hasSeedMarker,
+  setSeedMarker,
 } from "../lib/self-healing-runtime";
+
+const RUNS_SEED_NAMESPACE = "self_healing";
+const RUNS_SEED_MARKER_KEY = "runs_demo_seeded";
 const router: IRouter = Router();
 
 type RemediationStatus = "executing" | "pending_approval" | "completed" | "failed" | "queued";
@@ -195,6 +200,14 @@ async function ensureSeeded(): Promise<void> {
   if (!shouldSeedDemoData()) return;
   if (seedPromise) return seedPromise;
   seedPromise = (async () => {
+    // Once we've recorded that demo run history has been seeded for this
+    // environment, never re-insert it — even if an operator has since
+    // emptied the runs table. Conditioning only on "table is empty" caused
+    // deleted demo runs to silently reappear in long-lived demo/pilot
+    // environments.
+    if (await hasSeedMarker(RUNS_SEED_NAMESPACE, RUNS_SEED_MARKER_KEY)) {
+      return;
+    }
     const existingRuns = await db.select({ id: selfHealingRunsTable.id }).from(selfHealingRunsTable).limit(1);
     if (existingRuns.length === 0) {
       const now = Date.now();
@@ -213,6 +226,11 @@ async function ensureSeeded(): Promise<void> {
         auditRef: r.auditRef,
       }))).onConflictDoNothing();
     }
+    // Whether we just seeded an empty table or detected a pre-existing
+    // seeded environment, record the marker so future calls short-circuit.
+    // Pre-existing seeded environments behave the same as before — they
+    // simply gain the marker on the next request and never re-seed.
+    await setSeedMarker(RUNS_SEED_NAMESPACE, RUNS_SEED_MARKER_KEY);
   })().catch((err) => {
     seedPromise = null;
     throw err;

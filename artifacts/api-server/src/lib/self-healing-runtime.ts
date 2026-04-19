@@ -1,6 +1,43 @@
-import { db, selfHealingPatternsTable, selfHealingRunsTable } from "@szl-holdings/db";
+import { db, selfHealingPatternsTable, selfHealingRunsTable, platformSettingsTable } from "@szl-holdings/db";
 import { and, eq, sql } from "drizzle-orm";
 import { logger } from "./logger";
+
+const SEED_MARKER_NAMESPACE = "self_healing";
+const PATTERNS_SEED_MARKER_KEY = "patterns_demo_seeded";
+
+/**
+ * Returns true if the given platform_settings marker has been recorded,
+ * indicating that the corresponding demo seed has already run for this
+ * environment. The flag is namespaced so individual seeds (patterns,
+ * run history, …) can be tracked independently.
+ */
+export async function hasSeedMarker(namespace: string, key: string): Promise<boolean> {
+  const rows = await db
+    .select({ id: platformSettingsTable.id })
+    .from(platformSettingsTable)
+    .where(and(eq(platformSettingsTable.namespace, namespace), eq(platformSettingsTable.key, key)))
+    .limit(1);
+  return rows.length > 0;
+}
+
+/**
+ * Idempotently records that a demo seed has run. Subsequent calls are a
+ * no-op thanks to the (namespace, key) unique index — even if multiple
+ * processes race during first boot, exactly one row is written.
+ */
+export async function setSeedMarker(namespace: string, key: string): Promise<void> {
+  await db
+    .insert(platformSettingsTable)
+    .values({
+      namespace,
+      key,
+      value: { seededAt: new Date().toISOString() },
+      valueType: "json",
+      category: "demo_seed",
+      isPublic: false,
+    })
+    .onConflictDoNothing();
+}
 
 export type RemediationStatus = "executing" | "pending_approval" | "completed" | "failed" | "queued";
 export type StepStatus = "done" | "running" | "pending" | "failed";
@@ -371,16 +408,29 @@ export async function ensurePatternsSeeded(): Promise<void> {
   if (patternSeedPromise) return patternSeedPromise;
   patternSeedPromise = (async () => {
     try {
+      // Once we've recorded that demo seeding has run for this environment,
+      // never re-insert demo patterns — even if an operator has since deleted
+      // some or all of them. Deletions must be respected.
+      if (await hasSeedMarker(SEED_MARKER_NAMESPACE, PATTERNS_SEED_MARKER_KEY)) {
+        return;
+      }
+
       const existing = await db
         .select({ id: selfHealingPatternsTable.id })
         .from(selfHealingPatternsTable)
         .limit(1);
+
       if (existing.length === 0) {
         await db
           .insert(selfHealingPatternsTable)
           .values(SEED_PATTERN_DEFS)
           .onConflictDoNothing();
       }
+      // Whether we just seeded an empty table or detected a pre-existing
+      // seeded environment, record the marker so future calls short-circuit.
+      // This makes pre-existing environments behave the same as before
+      // (no re-seed) while new environments get seeded exactly once.
+      await setSeedMarker(SEED_MARKER_NAMESPACE, PATTERNS_SEED_MARKER_KEY);
     } catch (err) {
       patternSeedPromise = null;
       throw err;
