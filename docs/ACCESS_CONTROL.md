@@ -98,6 +98,30 @@ Enterprise deployments support SCIM 2.0 for automated user provisioning:
 
 ---
 
+## Multi-Factor Authentication (MFA)
+
+The platform supports TOTP-based MFA (e.g. Google Authenticator, 1Password).
+
+**Per-user MFA (opt-in):**
+- Any user may enable MFA for their own account via `POST /auth/mfa/setup` followed by `POST /auth/mfa/enable`.
+- When MFA is enabled, login returns an `mfa_challenge_token` instead of a session; the user submits a 6-digit TOTP code to `POST /auth/mfa/challenge` to receive a session.
+
+**Org-level MFA enforcement (admin-controlled):**
+- Org admins may require MFA for every member of their organization by setting `mfa_required = true` on the org. This is exposed via:
+  - `PATCH /api/orgs/:orgSlug/mfa-required` — body `{ "mfaRequired": true | false }`
+  - `PATCH /api/orgs/:orgSlug` — same body (alias)
+- Toggling enforcement requires the `admin` (or `owner`) org role, or a platform-elevated user (`super_admin` / `admin`).
+- When enforcement is on and a member without MFA logs in, the login response is `{ mfa_setup_required: true, mfa_setup_token }` and **no session is issued**. The user must complete:
+  1. `POST /auth/mfa/setup-required` with the setup token → returns the TOTP secret + QR-friendly `otpauth://` URI.
+  2. `POST /auth/mfa/enable-required` with the setup token + 6-digit code → enables MFA, consumes the setup token, and issues the session in a single step.
+- Setup tokens are short-lived (15 minutes) and stored in Redis with an in-memory fallback.
+- Enabling or disabling org-level MFA enforcement writes an audit event (`org_mfa_enforcement_enabled` / `org_mfa_enforcement_disabled`) including the actor, prior value, and new value.
+- Per-user MFA enable / disable / challenge events are also audited (`mfa.enabled`, `mfa.disabled`, `mfa.challenge_passed`).
+
+This satisfies enterprise buyers in regulated sectors (financial services, legal, security) who require organization-wide MFA as a tenant policy rather than relying on individual user opt-in.
+
+---
+
 ## Privileged Access
 
 **Admin PIN:** The `/admin` CMS panel requires a PIN verification in addition to session authentication. The PIN is stored as a hashed value; it is not stored in plaintext.

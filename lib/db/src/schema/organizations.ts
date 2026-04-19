@@ -13,6 +13,7 @@ export const organizationsTable = pgTable("organizations", {
   status: text("status", { enum: ["active", "inactive", "suspended"] }).notNull().default("active"),
   plan: text("plan", { enum: ["free", "starter", "professional", "enterprise"] }).notNull().default("free"),
   billingCustomerId: text("billing_customer_id"),
+  mfaRequired: boolean("mfa_required").notNull().default(false),
   isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),

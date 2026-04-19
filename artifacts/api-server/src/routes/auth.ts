@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db, usersTable, sessionsTable, rolesTable, userRolesTable, organizationsTable, orgMembersTable, mfaSecretsTable, toCanonicalRole, type RoleName } from "@szl-holdings/db";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and, inArray } from "drizzle-orm";
 import { randomBytes, pbkdf2Sync, timingSafeEqual, createCipheriv, createDecipheriv } from "crypto";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, sendNoContent, sendForbidden, sendError, handleRouteError, parsePagination } from "../lib/api-response";
@@ -119,6 +119,80 @@ function decryptMfaSecret(stored: string): string {
   return stored;
 }
 
+// ---------------------------------------------------------------------------
+// Org-level MFA enforcement (Task 2166)
+//
+// When any organization a user belongs to has mfa_required=true, the user
+// MUST have MFA enabled to receive a session. If they do not, login returns
+// `mfa_setup_required: true` along with a short-lived setup token that lets
+// them complete MFA setup without an active session, after which a session
+// is issued.
+// ---------------------------------------------------------------------------
+
+async function isOrgMfaRequiredForUser(userId: number): Promise<boolean> {
+  const memberOrgIds = await db
+    .select({ orgId: orgMembersTable.orgId })
+    .from(orgMembersTable)
+    .where(eq(orgMembersTable.userId, userId));
+  if (memberOrgIds.length === 0) return false;
+  const orgIds = memberOrgIds.map((r) => r.orgId);
+  const enforcing = await db
+    .select({ id: organizationsTable.id })
+    .from(organizationsTable)
+    .where(and(inArray(organizationsTable.id, orgIds), eq(organizationsTable.mfaRequired, true)))
+    .limit(1);
+  return enforcing.length > 0;
+}
+
+interface MfaSetupChallenge {
+  userId: number;
+  expiresAt: number;
+  secret?: string;
+}
+
+const _pendingMfaSetupFallback = new Map<string, MfaSetupChallenge>();
+const MFA_SETUP_TTL_MS = 15 * 60 * 1000;
+const MFA_SETUP_REDIS_PREFIX = "mfasetup:";
+
+async function createMfaSetupToken(userId: number): Promise<string> {
+  const token = "mfasetup_" + randomBytes(24).toString("hex");
+  const challenge: MfaSetupChallenge = { userId, expiresAt: Date.now() + MFA_SETUP_TTL_MS };
+  _pendingMfaSetupFallback.set(token, challenge);
+  await redisSet(MFA_SETUP_REDIS_PREFIX + token, challenge, MFA_SETUP_TTL_MS);
+  return token;
+}
+
+async function readMfaSetupToken(token: string): Promise<MfaSetupChallenge | null> {
+  const fromRedis = await redisGet<MfaSetupChallenge>(MFA_SETUP_REDIS_PREFIX + token);
+  if (fromRedis) {
+    if (Date.now() > fromRedis.expiresAt) return null;
+    return fromRedis;
+  }
+  const local = _pendingMfaSetupFallback.get(token);
+  if (!local) return null;
+  if (Date.now() > local.expiresAt) {
+    _pendingMfaSetupFallback.delete(token);
+    return null;
+  }
+  return local;
+}
+
+async function updateMfaSetupToken(token: string, patch: Partial<MfaSetupChallenge>): Promise<void> {
+  const current = await readMfaSetupToken(token);
+  if (!current) return;
+  const next = { ...current, ...patch };
+  _pendingMfaSetupFallback.set(token, next);
+  await redisSet(MFA_SETUP_REDIS_PREFIX + token, next, Math.max(1, next.expiresAt - Date.now()));
+}
+
+async function consumeMfaSetupToken(token: string): Promise<MfaSetupChallenge | null> {
+  const current = await readMfaSetupToken(token);
+  if (!current) return null;
+  await redisDel(MFA_SETUP_REDIS_PREFIX + token);
+  _pendingMfaSetupFallback.delete(token);
+  return current;
+}
+
 const loginBodySchema = z.object({
   credential: z.string().min(1, "credential is required"),
 });
@@ -158,6 +232,16 @@ router.post("/auth/login", validateBody(loginBodySchema), async (req, res) => {
     if (mfaRecord?.enabled) {
       const mfaChallengeToken = await createMfaChallengeToken(user.id);
       sendSuccess(res, { mfa_required: true, mfa_challenge_token: mfaChallengeToken });
+      return;
+    }
+
+    if (await isOrgMfaRequiredForUser(user.id)) {
+      const mfaSetupToken = await createMfaSetupToken(user.id);
+      sendSuccess(res, {
+        mfa_setup_required: true,
+        mfa_setup_token: mfaSetupToken,
+        message: "Your organization requires multi-factor authentication. Please set up MFA to continue.",
+      });
       return;
     }
 
@@ -609,6 +693,16 @@ router.post("/auth/login-password", validateBody(loginPasswordSchema), async (re
       return;
     }
 
+    if (await isOrgMfaRequiredForUser(user.id)) {
+      const mfaSetupToken = await createMfaSetupToken(user.id);
+      sendSuccess(res, {
+        mfa_setup_required: true,
+        mfa_setup_token: mfaSetupToken,
+        message: "Your organization requires multi-factor authentication. Please set up MFA to continue.",
+      });
+      return;
+    }
+
     const created = await createSessionWithRefresh({
       userId: user.id,
       ipAddress: req.ip ?? null,
@@ -842,6 +936,153 @@ router.delete("/auth/mfa", authMiddleware(), validateBody(mfaDisableSchema), asy
   } catch (err) {
     req.log?.error({ err }, "MFA disable failed");
     handleRouteError(res, err, "MFA disable failed");
+  }
+});
+
+// ---------------------------------------------------------------------------
+// Org-required MFA setup endpoints (Task 2166)
+//
+// These endpoints let a user complete MFA setup without holding a session,
+// using the short-lived setup token returned by /auth/login or
+// /auth/login-password when their org enforces MFA. After enabling MFA, a
+// session is issued in a single round trip.
+// ---------------------------------------------------------------------------
+
+const mfaSetupRequiredSchema = z.object({
+  mfa_setup_token: z.string().min(1, "mfa_setup_token is required"),
+});
+
+router.post("/auth/mfa/setup-required", validateBody(mfaSetupRequiredSchema), async (req, res) => {
+  try {
+    const { mfa_setup_token } = req.body as z.infer<typeof mfaSetupRequiredSchema>;
+    const challenge = await readMfaSetupToken(mfa_setup_token);
+    if (!challenge) {
+      sendError(res, "MFA setup token is invalid or expired. Please log in again.", 401, "MFA_SETUP_TOKEN_INVALID");
+      return;
+    }
+
+    const userId = challenge.userId;
+
+    const [existing] = await db
+      .select()
+      .from(mfaSecretsTable)
+      .where(eq(mfaSecretsTable.userId, userId))
+      .limit(1);
+
+    if (existing?.enabled) {
+      sendBadRequest(res, "MFA is already enabled. Please log in again.");
+      return;
+    }
+
+    const secret = otpGenerateSecret();
+    const storedSecret = encryptMfaSecret(secret);
+
+    if (existing) {
+      await db
+        .update(mfaSecretsTable)
+        .set({ secret: storedSecret, enabled: false, enabledAt: null })
+        .where(eq(mfaSecretsTable.userId, userId));
+    } else {
+      await db.insert(mfaSecretsTable).values({ userId, secret: storedSecret, enabled: false });
+    }
+
+    await updateMfaSetupToken(mfa_setup_token, { secret });
+
+    const [user] = await db.select({ displayName: usersTable.displayName, email: usersTable.email }).from(usersTable).where(eq(usersTable.id, userId)).limit(1);
+    const label = user?.email ?? user?.displayName ?? `user_${userId}`;
+    const otpauthUri = otpGenerateURI({ issuer: "SZL Holdings", label, secret, strategy: "totp" });
+
+    sendSuccess(res, {
+      secret,
+      otpauthUri,
+      message: "Scan the QR code in your authenticator app, then call POST /auth/mfa/enable-required with the 6-digit code to finish login.",
+    });
+  } catch (err) {
+    req.log?.error({ err }, "Org-required MFA setup failed");
+    handleRouteError(res, err, "MFA setup failed");
+  }
+});
+
+const mfaEnableRequiredSchema = z.object({
+  mfa_setup_token: z.string().min(1, "mfa_setup_token is required"),
+  code: z.string().length(6, "TOTP code must be exactly 6 digits").regex(/^\d{6}$/, "TOTP code must be 6 digits"),
+});
+
+router.post("/auth/mfa/enable-required", validateBody(mfaEnableRequiredSchema), async (req, res) => {
+  try {
+    const { mfa_setup_token, code } = req.body as z.infer<typeof mfaEnableRequiredSchema>;
+    const challenge = await readMfaSetupToken(mfa_setup_token);
+    if (!challenge) {
+      sendError(res, "MFA setup token is invalid or expired. Please log in again.", 401, "MFA_SETUP_TOKEN_INVALID");
+      return;
+    }
+
+    const userId = challenge.userId;
+
+    const [record] = await db
+      .select()
+      .from(mfaSecretsTable)
+      .where(eq(mfaSecretsTable.userId, userId))
+      .limit(1);
+
+    if (!record) {
+      sendBadRequest(res, "No MFA setup found. Call POST /auth/mfa/setup-required first.");
+      return;
+    }
+
+    if (record.enabled) {
+      sendBadRequest(res, "MFA is already enabled. Please log in again.");
+      return;
+    }
+
+    const isValid = otpVerifySync({ token: code, secret: decryptMfaSecret(record.secret) });
+    if (!isValid) {
+      sendError(res, "Invalid TOTP code. Please try again.", 400, "MFA_INVALID_CODE");
+      return;
+    }
+
+    await db
+      .update(mfaSecretsTable)
+      .set({ enabled: true, enabledAt: new Date() })
+      .where(eq(mfaSecretsTable.userId, userId));
+
+    await consumeMfaSetupToken(mfa_setup_token);
+
+    const [user] = await db.select().from(usersTable).where(eq(usersTable.id, userId)).limit(1);
+    if (!user || !user.isActive) {
+      sendError(res, "Account is disabled.", 403, "ACCOUNT_DISABLED");
+      return;
+    }
+
+    await writeAuditEvent({
+      userId,
+      action: "mfa.enabled",
+      entityType: "user",
+      entityId: String(userId),
+      ipAddress: req.ip ?? null,
+      userAgent: req.headers["user-agent"] ?? null,
+      newValues: { enabled: true, reason: "org_mfa_required" },
+    });
+
+    const created = await createSessionWithRefresh({
+      userId,
+      ipAddress: req.ip ?? null,
+      userAgent: req.headers["user-agent"] ?? null,
+      reason: "mfa_setup_required",
+    });
+
+    await db.update(usersTable).set({ lastLoginAt: new Date(), updatedAt: new Date() }).where(eq(usersTable.id, userId));
+
+    sendSuccess(res, {
+      token: created.token,
+      refreshToken: created.refreshToken,
+      expiresAt: created.expiresAt.toISOString(),
+      refreshTokenExpiresAt: created.refreshTokenExpiresAt.toISOString(),
+      user: { id: user.id, displayName: user.displayName, email: user.email },
+    });
+  } catch (err) {
+    req.log?.error({ err }, "Org-required MFA enable failed");
+    handleRouteError(res, err, "MFA enable failed");
   }
 });
 

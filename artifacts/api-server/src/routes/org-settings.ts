@@ -138,6 +138,7 @@ router.get("/orgs/:orgSlug/profile", readLimiter, authMiddleware(), async (req: 
       orgType: org.orgType,
       plan: org.plan,
       status: org.status,
+      mfaRequired: org.mfaRequired,
       createdAt: org.createdAt,
       updatedAt: org.updatedAt,
     });
@@ -145,6 +146,145 @@ router.get("/orgs/:orgSlug/profile", readLimiter, authMiddleware(), async (req: 
     handleRouteError(res, err, "Failed to get organization profile");
   }
 });
+
+const mfaRequiredSchema = z.object({
+  mfaRequired: z.boolean(),
+});
+
+/**
+ * PATCH /orgs/:orgSlug/mfa-required — toggle org-wide MFA enforcement.
+ *
+ * When enabled, all members of the org who attempt to log in without MFA
+ * already enabled are forced through MFA setup before a session is issued
+ * (see /auth/login and /auth/mfa/setup-required).
+ *
+ * Org admin role required (or platform-elevated user). Audited.
+ */
+router.patch(
+  "/orgs/:orgSlug/mfa-required",
+  writeLimiter,
+  authMiddleware(),
+  validateBody(mfaRequiredSchema),
+  async (req: Request, res: Response) => {
+    try {
+      const orgSlug = req.params["orgSlug"] as string;
+      const { mfaRequired } = req.body as z.infer<typeof mfaRequiredSchema>;
+
+      const [org] = await db
+        .select()
+        .from(organizationsTable)
+        .where(eq(organizationsTable.slug, orgSlug))
+        .limit(1);
+
+      if (!org) {
+        sendNotFound(res, "Organization");
+        return;
+      }
+
+      if (!isElevated(req)) {
+        const { membership } = await resolveOrgMembership(orgSlug, req.user!.id, "admin");
+        if (!membership) {
+          sendForbidden(res, "Admin access required to change MFA enforcement");
+          return;
+        }
+      }
+
+      const previous = org.mfaRequired;
+
+      const [updated] = await db
+        .update(organizationsTable)
+        .set({ mfaRequired, updatedAt: new Date() })
+        .where(eq(organizationsTable.id, org.id))
+        .returning();
+
+      await db.insert(auditEventsTable).values({
+        userId: req.user!.id,
+        action: mfaRequired ? "org_mfa_enforcement_enabled" : "org_mfa_enforcement_disabled",
+        entityType: "organization",
+        entityId: String(org.id),
+        ipAddress: hashIp(req.ip ?? null),
+        oldValues: { mfaRequired: previous },
+        newValues: { mfaRequired },
+      });
+
+      logger.info(
+        { orgId: org.id, orgSlug, mfaRequired, changedBy: req.user!.id },
+        "[org-mfa] Org-level MFA enforcement updated",
+      );
+
+      sendSuccess(res, {
+        id: updated.id,
+        slug: updated.slug,
+        mfaRequired: updated.mfaRequired,
+      });
+    } catch (err) {
+      handleRouteError(res, err, "Failed to update MFA enforcement");
+    }
+  },
+);
+
+/**
+ * Convenience alias matching the task spec wording: PATCH /orgs/:orgSlug
+ * Accepts `{ mfaRequired: boolean }` as a partial org update for the same
+ * MFA-enforcement toggle. Other fields are ignored on this endpoint to keep
+ * the surface area small; use PUT /orgs/:orgSlug/profile for profile fields.
+ */
+router.patch(
+  "/orgs/:orgSlug",
+  writeLimiter,
+  authMiddleware(),
+  validateBody(mfaRequiredSchema),
+  async (req: Request, res: Response) => {
+    try {
+      const orgSlug = req.params["orgSlug"] as string;
+      const { mfaRequired } = req.body as z.infer<typeof mfaRequiredSchema>;
+
+      const [org] = await db
+        .select()
+        .from(organizationsTable)
+        .where(eq(organizationsTable.slug, orgSlug))
+        .limit(1);
+
+      if (!org) {
+        sendNotFound(res, "Organization");
+        return;
+      }
+
+      if (!isElevated(req)) {
+        const { membership } = await resolveOrgMembership(orgSlug, req.user!.id, "admin");
+        if (!membership) {
+          sendForbidden(res, "Admin access required");
+          return;
+        }
+      }
+
+      const previous = org.mfaRequired;
+      const [updated] = await db
+        .update(organizationsTable)
+        .set({ mfaRequired, updatedAt: new Date() })
+        .where(eq(organizationsTable.id, org.id))
+        .returning();
+
+      await db.insert(auditEventsTable).values({
+        userId: req.user!.id,
+        action: mfaRequired ? "org_mfa_enforcement_enabled" : "org_mfa_enforcement_disabled",
+        entityType: "organization",
+        entityId: String(org.id),
+        ipAddress: hashIp(req.ip ?? null),
+        oldValues: { mfaRequired: previous },
+        newValues: { mfaRequired },
+      });
+
+      sendSuccess(res, {
+        id: updated.id,
+        slug: updated.slug,
+        mfaRequired: updated.mfaRequired,
+      });
+    } catch (err) {
+      handleRouteError(res, err, "Failed to update organization");
+    }
+  },
+);
 
 router.put(
   "/orgs/:orgSlug/profile",
