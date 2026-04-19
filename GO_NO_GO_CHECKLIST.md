@@ -16,8 +16,8 @@ This checklist is the final gate before any external user accesses the SZL Holdi
 | # | Item | Status | Notes |
 |---|------|--------|-------|
 | S1 | All P0 security gaps are confirmed resolved | ☐ | See KNOWN-GAPS.md — all confirmed Apr 2026 |
-| S2 | Firebase / Google credential rotation confirmed complete | ☐ | LB-001 — run `git log --all` check and rotate |
-| S3 | No live secrets in committed source code | ☐ | Run `git log --all --full-history -- '**/.env*'` |
+| S2 | Firebase / Google credential rotation confirmed complete | ⚠️ | LB-001 — git history verified clean Apr-2026 (only `PLACEHOLDER_*` values in committed `google-services.json`); operator must still rotate the live Firebase Web API key in the Firebase Console and tick this box |
+| S3 | No live secrets in committed source code | ☑ | Verified Apr-2026 via Task #1034: `git log --all --full-history -- '**/.env' '**/.env.local' '**/.env.production' '**/.env.prod'` returns 0 commits; `git ls-files` shows only `.env.example` templates; no Firebase admin SDK or service-account JSON in history |
 | S4 | Production `SESSION_SECRET` is environment-specific (≥32 chars) | ☐ | Must not match any dev value |
 | S5 | Production `SECRET_ENCRYPTION_KEY` set independently | ☐ | Must not match `SESSION_SECRET` |
 | S6 | `CORS_ORIGINS` set to production domains only (not `*`) | ☐ | |

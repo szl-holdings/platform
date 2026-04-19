@@ -18,15 +18,23 @@ These items must be resolved or formally accepted in writing by the Founder befo
 ### LB-001 · Firebase & Google Credentials — Manual Rotation Required
 **Severity:** Critical  
 **Gap reference:** GAP-001 in KNOWN-GAPS.md  
-**Status:** ⛔ Open  
+**Status:** ⚠️ Git history verified clean (Apr-2026) — Firebase Console rotation still required
 **Description:** Firebase API keys, Google service account credentials, and related credential files require manual rotation. The April 2026 audit confirmed that committed files are placeholder templates with no live key material, but the original real values may have existed in git history. Until rotation is confirmed against the production Firebase and Google Cloud projects, launch cannot be certified secure.  
-**What is needed:**
-- Confirm current git history contains no live key material (run `git log --all -- **/google-services.json` and `**/GoogleService-Info.plist`)
-- Rotate Firebase API key in Firebase Console
-- Rotate any Google Cloud service account keys referenced by the project
-- Document rotation completion date and confirm in this file
+
+**Engineering verification (Apr-2026, recorded by Task #1034):**
+- `git log --all --full-history -- '**/google-services.json' '**/GoogleService-Info.plist'` → only two commits ever added these files (`90f3d13e5`, `715786b7f`, both Task #499 EAS prep, Apr 15 2026)
+- File contents in those commits inspected via `git show`: every field is a literal `PLACEHOLDER_*` string (no real `api_key`, no real `project_id`, no real `mobilesdk_app_id`)
+- `git log --all --full-history -- '**/.env' '**/.env.local' '**/.env.production' '**/.env.prod'` → 0 commits (no `.env*` runtime files in history; only `.env.example` templates are tracked)
+- `git log --all -- '**/firebase-adminsdk*.json' '**/serviceAccountKey.json'` → 0 commits (no admin SDK service-account JSON ever committed)
+- **Conclusion:** Git history contains no live Firebase or Google Cloud key material. The committed templates are safe to keep.
+
+**Remaining operator action (cannot be performed by engineering):**
+- Rotate Firebase Web API key in Firebase Console → Project Settings → General → Web API key (regenerate)
+- Rotate any Google Cloud service-account keys referenced by the project (look at IAM → Service Accounts → Keys → "Add key / Disable old key")
+- Set the new keys in production secrets (Replit Secrets / Azure Key Vault) — never check them into git
+- Record the rotation date and the operator's initials in the sign-off table at the bottom of this file
 **Owner:** Stephen Lutar / Security Lead  
-**Estimated effort:** 2–4 hours
+**Estimated effort:** Engineering verification ✅ done. Operator rotation: 30–60 minutes.
 
 ---
 
@@ -62,7 +70,7 @@ These items must be resolved or formally accepted in writing by the Founder befo
 
 ### LB-004 · Production Database Separate from Development
 **Severity:** High  
-**Status:** ⛔ Confirm Before Launch  
+**Status:** ⛔ Confirm Before Launch (operator action — engineering cannot verify from dev workspace)  
 **Description:** The current environment uses Replit-managed PostgreSQL, which is shared across the workspace. A public launch using the same database as active development is not acceptable — a bad migration or dev seeding run could corrupt production data or expose demo/seed data to real users.  
 **What is needed:**
 - Confirm that the production deployment uses a separate database instance (separate `DATABASE_URL`)
@@ -75,7 +83,13 @@ These items must be resolved or formally accepted in writing by the Founder befo
 
 ### LB-005 · Production Secrets Set Independently (Not Reused from Dev)
 **Severity:** High  
-**Status:** ⛔ Confirm Before Launch  
+**Status:** ⛔ Confirm Before Launch (operator action — engineering cannot inspect production secret store)  
+
+**Engineering verification (Apr-2026, recorded by Task #1034):**
+- `git ls-files | grep -E '\.env($|\.)'` returns only `.env.example` files across the monorepo. No `.env`, `.env.local`, or `.env.production` is tracked.
+- `git log --all --full-history -- '**/.env' '**/.env.local' '**/.env.production' '**/.env.prod'` returns 0 commits — secrets have never been checked in.
+
+
 **Description:** Production secrets — `SESSION_SECRET`, `SECRET_ENCRYPTION_KEY`, `ADMIN_PIN`, `CORS_ORIGINS`, Stripe live keys — must be environment-specific and not reused from the development workspace. Using dev secrets in production is a credential hygiene failure that invalidates the security posture of the platform.  
 **What is needed:**
 - Confirm `SESSION_SECRET` (≥32 chars), `SECRET_ENCRYPTION_KEY`, and `ADMIN_PIN` are fresh values generated for production only
