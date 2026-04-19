@@ -89,19 +89,25 @@ Run via: `pnpm test:e2e` (full) or per-spec in CI `e2e.yml`
 | `command.spec.ts` | Unified Command | `@workspace/command` | 3005 |
 | `governed-decision-loop.spec.ts` | Governed Decision Loop (within Command at `/operations/governed-decision-loop`) | `@workspace/command` | 3005 |
 | `imperium.spec.ts` | IMPERIUM Infrastructure Map (within Command at `/infrastructure/imperium-map`) | `@workspace/command` | 3005 |
+| `prism-counsel.spec.ts` | PRISM Counsel — Legal Command | `@workspace/prism-counsel` | 3006 |
+| `stephen-site.spec.ts` | Stephen Lutar personal site (within SZL Holdings at `/stephen`) | `@workspace/szl-holdings` | 3000 |
 | `auth.spec.ts` | SZL Holdings (session-level auth flow) | `@workspace/szl-holdings` | 3000 |
 | `a11y.spec.ts` | SZL Holdings (accessibility) | `@workspace/szl-holdings` | 3000 |
 
-### 4b. Explicitly Excluded from CI E2E Matrix
+### 4b. Not Registered in CI E2E Matrix
 
 | Spec | Reason | Status |
 |------|--------|--------|
-| `prism-counsel.spec.ts` | PRISM Counsel has no standalone CI build artifact; spec uses `appAvailable` guard and self-skips | Excluded — no artifact |
-| `stephen-site.spec.ts` | Personal site; no CI build artifact; spec uses `appAvailable` guard and self-skips | Excluded — no artifact |
+| `correlation-deeplinks.spec.ts` | Cross-app deep-link spec; spans multiple artifacts and has no single-artifact CI build target | Run locally via `pnpm test:e2e` |
+| `decision-theater.spec.ts` | Decision Theater walkthrough; targets a not-yet-shipped UX surface still under construction | Run locally via `pnpm test:e2e` |
+
+All app-level smoke specs (`<app>.spec.ts`) are registered in §4a above.
 
 Previously excluded specs that have since been promoted to the CI matrix:
 - `imperium.spec.ts` — promoted April 2026; runs against `@workspace/command` build
 - `lyte.spec.ts` — promoted April 2026; runs against `@workspace/szl-holdings` build
+- `prism-counsel.spec.ts` — promoted April 2026; runs against standalone `@workspace/prism-counsel` build
+- `stephen-site.spec.ts` — promoted April 2026; runs against `@workspace/szl-holdings` build at `/stephen`
 
 ---
 
@@ -146,7 +152,6 @@ Previously excluded specs that have since been promoted to the CI matrix:
 | No mobile E2E coverage (CORTEX) | Sev 2 | Expo app; Playwright cannot target RN; manual + unit coverage only |
 | No cross-browser E2E (only Chromium in CI) | Sev 3 | Firefox/WebKit excluded for CI speed |
 | No performance regression testing | Sev 3 | Lighthouse is manual only |
-| PRISM Counsel, Stephen Site E2E not in CI | Sev 2 | No standalone CI artifact; specs exist and self-skip via `appAvailable` guard |
 
 ---
 
