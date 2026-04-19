@@ -1,7 +1,7 @@
 import { lazy, Suspense, useState, useCallback, useEffect } from "react";
 import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Layers, RotateCcw, GitBranch, Shield, Menu, X, ChevronRight, Presentation, Play } from "lucide-react";
+import { Layers, RotateCcw, GitBranch, Shield, Menu, X, ChevronRight, Presentation, Play, Network } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 
 import S01Cover from "./pages/slides/S01Cover";
@@ -15,6 +15,7 @@ import S08BusinessModel from "./pages/slides/S08BusinessModel";
 import S09Ask from "./pages/slides/S09Ask";
 
 const AegisAtlasRuntime = lazy(() => import("./pages/atlas-runtime"));
+const AegisAtlasCorrelation = lazy(() => import("./pages/atlas-correlation"));
 const AegisReplay = lazy(() => import("./pages/replay"));
 const AegisScenarioBranches = lazy(() => import("./pages/scenario-branches"));
 const AegisAtlasExecute = lazy(() => import("./pages/atlas-execute"));
@@ -32,6 +33,7 @@ const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 const ATLAS_NAV = [
   { path: "/atlas-runtime", label: "Threat Mesh", icon: Layers },
+  { path: "/atlas-runtime/correlation", label: "Worldline Correlation", icon: Network },
   { path: "/threat-twin-view", label: "Threat Twin", icon: Shield },
   { path: "/replay", label: "Incident Replay", icon: RotateCcw },
   { path: "/scenario-branches", label: "Scenario Branches", icon: GitBranch },
@@ -239,6 +241,13 @@ function SlideDeck() {
 function AppRoutes() {
   return (
     <Switch>
+      <Route path="/atlas-runtime/correlation">
+        <AtlasDashboardLayout>
+          <Suspense fallback={<PageLoader />}>
+            <AegisAtlasCorrelation />
+          </Suspense>
+        </AtlasDashboardLayout>
+      </Route>
       <Route path="/atlas-runtime">
         <AtlasDashboardLayout>
           <Suspense fallback={<PageLoader />}>
