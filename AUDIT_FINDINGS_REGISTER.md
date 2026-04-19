@@ -115,8 +115,8 @@ This register catalogs every finding from all operational audit phases (Phase 0�
 | QUAL-002 | No Lighthouse performance CI | P2 | CI (duplicate of OPS-006) | Performance regressions uncaught on merge | ⚠️ Open — KG019 | No | No |
 | QUAL-003 | No accessibility audit | P2 | All web artifacts | WCAG compliance unknown — enterprise risk | ⚠️ Open — KG025 | No | No |
 | AF-001 | Auth | P1 | `middlewares/admin-guard.ts` | `adminGuard` non-timing-safe token comparison | ⚠️ Open | No | Conditional |
-| AF-003 | Tenancy | P1 | `routes/vessels.ts` | Vessels fleet routes return all tenants' data | ⚠️ Open | No | Conditional |
-| AF-007 | Tenancy / DB | P1 | `lib/db/src/schema/vessels.ts` | `vessels.*` tables missing `org_id` | ⚠️ Open | No | Conditional |
+| AF-003 | Tenancy | P1 | `routes/vessels.ts` | Vessels fleet routes return all tenants' data | ✅ Resolved (Task #1048) | No | Conditional |
+| AF-007 | Tenancy / DB | P1 | `lib/db/src/schema/vessels.ts` | `vessels.*` tables missing `org_id` | ✅ Resolved (Task #1048) | No | Conditional |
 | AF-004 | Admin / Privileged | P2 | `routes/backup.ts` | Backup export lacks orgId authority check | ⚠️ Open | No | No |
 | AF-008 | Tenancy / DB | P2 | `lib/db/src/schema/conversations.ts` | `conversations` table missing `org_id` | ⚠️ Open | No | No |
 | AF-010 | Auth / Session | P2 | `lib/auth/` | Sessions not invalidated on role change | ⚠️ Open | No | No |
@@ -329,7 +329,13 @@ return timingSafeEqual(a, b);
 
 ---
 
-### AF-003: Vessels Fleet Routes Lack Tenant Scope Filtering
+### AF-003: Vessels Fleet Routes Lack Tenant Scope Filtering — ✅ Resolved (Task #1048, 2026-04-19)
+
+**Resolution:** Every fleet/vessel/route/alert-rule handler in `artifacts/api-server/src/routes/vessels.ts` now goes through `authMiddleware()` + `tenantScope()` and filters via the `fleetOrgWhere() / vesselOrgWhere() / alertRuleOrgWhere() / getOrgVesselIds() / getVesselInOrg()` helpers (routes/vessels.ts:36-75). Reads scope by `org_id`; writes stamp `org_id = req.tenantOrgId ?? null` and strip any client-supplied `orgId` on update; sub-resource handlers (positions/cargo/routes/alerts/events/command-workflows) verify the parent vessel's org via `getVesselInOrg` before returning rows. Elevated `super_admin` / `admin` users bypass the filter (matches `tenantScope()` semantics) and `org_id IS NULL` rows are invisible to tenant-scoped users by SQL `NULL`-comparison rules (documented inline at routes/vessels.ts:251-257). Companion finding AF-007 (schema/DB) addressed by migration `lib/db/drizzle/0076_vessels_org_id.sql`.
+
+---
+
+#### Original finding
 
 | Field | Value |
 |-------|-------|
@@ -348,7 +354,13 @@ return timingSafeEqual(a, b);
 
 ---
 
-### AF-007: `vessels.*` Tables Missing `org_id` Column
+### AF-007: `vessels.*` Tables Missing `org_id` Column — ✅ Resolved (Task #1048, 2026-04-19)
+
+**Resolution:** Schema (`lib/db/src/schema/vessels.ts`) declares `orgId: integer("org_id")` on `vesselsFleetsTable`, `vesselsTable`, and `vesselsAlertRulesTable`. Migration `lib/db/drizzle/0076_vessels_org_id.sql` adds the columns to the live DB (idempotent `ADD COLUMN IF NOT EXISTS`) plus indexes (`vessels_fleets_org_id_idx`, `vessels_org_id_idx`, `vessels_alert_rules_org_id_idx`) and `COMMENT ON COLUMN` documentation. Columns are nullable so existing rows remain visible to elevated admins as platform rows; tenant-scoped users cannot see them by SQL `NULL`-comparison rules. Verified: `information_schema.columns` confirms all three columns present.
+
+---
+
+#### Original finding
 
 | Field | Value |
 |-------|-------|
