@@ -309,6 +309,7 @@ const DEFAULT_SCHEDULES: ScheduleDefinition[] = [
   { name: "route_pressure_scan_hourly", jobType: NAMED_JOB_TYPES.HOURLY_ROUTE_PRESSURE_SCAN, cronExpression: "0 * * * *", payload: {}, maxRetries: 2 },
   { name: "terra_inquiry_digest_hourly", jobType: NAMED_JOB_TYPES.HOURLY_TERRA_INQUIRY_DIGEST, cronExpression: "0 * * * *", payload: {}, maxRetries: 2 },
   { name: "executive_digest_minutely", jobType: NAMED_JOB_TYPES.HOURLY_EXECUTIVE_DIGEST, cronExpression: "* * * * *", payload: {}, maxRetries: 1 },
+  { name: "proof_chain_digest_daily_0700", jobType: NAMED_JOB_TYPES.DAILY_PROOF_CHAIN_DIGEST, cronExpression: "0 7 * * *", payload: {}, maxRetries: 3 },
   { name: "atlas_snapshot_compaction_0200", jobType: NAMED_JOB_TYPES.ATLAS_SNAPSHOT_COMPACTION, cronExpression: "0 2 * * *", payload: { retainDays: 7, domains: ["vessels", "terra", "aegis", "prism"] }, maxRetries: 2 },
   { name: "atlas_retention_prune_0330", jobType: NAMED_JOB_TYPES.ATLAS_RETENTION_PRUNE, cronExpression: "30 3 * * *", payload: {}, maxRetries: 1 },
   { name: "platform_lyte_digest_0700", jobType: PLATFORM_JOB_TYPES.LYTE_DIGEST, cronExpression: "0 7 * * *", payload: { period: "daily" }, maxRetries: 2 },

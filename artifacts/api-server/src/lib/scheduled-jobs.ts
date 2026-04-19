@@ -21,6 +21,7 @@ export const NAMED_JOB_TYPES = {
   READINESS_SCORE_RECOMPUTE_JOB: "readiness_score_recompute_job",
   HOURLY_SCHEDULED_REPORTS: "hourly_scheduled_reports",
   HOURLY_EXECUTIVE_DIGEST: "hourly_executive_digest",
+  DAILY_PROOF_CHAIN_DIGEST: "daily_proof_chain_digest",
   ATLAS_SNAPSHOT_COMPACTION: "atlas_snapshot_compaction",
   ATLAS_RETENTION_PRUNE: "atlas_retention_prune",
 } as const;
@@ -64,6 +65,7 @@ registerEntry({ type: NAMED_JOB_TYPES.ROUTE_ECONOMICS_RECOMPUTE_JOB, name: "Rout
 registerEntry({ type: NAMED_JOB_TYPES.READINESS_SCORE_RECOMPUTE_JOB, name: "Readiness Score Recompute", description: "Recomputes readiness dimension scores for a specified program using the latest evidence and dimension weights.", schedule: "on_demand", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.DAILY_DOCUMENT_BATCH, name: "Daily Document Batch Generation", description: "Generates PDF exports for all approved documents pending batch processing across Terra, Aegis, Carlota Jo, Vessels, and Alloy. Archives completed PDFs and notifies document owners.", schedule: "daily", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.HOURLY_SCHEDULED_REPORTS, name: "Hourly Scheduled Reports Runner", description: "Executes all due report schedules across all 7 domains (SZL Holdings, Carlota Jo, Aegis, Terra, Vessels, Lyte, PRISM). Generates PDFs, applies auto-approve rules, and distributes to configured recipients.", schedule: "hourly", enabled: true });
+registerEntry({ type: NAMED_JOB_TYPES.DAILY_PROOF_CHAIN_DIGEST, name: "Daily Proof Chain Digest", description: "Generates the executive proof-chain digest (including Proof Chain section: recent approve/reject decisions with mode, confidence, and blocked reasons) and delivers it via email and/or Slack to a configurable list of recipients each morning. Recipients are configured via PROOF_CHAIN_DIGEST_EMAIL_RECIPIENTS (comma-separated) and PROOF_CHAIN_DIGEST_SLACK_CHANNEL env vars. Failures are logged and the durable scheduler retries.", schedule: "daily", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.HOURLY_EXECUTIVE_DIGEST, name: "Executive Digest Dispatcher", description: "Runs every minute. Finds users whose digest_config.enabled=true and whose deliveryHour+deliveryMinute match the current local time in their configured IANA timezone. Sends an Expo push (generic body, no cross-tenant aggregates) with a deepLink to the briefing workspace; the workspace then loads the tenant-scoped digest in-app.", schedule: "minutely", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.ATLAS_SNAPSHOT_COMPACTION, name: "ATLAS Snapshot Compaction", description: "Compacts ATLAS spatial twin snapshots older than 7 days by merging intermediate frames into summary records. Reduces storage growth while preserving full worldline replay fidelity for audits and proof bundles.", schedule: "daily", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.ATLAS_RETENTION_PRUNE, name: "ATLAS Retention Prune", description: "Deletes records from atlas_signals, atlas_evidence, atlas_outcomes, and atlas_runs older than the configured retention threshold (defaults to 90 days, override via ATLAS_RETENTION_DAYS env var or job payload retainDays). Prevents unbounded growth of ATLAS persistence tables.", schedule: "daily", enabled: true });
@@ -787,6 +789,187 @@ durableJobQueue.register(NAMED_JOB_TYPES.ATLAS_RETENTION_PRUNE, async (job) => {
     ...(failed > 0 ? { failCount: (jobRegistry.get(NAMED_JOB_TYPES.ATLAS_RETENTION_PRUNE)?.failCount || 0) + 1 } : {}),
   });
   logger.info({ jobId: job.id, retainDays, cutoff: cutoff.toISOString(), dryRun, counts, totalDeleted, failed }, "atlas_retention_prune: complete");
+});
+
+durableJobQueue.register(NAMED_JOB_TYPES.DAILY_PROOF_CHAIN_DIGEST, async (job) => {
+  const start = Date.now();
+  const payload = (job.payload ?? {}) as {
+    roleScope?: string;
+    emailRecipients?: string[];
+    slackChannel?: string;
+    channels?: Array<"email" | "slack">;
+  };
+
+  const roleScope = payload.roleScope ?? "executive";
+  const date = new Date().toISOString().slice(0, 10);
+
+  const envEmails = (process.env.PROOF_CHAIN_DIGEST_EMAIL_RECIPIENTS ?? "")
+    .split(",").map((s) => s.trim()).filter(Boolean);
+  const emailRecipients = (payload.emailRecipients && payload.emailRecipients.length > 0)
+    ? payload.emailRecipients
+    : envEmails;
+
+  const slackChannel = payload.slackChannel
+    ?? process.env.PROOF_CHAIN_DIGEST_SLACK_CHANNEL
+    ?? process.env.ALLOY_DIGEST_SLACK_CHANNEL
+    ?? "";
+
+  const channels: Array<"email" | "slack"> = payload.channels && payload.channels.length > 0
+    ? payload.channels
+    : ([
+        emailRecipients.length > 0 ? "email" : null,
+        slackChannel ? "slack" : null,
+      ].filter(Boolean) as Array<"email" | "slack">);
+
+  if (channels.length === 0) {
+    logger.warn({ jobId: job.id }, "daily_proof_chain_digest: no delivery channels configured (set PROOF_CHAIN_DIGEST_EMAIL_RECIPIENTS and/or PROOF_CHAIN_DIGEST_SLACK_CHANNEL)");
+    updateRegistry(NAMED_JOB_TYPES.DAILY_PROOF_CHAIN_DIGEST, { lastStatus: "completed", lastDurationMs: Date.now() - start });
+    serverTelemetry.recordBusinessEvent({ type: "daily_proof_chain_digest_skipped", durationMs: Date.now() - start, success: true, metadata: { reason: "no_channels" } });
+    return;
+  }
+
+  let emailSent = 0;
+  let emailFailed = 0;
+  let slackSent = 0;
+  let slackFailed = 0;
+  const errors: string[] = [];
+
+  let markdown = "";
+  try {
+    const { gatherDigestData, generateDigestMarkdown } = await import("../routes/alloy-digest");
+    const data = await gatherDigestData(roleScope);
+    markdown = await generateDigestMarkdown(data, roleScope, date);
+  } catch (err) {
+    logger.error({ err, jobId: job.id }, "daily_proof_chain_digest: failed to generate digest");
+    updateRegistry(NAMED_JOB_TYPES.DAILY_PROOF_CHAIN_DIGEST, {
+      lastStatus: "failed",
+      lastDurationMs: Date.now() - start,
+      failCount: (jobRegistry.get(NAMED_JOB_TYPES.DAILY_PROOF_CHAIN_DIGEST)?.failCount || 0) + 1,
+    });
+    throw err;
+  }
+
+  const dateLabel = new Date(date).toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+
+  if (channels.includes("email")) {
+    if (emailRecipients.length === 0) {
+      emailFailed++;
+      errors.push("email: channel requested but no recipients configured (set PROOF_CHAIN_DIGEST_EMAIL_RECIPIENTS)");
+      logger.warn({ jobId: job.id }, "daily_proof_chain_digest: email channel requested but no recipients");
+    } else {
+    try {
+      const { sendEmail, hasEmailProviderConfigured } = await import("./email");
+      if (!hasEmailProviderConfigured()) {
+        emailFailed += emailRecipients.length;
+        errors.push("email: no provider configured");
+        logger.warn({ jobId: job.id }, "daily_proof_chain_digest: email channel requested but no provider configured");
+      } else {
+        const escapeHtml = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"/><title>Proof Chain Digest — ${dateLabel}</title>
+<style>body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f5;margin:0;padding:24px;color:#111827}
+.wrap{max-width:760px;margin:0 auto;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:32px}
+h1{font-size:18px;margin:0 0 4px}.sub{color:#6b7280;font-size:13px;margin:0 0 24px}
+pre{white-space:pre-wrap;word-wrap:break-word;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;line-height:1.55;background:#fafafa;border:1px solid #eee;border-radius:8px;padding:20px;color:#111827}
+.foot{font-size:11px;color:#9ca3af;margin-top:24px}</style></head>
+<body><div class="wrap">
+<h1>Proof Chain Digest</h1>
+<p class="sub">${dateLabel} · role: ${escapeHtml(roleScope)}</p>
+<pre>${escapeHtml(markdown)}</pre>
+<p class="foot">Automated daily digest from SZL Holdings governance. Recipients managed via PROOF_CHAIN_DIGEST_EMAIL_RECIPIENTS.</p>
+</div></body></html>`;
+
+        for (const to of emailRecipients) {
+          try {
+            const result = await sendEmail({
+              to,
+              subject: `Proof Chain Digest — ${dateLabel}`,
+              html,
+              text: markdown,
+            });
+            if (result.success) emailSent++;
+            else {
+              emailFailed++;
+              errors.push(`email[${to}]: ${result.error ?? "unknown"}`);
+              logger.warn({ jobId: job.id, to, error: result.error }, "daily_proof_chain_digest: email provider rejected");
+            }
+          } catch (err) {
+            emailFailed++;
+            errors.push(`email[${to}]: ${String(err)}`);
+            logger.warn({ err, jobId: job.id, to }, "daily_proof_chain_digest: email send threw");
+          }
+        }
+      }
+    } catch (err) {
+      emailFailed += emailRecipients.length;
+      errors.push(`email: ${String(err)}`);
+      logger.error({ err, jobId: job.id }, "daily_proof_chain_digest: email channel fatal");
+    }
+    }
+  }
+
+  if (channels.includes("slack")) {
+    if (!slackChannel) {
+      slackFailed++;
+      errors.push("slack: channel requested but PROOF_CHAIN_DIGEST_SLACK_CHANNEL not configured");
+      logger.warn({ jobId: job.id }, "daily_proof_chain_digest: slack channel requested but no channel configured");
+    } else {
+    const slackToken = process.env.SLACK_BOT_TOKEN;
+    if (!slackToken) {
+      slackFailed++;
+      errors.push("slack: SLACK_BOT_TOKEN not configured");
+      logger.warn({ jobId: job.id }, "daily_proof_chain_digest: SLACK_BOT_TOKEN not configured");
+    } else {
+      try {
+        const slackText = `*Proof Chain Digest — ${dateLabel}*\n*Role: ${roleScope}*\n\n${markdown.slice(0, 2800)}${markdown.length > 2800 ? "\n\n_[digest truncated — view full version in app]_" : ""}`;
+        const slackRes = await fetch("https://slack.com/api/chat.postMessage", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${slackToken}` },
+          body: JSON.stringify({ channel: slackChannel, text: slackText, mrkdwn: true }),
+        });
+        const body = await slackRes.json().catch(() => ({} as Record<string, unknown>)) as { ok?: boolean; error?: string };
+        if (slackRes.ok && body.ok !== false) {
+          slackSent++;
+        } else {
+          slackFailed++;
+          const reason = body.error ?? `HTTP ${slackRes.status}`;
+          errors.push(`slack: ${reason}`);
+          logger.warn({ jobId: job.id, status: slackRes.status, error: reason }, "daily_proof_chain_digest: Slack API rejected");
+        }
+      } catch (err) {
+        slackFailed++;
+        errors.push(`slack: ${String(err)}`);
+        logger.warn({ err, jobId: job.id }, "daily_proof_chain_digest: Slack delivery threw");
+      }
+    }
+    }
+  }
+
+  const totalSent = emailSent + slackSent;
+  const totalFailed = emailFailed + slackFailed;
+  const anyFailed = totalFailed > 0;
+
+  serverTelemetry.recordBusinessEvent({
+    type: "daily_proof_chain_digest_completed",
+    durationMs: Date.now() - start,
+    success: !anyFailed,
+    metadata: { date, roleScope, channels, emailSent, emailFailed, slackSent, slackFailed, totalSent, errors },
+  });
+
+  if (anyFailed) {
+    updateRegistry(NAMED_JOB_TYPES.DAILY_PROOF_CHAIN_DIGEST, {
+      lastStatus: "failed",
+      lastDurationMs: Date.now() - start,
+      failCount: (jobRegistry.get(NAMED_JOB_TYPES.DAILY_PROOF_CHAIN_DIGEST)?.failCount || 0) + 1,
+    });
+    logger.error(
+      { jobId: job.id, emailSent, emailFailed, slackSent, slackFailed, errors },
+      "daily_proof_chain_digest: one or more deliveries failed — throwing to trigger retry",
+    );
+    throw new Error(`daily_proof_chain_digest: ${totalFailed} delivery failure(s) of ${totalFailed + totalSent} attempted — ${errors.join("; ")}`);
+  }
+
+  updateRegistry(NAMED_JOB_TYPES.DAILY_PROOF_CHAIN_DIGEST, { lastStatus: "completed", lastDurationMs: Date.now() - start });
+  logger.info({ jobId: job.id, date, emailSent, emailFailed, slackSent, slackFailed }, "daily_proof_chain_digest: complete");
 });
 
 let namedJobsStarted = false;
