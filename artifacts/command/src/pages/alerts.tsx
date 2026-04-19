@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { OpsLayout } from "../components/ops-layout";
-import { Bell, BellOff, ArrowUpRight, Clock, CheckCircle2, AlarmClock, ChevronDown, Filter, Settings, XCircle } from "lucide-react";
+import { Bell, BellOff, ArrowUpRight, Clock, CheckCircle2, AlarmClock, ChevronDown, Filter, Settings, XCircle, History } from "lucide-react";
 import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
 
 type AlertStatus = "active" | "acknowledged" | "snoozed" | "resolved";
@@ -49,6 +49,43 @@ function formatAcknowledgedAt(iso: string): string {
   if (h < 24) return `${h}h ago`;
   return d.toLocaleString();
 }
+
+type AuditAction = "acknowledged" | "snoozed" | "resolved" | "unsnoozed";
+
+interface AuditEntry {
+  id: number;
+  action: AuditAction;
+  actorId: number | null;
+  actorName: string | null;
+  snoozedUntil: string | null;
+  createdAt: string;
+}
+
+interface AuditResponse {
+  alertId: string;
+  entries: AuditEntry[];
+}
+
+const AUDIT_ACTION_LABEL: Record<AuditAction, string> = {
+  acknowledged: "Acknowledged",
+  snoozed: "Snoozed",
+  resolved: "Resolved",
+  unsnoozed: "Un-snoozed",
+};
+
+const AUDIT_ACTION_ICON: Record<AuditAction, React.ElementType> = {
+  acknowledged: CheckCircle2,
+  snoozed: AlarmClock,
+  resolved: CheckCircle2,
+  unsnoozed: Bell,
+};
+
+const AUDIT_ACTION_COLOR: Record<AuditAction, string> = {
+  acknowledged: "var(--color-medium)",
+  snoozed: "var(--color-fg-muted)",
+  resolved: "var(--color-low)",
+  unsnoozed: "var(--color-high)",
+};
 
 function formatSnoozedUntil(iso: string | undefined): string {
   if (!iso) return "";
@@ -163,12 +200,30 @@ export default function AlertsPage() {
       // Revalidate so badge counts and snooze/resolve filtering are accurate.
       await queryClient.invalidateQueries({ queryKey: ["command-alerts"] });
       await queryClient.invalidateQueries({ queryKey: ["ops-badge-counts"] });
+      // The audit timeline picks up the new action on the next poll, but
+      // we invalidate explicitly so it appears immediately for the operator.
+      await queryClient.invalidateQueries({ queryKey: ["command-alert-audit", id] });
     } catch {
       await queryClient.invalidateQueries({ queryKey: ["command-alerts"] });
     }
   };
 
   const selectedAlert = alerts.find((a) => a.id === selected);
+
+  const { data: auditData, isLoading: auditLoading } = useQuery<AuditResponse>({
+    queryKey: ["command-alert-audit", selected],
+    queryFn: async () => {
+      const res = await fetch(
+        `/api/command/alerts/${encodeURIComponent(selected ?? "")}/audit`,
+        { credentials: "include" },
+      );
+      if (!res.ok) throw new Error("Failed to load alert audit");
+      const json = await res.json();
+      return (json?.data ?? json) as AuditResponse;
+    },
+    enabled: !!selected,
+    staleTime: 10_000,
+  });
 
   return (
     <OpsLayout title="Alert Inbox">
@@ -493,6 +548,60 @@ export default function AlertsPage() {
                       <span className="text-xs font-semibold capitalize" style={{ color }}>{value}</span>
                     </div>
                   ))}
+                </div>
+
+                {/* Audit history timeline — every operator action with actor + when. */}
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest" style={{ color: "var(--color-fg-muted)" }}>
+                    <History className="w-3 h-3" />
+                    Audit History
+                  </div>
+                  {auditLoading && (
+                    <div className="text-[11px]" style={{ color: "var(--color-fg-muted)" }}>
+                      Loading history…
+                    </div>
+                  )}
+                  {!auditLoading && (auditData?.entries.length ?? 0) === 0 && (
+                    <div className="text-[11px]" style={{ color: "var(--color-fg-muted)" }}>
+                      No operator actions recorded yet.
+                    </div>
+                  )}
+                  {!auditLoading && (auditData?.entries.length ?? 0) > 0 && (
+                    <ol className="flex flex-col gap-2">
+                      {[...(auditData?.entries ?? [])].reverse().map((entry) => {
+                        const Icon = AUDIT_ACTION_ICON[entry.action];
+                        const color = AUDIT_ACTION_COLOR[entry.action];
+                        const actor = entry.actorName ?? (entry.actorId != null ? `user #${entry.actorId}` : "system");
+                        const snoozedSuffix =
+                          entry.action === "snoozed" && entry.snoozedUntil
+                            ? ` until ${new Date(entry.snoozedUntil).toLocaleString()}`
+                            : "";
+                        return (
+                          <li
+                            key={entry.id}
+                            className="flex items-start gap-2 py-1.5 px-2 rounded-md"
+                            style={{ backgroundColor: "var(--color-bg-elevated)", border: "1px solid var(--color-surface-border)" }}
+                          >
+                            <Icon className="w-3 h-3 mt-0.5 shrink-0" style={{ color }} />
+                            <div className="flex-1 min-w-0">
+                              <div className="text-[11px] font-semibold" style={{ color: "var(--color-fg-primary)" }}>
+                                <span style={{ color }}>{AUDIT_ACTION_LABEL[entry.action]}</span>
+                                <span style={{ color: "var(--color-fg-secondary)" }}> by {actor}</span>
+                                {snoozedSuffix && (
+                                  <span style={{ color: "var(--color-fg-muted)" }}>{snoozedSuffix}</span>
+                                )}
+                              </div>
+                              <div className="text-[10px] font-mono mt-0.5" style={{ color: "var(--color-fg-muted)" }}>
+                                <Clock className="w-2.5 h-2.5 inline-block mr-1 -mt-0.5" />
+                                {formatAcknowledgedAt(entry.createdAt)}
+                                <span className="opacity-60"> · {new Date(entry.createdAt).toLocaleString()}</span>
+                              </div>
+                            </div>
+                          </li>
+                        );
+                      })}
+                    </ol>
+                  )}
                 </div>
               </div>
             ) : (

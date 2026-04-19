@@ -21,8 +21,8 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { sendSuccess, handleRouteError } from "../lib/api-response";
 import { requireAnyAuth, requireRole } from "../middlewares/auth";
-import { db, intelligenceCacheTable, pcMattersTable, pcDeadlinesTable, fundNavRecordsTable, fundPortfolioFinancialsTable, usersTable, guardianPoliciesTable, guardianActionsTable, maritimeVesselsTable, lyteMetricsTable, lyteAlertsTable, lyteAlertEventsTable, usageEventsTable, approvalRequestsTable, approvalAuditTrailTable, healthChecksTable, deploymentsTable, activityLogTable, commandInboxAlertStatesTable, GLOBAL_TENANT_SENTINEL } from "@szl-holdings/db";
-import { eq, desc, count, sql, and, gte, lte, isNull, or, inArray } from "drizzle-orm";
+import { db, intelligenceCacheTable, pcMattersTable, pcDeadlinesTable, fundNavRecordsTable, fundPortfolioFinancialsTable, usersTable, guardianPoliciesTable, guardianActionsTable, maritimeVesselsTable, lyteMetricsTable, lyteAlertsTable, lyteAlertEventsTable, usageEventsTable, approvalRequestsTable, approvalAuditTrailTable, healthChecksTable, deploymentsTable, activityLogTable, commandInboxAlertStatesTable, commandInboxAlertAuditTable, GLOBAL_TENANT_SENTINEL } from "@szl-holdings/db";
+import { asc, eq, desc, count, sql, and, gte, lte, isNull, or, inArray } from "drizzle-orm";
 
 /**
  * Coalesce a possibly-null tenant id into the persisted sentinel value.
@@ -1102,6 +1102,20 @@ router.post(
               eq(commandInboxAlertStatesTable.tenantId, key),
             ),
           );
+        // Append an immutable audit row so the timeline shows the
+        // un-snooze / re-open event explicitly. Failures here must not
+        // break the operator action — audit is best-effort.
+        try {
+          await db.insert(commandInboxAlertAuditTable).values({
+            alertId,
+            tenantId: key,
+            action: "unsnoozed",
+            snoozedUntil: null,
+            actorId: updatedById,
+          });
+        } catch (auditErr) {
+          logger.warn({ auditErr, alertId }, "command alerts/state audit insert failed");
+        }
         return sendSuccess(res, { alertId, state, tenantId: key });
       }
 
@@ -1137,10 +1151,94 @@ router.post(
           },
         });
 
+      // Append an immutable audit row for compliance traceability. Each
+      // operator action gets its own row — the states table is overwritten
+      // on every action, so it cannot answer "who acted, when". Audit
+      // failures must not break the action — log and continue.
+      try {
+        await db.insert(commandInboxAlertAuditTable).values({
+          alertId,
+          tenantId: key,
+          action: state,
+          snoozedUntil,
+          actorId: updatedById,
+        });
+      } catch (auditErr) {
+        logger.warn({ auditErr, alertId }, "command alerts/state audit insert failed");
+      }
+
       sendSuccess(res, { alertId, state, snoozedUntil, tenantId: key });
     } catch (err) {
       logger.error({ err }, "command alerts/state update error");
       handleRouteError(res, err, "Failed to update alert state");
+    }
+  },
+);
+
+/**
+ * GET /api/command/alerts/:alertId/audit
+ *
+ * Returns the chronological audit history for a single alert: every
+ * acknowledge / snooze / resolve / un-snooze action with the actor and
+ * timestamp. Backed by the immutable command_inbox_alert_audit table —
+ * the states table is overwritten on each action and cannot answer this
+ * question.
+ *
+ * Tenant scoping mirrors the read path: the caller sees rows for their
+ * tenant plus the global sentinel (so demo-mode actions are visible to
+ * authenticated callers too).
+ */
+router.get(
+  "/alerts/:alertId/audit",
+  requireAnyAuth(),
+  async (req: Request, res: Response) => {
+    try {
+      const alertId = req.params["alertId"];
+      if (!alertId || alertId.length > 200) {
+        return handleRouteError(res, new Error("Invalid alertId"), "Invalid alertId");
+      }
+
+      const tenantId = req.user?.orgs?.[0]?.orgId?.toString() ?? null;
+      const key = tenantKey(tenantId);
+
+      const rows = await db
+        .select()
+        .from(commandInboxAlertAuditTable)
+        .where(
+          and(
+            eq(commandInboxAlertAuditTable.alertId, alertId),
+            key === GLOBAL_TENANT_SENTINEL
+              ? eq(commandInboxAlertAuditTable.tenantId, GLOBAL_TENANT_SENTINEL)
+              : or(
+                  eq(commandInboxAlertAuditTable.tenantId, key),
+                  eq(commandInboxAlertAuditTable.tenantId, GLOBAL_TENANT_SENTINEL),
+                ),
+          ),
+        )
+        .orderBy(asc(commandInboxAlertAuditTable.createdAt));
+
+      const actorIds = Array.from(
+        new Set(
+          rows
+            .map((r) => r.actorId)
+            .filter((id): id is number => typeof id === "number"),
+        ),
+      );
+      const actorNames = await loadUserDisplayNames(actorIds);
+
+      const entries = rows.map((r) => ({
+        id: r.id,
+        action: r.action,
+        actorId: r.actorId,
+        actorName: r.actorId != null ? actorNames.get(r.actorId) ?? null : null,
+        snoozedUntil: r.snoozedUntil ? r.snoozedUntil.toISOString() : null,
+        createdAt: r.createdAt.toISOString(),
+      }));
+
+      sendSuccess(res, { alertId, entries });
+    } catch (err) {
+      logger.error({ err }, "command alerts/audit error");
+      handleRouteError(res, err, "Failed to load alert audit history");
     }
   },
 );
