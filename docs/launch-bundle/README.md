@@ -44,8 +44,8 @@ Filled in once each channel is published. Until a row is filled in, leave it as
 | Substack       | https://szlholdings.substack.com/p/the-operator-issue-01-why-im-building                                                                                         | 2026-04-16T21:03:00Z      |
 | Medium         | https://medium.com/@stephen_38454/im-building-a-multi-domain-intelligence-company-in-public-here-s-why-that-changes-everything-f00b6758436e                      | 2026-04-16T21:00:59Z      |
 | GitHub release | https://github.com/szl-holdings/szl-holdings-platform/releases/tag/v1.0-standby                                                                                  | 2026-04-18T12:30:25Z      |
-| LinkedIn       | _pending_ — paste the post permalink (`linkedin.com/posts/...` or `linkedin.com/feed/update/urn:li:activity:...`).                                                | _pending_                 |
-| X (thread)     | _pending_ — paste the first tweet permalink (`x.com/szlholdings/status/...`).                                                                                    | _pending_                 |
+| LinkedIn       | _permalink pending_ — post is live on Stephen Lutar's profile (linking to Medium + Substack); copy the post URL via `⋯ → Copy link to post` and paste here.       | ~2026-04-19T (live, exact publish-time pending with permalink) |
+| X (thread)     | Profile live: https://x.com/szlholdings — first-tweet permalink (`x.com/szlholdings/status/...`) still pending; paste it here once the launch thread is published.| _pending_                 |
 
 When the Substack URL lands, also update the `> Canonical:` line at the top of
 `linkedin.md` and `x-thread.md` so cross-platform attribution stays consistent.
