@@ -7,7 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useColors } from "@/hooks/useColors";
 
 export default function AuthScreen() {
-  const { isAuthenticated, isLoading, login } = useAuth();
+  const { isAuthenticated, isLoading, login, sessionRevocation, dismissSessionRevocation } = useAuth();
   const colors = useColors();
   const insets = useSafeAreaInsets();
 
@@ -34,6 +34,31 @@ export default function AuthScreen() {
         </View>
 
         <View style={styles.divider} />
+
+        {sessionRevocation ? (
+          <View
+            style={[
+              styles.revocationNotice,
+              { backgroundColor: "rgba(201,168,76,0.08)", borderColor: colors.goldBorder },
+            ]}
+            accessibilityRole="alert"
+          >
+            <Text style={[styles.revocationLabel, { color: colors.gold }]}>Session ended</Text>
+            <Text style={[styles.revocationMessage, { color: colors.cream }]}>
+              {sessionRevocation.message}
+            </Text>
+            <Pressable
+              onPress={dismissSessionRevocation}
+              accessibilityRole="button"
+              hitSlop={8}
+              style={styles.revocationDismiss}
+            >
+              <Text style={[styles.revocationDismissText, { color: colors.mutedForeground }]}>
+                Dismiss
+              </Text>
+            </Pressable>
+          </View>
+        ) : null}
 
         <View style={styles.features}>
           {[
@@ -163,5 +188,33 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontFamily: "Inter_300Light",
     textAlign: "center",
+  },
+  revocationNotice: {
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    gap: 6,
+  },
+  revocationLabel: {
+    fontSize: 11,
+    fontFamily: "Inter_500Medium",
+    letterSpacing: 2,
+    textTransform: "uppercase",
+  },
+  revocationMessage: {
+    fontSize: 13,
+    fontFamily: "Inter_400Regular",
+    lineHeight: 19,
+  },
+  revocationDismiss: {
+    alignSelf: "flex-end",
+    paddingTop: 4,
+  },
+  revocationDismissText: {
+    fontSize: 11,
+    fontFamily: "Inter_400Regular",
+    letterSpacing: 1,
+    textTransform: "uppercase",
   },
 });

@@ -1,5 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { Briefing, DissentRecord, CustomBriefRequest, DomainKey, RiskLevel } from "./data";
+import {
+  detectSessionRevocationCode,
+  extractServerMessage,
+  notifySessionRevoked,
+} from "@szl-holdings/shared-ui/session-revocation";
 
 // The demo token is the PIN entered via the PIN modal in App.tsx.
 // It is stored in sessionStorage by verifyAndStoreDemoPin() after the server
@@ -36,6 +41,13 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
     ...init,
   });
   if (!res.ok) {
+    if (res.status === 401) {
+      const errBody = await res.clone().json().catch(() => null);
+      const code = detectSessionRevocationCode(errBody);
+      if (code) {
+        notifySessionRevoked(code, { message: extractServerMessage(errBody) ?? undefined });
+      }
+    }
     throw new Error(`Request failed: ${res.status} ${res.statusText}`);
   }
   const data = (await res.json()) as { success?: boolean; error?: string } & Record<string, unknown>;
@@ -276,11 +288,18 @@ async function rawFetch<T>(path: string, init?: RequestInit): Promise<T> {
   });
   if (!res.ok) {
     let detail = "";
+    let body: unknown = null;
     try {
-      const body = await res.json();
-      detail = body?.error ?? "";
+      body = await res.json();
+      detail = (body as { error?: string } | null)?.error ?? "";
     } catch {
       // ignore
+    }
+    if (res.status === 401) {
+      const code = detectSessionRevocationCode(body);
+      if (code) {
+        notifySessionRevoked(code, { message: extractServerMessage(body) ?? undefined });
+      }
     }
     throw new Error(`Request failed: ${res.status} ${res.statusText}${detail ? ` — ${detail}` : ""}`);
   }

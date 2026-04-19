@@ -18,6 +18,87 @@ WebBrowser.maybeCompleteAuthSession();
 export const AUTH_TOKEN_KEY = "cortex_auth_token";
 const ISSUER_URL = process.env.EXPO_PUBLIC_ISSUER_URL ?? "https://replit.com/oidc";
 
+// ---------------------------------------------------------------------------
+// Session-revocation signaling
+// ---------------------------------------------------------------------------
+// The API server returns `code: SESSION_REVOKED` when an admin revokes a
+// session (or bumps the user's session version) and `code: REFRESH_TOKEN_REPLAY`
+// when a refresh-token replay is detected. We surface a friendly explanation
+// on the sign-in screen instead of silently bouncing the user.
+
+export interface SessionRevocationInfo {
+  code: "SESSION_REVOKED" | "REFRESH_TOKEN_REPLAY" | string;
+  message: string;
+  at: string;
+}
+
+const REVOCATION_LISTENERS = new Set<(info: SessionRevocationInfo | null) => void>();
+let _latestRevocation: SessionRevocationInfo | null = null;
+
+function defaultRevocationMessage(code: string): string {
+  if (code === "REFRESH_TOKEN_REPLAY") {
+    return "Your session was ended for security reasons — please sign in again.";
+  }
+  return "An administrator updated your access — please sign in again.";
+}
+
+/** Called by apiClient when an API response carries a revocation code. */
+export function recordSessionRevocation(input: { code: string; message?: string }): void {
+  const info: SessionRevocationInfo = {
+    code: input.code,
+    message: input.message?.trim() || defaultRevocationMessage(input.code),
+    at: new Date().toISOString(),
+  };
+  _latestRevocation = info;
+  REVOCATION_LISTENERS.forEach((listener) => {
+    try {
+      listener(info);
+    } catch {
+      /* ignore listener failures */
+    }
+  });
+}
+
+export function clearSessionRevocation(): void {
+  _latestRevocation = null;
+  REVOCATION_LISTENERS.forEach((listener) => {
+    try {
+      listener(null);
+    } catch {
+      /* ignore */
+    }
+  });
+}
+
+export function getSessionRevocation(): SessionRevocationInfo | null {
+  return _latestRevocation;
+}
+
+function subscribeSessionRevocation(listener: (info: SessionRevocationInfo | null) => void): () => void {
+  REVOCATION_LISTENERS.add(listener);
+  return () => {
+    REVOCATION_LISTENERS.delete(listener);
+  };
+}
+
+const REVOCATION_CODES = new Set(["SESSION_REVOKED", "REFRESH_TOKEN_REPLAY"]);
+
+function pickRevocationCodeFromBody(body: unknown): string | null {
+  if (!body || typeof body !== "object") return null;
+  const code = (body as Record<string, unknown>)["code"];
+  return typeof code === "string" && REVOCATION_CODES.has(code) ? code : null;
+}
+
+function pickServerMessageFromBody(body: unknown): string | null {
+  if (!body || typeof body !== "object") return null;
+  const record = body as Record<string, unknown>;
+  const error = record["error"];
+  if (typeof error === "string" && error.trim()) return error;
+  const message = record["message"];
+  if (typeof message === "string" && message.trim()) return message;
+  return null;
+}
+
 export interface AuthUser {
   id: string;
   displayName: string | null;
@@ -38,6 +119,8 @@ interface AuthContextValue {
   buildHeaders: (extra?: Record<string, string>) => Record<string, string>;
   buildWsAuthMessage: () => { type: string; token: string };
   signals?: unknown[];
+  sessionRevocation: SessionRevocationInfo | null;
+  dismissSessionRevocation: () => void;
 }
 
 export const AuthContext = createContext<AuthContextValue>({
@@ -51,6 +134,8 @@ export const AuthContext = createContext<AuthContextValue>({
   buildHeaders: (extra) => ({ "Content-Type": "application/json", ...extra }),
   buildWsAuthMessage: () => ({ type: "auth", token: "" }),
   signals: [],
+  sessionRevocation: null,
+  dismissSessionRevocation: () => {},
 });
 
 function getApiBaseUrl(): string {
@@ -95,6 +180,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [sessionRevocation, setSessionRevocation] = useState<SessionRevocationInfo | null>(
+    () => getSessionRevocation(),
+  );
+
+  useEffect(() => {
+    return subscribeSessionRevocation((info) => {
+      setSessionRevocation(info);
+      if (info) {
+        // Drop any locally cached identity so the auth screen renders.
+        secureDelToken().catch(() => {});
+        setAccessToken(null);
+        setUser(null);
+        setIsLoading(false);
+      }
+    });
+  }, []);
 
   const discovery = AuthSession.useAutoDiscovery(ISSUER_URL);
   const redirectUri = AuthSession.makeRedirectUri();
@@ -125,6 +226,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (!res.ok) {
+        if (res.status === 401) {
+          const body = await res.clone().json().catch(() => null);
+          const code = pickRevocationCodeFromBody(body);
+          if (code) {
+            recordSessionRevocation({
+              code,
+              message: pickServerMessageFromBody(body) ?? undefined,
+            });
+          }
+        }
         await secureDelToken();
         setAccessToken(null);
         setUser(null);
@@ -209,12 +320,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [response, request, redirectUri, fetchUser]);
 
   const login = useCallback(async () => {
+    // A successful sign-in attempt invalidates any previous revocation notice.
+    clearSessionRevocation();
     try {
       await promptAsync();
     } catch (err) {
       console.error("[Auth] Login error:", err);
     }
   }, [promptAsync]);
+
+  const dismissSessionRevocation = useCallback(() => {
+    clearSessionRevocation();
+  }, []);
 
   const logout = useCallback(async () => {
     try {
@@ -253,6 +370,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return { type: "auth", token: accessToken ?? "" };
         },
         signals: [],
+        sessionRevocation,
+        dismissSessionRevocation,
       }}
     >
       {children}

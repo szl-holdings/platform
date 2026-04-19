@@ -1,3 +1,9 @@
+import {
+  detectSessionRevocationCode,
+  extractServerMessage,
+  notifySessionRevoked,
+} from "./session-revocation";
+
 const API_BASE = "/api";
 
 export interface PaginationMeta {
@@ -66,6 +72,13 @@ export async function apiFetch<T>(path: string, options?: ApiFetchOptions): Prom
       });
       if (!res.ok) {
         const errBody = await res.json().catch(() => ({ error: "Request failed" }));
+        if (res.status === 401) {
+          const code = detectSessionRevocationCode(errBody);
+          if (code) {
+            const message = extractServerMessage(errBody) ?? undefined;
+            notifySessionRevoked(code, { message });
+          }
+        }
         const apiErr = new ApiError(
           (errBody as { error?: string }).error || `HTTP ${res.status}`,
           res.status,

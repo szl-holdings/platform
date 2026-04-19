@@ -1,6 +1,56 @@
 import { Platform } from "react-native";
 import * as SecureStore from "expo-secure-store";
-import { AUTH_TOKEN_KEY } from "@/context/AuthContext";
+import { AUTH_TOKEN_KEY, recordSessionRevocation } from "@/context/AuthContext";
+
+let _cachedToken: string | null = null;
+
+const SESSION_REVOCATION_CODES = new Set(["SESSION_REVOKED", "REFRESH_TOKEN_REPLAY"]);
+
+function pickRevocationCode(body: unknown): string | null {
+  if (!body || typeof body !== "object") return null;
+  const record = body as Record<string, unknown>;
+  const code = record["code"];
+  if (typeof code === "string" && SESSION_REVOCATION_CODES.has(code)) return code;
+  return null;
+}
+
+function pickServerMessage(body: unknown): string | null {
+  if (!body || typeof body !== "object") return null;
+  const record = body as Record<string, unknown>;
+  const error = record["error"];
+  if (typeof error === "string" && error.trim()) return error;
+  const message = record["message"];
+  if (typeof message === "string" && message.trim()) return message;
+  return null;
+}
+
+async function handleAuthRevocation(res: Response): Promise<boolean> {
+  if (res.status !== 401) return false;
+  let body: unknown = null;
+  try {
+    body = await res.clone().json();
+  } catch {
+    return false;
+  }
+  const code = pickRevocationCode(body);
+  if (!code) return false;
+  const message = pickServerMessage(body) ?? undefined;
+  try {
+    await SecureStore.deleteItemAsync(AUTH_TOKEN_KEY);
+  } catch {
+    /* ignore */
+  }
+  if (Platform.OS === "web" && typeof window !== "undefined") {
+    try {
+      window.localStorage.removeItem(AUTH_TOKEN_KEY);
+    } catch {
+      /* ignore */
+    }
+  }
+  _cachedToken = null;
+  recordSessionRevocation({ code, message });
+  return true;
+}
 
 const APP_MODE = (process.env.EXPO_PUBLIC_APP_MODE ?? "sandbox").toLowerCase() as "demo" | "sandbox" | "production";
 const SANDBOX_API_BASE = (process.env.EXPO_PUBLIC_SANDBOX_API_BASE ?? "").replace(/\/$/, "");
@@ -211,8 +261,6 @@ function getDemoFixture(path: string): unknown | null {
   return key ? MOBILE_DEMO_FIXTURES[key] : null;
 }
 
-let _cachedToken: string | null = null;
-
 export function getCachedAuthToken(): string | null {
   if (Platform.OS === "web" && typeof window !== "undefined") {
     return window.localStorage.getItem(AUTH_TOKEN_KEY);
@@ -263,6 +311,7 @@ export async function apiFetch<T>(
   if (token) headers["Authorization"] = `Bearer ${token}`;
   const res = await fetch(`${getApiBase()}${path}`, { ...init, headers });
   if (!res.ok) {
+    await handleAuthRevocation(res);
     throw new Error(`API error ${res.status}: ${path}`);
   }
   if (res.status === 204) return null as T;
@@ -279,7 +328,11 @@ export async function apiFetchRaw(
     ...(init?.headers as Record<string, string>),
   };
   if (token) headers["Authorization"] = `Bearer ${token}`;
-  return fetch(`${getApiBase()}${path}`, { ...init, headers });
+  const res = await fetch(`${getApiBase()}${path}`, { ...init, headers });
+  if (!res.ok) {
+    await handleAuthRevocation(res);
+  }
+  return res;
 }
 
 export async function apiGet<T>(path: string): Promise<T> {
