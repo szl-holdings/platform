@@ -8,11 +8,14 @@
 set -e
 pnpm install --frozen-lockfile 2>&1 || pnpm install 2>&1 || true
 # Run schema sync non-interactively.
-# --force (via push-force script) bypasses drizzle-kit confirmation prompts.
+# Uses the non-interactive wrapper (push-non-interactive) so the workflow
+# never hangs on drizzle-kit's "Is `foo` a new table or rename?" prompts.
+# See lib/db/scripts/non-interactive-migrate.mjs for behavior + safety knobs
+# (DB_MIGRATE_TIMEOUT_MS, DB_MIGRATE_FAIL_ON_PROMPT).
 # stdin is /dev/null so any remaining prompt receives EOF and fails immediately
 # rather than blocking forever.
 # Non-fatal: a migration warning must never block workflow reconciliation.
-timeout 150 pnpm --filter @szl-holdings/db push-force < /dev/null 2>&1 || echo "drizzle-kit push timed out or failed (non-fatal)"
+DB_MIGRATE_TIMEOUT_MS=140000 pnpm --filter @szl-holdings/db push-non-interactive < /dev/null 2>&1 || echo "drizzle-kit push timed out or failed (non-fatal)"
 
 # Ensure the corporate site's capability manifest is a symlink to the audit
 # source-of-truth, never a stale hand-copied file. The Product Readiness Matrix,

@@ -29,7 +29,7 @@
     "seed:atlas:terra": "pnpm --filter @workspace/scripts run seed:atlas:terra",
     "seed:atlas:counsel": "pnpm --filter @workspace/scripts run seed:atlas:counsel",
     "seed:tenant-health": "pnpm --filter @workspace/scripts run seed:tenant-health",
-    "migrate": "pnpm --filter @szl-holdings/db run push-force",
+    "migrate": "pnpm --filter @szl-holdings/db run push-non-interactive",
     "db:migrate": "pnpm --filter @szl-holdings/db run migrate",
     "start": "pnpm -r --if-present run dev",
     "capture:screens": "bash scripts/media/capture-screenshots.sh",
