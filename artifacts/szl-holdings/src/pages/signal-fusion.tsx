@@ -370,6 +370,8 @@ export default function SignalFusionPage() {
   const [acknowledged, setAcknowledged] = useState<Set<string>>(new Set());
   const [escalated, setEscalated] = useState<Set<string>>(new Set());
   const [showAcked, setShowAcked] = useState(false);
+  const [detailTab, setDetailTab] = useState<"overview" | "proof" | "actions">("overview");
+  useEffect(() => { setDetailTab("overview"); }, [activeSignal]);
 
   useEffect(() => {
     const t = setInterval(() => setTick(n => n + 1), 6000);
@@ -572,34 +574,52 @@ export default function SignalFusionPage() {
                     <p style={{ fontSize: "0.6rem", fontFamily: MONO, color: TEXT_FAINT, margin: 0 }}>Signal ID: {sig.id.toUpperCase()} · {sig.sourceType.replace(/_/g, " ")} · {sig.timestamp}</p>
                   </div>
 
-                  {/* Metadata */}
-                  <div style={{ background: BG, padding: "1rem 1.125rem" }}>
-                    <p style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: TEXT_FAINT, marginBottom: "0.625rem" }}>
-                      Signal Metadata
-                    </p>
-                    {Object.entries(sig.metadata).map(([k, v]) => (
-                      <div key={k} style={{ display: "flex", justifyContent: "space-between", padding: "0.375rem 0", borderBottom: `1px solid ${BORDER}` }}>
-                        <span style={{ fontSize: "0.6875rem", color: TEXT_FAINT, fontFamily: MONO }}>{k}</span>
-                        <span style={{ fontSize: "0.6875rem", color: TEXT_SEC, fontWeight: 600 }}>{v}</span>
-                      </div>
+                  {/* Tabs */}
+                  <div style={{ background: BG, padding: "0.5rem 1.125rem 0", display: "flex", gap: "0.25rem", borderBottom: `1px solid ${BORDER}` }}>
+                    {(["overview", "proof", "actions"] as const).map(tab => (
+                      <button
+                        key={tab}
+                        onClick={() => setDetailTab(tab)}
+                        data-testid={`tab-detail-${tab}`}
+                        style={{
+                          padding: "0.5rem 0.75rem",
+                          background: "transparent",
+                          border: "none",
+                          borderBottom: `2px solid ${detailTab === tab ? LYTE : "transparent"}`,
+                          cursor: "pointer",
+                          fontSize: "0.6875rem",
+                          fontFamily: MONO,
+                          fontWeight: detailTab === tab ? 700 : 500,
+                          color: detailTab === tab ? LYTE : TEXT_FAINT,
+                          textTransform: "uppercase",
+                          letterSpacing: "0.08em",
+                        }}
+                      >
+                        {tab}
+                      </button>
                     ))}
                   </div>
 
-                  {/* Proof Drawer */}
-                  <div style={{ background: BG, padding: "0.875rem 1.125rem" }}>
-                    <ProofDrawer
-                      proof={SIG_PROOF_RECORDS[sig.id] ?? SAMPLE_PROOF_RECORD}
-                      compact={true}
-                      defaultOpen={false}
-                    />
-                  </div>
+                  {/* Overview tab */}
+                  {detailTab === "overview" && (
+                    <>
+                      <div style={{ background: BG, padding: "1rem 1.125rem" }}>
+                        <p style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: TEXT_FAINT, marginBottom: "0.625rem" }}>
+                          Signal Metadata
+                        </p>
+                        {Object.entries(sig.metadata).map(([k, v]) => (
+                          <div key={k} style={{ display: "flex", justifyContent: "space-between", padding: "0.375rem 0", borderBottom: `1px solid ${BORDER}` }}>
+                            <span style={{ fontSize: "0.6875rem", color: TEXT_FAINT, fontFamily: MONO }}>{k}</span>
+                            <span style={{ fontSize: "0.6875rem", color: TEXT_SEC, fontWeight: 600 }}>{v}</span>
+                          </div>
+                        ))}
+                      </div>
 
-                  {/* Correlations */}
-                  {allCorrelated.length > 0 && (
-                    <div style={{ background: BG, padding: "1rem 1.125rem" }}>
-                      <p style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: TEXT_FAINT, marginBottom: "0.75rem" }}>
-                        Correlated Signals
-                      </p>
+                      {allCorrelated.length > 0 && (
+                        <div style={{ background: BG, padding: "1rem 1.125rem" }}>
+                          <p style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: TEXT_FAINT, marginBottom: "0.75rem" }}>
+                            Correlated Signals
+                          </p>
                       <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                         {allCorrelated.map(cs => {
                           const ccfg = DOMAIN_CONFIG[cs.domain];
@@ -632,10 +652,24 @@ export default function SignalFusionPage() {
                           );
                         })}
                       </div>
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  {/* Proof tab */}
+                  {detailTab === "proof" && (
+                    <div style={{ background: BG, padding: "1rem 1.125rem" }} data-testid={`proof-tab-content-${sig.id}`}>
+                      <ProofDrawer
+                        proof={SIG_PROOF_RECORDS[sig.id] ?? SAMPLE_PROOF_RECORD}
+                        compact={false}
+                        defaultOpen={true}
+                      />
                     </div>
                   )}
 
-                  {/* Actions */}
+                  {/* Actions tab */}
+                  {detailTab === "actions" && (
                   <div style={{ background: BG, padding: "1rem 1.125rem" }}>
                     <p style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: TEXT_FAINT, marginBottom: "0.75rem" }}>
                       Actions
@@ -683,6 +717,7 @@ export default function SignalFusionPage() {
                       </button>
                     </div>
                   </div>
+                  )}
                 </m.div>
               </AnimatePresence>
             </div>

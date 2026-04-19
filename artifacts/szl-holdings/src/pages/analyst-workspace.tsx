@@ -8,6 +8,7 @@ import {
   User, AlertTriangle, Network, Activity, Layers, ArrowRight,
   GitBranch,
 } from "lucide-react";
+import { ProofDrawer, SAMPLE_PROOF_RECORD, type ProofRecord, type ReviewState, type ExportSafety } from "@/components/ProofDrawer";
 
 type EntityType = "person" | "organization" | "vessel" | "property" | "matter" | "threat" | "asset";
 type RiskLevel = "critical" | "high" | "medium" | "low" | "none";
@@ -182,6 +183,52 @@ function getNeighbors(entityId: string): Entity[] {
     if (e.to !== entityId) neighborIds.add(e.to);
   });
   return ENTITIES.filter(e => neighborIds.has(e.id));
+}
+
+function buildEntityProof(entity: Entity, kind: "cross_domain" | "fusion_alert", subjectId: string): ProofRecord {
+  const review: ReviewState =
+    entity.risk === "critical" ? "unreviewed" :
+    entity.risk === "high"     ? "peer_reviewed" : "human_reviewed";
+  const exportSafety: ExportSafety =
+    entity.risk === "critical" ? "restricted" :
+    entity.risk === "high"     ? "pending_review" : "safe";
+  const conf = Math.max(0.5, Math.min(0.99, entity.riskScore / 100));
+  return {
+    ...SAMPLE_PROOF_RECORD,
+    id: `PCH-${kind === "cross_domain" ? "XDP" : "FAL"}-${entity.id.toUpperCase()}-${subjectId.toUpperCase()}`,
+    sourceSystem: kind === "cross_domain" ? "Analyst Entity Graph" : "Signal Fusion Engine",
+    sourceDomain: entity.domains[0] ?? "operations",
+    signalType: kind === "cross_domain" ? "cross_domain_recommendation" : "fusion_alert_recommendation",
+    confidence: conf,
+    model: "Entity correlation engine v3.2",
+    modelVersion: "2026-04-15",
+    reviewState: review,
+    exportSafety,
+    policyChecks: [
+      { label: "Role: analyst — permitted", passed: true },
+      { label: `Domain scope: ${entity.domains.join(", ")} — in scope`, passed: true },
+      { label: `Risk threshold (${entity.risk}) within review SLA`, passed: entity.risk !== "critical", note: entity.risk === "critical" ? "Critical risk requires SOC Lead sign-off" : undefined },
+      { label: "Human-in-loop gate: required before pivot", passed: true },
+      { label: "Source provenance: graph traversal documented", passed: true },
+      { label: "Export safety: redact identifiers before sharing", passed: exportSafety === "safe", note: exportSafety === "safe" ? undefined : "PII redaction pending review" },
+    ],
+    chainLinks: [
+      { id: "c1", event: `Entity ${entity.label} ingested into graph`, actor: "System / Entity Resolver", timestamp: "16 Apr 2026 06:02:11", hash: `sha256:${entity.id.slice(0, 8)}1...` },
+      { id: "c2", event: `Risk score computed: ${entity.riskScore}/100 (${entity.risk})`, actor: "Risk engine", timestamp: "16 Apr 2026 07:45:32", hash: `sha256:${entity.id.slice(0, 8)}2...` },
+      { id: "c3", event: kind === "cross_domain" ? `Cross-domain path surfaced — ${subjectId}` : `Fusion alert linked — ${subjectId}`, actor: "Recommendation engine", timestamp: "16 Apr 2026 08:12:48", hash: `sha256:${entity.id.slice(0, 8)}3...` },
+      { id: "c4", event: "Recorded in analyst proof chain", actor: "System / Proof Chain", timestamp: "16 Apr 2026 08:12:49", hash: `sha256:${entity.id.slice(0, 8)}4...` },
+    ],
+    metadata: {
+      "Entity ID": entity.id,
+      "Entity label": entity.label,
+      "Entity type": entity.type,
+      "Risk level": entity.risk,
+      "Risk score": String(entity.riskScore),
+      "Domains": entity.domains.join(", "),
+      "Recommendation kind": kind === "cross_domain" ? "Cross-domain path" : "Fusion alert",
+      "Subject": subjectId,
+    },
+  };
 }
 
 function getCrossdomainPaths(entityId: string): Array<{ path: string[]; domains: string[]; risk: string }> {
@@ -670,6 +717,13 @@ export default function AnalystWorkspacePage() {
                                 }}>{d}</span>
                               ))}
                             </div>
+                            <div style={{ marginTop: 10 }} data-testid={`proof-drawer-xdp-${selectedEntity.id}-${i}`}>
+                              <ProofDrawer
+                                proof={buildEntityProof(selectedEntity, "cross_domain", `XDP-${i + 1}-${path.path[path.path.length - 1].slice(0, 16).replace(/\s+/g, "-")}`)}
+                                compact={true}
+                                defaultOpen={false}
+                              />
+                            </div>
                           </m.div>
                         ))}
 
@@ -690,13 +744,22 @@ export default function AnalystWorkspacePage() {
                                 const alertMeta = ALERT_LABELS[alertId];
                                 if (!alertMeta) return null;
                                 return (
-                                  <div key={alertId} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
-                                    <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#ef4444", flexShrink: 0, marginTop: 4 }} />
-                                    <Link href={alertMeta.href}>
-                                      <a style={{ fontSize: 12, color: "#60a5fa", textDecoration: "none", lineHeight: 1.4 }}>
-                                        {alertMeta.title}
-                                      </a>
-                                    </Link>
+                                  <div key={alertId} style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                                    <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+                                      <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#ef4444", flexShrink: 0, marginTop: 4 }} />
+                                      <Link href={alertMeta.href}>
+                                        <a style={{ fontSize: 12, color: "#60a5fa", textDecoration: "none", lineHeight: 1.4 }}>
+                                          {alertMeta.title}
+                                        </a>
+                                      </Link>
+                                    </div>
+                                    <div style={{ paddingLeft: 14 }} data-testid={`proof-drawer-alert-${selectedEntity.id}-${alertId}`}>
+                                      <ProofDrawer
+                                        proof={buildEntityProof(selectedEntity, "fusion_alert", alertId)}
+                                        compact={true}
+                                        defaultOpen={false}
+                                      />
+                                    </div>
                                   </div>
                                 );
                               })}

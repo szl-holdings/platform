@@ -9,6 +9,55 @@ import {
 } from "lucide-react";
 import { generateOracleBrief, type OracleBriefSection, type BriefSeverity } from "@/lib/nexus/oracle-pipeline";
 import { KNOWLEDGE_GRAPH } from "@/lib/nexus/graph";
+import { ProofDrawer, SAMPLE_PROOF_RECORD, type ProofRecord, type ReviewState, type ExportSafety } from "@/components/ProofDrawer";
+
+function buildSectionProof(section: OracleBriefSection, briefId: string, graphVersion: string): ProofRecord {
+  const sevToReview: Record<BriefSeverity, ReviewState> = {
+    critical: "unreviewed", high: "unreviewed",
+    medium: "human_reviewed", low: "human_reviewed", info: "human_reviewed",
+  };
+  const sevToExport: Record<BriefSeverity, ExportSafety> = {
+    critical: "restricted", high: "pending_review",
+    medium: "pending_review", low: "safe", info: "safe",
+  };
+  const conf = Math.max(0, Math.min(1, section.analystConfidence / 100));
+  return {
+    ...SAMPLE_PROOF_RECORD,
+    id: `PCH-ORACLE-${section.id.toUpperCase()}-${briefId}`,
+    sourceSystem: "ORACLE Pipeline",
+    sourceDomain: section.domain,
+    signalType: "oracle_intelligence_brief",
+    confidence: conf,
+    model: "ORACLE pipeline · NEXUS graph synthesis",
+    modelVersion: `graph v${graphVersion}`,
+    reviewState: sevToReview[section.severity],
+    exportSafety: sevToExport[section.severity],
+    policyChecks: [
+      { label: "Role: executive_reader — permitted", passed: true },
+      { label: `Domain: ${section.domain} — in scope`, passed: true },
+      { label: "Source: deterministic NEXUS graph traversal", passed: true },
+      { label: "Human-in-loop gate: required before broad distribution", passed: true },
+      { label: "Review state: must be human_reviewed before export", passed: section.severity === "low" || section.severity === "info" || section.severity === "medium", note: "ORACLE drafts must be reviewed before external sharing" },
+      { label: "Export safety: PII redaction applied", passed: true },
+    ],
+    chainLinks: [
+      { id: "c1", event: `NEXUS graph traversed (v${graphVersion}) — entities + edges`, actor: "System / NEXUS", timestamp: new Date().toUTCString().replace(" GMT", ""), hash: `sha256:${section.id.repeat(2).slice(0, 9)}...` },
+      { id: "c2", event: `Section synthesized — ${section.findings.length} findings, ${section.recommendedActions.length} actions`, actor: "ORACLE pipeline", timestamp: new Date().toUTCString().replace(" GMT", ""), hash: `sha256:${section.id.repeat(3).slice(0, 9)}...` },
+      { id: "c3", event: `Severity classified ${section.severity} — confidence ${section.analystConfidence}%`, actor: "ORACLE classifier", timestamp: new Date().toUTCString().replace(" GMT", ""), hash: `sha256:o${section.id.slice(0, 8)}...` },
+      { id: "c4", event: "Recorded in proof chain — read receipts pending", actor: "System / Proof Chain", timestamp: new Date().toUTCString().replace(" GMT", ""), hash: `sha256:${briefId.slice(-9)}...` },
+    ],
+    metadata: {
+      "Section ID": section.id,
+      "Section number": String(section.sectionNumber),
+      "Domain": section.domain,
+      "Severity": section.severity,
+      "Findings": String(section.findings.length),
+      "Recommended actions": String(section.recommendedActions.length),
+      "Analyst confidence": `${section.analystConfidence}%`,
+      "Brief": briefId,
+    },
+  };
+}
 
 const SEVERITY_COLORS: Record<BriefSeverity, string> = {
   critical: "#ef4444",
@@ -39,7 +88,7 @@ function ConfidenceMeter({ value, color }: { value: number; color: string }) {
   );
 }
 
-function SectionCard({ section, index }: { section: OracleBriefSection; index: number }) {
+function SectionCard({ section, index, briefId, graphVersion }: { section: OracleBriefSection; index: number; briefId: string; graphVersion: string }) {
   const [expanded, setExpanded] = useState(index < 2);
   const color = SEVERITY_COLORS[section.severity];
 
@@ -164,6 +213,10 @@ function SectionCard({ section, index }: { section: OracleBriefSection; index: n
                   </Link>
                 </div>
               )}
+
+              <div style={{ marginTop: "1rem" }} data-testid={`proof-drawer-section-${section.id}`}>
+                <ProofDrawer proof={buildSectionProof(section, briefId, graphVersion)} compact={true} defaultOpen={false} />
+              </div>
             </div>
           </m.div>
         )}
@@ -340,7 +393,7 @@ export default function OracleBriefingPage() {
 
           <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem", marginBottom: "3rem" }}>
             {sections.map((section, i) => (
-              <SectionCard key={section.id} section={section} index={i} />
+              <SectionCard key={section.id} section={section} index={i} briefId={brief.briefId} graphVersion={brief.graphVersion} />
             ))}
           </div>
 

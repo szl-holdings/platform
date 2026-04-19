@@ -338,15 +338,31 @@ function LivePulse({ healthy = true, flash = false }: { healthy?: boolean; flash
   );
 }
 
+function buildSignalProof(sig: SignalItem): ProofRecord {
+  const base = SIT_PROOF_RECORDS[sig.correlatedTo ?? ""] ?? SAMPLE_PROOF_RECORD;
+  return {
+    ...base,
+    id: `PCH-${sig.id.toUpperCase()}-20260416`,
+    sourceDomain: sig.domain,
+    sourceSystem: `${sig.domain} Signal Feed`,
+    metadata: {
+      ...(base.metadata ?? {}),
+      "Signal ID": sig.id.toUpperCase(),
+      "Signal title": sig.title,
+      "Severity": sig.severity,
+      "Age": sig.age,
+      ...(sig.correlatedTo ? { "Correlated situation": sig.correlatedTo } : {}),
+    },
+  };
+}
+
 function SignalRow({ sig, active, onClick }: { sig: SignalItem; active: boolean; onClick: () => void }) {
   const DIcon = DOMAIN_ICON[sig.domain] ?? Radio;
   const dc = DOMAIN_COLOR[sig.domain] ?? LYTE;
+  const [proofOpen, setProofOpen] = useState(false);
   return (
-    <button
-      onClick={onClick}
+    <div
       style={{
-        width: "100%",
-        textAlign: "left",
         display: "flex",
         flexDirection: "column",
         gap: "0.375rem",
@@ -354,78 +370,130 @@ function SignalRow({ sig, active, onClick }: { sig: SignalItem; active: boolean;
         borderRadius: "6px",
         background: active ? `${LYTE}0a` : "transparent",
         border: active ? `1px solid ${LYTE}25` : "1px solid transparent",
-        cursor: "pointer",
         transition: "background 0.15s ease",
       }}
       onMouseEnter={e => { if (!active) (e.currentTarget as HTMLElement).style.background = SURFACE_HOVER; }}
       onMouseLeave={e => { if (!active) (e.currentTarget as HTMLElement).style.background = "transparent"; }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-        <SeverityDot sev={sig.severity} />
-        <div style={{ width: 18, height: 18, borderRadius: 4, background: `${dc}20`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-          <DIcon size={10} style={{ color: dc }} />
+      <button
+        onClick={onClick}
+        style={{
+          all: "unset",
+          width: "100%",
+          cursor: "pointer",
+          display: "flex",
+          flexDirection: "column",
+          gap: "0.375rem",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <SeverityDot sev={sig.severity} />
+          <div style={{ width: 18, height: 18, borderRadius: 4, background: `${dc}20`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <DIcon size={10} style={{ color: dc }} />
+          </div>
+          <span style={{ fontSize: "0.75rem", fontWeight: 600, color: TEXT, lineHeight: 1.3, flex: 1, minWidth: 0 }}
+            className="truncate">
+            {sig.title}
+          </span>
+          <span style={{ fontSize: "0.6rem", fontFamily: MONO, color: TEXT_FAINT, flexShrink: 0 }}>{sig.age}</span>
         </div>
-        <span style={{ fontSize: "0.75rem", fontWeight: 600, color: TEXT, lineHeight: 1.3, flex: 1, minWidth: 0 }}
-          className="truncate">
-          {sig.title}
-        </span>
-        <span style={{ fontSize: "0.6rem", fontFamily: MONO, color: TEXT_FAINT, flexShrink: 0 }}>{sig.age}</span>
-      </div>
-      <div style={{ paddingLeft: "1.625rem" }}>
-        <p style={{ fontSize: "0.6875rem", color: TEXT_SEC, lineHeight: 1.4, margin: 0 }}>{sig.detail}</p>
-      </div>
-      {sig.status === "new" && (
         <div style={{ paddingLeft: "1.625rem" }}>
+          <p style={{ fontSize: "0.6875rem", color: TEXT_SEC, lineHeight: 1.4, margin: 0 }}>{sig.detail}</p>
+        </div>
+      </button>
+      <div style={{ paddingLeft: "1.625rem", display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
+        {sig.status === "new" && (
           <span style={{ fontSize: "0.575rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(0,72%,62%)", background: "hsla(0,72%,54%,0.12)", border: "1px solid hsla(0,72%,54%,0.2)", padding: "1px 5px", borderRadius: 3 }}>
             UNACKNOWLEDGED
           </span>
+        )}
+        <button
+          onClick={(e) => { e.stopPropagation(); setProofOpen(p => !p); }}
+          style={{
+            fontSize: "0.575rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.1em",
+            textTransform: "uppercase", color: LYTE,
+            background: `${LYTE}10`, border: `1px solid ${LYTE}25`,
+            padding: "1px 6px", borderRadius: 3, cursor: "pointer",
+            display: "flex", alignItems: "center", gap: 3,
+          }}
+          data-testid={`button-view-proof-${sig.id}`}
+        >
+          <FileCheck size={9} /> {proofOpen ? "Hide proof" : "View proof"}
+        </button>
+      </div>
+      {proofOpen && (
+        <div style={{ paddingLeft: "1.625rem", paddingTop: "0.25rem" }}>
+          <ProofDrawer proof={buildSignalProof(sig)} compact={true} defaultOpen={true} />
         </div>
       )}
-    </button>
+    </div>
   );
 }
 
 function SituationCard({ sit, active, onClick }: { sit: SituationItem; active: boolean; onClick: () => void }) {
   const stg = STAGE_FLOW.findIndex(s => s.id === sit.stage);
   const progress = ((stg + 1) / STAGE_FLOW.length) * 100;
+  const [proofOpen, setProofOpen] = useState(false);
   return (
-    <button
-      onClick={onClick}
+    <div
       style={{
         width: "100%",
-        textAlign: "left",
         padding: "0.875rem",
         borderRadius: "8px",
         background: active ? `${LYTE}08` : SURFACE,
         border: active ? `1px solid ${LYTE}30` : `1px solid ${BORDER}`,
-        cursor: "pointer",
         transition: "all 0.15s ease",
       }}
       onMouseEnter={e => { if (!active) (e.currentTarget as HTMLElement).style.background = SURFACE_HOVER; }}
       onMouseLeave={e => { if (!active) (e.currentTarget as HTMLElement).style.background = SURFACE; }}
     >
-      <div style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem", marginBottom: "0.5rem" }}>
-        <SeverityDot sev={sit.severity} />
-        <p style={{ fontSize: "0.8rem", fontWeight: 600, color: TEXT, lineHeight: 1.3, flex: 1, margin: 0 }}>{sit.title}</p>
+      <button
+        onClick={onClick}
+        style={{ all: "unset", width: "100%", cursor: "pointer", display: "block", textAlign: "left" }}
+      >
+        <div style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem", marginBottom: "0.5rem" }}>
+          <SeverityDot sev={sit.severity} />
+          <p style={{ fontSize: "0.8rem", fontWeight: 600, color: TEXT, lineHeight: 1.3, flex: 1, margin: 0 }}>{sit.title}</p>
+        </div>
+        <div style={{ display: "flex", gap: "0.375rem", marginBottom: "0.625rem", flexWrap: "wrap" }}>
+          <DomainChip domain={sit.domain} />
+          <StageChip stage={sit.stage} />
+        </div>
+        <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.5rem", fontSize: "0.6875rem", color: TEXT_FAINT }}>
+          <span>Owner: <span style={{ color: sit.owner === "Unassigned" ? "hsl(30,90%,52%)" : TEXT_SEC }}>{sit.owner}</span></span>
+          <span style={{ color: BORDER }}>·</span>
+          <span>Pending: <span style={{ color: TEXT_SEC }}>{sit.pending}</span></span>
+        </div>
+        <div style={{ height: 3, borderRadius: 2, background: "hsla(0,0%,100%,0.06)", overflow: "hidden" }}>
+          <div style={{ height: "100%", width: `${progress}%`, background: `linear-gradient(90deg, ${LYTE}, hsl(215,72%,60%))`, borderRadius: 2 }} />
+        </div>
+        <div style={{ display: "flex", justifyContent: "space-between", marginTop: "0.3rem" }}>
+          {STAGE_FLOW.map((s, i) => (
+            <div key={s.id} style={{ width: 4, height: 4, borderRadius: "50%", background: i <= stg ? s.color : "hsla(0,0%,100%,0.1)", transition: "background 0.2s" }} />
+          ))}
+        </div>
+      </button>
+      <div style={{ marginTop: "0.5rem", display: "flex" }}>
+        <button
+          onClick={(e) => { e.stopPropagation(); setProofOpen(p => !p); }}
+          style={{
+            fontSize: "0.575rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.1em",
+            textTransform: "uppercase", color: LYTE,
+            background: `${LYTE}10`, border: `1px solid ${LYTE}25`,
+            padding: "1px 6px", borderRadius: 3, cursor: "pointer",
+            display: "flex", alignItems: "center", gap: 3,
+          }}
+          data-testid={`button-view-proof-sit-${sit.id}`}
+        >
+          <FileCheck size={9} /> {proofOpen ? "Hide proof" : "View proof"}
+        </button>
       </div>
-      <div style={{ display: "flex", gap: "0.375rem", marginBottom: "0.625rem", flexWrap: "wrap" }}>
-        <DomainChip domain={sit.domain} />
-        <StageChip stage={sit.stage} />
-      </div>
-      <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.5rem", fontSize: "0.6875rem", color: TEXT_FAINT }}>
-        <span>Owner: <span style={{ color: sit.owner === "Unassigned" ? "hsl(30,90%,52%)" : TEXT_SEC }}>{sit.owner}</span></span>
-        <span style={{ color: BORDER }}>·</span>
-        <span>Pending: <span style={{ color: TEXT_SEC }}>{sit.pending}</span></span>
-      </div>
-      <div style={{ height: 3, borderRadius: 2, background: "hsla(0,0%,100%,0.06)", overflow: "hidden" }}>
-        <div style={{ height: "100%", width: `${progress}%`, background: `linear-gradient(90deg, ${LYTE}, hsl(215,72%,60%))`, borderRadius: 2 }} />
-      </div>
-      <div style={{ display: "flex", justifyContent: "space-between", marginTop: "0.3rem" }}>
-        {STAGE_FLOW.map((s, i) => (
-          <div key={s.id} style={{ width: 4, height: 4, borderRadius: "50%", background: i <= stg ? s.color : "hsla(0,0%,100%,0.1)", transition: "background 0.2s" }} />
-        ))}
-      </div>
-    </button>
+      {proofOpen && (
+        <div style={{ marginTop: "0.5rem" }}>
+          <ProofDrawer proof={SIT_PROOF_RECORDS[sit.id] ?? SAMPLE_PROOF_RECORD} compact={true} defaultOpen={true} />
+        </div>
+      )}
+    </div>
   );
 }
 
