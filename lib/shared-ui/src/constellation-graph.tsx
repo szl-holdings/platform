@@ -468,9 +468,9 @@ function tickSim(
     b.vy -= dy * f;
   }
   for (let i = 0; i < sim.length; i++) {
-    const a = sim[i];
+    const a = sim[i]!;
     for (let j = i + 1; j < sim.length; j++) {
-      const b = sim[j];
+      const b = sim[j]!;
       const dx = b.x - a.x;
       const dy = b.y - a.y;
       const d = Math.sqrt(dx * dx + dy * dy) || 1;
@@ -896,7 +896,7 @@ export function ConstellationGraph({
   // Resize observer
   useEffect(() => {
     if (!containerRef.current) return;
-    const ro = new ResizeObserver(([e]) => setWidth(e.contentRect.width));
+    const ro = new ResizeObserver(([e]) => setWidth(e!.contentRect.width));
     ro.observe(containerRef.current);
     return () => ro.disconnect();
   }, []);
@@ -1235,7 +1235,7 @@ export function ConstellationGraph({
           id,
           entityType: "external",
           name: "Cross-domain entity",
-          domain: undefined, // unknown until enriched — disables navigation until then
+          // domain intentionally absent — unknown until enriched, disables navigation until then
         };
       }),
     ];
@@ -2604,7 +2604,7 @@ export function ConstellationGraph({
                     <circle
                       r={r + 3}
                       fill="none"
-                      stroke={DISTANCE_COLORS[Math.min(traceDistances[n.id], DISTANCE_COLORS.length - 1)]}
+                      stroke={DISTANCE_COLORS[Math.min(traceDistances[n.id]!, DISTANCE_COLORS.length - 1)]}
                       strokeWidth={n.id === traceOriginId ? 2.5 : 1.5}
                       strokeOpacity={0.85}
                     />
@@ -2622,7 +2622,7 @@ export function ConstellationGraph({
                       x={r + 4}
                       y={-r}
                       textAnchor="start"
-                      fill={DISTANCE_COLORS[Math.min(traceDistances[n.id], DISTANCE_COLORS.length - 1)]}
+                      fill={DISTANCE_COLORS[Math.min(traceDistances[n.id]!, DISTANCE_COLORS.length - 1)]}
                       fontSize={9}
                       fontWeight={700}
                       style={{ pointerEvents: "none" }}

@@ -161,7 +161,6 @@ export const WORKFLOWS: WorkflowEntity[] = [
     status: "healthy",
     latency_ms: 43200000,
     sla_ms: 86400000,
-    blocked_step: undefined,
     value_at_risk: 0,
     last_updated: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
     correlation_id: "corr-launch-v4",
@@ -542,7 +541,7 @@ export const WORKFLOWS_UI: WorkflowUI[] = WORKFLOWS.map(w => {
       { name: "CRM Trigger", status: "completed", assignee: "System" },
       { name: "Contract Gen", status: "completed", assignee: "Alloy" },
       { name: "Internal Review", status: "completed", assignee: "Jordan Alvarez" },
-      { name: "Legal Review", status: "blocked", assignee: undefined },
+      { name: "Legal Review", status: "blocked" },
       { name: "DocuSign", status: "pending" },
       { name: "Billing Activate", status: "pending" },
     ],
@@ -606,7 +605,7 @@ export const WORKFLOWS_UI: WorkflowUI[] = WORKFLOWS.map(w => {
     state: w.status,
     type: typeMap[w.id] ?? "workflow",
     sla_deadline: slaMap[w.id] ?? "2026-04-07",
-    block_reason: w.blocked_step,
+    ...(w.blocked_step !== undefined ? { block_reason: w.blocked_step } : {}),
     steps: stepMap[w.id] ?? [],
   };
 });
@@ -629,7 +628,7 @@ export const CONNECTORS_UI: ConnectorUI[] = CONNECTORS.map(c => ({
   latency_ms: { "conn-sf": 210, "conn-jira": 180, "conn-slack": 95, "conn-sage": 840, "conn-docusign": 320, "conn-gh": 145, "conn-stripe": 0, "conn-zendesk": 195 }[c.id] ?? 200,
   type: "REST API",
   category: { "conn-sf": "CRM", "conn-jira": "PM", "conn-slack": "Messaging", "conn-sage": "ERP", "conn-docusign": "eSignature", "conn-gh": "DevOps", "conn-stripe": "Payments", "conn-zendesk": "Support" }[c.id] ?? "Integration",
-  last_error: c.status === "auth_failed" ? "Auth token expired — API key needs rotation" : c.status === "degraded" ? "High error rate detected — partial sync only" : undefined,
+  ...(c.status === "auth_failed" ? { last_error: "Auth token expired — API key needs rotation" } : c.status === "degraded" ? { last_error: "High error rate detected — partial sync only" } : {}),
   last_sync: new Date(c.last_sync).toLocaleString(),
 }));
 

@@ -113,7 +113,7 @@ function applyToProjection(record: Intervention, current: State): State {
             ...prev,
             resolvedBy: record.actor,
             resolvedAt: record.timestamp,
-            resolutionNote: record.notes,
+            ...(record.notes !== undefined ? { resolutionNote: record.notes } : {}),
             resolveProofRef: record.proofRef,
           },
         },
@@ -129,7 +129,7 @@ function applyToProjection(record: Intervention, current: State): State {
           ...current.debt,
           [record.itemId]: {
             ...prev,
-            reassignedTo: record.newOwner,
+            ...(record.newOwner !== undefined ? { reassignedTo: record.newOwner } : {}),
             reassignedBy: record.actor,
             reassignedAt: record.timestamp,
             reassignProofRef: record.proofRef,
@@ -146,7 +146,7 @@ function applyToProjection(record: Intervention, current: State): State {
             ...prev,
             addressedBy: record.actor,
             addressedAt: record.timestamp,
-            addressedNote: record.notes,
+            ...(record.notes !== undefined ? { addressedNote: record.notes } : {}),
             addressedProofRef: record.proofRef,
           },
         },
@@ -222,8 +222,8 @@ async function recordIntervention(input: {
     itemTitle: input.itemTitle,
     type: input.type,
     actor: state.operator,
-    notes: input.notes,
-    newOwner: input.newOwner,
+    ...(input.notes !== undefined ? { notes: input.notes } : {}),
+    ...(input.newOwner !== undefined ? { newOwner: input.newOwner } : {}),
     proofRef: localFallbackProofRef(),
     timestamp,
   };
@@ -240,7 +240,7 @@ export async function resolveDrift(item: { id: string; title: string }, note: st
     itemKind: "drift",
     itemTitle: item.title,
     type: "resolve",
-    notes: note || undefined,
+    ...(note ? { notes: note } : {}),
   });
 }
 

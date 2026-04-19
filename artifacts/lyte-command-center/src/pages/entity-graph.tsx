@@ -85,7 +85,7 @@ export default function EntityGraphPage() {
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-3 px-3 py-1.5 rounded border border-amber-500/15 bg-amber-500/5">
             {["active", "stalled", "blocked", "void"].map(s => {
-              const sts = STATUS_CONFIG[s];
+              const sts = STATUS_CONFIG[s]!;
               return (
                 <div key={s} className="flex items-center gap-1">
                   <span className={sts.color}>{sts.icon}</span>
@@ -145,8 +145,8 @@ export default function EntityGraphPage() {
               </div>
 
               {(() => {
-                const cfg = NODE_TYPE_CONFIG[selected.type];
-                const sts = STATUS_CONFIG[selected.status];
+                const cfg = NODE_TYPE_CONFIG[selected.type]!;
+                const sts = STATUS_CONFIG[selected.status]!;
                 return (
                   <>
                     <div className={`flex items-center gap-2 p-3 rounded-lg ${cfg.bg} border ${cfg.border}`}>

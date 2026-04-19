@@ -82,7 +82,7 @@ function traceEntityFunnel(
 
   const stepToStepMs: number[] = [];
   for (let i = 1; i < stepTimestamps.length; i++) {
-    stepToStepMs.push(stepTimestamps[i].getTime() - stepTimestamps[i - 1].getTime());
+    stepToStepMs.push(stepTimestamps[i]!.getTime() - stepTimestamps[i - 1]!.getTime());
   }
 
   return {
@@ -130,7 +130,7 @@ export function runFunnelAnalysis(
 
     const timesToStep = traces
       .filter(t => t.stepToStepMs[idx] !== undefined)
-      .map(t => t.stepToStepMs[idx]);
+      .map(t => t.stepToStepMs[idx]!);
     const avgTimeToStep = timesToStep.length > 0
       ? timesToStep.reduce((s, v) => s + v, 0) / timesToStep.length / 1000
       : undefined;
@@ -144,8 +144,8 @@ export function runFunnelAnalysis(
       count: reachedThis,
       conversionRate: reachedPrev > 0 ? (reachedThis / reachedPrev) * 100 : 0,
       dropoffRate: reachedPrev > 0 ? ((reachedPrev - reachedThis) / reachedPrev) * 100 : 0,
-      avgTimeToStep,
-      segments,
+      ...(avgTimeToStep !== undefined ? { avgTimeToStep } : {}),
+      ...(segments !== undefined ? { segments } : {}),
     };
   });
 

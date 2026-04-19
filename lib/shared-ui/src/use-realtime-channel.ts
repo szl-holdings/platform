@@ -277,7 +277,7 @@ export function useRealtimeChannel<T = unknown>(
               event: parsed.event ?? "message",
               data: parsed.data as T,
               timestamp: parsed.timestamp ?? Date.now(),
-              seq: parsed.seq,
+              ...(parsed.seq !== undefined ? { seq: parsed.seq } : {}),
             });
             return;
           }

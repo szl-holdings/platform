@@ -26,7 +26,7 @@ const SCOPE_CONFIG: Record<string, string> = {
 
 function PolicyCard({ rule }: { rule: PolicyRule }) {
   const [expanded, setExpanded] = useState(false);
-  const cfg = EFFECT_CONFIG[rule.effect];
+  const cfg = EFFECT_CONFIG[rule.effect]!;
   const recent = policyEvaluationLog.filter(e => e.policyId === rule.id);
 
   return (
@@ -89,7 +89,7 @@ function PolicyCard({ rule }: { rule: PolicyRule }) {
             <div>
               <p className="text-[9px] font-mono text-amber-400/40 mb-2">RECENT EVALUATIONS</p>
               {recent.map(log => {
-                const outCfg = OUTCOME_CONFIG[log.outcome];
+                const outCfg = OUTCOME_CONFIG[log.outcome]!;
                 return (
                   <div key={log.id} className="flex items-start gap-3 py-2 border-b border-amber-500/5 last:border-0">
                     <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded border shrink-0 ${outCfg.color} bg-opacity-10 border-current/20`}>{outCfg.label}</span>

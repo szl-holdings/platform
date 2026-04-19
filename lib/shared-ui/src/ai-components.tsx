@@ -285,7 +285,7 @@ export function AnomalySparkline({
       {anomalyIndices.map((idx) => {
         if (idx >= data.length) return null;
         const x = idx * step;
-        const y = height - ((data[idx] - min) / range) * (height - 4) - 2;
+        const y = height - ((data[idx]! - min) / range) * (height - 4) - 2;
         return (
           <g key={idx}>
             <circle cx={x} cy={y} r={4} fill="none" stroke="#c45a4a" strokeWidth={2}>

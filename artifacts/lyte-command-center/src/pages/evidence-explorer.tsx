@@ -21,7 +21,7 @@ const FRESHNESS_COLORS: Record<string, string> = {
 
 function EvidenceCard({ ev }: { ev: EvidenceItem }) {
   const [expanded, setExpanded] = useState(false);
-  const cfg = TYPE_CONFIG[ev.type] ?? TYPE_CONFIG.system;
+  const cfg = (TYPE_CONFIG[ev.type] ?? TYPE_CONFIG["system"])!;
 
   return (
     <div className={`cockpit-panel border ${cfg.border}`}>

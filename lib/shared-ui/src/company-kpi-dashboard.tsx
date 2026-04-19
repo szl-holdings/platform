@@ -307,8 +307,8 @@ function Sparkline({ data, color, width = 64, height = 28 }: { data: number[]; c
         opacity="0.8"
       />
       <circle
-        cx={pts[pts.length - 1].split(",")[0]}
-        cy={pts[pts.length - 1].split(",")[1]}
+        cx={pts[pts.length - 1]!.split(",")[0]!}
+        cy={pts[pts.length - 1]!.split(",")[1]!}
         r="2.5"
         fill={color}
         opacity="1"

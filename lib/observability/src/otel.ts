@@ -72,7 +72,7 @@ class OtelSpanWrapper implements Span {
   setStatus(status: "ok" | "error", message?: string): Span {
     this.nativeSpan.setStatus({
       code: status === "ok" ? api.SpanStatusCode.OK : api.SpanStatusCode.ERROR,
-      message,
+      ...(message !== undefined ? { message } : {}),
     });
     return this;
   }
@@ -285,9 +285,10 @@ export function getOtelConfig(): {
   newRelic: boolean;
   initialized: boolean;
 } {
+  const otlpEndpoint = process.env.OTLP_ENDPOINT ?? process.env.OTEL_EXPORTER_OTLP_ENDPOINT;
   return {
     serviceName: process.env.OTEL_SERVICE_NAME ?? "szl-api",
-    otlpEndpoint: process.env.OTLP_ENDPOINT ?? process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
+    ...(otlpEndpoint !== undefined ? { otlpEndpoint } : {}),
     azureMonitor: !!process.env.AZURE_APP_INSIGHTS_CONNECTION_STRING,
     newRelic: !!process.env.NEW_RELIC_LICENSE_KEY,
     initialized: otelInitialized,

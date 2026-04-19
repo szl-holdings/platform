@@ -253,7 +253,7 @@ export class MetricTimeSeriesSimulator {
         durationMs: parseFloat(dbMs.toFixed(1)),
         startOffset: offset,
         detail: query,
-        error: hasError && i === dbCount - 1 ? "Connection pool exhausted" : undefined,
+        ...(hasError && i === dbCount - 1 ? { error: "Connection pool exhausted" } : {}),
       });
       offset += dbMs;
     }
@@ -281,7 +281,7 @@ export class MetricTimeSeriesSimulator {
       statusCode,
       timestamp: nowMs - Math.floor(rng.range(0, 3_600_000)),
       spans,
-      userId: rng.bool(0.7) ? `usr_${rng.int(10000, 99999)}` : undefined,
+      ...(rng.bool(0.7) ? { userId: `usr_${rng.int(10000, 99999)}` } : {}),
       deployVersion: `v${rng.int(3, 5)}.${rng.int(10, 20)}.${rng.int(0, 8)}`,
     };
   }

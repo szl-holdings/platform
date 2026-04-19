@@ -57,7 +57,7 @@ export function MicroFeedbackWidget({
   const handleVote = useCallback(async (s: FeedbackSentiment) => {
     setSentiment(s);
     if (s === "positive") {
-      const payload: FeedbackPayload = { featureId, featureName, app, sentiment: s, context };
+      const payload: FeedbackPayload = { featureId, featureName, app, sentiment: s, ...(context !== undefined ? { context } : {}) };
       await submitFeedback(payload);
       if (onSubmit) await onSubmit(payload);
       setState("submitted");
@@ -68,7 +68,7 @@ export function MicroFeedbackWidget({
 
   const handleSubmitComment = useCallback(async () => {
     if (!sentiment) return;
-    const payload: FeedbackPayload = { featureId, featureName, app, sentiment, comment: comment.trim() || undefined, context };
+    const payload: FeedbackPayload = { featureId, featureName, app, sentiment, ...(comment.trim() ? { comment: comment.trim() } : {}), ...(context !== undefined ? { context } : {}) };
     await submitFeedback(payload);
     if (onSubmit) await onSubmit(payload);
     setState("submitted");

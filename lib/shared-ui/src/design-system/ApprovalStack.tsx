@@ -119,7 +119,7 @@ export function ApprovalStack({
             const token = colors.reviewState[approver.state];
             return (
               <div key={approver.id} className="flex items-center gap-2.5">
-                <ApproverAvatar approver={approver} accentColor={accentColor} />
+                <ApproverAvatar approver={approver} {...(accentColor !== undefined ? { accentColor } : {})} />
                 <div className="flex-1 min-w-0">
                   <p className="text-[12px] font-medium truncate" style={{ color: colors.text.primary }}>
                     {approver.name}
@@ -147,7 +147,7 @@ export function ApprovalStack({
       ) : (
         <div className="flex items-center gap-1">
           {approvers.map((approver) => (
-            <ApproverAvatar key={approver.id} approver={approver} accentColor={accentColor} />
+            <ApproverAvatar key={approver.id} approver={approver} {...(accentColor !== undefined ? { accentColor } : {})} />
           ))}
         </div>
       )}

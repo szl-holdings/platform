@@ -283,7 +283,7 @@ export class LivingMeshStream {
       "firestorm-soc": 25000,
       default: 10000,
     };
-    const baseRate = BASE_REVENUE_PER_HOUR[service] ?? BASE_REVENUE_PER_HOUR.default;
+    const baseRate = (BASE_REVENUE_PER_HOUR[service] ?? BASE_REVENUE_PER_HOUR.default) as number;
     const impactFraction = Math.min(1, errorRatePct / 100);
     const hoursAffected = durationMs / 3_600_000;
     return baseRate * impactFraction * hoursAffected;
@@ -323,7 +323,7 @@ export function seedLivingMeshData(): void {
         throughput: 100 + Math.random() * 900,
         status: score > 70 ? "alive" : score > 50 ? "degraded" : "critical",
         anomalyDetected: anomaly,
-        anomalyScore: anomaly ? 60 + Math.random() * 40 : undefined,
+        ...(anomaly ? { anomalyScore: 60 + Math.random() * 40 } : {}),
       });
     }
   }

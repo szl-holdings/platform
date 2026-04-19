@@ -330,9 +330,9 @@ export function ExplainabilityToggle({ explainability, context, accentColor }: E
   return (
     <ExplainabilityPanel
       explainability={explainability}
-      context={context}
+      {...(context !== undefined ? { context } : {})}
       variant="drawer"
-      accentColor={accentColor}
+      {...(accentColor !== undefined ? { accentColor } : {})}
     />
   );
 }

@@ -1,0 +1,41 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "ui": "tui",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["src/**", "tsconfig.json", "tsconfig*.json", "vite.config.*", "build.mjs"],
+      "outputs": ["dist/**", "build/**", ".next/**"]
+    },
+    "typecheck": {
+      "dependsOn": ["^build"],
+      "inputs": ["src/**", "tsconfig.json", "tsconfig*.json", "../../tsconfig.base.json"],
+      "outputs": []
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "inputs": ["src/**", "tests/**", "vitest.config.*"],
+      "outputs": ["coverage/**"]
+    },
+    "test:watch": {
+      "cache": false,
+      "persistent": true
+    },
+    "lint": {
+      "inputs": ["src/**", "biome.json", "../../biome.json"],
+      "outputs": []
+    },
+    "lint:ci": {
+      "inputs": ["src/**", "biome.json", "../../biome.json", ".oxlintrc.json", "../../.oxlintrc.json"],
+      "outputs": []
+    },
+    "format": {
+      "inputs": ["src/**"],
+      "outputs": []
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    }
+  }
+}

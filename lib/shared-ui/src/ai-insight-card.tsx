@@ -237,10 +237,10 @@ async function fetchLiveInsights(domain: InsightDomain): Promise<AIInsight[] | n
         confidence: Number(r.confidence ?? r.confidenceScore ?? 0.75),
         severity: (r.severity ?? "info") as InsightSeverity,
         domain,
-        recommendedAction: r.recommendedAction ? String(r.recommendedAction) : undefined,
+        ...(r.recommendedAction ? { recommendedAction: String(r.recommendedAction) } : {}),
         relatedEntities: Array.isArray(r.entities) ? r.entities.map(String) : [],
         generatedAt: new Date(String(r.generatedAt ?? r.enrichedAt ?? r.detectedAt ?? Date.now())),
-        agentId: r.agentId ? String(r.agentId) : undefined,
+        ...(r.agentId ? { agentId: String(r.agentId) } : {}),
       };
     });
   } catch {

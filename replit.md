@@ -10,6 +10,19 @@ Ask before making major changes.
 Do not make changes to the folder `Z`.
 Do not make changes to the file `Y`.
 
+## Toolchain (Phase 1 Modernization — Task #2381)
+- **Node:** 24 LTS (pinned in `.nvmrc` / `.node-version`; `engines.node: >=24.0.0`)
+- **Package manager:** pnpm 10.26.1
+- **Build orchestration:** Turborepo 2.9.6 (`turbo.json` — cached pipelines: `build`, `test`, `lint`, `lint:ci`, `typecheck`, `format`)
+- **Linter:** Biome 2.4.12 (`biome.json`) + Oxlint 1.60.0 (`.oxlintrc.json`)
+- **Root scripts:** `pnpm lint` → Biome lint; `pnpm lint:ci` → Oxlint + Biome; `pnpm format` → Biome format --write; `pnpm typecheck` → turbo run typecheck; `pnpm test` → turbo run test
+- **ESLint + Prettier removed:** `eslint.config.js` and `.prettierrc.cjs` deleted; `@eslint/js`, `eslint`, `prettier`, `@typescript-eslint/*` devDeps removed
+- **Pre-commit hook:** `scripts/setup-hooks.sh` installs a hook that runs Biome + Oxlint on staged `.ts/.tsx/.js/.jsx/.json/.css` files only (fast path)
+- **tsconfig.base.json strict flags added:** `strict: true`, `noImplicitOverride: true`, `forceConsistentCasingInFileNames: true`, `verbatimModuleSyntax: true`, `target: ESNext`. Note: `module/moduleResolution` kept as `esnext/bundler` to preserve Vite compatibility; `noUncheckedIndexedAccess` and `exactOptionalPropertyTypes` deferred to a later phase to avoid widespread breakage.
+- **Override errors fixed:** `lib/shared-ui/src/error-boundary.tsx`, `lib/mobile-shared/src/components/ErrorBoundary.tsx`, `lib/api-client-react/src/custom-fetch.ts`
+- **Duplicate package names resolved:** `lib/action-engine`, `lib/decision-engine`, `lib/policy-engine`, `lib/domain-claims` renamed to `@szl-holdings/lib-*` variants so turbo's package graph is valid
+- **Script normalization:** All 97 workspace packages (packages/*, lib/*, artifacts/*) now expose `lint`, `lint:ci`, `format`, `typecheck`, `test:watch` scripts where applicable
+
 ## System Architecture
 The platform is a pnpm monorepo using TypeScript 5.9, React 19, Vite, and Node.js. It employs a micro-frontend architecture for web applications, routed via a shared gateway proxy on port 9090.
 

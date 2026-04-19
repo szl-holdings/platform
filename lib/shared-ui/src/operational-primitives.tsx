@@ -444,7 +444,7 @@ export function OperationalDetailPane({ entity, title, children }: OperationalDe
           <div className="flex items-center gap-2 flex-wrap mt-1.5">
             {entity.status && <OperationalStatusBadge status={entity.status} size="xs" />}
             {(entity.riskLevel || entity.riskScore !== undefined) && (
-              <OperationalRiskBadge level={entity.riskLevel} score={entity.riskScore} size="xs" showScore />
+              <OperationalRiskBadge {...(entity.riskLevel !== undefined ? { level: entity.riskLevel } : {})} {...(entity.riskScore !== undefined ? { score: entity.riskScore } : {})} size="xs" showScore />
             )}
             {entity.approvalState && entity.approvalState !== "none" && (
               <OperationalApprovalBadge state={entity.approvalState} size="xs" />
@@ -457,7 +457,7 @@ export function OperationalDetailPane({ entity, title, children }: OperationalDe
       <div className="grid grid-cols-2 gap-3">
         <div className="rounded px-3 py-2.5" style={{ background: BG_ELEVATED, border: `1px solid ${BORDER_MUTED}` }}>
           <p className="text-[8px] uppercase tracking-wider font-semibold mb-1.5" style={{ color: TEXT_MUTED }}>Owner</p>
-          <OperationalOwnerChip owner={entity.owner} />
+          <OperationalOwnerChip {...(entity.owner !== undefined ? { owner: entity.owner } : {})} />
         </div>
         <div className="rounded px-3 py-2.5" style={{ background: BG_ELEVATED, border: `1px solid ${BORDER_MUTED}` }}>
           <p className="text-[8px] uppercase tracking-wider font-semibold mb-1.5" style={{ color: TEXT_MUTED }}>Next Action</p>
@@ -469,7 +469,7 @@ export function OperationalDetailPane({ entity, title, children }: OperationalDe
 
       {/* Evidence + Rationale */}
       {((entity.evidence && entity.evidence.length > 0) || entity.rationale) && (
-        <OperationalEvidencePanel items={entity.evidence ?? []} rationale={entity.rationale} />
+        <OperationalEvidencePanel items={entity.evidence ?? []} {...(entity.rationale !== undefined ? { rationale: entity.rationale } : {})} />
       )}
 
       {/* Escalation Paths */}
@@ -529,9 +529,9 @@ export function OperationalQueueRow({ entity, onClick, selected = false }: Queue
         <div className="flex items-center gap-2 flex-wrap">
           {entity.status && <OperationalStatusBadge status={entity.status} size="xs" />}
           {(entity.riskLevel || entity.riskScore !== undefined) && (
-            <OperationalRiskBadge level={entity.riskLevel} score={entity.riskScore} size="xs" />
+            <OperationalRiskBadge {...(entity.riskLevel !== undefined ? { level: entity.riskLevel } : {})} {...(entity.riskScore !== undefined ? { score: entity.riskScore } : {})} size="xs" />
           )}
-          <OperationalOwnerChip owner={entity.owner} size="xs" unassignedLabel="" />
+          <OperationalOwnerChip {...(entity.owner !== undefined ? { owner: entity.owner } : {})} size="xs" unassignedLabel="" />
           {entity.nextAction && (
             <span className="text-[9px] truncate ml-auto" style={{ color: ACCENT }}>
               {typeof entity.nextAction === "string" ? entity.nextAction : entity.nextAction.label}

@@ -392,7 +392,7 @@ export function RunConsole({
         <RunDetailPanel
           run={selectedRun}
           onClose={() => setSelectedRun(null)}
-          onReplay={onReplay}
+          {...(onReplay !== undefined ? { onReplay } : {})}
         />
       )}
     </div>

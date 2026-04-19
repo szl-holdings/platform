@@ -76,7 +76,7 @@ function setupGlobalHandlers(appSlug: string) {
 
 export function reportError(error: Error, context?: Record<string, string>) {
   if (isSentryInitialized() && Sentry.isInitialized()) {
-    Sentry.captureException(error, { tags: context });
+    Sentry.captureException(error, { ...(context !== undefined ? { tags: context } : {}) });
   }
   console.error("[ErrorTracking]", error.message, context);
 }
@@ -95,7 +95,7 @@ export function clearUser() {
 
 export function addBreadcrumb(message: string, category?: string, data?: Record<string, unknown>) {
   if (Sentry.isInitialized()) {
-    Sentry.addBreadcrumb({ message, category, data, level: "info" });
+    Sentry.addBreadcrumb({ message, ...(category !== undefined ? { category } : {}), ...(data !== undefined ? { data } : {}), level: "info" });
   }
 }
 

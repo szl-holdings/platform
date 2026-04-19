@@ -31,7 +31,7 @@ export function CrdtEntityPanel({
     { notes: initialNotes, status: initialStatus },
     {
       actorId,
-      schema,
+      ...(schema !== undefined ? { schema } : {}),
       apiBaseUrl,
       onMerge: () => setShowMerge(true),
     }

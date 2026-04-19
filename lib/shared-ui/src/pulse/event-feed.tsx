@@ -8,14 +8,14 @@ export interface PulseEvent {
 }
 
 export function generatePulseEvent(agents: { name: string; domain: string }[], eventTypes: { type: string; messages: string[] }[]): PulseEvent {
-  const agent = agents[Math.floor(Math.random() * agents.length)];
-  const et = eventTypes[Math.floor(Math.random() * eventTypes.length)];
+  const agent = agents[Math.floor(Math.random() * agents.length)]!;
+  const et = eventTypes[Math.floor(Math.random() * eventTypes.length)]!;
   const severities: PulseEvent["severity"][] = ["info", "info", "info", "low", "low", "medium", "high"];
   return {
     id: `evt-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
     type: et.type, agent: agent.name, domain: agent.domain,
-    severity: severities[Math.floor(Math.random() * severities.length)],
-    message: et.messages[Math.floor(Math.random() * et.messages.length)],
+    severity: severities[Math.floor(Math.random() * severities.length)]!,
+    message: et.messages[Math.floor(Math.random() * et.messages.length)]!,
     timestamp: Date.now(),
   };
 }

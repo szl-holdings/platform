@@ -572,7 +572,7 @@ function RecommendationCard({
         </div>
         <PolicyStateChip
           state={policyOutcomeToState(r.policyEvaluation.outcome)}
-          reason={r.policyEvaluation.reason}
+          {...(r.policyEvaluation.reason !== undefined ? { reason: r.policyEvaluation.reason } : {})}
         />
       </div>
       <div className="flex items-center gap-4 mt-2.5">
@@ -910,7 +910,7 @@ function EvidenceChainDrawer({
                 </span>
                 <PolicyStateChip
                   state={policyOutcomeToState(chain.recommendation.policyEvaluation.outcome)}
-                  reason={chain.recommendation.policyEvaluation.reason}
+                  {...(chain.recommendation.policyEvaluation.reason !== undefined ? { reason: chain.recommendation.policyEvaluation.reason } : {})}
                 />
               </div>
               <h2 className="text-[15px] font-semibold" style={{ color: TEXT }}>
@@ -1368,7 +1368,7 @@ export function EvidenceExplorer({ domainFilter, title = "Evidence Explorer" }: 
 
   return (
     <div className="flex flex-col h-full relative" style={{ background: "#080c14" }}>
-      <StatusBar status={status} title={title} />
+      <StatusBar {...(status !== undefined ? { status } : {})} title={title} />
       <FilterBar
         domain={filterMemo.domain}
         onDomain={(d) => { setDomain(d); setSelectedRec(null); }}
@@ -1376,7 +1376,7 @@ export function EvidenceExplorer({ domainFilter, title = "Evidence Explorer" }: 
         onStatus={(s) => { setRecStatus(s); setSelectedRec(null); }}
         onRefresh={handleRefresh}
         isFetching={isFetching}
-        lockedDomain={domainFilter}
+        {...(domainFilter !== undefined ? { lockedDomain: domainFilter } : {})}
       />
 
       <div className="flex-1 grid overflow-hidden" style={{ gridTemplateColumns: "minmax(0,1fr) minmax(0,1fr)" }}>

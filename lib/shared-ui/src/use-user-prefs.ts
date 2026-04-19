@@ -83,7 +83,7 @@ function getServerSnapshot(): UserPrefs {
 function getCsrfToken(): string {
   if (typeof document === "undefined") return "";
   const m = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
-  return m ? decodeURIComponent(m[1]) : "";
+  return m ? decodeURIComponent(m[1]!) : "";
 }
 
 async function hydrateFromServer(): Promise<void> {

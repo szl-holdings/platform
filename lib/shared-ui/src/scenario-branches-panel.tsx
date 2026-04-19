@@ -215,7 +215,7 @@ function BranchCard({ branch, accentColor, depth = 0, onSelect }: BranchCardProp
       {/* Child branches */}
       {expanded && branch.childBranches?.map((child) => (
         <div key={child.id} className="mt-2">
-          <BranchCard branch={child} accentColor={accentColor} depth={depth + 1} onSelect={onSelect} />
+          <BranchCard branch={child} accentColor={accentColor} depth={depth + 1} {...(onSelect !== undefined ? { onSelect } : {})} />
         </div>
       ))}
     </div>
@@ -307,7 +307,7 @@ export function ScenarioBranchesPanel({
               key={branch.id}
               branch={branch}
               accentColor={accentColor}
-              onSelect={onSelectBranch}
+              {...(onSelectBranch !== undefined ? { onSelect: onSelectBranch } : {})}
             />
           ))}
         </div>

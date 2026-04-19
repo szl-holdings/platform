@@ -292,9 +292,7 @@ function buildExplainability(content: string, agentName: string): Explainability
     recommendedAction: hasRecommendation
       ? "Review the suggestion above and confirm before taking action — this is advisory only"
       : "Use this information as context for your next decision",
-    alternativeActions: hasRecommendation
-      ? ["Request a more detailed analysis", "Compare with historical baselines", "Escalate to domain expert if uncertain"]
-      : undefined,
+    ...(hasRecommendation ? { alternativeActions: ["Request a more detailed analysis", "Compare with historical baselines", "Escalate to domain expert if uncertain"] } : {}),
     layer: "UNDERSTAND",
   };
 }

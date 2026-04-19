@@ -62,7 +62,7 @@ export function LoadingSkeleton({
     return (
       <Bone
         dark={dark}
-        className={className}
+        {...(className !== undefined ? { className } : {})}
         style={{ width: width ?? "100%", height: height ?? "120px" } as React.CSSProperties}
       />
     );

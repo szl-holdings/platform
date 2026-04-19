@@ -72,14 +72,14 @@ export function listReceipts(options: {
 export function isExportSafe(contentType: string, contentId: string): boolean {
   const receipts = receiptStore.getByContent(contentType, contentId);
   if (receipts.length === 0) return true;
-  const latest = receipts[receipts.length - 1];
+  const latest = receipts[receipts.length - 1]!;
   return latest.exportSafe;
 }
 
 export function assertExportSafe(contentType: string, contentId: string): void {
   const receipts = receiptStore.getByContent(contentType, contentId);
   if (receipts.length === 0) return;
-  const latest = receipts[receipts.length - 1];
+  const latest = receipts[receipts.length - 1]!;
   if (!latest.exportSafe) {
     throw Object.assign(
       new Error(`Content ${contentType}:${contentId} is not export safe — status: ${latest.status}, policy: ${latest.policyClass}`),

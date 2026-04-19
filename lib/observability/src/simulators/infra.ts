@@ -234,8 +234,8 @@ export class InfraSimulator {
     const rand = rng.next();
     let state: GpuState = "plateau";
     for (let i = 0; i < states.length; i++) {
-      cumWeight += stateWeights[i];
-      if (rand < cumWeight) { state = states[i]; break; }
+      cumWeight += stateWeights[i]!;
+      if (rand < cumWeight) { state = states[i]!; break; }
     }
 
     const vramTotal = vramByModel[model] * gpuCount;
@@ -249,7 +249,7 @@ export class InfraSimulator {
       throttle: [88, 100],
       error: [10, 45],
     };
-    const [uMin, uMax] = utilByState[state];
+    const [uMin, uMax] = utilByState[state]!;
     const util = rng.range(uMin, uMax);
 
     const vramUsed = (util / 100) * vramTotal * rng.range(0.85, 1.05);
@@ -289,13 +289,13 @@ export class InfraSimulator {
       powerLimitWatts: powerLimit,
       nvlinkBandwidthGbps: parseFloat((nvlinkMax * nvlinkUtil).toFixed(1)),
       nvlinkBandwidthMaxGbps: nvlinkMax,
-      activeJob,
+      ...(activeJob !== undefined ? { activeJob } : {}),
       eccErrorCount: state === "error" ? rng.int(5, 150) : state === "throttle" ? rng.int(0, 4) : 0,
       xidEvents: this.generateXidEvents(rng, state, nowMs),
       thermalCurve: this.generateThermalCurve(state, 20, nowMs),
       tokenThroughput: hasJob ? rng.range(40_000, 280_000) : 0,
-      trainingLoss,
-      gradientNorm,
+      ...(trainingLoss !== undefined ? { trainingLoss } : {}),
+      ...(gradientNorm !== undefined ? { gradientNorm } : {}),
     };
   }
 
@@ -310,7 +310,7 @@ export class InfraSimulator {
 
     const nodes: GpuNode[] = nodeConfigs.map((cfg, i) => {
       const tier = i < 2 ? 0 : 1;
-      const name = NODE_NAMES[tier][i < 2 ? i : i - 2];
+      const name = NODE_NAMES[tier]![i < 2 ? i : i - 2]!;
       return this.generateGpuNode(`node-${String(i + 1).padStart(2, "0")}`, name, cfg.model, cfg.count, nowMs);
     });
 
@@ -398,7 +398,7 @@ export class InfraSimulator {
         service: rng.pick(services),
         action: isAnomalous && rng.bool(0.4) ? "DENY" : rng.bool(0.1) ? "INSPECT" : "ALLOW",
         anomalous: isAnomalous,
-        threatLabel: isAnomalous ? rng.pick(threats) : undefined,
+        ...(isAnomalous ? { threatLabel: rng.pick(threats) } : {}),
         geo: direction === "egress" ? rng.pick(["US", "DE", "CN", "RU", "NL", "SG", "GB"]) : "internal",
         timestamp: nowMs - rng.range(0, 3_600_000),
       };

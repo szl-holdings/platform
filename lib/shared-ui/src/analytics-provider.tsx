@@ -62,7 +62,7 @@ export function AnalyticsProvider({ appName, children, enabled = true }: Analyti
 
   const track = useCallback((name: string, properties?: Record<string, unknown>) => {
     if (!enabled) return;
-    EVENT_QUEUE.push({ name, properties, timestamp: Date.now() });
+    EVENT_QUEUE.push({ name, ...(properties !== undefined ? { properties } : {}), timestamp: Date.now() });
     if (EVENT_QUEUE.length >= FLUSH_BATCH_SIZE) {
       flushEvents(appName);
     }

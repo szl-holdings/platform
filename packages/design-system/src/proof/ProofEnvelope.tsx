@@ -148,11 +148,11 @@ export function ProofEnvelope({
           <FreshnessChip timestamp={timestamp} showAbsolute />
           <ConfidenceMeter
             value={confidence}
-            contradiction={contradiction}
+            {...(contradiction !== undefined ? { contradiction } : {})}
             label="Confidence"
             variant="compact"
           />
-          <PolicyStateChip state={effectivePolicyState} reason={effectivePolicyReason} />
+          <PolicyStateChip state={effectivePolicyState} {...(effectivePolicyReason !== undefined ? { reason: effectivePolicyReason } : {})} />
           <div className="ml-auto">
             <AutonomyModeToggle
               value={autonomyMode}

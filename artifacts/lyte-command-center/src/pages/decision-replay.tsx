@@ -140,8 +140,8 @@ export default function DecisionReplayPage() {
   useEffect(() => {
     if (!data?.scenarios?.length) return;
     const initial = params.id
-      ? (data.scenarios.find(s => s.id === params.id) ?? data.scenarios[0])
-      : data.scenarios[0];
+      ? (data.scenarios.find(s => s.id === params.id) ?? data.scenarios[0]!)
+      : data.scenarios[0]!;
     setActiveScenario(prev => prev?.id === initial.id ? prev : initial);
   }, [data, params.id]);
 

@@ -209,7 +209,7 @@ export function GraphCanvas({
   function hitTest(mx: number, my: number, W: number, H: number): GraphNode | null {
     // Iterate in reverse so visually top-most nodes are picked first.
     for (let i = nodes.length - 1; i >= 0; i--) {
-      const node = nodes[i];
+      const node = nodes[i]!;
       const nx = node.x * W;
       const ny = node.y * H;
       const r  = (node.radius ?? 8) + 6;

@@ -51,6 +51,16 @@ const SIGNAL_TYPE_LABELS: Record<string, string> = {
 };
 
 function toSignalProfile(sig: SignalItem): SignalProfile {
+  const stalledDays = sig.type === "approval_chain_stall" ? 47
+    : sig.type === "deliverable_overdue" ? 22
+    : sig.type === "ownership_gap" ? 28
+    : undefined;
+  const financialExposureUsd = sig.type === "revenue_risk" ? 4_200_000
+    : sig.type === "workflow_bottleneck" ? 7_800_000
+    : sig.type === "policy_violation" ? 3_400_000
+    : sig.type === "budget_leakage" ? 340_000
+    : sig.type === "approval_chain_stall" ? 1_800_000
+    : undefined;
   return {
     id: sig.id,
     severity: sig.severity,
@@ -60,16 +70,8 @@ function toSignalProfile(sig: SignalItem): SignalProfile {
     isPolicyBlocked: sig.policyState === "blocked",
     hasBuyerEngagementRisk: sig.type === "buyer_engagement_decay",
     isSecurityRelated: sig.type === "policy_violation" || sig.type === "escalation_blocked",
-    stalledDays: sig.type === "approval_chain_stall" ? 47
-      : sig.type === "deliverable_overdue" ? 22
-      : sig.type === "ownership_gap" ? 28
-      : undefined,
-    financialExposureUsd: sig.type === "revenue_risk" ? 4_200_000
-      : sig.type === "workflow_bottleneck" ? 7_800_000
-      : sig.type === "policy_violation" ? 3_400_000
-      : sig.type === "budget_leakage" ? 340_000
-      : sig.type === "approval_chain_stall" ? 1_800_000
-      : undefined,
+    ...(stalledDays !== undefined ? { stalledDays } : {}),
+    ...(financialExposureUsd !== undefined ? { financialExposureUsd } : {}),
     affectedStakeholders: 3,
   };
 }

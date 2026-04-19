@@ -117,12 +117,12 @@ export function computeRollingStats(values: number[]): RollingStats {
   return {
     mean,
     stddev,
-    min: sorted[0],
-    max: sorted[n - 1],
+    min: sorted[0]!,
+    max: sorted[n - 1]!,
     count: n,
-    p50: percentile(0.5),
-    p95: percentile(0.95),
-    p99: percentile(0.99),
+    p50: percentile(0.5)!,
+    p95: percentile(0.95)!,
+    p99: percentile(0.99)!,
   };
 }
 
@@ -173,8 +173,8 @@ export function buildMetricQueryResult(
     periodEnd: to,
     dataPoints: sorted,
     currentValue,
-    previousValue,
-    changePercent,
+    ...(previousValue !== undefined ? { previousValue } : {}),
+    ...(changePercent !== undefined ? { changePercent } : {}),
     trend: detectTrend(sorted),
   };
 }

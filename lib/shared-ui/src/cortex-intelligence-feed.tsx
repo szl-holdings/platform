@@ -529,8 +529,8 @@ export function CortexIntelligenceFeed({
               signal={signal}
               expanded={expandedId === signal.id}
               onToggle={() => handleToggle(signal)}
-              onGenerateDrafts={onGenerateDrafts}
-              onAcknowledge={onAcknowledge}
+              {...(onGenerateDrafts !== undefined ? { onGenerateDrafts } : {})}
+              {...(onAcknowledge !== undefined ? { onAcknowledge } : {})}
             />
           ))}
         </div>

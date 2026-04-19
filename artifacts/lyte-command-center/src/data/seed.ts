@@ -36,7 +36,7 @@ export const overviewMetrics: OverviewMetric[] = [
   { id: "approval-queue", label: "Stalled Approvals", value: 8, delta: "+3 this week", trend: "up", good: "down", context: "Total approvals frozen >14 days without owner action", severity: "critical" },
   { id: "workflow-health", label: "Workflow Health", value: "62%", delta: "-11pp vs last month", trend: "down", good: "up", context: "38% of tracked workflows have at least one bottleneck", severity: "high" },
   { id: "rec-backlog", label: "Decision Backlog", value: 14, delta: "6 critical", trend: "up", good: "down", context: "Unaddressed recommendations pending human decision", severity: "high" },
-  { id: "evidence-coverage", label: "Evidence Coverage", value: "94%", delta: "+2pp", trend: "up", good: "up", context: "Decisions with full evidence chain attached", severity: undefined },
+  { id: "evidence-coverage", label: "Evidence Coverage", value: "94%", delta: "+2pp", trend: "up", good: "up", context: "Decisions with full evidence chain attached" },
 ];
 
 export const overviewSummary: OverviewSummary = {

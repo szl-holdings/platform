@@ -467,14 +467,14 @@ export function SimulationResultCard({
 
       {!compact && (
         <>
-          <ProbabilityDensityPlot histogram={histogram} stats={stats} format={metric.format} height={160} />
-          <CumulativeDistributionCurve cdf={cdf} stats={stats} format={metric.format} height={160} />
+          <ProbabilityDensityPlot histogram={histogram} stats={stats} {...(metric.format !== undefined ? { format: metric.format } : {})} height={160} />
+          <CumulativeDistributionCurve cdf={cdf} stats={stats} {...(metric.format !== undefined ? { format: metric.format } : {})} height={160} />
           {tornado && baselineMean !== undefined && tornado.length > 0 && (
             <TornadoDiagram
               tornado={tornado}
               baselineMean={baselineMean}
               outputLabel={metric.label}
-              format={metric.format}
+              {...(metric.format !== undefined ? { format: metric.format } : {})}
               maxEntries={6}
             />
           )}

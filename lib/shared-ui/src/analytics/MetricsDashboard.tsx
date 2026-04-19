@@ -132,7 +132,7 @@ export function MetricsDashboard({
             <MetricCard
               result={{ metricId: widget.metricId ?? "", domain, granularity: "day", periodStart: new Date(), periodEnd: new Date(), dataPoints: [], currentValue: 0, trend: "stable" }}
               label={widget.title ?? widget.metricId ?? ""}
-              unit={widget.unit}
+              {...(widget.unit !== undefined ? { unit: widget.unit } : {})}
               loading={true}
             />
           );
@@ -141,10 +141,10 @@ export function MetricsDashboard({
           <MetricCard
             result={result}
             label={widget.title ?? result.metricId}
-            unit={widget.unit}
-            thresholdWarning={widget.thresholdWarning}
-            thresholdCritical={widget.thresholdCritical}
-            thresholdDirection={widget.thresholdDirection}
+            {...(widget.unit !== undefined ? { unit: widget.unit } : {})}
+            {...(widget.thresholdWarning !== undefined ? { thresholdWarning: widget.thresholdWarning } : {})}
+            {...(widget.thresholdCritical !== undefined ? { thresholdCritical: widget.thresholdCritical } : {})}
+            {...(widget.thresholdDirection !== undefined ? { thresholdDirection: widget.thresholdDirection } : {})}
             loading={isLoading}
           />
         );
@@ -167,10 +167,10 @@ export function MetricsDashboard({
           <TimeSeriesChart
             result={result}
             label={widget.title ?? result.metricId}
-            unit={widget.unit}
-            color={widget.color}
-            thresholdWarning={widget.thresholdWarning}
-            thresholdCritical={widget.thresholdCritical}
+            {...(widget.unit !== undefined ? { unit: widget.unit } : {})}
+            {...(widget.color !== undefined ? { color: widget.color } : {})}
+            {...(widget.thresholdWarning !== undefined ? { thresholdWarning: widget.thresholdWarning } : {})}
+            {...(widget.thresholdCritical !== undefined ? { thresholdCritical: widget.thresholdCritical } : {})}
             loading={isLoading}
           />
         );
@@ -182,7 +182,7 @@ export function MetricsDashboard({
         return (
           <FunnelChart
             result={result ?? { funnelId: widget.funnelId, domain, periodStart: new Date(), periodEnd: new Date(), totalEntries: 0, totalCompletions: 0, overallConversionRate: 0, steps: [] }}
-            label={widget.title}
+            {...(widget.title !== undefined ? { label: widget.title } : {})}
             loading={isLoading || !result}
           />
         );
@@ -194,7 +194,7 @@ export function MetricsDashboard({
         return (
           <CohortMatrix
             result={result ?? { cohortId: widget.cohortId, domain, analysisType: "retention", cohorts: [], overallRetentionRate: 0 }}
-            label={widget.title}
+            {...(widget.title !== undefined ? { label: widget.title } : {})}
             loading={isLoading || !result}
           />
         );
@@ -206,7 +206,7 @@ export function MetricsDashboard({
             anomalies={anomalies}
             label={widget.title ?? "Anomaly Feed"}
             loading={isLoading}
-            onResolve={onResolveAnomaly}
+            {...(onResolveAnomaly !== undefined ? { onResolve: onResolveAnomaly } : {})}
           />
         );
       }

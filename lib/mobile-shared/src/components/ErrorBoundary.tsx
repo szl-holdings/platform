@@ -36,7 +36,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     return { error };
   }
 
-  componentDidCatch(error: Error, info: { componentStack: string }): void {
+  override componentDidCatch(error: Error, info: { componentStack: string }): void {
     console.error("[ErrorBoundary]", error);
     if (typeof this.props.onError === "function") {
       this.props.onError(error, info.componentStack);
@@ -47,7 +47,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     this.setState({ error: null });
   };
 
-  render() {
+  override render() {
     const { FallbackComponent } = this.props;
     return this.state.error && FallbackComponent ? (
       <FallbackComponent error={this.state.error} resetError={this.resetError} />

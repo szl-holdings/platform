@@ -1,5 +1,5 @@
 {
-  "name": "@szl-holdings/domain-claims",
+  "name": "@szl-holdings/lib-domain-claims",
   "version": "0.0.0",
   "private": false,
   "type": "module",
@@ -8,7 +8,12 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "test": "vitest run"
+    "test": "vitest run",
+    "lint": "biome lint ./src",
+    "lint:ci": "biome lint ./src",
+    "format": "biome format --write ./src",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test:watch": "vitest"
   },
   "devDependencies": {
     "@types/node": "catalog:",

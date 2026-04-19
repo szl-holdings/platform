@@ -190,7 +190,7 @@ export function EnvironmentLabel({ environment }: {
     seeded: { color: "#d4a054", label: "SEEDED DATA" },
     simulated: { color: "#d4a054", label: "SIMULATED" },
   };
-  const cfg = configs[environment] || configs.demo;
+  const cfg = (configs[environment] || configs.demo) as { color: string; label: string };
 
   return (
     <span className="text-[8px] font-mono font-semibold tracking-wider px-2 py-0.5 rounded" style={{

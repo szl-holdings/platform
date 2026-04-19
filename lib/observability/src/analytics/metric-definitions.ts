@@ -302,7 +302,7 @@ export function calculate(values: number[], type: CalculationType): number {
     case "max": return Math.max(...values);
     case "distinct_count": return new Set(values).size;
     case "rate": return (values.filter(v => v > 0).length / values.length) * 100;
-    case "ratio": return values.length >= 2 ? values[0] / values[1] : 0;
+    case "ratio": return values.length >= 2 ? values[0]! / values[1]! : 0;
     case "percentile": {
       const sorted = [...values].sort((a, b) => a - b);
       const p95idx = Math.floor(sorted.length * 0.95);

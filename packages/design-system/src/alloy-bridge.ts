@@ -68,9 +68,9 @@ export function ledgerEntriesToEvidence(entries: LedgerEntry[]): EvidenceSource[
     .map((e) => ({
       id:        e.entryId,
       label:     e.description,
-      type:      (e.type === "approval" ? "user" : "api") as EvidenceSource["type"],
+      type:      (e.type === "approval" ? "user" : "api") as "signal" | "model" | "user" | "document" | "api",
       timestamp: e.timestamp,
-      excerpt:   e.metadata?.summary as string | undefined,
+      ...(e.metadata?.summary !== undefined ? { excerpt: e.metadata.summary as string } : {}),
     }));
 }
 

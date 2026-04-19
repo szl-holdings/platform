@@ -1920,7 +1920,7 @@ export function EcosystemNav({
       {showSearch && (
         <GlobalSearchPanel
           onClose={() => setShowSearch(false)}
-          onSearch={onSearch}
+          {...(onSearch !== undefined ? { onSearch } : {})}
         />
       )}
 

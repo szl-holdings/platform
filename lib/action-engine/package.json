@@ -1,5 +1,5 @@
 {
-  "name": "@szl-holdings/action-engine",
+  "name": "@szl-holdings/lib-action-engine",
   "version": "0.0.0",
   "private": true,
   "type": "module",

@@ -12,7 +12,10 @@
     "./env-contract": "./src/env-contract.ts"
   },
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint": "biome lint ./src",
+    "lint:ci": "biome lint ./src",
+    "format": "biome format --write ./src"
   },
   "devDependencies": {
     "typescript": "^5.4.5"

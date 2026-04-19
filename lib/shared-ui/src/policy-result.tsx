@@ -192,7 +192,7 @@ function PolicyResultCard({ decision, accentColor = "#8b5cf6", onEscalate, onApp
               <SectionLabel>Approval History</SectionLabel>
               <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
                 {decision.approvalHistory.map((h, i) => {
-                  const hcfg = APPROVAL_CONFIG[h.decision] ?? APPROVAL_CONFIG.pending;
+                  const hcfg = (APPROVAL_CONFIG[h.decision] ?? APPROVAL_CONFIG.pending) as NonNullable<typeof APPROVAL_CONFIG.pending>;
                   return (
                     <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8, padding: "5px 8px", background: "rgba(255,255,255,0.02)", borderRadius: 5 }}>
                       <span style={{ color: hcfg.color, fontWeight: 700, flexShrink: 0 }}>{hcfg.icon}</span>
@@ -303,9 +303,9 @@ export function PolicyResult({ decision, variant = "card", accentColor = "#8b5cf
       <PolicyResultCard
         decision={decision}
         accentColor={accentColor}
-        onEscalate={onEscalate}
-        onAppeal={onAppeal}
-        showDetails={showDetails}
+        {...(onEscalate !== undefined ? { onEscalate } : {})}
+        {...(onAppeal !== undefined ? { onAppeal } : {})}
+        {...(showDetails !== undefined ? { showDetails } : {})}
         variant={variant}
       />
     </div>

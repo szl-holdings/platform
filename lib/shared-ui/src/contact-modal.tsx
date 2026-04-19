@@ -64,7 +64,7 @@ export function ContactModal({
   const [submitState, setSubmitState] = useState<SubmitState>("idle");
   const [errorMsg, setErrorMsg] = useState<string>("");
 
-  const labels = TYPE_LABELS[type] ?? TYPE_LABELS.general;
+  const labels = (TYPE_LABELS[type] ?? TYPE_LABELS["general"])!;
   const heading = title ?? labels.heading;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {

@@ -63,7 +63,7 @@ function CascadeCard({ cascade, index }: { cascade: WhatIfCascade; index: number
     icon: "◆",
     color: "#6b7280",
   };
-  const impact = IMPACT_CONFIG[cascade.impact];
+  const impact = IMPACT_CONFIG[cascade.impact]!;
 
   return (
     <div

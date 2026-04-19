@@ -241,7 +241,7 @@ export function ObservabilityPanel() {
   const topSignal = state.topSignal;
   const velocityTrendArr = state.velocityTrend;
   const velocityTrend = velocityTrendArr && velocityTrendArr.length >= 2
-    ? Number((((velocityTrendArr[velocityTrendArr.length - 1] - velocityTrendArr[0]) / Math.max(1, velocityTrendArr[0])) * 100).toFixed(1))
+    ? Number((((velocityTrendArr[velocityTrendArr.length - 1]! - velocityTrendArr[0]!) / Math.max(1, velocityTrendArr[0]!)) * 100).toFixed(1))
     : undefined;
 
   return (

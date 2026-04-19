@@ -331,7 +331,7 @@ export async function apiFetch<T>(path: string, options?: ApiFetchOptions): Prom
           const code = detectSessionRevocationCode(errBody);
           if (code) {
             const message = extractServerMessage(errBody) ?? undefined;
-            notifySessionRevoked(code, { message });
+            notifySessionRevoked(code, { ...(message !== undefined ? { message } : {}) });
           }
         }
         const apiErr = new ApiError(
@@ -412,7 +412,7 @@ export async function graphqlRequest<T = unknown>(
         headers,
         credentials: "include",
         body: JSON.stringify({ query, variables }),
-        signal,
+        signal: signal ?? null,
       });
       if (!res.ok) {
         const apiErr = new ApiError(`GraphQL HTTP ${res.status}`, res.status);

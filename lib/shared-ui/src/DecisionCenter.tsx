@@ -140,7 +140,7 @@ function JustificationModal({
   onCancel: () => void;
 }) {
   const [text, setText] = React.useState("");
-  const cfg = ACTION_BUTTON[action];
+  const cfg = ACTION_BUTTON[action]!;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
@@ -220,7 +220,7 @@ export function RecommendationCard({
       await onAction(rec.id, action, justification);
       setAuditLog(prev => [...prev, {
         action,
-        justification,
+        ...(justification !== undefined ? { justification } : {}),
         at: new Date().toISOString(),
       }]);
     } finally {
@@ -354,7 +354,7 @@ export function RecommendationCard({
                       disabled={acting}
                       onClick={() => requestAction("rollback")}
                       className="rounded px-3 py-1.5 text-[11px] font-medium transition-opacity disabled:opacity-50"
-                      style={{ background: ACTION_BUTTON.rollback.bg, color: ACTION_BUTTON.rollback.color, border: `1px solid ${ACTION_BUTTON.rollback.border}` }}
+                      style={{ background: ACTION_BUTTON.rollback!.bg, color: ACTION_BUTTON.rollback!.color, border: `1px solid ${ACTION_BUTTON.rollback!.border}` }}
                     >
                       Rollback
                     </button>
@@ -378,7 +378,7 @@ export function RecommendationCard({
                     )}
                     <div className="flex items-center gap-2">
                       {(["approve", "reject", "escalate"] as RecommendationAction[]).map(action => {
-                        const cfg = ACTION_BUTTON[action];
+                        const cfg = ACTION_BUTTON[action]!;
                         return (
                           <button
                             key={action}
@@ -565,10 +565,10 @@ export function DecisionCenter({
               <RecommendationCard
                 key={rec.id}
                 rec={rec}
-                onAction={onAction}
+                {...(onAction !== undefined ? { onAction } : {})}
                 onOpenEvidence={setEvidenceRec}
                 defaultExpanded={i === 0 && filter === "pending"}
-                accentColor={accentColor}
+                {...(accentColor !== undefined ? { accentColor } : {})}
               />
             ))}
           </div>

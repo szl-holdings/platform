@@ -84,9 +84,7 @@ export function createServerAnalyticsSDK(
             statusCode: response.statusCode,
             durationMs,
           },
-          context: {
-            userId: request.user?.id ? String(request.user.id) : undefined,
-          },
+          ...(request.user?.id ? { context: { userId: String(request.user.id) } } : {}),
           numericValue: durationMs,
           occurredAt: new Date(),
         });
@@ -189,13 +187,13 @@ export function createClientAnalytics(config: ClientAnalyticsConfig) {
       eventName,
       sourceApp,
       domain,
-      properties,
+      ...(properties !== undefined ? { properties } : {}),
       serverSide: false,
       context: {
         sessionId,
-        url: typeof window !== "undefined" ? window.location.href : undefined,
-        referrer: typeof document !== "undefined" ? document.referrer : undefined,
-        userAgent: typeof navigator !== "undefined" ? navigator.userAgent : undefined,
+        ...(typeof window !== "undefined" ? { url: window.location.href } : {}),
+        ...(typeof document !== "undefined" ? { referrer: document.referrer } : {}),
+        ...(typeof navigator !== "undefined" ? { userAgent: navigator.userAgent } : {}),
       },
       ...overrides,
       queuedAt: Date.now(),

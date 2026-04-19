@@ -389,10 +389,10 @@ export function OnboardingWizard({ config, onComplete, onSkip }: OnboardingWizar
 
   if (!active || steps.length === 0) return null;
 
-  const step = steps[currentStep];
+  const step = steps[currentStep]!;
 
   return (
-    <SpotlightOverlay targetSelector={step.targetSelector}>
+    <SpotlightOverlay {...(step.targetSelector !== undefined ? { targetSelector: step.targetSelector } : {})}>
       <StepCard
         step={step}
         currentIndex={currentStep}

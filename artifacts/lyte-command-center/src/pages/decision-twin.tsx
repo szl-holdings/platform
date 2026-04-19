@@ -31,30 +31,29 @@ import {
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function toSignalProfile(sig: SignalItem): SignalProfile {
-  const meta = {
-    hasOwnershipGap: sig.type === "ownership_gap" || sig.type === "approval_chain_stall",
-    isPolicyBlocked: sig.policyState === "blocked",
-    hasBuyerEngagementRisk: sig.type === "buyer_engagement_decay",
-    isSecurityRelated: sig.type === "policy_violation" || sig.type === "escalation_blocked",
-    stalledDays: sig.type === "approval_chain_stall" ? 47
-      : sig.type === "deliverable_overdue" ? 22
-      : sig.type === "ownership_gap" ? 28
-      : undefined,
-    financialExposureUsd: sig.type === "revenue_risk" ? 4_200_000
-      : sig.type === "workflow_bottleneck" ? 7_800_000
-      : sig.type === "policy_violation" ? 3_400_000
-      : sig.type === "budget_leakage" ? 340_000
-      : sig.type === "approval_chain_stall" ? 1_800_000
-      : undefined,
-    affectedStakeholders: 3,
-  };
+  const stalledDays = sig.type === "approval_chain_stall" ? 47
+    : sig.type === "deliverable_overdue" ? 22
+    : sig.type === "ownership_gap" ? 28
+    : undefined;
+  const financialExposureUsd = sig.type === "revenue_risk" ? 4_200_000
+    : sig.type === "workflow_bottleneck" ? 7_800_000
+    : sig.type === "policy_violation" ? 3_400_000
+    : sig.type === "budget_leakage" ? 340_000
+    : sig.type === "approval_chain_stall" ? 1_800_000
+    : undefined;
 
   return {
     id: sig.id,
     severity: sig.severity,
     type: sig.type,
     confidence: sig.confidence,
-    ...meta,
+    hasOwnershipGap: sig.type === "ownership_gap" || sig.type === "approval_chain_stall",
+    isPolicyBlocked: sig.policyState === "blocked",
+    hasBuyerEngagementRisk: sig.type === "buyer_engagement_decay",
+    isSecurityRelated: sig.type === "policy_violation" || sig.type === "escalation_blocked",
+    ...(stalledDays !== undefined ? { stalledDays } : {}),
+    ...(financialExposureUsd !== undefined ? { financialExposureUsd } : {}),
+    affectedStakeholders: 3,
   };
 }
 
@@ -239,7 +238,7 @@ function ScenarioCompareTable({ scenarios }: { scenarios: DecisionTwinScenario[]
                   const bImpact = best.prismImpacts.find(i => i.dimension === dim);
                   const cImpact = curr.prismImpacts.find(i => i.dimension === dim);
                   return (bImpact?.riskAfter ?? 999) > (cImpact?.riskAfter ?? 999) ? curr : best;
-                }, scenarios[0]).action === s.action;
+                }, scenarios[0]!).action === s.action;
 
                 return (
                   <td key={s.action} className={`p-3 text-center ${isBest ? "bg-emerald-500/5" : ""}`}>
@@ -301,7 +300,7 @@ function AuditPanel({ signalId, scenarios }: { signalId: string; scenarios: Deci
       selectedScenario.overallRiskBefore,
       selectedScenario.overallRiskAfter,
       selectedScenario.overallDelta,
-      { operator: "Demo Operator", modificationNote: note || undefined },
+      { operator: "Demo Operator", ...(note ? { modificationNote: note } : {}) },
     );
     setSubmitted(true);
     setNote("");
@@ -573,7 +572,7 @@ export default function DecisionTwinPage() {
     const params = new URLSearchParams(search);
     const fromUrl = params.get("signal");
     if (fromUrl && signalItems.some(s => s.id === fromUrl)) return fromUrl;
-    return signalItems[0].id;
+    return signalItems[0]!.id;
   }
 
   const [selectedSignalId, setSelectedSignalId] = useState(resolveInitialSignalId);
@@ -588,7 +587,7 @@ export default function DecisionTwinPage() {
     }
   }, [search]);
 
-  const selectedSignal = signalItems.find(s => s.id === selectedSignalId) ?? signalItems[0];
+  const selectedSignal = signalItems.find(s => s.id === selectedSignalId) ?? signalItems[0]!;
   const profile = useMemo(() => toSignalProfile(selectedSignal), [selectedSignal]);
   const scenarios = useMemo(() => runAllDecisionTwinScenarios(profile), [profile]);
   const best = useMemo(() => getBestScenario(scenarios), [scenarios]);
@@ -600,7 +599,7 @@ export default function DecisionTwinPage() {
     medium: { text: "text-amber-400", border: "border-amber-500/25" },
     low: { text: "text-sky-400", border: "border-sky-500/25" },
   };
-  const sevCfg = SEV_COLORS[selectedSignal.severity];
+  const sevCfg = SEV_COLORS[selectedSignal.severity]!;
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-5">
@@ -620,7 +619,7 @@ export default function DecisionTwinPage() {
           </p>
         </div>
         <button
-          onClick={() => exportBriefing(selectedSignal, scenarios, best)}
+          onClick={() => exportBriefing(selectedSignal, scenarios, best!)}
           className="flex items-center gap-2 px-3.5 py-2 rounded-md bg-amber-500/8 border border-amber-500/20 text-amber-300 text-xs font-medium hover:bg-amber-500/12 transition-colors shrink-0"
         >
           <Printer className="w-3.5 h-3.5" />

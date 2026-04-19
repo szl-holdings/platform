@@ -153,9 +153,9 @@ function tickSimulation(
   }
 
   for (let i = 0; i < simNodes.length; i++) {
-    const ni = simNodes[i];
+    const ni = simNodes[i]!;
     for (let j = i + 1; j < simNodes.length; j++) {
-      const nj = simNodes[j];
+      const nj = simNodes[j]!;
       const dx = nj.x - ni.x;
       const dy = nj.y - ni.y;
       const dist = Math.sqrt(dx * dx + dy * dy) || 1;
@@ -233,7 +233,7 @@ export function CortexEntityGraph({
   useEffect(() => {
     if (!containerRef.current) return;
     const observer = new ResizeObserver(([entry]) => {
-      setCanvasWidth(entry.contentRect.width);
+      setCanvasWidth(entry!.contentRect.width);
     });
     observer.observe(containerRef.current);
     return () => observer.disconnect();

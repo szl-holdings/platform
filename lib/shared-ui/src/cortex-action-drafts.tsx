@@ -448,8 +448,8 @@ export function CortexActionDrafts({
               draft={draft}
               expanded={expandedId === draft.id}
               onToggle={() => setExpandedId((prev) => (prev === draft.id ? null : draft.id))}
-              onApprove={onApprove}
-              onDismiss={onDismiss}
+              {...(onApprove !== undefined ? { onApprove } : {})}
+              {...(onDismiss !== undefined ? { onDismiss } : {})}
             />
           ))}
         </div>

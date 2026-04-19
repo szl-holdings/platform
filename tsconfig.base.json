@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "strict": true,
     "isolatedModules": true,
     "jsx": "react-jsx",
     "lib": ["es2022"],
@@ -7,19 +8,23 @@
     "moduleResolution": "bundler",
     "noEmitOnError": true,
     "noFallthroughCasesInSwitch": true,
-    "noImplicitOverride": false,
+    "noImplicitOverride": true,
     "noImplicitReturns": true,
     "noUnusedLocals": false,
     "noImplicitAny": true,
     "noImplicitThis": true,
     "strictNullChecks": true,
-    "strictFunctionTypes": false,
+    "strictFunctionTypes": true,
     "strictBindCallApply": true,
     "strictPropertyInitialization": true,
     "useUnknownInCatchVariables": true,
     "alwaysStrict": true,
+    "forceConsistentCasingInFileNames": true,
+    "verbatimModuleSyntax": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
     "skipLibCheck": true,
-    "target": "es2022",
+    "target": "ESNext",
     "types": [],
     "customConditions": ["workspace"]
   }

@@ -11,6 +11,33 @@ fi
 
 mkdir -p "$HOOKS_DIR"
 
+cat > "$HOOKS_DIR/pre-commit" << 'HOOK'
+#!/usr/bin/env sh
+# Pre-commit: run Biome format + Oxlint on staged files only (fast path).
+set -e
+
+STAGED=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.(ts|tsx|js|jsx|json|css)$' || true)
+
+if [ -z "$STAGED" ]; then
+  exit 0
+fi
+
+echo "Running biome format on staged files..."
+echo "$STAGED" | xargs node_modules/.bin/biome format --write
+
+echo "Running oxlint on staged files..."
+echo "$STAGED" | xargs node_modules/.bin/oxlint --quiet
+
+echo "Running biome lint on staged files..."
+echo "$STAGED" | xargs node_modules/.bin/biome lint
+
+# Re-add any files that biome formatted
+echo "$STAGED" | xargs git add --
+HOOK
+
+chmod +x "$HOOKS_DIR/pre-commit"
+echo "setup-hooks: pre-commit hook installed at $HOOKS_DIR/pre-commit"
+
 cat > "$HOOKS_DIR/pre-push" << 'HOOK'
 #!/usr/bin/env sh
 # Brand drift guard — runs on every git push.

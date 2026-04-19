@@ -300,7 +300,7 @@ export function PowerUserProvider({
 }) {
   const { showHelp, setShowHelp } = useKeyboardShortcuts({
     shortcuts,
-    onSearchFocus,
+    ...(onSearchFocus !== undefined ? { onSearchFocus } : {}),
   });
 
   return (
@@ -309,9 +309,9 @@ export function PowerUserProvider({
       <ShortcutHelpOverlay
         open={showHelp}
         onClose={() => setShowHelp(false)}
+        {...(appName !== undefined ? { appName } : {})}
+        {...(accentColor !== undefined ? { accentColor } : {})}
         shortcuts={shortcuts}
-        appName={appName}
-        accentColor={accentColor}
       />
     </>
   );

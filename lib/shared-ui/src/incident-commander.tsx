@@ -214,7 +214,7 @@ function ContainmentPanel({
       </div>
       <div className="flex flex-col gap-2">
         {steps.map((step, i) => {
-          const cfg = STEP_CFG[step.status];
+          const cfg = STEP_CFG[step.status]!;
           return (
             <div
               key={step.id}
@@ -457,7 +457,7 @@ export function IncidentCommander({
         {tab === "overview" && (
           <ContainmentPanel
             steps={incident.containmentSteps}
-            onAction={onContainmentStepAction}
+            {...(onContainmentStepAction !== undefined ? { onAction: onContainmentStepAction } : {})}
           />
         )}
         {tab === "timeline" && <TimelinePanel events={incident.timeline} />}

@@ -718,9 +718,9 @@ export function UnifiedKnowledgeGraphViz({
           </button>
         ))}
       </div>
-      {layout === "force" && <KnowledgeGraphViz data={data} width={width} height={height} onNodeClick={onNodeClick} />}
-      {layout === "hierarchical" && <HierarchicalGraphViz data={data} width={width} height={height} onNodeClick={onNodeClick} />}
-      {layout === "timeline" && <TimelineGraphViz data={data} width={width} height={height} onNodeClick={onNodeClick} />}
+      {layout === "force" && <KnowledgeGraphViz data={data} width={width} height={height} {...(onNodeClick !== undefined ? { onNodeClick } : {})} />}
+      {layout === "hierarchical" && <HierarchicalGraphViz data={data} width={width} height={height} {...(onNodeClick !== undefined ? { onNodeClick } : {})} />}
+      {layout === "timeline" && <TimelineGraphViz data={data} width={width} height={height} {...(onNodeClick !== undefined ? { onNodeClick } : {})} />}
     </div>
   );
 }

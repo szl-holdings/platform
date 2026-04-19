@@ -15,7 +15,7 @@ export function ParticleField({ accentColor = "#d4a054", particleCount = 50 }: {
       x: Math.random() * canvas.width, y: Math.random() * canvas.height,
       vx: (Math.random() - 0.5) * 0.4, vy: (Math.random() - 0.5) * 0.4,
       size: Math.random() * 2 + 0.5, alpha: Math.random() * 0.3 + 0.05,
-      color: colors[Math.floor(Math.random() * colors.length)],
+      color: colors[Math.floor(Math.random() * colors.length)]!,
     }));
     let animId: number;
     const animate = () => {
@@ -29,11 +29,11 @@ export function ParticleField({ accentColor = "#d4a054", particleCount = 50 }: {
       }
       for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
-          const dx = particles[i].x - particles[j].x, dy = particles[i].y - particles[j].y;
+          const dx = particles[i]!.x - particles[j]!.x, dy = particles[i]!.y - particles[j]!.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
           if (dist < 120) {
-            ctx.beginPath(); ctx.moveTo(particles[i].x, particles[i].y); ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.strokeStyle = particles[i].color; ctx.globalAlpha = (1 - dist / 120) * 0.06;
+            ctx.beginPath(); ctx.moveTo(particles[i]!.x, particles[i]!.y); ctx.lineTo(particles[j]!.x, particles[j]!.y);
+            ctx.strokeStyle = particles[i]!.color; ctx.globalAlpha = (1 - dist / 120) * 0.06;
             ctx.lineWidth = 0.5; ctx.stroke();
           }
         }

@@ -101,7 +101,7 @@ export default function RiskExposureDesk() {
               title="Escalation Recommended — Meridian Deadline"
               accentColor={ACCENT}
               evidence={DEADLINE_EVIDENCE}
-              timestamp={DEADLINE_EVIDENCE[0].timestamp}
+              timestamp={DEADLINE_EVIDENCE[0]!.timestamp}
               confidence={92}
               policyState={"requires-approval" as PolicyState}
               autonomyMode={escalationMode}
@@ -139,7 +139,7 @@ export default function RiskExposureDesk() {
               title="Budget Realignment — Sterling & Ross"
               accentColor={ACCENT}
               evidence={BUDGET_EVIDENCE}
-              timestamp={BUDGET_EVIDENCE[0].timestamp}
+              timestamp={BUDGET_EVIDENCE[0]!.timestamp}
               confidence={85}
               policyState={"allowed" as PolicyState}
               autonomyMode={budgetMode}

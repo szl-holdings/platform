@@ -335,7 +335,7 @@ export function ProofPanel({ proof, variant = "inline", accentColor = "#8b5cf6",
             {proof.proofId ? `#${proof.proofId}` : ""}
           </span>
         </div>
-        <ProofPanelInline proof={proof} accentColor={accentColor} onReview={onReview} showActions={showActions} />
+        <ProofPanelInline proof={proof} accentColor={accentColor} {...(onReview !== undefined ? { onReview } : {})} {...(showActions !== undefined ? { showActions } : {})} />
       </div>
     );
   }
@@ -350,7 +350,7 @@ export function ProofPanel({ proof, variant = "inline", accentColor = "#8b5cf6",
           <span style={{ marginLeft: "auto", fontSize: 9, color: TEXT.tertiary, fontFamily: "monospace" }}>#{proof.proofId}</span>
         )}
       </div>
-      <ProofPanelInline proof={proof} accentColor={accentColor} onReview={onReview} showActions={showActions} />
+      <ProofPanelInline proof={proof} accentColor={accentColor} {...(onReview !== undefined ? { onReview } : {})} {...(showActions !== undefined ? { showActions } : {})} />
     </div>
   );
 }

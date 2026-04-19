@@ -45,7 +45,7 @@ export function BatchPdfPanel({ appSource = "general", accentColor = "#8b7ac8", 
   const [expandedBatch, setExpandedBatch] = useState<string | null>(null);
 
   const appTemplates = DOCUMENT_TEMPLATES.filter(t => t.appSource === appSource || t.appSource === "general");
-  const entities = sampleEntities || DEMO_ENTITIES[appSource] || DEMO_ENTITIES.general;
+  const entities = (sampleEntities || DEMO_ENTITIES[appSource] || DEMO_ENTITIES.general)!;
 
   const loadBatches = useCallback(async () => {
     setLoading(true);

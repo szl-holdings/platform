@@ -45,5 +45,11 @@
     "lucide-react": "catalog:",
     "tailwind-merge": "catalog:",
     "@workspace/alloy": "workspace:*"
+  },
+  "scripts": {
+    "lint": "biome lint ./src",
+    "lint:ci": "biome lint ./src",
+    "format": "biome format --write ./src",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
   }
 }

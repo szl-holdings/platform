@@ -199,7 +199,6 @@
     "./command-mode": "./src/command-mode.tsx",
     "./doctrine-layer": "./src/doctrine-layer.ts",
     "./micro-feedback-widget": "./src/micro-feedback-widget.tsx",
-    "./decision-shield": "./src/decision-shield.tsx",
     "./stakeholder-lens": "./src/stakeholder-lens.tsx",
     "./sync-status-badge": "./src/sync-status-badge.tsx",
     "./use-web-sync-status": "./src/use-web-sync-status.ts",
@@ -284,5 +283,11 @@
   "devDependencies": {
     "@types/node": "catalog:",
     "@types/react": "catalog:"
+  },
+  "scripts": {
+    "lint": "biome lint ./src",
+    "lint:ci": "biome lint ./src",
+    "format": "biome format --write ./src",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
   }
 }

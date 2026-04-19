@@ -240,18 +240,18 @@ export class ThreatFeedSimulator {
         tlp,
         confidence,
         severity,
-        sources: sources.length > 0 ? sources : [allSources[0]],
+        sources: sources.length > 0 ? sources : [allSources[0]!],
         tags: [
           campaign?.actor ?? "unknown-actor",
-          iocType.split(":")[0],
+          iocType.split(":")[0]!,
           severity,
           ...(campaign?.targetSectors.slice(0, 1) ?? []),
         ],
         killChainPhase: campaign ? campaign.activePhase : rng.pick(killChainPhases),
-        aptCampaign: campaign?.name,
+        ...(campaign?.name !== undefined ? { aptCampaign: campaign.name } : {}),
         firstSeen,
         lastSeen: firstSeen + rng.range(0, (nowMs - firstSeen) * 0.9),
-        expiresAt: rng.bool(0.4) ? nowMs + rng.range(7, 90) * 86_400_000 : undefined,
+        ...(rng.bool(0.4) ? { expiresAt: nowMs + rng.range(7, 90) * 86_400_000 } : {}),
         mitreAttack,
         description: campaign
           ? `IOC attributed to ${campaign.name} (${campaign.alias}). Linked to ${campaign.activePhase} phase activity targeting ${campaign.targetSectors.join(", ")}.`

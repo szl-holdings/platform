@@ -172,7 +172,7 @@ export function EmbeddedSigner({
   const getPos = (e: React.MouseEvent | React.TouchEvent, canvas: HTMLCanvasElement) => {
     const rect = canvas.getBoundingClientRect();
     if ("touches" in e) {
-      const t = e.touches[0];
+      const t = e.touches[0]!;
       return { x: t.clientX - rect.left, y: t.clientY - rect.top };
     }
     return { x: (e as React.MouseEvent).clientX - rect.left, y: (e as React.MouseEvent).clientY - rect.top };

@@ -65,7 +65,7 @@ export function writeTwinAuditEvent(
     overallRiskBefore,
     overallRiskAfter,
     overallDelta,
-    modificationNote: opts?.modificationNote,
+    ...(opts?.modificationNote !== undefined ? { modificationNote: opts.modificationNote } : {}),
     proofRef: generateProofRef(signalId, action, verdict),
     timestamp: Date.now(),
   };

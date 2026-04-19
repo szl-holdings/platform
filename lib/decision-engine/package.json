@@ -1,5 +1,5 @@
 {
-  "name": "@szl-holdings/decision-engine",
+  "name": "@szl-holdings/lib-decision-engine",
   "version": "0.0.0",
   "private": true,
   "type": "module",

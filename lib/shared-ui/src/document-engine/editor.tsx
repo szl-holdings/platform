@@ -618,9 +618,9 @@ export function DocumentEditor({
         {!readOnly && (
           <EditorToolbar
             editor={editor}
-            mergeFields={suggestedFields}
+            mergeFields={suggestedFields ?? []}
             appSource={appSource}
-            documentId={documentId}
+            {...(documentId !== undefined ? { documentId } : {})}
           />
         )}
         <PlateContent

@@ -13,13 +13,14 @@
   },
   "type": "module",
   "scripts": {
-    "test": "vitest run"
+    "build": "tsc -p tsconfig.json",
+    "lint": "biome lint ./src",
+    "lint:ci": "biome lint ./src",
+    "format": "biome format --write ./src",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "exports": {
     ".": "./src/index.ts"
-  },
-  "scripts": {
-    "build": "tsc -p tsconfig.json"
   },
   "dependencies": {
     "@tanstack/react-query": "catalog:"

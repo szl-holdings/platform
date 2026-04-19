@@ -300,7 +300,7 @@ class ReceiptStore {
     return {
       receiptId,
       exportedAt: new Date(),
-      exportedByUserId,
+      ...(exportedByUserId !== undefined ? { exportedByUserId } : {}),
       orgId: receipt.orgId,
       receipt,
       graph,
@@ -310,7 +310,7 @@ class ReceiptStore {
 
   getExecutiveSummary(options: { orgId?: number | null; windowMs?: number } = {}): ExecutiveTrustSummary {
     const windowMs = options.windowMs ?? 86_400_000;
-    const items = this.list({ orgId: options.orgId, sinceMs: windowMs, limit: 5000 });
+    const items = this.list({ ...(options.orgId !== undefined ? { orgId: options.orgId } : {}), sinceMs: windowMs, limit: 5000 });
 
     const byClass = {} as Record<ReceiptClass, number>;
     const byStatus = {} as Record<ReceiptStatus, number>;

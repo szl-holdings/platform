@@ -32,7 +32,10 @@
   },
   "scripts": {
     "build": "tsc --build",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint": "biome lint ./src",
+    "lint:ci": "biome lint ./src",
+    "format": "biome format --write ./src"
   },
   "dependencies": {
     "@szl-holdings/decision-engine": "workspace:*",

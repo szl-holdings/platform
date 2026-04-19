@@ -35,7 +35,7 @@ export function exportToCSV(
   }
 
   const cols: ExportColumn[] = columns ??
-    Object.keys(data[0]).map((k) => ({ key: k, label: k }));
+    Object.keys(data[0]!).map((k) => ({ key: k, label: k }));
 
   const lines: string[] = [];
 
@@ -441,7 +441,7 @@ export function ExportableSection({
             {headerExtra}
           </div>
           {data && data.length > 0 && (
-            <ExportButton data={data} options={{ ...options, title: title ?? options?.title }} variant="compact" />
+            <ExportButton data={data} options={{ ...options, ...(title !== undefined ? { title } : (options?.title !== undefined ? { title: options.title } : {})) }} variant="compact" />
           )}
         </div>
       )}

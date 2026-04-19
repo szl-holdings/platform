@@ -163,7 +163,7 @@ export function ServiceStatusRail() {
   }, [fetchHealth]);
 
   const env = health?.mode ?? health?.environment ?? "development";
-  const envCfg = ENV_COLORS[env] ?? ENV_COLORS.development;
+  const envCfg = (ENV_COLORS[env] ?? ENV_COLORS.development) as NonNullable<typeof ENV_COLORS.development>;
   const overallStatus = health?.status;
   const isHealthy = !error && (overallStatus === "healthy" || overallStatus === "warning");
   const isConnected = !error && health != null;

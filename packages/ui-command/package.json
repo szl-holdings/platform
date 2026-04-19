@@ -31,5 +31,10 @@
     "lucide-react": "catalog:",
     "recharts": "catalog:",
     "tailwind-merge": "catalog:"
+  },
+  "scripts": {
+    "lint": "biome lint ./src",
+    "lint:ci": "biome lint ./src",
+    "format": "biome format --write ./src"
   }
 }

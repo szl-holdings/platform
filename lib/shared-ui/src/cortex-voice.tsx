@@ -67,7 +67,7 @@ async function defaultQueryHandler(query: string): Promise<CortexResult> {
 
     return {
       summary: data.summary ?? `Query processed: "${query}". Cross-domain intelligence aggregated.`,
-      domain: domain,
+      ...(domain !== undefined ? { domain } : {}),
       confidence: typeof data.confidence === "number" ? data.confidence : 0.75,
       actions,
     };

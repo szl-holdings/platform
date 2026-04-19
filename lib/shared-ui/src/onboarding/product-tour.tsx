@@ -130,7 +130,7 @@ export function ProductTour({
   }, [step?.target, visible, currentStep]);
 
   React.useEffect(() => {
-    if (visible) onStepChange?.(currentStep, step);
+    if (visible && step) onStepChange?.(currentStep, step);
   }, [currentStep, visible]);
 
   const handleDismiss = React.useCallback(() => {

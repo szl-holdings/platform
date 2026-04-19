@@ -390,9 +390,9 @@ class GenAITelemetryCollector {
     const byModel: GenAITelemetrySnapshot["modelCalls"]["byModel"] = {};
     for (const s of modelSpans) {
       if (!byModel[s.model]) byModel[s.model] = { count: 0, totalTokens: 0, totalCostUsd: 0, avgLatencyMs: 0 };
-      byModel[s.model].count++;
-      byModel[s.model].totalTokens += s.totalTokens;
-      byModel[s.model].totalCostUsd += s.costEstimateUsd;
+      byModel[s.model]!.count++;
+      byModel[s.model]!.totalTokens += s.totalTokens;
+      byModel[s.model]!.totalCostUsd += s.costEstimateUsd;
     }
     for (const [, v] of Object.entries(byModel)) {
       const modelKey = Object.keys(byModel).find(k => byModel[k] === v) ?? "";
@@ -402,7 +402,7 @@ class GenAITelemetryCollector {
     const byTool: GenAITelemetrySnapshot["toolCalls"]["byTool"] = {};
     for (const s of toolSpans) {
       if (!byTool[s.toolName]) byTool[s.toolName] = { count: 0, errorRate: 0 };
-      byTool[s.toolName].count++;
+      byTool[s.toolName]!.count++;
     }
     for (const [toolName, v] of Object.entries(byTool)) {
       const toolAll = toolSpans.filter(s => s.toolName === toolName);
@@ -483,7 +483,7 @@ class GenAITelemetryCollector {
     const trace: LangfuseTrace = {
       id: traceId,
       name,
-      metadata,
+      ...(metadata !== undefined ? { metadata } : {}),
       createdAt: new Date().toISOString(),
     };
 
@@ -503,7 +503,7 @@ class GenAITelemetryCollector {
           model: span.model,
           usage: { input: span.promptTokens, output: span.completionTokens, total: span.totalTokens, unit: "TOKENS" as const },
           level: span.status === "error" ? "ERROR" as const : "DEFAULT" as const,
-          statusMessage: span.error,
+          ...(span.error !== undefined ? { statusMessage: span.error } : {}),
         };
       }
 

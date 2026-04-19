@@ -25,7 +25,7 @@ export function PulseThroughputChart({ color = "#d4a054", label = "Throughput" }
       </defs>
       <polygon points={areaPoints} fill={`url(#tp-fill-${color.replace("#","")})`} />
       <polyline points={points} fill="none" stroke={`url(#tp-stroke-${color.replace("#","")})`} strokeWidth="2" strokeLinejoin="round" />
-      <circle cx={w} cy={h - (dataPoints[dataPoints.length - 1] / max) * h} r="3" fill={color}>
+      <circle cx={w} cy={h - (dataPoints[dataPoints.length - 1]! / max) * h} r="3" fill={color}>
         <animate attributeName="r" values="3;5;3" dur="1.5s" repeatCount="indefinite" />
       </circle>
     </svg>

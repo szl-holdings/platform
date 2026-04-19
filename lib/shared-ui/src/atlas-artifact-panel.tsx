@@ -361,7 +361,7 @@ export function AtlasArtifactPanel({ apiBaseUrl = "/api-server", domain, entityT
         onExport={fmt => handleExport(selectedArtifact.id, fmt)}
         onShare={() => handleShare(selectedArtifact.id)}
         onRegenerate={() => handleRegenerate(selectedArtifact.id)}
-        className={className}
+        {...(className !== undefined ? { className } : {})}
       />
     );
   }

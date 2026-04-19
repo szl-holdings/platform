@@ -324,7 +324,7 @@ export function SaveRiskRunButton({ domain, build, disabled, accentColor = "#7a9
     const note = typeof window !== "undefined" ? window.prompt("Optional note (cited on the evidence record):", "") : "";
     setSaving(true);
     try {
-      const record = await saveRiskRunEvidence(domain, { ...payload, note: note?.trim() || undefined });
+      const record = await saveRiskRunEvidence(domain, { ...payload, ...(note?.trim() ? { note: note.trim() } : {}) });
       setSavedId(record.evidenceId);
       window.setTimeout(() => setSavedId(null), 4000);
     } finally {

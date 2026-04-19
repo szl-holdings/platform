@@ -7,7 +7,7 @@ import type { Recommendation, Run, SourceHealthRecord, EvidenceRecord, PolicyVer
 import type { EvalResult } from "./RunConsole";
 
 function ev(id: string, sourceName: string, sourceType: EvidenceRecord["sourceType"], content: string, freshnessSeconds: number, confidence: number, lineage?: string[]): EvidenceRecord {
-  return { id, sourceId: id, sourceName, sourceType, content, timestamp: new Date(Date.now() - freshnessSeconds * 1000).toISOString(), freshnessSeconds, confidence, lineage };
+  return { id, sourceId: id, sourceName, sourceType, content, timestamp: new Date(Date.now() - freshnessSeconds * 1000).toISOString(), freshnessSeconds, confidence, ...(lineage !== undefined ? { lineage } : {}) };
 }
 
 function pv(verdict: PolicyVerdictDetail["verdict"], policyPack: string, ruleId: string, ruleLabel: string, reason: string, requiresJustification = false): PolicyVerdictDetail {

@@ -322,7 +322,7 @@ export function MorningBriefingCard({ briefing, compact = false, accentColor = "
                       {signal.metric}
                     </div>
                   )}
-                  <TrendArrow trend={signal.trend} severity={signal.severity} />
+                  <TrendArrow {...(signal.trend !== undefined ? { trend: signal.trend } : {})} {...(signal.severity !== undefined ? { severity: signal.severity } : {})} />
                 </div>
               </a>
             );

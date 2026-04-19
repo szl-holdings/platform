@@ -435,10 +435,10 @@ export function AgentRunList({
           run={run}
           accentColor={accentColor}
           compact={compact}
-          onViewTrace={onViewTrace}
-          onApprove={onApprove}
-          onReject={onReject}
-          onRequestRollback={onRequestRollback}
+          {...(onViewTrace !== undefined ? { onViewTrace } : {})}
+          {...(onApprove !== undefined ? { onApprove } : {})}
+          {...(onReject !== undefined ? { onReject } : {})}
+          {...(onRequestRollback !== undefined ? { onRequestRollback } : {})}
         />
       ))}
     </div>

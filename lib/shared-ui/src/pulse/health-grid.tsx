@@ -26,7 +26,7 @@ export function PulseHealthGrid({ items }: { items: HealthItem[] }) {
           </div>
           <div className="flex justify-between mt-1">
             <span className="text-[9px]" style={{ color: "rgba(255,255,255,0.15)" }}>Load</span>
-            <span className="text-[9px] tabular-nums font-medium" style={{ color: "rgba(255,255,255,0.3)" }}>{Math.round(loads[i])}%</span>
+            <span className="text-[9px] tabular-nums font-medium" style={{ color: "rgba(255,255,255,0.3)" }}>{Math.round(loads[i]!)}%</span>
           </div>
         </m.div>
       ))}

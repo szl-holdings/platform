@@ -259,7 +259,7 @@ export interface DemoPersonaContextValue {
   hasPack: (packId: string) => boolean;
 }
 
-const DEFAULT_PERSONA = DEMO_PERSONAS[0];
+const DEFAULT_PERSONA = DEMO_PERSONAS[0]!;
 
 const DemoPersonaContext = createContext<DemoPersonaContextValue>({
   persona: DEFAULT_PERSONA,

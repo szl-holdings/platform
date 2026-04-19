@@ -89,7 +89,7 @@ export class ServerTelemetryCollector {
 
   private pruneOldEntries() {
     const cutoff = Date.now() - WINDOW_SIZE;
-    while (this.requests.length > 0 && this.requests[0].timestamp < cutoff) {
+    while (this.requests.length > 0 && this.requests[0]!.timestamp < cutoff) {
       this.requests.shift();
     }
     if (this.requests.length > MAX_REQUESTS) {
@@ -157,7 +157,8 @@ export class ServerTelemetryCollector {
   }
 
   recordDbQueryLatency(durationMs: number, query?: string) {
-    this.dbQueryLatencies.push({ durationMs, timestamp: Date.now(), query: query?.slice(0, 120) });
+    const querySlice = query?.slice(0, 120);
+    this.dbQueryLatencies.push({ durationMs, timestamp: Date.now(), ...(querySlice !== undefined ? { query: querySlice } : {}) });
     const MAX_DB_SAMPLES = 500;
     if (this.dbQueryLatencies.length > MAX_DB_SAMPLES) {
       this.dbQueryLatencies.splice(0, this.dbQueryLatencies.length - MAX_DB_SAMPLES);
