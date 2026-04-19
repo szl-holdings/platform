@@ -1,5 +1,5 @@
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { useEffect, useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { getSubmittedDeals, loadSubmittedDeals, subscribeSubmittedDeals, type SubmittedDeal, type DealAttachmentRef } from "@/lib/dealSubmissions";
 
 import { m, AnimatePresence } from "framer-motion";
@@ -171,7 +171,7 @@ export default function DealScoringPage() {
   const [filter, setFilter] = useState<string>("all");
   const [submissions, setSubmissions] = useState<SubmittedDeal[]>(() => getSubmittedDeals());
 
-  const { data: inboundDeals } = useQuery({
+  const { data: inboundDeals } = useStandardQuery({
     queryKey: ["fund-inbound-deals"],
     queryFn: () => apiFetch<Array<{ status: string; convictionScore: number }>>("/fund-inbound-deals"),
     staleTime: 60_000,

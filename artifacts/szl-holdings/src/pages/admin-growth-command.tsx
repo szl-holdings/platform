@@ -1,5 +1,5 @@
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 import React, { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import {
   TrendingUp, AlertTriangle, CheckCircle2,
   Users, BarChart3, Activity, Zap, RefreshCw, ExternalLink,
@@ -191,19 +191,19 @@ const TOP_CONTENT = [
 export default function AdminGrowthCommandPage() {
   const [refreshKey, setRefreshKey] = useState(0);
 
-  const growthQuery = useQuery<GrowthData>({
+  const growthQuery = useStandardQuery<GrowthData>({
     queryKey: ["admin-growth-inquiries", refreshKey],
     queryFn: () => adminFetch<GrowthData>("/admin/inquiries"),
     refetchInterval: 60_000,
   });
 
-  const funnelQuery = useQuery<FunnelData>({
+  const funnelQuery = useStandardQuery<FunnelData>({
     queryKey: ["admin-funnel", refreshKey],
     queryFn: () => adminFetch<FunnelData>("/admin/analytics/funnel?window=7d"),
     refetchInterval: 60_000,
   });
 
-  const healthQuery = useQuery<HealthData>({
+  const healthQuery = useStandardQuery<HealthData>({
     queryKey: ["admin-health-detailed", refreshKey],
     queryFn: () => adminFetch<HealthData>("/health/detailed"),
     refetchInterval: 30_000,

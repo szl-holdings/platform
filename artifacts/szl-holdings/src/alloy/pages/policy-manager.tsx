@@ -1,6 +1,7 @@
 import { DataStateBadge } from "@szl-holdings/shared-ui/data-state-badge";
 import { useState, useMemo } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import {
   Shield, Plus, ChevronDown, ChevronUp, CheckCircle, AlertTriangle,
@@ -324,7 +325,7 @@ function NewPolicyDialog({ onClose, onCreated }: { onClose: () => void; onCreate
   const [description, setDescription] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  const mutation = useMutation({
+  const mutation = useStandardMutation({
     mutationFn: async () => {
       const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
       const defaultRules: Record<Policy["kind"], Record<string, unknown>> = {
@@ -424,7 +425,7 @@ export default function PolicyManager() {
   const [showNewPolicy, setShowNewPolicy] = useState(false);
   const queryClient = useQueryClient();
 
-  const { data: apiPolicies, isLoading, isError } = useQuery({
+  const { data: apiPolicies, isLoading, isError } = useStandardQuery({
     queryKey: ["alloyPolicies"],
     queryFn: async () => {
       try {
@@ -439,7 +440,7 @@ export default function PolicyManager() {
     staleTime: 30000,
   });
 
-  const { data: apiIncidents } = useQuery({
+  const { data: apiIncidents } = useStandardQuery({
     queryKey: ["alloyIncidents"],
     queryFn: async () => {
       try {

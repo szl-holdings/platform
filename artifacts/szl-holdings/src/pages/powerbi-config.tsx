@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 import { m } from "framer-motion";
 import {
   BarChart3, Settings, CheckCircle2, AlertCircle, ArrowLeft, ChevronRight,
@@ -137,7 +138,7 @@ const REPORTS: Array<{
 export default function PowerBiConfigPage() {
   const queryClient = useQueryClient();
 
-  const { data: loaded, isLoading: loadingConfig } = useQuery<ConfigResponse>({
+  const { data: loaded, isLoading: loadingConfig } = useStandardQuery<ConfigResponse>({
     queryKey: ["pbi-config"],
     queryFn: () => apiFetch<ConfigResponse>("/admin/powerbi-config"),
     retry: 1,
@@ -172,7 +173,7 @@ export default function PowerBiConfigPage() {
 
   const [testResult, setTestResult] = useState<{ ok: boolean; message: string } | null>(null);
 
-  const testMutation = useMutation<{ ok: boolean; message: string }, Error, void>({
+  const testMutation = useStandardMutation<{ ok: boolean; message: string }, Error, void>({
     mutationFn: async () => {
       return apiFetch<{ ok: boolean; message: string }>("/admin/powerbi-config/test", {
         method: "POST",
@@ -188,7 +189,7 @@ export default function PowerBiConfigPage() {
     onError: (err) => setTestResult({ ok: false, message: err.message }),
   });
 
-  const saveMutation = useMutation<unknown, Error, void>({
+  const saveMutation = useStandardMutation<unknown, Error, void>({
     mutationFn: async () => {
       return apiFetch("/admin/powerbi-config", {
         method: "PUT",

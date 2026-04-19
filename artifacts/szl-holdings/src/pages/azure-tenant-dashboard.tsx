@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 import { m } from "framer-motion";
 import {
   Building2, CheckCircle2, AlertCircle, Clock, RefreshCw, Users,
@@ -84,7 +85,7 @@ function TenantDetailPanel({
   const [loadingConsent, setLoadingConsent] = useState(false);
   const [consentUrl, setConsentUrl] = useState<string | null>(null);
 
-  const { data: tenantDetail } = useQuery<{
+  const { data: tenantDetail } = useStandardQuery<{
     tenant: AzureTenant;
     dataverseConnections: DataverseConnection[];
   }>({
@@ -103,7 +104,7 @@ function TenantDetailPanel({
     return sum + Object.values(counts).reduce((s, n) => s + n, 0);
   }, 0);
 
-  const updateStatus = useMutation({
+  const updateStatus = useStandardMutation({
     mutationFn: (body: { status?: string; adminConsentGranted?: string }) =>
       apiFetch(`/admin/tenants/${tenant.id}/status`, { method: "PATCH", body: JSON.stringify(body) }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["azure-tenants"] }),
@@ -316,7 +317,7 @@ export default function AzureTenantDashboardPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
-  const { data, isLoading, error, refetch, isFetching } = useQuery<TenantsResponse>({
+  const { data, isLoading, error, refetch, isFetching } = useStandardQuery<TenantsResponse>({
     queryKey: ["azure-tenants"],
     queryFn: () => apiFetch("/admin/tenants"),
     retry: 1,

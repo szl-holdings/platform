@@ -1,7 +1,7 @@
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { useState, useMemo } from "react";
 import { m } from "framer-motion";
 import { Link } from "wouter";
-import { useQuery } from "@tanstack/react-query";
 import { Layers, ArrowLeft, ChevronRight } from "lucide-react";
 import { PieChart as RePie, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { SiteNav } from "@/components/SiteNav";
@@ -61,7 +61,7 @@ export default function CapTablePage() {
   const [preMoney, setPreMoney] = useState(40_000_000);
   const [activeTab, setActiveTab] = useState<"captable" | "waterfall" | "modeling">("captable");
 
-  const { data: capTableSummary } = useQuery({
+  const { data: capTableSummary } = useStandardQuery({
     queryKey: ["fund-ops", "cap-table-summary"],
     queryFn: () => apiFetch<CapTableSummary>("/fund-ops/cap-table-summary"),
     staleTime: 60_000,

@@ -1,5 +1,5 @@
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import {
   AreaChart, Area, BarChart, Bar, LineChart, Line, XAxis, YAxis,
   CartesianGrid, Tooltip, ResponsiveContainer, Cell, ReferenceLine,
@@ -265,25 +265,25 @@ export default function InvestorAnalytics() {
   const [tab, setTab] = useState<"metrics" | "funnel" | "cohort" | "diffs">("metrics");
   const [cohortGranularity, setCohortGranularity] = useState<"month" | "week">("month");
 
-  const { data: metricsRaw, isLoading: mLoading } = useQuery({
+  const { data: metricsRaw, isLoading: mLoading } = useStandardQuery({
     queryKey: ["investor-metrics"],
     queryFn: () => apiFetch("/investor-analytics/metrics"),
     refetchInterval: 60_000,
   });
 
-  const { data: funnelRaw } = useQuery({
+  const { data: funnelRaw } = useStandardQuery({
     queryKey: ["investor-funnel"],
     queryFn: () => apiFetch("/investor-analytics/funnel"),
     enabled: tab === "funnel" || tab === "metrics",
   });
 
-  const { data: cohortRaw } = useQuery({
+  const { data: cohortRaw } = useStandardQuery({
     queryKey: ["investor-cohort", cohortGranularity],
     queryFn: () => apiFetch(`/investor-analytics/cohort?granularity=${cohortGranularity}`),
     enabled: tab === "cohort",
   });
 
-  const { data: diffsRaw, isLoading: diffsLoading } = useQuery({
+  const { data: diffsRaw, isLoading: diffsLoading } = useStandardQuery({
     queryKey: ["investor-audit-diffs"],
     queryFn: () => apiFetch("/investor-analytics/audit-diffs?limit=50"),
     enabled: tab === "diffs",

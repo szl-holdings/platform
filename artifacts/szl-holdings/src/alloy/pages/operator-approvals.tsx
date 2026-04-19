@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 import {
   Shield,
   CheckCircle,
@@ -111,7 +112,7 @@ function relativeTime(iso: string): string {
 }
 
 function ApprovalDetail({ approval }: { approval: ApprovalRequest }) {
-  const { data: trail } = useQuery({
+  const { data: trail } = useStandardQuery({
     queryKey: ["approval-audit", approval.id],
     queryFn: async () => {
       try {
@@ -249,7 +250,7 @@ function ApprovalRow({ approval }: { approval: ApprovalRequest }) {
   const priority = PRIORITY_CONFIG[approval.priority];
   const isActionable = approval.status === "pending" || approval.status === "escalated";
 
-  const reviewMutation = useMutation({
+  const reviewMutation = useStandardMutation({
     mutationFn: async (decision: "approved" | "rejected" | "revised") => {
       return apiRequest("POST", `/api/approvals/${approval.id}/review`, { decision, note: note.trim() || undefined });
     },
@@ -262,7 +263,7 @@ function ApprovalRow({ approval }: { approval: ApprovalRequest }) {
     onError: (err: Error) => setError(err.message),
   });
 
-  const escalateMutation = useMutation({
+  const escalateMutation = useStandardMutation({
     mutationFn: async () => {
       return apiRequest("POST", `/api/approvals/${approval.id}/escalate`, { reason: escalateReason.trim() });
     },
@@ -413,7 +414,7 @@ export default function OperatorApprovalsPage() {
   const queryClient = useQueryClient();
   const [filter, setFilter] = useState<"active" | "all">("active");
 
-  const { data, isLoading, isFetching, error } = useQuery({
+  const { data, isLoading, isFetching, error } = useStandardQuery({
     queryKey: ["operator-approvals", filter],
     queryFn: async () => {
       const path = filter === "all" ? "/api/approvals?status=all" : "/api/approvals?status=pending";

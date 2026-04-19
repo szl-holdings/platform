@@ -1,7 +1,8 @@
 import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
 import { ErrorState } from "@szl-holdings/shared-ui/design-system";
 import { useState, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 import { Bell, Check, CheckCheck, Filter, RefreshCw, Trash2, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PageDataSkeleton } from "@szl-holdings/shared-ui/page-data-skeleton";
@@ -145,7 +146,7 @@ export default function NotificationsInbox() {
   const [filterRead, setFilterRead] = useState<"all" | "unread" | "read">("all");
   const qc = useQueryClient();
 
-  const { data, isLoading, error, refetch } = useQuery<Notification[]>({
+  const { data, isLoading, error, refetch } = useStandardQuery<Notification[]>({
     queryKey: ["notifications-inbox"],
     queryFn: async () => {
       const res = await fetch("/api/notifications?limit=100");
@@ -160,7 +161,7 @@ export default function NotificationsInbox() {
     retry: 1,
   });
 
-  const markReadMutation = useMutation({
+  const markReadMutation = useStandardMutation({
     mutationFn: async (id: number) => {
       const res = await fetch(`/api/notifications/${id}/read`, { method: "PATCH" });
       if (!res.ok) throw new Error("Failed to mark as read");
@@ -168,7 +169,7 @@ export default function NotificationsInbox() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["notifications-inbox"] }),
   });
 
-  const markAllReadMutation = useMutation({
+  const markAllReadMutation = useStandardMutation({
     mutationFn: async () => {
       const res = await fetch("/api/notifications/read-all", { method: "PATCH" });
       if (!res.ok) throw new Error("Failed to mark all as read");
@@ -176,7 +177,7 @@ export default function NotificationsInbox() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["notifications-inbox"] }),
   });
 
-  const deleteMutation = useMutation({
+  const deleteMutation = useStandardMutation({
     mutationFn: async (id: number) => {
       const res = await fetch(`/api/notifications/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Failed to delete notification");

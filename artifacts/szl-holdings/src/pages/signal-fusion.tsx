@@ -1,5 +1,5 @@
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { m, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
 import { apiRequest } from "@/lib/api";
@@ -378,7 +378,7 @@ export default function SignalFusionPage() {
     return () => clearInterval(t);
   }, []);
 
-  const fusionQuery = useQuery<{ signals: FusionSignal[]; correlations: CorrelationPair[]; dataAvailable: boolean }>({
+  const fusionQuery = useStandardQuery<{ signals: FusionSignal[]; correlations: CorrelationPair[]; dataAvailable: boolean }>({
     queryKey: ["lyte", "signal-fusion"],
     queryFn: async () => {
       const res = await apiRequest<{ signals: FusionSignal[]; correlations: CorrelationPair[]; dataAvailable: boolean }>("GET", "/api/lyte/signal-fusion");

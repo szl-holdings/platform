@@ -1,5 +1,6 @@
 import { DataStateBadge } from "@szl-holdings/shared-ui/data-state-badge";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { useState } from "react";
 import {
@@ -202,7 +203,7 @@ export default function DecisionObjects() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const qc = useQueryClient();
 
-  const { data: apiDecisions, isLoading, isError } = useQuery({
+  const { data: apiDecisions, isLoading, isError } = useStandardQuery({
     queryKey: ["alloyDecisions", statusFilter],
     queryFn: async () => {
       try {
@@ -217,14 +218,14 @@ export default function DecisionObjects() {
     retry: 1,
   });
 
-  const approveDecision = useMutation({
+  const approveDecision = useStandardMutation({
     mutationFn: async (id: number) => {
       try { return await apiFetch(`/alloy/decisions/${id}/approve`, { method: "POST" }); } catch { return null; }
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["alloyDecisions"] }),
   });
 
-  const rejectDecision = useMutation({
+  const rejectDecision = useStandardMutation({
     mutationFn: async (id: number) => {
       try { return await apiFetch(`/alloy/decisions/${id}/reject`, { method: "POST" }); } catch { return null; }
     },

@@ -1,5 +1,5 @@
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { m, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
 import { apiRequest } from "@/lib/api";
@@ -319,7 +319,7 @@ export default function DecisionSchemaLibraryPage() {
 
   interface SchemaApiRow extends Omit<DecisionSchema, "icon"> { iconKey: string; }
   interface SchemaApiResponse { schemas: SchemaApiRow[]; categories: string[]; dataAvailable: boolean; }
-  const schemaQuery = useQuery<SchemaApiResponse>({
+  const schemaQuery = useStandardQuery<SchemaApiResponse>({
     queryKey: ["lyte", "decision-schemas"],
     queryFn: async () => {
       const res = await apiRequest<SchemaApiResponse>("GET", "/api/lyte/decision-schemas");

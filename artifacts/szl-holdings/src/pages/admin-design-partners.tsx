@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 import { RefreshCw, Mail, Building2, User, Calendar, CheckCircle2, XCircle, Clock, Archive, Filter } from "lucide-react";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 import { usePageMeta } from "@/hooks/usePageMeta";
@@ -61,7 +62,7 @@ export default function AdminDesignPartnersPage() {
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [updatingId, setUpdatingId] = useState<number | null>(null);
 
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
+  const { data, isLoading, isError, error, refetch, isFetching } = useStandardQuery({
     queryKey: ["admin-design-partners", "partnership"],
     queryFn: async () => {
       const res = await fetch(`${API}/stephen/booking-requests?type=partnership`, {
@@ -75,7 +76,7 @@ export default function AdminDesignPartnersPage() {
     },
   });
 
-  const updateStatus = useMutation({
+  const updateStatus = useStandardMutation({
     mutationFn: async (args: { id: number; status: BookingStatus }) => {
       setUpdatingId(args.id);
       const res = await fetch(`${API}/stephen/booking-requests/${args.id}`, {

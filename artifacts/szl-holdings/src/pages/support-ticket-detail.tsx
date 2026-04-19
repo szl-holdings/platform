@@ -5,7 +5,8 @@ import { ArrowLeft, Send, Clock, CheckCircle2, RefreshCw, MessageSquare, AlertCi
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 import { useAuth } from "@szl-holdings/replit-auth-web";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 
@@ -63,7 +64,7 @@ export default function SupportTicketDetailPage() {
   const queryClient = useQueryClient();
   const [reply, setReply] = useState("");
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error } = useStandardQuery({
     queryKey: ["support-ticket", id],
     queryFn: async () => {
       const res = await fetch(`${API}/support/tickets/${id}`, { credentials: "include" });
@@ -73,7 +74,7 @@ export default function SupportTicketDetailPage() {
     enabled: !!user && !!id,
   });
 
-  const addCommentMutation = useMutation({
+  const addCommentMutation = useStandardMutation({
     mutationFn: async (body: string) => {
       const res = await fetch(`${API}/support/tickets/${id}/comments`, {
         method: "POST",

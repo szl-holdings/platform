@@ -1,6 +1,6 @@
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { useState, useEffect, useCallback } from "react";
 import { m } from "framer-motion";
-import { useQuery } from "@tanstack/react-query";
 import {
   Activity, AlertTriangle, ArrowRight, CheckCircle2, ChevronRight,
   Circle, Clock, GitBranch, Globe, Layers, Shield, TrendingUp, Zap,
@@ -213,14 +213,14 @@ export default function HelmConsolePage() {
   const [activeTab, setActiveTab] = useState<TabId>("apps");
 
   // ── Cross-app queries (React Query) ────────────────────────────────────────
-  const { data: familyHealth } = useQuery<FamilyHealthData>({
+  const { data: familyHealth } = useStandardQuery<FamilyHealthData>({
     queryKey: ["cross-app-family-health"],
     queryFn: () => apiFetch<FamilyHealthData>("/api/cross-app/family/health"),
     refetchInterval: 30000,
     retry: 1,
   });
 
-  const { data: handoffStats } = useQuery<HandoffStats>({
+  const { data: handoffStats } = useStandardQuery<HandoffStats>({
     queryKey: ["cross-app-handoff-stats"],
     queryFn: () => apiFetch<HandoffStats>("/api/cross-app/handoffs/stats"),
     refetchInterval: 30000,

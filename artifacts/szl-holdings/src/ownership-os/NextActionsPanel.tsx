@@ -1,11 +1,11 @@
-import { useQuery } from "@tanstack/react-query";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { Loader2, CheckCircle2 } from "lucide-react";
 import type { NextActions } from "./types";
 import { apiFetch } from "./api";
 import { PriorityBadge } from "./components";
 
 export function NextActionsPanel({ scenarioId }: { scenarioId?: number }) {
-  const { data, isLoading } = useQuery<NextActions>({
+  const { data, isLoading } = useStandardQuery<NextActions>({
     queryKey: ["ownership-next-actions"],
     queryFn: () => apiFetch("/ownership/next-actions"),
     enabled: !!scenarioId,

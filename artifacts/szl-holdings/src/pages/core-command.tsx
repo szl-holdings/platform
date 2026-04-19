@@ -1,5 +1,5 @@
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { useState, useEffect, useRef, lazy, Suspense } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { useSearch, useLocation } from "wouter";
 import { m } from "framer-motion";
 import {
@@ -305,7 +305,7 @@ export default function CoreCommandCenter() {
     navigate(`/core${qs ? `?${qs}` : ""}`);
   };
 
-  const { data: metrics, isLoading: metricsLoading, refetch } = useQuery<CoreMetrics>({
+  const { data: metrics, isLoading: metricsLoading, refetch } = useStandardQuery<CoreMetrics>({
     queryKey: ["core-metrics"],
     queryFn: async () => {
       const res = await fetch("/api/core/metrics");
@@ -316,7 +316,7 @@ export default function CoreCommandCenter() {
     refetchInterval: 60_000,
   });
 
-  const { data: health, isLoading: healthLoading } = useQuery<CoreHealth>({
+  const { data: health, isLoading: healthLoading } = useStandardQuery<CoreHealth>({
     queryKey: ["core-health"],
     queryFn: async () => {
       const res = await fetch("/api/core/health");
@@ -327,7 +327,7 @@ export default function CoreCommandCenter() {
     refetchInterval: 30_000,
   });
 
-  const { data: recsData, isLoading: recsLoading } = useQuery<{ data: CoreMetrics["alloy"]["recent_recommendations"]; meta: { total: number } }>({
+  const { data: recsData, isLoading: recsLoading } = useStandardQuery<{ data: CoreMetrics["alloy"]["recent_recommendations"]; meta: { total: number } }>({
     queryKey: ["core-recs-tab"],
     queryFn: async () => {
       const res = await fetch("/api/core/recommendations?limit=10");
@@ -337,7 +337,7 @@ export default function CoreCommandCenter() {
     enabled: tab === "recommendations",
   });
 
-  const { data: auditData, isLoading: auditLoading } = useQuery<{ data?: unknown[]; items?: unknown[] }>({
+  const { data: auditData, isLoading: auditLoading } = useStandardQuery<{ data?: unknown[]; items?: unknown[] }>({
     queryKey: ["audit-tab"],
     queryFn: async () => {
       const res = await fetch("/api/audit?limit=10");

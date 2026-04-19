@@ -1,6 +1,6 @@
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { DataStateBadge } from "@szl-holdings/shared-ui/data-state-badge";
 import { isAuthError } from "@szl-holdings/shared-ui/api-fetch";
-import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { CheckCircle, XCircle, Clock, Activity, ChevronLeft, RotateCcw, AlertTriangle, Terminal, GitBranch } from "lucide-react";
 import { useLocation } from "wouter";
@@ -42,7 +42,7 @@ interface RunDetailData {
 }
 
 function useRunDetail(id: number) {
-  return useQuery({
+  return useStandardQuery({
     queryKey: ["alloyRunDetail", id],
     queryFn: async () => {
       const resp = await apiFetch<RunDetailData | { data: RunDetailData }>(`/alloy/runs/${id}/steps`);

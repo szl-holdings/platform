@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { motion } from "framer-motion";
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") || "";
@@ -368,13 +369,13 @@ export default function ReportsHub() {
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [filters, setFilters] = useState<{ domain?: string; status?: string; search?: string }>({});
 
-  const { data: statsData } = useQuery({
+  const { data: statsData } = useStandardQuery({
     queryKey: ["report-stats"],
     queryFn: () => apiFetch("/reports/stats"),
     refetchInterval: 30_000,
   });
 
-  const { data: reportsData, isLoading } = useQuery({
+  const { data: reportsData, isLoading } = useStandardQuery({
     queryKey: ["reports", filters],
     queryFn: () => {
       const params = new URLSearchParams();

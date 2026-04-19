@@ -1,6 +1,7 @@
 import { useState } from "react";
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 import { Cpu, Brain, Play, GitBranch, ChevronDown } from "lucide-react";
 
@@ -17,19 +18,19 @@ export function DecideLayer() {
   const [expandedDecision, setExpandedDecision] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
-  const { data: agentsData, isLoading: agentsLoading } = useQuery<{ data: Record<string, unknown> }>({
+  const { data: agentsData, isLoading: agentsLoading } = useStandardQuery<{ data: Record<string, unknown> }>({
     queryKey: ["ct-agents"],
     queryFn: () => fetch(`${API_BASE}/control-tower/decide/agents`).then(r => r.json()),
     staleTime: 60000,
   });
 
-  const { data: journalData, isLoading: journalLoading, refetch: refetchJournal } = useQuery<{ data: Record<string, unknown> }>({
+  const { data: journalData, isLoading: journalLoading, refetch: refetchJournal } = useStandardQuery<{ data: Record<string, unknown> }>({
     queryKey: ["ct-journal"],
     queryFn: () => fetch(`${API_BASE}/control-tower/decide/journal?limit=20`).then(r => r.json()),
     refetchInterval: 15000,
   });
 
-  const orchestrateMutation = useMutation({
+  const orchestrateMutation = useStandardMutation({
     mutationFn: (body: { query: string; depth: string }) =>
       fetch(`${API_BASE}/control-tower/decide/orchestrate`, {
         method: "POST",

@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 import { m } from "framer-motion";
 import {
   Palette, Eye, EyeOff, Save, Loader2, ArrowLeft,
@@ -294,13 +295,13 @@ export default function TenantBrandingPage() {
 
   const queryClient = useQueryClient();
 
-  const { data: tenant, isLoading: tenantLoading } = useQuery<AzureTenant>({
+  const { data: tenant, isLoading: tenantLoading } = useStandardQuery<AzureTenant>({
     queryKey: ["azure-tenant", tenantId],
     queryFn: () => apiFetch<{ tenant: AzureTenant }>(`/admin/tenants/${tenantId}`).then(r => r.tenant),
     enabled: tenantId !== null,
   });
 
-  const { data: brandingData, isLoading: brandingLoading } = useQuery<{ branding: TenantBranding | null }>({
+  const { data: brandingData, isLoading: brandingLoading } = useStandardQuery<{ branding: TenantBranding | null }>({
     queryKey: ["tenant-branding", tenantId],
     queryFn: () => apiFetch(`/admin/tenants/${tenantId}/branding`),
     enabled: tenantId !== null,
@@ -327,7 +328,7 @@ export default function TenantBrandingPage() {
     }
   }, [brandingData, hasLoaded]);
 
-  const saveMutation = useMutation({
+  const saveMutation = useStandardMutation({
     mutationFn: (data: typeof EMPTY_BRANDING) =>
       apiFetch(`/admin/tenants/${tenantId}/branding`, {
         method: "PUT",
@@ -340,7 +341,7 @@ export default function TenantBrandingPage() {
     },
   });
 
-  const resetMutation = useMutation({
+  const resetMutation = useStandardMutation({
     mutationFn: () =>
       apiFetch(`/admin/tenants/${tenantId}/branding`, { method: "DELETE" }),
     onSuccess: () => {

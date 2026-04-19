@@ -1,7 +1,7 @@
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { DataStateBadge } from "@szl-holdings/shared-ui/data-state-badge";
 import { isAuthError } from "@szl-holdings/shared-ui/api-fetch";
 import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
-import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { Radio, AlertTriangle, Info, ChevronRight, Filter, RefreshCw } from "lucide-react";
 import { useState } from "react";
@@ -47,7 +47,7 @@ const FALLBACK_SIGNAL_RESP: SignalResp = {
 };
 
 function useSignals(source: string | null, severity: string | null, page: number) {
-  return useQuery({
+  return useStandardQuery({
     queryKey: ["alloySignals", source, severity, page],
     queryFn: async () => {
       try {

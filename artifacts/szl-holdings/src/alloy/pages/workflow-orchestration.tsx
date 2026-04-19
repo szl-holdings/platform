@@ -1,5 +1,6 @@
 import { DataStateBadge } from "@szl-holdings/shared-ui/data-state-badge";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { GitBranch, User, Clock, ExternalLink, AlertTriangle, RefreshCw, Play, Pause, XCircle, CheckCircle, ChevronRight, Terminal, Zap, Activity, Filter, Radio } from "lucide-react";
 import { useState, useMemo } from "react";
@@ -20,7 +21,7 @@ interface Workflow {
 }
 
 function useWorkflows() {
-  return useQuery({
+  return useStandardQuery({
     queryKey: ["alloyWorkflows"],
     queryFn: async () => {
       const resp = await apiFetch<Workflow[] | { data: Workflow[] }>("/alloy/workflows");
@@ -33,7 +34,7 @@ function useWorkflows() {
 
 function useUpdateWorkflow() {
   const qc = useQueryClient();
-  return useMutation({
+  return useStandardMutation({
     mutationFn: async ({ id, ...data }: { id: number } & Partial<Workflow>) => {
       return await apiFetch<Workflow>(`/alloy/workflows/${id}`, { method: "PATCH", body: JSON.stringify(data) });
     },
@@ -57,7 +58,7 @@ function useUpdateWorkflow() {
 
 function useStartRun() {
   const qc = useQueryClient();
-  return useMutation({
+  return useStandardMutation({
     mutationFn: async (workflowId: number) => {
       return await apiFetch<{ id: number }>("/alloy/runs", { method: "POST", body: JSON.stringify({ workflowId }) });
     },

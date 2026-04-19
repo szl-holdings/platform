@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 import { m } from "framer-motion";
 import {
   Shield, Users, FileText, CheckCircle2, AlertCircle, Loader2, Plus, Trash2,
@@ -35,12 +36,12 @@ export function ScenarioDetailView({ scenarioId, onBack }: { scenarioId: number;
   const [showAddForm, setShowAddForm] = useState<string | null>(null);
   const qc = useQueryClient();
 
-  const { data, isLoading, error } = useQuery<ScenarioDetail>({
+  const { data, isLoading, error } = useStandardQuery<ScenarioDetail>({
     queryKey: ["ownership-scenario-detail", scenarioId],
     queryFn: () => apiFetch(`/ownership/scenarios/${scenarioId}`),
   });
 
-  const activateMutation = useMutation({
+  const activateMutation = useStandardMutation({
     mutationFn: () => apiFetch(`/ownership/scenarios/${scenarioId}`, {
       method: "PATCH",
       body: JSON.stringify({ isActive: true }),

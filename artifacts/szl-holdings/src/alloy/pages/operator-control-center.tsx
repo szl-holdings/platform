@@ -1,5 +1,6 @@
 import { DataStateBadge } from "@szl-holdings/shared-ui/data-state-badge";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { useState } from "react";
 import {
@@ -135,7 +136,7 @@ export default function OperatorControlCenter() {
   const [alertThresholds, _setAlertThresholds] = useState({ timeMs: 120000, costUsd: 20 });
   const qc = useQueryClient();
 
-  const { data: agentStats } = useQuery({
+  const { data: agentStats } = useStandardQuery({
     queryKey: ["alloyOperatorAgents"],
     queryFn: async () => {
       try { return await apiFetch("/agent-os/agent-stats"); } catch { return null; }
@@ -143,7 +144,7 @@ export default function OperatorControlCenter() {
     refetchInterval: 15000,
   });
 
-  const { data: factoryFloor } = useQuery({
+  const { data: factoryFloor } = useStandardQuery({
     queryKey: ["alloyFactoryFloorOperator"],
     queryFn: async () => {
       try { return await apiFetch<{ globalCounts: unknown[] }>("/alloy/factory-floor"); } catch { return null; }
@@ -151,7 +152,7 @@ export default function OperatorControlCenter() {
     refetchInterval: 15000,
   });
 
-  const { data: violationsData } = useQuery({
+  const { data: violationsData } = useStandardQuery({
     queryKey: ["alloyPolicyViolations"],
     queryFn: async (): Promise<{ violations: any[] } | null> => {
       try { return await apiFetch<{ violations: any[] }>("/alloy/policy-violations"); } catch { return null; }
@@ -159,7 +160,7 @@ export default function OperatorControlCenter() {
     refetchInterval: 15000,
   });
 
-  const { data: bottlenecksData } = useQuery({
+  const { data: bottlenecksData } = useStandardQuery({
     queryKey: ["alloyApprovalBottlenecks"],
     queryFn: async (): Promise<{ bottlenecks: any[] } | null> => {
       try { return await apiFetch<{ bottlenecks: any[] }>("/alloy/approval-bottlenecks"); } catch { return null; }
@@ -167,7 +168,7 @@ export default function OperatorControlCenter() {
     refetchInterval: 15000,
   });
 
-  const { data: providersData } = useQuery({
+  const { data: providersData } = useStandardQuery({
     queryKey: ["alloyProviderHealth"],
     queryFn: async (): Promise<{ providers: any[] } | null> => {
       try { return await apiFetch<{ providers: any[] }>("/alloy/provider-health"); } catch { return null; }

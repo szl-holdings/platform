@@ -1,3 +1,4 @@
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { useState } from "react";
 import { Link } from "wouter";
 import { m } from "framer-motion";
@@ -5,7 +6,6 @@ import { Search, MessageSquare, FileText, BookOpen, ArrowRight, CheckCircle2, Cl
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
-import { useQuery } from "@tanstack/react-query";
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
 const API = `${BASE}/api`;
@@ -47,7 +47,7 @@ export default function SupportPortalPage() {
 
   const [search, setSearch] = useState("");
 
-  const { data: kbData, isLoading } = useQuery({
+  const { data: kbData, isLoading } = useStandardQuery({
     queryKey: ["support-kb", search],
     queryFn: async () => {
       const params = search ? `?q=${encodeURIComponent(search)}` : "";

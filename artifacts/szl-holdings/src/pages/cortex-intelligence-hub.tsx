@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { m, AnimatePresence } from "framer-motion";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 import {
   Brain, GitBranch, RefreshCw, Zap, FileText,
   AlertTriangle, Network, BookOpen, CheckCircle, Clock,
@@ -99,14 +100,14 @@ export default function CortexIntelligenceHub() {
   const [graphMinRisk, setGraphMinRisk] = useState(0);
   const qc = useQueryClient();
 
-  const feedQuery = useQuery<FeedResponse>({
+  const feedQuery = useStandardQuery<FeedResponse>({
     queryKey: ["cortex-intelligence-feed"],
     queryFn: () => apiRequest<FeedResponse>("GET", "/api/cortex/intelligence-feed"),
     refetchInterval: 60000,
     staleTime: 30000,
   });
 
-  const graphQuery = useQuery<GraphResponse>({
+  const graphQuery = useStandardQuery<GraphResponse>({
     queryKey: ["cortex-entity-graph", graphDomain, graphSinceHours, graphMinRisk],
     queryFn: () => {
       const params = new URLSearchParams();
@@ -119,20 +120,20 @@ export default function CortexIntelligenceHub() {
     staleTime: 60000,
   });
 
-  const draftsQuery = useQuery<DraftsResponse>({
+  const draftsQuery = useStandardQuery<DraftsResponse>({
     queryKey: ["cortex-action-drafts"],
     queryFn: () => apiRequest<DraftsResponse>("GET", "/api/cortex/action-drafts"),
     refetchInterval: 30000,
   });
 
-  const briefingQuery = useQuery<BriefingResponse>({
+  const briefingQuery = useStandardQuery<BriefingResponse>({
     queryKey: ["cortex-briefing-today"],
     queryFn: () => apiRequest<BriefingResponse>("GET", "/api/cortex/briefing/today"),
     staleTime: 5 * 60 * 1000,
     enabled: activeTab === "briefing",
   });
 
-  const generateDraftsMutation = useMutation({
+  const generateDraftsMutation = useStandardMutation({
     mutationFn: async (signal: IntelligenceSignal) =>
       apiRequest("POST", "/api/cortex/action-drafts/generate", {
         alertId: signal.id,
@@ -147,13 +148,13 @@ export default function CortexIntelligenceHub() {
     },
   });
 
-  const approveDraftMutation = useMutation({
+  const approveDraftMutation = useStandardMutation({
     mutationFn: (draftId: string) =>
       apiRequest("POST", `/api/cortex/action-drafts/${draftId}/approve`, {}),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["cortex-action-drafts"] }),
   });
 
-  const dismissDraftMutation = useMutation({
+  const dismissDraftMutation = useStandardMutation({
     mutationFn: (draftId: string) =>
       apiRequest("POST", `/api/cortex/action-drafts/${draftId}/dismiss`, {}),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["cortex-action-drafts"] }),

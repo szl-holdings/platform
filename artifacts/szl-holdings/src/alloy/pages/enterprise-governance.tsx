@@ -1,4 +1,5 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { useState } from "react";
 import {
@@ -119,13 +120,13 @@ function StatCard({ icon: Icon, label, value, sub, color = "text-[#d4a054]" }: {
 }
 
 function OverviewTab() {
-  const { data: analytics } = useQuery({
+  const { data: analytics } = useStandardQuery({
     queryKey: ["governance-analytics"],
     queryFn: () => apiFetch<{ data: AnalyticsData }>("/governance/analytics").then(r => (r as any)?.data ?? r),
     retry: 1,
   });
 
-  const { data: costData } = useQuery({
+  const { data: costData } = useStandardQuery({
     queryKey: ["governance-cost-summary"],
     queryFn: () => apiFetch<{ data: CostSummary }>("/governance/cost-summary").then(r => (r as any)?.data ?? r),
     retry: 1,
@@ -220,18 +221,18 @@ function PoliciesTab() {
   const [showCreate, setShowCreate] = useState(false);
   const [newPolicy, setNewPolicy] = useState({ name: "", description: "", policyType: "approval_matrix", scope: "tenant", priority: 100 });
 
-  const { data } = useQuery({
+  const { data } = useStandardQuery({
     queryKey: ["governance-policies"],
     queryFn: () => apiFetch<{ data: Policy[] }>("/governance/policies?isActive=all").then(r => (r as any)?.data ?? r ?? []),
     retry: 1,
   });
 
-  const createMutation = useMutation({
+  const createMutation = useStandardMutation({
     mutationFn: (body: Record<string, unknown>) => apiFetch("/governance/policies", { method: "POST", body: JSON.stringify(body), headers: { "Content-Type": "application/json" } }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["governance-policies"] }); setShowCreate(false); setNewPolicy({ name: "", description: "", policyType: "approval_matrix", scope: "tenant", priority: 100 }); },
   });
 
-  const toggleMutation = useMutation({
+  const toggleMutation = useStandardMutation({
     mutationFn: ({ id, isActive }: { id: number; isActive: boolean }) => apiFetch(`/governance/policies/${id}`, { method: "PATCH", body: JSON.stringify({ isActive }), headers: { "Content-Type": "application/json" } }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["governance-policies"] }),
   });
@@ -313,18 +314,18 @@ function ModelRoutingTab() {
   const [showCreate, setShowCreate] = useState(false);
   const [newRoute, setNewRoute] = useState({ name: "", modelProvider: "", modelId: "", maxCostPerCall: "", environment: "production" });
 
-  const { data } = useQuery({
+  const { data } = useStandardQuery({
     queryKey: ["governance-model-routing"],
     queryFn: () => apiFetch<{ data: ModelRoute[] }>("/governance/model-routing").then(r => (r as any)?.data ?? r ?? []),
     retry: 1,
   });
 
-  const createMutation = useMutation({
+  const createMutation = useStandardMutation({
     mutationFn: (body: Record<string, unknown>) => apiFetch("/governance/model-routing", { method: "POST", body: JSON.stringify(body), headers: { "Content-Type": "application/json" } }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["governance-model-routing"] }); setShowCreate(false); },
   });
 
-  const toggleMutation = useMutation({
+  const toggleMutation = useStandardMutation({
     mutationFn: ({ id, isAllowed }: { id: number; isAllowed: boolean }) => apiFetch(`/governance/model-routing/${id}`, { method: "PATCH", body: JSON.stringify({ isAllowed }), headers: { "Content-Type": "application/json" } }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["governance-model-routing"] }),
   });
@@ -407,13 +408,13 @@ function CostControlsTab() {
   const [showCreate, setShowCreate] = useState(false);
   const [newBudget, setNewBudget] = useState({ name: "", budgetType: "monthly", limitAmount: "" });
 
-  const { data: costData } = useQuery({
+  const { data: costData } = useStandardQuery({
     queryKey: ["governance-cost-summary"],
     queryFn: () => apiFetch<{ data: CostSummary }>("/governance/cost-summary").then(r => (r as any)?.data ?? r),
     retry: 1,
   });
 
-  const createMutation = useMutation({
+  const createMutation = useStandardMutation({
     mutationFn: (body: Record<string, unknown>) => apiFetch("/governance/budgets", { method: "POST", body: JSON.stringify(body), headers: { "Content-Type": "application/json" } }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["governance-cost-summary"] }); setShowCreate(false); },
   });
@@ -526,14 +527,14 @@ function IncidentsTab() {
   const qc = useQueryClient();
   const [expandedId, setExpandedId] = useState<number | null>(null);
 
-  const { data } = useQuery({
+  const { data } = useStandardQuery({
     queryKey: ["governance-incidents"],
     queryFn: () => apiFetch<{ data: Incident[] }>("/governance/incidents").then(r => (r as any)?.data ?? r ?? []),
     retry: 1,
     refetchInterval: 30000,
   });
 
-  const resolveMutation = useMutation({
+  const resolveMutation = useStandardMutation({
     mutationFn: ({ id, resolution }: { id: number; resolution: string }) => apiFetch(`/governance/incidents/${id}/resolve`, { method: "PATCH", body: JSON.stringify({ resolution }), headers: { "Content-Type": "application/json" } }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["governance-incidents"] }),
   });

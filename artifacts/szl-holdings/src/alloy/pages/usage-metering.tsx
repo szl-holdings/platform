@@ -1,6 +1,6 @@
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { DataStateBadge } from "@szl-holdings/shared-ui/data-state-badge";
 import { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import {
   Activity, Zap, FileText, Globe, DollarSign, TrendingUp,
@@ -72,7 +72,7 @@ function UsageBar({ used, limit, color }: { used: number; limit: number; color: 
 export default function UsageMetering() {
   const [tab, setTab] = useState<"dashboard" | "events" | "tiers">("dashboard");
 
-  const { data: liveEvents } = useQuery({
+  const { data: liveEvents } = useStandardQuery({
     queryKey: ["usageEvents"],
     queryFn: async () => {
       try {

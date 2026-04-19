@@ -1,3 +1,4 @@
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { useState } from "react";
 import { Link } from "wouter";
 import { m } from "framer-motion";
@@ -5,7 +6,6 @@ import { Plus, Clock, CheckCircle2, AlertCircle, RefreshCw, MessageSquare, type 
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
-import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@szl-holdings/replit-auth-web";
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
@@ -49,7 +49,7 @@ export default function SupportTicketsPage() {
   const { user } = useAuth();
   const [statusFilter, setStatusFilter] = useState("");
 
-  const { data, isLoading, refetch } = useQuery({
+  const { data, isLoading, refetch } = useStandardQuery({
     queryKey: ["support-tickets", statusFilter],
     queryFn: async () => {
       const params = statusFilter ? `?status=${statusFilter}` : "";

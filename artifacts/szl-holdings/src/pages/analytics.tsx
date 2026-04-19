@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { m } from "framer-motion";
 import {
   BarChart3, TrendingUp, Users, MousePointer, Globe, Activity,
@@ -24,7 +24,7 @@ interface AppObs {
 }
 
 function useEcosystemObs() {
-  return useQuery<{ portfolioScore: number; apps: AppObs[]; timestamp: string }>({
+  return useStandardQuery<{ portfolioScore: number; apps: AppObs[]; timestamp: string }>({
     queryKey: ["analytics-obs"],
     queryFn: async () => {
       const res = await fetch("/api/observability");

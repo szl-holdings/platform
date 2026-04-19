@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { Bell, Check } from "lucide-react";
 import { AnimatePresence, m } from "framer-motion";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 import { Link } from "wouter";
 import { useAuth } from "@szl-holdings/replit-auth-web";
 
@@ -39,7 +40,7 @@ export function NotificationBell() {
   const queryClient = useQueryClient();
   const { isAuthenticated, isLoading } = useAuth();
 
-  const { data } = useQuery<Notification[]>({
+  const { data } = useStandardQuery<Notification[]>({
     queryKey: ["navbar-notifications"],
     queryFn: async () => {
       const res = await fetch("/api/notifications?limit=100");
@@ -111,7 +112,7 @@ export function NotificationBell() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, [open]);
 
-  const markReadMutation = useMutation({
+  const markReadMutation = useStandardMutation({
     mutationFn: async (id: number) => {
       const res = await fetch(`/api/notifications/${id}/read`, { method: "PATCH" });
       if (!res.ok) throw new Error("Failed to mark as read");

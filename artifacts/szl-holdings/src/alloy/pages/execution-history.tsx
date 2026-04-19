@@ -1,6 +1,7 @@
 import { isAuthError } from "@szl-holdings/shared-ui/api-fetch";
 import { DataStateBadge } from "@szl-holdings/shared-ui/data-state-badge";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { Activity, Clock, CheckCircle, XCircle, RotateCcw, RefreshCw, AlertTriangle, Filter, Download, ChevronRight, Play } from "lucide-react";
 import { useState } from "react";
@@ -37,7 +38,7 @@ interface WorkflowDef {
 const EMPTY_RUNS_RESP: RunsResp = { data: [], meta: { page: 1, limit: 20, total: 0 } };
 
 function useRuns(state: string | null, workflowId: number | null, page: number) {
-  return useQuery({
+  return useStandardQuery({
     queryKey: ["alloyRuns", state, workflowId, page],
     queryFn: async () => {
       try {
@@ -60,7 +61,7 @@ function useRuns(state: string | null, workflowId: number | null, page: number) 
 }
 
 function useWorkflows() {
-  return useQuery({
+  return useStandardQuery({
     queryKey: ["alloyWorkflowsForFilter"],
     queryFn: async () => {
       const resp = await apiFetch<{ data: WorkflowDef[] } | WorkflowDef[]>("/alloy/workflows?limit=100");
@@ -73,7 +74,7 @@ function useWorkflows() {
 
 function useRetryRun() {
   const qc = useQueryClient();
-  return useMutation({
+  return useStandardMutation({
     mutationFn: async (id: number) => apiFetch(`/alloy/runs/${id}/retry`, { method: "POST" }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["alloyRuns"] }),
   });
@@ -81,7 +82,7 @@ function useRetryRun() {
 
 function useCancelRun() {
   const qc = useQueryClient();
-  return useMutation({
+  return useStandardMutation({
     mutationFn: async (id: number) => apiFetch(`/alloy/runs/${id}/cancel`, { method: "POST" }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["alloyRuns"] }),
   });

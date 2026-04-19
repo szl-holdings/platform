@@ -1,5 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
 
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { Shield, CheckCircle2, XCircle, Circle, Lock, Unlock, Eye } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -9,19 +9,19 @@ import { API_BASE, DOMAIN_COLORS } from "./constants";
 import { SectionCard, TimeAgo } from "./components";
 
 export function GovernLayer() {
-  const { data: complianceData, isLoading: complianceLoading } = useQuery<{ data: Record<string, unknown> }>({
+  const { data: complianceData, isLoading: complianceLoading } = useStandardQuery<{ data: Record<string, unknown> }>({
     queryKey: ["ct-compliance"],
     queryFn: () => fetch(`${API_BASE}/control-tower/govern/compliance`).then(r => r.json()),
     refetchInterval: 30000,
   });
 
-  const { data: auditData, isLoading: auditLoading } = useQuery<{ data: Record<string, unknown> }>({
+  const { data: auditData, isLoading: auditLoading } = useStandardQuery<{ data: Record<string, unknown> }>({
     queryKey: ["ct-audit"],
     queryFn: () => fetch(`${API_BASE}/control-tower/govern/audit?limit=30`).then(r => r.json()),
     refetchInterval: 20000,
   });
 
-  const { data: certsData, isLoading: certsLoading } = useQuery<{ data: Record<string, unknown> }>({
+  const { data: certsData, isLoading: certsLoading } = useStandardQuery<{ data: Record<string, unknown> }>({
     queryKey: ["ct-certs"],
     queryFn: () => fetch(`${API_BASE}/control-tower/govern/certificates`).then(r => r.json()),
     staleTime: 300000,

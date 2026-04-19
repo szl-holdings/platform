@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { m, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 import {
   Eye, Radio, AlertTriangle, CheckCircle2, Clock, ArrowRight,
   Shield, Ship, Building2, Briefcase, Activity, Filter,
@@ -632,7 +633,7 @@ export default function LytePage() {
   const isScrolledRef = useRef<boolean>(false);
   const queryClient = useQueryClient();
 
-  const signalsQuery = useQuery<SignalItem[]>({
+  const signalsQuery = useStandardQuery<SignalItem[]>({
     queryKey: ["lyte", "signals"],
     queryFn: async () => {
       const res = await apiRequest<{ success: boolean; data: ApiSignal[] }>("GET", "/api/lyte/signals?limit=20");
@@ -643,7 +644,7 @@ export default function LytePage() {
     placeholderData: SIGNAL_STREAM,
   });
 
-  const incidentsQuery = useQuery<SituationItem[]>({
+  const incidentsQuery = useStandardQuery<SituationItem[]>({
     queryKey: ["lyte", "incidents"],
     queryFn: async () => {
       const res = await apiRequest<{ success: boolean; data: ApiIncident[] }>("GET", "/api/lyte/incidents?limit=10");
@@ -654,7 +655,7 @@ export default function LytePage() {
     placeholderData: SITUATION_BOARD,
   });
 
-  const govQuery = useQuery<ApiGovPosture>({
+  const govQuery = useStandardQuery<ApiGovPosture>({
     queryKey: ["lyte", "governance-posture"],
     queryFn: async () => {
       const res = await apiRequest<{ success: boolean; data: ApiGovPosture }>("GET", "/api/lyte/governance-posture");

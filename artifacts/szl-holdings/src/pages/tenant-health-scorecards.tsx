@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 import {
   Activity, TrendingUp, TrendingDown, Minus, Users, Zap, ShieldCheck,
   CreditCard, RefreshCw, Filter, ArrowUpDown, BarChart3, AlertTriangle,
@@ -159,7 +160,7 @@ export default function TenantHealthScorecards() {
   const [sortDir, setSortDir] = useState<"desc" | "asc">("desc");
   const [selectedOrg, setSelectedOrg] = useState<TenantScorecard | null>(null);
 
-  const { data: scorecardsData, isLoading } = useQuery({
+  const { data: scorecardsData, isLoading } = useStandardQuery({
     queryKey: ["tenant-health", filterTier, sortDir],
     queryFn: () => apiFetch<{ scorecards: TenantScorecard[]; total: number; period: unknown }>(
       `/tenant-health?${filterTier !== "all" ? `tier=${filterTier}&` : ""}sortDir=${sortDir}`
@@ -167,13 +168,13 @@ export default function TenantHealthScorecards() {
     staleTime: 60_000,
   });
 
-  const { data: benchmarksData } = useQuery({
+  const { data: benchmarksData } = useStandardQuery({
     queryKey: ["tenant-health-benchmarks"],
     queryFn: () => apiFetch<{ benchmarks: Benchmarks; tierBreakdown: Record<string, number> }>("/tenant-health/benchmarks"),
     staleTime: 60_000,
   });
 
-  const computeMutation = useMutation({
+  const computeMutation = useStandardMutation({
     mutationFn: (orgId: number) => apiFetch(`/tenant-health/${orgId}/compute`, { method: "POST" }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tenant-health"] }),
   });

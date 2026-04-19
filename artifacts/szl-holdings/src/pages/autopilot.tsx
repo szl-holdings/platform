@@ -1,6 +1,6 @@
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { useState, useMemo } from "react";
 import { m, AnimatePresence } from "framer-motion";
-import { useQuery } from "@tanstack/react-query";
 import {
   Activity, AlertTriangle, ArrowRight, ArrowUpRight, BarChart3, BookOpen, Brain,
   Building, CheckCircle2, ChevronDown, ChevronRight, Circle, Clock, Cpu,
@@ -259,7 +259,7 @@ function EffortBadge({ effort }: { effort: string }) {
 function GenomeTab() {
   const [hovered, setHovered] = useState<{ app: string; cap: string } | null>(null);
 
-  const { data: genomeApi } = useQuery({
+  const { data: genomeApi } = useStandardQuery({
     queryKey: ["autopilot", "genome"],
     queryFn: () => apiFetch<{ genome: Record<string, Record<string, MaturityLevel>>; score: number; gaps: number; bestInClass: number; capabilities: number }>("/autopilot/genome"),
     staleTime: 60_000,
@@ -383,7 +383,7 @@ function GenomeTab() {
 function DriftTab() {
   const [dismissed, setDismissed] = useState<string[]>([]);
 
-  const { data: driftApi } = useQuery({
+  const { data: driftApi } = useStandardQuery({
     queryKey: ["autopilot", "drift-alerts"],
     queryFn: () => apiFetch<{ alerts: typeof DRIFT_ALERTS }>("/autopilot/drift-alerts"),
     staleTime: 30_000,
@@ -485,7 +485,7 @@ function UsageTab() {
     dead:     { icon: Radio,        color: "#6b7280", label: "Dead" },
   };
 
-  const { data: usageApi } = useQuery({
+  const { data: usageApi } = useStandardQuery({
     queryKey: ["autopilot", "feature-usage"],
     queryFn: () => apiFetch<{ features: typeof FEATURE_USAGE; windowDays: number }>("/autopilot/feature-usage"),
     staleTime: 120_000,
@@ -552,7 +552,7 @@ function UsageTab() {
 // ─── Tab: User Signal Dashboard ───────────────────────────────────────────────
 
 function FeedbackTab() {
-  const { data: feedbackApi } = useQuery({
+  const { data: feedbackApi } = useStandardQuery({
     queryKey: ["autopilot", "feedback-signals"],
     queryFn: () => apiFetch<{ signals: typeof FEEDBACK_SIGNALS }>("/autopilot/feedback-signals"),
     staleTime: 60_000,
@@ -620,7 +620,7 @@ function FeedbackTab() {
 // ─── Tab: Performance Budget ──────────────────────────────────────────────────
 
 function BudgetTab() {
-  const { data: budgetApi } = useQuery({
+  const { data: budgetApi } = useStandardQuery({
     queryKey: ["autopilot", "performance-budgets"],
     queryFn: () => apiFetch<{ budgets: typeof PERF_BUDGETS }>("/autopilot/performance-budgets"),
     staleTime: 120_000,
@@ -691,7 +691,7 @@ function BudgetTab() {
 function PlaybooksTab() {
   const [expanded, setExpanded] = useState<string | null>(null);
 
-  const { data: playbooksApi } = useQuery({
+  const { data: playbooksApi } = useStandardQuery({
     queryKey: ["autopilot", "playbooks"],
     queryFn: () => apiFetch<{ playbooks: typeof PLAYBOOKS }>("/autopilot/playbooks"),
     staleTime: 120_000,
@@ -772,7 +772,7 @@ function PlaybooksTab() {
 function RadarTab() {
   const [selected, setSelected] = useState(0);
 
-  const { data: radarApi } = useQuery({
+  const { data: radarApi } = useStandardQuery({
     queryKey: ["autopilot", "competitive-radar"],
     queryFn: () => apiFetch<{ radar: typeof COMPETITIVE_RADAR }>("/autopilot/competitive-radar"),
     staleTime: 300_000,
@@ -895,7 +895,7 @@ function RadarTab() {
 function NextBestActionPanel() {
   const [open, setOpen] = useState(true);
 
-  const { data: nbaApi } = useQuery({
+  const { data: nbaApi } = useStandardQuery({
     queryKey: ["autopilot", "next-best-actions"],
     queryFn: () => apiFetch<{ actions: typeof NEXT_BEST_ACTIONS }>("/autopilot/next-best-actions"),
     staleTime: 300_000,
@@ -1176,14 +1176,14 @@ export default function AutopilotPage() {
 
   const [activeTab, setActiveTab] = useState("genome");
 
-  const { data: summary } = useQuery({
+  const { data: summary } = useStandardQuery({
     queryKey: ["autopilot", "summary"],
     queryFn: () => apiFetch<{ genomeScore: number; gaps: number; bestInClass: number; capabilities: number; scheduledJobsActive: number }>("/autopilot/summary"),
     staleTime: 60_000,
     refetchInterval: 120_000,
   });
 
-  const { data: driftSummary } = useQuery({
+  const { data: driftSummary } = useStandardQuery({
     queryKey: ["autopilot", "drift-alerts"],
     queryFn: () => apiFetch<{ alerts: Array<{ severity: string }> }>("/autopilot/drift-alerts"),
     staleTime: 30_000,

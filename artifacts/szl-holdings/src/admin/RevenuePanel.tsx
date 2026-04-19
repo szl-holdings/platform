@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
 import {
   BarChart3, TrendingUp, DollarSign, Download, ChevronDown, ChevronRight,
   AlertCircle, Loader2, RefreshCw, Globe, Building2, Users,

@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 import {
   TrendingUp, FileText, Users, CheckSquare, ChevronRight, ChevronDown, ChevronUp,
   DollarSign, Briefcase, BarChart3, Clock, AlertCircle, CheckCircle2, Circle,
@@ -80,7 +81,7 @@ function DeliverableRow({ item, endpoint, qk }: { item: Deliverable; endpoint: s
     reviewed: "#8b5cf6", final: "#10b981",
   };
 
-  const mut = useMutation({
+  const mut = useStandardMutation({
     mutationFn: (update: Partial<Deliverable>) =>
       apiFetch(`${endpoint}/${item.id}`, { method: "PATCH", body: JSON.stringify(update) }),
     onSuccess: () => qc.invalidateQueries({ queryKey: qk }),
@@ -148,7 +149,7 @@ function PacketBuilder({
   deliverableEndpoint: string;
   queryKey: (string | number)[];
 }) {
-  const { data: detail, isLoading } = useQuery<LenderPacket & InvestorPacket>({
+  const { data: detail, isLoading } = useStandardQuery<LenderPacket & InvestorPacket>({
     queryKey: [...queryKey, packet.id],
     queryFn: () => apiFetch(`${endpoint}/${packet.id}`),
   });
@@ -216,12 +217,12 @@ function PacketBuilder({
 
 function ChecklistPanel({ checklist }: { checklist: DiligenceChecklist }) {
   const qc = useQueryClient();
-  const { data: detail, isLoading } = useQuery<DiligenceChecklist & { items: DiligenceItem[] }>({
+  const { data: detail, isLoading } = useStandardQuery<DiligenceChecklist & { items: DiligenceItem[] }>({
     queryKey: ["diligence-detail", checklist.id],
     queryFn: () => apiFetch(`/capital/diligence-checklists/${checklist.id}`),
   });
 
-  const mut = useMutation({
+  const mut = useStandardMutation({
     mutationFn: ({ id, status }: { id: number; status: string }) =>
       apiFetch(`/capital/diligence-checklist-items/${id}`, { method: "PATCH", body: JSON.stringify({ status }) }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["diligence-detail", checklist.id] }),
@@ -291,24 +292,24 @@ export function CapitalReadinessOS() {
   const [activeLenderId, setActiveLenderId] = useState<number | null>(null);
   const [activeInvestorId, setActiveInvestorId] = useState<number | null>(null);
 
-  const { data: dashboard, isLoading: dashLoading } = useQuery<CapDashboard>({
+  const { data: dashboard, isLoading: dashLoading } = useStandardQuery<CapDashboard>({
     queryKey: ["capital-dashboard"],
     queryFn: () => apiFetch("/capital/dashboard"),
   });
 
-  const { data: lenderPackets = [] } = useQuery<LenderPacket[]>({
+  const { data: lenderPackets = [] } = useStandardQuery<LenderPacket[]>({
     queryKey: ["lender-packets"],
     queryFn: () => apiFetch("/capital/lender-packets"),
     enabled: activeTab === "lender",
   });
 
-  const { data: investorPackets = [] } = useQuery<InvestorPacket[]>({
+  const { data: investorPackets = [] } = useStandardQuery<InvestorPacket[]>({
     queryKey: ["investor-packets"],
     queryFn: () => apiFetch("/capital/investor-packets"),
     enabled: activeTab === "investor",
   });
 
-  const { data: checklists = [] } = useQuery<DiligenceChecklist[]>({
+  const { data: checklists = [] } = useStandardQuery<DiligenceChecklist[]>({
     queryKey: ["diligence-checklists"],
     queryFn: () => apiFetch("/capital/diligence-checklists"),
     enabled: activeTab === "diligence",
@@ -534,7 +535,7 @@ interface CapTableEntry {
 
 function CapTablePanel() {
   const qc = useQueryClient();
-  const { data: entries = [], isLoading } = useQuery<CapTableEntry[]>({
+  const { data: entries = [], isLoading } = useStandardQuery<CapTableEntry[]>({
     queryKey: ["cap-table"],
     queryFn: () => apiFetch("/capital/cap-table"),
   });
@@ -542,7 +543,7 @@ function CapTablePanel() {
   const [showAdd, setShowAdd] = useState(false);
   const [newEntry, setNewEntry] = useState({ holderName: "", holderType: "founder", shareClass: "Common", ownershipPct: "" });
 
-  const addMut = useMutation({
+  const addMut = useStandardMutation({
     mutationFn: (data: typeof newEntry) => apiFetch("/capital/cap-table", { method: "POST", body: JSON.stringify(data) }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["cap-table"] }); setShowAdd(false); setNewEntry({ holderName: "", holderType: "founder", shareClass: "Common", ownershipPct: "" }); },
   });

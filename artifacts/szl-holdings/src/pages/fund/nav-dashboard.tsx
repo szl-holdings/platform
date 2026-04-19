@@ -1,7 +1,7 @@
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { useState, useMemo } from "react";
 import { m, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
-import { useQuery } from "@tanstack/react-query";
 import {
   TrendingUp, ArrowLeft, ChevronRight, DollarSign, BarChart3,
   Calculator, Download, RefreshCw, ArrowUpRight, ArrowDownRight,
@@ -123,7 +123,7 @@ export default function NavDashboardPage() {
   const [tab, setTab] = useState<"nav" | "companies" | "fees" | "reports">("nav");
   const [selectedPeriod, setSelectedPeriod] = useState("Q1 2026");
 
-  const { data: navRecords } = useQuery({
+  const { data: navRecords } = useStandardQuery({
     queryKey: ["fund-ops", "nav-records"],
     queryFn: () => apiFetch<NavRecord[]>("/fund-ops/nav-records"),
     staleTime: 60_000,
@@ -134,7 +134,7 @@ export default function NavDashboardPage() {
     revenueConcentration: Array<{ company: string; slug: string; revenue: number; cash: number; runway: number }>;
     summary: { totalRevenue: number; totalCash: number; companyCount: number };
   };
-  const { data: portfolioAggregate } = useQuery({
+  const { data: portfolioAggregate } = useStandardQuery({
     queryKey: ["fund-ops", "portfolio-aggregate"],
     queryFn: () => apiFetch<PortfolioAggregate>("/fund-ops/portfolio-aggregate"),
     staleTime: 120_000,
@@ -149,7 +149,7 @@ export default function NavDashboardPage() {
     preferredReturnRate: string | null; calledCapital: string | null;
     periodStart: string | null;
   };
-  const { data: lpReportRows } = useQuery({
+  const { data: lpReportRows } = useStandardQuery({
     queryKey: ["fund-ops", "lp-reports"],
     queryFn: () => apiFetch<LpReport[]>("/fund-ops/lp-reports"),
     staleTime: 120_000,

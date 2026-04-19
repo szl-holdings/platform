@@ -1,5 +1,5 @@
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { ShieldAlert, Zap, Activity, Cpu, AlertTriangle } from "lucide-react";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import {
@@ -78,7 +78,7 @@ function severityClass(sev: string): string {
 export default function DecisionCenter() {
   const [autonomyMode, setAutonomyMode] = useState<AutonomyMode>("recommend");
 
-  const { data, isLoading, error } = useQuery<NarrativePayload>({
+  const { data, isLoading, error } = useStandardQuery<NarrativePayload>({
     queryKey: ["narratives", "sentra-ransomware"],
     queryFn: () => apiFetch<NarrativePayload>("/narratives/sentra-ransomware", { skipAuth: true }),
     refetchInterval: 30_000,

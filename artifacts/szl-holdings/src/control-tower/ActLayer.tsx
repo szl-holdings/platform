@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from "react";
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 import { Workflow, PlusCircle, Layers, Play, ChevronRight, Trash2, GripVertical } from "lucide-react";
 
@@ -22,13 +23,13 @@ export function ActLayer() {
   const dragSrcIdx = useRef<number | null>(null);
   const queryClient = useQueryClient();
 
-  const { data: pipelinesData, isLoading: pipelinesLoading } = useQuery<{ data: Record<string, unknown> }>({
+  const { data: pipelinesData, isLoading: pipelinesLoading } = useStandardQuery<{ data: Record<string, unknown> }>({
     queryKey: ["ct-pipelines"],
     queryFn: () => fetch(`${API_BASE}/control-tower/act/pipelines`).then(r => r.json()),
     staleTime: 300000,
   });
 
-  const runMutation = useMutation({
+  const runMutation = useStandardMutation({
     mutationFn: (body: { pipelineId: string; input: string }) =>
       fetch(`${API_BASE}/control-tower/act/pipelines/${body.pipelineId}/run`, {
         method: "POST",
@@ -41,7 +42,7 @@ export function ActLayer() {
     },
   });
 
-  const composerRunMutation = useMutation({
+  const composerRunMutation = useStandardMutation({
     mutationFn: (body: { stages: ComposerStage[]; input: string }) =>
       fetch(`${API_BASE}/control-tower/act/compose`, {
         method: "POST",

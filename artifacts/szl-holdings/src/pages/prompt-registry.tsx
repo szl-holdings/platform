@@ -6,7 +6,8 @@ import {
   TrendingUp, TrendingDown, Minus, RefreshCw, AlertCircle,
   Filter, Search,
 } from "lucide-react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -119,7 +120,7 @@ function fmtDate(s: string | null | undefined) {
 
 function usePrompts(domain?: string) {
   const params = domain ? `?domain=${domain}` : "";
-  return useQuery<PromptSummary[]>({
+  return useStandardQuery<PromptSummary[]>({
     queryKey: ["prompt-registry", domain],
     queryFn: async () => {
       const r = await fetch(`/api/ai/prompts${params}`, { credentials: "include" });
@@ -132,7 +133,7 @@ function usePrompts(domain?: string) {
 }
 
 function usePromptDetail(id: string | null) {
-  return useQuery<PromptDetail>({
+  return useStandardQuery<PromptDetail>({
     queryKey: ["prompt-registry", "detail", id],
     queryFn: async () => {
       const r = await fetch(`/api/ai/prompts/${id}`, { credentials: "include" });
@@ -147,7 +148,7 @@ function usePromptDetail(id: string | null) {
 
 function usePromote(promptId: string) {
   const qc = useQueryClient();
-  return useMutation({
+  return useStandardMutation({
     mutationFn: async (versionId: string) => {
       const r = await fetch(`/api/ai/prompts/${promptId}/promote`, {
         method: "POST",
@@ -169,7 +170,7 @@ function usePromote(promptId: string) {
 
 function useRunEval(promptId: string) {
   const qc = useQueryClient();
-  return useMutation({
+  return useStandardMutation({
     mutationFn: async (versionId: string) => {
       const r = await fetch(`/api/ai/prompts/${promptId}/versions/${versionId}/eval`, {
         method: "POST",

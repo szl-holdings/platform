@@ -1,6 +1,7 @@
 import { useState } from "react";
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 import { TrendingUp, Server, FlaskConical, Sparkles } from "lucide-react";
 
@@ -16,13 +17,13 @@ export function EvolveLayer() {
   const [proposeForm, setProposeForm] = useState<ProposeForm>({ agentId: "", description: "", expectedImprovement: "" });
   const queryClient = useQueryClient();
 
-  const { data: metricsData, isLoading: metricsLoading } = useQuery<{ data: Record<string, unknown> }>({
+  const { data: metricsData, isLoading: metricsLoading } = useStandardQuery<{ data: Record<string, unknown> }>({
     queryKey: ["ct-evolve-metrics"],
     queryFn: () => fetch(`${API_BASE}/control-tower/evolve/metrics`).then(r => r.json()),
     refetchInterval: 30000,
   });
 
-  const proposeMutation = useMutation({
+  const proposeMutation = useStandardMutation({
     mutationFn: (body: { agentId: string; description: string; expectedImprovement: string }) =>
       fetch(`${API_BASE}/control-tower/evolve/propose`, {
         method: "POST",

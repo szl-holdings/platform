@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 import {
   Building2, Target, Mail, Linkedin, FileText, Handshake, ClipboardCheck,
   Plus, Trash2, ChevronDown, ChevronRight, Copy, CheckCircle2, AlertCircle,
@@ -242,7 +243,7 @@ const KICKOFF_AGENDA = `DESIGN PARTNER KICKOFF — 60 min\n\n00:00–00:05  Welc
 const DISCOVERY_SCRIPT = `DISCOVERY CALL — 25 min (after they accept the meeting)\n\n00:00–00:03  Set the frame: "I'd like to spend 20 minutes understanding how decisions get made and recorded today. Then 5 minutes on whether what we built fits."\n\n00:03–00:18  The six questions (let them talk):\n  1. How do you currently track which decisions were made, who made them, and based on what information?\n  2. When a regulatory body or legal team asks to reconstruct a decision chain, how do you respond?\n  3. How do you govern AI recommendations before they become actions?\n  4. Who in your organization is accountable when an AI-assisted action goes wrong?\n  5. What does your compliance posture look like for high-consequence operational decisions?\n  6. What does your team spend on managing decision fallout — audits, investigations, remediation?\n\n00:18–00:23  Mirror back what you heard. Name the accountability gap in their words.\n\n00:23–00:25  Next step: "Based on this, the right next step is [demo / no fit / different product]. Would [date] work for a 30-min walkthrough on a [their-shaped] decision?"\n\nIf they don't have the gap: end the call honestly. They are not a fit. Save the time on both sides.`;
 
 function DealAuditTrail({ dealId }: { dealId: number }) {
-  const { data, isLoading, isError, error } = useQuery({
+  const { data, isLoading, isError, error } = useStandardQuery({
     queryKey: ["admin", "pipeline-deal-events", dealId],
     queryFn: async () => (await apiJson(`${API}/admin/pipeline-deals/${dealId}/events`)) as DealEvent[],
   });
@@ -283,14 +284,14 @@ export default function PipelineCommandPage() {
   const [pendingId, setPendingId] = useState<number | null>(null);
   const [auditOpenFor, setAuditOpenFor] = useState<number | null>(null);
 
-  const dealsQuery = useQuery({
+  const dealsQuery = useStandardQuery({
     queryKey: QUERY_KEY,
     queryFn: async () => (await apiJson(`${API}/admin/pipeline-deals`)) as Deal[],
   });
 
   const deals: Deal[] = dealsQuery.data ?? [];
 
-  const createMutation = useMutation({
+  const createMutation = useStandardMutation({
     mutationFn: async (input: Omit<Deal, "id" | "updatedAt" | "createdAt">) => {
       return (await apiJson(`${API}/admin/pipeline-deals`, {
         method: "POST",
@@ -314,7 +315,7 @@ export default function PipelineCommandPage() {
     onSettled: () => queryClient.invalidateQueries({ queryKey: QUERY_KEY }),
   });
 
-  const updateMutation = useMutation({
+  const updateMutation = useStandardMutation({
     mutationFn: async (args: { id: number; patch: Partial<Deal> }) => {
       return (await apiJson(`${API}/admin/pipeline-deals/${args.id}`, {
         method: "PATCH",
@@ -338,7 +339,7 @@ export default function PipelineCommandPage() {
     },
   });
 
-  const deleteMutation = useMutation({
+  const deleteMutation = useStandardMutation({
     mutationFn: async (id: number) => {
       await apiJson(`${API}/admin/pipeline-deals/${id}`, { method: "DELETE" });
       return id;

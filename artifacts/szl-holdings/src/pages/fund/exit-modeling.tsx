@@ -1,7 +1,7 @@
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { useState, useMemo } from "react";
 import { m } from "framer-motion";
 import { Link } from "wouter";
-import { useQuery } from "@tanstack/react-query";
 import { TrendingUp, ArrowLeft, ChevronRight, RefreshCw } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -70,14 +70,14 @@ export default function ExitModelingPage() {
   const [running, setRunning] = useState(false);
   const [simSeed, setSimSeed] = useState(0);
 
-  const { data: portfolioFinancials } = useQuery({
+  const { data: portfolioFinancials } = useStandardQuery({
     queryKey: ["fund-ops", "portfolio-financials"],
     queryFn: () => apiFetch<PortfolioFinancial[]>("/fund-ops/portfolio-financials"),
     staleTime: 60_000,
     refetchInterval: 120_000,
   });
 
-  const { data: navRecords } = useQuery({
+  const { data: navRecords } = useStandardQuery({
     queryKey: ["fund-ops", "nav-records"],
     queryFn: () => apiFetch<NavRecord[]>("/fund-ops/nav-records"),
     staleTime: 60_000,

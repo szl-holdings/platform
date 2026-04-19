@@ -1,5 +1,5 @@
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { m, AnimatePresence } from "framer-motion";
 import { Shield, Scale, ClipboardList, Lock, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -22,7 +22,7 @@ export default function OwnershipOsPage() {
   const [nav, setNav] = useState<NavItem>("scenarios");
   const [selectedScenarioId, setSelectedScenarioId] = useState<number | null>(null);
 
-  const { data: featureEnabled, isLoading: flagLoading } = useQuery<boolean>({
+  const { data: featureEnabled, isLoading: flagLoading } = useStandardQuery<boolean>({
     queryKey: ["ownership-feature-flag"],
     queryFn: async () => {
       try {

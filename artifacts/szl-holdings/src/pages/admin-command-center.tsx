@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useUserPreferences } from "@szl-holdings/shared-ui/use-user-preferences";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 import { m, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard, Users, Building2, Shield, Flag, Activity, HeadphonesIcon, Search, RefreshCw, ChevronRight, CheckCircle2, AlertCircle, XCircle, Loader2, Download, ToggleLeft, ToggleRight, UserX, UserCheck, Plus, Filter, Clock, Mail, ChevronDown, ChevronUp, X, Eye, Settings, BarChart3, TrendingUp, Database, Globe, Zap, Lock, ExternalLink, Terminal, AlertTriangle, CheckSquare, Circle, UserCog, Sliders, DollarSign, Tag, Trash2, Edit2, ChevronLeft, ShieldCheck, } from "lucide-react";
@@ -243,7 +244,7 @@ function Modal({ open, onClose, title, children }: { open: boolean; onClose: () 
 // ─── Overview Panel ───────────────────────────────────────────────────────────
 
 function OverviewPanel() {
-  const { data, isLoading, refetch } = useQuery<OverviewData>({
+  const { data, isLoading, refetch } = useStandardQuery<OverviewData>({
     queryKey: ["admin-overview"],
     queryFn: () => adminFetch<OverviewData>("/admin/overview"),
     refetchInterval: 30000,
@@ -291,7 +292,7 @@ function OverviewPanel() {
 // ─── Analytics Panel ──────────────────────────────────────────────────────────
 
 function AnalyticsPanel() {
-  const { data, isLoading, refetch } = useQuery<AnalyticsData>({
+  const { data, isLoading, refetch } = useStandardQuery<AnalyticsData>({
     queryKey: ["admin-analytics"],
     queryFn: () => adminFetch<AnalyticsData>("/admin/analytics"),
     refetchInterval: 60000,
@@ -380,7 +381,7 @@ function AnalyticsPanel() {
 // ─── Tenant Detail Drawer ─────────────────────────────────────────────────────
 
 function TenantDetailDrawer({ tenantId, onClose }: { tenantId: number | null; onClose: () => void }) {
-  const { data, isLoading } = useQuery<TenantDetail>({
+  const { data, isLoading } = useStandardQuery<TenantDetail>({
     queryKey: ["admin-tenant-detail", tenantId],
     queryFn: () => adminFetch<TenantDetail>(`/admin/orgs/${tenantId}`),
     enabled: tenantId != null,
@@ -474,18 +475,18 @@ function TenantsPanel() {
   const [form, setForm] = useState({ name: "", slug: "" });
   const [selectedTenantId, setSelectedTenantId] = useState<number | null>(null);
 
-  const { data, isLoading, refetch } = useQuery<{ tenants: Tenant[]; total: number }>({
+  const { data, isLoading, refetch } = useStandardQuery<{ tenants: Tenant[]; total: number }>({
     queryKey: ["admin-tenants"],
     queryFn: () => adminFetch("/admin/orgs"),
   });
 
-  const suspendMutation = useMutation({
+  const suspendMutation = useStandardMutation({
     mutationFn: ({ id, suspended }: { id: number; suspended: boolean }) =>
       adminFetch(`/admin/orgs/${id}/suspend`, { method: "PATCH", body: JSON.stringify({ suspended }) }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-tenants"] }),
   });
 
-  const createMutation = useMutation({
+  const createMutation = useStandardMutation({
     mutationFn: (vals: { name: string; slug: string }) =>
       adminFetch("/admin/orgs", { method: "POST", body: JSON.stringify(vals) }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-tenants"] }); setCreating(false); setForm({ name: "", slug: "" }); },
@@ -579,19 +580,19 @@ function TenantsPanel() {
 function UserDetailModal({ userId, onClose }: { userId: number | null; onClose: () => void }) {
   const qc = useQueryClient();
 
-  const { data: detail, isLoading } = useQuery<UserDetail>({
+  const { data: detail, isLoading } = useStandardQuery<UserDetail>({
     queryKey: ["admin-user-detail", userId],
     queryFn: () => adminFetch<UserDetail>(`/admin/users/${userId}/detail`),
     enabled: userId != null,
   });
 
-  const { data: rolesData } = useQuery<{ roles: PlatformRole[] }>({
+  const { data: rolesData } = useStandardQuery<{ roles: PlatformRole[] }>({
     queryKey: ["admin-roles"],
     queryFn: () => adminFetch<{ roles: PlatformRole[] }>("/admin/roles"),
     enabled: userId != null,
   });
 
-  const roleMutation = useMutation({
+  const roleMutation = useStandardMutation({
     mutationFn: ({ roleId, action }: { roleId: number; action: "add" | "remove" }) =>
       adminFetch(`/admin/users/${userId}/role`, { method: "PATCH", body: JSON.stringify({ roleId, action }) }),
     onSuccess: () => {
@@ -681,19 +682,19 @@ function UserDetailModal({ userId, onClose }: { userId: number | null; onClose: 
 function ChangeRoleModal({ userId, userName, onClose }: { userId: number | null; userName: string; onClose: () => void }) {
   const qc = useQueryClient();
 
-  const { data: detailData, isLoading: detailLoading } = useQuery<UserDetail>({
+  const { data: detailData, isLoading: detailLoading } = useStandardQuery<UserDetail>({
     queryKey: ["admin-user-detail", userId],
     queryFn: () => adminFetch<UserDetail>(`/admin/users/${userId}/detail`),
     enabled: userId != null,
   });
 
-  const { data: rolesData, isLoading: rolesLoading } = useQuery<{ roles: PlatformRole[] }>({
+  const { data: rolesData, isLoading: rolesLoading } = useStandardQuery<{ roles: PlatformRole[] }>({
     queryKey: ["admin-roles"],
     queryFn: () => adminFetch<{ roles: PlatformRole[] }>("/admin/roles"),
     enabled: userId != null,
   });
 
-  const roleMutation = useMutation({
+  const roleMutation = useStandardMutation({
     mutationFn: ({ roleId, action }: { roleId: number; action: "add" | "remove" }) =>
       adminFetch(`/admin/users/${userId}/role`, { method: "PATCH", body: JSON.stringify({ roleId, action }) }),
     onSuccess: () => {
@@ -776,12 +777,12 @@ function UsersPanel() {
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   const [changeRoleUser, setChangeRoleUser] = useState<{ id: number; name: string } | null>(null);
 
-  const { data, isLoading, refetch } = useQuery<{ users: AdminUser[]; total: number }>({
+  const { data, isLoading, refetch } = useStandardQuery<{ users: AdminUser[]; total: number }>({
     queryKey: ["admin-users"],
     queryFn: () => adminFetch("/admin/users"),
   });
 
-  const toggleMutation = useMutation({
+  const toggleMutation = useStandardMutation({
     mutationFn: ({ id, active }: { id: string; active: boolean }) => {
       const numId = id.replace("usr_", "");
       return adminFetch(`/admin/users/${numId}/deactivate`, { method: "PATCH", body: JSON.stringify({ active }) });
@@ -888,19 +889,19 @@ function SupportPanel() {
   const [replySending, setReplySending] = useState(false);
   const [replyResult, setReplyResult] = useState<{ success: boolean; message: string } | null>(null);
 
-  const { data, isLoading, refetch } = useQuery<{ tickets: SupportTicket[]; total: number; openTotal: number }>({
+  const { data, isLoading, refetch } = useStandardQuery<{ tickets: SupportTicket[]; total: number; openTotal: number }>({
     queryKey: ["admin-support", showResolved],
     queryFn: () => adminFetch(`/admin/support-queue${showResolved ? "?includeResolved=true" : ""}`),
     refetchInterval: 60000,
   });
 
-  const statusMutation = useMutation({
+  const statusMutation = useStandardMutation({
     mutationFn: ({ id, status, ownerUserId }: { id: number; status: string; ownerUserId?: number }) =>
       adminFetch(`/admin/support-queue/${id}/status`, { method: "POST", body: JSON.stringify({ status, ownerUserId }) }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-support"] }),
   });
 
-  const assignMutation = useMutation({
+  const assignMutation = useStandardMutation({
     mutationFn: ({ id, ownerUserId }: { id: number; ownerUserId: number }) =>
       adminFetch(`/admin/support-queue/${id}/status`, { method: "POST", body: JSON.stringify({ status: "contacted", ownerUserId }) }),
     onSuccess: (_, { id }) => {
@@ -909,7 +910,7 @@ function SupportPanel() {
     },
   });
 
-  const noteMutation = useMutation({
+  const noteMutation = useStandardMutation({
     mutationFn: ({ id, notes, status }: { id: number; notes: string; status: string }) =>
       adminFetch(`/admin/support-queue/${id}/status`, { method: "POST", body: JSON.stringify({ status, notes }) }),
     onSuccess: (_, { id }) => {
@@ -918,13 +919,13 @@ function SupportPanel() {
     },
   });
 
-  const resolveMutation = useMutation({
+  const resolveMutation = useStandardMutation({
     mutationFn: ({ id }: { id: number }) =>
       adminFetch(`/admin/support-queue/${id}/resolve`, { method: "POST" }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-support"] }),
   });
 
-  const reopenMutation = useMutation({
+  const reopenMutation = useStandardMutation({
     mutationFn: ({ id }: { id: number }) =>
       adminFetch(`/admin/support-queue/${id}/reopen`, { method: "POST" }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-support"] }),
@@ -1252,12 +1253,12 @@ function AuditPanel() {
   if (tenantFilter) params.set("orgId", tenantFilter);
   params.set("limit", "100");
 
-  const { data, isLoading, refetch } = useQuery<{ logs: AuditEntry[]; total: number }>({
+  const { data, isLoading, refetch } = useStandardQuery<{ logs: AuditEntry[]; total: number }>({
     queryKey: ["admin-audit", search, action, dateFrom, dateTo, tenantFilter],
     queryFn: () => adminFetch(`/admin/audit-log?${params}`),
   });
 
-  const { data: tenantsData } = useQuery<{ tenants: Tenant[] }>({
+  const { data: tenantsData } = useStandardQuery<{ tenants: Tenant[] }>({
     queryKey: ["admin-tenants"],
     queryFn: () => adminFetch("/admin/orgs"),
   });
@@ -1413,19 +1414,19 @@ function FlagOverridesEditor({ flagKey, onClose }: { flagKey: string; onClose: (
   const qc = useQueryClient();
   const [form, setForm] = useState({ entityType: "role" as "user" | "org" | "role", entityId: "", isEnabled: true });
 
-  const { data, isLoading } = useQuery<{ overrides: FlagOverride[] }>({
+  const { data, isLoading } = useStandardQuery<{ overrides: FlagOverride[] }>({
     queryKey: ["admin-flag-overrides", flagKey],
     queryFn: () => adminFetch<{ overrides: FlagOverride[] }>(`/admin/feature-flags/${flagKey}/overrides`),
     enabled: !!flagKey,
   });
 
-  const addMutation = useMutation({
+  const addMutation = useStandardMutation({
     mutationFn: (vals: typeof form) =>
       adminFetch(`/admin/feature-flags/${flagKey}/overrides`, { method: "POST", body: JSON.stringify(vals) }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-flag-overrides", flagKey] }); setForm({ entityType: "role", entityId: "", isEnabled: true }); },
   });
 
-  const deleteMutation = useMutation({
+  const deleteMutation = useStandardMutation({
     mutationFn: (overrideId: number) =>
       adminFetch(`/admin/feature-flags/${flagKey}/overrides/${overrideId}`, { method: "DELETE" }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-flag-overrides", flagKey] }),
@@ -1533,19 +1534,19 @@ function FlagsPanel() {
   const [rolloutValue, setRolloutValue] = useState(0);
   const [overrideKey, setOverrideKey] = useState<string>("");
 
-  const { data, isLoading, refetch } = useQuery<{ flags: FeatureFlag[] }>({
+  const { data, isLoading, refetch } = useStandardQuery<{ flags: FeatureFlag[] }>({
     queryKey: ["admin-flags"],
     queryFn: () => adminFetch("/admin/feature-flags"),
   });
 
-  const toggleMutation = useMutation({
+  const toggleMutation = useStandardMutation({
     mutationFn: ({ key, enabled }: { key: string; enabled: boolean }) =>
       adminFetch(`/admin/feature-flags/${key}`, { method: "PUT", body: JSON.stringify({ enabled }) }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-flags"] }); setToggling(null); },
     onError: () => setToggling(null),
   });
 
-  const rolloutMutation = useMutation({
+  const rolloutMutation = useStandardMutation({
     mutationFn: ({ key, rolloutPercentage }: { key: string; rolloutPercentage: number }) =>
       adminFetch(`/admin/feature-flags/${key}/rollout`, { method: "PUT", body: JSON.stringify({ rolloutPercentage }) }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-flags"] }); setEditingRollout(null); },
@@ -1636,7 +1637,7 @@ function FlagsPanel() {
 function HealthPanel() {
   const [categoryFilter, setCategoryFilter] = useState("All");
 
-  const { data, isLoading, refetch } = useQuery<{
+  const { data, isLoading, refetch } = useStandardQuery<{
     timestamp: string; status: string;
     checks: HealthCheck[];
     summary: { total: number; healthy: number; degraded: number; down: number };

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 import { GitBranch, CheckCircle, XCircle, AlertTriangle, Clock, ChevronRight, Shield, Zap, Target, Eye, ArrowRight, Loader2, RefreshCw } from "lucide-react";
 import { apiRequest } from "@/lib/api";
 import { useAtlasApprovalsBadge, ATLAS_APPROVALS_BADGE_QUERY_KEY } from "@/alloy/hooks/use-atlas-approvals-badge";
@@ -268,7 +269,7 @@ function ApprovalCard({
 export default function AlloyAtlasApprovals() {
   const queryClient = useQueryClient();
 
-  const { data: apiData, isLoading, refetch } = useQuery<ApiApproval[]>({
+  const { data: apiData, isLoading, refetch } = useStandardQuery<ApiApproval[]>({
     queryKey: ["atlas-approvals"],
     queryFn: async () => {
       const result = await apiRequest<ApiApproval[] | { data: ApiApproval[] }>("GET", "/api/approvals?status=all");
@@ -291,7 +292,7 @@ export default function AlloyAtlasApprovals() {
   const [localOverrides, setLocalOverrides] = useState<Record<string, ApprovalStatus>>({});
   const [updatingIds, setUpdatingIds] = useState<Set<string>>(new Set());
 
-  const reviewMutation = useMutation({
+  const reviewMutation = useStandardMutation({
     mutationFn: async ({ numericId, decision, reason }: { numericId: number; decision: "approved" | "rejected" | "revised"; reason?: string }) => {
       if (numericId < 0) throw new Error("Demo record — no API call");
       return apiRequest("POST", `/api/approvals/${numericId}/review`, { decision, note: reason });
@@ -303,7 +304,7 @@ export default function AlloyAtlasApprovals() {
     },
   });
 
-  const escalateMutation = useMutation({
+  const escalateMutation = useStandardMutation({
     mutationFn: async ({ numericId, reason }: { numericId: number; reason: string }) => {
       if (numericId < 0) throw new Error("Demo record — no API call");
       return apiRequest("POST", `/api/approvals/${numericId}/escalate`, { reason });

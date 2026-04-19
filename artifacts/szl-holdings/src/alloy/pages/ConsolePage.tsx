@@ -1,6 +1,7 @@
 import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient, QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useQueryClient, QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 import { alloyApi, type AlloyWorkflow, type AlloyWorkflowRun, type AlloyArtifact, type AlloySignal, type FeatureFlag } from "../lib/api";
 import {
   Play, RefreshCw, CheckCircle, XCircle, Clock, AlertTriangle, Zap, ChevronDown, ChevronRight, Eye, CheckCheck, X as XIcon, ToggleRight, FileText, Users, Flag, } from "lucide-react";
@@ -43,7 +44,7 @@ function WorkflowCard({ workflow }: { workflow: AlloyWorkflow }) {
   const [expanded, setExpanded] = useState(false);
   const [triggering, setTriggering] = useState(false);
 
-  const { data: runs = [], isLoading: runsLoading } = useQuery({
+  const { data: runs = [], isLoading: runsLoading } = useStandardQuery({
     queryKey: ["alloy-runs", workflow.id],
     queryFn: () => alloyApi.workflows.runs(workflow.id),
     enabled: expanded,
@@ -210,7 +211,7 @@ function ArtifactCard({ artifact }: { artifact: AlloyArtifact }) {
 
 function FeatureFlagRow({ flag }: { flag: FeatureFlag }) {
   const qcInner = useQueryClient();
-  const toggle = useMutation({
+  const toggle = useStandardMutation({
     mutationFn: () => alloyApi.featureFlags.update(flag.key, { isEnabled: !flag.isEnabled }),
     onSuccess: () => qcInner.invalidateQueries({ queryKey: ["alloy-flags"] }),
   });
@@ -285,7 +286,7 @@ type Tab = typeof TABS[number]["id"];
 function ConsoleInner() {
   const [tab, setTab] = useState<Tab>("workflows");
 
-  const { data: dashboard, isLoading: dashLoading } = useQuery({
+  const { data: dashboard, isLoading: dashLoading } = useStandardQuery({
     queryKey: ["alloy-dashboard"],
     queryFn: () => alloyApi.dashboard(),
     refetchInterval: (query) => {
@@ -294,36 +295,36 @@ function ConsoleInner() {
     },
   });
 
-  const { data: workflows = [], isLoading: wfLoading } = useQuery({
+  const { data: workflows = [], isLoading: wfLoading } = useStandardQuery({
     queryKey: ["alloy-workflows"],
     queryFn: () => alloyApi.workflows.list(),
   });
 
-  const { data: signals = [], isLoading: sigLoading } = useQuery({
+  const { data: signals = [], isLoading: sigLoading } = useStandardQuery({
     queryKey: ["alloy-signals"],
     queryFn: () => alloyApi.signals.list(),
     enabled: tab === "signals",
   });
 
-  const { data: artifacts = [], isLoading: artLoading } = useQuery({
+  const { data: artifacts = [], isLoading: artLoading } = useStandardQuery({
     queryKey: ["alloy-artifacts"],
     queryFn: () => alloyApi.artifacts.list(),
     enabled: tab === "artifacts",
   });
 
-  const { data: flags = [], isLoading: flagsLoading } = useQuery({
+  const { data: flags = [], isLoading: flagsLoading } = useStandardQuery({
     queryKey: ["alloy-flags"],
     queryFn: () => alloyApi.featureFlags.list(),
     enabled: tab === "feature-flags",
   });
 
-  const { data: auditEntries = [], isLoading: auditLoading } = useQuery({
+  const { data: auditEntries = [], isLoading: auditLoading } = useStandardQuery({
     queryKey: ["alloy-audit"],
     queryFn: () => alloyApi.audit.list({ limit: 100 }),
     enabled: tab === "audit",
   });
 
-  const { data: users = [], isLoading: usersLoading } = useQuery({
+  const { data: users = [], isLoading: usersLoading } = useStandardQuery({
     queryKey: ["alloy-admin-users"],
     queryFn: () => alloyApi.admin.users(),
     enabled: tab === "users",

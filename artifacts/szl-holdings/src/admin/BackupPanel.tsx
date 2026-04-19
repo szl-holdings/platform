@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 import {
   HardDrive, Download, CheckCircle2, AlertCircle, Loader2, RefreshCw,
   Database, Clock, Activity, Shield, X, FileText, Save, Plus,
@@ -50,13 +51,13 @@ function BackupPanel() {
   const [exportLoading, setExportLoading] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
 
-  const { data, isLoading, isError } = useQuery<BackupStatus>({
+  const { data, isLoading, isError } = useStandardQuery<BackupStatus>({
     queryKey: ["backup-status"],
     queryFn: () => apiFetchAdmin<BackupStatus>("/admin/backup/status"),
     refetchInterval: 30000,
   });
 
-  const runBackupMutation = useMutation({
+  const runBackupMutation = useStandardMutation({
     mutationFn: () => apiFetchAdmin("/admin/backup/run", { method: "POST" }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["backup-status"] }),
   });

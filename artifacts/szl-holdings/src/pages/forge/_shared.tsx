@@ -1,5 +1,5 @@
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { Link } from "wouter";
-import { useQuery } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { apiRequest } from "@/lib/api";
 
@@ -77,7 +77,7 @@ export function StatusPill({ value }: { value: string }) {
 }
 
 export function useForgeQuery<T>(key: string, path: string) {
-  return useQuery<T>({
+  return useStandardQuery<T>({
     queryKey: ["forge", key],
     queryFn: async () => {
       const result = await apiRequest<{ success: boolean; data: T }>("GET", path);

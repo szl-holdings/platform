@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 import {
   Shield, CheckSquare, ChevronDown, ChevronUp, AlertTriangle, CheckCircle2,
   Circle, Clock, Loader2, Calendar, TrendingUp, FileSearch, Users, AlertCircle,
@@ -102,7 +103,7 @@ function TaskRow({ task }: { task: CertTask }) {
     ? <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
     : <Circle className="w-4 h-4 text-border shrink-0" />;
 
-  const mut = useMutation({
+  const mut = useStandardMutation({
     mutationFn: (status: string) => apiFetch(`/certification/tasks/${task.id}`, { method: "PATCH", body: JSON.stringify({ status }) }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["cert-tasks"] }),
   });
@@ -217,13 +218,13 @@ function ProgramCard({ program, onSelect }: { program: CertProgram; onSelect: ()
 }
 
 function ProgramDetail({ program }: { program: CertProgram }) {
-  const { data: detail } = useQuery<CertProgram & { requirements: CertRequirement[]; tasks: CertTask[] }>({
+  const { data: detail } = useStandardQuery<CertProgram & { requirements: CertRequirement[]; tasks: CertTask[] }>({
     queryKey: ["cert-program-detail", program.id],
     queryFn: () => apiFetch(`/certification/programs/${program.id}`),
   });
 
   const qc = useQueryClient();
-  const updateStatus = useMutation({
+  const updateStatus = useStandardMutation({
     mutationFn: ({ status }: { status: string }) => apiFetch(`/certification/status/${program.status?.id}`, { method: "PATCH", body: JSON.stringify({ overallStatus: status }) }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["cert-dashboard"] }); qc.invalidateQueries({ queryKey: ["cert-program-detail", program.id] }); },
   });
@@ -311,7 +312,7 @@ function ProgramDetail({ program }: { program: CertProgram }) {
 }
 
 function OwnershipScenarioPlanner() {
-  const { data: scenarios = [], isLoading } = useQuery<OwnershipScenario[]>({
+  const { data: scenarios = [], isLoading } = useStandardQuery<OwnershipScenario[]>({
     queryKey: ["ownership-scenarios"],
     queryFn: () => apiFetch("/certification/ownership-scenarios"),
   });
@@ -369,7 +370,7 @@ function OwnershipScenarioPlanner() {
 }
 
 function OpportunityTracker() {
-  const { data: opportunities = [], isLoading } = useQuery<Opportunity[]>({
+  const { data: opportunities = [], isLoading } = useStandardQuery<Opportunity[]>({
     queryKey: ["cert-opportunities"],
     queryFn: () => apiFetch("/certification/opportunities"),
   });
@@ -460,7 +461,7 @@ interface LegalReview {
 }
 
 function NaicsView() {
-  const { data: naics = [], isLoading } = useQuery<NaicsCode[]>({
+  const { data: naics = [], isLoading } = useStandardQuery<NaicsCode[]>({
     queryKey: ["cert-naics"],
     queryFn: () => apiFetch("/certification/naics"),
   });
@@ -506,7 +507,7 @@ function NaicsView() {
 }
 
 function LegalReviewsView() {
-  const { data: reviews = [], isLoading } = useQuery<LegalReview[]>({
+  const { data: reviews = [], isLoading } = useStandardQuery<LegalReview[]>({
     queryKey: ["cert-legal-reviews"],
     queryFn: () => apiFetch("/certification/legal-reviews"),
   });
@@ -592,7 +593,7 @@ interface MomLedReadinessData {
 function MomLedSummary() {
   const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
 
-  const { data, isLoading, isError } = useQuery<MomLedReadinessData>({
+  const { data, isLoading, isError } = useStandardQuery<MomLedReadinessData>({
     queryKey: ["cert-mom-led-readiness"],
     queryFn: () => apiFetch("/certification/mom-led-readiness"),
   });
@@ -710,18 +711,18 @@ export function CertificationReadinessOS() {
   const [selectedProgram, setSelectedProgram] = useState<CertProgram | null>(null);
   const qc = useQueryClient();
 
-  const { data: dashboard, isLoading: dashLoading } = useQuery<CertDashboard>({
+  const { data: dashboard, isLoading: dashLoading } = useStandardQuery<CertDashboard>({
     queryKey: ["cert-dashboard"],
     queryFn: () => apiFetch("/certification/dashboard"),
   });
 
-  const { data: calendar = [] } = useQuery<CalendarEvent[]>({
+  const { data: calendar = [] } = useStandardQuery<CalendarEvent[]>({
     queryKey: ["cert-calendar"],
     queryFn: () => apiFetch("/certification/calendar"),
     enabled: activeTab === "calendar",
   });
 
-  const seedMut = useMutation({
+  const seedMut = useStandardMutation({
     mutationFn: () => apiFetch("/certification/seed", { method: "POST" }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["cert-dashboard"] });

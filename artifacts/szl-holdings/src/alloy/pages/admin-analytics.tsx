@@ -1,6 +1,6 @@
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { DataStateBadge } from "@szl-holdings/shared-ui/data-state-badge";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import {
   BarChart2, Users, Activity, AlertTriangle, Clock, TrendingUp,
@@ -123,7 +123,7 @@ function TenantRow({ tenant }: { tenant: TenantSummary }) {
 export default function AdminAnalytics() {
   const [tab, setTab] = useState<"overview" | "tenants" | "models">("overview");
 
-  const { data: liveAnalytics } = useQuery({
+  const { data: liveAnalytics } = useStandardQuery({
     queryKey: ["adminAnalytics"],
     queryFn: async () => {
       try {

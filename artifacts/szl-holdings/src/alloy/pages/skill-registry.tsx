@@ -1,5 +1,6 @@
 import { DataStateBadge } from "@szl-holdings/shared-ui/data-state-badge";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { useState } from "react";
 import {
@@ -230,7 +231,7 @@ export default function SkillRegistry() {
   const [approvalFilter, setApprovalFilter] = useState("all");
   const qc = useQueryClient();
 
-  const { data: apiSkills, isLoading, isError } = useQuery({
+  const { data: apiSkills, isLoading, isError } = useStandardQuery({
     queryKey: ["alloySkills", categoryFilter, approvalFilter],
     queryFn: async () => {
       try {
@@ -246,7 +247,7 @@ export default function SkillRegistry() {
     retry: 1,
   });
 
-  const toggleSkill = useMutation({
+  const toggleSkill = useStandardMutation({
     mutationFn: async ({ id, enabled }: { id: number; enabled: boolean }) => {
       try {
         return await apiFetch(`/alloy/skills/${id}`, { method: "PATCH", body: JSON.stringify({ isEnabled: enabled }) });

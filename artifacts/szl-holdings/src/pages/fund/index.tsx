@@ -1,7 +1,7 @@
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { useMemo } from "react";
 import { m } from "framer-motion";
 import { Link } from "wouter";
-import { useQuery } from "@tanstack/react-query";
 import {
   Brain, FileText, Activity, Layers, TrendingUp, DollarSign,
   ShieldCheck, Users, BarChart3, GitMerge, ArrowRight, Cpu,
@@ -216,33 +216,33 @@ export default function FundIntelligenceHub() {
     canonical: "https://szlholdings.com/fund",
   });
 
-  const { data: fundSummary } = useQuery({
+  const { data: fundSummary } = useStandardQuery({
     queryKey: ["fund-ops", "summary"],
     queryFn: () => apiFetch<FundOpsSummary>("/fund-ops/summary"),
     staleTime: 60_000,
     refetchInterval: 120_000,
   });
 
-  const { data: portfolioAgg } = useQuery({
+  const { data: portfolioAgg } = useStandardQuery({
     queryKey: ["fund-ops", "portfolio-aggregate"],
     queryFn: () => apiFetch<PortfolioAggregate>("/fund-ops/portfolio-aggregate"),
     staleTime: 60_000,
     refetchInterval: 120_000,
   });
 
-  const { data: capTableSummary } = useQuery({
+  const { data: capTableSummary } = useStandardQuery({
     queryKey: ["fund-ops", "cap-table-summary"],
     queryFn: () => apiFetch<CapTableSummary>("/fund-ops/cap-table-summary"),
     staleTime: 60_000,
   });
 
-  const { data: portfolioKpis } = useQuery({
+  const { data: portfolioKpis } = useStandardQuery({
     queryKey: ["fund-ops", "portfolio-kpis"],
     queryFn: () => apiFetch<unknown[]>("/fund-ops/portfolio-kpis"),
     staleTime: 60_000,
   });
 
-  const { data: portfolioFinancials } = useQuery({
+  const { data: portfolioFinancials } = useStandardQuery({
     queryKey: ["fund-ops", "portfolio-financials"],
     queryFn: () => apiFetch<PortfolioFinancial[]>("/fund-ops/portfolio-financials"),
     staleTime: 60_000,

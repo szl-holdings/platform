@@ -1,5 +1,5 @@
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { m, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
 import { apiRequest } from "@/lib/api";
@@ -245,7 +245,7 @@ export default function GovernancePosturePage() {
     platformMetrics: PlatformMetrics;
     dataAvailable: boolean;
   }
-  const govQuery = useQuery<GovApiResponse>({
+  const govQuery = useStandardQuery<GovApiResponse>({
     queryKey: ["lyte", "governance-domains"],
     queryFn: async () => {
       const res = await apiRequest<GovApiResponse>("GET", "/api/lyte/governance-domains");

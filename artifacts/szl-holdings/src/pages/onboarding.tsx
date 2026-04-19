@@ -1,6 +1,6 @@
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { useMutation, useQuery } from "@tanstack/react-query";
 import { m } from "framer-motion";
 import {
   Building2, Users, Bell, Plug, CheckCircle2, ArrowRight, ArrowLeft,
@@ -84,7 +84,7 @@ export default function OnboardingPage({ orgSlug: initialOrgSlug }: { orgSlug?: 
   const [sentInvites, setSentInvites] = useState<string[]>([]);
   const [notifPrefs, setNotifPrefs] = useState({ emailEnabled: true, smsEnabled: false, slackEnabled: false, inAppEnabled: true });
 
-  const wizardStateQuery = useQuery<{ wizard: { currentStep: string; completedSteps: string[] } }>({
+  const wizardStateQuery = useStandardQuery<{ wizard: { currentStep: string; completedSteps: string[] } }>({
     queryKey: ["onboarding-wizard", initialOrgSlug],
     queryFn: () =>
       apiGet<{ wizard: { currentStep: string; completedSteps: string[] } }>(`/onboarding/wizard/${initialOrgSlug}`),
@@ -102,7 +102,7 @@ export default function OnboardingPage({ orgSlug: initialOrgSlug }: { orgSlug?: 
     setCompletedSteps(doneIdxs);
   }, [wizardStateQuery.data]);
 
-  const createOrgMutation = useMutation({
+  const createOrgMutation = useStandardMutation({
     mutationFn: () =>
       apiPost("/onboarding/org", {
         name: profile.name,
@@ -120,7 +120,7 @@ export default function OnboardingPage({ orgSlug: initialOrgSlug }: { orgSlug?: 
     onError: (err: Error) => setError(err.message),
   });
 
-  const sendInviteMutation = useMutation({
+  const sendInviteMutation = useStandardMutation({
     mutationFn: (email: string) =>
       apiPost(`/onboarding/resend-invite/${orgSlug}`, { email, role: inviteRole }),
     onSuccess: () => {
@@ -132,14 +132,14 @@ export default function OnboardingPage({ orgSlug: initialOrgSlug }: { orgSlug?: 
     onError: (err: Error) => setError(err.message),
   });
 
-  const advanceWizardMutation = useMutation({
+  const advanceWizardMutation = useStandardMutation({
     mutationFn: (step: string) =>
       apiPut(`/onboarding/wizard/${orgSlug}`, { step }),
     onSuccess: () => {},
     onError: () => {},
   });
 
-  const completeOnboardingMutation = useMutation({
+  const completeOnboardingMutation = useStandardMutation({
     mutationFn: () =>
       apiPost(`/onboarding/wizard/${orgSlug}/complete`, {}),
     onSuccess: () => {

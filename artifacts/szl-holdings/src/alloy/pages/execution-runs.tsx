@@ -2,7 +2,8 @@ import { isAuthError } from "@szl-holdings/shared-ui/api-fetch";
 import { DataStateBadge } from "@szl-holdings/shared-ui/data-state-badge";
 import { useRealtimeChannel } from "@szl-holdings/shared-ui/use-realtime-channel";
 import { LiveClock } from "@szl-holdings/shared-ui/live-clock";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { Activity, Clock, CheckCircle, XCircle, RotateCcw, RefreshCw, AlertTriangle, Zap, Terminal, ChevronRight, Play, Filter } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
@@ -26,7 +27,7 @@ interface WorkflowRun {
 }
 
 function useRuns(status?: string) {
-  return useQuery({
+  return useStandardQuery({
     queryKey: ["alloyRuns", status],
     queryFn: async () => {
       const qs = status && status !== "all" ? `?status=${encodeURIComponent(status)}` : "";
@@ -47,7 +48,7 @@ function useRuns(status?: string) {
 
 function useRetryRun() {
   const qc = useQueryClient();
-  return useMutation({
+  return useStandardMutation({
     mutationFn: async (id: number) => {
       return await apiFetch<{ run: WorkflowRun }>(`/alloy/runs/${id}/retry`, { method: "POST" });
     },
@@ -57,7 +58,7 @@ function useRetryRun() {
 
 function useCancelRun() {
   const qc = useQueryClient();
-  return useMutation({
+  return useStandardMutation({
     mutationFn: async (id: number) => {
       return await apiFetch<{ run: WorkflowRun }>(`/alloy/runs/${id}/cancel`, { method: "POST" });
     },

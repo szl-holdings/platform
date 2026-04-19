@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 import { m, AnimatePresence } from "framer-motion";
 import {
   FileText, Plus, Edit3, Trash2, Save, Loader2, X, Eye, Image,
@@ -241,12 +242,12 @@ function CmsPostsPanel() {
   const [form, setForm] = useState<Partial<CmsPost>>({});
   const [saveError, setSaveError] = useState("");
 
-  const { data: draftsResult, isLoading } = useQuery({
+  const { data: draftsResult, isLoading } = useStandardQuery({
     queryKey: ["cms-posts", filterType],
     queryFn: () => apiFetchAdmin<CmsPost[]>(filterType ? `/cms/posts?content_type=${filterType}&status=draft` : "/cms/posts?status=draft"),
   });
 
-  const { data: publishedResult } = useQuery({
+  const { data: publishedResult } = useStandardQuery({
     queryKey: ["cms-posts-published", filterType],
     queryFn: () => apiFetchAdmin<CmsPost[]>(filterType ? `/cms/posts?content_type=${filterType}` : "/cms/posts"),
   });
@@ -262,7 +263,7 @@ function CmsPostsPanel() {
     return combined.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
   })();
 
-  const saveMutation = useMutation({
+  const saveMutation = useStandardMutation({
     mutationFn: async (vals: Partial<CmsPost>) => {
       if (isNew) {
         return apiFetchAdmin("/cms/posts", { method: "POST", body: JSON.stringify(vals) });
@@ -282,7 +283,7 @@ function CmsPostsPanel() {
     },
   });
 
-  const deleteMutation = useMutation({
+  const deleteMutation = useStandardMutation({
     mutationFn: async (id: number) => apiFetchAdmin(`/cms/posts/${id}`, { method: "DELETE" }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["cms-posts"] });

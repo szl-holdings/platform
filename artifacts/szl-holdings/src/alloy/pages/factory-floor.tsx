@@ -1,8 +1,8 @@
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { DataStateBadge } from "@szl-holdings/shared-ui/data-state-badge";
 import { isAuthError } from "@szl-holdings/shared-ui/api-fetch";
 import { DataProvenance, ActionLoop, RoleSelector } from "@szl-holdings/shared-ui/data-provenance";
 import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
-import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { type DataProvenanceInfo } from "@szl-holdings/shared-ui/ontology";
 import { Activity, CheckCircle, XCircle, Clock, AlertTriangle, ChevronRight, Zap, TrendingUp, Timer } from "lucide-react";
@@ -58,7 +58,7 @@ const EMPTY_FACTORY_FLOOR: FactoryFloorData = {
 };
 
 function useFactoryFloor() {
-  return useQuery({
+  return useStandardQuery({
     queryKey: ["alloyFactoryFloor"],
     queryFn: async () => {
       try {

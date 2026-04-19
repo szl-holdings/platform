@@ -1,6 +1,6 @@
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 import type { ElementType, ReactNode } from "react";
 
-import { useQuery } from "@tanstack/react-query";
 
 import { Radio, Brain, Shield, Lock, Cpu, ArrowUpRight } from "lucide-react";
 
@@ -55,7 +55,7 @@ export function ConfidenceBadge({ value }: { value: number | null }) {
 }
 
 export function ControlTowerStatusBar() {
-  const { data, isLoading } = useQuery<{ data: Record<string, unknown> }>({
+  const { data, isLoading } = useStandardQuery<{ data: Record<string, unknown> }>({
     queryKey: ["ct-status"],
     queryFn: () => fetch(`${API_BASE}/control-tower/status`).then(r => r.json()),
     refetchInterval: 30000,

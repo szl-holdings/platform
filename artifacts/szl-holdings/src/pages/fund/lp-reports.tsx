@@ -1,7 +1,7 @@
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { useState } from "react";
 import { m } from "framer-motion";
 import { Link } from "wouter";
-import { useQuery } from "@tanstack/react-query";
 import {
   FileText, ArrowLeft, ChevronRight, Zap, Download, Send,
   CheckCircle2, RefreshCw,
@@ -84,14 +84,14 @@ export default function LpReportsPage() {
   const [selectedId, setSelectedId] = useState("r1");
   const [generating, setGenerating] = useState(false);
 
-  const { data: apiReports } = useQuery({
+  const { data: apiReports } = useStandardQuery({
     queryKey: ["fund-ops", "lp-reports"],
     queryFn: () => apiFetch<ApiLpReport[]>("/fund-ops/lp-reports"),
     staleTime: 60_000,
     refetchInterval: 120_000,
   });
 
-  const { data: fundSummary } = useQuery({
+  const { data: fundSummary } = useStandardQuery({
     queryKey: ["fund-ops", "summary"],
     queryFn: () => apiFetch<FundSummary>("/fund-ops/summary"),
     staleTime: 60_000,

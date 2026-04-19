@@ -1,6 +1,7 @@
 import { SettingsSectionPanel, SettingsCard, SettingsRow, type SettingsSection } from "@szl-holdings/shared-ui/settings-shell";
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 import {
   SettingsShell, } from "@szl-holdings/shared-ui/settings-shell";
 import {
@@ -71,7 +72,7 @@ interface AuditEntry {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function AccountPanel() {
-  const { data } = useQuery({
+  const { data } = useStandardQuery({
     queryKey: ["auth-me"],
     queryFn: () => apiFetch<{ user?: { id: number; name?: string; email?: string; roles?: string[] } }>("/auth/me"),
     staleTime: 60_000,
@@ -105,7 +106,7 @@ function AccountPanel() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function TeamPanel() {
-  const { data } = useQuery({
+  const { data } = useStandardQuery({
     queryKey: ["team-members"],
     queryFn: () => apiFetch<{ members: Array<{ id: number; role: string; joinedAt: string; user?: { name: string; email: string } }> }>("/auth/org/members"),
     staleTime: 30_000,
@@ -139,7 +140,7 @@ function TeamPanel() {
 
 function NotificationsPanel() {
   const queryClient = useQueryClient();
-  const { data } = useQuery({
+  const { data } = useStandardQuery({
     queryKey: ["user-settings", "szl.notifications"],
     queryFn: () => apiFetch<{ settings: ResolvedSetting[] }>("/settings/resolve?namespace=szl.notifications"),
     staleTime: 30_000,
@@ -202,7 +203,7 @@ function NotificationsPanel() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function IntegrationsPanel() {
-  const { data } = useQuery({
+  const { data } = useStandardQuery({
     queryKey: ["szl-integrations"],
     queryFn: () => apiFetch<{ integrations: Array<{ id: number; provider: string; status: string; lastSuccess: string | null; lastError: string | null }> }>("/distribution-os/integrations"),
     staleTime: 30_000,
@@ -287,7 +288,7 @@ function SecurityPanel() {
 
 function PlatformSettingsPanel() {
   const queryClient = useQueryClient();
-  const { data, isLoading } = useQuery({
+  const { data, isLoading } = useStandardQuery({
     queryKey: ["platform-settings"],
     queryFn: () => apiFetch<PlatformSetting[]>("/settings/platform"),
     staleTime: 30_000,
@@ -388,7 +389,7 @@ function PlatformSettingsPanel() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function AuditLogPanel() {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading } = useStandardQuery({
     queryKey: ["settings-audit"],
     queryFn: () => apiFetch<AuditEntry[]>("/settings/audit?limit=50"),
     staleTime: 30_000,

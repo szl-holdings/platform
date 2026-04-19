@@ -1,5 +1,5 @@
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { useState, useRef, useCallback } from "react";
-import { useQuery } from "@tanstack/react-query";
 import {
   SmilePlus, ThumbsUp, ThumbsDown, TrendingUp, BarChart3, MessageSquare,
   Star, AlertCircle, Loader2, RefreshCw, ChevronDown, ChevronRight,
@@ -61,13 +61,13 @@ function FeedbackPanel() {
   const [typeFilter, setTypeFilter] = useState<"all" | "nps" | "contextual">("all");
   const [page, setPage] = useState(1);
 
-  const { data: analytics, isLoading: analyticsLoading } = useQuery<FeedbackAnalytics>({
+  const { data: analytics, isLoading: analyticsLoading } = useStandardQuery<FeedbackAnalytics>({
     queryKey: ["feedback-analytics"],
     queryFn: () => apiFetchAdmin<FeedbackAnalytics>("/admin/feedback/analytics"),
     refetchInterval: 60000,
   });
 
-  const { data: listData, isLoading: listLoading } = useQuery<{
+  const { data: listData, isLoading: listLoading } = useStandardQuery<{
     data: FeedbackAnalytics["recentComments"];
     pagination: { total: number; page: number; limit: number; pages: number };
   }>({

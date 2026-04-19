@@ -1,5 +1,5 @@
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { useState, useMemo, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { m, AnimatePresence } from "framer-motion";
 import { HoldingsGraphQLPanel } from "@/components/graphql-data-panel";
 import {
@@ -398,7 +398,7 @@ interface ObservabilityResponse {
 }
 
 function useEcosystemHealth() {
-  return useQuery<ObservabilityResponse>({
+  return useStandardQuery<ObservabilityResponse>({
     queryKey: ["ecosystem-health"],
     queryFn: async () => {
       const res = await fetch("/api/observability");

@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { m, AnimatePresence } from "framer-motion";
 import {
   Building2, ChevronRight, ChevronDown, ChevronUp, CheckCircle2, AlertCircle, Loader2,
@@ -69,7 +70,7 @@ function AzureTenantsPanel() {
   const [expandedTenant, setExpandedTenant] = useState<number | null>(null);
   const qc = useQueryClient();
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error } = useStandardQuery({
     queryKey: ["azure-tenants"],
     queryFn: () => apiFetch<{ count: number; tenants: AzureTenant[] }>("/admin/tenants"),
   });

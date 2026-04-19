@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStandardMutation } from "@szl-holdings/api-client-react";
 import { Plus } from "lucide-react";
 import { apiFetch } from "./api";
 
@@ -66,17 +67,17 @@ export function InlineForm({ fields, onSubmit, onCancel, submitLabel = "Add" }: 
 
 export function useEntityMutation(scenarioId: number, endpoint: string) {
   const qc = useQueryClient();
-  const addMutation = useMutation({
+  const addMutation = useStandardMutation({
     mutationFn: (body: Record<string, unknown>) => apiFetch(`/ownership/scenarios/${scenarioId}/${endpoint}`, {
       method: "POST", body: JSON.stringify(body),
     }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["ownership-scenario-detail", scenarioId] }),
   });
-  const deleteMutation = useMutation({
+  const deleteMutation = useStandardMutation({
     mutationFn: (id: number) => apiFetch(`/ownership/${endpoint}/${id}`, { method: "DELETE" }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["ownership-scenario-detail", scenarioId] }),
   });
-  const updateMutation = useMutation({
+  const updateMutation = useStandardMutation({
     mutationFn: ({ id, body }: { id: number; body: Record<string, unknown> }) => apiFetch(`/ownership/${endpoint}/${id}`, {
       method: "PATCH", body: JSON.stringify(body),
     }),

@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 import { m } from "framer-motion";
 import {
   Users, Shield, Key, RefreshCw, CheckCircle2, AlertCircle, Clock,
@@ -155,7 +156,7 @@ function CreateTokenModal({
   const [label, setLabel] = useState("default");
   const [expiry, setExpiry] = useState("");
 
-  const mutation = useMutation({
+  const mutation = useStandardMutation({
     mutationFn: () => apiFetch(`/admin/tenants/${tenantId}/scim/tokens`, {
       method: "POST",
       body: JSON.stringify({ label, expiresInDays: expiry ? parseInt(expiry, 10) : undefined }),
@@ -310,23 +311,23 @@ function TenantScimPanel({ tenant }: { tenant: AzureTenant }) {
   const [newToken, setNewToken] = useState<{ rawToken: string; label: string; prefix: string } | null>(null);
   const [activeTab, setActiveTab] = useState<"users" | "tokens" | "activity">("users");
 
-  const { data: dashboard, isLoading: dashLoading } = useQuery<ScimDashboardData>({
+  const { data: dashboard, isLoading: dashLoading } = useStandardQuery<ScimDashboardData>({
     queryKey: ["scim-dashboard", tenant.id],
     queryFn: () => apiFetch(`/admin/tenants/${tenant.id}/scim/provisioned-users`),
     refetchInterval: 30000,
   });
 
-  const { data: tokensData, isLoading: tokensLoading } = useQuery<TokensResponse>({
+  const { data: tokensData, isLoading: tokensLoading } = useStandardQuery<TokensResponse>({
     queryKey: ["scim-tokens", tenant.id],
     queryFn: () => apiFetch(`/admin/tenants/${tenant.id}/scim/tokens`),
   });
 
-  const syncMutation = useMutation({
+  const syncMutation = useStandardMutation({
     mutationFn: () => apiFetch(`/admin/tenants/${tenant.id}/scim/sync`, { method: "POST" }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["scim-dashboard", tenant.id] }),
   });
 
-  const revokeTokenMutation = useMutation({
+  const revokeTokenMutation = useStandardMutation({
     mutationFn: (tokenId: number) => apiFetch(`/admin/tenants/${tenant.id}/scim/tokens/${tokenId}`, { method: "DELETE" }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["scim-tokens", tenant.id] }),
   });
@@ -587,7 +588,7 @@ export default function ScimProvisioningPage() {
   const [selectedTenant, setSelectedTenant] = useState<AzureTenant | null>(null);
   const [search, setSearch] = useState("");
 
-  const { data: tenantsData, isLoading } = useQuery<{ count: number; tenants: AzureTenant[] }>({
+  const { data: tenantsData, isLoading } = useStandardQuery<{ count: number; tenants: AzureTenant[] }>({
     queryKey: ["azure-tenants"],
     queryFn: () => apiFetch("/admin/tenants"),
   });

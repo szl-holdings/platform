@@ -1,5 +1,5 @@
+import { useStandardMutation } from "@szl-holdings/api-client-react";
 import * as React from "react";
-import { useMutation } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, TrendingUp, ImageIcon, Type, Calendar, Loader2, Lightbulb, Globe, Zap, Video, Music, Palette, Layers, Wand2 } from "lucide-react";
 import { ShimmerReveal, TypewriterText } from "@szl-holdings/shared-ui/ai-components";
@@ -51,7 +51,7 @@ export default function AIStudio() {
 
   const toneLabel = tone < 25 ? "Corporate" : tone < 50 ? "Professional" : tone < 75 ? "Conversational" : "Bold & Provocative";
 
-  const imageMutation = useMutation({
+  const imageMutation = useStandardMutation({
     mutationFn: async (prompt: string) => {
       const res = await fetch("/api/alloy-chat/image-generate", {
         method: "POST",

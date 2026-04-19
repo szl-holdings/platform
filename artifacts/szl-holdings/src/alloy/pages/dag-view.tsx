@@ -1,5 +1,5 @@
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { isAuthError } from "@szl-holdings/shared-ui/api-fetch";
-import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { useState } from "react";
 import { CheckCircle, XCircle, Clock, Activity, AlertTriangle, ChevronLeft } from "lucide-react";
@@ -21,7 +21,7 @@ interface WorkflowDetail {
 }
 
 function useWorkflow(id: number) {
-  return useQuery({
+  return useStandardQuery({
     queryKey: ["alloyWorkflowDetail", id],
     queryFn: async () => {
       const resp = await apiFetch<WorkflowDetail | { data: WorkflowDetail }>(`/alloy/workflows/${id}`);

@@ -1,4 +1,5 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { useLocation } from "wouter";
 import {
@@ -91,7 +92,7 @@ export default function WorkspaceHome() {
   const [, navigate] = useLocation();
   const qc = useQueryClient();
 
-  const { data: approvals } = useQuery({
+  const { data: approvals } = useStandardQuery({
     queryKey: ["alloyApprovalsHome"],
     queryFn: async () => {
       try {
@@ -102,7 +103,7 @@ export default function WorkspaceHome() {
     refetchInterval: 30000,
   });
 
-  const { data: runsData } = useQuery({
+  const { data: runsData } = useStandardQuery({
     queryKey: ["alloyRunsHome"],
     queryFn: async () => {
       try {
@@ -113,7 +114,7 @@ export default function WorkspaceHome() {
     refetchInterval: 15000,
   });
 
-  const { data: signals } = useQuery({
+  const { data: signals } = useStandardQuery({
     queryKey: ["alloySignalsHome"],
     queryFn: async () => {
       try {
@@ -124,7 +125,7 @@ export default function WorkspaceHome() {
     refetchInterval: 30000,
   });
 
-  const { data: decisions } = useQuery({
+  const { data: decisions } = useStandardQuery({
     queryKey: ["alloyDecisionsHome"],
     queryFn: async () => {
       try {
@@ -135,7 +136,7 @@ export default function WorkspaceHome() {
     refetchInterval: 30000,
   });
 
-  const { data: recentArtifactsData } = useQuery({
+  const { data: recentArtifactsData } = useStandardQuery({
     queryKey: ["alloyRecentArtifacts"],
     queryFn: async () => {
       try {

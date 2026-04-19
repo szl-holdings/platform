@@ -1,5 +1,5 @@
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { m, AnimatePresence } from "framer-motion";
 import {
   Settings, CheckCircle2, AlertCircle, Loader2, RefreshCw, Database,
@@ -52,7 +52,7 @@ function ProvisioningPanel() {
   const [search, setSearch] = useState("");
   const [expandedAdapter, setExpandedAdapter] = useState<string | null>(null);
 
-  const { data, isLoading, isError, refetch } = useQuery<ProvisioningData>({
+  const { data, isLoading, isError, refetch } = useStandardQuery<ProvisioningData>({
     queryKey: ["admin-provisioning"],
     queryFn: () => apiFetchAdmin<ProvisioningData>("/admin/provisioning"),
     staleTime: 30_000,

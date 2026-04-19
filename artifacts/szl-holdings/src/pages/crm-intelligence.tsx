@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 import {
   Users, TrendingUp, BarChart3, Activity, RefreshCw, Building2,
   ChevronRight, DollarSign, Target, Clock, CheckCircle2, AlertTriangle,
@@ -120,37 +121,37 @@ export default function CrmIntelligencePage() {
   const [activeTab, setActiveTab] = useState<"pipeline" | "accounts" | "leads" | "sync">("pipeline");
   const queryClient = useQueryClient();
 
-  const { data: sfOppsData, isLoading: sfOppsLoading } = useQuery({
+  const { data: sfOppsData, isLoading: sfOppsLoading } = useStandardQuery({
     queryKey: ["crm-sf-opps"],
     queryFn: () => apiFetch<{ data: SalesforceOpportunity[] }>("/salesforce/opportunities"),
     refetchInterval: 60000,
   });
 
-  const { data: sfAccountsData } = useQuery({
+  const { data: sfAccountsData } = useStandardQuery({
     queryKey: ["crm-sf-accounts"],
     queryFn: () => apiFetch<{ data: SalesforceAccount[] }>("/salesforce/accounts"),
     enabled: activeTab === "accounts",
   });
 
-  const { data: sfLeadsData } = useQuery({
+  const { data: sfLeadsData } = useStandardQuery({
     queryKey: ["crm-sf-leads"],
     queryFn: () => apiFetch<{ data: SalesforceLead[] }>("/salesforce/leads"),
     enabled: activeTab === "leads",
   });
 
-  const { data: dynOppsData } = useQuery({
+  const { data: dynOppsData } = useStandardQuery({
     queryKey: ["crm-dyn-opps"],
     queryFn: () => apiFetch<{ data: DynamicsOpportunity[] }>("/dynamics/opportunities"),
     refetchInterval: 60000,
   });
 
-  const { data: hsDealsData } = useQuery({
+  const { data: hsDealsData } = useStandardQuery({
     queryKey: ["crm-hs-deals"],
     queryFn: () => apiFetch<{ data: HubSpotDeal[] }>("/hubspot/deals"),
     refetchInterval: 60000,
   });
 
-  const syncMutation = useMutation({
+  const syncMutation = useStandardMutation({
     mutationFn: (crmType: string) =>
       apiFetch(`/crm/sync/${crmType}`, { method: "POST" }),
     onSuccess: () => {

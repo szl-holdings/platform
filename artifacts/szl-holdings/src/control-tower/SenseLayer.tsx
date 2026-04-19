@@ -1,6 +1,6 @@
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { useState } from "react";
 
-import { useQuery } from "@tanstack/react-query";
 
 import { Radio, Activity, RefreshCw, Hash } from "lucide-react";
 
@@ -14,7 +14,7 @@ export function SenseLayer() {
   const [domainFilter, setDomainFilter] = useState("");
   const [severityFilter, setSeverityFilter] = useState("");
 
-  const { data: signalData, isLoading: signalLoading, refetch } = useQuery<{ data: Record<string, unknown> }>({
+  const { data: signalData, isLoading: signalLoading, refetch } = useStandardQuery<{ data: Record<string, unknown> }>({
     queryKey: ["ct-signals", domainFilter, severityFilter],
     queryFn: () => {
       const params = new URLSearchParams({ limit: "60" });
@@ -25,7 +25,7 @@ export function SenseLayer() {
     refetchInterval: 10000,
   });
 
-  const { data: domainSnapshot } = useQuery<{ data: Record<string, unknown> }>({
+  const { data: domainSnapshot } = useStandardQuery<{ data: Record<string, unknown> }>({
     queryKey: ["ct-domain-snapshot"],
     queryFn: () => fetch(`${API_BASE}/control-tower/sense/domain-snapshot`).then(r => r.json()),
     refetchInterval: 15000,

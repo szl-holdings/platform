@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") || "";
@@ -332,14 +333,14 @@ export default function ExportBuilder() {
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
-  const { data: exportHistory, isLoading: historyLoading, isError: historyError } = useQuery({
+  const { data: exportHistory, isLoading: historyLoading, isError: historyError } = useStandardQuery({
     queryKey: ["export-history-items"],
     queryFn: fetchExportHistoryItems,
     refetchInterval: 30_000,
     retry: 1,
   });
 
-  const { data: previewData, isLoading: previewLoading } = useQuery({
+  const { data: previewData, isLoading: previewLoading } = useStandardQuery({
     queryKey: ["export-preview", domain, filters],
     queryFn: () => fetchPreviewData(domain, {
       dateFrom: filters.dateFrom || "",
@@ -348,7 +349,7 @@ export default function ExportBuilder() {
     enabled: previewMode,
   });
 
-  const { data: historyData, refetch: refetchHistory } = useQuery({
+  const { data: historyData, refetch: refetchHistory } = useStandardQuery({
     queryKey: ["export-history"],
     queryFn: fetchExportHistory,
     enabled: showHistory,

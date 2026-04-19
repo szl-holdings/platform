@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 import { m, AnimatePresence } from "framer-motion";
 import {
   Plus, Edit3, Trash2, Save, Loader2, X, Mail, BarChart3, RefreshCw,
@@ -25,10 +26,10 @@ function StatusBadge({ status }: { status: string }) {
 // ─── Admin Dashboard ──────────────────────────────────────────────────────────
 
 function DashboardPanel() {
-  const { data: sites } = useQuery({ queryKey: ["cms-sites"], queryFn: () => apiFetch<Site[]>("/cms/sites") });
-  const { data: venturesData } = useQuery({ queryKey: ["cms-ventures"], queryFn: () => apiFetch<Venture[]>("/cms/ventures") });
-  const { data: articlesData } = useQuery({ queryKey: ["cms-articles"], queryFn: () => apiFetch<{ data: Article[] }>("/cms/articles") });
-  const { data: submissionsData } = useQuery({ queryKey: ["cms-submissions"], queryFn: () => apiFetch<{ data: ContactSubmission[] }>("/cms/contact-submissions") });
+  const { data: sites } = useStandardQuery({ queryKey: ["cms-sites"], queryFn: () => apiFetch<Site[]>("/cms/sites") });
+  const { data: venturesData } = useStandardQuery({ queryKey: ["cms-ventures"], queryFn: () => apiFetch<Venture[]>("/cms/ventures") });
+  const { data: articlesData } = useStandardQuery({ queryKey: ["cms-articles"], queryFn: () => apiFetch<{ data: Article[] }>("/cms/articles") });
+  const { data: submissionsData } = useStandardQuery({ queryKey: ["cms-submissions"], queryFn: () => apiFetch<{ data: ContactSubmission[] }>("/cms/contact-submissions") });
 
   const ventures = Array.isArray(venturesData) ? venturesData : [];
   const articles = articlesData?.data ?? [];
@@ -124,14 +125,14 @@ function CmsTablePanel({
   const [isNew, setIsNew] = useState(false);
   const [form, setForm] = useState<Record<string, string | boolean>>({});
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading } = useStandardQuery({
     queryKey,
     queryFn: () => apiFetch<unknown>(endpoint),
   });
 
   const rows: Record<string, unknown>[] = Array.isArray(data) ? (data as Record<string, unknown>[]) : ((data as { data?: Record<string, unknown>[] } | undefined)?.data ?? []);
 
-  const saveMutation = useMutation({
+  const saveMutation = useStandardMutation({
     mutationFn: async (vals: Record<string, unknown>) => {
       if (isNew) {
         return apiFetch(endpoint, { method: "POST", body: JSON.stringify(vals) });
@@ -142,7 +143,7 @@ function CmsTablePanel({
     onSuccess: () => { qc.invalidateQueries({ queryKey }); setEditing(null); setIsNew(false); },
   });
 
-  const deleteMutation = useMutation({
+  const deleteMutation = useStandardMutation({
     mutationFn: async (id: number) => apiFetch(`${endpoint}/${id}`, { method: "DELETE" }),
     onSuccess: () => qc.invalidateQueries({ queryKey }),
   });
@@ -257,7 +258,7 @@ function CmsTablePanel({
 // ─── Submissions Panel ────────────────────────────────────────────────────────
 
 function SubmissionsPanel() {
-  const { data, isLoading, refetch } = useQuery({
+  const { data, isLoading, refetch } = useStandardQuery({
     queryKey: ["cms-submissions"],
     queryFn: () => apiFetch<{ data: ContactSubmission[] }>("/cms/contact-submissions"),
   });
@@ -381,7 +382,7 @@ function AnalyticsPanel() {
 // ─── Inquiries Panel ──────────────────────────────────────────────────────────
 
 function InquiriesPanel() {
-  const { data, isLoading, refetch } = useQuery({
+  const { data, isLoading, refetch } = useStandardQuery({
     queryKey: ["holdings-inquiries"],
     queryFn: () => apiFetch<HoldingsInquiry[]>("/holdings/inquiries"),
   });

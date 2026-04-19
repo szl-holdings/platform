@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") || "";
@@ -344,7 +345,7 @@ export default function ScheduledReports() {
   const [filterActive, setFilterActive] = useState<string>("");
   const [runMsg, setRunMsg] = useState<string | null>(null);
 
-  const { data: schedulesRaw, isLoading } = useQuery({
+  const { data: schedulesRaw, isLoading } = useStandardQuery({
     queryKey: ["report-schedules", filterDomain, filterActive],
     queryFn: () => {
       const params = new URLSearchParams();
@@ -355,7 +356,7 @@ export default function ScheduledReports() {
     refetchInterval: 30_000,
   });
 
-  const { data: templatesRaw } = useQuery({
+  const { data: templatesRaw } = useStandardQuery({
     queryKey: ["report-templates-schedulable"],
     queryFn: () => apiFetch("/reports/templates?isActive=true&limit=100"),
   });

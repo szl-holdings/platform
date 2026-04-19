@@ -1,6 +1,6 @@
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { useState, useEffect, useMemo } from "react";
 import { useParams, useLocation } from "wouter";
-import { useQuery } from "@tanstack/react-query";
 import { m } from "framer-motion";
 import {
   BarChart3, Users, Activity, HardDrive, Zap, ArrowLeft,
@@ -139,7 +139,7 @@ function AdminUsageView({ days }: { days: number }) {
   if (debouncedSearch) params.set("org", debouncedSearch);
   params.set("limit", "200");
 
-  const adminQuery = useQuery<AdminUsageResponse>({
+  const adminQuery = useStandardQuery<AdminUsageResponse>({
     queryKey: ["admin-usage", days, planFilter, debouncedSearch],
     queryFn: () => apiFetch(`/admin/usage?${params}`),
     staleTime: 60_000,
@@ -374,7 +374,7 @@ export default function UsageDashboardPage() {
   const [showPeriodMenu, setShowPeriodMenu] = useState(false);
   const [view, setView] = useState<"tenant" | "admin">("tenant");
 
-  const meQuery = useQuery<CurrentUser>({
+  const meQuery = useStandardQuery<CurrentUser>({
     queryKey: ["me"],
     queryFn: () => apiFetch<CurrentUser>("/auth/me"),
     staleTime: Infinity,
@@ -382,7 +382,7 @@ export default function UsageDashboardPage() {
 
   const isAdmin = meQuery.data?.roles?.some((r) => r === "super_admin") ?? false;
 
-  const resolvedOrgQuery = useQuery<{ orgs?: { slug: string }[] }>({
+  const resolvedOrgQuery = useStandardQuery<{ orgs?: { slug: string }[] }>({
     queryKey: ["me-orgs"],
     queryFn: () => apiFetch<{ orgs?: { slug: string }[] }>("/auth/me"),
     enabled: !orgSlug,
@@ -400,14 +400,14 @@ export default function UsageDashboardPage() {
   const from = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
   const to = new Date().toISOString();
 
-  const summaryQuery = useQuery<UsageSummary>({
+  const summaryQuery = useStandardQuery<UsageSummary>({
     queryKey: ["usage-summary", slug, days],
     queryFn: () => apiFetch(`/orgs/${slug}/usage?from=${from}&to=${to}`),
     enabled: !!slug && view === "tenant",
     staleTime: 60_000,
   });
 
-  const historyQuery = useQuery<UsageHistory>({
+  const historyQuery = useStandardQuery<UsageHistory>({
     queryKey: ["usage-history", slug, days],
     queryFn: () => apiFetch(`/orgs/${slug}/usage/history?days=${days}`),
     enabled: !!slug && view === "tenant",

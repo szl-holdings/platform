@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { m, AnimatePresence } from "framer-motion";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 import { Loader2, Plus, RefreshCw, Shield, ChevronRight, Star, TrendingUp, Eye, EyeOff, CheckCircle2, AlertCircle, Check, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { OwnershipScenario } from "./types";
@@ -13,12 +14,12 @@ export function ScenarioList({ onSelect }: { onSelect: (id: number) => void }) {
   const qc = useQueryClient();
   const [autoSeeded, setAutoSeeded] = useState(false);
 
-  const { data: scenarios = [], isLoading } = useQuery<OwnershipScenario[]>({
+  const { data: scenarios = [], isLoading } = useStandardQuery<OwnershipScenario[]>({
     queryKey: ["ownership-scenarios"],
     queryFn: () => apiFetch("/ownership/scenarios?limit=50"),
   });
 
-  const seedMutation = useMutation({
+  const seedMutation = useStandardMutation({
     mutationFn: () => apiFetch("/ownership/seed-preferred-template", { method: "POST" }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["ownership-scenarios"] }),
   });
@@ -30,7 +31,7 @@ export function ScenarioList({ onSelect }: { onSelect: (id: number) => void }) {
     }
   }, [isLoading, scenarios.length, autoSeeded, seedMutation]);
 
-  const deleteMutation = useMutation({
+  const deleteMutation = useStandardMutation({
     mutationFn: (id: number) => apiFetch(`/ownership/scenarios/${id}`, { method: "DELETE" }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["ownership-scenarios"] }),
   });
@@ -39,7 +40,7 @@ export function ScenarioList({ onSelect }: { onSelect: (id: number) => void }) {
   const [newName, setNewName] = useState("");
   const [newDesc, setNewDesc] = useState("");
 
-  const createMutation = useMutation({
+  const createMutation = useStandardMutation({
     mutationFn: () => apiFetch("/ownership/scenarios", {
       method: "POST",
       body: JSON.stringify({ name: newName, description: newDesc }),

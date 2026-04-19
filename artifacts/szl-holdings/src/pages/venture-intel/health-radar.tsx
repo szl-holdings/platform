@@ -1,5 +1,5 @@
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { m } from "framer-motion";
 import { Link } from "wouter";
 import { ArrowLeft, Activity, TrendingUp, TrendingDown, Minus } from "lucide-react";
@@ -223,7 +223,7 @@ export default function HealthRadarPage() {
     canonical: "https://szlholdings.com/venture-intelligence/health-radar",
   });
 
-  const { data: healthSignals } = useQuery<VentureHealthSignals>({
+  const { data: healthSignals } = useStandardQuery<VentureHealthSignals>({
     queryKey: ["venture-health-signals"],
     queryFn: async () => {
       const res = await fetch(`${API_BASE}/api/holdings/venture-health`, { credentials: "include" });

@@ -2,7 +2,8 @@ import { useState } from "react";
 import { m } from "framer-motion";
 import { Shield, Clock, Trash2, RefreshCw, ChevronDown, ChevronUp, AlertTriangle, CheckCircle2, Database, Play } from "lucide-react";
 import { usePageMeta } from "@/hooks/usePageMeta";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
@@ -75,7 +76,7 @@ export default function AdminDataRetentionPage() {
   const [orgIdInput, setOrgIdInput] = useState<string>("");
   const selectedOrgId = orgIdInput.trim() !== "" ? Number(orgIdInput.trim()) || null : null;
 
-  const { data: tablesData } = useQuery({
+  const { data: tablesData } = useStandardQuery({
     queryKey: ["retention-tables"],
     queryFn: async () => {
       const res = await fetch(`${API}/data-retention/tables`, { credentials: "include" });
@@ -84,7 +85,7 @@ export default function AdminDataRetentionPage() {
     },
   });
 
-  const { data: policiesData, refetch: refetchPolicies } = useQuery({
+  const { data: policiesData, refetch: refetchPolicies } = useStandardQuery({
     queryKey: ["retention-policies", selectedOrgId],
     queryFn: async () => {
       const params = selectedOrgId != null ? `?orgId=${selectedOrgId}` : "";
@@ -94,7 +95,7 @@ export default function AdminDataRetentionPage() {
     },
   });
 
-  const { data: auditData, refetch: refetchAudit } = useQuery({
+  const { data: auditData, refetch: refetchAudit } = useStandardQuery({
     queryKey: ["retention-audit-log", selectedOrgId],
     queryFn: async () => {
       const params = selectedOrgId != null ? `orgId=${selectedOrgId}&limit=30` : "limit=30";
@@ -104,7 +105,7 @@ export default function AdminDataRetentionPage() {
     },
   });
 
-  const { data: sweepStatusData, refetch: refetchSweepStatus } = useQuery({
+  const { data: sweepStatusData, refetch: refetchSweepStatus } = useStandardQuery({
     queryKey: ["retention-sweep-status"],
     queryFn: async () => {
       const res = await fetch(`${API}/data-retention/sweep-status`, { credentials: "include" });
@@ -114,7 +115,7 @@ export default function AdminDataRetentionPage() {
     refetchInterval: 30_000,
   });
 
-  const runSweepMutation = useMutation({
+  const runSweepMutation = useStandardMutation({
     mutationFn: async () => {
       const res = await fetch(`${API}/data-retention/sweep`, {
         method: "POST",
@@ -140,7 +141,7 @@ export default function AdminDataRetentionPage() {
 
   type PolicyInput = Pick<RetentionPolicy, "tableName" | "retentionDays" | "purgeStrategy" | "isActive" | "description">;
 
-  const savePolicyMutation = useMutation({
+  const savePolicyMutation = useStandardMutation({
     mutationFn: async (policy: PolicyInput) => {
       const res = await fetch(`${API}/data-retention/policies`, {
         method: "PUT",
@@ -159,7 +160,7 @@ export default function AdminDataRetentionPage() {
     onError: () => toast.error("Failed to save policy."),
   });
 
-  const runPurgeMutation = useMutation({
+  const runPurgeMutation = useStandardMutation({
     mutationFn: async ({ policyId, tableName }: { policyId: number; tableName: string }) => {
       setRunningTable(tableName);
       const res = await fetch(`${API}/data-retention/policies/${policyId}/run`, {

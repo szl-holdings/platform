@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { DollarSign, TrendingUp, Zap, Bot, AlertTriangle, CheckCircle, BarChart3, RefreshCw } from "lucide-react";
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
@@ -75,7 +75,7 @@ function BudgetStatusBar({ workflowId, percentUsed, status, budgetUsd, usedUsd }
 const API_BASE = "/api";
 
 export default function AICostAnalyticsPage() {
-  const { data: costData, isLoading, refetch } = useQuery<CostAnalytics>({
+  const { data: costData, isLoading, refetch } = useStandardQuery<CostAnalytics>({
     queryKey: ["ai-cost-analytics"],
     queryFn: async () => {
       const r = await fetch(`${BASE}/nuro-mesh/cost/analytics`);
@@ -84,7 +84,7 @@ export default function AICostAnalyticsPage() {
     refetchInterval: 30000,
   });
 
-  const { data: flywheelStats } = useQuery<FlywheelStats>({
+  const { data: flywheelStats } = useStandardQuery<FlywheelStats>({
     queryKey: ["flywheel-stats"],
     queryFn: async () => {
       const r = await fetch(`${BASE}/nuro-mesh/flywheel/stats`);

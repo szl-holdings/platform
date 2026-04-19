@@ -1,6 +1,7 @@
 import { DataStateBadge } from "@szl-holdings/shared-ui/data-state-badge";
 import { isAuthError } from "@szl-holdings/shared-ui/api-fetch";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { Shield, CheckCircle, Clock, XCircle, AlertTriangle, RefreshCw, ChevronDown, ChevronUp, FileText, Radio } from "lucide-react";
 import { AlloyGraphQLPanel } from "../components/graphql-data-panel";
@@ -50,7 +51,7 @@ const EMPTY_APPROVALS_RESP: ApprovalsResp = {
 };
 
 function useApprovals(status: string | null, page: number) {
-  return useQuery({
+  return useStandardQuery({
     queryKey: ["alloyApprovals", status, page],
     queryFn: async () => {
       try {
@@ -93,7 +94,7 @@ interface Artifact {
 }
 
 function useRecentRuns() {
-  return useQuery({
+  return useStandardQuery({
     queryKey: ["alloyRecentRunsForAudit"],
     queryFn: async () => {
       const resp = await apiFetch<{ data: WorkflowRun[] } | WorkflowRun[]>("/alloy/runs?limit=30");
@@ -106,7 +107,7 @@ function useRecentRuns() {
 
 function useAuditData() {
   const [runs, artifacts] = [
-    useQuery({
+    useStandardQuery({
       queryKey: ["alloyRuns"],
       queryFn: async () => {
         const resp = await apiFetch<WorkflowRun[] | { data: WorkflowRun[] }>("/alloy/runs?limit=100");
@@ -114,7 +115,7 @@ function useAuditData() {
         return resp as WorkflowRun[];
       },
     }),
-    useQuery({
+    useStandardQuery({
       queryKey: ["alloyArtifacts"],
       queryFn: async () => {
         const resp = await apiFetch<Artifact[] | { data: Artifact[] }>("/alloy/artifacts");
@@ -152,7 +153,7 @@ function useAuditData() {
 }
 
 function useWorkflows() {
-  return useQuery({
+  return useStandardQuery({
     queryKey: ["alloyWorkflowsForAudit"],
     queryFn: async () => {
       const resp = await apiFetch<{ data: WorkflowDef[] } | WorkflowDef[]>("/alloy/workflows?limit=100");
@@ -165,7 +166,7 @@ function useWorkflows() {
 
 function useDecideApproval() {
   const qc = useQueryClient();
-  return useMutation({
+  return useStandardMutation({
     mutationFn: async ({ id, decision, notes }: { id: number; decision: string; notes?: string }) => {
       return await apiFetch(`/alloy/approvals/${id}/decide`, {
         method: "POST",

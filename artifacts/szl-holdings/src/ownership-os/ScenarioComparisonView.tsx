@@ -1,5 +1,5 @@
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { Loader2, Scale, Eye, EyeOff, CheckCircle2, AlertCircle, Star, Shield, CheckSquare, Circle, Percent, Award, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { OwnershipScenario, ScenarioDetail } from "./types";
@@ -7,7 +7,7 @@ import { apiFetch } from "./api";
 import { ScoreBar, StatusBadge, FitBadge, DisclaimerBanner } from "./components";
 
 export function ScenarioComparisonView() {
-  const { data: scenarios = [], isLoading } = useQuery<OwnershipScenario[]>({
+  const { data: scenarios = [], isLoading } = useStandardQuery<OwnershipScenario[]>({
     queryKey: ["ownership-scenarios"],
     queryFn: () => apiFetch("/ownership/scenarios?limit=50"),
   });

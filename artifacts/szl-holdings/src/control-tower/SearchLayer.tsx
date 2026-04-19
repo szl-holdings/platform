@@ -1,6 +1,6 @@
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 import { useState } from "react";
 
-import { useQuery } from "@tanstack/react-query";
 
 import { Search } from "lucide-react";
 
@@ -15,7 +15,7 @@ export function SearchLayer() {
   const [submittedQuery, setSubmittedQuery] = useState("");
   const [domainFilter, setDomainFilter] = useState<string[]>([]);
 
-  const { data: searchData, isLoading } = useQuery<{ data: Record<string, unknown> }>({
+  const { data: searchData, isLoading } = useStandardQuery<{ data: Record<string, unknown> }>({
     queryKey: ["ct-search", submittedQuery, domainFilter],
     queryFn: () => {
       const params = new URLSearchParams({ q: submittedQuery, limit: "30" });

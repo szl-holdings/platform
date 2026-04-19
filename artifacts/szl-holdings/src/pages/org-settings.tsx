@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useProductionConfirm } from "@szl-holdings/shared-ui/production-confirm";
 import { useParams, useLocation } from "wouter";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 import { m, AnimatePresence } from "framer-motion";
 import {
   Building2, Users, Bell, Save, Plus, Trash2, ChevronRight,
@@ -68,7 +69,7 @@ export default function OrgSettingsPage() {
   const qc = useQueryClient();
   const { confirm: productionConfirm } = useProductionConfirm();
 
-  const resolvedOrgQuery = useQuery<{ orgs?: { slug: string }[] }>({
+  const resolvedOrgQuery = useStandardQuery<{ orgs?: { slug: string }[] }>({
     queryKey: ["me-orgs"],
     queryFn: () => apiFetch("/auth/me"),
     enabled: !orgSlug,
@@ -95,31 +96,31 @@ export default function OrgSettingsPage() {
     setTimeout(() => setErrorMsg(null), 5000);
   };
 
-  const orgQuery = useQuery<OrgProfile>({
+  const orgQuery = useStandardQuery<OrgProfile>({
     queryKey: ["org-profile", slug],
     queryFn: () => apiFetch(`/orgs/${slug}/profile`),
     enabled: !!slug,
   });
 
-  const membersQuery = useQuery<{ members: Member[]; total: number }>({
+  const membersQuery = useStandardQuery<{ members: Member[]; total: number }>({
     queryKey: ["org-members", slug],
     queryFn: () => apiFetch(`/orgs/${slug}/members`),
     enabled: !!slug,
   });
 
-  const notifQuery = useQuery<NotifPrefs>({
+  const notifQuery = useStandardQuery<NotifPrefs>({
     queryKey: ["org-notif-prefs", slug],
     queryFn: () => apiFetch(`/orgs/${slug}/notification-prefs`),
     enabled: !!slug && activeTab === "notifications",
   });
 
-  const userNotifQuery = useQuery<NotifPrefs>({
+  const userNotifQuery = useStandardQuery<NotifPrefs>({
     queryKey: ["user-notif-prefs"],
     queryFn: () => apiFetch(`/user/notification-preferences`),
     enabled: activeTab === "account",
   });
 
-  const userProfileQuery = useQuery<{
+  const userProfileQuery = useStandardQuery<{
     id: number; displayName: string; email: string | null; avatarUrl: string | null; bio: string | null;
   }>({
     queryKey: ["user-profile"],
@@ -128,7 +129,7 @@ export default function OrgSettingsPage() {
   });
 
   const [orgForm, setOrgForm] = useState<Partial<OrgProfile>>({});
-  const updateOrgMutation = useMutation({
+  const updateOrgMutation = useStandardMutation({
     mutationFn: (data: Partial<OrgProfile>) =>
       apiFetch(`/orgs/${slug}/profile`, { method: "PUT", body: JSON.stringify(data) }),
     onSuccess: () => {
@@ -139,7 +140,7 @@ export default function OrgSettingsPage() {
   });
 
   const [removingUserId, setRemovingUserId] = useState<number | null>(null);
-  const removeMemberMutation = useMutation({
+  const removeMemberMutation = useStandardMutation({
     mutationFn: (userId: number) =>
       apiFetch(`/orgs/${slug}/members/${userId}`, { method: "DELETE" }),
     onSuccess: () => {
@@ -150,7 +151,7 @@ export default function OrgSettingsPage() {
     onError: (err: Error) => { showError(err.message); setRemovingUserId(null); },
   });
 
-  const updateRoleMutation = useMutation({
+  const updateRoleMutation = useStandardMutation({
     mutationFn: ({ userId, role }: { userId: number; role: string }) =>
       apiFetch(`/orgs/${slug}/members/${userId}/role`, { method: "PUT", body: JSON.stringify({ role }) }),
     onSuccess: () => {
@@ -161,7 +162,7 @@ export default function OrgSettingsPage() {
   });
 
   const [notifForm, setNotifForm] = useState<Partial<NotifPrefs>>({});
-  const updateNotifMutation = useMutation({
+  const updateNotifMutation = useStandardMutation({
     mutationFn: (data: Partial<NotifPrefs>) =>
       apiFetch(`/orgs/${slug}/notification-prefs`, { method: "PUT", body: JSON.stringify(data) }),
     onSuccess: () => {
@@ -172,7 +173,7 @@ export default function OrgSettingsPage() {
   });
 
   const [userNotifForm, setUserNotifForm] = useState<Partial<NotifPrefs>>({});
-  const updateUserNotifMutation = useMutation({
+  const updateUserNotifMutation = useStandardMutation({
     mutationFn: (data: Partial<NotifPrefs>) =>
       apiFetch(`/user/notification-preferences`, { method: "PUT", body: JSON.stringify(data) }),
     onSuccess: () => {
@@ -183,7 +184,7 @@ export default function OrgSettingsPage() {
   });
 
   const [userForm, setUserForm] = useState<{ displayName: string; bio: string }>({ displayName: "", bio: "" });
-  const updateUserMutation = useMutation({
+  const updateUserMutation = useStandardMutation({
     mutationFn: (data: typeof userForm) =>
       apiFetch(`/user/profile`, { method: "PUT", body: JSON.stringify(data) }),
     onSuccess: () => {
@@ -194,7 +195,7 @@ export default function OrgSettingsPage() {
   });
 
   const [pwResetSent, setPwResetSent] = useState(false);
-  const pwResetMutation = useMutation({
+  const pwResetMutation = useStandardMutation({
     mutationFn: (email: string) =>
       apiFetch("/user/password-reset", { method: "POST", body: JSON.stringify({ email }) }),
     onSuccess: () => {
@@ -206,7 +207,7 @@ export default function OrgSettingsPage() {
 
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState("member");
-  const inviteMutation = useMutation({
+  const inviteMutation = useStandardMutation({
     mutationFn: ({ email, role }: { email: string; role: string }) =>
       apiFetch(`/orgs/${slug}/invite`, { method: "POST", body: JSON.stringify({ email, role }) }),
     onSuccess: () => {
