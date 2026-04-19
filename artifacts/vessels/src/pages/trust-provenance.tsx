@@ -9,6 +9,7 @@ import { type ProofPanelData } from "@szl-holdings/shared-ui/proof-panel";
 import { type PolicyDecisionRecord } from "@szl-holdings/shared-ui/policy-result";
 import { type AuditTrailEntry } from "@szl-holdings/shared-ui/admin-audit-trail";
 import { type SimulationScenario, type PredictedVsActual } from "@szl-holdings/shared-ui/simulation-cockpit";
+import { postPolicyAppeal } from "@szl-holdings/shared-ui/policy-appeal-client";
 
 const ACCENT = "#0ea5e9";
 const DOMAIN = "vessels";
@@ -218,7 +219,25 @@ export default function TrustProvenancePage() {
             <>
               <p className="text-xs text-sky-400/50 px-1">Covenant policy evaluation results for sanctions alerts and trade freeze governance</p>
               {policyDecisions.map((d, i) => (
-                <PolicyResult key={d.requestId ?? i} decision={d} accentColor={ACCENT} showDetails />
+                <PolicyResult
+                  key={d.requestId ?? i}
+                  decision={d}
+                  accentColor={ACCENT}
+                  showDetails
+                  onEscalate={() => {
+                    void postPolicyAppeal({
+                      requestId: d.requestId,
+                      action: "escalate",
+                    });
+                  }}
+                  onAppeal={(reason) => {
+                    void postPolicyAppeal({
+                      requestId: d.requestId,
+                      action: "appeal",
+                      justification: reason,
+                    });
+                  }}
+                />
               ))}
             </>
           )}

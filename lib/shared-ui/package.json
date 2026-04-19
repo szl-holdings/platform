@@ -166,6 +166,7 @@
     "./analytics": "./src/analytics/index.ts",
     "./feature-flag-gate": "./src/feature-flag-gate.tsx",
     "./policy-result": "./src/policy-result.tsx",
+    "./policy-appeal-client": "./src/policy-appeal-client.ts",
     "./proof-panel": "./src/proof-panel.tsx",
     "./alloy-decision-card": "./src/alloy-decision-card.tsx",
     "./outcome-feedback": "./src/outcome-feedback.tsx",
