@@ -220,6 +220,7 @@ const RouteAnomalyEnginePage = lazy(() => import("@/pages/route-anomaly-engine")
 const SanctionsChainExplorerPage = lazy(() => import("@/pages/sanctions-chain-explorer"));
 const CounterpartyRiskMapPage = lazy(() => import("@/pages/counterparty-risk-map"));
 const VoyageTwinPage = lazy(() => import("@/pages/voyage-twin"));
+const VoyageRiskTwinPage = lazy(() => import("@/pages/voyage-risk-twin"));
 const GovernedCockpitPage = lazy(() => import("@/pages/governed-cockpit"));
 const GeoDecisionCenterPage = lazy(() => import("@/pages/geo-decision-center"));
 const RiskSimulationPage = lazy(() => import("@/pages/risk-simulation"));
@@ -381,6 +382,7 @@ function VesselsSidebarContent({ expanded, onMobileClose, onToggleCollapse }: { 
         { id: "route-anomaly-engine", label: "Route Anomaly Engine", href: "/route-anomaly-engine", icon: <Navigation className="w-3.5 h-3.5" /> },
         { id: "sanctions-chain-explorer", label: "Sanctions Chain Explorer", href: "/sanctions-chain-explorer", icon: <Link2 className="w-3.5 h-3.5" /> },
         { id: "counterparty-risk-map", label: "Counterparty Risk Map", href: "/counterparty-risk-map", icon: <Users className="w-3.5 h-3.5" /> },
+        { id: "voyage-risk-twin", label: "Voyage Risk Twin ★", href: "/voyage-risk-twin", icon: <Layers className="w-3.5 h-3.5" /> },
         { id: "voyage-twin", label: "Voyage Twin", href: "/voyage-twin", icon: <Cpu className="w-3.5 h-3.5" /> },
       ],
     },
@@ -654,6 +656,7 @@ function DashboardRouter() {
         <Route path="/sanctions-chain-explorer" component={SanctionsChainExplorerPage} />
         <Route path="/counterparty-risk-map" component={CounterpartyRiskMapPage} />
         <Route path="/voyage-twin" component={VoyageTwinPage} />
+        <Route path="/voyage-risk-twin" component={VoyageRiskTwinPage} />
         <Route path="/governed-cockpit" component={GovernedCockpitPage} />
         <Route path="/geo-decision-center" component={GeoDecisionCenterPage} />
         <Route path="/risk-simulation" component={RiskSimulationPage} />

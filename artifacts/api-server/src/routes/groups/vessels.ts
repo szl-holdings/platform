@@ -11,6 +11,7 @@ import vesselsInsuranceRouter from "../vessels-insurance";
 import vesselsCognitiveRouter from "../vessels-cognitive";
 import vesselsDigitalTwinRouter from "../vessels-digital-twin";
 import vesselsModulesRouter from "../vessels-modules";
+import vesselsVoyageRiskRouter from "../vessels-voyage-risk";
 
 export function register(router: IRouter): void {
   router.use("/vessels", tenantScope({ required: true }));
@@ -25,4 +26,5 @@ export function register(router: IRouter): void {
   router.use(vesselsCognitiveRouter);
   router.use(vesselsDigitalTwinRouter);
   router.use(vesselsModulesRouter);
+  router.use(vesselsVoyageRiskRouter);
 }
