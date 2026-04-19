@@ -2,6 +2,7 @@ import { useContactModal } from "@szl-holdings/shared-ui/contact-modal";
 import { useState } from "react";
 import { CheckCircle, ArrowRight, Shield, Layers, Building2, X } from "lucide-react";
 import { ContactModal } from "@szl-holdings/shared-ui/contact-modal";
+import { AEGIS_MITRE_COVERAGE, metricDisplay } from "../lib/claims";
 
 const ACCENT = "#ef4444";
 const BG = "#080a10";
@@ -17,7 +18,7 @@ const tiers = [
     highlight: false,
     features: [
       "SOC command dashboard",
-      "MITRE ATT&CK mapping",
+      metricDisplay(AEGIS_MITRE_COVERAGE),
       "CVE & vulnerability tracking",
       "Basic threat intelligence feed",
       "Incident management",

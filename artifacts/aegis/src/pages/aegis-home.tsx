@@ -3,6 +3,7 @@ import { copyrightLine } from "@szl-holdings/brand-registry";
 import { useState, useEffect, useRef } from "react";
 import { ContactModal } from "@szl-holdings/shared-ui/contact-modal";
 import { Link } from "wouter";
+import { AEGIS_MITRE_COVERAGE, metricDisplay } from "../lib/claims";
 import {
   Shield, ArrowRight, Layers, Server, Brain, Eye, Target,
   Lock, Users, Network, Menu, X,
@@ -21,7 +22,7 @@ const workspaces = [
     href: "/soc",
     capabilities: [
       "SOC command with unified XDR correlation",
-      "MITRE ATT&CK mapping and adversary emulation",
+      metricDisplay(AEGIS_MITRE_COVERAGE) + " — adversary emulation included",
       "Threat hunting, forensics, identity threat detection",
       "Vulnerability management and hardening controls",
       "Compliance readiness across frameworks",

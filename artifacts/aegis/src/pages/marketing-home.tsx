@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { Shield, ChevronRight, Activity, AlertTriangle, Target, Eye, Flame, Zap, BarChart3, Lock, ArrowRight, Layers, Users, Brain } from "lucide-react";
 import { motion as m } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
+import { AEGIS_MITRE_COVERAGE, metricDisplay } from "../lib/claims";
 
 const threatFeed = [
   { type: "Critical", title: "Lateral movement detected — domain controller pivot attempt", source: "XDR · Endpoint", time: "2 min ago", color: "text-red-400 bg-red-500/10 border-red-500/20" },
@@ -226,6 +227,7 @@ export default function AegisMarketingHome() {
             <p className="text-[11px] font-semibold text-red-400/60 tracking-[0.15em] uppercase mb-3">Coverage</p>
             <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">MITRE ATT&CK — mapped and measured</h2>
             <p className="text-gray-500 text-[14px] max-w-2xl mx-auto">Every detection rule mapped to ATT&CK techniques. Real-time coverage visibility.</p>
+            <p className="text-[12px] text-red-400/70 font-mono mt-3">{metricDisplay(AEGIS_MITRE_COVERAGE)}</p>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-2 sm:gap-3">
             {["Initial Access", "Execution", "Persistence", "Privilege Escalation", "Defense Evasion", "Credential Access", "Discovery", "Lateral Movement", "Collection", "Exfiltration", "Command & Control", "Impact", "Reconnaissance", "Resource Development"].map((tactic, i) => (

@@ -52,7 +52,7 @@ function resolveClaim(claimId: string, fallback: string): ClaimValue {
 export const AEGIS_SIMULATIONS = resolveClaim("aegis-simulations", "31,200+");
 export const AEGIS_MITRE_COVERAGE = resolveClaim(
   "aegis-mitre-coverage",
-  "200+ MITRE ATT&CK techniques covered"
+  "MITRE ATT&CK techniques covered"
 );
 export const AEGIS_MARKET_MARITIME = resolveClaim(
   "market-maritime-size",
