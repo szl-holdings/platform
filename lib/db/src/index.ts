@@ -13,6 +13,9 @@ if (!process.env.DATABASE_URL) {
 const isDev = process.env.NODE_ENV !== "production";
 const SLOW_QUERY_THRESHOLD_MS = parseInt(process.env.SLOW_QUERY_THRESHOLD_MS ?? "500", 10);
 
+export const PgPool = Pool;
+export { drizzle as drizzleConnect } from "drizzle-orm/node-postgres";
+
 export const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   min: parseInt(process.env.DB_POOL_MIN ?? "1", 10),

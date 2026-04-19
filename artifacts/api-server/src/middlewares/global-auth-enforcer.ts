@@ -90,6 +90,11 @@ const PUBLIC_EXACT_PATHS = new Set([
   "/api/lyte/signal-fusion",
   "/api/lyte/governance-domains",
   "/api/lyte/decision-schemas",
+  // Decision Runtime v1 — list endpoint GET /api/decisions/cards.
+  // Per-card GET routes are whitelisted by prefix in PUBLIC_PREFIXES below.
+  // Mutating routes (approve/reject/request-changes, simulate-policy) are NOT
+  // whitelisted here — they enforce auth via requireAuth in the route handler.
+  "/api/decisions/cards",
 ]);
 
 const PUBLIC_PREFIXES = [
@@ -185,6 +190,12 @@ const PUBLIC_PREFIXES = [
   // facing but unauthenticated like the rest of the Command demo surface; the
   // underlying data is sourced exclusively from public product blogs / RSS feeds.
   "/api/competitive-intel/",
+  // Decision Runtime v1 — per-card GET endpoints (GET /api/decisions/cards/:id).
+  // Public so the Decision Center demo works without a session; route handlers
+  // apply authMiddleware({ required: false }) and scope to ws-demo-001 for
+  // unauthenticated callers. POST mutating routes at /decisions/cards/:id/approve
+  // etc. enforce auth via requireAuth in the route handler (not here).
+  "/api/decisions/cards/",
 ];
 
 function isValidInternalToken(req: Request): boolean {

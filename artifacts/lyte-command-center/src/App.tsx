@@ -30,6 +30,8 @@ const EvidenceExplorerPage = lazy(() => import("@/pages/evidence-explorer"));
 const PolicyCenterPage = lazy(() => import("@/pages/policy-center"));
 const EvalStudioPage = lazy(() => import("@/pages/eval-studio"));
 
+const BriefPage = lazy(() => import("@/pages/brief"));
+
 // Legacy surfaces (kept for historical nav)
 const OwnershipDriftPage = lazy(() => import("@/pages/ownership-drift"));
 const PressureMapPage = lazy(() => import("@/pages/pressure-map"));
@@ -340,6 +342,7 @@ function DashboardRoutes() {
         <Route path="/evidence" component={EvidenceExplorerPage} />
         <Route path="/policies" component={PolicyCenterPage} />
         <Route path="/eval" component={EvalStudioPage} />
+        <Route path="/brief" component={BriefPage} />
         {/* Legacy surfaces */}
         <Route path="/board" component={BoardViewPage} />
         <Route path="/ownership-drift" component={OwnershipDriftPage} />

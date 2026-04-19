@@ -24,6 +24,7 @@ import * as selfModel from "./groups/self-model";
 import * as verifier from "./groups/verifier";
 import * as skillLibrary from "./groups/skill-library";
 import * as crossPlatform from "./groups/cross-platform";
+import decisionsRuntimeRouter from "./decisions-runtime";
 
 const router: IRouter = Router();
 
@@ -125,6 +126,13 @@ router.use(
 );
 router.use(lazyMatch("/aegis", () => import("./aegis-pcap"), "aegis-pcap"));
 router.use(lazyMatch("/lp-portal", () => import("./lp-portal"), "lp-portal"));
+
+// Decision Runtime v1 — GET /api/decisions/cards and GET /api/decisions/cards/:id
+// are public (demo workspace when unauthenticated). Mutating routes require auth.
+// Must be mounted BEFORE ai.register() because copilotRouter is mounted there
+// without a path prefix and applies tenantScope({ required: true }) globally,
+// which would block unauthenticated GET requests before the handler runs.
+router.use(decisionsRuntimeRouter);
 
 // Trace/reflection/plan/replay routers must be registered BEFORE ai.register()
 // because copilotRouter applies a global tenantScope that would terminate

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Shield, TrendingUp, TrendingDown, Minus, AlertTriangle, CheckCircle2, Clock, ArrowRight, Brain, Zap, Users, ChevronRight, Compass } from "lucide-react";
+import { Shield, TrendingUp, TrendingDown, Minus, AlertTriangle, CheckCircle2, Clock, ArrowRight, Brain, Zap, Users, ChevronRight, Compass, FileText } from "lucide-react";
 import { Link } from "wouter";
 import { isOnboardingComplete } from "@/pages/onboarding";
 import {
@@ -131,6 +131,13 @@ export default function OverviewPage() {
           <p className="text-xs text-amber-400/50 mt-0.5">Decision operations snapshot — {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}</p>
         </div>
         <div className="flex items-center gap-2">
+          <Link
+            href="/brief"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded border border-amber-500/20 bg-amber-500/5 hover:bg-amber-500/10 transition-colors"
+          >
+            <FileText className="w-3 h-3 text-amber-400/60" />
+            <span className="text-[10px] text-amber-400/60 font-mono">Differentiation Brief</span>
+          </Link>
           <span className="proof-badge">
             <Shield className="w-2.5 h-2.5" />
             {overviewSummary.proofRef}
