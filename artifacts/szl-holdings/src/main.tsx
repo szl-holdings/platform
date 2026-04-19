@@ -6,6 +6,7 @@ import { configurePlausible } from "@szl-holdings/analytics";
 import { initSentry, initWebVitals, initAnalytics } from "@szl-holdings/observability/react";
 import { GraphQLProvider } from "@szl-holdings/graphql-client/provider";
 import App from "./App";
+import { initPostHog } from "./lib/posthog-init";
 import "./i18n";
 import "./index.css";
 
@@ -14,6 +15,8 @@ configurePlausible({
   debugMode: import.meta.env.DEV,
   trackLocalhost: false,
 });
+
+initPostHog();
 
 initSentry({ appSlug: "szl-holdings", tracesSampleRate: 0.2 });
 initWebVitals("szl-holdings", "/api/");
