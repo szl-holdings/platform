@@ -234,6 +234,26 @@ export function register(router: IRouter): void {
     }
   });
 
+  router.post("/admin/users/:id/revoke-sessions", requireRole("admin"), async (req, res) => {
+    try {
+      const targetUserId = parseInt(req.params["id"] as string, 10);
+      if (isNaN(targetUserId) || targetUserId < 1) { sendBadRequest(res, "Invalid user ID"); return; }
+      const [targetUser] = await db.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.id, targetUserId)).limit(1);
+      if (!targetUser) { sendNotFound(res, "User not found"); return; }
+      const { revokedCount } = await revokeUserSessionsOnRoleChange({
+        userId: targetUserId,
+        changedByUserId: req.user?.id ?? null,
+        reason: "admin_force_logout",
+        ipAddress: req.ip ?? null,
+        userAgent: req.headers["user-agent"] ?? null,
+      });
+      res.status(200).json({ userId: targetUserId, revokedSessionCount: revokedCount, message: "Sessions revoked" });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Failed to revoke sessions";
+      sendError(res, message, 500, "INTERNAL_ERROR");
+    }
+  });
+
   router.delete("/admin/sessions/:userId", requireRole("admin"), validateBody(reasonSchema), async (req, res) => {
     try {
       const { forceTerminateUserSessions } = await import("../../middlewares/session-policy.js");

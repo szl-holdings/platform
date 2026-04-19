@@ -1,10 +1,11 @@
-import { useQuery } from "@tanstack/react-query";
-import { Users, UserPlus, Mail, Shield, Clock, AlertTriangle } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Users, UserPlus, Mail, Shield, Clock, AlertTriangle, LogOut } from "lucide-react";
 import { useState } from "react";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
+import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 
 interface UserInfo {
-  id: number;
+  id: string;
   email: string;
   name: string;
   role: string;
@@ -23,9 +24,34 @@ const roleColors: Record<string, string> = {
 
 export default function AdminUsers() {
   const [search, setSearch] = useState("");
+  const [confirmingId, setConfirmingId] = useState<string | null>(null);
+  const queryClient = useQueryClient();
   const { data, isLoading, error } = useQuery<{ users: UserInfo[] }>({
     queryKey: ["admin-users"],
     queryFn: () => apiFetch("/admin/users"),
+  });
+
+  const extractNumericId = (id: string): string => id.replace(/^usr_/, "");
+
+  const forceLogout = useMutation({
+    mutationFn: (userId: string) =>
+      apiFetch(`/admin/users/${extractNumericId(userId)}/revoke-sessions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      }) as Promise<{ revokedSessionCount: number }>,
+    onSuccess: (result, userId) => {
+      const user = users.find(u => u.id === userId);
+      const label = user?.name || user?.email || `user ${userId}`;
+      toast.success(`Signed out ${label} (${result.revokedSessionCount} session${result.revokedSessionCount === 1 ? "" : "s"} revoked)`);
+      setConfirmingId(null);
+      queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+    },
+    onError: (err: unknown) => {
+      const message = err instanceof Error ? err.message : "Failed to sign user out";
+      toast.error(message);
+      setConfirmingId(null);
+    },
   });
 
   const users = data?.users ?? [];
@@ -90,6 +116,35 @@ export default function AdminUsers() {
                     <Shield className="w-2.5 h-2.5 inline mr-1" />{user.role}
                   </span>
                   <span className="text-[10px] text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3" />{user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : "Never"}</span>
+                  {confirmingId === user.id ? (
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => forceLogout.mutate(user.id)}
+                        disabled={forceLogout.isPending}
+                        className="px-2 py-1 rounded text-[10px] font-semibold bg-[#c45a4a] text-white hover:bg-[#b04a3a] disabled:opacity-60"
+                        data-testid={`button-confirm-force-logout-${user.id}`}
+                      >
+                        {forceLogout.isPending ? "Signing out…" : "Confirm sign-out"}
+                      </button>
+                      <button
+                        onClick={() => setConfirmingId(null)}
+                        disabled={forceLogout.isPending}
+                        className="px-2 py-1 rounded text-[10px] font-semibold border border-border text-muted-foreground hover:bg-muted"
+                        data-testid={`button-cancel-force-logout-${user.id}`}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setConfirmingId(user.id)}
+                      className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-semibold border border-border text-[#c45a4a] hover:bg-[#c45a4a]/10"
+                      title="Force this user's active sessions to sign out immediately"
+                      data-testid={`button-force-logout-${user.id}`}
+                    >
+                      <LogOut className="w-3 h-3" /> Force sign-out
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
