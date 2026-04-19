@@ -14,6 +14,7 @@ export * from "./health_checks";
 export * from "./drift_snapshots";
 export * from "./webhook_events";
 export * from "./apps_registry";
+export * from "./pipeline_deals";
 export * from "./stephen_site";
 export * from "./stephen";
 export * from "./vessels";

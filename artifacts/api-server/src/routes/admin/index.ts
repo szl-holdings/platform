@@ -9,6 +9,7 @@ import { register as registerUsage } from "./usage.js";
 import { register as registerSeed } from "./seed.js";
 import { register as registerGrowth } from "./growth.js";
 import { register as registerFunnel } from "./funnel.js";
+import { register as registerPipelineDeals } from "./pipeline-deals.js";
 
 const adminRouter: IRouter = Router();
 
@@ -24,6 +25,7 @@ registerUsage(adminRouter);
 registerSeed(adminRouter);
 registerGrowth(adminRouter);
 registerFunnel(adminRouter);
+registerPipelineDeals(adminRouter);
 
 export { integrationActivityLog, type IntegrationActivity };
 export default adminRouter;
