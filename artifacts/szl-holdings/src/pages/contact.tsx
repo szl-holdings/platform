@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { m } from "framer-motion";
 import { Link } from "wouter";
 import { ArrowRight, CheckCircle2, Shield } from "lucide-react";
@@ -49,7 +49,20 @@ export default function ContactPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [honeypot, setHoneypot] = useState("");
+  const [referrerSource, setReferrerSource] = useState<string>("contact-page");
   const funnelStarted = useRef(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const t = params.get("type");
+    const validTypes: InquiryType[] = ["demo", "design-partner", "general", "security", "partner", "media"];
+    if (t && (validTypes as string[]).includes(t)) {
+      setForm((f) => ({ ...f, type: t as InquiryType }));
+    }
+    const src = params.get("source");
+    if (src) setReferrerSource(src);
+  }, []);
 
   const trackFunnelStart = (inquiryType: string) => {
     if (!funnelStarted.current) {
@@ -112,7 +125,9 @@ export default function ContactPage() {
       }
       setSubmitted(true);
       analytics.contactFormSubmit(form.type);
-      if (form.type === "demo") analytics.demoRequest("contact-page");
+      analytics.diligenceRequested(referrerSource, "/contact");
+      if (form.type === "demo") analytics.demoRequest(referrerSource);
+      if (form.type === "design-partner") analytics.designPartnerInterest(referrerSource, "/contact");
 
       fetch(`${API}/holdings/inquiries`, {
         method: "POST",

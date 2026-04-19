@@ -307,7 +307,7 @@ export default function DemoPage() {
       });
       if (response.status === 201 || response.ok) {
         setAccessSent(true);
-        analytics.demoRequest("demo-page");
+        analytics.demoRequest("demo-page", pack.id);
         analytics.formSubmit("demo_access_request", "demo");
         toast.success("Request received. We'll follow up within 24 hours.");
       } else {

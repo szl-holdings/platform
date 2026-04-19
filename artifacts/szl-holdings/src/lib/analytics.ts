@@ -198,8 +198,8 @@ export const analytics = {
   formSubmit: (formKey: string, page: string, site = "szl-holdings") =>
     track("form_submit", { form_key: formKey, page, site }),
 
-  demoRequest: (source = "unknown", site = "szl-holdings") =>
-    track("demo_request", { site, source }),
+  demoRequest: (source = "unknown", productKey?: string, site = "szl-holdings") =>
+    track("demo_request", { site, source, ...(productKey ? { product_key: productKey } : {}) }),
 
   accessRequest: (site = "inca") =>
     track("access_request", { site }),

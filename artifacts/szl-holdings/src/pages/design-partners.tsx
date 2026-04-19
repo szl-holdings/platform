@@ -108,7 +108,7 @@ export default function DesignPartnersPage() {
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
-                href="/contact"
+                href="/contact?type=design-partner&source=design-partner-page"
                 className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-white/90"
               >
                 Start a conversation
@@ -285,7 +285,7 @@ export default function DesignPartnersPage() {
               </p>
               <div className="mt-8 flex flex-wrap justify-center gap-3">
                 <Link
-                  href="/contact"
+                  href="/contact?type=design-partner&source=design-partner-page"
                   className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-black transition hover:bg-white/90"
                 >
                   Start a conversation
