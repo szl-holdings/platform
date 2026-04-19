@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { m } from "framer-motion";
 import { Link } from "wouter";
-import { ShieldCheck, Lock, Brain, Download, Settings, CheckSquare, ArrowRight, Layers, Database, Eye, Briefcase, Code2, UserCheck, BarChart2, Github, Calendar, Key, FileOutput, GitBranch, ExternalLink, FileText, Cookie, Accessibility, Scale, Shield } from "lucide-react";
+import { ShieldCheck, Lock, Brain, Download, Settings, CheckSquare, ArrowRight, Layers, Database, Eye, Briefcase, Code2, UserCheck, BarChart2, Github, Calendar, Key, FileOutput, GitBranch, ExternalLink, FileText, Cookie, Accessibility, Scale, Shield, AlertTriangle } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
@@ -397,6 +397,206 @@ export default function TrustPage() {
           </div>
         </section>
 
+        {/* Six Pillars (spec-aligned inline content) */}
+        <section id="pillars" style={{ padding: "var(--space-section-md) 0", borderBottom: "1px solid var(--color-szl-border)" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", marginBottom: "1rem" }}>The six pillars</p>
+              <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "32ch", marginBottom: "0.75rem" }}>
+                What's actually in place today.
+              </h2>
+              <p style={{ fontSize: "0.9375rem", lineHeight: 1.68, color: "hsl(214,7%,58%)", maxWidth: "56ch", marginBottom: "3rem" }}>
+                Each pillar lists the controls a security reviewer can verify against the running system. No aspirational language; no certifications we don't hold.
+              </p>
+            </m.div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(360px, 1fr))", gap: "1.25rem" }}>
+              {[
+                {
+                  icon: Shield,
+                  label: "1 · Security Architecture",
+                  href: "/trust/security",
+                  color: "hsl(145,62%,46%)",
+                  colorMuted: "hsla(145,62%,40%,0.07)",
+                  colorBorder: "hsla(145,62%,40%,0.20)",
+                  items: [
+                    "TLS 1.3 enforced on every browser, mobile and API connection",
+                    "mTLS on internal Replit proxy preview connections",
+                    "Sessions: HttpOnly + Secure + SameSite=Lax, 24-hour expiry with sliding refresh",
+                    "Authentication: bearer token (mobile/API) and session cookie (web), same RBAC enforcement",
+                    "Rate limiting: 200 req/15min global, 5 req/1min on auth, 60/min on writes — per user, fail-closed",
+                    "10MB body size limit to prevent large-payload DoS",
+                    "Tenant isolation enforced at the data layer via callerOrgIds() — architectural, not query-level",
+                  ],
+                },
+                {
+                  icon: Database,
+                  label: "2 · Data Handling",
+                  href: "/trust/architecture",
+                  color: "hsl(210,80%,60%)",
+                  colorMuted: "hsla(210,80%,60%,0.07)",
+                  colorBorder: "hsla(210,80%,60%,0.20)",
+                  items: [
+                    "Encryption at rest: AES-256-GCM with authentication tags on sensitive fields",
+                    "Encryption in transit: TLS 1.3 end-to-end",
+                    "Field-level encryption via FIELD_ENCRYPTION_KEY managed in Replit Secrets, not source code",
+                    "Database: PostgreSQL 16 on managed Replit infrastructure",
+                    "Audit trail: append-only Proof Chain with SHA-256 integrity, activity logger on all consequential actions",
+                    "Data residency: United States (Replit-managed)",
+                    "Retention: defined in privacy policy; enterprise contracts can specify custom terms",
+                  ],
+                },
+                {
+                  icon: Brain,
+                  label: "3 · AI Governance",
+                  href: "/trust/governance",
+                  color: "hsl(258,55%,68%)",
+                  colorMuted: "hsla(258,55%,68%,0.07)",
+                  colorBorder: "hsla(258,55%,68%,0.20)",
+                  items: [
+                    "Advisory-only model: AI surfaces recommendations; consequential actions require explicit human approval",
+                    "Proof Chain anchoring: every AI output creates an immutable audit trail entry",
+                    "Source grounding: every AI recommendation includes the data points it drew from and a confidence score",
+                    "Covenant Policy: approval gates enforced at the platform layer — AI cannot route around them",
+                    "Multi-provider: OpenAI, Anthropic, Gemini with fallback logic — no single AI provider dependency",
+                    "No autonomous execution: AI cannot execute consequential actions without human confirmation",
+                  ],
+                },
+                {
+                  icon: UserCheck,
+                  label: "4 · Access Controls",
+                  href: "/trust/security",
+                  color: "hsl(40,90%,54%)",
+                  colorMuted: "hsla(40,90%,54%,0.07)",
+                  colorBorder: "hsla(40,90%,54%,0.22)",
+                  items: [
+                    "Role hierarchy: super_admin → ops → manager → analyst → viewer → guest, inheriting downward",
+                    "SCIM 2.0 available for enterprise identity lifecycle management",
+                    "Azure AD SSO available for enterprise single sign-on",
+                    "ALLOY_INTERNAL_TOKEN restricted to server-side; never in client bundles",
+                    "Cross-org requests return 404 (not 403) to prevent information leakage",
+                    "Experimental features behind server-side feature flags, not client-toggleable",
+                  ],
+                },
+                {
+                  icon: Calendar,
+                  label: "5 · Compliance Roadmap",
+                  href: "#compliance",
+                  color: "hsl(192,72%,48%)",
+                  colorMuted: "hsla(192,72%,48%,0.07)",
+                  colorBorder: "hsla(192,72%,48%,0.20)",
+                  items: [
+                    "SOC 2 Type II: not yet certified. Targeted 6–9 months post-funding close",
+                    "Penetration test: not yet conducted. Scheduled pre-production launch",
+                    "GDPR: not yet formally assessed. Pre-EU customer acquisition",
+                    "HIPAA: not currently targeted (only if healthcare vertical pursued)",
+                    "FedRAMP: not currently targeted (only if federal vertical pursued)",
+                    "ISO 27001: aligned architecture, not certified",
+                  ],
+                },
+                {
+                  icon: AlertTriangle,
+                  label: "6 · Incident Response",
+                  href: "/legal/security-disclosure",
+                  color: "hsl(0,62%,52%)",
+                  colorMuted: "hsla(0,62%,52%,0.07)",
+                  colorBorder: "hsla(0,62%,52%,0.22)",
+                  items: [
+                    "Disclosure contact: security@szlholdings.com",
+                    "Acknowledge within 24 hours; patch within 48–72 hours for critical issues",
+                    "Rollback capability: previous deployment versions available via Replit for rapid rollback",
+                    "Incident logging: structured Pino logs with correlation IDs on every incident",
+                    "No SLA commitments offered without a signed enterprise contract",
+                  ],
+                },
+              ].map((pillar, i) => {
+                const Icon = pillar.icon;
+                return (
+                  <m.div
+                    key={pillar.label}
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.38, delay: (i % 3) * 0.06 }}
+                    className="szl-card"
+                    style={{ borderRadius: "0.875rem", padding: "1.5rem", display: "flex", flexDirection: "column", gap: "1rem" }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
+                      <div style={{ width: "32px", height: "32px", display: "flex", alignItems: "center", justifyContent: "center", background: pillar.colorMuted, border: `1px solid ${pillar.colorBorder}`, borderRadius: "0.375rem", flexShrink: 0 }}>
+                        <Icon size={15} color={pillar.color} />
+                      </div>
+                      <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.10em", textTransform: "uppercase", color: pillar.color }}>{pillar.label}</span>
+                    </div>
+                    <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                      {pillar.items.map((item) => (
+                        <li key={item} style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem" }}>
+                          <div style={{ width: "4px", height: "4px", borderRadius: "50%", background: pillar.color, flexShrink: 0, marginTop: "8px", opacity: 0.85 }} />
+                          <span style={{ fontSize: "0.8125rem", lineHeight: 1.6, color: "hsl(214,7%,62%)" }}>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <Link
+                      href={pillar.href}
+                      style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem", fontSize: "0.75rem", fontWeight: 600, color: pillar.color, textDecoration: "none", marginTop: "auto", paddingTop: "0.5rem" }}
+                    >
+                      Verify in detail <ArrowRight size={11} />
+                    </Link>
+                  </m.div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* Known Gaps (proactive disclosure) */}
+        <section id="known-gaps" style={{ padding: "var(--space-section-md) 0", borderBottom: "1px solid var(--color-szl-border)" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
+                <AlertTriangle size={14} color="hsl(40,90%,54%)" />
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(40,90%,54%)" }}>Known gaps · proactive disclosure</p>
+              </div>
+              <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "34ch", marginBottom: "0.75rem" }}>
+                The gaps we know about, with current mitigation.
+              </h2>
+              <p style={{ fontSize: "0.9375rem", lineHeight: 1.68, color: "hsl(214,7%,58%)", maxWidth: "60ch", marginBottom: "2.5rem" }}>
+                Disclosing known gaps with mitigation plans is more credible than pretending they don't exist. Each row below names the gap, the control we currently rely on, and the planned remediation.
+              </p>
+            </m.div>
+            <div style={{ borderRadius: "0.875rem", overflow: "hidden", border: "1px solid var(--color-szl-border)" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "minmax(12rem,1.2fr) minmax(14rem,1.5fr) minmax(10rem,1fr)", padding: "0.875rem 1.25rem", background: "hsla(0,0%,100%,0.025)", borderBottom: "1px solid var(--color-szl-border)" }}>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.10em", textTransform: "uppercase", color: "hsl(214,7%,52%)" }}>Gap</span>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.10em", textTransform: "uppercase", color: "hsl(214,7%,52%)" }}>Current mitigation</span>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.10em", textTransform: "uppercase", color: "hsl(214,7%,52%)" }}>Roadmap</span>
+              </div>
+              {[
+                { gap: "Immutable log sink", mitigation: "Pino structured logs with correlation IDs; no external tamper-proof sink yet.", roadmap: "External logging service (post-funding)" },
+                { gap: "ALLOY_INTERNAL_TOKEN rotation", mitigation: "Static token managed in Replit Secrets, server-side only.", roadmap: "Implement rotation policy post-funding" },
+                { gap: "Database query timeout enforcement", mitigation: "Not yet enforced at the database statement level.", roadmap: "Engineering backlog" },
+                { gap: "AI provider circuit breakers", mitigation: "Multi-provider fallback exists across OpenAI, Anthropic, and Gemini.", roadmap: "Circuit breaker pattern on engineering backlog" },
+              ].map((row, i, arr) => (
+                <div
+                  key={row.gap}
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "minmax(12rem,1.2fr) minmax(14rem,1.5fr) minmax(10rem,1fr)",
+                    padding: "1rem 1.25rem",
+                    borderBottom: i < arr.length - 1 ? "1px solid var(--color-szl-border)" : "none",
+                    gap: "1rem",
+                    alignItems: "start",
+                  }}
+                >
+                  <span style={{ fontSize: "0.8125rem", fontWeight: 600, color: "hsl(38,8%,82%)" }}>{row.gap}</span>
+                  <span style={{ fontSize: "0.8125rem", lineHeight: 1.6, color: "hsl(214,7%,60%)" }}>{row.mitigation}</span>
+                  <span style={{ fontSize: "0.8125rem", lineHeight: 1.6, color: "hsl(214,7%,60%)" }}>{row.roadmap}</span>
+                </div>
+              ))}
+            </div>
+            <p style={{ fontSize: "0.75rem", color: "hsl(214,7%,42%)", marginTop: "1rem" }}>
+              Source: <code style={{ fontFamily: "var(--font-mono)", color: "hsl(214,7%,52%)" }}>ops/security/threat-model-summary.md</code>. Last reviewed April 2026.
+            </p>
+          </div>
+        </section>
+
         {/* Legal & policy documents */}
         <section id="legal" style={{ padding: "var(--space-section-md) 0", borderBottom: "1px solid var(--color-szl-border)" }}>
           <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
@@ -480,7 +680,7 @@ export default function TrustPage() {
                   icon: Key,
                   label: "Credential Management",
                   standard: "Env-injected secrets",
-                  detail: "All secrets managed as environment variables. No credentials in source control, logs, or build artifacts. Azure Key Vault for production secret management.",
+                  detail: "All secrets managed as environment variables in Replit Secrets — encrypted, server-side only, never in client bundles. Field-level encryption via FIELD_ENCRYPTION_KEY. No credentials in source control, logs, or build artifacts.",
                   color: "hsl(40,90%,54%)",
                   colorMuted: "hsla(40,90%,54%,0.07)",
                   colorBorder: "hsla(40,90%,54%,0.22)",
@@ -549,7 +749,6 @@ export default function TrustPage() {
                     "Six-tier RBAC enforced server-side",
                     "Immutable audit trail on all platform actions",
                     "SHA-256 integrity hashing on all exports",
-                    "Penetration test completed — NCC Group (0 Critical, 3 High — all remediated)",
                     "Automated dependency vulnerability scanning (blocks on high/critical)",
                     "Secret scanning in CI pipeline",
                     "Multi-tenant data isolation at DB + middleware layer",

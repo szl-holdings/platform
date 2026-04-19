@@ -135,7 +135,7 @@ const sections = [
 
 const COMPLIANCE_FRAMEWORKS = [
   { name: "SOC 2 Type II", status: "Roadmapped", color: "#f59e0b", detail: "Not yet initiated. Targeted for Phase 3 post-funding. Controls alignment underway." },
-  { name: "ISO 27001", status: "Roadmapped", color: "#3b82f6", detail: "Not yet initiated. Targeted for Phase 3 alongside SOC 2." },
+  { name: "ISO 27001", status: "Aligned, not certified", color: "#3b82f6", detail: "Architecture aligned to ISO 27001 controls. No formal certification. Scoping after Series A." },
   { name: "GDPR", status: "Framework active", color: "#10b981", detail: "Privacy framework in place. Data subject rights requests: support@szlholdings.com" },
   { name: "CCPA", status: "Framework active", color: "#10b981", detail: "California resident rights honored within 45 days. Opt-out and deletion workflows operational." },
   { name: "HIPAA", status: "Per contract", color: "#6366f1", detail: "Business Associate Agreement evaluated per enterprise customer need." },
@@ -148,7 +148,7 @@ const TRUST_SUMMARY = [
   { concern: "Access control", how: "11-role RBAC with org-scoped tenant isolation. Deny-by-default global auth enforcer on all /api/* routes." },
   { concern: "Multi-tenancy", how: "All queries scoped by org_id. Cross-org access returns 404 to prevent information leakage. AI/RAG retrieval is tenant-isolated at the library layer." },
   { concern: "Data in transit", how: "TLS 1.3 for all connections. WebSocket uses HMAC-signed tickets with 5-minute TTL." },
-  { concern: "Secrets management", how: "All credentials injected via environment variables. No secrets in source control. Azure Key Vault in production." },
+  { concern: "Secrets management", how: "All credentials injected via environment variables in Replit Secrets — encrypted, server-side only. No secrets in source control. Field-level encryption via FIELD_ENCRYPTION_KEY." },
   { concern: "Compliance posture", how: "GDPR/CCPA privacy frameworks in place. SOC 2 Type II roadmapped post-funding." },
 ];
 
