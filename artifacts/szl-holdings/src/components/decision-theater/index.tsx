@@ -2,13 +2,16 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { m, AnimatePresence } from "framer-motion";
 import {
   ChevronRight, ChevronLeft, Pause, Play, RotateCcw,
-  AlertTriangle, Loader2, Database, Wifi,
+  AlertTriangle, Loader2, Database, Wifi, ShieldCheck, CheckCircle2,
+  XCircle, MessageSquare, Clock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useDecisionEngine } from "@/hooks/useDecisionEngine";
 import type { EngineState } from "@/hooks/useDecisionEngine";
 import { useLiveTheaterData } from "@/hooks/useLiveTheaterData";
 import type { LiveMetrics, LiveRecommendation, LiveAuditRecord } from "@/hooks/useLiveTheaterData";
+import { ProofDrawer } from "@/components/ProofDrawer";
+import type { DecisionCase } from "@/data/decision-theater-cases";
 import { LOOP_STAGES, DEMO_SCENARIO } from "./scenarios";
 import type { StageId } from "./scenarios";
 import { SignalStage, LiveSignalStage } from "./stages/signal";
@@ -130,13 +133,385 @@ function LiveStageRouter({ stageId, metrics, recommendations, auditRecords, audi
   }
 }
 
-export default function DecisionTheater() {
-  const [currentStage, setCurrentStage] = useState(0);
+interface DecisionTheaterProps {
+  activeCase?: DecisionCase;
+}
+
+function ConfidenceMeter({ value, color = "#ec4899" }: { value: number; color?: string }) {
+  const pct = Math.round(value * 100);
+  return (
+    <div className="flex items-center gap-2 w-full">
+      <div className="flex-1 h-1.5 rounded-full bg-muted/30 overflow-hidden">
+        <m.div
+          className="h-full rounded-full"
+          style={{ background: color }}
+          initial={{ width: 0 }}
+          animate={{ width: `${pct}%` }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+        />
+      </div>
+      <span className="text-[11px] font-mono font-bold" style={{ color }}>{pct}%</span>
+    </div>
+  );
+}
+
+function CaseStageRenderer({ activeCase, stageId }: { activeCase: DecisionCase; stageId: StageId }) {
+  const c = activeCase;
+  switch (stageId) {
+    case "signal":
+      return (
+        <div className="space-y-3">
+          <p className="text-sm text-muted-foreground">{c.signal.label}</p>
+          <div className="rounded-xl border border-border/40 bg-card/60 p-5">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-bold text-foreground">{c.signal.sourceSystem}</h3>
+              <span className="text-[10px] font-mono text-muted-foreground">{c.signal.receivedAt}</span>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {Object.entries(c.signal.raw).map(([k, v]) => (
+                <div key={k} className="rounded-lg border border-border/30 bg-muted/10 px-3 py-2">
+                  <p className="text-[9px] uppercase tracking-wider text-muted-foreground">{k.replace(/_/g, " ")}</p>
+                  <p className="text-[11px] font-mono text-foreground">{String(v)}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    case "context":
+      return (
+        <div className="space-y-3">
+          <p className="text-sm text-muted-foreground">Cross-domain correlation across the SZL Holdings platform.</p>
+          <div className="rounded-xl border border-border/40 bg-card/60 p-5">
+            <h3 className="text-sm font-bold text-foreground mb-2">{c.title}</h3>
+            <p className="text-[12px] text-muted-foreground leading-relaxed">{c.summary}</p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-4">
+              <div className="rounded-lg border border-border/30 bg-muted/10 px-3 py-2">
+                <p className="text-[9px] uppercase tracking-wider text-muted-foreground">Domain</p>
+                <p className="text-[11px] font-semibold text-foreground">{c.domain}</p>
+              </div>
+              <div className="rounded-lg border border-border/30 bg-muted/10 px-3 py-2">
+                <p className="text-[9px] uppercase tracking-wider text-muted-foreground">Severity</p>
+                <p className="text-[11px] font-semibold text-foreground capitalize">{c.severity}</p>
+              </div>
+              <div className="rounded-lg border border-border/30 bg-muted/10 px-3 py-2">
+                <p className="text-[9px] uppercase tracking-wider text-muted-foreground">Owner</p>
+                <p className="text-[11px] font-semibold text-foreground">{c.owner}</p>
+              </div>
+              <div className="rounded-lg border border-border/30 bg-muted/10 px-3 py-2">
+                <p className="text-[9px] uppercase tracking-wider text-muted-foreground">Opened</p>
+                <p className="text-[11px] font-mono text-foreground">{c.openedAt}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    case "recommendation":
+      return (
+        <div className="space-y-3" data-testid="case-recommendation">
+          <p className="text-sm text-muted-foreground">AI-generated advisory with full source attribution and provenance.</p>
+          <div className="rounded-xl border border-border/40 bg-card/60 p-5">
+            <h3 className="text-sm font-bold text-foreground mb-2">{c.recommendation.title}</h3>
+            <p className="text-[12px] text-muted-foreground leading-relaxed mb-4">{c.recommendation.body}</p>
+            <div className="mb-4">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Model confidence</span>
+                <span className="text-[10px] font-mono text-muted-foreground">{c.recommendation.model}</span>
+              </div>
+              <ConfidenceMeter value={c.recommendation.confidence} />
+            </div>
+            <div className="mb-4">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2">Recommended actions</p>
+              <ul className="space-y-1.5">
+                {c.recommendation.actions.map((a, i) => (
+                  <li key={i} className="flex items-start gap-2 text-[12px] text-foreground">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0 mt-0.5" />
+                    <span>{a}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2">Source citations · provenance</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {c.recommendation.sources.map((s) => (
+                  <div key={s.id} className="rounded-lg border border-border/30 bg-muted/10 px-3 py-2 flex items-start justify-between gap-2">
+                    <div>
+                      <p className="text-[11px] font-semibold text-foreground">{s.label}</p>
+                      <p className="text-[9px] text-muted-foreground font-mono">{s.type}:{s.id}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    case "simulation":
+      return (
+        <div className="space-y-3">
+          <p className="text-sm text-muted-foreground">Monte Carlo simulation results across {c.simulation.runs.toLocaleString()} runs.</p>
+          <div className="rounded-xl border border-border/40 bg-card/60 p-5">
+            <p className="text-sm font-bold text-foreground mb-3">{c.simulation.expectedOutcome}</p>
+            <div className="grid grid-cols-3 gap-3 mb-4">
+              {[
+                { label: "P10", value: c.simulation.p10, color: "#10b981" },
+                { label: "P50", value: c.simulation.p50, color: "#f59e0b" },
+                { label: "P90", value: c.simulation.p90, color: "#ef4444" },
+              ].map((p) => (
+                <div key={p.label} className="rounded-lg border border-border/30 bg-muted/10 px-3 py-3">
+                  <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: p.color }}>{p.label}</p>
+                  <p className="text-[12px] font-semibold text-foreground mt-1">{p.value}</p>
+                </div>
+              ))}
+            </div>
+            <p className="text-[11px] text-muted-foreground leading-relaxed">{c.simulation.notes}</p>
+          </div>
+        </div>
+      );
+    case "policy":
+      return (
+        <div className="space-y-3">
+          <p className="text-sm text-muted-foreground">Covenant Policy gate evaluating the recommendation against organizational rules.</p>
+          <div className="rounded-xl border border-border/40 bg-card/60 p-5">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-bold text-foreground">Policy verdict</h3>
+              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-400">Approval required</span>
+            </div>
+            <ul className="space-y-2">
+              {c.proof.policyChecks.map((check, i) => (
+                <li key={i} className={cn(
+                  "flex items-start gap-2 rounded-lg border px-3 py-2",
+                  check.passed ? "border-emerald-500/20 bg-emerald-500/5" : "border-amber-500/20 bg-amber-500/5"
+                )}>
+                  {check.passed
+                    ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0 mt-0.5" />
+                    : <AlertTriangle className="w-3.5 h-3.5 text-amber-400 flex-shrink-0 mt-0.5" />}
+                  <div>
+                    <p className="text-[12px] font-semibold text-foreground">{check.label}</p>
+                    {check.note && <p className="text-[11px] text-muted-foreground">{check.note}</p>}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      );
+    case "execution":
+      return (
+        <div className="space-y-3">
+          <p className="text-sm text-muted-foreground">Governed workflow <span className="font-mono text-foreground">{c.execution.workflowId}</span> dispatched after approval.</p>
+          <div className="rounded-xl border border-border/40 bg-card/60 p-5">
+            <ul className="space-y-2">
+              {c.execution.steps.map((step, i) => {
+                const color = step.status === "complete" ? "#10b981" : step.status === "running" ? "#f59e0b" : "#64748b";
+                return (
+                  <li key={i} className="flex items-center justify-between rounded-lg border border-border/30 bg-muted/10 px-3 py-2">
+                    <div className="flex items-center gap-3">
+                      <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: `${color}20` }}>
+                        {step.status === "complete" ? <CheckCircle2 className="w-3.5 h-3.5" style={{ color }} /> : step.status === "running" ? <Loader2 className="w-3.5 h-3.5 animate-spin" style={{ color }} /> : <Clock className="w-3.5 h-3.5" style={{ color }} />}
+                      </div>
+                      <span className="text-[12px] font-semibold text-foreground">{step.label}</span>
+                    </div>
+                    <span className="text-[10px] font-mono uppercase tracking-wider" style={{ color }}>
+                      {step.status}{step.durationMs ? ` · ${step.durationMs}ms` : ""}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </div>
+      );
+    case "proof":
+      return (
+        <div className="space-y-3">
+          <p className="text-sm text-muted-foreground">Immutable proof envelope — open the drawer below for the full attribution chain.</p>
+          <div className="rounded-xl border border-border/40 bg-card/60 p-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {[
+                { label: "Chain ID", value: c.proof.id },
+                { label: "Source system", value: c.proof.sourceSystem },
+                { label: "Model", value: `${c.proof.model ?? "—"}${c.proof.modelVersion ? ` / ${c.proof.modelVersion}` : ""}` },
+                { label: "Review state", value: c.proof.reviewState.replace(/_/g, " ") },
+              ].map((row) => (
+                <div key={row.label} className="rounded-lg border border-border/30 bg-muted/10 px-3 py-2">
+                  <p className="text-[9px] uppercase tracking-wider text-muted-foreground">{row.label}</p>
+                  <p className="text-[11px] font-mono text-foreground">{row.value}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    case "outcome":
+      return (
+        <div className="space-y-3">
+          <p className="text-sm text-muted-foreground">Measured outcome compared to the simulation prediction.</p>
+          <div className="rounded-xl border border-border/40 bg-card/60 p-5">
+            <p className="text-sm font-bold text-foreground mb-2">{c.outcome.actual}</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+              <div className="rounded-lg border border-border/30 bg-muted/10 px-3 py-2">
+                <p className="text-[9px] uppercase tracking-wider text-muted-foreground">Δ vs prediction</p>
+                <p className="text-[11px] font-semibold text-foreground">{c.outcome.predictionDelta}</p>
+              </div>
+              <div className="rounded-lg border border-border/30 bg-muted/10 px-3 py-2">
+                <p className="text-[9px] uppercase tracking-wider text-muted-foreground">Measured at</p>
+                <p className="text-[11px] font-mono text-foreground">{c.outcome.measuredAt}</p>
+              </div>
+              <div className="rounded-lg border border-border/30 bg-muted/10 px-3 py-2">
+                <p className="text-[9px] uppercase tracking-wider text-muted-foreground">Success criteria</p>
+                <p className="text-[11px] text-foreground">{c.outcome.successCriteria}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    case "learning":
+      return (
+        <div className="space-y-3">
+          <p className="text-sm text-muted-foreground">Decision indexed into the calibration memory for future recommendations.</p>
+          <div className="rounded-xl border border-border/40 bg-card/60 p-5">
+            <p className="text-[12px] text-foreground leading-relaxed mb-3">{c.learning.summary}</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <div className="rounded-lg border border-border/30 bg-muted/10 px-3 py-2">
+                <p className="text-[9px] uppercase tracking-wider text-muted-foreground">Calibration</p>
+                <p className="text-[11px] text-foreground">{c.learning.calibrationNote}</p>
+              </div>
+              <div className="rounded-lg border border-border/30 bg-muted/10 px-3 py-2">
+                <p className="text-[9px] uppercase tracking-wider text-muted-foreground">Indexed at</p>
+                <p className="text-[11px] font-mono text-foreground">{c.learning.indexedAt}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    default:
+      return null;
+  }
+}
+
+type ApprovalDecision = "pending" | "approved" | "rejected" | "changes_requested";
+
+function ApprovalActionPanel({ activeCase }: { activeCase: DecisionCase }) {
+  const [decision, setDecision] = useState<ApprovalDecision>("pending");
+  const [note, setNote] = useState("");
+  const ap = activeCase.approval;
+
+  return (
+    <div
+      data-testid="approval-action-panel"
+      className="rounded-xl border border-emerald-500/25 bg-emerald-500/5 p-5 mt-4"
+    >
+      <div className="flex items-center gap-2 mb-3">
+        <ShieldCheck className="w-4 h-4 text-emerald-400" />
+        <h4 className="text-sm font-bold text-foreground">Covenant Policy · {ap.policyName}</h4>
+        <span className="text-[10px] font-mono text-muted-foreground ml-auto">{ap.policyId}</span>
+      </div>
+      <p className="text-[12px] text-muted-foreground leading-relaxed mb-3">{ap.covenantText}</p>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
+        <div className="rounded-lg border border-border/30 bg-card/40 px-3 py-2">
+          <p className="text-[9px] uppercase tracking-wider text-muted-foreground">Risk class</p>
+          <p className="text-[11px] font-semibold text-foreground capitalize">{ap.riskClass.replace("-", " ")}</p>
+        </div>
+        <div className="rounded-lg border border-border/30 bg-card/40 px-3 py-2">
+          <p className="text-[9px] uppercase tracking-wider text-muted-foreground">SLA window</p>
+          <p className="text-[11px] font-semibold text-foreground">{ap.slaWindow}</p>
+        </div>
+        <div className="rounded-lg border border-border/30 bg-card/40 px-3 py-2">
+          <p className="text-[9px] uppercase tracking-wider text-muted-foreground">Required roles</p>
+          <p className="text-[11px] font-semibold text-foreground">{ap.requiredRoles.join(", ")}</p>
+        </div>
+        <div className="rounded-lg border border-border/30 bg-card/40 px-3 py-2">
+          <p className="text-[9px] uppercase tracking-wider text-muted-foreground">Escalation</p>
+          <p className="text-[11px] font-semibold text-foreground">{ap.escalationPath}</p>
+        </div>
+      </div>
+
+      {decision === "pending" ? (
+        <>
+          <textarea
+            data-testid="approval-note"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder="Add an approval note (optional)…"
+            className="w-full text-[12px] bg-card/40 border border-border/30 rounded-lg px-3 py-2 text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:border-emerald-500/40 resize-none"
+            rows={2}
+          />
+          <div className="flex flex-wrap items-center gap-2 mt-3">
+            <button
+              data-testid="approve-action"
+              onClick={() => setDecision("approved")}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/25 transition-colors"
+            >
+              <CheckCircle2 className="w-3.5 h-3.5" /> Approve & continue
+            </button>
+            <button
+              data-testid="request-changes-action"
+              onClick={() => setDecision("changes_requested")}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold bg-amber-500/15 border border-amber-500/30 text-amber-400 hover:bg-amber-500/25 transition-colors"
+            >
+              <MessageSquare className="w-3.5 h-3.5" /> Request changes
+            </button>
+            <button
+              data-testid="reject-action"
+              onClick={() => setDecision("rejected")}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold bg-red-500/15 border border-red-500/30 text-red-400 hover:bg-red-500/25 transition-colors"
+            >
+              <XCircle className="w-3.5 h-3.5" /> Reject
+            </button>
+            <span className="text-[10px] text-muted-foreground ml-auto flex items-center gap-1.5">
+              <Clock className="w-3 h-3" /> Decision logged to proof chain
+            </span>
+          </div>
+        </>
+      ) : (
+        <div
+          data-testid="approval-decision-result"
+          className={cn(
+            "rounded-lg border px-3 py-2.5 flex items-start gap-2",
+            decision === "approved" && "border-emerald-500/30 bg-emerald-500/10",
+            decision === "rejected" && "border-red-500/30 bg-red-500/10",
+            decision === "changes_requested" && "border-amber-500/30 bg-amber-500/10"
+          )}
+        >
+          {decision === "approved" && <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />}
+          {decision === "rejected" && <XCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />}
+          {decision === "changes_requested" && <MessageSquare className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />}
+          <div className="flex-1">
+            <p className="text-[12px] font-semibold text-foreground">
+              {decision === "approved" && "Approved — workflow released to execution"}
+              {decision === "rejected" && "Rejected — recommendation will not execute"}
+              {decision === "changes_requested" && "Changes requested — sent back to recommendation stage"}
+            </p>
+            {note && <p className="text-[11px] text-muted-foreground mt-1">Note: {note}</p>}
+            <button
+              onClick={() => { setDecision("pending"); setNote(""); }}
+              className="text-[10px] text-muted-foreground hover:text-foreground underline mt-1.5"
+            >
+              Reset decision
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function DecisionTheater({ activeCase }: DecisionTheaterProps = {}) {
+  const [currentStage, setCurrentStage] = useState(activeCase?.currentStage ?? 0);
   const [demoMode, setDemoMode] = useState(false);
-  const [dataMode, setDataMode] = useState<DataMode>("live");
+  const [dataMode, setDataMode] = useState<DataMode>(activeCase ? "demo" : "live");
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const engine = useDecisionEngine();
   const liveData = useLiveTheaterData(dataMode === "live");
+
+  useEffect(() => {
+    if (activeCase) {
+      setCurrentStage(activeCase.currentStage);
+      setDataMode("demo");
+    }
+  }, [activeCase?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const stage = LOOP_STAGES[currentStage]!;
   const StageComponent = STAGE_COMPONENTS[stage.id];
@@ -195,32 +570,39 @@ export default function DecisionTheater() {
               </span>
             )}
 
-            <div className="flex items-center rounded-lg border border-border/30 bg-muted/10 p-0.5 gap-0.5">
-              <button
-                onClick={() => setDataMode("demo")}
-                className={cn(
-                  "flex items-center gap-1 px-2.5 py-1.5 rounded-md text-[11px] font-semibold transition-all",
-                  dataMode === "demo"
-                    ? "bg-muted/40 text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
+            {activeCase ? (
+              <span className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[11px] font-semibold bg-cyan-500/10 border border-cyan-500/25 text-cyan-300">
                 <Database className="w-3 h-3" />
-                Demo
-              </button>
-              <button
-                onClick={() => setDataMode("live")}
-                className={cn(
-                  "flex items-center gap-1 px-2.5 py-1.5 rounded-md text-[11px] font-semibold transition-all",
-                  dataMode === "live"
-                    ? "bg-emerald-500/15 text-emerald-400 shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <Wifi className="w-3 h-3" />
-                Live
-              </button>
-            </div>
+                Case mode · {activeCase.id}
+              </span>
+            ) : (
+              <div className="flex items-center rounded-lg border border-border/30 bg-muted/10 p-0.5 gap-0.5">
+                <button
+                  onClick={() => setDataMode("demo")}
+                  className={cn(
+                    "flex items-center gap-1 px-2.5 py-1.5 rounded-md text-[11px] font-semibold transition-all",
+                    dataMode === "demo"
+                      ? "bg-muted/40 text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <Database className="w-3 h-3" />
+                  Demo
+                </button>
+                <button
+                  onClick={() => setDataMode("live")}
+                  className={cn(
+                    "flex items-center gap-1 px-2.5 py-1.5 rounded-md text-[11px] font-semibold transition-all",
+                    dataMode === "live"
+                      ? "bg-emerald-500/15 text-emerald-400 shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <Wifi className="w-3 h-3" />
+                  Live
+                </button>
+              </div>
+            )}
 
             <button
               onClick={() => {
@@ -316,8 +698,19 @@ export default function DecisionTheater() {
               auditTotal={liveData.auditTotal}
               engine={engine}
             />
+          ) : activeCase ? (
+            <CaseStageRenderer activeCase={activeCase} stageId={stage.id} />
           ) : (
             <StageComponent engine={engine} />
+          )}
+
+          {activeCase && stage.id === "policy" && (
+            <ApprovalActionPanel activeCase={activeCase} />
+          )}
+          {activeCase && stage.id === "proof" && (
+            <div data-testid="proof-drawer-inline" className="mt-4">
+              <ProofDrawer proof={activeCase.proof} defaultOpen />
+            </div>
           )}
         </m.div>
       </AnimatePresence>
