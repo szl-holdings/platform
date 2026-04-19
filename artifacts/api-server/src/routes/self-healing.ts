@@ -5,6 +5,12 @@ import { db, selfHealingPatternsTable, selfHealingRunsTable } from "@szl-holding
 import { and, desc, eq, sql } from "drizzle-orm";
 
 import { anyQuerySchema, jsonObjectBodySchema, validateBody, validateQuery } from "../lib/validation";
+import {
+  ensurePatternsSeeded,
+  approveRemediation,
+  failRemediation,
+  findActiveByRunKey,
+} from "../lib/self-healing-runtime";
 const router: IRouter = Router();
 
 type RemediationStatus = "executing" | "pending_approval" | "completed" | "failed" | "queued";
@@ -182,13 +188,10 @@ function shouldSeedDemoData(): boolean {
 }
 
 async function ensureSeeded(): Promise<void> {
+  await ensurePatternsSeeded();
   if (!shouldSeedDemoData()) return;
   if (seedPromise) return seedPromise;
   seedPromise = (async () => {
-    const existingPatterns = await db.select({ id: selfHealingPatternsTable.id }).from(selfHealingPatternsTable).limit(1);
-    if (existingPatterns.length === 0) {
-      await db.insert(selfHealingPatternsTable).values(SEED_PATTERNS).onConflictDoNothing();
-    }
     const existingRuns = await db.select({ id: selfHealingRunsTable.id }).from(selfHealingRunsTable).limit(1);
     if (existingRuns.length === 0) {
       const now = Date.now();
@@ -413,6 +416,52 @@ router.get("/self-healing/runs", validateQuery(anyQuerySchema), authMiddleware({
     sendSuccess(res, { runs, total });
   } catch (err) {
     handleRouteError(res, err, "Failed to fetch self-healing runs");
+  }
+});
+
+router.post("/self-healing/runs/:id/approve", validateBody(jsonObjectBodySchema), authMiddleware({ required: true }), async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params as { id: string };
+    const body = (req.body ?? {}) as { approver?: string };
+    const approver = (body.approver?.trim() || (req as Request & { user?: { email?: string; id?: string } }).user?.email || (req as Request & { user?: { email?: string; id?: string } }).user?.id) ?? "operator";
+
+    const active = findActiveByRunKey(id);
+    if (!active) {
+      const row = await db.select({ status: selfHealingRunsTable.status }).from(selfHealingRunsTable).where(eq(selfHealingRunsTable.runKey, id)).limit(1);
+      if (row.length === 0) { sendNotFound(res, "Run"); return; }
+      res.status(409).json({ success: false, error: { code: "INVALID_STATE", message: `Run is ${row[0].status}; only pending_approval runs can be approved.` } });
+      return;
+    }
+    const ok = await approveRemediation(active.patternKey, active.service, approver);
+    if (!ok) {
+      res.status(409).json({ success: false, error: { code: "INVALID_STATE", message: "Run is no longer pending approval." } });
+      return;
+    }
+    const runs = await loadRuns({ runKey: id, limit: 1 });
+    sendSuccess(res, { run: runs[0] ?? null });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to approve self-healing run");
+  }
+});
+
+router.post("/self-healing/runs/:id/reject", validateBody(jsonObjectBodySchema), authMiddleware({ required: true }), async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params as { id: string };
+    const body = (req.body ?? {}) as { reason?: string };
+    const reason = body.reason?.trim() || "Rejected by operator";
+
+    const active = findActiveByRunKey(id);
+    if (!active) {
+      const row = await db.select({ status: selfHealingRunsTable.status }).from(selfHealingRunsTable).where(eq(selfHealingRunsTable.runKey, id)).limit(1);
+      if (row.length === 0) { sendNotFound(res, "Run"); return; }
+      res.status(409).json({ success: false, error: { code: "INVALID_STATE", message: `Run is ${row[0].status}; only active runs can be rejected.` } });
+      return;
+    }
+    await failRemediation(active.patternKey, active.service, reason);
+    const runs = await loadRuns({ runKey: id, limit: 1 });
+    sendSuccess(res, { run: runs[0] ?? null });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to reject self-healing run");
   }
 });
 

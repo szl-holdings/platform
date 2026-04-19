@@ -4,6 +4,17 @@ import { LRUCache } from "lru-cache";
 import { publish, WS_CHANNELS } from "./websocket";
 import { logger } from "./logger";
 import { sendEmail, hasEmailProviderConfigured } from "./email";
+import {
+  startRemediation,
+  advanceRemediation,
+  completeRemediation,
+  failRemediation,
+  hasActiveRun,
+  isExecutionExpired,
+  listActiveRuns,
+  ensurePatternsSeeded,
+  recoverActiveRuns,
+} from "./self-healing-runtime";
 
 const POLL_INTERVAL_MS = 5 * 60_000;
 const SIGNAL_COOLDOWN_MS = 10 * 60_000;
@@ -187,6 +198,143 @@ async function pruneOldSignals(): Promise<void> {
   }
 }
 
+interface RemediationTrigger {
+  patternKey: string;
+  service: string;
+  triggerSignal: string;
+  plannedSteps: { id: string; action: string }[];
+  requireApproval?: boolean;
+  approver?: string;
+}
+
+function detectRemediationTriggers(health: HealthDetailedResponse): RemediationTrigger[] {
+  const triggers: RemediationTrigger[] = [];
+
+  const dbCheck = health.checks["database"];
+  if (dbCheck?.status === "unreachable" || dbCheck?.status === "unavailable") {
+    triggers.push({
+      patternKey: "p3",
+      service: "postgres-primary",
+      triggerSignal: `Primary DB ${dbCheck.status} via /api/health/detailed`,
+      plannedSteps: [
+        { id: "s1", action: "Promote replica to primary" },
+        { id: "s2", action: "Update DNS records" },
+        { id: "s3", action: "Validate connection pool" },
+      ],
+      requireApproval: true,
+      approver: "ops-manager",
+    });
+  }
+
+  const jobQueueCheck = health.checks["job_queue"];
+  if (jobQueueCheck?.status === "backpressure") {
+    triggers.push({
+      patternKey: "p4",
+      service: "job-queue",
+      triggerSignal: `Job queue backpressure: ${jobQueueCheck.details ?? "details unavailable"}`,
+      plannedSteps: [
+        { id: "s1", action: "Pause message producers" },
+        { id: "s2", action: "Drain backlog queue" },
+        { id: "s3", action: "Flush dead letter queue" },
+        { id: "s4", action: "Resume producers & validate" },
+      ],
+    });
+  }
+
+  const memory = health.memory;
+  if (memory && memory.heapTotalMb > 0) {
+    const heapPct = (memory.heapUsedMb / memory.heapTotalMb) * 100;
+    if (heapPct > 90) {
+      triggers.push({
+        patternKey: "p1",
+        service: "api-server",
+        triggerSignal: `Heap critical at ${heapPct.toFixed(0)}% (${memory.heapUsedMb}MB / ${memory.heapTotalMb}MB)`,
+        plannedSteps: [
+          { id: "s1", action: "Drain existing connections" },
+          { id: "s2", action: "Signal graceful shutdown" },
+          { id: "s3", action: "Restart pod & await ready state" },
+          { id: "s4", action: "Run health check suite" },
+          { id: "s5", action: "Re-route traffic and verify" },
+        ],
+        requireApproval: true,
+        approver: "ops-manager",
+      });
+    }
+  }
+
+  const telemetryCheck = health.checks["telemetry"];
+  if (telemetryCheck?.status === "elevated_errors") {
+    const details = telemetryCheck.details ?? "";
+    const p95Match = details.match(/p95=(\d+)ms/);
+    const p95 = p95Match ? parseInt(p95Match[1]) : null;
+    if (p95 != null && p95 > 1000) {
+      triggers.push({
+        patternKey: "p2",
+        service: "api-server",
+        triggerSignal: `Sustained API p95 latency at ${p95}ms (>1000ms threshold)`,
+        plannedSteps: [
+          { id: "s1", action: "Scale +2 replicas via HPA" },
+          { id: "s2", action: "Verify pod readiness" },
+          { id: "s3", action: "Alert on-call engineer" },
+        ],
+        requireApproval: true,
+        approver: "ops-manager",
+      });
+    }
+  }
+
+  return triggers;
+}
+
+async function reconcileSelfHealing(health: HealthDetailedResponse): Promise<void> {
+  try {
+    await ensurePatternsSeeded();
+  } catch (err) {
+    logger.warn({ err }, "Self-monitor: failed to seed self-healing patterns");
+    return;
+  }
+
+  const triggers = detectRemediationTriggers(health);
+  const triggerKeys = new Set(triggers.map(t => `${t.patternKey}::${t.service}`));
+
+  for (const t of triggers) {
+    const key = `${t.patternKey}::${t.service}`;
+    const wasActive = hasActiveRun(t.patternKey, t.service);
+    if (!wasActive) {
+      await startRemediation(t);
+    } else if (!t.requireApproval) {
+      // Condition still present — either advance the next planned step on
+      // this cycle, or, if the run has been executing past the timeout,
+      // mark it failed so the row reflects a real outcome rather than
+      // staying executing forever.
+      if (isExecutionExpired(t.patternKey, t.service)) {
+        await failRemediation(
+          t.patternKey,
+          t.service,
+          `Remediation exceeded execution window — condition still present after timeout`,
+        );
+      } else {
+        await advanceRemediation(t.patternKey, t.service);
+      }
+    }
+    triggerKeys.add(key);
+  }
+
+  // Any active runs whose conditions are no longer present have recovered.
+  // We only auto-complete runs that were actually executing — pending-approval
+  // runs are left alone so that an operator must explicitly approve, reject, or
+  // cancel them. Auto-completing a never-started approval-required run would
+  // fabricate success and inflate MTTR/success-rate stats.
+  for (const active of listActiveRuns()) {
+    const key = `${active.patternKey}::${active.service}`;
+    if (triggerKeys.has(key)) continue;
+    if (active.awaitingApproval) continue;
+    await completeRemediation(active.patternKey, active.service, {
+      approver: "self-healing-runtime",
+    });
+  }
+}
+
 async function runMonitoringCycle(): Promise<void> {
   logger.debug("Self-monitoring: polling /api/health/detailed");
   pruneCounter++;
@@ -359,6 +507,8 @@ async function runMonitoringCycle(): Promise<void> {
   if (overallStatus === "healthy" && dbCheck?.status === "connected") {
     logger.debug({ uptime: Math.round(uptime) }, "Self-monitoring: health check passed — all systems nominal");
   }
+
+  await reconcileSelfHealing(health);
 }
 
 export function startSelfMonitoring(): void {
@@ -366,6 +516,13 @@ export function startSelfMonitoring(): void {
     logger.warn("Self-monitoring: already running, skipping start");
     return;
   }
+
+  // Recover any open self-healing runs (executing/pending_approval) that
+  // were left in the DB by a previous process so step transitions and
+  // completion continue from where they were left.
+  recoverActiveRuns().catch((err) =>
+    logger.warn({ err }, "Self-monitor: self-healing recovery failed"),
+  );
 
   setTimeout(async () => {
     try {
