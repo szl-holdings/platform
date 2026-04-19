@@ -2867,7 +2867,11 @@ importers:
         specifier: 19.2.14
         version: 19.2.14
 
-  lib/workflow-engine: {}
+  lib/workflow-engine:
+    dependencies:
+      '@szl-holdings/forge-runtime':
+        specifier: workspace:*
+        version: link:../forge-runtime
 
   lib/worldline:
     dependencies:

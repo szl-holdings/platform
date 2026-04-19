@@ -551,6 +551,7 @@ export default function VesselsSettings() {
 
   const panels: Record<SettingsSection, React.ReactNode> = {
     account: <AccountPanel />,
+    workspace: <PreferencesPanel />,
     team: <TeamPanel />,
     notifications: <NotificationsPanel />,
     integrations: <IntegrationsPanel />,

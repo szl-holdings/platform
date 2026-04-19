@@ -184,7 +184,9 @@ export default function ThreatTwinView() {
             <div className="p-5">
               <ProofEnvelope
                 confidence={0.91}
-                freshness="live"
+                timestamp={new Date().toISOString()}
+                evidence={[]}
+                autonomyMode="recommend"
                 policyState="requires-approval"
               >
                 <div className="mt-4 space-y-4">

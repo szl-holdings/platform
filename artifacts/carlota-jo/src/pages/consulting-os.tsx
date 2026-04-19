@@ -343,6 +343,7 @@ export default function ConsultingOS() {
                   <ProofEnvelope
                     title={insight.title}
                     confidence={i === 0 ? 78 : i === 1 ? 82 : 74}
+                    timestamp={new Date().toISOString()}
                     policyState="allowed"
                     autonomyMode={autonomyMode}
                     onAutonomyChange={setAutonomyMode}

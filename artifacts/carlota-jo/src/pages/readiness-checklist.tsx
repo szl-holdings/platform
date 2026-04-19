@@ -159,7 +159,7 @@ export default function ReadinessChecklistPage() {
                 confidence={rec.confidence}
                 timestamp={new Date().toISOString()}
                 evidence={[{ id: 'ev-1', type: 'signal', label: 'Sensor Network' }]}
-                policyState={rec.policyState}
+                policyState={rec.policyState === "cleared" ? "allowed" : rec.policyState === "flagged" ? "blocked" : "requires-approval"}
                 autonomyMode="recommend"
               >
                 <div className="space-y-4">

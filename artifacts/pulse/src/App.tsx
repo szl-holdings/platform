@@ -196,7 +196,7 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
     if (user) {
       const userId = String(user.id);
       const email = user.email ?? undefined;
-      const name = user.displayName ?? user.name ?? undefined;
+      const name = user.displayName ?? undefined;
       identifyAnalyticsUser({ id: userId, email, name });
       setSentryUser({ id: userId, email, username: name });
     } else {

@@ -204,5 +204,7 @@ export const insertVesselCommandWorkflowSchema = createInsertSchema(vesselsComma
 export type InsertVesselCommandWorkflow = z.infer<typeof insertVesselCommandWorkflowSchema>;
 export type VesselCommandWorkflow = typeof vesselsCommandWorkflowsTable.$inferSelect;
 
-// Bills of Lading (BoL) tables live in ./vessels_bol.ts and are re-exported
-// from ./index.ts. Do not redefine them here — duplicate exports break esbuild.
+// ─── Bills of Lading (Blockchain BoL) ──────────────────────────────────────
+// Canonical Bills of Lading and BoL Chain Event tables live in
+// `./vessels_bol.ts` and are re-exported via the schema barrel (./index.ts).
+// Do not redefine them here — duplicate exports break esbuild.

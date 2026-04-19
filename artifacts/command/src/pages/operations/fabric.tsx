@@ -143,7 +143,7 @@ function SignalsPanel({ signals, onDrill }: { signals: Signal[]; onDrill: (sig: 
   return (
     <Panel>
       <PanelHeader icon={Radio} title="Active Signals" count={signals.length} accent="#0ea5e9" />
-      <div className="flex-1 overflow-y-auto divide-y" style={{ divideColor: "rgba(255,255,255,0.04)" }}>
+      <div className="flex-1 overflow-y-auto divide-y">
         {signals.map((s) => {
           const sc = SEVERITY_COLORS[s.severity] ?? "#64748b";
           const pc = PRODUCT_COLORS[s.product] ?? "#64748b";
@@ -201,7 +201,7 @@ function RunsPanel({ runs, onDrill }: { runs: Run[]; onDrill: (r: Run) => void }
   return (
     <Panel>
       <PanelHeader icon={Activity} title="Active Runs" count={runs.filter(r => r.status !== "completed").length} accent="#d4a054" />
-      <div className="flex-1 overflow-y-auto divide-y" style={{ divideColor: "rgba(255,255,255,0.04)" }}>
+      <div className="flex-1 overflow-y-auto divide-y">
         {runs.map((r) => {
           const sc = STATUS_COLORS[r.status] ?? "#64748b";
           const pc = PRODUCT_COLORS[r.product] ?? "#64748b";
@@ -253,7 +253,7 @@ function AlertsPanel({ alerts, onDrill }: { alerts: Alert[]; onDrill: (a: Alert)
       <PanelHeader icon={Bell} title="Alerts" count={open.length} accent="#ef4444"
         right={<Link href="/operations/alerts"><a className="text-[10px] flex items-center gap-1 hover:opacity-70 transition-opacity" style={{ color: "rgba(255,255,255,0.3)" }}>All <ChevronRight className="w-3 h-3" /></a></Link>}
       />
-      <div className="flex-1 overflow-y-auto divide-y" style={{ divideColor: "rgba(255,255,255,0.04)" }}>
+      <div className="flex-1 overflow-y-auto divide-y">
         {alerts.map((a) => {
           const sc = SEVERITY_COLORS[a.severity] ?? "#64748b";
           const pc = PRODUCT_COLORS[a.product] ?? "#64748b";
@@ -325,7 +325,7 @@ function ApprovalsPanel({ approvals, onDrill }: { approvals: Approval[]; onDrill
         <PanelHeader icon={CheckSquare} title="Approvals Waiting" count={approvals.length} accent="#f59e0b"
           right={<Link href="/operations/approvals"><a className="text-[10px] flex items-center gap-1 hover:opacity-70 transition-opacity" style={{ color: "rgba(255,255,255,0.3)" }}>Review <ChevronRight className="w-3 h-3" /></a></Link>}
         />
-        <div className="flex-1 overflow-y-auto divide-y" style={{ divideColor: "rgba(255,255,255,0.04)" }}>
+        <div className="flex-1 overflow-y-auto divide-y">
           {approvals.length === 0 && (
             <div className="flex items-center justify-center h-20 text-xs" style={{ color: "rgba(255,255,255,0.25)" }}>No pending approvals</div>
           )}
@@ -387,7 +387,7 @@ function ConnectorsPanel({ connectors }: { connectors: Connector[] }) {
       <PanelHeader icon={Network} title="Connector Health" accent="#0ea5e9"
         right={degraded.length > 0 ? <Badge label={`${degraded.length} degraded`} color="#f97316" /> : <Badge label="All healthy" color="#22c55e" />}
       />
-      <div className="flex-1 overflow-y-auto divide-y" style={{ divideColor: "rgba(255,255,255,0.04)" }}>
+      <div className="flex-1 overflow-y-auto divide-y">
         {connectors.map((c) => {
           const sc = STATUS_COLORS[c.status] ?? "#22c55e";
           const pc = PRODUCT_COLORS[c.product] ?? "#64748b";
@@ -440,7 +440,7 @@ function SystemHealthPanel({ health }: { health: SystemHealth | null }) {
       <PanelHeader icon={Cpu} title="System Health" accent="#22c55e"
         right={degraded > 0 ? <Badge label={`${degraded} issue${degraded > 1 ? "s" : ""}`} color="#f97316" /> : <Badge label="All systems go" color="#22c55e" />}
       />
-      <div className="flex-1 overflow-y-auto divide-y" style={{ divideColor: "rgba(255,255,255,0.04)" }}>
+      <div className="flex-1 overflow-y-auto divide-y">
         {entries.map(([key, svc]) => {
           const sc = STATUS_COLORS[svc.status] ?? "#22c55e";
           const Icon = SYS_ICONS[key] ?? Server;

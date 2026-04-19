@@ -24,7 +24,7 @@ interface GraphNode {
   description?: string;
   capabilities?: string[];
   secondaryLinks?: SecondaryLink[];
-  status?: "live" | "development";
+  status?: "live" | "development" | "alpha" | "beta" | "deferred";
 }
 
 const CAPABILITIES: Record<string, string[]> = {

@@ -65,6 +65,7 @@ export default function VesselsIntelligence() {
         <ProofEnvelope
           title="Sanctions Monitor — NER Entity Detection"
           confidence={sanctionsArray.length > 0 ? 88 : 0}
+          timestamp={new Date().toISOString()}
           policyState={allEntities.length > 0 ? "requires-approval" : "allowed"}
           policyReason={allEntities.length > 0 ? "Sanctioned entity detection requires compliance officer review before action" : undefined}
           autonomyMode={autonomyMode}
@@ -98,6 +99,7 @@ export default function VesselsIntelligence() {
         <ProofEnvelope
           title={`Route Safety Analysis — ${selectedRoute}`}
           confidence={routeAnalysis.data ? 81 : 0}
+          timestamp={new Date().toISOString()}
           policyState="allowed"
           autonomyMode={autonomyMode}
           onAutonomyChange={setAutonomyMode}

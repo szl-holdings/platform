@@ -1,5 +1,5 @@
 import { type ApiFetchOptions } from "@szl-holdings/shared-ui/api-fetch";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, type ReactElement } from "react";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import {
   Zap, RefreshCw, CheckCircle, Clock, AlertTriangle, Shield, ChevronRight,
@@ -31,7 +31,7 @@ function atlasApi<T>(path: string, opts?: ApiFetchOptions): Promise<T> {
 }
 
 const SEV_COLOR: Record<Severity, string> = { info: "#64748b", low: "#22c55e", medium: "#f59e0b", high: "#f97316", critical: "#ef4444" };
-const STATUS_ICON: Record<string, JSX.Element> = {
+const STATUS_ICON: Record<string, ReactElement> = {
   completed: <CheckCircle className="w-3 h-3" style={{ color: "#22c55e" }} />,
   failed: <XCircle className="w-3 h-3" style={{ color: "#ef4444" }} />,
   running: <Activity className="w-3 h-3" style={{ color: ACCENT }} />,

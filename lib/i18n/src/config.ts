@@ -1,4 +1,4 @@
-import i18n from "i18next";
+import i18n, { type i18n as I18nInstance } from "i18next";
 import { initReactI18next } from "react-i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
 
@@ -23,7 +23,7 @@ export interface I18nConfig {
   supportedLocales?: SupportedLocale[];
 }
 
-export function createI18n(config: I18nConfig) {
+export function createI18n(config: I18nConfig): I18nInstance {
   const {
     namespace,
     resources,

@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { AlertTriangle, Anchor, Shield, Clock, User, CheckCircle, ArrowUpRight } from "lucide-react";
 import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
-import { fleetExceptions, type FleetException } from "@/data/fleet-twin";
+import { useFleetExceptions } from "@/hooks/use-vessels-data";
+
+type FleetException = ReturnType<typeof useFleetExceptions>["fleetExceptions"][number];
 
 const ACCENT = "hsl(205 70% 50%)";
 
@@ -51,7 +53,7 @@ function ExceptionCard({ exc, onResolve }: { exc: FleetException; onResolve: (id
             <div className="text-sm font-semibold" style={{ color: "rgba(255,255,255,0.9)" }}>
               {TYPE_LABELS[exc.type] ?? exc.type.replace(/_/g, " ")}
             </div>
-            <div className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.4)" }}>{exc.entityName}</div>
+            <div className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.4)" }}>{exc.vesselName}</div>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -66,7 +68,7 @@ function ExceptionCard({ exc, onResolve }: { exc: FleetException; onResolve: (id
       <p className="text-sm mb-3" style={{ color: "rgba(255,255,255,0.55)" }}>{exc.description}</p>
       <div className="flex items-center gap-3 text-xs mb-3" style={{ color: "rgba(255,255,255,0.3)" }}>
         <span className="flex items-center gap-1"><Clock size={10} />Detected {relTime(exc.detectedAt)}</span>
-        {exc.assignedTo && <span className="flex items-center gap-1"><User size={10} />{exc.assignedTo}</span>}
+        {exc.owner && exc.owner !== "—" && <span className="flex items-center gap-1"><User size={10} />{exc.owner}</span>}
       </div>
       {exc.status !== "resolved" && (
         <div className="flex gap-2">
@@ -91,17 +93,19 @@ export default function ExceptionQueue() {
   const [resolved, setResolved] = useState<Set<string>>(new Set());
   const [filter, setFilter] = useState("open");
 
-  const exceptions = fleetExceptions.map(e => ({
+  const { fleetExceptions } = useFleetExceptions();
+
+  const exceptions = fleetExceptions.map((e: FleetException) => ({
     ...e,
-    status: resolved.has(e.id) ? "resolved" as const : e.status,
+    status: resolved.has(e.id) ? ("resolved" as const) : e.status,
   }));
 
-  const displayed = exceptions.filter(e =>
+  const displayed = exceptions.filter((e: FleetException) =>
     filter === "all" || (filter === "open" && e.status !== "resolved") || e.status === filter
   );
 
-  const openCount = exceptions.filter(e => e.status !== "resolved").length;
-  const criticalCount = exceptions.filter(e => e.severity === "critical" && e.status !== "resolved").length;
+  const openCount = exceptions.filter((e: FleetException) => e.status !== "resolved").length;
+  const criticalCount = exceptions.filter((e: FleetException) => e.severity === "critical" && e.status !== "resolved").length;
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
@@ -125,7 +129,7 @@ export default function ExceptionQueue() {
         {[
           { label: "Open", value: openCount, color: "#c04a2a" },
           { label: "Critical", value: criticalCount, color: "#f87171" },
-          { label: "Investigating", value: exceptions.filter(e => e.status === "investigating").length, color: "#c08a2c" },
+          { label: "Acknowledged", value: exceptions.filter((e: FleetException) => e.status === "acknowledged").length, color: "#c08a2c" },
           { label: "Resolved", value: exceptions.filter(e => e.status === "resolved").length, color: "#40856a" },
         ].map(m => (
           <div key={m.label} className="rounded-xl border p-4" style={{ background: "rgba(255,255,255,0.02)", borderColor: "rgba(255,255,255,0.06)" }}>

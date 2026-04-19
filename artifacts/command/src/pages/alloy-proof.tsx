@@ -305,7 +305,7 @@ export function AlloyProofPage() {
 
   return (
     <div style={{ minHeight: "100vh", background: "#020817", color: "#e2e8f0", fontFamily: "'Inter', system-ui, sans-serif" }}>
-      <EcosystemNav currentApp="command" />
+      <EcosystemNav currentAppId="command" currentAppName="Unified Command" />
       <div style={{ maxWidth: 900, margin: "0 auto", padding: "32px 24px" }}>
         <div style={{ marginBottom: 28 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>

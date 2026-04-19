@@ -501,7 +501,9 @@ export default function PolicyManagerPage() {
               style={{ background: meta.bg, border: `1px solid ${meta.border}` }}
             >
               <div className="flex items-center gap-1.5">
-                <meta.Icon className="w-3.5 h-3.5" style={{ color: meta.color }} />
+                <span style={{ color: meta.color, display: "inline-flex" }}>
+                  <meta.Icon className="w-3.5 h-3.5" />
+                </span>
                 <span className="text-[10px] font-semibold" style={{ color: meta.color }}>{meta.label}</span>
               </div>
               <div className="text-[18px] font-bold font-mono" style={{ color: meta.color }}>{count}</div>

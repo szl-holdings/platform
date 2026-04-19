@@ -225,7 +225,11 @@ function LiveFleetCommandVisual() {
 
   const liveAlerts: DemoAlert[] = fleetExceptions.slice(0, 4).map((e, i) => ({
     id: `ALT-${String(i + 1).padStart(3, "0")}`,
-    severity: (e.severity === "critical" || e.severity === "high") ? "critical" : (e.severity === "medium") ? "warn" : "info",
+    severity: ((): "critical" | "warn" | "info" => {
+      if (e.severity === "critical" || e.severity === "high") return "critical";
+      if (e.severity === "watch") return "warn";
+      return "info";
+    })(),
     msg: e.title ?? "Fleet exception detected",
     vessel: e.vesselName ?? "Unknown vessel",
     time: e.detectedAt ? `${Math.max(1, Math.round((Date.now() - new Date(e.detectedAt).getTime()) / 60000))}m ago` : "—",

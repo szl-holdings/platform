@@ -293,6 +293,7 @@ export default function MarketIntelligence() {
                 <ProofEnvelope
                   title={`High Opportunity Zone — ${selectedSubmarket.name}`}
                   confidence={selectedSubmarket.heat}
+                  timestamp={new Date().toISOString()}
                   policyState="allowed"
                   autonomyMode={autonomyMode}
                   onAutonomyChange={setAutonomyMode}
@@ -310,6 +311,7 @@ export default function MarketIntelligence() {
                 <ProofEnvelope
                   title={`Elevated Vacancy Risk — ${selectedSubmarket.name}`}
                   confidence={70}
+                  timestamp={new Date().toISOString()}
                   policyState="requires-approval"
                   policyReason="High vacancy submarkets require investment committee sign-off before capital deployment"
                   autonomyMode={autonomyMode}
