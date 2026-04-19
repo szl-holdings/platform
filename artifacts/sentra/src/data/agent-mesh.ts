@@ -65,6 +65,8 @@ export interface MeshExposure {
   status: "open" | "fix-pending" | "resolved";
 }
 
+export type EnforcementMode = "log-only" | "block" | "quarantine";
+
 export interface ContainmentRule {
   id: string;
   name: string;
@@ -76,6 +78,27 @@ export interface ContainmentRule {
   tier: "critical" | "elevated" | "standard";
   violationCount: number;
   lastEvaluatedAt: string;
+  enforcementMode: EnforcementMode;
+  pendingModeChange?: {
+    requestedMode: EnforcementMode;
+    requestedBy: string;
+    requestedAt: string;
+    guardianApprovalId: string;
+  };
+}
+
+export interface GatewayEvent {
+  id: string;
+  ruleId: string;
+  agentId: string;
+  mcpServerId: string;
+  tool: string;
+  egressDomain?: string;
+  decision: "allowed" | "logged" | "blocked" | "quarantined";
+  reason: string;
+  enforcementMode: EnforcementMode;
+  linkedExposureId?: string;
+  occurredAt: string;
 }
 
 export interface MeshDriftSnapshot {
@@ -111,6 +134,18 @@ export interface AgentMeshState {
   containmentRules: ContainmentRule[];
   driftSnapshots: MeshDriftSnapshot[];
   resilienceIndex: MeshResilienceIndex;
+  gateway: McpGatewayConfig;
+  gatewayEvents: GatewayEvent[];
+}
+
+export interface McpGatewayConfig {
+  endpoint: string;
+  status: "online" | "degraded" | "offline";
+  uptimeSeconds: number;
+  callsLast24h: number;
+  blockedLast24h: number;
+  quarantinedLast24h: number;
+  averageLatencyMs: number;
 }
 
 const now = new Date();
@@ -368,6 +403,7 @@ export const agentMesh: AgentMeshState = {
       tier: "standard",
       violationCount: 2,
       lastEvaluatedAt: minsAgo(5),
+      enforcementMode: "log-only",
     },
     {
       id: "rule-cursor-elevated",
@@ -380,6 +416,7 @@ export const agentMesh: AgentMeshState = {
       tier: "elevated",
       violationCount: 0,
       lastEvaluatedAt: minsAgo(8),
+      enforcementMode: "block",
     },
     {
       id: "rule-codex-restricted",
@@ -392,6 +429,13 @@ export const agentMesh: AgentMeshState = {
       tier: "critical",
       violationCount: 3,
       lastEvaluatedAt: hoursAgo(2),
+      enforcementMode: "quarantine",
+      pendingModeChange: {
+        requestedMode: "block",
+        requestedBy: "ops-on-call@szl",
+        requestedAt: minsAgo(18),
+        guardianApprovalId: "approval-mcp-gw-c1",
+      },
     },
   ],
 
@@ -454,6 +498,93 @@ export const agentMesh: AgentMeshState = {
         ],
       },
       linkedExposureIds: ["exp-005"],
+    },
+  ],
+
+  gateway: {
+    endpoint: "https://mcp-gateway.sentra.szl.local/v1/proxy",
+    status: "online",
+    uptimeSeconds: 86_400 * 7 + 3_600 * 4,
+    callsLast24h: 24_318,
+    blockedLast24h: 142,
+    quarantinedLast24h: 9,
+    averageLatencyMs: 6,
+  },
+
+  gatewayEvents: [
+    {
+      id: "gw-evt-001",
+      ruleId: "rule-codex-restricted",
+      agentId: "agent-codex-cli",
+      mcpServerId: "mcp-unknown-ext",
+      tool: "scrape_page",
+      egressDomain: "collect.ext-scraper.io",
+      decision: "quarantined",
+      reason: "MCP server not in allowlist · egress domain unallowed",
+      enforcementMode: "quarantine",
+      linkedExposureId: "exp-002",
+      occurredAt: minsAgo(4),
+    },
+    {
+      id: "gw-evt-002",
+      ruleId: "rule-codex-restricted",
+      agentId: "agent-codex-cli",
+      mcpServerId: "mcp-unknown-ext",
+      tool: "collect_context",
+      egressDomain: "telemetry.scraper-cdn.net",
+      decision: "quarantined",
+      reason: "Agent revoked from MCP server after containment trigger",
+      enforcementMode: "quarantine",
+      linkedExposureId: "exp-002",
+      occurredAt: minsAgo(11),
+    },
+    {
+      id: "gw-evt-003",
+      ruleId: "rule-cursor-elevated",
+      agentId: "agent-cursor-composer",
+      mcpServerId: "mcp-github",
+      tool: "delete_repository",
+      egressDomain: "api.github.com",
+      decision: "blocked",
+      reason: "Tool not in allowlist for elevated tier",
+      enforcementMode: "block",
+      occurredAt: minsAgo(27),
+    },
+    {
+      id: "gw-evt-004",
+      ruleId: "rule-claude-standard",
+      agentId: "agent-claude-main",
+      mcpServerId: "mcp-filesystem",
+      tool: "read_file",
+      decision: "logged",
+      reason: "Read path ~/.ssh/id_rsa outside allowed scope (log-only mode)",
+      enforcementMode: "log-only",
+      linkedExposureId: "exp-004",
+      occurredAt: minsAgo(33),
+    },
+    {
+      id: "gw-evt-005",
+      ruleId: "rule-cursor-elevated",
+      agentId: "agent-cursor-composer",
+      mcpServerId: "mcp-github",
+      tool: "create_pull_request",
+      egressDomain: "api.github.com",
+      decision: "allowed",
+      reason: "Matches policy",
+      enforcementMode: "block",
+      occurredAt: minsAgo(41),
+    },
+    {
+      id: "gw-evt-006",
+      ruleId: "rule-codex-restricted",
+      agentId: "agent-codex-cli",
+      mcpServerId: "mcp-brave-search",
+      tool: "brave_web_search",
+      egressDomain: "api.search.brave.com",
+      decision: "quarantined",
+      reason: "Egress domain unallowed for critical tier",
+      enforcementMode: "quarantine",
+      occurredAt: hoursAgo(1),
     },
   ],
 

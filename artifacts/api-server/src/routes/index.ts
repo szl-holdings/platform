@@ -27,6 +27,7 @@ import * as domainAtlas from "./groups/domain-atlas";
 import * as graph from "./groups/graph";
 import * as guardian from "./groups/guardian";
 import trustProvenanceRouter from "./trust-provenance";
+import mcpGatewayRouter from "./mcp-gateway";
 import tracesRouter from "./traces";
 import reflectionsRouter from "./reflections";
 import plansRouter from "./plans";
@@ -193,6 +194,7 @@ router.use(reflectionsRouter);
 router.use(plansRouter);
 router.use(replayRouter);
 router.use(trustProvenanceRouter);
+router.use(mcpGatewayRouter);
 
 core.register(router);
 vessels.register(router);
