@@ -21,6 +21,7 @@ export interface OfflineConflict {
   domain: string;
   mutationId: string;
   url: string;
+  method?: "POST" | "PUT" | "PATCH" | "DELETE";
   localBody: unknown;
   serverResponse: unknown;
   timestamp: number;
@@ -112,6 +113,7 @@ async function replayMutations(
           domain: mutation.domain,
           mutationId: mutation.id,
           url: mutation.url,
+          method: mutation.method,
           localBody: mutation.body,
           serverResponse,
           timestamp: Date.now(),

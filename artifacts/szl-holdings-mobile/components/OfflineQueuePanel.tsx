@@ -52,6 +52,18 @@ interface SharedQueued {
   retries: number;
 }
 
+interface SharedConflict {
+  id: string;
+  domain: string;
+  mutationId: string;
+  url: string;
+  method?: "POST" | "PUT" | "PATCH" | "DELETE";
+  localBody?: unknown;
+  serverResponse?: unknown;
+  timestamp: number;
+  resolved: boolean;
+}
+
 async function getStorage() {
   try {
     return (await import("@react-native-async-storage/async-storage")).default;
@@ -235,6 +247,7 @@ async function retryItem(item: UnifiedQueuedItem): Promise<{ ok: boolean; reason
         domain: entry.domain,
         mutationId: entry.id,
         url: entry.url,
+        method: entry.method,
         localBody: entry.body,
         serverResponse,
         timestamp: Date.now(),
@@ -260,6 +273,51 @@ async function retryItem(item: UnifiedQueuedItem): Promise<{ ok: boolean; reason
         ? `Network error. Giving up after ${SHARED_MAX_RETRIES} attempts.`
         : "Network error — still offline?",
     };
+  }
+}
+
+async function loadConflicts(): Promise<SharedConflict[]> {
+  const all = await readJson<SharedConflict[]>(SHARED_CONFLICTS_KEY, []);
+  return all.filter((c) => !c.resolved).sort((a, b) => b.timestamp - a.timestamp);
+}
+
+async function markConflictResolved(conflictId: string): Promise<void> {
+  const all = await readJson<SharedConflict[]>(SHARED_CONFLICTS_KEY, []);
+  await writeJson(
+    SHARED_CONFLICTS_KEY,
+    all.map((c) => (c.id === conflictId ? { ...c, resolved: true } : c))
+  );
+}
+
+async function keepMineFromConflict(conflict: SharedConflict): Promise<{ ok: boolean; reason?: string }> {
+  if (!conflict.method) {
+    return { ok: false, reason: "Cannot replay — original request method was not recorded." };
+  }
+  const queue = await readJson<SharedQueued[]>(SHARED_QUEUE_KEY, []);
+  const replayEntry: SharedQueued = {
+    id: `${conflict.domain}-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    domain: conflict.domain,
+    method: conflict.method,
+    url: conflict.url,
+    body: conflict.localBody,
+    timestamp: Date.now(),
+    retries: 0,
+  };
+  await writeJson(SHARED_QUEUE_KEY, [...queue, replayEntry]);
+  await markConflictResolved(conflict.id);
+  return { ok: true };
+}
+
+function previewValue(value: unknown, max = 80): string {
+  if (value === null || value === undefined) return "—";
+  if (typeof value === "string") {
+    return value.length > max ? value.slice(0, max - 1) + "…" : value;
+  }
+  try {
+    const s = JSON.stringify(value);
+    return s.length > max ? s.slice(0, max - 1) + "…" : s;
+  } catch {
+    return String(value);
   }
 }
 
@@ -294,25 +352,35 @@ export function OfflineQueuePanel({
 }: OfflineQueuePanelProps) {
   const colors = useColors();
   const [items, setItems] = useState<UnifiedQueuedItem[]>([]);
+  const [conflicts, setConflicts] = useState<SharedConflict[]>([]);
   const [expanded, setExpanded] = useState(defaultExpanded);
   const [loaded, setLoaded] = useState(false);
   const [recentlyClearedAt, setRecentlyClearedAt] = useState<number | null>(null);
   const [retryingId, setRetryingId] = useState<string | null>(null);
   const [bulkBusy, setBulkBusy] = useState<null | "retry" | "discard">(null);
+  const [resolvingConflictId, setResolvingConflictId] = useState<string | null>(null);
 
   const suppressSyncedBannerRef = React.useRef(false);
 
   const refresh = useCallback(async () => {
-    const next = await loadAllQueued();
+    const [next, nextConflicts] = await Promise.all([loadAllQueued(), loadConflicts()]);
     setItems((prev) => {
       // Only show "All synced" when items disappeared while online and the
-      // change was NOT caused by a manual discard from this panel.
-      if (prev.length > 0 && next.length === 0 && !isOffline && !suppressSyncedBannerRef.current) {
+      // change was NOT caused by a manual discard from this panel. Suppress
+      // when there are unresolved conflicts to surface instead.
+      if (
+        prev.length > 0 &&
+        next.length === 0 &&
+        nextConflicts.length === 0 &&
+        !isOffline &&
+        !suppressSyncedBannerRef.current
+      ) {
         setRecentlyClearedAt(Date.now());
       }
       suppressSyncedBannerRef.current = false;
       return next;
     });
+    setConflicts(nextConflicts);
     setLoaded(true);
   }, [isOffline]);
 
@@ -406,6 +474,48 @@ export function OfflineQueuePanel({
     );
   }, [items, bulkBusy, retryingId, refresh, onChanged]);
 
+  const handleKeepMine = useCallback(
+    async (conflict: SharedConflict) => {
+      if (resolvingConflictId) return;
+      setResolvingConflictId(conflict.id);
+      const result = await keepMineFromConflict(conflict);
+      setResolvingConflictId(null);
+      if (result.ok) {
+        suppressSyncedBannerRef.current = true;
+        await refresh();
+        onChanged?.();
+      } else {
+        Alert.alert("Could not replay", result.reason ?? "The conflict remains unresolved.");
+      }
+    },
+    [refresh, onChanged, resolvingConflictId]
+  );
+
+  const handleUseServer = useCallback(
+    (conflict: SharedConflict) => {
+      Alert.alert(
+        "Use server version?",
+        `Discard your local change for ${conflict.domain.toUpperCase()} and accept the server's current value?`,
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Use server",
+            style: "destructive",
+            onPress: async () => {
+              setResolvingConflictId(conflict.id);
+              await markConflictResolved(conflict.id);
+              setResolvingConflictId(null);
+              suppressSyncedBannerRef.current = true;
+              await refresh();
+              onChanged?.();
+            },
+          },
+        ]
+      );
+    },
+    [refresh, onChanged]
+  );
+
   const handleDiscard = useCallback(
     (item: UnifiedQueuedItem) => {
       Alert.alert(
@@ -431,11 +541,11 @@ export function OfflineQueuePanel({
 
   if (!loaded) return null;
 
-  // Nothing queued and nothing recently cleared → render nothing
-  if (items.length === 0 && !recentlyClearedAt) return null;
+  // Nothing queued, no conflicts, nothing recently cleared → render nothing
+  if (items.length === 0 && conflicts.length === 0 && !recentlyClearedAt) return null;
 
-  // Empty + just synced → "All synced" banner
-  if (items.length === 0 && recentlyClearedAt) {
+  // Empty queue + no conflicts + just synced → "All synced" banner
+  if (items.length === 0 && conflicts.length === 0 && recentlyClearedAt) {
     return (
       <View style={[styles.container, { backgroundColor: colors.card ?? "#0d1220", borderColor: "#22c55e40" }]}>
         <View style={styles.header}>
@@ -447,7 +557,22 @@ export function OfflineQueuePanel({
     );
   }
 
-  const accentColor = isOffline ? AMBER : ACCENT;
+  const hasConflicts = conflicts.length > 0;
+  const accentColor = hasConflicts ? RED : isOffline ? AMBER : ACCENT;
+
+  const headerLabel = (() => {
+    const parts: string[] = [];
+    if (items.length > 0) parts.push(`${items.length} pending sync`);
+    if (hasConflicts) parts.push(`${conflicts.length} need${conflicts.length !== 1 ? "" : "s"} your decision`);
+    return parts.join(" · ") || "Offline queue";
+  })();
+
+  const headerHint = hasConflicts ? "ACTION REQUIRED" : isOffline ? "OFFLINE" : "WILL SYNC";
+  const headerIcon: React.ComponentProps<typeof Feather>["name"] = hasConflicts
+    ? "alert-triangle"
+    : isOffline
+      ? "wifi-off"
+      : "upload-cloud";
 
   return (
     <View
@@ -461,14 +586,10 @@ export function OfflineQueuePanel({
     >
       <TouchableOpacity onPress={handleToggle} activeOpacity={0.8} style={styles.header}>
         <View style={[styles.statusDot, { backgroundColor: accentColor }]} />
-        <Feather name={isOffline ? "wifi-off" : "upload-cloud"} size={13} color={accentColor} />
-        <Text style={[styles.headerTitle, { color: accentColor }]}>
-          {items.length} action{items.length !== 1 ? "s" : ""} pending sync
-        </Text>
+        <Feather name={headerIcon} size={13} color={accentColor} />
+        <Text style={[styles.headerTitle, { color: accentColor }]}>{headerLabel}</Text>
         <View style={{ flex: 1 }} />
-        <Text style={[styles.headerHint, { color: colors.mutedForeground ?? "#6b7280" }]}>
-          {isOffline ? "OFFLINE" : "WILL SYNC"}
-        </Text>
+        <Text style={[styles.headerHint, { color: colors.mutedForeground ?? "#6b7280" }]}>{headerHint}</Text>
         <Feather
           name={expanded ? "chevron-up" : "chevron-down"}
           size={14}
@@ -527,6 +648,96 @@ export function OfflineQueuePanel({
 
       {expanded && (
         <View style={styles.list}>
+          {hasConflicts && (
+            <View style={styles.sectionHeaderRow}>
+              <Feather name="alert-triangle" size={11} color={RED} />
+              <Text style={[styles.sectionHeader, { color: RED }]}>NEEDS YOUR DECISION</Text>
+            </View>
+          )}
+          {conflicts.map((conflict) => {
+            const targetTail = shortTargetFromUrl(conflict.url);
+            const isResolving = resolvingConflictId === conflict.id;
+            return (
+              <View
+                key={conflict.id}
+                style={[
+                  styles.conflictRow,
+                  { borderColor: RED + "55", backgroundColor: RED + "0d" },
+                ]}
+              >
+                <View style={styles.itemMetaRow}>
+                  <View style={[styles.tag, { backgroundColor: RED + "18", borderColor: RED + "40" }]}>
+                    <Text style={[styles.tagText, { color: RED }]}>
+                      {(conflict.method ?? "CONFLICT").toUpperCase()}
+                    </Text>
+                  </View>
+                  <Text style={[styles.sourceLabel, { color: colors.mutedForeground ?? "#6b7280" }]}>
+                    {conflict.domain.toUpperCase()}
+                  </Text>
+                  <View style={{ flex: 1 }} />
+                  <Text style={[styles.timestamp, { color: colors.mutedForeground ?? "#6b7280", marginTop: 0 }]}>
+                    {relative(conflict.timestamp)}
+                  </Text>
+                </View>
+                <Text style={[styles.targetId, { color: colors.foreground ?? "#e5e7eb" }]} numberOfLines={1}>
+                  {targetTail}
+                </Text>
+                <View style={styles.diffBlock}>
+                  <Text style={[styles.diffLabel, { color: colors.mutedForeground ?? "#6b7280" }]}>YOU SENT</Text>
+                  <Text style={[styles.diffValue, { color: colors.foreground ?? "#e5e7eb" }]} numberOfLines={2}>
+                    {previewValue(conflict.localBody)}
+                  </Text>
+                </View>
+                <View style={styles.diffBlock}>
+                  <Text style={[styles.diffLabel, { color: colors.mutedForeground ?? "#6b7280" }]}>SERVER NOW</Text>
+                  <Text style={[styles.diffValue, { color: colors.foreground ?? "#e5e7eb" }]} numberOfLines={2}>
+                    {previewValue(conflict.serverResponse)}
+                  </Text>
+                </View>
+                <View style={styles.conflictActions}>
+                  <TouchableOpacity
+                    onPress={() => handleKeepMine(conflict)}
+                    disabled={resolvingConflictId !== null || !conflict.method}
+                    style={[
+                      styles.retryBtn,
+                      { borderColor: ACCENT + "40", backgroundColor: ACCENT + "12", flex: 1 },
+                      (resolvingConflictId !== null && !isResolving) && { opacity: 0.4 },
+                      !conflict.method && { opacity: 0.4 },
+                    ]}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  >
+                    {isResolving ? (
+                      <ActivityIndicator size="small" color={ACCENT} />
+                    ) : (
+                      <>
+                        <Feather name="upload-cloud" size={12} color={ACCENT} />
+                        <Text style={[styles.retryText, { color: ACCENT }]}>Keep mine</Text>
+                      </>
+                    )}
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => handleUseServer(conflict)}
+                    disabled={resolvingConflictId !== null}
+                    style={[
+                      styles.discardBtn,
+                      { borderColor: RED + "40", backgroundColor: RED + "12", flex: 1 },
+                      (resolvingConflictId !== null && !isResolving) && { opacity: 0.4 },
+                    ]}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  >
+                    <Feather name="server" size={12} color={RED} />
+                    <Text style={[styles.discardText, { color: RED }]}>Use server</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            );
+          })}
+          {hasConflicts && items.length > 0 && (
+            <View style={styles.sectionHeaderRow}>
+              <Feather name="upload-cloud" size={11} color={isOffline ? AMBER : ACCENT} />
+              <Text style={[styles.sectionHeader, { color: isOffline ? AMBER : ACCENT }]}>PENDING SYNC</Text>
+            </View>
+          )}
           {items.map((item) => (
             <View
               key={item.id}
@@ -670,6 +881,33 @@ const styles = StyleSheet.create({
     minWidth: 76,
   },
   discardText: { fontSize: 10, fontWeight: "700" },
+  sectionHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingTop: 4,
+    paddingBottom: 2,
+  },
+  sectionHeader: { fontSize: 9, fontWeight: "800", letterSpacing: 0.8 },
+  conflictRow: {
+    padding: 10,
+    borderWidth: 1,
+    borderRadius: 8,
+    gap: 6,
+  },
+  diffBlock: {
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    borderRadius: 6,
+    backgroundColor: "#0000001a",
+  },
+  diffLabel: { fontSize: 9, fontWeight: "700", letterSpacing: 0.6, marginBottom: 2 },
+  diffValue: { fontSize: 11, fontFamily: Platform.select({ ios: "Menlo", android: "monospace", default: "monospace" }) },
+  conflictActions: {
+    flexDirection: "row",
+    gap: 6,
+    marginTop: 4,
+  },
 });
 
 export default OfflineQueuePanel;
