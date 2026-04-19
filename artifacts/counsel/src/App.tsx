@@ -1,5 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
-import { Switch, Route, Router as WouterRouter, Redirect, useLocation } from "wouter";
+import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@szl-holdings/shared-ui/ui/sonner";
 import { AnalyticsProvider, useUserPreferences } from "@szl-holdings/shared-ui";
@@ -14,6 +14,7 @@ import { DashboardShell as SharedDashboardShell } from "@szl-holdings/shared-ui/
 const COUNSEL_ACCENT = "#8b5cf6";
 
 const DashboardPage = lazy(() => import("./pages/dashboard"));
+const CounselLandingPage = lazy(() => import("./pages/counsel-landing"));
 const MatterOverviewPage = lazy(() => import("./pages/matter-overview"));
 const ObligationTimelinePage = lazy(() => import("./pages/obligation-timeline"));
 const DependencyGraphPage = lazy(() => import("./pages/dependency-graph"));
@@ -59,7 +60,7 @@ function CounselSidebarContent({
       id: "core",
       label: "Core",
       items: [
-        { id: "/", label: "Dashboard", href: "/", icon: <LayoutDashboard className="w-3.5 h-3.5" /> },
+        { id: "/dashboard", label: "Dashboard", href: "/dashboard", icon: <LayoutDashboard className="w-3.5 h-3.5" /> },
         { id: "/matters", label: "Matter Overview", href: "/matters", icon: <Briefcase className="w-3.5 h-3.5" /> },
         { id: "/obligations", label: "Obligation Timeline", href: "/obligations", icon: <Clock className="w-3.5 h-3.5" /> },
         { id: "/dependencies", label: "Dependency Graph", href: "/dependencies", icon: <Network className="w-3.5 h-3.5" /> },
@@ -164,7 +165,7 @@ function DashboardRouter() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Switch>
-        <Route path="/" component={DashboardPage} />
+        <Route path="/dashboard" component={DashboardPage} />
         <Route path="/matters" component={MatterOverviewPage} />
         <Route path="/obligations" component={ObligationTimelinePage} />
         <Route path="/dependencies" component={DependencyGraphPage} />
@@ -184,12 +185,13 @@ function DashboardRouter() {
   );
 }
 
-export default function App() {
+function AppShell() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { prefs, setPreference, isLoaded } = useUserPreferences();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => prefs.sidebar_collapsed);
   const [sidebarHovered, setSidebarHovered] = useState(false);
   const userOverriddenSidebarRef = useRef(false);
+  const [location] = useLocation();
 
   useEffect(() => {
     if (isLoaded && !userOverriddenSidebarRef.current) {
@@ -208,54 +210,76 @@ export default function App() {
 
   const sidebarExpanded = !sidebarCollapsed || sidebarHovered;
 
+  if (location === "/" || location === "") {
+    return (
+      <>
+        <EcosystemNav
+          currentAppId="counsel"
+          currentAppName="Counsel Legal Matter Command"
+          accentColor={COUNSEL_ACCENT}
+        />
+        <Suspense fallback={<div style={{ height: "100vh", background: "#0a0614" }} />}>
+          <CounselLandingPage />
+        </Suspense>
+        <Toaster position="bottom-right" theme="dark" />
+      </>
+    );
+  }
+
+  return (
+    <div className="flex flex-col h-screen" style={{ background: "#0a0614" }}>
+      <EcosystemNav
+        currentAppId="counsel"
+        currentAppName="Counsel Legal Matter Command"
+        accentColor={COUNSEL_ACCENT}
+      />
+      <SharedDashboardShell
+        sidebar={
+          <CounselSidebarContent
+            expanded={sidebarExpanded}
+            onMobileClose={() => setSidebarOpen(false)}
+            onToggleCollapse={toggleCollapsed}
+          />
+        }
+        mobileOpen={sidebarOpen}
+        onMobileClose={() => setSidebarOpen(false)}
+        sidebarWidth={sidebarExpanded ? "13rem" : "3.5rem"}
+        sidebarEvents={{
+          onMouseEnter: () => setSidebarHovered(true),
+          onMouseLeave: () => setSidebarHovered(false),
+        }}
+        theme={{ sidebarBg: "#0a0614", pageBg: "#0a0614", headerBg: "rgba(10,6,20,0.92)" }}
+        accentColor={COUNSEL_ACCENT}
+        topbar={
+          <div className="flex items-center gap-3 w-full md:hidden">
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="p-1.5 rounded transition-colors text-violet-400/50"
+              aria-label="Toggle navigation"
+            >
+              <Menu className="w-4 h-4" />
+            </button>
+            <span className="text-[10px] font-mono uppercase tracking-wider text-violet-400/80">
+              Counsel
+            </span>
+          </div>
+        }
+      >
+        <main className="flex-1 overflow-auto h-full">
+          <DashboardRouter />
+        </main>
+      </SharedDashboardShell>
+      <Toaster position="bottom-right" theme="dark" />
+    </div>
+  );
+}
+
+export default function App() {
   return (
     <AnalyticsProvider appName="counsel">
       <QueryClientProvider client={queryClient}>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <div className="flex flex-col h-screen" style={{ background: "#0a0614" }}>
-            <EcosystemNav
-              currentAppId="counsel"
-              currentAppName="Counsel Legal Matter Command"
-              accentColor={COUNSEL_ACCENT}
-            />
-            <SharedDashboardShell
-              sidebar={
-                <CounselSidebarContent
-                  expanded={sidebarExpanded}
-                  onMobileClose={() => setSidebarOpen(false)}
-                  onToggleCollapse={toggleCollapsed}
-                />
-              }
-              mobileOpen={sidebarOpen}
-              onMobileClose={() => setSidebarOpen(false)}
-              sidebarWidth={sidebarExpanded ? "13rem" : "3.5rem"}
-              sidebarEvents={{
-                onMouseEnter: () => setSidebarHovered(true),
-                onMouseLeave: () => setSidebarHovered(false),
-              }}
-              theme={{ sidebarBg: "#0a0614", pageBg: "#0a0614", headerBg: "rgba(10,6,20,0.92)" }}
-              accentColor={COUNSEL_ACCENT}
-              topbar={
-                <div className="flex items-center gap-3 w-full md:hidden">
-                  <button
-                    onClick={() => setSidebarOpen(!sidebarOpen)}
-                    className="p-1.5 rounded transition-colors text-violet-400/50"
-                    aria-label="Toggle navigation"
-                  >
-                    <Menu className="w-4 h-4" />
-                  </button>
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-violet-400/80">
-                    Counsel
-                  </span>
-                </div>
-              }
-            >
-              <main className="flex-1 overflow-auto h-full">
-                <DashboardRouter />
-              </main>
-            </SharedDashboardShell>
-            <Toaster position="bottom-right" theme="dark" />
-          </div>
+          <AppShell />
         </WouterRouter>
       </QueryClientProvider>
     </AnalyticsProvider>

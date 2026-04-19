@@ -1,5 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
-import { Switch, Route, Router as WouterRouter, Redirect, useLocation } from "wouter";
+import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@szl-holdings/shared-ui/ui/sonner";
 import { AnalyticsProvider, useUserPreferences } from "@szl-holdings/shared-ui";
@@ -24,6 +24,7 @@ const DecisionCenterPage = lazy(() => import("@/pages/decision-center"));
 const TrustProvenancePage = lazy(() => import("@/pages/trust-provenance"));
 const AlertsPage = lazy(() => import("@/pages/alerts"));
 const ApprovalsPage = lazy(() => import("@/pages/approvals"));
+const SentraLandingPage = lazy(() => import("@/pages/sentra-landing"));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -180,9 +181,7 @@ function DashboardRouter() {
         <Route path="/trust" component={TrustProvenancePage} />
         <Route path="/alerts" component={AlertsPage} />
         <Route path="/approvals" component={ApprovalsPage} />
-        <Route path="/">
-          <Redirect to="/dashboard" />
-        </Route>
+        <Route path="/" component={SentraLandingPage} />
         <Route>
           <div className="flex items-center justify-center h-full">
             <p className="text-red-400/40">Page not found</p>
@@ -216,6 +215,22 @@ function AppShell({
       <Suspense fallback={<div style={{ height: "100vh", background: "#060e1a" }} />}>
         <ResilienceScorecardPage />
       </Suspense>
+    );
+  }
+
+  if (location === "/" || location === "") {
+    return (
+      <>
+        <EcosystemNav
+          currentAppId="sentra"
+          currentAppName="Sentra Cyber Resilience"
+          accentColor={SENTRA_ACCENT}
+        />
+        <Suspense fallback={<div style={{ height: "100vh", background: "#0a0606" }} />}>
+          <SentraLandingPage />
+        </Suspense>
+        <Toaster position="bottom-right" theme="dark" />
+      </>
     );
   }
 
