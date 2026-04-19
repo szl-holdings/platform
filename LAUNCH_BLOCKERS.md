@@ -125,7 +125,7 @@ These items must be resolved or formally accepted in writing by the Founder befo
 - Design-partner / pilot agreement template reviewed and approved by counsel
 - If collecting analytics from EU visitors: GDPR-compliant cookie consent mechanism verified by counsel
 **Owner:** Stephen Lutar (to engage counsel)  
-**Note:** Engineering cannot sign off on this item. It requires a human legal review and is listed here so it is not omitted from the launch gate.
+**Note:** Engineering cannot sign off on this item. It requires a human legal review and is listed here so it is not omitted from the launch gate. Counsel review of the customer Data Processing Agreement template is also a SOC 2 Type II observation-window dependency tracked in [SOC2_AUDIT_ENGAGEMENT.md](SOC2_AUDIT_ENGAGEMENT.md) §2.
 
 ---
 

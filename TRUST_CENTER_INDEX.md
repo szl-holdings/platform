@@ -19,7 +19,7 @@
 | Multi-tenancy | All queries scoped by `org_id`. Cross-org access returns 404 to prevent information leakage. AI/RAG retrieval is tenant-isolated at the library layer. |
 | Data in transit | TLS 1.3 for all connections. WebSocket uses HMAC-signed tickets with 5-minute TTL. |
 | Secrets management | All credentials injected via environment variables. No secrets in source control. Azure Key Vault in production. |
-| Compliance posture | GDPR/CCPA privacy frameworks in place. SOC 2 Type II roadmapped post-funding. |
+| Compliance posture | GDPR/CCPA privacy frameworks in place. **SOC 2 Type II audit engagement signed with A-LIGN on 2026-04-19; observation period in progress (2026-05-01 → 2026-10-31).** Type I bridge report targeted 2026-07-31; Type II report targeted 2027-01-31. See [SOC2_AUDIT_ENGAGEMENT.md](SOC2_AUDIT_ENGAGEMENT.md). |
 
 ---
 
@@ -218,11 +218,13 @@ All trust surfaces use reusable React components from `lib/shared-ui`:
 
 | Standard | Status | Target |
 |----------|--------|--------|
-| SOC 2 Type II | Not yet initiated | Phase 3 (post-funding) |
+| SOC 2 Type II | **Audit engagement signed (A-LIGN, 2026-04-19) — observation period 2026-05-01 → 2026-10-31** | Type I bridge report 2026-07-31; Type II report 2027-01-31 |
 | ISO 27001 | Not yet initiated | Phase 3 |
 | GDPR Compliance | Privacy framework in place | Ongoing |
 | CCPA Compliance | Privacy framework in place | Ongoing |
 | HIPAA Business Associate | Evaluated per contract | As customer need arises |
+
+For the engagement scope, observation window, evidence sources, and per-criterion readiness, see [SOC2_AUDIT_ENGAGEMENT.md](SOC2_AUDIT_ENGAGEMENT.md). Enterprise evaluators may request the engagement letter and current bridge letter under NDA at security@szlholdings.com.
 
 ---
 
