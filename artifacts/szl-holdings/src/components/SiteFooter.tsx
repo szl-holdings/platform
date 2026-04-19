@@ -23,11 +23,15 @@ const FOOTER_COLS = [
     ],
   },
   {
-    heading: "Trust",
+    heading: "Trust & Proof",
     links: [
       { label: "Trust Center", href: "/trust" },
+      { label: "Trust Center Status", href: "/trust-center/status" },
+      { label: "Product Readiness", href: "/product-readiness" },
+      { label: "Technical Proof", href: "/technical-proof" },
+      { label: "Changelog Highlights", href: "/changelog-highlights" },
+      { label: "Full Changelog", href: "/changelog" },
       { label: "Security", href: "/trust/security" },
-      { label: "Architecture", href: "/architecture" },
       { label: "AI Governance", href: "/trust/ai" },
     ],
   },

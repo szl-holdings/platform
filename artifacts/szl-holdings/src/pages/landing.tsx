@@ -439,6 +439,22 @@ export default function HomePage() {
                   <Handshake size={15} />
                   Become a design partner
                 </Link>
+                <Link
+                  href="/product-readiness"
+                  onClick={() => analytics.navLinkClick("See the proof", "/product-readiness")}
+                  style={{
+                    display: "inline-flex", alignItems: "center", gap: "0.5rem",
+                    padding: "0.875rem 1.75rem",
+                    background: "transparent",
+                    color: TEXT_SEC,
+                    border: `1px solid ${BORDER}`,
+                    borderRadius: "0.375rem",
+                    fontSize: "0.9375rem", fontWeight: 500,
+                    textDecoration: "none",
+                  }}
+                >
+                  See the proof <ArrowUpRight size={14} />
+                </Link>
               </div>
             </m.div>
 
