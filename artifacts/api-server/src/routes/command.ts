@@ -669,6 +669,9 @@ type CommandAlert = {
   id: string; domain: string; domainColor: string; priority: "critical" | "high" | "medium" | "low";
   title: string; description: string; time: string; status: "active" | "acknowledged" | "snoozed" | "resolved";
   category: string; assignee?: string;
+  // Populated for snoozed alerts so the UI can show "Snoozed until …" and
+  // offer an Un-snooze action without having to compute the timer itself.
+  snoozedUntil?: string;
   // Optional deep-link metadata. Cross-platform correlation alerts populate
   // these so the inbox card can navigate back to the Signal Correlation page.
   correlationId?: string; href?: string;
@@ -936,7 +939,17 @@ function applyAlertStates(
       continue;
     }
     if (s.state === "resolved") continue; // hide entirely
-    if (s.state === "snoozed") continue;  // hide until snooze elapses
+    if (s.state === "snoozed") {
+      // Keep snoozed alerts in the payload (flagged) so operators can see
+      // them under the "Snoozed" filter and Un-snooze before the timer
+      // expires. They're excluded from the active count below.
+      out.push({
+        ...a,
+        status: "snoozed",
+        snoozedUntil: s.snoozedUntil ? s.snoozedUntil.toISOString() : undefined,
+      });
+      continue;
+    }
     // acknowledged — keep but mark, surfacing audit fields so the inbox
     // can render "Acknowledged by X at Y".
     const acknowledgedBy =

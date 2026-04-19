@@ -28,7 +28,15 @@ interface Alert {
   acknowledgedBy?: string;
   acknowledgedById?: number;
   acknowledgedAt?: string;
+  snoozedUntil?: string;
 }
+
+const SNOOZE_PRESETS: { label: string; minutes: number }[] = [
+  { label: "15m", minutes: 15 },
+  { label: "1h", minutes: 60 },
+  { label: "4h", minutes: 60 * 4 },
+  { label: "24h", minutes: 60 * 24 },
+];
 
 function formatAcknowledgedAt(iso: string): string {
   const d = new Date(iso);
@@ -40,6 +48,20 @@ function formatAcknowledgedAt(iso: string): string {
   const h = Math.floor(m / 60);
   if (h < 24) return `${h}h ago`;
   return d.toLocaleString();
+}
+
+function formatSnoozedUntil(iso: string | undefined): string {
+  if (!iso) return "";
+  const target = new Date(iso).getTime();
+  if (!Number.isFinite(target)) return "";
+  const diffMs = target - Date.now();
+  if (diffMs <= 0) return "expiring";
+  const mins = Math.round(diffMs / 60_000);
+  if (mins < 60) return `${mins}m left`;
+  const hours = Math.round(mins / 60);
+  if (hours < 48) return `${hours}h left`;
+  const days = Math.round(hours / 24);
+  return `${days}d left`;
 }
 
 const INITIAL_ALERTS: Alert[] = [
@@ -94,6 +116,8 @@ export default function AlertsPage() {
   const [domainFilter, setDomainFilter] = useState("all");
   const [selected, setSelected] = useState<string | null>(null);
   const [prefsOpen, setPrefsOpen] = useState(false);
+  const [snoozeMenuFor, setSnoozeMenuFor] = useState<string | null>(null);
+  const [customSnooze, setCustomSnooze] = useState<string>("");
 
   const domains = Array.from(new Set(INITIAL_ALERTS.map((a) => a.domain)));
 
@@ -115,15 +139,15 @@ export default function AlertsPage() {
     snoozed: alerts.filter((a) => a.status === "snoozed").length,
   };
 
-  const updateStatus = async (id: string, status: AlertStatus) => {
+  const updateStatus = async (id: string, status: AlertStatus, snoozeMinutes?: number) => {
     // Optimistic local update — the server is the source of truth and the
     // next refetch will reconcile (e.g. snooze drops the row entirely).
     setAlerts((prev) => prev.map((a) => (a.id === id ? { ...a, status } : a)));
-    if (selected === id && status === "resolved") setSelected(null);
+    if (selected === id && (status === "resolved" || status === "snoozed")) setSelected(null);
     try {
       const body =
         status === "snoozed"
-          ? { state: "snoozed", snoozeMinutes: 60 }
+          ? { state: "snoozed", snoozeMinutes: snoozeMinutes ?? 60 }
           : { state: status };
       const res = await fetch(`/api/command/alerts/${encodeURIComponent(id)}/state`, {
         method: "POST",
@@ -325,40 +349,117 @@ export default function AlertsPage() {
                     </div>
                   </div>
                   {isSelected && (
-                    <div className="flex gap-2 mt-3 pt-3" style={{ borderTop: "1px solid var(--color-surface-border)" }}>
-                      {alert.status !== "acknowledged" && alert.status !== "resolved" && (
+                    <div className="flex flex-col gap-2 mt-3 pt-3" style={{ borderTop: "1px solid var(--color-surface-border)" }}>
+                      <div className="flex flex-wrap gap-2 items-center">
+                        {alert.status !== "acknowledged" && alert.status !== "resolved" && alert.status !== "snoozed" && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); updateStatus(alert.id, "acknowledged"); }}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium"
+                            style={{ backgroundColor: "var(--color-bg-elevated)", border: "1px solid var(--color-surface-border)", color: "var(--color-fg-secondary)" }}
+                          >
+                            <CheckCircle2 className="w-3 h-3" /> Acknowledge
+                          </button>
+                        )}
+                        {alert.status !== "snoozed" && alert.status !== "resolved" && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSnoozeMenuFor(snoozeMenuFor === alert.id ? null : alert.id);
+                              setCustomSnooze("");
+                            }}
+                            aria-expanded={snoozeMenuFor === alert.id}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium"
+                            style={{ backgroundColor: "var(--color-bg-elevated)", border: "1px solid var(--color-surface-border)", color: "var(--color-fg-secondary)" }}
+                          >
+                            <AlarmClock className="w-3 h-3" /> Snooze
+                            <ChevronDown className="w-3 h-3" />
+                          </button>
+                        )}
+                        {alert.status === "snoozed" && (
+                          <>
+                            {alert.snoozedUntil && (
+                              <span className="text-[10px] font-mono uppercase tracking-wider" style={{ color: "var(--color-fg-muted)" }}>
+                                Snoozed · {formatSnoozedUntil(alert.snoozedUntil)}
+                              </span>
+                            )}
+                            <button
+                              onClick={(e) => { e.stopPropagation(); updateStatus(alert.id, "active"); }}
+                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium"
+                              style={{ backgroundColor: "var(--color-bg-elevated)", border: "1px solid var(--color-surface-border)", color: "var(--color-fg-secondary)" }}
+                            >
+                              <Bell className="w-3 h-3" /> Un-snooze
+                            </button>
+                          </>
+                        )}
+                        {alert.status !== "resolved" && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); updateStatus(alert.id, "resolved"); }}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium"
+                            style={{ backgroundColor: "var(--color-bg-elevated)", border: "1px solid var(--color-surface-border)", color: "var(--color-low)" }}
+                          >
+                            <CheckCircle2 className="w-3 h-3" /> Resolve
+                          </button>
+                        )}
                         <button
-                          onClick={(e) => { e.stopPropagation(); updateStatus(alert.id, "acknowledged"); }}
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium"
-                          style={{ backgroundColor: "var(--color-bg-elevated)", border: "1px solid var(--color-surface-border)", color: "var(--color-fg-secondary)" }}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium ml-auto"
+                          style={{ backgroundColor: "#8b7ac820", border: "1px solid #8b7ac840", color: "#8b7ac8" }}
                         >
-                          <CheckCircle2 className="w-3 h-3" /> Acknowledge
+                          <ArrowUpRight className="w-3 h-3" /> Escalate
                         </button>
-                      )}
-                      {alert.status !== "snoozed" && alert.status !== "resolved" && (
-                        <button
-                          onClick={(e) => { e.stopPropagation(); updateStatus(alert.id, "snoozed"); }}
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium"
-                          style={{ backgroundColor: "var(--color-bg-elevated)", border: "1px solid var(--color-surface-border)", color: "var(--color-fg-secondary)" }}
+                      </div>
+                      {snoozeMenuFor === alert.id && alert.status !== "snoozed" && (
+                        <div
+                          onClick={(e) => e.stopPropagation()}
+                          className="flex flex-wrap items-center gap-2 p-2 rounded-lg"
+                          style={{ backgroundColor: "var(--color-bg-elevated)", border: "1px solid var(--color-surface-border)" }}
                         >
-                          <AlarmClock className="w-3 h-3" /> Snooze 1h
-                        </button>
+                          <span className="text-[10px] font-mono uppercase tracking-wider" style={{ color: "var(--color-fg-muted)" }}>Snooze for</span>
+                          {SNOOZE_PRESETS.map((p) => (
+                            <button
+                              key={p.label}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                updateStatus(alert.id, "snoozed", p.minutes);
+                                setSnoozeMenuFor(null);
+                              }}
+                              className="px-2.5 py-1 rounded-md text-xs font-medium"
+                              style={{ backgroundColor: "var(--color-surface-base)", border: "1px solid var(--color-surface-border)", color: "var(--color-fg-secondary)" }}
+                            >
+                              {p.label}
+                            </button>
+                          ))}
+                          <div className="flex items-center gap-1 ml-1">
+                            <input
+                              type="number"
+                              min={1}
+                              max={60 * 24 * 30}
+                              placeholder="Custom"
+                              value={customSnooze}
+                              onChange={(e) => setCustomSnooze(e.target.value)}
+                              onClick={(e) => e.stopPropagation()}
+                              className="w-20 px-2 py-1 rounded-md text-xs"
+                              style={{ backgroundColor: "var(--color-surface-base)", border: "1px solid var(--color-surface-border)", color: "var(--color-fg-primary)" }}
+                            />
+                            <span className="text-[10px] font-mono uppercase" style={{ color: "var(--color-fg-muted)" }}>min</span>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const m = Math.floor(Number(customSnooze));
+                                if (Number.isFinite(m) && m > 0 && m <= 60 * 24 * 30) {
+                                  updateStatus(alert.id, "snoozed", m);
+                                  setSnoozeMenuFor(null);
+                                  setCustomSnooze("");
+                                }
+                              }}
+                              disabled={(() => { const m = Math.floor(Number(customSnooze)); return !(Number.isFinite(m) && m > 0 && m <= 60 * 24 * 30); })()}
+                              className="px-2 py-1 rounded-md text-xs font-medium"
+                              style={{ backgroundColor: "#8b7ac820", border: "1px solid #8b7ac840", color: "#8b7ac8" }}
+                            >
+                              Apply
+                            </button>
+                          </div>
+                        </div>
                       )}
-                      {alert.status !== "resolved" && (
-                        <button
-                          onClick={(e) => { e.stopPropagation(); updateStatus(alert.id, "resolved"); }}
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium"
-                          style={{ backgroundColor: "var(--color-bg-elevated)", border: "1px solid var(--color-surface-border)", color: "var(--color-low)" }}
-                        >
-                          <CheckCircle2 className="w-3 h-3" /> Resolve
-                        </button>
-                      )}
-                      <button
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium ml-auto"
-                        style={{ backgroundColor: "#8b7ac820", border: "1px solid #8b7ac840", color: "#8b7ac8" }}
-                      >
-                        <ArrowUpRight className="w-3 h-3" /> Escalate
-                      </button>
                     </div>
                   )}
                 </div>
