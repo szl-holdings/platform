@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
+import { toast } from "sonner";
 import {
   Shield,
   CheckCircle,
@@ -427,6 +428,34 @@ export default function OperatorApprovalsPage() {
   const approvals = data ?? [];
   const pending = approvals.filter((a) => a.status === "pending");
   const escalated = approvals.filter((a) => a.status === "escalated");
+
+  // Toast/banner the on-call operator the moment a new approval lands.
+  // Tracks IDs we've already surfaced so we only toast genuinely new
+  // requests (not on initial mount, not on re-renders).
+  const seenApprovalIds = useRef<Set<number> | null>(null);
+  useEffect(() => {
+    const queue = [...pending, ...escalated];
+    if (queue.length === 0) return;
+    if (seenApprovalIds.current === null) {
+      seenApprovalIds.current = new Set(queue.map((a) => a.id));
+      return;
+    }
+    const seen = seenApprovalIds.current;
+    const fresh = queue.filter((a) => !seen.has(a.id));
+    fresh.forEach((a) => {
+      seen.add(a.id);
+      const isCritical =
+        a.priority === "critical" ||
+        a.actionClass === "human-approval-mandatory" ||
+        /tier[\s_-]?8/i.test(String(a.payload?.tier ?? ""));
+      const description = `${a.resourceType}/${a.resourceId} · ${a.actionClass}${a.requiredApproverRole ? ` · ${a.requiredApproverRole}` : ""}`;
+      const fn = isCritical ? toast.error : toast.warning;
+      fn(`Guardian approval needed: ${a.title}`, {
+        description,
+        duration: isCritical ? 12000 : 8000,
+      });
+    });
+  }, [pending, escalated]);
   const resolved = approvals.filter((a) =>
     ["approved", "rejected", "revised", "expired", "withdrawn"].includes(a.status),
   );

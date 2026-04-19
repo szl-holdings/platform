@@ -11,6 +11,7 @@ import { startDurableQueue, startDurableScheduler, durableJobQueue, durableSched
 import "./lib/platform-jobs";
 import { ensurePlatformFlags } from "./lib/platform-flags";
 import { startDomainNotificationGenerators, stopDomainNotificationGenerators } from "./lib/domain-notifications";
+import { registerApprovalNotificationHook } from "./lib/approval-notifications";
 import { startSelfMonitoring, stopSelfMonitoring } from "./lib/self-monitor";
 import { startHealthDegradationWatcher, stopHealthDegradationWatcher } from "./lib/health-degradation-watcher";
 import { agentScheduler, registerDefaultSchedules } from "./lib/agent-scheduler";
@@ -85,6 +86,7 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
   initWebSocket(server);
   startPrismBusBridge();
   startDomainNotificationGenerators();
+  registerApprovalNotificationHook();
   startSelfMonitoring();
   startHealthDegradationWatcher();
 

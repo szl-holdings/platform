@@ -41,7 +41,10 @@ export {
   getApprovalComments,
   expireStaleApprovals,
   ApprovalAccessDeniedError,
+  setApprovalCreatedHook,
 } from "./approvals.js";
+
+export type { ApprovalCreatedHook } from "./approvals.js";
 
 export type {
   ApprovalRequest,

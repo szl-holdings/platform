@@ -66,6 +66,24 @@ export class ApprovalAccessDeniedError extends Error {
   }
 }
 
+/**
+ * Hook fired (fire-and-forget) immediately after a new approval request is
+ * persisted. Used by the API server to push notifications (in-app toast,
+ * email, Slack) to operators with the required approver role so they can act
+ * on the request without having the dashboard open.
+ *
+ * The hook is registered at server startup via `setApprovalCreatedHook`. Hook
+ * errors are swallowed by the caller — notification failure must never break
+ * approval creation itself.
+ */
+export type ApprovalCreatedHook = (approval: ApprovalRequest) => void | Promise<void>;
+
+let approvalCreatedHook: ApprovalCreatedHook | null = null;
+
+export function setApprovalCreatedHook(hook: ApprovalCreatedHook | null): void {
+  approvalCreatedHook = hook;
+}
+
 export interface AddApprovalCommentParams {
   approvalId: number;
   orgId?: number | null;
@@ -142,6 +160,15 @@ export async function createApprovalRequest(
     correlationId: params.correlationId,
     serviceAttribution: params.serviceAttribution,
   });
+
+  if (approvalCreatedHook) {
+    Promise.resolve()
+      .then(() => approvalCreatedHook?.(approval))
+      .catch(() => {
+        // Notification failure must never break approval creation. The hook
+        // is responsible for its own logging.
+      });
+  }
 
   return approval;
 }
