@@ -158,6 +158,7 @@ export default function OtIcsDashboard() {
     const [rangeEndIdx, setRangeEndIdx] = useState(0);
     const [pcapDownloading, setPcapDownloading] = useState(false);
     const [pcapError, setPcapError] = useState<string | null>(null);
+    const [pcapngDownloading, setPcapngDownloading] = useState(false);
 
     const framesQuery = useQuery<DecodedFrame[]>({
       queryKey: ["ot-ics", "frames", protocolFilter],
@@ -251,19 +252,30 @@ export default function OtIcsDashboard() {
       }
     }, [filteredConversation.length, replayIndex]);
 
-    const handleDownloadPcap = async () => {
-      setPcapDownloading(true);
+    const handleDownloadCapture = async (format: "pcap" | "pcapng") => {
+      if (format === "pcap") setPcapDownloading(true);
+      else setPcapngDownloading(true);
       setPcapError(null);
       try {
         const rawHexById = new Map(frames.map((d) => [d.frameId, d.rawHex] as const));
-        const framesPayload = filteredConversation.map((f) => ({
-          ts: new Date(f.observedAt).getTime(),
-          srcIp: HOST_IP[f.src] ?? "10.4.99.1",
-          dstIp: HOST_IP[f.dst] ?? "10.4.99.2",
-          protocol: f.protocol.toLowerCase() as "modbus" | "dnp3" | "s7",
-          payloadHex: f.frameId ? rawHexById.get(f.frameId) : undefined,
-          bytes: f.bytes,
-        }));
+        const forensicById = new Map(frames.map((d) => [d.frameId, d.forensicEventId] as const));
+        const framesPayload = filteredConversation.map((f) => {
+          const fid = f.frameId;
+          const forensicEventId = fid ? forensicById.get(fid) ?? undefined : undefined;
+          return {
+            ts: new Date(f.observedAt).getTime(),
+            srcIp: HOST_IP[f.src] ?? "10.4.99.1",
+            dstIp: HOST_IP[f.dst] ?? "10.4.99.2",
+            protocol: f.protocol.toLowerCase() as "modbus" | "dnp3" | "s7",
+            payloadHex: fid ? rawHexById.get(fid) : undefined,
+            bytes: f.bytes,
+            comment: format === "pcapng"
+              ? `${f.protocol} #${f.seq} ${f.src} ${f.direction} ${f.dst} — ${f.summary}`
+              : undefined,
+            anomalyNote: format === "pcapng" && f.anomalous ? f.summary : undefined,
+            forensicEventId: format === "pcapng" ? forensicEventId ?? undefined : undefined,
+          };
+        });
         const sessionId = `${ACTIVE_SESSION_ID}-${replayProtocolFilter}-${rangeStartIdx}-${rangeEndIdx}`;
         const startTs = framesPayload.length > 0 ? Math.min(...framesPayload.map((f) => f.ts)) : undefined;
         const endTs = framesPayload.length > 0 ? Math.max(...framesPayload.map((f) => f.ts)) : undefined;
@@ -281,7 +293,8 @@ export default function OtIcsDashboard() {
           }
         }
 
-        const res = await fetch("/api/aegis/replay/pcap", {
+        const endpoint = format === "pcap" ? "/api/aegis/replay/pcap" : "/api/aegis/replay/pcapng";
+        const res = await fetch(endpoint, {
           method: "POST",
           credentials: "include",
           headers: {
@@ -307,17 +320,21 @@ export default function OtIcsDashboard() {
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `${sessionId}.pcap`;
+        a.download = `${sessionId}.${format}`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
       } catch (err) {
-        setPcapError(err instanceof Error ? err.message : "Failed to export PCAP");
+        setPcapError(err instanceof Error ? err.message : `Failed to export ${format.toUpperCase()}`);
       } finally {
-        setPcapDownloading(false);
+        if (format === "pcap") setPcapDownloading(false);
+        else setPcapngDownloading(false);
       }
     };
+
+    const handleDownloadPcap = () => handleDownloadCapture("pcap");
+    const handleDownloadPcapng = () => handleDownloadCapture("pcapng");
 
     // KPIs (computed from real data)
     const activeAnomalies = scores.filter((s) => Number(s.score) >= Number(s.baselineSnapshot ?? 10) * 2).length;
@@ -538,13 +555,23 @@ export default function OtIcsDashboard() {
                     <ReplayBtn onClick={() => setReplayIndex(Math.max(0, filteredConversation.length - 1))} icon={<SkipForward className="w-3.5 h-3.5" />} label="End" />
                     <button
                       onClick={handleDownloadPcap}
-                      disabled={pcapDownloading || filteredConversation.length === 0}
+                      disabled={pcapDownloading || pcapngDownloading || filteredConversation.length === 0}
                       data-testid="button-download-pcap"
                       title="Export the current session frames as a .pcap file for Wireshark, Zeek, or other forensics tools"
                       className="px-3 py-1.5 rounded-lg border border-emerald-500/50 bg-emerald-500/10 text-emerald-300 text-xs font-medium flex items-center gap-1.5 hover:bg-emerald-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Download className="w-3.5 h-3.5" />
                       {pcapDownloading ? "Exporting…" : "Download PCAP"}
+                    </button>
+                    <button
+                      onClick={handleDownloadPcapng}
+                      disabled={pcapDownloading || pcapngDownloading || filteredConversation.length === 0}
+                      data-testid="button-download-pcapng"
+                      title="Export as PCAPNG with per-packet anomaly notes and forensic event IDs as Wireshark Frame > Packet comments"
+                      className="px-3 py-1.5 rounded-lg border border-cyan-500/50 bg-cyan-500/10 text-cyan-300 text-xs font-medium flex items-center gap-1.5 hover:bg-cyan-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      {pcapngDownloading ? "Exporting…" : "Download PCAPNG"}
                     </button>
                   </div>
                 </div>

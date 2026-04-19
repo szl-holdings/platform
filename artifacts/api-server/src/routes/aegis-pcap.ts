@@ -12,6 +12,9 @@ interface FrameInput {
   protocol: "modbus" | "dnp3" | "s7";
   payloadHex?: string;
   bytes?: number;
+  comment?: string;
+  anomalyNote?: string;
+  forensicEventId?: string;
 }
 
 interface PcapBody {
@@ -165,6 +168,135 @@ router.post("/aegis/replay/pcap", validateBody(jsonObjectBodySchema), (req, res)
   res.setHeader("Content-Length", String(pcap.length));
   res.setHeader("X-Pcap-Frame-Count", String(filtered.length));
   res.end(pcap);
+});
+
+// ----- PCAPNG export with per-packet comments -----
+
+function pad4(n: number): number {
+  return (4 - (n % 4)) % 4;
+}
+
+function writeOption(code: number, value: Buffer): Buffer {
+  const padding = pad4(value.length);
+  const buf = Buffer.alloc(4 + value.length + padding);
+  buf.writeUInt16LE(code, 0);
+  buf.writeUInt16LE(value.length, 2);
+  value.copy(buf, 4);
+  return buf;
+}
+
+const OPT_END_OF_OPT = Buffer.alloc(4); // code=0 length=0
+
+function buildBlock(blockType: number, body: Buffer): Buffer {
+  const padding = pad4(body.length);
+  const totalLen = 12 + body.length + padding;
+  const buf = Buffer.alloc(totalLen);
+  buf.writeUInt32LE(blockType, 0);
+  buf.writeUInt32LE(totalLen, 4);
+  body.copy(buf, 8);
+  buf.writeUInt32LE(totalLen, 8 + body.length + padding);
+  return buf;
+}
+
+function buildSectionHeaderBlock(appName: string): Buffer {
+  const fixed = Buffer.alloc(16);
+  fixed.writeUInt32LE(0x1a2b3c4d, 0);
+  fixed.writeUInt16LE(1, 4);
+  fixed.writeUInt16LE(0, 6);
+  fixed.writeBigInt64LE(-1n, 8);
+  const opts = Buffer.concat([
+    writeOption(4, Buffer.from(appName, "utf8")), // shb_userappl
+    OPT_END_OF_OPT,
+  ]);
+  return buildBlock(0x0a0d0d0a, Buffer.concat([fixed, opts]));
+}
+
+function buildInterfaceDescriptionBlock(ifName: string, ifDescription: string): Buffer {
+  const fixed = Buffer.alloc(8);
+  fixed.writeUInt16LE(1, 0); // LINKTYPE_ETHERNET
+  fixed.writeUInt16LE(0, 2); // reserved
+  fixed.writeUInt32LE(65535, 4); // snaplen
+  const opts = Buffer.concat([
+    writeOption(2, Buffer.from(ifName, "utf8")), // if_name
+    writeOption(3, Buffer.from(ifDescription, "utf8")), // if_description
+    writeOption(9, Buffer.from([6])), // if_tsresol = microseconds (10^-6)
+    OPT_END_OF_OPT,
+  ]);
+  return buildBlock(0x00000001, Buffer.concat([fixed, opts]));
+}
+
+function buildEnhancedPacketBlock(packet: Buffer, tsMillis: number, comments: string[]): Buffer {
+  const tsMicros = BigInt(Math.round(tsMillis * 1000));
+  const tsHigh = Number((tsMicros >> 32n) & 0xffffffffn);
+  const tsLow = Number(tsMicros & 0xffffffffn);
+  const padding = pad4(packet.length);
+  const fixed = Buffer.alloc(20 + packet.length + padding);
+  fixed.writeUInt32LE(0, 0); // interface_id = 0
+  fixed.writeUInt32LE(tsHigh, 4);
+  fixed.writeUInt32LE(tsLow, 8);
+  fixed.writeUInt32LE(packet.length, 12); // captured length
+  fixed.writeUInt32LE(packet.length, 16); // original length
+  packet.copy(fixed, 20);
+  const cleanComments = comments.filter((c) => typeof c === "string" && c.length > 0);
+  let optsBuf: Buffer;
+  if (cleanComments.length === 0) {
+    optsBuf = Buffer.alloc(0);
+  } else {
+    optsBuf = Buffer.concat([
+      ...cleanComments.map((c) => writeOption(1, Buffer.from(c.slice(0, 65535), "utf8"))),
+      OPT_END_OF_OPT,
+    ]);
+  }
+  return buildBlock(0x00000006, Buffer.concat([fixed, optsBuf]));
+}
+
+router.post("/aegis/replay/pcapng", validateBody(jsonObjectBodySchema), (req, res) => {
+  const body = req.body as PcapBody | undefined;
+  if (!body || !Array.isArray(body.frames) || body.frames.length === 0) {
+    res.status(400).json({ error: "frames array is required" });
+    return;
+  }
+
+  const filter = body.filter ?? {};
+  const protocolFilter = filter.protocol ?? "all";
+  const filtered = body.frames.filter((f) => {
+    if (protocolFilter !== "all" && f.protocol !== protocolFilter) return false;
+    if (typeof filter.startTs === "number" && f.ts < filter.startTs) return false;
+    if (typeof filter.endTs === "number" && f.ts > filter.endTs) return false;
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    res.status(400).json({ error: "No frames match the selected protocol filter and time range" });
+    return;
+  }
+
+  const safeId = (body.sessionId ?? "session").replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 64);
+  const seqState = new Map<string, number>();
+
+  const blocks: Buffer[] = [
+    buildSectionHeaderBlock("Aegis Cyber Resilience Command"),
+    buildInterfaceDescriptionBlock(
+      `aegis-${safeId}`,
+      `Aegis OT/ICS conversation replay (session ${safeId}, protocol ${protocolFilter})`,
+    ),
+  ];
+
+  for (const f of filtered) {
+    const data = buildPacket(f, seqState);
+    const comments: string[] = [];
+    if (f.comment) comments.push(f.comment);
+    if (f.anomalyNote) comments.push(`Anomaly: ${f.anomalyNote}`);
+    if (f.forensicEventId) comments.push(`Forensic Event ID: ${f.forensicEventId}`);
+    blocks.push(buildEnhancedPacketBlock(data, f.ts, comments));
+  }
+
+  const pcapng = Buffer.concat(blocks);
+  res.setHeader("Content-Type", "application/x-pcapng");
+  res.setHeader("Content-Disposition", `attachment; filename="${safeId}.pcapng"`);
+  res.setHeader("Content-Length", String(pcapng.length));
+  res.setHeader("X-Pcap-Frame-Count", String(filtered.length));
+  res.end(pcapng);
 });
 
 export default router;
