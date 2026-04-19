@@ -223,8 +223,22 @@ export class EvidenceStore implements EvidenceStoreBackend {
   }
 }
 
+export type RecommendationEventKind = "saved" | "status-changed";
+
+export interface RecommendationEvent {
+  kind: RecommendationEventKind;
+  recommendation: Recommendation;
+}
+
+export type RecommendationEventHandler = (event: RecommendationEvent) => void;
+
+export interface RecommendationEventSubscription {
+  unsubscribe(): void;
+}
+
 export class RecommendationStore implements RecommendationStoreBackend {
   private backend: RecommendationStoreBackend;
+  private readonly listeners = new Set<RecommendationEventHandler>();
 
   constructor(initial: RecommendationStoreBackend = new InMemoryRecommendationStore()) {
     this.backend = initial;
@@ -238,8 +252,24 @@ export class RecommendationStore implements RecommendationStoreBackend {
     return this.backend;
   }
 
+  on(handler: RecommendationEventHandler): RecommendationEventSubscription {
+    this.listeners.add(handler);
+    return { unsubscribe: () => this.listeners.delete(handler) };
+  }
+
+  private emit(event: RecommendationEvent): void {
+    for (const h of this.listeners) {
+      try {
+        h(event);
+      } catch (err) {
+        console.error("[RecommendationStore] listener error:", err);
+      }
+    }
+  }
+
   save(rec: Recommendation): void {
     this.backend.save(rec);
+    this.emit({ kind: "saved", recommendation: rec });
   }
 
   get(recommendationId: string): Recommendation | undefined {
@@ -260,7 +290,12 @@ export class RecommendationStore implements RecommendationStoreBackend {
     recommendationId: string,
     status: Recommendation["status"],
   ): boolean {
-    return this.backend.updateStatus(recommendationId, status);
+    const ok = this.backend.updateStatus(recommendationId, status);
+    if (ok) {
+      const updated = this.backend.get(recommendationId);
+      if (updated) this.emit({ kind: "status-changed", recommendation: updated });
+    }
+    return ok;
   }
 
   forEntity(entityId: string): Recommendation[] {

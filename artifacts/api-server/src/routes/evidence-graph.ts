@@ -13,8 +13,8 @@
  *   GET /evidence-graph/status                   — mesh health / counts
  */
 
-import { Router, type IRouter } from "express";
-import { defaultEvidenceGraphQuery } from "@szl-holdings/evidence-graph";
+import { Router, type IRouter, type Request, type Response } from "express";
+import { defaultEvidenceGraphQuery, defaultRecommendationStore } from "@szl-holdings/evidence-graph";
 import { defaultSignalBus } from "@szl-holdings/signal-mesh";
 import { defaultEntityRegistry } from "@workspace/ontology";
 import type { Recommendation, Signal, EntitySnapshot } from "@workspace/ontology";
@@ -151,6 +151,90 @@ router.get("/evidence-graph/status", auth, rateLimit, (_req, res) => {
   } catch (err) {
     handleRouteError(res, err, "Failed to get mesh status");
   }
+});
+
+/**
+ * GET /evidence-graph/stream
+ *
+ * Server-Sent Events stream for the evidence graph.
+ * Emits three event types as soon as they occur:
+ *   - `signal`         — every signal published to the bus
+ *   - `recommendation` — every recommendation save / status change
+ *   - `status`         — periodic mesh counts (every 15s + on connect)
+ *
+ * Heartbeat comments are sent every 25s to keep proxies from closing the
+ * connection.
+ */
+router.get("/evidence-graph/stream", auth, (req: Request, res: Response) => {
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache, no-transform");
+  res.setHeader("Connection", "keep-alive");
+  res.setHeader("X-Accel-Buffering", "no");
+  res.flushHeaders?.();
+
+  const write = (event: string, payload: unknown) => {
+    try {
+      res.write(`event: ${event}\n`);
+      res.write(`data: ${JSON.stringify(payload)}\n\n`);
+    } catch {
+      // socket likely closed; cleanup will run via "close"
+    }
+  };
+
+  const buildStatus = () => {
+    const DOMAINS: Signal["domain"][] = ["maritime", "real-estate", "legal", "security", "finance", "platform", "ai"];
+    const evidenceItems = defaultEvidenceGraphQuery.listEvidence({ limit: 5000 });
+    const recommendations = defaultEvidenceGraphQuery.listRecommendations({ limit: 5000 });
+    const entities = defaultEntityRegistry.list();
+    return {
+      status: "live",
+      meshVersion: "1.0.0",
+      counts: {
+        signals: defaultSignalBus.count(),
+        evidenceItems: evidenceItems.length,
+        recommendations: recommendations.length,
+        entities: entities.length,
+      },
+      domainBreakdown: {
+        signals: Object.fromEntries(
+          DOMAINS.map((d) => [d, defaultSignalBus.snapshot({ domain: d, limit: 10000 }).length]),
+        ),
+        recommendations: Object.fromEntries(
+          DOMAINS.map((d) => [d, recommendations.filter((r) => r.domain === d).length]),
+        ),
+      },
+      retrievedAt: new Date().toISOString(),
+    };
+  };
+
+  // Initial status snapshot so clients reflect counts immediately.
+  write("status", buildStatus());
+
+  const signalSub = defaultSignalBus.on("*", (signal) => {
+    write("signal", signal);
+  });
+
+  const recSub = defaultRecommendationStore.on(({ kind, recommendation }) => {
+    write("recommendation", { kind, recommendation });
+  });
+
+  const statusInterval = setInterval(() => {
+    write("status", buildStatus());
+  }, 15_000);
+
+  const heartbeat = setInterval(() => {
+    try {
+      res.write(": ping\n\n");
+    } catch { /* ignored */ }
+  }, 25_000);
+
+  req.on("close", () => {
+    signalSub.unsubscribe();
+    recSub.unsubscribe();
+    clearInterval(statusInterval);
+    clearInterval(heartbeat);
+    try { res.end(); } catch { /* ignored */ }
+  });
 });
 
 export default router;

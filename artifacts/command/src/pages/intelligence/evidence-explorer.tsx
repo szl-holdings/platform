@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import {
   EvidenceBadge,
   ConfidenceMeter,
@@ -151,6 +151,141 @@ async function fetchJson<T>(url: string): Promise<T> {
   if (!res.ok) throw new Error(`${res.status} ${res.statusText} — ${url}`);
   const body = await res.json();
   return (body?.data ?? body) as T;
+}
+
+// ─── Live SSE subscription ────────────────────────────────────────────────
+//
+// Subscribes to /api/evidence-graph/stream and merges signal, recommendation,
+// and status events into the React Query cache so the Explorer reflects bus
+// activity the moment it happens. While the SSE socket is open the polling
+// queries below switch off; if the socket drops we reconnect with backoff and
+// the queries fall back to their previous polling intervals.
+
+type SignalsCache = { signals: ApiSignal[]; total: number; busCount: number };
+type RecommendationsCache = { recommendations: ApiRecommendation[]; total: number };
+
+function mergeSignalIntoCaches(qc: QueryClient, signal: ApiSignal): void {
+  const queries = qc.getQueriesData<SignalsCache>({ queryKey: ["evidence-graph", "signals"] });
+  for (const [key, data] of queries) {
+    if (!data) continue;
+    const domainKey = key[2] as string | undefined;
+    if (domainKey && signal.domain !== domainKey) continue;
+    const without = data.signals.filter((s) => s.signalId !== signal.signalId);
+    const next = [signal, ...without].slice(0, 100);
+    qc.setQueryData<SignalsCache>(key, {
+      ...data,
+      signals: next,
+      total: next.length,
+      busCount: data.busCount + 1,
+    });
+  }
+}
+
+function mergeRecommendationIntoCaches(qc: QueryClient, rec: ApiRecommendation): void {
+  const queries = qc.getQueriesData<RecommendationsCache>({ queryKey: ["evidence-graph", "recommendations"] });
+  for (const [key, data] of queries) {
+    if (!data) continue;
+    const domainKey = key[2] as string | undefined;
+    const statusKey = key[3] as string | undefined;
+
+    // Always drop any prior copy first so a status transition (e.g. pending →
+    // accepted) removes the recommendation from filter views it no longer
+    // belongs to. Reinsert only if the updated recommendation still matches
+    // this query's filters.
+    const without = data.recommendations.filter((r) => r.recommendationId !== rec.recommendationId);
+    const matchesDomain = !domainKey || rec.domain === domainKey;
+    const matchesStatus = !statusKey || rec.status === statusKey;
+
+    let next: ApiRecommendation[];
+    if (matchesDomain && matchesStatus) {
+      next = [rec, ...without].slice(0, 100);
+    } else if (without.length === data.recommendations.length) {
+      // Nothing to remove and recommendation doesn't belong here — skip the
+      // setQueryData call so we don't churn unrelated caches.
+      continue;
+    } else {
+      next = without;
+    }
+
+    qc.setQueryData<RecommendationsCache>(key, {
+      ...data,
+      recommendations: next,
+      total: next.length,
+    });
+  }
+  // The chain endpoint cache for this rec may now be stale; let it refetch on next view.
+  qc.invalidateQueries({ queryKey: ["evidence-graph", "chain", rec.recommendationId] });
+}
+
+function useEvidenceGraphStream(): { connected: boolean } {
+  const qc = useQueryClient();
+  const [connected, setConnected] = useState(false);
+  const esRef = useRef<EventSource | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const open = () => {
+      if (cancelled) return;
+      esRef.current?.close();
+      const es = new EventSource("/api/evidence-graph/stream", { withCredentials: true });
+      esRef.current = es;
+
+      es.addEventListener("open", () => {
+        if (!cancelled) setConnected(true);
+      });
+
+      es.addEventListener("status", (event) => {
+        if (cancelled) return;
+        try {
+          const status = JSON.parse((event as MessageEvent).data) as ApiStatus;
+          qc.setQueryData<ApiStatus>(["evidence-graph", "status"], status);
+        } catch { /* ignore parse errors */ }
+      });
+
+      es.addEventListener("signal", (event) => {
+        if (cancelled) return;
+        try {
+          const signal = JSON.parse((event as MessageEvent).data) as ApiSignal;
+          mergeSignalIntoCaches(qc, signal);
+        } catch { /* ignore */ }
+      });
+
+      es.addEventListener("recommendation", (event) => {
+        if (cancelled) return;
+        try {
+          const payload = JSON.parse((event as MessageEvent).data) as { kind: string; recommendation: ApiRecommendation };
+          mergeRecommendationIntoCaches(qc, payload.recommendation);
+        } catch { /* ignore */ }
+      });
+
+      es.onerror = () => {
+        if (cancelled) return;
+        setConnected(false);
+        es.close();
+        esRef.current = null;
+        // Reconnect with a short delay; polling fallbacks resume in the meantime.
+        if (!reconnectTimer) {
+          reconnectTimer = setTimeout(() => {
+            reconnectTimer = null;
+            open();
+          }, 5_000);
+        }
+      };
+    };
+
+    open();
+
+    return () => {
+      cancelled = true;
+      esRef.current?.close();
+      esRef.current = null;
+      if (reconnectTimer) clearTimeout(reconnectTimer);
+    };
+  }, [qc]);
+
+  return { connected };
 }
 
 // ─── Visual helpers ────────────────────────────────────────────────────────
@@ -329,7 +464,7 @@ function SignalRow({ s }: { s: ApiSignal }) {
   );
 }
 
-function SignalsPanel({ domain }: { domain: string }) {
+function SignalsPanel({ domain, sseConnected }: { domain: string; sseConnected: boolean }) {
   const params = new URLSearchParams();
   if (domain) params.set("domain", domain);
   params.set("limit", "100");
@@ -339,7 +474,8 @@ function SignalsPanel({ domain }: { domain: string }) {
     queryFn: () => fetchJson<{ signals: ApiSignal[]; total: number; busCount: number }>(
       `/api/evidence-graph/signals?${params.toString()}`,
     ),
-    refetchInterval: 5_000,
+    // Polling falls back on when the SSE socket is disconnected.
+    refetchInterval: sseConnected ? false : 5_000,
   });
 
   return (
@@ -442,11 +578,13 @@ function RecommendationsPanel({
   status,
   selectedId,
   onSelect,
+  sseConnected,
 }: {
   domain: string;
   status: string;
   selectedId: string | null;
   onSelect: (id: string) => void;
+  sseConnected: boolean;
 }) {
   const params = new URLSearchParams();
   if (domain) params.set("domain", domain);
@@ -458,7 +596,7 @@ function RecommendationsPanel({
     queryFn: () => fetchJson<{ recommendations: ApiRecommendation[]; total: number }>(
       `/api/evidence-graph/recommendations?${params.toString()}`,
     ),
-    refetchInterval: 10_000,
+    refetchInterval: sseConnected ? false : 10_000,
   });
 
   return (
@@ -864,11 +1002,12 @@ export default function EvidenceExplorerPage() {
   const [selectedRec, setSelectedRec] = useState<string | null>(null);
   const [selectedEntity, setSelectedEntity] = useState<string | null>(null);
   const queryClient = useQueryClient();
+  const { connected: sseConnected } = useEvidenceGraphStream();
 
   const { data: status, isFetching } = useQuery({
     queryKey: ["evidence-graph", "status"],
     queryFn: () => fetchJson<ApiStatus>("/api/evidence-graph/status"),
-    refetchInterval: 15_000,
+    refetchInterval: sseConnected ? false : 15_000,
   });
 
   const handleRefresh = () => {
@@ -896,10 +1035,11 @@ export default function EvidenceExplorerPage() {
             status={filterMemo.recStatus}
             selectedId={selectedRec}
             onSelect={(id) => setSelectedRec(id)}
+            sseConnected={sseConnected}
           />
         </div>
         <div style={{ overflow: "hidden" }}>
-          <SignalsPanel domain={filterMemo.domain} />
+          <SignalsPanel domain={filterMemo.domain} sseConnected={sseConnected} />
         </div>
       </div>
 
