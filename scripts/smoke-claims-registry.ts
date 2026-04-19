@@ -23,6 +23,7 @@ import {
   PUBLIC_CLAIMS,
   getClaim,
   FOUNDER_YEARS_EXPERIENCE,
+  BANNED_HARDCODED_STRINGS,
 } from "../packages/config/src/public-claims.js";
 
 import {
@@ -30,8 +31,8 @@ import {
   getProduct,
 } from "../packages/config/src/platform-registry.js";
 
-import { readFileSync } from "fs";
-import { resolve, dirname } from "path";
+import { readFileSync, readdirSync, statSync } from "fs";
+import { resolve, dirname, relative } from "path";
 import { execSync } from "child_process";
 import { fileURLToPath } from "url";
 
@@ -486,6 +487,138 @@ for (const { artifact, consumers } of adapterConsumptionChecks) {
       new RegExp(`\\b${symbol}\\b`).test(source)
     );
   }
+}
+
+// ─── 7d. Banned hardcoded claim string scan ──────────────────────────────────
+//
+// Walks each migrated artifact's src/ directory and reports any .ts/.tsx file
+// (excluding lib/claims.ts — the sanctioned adapter) that contains a banned
+// hardcoded claim string from BANNED_HARDCODED_STRINGS in public-claims.ts.
+//
+// This is the regression guard: someone adds a new hardcoded "31,200+" or
+// "52,000+" in vessels-home.tsx and CI catches it on the next run.
+
+console.log("\n[7d] Banned hardcoded claim string scan (per-artifact src/)\n");
+
+const migratedArtifacts = [
+  "command",
+  "carlota-jo",
+  "vessels",
+  "aegis",
+  "pulse",
+  "terra",
+  "szl-holdings",
+];
+
+const repoRoot = resolve(__dirname, "..");
+
+function walkSourceFiles(dir: string, acc: string[] = []): string[] {
+  let entries: string[] = [];
+  try {
+    entries = readdirSync(dir);
+  } catch {
+    return acc;
+  }
+  for (const entry of entries) {
+    const full = `${dir}/${entry}`;
+    let s;
+    try {
+      s = statSync(full);
+    } catch {
+      continue;
+    }
+    if (s.isDirectory()) {
+      // Skip generated and dependency directories
+      if (entry === "node_modules" || entry === "dist" || entry === ".turbo") {
+        continue;
+      }
+      walkSourceFiles(full, acc);
+    } else if (
+      s.isFile() &&
+      (entry.endsWith(".ts") || entry.endsWith(".tsx"))
+    ) {
+      acc.push(full);
+    }
+  }
+  return acc;
+}
+
+interface HardcodedHit {
+  artifact: string;
+  file: string;
+  line: number;
+  banned: string;
+  claimId: string;
+  reason: string;
+  snippet: string;
+}
+
+const allHits: HardcodedHit[] = [];
+
+for (const artifact of migratedArtifacts) {
+  const srcDir = resolve(repoRoot, "artifacts", artifact, "src");
+  const files = walkSourceFiles(srcDir);
+  // Exclude the sanctioned claims adapter for this artifact
+  const excludedSuffix = `/lib/claims.ts`;
+  const scannable = files.filter((f) => !f.endsWith(excludedSuffix));
+
+  const artifactHits: HardcodedHit[] = [];
+  for (const file of scannable) {
+    let source: string;
+    try {
+      source = readFileSync(file, "utf8");
+    } catch {
+      continue;
+    }
+    const relPath = relative(repoRoot, file);
+    const lines = source.split("\n");
+    for (const banned of BANNED_HARDCODED_STRINGS) {
+      if (!source.includes(banned.value)) continue;
+      // Honor per-string legacy allowlist for grandfathered occurrences.
+      if (banned.legacyAllowedFiles?.includes(relPath)) continue;
+      for (let i = 0; i < lines.length; i++) {
+        if (lines[i].includes(banned.value)) {
+          artifactHits.push({
+            artifact,
+            file: relPath,
+            line: i + 1,
+            banned: banned.value,
+            claimId: banned.claimId,
+            reason: banned.reason ?? "",
+            snippet: lines[i].trim().slice(0, 200),
+          });
+        }
+      }
+    }
+  }
+
+  check(
+    `${artifact}/src/ has no banned hardcoded claim strings (outside lib/claims.ts)`,
+    artifactHits.length === 0,
+    artifactHits.length > 0
+      ? `${artifactHits.length} hit(s) — see diff below`
+      : undefined
+  );
+
+  allHits.push(...artifactHits);
+}
+
+if (allHits.length > 0) {
+  console.error("\n  ── Hardcoded claim regression diff ────────────────────");
+  for (const hit of allHits) {
+    console.error(
+      `  ${hit.file}:${hit.line}  ⟶  banned "${hit.banned}" (claim: ${hit.claimId})`
+    );
+    console.error(`    │ ${hit.snippet}`);
+    if (hit.reason) console.error(`    └─ ${hit.reason}`);
+  }
+  console.error(
+    "  ───────────────────────────────────────────────────────\n" +
+      "  Fix: replace each hardcoded value with the registry-backed constant\n" +
+      "  exported from the artifact's src/lib/claims.ts adapter, or add the\n" +
+      "  string to public-claims.ts BANNED_HARDCODED_STRINGS exemption list\n" +
+      "  only if it represents a genuinely unrelated use of the same characters.\n"
+  );
 }
 
 // ─── 8. Data-layer render assertion (subprocess) ─────────────────────────────

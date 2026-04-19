@@ -241,6 +241,117 @@ export const PUBLIC_CLAIMS: PublicClaim[] = [
   },
 ];
 
+/**
+ * Banned hardcoded claim strings.
+ *
+ * Any of these literal strings appearing in a migrated artifact's source files
+ * (outside of lib/claims.ts, which IS the registry adapter) is treated as a
+ * regression: someone reintroduced a hardcoded number that should be sourced
+ * from the public claims registry. The CI smoke test fails when one of these
+ * strings is found.
+ *
+ * Maintenance rules:
+ *   - When you add a new claim to PUBLIC_CLAIMS whose `claim` text is a short,
+ *     unambiguous public-facing number (e.g. "99.97%", "$4.2B+"), add the
+ *     literal string here too so future hardcoded re-introductions are caught.
+ *   - Use very specific phrases (e.g. "34 days pre-designation" rather than
+ *     "34 days") to avoid false positives in unrelated copy.
+ *   - Strings that already appear in non-claims source files are NOT included
+ *     here yet — they would need to be migrated through the claims adapter
+ *     first. Add them here once the migration is complete.
+ *   - The associated `claimId` documents which registry entry the value lives
+ *     under so reviewers know where to source it from.
+ */
+export interface BannedHardcodedString {
+  value: string;
+  claimId: string;
+  reason?: string;
+  /**
+   * Repo-relative file paths (POSIX) that are grandfathered for this banned
+   * value. Used to allow CI to enforce the ban globally while existing legacy
+   * occurrences are migrated incrementally. Any NEW file or any file removed
+   * from this list that still contains the literal will fail the smoke test.
+   *
+   * Keep this list as small as possible — every entry is tech debt waiting to
+   * be migrated through the per-artifact claims adapter.
+   */
+  legacyAllowedFiles?: string[];
+}
+
+export const BANNED_HARDCODED_STRINGS: BannedHardcodedString[] = [
+  {
+    value: "31,200+",
+    claimId: "aegis-simulations",
+    reason: "Use AEGIS_SIMULATIONS from the artifact's claims adapter.",
+  },
+  {
+    value: "52,000+",
+    claimId: "vessels-count",
+    reason: "Use VESSELS_COUNT from the artifact's claims adapter.",
+  },
+  {
+    value: "2.4M+",
+    claimId: "lyte-signals-per-day",
+    reason: "Use LYTE_SIGNALS_PER_DAY from the artifact's claims adapter.",
+  },
+  {
+    value: "< 3%",
+    claimId: "lyte-false-positive-rate",
+    reason:
+      "Use LYTE_FALSE_POSITIVE_RATE from the artifact's claims adapter.",
+  },
+  {
+    value: "34 days pre-designation",
+    claimId: "vessels-dark-detection-lead",
+    reason:
+      "Use VESSELS_DARK_DETECTION_LEAD from the artifact's claims adapter.",
+  },
+  {
+    value: "$4.2B+",
+    claimId: "terra-portfolio-aum",
+    reason: "Use TERRA_PORTFOLIO_AUM from the artifact's claims adapter.",
+    // Legacy: szl-holdings ventures.ts still hardcodes the Terra AUM metric.
+    legacyAllowedFiles: ["artifacts/szl-holdings/src/data/ventures.ts"],
+  },
+  {
+    value: "99.97%",
+    claimId: "command-uptime-90day",
+    reason:
+      "Use COMMAND_UPTIME_90DAY (or appropriate uptime constant) from the artifact's claims adapter.",
+    // Legacy: pre-existing uptime occurrences across command and szl-holdings
+    // surfaces. Migrate each through the claims adapter and remove the entry.
+    legacyAllowedFiles: [
+      "artifacts/command/src/data/mock-data.ts",
+      "artifacts/command/src/hooks/use-ecosystem-data.ts",
+      "artifacts/command/src/operations/pages/executive-command.tsx",
+      "artifacts/command/src/operations/pages/executive-summary.tsx",
+      "artifacts/command/src/pages/marketing/apps/[id].tsx",
+      "artifacts/command/src/pages/marketing/pricing.tsx",
+      "artifacts/command/src/pages/marketing/status.tsx",
+      "artifacts/aegis/src/pages/msp/dashboard.tsx",
+      "artifacts/szl-holdings/src/alloy/pages/marketing-landing.tsx",
+      "artifacts/szl-holdings/src/data/ventures.ts",
+      "artifacts/szl-holdings/src/pages/control-plane.tsx",
+      "artifacts/szl-holdings/src/pages/forge-home.tsx",
+      "artifacts/szl-holdings/src/pages/nexus-command.tsx",
+      "artifacts/szl-holdings/src/pages/pulse.tsx",
+    ],
+  },
+  {
+    value: "99.98%",
+    claimId: "command-uptime-30day",
+    reason:
+      "Use COMMAND_UPTIME_30DAY (or appropriate uptime constant) from the artifact's claims adapter.",
+    legacyAllowedFiles: [
+      "artifacts/command/src/infrastructure/lib/imperium-data.ts",
+      "artifacts/command/src/pages/marketing/apps/[id].tsx",
+      "artifacts/command/src/pages/marketing/status.tsx",
+      "artifacts/szl-holdings/src/pages/control-plane.tsx",
+      "artifacts/szl-holdings/src/pages/nexus-command.tsx",
+    ],
+  },
+];
+
 export const FOUNDER_START_YEAR = 2007;
 export const CURRENT_YEAR = new Date().getFullYear();
 export const FOUNDER_YEARS_EXPERIENCE = CURRENT_YEAR - FOUNDER_START_YEAR;
