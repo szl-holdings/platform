@@ -1,7 +1,8 @@
-import { useState } from "react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from "recharts";
-import { GitBranch, AlertTriangle, Clock, Users, ChevronDown, ChevronUp, Shield, ExternalLink } from "lucide-react";
+import { useEffect, useState } from "react";
+import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from "recharts";
+import { GitBranch, Clock, Users, ChevronDown, ChevronUp, Shield, CheckCircle2, UserCheck } from "lucide-react";
 import { driftItems, driftHistory, type DriftItem } from "@/data/seed";
+import { claimDrift, resolveDrift, useInterventions, formatTimestamp, bootstrapInterventions } from "@/data/interventions";
 
 function ProofBadge({ ref: proofRef }: { ref: string }) {
   return (
@@ -20,9 +21,31 @@ function StatusPill({ status }: { status: DriftItem["status"] }) {
 
 function DriftCard({ item }: { item: DriftItem }) {
   const [expanded, setExpanded] = useState(false);
+  const [resolveOpen, setResolveOpen] = useState(false);
+  const [note, setNote] = useState("");
+  const { drift } = useInterventions();
+  const intervention = drift[item.id];
+  const claimed = Boolean(intervention?.claimedBy);
+  const resolved = Boolean(intervention?.resolvedBy);
+
+  const handleClaim = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    claimDrift({ id: item.id, title: item.title });
+  };
+
+  const handleResolveSubmit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    resolveDrift({ id: item.id, title: item.title }, note.trim());
+    setNote("");
+    setResolveOpen(false);
+  };
 
   return (
-    <div className={`cockpit-panel transition-all ${item.status === "critical" ? "border-red-500/20" : item.status === "warn" ? "border-amber-500/20" : ""}`}>
+    <div className={`cockpit-panel transition-all ${
+      resolved ? "border-emerald-500/25 opacity-80" :
+      item.status === "critical" ? "border-red-500/20" :
+      item.status === "warn" ? "border-amber-500/20" : ""
+    }`}>
       <div
         className="flex items-start gap-3 p-4 cursor-pointer hover:bg-amber-500/3 transition-colors"
         onClick={() => setExpanded(v => !v)}
@@ -55,7 +78,7 @@ function DriftCard({ item }: { item: DriftItem }) {
             </div>
             <div className="flex items-center gap-1 text-[11px] text-amber-400/60">
               <Users className="w-3 h-3" />
-              <span>{item.owners.length} named owners</span>
+              <span>{claimed ? "1 sole owner (claimed)" : `${item.owners.length} named owners`}</span>
             </div>
             <ProofBadge ref={item.proofRef} />
           </div>
@@ -72,13 +95,24 @@ function DriftCard({ item }: { item: DriftItem }) {
 
           {/* Owners */}
           <div>
-            <p className="text-[10px] font-mono text-amber-400/40 uppercase mb-2">Named Owners</p>
+            <p className="text-[10px] font-mono text-amber-400/40 uppercase mb-2">
+              {claimed ? "Sole Owner (Claimed)" : "Named Owners"}
+            </p>
             <div className="flex flex-wrap gap-2">
-              {item.owners.map(owner => (
-                <span key={owner} className="text-[11px] px-2.5 py-1 rounded border border-amber-500/15 bg-amber-500/5 text-amber-200/70">
-                  {owner}
+              {claimed ? (
+                <span
+                  className="text-[11px] px-2.5 py-1 rounded border border-amber-400/40 bg-amber-500/15 text-amber-100 font-semibold"
+                  data-testid={`sole-owner-${item.id}`}
+                >
+                  {intervention?.claimedBy}
                 </span>
-              ))}
+              ) : (
+                item.owners.map(owner => (
+                  <span key={owner} className="text-[11px] px-2.5 py-1 rounded border border-amber-500/15 bg-amber-500/5 text-amber-200/70">
+                    {owner}
+                  </span>
+                ))
+              )}
             </div>
           </div>
 
@@ -94,6 +128,96 @@ function DriftCard({ item }: { item: DriftItem }) {
               ))}
             </ul>
           </div>
+
+          {/* Intervention status */}
+          {(claimed || resolved) && (
+            <div className={`rounded p-3 border ${resolved ? "bg-emerald-500/5 border-emerald-500/20" : "bg-sky-500/5 border-sky-500/20"}`}>
+              <p className={`text-[10px] font-mono uppercase mb-1 ${resolved ? "text-emerald-400/60" : "text-sky-400/60"}`}>
+                {resolved ? "Resolved" : "Claimed — In Progress"}
+              </p>
+              {claimed && (
+                <p className="text-[11px] text-amber-100/70">
+                  <span className="text-amber-200">{intervention?.claimedBy}</span> claimed sole ownership · {formatTimestamp(intervention?.claimedAt ?? "")}
+                  {intervention?.claimProofRef && (
+                    <span className="ml-2 proof-badge text-[9px]"><Shield className="w-2 h-2" />{intervention.claimProofRef}</span>
+                  )}
+                </p>
+              )}
+              {resolved && (
+                <p className="text-[11px] text-amber-100/70 mt-1">
+                  <span className="text-amber-200">{intervention?.resolvedBy}</span> marked resolved · {formatTimestamp(intervention?.resolvedAt ?? "")}
+                  {intervention?.resolveProofRef && (
+                    <span className="ml-2 proof-badge text-[9px]"><Shield className="w-2 h-2" />{intervention.resolveProofRef}</span>
+                  )}
+                </p>
+              )}
+              {resolved && intervention?.resolutionNote && (
+                <p className="text-[11px] text-amber-100/55 mt-1.5 italic">"{intervention.resolutionNote}"</p>
+              )}
+            </div>
+          )}
+
+          {/* Action buttons */}
+          {!resolved && (
+            <div className="flex flex-wrap items-center gap-2" onClick={e => e.stopPropagation()}>
+              {!claimed && (
+                <button
+                  type="button"
+                  onClick={handleClaim}
+                  data-testid={`button-claim-${item.id}`}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-amber-500 text-amber-950 text-[11px] font-semibold hover:bg-amber-400 transition-colors"
+                >
+                  <UserCheck className="w-3 h-3" />
+                  Claim Ownership
+                </button>
+              )}
+              {claimed && !resolveOpen && (
+                <button
+                  type="button"
+                  onClick={() => setResolveOpen(true)}
+                  data-testid={`button-open-resolve-${item.id}`}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 text-[11px] font-semibold hover:bg-emerald-500/15 transition-colors"
+                >
+                  <CheckCircle2 className="w-3 h-3" />
+                  Mark Resolved
+                </button>
+              )}
+              {claimed && intervention?.claimedBy && (
+                <span className="text-[10px] font-mono text-amber-400/40">Claimed by {intervention.claimedBy}</span>
+              )}
+            </div>
+          )}
+
+          {claimed && resolveOpen && !resolved && (
+            <div className="rounded border border-emerald-500/20 bg-emerald-500/4 p-3 space-y-2" onClick={e => e.stopPropagation()}>
+              <p className="text-[10px] font-mono text-emerald-400/60 uppercase">Resolution note (optional)</p>
+              <textarea
+                value={note}
+                onChange={e => setNote(e.target.value)}
+                placeholder="What was the proof of resolution? (e.g. 'Step 1 voided, Sarah Kim assigned, buyer call scheduled.')"
+                rows={2}
+                data-testid={`input-resolve-note-${item.id}`}
+                className="w-full text-xs bg-[#0d1520] border border-amber-500/15 rounded px-2 py-1.5 text-amber-100 placeholder:text-amber-400/30 focus:outline-none focus:border-emerald-500/40"
+              />
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleResolveSubmit}
+                  data-testid={`button-confirm-resolve-${item.id}`}
+                  className="px-3 py-1 rounded bg-emerald-500 text-emerald-950 text-[11px] font-semibold hover:bg-emerald-400 transition-colors"
+                >
+                  Confirm Resolution
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setResolveOpen(false); setNote(""); }}
+                  className="px-3 py-1 rounded text-[11px] text-amber-400/60 hover:text-amber-300 transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Last activity + proof */}
           <div className="flex items-center justify-between pt-2 border-t border-amber-500/8">
@@ -129,6 +253,8 @@ const CustomTooltip = ({ active, payload, label }: DriftTooltipProps) => {
 };
 
 export default function OwnershipDriftPage() {
+  useEffect(() => { void bootstrapInterventions(); }, []);
+
   const [filter, setFilter] = useState<"all" | "critical" | "warn" | "info">("all");
 
   const filtered = filter === "all" ? driftItems : driftItems.filter(d => d.status === filter);

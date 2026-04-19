@@ -1,7 +1,29 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "wouter";
-import { Activity, Shield, User, Zap, Brain, AlertTriangle, ChevronRight, Clock } from "lucide-react";
+import { Activity, Shield, User, Zap, Brain, AlertTriangle, ChevronRight, UserCheck, CheckCircle2, UserCog } from "lucide-react";
 import { replayScenarios, type ReplayEvent, type ReplayScenario } from "@/data/seed";
+import { useInterventions, bootstrapInterventions, formatTimestamp, type Intervention } from "@/data/interventions";
+
+const INTERVENTION_ICON: Record<Intervention["type"], React.ReactNode> = {
+  claim: <UserCheck className="w-3 h-3 text-amber-300" />,
+  resolve: <CheckCircle2 className="w-3 h-3 text-emerald-300" />,
+  reassign: <UserCog className="w-3 h-3 text-sky-300" />,
+  address: <CheckCircle2 className="w-3 h-3 text-emerald-300" />,
+};
+
+const INTERVENTION_LABEL: Record<Intervention["type"], string> = {
+  claim: "Claimed ownership",
+  resolve: "Resolved drift item",
+  reassign: "Reassigned owner",
+  address: "Flagged as addressed",
+};
+
+const INTERVENTION_TONE: Record<Intervention["type"], string> = {
+  claim: "border-amber-500/30 bg-amber-500/5",
+  resolve: "border-emerald-500/30 bg-emerald-500/5",
+  reassign: "border-sky-500/30 bg-sky-500/5",
+  address: "border-emerald-500/30 bg-emerald-500/5",
+};
 
 const EVIDENCE_ICONS: Record<ReplayEvent["evidenceType"], React.ReactNode> = {
   alloy: <Zap className="w-3 h-3 text-amber-400" />,
@@ -106,12 +128,14 @@ function ScenarioCard({ scenario, selected, onClick }: { scenario: ReplayScenari
 }
 
 export default function DecisionReplayPage() {
+  useEffect(() => { void bootstrapInterventions(); }, []);
+
   const params = useParams<{ id?: string }>();
   const initialScenario = params.id
     ? (replayScenarios.find(s => s.id === params.id) ?? replayScenarios[0])
     : replayScenarios[0];
   const [activeScenario, setActiveScenario] = useState<ReplayScenario>(initialScenario);
-  const [activeEvent, setActiveEvent] = useState<string | null>(null);
+  const { log: interventionLog } = useInterventions();
 
   const alloyEvents = activeScenario.events.filter(e => e.evidenceType === "alloy").length;
   const humanEvents = activeScenario.events.filter(e => e.evidenceType === "human").length;
@@ -154,6 +178,47 @@ export default function DecisionReplayPage() {
               onClick={() => setActiveScenario(s)}
             />
           ))}
+
+          {/* Operator interventions */}
+          <div className="cockpit-panel p-4 mt-4 space-y-2" data-testid="panel-intervention-log">
+            <div className="flex items-center justify-between">
+              <p className="text-[10px] font-mono text-amber-400/40 uppercase">Operator Interventions</p>
+              <span className="text-[9px] font-mono text-amber-400/40">{interventionLog.length} logged</span>
+            </div>
+            {interventionLog.length === 0 ? (
+              <p className="text-[10px] text-amber-100/40 italic">
+                Claim, reassign, or close items from the Drift / Debt surfaces — entries land here, ledger-anchored.
+              </p>
+            ) : (
+              <ul className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                {interventionLog.slice(0, 8).map(entry => (
+                  <li
+                    key={entry.id}
+                    data-testid={`intervention-${entry.type}-${entry.itemId}`}
+                    className={`rounded border px-2.5 py-2 ${INTERVENTION_TONE[entry.type]}`}
+                  >
+                    <div className="flex items-start gap-2">
+                      <div className="mt-0.5">{INTERVENTION_ICON[entry.type]}</div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[10px] font-mono text-amber-400/55">{formatTimestamp(entry.timestamp)}</p>
+                        <p className="text-[11px] text-amber-100/80 leading-snug">
+                          <span className="text-amber-200">{entry.actor}</span> · {INTERVENTION_LABEL[entry.type]}
+                          {entry.newOwner && <> → <span className="text-sky-300">{entry.newOwner}</span></>}
+                        </p>
+                        <p className="text-[10px] text-amber-100/45 truncate">{entry.itemTitle}</p>
+                        {entry.notes && (
+                          <p className="text-[10px] text-amber-100/55 mt-0.5 italic">"{entry.notes}"</p>
+                        )}
+                        <span className="proof-badge text-[9px] mt-1">
+                          <Shield className="w-2 h-2" />{entry.proofRef}
+                        </span>
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
 
           {/* Proof stats for active */}
           <div className="cockpit-panel p-4 mt-4 space-y-2">

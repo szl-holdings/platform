@@ -705,4 +705,104 @@ router.get("/lyte/live/github-trending", lyteLiveLimit, authMiddleware(), valida
   } catch (err) { handleRouteError(res, err, "Failed to fetch GitHub trending data"); }
 });
 
+// ─── Intervention ledger (claim, resolve, reassign, address) ──────────────────
+// In-memory ledger of operator interventions on Lyte drift / debt items.
+// Persists per process; mirrors the dashboard's local-first intervention store
+// so downstream consumers (Decision Replay, Board View intervention rate) can
+// pull a unified history. Replace with persistent store when DB schema lands.
+
+type LyteInterventionType = "claim" | "resolve" | "reassign" | "address";
+type LyteItemKind = "drift" | "debt";
+
+interface LyteInterventionRecord {
+  id: string;
+  itemId: string;
+  itemKind: LyteItemKind;
+  itemTitle: string;
+  type: LyteInterventionType;
+  actor: string;
+  notes?: string;
+  newOwner?: string;
+  proofRef: string;
+  timestamp: string;
+}
+
+const interventionLedger: LyteInterventionRecord[] = [];
+let interventionSeq = 0;
+
+function nextInterventionProofRef(): string {
+  interventionSeq += 1;
+  return `ALLOY-INT-${String(interventionSeq).padStart(4, "0")}`;
+}
+
+router.get("/lyte/interventions", authMiddleware(), (req, res) => {
+  try {
+    const { itemKind, itemId, type } = req.query as { itemKind?: string; itemId?: string; type?: string };
+    let rows = interventionLedger.slice();
+    if (itemKind === "drift" || itemKind === "debt") rows = rows.filter(r => r.itemKind === itemKind);
+    if (itemId) rows = rows.filter(r => r.itemId === itemId);
+    if (type && ["claim", "resolve", "reassign", "address"].includes(type)) {
+      rows = rows.filter(r => r.type === type);
+    }
+    rows.sort((a, b) => (a.timestamp < b.timestamp ? 1 : -1));
+    sendSuccess(res, rows, 200, { total: rows.length });
+  } catch (err) { handleRouteError(res, err, "Failed to list interventions"); }
+});
+
+router.post("/lyte/interventions", authMiddleware({ required: true }), denyIfReadOnly(), (req, res) => {
+  try {
+    const body = (req.body ?? {}) as Partial<LyteInterventionRecord>;
+    const validTypes: LyteInterventionType[] = ["claim", "resolve", "reassign", "address"];
+    const validKinds: LyteItemKind[] = ["drift", "debt"];
+    if (!body.itemId || typeof body.itemId !== "string") {
+      sendError(res, "itemId is required", 400);
+      return;
+    }
+    if (!body.itemTitle || typeof body.itemTitle !== "string") {
+      sendError(res, "itemTitle is required", 400);
+      return;
+    }
+    if (!body.type || !validTypes.includes(body.type as LyteInterventionType)) {
+      sendError(res, `type must be one of ${validTypes.join(", ")}`, 400);
+      return;
+    }
+    if (!body.itemKind || !validKinds.includes(body.itemKind as LyteItemKind)) {
+      sendError(res, `itemKind must be one of ${validKinds.join(", ")}`, 400);
+      return;
+    }
+    if (body.type === "reassign" && (!body.newOwner || typeof body.newOwner !== "string" || !body.newOwner.trim())) {
+      sendError(res, "newOwner is required for reassign", 400);
+      return;
+    }
+    if (body.type === "address" && (typeof body.notes !== "string" || !body.notes.trim())) {
+      sendError(res, "notes (evidence) is required for address", 400);
+      return;
+    }
+
+    // Audit-integrity: actor MUST be derived from the authenticated session.
+    // Never trust a client-supplied actor — that would allow forging the
+    // identity recorded in a governance proof chain.
+    if (!req.user) {
+      sendError(res, "Authentication required", 401);
+      return;
+    }
+    const actor = req.user.displayName;
+
+    const record: LyteInterventionRecord = {
+      id: `int-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      itemId: body.itemId,
+      itemKind: body.itemKind as LyteItemKind,
+      itemTitle: body.itemTitle,
+      type: body.type as LyteInterventionType,
+      actor,
+      notes: typeof body.notes === "string" ? body.notes : undefined,
+      newOwner: typeof body.newOwner === "string" ? body.newOwner.trim() : undefined,
+      proofRef: nextInterventionProofRef(),
+      timestamp: new Date().toISOString(),
+    };
+    interventionLedger.push(record);
+    sendSuccess(res, record, 201);
+  } catch (err) { handleRouteError(res, err, "Failed to record intervention"); }
+});
+
 export default router;

@@ -1,5 +1,7 @@
-import { LayoutDashboard, Shield, AlertTriangle, TrendingUp, TrendingDown, Minus, CheckCircle2, Clock, ArrowRight, Zap, Brain, Users } from "lucide-react";
-import { boardMetrics, boardRisks, type BoardMetric, type BoardRisk } from "@/data/seed";
+import { LayoutDashboard, Shield, AlertTriangle, TrendingUp, TrendingDown, Minus, Clock, ArrowRight, Zap, Brain, Users } from "lucide-react";
+import { boardMetrics, boardRisks, driftItems, debtItems, type BoardMetric, type BoardRisk } from "@/data/seed";
+import { useEffect } from "react";
+import { useInterventions, bootstrapInterventions } from "@/data/interventions";
 import { Link } from "wouter";
 
 function MetricCard({ metric }: { metric: BoardMetric }) {
@@ -85,9 +87,31 @@ function RiskCard({ risk }: { risk: BoardRisk }) {
 }
 
 export default function BoardViewPage() {
+  useEffect(() => { void bootstrapInterventions(); }, []);
+
   const critical = boardRisks.filter(r => r.severity === "critical");
   const high = boardRisks.filter(r => r.severity === "high");
   const medium = boardRisks.filter(r => r.severity === "medium");
+
+  const { drift, debt, log } = useInterventions();
+  const totalItems = driftItems.length + debtItems.length;
+  const driftClaimed = driftItems.filter(d => drift[d.id]?.claimedBy).length;
+  const driftResolved = driftItems.filter(d => drift[d.id]?.resolvedBy).length;
+  const debtReassigned = debtItems.filter(d => debt[d.id]?.reassignedTo).length;
+  const debtAddressed = debtItems.filter(d => debt[d.id]?.addressedBy).length;
+  const itemsWithIntervention = driftItems.filter(d => drift[d.id]).length + debtItems.filter(d => debt[d.id]).length;
+  const interventionRate = totalItems > 0 ? Math.round((itemsWithIntervention / totalItems) * 100) : 0;
+  const closedItems = driftResolved + debtAddressed;
+  const closureRate = totalItems > 0 ? Math.round((closedItems / totalItems) * 100) : 0;
+
+  const interventionMetric: BoardMetric = {
+    label: "Intervention Rate",
+    value: `${interventionRate}%`,
+    delta: `${log.length} action${log.length === 1 ? "" : "s"} logged`,
+    trend: interventionRate > 0 ? "up" : "flat",
+    context: `${itemsWithIntervention} of ${totalItems} drift+debt items have an operator action — ${closureRate}% closed.`,
+    good: "up",
+  };
 
   return (
     <div className="p-6 space-y-6 max-w-6xl">
@@ -144,7 +168,44 @@ export default function BoardViewPage() {
         <p className="text-[10px] font-mono text-amber-400/40 uppercase mb-3">Operational Health Metrics</p>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {boardMetrics.map(m => <MetricCard key={m.label} metric={m} />)}
+          <div data-testid="metric-intervention-rate">
+            <MetricCard metric={interventionMetric} />
+          </div>
         </div>
+      </div>
+
+      {/* Intervention activity */}
+      <div className="cockpit-panel p-5">
+        <div className="flex items-start justify-between gap-3 mb-4">
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 rounded bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
+              <Zap className="w-4 h-4 text-emerald-400" />
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-amber-100 mb-0.5">Operator Intervention Activity</p>
+              <p className="text-[10px] font-mono text-amber-400/45">Live count of claims, reassigns, and closures from the dashboard</p>
+            </div>
+          </div>
+          <span className="proof-badge"><Shield className="w-2.5 h-2.5" />ALLOY-INT</span>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {[
+            { label: "Claims", value: driftClaimed, color: "text-amber-300", testId: "stat-claims" },
+            { label: "Drift Resolved", value: driftResolved, color: "text-emerald-300", testId: "stat-drift-resolved" },
+            { label: "Debt Reassigned", value: debtReassigned, color: "text-sky-300", testId: "stat-debt-reassigned" },
+            { label: "Debt Addressed", value: debtAddressed, color: "text-emerald-300", testId: "stat-debt-addressed" },
+          ].map(s => (
+            <div key={s.label} className="rounded border border-amber-500/12 bg-amber-500/4 p-3" data-testid={s.testId}>
+              <p className="text-[10px] font-mono text-amber-400/45 uppercase mb-1">{s.label}</p>
+              <p className={`text-2xl font-mono font-bold ${s.color}`}>{s.value}</p>
+            </div>
+          ))}
+        </div>
+        {log.length === 0 && (
+          <p className="text-[11px] text-amber-100/45 mt-3">
+            No interventions logged yet. Use the Ownership Drift and Action Debt surfaces to claim, reassign, or close items — they will appear in Decision Replay.
+          </p>
+        )}
       </div>
 
       {/* Risk register */}
