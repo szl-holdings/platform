@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import {
+
   GitBranch,
   Layers,
   Shield,
@@ -15,6 +16,7 @@ import {
   Sparkles,
   Filter,
 } from "lucide-react";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 type Domain = "aegis" | "vessels" | "terra";
 
@@ -204,7 +206,7 @@ function fmtRelative(ts: number): string {
 
 function useDomainOverlays(domain: Domain) {
   const meta = DOMAIN_META[domain];
-  return useQuery<OverlayApiResponse>({
+  return useStandardQuery<OverlayApiResponse>({
     queryKey: ["correlation-overlays", meta.twinCategory],
     queryFn: () => apiFetch<OverlayApiResponse>(`/atlas/spatial/worldline/overlays?twinCategory=${encodeURIComponent(meta.twinCategory)}&limit=50`),
     staleTime: 30_000,

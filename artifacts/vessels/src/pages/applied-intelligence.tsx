@@ -1,9 +1,10 @@
-import { useQuery } from "@tanstack/react-query";
+
 import { dataProvider } from "@/data/data-provider";
 import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Brain, Sparkles, Wrench, TrendingUp, AlertTriangle, Info, CheckCircle, Target, BarChart3 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Area, AreaChart } from "recharts";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const severityColors: Record<string, string> = {
   Critical: "bg-red-500/10 text-red-400 border-red-500/20",
@@ -18,9 +19,9 @@ const riskColors: Record<string, string> = {
 };
 
 export default function AppliedIntelligencePage() {
-  const { data: briefings = [] } = useQuery({ queryKey: ["ai-briefings"], queryFn: () => dataProvider.getAIBriefings() });
-  const { data: predictive = [] } = useQuery({ queryKey: ["predictive-maint"], queryFn: () => dataProvider.getPredictiveMaintenanceItems() });
-  const { data: forecasts = [] } = useQuery({ queryKey: ["forecasts"], queryFn: () => dataProvider.getForecastModules() });
+  const { data: briefings = [] } = useStandardQuery({ queryKey: ["ai-briefings"], queryFn: () => dataProvider.getAIBriefings() });
+  const { data: predictive = [] } = useStandardQuery({ queryKey: ["predictive-maint"], queryFn: () => dataProvider.getPredictiveMaintenanceItems() });
+  const { data: forecasts = [] } = useStandardQuery({ queryKey: ["forecasts"], queryFn: () => dataProvider.getForecastModules() });
 
   return (
     <div className="p-6 space-y-6">

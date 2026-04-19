@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { Layers, Building2, TrendingUp, TrendingDown, Activity, MapPin, BarChart3, AlertTriangle, DollarSign, Shield, Clock, ChevronRight, Lock, GitBranch } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const DEMO_PROPERTIES = [
   { id: "p-001", address: "84 Grand St", neighborhood: "Williamsburg", type: "Multi-Family", units: 12, value: 3_800_000, noi: 228_000, ltv: 0.58, status: "stable" },
@@ -181,32 +182,32 @@ export default function TerraAtlasRuntimePage() {
   const [overlays, setOverlays] = useState(OVERLAYS.map(o => ({ ...o })));
   const [safeMode, setSafeMode] = useState(false);
 
-  const { data: driftData } = useQuery<{ twins: Array<{ twinId: string; driftScore: number; status: string }> }>({
+  const { data: driftData } = useStandardQuery<{ twins: Array<{ twinId: string; driftScore: number; status: string }> }>({
     queryKey: ["terra-atlas-drift"],
     queryFn: () => fetch("/api/atlas/spatial/drift?twinCategory=property").then(r => r.ok ? r.json() : Promise.reject(r.status)).then(r => r.data ?? r),
     staleTime: 60000,
     retry: 1,
   });
-  const { data: branchData } = useQuery<{ count: number }>({
+  const { data: branchData } = useStandardQuery<{ count: number }>({
     queryKey: ["terra-atlas-branches"],
     queryFn: () => fetch("/api/atlas/spatial/branches?twinCategory=property").then(r => r.ok ? r.json() : Promise.reject(r.status)).then(r => r.data ?? r),
     staleTime: 60000,
     retry: 1,
   });
-  const { data: propertiesData, isError: propertiesError, isLoading: propertiesLoading } = useQuery<{ data: { properties: ApiProperty[] } }>({
+  const { data: propertiesData, isError: propertiesError, isLoading: propertiesLoading } = useStandardQuery<{ data: { properties: ApiProperty[] } }>({
     queryKey: ["terra-properties-list"],
     queryFn: () => fetch("/api/terra/properties").then(r => r.ok ? r.json() : Promise.reject(r.status)),
     staleTime: 120000,
     retry: 1,
   });
-  const { data: selectedPropData } = useQuery<{ data: ApiProperty }>({
+  const { data: selectedPropData } = useStandardQuery<{ data: ApiProperty }>({
     queryKey: ["terra-property", selectedId],
     queryFn: () => fetch(`/api/terra/properties/${selectedId}`).then(r => r.ok ? r.json() : Promise.reject(r.status)),
     staleTime: 60000,
     retry: 1,
     enabled: !!selectedId,
   });
-  const { data: marketData } = useQuery<{ data: MarketData }>({
+  const { data: marketData } = useStandardQuery<{ data: MarketData }>({
     queryKey: ["terra-market"],
     queryFn: () => fetch("/api/terra/market").then(r => r.ok ? r.json() : Promise.reject(r.status)),
     staleTime: 120000,

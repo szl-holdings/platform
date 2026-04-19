@@ -1,16 +1,18 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { Card, CardContent } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Button } from "@szl-holdings/shared-ui/ui/button";
 import { Progress } from "@szl-holdings/shared-ui/ui/progress";
 import {
+
   Shield, Key, Globe, Settings, Package, Search,
   CheckCircle, AlertTriangle, XCircle, RefreshCw,
   ChevronDown, ChevronRight, Zap, User, Clock, Calendar
 } from "lucide-react";
 import { type ElementType, useState } from "react";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface HardeningControl {
   id: number;
@@ -64,14 +66,14 @@ function ControlCard({ control, categoryColor }: { control: HardeningControl; ca
   const linkedAssets = Array.isArray(control.linkedAssets) ? control.linkedAssets : [];
   const auditTrail = Array.isArray(control.auditTrail) ? control.auditTrail : [];
 
-  const workflowMutation = useMutation({
+  const workflowMutation = useStandardMutation({
     mutationFn: (actionType: string) =>
       api.workflowActions.create({ entityType: "asset", entityId: control.id, actionType, assignedTo: control.owner, notes: `Control: ${control.controlId} — ${control.name}` }),
     onSuccess: () => toast.success("Workflow action triggered via Alloy"),
     onError: () => toast.error("Failed to trigger workflow"),
   });
 
-  const updateMutation = useMutation({
+  const updateMutation = useStandardMutation({
     mutationFn: (data: { status: string; notes?: string }) =>
       api.hardeningControls.update(control.id, data),
     onSuccess: () => {
@@ -222,13 +224,13 @@ function categoryScore(controls: HardeningControl[]): number {
 export default function HardeningControlsPage() {
   const [expandedCategory, setExpandedCategory] = useState<string | null>("mfa_credential");
 
-  const { data: controls = [], isLoading, refetch } = useQuery({
+  const { data: controls = [], isLoading, refetch } = useStandardQuery({
     queryKey: ["hardening-controls"],
     queryFn: () => api.hardeningControls.list(),
     staleTime: 30_000,
   });
 
-  const { data: summary } = useQuery({
+  const { data: summary } = useStandardQuery({
     queryKey: ["hardening-summary"],
     queryFn: () => api.hardeningControls.summary(),
     staleTime: 30_000,

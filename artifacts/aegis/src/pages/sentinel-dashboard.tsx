@@ -1,6 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
+
 import { Shield, AlertTriangle, Eye, Clock, Activity, Target, Radio, Wifi, Lock, Zap, ChevronRight } from "lucide-react";
 import { api } from "@/lib/api";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const threatFeeds = [
   { source: "MITRE ATT&CK", threats: 142, severity: "high", lastUpdate: "2m ago", status: "active" },
@@ -57,14 +58,14 @@ const zoneStyles: Record<string, string> = {
 };
 
 export default function SentinelDashboard() {
-  const { data: mitreCoverageData } = useQuery({
+  const { data: mitreCoverageData } = useStandardQuery({
     queryKey: ["mitre-coverage"],
     queryFn: () => api.mitre.coverage(),
     staleTime: 300_000,
     retry: false,
   });
 
-  const { data: threatSummaryData } = useQuery({
+  const { data: threatSummaryData } = useStandardQuery({
     queryKey: ["threat-summary"],
     queryFn: () => api.liveData.threatSummary(),
     staleTime: 30_000,

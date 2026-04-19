@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+
 import {
+
   BookOpen, AlertTriangle, Shield, CheckCircle, Activity, Clock, Eye,
   ChevronDown, ChevronRight, Target, FileText, Link2, User, Server,
   Database, Globe, Network, Lock, Unlock, Zap, Brain, TrendingUp,
@@ -9,6 +10,7 @@ import {
 } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
+import { useStandardMutation } from "@szl-holdings/api-client-react";
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "/api";
 
@@ -1058,7 +1060,7 @@ function ApprovalModal({ action, stepTitle, incidentId, onApprove, onDeny, onClo
   const risk = RISK_CONFIG[action.riskLevel];
 
   // Create approval request then immediately review it (approve or deny)
-  const submitMutation = useMutation({
+  const submitMutation = useStandardMutation({
     mutationFn: async (decision: "approved" | "rejected") => {
       // Step 1: create the approval request in the policy engine
       const createRes = await fetch(`${API_BASE}/approvals`, {

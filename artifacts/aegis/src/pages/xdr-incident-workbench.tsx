@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import {
+
   AlertTriangle, Shield, Users, Clock, ChevronRight, X, Activity, Tag,
   MessageSquare, FileText, Link2, Target, Cpu, Globe, Database, User,
   CheckCircle, Play, Pause, Zap, ArrowRight, Eye, Search, Filter, Plus,
@@ -12,6 +13,7 @@ import { Button } from "@szl-holdings/shared-ui/ui/button";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { api } from "@/lib/api";
 import { NARRATIVE_INCIDENTS, type MitreStageCoverage } from "./adversary-narrative-engine";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 const SEVERITY_CONFIG = {
   critical: { label: "Critical", color: "#ef4444", bg: "rgba(239,68,68,0.1)", border: "rgba(239,68,68,0.25)" },

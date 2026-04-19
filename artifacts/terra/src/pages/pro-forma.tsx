@@ -1,14 +1,16 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
+
   BarChart3, DollarSign, TrendingUp, Calculator, Building2, Calendar,
   ChevronDown, ChevronUp, AlertTriangle, CheckCircle, RefreshCw, Download,
   Save, FolderOpen, Plus, Trash2, Copy, BarChart2, GitCompare, Grid3X3
 } from "lucide-react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { api } from "../lib/api";
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface TooltipPayloadEntry { name: string; value: number; color?: string; fill?: string; }
 interface ChartTooltipProps { active?: boolean; payload?: TooltipPayloadEntry[]; label?: string; }
@@ -359,13 +361,13 @@ const INITIAL_SCENARIOS: Scenario[] = [
 export default function ProFormaPage() {
   const queryClient = useQueryClient();
 
-  const { data: savedProjects } = useQuery({
+  const { data: savedProjects } = useStandardQuery({
     queryKey: ["terra-pro-forma-projects"],
     queryFn: () => api.proForma.list(),
     staleTime: 30_000,
   });
 
-  const saveProjectMutation = useMutation({
+  const saveProjectMutation = useStandardMutation({
     mutationFn: (data: { projectName: string; inputs: Record<string, unknown>; results: Record<string, unknown> }) =>
       api.proForma.create(data),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["terra-pro-forma-projects"] }); },

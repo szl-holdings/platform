@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { OpsLayout } from "../components/ops-layout";
 import { Zap, Shield, Activity, DollarSign, CheckCircle2, Clock, AlertTriangle, ChevronRight, Settings, RefreshCw, User } from "lucide-react";
 import { useEcosystemData } from "../hooks/use-ecosystem-data";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface ApiDigestSection {
   id: string;
@@ -149,7 +150,7 @@ export default function DigestPage() {
 
   const compositeScore = data?.compositeScore ?? 78;
 
-  const { data: apiData } = useQuery<ApiDigestResponse>({
+  const { data: apiData } = useStandardQuery<ApiDigestResponse>({
     queryKey: ["command-digest", role],
     queryFn: async () => {
       const res = await fetch(`/api/command/digest?role=${role}`, { credentials: "include" });

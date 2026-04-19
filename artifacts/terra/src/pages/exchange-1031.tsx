@@ -1,11 +1,13 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import {
+
   Clock, AlertTriangle, CheckCircle, Building2, DollarSign, Calendar,
   ArrowRight, Shield, FileText, RefreshCw, ChevronRight, CircleAlert, Plus, X, Database
 } from "lucide-react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { api } from "../lib/api";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 const DS = {
   surface: "rgba(255,255,255,0.025)",
@@ -195,13 +197,13 @@ function ExchangeCard({ ex, selected, onClick }: { ex: Exchange; selected: boole
 export default function Exchange1031Page() {
   const queryClient = useQueryClient();
 
-  const { data: apiData, isLoading, isError } = useQuery({
+  const { data: apiData, isLoading, isError } = useStandardQuery({
     queryKey: ["terra-exchanges-1031"],
     queryFn: () => api.exchanges1031.list(),
     staleTime: 30_000,
   });
 
-  const seedMutation = useMutation({
+  const seedMutation = useStandardMutation({
     mutationFn: async () => {
       for (const ex of EXCHANGES) {
         await api.exchanges1031.create({

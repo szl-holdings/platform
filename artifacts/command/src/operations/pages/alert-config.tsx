@@ -1,9 +1,10 @@
 // @ts-nocheck
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { Bell, Plus, AlertTriangle, CheckCircle, Clock, Zap, RefreshCw, X, Trash2 } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface LyteAlert {
   id: number;
@@ -51,13 +52,13 @@ const SEV_COLORS: Record<string, string> = { critical: "#c45a4a", high: "#c8953c
 const COND_LABELS: Record<string, string> = { gt: ">", lt: "<", gte: "≥", lte: "≤", eq: "=", anomaly: "anomaly" };
 
 function AlertDetail({ alertId, onClose }: { alertId: number; onClose: () => void }) {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading } = useStandardQuery({
     queryKey: ["alert-detail", alertId],
     queryFn: () => apiFetch<LyteAlert & { events: AlertEvent[] }>(`/lyte/alerts/${alertId}`),
   });
 
   const qc = useQueryClient();
-  const updateMutation = useMutation({
+  const updateMutation = useStandardMutation({
     mutationFn: (patch: Partial<LyteAlert>) => apiFetch(`/lyte/alerts/${alertId}`, { method: "PATCH", body: JSON.stringify(patch) }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["alerts"] }); qc.invalidateQueries({ queryKey: ["alert-detail", alertId] }); },
   });
@@ -170,7 +171,7 @@ function CreateAlertModal({ onClose }: { onClose: () => void }) {
     channelInput: "",
   });
 
-  const mutation = useMutation({
+  const mutation = useStandardMutation({
     mutationFn: (data: any) => apiFetch("/lyte/alerts", { method: "POST", body: JSON.stringify(data) }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["alerts"] }); onClose(); },
   });
@@ -284,7 +285,7 @@ export default function AlertConfig() {
   const params = new URLSearchParams();
   if (statusFilter !== "all") params.set("status", statusFilter);
 
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { data, isLoading, isError, refetch } = useStandardQuery({
     queryKey: ["alerts", statusFilter],
     queryFn: async () => {
       const result = await apiFetch<any>(`/lyte/alerts?${params}&limit=100`);
@@ -299,7 +300,7 @@ export default function AlertConfig() {
   const activeCount = alerts.filter(a => a.status === "active").length;
 
   const qc = useQueryClient();
-  const deleteMutation = useMutation({
+  const deleteMutation = useStandardMutation({
     mutationFn: (id: number) => apiFetch(`/lyte/alerts/${id}`, { method: "DELETE" }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["alerts"] }),
   });

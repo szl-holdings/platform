@@ -1,8 +1,9 @@
-import { useQuery } from "@tanstack/react-query";
+
 import { dataProvider } from "@/data/data-provider";
 import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { ShieldCheck, FileWarning, AlertTriangle, CheckCircle, Clock, Shield, Ban, Globe } from "lucide-react";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const certStatusColors: Record<string, string> = {
   Valid: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
@@ -17,10 +18,10 @@ const defSeverityColors: Record<string, string> = {
 };
 
 export default function SyntheticsCompliancePage() {
-  const { data: certificates = [] } = useQuery({ queryKey: ["certificates"], queryFn: () => dataProvider.getComplianceCertificates() });
-  const { data: deficiencies = [] } = useQuery({ queryKey: ["deficiencies"], queryFn: () => dataProvider.getPortStateDeficiencies() });
-  const { data: alerts = [] } = useQuery({ queryKey: ["compliance-alerts"], queryFn: () => dataProvider.getComplianceAlerts() });
-  const { data: sanctions = [] } = useQuery({ queryKey: ["sanctions-risk"], queryFn: () => dataProvider.getSanctionsRiskIndicators() });
+  const { data: certificates = [] } = useStandardQuery({ queryKey: ["certificates"], queryFn: () => dataProvider.getComplianceCertificates() });
+  const { data: deficiencies = [] } = useStandardQuery({ queryKey: ["deficiencies"], queryFn: () => dataProvider.getPortStateDeficiencies() });
+  const { data: alerts = [] } = useStandardQuery({ queryKey: ["compliance-alerts"], queryFn: () => dataProvider.getComplianceAlerts() });
+  const { data: sanctions = [] } = useStandardQuery({ queryKey: ["sanctions-risk"], queryFn: () => dataProvider.getSanctionsRiskIndicators() });
 
   const expiring = certificates.filter(c => c.status === "Expiring Soon").length;
   const expired = certificates.filter(c => c.status === "Expired").length;

@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { CreditCard, CheckCircle2, Clock, AlertTriangle, FileText, RefreshCw, ExternalLink, Zap } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { trackEvent } from "@szl-holdings/observability/react";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface Subscription {
   id: number;
@@ -66,13 +67,13 @@ export default function BillingPanelPage() {
   const [invoicePage, setInvoicePage] = useState(0);
   const pageSize = 5;
 
-  const { data: subsData, isLoading: subsLoading, refetch: refetchSubs } = useQuery({
+  const { data: subsData, isLoading: subsLoading, refetch: refetchSubs } = useStandardQuery({
     queryKey: ["billing-subscriptions"],
     queryFn: () => apiFetch<ApiResponse<Subscription[]>>("/billing/subscriptions"),
     staleTime: 60_000,
   });
 
-  const { data: invData, isLoading: invLoading, refetch: refetchInvoices } = useQuery({
+  const { data: invData, isLoading: invLoading, refetch: refetchInvoices } = useStandardQuery({
     queryKey: ["billing-invoices", invoicePage],
     queryFn: () => apiFetch<ApiResponse<Invoice[]>>(`/billing/invoices?limit=${pageSize}&offset=${invoicePage * pageSize}`),
     staleTime: 60_000,

@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import {
+
   Globe, Search, Filter, RefreshCw, ZoomIn, ZoomOut,
   Info, Clock, ChevronRight, X, Layers, GitBranch,
 } from "lucide-react";
 import { CognitiveLayout } from "./cognitive-layout";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 const ACCENT = "#8b7ac8";
@@ -182,7 +184,7 @@ export default function WorldModelExplorer() {
     return () => clearTimeout(t);
   }, [searchQuery]);
 
-  const { data: worldData, refetch, isFetching } = useQuery<WorldModel>({
+  const { data: worldData, refetch, isFetching } = useStandardQuery<WorldModel>({
     queryKey: ["cognitive", "world-model"],
     queryFn: () =>
       fetch(`${BASE}/api/graph/entities`, { credentials: "include" })
@@ -193,7 +195,7 @@ export default function WorldModelExplorer() {
   });
 
   interface SearchResult { nodeIds: string[]; nodes?: ConstellationNode[] }
-  const { data: searchData, isFetching: isSearching } = useQuery<SearchResult>({
+  const { data: searchData, isFetching: isSearching } = useStandardQuery<SearchResult>({
     queryKey: ["cognitive", "graph-search", debouncedQuery],
     queryFn: () =>
       fetch(`${BASE}/api/graph/search?q=${encodeURIComponent(debouncedQuery)}`, { credentials: "include" })

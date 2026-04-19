@@ -1,7 +1,8 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { Flag, AlertTriangle, ToggleLeft, ToggleRight, Search } from "lucide-react";
 import { useState } from "react";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface FeatureFlag {
   key: string;
@@ -26,12 +27,12 @@ export default function FeatureFlags() {
   const [search, setSearch] = useState("");
   const qc = useQueryClient();
 
-  const { data, isLoading, error } = useQuery<{ flags: FeatureFlag[] }>({
+  const { data, isLoading, error } = useStandardQuery<{ flags: FeatureFlag[] }>({
     queryKey: ["feature-flags"],
     queryFn: () => apiFetch("/admin/feature-flags"),
   });
 
-  const toggleMutation = useMutation({
+  const toggleMutation = useStandardMutation({
     mutationFn: ({ key, enabled }: { key: string; enabled: boolean }) =>
       apiFetch(`/admin/feature-flags/${key}`, { method: "PUT", body: JSON.stringify({ enabled }) }),
     onMutate: async ({ key, enabled }) => {

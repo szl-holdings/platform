@@ -211,6 +211,9 @@ importers:
 
   artifacts/aegis:
     dependencies:
+      '@szl-holdings/api-client-react':
+        specifier: workspace:*
+        version: link:../../lib/api-client-react
       '@szl-holdings/brand-registry':
         specifier: workspace:*
         version: link:../../packages/brand-registry
@@ -827,6 +830,9 @@ importers:
       '@szl-holdings/analytics':
         specifier: workspace:*
         version: link:../../lib/analytics
+      '@szl-holdings/api-client-react':
+        specifier: workspace:*
+        version: link:../../lib/api-client-react
       '@szl-holdings/graphql-client':
         specifier: workspace:*
         version: link:../../lib/graphql-client
@@ -1373,6 +1379,9 @@ importers:
 
   artifacts/pulse:
     dependencies:
+      '@szl-holdings/api-client-react':
+        specifier: workspace:*
+        version: link:../../lib/api-client-react
       '@szl-holdings/brand-registry':
         specifier: workspace:*
         version: link:../../packages/brand-registry

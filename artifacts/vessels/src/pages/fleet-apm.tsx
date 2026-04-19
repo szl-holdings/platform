@@ -1,13 +1,14 @@
-import { useQuery } from "@tanstack/react-query";
+
 import { dataProvider } from "@/data/data-provider";
 import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { TrendingUp, TrendingDown, DollarSign, BarChart3, Ship, Activity, Gauge, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Legend, Area, AreaChart } from "recharts";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 export default function FleetAPMPage() {
-  const { data: vessels = [] } = useQuery({ queryKey: ["apm-vessels"], queryFn: () => dataProvider.getVessels() });
-  const { data: kpis } = useQuery({ queryKey: ["fleet-kpis"], queryFn: () => dataProvider.getFleetKPIs() });
+  const { data: vessels = [] } = useStandardQuery({ queryKey: ["apm-vessels"], queryFn: () => dataProvider.getVessels() });
+  const { data: kpis } = useStandardQuery({ queryKey: ["fleet-kpis"], queryFn: () => dataProvider.getFleetKPIs() });
 
   const activeVessels = vessels.filter(v => (v.tce ?? 0) > 0);
   const avgTCE = activeVessels.length > 0 ? Math.round(activeVessels.reduce((s, v) => s + (v.tce ?? 0), 0) / activeVessels.length) : 0;

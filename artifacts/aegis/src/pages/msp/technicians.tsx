@@ -1,10 +1,11 @@
 import { motion } from "framer-motion";
 import { User, CheckCircle2, Clock, Wrench, BarChart3 } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
-import { useQuery } from "@tanstack/react-query";
+
 import { Skeleton } from "@szl-holdings/shared-ui/ui/skeleton";
 import { technicians as fallbackTechnicians, type Technician } from "@/data/seed-data";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface ApiTechnician {
   id: number;
@@ -110,7 +111,7 @@ function TechnicianCard({ tech, index }: { tech: Technician | ApiTechnician; ind
 }
 
 export default function TechniciansPage() {
-  const { data, isLoading } = useQuery<{ technicians: ApiTechnician[] }>({
+  const { data, isLoading } = useStandardQuery<{ technicians: ApiTechnician[] }>({
     queryKey: ["msp-technicians"],
     queryFn: () => apiFetch<{ technicians: ApiTechnician[] }>("/msp/technicians"),
     staleTime: 60000,

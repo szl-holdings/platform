@@ -1,11 +1,12 @@
 import { AgentInsightsWidget } from "@szl-holdings/shared-ui/agent-insights-widget";
-import { useQuery } from "@tanstack/react-query";
+
 import { Brain, Zap, Radio, Activity } from "lucide-react";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const ACCENT = "#6366f1";
 
 function GlobalFeedStats() {
-  const { data } = useQuery<{ stats: { knowledge: { byDomain?: Record<string, number> }; eventBus: { totalPublished?: number } }; globalFeed: { correlations: unknown[] } }>({
+  const { data } = useStandardQuery<{ stats: { knowledge: { byDomain?: Record<string, number> }; eventBus: { totalPublished?: number } }; globalFeed: { correlations: unknown[] } }>({
     queryKey: ["agent-os-global-feed-lyte"],
     queryFn: async () => {
       const r = await fetch("/api/agent-os/feed?limit=20");

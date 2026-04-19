@@ -1,13 +1,15 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import {
+
   Brain, Activity, AlertTriangle, CheckCircle, DollarSign,
   RefreshCw, ChevronRight, Shield, Zap, BarChart3, Radio, Filter,
   ArrowRight, Loader2, TrendingUp, TrendingDown,
   Minus, ClipboardList, Check, X
 } from "lucide-react";
 import { Link } from "wouter";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface AIOpsTrace {
   traces: {
@@ -183,7 +185,7 @@ function ReviewQueuePanel() {
   const [verdict, setVerdict] = useState("approved");
   const [notes, setNotes] = useState("");
 
-  const { data: queueData, isLoading } = useQuery({
+  const { data: queueData, isLoading } = useStandardQuery({
     queryKey: ["ai-ops-review-queue", priorityFilter],
     queryFn: () => {
       const qp = new URLSearchParams({ limit: "20" });
@@ -193,13 +195,13 @@ function ReviewQueuePanel() {
     refetchInterval: 30000,
   });
 
-  const claimMutation = useMutation({
+  const claimMutation = useStandardMutation({
     mutationFn: (reviewId: string) =>
       apiFetch<{ reviewId: string; status: string }>(`/ai/ops/review-queue/${reviewId}/claim`, { method: "PATCH" }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["ai-ops-review-queue"] }),
   });
 
-  const decideMutation = useMutation({
+  const decideMutation = useStandardMutation({
     mutationFn: ({ reviewId, verdict, notes }: { reviewId: string; verdict: string; notes?: string }) =>
       apiFetch<unknown>(`/ai/ops/review-queue/${reviewId}/decision`, {
         method: "PATCH",
@@ -414,7 +416,7 @@ function ReviewQueuePanel() {
 }
 
 function EvaluatorStatsPanel() {
-  const { data, isLoading, isError, error } = useQuery({
+  const { data, isLoading, isError, error } = useStandardQuery({
     queryKey: ["ai-ops-evaluators"],
     queryFn: () => apiFetch<{ stats: EvaluatorStat[]; count: number }>("/ai/ops/evaluators/stats"),
     refetchInterval: 60000,
@@ -504,7 +506,7 @@ function TraceListPanel() {
   if (domainFilter !== "all") params.set("domain", domainFilter);
   if (statusFilter !== "all") params.set("status", statusFilter);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading } = useStandardQuery({
     queryKey: ["ai-ops-traces", domainFilter, statusFilter],
     queryFn: () => apiFetch<{ traces: TraceItem[]; count: number }>(`/ai/ops/traces?${params.toString()}`),
     refetchInterval: 30000,
@@ -655,7 +657,7 @@ function TraceListPanel() {
 export default function AIQualityDashboard() {
   const queryClient = useQueryClient();
 
-  const { data: summaryRaw, isLoading, isError, dataUpdatedAt } = useQuery({
+  const { data: summaryRaw, isLoading, isError, dataUpdatedAt } = useStandardQuery({
     queryKey: ["ai-ops-summary"],
     queryFn: () => apiFetch<AIOpsTrace>("/ai/ops/summary"),
     refetchInterval: 30000,

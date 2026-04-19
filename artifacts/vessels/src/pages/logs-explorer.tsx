@@ -1,10 +1,11 @@
-import { useQuery } from "@tanstack/react-query";
+
 import { dataProvider } from "@/data/data-provider";
 import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Input } from "@szl-holdings/shared-ui/ui/input";
 import { ScrollText, Search, ChevronDown, ChevronRight, AlertTriangle, AlertCircle, Info, Bug, Filter } from "lucide-react";
 import { useState } from "react";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const severityConfig = {
   Critical: { color: "bg-red-500/10 text-red-400 border-red-500/20", icon: AlertTriangle, dotColor: "bg-red-400", lineColor: "border-l-red-400" },
@@ -20,7 +21,7 @@ export default function LogsExplorerPage() {
   const [search, setSearch] = useState("");
   const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
 
-  const { data: logs = [], isLoading } = useQuery({
+  const { data: logs = [], isLoading } = useStandardQuery({
     queryKey: ["event-logs", severity, search],
     queryFn: () => dataProvider.getEventLogs({ severity: severity === "All" ? undefined : severity, search: search || undefined }),
   });

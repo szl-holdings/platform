@@ -1,7 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
+
 import { useState } from "react";
 import { Shield, AlertTriangle, Clock, DollarSign, RefreshCw, Tag, TrendingUp, BarChart3 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, PieChart, Pie, Legend } from "recharts";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const ACCENT = "#40856a";
 const API = "/api";
@@ -97,7 +98,7 @@ function LenderCard({ lender, selected, onSelect }: { lender: any; selected: boo
 
 export default function LenderExposureMapPage() {
   const [selectedLender, setSelectedLender] = useState<string | null>(null);
-  const { data, isLoading, refetch } = useQuery({
+  const { data, isLoading, refetch } = useStandardQuery({
     queryKey: ["terra-lender-exposure"],
     queryFn: fetchLenderExposure,
   });

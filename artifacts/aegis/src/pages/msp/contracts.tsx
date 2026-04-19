@@ -2,9 +2,10 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { FileText, Calendar, AlertTriangle, CheckCircle2, Clock, DollarSign, Shield, Search, Filter, RefreshCw } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
-import { useQuery } from "@tanstack/react-query";
+
 import { Skeleton } from "@szl-holdings/shared-ui/ui/skeleton";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface Contract {
   id: number;
@@ -133,7 +134,7 @@ export default function ContractsPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
-  const { data, isLoading, refetch } = useQuery<ContractsResponse>({
+  const { data, isLoading, refetch } = useStandardQuery<ContractsResponse>({
     queryKey: ["msp-contracts", statusFilter],
     queryFn: () => apiFetch<ContractsResponse>(`/msp/contracts${statusFilter !== "all" ? `?status=${statusFilter}` : ""}`),
     staleTime: 60_000,

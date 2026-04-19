@@ -1,13 +1,15 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { cn } from "@lyte/lib/utils";
 import {
+
   Activity, AlertTriangle, CheckCircle, Clock, TrendingDown, TrendingUp,
   Zap, Eye, Shield, ArrowRight, RefreshCw, Target, Gauge, BarChart3, Wifi, WifiOff
 } from "lucide-react";
 import { AreaChart, Area, LineChart, Line, BarChart, Bar, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid, ReferenceLine, Cell } from "recharts";
 import { MetricTimeSeriesSimulator, seededRng } from "@szl-holdings/observability";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const BG = { page: "#080c14", surface: "#0c1018", elevated: "#10141e" };
 const BORDER = { subtle: "rgba(255,255,255,0.04)", muted: "rgba(255,255,255,0.07)" };
@@ -51,7 +53,6 @@ const SLOS = _simSlos.map((s, i) => ({
   incidents: _rng.int(0, 5),
   color: STATUS_COLORS_MAP[s.status] ?? "#6b8f71",
 }));
-
 
 const _bhRng = seededRng(0x5010dead + 1);
 const BURN_HISTORY = Array.from({ length: 30 }, (_, i) => {
@@ -125,14 +126,14 @@ interface OpsSummaryResponse {
 export default function ErrorBudgetBurn() {
   const [selectedSlo, setSelectedSlo] = useState(SLOS[0]);
 
-  const { data: liveSignals, isError: isSignalsError } = useQuery<LiveSignalsResponse>({
+  const { data: liveSignals, isError: isSignalsError } = useStandardQuery<LiveSignalsResponse>({
     queryKey: ["error-budget-live-signals"],
     queryFn: () => apiFetch<LiveSignalsResponse>("/lyte/live/signals"),
     refetchInterval: 15000,
     retry: 1,
   });
 
-  const { data: opsSummary } = useQuery<OpsSummaryResponse>({
+  const { data: opsSummary } = useStandardQuery<OpsSummaryResponse>({
     queryKey: ["error-budget-ops-summary"],
     queryFn: () => apiFetch<OpsSummaryResponse>("/lyte/live/operations-summary"),
     refetchInterval: 15000,

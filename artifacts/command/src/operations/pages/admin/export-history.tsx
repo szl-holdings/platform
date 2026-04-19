@@ -1,6 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
-import { Download, Clock, User, AlertTriangle, CheckCircle, XCircle, Loader, Calendar, Database, FileText, FileSpreadsheet } from "lucide-react";
 
+import { Download, Clock, User, AlertTriangle, CheckCircle, XCircle, Loader, Calendar, Database, FileText, FileSpreadsheet } from "lucide-react";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 async function apiFetch<T>(path: string): Promise<T> {
   const r = await fetch(`/api${path}`);
@@ -72,7 +72,7 @@ const DATA_SOURCE_LABELS: Record<string, string> = {
 };
 
 export default function ExportHistory() {
-  const { data, isLoading, error } = useQuery<{ exports: ExportRecord[]; total: number; page: number; limit: number }>({
+  const { data, isLoading, error } = useStandardQuery<{ exports: ExportRecord[]; total: number; page: number; limit: number }>({
     queryKey: ["admin-export-history"],
     queryFn: () => apiFetch("/admin/export-history"),
     staleTime: 15000,

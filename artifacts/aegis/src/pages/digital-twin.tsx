@@ -1,9 +1,10 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { Layers, Play, RefreshCw, Shield, AlertTriangle, CheckCircle, Target, Activity, Server, Network, Database, Globe } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 import { api } from "../lib/api";
 import { AEGIS_MITRE_COVERAGE, metricDisplay } from "../lib/claims";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface TwinNode {
   id: string;
@@ -53,19 +54,19 @@ const scenarioStatusColor: Record<string, string> = {
 export default function DigitalTwin() {
   const qc = useQueryClient();
 
-  const topologyQuery = useQuery({
+  const topologyQuery = useStandardQuery({
     queryKey: ["digital-twin", "topology"],
     queryFn: () => api.digitalTwin.topology(),
     refetchInterval: 30000,
   });
 
-  const scenariosQuery = useQuery({
+  const scenariosQuery = useStandardQuery({
     queryKey: ["digital-twin", "scenarios"],
     queryFn: () => api.digitalTwin.scenarios(),
     refetchInterval: 15000,
   });
 
-  const syncMutation = useMutation({
+  const syncMutation = useStandardMutation({
     mutationFn: () => api.digitalTwin.sync(),
     onSuccess: (data: { data?: { message?: string } }) => {
       qc.invalidateQueries({ queryKey: ["digital-twin", "topology"] });
@@ -74,7 +75,7 @@ export default function DigitalTwin() {
     onError: () => toast.error("Sync failed"),
   });
 
-  const runScenarioMutation = useMutation({
+  const runScenarioMutation = useStandardMutation({
     mutationFn: (id: string) => api.digitalTwin.runScenario(id),
     onSuccess: (data: { data?: { message?: string } }) => {
       qc.invalidateQueries({ queryKey: ["digital-twin", "scenarios"] });

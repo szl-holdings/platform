@@ -1,9 +1,10 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { FlaskConical, Play, GitCompare, Shield, Cpu, Brain, DollarSign, Clock, CheckCircle, XCircle, AlertTriangle, ChevronDown, ChevronRight } from "lucide-react";
 import { apiUrl, fetchJson, tracedFetch, emitSpan, ACCENT, AGENT_RUN_ATTRS } from "./cognitive/shared";
 import { AuditRail } from "@szl-holdings/design-system/cockpit/audit-rail";
 import type { AuditEvent } from "@szl-holdings/design-system/cockpit/audit-rail";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 function getCsrfToken(): string | undefined {
   const match = document.cookie.split(";").find((c) => c.trim().startsWith("csrf_token="));
@@ -654,7 +655,7 @@ export default function EvalStudio() {
     });
   }, []);
 
-  const { data, isLoading, error, refetch } = useQuery<EvalsApiResponse>({
+  const { data, isLoading, error, refetch } = useStandardQuery<EvalsApiResponse>({
     queryKey: ["eval-studio", "all"],
     queryFn: () => tracedFetch<EvalsApiResponse>(
       "eval_studio.suites.fetch",

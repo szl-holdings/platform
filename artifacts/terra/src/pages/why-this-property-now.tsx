@@ -1,8 +1,9 @@
 import { useState, useCallback } from "react";
 import { useRoute, Link } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+
 import { motion, AnimatePresence } from "framer-motion";
 import {
+
   Flame, ArrowLeft, Building2, Download, RefreshCw, AlertTriangle,
   Shield, TrendingDown, Gavel, FileText, User, ChevronRight, Tag,
   Activity, Calendar, DollarSign, Loader2, Zap, MapPin, BarChart3,
@@ -10,6 +11,7 @@ import {
 } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const ACCENT = "#40856a";
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
@@ -766,7 +768,7 @@ export default function WhyThisPropertyNow() {
   const propertyId = params?.propertyId ?? "dp-001";
   const [activeTab, setActiveTab] = useState<TabId>("distress");
 
-  const { data, isLoading, error, refetch, isFetching } = useQuery({
+  const { data, isLoading, error, refetch, isFetching } = useStandardQuery({
     queryKey: ["why-this-property", propertyId],
     queryFn: () => fetchWhyNow(propertyId),
     staleTime: 1000 * 60 * 30,

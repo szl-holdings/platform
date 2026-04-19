@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { GitBranch, TrendingDown, TrendingUp, AlertTriangle, Droplets, DollarSign, Clock, Building2, CheckCircle2, XCircle, Shield, BarChart3 } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 type BranchId = "valuation-stress" | "tenant-churn" | "flood-risk" | "financing-pressure";
 
@@ -198,7 +199,7 @@ function BranchDetail({ branch }: { branch: Branch }) {
 export default function TerraScenarioBranchesPage() {
   const [selected, setSelected] = useState<BranchId>("valuation-stress");
 
-  const { data: atlasData, isError: atlasError, isLoading: atlasLoading } = useQuery<{ data?: { count: number } }>({
+  const { data: atlasData, isError: atlasError, isLoading: atlasLoading } = useStandardQuery<{ data?: { count: number } }>({
     queryKey: ["terra-atlas-scenario-branches"],
     queryFn: () => fetch("/api/atlas/spatial/branches?twinCategory=property").then(r => r.ok ? r.json() : Promise.reject(r.status)),
     staleTime: 60000,

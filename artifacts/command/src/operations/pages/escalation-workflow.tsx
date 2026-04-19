@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { AlertOctagon, Clock, User, ChevronRight, RefreshCw, AlertTriangle, CheckCircle, ArrowRight } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface Escalation {
   id: number;
@@ -140,7 +141,7 @@ function EscalationDetail({ esc, onClose }: { esc: Escalation; onClose: () => vo
   const qc = useQueryClient();
   const sc = STATUS_CONFIG[esc.status];
 
-  const updateMutation = useMutation({
+  const updateMutation = useStandardMutation({
     mutationFn: (patch: Partial<Escalation>) => apiFetch(`/lyte/escalations/${esc.id}`, { method: "PATCH", body: JSON.stringify(patch) }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["escalations"] }); onClose(); },
   });
@@ -227,7 +228,7 @@ export default function EscalationWorkflow() {
   const params = new URLSearchParams({ limit: "100" });
   if (statusFilter !== "all" && statusFilter !== "active") params.set("status", statusFilter);
 
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { data, isLoading, isError, refetch } = useStandardQuery({
     queryKey: ["escalations", statusFilter],
     queryFn: () => apiFetch<any>(`/lyte/escalations?${params}`),
     refetchInterval: 30000,

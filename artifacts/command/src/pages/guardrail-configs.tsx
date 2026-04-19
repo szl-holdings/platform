@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { ShieldCheck, Plus, Pencil, Trash2, RefreshCw, AlertTriangle, Check, X, Save, Power, PowerOff } from "lucide-react";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 const ACCENT = "#d4a054";
 
@@ -293,29 +294,29 @@ export default function GuardrailConfigsPage() {
     return p.toString();
   }, [typeFilter, enabledFilter]);
 
-  const listQ = useQuery<ApiResponse<GuardrailConfig[]>>({
+  const listQ = useStandardQuery<ApiResponse<GuardrailConfig[]>>({
     queryKey: ["guardrail-configs", typeFilter, enabledFilter],
     queryFn: () => fetchJson<ApiResponse<GuardrailConfig[]>>(`/api/guardian/guardrail-configs?${queryParams}`),
   });
 
-  const createMut = useMutation({
+  const createMut = useStandardMutation({
     mutationFn: (body: object) => fetchJson("/api/guardian/guardrail-configs", { method: "POST", body: JSON.stringify(body) }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["guardrail-configs"] }); setCreating(false); setFlash("Guardrail created."); },
   });
 
-  const updateMut = useMutation({
+  const updateMut = useStandardMutation({
     mutationFn: ({ id, body }: { id: number; body: object }) =>
       fetchJson(`/api/guardian/guardrail-configs/${id}`, { method: "PATCH", body: JSON.stringify(body) }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["guardrail-configs"] }); setEditingId(null); setFlash("Guardrail updated."); },
   });
 
-  const toggleMut = useMutation({
+  const toggleMut = useStandardMutation({
     mutationFn: ({ id, enabled }: { id: number; enabled: boolean }) =>
       fetchJson(`/api/guardian/guardrail-configs/${id}`, { method: "PATCH", body: JSON.stringify({ enabled }) }),
     onSuccess: (_d, vars) => { qc.invalidateQueries({ queryKey: ["guardrail-configs"] }); setFlash(vars.enabled ? "Guardrail enabled." : "Guardrail disabled."); },
   });
 
-  const deleteMut = useMutation({
+  const deleteMut = useStandardMutation({
     mutationFn: (id: number) => fetchJson(`/api/guardian/guardrail-configs/${id}`, { method: "DELETE", body: JSON.stringify({}) }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["guardrail-configs"] }); setConfirmDeleteId(null); setFlash("Guardrail deleted."); },
   });

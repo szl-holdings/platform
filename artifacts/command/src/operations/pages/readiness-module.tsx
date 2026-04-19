@@ -1,14 +1,16 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Button } from "@szl-holdings/shared-ui/ui/button";
 import { Progress } from "@szl-holdings/shared-ui/ui/progress";
 import {
+
   CheckCircle, XCircle, Clock, AlertTriangle, Shield, Zap, User, ArrowRight, Package
 } from "lucide-react";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 const ITEM_TYPE_CONFIG: Record<string, { label: string; icon: any; color: string }> = {
   launch_gate: { label: "Launch Gate", icon: Shield, color: "text-[#d4a054]" },
@@ -54,7 +56,7 @@ function formatDate(isoDate: string | null): string {
 export default function ReadinessModulePage() {
   const queryClient = useQueryClient();
 
-  const { data: rawData } = useQuery({
+  const { data: rawData } = useStandardQuery({
     queryKey: ["lyte-readiness"],
     queryFn: () => apiFetch<typeof DEMO_READINESS>("/lyte/readiness"),
     placeholderData: DEMO_READINESS as any,
@@ -64,7 +66,7 @@ export default function ReadinessModulePage() {
   const items = data.items ?? DEMO_READINESS.items;
   const summary = data.summary ?? DEMO_READINESS.summary;
 
-  const updateStatus = useMutation({
+  const updateStatus = useStandardMutation({
     mutationFn: ({ id, status }: { id: number; status: string }) =>
       apiFetch(`/lyte/readiness/${id}`, { method: "PATCH", body: JSON.stringify({ status }) }),
     onSuccess: () => {

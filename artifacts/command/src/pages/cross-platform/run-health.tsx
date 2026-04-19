@@ -1,7 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
+
 import { Link } from "wouter";
 import { ArrowLeft, Activity, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { apiUrl, fetchJson } from "../cognitive/shared";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -95,7 +96,7 @@ function AutonomyBar({ mix }: { mix: ProductHealth["autonomyMix"] }) {
 }
 
 export function RunHealthPage() {
-  const { data, isLoading, error } = useQuery<RunHealthResponse>({
+  const { data, isLoading, error } = useStandardQuery<RunHealthResponse>({
     queryKey: ["cross-platform", "run-health"],
     queryFn: () => fetchJson<RunHealthResponse>(apiUrl("/cross-platform/run-health")),
     staleTime: 30_000,

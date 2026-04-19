@@ -1,5 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
+
 import { ShieldCheck, CheckCircle, AlertTriangle, WifiOff, RefreshCw, Server } from "lucide-react";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 async function apiFetch<T>(path: string, opts?: RequestInit): Promise<T> {
   const r = await fetch(`/api${path}`, { headers: { "Content-Type": "application/json" }, ...opts });
@@ -16,7 +17,7 @@ interface AppHealthSummary {
 const apps = ["firestorm", "lyte", "aegis", "terra", "vessels", "carlota-jo", "szl-holdings"];
 
 function AppCard({ slug }: { slug: string }) {
-  const { data, isLoading, refetch, isRefetching } = useQuery<AppHealthSummary>({
+  const { data, isLoading, refetch, isRefetching } = useStandardQuery<AppHealthSummary>({
     queryKey: ["app-health", slug],
     queryFn: () => apiFetch(`/services/health/app/${slug}`),
     refetchInterval: 60000,

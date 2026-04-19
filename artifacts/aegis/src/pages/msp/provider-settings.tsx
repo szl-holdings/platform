@@ -4,10 +4,12 @@ import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Button } from "@szl-holdings/shared-ui/ui/button";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import {
+
   Settings, Plus, RefreshCw, Trash2, CheckCircle, XCircle, Activity,
   AlertTriangle, Loader2, Wifi, ChevronDown, ChevronUp, X, Clock,
 } from "lucide-react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface RmmProvider {
   id: number;
@@ -285,19 +287,19 @@ export default function ProviderSettings() {
   const [syncingId, setSyncingId] = useState<number | null>(null);
   const [syncResults, setSyncResults] = useState<Record<number, { devicesFound: number; syncedAt: string }>>({});
 
-  const { data, isLoading, refetch } = useQuery({
+  const { data, isLoading, refetch } = useStandardQuery({
     queryKey: ["rmm-providers"],
     queryFn: () => apiFetch<{ providers: RmmProvider[]; total: number }>("/msp/rmm/providers"),
     staleTime: 30_000,
   });
 
-  const createMutation = useMutation({
+  const createMutation = useStandardMutation({
     mutationFn: (body: Record<string, unknown>) =>
       apiFetch("/msp/rmm/providers", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }),
     onSuccess: () => { setShowAddForm(false); queryClient.invalidateQueries({ queryKey: ["rmm-providers"] }); },
   });
 
-  const deleteMutation = useMutation({
+  const deleteMutation = useStandardMutation({
     mutationFn: (id: number) => apiFetch(`/msp/rmm/providers/${id}`, { method: "DELETE" }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["rmm-providers"] }),
   });

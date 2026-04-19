@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+
 import { AnimatedCounter } from "@szl-holdings/shared-ui/animated-counter";
 import { api } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
@@ -6,6 +6,7 @@ import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@szl-holdings/shared-ui/ui/select";
 import { FileText, Shield, AlertTriangle, CheckCircle, BarChart3, Target, Loader2 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const severityColors: Record<string, string> = {
   info: "bg-blue-500/10 text-blue-400 border-blue-500/20",
@@ -23,9 +24,9 @@ function getScoreColor(score: number) {
 }
 
 export default function ReportsPage() {
-  const { data: assessments = [] } = useQuery({ queryKey: ["assessments"], queryFn: api.assessments.list });
+  const { data: assessments = [] } = useStandardQuery({ queryKey: ["assessments"], queryFn: api.assessments.list });
   const [selectedId, setSelectedId] = useState<string>("");
-  const { data: report, isLoading, error } = useQuery({
+  const { data: report, isLoading, error } = useStandardQuery({
     queryKey: ["report", selectedId],
     queryFn: () => api.reports.get(Number(selectedId)),
     enabled: !!selectedId,

@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { OperationalEvidencePanel, OperationalAuditTimeline } from "@szl-holdings/shared-ui/operational-primitives";
 import { type EvidenceItem, type AuditHistoryEntry } from "@szl-holdings/shared-ui/operational-primitives";
@@ -7,12 +7,14 @@ import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Button } from "@szl-holdings/shared-ui/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@szl-holdings/shared-ui/ui/select";
 import {
+
   CheckSquare, User, AlertOctagon, TrendingDown, GitBranch, Clock, AlertTriangle,
   ArrowRight, Filter, Zap, Users, BarChart3, Package, Calendar, ChevronDown, ChevronRight, FileSearch
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 type Role = "executive" | "operations" | "delivery";
 type ActionState = "new" | "acknowledged" | "assigned" | "escalated" | "resolved" | "dismissed";
@@ -251,7 +253,7 @@ export default function ActionQueuePage() {
 
   const IS_DEMO = import.meta.env.VITE_IS_DEMO === "true";
 
-  const { data: rawActions } = useQuery<any[]>({
+  const { data: rawActions } = useStandardQuery<any[]>({
     queryKey: ["lyte-actions", role],
     queryFn: async () => {
       const json = await apiFetch<{ data: any[] } | any[]>(`/lyte/actions?role=${role}`);
@@ -267,7 +269,7 @@ export default function ActionQueuePage() {
     ? rawActions
     : (IS_DEMO ? DEMO_ACTIONS : []);
 
-  const transition = useMutation({
+  const transition = useStandardMutation({
     mutationFn: ({ id, state, assignedTo }: { id: number; state: string; assignedTo?: string }) =>
       apiFetch(`/lyte/actions/${id}`, { method: "PATCH", body: JSON.stringify({ state, assignedTo }) }),
     onSuccess: (_data, vars) => {

@@ -1,14 +1,16 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
+
   Thermometer, Droplets, Flame, Wind, Cloud, ShieldAlert, DollarSign,
   TrendingUp, AlertTriangle, X, ChevronRight, Building2, BarChart3,
   Calendar, MapPin, Info, Eye, RefreshCw, Activity, ArrowLeft, Loader2
 } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { useRoute, Link } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+
 import { api } from "@/lib/api";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 type RiskLevel = "Critical" | "High" | "Medium" | "Low" | "Negligible";
 type HazardType = "flood" | "wildfire" | "heat" | "storm" | "sea-level" | "seismic";
@@ -232,14 +234,14 @@ export default function ClimateRiskEnhanced() {
   const [, params] = useRoute<{ propertyId: string }>("/climate-risk-enhanced/:propertyId");
   const propertyId = params?.propertyId;
 
-  const { data: propertyData, isLoading: propertyLoading } = useQuery({
+  const { data: propertyData, isLoading: propertyLoading } = useStandardQuery({
     queryKey: ["terra-climate-risk", propertyId],
     queryFn: () => api.properties.climateRisk(propertyId!),
     enabled: !!propertyId,
     staleTime: 300_000,
   });
 
-  const { data: portfolioData, isLoading: portfolioLoading, isError: portfolioError } = useQuery({
+  const { data: portfolioData, isLoading: portfolioLoading, isError: portfolioError } = useStandardQuery({
     queryKey: ["terra-portfolio-climate-risk"],
     queryFn: () => api.portfolio.climateRisk(),
     enabled: !propertyId,

@@ -1,7 +1,8 @@
 import { useState, useMemo, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useSearch } from "wouter";
 import {
+
   ShieldCheck,
   Plus,
   Pencil,
@@ -18,6 +19,7 @@ import {
   Hand,
   Bot,
 } from "lucide-react";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 const ACCENT = "#d4a054";
 
@@ -339,35 +341,35 @@ export default function PolicyManagerPage() {
     setProductFilter(initialProductFilter);
   }, [initialProductFilter]);
 
-  const modesQ = useQuery<ApiResponse<PolicyModeConfig[]>>({
+  const modesQ = useStandardQuery<ApiResponse<PolicyModeConfig[]>>({
     queryKey: ["policy-modes"],
     queryFn: () => fetchJson<ApiResponse<PolicyModeConfig[]>>("/api/policy-modes"),
     refetchInterval: 30_000,
   });
 
-  const metaQ = useQuery<{ modes: Array<{ mode: PolicyMode; description: string }> }>({
+  const metaQ = useStandardQuery<{ modes: Array<{ mode: PolicyMode; description: string }> }>({
     queryKey: ["policy-modes-meta"],
     queryFn: () => fetchJson("/api/policy-modes/meta"),
     staleTime: Infinity,
   });
 
-  const createMut = useMutation({
+  const createMut = useStandardMutation({
     mutationFn: (body: object) => fetchJson("/api/policy-modes", { method: "POST", body: JSON.stringify(body) }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["policy-modes"] }); setCreating(false); },
   });
 
-  const updateMut = useMutation({
+  const updateMut = useStandardMutation({
     mutationFn: ({ id, body }: { id: string; body: object }) =>
       fetchJson(`/api/policy-modes/${id}`, { method: "PATCH", body: JSON.stringify(body) }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["policy-modes"] }); setEditingId(null); },
   });
 
-  const deleteMut = useMutation({
+  const deleteMut = useStandardMutation({
     mutationFn: (id: string) => fetchJson(`/api/policy-modes/${id}`, { method: "DELETE" }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["policy-modes"] }),
   });
 
-  const seedMut = useMutation({
+  const seedMut = useStandardMutation({
     mutationFn: () => fetchJson("/api/demo/seed-governed-scenarios", { method: "POST" }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["policy-modes"] }),
   });

@@ -5,7 +5,7 @@ import { marketData, properties } from "@/data/portfolio";
 import { cn } from "@/lib/utils";
 import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend } from "recharts";
-import { useQuery } from "@tanstack/react-query";
+
 import { api } from "@/lib/api";
 import { LiveDataBadge } from "@/lib/live-badge";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
@@ -13,6 +13,7 @@ import { Skeleton } from "@szl-holdings/shared-ui/ui/skeleton";
 import { useMapboxToken } from "@/hooks/use-mapbox-token";
 import { Link } from "wouter";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const PropertyMap = lazy(() => import("@/components/property-map"));
 
@@ -79,7 +80,7 @@ function TableRowSkeleton() {
 
 export default function MarketPage() {
   const { token, isLoading: tokenLoading } = useMapboxToken();
-  const { data: liveData, isLoading, isError, refetch, isFetching } = useQuery<{ data: MarketIntelligence }>({
+  const { data: liveData, isLoading, isError, refetch, isFetching } = useStandardQuery<{ data: MarketIntelligence }>({
     queryKey: ["terra-market-intelligence"],
     queryFn: () => apiFetch<{ data: MarketIntelligence }>("/terra/market-intelligence"),
     staleTime: 5 * 60_000,
@@ -105,14 +106,14 @@ export default function MarketPage() {
     "Market Speed": Math.max(0, (60 - (m.daysOnMarket ?? 30))) * 2,
   }));
 
-  const { data: mortgageData, isLoading: mortgageLoading } = useQuery({
+  const { data: mortgageData, isLoading: mortgageLoading } = useStandardQuery({
     queryKey: ["terra-mortgage-rates"],
     queryFn: () => api.live.mortgageRates(),
     staleTime: 3600000 * 6,
     refetchInterval: 3600000 * 6,
   });
 
-  const { data: blsData, isLoading: blsLoading } = useQuery({
+  const { data: blsData, isLoading: blsLoading } = useStandardQuery({
     queryKey: ["terra-bls-construction"],
     queryFn: () => api.live.blsConstruction(),
     staleTime: 86400000,

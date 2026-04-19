@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Navigation, Plus, MapPin, Clock, Trash2, Route, ArrowRight } from "lucide-react";
 import { useState } from "react";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 const statusColors: Record<string, string> = {
   planned: "bg-amber-500/10 text-amber-400 border-amber-500/20",
@@ -61,18 +62,18 @@ function RouteSkeleton() {
 
 export default function RoutePlanningPage() {
   const qc = useQueryClient();
-  const { data: routes = [], isLoading } = useQuery({ queryKey: ["routes"], queryFn: api.routes.list });
-  const { data: vessels = [] } = useQuery({ queryKey: ["vessels"], queryFn: api.vessels.list });
+  const { data: routes = [], isLoading } = useStandardQuery({ queryKey: ["routes"], queryFn: api.routes.list });
+  const { data: vessels = [] } = useStandardQuery({ queryKey: ["vessels"], queryFn: api.vessels.list });
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ vesselId: "", originPort: "", destinationPort: "", distanceNm: "" });
 
-  const createMut = useMutation({
+  const createMut = useStandardMutation({
     mutationFn: (data: any) => api.routes.create(data),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["routes"] }); setOpen(false); toast.success("Route created"); },
     onError: (e: any) => toast.error(e.message),
   });
 
-  const deleteMut = useMutation({
+  const deleteMut = useStandardMutation({
     mutationFn: (id: number) => api.routes.delete(id),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["routes"] }); toast.success("Route deleted"); },
   });

@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { OpsLayout } from "../components/ops-layout";
 import { Target, AlertTriangle, CheckCircle2, Clock, Plus } from "lucide-react";
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, ReferenceLine } from "recharts";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface SLADefinition {
   id: string;
@@ -83,7 +84,7 @@ const COMPLIANCE_COLOR = (pct: number) =>
   pct >= 95 ? "var(--color-low)" : pct >= 80 ? "var(--color-medium)" : "var(--color-critical)";
 
 export default function SLAPage() {
-  const { data: apiData } = useQuery<ApiSlaResponse>({
+  const { data: apiData } = useStandardQuery<ApiSlaResponse>({
     queryKey: ["command-sla"],
     queryFn: async () => {
       const res = await fetch("/api/command/sla", { credentials: "include" });

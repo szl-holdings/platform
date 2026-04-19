@@ -1,16 +1,18 @@
 import { PolicyResultBanner } from "@szl-holdings/shared-ui/policy-result";
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { useStepUp } from "@/lib/use-step-up";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { ProofPanel } from "@szl-holdings/shared-ui/proof-panel";
 import {
+
   CheckCircle2, XCircle, Clock, AlertTriangle, FileText, Lock,
   ChevronDown, ChevronRight, Eye, Shield, UserCheck, Activity,
   Lightbulb, BookOpen, Minus, ArrowRight, RefreshCw, Zap, Users
 } from "lucide-react";
 import { TradecraftPanel, RelatedCasesPanel, EvidenceIndexPanel } from "@/components/tradecraft-panel";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 const DECISIONS = [
   {
@@ -125,7 +127,7 @@ export default function DecisionConsole() {
   const [selectedMockId, setSelectedMockId] = useState(DECISIONS[0].id);
   const [expandedAudit, setExpandedAudit] = useState(false);
 
-  const { data: decisionsData } = useQuery<DecisionsPayload>({
+  const { data: decisionsData } = useStandardQuery<DecisionsPayload>({
     queryKey: ["command-decisions"],
     queryFn: () => api.command.decisions(),
     retry: false,
@@ -133,7 +135,7 @@ export default function DecisionConsole() {
 
   const { requestStepUp } = useStepUp();
 
-  const approveMutation = useMutation({
+  const approveMutation = useStandardMutation({
     mutationFn: async (findingId: string) => {
       const token = await requestStepUp("Approve finding decision");
       if (!token) throw new Error("Step-up verification cancelled by operator.");

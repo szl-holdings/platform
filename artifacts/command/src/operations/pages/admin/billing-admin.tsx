@@ -1,9 +1,11 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import {
+
   DollarSign, CreditCard, TrendingUp, AlertCircle, CheckCircle,
   RefreshCw, ExternalLink, Users, Activity, XCircle, Clock
 } from "lucide-react";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface StripeConfig {
   stripeConnected: boolean;
@@ -63,7 +65,6 @@ function formatCurrency(cents: number): string {
   return `$${(cents / 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
-
 function StatusIcon({ ok }: { ok: boolean }) {
   return ok
     ? <CheckCircle size={14} className="text-[#6b8f71]" />
@@ -86,35 +87,35 @@ function StatCard({ label, value, sub, icon: Icon, accent }: { label: string; va
 export default function BillingAdminPage() {
   const qc = useQueryClient();
 
-  const { data: config, isLoading: configLoading } = useQuery<{ data: StripeConfig }>({
+  const { data: config, isLoading: configLoading } = useStandardQuery<{ data: StripeConfig }>({
     queryKey: ["billing-stripe-config"],
     queryFn: () => apiFetch("/billing/stripe-config"),
   });
 
-  const { data: analytics, isLoading: analyticsLoading } = useQuery<{ data: RevenueAnalytics }>({
+  const { data: analytics, isLoading: analyticsLoading } = useStandardQuery<{ data: RevenueAnalytics }>({
     queryKey: ["billing-revenue-analytics"],
     queryFn: () => apiFetch("/billing/revenue-analytics"),
   });
 
-  const { data: pilotData } = useQuery<{ data: LytePilotMetrics }>({
+  const { data: pilotData } = useStandardQuery<{ data: LytePilotMetrics }>({
     queryKey: ["lyte-pilot-metrics"],
     queryFn: () => apiFetch("/lyte/billing/pilot-metrics"),
     retry: false,
   });
 
-  const { data: revenueEvents } = useQuery<{ data: RevenueEvent[] }>({
+  const { data: revenueEvents } = useStandardQuery<{ data: RevenueEvent[] }>({
     queryKey: ["lyte-revenue-events"],
     queryFn: () => apiFetch("/lyte/billing/revenue-events?limit=20"),
     retry: false,
   });
 
-  const { data: invoicesData } = useQuery<{ data: StripeInvoice[] }>({
+  const { data: invoicesData } = useStandardQuery<{ data: StripeInvoice[] }>({
     queryKey: ["billing-stripe-invoices"],
     queryFn: () => apiFetch("/billing/stripe-invoices"),
     retry: false,
   });
 
-  const syncPlansMut = useMutation({
+  const syncPlansMut = useStandardMutation({
     mutationFn: () => apiFetch("/billing/sync-plans", { method: "POST" }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["billing"] }),
   });

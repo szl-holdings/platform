@@ -1,13 +1,15 @@
 import { useState, useMemo } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+
 import { api } from "@/lib/api";
 import { useStepUp } from "@/lib/use-step-up";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import {
+
   Play, Pause, CheckCircle2, XCircle, Clock, AlertTriangle, Shield,
   ChevronRight, ChevronDown, RotateCcw, ShieldOff, Zap, Lock, Eye,
   Users, AlertOctagon, ArrowRight, Activity, Server, Network
 } from "lucide-react";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 const FALLBACK_PLAYBOOKS = [
   {
@@ -238,7 +240,7 @@ export default function ResponseOrchestration() {
   const [activeTab, setActiveTab] = useState<"playbook" | "rollback" | "containment">("playbook");
   const [expandedSteps, setExpandedSteps] = useState(true);
 
-  const { data: playbooksData } = useQuery<PlaybooksPayload>({
+  const { data: playbooksData } = useStandardQuery<PlaybooksPayload>({
     queryKey: ["command-playbooks"],
     queryFn: () => api.command.playbooks(),
     retry: false,
@@ -246,7 +248,7 @@ export default function ResponseOrchestration() {
 
   const { requestStepUp } = useStepUp();
 
-  const containMutation = useMutation({
+  const containMutation = useStandardMutation({
     mutationFn: async (payload: { containmentType: string; assetId: string; justification: string }) => {
       const token = await requestStepUp(`Containment action: ${payload.containmentType} on ${payload.assetId}`);
       if (!token) throw new Error("Step-up verification cancelled by operator.");

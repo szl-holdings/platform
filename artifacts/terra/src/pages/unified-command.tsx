@@ -1,11 +1,13 @@
-import { useQuery } from "@tanstack/react-query";
+
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import {
+
   Shield, Ship, Zap, TrendingDown, AlertTriangle, CheckCircle, Clock,
   ArrowRight, ExternalLink, Activity, BarChart3, Eye, User,
   GitBranch, Package, Navigation
 } from "lucide-react";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface LyteAction {
   priority?: string;
@@ -58,7 +60,6 @@ const DOMAIN_LINKS = [
   { id: "alloy", label: "Alloy", description: "Intelligence Engine", color: "#60a5fa", href: "/alloy/", icon: GitBranch },
 ];
 
-
 const DOMAIN_COLORS: Record<string, string> = {
   lyte: "text-amber-400",
   vessels: "text-sky-400",
@@ -90,19 +91,19 @@ function formatTimeSince(isoDate: string | null): string {
 }
 
 export default function UnifiedCommandDashboard() {
-  const { data: rawLyteActions } = useQuery({
+  const { data: rawLyteActions } = useStandardQuery({
     queryKey: ["unified-lyte-actions"],
     queryFn: () => apiFetch<LyteAction[]>("/lyte/actions?state=new"),
     placeholderData: [],
   });
 
-  const { data: rawVesselEvents } = useQuery({
+  const { data: rawVesselEvents } = useStandardQuery({
     queryKey: ["unified-vessel-events"],
     queryFn: () => apiFetch<VesselEvent[]>("/vessels/events?status=open"),
     placeholderData: [],
   });
 
-  const { data: rawTerraSignals } = useQuery({
+  const { data: rawTerraSignals } = useStandardQuery({
     queryKey: ["unified-terra-signals"],
     queryFn: () => apiFetch<TerraSignal[]>("/terra/signals"),
     placeholderData: [],

@@ -1,17 +1,18 @@
-import { useQuery, useMutation } from "@tanstack/react-query";
+
 import { useState } from "react";
 import { Shield, AlertTriangle, Brain, Radio, Ship, Loader2, Navigation } from "lucide-react";
 import { NERHighlight, AnimatedGauge, SeverityMeter } from "@szl-holdings/shared-ui/ai-components";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { ProofEnvelope, type AutonomyMode } from "@szl-holdings/design-system";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 export default function VesselsIntelligence() {
   const [autonomyMode, setAutonomyMode] = useState<AutonomyMode>("ask-to-act");
-  const { data: sanctions } = useQuery({ queryKey: ["maritime-sanctions"], queryFn: () => apiFetch<any>("/intelligence/maritime/sanctions") });
-  const { data: vessels = [] } = useQuery({ queryKey: ["maritime-vessels"], queryFn: () => apiFetch<any[]>("/intelligence/maritime/vessels") });
-  const { data: chokepoints = [] } = useQuery({ queryKey: ["maritime-chokepoints"], queryFn: () => apiFetch<any[]>("/intelligence/maritime/chokepoints") });
+  const { data: sanctions } = useStandardQuery({ queryKey: ["maritime-sanctions"], queryFn: () => apiFetch<any>("/intelligence/maritime/sanctions") });
+  const { data: vessels = [] } = useStandardQuery({ queryKey: ["maritime-vessels"], queryFn: () => apiFetch<any[]>("/intelligence/maritime/vessels") });
+  const { data: chokepoints = [] } = useStandardQuery({ queryKey: ["maritime-chokepoints"], queryFn: () => apiFetch<any[]>("/intelligence/maritime/chokepoints") });
 
-  const routeAnalysis = useMutation({
+  const routeAnalysis = useStandardMutation({
     mutationFn: (route: string) => apiFetch<any>("/intelligence/ai/chat", {
       method: "POST",
       body: JSON.stringify({ message: `Analyze this maritime route for safety risks, piracy threats, weather hazards, and sanctions compliance: ${route}. Provide a concise risk assessment with severity ratings.` }),

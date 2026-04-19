@@ -1,8 +1,9 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, XCircle, AlertTriangle, Clock, FileText, RefreshCw, Lock } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@lyte/lib/utils";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface Approval {
   id: number;
@@ -50,19 +51,19 @@ export default function ApprovalQueue() {
   const [reason, setReason] = useState("");
   const qc = useQueryClient();
 
-  const { data, isLoading, error } = useQuery<ApprovalsResponse>({
+  const { data, isLoading, error } = useStandardQuery<ApprovalsResponse>({
     queryKey: ["admin-approvals", filter],
     queryFn: () => apiFetch(`/admin/artifact-approvals${filter !== "all" ? `?status=${filter}` : ""}`),
     refetchInterval: 15000,
   });
 
-  const approveMutation = useMutation({
+  const approveMutation = useStandardMutation({
     mutationFn: (approvalId: string) =>
       apiFetch(`/admin/artifact-approvals/${approvalId}/approve`, { method: "POST" }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-approvals"] }); setSelected(null); setReason(""); },
   });
 
-  const rejectMutation = useMutation({
+  const rejectMutation = useStandardMutation({
     mutationFn: ({ approvalId, reason: r }: { approvalId: string; reason?: string }) =>
       apiFetch(`/admin/artifact-approvals/${approvalId}/reject`, { method: "POST", body: JSON.stringify({ reason: r }) }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-approvals"] }); setSelected(null); setReason(""); },

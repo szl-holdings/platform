@@ -1,15 +1,17 @@
 // @ts-nocheck
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import {
+
   Brain, Activity, Play, CheckCircle, AlertTriangle, Clock,
   RefreshCw, Zap, GitBranch, ArrowRight, Search,
   Filter, Plus, Eye, StopCircle, RotateCcw, Wifi, WifiOff,
   UserCheck, Shield, FileText,
   Plug, Network
 } from "lucide-react";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 const BG = { page: "#080c14", surface: "#0c1018", elevated: "#10141e" };
 const BORDER = { subtle: "rgba(255,255,255,0.04)", muted: "rgba(255,255,255,0.07)" };
@@ -324,28 +326,28 @@ export default function AlloyWorkflowCanvas() {
   const [expandedWf, setExpandedWf] = useState<number | null>(null);
   const qc = useQueryClient();
 
-  const { data: dashData, isError: isDashError } = useQuery<DashboardResponse>({
+  const { data: dashData, isError: isDashError } = useStandardQuery<DashboardResponse>({
     queryKey: ["alloy-dashboard"],
     queryFn: () => apiFetch<DashboardResponse>("/alloy/dashboard"),
     refetchInterval: 20000,
     retry: 1,
   });
 
-  const { data: workflowsData } = useQuery<WorkflowsResponse>({
+  const { data: workflowsData } = useStandardQuery<WorkflowsResponse>({
     queryKey: ["alloy-workflows"],
     queryFn: () => apiFetch<WorkflowsResponse>("/alloy/workflows"),
     refetchInterval: 30000,
     retry: 1,
   });
 
-  const { data: runsData } = useQuery<RunsResponse>({
+  const { data: runsData } = useStandardQuery<RunsResponse>({
     queryKey: ["alloy-runs"],
     queryFn: () => apiFetch<RunsResponse>("/alloy/runs"),
     refetchInterval: 10000,
     retry: 1,
   });
 
-  const triggerMutation = useMutation({
+  const triggerMutation = useStandardMutation({
     mutationFn: (workflowId: number) =>
       apiFetch(`/alloy/workflows/${workflowId}/run`, { method: "POST", body: JSON.stringify({}) }),
     onSuccess: () => {
@@ -354,13 +356,13 @@ export default function AlloyWorkflowCanvas() {
     },
   });
 
-  const retryMutation = useMutation({
+  const retryMutation = useStandardMutation({
     mutationFn: (runId: number) =>
       apiFetch(`/alloy/runs/${runId}/retry`, { method: "POST" }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["alloy-runs"] }),
   });
 
-  const cancelMutation = useMutation({
+  const cancelMutation = useStandardMutation({
     mutationFn: (runId: number) =>
       apiFetch(`/alloy/runs/${runId}/cancel`, { method: "POST" }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["alloy-runs"] }),

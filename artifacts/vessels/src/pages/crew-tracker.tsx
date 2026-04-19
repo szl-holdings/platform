@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { Users, AlertTriangle, CheckCircle2, Clock, Award, Calendar, Ship, User, Globe, RefreshCw, FileText } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "/api";
 
@@ -197,7 +198,7 @@ export default function CrewTrackerPage() {
   const [tab, setTab] = useState<"crew" | "rotations">("crew");
   const [vesselFilter, setVesselFilter] = useState("all");
 
-  const { data, isLoading, isError, refetch } = useQuery<CrewApiResponse>({
+  const { data, isLoading, isError, refetch } = useStandardQuery<CrewApiResponse>({
     queryKey: ["vessels-crew"],
     queryFn: () =>
       fetch(`${API_BASE}/vessels/modules/crew`, { credentials: "include" })

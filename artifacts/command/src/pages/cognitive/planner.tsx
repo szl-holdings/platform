@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+
 import { CognitiveLayout } from "./cognitive-layout";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 const ACCENT = "#8b7ac8";
 
@@ -411,7 +412,7 @@ function DependencyLines({ steps }: { steps: PlanStep[] }) {
 }
 
 export default function PlannerStudio() {
-  const { data: apiPlans } = useQuery<Plan[]>({
+  const { data: apiPlans } = useStandardQuery<Plan[]>({
     queryKey: ["cognitive", "plans"],
     queryFn: async () => {
       const res = await fetch("/plans", { credentials: "include" });
@@ -438,7 +439,7 @@ export default function PlannerStudio() {
     }
   }, [plans]);
 
-  const replayMutation = useMutation({
+  const replayMutation = useStandardMutation({
     mutationFn: async (planId: string) => {
       const res = await fetch(`/plans/${planId}/replay`, {
         method: "POST",

@@ -1,10 +1,11 @@
 import { Link } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Button } from "@szl-holdings/shared-ui/ui/button";
 import { api } from "@/lib/api";
 import {
+
   Shield,
   ShieldCheck,
   Cloud,
@@ -38,6 +39,7 @@ import {
   RadialBarChart,
   RadialBar,
 } from "recharts";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 type Module = {
   key: string;
@@ -313,19 +315,19 @@ interface AssetRiskData {
 export default function CisoDashboard() {
   const radial = [{ name: "ZT", uv: 78, fill: "#22d3ee" }];
 
-  const threatSummary = useQuery<ThreatSummaryData>({
+  const threatSummary = useStandardQuery<ThreatSummaryData>({
     queryKey: ["ciso", "threat-summary"],
     queryFn: () => api.liveData.threatSummary() as Promise<ThreatSummaryData>,
     staleTime: 60_000,
     retry: false,
   });
-  const complianceQuery = useQuery<ComplianceSummaryData>({
+  const complianceQuery = useStandardQuery<ComplianceSummaryData>({
     queryKey: ["ciso", "compliance-summary"],
     queryFn: () => api.liveData.complianceSummary() as Promise<ComplianceSummaryData>,
     staleTime: 60_000,
     retry: false,
   });
-  const assetRisk = useQuery<AssetRiskData>({
+  const assetRisk = useStandardQuery<AssetRiskData>({
     queryKey: ["ciso", "asset-risk"],
     queryFn: () => api.liveData.assetRisk() as Promise<AssetRiskData>,
     staleTime: 60_000,

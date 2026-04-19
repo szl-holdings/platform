@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
 import { ACCENT, DOMAIN_COLORS, fetchJson, apiUrl, GUARDIAN_TIER_TO_AUTONOMY } from "./shared";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 type AutonomyTier = "read-only" | "advisory" | "supervised" | "autonomous";
 type Env = "production" | "staging" | "sandbox";
@@ -218,7 +219,7 @@ export default function CognitivePolicies() {
   const [reviewingId, setReviewingId] = useState<string | number | null>(null);
   const qc = useQueryClient();
 
-  const approvalsQuery = useQuery<{ data: ApiApproval[]; meta?: { total?: number } }>({
+  const approvalsQuery = useStandardQuery<{ data: ApiApproval[]; meta?: { total?: number } }>({
     queryKey: ["cognitive", "approvals", "pending"],
     queryFn: () => fetchJson(apiUrl("/approvals?status=pending&limit=50")),
     retry: 1,
@@ -226,21 +227,21 @@ export default function CognitivePolicies() {
     refetchInterval: 60_000,
   });
 
-  const policiesQuery = useQuery<{ data: ApiPolicy[]; meta?: { count?: number } }>({
+  const policiesQuery = useStandardQuery<{ data: ApiPolicy[]; meta?: { count?: number } }>({
     queryKey: ["cognitive", "policies"],
     queryFn: () => fetchJson(apiUrl("/policies?limit=50")),
     retry: 1,
     staleTime: 120_000,
   });
 
-  const incidentsQuery = useQuery<{ data: ApiIncident[]; meta?: { count?: number } }>({
+  const incidentsQuery = useStandardQuery<{ data: ApiIncident[]; meta?: { count?: number } }>({
     queryKey: ["cognitive", "incidents"],
     queryFn: () => fetchJson(apiUrl("/incidents?limit=50")),
     retry: 1,
     staleTime: 60_000,
   });
 
-  const actionsQuery = useQuery<{ data: ApiGuardianAction[]; meta?: { total?: number } }>({
+  const actionsQuery = useStandardQuery<{ data: ApiGuardianAction[]; meta?: { total?: number } }>({
     queryKey: ["cognitive", "actions"],
     queryFn: () => fetchJson(apiUrl("/actions?limit=20")),
     retry: 1,
@@ -248,7 +249,7 @@ export default function CognitivePolicies() {
     refetchInterval: 120_000,
   });
 
-  const reviewMutation = useMutation({
+  const reviewMutation = useStandardMutation({
     mutationFn: ({ id, decision }: { id: number; decision: "approved" | "rejected" }) =>
       fetchJson<unknown>(apiUrl(`/approvals/${id}/review`), {
         method: "POST",

@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
@@ -10,12 +10,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@szl-holdings/shared-ui/ui/textarea";
 import { Progress } from "@szl-holdings/shared-ui/ui/progress";
 import {
+
   Shield, Play, CheckCircle, Clock, AlertTriangle,
   Activity, Target, Zap, User, CalendarDays, ChevronDown,
   ChevronRight, XCircle, RefreshCw, Info
 } from "lucide-react";
 import { type ElementType, useState } from "react";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface AuditEntry { action: string; user: string; at: string; }
 interface SimulationRun {
@@ -38,7 +40,6 @@ interface SimulationRun {
   auditTrail?: AuditEntry[];
   parameters?: Record<string, unknown>;
 }
-
 
 const SCENARIO_TEMPLATES = [
   "Brute Force & Credential Stuffing",
@@ -71,14 +72,14 @@ export default function SimulationPanelPage() {
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [form, setForm] = useState({ name: "", scenario: "", owner: "", dueDate: "", notes: "" });
 
-  const { data: rawSims, isLoading } = useQuery<SimulationRun[]>({
+  const { data: rawSims, isLoading } = useStandardQuery<SimulationRun[]>({
     queryKey: ["aegis-simulations"],
     queryFn: () => api.simulations.list() as Promise<SimulationRun[]>,
   });
 
   const simulations: SimulationRun[] = rawSims ?? [];
 
-  const createMutation = useMutation({
+  const createMutation = useStandardMutation({
     mutationFn: (data: typeof form) => api.simulations.create({ name: data.name, mode: "controlled", parameters: { scenario: data.scenario, owner: data.owner, dueDate: data.dueDate, notes: data.notes } }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["aegis-simulations"] });
@@ -89,7 +90,7 @@ export default function SimulationPanelPage() {
     onError: () => toast.error("Failed to schedule simulation"),
   });
 
-  const workflowMutation = useMutation({
+  const workflowMutation = useStandardMutation({
     mutationFn: ({ entityId, actionType, assignedTo }: { entityId: number; actionType: string; assignedTo?: string }) =>
       api.workflowActions.create({ entityType: "simulation", entityId, actionType, assignedTo }),
     onSuccess: () => toast.success("Workflow action triggered via Alloy"),

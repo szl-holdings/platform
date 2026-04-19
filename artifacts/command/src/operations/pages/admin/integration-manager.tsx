@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import {
+
   Wifi, WifiOff, AlertTriangle, Play, RefreshCw, CheckCircle, Plus,
   Pencil, Trash2, Calendar, Clock, BarChart3, ChevronDown, ChevronUp,
   Save, X, Eye, EyeOff, ExternalLink, RotateCcw, Shield, Zap,
 } from "lucide-react";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 const API = "/api";
 async function apiFetch<T>(path: string, opts?: RequestInit): Promise<T> {
@@ -106,29 +108,29 @@ export default function IntegrationManager() {
   const [schedules, setSchedules] = useState<Record<string, string>>({});
   const [searchQuery, setSearchQuery] = useState("");
 
-  const { data, isLoading, error, refetch } = useQuery<{ connectors: Connector[]; summary: { total: number; liveConfigured: number; mockedDemoMode: number; manualRequired: number } }>({
+  const { data, isLoading, error, refetch } = useStandardQuery<{ connectors: Connector[]; summary: { total: number; liveConfigured: number; mockedDemoMode: number; manualRequired: number } }>({
     queryKey: ["admin-connectors"],
     queryFn: () => apiFetch("/admin/connectors"),
     refetchInterval: 30000,
   });
 
-  const { data: logsData } = useQuery<{ logs: ConnectorLog[]; total: number }>({
+  const { data: logsData } = useStandardQuery<{ logs: ConnectorLog[]; total: number }>({
     queryKey: ["integration-activity"],
     queryFn: () => apiFetch("/admin/connectors/activity"),
     refetchInterval: 15000,
   });
 
-  const testMutation = useMutation({
+  const testMutation = useStandardMutation({
     mutationFn: (name: string) => apiFetch(`/admin/connectors/${name}/test`, { method: "POST" }),
     onSettled: () => { setTesting(null); qc.invalidateQueries({ queryKey: ["admin-connectors"] }); },
   });
 
-  const syncMutation = useMutation({
+  const syncMutation = useStandardMutation({
     mutationFn: (name: string) => apiFetch(`/admin/connectors/${name}/sync`, { method: "POST" }),
     onSettled: (_, __, name) => { setSyncing(null); qc.invalidateQueries({ queryKey: ["admin-connectors"] }); },
   });
 
-  const toggleMutation = useMutation({
+  const toggleMutation = useStandardMutation({
     mutationFn: ({ name, enabled }: { name: string; enabled: boolean }) =>
       apiFetch(`/admin/connectors/${name}/enable`, { method: "PUT", body: JSON.stringify({ enabled }) }),
     onMutate: async ({ name, enabled }) => {

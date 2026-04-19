@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, CheckCircle, Clock, User, Shield, ArrowUpRight, Target, RefreshCw, Bell, X } from "lucide-react";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
 import { useRealtimeChannel } from "@szl-holdings/shared-ui/use-realtime-channel";
 import { LiveDataBadge } from "@/lib/live-badge";
 import { api } from "../lib/api";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 type ActionQueuePriority = "critical" | "high" | "medium" | "low";
 type ActionQueueStatus = "open" | "in_progress" | "blocked" | "escalated" | "completed";
@@ -177,7 +178,7 @@ export default function ActionQueue() {
   const [filter, setFilter] = useState("open");
   const [activeAction, setActiveAction] = useState<{ id: string; type: "complete" | "escalate" } | null>(null);
 
-  const queueQuery = useQuery({
+  const queueQuery = useStandardQuery({
     queryKey: ["action-queue"],
     queryFn: () => api.actionQueue.list(),
     refetchInterval: 15000,
@@ -228,7 +229,7 @@ export default function ActionQueue() {
 
   const dismissNewBadge = () => setNewCount(0);
 
-  const completeMutation = useMutation({
+  const completeMutation = useStandardMutation({
     mutationFn: (id: string) => api.actionQueue.complete(id, "Executed via Action Queue"),
     onSuccess: (data: { data?: { message?: string } }) => {
       qc.invalidateQueries({ queryKey: ["action-queue"] });
@@ -241,7 +242,7 @@ export default function ActionQueue() {
     },
   });
 
-  const escalateMutation = useMutation({
+  const escalateMutation = useStandardMutation({
     mutationFn: (id: string) => api.actionQueue.escalate(id),
     onSuccess: (data: { data?: { message?: string } }) => {
       qc.invalidateQueries({ queryKey: ["action-queue"] });

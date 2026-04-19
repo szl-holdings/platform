@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Button } from "@szl-holdings/shared-ui/ui/button";
@@ -7,6 +7,7 @@ import { Textarea } from "@szl-holdings/shared-ui/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@szl-holdings/shared-ui/ui/select";
 import type { LucideIcon } from "lucide-react";
 import {
+
   Brain, Shield, AlertTriangle, FileText, Search, Eye, ChevronDown, ChevronUp,
   Clock, CheckCircle, XCircle, BookOpen, FlaskConical, Target, Zap, Activity,
   TrendingUp, TrendingDown, Minus, Plus, Archive, Edit3, Star, Layers, Network,
@@ -16,6 +17,7 @@ import { useState, useMemo } from "react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 import { EvidenceIndexPanel } from "@/components/tradecraft-panel";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 type DecisionType = "TriageDecision" | "IncidentAssessment" | "RiskDecision" | "EscalationDecision" | "ApprovalRecommendation" | "ResponsePlan" | "ExecutiveBrief" | "ControlGapFinding";
 type AnalyticMode = "triage" | "incident_hypothesis" | "adversary_threat_pattern" | "executive_summary" | "alternative_analysis" | "confidence_challenge";
@@ -479,7 +481,7 @@ function NotebookPanel({ caseId, incidentId }: { caseId?: string; incidentId?: s
   if (incidentId) params.set("incidentId", incidentId);
   params.set("limit", "50");
 
-  const { data: notesData } = useQuery({
+  const { data: notesData } = useStandardQuery({
     queryKey: ["tradecraft-notebook", caseId, incidentId],
     queryFn: () => api.tradecraft.notebook(params.toString()),
     refetchInterval: 30000,
@@ -487,7 +489,7 @@ function NotebookPanel({ caseId, incidentId }: { caseId?: string; incidentId?: s
 
   const notes: AnalystNote[] = Array.isArray(notesData) ? notesData : [];
 
-  const createNote = useMutation({
+  const createNote = useStandardMutation({
     mutationFn: (data: unknown) => api.tradecraft.createNote(data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["tradecraft-notebook"] });
@@ -587,7 +589,7 @@ export default function TradecraftEnginePage() {
   if (filterCase) params.set("caseId", filterCase);
   params.set("limit", "100");
 
-  const { data: decisionsData, isLoading } = useQuery({
+  const { data: decisionsData, isLoading } = useStandardQuery({
     queryKey: ["tradecraft-decisions", filterType, filterCase],
     queryFn: () => api.tradecraft.decisions(params.toString()),
     refetchInterval: 30000,

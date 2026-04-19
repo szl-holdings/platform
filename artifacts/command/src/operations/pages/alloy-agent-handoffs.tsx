@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import {
+
   Network, Send, CheckCircle, Clock, AlertTriangle, ChevronRight,
   RefreshCw, ArrowRight, Cpu, Shield, FileText, Activity, Zap, Eye,
   Plus, XCircle, Lock
 } from "lucide-react";
 import { api } from "@lyte/lib/api";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const BG = { page: "#080c14", surface: "#0c1018", elevated: "#10141e" };
 const BORDER = { subtle: "rgba(255,255,255,0.04)", muted: "rgba(255,255,255,0.07)" };
@@ -295,13 +297,13 @@ function mapApiHandoffHistory(h: Record<string, unknown>): AgentHandoff {
 export default function AlloyAgentHandoffsPage() {
   const [filter, setFilter] = useState<"all" | HandoffStatus>("all");
 
-  const { data: contractsData, isLoading: contractsLoading } = useQuery({
+  const { data: contractsData, isLoading: contractsLoading } = useStandardQuery({
     queryKey: ["handoff-contracts"],
     queryFn: () => api.handoffs.contracts(),
     staleTime: 60_000,
   });
 
-  const { data: historyData, isLoading: historyLoading } = useQuery({
+  const { data: historyData, isLoading: historyLoading } = useStandardQuery({
     queryKey: ["handoff-history"],
     queryFn: () => api.handoffs.history({ limit: 20 }),
     staleTime: 30_000,

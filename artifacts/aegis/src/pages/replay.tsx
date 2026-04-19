@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { Play, Pause, SkipBack, SkipForward, Clock, AlertTriangle, Shield, Network, Server, Zap, ChevronRight, Target, Lock, Loader2 } from "lucide-react";
 import { ExecutiveSafeModeProvider, useExecutiveSafeMode } from "../lib/executive-safe-mode-context";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 type EventSeverity = "critical" | "high" | "medium" | "low";
 
@@ -104,7 +105,7 @@ function AegisReplayContent() {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const safeMode = useExecutiveSafeMode();
 
-  const { data: incidentData, isLoading } = useQuery<FirestormIncident[]>({
+  const { data: incidentData, isLoading } = useStandardQuery<FirestormIncident[]>({
     queryKey: ["firestorm-incidents-replay"],
     queryFn: () => apiFetch<FirestormIncident[]>("/firestorm/incidents"),
     staleTime: 60000,

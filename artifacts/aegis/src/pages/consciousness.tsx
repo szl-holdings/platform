@@ -1,11 +1,13 @@
-import { useQuery } from "@tanstack/react-query";
+
 import { motion as m } from "framer-motion";
 import {
+
   Brain, Eye, Heart, Target, Clock, MessageSquare, Compass,
   Activity, AlertTriangle, TrendingUp, TrendingDown, Minus,
   Sparkles, Lightbulb, Zap, Moon, Radio, Shield, GitBranch,
   Users, Crosshair, Scale, Gauge, Layers
 } from "lucide-react";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const API = "/api/nuro-mesh/consciousness";
 
@@ -160,7 +162,7 @@ interface SnapshotData {
 }
 
 function useCSnapshot() {
-  return useQuery<SnapshotData>({
+  return useStandardQuery<SnapshotData>({
     queryKey: ["consciousness-snapshot"],
     queryFn: async () => {
       const r = await fetch(`${API}/snapshot`);

@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { Database, Brain, CheckCircle2, Clock, AlertTriangle, Shield, Activity, RefreshCw, ChevronDown, ChevronUp, InboxIcon } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const API = import.meta.env.VITE_API_URL ?? "/api";
 
@@ -296,14 +297,14 @@ function GovernanceLog({ entries, isLoading }: { entries: LogEntry[]; isLoading:
 export default function Models() {
   // Live backend routes — /firestorm/* paths are active api-server endpoints.
   // Follow-up task #1715 will rename them to /aegis/* once the server migration lands.
-  const { data: registryData, isLoading: regLoading, isError: regError, refetch: refetchReg } = useQuery({
+  const { data: registryData, isLoading: regLoading, isError: regError, refetch: refetchReg } = useStandardQuery({
     queryKey: ["ai-governance-registry"],
     queryFn: () => apiFetch("/firestorm/ai-governance/registry"),
     staleTime: 30_000,
     retry: false,
   });
 
-  const { data: logData, isLoading: logLoading, isError: logError, refetch: refetchLog } = useQuery({
+  const { data: logData, isLoading: logLoading, isError: logError, refetch: refetchLog } = useStandardQuery({
     queryKey: ["ai-governance-log"],
     queryFn: () => apiFetch("/firestorm/ai-governance/log"),
     staleTime: 30_000,

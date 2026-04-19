@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Network, Activity, AlertTriangle, Zap, RefreshCw, ChevronRight, Cpu, Radio, Eye } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface TopologyNode {
   service: string;
@@ -208,7 +209,7 @@ export default function LivingTopology() {
   const [showTrace, setShowTrace] = useState(false);
   const [dimensions] = useState({ w: 800, h: 520 });
 
-  const { data } = useQuery({
+  const { data } = useStandardQuery({
     queryKey: ["topology"],
     queryFn: () => apiFetch<{ nodes: TopologyNode[]; firingAlertCount: number }>("/lyte/topology"),
     refetchInterval: 30000,

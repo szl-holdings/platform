@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import {
+
   DndContext,
   closestCenter,
   KeyboardSensor,
@@ -18,7 +19,7 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   LayoutDashboard, Plus, Save, Trash2, GripVertical, X, ChevronDown, ChevronRight,
   BarChart3, AlertTriangle, Table, Network, Circle,
@@ -26,6 +27,7 @@ import {
 } from "lucide-react";
 import { cn } from "@lyte/lib/utils";
 import { api } from "@lyte/lib/api";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 type WidgetType = "metric_card" | "time_series" | "table" | "alert_feed" | "topology_map" | "status_indicator";
 type GridSize = "sm" | "md" | "lg" | "xl";
@@ -429,7 +431,7 @@ export default function DashboardBuilder() {
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
 
-  const { data: dashboards = [] } = useQuery<Dashboard[]>({
+  const { data: dashboards = [] } = useStandardQuery<Dashboard[]>({
     queryKey: ["lyte-dashboards"],
     queryFn: async () => {
       const rows = await api.dashboards.list();
@@ -437,7 +439,7 @@ export default function DashboardBuilder() {
     },
   });
 
-  const saveMutation = useMutation({
+  const saveMutation = useStandardMutation({
     mutationFn: async (dash: Dashboard) => {
       const payload = { name: dash.name, description: dash.description, widgets: dash.widgets, isShared: dash.isShared, template: dash.template };
       if (dash.id && dash.id > 0) {
@@ -454,7 +456,7 @@ export default function DashboardBuilder() {
     },
   });
 
-  const deleteMutation = useMutation({
+  const deleteMutation = useStandardMutation({
     mutationFn: async (id: number) => { await api.dashboards.delete(id); },
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["lyte-dashboards"] }); },
   });

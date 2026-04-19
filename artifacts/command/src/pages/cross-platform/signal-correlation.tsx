@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { Link } from "wouter";
 import { ArrowLeft, GitMerge, RefreshCw, ChevronRight, AlertCircle, CheckCircle, Clock, ExternalLink } from "lucide-react";
 import { apiUrl, fetchJson } from "../cognitive/shared";
 import { productDashboardUrl, productEntityUrl, inferProductForEntity } from "./product-links";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -74,7 +75,7 @@ export function SignalCorrelationPage() {
   const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
 
-  const { data, isLoading, error, refetch } = useQuery<CorrelationsResponse>({
+  const { data, isLoading, error, refetch } = useStandardQuery<CorrelationsResponse>({
     queryKey: ["cross-platform", "correlations", selectedProduct],
     queryFn: () =>
       fetchJson<CorrelationsResponse>(

@@ -4,12 +4,14 @@ import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Button } from "@szl-holdings/shared-ui/ui/button";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import {
+
   Monitor, AlertTriangle, CheckCircle, RefreshCw, Shield, Package, Terminal, Cpu,
   HardDrive, MemoryStick, Activity, Play, RotateCcw, Zap, ChevronRight, X,
   Clock, Server, Wifi, WifiOff, Wrench, Eye, CheckSquare, XCircle,
 } from "lucide-react";
 import { Skeleton } from "@szl-holdings/shared-ui/ui/skeleton";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface Device {
   id: number;
@@ -216,21 +218,21 @@ export default function RMMConsole() {
   const [actionDevice, setActionDevice] = useState<Device | null>(null);
   const [actionFilter, setActionFilter] = useState("all");
 
-  const { data: devicesData, isLoading: devicesLoading, refetch: refetchDevices } = useQuery({
+  const { data: devicesData, isLoading: devicesLoading, refetch: refetchDevices } = useStandardQuery({
     queryKey: ["msp-devices-rmm"],
     queryFn: () => apiFetch<{ dbDevices: Device[]; totalDbDevices: number }>("/msp/rmm/devices").then(r => ({ devices: r.dbDevices, total: r.totalDbDevices })),
     staleTime: 30_000,
     refetchInterval: 60_000,
   });
 
-  const { data: rmmHealth, refetch: refetchHealth } = useQuery({
+  const { data: rmmHealth, refetch: refetchHealth } = useStandardQuery({
     queryKey: ["rmm-health"],
     queryFn: () => apiFetch<RmmHealthResponse>("/msp/rmm/health"),
     staleTime: 15_000,
     refetchInterval: 30_000,
   });
 
-  const { data: actionsData, refetch: refetchActions } = useQuery({
+  const { data: actionsData, refetch: refetchActions } = useStandardQuery({
     queryKey: ["rmm-actions", actionFilter],
     queryFn: () => apiFetch<{ actions: RemoteAction[]; total: number }>(`/msp/rmm/actions?status=${actionFilter}&limit=30`),
     staleTime: 10_000,
@@ -238,7 +240,7 @@ export default function RMMConsole() {
     enabled: activeTab === "actions",
   });
 
-  const { data: healingData, refetch: refetchHealing } = useQuery({
+  const { data: healingData, refetch: refetchHealing } = useStandardQuery({
     queryKey: ["rmm-healing-executions"],
     queryFn: () => apiFetch<{ executions: HealingExecution[]; total: number }>("/msp/rmm/playbooks/executions?limit=30"),
     staleTime: 10_000,
@@ -246,7 +248,7 @@ export default function RMMConsole() {
     enabled: activeTab === "healing",
   });
 
-  const createActionMutation = useMutation({
+  const createActionMutation = useStandardMutation({
     mutationFn: (data: { deviceId: number; actionType: string; target?: string; parameters?: Record<string, unknown> }) =>
       apiFetch<{ action: { id: number; status: string }; message: string }>("/msp/rmm/actions", {
         method: "POST",
@@ -259,19 +261,19 @@ export default function RMMConsole() {
     },
   });
 
-  const approveActionMutation = useMutation({
+  const approveActionMutation = useStandardMutation({
     mutationFn: (actionId: number) =>
       apiFetch(`/msp/rmm/actions/${actionId}/approve`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ approvedBy: "operator" }) }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["rmm-actions"] }),
   });
 
-  const cancelActionMutation = useMutation({
+  const cancelActionMutation = useStandardMutation({
     mutationFn: (actionId: number) =>
       apiFetch(`/msp/rmm/actions/${actionId}/cancel`, { method: "POST" }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["rmm-actions"] }),
   });
 
-  const approveHealingMutation = useMutation({
+  const approveHealingMutation = useStandardMutation({
     mutationFn: (execId: number) =>
       apiFetch(`/msp/rmm/playbooks/executions/${execId}/approve`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ approvedBy: "operator" }) }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["rmm-healing-executions"] }),

@@ -1,10 +1,11 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { Users, Search, Phone, Mail, TrendingUp, CheckSquare, Plus, RefreshCw, X } from "lucide-react";
 import { EmptyState } from "@szl-holdings/shared-ui/design-system";
 import { StageBadge, AgentAvatar, formatCurrency, ProbabilityBar } from "@/components/brokerage-ui";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
 const API = "/api";
@@ -259,7 +260,7 @@ export default function LeadsPage() {
   const [selectedLead, setSelectedLead] = useState<ApiLead | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
 
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { data, isLoading, isError, refetch } = useStandardQuery({
     queryKey: ["terra-leads", stageFilter, sourceFilter, search],
     queryFn: () => {
       const params = new URLSearchParams();
@@ -272,7 +273,7 @@ export default function LeadsPage() {
     staleTime: 30000,
   });
 
-  const convertToDeal = useMutation({
+  const convertToDeal = useStandardMutation({
     mutationFn: (leadId: string) => postJson("/terra/convert/lead-to-deal", { leadId }),
     onMutate: async (leadId) => {
       await qc.cancelQueries({ queryKey: ["terra-leads"] });

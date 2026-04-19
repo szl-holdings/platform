@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import {
+
   SettingsShell,
   SettingsSectionPanel,
   SettingsCard,
@@ -14,6 +15,7 @@ import {
 } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import ProviderSettings from "@/pages/msp/provider-settings";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const AEGIS_ACCENT = "#6366f1";
 
@@ -29,7 +31,7 @@ function getValue(settings: ResolvedSetting[], key: string): unknown {
 }
 
 function AccountPanel() {
-  const { data } = useQuery({
+  const { data } = useStandardQuery({
     queryKey: ["auth-me-aegis"],
     queryFn: () => apiFetch<{ user?: { id: number; name?: string; email?: string; roles?: string[] } }>("/auth/me"),
     staleTime: 60_000,
@@ -59,7 +61,7 @@ function AccountPanel() {
 
 function NotificationsPanel() {
   const queryClient = useQueryClient();
-  const { data } = useQuery({
+  const { data } = useStandardQuery({
     queryKey: ["aegis-notif-settings"],
     queryFn: () => apiFetch<{ settings: ResolvedSetting[] }>("/settings/resolve?namespace=aegis.notifications"),
     staleTime: 30_000,
@@ -154,7 +156,7 @@ function SecurityPanel() {
 }
 
 function TeamPanel() {
-  const { data } = useQuery({
+  const { data } = useStandardQuery({
     queryKey: ["aegis-org-members"],
     queryFn: () => apiFetch<{ members: Array<{ id: number; role: string; joinedAt: string; user?: { name: string; email: string } }> }>("/auth/org/members"),
     staleTime: 30_000,
@@ -237,7 +239,7 @@ function AuditPanel() {
   if (applied.after) params.set("after", applied.after);
   if (applied.before) params.set("before", applied.before);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading } = useStandardQuery({
     queryKey: ["aegis-settings-audit", applied],
     queryFn: () => apiFetch<AuditEntry[]>(`/settings/audit?${params.toString()}`),
     staleTime: 30_000,

@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { AnimatedCounter } from "@szl-holdings/shared-ui/animated-counter";
 import { api } from "@/lib/api";
 import { AegisGraphQLPanel } from "@/components/graphql-data-panel";
@@ -14,6 +14,7 @@ import { Progress } from "@szl-holdings/shared-ui/ui/progress";
 import { Shield, Target, AlertTriangle, CheckCircle, Plus, Clock, Trash2, ShieldAlert, Download, Loader2 as LoaderIcon } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 const statusColors: Record<string, string> = {
   draft: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",
@@ -87,20 +88,20 @@ async function downloadAssessmentPDF(assessment: Record<string, unknown>, findin
 
 export default function AssessmentDashboard() {
   const qc = useQueryClient();
-  const { data: assessments = [], isLoading } = useQuery({ queryKey: ["assessments"], queryFn: api.assessments.list });
-  const { data: findings = [] } = useQuery({ queryKey: ["findings"], queryFn: () => api.findings.list() });
-  const { data: simulations = [] } = useQuery({ queryKey: ["simulations"], queryFn: api.simulations.list });
+  const { data: assessments = [], isLoading } = useStandardQuery({ queryKey: ["assessments"], queryFn: api.assessments.list });
+  const { data: findings = [] } = useStandardQuery({ queryKey: ["findings"], queryFn: () => api.findings.list() });
+  const { data: simulations = [] } = useStandardQuery({ queryKey: ["simulations"], queryFn: api.simulations.list });
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ name: "", assessmentType: "penetration_test" as string, scope: "", targetEnvironment: "", description: "" });
   const [downloadingId, setDownloadingId] = useState<number | null>(null);
 
-  const createMut = useMutation({
+  const createMut = useStandardMutation({
     mutationFn: (data: any) => api.assessments.create(data),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["assessments"] }); setOpen(false); toast.success("Assessment created"); },
     onError: (e: any) => toast.error(e.message),
   });
 
-  const deleteMut = useMutation({
+  const deleteMut = useStandardMutation({
     mutationFn: (id: number) => api.assessments.delete(id),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["assessments"] }); toast.success("Assessment deleted"); },
   });

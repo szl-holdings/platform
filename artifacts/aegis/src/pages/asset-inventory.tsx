@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
@@ -8,12 +8,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@szl-holdings/shared-ui/ui/dialog";
 import { Label } from "@szl-holdings/shared-ui/ui/label";
 import {
+
   Server, Monitor, Network, Cloud, Globe, Database, Cpu, User, Box, Layers,
   AlertTriangle, Shield, Search, Filter, Plus, RefreshCw, ArrowUpRight,
   CheckCircle, XCircle, Clock, Flame, Zap
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 const assetTypeIcons: Record<string, any> = {
   server: Server,
@@ -57,7 +59,6 @@ function getRiskBg(score: number): string {
   return "bg-emerald-500/10 border-emerald-500/20";
 }
 
-
 function formatTimeSince(isoDate: string | null | undefined): string {
   if (!isoDate) return "Never";
   const diff = Date.now() - new Date(isoDate).getTime();
@@ -76,14 +77,14 @@ export default function AssetInventoryPage() {
   const [envFilter, setEnvFilter] = useState("all");
   const [selectedAsset, setSelectedAsset] = useState<any>(null);
 
-  const { data: rawAssets, isLoading } = useQuery({
+  const { data: rawAssets, isLoading } = useStandardQuery({
     queryKey: ["aegis-assets"],
     queryFn: () => api.assets.list(),
   });
 
   const assets: any[] = (rawAssets && Array.isArray(rawAssets)) ? rawAssets : [];
 
-  const triggerWorkflow = useMutation({
+  const triggerWorkflow = useStandardMutation({
     mutationFn: ({ entityId, actionType, assignedTo }: any) =>
       api.workflowActions.create({ entityType: "asset", entityId, actionType, assignedTo }),
     onSuccess: () => {

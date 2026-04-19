@@ -1,13 +1,15 @@
 import { useState, useMemo } from "react";
 import { motion as m, AnimatePresence } from "framer-motion";
 import {
+
   Building2, Layers, MapPin, DollarSign, TrendingUp, ChevronRight,
   BarChart3, Eye, Grid3X3, Maximize2, ArrowUpRight, Scale, FileText, Box, ArrowLeft, Loader2
 } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { useRoute, Link } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+
 import { api } from "@/lib/api";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface ZoningParcel {
   id: string;
@@ -52,7 +54,6 @@ interface VarianceRecord {
   conditions: string;
 }
 
-
 const fmt = (n: number) => n >= 1_000_000 ? `$${(n / 1_000_000).toFixed(1)}M` : n >= 1000 ? `$${(n / 1000).toFixed(0)}K` : `$${n}`;
 const fmtSqft = (n: number) => `${n.toLocaleString()} SF`;
 
@@ -60,14 +61,14 @@ export default function ZoningIntelligencePage() {
   const [, params] = useRoute<{ propertyId: string }>("/zoning-intelligence/:propertyId");
   const propertyId = params?.propertyId;
 
-  const { data: propertyData, isLoading: propertyLoading } = useQuery({
+  const { data: propertyData, isLoading: propertyLoading } = useStandardQuery({
     queryKey: ["terra-zoning", propertyId],
     queryFn: () => api.properties.zoning(propertyId!),
     enabled: !!propertyId,
     staleTime: 300_000,
   });
 
-  const { data: portfolioData, isLoading: portfolioLoading, isError: portfolioError } = useQuery({
+  const { data: portfolioData, isLoading: portfolioLoading, isError: portfolioError } = useStandardQuery({
     queryKey: ["terra-portfolio-zoning"],
     queryFn: () => api.portfolio.zoning(),
     enabled: !propertyId,

@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
@@ -11,6 +11,7 @@ import { Textarea } from "@szl-holdings/shared-ui/ui/textarea";
 import { Target, Plus, Trash2, Shield, Zap, AlertTriangle, Globe, Server, Users, Lock, Link2, Building } from "lucide-react";
 import { useState } from "react";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 const categoryColors: Record<string, string> = {
   network: "bg-blue-500/10 text-blue-400 border-blue-500/20",
@@ -69,18 +70,18 @@ function ScenarioSkeleton() {
 
 export default function ScenarioLibrary() {
   const qc = useQueryClient();
-  const { data: scenarios = [], isLoading } = useQuery({ queryKey: ["scenarios"], queryFn: api.scenarios.list });
+  const { data: scenarios = [], isLoading } = useStandardQuery({ queryKey: ["scenarios"], queryFn: api.scenarios.list });
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ name: "", category: "network", severity: "medium", description: "" });
   const [filter, setFilter] = useState<string>("all");
 
-  const createMut = useMutation({
+  const createMut = useStandardMutation({
     mutationFn: (data: any) => api.scenarios.create(data),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["scenarios"] }); setOpen(false); toast.success("Scenario created"); },
     onError: (e: any) => toast.error(e.message),
   });
 
-  const deleteMut = useMutation({
+  const deleteMut = useStandardMutation({
     mutationFn: (id: number) => api.scenarios.delete(id),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["scenarios"] }); toast.success("Scenario deleted"); },
   });

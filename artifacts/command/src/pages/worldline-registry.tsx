@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import {
+
   GitBranch,
   Layers,
   Shield,
@@ -20,6 +21,7 @@ import {
   X,
   Send,
 } from "lucide-react";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const BASE_URL = import.meta.env.BASE_URL?.replace(/\/$/, "") || "";
 
@@ -166,7 +168,7 @@ interface ApiScenarioBranch {
 }
 
 function useBranches() {
-  return useQuery<{ branches: ApiScenarioBranch[]; count: number }>({
+  return useStandardQuery<{ branches: ApiScenarioBranch[]; count: number }>({
     queryKey: ["atlas-worldline-branches"],
     queryFn: () => fetch("/api/atlas/spatial/branches?limit=50").then(r => {
       if (!r.ok) throw new Error(`HTTP ${r.status}`);

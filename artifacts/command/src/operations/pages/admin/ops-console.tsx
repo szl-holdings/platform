@@ -1,12 +1,14 @@
-import { useQuery } from "@tanstack/react-query";
+
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import {
+
   Server, Database, HardDrive, Users, Zap, Activity, CheckCircle,
   AlertTriangle, WifiOff, RefreshCw, Clock, Shield, Cpu, BarChart3,
   FileText, AlertCircle, Package, GitBranch, Globe, Radio, Target,
   Lock, TrendingUp, X,
 } from "lucide-react";
 import { useState } from "react";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface SystemHealth {
   timestamp: string;
@@ -136,12 +138,12 @@ export default function OpsConsole() {
     setTimeout(() => setIsRefreshing(false), 1500);
   };
 
-  const overview = useQuery<AdminOverview>({ queryKey: ["ops-overview", refreshKey], queryFn: () => apiFetch("/admin/overview"), refetchInterval: 30000 });
-  const systemHealth = useQuery<SystemHealth>({ queryKey: ["ops-system-health", refreshKey], queryFn: () => apiFetch("/admin/system-health"), refetchInterval: 60000 });
-  const jobsData = useQuery<JobStats>({ queryKey: ["ops-jobs", refreshKey], queryFn: () => apiFetch("/admin/jobs/stats"), refetchInterval: 30000 });
-  const connectorsData = useQuery<ConnectorSummary>({ queryKey: ["ops-connectors", refreshKey], queryFn: () => apiFetch("/admin/connectors"), refetchInterval: 60000 });
-  const seedData = useQuery<SeedValidation>({ queryKey: ["ops-seed", refreshKey], queryFn: () => apiFetch("/admin/seed/validate"), staleTime: 5 * 60 * 1000 });
-  const rmmHealth = useQuery<{ overallStatus: string; providers: { total: number; active: number; error: number; list: Array<{ id: number; name: string; provider: string; status: string; lastSyncAt: string | null; deviceCount: number | null }> }; devices: { total: number; online: number; warning: number; critical: number; offline: number; avgCpu: number; avgMemory: number; avgDisk: number; totalAlerts: number }; healing: { pendingApprovals: number; stats: Record<string, number> } }>({
+  const overview = useStandardQuery<AdminOverview>({ queryKey: ["ops-overview", refreshKey], queryFn: () => apiFetch("/admin/overview"), refetchInterval: 30000 });
+  const systemHealth = useStandardQuery<SystemHealth>({ queryKey: ["ops-system-health", refreshKey], queryFn: () => apiFetch("/admin/system-health"), refetchInterval: 60000 });
+  const jobsData = useStandardQuery<JobStats>({ queryKey: ["ops-jobs", refreshKey], queryFn: () => apiFetch("/admin/jobs/stats"), refetchInterval: 30000 });
+  const connectorsData = useStandardQuery<ConnectorSummary>({ queryKey: ["ops-connectors", refreshKey], queryFn: () => apiFetch("/admin/connectors"), refetchInterval: 60000 });
+  const seedData = useStandardQuery<SeedValidation>({ queryKey: ["ops-seed", refreshKey], queryFn: () => apiFetch("/admin/seed/validate"), staleTime: 5 * 60 * 1000 });
+  const rmmHealth = useStandardQuery<{ overallStatus: string; providers: { total: number; active: number; error: number; list: Array<{ id: number; name: string; provider: string; status: string; lastSyncAt: string | null; deviceCount: number | null }> }; devices: { total: number; online: number; warning: number; critical: number; offline: number; avgCpu: number; avgMemory: number; avgDisk: number; totalAlerts: number }; healing: { pendingApprovals: number; stats: Record<string, number> } }>({
     queryKey: ["lyte-rmm-health", refreshKey],
     queryFn: () => apiFetch("/msp/rmm/health"),
     refetchInterval: 30000,

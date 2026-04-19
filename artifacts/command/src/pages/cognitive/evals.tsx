@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { Link } from "wouter";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
 import { ACCENT, DOMAIN_COLORS, fetchJson, apiUrl } from "./shared";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface ApiSuite {
   suiteId: string;
@@ -344,7 +345,7 @@ export default function CognitiveEvals() {
   const [runningId, setRunningId] = useState<string | null>(null);
   const qc = useQueryClient();
 
-  const evalsQuery = useQuery<ApiEvalsResponse>({
+  const evalsQuery = useStandardQuery<ApiEvalsResponse>({
     queryKey: ["cognitive", "evals"],
     queryFn: () => fetchJson<ApiEvalsResponse>(apiUrl("/evals")),
     retry: 1,
@@ -358,7 +359,7 @@ export default function CognitiveEvals() {
   const runs: EvalRun[] = apiRuns.length > 0 ? apiRuns : SEEDED_RUNS;
   const isLiveData = apiSuites.length > 0;
 
-  const runEvalMutation = useMutation({
+  const runEvalMutation = useStandardMutation({
     mutationFn: ({ suiteId, strategy }: { suiteId: string; strategy: string }) =>
       fetchJson<{ runId: string }>(apiUrl("/evals/run"), {
         method: "POST",

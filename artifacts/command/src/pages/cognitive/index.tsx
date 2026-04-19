@@ -1,9 +1,11 @@
-import { useQuery } from "@tanstack/react-query";
+
 import {
+
   Activity, AlertTriangle, Brain, CheckCircle2, ChevronRight,
   Clock, Eye, GitBranch, Info, Layers, Shield, Target, Zap,
 } from "lucide-react";
 import { CognitiveLayout } from "./cognitive-layout";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 const ACCENT = "#8b7ac8";
@@ -334,7 +336,7 @@ function ReflectionsPanel({ reflections }: { reflections: Reflection[] }) {
 }
 
 export default function CognitiveCommandCenter() {
-  const { data: runtimeData } = useQuery<RuntimeState>({
+  const { data: runtimeData } = useStandardQuery<RuntimeState>({
     queryKey: ["cognitive", "runtime"],
     queryFn: () =>
       fetch(`${BASE}/api/cognitive/runtime`, { credentials: "include" })

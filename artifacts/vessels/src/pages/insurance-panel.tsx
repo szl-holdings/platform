@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { Shield, AlertTriangle, DollarSign, FileText, TrendingUp, Activity } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface Claim {
   id: string;
@@ -167,17 +168,17 @@ async function fetchJson<T>(url: string): Promise<T> {
 export default function InsurancePanelPage() {
   const [tab, setTab] = useState<"policies" | "claims">("policies");
 
-  const policiesQuery = useQuery({
+  const policiesQuery = useStandardQuery({
     queryKey: ["vessels-insurance-policies"],
     queryFn: () => fetchJson<{ policies: ApiPolicy[] }>("/api/vessels/insurance/policies"),
     staleTime: 60_000,
   });
-  const claimsQuery = useQuery({
+  const claimsQuery = useStandardQuery({
     queryKey: ["vessels-insurance-claims"],
     queryFn: () => fetchJson<{ claims: ApiClaim[] }>("/api/vessels/insurance/claims"),
     staleTime: 60_000,
   });
-  const summaryQuery = useQuery({
+  const summaryQuery = useStandardQuery({
     queryKey: ["vessels-insurance-summary"],
     queryFn: () => fetchJson<PortfolioSummary>("/api/vessels/insurance/portfolio-summary"),
     staleTime: 60_000,

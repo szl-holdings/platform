@@ -1,6 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
+
 import { Activity, AlertTriangle, CheckCircle, Clock, Database, Server, Wifi, Zap, RefreshCw, ShieldCheck, BarChart3 } from "lucide-react";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface HealthCheck {
   status: string;
@@ -98,13 +99,13 @@ function formatUptime(seconds: number): string {
 }
 
 export default function AdminDiagnosticsPage() {
-  const { data: dashboard, isLoading: dashLoading, refetch: refetchDash, dataUpdatedAt } = useQuery<HealthDashboard>({
+  const { data: dashboard, isLoading: dashLoading, refetch: refetchDash, dataUpdatedAt } = useStandardQuery<HealthDashboard>({
     queryKey: ["admin-health-dashboard"],
     queryFn: () => apiFetch<HealthDashboard>("/admin/health-dashboard"),
     refetchInterval: 30_000,
   });
 
-  const { data: detailed, isLoading: detailedLoading, refetch: refetchDetailed } = useQuery<DetailedHealth>({
+  const { data: detailed, isLoading: detailedLoading, refetch: refetchDetailed } = useStandardQuery<DetailedHealth>({
     queryKey: ["admin-detailed-health"],
     queryFn: () => apiFetch<DetailedHealth>("/health/detailed"),
     refetchInterval: 30_000,

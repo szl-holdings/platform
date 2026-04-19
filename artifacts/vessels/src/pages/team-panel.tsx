@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { Users, UserCheck, Shield, Crown, Wrench, Eye, MoreHorizontal, Mail, RefreshCw } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface TeamMember {
   id: number;
@@ -86,7 +87,7 @@ export default function TeamPanelPage() {
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<string | null>(null);
 
-  const { data: apiData, isLoading, refetch } = useQuery({
+  const { data: apiData, isLoading, refetch } = useStandardQuery({
     queryKey: ["team-members"],
     queryFn: () => apiFetch<{ data?: TeamMember[] }>("/auth/users"),
     staleTime: 60_000,

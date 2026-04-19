@@ -2,9 +2,10 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Search, Filter, Server, Monitor, Wifi, Printer, Smartphone, Shield, AlertTriangle, CheckCircle2, XCircle, Activity, RefreshCw } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
-import { useQuery } from "@tanstack/react-query";
+
 import { Skeleton } from "@szl-holdings/shared-ui/ui/skeleton";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface Device {
   id: number;
@@ -135,7 +136,7 @@ export default function DevicesPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [groupBy, setGroupBy] = useState<"none" | "client" | "type">("client");
 
-  const { data, isLoading, refetch } = useQuery<DevicesResponse>({
+  const { data, isLoading, refetch } = useStandardQuery<DevicesResponse>({
     queryKey: ["msp-devices"],
     queryFn: () => apiFetch<DevicesResponse>("/msp/devices?limit=200"),
     staleTime: 30_000,

@@ -1,9 +1,10 @@
 import { MicroFeedbackWidget } from "@szl-holdings/shared-ui/micro-feedback-widget";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { TrendingUp, TrendingDown, Minus, BarChart3, ChevronRight, Zap, AlertTriangle, RefreshCw, ArrowRight, CheckCircle2, Clock, Target, UserCheck, Shield } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const LENS_META: Record<string, { label: string; color: string; emoji: string; description: string }> = {
   financial_health:   { label: "Financial Health",    color: "#6b8f71", emoji: "💰", description: "Revenue, burn rate, cash position, ARR" },
@@ -205,7 +206,7 @@ function LensDetailPanel({ lens, onClose }: { lens: string; onClose: () => void 
   const meta = LENS_META[lens] ?? { label: lens, color: "#d4a054", emoji: "⚡", description: "" };
   const recActions = LENS_RECOMMENDED_ACTIONS[lens] ?? [];
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading } = useStandardQuery({
     queryKey: ["prism-lens-history", lens],
     queryFn: () => apiFetch<PrismScore[]>(`/lyte/prism/scores?lens=${lens}`),
   });
@@ -338,7 +339,7 @@ function LensDetailPanel({ lens, onClose }: { lens: string; onClose: () => void 
 export default function PrismDashboard() {
   const [drill, setDrill] = useState<string | null>(null);
 
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { data, isLoading, isError, refetch } = useStandardQuery({
     queryKey: ["prism-summary"],
     queryFn: () => apiFetch<PrismSummary>("/lyte/prism/summary"),
     refetchInterval: 60000,

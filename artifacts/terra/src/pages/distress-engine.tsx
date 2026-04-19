@@ -1,14 +1,16 @@
 import { useState, useMemo, useCallback } from "react";
 import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import {
+
   Flame, MapPin, List, Filter, Search, AlertTriangle, Clock, DollarSign,
   ChevronRight, X, Building2, TrendingDown, Gavel, FileText, ShieldAlert,
   Calendar, User, Tag, ArrowRight, Bell, BarChart3, Eye, Zap, Target,
   CheckCircle, ArrowUpRight, LinkIcon, Layers, Loader2, RefreshCw, Download
 } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
 function fetchJson(path: string) {
@@ -411,7 +413,7 @@ function useDistressProperties(params: { borough?: string; distressType?: string
   searchParams.set("limit", String(params.limit));
   searchParams.set("sort", "score");
 
-  return useQuery({
+  return useStandardQuery({
     queryKey: ["terra-distress-properties", params],
     queryFn: () => fetchJson(`/terra/distress/search?${searchParams}`),
     staleTime: 30000,
@@ -419,7 +421,7 @@ function useDistressProperties(params: { borough?: string; distressType?: string
 }
 
 function useDistressAlerts() {
-  return useQuery({
+  return useStandardQuery({
     queryKey: ["terra-distress-alerts"],
     queryFn: () => fetchJson("/terra/distress/alerts?limit=20"),
     staleTime: 60000,

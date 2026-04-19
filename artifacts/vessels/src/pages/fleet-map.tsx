@@ -5,11 +5,12 @@ import { Link } from "wouter";
 import { type VesselProfile } from "@/data/types";
 import { useVessels, useFleetExceptions } from "@/hooks/use-vessels-data";
 import { useMapboxToken } from "@/hooks/use-mapbox-token";
-import { useQuery } from "@tanstack/react-query";
+
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { SectionErrorBoundary } from "@szl-holdings/shared-ui/error-boundary";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 import {
+
   X, Ship, MapPin, Radio, Navigation, Clock, Filter, ChevronRight,
   AlertTriangle, Anchor, Wrench, Activity, TrendingUp, TrendingDown, Layers, Play, Pause
 } from "lucide-react";
@@ -17,6 +18,7 @@ import { cn } from "@szl-holdings/shared-ui/utils";
 import { useRealtimeChannel } from "@szl-holdings/shared-ui/use-realtime-channel";
 import { EmptyState } from "@szl-holdings/shared-ui/design-system";
 import { useQueryClient } from "@tanstack/react-query";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const statusColors: Record<string, string> = {
   at_sea: "#22c55e",
@@ -243,7 +245,7 @@ function MapboxFleetMap({
   const [mapLoaded, setMapLoaded] = useState(false);
   const [mapError, setMapError] = useState<string | null>(null);
 
-  const { data: trackData } = useQuery<TrackHistoryResponse>({
+  const { data: trackData } = useStandardQuery<TrackHistoryResponse>({
     queryKey: ["vessel-track", selectedVessel?.id],
     queryFn: async (): Promise<TrackHistoryResponse> => {
       const res = await fetch(`/api/vessels/track/${selectedVessel!.id}`, { credentials: "include" });
@@ -703,7 +705,7 @@ export default function FleetMapPage() {
   const [playbackActive, setPlaybackActive] = useState(false);
   const [showAis, setShowAis] = useState(true);
 
-  const { data: aisData } = useQuery<AisApiResponse>({
+  const { data: aisData } = useStandardQuery<AisApiResponse>({
     queryKey: ["vessels-live-ais"],
     queryFn: async (): Promise<AisApiResponse> => {
       const res = await fetch("/api/vessels/live/ais", { credentials: "include" });

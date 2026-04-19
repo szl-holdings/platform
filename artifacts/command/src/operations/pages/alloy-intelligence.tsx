@@ -1,12 +1,14 @@
 // @ts-nocheck
 import { EvidencePanel, ApprovalBadge, DegradedModeBanner, HumanReviewBadge, PriorityBadge, ActionTypeBadge, EnvironmentLabel } from "@szl-holdings/shared-ui/alloy-decision-card";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { api } from "@lyte/lib/api";
 import type { AlloyAIHealth, AlloyAIModels, AlloyAIAuditResult } from "@lyte/lib/api";
 import {
+
   Brain, Cpu, Shield, Activity, Search, FileText, CheckCircle, AlertTriangle, Clock, Zap, Eye, ChevronRight, RefreshCw, Crosshair, UserCheck, Database, BarChart3, Lock, GitBranch, Info, X, } from "lucide-react";
 import { ConfidenceBand } from "@szl-holdings/shared-ui/alloy-decision-card";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const BG = { page: "#080c14", surface: "#0c1018", elevated: "#10141e" };
 const BORDER = { subtle: "rgba(255,255,255,0.04)", muted: "rgba(255,255,255,0.07)" };
@@ -34,7 +36,6 @@ function PanelHead({ icon: Icon, title, right, accent }: { icon: React.ElementTy
     </div>
   );
 }
-
 
 function ModelSlotCard({ slot }: { slot: { model: string; role: string; provider: string } }) {
   const roleColors: Record<string, string> = {
@@ -66,31 +67,31 @@ export default function AlloyIntelligence() {
   const [planResult, setPlanResult] = useState<any>(null);
   const [planLoading, setPlanLoading] = useState(false);
 
-  const { data: health, isLoading: healthLoading, refetch: refetchHealth } = useQuery<AlloyAIHealth>({
+  const { data: health, isLoading: healthLoading, refetch: refetchHealth } = useStandardQuery<AlloyAIHealth>({
     queryKey: ["alloy-ai-health"],
     queryFn: () => api.ai.health(),
     refetchInterval: 30_000,
   });
 
-  const { data: models } = useQuery<AlloyAIModels>({
+  const { data: models } = useStandardQuery<AlloyAIModels>({
     queryKey: ["alloy-ai-models"],
     queryFn: () => api.ai.models(),
     enabled: tab === "models" || tab === "overview",
   });
 
-  const { data: tools } = useQuery({
+  const { data: tools } = useStandardQuery({
     queryKey: ["alloy-ai-tools"],
     queryFn: () => api.ai.tools(),
     enabled: tab === "tools",
   });
 
-  const { data: auditData } = useQuery<AlloyAIAuditResult>({
+  const { data: auditData } = useStandardQuery<AlloyAIAuditResult>({
     queryKey: ["alloy-ai-audit"],
     queryFn: () => api.ai.audit(50),
     enabled: tab === "audit",
   });
 
-  const { data: decisionsData, refetch: refetchDecisions } = useQuery<{ total: number; decisions: any[] }>({
+  const { data: decisionsData, refetch: refetchDecisions } = useStandardQuery<{ total: number; decisions: any[] }>({
     queryKey: ["alloy-ai-decisions"],
     queryFn: () => api.ai.decisions(),
     enabled: tab === "decisions",

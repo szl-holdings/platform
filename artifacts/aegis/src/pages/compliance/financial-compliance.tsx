@@ -1,12 +1,14 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import {
+
   Shield, AlertTriangle, CheckCircle2, Clock, FileText, Scale, Archive,
   Calendar, BarChart3, TrendingUp, TrendingDown, Activity, ChevronRight,
   Plus, RefreshCw, Eye, AlertCircle, Building2, DollarSign, Zap
 } from "lucide-react";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { motion } from "framer-motion";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface CompliancePosture {
   overallRiskScore: number;
@@ -137,32 +139,32 @@ export default function FinancialCompliancePage() {
   const [activeTab, setActiveTab] = useState<"posture" | "supervision" | "calendar" | "archival" | "fusion">("posture");
   const queryClient = useQueryClient();
 
-  const { data: postureData, isLoading: postureLoading } = useQuery({
+  const { data: postureData, isLoading: postureLoading } = useStandardQuery({
     queryKey: ["compliance-posture"],
     queryFn: () => apiFetch<{ data: CompliancePosture }>("/compliance/posture"),
     refetchInterval: 60000,
   });
 
-  const { data: supervisionData, isLoading: supervisionLoading } = useQuery({
+  const { data: supervisionData, isLoading: supervisionLoading } = useStandardQuery({
     queryKey: ["compliance-supervision"],
     queryFn: () => apiFetch<{ data: { items: SupervisionItem[]; count: number } }>("/compliance/supervision"),
     enabled: activeTab === "supervision" || activeTab === "posture",
     refetchInterval: 30000,
   });
 
-  const { data: calendarData, isLoading: calendarLoading } = useQuery({
+  const { data: calendarData, isLoading: calendarLoading } = useStandardQuery({
     queryKey: ["compliance-calendar"],
     queryFn: () => apiFetch<{ data: { events: CalendarEvent[] } }>("/compliance/calendar"),
     enabled: activeTab === "calendar" || activeTab === "posture",
   });
 
-  const { data: fusionData, isLoading: fusionLoading } = useQuery({
+  const { data: fusionData, isLoading: fusionLoading } = useStandardQuery({
     queryKey: ["compliance-fusion"],
     queryFn: () => apiFetch<{ data: { insights: FusionInsight[] } }>("/compliance/intelligence-fusion"),
     enabled: activeTab === "fusion",
   });
 
-  const actionMutation = useMutation({
+  const actionMutation = useStandardMutation({
     mutationFn: ({ itemId, action, notes }: { itemId: string; action: string; notes?: string }) =>
       apiFetch(`/compliance/supervision/${itemId}/action`, {
         method: "PATCH",
@@ -512,7 +514,7 @@ export default function FinancialCompliancePage() {
 }
 
 function ArchivalPanel() {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading } = useStandardQuery({
     queryKey: ["compliance-archival"],
     queryFn: () => apiFetch<{ data: { items: Array<{ entryId: string; communicationType: string; subject?: string; participants: Array<{ name: string }>; contentHash: string; retentionExpiresAt: string; archivedAt: string }> } }>("/compliance/archival"),
   });

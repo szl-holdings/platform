@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import {
+
   Rss, Globe, Shield, AlertTriangle, Clock, Radio, Eye, ExternalLink,
   RefreshCw, Sparkles, Loader2, ChevronDown, ChevronUp, Database,
   Activity, Crosshair, Target, CheckCircle, WifiOff, Wifi, BarChart3,
@@ -11,6 +12,7 @@ import { LiveDataBadge } from "@/lib/live-badge";
 import { api } from "@/lib/api";
 import { ThreatFeedSimulator } from "@szl-holdings/observability";
 import type { FeedSource, StixIoc, AptCampaign, FeedHealthPanel } from "@szl-holdings/observability";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const feedSim = new ThreatFeedSimulator(0xfeed1337);
 const NOW = Date.now();
@@ -291,35 +293,35 @@ export default function ThreatIntelFeed() {
     }
   };
 
-  const { data: cveData, isLoading: cveLoading, refetch: refetchCves } = useQuery({
+  const { data: cveData, isLoading: cveLoading, refetch: refetchCves } = useStandardQuery({
     queryKey: ["live-nvd-cves"],
     queryFn: () => api.live.nvdCves("CRITICAL", undefined, 15),
     staleTime: 600000,
     refetchInterval: 600000,
   });
 
-  const { data: kevData, isLoading: kevLoading, refetch: refetchKev } = useQuery({
+  const { data: kevData, isLoading: kevLoading, refetch: refetchKev } = useStandardQuery({
     queryKey: ["live-cisa-kev"],
     queryFn: () => api.live.cisaKev(false, 20),
     staleTime: 3600000,
     refetchInterval: 3600000,
   });
 
-  const { data: newsData, isLoading: newsLoading, refetch: refetchNews } = useQuery({
+  const { data: newsData, isLoading: newsLoading, refetch: refetchNews } = useStandardQuery({
     queryKey: ["live-threat-news"],
     queryFn: () => api.live.threatNews(),
     staleTime: 600000,
     refetchInterval: 600000,
   });
 
-  const { data: certData, isLoading: certLoading, refetch: refetchCerts } = useQuery({
+  const { data: certData, isLoading: certLoading, refetch: refetchCerts } = useStandardQuery({
     queryKey: ["live-cert-advisories"],
     queryFn: () => api.live.certAdvisories(),
     staleTime: 3600000,
     refetchInterval: 3600000,
   });
 
-  const { data: taxiiData, refetch: refetchTaxii } = useQuery({
+  const { data: taxiiData, refetch: refetchTaxii } = useStandardQuery({
     queryKey: ["live-taxii-indicators"],
     queryFn: () => api.live.taxiiIndicators(undefined, 50),
     staleTime: 300_000,

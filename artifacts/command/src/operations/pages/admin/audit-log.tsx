@@ -1,7 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
+
 import { FileText, Search, Filter, AlertTriangle, User, Clock, Shield, Zap, Download, Calendar, X } from "lucide-react";
 import { useState } from "react";
-
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 async function apiFetch<T>(path: string): Promise<T> {
   const r = await fetch(`/api${path}`);
@@ -66,7 +66,7 @@ export default function AuditLog() {
   const [exporting, setExporting] = useState<"csv" | "pdf" | null>(null);
   const [exportError, setExportError] = useState<string | null>(null);
 
-  const { data, isLoading, error } = useQuery<{ logs: AuditEntry[]; total: number }>({
+  const { data, isLoading, error } = useStandardQuery<{ logs: AuditEntry[]; total: number }>({
     queryKey: ["audit-log", search, actionFilter, dateFrom, dateTo],
     queryFn: () => {
       const qs = new URLSearchParams();

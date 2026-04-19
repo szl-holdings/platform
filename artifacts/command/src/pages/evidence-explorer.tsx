@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { Search, Database, GitBranch, AlertTriangle, CheckCircle, Clock, ExternalLink, ChevronRight } from "lucide-react";
 import { apiUrl, fetchJson, tracedFetch, emitSpan, ACCENT, AGENT_RUN_ATTRS } from "./cognitive/shared";
 import { ConfidenceMeter } from "@szl-holdings/design-system/proof/confidence-meter";
@@ -7,6 +7,7 @@ import { FreshnessChip } from "@szl-holdings/design-system/proof/freshness-chip"
 import { PolicyStateChip, type PolicyState } from "@szl-holdings/design-system/proof/policy-state-chip";
 import { EvidenceDrawer } from "@szl-holdings/design-system/cockpit/evidence-drawer";
 import { RecommendationCard } from "@szl-holdings/design-system/cockpit/recommendation-card";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 function toPolicy(status: string | undefined): PolicyState | undefined {
   if (!status) return undefined;
@@ -271,7 +272,7 @@ function EntityDetailPanel({
   entity: EntitySnapshot;
   onViewEvidence: (evidence: EvidenceItem[]) => void;
 }) {
-  const { data, isLoading, error } = useQuery<WhyResponse>({
+  const { data, isLoading, error } = useStandardQuery<WhyResponse>({
     queryKey: ["evidence-explorer", "why", entity.entityId],
     queryFn: () => tracedFetch<WhyResponse>(
       "evidence_explorer.entity_why.fetch",
@@ -393,7 +394,7 @@ export default function EvidenceExplorer() {
     });
   }, []);
 
-  const { data: entitiesData, isLoading: entitiesLoading } = useQuery({
+  const { data: entitiesData, isLoading: entitiesLoading } = useStandardQuery({
     queryKey: ["evidence-explorer", "entities", domainFilter],
     queryFn: () => {
       const params = new URLSearchParams();
@@ -411,7 +412,7 @@ export default function EvidenceExplorer() {
     refetchIntervalInBackground: false,
   });
 
-  const { data: recsData, isLoading: recsLoading } = useQuery({
+  const { data: recsData, isLoading: recsLoading } = useStandardQuery({
     queryKey: ["evidence-explorer", "recommendations", domainFilter],
     queryFn: () => {
       const params = new URLSearchParams({ limit: "100" });
@@ -430,7 +431,7 @@ export default function EvidenceExplorer() {
   });
 
   const [selectedRec, setSelectedRec] = useState<Recommendation | null>(null);
-  const { data: recChainData } = useQuery<RecommendationChainResponse>({
+  const { data: recChainData } = useStandardQuery<RecommendationChainResponse>({
     queryKey: ["evidence-explorer", "rec-chain", selectedRec?.recommendationId],
     queryFn: () => tracedFetch<RecommendationChainResponse>(
       "evidence_explorer.rec_chain.fetch",

@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { Network, Activity, AlertTriangle, CheckCircle, RefreshCw, Zap, Server, Database, Globe, Shield, Layers } from "lucide-react";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface TopologyNode {
   service: string;
@@ -113,7 +114,7 @@ function ServiceCard({ node, metricsNode, selected, onClick }: { node: typeof PL
 export default function ServiceTopology() {
   const [selected, setSelected] = useState<string | null>(null);
 
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { data, isLoading, isError, refetch } = useStandardQuery({
     queryKey: ["topology"],
     queryFn: () => apiFetch<TopologyResponse>("/lyte/topology"),
     refetchInterval: 30000,

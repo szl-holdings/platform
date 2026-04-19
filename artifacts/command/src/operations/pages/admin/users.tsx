@@ -1,8 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { Users, UserPlus, Mail, Shield, Clock, AlertTriangle, LogOut } from "lucide-react";
 import { useState } from "react";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface UserInfo {
   id: string;
@@ -26,14 +27,14 @@ export default function AdminUsers() {
   const [search, setSearch] = useState("");
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
   const queryClient = useQueryClient();
-  const { data, isLoading, error } = useQuery<{ users: UserInfo[] }>({
+  const { data, isLoading, error } = useStandardQuery<{ users: UserInfo[] }>({
     queryKey: ["admin-users"],
     queryFn: () => apiFetch("/admin/users"),
   });
 
   const extractNumericId = (id: string): string => id.replace(/^usr_/, "");
 
-  const forceLogout = useMutation({
+  const forceLogout = useStandardMutation({
     mutationFn: (userId: string) =>
       apiFetch(`/admin/users/${extractNumericId(userId)}/revoke-sessions`, {
         method: "POST",

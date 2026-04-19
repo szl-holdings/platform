@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { Link } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Navigation, TrendingUp, TrendingDown, Minus, AlertTriangle, Ship, Clock, Activity, RefreshCw } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { api, type Corridor } from "@/lib/api";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const weatherRiskColors: Record<string, string> = {
   low: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
@@ -40,7 +41,7 @@ function getNum(val: string | number | undefined, def: number): number {
 export default function CorridorRoutesPage() {
   const [selected, setSelected] = useState<string | null>(null);
 
-  const { data: liveCorridor = [], isLoading, refetch } = useQuery({
+  const { data: liveCorridor = [], isLoading, refetch } = useStandardQuery({
     queryKey: ["vessels-corridors"],
     queryFn: () => api.corridors.list(),
     refetchInterval: 120_000,

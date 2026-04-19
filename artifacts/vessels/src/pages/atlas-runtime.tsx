@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { GitBranch, Layers, MapPin, AlertTriangle, Activity, Navigation, Shield, CloudRain, RotateCcw, ChevronRight, Anchor, Radio, Clock, Zap, Lock, RefreshCw } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const DEMO_VESSELS = [
   { id: "MV-001", name: "Pacific Navigator", type: "VLCC Tanker", flag: "🇱🇷", lat: 24.5, lon: 55.2, status: "at_sea", heading: 278, speed: 13.4 },
@@ -170,25 +171,25 @@ export default function VesselsAtlasRuntimePage() {
   const [overlays, setOverlays] = useState(OVERLAYS.map(o => ({ ...o })));
   const [safeMode, setSafeMode] = useState(false);
 
-  const { data: driftData } = useQuery<{ twins: Array<{ twinId: string; driftScore: number; status: string }> }>({
+  const { data: driftData } = useStandardQuery<{ twins: Array<{ twinId: string; driftScore: number; status: string }> }>({
     queryKey: ["vessels-atlas-drift"],
     queryFn: () => fetch("/api/atlas/spatial/drift?twinCategory=vessel").then(r => r.ok ? r.json() : Promise.reject(r.status)).then(r => r.data ?? r),
     staleTime: 60000,
     retry: 1,
   });
-  const { data: branchData } = useQuery<{ count: number }>({
+  const { data: branchData } = useStandardQuery<{ count: number }>({
     queryKey: ["vessels-atlas-branches"],
     queryFn: () => fetch("/api/atlas/spatial/branches?twinCategory=vessel").then(r => r.ok ? r.json() : Promise.reject(r.status)).then(r => r.data ?? r),
     staleTime: 60000,
     retry: 1,
   });
-  const { data: liveVesselsData, isError: vesselsError, isLoading: vesselsLoading } = useQuery<{ data: ApiVessel[] }>({
+  const { data: liveVesselsData, isError: vesselsError, isLoading: vesselsLoading } = useStandardQuery<{ data: ApiVessel[] }>({
     queryKey: ["vessels-list"],
     queryFn: () => fetch("/api/vessels").then(r => r.ok ? r.json() : Promise.reject(r.status)),
     staleTime: 120000,
     retry: 1,
   });
-  const { data: liveRouteData } = useQuery<{ data: { vessel: ApiVessel; position: { latitude: string; longitude: string; heading: string; speed: string } | null; waypoints: Waypoint[] } }>({
+  const { data: liveRouteData } = useStandardQuery<{ data: { vessel: ApiVessel; position: { latitude: string; longitude: string; heading: string; speed: string } | null; waypoints: Waypoint[] } }>({
     queryKey: ["vessels-route", selectedVesselId],
     queryFn: () => fetch(`/api/vessels/${selectedVesselId}/route`).then(r => r.ok ? r.json() : Promise.reject(r.status)),
     staleTime: 30000,

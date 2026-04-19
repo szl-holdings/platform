@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+
 import { AnimatedCounter } from "@szl-holdings/shared-ui/animated-counter";
 import { api } from "@/lib/api";
 import { Card, CardContent } from "@szl-holdings/shared-ui/ui/card";
@@ -6,6 +6,7 @@ import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Progress } from "@szl-holdings/shared-ui/ui/progress";
 import { BarChart3, Shield, TrendingUp, TrendingDown, AlertTriangle, Minus, Gauge } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 function getScoreColor(score: number) {
   if (score < 30) return "text-emerald-400";
@@ -126,8 +127,8 @@ function RiskSkeleton() {
 }
 
 export default function RiskScoringPage() {
-  const { data: riskScores = [], isLoading } = useQuery({ queryKey: ["riskScores"], queryFn: () => api.riskScores.list() });
-  const { data: assessments = [] } = useQuery({ queryKey: ["assessments"], queryFn: api.assessments.list });
+  const { data: riskScores = [], isLoading } = useStandardQuery({ queryKey: ["riskScores"], queryFn: () => api.riskScores.list() });
+  const { data: assessments = [] } = useStandardQuery({ queryKey: ["assessments"], queryFn: api.assessments.list });
 
   const avgScore = riskScores.length > 0
     ? riskScores.reduce((sum: number, r: any) => sum + Number(r.currentScore || 0), 0) / riskScores.length

@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import {
+
   TrendingUp, Star, Filter, RefreshCw, Download, DollarSign, Target,
   Building2, AlertTriangle, Clock, Gavel, FileText, CheckCircle, X,
   BarChart3, Zap, Users, Bookmark
 } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
 const API = "/api";
@@ -183,7 +185,7 @@ export default function InvestorModePage() {
   if (borough !== "all") params.set("borough", borough);
   if (distressType !== "all") params.set("type", distressType);
 
-  const { data, isLoading, refetch } = useQuery({
+  const { data, isLoading, refetch } = useStandardQuery({
     queryKey: ["terra-investor-opportunities", minScore, borough, distressType],
     queryFn: () => fetchJson(`/terra/investor/opportunities?${params}`),
     staleTime: 30000,

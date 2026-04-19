@@ -1,8 +1,9 @@
 import { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { Activity, AlertTriangle, RefreshCw, TrendingUp, Zap } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceLine, ResponsiveContainer } from "recharts";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface MetricRow {
   id: number;
@@ -89,7 +90,7 @@ export default function MetricsExplorer() {
   if (service) params.set("service", service);
   if (metricName) params.set("metricName", metricName);
 
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { data, isLoading, isError, refetch } = useStandardQuery({
     queryKey: ["metrics", window, service, metricName],
     queryFn: () => apiFetch<MetricsResponse>(`/lyte/metrics?${params}`),
     refetchInterval: 30000,
@@ -99,7 +100,7 @@ export default function MetricsExplorer() {
   if (compareService) compareParams.set("service", compareService);
   if (metricName) compareParams.set("metricName", metricName);
 
-  const { data: compareData } = useQuery({
+  const { data: compareData } = useStandardQuery({
     queryKey: ["metrics-compare", window, compareService, metricName],
     queryFn: () => apiFetch<MetricsResponse>(`/lyte/metrics?${compareParams}`),
     enabled: !!compareService && compareService !== service,

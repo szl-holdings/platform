@@ -2,11 +2,12 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Search, Filter, ArrowUpDown, Building2, Monitor, Ticket, AlertTriangle, TrendingUp, TrendingDown, ChevronRight, Plus, CheckCircle, Activity } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
-import { useQuery } from "@tanstack/react-query";
+
 import { Skeleton } from "@szl-holdings/shared-ui/ui/skeleton";
 import { clients as fallbackClients, type Client } from "@/data/seed-data";
 import { ExportButton } from "@szl-holdings/shared-ui/data-export";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface ApiClient {
   id: number;
@@ -163,7 +164,7 @@ export default function ClientsPage() {
   const [sortBy, setSortBy] = useState<"name" | "health" | "mrr">("health");
   const [filterStatus, setFilterStatus] = useState<string>("all");
 
-  const { data, isLoading } = useQuery<{ clients: ApiClient[] }>({
+  const { data, isLoading } = useStandardQuery<{ clients: ApiClient[] }>({
     queryKey: ["msp-clients"],
     queryFn: () => apiFetch<{ clients: ApiClient[] }>("/msp/clients?limit=100"),
     staleTime: 60000,

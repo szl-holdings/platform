@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { Play, Pause, SkipBack, SkipForward, RotateCcw, Clock, Building2, TrendingDown, TrendingUp, DollarSign, AlertTriangle, Activity, ChevronRight } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const DEMO_PROPERTY_EVENTS = [
   { time: "Jan 2023", type: "acquisition", label: "Property acquired at $3.2M", detail: "Cap rate 6.4% — below market comp avg of 7.1%", severity: "info" },
@@ -118,7 +119,7 @@ export default function TerraReplayPage() {
   const [cursor, setCursor] = useState(12);
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
 
-  const { data: propertiesData, isError: propertiesListError } = useQuery<{ data: { properties: Array<{ id: number; address: string }> } }>({
+  const { data: propertiesData, isError: propertiesListError } = useStandardQuery<{ data: { properties: Array<{ id: number; address: string }> } }>({
     queryKey: ["terra-properties-replay-list"],
     queryFn: () => fetch("/api/terra/properties").then(r => r.ok ? r.json() : Promise.reject(r.status)),
     staleTime: 120000,
@@ -128,7 +129,7 @@ export default function TerraReplayPage() {
   const properties = propertiesData?.data?.properties ?? [];
   const effectivePropertyId = selectedPropertyId ?? (properties[0] ? String(properties[0].id) : null);
 
-  const { data: historyData, isError: historyError, isLoading: historyLoading, isFetching: historyFetching } = useQuery<{ data: { events: ApiEvent[]; address: string } }>({
+  const { data: historyData, isError: historyError, isLoading: historyLoading, isFetching: historyFetching } = useStandardQuery<{ data: { events: ApiEvent[]; address: string } }>({
     queryKey: ["terra-property-history", effectivePropertyId],
     queryFn: () => fetch(`/api/terra/properties/${effectivePropertyId}/history`).then(r => r.ok ? r.json() : Promise.reject(r.status)),
     staleTime: 60000,

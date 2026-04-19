@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { api, type LyteSignal, type LyteIncident, type LyteAction } from "@lyte/lib/api";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import {
+
   Radio, AlertTriangle, CheckSquare, Filter, RefreshCw,
   User, Clock, ArrowUp, ArrowDown, ChevronRight,
   Zap, X, MoreVertical, Eye,
@@ -11,6 +12,7 @@ import { Button } from "@szl-holdings/shared-ui/ui/button";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@szl-holdings/shared-ui/ui/select";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -150,37 +152,37 @@ function DetailPane({ item, onClose }: { item: QueueItem; onClose: () => void })
   const Icon = ENTITY_ICONS[item.entityType];
   const qc = useQueryClient();
 
-  const assignSignalMut = useMutation({
+  const assignSignalMut = useStandardMutation({
     mutationFn: (assignee: string) => api.signals.assign(item.entityId, assignee),
     onSuccess: () => { toast.success("Signal assigned"); qc.invalidateQueries({ queryKey: ["lyte-queue"] }); },
     onError: () => toast.error("Failed to assign signal"),
   });
 
-  const escalateSignalMut = useMutation({
+  const escalateSignalMut = useStandardMutation({
     mutationFn: () => api.signals.escalate(item.entityId, undefined, "Escalated from queue"),
     onSuccess: () => { toast.success("Signal escalated"); qc.invalidateQueries({ queryKey: ["lyte-queue"] }); },
     onError: () => toast.error("Failed to escalate signal"),
   });
 
-  const assignIncidentMut = useMutation({
+  const assignIncidentMut = useStandardMutation({
     mutationFn: (assignee: string) => api.incidents.update(item.entityId, { assignee }),
     onSuccess: () => { toast.success("Incident assigned"); qc.invalidateQueries({ queryKey: ["lyte-queue"] }); },
     onError: () => toast.error("Failed to assign incident"),
   });
 
-  const escalateIncidentMut = useMutation({
+  const escalateIncidentMut = useStandardMutation({
     mutationFn: () => api.incidents.update(item.entityId, { status: "investigating" }),
     onSuccess: () => { toast.success("Incident escalated to investigating"); qc.invalidateQueries({ queryKey: ["lyte-queue"] }); },
     onError: () => toast.error("Failed to escalate incident"),
   });
 
-  const assignActionMut = useMutation({
+  const assignActionMut = useStandardMutation({
     mutationFn: (assignedTo: string) => api.actions.update(item.entityId, { assignedTo }),
     onSuccess: () => { toast.success("Action assigned"); qc.invalidateQueries({ queryKey: ["lyte-queue"] }); },
     onError: () => toast.error("Failed to assign action"),
   });
 
-  const escalateActionMut = useMutation({
+  const escalateActionMut = useStandardMutation({
     mutationFn: () => api.actions.update(item.entityId, { state: "escalated" }),
     onSuccess: () => { toast.success("Action escalated"); qc.invalidateQueries({ queryKey: ["lyte-queue"] }); },
     onError: () => toast.error("Failed to escalate action"),
@@ -415,19 +417,19 @@ export default function OperationalQueue() {
   const [selected, setSelected] = useState<QueueItem | null>(null);
   const qc = useQueryClient();
 
-  const { data: signals = [], isLoading: sigLoading } = useQuery({
+  const { data: signals = [], isLoading: sigLoading } = useStandardQuery({
     queryKey: ["lyte-queue", "signals"],
     queryFn: () => api.signals.list(),
     refetchInterval: 30_000,
   });
 
-  const { data: incidents = [], isLoading: incLoading } = useQuery({
+  const { data: incidents = [], isLoading: incLoading } = useStandardQuery({
     queryKey: ["lyte-queue", "incidents"],
     queryFn: () => api.incidents.list(),
     refetchInterval: 30_000,
   });
 
-  const { data: actions = [], isLoading: actLoading } = useQuery({
+  const { data: actions = [], isLoading: actLoading } = useStandardQuery({
     queryKey: ["lyte-queue", "actions"],
     queryFn: () => api.actions.list(),
     refetchInterval: 30_000,

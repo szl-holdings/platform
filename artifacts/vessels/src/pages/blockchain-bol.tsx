@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { FileText, Shield, Link, CheckCircle2, Clock, Hash, Anchor, RefreshCw, AlertTriangle, PlusCircle, X, PenTool } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { useAuth } from "../contexts/auth-context";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "/api";
 
@@ -139,7 +140,7 @@ export default function BlockchainBoLPage() {
     : signAction === "sign" ? "Sign"
     : null;
 
-  const { data, isLoading, isError, refetch } = useQuery<BolListResponse>({
+  const { data, isLoading, isError, refetch } = useStandardQuery<BolListResponse>({
     queryKey: ["vessels-bol-list"],
     queryFn: () =>
       fetch(`${API_BASE}/vessels/modules/bills-of-lading`, { credentials: "include" })
@@ -147,7 +148,7 @@ export default function BlockchainBoLPage() {
     staleTime: 30_000,
   });
 
-  const { data: selectedDoc, isLoading: isLoadingDoc } = useQuery<BolDocument>({
+  const { data: selectedDoc, isLoading: isLoadingDoc } = useStandardQuery<BolDocument>({
     queryKey: ["vessels-bol-detail", selectedId],
     queryFn: () =>
       fetch(`${API_BASE}/vessels/modules/bills-of-lading/${selectedId}`, { credentials: "include" })
@@ -156,7 +157,7 @@ export default function BlockchainBoLPage() {
     staleTime: 30_000,
   });
 
-  const createMutation = useMutation({
+  const createMutation = useStandardMutation({
     mutationFn: async (body: object) => {
       const r = await fetch(`${API_BASE}/vessels/modules/bills-of-lading`, {
         method: "POST", credentials: "include",
@@ -175,7 +176,7 @@ export default function BlockchainBoLPage() {
     },
   });
 
-  const signMutation = useMutation({
+  const signMutation = useStandardMutation({
     mutationFn: async ({ id, action }: { id: string; action: "sign" | "endorse" | "countersign" }) => {
       const r = await fetch(`${API_BASE}/vessels/modules/bills-of-lading/${id}/transfer`, {
         method: "POST", credentials: "include",

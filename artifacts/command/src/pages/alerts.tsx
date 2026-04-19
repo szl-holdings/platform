@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { OpsLayout } from "../components/ops-layout";
 import { Bell, BellOff, ArrowUpRight, Clock, CheckCircle2, AlarmClock, ChevronDown, Filter, Settings, XCircle, History } from "lucide-react";
 import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 type AlertStatus = "active" | "acknowledged" | "snoozed" | "resolved";
 type AlertPriority = "critical" | "high" | "medium" | "low";
@@ -130,7 +131,7 @@ const STATUS_ICONS: Record<AlertStatus, React.ElementType> = {
 
 export default function AlertsPage() {
   const queryClient = useQueryClient();
-  const { data: apiData } = useQuery<ApiAlertsResponse>({
+  const { data: apiData } = useStandardQuery<ApiAlertsResponse>({
     queryKey: ["command-alerts"],
     queryFn: async () => {
       const res = await fetch("/api/command/alerts", { credentials: "include" });
@@ -210,7 +211,7 @@ export default function AlertsPage() {
 
   const selectedAlert = alerts.find((a) => a.id === selected);
 
-  const { data: auditData, isLoading: auditLoading } = useQuery<AuditResponse>({
+  const { data: auditData, isLoading: auditLoading } = useStandardQuery<AuditResponse>({
     queryKey: ["command-alert-audit", selected],
     queryFn: async () => {
       const res = await fetch(

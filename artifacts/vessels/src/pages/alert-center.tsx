@@ -1,5 +1,5 @@
 import { AnimatedCounter } from "@szl-holdings/shared-ui/animated-counter";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { Card, CardContent } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
@@ -16,6 +16,7 @@ import { doctrineEventBus } from "@szl-holdings/observability";
 import { DoctrineLayerBadge } from "@szl-holdings/shared-ui/doctrine-layer-badge";
 import { DataStateBadge } from "@szl-holdings/shared-ui/data-state-badge";
 import { EmptyState } from "@szl-holdings/shared-ui/design-system";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface FleetAlert {
   id: number;
@@ -40,7 +41,6 @@ interface AlertRuleData {
   severity: string;
   isActive?: boolean;
 }
-
 
 const severityColors: Record<string, string> = {
   low: "bg-blue-500/10 text-blue-400 border-blue-500/20",
@@ -86,9 +86,9 @@ function AlertSkeleton() {
 
 export default function AlertCenterPage() {
   const qc = useQueryClient();
-  const { data: alertsRaw = [], isLoading: loadingAlerts, isError: alertsError } = useQuery({ queryKey: ["alerts"], queryFn: api.alerts.list });
-  const { data: alertRulesRaw = [] } = useQuery({ queryKey: ["alertRules"], queryFn: api.alertRules.list });
-  const { data: vesselsRaw = [] } = useQuery({ queryKey: ["vessels"], queryFn: api.vessels.list });
+  const { data: alertsRaw = [], isLoading: loadingAlerts, isError: alertsError } = useStandardQuery({ queryKey: ["alerts"], queryFn: api.alerts.list });
+  const { data: alertRulesRaw = [] } = useStandardQuery({ queryKey: ["alertRules"], queryFn: api.alertRules.list });
+  const { data: vesselsRaw = [] } = useStandardQuery({ queryKey: ["vessels"], queryFn: api.vessels.list });
 
   const alerts = alertsRaw as unknown as FleetAlert[];
   const alertRules = alertRulesRaw as unknown as AlertRuleData[];
@@ -97,13 +97,13 @@ export default function AlertCenterPage() {
   const [ruleOpen, setRuleOpen] = useState(false);
   const [ruleForm, setRuleForm] = useState({ name: "", ruleType: "speed", severity: "medium" });
 
-  const createRuleMut = useMutation({
+  const createRuleMut = useStandardMutation({
     mutationFn: (data: any) => api.alertRules.create(data),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["alertRules"] }); setRuleOpen(false); toast.success("Alert rule created"); },
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const deleteRuleMut = useMutation({
+  const deleteRuleMut = useStandardMutation({
     mutationFn: (id: number) => api.alertRules.delete(id),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["alertRules"] }); toast.success("Rule deleted"); },
   });

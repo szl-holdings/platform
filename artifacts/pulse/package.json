@@ -30,6 +30,7 @@
     "wouter": "^3.3.5"
   },
   "dependencies": {
+    "@szl-holdings/api-client-react": "workspace:*",
     "@szl-holdings/design-system": "workspace:*",
     "@szl-holdings/observability": "workspace:*",
     "@szl-holdings/shared-ui": "workspace:*",

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import {
+
   TrendingUp, TrendingDown, MapPin, BarChart3, ArrowUpRight, ArrowDownRight,
   Building2, DollarSign, Users, Activity, Layers, Info, Target, Zap, Eye, ArrowLeft, Loader2
 } from "lucide-react";
@@ -9,8 +10,9 @@ import { AmbientBar, type AmbientSignal } from "@szl-holdings/shared-ui/ambient-
 import { EnergyPulse, type EnergyMetrics } from "@szl-holdings/shared-ui/energy-heartbeat";
 import { CorrelationFeed, type CrossDomainCorrelation } from "@szl-holdings/shared-ui/cross-domain-correlation";
 import { useRoute, Link } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+
 import { api } from "@/lib/api";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 type Trajectory = "accelerating" | "gentrifying" | "stable" | "declining" | "distressed";
 
@@ -39,7 +41,6 @@ const TRAJECTORY_META: Record<Trajectory, { label: string; color: string; bg: st
   declining: { label: "Declining", color: "text-amber-400", bg: "bg-amber-400/10 border-amber-400/20", barColor: "#fbbf24", icon: TrendingDown },
   distressed: { label: "Distressed", color: "text-red-400", bg: "bg-red-400/10 border-red-400/20", barColor: "#f87171", icon: ArrowDownRight },
 };
-
 
 function formatCurrency(n: number) {
   if (n >= 1e6) return `$${(n / 1e6).toFixed(1)}M`;
@@ -266,14 +267,14 @@ export default function NeighborhoodMomentum() {
   const [, params] = useRoute<{ propertyId: string }>("/neighborhood-momentum/:propertyId");
   const propertyId = params?.propertyId;
 
-  const { data: propertyData, isLoading: propertyLoading } = useQuery({
+  const { data: propertyData, isLoading: propertyLoading } = useStandardQuery({
     queryKey: ["terra-neighborhood-momentum", propertyId],
     queryFn: () => api.properties.neighborhoodMomentum(propertyId!),
     enabled: !!propertyId,
     staleTime: 300_000,
   });
 
-  const { data: portfolioData, isLoading: portfolioLoading, isError: portfolioError } = useQuery({
+  const { data: portfolioData, isLoading: portfolioLoading, isError: portfolioError } = useStandardQuery({
     queryKey: ["terra-portfolio-neighborhood-momentum"],
     queryFn: () => api.portfolio.neighborhoodMomentum(),
     enabled: !propertyId,

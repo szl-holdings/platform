@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { GitBranch, TrendingDown, TrendingUp, AlertTriangle, Shield, Activity, Clock, DollarSign, Fuel, ChevronRight, RotateCcw, CheckCircle2, XCircle, Zap } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 type BranchId = "reroute" | "speed-reduction" | "embargo" | "detention";
 
@@ -139,7 +140,7 @@ export default function VesselsScenarioBranchesPage() {
   const [selected, setSelected] = useState<BranchId>("reroute");
   const [comparing, setComparing] = useState<BranchId | null>(null);
 
-  const { data: atlasData, isError: atlasError, isLoading: atlasLoading } = useQuery<{ data?: { count: number; branches?: Array<{ twinId: string; probability?: number }> } }>({
+  const { data: atlasData, isError: atlasError, isLoading: atlasLoading } = useStandardQuery<{ data?: { count: number; branches?: Array<{ twinId: string; probability?: number }> } }>({
     queryKey: ["vessels-atlas-scenario-branches"],
     queryFn: () => fetch("/api/atlas/spatial/branches?twinCategory=vessel").then(r => r.ok ? r.json() : Promise.reject(r.status)),
     staleTime: 60000,

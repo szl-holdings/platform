@@ -1,8 +1,9 @@
 import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import {
+
   Server, Activity, Thermometer, Zap, Clock, TrendingUp,
   AlertTriangle, CheckCircle, Cpu, Database, Network, BarChart3,
 } from "lucide-react";
@@ -13,6 +14,7 @@ import {
 import { InfraSimulator, MetricTimeSeriesSimulator } from "@szl-holdings/observability";
 import type { GpuNode, QueuedJob } from "@szl-holdings/observability";
 import { api } from "@/lib/api";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const infraSim = new InfraSimulator(0x9ef4a2b8);
 const metricSim = new MetricTimeSeriesSimulator(0xdeadbeef);
@@ -244,14 +246,14 @@ function QueuedJobRow({ job, rank }: { job: QueuedJob; rank: number }) {
 }
 
 export default function GPUMonitoring() {
-  const { data: liveGpuData } = useQuery({
+  const { data: liveGpuData } = useStandardQuery({
     queryKey: ["dcgm-gpus"],
     queryFn: () => api.live.gpuMetrics(),
     refetchInterval: 30_000,
     staleTime: 15_000,
   });
 
-  const { data: liveClusterData } = useQuery({
+  const { data: liveClusterData } = useStandardQuery({
     queryKey: ["dcgm-cluster"],
     queryFn: () => api.live.gpuCluster(),
     refetchInterval: 30_000,

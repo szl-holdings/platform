@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import {
+
   GitBranch, Zap, ChevronRight, Play, Plus, Shield, AlertTriangle,
   CheckCircle, Clock, ArrowRight, RefreshCw, Cpu, Lock, RotateCcw,
   Eye, AlertCircle, Split, Database
 } from "lucide-react";
 import { api } from "@lyte/lib/api";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const BG = { page: "#080c14", surface: "#0c1018", elevated: "#10141e" };
 const BORDER = { subtle: "rgba(255,255,255,0.04)", muted: "rgba(255,255,255,0.07)" };
@@ -263,7 +265,7 @@ export default function AlloyGraphCompilerPage() {
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
   const [apiError, setApiError] = useState<string | null>(null);
 
-  const { data: workflowsData } = useQuery({
+  const { data: workflowsData } = useStandardQuery({
     queryKey: ["alloy-workflows-compiler"],
     queryFn: () => api.alloyWorkflows.list({ limit: 5 }),
     staleTime: 60_000,

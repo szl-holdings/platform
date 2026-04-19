@@ -1,7 +1,8 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { Wifi, WifiOff, AlertTriangle, Play, RefreshCw, CheckCircle } from "lucide-react";
 import { useState } from "react";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface ServiceHealth {
   name: string;
@@ -28,13 +29,13 @@ export default function Connectors() {
   const qc = useQueryClient();
   const [testing, setTesting] = useState<string | null>(null);
 
-  const { data, isLoading, error } = useQuery<ServicesHealthMatrix>({
+  const { data, isLoading, error } = useStandardQuery<ServicesHealthMatrix>({
     queryKey: ["services-health"],
     queryFn: () => apiFetch("/services/health"),
     refetchInterval: 30000,
   });
 
-  const testMutation = useMutation({
+  const testMutation = useStandardMutation({
     mutationFn: (name: string) => apiFetch(`/admin/connectors/${name}/test`, { method: "POST" }),
     onSettled: () => { setTesting(null); qc.invalidateQueries({ queryKey: ["services-health"] }); },
   });

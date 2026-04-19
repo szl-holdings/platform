@@ -1,13 +1,15 @@
 import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
+
   Layers, DollarSign, TrendingUp, Users, BarChart3, Calculator, ChevronDown, ArrowRight, Save, FolderOpen, Download, ArrowLeft, Loader2
 } from "lucide-react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { api } from "../lib/api";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { useRoute, Link } from "wouter";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface TooltipPayloadEntry { name: string; value: number; color?: string; fill?: string; }
 interface ChartTooltipProps { active?: boolean; payload?: TooltipPayloadEntry[]; label?: string; }
@@ -183,7 +185,7 @@ export default function WaterfallCalculatorPage() {
   const [, params] = useRoute<{ propertyId: string }>("/waterfall-calculator/:propertyId");
   const propertyId = params?.propertyId;
 
-  const { data: propertyData, isLoading: propertyLoading } = useQuery({
+  const { data: propertyData, isLoading: propertyLoading } = useStandardQuery({
     queryKey: ["terra-waterfall", propertyId],
     queryFn: () => api.properties.waterfall(propertyId!),
     enabled: !!propertyId,
@@ -192,13 +194,13 @@ export default function WaterfallCalculatorPage() {
 
   const queryClient = useQueryClient();
 
-  const { data: savedStructures } = useQuery({
+  const { data: savedStructures } = useStandardQuery({
     queryKey: ["terra-waterfall-structures"],
     queryFn: () => api.waterfall.list(),
     staleTime: 30_000,
   });
 
-  const saveStructureMutation = useMutation({
+  const saveStructureMutation = useStandardMutation({
     mutationFn: (data: { name: string; inputs: Record<string, unknown>; results: Record<string, unknown> }) =>
       api.waterfall.create(data),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["terra-waterfall-structures"] }); },

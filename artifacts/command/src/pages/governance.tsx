@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { OpsLayout } from "../components/ops-layout";
 import { Shield, FileText, CheckCircle2, Clock, AlertTriangle, Plus, ChevronRight, ChevronDown, User } from "lucide-react";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface ApiGovernanceResponse {
   policies: Policy[];
@@ -132,7 +133,7 @@ const STATUS_COLORS: Record<PolicyStatus, string> = {
 };
 
 export default function GovernancePage() {
-  const { data: apiData } = useQuery<ApiGovernanceResponse>({
+  const { data: apiData } = useStandardQuery<ApiGovernanceResponse>({
     queryKey: ["command-governance"],
     queryFn: async () => {
       const res = await fetch("/api/command/governance", { credentials: "include" });

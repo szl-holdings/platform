@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import {
+
   Shield, Play, CheckCircle, XCircle, AlertTriangle, ChevronRight,
   RefreshCw, Lock, GitBranch, Eye, Zap, ArrowRight, Clock, Info
 } from "lucide-react";
 import { api } from "@lyte/lib/api";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const BG = { page: "#080c14", surface: "#0c1018", elevated: "#10141e" };
 const BORDER = { subtle: "rgba(255,255,255,0.04)", muted: "rgba(255,255,255,0.07)" };
@@ -147,13 +149,13 @@ export default function AlloyPolicySimPage() {
   const [liveSimResult, setLiveSimResult] = useState<Record<string, unknown> | null>(null);
   const [isLiveSimRunning, setIsLiveSimRunning] = useState(false);
 
-  const { data: policiesData } = useQuery({
+  const { data: policiesData } = useStandardQuery({
     queryKey: ["covenant-policies"],
     queryFn: () => api.covenant.policies(),
     staleTime: 120_000,
   });
 
-  const { data: covenantStatus } = useQuery({
+  const { data: covenantStatus } = useStandardQuery({
     queryKey: ["covenant-status"],
     queryFn: () => api.covenant.status(),
     staleTime: 60_000,

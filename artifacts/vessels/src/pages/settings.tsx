@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import {
+
   SettingsShell,
   SettingsSectionPanel,
   SettingsCard,
@@ -13,6 +14,7 @@ import {
   Activity, Lock, CreditCard, FileText, Filter, ChevronRight,
 } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 const VESSELS_ACCENT = "#38bdf8";
 
@@ -24,7 +26,7 @@ interface ResolvedSetting {
 }
 
 function useSettings(namespace: string) {
-  return useQuery({
+  return useStandardQuery({
     queryKey: ["settings", "resolve", namespace],
     queryFn: () =>
       apiFetch<{ settings: ResolvedSetting[]; resolvedFor: { userId: number; orgId: number } }>(
@@ -43,7 +45,7 @@ function getValue(settings: ResolvedSetting[], key: string): unknown {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function AccountPanel() {
-  const { data: authData } = useQuery({
+  const { data: authData } = useStandardQuery({
     queryKey: ["auth-session"],
     queryFn: () => apiFetch<{ user?: { id: number; name?: string; email?: string } }>("/auth/me"),
     staleTime: 60_000,
@@ -72,7 +74,7 @@ function AccountPanel() {
 }
 
 function TeamPanel() {
-  const { data } = useQuery({
+  const { data } = useStandardQuery({
     queryKey: ["org-members"],
     queryFn: () => apiFetch<{ members: Array<{ id: number; role: string; joinedAt: string; user?: { name: string; email: string } }> }>("/auth/org/members"),
     staleTime: 30_000,
@@ -180,7 +182,7 @@ function NotificationsPanel() {
 }
 
 function IntegrationsPanel() {
-  const { data } = useQuery({
+  const { data } = useStandardQuery({
     queryKey: ["vessels-integrations-health"],
     queryFn: () =>
       fetch("/api/services/health/app/vessels").then(r => r.json()) as Promise<{
@@ -418,7 +420,7 @@ function AuditPanel() {
   if (applied.after) params.set("after", applied.after);
   if (applied.before) params.set("before", applied.before);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading } = useStandardQuery({
     queryKey: ["vessels-settings-audit", applied],
     queryFn: () => apiFetch<AuditEntry[]>(`/settings/audit?${params.toString()}`),
     staleTime: 30_000,

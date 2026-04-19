@@ -1,12 +1,13 @@
 import { BarChart3, Users, Ticket, Server, AlertTriangle, CheckCircle, Clock, DollarSign, ArrowUp, ArrowDown, Activity, Wifi, Shield, TrendingUp, ChevronRight, RefreshCw, Bell, MapPin, Star, AlertCircle } from "lucide-react";
 import { ActivityFeed } from "@szl-holdings/shared-ui/collaboration";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { Skeleton } from "@szl-holdings/shared-ui/ui/skeleton";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 import { DataStateBadge } from "@szl-holdings/shared-ui/data-state-badge";
 import { AegisGraphQLPanel } from "@/components/graphql-data-panel";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface DashboardMetrics {
   metrics: {
@@ -328,7 +329,7 @@ function ClientChurnHeatmap({ byClient }: { byClient: RevenueData["byClient"] })
 }
 
 export default function Dashboard() {
-  const { data: dashboardData, isLoading: dashLoading, isError: dashError, refetch } = useQuery<DashboardMetrics>({
+  const { data: dashboardData, isLoading: dashLoading, isError: dashError, refetch } = useStandardQuery<DashboardMetrics>({
     queryKey: ["msp-dashboard"],
     queryFn: () => apiFetch<DashboardMetrics>("/msp/dashboard"),
     staleTime: 60_000,
@@ -336,28 +337,28 @@ export default function Dashboard() {
     refetchInterval: 5 * 60_000,
   });
 
-  const { data: ticketsData, isLoading: ticketsLoading, isError: ticketsError, refetch: refetchTickets } = useQuery<{ tickets: TicketItem[] }>({
+  const { data: ticketsData, isLoading: ticketsLoading, isError: ticketsError, refetch: refetchTickets } = useStandardQuery<{ tickets: TicketItem[] }>({
     queryKey: ["msp-tickets-dashboard"],
     queryFn: () => apiFetch<{ tickets: TicketItem[] }>("/msp/tickets?limit=10"),
     staleTime: 60_000,
     retry: 1,
   });
 
-  const { data: techData, isLoading: techLoading, isError: techError, refetch: refetchTech } = useQuery<{ technicians: TechItem[] }>({
+  const { data: techData, isLoading: techLoading, isError: techError, refetch: refetchTech } = useStandardQuery<{ technicians: TechItem[] }>({
     queryKey: ["msp-technicians-dashboard"],
     queryFn: () => apiFetch<{ technicians: TechItem[] }>("/msp/technicians"),
     staleTime: 60_000,
     retry: 1,
   });
 
-  const { data: clientsData, isLoading: clientsLoading, isError: clientsError, refetch: refetchClients } = useQuery<{ clients: ClientItem[] }>({
+  const { data: clientsData, isLoading: clientsLoading, isError: clientsError, refetch: refetchClients } = useStandardQuery<{ clients: ClientItem[] }>({
     queryKey: ["msp-clients-dashboard"],
     queryFn: () => apiFetch<{ clients: ClientItem[] }>("/msp/clients"),
     staleTime: 60_000,
     retry: 1,
   });
 
-  const { data: revenueData, isLoading: revenueLoading, isError: revenueError, refetch: refetchRevenue } = useQuery<RevenueData>({
+  const { data: revenueData, isLoading: revenueLoading, isError: revenueError, refetch: refetchRevenue } = useStandardQuery<RevenueData>({
     queryKey: ["msp-revenue-dashboard"],
     queryFn: () => apiFetch<RevenueData>("/msp/revenue"),
     staleTime: 120_000,

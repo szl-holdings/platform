@@ -1,16 +1,18 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { Card, CardContent } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Button } from "@szl-holdings/shared-ui/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@szl-holdings/shared-ui/ui/select";
 import {
+
   Ship, AlertTriangle, Clock, ArrowRight, User, Anchor, Navigation, Wrench,
   Zap, Filter, CheckCircle, RefreshCw, TrendingDown, Wind
 } from "lucide-react";
 import React, { useState } from "react";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 const EVENT_TYPE_CONFIG: Record<string, { label: string; icon: React.ElementType; color: string }> = {
   status_change: { label: "Status Change", icon: Ship, color: "text-blue-400" },
@@ -113,7 +115,7 @@ export default function CommandWorkflowsPage() {
   const [severityFilter, setSeverityFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
 
-  const { data: rawEvents } = useQuery({
+  const { data: rawEvents } = useStandardQuery({
     queryKey: ["vessel-events", vesselFilter],
     queryFn: () => {
       const q = vesselFilter !== "all" ? `?vesselId=${vesselFilter}` : "";
@@ -124,7 +126,7 @@ export default function CommandWorkflowsPage() {
 
   const events: any[] = (rawEvents && Array.isArray(rawEvents) && rawEvents.length > 0) ? rawEvents : FALLBACK_EVENTS;
 
-  const acknowledgeEvent = useMutation({
+  const acknowledgeEvent = useStandardMutation({
     mutationFn: ({ id }: { id: number }) =>
       apiFetch(`/vessels/events/${id}`, { method: "PATCH", body: JSON.stringify({ status: "acknowledged" }) }),
     onMutate: async ({ id }) => {
@@ -144,7 +146,7 @@ export default function CommandWorkflowsPage() {
     onSettled: () => queryClient.invalidateQueries({ queryKey: ["vessel-events"] }),
   });
 
-  const createWorkflow = useMutation({
+  const createWorkflow = useStandardMutation({
     mutationFn: ({ eventId, vesselId, workflowType, assignedTo }: any) =>
       apiFetch("/vessels/command-workflows", {
         method: "POST",

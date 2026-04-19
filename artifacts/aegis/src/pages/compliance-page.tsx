@@ -1,10 +1,11 @@
-import { useQuery } from "@tanstack/react-query";
+
 import { api } from "@/lib/api";
 import { Card, CardContent } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Progress } from "@szl-holdings/shared-ui/ui/progress";
 import { ClipboardCheck, Shield, CheckCircle, AlertTriangle, XCircle } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const frameworkLabels: Record<string, string> = {
   nist_csf: "NIST CSF",
@@ -37,7 +38,7 @@ function AnimatedProgress({ value, className }: { value: number; className?: str
 
 export default function CompliancePage() {
   const [framework] = useState<string>("nist_csf");
-  const { data: controls = [], isLoading } = useQuery({
+  const { data: controls = [], isLoading } = useStandardQuery({
     queryKey: ["compliance", framework],
     queryFn: () => api.compliance.list(framework),
   });

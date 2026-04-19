@@ -1,7 +1,8 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { Play, Clock, CheckCircle, XCircle, AlertTriangle, RefreshCw, Zap, Calendar, RotateCcw } from "lucide-react";
 import { useState } from "react";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface JobRegistryEntry {
   type: string;
@@ -100,25 +101,25 @@ export default function JobsPage() {
   const queryClient = useQueryClient();
   const [triggerType, setTriggerType] = useState<string | null>(null);
 
-  const { data: registry = [], isLoading: regLoading } = useQuery<JobRegistryEntry[]>({
+  const { data: registry = [], isLoading: regLoading } = useStandardQuery<JobRegistryEntry[]>({
     queryKey: ["jobs-registry"],
     queryFn: () => apiFetch("/jobs/registry"),
     refetchInterval: 15000,
   });
 
-  const { data: stats } = useQuery<JobStats>({
+  const { data: stats } = useStandardQuery<JobStats>({
     queryKey: ["jobs-stats"],
     queryFn: () => apiFetch("/jobs/stats"),
     refetchInterval: 10000,
   });
 
-  const { data: recentJobs = [] } = useQuery<RecentJob[]>({
+  const { data: recentJobs = [] } = useStandardQuery<RecentJob[]>({
     queryKey: ["jobs-recent"],
     queryFn: () => apiFetch("/jobs/recent?limit=15"),
     refetchInterval: 10000,
   });
 
-  const triggerMutation = useMutation({
+  const triggerMutation = useStandardMutation({
     mutationFn: (type: string) => apiFetch(`/jobs/trigger/${type}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({}) }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["jobs-recent"] });

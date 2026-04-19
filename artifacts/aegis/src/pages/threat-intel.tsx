@@ -1,15 +1,16 @@
 import { PageDataSkeleton } from "@szl-holdings/shared-ui/page-data-skeleton";
 import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
-import { useQuery } from "@tanstack/react-query";
+
 import { useState } from "react";
 import { Shield, AlertTriangle, Brain, Radio, Crosshair, Activity, Loader2, Zap, FileText } from "lucide-react";
 import { SeverityMeter, TypewriterText, AnomalySparkline } from "@szl-holdings/shared-ui/ai-components";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 export default function ThreatIntelAI() {
-  const { data: cves = [], isLoading: cvesLoading } = useQuery({ queryKey: ["threat-cves"], queryFn: () => apiFetch<any[]>("/intelligence/cves") });
-  const { data: threats = [], isLoading: threatsLoading } = useQuery({ queryKey: ["threat-data"], queryFn: () => apiFetch<any[]>("/intelligence/threats") });
-  const { data: anomalies = [], isLoading: anomaliesLoading } = useQuery({ queryKey: ["threat-anomalies"], queryFn: () => apiFetch<any[]>("/intelligence/anomalies") });
+  const { data: cves = [], isLoading: cvesLoading } = useStandardQuery({ queryKey: ["threat-cves"], queryFn: () => apiFetch<any[]>("/intelligence/cves") });
+  const { data: threats = [], isLoading: threatsLoading } = useStandardQuery({ queryKey: ["threat-data"], queryFn: () => apiFetch<any[]>("/intelligence/threats") });
+  const { data: anomalies = [], isLoading: anomaliesLoading } = useStandardQuery({ queryKey: ["threat-anomalies"], queryFn: () => apiFetch<any[]>("/intelligence/anomalies") });
   const isLoading = cvesLoading || threatsLoading || anomaliesLoading;
 
   const [briefingText, setBriefingText] = useState("");

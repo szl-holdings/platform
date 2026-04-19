@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { api } from "@/lib/api";
 import { Link } from "wouter";
 import {
+
   Activity, AlertTriangle, CheckCircle2, Clock, Shield, Zap,
   TrendingUp, TrendingDown, Minus, BarChart3, RefreshCw,
   Users, Lock, Database, Server, Eye, AlertOctagon, Info
@@ -11,6 +12,7 @@ import {
   AreaChart, Area, BarChart, Bar, LineChart, Line,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell
 } from "recharts";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const COLORS = { critical: "#ef4444", high: "#f97316", medium: "#f59e0b", low: "#3b82f6", info: "#6b7280" };
 
@@ -102,9 +104,9 @@ function DemoDataBanner({ label }: { label: string }) {
 
 export default function OperatorAnalyticsPage() {
   const [timeRange, setTimeRange] = useState<"24h" | "7d" | "30d">("24h");
-  const { data: incidents } = useQuery<Incident[]>({ queryKey: ["incidents"], queryFn: () => api.incidents.list() });
-  const { data: cases } = useQuery<Case[]>({ queryKey: ["cases"], queryFn: () => api.cases.list() });
-  const { data: decisions } = useQuery<Decision[]>({ queryKey: ["tradecraft-decisions"], queryFn: () => api.tradecraft.decisions() });
+  const { data: incidents } = useStandardQuery<Incident[]>({ queryKey: ["incidents"], queryFn: () => api.incidents.list() });
+  const { data: cases } = useStandardQuery<Case[]>({ queryKey: ["cases"], queryFn: () => api.cases.list() });
+  const { data: decisions } = useStandardQuery<Decision[]>({ queryKey: ["tradecraft-decisions"], queryFn: () => api.tradecraft.decisions() });
 
   const totalIncidents = incidents?.length ?? 0;
   const activeIncidents = incidents?.filter(i => !["closed"].includes(i.status))?.length ?? 0;

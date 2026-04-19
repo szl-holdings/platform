@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { Network, Shield, Users, Server, Lock, AlertTriangle, CheckCircle, XCircle, RefreshCw, ChevronRight, Eye, Activity } from "lucide-react";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const API = import.meta.env.VITE_API_URL ?? "/api";
 
@@ -111,7 +112,7 @@ function AttackGraphCanvas({ nodes, edges }: { nodes: GraphNode[]; edges: GraphE
 export default function CognitiveAttackPath() {
   // Live backend route — /firestorm/* path is an active api-server endpoint.
   // Follow-up task #1715 will rename it to /aegis/* once the server migration lands.
-  const { data, isLoading, refetch, dataUpdatedAt } = useQuery({
+  const { data, isLoading, refetch, dataUpdatedAt } = useStandardQuery({
     queryKey: ["cognitive-attack-path-graph"],
     queryFn: async () => {
       const r = await fetch(`${API}/firestorm/cognitive/attack-path-graph`, { credentials: "include" });

@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { OpsLayout } from "../components/ops-layout";
 import { Users, UserPlus, Shield, Key, Search, Edit2, Check } from "lucide-react";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface ApiTeamResponse {
   members: TeamMember[];
@@ -64,7 +65,7 @@ export default function TeamPage() {
   const [teamFilter, setTeamFilter] = useState("all");
   const [editingId, setEditingId] = useState<string | null>(null);
 
-  const { data: apiData } = useQuery<ApiTeamResponse>({
+  const { data: apiData } = useStandardQuery<ApiTeamResponse>({
     queryKey: ["command-team"],
     queryFn: async () => {
       const res = await fetch("/api/command/team", { credentials: "include" });

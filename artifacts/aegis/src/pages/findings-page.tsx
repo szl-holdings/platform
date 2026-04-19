@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { AnimatedCounter } from "@szl-holdings/shared-ui/animated-counter";
 import { api } from "@/lib/api";
 import { Card, CardContent } from "@szl-holdings/shared-ui/ui/card";
@@ -13,6 +13,7 @@ import { AlertTriangle, Plus, Shield, Bug, CheckCircle, XCircle, Search } from "
 import { EmptyState } from "@szl-holdings/shared-ui/design-system";
 import { useState, useEffect, useRef } from "react";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 const severityColors: Record<string, string> = {
   info: "bg-blue-500/10 text-blue-400 border-blue-500/20",
@@ -52,19 +53,19 @@ function FindingSkeleton() {
 
 export default function FindingsPage() {
   const qc = useQueryClient();
-  const { data: findings = [], isLoading } = useQuery({ queryKey: ["findings"], queryFn: () => api.findings.list() });
-  const { data: assessments = [] } = useQuery({ queryKey: ["assessments"], queryFn: api.assessments.list });
+  const { data: findings = [], isLoading } = useStandardQuery({ queryKey: ["findings"], queryFn: () => api.findings.list() });
+  const { data: assessments = [] } = useStandardQuery({ queryKey: ["assessments"], queryFn: api.assessments.list });
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState("all");
   const [form, setForm] = useState({ title: "", severity: "medium", assessmentId: "", description: "", affectedAsset: "" });
 
-  const createMut = useMutation({
+  const createMut = useStandardMutation({
     mutationFn: (data: any) => api.findings.create(data),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["findings"] }); setOpen(false); toast.success("Finding created"); },
     onError: (e: any) => toast.error(e.message),
   });
 
-  const updateMut = useMutation({
+  const updateMut = useStandardMutation({
     mutationFn: ({ id, data }: { id: number; data: any }) => api.findings.update(id, data),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["findings"] }); toast.success("Finding updated"); },
   });

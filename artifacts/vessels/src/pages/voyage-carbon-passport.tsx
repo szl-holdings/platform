@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { AmbientBar, type AmbientSignal } from "@szl-holdings/shared-ui/ambient-intelligence";
 import { Leaf, Radio, RefreshCw, AlertTriangle, CheckCircle2, Database, PlusCircle, X } from "lucide-react";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "/api";
 
@@ -102,7 +103,7 @@ export default function VoyageCarbonPassport() {
   const [showCreate, setShowCreate] = useState(false);
   const [form, setForm] = useState<ComputeFormData>(EMPTY_COMPUTE);
 
-  const { data, isLoading, isError, refetch } = useQuery<EmissionsApiResponse>({
+  const { data, isLoading, isError, refetch } = useStandardQuery<EmissionsApiResponse>({
     queryKey: ["vessels-voyages-emissions"],
     queryFn: () =>
       fetch(`${API_BASE}/vessels/modules/voyages-emissions`, { credentials: "include" }).then(r => {
@@ -121,7 +122,7 @@ export default function VoyageCarbonPassport() {
     refetchIntervalInBackground: false,
   });
 
-  const computeMutation = useMutation({
+  const computeMutation = useStandardMutation({
     mutationFn: (payload: Record<string, unknown>) =>
       fetch(`${API_BASE}/vessels/modules/voyages-emissions`, {
         method: "POST", credentials: "include",

@@ -1,5 +1,5 @@
 import { AnimatedCounter } from "@szl-holdings/shared-ui/animated-counter";
-import { useQuery } from "@tanstack/react-query";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Button } from "@szl-holdings/shared-ui/ui/button";
@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Globe, Shield, AlertTriangle, Search, Radio, Brain, MapPin, Crosshair, Activity, FileText, Clock, TrendingUp, Zap } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const severityColors: Record<string, string> = {
   critical: "bg-red-500/10 text-red-400 border-red-500/20",
@@ -95,10 +96,10 @@ function ThreatMapCanvas({ threats }: { threats: any[] }) {
 }
 
 export default function ThreatIntelligence() {
-  const { data: threats = [] } = useQuery({ queryKey: ["intel-threats"], queryFn: () => apiFetch<any[]>("/intelligence/threats"), refetchInterval: 30000 });
-  const { data: cves = [] } = useQuery({ queryKey: ["intel-cves"], queryFn: () => apiFetch<any[]>("/aegis/cves"), refetchInterval: 60000 });
-  const { data: geoEvents = [] } = useQuery({ queryKey: ["intel-geo"], queryFn: () => apiFetch<any[]>("/intelligence/geopolitical"), refetchInterval: 60000 });
-  const { data: briefing } = useQuery({ queryKey: ["intel-briefing"], queryFn: () => apiFetch<any>("/intelligence/ai/threat-briefing", { method: "POST", body: JSON.stringify({}) }), refetchInterval: 300000, retry: 1 });
+  const { data: threats = [] } = useStandardQuery({ queryKey: ["intel-threats"], queryFn: () => apiFetch<any[]>("/intelligence/threats"), refetchInterval: 30000 });
+  const { data: cves = [] } = useStandardQuery({ queryKey: ["intel-cves"], queryFn: () => apiFetch<any[]>("/aegis/cves"), refetchInterval: 60000 });
+  const { data: geoEvents = [] } = useStandardQuery({ queryKey: ["intel-geo"], queryFn: () => apiFetch<any[]>("/intelligence/geopolitical"), refetchInterval: 60000 });
+  const { data: briefing } = useStandardQuery({ queryKey: ["intel-briefing"], queryFn: () => apiFetch<any>("/intelligence/ai/threat-briefing", { method: "POST", body: JSON.stringify({}) }), refetchInterval: 300000, retry: 1 });
 
   const [cveFilter, setCveFilter] = useState("");
   const [cveSeverity, setCveSeverity] = useState("all");

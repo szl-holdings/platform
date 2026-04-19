@@ -1,14 +1,16 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { ProofEnvelope, type AutonomyMode } from "@szl-holdings/design-system";
 import {
+
   BarChart3, TrendingUp, TrendingDown, MapPin, Building2, DollarSign,
   Activity, Target, Eye, Filter, Download, ChevronDown, ArrowRight,
   AlertTriangle, CheckCircle, Clock, Layers, Globe, Wifi, WifiOff
 } from "lucide-react";
 import { BarChart, Bar, AreaChart, Area, LineChart, Line, ScatterChart, Scatter, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid, Cell, ReferenceLine } from "recharts";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const TERRA_GREEN = "#40856a";
 const TERRA_GREEN_LIGHT = "#4a9d7d";
@@ -97,21 +99,21 @@ export default function MarketIntelligence() {
   const [activeTab, setActiveTab] = useState<"heat" | "absorption" | "comps" | "cycle">("heat");
   const [autonomyMode, setAutonomyMode] = useState<AutonomyMode>("recommend");
 
-  const { data: marketData, isError: isMarketError } = useQuery<TerraMarketResponse>({
+  const { data: marketData, isError: isMarketError } = useStandardQuery<TerraMarketResponse>({
     queryKey: ["market-intelligence-terra"],
     queryFn: () => apiFetch<TerraMarketResponse>("/terra/market-intelligence"),
     refetchInterval: 60000,
     retry: 1,
   });
 
-  const { data: sectorData } = useQuery<TerraSectorResponse>({
+  const { data: sectorData } = useStandardQuery<TerraSectorResponse>({
     queryKey: ["market-intelligence-sectors"],
     queryFn: () => apiFetch<TerraSectorResponse>("/terra/sector-performance"),
     refetchInterval: 60000,
     retry: 1,
   });
 
-  const { data: mortgageData } = useQuery<TerraMortgageResponse>({
+  const { data: mortgageData } = useStandardQuery<TerraMortgageResponse>({
     queryKey: ["market-intelligence-mortgage"],
     queryFn: () => apiFetch<TerraMortgageResponse>("/terra/live/mortgage-rates"),
     refetchInterval: 60000,

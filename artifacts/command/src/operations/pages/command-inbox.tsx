@@ -1,14 +1,16 @@
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { DataStateBadge } from "@szl-holdings/shared-ui/data-state-badge";
 import { useState, useEffect } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
 import {
+
   Heart, AlertTriangle, Brain, Radio, Workflow,
   ArrowRight, User, ExternalLink, Clock, ChevronRight,
   TrendingDown, Shield, Zap, Activity, Eye,
   Bell, BellOff, CheckCircle2, AlarmClock, Undo2,
 } from "lucide-react";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 // ---------------------------------------------------------------------------
 // Cross-Platform Correlation Alerts (live, persistable)
@@ -51,7 +53,7 @@ const SNOOZE_PRESETS: Array<{ label: string; minutes: number }> = [
 
 function CommandInboxAlerts() {
   const qc = useQueryClient();
-  const { data, isLoading } = useQuery<CommandAlertsResponse>({
+  const { data, isLoading } = useStandardQuery<CommandAlertsResponse>({
     queryKey: ["command-alerts"],
     queryFn: async () => {
       const res = await fetch("/api/command/alerts", { credentials: "include" });

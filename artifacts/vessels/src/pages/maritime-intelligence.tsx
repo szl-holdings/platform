@@ -1,10 +1,11 @@
 import { AnimatedCounter } from "@szl-holdings/shared-ui/animated-counter";
-import { useQuery, useMutation } from "@tanstack/react-query";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Ship, Anchor, Navigation, AlertTriangle, Cloud, ShieldAlert, Globe, Radio, Waves, Thermometer, Wind, Eye, MapPin, Languages, Loader2 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface MapVessel { lat?: number; lon?: number; latitude?: number; longitude?: number; name?: string; mmsi?: string; course?: number; }
 interface MapChokepoint { lat?: number; lon?: number; name?: string; riskLevel?: string; status?: string; vesselCount?: number; dailyTransits?: number; oilFlowMbpd?: number; }
@@ -86,13 +87,13 @@ const riskColors: Record<string, string> = {
 };
 
 export default function MaritimeIntelligence() {
-  const { data: aisVessels = [] } = useQuery({ queryKey: ["intel-maritime-vessels"], queryFn: () => apiFetch<any[]>("/intelligence/maritime/vessels"), refetchInterval: 30000 });
-  const { data: chokepoints = [] } = useQuery({ queryKey: ["intel-chokepoints"], queryFn: () => apiFetch<any[]>("/intelligence/maritime/chokepoints"), refetchInterval: 60000 });
-  const { data: weather = [] } = useQuery({ queryKey: ["intel-marine-weather"], queryFn: () => apiFetch<any[]>("/intelligence/maritime/weather"), refetchInterval: 300000 });
-  const { data: sanctions = [] } = useQuery({ queryKey: ["intel-sanctions"], queryFn: () => apiFetch<any[]>("/intelligence/maritime/sanctions") });
+  const { data: aisVessels = [] } = useStandardQuery({ queryKey: ["intel-maritime-vessels"], queryFn: () => apiFetch<any[]>("/intelligence/maritime/vessels"), refetchInterval: 30000 });
+  const { data: chokepoints = [] } = useStandardQuery({ queryKey: ["intel-chokepoints"], queryFn: () => apiFetch<any[]>("/intelligence/maritime/chokepoints"), refetchInterval: 60000 });
+  const { data: weather = [] } = useStandardQuery({ queryKey: ["intel-marine-weather"], queryFn: () => apiFetch<any[]>("/intelligence/maritime/weather"), refetchInterval: 300000 });
+  const { data: sanctions = [] } = useStandardQuery({ queryKey: ["intel-sanctions"], queryFn: () => apiFetch<any[]>("/intelligence/maritime/sanctions") });
   const [translations, setTranslations] = useState<Record<string, string>>({});
 
-  const translateMutation = useMutation({
+  const translateMutation = useStandardMutation({
     mutationFn: async ({ text, imo, targetLang }: { text: string; imo: string; targetLang: string }) => {
       const result = await apiFetch<{ translatedText: string }>("/intelligence/ai/translate", {
         method: "POST",

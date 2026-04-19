@@ -1,14 +1,16 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
+
   Brain, Target, TrendingDown, DollarSign, Clock, AlertTriangle,
   ChevronRight, X, BarChart3, Activity, ArrowUpRight, Users,
   Zap, Shield, CheckCircle, Info, Loader2, Sliders, ArrowLeft
 } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { useRoute, Link } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+
 import { api } from "@/lib/api";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 type AcceptanceCategory = "very-likely" | "likely" | "possible" | "unlikely";
 
@@ -44,7 +46,6 @@ const CATEGORY_META: Record<AcceptanceCategory, { label: string; color: string; 
   "possible": { label: "Possible", color: "text-amber-400", bg: "bg-amber-400/10 border-amber-400/20", description: "Mixed signals — relationship-building approach recommended" },
   "unlikely": { label: "Unlikely", color: "text-red-400", bg: "bg-red-400/10 border-red-400/20", description: "Seller has leverage — full-price or near-market required" },
 };
-
 
 function formatCurrency(n: number) {
   if (n >= 1e6) return `$${(n / 1e6).toFixed(1)}M`;
@@ -217,14 +218,14 @@ export default function SellerMotivation() {
   const [, params] = useRoute<{ propertyId: string }>("/seller-motivation/:propertyId");
   const propertyId = params?.propertyId;
 
-  const { data: propertyData, isLoading: propertyLoading } = useQuery({
+  const { data: propertyData, isLoading: propertyLoading } = useStandardQuery({
     queryKey: ["terra-seller-motivation", propertyId],
     queryFn: () => api.properties.sellerMotivation(propertyId!),
     enabled: !!propertyId,
     staleTime: 300_000,
   });
 
-  const { data: portfolioData, isLoading: portfolioLoading, isError: portfolioError } = useQuery({
+  const { data: portfolioData, isLoading: portfolioLoading, isError: portfolioError } = useStandardQuery({
     queryKey: ["terra-portfolio-seller-motivation"],
     queryFn: () => api.portfolio.sellerMotivation(),
     enabled: !propertyId,

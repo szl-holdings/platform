@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import {
+
   Play, Clock, CheckCircle, XCircle, Shield, Eye, Camera, Zap,
   ChevronDown, ChevronRight, FileText, Lock, AlertTriangle, RefreshCw,
   Activity, ArrowRight, Cpu
 } from "lucide-react";
 import { api, type AlloyWorkflowRun } from "@lyte/lib/api";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const BG = { page: "#080c14", surface: "#0c1018", elevated: "#10141e" };
 const BORDER = { subtle: "rgba(255,255,255,0.04)", muted: "rgba(255,255,255,0.07)" };
@@ -268,7 +270,7 @@ export default function AlloyReplayTimelinePage() {
   const [selectedRun, setSelectedRun] = useState<ReplayRun | null>(null);
   const [playheadIdx, setPlayheadIdx] = useState<number | null>(null);
 
-  const { data: runsData, isLoading: runsLoading } = useQuery({
+  const { data: runsData, isLoading: runsLoading } = useStandardQuery({
     queryKey: ["alloy-runs-replay"],
     queryFn: () => api.alloyRuns.list({ limit: 10 }),
     staleTime: 30_000,

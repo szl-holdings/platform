@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { CognitiveLayout } from "./cognitive-layout";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const ACCENT = "#8b7ac8";
 
@@ -400,7 +401,7 @@ function ScoreRing({ score, color, size = 48 }: { score: number; color: string; 
 }
 
 export default function VerifierConsole() {
-  const { data: apiResults } = useQuery<VerifierResult[]>({
+  const { data: apiResults } = useStandardQuery<VerifierResult[]>({
     queryKey: ["cognitive", "verifier"],
     queryFn: async () => {
       const res = await fetch("/verifier", { credentials: "include" });

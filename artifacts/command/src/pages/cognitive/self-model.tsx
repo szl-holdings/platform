@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import {
+
   Brain, ChevronDown, ChevronRight, Clock, GitBranch, Info,
   Layers, Shield, Target, TrendingDown, TrendingUp, Zap,
 } from "lucide-react";
 import { CognitiveLayout } from "./cognitive-layout";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 const ACCENT = "#8b7ac8";
@@ -317,7 +319,7 @@ function SnapshotTimeline({ snapshots }: { snapshots: SnapshotEntry[] }) {
 }
 
 export default function SelfModelConsole() {
-  const { data: selfModel } = useQuery<SelfModel>({
+  const { data: selfModel } = useStandardQuery<SelfModel>({
     queryKey: ["cognitive", "self-model"],
     queryFn: () =>
       fetch(`${BASE}/api/self-model`, { credentials: "include" })
@@ -326,7 +328,7 @@ export default function SelfModelConsole() {
     staleTime: 30_000,
   });
 
-  const { data: history } = useQuery<SelfModelHistory>({
+  const { data: history } = useStandardQuery<SelfModelHistory>({
     queryKey: ["cognitive", "self-model-history"],
     queryFn: () =>
       fetch(`${BASE}/api/self-model/history`, { credentials: "include" })

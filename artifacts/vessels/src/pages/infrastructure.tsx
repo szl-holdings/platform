@@ -1,9 +1,10 @@
-import { useQuery } from "@tanstack/react-query";
+
 import { dataProvider } from "@/data/data-provider";
 import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Progress } from "@szl-holdings/shared-ui/ui/progress";
 import { Wrench, Cog, Ship, AlertTriangle, CheckCircle, Clock, Shield, Activity } from "lucide-react";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const severityColors: Record<string, string> = {
   Critical: "bg-red-500/10 text-red-400 border-red-500/20",
@@ -34,8 +35,8 @@ function HealthGauge({ value, label, color }: { value: number; label: string; co
 }
 
 export default function InfrastructurePage() {
-  const { data: vessels = [] } = useQuery({ queryKey: ["infra-vessels"], queryFn: () => dataProvider.getVessels() });
-  const { data: maintenanceLogs = [] } = useQuery({ queryKey: ["maintenance-logs"], queryFn: () => dataProvider.getMaintenanceLogs() });
+  const { data: vessels = [] } = useStandardQuery({ queryKey: ["infra-vessels"], queryFn: () => dataProvider.getVessels() });
+  const { data: maintenanceLogs = [] } = useStandardQuery({ queryKey: ["maintenance-logs"], queryFn: () => dataProvider.getMaintenanceLogs() });
 
   const inProgressCount = maintenanceLogs.filter(m => m.status === "In Progress").length;
   const overdueCount = maintenanceLogs.filter(m => m.status === "Overdue").length;

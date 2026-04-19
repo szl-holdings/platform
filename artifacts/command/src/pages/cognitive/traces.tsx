@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
 import { ACCENT, DOMAIN_COLORS, fetchJson, apiUrl } from "./shared";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 type Phase = "perceive" | "reason" | "plan" | "act" | "reflect";
 const PHASES: Phase[] = ["perceive", "reason", "plan", "act", "reflect"];
@@ -318,7 +319,6 @@ function apiTraceToTraceRun(t: ApiTrace): TraceRun {
   };
 }
 
-
 const OUTCOME_STYLE: Record<string, { color: string; label: string }> = {
   success: { color: "#22c55e", label: "SUCCESS" },
   partial: { color: "#f59e0b", label: "PARTIAL" },
@@ -392,7 +392,7 @@ function PhaseDetail({
   const c = PHASE_COLORS[snapshot.phase];
   const qc = useQueryClient();
 
-  const commentMutation = useMutation({
+  const commentMutation = useStandardMutation({
     mutationFn: (text: string) =>
       fetchJson<unknown>(apiUrl(`/traces/${traceId}/comment`), {
         method: "POST",
@@ -529,7 +529,7 @@ export default function CognitiveTraces() {
   const [activePhaseIndex, setActivePhaseIndex] = useState(0);
   const [filterDomain, setFilterDomain] = useState("all");
 
-  const tracesQuery = useQuery<ApiTracesResponse>({
+  const tracesQuery = useStandardQuery<ApiTracesResponse>({
     queryKey: ["cognitive", "traces"],
     queryFn: () => fetchJson<ApiTracesResponse>(apiUrl("/traces?limit=50")),
     retry: 1,

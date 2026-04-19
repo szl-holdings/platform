@@ -1,7 +1,8 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { Database, CheckCircle2, AlertTriangle, RefreshCw, Play, RotateCcw, Info } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@lyte/lib/utils";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 async function apiFetch<T>(path: string, opts?: RequestInit): Promise<T> {
   const r = await fetch(`/api${path}`, { headers: { "Content-Type": "application/json" }, ...opts });
@@ -41,13 +42,13 @@ export default function DemoDataSeeder() {
   const [actionResult, setActionResult] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const qc = useQueryClient();
 
-  const { data, isLoading, error } = useQuery<SeedValidation>({
+  const { data, isLoading, error } = useStandardQuery<SeedValidation>({
     queryKey: ["admin-seed-validate"],
     queryFn: () => apiFetch("/admin/seed/validate"),
     refetchInterval: 30000,
   });
 
-  const seedMutation = useMutation({
+  const seedMutation = useStandardMutation({
     mutationFn: () => apiFetch("/admin/seed", { method: "POST" }),
     onSuccess: () => {
       setActionResult({ type: "success", message: "Platform data seeded successfully." });
@@ -56,7 +57,7 @@ export default function DemoDataSeeder() {
     onError: (e) => setActionResult({ type: "error", message: String(e) }),
   });
 
-  const resetMutation = useMutation({
+  const resetMutation = useStandardMutation({
     mutationFn: () => apiFetch("/admin/seed/reset", { method: "POST" }),
     onSuccess: () => {
       setActionResult({ type: "success", message: "Demo data reset. Re-seeding on next load." });

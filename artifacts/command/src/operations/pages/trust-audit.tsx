@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { Shield, Clock, User, Filter, Activity, CheckCircle2, AlertTriangle, Eye, RefreshCw, Download } from "lucide-react";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const BG = { page: "#080c14", surface: "#0c1018", elevated: "#10141e" };
 const BORDER = { subtle: "rgba(255,255,255,0.04)", muted: "rgba(255,255,255,0.06)" };
@@ -77,7 +78,7 @@ export default function TrustAuditPage() {
   if (filterProduct !== "all") params.set("product", filterProduct);
   if (filterMode !== "all") params.set("mode", filterMode);
 
-  const auditQ = useQuery<ListResponse<PolicyDecisionAuditRow>>({
+  const auditQ = useStandardQuery<ListResponse<PolicyDecisionAuditRow>>({
     queryKey: ["guardian", "audit-policy-decisions", filterDecision, filterProduct, filterMode],
     queryFn: () => fetchJson(`/api/guardian/audit/policy-decisions?${params.toString()}`),
     refetchInterval: 30_000,
@@ -87,7 +88,7 @@ export default function TrustAuditPage() {
   const total = auditQ.data?.meta?.total ?? events.length;
 
   // For filter dropdowns, get unique products & modes from a wider sample
-  const allEventsQ = useQuery<ListResponse<PolicyDecisionAuditRow>>({
+  const allEventsQ = useStandardQuery<ListResponse<PolicyDecisionAuditRow>>({
     queryKey: ["guardian", "audit-policy-decisions-index"],
     queryFn: () => fetchJson(`/api/guardian/audit/policy-decisions?limit=200`),
     staleTime: 5 * 60_000,

@@ -3,10 +3,11 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Brain, Activity, Globe, AlertTriangle, FileText, Radio, TrendingUp, Clock, Newspaper, Zap, Shield } from "lucide-react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRealtimeChannel } from "@szl-holdings/shared-ui/use-realtime-channel";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { ProofEnvelope, type AutonomyMode } from "@szl-holdings/design-system";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 function LocalCounter({ value }: { value: number }) {
   const [display, setDisplay] = useState(0);
@@ -31,10 +32,10 @@ const severityColors: Record<string, string> = {
 
 export default function IntelligencePage() {
   const [autonomyMode, setAutonomyMode] = useState<AutonomyMode>("ask-to-act");
-  const { data: anomalies = [] } = useQuery({ queryKey: ["intel-anomalies"], queryFn: () => apiFetch<any[]>("/intelligence/anomalies"), refetchInterval: 30000 });
-  const { data: opsHeatmap = [] } = useQuery({ queryKey: ["intel-ops-heatmap"], queryFn: () => apiFetch<any[]>("/intelligence/ops-heatmap"), refetchInterval: 60000 });
-  const { data: news = [] } = useQuery({ queryKey: ["intel-news"], queryFn: () => apiFetch<any[]>("/intelligence/news"), refetchInterval: 120000 });
-  const { data: sitRep } = useQuery({ queryKey: ["intel-sitrep"], queryFn: () => apiFetch<any>("/intelligence/ai/situation-report", { method: "POST", body: JSON.stringify({}) }), refetchInterval: 600000, retry: 1 });
+  const { data: anomalies = [] } = useStandardQuery({ queryKey: ["intel-anomalies"], queryFn: () => apiFetch<any[]>("/intelligence/anomalies"), refetchInterval: 30000 });
+  const { data: opsHeatmap = [] } = useStandardQuery({ queryKey: ["intel-ops-heatmap"], queryFn: () => apiFetch<any[]>("/intelligence/ops-heatmap"), refetchInterval: 60000 });
+  const { data: news = [] } = useStandardQuery({ queryKey: ["intel-news"], queryFn: () => apiFetch<any[]>("/intelligence/news"), refetchInterval: 120000 });
+  const { data: sitRep } = useStandardQuery({ queryKey: ["intel-sitrep"], queryFn: () => apiFetch<any>("/intelligence/ai/situation-report", { method: "POST", body: JSON.stringify({}) }), refetchInterval: 600000, retry: 1 });
 
   const qcIntel = useQueryClient();
   const { lastMessage: wsLyteMsg } = useRealtimeChannel("lyte-metrics");

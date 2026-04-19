@@ -1,6 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
+
 import { Server, Database, HardDrive, Users, Layers, Zap, Activity, CheckCircle, AlertTriangle, Clock } from "lucide-react";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface AdminOverview {
   timestamp: string;
@@ -29,7 +30,7 @@ function StatusDot({ status }: { status: string }) {
 }
 
 export default function AdminOverview() {
-  const { data, isLoading, error } = useQuery<AdminOverview>({
+  const { data, isLoading, error } = useStandardQuery<AdminOverview>({
     queryKey: ["admin-overview"],
     queryFn: () => apiFetch("/admin/overview"),
     refetchInterval: 30000,

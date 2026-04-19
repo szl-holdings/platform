@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { CheckCircle, Clock, Shield, Activity, RotateCcw, RefreshCw, ChevronRight, Plus, Pencil, Trash2, X, History } from "lucide-react";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 const GOLD = "#d4a054";
 const DS = {
@@ -419,7 +420,7 @@ function diffFields(before: Record<string, unknown> | null, after: Record<string
 }
 
 function PatternHistoryPanel({ pattern, onClose }: { pattern: FailurePattern; onClose: () => void }) {
-  const historyQuery = useQuery<{ entries: PatternHistoryEntry[] }>({
+  const historyQuery = useStandardQuery<{ entries: PatternHistoryEntry[] }>({
     queryKey: ["self-healing-pattern-history", pattern.id],
     queryFn: () => apiFetch<{ entries: PatternHistoryEntry[] }>(`/self-healing/policies/${pattern.id}/history`),
   });
@@ -517,19 +518,19 @@ export default function SelfHealingPage() {
   const [historyPattern, setHistoryPattern] = useState<FailurePattern | null>(null);
   const qc = useQueryClient();
 
-  const statsQuery = useQuery<StatsResponse>({
+  const statsQuery = useStandardQuery<StatsResponse>({
     queryKey: ["self-healing-stats"],
     queryFn: () => apiFetch<StatsResponse>("/self-healing/stats"),
     refetchInterval: 15000,
   });
 
-  const runsQuery = useQuery<{ runs: RemediationRun[]; total: number }>({
+  const runsQuery = useStandardQuery<{ runs: RemediationRun[]; total: number }>({
     queryKey: ["self-healing-runs"],
     queryFn: () => apiFetch<{ runs: RemediationRun[]; total: number }>("/self-healing/runs"),
     refetchInterval: 10000,
   });
 
-  const policiesQuery = useQuery<{ policies: FailurePattern[] }>({
+  const policiesQuery = useStandardQuery<{ policies: FailurePattern[] }>({
     queryKey: ["self-healing-policies"],
     queryFn: () => apiFetch<{ policies: FailurePattern[] }>("/self-healing/policies"),
   });
@@ -544,7 +545,7 @@ export default function SelfHealingPage() {
     void qc.invalidateQueries({ queryKey: ["self-healing-stats"] });
   };
 
-  const toggleMutation = useMutation({
+  const toggleMutation = useStandardMutation({
     mutationFn: (id: string) => {
       const csrfToken = getCsrfToken();
       return apiFetch<{ policy: FailurePattern }>(`/self-healing/policies/${id}/toggle`, {
@@ -555,7 +556,7 @@ export default function SelfHealingPage() {
     onSuccess: invalidatePolicies,
   });
 
-  const createMutation = useMutation({
+  const createMutation = useStandardMutation({
     mutationFn: (form: PatternFormState) => {
       const csrfToken = getCsrfToken();
       return apiFetch<{ policy: FailurePattern }>(`/self-healing/policies`, {
@@ -572,7 +573,7 @@ export default function SelfHealingPage() {
     onError: (err: Error) => setEditorError(err.message || "Failed to create pattern"),
   });
 
-  const updateMutation = useMutation({
+  const updateMutation = useStandardMutation({
     mutationFn: ({ id, form }: { id: string; form: PatternFormState }) => {
       const csrfToken = getCsrfToken();
       return apiFetch<{ policy: FailurePattern }>(`/self-healing/policies/${id}`, {
@@ -589,7 +590,7 @@ export default function SelfHealingPage() {
     onError: (err: Error) => setEditorError(err.message || "Failed to update pattern"),
   });
 
-  const deleteMutation = useMutation({
+  const deleteMutation = useStandardMutation({
     mutationFn: (id: string) => {
       const csrfToken = getCsrfToken();
       return apiFetch<void>(`/self-healing/policies/${id}`, {

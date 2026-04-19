@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { Activity, GitBranch, Zap, Shield, AlertTriangle, CheckCircle, Clock, TrendingUp, TrendingDown, ChevronRight, ChevronDown, Eye, RefreshCw } from "lucide-react";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const ACCENT = "#ef4444";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -154,7 +155,7 @@ function TraceCard({ trace, onSelect, isSelected }: { trace: ExecutionTrace; onS
 export default function AgentOpsExplorer() {
   const [selectedTraceId, setSelectedTraceId] = useState<string | null>(null);
 
-  const { data: statsData, isLoading: statsLoading } = useQuery<ObservabilityStats>({
+  const { data: statsData, isLoading: statsLoading } = useStandardQuery<ObservabilityStats>({
     queryKey: ["nuro-mesh-observability-stats"],
     queryFn: async () => {
       const r = await fetch(`${API_BASE}/nuro-mesh/observability/stats`);
@@ -163,7 +164,7 @@ export default function AgentOpsExplorer() {
     refetchInterval: 30000,
   });
 
-  const { data: tracesData, isLoading: tracesLoading, refetch } = useQuery<{ traces: ExecutionTrace[] }>({
+  const { data: tracesData, isLoading: tracesLoading, refetch } = useStandardQuery<{ traces: ExecutionTrace[] }>({
     queryKey: ["nuro-mesh-observability-traces"],
     queryFn: async () => {
       const r = await fetch(`${API_BASE}/nuro-mesh/observability/traces?limit=30`);
@@ -172,7 +173,7 @@ export default function AgentOpsExplorer() {
     refetchInterval: 15000,
   });
 
-  const { data: traceDetail } = useQuery<ExecutionTrace>({
+  const { data: traceDetail } = useStandardQuery<ExecutionTrace>({
     queryKey: ["nuro-mesh-trace-detail", selectedTraceId],
     queryFn: async () => {
       const r = await fetch(`${API_BASE}/nuro-mesh/observability/traces/${selectedTraceId}`);

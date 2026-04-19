@@ -1,9 +1,10 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { LiveClock } from "@szl-holdings/shared-ui/live-clock";
-import { useQuery } from "@tanstack/react-query";
+
 import { api } from "@/lib/api";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import {
+
   Shield, AlertTriangle, Bell, Clock, CheckCircle2, XCircle, Activity,
   TrendingUp, TrendingDown, Minus, Users, Lock, Eye, Zap,
   ChevronRight, Circle, ArrowRight, UserCheck, Server, AlertOctagon,
@@ -13,6 +14,7 @@ import {
 import { Link, useLocation } from "wouter";
 import { ActivationBanner, useActivationState, useOnboardingAnalytics, HelpTip } from "@szl-holdings/shared-ui/onboarding";
 import type { ActivationStep } from "@szl-holdings/shared-ui/onboarding";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
 
@@ -192,11 +194,11 @@ interface PlaybooksPayload {
 }
 
 export default function CommandHome() {
-  const { data: posture } = useQuery<PostureSummary>({ queryKey: ["command-posture"], queryFn: () => api.command.posture(), retry: false });
-  const { data: incidents = [] } = useQuery<AegisIncident[]>({ queryKey: ["aegis-incidents"], queryFn: () => api.incidents.list() });
-  const { data: alerts = [] } = useQuery<AegisAlert[]>({ queryKey: ["aegis-alerts"], queryFn: () => api.alerts.list() });
-  const { data: decisionsData, isSuccess: decisionsLoaded } = useQuery<DecisionsPayload>({ queryKey: ["command-decisions"], queryFn: () => api.command.decisions(), retry: false });
-  const { data: playbooksData, isSuccess: playbooksLoaded } = useQuery<PlaybooksPayload>({ queryKey: ["command-playbooks"], queryFn: () => api.command.playbooks(), retry: false });
+  const { data: posture } = useStandardQuery<PostureSummary>({ queryKey: ["command-posture"], queryFn: () => api.command.posture(), retry: false });
+  const { data: incidents = [] } = useStandardQuery<AegisIncident[]>({ queryKey: ["aegis-incidents"], queryFn: () => api.incidents.list() });
+  const { data: alerts = [] } = useStandardQuery<AegisAlert[]>({ queryKey: ["aegis-alerts"], queryFn: () => api.alerts.list() });
+  const { data: decisionsData, isSuccess: decisionsLoaded } = useStandardQuery<DecisionsPayload>({ queryKey: ["command-decisions"], queryFn: () => api.command.decisions(), retry: false });
+  const { data: playbooksData, isSuccess: playbooksLoaded } = useStandardQuery<PlaybooksPayload>({ queryKey: ["command-playbooks"], queryFn: () => api.command.playbooks(), retry: false });
   const [, navigate] = useLocation();
 
   const activation = useActivationState({ apiBaseUrl: `${BASE}/api`, pollIntervalMs: 60_000 });

@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import {
+
   FileText, Shield, CheckCircle, ChevronRight, Download, Lock,
   Clock, Activity, Cpu, AlertTriangle, ArrowRight, Eye, Zap, Search, RefreshCw
 } from "lucide-react";
 import { api } from "@lyte/lib/api";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const BG = { page: "#080c14", surface: "#0c1018", elevated: "#10141e" };
 const BORDER = { subtle: "rgba(255,255,255,0.04)", muted: "rgba(255,255,255,0.07)" };
@@ -383,14 +385,14 @@ function mapApiReceipt(r: Record<string, unknown>): TrustReceipt {
 export default function AlloyTrustReceiptsPage() {
   const [search, setSearch] = useState("");
 
-  const { data: receiptsData, isLoading: receiptsLoading } = useQuery({
+  const { data: receiptsData, isLoading: receiptsLoading } = useStandardQuery({
     queryKey: ["receipt-graph-list"],
     queryFn: () => api.receipts.list({ limit: 20 }),
     staleTime: 30_000,
     refetchInterval: 60_000,
   });
 
-  const { data: trustSummary } = useQuery({
+  const { data: trustSummary } = useStandardQuery({
     queryKey: ["receipt-graph-trust-summary"],
     queryFn: () => api.receipts.executiveSummary(),
     staleTime: 60_000,

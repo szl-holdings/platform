@@ -4,7 +4,7 @@ import { ServiceStatusPanel } from "../components/service-status-panel";
 import { BarChart2, Shield, Activity, DollarSign, CheckCircle2, AlertTriangle, Info, Wifi, WifiOff, Clock, Database, RefreshCw, ChevronDown } from "lucide-react";
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer } from "recharts";
 import { useEcosystemData } from "../hooks/use-ecosystem-data";
-import { useQuery } from "@tanstack/react-query";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const CONNECTOR_FRESHNESS = [
   { id: "ais", label: "AIS / GNSS Feed", source: "ExactEarth + Spire", status: "live" as const, lastPoll: "12s ago", latency: 310, records: 14302, staleWindow: "5m", domain: "Vessels" },
@@ -163,7 +163,6 @@ const FALLBACK_DIMENSIONS: DimensionScore[] = [
   },
 ];
 
-
 function scoreColor(score: number) {
   if (score >= 85) return "var(--color-low)";
   if (score >= 70) return "var(--color-medium)";
@@ -180,7 +179,7 @@ function scoreLabel(score: number) {
 
 export default function HealthPage() {
   const { data } = useEcosystemData();
-  const { data: apiData } = useQuery<ApiHealthResponse>({
+  const { data: apiData } = useStandardQuery<ApiHealthResponse>({
     queryKey: ["command-health"],
     queryFn: async () => {
       const res = await fetch("/api/command/health", { credentials: "include" });

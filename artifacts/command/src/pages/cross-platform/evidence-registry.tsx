@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { Link } from "wouter";
 import { ArrowLeft, Database, Search, X, ExternalLink } from "lucide-react";
 import { apiUrl, fetchJson } from "../cognitive/shared";
 import { productDashboardUrl, productEntityUrl, inferProductForEntity } from "./product-links";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -74,7 +75,7 @@ export function EvidenceRegistryPage() {
   if (debouncedSearch) params.set("q", debouncedSearch);
   if (selectedProduct) params.set("product", selectedProduct);
 
-  const { data, isLoading, error } = useQuery<EvidenceResponse>({
+  const { data, isLoading, error } = useStandardQuery<EvidenceResponse>({
     queryKey: ["cross-platform", "evidence", debouncedSearch, selectedProduct],
     queryFn: () => fetchJson<EvidenceResponse>(apiUrl(`/cross-platform/evidence?${params}`)),
     staleTime: 30_000,

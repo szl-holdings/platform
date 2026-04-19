@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+
 import { useRoute, Link } from "wouter";
 import { api } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
@@ -7,6 +7,7 @@ import { Button } from "@szl-holdings/shared-ui/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@szl-holdings/shared-ui/ui/tabs";
 import { ArrowLeft, Ship, MapPin, Package, Navigation, Clock } from "lucide-react";
 import { CommentThread, ActivityFeed } from "@szl-holdings/shared-ui/collaboration";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface RouteRecord { id: number; originPort?: string; destinationPort?: string; departureAt?: string; arrivalAt?: string; distanceNm?: number; status?: string; waypoints?: { name?: string }[]; }
 interface CargoRecord { id: number; cargoType?: string; quantity?: number; unit?: string; origin?: string; destination?: string; status?: string; }
@@ -49,10 +50,10 @@ export default function VesselDetailPage() {
   const [, params] = useRoute("/vessel/:id");
   const vesselId = Number(params?.id);
 
-  const { data: vessel, isLoading } = useQuery<any>({ queryKey: ["vessel", vesselId], queryFn: () => api.vessels.get(vesselId), enabled: !!vesselId });
-  const { data: positions = [] } = useQuery<PositionRecord[]>({ queryKey: ["positions", vesselId], queryFn: () => api.vessels.positions(vesselId) as any, enabled: !!vesselId });
-  const { data: cargo = [] } = useQuery<CargoRecord[]>({ queryKey: ["cargo", vesselId], queryFn: () => api.vessels.cargo(vesselId) as any, enabled: !!vesselId });
-  const { data: routes = [] } = useQuery<RouteRecord[]>({ queryKey: ["vesselRoutes", vesselId], queryFn: () => api.vessels.routes(vesselId) as any, enabled: !!vesselId });
+  const { data: vessel, isLoading } = useStandardQuery<any>({ queryKey: ["vessel", vesselId], queryFn: () => api.vessels.get(vesselId), enabled: !!vesselId });
+  const { data: positions = [] } = useStandardQuery<PositionRecord[]>({ queryKey: ["positions", vesselId], queryFn: () => api.vessels.positions(vesselId) as any, enabled: !!vesselId });
+  const { data: cargo = [] } = useStandardQuery<CargoRecord[]>({ queryKey: ["cargo", vesselId], queryFn: () => api.vessels.cargo(vesselId) as any, enabled: !!vesselId });
+  const { data: routes = [] } = useStandardQuery<RouteRecord[]>({ queryKey: ["vesselRoutes", vesselId], queryFn: () => api.vessels.routes(vesselId) as any, enabled: !!vesselId });
 
   if (isLoading) return <DetailSkeleton />;
   if (!vessel) return (

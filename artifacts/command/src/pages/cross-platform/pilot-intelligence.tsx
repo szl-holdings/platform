@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { Link } from "wouter";
 import { ArrowLeft, Activity, AlertTriangle, CheckCircle, Clock, MinusCircle } from "lucide-react";
 import { apiUrl, fetchJson } from "../cognitive/shared";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -55,7 +56,7 @@ export function PilotIntelligencePage() {
   const params = new URLSearchParams({ limit: "100" });
   if (statusFilter !== "all") params.set("status", statusFilter);
 
-  const { data, isLoading, error } = useQuery<PilotsResponse>({
+  const { data, isLoading, error } = useStandardQuery<PilotsResponse>({
     queryKey: ["cross-platform", "pilots", statusFilter],
     queryFn:  () => fetchJson<PilotsResponse>(apiUrl(`/cross-platform/pilots?${params}`)),
     staleTime: 30_000,

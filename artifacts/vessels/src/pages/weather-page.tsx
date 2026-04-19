@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+
 import { AnimatedCounter } from "@szl-holdings/shared-ui/animated-counter";
 import { api } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
@@ -6,6 +6,7 @@ import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { CloudRain, Wind, Eye, Thermometer, Waves, AlertTriangle, Cloud, Sun, Snowflake, CloudLightning, MapPin } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { LiveDataBadge } from "@/lib/live-badge";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const riskColors: Record<string, string> = {
   low: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
@@ -111,12 +112,12 @@ interface MarineWeatherData {
 }
 
 export default function WeatherPage() {
-  const { data: rawSnapshots = [], isLoading } = useQuery({ queryKey: ["weather"], queryFn: () => api.weather.snapshots() });
+  const { data: rawSnapshots = [], isLoading } = useStandardQuery({ queryKey: ["weather"], queryFn: () => api.weather.snapshots() });
   const snapshots = rawSnapshots as unknown as WeatherSnapshot[];
-  const { data: rawRoutes = [] } = useQuery({ queryKey: ["routes"], queryFn: api.routes.list });
+  const { data: rawRoutes = [] } = useStandardQuery({ queryKey: ["routes"], queryFn: api.routes.list });
   const routes = rawRoutes as unknown as RouteItem[];
 
-  const { data: rawMarineWeather, isLoading: marineLoading } = useQuery({
+  const { data: rawMarineWeather, isLoading: marineLoading } = useStandardQuery({
     queryKey: ["marine-weather-hormuz"],
     queryFn: () => api.live.marineWeather(26.58, 56.26),
     staleTime: 3600000,

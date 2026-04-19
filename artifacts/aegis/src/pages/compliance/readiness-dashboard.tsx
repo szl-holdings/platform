@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { Activity, Target, ShieldAlert, BellRing, ArrowUpRight, Loader2 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { motion } from "framer-motion";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface ReadinessDimension {
   id: number;
@@ -87,14 +88,14 @@ function DimensionBar({ name, score, target, index }: { name: string; score: num
 }
 
 export default function ReadinessDashboard() {
-  const { data: rollup, isLoading } = useQuery<ExecutiveRollup>({
+  const { data: rollup, isLoading } = useStandardQuery<ExecutiveRollup>({
     queryKey: ["readiness", "executive-rollup"],
     queryFn: () => apiFetch<ExecutiveRollup>("/readiness/executive-rollup"),
     retry: 1,
     staleTime: 60000,
   });
 
-  const { data: dimensionsRaw = [] } = useQuery<ReadinessDimension[]>({
+  const { data: dimensionsRaw = [] } = useStandardQuery<ReadinessDimension[]>({
     queryKey: ["readiness", "dimensions"],
     queryFn: async () => {
       if (!rollup?.programs?.[0]?.id) return [];

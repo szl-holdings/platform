@@ -1,14 +1,16 @@
 import { useState, useMemo } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import {
+
   Search, FileText, Tag, ChevronRight, ChevronDown, Plus, Circle,
   Clock, User, Link2, AlertTriangle, Network, Layers, Lightbulb,
   CheckCircle2, XCircle, Minus, ArrowRight, Shield, Eye, Lock,
   BookOpen, Zap, Activity, Target, Brain
 } from "lucide-react";
 import { TradecraftPanel, RelatedCasesPanel, EvidenceIndexPanel } from "@/components/tradecraft-panel";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 const FALLBACK_CASE = {
   id: "CASE-0041",
@@ -144,13 +146,13 @@ export default function InvestigationsBoard() {
   const [noteText, setNoteText] = useState("");
   const [selectedCaseIdx, setSelectedCaseIdx] = useState(0);
 
-  const { data: investigationsData, isSuccess: investigationsLoaded } = useQuery<InvestigationsPayload>({
+  const { data: investigationsData, isSuccess: investigationsLoaded } = useStandardQuery<InvestigationsPayload>({
     queryKey: ["command-investigations"],
     queryFn: () => api.command.investigations(),
     retry: false,
   });
 
-  const addNoteMutation = useMutation({
+  const addNoteMutation = useStandardMutation({
     mutationFn: (params: { note: string; caseId?: number }) =>
       api.command.addNote(params.note, params.caseId),
     onSuccess: () => {

@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { CognitiveLayout } from "./cognitive-layout";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const ACCENT = "#8b7ac8";
 
@@ -237,7 +238,7 @@ export default function MemoryExplorer() {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<MemoryRecord | null>(SEEDED_RECORDS[0] ?? null);
 
-  const { data: apiRecords } = useQuery<MemoryRecord[]>({
+  const { data: apiRecords } = useStandardQuery<MemoryRecord[]>({
     queryKey: ["cognitive", "memory", typeFilter, tierFilter, domainFilter, entityFilter, traceFilter],
     queryFn: async () => {
       const params = new URLSearchParams();

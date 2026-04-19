@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { Activity, AlertTriangle, CheckCircle, Clock, ChevronRight, Layers, Zap, Shield, Filter, RefreshCw, Loader2 } from "lucide-react";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 type ChangeType = "drift_resolved" | "drift_detected" | "approval_granted" | "approval_pending" | "incident_opened" | "incident_resolved" | "twin_synced" | "worldline_branched";
 type Domain = "aegis" | "terra" | "vessels" | "alloy" | "prism" | "lyte" | "all";
@@ -110,7 +111,7 @@ export default function WhatChanged() {
   const [domainFilter, setDomainFilter] = useState<Domain | "all">("all");
   const [typeFilter, setTypeFilter] = useState<ChangeType | "all">("all");
 
-  const { data: changeData, isLoading, refetch } = useQuery<{ events: ApiChangeEvent[]; cursor: number; hasMore: boolean }>({
+  const { data: changeData, isLoading, refetch } = useStandardQuery<{ events: ApiChangeEvent[]; cursor: number; hasMore: boolean }>({
     queryKey: ["twin-changes"],
     queryFn: () => fetch("/api/changes?limit=50").then(r => {
       if (!r.ok) throw new Error(`HTTP ${r.status}`);

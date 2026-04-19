@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { OpsLayout } from "../components/ops-layout";
 import { GitCommit, Tag, Rocket, AlertTriangle, CheckCircle2, Clock, Search } from "lucide-react";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 type ChangeType = "deploy" | "feature" | "fix" | "security" | "config" | "breaking";
 type ChangeSeverity = "major" | "minor" | "patch";
@@ -74,7 +75,7 @@ export default function ChangelogPage() {
   const [typeFilter, setTypeFilter] = useState<ChangeType | "all">("all");
   const [severityFilter, setSeverityFilter] = useState<ChangeSeverity | "all">("all");
 
-  const { data: apiData } = useQuery<ApiReleasesResponse>({
+  const { data: apiData } = useStandardQuery<ApiReleasesResponse>({
     queryKey: ["command-releases"],
     queryFn: async () => {
       const res = await fetch("/api/command/releases", { credentials: "include" });

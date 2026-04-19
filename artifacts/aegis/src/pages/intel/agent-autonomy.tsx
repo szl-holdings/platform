@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+
 import { useLocation } from "wouter";
 import {
+
   Brain, Network, Zap, Activity, CheckCircle, AlertTriangle, XCircle,
   ArrowRight, ChevronDown, ChevronUp, RefreshCw, Database, Plug,
   TrendingUp, TrendingDown, Minus, Bot, Link2, BookOpen,
@@ -9,6 +10,7 @@ import {
   GitBranch, AlertCircle, Eye, Cpu
 } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 const BASE = import.meta.env.BASE_URL ?? "/aegis/";
 const API = BASE.replace(/\/$/, "") + "/../api-server/api";
@@ -820,54 +822,54 @@ export default function AgentAutonomyDashboard() {
   const [location, navigate] = useLocation();
   const tab = deriveTab(location);
 
-  const { data: overview, isLoading: overviewLoading, refetch: refetchOverview } = useQuery({
+  const { data: overview, isLoading: overviewLoading, refetch: refetchOverview } = useStandardQuery({
     queryKey: ["agent-autonomy-overview"],
     queryFn: () => apiFetch("/agent-autonomy/overview"),
     refetchInterval: 30000,
   });
 
-  const { data: agentsData, isLoading: agentsLoading } = useQuery({
+  const { data: agentsData, isLoading: agentsLoading } = useStandardQuery({
     queryKey: ["agent-autonomy-agents"],
     queryFn: () => apiFetch("/agent-autonomy/agents"),
     enabled: tab === "agents" || tab === "overview",
     refetchInterval: 15000,
   });
 
-  const { data: delegationsData, isLoading: delegationsLoading } = useQuery({
+  const { data: delegationsData, isLoading: delegationsLoading } = useStandardQuery({
     queryKey: ["agent-autonomy-delegations"],
     queryFn: () => apiFetch("/agent-autonomy/delegations"),
     enabled: tab === "a2a" || tab === "overview",
     refetchInterval: 15000,
   });
 
-  const { data: skillsData, isLoading: skillsLoading } = useQuery({
+  const { data: skillsData, isLoading: skillsLoading } = useStandardQuery({
     queryKey: ["agent-autonomy-skills"],
     queryFn: () => apiFetch("/agent-autonomy/skills"),
     enabled: tab === "skills",
   });
 
-  const { data: connectorsData, isLoading: connectorsLoading } = useQuery({
+  const { data: connectorsData, isLoading: connectorsLoading } = useStandardQuery({
     queryKey: ["agent-autonomy-connectors"],
     queryFn: () => apiFetch("/agent-autonomy/connectors"),
     enabled: tab === "connectors",
     refetchInterval: 20000,
   });
 
-  const { data: ragData, isLoading: ragLoading } = useQuery({
+  const { data: ragData, isLoading: ragLoading } = useStandardQuery({
     queryKey: ["agent-autonomy-rag"],
     queryFn: () => apiFetch("/agent-autonomy/rag"),
     enabled: tab === "rag",
     refetchInterval: 30000,
   });
 
-  const { data: perfData, isLoading: perfLoading } = useQuery({
+  const { data: perfData, isLoading: perfLoading } = useStandardQuery({
     queryKey: ["agent-autonomy-perf"],
     queryFn: () => apiFetch("/agent-autonomy/performance"),
     enabled: tab === "self-improvement",
     refetchInterval: 20000,
   });
 
-  const ingestMutation = useMutation({
+  const ingestMutation = useStandardMutation({
     mutationFn: () => apiFetch("/agent-autonomy/rag/ingest", { method: "POST" }),
   });
 

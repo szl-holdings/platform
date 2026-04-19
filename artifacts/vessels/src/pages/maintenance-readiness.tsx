@@ -1,9 +1,10 @@
 import { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { api, type VesselMaintenance } from "@/lib/api";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Wrench, AlertTriangle, Clock, CheckCircle2, TrendingDown, Ship, Calendar, RefreshCw } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const statusConfig: Record<string, { label: string; color: string; dot: string }> = {
   overdue: { label: "Overdue", color: "text-red-400 bg-red-500/10 border-red-500/20", dot: "bg-red-400" },
@@ -153,13 +154,13 @@ type FilterType = "all" | "overdue" | "in_progress" | "due_soon" | "scheduled" |
 export default function MaintenanceReadinessPage() {
   const [filter, setFilter] = useState<FilterType>("all");
 
-  const { data: liveItems = [], isLoading: itemsLoading, refetch } = useQuery({
+  const { data: liveItems = [], isLoading: itemsLoading, refetch } = useStandardQuery({
     queryKey: ["vessels-maintenance"],
     queryFn: () => api.maintenance.list(),
     refetchInterval: 120_000,
   });
 
-  const { data: liveVessels = [] } = useQuery({
+  const { data: liveVessels = [] } = useStandardQuery({
     queryKey: ["vessels-list"],
     queryFn: () => api.vessels.list(),
   });

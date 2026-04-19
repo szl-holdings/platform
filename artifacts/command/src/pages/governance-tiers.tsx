@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { ShieldCheck, Pencil, RefreshCw, AlertTriangle, Check, X, Save } from "lucide-react";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 const ACCENT = "#d4a054";
 
@@ -143,12 +144,12 @@ export default function GovernanceTiersPage() {
   const [editingTier, setEditingTier] = useState<string | null>(null);
   const [savedTier, setSavedTier] = useState<string | null>(null);
 
-  const tiersQ = useQuery<ApiResponse<TierApi[]>>({
+  const tiersQ = useStandardQuery<ApiResponse<TierApi[]>>({
     queryKey: ["governance-tiers"],
     queryFn: () => fetchJson<ApiResponse<TierApi[]>>("/api/guardian/policies/tiers"),
   });
 
-  const updateMut = useMutation({
+  const updateMut = useStandardMutation({
     mutationFn: ({ tier, body }: { tier: string; body: object }) =>
       fetchJson(`/api/guardian/policies/tiers/${tier}`, { method: "PATCH", body: JSON.stringify(body) }),
     onSuccess: (_data, vars) => {

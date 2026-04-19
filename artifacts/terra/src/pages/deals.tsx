@@ -2,11 +2,12 @@ import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { CrdtEntityPanel } from "@szl-holdings/shared-ui/crdt-entity-panel";
 import { EmptyState } from "@szl-holdings/shared-ui/design-system";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRealtimeChannel } from "@szl-holdings/shared-ui/use-realtime-channel";
 import { Activity, AlertTriangle, RefreshCw, Plus, X } from "lucide-react";
 import { RiskBadge, StageBadge, DealHealthCard, ProbabilityBar, formatCurrency, AgentAvatar } from "@/components/brokerage-ui";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
 const API = "/api";
@@ -56,7 +57,6 @@ export interface ApiDeal {
   daysInStage: number;
   createdAt: string;
 }
-
 
 const STAGES = [
   "lead","qualified","showing","offer","negotiation",
@@ -407,13 +407,13 @@ export default function DealsPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showPanel, setShowPanel] = useState<"diligence" | "1031" | null>(null);
 
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { data, isLoading, isError, refetch } = useStandardQuery({
     queryKey: ["terra-deals"],
     queryFn: () => fetchJson("/terra/pipeline/deals?limit=200"),
     staleTime: 30000,
   });
 
-  const advanceStageMut = useMutation({
+  const advanceStageMut = useStandardMutation({
     mutationFn: ({ id, stage }: { id: string; stage: string }) =>
       patchJson(`/terra/pipeline/deals/${id}/stage`, { stage }),
     onMutate: async ({ id, stage }) => {

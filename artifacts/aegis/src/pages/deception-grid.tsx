@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { Eye, Server, Database, Globe, Key, FileText, Activity, AlertTriangle, Zap, Shield, RefreshCw, TrendingUp, Network, HardDrive } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 import { api } from "../lib/api";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface Honeypot {
   id: string;
@@ -80,13 +81,13 @@ export default function DeceptionGrid() {
   const qc = useQueryClient();
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
 
-  const honeypotsQuery = useQuery({
+  const honeypotsQuery = useStandardQuery({
     queryKey: ["deception", "honeypots"],
     queryFn: () => api.deception.honeypots(),
     refetchInterval: 20000,
   });
 
-  const eventsQuery = useQuery({
+  const eventsQuery = useStandardQuery({
     queryKey: ["deception", "events"],
     queryFn: () => api.deception.events(),
     refetchInterval: 10000,
@@ -95,7 +96,7 @@ export default function DeceptionGrid() {
   type HoneypotsResponse = { data?: { honeypots?: Honeypot[]; totalInteractions?: number; avgDeception?: number; intelItems?: number } };
   type EventsResponse = { data?: { events?: DeceptionEvent[] } };
 
-  const deployMutation = useMutation({
+  const deployMutation = useStandardMutation({
     mutationFn: () => api.deception.deployHoneypot(),
     onSuccess: (data: { data?: { message?: string } }) => {
       qc.invalidateQueries({ queryKey: ["deception", "honeypots"] });
@@ -104,7 +105,7 @@ export default function DeceptionGrid() {
     onError: () => toast.error("Failed to deploy honeypot"),
   });
 
-  const pushIocMutation = useMutation({
+  const pushIocMutation = useStandardMutation({
     mutationFn: (eventId: string) => api.deception.pushIoc(eventId),
     onSuccess: (data: { data?: { message?: string } }) => {
       qc.invalidateQueries({ queryKey: ["deception", "events"] });

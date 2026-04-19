@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { GitBranch, Zap, AlertTriangle, CheckCircle, XCircle, ChevronRight, Target, Shield, Clock, BarChart3, Play, Lock, Loader2 } from "lucide-react";
 import { ExecutiveSafeModeProvider, useExecutiveSafeMode } from "../lib/executive-safe-mode-context";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 type BranchOutcome = "contained" | "escalated" | "catastrophic" | "recovering";
 
@@ -317,7 +318,7 @@ function AegisScenarioBranchesContent() {
   const [comparing, setComparing] = useState(false);
   const safeMode = useExecutiveSafeMode();
 
-  const { data: branchData, isLoading } = useQuery<{ branches: ApiBranch[]; count: number }>({
+  const { data: branchData, isLoading } = useStandardQuery<{ branches: ApiBranch[]; count: number }>({
     queryKey: ["aegis-atlas-branches"],
     queryFn: () => apiFetch<{ branches: ApiBranch[]; count: number }>("/atlas/spatial/branches?limit=20"),
     staleTime: 30000,

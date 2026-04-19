@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { useState, useEffect } from "react";
 import { Zap, Clock, ChevronDown, ChevronRight, CheckCircle2, AlertTriangle, Users, DollarSign, ArrowRight, RefreshCw } from "lucide-react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRealtimeChannel } from "@szl-holdings/shared-ui/use-realtime-channel";
 import { doctrineEventBus } from "@szl-holdings/observability";
 import { DoctrineLayerBadge } from "@szl-holdings/shared-ui/doctrine-layer-badge";
@@ -9,6 +9,7 @@ import { cn } from "@lyte/lib/utils";
 import { resolveTimeZone } from "@szl-holdings/shared-ui/utils";
 import { api, type LyteAction } from "@lyte/lib/api";
 import { LyteGraphQLPanel } from "@lyte/components/graphql-data-panel";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 function formatCurrency(n: number): string {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
@@ -94,7 +95,6 @@ function liveActionToDisplay(a: LyteAction): DisplayAction {
     backendId: a.id,
   };
 }
-
 
 function ActionCard({ action, expanded, onToggle, onUpdate }: {
   action: DisplayAction;
@@ -203,7 +203,7 @@ export default function ActionCenter() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
-  const { data: liveActions = [], isLoading } = useQuery({
+  const { data: liveActions = [], isLoading } = useStandardQuery({
     queryKey: ["lyte-actions"],
     queryFn: () => api.actions.list(),
     refetchInterval: 300_000,
@@ -215,7 +215,7 @@ export default function ActionCenter() {
     queryClient.invalidateQueries({ queryKey: ["lyte-actions"] });
   }, [wsLyteMsg, queryClient]);
 
-  const updateMutation = useMutation({
+  const updateMutation = useStandardMutation({
     mutationFn: ({ id, status }: { id: number; status: string }) =>
       api.actions.update(id, { state: status === "done" ? "resolved" : status === "in_progress" ? "assigned" : status }),
     onSuccess: () => {

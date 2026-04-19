@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
+
   User, Shield, DollarSign, TrendingUp, AlertTriangle, CheckCircle,
   Clock, FileText, Star, ChevronRight, Building2, BarChart3, X, ArrowRight, Database
 } from "lucide-react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { api } from "../lib/api";
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from "recharts";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 const DS = {
   surface: "rgba(255,255,255,0.025)",
@@ -209,13 +211,13 @@ function ScoreGauge({ score }: { score: number }) {
 export default function TenantScreeningPage() {
   const queryClient = useQueryClient();
 
-  const { data: apiData, isLoading, isError } = useQuery({
+  const { data: apiData, isLoading, isError } = useStandardQuery({
     queryKey: ["terra-tenant-applications"],
     queryFn: () => api.tenantApplications.list(),
     staleTime: 30_000,
   });
 
-  const seedMutation = useMutation({
+  const seedMutation = useStandardMutation({
     mutationFn: async () => {
       for (const a of APPLICANTS) {
         await api.tenantApplications.create({

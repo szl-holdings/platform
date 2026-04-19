@@ -1,8 +1,9 @@
 import { ApiError } from "@szl-holdings/shared-ui/api-fetch";
 import { useMemo, useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import {
+
   Rocket,
   History,
   RotateCcw,
@@ -18,6 +19,7 @@ import {
   User,
   X,
 } from "lucide-react";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 type DeploymentStatus = "active" | "deploying" | "rolled-back" | "failed" | "inactive";
 type DeploymentEnvironment = "development" | "staging" | "production";
@@ -225,13 +227,13 @@ export default function DeploymentsPage() {
 
   // Unfiltered list — drives the deployer dropdown options so the choices
   // don't disappear once a filter is applied.
-  const allDeployersQuery = useQuery<ListResponse>({
+  const allDeployersQuery = useStandardQuery<ListResponse>({
     queryKey: ["deployments", "list", environment, "all-deployers"],
     queryFn: () => apiFetch<ListResponse>(`/deployments?environment=${environment}`),
     refetchInterval: 60_000,
   });
 
-  const listQuery = useQuery<ListResponse>({
+  const listQuery = useStandardQuery<ListResponse>({
     queryKey: ["deployments", "list", environment, deployerFilter || null],
     queryFn: () => {
       const qs = new URLSearchParams({ environment });
@@ -241,7 +243,7 @@ export default function DeploymentsPage() {
     refetchInterval: 30_000,
   });
 
-  const historyQuery = useQuery<HistoryResponse>({
+  const historyQuery = useStandardQuery<HistoryResponse>({
     queryKey: ["deployments", "history", selectedAppId, environment, deployerFilter || null],
     queryFn: () => {
       const qs = new URLSearchParams({ environment });
@@ -286,7 +288,7 @@ export default function DeploymentsPage() {
     queueMicrotask(() => setDeployerFilter(""));
   }
 
-  const rollbackMutation = useMutation({
+  const rollbackMutation = useStandardMutation({
     mutationFn: async (vars: { appId: string; version?: string }) => {
       return apiFetch<RollbackResponse>(`/deployments/${vars.appId}/rollback`, {
         method: "POST",

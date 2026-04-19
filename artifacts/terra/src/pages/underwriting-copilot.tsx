@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+
 import { Brain, CheckCircle, AlertTriangle, XCircle, FileText, Tag, ChevronDown, ChevronUp, Play, Shield } from "lucide-react";
 import { HelpTip } from "@szl-holdings/shared-ui/onboarding";
+import { useStandardMutation } from "@szl-holdings/api-client-react";
 
 const ACCENT = "#40856a";
 const API = "/api";
@@ -106,7 +107,7 @@ export default function UnderwritingCopilotPage() {
     ltv: "0.65",
   });
 
-  const mutation = useMutation({
+  const mutation = useStandardMutation({
     mutationFn: runUnderwritingCopilot,
   });
 

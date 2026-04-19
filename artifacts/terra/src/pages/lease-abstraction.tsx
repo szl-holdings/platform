@@ -1,11 +1,13 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
+
   FileText, Upload, CheckCircle, AlertTriangle, Clock, Calendar,
   DollarSign, TrendingUp, ChevronRight, ChevronDown, Building2, RefreshCw, Download, Database
 } from "lucide-react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { api } from "../lib/api";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 const DS = {
   page: "#08090e",
@@ -365,13 +367,13 @@ function LeaseDetail({ lease }: { lease: ExtractedLease }) {
 export default function LeaseAbstractionPage() {
   const queryClient = useQueryClient();
 
-  const { data: apiData, isLoading, isError } = useQuery({
+  const { data: apiData, isLoading, isError } = useStandardQuery({
     queryKey: ["terra-leases"],
     queryFn: () => api.leases.list(),
     staleTime: 30_000,
   });
 
-  const seedMutation = useMutation({
+  const seedMutation = useStandardMutation({
     mutationFn: async () => {
       for (const lease of DEMO_LEASES) {
         await api.leases.create({
@@ -394,7 +396,7 @@ export default function LeaseAbstractionPage() {
     ? (apiData.leases as unknown as ExtractedLease[])
     : [];
 
-  const uploadMutation = useMutation({
+  const uploadMutation = useStandardMutation({
     mutationFn: (file: File) => api.leases.upload(file),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["terra-leases"] });

@@ -1,13 +1,15 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
+
   Scale, AlertTriangle, CheckCircle, DollarSign, TrendingDown, Building2,
   FileText, Download, Search, ChevronRight, Target, BarChart3, X, Database
 } from "lucide-react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { api } from "../lib/api";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Cell } from "recharts";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface TooltipPayloadEntry { name: string; value: number; color?: string; fill?: string; }
 interface ChartTooltipProps { active?: boolean; payload?: TooltipPayloadEntry[]; label?: string; }
@@ -172,13 +174,13 @@ const CustomTooltip = ({ active, payload, label }: ChartTooltipProps) => {
 export default function TaxAppealPage() {
   const queryClient = useQueryClient();
 
-  const { data: apiData, isLoading, isError } = useQuery({
+  const { data: apiData, isLoading, isError } = useStandardQuery({
     queryKey: ["terra-tax-appeals"],
     queryFn: () => api.taxAppeals.list(),
     staleTime: 30_000,
   });
 
-  const seedMutation = useMutation({
+  const seedMutation = useStandardMutation({
     mutationFn: async () => {
       for (const p of PROPERTIES) {
         await api.taxAppeals.create({

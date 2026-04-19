@@ -1,6 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
+
 import { useState } from "react";
 import { FileText, CheckCircle, Clock, AlertCircle, Shield, Tag, RefreshCw, ChevronDown, ChevronUp, Layers, ExternalLink, BookOpen, Plus, Upload } from "lucide-react";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const ACCENT = "#40856a";
 const API = "/api";
@@ -323,7 +324,7 @@ function AddEvidenceForm({ matterId, onAdded }: { matterId: string; onAdded: () 
 
 export default function DiligenceRoomPage() {
   const [selectedMatterId, setSelectedMatterId] = useState<string | undefined>(undefined);
-  const { data, isLoading, refetch } = useQuery({
+  const { data, isLoading, refetch } = useStandardQuery({
     queryKey: ["terra-diligence-room", selectedMatterId],
     queryFn: () => fetchDiligenceRoom(selectedMatterId),
   });

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion as m, AnimatePresence } from "framer-motion";
 import {
+
   Box, Ruler, Paintbrush, Sofa, Camera, Layers, Eye, ChevronRight,
   Building2, Maximize2, RotateCcw, ZoomIn, ZoomOut, Move, Grid3X3,
   Sun, Moon, ArrowRight, CheckCircle, DollarSign, Palette, Map, Zap, ArrowLeft, Loader2
@@ -8,8 +9,9 @@ import {
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { trackEvent } from "@szl-holdings/observability/react";
 import { useRoute, Link } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+
 import { api } from "@/lib/api";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface Room {
   id: string;
@@ -54,7 +56,6 @@ interface PropertyWalkthrough {
 const CONDITION_COLORS = {
   excellent: "#34d399", good: "#60a5fa", fair: "#fbbf24", poor: "#ef4444",
 };
-
 
 const fmt = (n: number) => n >= 1000 ? `$${(n / 1000).toFixed(0)}K` : `$${n.toLocaleString()}`;
 
@@ -456,14 +457,14 @@ export default function SpatialWalkthroughPage() {
   const [, params] = useRoute<{ propertyId: string }>("/spatial-walkthrough/:propertyId");
   const propertyId = params?.propertyId;
 
-  const { data: propertyData, isLoading: propertyLoading } = useQuery({
+  const { data: propertyData, isLoading: propertyLoading } = useStandardQuery({
     queryKey: ["terra-spatial-walkthrough", propertyId],
     queryFn: () => api.properties.spatialWalkthrough(propertyId!),
     enabled: !!propertyId,
     staleTime: 300_000,
   });
 
-  const { data: portfolioData, isLoading: portfolioLoading, isError: portfolioError } = useQuery({
+  const { data: portfolioData, isLoading: portfolioLoading, isError: portfolioError } = useStandardQuery({
     queryKey: ["terra-portfolio-spatial-walkthrough"],
     queryFn: () => api.portfolio.spatialWalkthrough(),
     enabled: !propertyId,

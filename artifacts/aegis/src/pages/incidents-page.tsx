@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { Card, CardContent } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
@@ -17,6 +17,7 @@ import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 import { useRealtimeChannel } from "@szl-holdings/shared-ui/use-realtime-channel";
 import { ExportButton } from "@szl-holdings/shared-ui/data-export";
 import {
+
   OperationalDetailPane,
   OperationalStatusBadge,
   OperationalRiskBadge,
@@ -31,6 +32,7 @@ import {
   type EvidenceItem,
   type EscalationPath,
 } from "@szl-holdings/shared-ui/operational-primitives";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 async function downloadIncidentPDF(incident: Record<string, unknown>): Promise<void> {
   const res = await fetch("/api/documents/generate", {
@@ -272,7 +274,7 @@ function IncidentDetailSidePane({ incident, onClose, onUpdate }: {
 
 export default function IncidentsPage() {
   const qc = useQueryClient();
-  const { data: incidents = [], isLoading } = useQuery({ queryKey: ["incidents"], queryFn: api.incidents.list });
+  const { data: incidents = [], isLoading } = useStandardQuery({ queryKey: ["incidents"], queryFn: api.incidents.list });
   const [open, setOpen] = useState(false);
 
   const [liveAlert, setLiveAlert] = useState<{ title?: string; severity?: string } | null>(null);
@@ -301,13 +303,13 @@ export default function IncidentsPage() {
 
   const selectedIncident = detailPaneIncident ?? (selectedIncidentId !== null ? incidents.find((i: any) => i.id === selectedIncidentId) : null);
 
-  const createMut = useMutation({
+  const createMut = useStandardMutation({
     mutationFn: (data: any) => api.incidents.create(data),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["incidents"] }); setOpen(false); toast.success("Incident created"); },
     onError: (e: any) => toast.error(e.message),
   });
 
-  const updateMut = useMutation({
+  const updateMut = useStandardMutation({
     mutationFn: ({ id, data }: { id: number; data: Record<string, unknown> }) => api.incidents.update(id, data),
     onMutate: async ({ id, data }) => {
       await qc.cancelQueries({ queryKey: ["incidents"] });
@@ -329,7 +331,7 @@ export default function IncidentsPage() {
     onSettled: () => qc.invalidateQueries({ queryKey: ["incidents"] }),
   });
 
-  const deleteMut = useMutation({
+  const deleteMut = useStandardMutation({
     mutationFn: (id: number) => api.incidents.delete(id),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["incidents"] }); toast.success("Incident deleted"); },
   });

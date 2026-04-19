@@ -1,6 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
+
 import { api } from "@/lib/api";
 import {
+
   Clock, TrendingUp, TrendingDown, Users, AlertTriangle, CheckCircle2,
   BarChart3, Activity, Target, Minus, Info
 } from "lucide-react";
@@ -8,6 +9,7 @@ import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, Radar, PieChart, Pie, Cell
 } from "recharts";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface Incident { id: number; status: string; severity: string; assignedAnalyst?: string; title?: string }
 interface Finding { id: number; severity: string; status: string }
@@ -90,8 +92,8 @@ const RESOLUTION_BY_SEVERITY = [
 ];
 
 export default function IncidentAnalyticsPage() {
-  const { data: incidents } = useQuery<Incident[]>({ queryKey: ["incidents"], queryFn: () => api.incidents.list() });
-  const { data: findings } = useQuery<Finding[]>({ queryKey: ["findings"], queryFn: () => api.findings.list() });
+  const { data: incidents } = useStandardQuery<Incident[]>({ queryKey: ["incidents"], queryFn: () => api.incidents.list() });
+  const { data: findings } = useStandardQuery<Finding[]>({ queryKey: ["findings"], queryFn: () => api.findings.list() });
   const closedIncidents = incidents?.filter(i => i.status === "closed") ?? [];
   const activeIncidents = incidents?.filter(i => i.status !== "closed") ?? [];
   const criticalFindings = findings?.filter(f => f.severity === "critical" && f.status !== "mitigated").length ?? 0;

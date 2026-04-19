@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { Layers, Activity, AlertTriangle, CheckCircle, Clock, Shield, Zap, Server, Network, Globe, Database, RefreshCw, ChevronRight, Eye, GitBranch, Radio, Lock, Loader2 } from "lucide-react";
 import { ExecutiveSafeModeProvider, useExecutiveSafeMode, useExecutiveSafeModeToggle } from "../lib/executive-safe-mode-context";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 type TwinHealth = "stable" | "degraded" | "awaiting_approval" | "offline";
 
@@ -175,7 +176,7 @@ function AegisAtlasRuntimeContent() {
   const safeMode = useExecutiveSafeMode();
   const [, setSafeMode] = useExecutiveSafeModeToggle();
 
-  const { data: incidentData, isLoading: loadingIncidents, refetch } = useQuery<FirestormIncident[]>({
+  const { data: incidentData, isLoading: loadingIncidents, refetch } = useStandardQuery<FirestormIncident[]>({
     queryKey: ["firestorm-incidents-atlas"],
     queryFn: () => apiFetch<FirestormIncident[]>("/firestorm/incidents"),
     staleTime: 30000,

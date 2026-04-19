@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
@@ -11,6 +11,7 @@ import { Progress } from "@szl-holdings/shared-ui/ui/progress";
 import { Activity, Play, Clock, AlertTriangle, CheckCircle, TrendingDown, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 const statusColors: Record<string, string> = {
   pending: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",
@@ -71,13 +72,13 @@ function SimSkeleton() {
 
 export default function SimulationsPage() {
   const qc = useQueryClient();
-  const { data: simulations = [], isLoading } = useQuery({ queryKey: ["simulations"], queryFn: api.simulations.list });
-  const { data: vessels = [] } = useQuery({ queryKey: ["vessels"], queryFn: api.vessels.list });
-  const { data: routes = [] } = useQuery({ queryKey: ["routes"], queryFn: api.routes.list });
+  const { data: simulations = [], isLoading } = useStandardQuery({ queryKey: ["simulations"], queryFn: api.simulations.list });
+  const { data: vessels = [] } = useStandardQuery({ queryKey: ["vessels"], queryFn: api.vessels.list });
+  const { data: routes = [] } = useStandardQuery({ queryKey: ["routes"], queryFn: api.routes.list });
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ name: "", vesselId: "", routeId: "", simulationType: "route_risk" });
 
-  const createMut = useMutation({
+  const createMut = useStandardMutation({
     mutationFn: (data: any) => api.simulations.create(data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["simulations"] });

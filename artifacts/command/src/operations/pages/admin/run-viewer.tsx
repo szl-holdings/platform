@@ -1,7 +1,8 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { Play, CheckCircle2, XCircle, Clock, AlertTriangle, RefreshCw, RotateCcw, StopCircle, Hourglass } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@lyte/lib/utils";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 async function apiFetch<T>(path: string, opts?: RequestInit): Promise<T> {
   const r = await fetch(`/api${path}`, { headers: { "Content-Type": "application/json" }, ...opts });
@@ -69,18 +70,18 @@ export default function RunViewer() {
   const [selected, setSelected] = useState<WorkflowRun | null>(null);
   const qc = useQueryClient();
 
-  const { data: resp, isLoading, error } = useQuery<PaginatedResponse<WorkflowRun>>({
+  const { data: resp, isLoading, error } = useStandardQuery<PaginatedResponse<WorkflowRun>>({
     queryKey: ["admin-runs", stateFilter],
     queryFn: () => apiFetch(`/alloy/runs${stateFilter !== "all" ? `?state=${stateFilter}` : ""}`),
     refetchInterval: 10000,
   });
 
-  const retryMutation = useMutation({
+  const retryMutation = useStandardMutation({
     mutationFn: (id: number) => apiFetch(`/alloy/runs/${id}/retry`, { method: "POST" }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-runs"] }),
   });
 
-  const cancelMutation = useMutation({
+  const cancelMutation = useStandardMutation({
     mutationFn: (id: number) => apiFetch(`/alloy/runs/${id}/cancel`, { method: "POST" }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-runs"] }),
   });

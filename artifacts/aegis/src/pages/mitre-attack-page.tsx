@@ -1,9 +1,10 @@
-import { useQuery } from "@tanstack/react-query";
+
 import { api } from "@/lib/api";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Grid3X3, Shield, AlertTriangle, Eye, Target, Activity, ChevronRight, X } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const tactics = [
   { id: "TA0001", name: "Initial Access", shortName: "Initial Access", techniques: ["T1566.001", "T1190", "T1133", "T1078", "T1195.002", "T1189"] },
@@ -169,7 +170,7 @@ function DrillDownPanel({ techniqueId, techniqueName, tactic, detection, onClose
 export default function MitreAttackPage() {
   const [selectedTechnique, setSelectedTechnique] = useState<{ id: string; name: string; tactic: string; detection: any } | null>(null);
 
-  const { data: detections = [], isLoading } = useQuery({
+  const { data: detections = [], isLoading } = useStandardQuery({
     queryKey: ["mitre-detections"],
     queryFn: () => api.mitreDetections.list(),
   });

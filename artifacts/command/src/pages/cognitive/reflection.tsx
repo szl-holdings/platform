@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { CognitiveLayout } from "./cognitive-layout";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const ACCENT = "#8b7ac8";
 
@@ -291,7 +292,7 @@ const IMPACT_COLORS: Record<string, string> = {
 };
 
 export default function ReflectionConsole() {
-  const { data: apiReflections } = useQuery<Reflection[]>({
+  const { data: apiReflections } = useStandardQuery<Reflection[]>({
     queryKey: ["cognitive", "reflections"],
     queryFn: async () => {
       const res = await fetch("/reflections", { credentials: "include" });

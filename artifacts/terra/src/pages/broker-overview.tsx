@@ -1,14 +1,16 @@
-import { useQuery } from "@tanstack/react-query";
+
 import { useCallback } from "react";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
 import {
+
   TrendingUp, Users, Flame, BookmarkIcon, Handshake, BarChart3,
   CheckCircle, Target, MapPin, Award, Activity
 } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { ActivationBanner, useActivationState } from "@szl-holdings/shared-ui/onboarding";
 import type { ActivationStep } from "@szl-holdings/shared-ui/onboarding";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
 const API = "/api";
@@ -18,7 +20,7 @@ function fetchJson(path: string) {
 }
 
 function useOverview() {
-  return useQuery({
+  return useStandardQuery({
     queryKey: ["terra-broker-overview"],
     queryFn: () => fetchJson("/terra/broker/overview"),
     refetchInterval: 60000,

@@ -1,14 +1,16 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import {
+
   BarChart3, TrendingUp, TrendingDown, Ship, Anchor, AlertTriangle,
   Clock, Globe, ArrowRight, Activity, Filter, ChevronDown, Download,
   Layers, Zap, Navigation, MapPin, DollarSign, Package, Droplets,
   Fuel, Wind, Wheat, Box, Wifi, WifiOff
 } from "lucide-react";
 import { AreaChart, Area, BarChart, Bar, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid, LineChart, Line, Cell } from "recharts";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const COMMODITIES = [
   { id: "crude", name: "Crude Oil", icon: Droplets, color: "#f97316", unit: "MB/day", volume: 82.4, change: +2.1, vessels: 142, avg_days: 21 },
@@ -95,14 +97,14 @@ export default function CommodityFlowIntelligence() {
   const BORDER = "rgba(14,165,233,0.1)";
   const SKY = "#0ea5e9";
 
-  const { data: chokepointsData, isError: isChokepointsError } = useQuery<ChokepointsResponse>({
+  const { data: chokepointsData, isError: isChokepointsError } = useStandardQuery<ChokepointsResponse>({
     queryKey: ["commodity-flow-chokepoints"],
     queryFn: () => apiFetch<ChokepointsResponse>("/vessels/live/chokepoints"),
     refetchInterval: 30000,
     retry: 1,
   });
 
-  const { data: fleetSummaryData } = useQuery<FleetSummaryResponse>({
+  const { data: fleetSummaryData } = useStandardQuery<FleetSummaryResponse>({
     queryKey: ["commodity-flow-fleet-summary"],
     queryFn: () => apiFetch<FleetSummaryResponse>("/vessels/live/fleet-summary"),
     refetchInterval: 30000,

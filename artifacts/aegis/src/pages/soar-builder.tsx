@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { Zap, Plus, Play, CheckCircle, AlertTriangle, User, Mail, Database, Shield, Activity, RefreshCw, Trash2, Copy, GitBranch, Clock, History } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 import { api } from "../lib/api";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 type NodeType = "trigger" | "action" | "condition" | "enrich" | "notify" | "approve" | "loop";
 type PlaybookStatus = "active" | "draft" | "archived";
@@ -110,19 +111,19 @@ export default function SOARBuilder() {
   const [selectedNode, setSelectedNode] = useState<PlaybookNode | null>(null);
   const [canvasNodes, setCanvasNodes] = useState<PlaybookNode[]>(DEFAULT_CANVAS_NODES);
 
-  const playbooksQuery = useQuery({
+  const playbooksQuery = useStandardQuery({
     queryKey: ["soar-builder", "playbooks"],
     queryFn: () => api.soarBuilder.playbooks(),
     refetchInterval: 30000,
   });
 
-  const runsQuery = useQuery({
+  const runsQuery = useStandardQuery({
     queryKey: ["soar-builder", "runs", selectedPlaybookId],
     queryFn: () => api.soarBuilder.runs(selectedPlaybookId ?? undefined),
     refetchInterval: 15000,
   });
 
-  const playbookDetailQuery = useQuery({
+  const playbookDetailQuery = useStandardQuery({
     queryKey: ["soar-builder", "playbook", selectedPlaybookId],
     queryFn: () => (selectedPlaybookId ? api.soarBuilder.getPlaybook(selectedPlaybookId) : null),
     enabled: !!selectedPlaybookId,
@@ -137,7 +138,7 @@ export default function SOARBuilder() {
     }
   }, [playbookDetailQuery.data]);
 
-  const saveMutation = useMutation({
+  const saveMutation = useStandardMutation({
     mutationFn: () => {
       const selectedPlaybook = playbooks.find(p => p.id === selectedPlaybookId);
       if (selectedPlaybookId && selectedPlaybook) {
@@ -162,7 +163,7 @@ export default function SOARBuilder() {
     onError: () => toast.error("Failed to save playbook"),
   });
 
-  const executeMutation = useMutation({
+  const executeMutation = useStandardMutation({
     mutationFn: (playbookId: string) => api.soarBuilder.execute(playbookId, undefined, "Manual execution from SOAR Builder"),
     onSuccess: (data: { data?: { message?: string } }) => {
       qc.invalidateQueries({ queryKey: ["soar-builder", "runs"] });
@@ -172,7 +173,7 @@ export default function SOARBuilder() {
     onError: () => toast.error("Failed to execute playbook"),
   });
 
-  const deleteMutation = useMutation({
+  const deleteMutation = useStandardMutation({
     mutationFn: (id: string) => api.soarBuilder.deletePlaybook(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["soar-builder", "playbooks"] });

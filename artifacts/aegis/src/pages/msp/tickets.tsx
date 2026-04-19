@@ -1,11 +1,12 @@
 import { Ticket, Clock, AlertTriangle, CheckCircle, User, Plus, Sparkles, Loader2, X, ChevronRight, MessageCircle, RefreshCw } from "lucide-react";
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { ExportButton } from "@szl-holdings/shared-ui/data-export";
 import { CommentThread, ActivityFeed } from "@szl-holdings/shared-ui/collaboration";
 import { Skeleton } from "@szl-holdings/shared-ui/ui/skeleton";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 const API_BASE = "/api";
 
@@ -171,7 +172,7 @@ export default function Tickets() {
   const [triageResults, setTriageResults] = useState<Record<number, { triage: string; loading: boolean; error?: string }>>({});
   const [showNewTicket, setShowNewTicket] = useState(false);
 
-  const { data, isLoading, refetch } = useQuery<TicketsResponse>({
+  const { data, isLoading, refetch } = useStandardQuery<TicketsResponse>({
     queryKey: ["msp-tickets", filter],
     queryFn: () => apiFetch<TicketsResponse>(`/msp/tickets${filter !== "all" ? `?status=${filter}` : ""}`),
     staleTime: 30_000,

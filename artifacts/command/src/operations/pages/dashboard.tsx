@@ -7,17 +7,19 @@ import { DataProvenance } from "@szl-holdings/shared-ui/data-provenance";
 import { type DataProvenanceInfo } from "@szl-holdings/shared-ui/ontology";
 import { Link } from "wouter";
 import {
+
   ChevronRight, Zap, Target, Activity,
   ArrowUpRight, RefreshCw, Shield, CheckCircle2, AlertTriangle, Radio,
   Eye, Gauge, Heart, FileText, GitBranch,
   UserCheck, Crosshair, TrendingDown, TrendingUp, Minus,
 } from "lucide-react";
 import { AreaChart, Area, ResponsiveContainer, Tooltip, XAxis } from "recharts";
-import { useQuery } from "@tanstack/react-query";
+
 import { cn } from "@lyte/lib/utils";
 import { api, type LyteSignal, type LyteDashboard, type LyteRecommendation } from "@lyte/lib/api";
 import { severityColors } from "@lyte/lib/business-data";
 import type { SignalSeverity } from "@lyte/lib/business-data";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const BG = { page: "#080c14", surface: "#0b0f19", elevated: "#0f1420", panel: "#0d1118" };
 const BORDER = { subtle: "rgba(255,255,255,0.04)", muted: "rgba(255,255,255,0.07)", accent: "rgba(212,160,84,0.12)" };
@@ -167,25 +169,25 @@ export default function Dashboard() {
     return () => { analytics.dashboardViewed("main", Date.now() - start); };
   }, []);
 
-  const { data: dashboardData, isLoading: dashLoading, error: dashError, refetch } = useQuery<LyteDashboard>({
+  const { data: dashboardData, isLoading: dashLoading, error: dashError, refetch } = useStandardQuery<LyteDashboard>({
     queryKey: ["lyte-dashboard"],
     queryFn: () => api.dashboard(),
     refetchInterval: 60_000,
   });
 
-  const { data: insightsData } = useQuery({
+  const { data: insightsData } = useStandardQuery({
     queryKey: ["lyte-insights-narratives"],
     queryFn: () => api.insights(),
     refetchInterval: 120_000,
   });
 
-  const { data: signals = [], isLoading: signalsLoading } = useQuery({
+  const { data: signals = [], isLoading: signalsLoading } = useStandardQuery({
     queryKey: ["lyte-signals-feed"],
     queryFn: () => api.signals.list(),
     refetchInterval: 30_000,
   });
 
-  const { data: recommendationsData = [] } = useQuery<LyteRecommendation[]>({
+  const { data: recommendationsData = [] } = useStandardQuery<LyteRecommendation[]>({
     queryKey: ["lyte-recommendations"],
     queryFn: () => api.recommendations.list(),
     staleTime: 120_000,

@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { api } from "@/lib/api";
 import { usePerformanceMetrics } from "@/hooks/use-vessels-data";
 import { BarChart3, TrendingUp, TrendingDown, Clock, Ship, Activity, Minus, RefreshCw } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 function SparkBar({ values, color }: { values: number[]; color: string }) {
   const max = Math.max(...values, 1);
@@ -29,7 +30,7 @@ function MiniBar({ value, max, color }: { value: number; max: number; color: str
 
 export default function PerformanceAnalyticsPage() {
   const { performanceMetrics, isLoading } = usePerformanceMetrics();
-  const { data: liveCorridors = [] } = useQuery({
+  const { data: liveCorridors = [] } = useStandardQuery({
     queryKey: ["vessels-corridors"],
     queryFn: () => api.corridors.list(),
     refetchInterval: 120_000,

@@ -1,11 +1,13 @@
 import { useState, useRef } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { motion, AnimatePresence } from "framer-motion";
 import {
+
   Upload, RefreshCw, CheckCircle, XCircle, Clock, AlertTriangle,
   FileText, Database, Play, ChevronDown, ChevronUp, Zap, BarChart3
 } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
 const API = "/api";
@@ -15,7 +17,7 @@ function fetchJson(path: string) {
 }
 
 function useIngestionStats() {
-  return useQuery({
+  return useStandardQuery({
     queryKey: ["terra-ingestion-stats"],
     queryFn: () => fetchJson("/terra/distress/ingestion/stats"),
     refetchInterval: 30000,

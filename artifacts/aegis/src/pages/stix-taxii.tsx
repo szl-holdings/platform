@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+
 import { Shield, Globe, Link2, AlertTriangle, Bug, Target, Activity, Download, Upload, CheckCircle, Clock, Radio, Database, FileText, ChevronRight, Eye, Layers } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { api } from "@/lib/api";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 type StixType = "indicator" | "malware" | "attack-pattern" | "threat-actor" | "campaign" | "vulnerability" | "course-of-action";
 
@@ -164,21 +165,21 @@ export default function StixTaxii() {
   const [selectedObject, setSelectedObject] = useState<StixObject | null>(STIX_OBJECTS[0]);
   const [selectedForExport, setSelectedForExport] = useState<Set<string>>(new Set());
 
-  const { data: stixData } = useQuery({
+  const { data: stixData } = useStandardQuery({
     queryKey: ["stix-objects"],
     queryFn: () => api.stix.objects(),
     staleTime: 120_000,
     retry: false,
   });
 
-  const { data: taxiiData } = useQuery({
+  const { data: taxiiData } = useStandardQuery({
     queryKey: ["taxii-feeds"],
     queryFn: () => api.taxii.feeds(),
     staleTime: 60_000,
     retry: false,
   });
 
-  const exportMutation = useMutation({
+  const exportMutation = useStandardMutation({
     mutationFn: (objectIds: string[]) => api.stix.export(objectIds, "Aegis Intelligence Bundle"),
     onSuccess: (data) => {
       toast.success(`STIX bundle exported — ID: ${data?.data?.bundle?.id?.slice(0, 30) ?? "N/A"}`);

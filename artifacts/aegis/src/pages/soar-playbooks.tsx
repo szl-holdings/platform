@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+
 import { Play, Pause, CheckCircle, XCircle, Clock, Zap, Shield, AlertTriangle, Users, Globe, Lock, Mail, Server, ChevronRight, ChevronDown, Activity, BarChart3, Plus, Edit, Copy } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { api } from "@/lib/api";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 const PLAYBOOK_TEMPLATES = [
   {
@@ -187,14 +188,14 @@ export default function SOARPlaybooks() {
   const [activeTab, setActiveTab] = useState<"playbooks" | "history" | "analytics">("playbooks");
   const [expandedStep, setExpandedStep] = useState<number | null>(null);
 
-  const { data: playbookData } = useQuery({
+  const { data: playbookData } = useStandardQuery({
     queryKey: ["soar-playbooks"],
     queryFn: () => api.soar.playbooks(),
     staleTime: 60_000,
     retry: false,
   });
 
-  const executeMutation = useMutation({
+  const executeMutation = useStandardMutation({
     mutationFn: (playbookId: string) => api.soar.execute(playbookId),
     onSuccess: (data) => {
       toast.success(`Playbook execution queued — ID: ${data?.data?.executionId ?? "N/A"}`);

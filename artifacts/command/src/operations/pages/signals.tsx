@@ -1,16 +1,18 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { Search, Clock, X, Users, Zap, Activity, RefreshCw, CheckCircle2, ArrowUp } from "lucide-react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@lyte/lib/utils";
 import { api, type LyteSignal } from "@lyte/lib/api";
 import {
+
   severityColors,
   signalTypeLabels,
   type BusinessSignal,
   type SignalSeverity,
   type SignalType,
 } from "@lyte/lib/business-data";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 function lyteSignalToDisplay(s: LyteSignal): BusinessSignal {
   const meta = (s.metadata ?? {}) as Record<string, unknown>;
@@ -237,27 +239,27 @@ export default function SignalsFeed() {
   const [showNarrative, setShowNarrative] = useState(true);
   const queryClient = useQueryClient();
 
-  const { data: liveSignals = [] } = useQuery({
+  const { data: liveSignals = [] } = useStandardQuery({
     queryKey: ["lyte-signals-feed"],
     queryFn: () => api.signals.list(),
     refetchInterval: 30_000,
   });
 
-  const { data: insightsData } = useQuery({
+  const { data: insightsData } = useStandardQuery({
     queryKey: ["lyte-insights-narratives"],
     queryFn: () => api.insights(),
     refetchInterval: 120_000,
   });
 
-  const acknowledgeMutation = useMutation({
+  const acknowledgeMutation = useStandardMutation({
     mutationFn: (id: number) => api.signals.acknowledge(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["lyte-signals-feed"] }),
   });
-  const resolveMutation = useMutation({
+  const resolveMutation = useStandardMutation({
     mutationFn: (id: number) => api.signals.resolve(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["lyte-signals-feed"] }),
   });
-  const escalateMutation = useMutation({
+  const escalateMutation = useStandardMutation({
     mutationFn: (id: number) => api.signals.escalate(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["lyte-signals-feed"] }),
   });

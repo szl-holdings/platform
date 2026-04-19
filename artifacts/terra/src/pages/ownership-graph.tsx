@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { Network, Shield, AlertTriangle, User, Building2, Landmark, Tag, RefreshCw, ChevronRight, GitBranch, Info } from "lucide-react";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const ACCENT = "#40856a";
 const API = "/api";
@@ -114,7 +115,7 @@ function EdgeRow({ edge, nodes }: { edge: any; nodes: any[] }) {
 
 export default function OwnershipGraphPage() {
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
-  const { data, isLoading, refetch } = useQuery({
+  const { data, isLoading, refetch } = useStandardQuery({
     queryKey: ["terra-ownership-graph"],
     queryFn: () => fetchOwnershipGraph(),
   });

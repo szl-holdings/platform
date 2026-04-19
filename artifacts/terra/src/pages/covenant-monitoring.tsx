@@ -1,7 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
+
 import { useState } from "react";
 import { Shield, AlertTriangle, CheckCircle, Clock, FileText, Tag, RefreshCw, Bell, GitMerge, ChevronDown, ChevronUp } from "lucide-react";
 import { HelpTip } from "@szl-holdings/shared-ui/onboarding";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const ACCENT = "#40856a";
 const API = "/api";
@@ -138,7 +139,7 @@ function CovenantCard({ covenant }: { covenant: any }) {
 }
 
 export default function CovenantMonitoringPage() {
-  const { data, isLoading, refetch } = useQuery({
+  const { data, isLoading, refetch } = useStandardQuery({
     queryKey: ["terra-covenants"],
     queryFn: fetchCovenants,
   });

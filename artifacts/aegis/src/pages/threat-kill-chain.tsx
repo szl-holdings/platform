@@ -1,13 +1,15 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import {
+
   Shield, AlertTriangle, ChevronRight, Clock, User, Server, Network, Globe,
   Eye, Crosshair, Database, Lock, ArrowRight, Activity, Zap, Radio, Bug,
   Terminal, FileText, Key, HardDrive, Cpu, Download, Upload, X, Check,
   ExternalLink, Play, Pause, RefreshCw, Wifi, WifiOff, Target
 } from "lucide-react";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const KILL_CHAIN_STAGES = [
   {
@@ -162,14 +164,14 @@ export default function ThreatKillChain() {
   const [playMode, setPlayMode] = useState(false);
   const [activeStageIdx, setActiveStageIdx] = useState(5);
 
-  const { data: liveThreats, isError: isThreatsError, dataUpdatedAt } = useQuery<LiveThreatsResponse>({
+  const { data: liveThreats, isError: isThreatsError, dataUpdatedAt } = useStandardQuery<LiveThreatsResponse>({
     queryKey: ["kill-chain-live-threats"],
     queryFn: () => apiFetch<LiveThreatsResponse>("/aegis/live/threats"),
     refetchInterval: 30000,
     retry: 1,
   });
 
-  const { data: threatSummary } = useQuery<ThreatSummaryResponse>({
+  const { data: threatSummary } = useStandardQuery<ThreatSummaryResponse>({
     queryKey: ["kill-chain-threat-summary"],
     queryFn: () => apiFetch<ThreatSummaryResponse>("/aegis/live/threat-summary"),
     refetchInterval: 30000,

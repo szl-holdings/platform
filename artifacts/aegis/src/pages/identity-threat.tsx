@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Users, AlertTriangle, MapPin, Clock, Lock, Eye, Activity } from "lucide-react";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface LiveAlert {
   id: number | string;
@@ -68,7 +69,7 @@ function isIdentityRelated(a: LiveAlert): boolean {
 }
 
 export default function IdentityThreat() {
-  const live = useQuery({
+  const live = useStandardQuery({
     queryKey: ["identity-threat", "live"],
     queryFn: () => apiFetch<{ alerts?: LiveAlert[]; incidents?: LiveIncident[] }>("/aegis/live/threats"),
     staleTime: 60_000,

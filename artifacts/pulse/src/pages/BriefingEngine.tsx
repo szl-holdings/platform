@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { RefreshCw, AlertTriangle, ChevronDown, ChevronRight, Target, Info, CheckCircle2, ArrowRight } from "lucide-react";
 import { CitationPanel, type Citation } from "../components/CitationPanel";
 import { VerifierBadge, AutonomyTierBadge } from "../components/VerifierBadge";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 const BASE_API = import.meta.env.BASE_URL?.replace(/\/$/, "").replace(/\/pulse$/, "") || "";
 const API_PREFIX = `${BASE_API}/api`;
@@ -362,14 +363,14 @@ export default function BriefingEngine() {
   const [domain, setDomain] = useState<Domain>("consolidated");
   const qc = useQueryClient();
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error } = useStandardQuery({
     queryKey: ["exec-brief", domain],
     queryFn: () => fetchExecBrief(domain),
     select: (d) => d.data,
     staleTime: 5 * 60 * 1000,
   });
 
-  const generateMutation = useMutation({
+  const generateMutation = useStandardMutation({
     mutationFn: () => generateExecBrief(domain),
     onSuccess: (result) => {
       qc.setQueryData(["exec-brief", domain], result);

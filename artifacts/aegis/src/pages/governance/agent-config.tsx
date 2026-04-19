@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import {
+
   Brain, Shield, Play, Pause, Settings, Save, X, ChevronDown, ChevronUp,
   AlertTriangle, CheckCircle2, RefreshCw, Zap, ToggleLeft, ToggleRight,
   Cpu, Lock, Wrench, SlidersHorizontal, Eye, EyeOff, Info,
 } from "lucide-react";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface AgentDef {
   id: string;
@@ -202,7 +204,7 @@ export default function AgentConfigPage() {
   const [editing, setEditing] = useState<AgentDef | null>(null);
   const [savingId, setSavingId] = useState<string | null>(null);
 
-  const { data: liveAgents, isLoading } = useQuery({
+  const { data: liveAgents, isLoading } = useStandardQuery({
     queryKey: ["nuro-mesh-agent-list"],
     queryFn: () => apiFetch<AgentDef[]>("/nuro-mesh/agents"),
     retry: 1,

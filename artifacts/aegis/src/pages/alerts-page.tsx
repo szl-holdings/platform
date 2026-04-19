@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { AnimatedCounter } from "@szl-holdings/shared-ui/animated-counter";
 import { api } from "@/lib/api";
 import { Card, CardContent } from "@szl-holdings/shared-ui/ui/card";
@@ -14,6 +14,7 @@ import { EmptyState } from "@szl-holdings/shared-ui/design-system";
 import { useState, useEffect, useRef } from "react";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 import { ProofEnvelope, type AutonomyMode } from "@szl-holdings/design-system";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 const severityColors: Record<string, string> = {
   critical: "bg-red-500/10 text-red-400 border-red-500/20",
@@ -32,19 +33,19 @@ const statusColors: Record<string, string> = {
 
 export default function AlertsPage() {
   const qc = useQueryClient();
-  const { data: alerts = [], isLoading } = useQuery({ queryKey: ["alerts"], queryFn: () => api.alerts.list() });
+  const { data: alerts = [], isLoading } = useStandardQuery({ queryKey: ["alerts"], queryFn: () => api.alerts.list() });
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState("all");
   const [autonomyMode, setAutonomyMode] = useState<AutonomyMode>("ask-to-act");
   const [form, setForm] = useState({ title: "", description: "", severity: "medium", source: "manual", relatedCve: "" });
 
-  const createMut = useMutation({
+  const createMut = useStandardMutation({
     mutationFn: (data: any) => api.alerts.create(data),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["alerts"] }); setOpen(false); toast.success("Alert created"); },
     onError: (e: any) => toast.error(e.message),
   });
 
-  const updateMut = useMutation({
+  const updateMut = useStandardMutation({
     mutationFn: ({ id, data }: { id: number; data: any }) => api.alerts.update(id, data),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["alerts"] }); toast.success("Alert updated"); },
   });

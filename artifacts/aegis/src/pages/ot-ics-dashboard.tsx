@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "wouter";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import {
+
   Activity,
   AlertTriangle,
   ChevronLeft,
@@ -23,6 +24,7 @@ import {
   Zap,
 } from "lucide-react";
 import { api } from "../lib/api";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 type ProtocolName = "Modbus" | "DNP3" | "S7";
 type Severity = "info" | "low" | "medium" | "high" | "critical";
@@ -161,30 +163,30 @@ export default function OtIcsDashboard() {
     const [pcapError, setPcapError] = useState<string | null>(null);
     const [pcapngDownloading, setPcapngDownloading] = useState(false);
 
-    const framesQuery = useQuery<DecodedFrame[]>({
+    const framesQuery = useStandardQuery<DecodedFrame[]>({
       queryKey: ["ot-ics", "frames", protocolFilter],
       queryFn: () => api.otIcs.frames({ protocol: protocolFilter === "all" ? undefined : protocolFilter, limit: 100 }) as Promise<DecodedFrame[]>,
       refetchInterval: 15000,
     });
 
-    const conversationQuery = useQuery<ConversationFrame[]>({
+    const conversationQuery = useStandardQuery<ConversationFrame[]>({
       queryKey: ["ot-ics", "conversations", ACTIVE_SESSION_ID],
       queryFn: () => api.otIcs.conversations(ACTIVE_SESSION_ID) as Promise<ConversationFrame[]>,
       refetchInterval: 30000,
     });
 
-    const assetsQuery = useQuery<OtAsset[]>({
+    const assetsQuery = useStandardQuery<OtAsset[]>({
       queryKey: ["ot-ics", "assets"],
       queryFn: () => api.otIcs.assets() as Promise<OtAsset[]>,
     });
 
-    const scoresQuery = useQuery<AnomalyScore[]>({
+    const scoresQuery = useStandardQuery<AnomalyScore[]>({
       queryKey: ["ot-ics", "scores", HEATMAP_HOURS],
       queryFn: () => api.otIcs.anomalyScores({ hours: HEATMAP_HOURS }) as Promise<AnomalyScore[]>,
       refetchInterval: 30000,
     });
 
-    const recomputeMutation = useMutation({
+    const recomputeMutation = useStandardMutation({
       mutationFn: () => api.otIcs.recomputeBaselines(),
       onSuccess: () => {
         qc.invalidateQueries({ queryKey: ["ot-ics", "assets"] });

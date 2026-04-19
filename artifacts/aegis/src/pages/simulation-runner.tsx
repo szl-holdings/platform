@@ -1,5 +1,5 @@
 import { AnimatedCounter } from "@szl-holdings/shared-ui/animated-counter";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
@@ -16,6 +16,7 @@ import { doctrineEventBus } from "@szl-holdings/observability";
 import { DoctrineLayerBadge } from "@szl-holdings/shared-ui/doctrine-layer-badge";
 import { useRole } from "@szl-holdings/shared-ui/use-role";
 import { Lock } from "lucide-react";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 const statusColors: Record<string, string> = {
   pending: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",
@@ -115,9 +116,9 @@ function RunningExerciseDisplay() {
 export default function AdversaryEmulation() {
   const { isSecurity, isAdmin, isLoading: rolesLoading } = useRole();
   const qc = useQueryClient();
-  const { data: simulations = [], isLoading } = useQuery({ queryKey: ["simulations"], queryFn: api.simulations.list });
-  const { data: scenarios = [] } = useQuery({ queryKey: ["scenarios"], queryFn: api.scenarios.list });
-  const { data: assessments = [] } = useQuery({ queryKey: ["assessments"], queryFn: api.assessments.list });
+  const { data: simulations = [], isLoading } = useStandardQuery({ queryKey: ["simulations"], queryFn: api.simulations.list });
+  const { data: scenarios = [] } = useStandardQuery({ queryKey: ["scenarios"], queryFn: api.scenarios.list });
+  const { data: assessments = [] } = useStandardQuery({ queryKey: ["assessments"], queryFn: api.assessments.list });
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ name: "", scenarioId: "", assessmentId: "" });
 
@@ -159,7 +160,7 @@ export default function AdversaryEmulation() {
     }
   }, [completedSimulations.length]);
 
-  const createMut = useMutation({
+  const createMut = useStandardMutation({
     mutationFn: (data: any) => api.simulations.create(data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["simulations"] });

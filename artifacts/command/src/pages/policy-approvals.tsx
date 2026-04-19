@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import {
+
   ShieldCheck,
   Clock,
   CheckCircle2,
@@ -19,6 +20,7 @@ import {
   FileText,
   Zap,
 } from "lucide-react";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 const ACCENT = "#d4a054";
 
@@ -457,19 +459,19 @@ export default function PolicyApprovalsPage() {
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const qc = useQueryClient();
 
-  const approvalsQ = useQuery<ListResponse<ActionApproval>>({
+  const approvalsQ = useStandardQuery<ListResponse<ActionApproval>>({
     queryKey: ["guardian", "actions", tab],
     queryFn: () => fetchJson<ListResponse<ActionApproval>>(`/api/guardian/actions?limit=100${tab === "pending" ? "&status=pending" : ""}`),
     refetchInterval: tab === "pending" ? 15_000 : 60_000,
   });
 
-  const toolsQ = useQuery<ListResponse<ToolManifest>>({
+  const toolsQ = useStandardQuery<ListResponse<ToolManifest>>({
     queryKey: ["guardian", "tools-index"],
     queryFn: () => fetchJson<ListResponse<ToolManifest>>("/api/guardian/tools?limit=200"),
     staleTime: 5 * 60_000,
   });
 
-  const approveMut = useMutation({
+  const approveMut = useStandardMutation({
     mutationFn: ({ id, reason }: { id: number; reason: string }) =>
       fetchJson(`/api/guardian/actions/${id}/approve`, { method: "POST", body: JSON.stringify({ reason }) }),
     onSuccess: () => {
@@ -478,7 +480,7 @@ export default function PolicyApprovalsPage() {
     },
   });
 
-  const rejectMut = useMutation({
+  const rejectMut = useStandardMutation({
     mutationFn: ({ id, reason }: { id: number; reason: string }) =>
       fetchJson(`/api/guardian/actions/${id}/reject`, { method: "POST", body: JSON.stringify({ reason }) }),
     onSuccess: () => {

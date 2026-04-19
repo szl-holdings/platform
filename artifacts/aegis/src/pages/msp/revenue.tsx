@@ -1,11 +1,12 @@
 import { motion } from "framer-motion";
 import { DollarSign, TrendingUp, TrendingDown, Target, Users, Award, RefreshCw, BarChart3 } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
-import { useQuery } from "@tanstack/react-query";
+
 import { ExportButton } from "@szl-holdings/shared-ui/data-export";
 import { Skeleton } from "@szl-holdings/shared-ui/ui/skeleton";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface RevenueData {
   summary: {
@@ -57,7 +58,7 @@ const tierColors: Record<string, string> = {
 };
 
 export default function RevenuePage() {
-  const { data, isLoading, refetch } = useQuery<RevenueData>({
+  const { data, isLoading, refetch } = useStandardQuery<RevenueData>({
     queryKey: ["msp-revenue"],
     queryFn: () => apiFetch<RevenueData>("/msp/revenue"),
     staleTime: 120_000,

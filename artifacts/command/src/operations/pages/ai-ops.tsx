@@ -1,12 +1,13 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { Brain, Activity, AlertTriangle, Radio, Loader2, Zap, TrendingUp, FileText } from "lucide-react";
 import { AnomalySparkline, SeverityMeter, TypewriterText, AnimatedGauge } from "@szl-holdings/shared-ui/ai-components";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 export default function AIOps() {
-  const { data: anomalies = [] } = useQuery({ queryKey: ["lyte-anomalies"], queryFn: () => apiFetch<any[]>("/intelligence/anomalies") });
-  const { data: stats } = useQuery({ queryKey: ["lyte-stats"], queryFn: () => apiFetch<any>("/intelligence/platform-stats") });
+  const { data: anomalies = [] } = useStandardQuery({ queryKey: ["lyte-anomalies"], queryFn: () => apiFetch<any[]>("/intelligence/anomalies") });
+  const { data: stats } = useStandardQuery({ queryKey: ["lyte-stats"], queryFn: () => apiFetch<any>("/intelligence/platform-stats") });
 
   const [sitrepText, setSitrepText] = useState("");
   const [sitrepDone, setSitrepDone] = useState(false);

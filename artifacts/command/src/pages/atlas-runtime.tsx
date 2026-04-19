@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import { useSafeMode } from "../lib/use-safe-mode";
-import { useQuery } from "@tanstack/react-query";
+
 import { Layers, Activity, AlertTriangle, CheckCircle, Clock, Shield, Globe, ChevronRight, X, GitBranch, Zap, Server, Network, Eye, Lock, RefreshCw, Loader2, Radio, WifiOff } from "lucide-react";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface TwinSyncStatus {
   twinId: string;
@@ -123,7 +124,7 @@ function WorldlineDrawer({ twins, onClose }: { twins: CrossDomainTwin[]; onClose
 }
 
 function useAtlasBranches() {
-  return useQuery<{ branches: Array<{ id: string; branchName: string; status: string; twinCategory?: string }>; count: number }>({
+  return useStandardQuery<{ branches: Array<{ id: string; branchName: string; status: string; twinCategory?: string }>; count: number }>({
     queryKey: ["command-atlas-branches"],
     queryFn: () => fetch("/api/atlas/spatial/branches?limit=20").then(r => {
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
@@ -136,7 +137,7 @@ function useAtlasBranches() {
 
 function useTwinSyncStatuses(twinIds: string[]) {
   const idsParam = twinIds.join(",");
-  return useQuery<{ statuses: TwinSyncStatus[]; count: number; generatedAt: string }>({
+  return useStandardQuery<{ statuses: TwinSyncStatus[]; count: number; generatedAt: string }>({
     queryKey: ["command-twin-sync-status", idsParam],
     queryFn: () => fetch(`/api/atlas/spatial/twins/sync-status?ids=${encodeURIComponent(idsParam)}`).then(r => {
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
@@ -151,7 +152,7 @@ function useTwinSyncStatuses(twinIds: string[]) {
 }
 
 function useFirestormIncidents() {
-  return useQuery<FirestormIncident[]>({
+  return useStandardQuery<FirestormIncident[]>({
     queryKey: ["command-firestorm-incidents"],
     queryFn: () => fetch("/api/firestorm/incidents").then(r => {
       if (!r.ok) throw new Error(`HTTP ${r.status}`);

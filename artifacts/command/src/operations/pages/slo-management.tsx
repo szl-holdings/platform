@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { Target, CheckCircle, Flame, Settings, AlertTriangle, Activity, Clock, Shield, TrendingUp } from "lucide-react";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const GOLD = "#d4a054";
 const DS = {
@@ -336,7 +337,7 @@ function ApprovalLatencyRow({ severity, data }: {
 export default function SLOManagement() {
   const [filter, setFilter] = useState<"all" | SLOStatus>("all");
 
-  const { data: slo, isLoading } = useQuery<PlatformSloData>({
+  const { data: slo, isLoading } = useStandardQuery<PlatformSloData>({
     queryKey: ["ops-slo"],
     queryFn: async () => {
       const res = await fetch("/api/ops/slo", { credentials: "include" });

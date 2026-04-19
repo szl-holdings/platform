@@ -2,9 +2,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-u
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { DollarSign, TrendingUp, TrendingDown, Users, Clock, BarChart3, RefreshCw } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, BarChart, Bar } from "recharts";
-import { useQuery } from "@tanstack/react-query";
+
 import { Skeleton } from "@szl-holdings/shared-ui/ui/skeleton";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface RevenueData {
   summary: {
@@ -43,7 +44,7 @@ const churnRiskBadgeVariant: Record<string, string> = {
 };
 
 export default function MRRDashboard() {
-  const { data, isLoading, refetch } = useQuery<RevenueData>({
+  const { data, isLoading, refetch } = useStandardQuery<RevenueData>({
     queryKey: ["msp-revenue"],
     queryFn: () => apiFetch<RevenueData>("/msp/revenue"),
     staleTime: 120_000,

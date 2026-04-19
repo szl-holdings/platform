@@ -1,10 +1,11 @@
-import { useQuery } from "@tanstack/react-query";
+
 import { dataProvider } from "@/data/data-provider";
 import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Leaf, Fuel, TrendingDown, BarChart3, Ship, ArrowDownRight, ArrowUpRight } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Legend, AreaChart, Area, PieChart, Pie, Cell } from "recharts";
 import { useState } from "react";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const ciiColors: Record<string, string> = {
   A: "#22c55e",
@@ -23,8 +24,8 @@ const ciiBadgeColors: Record<string, string> = {
 };
 
 export default function CO2EmissionsPage() {
-  const { data: vessels = [] } = useQuery({ queryKey: ["co2-vessels"], queryFn: () => dataProvider.getVessels() });
-  const { data: emissions = [] } = useQuery({ queryKey: ["emissions"], queryFn: () => dataProvider.getEmissionRecords() });
+  const { data: vessels = [] } = useStandardQuery({ queryKey: ["co2-vessels"], queryFn: () => dataProvider.getVessels() });
+  const { data: emissions = [] } = useStandardQuery({ queryKey: ["emissions"], queryFn: () => dataProvider.getEmissionRecords() });
   const [selectedVessel, setSelectedVessel] = useState<number | null>(null);
 
   const filteredEmissions = selectedVessel ? emissions.filter(e => e.vesselId === selectedVessel) : emissions;

@@ -2,10 +2,11 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Search, Filter, AlertTriangle, Clock, User, ArrowUp, ArrowDown, Minus, CheckCircle2, Circle, Pause, Timer, Plus } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
-import { useQuery } from "@tanstack/react-query";
+
 import { Skeleton } from "@szl-holdings/shared-ui/ui/skeleton";
 import { tickets as fallbackTickets, type Ticket } from "@/data/seed-data";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface ApiTicket {
   id: number;
@@ -174,7 +175,7 @@ export default function ServiceDeskPage() {
   const [priorityFilter, setPriorityFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
-  const { data, isLoading } = useQuery<{ tickets: ApiTicket[] }>({
+  const { data, isLoading } = useStandardQuery<{ tickets: ApiTicket[] }>({
     queryKey: ["msp-tickets"],
     queryFn: () => apiFetch<{ tickets: ApiTicket[] }>("/msp/tickets?limit=100"),
     staleTime: 30000,

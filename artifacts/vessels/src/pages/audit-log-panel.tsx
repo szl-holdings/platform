@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { Activity, Shield, ShieldAlert, Info, AlertTriangle, Search, RefreshCw, CheckCircle2, Filter } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface AuditEvent {
   id: number;
@@ -106,7 +107,7 @@ export default function AuditLogPanelPage() {
     ...(riskFilter ? { riskLevel: riskFilter } : {}),
   });
 
-  const { data: apiData, isLoading, refetch } = useQuery({
+  const { data: apiData, isLoading, refetch } = useStandardQuery({
     queryKey: ["audit-chain-events", page, search, actionTypeFilter, riskFilter],
     queryFn: () => apiFetch<AuditResponse>(`/audit-chain/events?${params}`),
     staleTime: 30_000,

@@ -2,7 +2,7 @@
 import { useRealtimeChannel } from "@szl-holdings/shared-ui/use-realtime-channel";
 import { ActionLoop, RoleSelector, DataProvenance } from "@szl-holdings/shared-ui/data-provenance";
 import { useState, useEffect, lazy, Suspense } from "react";
-import { useQueryClient, useQuery } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { DataStateBadge } from "@szl-holdings/shared-ui/data-state-badge";
 import { type DataProvenanceInfo } from "@szl-holdings/shared-ui/ontology";
@@ -15,6 +15,7 @@ import { useMapboxToken } from "@/hooks/use-mapbox-token";
 import { PackBanner } from "@szl-holdings/shared-ui/pack-banner";
 import { TERRA_PORTFOLIO_AUM, metricDisplay } from "@/lib/claims";
 import { PolicyModeBadge } from "@szl-holdings/design-system/proof/policy-mode-badge";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const PropertyMap = lazy(() => import("@/components/property-map"));
 
@@ -35,14 +36,12 @@ const DOCTRINE_MODULES = [
   { id: "action", label: "Action", icon: ArrowRight, color: DS.text.tertiary, desc: "Execute", href: "/deals" },
 ];
 
-
 const SEVERITY_COLORS: Record<string, string> = {
   critical: DS.accent.red,
   high: DS.accent.gold,
   medium: DS.text.tertiary,
   low: DS.text.muted,
 };
-
 
 const FLAG_STYLES: Record<string, { color: string; label: string }> = {
   urgent: { color: DS.accent.red, label: "Urgent" },
@@ -103,7 +102,7 @@ export default function TerraIntelligence() {
   const qc = useQueryClient();
   const { lastMessage: wsSignal } = useRealtimeChannel("terra-signals");
 
-  const { data: dealsData, isError: dealsError } = useQuery({
+  const { data: dealsData, isError: dealsError } = useStandardQuery({
     queryKey: ["terra-dashboard-deals"],
     queryFn: () => fetch(`${API}/terra/pipeline/deals?limit=20`).then(r => { if (!r.ok) throw new Error(`API error ${r.status}`); return r.json(); }).then(d => d.data ?? d),
     staleTime: 60000,
@@ -111,7 +110,7 @@ export default function TerraIntelligence() {
     refetchInterval: 120_000,
   });
 
-  const { data: alertsData } = useQuery({
+  const { data: alertsData } = useStandardQuery({
     queryKey: ["terra-dashboard-alerts"],
     queryFn: () => fetch(`${API}/terra/distress/alerts?limit=10`).then(r => { if (!r.ok) throw new Error(`API error ${r.status}`); return r.json(); }).then(d => d.data ?? d),
     staleTime: 60000,

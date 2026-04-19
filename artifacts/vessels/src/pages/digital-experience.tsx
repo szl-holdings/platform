@@ -1,9 +1,10 @@
-import { useQuery } from "@tanstack/react-query";
+
 import { dataProvider } from "@/data/data-provider";
 import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Progress } from "@szl-holdings/shared-ui/ui/progress";
 import { Package, Truck, Star, Clock, AlertTriangle, CheckCircle, TrendingUp, MapPin } from "lucide-react";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const demurrageColors: Record<string, string> = {
   Low: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
@@ -12,7 +13,7 @@ const demurrageColors: Record<string, string> = {
 };
 
 export default function DigitalExperiencePage() {
-  const { data: shipments = [] } = useQuery({ queryKey: ["shipments"], queryFn: () => dataProvider.getShipmentRecords() });
+  const { data: shipments = [] } = useStandardQuery({ queryKey: ["shipments"], queryFn: () => dataProvider.getShipmentRecords() });
 
   const avgOnTime = shipments.length > 0 ? Math.round(shipments.reduce((s, r) => s + (r.onTimeScore ?? 0), 0) / shipments.length * 10) / 10 : 0;
   const avgSatisfaction = shipments.length > 0 ? (shipments.reduce((s, r) => s + (r.customerSatisfaction ?? 0), 0) / shipments.length).toFixed(1) : "0";

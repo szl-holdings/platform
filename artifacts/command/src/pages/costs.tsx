@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { OpsLayout } from "../components/ops-layout";
 import { DollarSign, TrendingUp, TrendingDown, AlertTriangle, BarChart2, Cpu, Database, Activity } from "lucide-react";
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Cell } from "recharts";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface ApiCostsResponse {
   domains: Array<{ id: string; name: string; color: string; budget: number; spent: number; apiCalls: number; storage: number; compute: number; trend: number }>;
@@ -52,7 +53,7 @@ export default function CostsPage() {
   const [period, setPeriod] = useState<"mtd" | "3m" | "ytd">("mtd");
   const [view, setView] = useState<"overview" | "api" | "domains">("overview");
 
-  const { data: apiData } = useQuery<ApiCostsResponse>({
+  const { data: apiData } = useStandardQuery<ApiCostsResponse>({
     queryKey: ["command-costs"],
     queryFn: async () => {
       const res = await fetch("/api/command/costs", { credentials: "include" });

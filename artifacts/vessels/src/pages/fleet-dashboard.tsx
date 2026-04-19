@@ -1,5 +1,5 @@
 import { ActionLoop, RoleSelector } from "@szl-holdings/shared-ui/data-provenance";
-import { useQuery } from "@tanstack/react-query";
+
 import { api } from "@/lib/api";
 import { useRoster, useFleetExceptions, useSanctions } from "@/hooks/use-vessels-data";
 import type { RosterVessel } from "@/lib/api";
@@ -17,6 +17,7 @@ import { DataProvenance } from "@szl-holdings/shared-ui/data-provenance";
 import { type DataProvenanceInfo } from "@szl-holdings/shared-ui/ontology";
 import { ActivationBanner, useActivationState } from "@szl-holdings/shared-ui/onboarding";
 import type { ActivationStep } from "@szl-holdings/shared-ui/onboarding";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const statusColors: Record<string, string> = {
   at_sea: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
@@ -679,10 +680,10 @@ type IntelTab = "behavioral" | "dark" | "sanctions" | "cargo" | "congestion" | "
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
 
 export default function FleetDashboard() {
-  const { data: kpis } = useQuery({ queryKey: ["fleet-kpis"], queryFn: () => dataProvider.getFleetKPIs() });
+  const { data: kpis } = useStandardQuery({ queryKey: ["fleet-kpis"], queryFn: () => dataProvider.getFleetKPIs() });
   const { roster } = useRoster();
   const { fleetExceptions } = useFleetExceptions({ status: "active" });
-  const { data: liveDashboard } = useQuery({ queryKey: ["vessels-dashboard"], queryFn: () => api.dashboard(), refetchInterval: 60_000 });
+  const { data: liveDashboard } = useStandardQuery({ queryKey: ["vessels-dashboard"], queryFn: () => api.dashboard(), refetchInterval: 60_000 });
   const [, navigate] = useLocation();
 
   const activation = useActivationState({ apiBaseUrl: `${BASE}/api`, pollIntervalMs: 60_000 });

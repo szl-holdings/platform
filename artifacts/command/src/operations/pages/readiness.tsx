@@ -1,12 +1,14 @@
 // @ts-nocheck
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { api, type LyteReadinessItem } from "@lyte/lib/api";
 import { cn } from "@lyte/lib/utils";
 import {
+
   CheckCircle2, Clock, AlertTriangle, RefreshCw, ChevronDown, ChevronRight,
   Shield, Users, Lock, Cpu, Activity,
 } from "lucide-react";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 const itemTypeConfig: Record<string, { label: string; icon: React.ElementType; color: string }> = {
   launch_gate: { label: "Launch Gate", icon: Shield, color: "text-cyan-400" },
@@ -144,7 +146,7 @@ export default function ReadinessPage() {
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
   const queryClient = useQueryClient();
 
-  const { data: items = [], isLoading, isError, refetch } = useQuery({
+  const { data: items = [], isLoading, isError, refetch } = useStandardQuery({
     queryKey: ["lyte-readiness"],
     queryFn: () => api.readiness.list(),
     refetchInterval: 60_000,

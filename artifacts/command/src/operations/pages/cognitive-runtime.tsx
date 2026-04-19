@@ -1,13 +1,15 @@
 import type { JSX } from "react";
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import {
+
   Brain, Layers, GitBranch, Users, TrendingDown, FileText,
   RefreshCw, AlertTriangle, CheckCircle, Clock, DollarSign,
   ChevronRight, Radio, Target, BarChart3, Shield, Zap, Play,
   ArrowUpRight, ExternalLink, Activity,
 } from "lucide-react";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 const BG = { page: "#080c14", surface: "#0c1018", elevated: "#10141e", panel: "#0e1219" };
 const BORDER = { subtle: "rgba(255,255,255,0.04)", muted: "rgba(255,255,255,0.06)", accent: "rgba(212,160,84,0.12)" };
@@ -60,7 +62,7 @@ function StatCard({ label, value, sub, accent }: { label: string; value: string 
 }
 
 function useSignalFusion() {
-  return useQuery({
+  return useStandardQuery({
     queryKey: ["cognitive", "signal-fusion"],
     queryFn: () => apiFetch<Record<string, unknown>>("/lyte/cognitive/signal-fusion"),
     staleTime: 30_000,
@@ -68,7 +70,7 @@ function useSignalFusion() {
 }
 
 function useBottlenecks() {
-  return useQuery({
+  return useStandardQuery({
     queryKey: ["cognitive", "bottlenecks"],
     queryFn: () => apiFetch<Record<string, unknown>>("/lyte/cognitive/bottlenecks"),
     staleTime: 30_000,
@@ -76,7 +78,7 @@ function useBottlenecks() {
 }
 
 function useInterventions() {
-  return useQuery({
+  return useStandardQuery({
     queryKey: ["cognitive", "interventions"],
     queryFn: () => apiFetch<Record<string, unknown>>("/lyte/cognitive/interventions"),
     staleTime: 30_000,
@@ -84,7 +86,7 @@ function useInterventions() {
 }
 
 function useAccountabilityMap() {
-  return useQuery({
+  return useStandardQuery({
     queryKey: ["cognitive", "accountability-map"],
     queryFn: () => apiFetch<Record<string, unknown>>("/lyte/cognitive/accountability-map"),
     staleTime: 30_000,
@@ -92,7 +94,7 @@ function useAccountabilityMap() {
 }
 
 function useVaR(days: number) {
-  return useQuery({
+  return useStandardQuery({
     queryKey: ["cognitive", "var", days],
     queryFn: () => apiFetch<Record<string, unknown>>(`/lyte/cognitive/value-at-risk?days=${days}`),
     staleTime: 30_000,
@@ -100,7 +102,7 @@ function useVaR(days: number) {
 }
 
 function useNarrative(from: string, to: string) {
-  return useQuery({
+  return useStandardQuery({
     queryKey: ["cognitive", "narrative", from, to],
     queryFn: () => apiFetch<Record<string, unknown>>(`/lyte/cognitive/executive-narrative?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`),
     staleTime: 60_000,
@@ -111,7 +113,7 @@ function SignalFusionTab(): JSX.Element {
   const { data, isLoading, refetch, isFetching } = useSignalFusion();
   const qc = useQueryClient();
 
-  const runMutation = useMutation({
+  const runMutation = useStandardMutation({
     mutationFn: () => apiFetch<Record<string, unknown>>("/lyte/cognitive/signal-fusion/run", { method: "POST" }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["cognitive", "signal-fusion"] });

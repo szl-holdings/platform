@@ -1,10 +1,11 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Button } from "@szl-holdings/shared-ui/ui/button";
 import { Input } from "@szl-holdings/shared-ui/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@szl-holdings/shared-ui/ui/select";
 import {
+
   Briefcase, Clock, AlertTriangle, CheckCircle, XCircle,
   Search, Filter, ChevronDown, ChevronUp, User, Calendar,
   FileText, Shield, Activity, Plus, Flame
@@ -20,6 +21,7 @@ import {
   type AuditHistoryEntry,
 } from "@szl-holdings/shared-ui/operational-primitives";
 import { TradecraftPanel } from "@/components/tradecraft-panel";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface CaseNote { content: string; author: string; at: string }
 interface ConstellationTraceEvidence {
@@ -126,7 +128,7 @@ function CaseDetailPanel({ caseItem, onClose, onUpdate }: { caseItem: Case; onCl
   const [noteText, setNoteText] = useState("");
   const [newStatus, setNewStatus] = useState(caseItem.status);
 
-  const updateMutation = useMutation({
+  const updateMutation = useStandardMutation({
     mutationFn: (data: any) => api.cases.update(caseItem.id, data),
     onSuccess: () => { toast.success("Case updated"); qc.invalidateQueries({ queryKey: ["aegis-cases"] }); onUpdate(); },
     onError: () => toast.error("Failed to update case"),
@@ -381,7 +383,7 @@ export default function CasesPage() {
   const [selectedCase, setSelectedCase] = useState<Case | null>(null);
   const [expandedId, setExpandedId] = useState<number | null>(null);
 
-  const { data: cases = [], isLoading } = useQuery<Case[]>({
+  const { data: cases = [], isLoading } = useStandardQuery<Case[]>({
     queryKey: ["aegis-cases"],
     queryFn: () => api.cases.list(),
     refetchInterval: 30000,

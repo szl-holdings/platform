@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
+
   Hammer, Calendar, DollarSign, AlertTriangle, CheckCircle, Clock, Camera,
   TrendingUp, Building2, ChevronRight, BarChart3, ArrowUpRight, Activity, X, Database
 } from "lucide-react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { api } from "../lib/api";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 interface TooltipPayloadEntry { name: string; value: number; color?: string; fill?: string; }
 interface ChartTooltipProps { active?: boolean; payload?: TooltipPayloadEntry[]; label?: string; }
@@ -163,13 +165,13 @@ const CustomTooltip = ({ active, payload, label }: ChartTooltipProps) => {
 export default function ConstructionMonitorPage() {
   const queryClient = useQueryClient();
 
-  const { data: apiData, isLoading, isError } = useQuery({
+  const { data: apiData, isLoading, isError } = useStandardQuery({
     queryKey: ["terra-construction-projects"],
     queryFn: () => api.construction.list(),
     staleTime: 30_000,
   });
 
-  const seedMutation = useMutation({
+  const seedMutation = useStandardMutation({
     mutationFn: async () => {
       for (const p of PROJECTS) {
         await api.construction.create({

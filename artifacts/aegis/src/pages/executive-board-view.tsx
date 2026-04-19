@@ -1,13 +1,15 @@
 import { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { api } from "@/lib/api";
 
 import { cn } from "@szl-holdings/shared-ui/utils";
 import {
+
   Shield, TrendingUp, TrendingDown, Minus, AlertTriangle, CheckCircle2,
   BarChart3, Clock, Download, Lock, Eye, Target, Activity,
   ShieldCheck, Users, FileText, ChevronRight, Zap, Building2
 } from "lucide-react";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const FALLBACK_POSTURE_SCORE = 72;
 
@@ -171,13 +173,13 @@ export default function ExecutiveBoardView() {
   const [period, setPeriod] = useState<"30d" | "90d">("30d");
   const [showExportHint, setShowExportHint] = useState(false);
 
-  const { data: execPosture } = useQuery<ExecPosturePayload>({
+  const { data: execPosture } = useStandardQuery<ExecPosturePayload>({
     queryKey: ["command-executive-posture"],
     queryFn: () => api.command.executivePosture(),
     retry: false,
   });
 
-  const { data: execCompliance } = useQuery<ExecCompliancePayload>({
+  const { data: execCompliance } = useStandardQuery<ExecCompliancePayload>({
     queryKey: ["command-executive-compliance"],
     queryFn: () => api.command.executiveCompliance(),
     retry: false,

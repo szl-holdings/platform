@@ -1,6 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
+
 import { useState } from "react";
 import { TrendingDown, AlertTriangle, Clock, FileText, Tag, RefreshCw, ChevronDown, ChevronUp, Shield, CheckCircle } from "lucide-react";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const ACCENT = "#40856a";
 const API = "/api";
@@ -122,7 +123,7 @@ function ForecastCard({ item }: { item: any }) {
 }
 
 export default function DistressForecastPage() {
-  const { data, isLoading, refetch } = useQuery({
+  const { data, isLoading, refetch } = useStandardQuery({
     queryKey: ["terra-distress-forecast"],
     queryFn: fetchDistressForecast,
   });

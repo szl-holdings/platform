@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { Play, Pause, SkipBack, SkipForward, RotateCcw, Clock, MapPin, Fuel, Wind, AlertTriangle, Activity, ChevronRight, Zap } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
+import { useStandardQuery } from "@szl-holdings/api-client-react";
 
 const DEMO_VOYAGE_EVENTS = [
   { time: "Apr 8 06:00", type: "departure", label: "Departed Ras Tanura (SATANK)", detail: "Cargo: 280,000t crude", severity: "info", lat: 26.6, lon: 50.2 },
@@ -140,7 +141,7 @@ export default function VesselsReplayPage() {
   const [cursor, setCursor] = useState(12);
   const [selectedVesselId, setSelectedVesselId] = useState<string | null>(null);
 
-  const { data: vesselsData, isError: vesselsListError } = useQuery<{ data: Array<{ id: number; name: string }> }>({
+  const { data: vesselsData, isError: vesselsListError } = useStandardQuery<{ data: Array<{ id: number; name: string }> }>({
     queryKey: ["vessels-list-replay"],
     queryFn: () => fetch("/api/vessels").then(r => r.ok ? r.json() : Promise.reject(r.status)),
     staleTime: 120000,
@@ -150,7 +151,7 @@ export default function VesselsReplayPage() {
   const vessels = vesselsData?.data ?? [];
   const effectiveVesselId = selectedVesselId ?? (vessels[0] ? String(vessels[0].id) : null);
 
-  const { data: eventsData, isFetching: eventsFetching, isError: eventsError, isLoading: eventsLoading } = useQuery<{ data: ApiVesselEvent[] }>({
+  const { data: eventsData, isFetching: eventsFetching, isError: eventsError, isLoading: eventsLoading } = useStandardQuery<{ data: ApiVesselEvent[] }>({
     queryKey: ["vessel-events", effectiveVesselId],
     queryFn: () => fetch(`/api/vessels/${effectiveVesselId}/events`).then(r => r.ok ? r.json() : Promise.reject(r.status)),
     staleTime: 60000,

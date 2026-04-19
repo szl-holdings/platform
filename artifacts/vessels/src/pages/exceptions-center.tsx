@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { EmptyState } from "@szl-holdings/shared-ui/design-system";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import {
+
   AlertTriangle, Clock, User, ChevronDown, ChevronRight,
   CheckCircle2, Ship, CloudLightning, Anchor, Wrench, Fuel, Navigation, Radio,
   RefreshCw, CheckCheck, ArrowUpCircle,
@@ -15,6 +16,7 @@ import {
   OperationalRiskBadge,
   severityToRiskLevel,
 } from "@szl-holdings/shared-ui/operational-primitives";
+import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
 export type ExceptionSeverity = "critical" | "high" | "watch" | "normal" | "medium" | "low";
 export type ExceptionType = "route_deviation" | "delay_risk" | "port_congestion" | "weather_disruption" | "maintenance_risk" | "fuel_anomaly" | "schedule_variance" | "security_alert";
@@ -75,7 +77,7 @@ const statusConfig: Record<string, { label: string; color: string }> = {
 };
 
 function useExceptions(status?: string, severity?: string) {
-  return useQuery({
+  return useStandardQuery({
     queryKey: ["vesselExceptions", status, severity],
     queryFn: async () => {
       const params = new URLSearchParams();
@@ -94,7 +96,7 @@ function useExceptions(status?: string, severity?: string) {
 
 function useAcknowledgeException() {
   const qc = useQueryClient();
-  return useMutation({
+  return useStandardMutation({
     mutationFn: async ({ id, notes }: { id: number; notes?: string }) =>
       apiFetch<VesselsException>(`/vessels/exceptions/${id}/acknowledge`, {
         method: "POST",
@@ -117,7 +119,7 @@ function useAcknowledgeException() {
 
 function useEscalateException() {
   const qc = useQueryClient();
-  return useMutation({
+  return useStandardMutation({
     mutationFn: async ({ id, notes }: { id: number; notes?: string }) =>
       apiFetch<VesselsException>(`/vessels/exceptions/${id}/escalate`, {
         method: "POST",
@@ -129,7 +131,7 @@ function useEscalateException() {
 
 function useResolveException() {
   const qc = useQueryClient();
-  return useMutation({
+  return useStandardMutation({
     mutationFn: async ({ id, notes }: { id: number; notes: string }) =>
       apiFetch<VesselsException>(`/vessels/exceptions/${id}/resolve`, {
         method: "POST",
