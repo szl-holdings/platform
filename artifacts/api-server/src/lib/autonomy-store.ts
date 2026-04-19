@@ -5,9 +5,12 @@
  * Side-effecting Alloy workflow steps consult this store to decide whether
  * to execute, draft, queue for approval, or block.
  *
- * In-memory by design (matches existing Alloy in-memory stores under
- * @szl/alloy). Persistence to a durable store is out of scope for this task.
+ * Persisted in Postgres via the `alloy_autonomy_modes` table so choices
+ * survive api-server restarts and are consistent across replicas.
  */
+
+import { db, alloyAutonomyModesTable } from "@szl-holdings/db";
+import { and, eq, isNull, sql } from "drizzle-orm";
 
 export type AutonomyMode =
   | "observe"
@@ -51,19 +54,33 @@ export interface AutonomyDecision {
   mode: AutonomyMode;
 }
 
-const store = new Map<string, AutonomyModeRecord>();
-
-function makeKey(tenantOrgId: number | null, domain: string): string {
-  return `${tenantOrgId ?? "global"}::${domain.toLowerCase()}`;
+function tenantPredicate(tenantOrgId: number | null) {
+  return tenantOrgId == null
+    ? isNull(alloyAutonomyModesTable.tenantOrgId)
+    : eq(alloyAutonomyModesTable.tenantOrgId, tenantOrgId);
 }
 
-export function getAutonomyMode(
-  tenantOrgId: number | null,
-  domain: string,
-): AutonomyModeRecord {
-  const key = makeKey(tenantOrgId, domain);
-  const existing = store.get(key);
-  if (existing) return existing;
+/**
+ * Domains are matched case-insensitively to match the legacy in-memory store
+ * behavior, which keyed by `domain.toLowerCase()`. We normalize on both read
+ * and write so callers can use any casing without producing duplicate rows.
+ */
+function normalizeDomain(domain: string): string {
+  return domain.trim().toLowerCase();
+}
+
+function rowToRecord(row: typeof alloyAutonomyModesTable.$inferSelect): AutonomyModeRecord {
+  return {
+    tenantOrgId: row.tenantOrgId,
+    domain: row.domain,
+    mode: row.mode as AutonomyMode,
+    updatedAt: (row.updatedAt instanceof Date ? row.updatedAt : new Date(row.updatedAt)).toISOString(),
+    updatedBy: row.updatedBy,
+    reason: row.reason,
+  };
+}
+
+function defaultRecord(tenantOrgId: number | null, domain: string): AutonomyModeRecord {
   return {
     tenantOrgId,
     domain,
@@ -74,38 +91,85 @@ export function getAutonomyMode(
   };
 }
 
-export function setAutonomyMode(params: {
+export async function getAutonomyMode(
+  tenantOrgId: number | null,
+  domain: string,
+): Promise<AutonomyModeRecord> {
+  const normalizedDomain = normalizeDomain(domain);
+  const [row] = await db
+    .select()
+    .from(alloyAutonomyModesTable)
+    .where(and(tenantPredicate(tenantOrgId), eq(alloyAutonomyModesTable.domain, normalizedDomain)))
+    .limit(1);
+  if (row) return rowToRecord(row);
+  return defaultRecord(tenantOrgId, normalizedDomain);
+}
+
+export async function setAutonomyMode(params: {
   tenantOrgId: number | null;
   domain: string;
   mode: AutonomyMode;
   updatedBy?: string | null;
   reason?: string | null;
-}): AutonomyModeRecord {
-  const record: AutonomyModeRecord = {
-    tenantOrgId: params.tenantOrgId,
-    domain: params.domain,
+}): Promise<AutonomyModeRecord> {
+  const now = new Date();
+  const updatedBy = params.updatedBy ?? null;
+  const reason = params.reason ?? null;
+  const domain = normalizeDomain(params.domain);
+
+  // Race-safe upsert. Two partial unique indexes back this table — one for
+  // (tenant_org_id, domain) WHERE tenant_org_id IS NOT NULL, one for
+  // (domain) WHERE tenant_org_id IS NULL — so we target whichever applies.
+  const setOnConflict = {
     mode: params.mode,
-    updatedAt: new Date().toISOString(),
-    updatedBy: params.updatedBy ?? null,
-    reason: params.reason ?? null,
+    updatedAt: now,
+    updatedBy,
+    reason,
   };
-  store.set(makeKey(params.tenantOrgId, params.domain), record);
-  return record;
+  const values = {
+    tenantOrgId: params.tenantOrgId,
+    domain,
+    mode: params.mode,
+    updatedAt: now,
+    updatedBy,
+    reason,
+  };
+
+  const [row] = params.tenantOrgId == null
+    ? await db
+        .insert(alloyAutonomyModesTable)
+        .values(values)
+        .onConflictDoUpdate({
+          target: [alloyAutonomyModesTable.domain],
+          targetWhere: sql`tenant_org_id IS NULL`,
+          set: setOnConflict,
+        })
+        .returning()
+    : await db
+        .insert(alloyAutonomyModesTable)
+        .values(values)
+        .onConflictDoUpdate({
+          target: [alloyAutonomyModesTable.tenantOrgId, alloyAutonomyModesTable.domain],
+          targetWhere: sql`tenant_org_id IS NOT NULL`,
+          set: setOnConflict,
+        })
+        .returning();
+  return rowToRecord(row);
 }
 
-export function listAutonomyModes(
+export async function listAutonomyModes(
   tenantOrgId: number | null,
-): AutonomyModeRecord[] {
-  const out: AutonomyModeRecord[] = [];
-  for (const rec of store.values()) {
-    if (rec.tenantOrgId === tenantOrgId) out.push(rec);
-  }
-  return out;
+): Promise<AutonomyModeRecord[]> {
+  const rows = await db
+    .select()
+    .from(alloyAutonomyModesTable)
+    .where(tenantPredicate(tenantOrgId));
+  return rows.map(rowToRecord);
 }
 
 /** For tests only. */
-export function _clearAutonomyStore(): void {
-  store.clear();
+export async function _clearAutonomyStore(): Promise<void> {
+  await db.delete(alloyAutonomyModesTable);
 }
 
 /**
@@ -113,12 +177,12 @@ export function _clearAutonomyStore(): void {
  * autonomy mode for (tenant, domain). Returns the policy state to display
  * in the ProofEnvelope and the runtime disposition for the workflow engine.
  */
-export function evaluateAutonomyForAction(
+export async function evaluateAutonomyForAction(
   tenantOrgId: number | null,
   domain: string,
   opts?: { actionLabel?: string },
-): AutonomyDecision {
-  const record = getAutonomyMode(tenantOrgId, domain);
+): Promise<AutonomyDecision> {
+  const record = await getAutonomyMode(tenantOrgId, domain);
   const action = opts?.actionLabel ?? "this action";
   switch (record.mode) {
     case "observe":

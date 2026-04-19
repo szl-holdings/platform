@@ -1362,8 +1362,8 @@ router.post("/alloy/recommend", authMiddleware(), validateBody(recommendBodySche
     // letting any side-effecting recommendation execute. The mode written via
     // PATCH /alloy/autonomy-mode wins over the per-call autonomyMode hint
     // unless an explicit override is requested.
-    const persisted = getAutonomyMode(tenantOrgId, req.body.domain);
-    const decision = evaluateAutonomyForAction(tenantOrgId, req.body.domain, {
+    const persisted = await getAutonomyMode(tenantOrgId, req.body.domain);
+    const decision = await evaluateAutonomyForAction(tenantOrgId, req.body.domain, {
       actionLabel: req.body.suggestedAction ?? req.body.title,
     });
     const effectiveMode = (req.body.autonomyMode as AutonomyMode | undefined) ?? persisted.mode;
@@ -1543,11 +1543,11 @@ router.get("/alloy/autonomy-mode", authMiddleware(), validateQuery(listQuerySche
     const tenantOrgId = resolveAlloyTenant(req);
     const domain = (req.query.domain as string | undefined)?.trim();
     if (domain) {
-      const record = getAutonomyMode(tenantOrgId, domain);
-      const decision = evaluateAutonomyForAction(tenantOrgId, domain);
+      const record = await getAutonomyMode(tenantOrgId, domain);
+      const decision = await evaluateAutonomyForAction(tenantOrgId, domain);
       return sendSuccess(res, { ...record, decision, modes: AUTONOMY_MODES });
     }
-    const list = listAutonomyModes(tenantOrgId);
+    const list = await listAutonomyModes(tenantOrgId);
     return sendSuccess(res, { items: list, modes: AUTONOMY_MODES });
   } catch (err) {
     handleRouteError(res, err, "Failed to read autonomy mode");
@@ -1566,10 +1566,10 @@ router.patch(
         sendBadRequest(res, "Invalid autonomy mode payload", parsed.error.flatten());
         return;
       }
-      const before = getAutonomyMode(tenantOrgId, parsed.data.domain);
+      const before = await getAutonomyMode(tenantOrgId, parsed.data.domain);
       const updatedBy =
         req.user?.displayName ?? req.user?.email ?? (req.user?.id != null ? `user:${req.user.id}` : "anonymous");
-      const record = setAutonomyMode({
+      const record = await setAutonomyMode({
         tenantOrgId,
         domain: parsed.data.domain,
         mode: parsed.data.mode as AutonomyMode,
@@ -1589,7 +1589,7 @@ router.patch(
         { tenantOrgId, domain: record.domain, mode: record.mode, updatedBy },
         "alloy.autonomy-mode.updated",
       );
-      const decision = evaluateAutonomyForAction(tenantOrgId, record.domain);
+      const decision = await evaluateAutonomyForAction(tenantOrgId, record.domain);
       return sendSuccess(res, { ...record, decision, modes: AUTONOMY_MODES });
     } catch (err) {
       handleRouteError(res, err, "Failed to update autonomy mode");
@@ -1614,10 +1614,10 @@ router.post(
         sendBadRequest(res, "domain is required");
         return;
       }
-      const decision = evaluateAutonomyForAction(tenantOrgId, body.domain, {
+      const decision = await evaluateAutonomyForAction(tenantOrgId, body.domain, {
         actionLabel: body.actionLabel,
       });
-      const record = getAutonomyMode(tenantOrgId, body.domain);
+      const record = await getAutonomyMode(tenantOrgId, body.domain);
       return sendSuccess(res, { ...record, decision });
     } catch (err) {
       handleRouteError(res, err, "Failed to evaluate autonomy mode");

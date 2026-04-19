@@ -49,6 +49,7 @@ export * from "./capital_readiness";
 export * from "./certification_readiness";
 export * from "./ownership_control";
 export * from "./alloy_platform";
+export * from "./alloy_autonomy_modes";
 export * from "./lyte_product";
 export * from "./vessels_intelligence";
 export * from "./platform_ops";
