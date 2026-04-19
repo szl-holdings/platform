@@ -3,7 +3,7 @@ import { useRoute, useLocation } from "wouter";
 import {
   Network, ChevronDown, Clock, AlertTriangle, CheckCircle, Circle,
   ArrowRight, Lock, User, Building, Scale, FileText, Gavel, X,
-  Zap, Hash
+  Zap, Hash, RotateCcw, Move
 } from "lucide-react";
 import { GraphCanvas, type GraphNode, type GraphEdge } from "@szl-holdings/design-system";
 import {
@@ -225,7 +225,11 @@ interface BuiltGraph {
   criticalIds: Set<string>;
 }
 
-function buildGraph(matter: Matter, selectedId: string | null): BuiltGraph {
+function buildGraph(
+  matter: Matter,
+  selectedId: string | null,
+  overrides: Record<string, { x: number; y: number }>,
+): BuiltGraph {
   const filings = matter.proofChain.filter((p) => p.eventType === "filing");
   const criticalObligIds = computeCriticalPath(matter.obligations);
   const criticalIds = new Set<string>();
@@ -324,7 +328,7 @@ function buildGraph(matter: Matter, selectedId: string | null): BuiltGraph {
   // Build GraphCanvas nodes
   const graphNodes: GraphNode[] = ids.map((id) => {
     const data = nodeData[id];
-    const pos = layout[id];
+    const pos = overrides[id] ?? layout[id];
     const isSelected = selectedId === id;
     const isCritical = criticalIds.has(id);
 
@@ -642,9 +646,53 @@ export default function ObligationGraph() {
   // Reset selection when matter changes
   useEffect(() => { setSelectedNodeId(null); }, [selectedMatterId]);
 
+  // Custom node positions (per matter), persisted in localStorage so lawyers
+  // can clean up the layout for screenshots, depositions, etc.
+  const positionsKey = matter ? `prism-counsel:obligation-graph:positions:${matter.id}` : "";
+  const [nodePositions, setNodePositions] = useState<Record<string, { x: number; y: number }>>({});
+
+  useEffect(() => {
+    if (!positionsKey) { setNodePositions({}); return; }
+    try {
+      const raw = localStorage.getItem(positionsKey);
+      setNodePositions(raw ? JSON.parse(raw) : {});
+    } catch {
+      setNodePositions({});
+    }
+  }, [positionsKey]);
+
+  const persistPositions = (next: Record<string, { x: number; y: number }>) => {
+    if (!positionsKey) return;
+    try {
+      if (Object.keys(next).length === 0) localStorage.removeItem(positionsKey);
+      else localStorage.setItem(positionsKey, JSON.stringify(next));
+    } catch {
+      // ignore storage failures (private mode, quota, etc.)
+    }
+  };
+
+  const handleNodeDrag = (id: string, x: number, y: number) => {
+    setNodePositions((prev) => ({ ...prev, [id]: { x, y } }));
+  };
+
+  const handleNodeDragEnd = (id: string, x: number, y: number) => {
+    setNodePositions((prev) => {
+      const next = { ...prev, [id]: { x, y } };
+      persistPositions(next);
+      return next;
+    });
+  };
+
+  const handleResetLayout = () => {
+    setNodePositions({});
+    persistPositions({});
+  };
+
+  const hasCustomLayout = Object.keys(nodePositions).length > 0;
+
   const { graphNodes, graphEdges, nodeData, criticalIds } = useMemo(
-    () => buildGraph(matter, selectedNodeId),
-    [matter, selectedNodeId],
+    () => buildGraph(matter, selectedNodeId, nodePositions),
+    [matter, selectedNodeId, nodePositions],
   );
 
   const obligsByStatus = useMemo(() => ({
@@ -707,7 +755,26 @@ export default function ObligationGraph() {
               <span className="text-[10px]" style={{ color: CRITICAL_COLOR }}>Critical Path ({criticalObligationCount})</span>
             </div>
           </div>
-          <p className="text-[10px] text-white/30">Click a node for details · Drag the matter selector to switch</p>
+          <div className="flex items-center gap-2">
+            <p className="text-[10px] text-white/30 hidden sm:flex items-center gap-1">
+              <Move className="w-2.5 h-2.5" /> Drag nodes to reposition · Click for details
+            </p>
+            <button
+              type="button"
+              onClick={handleResetLayout}
+              disabled={!hasCustomLayout}
+              className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full border transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              style={{
+                background: hasCustomLayout ? "rgba(167,139,250,0.10)" : "rgba(255,255,255,0.02)",
+                borderColor: hasCustomLayout ? "rgba(167,139,250,0.30)" : "rgba(255,255,255,0.08)",
+                color: hasCustomLayout ? ACCENT : "rgba(255,255,255,0.35)",
+              }}
+              title={hasCustomLayout ? "Restore the auto-computed layout" : "No custom positions to reset"}
+            >
+              <RotateCcw className="w-2.5 h-2.5" />
+              Reset Layout
+            </button>
+          </div>
         </div>
         <div className="grid lg:grid-cols-[1fr_320px]">
           <div className="relative">
@@ -718,6 +785,8 @@ export default function ObligationGraph() {
               background="transparent"
               showLabels
               onNodeClick={(n) => setSelectedNodeId(n.id)}
+              onNodeDrag={handleNodeDrag}
+              onNodeDragEnd={handleNodeDragEnd}
               className="border-0 rounded-none"
             />
           </div>

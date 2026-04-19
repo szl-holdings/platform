@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback } from "react";
+import { useRef, useEffect, useCallback, useState } from "react";
 import { cn } from "../utils";
 
 export interface GraphNode {
@@ -32,6 +32,13 @@ export interface GraphCanvasProps {
   height?: number | string;
   className?: string;
   onNodeClick?: (node: GraphNode) => void;
+  /**
+   * Called continuously while a node is being dragged with normalized
+   * coordinates in [0, 1]. When provided, nodes become draggable.
+   */
+  onNodeDrag?: (nodeId: string, x: number, y: number) => void;
+  /** Called once when a drag gesture ends. */
+  onNodeDragEnd?: (nodeId: string, x: number, y: number) => void;
   /** Background color — defaults to the GI surface token */
   background?: string;
   /** Show node labels */
@@ -45,11 +52,17 @@ export function GraphCanvas({
   height = 320,
   className,
   onNodeClick,
+  onNodeDrag,
+  onNodeDragEnd,
   background = "#0d1520",
   showLabels = true,
 }: GraphCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const hitRef = useRef<Map<string, GraphNode>>(new Map());
+  const dragRef = useRef<{ id: string; moved: boolean } | null>(null);
+  const [hoverId, setHoverId] = useState<string | null>(null);
+
+  const draggable = !!onNodeDrag;
 
   const draw = useCallback(() => {
     const canvas = canvasRef.current;
@@ -181,26 +194,99 @@ export function GraphCanvas({
     return () => ro.disconnect();
   }, [draw]);
 
-  function handleClick(e: React.MouseEvent<HTMLCanvasElement>) {
-    if (!onNodeClick) return;
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+  function getCanvasCoords(e: { clientX: number; clientY: number }) {
+    const canvas = canvasRef.current!;
     const rect = canvas.getBoundingClientRect();
-    const mx = e.clientX - rect.left;
-    const my = e.clientY - rect.top;
-    const W = canvas.width;
-    const H = canvas.height;
+    return {
+      mx: e.clientX - rect.left,
+      my: e.clientY - rect.top,
+      W: canvas.width,
+      H: canvas.height,
+      rect,
+    };
+  }
 
-    for (const node of nodes) {
+  function hitTest(mx: number, my: number, W: number, H: number): GraphNode | null {
+    // Iterate in reverse so visually top-most nodes are picked first.
+    for (let i = nodes.length - 1; i >= 0; i--) {
+      const node = nodes[i];
       const nx = node.x * W;
       const ny = node.y * H;
       const r  = (node.radius ?? 8) + 6;
-      if (Math.hypot(mx - nx, my - ny) <= r) {
-        onNodeClick(node);
-        return;
-      }
+      if (Math.hypot(mx - nx, my - ny) <= r) return node;
+    }
+    return null;
+  }
+
+  function handleMouseDown(e: React.MouseEvent<HTMLCanvasElement>) {
+    if (!draggable) return;
+    if (!canvasRef.current) return;
+    const { mx, my, W, H } = getCanvasCoords(e);
+    const node = hitTest(mx, my, W, H);
+    if (!node) return;
+    e.preventDefault();
+    dragRef.current = { id: node.id, moved: false };
+  }
+
+  function handleMouseMove(e: React.MouseEvent<HTMLCanvasElement>) {
+    if (!canvasRef.current) return;
+    const { mx, my, W, H } = getCanvasCoords(e);
+
+    const drag = dragRef.current;
+    if (drag && draggable) {
+      drag.moved = true;
+      const nx = Math.max(0.02, Math.min(0.98, mx / W));
+      const ny = Math.max(0.02, Math.min(0.98, my / H));
+      onNodeDrag?.(drag.id, nx, ny);
+      return;
+    }
+
+    if (draggable || onNodeClick) {
+      const node = hitTest(mx, my, W, H);
+      const id = node?.id ?? null;
+      if (id !== hoverId) setHoverId(id);
     }
   }
+
+  function endDrag(e: React.MouseEvent<HTMLCanvasElement>) {
+    const drag = dragRef.current;
+    if (!drag) return;
+    dragRef.current = null;
+    if (drag.moved) {
+      const { mx, my, W, H } = getCanvasCoords(e);
+      const nx = Math.max(0.02, Math.min(0.98, mx / W));
+      const ny = Math.max(0.02, Math.min(0.98, my / H));
+      onNodeDragEnd?.(drag.id, nx, ny);
+    } else if (onNodeClick) {
+      // Treat a no-move mouseup as a click.
+      const node = nodes.find((n) => n.id === drag.id);
+      if (node) onNodeClick(node);
+    }
+  }
+
+  function handleMouseUp(e: React.MouseEvent<HTMLCanvasElement>) {
+    if (draggable) {
+      endDrag(e);
+      return;
+    }
+    if (!onNodeClick) return;
+    const { mx, my, W, H } = getCanvasCoords(e);
+    const node = hitTest(mx, my, W, H);
+    if (node) onNodeClick(node);
+  }
+
+  function handleMouseLeave(e: React.MouseEvent<HTMLCanvasElement>) {
+    if (dragRef.current && draggable) endDrag(e);
+    if (hoverId) setHoverId(null);
+  }
+
+  const cursor = dragRef.current
+    ? "grabbing"
+    : hoverId
+    ? draggable
+      ? "grab"
+      : "pointer"
+    : "default";
 
   return (
     <div
@@ -209,11 +295,12 @@ export function GraphCanvas({
     >
       <canvas
         ref={canvasRef}
-        onClick={handleClick}
-        className={cn(
-          "block w-full h-full",
-          onNodeClick && "cursor-pointer"
-        )}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseLeave}
+        className="block w-full h-full select-none"
+        style={{ cursor, touchAction: "none" }}
         aria-label="Graph visualization"
         role="img"
       />
