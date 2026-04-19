@@ -24,6 +24,7 @@ import {
   usersTable,
   notificationsTable,
   notificationPreferencesTable,
+  appsRegistryTable,
   type Deployment,
 } from "@szl-holdings/db";
 import { and, asc, desc, eq, inArray, or } from "drizzle-orm";
@@ -85,35 +86,44 @@ export interface DeploymentRecord {
 }
 
 /**
- * Static map of appId -> owning team. Used so the operator console can show
- * "who do I page" alongside each deployment row without requiring a separate
- * lookup. Apps not listed here fall back to "Platform" — the catch-all team
- * that owns shared infrastructure.
+ * Default owning team for apps that aren't yet registered in `apps_registry`
+ * or that have a NULL `owner_team`. Platform owns shared infrastructure and
+ * is the right "who do I page" fallback when nothing else is configured.
  */
-const APP_OWNER_TEAMS: Record<string, string> = {
-  "api-server": "Platform",
-  command: "Platform",
-  "szl-holdings": "Platform",
-  "szl-holdings-mobile": "Platform",
-  pulse: "Pulse",
-  aegis: "Aegis",
-  vessels: "Vessels",
-  terra: "Terra",
-  sentra: "Sentra",
-  counsel: "PRISM Counsel",
-  "prism-counsel": "PRISM Counsel",
-  lyte: "Lyte",
-  "lyte-command-center": "Lyte",
-  "carlota-jo": "Advisory",
-  "szl-demo-video": "Marketing",
-  "mockup-sandbox": "Design",
-};
+const DEFAULT_OWNER_TEAM = "Platform";
 
-function ownerTeamFor(appId: string): string {
-  return APP_OWNER_TEAMS[appId] ?? "Platform";
+/**
+ * Resolve owning teams for a batch of app slugs from the apps registry.
+ * Apps without a row, or with `owner_team IS NULL`, fall back to the default.
+ * Batched into a single query so listing all deployments stays a 2-query
+ * operation regardless of how many apps are registered.
+ */
+async function lookupOwnerTeams(appIds: string[]): Promise<Map<string, string>> {
+  const map = new Map<string, string>();
+  const unique = Array.from(new Set(appIds)).filter((s) => s.length > 0);
+  if (unique.length === 0) return map;
+
+  const rows = await db
+    .select({ slug: appsRegistryTable.slug, ownerTeam: appsRegistryTable.ownerTeam })
+    .from(appsRegistryTable)
+    .where(inArray(appsRegistryTable.slug, unique));
+
+  for (const r of rows) {
+    if (r.ownerTeam && r.ownerTeam.trim().length > 0) map.set(r.slug, r.ownerTeam);
+  }
+  return map;
 }
 
-function toRecord(row: Deployment, user?: DeploymentUserSummary): DeploymentRecord {
+async function ownerTeamFor(appId: string): Promise<string> {
+  const map = await lookupOwnerTeams([appId]);
+  return map.get(appId) ?? DEFAULT_OWNER_TEAM;
+}
+
+function toRecord(
+  row: Deployment,
+  user?: DeploymentUserSummary,
+  ownerTeam?: string,
+): DeploymentRecord {
   return {
     appId: row.appId,
     appName: row.appName,
@@ -123,7 +133,7 @@ function toRecord(row: Deployment, user?: DeploymentUserSummary): DeploymentReco
     deployedAt: row.deployedAt.toISOString(),
     deployedBy: row.deployedBy,
     deployedByUser: user,
-    ownerTeam: ownerTeamFor(row.appId),
+    ownerTeam: ownerTeam ?? DEFAULT_OWNER_TEAM,
     commitSha: row.commitSha ?? undefined,
     notes: row.notes ?? undefined,
     metadata: row.metadata ?? undefined,
@@ -187,8 +197,13 @@ async function lookupDeployers(
 }
 
 async function recordsWithUsers(rows: Deployment[]): Promise<DeploymentRecord[]> {
-  const users = await lookupDeployers(rows.map((r) => r.deployedBy));
-  return rows.map((r) => toRecord(r, users.get(r.deployedBy)));
+  const [users, owners] = await Promise.all([
+    lookupDeployers(rows.map((r) => r.deployedBy)),
+    lookupOwnerTeams(rows.map((r) => r.appId)),
+  ]);
+  return rows.map((r) =>
+    toRecord(r, users.get(r.deployedBy), owners.get(r.appId) ?? DEFAULT_OWNER_TEAM),
+  );
 }
 
 async function getHistory(
@@ -261,7 +276,7 @@ async function notifyRollback(params: {
   previousDeployedBy: string;
 }): Promise<void> {
   try {
-    const team = ownerTeamFor(params.appId);
+    const team = await ownerTeamFor(params.appId);
     const recipientIds = new Set<number>();
 
     const teamUsers = await db

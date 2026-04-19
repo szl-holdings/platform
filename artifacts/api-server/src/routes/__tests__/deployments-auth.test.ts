@@ -75,6 +75,9 @@ vi.mock("@szl-holdings/db", () => {
   const notificationPreferencesTable = new Proxy({} as Record<string, unknown>, {
     get: (_t, p) => col(String(p)),
   });
+  const appsRegistryTable = new Proxy({} as Record<string, unknown>, {
+    get: (_t, p) => col(String(p)),
+  });
 
   function makeSelectChain(table: unknown) {
     const state: { conds: unknown[]; orderRows?: DeploymentRow[] } = { conds: [] };
@@ -182,6 +185,7 @@ vi.mock("@szl-holdings/db", () => {
     usersTable,
     notificationsTable,
     notificationPreferencesTable,
+    appsRegistryTable,
   };
 });
 

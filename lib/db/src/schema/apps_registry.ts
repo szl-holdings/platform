@@ -12,6 +12,7 @@ export const appsRegistryTable = pgTable("apps_registry", {
   status: text("status", { enum: ["active", "coming_soon", "maintenance", "deprecated"] }).notNull().default("coming_soon"),
   version: text("version").notNull().default("0.1.0"),
   config: jsonb("config"),
+  ownerTeam: text("owner_team"),
   isPublic: boolean("is_public").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),

@@ -7,7 +7,7 @@ import { SectionErrorBoundary } from "@szl-holdings/shared-ui/error-boundary";
 import { ReactNode, useState } from "react";
 import { ServiceStatusRail } from "@szl-holdings/shared-ui/service-status-rail";
 import {
-  Zap, Menu, X, ChevronDown, Bell, Settings, Users, Flag, FileText, Database, Play, Activity, CheckSquare, Shield, Network, Heart, AlertTriangle, Brain, Radio, Workflow, Inbox, Search, UserCheck, ChevronRight, Gauge, BarChart3, LayoutDashboard, Download, Clapperboard, Power, GitBranch, Send, Cpu, TrendingUp, DollarSign, RotateCcw, Calculator, Bot, Monitor, Building, BookOpen, Layers, Calendar, BellOff, Code, Target, Globe, Phone, Scale
+  Zap, Menu, X, ChevronDown, Bell, Settings, Users, Flag, FileText, Database, Play, Activity, CheckSquare, Shield, Network, Heart, AlertTriangle, Brain, Radio, Workflow, Inbox, Search, UserCheck, ChevronRight, Gauge, BarChart3, LayoutDashboard, Download, Clapperboard, Power, GitBranch, Send, Cpu, TrendingUp, DollarSign, RotateCcw, Calculator, Bot, Monitor, Building, BookOpen, Layers, Calendar, BellOff, Code, Target, Globe, Phone, Scale, Boxes
 } from "lucide-react";
 import { useRealtimeChannel } from "@szl-holdings/shared-ui/use-realtime-channel";
 import { useSandboxMode } from "@szl-holdings/shared-ui/sandbox-mode";
@@ -185,6 +185,7 @@ const ADMIN_NAV = [
   { href: "/operations/admin/overview", label: "System", icon: Settings },
   { href: "/operations/admin/users", label: "Users", icon: Users },
   { href: "/operations/admin/flags", label: "Flags", icon: Flag },
+  { href: "/operations/admin/apps", label: "Apps", icon: Boxes },
   { href: "/operations/admin/runs", label: "Runs", icon: Play },
   { href: "/operations/admin/approvals", label: "Queue", icon: CheckSquare },
   { href: "/operations/admin/audit", label: "Audit", icon: FileText },

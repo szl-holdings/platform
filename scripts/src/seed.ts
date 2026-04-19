@@ -291,13 +291,13 @@ async function seed() {
   console.log("  ✓ usage events");
 
   await db.insert(appsRegistryTable).values([
-    { slug: "stephen-site", name: "Stephen L. Portfolio", description: "Personal portfolio and consulting showcase", icon: "Globe", color: "#6366f1", status: "active", version: "1.0.0", isPublic: true },
-    { slug: "vessels", name: "Vessels Tracker", description: "Maritime vessel tracking and cargo management", icon: "Ship", color: "#06b6d4", status: "active", version: "0.5.0" },
-    { slug: "firestorm", name: "Firestorm Marketing", description: "Campaign management and lead generation", icon: "Flame", color: "#f97316", status: "active", version: "0.3.0" },
-    { slug: "lyte-command-center", name: "Lyte Command Center", description: "Business observability and operational decisions", icon: "Monitor", color: "#0ea5e9", status: "active", version: "1.0.0" },
-    { slug: "dreamscape", name: "Dreamscape Creative", description: "Creative campaign engine for storytelling and media", icon: "Palette", color: "#f59e0b", status: "active", version: "1.0.0" },
-    { slug: "readiness-report", name: "Lyte Readiness", description: "Operational readiness and maturity scoring module within Lyte", icon: "Shield", color: "#10b981", status: "active", version: "1.0.0" },
-    { slug: "control-plane", name: "Admin Control Plane", description: "Platform administration and configuration", icon: "Settings", color: "#64748b", status: "active", version: "0.2.0" },
+    { slug: "stephen-site", name: "Stephen L. Portfolio", description: "Personal portfolio and consulting showcase", icon: "Globe", color: "#6366f1", status: "active", version: "1.0.0", isPublic: true, ownerTeam: "Platform" },
+    { slug: "vessels", name: "Vessels Tracker", description: "Maritime vessel tracking and cargo management", icon: "Ship", color: "#06b6d4", status: "active", version: "0.5.0", ownerTeam: "Vessels" },
+    { slug: "firestorm", name: "Firestorm Marketing", description: "Campaign management and lead generation", icon: "Flame", color: "#f97316", status: "active", version: "0.3.0", ownerTeam: "Marketing" },
+    { slug: "lyte-command-center", name: "Lyte Command Center", description: "Business observability and operational decisions", icon: "Monitor", color: "#0ea5e9", status: "active", version: "1.0.0", ownerTeam: "Lyte" },
+    { slug: "dreamscape", name: "Dreamscape Creative", description: "Creative campaign engine for storytelling and media", icon: "Palette", color: "#f59e0b", status: "active", version: "1.0.0", ownerTeam: "Marketing" },
+    { slug: "readiness-report", name: "Lyte Readiness", description: "Operational readiness and maturity scoring module within Lyte", icon: "Shield", color: "#10b981", status: "active", version: "1.0.0", ownerTeam: "Lyte" },
+    { slug: "control-plane", name: "Admin Control Plane", description: "Platform administration and configuration", icon: "Settings", color: "#64748b", status: "active", version: "0.2.0", ownerTeam: "Platform" },
   ]);
   console.log("  ✓ apps registry");
 
