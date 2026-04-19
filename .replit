@@ -38,6 +38,10 @@ args = "artifacts/lyte-command-center: web"
 task = "workflow.run"
 args = "artifacts/counsel: web"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "api-test"
+
 [[workflows.workflow]]
 name = "check-deprecated-links"
 author = "agent"
@@ -82,6 +86,17 @@ args = "bash -c 'cd /home/runner/workspace/artifacts/counsel && exec node_module
 
 [workflows.workflow.metadata]
 outputType = "webview"
+
+[[workflows.workflow]]
+name = "api-test"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "pnpm --filter ./artifacts/api-server test"
+
+[workflows.workflow.metadata]
+isValidation = true
 
 [agent]
 stack = "PNPM_WORKSPACE"
