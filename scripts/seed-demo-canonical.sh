@@ -12,6 +12,19 @@
 set -euo pipefail
 
 echo "[demo-seed] Starting demo seed pack..."
+
+# Step 0 (auto-precondition): make sure the schema is fully migrated before
+# running anything that inserts into recently-added tables. The
+# non-interactive wrapper (added in task #1050) auto-answers drizzle-kit's
+# rename prompts and enforces a hard timeout, so this is safe to run from
+# a non-TTY context like CI. Without this, step 10 (marine-extended)
+# fails on fresh environments because tables exist as "stub" placeholders.
+echo "[demo-seed] Step 0: Ensure database schema is migrated"
+pnpm migrate || {
+  echo "[demo-seed] WARNING: migrate command failed — step 10 (marine-extended) may skip."
+  echo "[demo-seed] Continuing with seed; investigate migrate failure separately."
+}
+
 echo "[demo-seed] Step 1: SZL canonical data (ports, vessels, routes, signals, actions)"
 pnpm --filter @workspace/scripts run seed:canonical
 

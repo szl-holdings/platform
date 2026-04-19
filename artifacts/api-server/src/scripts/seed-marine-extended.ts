@@ -10,12 +10,59 @@ import {
   vesselMaintenanceTable,
   vesselSanctionsScreeningTable,
 } from "@szl-holdings/db";
+import { sql } from "drizzle-orm";
 
 function daysAgo(n: number) { return new Date(Date.now() - n * 86400000); }
 function daysAhead(n: number) { return new Date(Date.now() + n * 86400000); }
 
+/**
+ * Several marine tables (e.g. marine_insurance_quotes) were historically created
+ * as one-column "stub" tables (just `_stub boolean`) by an emergency
+ * unblock script that bypassed drizzle-kit's interactive prompts. If we
+ * try to insert against a stub the failure is a confusing
+ * "column 'id' does not exist" mid-insert. Detect the stub state up
+ * front so the operator gets a clear instruction instead of a stack trace.
+ *
+ * Returns the list of required table/column pairs that are still missing.
+ */
+async function detectStubTables(): Promise<string[]> {
+  const required: Array<{ table: string; column: string }> = [
+    { table: "marine_insurance_quotes", column: "id" },
+    { table: "marine_insurance_policies", column: "id" },
+    { table: "marine_insurance_claims", column: "id" },
+    { table: "commodity_trading_instruments", column: "id" },
+    { table: "commodity_trading_orders", column: "id" },
+    { table: "commodity_trading_positions", column: "id" },
+    { table: "fleet_exceptions", column: "id" },
+    { table: "vessel_maintenance", column: "id" },
+    { table: "vessel_sanctions_screening", column: "id" },
+  ];
+  const missing: string[] = [];
+  for (const { table, column } of required) {
+    const result = await db.execute(
+      sql`SELECT 1 FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = ${table} AND column_name = ${column} LIMIT 1`,
+    );
+    // drizzle's execute returns { rows: [...] } on node-postgres
+    const rows = (result as unknown as { rows?: unknown[] }).rows ?? (result as unknown as unknown[]);
+    if (!Array.isArray(rows) || rows.length === 0) {
+      missing.push(`${table}.${column}`);
+    }
+  }
+  return missing;
+}
+
 export async function seedMarineExtended() {
   console.log("[seed-marine-extended] Starting Marine Insurance, Trading & Intelligence seed...");
+
+  const missing = await detectStubTables();
+  if (missing.length > 0) {
+    console.error(
+      `[seed-marine-extended] SKIPPING — schema not migrated. Missing columns: ${missing.join(", ")}.\n` +
+        `[seed-marine-extended] Fix: run \`pnpm migrate\` from the repo root, then re-run this seed. ` +
+        `(Tables exist as stubs from an earlier emergency unblock; the proper schema is in lib/db/src/schema/marine_insurance.ts and related files.)`,
+    );
+    return { skipped: true, reason: "schema_not_migrated", missing };
+  }
 
   const existing = await db.select({ id: marineInsuranceQuotesTable.id }).from(marineInsuranceQuotesTable).limit(1);
   if (existing.length > 0) {

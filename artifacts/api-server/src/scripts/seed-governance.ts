@@ -10,8 +10,36 @@ import {
   complianceSupervisionQueueTable,
   complianceCalendarTable,
   complianceRiskScoreTable,
+  organizationsTable,
 } from "@szl-holdings/db";
+import { sql } from "drizzle-orm";
 import { randomUUID } from "crypto";
+
+/**
+ * Ensures the demo organization with id=1 exists. Every governance row this
+ * seed inserts has `org_id = 1` (FK → organizations.id), so on a fresh DB
+ * where no organization has been created yet the FK rejects the entire
+ * seed. We use ON CONFLICT DO NOTHING so re-runs and environments where
+ * the row already exists are no-ops, and we bump the `serial` sequence
+ * past 1 afterwards so subsequent organic inserts don't collide on PK.
+ */
+async function ensureDemoOrgExists() {
+  await db
+    .insert(organizationsTable)
+    .values({
+      id: 1,
+      name: "SZL Holdings (Demo)",
+      slug: "szl-holdings-demo",
+      orgType: "internal",
+      plan: "enterprise",
+    })
+    .onConflictDoNothing({ target: organizationsTable.id });
+  // Advance the serial sequence past 1 so future organic inserts
+  // (which rely on serial autogen) don't fail with duplicate PK.
+  await db.execute(
+    sql`SELECT setval(pg_get_serial_sequence('organizations', 'id'), GREATEST((SELECT MAX(id) FROM organizations), 1))`,
+  );
+}
 
 function daysAgo(n: number) { return new Date(Date.now() - n * 86400000); }
 function daysAhead(n: number) { return new Date(Date.now() + n * 86400000); }
@@ -24,6 +52,10 @@ export async function seedGovernance() {
     console.log("[seed-governance] Data already seeded, skipping.");
     return { skipped: true };
   }
+
+  // Fresh-environment guarantee: every row below FK-references organizations.id=1.
+  // Without this, a fresh DB rejects the entire seed with a FK violation.
+  await ensureDemoOrgExists();
 
   const ORG_ID = 1;
 
