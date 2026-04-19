@@ -53,9 +53,9 @@ const EXTERNAL_DATA_POLICY = [
 ];
 
 const METRICS = [
-  { label: "Ingestion uptime target", value: "99.9%", sub: "Per month SLA" },
-  { label: "Export audit retention", value: "7 years", sub: "Minimum retention" },
-  { label: "Incident response SLA", value: "< 4 hrs", sub: "Initial response" },
+  { label: "Ingestion uptime target", value: "99.9%", sub: "Operational target" },
+  { label: "Export audit retention", value: "7 years", sub: "Default retention; enterprise contracts may specify custom terms" },
+  { label: "Incident response target", value: "< 4 hrs", sub: "Initial acknowledgement" },
   { label: "Failed job replay window", value: "30 days", sub: "Replay availability" },
 ];
 

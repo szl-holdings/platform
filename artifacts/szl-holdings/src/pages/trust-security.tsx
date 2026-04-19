@@ -57,7 +57,7 @@ const CONTROLS = [
 
 const DISCLOSURE_STEPS = [
   { step: "01", title: "Report", body: "Submit vulnerability details via the contact form, marked as security disclosure. Include steps to reproduce and impact assessment." },
-  { step: "02", title: "Acknowledge", body: "We acknowledge all security reports within 48 hours and provide an initial severity assessment." },
+  { step: "02", title: "Acknowledge", body: "We acknowledge security reports within 24 hours with an initial severity assessment. Critical issues are targeted for patch within 48–72 hours; lower-severity issues follow the standard remediation cycle." },
   { step: "03", title: "Remediate", body: "We investigate and remediate confirmed vulnerabilities. Researchers are kept informed of progress and expected timeline." },
   { step: "04", title: "Disclose", body: "After remediation, we support coordinated disclosure. Researchers who report responsibly are credited unless they prefer anonymity." },
 ];
@@ -170,7 +170,7 @@ export default function TrustSecurityPage() {
               {[
                 { label: "Security Diligence Brief", desc: "RBAC matrix, isolation model, credential handling, and vulnerability disclosure process", href: "/trust/diligence/security" },
                 { label: "Technical Diligence Brief", desc: "Architecture layers, tenancy model, API surface, integration security, and proof chain", href: "/trust/diligence/technical" },
-                { label: "Known Gaps Register", desc: "Transparent gap register with severity classification and remediation sprint assignments — all P0 gaps resolved April 2026", href: "/trust-center" },
+                { label: "Known Gaps Register", desc: "Transparent gap register with severity classification and remediation status. Remaining open gaps — including immutable log sink, internal token rotation, query timeouts, and AI provider circuit breakers — are tracked openly with roadmap dates.", href: "/trust-center" },
               ].map((item, i) => (
                 <m.div key={item.label} initial={{ opacity: 0, y: 8 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.35, delay: i * 0.07 }} className="szl-card" style={{ borderRadius: "0.75rem", padding: "1.125rem 1.25rem" }}>
                   <Link href={item.href} style={{ textDecoration: "none", display: "block" }}>
