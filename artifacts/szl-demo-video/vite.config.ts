@@ -10,7 +10,7 @@ function healthCheckMiddlewarePlugin(): Plugin {
     apply: "serve",
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
-        if (req.url === "/" || req.url === "/__health" || req.url === "/health") {
+        if (req.url === "/__health") {
           res.writeHead(200, { "Content-Type": "text/plain" });
           res.end("OK");
           return;

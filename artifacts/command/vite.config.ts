@@ -22,7 +22,7 @@ const SHARED_PROXY_PORT = 9090;
 // under BASE_PATH=/command/ and EMBED_API_SERVER=false.
 const proxyServer = http.createServer((req: any, res: any) => {
   const url = req.url || "/";
-  if (url === "/" || url === "/health" || url === "/__health") {
+  if (url === "/__health") {
     res.writeHead(200, { "Content-Type": "text/plain" });
     res.end("OK");
     return;
@@ -100,7 +100,7 @@ function sharedProxyPlugin(): Plugin {
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
         const url = req.url ?? "/";
-        if (url === "/" || url === "/__health" || url === "/health") {
+        if (url === "/__health") {
           res.writeHead(200, { "Content-Type": "text/plain" });
           res.end("OK");
           return;

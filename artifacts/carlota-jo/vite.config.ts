@@ -19,7 +19,7 @@ function healthCheckPlugin(): Plugin {
     apply: "serve" as const,
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
-        if (req.url === "/" || req.url === "/health" || req.url === "/__health") {
+        if (req.url === "/__health") {
           res.writeHead(200, { "Content-Type": "text/plain" });
           res.end("OK");
           return;
@@ -39,7 +39,7 @@ function sharedProxyPlugin() {
       const net = await import("net");
       const proxyServer = http.createServer((req, res) => {
         const url = req.url || "/";
-        if (url === "/" || url === "/health" || url === "/__health") {
+        if (url === "/__health") {
           res.writeHead(200, { "Content-Type": "text/plain" });
           res.end("OK");
           return;
