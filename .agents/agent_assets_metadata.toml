@@ -299,3 +299,9 @@ id = "aEWwcYFA65VSVTexQD4w6"
 uri = "file://demo-assets/szl-holdings-investor-carousel.pdf"
 type = "pdf"
 title = "SZL Holdings — Investor Carousel (10 slides)"
+
+[[outputs]]
+id = "CnYoqp9x0iCeG8S2ILIeo"
+uri = "file://output/szl-substack-kit/SZL-Substack-Post-Templates.docx"
+type = "word_document"
+title = "SZL Substack — 5 Post Templates"
