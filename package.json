@@ -71,7 +71,10 @@
     "docs:claims-check": "node --experimental-vm-modules scripts/docs/check-docs-claims.js",
     "brand:check": "tsx scripts/brand-check.ts",
     "brand:check:verbose": "tsx scripts/brand-check.ts --verbose",
-    "validate": "pnpm run brand:check && pnpm run typecheck && pnpm run test"
+    "validate": "pnpm run brand:check && pnpm run typecheck && pnpm run test",
+    "audit:full": "node --experimental-vm-modules scripts/audit-full.js",
+    "audit:full:fast": "node --experimental-vm-modules scripts/audit-full.js --skip-install --skip-e2e",
+    "audit:full:ci": "node --experimental-vm-modules scripts/audit-full.js --skip-install --skip-e2e"
   },
   "private": true,
   "packageManager": "pnpm@10.26.1",

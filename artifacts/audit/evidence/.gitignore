@@ -1,0 +1,4 @@
+# Ignore timestamped run directories — evidence is captured as CI artifacts,
+# not committed to the repository.
+20*/
+latest/
