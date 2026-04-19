@@ -95,12 +95,16 @@ export interface LinearTeam {
   name: string;
 }
 
-async function getDefaultTeam(preferredKey?: string): Promise<LinearTeam> {
+export async function listLinearTeams(): Promise<LinearTeam[]> {
   const data = await linearGraphQL<{ teams: { nodes: LinearTeam[] } }>(
     `query Teams { teams(first: 50) { nodes { id key name } } }`,
     {},
   );
-  const teams = data.teams.nodes ?? [];
+  return data.teams.nodes ?? [];
+}
+
+async function getDefaultTeam(preferredKey?: string): Promise<LinearTeam> {
+  const teams = await listLinearTeams();
   if (teams.length === 0) {
     throw new Error("No Linear teams available for the connected workspace");
   }
@@ -109,6 +113,30 @@ async function getDefaultTeam(preferredKey?: string): Promise<LinearTeam> {
     if (match) return match;
   }
   return teams[0]!;
+}
+
+interface LinearLabel { id: string; name: string; team: { id: string } | null }
+
+async function findLabelIdsByNames(teamId: string, names: string[]): Promise<string[]> {
+  if (names.length === 0) return [];
+  const data = await linearGraphQL<{ issueLabels: { nodes: LinearLabel[] } }>(
+    `query Labels { issueLabels(first: 250) { nodes { id name team { id } } } }`,
+    {},
+  );
+  const wanted = new Set(names.map((n) => n.toLowerCase()));
+  const matches = data.issueLabels.nodes.filter(
+    (l) => wanted.has(l.name.toLowerCase()) && (l.team === null || l.team.id === teamId),
+  );
+  // De-dup by name; prefer team-scoped over workspace-scoped when both exist.
+  const byName = new Map<string, LinearLabel>();
+  for (const m of matches) {
+    const key = m.name.toLowerCase();
+    const existing = byName.get(key);
+    if (!existing || (existing.team === null && m.team?.id === teamId)) {
+      byName.set(key, m);
+    }
+  }
+  return Array.from(byName.values()).map((l) => l.id);
 }
 
 async function findUserIdByName(name: string): Promise<string | null> {
@@ -133,6 +161,9 @@ export interface CreateLinearIssueInput {
   // user matches, the issue is created unassigned (no error is raised).
   assigneeName?: string;
   teamKey?: string;
+  // Best-effort exact-match against existing Linear label `name`s. Names that
+  // do not match an existing label are silently skipped (no auto-create).
+  labels?: string[];
 }
 
 export interface CreatedLinearIssue {
@@ -175,6 +206,15 @@ export async function createLinearIssue(input: CreateLinearIssueInput): Promise<
     }
   `;
 
+  let labelIds: string[] = [];
+  if (input.labels && input.labels.length > 0) {
+    try {
+      labelIds = await findLabelIdsByNames(team.id, input.labels);
+    } catch (err) {
+      logger.warn({ err, labels: input.labels }, "linear: label lookup failed");
+    }
+  }
+
   const variables: Record<string, unknown> = {
     input: {
       teamId: team.id,
@@ -182,6 +222,7 @@ export async function createLinearIssue(input: CreateLinearIssueInput): Promise<
       description: input.description,
       priority: input.priority,
       assigneeId,
+      labelIds: labelIds.length > 0 ? labelIds : undefined,
     },
   };
 

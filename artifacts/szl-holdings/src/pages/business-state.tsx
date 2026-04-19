@@ -588,6 +588,8 @@ function BusinessFlowModule() {
 
 // ── Module: Risk Register ──────────────────────────────────────────────────────
 
+type LinearTeamOption = { id: string; key: string; name: string };
+
 function RiskRegisterModule() {
   const live = useLive();
   const risks = (live?.riskRegister ?? RISK_REGISTER) as typeof RISK_REGISTER;
@@ -596,6 +598,76 @@ function RiskRegisterModule() {
   const [ownerInput, setOwnerInput] = useState("");
   const { store, patch } = useActionStore();
   const { toasts, show, dismiss } = useToasts();
+
+  const [defaultTeamKey, setDefaultTeamKey] = useState<string | null>(null);
+  const [teams, setTeams] = useState<LinearTeamOption[]>([]);
+  const [teamsErr, setTeamsErr] = useState<string | null>(null);
+  const [adminOpen, setAdminOpen] = useState(false);
+  const [savingDefault, setSavingDefault] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/linear/settings", { credentials: "include" })
+      .then(r => (r.ok ? r.json() : null))
+      .then(json => {
+        if (cancelled || !json) return;
+        const data = (json.data ?? json) as { defaultTeamKey?: string | null };
+        setDefaultTeamKey(data?.defaultTeamKey ?? null);
+      })
+      .catch(() => {});
+    fetch("/api/linear/teams", { credentials: "include" })
+      .then(async r => {
+        const json = await r.json().catch(() => null);
+        if (cancelled) return;
+        if (!r.ok) {
+          setTeamsErr(json?.error || `Could not load Linear teams (HTTP ${r.status})`);
+          return;
+        }
+        const data = (json.data ?? json) as { teams?: LinearTeamOption[] };
+        setTeams(data?.teams ?? []);
+      })
+      .catch(err => { if (!cancelled) setTeamsErr((err as Error).message); });
+    return () => { cancelled = true; };
+  }, []);
+
+  async function handleSaveDefaultTeam(nextKey: string | null) {
+    setSavingDefault(true);
+    try {
+      const r = await fetch("/api/linear/settings", {
+        method: "PUT",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ defaultTeamKey: nextKey }),
+      });
+      const json = await r.json().catch(() => null);
+      if (!r.ok) {
+        const msg =
+          r.status === 401 || r.status === 403
+            ? "You need an admin role to change the default Linear team."
+            : json?.error || `Could not save default team (HTTP ${r.status})`;
+        show(msg, "error", 6000);
+        return;
+      }
+      const data = (json.data ?? json) as { defaultTeamKey?: string | null };
+      setDefaultTeamKey(data?.defaultTeamKey ?? null);
+      show(
+        nextKey
+          ? `Default Linear team set to ${nextKey}.`
+          : "Default Linear team cleared — falls back to the workspace's first team.",
+        "success",
+      );
+    } catch (err) {
+      show(`Could not save default team: ${(err as Error).message}`, "error", 6000);
+    } finally {
+      setSavingDefault(false);
+    }
+  }
+
+  const defaultTeamLabel = (() => {
+    if (!defaultTeamKey) return null;
+    const t = teams.find(t => t.key.toLowerCase() === defaultTeamKey.toLowerCase());
+    return t ? `${t.key} · ${t.name}` : defaultTeamKey;
+  })();
 
   function handlePlaybook(riskId: string, riskTitle: string) {
     patch({ riskActions: { [riskId]: { type: "playbook", status: "running", at: new Date().toISOString(), actor: CURRENT_ACTOR } } });
@@ -630,6 +702,7 @@ function RiskRegisterModule() {
           description,
           priority: priorityMap[risk.level] ?? 3,
           assigneeName: risk.owner,
+          labels: [`domain:${risk.domain}`, `severity:${risk.level}`, "szl-business-state"],
         }),
       });
       const json = await response.json().catch(() => null);
@@ -662,6 +735,44 @@ function RiskRegisterModule() {
   return (
     <>
       <ToastContainer toasts={toasts} onDismiss={dismiss} />
+      <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem", padding: "0.625rem 0.875rem", marginBottom: "0.5rem", background: "hsla(0,0%,100%,0.02)", border: `1px solid ${BORDER}`, borderRadius: "0.5rem" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", flexWrap: "wrap" }}>
+          <Ticket style={{ width: 12, height: 12, color: ACCENT }} />
+          <span style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "rgba(255,255,255,0.45)" }}>Linear routing</span>
+          <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.55)" }}>
+            New tickets land in:{" "}
+            <strong style={{ color: "rgba(255,255,255,0.85)" }}>
+              {defaultTeamLabel ?? (teams[0] ? `${teams[0].key} · ${teams[0].name} (workspace default)` : teamsErr ? "—" : "loading…")}
+            </strong>
+          </span>
+          {teamsErr && <span style={{ fontSize: "10px", color: "#f97316" }}>· {teamsErr}</span>}
+          <button
+            onClick={() => setAdminOpen(o => !o)}
+            style={{ marginLeft: "auto", fontSize: "10px", fontWeight: 600, padding: "3px 9px", borderRadius: "4px", background: adminOpen ? `${ACCENT}25` : "hsla(0,0%,100%,0.04)", border: `1px solid ${adminOpen ? `${ACCENT}50` : BORDER}`, color: adminOpen ? ACCENT : "rgba(255,255,255,0.55)", cursor: "pointer" }}
+          >
+            {adminOpen ? "Close admin" : "Admin"}
+          </button>
+        </div>
+        {adminOpen && (
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap", borderTop: `1px solid ${BORDER}`, paddingTop: "0.5rem" }}>
+            <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)" }}>Default team</span>
+            <select
+              value={defaultTeamKey ?? ""}
+              onChange={e => handleSaveDefaultTeam(e.target.value || null)}
+              disabled={savingDefault || teams.length === 0}
+              style={{ fontSize: "11px", background: "hsla(0,0%,100%,0.06)", border: `1px solid ${BORDER}`, borderRadius: "4px", padding: "3px 6px", color: "rgba(255,255,255,0.85)", outline: "none", minWidth: "200px" }}
+            >
+              <option value="">— Workspace first team —</option>
+              {teams.map(t => (
+                <option key={t.id} value={t.key}>{t.key} · {t.name}</option>
+              ))}
+            </select>
+            <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.35)" }}>
+              Each ticket is also tagged with <code style={{ fontSize: "10px", padding: "0 4px", background: "hsla(0,0%,100%,0.05)", borderRadius: 3 }}>domain:&lt;name&gt;</code> and <code style={{ fontSize: "10px", padding: "0 4px", background: "hsla(0,0%,100%,0.05)", borderRadius: 3 }}>severity:&lt;level&gt;</code> when those labels exist in Linear.
+            </span>
+          </div>
+        )}
+      </div>
       <div style={{ display: "flex", flexDirection: "column", gap: "0" }}>
         {risks.map((risk, i) => {
           const color = risk.level === "critical" ? "#ef4444" : risk.level === "high" ? "#f97316" : "#f59e0b";
