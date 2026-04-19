@@ -66,6 +66,11 @@ const PUBLIC_EXACT_PATHS = new Set([
   // and unauthenticated like the rest of those demo surfaces.
   "/api/action-store",
   "/api/action-store/stream",
+  // Shared risk evidence store — backs the Save-run-as-evidence button on
+  // Terra/Vessels Risk Simulation panels so cited Monte Carlo runs are
+  // visible to external reviewers and lender briefings (instead of being
+  // stuck in per-browser localStorage). Public under the same model as the
+  // rest of the Terra/Vessels demo surfaces.
   // Lyte legacy surfaces — read-only public GET endpoints backing the 5
   // decision-intelligence pages (Ownership Drift, Pressure Map, Action Debt
   // Index, Decision Replay, Board View). See routes/lyte-surfaces.ts.
@@ -135,6 +140,10 @@ const PUBLIC_PREFIXES = [
   // Backs the Decision Center pages with the same signal/evidence/recommendation
   // bundle that gets seeded into the live signal mesh at boot.
   "/api/narratives/",
+  // Shared risk evidence store — list/save/delete cited Monte Carlo runs
+  // and resolve them server-side for lender briefing exports. See
+  // routes/risk-evidence.ts for the endpoint contract.
+  "/api/risk-evidence/",
   // Global Operations Fabric — snapshot + SSE stream for the Fabric page.
   // Public prefix bypasses this enforcer so the route handler can apply its own
   // production/demo guard: in production the handler checks req.user and returns

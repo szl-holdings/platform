@@ -70,11 +70,16 @@ const EXEMPT_PATHS = new Set([
   "/api/action-store",
 ]);
 
+// Risk evidence store — public POST/DELETE endpoints accept any
+// /api/risk-evidence/<domain>[/<evidenceId>] path, so add a prefix-based
+// CSRF exemption alongside the EXEMPT_PATHS set.
+
 const GRAPHQL_PATHS = ["/api/graphql", "/graphql"];
 
 function isExempt(path: string): boolean {
   if (EXEMPT_PATHS.has(path)) return true;
   if (path.startsWith("/api/webhooks/")) return true;
+  if (path.startsWith("/api/risk-evidence/")) return true;
   if (path.startsWith("/api-docs")) return true;
   if (path.startsWith("/api/ai/")) return true;
   if (path === "/api/alloy/channels/slack/webhook") return true;

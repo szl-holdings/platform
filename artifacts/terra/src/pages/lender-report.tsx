@@ -12,6 +12,10 @@ import {
 } from "recharts";
 import { properties, revenueHistory, portfolioSummary } from "@/data/portfolio";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import {
+  fetchRiskRunEvidence,
+  type SavedRiskRun,
+} from "@szl-holdings/shared-ui/risk-evidence";
 
 function formatCurrency(n: number) {
   if (n >= 1e9) return `$${(n / 1e9).toFixed(1)}B`;
@@ -85,13 +89,53 @@ const capitalByType = [
 
 type ReportTab = "executive" | "portfolio" | "debt" | "investors" | "covenants";
 
+// Terra-domain risk-evidence keys whose cited Monte Carlo runs should be
+// embedded in the lender briefing export. The PDF pipeline resolves each
+// citedRunId server-side via GET /api/risk-evidence/by-id/<evidenceId> so
+// percentile bands and sensitivities make it into the briefing even when
+// the operator who saved the run was on a different device.
+const TERRA_EVIDENCE_DOMAINS = [
+  "terra",
+  "terra.distress",
+  "terra.brokerage",
+  "terra.acquisition",
+] as const;
+
+async function collectTerraCitedRuns(): Promise<SavedRiskRun[]> {
+  const lists = await Promise.all(TERRA_EVIDENCE_DOMAINS.map(d => fetchRiskRunEvidence(d).catch(() => [])));
+  const seen = new Set<string>();
+  const merged: SavedRiskRun[] = [];
+  for (const list of lists) {
+    for (const r of list) {
+      if (seen.has(r.evidenceId)) continue;
+      seen.add(r.evidenceId);
+      merged.push(r);
+    }
+  }
+  return merged;
+}
+
 async function exportLenderReportPDF(reportPeriod: string): Promise<void> {
+  const cited = await collectTerraCitedRuns();
   const res = await fetch("/api/documents/generate", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       template: "terra-lender-report",
-      data: { reportPeriod },
+      data: {
+        reportPeriod,
+        // The PDF pipeline resolves each cited run server-side so the
+        // briefing always shows the canonical evidence, regardless of which
+        // browser saved it.
+        citedRunIds: cited.map(r => r.evidenceId),
+        citedRuns: cited.map(r => ({
+          evidenceId: r.evidenceId,
+          scenarioId: r.scenarioId,
+          scenarioTitle: r.scenarioTitle,
+          domain: r.domain,
+          savedAt: r.savedAt,
+        })),
+      },
     }),
   });
   if (!res.ok) throw new Error("PDF export failed");

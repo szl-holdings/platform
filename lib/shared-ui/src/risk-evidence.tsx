@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ClipboardCheck, FileText, Layers, Sliders, Trash2, X } from "lucide-react";
 
 export interface SavedRiskRunMetric {
@@ -44,11 +44,12 @@ export interface SavedRiskRun {
   inputs: SavedRiskRunInput[];
   savedAt: string;
   savedBy?: string;
+  tenant?: string;
   note?: string;
 }
 
 const STORAGE_KEY_PREFIX = "szl.risk-evidence";
-const MAX_RUNS_PER_DOMAIN = 50;
+const MAX_RUNS_PER_DOMAIN = 200;
 
 const READ_EVENT = "szl-risk-evidence:changed";
 
@@ -79,42 +80,159 @@ function safeWrite(domain: string, runs: SavedRiskRun[]): void {
   }
 }
 
+function mergeRuns(...lists: SavedRiskRun[][]): SavedRiskRun[] {
+  const byId = new Map<string, SavedRiskRun>();
+  for (const list of lists) {
+    for (const run of list) {
+      const existing = byId.get(run.evidenceId);
+      // Prefer the most recent savedAt when duplicates collide.
+      if (!existing || (existing.savedAt < run.savedAt)) {
+        byId.set(run.evidenceId, run);
+      }
+    }
+  }
+  return Array.from(byId.values()).sort((a, b) => (a.savedAt < b.savedAt ? 1 : -1));
+}
+
+// ── Backend sync ─────────────────────────────────────────────────────────────
+//
+// The API endpoint lives at /api/risk-evidence (see
+// artifacts/api-server/src/routes/risk-evidence.ts) and is public/unauth like
+// the rest of the Terra/Vessels demo surfaces. localStorage stays in place as
+// an offline cache so the page still renders cited runs when the API is
+// briefly unreachable, but the API is the source of truth across browsers
+// and devices.
+
+const API_BASE = "/api/risk-evidence";
+
+async function fetchJson(url: string, init?: RequestInit): Promise<unknown> {
+  const res = await fetch(url, {
+    credentials: "include",
+    ...init,
+    headers: {
+      "Content-Type": "application/json",
+      ...(init?.headers ?? {}),
+    },
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+export async function fetchRiskRunEvidence(domain: string): Promise<SavedRiskRun[]> {
+  try {
+    const body = (await fetchJson(`${API_BASE}/${encodeURIComponent(domain)}`)) as { runs?: SavedRiskRun[] };
+    const remote = Array.isArray(body?.runs) ? body.runs : [];
+    const local = safeRead(domain);
+    const merged = mergeRuns(remote, local);
+    safeWrite(domain, merged);
+    return merged;
+  } catch {
+    return safeRead(domain).sort((a, b) => (a.savedAt < b.savedAt ? 1 : -1));
+  }
+}
+
+export async function fetchRiskRunEvidenceById(evidenceId: string): Promise<SavedRiskRun | null> {
+  try {
+    const body = (await fetchJson(`${API_BASE}/by-id/${encodeURIComponent(evidenceId)}`)) as SavedRiskRun;
+    if (body && typeof body === "object" && typeof body.evidenceId === "string") return body;
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 export function listRiskRunEvidence(domain: string): SavedRiskRun[] {
   return safeRead(domain).sort((a, b) => (a.savedAt < b.savedAt ? 1 : -1));
 }
 
-export function saveRiskRunEvidence(domain: string, run: Omit<SavedRiskRun, "evidenceId" | "savedAt"> & { evidenceId?: string; savedAt?: string }): SavedRiskRun {
+export async function saveRiskRunEvidence(
+  domain: string,
+  run: Omit<SavedRiskRun, "evidenceId" | "savedAt"> & { evidenceId?: string; savedAt?: string },
+): Promise<SavedRiskRun> {
   const evidenceId = run.evidenceId ?? `RSK-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`.toUpperCase();
   const savedAt = run.savedAt ?? new Date().toISOString();
-  const record: SavedRiskRun = { ...run, evidenceId, savedAt };
+  const optimistic: SavedRiskRun = { ...run, evidenceId, savedAt };
+
+  // Always update the local cache first so the UI reflects the save instantly
+  // — even when offline.
   const existing = safeRead(domain);
-  safeWrite(domain, [record, ...existing]);
-  return record;
+  safeWrite(domain, [optimistic, ...existing.filter(r => r.evidenceId !== evidenceId)]);
+
+  try {
+    const body = (await fetchJson(`${API_BASE}/${encodeURIComponent(domain)}`, {
+      method: "POST",
+      body: JSON.stringify(optimistic),
+    })) as SavedRiskRun;
+    if (body && typeof body === "object" && typeof body.evidenceId === "string") {
+      // Reconcile cache with server-canonical record (may have a different
+      // evidenceId or savedAt if the server reassigned them).
+      const after = safeRead(domain).filter(r => r.evidenceId !== optimistic.evidenceId && r.evidenceId !== body.evidenceId);
+      safeWrite(domain, [body, ...after]);
+      return body;
+    }
+  } catch {
+    // Offline / API unreachable — keep the optimistic local record. The next
+    // successful fetchRiskRunEvidence() call will reconcile if/when the
+    // server sees this run (typically because the operator re-saved while
+    // online), and the localStorage copy ensures the lender briefing
+    // export still has the data even if the server lookup misses.
+  }
+  return optimistic;
 }
 
-export function deleteRiskRunEvidence(domain: string, evidenceId: string): void {
+export async function deleteRiskRunEvidence(domain: string, evidenceId: string): Promise<void> {
   const existing = safeRead(domain);
   safeWrite(domain, existing.filter(r => r.evidenceId !== evidenceId));
+  try {
+    await fetch(`${API_BASE}/${encodeURIComponent(domain)}/${encodeURIComponent(evidenceId)}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+  } catch {
+    /* offline — local cache already updated */
+  }
 }
 
 export function useRiskRunEvidence(domain: string): SavedRiskRun[] {
   const [runs, setRuns] = useState<SavedRiskRun[]>(() => listRiskRunEvidence(domain));
+  const mounted = useRef(true);
+
   useEffect(() => {
-    const refresh = () => setRuns(listRiskRunEvidence(domain));
-    refresh();
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    const refreshLocal = () => setRuns(listRiskRunEvidence(domain));
+    refreshLocal();
+    // Background fetch from the API to merge in runs that other browsers /
+    // devices have saved.
+    fetchRiskRunEvidence(domain).then(merged => {
+      if (mounted.current) setRuns(merged);
+    }).catch(() => { /* ignore — local cache already shown */ });
+
     if (typeof window === "undefined") return;
     const onCustom = (evt: Event) => {
       const detail = (evt as CustomEvent<{ domain?: string }>).detail;
-      if (!detail?.domain || detail.domain === domain) refresh();
+      if (!detail?.domain || detail.domain === domain) refreshLocal();
     };
     const onStorage = (evt: StorageEvent) => {
-      if (evt.key === storageKey(domain)) refresh();
+      if (evt.key === storageKey(domain)) refreshLocal();
+    };
+    const onFocus = () => {
+      fetchRiskRunEvidence(domain).then(merged => {
+        if (mounted.current) setRuns(merged);
+      }).catch(() => { /* ignore */ });
     };
     window.addEventListener(READ_EVENT, onCustom);
     window.addEventListener("storage", onStorage);
+    window.addEventListener("focus", onFocus);
     return () => {
       window.removeEventListener(READ_EVENT, onCustom);
       window.removeEventListener("storage", onStorage);
+      window.removeEventListener("focus", onFocus);
     };
   }, [domain]);
   return runs;
@@ -168,28 +286,34 @@ interface SaveRiskRunButtonProps {
 
 export function SaveRiskRunButton({ domain, build, disabled, accentColor = "#7a99b8", className }: SaveRiskRunButtonProps) {
   const [savedId, setSavedId] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
-  const handleSave = useCallback(() => {
+  const handleSave = useCallback(async () => {
     const payload = build();
     if (!payload) return;
     const note = typeof window !== "undefined" ? window.prompt("Optional note (cited on the evidence record):", "") : "";
-    const record = saveRiskRunEvidence(domain, { ...payload, note: note?.trim() || undefined });
-    setSavedId(record.evidenceId);
-    window.setTimeout(() => setSavedId(null), 4000);
+    setSaving(true);
+    try {
+      const record = await saveRiskRunEvidence(domain, { ...payload, note: note?.trim() || undefined });
+      setSavedId(record.evidenceId);
+      window.setTimeout(() => setSavedId(null), 4000);
+    } finally {
+      setSaving(false);
+    }
   }, [build, domain]);
 
   return (
     <button
       type="button"
-      onClick={handleSave}
-      disabled={disabled}
+      onClick={() => { void handleSave(); }}
+      disabled={disabled || saving}
       className={`flex items-center gap-1.5 text-[11px] font-medium rounded-md px-2.5 py-1.5 transition-colors disabled:opacity-50 ${className ?? ""}`}
       style={{ background: `${accentColor}15`, color: accentColor, border: `1px solid ${accentColor}30` }}
       aria-label="Save run as evidence"
       title="Save this Monte Carlo run as a cited proof envelope on the Decision Theater"
     >
       {savedId ? <ClipboardCheck className="w-3 h-3" /> : <FileText className="w-3 h-3" />}
-      {savedId ? `Saved ${savedId}` : "Save run as evidence"}
+      {savedId ? `Saved ${savedId}` : saving ? "Saving…" : "Save run as evidence"}
     </button>
   );
 }
@@ -269,7 +393,7 @@ export function RiskEvidenceList({ domain, domainLabel, accentColor = "#7a99b8",
                   </button>
                   <button
                     type="button"
-                    onClick={() => deleteRiskRunEvidence(domain, run.evidenceId)}
+                    onClick={() => { void deleteRiskRunEvidence(domain, run.evidenceId); }}
                     className="text-[10px] p-1 rounded-md text-white/40 hover:text-white/70 hover:bg-white/5"
                     aria-label="Delete cited run"
                     title="Delete cited run"

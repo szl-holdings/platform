@@ -62,6 +62,7 @@ import fabricRouter from "./fabric";
 import narrativesRouter from "./narratives";
 import actionStoreRouter from "./action-store";
 import lyteSurfacesRouter from "./lyte-surfaces";
+import riskEvidenceRouter from "./risk-evidence";
 
 const router: IRouter = Router();
 
@@ -125,6 +126,13 @@ router.use(narrativesRouter);
 // unauthenticated; mounted BEFORE guardianPolicyCheck and exempted in the
 // global-auth-enforcer / csrf middleware allowlists.
 router.use(actionStoreRouter);
+
+// Shared risk evidence store — persists "Save run as evidence" Monte Carlo
+// runs so external reviewers and lender briefings see the same cited
+// envelopes that Terra/Vessels operators capture (instead of per-browser
+// localStorage). Mounted BEFORE guardianPolicyCheck and exempted in the
+// global-auth-enforcer / csrf middleware allowlists.
+router.use(riskEvidenceRouter);
 
 // Lyte legacy surfaces — read-only public GET endpoints backing the 5 legacy
 // decision-intelligence pages. Mounted BEFORE lyte.register so the
