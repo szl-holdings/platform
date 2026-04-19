@@ -477,4 +477,80 @@ if (totalFailed === 0 && totalWarnings === 0) {
 
 console.log(`\nSee docs/FAILURE_SEVERITY_POLICY.md for severity definitions.\n`);
 
+// ─── GitHub Actions Step Summary ─────────────────────────────────────────────
+// When running in GitHub Actions, $GITHUB_STEP_SUMMARY points to a markdown file
+// that gets rendered in the PR check view. Writing a summary here makes failures
+// easy to read without scrolling through raw logs (where ANSI colors are stripped).
+
+if (process.env.GITHUB_STEP_SUMMARY) {
+  try {
+    const fs = await import("node:fs");
+
+    const overall =
+      totalFailed === 0 && totalWarnings === 0
+        ? "✅ All product-mode checks passed"
+        : totalFailed === 0
+        ? `⚠️ No blocking failures — ${totalWarnings} warning(s) to address`
+        : `❌ ${totalFailed} blocking failure(s) — platform not ready for release`;
+
+    const lines = [];
+    lines.push(`## Product-Mode Smoke Test`);
+    lines.push("");
+    lines.push(`**Base URL:** \`${BASE_URL}\`  `);
+    lines.push(`**NODE_ENV:** \`${NODE_ENV}\`  `);
+    lines.push(`**Result:** ${overall}`);
+    lines.push("");
+    lines.push(`| Severity | Count |`);
+    lines.push(`| --- | --- |`);
+    lines.push(`| Sev 0 (deployment blocked) | ${results.sev0.length} |`);
+    lines.push(`| Sev 1 (release blocked) | ${results.sev1.length} |`);
+    lines.push(`| Sev 2 (warnings) | ${results.sev2.length} |`);
+    lines.push(`| Skipped | ${results.skipped.length} |`);
+    lines.push("");
+
+    const renderRows = (items) =>
+      items.length === 0
+        ? "_None_"
+        : [
+            `| Check | Detail |`,
+            `| --- | --- |`,
+            ...items.map(
+              ({ name, message, reason }) =>
+                `| \`${name}\` | ${String(message ?? reason ?? "").replace(/\|/g, "\\|")} |`,
+            ),
+          ].join("\n");
+
+    if (results.sev0.length > 0) {
+      lines.push(`### ❌ Sev 0 — Deployment Blocked (${results.sev0.length})`);
+      lines.push(renderRows(results.sev0));
+      lines.push("");
+    }
+    if (results.sev1.length > 0) {
+      lines.push(`### ❌ Sev 1 — Release Blocked (${results.sev1.length})`);
+      lines.push(renderRows(results.sev1));
+      lines.push("");
+    }
+    if (results.sev2.length > 0) {
+      lines.push(`### ⚠️ Sev 2 — Warnings (${results.sev2.length})`);
+      lines.push(renderRows(results.sev2));
+      lines.push("");
+    }
+    if (results.skipped.length > 0) {
+      lines.push(`<details><summary>Skipped checks (${results.skipped.length})</summary>`);
+      lines.push("");
+      lines.push(renderRows(results.skipped));
+      lines.push("");
+      lines.push(`</details>`);
+      lines.push("");
+    }
+
+    lines.push(`<sub>See \`docs/FAILURE_SEVERITY_POLICY.md\` for severity definitions.</sub>`);
+    lines.push("");
+
+    fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, lines.join("\n"));
+  } catch (err) {
+    console.log(`(Could not write GITHUB_STEP_SUMMARY: ${err.message})`);
+  }
+}
+
 process.exit(totalFailed > 0 ? 1 : 0);
