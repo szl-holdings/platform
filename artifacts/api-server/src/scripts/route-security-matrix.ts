@@ -232,7 +232,18 @@ interface ValidationStats {
   unvalidatedBody: number;
   unvalidatedQuery: number;
   unvalidatedExamples: string[];
+  baselineBody: number;
+  baselineQuery: number;
+  baselineExamples: string[];
 }
+
+// Baseline (permissive) validation schemas installed by the codemod. Routes
+// that pass these to validateBody / validateQuery have *some* validation
+// (body is a plain JSON object; query is at least an object), but no
+// field-level shape, type, enum, or range checks. High-impact mutating
+// routes should upgrade off these to a route-specific Zod schema.
+const BASELINE_BODY_SCHEMAS = ["jsonObjectBodySchema"];
+const BASELINE_QUERY_SCHEMAS = ["anyQuerySchema", "listQuerySchema", "paginationQuerySchema"];
 
 function analyzeValidation(content: string): ValidationStats {
   const stats: ValidationStats = {
@@ -240,6 +251,9 @@ function analyzeValidation(content: string): ValidationStats {
     unvalidatedBody: 0,
     unvalidatedQuery: 0,
     unvalidatedExamples: [],
+    baselineBody: 0,
+    baselineQuery: 0,
+    baselineExamples: [],
   };
   ROUTE_CALL_RE.lastIndex = 0;
   let m: RegExpExecArray | null;
@@ -262,6 +276,21 @@ function analyzeValidation(content: string): ValidationStats {
       const pathMatch = block.match(/^\s*(["'`])([^"'`]{1,80})\1/);
       const path = pathMatch?.[2] ?? "(unknown path)";
       stats.unvalidatedExamples.push(`${method.toUpperCase()} ${path}`);
+    }
+
+    // Detect baseline (permissive) schemas — present but not field-tightened.
+    const baselineBody = hasBody && BASELINE_BODY_SCHEMAS.some(s =>
+      new RegExp(`\\bvalidateBody\\s*\\(\\s*${s}\\b`).test(block),
+    );
+    const baselineQuery = hasQuery && BASELINE_QUERY_SCHEMAS.some(s =>
+      new RegExp(`\\bvalidateQuery\\s*\\(\\s*${s}\\b`).test(block),
+    );
+    if (baselineBody) stats.baselineBody++;
+    if (baselineQuery) stats.baselineQuery++;
+    if ((baselineBody || baselineQuery) && stats.baselineExamples.length < 3) {
+      const pathMatch = block.match(/^\s*(["'`])([^"'`]{1,80})\1/);
+      const path = pathMatch?.[2] ?? "(unknown path)";
+      stats.baselineExamples.push(`${method.toUpperCase()} ${path}`);
     }
   }
   return stats;
@@ -347,13 +376,21 @@ const validationTotals = entries.reduce(
     acc.totalRoutes += e.validation.totalRoutes;
     acc.unvalidatedBody += e.validation.unvalidatedBody;
     acc.unvalidatedQuery += e.validation.unvalidatedQuery;
+    acc.baselineBody += e.validation.baselineBody;
+    acc.baselineQuery += e.validation.baselineQuery;
     return acc;
   },
-  { totalRoutes: 0, unvalidatedBody: 0, unvalidatedQuery: 0 },
+  { totalRoutes: 0, unvalidatedBody: 0, unvalidatedQuery: 0, baselineBody: 0, baselineQuery: 0 },
 );
 const filesWithUnvalidated = entries.filter(
   e => e.validation.unvalidatedBody > 0 || e.validation.unvalidatedQuery > 0,
 );
+const filesWithBaseline = entries
+  .filter(e => e.validation.baselineBody > 0 || e.validation.baselineQuery > 0)
+  .sort((a, b) =>
+    (b.validation.baselineBody + b.validation.baselineQuery) -
+    (a.validation.baselineBody + a.validation.baselineQuery),
+  );
 const filesWithValidation = entries.filter(e => {
   const c = readFileSync(e.file, "utf-8");
   return /\bvalidate(Body|Query|Params)\s*\(/.test(c);
@@ -382,6 +419,23 @@ if (jsonMode) {
             Math.max(1, validationTotals.totalRoutes)) *
             100,
         ),
+        baselineBodyRoutes: validationTotals.baselineBody,
+        baselineQueryRoutes: validationTotals.baselineQuery,
+        filesWithBaselineSchemas: filesWithBaseline.length,
+        tightenedCoveragePct: Math.round(
+          ((validationTotals.totalRoutes -
+            validationTotals.unvalidatedBody -
+            validationTotals.unvalidatedQuery -
+            validationTotals.baselineBody -
+            validationTotals.baselineQuery) /
+            Math.max(1, validationTotals.totalRoutes)) *
+            100,
+        ),
+        topBaselineFiles: filesWithBaseline.slice(0, 20).map(e => ({
+          file: e.relPath,
+          baselineBody: e.validation.baselineBody,
+          baselineQuery: e.validation.baselineQuery,
+        })),
       },
     },
     note: "All /api/* routes not in the enforcer public allowlist are blocked by the global deny-by-default guard (src/middlewares/global-auth-enforcer.ts) regardless of file-level indicators.",
@@ -460,6 +514,29 @@ if (jsonMode) {
     for (const e of filesWithUnvalidated) {
       const v = e.validation;
       console.log(`    - ${e.relPath}  body=${v.unvalidatedBody} query=${v.unvalidatedQuery}  e.g. ${v.unvalidatedExamples.join("; ")}`);
+    }
+  }
+
+  console.log("\nField-level (tightened) schema coverage:");
+  console.log(`  Routes on baseline body schema (jsonObjectBodySchema)  : ${validationTotals.baselineBody}`);
+  console.log(`  Routes on baseline query schema (anyQuerySchema, etc.) : ${validationTotals.baselineQuery}`);
+  console.log(`  Files with one or more baseline-schema routes          : ${filesWithBaseline.length}`);
+  const tightenedPct = Math.round(
+    ((validationTotals.totalRoutes -
+      validationTotals.unvalidatedBody -
+      validationTotals.unvalidatedQuery -
+      validationTotals.baselineBody -
+      validationTotals.baselineQuery) /
+      Math.max(1, validationTotals.totalRoutes)) *
+      100,
+  );
+  console.log(`  Tightened (route-specific) coverage                    : ${tightenedPct}%`);
+  if (filesWithBaseline.length > 0) {
+    const top = filesWithBaseline.slice(0, 20);
+    console.log(`\n  Top ${top.length} files still on baseline schemas (highest counts first):`);
+    for (const e of top) {
+      const v = e.validation;
+      console.log(`    - ${e.relPath}  body=${v.baselineBody} query=${v.baselineQuery}  e.g. ${v.baselineExamples.join("; ")}`);
     }
   }
 

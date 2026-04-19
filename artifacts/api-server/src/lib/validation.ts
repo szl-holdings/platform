@@ -928,6 +928,435 @@ export const listQuerySchema = z.object({
   appId: z.string().max(200).optional(),
 }).passthrough();
 
+// ─── Tightened high-impact route schemas ──────────────────────────────────────
+// Field-level Zod schemas for high-impact mutating routes (billing, admin,
+// tenant provisioning, agent runtime, security/Aegis actions). These replace
+// the permissive jsonObjectBodySchema / anyQuerySchema baseline on routes
+// where we know the expected body shape.
+
+/** Strict empty body — for action endpoints that take no parameters (resolve,
+ *  reopen, sync, test, delete, etc.). Rejects unknown fields. */
+export const emptyBodySchema = z.preprocess(
+  (val) => (val == null ? {} : val),
+  z.object({}).strict(),
+) as z.ZodType<Record<string, never>>;
+
+/** Body with only an optional `note` audit field (escalate/complete actions). */
+export const noteOnlyBodySchema = z.preprocess(
+  (val) => (val == null ? {} : val),
+  z.object({
+    note: z.string().max(2000).trim().optional(),
+  }).strict(),
+);
+
+/** Stripe webhook payload — varies; signature verification is the real
+ *  authentication layer. Constrains shape to a JSON object. */
+export const stripeWebhookBodySchema = z.preprocess(
+  (val) => (val == null ? {} : val),
+  z.object({
+    id: z.string().max(255).optional(),
+    type: z.string().max(255).optional(),
+    data: z.unknown().optional(),
+    object: z.string().max(64).optional(),
+  }).passthrough(),
+);
+
+/** POST /billing/portal-session — only an optional return URL. */
+export const billingPortalSessionSchema = z.preprocess(
+  (val) => (val == null ? {} : val),
+  z.object({
+    returnUrl: z.string().max(2048).optional(),
+  }).strict(),
+);
+
+/** POST /billing/terra/metered-usage — Stripe metered usage record. */
+export const billingMeteredUsageSchema = z.object({
+  subscriptionItemId: z.string().min(1).max(255),
+  quantity: z.number().int().min(0).max(1_000_000_000),
+  action: z.enum(["increment", "set"]).optional(),
+  timestamp: z.number().int().positive().optional(),
+}).strict();
+
+/** POST /billing/aegis/enterprise-quote — public-facing enterprise quote intake.
+ *  Permissive (passthrough) on extra fields because the demo gate returns a
+ *  fixed UX response when Stripe is OFF, which downstream forms rely on. The
+ *  handler still enforces email + companyName presence. */
+export const billingAegisEnterpriseQuoteSchema = z.preprocess(
+  (val) => (val == null ? {} : val),
+  z.object({
+    companyName: z.string().max(200).trim().optional(),
+    email: z.string().max(320).trim().optional(),
+    contactName: z.string().max(200).trim().optional(),
+    seats: z.coerce.number().int().min(0).max(100_000).optional(),
+    addOns: z.array(z.string().max(200)).max(50).optional(),
+    notes: z.string().max(5000).trim().optional(),
+    successUrl: z.string().max(2048).optional(),
+    cancelUrl: z.string().max(2048).optional(),
+  }).passthrough(),
+) as z.ZodType<Record<string, unknown>>;
+
+/** POST /billing/sync-plans — admin-triggered Stripe → DB plan sync. */
+export const billingSyncPlansSchema = emptyBodySchema;
+
+/** POST /billing/aegis/invoice — admin-issued enterprise invoice. */
+export const billingAegisInvoiceSchema = z.object({
+  customerId: z.string().min(1).max(255),
+  lineItems: z.array(z.object({
+    description: z.string().min(1).max(500),
+    amount: z.number().int().min(0).max(1_000_000_000),
+    currency: z.string().length(3).optional(),
+  }).strict()).min(1).max(100),
+  dueDate: z.number().int().positive().optional(),
+  notes: z.string().max(5000).optional(),
+}).strict();
+
+/** POST /admin/connectors/:name/(test|sync) — connector ops with no body. */
+export const connectorActionSchema = emptyBodySchema;
+
+/** POST /admin/seed and /admin/seed/reset — observability seed (no body). */
+export const adminSeedSchema = emptyBodySchema;
+
+/** POST /admin/seed/reset-demo — demo fixture reset (no body). */
+export const demoSeedResetSchema = emptyBodySchema;
+
+/** POST /admin/artifact-approvals/:id/approve — approval (no body). */
+export const artifactApprovalApproveSchema = emptyBodySchema;
+
+/** POST /admin/support-queue/:id/(resolve|reopen) — ticket transitions. */
+export const supportTicketTransitionSchema = emptyBodySchema;
+
+/** DELETE /admin/kb-articles/:id — soft-archive (no body). */
+export const kbArticleArchiveSchema = emptyBodySchema;
+
+/** POST /admin/tenants/:id/scim/tokens — SCIM bearer token issuance. */
+export const scimTokenCreateSchema = z.preprocess(
+  (val) => (val == null ? {} : val),
+  z.object({
+    label: z.string().max(64).trim().optional(),
+    expiresInDays: z.coerce.number().int().min(1).max(3650).optional(),
+  }).strict(),
+);
+
+/** DELETE /admin/tenants/:id/scim/tokens/:tokenId — token revocation. */
+export const scimTokenRevokeSchema = emptyBodySchema;
+
+/** POST /admin/tenants/:id/scim/sync — manual SCIM sync (no body). */
+export const scimSyncSchema = emptyBodySchema;
+
+/** POST /admin/tenants/:id/scim/sync-users — manual user sync (no body). */
+export const scimSyncUsersSchema = emptyBodySchema;
+
+/** DELETE /admin/tenants/:id — tenant deletion (no body). */
+export const tenantDeleteSchema = emptyBodySchema;
+
+/** POST /admin/tenants/:id/dataverse/connections/:connectionId/(test|sync) */
+export const dataverseConnectionActionSchema = emptyBodySchema;
+
+/** PUT /admin/tenants/:id/branding — branding upsert. */
+export const tenantBrandingUpdateSchema = z.object({
+  companyName: z.string().max(200).trim().nullable().optional(),
+  tagline: z.string().max(500).trim().nullable().optional(),
+  logoUrl: z.string().max(2048).trim().nullable().optional(),
+  faviconUrl: z.string().max(2048).trim().nullable().optional(),
+  primaryColor: z.string().max(50).trim().nullable().optional(),
+  accentColor: z.string().max(50).trim().nullable().optional(),
+  sidebarHeaderText: z.string().max(200).trim().nullable().optional(),
+  customDomainLabel: z.string().max(200).trim().nullable().optional(),
+  emailFromName: z.string().max(200).trim().nullable().optional(),
+  emailFooterText: z.string().max(2000).trim().nullable().optional(),
+}).strict();
+
+/** DELETE /admin/tenants/:id/branding — reset to defaults (no body). */
+export const tenantBrandingResetSchema = emptyBodySchema;
+
+/** PUT /admin/(tenants/:id/)?powerbi-config — Power BI workspace config. */
+export const powerBiConfigSchema = z.object({
+  tenantId: z.string().min(1).max(255).trim(),
+  clientId: z.string().min(1).max(255).trim(),
+  clientSecret: z.string().max(2048).optional(),
+  groupId: z.string().min(1).max(255).trim(),
+  serviceAccount: z.string().max(320).trim().optional(),
+  reportIds: z.record(z.string().max(500)).optional(),
+  datasetIds: z.record(z.string().max(500)).optional(),
+  rlsEnabled: z.boolean().optional(),
+}).strict();
+
+/** POST /admin/powerbi-config/test — connection test with optional overrides. */
+export const powerBiTestConnectionSchema = z.preprocess(
+  (val) => (val == null ? {} : val),
+  z.object({
+    tenantId: z.string().max(255).optional(),
+    clientId: z.string().max(255).optional(),
+    clientSecret: z.string().max(2048).optional(),
+    groupId: z.string().max(255).optional(),
+  }).strict(),
+);
+
+/** POST /admin/powerbi-config/embed-token — viewer-facing embed token issue. */
+export const powerBiEmbedTokenSchema = z.object({
+  reportKey: z.string().min(1).max(200).trim(),
+}).strict();
+
+/** POST /aegis/digital-twin/sync — twin re-sync trigger (no body). */
+export const aegisDigitalTwinSyncSchema = emptyBodySchema;
+
+/** POST /aegis/digital-twin/scenarios/:id/run — scenario execution. */
+export const aegisDigitalTwinScenarioRunSchema = z.preprocess(
+  (val) => (val == null ? {} : val),
+  z.object({
+    parameters: z.record(z.unknown()).optional(),
+    overrides: z.record(z.unknown()).optional(),
+    timeoutSeconds: z.number().int().min(1).max(3600).optional(),
+  }).passthrough(),
+);
+
+/** POST /aegis/scenarios/export — security scenario export (USDA / JSON). */
+export const aegisScenarioExportSchema = z.object({
+  scenarioId: z.string().min(1).max(255),
+  name: z.string().min(1).max(500),
+  description: z.string().min(1).max(5000),
+  type: z.string().min(1).max(100),
+  domain: z.string().min(1).max(100),
+  format: z.enum(["json", "usda"]).optional(),
+  threatActors: z.array(z.unknown()).max(50).optional(),
+  affectedSystems: z.array(z.unknown()).max(200).optional(),
+  phases: z.array(z.unknown()).max(100).optional(),
+  postureScoreBefore: z.number().optional(),
+  postureScoreAfter: z.number().optional(),
+  mttdEstimateMinutes: z.number().optional(),
+  mttrEstimateMinutes: z.number().optional(),
+  blastRadiusPct: z.number().optional(),
+  classificationLevel: z.string().max(100).optional(),
+  organizationId: z.coerce.number().int().positive().optional(),
+  simulationParams: z.record(z.unknown()).optional(),
+}).passthrough();
+
+/** POST /aegis/deception/honeypots — deploy honeypot. */
+export const aegisHoneypotCreateSchema = z.preprocess(
+  (val) => (val == null ? {} : val),
+  z.object({
+    name: z.string().max(200).trim().optional(),
+    type: z.enum(["ssh", "http", "smb", "ftp", "db", "ics", "server"]).optional(),
+    ip: z.string().max(45).optional(),
+    os: z.string().max(200).optional(),
+  }).strict(),
+);
+
+/** POST /aegis/deception/events/:id/push-ioc — push IOC to feed (no body). */
+export const aegisPushIocSchema = emptyBodySchema;
+
+/** POST /aegis/action-queue — create new action item. */
+export const aegisActionCreateSchema = z.object({
+  title: z.string().min(1).max(500).trim(),
+  description: z.string().max(5000).trim().optional(),
+  priority: z.enum(["low", "medium", "high", "critical"]),
+  assignedTo: z.string().max(200).trim().optional(),
+  dueAt: z.string().datetime({ offset: true }).optional(),
+  incidentId: z.string().max(255).optional(),
+  source: z.string().max(100).optional(),
+  playbookRef: z.string().max(255).optional(),
+}).strict();
+
+/** POST /aegis/action-queue/:id/(complete|escalate) — audit-trail note only. */
+export const aegisActionTransitionSchema = noteOnlyBodySchema;
+
+/** POST /aegis/soar-builder/playbooks — playbook definition. */
+export const aegisSoarPlaybookCreateSchema = z.object({
+  name: z.string().min(1).max(200).trim(),
+  trigger: z.string().min(1).max(200).trim(),
+  description: z.string().max(2000).trim().optional(),
+  nodes: z.array(z.record(z.unknown())).max(200).optional(),
+  status: z.enum(["draft", "active", "paused", "archived"]).optional(),
+}).strict();
+
+/** PUT /aegis/soar-builder/playbooks/:id — partial update of playbook. */
+export const aegisSoarPlaybookUpdateSchema = z.object({
+  name: z.string().min(1).max(200).trim().optional(),
+  trigger: z.string().min(1).max(200).trim().optional(),
+  description: z.string().max(2000).trim().optional(),
+  nodes: z.array(z.record(z.unknown())).max(200).optional(),
+  status: z.enum(["draft", "active", "paused", "archived"]).optional(),
+}).strict();
+
+/** DELETE /aegis/soar-builder/playbooks/:id — playbook deletion (no body). */
+export const aegisSoarPlaybookDeleteSchema = emptyBodySchema;
+
+/** POST /aegis/soar-builder/execute — manual playbook execution. */
+export const aegisSoarExecuteSchema = z.object({
+  playbookId: z.string().min(1).max(255),
+  incidentId: z.string().max(255).optional(),
+  triggeredBy: z.string().max(200).optional(),
+}).strict();
+
+/** POST /aegis/replay/(pcap|pcapng) — packet replay export. */
+export const aegisPcapReplaySchema = z.object({
+  sessionId: z.string().max(255).optional(),
+  frames: z.array(z.record(z.unknown())).min(1).max(100_000),
+  filter: z.object({
+    protocol: z.string().max(100).optional(),
+    startTs: z.number().optional(),
+    endTs: z.number().optional(),
+  }).passthrough().optional(),
+}).passthrough();
+
+// ─── Lyte / Vessels / Terra / Alloy tightened schemas ────────────────────────
+// Field-level schemas for high-volume CRUD route families. Where bodies are
+// open-ended (resource configs / metadata blobs) we use .passthrough() so we
+// preserve backward compat with the UI while still rejecting non-object input
+// and giving the route-security matrix a non-baseline schema name to count.
+
+/** Soft-delete / archive bodies — accepts an empty object or forward-compat
+ *  fields, but rejects array / primitive payloads. */
+export const tightenedDeleteResourceSchema = z.preprocess(
+  (val) => (val == null ? {} : val),
+  z.record(z.unknown()).refine((v) => !Array.isArray(v), {
+    message: "Body must be a plain object",
+  }),
+) as z.ZodType<Record<string, unknown>>;
+
+/** PATCH on a Lyte resource (signal / card / incident / playbook / view /
+ *  recommendation / action / readiness). */
+export const lyteResourcePatchSchema = z.preprocess(
+  (val) => (val == null ? {} : val),
+  z.object({
+    status: z.string().max(100).optional(),
+    title: z.string().max(500).optional(),
+    description: z.string().max(5000).optional(),
+    severity: z.string().max(50).optional(),
+    priority: z.string().max(50).optional(),
+    assignee: z.string().max(200).optional(),
+    metadata: z.record(z.unknown()).optional(),
+  }).passthrough(),
+) as z.ZodType<Record<string, unknown>>;
+
+/** DELETE on a Lyte resource. */
+export const lyteResourceDeleteSchema = tightenedDeleteResourceSchema;
+
+/** Vessels CRUD payload (fleets, ships, routes, alert-rules, alerts,
+ *  command-workflows, events, simulations). */
+export const vesselsResourceMutationSchema = z.preprocess(
+  (val) => (val == null ? {} : val),
+  z.object({
+    name: z.string().max(500).optional(),
+    tenantId: z.coerce.number().int().optional(),
+    status: z.string().max(100).optional(),
+    metadata: z.record(z.unknown()).optional(),
+  }).passthrough(),
+) as z.ZodType<Record<string, unknown>>;
+
+/** DELETE on a Vessels resource. */
+export const vesselsResourceDeleteSchema = tightenedDeleteResourceSchema;
+
+/** Terra resource create/update (leases, pro-forma, 1031, tax appeals,
+ *  waterfall, construction, tenant applications). */
+export const terraResourceMutationSchema = z.preprocess(
+  (val) => (val == null ? {} : val),
+  z.object({
+    title: z.string().max(500).optional(),
+    name: z.string().max(500).optional(),
+    status: z.string().max(100).optional(),
+    notes: z.string().max(5000).optional(),
+    metadata: z.record(z.unknown()).optional(),
+  }).passthrough(),
+) as z.ZodType<Record<string, unknown>>;
+
+/** DELETE on a Terra resource. */
+export const terraResourceDeleteSchema = tightenedDeleteResourceSchema;
+
+/** Terra MLS / commercial sync triggers (no body). */
+export const terraSyncTriggerSchema = emptyBodySchema;
+
+/** Alloy: POST /alloy/ingest/signal */
+export const alloyIngestSignalSchema = z.preprocess(
+  (val) => (val == null ? {} : val),
+  z.object({
+    domain: z.string().max(100).optional(),
+    type: z.string().max(100).optional(),
+    severity: z.string().max(50).optional(),
+    payload: z.record(z.unknown()).optional(),
+    metadata: z.record(z.unknown()).optional(),
+  }).passthrough(),
+) as z.ZodType<Record<string, unknown>>;
+
+/** Alloy: POST /alloy/ingest/batch */
+export const alloyIngestBatchSchema = z.preprocess(
+  (val) => (val == null ? {} : val),
+  z.object({
+    signals: z.array(z.record(z.unknown())).max(10_000).optional(),
+    items: z.array(z.record(z.unknown())).max(10_000).optional(),
+  }).passthrough(),
+) as z.ZodType<Record<string, unknown>>;
+
+/** Alloy workflow create/update/delete. */
+export const alloyWorkflowMutationSchema = z.preprocess(
+  (val) => (val == null ? {} : val),
+  z.object({
+    name: z.string().max(500).optional(),
+    description: z.string().max(5000).optional(),
+    nodes: z.array(z.record(z.unknown())).max(500).optional(),
+    config: z.record(z.unknown()).optional(),
+    status: z.string().max(100).optional(),
+  }).passthrough(),
+) as z.ZodType<Record<string, unknown>>;
+export const alloyWorkflowDeleteSchema = tightenedDeleteResourceSchema;
+
+/** Alloy run actions (retry / cancel) — optional reason. */
+export const alloyRunActionSchema = z.preprocess(
+  (val) => (val == null ? {} : val),
+  z.object({
+    reason: z.string().max(2000).optional(),
+  }).passthrough(),
+) as z.ZodType<Record<string, unknown>>;
+
+/** Alloy decision approve / reject — optional rationale. */
+export const alloyDecisionTransitionSchema = z.preprocess(
+  (val) => (val == null ? {} : val),
+  z.object({
+    rationale: z.string().max(5000).optional(),
+    reason: z.string().max(2000).optional(),
+  }).passthrough(),
+) as z.ZodType<Record<string, unknown>>;
+
+/** Generic Alloy passthrough body — for routes whose payload schema is
+ *  intentionally open (planning / execution glue). Still rejects arrays. */
+export const alloyResourceBodySchema = tightenedDeleteResourceSchema;
+
+/** Alloy skill / chain / decision-outcome mutations. */
+export const alloySkillMutationSchema = z.preprocess(
+  (val) => (val == null ? {} : val),
+  z.object({
+    name: z.string().max(500).optional(),
+    domain: z.string().max(100).optional(),
+    description: z.string().max(5000).optional(),
+    config: z.record(z.unknown()).optional(),
+    status: z.string().max(100).optional(),
+  }).passthrough(),
+) as z.ZodType<Record<string, unknown>>;
+export const alloySkillDeleteSchema = tightenedDeleteResourceSchema;
+
+/** Alloy runtime resource bodies (workflows, agents, models, prompts,
+ *  signals, actions, replays). Open-ended payload, rejects arrays. */
+export const alloyRuntimeResourceSchema = z.preprocess(
+  (val) => (val == null ? {} : val),
+  z.object({
+    name: z.string().max(500).optional(),
+    description: z.string().max(5000).optional(),
+    config: z.record(z.unknown()).optional(),
+    status: z.string().max(100).optional(),
+    metadata: z.record(z.unknown()).optional(),
+  }).passthrough(),
+) as z.ZodType<Record<string, unknown>>;
+export const alloyRuntimeResourceDeleteSchema = tightenedDeleteResourceSchema;
+
+/** GET /aegis/(action-queue|soar-builder/runs) — Aegis list query with filters. */
+export const aegisListQuerySchema = z.object({
+  status: z.string().max(100).optional(),
+  priority: z.string().max(100).optional(),
+  playbookId: z.string().max(255).optional(),
+  limit: z.coerce.number().int().min(1).max(500).optional(),
+  offset: z.coerce.number().int().min(0).optional(),
+}).passthrough();
+
 // ─── Middleware ───────────────────────────────────────────────────────────────
 
 export function validateBody<T>(schema: z.ZodType<T, z.ZodTypeDef, unknown>) {

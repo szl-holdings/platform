@@ -13,7 +13,7 @@ import {
   getEnterpriseFeatureFlags,
 } from "../lib/terra-enterprise-ingestion";
 import { services } from "@szl-holdings/services";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { listQuerySchema, validateBody, validateQuery, terraSyncTriggerSchema } from "../lib/validation";
 import { db, terraPropertiesTable, terraDistressPropertiesTable } from "@szl-holdings/db";
 import { eq, desc, sql } from "drizzle-orm";
 
@@ -263,7 +263,7 @@ router.get("/terra/enterprise/flags", authMiddleware({ required: false }), async
   });
 });
 
-router.post("/terra/enterprise/sync/mls", validateBody(jsonObjectBodySchema), authMiddleware({ required: true }), async (_req: Request, res: Response) => {
+router.post("/terra/enterprise/sync/mls", validateBody(terraSyncTriggerSchema), authMiddleware({ required: true }), async (_req: Request, res: Response) => {
   try {
     const result = await runMlsListingSync();
     sendSuccess(res, { message: "MLS sync completed", ...result });
@@ -272,7 +272,7 @@ router.post("/terra/enterprise/sync/mls", validateBody(jsonObjectBodySchema), au
   }
 });
 
-router.post("/terra/enterprise/sync/commercial", validateBody(jsonObjectBodySchema), authMiddleware({ required: true }), async (_req: Request, res: Response) => {
+router.post("/terra/enterprise/sync/commercial", validateBody(terraSyncTriggerSchema), authMiddleware({ required: true }), async (_req: Request, res: Response) => {
   try {
     const result = await runCommercialDataRefresh();
     sendSuccess(res, { message: "Commercial data refresh completed", ...result });

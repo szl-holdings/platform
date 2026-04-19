@@ -33,7 +33,7 @@ import {
 } from "../lib/api-response";
 import { logger } from "../lib/logger";
 import { broadcastWs, pubsub, ALLOY_EVENTS } from "../lib/pubsub-bridge.js";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery, autonomyModeQuerySchema } from "../lib/validation";
+import { listQuerySchema, validateBody, validateQuery, autonomyModeQuerySchema, alloyIngestSignalSchema, alloyIngestBatchSchema, alloyWorkflowMutationSchema, alloyWorkflowDeleteSchema, alloyRunActionSchema, alloyDecisionTransitionSchema, alloyResourceBodySchema } from "../lib/validation";
 import {
   AUTONOMY_MODES,
   evaluateAutonomyForAction,
@@ -174,7 +174,7 @@ function transitionRunState(
   return { valid: true };
 }
 
-router.post("/alloy/ingest/signal", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/alloy/ingest/signal", authMiddleware(), validateBody(alloyIngestSignalSchema), async (req, res) => {
   try {
     const payload = req.body;
     if (!payload.source || !payload.sourceType || !payload.title) {
@@ -217,7 +217,7 @@ router.post("/alloy/ingest/signal", authMiddleware(), validateBody(jsonObjectBod
   }
 });
 
-router.post("/alloy/ingest/batch", authMiddleware(), requireRole("super_admin", "ops", "analyst"), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/alloy/ingest/batch", authMiddleware(), requireRole("super_admin", "ops", "analyst"), validateBody(alloyIngestBatchSchema), async (req, res) => {
   try {
     const orgIds = getUserOrgIds(req.user);
     const isAdmin = isGlobalAdmin(req.user);
@@ -285,7 +285,7 @@ router.get("/alloy/workflows/:id", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/alloy/workflows", authMiddleware(), requireRole("super_admin", "ops", "analyst"), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/alloy/workflows", authMiddleware(), requireRole("super_admin", "ops", "analyst"), validateBody(alloyWorkflowMutationSchema), async (req, res) => {
   try {
     const data = insertAlloyWorkflowSchema.parse(req.body);
     const userOrgIds = getUserOrgIds(req.user);
@@ -310,7 +310,7 @@ router.post("/alloy/workflows", authMiddleware(), requireRole("super_admin", "op
   }
 });
 
-router.patch("/alloy/workflows/:id", authMiddleware(), requireRole("super_admin", "ops", "analyst"), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/alloy/workflows/:id", authMiddleware(), requireRole("super_admin", "ops", "analyst"), validateBody(alloyWorkflowMutationSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [before] = await db.select().from(alloyWorkflowsTable).where(eq(alloyWorkflowsTable.id, id));
@@ -326,7 +326,7 @@ router.patch("/alloy/workflows/:id", authMiddleware(), requireRole("super_admin"
   }
 });
 
-router.delete("/alloy/workflows/:id", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("super_admin", "ops"), async (req, res) => {
+router.delete("/alloy/workflows/:id", validateBody(alloyWorkflowDeleteSchema), authMiddleware(), requireRole("super_admin", "ops"), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [existing] = await db.select().from(alloyWorkflowsTable).where(eq(alloyWorkflowsTable.id, id));
@@ -483,7 +483,7 @@ router.get("/alloy/runs/:id", authMiddleware(), requireRole("super_admin", "admi
   }
 });
 
-router.post("/alloy/runs/:id/retry", authMiddleware(), requireRole("super_admin", "ops"), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/alloy/runs/:id/retry", authMiddleware(), requireRole("super_admin", "ops"), validateBody(alloyRunActionSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [run] = await db.select().from(alloyWorkflowRunsTable).where(eq(alloyWorkflowRunsTable.id, id));
@@ -517,7 +517,7 @@ router.post("/alloy/runs/:id/retry", authMiddleware(), requireRole("super_admin"
   }
 });
 
-router.post("/alloy/runs/:id/cancel", authMiddleware(), requireRole("super_admin", "ops"), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/alloy/runs/:id/cancel", authMiddleware(), requireRole("super_admin", "ops"), validateBody(alloyRunActionSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [run] = await db.select().from(alloyWorkflowRunsTable).where(eq(alloyWorkflowRunsTable.id, id));
@@ -1074,7 +1074,7 @@ router.post("/decisions", platformAuth, validateBody(createDecisionSchema), asyn
   }
 });
 
-router.post("/decisions/:id/approve", platformAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/decisions/:id/approve", platformAuth, validateBody(alloyDecisionTransitionSchema), async (req: Request, res: Response) => {
   try {
     const id = parseIdParam(req.params.id);
     if (!id) return;
@@ -1090,7 +1090,7 @@ router.post("/decisions/:id/approve", platformAuth, validateBody(jsonObjectBodyS
   }
 });
 
-router.post("/decisions/:id/reject", platformAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/decisions/:id/reject", platformAuth, validateBody(alloyDecisionTransitionSchema), async (req: Request, res: Response) => {
   try {
     const id = parseIdParam(req.params.id);
     if (!id) return;
@@ -1557,7 +1557,7 @@ router.get("/alloy/autonomy-mode", authMiddleware(), validateQuery(autonomyModeQ
 router.patch(
   "/alloy/autonomy-mode",
   authMiddleware(),
-  validateBody(jsonObjectBodySchema),
+  validateBody(alloyResourceBodySchema),
   async (req: Request, res: Response) => {
     try {
       const tenantOrgId = resolveAlloyTenant(req);
@@ -1605,7 +1605,7 @@ router.patch(
 router.post(
   "/alloy/autonomy-mode/evaluate",
   authMiddleware(),
-  validateBody(jsonObjectBodySchema),
+  validateBody(alloyResourceBodySchema),
   async (req: Request, res: Response) => {
     try {
       const tenantOrgId = resolveAlloyTenant(req);

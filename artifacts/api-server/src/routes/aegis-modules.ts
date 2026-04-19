@@ -18,7 +18,7 @@ import {
 } from "@szl-holdings/db";
 import { authMiddleware } from "../middlewares/auth";
 import { handleRouteError, sendSuccess, sendNotFound, sendBadRequest } from "../lib/api-response";
-import { anyQuerySchema, jsonObjectBodySchema, validateBody, validateQuery } from "../lib/validation";
+import { aegisActionCreateSchema, aegisActionTransitionSchema, aegisDigitalTwinScenarioRunSchema, aegisDigitalTwinSyncSchema, aegisHoneypotCreateSchema, aegisListQuerySchema, aegisPushIocSchema, aegisSoarExecuteSchema, aegisSoarPlaybookCreateSchema, aegisSoarPlaybookDeleteSchema, aegisSoarPlaybookUpdateSchema, validateBody, validateQuery } from "../lib/validation";
 import { broadcastWs } from "../lib/pubsub-bridge";
 import rateLimit from "express-rate-limit";
 
@@ -248,7 +248,7 @@ router.get("/aegis/digital-twin/topology", limiter, authMiddleware({ required: f
   }
 });
 
-router.post("/aegis/digital-twin/sync", validateBody(jsonObjectBodySchema), limiter, authMiddleware({ required: true }), async (_req: Request, res: Response) => {
+router.post("/aegis/digital-twin/sync", validateBody(aegisDigitalTwinSyncSchema), limiter, authMiddleware({ required: true }), async (_req: Request, res: Response) => {
   try {
     // Bring the twin back in sync with the live asset inventory by stamping the
     // last_scanned_at on every active asset. Drift will re-emerge naturally as
@@ -341,7 +341,7 @@ router.get("/aegis/digital-twin/scenarios", limiter, authMiddleware({ required: 
   }
 });
 
-router.post("/aegis/digital-twin/scenarios/:id/run", validateBody(jsonObjectBodySchema), limiter, authMiddleware({ required: true }), async (req: Request, res: Response) => {
+router.post("/aegis/digital-twin/scenarios/:id/run", validateBody(aegisDigitalTwinScenarioRunSchema), limiter, authMiddleware({ required: true }), async (req: Request, res: Response) => {
   try {
     // Accept either raw numeric id or "SIM-###" form
     const raw = String(req.params.id ?? "");
@@ -408,7 +408,7 @@ router.get("/aegis/deception/honeypots", limiter, authMiddleware({ required: fal
   }
 });
 
-router.post("/aegis/deception/honeypots", limiter, authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/aegis/deception/honeypots", limiter, authMiddleware({ required: true }), validateBody(aegisHoneypotCreateSchema), async (req: Request, res: Response) => {
   try {
     const body = req.body as { name?: string; type?: string; ip?: string; os?: string };
     const inserted = await db.insert(aegisDeceptionHotpotsTable).values({
@@ -432,7 +432,7 @@ router.get("/aegis/deception/events", limiter, authMiddleware({ required: false 
   sendSuccess(res, { events: DECEPTION_EVENTS, fetchedAt: nowIso() });
 });
 
-router.post("/aegis/deception/events/:id/push-ioc", validateBody(jsonObjectBodySchema), limiter, authMiddleware({ required: true }), async (req: Request, res: Response) => {
+router.post("/aegis/deception/events/:id/push-ioc", validateBody(aegisPushIocSchema), limiter, authMiddleware({ required: true }), async (req: Request, res: Response) => {
   try {
     const evtId = req.params.id;
     const evt = DECEPTION_EVENTS.find(e => e.id === evtId);
@@ -453,7 +453,7 @@ router.post("/aegis/deception/events/:id/push-ioc", validateBody(jsonObjectBodyS
 
 // ─── ACTION QUEUE ROUTES ──────────────────────────────────────────────────────
 
-router.get("/aegis/action-queue", validateQuery(anyQuerySchema), limiter, authMiddleware({ required: false }), async (req: Request, res: Response) => {
+router.get("/aegis/action-queue", validateQuery(aegisListQuerySchema), limiter, authMiddleware({ required: false }), async (req: Request, res: Response) => {
   try {
     const { status, priority } = req.query as Record<string, string>;
     const conditions = [];
@@ -477,7 +477,7 @@ router.get("/aegis/action-queue", validateQuery(anyQuerySchema), limiter, authMi
   }
 });
 
-router.post("/aegis/action-queue/:id/complete", limiter, authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/aegis/action-queue/:id/complete", limiter, authMiddleware({ required: true }), validateBody(aegisActionTransitionSchema), async (req: Request, res: Response) => {
   try {
     const [item] = await db.select().from(aegisActionQueueItemsTable).where(eq(aegisActionQueueItemsTable.id, req.params.id)).limit(1);
     if (!item) { sendNotFound(res, "Action"); return; }
@@ -493,7 +493,7 @@ router.post("/aegis/action-queue/:id/complete", limiter, authMiddleware({ requir
   }
 });
 
-router.post("/aegis/action-queue/:id/escalate", limiter, authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/aegis/action-queue/:id/escalate", limiter, authMiddleware({ required: true }), validateBody(aegisActionTransitionSchema), async (req: Request, res: Response) => {
   try {
     const [item] = await db.select().from(aegisActionQueueItemsTable).where(eq(aegisActionQueueItemsTable.id, req.params.id)).limit(1);
     if (!item) { sendNotFound(res, "Action"); return; }
@@ -510,7 +510,7 @@ router.post("/aegis/action-queue/:id/escalate", limiter, authMiddleware({ requir
   }
 });
 
-router.post("/aegis/action-queue", limiter, authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/aegis/action-queue", limiter, authMiddleware({ required: true }), validateBody(aegisActionCreateSchema), async (req: Request, res: Response) => {
   try {
     const body = req.body as { title?: string; description?: string; priority?: string; assignedTo?: string; dueAt?: string; incidentId?: string; source?: string; playbookRef?: string };
     if (!body.title || !body.priority) { sendBadRequest(res, "title and priority are required"); return; }
@@ -587,7 +587,7 @@ router.get("/aegis/soar-builder/playbooks/:id", limiter, authMiddleware({ requir
   }
 });
 
-router.post("/aegis/soar-builder/playbooks", limiter, authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/aegis/soar-builder/playbooks", limiter, authMiddleware({ required: true }), validateBody(aegisSoarPlaybookCreateSchema), async (req: Request, res: Response) => {
   try {
     const body = req.body as { name?: string; trigger?: string; description?: string; nodes?: PlaybookNode[]; status?: string };
     if (!body.name || !body.trigger) { sendBadRequest(res, "name and trigger are required"); return; }
@@ -607,7 +607,7 @@ router.post("/aegis/soar-builder/playbooks", limiter, authMiddleware({ required:
   }
 });
 
-router.put("/aegis/soar-builder/playbooks/:id", limiter, authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.put("/aegis/soar-builder/playbooks/:id", limiter, authMiddleware({ required: true }), validateBody(aegisSoarPlaybookUpdateSchema), async (req: Request, res: Response) => {
   try {
     const [existing] = await db.select().from(aegisSoarPlaybooksTable).where(eq(aegisSoarPlaybooksTable.id, req.params.id)).limit(1);
     if (!existing) { sendNotFound(res, "Playbook"); return; }
@@ -629,7 +629,7 @@ router.put("/aegis/soar-builder/playbooks/:id", limiter, authMiddleware({ requir
   }
 });
 
-router.delete("/aegis/soar-builder/playbooks/:id", validateBody(jsonObjectBodySchema), limiter, authMiddleware({ required: true }), async (req: Request, res: Response) => {
+router.delete("/aegis/soar-builder/playbooks/:id", validateBody(aegisSoarPlaybookDeleteSchema), limiter, authMiddleware({ required: true }), async (req: Request, res: Response) => {
   try {
     const [existing] = await db.select().from(aegisSoarPlaybooksTable).where(eq(aegisSoarPlaybooksTable.id, req.params.id)).limit(1);
     if (!existing) { sendNotFound(res, "Playbook"); return; }
@@ -640,7 +640,7 @@ router.delete("/aegis/soar-builder/playbooks/:id", validateBody(jsonObjectBodySc
   }
 });
 
-router.get("/aegis/soar-builder/runs", validateQuery(anyQuerySchema), limiter, authMiddleware({ required: false }), async (req: Request, res: Response) => {
+router.get("/aegis/soar-builder/runs", validateQuery(aegisListQuerySchema), limiter, authMiddleware({ required: false }), async (req: Request, res: Response) => {
   try {
     const { playbookId } = req.query as Record<string, string>;
     const conditions = playbookId ? [eq(aegisSoarRunsTable.playbookId, playbookId)] : [];
@@ -654,7 +654,7 @@ router.get("/aegis/soar-builder/runs", validateQuery(anyQuerySchema), limiter, a
   }
 });
 
-router.post("/aegis/soar-builder/execute", limiter, authMiddleware({ required: true }), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/aegis/soar-builder/execute", limiter, authMiddleware({ required: true }), validateBody(aegisSoarExecuteSchema), async (req: Request, res: Response) => {
   try {
     const body = req.body as { playbookId?: string; incidentId?: string; triggeredBy?: string };
     if (!body.playbookId) { sendBadRequest(res, "playbookId is required"); return; }

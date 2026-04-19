@@ -5,7 +5,7 @@ import crypto from "crypto";
 import { sendSuccess, sendBadRequest, sendNotFound, sendForbidden, sendError, handleRouteError } from "../../lib/api-response";
 import { authMiddleware, requireRole } from "../../middlewares/auth";
 import { logActivity } from "../../lib/activity-logger";
-import { jsonObjectBodySchema, tenantCreateSchema, tenantStatusSchema, validateBody } from "../../lib/validation";
+import { scimSyncSchema, scimTokenCreateSchema, scimTokenRevokeSchema, tenantBrandingResetSchema, tenantBrandingUpdateSchema, tenantCreateSchema, tenantStatusSchema, validateBody } from "../../lib/validation";
 import { db } from "@szl-holdings/db";
 import {
   azureTenantsTable,
@@ -35,7 +35,7 @@ router.post(
   tenantRateLimit,
   authMiddleware(),
   requireRole("admin"),
-  validateBody(jsonObjectBodySchema),
+  validateBody(scimTokenCreateSchema),
   async (req: Request, res: Response) => {
     try {
       const id = parseInt(String(req.params.id), 10);
@@ -125,7 +125,7 @@ router.get(
 );
 
 router.delete(
-  "/admin/tenants/:id/scim/tokens/:tokenId", validateBody(jsonObjectBodySchema),
+  "/admin/tenants/:id/scim/tokens/:tokenId", validateBody(scimTokenRevokeSchema),
   tenantRateLimit,
   authMiddleware(),
   requireRole("admin"),
@@ -268,7 +268,7 @@ router.post(
   tenantRateLimit,
   authMiddleware(),
   requireRole("admin"),
-  validateBody(jsonObjectBodySchema),
+  validateBody(scimSyncSchema),
   async (req: Request, res: Response) => {
     try {
       const id = parseInt(String(req.params.id), 10);
@@ -346,7 +346,7 @@ router.put(
   tenantRateLimit,
   authMiddleware(),
   requireRole("admin"),
-  validateBody(jsonObjectBodySchema),
+  validateBody(tenantBrandingUpdateSchema),
   async (req: Request, res: Response) => {
     try {
       const id = parseInt(String(req.params.id), 10);
@@ -400,7 +400,7 @@ router.put(
 );
 
 router.delete(
-  "/admin/tenants/:id/branding", validateBody(jsonObjectBodySchema),
+  "/admin/tenants/:id/branding", validateBody(tenantBrandingResetSchema),
   tenantRateLimit,
   authMiddleware(),
   requireRole("admin"),

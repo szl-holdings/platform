@@ -27,7 +27,7 @@ import {
   parsePagination,
 } from "../lib/api-response";
 import { logger } from "../lib/logger";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { listQuerySchema, validateBody, validateQuery, alloySkillMutationSchema, alloySkillDeleteSchema, alloyResourceBodySchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -145,7 +145,7 @@ router.get("/alloy/skills/:skillId", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/alloy/skills", authMiddleware(), requireRole("admin"), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/alloy/skills", authMiddleware(), requireRole("admin"), validateBody(alloySkillMutationSchema), async (req, res) => {
   try {
     const user = req.user as AuthenticatedUser | undefined;
     if (!user) return sendForbidden(res, "Authentication required");
@@ -212,7 +212,7 @@ router.post("/alloy/skills", authMiddleware(), requireRole("admin"), validateBod
   }
 });
 
-router.patch("/alloy/skills/:skillId", authMiddleware(), requireRole("admin"), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/alloy/skills/:skillId", authMiddleware(), requireRole("admin"), validateBody(alloySkillMutationSchema), async (req, res) => {
   try {
     const skillId = req.params.skillId as string;
     const user = req.user as AuthenticatedUser | undefined;
@@ -251,7 +251,7 @@ router.patch("/alloy/skills/:skillId", authMiddleware(), requireRole("admin"), v
   }
 });
 
-router.delete("/alloy/skills/:skillId", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("admin"), async (req, res) => {
+router.delete("/alloy/skills/:skillId", validateBody(alloySkillDeleteSchema), authMiddleware(), requireRole("admin"), async (req, res) => {
   try {
     const skillId = req.params.skillId as string;
     const user = req.user as AuthenticatedUser | undefined;
@@ -286,7 +286,7 @@ router.get("/alloy/skills/chains/list", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/alloy/skills/chains/compose", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/alloy/skills/chains/compose", authMiddleware(), validateBody(alloyResourceBodySchema), async (req, res) => {
   try {
     const { capabilities, name, description } = req.body;
     if (!capabilities || !Array.isArray(capabilities) || capabilities.length === 0) {
@@ -318,7 +318,7 @@ router.get("/alloy/skills/chains/prebuilt/:scenario", authMiddleware(), async (r
   }
 });
 
-router.post("/alloy/skills/chains/:chainId/plan", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/alloy/skills/chains/:chainId/plan", authMiddleware(), validateBody(alloyResourceBodySchema), async (req, res) => {
   try {
     const chainId = req.params.chainId as string;
     const inputs = req.body.inputs ?? {};
@@ -333,7 +333,7 @@ router.post("/alloy/skills/chains/:chainId/plan", authMiddleware(), validateBody
   }
 });
 
-router.delete("/alloy/skills/chains/:chainId", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("admin"), async (req, res) => {
+router.delete("/alloy/skills/chains/:chainId", validateBody(alloySkillDeleteSchema), authMiddleware(), requireRole("admin"), async (req, res) => {
   try {
     const chainId = req.params.chainId as string;
     const { skillManager } = await import("@szl-holdings/ai-engine");
@@ -345,7 +345,7 @@ router.delete("/alloy/skills/chains/:chainId", validateBody(jsonObjectBodySchema
   }
 });
 
-router.post("/alloy/skills/discover", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/alloy/skills/discover", authMiddleware(), validateBody(alloyResourceBodySchema), async (req, res) => {
   try {
     const { capabilities, domain, tags, triggerContext } = req.body;
     const { skillManager } = await import("@szl-holdings/ai-engine");
@@ -356,7 +356,7 @@ router.post("/alloy/skills/discover", authMiddleware(), validateBody(jsonObjectB
   }
 });
 
-router.post("/alloy/skills/select", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/alloy/skills/select", authMiddleware(), validateBody(alloyResourceBodySchema), async (req, res) => {
   try {
     const { task, context, maxSkills } = req.body;
     if (!task) return sendBadRequest(res, "task is required");
@@ -370,7 +370,7 @@ router.post("/alloy/skills/select", authMiddleware(), validateBody(jsonObjectBod
 
 // ─── Decision Outcome Tracking ────────────────────────────────────────────────
 
-router.post("/alloy/decisions/:decisionId/outcome", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/alloy/decisions/:decisionId/outcome", authMiddleware(), validateBody(alloyResourceBodySchema), async (req, res) => {
   try {
     const decisionId = req.params.decisionId as string;
     const user = req.user as AuthenticatedUser | undefined;
@@ -623,7 +623,7 @@ router.get("/alloy/agents/:agentId/skill-effectiveness", authMiddleware(), valid
   }
 });
 
-router.post("/alloy/agents/:agentId/performance/snapshot", authMiddleware(), requireRole("admin"), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/alloy/agents/:agentId/performance/snapshot", authMiddleware(), requireRole("admin"), validateBody(alloyResourceBodySchema), async (req, res) => {
   try {
     const agentId = req.params.agentId as string;
     const user = req.user as AuthenticatedUser | undefined;
@@ -781,7 +781,7 @@ router.get("/alloy/performance/alerts", authMiddleware(), validateQuery(listQuer
   }
 });
 
-router.post("/alloy/performance/alerts/evaluate", authMiddleware(), requireRole("admin"), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.post("/alloy/performance/alerts/evaluate", authMiddleware(), requireRole("admin"), validateBody(alloyResourceBodySchema), async (req, res) => {
   try {
     const { agentId, tenantId } = req.body;
     const user = req.user as AuthenticatedUser | undefined;
@@ -809,7 +809,7 @@ router.post("/alloy/performance/alerts/evaluate", authMiddleware(), requireRole(
   }
 });
 
-router.patch("/alloy/performance/alerts/:alertId/resolve", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/alloy/performance/alerts/:alertId/resolve", authMiddleware(), validateBody(alloyResourceBodySchema), async (req, res) => {
   try {
     const alertId = req.params.alertId as string;
     const user = req.user as AuthenticatedUser | undefined;
@@ -884,7 +884,7 @@ router.get("/alloy/self-improvement/config", authMiddleware(), validateQuery(lis
   }
 });
 
-router.put("/alloy/self-improvement/config", authMiddleware(), requireRole("admin"), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.put("/alloy/self-improvement/config", authMiddleware(), requireRole("admin"), validateBody(alloyResourceBodySchema), async (req, res) => {
   try {
     const user = req.user as AuthenticatedUser | undefined;
     if (!user) return sendForbidden(res, "Authentication required");

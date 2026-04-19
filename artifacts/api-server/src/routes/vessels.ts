@@ -29,7 +29,7 @@ import { sendSuccess, sendCreated, sendNotFound, sendNoContent, handleRouteError
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 import { tenantScope } from "../middlewares/tenant-scope";
 import { broadcastWs, pubsub, VESSELS_EVENTS } from "../lib/pubsub-bridge.js";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { listQuerySchema, validateBody, validateQuery, vesselsResourceMutationSchema, vesselsResourceDeleteSchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -102,7 +102,7 @@ router.get("/vessels/fleets/:id", authMiddleware(), tenantScope(), async (req: R
   }
 });
 
-router.post("/vessels/fleets", authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin", "editor"), validateBody(jsonObjectBodySchema), async (req: Request, res) => {
+router.post("/vessels/fleets", authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin", "editor"), validateBody(vesselsResourceMutationSchema), async (req: Request, res) => {
   try {
     const data = insertVesselFleetSchema.parse(req.body);
     const [fleet] = await db.insert(vesselsFleetsTable).values({
@@ -115,7 +115,7 @@ router.post("/vessels/fleets", authMiddleware(), tenantScope(), requireRole("ops
   }
 });
 
-router.put("/vessels/fleets/:id", authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin", "editor"), validateBody(jsonObjectBodySchema), async (req: Request, res) => {
+router.put("/vessels/fleets/:id", authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin", "editor"), validateBody(vesselsResourceMutationSchema), async (req: Request, res) => {
   try {
     const id = parseIdParam(req.params.id);
     // Strip orgId — tenant context is authoritative; clients must not reassign tenancy
@@ -131,7 +131,7 @@ router.put("/vessels/fleets/:id", authMiddleware(), tenantScope(), requireRole("
   }
 });
 
-router.delete("/vessels/fleets/:id", validateBody(jsonObjectBodySchema), authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin"), async (req: Request, res) => {
+router.delete("/vessels/fleets/:id", validateBody(vesselsResourceDeleteSchema), authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin"), async (req: Request, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const condition = req.tenantOrgId !== undefined
@@ -176,7 +176,7 @@ router.get("/vessels/events", authMiddleware(), tenantScope(), validateQuery(lis
   } catch (err) { handleRouteError(res, err, "Failed to list vessel events"); }
 });
 
-router.post("/vessels/events", authMiddleware(), tenantScope(), validateBody(jsonObjectBodySchema), async (req: Request, res) => {
+router.post("/vessels/events", authMiddleware(), tenantScope(), validateBody(vesselsResourceMutationSchema), async (req: Request, res) => {
   try {
     const data = insertVesselsExceptionEventSchema.parse(req.body);
     const vessel = await getVesselInOrg(data.vesselId, req.tenantOrgId);
@@ -208,7 +208,7 @@ router.get("/vessels/command-workflows", authMiddleware(), tenantScope(), valida
   } catch (err) { handleRouteError(res, err, "Failed to list command workflows"); }
 });
 
-router.post("/vessels/command-workflows", authMiddleware(), tenantScope(), validateBody(jsonObjectBodySchema), async (req: Request, res) => {
+router.post("/vessels/command-workflows", authMiddleware(), tenantScope(), validateBody(vesselsResourceMutationSchema), async (req: Request, res) => {
   try {
     const data = insertVesselCommandWorkflowSchema.parse(req.body);
     if (data.vesselId) {
@@ -245,7 +245,7 @@ router.get("/vessels/:id", authMiddleware(), tenantScope(), async (req: Request,
   }
 });
 
-router.post("/vessels", authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin", "editor"), validateBody(jsonObjectBodySchema), async (req: Request, res) => {
+router.post("/vessels", authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin", "editor"), validateBody(vesselsResourceMutationSchema), async (req: Request, res) => {
   try {
     const data = insertVesselSchema.parse(req.body);
     // orgId is intentionally nullable: a super_admin acting outside any tenant
@@ -264,7 +264,7 @@ router.post("/vessels", authMiddleware(), tenantScope(), requireRole("ops", "exe
   }
 });
 
-router.put("/vessels/:id", authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin", "editor"), validateBody(jsonObjectBodySchema), async (req: Request, res) => {
+router.put("/vessels/:id", authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin", "editor"), validateBody(vesselsResourceMutationSchema), async (req: Request, res) => {
   try {
     const id = parseIdParam(req.params.id);
     // Strip orgId — tenant context is authoritative; clients must not reassign tenancy
@@ -285,7 +285,7 @@ router.put("/vessels/:id", authMiddleware(), tenantScope(), requireRole("ops", "
   }
 });
 
-router.delete("/vessels/:id", validateBody(jsonObjectBodySchema), authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin"), async (req: Request, res) => {
+router.delete("/vessels/:id", validateBody(vesselsResourceDeleteSchema), authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin"), async (req: Request, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const condition = req.tenantOrgId !== undefined
@@ -378,7 +378,7 @@ router.get("/vessels/:id/route", authMiddleware(), tenantScope(), async (req: Re
   }
 });
 
-router.post("/vessels/routes", authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin", "editor"), validateBody(jsonObjectBodySchema), async (req: Request, res) => {
+router.post("/vessels/routes", authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin", "editor"), validateBody(vesselsResourceMutationSchema), async (req: Request, res) => {
   try {
     const data = insertVesselRouteSchema.parse(req.body);
     const vessel = await getVesselInOrg(data.vesselId, req.tenantOrgId);
@@ -390,7 +390,7 @@ router.post("/vessels/routes", authMiddleware(), tenantScope(), requireRole("ops
   }
 });
 
-router.put("/vessels/routes/:id", authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin", "editor"), validateBody(jsonObjectBodySchema), async (req: Request, res) => {
+router.put("/vessels/routes/:id", authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin", "editor"), validateBody(vesselsResourceMutationSchema), async (req: Request, res) => {
   try {
     const id = parseIdParam(req.params.id);
     // Strip vesselId — parent ownership must not be reassigned by clients
@@ -409,7 +409,7 @@ router.put("/vessels/routes/:id", authMiddleware(), tenantScope(), requireRole("
   }
 });
 
-router.delete("/vessels/routes/:id", validateBody(jsonObjectBodySchema), authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin"), async (req: Request, res) => {
+router.delete("/vessels/routes/:id", validateBody(vesselsResourceDeleteSchema), authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin"), async (req: Request, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [existing] = await db.select().from(vesselsRoutesTable).where(eq(vesselsRoutesTable.id, id));
@@ -440,7 +440,7 @@ router.get("/vessels/alert-rules/all", authMiddleware(), tenantScope(), async (r
   }
 });
 
-router.post("/vessels/alert-rules", authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin", "editor"), validateBody(jsonObjectBodySchema), async (req: Request, res) => {
+router.post("/vessels/alert-rules", authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin", "editor"), validateBody(vesselsResourceMutationSchema), async (req: Request, res) => {
   try {
     const data = insertVesselAlertRuleSchema.parse(req.body);
     const [rule] = await db.insert(vesselsAlertRulesTable).values({
@@ -453,7 +453,7 @@ router.post("/vessels/alert-rules", authMiddleware(), tenantScope(), requireRole
   }
 });
 
-router.put("/vessels/alert-rules/:id", authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin", "editor"), validateBody(jsonObjectBodySchema), async (req: Request, res) => {
+router.put("/vessels/alert-rules/:id", authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin", "editor"), validateBody(vesselsResourceMutationSchema), async (req: Request, res) => {
   try {
     const id = parseIdParam(req.params.id);
     // Strip orgId — tenant context is authoritative; clients must not reassign tenancy
@@ -469,7 +469,7 @@ router.put("/vessels/alert-rules/:id", authMiddleware(), tenantScope(), requireR
   }
 });
 
-router.delete("/vessels/alert-rules/:id", validateBody(jsonObjectBodySchema), authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin"), async (req: Request, res) => {
+router.delete("/vessels/alert-rules/:id", validateBody(vesselsResourceDeleteSchema), authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin"), async (req: Request, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const condition = req.tenantOrgId !== undefined
@@ -498,7 +498,7 @@ router.get("/vessels/alerts/all", authMiddleware(), tenantScope(), async (req: R
   }
 });
 
-router.post("/vessels/alerts", authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin", "editor"), validateBody(jsonObjectBodySchema), async (req: Request, res) => {
+router.post("/vessels/alerts", authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin", "editor"), validateBody(vesselsResourceMutationSchema), async (req: Request, res) => {
   try {
     const data = insertVesselAlertSchema.parse(req.body);
     if (data.vesselId) {
@@ -512,7 +512,7 @@ router.post("/vessels/alerts", authMiddleware(), tenantScope(), requireRole("ops
   }
 });
 
-router.delete("/vessels/alerts/:id", validateBody(jsonObjectBodySchema), authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin"), async (req: Request, res) => {
+router.delete("/vessels/alerts/:id", validateBody(vesselsResourceDeleteSchema), authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin"), async (req: Request, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [existing] = await db.select().from(vesselsAlertsTable).where(eq(vesselsAlertsTable.id, id));
@@ -579,7 +579,7 @@ router.get("/vessels/simulations/all", authMiddleware(), tenantScope(), async (r
   }
 });
 
-router.post("/vessels/simulations", authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin", "analyst"), validateBody(jsonObjectBodySchema), async (req: Request, res) => {
+router.post("/vessels/simulations", authMiddleware(), tenantScope(), requireRole("ops", "exec", "admin", "analyst"), validateBody(vesselsResourceMutationSchema), async (req: Request, res) => {
   try {
     const data = insertVesselSimulationSchema.parse(req.body);
     if (data.vesselId) {
@@ -816,7 +816,7 @@ const patchVesselCommandWorkflowSchema = z.object({
   consequenceImpact: z.string().max(2000).optional(),
 });
 
-router.patch("/vessels/events/:id", authMiddleware(), tenantScope(), validateBody(jsonObjectBodySchema), async (req: Request, res) => {
+router.patch("/vessels/events/:id", authMiddleware(), tenantScope(), validateBody(vesselsResourceMutationSchema), async (req: Request, res) => {
   try {
     const id = parseIdParam(req.params.id);
     // Strict schema: enum-constrained, length-bounded, no unknown keys allowed
@@ -846,7 +846,7 @@ router.patch("/vessels/events/:id", authMiddleware(), tenantScope(), validateBod
 
 // ─── Command Workflows (org-scoped via parent vessel ownership) ───────────────
 
-router.patch("/vessels/command-workflows/:id", authMiddleware(), tenantScope(), validateBody(jsonObjectBodySchema), async (req: Request, res) => {
+router.patch("/vessels/command-workflows/:id", authMiddleware(), tenantScope(), validateBody(vesselsResourceMutationSchema), async (req: Request, res) => {
   try {
     const id = parseIdParam(req.params.id);
     // Strict schema: enum-constrained, length-bounded, no unknown keys allowed

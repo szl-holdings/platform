@@ -10,7 +10,7 @@ import { serverTelemetry } from "@szl-holdings/observability";
 import { durableJobQueue } from "@szl-holdings/forge-runtime";
 import { logger } from "../../lib/logger.js";
 import { isFlagEnabled } from "../../lib/platform-flags.js";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../../lib/validation.js";
+import { adminSeedSchema, artifactApprovalApproveSchema, listQuerySchema, validateBody, validateQuery } from "../../lib/validation.js";
 import { sendError, sendNotFound, sendForbidden, sendBadRequest } from "../../lib/api-response.js";
 import { z } from "zod";
 import { services } from "@szl-holdings/services";
@@ -327,7 +327,7 @@ export function register(router: IRouter): void {
     res.json({ environment: process.env["NODE_ENV"] ?? "development", envVars, configured: envVars.filter((v) => v.configured).length, missing: envVars.filter((v) => !v.configured).length, total: envVars.length });
   });
 
-  router.post("/admin/seed", validateBody(jsonObjectBodySchema), async (_req, res) => {
+  router.post("/admin/seed", validateBody(adminSeedSchema), async (_req, res) => {
     if (guardSeedInProduction(res)) return;
     try {
       const results = await seedLyteObservability();
@@ -338,7 +338,7 @@ export function register(router: IRouter): void {
     }
   });
 
-  router.post("/admin/seed/reset", validateBody(jsonObjectBodySchema), async (_req, res) => {
+  router.post("/admin/seed/reset", validateBody(adminSeedSchema), async (_req, res) => {
     if (guardSeedInProduction(res)) return;
     try {
       const results = await seedLyteObservability();
@@ -412,7 +412,7 @@ export function register(router: IRouter): void {
     }
   });
 
-  router.post("/admin/artifact-approvals/:id/approve", validateBody(jsonObjectBodySchema), async (req, res) => {
+  router.post("/admin/artifact-approvals/:id/approve", validateBody(artifactApprovalApproveSchema), async (req, res) => {
     const approvalsEnabled = await isFlagEnabled("alloy_artifact_approvals_enabled");
     if (!approvalsEnabled) { sendForbidden(res, "Feature not available: alloy_artifact_approvals_enabled"); return; }
     const { id } = req.params as Record<string, string>;

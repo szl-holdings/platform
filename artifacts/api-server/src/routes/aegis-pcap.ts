@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { validateBody, jsonObjectBodySchema } from "../lib/validation";
+import { aegisPcapReplaySchema, validateBody } from "../lib/validation";
 
 type ProtoName = "modbus" | "dnp3" | "s7" | "all";
 
@@ -116,7 +116,7 @@ function hashString(s: string): number {
 
 const router: IRouter = Router();
 
-router.post("/aegis/replay/pcap", validateBody(jsonObjectBodySchema), (req, res) => {
+router.post("/aegis/replay/pcap", validateBody(aegisPcapReplaySchema), (req, res) => {
   const body = req.body as PcapBody | undefined;
   if (!body || !Array.isArray(body.frames) || body.frames.length === 0) {
     res.status(400).json({ error: "frames array is required" });
@@ -250,7 +250,7 @@ function buildEnhancedPacketBlock(packet: Buffer, tsMillis: number, comments: st
   return buildBlock(0x00000006, Buffer.concat([fixed, optsBuf]));
 }
 
-router.post("/aegis/replay/pcapng", validateBody(jsonObjectBodySchema), (req, res) => {
+router.post("/aegis/replay/pcapng", validateBody(aegisPcapReplaySchema), (req, res) => {
   const body = req.body as PcapBody | undefined;
   if (!body || !Array.isArray(body.frames) || body.frames.length === 0) {
     res.status(400).json({ error: "frames array is required" });

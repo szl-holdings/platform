@@ -3,7 +3,7 @@ import { db } from "@szl-holdings/db";
 import { contactSubmissionsTable, leadStatusTable, supportKnowledgeArticlesTable } from "@szl-holdings/db";
 import { eq, desc, sql, ilike, or, and } from "drizzle-orm";
 import { z } from "zod";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../../lib/validation.js";
+import { kbArticleArchiveSchema, listQuerySchema, supportTicketTransitionSchema, validateBody, validateQuery } from "../../lib/validation.js";
 import { sendError, sendNotFound, sendBadRequest } from "../../lib/api-response.js";
 import { sendEmail, buildTicketStatusEmail } from "../../lib/email.js";
 import { logger } from "../../lib/logger.js";
@@ -272,7 +272,7 @@ export function register(router: IRouter): void {
     }
   });
 
-  router.post("/admin/support-queue/:id/resolve", validateBody(jsonObjectBodySchema), async (req, res) => {
+  router.post("/admin/support-queue/:id/resolve", validateBody(supportTicketTransitionSchema), async (req, res) => {
     try {
       const id = parseInt(req.params.id as string, 10);
       if (isNaN(id)) { sendBadRequest(res, "Invalid ticket ID"); return; }
@@ -292,7 +292,7 @@ export function register(router: IRouter): void {
     }
   });
 
-  router.post("/admin/support-queue/:id/reopen", validateBody(jsonObjectBodySchema), async (req, res) => {
+  router.post("/admin/support-queue/:id/reopen", validateBody(supportTicketTransitionSchema), async (req, res) => {
     try {
       const id = parseInt(req.params.id as string, 10);
       if (isNaN(id)) { sendBadRequest(res, "Invalid ticket ID"); return; }
@@ -415,7 +415,7 @@ export function register(router: IRouter): void {
     }
   });
 
-  router.delete("/admin/kb-articles/:id", validateBody(jsonObjectBodySchema), async (req, res) => {
+  router.delete("/admin/kb-articles/:id", validateBody(kbArticleArchiveSchema), async (req, res) => {
     try {
       const id = parseInt(req.params.id as string, 10);
       if (isNaN(id)) { sendBadRequest(res, "Invalid article ID"); return; }

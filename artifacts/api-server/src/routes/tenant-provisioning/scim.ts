@@ -5,7 +5,7 @@ import crypto from "crypto";
 import { sendSuccess, sendBadRequest, sendNotFound, sendForbidden, sendError, handleRouteError } from "../../lib/api-response";
 import { authMiddleware, requireRole } from "../../middlewares/auth";
 import { logActivity } from "../../lib/activity-logger";
-import { validateBody, tenantCreateSchema, tenantStatusSchema, jsonObjectBodySchema} from "../../lib/validation";
+import { validateBody, scimSyncUsersSchema, tenantCreateSchema, tenantStatusSchema} from "../../lib/validation";
 import { db } from "@szl-holdings/db";
 import {
   azureTenantsTable,
@@ -107,7 +107,7 @@ router.post(
   tenantRateLimit,
   authMiddleware(),
   requireRole("admin"),
-  validateBody(jsonObjectBodySchema),
+  validateBody(scimSyncUsersSchema),
   async (req: Request, res: Response) => {
     try {
       const id = parseInt(String(req.params.id), 10);

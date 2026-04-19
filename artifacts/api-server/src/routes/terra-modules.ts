@@ -16,7 +16,7 @@ import { z } from "zod";
 import { randomUUID } from "crypto";
 import multer from "multer";
 import mammoth from "mammoth";
-import { jsonObjectBodySchema, validateBody } from "../lib/validation";
+import { validateBody, terraResourceMutationSchema, terraResourceDeleteSchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -347,7 +347,7 @@ const LeaseCreateSchema = z.object({
   isDemo: z.boolean().optional(),
 });
 
-router.post("/terra/leases", authWrite, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/terra/leases", authWrite, validateBody(terraResourceMutationSchema), async (req: Request, res: Response) => {
   try {
     const body = LeaseCreateSchema.safeParse(req.body);
     if (!body.success) return sendBadRequest(res, body.error.message);
@@ -381,7 +381,7 @@ router.post("/terra/leases", authWrite, validateBody(jsonObjectBodySchema), asyn
   } catch (err) { handleRouteError(res, err, "Failed to create lease"); }
 });
 
-router.post("/terra/leases/upload", authWrite, upload.single("file"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/terra/leases/upload", authWrite, upload.single("file"), validateBody(terraResourceMutationSchema), async (req: Request, res: Response) => {
   try {
     if (!req.file) return sendBadRequest(res, "No file uploaded. Use multipart/form-data with field name 'file'.");
     const { originalname, buffer, mimetype, size } = req.file;
@@ -474,7 +474,7 @@ router.post("/terra/leases/upload", authWrite, upload.single("file"), validateBo
   } catch (err) { handleRouteError(res, err, "Failed to process lease upload"); }
 });
 
-router.put("/terra/leases/:id", authWrite, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.put("/terra/leases/:id", authWrite, validateBody(terraResourceMutationSchema), async (req: Request, res: Response) => {
   try {
     const body = LeaseCreateSchema.partial().safeParse(req.body);
     if (!body.success) return sendBadRequest(res, body.error.message);
@@ -495,7 +495,7 @@ router.put("/terra/leases/:id", authWrite, validateBody(jsonObjectBodySchema), a
   } catch (err) { handleRouteError(res, err, "Failed to update lease"); }
 });
 
-router.delete("/terra/leases/:id", validateBody(jsonObjectBodySchema), authWrite, async (req: Request, res: Response) => {
+router.delete("/terra/leases/:id", validateBody(terraResourceDeleteSchema), authWrite, async (req: Request, res: Response) => {
   try {
     const leaseUserId = req.user?.id;
     const leaseWhere = leaseUserId != null
@@ -541,7 +541,7 @@ const ProFormaProjectSchema = z.object({
   isDemo: z.boolean().optional(),
 });
 
-router.post("/terra/pro-forma-projects", authWrite, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/terra/pro-forma-projects", authWrite, validateBody(terraResourceMutationSchema), async (req: Request, res: Response) => {
   try {
     const body = ProFormaProjectSchema.safeParse(req.body);
     if (!body.success) return sendBadRequest(res, body.error.message);
@@ -560,7 +560,7 @@ router.post("/terra/pro-forma-projects", authWrite, validateBody(jsonObjectBodyS
   } catch (err) { handleRouteError(res, err, "Failed to save pro forma project"); }
 });
 
-router.put("/terra/pro-forma-projects/:id", authWrite, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.put("/terra/pro-forma-projects/:id", authWrite, validateBody(terraResourceMutationSchema), async (req: Request, res: Response) => {
   try {
     const body = ProFormaProjectSchema.partial().safeParse(req.body);
     if (!body.success) return sendBadRequest(res, body.error.message);
@@ -576,7 +576,7 @@ router.put("/terra/pro-forma-projects/:id", authWrite, validateBody(jsonObjectBo
   } catch (err) { handleRouteError(res, err, "Failed to update pro forma project"); }
 });
 
-router.delete("/terra/pro-forma-projects/:id", validateBody(jsonObjectBodySchema), authWrite, async (req: Request, res: Response) => {
+router.delete("/terra/pro-forma-projects/:id", validateBody(terraResourceDeleteSchema), authWrite, async (req: Request, res: Response) => {
   try {
     const conditions = [eq(terraProFormaProjectsTable.externalId, req.params.id as string)];
     if (req.user?.id) conditions.push(eq(terraProFormaProjectsTable.ownerUserId, req.user.id));
@@ -639,7 +639,7 @@ const Exchange1031Schema = z.object({
   isDemo: z.boolean().optional(),
 });
 
-router.post("/terra/exchanges-1031", authWrite, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/terra/exchanges-1031", authWrite, validateBody(terraResourceMutationSchema), async (req: Request, res: Response) => {
   try {
     const body = Exchange1031Schema.safeParse(req.body);
     if (!body.success) return sendBadRequest(res, body.error.message);
@@ -667,7 +667,7 @@ router.post("/terra/exchanges-1031", authWrite, validateBody(jsonObjectBodySchem
   } catch (err) { handleRouteError(res, err, "Failed to create exchange"); }
 });
 
-router.put("/terra/exchanges-1031/:id", authWrite, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.put("/terra/exchanges-1031/:id", authWrite, validateBody(terraResourceMutationSchema), async (req: Request, res: Response) => {
   try {
     const body = Exchange1031Schema.partial().safeParse(req.body);
     if (!body.success) return sendBadRequest(res, body.error.message);
@@ -686,7 +686,7 @@ router.put("/terra/exchanges-1031/:id", authWrite, validateBody(jsonObjectBodySc
   } catch (err) { handleRouteError(res, err, "Failed to update exchange"); }
 });
 
-router.delete("/terra/exchanges-1031/:id", validateBody(jsonObjectBodySchema), authWrite, async (req: Request, res: Response) => {
+router.delete("/terra/exchanges-1031/:id", validateBody(terraResourceDeleteSchema), authWrite, async (req: Request, res: Response) => {
   try {
     const exUserId = req.user?.id;
     const exWhere = exUserId != null
@@ -755,7 +755,7 @@ const TaxAppealSchema = z.object({
   isDemo: z.boolean().optional(),
 });
 
-router.post("/terra/tax-appeals", authWrite, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/terra/tax-appeals", authWrite, validateBody(terraResourceMutationSchema), async (req: Request, res: Response) => {
   try {
     const body = TaxAppealSchema.safeParse(req.body);
     if (!body.success) return sendBadRequest(res, body.error.message);
@@ -785,7 +785,7 @@ router.post("/terra/tax-appeals", authWrite, validateBody(jsonObjectBodySchema),
   } catch (err) { handleRouteError(res, err, "Failed to create tax appeal"); }
 });
 
-router.put("/terra/tax-appeals/:id", authWrite, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.put("/terra/tax-appeals/:id", authWrite, validateBody(terraResourceMutationSchema), async (req: Request, res: Response) => {
   try {
     const body = TaxAppealSchema.partial().safeParse(req.body);
     if (!body.success) return sendBadRequest(res, body.error.message);
@@ -803,7 +803,7 @@ router.put("/terra/tax-appeals/:id", authWrite, validateBody(jsonObjectBodySchem
   } catch (err) { handleRouteError(res, err, "Failed to update tax appeal"); }
 });
 
-router.delete("/terra/tax-appeals/:id", validateBody(jsonObjectBodySchema), authWrite, async (req: Request, res: Response) => {
+router.delete("/terra/tax-appeals/:id", validateBody(terraResourceDeleteSchema), authWrite, async (req: Request, res: Response) => {
   try {
     const taUserId = req.user?.id;
     const taWhere = taUserId != null
@@ -849,7 +849,7 @@ const WaterfallStructureSchema = z.object({
   isDemo: z.boolean().optional(),
 });
 
-router.post("/terra/waterfall-structures", authWrite, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/terra/waterfall-structures", authWrite, validateBody(terraResourceMutationSchema), async (req: Request, res: Response) => {
   try {
     const body = WaterfallStructureSchema.safeParse(req.body);
     if (!body.success) return sendBadRequest(res, body.error.message);
@@ -868,7 +868,7 @@ router.post("/terra/waterfall-structures", authWrite, validateBody(jsonObjectBod
   } catch (err) { handleRouteError(res, err, "Failed to save waterfall structure"); }
 });
 
-router.put("/terra/waterfall-structures/:id", authWrite, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.put("/terra/waterfall-structures/:id", authWrite, validateBody(terraResourceMutationSchema), async (req: Request, res: Response) => {
   try {
     const body = WaterfallStructureSchema.partial().safeParse(req.body);
     if (!body.success) return sendBadRequest(res, body.error.message);
@@ -884,7 +884,7 @@ router.put("/terra/waterfall-structures/:id", authWrite, validateBody(jsonObject
   } catch (err) { handleRouteError(res, err, "Failed to update waterfall structure"); }
 });
 
-router.delete("/terra/waterfall-structures/:id", validateBody(jsonObjectBodySchema), authWrite, async (req: Request, res: Response) => {
+router.delete("/terra/waterfall-structures/:id", validateBody(terraResourceDeleteSchema), authWrite, async (req: Request, res: Response) => {
   try {
     const conditions = [eq(terraWaterfallStructuresTable.externalId, req.params.id as string)];
     if (req.user?.id) conditions.push(eq(terraWaterfallStructuresTable.ownerUserId, req.user.id));
@@ -948,7 +948,7 @@ const ConstructionProjectSchema = z.object({
   isDemo: z.boolean().optional(),
 });
 
-router.post("/terra/construction-projects", authWrite, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/terra/construction-projects", authWrite, validateBody(terraResourceMutationSchema), async (req: Request, res: Response) => {
   try {
     const body = ConstructionProjectSchema.safeParse(req.body);
     if (!body.success) return sendBadRequest(res, body.error.message);
@@ -977,7 +977,7 @@ router.post("/terra/construction-projects", authWrite, validateBody(jsonObjectBo
   } catch (err) { handleRouteError(res, err, "Failed to create construction project"); }
 });
 
-router.put("/terra/construction-projects/:id", authWrite, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.put("/terra/construction-projects/:id", authWrite, validateBody(terraResourceMutationSchema), async (req: Request, res: Response) => {
   try {
     const body = ConstructionProjectSchema.partial().safeParse(req.body);
     if (!body.success) return sendBadRequest(res, body.error.message);
@@ -1000,7 +1000,7 @@ router.put("/terra/construction-projects/:id", authWrite, validateBody(jsonObjec
   } catch (err) { handleRouteError(res, err, "Failed to update construction project"); }
 });
 
-router.delete("/terra/construction-projects/:id", validateBody(jsonObjectBodySchema), authWrite, async (req: Request, res: Response) => {
+router.delete("/terra/construction-projects/:id", validateBody(terraResourceDeleteSchema), authWrite, async (req: Request, res: Response) => {
   try {
     const cpUserId = req.user?.id;
     const cpWhere = cpUserId != null
@@ -1075,7 +1075,7 @@ const TenantApplicationSchema = z.object({
   isDemo: z.boolean().optional(),
 });
 
-router.post("/terra/tenant-applications", authWrite, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/terra/tenant-applications", authWrite, validateBody(terraResourceMutationSchema), async (req: Request, res: Response) => {
   try {
     const body = TenantApplicationSchema.safeParse(req.body);
     if (!body.success) return sendBadRequest(res, body.error.message);
@@ -1165,7 +1165,7 @@ router.post("/terra/tenant-applications", authWrite, validateBody(jsonObjectBody
   } catch (err) { handleRouteError(res, err, "Failed to create tenant application"); }
 });
 
-router.put("/terra/tenant-applications/:id", authWrite, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.put("/terra/tenant-applications/:id", authWrite, validateBody(terraResourceMutationSchema), async (req: Request, res: Response) => {
   try {
     const body = TenantApplicationSchema.partial().safeParse(req.body);
     if (!body.success) return sendBadRequest(res, body.error.message);
@@ -1187,7 +1187,7 @@ router.put("/terra/tenant-applications/:id", authWrite, validateBody(jsonObjectB
   } catch (err) { handleRouteError(res, err, "Failed to update tenant application"); }
 });
 
-router.delete("/terra/tenant-applications/:id", validateBody(jsonObjectBodySchema), authWrite, async (req: Request, res: Response) => {
+router.delete("/terra/tenant-applications/:id", validateBody(terraResourceDeleteSchema), authWrite, async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
     const where = userId != null

@@ -22,7 +22,7 @@ import {
   insertLyteSavedViewSchema,
   insertLyteReadinessItemSchema,
 } from "@szl-holdings/db";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery, lyteInterventionsQuerySchema, lyteInterventionCreateSchema } from "../lib/validation";
+import { listQuerySchema, validateBody, validateQuery, lyteInterventionsQuerySchema, lyteInterventionCreateSchema, lyteResourcePatchSchema, lyteResourceDeleteSchema } from "../lib/validation";
 import { z } from "zod";
 import { eq, desc, sql, and } from "drizzle-orm";
 import { sendSuccess, sendNotFound, sendError, handleRouteError, parsePagination } from "../lib/api-response";
@@ -92,7 +92,7 @@ router.post("/lyte/signals", authMiddleware(), denyIfReadOnly(), validateBody(in
   }
 });
 
-router.patch("/lyte/signals/:id", authMiddleware(), denyIfReadOnly(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/lyte/signals/:id", authMiddleware(), denyIfReadOnly(), validateBody(lyteResourcePatchSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(lyteSignalsTable).set(req.body).where(eq(lyteSignalsTable.id, id)).returning();
@@ -104,7 +104,7 @@ router.patch("/lyte/signals/:id", authMiddleware(), denyIfReadOnly(), validateBo
   }
 });
 
-router.delete("/lyte/signals/:id", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("ops", "admin", "super_admin"), async (req, res) => {
+router.delete("/lyte/signals/:id", validateBody(lyteResourceDeleteSchema), authMiddleware(), requireRole("ops", "admin", "super_admin"), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(lyteSignalsTable).where(eq(lyteSignalsTable.id, id)).returning();
@@ -135,7 +135,7 @@ router.post("/lyte/command-cards", authMiddleware(), denyIfReadOnly(), validateB
   }
 });
 
-router.patch("/lyte/command-cards/:id", authMiddleware(), denyIfReadOnly(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/lyte/command-cards/:id", authMiddleware(), denyIfReadOnly(), validateBody(lyteResourcePatchSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(lyteCommandCardsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(lyteCommandCardsTable.id, id)).returning();
@@ -146,7 +146,7 @@ router.patch("/lyte/command-cards/:id", authMiddleware(), denyIfReadOnly(), vali
   }
 });
 
-router.delete("/lyte/command-cards/:id", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("ops", "admin", "super_admin"), async (req, res) => {
+router.delete("/lyte/command-cards/:id", validateBody(lyteResourceDeleteSchema), authMiddleware(), requireRole("ops", "admin", "super_admin"), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(lyteCommandCardsTable).where(eq(lyteCommandCardsTable.id, id)).returning();
@@ -177,7 +177,7 @@ router.post("/lyte/incidents", authMiddleware(), denyIfReadOnly(), validateBody(
   }
 });
 
-router.patch("/lyte/incidents/:id", authMiddleware(), denyIfReadOnly(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/lyte/incidents/:id", authMiddleware(), denyIfReadOnly(), validateBody(lyteResourcePatchSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(lyteIncidentsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(lyteIncidentsTable.id, id)).returning();
@@ -188,7 +188,7 @@ router.patch("/lyte/incidents/:id", authMiddleware(), denyIfReadOnly(), validate
   }
 });
 
-router.delete("/lyte/incidents/:id", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("ops", "admin", "super_admin"), async (req, res) => {
+router.delete("/lyte/incidents/:id", validateBody(lyteResourceDeleteSchema), authMiddleware(), requireRole("ops", "admin", "super_admin"), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(lyteIncidentsTable).where(eq(lyteIncidentsTable.id, id)).returning();
@@ -230,7 +230,7 @@ router.get("/lyte/playbooks/:id", authMiddleware(), async (req, res) => {
   }
 });
 
-router.patch("/lyte/playbooks/:id", authMiddleware(), denyIfReadOnly(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/lyte/playbooks/:id", authMiddleware(), denyIfReadOnly(), validateBody(lyteResourcePatchSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(lytePlaybooksTable).set({ ...req.body, updatedAt: new Date() }).where(eq(lytePlaybooksTable.id, id)).returning();
@@ -241,7 +241,7 @@ router.patch("/lyte/playbooks/:id", authMiddleware(), denyIfReadOnly(), validate
   }
 });
 
-router.delete("/lyte/playbooks/:id", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("ops", "admin", "super_admin"), async (req, res) => {
+router.delete("/lyte/playbooks/:id", validateBody(lyteResourceDeleteSchema), authMiddleware(), requireRole("ops", "admin", "super_admin"), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(lytePlaybooksTable).where(eq(lytePlaybooksTable.id, id)).returning();
@@ -272,7 +272,7 @@ router.post("/lyte/recommendations", authMiddleware(), denyIfReadOnly(), validat
   }
 });
 
-router.patch("/lyte/recommendations/:id", authMiddleware(), denyIfReadOnly(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/lyte/recommendations/:id", authMiddleware(), denyIfReadOnly(), validateBody(lyteResourcePatchSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(lyteRecommendationsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(lyteRecommendationsTable.id, id)).returning();
@@ -283,7 +283,7 @@ router.patch("/lyte/recommendations/:id", authMiddleware(), denyIfReadOnly(), va
   }
 });
 
-router.delete("/lyte/recommendations/:id", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("ops", "admin", "super_admin"), async (req, res) => {
+router.delete("/lyte/recommendations/:id", validateBody(lyteResourceDeleteSchema), authMiddleware(), requireRole("ops", "admin", "super_admin"), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(lyteRecommendationsTable).where(eq(lyteRecommendationsTable.id, id)).returning();
@@ -417,7 +417,7 @@ router.post("/lyte/actions", authMiddleware(), denyIfReadOnly(), validateBody(in
   } catch (err) { handleRouteError(res, err, "Failed to create action"); }
 });
 
-router.patch("/lyte/actions/:id", authMiddleware(), denyIfReadOnly(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/lyte/actions/:id", authMiddleware(), denyIfReadOnly(), validateBody(lyteResourcePatchSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const current = await db.select().from(lyteActionsTable).where(eq(lyteActionsTable.id, id)).limit(1);
@@ -470,7 +470,7 @@ router.post("/lyte/views", authMiddleware(), denyIfReadOnly(), validateBody(inse
   } catch (err) { handleRouteError(res, err, "Failed to create view"); }
 });
 
-router.patch("/lyte/views/:id", authMiddleware(), denyIfReadOnly(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/lyte/views/:id", authMiddleware(), denyIfReadOnly(), validateBody(lyteResourcePatchSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(lyteSavedViewsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(lyteSavedViewsTable.id, id)).returning();
@@ -479,7 +479,7 @@ router.patch("/lyte/views/:id", authMiddleware(), denyIfReadOnly(), validateBody
   } catch (err) { handleRouteError(res, err, "Failed to update view"); }
 });
 
-router.delete("/lyte/views/:id", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("ops", "admin", "super_admin"), async (req, res) => {
+router.delete("/lyte/views/:id", validateBody(lyteResourceDeleteSchema), authMiddleware(), requireRole("ops", "admin", "super_admin"), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(lyteSavedViewsTable).where(eq(lyteSavedViewsTable.id, id)).returning();
@@ -506,7 +506,7 @@ router.post("/lyte/readiness", authMiddleware(), denyIfReadOnly(), validateBody(
   } catch (err) { handleRouteError(res, err, "Failed to create readiness item"); }
 });
 
-router.patch("/lyte/readiness/:id", authMiddleware(), denyIfReadOnly(), validateBody(jsonObjectBodySchema), async (req, res) => {
+router.patch("/lyte/readiness/:id", authMiddleware(), denyIfReadOnly(), validateBody(lyteResourcePatchSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(lyteReadinessItemsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(lyteReadinessItemsTable.id, id)).returning();

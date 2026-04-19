@@ -19,7 +19,7 @@ import { InMemoryCheckpointStore } from "@workspace/alloy/checkpoint";
 import { DefaultModelRouter } from "@workspace/alloy/model-router";
 import { ECHO_STEP } from "@workspace/alloy/workflow";
 import type { WorkflowStep, StepContext, StepResult, LedgerEntry, RunConfig } from "@workspace/alloy/types";
-import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { listQuerySchema, validateBody, validateQuery, alloyRuntimeResourceSchema, alloyRuntimeResourceDeleteSchema } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -117,7 +117,7 @@ router.get("/workflows/:workflowId", authMiddleware(), (req: Request, res: Respo
   sendSuccess(res, wf);
 });
 
-router.post("/workflows", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/workflows", authMiddleware(), validateBody(alloyRuntimeResourceSchema), async (req: Request, res: Response) => {
   try {
     const body = createWorkflowSchema.parse(req.body);
     const workflowId = randomUUID();
@@ -138,7 +138,7 @@ router.post("/workflows", authMiddleware(), validateBody(jsonObjectBodySchema), 
   }
 });
 
-router.patch("/workflows/:workflowId", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.patch("/workflows/:workflowId", authMiddleware(), validateBody(alloyRuntimeResourceSchema), async (req: Request, res: Response) => {
   try {
     const { workflowId } = req.params as { workflowId: string };
     const existing = inMemoryWorkflows.get(workflowId);
@@ -151,7 +151,7 @@ router.patch("/workflows/:workflowId", authMiddleware(), validateBody(jsonObject
   }
 });
 
-router.delete("/workflows/:workflowId", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("admin", "super_admin"), async (req: Request, res: Response) => {
+router.delete("/workflows/:workflowId", validateBody(alloyRuntimeResourceDeleteSchema), authMiddleware(), requireRole("admin", "super_admin"), async (req: Request, res: Response) => {
   try {
     const { workflowId } = req.params as { workflowId: string };
     if (!inMemoryWorkflows.has(workflowId)) { sendNotFound(res, "Workflow"); return; }
@@ -185,7 +185,7 @@ router.get("/workflow-runs", authMiddleware(), validateQuery(listQuerySchema), (
   }
 });
 
-router.post("/workflow-runs", authMiddleware(), validateBody(jsonObjectBodySchema), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
+router.post("/workflow-runs", authMiddleware(), validateBody(alloyRuntimeResourceSchema), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const body = req.body as {
       workflowId?: string;
@@ -254,7 +254,7 @@ router.get("/workflow-runs/:runId", authMiddleware(), (req: Request, res: Respon
   });
 });
 
-router.post("/workflow-runs/:runId/replay", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/workflow-runs/:runId/replay", authMiddleware(), validateBody(alloyRuntimeResourceSchema), async (req: Request, res: Response) => {
   try {
     const { runId } = req.params as { runId: string };
     const existingState = runManager.getState(runId);
@@ -301,7 +301,7 @@ router.get("/agents/:agentId", authMiddleware(), (req: Request, res: Response) =
   sendSuccess(res, agent);
 });
 
-router.post("/agents", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/agents", authMiddleware(), validateBody(alloyRuntimeResourceSchema), async (req: Request, res: Response) => {
   try {
     const body = createAgentSchema.parse(req.body);
     const agentId = randomUUID();
@@ -334,7 +334,7 @@ router.get("/agents/:agentId/versions", authMiddleware(), (req: Request, res: Re
   }
 });
 
-router.post("/agents/:agentId/versions", authMiddleware(), requireRole("admin", "super_admin"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/agents/:agentId/versions", authMiddleware(), requireRole("admin", "super_admin"), validateBody(alloyRuntimeResourceSchema), async (req: Request, res: Response) => {
   try {
     const { agentId } = req.params as { agentId: string };
     const existing = inMemoryAgents.get(agentId);
@@ -368,7 +368,7 @@ router.get("/models/:modelId", authMiddleware(), (req: Request, res: Response) =
   sendSuccess(res, model);
 });
 
-router.post("/models", authMiddleware(), requireRole("admin", "super_admin"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/models", authMiddleware(), requireRole("admin", "super_admin"), validateBody(alloyRuntimeResourceSchema), async (req: Request, res: Response) => {
   try {
     const body = createModelSchema.parse(req.body);
     const modelId = randomUUID();
@@ -385,7 +385,7 @@ router.post("/models", authMiddleware(), requireRole("admin", "super_admin"), va
   }
 });
 
-router.post("/models/route", authMiddleware(), validateBody(jsonObjectBodySchema), (req: Request, res: Response) => {
+router.post("/models/route", authMiddleware(), validateBody(alloyRuntimeResourceSchema), (req: Request, res: Response) => {
   try {
     const { task, latencyBudgetMs, maxCostUsd, preferredModel } = req.body as {
       task?: string;
@@ -416,7 +416,7 @@ router.get("/prompts/:promptId", authMiddleware(), (req: Request, res: Response)
   sendSuccess(res, prompt);
 });
 
-router.post("/prompts", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/prompts", authMiddleware(), validateBody(alloyRuntimeResourceSchema), async (req: Request, res: Response) => {
   try {
     const body = createPromptSchema.parse(req.body);
     const promptId = randomUUID();
@@ -466,7 +466,7 @@ router.get("/signals/:signalId", authMiddleware(), (req: Request, res: Response)
   sendSuccess(res, signal);
 });
 
-router.post("/signals", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/signals", authMiddleware(), validateBody(alloyRuntimeResourceSchema), async (req: Request, res: Response) => {
   try {
     const body = createSignalSchema.parse(req.body);
     const signalId = randomUUID();
@@ -483,7 +483,7 @@ router.post("/signals", authMiddleware(), validateBody(jsonObjectBodySchema), as
   }
 });
 
-router.patch("/signals/:signalId/status", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.patch("/signals/:signalId/status", authMiddleware(), validateBody(alloyRuntimeResourceSchema), async (req: Request, res: Response) => {
   try {
     const { signalId } = req.params as { signalId: string };
     const existing = inMemorySignals.get(signalId);
@@ -512,7 +512,7 @@ router.get("/actions", authMiddleware(), validateQuery(listQuerySchema), (req: R
   }
 });
 
-router.post("/actions", authMiddleware(), validateBody(jsonObjectBodySchema), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
+router.post("/actions", authMiddleware(), validateBody(alloyRuntimeResourceSchema), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { runId, stepId, type, description, metadata } = req.body as {
       runId?: string;

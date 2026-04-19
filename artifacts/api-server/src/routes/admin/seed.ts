@@ -12,7 +12,7 @@
 import type { IRouter } from "express";
 import { logger } from "../../lib/logger.js";
 import { demoFixtureStore } from "../../lib/demo-fixture-store.js";
-import { validateBody, jsonObjectBodySchema } from "../../lib/validation";
+import { validateBody, demoSeedResetSchema } from "../../lib/validation";
 import { guardSeedInProduction, isProductionEnvironment } from "../../lib/seed-guard.js";
 
 let resetCount = 0;
@@ -27,7 +27,7 @@ function isProductionMode(): boolean {
 }
 
 export function register(router: IRouter): void {
-  router.post("/admin/seed/reset-demo", validateBody(jsonObjectBodySchema), (_req, res) => {
+  router.post("/admin/seed/reset-demo", validateBody(demoSeedResetSchema), (_req, res) => {
     if (isProductionMode()) {
       logger.warn(
         { runtimeMode: process.env["RUNTIME_MODE"], nodeEnv: process.env["NODE_ENV"] },

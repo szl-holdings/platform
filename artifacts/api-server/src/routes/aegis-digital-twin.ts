@@ -4,7 +4,7 @@ import { sendNotFound, sendBadRequest, handleRouteError } from "../lib/api-respo
 import { authMiddleware } from "../middlewares/auth";
 import { exportSecurityScenario } from "@szl-holdings/openusd-export";
 import type { SecurityScenario, ThreatActor } from "@szl-holdings/openusd-export";
-import { validateBody, jsonObjectBodySchema } from "../lib/validation";
+import { aegisDigitalTwinScenarioRunSchema, aegisDigitalTwinSyncSchema, aegisScenarioExportSchema, validateBody } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -230,7 +230,7 @@ router.post(
   "/aegis/scenarios/export",
   twinRateLimit,
   authMiddleware({ required: false }),
-  validateBody(jsonObjectBodySchema),
+  validateBody(aegisScenarioExportSchema),
   async (req, res) => {
     try {
       const body = req.body as Partial<SecurityScenario> & { format?: string };

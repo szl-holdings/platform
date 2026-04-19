@@ -7,7 +7,7 @@ import { services } from "@szl-holdings/services";
 import { logger } from "../lib/logger";
 import { isFlagEnabled } from "../lib/platform-flags";
 import { requireStripeLive } from "../lib/stripe-gate";
-import { billingCheckoutSchema, billingCommandSubscribeSchema, billingCustomerPortalSchema, cancelSubscriptionSchema, jsonObjectBodySchema, listQuerySchema, planSubscribeSchema, stripeCheckoutSchema, updateSubscriptionSchema, validateBody, validateQuery } from "../lib/validation";
+import { billingAegisEnterpriseQuoteSchema, billingAegisInvoiceSchema, billingCheckoutSchema, billingCommandSubscribeSchema, billingCustomerPortalSchema, billingMeteredUsageSchema, billingPortalSessionSchema, billingSyncPlansSchema, cancelSubscriptionSchema, listQuerySchema, planSubscribeSchema, stripeCheckoutSchema, stripeWebhookBodySchema, updateSubscriptionSchema, validateBody, validateQuery } from "../lib/validation";
 import { z } from "zod";
 
 const router: IRouter = Router();
@@ -142,7 +142,7 @@ router.post("/billing/customer-portal", validateBody(billingCustomerPortalSchema
   }
 });
 
-router.post("/billing/portal-session", validateBody(jsonObjectBodySchema), authMiddleware(), requireStripeLive, async (req: Request, res: Response) => {
+router.post("/billing/portal-session", validateBody(billingPortalSessionSchema), authMiddleware(), requireStripeLive, async (req: Request, res: Response) => {
   try {
     const returnUrl = (req.body as { returnUrl?: string }).returnUrl ?? req.headers.referer ?? "/";
     const user = (req as unknown as { user?: { email?: string; id?: string } }).user;
@@ -239,7 +239,7 @@ router.get("/billing/stripe-config", async (_req, res) => {
   }
 });
 
-router.post("/billing/webhooks", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/billing/webhooks", validateBody(stripeWebhookBodySchema), async (req: Request, res: Response) => {
   try {
     const signature = req.headers["stripe-signature"] as string | undefined;
     const rawBody = (req as Request & { rawBody?: Buffer }).rawBody?.toString("utf8") ?? JSON.stringify(req.body);
@@ -560,7 +560,7 @@ router.post("/billing/terra/subscribe", validateBody(planSubscribeSchema), authM
   }
 });
 
-router.post("/billing/terra/metered-usage", validateBody(jsonObjectBodySchema), authMiddleware(), requireStripeLive, async (req: Request, res: Response) => {
+router.post("/billing/terra/metered-usage", validateBody(billingMeteredUsageSchema), authMiddleware(), requireStripeLive, async (req: Request, res: Response) => {
   try {
     const { subscriptionItemId, quantity, action, timestamp } = req.body as {
       subscriptionItemId?: string;
@@ -678,9 +678,9 @@ async function handleAegisEnterpriseQuote(req: Request, res: Response): Promise<
   }
 }
 
-router.post("/billing/aegis/enterprise-quote", validateBody(jsonObjectBodySchema), authMiddleware({ required: false }), requireStripeLive, handleAegisEnterpriseQuote);
+router.post("/billing/aegis/enterprise-quote", validateBody(billingAegisEnterpriseQuoteSchema), authMiddleware({ required: false }), requireStripeLive, handleAegisEnterpriseQuote);
 
-router.post("/billing/sync-plans", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("admin", "super_admin"), async (_req: Request, res: Response) => {
+router.post("/billing/sync-plans", validateBody(billingSyncPlansSchema), authMiddleware(), requireRole("admin", "super_admin"), async (_req: Request, res: Response) => {
   try {
     if (!services.stripe.isLive) {
       sendBadRequest(res, "Stripe must be connected (STRIPE_SECRET_KEY set) to sync plans");
@@ -881,7 +881,7 @@ router.get("/billing/revenue-analytics", authMiddleware(), requireRole("ops", "a
   }
 });
 
-router.post("/billing/aegis/invoice", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("admin", "super_admin"), requireStripeLive, async (req: Request, res: Response) => {
+router.post("/billing/aegis/invoice", validateBody(billingAegisInvoiceSchema), authMiddleware(), requireRole("admin", "super_admin"), requireStripeLive, async (req: Request, res: Response) => {
   try {
     const { customerId, lineItems, dueDate, notes } = req.body as {
       customerId?: string;
