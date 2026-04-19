@@ -20,17 +20,9 @@ const DependencyGraphPage = lazy(() => import("./pages/dependency-graph"));
 const CounselPerformancePage = lazy(() => import("./pages/counsel-performance"));
 const RiskExposureDeskPage = lazy(() => import("./pages/risk-exposure-desk"));
 const DecisionCenterPage = lazy(() => import("./pages/decision-center"));
-
-const PlaceholderPage = ({ title }: { title: string }) => (
-  <div className="p-8">
-    <h1 className="text-2xl font-bold text-violet-100 mb-4">{title}</h1>
-    <p className="text-violet-400/60">This operational surface is coming soon.</p>
-  </div>
-);
-
-const AlertsPage = () => <PlaceholderPage title="Alerts" />;
-const ApprovalsPage = () => <PlaceholderPage title="Approvals" />;
-const TrustProvenancePage = () => <PlaceholderPage title="Trust & Provenance" />;
+const AlertsPage = lazy(() => import("./pages/alerts"));
+const ApprovalsPage = lazy(() => import("./pages/approvals"));
+const TrustProvenancePage = lazy(() => import("./pages/trust-provenance"));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
