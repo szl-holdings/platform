@@ -1178,7 +1178,7 @@ router.post("/tool-approvals", authMiddleware(), requireRole("super_admin", "adm
   }
 });
 
-router.post("/tool-approvals/:id/approve", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+const approveActionHandler = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params["id"] as string, 10);
     if (isNaN(id)) { sendBadRequest(res, "Invalid action ID"); return; }
@@ -1204,9 +1204,9 @@ router.post("/tool-approvals/:id/approve", authMiddleware(), requireRole("super_
   } catch (err) {
     handleRouteError(res, err, "Failed to approve action");
   }
-});
+};
 
-router.post("/tool-approvals/:id/reject", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+const rejectActionHandler = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params["id"] as string, 10);
     if (isNaN(id)) { sendBadRequest(res, "Invalid action ID"); return; }
@@ -1232,7 +1232,15 @@ router.post("/tool-approvals/:id/reject", authMiddleware(), requireRole("super_a
   } catch (err) {
     handleRouteError(res, err, "Failed to reject action");
   }
-});
+};
+
+router.post("/tool-approvals/:id/approve", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(jsonObjectBodySchema), approveActionHandler);
+router.post("/tool-approvals/:id/reject", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(jsonObjectBodySchema), rejectActionHandler);
+
+// Aliases used by the operator UI (policy-approvals page) so the action
+// approval buttons work end-to-end and audit rows are written.
+router.post("/actions/:id/approve", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(jsonObjectBodySchema), approveActionHandler);
+router.post("/actions/:id/reject", authMiddleware(), requireRole("super_admin", "admin", "ops"), validateBody(jsonObjectBodySchema), rejectActionHandler);
 
 // ============================================================
 // GUARDIAN APPROVAL REQUESTS (multi-tier governance approvals)
