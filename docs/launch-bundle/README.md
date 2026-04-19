@@ -43,7 +43,7 @@ Filled in once each channel is published. Until a row is filled in, leave it as
 | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
 | Substack       | https://szlholdings.substack.com/p/the-operator-issue-01-why-im-building                                                                                         | 2026-04-16T21:03:00Z      |
 | Medium         | https://medium.com/@stephen_38454/im-building-a-multi-domain-intelligence-company-in-public-here-s-why-that-changes-everything-f00b6758436e                      | 2026-04-16T21:00:59Z      |
-| GitHub release | _pending_ — tag `v1.0-standby` exists on `szl-holdings/szl-holdings-platform`, but no public Release object has been cut yet. Publish a Release against the tag. | _pending_                 |
+| GitHub release | https://github.com/szl-holdings/szl-holdings-platform/releases/tag/v1.0-standby                                                                                  | 2026-04-18T12:30:25Z      |
 | LinkedIn       | _pending_ — paste the post permalink (`linkedin.com/posts/...` or `linkedin.com/feed/update/urn:li:activity:...`).                                                | _pending_                 |
 | X (thread)     | _pending_ — paste the first tweet permalink (`x.com/szlholdings/status/...`).                                                                                    | _pending_                 |
 
@@ -64,6 +64,6 @@ launch tasks and may not yet exist in this directory).
 - [x] Author byline + handles match the canonical block in `.local/tasks/launch-content-bundle-multichannel.md`.
 - [x] Substack post URL resolves (anchor for cross-links). Verified 200 on 2026-04-17 against https://szlholdings.substack.com/p/the-operator-issue-01-why-im-building.
 - [x] Medium post URL resolves. Confirmed via Medium RSS feed entry on 2026-04-17 (Cloudflare blocks direct unauth GETs, but the post is live in the public feed): https://medium.com/@stephen_38454/im-building-a-multi-domain-intelligence-company-in-public-here-s-why-that-changes-everything-f00b6758436e
-- [ ] GitHub release link points to the correct tag. Tag `v1.0-standby` exists on `szl-holdings/szl-holdings-platform` but no public Release object has been published against it yet — cut the Release and update the URL row above.
+- [x] GitHub release link points to the correct tag. Public Release "v1.0-standby — Wave 3 Launch Standby" published 2026-04-18T12:30:25Z against tag `v1.0-standby` on `szl-holdings/szl-holdings-platform`; verified HTTP 200 unauthenticated on 2026-04-19 at https://github.com/szl-holdings/szl-holdings-platform/releases/tag/v1.0-standby.
 - [ ] Per-product screenshots for Pulse, CORTEX mobile, Vessels (Command Overview + Voyage P&L), Unified Command, Terra, and Carlota Jo are captured into `assets/screenshots/` and spliced into the carousel/thread (tracked in follow-up #1086). If they aren't ready at publish time, the Aegis-only spine in `linkedin.md` and `x-thread.md` already publishes coherently on its own.
 - [ ] Pulse, Vessels, Terra, Command, and Carlota Jo workflows verified up before each respective social card link is shared.
