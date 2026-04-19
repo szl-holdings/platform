@@ -1,6 +1,5 @@
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import { formatDate as formatSharedDate } from "@szl-holdings/mobile-shared/utils";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useState, useCallback } from "react";
 import {
@@ -17,7 +16,11 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useSyncEngine } from "@szl-holdings/mobile-shared";
+import {
+  useSyncEngine,
+  useUserPreferences,
+  formatInUserTimeZone,
+} from "@szl-holdings/mobile-shared";
 import { useColors } from "@/hooks/useColors";
 
 const API_URL = `https://${process.env.EXPO_PUBLIC_DOMAIN}`;
@@ -51,19 +54,54 @@ function getNextBusinessDays(): string[] {
 function formatDate(dateStr: string): { day: string; date: string; month: string } {
   const d = new Date(dateStr + "T12:00:00");
   return {
-    day: formatSharedDate(d, {
-      locale: "en-GB",
-      intlOptions: { weekday: "short" },
-    }).toUpperCase(),
-    date: formatSharedDate(d, {
-      locale: "en-GB",
-      intlOptions: { day: "numeric" },
-    }),
-    month: formatSharedDate(d, {
-      locale: "en-GB",
-      intlOptions: { month: "short" },
-    }).toUpperCase(),
+    day: formatInUserTimeZone(d, { weekday: "short" }, "en-GB").toUpperCase(),
+    date: formatInUserTimeZone(d, { day: "numeric" }, "en-GB"),
+    month: formatInUserTimeZone(d, { month: "short" }, "en-GB").toUpperCase(),
   };
+}
+
+/**
+ * Resolve a SessionItem's instant from any ISO-formatted field the API may
+ * provide. We deliberately do NOT parse the legacy display strings
+ * (`date` / `time` like "Apr 7, 2026" / "10:00 AM") because their source
+ * zone is unspecified — re-formatting them in another zone could shift the
+ * displayed wall-clock time and confuse the user. When the booking API
+ * starts returning a canonical ISO timestamp, this returns a Date and we
+ * re-zone properly; otherwise we render the legacy strings as-is.
+ */
+function resolveSessionInstant(session: SessionItem): Date | null {
+  const anySession = session as SessionItem & {
+    startsAt?: string | null;
+    scheduledFor?: string | null;
+    startTime?: string | null;
+  };
+  for (const candidate of [anySession.startsAt, anySession.scheduledFor, anySession.startTime]) {
+    if (typeof candidate !== "string" || candidate.length === 0) continue;
+    // Require an ISO-style timestamp (must contain "T" and either "Z" or a
+    // numeric offset) so we know the source zone unambiguously.
+    if (!/T\d{2}:\d{2}/.test(candidate)) continue;
+    if (!/(Z|[+-]\d{2}:?\d{2})$/.test(candidate)) continue;
+    const d = new Date(candidate);
+    if (!Number.isNaN(d.getTime())) return d;
+  }
+  return null;
+}
+
+function formatSessionDate(session: SessionItem): string {
+  const d = resolveSessionInstant(session);
+  if (!d) return session.date; // Legacy display string — render as-is.
+  return (
+    formatInUserTimeZone(d, { month: "short", day: "numeric", year: "numeric" }) ||
+    session.date
+  );
+}
+
+function formatSessionTime(session: SessionItem): string {
+  const d = resolveSessionInstant(session);
+  if (!d) return session.time; // Legacy display string — render as-is.
+  return (
+    formatInUserTimeZone(d, { hour: "numeric", minute: "2-digit" }) || session.time
+  );
 }
 
 type SessionItem = {
@@ -98,6 +136,8 @@ export default function SessionsScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const qc = useQueryClient();
+  // Subscribe so dates re-render when the user changes their time zone.
+  useUserPreferences();
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
   const [selectedService, setSelectedService] = useState("");
@@ -278,11 +318,11 @@ export default function SessionsScreen() {
                   <View style={styles.sessionMeta}>
                     <Feather name="calendar" size={11} color={colors.goldSubtle} />
                     <Text style={[styles.sessionMetaText, { color: colors.creamDim }]}>
-                      {session.date}
+                      {formatSessionDate(session)}
                     </Text>
                     <Feather name="clock" size={11} color={colors.goldSubtle} style={{ marginLeft: 12 }} />
                     <Text style={[styles.sessionMetaText, { color: colors.creamDim }]}>
-                      {session.time}
+                      {formatSessionTime(session)}
                     </Text>
                     <Feather name="map-pin" size={11} color={colors.goldSubtle} style={{ marginLeft: 12 }} />
                     <Text style={[styles.sessionMetaText, { color: colors.creamDim }]}>

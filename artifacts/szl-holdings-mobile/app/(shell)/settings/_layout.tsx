@@ -7,6 +7,7 @@ export default function SettingsLayout() {
       <Stack.Screen name="index" />
       <Stack.Screen name="widgets" />
       <Stack.Screen name="digest" />
+      <Stack.Screen name="timezone" />
       <Stack.Screen name="security" />
     </Stack>
   );

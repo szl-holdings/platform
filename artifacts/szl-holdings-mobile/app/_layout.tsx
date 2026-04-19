@@ -31,6 +31,7 @@ import {
   OfflineBanner,
   ThemeProvider,
   setUploadAuthTokenGetter,
+  setUserPreferencesApiFetcher,
   BiometricProvider,
   BiometricLockScreen,
   useBiometric,
@@ -71,6 +72,17 @@ async function getCortexAuthToken(): Promise<string | null> {
 
 setAuthTokenGetter(getCortexAuthToken);
 setUploadAuthTokenGetter(getCortexAuthToken);
+
+// Wire the shared user-preferences store to our authenticated API client so
+// `time_zone` (and any future preference) round-trips with the web app.
+setUserPreferencesApiFetcher(async (path, init) => {
+  try {
+    const { apiFetch } = await import("@/lib/apiClient");
+    return (await apiFetch<Record<string, unknown>>(path, init)) ?? null;
+  } catch {
+    return null;
+  }
+});
 
 configurePushNotificationHandler();
 initSentryGlobalHandlers();

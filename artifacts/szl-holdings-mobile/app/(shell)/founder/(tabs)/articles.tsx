@@ -13,7 +13,7 @@ import { useRouter } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { formatDate as formatSharedDate } from "@szl-holdings/mobile-shared/utils";
+import { formatInUserTimeZone, useUserPreferences } from "@szl-holdings/mobile-shared";
 
 const ACCENT = "#6366f1";
 const BG = "#0a0a0a";
@@ -96,16 +96,18 @@ const ARTICLES_FALLBACK: Article[] = [
 
 function formatDate(iso?: string | null) {
   if (!iso) return "";
-  try {
-    return formatSharedDate(new Date(iso));
-  } catch {
-    return "";
-  }
+  return formatInUserTimeZone(iso, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
 export default function ArticlesScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  // Subscribe so the article list re-renders when the user changes time zone.
+  useUserPreferences();
   const { data: articles, isLoading } = useArticles();
 
   const displayArticles = articles && articles.length > 0 ? articles : ARTICLES_FALLBACK;

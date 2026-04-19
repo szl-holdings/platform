@@ -13,7 +13,6 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
-import { formatDate as formatSharedDate } from "@szl-holdings/mobile-shared/utils";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -21,6 +20,7 @@ import Animated, {
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
 import { useColors } from "@/hooks/useColors";
+import { formatInUserTimeZone, useUserPreferences } from "@szl-holdings/mobile-shared";
 
 const { width: W } = Dimensions.get("window");
 
@@ -82,13 +82,12 @@ function useAllCaseStudies() {
 
 function formatDate(dateStr?: string | null) {
   if (!dateStr) return null;
-  try {
-    return formatSharedDate(new Date(dateStr), {
-      intlOptions: { month: "long", day: "numeric", year: "numeric" },
-    });
-  } catch {
-    return null;
-  }
+  const formatted = formatInUserTimeZone(dateStr, {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+  return formatted || null;
 }
 
 function isArticleType(item: ReaderItem): item is Article & { _type: "article" } {
@@ -186,6 +185,8 @@ function ReaderPage({
 }
 
 export default function ArticleReaderScreen() {
+  // Subscribe so the article re-renders when the user changes time zone.
+  useUserPreferences();
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const router = useRouter();

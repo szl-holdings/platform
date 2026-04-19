@@ -66,3 +66,19 @@ export { useSyncMutation, type SyncMutationOptions, type SyncMutationResult, typ
 export { SyncStatusBanner } from "./components/SyncStatusBanner";
 export { ConflictResolutionModal } from "./components/ConflictResolutionModal";
 export { PendingMutationsBadge } from "./components/PendingMutationsBadge";
+export {
+  useUserPreferences,
+  setUserPreference,
+  setUserPreferencesApiFetcher,
+  getUserPreferencesSync,
+  getUserTimeZone,
+  subscribeUserPreferences,
+  type UserPreferences,
+  type UseUserPreferencesResult,
+  type PreferencesApiFetcher,
+} from "./hooks/useUserPreferences";
+export {
+  formatInUserTimeZone,
+  getResolvedUserTimeZone,
+  getDeviceTimeZone,
+} from "./format-time";

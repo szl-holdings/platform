@@ -11,6 +11,8 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNotifications, type AppNotification } from "../context/NotificationContext";
+import { formatInUserTimeZone } from "../format-time";
+import { useUserPreferences } from "../hooks/useUserPreferences";
 
 const TYPE_ICONS: Record<AppNotification["type"], string> = {
   info: "ℹ",
@@ -37,7 +39,7 @@ function formatTimeAgo(dateStr: string): string {
   if (diff < 3_600_000) return `${Math.floor(diff / 60_000)}m ago`;
   if (diff < 86_400_000) return `${Math.floor(diff / 3_600_000)}h ago`;
   if (diff < 604_800_000) return `${Math.floor(diff / 86_400_000)}d ago`;
-  return new Date(dateStr).toLocaleDateString();
+  return formatInUserTimeZone(dateStr, { year: "numeric", month: "short", day: "numeric" });
 }
 
 interface NotificationRowProps {
@@ -181,6 +183,8 @@ export function NotificationCenterModal({
   const insets = useSafeAreaInsets();
   const { notifications, unreadCount, isLoading, refresh, markRead, markAllRead, deleteNotification } =
     useNotifications();
+  // Subscribe so the rendered timestamps refresh when the user changes time zone.
+  useUserPreferences();
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 

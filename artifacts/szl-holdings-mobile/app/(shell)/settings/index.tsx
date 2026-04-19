@@ -59,6 +59,13 @@ const SETTINGS: SettingItem[] = [
     accent: ACCENT,
   },
   {
+    title: "Time Zone",
+    description: "Choose how timestamps are displayed across the app",
+    route: "/(shell)/settings/timezone",
+    icon: "globe",
+    accent: "#22d3ee",
+  },
+  {
     title: "Security & Privacy",
     description: "Biometric layers, screenshot prevention, enterprise policy",
     route: "/(shell)/settings/security",
