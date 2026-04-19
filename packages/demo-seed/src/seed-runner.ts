@@ -30,6 +30,7 @@ import {
   lyteIncidentsTable,
 } from "@szl-holdings/db";
 import { sql, inArray, eq } from "drizzle-orm";
+import { seedCarlotaAdvisoryData } from "./carlota-advisory-seed";
 
 function hoursAgo(h: number) { return new Date(Date.now() - h * 3600_000); }
 function minutesAgo(m: number) { return new Date(Date.now() - m * 60_000); }
@@ -782,6 +783,7 @@ export async function seedAllNarratives() {
   await seedSecurityNarrative();
   await seedMaritimeNarrative();
   await seedLegalNarrative();
+  await seedCarlotaAdvisoryData();
   console.log("[demo-seed] All four narratives seeded successfully.");
 }
 

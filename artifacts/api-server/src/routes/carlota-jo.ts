@@ -19,6 +19,13 @@ import {
   carlotaRadarNotifPrefsTable,
   carlotaRadarSeenSignalsTable,
   type CarlotaRadarPendingSignal,
+  carlotaAdvisoryClientsTable,
+  carlotaClientMarginHistoryTable,
+  carlotaClientRoiBenchmarksTable,
+  carlotaClientRoiTrendTable,
+  carlotaClientRadarSignalsTable,
+  carlotaClientCompetitorsTable,
+  carlotaClientMarketTrendTable,
 } from "@szl-holdings/db";
 import { eq, desc, sql, and, inArray } from "drizzle-orm";
 import { createHash } from "crypto";
@@ -831,174 +838,76 @@ const CLIENT_NAME_BY_ID: Record<ClientId, string> = {
   "oasis-wellness": "Oasis Wellness",
 };
 
-const CLIENT_MARGIN_HISTORY: Record<ClientId, { month: string; margin: number }[]> = {
-  "luminary-brands": [
-    { month: "Oct", margin: 48 }, { month: "Nov", margin: 46 }, { month: "Dec", margin: 44 },
-    { month: "Jan", margin: 49 }, { month: "Feb", margin: 51 }, { month: "Mar", margin: 53 }, { month: "Apr", margin: 52 },
-  ],
-  "vertex-capital": [
-    { month: "Oct", margin: 38 }, { month: "Nov", margin: 41 }, { month: "Dec", margin: 40 },
-    { month: "Jan", margin: 44 }, { month: "Feb", margin: 46 }, { month: "Mar", margin: 49 }, { month: "Apr", margin: 51 },
-  ],
-  "aurelius-pe": [
-    { month: "Oct", margin: 51 }, { month: "Nov", margin: 53 }, { month: "Dec", margin: 52 },
-    { month: "Jan", margin: 55 }, { month: "Feb", margin: 56 }, { month: "Mar", margin: 58 }, { month: "Apr", margin: 57 },
-  ],
-  "oasis-wellness": [
-    { month: "Oct", margin: 38 }, { month: "Nov", margin: 35 }, { month: "Dec", margin: 31 },
-    { month: "Jan", margin: 33 }, { month: "Feb", margin: 28 }, { month: "Mar", margin: 30 }, { month: "Apr", margin: 27 },
-  ],
-};
-
-const CLIENT_ROI_BENCHMARKS: Record<ClientId, typeof SEED_ROI_METRICS.portfolioBenchmarks> = {
-  "luminary-brands": { avgRoi: 271, avgPaybackMonths: 9, avgRateRealisationPct: 96, blendedMarginPct: 51, clientRetentionPct: 100, npsScore: 78 },
-  "vertex-capital": { avgRoi: 250, avgPaybackMonths: 14, avgRateRealisationPct: 100, blendedMarginPct: 47, clientRetentionPct: 100, npsScore: 70 },
-  "aurelius-pe": { avgRoi: 483, avgPaybackMonths: 5, avgRateRealisationPct: 100, blendedMarginPct: 57, clientRetentionPct: 100, npsScore: 84 },
-  "oasis-wellness": { avgRoi: 408, avgPaybackMonths: 12, avgRateRealisationPct: 81, blendedMarginPct: 27, clientRetentionPct: 100, npsScore: 62 },
-};
-
-const CLIENT_ROI_TREND: Record<ClientId, { month: string; avgRoi: number }[]> = {
-  "luminary-brands": [
-    { month: "Oct 2025", avgRoi: 110 }, { month: "Nov 2025", avgRoi: 145 }, { month: "Dec 2025", avgRoi: 178 },
-    { month: "Jan 2026", avgRoi: 210 }, { month: "Feb 2026", avgRoi: 235 }, { month: "Mar 2026", avgRoi: 258 }, { month: "Apr 2026", avgRoi: 271 },
-  ],
-  "vertex-capital": [
-    { month: "Oct 2025", avgRoi: 80 }, { month: "Nov 2025", avgRoi: 105 }, { month: "Dec 2025", avgRoi: 140 },
-    { month: "Jan 2026", avgRoi: 168 }, { month: "Feb 2026", avgRoi: 198 }, { month: "Mar 2026", avgRoi: 224 }, { month: "Apr 2026", avgRoi: 250 },
-  ],
-  "aurelius-pe": [
-    { month: "Oct 2025", avgRoi: 220 }, { month: "Nov 2025", avgRoi: 290 }, { month: "Dec 2025", avgRoi: 360 },
-    { month: "Jan 2026", avgRoi: 410 }, { month: "Feb 2026", avgRoi: 445 }, { month: "Mar 2026", avgRoi: 470 }, { month: "Apr 2026", avgRoi: 483 },
-  ],
-  "oasis-wellness": [
-    { month: "Oct 2025", avgRoi: 180 }, { month: "Nov 2025", avgRoi: 240 }, { month: "Dec 2025", avgRoi: 285 },
-    { month: "Jan 2026", avgRoi: 320 }, { month: "Feb 2026", avgRoi: 358 }, { month: "Mar 2026", avgRoi: 388 }, { month: "Apr 2026", avgRoi: 408 },
-  ],
-};
-
-const CLIENT_RADAR_SIGNALS: Record<ClientId, typeof SEED_RADAR_SIGNALS> = {
-  "luminary-brands": [
-    {
-      competitor: "Glossier", event: "DTC paid-acquisition costs up 23% across category — direct competitor pulled performance budget",
-      impact: "high", direction: "opportunity", date: "Apr 16, 2026",
-      detail: "Rising customer acquisition costs across the prestige DTC category create an opening for Luminary's owned-channel strategy. Glossier reportedly cut paid budget 30% in Q1.",
-    },
-    {
-      competitor: "Charlotte Tilbury", event: "Launched private label in two new EU markets — UK pricing held flat",
-      impact: "medium", direction: "threat", date: "Apr 9, 2026",
-      detail: "Charlotte Tilbury's EU expansion brings new shelf competition for the £40-£75 price tier where Luminary is repositioning. Watch UK Boots assortment changes.",
-    },
-    {
-      competitor: "Drunk Elephant", event: "Negative TikTok sentiment surge — formula reformulation backlash",
-      impact: "medium", direction: "opportunity", date: "Apr 3, 2026",
-      detail: "Sentiment dropped 18 points week-over-week. Opportunity for Luminary's editorial PR push to capture defectors searching for clean formulation alternatives.",
-    },
-  ],
-  "vertex-capital": [
-    {
-      competitor: "Bain & Company", event: "PE deal advisory fees down 12% — boutiques gaining mid-market share",
-      impact: "high", direction: "opportunity", date: "Apr 12, 2026",
-      detail: "Bain's mid-market PE advisory revenue declined for two consecutive quarters. Vertex's deal pipeline sits in the £50M–£200M range Bain is now de-prioritising.",
-    },
-    {
-      competitor: "EY-Parthenon", event: "Lost two senior MDs covering UK industrials — talent gap in core sector",
-      impact: "high", direction: "opportunity", date: "Apr 6, 2026",
-      detail: "EY-Parthenon's UK industrials practice lost both senior MDs within four weeks. Several portfolio targets in Vertex's pipeline previously bid by EY-P teams.",
-    },
-    {
-      competitor: "Lazard", event: "M&A volumes in UK lower-mid market down 18% YoY — pricing pressure on advisor fees",
-      impact: "medium", direction: "threat", date: "Mar 28, 2026",
-      detail: "Lazard's UK lower-mid market deal flow contraction is creating pricing pressure. Vertex should expect more aggressive fee proposals from competing sponsors.",
-    },
-  ],
-  "aurelius-pe": [
-    {
-      competitor: "Apollo Global", event: "Portfolio operating partner team expansion — UK ops focus",
-      impact: "high", direction: "threat", date: "Apr 14, 2026",
-      detail: "Apollo added 8 operating partners with UK industrials and consumer ops experience. Direct overlap with Aurelius portfolio uplift focus.",
-    },
-    {
-      competitor: "Permira", event: "Closed three portfolio-ops led value creation case studies — published thought leadership",
-      impact: "medium", direction: "threat", date: "Apr 7, 2026",
-      detail: "Permira's case studies establish them as the go-to PE firm for portfolio operations transformation, narrowing Aurelius' positioning advantage in UK PE LP conversations.",
-    },
-    {
-      competitor: "Triton Partners", event: "Lost two portfolio CEOs to competing GP buyouts in last 60 days",
-      impact: "medium", direction: "opportunity", date: "Mar 30, 2026",
-      detail: "Triton portfolio leadership turnover creates an opening for Aurelius to recruit experienced operators with mid-market portfolio uplift track records.",
-    },
-  ],
-  "oasis-wellness": [
-    {
-      competitor: "Holland & Barrett", event: "New private-label supplements line undercuts mid-tier wellness brands by ~30%",
-      impact: "high", direction: "threat", date: "Apr 15, 2026",
-      detail: "Holland & Barrett's expanded own-brand range targets the £18-£35 price tier where Oasis sits. Visible margin compression risk for Q3.",
-    },
-    {
-      competitor: "Heights", event: "Closed £15M Series B — accelerating UK retail rollout to Boots and Tesco",
-      impact: "high", direction: "threat", date: "Apr 8, 2026",
-      detail: "Heights' funding war chest enables aggressive shelf-space competition in UK pharmacy and grocery channels — Oasis must accelerate retail strategy.",
-    },
-    {
-      competitor: "AG1 (Athletic Greens)", event: "Subscription churn rising — sentiment shift toward simpler, single-ingredient products",
-      impact: "medium", direction: "opportunity", date: "Apr 1, 2026",
-      detail: "Consumer fatigue with all-in-one formulas creates opening for Oasis' targeted single-ingredient line. Earned media opportunity in wellness press.",
-    },
-  ],
-};
-
-const CLIENT_COMPETITORS: Record<ClientId, { name: string; score: number; trend: string; share: number }[]> = {
-  "luminary-brands": [
-    { name: "Glossier", score: 82, trend: "down", share: 14 },
-    { name: "Charlotte Tilbury", score: 88, trend: "up", share: 17 },
-    { name: "Drunk Elephant", score: 71, trend: "down", share: 9 },
-    { name: "Rare Beauty", score: 86, trend: "up", share: 12 },
-    { name: "Luminary Brands", score: 74, trend: "up", share: 6 },
-  ],
-  "vertex-capital": [
-    { name: "Bain & Company", score: 79, trend: "down", share: 18 },
-    { name: "EY-Parthenon", score: 73, trend: "down", share: 14 },
-    { name: "Lazard", score: 81, trend: "flat", share: 12 },
-    { name: "Rothschild", score: 84, trend: "up", share: 13 },
-    { name: "Vertex Capital Partners", score: 67, trend: "up", share: 5 },
-  ],
-  "aurelius-pe": [
-    { name: "Apollo Global", score: 92, trend: "up", share: 19 },
-    { name: "Permira", score: 88, trend: "up", share: 15 },
-    { name: "Triton Partners", score: 74, trend: "down", share: 11 },
-    { name: "CVC Capital Partners", score: 90, trend: "flat", share: 17 },
-    { name: "Aurelius Private Equity", score: 70, trend: "up", share: 6 },
-  ],
-  "oasis-wellness": [
-    { name: "Holland & Barrett", score: 86, trend: "up", share: 22 },
-    { name: "Heights", score: 79, trend: "up", share: 8 },
-    { name: "AG1 (Athletic Greens)", score: 81, trend: "down", share: 14 },
-    { name: "Wild Nutrition", score: 72, trend: "flat", share: 7 },
-    { name: "Oasis Wellness", score: 64, trend: "up", share: 4 },
-  ],
-};
-
-const CLIENT_MARKET_TREND: Record<ClientId, { month: string; you: number; market: number }[]> = {
-  "luminary-brands": [
-    { month: "Oct", you: 62, market: 70 }, { month: "Nov", you: 65, market: 70 }, { month: "Dec", you: 67, market: 71 },
-    { month: "Jan", you: 70, market: 71 }, { month: "Feb", you: 72, market: 72 }, { month: "Mar", you: 73, market: 72 }, { month: "Apr", you: 74, market: 73 },
-  ],
-  "vertex-capital": [
-    { month: "Oct", you: 52, market: 76 }, { month: "Nov", you: 55, market: 75 }, { month: "Dec", you: 58, market: 74 },
-    { month: "Jan", you: 60, market: 73 }, { month: "Feb", you: 63, market: 73 }, { month: "Mar", you: 65, market: 72 }, { month: "Apr", you: 67, market: 72 },
-  ],
-  "aurelius-pe": [
-    { month: "Oct", you: 60, market: 84 }, { month: "Nov", you: 62, market: 84 }, { month: "Dec", you: 64, market: 85 },
-    { month: "Jan", you: 66, market: 85 }, { month: "Feb", you: 68, market: 86 }, { month: "Mar", you: 69, market: 86 }, { month: "Apr", you: 70, market: 87 },
-  ],
-  "oasis-wellness": [
-    { month: "Oct", you: 54, market: 73 }, { month: "Nov", you: 56, market: 74 }, { month: "Dec", you: 58, market: 74 },
-    { month: "Jan", you: 60, market: 75 }, { month: "Feb", you: 61, market: 76 }, { month: "Mar", you: 63, market: 77 }, { month: "Apr", you: 64, market: 77 },
-  ],
-};
+// Per-client advisory data is persisted in the database. Demo fixtures live in
+// `packages/demo-seed/src/carlota-advisory-seed.ts` and are loaded via
+// `pnpm --filter @workspace/demo-seed run seed:carlota-advisory` (also run as
+// Per-client advisory data is persisted in the database. Demo fixtures live in
+// `packages/demo-seed/src/carlota-advisory-seed.ts` and are loaded via:
+//   pnpm --filter @workspace/demo-seed run seed:carlota-advisory
+// (also part of `seed:all`). The accessors below are DB-authoritative — there
+// are no in-memory fallbacks. If a table is empty, callers receive empty
+// arrays / nulls; operators must run the seed script or the admin PUT
+// endpoints below to populate data.
 
 function isValidClientId(value: unknown): value is ClientId {
   return typeof value === "string" && value in CLIENT_NAME_BY_ID;
+}
+
+async function getClientMarginHistory(clientId: ClientId): Promise<{ month: string; margin: number }[]> {
+  const rows = await db.select().from(carlotaClientMarginHistoryTable)
+    .where(eq(carlotaClientMarginHistoryTable.clientExternalId, clientId))
+    .orderBy(carlotaClientMarginHistoryTable.sortOrder);
+  return rows.map(r => ({ month: r.month, margin: Number(r.margin) }));
+}
+
+async function getClientRoiBenchmarks(clientId: ClientId): Promise<typeof SEED_ROI_METRICS.portfolioBenchmarks | null> {
+  const [row] = await db.select().from(carlotaClientRoiBenchmarksTable)
+    .where(eq(carlotaClientRoiBenchmarksTable.clientExternalId, clientId)).limit(1);
+  if (!row) return null;
+  return {
+    avgRoi: row.avgRoi, avgPaybackMonths: row.avgPaybackMonths,
+    avgRateRealisationPct: row.avgRateRealisationPct, blendedMarginPct: row.blendedMarginPct,
+    clientRetentionPct: row.clientRetentionPct, npsScore: row.npsScore,
+  };
+}
+
+async function getClientRoiTrend(clientId: ClientId): Promise<{ month: string; avgRoi: number }[]> {
+  const rows = await db.select().from(carlotaClientRoiTrendTable)
+    .where(eq(carlotaClientRoiTrendTable.clientExternalId, clientId))
+    .orderBy(carlotaClientRoiTrendTable.sortOrder);
+  return rows.map(r => ({ month: r.month, avgRoi: r.avgRoi }));
+}
+
+async function getClientRadarSignals(clientId: ClientId): Promise<typeof SEED_RADAR_SIGNALS> {
+  const rows = await db.select().from(carlotaClientRadarSignalsTable)
+    .where(eq(carlotaClientRadarSignalsTable.clientExternalId, clientId))
+    .orderBy(carlotaClientRadarSignalsTable.sortOrder);
+  return rows.map(r => ({
+    competitor: r.competitor, event: r.event, impact: r.impact, direction: r.direction,
+    date: r.signalDate, detail: r.detail,
+  }));
+}
+
+async function getClientCompetitors(clientId: ClientId): Promise<{ name: string; score: number; trend: string; share: number }[]> {
+  const rows = await db.select().from(carlotaClientCompetitorsTable)
+    .where(eq(carlotaClientCompetitorsTable.clientExternalId, clientId))
+    .orderBy(carlotaClientCompetitorsTable.sortOrder);
+  return rows.map(r => ({ name: r.name, score: r.score, trend: r.trend, share: r.share }));
+}
+
+async function getClientMarketTrend(clientId: ClientId): Promise<{ month: string; you: number; market: number }[]> {
+  const rows = await db.select().from(carlotaClientMarketTrendTable)
+    .where(eq(carlotaClientMarketTrendTable.clientExternalId, clientId))
+    .orderBy(carlotaClientMarketTrendTable.sortOrder);
+  return rows.map(r => ({ month: r.month, you: r.you, market: r.market }));
+}
+
+async function listAdvisoryClients(): Promise<{ id: ClientId; name: string; industry: string }[]> {
+  const rows = await db.select().from(carlotaAdvisoryClientsTable)
+    .orderBy(carlotaAdvisoryClientsTable.sortOrder);
+  return rows
+    .filter(r => isValidClientId(r.externalId))
+    .map(r => ({ id: r.externalId as ClientId, name: r.name, industry: r.industry }));
 }
 
 function getClientIdFromQuery(req: Request): ClientId | null {
@@ -1063,7 +972,8 @@ async function resolveAdvisoryClientScope(req: Request): Promise<ResolvedAdvisor
 
 router.get("/carlota/clients", authMiddleware(), requireRole("admin", "editor", "exec"), async (_req, res) => {
   try {
-    sendSuccess(res, { clients: SEED_CLIENTS });
+    const clients = await listAdvisoryClients();
+    sendSuccess(res, { clients });
   } catch (err) { handleRouteError(res, err, "Failed to list advisory clients"); }
 });
 
@@ -1129,7 +1039,7 @@ router.get("/carlota/engagements", authMiddleware(), async (req, res) => {
     const filteredRows = clientId
       ? rows.filter(r => r.client === CLIENT_NAME_BY_ID[clientId])
       : rows;
-    const marginHistory = clientId ? CLIENT_MARGIN_HISTORY[clientId] : SEED_MARGIN_HISTORY;
+    const marginHistory = clientId ? await getClientMarginHistory(clientId) : SEED_MARGIN_HISTORY;
 
     sendSuccess(res, {
       engagements: filteredRows.map(r => ({
@@ -1503,14 +1413,15 @@ router.get("/carlota/radar-signals", authMiddleware(), validateQuery(carlotaRada
       url: "",
     }));
 
-    const clientCompetitorList = clientId ? CLIENT_COMPETITORS[clientId].map(c => c.name) : null;
+    const clientCompetitors = clientId ? await getClientCompetitors(clientId) : null;
+    const clientCompetitorList = clientCompetitors ? clientCompetitors.map(c => c.name) : null;
     const competitorsParam = typeof req.query.competitors === "string" && req.query.competitors.trim().length > 0
       ? String(req.query.competitors).split(",").map(s => s.trim()).filter(Boolean).slice(0, 12)
       : null;
     const competitorList = competitorsParam ?? clientCompetitorList ?? DEFAULT_COMPETITORS.map(c => c.name);
     const defaultShareLookup = new Map(DEFAULT_COMPETITORS.map(c => [c.name.toLowerCase(), c.share]));
-    const clientShareLookup = clientId
-      ? new Map(CLIENT_COMPETITORS[clientId].map(c => [c.name.toLowerCase(), c.share]))
+    const clientShareLookup = clientCompetitors
+      ? new Map(clientCompetitors.map(c => [c.name.toLowerCase(), c.share]))
       : null;
     const shareLookup = (key: string) => clientShareLookup?.get(key) ?? defaultShareLookup.get(key);
 
@@ -1523,7 +1434,7 @@ router.get("/carlota/radar-signals", authMiddleware(), validateQuery(carlotaRada
     const liveSignals = (newsResult ?? []).slice(0, 30);
     const liveCount = liveSignals.length;
     const useFallback = liveCount === 0;
-    const fallbackSeed = clientId ? CLIENT_RADAR_SIGNALS[clientId] : SEED_RADAR_SIGNALS;
+    const fallbackSeed = clientId ? await getClientRadarSignals(clientId) : SEED_RADAR_SIGNALS;
     const newsFeedSignals = useFallback ? fallbackSeed.map(s => ({ ...s, source: "Carlota Jo intel desk", url: "" })) : liveSignals;
 
     const signalCounts = new Map<string, { threats: number; opportunities: number; total: number }>();
@@ -1544,7 +1455,7 @@ router.get("/carlota/radar-signals", authMiddleware(), validateQuery(carlotaRada
       return { name, score, trend, share };
     });
 
-    const clientMarketTrend = clientId ? CLIENT_MARKET_TREND[clientId] : null;
+    const clientMarketTrend = clientId ? await getClientMarketTrend(clientId) : null;
     const months = ["Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr"];
     const baseYou = 56;
     const baseMarket = 62;
@@ -1713,7 +1624,8 @@ router.get("/carlota/roi-metrics", authMiddleware(), async (req, res) => {
         cs.client === CLIENT_NAME_BY_ID[clientId] ||
         (clientId === "aurelius-pe" && cs.client === "Aurelius PE")
       );
-      let portfolioBenchmarks = CLIENT_ROI_BENCHMARKS[clientId];
+      let portfolioBenchmarks = (await getClientRoiBenchmarks(clientId))
+        ?? SEED_ROI_METRICS.portfolioBenchmarks;
       if (engagements.length > 0) {
         const totalContracted = engagements.reduce((s, e) => s + Number(e.contractedValue), 0);
         const totalCost = engagements.reduce((s, e) => s + Number(e.costToDate), 0);
@@ -1728,7 +1640,7 @@ router.get("/carlota/roi-metrics", authMiddleware(), async (req, res) => {
       sendSuccess(res, {
         caseStudies,
         portfolioBenchmarks,
-        roiTrendData: CLIENT_ROI_TREND[clientId],
+        roiTrendData: await getClientRoiTrend(clientId),
         clientId,
         fetchedAt: new Date().toISOString(),
       });
@@ -1753,6 +1665,165 @@ router.get("/carlota/roi-metrics", authMiddleware(), async (req, res) => {
     }
     sendSuccess(res, { ...SEED_ROI_METRICS, portfolioBenchmarks, clientId: null, fetchedAt: new Date().toISOString() });
   } catch (err) { handleRouteError(res, err, "Failed to fetch ROI metrics"); }
+});
+
+// ── Per-client advisory data: admin read + write endpoints ─────────────────────
+// These let portal-admin operators edit a client's persisted margin history,
+// ROI benchmarks, ROI trend, radar signals, competitor rankings and market
+// trend without redeploying the API.
+
+router.get("/carlota/admin/clients/:clientId/advisory-data", authMiddleware(), requireRole("super_admin", "admin"), async (req, res) => {
+  try {
+    const clientId = req.params.clientId;
+    if (!isValidClientId(clientId)) { sendBadRequest(res, "Unknown clientId"); return; }
+    const [marginHistory, roiBenchmarks, roiTrend, radarSignals, competitors, marketTrend] = await Promise.all([
+      getClientMarginHistory(clientId),
+      getClientRoiBenchmarks(clientId),
+      getClientRoiTrend(clientId),
+      getClientRadarSignals(clientId),
+      getClientCompetitors(clientId),
+      getClientMarketTrend(clientId),
+    ]);
+    sendSuccess(res, {
+      clientId, name: CLIENT_NAME_BY_ID[clientId],
+      marginHistory, roiBenchmarks, roiTrend, radarSignals, competitors, marketTrend,
+    });
+  } catch (err) { handleRouteError(res, err, "Failed to fetch advisory data"); }
+});
+
+router.put("/carlota/admin/clients/:clientId/margin-history", authMiddleware(), requireRole("super_admin", "admin"), validateBody(jsonObjectBodySchema), async (req, res) => {
+  try {
+    const clientId = req.params.clientId;
+    if (!isValidClientId(clientId)) { sendBadRequest(res, "Unknown clientId"); return; }
+    const items = (req.body as { items?: Array<{ month?: unknown; margin?: unknown }> }).items;
+    if (!Array.isArray(items)) { sendBadRequest(res, "items[] required"); return; }
+    await db.delete(carlotaClientMarginHistoryTable)
+      .where(eq(carlotaClientMarginHistoryTable.clientExternalId, clientId));
+    const rows = items.map((it, i) => ({
+      clientExternalId: clientId,
+      month: String(it.month ?? "").trim(),
+      margin: Number(it.margin ?? 0),
+      sortOrder: i,
+    })).filter(r => r.month.length > 0);
+    if (rows.length) await db.insert(carlotaClientMarginHistoryTable).values(rows);
+    sendSuccess(res, { clientId, count: rows.length });
+  } catch (err) { handleRouteError(res, err, "Failed to update margin history"); }
+});
+
+router.put("/carlota/admin/clients/:clientId/roi-benchmarks", authMiddleware(), requireRole("super_admin", "admin"), validateBody(jsonObjectBodySchema), async (req, res) => {
+  try {
+    const clientId = req.params.clientId;
+    if (!isValidClientId(clientId)) { sendBadRequest(res, "Unknown clientId"); return; }
+    const b = req.body as Partial<Record<"avgRoi" | "avgPaybackMonths" | "avgRateRealisationPct" | "blendedMarginPct" | "clientRetentionPct" | "npsScore", unknown>>;
+    const next = {
+      avgRoi: Number(b.avgRoi ?? 0),
+      avgPaybackMonths: Number(b.avgPaybackMonths ?? 0),
+      avgRateRealisationPct: Number(b.avgRateRealisationPct ?? 100),
+      blendedMarginPct: Number(b.blendedMarginPct ?? 0),
+      clientRetentionPct: Number(b.clientRetentionPct ?? 0),
+      npsScore: Number(b.npsScore ?? 0),
+    };
+    await db.insert(carlotaClientRoiBenchmarksTable)
+      .values({ clientExternalId: clientId, ...next })
+      .onConflictDoUpdate({
+        target: carlotaClientRoiBenchmarksTable.clientExternalId,
+        set: { ...next, updatedAt: new Date() },
+      });
+    sendSuccess(res, { clientId, ...next });
+  } catch (err) { handleRouteError(res, err, "Failed to update ROI benchmarks"); }
+});
+
+router.put("/carlota/admin/clients/:clientId/roi-trend", authMiddleware(), requireRole("super_admin", "admin"), validateBody(jsonObjectBodySchema), async (req, res) => {
+  try {
+    const clientId = req.params.clientId;
+    if (!isValidClientId(clientId)) { sendBadRequest(res, "Unknown clientId"); return; }
+    const items = (req.body as { items?: Array<{ month?: unknown; avgRoi?: unknown }> }).items;
+    if (!Array.isArray(items)) { sendBadRequest(res, "items[] required"); return; }
+    await db.delete(carlotaClientRoiTrendTable)
+      .where(eq(carlotaClientRoiTrendTable.clientExternalId, clientId));
+    const rows = items.map((it, i) => ({
+      clientExternalId: clientId,
+      month: String(it.month ?? "").trim(),
+      avgRoi: Number(it.avgRoi ?? 0),
+      sortOrder: i,
+    })).filter(r => r.month.length > 0);
+    if (rows.length) await db.insert(carlotaClientRoiTrendTable).values(rows);
+    sendSuccess(res, { clientId, count: rows.length });
+  } catch (err) { handleRouteError(res, err, "Failed to update ROI trend"); }
+});
+
+router.put("/carlota/admin/clients/:clientId/radar-signals", authMiddleware(), requireRole("super_admin", "admin"), validateBody(jsonObjectBodySchema), async (req, res) => {
+  try {
+    const clientId = req.params.clientId;
+    if (!isValidClientId(clientId)) { sendBadRequest(res, "Unknown clientId"); return; }
+    const items = (req.body as { items?: Array<Record<string, unknown>> }).items;
+    if (!Array.isArray(items)) { sendBadRequest(res, "items[] required"); return; }
+    const allowedImpact = new Set(["high", "medium", "low"]);
+    const allowedDirection = new Set(["threat", "opportunity", "neutral"]);
+    await db.delete(carlotaClientRadarSignalsTable)
+      .where(eq(carlotaClientRadarSignalsTable.clientExternalId, clientId));
+    const rows = items.map((it, i) => {
+      const impactRaw = String(it.impact ?? "medium");
+      const directionRaw = String(it.direction ?? "neutral");
+      return {
+        clientExternalId: clientId,
+        competitor: String(it.competitor ?? "").trim(),
+        event: String(it.event ?? "").trim(),
+        impact: (allowedImpact.has(impactRaw) ? impactRaw : "medium") as "high" | "medium" | "low",
+        direction: (allowedDirection.has(directionRaw) ? directionRaw : "neutral") as "threat" | "opportunity" | "neutral",
+        signalDate: String((it as { date?: unknown; signalDate?: unknown }).date ?? (it as { signalDate?: unknown }).signalDate ?? "").trim(),
+        detail: String(it.detail ?? "").trim(),
+        sortOrder: i,
+      };
+    }).filter(r => r.competitor.length > 0 && r.event.length > 0);
+    if (rows.length) await db.insert(carlotaClientRadarSignalsTable).values(rows);
+    sendSuccess(res, { clientId, count: rows.length });
+  } catch (err) { handleRouteError(res, err, "Failed to update radar signals"); }
+});
+
+router.put("/carlota/admin/clients/:clientId/competitors", authMiddleware(), requireRole("super_admin", "admin"), validateBody(jsonObjectBodySchema), async (req, res) => {
+  try {
+    const clientId = req.params.clientId;
+    if (!isValidClientId(clientId)) { sendBadRequest(res, "Unknown clientId"); return; }
+    const items = (req.body as { items?: Array<Record<string, unknown>> }).items;
+    if (!Array.isArray(items)) { sendBadRequest(res, "items[] required"); return; }
+    const allowedTrend = new Set(["up", "down", "flat"]);
+    await db.delete(carlotaClientCompetitorsTable)
+      .where(eq(carlotaClientCompetitorsTable.clientExternalId, clientId));
+    const rows = items.map((it, i) => {
+      const trendRaw = String(it.trend ?? "flat");
+      return {
+        clientExternalId: clientId,
+        name: String(it.name ?? "").trim(),
+        score: Number(it.score ?? 50),
+        trend: (allowedTrend.has(trendRaw) ? trendRaw : "flat") as "up" | "down" | "flat",
+        share: Number(it.share ?? 0),
+        sortOrder: i,
+      };
+    }).filter(r => r.name.length > 0);
+    if (rows.length) await db.insert(carlotaClientCompetitorsTable).values(rows);
+    sendSuccess(res, { clientId, count: rows.length });
+  } catch (err) { handleRouteError(res, err, "Failed to update competitors"); }
+});
+
+router.put("/carlota/admin/clients/:clientId/market-trend", authMiddleware(), requireRole("super_admin", "admin"), validateBody(jsonObjectBodySchema), async (req, res) => {
+  try {
+    const clientId = req.params.clientId;
+    if (!isValidClientId(clientId)) { sendBadRequest(res, "Unknown clientId"); return; }
+    const items = (req.body as { items?: Array<{ month?: unknown; you?: unknown; market?: unknown }> }).items;
+    if (!Array.isArray(items)) { sendBadRequest(res, "items[] required"); return; }
+    await db.delete(carlotaClientMarketTrendTable)
+      .where(eq(carlotaClientMarketTrendTable.clientExternalId, clientId));
+    const rows = items.map((it, i) => ({
+      clientExternalId: clientId,
+      month: String(it.month ?? "").trim(),
+      you: Number(it.you ?? 0),
+      market: Number(it.market ?? 0),
+      sortOrder: i,
+    })).filter(r => r.month.length > 0);
+    if (rows.length) await db.insert(carlotaClientMarketTrendTable).values(rows);
+    sendSuccess(res, { clientId, count: rows.length });
+  } catch (err) { handleRouteError(res, err, "Failed to update market trend"); }
 });
 
 // ── Helpers ────────────────────────────────────────────────────────────────────

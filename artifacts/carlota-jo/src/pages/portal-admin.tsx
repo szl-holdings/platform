@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { TenantBrandProvider, useTenantBrand } from "@szl-holdings/shared-ui/use-tenant-brand";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
-import { Settings, Users, Eye, Plus, Save, Globe, Palette, Lock } from "lucide-react";
+import { Settings, Users, Eye, Plus, Save, Globe, Palette, Lock, Database } from "lucide-react";
 import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";
+import AdvisoryDataEditor from "../components/AdvisoryDataEditor";
 
 const ACCENT = LANE_ACCENT_HEX.carlotaJo.primary;
 
@@ -363,6 +364,20 @@ export default function PortalAdminPage() {
             <Plus size={20} />
             <span style={{ fontSize: "12px", fontWeight: 600 }}>New White-Label Portal</span>
           </button>
+        </div>
+
+        {/* Per-client advisory data editor */}
+        <div style={{ marginTop: "32px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
+            <Database size={16} style={{ color: ACCENT }} />
+            <h2 style={{ fontSize: "15px", fontWeight: 700, margin: 0 }}>Per-Client Advisory Data</h2>
+          </div>
+          <p style={{ fontSize: "12px", color: "rgba(255,255,255,0.4)", margin: "0 0 14px" }}>
+            Edit the persisted margin history, ROI benchmarks, ROI trend, radar signals, competitor rankings, and market trend for each
+            advisory client. Changes are written to the database and applied immediately to /carlota/engagements,
+            /carlota/radar-signals, and /carlota/roi-metrics. Requires admin role.
+          </p>
+          <AdvisoryDataEditor accent={ACCENT} />
         </div>
       </main>
 

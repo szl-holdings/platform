@@ -10,7 +10,8 @@
     "seed:security": "tsx src/seed-runner.ts security",
     "seed:maritime": "tsx src/seed-runner.ts maritime",
     "seed:legal": "tsx src/seed-runner.ts legal",
-    "seed:mesh": "tsx src/seed-mesh-cli.ts"
+    "seed:mesh": "tsx src/seed-mesh-cli.ts",
+    "seed:carlota-advisory": "tsx src/carlota-advisory-seed.ts"
   },
   "dependencies": {
     "@szl-holdings/db": "workspace:*",
