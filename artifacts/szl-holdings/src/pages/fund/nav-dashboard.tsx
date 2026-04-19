@@ -144,6 +144,9 @@ export default function NavDashboardPage() {
   type LpReport = {
     id: number; reportingPeriod: string; status: string; fundNav: string | null;
     netIrr: string | null; tvpi: string | null; dpi: string | null; createdAt: string;
+    managementFeesAccrued: string | null; carriedInterestAccrued: string | null;
+    preferredReturnRate: string | null; calledCapital: string | null;
+    periodStart: string | null;
   };
   const { data: lpReportRows } = useQuery({
     queryKey: ["fund-ops", "lp-reports"],
@@ -159,7 +162,7 @@ export default function NavDashboardPage() {
   const liveGrossIrr = latestNav?.grossIrr != null ? parseFloat(latestNav.grossIrr) : CURRENT_FUND.grossIrr;
   const liveTvpi = latestNav?.tvpi != null ? parseFloat(latestNav.tvpi) : CURRENT_FUND.tvpi;
   const liveDpi = latestNav?.dpi != null ? parseFloat(latestNav.dpi) : CURRENT_FUND.dpi;
-  const liveCarry = latestNav?.carryAccruedCents != null ? latestNav.carryAccruedCents / 100 : FEE_SCHEDULE.reduce((s, f) => s + f.carryAccrual, 0);
+  const liveCarry = latestNav?.carryAccruedCents != null ? latestNav.carryAccruedCents / 100 : CURRENT_FUND.totalCarryAccrued;
 
   const QUARTER_LABELS: Record<string, string> = {
     "01": "Q1", "02": "Q1", "03": "Q1",
@@ -202,6 +205,28 @@ export default function NavDashboardPage() {
     });
   }, [portfolioAggregate, liveNav]);
 
+  const liveFeeSchedule = useMemo(() => {
+    if (!lpReportRows || lpReportRows.length === 0) return FEE_SCHEDULE;
+    const sorted = lpReportRows.slice().sort((a, b) => {
+      const ad = a.periodStart ?? "";
+      const bd = b.periodStart ?? "";
+      return ad.localeCompare(bd);
+    });
+    return sorted.map((r, i) => {
+      const prior = i > 0 ? sorted[i - 1]! : null;
+      const curMgmt = parseFloat(r.managementFeesAccrued ?? "0");
+      const priorMgmt = prior ? parseFloat(prior.managementFeesAccrued ?? "0") : 0;
+      const managementFee = Math.max(0, curMgmt - priorMgmt);
+      const curCarry = parseFloat(r.carriedInterestAccrued ?? "0");
+      const priorCarry = prior ? parseFloat(prior.carriedInterestAccrued ?? "0") : 0;
+      const carryAccrual = Math.max(0, curCarry - priorCarry);
+      const calledCap = parseFloat(r.calledCapital ?? "0");
+      const prefRate = parseFloat(r.preferredReturnRate ?? "0");
+      const prefReturn = calledCap * prefRate * 0.25;
+      return { period: r.reportingPeriod, managementFee, carryAccrual, prefReturn };
+    });
+  }, [lpReportRows]);
+
   const liveLpReports = useMemo(() => {
     if (!lpReportRows || lpReportRows.length === 0) return QUARTERLY_LP_REPORTS;
     return lpReportRows.map(r => {
@@ -224,7 +249,7 @@ export default function NavDashboardPage() {
   const navChangePct = ((liveNav - prevNav.nav) / prevNav.nav) * 100;
 
   const totalCarry = liveCarry;
-  const totalMgmtFees = FEE_SCHEDULE.reduce((s, f) => s + f.managementFee, 0);
+  const totalMgmtFees = liveFeeSchedule.reduce((s, f) => s + f.managementFee, 0);
 
   const navChartData = activeNavHistory.map(n => ({
     period: n.period,
@@ -466,7 +491,7 @@ export default function NavDashboardPage() {
                 <div className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-6 mb-5">
                   <h3 className="text-sm font-semibold text-white mb-5">Management Fees & Carry Accruals by Quarter</h3>
                   <ResponsiveContainer width="100%" height={220}>
-                    <BarChart data={FEE_SCHEDULE} barSize={18}>
+                    <BarChart data={liveFeeSchedule} barSize={18}>
                       <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
                       <XAxis dataKey="period" tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 11 }} axisLine={false} tickLine={false} />
                       <YAxis tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={v => `$${(v / 1000).toFixed(0)}K`} />
