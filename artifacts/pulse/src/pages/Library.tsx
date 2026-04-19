@@ -2,8 +2,9 @@ import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { Search, ChevronRight, Calendar, Shield, Check, Archive } from "lucide-react";
 import { getRiskColor, type DomainKey, type RiskLevel } from "../lib/data";
-import { useBriefings, useApproveBriefing, useArchiveBriefing, useBriefingSearch } from "../lib/api";
+import { useBriefings, useApproveBriefing, useArchiveBriefing, useBriefingSearch, isDemoMode } from "../lib/api";
 import ConfidenceChip from "../components/ConfidenceChip";
+import { PULSE_SYNTHESIZED_LABEL } from "../lib/claims";
 
 type RiskFilter = RiskLevel | "all";
 
@@ -163,6 +164,26 @@ export default function Library() {
                         <Shield size={10} color="var(--pulse-gold-dim)" />
                         <span style={{ color: "var(--pulse-gold-dim)" }}>{briefing.classification}</span>
                       </div>
+                      {isDemoMode() && (
+                        <>
+                          <div style={{ width: 3, height: 3, borderRadius: "50%", background: "var(--pulse-border-bright)" }} />
+                          <span
+                            className="font-mono"
+                            title="This briefing card is rendered from a synthesized fixture, not a freshly produced live agent response."
+                            style={{
+                              fontSize: "0.62rem",
+                              color: "var(--pulse-gold)",
+                              fontWeight: 600,
+                              letterSpacing: "0.06em",
+                              padding: "1px 5px",
+                              border: "1px solid var(--pulse-border-bright)",
+                              borderRadius: 3,
+                            }}
+                          >
+                            {PULSE_SYNTHESIZED_LABEL}
+                          </span>
+                        </>
+                      )}
                     </div>
                     <div className="font-serif" style={{ fontSize: "1rem", color: "var(--pulse-text)", lineHeight: 1.4, marginBottom: 6 }}>
                       {briefing.headline}
