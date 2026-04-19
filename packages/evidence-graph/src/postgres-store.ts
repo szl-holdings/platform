@@ -18,6 +18,7 @@ import {
   InMemoryEvidenceStore,
   InMemoryRecommendationStore,
   type EvidenceStoreBackend,
+  type RecommendationDecision,
   type RecommendationStoreBackend,
 } from "./store.js";
 
@@ -303,6 +304,16 @@ export class PostgresRecommendationStore implements RecommendationStoreBackend {
 
   count(): number {
     return this.cache.count();
+  }
+
+  recordDecision(decision: RecommendationDecision): void {
+    // Decisions are tracked in the in-memory cache; durable persistence is
+    // tracked separately via the outcome signal emitted on the bus.
+    this.cache.recordDecision(decision);
+  }
+
+  listDecisions(recommendationId: string): RecommendationDecision[] {
+    return this.cache.listDecisions(recommendationId);
   }
 
   async hydrate(limit?: number): Promise<number> {

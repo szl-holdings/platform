@@ -2,7 +2,11 @@
  * Evidence Graph Read API
  *
  * Exposes the signal mesh evidence graph to any product surface.
- * All routes are read-only — writes happen through the signal pipeline.
+ * Most routes are read-only and reflect state derived from the signal pipeline.
+ * The exception is POST /evidence-graph/recommendations/:id/decision, which
+ * lets operators record an Approve/Reject/Escalate/Defer decision on a
+ * recommendation; that handler updates status, persists the decision, and
+ * emits an outcome signal back into the mesh.
  *
  * Routes:
  *   GET /evidence-graph/recommendations          — list recommendations (filterable)
@@ -14,15 +18,35 @@
  */
 
 import { Router, type IRouter, type Request, type Response } from "express";
-import { defaultEvidenceGraphQuery, defaultRecommendationStore } from "@szl-holdings/evidence-graph";
+import { randomUUID } from "node:crypto";
+import { z } from "zod";
+import {
+  defaultEvidenceGraphQuery,
+  defaultRecommendationStore,
+  type RecommendationDecision,
+} from "@szl-holdings/evidence-graph";
 import { defaultSignalBus } from "@szl-holdings/signal-mesh";
 import { defaultEntityRegistry } from "@workspace/ontology";
-import type { Recommendation, Signal, EntitySnapshot } from "@workspace/ontology";
+import type { Recommendation, EntitySnapshot } from "@workspace/ontology";
+// Import Signal/createSignal directly from the Zod-based module to avoid the
+// name collision in `@workspace/ontology` (signals.js vs signal.js).
+import { createSignal, type Signal } from "@workspace/ontology/signal";
 import { authMiddleware } from "../middlewares/auth";
 import { perUserApiSlidingLimiter } from "../middlewares/sliding-window-limiter";
-import { sendSuccess, sendNotFound, handleRouteError } from "../lib/api-response";
+import {
+  sendSuccess,
+  sendNotFound,
+  sendBadRequest,
+  sendForbidden,
+  handleRouteError,
+} from "../lib/api-response";
 
-import { anyQuerySchema, validateQuery } from "../lib/validation";
+import { anyQuerySchema, validateBody, validateQuery } from "../lib/validation";
+
+const decisionBodySchema = z.object({
+  decision: z.enum(["approve", "reject", "escalate", "defer"]),
+  justification: z.string().trim().max(2000).optional(),
+});
 const router: IRouter = Router();
 const auth = authMiddleware();
 const rateLimit = perUserApiSlidingLimiter;
@@ -64,6 +88,157 @@ router.get("/evidence-graph/recommendations/:id", auth, rateLimit, (req, res) =>
     handleRouteError(res, err, "Failed to get recommendation");
   }
 });
+
+router.get("/evidence-graph/recommendations/:id/decisions", auth, rateLimit, (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) { sendNotFound(res, "Recommendation"); return; }
+    const rec = defaultRecommendationStore.get(id);
+    if (!rec) { sendNotFound(res, "Recommendation"); return; }
+
+    sendSuccess(res, {
+      decisions: defaultRecommendationStore.listDecisions(id),
+      recommendationId: id,
+      meta: { meshVersion: "1.0.0", retrievedAt: new Date().toISOString() },
+    });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to list decisions");
+  }
+});
+
+const DECISION_TO_STATUS: Record<
+  "approve" | "reject" | "escalate" | "defer",
+  Recommendation["status"]
+> = {
+  approve: "accepted",
+  reject: "rejected",
+  // Escalate / defer keep the recommendation actionable but record the
+  // operator's intervention via the decision log + outcome signal.
+  escalate: "pending",
+  defer: "pending",
+};
+
+router.post(
+  "/evidence-graph/recommendations/:id/decision",
+  auth,
+  rateLimit,
+  validateBody(decisionBodySchema),
+  (req, res) => {
+    try {
+      const { id } = req.params;
+      if (!id) { sendNotFound(res, "Recommendation"); return; }
+
+      const rec = defaultRecommendationStore.get(id);
+      if (!rec) { sendNotFound(res, "Recommendation"); return; }
+
+      const { decision, justification } = req.body as z.infer<typeof decisionBodySchema>;
+      const policyOutcome = rec.policyEvaluation.outcome;
+
+      // Hard-block: operators cannot act from this surface; admins must override.
+      if (policyOutcome === "block") {
+        sendForbidden(
+          res,
+          "Recommendation is blocked by policy and cannot be actioned from Evidence Explorer.",
+        );
+        return;
+      }
+
+      // Approvals on require-approval policies must carry a written justification.
+      const justificationRequired =
+        decision === "approve" && policyOutcome === "require-approval";
+      const trimmed = justification?.trim();
+      if (justificationRequired && (!trimmed || trimmed.length < 4)) {
+        sendBadRequest(
+          res,
+          "Policy requires a written justification (≥ 4 chars) to approve this recommendation.",
+        );
+        return;
+      }
+
+      const previousStatus = rec.status;
+      const newStatus = DECISION_TO_STATUS[decision];
+
+      // Don't clobber a terminal status with a no-op transition. A second
+      // decision on an already-resolved rec is recorded but status sticks.
+      const isTerminal = ["accepted", "rejected", "completed", "failed", "expired"]
+        .includes(previousStatus);
+      const effectiveStatus: Recommendation["status"] = isTerminal ? previousStatus : newStatus;
+      if (!isTerminal && effectiveStatus !== previousStatus) {
+        defaultRecommendationStore.updateStatus(id, effectiveStatus);
+      }
+
+      const actorId = req.user?.id?.toString() ?? "anonymous";
+      const actorRole = req.user?.roles?.[0];
+      const tenantId = req.user?.orgs?.[0]?.orgId?.toString();
+
+      const decidedAt = new Date().toISOString();
+      const record: RecommendationDecision = {
+        decisionId: randomUUID(),
+        recommendationId: id,
+        decision,
+        actorId,
+        actorRole,
+        justification: trimmed,
+        policyOutcome,
+        previousStatus,
+        newStatus: effectiveStatus,
+        decidedAt,
+      };
+      defaultRecommendationStore.recordDecision(record);
+
+      // Emit an outcome signal so the action is captured by the audit /
+      // telemetry pipeline and downstream consumers (analytics, Atlas, etc.).
+      try {
+        const outcome: Signal = createSignal({
+          source: "human",
+          type: "outcome",
+          domain: rec.domain,
+          occurredAt: decidedAt,
+          freshness: 1,
+          confidence: 1,
+          severity: decision === "reject" || decision === "escalate" ? "high" : "info",
+          entityRefs: rec.entityRefs,
+          tenantId,
+          rawPayload: {
+            recommendationId: id,
+            decision,
+            decisionId: record.decisionId,
+            previousStatus,
+            newStatus: effectiveStatus,
+            actorId,
+            justification: trimmed,
+            policyOutcome,
+            sourceSurface: "evidence-explorer",
+          },
+          tags: [
+            "recommendation-decision",
+            `decision:${decision}`,
+            `domain:${rec.domain}`,
+          ],
+          provenance: {
+            sourceService: "api-server",
+            correlationId: id,
+          },
+        });
+        defaultSignalBus.publish(outcome);
+      } catch (e) {
+        // Signal emission must not block the operator action — log and continue.
+        console.error("[evidence-graph] outcome signal publish failed:", e);
+      }
+
+      const chain = defaultEvidenceGraphQuery.getEvidenceChain(id);
+      sendSuccess(res, {
+        decision: record,
+        recommendation: defaultRecommendationStore.get(id),
+        chain,
+        decisions: defaultRecommendationStore.listDecisions(id),
+        meta: { meshVersion: "1.0.0", recordedAt: decidedAt },
+      });
+    } catch (err) {
+      handleRouteError(res, err, "Failed to record decision");
+    }
+  },
+);
 
 router.get("/evidence-graph/why/:entityId", auth, rateLimit, (req, res) => {
   try {

@@ -40,6 +40,21 @@ export interface EvidenceStoreBackend {
   count(): number;
 }
 
+export type RecommendationDecisionType = "approve" | "reject" | "escalate" | "defer";
+
+export interface RecommendationDecision {
+  decisionId: string;
+  recommendationId: string;
+  decision: RecommendationDecisionType;
+  actorId: string;
+  actorRole?: string;
+  justification?: string;
+  policyOutcome: "allow" | "require-approval" | "block" | "pending";
+  previousStatus: Recommendation["status"];
+  newStatus: Recommendation["status"];
+  decidedAt: string;
+}
+
 export interface RecommendationStoreBackend {
   save(rec: Recommendation): void;
   get(recommendationId: string): Recommendation | undefined;
@@ -56,6 +71,8 @@ export interface RecommendationStoreBackend {
   ): boolean;
   forEntity(entityId: string): Recommendation[];
   count(): number;
+  recordDecision(decision: RecommendationDecision): void;
+  listDecisions(recommendationId: string): RecommendationDecision[];
 }
 
 export class InMemoryEvidenceStore implements EvidenceStoreBackend {
@@ -140,6 +157,7 @@ export class InMemoryEvidenceStore implements EvidenceStoreBackend {
 
 export class InMemoryRecommendationStore implements RecommendationStoreBackend {
   private readonly recs = new Map<string, Recommendation>();
+  private readonly decisions = new Map<string, RecommendationDecision[]>();
 
   save(rec: Recommendation): void {
     this.recs.set(rec.recommendationId, rec);
@@ -190,7 +208,18 @@ export class InMemoryRecommendationStore implements RecommendationStoreBackend {
   }
 
   delete(recommendationId: string): boolean {
+    this.decisions.delete(recommendationId);
     return this.recs.delete(recommendationId);
+  }
+
+  recordDecision(decision: RecommendationDecision): void {
+    const list = this.decisions.get(decision.recommendationId) ?? [];
+    list.push(decision);
+    this.decisions.set(decision.recommendationId, list);
+  }
+
+  listDecisions(recommendationId: string): RecommendationDecision[] {
+    return [...(this.decisions.get(recommendationId) ?? [])];
   }
 }
 
@@ -329,6 +358,14 @@ export class RecommendationStore implements RecommendationStoreBackend {
 
   count(): number {
     return this.backend.count();
+  }
+
+  recordDecision(decision: RecommendationDecision): void {
+    this.backend.recordDecision(decision);
+  }
+
+  listDecisions(recommendationId: string): RecommendationDecision[] {
+    return this.backend.listDecisions(recommendationId);
   }
 }
 

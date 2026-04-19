@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import {
   EvidenceBadge,
   ConfidenceMeter,
@@ -653,6 +653,134 @@ function RecommendationsPanel({
   );
 }
 
+// ─── Operator decisions (Approve / Reject / Escalate / Defer) ─────────────
+
+type DecisionType = "approve" | "reject" | "escalate" | "defer";
+
+interface DecisionRecord {
+  decisionId: string;
+  recommendationId: string;
+  decision: DecisionType;
+  actorId: string;
+  actorRole?: string;
+  justification?: string;
+  policyOutcome: ApiRecommendation["policyEvaluation"]["outcome"];
+  previousStatus: ApiRecommendation["status"];
+  newStatus: ApiRecommendation["status"];
+  decidedAt: string;
+}
+
+const DECISION_BTN: Record<DecisionType, { color: string; label: string }> = {
+  approve:  { color: "#6b8f71", label: "Approve" },
+  reject:   { color: "#c45a4a", label: "Reject" },
+  escalate: { color: "#c8953c", label: "Escalate" },
+  defer:    { color: "#4a90b8", label: "Defer" },
+};
+
+const DECISION_TO_NEXT_STATUS: Record<DecisionType, ApiRecommendation["status"]> = {
+  approve: "accepted",
+  reject: "rejected",
+  escalate: "pending",
+  defer: "pending",
+};
+
+async function postDecision(
+  recommendationId: string,
+  body: { decision: DecisionType; justification?: string },
+): Promise<{ chain: ApiEvidenceChain; decision: DecisionRecord; decisions: DecisionRecord[] }> {
+  const res = await fetch(
+    `/api/evidence-graph/recommendations/${recommendationId}/decision`,
+    {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    },
+  );
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const msg = (json && (json.error || json.message)) || `${res.status} ${res.statusText}`;
+    throw new Error(msg);
+  }
+  return (json?.data ?? json) as {
+    chain: ApiEvidenceChain;
+    decision: DecisionRecord;
+    decisions: DecisionRecord[];
+  };
+}
+
+function JustificationModal({
+  decision,
+  onSubmit,
+  onCancel,
+  pending,
+}: {
+  decision: DecisionType;
+  onSubmit: (justification: string) => void;
+  onCancel: () => void;
+  pending: boolean;
+}) {
+  const [text, setText] = useState("");
+  const cfg = DECISION_BTN[decision];
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: "rgba(8,12,20,0.85)" }}
+    >
+      <div
+        className="w-full max-w-md rounded-lg p-5 space-y-3"
+        style={{ background: "#0f1521", border: `1px solid ${BORDER}` }}
+      >
+        <div className="text-[13px] font-semibold" style={{ color: TEXT }}>
+          Justification required
+        </div>
+        <p className="text-[11px] leading-relaxed" style={{ color: MUTED }}>
+          Policy verdict requires a written justification before {cfg.label.toLowerCase()}. It will be
+          captured in the audit trail and emitted as an outcome signal.
+        </p>
+        <textarea
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          rows={4}
+          autoFocus
+          placeholder="Describe why this action is warranted…"
+          className="w-full rounded px-2.5 py-2 text-[12px] resize-none focus:outline-none"
+          style={{
+            background: "#0a0f18",
+            border: `1px solid ${BORDER}`,
+            color: TEXT,
+            caretColor: cfg.color,
+          }}
+        />
+        <div className="flex gap-2 justify-end">
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={pending}
+            className="px-3 py-1.5 rounded text-[11px]"
+            style={{ background: "transparent", border: `1px solid ${BORDER}`, color: MUTED }}
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            disabled={pending || text.trim().length < 4}
+            onClick={() => onSubmit(text.trim())}
+            className="px-3 py-1.5 rounded text-[11px] font-medium disabled:opacity-40"
+            style={{
+              background: `${cfg.color}22`,
+              border: `1px solid ${cfg.color}55`,
+              color: cfg.color,
+            }}
+          >
+            {pending ? "Submitting…" : `Submit & ${cfg.label}`}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function EvidenceChainDrawer({
   recommendationId,
   onClose,
@@ -662,6 +790,10 @@ function EvidenceChainDrawer({
   onClose: () => void;
   onSelectEntity: (entityId: string) => void;
 }) {
+  const queryClient = useQueryClient();
+  const [pendingDecision, setPendingDecision] = useState<DecisionType | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+
   const { data, isLoading, isError } = useQuery({
     queryKey: ["evidence-graph", "chain", recommendationId],
     queryFn: () => fetchJson<{ chain: ApiEvidenceChain }>(
@@ -669,7 +801,80 @@ function EvidenceChainDrawer({
     ),
   });
 
+  const decisionsQuery = useQuery({
+    queryKey: ["evidence-graph", "decisions", recommendationId],
+    queryFn: () => fetchJson<{ decisions: DecisionRecord[] }>(
+      `/api/evidence-graph/recommendations/${recommendationId}/decisions`,
+    ),
+  });
+
+  const mutation = useMutation({
+    mutationFn: (body: { decision: DecisionType; justification?: string }) =>
+      postDecision(recommendationId, body),
+    onMutate: async (body) => {
+      setActionError(null);
+      await queryClient.cancelQueries({ queryKey: ["evidence-graph", "chain", recommendationId] });
+      const prev = queryClient.getQueryData<{ chain: ApiEvidenceChain }>([
+        "evidence-graph",
+        "chain",
+        recommendationId,
+      ]);
+      if (prev?.chain) {
+        const cur = prev.chain.recommendation.status;
+        const next: ApiRecommendation["status"] =
+          cur === "accepted" || cur === "rejected" || cur === "completed" ||
+          cur === "failed" || cur === "expired"
+            ? cur
+            : DECISION_TO_NEXT_STATUS[body.decision];
+        queryClient.setQueryData(["evidence-graph", "chain", recommendationId], {
+          chain: {
+            ...prev.chain,
+            recommendation: { ...prev.chain.recommendation, status: next },
+          },
+        });
+      }
+      return { prev };
+    },
+    onError: (err, _vars, ctx) => {
+      setActionError(err instanceof Error ? err.message : "Failed to submit decision.");
+      if (ctx?.prev) {
+        queryClient.setQueryData(["evidence-graph", "chain", recommendationId], ctx.prev);
+      }
+    },
+    onSuccess: (data) => {
+      queryClient.setQueryData(["evidence-graph", "chain", recommendationId], { chain: data.chain });
+      queryClient.setQueryData(
+        ["evidence-graph", "decisions", recommendationId],
+        { decisions: data.decisions },
+      );
+    },
+    onSettled: () => {
+      setPendingDecision(null);
+      queryClient.invalidateQueries({ queryKey: ["evidence-graph", "recommendations"] });
+      queryClient.invalidateQueries({ queryKey: ["evidence-graph", "chain", recommendationId] });
+      queryClient.invalidateQueries({ queryKey: ["evidence-graph", "decisions", recommendationId] });
+      queryClient.invalidateQueries({ queryKey: ["evidence-graph", "signals"] });
+      queryClient.invalidateQueries({ queryKey: ["evidence-graph", "status"] });
+    },
+  });
+
   const chain = data?.chain;
+  const policyOutcome = chain?.recommendation.policyEvaluation.outcome;
+  const status = chain?.recommendation.status;
+  const isTerminal =
+    status === "accepted" || status === "rejected" || status === "completed" ||
+    status === "failed" || status === "expired";
+  const isBlocked = policyOutcome === "block";
+  const requiresJustification = policyOutcome === "require-approval";
+
+  function requestDecision(decision: DecisionType) {
+    setActionError(null);
+    if (decision === "approve" && requiresJustification) {
+      setPendingDecision("approve");
+      return;
+    }
+    mutation.mutate({ decision });
+  }
 
   return (
     <aside
@@ -815,9 +1020,124 @@ function EvidenceChainDrawer({
                 </div>
               </div>
             </section>
+
+            <section
+              className="p-3 rounded space-y-2.5"
+              style={{ background: "rgba(139,122,200,0.04)", border: `1px solid ${BORDER}` }}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[10px] uppercase tracking-wider" style={{ color: MUTED_DIM }}>
+                  Operator decision
+                </span>
+                {requiresJustification && !isTerminal && !isBlocked && (
+                  <span className="text-[10px]" style={{ color: "#c8953c" }}>
+                    Approve requires written justification
+                  </span>
+                )}
+              </div>
+
+              {isBlocked ? (
+                <div
+                  className="text-[11px] px-2.5 py-1.5 rounded"
+                  style={{
+                    background: "rgba(196,90,74,0.10)",
+                    color: "rgba(255,140,128,0.9)",
+                    border: "1px solid rgba(196,90,74,0.25)",
+                  }}
+                >
+                  Policy verdict: blocked. Override requires admin review — actions disabled here.
+                </div>
+              ) : isTerminal ? (
+                <div className="text-[11px]" style={{ color: MUTED }}>
+                  Recommendation already resolved as <span style={{ color: TEXT }}>{status}</span>.
+                </div>
+              ) : (
+                <div className="flex flex-wrap items-center gap-2">
+                  {(["approve", "reject", "escalate", "defer"] as DecisionType[]).map((d) => {
+                    const cfg = DECISION_BTN[d];
+                    return (
+                      <button
+                        key={d}
+                        type="button"
+                        disabled={mutation.isPending}
+                        onClick={() => requestDecision(d)}
+                        className="px-3 py-1.5 rounded text-[11px] font-medium disabled:opacity-50 transition-opacity"
+                        style={{
+                          background: `${cfg.color}1c`,
+                          border: `1px solid ${cfg.color}55`,
+                          color: cfg.color,
+                        }}
+                        data-testid={`button-decision-${d}`}
+                      >
+                        {cfg.label}
+                      </button>
+                    );
+                  })}
+                  {mutation.isPending && (
+                    <span className="text-[10px]" style={{ color: MUTED_DIM }}>Recording…</span>
+                  )}
+                </div>
+              )}
+
+              {actionError && (
+                <div className="text-[11px]" style={{ color: SEVERITY_COLOR.high }}>
+                  {actionError}
+                </div>
+              )}
+
+              {(decisionsQuery.data?.decisions?.length ?? 0) > 0 && (
+                <div className="space-y-1 pt-1.5" style={{ borderTop: `1px solid ${BORDER}` }}>
+                  <div className="text-[10px] uppercase tracking-wider pt-1.5" style={{ color: MUTED_DIM }}>
+                    Decision log ({decisionsQuery.data!.decisions.length})
+                  </div>
+                  {decisionsQuery.data!.decisions
+                    .slice()
+                    .reverse()
+                    .map((d) => {
+                      const cfg = DECISION_BTN[d.decision];
+                      return (
+                        <div
+                          key={d.decisionId}
+                          className="text-[11px] flex items-start gap-2 flex-wrap"
+                          style={{ color: MUTED }}
+                          data-testid={`decision-record-${d.decisionId}`}
+                        >
+                          <span
+                            className="font-semibold uppercase tracking-wider text-[10px]"
+                            style={{ color: cfg.color }}
+                          >
+                            {cfg.label}
+                          </span>
+                          <span style={{ color: MUTED_DIM }}>by {d.actorId}</span>
+                          <span className="ml-auto tabular-nums" style={{ color: MUTED_DIM }}>
+                            {relativeTime(d.decidedAt)}
+                          </span>
+                          {d.justification && (
+                            <div
+                              className="basis-full pl-1 italic"
+                              style={{ color: MUTED }}
+                            >
+                              "{d.justification}"
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                </div>
+              )}
+            </section>
           </>
         )}
       </div>
+
+      {pendingDecision && (
+        <JustificationModal
+          decision={pendingDecision}
+          pending={mutation.isPending}
+          onCancel={() => setPendingDecision(null)}
+          onSubmit={(j) => mutation.mutate({ decision: pendingDecision, justification: j })}
+        />
+      )}
     </aside>
   );
 }
