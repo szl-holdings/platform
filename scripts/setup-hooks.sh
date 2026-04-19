@@ -17,6 +17,15 @@ cat > "$HOOKS_DIR/pre-push" << 'HOOK'
 # Fails the push if any deprecated strings or stale metrics are found.
 echo "Running brand:check before push..."
 pnpm brand:check
+
+# OG card freshness — flags committed cards that no longer match the generator.
+# Skipped automatically if python3 / Pillow are unavailable on the machine.
+if command -v python3 >/dev/null 2>&1 && python3 -c "import PIL" >/dev/null 2>&1; then
+  echo "Running qa:og before push..."
+  pnpm qa:og
+else
+  echo "qa:og skipped (python3 + Pillow not available)"
+fi
 HOOK
 
 chmod +x "$HOOKS_DIR/pre-push"

@@ -1,10 +1,23 @@
 #!/usr/bin/env python3
-"""Generate OG social card images (1200x630 JPG) for SZL Holdings major pages."""
+"""Generate OG social card images (1200x630 JPG) for SZL Holdings major pages.
 
+Usage:
+    python3 scripts/generate_og_cards.py            # regenerate all cards in place
+    python3 scripts/generate_og_cards.py --check    # verify committed cards match
+                                                    #   what the script would produce
+    python3 scripts/generate_og_cards.py --out DIR  # write into DIR instead of the
+                                                    #   default output directory
+"""
+
+import argparse
+import filecmp
 import os
+import sys
+import tempfile
 from PIL import Image, ImageDraw, ImageFont
 
-OUT_DIR = "artifacts/szl-holdings/public/og"
+DEFAULT_OUT_DIR = "artifacts/szl-holdings/public/og"
+OUT_DIR = DEFAULT_OUT_DIR
 W, H = 1200, 630
 
 # Brand palette
@@ -254,8 +267,64 @@ CARDS = [
     ),
 ]
 
-if __name__ == "__main__":
+def main() -> int:
+    global OUT_DIR
+
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Regenerate to a temp dir and fail if committed cards are stale.",
+    )
+    parser.add_argument(
+        "--out",
+        default=None,
+        help=f"Output directory (default: {DEFAULT_OUT_DIR}).",
+    )
+    args = parser.parse_args()
+
+    if args.check:
+        committed_dir = args.out or DEFAULT_OUT_DIR
+        with tempfile.TemporaryDirectory(prefix="og-check-") as tmp:
+            OUT_DIR = tmp
+            print(f"Generating {len(CARDS)} OG cards → {tmp}/ (check mode)")
+            for card in CARDS:
+                generate_card(**card)
+
+            expected = sorted(c["filename"] for c in CARDS)
+            stale: list[str] = []
+            missing: list[str] = []
+            for name in expected:
+                committed = os.path.join(committed_dir, name)
+                generated = os.path.join(tmp, name)
+                if not os.path.exists(committed):
+                    missing.append(name)
+                    continue
+                if not filecmp.cmp(committed, generated, shallow=False):
+                    stale.append(name)
+
+            if missing or stale:
+                print()
+                if missing:
+                    print("Missing OG cards (run `pnpm generate:og`):")
+                    for name in missing:
+                        print(f"  - {name}")
+                if stale:
+                    print("Stale OG cards (run `pnpm generate:og` and commit):")
+                    for name in stale:
+                        print(f"  - {name}")
+                return 1
+
+            print(f"\nOK — {len(expected)} OG cards are up to date.")
+            return 0
+
+    OUT_DIR = args.out or DEFAULT_OUT_DIR
     print(f"Generating {len(CARDS)} OG cards → {OUT_DIR}/")
     for card in CARDS:
         generate_card(**card)
     print(f"\nDone — {len(CARDS)} images written.")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
