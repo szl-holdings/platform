@@ -3156,6 +3156,9 @@ importers:
         specifier: 'catalog:'
         version: 3.5.0
     devDependencies:
+      '@tanstack/react-query':
+        specifier: 'catalog:'
+        version: 5.99.0(react@19.1.0)
       '@types/react':
         specifier: 19.2.14
         version: 19.2.14

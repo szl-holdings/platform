@@ -5,7 +5,7 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 import { useConsultingMetrics } from "@/hooks/useConsultingMetrics";
 import { useCarlotaApiData } from "@/hooks/useCarlotaApiData";
 import { ProofEnvelope, type AutonomyMode } from "@szl-holdings/design-system";
-import { PolicyModeBadge } from "@/components/policy-mode-badge";
+import { PolicyModeBadge } from "@szl-holdings/design-system/proof/policy-mode-badge";
 import {
   Sparkles, FileText, Network, Radar, Activity, Heart,
   TrendingUp, GraduationCap, Lightbulb, Users, FolderOpen,

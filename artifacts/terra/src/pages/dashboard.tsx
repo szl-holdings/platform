@@ -14,7 +14,7 @@ import { properties } from "@/data/portfolio";
 import { useMapboxToken } from "@/hooks/use-mapbox-token";
 import { PackBanner } from "@szl-holdings/shared-ui/pack-banner";
 import { TERRA_PORTFOLIO_AUM, metricDisplay } from "@/lib/claims";
-import { PolicyModeBadge } from "@/components/policy-mode-badge";
+import { PolicyModeBadge } from "@szl-holdings/design-system/proof/policy-mode-badge";
 
 const PropertyMap = lazy(() => import("@/components/property-map"));
 

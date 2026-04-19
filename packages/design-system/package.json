@@ -13,6 +13,7 @@
     "./proof/freshness-chip": "./src/proof/FreshnessChip.tsx",
     "./proof/confidence-meter": "./src/proof/ConfidenceMeter.tsx",
     "./proof/policy-state-chip": "./src/proof/PolicyStateChip.tsx",
+    "./proof/policy-mode-badge": "./src/proof/PolicyModeBadge.tsx",
     "./proof/autonomy-mode-toggle": "./src/proof/AutonomyModeToggle.tsx",
     "./proof/proof-envelope": "./src/proof/ProofEnvelope.tsx",
     "./cockpit/dense-table": "./src/cockpit/DenseTable.tsx",
@@ -29,9 +30,11 @@
   },
   "peerDependencies": {
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "@tanstack/react-query": "^5.0.0"
   },
   "devDependencies": {
+    "@tanstack/react-query": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "typescript": "catalog:"

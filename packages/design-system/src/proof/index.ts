@@ -10,6 +10,9 @@ export type { ConfidenceMeterProps } from "./ConfidenceMeter";
 export { PolicyStateChip } from "./PolicyStateChip";
 export type { PolicyStateChipProps, PolicyState } from "./PolicyStateChip";
 
+export { PolicyModeBadge } from "./PolicyModeBadge";
+export type { PolicyModeBadgeProps, PolicyMode } from "./PolicyModeBadge";
+
 export { AutonomyModeToggle } from "./AutonomyModeToggle";
 export type { AutonomyModeToggleProps, AutonomyMode } from "./AutonomyModeToggle";
 

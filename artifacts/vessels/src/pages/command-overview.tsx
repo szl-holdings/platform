@@ -10,7 +10,7 @@ import { CommandModeSurface, type CommandModeSignal } from "@szl-holdings/shared
 import { useVessels, useFleetExceptions, useVoyages, useMaintenance } from "@/hooks/use-vessels-data";
 import { useQueryClient } from "@tanstack/react-query";
 import { PackBanner } from "@szl-holdings/shared-ui/pack-banner";
-import { PolicyModeBadge } from "@/components/policy-mode-badge";
+import { PolicyModeBadge } from "@szl-holdings/design-system/proof/policy-mode-badge";
 
 const statusConfig: Record<string, { label: string; color: string; dot: string }> = {
   at_sea: { label: "At Sea", color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20", dot: "bg-emerald-400" },
