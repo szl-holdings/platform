@@ -8,6 +8,8 @@
 
 [Live Demo](https://szlholdings.com) · [Platform Demo Video](https://szlholdings.com/szl-demo-video/) · [Investor Dashboard](https://szlholdings.com/stephen/investor) · [Platform Thesis](../../docs/investor/platform-thesis.md)
 
+![Sentra — Cyber Resilience Command](../../.github/assets/screenshots/sentra-hero.jpg)
+
 ---
 
 ## What it does

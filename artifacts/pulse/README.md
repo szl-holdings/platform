@@ -8,6 +8,8 @@
 
 [Live Demo](https://szlholdings.com) · [Platform Demo Video](https://szlholdings.com/szl-demo-video/) · [Investor Dashboard](https://szlholdings.com/stephen/investor) · [Platform Thesis](../../docs/investor/platform-thesis.md)
 
+![Pulse — AI Executive Briefing](../../.github/assets/screenshots/pulse-hero.jpg)
+
 ---
 
 ## What it does

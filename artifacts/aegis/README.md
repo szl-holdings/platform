@@ -8,6 +8,8 @@
 
 [Investor Dashboard](https://szlholdings.com/stephen/investor) · [Platform Demo Video](https://szlholdings.com/szl-demo-video/) · [Platform Thesis](../../docs/investor/platform-thesis.md) · [Data Room Index](../../docs/investor/data-room-index.md)
 
+![SZL Holdings — Investor Pitch Deck](../../.github/assets/screenshots/aegis-deck-cover.jpg)
+
 ---
 
 ## What it does
