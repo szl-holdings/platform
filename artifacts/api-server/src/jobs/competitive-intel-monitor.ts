@@ -6,10 +6,12 @@
  * ThoughtSpot, etc.) and surfaces "major feature ship" events as Intel
  * Update alerts that render on the Atlas page.
  *
- * Design notes:
- *   - Self-contained: in-memory store with JSON-file persistence so dismiss
- *     state and the dedup index survive api-server restarts. No DB migration
- *     required.
+ * Persistence:
+ *   - Backed by Postgres (`competitive_intel_feeds`, `competitive_intel_alerts`,
+ *     `competitive_intel_state` in `@szl-holdings/db`) so dismiss state, feed
+ *     config, and feed health survive restarts and unify across api-server
+ *     replicas. The previous JSON file at `.data/competitive-intel.json` is
+ *     auto-migrated on first boot, then left in place as `.bak` for safety.
  *   - Network-tolerant: feed fetches use AbortController timeouts and any
  *     failure on a single feed is logged + skipped, never throws.
  *   - Always demoable: ships with a seeded alert per lane so the UI is rich
@@ -21,6 +23,15 @@
 
 import { promises as fs } from "fs";
 import path from "path";
+import { eq, sql, inArray, and, desc, like } from "drizzle-orm";
+import {
+  db,
+  competitiveIntelFeedsTable,
+  competitiveIntelAlertsTable,
+  competitiveIntelStateTable,
+  type CompetitiveIntelFeed as DbFeed,
+  type CompetitiveIntelAlert as DbAlert,
+} from "@szl-holdings/db";
 import { logger } from "../lib/logger";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -57,7 +68,7 @@ export interface IntelAlert {
    * ISO timestamp when this alert was pushed to Slack/email. Set the first
    * time `notifyNewAlerts` includes the alert in a dispatch so we never
    * re-notify on subsequent poll cycles even if the alert is later
-   * dismissed and undismissed.
+   * dismissed and undismissed. Persisted on the alerts row.
    */
   notifiedAt?: string;
 }
@@ -86,7 +97,7 @@ interface PollResult {
   durationMs: number;
 }
 
-// ─── Champion feeds ──────────────────────────────────────────────────────────
+// ─── Champion feeds (defaults — seeded into DB on first boot) ────────────────
 
 export const DEFAULT_CHAMPION_FEEDS: ChampionFeed[] = [
   // Cyber Resilience
@@ -154,140 +165,310 @@ export const DEFAULT_CHAMPION_FEEDS: ChampionFeed[] = [
   },
 ];
 
-// ─── Persistence ─────────────────────────────────────────────────────────────
+/**
+ * Live, mutable list of champion feeds — kept in sync with the DB after every
+ * mutation. Exists for backward compatibility with consumers (routes, tests)
+ * that import `CHAMPION_FEEDS` directly. Reads from this array are best-effort
+ * snapshots; callers wanting the authoritative list should use `listFeeds()`.
+ */
+export const CHAMPION_FEEDS: ChampionFeed[] = [];
+
+// ─── Mappers between DB rows and API shapes ──────────────────────────────────
+
+function feedFromRow(row: DbFeed): ChampionFeed {
+  return {
+    id: row.id,
+    laneId: row.laneId,
+    champion: row.champion,
+    feedUrl: row.feedUrl,
+    homeUrl: row.homeUrl,
+    paused: row.paused,
+    recommendationHint: row.recommendationHint ?? undefined,
+    createdAt: row.createdAt.toISOString(),
+    updatedAt: row.updatedAt.toISOString(),
+  };
+}
+
+function healthFromRow(row: DbFeed): FeedHealth {
+  return {
+    feedId: row.id,
+    champion: row.champion,
+    laneId: row.laneId,
+    lastPolledAt: row.lastPolledAt ? row.lastPolledAt.toISOString() : null,
+    lastSuccessAt: row.lastSuccessAt ? row.lastSuccessAt.toISOString() : null,
+    lastError: row.lastError ?? null,
+    itemsSeen: row.itemsSeen,
+    alertsCreated: row.alertsCreated,
+  };
+}
+
+function alertFromRow(row: DbAlert): IntelAlert {
+  return {
+    id: row.id,
+    laneId: row.laneId,
+    champion: row.champion,
+    title: row.title,
+    summary: row.summary,
+    link: row.link,
+    publishedAt: row.publishedAt.toISOString(),
+    detectedAt: row.detectedAt.toISOString(),
+    recommendation: row.recommendation,
+    recommendationReason: row.recommendationReason,
+    dismissed: row.dismissed,
+    dismissedAt: row.dismissedAt ? row.dismissedAt.toISOString() : undefined,
+    source: row.source,
+    notifiedAt: row.notifiedAt ? row.notifiedAt.toISOString() : undefined,
+  };
+}
+
+// ─── Bootstrap / migration ───────────────────────────────────────────────────
 
 const DATA_DIR = path.join(process.cwd(), ".data");
 const STATE_FILE = path.join(DATA_DIR, "competitive-intel.json");
 
+/** Legacy on-disk shape — only used during one-shot migration. */
 interface PersistedState {
-  alerts: IntelAlert[];
-  feedHealth: Record<string, FeedHealth>;
-  lastFullPollAt: string | null;
-  pollRunCount: number;
-  seededAt: string | null;
-  feeds: ChampionFeed[];
-  feedsSeededAt: string | null;
+  alerts?: IntelAlert[];
+  feedHealth?: Record<string, FeedHealth>;
+  lastFullPollAt?: string | null;
+  pollRunCount?: number;
+  seededAt?: string | null;
+  feeds?: ChampionFeed[];
+  feedsSeededAt?: string | null;
   /**
-   * Per-lane mute switches. When true, the notifier skips Slack/email
-   * dispatch for new alerts in that lane. The alert still appears on the
-   * Atlas page — only the push side is suppressed.
+   * Per-lane mute switches inherited from the legacy file. Migrated into
+   * `competitive_intel_state.meta.mutedLanes` on first boot.
    */
-  mutedLanes: Record<string, boolean>;
+  mutedLanes?: Record<string, boolean>;
 }
 
-const state: PersistedState = {
-  alerts: [],
-  feedHealth: {},
-  lastFullPollAt: null,
-  pollRunCount: 0,
-  seededAt: null,
-  feeds: [],
-  feedsSeededAt: null,
-  mutedLanes: {},
-};
-
 /**
- * Live, mutable list of champion feeds. Backed by `state.feeds` which is
- * persisted to disk so analyst-managed additions/removals survive restart.
- * Exposed as an export so existing callers (routes, tests, jobs) keep working.
+ * In-process cache of per-lane mute switches. Loaded from
+ * `competitive_intel_state.meta.mutedLanes` during `ensureLoaded`, kept in
+ * sync by `setLaneMute`. Backed by Postgres so the cache is rebuilt on every
+ * restart from the authoritative state row. Exists so `isLaneMuted` (called
+ * from synchronous notification predicates) does not have to await a query.
  */
-export const CHAMPION_FEEDS: ChampionFeed[] = state.feeds;
+const _mutedLanesCache: Record<string, boolean> = {};
 
 let _loaded = false;
-let _writePending: Promise<void> | null = null;
+let _loadingPromise: Promise<void> | null = null;
 
 async function ensureLoaded(): Promise<void> {
   if (_loaded) return;
-  _loaded = true;
-  try {
-    await fs.mkdir(DATA_DIR, { recursive: true });
-    const raw = await fs.readFile(STATE_FILE, "utf8");
-    const parsed = JSON.parse(raw) as Partial<PersistedState>;
-    if (Array.isArray(parsed.alerts)) state.alerts = parsed.alerts;
-    if (parsed.feedHealth && typeof parsed.feedHealth === "object") {
-      state.feedHealth = parsed.feedHealth as Record<string, FeedHealth>;
-    }
-    if (typeof parsed.lastFullPollAt === "string" || parsed.lastFullPollAt === null) {
-      state.lastFullPollAt = parsed.lastFullPollAt ?? null;
-    }
-    if (typeof parsed.pollRunCount === "number") state.pollRunCount = parsed.pollRunCount;
-    if (typeof parsed.seededAt === "string" || parsed.seededAt === null) {
-      state.seededAt = parsed.seededAt ?? null;
-    }
-    if (Array.isArray(parsed.feeds)) {
-      // Mutate in place so the exported CHAMPION_FEEDS reference stays valid
-      state.feeds.length = 0;
-      state.feeds.push(...parsed.feeds);
-    }
-    if (typeof parsed.feedsSeededAt === "string" || parsed.feedsSeededAt === null) {
-      state.feedsSeededAt = parsed.feedsSeededAt ?? null;
-    }
-    if (parsed.mutedLanes && typeof parsed.mutedLanes === "object") {
-      state.mutedLanes = parsed.mutedLanes as Record<string, boolean>;
-    }
-  } catch (err) {
-    const code = (err as NodeJS.ErrnoException).code;
-    if (code !== "ENOENT") {
-      logger.warn({ err }, "[competitive-intel] Failed to load persisted state — starting fresh");
-    }
-  }
-  // Seed defaults the first time we load (or if persisted feed list is empty)
-  if (!state.feedsSeededAt || state.feeds.length === 0) {
-    const now = new Date().toISOString();
-    for (const f of DEFAULT_CHAMPION_FEEDS) {
-      if (!state.feeds.some(existing => existing.id === f.id)) {
-        state.feeds.push({ ...f, createdAt: now, updatedAt: now });
-      }
-    }
-    state.feedsSeededAt = now;
-    await persistSoon();
-  }
-  ensureFeedHealth();
-  if (!state.seededAt) {
-    seedInitialAlerts();
-    state.seededAt = new Date().toISOString();
-    await persistSoon();
-  }
-}
-
-function ensureFeedHealth(): void {
-  for (const feed of state.feeds) {
-    if (!state.feedHealth[feed.id]) {
-      state.feedHealth[feed.id] = {
-        feedId: feed.id,
-        champion: feed.champion,
-        laneId: feed.laneId,
-        lastPolledAt: null,
-        lastSuccessAt: null,
-        lastError: null,
-        itemsSeen: 0,
-        alertsCreated: 0,
-      };
-    }
-  }
-}
-
-async function persistSoon(): Promise<void> {
-  if (_writePending) return _writePending;
-  _writePending = (async () => {
-    await new Promise(r => setTimeout(r, 50));
+  if (_loadingPromise) return _loadingPromise;
+  _loadingPromise = (async () => {
     try {
-      await fs.mkdir(DATA_DIR, { recursive: true });
-      await fs.writeFile(STATE_FILE, JSON.stringify(state, null, 2), "utf8");
-    } catch (err) {
-      logger.warn({ err }, "[competitive-intel] Failed to persist state");
+      await ensureStateRow();
+      await migrateLegacyJsonIfPresent();
+      await seedFeedsIfEmpty();
+      await seedAlertsIfNeeded();
+      await refreshFeedsCache();
+      await refreshMutedLanesCache();
+      _loaded = true;
     } finally {
-      _writePending = null;
+      _loadingPromise = null;
     }
   })();
-  return _writePending;
+  return _loadingPromise;
+}
+
+async function ensureStateRow(): Promise<void> {
+  await db
+    .insert(competitiveIntelStateTable)
+    .values({ id: 1, pollRunCount: 0 })
+    .onConflictDoNothing();
+}
+
+async function getState() {
+  const rows = await db
+    .select()
+    .from(competitiveIntelStateTable)
+    .where(eq(competitiveIntelStateTable.id, 1))
+    .limit(1);
+  return rows[0];
+}
+
+async function refreshFeedsCache(): Promise<void> {
+  const rows = await db.select().from(competitiveIntelFeedsTable);
+  CHAMPION_FEEDS.length = 0;
+  for (const r of rows) CHAMPION_FEEDS.push(feedFromRow(r));
+}
+
+async function seedFeedsIfEmpty(): Promise<void> {
+  const state = await getState();
+  if (state?.feedsSeededAt) return;
+  const existing = await db.select({ id: competitiveIntelFeedsTable.id }).from(competitiveIntelFeedsTable);
+  if (existing.length === 0) {
+    const now = new Date();
+    for (const f of DEFAULT_CHAMPION_FEEDS) {
+      await db
+        .insert(competitiveIntelFeedsTable)
+        .values({
+          id: f.id,
+          laneId: f.laneId,
+          champion: f.champion,
+          feedUrl: f.feedUrl,
+          homeUrl: f.homeUrl,
+          paused: f.paused === true,
+          recommendationHint: f.recommendationHint ?? null,
+          createdAt: now,
+          updatedAt: now,
+        })
+        .onConflictDoNothing();
+    }
+  }
+  await db
+    .update(competitiveIntelStateTable)
+    .set({ feedsSeededAt: new Date() })
+    .where(eq(competitiveIntelStateTable.id, 1));
+}
+
+async function seedAlertsIfNeeded(): Promise<void> {
+  const state = await getState();
+  if (state?.alertsSeededAt) return;
+  const seeds = buildSeedAlerts();
+  if (seeds.length > 0) {
+    await db.insert(competitiveIntelAlertsTable).values(seeds).onConflictDoNothing();
+  }
+  await db
+    .update(competitiveIntelStateTable)
+    .set({ alertsSeededAt: new Date() })
+    .where(eq(competitiveIntelStateTable.id, 1));
+}
+
+/**
+ * One-shot migration of `.data/competitive-intel.json` into Postgres. Runs at
+ * most once: after a successful import we stamp `json_migrated_at` and rename
+ * the file to `.bak` so a second boot is a no-op even if the marker is lost.
+ */
+async function migrateLegacyJsonIfPresent(): Promise<void> {
+  const state = await getState();
+  if (state?.jsonMigratedAt) return;
+  let raw: string;
+  try {
+    raw = await fs.readFile(STATE_FILE, "utf8");
+  } catch (err) {
+    const code = (err as NodeJS.ErrnoException).code;
+    if (code === "ENOENT") return; // nothing to migrate
+    logger.warn({ err }, "[competitive-intel] Failed to read legacy JSON for migration");
+    return;
+  }
+  let parsed: PersistedState;
+  try {
+    parsed = JSON.parse(raw) as PersistedState;
+  } catch (err) {
+    logger.warn({ err }, "[competitive-intel] Legacy JSON is malformed — skipping migration");
+    return;
+  }
+
+  let migratedFeeds = 0;
+  let migratedAlerts = 0;
+
+  if (Array.isArray(parsed.feeds) && parsed.feeds.length > 0) {
+    for (const f of parsed.feeds) {
+      const health = parsed.feedHealth?.[f.id];
+      const createdAt = f.createdAt ? new Date(f.createdAt) : new Date();
+      const updatedAt = f.updatedAt ? new Date(f.updatedAt) : createdAt;
+      await db
+        .insert(competitiveIntelFeedsTable)
+        .values({
+          id: f.id,
+          laneId: f.laneId,
+          champion: f.champion,
+          feedUrl: f.feedUrl,
+          homeUrl: f.homeUrl,
+          paused: f.paused === true,
+          recommendationHint: f.recommendationHint ?? null,
+          lastPolledAt: health?.lastPolledAt ? new Date(health.lastPolledAt) : null,
+          lastSuccessAt: health?.lastSuccessAt ? new Date(health.lastSuccessAt) : null,
+          lastError: health?.lastError ?? null,
+          itemsSeen: health?.itemsSeen ?? 0,
+          alertsCreated: health?.alertsCreated ?? 0,
+          createdAt,
+          updatedAt,
+        })
+        .onConflictDoNothing();
+      migratedFeeds++;
+    }
+  }
+
+  if (Array.isArray(parsed.alerts) && parsed.alerts.length > 0) {
+    for (const a of parsed.alerts) {
+      try {
+        await db
+          .insert(competitiveIntelAlertsTable)
+          .values({
+            id: a.id,
+            laneId: a.laneId,
+            champion: a.champion,
+            title: a.title,
+            summary: a.summary,
+            link: a.link,
+            publishedAt: new Date(a.publishedAt),
+            detectedAt: a.detectedAt ? new Date(a.detectedAt) : new Date(),
+            recommendation: a.recommendation,
+            recommendationReason: a.recommendationReason,
+            dismissed: a.dismissed === true,
+            dismissedAt: a.dismissedAt ? new Date(a.dismissedAt) : null,
+            source: a.source,
+            notifiedAt: a.notifiedAt ? new Date(a.notifiedAt) : null,
+          })
+          .onConflictDoNothing();
+        migratedAlerts++;
+      } catch (err) {
+        logger.warn({ err, alertId: a.id }, "[competitive-intel] Skipping malformed legacy alert");
+      }
+    }
+  }
+
+  const meta: Record<string, unknown> = {};
+  if (parsed.mutedLanes && typeof parsed.mutedLanes === "object") {
+    meta.mutedLanes = parsed.mutedLanes;
+  }
+
+  await db
+    .update(competitiveIntelStateTable)
+    .set({
+      jsonMigratedAt: new Date(),
+      lastFullPollAt: parsed.lastFullPollAt ? new Date(parsed.lastFullPollAt) : null,
+      pollRunCount: typeof parsed.pollRunCount === "number" ? parsed.pollRunCount : 0,
+      alertsSeededAt: parsed.seededAt ? new Date(parsed.seededAt) : null,
+      feedsSeededAt: parsed.feedsSeededAt ? new Date(parsed.feedsSeededAt) : null,
+      meta: Object.keys(meta).length > 0 ? meta : null,
+    })
+    .where(eq(competitiveIntelStateTable.id, 1));
+
+  // Rename the legacy file so this branch is a strict no-op on subsequent
+  // boots, even if the marker row is wiped.
+  try {
+    await fs.rename(STATE_FILE, `${STATE_FILE}.bak`);
+  } catch (err) {
+    logger.debug({ err }, "[competitive-intel] Could not rename legacy JSON to .bak");
+  }
+
+  logger.info(
+    { migratedFeeds, migratedAlerts },
+    "[competitive-intel] Migrated legacy JSON store into Postgres",
+  );
 }
 
 // ─── Seed alerts ─────────────────────────────────────────────────────────────
 
-function seedInitialAlerts(): void {
+function buildSeedAlerts(): Array<typeof competitiveIntelAlertsTable.$inferInsert> {
   const now = Date.now();
-  const seeds: Array<Omit<IntelAlert, "detectedAt" | "dismissed" | "source">> = [
+  const detectedAt = new Date();
+  const seeds: Array<{
+    id: string;
+    laneId: string;
+    champion: string;
+    title: string;
+    summary: string;
+    link: string;
+    publishedAt: Date;
+    recommendation: Recommendation;
+    recommendationReason: string;
+  }> = [
     {
       id: "seed-crowdstrike-charlotte-actions",
       laneId: "cyber",
@@ -295,7 +476,7 @@ function seedInitialAlerts(): void {
       title: "Charlotte AI Detection Actions — agentic triage now GA",
       summary: "CrowdStrike opened the Charlotte AI agentic triage capability to all Falcon customers, letting analysts hand off triage of low-severity detections to an autonomous agent with audit trail.",
       link: "https://www.crowdstrike.com/blog/",
-      publishedAt: new Date(now - 4 * 24 * 3600_000).toISOString(),
+      publishedAt: new Date(now - 4 * 24 * 3600_000),
       recommendation: "counter",
       recommendationReason: "Sentra already wraps every action in a governed proof envelope — counter by emphasising approver identity and reversibility on the Incident Commander surface.",
     },
@@ -306,7 +487,7 @@ function seedInitialAlerts(): void {
       title: "Matter Stages now available in Clio Mobile",
       summary: "Clio extended its visual Matter Stages pipeline to the iOS and Android apps so attorneys can advance matters from anywhere.",
       link: "https://www.clio.com/blog/",
-      publishedAt: new Date(now - 2 * 24 * 3600_000).toISOString(),
+      publishedAt: new Date(now - 2 * 24 * 3600_000),
       recommendation: "adopt",
       recommendationReason: "PRISM Counsel already mirrors Matter Stages on the desktop — extending the rail to the SZL Holdings mobile shell would close the parity gap.",
     },
@@ -317,7 +498,7 @@ function seedInitialAlerts(): void {
       title: "CoStar adds CMBS loan overlay directly on the property pin",
       summary: "CoStar shipped a loan-data overlay so brokers can see active CMBS terms, maturity, and DSCR without leaving the property card.",
       link: "https://www.costar.com/news",
-      publishedAt: new Date(now - 6 * 24 * 3600_000).toISOString(),
+      publishedAt: new Date(now - 6 * 24 * 3600_000),
       recommendation: "adopt",
       recommendationReason: "Terra has the data via CRED iQ — wire a Loan Overlay strip onto the property card so analysts stop tab-switching.",
     },
@@ -328,7 +509,7 @@ function seedInitialAlerts(): void {
       title: "Windward fuses RF GEOINT signals into Predictive Intelligence",
       summary: "Windward's Maritime AI now ingests commercial RF GEOINT alongside AIS and SAR, sharpening dark-vessel detection in chokepoints.",
       link: "https://windward.ai/blog/",
-      publishedAt: new Date(now - 9 * 24 * 3600_000).toISOString(),
+      publishedAt: new Date(now - 9 * 24 * 3600_000),
       recommendation: "monitor",
       recommendationReason: "Vessels already shows Intelligence Sources fusion badges — monitor RF coverage gaps and prioritise an RF data partner if customers ask.",
     },
@@ -339,7 +520,7 @@ function seedInitialAlerts(): void {
       title: "AIP Now — daily executive briefing template kit",
       summary: "Palantir released a packaged template for executive daily briefings inside AIP, including sourcing strips and recommendation cards.",
       link: "https://blog.palantir.com/",
-      publishedAt: new Date(now - 1 * 24 * 3600_000).toISOString(),
+      publishedAt: new Date(now - 1 * 24 * 3600_000),
       recommendation: "counter",
       recommendationReason: "Pulse already ships Today's Brief with provenance + dissent — counter with a side-by-side comparison demo emphasising cross-domain consensus.",
     },
@@ -350,7 +531,7 @@ function seedInitialAlerts(): void {
       title: "ThoughtSpot Spotter — agentic analytics in the same chat thread",
       summary: "ThoughtSpot introduced Spotter, an agentic analytics assistant that returns answers, charts, and follow-up questions in a single conversation.",
       link: "https://www.thoughtspot.com/blog",
-      publishedAt: new Date(now - 5 * 24 * 3600_000).toISOString(),
+      publishedAt: new Date(now - 5 * 24 * 3600_000),
       recommendation: "adopt",
       recommendationReason: "Lyte's Signals Console NL bar should grow follow-up question chips so it matches Spotter's conversational loop.",
     },
@@ -361,19 +542,17 @@ function seedInitialAlerts(): void {
       title: "Foundry Warp Speed — ontology-driven app generation",
       summary: "Foundry shipped Warp Speed, letting non-engineers spin up ontology-grounded apps from a prompt with full lineage preserved.",
       link: "https://blog.palantir.com/",
-      publishedAt: new Date(now - 7 * 24 * 3600_000).toISOString(),
+      publishedAt: new Date(now - 7 * 24 * 3600_000),
       recommendation: "monitor",
       recommendationReason: "Command already exposes ontology via the Worldline Registry — monitor enterprise reactions before investing in a builder surface.",
     },
   ];
-  for (const s of seeds) {
-    state.alerts.push({
-      ...s,
-      detectedAt: new Date().toISOString(),
-      dismissed: false,
-      source: "seed",
-    });
-  }
+  return seeds.map(s => ({
+    ...s,
+    detectedAt,
+    dismissed: false,
+    source: "seed" as const,
+  }));
 }
 
 // ─── RSS parser (tiny, dependency-free) ──────────────────────────────────────
@@ -423,7 +602,6 @@ function parseFeed(xml: string): ParsedItem[] {
     const title = stripHtml(pickTag(block, "title") ?? "");
     let link = pickTag(block, "link") ?? "";
     if (!link || /<link\b/i.test(`<link${link}`)) {
-      // Atom: <link href="..." />
       link = pickAttr(block, "link", "href") ?? link;
     }
     link = stripHtml(link);
@@ -497,125 +675,155 @@ async function fetchWithTimeout(url: string, timeoutMs = 8000): Promise<string> 
 
 function alertIdFor(feedId: string, item: ParsedItem): string {
   const basis = item.guid || item.link;
-  // simple hash so the id stays short and stable
   let h = 0;
   for (let i = 0; i < basis.length; i++) h = (h * 31 + basis.charCodeAt(i)) | 0;
   return `${feedId}-${Math.abs(h).toString(36)}`;
 }
 
-async function pollFeed(feed: ChampionFeed): Promise<number> {
-  const health = state.feedHealth[feed.id];
-  if (!health) return 0;
+async function pollFeed(feed: DbFeed): Promise<{ created: number; ok: boolean }> {
   if (feed.paused) {
-    health.lastPolledAt = new Date().toISOString();
-    health.lastError = "paused";
-    return 0;
+    await db
+      .update(competitiveIntelFeedsTable)
+      .set({ lastPolledAt: new Date(), lastError: "paused", updatedAt: new Date() })
+      .where(eq(competitiveIntelFeedsTable.id, feed.id));
+    return { created: 0, ok: false };
   }
-  health.lastPolledAt = new Date().toISOString();
+
+  const polledAt = new Date();
   let xml: string;
   try {
     xml = await fetchWithTimeout(feed.feedUrl);
   } catch (err) {
-    health.lastError = err instanceof Error ? err.message : String(err);
-    logger.debug({ feedId: feed.id, err: health.lastError }, "[competitive-intel] Feed fetch failed");
-    return 0;
+    const errMsg = err instanceof Error ? err.message : String(err);
+    await db
+      .update(competitiveIntelFeedsTable)
+      .set({ lastPolledAt: polledAt, lastError: errMsg, updatedAt: new Date() })
+      .where(eq(competitiveIntelFeedsTable.id, feed.id));
+    logger.debug({ feedId: feed.id, err: errMsg }, "[competitive-intel] Feed fetch failed");
+    return { created: 0, ok: false };
   }
 
   let items: ParsedItem[] = [];
   try {
     items = parseFeed(xml);
   } catch (err) {
-    health.lastError = `parse: ${err instanceof Error ? err.message : String(err)}`;
-    return 0;
+    const errMsg = `parse: ${err instanceof Error ? err.message : String(err)}`;
+    await db
+      .update(competitiveIntelFeedsTable)
+      .set({ lastPolledAt: polledAt, lastError: errMsg, updatedAt: new Date() })
+      .where(eq(competitiveIntelFeedsTable.id, feed.id));
+    return { created: 0, ok: false };
   }
 
-  health.lastError = null;
-  health.lastSuccessAt = new Date().toISOString();
-  health.itemsSeen += items.length;
-
-  let created = 0;
-  const cutoff = Date.now() - 30 * 24 * 3600_000; // ignore items older than 30d
-  const _newAlerts: IntelAlert[] = [];
+  const cutoff = Date.now() - 30 * 24 * 3600_000;
+  const candidates: Array<typeof competitiveIntelAlertsTable.$inferInsert> = [];
 
   for (const item of items.slice(0, 25)) {
     if (!isMajorFeatureAnnouncement(item.title, item.summary)) continue;
     const pub = Date.parse(item.pubDate);
     if (Number.isFinite(pub) && pub < cutoff) continue;
     const id = alertIdFor(feed.id, item);
-    if (state.alerts.some(a => a.id === id)) continue;
     const auto = classifyRecommendation(item.title, item.summary);
     const rec: Recommendation = feed.recommendationHint ?? auto.rec;
     const reason = feed.recommendationHint
       ? `Analyst hint for ${feed.champion}: treat as ${feed.recommendationHint}.`
       : auto.reason;
-    const alert: IntelAlert = {
+    candidates.push({
       id,
       laneId: feed.laneId,
       champion: feed.champion,
       title: item.title.slice(0, 240),
       summary: item.summary || `${feed.champion} announcement.`,
       link: item.link,
-      publishedAt: Number.isFinite(pub) ? new Date(pub).toISOString() : new Date().toISOString(),
-      detectedAt: new Date().toISOString(),
+      publishedAt: Number.isFinite(pub) ? new Date(pub) : new Date(),
+      detectedAt: new Date(),
       recommendation: rec,
       recommendationReason: reason,
       dismissed: false,
       source: "rss",
-    };
-    state.alerts.push(alert);
-    _newAlerts.push(alert);
-    created++;
-    health.alertsCreated++;
+    });
   }
 
-  // Stash the new alerts on the feed-level scratch so the caller (pollAllFeeds)
-  // can collect them after Promise.allSettled without re-iterating state.
-  _newAlertsByFeed.set(feed.id, _newAlerts);
-  return created;
-}
+  let created = 0;
+  let inserted: DbAlert[] = [];
+  if (candidates.length > 0) {
+    const ids = candidates.map(c => c.id!);
+    const existing = await db
+      .select({ id: competitiveIntelAlertsTable.id })
+      .from(competitiveIntelAlertsTable)
+      .where(inArray(competitiveIntelAlertsTable.id, ids));
+    const existingIds = new Set(existing.map(e => e.id));
+    const fresh = candidates.filter(c => !existingIds.has(c.id!));
+    if (fresh.length > 0) {
+      inserted = await db
+        .insert(competitiveIntelAlertsTable)
+        .values(fresh)
+        .onConflictDoNothing()
+        .returning();
+      created = inserted.length;
+    }
+  }
 
-const _newAlertsByFeed = new Map<string, IntelAlert[]>();
+  await db
+    .update(competitiveIntelFeedsTable)
+    .set({
+      lastPolledAt: polledAt,
+      lastSuccessAt: polledAt,
+      lastError: null,
+      itemsSeen: feed.itemsSeen + items.length,
+      alertsCreated: feed.alertsCreated + created,
+      updatedAt: new Date(),
+    })
+    .where(eq(competitiveIntelFeedsTable.id, feed.id));
+
+  return { created, ok: true, newAlerts: inserted.map(alertFromRow) };
+}
 
 export async function pollAllFeeds(): Promise<PollResult> {
   await ensureLoaded();
-  ensureFeedHealth();
   const start = Date.now();
+  const feeds = await db
+    .select()
+    .from(competitiveIntelFeedsTable)
+    .where(eq(competitiveIntelFeedsTable.paused, false));
+
   let success = 0;
   let newAlerts = 0;
-  const activeFeeds = state.feeds.filter(f => !f.paused);
-
-  _newAlertsByFeed.clear();
+  const justCreated: IntelAlert[] = [];
 
   await Promise.allSettled(
-    activeFeeds.map(async feed => {
+    feeds.map(async feed => {
       try {
-        const created = await pollFeed(feed);
+        const { created, ok, newAlerts: createdAlerts } = await pollFeed(feed);
         newAlerts += created;
-        if (state.feedHealth[feed.id]?.lastError == null) success++;
+        if (ok) success++;
+        if (createdAlerts && createdAlerts.length > 0) {
+          justCreated.push(...createdAlerts);
+        }
       } catch (err) {
         logger.warn({ err, feedId: feed.id }, "[competitive-intel] pollFeed threw");
       }
     }),
   );
 
-  // Collect everything we just created so the notifier can decide what to push.
-  const justCreated: IntelAlert[] = [];
-  for (const arr of _newAlertsByFeed.values()) justCreated.push(...arr);
-  _newAlertsByFeed.clear();
-
   // Also include recent alerts whose previous notification attempt failed
-  // (notifiedAt is still unset). Capped at 7 days so a permanently-broken
+  // (notified_at is still NULL). Capped at 7 days so a permanently-broken
   // webhook can't grow the retry batch unbounded.
   const RETRY_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
-  const cutoff = Date.now() - RETRY_WINDOW_MS;
-  const justCreatedIds = new Set(justCreated.map((a) => a.id));
-  const retries = state.alerts.filter(
-    (a) =>
-      !a.notifiedAt &&
-      !a.dismissed &&
-      !justCreatedIds.has(a.id) &&
-      new Date(a.detectedAt).getTime() >= cutoff,
-  );
+  const retryCutoff = new Date(Date.now() - RETRY_WINDOW_MS);
+  const justCreatedIds = new Set(justCreated.map(a => a.id));
+  const retryRows = await db
+    .select()
+    .from(competitiveIntelAlertsTable)
+    .where(
+      and(
+        sql`${competitiveIntelAlertsTable.notifiedAt} is null`,
+        eq(competitiveIntelAlertsTable.dismissed, false),
+        eq(competitiveIntelAlertsTable.source, "rss"),
+        sql`${competitiveIntelAlertsTable.detectedAt} >= ${retryCutoff}`,
+      ) as any,
+    );
+  const retries = retryRows.map(alertFromRow).filter(a => !justCreatedIds.has(a.id));
   const toNotify = [...justCreated, ...retries];
 
   // Notify Slack/email for high-confidence, non-muted, non-dismissed alerts.
@@ -629,27 +837,22 @@ export async function pollAllFeeds(): Promise<PollResult> {
     }
   }
 
-  // Cap total alert history per lane to keep state file bounded
-  const MAX_PER_LANE = 50;
-  const byLane = new Map<string, IntelAlert[]>();
-  for (const a of state.alerts) {
-    const arr = byLane.get(a.laneId) ?? [];
-    arr.push(a);
-    byLane.set(a.laneId, arr);
-  }
-  const trimmed: IntelAlert[] = [];
-  for (const [, arr] of byLane) {
-    arr.sort((x, y) => Date.parse(y.publishedAt) - Date.parse(x.publishedAt));
-    trimmed.push(...arr.slice(0, MAX_PER_LANE));
-  }
-  state.alerts = trimmed;
+  // Cap alert history per lane so the table stays bounded. Keep newest 50 by
+  // publishedAt; delete the rest.
+  await trimAlertHistoryPerLane(50);
 
-  state.lastFullPollAt = new Date().toISOString();
-  state.pollRunCount += 1;
-  await persistSoon();
+  await db
+    .update(competitiveIntelStateTable)
+    .set({
+      lastFullPollAt: new Date(),
+      pollRunCount: sql`${competitiveIntelStateTable.pollRunCount} + 1`,
+    })
+    .where(eq(competitiveIntelStateTable.id, 1));
+
+  await refreshFeedsCache();
 
   const result: PollResult = {
-    polledFeeds: activeFeeds.length,
+    polledFeeds: feeds.length,
     successfulFeeds: success,
     newAlerts,
     durationMs: Date.now() - start,
@@ -658,26 +861,69 @@ export async function pollAllFeeds(): Promise<PollResult> {
   return result;
 }
 
+async function trimAlertHistoryPerLane(maxPerLane: number): Promise<void> {
+  // For each lane, find the IDs of alerts ranked > maxPerLane by publishedAt
+  // (newest first) and delete them.
+  const lanes = await db
+    .selectDistinct({ laneId: competitiveIntelAlertsTable.laneId })
+    .from(competitiveIntelAlertsTable);
+  for (const { laneId } of lanes) {
+    const rows = await db
+      .select({ id: competitiveIntelAlertsTable.id })
+      .from(competitiveIntelAlertsTable)
+      .where(eq(competitiveIntelAlertsTable.laneId, laneId))
+      .orderBy(desc(competitiveIntelAlertsTable.publishedAt));
+    const toDelete = rows.slice(maxPerLane).map(r => r.id);
+    if (toDelete.length > 0) {
+      await db
+        .delete(competitiveIntelAlertsTable)
+        .where(inArray(competitiveIntelAlertsTable.id, toDelete));
+    }
+  }
+}
+
 // ─── Public store API ────────────────────────────────────────────────────────
 
 export async function listAlerts(opts?: { laneId?: string; includeDismissed?: boolean }): Promise<IntelAlert[]> {
   await ensureLoaded();
-  let alerts = state.alerts.slice();
-  if (opts?.laneId) alerts = alerts.filter(a => a.laneId === opts.laneId);
-  if (!opts?.includeDismissed) alerts = alerts.filter(a => !a.dismissed);
-  alerts.sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt));
-  return alerts;
+  const conds = [];
+  if (opts?.laneId) conds.push(eq(competitiveIntelAlertsTable.laneId, opts.laneId));
+  if (!opts?.includeDismissed) conds.push(eq(competitiveIntelAlertsTable.dismissed, false));
+  const where = conds.length === 0 ? undefined : conds.length === 1 ? conds[0] : and(...conds);
+  const rows = await db
+    .select()
+    .from(competitiveIntelAlertsTable)
+    .where(where as any)
+    .orderBy(desc(competitiveIntelAlertsTable.publishedAt));
+  return rows.map(alertFromRow);
 }
 
 export async function dismissAlert(id: string, actor?: string): Promise<IntelAlert | null> {
   await ensureLoaded();
-  const alert = state.alerts.find(a => a.id === id);
-  if (!alert) return null;
-  alert.dismissed = true;
-  alert.dismissedAt = new Date().toISOString();
-  await persistSoon();
+  const updated = await db
+    .update(competitiveIntelAlertsTable)
+    .set({ dismissed: true, dismissedAt: new Date(), dismissedBy: actor ?? null })
+    .where(eq(competitiveIntelAlertsTable.id, id))
+    .returning();
+  if (updated.length === 0) return null;
   logger.info({ alertId: id, actor }, "[competitive-intel] Alert dismissed");
-  return alert;
+  return alertFromRow(updated[0]);
+}
+
+/**
+ * Reload the in-memory mute cache from `competitive_intel_state.meta.mutedLanes`.
+ * Called on bootstrap and after every `setLaneMute` write so `isLaneMuted` can
+ * stay synchronous for use inside the notifier predicate.
+ */
+async function refreshMutedLanesCache(): Promise<void> {
+  const row = await getState();
+  for (const k of Object.keys(_mutedLanesCache)) delete _mutedLanesCache[k];
+  const meta = (row?.meta ?? null) as { mutedLanes?: Record<string, boolean> } | null;
+  if (meta && meta.mutedLanes && typeof meta.mutedLanes === "object") {
+    for (const [laneId, muted] of Object.entries(meta.mutedLanes)) {
+      if (muted) _mutedLanesCache[laneId] = true;
+    }
+  }
 }
 
 export async function listLanes(): Promise<LaneInfo[]> {
@@ -692,22 +938,40 @@ export async function listLanes(): Promise<LaneInfo[]> {
     .map(([laneId, champs]) => ({
       laneId,
       champions: Array.from(champs).sort(),
-      muted: !!state.mutedLanes[laneId],
+      muted: !!_mutedLanesCache[laneId],
     }))
     .sort((a, b) => a.laneId.localeCompare(b.laneId));
 }
 
+/**
+ * Synchronous mute lookup backed by the in-process cache loaded from
+ * Postgres at boot. Used by the notifier's `shouldNotify` predicate.
+ */
 export function isLaneMuted(laneId: string): boolean {
-  return !!state.mutedLanes[laneId];
+  return !!_mutedLanesCache[laneId];
 }
 
 export async function setLaneMute(laneId: string, muted: boolean): Promise<LaneInfo | null> {
   await ensureLoaded();
   const known = CHAMPION_FEEDS.some(f => f.laneId === laneId);
   if (!known) return null;
-  if (muted) state.mutedLanes[laneId] = true;
-  else delete state.mutedLanes[laneId];
-  await persistSoon();
+
+  // Read-modify-write the meta JSON so we don't clobber other meta keys.
+  const row = await getState();
+  const currentMeta = (row?.meta ?? null) as Record<string, unknown> | null;
+  const mutedLanes: Record<string, boolean> = {
+    ...((currentMeta?.mutedLanes as Record<string, boolean> | undefined) ?? {}),
+  };
+  if (muted) mutedLanes[laneId] = true;
+  else delete mutedLanes[laneId];
+  const nextMeta = { ...(currentMeta ?? {}), mutedLanes };
+
+  await db
+    .update(competitiveIntelStateTable)
+    .set({ meta: nextMeta })
+    .where(eq(competitiveIntelStateTable.id, 1));
+
+  await refreshMutedLanesCache();
   logger.info({ laneId, muted }, "[competitive-intel] Lane mute updated");
   const lanes = await listLanes();
   return lanes.find(l => l.laneId === laneId) ?? null;
@@ -716,21 +980,20 @@ export async function setLaneMute(laneId: string, muted: boolean): Promise<LaneI
 /**
  * Mark the given alert IDs as notified so the next poll cycle does not
  * dispatch them again. Caller (notifier) decides which IDs were actually
- * pushed to Slack/email.
+ * pushed to Slack/email. Persisted on the alerts row in Postgres.
  */
 export async function markAlertsNotified(ids: string[]): Promise<void> {
   if (ids.length === 0) return;
   await ensureLoaded();
-  const set = new Set(ids);
-  const stamp = new Date().toISOString();
-  let touched = 0;
-  for (const a of state.alerts) {
-    if (set.has(a.id) && !a.notifiedAt) {
-      a.notifiedAt = stamp;
-      touched++;
-    }
-  }
-  if (touched > 0) await persistSoon();
+  await db
+    .update(competitiveIntelAlertsTable)
+    .set({ notifiedAt: new Date() })
+    .where(
+      and(
+        inArray(competitiveIntelAlertsTable.id, ids),
+        sql`${competitiveIntelAlertsTable.notifiedAt} is null`,
+      ) as any,
+    );
 }
 
 export async function getMonitorStatus(): Promise<{
@@ -741,12 +1004,21 @@ export async function getMonitorStatus(): Promise<{
   activeAlerts: number;
 }> {
   await ensureLoaded();
+  const [feedRows, state, totalRows, activeRows] = await Promise.all([
+    db.select().from(competitiveIntelFeedsTable),
+    getState(),
+    db.select({ c: sql<number>`count(*)::int` }).from(competitiveIntelAlertsTable),
+    db
+      .select({ c: sql<number>`count(*)::int` })
+      .from(competitiveIntelAlertsTable)
+      .where(eq(competitiveIntelAlertsTable.dismissed, false)),
+  ]);
   return {
-    feeds: Object.values(state.feedHealth),
-    lastFullPollAt: state.lastFullPollAt,
-    pollRunCount: state.pollRunCount,
-    totalAlerts: state.alerts.length,
-    activeAlerts: state.alerts.filter(a => !a.dismissed).length,
+    feeds: feedRows.map(healthFromRow),
+    lastFullPollAt: state?.lastFullPollAt ? state.lastFullPollAt.toISOString() : null,
+    pollRunCount: state?.pollRunCount ?? 0,
+    totalAlerts: Number(totalRows[0]?.c ?? 0),
+    activeAlerts: Number(activeRows[0]?.c ?? 0),
   };
 }
 
@@ -763,11 +1035,16 @@ function slugify(input: string): string {
     .slice(0, 60);
 }
 
-function uniqueFeedId(base: string): string {
+async function uniqueFeedId(base: string): Promise<string> {
   const root = slugify(base) || "feed";
-  if (!state.feeds.some(f => f.id === root)) return root;
+  const existing = await db
+    .select({ id: competitiveIntelFeedsTable.id })
+    .from(competitiveIntelFeedsTable)
+    .where(like(competitiveIntelFeedsTable.id, `${root}%`));
+  const taken = new Set(existing.map(r => r.id));
+  if (!taken.has(root)) return root;
   let i = 2;
-  while (state.feeds.some(f => f.id === `${root}-${i}`)) i++;
+  while (taken.has(`${root}-${i}`)) i++;
   return `${root}-${i}`;
 }
 
@@ -806,7 +1083,8 @@ function validateUrl(value: string, field: string): string {
 
 export async function listFeeds(): Promise<ChampionFeed[]> {
   await ensureLoaded();
-  return state.feeds.map(f => ({ ...f }));
+  const rows = await db.select().from(competitiveIntelFeedsTable);
+  return rows.map(feedFromRow);
 }
 
 export async function addFeed(input: FeedInput, actor?: string): Promise<ChampionFeed> {
@@ -820,81 +1098,118 @@ export async function addFeed(input: FeedInput, actor?: string): Promise<Champio
   if (input.recommendationHint && !VALID_RECOMMENDATIONS.includes(input.recommendationHint)) {
     throw new Error("recommendationHint must be adopt | counter | monitor");
   }
-  if (state.feeds.some(f => f.feedUrl.toLowerCase() === feedUrl.toLowerCase() && f.laneId === laneId)) {
+  // Check for duplicate (laneId, feedUrl) — case-insensitive on URL.
+  const dupes = await db
+    .select({ id: competitiveIntelFeedsTable.id })
+    .from(competitiveIntelFeedsTable)
+    .where(
+      and(
+        eq(competitiveIntelFeedsTable.laneId, laneId),
+        sql`lower(${competitiveIntelFeedsTable.feedUrl}) = lower(${feedUrl})`,
+      ),
+    );
+  if (dupes.length > 0) {
     throw new Error("A feed with this URL already exists in this lane");
   }
-  const now = new Date().toISOString();
-  const feed: ChampionFeed = {
-    id: uniqueFeedId(`${laneId}-${champion}`),
-    laneId,
-    champion,
-    feedUrl,
-    homeUrl,
-    paused: input.paused === true,
-    recommendationHint: input.recommendationHint ?? undefined,
-    createdAt: now,
-    updatedAt: now,
-  };
-  state.feeds.push(feed);
-  ensureFeedHealth();
-  await persistSoon();
-  logger.info({ feedId: feed.id, actor }, "[competitive-intel] Feed added");
-  return { ...feed };
+  const id = await uniqueFeedId(`${laneId}-${champion}`);
+  const now = new Date();
+  const inserted = await db
+    .insert(competitiveIntelFeedsTable)
+    .values({
+      id,
+      laneId,
+      champion,
+      feedUrl,
+      homeUrl,
+      paused: input.paused === true,
+      recommendationHint: input.recommendationHint ?? null,
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning();
+  await refreshFeedsCache();
+  logger.info({ feedId: id, actor }, "[competitive-intel] Feed added");
+  return feedFromRow(inserted[0]);
 }
 
 export async function updateFeed(id: string, patch: FeedUpdate, actor?: string): Promise<ChampionFeed | null> {
   await ensureLoaded();
-  const feed = state.feeds.find(f => f.id === id);
-  if (!feed) return null;
+  const existing = await db
+    .select()
+    .from(competitiveIntelFeedsTable)
+    .where(eq(competitiveIntelFeedsTable.id, id))
+    .limit(1);
+  if (existing.length === 0) return null;
+  const current = existing[0];
+
+  const next: Partial<typeof competitiveIntelFeedsTable.$inferInsert> = {};
+
   if (patch.champion !== undefined) {
     const v = String(patch.champion).trim();
     if (!v) throw new Error("champion cannot be empty");
-    feed.champion = v;
+    next.champion = v;
   }
   if (patch.laneId !== undefined) {
     const v = String(patch.laneId).trim();
     if (!v) throw new Error("laneId cannot be empty");
-    feed.laneId = v;
+    next.laneId = v;
   }
-  if (patch.feedUrl !== undefined) feed.feedUrl = validateUrl(patch.feedUrl, "feedUrl");
-  if (patch.homeUrl !== undefined) feed.homeUrl = validateUrl(patch.homeUrl, "homeUrl");
-  // Reject (laneId, feedUrl) collisions with another feed (mirrors addFeed behavior)
-  if (patch.feedUrl !== undefined || patch.laneId !== undefined) {
-    if (state.feeds.some(f => f.id !== feed.id && f.laneId === feed.laneId && f.feedUrl.toLowerCase() === feed.feedUrl.toLowerCase())) {
-      throw new Error("A feed with this URL already exists in this lane");
-    }
-  }
-  if (patch.paused !== undefined) feed.paused = patch.paused === true;
+  if (patch.feedUrl !== undefined) next.feedUrl = validateUrl(patch.feedUrl, "feedUrl");
+  if (patch.homeUrl !== undefined) next.homeUrl = validateUrl(patch.homeUrl, "homeUrl");
+  if (patch.paused !== undefined) next.paused = patch.paused === true;
   if (patch.recommendationHint !== undefined) {
     if (patch.recommendationHint === null) {
-      delete feed.recommendationHint;
+      next.recommendationHint = null;
     } else if (VALID_RECOMMENDATIONS.includes(patch.recommendationHint)) {
-      feed.recommendationHint = patch.recommendationHint;
+      next.recommendationHint = patch.recommendationHint;
     } else {
       throw new Error("recommendationHint must be adopt | counter | monitor");
     }
   }
-  feed.updatedAt = new Date().toISOString();
-  // Reflect new champion/laneId on health record
-  const health = state.feedHealth[feed.id];
-  if (health) {
-    health.champion = feed.champion;
-    health.laneId = feed.laneId;
+
+  // Reject (laneId, feedUrl) collisions with another feed (mirrors addFeed).
+  if (next.feedUrl !== undefined || next.laneId !== undefined) {
+    const checkLane = next.laneId ?? current.laneId;
+    const checkUrl = next.feedUrl ?? current.feedUrl;
+    const dupes = await db
+      .select({ id: competitiveIntelFeedsTable.id })
+      .from(competitiveIntelFeedsTable)
+      .where(
+        and(
+          eq(competitiveIntelFeedsTable.laneId, checkLane),
+          sql`lower(${competitiveIntelFeedsTable.feedUrl}) = lower(${checkUrl})`,
+        ),
+      );
+    if (dupes.some(d => d.id !== id)) {
+      throw new Error("A feed with this URL already exists in this lane");
+    }
   }
-  await persistSoon();
+
+  next.updatedAt = new Date();
+  const updated = await db
+    .update(competitiveIntelFeedsTable)
+    .set(next)
+    .where(eq(competitiveIntelFeedsTable.id, id))
+    .returning();
+  await refreshFeedsCache();
   logger.info({ feedId: id, actor }, "[competitive-intel] Feed updated");
-  return { ...feed };
+  return updated.length > 0 ? feedFromRow(updated[0]) : null;
 }
 
 export async function removeFeed(id: string, actor?: string): Promise<boolean> {
   await ensureLoaded();
-  const idx = state.feeds.findIndex(f => f.id === id);
-  if (idx < 0) return false;
-  state.feeds.splice(idx, 1);
-  delete state.feedHealth[id];
-  // Drop alerts owned by the removed feed so the UI doesn't show orphans
-  state.alerts = state.alerts.filter(a => !a.id.startsWith(`${id}-`));
-  await persistSoon();
+  const deleted = await db
+    .delete(competitiveIntelFeedsTable)
+    .where(eq(competitiveIntelFeedsTable.id, id))
+    .returning({ id: competitiveIntelFeedsTable.id });
+  if (deleted.length === 0) return false;
+  // Drop alerts owned by the removed feed so the UI doesn't show orphans.
+  // Alerts use ids like `${feedId}-${hash}` (or `seed-${champion}-...` for
+  // seeds) — match by the same prefix convention.
+  await db
+    .delete(competitiveIntelAlertsTable)
+    .where(like(competitiveIntelAlertsTable.id, `${id}-%`));
+  await refreshFeedsCache();
   logger.info({ feedId: id, actor }, "[competitive-intel] Feed removed");
   return true;
 }
@@ -910,7 +1225,7 @@ export function startCompetitiveIntelMonitor(): void {
   _timer = setInterval(() => {
     pollAllFeeds().catch(err => logger.error({ err }, "[competitive-intel] scheduled poll failed"));
   }, POLL_INTERVAL_MS);
-  logger.info({ intervalMs: POLL_INTERVAL_MS, feeds: state.feeds.length }, "[competitive-intel] Monitor started");
+  logger.info({ intervalMs: POLL_INTERVAL_MS }, "[competitive-intel] Monitor started");
 }
 
 export function stopCompetitiveIntelMonitor(): void {
