@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { FileText, Shield, Link, CheckCircle2, Clock, Hash, Anchor, RefreshCw, AlertTriangle, PlusCircle, X } from "lucide-react";
+import { FileText, Shield, Link, CheckCircle2, Clock, Hash, Anchor, RefreshCw, AlertTriangle, PlusCircle, X, PenTool } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
+import { useAuth } from "../contexts/auth-context";
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "/api";
 
@@ -119,6 +120,24 @@ export default function BlockchainBoLPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [form, setForm] = useState<CreateFormData>(EMPTY_FORM);
   const [verifyResult, setVerifyResult] = useState<VerifyResponse | null>(null);
+  const [signError, setSignError] = useState<string | null>(null);
+  const { user } = useAuth();
+
+  // Role-based action mapping. Authorization is also enforced server-side; the
+  // UI is purely about presenting the right affordance to the current operator.
+  // - compliance → "Endorse" (server-checked: only compliance/admin can endorse)
+  // - exec / ops → "Sign" / "Countersign" (regular operator signature)
+  // - maintenance → no signing affordance (read-only for BoL flow)
+  const signAction: "sign" | "endorse" | "countersign" | null =
+    user.role === "compliance" ? "endorse"
+    : user.role === "exec" ? "countersign"
+    : user.role === "ops" ? "sign"
+    : null;
+  const signActionLabel =
+    signAction === "endorse" ? "Endorse"
+    : signAction === "countersign" ? "Countersign"
+    : signAction === "sign" ? "Sign"
+    : null;
 
   const { data, isLoading, isError, refetch } = useQuery<BolListResponse>({
     queryKey: ["vessels-bol-list"],
@@ -154,6 +173,25 @@ export default function BlockchainBoLPage() {
       setForm(EMPTY_FORM);
       setSelectedId(doc.id);
     },
+  });
+
+  const signMutation = useMutation({
+    mutationFn: async ({ id, action }: { id: string; action: "sign" | "endorse" | "countersign" }) => {
+      const r = await fetch(`${API_BASE}/vessels/modules/bills-of-lading/${id}/transfer`, {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action }),
+      });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d?.error ?? d?.message ?? `HTTP ${r.status}`);
+      return d.data ?? d;
+    },
+    onSuccess: () => {
+      setSignError(null);
+      qc.invalidateQueries({ queryKey: ["vessels-bol-list"] });
+      qc.invalidateQueries({ queryKey: ["vessels-bol-detail", selectedId] });
+    },
+    onError: (err: Error) => setSignError(err.message),
   });
 
   async function handleVerify(id: string) {
@@ -382,6 +420,36 @@ export default function BlockchainBoLPage() {
                   >
                     Verify Chain Integrity
                   </button>
+
+                  {(selectedDoc.status === "issued" || selectedDoc.status === "in_transit" || selectedDoc.status === "transferred") && signAction && signActionLabel && (
+                    <div className="mt-4 pt-3 border-t border-sky-500/10 space-y-2">
+                      <p className="text-[10px] text-sky-400/50 uppercase tracking-wider flex items-center gap-1.5">
+                        <PenTool className="w-3 h-3 text-emerald-400" />{signActionLabel} as {user.name}
+                      </p>
+                      <p className="text-[10px] text-sky-400/40">
+                        Your signature will be recorded on the immutable ledger as <span className="text-sky-300 font-mono">{user.name}</span>
+                        {" "}({user.role}).
+                      </p>
+                      <button
+                        onClick={() => {
+                          setSignError(null);
+                          signMutation.mutate({ id: selectedDoc.id, action: signAction });
+                        }}
+                        disabled={signMutation.isPending}
+                        className="w-full text-xs bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 py-1.5 rounded-lg hover:bg-emerald-500/15 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                      >
+                        {signMutation.isPending ? `${signActionLabel}ing…` : signActionLabel}
+                      </button>
+                      {signError && <p className="text-[10px] text-red-400">{signError}</p>}
+                    </div>
+                  )}
+                  {(selectedDoc.status === "issued" || selectedDoc.status === "in_transit" || selectedDoc.status === "transferred") && !signAction && (
+                    <div className="mt-4 pt-3 border-t border-sky-500/10">
+                      <p className="text-[10px] text-sky-400/40 italic">
+                        Signing is not available for the {user.role} role.
+                      </p>
+                    </div>
+                  )}
                 </div>
               ) : null
             )}

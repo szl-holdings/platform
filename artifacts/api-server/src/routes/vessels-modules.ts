@@ -914,27 +914,109 @@ router.post("/vessels/modules/bills-of-lading", validateBody(jsonObjectBodySchem
   }
 });
 
-// Transfer a BoL (add an endorsement event)
+// Transfer / sign / endorse / countersign a BoL (append an event to the hash chain)
+//
+// Body shape:
+//   { action?: "transfer" | "sign" | "endorse" | "countersign", newConsignee?: string }
+//
+// - For "transfer" (default when newConsignee is provided): requires newConsignee,
+//   advances status to "transferred", increments transferCount.
+// - For "sign" / "endorse" / "countersign": appends a signature event without
+//   changing the consignee. The actor identity and authorization are derived
+//   from the authenticated user (req.user) — clients cannot impersonate
+//   another signer or escalate to compliance endorsement.
 router.post("/vessels/modules/bills-of-lading/:id/transfer", validateBody(jsonObjectBodySchema), authMiddleware(), async (req: Request, res) => {
   try {
     await ensureBolSeed();
     const existing = await loadBolById(req.params.id as string);
     if (!existing) { sendNotFound(res, "BillOfLading"); return; }
-    const { newConsignee, actor } = req.body ?? {};
-    if (!newConsignee || !actor) { sendBadRequest(res, "Missing newConsignee or actor"); return; }
+    if (!req.user) { sendBadRequest(res, "Authentication required"); return; }
+
+    const body = (req.body ?? {}) as { action?: string; newConsignee?: string };
+    const rawAction = typeof body.action === "string" ? body.action.toLowerCase() : (body.newConsignee ? "transfer" : "");
+    const allowedActions = ["transfer", "sign", "endorse", "countersign"];
+    if (!allowedActions.includes(rawAction)) {
+      sendBadRequest(res, `Missing or invalid action. Must be one of: ${allowedActions.join(", ")}`);
+      return;
+    }
+
+    const userRoles = req.user.roles ?? [];
+    const isCompliance = userRoles.includes("compliance") || userRoles.includes("admin") || userRoles.includes("super_admin");
+    // Actor identity is *always* derived from the authenticated user. The body
+    // cannot supply an arbitrary actor string — that would let any caller
+    // forge a signature on behalf of a different operator.
+    const actor = req.user.displayName || req.user.email || `user:${req.user.id}`;
     const now = new Date().toISOString();
-    const newEvent: PersistedEventInput = { eventType: "BoL Transferred", actor, timestamp: now, confirmed: true };
-    await appendChainEvent(existing.id, newEvent, {
-      consignee: newConsignee,
-      status: "transferred",
-      transferCount: existing.transferCount + 1,
-      updatedAt: now,
-    });
+
+    if (rawAction === "transfer") {
+      const newConsignee = body.newConsignee;
+      if (!newConsignee || typeof newConsignee !== "string") {
+        sendBadRequest(res, "Missing newConsignee");
+        return;
+      }
+      const newEvent: PersistedEventInput = { eventType: "BoL Transferred", actor, timestamp: now, confirmed: true };
+      await appendChainEvent(existing.id, newEvent, {
+        consignee: newConsignee,
+        status: "transferred",
+        transferCount: existing.transferCount + 1,
+        updatedAt: now,
+      });
+      const updated = await loadBolById(existing.id);
+      if (!updated) { sendNotFound(res, "BillOfLading"); return; }
+      sendSuccess(res, updated);
+      return;
+    }
+
+    // Signature actions
+    if (existing.status !== "issued" && existing.status !== "in_transit" && existing.status !== "transferred") {
+      sendBadRequest(res, `Cannot sign BoL in status '${existing.status}'`);
+      return;
+    }
+
+    // Authorization (server-side, not just UI):
+    //  - endorse:     compliance, admin, or super_admin only
+    //  - countersign: exec, admin, or super_admin (operator-class roles)
+    //  - sign:        any non-readonly authenticated operator (exec/ops/compliance/admin)
+    const operatorRoles: string[] = ["exec", "ops", "compliance", "admin", "super_admin"];
+    const canCountersign = userRoles.some(r => ["exec", "admin", "super_admin"].includes(r));
+    const canSign = userRoles.some(r => operatorRoles.includes(r));
+
+    if (rawAction === "endorse" && !isCompliance) {
+      return void res.status(403).json({
+        error: "Forbidden",
+        message: "Only users with the compliance role can endorse a Bill of Lading.",
+      });
+    }
+    if (rawAction === "countersign" && !canCountersign) {
+      return void res.status(403).json({
+        error: "Forbidden",
+        message: "Only executive or administrator roles can countersign a Bill of Lading.",
+      });
+    }
+    if (rawAction === "sign" && !canSign) {
+      return void res.status(403).json({
+        error: "Forbidden",
+        message: "Your role is not permitted to sign Bills of Lading.",
+      });
+    }
+
+    const eventLabel =
+      rawAction === "endorse" ? "Endorsed by"
+      : rawAction === "countersign" ? "Countersigned by"
+      : "Signed by";
+
+    const newEvent: PersistedEventInput = {
+      eventType: `${eventLabel} — ${actor}`,
+      actor,
+      timestamp: now,
+      confirmed: true,
+    };
+    await appendChainEvent(existing.id, newEvent, { updatedAt: now });
     const updated = await loadBolById(existing.id);
     if (!updated) { sendNotFound(res, "BillOfLading"); return; }
     sendSuccess(res, updated);
   } catch (err) {
-    handleRouteError(res, err, "Failed to transfer bill of lading");
+    handleRouteError(res, err, "Failed to update bill of lading");
   }
 });
 
