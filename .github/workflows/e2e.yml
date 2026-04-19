@@ -93,6 +93,15 @@ jobs:
             dist: artifacts/szl-holdings/dist/public
             port: 3000
             spec: auth.spec.ts
+          # RBAC E2E: tests the admin-only access gate (RequireAdmin) by
+          # mocking /api/auth/user (authenticated) and /api/auth/my-roles
+          # (role set) and visiting an admin-gated route.  Runs against the
+          # same SZL Holdings static build as auth.spec.ts.
+          - app: rbac
+            filter: "@workspace/szl-holdings"
+            dist: artifacts/szl-holdings/dist/public
+            port: 3000
+            spec: rbac.spec.ts
           # PRISM Counsel — Legal Command is its own standalone artifact.
           # Built from @workspace/prism-counsel and served on port 3006.
           - app: prism-counsel
