@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-u
 import { ArrowRight, Calculator, TrendingUp, Loader2 } from "lucide-react";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from "recharts";
+import ClientScopeSwitcher, { useClientScope } from "@/components/ClientScopeSwitcher";
 
 const GOLD = "var(--color-gold)";
 const API = import.meta.env.BASE_URL + "api";
@@ -83,15 +84,25 @@ export default function ROICalculator() {
   const [conversionLift, setConversionLift] = useState(35);
   const [engagementLift, setEngagementLift] = useState(80);
   const [investment, setInvestment] = useState(7000);
+  const { clientId, setClientId, clients } = useClientScope();
+  const activeClient = clients.find(c => c.id === clientId) ?? null;
 
   useEffect(() => {
     async function loadMetrics() {
+      setLoading(true);
       try {
-        const res = await fetch(`${API}/carlota/roi-metrics`, { credentials: "include" });
+        const url = clientId
+          ? `${API}/carlota/roi-metrics?clientId=${encodeURIComponent(clientId)}`
+          : `${API}/carlota/roi-metrics`;
+        const res = await fetch(url, { credentials: "include" });
         if (res.ok) {
           const json = await res.json();
-          if (json.data?.caseStudies?.length > 0) {
-            setMetrics(json.data);
+          if (json.data) {
+            setMetrics({
+              caseStudies: json.data.caseStudies ?? [],
+              portfolioBenchmarks: json.data.portfolioBenchmarks ?? STATIC_METRICS.portfolioBenchmarks,
+              roiTrendData: json.data.roiTrendData ?? STATIC_METRICS.roiTrendData,
+            });
           }
         }
       } catch {
@@ -100,7 +111,7 @@ export default function ROICalculator() {
       }
     }
     void loadMetrics();
-  }, []);
+  }, [clientId]);
 
   const annualRevLift = monthlyRevenue * 12 * (conversionLift / 100) * 0.4;
   const brandValue = monthlyRevenue * 12 * (engagementLift / 100) * 0.15;
@@ -119,16 +130,23 @@ export default function ROICalculator() {
 
   return (
     <div className="p-6 space-y-6">
-      <div>
-        <div className="flex items-center gap-2 mb-1">
-          <Calculator className="w-5 h-5" style={{ color: GOLD }} />
-          <span className="text-xs font-medium uppercase tracking-widest" style={{ color: GOLD }}>ROI Tracker</span>
-          {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" style={{ color: GOLD }} />}
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <Calculator className="w-5 h-5" style={{ color: GOLD }} />
+            <span className="text-xs font-medium uppercase tracking-widest" style={{ color: GOLD }}>ROI Tracker</span>
+            {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" style={{ color: GOLD }} />}
+          </div>
+          <h1 className="text-2xl" style={{ fontFamily: "var(--font-serif)" }}>
+            {activeClient ? `${activeClient.name} — Engagement ROI` : "Engagement Returns & Value Creation"}
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            {activeClient
+              ? `Returns from ${activeClient.name}'s engagements only — ${metrics.caseStudies.length} case ${metrics.caseStudies.length === 1 ? "study" : "studies"}.`
+              : `Track ROI across the portfolio and model your own engagement projections. Powered by ${metrics.caseStudies.length} client case studies.`}
+          </p>
         </div>
-        <h1 className="text-2xl" style={{ fontFamily: "var(--font-serif)" }}>Engagement Returns & Value Creation</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Track ROI across the portfolio and model your own engagement projections. Powered by {metrics.caseStudies.length} client case studies.
-        </p>
+        <ClientScopeSwitcher clientId={clientId} onChange={setClientId} clients={clients} />
       </div>
 
       {/* Portfolio benchmarks */}

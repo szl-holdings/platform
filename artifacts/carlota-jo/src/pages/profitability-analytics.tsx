@@ -8,6 +8,7 @@ import {
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, ReferenceLine } from "recharts";
 import { ENGAGEMENTS as STATIC_ENGAGEMENTS, MARGIN_HISTORY as STATIC_MARGIN_HISTORY } from "@/data/operationalData";
 import type { EngagementPnL } from "@/data/operationalData";
+import ClientScopeSwitcher, { useClientScope } from "@/components/ClientScopeSwitcher";
 
 const GOLD = "var(--color-gold)";
 const API = import.meta.env.BASE_URL + "api";
@@ -32,15 +33,26 @@ export default function ProfitabilityAnalytics() {
   const [engagements, setEngagements] = useState<EngagementPnL[]>(STATIC_ENGAGEMENTS);
   const [marginHistory, setMarginHistory] = useState<{ month: string; margin: number }[]>(STATIC_MARGIN_HISTORY);
   const [loading, setLoading] = useState(true);
+  const { clientId, setClientId, clients } = useClientScope();
+  const activeClientName = clients.find(c => c.id === clientId)?.name ?? null;
 
   useEffect(() => {
     async function loadData() {
+      setLoading(true);
       try {
-        const res = await fetch(`${API}/carlota/engagements`, { credentials: "include" });
+        const url = clientId
+          ? `${API}/carlota/engagements?clientId=${encodeURIComponent(clientId)}`
+          : `${API}/carlota/engagements`;
+        const res = await fetch(url, { credentials: "include" });
         if (res.ok) {
           const json = await res.json();
-          if (Array.isArray(json.data?.engagements) && json.data.engagements.length > 0) {
-            setEngagements(json.data.engagements);
+          if (Array.isArray(json.data?.engagements)) {
+            const list = json.data.engagements as EngagementPnL[];
+            setEngagements(list.length > 0
+              ? list
+              : (clientId
+                  ? STATIC_ENGAGEMENTS.filter(e => e.client === activeClientName)
+                  : STATIC_ENGAGEMENTS));
           }
           if (Array.isArray(json.data?.marginHistory) && json.data.marginHistory.length > 0) {
             setMarginHistory(json.data.marginHistory);
@@ -52,7 +64,7 @@ export default function ProfitabilityAnalytics() {
       }
     }
     void loadData();
-  }, []);
+  }, [clientId, activeClientName]);
 
   const totalContracted = engagements.reduce((s, e) => s + e.contractedValue, 0);
   const totalCollected = engagements.reduce((s, e) => s + e.collected, 0);
@@ -74,7 +86,15 @@ export default function ProfitabilityAnalytics() {
               </div>
               <span style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.1em", color: "#34D399", textTransform: "uppercase" }}>Engagement Profitability Analytics</span>
               {loading && <Loader2 size={14} color="#34D399" className="animate-spin" />}
+              <div style={{ marginLeft: "auto" }}>
+                <ClientScopeSwitcher clientId={clientId} onChange={setClientId} clients={clients} variant="dark" />
+              </div>
             </div>
+            {activeClientName && (
+              <div style={{ fontSize: 11, color: "#34D399", marginBottom: 8 }}>
+                Showing data scoped to <strong>{activeClientName}</strong> only
+              </div>
+            )}
             <h1 style={{ fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 300, color: "#F5F0E8", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1.1, marginBottom: 12 }}>
               True Margins. Zero Surprises.<br /><em style={{ color: "#34D399" }}>P&L Visibility Per Engagement.</em>
             </h1>

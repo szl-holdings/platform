@@ -5,6 +5,7 @@ import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Radar, TrendingUp, TrendingDown, Minus, AlertCircle, Sparkles, Clock, Loader2, ChevronDown, ChevronUp, Settings2, X, Plus, RefreshCw, ExternalLink } from "lucide-react";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import ClientScopeSwitcher, { useClientScope } from "@/components/ClientScopeSwitcher";
 
 const GOLD = "var(--color-gold)";
 
@@ -106,7 +107,9 @@ export default function CompetitiveRadar() {
   const [refreshing, setRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(new Date());
   const [generatingBrief, setGeneratingBrief] = useState(false);
-  const [companyContext] = useState({ name: "Carlota Jo Consulting", industry: "Management Consulting" });
+  const { clientId, setClientId, clients } = useClientScope();
+  const activeClient = clients.find(c => c.id === clientId) ?? null;
+  const [companyContext, setCompanyContext] = useState({ name: "Carlota Jo Consulting", industry: "Management Consulting" });
   const [tracked, setTracked] = useState<string[]>(() => loadCompetitorList());
   const [refreshIntervalMs, setRefreshIntervalMs] = useState<number>(() => loadRefreshInterval());
   const [showSettings, setShowSettings] = useState(false);
@@ -116,6 +119,14 @@ export default function CompetitiveRadar() {
   const [liveSignalCount, setLiveSignalCount] = useState<number>(0);
   const trackedRef = useRef(tracked);
   trackedRef.current = tracked;
+  const clientIdRef = useRef(clientId);
+  clientIdRef.current = clientId;
+
+  useEffect(() => {
+    setCompanyContext(activeClient
+      ? { name: activeClient.name, industry: activeClient.industry }
+      : { name: "Carlota Jo Consulting", industry: "Management Consulting" });
+  }, [activeClient]);
 
   useEffect(() => {
     try { localStorage.setItem(COMPETITORS_STORAGE_KEY, JSON.stringify(tracked)); } catch {}
@@ -129,7 +140,10 @@ export default function CompetitiveRadar() {
     if (opts.silent) setRefreshing(true); else setLoading(true);
     try {
       const list = trackedRef.current;
-      const qs = list.length > 0 ? `?competitors=${encodeURIComponent(list.join(","))}` : "";
+      const params = new URLSearchParams();
+      if (list.length > 0) params.set("competitors", list.join(","));
+      if (clientIdRef.current) params.set("clientId", clientIdRef.current);
+      const qs = params.toString() ? `?${params.toString()}` : "";
       const radarRes = await fetch(`${API}/carlota/radar-signals${qs}`, { credentials: "include" });
       if (radarRes.ok) {
         const json = await radarRes.json();
@@ -149,7 +163,7 @@ export default function CompetitiveRadar() {
     }
   }, []);
 
-  useEffect(() => { void loadData(); }, [loadData, tracked]);
+  useEffect(() => { void loadData(); }, [loadData, tracked, clientId]);
 
   useEffect(() => {
     if (refreshIntervalMs <= 0) return;
@@ -250,8 +264,14 @@ Return ONLY valid JSON, no markdown.`;
               </span>
             )}
           </p>
+          {activeClient && (
+            <p className="text-xs mt-1" style={{ color: GOLD }}>
+              Scoped to <strong>{activeClient.name}</strong> · {activeClient.industry}
+            </p>
+          )}
         </div>
-        <div className="flex gap-2 items-center">
+        <div className="flex items-center gap-2 flex-wrap">
+          <ClientScopeSwitcher clientId={clientId} onChange={setClientId} clients={clients} />
           <select
             value={refreshIntervalMs}
             onChange={(e) => setRefreshIntervalMs(Number(e.target.value))}

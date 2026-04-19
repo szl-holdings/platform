@@ -805,12 +805,213 @@ const SEED_ROI_METRICS = {
   ],
 };
 
+// ── Per-client seed data (advisory tool scoping) ──────────────────────────────
+
+type ClientId = "luminary-brands" | "vertex-capital" | "aurelius-pe" | "oasis-wellness";
+
+const SEED_CLIENTS: { id: ClientId; name: string; industry: string }[] = [
+  { id: "luminary-brands", name: "Luminary Brands", industry: "Consumer Brand / DTC" },
+  { id: "vertex-capital", name: "Vertex Capital Partners", industry: "Private Equity / M&A" },
+  { id: "aurelius-pe", name: "Aurelius Private Equity", industry: "PE Portfolio Operations" },
+  { id: "oasis-wellness", name: "Oasis Wellness", industry: "Wellness / Consumer Health" },
+];
+
+const CLIENT_NAME_BY_ID: Record<ClientId, string> = {
+  "luminary-brands": "Luminary Brands",
+  "vertex-capital": "Vertex Capital Partners",
+  "aurelius-pe": "Aurelius Private Equity",
+  "oasis-wellness": "Oasis Wellness",
+};
+
+const CLIENT_MARGIN_HISTORY: Record<ClientId, { month: string; margin: number }[]> = {
+  "luminary-brands": [
+    { month: "Oct", margin: 48 }, { month: "Nov", margin: 46 }, { month: "Dec", margin: 44 },
+    { month: "Jan", margin: 49 }, { month: "Feb", margin: 51 }, { month: "Mar", margin: 53 }, { month: "Apr", margin: 52 },
+  ],
+  "vertex-capital": [
+    { month: "Oct", margin: 38 }, { month: "Nov", margin: 41 }, { month: "Dec", margin: 40 },
+    { month: "Jan", margin: 44 }, { month: "Feb", margin: 46 }, { month: "Mar", margin: 49 }, { month: "Apr", margin: 51 },
+  ],
+  "aurelius-pe": [
+    { month: "Oct", margin: 51 }, { month: "Nov", margin: 53 }, { month: "Dec", margin: 52 },
+    { month: "Jan", margin: 55 }, { month: "Feb", margin: 56 }, { month: "Mar", margin: 58 }, { month: "Apr", margin: 57 },
+  ],
+  "oasis-wellness": [
+    { month: "Oct", margin: 38 }, { month: "Nov", margin: 35 }, { month: "Dec", margin: 31 },
+    { month: "Jan", margin: 33 }, { month: "Feb", margin: 28 }, { month: "Mar", margin: 30 }, { month: "Apr", margin: 27 },
+  ],
+};
+
+const CLIENT_ROI_BENCHMARKS: Record<ClientId, typeof SEED_ROI_METRICS.portfolioBenchmarks> = {
+  "luminary-brands": { avgRoi: 271, avgPaybackMonths: 9, avgRateRealisationPct: 96, blendedMarginPct: 51, clientRetentionPct: 100, npsScore: 78 },
+  "vertex-capital": { avgRoi: 250, avgPaybackMonths: 14, avgRateRealisationPct: 100, blendedMarginPct: 47, clientRetentionPct: 100, npsScore: 70 },
+  "aurelius-pe": { avgRoi: 483, avgPaybackMonths: 5, avgRateRealisationPct: 100, blendedMarginPct: 57, clientRetentionPct: 100, npsScore: 84 },
+  "oasis-wellness": { avgRoi: 408, avgPaybackMonths: 12, avgRateRealisationPct: 81, blendedMarginPct: 27, clientRetentionPct: 100, npsScore: 62 },
+};
+
+const CLIENT_ROI_TREND: Record<ClientId, { month: string; avgRoi: number }[]> = {
+  "luminary-brands": [
+    { month: "Oct 2025", avgRoi: 110 }, { month: "Nov 2025", avgRoi: 145 }, { month: "Dec 2025", avgRoi: 178 },
+    { month: "Jan 2026", avgRoi: 210 }, { month: "Feb 2026", avgRoi: 235 }, { month: "Mar 2026", avgRoi: 258 }, { month: "Apr 2026", avgRoi: 271 },
+  ],
+  "vertex-capital": [
+    { month: "Oct 2025", avgRoi: 80 }, { month: "Nov 2025", avgRoi: 105 }, { month: "Dec 2025", avgRoi: 140 },
+    { month: "Jan 2026", avgRoi: 168 }, { month: "Feb 2026", avgRoi: 198 }, { month: "Mar 2026", avgRoi: 224 }, { month: "Apr 2026", avgRoi: 250 },
+  ],
+  "aurelius-pe": [
+    { month: "Oct 2025", avgRoi: 220 }, { month: "Nov 2025", avgRoi: 290 }, { month: "Dec 2025", avgRoi: 360 },
+    { month: "Jan 2026", avgRoi: 410 }, { month: "Feb 2026", avgRoi: 445 }, { month: "Mar 2026", avgRoi: 470 }, { month: "Apr 2026", avgRoi: 483 },
+  ],
+  "oasis-wellness": [
+    { month: "Oct 2025", avgRoi: 180 }, { month: "Nov 2025", avgRoi: 240 }, { month: "Dec 2025", avgRoi: 285 },
+    { month: "Jan 2026", avgRoi: 320 }, { month: "Feb 2026", avgRoi: 358 }, { month: "Mar 2026", avgRoi: 388 }, { month: "Apr 2026", avgRoi: 408 },
+  ],
+};
+
+const CLIENT_RADAR_SIGNALS: Record<ClientId, typeof SEED_RADAR_SIGNALS> = {
+  "luminary-brands": [
+    {
+      competitor: "Glossier", event: "DTC paid-acquisition costs up 23% across category — direct competitor pulled performance budget",
+      impact: "high", direction: "opportunity", date: "Apr 16, 2026",
+      detail: "Rising customer acquisition costs across the prestige DTC category create an opening for Luminary's owned-channel strategy. Glossier reportedly cut paid budget 30% in Q1.",
+    },
+    {
+      competitor: "Charlotte Tilbury", event: "Launched private label in two new EU markets — UK pricing held flat",
+      impact: "medium", direction: "threat", date: "Apr 9, 2026",
+      detail: "Charlotte Tilbury's EU expansion brings new shelf competition for the £40-£75 price tier where Luminary is repositioning. Watch UK Boots assortment changes.",
+    },
+    {
+      competitor: "Drunk Elephant", event: "Negative TikTok sentiment surge — formula reformulation backlash",
+      impact: "medium", direction: "opportunity", date: "Apr 3, 2026",
+      detail: "Sentiment dropped 18 points week-over-week. Opportunity for Luminary's editorial PR push to capture defectors searching for clean formulation alternatives.",
+    },
+  ],
+  "vertex-capital": [
+    {
+      competitor: "Bain & Company", event: "PE deal advisory fees down 12% — boutiques gaining mid-market share",
+      impact: "high", direction: "opportunity", date: "Apr 12, 2026",
+      detail: "Bain's mid-market PE advisory revenue declined for two consecutive quarters. Vertex's deal pipeline sits in the £50M–£200M range Bain is now de-prioritising.",
+    },
+    {
+      competitor: "EY-Parthenon", event: "Lost two senior MDs covering UK industrials — talent gap in core sector",
+      impact: "high", direction: "opportunity", date: "Apr 6, 2026",
+      detail: "EY-Parthenon's UK industrials practice lost both senior MDs within four weeks. Several portfolio targets in Vertex's pipeline previously bid by EY-P teams.",
+    },
+    {
+      competitor: "Lazard", event: "M&A volumes in UK lower-mid market down 18% YoY — pricing pressure on advisor fees",
+      impact: "medium", direction: "threat", date: "Mar 28, 2026",
+      detail: "Lazard's UK lower-mid market deal flow contraction is creating pricing pressure. Vertex should expect more aggressive fee proposals from competing sponsors.",
+    },
+  ],
+  "aurelius-pe": [
+    {
+      competitor: "Apollo Global", event: "Portfolio operating partner team expansion — UK ops focus",
+      impact: "high", direction: "threat", date: "Apr 14, 2026",
+      detail: "Apollo added 8 operating partners with UK industrials and consumer ops experience. Direct overlap with Aurelius portfolio uplift focus.",
+    },
+    {
+      competitor: "Permira", event: "Closed three portfolio-ops led value creation case studies — published thought leadership",
+      impact: "medium", direction: "threat", date: "Apr 7, 2026",
+      detail: "Permira's case studies establish them as the go-to PE firm for portfolio operations transformation, narrowing Aurelius' positioning advantage in UK PE LP conversations.",
+    },
+    {
+      competitor: "Triton Partners", event: "Lost two portfolio CEOs to competing GP buyouts in last 60 days",
+      impact: "medium", direction: "opportunity", date: "Mar 30, 2026",
+      detail: "Triton portfolio leadership turnover creates an opening for Aurelius to recruit experienced operators with mid-market portfolio uplift track records.",
+    },
+  ],
+  "oasis-wellness": [
+    {
+      competitor: "Holland & Barrett", event: "New private-label supplements line undercuts mid-tier wellness brands by ~30%",
+      impact: "high", direction: "threat", date: "Apr 15, 2026",
+      detail: "Holland & Barrett's expanded own-brand range targets the £18-£35 price tier where Oasis sits. Visible margin compression risk for Q3.",
+    },
+    {
+      competitor: "Heights", event: "Closed £15M Series B — accelerating UK retail rollout to Boots and Tesco",
+      impact: "high", direction: "threat", date: "Apr 8, 2026",
+      detail: "Heights' funding war chest enables aggressive shelf-space competition in UK pharmacy and grocery channels — Oasis must accelerate retail strategy.",
+    },
+    {
+      competitor: "AG1 (Athletic Greens)", event: "Subscription churn rising — sentiment shift toward simpler, single-ingredient products",
+      impact: "medium", direction: "opportunity", date: "Apr 1, 2026",
+      detail: "Consumer fatigue with all-in-one formulas creates opening for Oasis' targeted single-ingredient line. Earned media opportunity in wellness press.",
+    },
+  ],
+};
+
+const CLIENT_COMPETITORS: Record<ClientId, { name: string; score: number; trend: string; share: number }[]> = {
+  "luminary-brands": [
+    { name: "Glossier", score: 82, trend: "down", share: 14 },
+    { name: "Charlotte Tilbury", score: 88, trend: "up", share: 17 },
+    { name: "Drunk Elephant", score: 71, trend: "down", share: 9 },
+    { name: "Rare Beauty", score: 86, trend: "up", share: 12 },
+    { name: "Luminary Brands", score: 74, trend: "up", share: 6 },
+  ],
+  "vertex-capital": [
+    { name: "Bain & Company", score: 79, trend: "down", share: 18 },
+    { name: "EY-Parthenon", score: 73, trend: "down", share: 14 },
+    { name: "Lazard", score: 81, trend: "flat", share: 12 },
+    { name: "Rothschild", score: 84, trend: "up", share: 13 },
+    { name: "Vertex Capital Partners", score: 67, trend: "up", share: 5 },
+  ],
+  "aurelius-pe": [
+    { name: "Apollo Global", score: 92, trend: "up", share: 19 },
+    { name: "Permira", score: 88, trend: "up", share: 15 },
+    { name: "Triton Partners", score: 74, trend: "down", share: 11 },
+    { name: "CVC Capital Partners", score: 90, trend: "flat", share: 17 },
+    { name: "Aurelius Private Equity", score: 70, trend: "up", share: 6 },
+  ],
+  "oasis-wellness": [
+    { name: "Holland & Barrett", score: 86, trend: "up", share: 22 },
+    { name: "Heights", score: 79, trend: "up", share: 8 },
+    { name: "AG1 (Athletic Greens)", score: 81, trend: "down", share: 14 },
+    { name: "Wild Nutrition", score: 72, trend: "flat", share: 7 },
+    { name: "Oasis Wellness", score: 64, trend: "up", share: 4 },
+  ],
+};
+
+const CLIENT_MARKET_TREND: Record<ClientId, { month: string; you: number; market: number }[]> = {
+  "luminary-brands": [
+    { month: "Oct", you: 62, market: 70 }, { month: "Nov", you: 65, market: 70 }, { month: "Dec", you: 67, market: 71 },
+    { month: "Jan", you: 70, market: 71 }, { month: "Feb", you: 72, market: 72 }, { month: "Mar", you: 73, market: 72 }, { month: "Apr", you: 74, market: 73 },
+  ],
+  "vertex-capital": [
+    { month: "Oct", you: 52, market: 76 }, { month: "Nov", you: 55, market: 75 }, { month: "Dec", you: 58, market: 74 },
+    { month: "Jan", you: 60, market: 73 }, { month: "Feb", you: 63, market: 73 }, { month: "Mar", you: 65, market: 72 }, { month: "Apr", you: 67, market: 72 },
+  ],
+  "aurelius-pe": [
+    { month: "Oct", you: 60, market: 84 }, { month: "Nov", you: 62, market: 84 }, { month: "Dec", you: 64, market: 85 },
+    { month: "Jan", you: 66, market: 85 }, { month: "Feb", you: 68, market: 86 }, { month: "Mar", you: 69, market: 86 }, { month: "Apr", you: 70, market: 87 },
+  ],
+  "oasis-wellness": [
+    { month: "Oct", you: 54, market: 73 }, { month: "Nov", you: 56, market: 74 }, { month: "Dec", you: 58, market: 74 },
+    { month: "Jan", you: 60, market: 75 }, { month: "Feb", you: 61, market: 76 }, { month: "Mar", you: 63, market: 77 }, { month: "Apr", you: 64, market: 77 },
+  ],
+};
+
+function isValidClientId(value: unknown): value is ClientId {
+  return typeof value === "string" && value in CLIENT_NAME_BY_ID;
+}
+
+function getClientIdFromQuery(req: Request): ClientId | null {
+  const raw = req.query?.clientId;
+  if (typeof raw === "string" && isValidClientId(raw)) return raw;
+  return null;
+}
+
 // ── Engagement P&L endpoints (auth-gated, DB-backed per org) ─────────────────
+
+router.get("/carlota/clients", authMiddleware({ required: false }), async (_req, res) => {
+  try {
+    sendSuccess(res, { clients: SEED_CLIENTS });
+  } catch (err) { handleRouteError(res, err, "Failed to list advisory clients"); }
+});
 
 router.get("/carlota/engagements", authMiddleware(), async (req, res) => {
   try {
     const userId = req.user!.id;
     const orgId = req.user?.orgs[0]?.orgId ?? null;
+    const clientId = getClientIdFromQuery(req);
     const scopeFilter = orgId
       ? eq(carlotaEngagementsTable.organizationId, orgId)
       : eq(carlotaEngagementsTable.createdByUserId, userId);
@@ -851,8 +1052,13 @@ router.get("/carlota/engagements", authMiddleware(), async (req, res) => {
         .orderBy(desc(carlotaEngagementsTable.createdAt));
     }
 
+    const filteredRows = clientId
+      ? rows.filter(r => r.client === CLIENT_NAME_BY_ID[clientId])
+      : rows;
+    const marginHistory = clientId ? CLIENT_MARGIN_HISTORY[clientId] : SEED_MARGIN_HISTORY;
+
     sendSuccess(res, {
-      engagements: rows.map(r => ({
+      engagements: filteredRows.map(r => ({
         ...r,
         id: r.externalId,
         contractedValue: Number(r.contractedValue),
@@ -862,7 +1068,8 @@ router.get("/carlota/engagements", authMiddleware(), async (req, res) => {
         forecastedCost: Number(r.forecastedCost),
         writeOffs: Number(r.writeOffs),
       })),
-      marginHistory: SEED_MARGIN_HISTORY,
+      marginHistory,
+      clientId: clientId ?? null,
       fetchedAt: new Date().toISOString(),
     });
   } catch (err) { handleRouteError(res, err, "Failed to fetch engagements"); }
@@ -933,10 +1140,14 @@ router.get("/carlota/radar-signals", authMiddleware(), async (req, res) => {
   try {
     const userId = req.user!.id;
     const orgId = req.user?.orgs[0]?.orgId ?? null;
+    const clientId = getClientIdFromQuery(req);
     const scopeFilter = orgId
       ? eq(carlotaEngagementsTable.organizationId, orgId)
       : eq(carlotaEngagementsTable.createdByUserId, userId);
-    const engagements = await db.select().from(carlotaEngagementsTable).where(scopeFilter);
+    const allEngagements = await db.select().from(carlotaEngagementsTable).where(scopeFilter);
+    const engagements = clientId
+      ? allEngagements.filter(e => e.client === CLIENT_NAME_BY_ID[clientId])
+      : allEngagements;
     const atRisk = engagements.filter(e =>
       Number(e.contractedValue) > 0 &&
       (Number(e.costToDate) / Number(e.contractedValue) > 0.85 || (e.scopeCreepHours ?? 0) > 30)
@@ -952,11 +1163,16 @@ router.get("/carlota/radar-signals", authMiddleware(), async (req, res) => {
       url: "",
     }));
 
+    const clientCompetitorList = clientId ? CLIENT_COMPETITORS[clientId].map(c => c.name) : null;
     const competitorsParam = typeof req.query.competitors === "string" && req.query.competitors.trim().length > 0
       ? String(req.query.competitors).split(",").map(s => s.trim()).filter(Boolean).slice(0, 12)
       : null;
-    const competitorList = competitorsParam ?? DEFAULT_COMPETITORS.map(c => c.name);
-    const shareLookup = new Map(DEFAULT_COMPETITORS.map(c => [c.name.toLowerCase(), c.share]));
+    const competitorList = competitorsParam ?? clientCompetitorList ?? DEFAULT_COMPETITORS.map(c => c.name);
+    const defaultShareLookup = new Map(DEFAULT_COMPETITORS.map(c => [c.name.toLowerCase(), c.share]));
+    const clientShareLookup = clientId
+      ? new Map(CLIENT_COMPETITORS[clientId].map(c => [c.name.toLowerCase(), c.share]))
+      : null;
+    const shareLookup = (key: string) => clientShareLookup?.get(key) ?? defaultShareLookup.get(key);
 
     const cacheKey = `carlota-radar-news:${competitorList.map(c => c.toLowerCase()).sort().join("|")}`;
     const newsResult = await getCached(cacheKey, 10 * 60 * 1000, async () => {
@@ -967,7 +1183,8 @@ router.get("/carlota/radar-signals", authMiddleware(), async (req, res) => {
     const liveSignals = (newsResult ?? []).slice(0, 30);
     const liveCount = liveSignals.length;
     const useFallback = liveCount === 0;
-    const newsFeedSignals = useFallback ? SEED_RADAR_SIGNALS.map(s => ({ ...s, source: "Carlota Jo intel desk", url: "" })) : liveSignals;
+    const fallbackSeed = clientId ? CLIENT_RADAR_SIGNALS[clientId] : SEED_RADAR_SIGNALS;
+    const newsFeedSignals = useFallback ? fallbackSeed.map(s => ({ ...s, source: "Carlota Jo intel desk", url: "" })) : liveSignals;
 
     const signalCounts = new Map<string, { threats: number; opportunities: number; total: number }>();
     for (const s of liveSignals) {
@@ -981,17 +1198,18 @@ router.get("/carlota/radar-signals", authMiddleware(), async (req, res) => {
 
     const competitorEntries = competitorList.map(name => {
       const c = signalCounts.get(name.toLowerCase()) ?? { threats: 0, opportunities: 0, total: 0 };
-      const score = Math.max(30, Math.min(95, 50 + c.threats * 7 - c.opportunities * 4 + (shareLookup.get(name.toLowerCase()) ?? 5)));
+      const score = Math.max(30, Math.min(95, 50 + c.threats * 7 - c.opportunities * 4 + (shareLookup(name.toLowerCase()) ?? 5)));
       const trend = c.threats > c.opportunities ? "up" : c.opportunities > c.threats ? "down" : "flat";
-      const share = shareLookup.get(name.toLowerCase()) ?? Math.max(2, Math.round(100 / competitorList.length / 1.5));
+      const share = shareLookup(name.toLowerCase()) ?? Math.max(2, Math.round(100 / competitorList.length / 1.5));
       return { name, score, trend, share };
     });
 
+    const clientMarketTrend = clientId ? CLIENT_MARKET_TREND[clientId] : null;
     const months = ["Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr"];
     const baseYou = 56;
     const baseMarket = 62;
     const liveBoost = Math.min(8, Math.round(liveCount / 4));
-    const marketTrend = months.map((m, i) => ({
+    const marketTrend = clientMarketTrend ?? months.map((m, i) => ({
       month: m,
       you: Math.min(95, baseYou + i * 3 + (i === months.length - 1 ? liveBoost : 0)),
       market: Math.min(95, baseMarket + i),
@@ -1007,6 +1225,7 @@ router.get("/carlota/radar-signals", authMiddleware(), async (req, res) => {
       lastUpdated: new Date().toISOString(),
       competitors: competitorEntries,
       marketTrend,
+      clientId: clientId ?? null,
     });
   } catch (err) { handleRouteError(res, err, "Failed to fetch radar signals"); }
 });
@@ -1017,10 +1236,42 @@ router.get("/carlota/roi-metrics", authMiddleware(), async (req, res) => {
   try {
     const userId = req.user!.id;
     const orgId = req.user?.orgs[0]?.orgId ?? null;
+    const clientId = getClientIdFromQuery(req);
     const scopeFilter = orgId
       ? eq(carlotaEngagementsTable.organizationId, orgId)
       : eq(carlotaEngagementsTable.createdByUserId, userId);
-    const engagements = await db.select().from(carlotaEngagementsTable).where(scopeFilter);
+    const allEngagements = await db.select().from(carlotaEngagementsTable).where(scopeFilter);
+    const engagements = clientId
+      ? allEngagements.filter(e => e.client === CLIENT_NAME_BY_ID[clientId])
+      : allEngagements;
+
+    if (clientId) {
+      const caseStudies = SEED_ROI_METRICS.caseStudies.filter(cs =>
+        cs.client === CLIENT_NAME_BY_ID[clientId] ||
+        (clientId === "aurelius-pe" && cs.client === "Aurelius PE")
+      );
+      let portfolioBenchmarks = CLIENT_ROI_BENCHMARKS[clientId];
+      if (engagements.length > 0) {
+        const totalContracted = engagements.reduce((s, e) => s + Number(e.contractedValue), 0);
+        const totalCost = engagements.reduce((s, e) => s + Number(e.costToDate), 0);
+        const blendedMarginPct = totalContracted > 0
+          ? Math.round(((totalContracted - totalCost) / totalContracted) * 100)
+          : portfolioBenchmarks.blendedMarginPct;
+        const avgRateRealisationPct = Math.round(
+          engagements.reduce((s, e) => s + (e.rateRealisationPct ?? 100), 0) / engagements.length
+        );
+        portfolioBenchmarks = { ...portfolioBenchmarks, blendedMarginPct, avgRateRealisationPct };
+      }
+      sendSuccess(res, {
+        caseStudies,
+        portfolioBenchmarks,
+        roiTrendData: CLIENT_ROI_TREND[clientId],
+        clientId,
+        fetchedAt: new Date().toISOString(),
+      });
+      return;
+    }
+
     let portfolioBenchmarks = SEED_ROI_METRICS.portfolioBenchmarks;
     if (engagements.length > 0) {
       const totalContracted = engagements.reduce((s, e) => s + Number(e.contractedValue), 0);
@@ -1037,7 +1288,7 @@ router.get("/carlota/roi-metrics", authMiddleware(), async (req, res) => {
         avgRateRealisationPct,
       };
     }
-    sendSuccess(res, { ...SEED_ROI_METRICS, portfolioBenchmarks, fetchedAt: new Date().toISOString() });
+    sendSuccess(res, { ...SEED_ROI_METRICS, portfolioBenchmarks, clientId: null, fetchedAt: new Date().toISOString() });
   } catch (err) { handleRouteError(res, err, "Failed to fetch ROI metrics"); }
 });
 
