@@ -421,6 +421,9 @@ export async function listBranches(options: {
     status: row.status as ScenarioBranch["status"],
     proofChainId: row.proofChainId,
     correlationId: row.correlationId,
+    metadata: (row.metadata as Record<string, unknown>) ?? null,
+    completedAt: row.completedAt ? row.completedAt.toISOString() : null,
+    createdAt: row.createdAt ? row.createdAt.toISOString() : null,
   }));
 }
 

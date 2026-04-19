@@ -51,68 +51,6 @@ interface AtlasBranchEvent {
   atlasPath: string;
 }
 
-const DEMO_ATLAS_EVENTS: AtlasBranchEvent[] = [
-  {
-    id: "ev-1",
-    domain: "vessels",
-    domainLabel: "Vessels",
-    domainColor: "#06b6d4",
-    type: "branch_activated",
-    title: "Branch WL-DELTA-3 Activated",
-    description: "Pacific Navigator rerouted via Cape of Good Hope — storm avoidance scenario activated by ATLAS Spatial.",
-    severity: "warning",
-    ts: new Date(Date.now() - 14 * 60000).toISOString(),
-    atlasPath: "/vessels/atlas-runtime",
-  },
-  {
-    id: "ev-2",
-    domain: "terra",
-    domainLabel: "Terra",
-    domainColor: "#10b981",
-    type: "scenario_simulation",
-    title: "Williamsburg Submarket Simulation",
-    description: "Cap rate expansion scenario (+85 bps) simulated across 4 property twins. Decision gate pending review.",
-    severity: "info",
-    ts: new Date(Date.now() - 38 * 60000).toISOString(),
-    atlasPath: "/terra/atlas-runtime",
-  },
-  {
-    id: "ev-3",
-    domain: "vessels",
-    domainLabel: "Vessels",
-    domainColor: "#06b6d4",
-    type: "drift_spike",
-    title: "Arctic Breeze Drift Spike — Δ23%",
-    description: "Route memory divergence exceeded threshold. ATLAS flagged for human review before next waypoint.",
-    severity: "critical",
-    ts: new Date(Date.now() - 72 * 60000).toISOString(),
-    atlasPath: "/vessels/atlas-runtime",
-  },
-  {
-    id: "ev-4",
-    domain: "terra",
-    domainLabel: "Terra",
-    domainColor: "#10b981",
-    type: "worldline_merge",
-    title: "WL-ALPHA Merged — 2 Twins Reconciled",
-    description: "Dallas–Fort Worth asset twins reconciled after valuation refresh. Both twins stable on WL-ALPHA.",
-    severity: "info",
-    ts: new Date(Date.now() - 4 * 3600000).toISOString(),
-    atlasPath: "/terra/atlas-runtime",
-  },
-  {
-    id: "ev-5",
-    domain: "vessels",
-    domainLabel: "Vessels",
-    domainColor: "#06b6d4",
-    type: "scenario_simulation",
-    title: "Bay of Bengal Corridor Scenario",
-    description: "3-vessel detour scenario simulated — 18h ETA delay projected. Awaiting operator approval to activate.",
-    severity: "warning",
-    ts: new Date(Date.now() - 6 * 3600000).toISOString(),
-    atlasPath: "/vessels/atlas-runtime",
-  },
-];
 
 const EVENT_TYPE_META: Record<AtlasBranchEvent["type"], { label: string; icon: typeof GitBranch; color: string }> = {
   branch_activated: { label: "Branch Activated", icon: GitBranch, color: "#8b7ac8" },
@@ -188,27 +126,102 @@ function useCrossDomainSummary() {
   });
 }
 
+interface ApiAtlasBranch {
+  id?: number;
+  branchId: string;
+  name: string;
+  description?: string | null;
+  twinId: string;
+  entityId: string;
+  twinCategory: string;
+  status: "pending" | "running" | "completed" | "failed" | "archived";
+  riskAssessment?: string | null;
+  recommendedActions?: string[];
+  parameters?: Record<string, unknown>;
+  deltaMetrics?: Record<string, { before?: unknown; after?: unknown; changePercent?: number }>;
+  confidenceScore?: number;
+  metadata?: Record<string, unknown> | null;
+  completedAt?: string | null;
+  createdAt?: string | null;
+}
+
 interface AtlasBranchesResponse {
-  data: { branches: Array<{ id: string; name: string; status: string; activatedAt?: string; description?: string }> };
+  data: { branches: ApiAtlasBranch[]; count: number };
 }
 
 function useAtlasBranches(twinCategory: "vessel" | "property") {
   return useQuery<AtlasBranchesResponse>({
     queryKey: ["atlas-branches", twinCategory],
     queryFn: () =>
-      fetch(`/api/atlas/spatial/branches?twinCategory=${twinCategory}`)
+      fetch(`/api/atlas/spatial/branches?twinCategory=${twinCategory}&limit=25`)
         .then(r => r.ok ? r.json() : Promise.reject(r.status)),
     staleTime: 60_000,
     retry: 1,
   });
 }
 
+function branchToEvent(b: ApiAtlasBranch): AtlasBranchEvent {
+  const isVessel = b.twinCategory === "vessel";
+  const domain: AtlasBranchEvent["domain"] = isVessel ? "vessels" : "terra";
+  const domainLabel = isVessel ? "Vessels" : "Terra";
+  const domainColor = isVessel ? "#06b6d4" : "#10b981";
+  const atlasPath = isVessel ? "/vessels/atlas-runtime" : "/terra/atlas-runtime";
+
+  let type: AtlasBranchEvent["type"] = "scenario_simulation";
+  if (b.status === "completed") type = "branch_activated";
+  else if (b.status === "archived") type = "worldline_merge";
+  else if (b.status === "failed") type = "drift_spike";
+  else type = "scenario_simulation";
+
+  let severity: AtlasBranchEvent["severity"] = "info";
+  const risk = (b.riskAssessment ?? "").toLowerCase();
+  if (b.status === "failed" || risk.includes("critical") || risk.includes("high")) {
+    severity = "critical";
+  } else if (b.status === "pending" || b.status === "running" || risk.includes("warn") || risk.includes("medium")) {
+    severity = "warning";
+  }
+
+  const description =
+    b.description ??
+    b.riskAssessment ??
+    (b.recommendedActions && b.recommendedActions.length > 0
+      ? b.recommendedActions.join(" • ")
+      : `${b.twinCategory} twin ${b.entityId} — status ${b.status}`);
+
+  const ts = b.completedAt ?? b.createdAt ?? new Date(0).toISOString();
+
+  return {
+    id: b.branchId,
+    domain,
+    domainLabel,
+    domainColor,
+    type,
+    title: b.name,
+    description,
+    severity,
+    ts,
+    atlasPath,
+  };
+}
+
 export function AtlasKpiSection() {
   const { data: runData, isLoading } = useAtlasRunSummary();
   const { data: crossDomain } = useCrossDomainSummary();
-  const { data: vesselBranches } = useAtlasBranches("vessel");
-  const { data: propertyBranches } = useAtlasBranches("property");
+  const { data: vesselBranches, isLoading: vesselsLoading, isError: vesselsError } = useAtlasBranches("vessel");
+  const { data: propertyBranches, isLoading: propertyLoading, isError: propertyError } = useAtlasBranches("property");
   const runSummaries: ApiRunSummary[] = runData?.data ?? [];
+
+  const liveBranches = [
+    ...(vesselBranches?.data?.branches ?? []),
+    ...(propertyBranches?.data?.branches ?? []),
+  ];
+  const liveEvents = liveBranches
+    .map(branchToEvent)
+    .sort((a, b) => new Date(b.ts).getTime() - new Date(a.ts).getTime())
+    .slice(0, 8);
+  const branchesLoading = vesselsLoading || propertyLoading;
+  const branchesPartialError = (vesselsError || propertyError) && !(vesselsError && propertyError);
+  const branchesAllError = vesselsError && propertyError;
 
   const totalTwins = crossDomain?.totals.totalTwins ?? DEMO_SUMMARIES.reduce((s, d) => s + d.twinCount, 0);
   const totalDegraded = crossDomain?.totals.degradedTotal ?? DEMO_SUMMARIES.reduce((s, d) => s + d.degradedCount + d.awaitingCount, 0);
@@ -216,14 +229,15 @@ export function AtlasKpiSection() {
   const stableTotal = crossDomain?.totals.stableTotal ?? DEMO_SUMMARIES.reduce((s, d) => s + d.stableCount, 0);
   const stablePercent = totalTwins > 0 ? Math.round((stableTotal / totalTwins) * 100) : 0;
 
+  const isActiveBranch = (s: ApiAtlasBranch["status"]) => s === "completed" || s === "running";
   const activeBranchesVessels =
-    vesselBranches?.data?.branches?.filter(b => b.status === "active").length ??
+    (vesselBranches?.data?.branches?.filter(b => isActiveBranch(b.status)).length) ??
     crossDomain?.domains?.find(d => d.domain === "vessels")?.activeBranches ??
-    3;
+    0;
   const activeBranchesTerra =
-    propertyBranches?.data?.branches?.filter(b => b.status === "active").length ??
+    (propertyBranches?.data?.branches?.filter(b => isActiveBranch(b.status)).length) ??
     crossDomain?.domains?.find(d => d.domain === "terra")?.activeBranches ??
-    1;
+    0;
 
   return (
     <div
@@ -392,8 +406,29 @@ export function AtlasKpiSection() {
           </div>
         </div>
 
+        {branchesPartialError && (
+          <div
+            className="rounded-xl border px-3 py-2 text-[10px] mb-2"
+            style={{ background: "rgba(245,158,11,0.05)", borderColor: "rgba(245,158,11,0.2)", color: "#f59e0b" }}
+          >
+            {vesselsError ? "Vessels" : "Terra"} ATLAS branch feed temporarily unavailable — showing partial results.
+          </div>
+        )}
+        {liveEvents.length === 0 && (
+          <div
+            className="rounded-xl border px-3 py-4 text-center text-[10px]"
+            style={{ background: "rgba(255,255,255,0.01)", borderColor: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.4)" }}
+          >
+            {branchesLoading
+              ? "Loading recent ATLAS branch activity…"
+              : branchesAllError
+                ? "ATLAS branch feed temporarily unavailable."
+                : "No recent ATLAS branch activations or scenario simulations."}
+          </div>
+        )}
+
         <div className="flex flex-col gap-2">
-          {DEMO_ATLAS_EVENTS.map(ev => {
+          {liveEvents.map(ev => {
             const meta = EVENT_TYPE_META[ev.type];
             const MetaIcon = meta.icon;
             const sev = SEV_STYLE[ev.severity];

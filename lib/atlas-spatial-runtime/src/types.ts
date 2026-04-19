@@ -111,6 +111,9 @@ export interface ScenarioBranch {
   status: "pending" | "running" | "completed" | "failed" | "archived";
   proofChainId?: number | null;
   correlationId?: string | null;
+  metadata?: Record<string, unknown> | null;
+  completedAt?: string | null;
+  createdAt?: string | null;
 }
 
 export interface ScenarioBranchComparison {
