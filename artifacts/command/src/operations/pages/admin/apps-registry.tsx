@@ -1,6 +1,16 @@
 import { useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Boxes, AlertTriangle, Search, Save, Loader2, CheckCircle2 } from "lucide-react";
+import {
+  Boxes,
+  AlertTriangle,
+  Search,
+  Save,
+  Loader2,
+  CheckCircle2,
+  Plus,
+  Trash2,
+  X,
+} from "lucide-react";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
 
@@ -16,6 +26,13 @@ interface AppsResponse {
   apps: AppRow[];
 }
 
+const STATUS_OPTIONS = [
+  { value: "active", label: "Active" },
+  { value: "coming_soon", label: "Coming soon" },
+  { value: "maintenance", label: "Maintenance" },
+  { value: "deprecated", label: "Deprecated" },
+] as const;
+
 const STATUS_COLORS: Record<string, string> = {
   active: "text-[#6b8f71] bg-[#6b8f71]/10",
   coming_soon: "text-[#4a90b8] bg-[#4a90b8]/10",
@@ -23,16 +40,38 @@ const STATUS_COLORS: Record<string, string> = {
   deprecated: "text-muted-foreground bg-muted",
 };
 
+interface NewAppDraft {
+  slug: string;
+  name: string;
+  status: string;
+  ownerTeam: string;
+}
+
+const EMPTY_NEW_APP: NewAppDraft = {
+  slug: "",
+  name: "",
+  status: "coming_soon",
+  ownerTeam: "",
+};
+
 export default function AppsRegistryAdmin() {
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [savedSlug, setSavedSlug] = useState<string | null>(null);
+  const [showNewForm, setShowNewForm] = useState(false);
+  const [newApp, setNewApp] = useState<NewAppDraft>(EMPTY_NEW_APP);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
   const { data, isLoading, error } = useStandardQuery<AppsResponse>({
     queryKey: ["admin-apps-registry"],
     queryFn: () => apiFetch<AppsResponse>("/admin/apps"),
   });
+
+  const invalidate = () => {
+    qc.invalidateQueries({ queryKey: ["admin-apps-registry"] });
+    qc.invalidateQueries({ queryKey: ["deployments"] });
+  };
 
   const saveMutation = useStandardMutation({
     mutationFn: ({ slug, ownerTeam }: { slug: string; ownerTeam: string | null }) =>
@@ -48,8 +87,43 @@ export default function AppsRegistryAdmin() {
       });
       setSavedSlug(updated.slug);
       window.setTimeout(() => setSavedSlug((s) => (s === updated.slug ? null : s)), 1800);
-      qc.invalidateQueries({ queryKey: ["admin-apps-registry"] });
-      qc.invalidateQueries({ queryKey: ["deployments"] });
+      invalidate();
+    },
+  });
+
+  const statusMutation = useStandardMutation({
+    mutationFn: ({ slug, status }: { slug: string; status: string }) =>
+      apiFetch<AppRow>(`/admin/apps/${slug}/status`, {
+        method: "PUT",
+        body: JSON.stringify({ status }),
+      }),
+    onSuccess: () => invalidate(),
+  });
+
+  const createMutation = useStandardMutation({
+    mutationFn: (payload: NewAppDraft) =>
+      apiFetch<AppRow>("/admin/apps", {
+        method: "POST",
+        body: JSON.stringify({
+          slug: payload.slug.trim(),
+          name: payload.name.trim(),
+          status: payload.status,
+          ownerTeam: payload.ownerTeam.trim() || null,
+        }),
+      }),
+    onSuccess: () => {
+      setNewApp(EMPTY_NEW_APP);
+      setShowNewForm(false);
+      invalidate();
+    },
+  });
+
+  const deleteMutation = useStandardMutation({
+    mutationFn: (slug: string) =>
+      apiFetch<{ ok: boolean }>(`/admin/apps/${slug}`, { method: "DELETE" }),
+    onSuccess: () => {
+      setConfirmDelete(null);
+      invalidate();
     },
   });
 
@@ -71,17 +145,38 @@ export default function AppsRegistryAdmin() {
     return Array.from(set).sort();
   }, [apps]);
 
+  const slugLooksValid = /^[a-z0-9][a-z0-9-]*$/.test(newApp.slug.trim());
+  const canCreate =
+    newApp.slug.trim().length >= 2 &&
+    slugLooksValid &&
+    newApp.name.trim().length > 0 &&
+    !createMutation.isPending;
+
   return (
     <div className="space-y-5">
-      <div>
-        <h1 className="text-xl font-display font-bold flex items-center gap-2">
-          <Boxes className="w-5 h-5 text-primary" />
-          App Ownership
-        </h1>
-        <p className="text-xs text-muted-foreground mt-1">
-          Set the owning team for each registered app. The Deployments panel and rollback
-          notifications use this mapping to decide who to page.
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-xl font-display font-bold flex items-center gap-2">
+            <Boxes className="w-5 h-5 text-primary" />
+            App Registry
+          </h1>
+          <p className="text-xs text-muted-foreground mt-1">
+            Add or sunset apps and set the owning team. The Deployments panel and rollback
+            notifications use this mapping to decide who to page.
+          </p>
+        </div>
+        {!error && (
+          <button
+            onClick={() => {
+              setShowNewForm((s) => !s);
+              setNewApp(EMPTY_NEW_APP);
+            }}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono uppercase tracking-wider rounded-md bg-primary/15 border border-primary/30 text-primary hover:bg-primary/25"
+          >
+            {showNewForm ? <X className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
+            {showNewForm ? "Cancel" : "New App"}
+          </button>
+        )}
       </div>
 
       {error ? (
@@ -91,6 +186,95 @@ export default function AppsRegistryAdmin() {
         </div>
       ) : (
         <>
+          {showNewForm && (
+            <div className="rounded-xl border border-primary/30 bg-card p-4 space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                <div>
+                  <label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    Slug
+                  </label>
+                  <input
+                    value={newApp.slug}
+                    onChange={(e) =>
+                      setNewApp((p) => ({ ...p, slug: e.target.value.toLowerCase() }))
+                    }
+                    placeholder="my-new-app"
+                    className="mt-1 w-full px-2.5 py-1.5 text-xs font-mono bg-muted rounded border border-border focus:outline-none focus:ring-1 focus:ring-primary"
+                  />
+                  {newApp.slug && !slugLooksValid && (
+                    <p className="mt-1 text-[10px] text-[#c45a4a]">
+                      Use lowercase letters, numbers, dashes
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    Name
+                  </label>
+                  <input
+                    value={newApp.name}
+                    onChange={(e) => setNewApp((p) => ({ ...p, name: e.target.value }))}
+                    placeholder="My New App"
+                    className="mt-1 w-full px-2.5 py-1.5 text-xs bg-muted rounded border border-border focus:outline-none focus:ring-1 focus:ring-primary"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    Status
+                  </label>
+                  <select
+                    value={newApp.status}
+                    onChange={(e) => setNewApp((p) => ({ ...p, status: e.target.value }))}
+                    className="mt-1 w-full px-2.5 py-1.5 text-xs bg-muted rounded border border-border focus:outline-none focus:ring-1 focus:ring-primary"
+                  >
+                    {STATUS_OPTIONS.map((o) => (
+                      <option key={o.value} value={o.value}>
+                        {o.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    Owning team (optional)
+                  </label>
+                  <input
+                    list="known-teams"
+                    value={newApp.ownerTeam}
+                    onChange={(e) =>
+                      setNewApp((p) => ({ ...p, ownerTeam: e.target.value }))
+                    }
+                    placeholder="Platform"
+                    className="mt-1 w-full px-2.5 py-1.5 text-xs bg-muted rounded border border-border focus:outline-none focus:ring-1 focus:ring-primary"
+                  />
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                {createMutation.error ? (
+                  <span className="text-[11px] text-[#c45a4a]">
+                    {(createMutation.error as Error).message}
+                  </span>
+                ) : (
+                  <span className="text-[11px] text-muted-foreground">
+                    The new app appears in the deployments panel immediately.
+                  </span>
+                )}
+                <button
+                  disabled={!canCreate}
+                  onClick={() => createMutation.mutate(newApp)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-mono uppercase tracking-wider rounded-md bg-primary/15 border border-primary/30 text-primary disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {createMutation.isPending ? (
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                  ) : (
+                    <Plus className="w-3 h-3" />
+                  )}
+                  Add app
+                </button>
+              </div>
+            </div>
+          )}
+
           <div className="relative max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
             <input
@@ -125,6 +309,11 @@ export default function AppsRegistryAdmin() {
                     const saving =
                       saveMutation.isPending &&
                       saveMutation.variables?.slug === app.slug;
+                    const statusChanging =
+                      statusMutation.isPending &&
+                      statusMutation.variables?.slug === app.slug;
+                    const deleting =
+                      deleteMutation.isPending && deleteMutation.variables === app.slug;
                     return (
                       <tr key={app.slug} className="hover:bg-muted/30">
                         <td className="px-4 py-3">
@@ -134,13 +323,32 @@ export default function AppsRegistryAdmin() {
                           </code>
                         </td>
                         <td className="px-4 py-3">
-                          <span
-                            className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
-                              STATUS_COLORS[app.status] ?? "text-muted-foreground bg-muted"
-                            }`}
-                          >
-                            {app.status.replace(/_/g, " ")}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span
+                              className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
+                                STATUS_COLORS[app.status] ?? "text-muted-foreground bg-muted"
+                              }`}
+                            >
+                              {app.status.replace(/_/g, " ")}
+                            </span>
+                            <select
+                              disabled={statusChanging}
+                              value={app.status}
+                              onChange={(e) =>
+                                statusMutation.mutate({
+                                  slug: app.slug,
+                                  status: e.target.value,
+                                })
+                              }
+                              className="text-[10px] bg-transparent text-muted-foreground border border-border rounded px-1 py-0.5 focus:outline-none focus:ring-1 focus:ring-primary"
+                            >
+                              {STATUS_OPTIONS.map((o) => (
+                                <option key={o.value} value={o.value}>
+                                  {o.label}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
                         </td>
                         <td className="px-4 py-3">
                           <input
@@ -154,29 +362,61 @@ export default function AppsRegistryAdmin() {
                           />
                         </td>
                         <td className="px-4 py-3 text-right">
-                          {savedSlug === app.slug ? (
-                            <span className="inline-flex items-center gap-1 text-[11px] text-[#6b8f71]">
-                              <CheckCircle2 className="w-3.5 h-3.5" /> Saved
-                            </span>
-                          ) : (
-                            <button
-                              onClick={() =>
-                                saveMutation.mutate({
-                                  slug: app.slug,
-                                  ownerTeam: value.trim() ? value.trim() : null,
-                                })
-                              }
-                              disabled={!dirty || saving}
-                              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-mono uppercase tracking-wider rounded-md bg-primary/15 border border-primary/30 text-primary disabled:opacity-40 disabled:cursor-not-allowed"
-                            >
-                              {saving ? (
-                                <Loader2 className="w-3 h-3 animate-spin" />
-                              ) : (
-                                <Save className="w-3 h-3" />
-                              )}
-                              Save
-                            </button>
-                          )}
+                          <div className="inline-flex items-center gap-1.5 justify-end">
+                            {savedSlug === app.slug ? (
+                              <span className="inline-flex items-center gap-1 text-[11px] text-[#6b8f71]">
+                                <CheckCircle2 className="w-3.5 h-3.5" /> Saved
+                              </span>
+                            ) : (
+                              <button
+                                onClick={() =>
+                                  saveMutation.mutate({
+                                    slug: app.slug,
+                                    ownerTeam: value.trim() ? value.trim() : null,
+                                  })
+                                }
+                                disabled={!dirty || saving}
+                                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-mono uppercase tracking-wider rounded-md bg-primary/15 border border-primary/30 text-primary disabled:opacity-40 disabled:cursor-not-allowed"
+                              >
+                                {saving ? (
+                                  <Loader2 className="w-3 h-3 animate-spin" />
+                                ) : (
+                                  <Save className="w-3 h-3" />
+                                )}
+                                Save
+                              </button>
+                            )}
+                            {confirmDelete === app.slug ? (
+                              <>
+                                <button
+                                  onClick={() => deleteMutation.mutate(app.slug)}
+                                  disabled={deleting}
+                                  className="inline-flex items-center gap-1 px-2 py-1.5 text-[11px] font-mono uppercase tracking-wider rounded-md bg-[#c45a4a]/15 border border-[#c45a4a]/40 text-[#c45a4a] disabled:opacity-40"
+                                >
+                                  {deleting ? (
+                                    <Loader2 className="w-3 h-3 animate-spin" />
+                                  ) : (
+                                    <Trash2 className="w-3 h-3" />
+                                  )}
+                                  Confirm
+                                </button>
+                                <button
+                                  onClick={() => setConfirmDelete(null)}
+                                  className="inline-flex items-center px-2 py-1.5 text-[11px] font-mono uppercase tracking-wider rounded-md border border-border text-muted-foreground hover:bg-muted"
+                                >
+                                  <X className="w-3 h-3" />
+                                </button>
+                              </>
+                            ) : (
+                              <button
+                                onClick={() => setConfirmDelete(app.slug)}
+                                title="Remove from registry"
+                                className="inline-flex items-center px-2 py-1.5 text-[11px] font-mono uppercase tracking-wider rounded-md border border-border text-muted-foreground hover:text-[#c45a4a] hover:border-[#c45a4a]/40"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </button>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     );
@@ -204,6 +444,16 @@ export default function AppsRegistryAdmin() {
           {saveMutation.error ? (
             <div className="text-xs text-[#c45a4a]">
               Failed to save: {(saveMutation.error as Error).message}
+            </div>
+          ) : null}
+          {deleteMutation.error ? (
+            <div className="text-xs text-[#c45a4a]">
+              Failed to delete: {(deleteMutation.error as Error).message}
+            </div>
+          ) : null}
+          {statusMutation.error ? (
+            <div className="text-xs text-[#c45a4a]">
+              Failed to update status: {(statusMutation.error as Error).message}
             </div>
           ) : null}
         </>
