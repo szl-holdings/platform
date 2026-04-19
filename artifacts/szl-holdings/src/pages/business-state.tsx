@@ -83,7 +83,11 @@ function applyPatchLocal(prev: ActionStore, patch: ActionStorePatch): ActionStor
   return next;
 }
 
-const POLL_INTERVAL_MS = 4000;
+// Polling cadence used as a safety net when the SSE stream is unavailable
+// (e.g. the connection failed to open or the browser dropped it). While the
+// stream is live, polling is paused so it stays effectively idle.
+const POLL_INTERVAL_MS = 15000;
+const STREAM_URL = `${STORE_URL}/stream`;
 
 function storesEqual(a: ActionStore, b: ActionStore): boolean {
   try { return JSON.stringify(a) === JSON.stringify(b); } catch { return false; }
@@ -92,6 +96,16 @@ function storesEqual(a: ActionStore, b: ActionStore): boolean {
 function useActionStore() {
   const [store, setStore] = useState<ActionStore>(readCache);
   const pendingRef = useRef(0);
+  const streamConnectedRef = useRef(false);
+
+  const applyServer = useCallback((server: Partial<ActionStore>) => {
+    const merged = { ...emptyStore(), ...server };
+    setStore(prev => {
+      if (storesEqual(prev, merged)) return prev;
+      writeCache(merged);
+      return merged;
+    });
+  }, []);
 
   const refresh = useCallback(async () => {
     if (pendingRef.current > 0) return;
@@ -99,26 +113,45 @@ function useActionStore() {
       const r = await fetch(STORE_URL, { credentials: "include" });
       if (!r.ok) return;
       const json = await r.json();
-      const server = (json.data ?? json) as Partial<ActionStore>;
-      const merged = { ...emptyStore(), ...server };
-      setStore(prev => {
-        if (storesEqual(prev, merged)) return prev;
-        writeCache(merged);
-        return merged;
-      });
+      applyServer((json.data ?? json) as Partial<ActionStore>);
     } catch { /* keep cached store */ }
-  }, []);
+  }, [applyServer]);
 
   useEffect(() => {
     refresh();
-    const id = window.setInterval(refresh, POLL_INTERVAL_MS);
+
+    // Primary sync channel — Server-Sent Events push the full store within
+    // ~100ms of any teammate's change. EventSource auto-reconnects on drop.
+    let es: EventSource | null = null;
+    try {
+      es = new EventSource(STREAM_URL, { withCredentials: true });
+      es.addEventListener("store", (ev: MessageEvent) => {
+        streamConnectedRef.current = true;
+        if (pendingRef.current > 0) return; // local optimistic write in flight
+        try {
+          const data = JSON.parse(ev.data) as Partial<ActionStore>;
+          applyServer(data);
+        } catch { /* ignore malformed frame */ }
+      });
+      es.onopen = () => { streamConnectedRef.current = true; };
+      es.onerror = () => { streamConnectedRef.current = false; };
+    } catch {
+      streamConnectedRef.current = false;
+    }
+
+    // Polling safety net — only fires when the stream isn't currently
+    // connected, so it stays idle during normal operation.
+    const id = window.setInterval(() => {
+      if (!streamConnectedRef.current) refresh();
+    }, POLL_INTERVAL_MS);
     const onVis = () => { if (document.visibilityState === "visible") refresh(); };
     document.addEventListener("visibilitychange", onVis);
     return () => {
       window.clearInterval(id);
       document.removeEventListener("visibilitychange", onVis);
+      if (es) es.close();
     };
-  }, [refresh]);
+  }, [refresh, applyServer]);
 
   const patch = useCallback((partial: ActionStorePatch) => {
     setStore(prev => {

@@ -11,9 +11,15 @@
  *
  * Endpoints (public, unauthenticated — same model as the rest of the
  * Business State / Enterprise State demo surfaces):
- *   GET   /api/action-store   — return the current shared store
- *   PATCH /api/action-store   — merge a partial update into the store and
- *                                return the resulting full store
+ *   GET    /api/action-store         — return the current shared store
+ *   PATCH  /api/action-store         — merge a partial update into the store
+ *                                       and return the resulting full store
+ *   GET    /api/action-store/stream  — Server-Sent Events stream that pushes
+ *                                       the store to every open page within
+ *                                       ~100ms of any change. The HTTP polling
+ *                                       on /api/action-store stays in place as
+ *                                       a safety net, but goes effectively idle
+ *                                       while a stream connection is live.
  *
  * Storage: a single JSONB row in platform_settings
  *   namespace = "szl.actionStore"
@@ -125,6 +131,28 @@ function mergePatch(current: ActionStore, patch: Record<string, unknown>): Actio
   return next;
 }
 
+// ── In-process pub/sub for SSE subscribers ───────────────────────────────────
+//
+// The Business State / Enterprise State pages run against a single API server
+// instance, so a Set of Response objects is sufficient. If this ever moves
+// behind a horizontally-scaled deployment, swap this for a Postgres LISTEN /
+// NOTIFY (or Redis pub/sub) bridge so every instance broadcasts to its own
+// subscribers.
+
+const subscribers = new Set<Response>();
+
+function broadcast(store: ActionStore): void {
+  if (subscribers.size === 0) return;
+  const payload = `event: store\ndata: ${JSON.stringify(store)}\n\n`;
+  for (const res of subscribers) {
+    try {
+      res.write(payload);
+    } catch {
+      // Best-effort: dead sockets are cleaned up by the close handler.
+    }
+  }
+}
+
 const router: IRouter = Router();
 
 router.get("/action-store", async (_req: Request, res: Response) => {
@@ -134,6 +162,51 @@ router.get("/action-store", async (_req: Request, res: Response) => {
   } catch (err) {
     handleRouteError(res, err, "Failed to load action store");
   }
+});
+
+router.get("/action-store/stream", async (req: Request, res: Response) => {
+  // Server-Sent Events: long-lived response that pushes the full store to the
+  // client every time PATCH /action-store mutates it. Clients use this as the
+  // primary sync channel; the polling on GET /action-store stays as a safety
+  // net but goes effectively idle while a stream is connected.
+  res.status(200);
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache, no-transform");
+  res.setHeader("Connection", "keep-alive");
+  res.setHeader("X-Accel-Buffering", "no");
+  res.flushHeaders?.();
+
+  // Suggest a slow client-side reconnect — EventSource defaults to ~3s which
+  // is fine, but spelling it out makes the safety net behaviour explicit.
+  res.write("retry: 3000\n\n");
+
+  // Initial snapshot so the client doesn't need a separate GET on connect.
+  try {
+    const initial = await loadStore();
+    res.write(`event: store\ndata: ${JSON.stringify(initial)}\n\n`);
+  } catch {
+    res.write(`event: store\ndata: ${JSON.stringify(EMPTY_STORE)}\n\n`);
+  }
+
+  subscribers.add(res);
+
+  // Heartbeat to keep proxies / load balancers from killing the idle socket.
+  const heartbeat = setInterval(() => {
+    try {
+      res.write(": ping\n\n");
+    } catch {
+      // ignore — close handler will clean up
+    }
+  }, 25000);
+
+  const cleanup = () => {
+    clearInterval(heartbeat);
+    subscribers.delete(res);
+  };
+  req.on("close", cleanup);
+  req.on("error", cleanup);
+  res.on("close", cleanup);
+  res.on("error", cleanup);
 });
 
 router.patch(
@@ -154,6 +227,9 @@ router.patch(
       const next = mergePatch(current, body);
       await saveStore(next);
       sendSuccess(res, next);
+      // Push to every open SSE subscriber so other open Business State /
+      // Enterprise State pages reflect the change within ~100ms.
+      broadcast(next);
     } catch (err) {
       handleRouteError(res, err, "Failed to update action store");
     }

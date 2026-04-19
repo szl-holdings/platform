@@ -65,6 +65,7 @@ const PUBLIC_EXACT_PATHS = new Set([
   // so risk owner assignments and decisions sync across team members. Public
   // and unauthenticated like the rest of those demo surfaces.
   "/api/action-store",
+  "/api/action-store/stream",
   // Lyte legacy surfaces — read-only public GET endpoints backing the 5
   // decision-intelligence pages (Ownership Drift, Pressure Map, Action Debt
   // Index, Decision Replay, Board View). See routes/lyte-surfaces.ts.
