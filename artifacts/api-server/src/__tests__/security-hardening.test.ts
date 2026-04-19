@@ -113,17 +113,28 @@ describe("timingSafeEqual token comparison — HMAC digest approach", () => {
     expect(timingSafeEqual(digest(secret), digest(tampered))).toBe(false);
   });
 
-  it("admin-guard source uses createHmac + timingSafeEqual (not Buffer.equals or raw length compare)", async () => {
+  it("internal-token comparison source uses createHmac + timingSafeEqual (not Buffer.equals or raw length compare)", async () => {
+    // Internal-token comparison was extracted from admin-guard into the
+    // scoped registry (lib/internal-tokens.ts) as part of GAP-016. The
+    // architectural property — constant-time HMAC digest comparison, no
+    // length side-channel — is enforced there now and consumed by
+    // admin-guard, csrf, global-auth-enforcer, and auth.
     const { readFileSync } = await import("fs");
     const { fileURLToPath } = await import("url");
     const { dirname, resolve } = await import("path");
     const dir = dirname(fileURLToPath(import.meta.url));
-    const src = readFileSync(resolve(dir, "../middlewares/admin-guard.ts"), "utf8");
+    const src = readFileSync(resolve(dir, "../lib/internal-tokens.ts"), "utf8");
     expect(src).toContain("createHmac");
     expect(src).toContain("timingSafeEqual");
     expect(src).not.toMatch(/\.equals\s*\(/);
     // Confirm no early-exit branch on byteLength (the length side-channel pattern)
     expect(src).not.toMatch(/byteLength\s*!==\s*byteLength/);
+
+    // And admin-guard must still delegate to the scoped registry (no
+    // local raw-string compare slipped in).
+    const adminSrc = readFileSync(resolve(dir, "../middlewares/admin-guard.ts"), "utf8");
+    expect(adminSrc).toMatch(/verifyInternalHeader|matchInternalToken/);
+    expect(adminSrc).not.toMatch(/\.equals\s*\(/);
   });
 });
 
@@ -234,16 +245,18 @@ describe("globalAuthEnforcer — deny-by-default", () => {
     expect(res.status).toBe(200);
   });
 
-  it("allows internal token access", async () => {
+  it("allows internal token access on a legacy-allowed prefix", async () => {
     const tokenApp = express();
     tokenApp.use(express.json());
     const token = "a".repeat(32);
     process.env.ALLOY_INTERNAL_TOKEN = token;
     tokenApp.use(globalAuthEnforcer as express.RequestHandler);
-    tokenApp.get("/api/secret", successHandler);
+    // GAP-016: legacy ALLOY_INTERNAL_TOKEN is now path-restricted to its
+    // historical surface (`/api/internal/`, `/api/alloy/agent/`, etc).
+    tokenApp.get("/api/internal/secret", successHandler);
 
     const res = await request(tokenApp)
-      .get("/api/secret")
+      .get("/api/internal/secret")
       .set("x-internal-token", token);
     expect(res.status).toBe(200);
 

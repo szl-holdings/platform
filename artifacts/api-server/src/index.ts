@@ -44,6 +44,7 @@ import { providerHealth } from "./lib/provider-health";
 import { startEmbeddingWorker, stopEmbeddingWorker, getWorkerStatus } from "./lib/embedding-worker";
 import { initIngestionFramework } from "./lib/ingestion-framework";
 import { registerAnalyticsJobHandlers } from "./lib/analytics-jobs";
+import { registerQueuedJobHandlers } from "./lib/queued-jobs";
 import { runAlertRuleEvaluation } from "./routes/ops-management";
 import { initializeAlloyDomainEventSubscriptions } from "./lib/domain-events/alloy-wiring.js";
 import { startIntelligenceFeeds, stopIntelligenceFeeds } from "./lib/intelligence-feeds-init";
@@ -90,6 +91,7 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
   providerHealth.startActiveProbes();
   registerAllPrismJobHandlers();
   registerAnalyticsJobHandlers();
+  registerQueuedJobHandlers();
   const prismPoller = startPrismJobPoller(5000);
 
   const memoryMonitor = setInterval(() => {

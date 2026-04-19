@@ -1,45 +1,38 @@
-import { createHmac, timingSafeEqual } from "crypto";
 import type { Request, Response, NextFunction } from "express";
 import { getSessionToken, getSessionUser } from "../lib/auth";
 import { sendUnauthorized, sendForbidden, sendError } from "../lib/api-response";
 import type { RoleName } from "@szl-holdings/db";
 import { logger } from "../lib/logger";
+import { verifyInternalHeader, tokenHasScope } from "../lib/internal-tokens";
 
 const ADMIN_ROLES: RoleName[] = ["super_admin", "ops", "exec"];
 
 /**
- * Fixed-size HMAC digest of a string value.
- * By hashing both the secret and the header with the same key, both outputs
- * are always 32 bytes regardless of input length.  This eliminates the
- * length side-channel that would leak whether the header length matches the
- * configured secret length before the constant-time comparison runs.
- */
-const TOKEN_HMAC_KEY = Buffer.from("szl-internal-token-comparison-key", "utf8");
-function tokenDigest(val: string): Buffer {
-  return createHmac("sha256", TOKEN_HMAC_KEY).update(Buffer.from(val, "utf8")).digest();
-}
-
-/**
- * Check whether the request carries the platform-internal service token.
- * Server-to-server calls (e.g., AlloyChat → admin endpoints) must include
- * `x-internal-token: <ALLOY_INTERNAL_TOKEN>` in the request headers.
- * This is the only non-user bypass path — requires explicit configuration.
+ * Check whether the request carries an authorized internal service token for
+ * an admin route. Tokens come from the scoped registry (see internal-tokens.ts
+ * and docs/SECRETS_POLICY.md). Admin routes require `internal:write` scope.
  *
- * Comparison uses HMAC digests via timingSafeEqual to prevent both timing
- * and length side-channel attacks.
+ * Note: the legacy ALLOY_INTERNAL_TOKEN intentionally does NOT carry
+ * `internal:write` (and is not on this route's path allowlist), so a legacy
+ * token cannot bypass admin-guard. Only scoped tokens that explicitly declare
+ * `internal:write` and include the admin route in their `pathPrefixes` pass
+ * here. This is the GAP-016 closure criterion for admin/global bypass
+ * containment.
  */
 function hasInternalServiceToken(req: Request): boolean {
-  const internalSecret = process.env.ALLOY_INTERNAL_TOKEN;
-  if (!internalSecret) return false;
-
   const header = req.headers["x-internal-token"] as string | undefined;
-  if (!header) return false;
-
-  try {
-    return timingSafeEqual(tokenDigest(internalSecret), tokenDigest(header));
-  } catch {
+  // Use originalUrl so path-prefix scoping is checked against the externally-
+  // visible path, not the router-relative path (req.path strips the mount).
+  const match = verifyInternalHeader(header, req.originalUrl || req.url);
+  if (!match) return false;
+  if (!tokenHasScope(match.context, "internal:write")) {
+    logger.warn(
+      { tokenName: match.context.name, path: req.path, scopes: Array.from(match.context.scopes) },
+      "[admin-guard] Internal token rejected — missing internal:write scope"
+    );
     return false;
   }
+  return true;
 }
 
 export function adminGuard(req: Request, res: Response, next: NextFunction): void {

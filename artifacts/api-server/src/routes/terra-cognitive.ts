@@ -4,6 +4,7 @@ import rateLimit from "express-rate-limit";
 import multer from "multer";
 import { sendSuccess, sendError, sendBadRequest, sendUnauthorized, sendCreated, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
+import { verifyInternalHeader, tokenHasScope } from "../lib/internal-tokens";
 import {
   queryNodes,
   queryEdges,
@@ -1085,17 +1086,13 @@ router.post("/terra/cognitive/covenants/seed", cogLimit, auth, validateBody(json
 
 router.post("/terra/cognitive/covenants/submit-review", cogLimit, validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
-    // Internal-token auth: only agents/schedulers may call this mutation
-    const envToken = process.env["ALLOY_INTERNAL_TOKEN"];
+    // GAP-016: scoped-token auth via the central registry. Replaces an
+    // inline raw-string compare with the constant-time HMAC digest path
+    // and enforces a per-domain scope (`agent:write` — covenant submission
+    // is an agent/scheduler-only mutation).
     const reqToken = req.headers["x-internal-token"] as string | undefined;
-    let authorized = false;
-    if (envToken && reqToken && envToken.length === reqToken.length) {
-      let diff = 0;
-      for (let i = 0; i < envToken.length; i++) {
-        diff |= envToken.charCodeAt(i) ^ reqToken.charCodeAt(i);
-      }
-      authorized = diff === 0;
-    }
+    const match = verifyInternalHeader(reqToken, req.originalUrl || req.url);
+    const authorized = match !== null && tokenHasScope(match.context, "agent:write");
     if (!authorized && !req.user) {
       sendUnauthorized(res, "Authentication required");
       return;

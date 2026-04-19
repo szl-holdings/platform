@@ -194,7 +194,8 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_LYTE_DIGEST, async (job) => {
     const { db } = await import("@szl-holdings/db");
     const { notificationPreferencesTable, notificationsTable, usersTable } = await import("@szl-holdings/db");
     const { eq, and, gte, desc } = await import("drizzle-orm");
-    const { sendEmail, buildNotificationDigestEmail } = await import("./email");
+    const { buildNotificationDigestEmail } = await import("./email");
+    const { queueEmail } = await import("./queued-jobs");
 
     const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
@@ -248,7 +249,12 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_LYTE_DIGEST, async (job) => {
 
         const dateLabel = new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
 
-        const result = await sendEmail({
+        // GAP-017: enqueue durably. The digest job touches up to thousands
+        // of recipients on a single tick — if the API server restarts mid-
+        // loop, every email after the restart point would have been lost
+        // when called inline. Queueing means each email is independently
+        // retried with exponential backoff and survives a restart.
+        await queueEmail({
           to: recipient.email,
           subject: `Your Daily Digest — ${dateLabel}`,
           html: buildNotificationDigestEmail({
@@ -264,13 +270,7 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_LYTE_DIGEST, async (job) => {
           }),
           text: `Your Daily Digest (${dateLabel}) — ${notifications.length} unread notification(s). Log in to review them at ${process.env.APP_URL || "https://szlholdings.com"}.`,
         });
-
-        if (result.success) {
-          sent++;
-        } else {
-          failed++;
-          logger.warn({ userId: recipient.userId, error: result.error }, "daily_lyte_digest: provider rejected digest email");
-        }
+        sent++;
       } catch (err) {
         failed++;
         logger.warn({ err, userId: recipient.userId }, "daily_lyte_digest: failed to send digest to user");
@@ -590,7 +590,7 @@ durableJobQueue.register(NAMED_JOB_TYPES.WEEKLY_ECOSYSTEM_HEALTH_BRIEFING, async
   const weekOf = payload.weekOf ?? now.toISOString().split("T")[0];
 
   try {
-    const { dispatchExternalAlert } = await import("./notification-dispatch");
+    const { queueExternalAlert } = await import("./queued-jobs");
 
     // ── Fetch live metrics from autopilot data sources ──────────────────────
 
@@ -649,7 +649,9 @@ durableJobQueue.register(NAMED_JOB_TYPES.WEEKLY_ECOSYSTEM_HEALTH_BRIEFING, async
       `View full Autopilot dashboard: /szl-holdings/autopilot`,
     ].join("\n");
 
-    await dispatchExternalAlert({
+    // GAP-017: enqueue durably so a server restart between briefing
+    // generation and Slack/Teams/email fanout does not lose the briefing.
+    await queueExternalAlert({
       appName: "Ecosystem Autopilot",
       title: `Weekly Health Briefing — ${weekOf}`,
       message: briefingText,
@@ -664,6 +666,26 @@ durableJobQueue.register(NAMED_JOB_TYPES.WEEKLY_ECOSYSTEM_HEALTH_BRIEFING, async
       success: true,
       metadata: { weekOf, sections: briefingSections.length, activeJobs, failedJobs },
     });
+
+    // GAP-017: enqueue a fire-and-forget AI inference to generate
+    // next-week predictions for the briefing. Routed through the durable
+    // AI queue so a server restart does not lose it and so it is retried
+    // with backoff on transient provider failure.
+    try {
+      const { queueAiInference } = await import("./queued-jobs");
+      await queueAiInference({
+        agentId: "ecosystem-autopilot-weekly-predictions",
+        domain: "autopilot",
+        strategy: "fastest",
+        maxTokens: 600,
+        messages: [
+          { role: "system", content: "You are the SZL Holdings ecosystem autopilot. Given a weekly health briefing, produce 3 short bullet predictions for the coming week." },
+          { role: "user", content: briefingText },
+        ],
+      });
+    } catch (predictErr) {
+      logger.warn({ err: predictErr, weekOf }, "weekly_ecosystem_health_briefing: queueAiInference for predictions failed (non-fatal)");
+    }
 
     updateRegistry(NAMED_JOB_TYPES.WEEKLY_ECOSYSTEM_HEALTH_BRIEFING, { lastStatus: "completed", lastDurationMs: Date.now() - start });
     logger.info({ jobId: job.id, weekOf }, "weekly_ecosystem_health_briefing: complete");
@@ -858,7 +880,8 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_PROOF_CHAIN_DIGEST, async (job) =
       logger.warn({ jobId: job.id }, "daily_proof_chain_digest: email channel requested but no recipients");
     } else {
     try {
-      const { sendEmail, hasEmailProviderConfigured } = await import("./email");
+      const { hasEmailProviderConfigured } = await import("./email");
+      const { queueEmail } = await import("./queued-jobs");
       if (!hasEmailProviderConfigured()) {
         emailFailed += emailRecipients.length;
         errors.push("email: no provider configured");
@@ -880,22 +903,19 @@ pre{white-space:pre-wrap;word-wrap:break-word;font-family:ui-monospace,SFMono-Re
 
         for (const to of emailRecipients) {
           try {
-            const result = await sendEmail({
+            // GAP-017: enqueue durably so digest emails to compliance
+            // recipients survive an API restart and get retries.
+            await queueEmail({
               to,
               subject: `Proof Chain Digest — ${dateLabel}`,
               html,
               text: markdown,
             });
-            if (result.success) emailSent++;
-            else {
-              emailFailed++;
-              errors.push(`email[${to}]: ${result.error ?? "unknown"}`);
-              logger.warn({ jobId: job.id, to, error: result.error }, "daily_proof_chain_digest: email provider rejected");
-            }
+            emailSent++;
           } catch (err) {
             emailFailed++;
             errors.push(`email[${to}]: ${String(err)}`);
-            logger.warn({ err, jobId: job.id, to }, "daily_proof_chain_digest: email send threw");
+            logger.warn({ err, jobId: job.id, to }, "daily_proof_chain_digest: queueEmail threw");
           }
         }
       }

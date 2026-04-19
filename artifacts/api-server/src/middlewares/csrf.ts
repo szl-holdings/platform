@@ -2,15 +2,7 @@ import { type Request, type Response, type NextFunction } from "express";
 import { randomBytes } from "crypto";
 import { logger } from "../lib/logger";
 import { sendError } from "../lib/api-response";
-
-function safeEqual(a: string, b: string): boolean {
-  if (a.length !== b.length) return false;
-  let diff = 0;
-  for (let i = 0; i < a.length; i++) {
-    diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  }
-  return diff === 0;
-}
+import { verifyInternalHeader } from "../lib/internal-tokens";
 
 const CSRF_COOKIE = "csrf_token";
 const CSRF_HEADER = "x-csrf-token";
@@ -117,15 +109,12 @@ function timingSafeEqual(a: string, b: string): boolean {
 
 export function csrfMiddleware(req: Request, res: Response, next: NextFunction): void {
   // Internal service-to-service requests carry x-internal-token instead of a
-  // browser CSRF cookie — bypass CSRF enforcement for them.
-  const internalToken = process.env["ALLOY_INTERNAL_TOKEN"];
-  if (internalToken) {
-    const header = req.headers["x-internal-token"] as string | undefined;
-    if (header) {
-      if (safeEqual(internalToken, header)) {
-        return next();
-      }
-    }
+  // browser CSRF cookie — bypass CSRF enforcement for them. The token must
+  // be present in the scoped registry (or the legacy ALLOY_INTERNAL_TOKEN env
+  // var) and the request path must be in the token's allowed prefixes.
+  const internalHeader = req.headers["x-internal-token"] as string | undefined;
+  if (internalHeader && verifyInternalHeader(internalHeader, req.originalUrl || req.url)) {
+    return next();
   }
 
   // API clients (mobile apps, CLI tools) that authenticate via bearer token do

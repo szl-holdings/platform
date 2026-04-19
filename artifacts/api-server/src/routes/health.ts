@@ -3,17 +3,36 @@ import { HealthCheckResponse } from "@szl-holdings/api-zod";
 import { getBackupHealthStatus } from "../lib/backup-service";
 import { pool } from "@szl-holdings/db";
 import { adminGuard } from "../middlewares/admin-guard";
+import { verifyInternalHeader, tokenHasScope } from "../lib/internal-tokens";
 import { Sentry } from "../lib/sentry";
 
 /**
- * Apply adminGuard in production environments.
+ * Apply a lightweight diagnostics guard in production environments.
  * In development/staging the endpoint is accessible without auth so local
  * operators and integration tests can reach diagnostics without a session.
  * Set APP_ENV=production or NODE_ENV=production to activate the guard.
+ *
+ * Production policy (GAP-016):
+ *   - An internal token (scoped or legacy) with `health:read` scope is
+ *     accepted. The legacy ALLOY_INTERNAL_TOKEN carries `health:read` by
+ *     default and `/health/detailed` is in its path allowlist.
+ *   - Otherwise, fall back to `adminGuard` (which requires an authenticated
+ *     ops/super_admin/exec session).
  */
 const IS_PRODUCTION = process.env.NODE_ENV === "production" || process.env.APP_ENV === "production";
+function healthDiagnosticsGuard(req: Request, res: Response, next: NextFunction): void {
+  const header = req.headers["x-internal-token"] as string | undefined;
+  if (header) {
+    const match = verifyInternalHeader(header, req.originalUrl || req.url);
+    if (match && tokenHasScope(match.context, "health:read")) {
+      next();
+      return;
+    }
+  }
+  adminGuard(req, res, next);
+}
 const productionAdminGuard = IS_PRODUCTION
-  ? adminGuard
+  ? healthDiagnosticsGuard
   : (_req: Request, _res: Response, next: NextFunction) => next();
 
 const router: IRouter = Router();

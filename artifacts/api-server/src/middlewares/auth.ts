@@ -7,6 +7,12 @@ import { ROLE_HIERARCHY, isReadOnlyRole, toCanonicalRole } from "@szl-holdings/d
 import { serverTelemetry } from "@szl-holdings/observability";
 import { logger } from "../lib/logger";
 import { getSessionMinCreatedAt } from "./session-policy";
+import {
+  verifyInternalHeader,
+  type InternalAgentContext,
+  type InternalScope,
+  tokenHasScope,
+} from "../lib/internal-tokens";
 
 export interface OrgMembership {
   orgId: number;
@@ -28,17 +34,35 @@ declare global {
     interface Request {
       user?: AuthenticatedUser;
       isInternalAgent?: boolean;
+      internalAgent?: InternalAgentContext;
     }
   }
 }
 
-const INTERNAL_AGENT_USER: AuthenticatedUser = {
-  id: 0,
-  displayName: "Internal Agent",
-  email: null,
-  roles: ["super_admin"],
-  orgs: [],
-};
+/**
+ * Build the synthesized request user for an authenticated internal-service
+ * call.
+ *
+ * GAP-016: BOTH legacy ALLOY_INTERNAL_TOKEN and new INTERNAL_SERVICE_TOKENS
+ * entries are mapped to "ops" only — never `super_admin`. The previous
+ * behavior (legacy → super_admin) created a privilege-escalation blast
+ * radius if the token leaked: any holder could perform admin-only
+ * operations across every domain. Now legacy callers are bounded to the
+ * same scope catalog as scoped tokens, and downstream routes that need
+ * fine-grained authorization must additionally gate on declared scopes
+ * via `requireInternalScope(...)`. This is the hardening the first
+ * external-user launch requires.
+ */
+function buildInternalAgentUser(ctx: InternalAgentContext): AuthenticatedUser {
+  const roles: RoleName[] = ["ops"];
+  return {
+    id: 0,
+    displayName: `Internal Agent (${ctx.name})`,
+    email: null,
+    roles,
+    orgs: [],
+  };
+}
 
 function safeEqual(a: string, b: string): boolean {
   if (a.length !== b.length) return false;
@@ -49,30 +73,23 @@ function safeEqual(a: string, b: string): boolean {
   return diff === 0;
 }
 
-const INTERNAL_TOKEN_ALLOWED_PREFIXES = ["/api/internal/", "/api/alloy/agent/"];
-
-function checkInternalToken(req: Request): boolean {
-  const internalToken = process.env["ALLOY_INTERNAL_TOKEN"];
-  if (!internalToken) return false;
+function checkInternalToken(req: Request): InternalAgentContext | null {
   const header = req.headers["x-internal-token"] as string | undefined;
-  if (!header) return false;
-  const matched = safeEqual(internalToken, header);
-  if (matched) {
-    const path = req.path;
-    const allowedByScope = INTERNAL_TOKEN_ALLOWED_PREFIXES.some((prefix) => path.startsWith(prefix));
-    if (!allowedByScope) {
-      logger.warn(
-        { method: req.method, path, ip: req.ip },
-        "[auth] Internal token rejected: route is outside allowed internal-token scope"
-      );
-      return false;
-    }
-    logger.info(
-      { method: req.method, path, ip: req.ip },
-      "[auth] Internal agent token accepted"
-    );
+  if (!header) return null;
+  const match = verifyInternalHeader(header, req.originalUrl || req.url);
+  if (!match) {
+    // We can't tell from the registry alone whether the header value matched
+    // *some* token but failed the path check vs. didn't match at all; the
+    // registry helper logs neither case. Emit a single low-noise debug-level
+    // notice for visibility without alerting on every probe.
+    logger.debug({ method: req.method, path: req.path, ip: req.ip }, "[auth] Internal token header rejected");
+    return null;
   }
-  return matched;
+  logger.info(
+    { method: req.method, path: req.path, ip: req.ip, tokenName: match.context.name, legacy: match.context.legacy },
+    "[auth] Internal agent token accepted"
+  );
+  return match.context;
 }
 
 type SessionResolution =
@@ -174,9 +191,11 @@ export function authMiddleware(options: { required?: boolean } = {}) {
 
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      if (checkInternalToken(req)) {
-        req.user = INTERNAL_AGENT_USER;
+      const internalCtx = checkInternalToken(req);
+      if (internalCtx) {
+        req.user = buildInternalAgentUser(internalCtx);
         req.isInternalAgent = true;
+        req.internalAgent = internalCtx;
         next();
         return;
       }
@@ -342,4 +361,32 @@ export function canAccessOrgRecord(user: AuthenticatedUser, recordOrgId: number 
 export function isElevatedUser(user: AuthenticatedUser): boolean {
   const elevated = new Set(["super_admin", "admin", "exec", "ops", "compliance"]);
   return user.roles.some((r) => elevated.has(r));
+}
+
+/**
+ * Gate a route on a specific internal-token scope. Sessioned (human) users
+ * always pass through to the next handler — combine this with `authMiddleware`
+ * + role checks to constrain the human path. The scope check ONLY applies to
+ * internal service callers (those authenticated via `x-internal-token`).
+ */
+export function requireInternalScope(required: InternalScope) {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    if (!req.isInternalAgent) {
+      next();
+      return;
+    }
+    if (tokenHasScope(req.internalAgent, required)) {
+      next();
+      return;
+    }
+    logger.warn(
+      { tokenName: req.internalAgent?.name, required, scopes: Array.from(req.internalAgent?.scopes ?? []), path: req.path },
+      "[auth] Internal token lacks required scope"
+    );
+    res.status(403).json({
+      error: "Forbidden",
+      message: `Internal token missing required scope: ${required}`,
+      code: "INTERNAL_SCOPE_MISSING",
+    });
+  };
 }

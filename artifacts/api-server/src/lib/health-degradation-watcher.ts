@@ -1,6 +1,7 @@
 import { logger } from "./logger";
 import { getDetailedHealth, type ProbeStatus, type DetailedHealthSnapshot } from "./health-probes";
 import { dispatchExternalAlert } from "./notification-dispatch";
+import { queueExternalAlert } from "./queued-jobs";
 import { captureServerException } from "./sentry";
 import type { NotifSeverity } from "./domain-notifications";
 
@@ -87,16 +88,32 @@ async function fireAlert(params: {
   const jobs: Promise<unknown>[] = [];
 
   if (channel === "notification" || channel === "both") {
+    // GAP-017: queue durably so an alert from a degraded watcher tick is
+    // delivered even if the API server crashes between detection and fanout.
+    // Falls back to inline dispatch if the durable queue is unavailable
+    // (e.g. tests, early bootstrap) so we never silently drop critical alerts.
     jobs.push(
-      dispatchExternalAlert({
+      queueExternalAlert({
         appName: "API Health",
         title,
         message,
         severity,
         actionUrl: "/command/operations/prism/signals",
-      }).catch((err) => {
-        logger.warn({ err, probe }, "[health-watcher] notification dispatch failed");
-      }),
+      })
+        .catch(async (err) => {
+          logger.warn({ err, probe }, "[health-watcher] queueExternalAlert failed — falling back to inline dispatch");
+          try {
+            await dispatchExternalAlert({
+              appName: "API Health",
+              title,
+              message,
+              severity,
+              actionUrl: "/command/operations/prism/signals",
+            });
+          } catch (innerErr) {
+            logger.warn({ err: innerErr, probe }, "[health-watcher] inline notification dispatch fallback failed");
+          }
+        }),
     );
   }
 

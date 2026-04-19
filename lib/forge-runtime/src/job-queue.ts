@@ -210,4 +210,6 @@ export const JOB_TYPES = {
   METRICS_AGGREGATION: "metrics_aggregation",
   ANOMALY_SCAN: "anomaly_scan",
   ANALYTICS_EXPORT: "analytics_export",
+  AI_INFERENCE: "ai_inference",
+  EXTERNAL_ALERT: "external_alert",
 } as const;

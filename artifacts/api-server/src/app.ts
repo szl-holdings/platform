@@ -13,6 +13,7 @@ import { dirname, join } from "path";
 import { randomBytes } from "crypto";
 import router from "./routes";
 import demoResetRouter from "./routes/demo-reset";
+import { assertInternalTokenPolicy } from "./lib/internal-tokens";
 import { logger } from "./lib/logger";
 import { sendError, sendForbidden, sendNotFound, sendUnauthorized } from "./lib/api-response";
 import { correlationMiddleware } from "./middlewares/correlation";
@@ -36,6 +37,10 @@ const app: Express = express();
 app.set("trust proxy", 1);
 
 const isProduction = process.env.NODE_ENV === "production";
+
+// GAP-016: refuse to boot in production when only the legacy
+// ALLOY_INTERNAL_TOKEN is configured. See docs/SECRETS_POLICY.md.
+assertInternalTokenPolicy({ isProduction });
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -302,17 +307,13 @@ app.get("/api/health/ready", handleReadiness);
 
 app.get("/api/health/detailed", async (req: Request, res: Response) => {
   if (isProduction) {
-    const internalToken = process.env.ALLOY_INTERNAL_TOKEN;
+    // GAP-016: route through the scoped-token registry so the same
+    // policy (HMAC-digest constant-time compare, scope catalog) applies
+    // here as everywhere else. Requires `health:read` scope.
+    const { verifyInternalHeader, tokenHasScope } = await import("./lib/internal-tokens");
     const providedToken = req.headers["x-internal-token"] as string | undefined;
-    let hasInternalAccess = false;
-    if (internalToken && providedToken) {
-      const a = Buffer.from(internalToken, "utf8");
-      const b = Buffer.from(providedToken, "utf8");
-      if (a.length === b.length) {
-        const { timingSafeEqual } = await import("crypto");
-        hasInternalAccess = timingSafeEqual(a, b);
-      }
-    }
+    const match = verifyInternalHeader(providedToken, req.originalUrl || req.url);
+    const hasInternalAccess = match !== null && tokenHasScope(match.context, "health:read");
     if (!hasInternalAccess) {
       if (!req.isAuthenticated()) {
         sendUnauthorized(res, "Detailed health information is restricted to authenticated users");
@@ -445,17 +446,13 @@ app.get("/api/version", (_req: Request, res: Response) => {
 
 app.get("/api/env-registry", async (req: Request, res: Response) => {
   if (isProduction) {
-    const internalToken = process.env.ALLOY_INTERNAL_TOKEN;
+    // GAP-016: route through the scoped-token registry. Requires
+    // `internal:read` scope (env registry exposes which secrets are
+    // configured — not their values, but still operationally sensitive).
+    const { verifyInternalHeader, tokenHasScope } = await import("./lib/internal-tokens");
     const providedToken = req.headers["x-internal-token"] as string | undefined;
-    let hasInternalAccess = false;
-    if (internalToken && providedToken) {
-      const a = Buffer.from(internalToken, "utf8");
-      const b = Buffer.from(providedToken, "utf8");
-      if (a.length === b.length) {
-        const { timingSafeEqual } = await import("crypto");
-        hasInternalAccess = timingSafeEqual(a, b);
-      }
-    }
+    const match = verifyInternalHeader(providedToken, req.originalUrl || req.url);
+    const hasInternalAccess = match !== null && tokenHasScope(match.context, "internal:read");
     if (!hasInternalAccess && !req.isAuthenticated()) {
       sendUnauthorized(res, "Environment registry is restricted to authenticated or internal users in production");
       return;

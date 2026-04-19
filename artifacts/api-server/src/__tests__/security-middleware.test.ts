@@ -134,7 +134,7 @@ describe("globalAuthEnforcer", () => {
     expect(res.status).toBe(200);
   });
 
-  it("passes through when a valid X-Internal-Token header is provided", async () => {
+  it("passes through when a valid X-Internal-Token header is provided on a legacy-allowed prefix", async () => {
     const token = "test-internal-token-abc123";
     const original = process.env["ALLOY_INTERNAL_TOKEN"];
     process.env["ALLOY_INTERNAL_TOKEN"] = token;
@@ -142,10 +142,14 @@ describe("globalAuthEnforcer", () => {
     const app = express();
     app.use(express.json());
     app.use(globalAuthEnforcer as express.RequestHandler);
-    app.get("/api/protected-resource", successHandler);
+    // GAP-016: legacy ALLOY_INTERNAL_TOKEN is restricted to its historical
+    // path prefixes (`/api/internal/`, `/api/alloy/agent/`, `/api/health`,
+    // `/api/env-registry`). A path outside that allowlist would be rejected
+    // — see the dedicated rejection test below.
+    app.get("/api/internal/protected-resource", successHandler);
 
     const res = await request(app)
-      .get("/api/protected-resource")
+      .get("/api/internal/protected-resource")
       .set("x-internal-token", token);
 
     // Restore original value precisely — delete if it was absent, reset if it had a value
@@ -165,10 +169,10 @@ describe("globalAuthEnforcer", () => {
     const app = express();
     app.use(express.json());
     app.use(globalAuthEnforcer as express.RequestHandler);
-    app.get("/api/protected-resource", (_req, res) => res.json({ ok: true }));
+    app.get("/api/internal/protected-resource", (_req, res) => res.json({ ok: true }));
 
     const res = await request(app)
-      .get("/api/protected-resource")
+      .get("/api/internal/protected-resource")
       .set("x-internal-token", "wrong-token");
 
     // Restore original value precisely

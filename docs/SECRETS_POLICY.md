@@ -67,8 +67,92 @@ This policy applies to all secrets used by the SZL Holdings platform, including:
 | `MAPBOX_ACCESS_TOKEN` | Annually |
 | `OAUTH_CLIENT_SECRET` | Per Azure AD recommendation |
 | SMTP credentials | Annually |
+| `INTERNAL_SERVICE_TOKENS` (each entry) | Quarterly, or immediately on team change |
+| `ALLOY_INTERNAL_TOKEN` (legacy, deprecated) | Quarterly until migrated to `INTERNAL_SERVICE_TOKENS` |
 
 For rotation procedures, see [RUNBOOK_SECRETS.md](../infra/runbooks/RUNBOOK_SECRETS.md).
+
+---
+
+## Internal Service Tokens
+
+Server-to-server calls (e.g. AlloyChat → admin endpoints, background workers
+recording usage events, internal health probes) are authenticated with the
+`x-internal-token` header. The platform supports two configuration paths:
+
+### 1. Preferred — `INTERNAL_SERVICE_TOKENS` (scoped, per-domain)
+
+Set `INTERNAL_SERVICE_TOKENS` to a JSON array. Each entry declares an explicit
+scope set; tokens **never** carry blanket `super_admin` privileges.
+
+```json
+[
+  { "name": "alloy-runner",     "token": "…", "scopes": ["alloy:write", "agent:write"], "pathPrefixes": ["/api/alloy/agent/"] },
+  { "name": "health-prober",    "token": "…", "scopes": ["health:read"],                "pathPrefixes": ["/api/internal/health"] },
+  { "name": "admin-automation", "token": "…", "scopes": ["internal:write"],             "pathPrefixes": ["/api/internal/"] }
+]
+```
+
+Recognized scopes (see `artifacts/api-server/src/lib/internal-tokens.ts`):
+`alloy:read`, `alloy:write`, `agent:read`, `agent:write`, `health:read`,
+`health:write`, `internal:read`, `internal:write`, `usage-events:write`.
+
+Routes that need to gate on a specific scope use the
+`requireInternalScope("…")` middleware (defined in
+`artifacts/api-server/src/middlewares/auth.ts`). The synthesized request user
+for a scoped token is **never** mapped to `super_admin` — it gets the `ops`
+role plus its declared scope set.
+
+### 2. Legacy — `ALLOY_INTERNAL_TOKEN` (deprecated, hard-restricted)
+
+Accepted for backward compatibility only. On first use per process the server
+logs a deprecation warning. The legacy token is mapped to:
+
+- **Role:** `["ops"]` only — **never `super_admin`**.
+- **Scopes:** `["alloy:read","alloy:write","agent:read","agent:write","internal:read","health:read"]`.
+  Notably, `internal:write` is **not** granted, so the legacy token cannot
+  pass `adminGuard` (which requires `internal:write`).
+- **Path allowlist:** the legacy token is accepted **only** on its historical
+  surface:
+  - `/api/internal/`
+  - `/api/alloy/agent/`
+  - `/api/health` and `/health` (diagnostics)
+  - `/api/env-registry`
+
+  Anything outside this allowlist (e.g. `/api/admin/*`, `/api/orgs/*`,
+  `/api/billing/*`, `/api/auth/*`) is treated as if no internal token was
+  presented — the caller falls back to normal session/bearer auth.
+
+#### Production startup policy
+
+In production (`NODE_ENV=production`) the server **refuses to boot** if
+`ALLOY_INTERNAL_TOKEN` is the only internal token configured (no
+`INTERNAL_SERVICE_TOKENS`). Operators with an unavoidable migration window
+can opt out by setting `INTERNAL_TOKENS_ALLOW_LEGACY_ONLY=true`; the opt-out
+emits a warning on every startup so it cannot be silently left in place.
+
+Operators must treat `ALLOY_INTERNAL_TOKEN` as a transitional control:
+migrate each consumer to a scoped `INTERNAL_SERVICE_TOKENS` entry with the
+narrowest `pathPrefixes` it actually needs, then remove
+`ALLOY_INTERNAL_TOKEN` from the environment.
+
+### Rotation procedure
+
+1. Generate a new token (≥32 random bytes, hex-encoded —
+   `openssl rand -hex 32`).
+2. Append the new entry to `INTERNAL_SERVICE_TOKENS` alongside the old one
+   (both are accepted simultaneously while consumers cut over).
+3. Roll the new token to every consumer (AlloyChat workers, background jobs,
+   integration partners). Each consumer should fetch the token from its
+   secrets store at startup.
+4. After 24 hours of zero observed traffic on the old token in audit logs
+   (`grep "Internal agent token accepted"` for `tokenName`), remove the old
+   entry from `INTERNAL_SERVICE_TOKENS`.
+5. Restart the API server to invalidate the in-memory registry cache.
+6. Record the rotation in `docs/internal/secret-rotations.log`.
+
+If a token is suspected to be exposed, follow the **Secret Exposure Response**
+section below — remove the entry immediately, do not wait for 24h drain.
 
 ---
 

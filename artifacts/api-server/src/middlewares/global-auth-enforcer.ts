@@ -32,6 +32,7 @@ import { timingSafeEqual } from "crypto";
 import type { Request, Response, NextFunction } from "express";
 import { serverTelemetry } from "@szl-holdings/observability";
 import { sendUnauthorized } from "../lib/api-response";
+import { verifyInternalHeader } from "../lib/internal-tokens";
 
 const PUBLIC_EXACT_PATHS = new Set([
   "/api/contact",
@@ -157,14 +158,9 @@ const PUBLIC_PREFIXES = [
 ];
 
 function isValidInternalToken(req: Request): boolean {
-  const secret = process.env["ALLOY_INTERNAL_TOKEN"];
-  if (!secret) return false;
   const header = req.headers["x-internal-token"];
   if (typeof header !== "string") return false;
-  const a = Buffer.from(secret, "utf8");
-  const b = Buffer.from(header, "utf8");
-  if (a.length !== b.length) return false;
-  return timingSafeEqual(a, b);
+  return verifyInternalHeader(header, req.originalUrl || req.url) !== null;
 }
 
 /**

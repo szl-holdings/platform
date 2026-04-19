@@ -1,6 +1,7 @@
 import { publish, WS_CHANNELS } from "./websocket";
 import { logger } from "./logger";
 import { dispatchExternalAlert } from "./notification-dispatch";
+import { queueExternalAlert } from "./queued-jobs";
 
 export type NotifSeverity = "info" | "warning" | "critical";
 
@@ -76,14 +77,26 @@ export function broadcastNotification(notif: DomainNotif): void {
   logger.debug({ appId: notif.appId, title: notif.title, severity: notif.severity }, "Domain notification broadcast");
 
   if (notif.severity === "critical" || notif.severity === "warning") {
-    dispatchExternalAlert({
+    // GAP-017: enqueue durably so a server restart between WS broadcast
+    // and external fanout (Slack/Teams/SMS/voice/email) does not lose
+    // the alert. Falls back to inline dispatch if the queue is offline.
+    queueExternalAlert({
       appName: notif.appName,
       title: notif.title,
       message: notif.message,
       severity: notif.severity,
       actionUrl: notif.actionUrl,
     }).catch((err) => {
-      logger.warn({ err }, "External alert dispatch error");
+      logger.warn({ err }, "queueExternalAlert failed — falling back to inline dispatch");
+      dispatchExternalAlert({
+        appName: notif.appName,
+        title: notif.title,
+        message: notif.message,
+        severity: notif.severity,
+        actionUrl: notif.actionUrl,
+      }).catch((innerErr) => {
+        logger.warn({ err: innerErr }, "External alert inline dispatch fallback failed");
+      });
     });
   }
 }

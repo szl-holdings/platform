@@ -39,16 +39,10 @@ durableJobQueue.register(JOB_TYPES.REPORT_GENERATION, async (job) => {
   logger.info({ jobId: job.id, reportType }, "Report generation completed");
 });
 
-durableJobQueue.register(JOB_TYPES.NOTIFICATION_DISPATCH, async (job) => {
-  const { userId, message, channel } = job.payload as { userId: number; message: string; channel: string };
-  logger.info({ jobId: job.id, userId, channel }, "Notification dispatch job");
-  publish(WS_CHANNELS.NOTIFICATIONS, "notification", { userId, message, channel });
-});
-
-durableJobQueue.register(JOB_TYPES.EMAIL_SEND, async (job) => {
-  const { to, subject } = job.payload as { to: string; subject: string };
-  logger.info({ jobId: job.id, to, subject }, "Email send job (no-op in demo mode)");
-});
+// JOB_TYPES.NOTIFICATION_DISPATCH and JOB_TYPES.EMAIL_SEND are registered in
+// platform-jobs.ts and queued-jobs.ts respectively, with real implementations
+// (durable email delivery + multi-channel notification fanout). Earlier stub
+// handlers that lived here have been removed to avoid double registration.
 
 durableJobQueue.register(JOB_TYPES.DAILY_DIGEST, async (job) => {
   const { domains = [] } = job.payload as { domains?: string[] };
