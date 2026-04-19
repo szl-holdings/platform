@@ -1,4 +1,5 @@
 import { Router, type IRouter, type Request, type Response, type NextFunction } from "express";
+import v8 from "node:v8";
 import { HealthCheckResponse } from "@szl-holdings/api-zod";
 import { getBackupHealthStatus } from "../lib/backup-service";
 import { pool } from "@szl-holdings/db";
@@ -159,7 +160,11 @@ router.get("/health/detailed", productionAdminGuard, async (_req: Request, res: 
     },
     memory: {
       heapUsedMb: Math.round(memUsage.heapUsed / 1024 / 1024),
-      heapTotalMb: Math.round(memUsage.heapTotal / 1024 / 1024),
+      // Use V8's heap_size_limit (the real OOM ceiling) as the denominator,
+      // not process.memoryUsage().heapTotal (V8's currently-allocated heap,
+      // which grows on demand and produces meaningless 90+% ratios when V8
+      // hasn't yet expanded the heap to its limit).
+      heapTotalMb: Math.round(v8.getHeapStatistics().heap_size_limit / 1024 / 1024),
       rssMb: Math.round(memUsage.rss / 1024 / 1024),
       externalMb: Math.round(memUsage.external / 1024 / 1024),
     },

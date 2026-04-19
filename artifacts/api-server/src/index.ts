@@ -61,7 +61,9 @@ initializeAlloyDomainEventSubscriptions();
 registerGenAITelemetryBridge();
 
 
-const HEAP_LIMIT_MB = 512;
+// Must match the V8 --max-old-space-size flag passed in start.sh; otherwise the
+// monitor under/over-reports pressure and floods logs with false criticals.
+const HEAP_LIMIT_MB = Number(process.env["NODE_HEAP_LIMIT_MB"] ?? "1536");
 const HEAP_CRITICAL_THRESHOLD_MB = Math.round(HEAP_LIMIT_MB * 0.92);
 const HEAP_WARN_THRESHOLD_MB = Math.round(HEAP_LIMIT_MB * 0.82);
 const HEAP_GC_THRESHOLD_MB = Math.round(HEAP_LIMIT_MB * 0.70);

@@ -11,6 +11,7 @@ import { parse } from "yaml";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 import { randomBytes } from "crypto";
+import v8 from "node:v8";
 import router from "./routes";
 import demoResetRouter from "./routes/demo-reset";
 import { assertInternalTokenPolicy } from "./lib/internal-tokens";
@@ -246,12 +247,19 @@ app.get("/api/health", async (_req: Request, res: Response) => {
     environment: process.env.NODE_ENV || "development",
     mode: runtimeMode,
     node: process.version,
-    memory: {
-      heapUsedMb: Math.round(memUsage.heapUsed / 1024 / 1024),
-      heapTotalMb: Math.round(memUsage.heapTotal / 1024 / 1024),
-      rssMb: Math.round(memUsage.rss / 1024 / 1024),
-      heapUsedPct: Math.round((memUsage.heapUsed / memUsage.heapTotal) * 100),
-    },
+    memory: (() => {
+      // Use V8's heap_size_limit (the real OOM ceiling) as the denominator,
+      // not process.memoryUsage().heapTotal (V8's currently-allocated heap,
+      // which grows on demand and produces meaningless 90+% ratios when V8
+      // hasn't yet expanded the heap to its limit).
+      const heapLimit = v8.getHeapStatistics().heap_size_limit;
+      return {
+        heapUsedMb: Math.round(memUsage.heapUsed / 1024 / 1024),
+        heapTotalMb: Math.round(heapLimit / 1024 / 1024),
+        rssMb: Math.round(memUsage.rss / 1024 / 1024),
+        heapUsedPct: Math.round((memUsage.heapUsed / heapLimit) * 100),
+      };
+    })(),
     services: {
       server: { status: "ok" },
       database: { status: probes.database.status, latencyMs: dbLatencyMs },
@@ -393,9 +401,12 @@ app.get("/api/health/detailed", async (req: Request, res: Response) => {
     services,
     memory: (() => {
       const m = process.memoryUsage();
+      // Use V8's heap_size_limit (real OOM ceiling), not m.heapTotal
+      // (V8's currently-allocated heap, which grows on demand).
+      const heapLimit = v8.getHeapStatistics().heap_size_limit;
       return {
         heapUsedMb: Math.round(m.heapUsed / 1024 / 1024),
-        heapTotalMb: Math.round(m.heapTotal / 1024 / 1024),
+        heapTotalMb: Math.round(heapLimit / 1024 / 1024),
         rssMb: Math.round(m.rss / 1024 / 1024),
       };
     })(),

@@ -1,33 +1,12 @@
 import type { IRouter } from "express";
 import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../../middlewares/sliding-window-limiter";
 import { tenantScope } from "../../middlewares/tenant-scope";
-
-import * as tenantProvisioning from "../tenant-provisioning";
-import dataverseRouter from "../dataverse";
-import scimRouter from "../scim";
-import orgSettingsRouter from "../org-settings";
-import onboardingRouter from "../onboarding";
-import invitationsRouter from "../invitations";
-import tenantHealthRouter from "../tenant-health";
-import unifiedSettingsRouter from "../unified-settings";
-import changelogRouter from "../changelog";
-import changesRouter from "../changes";
-import deltaSyncRouter from "../delta-sync";
-import gdprRouter from "../gdpr";
-import privacyRouter from "../privacy";
-import complianceRouter from "../compliance";
-import approvalsRouter from "../approvals";
-import proofChainRouter from "../proof-chain";
-import auditChainRouter from "../audit-chain";
-import worldlineRouter from "../worldline";
-import auditRouter from "../audit";
+import { lazyMount, lazyRegister, lazyMatch, lazyRegisterMatch } from "../../lib/lazy-router";
 
 const _readLimiter = perUserApiSlidingLimiter;
 const _writeLimiter = perUserWriteSlidingLimiter;
 
 export function register(router: IRouter): void {
-  // Org-member–required paths: these are only accessible once a user belongs
-  // to an organization. required: true returns 403 for no-org users.
   router.use("/audit", tenantScope({ required: true }));
   router.use("/tenant-health", tenantScope({ required: true }));
   router.use("/settings", tenantScope({ required: true }));
@@ -42,71 +21,68 @@ export function register(router: IRouter): void {
   router.use("/worldline", tenantScope({ required: true }));
   router.use("/dataverse", tenantScope({ required: true }));
 
-  // Bootstrap / pre-membership paths: these are used before an org is joined
-  // (invitation acceptance, onboarding, password-reset). required: false resolves
-  // org context when present but does not block users with zero org memberships.
   router.use("/orgs", tenantScope({ required: false }));
   router.use("/user", tenantScope({ required: false }));
   router.use("/onboarding", tenantScope({ required: false }));
 
   router.use("/audit", _readLimiter);
-  router.use(auditRouter);
+  router.use(lazyMatch("/audit", () => import("../audit"), "audit"));
 
   router.use("/admin/tenants", _writeLimiter);
-  tenantProvisioning.register(router);
+  router.use(lazyRegisterMatch(["/admin/tenants", "/tenants"], () => import("../tenant-provisioning"), "tenant-provisioning"));
 
   router.use("/dataverse", _readLimiter);
-  router.use("/dataverse", dataverseRouter);
+  router.use("/dataverse", lazyMount(() => import("../dataverse"), "dataverse"));
 
-  router.use(scimRouter);
+  router.use(lazyMatch("/scim", () => import("../scim"), "scim"));
 
   router.use("/orgs", _readLimiter);
   router.use("/orgs", _writeLimiter);
   router.use("/user", _readLimiter);
   router.use("/user", _writeLimiter);
-  router.use(orgSettingsRouter);
+  router.use(lazyMatch(["/orgs", "/user"], () => import("../org-settings"), "org-settings"));
 
   router.use("/onboarding", _writeLimiter);
-  router.use(onboardingRouter);
+  router.use(lazyMatch("/onboarding", () => import("../onboarding"), "onboarding"));
 
   router.use("/orgs", _writeLimiter);
-  router.use(invitationsRouter);
+  router.use(lazyMatch("/orgs", () => import("../invitations"), "invitations"));
 
   router.use("/tenant-health", _readLimiter);
   router.use("/tenant-health", _writeLimiter);
-  router.use(tenantHealthRouter);
+  router.use(lazyMatch("/tenant-health", () => import("../tenant-health"), "tenant-health"));
 
   router.use("/settings", _readLimiter);
   router.use("/settings", _writeLimiter);
-  router.use(unifiedSettingsRouter);
+  router.use(lazyMatch("/settings", () => import("../unified-settings"), "unified-settings"));
 
   router.use("/changelog", _readLimiter);
   router.use("/changelog", _writeLimiter);
-  router.use(changelogRouter);
+  router.use(lazyMatch("/changelog", () => import("../changelog"), "changelog"));
 
   router.use("/aegis/sync", _readLimiter);
   router.use("/vessels/sync", _readLimiter);
   router.use("/alloy/sync", _readLimiter);
-  router.use(deltaSyncRouter);
-  router.use(changesRouter);
+  router.use(lazyMatch(["/aegis", "/vessels", "/alloy"], () => import("../delta-sync"), "delta-sync"));
+  router.use(lazyMatch("/changes", () => import("../changes"), "changes"));
 
-  router.use(gdprRouter);
-  router.use(privacyRouter);
+  router.use(lazyMatch("/gdpr", () => import("../gdpr"), "gdpr"));
+  router.use(lazyMatch("/privacy", () => import("../privacy"), "privacy"));
 
   router.use("/compliance", _readLimiter);
   router.use("/compliance", _writeLimiter);
-  router.use(complianceRouter);
+  router.use(lazyMatch("/compliance", () => import("../compliance"), "compliance"));
 
   router.use("/approvals", _writeLimiter);
-  router.use(approvalsRouter);
+  router.use(lazyMatch(["/approvals", "/audit-log"], () => import("../approvals"), "approvals"));
 
   router.use("/proof-chain", _readLimiter);
-  router.use(proofChainRouter);
+  router.use(lazyMatch("/proof-chain", () => import("../proof-chain"), "proof-chain"));
 
   router.use("/audit-chain", _readLimiter);
   router.use("/audit-chain", _writeLimiter);
-  router.use(auditChainRouter);
+  router.use(lazyMatch("/audit-chain", () => import("../audit-chain"), "audit-chain"));
 
   router.use("/worldline", _writeLimiter);
-  router.use(worldlineRouter);
+  router.use(lazyMatch("/worldline", () => import("../worldline"), "worldline"));
 }

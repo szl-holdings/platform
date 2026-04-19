@@ -49,6 +49,18 @@ vi.mock("../../middlewares/auth", () => ({
   InvalidIdError: class InvalidIdError extends Error {},
 }));
 
+// In the pre-lazy era, the ai-engine stub was mounted at the root of the ai
+// group router (`router.use(lazyMount(ai-engine))`), so its catch-all 200
+// responder happened to intercept unrelated paths like `/forge/agents` before
+// they could reach `aiControlPlane` on `/forge`. Path-gated lazy mounts
+// (`lazyMatch("/ai", ai-engine)`) no longer do that, so the policy engine now
+// genuinely runs on `/forge/agents` and blocks the assistant tier. Mock the
+// middleware to a no-op to preserve the test's "previously ungated" intent —
+// these tests are about the tenantScope contract, not policy enforcement.
+vi.mock("../../middlewares/ai-control-plane", () => ({
+  aiControlPlane: () => (_req: Request, _res: Response, next: NextFunction) => next(),
+}));
+
 vi.mock("../../lib/validation", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../../lib/validation")>();
   return {
@@ -297,6 +309,20 @@ async function buildGroupApp(
     const { register } = await import("../groups/ai.js");
     register(groupRouter);
   }
+
+  // Catch-all 200 stub mounted AFTER the group router. Several group files
+  // delegate the `/documents/status`, `/forge/agents`, etc. test paths to a
+  // namespace `register()` function whose mocked implementation is a no-op,
+  // or to a router file mounted with a more specific prefix than the test
+  // path. In the pre-lazy era a sibling stub mounted at root with
+  // `router.use(stubRouter())` would happen to match the test path and
+  // satisfy the 200 expectation. Path-gated lazy mounts no longer match
+  // unrelated paths, so we make the fallthrough explicit here. This does
+  // NOT affect the 403 expectations — those short-circuit inside
+  // tenantScope before reaching this handler.
+  groupRouter.use((_req: Request, res: Response) => {
+    res.status(200).json({ ok: true });
+  });
 
   app.use(groupRouter);
   return app;

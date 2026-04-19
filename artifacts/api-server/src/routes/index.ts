@@ -1,13 +1,7 @@
 import { Router, type IRouter } from "express";
-import pulseBriefingRouter from "./pulse";
-import evalsRouter from "./evals";
-import briefingsRouter from "./briefings";
-import driftRouter from "./drift";
-import deploymentsRouter from "./deployments";
-import domainsRouter from "./domains";
-import constellationViewsRouter from "./constellation-views";
 import { perUserApiSlidingLimiter } from "../middlewares/sliding-window-limiter";
 import { guardianPolicyCheck } from "../middlewares/guardian-policy";
+import { lazyMount, lazyMatch } from "../lib/lazy-router";
 import * as core from "./groups/core";
 import * as vessels from "./groups/vessels";
 import * as security from "./groups/security";
@@ -21,187 +15,129 @@ import * as operations from "./groups/operations";
 import * as dataServices from "./groups/data-services";
 import * as billing from "./groups/billing";
 import * as misc from "./groups/misc";
-import carlotaJoInvoiceEmailRouter from "./carlota-jo-invoice-email";
 import * as decisions from "./groups/decisions";
 import * as domainAtlas from "./groups/domain-atlas";
 import * as graph from "./groups/graph";
 import * as guardian from "./groups/guardian";
-import trustProvenanceRouter from "./trust-provenance";
-import mcpGatewayRouter from "./mcp-gateway";
-import tracesRouter from "./traces";
-import reflectionsRouter from "./reflections";
-import plansRouter from "./plans";
 import * as alloyRuntime from "./groups/alloy-runtime-group";
 import * as selfModel from "./groups/self-model";
 import * as verifier from "./groups/verifier";
 import * as skillLibrary from "./groups/skill-library";
 import * as crossPlatform from "./groups/cross-platform";
-import nexusRouter from "./nexus";
-import replayRouter from "./replay";
-import cognitiveRuntimeRouter from "./cognitive-runtime";
-import execBriefingsRouter from "./executive-briefings";
-import fundInboundDealsRouter from "./fund-inbound-deals";
-import aegisPcapRouter from "./aegis-pcap";
-import carlotaTimeTrackingRouter from "./carlota-time-tracking";
-import lpPortalRouter from "./lp-portal";
-import atlasArtifactsRouter from "./atlas-artifacts";
-import outcomeGraphRouter from "./outcome-graph";
-import pageViewTrackingRouter from "./page-view-tracking";
-import analyticsEnginePublicRouter from "./analytics-engine-public";
-import newsletterRouter from "./newsletter";
-import selfHealingRouter from "./self-healing";
-import simulationWhatIfRouter from "./simulation-whatif";
-import infrastructureStatusRouter from "./infrastructure-status";
-import debugRouter from "./debug";
-import mapsRouter from "./maps";
-import atlasSceneExportRouter from "./atlas-scene-export";
-import preferencesRouter from "./preferences";
-import evidenceGraphRouter from "./evidence-graph";
-import policyModesRouter from "./policy-modes";
-import demoGovernedScenariosRouter from "./demo-governed-scenarios";
-import counselRouter from "./counsel";
-import fabricRouter from "./fabric";
-import narrativesRouter from "./narratives";
-import actionStoreRouter from "./action-store";
-import lyteSurfacesRouter from "./lyte-surfaces";
-import lyteIntelRouter from "./lyte-intel";
-import riskEvidenceRouter from "./risk-evidence";
-import competitiveIntelTopRouter from "./competitive-intel";
-import agentMeshRouter from "./agent-mesh";
 
 const router: IRouter = Router();
 
 // Carlota Jo time-tracking & invoice routes (public, unauthenticated).
-// Mounted at the TOP of the /api router, BEFORE any route group that applies
-// blanket auth/tenant-scope middleware to an unprefixed sub-router — otherwise
-// those guards would intercept /booking/time-entries and /booking/time-invoices
-// and return 401 before the handlers run. See carlota-time-tracking.ts for the
-// matching PUBLIC_PREFIXES allowlist in global-auth-enforcer.ts.
-router.use(carlotaTimeTrackingRouter);
+// Owns /booking/time-entries and /booking/time-invoices.
+router.use(lazyMatch("/booking", () => import("./carlota-time-tracking"), "carlota-time-tracking"));
 
-// Anonymous page-view tracking — public, unauthenticated.  Must be mounted
-// BEFORE guardianPolicyCheck so pre-login visitors can POST without a session.
-// The /api/track/ prefix is also in PUBLIC_PREFIXES in global-auth-enforcer.ts.
-router.use(pageViewTrackingRouter);
+// Anonymous page-view tracking — public, unauthenticated.
+router.use(lazyMatch("/track", () => import("./page-view-tracking"), "page-view-tracking"));
 
-// Public anonymous analytics-engine ingest — backs the conversion funnel
-// for the szl-holdings marketing site. Mounted BEFORE guardianPolicyCheck and
-// the data-services tenantScope guard. /api/analytics-engine/events is in
-// PUBLIC_EXACT_PATHS / PUBLIC_PREFIXES allow-lists; the client sanitises all
-// properties through a strict allow-list (no PII forwarded).
-router.use(analyticsEnginePublicRouter);
+// Public anonymous analytics-engine ingest.
+router.use(lazyMatch("/analytics-engine", () => import("./analytics-engine-public"), "analytics-engine-public"));
 
-// Newsletter subscribe proxy — public, unauthenticated. Forwards email
-// subscriptions to the Substack API on behalf of all portfolio sites.
-// /api/newsletter/ is in PUBLIC_PREFIXES in global-auth-enforcer.ts.
-router.use(newsletterRouter);
+// Newsletter subscribe proxy — public, unauthenticated.
+router.use(lazyMatch("/newsletter", () => import("./newsletter"), "newsletter"));
 
-// Self-healing orchestrator — GET routes are publicly accessible (stats, policies
-// and runs are whitelisted in global-auth-enforcer via PUBLIC_EXACT_PATHS/PREFIX).
-// The PATCH /policies/:id/toggle mutation requires auth and is NOT whitelisted.
-// Must be mounted BEFORE guardianPolicyCheck so the public GETs reach the handler.
-router.use(selfHealingRouter);
+// Self-healing orchestrator — public GETs.
+router.use(lazyMatch("/self-healing", () => import("./self-healing"), "self-healing"));
 
-// Simulation what-if engine — POST route is public so the Strategy simulation
-// page can compute cross-domain scenario impacts in demo mode. Must be mounted
-// BEFORE guardianPolicyCheck. /api/simulation/ is in PUBLIC_PREFIXES.
-router.use(simulationWhatIfRouter);
+// Simulation what-if engine — POST route is public.
+router.use(lazyMatch("/simulation", () => import("./simulation-whatif"), "simulation-whatif"));
 
-// Infrastructure status — lightweight public endpoint used by the Legatus
-// console to show live AquilaScore and threat level. Must be mounted
-// BEFORE guardianPolicyCheck. /api/infrastructure/ is in PUBLIC_PREFIXES.
-router.use(infrastructureStatusRouter);
+// Infrastructure status — public.
+router.use(lazyMatch("/infrastructure", () => import("./infrastructure-status"), "infrastructure-status"));
 
-// PRISM Counsel — GC matters CRUD (public, demo data backed by Postgres).
-// /api/counsel/ is in PUBLIC_PREFIXES in global-auth-enforcer.ts.
-router.use(counselRouter);
+// PRISM Counsel — public matters CRUD.
+router.use(lazyMatch("/counsel", () => import("./counsel"), "counsel"));
 
-// Cross-platform intelligence — read-only GET routes for signal correlations,
-// shared evidence registry, run health, and pilot intelligence. Mounted BEFORE
-// guardianPolicyCheck. NOT in PUBLIC_PREFIXES — protected in production by the
-// global auth enforcer (NODE_ENV === "production" blocks unauthenticated access).
+// Cross-platform intelligence — read-only (auth-gated in production).
 crossPlatform.register(router);
 
-// Global Operations Fabric — read-only snapshot + SSE stream aggregating all
-// products, signals, runs, alerts, recommendations, approvals, connector health
-// and system health. Public in demo/dev mode so the Fabric page works without auth.
-router.use(fabricRouter);
+// Global Operations Fabric — read-only snapshot + SSE stream.
+router.use(lazyMatch("/fabric", () => import("./fabric"), "fabric"));
 
-// Public read-only narrative payloads (Sentra, Counsel) for the demo
-// Decision Center pages. Mounted BEFORE guardianPolicyCheck.
-// /api/narratives/ is in PUBLIC_PREFIXES in global-auth-enforcer.ts.
-router.use(narrativesRouter);
+// Public read-only narrative payloads.
+router.use(lazyMatch("/narratives", () => import("./narratives"), "narratives"));
 
-// Shared action store — persists risk owner assignments and decisions for the
-// Business State / Enterprise State pages so all team members see the same
-// synchronized state instead of per-browser localStorage. Public,
-// unauthenticated; mounted BEFORE guardianPolicyCheck and exempted in the
-// global-auth-enforcer / csrf middleware allowlists.
-router.use(actionStoreRouter);
+// Shared action store — public, unauthenticated.
+router.use(lazyMatch("/action-store", () => import("./action-store"), "action-store"));
 
-// Competitive Intel monitor — backs the Command Competitive Atlas page with
-// RSS-derived "Intel Update" alerts about tracked champions. Mounted at the
-// TOP of the /api router (BEFORE any group register call that mounts a
-// sub-router at root with router-level authMiddleware/tenantScope) so the
-// public Atlas demo surface can fetch alerts without a session. The
-// /api/competitive-intel/ prefix is also in PUBLIC_PREFIXES in
-// global-auth-enforcer.ts.
-router.use("/competitive-intel", competitiveIntelTopRouter);
+// Competitive Intel monitor — public Atlas demo surface.
+router.use("/competitive-intel", lazyMount(() => import("./competitive-intel"), "competitive-intel"));
 
-// Shared risk evidence store — persists "Save run as evidence" Monte Carlo
-// runs so external reviewers and lender briefings see the same cited
-// envelopes that Terra/Vessels operators capture (instead of per-browser
-// localStorage). Mounted BEFORE guardianPolicyCheck and exempted in the
-// global-auth-enforcer / csrf middleware allowlists.
-router.use(riskEvidenceRouter);
+// Shared risk evidence store — public.
+router.use(lazyMatch("/risk-evidence", () => import("./risk-evidence"), "risk-evidence"));
 
 // Agent Mesh telemetry — public read-only state + scan endpoints used by
 // Sentra's Mesh Map and Pulse's MeshCard. Mounted BEFORE guardianPolicyCheck
 // so unauthenticated demo views can hydrate. Scan is also public (no
 // destructive side-effects beyond rewriting the per-org telemetry slice).
-router.use(agentMeshRouter);
+router.use(lazyMatch("/agent-mesh", () => import("./agent-mesh"), "agent-mesh"));
 
 // Lyte legacy surfaces — read-only public GET endpoints backing the 5 legacy
 // decision-intelligence pages. Mounted BEFORE lyte.register so the
 // tenantScope middleware registered at "/lyte" never intercepts these routes.
 // Exact paths are whitelisted in global-auth-enforcer.ts.
-router.use(lyteSurfacesRouter);
-router.use(lyteIntelRouter);
+router.use(lazyMatch("/lyte", () => import("./lyte-surfaces"), "lyte-surfaces"));
+router.use(lazyMatch("/lyte", () => import("./lyte-intel"), "lyte-intel"));
 
-// Global Guardian policy check — derives category from request path and
-// applies to every agent-facing route family. Read-only methods skip
-// automatically. Tier is derived server-side from authenticated user.
+// Global Guardian policy check — derives category from request path.
 router.use(guardianPolicyCheck());
 
-// Carlota Jo invoice email router is mounted early (before group registers)
-// so it matches before unrelated sub-routers — like copilotRouter — that
-// apply tenantScope as router-level middleware. Tracked by follow-up #1367;
-// once that lands, this early mount can be removed.
-router.use(carlotaJoInvoiceEmailRouter);
+// Carlota Jo invoice email router — mounted early.
+router.use(lazyMatch("/booking", () => import("./carlota-jo-invoice-email"), "carlota-jo-invoice-email"));
 
-router.use("/pulse", perUserApiSlidingLimiter, pulseBriefingRouter);
-router.use("/pulse", perUserApiSlidingLimiter, execBriefingsRouter);
-router.use(evalsRouter);
-router.use(briefingsRouter);
-router.use(driftRouter);
-router.use(deploymentsRouter);
-router.use(domainsRouter);
-router.use(constellationViewsRouter);
-router.use(fundInboundDealsRouter);
-router.use(aegisPcapRouter);
-router.use(lpPortalRouter);
+// Pulse demo + briefing surfaces — owns multiple top-level prefixes.
+router.use(
+  perUserApiSlidingLimiter,
+  lazyMatch(
+    [
+      "/demo",
+      "/today",
+      "/briefings",
+      "/domain-panel",
+      "/confidence",
+      "/custom",
+      "/dissents",
+      "/export",
+      "/subscriptions",
+      "/unsubscribe",
+    ],
+    () => import("./pulse"),
+    "pulse",
+  ),
+);
+router.use("/executive", perUserApiSlidingLimiter, lazyMount(() => import("./executive-briefings"), "executive-briefings"));
+router.use(lazyMatch("/evals", () => import("./evals"), "evals"));
+router.use(lazyMatch("/briefings", () => import("./briefings"), "briefings"));
+router.use(lazyMatch("/drift", () => import("./drift"), "drift"));
+router.use(lazyMatch("/deployments", () => import("./deployments"), "deployments"));
+router.use(lazyMatch("/domains", () => import("./domains"), "domains"));
+router.use(lazyMatch("/constellation", () => import("./constellation-views"), "constellation-views"));
+router.use(
+  lazyMatch(
+    ["/fund-inbound-deals", "/public/fund-inbound-deals"],
+    () => import("./fund-inbound-deals"),
+    "fund-inbound-deals",
+  ),
+);
+router.use(lazyMatch("/aegis", () => import("./aegis-pcap"), "aegis-pcap"));
+router.use(lazyMatch("/lp-portal", () => import("./lp-portal"), "lp-portal"));
 
-// tracesRouter (/runs*, /traces*, /reflections*, /plans*, /replay*) and its
-// companions must be registered BEFORE ai.register() because copilotRouter
-// is mounted there without a path prefix and applies a global
-// tenantScope({ required: true }) that would terminate unauthenticated
-// requests before they ever reach these handlers.
-router.use(tracesRouter);
-router.use(reflectionsRouter);
-router.use(plansRouter);
-router.use(replayRouter);
-router.use(trustProvenanceRouter);
-router.use(mcpGatewayRouter);
+// Trace/reflection/plan/replay routers must be registered BEFORE ai.register()
+// because copilotRouter applies a global tenantScope that would terminate
+// unauthenticated requests before they reach these handlers. Note traces.ts
+// also serves /runs* paths.
+router.use(lazyMatch(["/traces", "/runs"], () => import("./traces"), "traces"));
+router.use(lazyMatch("/reflections", () => import("./reflections"), "reflections"));
+router.use(lazyMatch("/plans", () => import("./plans"), "plans"));
+router.use(lazyMatch("/replay", () => import("./replay"), "replay"));
+router.use(
+  lazyMatch(["/proof-chain", "/audit-log"], () => import("./trust-provenance"), "trust-provenance"),
+);
+router.use(lazyMatch("/mcp-gateway", () => import("./mcp-gateway"), "mcp-gateway"));
 
 core.register(router);
 vessels.register(router);
@@ -225,18 +161,26 @@ selfModel.register(router);
 verifier.register(router);
 skillLibrary.register(router);
 
-router.use("/nexus", nexusRouter);
+router.use("/nexus", lazyMount(() => import("./nexus"), "nexus"));
 
-router.use(cognitiveRuntimeRouter);
-router.use(atlasArtifactsRouter);
-router.use(atlasSceneExportRouter);
-router.use(outcomeGraphRouter);
+router.use(lazyMatch("/cognitive-runtime", () => import("./cognitive-runtime"), "cognitive-runtime"));
+router.use(lazyMatch("/atlas/artifacts", () => import("./atlas-artifacts"), "atlas-artifacts"));
+router.use(
+  lazyMatch(
+    ["/atlas/snapshot", "/atlas/branch", "/atlas/proof-bundle", "/atlas/export"],
+    () => import("./atlas-scene-export"),
+    "atlas-scene-export",
+  ),
+);
+router.use(lazyMatch("/outcome-graph", () => import("./outcome-graph"), "outcome-graph"));
 
-router.use(evidenceGraphRouter);
-router.use(mapsRouter);
-router.use(debugRouter);
-router.use(preferencesRouter);
-router.use(policyModesRouter);
-router.use(demoGovernedScenariosRouter);
+router.use(lazyMatch("/evidence-graph", () => import("./evidence-graph"), "evidence-graph"));
+router.use(lazyMatch("/maps", () => import("./maps"), "maps"));
+router.use(lazyMatch("/debug", () => import("./debug"), "debug"));
+router.use(lazyMatch("/preferences", () => import("./preferences"), "preferences"));
+router.use(lazyMatch("/policy-modes", () => import("./policy-modes"), "policy-modes"));
+router.use(
+  lazyMatch("/demo/seed-governed-scenarios", () => import("./demo-governed-scenarios"), "demo-governed-scenarios"),
+);
 
 export default router;

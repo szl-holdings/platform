@@ -3,35 +3,7 @@ import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../../midd
 import { idempotencyMiddleware } from "../../middlewares/idempotency";
 import { tenantScope } from "../../middlewares/tenant-scope";
 import { aiControlPlane } from "../../middlewares/ai-control-plane";
-
-import aiEngineRouter from "../ai-engine";
-import aiOpsDashboardRouter from "../ai-ops-dashboard";
-import copilotRouter from "../copilot";
-import mcpRouter from "../mcp";
-import nueroMeshRouter from "../nuro-mesh";
-import nueroMeshAdvancedRouter from "../nuro-mesh-advanced";
-import * as controlTower from "../control-tower";
-import domainAgentsRouter from "../domain-agents/index";
-import agentOsRouter from "../agent-os";
-import agentTrainingRouter from "../agent-training";
-import agentAutonomyRouter from "../agent-autonomy";
-import agentFederationRouter from "../agent-federation";
-import fineTuningRouter from "../fine-tuning";
-import mlPipelineRouter from "../ml-pipeline";
-import consciousnessRouter from "../consciousness";
-import ontologyRouter from "../ontology";
-import digitalTwinsRouter from "../digital-twins";
-import fusionRouter from "../fusion";
-import knowledgeGraphRouter from "../knowledge-graph";
-import aiSafetyRouter from "../ai-safety";
-import forgeRouter from "../forge";
-import ragKnowledgeRouter from "../rag-knowledge";
-import streamingIngestionRouter from "../streaming-ingestion";
-import connectorHubRouter from "../connector-hub";
-import a2aRouter from "../a2a";
-import jobsRouter from "../jobs";
-import atlasSpatialRuntimeRouter from "../atlas-spatial-runtime";
-import promptRegistryRouter from "../prompt-registry";
+import { lazyMount, lazyRegister, lazyMatch, lazyRegisterMatch } from "../../lib/lazy-router";
 
 const _readLimiter = perUserApiSlidingLimiter;
 const _writeLimiter = perUserWriteSlidingLimiter;
@@ -64,107 +36,104 @@ export function register(router: IRouter): void {
 
   router.use("/ai", _readLimiter);
   router.use("/ai/tools/execute", idempotencyMiddleware);
-  // Each endpoint uses an authoritative policyRouteClass (must be in tier allowedRouteClasses).
-  // costRouteClass is a descriptive label for cost tracking and may differ.
   router.use("/ai/respond", aiControlPlane({ policyRouteClass: "reasoning", costRouteClass: "respond" }));
   router.use("/ai/triage", aiControlPlane({ policyRouteClass: "triage", costRouteClass: "triage" }));
   router.use("/ai/extract", aiControlPlane({ policyRouteClass: "extraction", costRouteClass: "extract" }));
   router.use("/ai/plan", aiControlPlane({ policyRouteClass: "planning", costRouteClass: "plan" }));
-  // retrieval and tool_execution have no matching policy route class — skip routeClass policy check.
   router.use("/ai/retrieve", aiControlPlane({ costRouteClass: "retrieval" }));
   router.use("/ai/retrieval", aiControlPlane({ policyRouteClass: "classification", costRouteClass: "retrieval_ingest" }));
   router.use("/ai/tools/execute", aiControlPlane({ costRouteClass: "tool_execution" }));
   router.use("/ai/evals/run", aiControlPlane({ policyRouteClass: "classification", costRouteClass: "evals" }));
-  router.use(aiEngineRouter);
+  router.use(lazyMatch("/ai", () => import("../ai-engine"), "ai-engine"));
 
   router.use("/ai/ops", _readLimiter);
-  router.use(aiOpsDashboardRouter);
+  router.use(lazyMatch("/ai", () => import("../ai-ops-dashboard"), "ai-ops-dashboard"));
 
   router.use("/copilot", _writeLimiter);
-  router.use(copilotRouter);
+  router.use(lazyMatch("/copilot", () => import("../copilot"), "copilot"));
 
   router.use("/mcp", _readLimiter);
-  router.use(mcpRouter);
+  router.use(lazyMatch("/mcp", () => import("../mcp"), "mcp"));
 
   router.use("/nuro-mesh", _readLimiter);
-  router.use(nueroMeshRouter);
-  router.use(nueroMeshAdvancedRouter);
+  router.use(lazyMatch("/nuro-mesh", () => import("../nuro-mesh"), "nuro-mesh"));
+  router.use(lazyMatch("/nuro-mesh", () => import("../nuro-mesh-advanced"), "nuro-mesh-advanced"));
 
   router.use("/control-tower", _readLimiter);
   router.use("/control-tower", _writeLimiter);
-  controlTower.register(router);
+  router.use(lazyRegisterMatch("/control-tower", () => import("../control-tower"), "control-tower"));
 
   router.use("/domain-agents", _readLimiter);
-  router.use(domainAgentsRouter);
+  router.use(lazyMatch("/domain-agents", () => import("../domain-agents/index"), "domain-agents"));
 
   router.use("/agent-os", _readLimiter);
-  router.use(agentOsRouter);
+  router.use(lazyMatch("/agent-os", () => import("../agent-os"), "agent-os"));
 
-  router.use(agentTrainingRouter);
+  router.use(lazyMatch("/agent-training", () => import("../agent-training"), "agent-training"));
 
   router.use("/agent-autonomy", _readLimiter);
   router.use("/agent-autonomy", _writeLimiter);
-  router.use(agentAutonomyRouter);
+  router.use(lazyMatch("/agent-autonomy", () => import("../agent-autonomy"), "agent-autonomy"));
 
   router.use("/federation", _readLimiter);
-  router.use(agentFederationRouter);
+  router.use(lazyMatch("/federation", () => import("../agent-federation"), "agent-federation"));
 
   router.use("/fine-tuning", _readLimiter);
   router.use("/fine-tuning", _writeLimiter);
-  router.use(fineTuningRouter);
+  router.use(lazyMatch("/fine-tuning", () => import("../fine-tuning"), "fine-tuning"));
 
   router.use("/ml", _readLimiter);
   router.use("/ml", _writeLimiter);
-  router.use(mlPipelineRouter);
+  router.use(lazyMatch("/ml", () => import("../ml-pipeline"), "ml-pipeline"));
 
-  router.use(consciousnessRouter);
+  router.use(lazyMatch("/nuro-mesh", () => import("../consciousness"), "consciousness"));
 
   router.use("/ontology", _readLimiter);
   router.use("/ontology", _writeLimiter);
-  router.use(ontologyRouter);
+  router.use(lazyMatch("/ontology", () => import("../ontology"), "ontology"));
 
   router.use("/digital-twins", _readLimiter);
   router.use("/digital-twins", _writeLimiter);
-  router.use(digitalTwinsRouter);
+  router.use(lazyMatch("/digital-twins", () => import("../digital-twins"), "digital-twins"));
 
   router.use("/fusion", _readLimiter);
   router.use("/fusion", _writeLimiter);
-  router.use(fusionRouter);
+  router.use(lazyMatch("/fusion", () => import("../fusion"), "fusion"));
 
   router.use("/knowledge", _readLimiter);
   router.use("/knowledge", _writeLimiter);
-  router.use("/knowledge", knowledgeGraphRouter);
+  router.use("/knowledge", lazyMount(() => import("../knowledge-graph"), "knowledge-graph"));
 
   router.use("/ai-safety", _readLimiter);
-  router.use(aiSafetyRouter);
+  router.use(lazyMatch("/ai-safety", () => import("../ai-safety"), "ai-safety"));
 
   router.use("/forge", _readLimiter);
   router.use("/forge", _writeLimiter);
   router.use("/forge", aiControlPlane({ policyRouteClass: "reasoning", costRouteClass: "forge" }));
-  router.use(forgeRouter);
+  router.use(lazyMatch("/forge", () => import("../forge"), "forge"));
 
   router.use("/rag", _readLimiter);
-  router.use(ragKnowledgeRouter);
+  router.use(lazyMatch("/rag", () => import("../rag-knowledge"), "rag-knowledge"));
 
   router.use("/stream", _readLimiter);
-  router.use(streamingIngestionRouter);
+  router.use(lazyMatch("/stream", () => import("../streaming-ingestion"), "streaming-ingestion"));
 
   router.use("/connector-hub", _readLimiter);
   router.use("/connector-hub", _writeLimiter);
-  router.use(connectorHubRouter);
+  router.use(lazyMatch("/connector-hub", () => import("../connector-hub"), "connector-hub"));
 
   router.use("/a2a", _readLimiter);
   router.use("/a2a", _writeLimiter);
-  router.use(a2aRouter);
+  router.use(lazyMatch(["/.well-known", "/a2a"], () => import("../a2a"), "a2a"));
 
   router.use("/jobs", _readLimiter);
-  router.use(jobsRouter);
+  router.use(lazyMatch("/jobs", () => import("../jobs"), "jobs"));
 
   router.use("/atlas/spatial", _readLimiter);
   router.use("/atlas/spatial", _writeLimiter);
-  router.use(atlasSpatialRuntimeRouter);
+  router.use(lazyMatch("/atlas/spatial", () => import("../atlas-spatial-runtime"), "atlas-spatial-runtime"));
 
   router.use("/ai/prompts", _readLimiter);
   router.use("/ai/prompts", _writeLimiter);
-  router.use(promptRegistryRouter);
+  router.use(lazyMatch("/ai", () => import("../prompt-registry"), "prompt-registry"));
 }

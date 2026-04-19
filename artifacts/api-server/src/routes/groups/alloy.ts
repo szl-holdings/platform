@@ -2,19 +2,7 @@ import type { IRouter } from "express";
 import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../../middlewares/sliding-window-limiter";
 import { optionalIdempotencyMiddleware } from "../../middlewares/idempotency";
 import { tenantScope } from "../../middlewares/tenant-scope";
-import alloyRouter from "../alloy";
-import alloyChatRouter from "../alloy-chat";
-import alloyEmailRouter from "../alloy-email";
-import alloyMeetingsRouter from "../alloy-meetings";
-import alloyDigestRouter from "../alloy-digest";
-import alloyIntegrationsRouter from "../alloy-integrations";
-import alloyVoiceRouter from "../alloy-voice";
-import alloyCognitiveLearningRouter from "../alloy-cognitive-learning";
-import alloyGovernanceRouter from "../alloy-governance";
-import alloySkillsRouter from "../alloy-skills";
-import { alloyResearchRouter } from "../alloy-research";
-import alloyChannelsRouter from "../alloy-channels";
-import governanceRouter from "../governance";
+import { lazyMount, lazyMatch } from "../../lib/lazy-router";
 
 const _readLimiter = perUserApiSlidingLimiter;
 const _writeLimiter = perUserWriteSlidingLimiter;
@@ -27,40 +15,40 @@ export function register(router: IRouter): void {
   router.use("/alloy/ingest", optionalIdempotencyMiddleware);
   router.use("/alloy/workflows", _writeLimiter);
   router.use("/alloy/workflows", optionalIdempotencyMiddleware);
-  router.use(alloyRouter);
+  router.use(lazyMatch(["/alloy", "/decisions", "/skills"], () => import("../alloy"), "alloy"));
 
-  router.use(alloyChatRouter);
+  router.use(lazyMatch("/alloy-chat", () => import("../alloy-chat"), "alloy-chat"));
 
   router.use("/alloy/channels", _writeLimiter);
-  router.use(alloyChannelsRouter);
+  router.use(lazyMatch("/alloy", () => import("../alloy-channels"), "alloy-channels"));
 
   router.use("/alloy/email", _writeLimiter);
-  router.use(alloyEmailRouter);
+  router.use(lazyMatch("/alloy", () => import("../alloy-email"), "alloy-email"));
 
   router.use("/alloy/meetings", _writeLimiter);
-  router.use(alloyMeetingsRouter);
+  router.use(lazyMatch("/alloy", () => import("../alloy-meetings"), "alloy-meetings"));
 
   router.use("/alloy/digest", _readLimiter);
-  router.use(alloyDigestRouter);
+  router.use(lazyMatch("/alloy", () => import("../alloy-digest"), "alloy-digest"));
 
   router.use("/alloy/integrations", _writeLimiter);
-  router.use(alloyIntegrationsRouter);
+  router.use(lazyMatch("/alloy", () => import("../alloy-integrations"), "alloy-integrations"));
 
   router.use("/alloy/voice", _writeLimiter);
-  router.use(alloyVoiceRouter);
+  router.use(lazyMatch("/alloy", () => import("../alloy-voice"), "alloy-voice"));
 
   router.use("/alloy/cognitive", _readLimiter);
   router.use("/alloy/cognitive", _writeLimiter);
-  router.use(alloyCognitiveLearningRouter);
+  router.use(lazyMatch("/alloy", () => import("../alloy-cognitive-learning"), "alloy-cognitive-learning"));
 
   router.use("/governance", _writeLimiter);
-  router.use("/governance", governanceRouter);
+  router.use("/governance", lazyMount(() => import("../governance"), "governance"));
 
   router.use("/alloy/policies", _writeLimiter);
   router.use("/alloy/governance", _writeLimiter);
   router.use("/alloy/usage", _writeLimiter);
   router.use("/alloy/admin", _readLimiter);
-  router.use(alloyGovernanceRouter);
+  router.use(lazyMatch("/alloy", () => import("../alloy-governance"), "alloy-governance"));
 
   router.use("/alloy/skills", _readLimiter);
   router.use("/alloy/agents", _readLimiter);
@@ -68,9 +56,9 @@ export function register(router: IRouter): void {
   router.use("/alloy/self-improvement", _readLimiter);
   router.use("/alloy/self-improvement", _writeLimiter);
   router.use("/alloy/decisions", _writeLimiter);
-  router.use(alloySkillsRouter);
+  router.use(lazyMatch("/alloy", () => import("../alloy-skills"), "alloy-skills"));
 
   router.use("/alloy/research", _writeLimiter);
   router.use("/alloy/browser", _writeLimiter);
-  router.use(alloyResearchRouter);
+  router.use(lazyMatch("/alloy", () => import("../alloy-research").then(m => ({ default: m.alloyResearchRouter })), "alloy-research"));
 }

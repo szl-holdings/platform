@@ -1,48 +1,7 @@
 import { Router, type IRouter } from "express";
 import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../../middlewares/sliding-window-limiter";
 import { tenantScope } from "../../middlewares/tenant-scope";
-
-import stephenRouter from "../stephen";
-import carlotaJoRouter from "../carlota-jo";
-import holdingsRouter from "../holdings";
-import capitalReadinessRouter from "../capital-readiness";
-import certificationReadinessRouter from "../certification-readiness";
-import ownershipControlRouter from "../ownership-control";
-import fundOpsRouter from "../fund-ops";
-import bookingRouter from "../booking";
-import crmRouter from "../crm";
-import creativeWorkflowsRouter from "../dreamscape";
-import briefingRouter from "../briefing";
-import cortexRouter from "../cortex";
-import innovationEngineRouter from "../innovation-engine";
-import { autopilotRouter } from "../autopilot";
-import monteCarloRouter from "../monte-carlo";
-import signalChainsRouter from "../signal-chains";
-import crossDomainQueryRouter from "../cross-domain-query";
-import correlationMapRouter from "../correlation-map";
-import realtimeRouter from "../realtime";
-import helmRouter from "../helm-console";
-import crossAppHandoffsRouter from "../cross-app-handoffs";
-import multiplayerSessionsRouter from "../multiplayer-sessions";
-import prismBusApiRouter from "../prism-bus-api";
-import forgeRuntimeApiRouter from "../forge-runtime-api";
-import covenantPolicyApiRouter from "../covenant-policy-api";
-import imperiumRouter from "../imperium";
-import * as distributionOs from "../distribution-os";
-import dosPublicApiRouter from "../dos-public-api";
-import integrationsRouter from "../integrations";
-import microsoftGraphRouter from "../microsoft-graph";
-import microsoftIntegrationsRouter from "../microsoft-integrations";
-import pushTokensRouter from "../push-tokens";
-import pushNotificationsRouter from "../push-notifications";
-import pushPreferencesRouter from "../push-preferences";
-import pushHistoryRouter from "../push-history";
-import pushAnalyticsRouter from "../push-analytics";
-import webPushSubscriptionsRouter from "../web-push-subscriptions";
-import notificationRecipientsRouter from "../notification-recipients";
-import supportRouter from "../support";
-import dataRetentionRouter from "../data-retention";
-import investorAnalyticsRouter from "../investor-analytics";
+import { lazyMount, lazyRegister, lazyMatch } from "../../lib/lazy-router";
 
 const _readLimiter = perUserApiSlidingLimiter;
 const _writeLimiter = perUserWriteSlidingLimiter;
@@ -90,126 +49,127 @@ export function register(router: IRouter): void {
   router.use("/analytics/investor", tenantScope({ required: true }));
   router.use("/stephen", tenantScope({ required: true }));
 
-  router.use(stephenRouter);
-  router.use(carlotaJoRouter);
+  router.use(lazyMatch("/stephen", () => import("../stephen"), "stephen"));
+  router.use(lazyMatch(["/booking", "/portal", "/carlota"], () => import("../carlota-jo"), "carlota-jo"));
 
   router.use("/holdings/inquiries", _writeLimiter);
   router.use("/holdings", _readLimiter);
-  router.use(holdingsRouter);
+  router.use(lazyMatch(["/holdings", "/investors"], () => import("../holdings"), "holdings"));
 
   router.use("/capital", _writeLimiter);
-  router.use(capitalReadinessRouter);
+  router.use(lazyMatch("/capital", () => import("../capital-readiness"), "capital-readiness"));
 
   router.use("/certification", _writeLimiter);
-  router.use(certificationReadinessRouter);
+  router.use(lazyMatch("/certification", () => import("../certification-readiness"), "certification-readiness"));
 
   router.use("/ownership", _writeLimiter);
-  router.use(ownershipControlRouter);
+  router.use(lazyMatch("/ownership", () => import("../ownership-control"), "ownership-control"));
 
   router.use("/fund-ops", _writeLimiter);
   router.use("/fund-ops", _readLimiter);
-  router.use(fundOpsRouter);
+  router.use(lazyMatch("/fund-ops", () => import("../fund-ops"), "fund-ops"));
 
   router.use("/booking", _readLimiter);
-  router.use(bookingRouter);
+  router.use(lazyMatch("/booking", () => import("../booking"), "booking"));
 
   router.use("/salesforce", _readLimiter);
   router.use("/hubspot", _readLimiter);
   router.use("/dynamics", _readLimiter);
   router.use("/crm", _writeLimiter);
-  router.use(crmRouter);
+  router.use(lazyMatch(["/salesforce", "/hubspot", "/dynamics", "/crm"], () => import("../crm"), "crm"));
 
   router.use("/dreamscape", _readLimiter);
-  router.use(creativeWorkflowsRouter);
+  router.use(lazyMatch("/dreamscape", () => import("../dreamscape"), "dreamscape"));
 
   router.use("/briefing", _readLimiter);
   router.use("/briefing", _writeLimiter);
-  router.use(briefingRouter);
+  router.use(lazyMatch("/briefing", () => import("../briefing"), "briefing"));
 
   router.use("/cortex", _writeLimiter);
-  router.use(cortexRouter);
+  router.use(lazyMatch("/cortex", () => import("../cortex"), "cortex"));
 
   router.use("/innovation-engine", _readLimiter);
-  router.use("/innovation-engine", innovationEngineRouter);
+  router.use("/innovation-engine", lazyMount(() => import("../innovation-engine"), "innovation-engine"));
 
   router.use("/autopilot", _readLimiter);
-  router.use(autopilotRouter);
+  router.use(lazyMatch("/autopilot", () => import("../autopilot").then(m => ({ default: m.autopilotRouter })), "autopilot"));
 
   router.use("/monte-carlo", _readLimiter);
-  router.use(monteCarloRouter);
+  router.use(lazyMatch("/monte-carlo", () => import("../monte-carlo"), "monte-carlo"));
 
   router.use("/signal-chains", _readLimiter);
   router.use("/signal-chains", _writeLimiter);
-  router.use(signalChainsRouter);
+  router.use(lazyMatch("/signal-chains", () => import("../signal-chains"), "signal-chains"));
 
   router.use("/cross-domain-query", _writeLimiter);
-  router.use(crossDomainQueryRouter);
+  router.use(lazyMatch("/cross-domain-query", () => import("../cross-domain-query"), "cross-domain-query"));
 
   router.use("/correlation-map", _readLimiter);
-  router.use(correlationMapRouter);
+  router.use(lazyMatch("/correlation-map", () => import("../correlation-map"), "correlation-map"));
 
   router.use("/realtime", _readLimiter);
-  router.use(realtimeRouter);
+  router.use(lazyMatch("/realtime", () => import("../realtime"), "realtime"));
 
   router.use("/helm", _readLimiter);
-  router.use(helmRouter);
+  router.use(lazyMatch("/helm", () => import("../helm-console"), "helm-console"));
 
   router.use("/cross-app", _readLimiter);
   router.use("/cross-app", _writeLimiter);
-  router.use(crossAppHandoffsRouter);
+  router.use(lazyMatch("/cross-app", () => import("../cross-app-handoffs"), "cross-app-handoffs"));
 
   router.use("/sessions/command", _readLimiter);
   router.use("/sessions/command", _writeLimiter);
-  router.use(multiplayerSessionsRouter);
+  router.use(lazyMatch("/sessions", () => import("../multiplayer-sessions"), "multiplayer-sessions"));
 
   router.use("/prism-bus", _readLimiter);
-  router.use(prismBusApiRouter);
+  router.use(lazyMatch("/prism-bus", () => import("../prism-bus-api"), "prism-bus-api"));
 
   router.use("/forge", _writeLimiter);
-  router.use(forgeRuntimeApiRouter);
+  router.use(lazyMatch("/forge", () => import("../forge-runtime-api"), "forge-runtime-api"));
 
   router.use("/covenant", _readLimiter);
-  router.use(covenantPolicyApiRouter);
+  router.use(lazyMatch("/covenant", () => import("../covenant-policy-api"), "covenant-policy-api"));
 
   router.use("/imperium", _readLimiter);
-  router.use(imperiumRouter);
+  router.use(lazyMatch("/imperium", () => import("../imperium"), "imperium"));
 
   router.use("/distribution-os", _writeLimiter);
-  const dosRouter = Router();
-  distributionOs.register(dosRouter);
-  router.use("/distribution-os", dosRouter);
+  router.use("/distribution-os", lazyRegister(() => import("../distribution-os"), "distribution-os"));
   // /v1 — public API gated by dosApiKeyAuth (API key), not user session. Exempt from tenantScope by design.
-  router.use("/v1", dosPublicApiRouter);
+  router.use("/v1", lazyMount(() => import("../dos-public-api"), "dos-public-api"));
 
   router.use("/integrations", _readLimiter);
-  router.use(microsoftIntegrationsRouter);
-  router.use(integrationsRouter);
+  router.use(lazyMatch("/integrations", () => import("../microsoft-integrations"), "microsoft-integrations"));
+  router.use(lazyMatch("/integrations", () => import("../integrations"), "integrations"));
 
   router.use("/microsoft", _readLimiter);
-  router.use(microsoftGraphRouter);
+  router.use(lazyMatch("/microsoft", () => import("../microsoft-graph"), "microsoft-graph"));
 
   router.use("/push-tokens", _writeLimiter);
-  router.use(pushTokensRouter);
+  router.use(lazyMatch("/push-tokens", () => import("../push-tokens"), "push-tokens"));
   router.use("/push-notifications", _writeLimiter);
-  router.use(pushNotificationsRouter);
-  router.use(pushPreferencesRouter);
-  router.use(pushHistoryRouter);
-  router.use(pushAnalyticsRouter);
+  router.use(lazyMatch("/push-notifications", () => import("../push-notifications"), "push-notifications"));
+  router.use(lazyMatch("/push-preferences", () => import("../push-preferences"), "push-preferences"));
+  router.use(lazyMatch("/push-history", () => import("../push-history"), "push-history"));
+  router.use(lazyMatch("/push-analytics", () => import("../push-analytics"), "push-analytics"));
 
   router.use("/web-push", _writeLimiter);
-  router.use(webPushSubscriptionsRouter);
+  router.use(lazyMatch("/web-push", () => import("../web-push-subscriptions"), "web-push-subscriptions"));
 
   router.use("/notification-recipients", _writeLimiter);
-  router.use(notificationRecipientsRouter);
+  router.use(lazyMatch("/notification-recipients", () => import("../notification-recipients"), "notification-recipients"));
 
   router.use("/support", _readLimiter);
   router.use("/support", _writeLimiter);
-  router.use(supportRouter);
+  router.use(lazyMatch("/support", () => import("../support"), "support"));
 
   router.use("/data-retention", _readLimiter);
   router.use("/data-retention", _writeLimiter);
-  router.use(dataRetentionRouter);
+  router.use(lazyMatch("/data-retention", () => import("../data-retention"), "data-retention"));
 
   router.use("/analytics/investor", _readLimiter);
-  router.use(investorAnalyticsRouter);
+  router.use(lazyMatch("/investor-analytics", () => import("../investor-analytics"), "investor-analytics"));
+
+  // Suppress unused-Router warning (kept import for compatibility with consumers).
+  void Router;
 }

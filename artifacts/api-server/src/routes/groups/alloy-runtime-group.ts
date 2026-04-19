@@ -2,8 +2,7 @@ import type { IRouter } from "express";
 import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../../middlewares/sliding-window-limiter";
 import { optionalIdempotencyMiddleware } from "../../middlewares/idempotency";
 import { tenantScope } from "../../middlewares/tenant-scope";
-import alloyRuntimeRouter from "../alloy-runtime";
-import memoryRouter from "../memory";
+import { lazyMount, lazyMatch } from "../../lib/lazy-router";
 
 export function register(router: IRouter): void {
   router.use("/memory", tenantScope({ required: true }));
@@ -18,7 +17,7 @@ export function register(router: IRouter): void {
 
   router.use("/memory", perUserApiSlidingLimiter);
   router.use("/memory", perUserWriteSlidingLimiter);
-  router.use(memoryRouter);
+  router.use(lazyMatch("/memory", () => import("../memory"), "memory"));
 
   router.use("/workflows", perUserApiSlidingLimiter);
   router.use("/workflow-runs", perUserApiSlidingLimiter);
@@ -30,5 +29,5 @@ export function register(router: IRouter): void {
   router.use("/signals", perUserWriteSlidingLimiter);
   router.use("/actions", perUserApiSlidingLimiter);
   router.use("/recommendations", perUserApiSlidingLimiter);
-  router.use(alloyRuntimeRouter);
+  router.use(lazyMatch(["/workflows", "/workflow-runs", "/agents", "/models", "/prompts", "/signals", "/actions", "/recommendations"], () => import("../alloy-runtime"), "alloy-runtime"));
 }

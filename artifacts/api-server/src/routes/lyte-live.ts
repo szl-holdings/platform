@@ -6,6 +6,7 @@ import { authMiddleware } from "../middlewares/auth";
 import { db } from "@szl-holdings/db";
 import { sql } from "drizzle-orm";
 import os from "os";
+import v8 from "node:v8";
 
 const router: IRouter = Router();
 
@@ -164,12 +165,14 @@ router.get("/lyte/live/signals", authMiddleware({ required: false }), async (_re
         value: `${(memUsage.heapUsed / 1024 / 1024).toFixed(1)} MB`,
         rawValue: memUsage.heapUsed,
         unit: "bytes",
-        status: memUsage.heapUsed / memUsage.heapTotal > 0.9 ? "critical" : memUsage.heapUsed / memUsage.heapTotal > 0.75 ? "elevated" : "healthy",
+        status: (memUsage.heapUsed / v8.getHeapStatistics().heap_size_limit) > 0.9 ? "critical" : (memUsage.heapUsed / v8.getHeapStatistics().heap_size_limit) > 0.75 ? "elevated" : "healthy",
         category: "infrastructure",
         source: "process",
         detail: {
           heapUsedMb: +(memUsage.heapUsed / 1024 / 1024).toFixed(1),
-          heapTotalMb: +(memUsage.heapTotal / 1024 / 1024).toFixed(1),
+          // Use V8's heap_size_limit (real OOM ceiling), not memUsage.heapTotal
+          // which is V8's currently-allocated heap and grows on demand.
+          heapTotalMb: +(v8.getHeapStatistics().heap_size_limit / 1024 / 1024).toFixed(1),
           externalMb: +(memUsage.external / 1024 / 1024).toFixed(1),
           rssMb: +(memUsage.rss / 1024 / 1024).toFixed(1),
         },
@@ -470,8 +473,9 @@ router.get("/lyte/live/operations-summary", authMiddleware({ required: false }),
       },
       memory: {
         heapUsedMb: +(memUsage.heapUsed / 1024 / 1024).toFixed(1),
-        heapTotalMb: +(memUsage.heapTotal / 1024 / 1024).toFixed(1),
-        heapUtilizationPct: +((memUsage.heapUsed / memUsage.heapTotal) * 100).toFixed(1),
+        // Use V8's heap_size_limit (real OOM ceiling), not memUsage.heapTotal.
+        heapTotalMb: +(v8.getHeapStatistics().heap_size_limit / 1024 / 1024).toFixed(1),
+        heapUtilizationPct: +((memUsage.heapUsed / v8.getHeapStatistics().heap_size_limit) * 100).toFixed(1),
         rssMb: +(memUsage.rss / 1024 / 1024).toFixed(1),
         systemTotalGb: +(totalMem / 1024 / 1024 / 1024).toFixed(2),
         systemFreeGb: +(freeMem / 1024 / 1024 / 1024).toFixed(2),

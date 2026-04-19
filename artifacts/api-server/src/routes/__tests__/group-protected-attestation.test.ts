@@ -238,6 +238,16 @@ describe("GROUP_PROTECTED_BASENAMES attestation guardrail", () => {
           //      import { fooRouter } from "../foo";
           //      import * as foo from "../foo";
           //      import fooRouter, { other } from "../foo";
+          //      router.use(lazyMount(() => import("../foo"), ...))   // lazy
+          //      router.use(lazyMatch(prefix, () => import("../foo"), ...))
+          //      router.use(lazyRegister(() => import("../foo"), ...))
+          //      router.use(lazyRegisterMatch(prefix, () => import("../foo"), ...))
+          //
+          //    Lazy-loaded modules satisfy the import + mount checks in a
+          //    single expression (the dynamic import IS the import, and the
+          //    enclosing router.use(...) IS the mount). The tenantScope gate
+          //    check below remains untouched — that's the real security
+          //    guarantee, and lazy loading does not affect it.
           //
           //    We iterate every import statement in the file rather than
           //    using a single regex, because non-greedy `[\s\S]*?` can leak
@@ -255,11 +265,40 @@ describe("GROUP_PROTECTED_BASENAMES attestation guardrail", () => {
               break;
             }
           }
+          // Lazy-import detection: a `router.use(lazy*(... import("../X")))`
+          // call counts as both import AND mount.
+          const lazyMountRe = new RegExp(
+            `router\\.use\\(\\s*(?:lazyMount|lazyMatch|lazyRegister|lazyRegisterMatch)\\(` +
+              `[\\s\\S]*?import\\(\\s*["']\\.\\./${escapeRegex(moduleName)}(?:\\.js)?["']\\s*\\)`,
+          );
+          const hasLazyMount = lazyMountRe.test(src);
           expect(
-            importMatch !== null,
-            `${att.groupFile} no longer imports "../${moduleName}". ` +
-              `If the file moved, update GROUP_PROTECTED_BASENAMES and this attestation.`,
+            importMatch !== null || hasLazyMount,
+            `${att.groupFile} no longer imports "../${moduleName}" (neither ` +
+              `as a static import nor as a lazyMount/lazyMatch/lazyRegister ` +
+              `dynamic import). If the file moved, update ` +
+              `GROUP_PROTECTED_BASENAMES and this attestation.`,
           ).toBe(true);
+
+          // If the import is via a lazy helper, the import + mount check is
+          // already satisfied by hasLazyMount; we can skip the binding-name
+          // mount check below.
+          if (hasLazyMount && !importMatch) {
+            // 3. The gate prefix must still have a tenantScope({ required: true })
+            //    call in the same group file.
+            const gateRe = new RegExp(
+              `router\\.use\\(\\s*["']${escapeRegex(att.gatePrefix)}["']\\s*,` +
+                `\\s*tenantScope\\(\\s*\\{\\s*required\\s*:\\s*true`,
+            );
+            expect(
+              gateRe.test(src),
+              `${att.groupFile} no longer applies tenantScope({ required: true }) ` +
+                `at "${att.gatePrefix}". Either restore the gate, or reclassify ` +
+                `${basename} as PROTECTED by adding explicit auth middleware to ` +
+                `the file itself (and remove it from GROUP_PROTECTED_BASENAMES).`,
+            ).toBe(true);
+            return;
+          }
 
           // Extract the bound symbol(s) — default-import name, named-imports,
           // or namespace-import name.
@@ -461,13 +500,20 @@ describe("GROUP_PROTECTED_BASENAMES attestation guardrail", () => {
         it("still mounted (imported) in routes/index.ts", () => {
           const src = fs.readFileSync(MAIN_INDEX_PATH, "utf-8");
           const moduleName = basename.replace(/\.ts$/, "");
-          const importRe = new RegExp(
+          // Accept either a static `from "./X"` import or a lazy
+          // `lazyMount/lazyMatch(... import("./X") ...)` mount expression.
+          const staticRe = new RegExp(
             `from\\s+["']\\./${escapeRegex(moduleName)}(?:\\.js)?["']`,
           );
+          const lazyRe = new RegExp(
+            `(?:lazyMount|lazyMatch|lazyRegister|lazyRegisterMatch)\\(` +
+              `[\\s\\S]*?import\\(\\s*["']\\./${escapeRegex(moduleName)}(?:\\.js)?["']\\s*\\)`,
+          );
           expect(
-            importRe.test(src),
-            `routes/index.ts no longer imports "./${moduleName}". Either ` +
-              `restore the mount or remove ${basename} from ` +
+            staticRe.test(src) || lazyRe.test(src),
+            `routes/index.ts no longer imports "./${moduleName}" (neither ` +
+              `as a static import nor as a lazyMount/lazyMatch dynamic ` +
+              `import). Either restore the mount or remove ${basename} from ` +
               `GROUP_PROTECTED_BASENAMES.`,
           ).toBe(true);
         });

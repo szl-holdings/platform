@@ -1,7 +1,7 @@
 import type { IRouter } from "express";
 import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../../middlewares/sliding-window-limiter";
 import { tenantScope } from "../../middlewares/tenant-scope";
-import domainAtlasRouter from "../domain-atlas-execution";
+import { lazyMount, lazyMatch } from "../../lib/lazy-router";
 
 export function register(router: IRouter): void {
   router.use("/aegis/atlas", tenantScope({ required: true }));
@@ -27,5 +27,5 @@ export function register(router: IRouter): void {
   router.use("/carlota-jo/atlas", perUserWriteSlidingLimiter);
   router.use("/imperium/atlas", perUserWriteSlidingLimiter);
 
-  router.use(domainAtlasRouter);
+  router.use(lazyMatch("/atlas", () => import("../domain-atlas-execution"), "domain-atlas-execution"));
 }

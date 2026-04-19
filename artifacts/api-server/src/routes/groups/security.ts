@@ -1,21 +1,7 @@
-import { Router, type IRouter } from "express";
+import { type IRouter } from "express";
 import { perUserApiSlidingLimiter } from "../../middlewares/sliding-window-limiter";
 import { tenantScope } from "../../middlewares/tenant-scope";
-
-import * as aegisSoc from "../firestorm";
-import aegisSocLiveRouter from "../firestorm-live";
-import firestormCommandRouter from "../firestorm-command-surfaces";
-import firestormCognitiveRouter from "../firestorm-cognitive";
-import * as intelligence from "../intelligence";
-import aegisIntelRouter from "../inca";
-import govDataRouter from "../gov-data";
-import readinessRouter from "../readiness";
-import aegisOpsLiveRouter from "../msp-live";
-import aegisOpsRouter from "../msp";
-import * as rmm from "../rmm";
-import otIcsRouter from "../ot-ics";
-import aegisDigitalTwinRouter from "../aegis-digital-twin";
-import aegisModulesRouter from "../aegis-modules";
+import { lazyMount, lazyRegister, lazyMatch, lazyRegisterMatch } from "../../lib/lazy-router";
 
 const _readLimiter = perUserApiSlidingLimiter;
 
@@ -49,38 +35,36 @@ export function register(router: IRouter): void {
     next();
   });
 
-  aegisSoc.register(router);
-  router.use(aegisSocLiveRouter);
+  router.use(lazyRegisterMatch("/firestorm", () => import("../firestorm"), "firestorm"));
+  router.use(lazyMatch("/firestorm", () => import("../firestorm-live"), "firestorm-live"));
 
   router.use("/command", _readLimiter);
   router.use("/firestorm/command", _readLimiter);
-  router.use(firestormCommandRouter);
+  router.use(lazyMatch("/firestorm", () => import("../firestorm-command-surfaces"), "firestorm-command-surfaces"));
 
   router.use("/firestorm/cognitive", _readLimiter);
-  router.use(firestormCognitiveRouter);
+  router.use(lazyMatch("/firestorm", () => import("../firestorm-cognitive"), "firestorm-cognitive"));
 
-  intelligence.register(router);
-  router.use(aegisIntelRouter);
+  router.use(lazyRegisterMatch("/intelligence", () => import("../intelligence"), "intelligence"));
+  router.use(lazyMatch("/inca", () => import("../inca"), "inca"));
 
   router.use("/gov", _readLimiter);
-  router.use(govDataRouter);
+  router.use(lazyMatch("/gov", () => import("../gov-data"), "gov-data"));
 
   router.use("/readiness", _readLimiter);
-  router.use(readinessRouter);
+  router.use(lazyMatch("/readiness", () => import("../readiness"), "readiness"));
   router.use("/aegis", _readLimiter);
-  router.use(readinessRouter);
+  router.use(lazyMatch("/readiness", () => import("../readiness"), "readiness"));
 
-  router.use(aegisOpsLiveRouter);
-  router.use(aegisOpsRouter);
+  router.use(lazyMatch("/msp", () => import("../msp-live"), "msp-live"));
+  router.use(lazyMatch("/msp", () => import("../msp"), "msp"));
 
   router.use("/msp", _readLimiter);
-  const mspRouter = Router();
-  rmm.register(mspRouter);
-  router.use("/msp", mspRouter);
+  router.use("/msp", lazyRegister(() => import("../rmm"), "rmm"));
 
-  router.use(otIcsRouter);
+  router.use(lazyMatch("/aegis", () => import("../ot-ics"), "ot-ics"));
 
   router.use("/aegis", _readLimiter);
-  router.use(aegisDigitalTwinRouter);
-  router.use(aegisModulesRouter);
+  router.use(lazyMatch("/aegis", () => import("../aegis-digital-twin"), "aegis-digital-twin"));
+  router.use(lazyMatch("/aegis", () => import("../aegis-modules"), "aegis-modules"));
 }

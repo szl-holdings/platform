@@ -2,14 +2,7 @@ import type { IRouter } from "express";
 import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../../middlewares/sliding-window-limiter";
 import { adminGuard } from "../../middlewares/admin-guard";
 import { tenantScope } from "../../middlewares/tenant-scope";
-
-import adminRouter from "../admin";
-import observabilityRouter from "../observability";
-import opsManagementRouter from "../ops-management";
-import commandRouter from "../command";
-import governanceCountsRouter from "../governance-counts";
-import businessEventsRouter from "../business-events-ingestion";
-import linearRouter from "../linear";
+import { lazyMount, lazyMatch } from "../../lib/lazy-router";
 
 const _readLimiter = perUserApiSlidingLimiter;
 const _writeLimiter = perUserWriteSlidingLimiter;
@@ -20,29 +13,24 @@ export function register(router: IRouter): void {
   router.use("/business-events", tenantScope({ required: true }));
 
   router.use("/admin", adminGuard);
-  router.use(adminRouter);
+  router.use(lazyMatch("/admin", () => import("../admin"), "admin"));
 
   router.use("/observability", _readLimiter);
-  router.use(observabilityRouter);
+  router.use(lazyMatch("/observability", () => import("../observability"), "observability"));
 
-  router.use(opsManagementRouter);
+  router.use(lazyMatch("/ops", () => import("../ops-management"), "ops-management"));
 
   router.use("/command", _readLimiter);
   router.use("/command", _writeLimiter);
-  router.use("/command", commandRouter);
-
-  // Note: /competitive-intel is mounted at the TOP of routes/index.ts (BEFORE
-  // any router that applies blanket auth/tenantScope at "/") so the public
-  // Atlas demo surface can fetch alerts without a session. The top-level mount
-  // owns the handler chain; this group register intentionally does NOT remount it.
+  router.use("/command", lazyMount(() => import("../command"), "command"));
 
   router.use("/governance", _readLimiter);
-  router.use("/governance", governanceCountsRouter);
+  router.use("/governance", lazyMount(() => import("../governance-counts"), "governance-counts"));
 
   router.use("/business-events", _writeLimiter);
-  router.use(businessEventsRouter);
+  router.use(lazyMatch("/business-events", () => import("../business-events-ingestion"), "business-events-ingestion"));
 
   router.use("/linear", tenantScope({ required: true }));
   router.use("/linear", _writeLimiter);
-  router.use(linearRouter);
+  router.use(lazyMatch("/linear", () => import("../linear"), "linear"));
 }
