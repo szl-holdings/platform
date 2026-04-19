@@ -43,8 +43,8 @@ async function fetchIncidentWithETag(
   id: string,
   onETag: (etag: string) => void
 ): Promise<IncidentDetail> {
-  const res = await apiFetchRaw(`/api/firestorm/incidents/${id}`);
-  if (!res.ok) throw new Error(`GET /api/firestorm/incidents/${id} failed: ${res.status}`);
+  const res = await apiFetchRaw(`/api/aegis/incidents/${id}`);
+  if (!res.ok) throw new Error(`GET /api/aegis/incidents/${id} failed: ${res.status}`);
   const etag = res.headers.get("etag");
   if (etag) onETag(etag);
   const json = await res.json() as { data?: IncidentDetail } | IncidentDetail;
@@ -116,7 +116,7 @@ export default function IncidentDetailScreen() {
 
   const updateMut = useMutation({
     mutationFn: async (data: IncidentUpdate) => {
-      const path = `/api/firestorm/incidents/${id}`;
+      const path = `/api/aegis/incidents/${id}`;
       const idempotencyKey = `aegis-incident-update-${id}-${Date.now().toString(36)}`;
 
       const concurrencyHeaders: Record<string, string> = {};

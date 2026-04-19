@@ -175,16 +175,16 @@ function SkeletonBlock({ width, height, style }: { width: number | `${number}%`;
 }
 
 async function fetchIncidents(): Promise<Incident[]> {
-  return apiGet<Incident[]>("/api/firestorm/incidents");
+  return apiGet<Incident[]>("/api/aegis/incidents");
 }
 
 async function fetchFindings(): Promise<Finding[]> {
-  return apiGet<Finding[]>("/api/firestorm/findings");
+  return apiGet<Finding[]>("/api/aegis/findings");
 }
 
 async function fetchThreatSummary(): Promise<ThreatSummary> {
   try {
-    return await apiGet<ThreatSummary>("/api/firestorm/live/threat-summary");
+    return await apiGet<ThreatSummary>("/api/aegis/live/threat-summary");
   } catch (err) {
     console.warn("[Dashboard] Threat summary unavailable:", err);
     return {};
@@ -193,7 +193,7 @@ async function fetchThreatSummary(): Promise<ThreatSummary> {
 
 async function fetchHardeningSummary(): Promise<HardeningSummary> {
   try {
-    return await apiGet<HardeningSummary>("/api/firestorm/hardening-summary");
+    return await apiGet<HardeningSummary>("/api/aegis/hardening-summary");
   } catch (err) {
     console.warn("[Dashboard] Hardening summary unavailable:", err);
     return { overallScore: 0, total: 0, implemented: 0, partial: 0, notImplemented: 0, criticalGaps: 0 };

@@ -31,11 +31,11 @@ interface Finding {
 }
 
 async function fetchFindings(): Promise<Finding[]> {
-  return apiGet<Finding[]>("/api/firestorm/findings");
+  return apiGet<Finding[]>("/api/aegis/findings");
 }
 
 async function updateFinding(id: number, data: Partial<Finding>): Promise<Finding> {
-  return apiPut<Finding>(`/api/firestorm/findings/${id}`, data);
+  return apiPut<Finding>(`/api/aegis/findings/${id}`, data);
 }
 
 const SEVERITY_COLORS: Record<Finding["severity"], string> = {

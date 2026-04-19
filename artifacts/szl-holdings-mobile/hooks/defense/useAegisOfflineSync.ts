@@ -125,7 +125,7 @@ export function useAegisOfflineSync(): AegisOfflineSyncResult {
       if (!API_BASE) return;
       await enqueue({
         method: "POST",
-        url: `${API_BASE}/firestorm/incidents`,
+        url: `${API_BASE}/aegis/incidents`,
         body: {
           title: params.title,
           description: params.description,
@@ -143,7 +143,7 @@ export function useAegisOfflineSync(): AegisOfflineSyncResult {
       if (!API_BASE) return;
       await enqueue({
         method: "PATCH",
-        url: `${API_BASE}/firestorm/incidents/${incidentId}`,
+        url: `${API_BASE}/aegis/incidents/${incidentId}`,
         body: { status, notes },
       });
     },

@@ -26,7 +26,7 @@ interface MitreDetection {
 
 async function fetchMitreDetections(): Promise<MitreDetection[]> {
   try {
-    return await apiGet<MitreDetection[]>("/api/firestorm/mitre-detections");
+    return await apiGet<MitreDetection[]>("/api/aegis/mitre-detections");
   } catch (err) {
     console.warn("[MITRE] Failed to fetch detections:", err);
     return [];

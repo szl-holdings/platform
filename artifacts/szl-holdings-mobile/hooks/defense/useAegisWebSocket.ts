@@ -45,7 +45,7 @@ export function useAegisWebSocket() {
 
   const domain = process.env.EXPO_PUBLIC_DOMAIN ?? "";
   const url = domain
-    ? `wss://${domain}/api/firestorm/ws`
+    ? `wss://${domain}/api/aegis/ws`
     : "";
 
   const handleMessage = useCallback(

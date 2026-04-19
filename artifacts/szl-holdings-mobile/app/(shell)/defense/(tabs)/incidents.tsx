@@ -63,7 +63,7 @@ const DEMO_INCIDENTS: Incident[] = [
 
 async function fetchIncidents(): Promise<Incident[]> {
   try {
-    const data = await apiGet<Incident[]>("/api/firestorm/incidents");
+    const data = await apiGet<Incident[]>("/api/aegis/incidents");
     await cacheSet(CACHE_KEYS.INCIDENTS, data);
     return data;
   } catch (err) {
@@ -77,7 +77,7 @@ async function fetchIncidents(): Promise<Incident[]> {
 }
 
 async function updateIncident(id: number, data: IncidentUpdate): Promise<Incident> {
-  return apiPut<Incident>(`/api/firestorm/incidents/${id}`, data);
+  return apiPut<Incident>(`/api/aegis/incidents/${id}`, data);
 }
 
 const SEVERITY_COLORS: Record<string, string> = {
@@ -264,7 +264,7 @@ export default function IncidentsScreen() {
       const base = process.env.EXPO_PUBLIC_DOMAIN ? `https://${process.env.EXPO_PUBLIC_DOMAIN}` : "";
       enqueueOffline({
         method: "PUT",
-        url: `${base}/api/firestorm/incidents/${id}`,
+        url: `${base}/api/aegis/incidents/${id}`,
         body: data,
       });
     },

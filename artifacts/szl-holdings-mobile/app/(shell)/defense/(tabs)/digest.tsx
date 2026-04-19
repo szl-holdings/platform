@@ -74,17 +74,17 @@ export default function DigestTab() {
 
   const { data: incidents, isLoading: incLoading, refetch: refetchInc, isRefetching: incRefetching } = useQuery({
     queryKey: ["incidents"],
-    queryFn: () => apiGet<Incident[]>("/api/firestorm/incidents"),
+    queryFn: () => apiGet<Incident[]>("/api/aegis/incidents"),
   });
 
   const { data: findings, isLoading: findLoading, refetch: refetchFind, isRefetching: findRefetching } = useQuery({
     queryKey: ["findings"],
-    queryFn: () => apiGet<Finding[]>("/api/firestorm/findings"),
+    queryFn: () => apiGet<Finding[]>("/api/aegis/findings"),
   });
 
   const { data: hardeningSummary, isLoading: hardLoading } = useQuery({
     queryKey: ["hardening-summary"],
-    queryFn: () => apiGet<HardeningSummary>("/api/firestorm/hardening-summary"),
+    queryFn: () => apiGet<HardeningSummary>("/api/aegis/hardening-summary"),
   });
 
   const { data: decisions, isLoading: decLoading, refetch: refetchDec, isRefetching: decRefetching } = useQuery({

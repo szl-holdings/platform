@@ -45,11 +45,11 @@ interface FindingUpdate {
 }
 
 async function fetchFinding(id: string): Promise<FindingDetail> {
-  return apiGet<FindingDetail>(`/api/firestorm/findings/${id}`);
+  return apiGet<FindingDetail>(`/api/aegis/findings/${id}`);
 }
 
 async function updateFinding(id: string, data: FindingUpdate): Promise<FindingDetail> {
-  return apiPut<FindingDetail>(`/api/firestorm/findings/${id}`, data);
+  return apiPut<FindingDetail>(`/api/aegis/findings/${id}`, data);
 }
 
 const SEVERITY_COLORS: Record<string, string> = {
