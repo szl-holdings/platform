@@ -12,6 +12,9 @@
     "access": "public"
   },
   "type": "module",
+  "scripts": {
+    "test": "vitest run"
+  },
   "exports": {
     ".": "./src/index.ts"
   },
