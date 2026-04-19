@@ -125,3 +125,15 @@ VAPID_SUBJECT = "mailto:platform@szlholdings.com"
 EXPO_PUBLIC_POSTHOG_HOST = "https://us.i.posthog.com"
 
 [userenv.development]
+
+[[ports]]
+localPort = 8080
+externalPort = 80
+
+[[ports]]
+localPort = 9090
+externalPort = 3000
+
+[[ports]]
+localPort = 21130
+externalPort = 3001
