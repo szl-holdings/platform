@@ -734,23 +734,23 @@ function RiskRegisterModule() {
                     {/* Action buttons */}
                     <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", borderTop: `1px solid ${BORDER}`, paddingTop: "0.625rem" }}>
                       {risk.id === "r1" && (
-                        riskAction?.status === "running" ? (
+                        riskAction?.type === "playbook" && riskAction.status === "running" ? (
                           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "10px", color: "#f59e0b" }}>
                             <RefreshCw style={{ width: 11, height: 11, animation: "spin 1s linear infinite" }} />
                             Running credential rotation playbook…
                           </div>
-                        ) : riskAction?.status === "done" ? (
+                        ) : riskAction?.type === "playbook" && riskAction.status === "done" ? (
                           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "10px", color: "#22c55e" }}>
                             <CheckCircle2 style={{ width: 11, height: 11 }} />
                             {riskAction.result}
                           </div>
-                        ) : (
+                        ) : riskAction?.type !== "ticket" ? (
                           <button onClick={() => handlePlaybook(risk.id, risk.title)} style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "10px", fontWeight: 700, padding: "5px 12px", borderRadius: "6px", background: "#c2a55a20", border: "1px solid #c2a55a40", color: "#c2a55a", cursor: "pointer" }}>
                             <RefreshCw style={{ width: 10, height: 10 }} /> Rotate Credentials &amp; Reconnect
                           </button>
-                        )
+                        ) : null
                       )}
-                      {risk.id === "r2" && (
+                      {(
                         riskAction?.type === "ticket" && riskAction.status === "running" ? (
                           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "10px", color: "#f59e0b" }}>
                             <RefreshCw style={{ width: 11, height: 11, animation: "spin 1s linear infinite" }} />
