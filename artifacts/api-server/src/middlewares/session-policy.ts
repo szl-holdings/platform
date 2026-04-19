@@ -179,6 +179,22 @@ export function getSessionMinCreatedAt(): Date | null {
     _cachedCutoff = { raw, value: null };
     return null;
   }
+  // Defensive: a future cutoff would invalidate every session including
+  // brand-new ones (clock skew / timezone typo / accidentally pasting
+  // a tomorrow timestamp), creating a global auth outage. Allow a small
+  // forward tolerance for clock drift but reject anything beyond.
+  // NOTE: future timestamps are not cached — once "now" advances past
+  // them they should automatically take effect, so we re-evaluate on
+  // every call until they become valid.
+  const now = Date.now();
+  const FUTURE_TOLERANCE_MS = 5 * 60 * 1000;
+  if (parsed.getTime() > now + FUTURE_TOLERANCE_MS) {
+    logger.warn(
+      { rawValue: raw, parsedIso: parsed.toISOString(), nowIso: new Date(now).toISOString() },
+      "SESSION_MIN_CREATED_AT is more than 5 minutes in the future — ignoring to avoid locking out all users (likely clock-skew or timezone misconfig)",
+    );
+    return null;
+  }
   _cachedCutoff = { raw, value: parsed };
   return parsed;
 }
