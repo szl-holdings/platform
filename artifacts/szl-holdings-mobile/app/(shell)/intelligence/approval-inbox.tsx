@@ -648,7 +648,10 @@ export default function ApprovalInboxScreen() {
         <OfflineQueuePanel
           isOffline={isOffline}
           refreshKey={offlineQueue.length}
-          onChanged={() => loadQueuedDecisions().then(setOfflineQueue)}
+          onChanged={() => {
+            loadQueuedDecisions().then(setOfflineQueue);
+            qc.invalidateQueries({ queryKey: ["cognitive-approvals"] });
+          }}
         />
         {offlineQueue.length > 0 && (
           <View style={styles.queuedSection}>

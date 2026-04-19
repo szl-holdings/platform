@@ -427,7 +427,10 @@ export default function ApprovalsTab() {
         <OfflineQueuePanel
           isOffline={isOffline}
           refreshKey={offlineQueue.length}
-          onChanged={() => loadTradecraftQueue().then(setOfflineQueue)}
+          onChanged={() => {
+            loadTradecraftQueue().then(setOfflineQueue);
+            queryClient.invalidateQueries({ queryKey: ["tradecraft-decisions"] });
+          }}
         />
         {showQueue && (
           <View style={{ marginBottom: 4 }}>

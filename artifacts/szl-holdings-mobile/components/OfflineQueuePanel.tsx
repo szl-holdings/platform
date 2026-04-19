@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Alert, LayoutAnimation, Platform, UIManager } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Alert, LayoutAnimation, Platform, UIManager, ActivityIndicator } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useColors } from "@/hooks/useColors";
+import { apiFetchRaw } from "@/lib/apiClient";
 
 if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -14,6 +15,8 @@ const RED = "#ef4444";
 const CORTEX_QUEUE_KEY = "cortex:approval-offline-queue";
 const TRADECRAFT_QUEUE_KEY = "defense:tradecraft-offline-queue";
 const SHARED_QUEUE_KEY = "mobile-shared:offline-mutation-queue";
+const SHARED_CONFLICTS_KEY = "mobile-shared:offline-conflicts";
+const SHARED_MAX_RETRIES = 3;
 
 export interface UnifiedQueuedItem {
   id: string;
@@ -142,6 +145,124 @@ export async function loadAllQueued(): Promise<UnifiedQueuedItem[]> {
   return items;
 }
 
+async function bumpSharedRetry(sharedId: string): Promise<boolean> {
+  const queue = await readJson<SharedQueued[]>(SHARED_QUEUE_KEY, []);
+  const entry = queue.find((q) => q.id === sharedId);
+  if (!entry) return false;
+  const nextRetries = (entry.retries ?? 0) + 1;
+  if (nextRetries > SHARED_MAX_RETRIES) {
+    await writeJson(SHARED_QUEUE_KEY, queue.filter((q) => q.id !== sharedId));
+    return true;
+  }
+  await writeJson(
+    SHARED_QUEUE_KEY,
+    queue.map((q) => (q.id === sharedId ? { ...q, retries: nextRetries } : q))
+  );
+  return false;
+}
+
+async function retryItem(item: UnifiedQueuedItem): Promise<{ ok: boolean; reason?: string }> {
+  if (item.source === "cortex") {
+    const approvalId = Number(item.id.split(":")[1]);
+    const queue = await readJson<CortexQueued[]>(CORTEX_QUEUE_KEY, []);
+    const entry = queue.find((q) => q.approvalId === approvalId);
+    if (!entry) return { ok: false, reason: "Queued entry not found." };
+    try {
+      const res = await apiFetchRaw(`/api/approvals/${entry.approvalId}/review`, {
+        method: "POST",
+        body: JSON.stringify({ decision: entry.decision, note: entry.note || undefined }),
+      });
+      if (!res.ok) return { ok: false, reason: `Server returned ${res.status}` };
+      await writeJson(CORTEX_QUEUE_KEY, queue.filter((q) => q.approvalId !== approvalId));
+      return { ok: true };
+    } catch {
+      return { ok: false, reason: "Network error — still offline?" };
+    }
+  }
+
+  if (item.source === "defense") {
+    const objectId = item.id.split(":").slice(1).join(":");
+    const queue = await readJson<DefenseQueued[]>(TRADECRAFT_QUEUE_KEY, []);
+    const entry = queue.find((q) => q.objectId === objectId);
+    if (!entry) return { ok: false, reason: "Queued entry not found." };
+    try {
+      const res = await apiFetchRaw(`/api/aegis/tradecraft/decisions/${entry.objectId}`, {
+        method: "PUT",
+        body: JSON.stringify({ action: entry.action }),
+      });
+      if (!res.ok) return { ok: false, reason: `Server returned ${res.status}` };
+      await writeJson(TRADECRAFT_QUEUE_KEY, queue.filter((q) => q.objectId !== objectId));
+      return { ok: true };
+    } catch {
+      return { ok: false, reason: "Network error — still offline?" };
+    }
+  }
+
+  // shared — mirror useOfflineQueue.replayMutations semantics:
+  //   2xx → dequeue
+  //   409 → record a conflict, dequeue
+  //   other failure or thrown network error → bump retries, drop after MAX_RETRIES
+  const sharedId = item.id.split(":").slice(1).join(":");
+  const queue = await readJson<SharedQueued[]>(SHARED_QUEUE_KEY, []);
+  const entry = queue.find((q) => q.id === sharedId);
+  if (!entry) return { ok: false, reason: "Queued entry not found." };
+
+  // Shared mutations carry an absolute URL captured at enqueue time, so they
+  // bypass apiFetchRaw (which prepends getApiBase()). We still apply the same
+  // auth handling here.
+  const { getAuthToken } = await import("@/lib/apiClient");
+  const token = await getAuthToken();
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+
+  try {
+    const res = await fetch(entry.url, {
+      method: entry.method,
+      headers,
+      body: entry.body !== undefined ? JSON.stringify(entry.body) : undefined,
+    });
+    if (res.ok) {
+      await writeJson(SHARED_QUEUE_KEY, queue.filter((q) => q.id !== sharedId));
+      return { ok: true };
+    }
+    if (res.status === 409) {
+      let serverResponse: unknown = null;
+      try { serverResponse = await res.json(); } catch {}
+      const conflict = {
+        id: `conflict-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+        domain: entry.domain,
+        mutationId: entry.id,
+        url: entry.url,
+        localBody: entry.body,
+        serverResponse,
+        timestamp: Date.now(),
+        resolved: false,
+      };
+      const existingConflicts = await readJson<unknown[]>(SHARED_CONFLICTS_KEY, []);
+      await writeJson(SHARED_CONFLICTS_KEY, [...existingConflicts, conflict]);
+      await writeJson(SHARED_QUEUE_KEY, queue.filter((q) => q.id !== sharedId));
+      return { ok: false, reason: "Server reports a conflict — your change was not applied." };
+    }
+    const dropped = await bumpSharedRetry(sharedId);
+    return {
+      ok: false,
+      reason: dropped
+        ? `Server returned ${res.status}. Giving up after ${SHARED_MAX_RETRIES} attempts.`
+        : `Server returned ${res.status}`,
+    };
+  } catch {
+    const dropped = await bumpSharedRetry(sharedId);
+    return {
+      ok: false,
+      reason: dropped
+        ? `Network error. Giving up after ${SHARED_MAX_RETRIES} attempts.`
+        : "Network error — still offline?",
+    };
+  }
+}
+
 async function discardItem(item: UnifiedQueuedItem): Promise<void> {
   if (item.source === "cortex") {
     const approvalId = Number(item.id.split(":")[1]);
@@ -176,6 +297,7 @@ export function OfflineQueuePanel({
   const [expanded, setExpanded] = useState(defaultExpanded);
   const [loaded, setLoaded] = useState(false);
   const [recentlyClearedAt, setRecentlyClearedAt] = useState<number | null>(null);
+  const [retryingId, setRetryingId] = useState<string | null>(null);
 
   const suppressSyncedBannerRef = React.useRef(false);
 
@@ -214,6 +336,23 @@ export function OfflineQueuePanel({
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setExpanded((v) => !v);
   }, []);
+
+  const handleRetry = useCallback(
+    async (item: UnifiedQueuedItem) => {
+      if (retryingId) return;
+      setRetryingId(item.id);
+      const result = await retryItem(item);
+      setRetryingId(null);
+      if (result.ok) {
+        suppressSyncedBannerRef.current = true;
+        await refresh();
+        onChanged?.();
+      } else {
+        Alert.alert("Retry failed", result.reason ?? "The action remains queued. Please try again.");
+      }
+    },
+    [refresh, onChanged, retryingId]
+  );
 
   const handleDiscard = useCallback(
     (item: UnifiedQueuedItem) => {
@@ -312,14 +451,36 @@ export function OfflineQueuePanel({
                   Queued {relative(item.timestamp)}
                 </Text>
               </View>
-              <TouchableOpacity
-                onPress={() => handleDiscard(item)}
-                style={[styles.discardBtn, { borderColor: RED + "40", backgroundColor: RED + "12" }]}
-                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-              >
-                <Feather name="trash-2" size={12} color={RED} />
-                <Text style={[styles.discardText, { color: RED }]}>Discard</Text>
-              </TouchableOpacity>
+              <View style={styles.actionsCol}>
+                <TouchableOpacity
+                  onPress={() => handleRetry(item)}
+                  disabled={retryingId !== null}
+                  style={[
+                    styles.retryBtn,
+                    { borderColor: ACCENT + "40", backgroundColor: ACCENT + "12" },
+                    retryingId !== null && retryingId !== item.id && { opacity: 0.4 },
+                  ]}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
+                  {retryingId === item.id ? (
+                    <ActivityIndicator size="small" color={ACCENT} />
+                  ) : (
+                    <>
+                      <Feather name="upload-cloud" size={12} color={ACCENT} />
+                      <Text style={[styles.retryText, { color: ACCENT }]}>Retry now</Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => handleDiscard(item)}
+                  disabled={retryingId === item.id}
+                  style={[styles.discardBtn, { borderColor: RED + "40", backgroundColor: RED + "12" }]}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
+                  <Feather name="trash-2" size={12} color={RED} />
+                  <Text style={[styles.discardText, { color: RED }]}>Discard</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           ))}
         </View>
@@ -360,14 +521,30 @@ const styles = StyleSheet.create({
   sourceLabel: { fontSize: 10, fontWeight: "600", letterSpacing: 0.4 },
   targetId: { fontSize: 12, fontWeight: "600" },
   timestamp: { fontSize: 10, marginTop: 2 },
-  discardBtn: {
+  actionsCol: { flexDirection: "column", gap: 6, alignItems: "stretch" },
+  retryBtn: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     gap: 4,
     paddingHorizontal: 8,
     paddingVertical: 6,
     borderRadius: 6,
     borderWidth: 1,
+    minHeight: 26,
+    minWidth: 76,
+  },
+  retryText: { fontSize: 10, fontWeight: "700" },
+  discardBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    borderRadius: 6,
+    borderWidth: 1,
+    minWidth: 76,
   },
   discardText: { fontSize: 10, fontWeight: "700" },
 });
