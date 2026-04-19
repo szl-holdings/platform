@@ -82,3 +82,38 @@ URL — open it in the browser and pick **Pin to your profile** from the ⋯ men
 Edit `post_plan.json` — it's the single source of truth that the script reads.
 Keep each tweet ≤ 280 characters (links auto-shorten to 23). The dry-run prints
 the character count for every item, so you can re-run it after edits to verify.
+
+## 9 — Scheduled, hands-off launch
+
+For the full launch week you don't have to babysit the terminal. A long-running
+scheduler is wired up as a workflow:
+
+- **Workflow name:** `x-launch-scheduler`
+- **Schedule source:** `schedule.json` (America/New_York)
+- **State file:** `posted_state.json` (auto-created; safe to delete to re-run)
+
+Default launch week is **Thu 2026-04-23 → Mon 2026-04-27**. To roll the whole
+sequence to a different week, edit `schedule.json` → `launch_thursday`.
+
+Start it once the four X secrets are configured:
+
+```bash
+# from the workspace root
+python3 output/szl-x-launch-kit/poster/scheduler.py
+```
+
+…or just start the `x-launch-scheduler` workflow from the workflows panel — it
+will print every slot, sleep until each scheduled minute, then call the poster
+with `--live --only N`. Restart-safe: anything already posted is skipped.
+
+Useful flags:
+
+```bash
+python3 scheduler.py --dry-run              # rehearse, don't actually post
+python3 scheduler.py --force-now 1 --dry-run # rehearse a single post
+python3 scheduler.py --force-now 1           # post a single one immediately
+```
+
+After post #1 fires, the scheduler prints a reminder to pin it manually from
+`x.com/szlholdings → ⋯ → Pin to your profile` (the API tier doesn't allow
+pinning programmatically).

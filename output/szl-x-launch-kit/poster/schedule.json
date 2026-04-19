@@ -1,0 +1,16 @@
+{
+  "_comment": "Launch week schedule. Times are America/New_York. Edit launch_thursday to roll the whole sequence to a different week.",
+  "launch_thursday": "2026-04-23",
+  "timezone": "America/New_York",
+  "slots": [
+    { "post": 1, "day_offset": 0, "time": "08:30", "label": "Thu 08:30 ET — Announcement (pin)" },
+    { "post": 2, "day_offset": 0, "time": "12:15", "label": "Thu 12:15 ET — Aegis demo" },
+    { "post": 3, "day_offset": 0, "time": "17:45", "label": "Thu 17:45 ET — Doctrine thread (6 tweets)" },
+    { "post": 4, "day_offset": 3, "time": "09:00", "label": "Sun 09:00 ET — Vessels demo" },
+    { "post": 5, "day_offset": 3, "time": "13:30", "label": "Sun 13:30 ET — Terra demo" },
+    { "post": 6, "day_offset": 3, "time": "19:00", "label": "Sun 19:00 ET — BTS / principle" },
+    { "post": 7, "day_offset": 4, "time": "08:00", "label": "Mon 08:00 ET — Ecosystem social proof" },
+    { "post": 8, "day_offset": 4, "time": "12:45", "label": "Mon 12:45 ET — Carlota Jo cross-promo" },
+    { "post": 9, "day_offset": 4, "time": "17:30", "label": "Mon 17:30 ET — CTA / design partner call" }
+  ]
+}

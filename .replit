@@ -42,6 +42,10 @@ args = "artifacts/counsel: web"
 task = "workflow.run"
 args = "api-test"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "x-launch-scheduler"
+
 [[workflows.workflow]]
 name = "check-deprecated-links"
 author = "agent"
@@ -98,6 +102,17 @@ args = "pnpm --filter ./artifacts/api-server test"
 [workflows.workflow.metadata]
 isValidation = true
 
+[[workflows.workflow]]
+name = "x-launch-scheduler"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python3 -u output/szl-x-launch-kit/poster/scheduler.py --poll-seconds 30"
+
+[workflows.workflow.metadata]
+outputType = "console"
+
 [agent]
 stack = "PNPM_WORKSPACE"
 expertMode = true
@@ -123,6 +138,10 @@ PUBLIC_APP_URL = "https://szlholdings.replit.app"
 VAPID_PUBLIC_KEY = "BIe1uJr8KS1Ilhz9KWTwRwfV_BC6C2FDdo6gbn-KDt1QS14KaOIMHuWVhzzJFUYIP0iKiWZOLh4xbcUiay2ZrEc"
 VAPID_SUBJECT = "mailto:platform@szlholdings.com"
 EXPO_PUBLIC_POSTHOG_HOST = "https://us.i.posthog.com"
+X_API_KEY = "REPLACE_ME_when_x_developer_account_is_paid"
+X_API_SECRET = "REPLACE_ME_when_x_developer_account_is_paid"
+X_ACCESS_TOKEN = "REPLACE_ME_when_x_developer_account_is_paid"
+X_ACCESS_TOKEN_SECRET = "REPLACE_ME_when_x_developer_account_is_paid"
 
 [userenv.development]
 
