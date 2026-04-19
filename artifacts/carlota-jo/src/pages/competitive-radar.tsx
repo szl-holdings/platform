@@ -61,6 +61,10 @@ const DEFAULT_COMPETITOR_NAMES = ["McKinsey & Company", "BCG", "Bain & Company",
 const COMPETITORS_STORAGE_KEY = "carlota-radar-competitors";
 const REFRESH_INTERVAL_STORAGE_KEY = "carlota-radar-refresh-interval";
 
+function competitorsCacheKey(clientId: string | null): string {
+  return `${COMPETITORS_STORAGE_KEY}:${clientId ?? "portfolio"}`;
+}
+
 const REFRESH_OPTIONS: Array<{ label: string; value: number }> = [
   { label: "Off", value: 0 },
   { label: "1 min", value: 60_000 },
@@ -69,13 +73,20 @@ const REFRESH_OPTIONS: Array<{ label: string; value: number }> = [
   { label: "1 hr", value: 60 * 60_000 },
 ];
 
-function loadCompetitorList(): string[] {
+function loadCompetitorList(clientId: string | null): string[] {
   if (typeof window === "undefined") return DEFAULT_COMPETITOR_NAMES;
   try {
-    const raw = localStorage.getItem(COMPETITORS_STORAGE_KEY);
-    if (!raw) return DEFAULT_COMPETITOR_NAMES;
-    const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed) && parsed.every((s) => typeof s === "string") && parsed.length > 0) return parsed;
+    const raw = localStorage.getItem(competitorsCacheKey(clientId));
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.every((s) => typeof s === "string") && parsed.length > 0) return parsed;
+    }
+    // Backwards compatibility: legacy single-key storage from before per-client persistence
+    const legacy = localStorage.getItem(COMPETITORS_STORAGE_KEY);
+    if (legacy) {
+      const parsed = JSON.parse(legacy);
+      if (Array.isArray(parsed) && parsed.every((s) => typeof s === "string") && parsed.length > 0) return parsed;
+    }
   } catch {}
   return DEFAULT_COMPETITOR_NAMES;
 }
@@ -110,7 +121,11 @@ export default function CompetitiveRadar() {
   const { clientId, setClientId, clients } = useClientScope();
   const activeClient = clients.find(c => c.id === clientId) ?? null;
   const [companyContext, setCompanyContext] = useState({ name: "Carlota Jo Consulting", industry: "Management Consulting" });
-  const [tracked, setTracked] = useState<string[]>(() => loadCompetitorList());
+  const [tracked, setTracked] = useState<string[]>(() => loadCompetitorList(null));
+  const [trackedSource, setTrackedSource] = useState<"server" | "local" | "default">("default");
+  const [trackedSavedAt, setTrackedSavedAt] = useState<Date | null>(null);
+  const [savingTracked, setSavingTracked] = useState(false);
+  const [trackedSaveError, setTrackedSaveError] = useState<string | null>(null);
   const [refreshIntervalMs, setRefreshIntervalMs] = useState<number>(() => loadRefreshInterval());
   const [showSettings, setShowSettings] = useState(false);
   const [newCompetitor, setNewCompetitor] = useState("");
@@ -129,8 +144,71 @@ export default function CompetitiveRadar() {
   }, [activeClient]);
 
   useEffect(() => {
-    try { localStorage.setItem(COMPETITORS_STORAGE_KEY, JSON.stringify(tracked)); } catch {}
-  }, [tracked]);
+    try { localStorage.setItem(competitorsCacheKey(clientId), JSON.stringify(tracked)); } catch {}
+  }, [tracked, clientId]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const ac = new AbortController();
+    setTrackedSaveError(null);
+    (async () => {
+      try {
+        const params = new URLSearchParams();
+        if (clientId) params.set("clientId", clientId);
+        const qs = params.toString() ? `?${params.toString()}` : "";
+        const res = await fetch(`${API}/carlota/radar-competitors${qs}`, {
+          credentials: "include",
+          signal: ac.signal,
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const json = await res.json();
+        if (cancelled) return;
+        const list = json?.data?.competitors;
+        const updatedAt = json?.data?.updatedAt;
+        if (Array.isArray(list) && list.every((s: unknown) => typeof s === "string") && list.length > 0) {
+          setTracked(list as string[]);
+          setTrackedSource("server");
+          setTrackedSavedAt(updatedAt ? new Date(updatedAt) : null);
+        } else {
+          // No server-side list yet — fall back to local cache / defaults for this scope
+          const local = loadCompetitorList(clientId);
+          setTracked(local);
+          setTrackedSource(typeof window !== "undefined" && localStorage.getItem(competitorsCacheKey(clientId)) ? "local" : "default");
+          setTrackedSavedAt(null);
+        }
+      } catch {
+        if (cancelled) return;
+        const local = loadCompetitorList(clientId);
+        setTracked(local);
+        setTrackedSource(typeof window !== "undefined" && localStorage.getItem(competitorsCacheKey(clientId)) ? "local" : "default");
+        setTrackedSavedAt(null);
+      }
+    })();
+    return () => { cancelled = true; ac.abort(); };
+  }, [clientId]);
+
+  const persistTracked = useCallback(async (next: string[]) => {
+    setSavingTracked(true);
+    setTrackedSaveError(null);
+    try {
+      const res = await fetch(`${API}/carlota/radar-competitors`, {
+        method: "PUT",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ clientId: clientId ?? null, competitors: next }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+      const updatedAt = json?.data?.updatedAt;
+      setTrackedSource("server");
+      setTrackedSavedAt(updatedAt ? new Date(updatedAt) : new Date());
+    } catch {
+      setTrackedSaveError("Saved locally — couldn't reach the server. Will retry on next change.");
+      setTrackedSource("local");
+    } finally {
+      setSavingTracked(false);
+    }
+  }, [clientId]);
 
   useEffect(() => {
     try { localStorage.setItem(REFRESH_INTERVAL_STORAGE_KEY, String(refreshIntervalMs)); } catch {}
@@ -176,16 +254,23 @@ export default function CompetitiveRadar() {
     if (!name) return;
     if (tracked.some((c) => c.toLowerCase() === name.toLowerCase())) { setNewCompetitor(""); return; }
     if (tracked.length >= 12) return;
-    setTracked([...tracked, name]);
+    const next = [...tracked, name];
+    setTracked(next);
     setNewCompetitor("");
+    void persistTracked(next);
   };
 
   const removeCompetitor = (name: string) => {
     if (tracked.length <= 1) return;
-    setTracked(tracked.filter((c) => c !== name));
+    const next = tracked.filter((c) => c !== name);
+    setTracked(next);
+    void persistTracked(next);
   };
 
-  const resetCompetitors = () => setTracked(DEFAULT_COMPETITOR_NAMES);
+  const resetCompetitors = () => {
+    setTracked(DEFAULT_COMPETITOR_NAMES);
+    void persistTracked(DEFAULT_COMPETITOR_NAMES);
+  };
 
   const generateWeeklyBrief = async () => {
     setGeneratingBrief(true);
@@ -304,7 +389,23 @@ Return ONLY valid JSON, no markdown.`;
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <p className="text-xs text-muted-foreground">Add or remove competitors to monitor. Live news is pulled per-competitor and refreshed at the chosen interval. Saved locally to this browser.</p>
+            <p className="text-xs text-muted-foreground">
+              Add or remove competitors to monitor. Live news is pulled per-competitor and refreshed at the chosen interval.
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {savingTracked ? (
+                <span className="inline-flex items-center gap-1.5"><Loader2 className="w-3 h-3 animate-spin" /> Saving…</span>
+              ) : trackedSource === "server" ? (
+                <span>Saved to your account{trackedSavedAt ? ` · ${trackedSavedAt.toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}` : ""}{clientId ? " for this client view" : " (portfolio view)"}.</span>
+              ) : trackedSource === "local" ? (
+                <span>Saved locally to this browser{clientId ? " for this client view" : " (portfolio view)"} — will sync when the server is reachable.</span>
+              ) : (
+                <span>Default list — your changes will be saved to your account{clientId ? " for this client view" : " (portfolio view)"}.</span>
+              )}
+            </p>
+            {trackedSaveError && (
+              <p className="text-xs text-amber-700">{trackedSaveError}</p>
+            )}
             <div className="flex flex-wrap gap-2">
               {tracked.map((name) => (
                 <span key={name} className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border" style={{ borderColor: "var(--color-gold-border)", background: "var(--color-gold-dim)" }}>

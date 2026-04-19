@@ -146,3 +146,17 @@ export type CarlotaDiagnostic = typeof carlotaDiagnosticsTable.$inferSelect;
 export const insertCarlotaScenarioSchema = createInsertSchema(carlotaScenariosTable).omit({ id: true, createdAt: true });
 export type InsertCarlotaScenario = z.infer<typeof insertCarlotaScenarioSchema>;
 export type CarlotaScenario = typeof carlotaScenariosTable.$inferSelect;
+
+export const carlotaRadarCompetitorsTable = pgTable("carlota_radar_competitors", {
+  id: serial("id").primaryKey(),
+  organizationId: integer("organization_id"),
+  userId: integer("user_id"),
+  clientId: text("client_id"),
+  competitors: jsonb("competitors").$type<string[]>().notNull().default([]),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertCarlotaRadarCompetitorsSchema = createInsertSchema(carlotaRadarCompetitorsTable).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertCarlotaRadarCompetitors = z.infer<typeof insertCarlotaRadarCompetitorsSchema>;
+export type CarlotaRadarCompetitors = typeof carlotaRadarCompetitorsTable.$inferSelect;

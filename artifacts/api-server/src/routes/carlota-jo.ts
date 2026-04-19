@@ -1,7 +1,7 @@
 import { Router, type IRouter, type Request, type Response, type RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
 import multer from "multer";
-import { carlotaInquirySchema, carlotaInquiryUpdateSchema, carlotaReservationSchema, jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery, carlotaRadarSignalsQuerySchema } from "../lib/validation";
+import { carlotaInquirySchema, carlotaInquiryUpdateSchema, carlotaReservationSchema, jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery, carlotaRadarSignalsQuerySchema, carlotaRadarCompetitorsQuerySchema, carlotaRadarCompetitorsBodySchema } from "../lib/validation";
 import {
   db,
   carlotaInquiriesTable,
@@ -15,6 +15,7 @@ import {
   carlotaDiagnosticsTable,
   carlotaScenariosTable,
   carlotaEngagementsTable,
+  carlotaRadarCompetitorsTable,
 } from "@szl-holdings/db";
 import { eq, desc, sql, and } from "drizzle-orm";
 import { sendSuccess, sendNotFound, handleRouteError, sendBadRequest, parsePagination } from "../lib/api-response";
@@ -1135,6 +1136,85 @@ async function fetchCompetitorNews(competitor: string, max = 5): Promise<Array<{
     return [];
   }
 }
+
+function radarCompetitorScopeFilter(orgId: number | null, userId: number, clientId: ClientId | null) {
+  const scopeKey = orgId
+    ? eq(carlotaRadarCompetitorsTable.organizationId, orgId)
+    : and(
+        sql`${carlotaRadarCompetitorsTable.organizationId} IS NULL`,
+        eq(carlotaRadarCompetitorsTable.userId, userId),
+      );
+  const clientKey = clientId
+    ? eq(carlotaRadarCompetitorsTable.clientId, clientId)
+    : sql`${carlotaRadarCompetitorsTable.clientId} IS NULL`;
+  return and(scopeKey, clientKey);
+}
+
+router.get("/carlota/radar-competitors", authMiddleware(), validateQuery(carlotaRadarCompetitorsQuerySchema), async (req, res) => {
+  try {
+    const userId = req.user!.id;
+    const orgId = req.user?.orgs[0]?.orgId ?? null;
+    const clientId = getClientIdFromQuery(req);
+    const [row] = await db.select().from(carlotaRadarCompetitorsTable)
+      .where(radarCompetitorScopeFilter(orgId, userId, clientId));
+    sendSuccess(res, {
+      clientId: clientId ?? null,
+      competitors: row?.competitors ?? null,
+      updatedAt: row?.updatedAt ?? null,
+    });
+  } catch (err) { handleRouteError(res, err, "Failed to load tracked competitors"); }
+});
+
+router.put("/carlota/radar-competitors", authMiddleware(), validateBody(carlotaRadarCompetitorsBodySchema), async (req, res) => {
+  try {
+    const userId = req.user!.id;
+    const orgId = req.user?.orgs[0]?.orgId ?? null;
+    const body = req.body as { clientId?: string | null; competitors: string[] };
+    let clientId: ClientId | null = null;
+    if (body.clientId != null && body.clientId !== "") {
+      if (!isValidClientId(body.clientId)) {
+        sendBadRequest(res, "Invalid clientId — must reference a known advisory client");
+        return;
+      }
+      clientId = body.clientId;
+    }
+    const seen = new Set<string>();
+    const competitors = body.competitors
+      .map((c) => c.trim())
+      .filter((c) => {
+        const k = c.toLowerCase();
+        if (!c || seen.has(k)) return false;
+        seen.add(k);
+        return true;
+      })
+      .slice(0, 12);
+    if (competitors.length === 0) {
+      sendBadRequest(res, "At least one competitor is required");
+      return;
+    }
+    const [existing] = await db.select().from(carlotaRadarCompetitorsTable)
+      .where(radarCompetitorScopeFilter(orgId, userId, clientId));
+    let row;
+    if (existing) {
+      [row] = await db.update(carlotaRadarCompetitorsTable)
+        .set({ competitors, updatedAt: new Date() })
+        .where(eq(carlotaRadarCompetitorsTable.id, existing.id))
+        .returning();
+    } else {
+      [row] = await db.insert(carlotaRadarCompetitorsTable).values({
+        organizationId: orgId,
+        userId,
+        clientId,
+        competitors,
+      }).returning();
+    }
+    sendSuccess(res, {
+      clientId: clientId ?? null,
+      competitors: row.competitors,
+      updatedAt: row.updatedAt,
+    });
+  } catch (err) { handleRouteError(res, err, "Failed to save tracked competitors"); }
+});
 
 router.get("/carlota/radar-signals", authMiddleware(), validateQuery(carlotaRadarSignalsQuerySchema), async (req, res) => {
   try {

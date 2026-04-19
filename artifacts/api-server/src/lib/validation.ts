@@ -1011,6 +1011,17 @@ export const carlotaRadarSignalsQuerySchema = z.object({
   clientId: z.string().max(100).optional(),
 }).strict();
 
+// carlota-jo: GET /carlota/radar-competitors (query: clientId)
+export const carlotaRadarCompetitorsQuerySchema = z.object({
+  clientId: z.string().max(100).optional(),
+}).strict();
+
+// carlota-jo: PUT /carlota/radar-competitors (body: clientId?, competitors[])
+export const carlotaRadarCompetitorsBodySchema = z.object({
+  clientId: z.string().max(100).optional().nullable(),
+  competitors: z.array(z.string().min(1).max(120).trim()).min(1).max(12),
+}).strict();
+
 // counsel: DELETE /counsel/matters/:id (no body)
 export const counselDeleteMatterBodySchema = optionalEmptyBody(
   z.object({}).strict(),
