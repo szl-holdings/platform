@@ -35,6 +35,54 @@ const HEALTH_CONFIG: Record<string, { color: string; icon: React.ReactNode }> = 
 
 type Tab = "entities" | "recommendations";
 
+const REFRESH_INTERVAL_MS = 30_000;
+const FLASH_DURATION_MS = 2_000;
+
+function usePageVisible(): boolean {
+  const [visible, setVisible] = useState(typeof document === "undefined" ? true : !document.hidden);
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const onChange = () => setVisible(!document.hidden);
+    document.addEventListener("visibilitychange", onChange);
+    return () => document.removeEventListener("visibilitychange", onChange);
+  }, []);
+  return visible;
+}
+
+function useFlashOnChange<T>(items: T[] | undefined, getId: (it: T) => string, getStamp: (it: T) => string): Set<string> {
+  const prevRef = useRef<Map<string, string> | null>(null);
+  const [flashIds, setFlashIds] = useState<Set<string>>(new Set());
+  useEffect(() => {
+    if (!items) return undefined;
+    const next = new Map<string, string>();
+    for (const it of items) next.set(getId(it), getStamp(it));
+    const prev = prevRef.current;
+    prevRef.current = next;
+    if (!prev) return undefined;
+    const changed = new Set<string>();
+    for (const [id, stamp] of next.entries()) {
+      const before = prev.get(id);
+      if (before === undefined || before !== stamp) changed.add(id);
+    }
+    if (changed.size === 0) return undefined;
+    setFlashIds((curr) => {
+      const merged = new Set(curr);
+      for (const id of changed) merged.add(id);
+      return merged;
+    });
+    const timeout = setTimeout(() => {
+      setFlashIds((curr) => {
+        if (curr.size === 0) return curr;
+        const next2 = new Set(curr);
+        for (const id of changed) next2.delete(id);
+        return next2;
+      });
+    }, FLASH_DURATION_MS);
+    return () => clearTimeout(timeout);
+  }, [items, getId, getStamp]);
+  return flashIds;
+}
+
 interface EntitySnapshot {
   entityId: string;
   entityType: string;
@@ -119,10 +167,12 @@ function EntityList({
   entities,
   selected,
   onSelect,
+  flashIds,
 }: {
   entities: EntitySnapshot[];
   selected: EntitySnapshot | null;
   onSelect: (e: EntitySnapshot) => void;
+  flashIds: Set<string>;
 }) {
   if (entities.length === 0) {
     return (
@@ -138,6 +188,7 @@ function EntityList({
         const domainColor = DOMAIN_COLORS[entity.domain] ?? "#475569";
         const health = HEALTH_CONFIG[entity.health] ?? HEALTH_CONFIG.unknown;
         const isSelected = selected?.entityId === entity.entityId;
+        const isFlashing = flashIds.has(entity.entityId);
 
         return (
           <div
@@ -153,6 +204,7 @@ function EntityList({
               background: isSelected ? `${ACCENT}0a` : "transparent",
               borderLeft: isSelected ? `2px solid ${ACCENT}` : "2px solid transparent",
               transition: "background 0.1s",
+              animation: isFlashing ? "evidenceFlash 2s ease-out" : undefined,
             }}
           >
             <div
@@ -226,7 +278,9 @@ function EntityDetailPanel({
       apiUrl(`/evidence-graph/why/${entity.entityId}`),
       { "agent.evidence.entity_id": entity.entityId, "agent.run.domain": entity.domain }
     ),
-    staleTime: 60_000,
+    staleTime: 15_000,
+    refetchInterval: REFRESH_INTERVAL_MS,
+    refetchIntervalInBackground: false,
   });
 
   const why = data?.why;
@@ -318,6 +372,7 @@ export default function EvidenceExplorer() {
   const [tab, setTab] = useState<Tab>("entities");
   const [search, setSearch] = useState("");
   const [domainFilter, setDomainFilter] = useState("all");
+  const pageVisible = usePageVisible();
   const [selectedEntity, setSelectedEntity] = useState<EntitySnapshot | null>(null);
   const [drawerEvidence, setDrawerEvidence] = useState<EvidenceItem[]>([]);
   const [drawerTitle, setDrawerTitle] = useState("Evidence");
@@ -350,8 +405,10 @@ export default function EvidenceExplorer() {
         { "app.page_load.path": "/operations/evidence-explorer", "agent.evidence.kind": "normalized", domain: domainFilter }
       );
     },
-    staleTime: 60_000,
+    staleTime: 15_000,
     enabled: tab === "entities",
+    refetchInterval: tab === "entities" && pageVisible ? REFRESH_INTERVAL_MS : false,
+    refetchIntervalInBackground: false,
   });
 
   const { data: recsData, isLoading: recsLoading } = useQuery({
@@ -366,8 +423,10 @@ export default function EvidenceExplorer() {
         { "app.page_load.path": "/operations/evidence-explorer", domain: domainFilter }
       );
     },
-    staleTime: 60_000,
+    staleTime: 15_000,
     enabled: tab === "recommendations",
+    refetchInterval: tab === "recommendations" && pageVisible ? REFRESH_INTERVAL_MS : false,
+    refetchIntervalInBackground: false,
   });
 
   const [selectedRec, setSelectedRec] = useState<Recommendation | null>(null);
@@ -382,8 +441,10 @@ export default function EvidenceExplorer() {
         "app.page_load.path": "/operations/evidence-explorer",
       }
     ),
-    staleTime: 60_000,
+    staleTime: 15_000,
     enabled: !!selectedRec,
+    refetchInterval: selectedRec && pageVisible ? REFRESH_INTERVAL_MS : false,
+    refetchIntervalInBackground: false,
   });
 
   const domains = ["all", "maritime", "real-estate", "legal", "security", "finance", "platform", "ai"];
@@ -394,6 +455,48 @@ export default function EvidenceExplorer() {
 
   const filteredRecs = (recsData?.recommendations ?? []).filter((r) =>
     !search || r.title.toLowerCase().includes(search.toLowerCase()) || r.summary.toLowerCase().includes(search.toLowerCase())
+  );
+
+  useEffect(() => {
+    if (!selectedRec || !recsData?.recommendations) return;
+    const updated = recsData.recommendations.find((r) => r.recommendationId === selectedRec.recommendationId);
+    if (!updated) return;
+    if (
+      updated.confidence !== selectedRec.confidence ||
+      updated.status !== selectedRec.status ||
+      updated.generatedAt !== selectedRec.generatedAt ||
+      updated.evidenceCount !== selectedRec.evidenceCount ||
+      updated.summary !== selectedRec.summary ||
+      updated.title !== selectedRec.title
+    ) {
+      setSelectedRec(updated);
+    }
+  }, [recsData, selectedRec]);
+
+  useEffect(() => {
+    if (!selectedEntity || !entitiesData?.entities) return;
+    const updated = entitiesData.entities.find((e) => e.entityId === selectedEntity.entityId);
+    if (!updated) return;
+    if (
+      updated.updatedAt !== selectedEntity.updatedAt ||
+      updated.health !== selectedEntity.health ||
+      updated.signalCount !== selectedEntity.signalCount ||
+      updated.evidenceCount !== selectedEntity.evidenceCount ||
+      updated.label !== selectedEntity.label
+    ) {
+      setSelectedEntity(updated);
+    }
+  }, [entitiesData, selectedEntity]);
+
+  const entityFlashIds = useFlashOnChange(
+    entitiesData?.entities,
+    (e) => e.entityId,
+    (e) => `${e.updatedAt}|${e.signalCount ?? ""}|${e.evidenceCount ?? ""}|${e.health}`,
+  );
+  const recFlashIds = useFlashOnChange(
+    recsData?.recommendations,
+    (r) => r.recommendationId,
+    (r) => `${r.generatedAt}|${r.confidence}|${r.status}|${r.evidenceCount ?? ""}`,
   );
 
   const openDrawerForEntity = useCallback((evidence: EvidenceItem[], entityLabel?: string) => {
@@ -511,7 +614,7 @@ export default function EvidenceExplorer() {
                   <div style={{ width: 24, height: 24, border: `2px solid ${ACCENT}`, borderTop: "2px solid transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite", margin: "0 auto" }} />
                 </div>
               ) : (
-                <EntityList entities={filteredEntities} selected={selectedEntity} onSelect={setSelectedEntity} />
+                <EntityList entities={filteredEntities} selected={selectedEntity} onSelect={setSelectedEntity} flashIds={entityFlashIds} />
               )}
             </div>
 
@@ -535,8 +638,14 @@ export default function EvidenceExplorer() {
                 <div style={{ textAlign: "center", padding: "60px 0", color: "#475569", fontSize: 13 }}>No recommendations found</div>
               ) : (
                 filteredRecs.map((rec) => (
-                  <RecommendationCard
+                  <div
                     key={rec.recommendationId}
+                    style={{
+                      borderRadius: 12,
+                      animation: recFlashIds.has(rec.recommendationId) ? "evidenceFlash 2s ease-out" : undefined,
+                    }}
+                  >
+                  <RecommendationCard
                     recommendationId={rec.recommendationId}
                     title={rec.title}
                     summary={rec.summary}
@@ -550,6 +659,7 @@ export default function EvidenceExplorer() {
                     variant="full"
                     className={selectedRec?.recommendationId === rec.recommendationId ? "border-[#8b7ac850]" : ""}
                   />
+                  </div>
                 ))
               )}
             </div>
@@ -612,7 +722,14 @@ export default function EvidenceExplorer() {
         accent={ACCENT}
       />
 
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes evidenceFlash {
+          0%   { background-color: rgba(139,122,200,0.28); box-shadow: inset 2px 0 0 ${ACCENT}; }
+          60%  { background-color: rgba(139,122,200,0.12); }
+          100% { background-color: transparent; box-shadow: none; }
+        }
+      `}</style>
     </div>
   );
 }
