@@ -9,6 +9,7 @@ import {
   PlanNotFoundError,
   type PlanStoreQuery,
 } from "@workspace/planner";
+import { executePlan } from "@workspace/alloy/plan-orchestrator";
 import { authMiddleware, isElevatedUser, type AuthenticatedUser } from "../middlewares/auth";
 import {
   sendSuccess,
@@ -293,6 +294,56 @@ router.post(
       await decideStep(req, res, "denied");
     } catch (err) {
       handleRouteError(res, err, "Failed to deny step");
+    }
+  },
+);
+
+router.post(
+  "/plans/:id/execute",
+  authMiddleware(),
+  validateBody(jsonObjectBodySchema),
+  async (req, res) => {
+    try {
+      const user = requireUser(req);
+      if (!user) {
+        sendForbidden(res, "authentication required");
+        return;
+      }
+      const planId = req.params.id as string;
+      const plan = await defaultPlanStore.get(planId);
+      if (!plan) {
+        sendNotFound(res, "Plan not found");
+        return;
+      }
+      if (!callerOwnsPlan(user, plan)) {
+        sendNotFound(res, "Plan not found");
+        return;
+      }
+
+      const body = (req.body ?? {}) as {
+        approvedStepIds?: unknown;
+        runId?: unknown;
+      };
+      const approvedStepIds = Array.isArray(body.approvedStepIds)
+        ? body.approvedStepIds.filter((s): s is string => typeof s === "string")
+        : undefined;
+      const runId = typeof body.runId === "string" ? body.runId : undefined;
+
+      const result = await executePlan(planId, {
+        store: defaultPlanStore,
+        approvedStepIds,
+        runId,
+      });
+
+      // Re-fetch so the response includes the persisted live step state.
+      const updated = (await defaultPlanStore.get(planId)) ?? plan;
+      sendSuccess(res, { run: result, plan: updated });
+    } catch (err) {
+      if (err instanceof PlanNotFoundError) {
+        sendNotFound(res, err.message);
+        return;
+      }
+      handleRouteError(res, err, "Failed to execute plan");
     }
   },
 );

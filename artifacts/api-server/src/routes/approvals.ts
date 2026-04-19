@@ -313,7 +313,11 @@ router.post("/approvals/:id/review", authMiddleware(), requireRole("super_admin"
 
     try {
       const full = await getApprovalById(id);
-      const payload = (full?.payload ?? {}) as { runId?: string; stepId?: string };
+      const payload = (full?.payload ?? {}) as {
+        runId?: string;
+        stepId?: string;
+        planId?: string;
+      };
       const runId = payload.runId ?? full?.correlationId ?? undefined;
       if (runId) {
         const { getAlloyRunManager } = await import("../lib/alloy-run-manager-singleton");
@@ -326,6 +330,57 @@ router.post("/approvals/:id/review", authMiddleware(), requireRole("super_admin"
           note,
           stepId: payload.stepId,
         });
+      }
+
+      // If the approval is for a plan step gate, flip the step's persisted
+      // status so the next executePlan call resumes from the gated step.
+      // We require the linked plan's tenant orgId (string) to match the
+      // approval's tenant orgId (number). This prevents an approval payload
+      // with an arbitrary planId from mutating a plan in a different tenant
+      // (IDOR via approval payload).
+      if (
+        decision === "approved" &&
+        typeof payload.planId === "string" &&
+        typeof payload.stepId === "string"
+      ) {
+        try {
+          const { defaultPlanStore } = await import("@workspace/planner");
+          const linkedPlan = await defaultPlanStore.get(payload.planId);
+          if (!linkedPlan) {
+            logger.warn(
+              { approvalId: id, planId: payload.planId },
+              "approvals.plan-step-flip-skipped-plan-missing",
+            );
+          } else {
+            const planOrg = linkedPlan.context["orgId"];
+            const approvalOrg = guard.orgId;
+            const planScopedOk =
+              approvalOrg == null
+                ? typeof planOrg !== "string"
+                : typeof planOrg === "string" && planOrg === String(approvalOrg);
+            if (!planScopedOk) {
+              logger.warn(
+                {
+                  approvalId: id,
+                  planId: payload.planId,
+                  planOrg,
+                  approvalOrg,
+                },
+                "approvals.plan-step-flip-denied-cross-tenant",
+              );
+            } else {
+              const { approvePlanStep } = await import(
+                "@workspace/alloy/plan-orchestrator"
+              );
+              await approvePlanStep(payload.planId, payload.stepId);
+            }
+          }
+        } catch (err) {
+          logger.warn(
+            { err, approvalId: id, planId: payload.planId, stepId: payload.stepId },
+            "approvals.plan-step-flip-failed",
+          );
+        }
       }
     } catch (err) {
       logger.warn({ err, approvalId: id }, "approvals.ledger-writeback-failed");
