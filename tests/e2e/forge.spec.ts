@@ -156,6 +156,158 @@ test.describe("Nuro Forge — Forge Runtime API", () => {
   });
 });
 
+/**
+ * Forge — Mutation E2E Coverage
+ *
+ * Closes the Sev 2 gap from docs/TESTING_MATRIX.md §7 ("No mutation API E2E
+ * coverage for Forge"). The Submit Execution panel on /forge/overview is the
+ * canonical browser-driven write surface for /api/forge/submit. These tests
+ * load that page in a browser, fill the form, and intercept the POST via
+ * page.route() to assert the request contract AND the visible UI response on
+ * success / validation / 4xx / 5xx error paths.
+ */
+const FORGE_OVERVIEW_PATH = (() => {
+  const base = SZL_PATH.endsWith("/") ? SZL_PATH.slice(0, -1) : SZL_PATH;
+  const path = `${base}/forge/overview`;
+  return path.startsWith("/") ? path : `/${path}`;
+})();
+
+test.describe("Forge — Submit Execution Mutation E2E", () => {
+  test.beforeEach(async ({ page }) => {
+    // Stub the overview GET so the page renders deterministically without a
+    // live API server. The submit panel is mounted independent of overview
+    // data, but stubbing avoids a noisy error banner during the form test.
+    await page.route("**/api/forge/overview", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          success: true,
+          data: {
+            totals: { agents: 0, executions: 0, promotions: 0, drift: 0, rollbacks: 0 },
+            byEnv: {},
+            byRisk: {},
+            driftStatus: { healthy: 0, drifting: 0, critical: 0 },
+            promotionQueue: [],
+            recentFailures: [],
+            recentRollbacks: [],
+          },
+        }),
+      }),
+    );
+    // CSRF preflight fired by apiRequest for any POST.
+    await page.route("**/api/csrf-token", (route) =>
+      route.fulfill({ status: 200, contentType: "application/json", body: '{"token":"test"}' }),
+    );
+    await page.goto(FORGE_OVERVIEW_PATH);
+    await page.waitForLoadState("domcontentloaded");
+    // Verify the submit form rendered. If it didn't, the test must fail loudly
+    // — silent skips would mask future regressions.
+    await expect(page.getByTestId("form-forge-submit")).toBeVisible({ timeout: 15000 });
+  });
+
+  test("submits valid payload, intercepts POST /api/forge/submit, and shows success state", async ({ page }) => {
+    let captured: { method: string; body: unknown; contentType: string | null; url: string } | null = null;
+    await page.route("**/api/forge/submit", async (route) => {
+      const req = route.request();
+      captured = {
+        method: req.method(),
+        body: req.postDataJSON(),
+        contentType: req.headers()["content-type"] ?? null,
+        url: req.url(),
+      };
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ success: true, data: { executionId: "exec_e2e_001", status: "queued" } }),
+      });
+    });
+
+    await page.getByTestId("input-forge-agent-slug").fill("legal-risk-v3");
+    await page.getByTestId("select-forge-env-tier").selectOption("staging");
+    await page.getByTestId("input-forge-input-json").fill('{"matterId":"mat_001","task":"risk-scan"}');
+    await page.getByTestId("button-forge-submit").click();
+
+    await expect(page.getByTestId("text-forge-submit-success")).toBeVisible({ timeout: 10000 });
+    await expect(page.getByTestId("text-forge-submit-success")).toContainText("exec_e2e_001");
+    await expect(page.getByTestId("text-forge-submit-success")).toContainText("queued");
+
+    expect(captured).not.toBeNull();
+    expect(captured!.method).toBe("POST");
+    expect(captured!.url).toContain("/api/forge/submit");
+    expect(captured!.contentType).toContain("application/json");
+    expect(captured!.body).toMatchObject({
+      agentSlug: "legal-risk-v3",
+      envTier: "staging",
+      input: { matterId: "mat_001", task: "risk-scan" },
+    });
+  });
+
+  test("client-side validation blocks POST when agent slug is empty", async ({ page }) => {
+    let posted = false;
+    await page.route("**/api/forge/submit", async (route) => {
+      posted = true;
+      await route.fulfill({ status: 200, contentType: "application/json", body: '{"success":true,"data":{}}' });
+    });
+
+    await page.getByTestId("input-forge-agent-slug").fill("");
+    await page.getByTestId("button-forge-submit").click();
+
+    await expect(page.getByTestId("text-forge-submit-error")).toContainText(/agent slug is required/i);
+    expect(posted).toBe(false);
+  });
+
+  test("client-side validation blocks POST when input is not valid JSON", async ({ page }) => {
+    let posted = false;
+    await page.route("**/api/forge/submit", async (route) => {
+      posted = true;
+      await route.fulfill({ status: 200, contentType: "application/json", body: '{"success":true,"data":{}}' });
+    });
+
+    await page.getByTestId("input-forge-agent-slug").fill("legal-risk-v3");
+    await page.getByTestId("input-forge-input-json").fill("{not valid json");
+    await page.getByTestId("button-forge-submit").click();
+
+    await expect(page.getByTestId("text-forge-submit-error")).toContainText(/valid json/i);
+    expect(posted).toBe(false);
+  });
+
+  test("surfaces server 400 validation error to the user", async ({ page }) => {
+    await page.route("**/api/forge/submit", (route) =>
+      route.fulfill({
+        status: 400,
+        contentType: "application/json",
+        body: JSON.stringify({ error: "INVALID_PAYLOAD", message: "agentSlug not registered" }),
+      }),
+    );
+
+    await page.getByTestId("input-forge-agent-slug").fill("ghost-agent");
+    await page.getByTestId("input-forge-input-json").fill("{}");
+    await page.getByTestId("button-forge-submit").click();
+
+    await expect(page.getByTestId("text-forge-submit-error")).toBeVisible({ timeout: 10000 });
+    await expect(page.getByTestId("text-forge-submit-error")).toContainText("400");
+  });
+
+  test("surfaces 5xx runtime failures and re-enables the submit button", async ({ page }) => {
+    await page.route("**/api/forge/submit", (route) =>
+      route.fulfill({
+        status: 503,
+        contentType: "application/json",
+        body: JSON.stringify({ error: "RUNTIME_UNAVAILABLE" }),
+      }),
+    );
+
+    await page.getByTestId("input-forge-agent-slug").fill("legal-risk-v3");
+    await page.getByTestId("input-forge-input-json").fill("{}");
+    await page.getByTestId("button-forge-submit").click();
+
+    await expect(page.getByTestId("text-forge-submit-error")).toBeVisible({ timeout: 10000 });
+    await expect(page.getByTestId("text-forge-submit-error")).toContainText("503");
+    await expect(page.getByTestId("button-forge-submit")).toBeEnabled({ timeout: 5000 });
+  });
+});
+
 test.describe("Nuro Forge — Mobile Viewport", () => {
   test.use({ viewport: { width: 390, height: 844 } });
 

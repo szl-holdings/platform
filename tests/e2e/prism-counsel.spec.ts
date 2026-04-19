@@ -83,6 +83,160 @@ test.describe("PRISM Counsel — Demo Mode (matter board)", () => {
   });
 });
 
+/**
+ * PRISM Counsel — Mutation E2E Coverage
+ *
+ * Closes the Sev 2 gap from docs/TESTING_MATRIX.md §7 ("No mutation API E2E
+ * coverage for PRISM"). The matter board's "New Matter" modal calls
+ * useCounselCreateMatter which POSTs to /api/counsel/matters. These tests
+ * exercise that write flow end-to-end in the browser by using page.route()
+ * to intercept the POST, then assert the UI's behavior on success / 4xx / 5xx
+ * responses and on client-side validation. Form data-testid attributes are
+ * already wired in the matter-board component.
+ */
+test.describe("PRISM Counsel — Matter Mutation E2E", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto(PRISM_DEMO);
+    await page.waitForLoadState("networkidle", { timeout: 20000 }).catch(() => null);
+  });
+
+  async function openNewMatterForm(page: import("@playwright/test").Page) {
+    // The matter board is the canonical demo-mode landing surface. If the
+    // "New Matter" trigger is missing, that is a regression — fail loudly
+    // instead of silently skipping coverage.
+    const trigger = page.getByTestId("button-new-matter");
+    await expect(trigger).toBeVisible({ timeout: 15000 });
+    await trigger.click();
+    await expect(page.getByTestId("form-new-matter")).toBeVisible({ timeout: 10000 });
+  }
+
+  async function fillRequiredFields(page: import("@playwright/test").Page) {
+    await page.getByTestId("input-matter-name").fill("E2E Test Matter — Apex Acquisition");
+    await page.getByTestId("input-matter-number").fill("2026-E2E-001");
+    await page.getByTestId("input-client-name").fill("Apex Capital Partners LP");
+    await page.getByTestId("input-lead-counsel").fill("E2E Counsel");
+    await page.getByTestId("input-jurisdiction").fill("Delaware / Federal");
+    await page.getByTestId("input-summary").fill("End-to-end mutation test matter exercising the create POST path.");
+  }
+
+  test("submits new matter, intercepts POST /api/counsel/matters, and closes modal on success", async ({ page }) => {
+    await openNewMatterForm(page);
+
+    let captured: { method: string; body: Record<string, unknown> | null; url: string } | null = null;
+    await page.route("**/api/counsel/matters", async (route) => {
+      const req = route.request();
+      if (req.method() !== "POST") {
+        await route.continue();
+        return;
+      }
+      captured = {
+        method: req.method(),
+        body: req.postDataJSON() as Record<string, unknown> | null,
+        url: req.url(),
+      };
+      await route.fulfill({
+        status: 201,
+        contentType: "application/json",
+        body: JSON.stringify({
+          id: "matter_e2e_001",
+          name: "E2E Test Matter — Apex Acquisition",
+          matterNumber: "2026-E2E-001",
+          clientName: "Apex Capital Partners LP",
+        }),
+      });
+    });
+
+    await fillRequiredFields(page);
+    await page.getByTestId("button-create-matter").click();
+
+    await expect(page.getByTestId("form-new-matter")).toBeHidden({ timeout: 10000 });
+
+    expect(captured).not.toBeNull();
+    expect(captured!.method).toBe("POST");
+    expect(captured!.url).toContain("/api/counsel/matters");
+    expect(captured!.body).toMatchObject({
+      name: "E2E Test Matter — Apex Acquisition",
+      matterNumber: "2026-E2E-001",
+      clientName: "Apex Capital Partners LP",
+      leadCounsel: "E2E Counsel",
+      jurisdiction: "Delaware / Federal",
+      summary: "End-to-end mutation test matter exercising the create POST path.",
+    });
+  });
+
+  test("client-side validation blocks POST when required fields are empty", async ({ page }) => {
+    await openNewMatterForm(page);
+
+    let posted = false;
+    await page.route("**/api/counsel/matters", async (route) => {
+      if (route.request().method() === "POST") {
+        posted = true;
+      }
+      await route.fulfill({ status: 201, contentType: "application/json", body: "{}" });
+    });
+
+    // Submit the form without filling any required fields. The browser's native
+    // `required` constraint should block submission before the mutation fires.
+    // Race a 1.5s POST watcher against the assertion that the form is still
+    // visible — if the mutation fires we fail; otherwise we confirm the
+    // unchanged DOM state deterministically.
+    const postRequestPromise = page
+      .waitForRequest((req) => req.url().includes("/api/counsel/matters") && req.method() === "POST", { timeout: 1500 })
+      .catch(() => null);
+    await page.getByTestId("button-create-matter").click();
+    const postReq = await postRequestPromise;
+
+    expect(postReq).toBeNull();
+    expect(posted).toBe(false);
+    await expect(page.getByTestId("form-new-matter")).toBeVisible();
+  });
+
+  test("surfaces server error message and keeps modal open on 500", async ({ page }) => {
+    await openNewMatterForm(page);
+
+    await page.route("**/api/counsel/matters", async (route) => {
+      if (route.request().method() !== "POST") {
+        await route.continue();
+        return;
+      }
+      await route.fulfill({
+        status: 500,
+        contentType: "application/json",
+        body: JSON.stringify({ error: "INTERNAL_ERROR", message: "matter store unavailable" }),
+      });
+    });
+
+    await fillRequiredFields(page);
+    await page.getByTestId("button-create-matter").click();
+
+    // Modal should remain open and the create button should be re-enabled
+    // after the failed mutation settles.
+    await expect(page.getByTestId("form-new-matter")).toBeVisible({ timeout: 10000 });
+    await expect(page.getByTestId("button-create-matter")).toBeEnabled({ timeout: 10000 });
+  });
+
+  test("rejects non-numeric estimated exposure before POSTing", async ({ page }) => {
+    await openNewMatterForm(page);
+
+    let posted = false;
+    await page.route("**/api/counsel/matters", async (route) => {
+      if (route.request().method() === "POST") posted = true;
+      await route.fulfill({ status: 201, contentType: "application/json", body: "{}" });
+    });
+
+    await fillRequiredFields(page);
+    await page.locator('input[placeholder="e.g. 25000000"]').fill("not-a-number");
+    const postRequestPromise = page
+      .waitForRequest((req) => req.url().includes("/api/counsel/matters") && req.method() === "POST", { timeout: 1500 })
+      .catch(() => null);
+    await page.getByTestId("button-create-matter").click();
+
+    await expect(page.getByText(/Estimated exposure must be a number/i)).toBeVisible({ timeout: 5000 });
+    expect(await postRequestPromise).toBeNull();
+    expect(posted).toBe(false);
+  });
+});
+
 test.describe("PRISM Counsel — Mobile Viewport", () => {
   test.use({ viewport: { width: 390, height: 844 } });
 

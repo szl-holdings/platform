@@ -148,7 +148,6 @@ Previously excluded specs that have since been promoted to the CI matrix:
 
 | Gap | Severity | Notes |
 |-----|---------|-------|
-| No mutation API E2E coverage for Forge, PRISM | Sev 2 | POST/mutation paths rely on unit + integration tests only |
 | No mobile E2E coverage (CORTEX) | Sev 2 | Expo app; Playwright cannot target RN; manual + unit coverage only |
 | No cross-browser E2E (only Chromium in CI) | Sev 3 | Firefox/WebKit excluded for CI speed |
 | No performance regression testing | Sev 3 | Lighthouse is manual only |
