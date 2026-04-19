@@ -926,6 +926,7 @@ export const listQuerySchema = z.object({
   from: z.string().max(64).optional(),
   to: z.string().max(64).optional(),
   appId: z.string().max(200).optional(),
+  deployedBy: z.string().max(200).optional(),
 }).passthrough();
 
 // ─── Tightened high-impact route schemas ──────────────────────────────────────

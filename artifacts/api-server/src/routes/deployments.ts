@@ -191,16 +191,22 @@ async function recordsWithUsers(rows: Deployment[]): Promise<DeploymentRecord[]>
   return rows.map((r) => toRecord(r, users.get(r.deployedBy)));
 }
 
-async function getHistory(appId: string, env: string): Promise<Deployment[]> {
+async function getHistory(
+  appId: string,
+  env: string,
+  deployedBy?: string,
+): Promise<Deployment[]> {
+  const conditions = [
+    eq(deploymentsTable.appId, appId),
+    eq(deploymentsTable.environment, env as DeploymentEnvironment),
+  ];
+  if (deployedBy) {
+    conditions.push(eq(deploymentsTable.deployedBy, deployedBy));
+  }
   return db
     .select()
     .from(deploymentsTable)
-    .where(
-      and(
-        eq(deploymentsTable.appId, appId),
-        eq(deploymentsTable.environment, env as DeploymentEnvironment),
-      ),
-    )
+    .where(and(...conditions))
     .orderBy(asc(deploymentsTable.deployedAt), asc(deploymentsTable.id));
 }
 
@@ -360,17 +366,25 @@ async function notifyRollback(params: {
 router.get("/deployments", authMiddleware({ required: false }), perUserApiSlidingLimiter, validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const env = (req.query.environment as string) ?? "production";
+    const deployedByFilter = (req.query.deployedBy as string | undefined)?.trim() || undefined;
+    const conditions = [
+      eq(deploymentsTable.environment, env as DeploymentEnvironment),
+      eq(deploymentsTable.status, "active"),
+    ];
+    if (deployedByFilter) {
+      conditions.push(eq(deploymentsTable.deployedBy, deployedByFilter));
+    }
     const rows = await db
       .select()
       .from(deploymentsTable)
-      .where(
-        and(
-          eq(deploymentsTable.environment, env as DeploymentEnvironment),
-          eq(deploymentsTable.status, "active"),
-        ),
-      );
+      .where(and(...conditions));
     const deployments = await recordsWithUsers(rows);
-    return sendSuccess(res, { deployments, environment: env, count: deployments.length });
+    return sendSuccess(res, {
+      deployments,
+      environment: env,
+      count: deployments.length,
+      deployedBy: deployedByFilter,
+    });
   } catch (err) {
     return handleRouteError(res, err, "GET /deployments");
   }
@@ -395,9 +409,16 @@ router.get("/deployments/:appId/history", authMiddleware({ required: false }), p
   try {
     const { appId } = req.params as { appId: string };
     const env = (req.query.environment as string) ?? "production";
-    const rows = await getHistory(appId, env);
+    const deployedByFilter = (req.query.deployedBy as string | undefined)?.trim() || undefined;
+    const rows = await getHistory(appId, env, deployedByFilter);
     const history = await recordsWithUsers(rows);
-    return sendSuccess(res, { appId, environment: env, history, count: history.length });
+    return sendSuccess(res, {
+      appId,
+      environment: env,
+      history,
+      count: history.length,
+      deployedBy: deployedByFilter,
+    });
   } catch (err) {
     return handleRouteError(res, err, `GET /deployments/${req.params.appId}/history`);
   }

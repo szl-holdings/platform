@@ -15,6 +15,8 @@ import {
   GitCommit,
   Server,
   Clock,
+  User,
+  X,
 } from "lucide-react";
 
 type DeploymentStatus = "active" | "deploying" | "rolled-back" | "failed" | "inactive";
@@ -216,22 +218,73 @@ export default function DeploymentsPage() {
   const queryClient = useQueryClient();
   const [environment, setEnvironment] = useState<DeploymentEnvironment>("production");
   const [selectedAppId, setSelectedAppId] = useState<string | null>(null);
+  const [deployerFilter, setDeployerFilter] = useState<string>("");
   const [confirmRollback, setConfirmRollback] = useState<{ appId: string; from: string; to?: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  const listQuery = useQuery<ListResponse>({
-    queryKey: ["deployments", "list", environment],
+  // Unfiltered list — drives the deployer dropdown options so the choices
+  // don't disappear once a filter is applied.
+  const allDeployersQuery = useQuery<ListResponse>({
+    queryKey: ["deployments", "list", environment, "all-deployers"],
     queryFn: () => apiFetch<ListResponse>(`/deployments?environment=${environment}`),
+    refetchInterval: 60_000,
+  });
+
+  const listQuery = useQuery<ListResponse>({
+    queryKey: ["deployments", "list", environment, deployerFilter || null],
+    queryFn: () => {
+      const qs = new URLSearchParams({ environment });
+      if (deployerFilter) qs.set("deployedBy", deployerFilter);
+      return apiFetch<ListResponse>(`/deployments?${qs.toString()}`);
+    },
     refetchInterval: 30_000,
   });
 
   const historyQuery = useQuery<HistoryResponse>({
-    queryKey: ["deployments", "history", selectedAppId, environment],
-    queryFn: () =>
-      apiFetch<HistoryResponse>(`/deployments/${selectedAppId}/history?environment=${environment}`),
+    queryKey: ["deployments", "history", selectedAppId, environment, deployerFilter || null],
+    queryFn: () => {
+      const qs = new URLSearchParams({ environment });
+      if (deployerFilter) qs.set("deployedBy", deployerFilter);
+      return apiFetch<HistoryResponse>(
+        `/deployments/${selectedAppId}/history?${qs.toString()}`,
+      );
+    },
     enabled: !!selectedAppId,
   });
+
+  // Build deployer options from the unfiltered active list, sorted by display
+  // name. Each option keeps the principal string (the actual filter value)
+  // and an optional resolved user summary for avatars/initials in the menu.
+  const deployerOptions = useMemo(() => {
+    const map = new Map<
+      string,
+      { value: string; label: string; user?: DeploymentUserSummary }
+    >();
+    for (const d of allDeployersQuery.data?.deployments ?? []) {
+      if (!d.deployedBy || d.deployedBy === "system") continue;
+      if (!map.has(d.deployedBy)) {
+        map.set(d.deployedBy, {
+          value: d.deployedBy,
+          label: d.deployedByUser?.displayName ?? d.deployedBy,
+          user: d.deployedByUser,
+        });
+      }
+    }
+    return Array.from(map.values()).sort((a, b) => a.label.localeCompare(b.label));
+  }, [allDeployersQuery.data]);
+
+  // If the active filter no longer matches any known deployer (env change,
+  // person no longer has active deploys), clear it so the UI doesn't get
+  // stuck showing an empty list with no obvious reason.
+  if (
+    deployerFilter &&
+    allDeployersQuery.data &&
+    !deployerOptions.some((o) => o.value === deployerFilter)
+  ) {
+    // Defer the state change to avoid setState-during-render warning.
+    queueMicrotask(() => setDeployerFilter(""));
+  }
 
   const rollbackMutation = useMutation({
     mutationFn: async (vars: { appId: string; version?: string }) => {
@@ -291,7 +344,37 @@ export default function DeploymentsPage() {
               <h1 className="text-xl font-bold tracking-tight">Deployments</h1>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg" style={{ backgroundColor: "var(--color-surface-base)", border: "1px solid var(--color-surface-border)" }}>
+              <User className="w-3 h-3" style={{ color: "var(--color-fg-muted)" }} />
+              <select
+                value={deployerFilter}
+                onChange={(e) => setDeployerFilter(e.target.value)}
+                aria-label="Filter by deployer"
+                className="bg-transparent text-[11px] font-mono outline-none cursor-pointer"
+                style={{
+                  color: deployerFilter ? "#cdb8f0" : "var(--color-fg-muted)",
+                  maxWidth: 180,
+                }}
+              >
+                <option value="">All deployers</option>
+                {deployerOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+              {deployerFilter && (
+                <button
+                  onClick={() => setDeployerFilter("")}
+                  aria-label="Clear deployer filter"
+                  className="opacity-70 hover:opacity-100"
+                  style={{ color: "var(--color-fg-muted)" }}
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              )}
+            </div>
             <div className="flex items-center gap-1 p-1 rounded-lg" style={{ backgroundColor: "var(--color-surface-base)", border: "1px solid var(--color-surface-border)" }}>
               {ENVIRONMENTS.map((env) => (
                 <button
