@@ -918,9 +918,14 @@ export function ConstellationGraph({
     depth: number;
     nodeIds: string[];
     edgeIds: Set<string>;
+    /** Ordered nodes from origin to target (length = depth + 1). */
+    nodes: ConstellationGraphNode[];
+    /** Ordered edges connecting consecutive nodes (length = depth). */
+    edges: ConstellationGraphEdge[];
     crossDomainSteps: number[];
     maxDepth: number;
   } | null>(null);
+  const [pathStepsOpen, setPathStepsOpen] = useState(true);
 
   // Reset operator expansions whenever the host graph changes (new domain or
   // refreshed payload) so fragments from a previous view never leak into the
@@ -940,6 +945,7 @@ export function ConstellationGraph({
     setPathFinding(false);
     setPathError(null);
     setPathHighlight(null);
+    setPathStepsOpen(true);
   }, [graphKey]);
 
   // Compute the cutoff time for the freshness window filter
@@ -1543,9 +1549,12 @@ export function ConstellationGraph({
           depth: p.depth ?? 0,
           nodeIds: p.path?.nodes.map((n) => n.id) ?? [],
           edgeIds: new Set(p.path?.edges.map((e) => e.id) ?? []),
+          nodes: p.path?.nodes ?? [],
+          edges: p.path?.edges ?? [],
           crossDomainSteps: p.path?.crossDomainSteps ?? [],
           maxDepth: p.maxDepth,
         });
+        setPathStepsOpen(true);
         // Pin the origin as the canvas selection so the details panel stays
         // anchored to the chain the operator is reading.
         setSelected(from);
@@ -2438,6 +2447,181 @@ export function ConstellationGraph({
           </div>
         )}
       </div>
+
+      {/* Step-by-step path breakdown — appears whenever a path is highlighted
+          and lets the operator read the chain as a sentence. Cross-domain
+          steps are visually flagged. Clicking a step selects/centers the
+          corresponding node on the canvas. */}
+      {pathHighlight && pathHighlight.found && pathHighlight.nodes.length > 0 && (
+        <div
+          data-testid="constellation-path-steps"
+          style={{
+            marginTop: 8,
+            borderRadius: 8,
+            background: "rgba(251,191,36,0.04)",
+            border: "1px solid rgba(251,191,36,0.25)",
+            overflow: "hidden",
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => setPathStepsOpen((o) => !o)}
+            data-testid="constellation-path-steps-toggle"
+            aria-expanded={pathStepsOpen ? "true" : "false"}
+            style={{
+              width: "100%",
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "8px 12px",
+              background: "transparent",
+              border: "none",
+              color: "#fde68a",
+              fontSize: 11,
+              cursor: "pointer",
+              textAlign: "left",
+              letterSpacing: "0.04em",
+              textTransform: "uppercase",
+              fontWeight: 600,
+            }}
+          >
+            <span style={{ fontSize: 10, transform: pathStepsOpen ? "rotate(90deg)" : "none", transition: "transform 120ms" }}>▶</span>
+            <span style={{ flex: 1 }}>
+              Path breakdown · {pathHighlight.depth} step{pathHighlight.depth === 1 ? "" : "s"}
+              {pathHighlight.crossDomainSteps.length > 0 && (
+                <> · {pathHighlight.crossDomainSteps.length} cross-domain</>
+              )}
+            </span>
+          </button>
+          {pathStepsOpen && (
+            <ol
+              data-testid="constellation-path-steps-list"
+              style={{
+                listStyle: "none",
+                margin: 0,
+                padding: "0 12px 10px",
+                display: "flex",
+                flexDirection: "column",
+                gap: 6,
+              }}
+            >
+              {pathHighlight.edges.map((edge, i) => {
+                const fromNode = pathHighlight.nodes[i];
+                const toNode = pathHighlight.nodes[i + 1];
+                if (!fromNode || !toNode) return null;
+                const isCross = pathHighlight.crossDomainSteps.includes(i);
+                const fromColor = DOMAIN_COLORS[fromNode.domain ?? hostDomain] ?? "#94a3b8";
+                const toColor = DOMAIN_COLORS[toNode.domain ?? hostDomain] ?? "#94a3b8";
+                const fromDomainLabel = fromNode.domain ? DOMAIN_LABEL[fromNode.domain] ?? fromNode.domain : null;
+                const toDomainLabel = toNode.domain ? DOMAIN_LABEL[toNode.domain] ?? toNode.domain : null;
+                return (
+                  <li
+                    key={edge.id}
+                    data-testid={`constellation-path-step-${i}`}
+                    data-cross-domain={isCross ? "true" : "false"}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                      padding: "6px 8px",
+                      borderRadius: 6,
+                      background: isCross ? "rgba(251,191,36,0.08)" : "rgba(255,255,255,0.02)",
+                      border: `1px solid ${isCross ? "rgba(251,191,36,0.4)" : "rgba(255,255,255,0.06)"}`,
+                      fontSize: 12,
+                      color: "#cbd5e1",
+                      flexWrap: "wrap",
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: 10,
+                        color: "#64748b",
+                        fontFamily: "monospace",
+                        minWidth: 18,
+                      }}
+                    >
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelected(fromNode);
+                        alphaRef.current = 0.6;
+                      }}
+                      data-testid={`constellation-path-step-${i}-from`}
+                      title={fromDomainLabel ? `${fromNode.name} · ${fromDomainLabel}` : fromNode.name}
+                      style={{
+                        background: "transparent",
+                        border: "none",
+                        padding: 0,
+                        color: fromColor,
+                        cursor: "pointer",
+                        fontWeight: 600,
+                        fontSize: 12,
+                        textAlign: "left",
+                        textDecoration: "underline",
+                        textDecorationColor: "rgba(255,255,255,0.15)",
+                        textUnderlineOffset: 2,
+                      }}
+                    >
+                      {fromNode.name}
+                    </button>
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: 4, color: isCross ? "#fbbf24" : "#94a3b8" }}>
+                      <span>—</span>
+                      <span style={{ fontStyle: "italic", fontSize: 11 }}>{edge.relationshipType}</span>
+                      <span>→</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelected(toNode);
+                        alphaRef.current = 0.6;
+                      }}
+                      data-testid={`constellation-path-step-${i}-to`}
+                      title={toDomainLabel ? `${toNode.name} · ${toDomainLabel}` : toNode.name}
+                      style={{
+                        background: "transparent",
+                        border: "none",
+                        padding: 0,
+                        color: toColor,
+                        cursor: "pointer",
+                        fontWeight: 600,
+                        fontSize: 12,
+                        textAlign: "left",
+                        textDecoration: "underline",
+                        textDecorationColor: "rgba(255,255,255,0.15)",
+                        textUnderlineOffset: 2,
+                      }}
+                    >
+                      {toNode.name}
+                    </button>
+                    {isCross && (
+                      <span
+                        data-testid={`constellation-path-step-${i}-cross`}
+                        style={{
+                          marginLeft: "auto",
+                          fontSize: 9,
+                          padding: "2px 6px",
+                          borderRadius: 3,
+                          background: "rgba(251,191,36,0.18)",
+                          border: "1px solid rgba(251,191,36,0.5)",
+                          color: "#fde68a",
+                          letterSpacing: "0.06em",
+                          textTransform: "uppercase",
+                          fontWeight: 700,
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        Cross-domain
+                      </span>
+                    )}
+                  </li>
+                );
+              })}
+            </ol>
+          )}
+        </div>
+      )}
 
       {/* Load more / pagination footer */}
       {showControls && !data && fetched && (
