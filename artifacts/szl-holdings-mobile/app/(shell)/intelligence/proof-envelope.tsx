@@ -12,6 +12,7 @@ import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
+import { apiFetch } from "@/lib/apiClient";
 
 const ACCENT = "#14b8a6";
 const BG = "#060b12";
@@ -67,6 +68,42 @@ interface ProofCardProps {
   accentColor?: string;
   metrics?: Array<{ label: string; value: string; color?: string }>;
   contradiction?: boolean;
+  /**
+   * When set, mode changes PATCH /api/alloy/autonomy-mode for this domain
+   * and the live policy decision is shown beneath the toggle.
+   */
+  domain?: string;
+  actionLabel?: string;
+}
+
+interface AutonomyDecisionPayload {
+  policyState: PolicyState;
+  policyReason?: string;
+  disposition: "execute" | "queue" | "draft" | "block";
+  mode: AutonomyMode;
+}
+
+async function patchAutonomyMode(
+  domain: string,
+  mode: AutonomyMode,
+): Promise<AutonomyDecisionPayload | null> {
+  try {
+    const res = await apiFetch<{ data?: { decision?: AutonomyDecisionPayload } }>(
+      "/api/alloy/autonomy-mode",
+      {
+        method: "PATCH",
+        body: JSON.stringify({ domain, mode }),
+      },
+    );
+    return res?.data?.decision ?? null;
+  } catch (err) {
+    return {
+      policyState: "blocked",
+      policyReason: `Could not reach Alloy autonomy service — mode not persisted (${(err as Error).message}).`,
+      disposition: "block",
+      mode,
+    };
+  }
 }
 
 function ConfidenceBar({ value, color }: { value: number; color: string }) {
@@ -94,7 +131,17 @@ function PolicyChip({ state, reason }: { state: PolicyState; reason?: string }) 
   );
 }
 
-function AutonomyToggle({ value, onChange }: { value: AutonomyMode; onChange: (m: AutonomyMode) => void }) {
+function AutonomyToggle({
+  value,
+  onChange,
+  domain,
+  disabled,
+}: {
+  value: AutonomyMode;
+  onChange: (m: AutonomyMode) => void;
+  domain?: string;
+  disabled?: boolean;
+}) {
   const modes: AutonomyMode[] = ["observe", "recommend", "draft", "ask-to-act", "approved-act"];
   return (
     <View style={styles.autonomyToggle}>
@@ -104,6 +151,7 @@ function AutonomyToggle({ value, onChange }: { value: AutonomyMode; onChange: (m
         return (
           <Pressable
             key={mode}
+            disabled={disabled}
             onPress={() => {
               if (Platform.OS !== "web") Haptics.selectionAsync();
               onChange(mode);
@@ -111,7 +159,9 @@ function AutonomyToggle({ value, onChange }: { value: AutonomyMode; onChange: (m
             style={[
               styles.autonomyBtn,
               active && { backgroundColor: color },
+              disabled && !active && { opacity: 0.4 },
             ]}
+            accessibilityLabel={`Set autonomy mode to ${mode}${domain ? ` for ${domain}` : ""}`}
           >
             <Text style={[styles.autonomyBtnText, { color: active ? BG : TEXT_MUTED }]}>
               {AUTONOMY_LABELS[mode]}
@@ -159,16 +209,38 @@ function ProofCard({
   accentColor = ACCENT,
   metrics,
   contradiction,
+  domain,
+  actionLabel,
 }: ProofCardProps) {
   const confColor =
     confidence >= 85 ? "#00e878" : confidence >= 70 ? "#84cc16" : confidence >= 50 ? "#ffb700" : "#ff4455";
+
+  const [liveDecision, setLiveDecision] = useState<AutonomyDecisionPayload | null>(null);
+  const [pending, setPending] = useState(false);
+
+  const handleAutonomy = useCallback(
+    async (mode: AutonomyMode) => {
+      onAutonomyChange(mode);
+      if (!domain) return;
+      setPending(true);
+      const decision = await patchAutonomyMode(domain, mode);
+      if (decision) setLiveDecision(decision);
+      setPending(false);
+    },
+    [onAutonomyChange, domain],
+  );
+
+  const effectivePolicyState = liveDecision?.policyState ?? policyState;
+  const effectivePolicyReason = liveDecision?.policyReason ?? policyReason;
+
+  void actionLabel;
 
   return (
     <View style={[styles.card, { borderLeftColor: accentColor, borderLeftWidth: 2 }]}>
       <View style={styles.cardHeader}>
         <Text style={styles.cardTitle}>{title}</Text>
         <View style={styles.cardChips}>
-          <PolicyChip state={policyState} reason={policyReason} />
+          <PolicyChip state={effectivePolicyState} reason={effectivePolicyReason} />
           {contradiction && (
             <View style={[styles.chip, { backgroundColor: "#a855f718", borderColor: "#a855f740" }]}>
               <Text style={[styles.chipText, { color: "#a855f7" }]}>DISSENT</Text>
@@ -208,8 +280,19 @@ function ProofCard({
       </View>
 
       <View style={styles.autonomySection}>
-        <Text style={styles.proofMeta}>Autonomy Mode</Text>
-        <AutonomyToggle value={autonomyMode} onChange={onAutonomyChange} />
+        <Text style={styles.proofMeta}>Autonomy Mode{domain ? ` · ${domain}` : ""}</Text>
+        <AutonomyToggle
+          value={autonomyMode}
+          onChange={handleAutonomy}
+          domain={domain}
+          disabled={pending}
+        />
+        {liveDecision?.policyReason && (
+          <Text style={styles.alloyDecisionText}>
+            <Text style={styles.alloyDecisionLabel}>ALLOY: </Text>
+            {liveDecision.policyReason}
+          </Text>
+        )}
       </View>
     </View>
   );
@@ -298,6 +381,8 @@ export default function ProofEnvelopeScreen() {
             { label: "IRR", value: "24.1%", color: "#00e878" },
             { label: "TVPI", value: "1.42x", color: ACCENT },
           ]}
+          domain="holdings.fund-performance"
+          actionLabel="Publish LP performance briefing"
         />
 
         <ProofCard
@@ -315,6 +400,8 @@ export default function ProofEnvelopeScreen() {
             { label: "Open Approvals", value: "3", color: "#ffb700" },
             { label: "Decision Exposure", value: "$4.7M", color: "#7a99b8" },
           ]}
+          domain="holdings.cross-domain-actions"
+          actionLabel="Execute correlated cross-domain mitigation"
         />
 
         <ProofCard
@@ -332,6 +419,8 @@ export default function ProofEnvelopeScreen() {
             { label: "Failure Risk", value: "31%", color: "#ff4455" },
             { label: "Downtime Saving", value: "$340K", color: "#00e878" },
           ]}
+          domain="vessels.charter-actions"
+          actionLabel="Schedule unplanned maintenance port call (MV Horizon Star)"
         />
       </ScrollView>
     </View>
@@ -603,6 +692,17 @@ const styles = StyleSheet.create({
   },
   autonomyBtnText: {
     fontSize: 9,
+    fontWeight: "700",
+    letterSpacing: 0.5,
+  },
+  alloyDecisionText: {
+    marginTop: 6,
+    fontSize: 10,
+    color: TEXT_SECONDARY,
+    lineHeight: 14,
+  },
+  alloyDecisionLabel: {
+    color: TEXT_MUTED,
     fontWeight: "700",
     letterSpacing: 0.5,
   },

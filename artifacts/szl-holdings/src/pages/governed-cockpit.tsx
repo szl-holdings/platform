@@ -84,6 +84,8 @@ export default function GovernedCockpit() {
           policyState={"allowed" as PolicyState}
           autonomyMode={autonomyMode}
           onAutonomyChange={setAutonomyMode}
+          domain="holdings.fund-performance"
+          actionLabel="Publish LP performance briefing"
         >
           <div className="space-y-2">
             <p className="text-sm" style={{ color: "#c8d8e8" }}>
@@ -116,6 +118,8 @@ export default function GovernedCockpit() {
           policyState={"allowed" as PolicyState}
           autonomyMode={autonomyMode}
           onAutonomyChange={setAutonomyMode}
+          domain="holdings.venture-intelligence"
+          actionLabel="Issue PRISM Series A readiness brief to IC"
         >
           <div className="space-y-2">
             <p className="text-sm" style={{ color: "#c8d8e8" }}>
@@ -148,6 +152,8 @@ export default function GovernedCockpit() {
           policyReason="Deployment >$3M per company requires Investment Committee approval per fund charter"
           autonomyMode={autonomyMode}
           onAutonomyChange={setAutonomyMode}
+          domain="holdings.deal-scoring"
+          actionLabel="Approve Q2 capital deployment ($6.5M)"
         >
           <div className="space-y-2">
             <p className="text-sm" style={{ color: "#c8d8e8" }}>

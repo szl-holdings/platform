@@ -14,4 +14,4 @@ export { AutonomyModeToggle } from "./AutonomyModeToggle";
 export type { AutonomyModeToggleProps, AutonomyMode } from "./AutonomyModeToggle";
 
 export { ProofEnvelope } from "./ProofEnvelope";
-export type { ProofEnvelopeProps } from "./ProofEnvelope";
+export type { ProofEnvelopeProps, AutonomyDecision } from "./ProofEnvelope";

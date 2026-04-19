@@ -34,6 +34,14 @@ import {
 import { logger } from "../lib/logger";
 import { broadcastWs, pubsub, ALLOY_EVENTS } from "../lib/pubsub-bridge.js";
 import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import {
+  AUTONOMY_MODES,
+  evaluateAutonomyForAction,
+  getAutonomyMode,
+  listAutonomyModes,
+  setAutonomyMode,
+  type AutonomyMode,
+} from "../lib/autonomy-store";
 
 const upsertFeatureFlagSchema = z.object({
   key: z.string().min(1).max(100).regex(/^[a-z0-9_-]+$/i),
@@ -1349,6 +1357,35 @@ router.post("/alloy/recommend", authMiddleware(), validateBody(recommendBodySche
   try {
     const tenantOrgId = requireAlloyTenant(req, res);
     if (tenantOrgId === null) return;
+
+    // Consult the persisted autonomy mode for this (tenant, domain) before
+    // letting any side-effecting recommendation execute. The mode written via
+    // PATCH /alloy/autonomy-mode wins over the per-call autonomyMode hint
+    // unless an explicit override is requested.
+    const persisted = getAutonomyMode(tenantOrgId, req.body.domain);
+    const decision = evaluateAutonomyForAction(tenantOrgId, req.body.domain, {
+      actionLabel: req.body.suggestedAction ?? req.body.title,
+    });
+    const effectiveMode = (req.body.autonomyMode as AutonomyMode | undefined) ?? persisted.mode;
+
+    if (decision.disposition === "block") {
+      logger.info(
+        { tenantOrgId, domain: req.body.domain, mode: effectiveMode },
+        "alloy.recommend.blocked-by-autonomy-mode",
+      );
+      return res.status(409).json({
+        success: false,
+        error: decision.policyReason ?? "Action blocked by autonomy mode",
+        code: "AUTONOMY_BLOCKED",
+        data: {
+          policyState: decision.policyState,
+          policyReason: decision.policyReason,
+          mode: effectiveMode,
+          domain: req.body.domain,
+        },
+      });
+    }
+
     const { recommend: alloyRecommend } = await import("@szl/alloy");
 
     const result = await alloyRecommend({
@@ -1376,5 +1413,100 @@ router.post("/alloy/recommend", authMiddleware(), validateBody(recommendBodySche
     handleRouteError(res, err, "Failed to generate recommendation");
   }
 });
+
+// ── Autonomy mode (per tenant + domain) ───────────────────────────────────
+
+const autonomyModeSchema = z.object({
+  domain: z.string().min(1).max(120).trim(),
+  mode: z.enum(["observe", "recommend", "draft", "ask-to-act", "approved-act"]),
+  reason: z.string().max(2000).trim().optional().nullable(),
+});
+
+router.get("/alloy/autonomy-mode", authMiddleware(), async (req: Request, res: Response) => {
+  try {
+    const tenantOrgId = resolveAlloyTenant(req);
+    const domain = (req.query.domain as string | undefined)?.trim();
+    if (domain) {
+      const record = getAutonomyMode(tenantOrgId, domain);
+      const decision = evaluateAutonomyForAction(tenantOrgId, domain);
+      return sendSuccess(res, { ...record, decision, modes: AUTONOMY_MODES });
+    }
+    const list = listAutonomyModes(tenantOrgId);
+    return sendSuccess(res, { items: list, modes: AUTONOMY_MODES });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to read autonomy mode");
+  }
+});
+
+router.patch(
+  "/alloy/autonomy-mode",
+  authMiddleware(),
+  validateBody(jsonObjectBodySchema),
+  async (req: Request, res: Response) => {
+    try {
+      const tenantOrgId = resolveAlloyTenant(req);
+      const parsed = autonomyModeSchema.safeParse(req.body);
+      if (!parsed.success) {
+        sendBadRequest(res, "Invalid autonomy mode payload", parsed.error.flatten());
+        return;
+      }
+      const before = getAutonomyMode(tenantOrgId, parsed.data.domain);
+      const updatedBy =
+        req.user?.displayName ?? req.user?.email ?? (req.user?.id != null ? `user:${req.user.id}` : "anonymous");
+      const record = setAutonomyMode({
+        tenantOrgId,
+        domain: parsed.data.domain,
+        mode: parsed.data.mode as AutonomyMode,
+        updatedBy,
+        reason: parsed.data.reason ?? null,
+      });
+      await writeAudit({
+        orgId: tenantOrgId ?? null,
+        userId: req.user?.id ?? null,
+        action: "set_autonomy_mode",
+        resourceType: "alloy_autonomy_mode",
+        resourceId: parsed.data.domain,
+        before,
+        after: record,
+      });
+      logger.info(
+        { tenantOrgId, domain: record.domain, mode: record.mode, updatedBy },
+        "alloy.autonomy-mode.updated",
+      );
+      const decision = evaluateAutonomyForAction(tenantOrgId, record.domain);
+      return sendSuccess(res, { ...record, decision, modes: AUTONOMY_MODES });
+    } catch (err) {
+      handleRouteError(res, err, "Failed to update autonomy mode");
+    }
+  },
+);
+
+/**
+ * Evaluate what would happen to a side-effecting action right now under the
+ * current autonomy mode for (tenant, domain). ProofEnvelope surfaces use this
+ * to decide whether to render the action as allowed, queued, or blocked.
+ */
+router.post(
+  "/alloy/autonomy-mode/evaluate",
+  authMiddleware(),
+  validateBody(jsonObjectBodySchema),
+  async (req: Request, res: Response) => {
+    try {
+      const tenantOrgId = resolveAlloyTenant(req);
+      const body = req.body as { domain?: string; actionLabel?: string };
+      if (!body.domain) {
+        sendBadRequest(res, "domain is required");
+        return;
+      }
+      const decision = evaluateAutonomyForAction(tenantOrgId, body.domain, {
+        actionLabel: body.actionLabel,
+      });
+      const record = getAutonomyMode(tenantOrgId, body.domain);
+      return sendSuccess(res, { ...record, decision });
+    } catch (err) {
+      handleRouteError(res, err, "Failed to evaluate autonomy mode");
+    }
+  },
+);
 
 export default router;

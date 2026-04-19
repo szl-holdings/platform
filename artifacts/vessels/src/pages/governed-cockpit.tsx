@@ -84,6 +84,8 @@ export default function GovernedCockpit() {
           policyState={"allowed" as PolicyState}
           autonomyMode={autonomyMode}
           onAutonomyChange={setAutonomyMode}
+          domain="vessels.routing"
+          actionLabel="Issue charter-party deviation order (Cyclone Aiko)"
         >
           <div className="space-y-2">
             <p className="text-sm" style={{ color: "#c8d8e8" }}>
@@ -116,6 +118,8 @@ export default function GovernedCockpit() {
           policyReason="OFAC SDN match above 85% threshold — transaction blocked pending compliance review"
           autonomyMode={autonomyMode}
           onAutonomyChange={setAutonomyMode}
+          domain="vessels.counterparty-approvals"
+          actionLabel="Onboard counterparty Starline Maritime SA"
         >
           <div className="space-y-2">
             <p className="text-sm" style={{ color: "#c8d8e8" }}>
@@ -138,6 +142,8 @@ export default function GovernedCockpit() {
           policyReason="Unscheduled port call requires commercial ops approval — charterer notification required"
           autonomyMode={autonomyMode}
           onAutonomyChange={setAutonomyMode}
+          domain="vessels.charter-actions"
+          actionLabel="Schedule unplanned maintenance port call (MV Horizon Star)"
         >
           <div className="space-y-2">
             <p className="text-sm" style={{ color: "#c8d8e8" }}>
