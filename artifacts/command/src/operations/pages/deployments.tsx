@@ -25,6 +25,7 @@ interface DeploymentUserSummary {
   displayName: string;
   email: string | null;
   avatarUrl: string | null;
+  team: string | null;
 }
 
 interface DeploymentRecord {
@@ -36,9 +37,27 @@ interface DeploymentRecord {
   deployedAt: string;
   deployedBy: string;
   deployedByUser?: DeploymentUserSummary;
+  ownerTeam?: string;
   commitSha?: string;
   notes?: string;
   metadata?: Record<string, unknown>;
+}
+
+function TeamPill({ team, tone = "owner" }: { team: string; tone?: "owner" | "person" }) {
+  const color = tone === "owner" ? "#7dd3fc" : "#cdb8f0";
+  return (
+    <span
+      className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded"
+      style={{
+        color,
+        backgroundColor: `color-mix(in srgb, ${color} 12%, transparent)`,
+        border: `1px solid color-mix(in srgb, ${color} 28%, transparent)`,
+      }}
+      title={tone === "owner" ? `Owning team: ${team}` : `On team: ${team}`}
+    >
+      {team}
+    </span>
+  );
 }
 
 function initialsFor(name: string): string {
@@ -95,6 +114,20 @@ function DeployerBadge({
       <span className="truncate" style={{ color: "var(--color-fg-secondary, var(--color-fg-primary))" }}>
         {name}
       </span>
+      {user?.team ? (
+        <TeamPill team={user.team} tone="person" />
+      ) : !user ? (
+        <span
+          className="text-[9px] font-mono uppercase tracking-wider px-1 py-0.5 rounded opacity-70"
+          style={{
+            color: "var(--color-fg-muted)",
+            border: "1px dashed var(--color-surface-border)",
+          }}
+          title="Not a registered user (likely a CI bot or automation)"
+        >
+          unregistered
+        </span>
+      ) : null}
     </span>
   );
 }
@@ -356,11 +389,12 @@ export default function DeploymentsPage() {
                           }}
                         >
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
                               <span className="text-sm font-semibold truncate">{d.appName}</span>
                               <span className="text-[10px] font-mono" style={{ color: "var(--color-fg-muted)" }}>
                                 {d.appId}
                               </span>
+                              {d.ownerTeam && <TeamPill team={d.ownerTeam} tone="owner" />}
                             </div>
                             <div className="flex items-center gap-2 flex-wrap">
                               <span className="text-[11px] font-mono" style={{ color: "#cdb8f0" }}>{d.version}</span>
@@ -390,11 +424,14 @@ export default function DeploymentsPage() {
             style={{ backgroundColor: "var(--color-surface-base)", border: "1px solid var(--color-surface-border)" }}
           >
             <div className="flex items-center justify-between px-4 py-3 gap-3" style={{ borderBottom: "1px solid var(--color-surface-border)" }}>
-              <div className="flex items-center gap-2 min-w-0">
+              <div className="flex items-center gap-2 min-w-0 flex-wrap">
                 <History className="w-3.5 h-3.5" style={{ color: "var(--color-fg-muted)" }} />
                 <h2 className="text-xs font-bold uppercase tracking-[0.15em] truncate">
                   {selectedActive ? `${selectedActive.appName} History` : "Deployment History"}
                 </h2>
+                {selectedActive?.ownerTeam && (
+                  <TeamPill team={selectedActive.ownerTeam} tone="owner" />
+                )}
               </div>
               {selectedActive && (
                 <button

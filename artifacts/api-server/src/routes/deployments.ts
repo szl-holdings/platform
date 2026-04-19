@@ -57,6 +57,7 @@ export interface DeploymentUserSummary {
   displayName: string;
   email: string | null;
   avatarUrl: string | null;
+  team: string | null;
 }
 
 export interface DeploymentRecord {
@@ -68,9 +69,39 @@ export interface DeploymentRecord {
   deployedAt: string;
   deployedBy: string;
   deployedByUser?: DeploymentUserSummary;
+  ownerTeam?: string;
   commitSha?: string;
   notes?: string;
   metadata?: Record<string, unknown>;
+}
+
+/**
+ * Static map of appId -> owning team. Used so the operator console can show
+ * "who do I page" alongside each deployment row without requiring a separate
+ * lookup. Apps not listed here fall back to "Platform" — the catch-all team
+ * that owns shared infrastructure.
+ */
+const APP_OWNER_TEAMS: Record<string, string> = {
+  "api-server": "Platform",
+  command: "Platform",
+  "szl-holdings": "Platform",
+  "szl-holdings-mobile": "Platform",
+  pulse: "Pulse",
+  aegis: "Aegis",
+  vessels: "Vessels",
+  terra: "Terra",
+  sentra: "Sentra",
+  counsel: "PRISM Counsel",
+  "prism-counsel": "PRISM Counsel",
+  lyte: "Lyte",
+  "lyte-command-center": "Lyte",
+  "carlota-jo": "Advisory",
+  "szl-demo-video": "Marketing",
+  "mockup-sandbox": "Design",
+};
+
+function ownerTeamFor(appId: string): string {
+  return APP_OWNER_TEAMS[appId] ?? "Platform";
 }
 
 function toRecord(row: Deployment, user?: DeploymentUserSummary): DeploymentRecord {
@@ -83,6 +114,7 @@ function toRecord(row: Deployment, user?: DeploymentUserSummary): DeploymentReco
     deployedAt: row.deployedAt.toISOString(),
     deployedBy: row.deployedBy,
     deployedByUser: user,
+    ownerTeam: ownerTeamFor(row.appId),
     commitSha: row.commitSha ?? undefined,
     notes: row.notes ?? undefined,
     metadata: row.metadata ?? undefined,
@@ -121,6 +153,7 @@ async function lookupDeployers(
       email: usersTable.email,
       displayName: usersTable.displayName,
       avatarUrl: usersTable.avatarUrl,
+      team: usersTable.team,
     })
     .from(usersTable)
     .where(filters.length === 1 ? filters[0] : or(...filters));
@@ -131,6 +164,7 @@ async function lookupDeployers(
       displayName: r.displayName,
       email: r.email,
       avatarUrl: r.avatarUrl,
+      team: r.team,
     };
     if (r.email && unique.includes(r.email)) map.set(r.email, summary);
     if (unique.includes(r.displayName)) {
