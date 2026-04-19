@@ -6,6 +6,7 @@ import {
   Globe, Layers, Shield, Star, Target, TrendingDown, TrendingUp,
   Users, Zap, X, Play, Check, Info, Briefcase, GitBranch,
   RefreshCw, Ticket, UserCheck, CheckCheck, BellOff, XCircle, ExternalLink,
+  History,
 } from "lucide-react";
 import { Link } from "wouter";
 import { cn } from "@/lib/utils";
@@ -25,9 +26,11 @@ const BORDER = "hsla(0,0%,100%,0.07)";
 const STORE_KEY = "szl:actionStore";
 const STORE_URL = "/api/action-store";
 
-type RiskActionState = { type: "playbook" | "ticket"; status: "running" | "done"; result?: string; ticketId?: string; ticketUrl?: string };
-type OppDecision = { decision: "accept" | "reject" | "snooze"; reason?: string; snoozeUntil?: string; at: string };
-type RecDecision = { decision: "accept" | "reject" | "snooze"; reason?: string; snoozeUntil?: string; at: string };
+type RiskActionState = { type: "playbook" | "ticket"; status: "running" | "done"; result?: string; ticketId?: string; ticketUrl?: string; at?: string; actor?: string };
+type OppDecision = { decision: "accept" | "reject" | "snooze"; reason?: string; snoozeUntil?: string; at: string; actor?: string };
+type RecDecision = { decision: "accept" | "reject" | "snooze"; reason?: string; snoozeUntil?: string; at: string; actor?: string };
+
+const CURRENT_ACTOR = "You (Operator)";
 
 interface ActionStore {
   riskOwners: Record<string, string>;
@@ -269,6 +272,7 @@ const MODULES = [
   { id: "value", label: "Value Ledger", icon: DollarSign },
   { id: "workflow", label: "Workflow Performance", icon: Layers },
   { id: "agent", label: "Agent Trust", icon: Brain },
+  { id: "log", label: "Decision Log", icon: History },
 ] as const;
 
 type ModuleId = typeof MODULES[number]["id"];
@@ -594,16 +598,17 @@ function RiskRegisterModule() {
   const { toasts, show, dismiss } = useToasts();
 
   function handlePlaybook(riskId: string, riskTitle: string) {
-    patch({ riskActions: { [riskId]: { type: "playbook", status: "running" } } });
+    patch({ riskActions: { [riskId]: { type: "playbook", status: "running", at: new Date().toISOString(), actor: CURRENT_ACTOR } } });
     show("Triggering credential rotation playbook…", "info", 2000);
     setTimeout(() => {
-      patch({ riskActions: { [riskId]: { type: "playbook", status: "done", result: "Credentials rotated. Pipeline reconnected at 14:38. Freshness restored." } } });
+      patch({ riskActions: { [riskId]: { type: "playbook", status: "done", result: "Credentials rotated. Pipeline reconnected at 14:38. Freshness restored.", at: new Date().toISOString(), actor: CURRENT_ACTOR } } });
       show("Playbook complete — Carlota CRM pipeline reconnected successfully.", "success");
     }, 2500);
   }
 
   async function handleTicket(riskId: string, risk: typeof RISK_REGISTER[number]) {
-    patch({ riskActions: { [riskId]: { type: "ticket", status: "running" } } });
+    const startedAt = new Date().toISOString();
+    patch({ riskActions: { [riskId]: { type: "ticket", status: "running", at: startedAt, actor: CURRENT_ACTOR } } });
     show("Creating Linear ticket…", "info", 2000);
 
     const priorityMap: Record<string, number> = { critical: 1, high: 2, medium: 3, low: 4 };
@@ -636,7 +641,7 @@ function RiskRegisterModule() {
       }
       patch({
         riskActions: {
-          [riskId]: { type: "ticket", status: "done", ticketId: json.identifier, ticketUrl: json.url },
+          [riskId]: { type: "ticket", status: "done", ticketId: json.identifier, ticketUrl: json.url, at: new Date().toISOString(), actor: CURRENT_ACTOR },
         },
       });
       show(`Linear ticket ${json.identifier} created — assigned to ${json.assignee?.name ?? risk.owner}.`, "success");
@@ -795,20 +800,20 @@ function OpportunityModule() {
   const [rejectReason, setRejectReason] = useState("");
 
   function handleAccept(oppId: string, title: string) {
-    patch({ oppDecisions: { [oppId]: { decision: "accept", at: new Date().toISOString() } } });
+    patch({ oppDecisions: { [oppId]: { decision: "accept", at: new Date().toISOString(), actor: CURRENT_ACTOR } } });
     show(`"${title}" accepted — added to sprint backlog.`, "success");
   }
 
   function handleRejectSubmit(oppId: string, title: string) {
     if (!rejectReason.trim()) return;
-    patch({ oppDecisions: { [oppId]: { decision: "reject", reason: rejectReason.trim(), at: new Date().toISOString() } } });
+    patch({ oppDecisions: { [oppId]: { decision: "reject", reason: rejectReason.trim(), at: new Date().toISOString(), actor: CURRENT_ACTOR } } });
     show(`"${title}" rejected.`, "info");
     setRejectTarget(null);
     setRejectReason("");
   }
 
   function handleSnoozeSubmit(oppId: string, title: string) {
-    patch({ oppDecisions: { [oppId]: { decision: "snooze", reason: snoozeInput.reason, snoozeUntil: snoozeInput.duration, at: new Date().toISOString() } } });
+    patch({ oppDecisions: { [oppId]: { decision: "snooze", reason: snoozeInput.reason, snoozeUntil: snoozeInput.duration, at: new Date().toISOString(), actor: CURRENT_ACTOR } } });
     show(`"${title}" snoozed for ${snoozeInput.duration}${snoozeInput.reason ? ` — ${snoozeInput.reason}` : ""}.`, "info");
     setSnoozeTarget(null);
     setSnoozeInput({ reason: "", duration: "7d" });
@@ -1084,6 +1089,181 @@ function AgentTrustModule() {
   );
 }
 
+// ── Module: Decision Log ──────────────────────────────────────────────────────
+
+type LogEntry = {
+  key: string;
+  at: string;
+  category: "Risk" | "Opportunity" | "Recommendation";
+  title: string;
+  decision: string;
+  decisionColor: string;
+  reason?: string;
+  detail?: string;
+  actor: string;
+};
+
+function formatTime(iso: string) {
+  try {
+    const d = new Date(iso);
+    return d.toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+  } catch { return iso; }
+}
+
+function DecisionLogModule() {
+  const live = useLive();
+  const { store } = useActionStore();
+  const [filter, setFilter] = useState<"all" | "Risk" | "Opportunity" | "Recommendation">("all");
+
+  const risks = (live?.riskRegister ?? RISK_REGISTER) as typeof RISK_REGISTER;
+  const opps = (live?.oppRegister ?? OPP_REGISTER) as typeof OPP_REGISTER;
+  const riskTitle = (id: string) => risks.find(r => r.id === id)?.title ?? id;
+  const oppTitle = (id: string) => opps.find(o => o.id === id)?.title ?? id;
+
+  const entries: LogEntry[] = [];
+
+  Object.entries(store.riskActions ?? {}).forEach(([id, a]) => {
+    if (!a.at) return;
+    const decision = a.type === "playbook" ? (a.status === "done" ? "Playbook executed" : "Playbook started") : `Ticket ${a.ticketId ?? "created"}`;
+    entries.push({
+      key: `risk-${id}-${a.at}`,
+      at: a.at,
+      category: "Risk",
+      title: riskTitle(id),
+      decision,
+      decisionColor: a.status === "done" ? "#22c55e" : "#f59e0b",
+      detail: a.result,
+      actor: a.actor ?? "—",
+    });
+  });
+
+  Object.entries(store.oppDecisions ?? {}).forEach(([id, d]) => {
+    if (!d.at) return;
+    const label = d.decision === "accept" ? "Accepted" : d.decision === "reject" ? "Rejected" : `Snoozed ${d.snoozeUntil ?? ""}`.trim();
+    const color = d.decision === "accept" ? "#22c55e" : d.decision === "reject" ? "#ef4444" : "#f59e0b";
+    entries.push({
+      key: `opp-${id}-${d.at}`,
+      at: d.at,
+      category: "Opportunity",
+      title: oppTitle(id),
+      decision: label,
+      decisionColor: color,
+      reason: d.reason,
+      actor: d.actor ?? "—",
+    });
+  });
+
+  Object.entries(store.recDecisions ?? {}).forEach(([id, d]) => {
+    if (!d.at) return;
+    const label = d.decision === "accept" ? "Accepted" : d.decision === "reject" ? "Rejected" : `Snoozed ${d.snoozeUntil ?? ""}`.trim();
+    const color = d.decision === "accept" ? "#22c55e" : d.decision === "reject" ? "#ef4444" : "#f59e0b";
+    entries.push({
+      key: `rec-${id}-${d.at}`,
+      at: d.at,
+      category: "Recommendation",
+      title: `Recommendation ${id}`,
+      decision: label,
+      decisionColor: color,
+      reason: d.reason,
+      actor: d.actor ?? "—",
+    });
+  });
+
+  const sorted = entries
+    .filter(e => filter === "all" || e.category === filter)
+    .sort((a, b) => (a.at < b.at ? 1 : -1));
+
+  const counts = {
+    all: entries.length,
+    Risk: entries.filter(e => e.category === "Risk").length,
+    Opportunity: entries.filter(e => e.category === "Opportunity").length,
+    Recommendation: entries.filter(e => e.category === "Recommendation").length,
+  };
+
+  const catColor: Record<LogEntry["category"], string> = {
+    Risk: "#ef4444",
+    Opportunity: "#0ea5e9",
+    Recommendation: ACCENT,
+  };
+
+  return (
+    <div>
+      <div style={{ display: "flex", gap: "0.375rem", marginBottom: "1rem", flexWrap: "wrap" }}>
+        {(["all", "Risk", "Opportunity", "Recommendation"] as const).map(f => {
+          const active = filter === f;
+          return (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              style={{
+                fontSize: "10px",
+                fontWeight: 600,
+                padding: "4px 10px",
+                borderRadius: "6px",
+                background: active ? `${ACCENT}18` : "transparent",
+                border: `1px solid ${active ? ACCENT + "40" : "hsla(0,0%,100%,0.08)"}`,
+                color: active ? ACCENT : "rgba(255,255,255,0.45)",
+                cursor: "pointer",
+                textTransform: "capitalize",
+              }}
+            >
+              {f === "all" ? "All" : f}{" "}
+              <span style={{ fontWeight: 800, color: active ? ACCENT : "rgba(255,255,255,0.3)" }}>{counts[f]}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {sorted.length === 0 ? (
+        <div style={{ padding: "2.5rem 1rem", textAlign: "center", color: "rgba(255,255,255,0.35)", fontSize: "12px" }}>
+          <History style={{ width: 22, height: 22, color: "rgba(255,255,255,0.15)", margin: "0 auto 0.5rem", display: "block" }} />
+          No decisions logged yet. Accept, reject, or snooze items in the Risk Register or Opportunities to see them here.
+        </div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+          {sorted.map((e, i) => (
+            <div
+              key={e.key}
+              style={{
+                display: "grid",
+                gridTemplateColumns: "auto 90px 1fr auto auto",
+                gap: "0.875rem",
+                alignItems: "center",
+                padding: "0.625rem 0.875rem",
+                borderBottom: i < sorted.length - 1 ? `1px solid ${BORDER}` : "none",
+                borderLeft: `3px solid ${catColor[e.category]}40`,
+              }}
+            >
+              <span style={{ fontSize: "9px", fontWeight: 700, padding: "2px 7px", borderRadius: "3px", background: `${catColor[e.category]}20`, color: catColor[e.category], textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                {e.category}
+              </span>
+              <span style={{ fontSize: "9px", fontWeight: 700, padding: "2px 7px", borderRadius: "3px", background: `${e.decisionColor}20`, color: e.decisionColor, textAlign: "center" }}>
+                {e.decision}
+              </span>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: "12px", fontWeight: 600, color: "rgba(255,255,255,0.85)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {e.title}
+                </div>
+                {(e.reason || e.detail) && (
+                  <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)", marginTop: "2px", lineHeight: 1.4 }}>
+                    {e.reason ? `Reason: ${e.reason}` : e.detail}
+                  </div>
+                )}
+              </div>
+              <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.45)", display: "flex", alignItems: "center", gap: 4 }}>
+                <UserCheck style={{ width: 10, height: 10 }} /> {e.actor}
+              </span>
+              <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.35)", fontVariantNumeric: "tabular-nums", display: "flex", alignItems: "center", gap: 4 }}>
+                <Clock style={{ width: 10, height: 10 }} /> {formatTime(e.at)}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Main Page ──────────────────────────────────────────────────────────────────
 
 export default function BusinessStatePage() {
@@ -1240,6 +1420,7 @@ export default function BusinessStatePage() {
                 {activeModule === "value" && <ValueLedgerModule />}
                 {activeModule === "workflow" && <WorkflowPerformanceModule />}
                 {activeModule === "agent" && <AgentTrustModule />}
+                {activeModule === "log" && <DecisionLogModule />}
               </div>
             </div>
           </m.div>

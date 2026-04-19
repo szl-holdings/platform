@@ -4,7 +4,7 @@ import {
   Activity, AlertTriangle, ArrowLeft, ArrowRight, Brain, CheckCircle2,
   ChevronRight, Clock, DollarSign, Eye, FileText, GitBranch, Globe, Layers,
   Shield, Star, Target, TrendingDown, TrendingUp, Users, Zap, X, Info,
-  CheckCheck, BellOff, XCircle, UserCheck, RefreshCw, Ticket,
+  CheckCheck, BellOff, XCircle, UserCheck, RefreshCw, Ticket, History,
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -17,12 +17,12 @@ import { Link } from "wouter";
 
 const STORE_KEY = "szl:actionStore";
 
-type RecDecision = { decision: "accept" | "reject" | "snooze"; reason?: string; snoozeUntil?: string; at: string };
+type RecDecision = { decision: "accept" | "reject" | "snooze"; reason?: string; snoozeUntil?: string; at: string; actor?: string };
 
 interface ActionStore {
   riskOwners: Record<string, string>;
-  riskActions: Record<string, { type: string; status: string; result?: string; ticketId?: string }>;
-  oppDecisions: Record<string, { decision: string; reason?: string; snoozeUntil?: string; at: string }>;
+  riskActions: Record<string, { type: string; status: string; result?: string; ticketId?: string; at?: string; actor?: string }>;
+  oppDecisions: Record<string, { decision: string; reason?: string; snoozeUntil?: string; at: string; actor?: string }>;
   recDecisions: Record<string, RecDecision>;
 }
 
@@ -32,6 +32,8 @@ type ActionStorePatch = Partial<{
   oppDecisions: Record<string, ActionStore["oppDecisions"][string] | null>;
   recDecisions: Record<string, RecDecision | null>;
 }>;
+
+const CURRENT_ACTOR = "You (Operator)";
 
 function emptyStore(): ActionStore {
   return { riskOwners: {}, riskActions: {}, oppDecisions: {}, recDecisions: {} };
@@ -366,20 +368,20 @@ function RecommendationQueueSection() {
   const [rejectReason, setRejectReason] = useState("");
 
   function handleAccept(recId: string, title: string) {
-    patch({ recDecisions: { [recId]: { decision: "accept", at: new Date().toISOString() } } });
+    patch({ recDecisions: { [recId]: { decision: "accept", at: new Date().toISOString(), actor: CURRENT_ACTOR } } });
     show(`Recommendation accepted — "${title}" queued for execution.`, "success");
   }
 
   function handleRejectSubmit(recId: string, title: string) {
     if (!rejectReason.trim()) return;
-    patch({ recDecisions: { [recId]: { decision: "reject", reason: rejectReason.trim(), at: new Date().toISOString() } } });
+    patch({ recDecisions: { [recId]: { decision: "reject", reason: rejectReason.trim(), at: new Date().toISOString(), actor: CURRENT_ACTOR } } });
     show(`Recommendation rejected.`, "info");
     setRejectTarget(null);
     setRejectReason("");
   }
 
   function handleSnoozeSubmit(recId: string, title: string) {
-    patch({ recDecisions: { [recId]: { decision: "snooze", reason: snoozeInput.reason, snoozeUntil: snoozeInput.duration, at: new Date().toISOString() } } });
+    patch({ recDecisions: { [recId]: { decision: "snooze", reason: snoozeInput.reason, snoozeUntil: snoozeInput.duration, at: new Date().toISOString(), actor: CURRENT_ACTOR } } });
     show(`Snoozed for ${snoozeInput.duration}${snoozeInput.reason ? ` — ${snoozeInput.reason}` : ""}.`, "info");
     setSnoozeTarget(null);
     setSnoozeInput({ reason: "", duration: "7d" });
@@ -969,6 +971,184 @@ function ValueWidgets() {
   );
 }
 
+// ── Section: Decision Log ─────────────────────────────────────────────────────
+
+type LogEntry = {
+  key: string;
+  at: string;
+  category: "Risk" | "Opportunity" | "Recommendation";
+  title: string;
+  decision: string;
+  decisionColor: string;
+  reason?: string;
+  detail?: string;
+  actor: string;
+};
+
+function formatLogTime(iso: string) {
+  try {
+    const d = new Date(iso);
+    return d.toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+  } catch { return iso; }
+}
+
+function DecisionLogSection() {
+  const live = useLive();
+  const { store } = useActionStore();
+  const [filter, setFilter] = useState<"all" | "Risk" | "Opportunity" | "Recommendation">("all");
+
+  const recs = (live?.recommendations ?? RECOMMENDATIONS) as typeof RECOMMENDATIONS;
+  const risks = (live?.heatmapRisks ?? HEATMAP_RISKS) as typeof HEATMAP_RISKS;
+  const opps = (live?.heatmapOpps ?? HEATMAP_OPPS) as typeof HEATMAP_OPPS;
+  const recTitle = (id: string) => recs.find(r => r.id === id)?.title ?? `Recommendation ${id}`;
+  const riskTitle = (id: string) => risks.find(r => r.id === id)?.title ?? `Risk ${id}`;
+  const oppTitle = (id: string) => opps.find(o => o.id === id)?.title ?? `Opportunity ${id}`;
+
+  const entries: LogEntry[] = [];
+
+  Object.entries(store.riskActions ?? {}).forEach(([id, a]) => {
+    if (!a.at) return;
+    const decision = a.type === "playbook"
+      ? (a.status === "done" ? "Playbook executed" : "Playbook started")
+      : `Ticket ${a.ticketId ?? "created"}`;
+    entries.push({
+      key: `risk-${id}-${a.at}`,
+      at: a.at,
+      category: "Risk",
+      title: riskTitle(id),
+      decision,
+      decisionColor: a.status === "done" ? "#22c55e" : "#f59e0b",
+      detail: a.result,
+      actor: a.actor ?? "—",
+    });
+  });
+
+  Object.entries(store.oppDecisions ?? {}).forEach(([id, d]) => {
+    if (!d.at) return;
+    const label = d.decision === "accept" ? "Accepted" : d.decision === "reject" ? "Rejected" : `Snoozed ${d.snoozeUntil ?? ""}`.trim();
+    const color = d.decision === "accept" ? "#22c55e" : d.decision === "reject" ? "#ef4444" : "#f59e0b";
+    entries.push({
+      key: `opp-${id}-${d.at}`,
+      at: d.at,
+      category: "Opportunity",
+      title: oppTitle(id),
+      decision: label,
+      decisionColor: color,
+      reason: d.reason,
+      actor: d.actor ?? "—",
+    });
+  });
+
+  Object.entries(store.recDecisions ?? {}).forEach(([id, d]) => {
+    if (!d.at) return;
+    const label = d.decision === "accept" ? "Accepted" : d.decision === "reject" ? "Rejected" : `Snoozed ${d.snoozeUntil ?? ""}`.trim();
+    const color = d.decision === "accept" ? "#22c55e" : d.decision === "reject" ? "#ef4444" : "#f59e0b";
+    entries.push({
+      key: `rec-${id}-${d.at}`,
+      at: d.at,
+      category: "Recommendation",
+      title: recTitle(id),
+      decision: label,
+      decisionColor: color,
+      reason: d.reason,
+      actor: d.actor ?? "—",
+    });
+  });
+
+  const sorted = entries
+    .filter(e => filter === "all" || e.category === filter)
+    .sort((a, b) => (a.at < b.at ? 1 : -1));
+
+  const counts = {
+    all: entries.length,
+    Risk: entries.filter(e => e.category === "Risk").length,
+    Opportunity: entries.filter(e => e.category === "Opportunity").length,
+    Recommendation: entries.filter(e => e.category === "Recommendation").length,
+  };
+
+  const catColor: Record<LogEntry["category"], string> = {
+    Risk: "#ef4444",
+    Opportunity: "#0ea5e9",
+    Recommendation: ACCENT,
+  };
+
+  return (
+    <div>
+      <div style={{ display: "flex", gap: "0.375rem", marginBottom: "1rem", flexWrap: "wrap" }}>
+        {(["all", "Risk", "Opportunity", "Recommendation"] as const).map(f => {
+          const active = filter === f;
+          return (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              style={{
+                fontSize: "10px",
+                fontWeight: 600,
+                padding: "4px 10px",
+                borderRadius: "6px",
+                background: active ? `${ACCENT}18` : "transparent",
+                border: `1px solid ${active ? ACCENT + "40" : BORDER}`,
+                color: active ? ACCENT : FG_MUT,
+                cursor: "pointer",
+              }}
+            >
+              {f === "all" ? "All" : f}{" "}
+              <span style={{ fontWeight: 800, color: active ? ACCENT : FG_MUT }}>{counts[f]}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {sorted.length === 0 ? (
+        <div style={{ padding: "2.5rem 1rem", textAlign: "center", color: FG_MUT, fontSize: "12px" }}>
+          <History style={{ width: 22, height: 22, color: FG_MUT, opacity: 0.4, margin: "0 auto 0.5rem", display: "block" }} />
+          No decisions logged yet. Accept, reject, or snooze a recommendation to see it here.
+        </div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+          {sorted.map((e, i) => (
+            <div
+              key={e.key}
+              style={{
+                display: "grid",
+                gridTemplateColumns: "auto 110px 1fr auto auto",
+                gap: "0.875rem",
+                alignItems: "center",
+                padding: "0.625rem 0.875rem",
+                borderBottom: i < sorted.length - 1 ? `1px solid ${BORDER}` : "none",
+                borderLeft: `3px solid ${catColor[e.category]}40`,
+              }}
+            >
+              <span style={{ fontSize: "9px", fontWeight: 700, padding: "2px 7px", borderRadius: "3px", background: `${catColor[e.category]}20`, color: catColor[e.category], textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                {e.category}
+              </span>
+              <span style={{ fontSize: "9px", fontWeight: 700, padding: "2px 7px", borderRadius: "3px", background: `${e.decisionColor}20`, color: e.decisionColor, textAlign: "center" }}>
+                {e.decision}
+              </span>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: "12px", fontWeight: 600, color: FG, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {e.title}
+                </div>
+                {(e.reason || e.detail) && (
+                  <div style={{ fontSize: "10px", color: FG_MUT, marginTop: "2px", lineHeight: 1.4 }}>
+                    {e.reason ? `Reason: ${e.reason}` : e.detail}
+                  </div>
+                )}
+              </div>
+              <span style={{ fontSize: "10px", color: FG_MUT, display: "flex", alignItems: "center", gap: 4 }}>
+                <UserCheck style={{ width: 10, height: 10 }} /> {e.actor}
+              </span>
+              <span style={{ fontSize: "10px", color: FG_MUT, fontVariantNumeric: "tabular-nums", display: "flex", alignItems: "center", gap: 4 }}>
+                <Clock style={{ width: 10, height: 10 }} /> {formatLogTime(e.at)}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Main Page ──────────────────────────────────────────────────────────────────
 
 const TABS = [
@@ -979,6 +1159,7 @@ const TABS = [
   { id: "heatmap", label: "Risk / Opp Heatmap", icon: Activity },
   { id: "impact", label: "Impact Map", icon: Globe },
   { id: "value", label: "Value Ledger", icon: DollarSign },
+  { id: "log", label: "Decision Log", icon: History },
 ] as const;
 
 type TabId = typeof TABS[number]["id"];
@@ -1108,6 +1289,19 @@ export default function EnterpriseStatePage() {
                 Value Ledger — At Risk · Protected · Created
               </div>
               <ValueWidgets />
+            </div>
+          )}
+          {activeTab === "log" && (
+            <div>
+              <div className="px-5 py-3 border-b flex items-center gap-2" style={{ borderColor: BORDER }}>
+                <History className="w-3.5 h-3.5" style={{ color: ACCENT }} />
+                <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--color-fg-muted)" }}>
+                  Decision Log — Audit trail of accept · reject · snooze actions
+                </span>
+              </div>
+              <div className="p-5">
+                <DecisionLogSection />
+              </div>
             </div>
           )}
         </div>
