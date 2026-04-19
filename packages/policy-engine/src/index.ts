@@ -3,6 +3,7 @@ export * from "./evaluator.js";
 export * from "./guardrails.js";
 export * from "./modes.js";
 export * from "./prism-counsel-policies.js";
+export * from "./compiler.js";
 
 export const POLICY_ENGINE_VERSION = "1.1.0" as const;
 

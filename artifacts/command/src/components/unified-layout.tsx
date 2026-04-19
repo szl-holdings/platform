@@ -105,6 +105,7 @@ const OPERATIONS_NAV: NavGroup[] = [
   {
     section: "Alloy — Execution",
     items: [
+      { href: "/operations/alloy/policy-compiler", label: "Policy Compiler", icon: Code },
       { href: "/operations/alloy/canvas", label: "Workflow Canvas", icon: Workflow },
       { href: "/operations/alloy/actions", label: "Action Queue", icon: Activity },
       { href: "/operations/alloy/governance", label: "Covenant Policy", icon: Lock },

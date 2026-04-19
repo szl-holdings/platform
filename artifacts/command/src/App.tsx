@@ -91,6 +91,7 @@ const AlloyAgentHandoffs = lazy(() => import("@lyte/pages/alloy-agent-handoffs")
 const AlloyTrustReceipts = lazy(() => import("@lyte/pages/alloy-trust-receipts"));
 const AlloyIntegrationHealth = lazy(() => import("@lyte/pages/alloy-integration-health"));
 const AlloyGraphCompiler = lazy(() => import("@lyte/pages/alloy-graph-compiler"));
+const AlloyPolicyCompiler = lazy(() => import("@lyte/pages/alloy-policy-compiler"));
 const CognitiveCommandCenter = lazy(() => import("./pages/cognitive/index"));
 const AlloyProofPage = lazy(() => import("./pages/alloy-proof").then(m => ({ default: m.AlloyProofPage })));
 const GovernedCockpitPage = lazy(() => import("./pages/governed-cockpit"));
@@ -341,6 +342,7 @@ function AppShell() {
               <Route path="/operations/alloy/receipts" component={() => <AlloyTrustReceipts />} />
               <Route path="/operations/alloy/integrations" component={() => <AlloyIntegrationHealth />} />
               <Route path="/operations/alloy/compiler" component={() => <AlloyGraphCompiler />} />
+              <Route path="/operations/alloy/policy-compiler" component={() => <AlloyPolicyCompiler />} />
               <Route path="/operations/alloy/replay-lab" component={() => <ReplayLab />} />
               <Route path="/operations/alloy/eval-lab" component={() => <EvalLab />} />
               <Route path="/operations/runs" component={() => <RunConsole />} />
