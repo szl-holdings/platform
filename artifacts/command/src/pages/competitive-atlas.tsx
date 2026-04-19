@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { ExternalLink, TrendingUp, Zap, CheckCircle2, Circle, ChevronDown, ChevronRight, Target, Shield, Scale, Building2, Ship, Brain, BarChart3, Cpu, Star } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { ExternalLink, TrendingUp, Zap, CheckCircle2, Circle, ChevronDown, ChevronRight, Target, Shield, Scale, Building2, Ship, Brain, BarChart3, Cpu, Star, XCircle, Clock, PauseCircle, Download, StickyNote } from "lucide-react";
 
-type AdoptionStatus = "adopted" | "in-progress" | "planned";
+type AdoptionStatus = "adopted" | "in-progress" | "evaluating" | "rejected" | "deferred";
 
 interface Champion {
   name: string;
@@ -560,36 +560,124 @@ function ChampionCard({ champion }: { champion: Champion }) {
 const STATUS_CONFIG: Record<AdoptionStatus, { label: string; color: string; bg: string; border: string; icon: React.ElementType }> = {
   adopted: { label: "Adopted", color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/25", icon: CheckCircle2 },
   "in-progress": { label: "In Progress", color: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/25", icon: Zap },
-  planned: { label: "Planned", color: "text-white/30", bg: "bg-white/5", border: "border-white/10", icon: Circle },
+  evaluating: { label: "Evaluating", color: "text-sky-400", bg: "bg-sky-500/10", border: "border-sky-500/25", icon: Clock },
+  rejected: { label: "Rejected", color: "text-rose-400", bg: "bg-rose-500/10", border: "border-rose-500/25", icon: XCircle },
+  deferred: { label: "Deferred", color: "text-white/40", bg: "bg-white/5", border: "border-white/10", icon: PauseCircle },
 };
 
-function AdoptionRow({ adoption }: { adoption: Adoption }) {
-  const cfg = STATUS_CONFIG[adoption.status];
+const STATUS_OPTIONS: AdoptionStatus[] = ["adopted", "in-progress", "evaluating", "rejected", "deferred"];
+
+const STORAGE_KEY = "competitive-atlas-overrides-v1";
+
+interface IdeaOverride {
+  status?: AdoptionStatus;
+  notes?: string;
+}
+
+type OverridesMap = Record<string, IdeaOverride>;
+
+function loadOverrides(): OverridesMap {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return {};
+    return JSON.parse(raw) as OverridesMap;
+  } catch {
+    return {};
+  }
+}
+
+function saveOverrides(overrides: OverridesMap) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(overrides));
+  } catch {
+    // ignore quota errors
+  }
+}
+
+function ideaKey(laneId: string, idea: string) {
+  return `${laneId}::${idea}`;
+}
+
+interface AdoptionRowProps {
+  laneId: string;
+  adoption: Adoption;
+  effectiveStatus: AdoptionStatus;
+  notes: string;
+  onStatusChange: (status: AdoptionStatus) => void;
+  onNotesChange: (notes: string) => void;
+}
+
+function AdoptionRow({ adoption, effectiveStatus, notes, onStatusChange, onNotesChange }: AdoptionRowProps) {
+  const cfg = STATUS_CONFIG[effectiveStatus];
   const Icon = cfg.icon;
+  const [showNotes, setShowNotes] = useState(notes.length > 0);
+
   return (
-    <div className="flex gap-3 p-3 rounded-lg" style={{ background: "rgba(255,255,255,0.018)", border: "1px solid rgba(255,255,255,0.05)" }}>
-      <div className="flex-shrink-0 mt-0.5">
-        <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full ${cfg.bg} border ${cfg.border}`}>
-          <Icon className={`w-2.5 h-2.5 ${cfg.color}`} />
-          <span className={`text-[9px] font-mono uppercase tracking-wider ${cfg.color}`}>{cfg.label}</span>
+    <div className="flex flex-col gap-2 p-3 rounded-lg" style={{ background: "rgba(255,255,255,0.018)", border: "1px solid rgba(255,255,255,0.05)" }}>
+      <div className="flex gap-3">
+        <div className="flex-shrink-0 mt-0.5">
+          <div className={`relative inline-flex items-center gap-1 px-2 py-0.5 rounded-full ${cfg.bg} border ${cfg.border}`}>
+            <Icon className={`w-2.5 h-2.5 ${cfg.color}`} />
+            <span className={`text-[9px] font-mono uppercase tracking-wider ${cfg.color}`}>{cfg.label}</span>
+            <select
+              value={effectiveStatus}
+              onChange={(e) => onStatusChange(e.target.value as AdoptionStatus)}
+              aria-label={`Status for ${adoption.idea}`}
+              className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+            >
+              {STATUS_OPTIONS.map((s) => (
+                <option key={s} value={s}>
+                  {STATUS_CONFIG[s].label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start justify-between gap-2">
+            <div className="text-xs font-semibold text-white/80">{adoption.idea}</div>
+            <div className="text-[9px] font-mono text-white/20 flex-shrink-0">from {adoption.source}</div>
+          </div>
+          <div className="text-xs text-white/45 mt-1 leading-relaxed">{adoption.ourVersion}</div>
+          <div className="flex items-center justify-between gap-2 mt-1.5">
+            <div className="text-[9px] font-mono text-white/20">{adoption.location}</div>
+            <button
+              onClick={() => setShowNotes((v) => !v)}
+              className="flex items-center gap-1 text-[9px] font-mono uppercase tracking-wider text-white/30 hover:text-white/60 transition-colors"
+            >
+              <StickyNote className="w-2.5 h-2.5" />
+              <span>{notes.length > 0 ? "Note" : showNotes ? "Hide note" : "Add note"}</span>
+            </button>
+          </div>
         </div>
       </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-start justify-between gap-2">
-          <div className="text-xs font-semibold text-white/80">{adoption.idea}</div>
-          <div className="text-[9px] font-mono text-white/20 flex-shrink-0">from {adoption.source}</div>
-        </div>
-        <div className="text-xs text-white/45 mt-1 leading-relaxed">{adoption.ourVersion}</div>
-        <div className="text-[9px] font-mono text-white/20 mt-1.5">{adoption.location}</div>
-      </div>
+      {showNotes && (
+        <textarea
+          value={notes}
+          onChange={(e) => onNotesChange(e.target.value)}
+          placeholder="Operator note — context, blockers, next steps…"
+          rows={2}
+          className="w-full text-xs text-white/75 bg-black/30 border border-white/10 rounded-md px-3 py-2 leading-relaxed focus:outline-none focus:border-white/25 placeholder:text-white/20"
+        />
+      )}
     </div>
   );
 }
 
-function LaneSection({ lane }: { lane: Lane }) {
+interface LaneSectionProps {
+  lane: Lane;
+  overrides: OverridesMap;
+  onStatusChange: (laneId: string, idea: string, status: AdoptionStatus) => void;
+  onNotesChange: (laneId: string, idea: string, notes: string) => void;
+}
+
+function LaneSection({ lane, overrides, onStatusChange, onNotesChange }: LaneSectionProps) {
   const [open, setOpen] = useState(false);
   const Icon = lane.icon;
-  const adoptedCount = lane.stealThis.filter(a => a.status === "adopted").length;
+  const effective = lane.stealThis.map((a) => overrides[ideaKey(lane.id, a.idea)]?.status ?? a.status);
+  const adoptedCount = effective.filter((s) => s === "adopted").length;
 
   return (
     <div className="rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.015)" }}>
@@ -617,8 +705,8 @@ function LaneSection({ lane }: { lane: Lane }) {
         </div>
         <div className="flex items-center gap-3">
           <div className="hidden sm:flex gap-1">
-            {lane.stealThis.map((a, i) => {
-              const cfg = STATUS_CONFIG[a.status];
+            {effective.map((s, i) => {
+              const cfg = STATUS_CONFIG[s];
               const Ic = cfg.icon;
               return <Ic key={i} className={`w-3.5 h-3.5 ${cfg.color}`} />;
             })}
@@ -639,7 +727,21 @@ function LaneSection({ lane }: { lane: Lane }) {
           <div>
             <div className="text-[10px] font-mono uppercase tracking-widest text-white/25 mb-3">Steal This, Make It Ours — Adoption Log</div>
             <div className="space-y-2">
-              {lane.stealThis.map((a, i) => <AdoptionRow key={i} adoption={a} />)}
+              {lane.stealThis.map((a, i) => {
+                const k = ideaKey(lane.id, a.idea);
+                const ov = overrides[k] ?? {};
+                return (
+                  <AdoptionRow
+                    key={i}
+                    laneId={lane.id}
+                    adoption={a}
+                    effectiveStatus={ov.status ?? a.status}
+                    notes={ov.notes ?? ""}
+                    onStatusChange={(s) => onStatusChange(lane.id, a.idea, s)}
+                    onNotesChange={(n) => onNotesChange(lane.id, a.idea, n)}
+                  />
+                );
+              })}
             </div>
           </div>
 
@@ -664,9 +766,113 @@ function LaneSection({ lane }: { lane: Lane }) {
   );
 }
 
+function buildMarkdownExport(overrides: OverridesMap): string {
+  const today = new Date().toISOString().slice(0, 10);
+  const lines: string[] = [];
+  lines.push(`# Competitive Atlas — Adoption Brief`);
+  lines.push(``);
+  lines.push(`Generated ${today} · SZL Holdings Competitive Intelligence`);
+  lines.push(``);
+
+  const allIdeas = LANES.flatMap((l) =>
+    l.stealThis.map((a) => ({
+      laneId: l.id,
+      laneName: l.name,
+      idea: a,
+      effective: overrides[ideaKey(l.id, a.idea)]?.status ?? a.status,
+      notes: overrides[ideaKey(l.id, a.idea)]?.notes ?? "",
+    }))
+  );
+
+  const counts: Record<AdoptionStatus, number> = {
+    adopted: 0, "in-progress": 0, evaluating: 0, rejected: 0, deferred: 0,
+  };
+  for (const i of allIdeas) counts[i.effective]++;
+
+  lines.push(`## Summary`);
+  lines.push(``);
+  lines.push(`- Total ideas: ${allIdeas.length}`);
+  for (const s of STATUS_OPTIONS) {
+    lines.push(`- ${STATUS_CONFIG[s].label}: ${counts[s]}`);
+  }
+  lines.push(``);
+
+  for (const lane of LANES) {
+    lines.push(`## ${lane.name} (${lane.artifact})`);
+    lines.push(``);
+    for (const a of lane.stealThis) {
+      const k = ideaKey(lane.id, a.idea);
+      const ov = overrides[k] ?? {};
+      const status = ov.status ?? a.status;
+      lines.push(`### ${a.idea}`);
+      lines.push(``);
+      lines.push(`- **Status:** ${STATUS_CONFIG[status].label}`);
+      lines.push(`- **Source:** ${a.source}`);
+      lines.push(`- **Our version:** ${a.ourVersion}`);
+      lines.push(`- **Location:** \`${a.location}\``);
+      if (ov.notes && ov.notes.trim().length > 0) {
+        lines.push(`- **Operator note:** ${ov.notes.trim()}`);
+      }
+      lines.push(``);
+    }
+  }
+
+  return lines.join("\n");
+}
+
 export function CompetitiveAtlasPage() {
-  const totalAdopted = LANES.flatMap(l => l.stealThis).filter(a => a.status === "adopted").length;
-  const totalIdeas = LANES.flatMap(l => l.stealThis).length;
+  const [overrides, setOverrides] = useState<OverridesMap>(() => loadOverrides());
+
+  useEffect(() => {
+    saveOverrides(overrides);
+  }, [overrides]);
+
+  const handleStatusChange = (laneId: string, idea: string, status: AdoptionStatus) => {
+    setOverrides((prev) => {
+      const k = ideaKey(laneId, idea);
+      return { ...prev, [k]: { ...prev[k], status } };
+    });
+  };
+
+  const handleNotesChange = (laneId: string, idea: string, notes: string) => {
+    setOverrides((prev) => {
+      const k = ideaKey(laneId, idea);
+      return { ...prev, [k]: { ...prev[k], notes } };
+    });
+  };
+
+  const stats = useMemo(() => {
+    const all = LANES.flatMap((l) =>
+      l.stealThis.map((a) => overrides[ideaKey(l.id, a.idea)]?.status ?? a.status)
+    );
+    const counts: Record<AdoptionStatus, number> = {
+      adopted: 0, "in-progress": 0, evaluating: 0, rejected: 0, deferred: 0,
+    };
+    for (const s of all) counts[s]++;
+    return { total: all.length, counts };
+  }, [overrides]);
+
+  const handleExport = () => {
+    const md = buildMarkdownExport(overrides);
+    const blob = new Blob([md], { type: "text/markdown;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `competitive-atlas-${new Date().toISOString().slice(0, 10)}.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleReset = () => {
+    if (typeof window === "undefined") return;
+    const ok = window.confirm("Reset all operator overrides (status changes and notes) to their defaults?");
+    if (!ok) return;
+    setOverrides({});
+  };
+
+  const overrideCount = Object.keys(overrides).length;
 
   return (
     <div className="min-h-screen p-6 lg:p-8" style={{ background: "#070b12", color: "#c8d8e8" }}>
@@ -677,17 +883,38 @@ export function CompetitiveAtlasPage() {
             <TrendingUp className="w-3 h-3" />
             <span>Internal · Competitive Intelligence</span>
           </div>
-          <h1 className="text-3xl font-bold text-white/95 tracking-tight">Competitive Atlas</h1>
-          <p className="text-sm text-white/45 max-w-2xl leading-relaxed">
-            Per-lane research on global category champions, what they do exceptionally well, what we have adopted and reinterpreted, and what makes each SZL product genuinely one-of-one. Updated April 2026.
-          </p>
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="space-y-2">
+              <h1 className="text-3xl font-bold text-white/95 tracking-tight">Competitive Atlas</h1>
+              <p className="text-sm text-white/45 max-w-2xl leading-relaxed">
+                Per-lane research on global category champions, what they do exceptionally well, what we have adopted and reinterpreted, and what makes each SZL product genuinely one-of-one. Operators can edit each idea's status and add notes — your changes are saved on this device.
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              {overrideCount > 0 && (
+                <button
+                  onClick={handleReset}
+                  className="text-[10px] font-mono uppercase tracking-wider text-white/40 hover:text-white/70 transition-colors px-3 py-2 rounded-md border border-white/10 hover:border-white/25"
+                >
+                  Reset overrides
+                </button>
+              )}
+              <button
+                onClick={handleExport}
+                className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-wider text-white/80 hover:text-white transition-colors px-3 py-2 rounded-md bg-white/10 border border-white/15 hover:bg-white/15"
+              >
+                <Download className="w-3 h-3" />
+                <span>Export brief</span>
+              </button>
+            </div>
+          </div>
         </header>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
             { label: "Lanes Researched", value: LANES.length.toString() },
             { label: "Champions Studied", value: LANES.flatMap(l => l.champions).length.toString() },
-            { label: "Ideas Adopted", value: `${totalAdopted}/${totalIdeas}` },
+            { label: "Ideas Adopted", value: `${stats.counts.adopted}/${stats.total}` },
             { label: "One-of-One Theses", value: LANES.length.toString() },
           ].map(m => (
             <div key={m.label} className="rounded-lg p-4" style={{ background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.06)" }}>
@@ -697,8 +924,30 @@ export function CompetitiveAtlasPage() {
           ))}
         </div>
 
+        <div className="flex flex-wrap gap-2">
+          {STATUS_OPTIONS.map((s) => {
+            const cfg = STATUS_CONFIG[s];
+            const Ic = cfg.icon;
+            return (
+              <div key={s} className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full ${cfg.bg} border ${cfg.border}`}>
+                <Ic className={`w-3 h-3 ${cfg.color}`} />
+                <span className={`text-[10px] font-mono uppercase tracking-wider ${cfg.color}`}>{cfg.label}</span>
+                <span className={`text-[10px] font-mono ${cfg.color} opacity-70`}>{stats.counts[s]}</span>
+              </div>
+            );
+          })}
+        </div>
+
         <div className="space-y-3">
-          {LANES.map(lane => <LaneSection key={lane.id} lane={lane} />)}
+          {LANES.map(lane => (
+            <LaneSection
+              key={lane.id}
+              lane={lane}
+              overrides={overrides}
+              onStatusChange={handleStatusChange}
+              onNotesChange={handleNotesChange}
+            />
+          ))}
         </div>
 
         <footer className="pt-4 border-t border-white/5 flex items-center justify-between">
