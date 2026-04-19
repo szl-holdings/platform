@@ -402,6 +402,28 @@ export function SiteNav() {
                   Admin Command Center
                 </Link>
               )}
+              {isAdminUser && (
+                <Link
+                  href="/admin/pipeline-command"
+                  onClick={() => handleNavClick("Pipeline Command", "/admin/pipeline-command")}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "0.3rem",
+                    fontSize: "0.8125rem",
+                    fontWeight: 500,
+                    color: location.startsWith("/admin/pipeline-command") ? "hsl(38,90%,62%)" : "var(--color-szl-text-secondary)",
+                    textDecoration: "none",
+                    padding: "0.375rem 0.625rem",
+                    borderRadius: "0.375rem",
+                    transition: "color 0.18s ease, background 0.18s ease",
+                  }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "hsl(38,90%,62%)"; (e.currentTarget as HTMLElement).style.background = "hsla(0,0%,100%,0.04)"; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = location.startsWith("/admin/pipeline-command") ? "hsl(38,90%,62%)" : "var(--color-szl-text-secondary)"; (e.currentTarget as HTMLElement).style.background = "transparent"; }}
+                >
+                  Pipeline
+                </Link>
+              )}
               <UserButton />
             </div>
 

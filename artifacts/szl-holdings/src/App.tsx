@@ -83,6 +83,7 @@ const UnifiedSettingsPage = lazy(() => import("@/pages/unified-settings-page"));
 const NotificationsInboxPage = lazy(() => import("@/pages/notifications-inbox"));
 const AdminCommandCenterPage = lazy(() => import("@/pages/admin-command-center"));
 const AdminDesignPartnersPage = lazy(() => import("@/pages/admin-design-partners"));
+const PipelineCommandPage = lazy(() => import("@/pages/pipeline-command"));
 const AdminGrowthCommandPage = lazy(() => import("@/pages/admin-growth-command"));
 const OpsPage = lazy(() => import("@/pages/ops"));
 const AzureTenantOnboardingPage = lazy(() => import("@/pages/azure-tenant-onboarding"));
@@ -1119,6 +1120,9 @@ function App() {
             </Route>
             <Route path="/admin/design-partners">
               <RequireAuth><RequireAdmin><Suspense fallback={<PageLoader />}><AdminDesignPartnersPage /></Suspense></RequireAdmin></RequireAuth>
+            </Route>
+            <Route path="/admin/pipeline-command">
+              <RequireAuth><RequireAdmin><Suspense fallback={<PageLoader />}><PipelineCommandPage /></Suspense></RequireAdmin></RequireAuth>
             </Route>
             <Route path="/admin">
               <RequireAuth><Suspense fallback={<PageLoader />}><AdminPage /></Suspense></RequireAuth>
