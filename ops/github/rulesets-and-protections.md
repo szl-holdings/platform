@@ -2,7 +2,9 @@
 
 Last updated: 2026-04-19
 
-> **Resolved (2026-04-19):** Repository was made **public** to unlock the branch protection API (alternative to the GitHub Team upgrade). Branch protection is now active on both `main` and `master` with all five required status checks. The repo is owned by the `szl-holdings` organization (the earlier `stephenlutar2-hash` reference was incorrect and has been fixed throughout this directory).
+> **Resolved (2026-04-19):** Repository was made **public** to unlock the branch protection API (alternative to the GitHub Team upgrade). Branch protection is now active on both `main` and `master` with all six required status checks. The repo is owned by the `szl-holdings` organization (the earlier `stephenlutar2-hash` reference was incorrect and has been fixed throughout this directory).
+>
+> **Visibility decision (2026-04-19):** Owner explicitly chose to **stay public** rather than upgrade the org to GitHub Team and re-privatize. Rationale, secret/PII sweep evidence, and the reversal path are recorded in [`repo-visibility-decision.md`](./repo-visibility-decision.md).
 
 This document defines the exact branch protection and ruleset configuration required for the repository. It pairs with `/ops/github/manual-click-paths.md` which provides the step-by-step GitHub UI instructions.
 
