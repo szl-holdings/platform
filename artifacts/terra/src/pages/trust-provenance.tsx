@@ -3,6 +3,7 @@ import { PolicyResult } from "@szl-holdings/shared-ui/policy-result";
 import { AdminAuditTrail } from "@szl-holdings/shared-ui/admin-audit-trail";
 import { SimulationCockpit } from "@szl-holdings/shared-ui/simulation-cockpit";
 import { Building2, FileSearch, Shield, Clock, TrendingUp, AlertCircle, Loader2 } from "lucide-react";
+import { PendingAutonomyApprovalsPanel } from "../components/pending-autonomy-approvals";
 import { ProofPanel } from "@szl-holdings/shared-ui/proof-panel";
 import { type ProofPanelData } from "@szl-holdings/shared-ui/proof-panel";
 import { type PolicyDecisionRecord } from "@szl-holdings/shared-ui/policy-result";
@@ -81,7 +82,7 @@ function useApiData<T>(url: string): { data: T | null; loading: boolean; error: 
   return { data, loading, error, refetch: () => setTick(t => t + 1) };
 }
 
-type View = "proofs" | "policy" | "audit" | "simulation";
+type View = "proofs" | "policy" | "audit" | "simulation" | "approvals";
 
 export default function TrustProvenancePage() {
   const [view, setView] = useState<View>("proofs");
@@ -98,6 +99,7 @@ export default function TrustProvenancePage() {
 
   const tabs: Array<{ id: View; label: string }> = [
     { id: "proofs", label: "AI Proof Chains" },
+    { id: "approvals", label: "Pending Approvals" },
     { id: "policy", label: "Policy Governance" },
     { id: "audit", label: "Audit Trail" },
     { id: "simulation", label: "Deal Simulation" },
@@ -151,6 +153,20 @@ export default function TrustProvenancePage() {
           </button>
         ))}
       </div>
+
+      {view === "approvals" && (
+        <PendingAutonomyApprovalsPanel
+          domain="terra"
+          accentColor={ACCENT}
+          accentClasses={{
+            text: "text-amber-300",
+            textMuted: "text-amber-400/60",
+            bg: "bg-amber-500/10",
+            border: "border-amber-500/20",
+            button: "text-amber-300",
+          }}
+        />
+      )}
 
       {view === "proofs" && (
         <div className="space-y-4">
