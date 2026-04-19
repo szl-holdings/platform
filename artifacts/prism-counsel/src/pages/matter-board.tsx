@@ -347,6 +347,57 @@ export default function MatterBoard() {
         <NewMatterModal onClose={() => setShowNewMatter(false)} onCreated={() => setShowNewMatter(false)} />
       )}
 
+      {/* Matter Stage Pipeline Rail — inspired by Clio Matter Stages */}
+      {(() => {
+        const STAGES = [
+          { id: "intake", label: "Intake", statuses: ["pending"] as MatterStatus[] },
+          { id: "active", label: "Active", statuses: ["active"] as MatterStatus[] },
+          { id: "escalated", label: "Escalated", statuses: ["escalated"] as MatterStatus[] },
+          { id: "hold", label: "On Hold", statuses: ["on-hold"] as MatterStatus[] },
+          { id: "closed", label: "Closed", statuses: ["closed"] as MatterStatus[] },
+        ];
+        const totalExp = matters.reduce((s, m) => s + (m.estimatedExposure || 0), 0) || 1;
+        return (
+          <div className="rounded-xl border border-white/5 overflow-hidden" style={{ background: "rgba(255,255,255,0.015)" }}>
+            <div className="flex items-center gap-2 px-4 pt-3 pb-0">
+              <span className="text-[9px] font-mono uppercase tracking-widest" style={{ color: "rgba(167,139,250,0.4)" }}>Matter Lifecycle Pipeline</span>
+              <span className="text-[9px] font-mono text-white/15">· {matters.length} total · {formatCurrency(totalExposure)} aggregate exposure</span>
+            </div>
+            <div className="flex items-stretch gap-0 px-4 py-3 overflow-x-auto">
+              {STAGES.map((stage, i) => {
+                const stageMatters = matters.filter(m => stage.statuses.includes(m.status));
+                const stageExp = stageMatters.reduce((s, m) => s + (m.estimatedExposure || 0), 0);
+                const pct = totalExposure > 0 ? Math.round(stageExp / totalExp * 100) : 0;
+                const isLast = i === STAGES.length - 1;
+                return (
+                  <div key={stage.id} className="flex items-center gap-0 flex-1 min-w-0">
+                    <div
+                      className="flex-1 min-w-0 rounded-lg px-3 py-2.5 cursor-pointer hover:opacity-80 transition-opacity"
+                      style={{ background: stageMatters.length > 0 ? "rgba(167,139,250,0.06)" : "rgba(255,255,255,0.02)", border: "1px solid rgba(167,139,250,0.12)" }}
+                      onClick={() => { setStatusFilter(stage.statuses[0]); }}
+                    >
+                      <div className="text-[9px] font-mono uppercase tracking-wider text-white/30 mb-1">{stage.label}</div>
+                      <div className="text-lg font-bold font-display" style={{ color: stageMatters.length > 0 ? ACCENT : "rgba(255,255,255,0.15)" }}>{stageMatters.length}</div>
+                      <div className="text-[9px] text-white/20 mt-0.5">{stageMatters.length > 0 ? formatCurrency(stageExp) : "—"}</div>
+                      {stageMatters.length > 0 && (
+                        <div className="mt-2 w-full h-0.5 rounded-full bg-white/5 overflow-hidden">
+                          <div className="h-full rounded-full" style={{ width: `${Math.min(100, pct * 3)}%`, background: ACCENT }} />
+                        </div>
+                      )}
+                    </div>
+                    {!isLast && (
+                      <div className="flex-shrink-0 w-5 flex items-center justify-center">
+                        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 2l6 3-6 3" stroke="rgba(167,139,250,0.2)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })()}
+
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
           { label: "Total Matters", value: String(matters.length), sub: `${criticalCount} critical` },

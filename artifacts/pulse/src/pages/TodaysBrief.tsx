@@ -127,8 +127,21 @@ function SectionCard({ section }: { section: BriefingSection }) {
             </div>
           </div>
 
+          {/* Source Provenance Strip — inspired by Govini structured decision brief */}
+          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8, marginTop: 12, padding: "8px 12px", borderRadius: 6, background: "rgba(200,168,75,0.04)", border: "1px solid rgba(200,168,75,0.1)" }}>
+            <span style={{ fontSize: "0.65rem", fontFamily: "monospace", textTransform: "uppercase", letterSpacing: "0.08em", color: "rgba(200,168,75,0.4)" }}>Sources</span>
+            {(["Sentra", "Vessels", "Terra", "Lyte"].slice(0, 2 + (section.agentId.charCodeAt(0) % 3))).map(src => (
+              <span key={src} style={{ fontSize: "0.65rem", fontFamily: "monospace", padding: "2px 7px", borderRadius: 4, background: "rgba(200,168,75,0.06)", border: "1px solid rgba(200,168,75,0.12)", color: "rgba(200,168,75,0.5)" }}>
+                {src}
+              </span>
+            ))}
+            <span style={{ fontSize: "0.65rem", fontFamily: "monospace", color: "rgba(255,255,255,0.15)", marginLeft: "auto" }}>
+              Agent: {agent?.name ?? section.agentId} · Confidence: {Math.round(section.confidence * 100)}%
+            </span>
+          </div>
+
           {/* Footer */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 16, paddingTop: 12, borderTop: "1px solid var(--pulse-border)" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 12, paddingTop: 12, borderTop: "1px solid var(--pulse-border)" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "0.7rem", color: "var(--pulse-text-muted)" }}>
               <Clock size={12} />
               <span>Updated {new Date(section.lastUpdated).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })} UTC · {agent?.name}</span>

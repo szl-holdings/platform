@@ -872,6 +872,27 @@ export default function FleetDashboard() {
             </div>
           )}
 
+          {/* Intelligence Source Fusion Strip — inspired by Windward EO/SAR/RF GEOINT fusion */}
+          <div className="mx-3 mt-2 mb-1 rounded-lg px-3 py-2 flex items-center gap-2 overflow-x-auto flex-wrap" style={{ background: "rgba(14,165,233,0.03)", border: "1px solid rgba(14,165,233,0.1)" }}>
+            <span className="text-[8px] font-mono uppercase tracking-widest flex-shrink-0" style={{ color: "rgba(14,165,233,0.35)" }}>Intelligence Sources</span>
+            {[
+              { label: "AIS Live", active: true, color: "#22c55e" },
+              { label: "SAR", active: roster.some(v => v.status === "dark"), color: "#0ea5e9" },
+              { label: "RF GEOINT", active: roster.some(v => v.status === "detained"), color: "#8b5cf6" },
+              { label: "Port State", active: true, color: "#0ea5e9" },
+              { label: "Sanctions DB", active: true, color: "#f97316" },
+              { label: "OFAC/EU/UN", active: true, color: "#f97316" },
+            ].map(src => (
+              <div key={src.label} className="flex items-center gap-1 px-2 py-0.5 rounded flex-shrink-0" style={{ background: src.active ? `${src.color}10` : "rgba(255,255,255,0.02)", border: `1px solid ${src.active ? `${src.color}25` : "rgba(255,255,255,0.05)"}` }}>
+                <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: src.active ? src.color : "rgba(255,255,255,0.1)" }} />
+                <span className="text-[9px] font-mono" style={{ color: src.active ? `${src.color}cc` : "rgba(255,255,255,0.15)" }}>{src.label}</span>
+              </div>
+            ))}
+            <span className="text-[8px] font-mono ml-auto flex-shrink-0" style={{ color: "rgba(14,165,233,0.2)" }}>
+              Multi-source · Fused · {roster.length} vessels tracked
+            </span>
+          </div>
+
           <div className="flex-1 relative overflow-hidden">
             {roster.length > 0 ? (
               <FleetMap vessels={roster} onVesselClick={setSelectedVessel} selectedVesselId={selectedVessel?.id} />

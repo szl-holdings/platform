@@ -17,7 +17,7 @@ import { useEcosystemData } from "../hooks/use-ecosystem-data";
 import { MorningBriefingCard } from "@szl-holdings/shared-ui/morning-briefing";
 import { ActivationBanner, useActivationState } from "@szl-holdings/shared-ui/onboarding";
 import type { ActivationStep } from "@szl-holdings/shared-ui/onboarding";
-import { GitBranch, Zap, Map } from "lucide-react";
+import { GitBranch, Zap, Map, TrendingUp } from "lucide-react";
 import { EcosystemAppsGrid } from "../components/ecosystem-apps-grid";
 import { AtlasKpiSection } from "../components/atlas-kpi-section";
 import { DemoLaunchpadPanel } from "../components/demo-launchpad-panel";
@@ -42,6 +42,14 @@ function SectionNav() {
       >
         <Zap className="w-3 h-3" />
         Signal Chains
+      </Link>
+      <Link
+        href={`${BASE}/competitive-atlas`}
+        className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg transition-opacity hover:opacity-80"
+        style={{ backgroundColor: "color-mix(in srgb, #8b7ac8 8%, var(--color-bg-elevated))", border: "1px solid color-mix(in srgb, #8b7ac8 25%, transparent)", color: "#a78bfa" }}
+      >
+        <TrendingUp className="w-3 h-3" />
+        Competitive Atlas
       </Link>
     </nav>
   );

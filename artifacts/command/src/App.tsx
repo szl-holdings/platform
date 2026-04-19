@@ -150,6 +150,7 @@ const LivingTopology = lazy(() => import("@lyte/pages/living-topology"));
 const GovernedDecisionLoop = lazy(() => import("@lyte/pages/governed-decision-loop"));
 const CognitiveRuntime = lazy(() => import("@lyte/pages/cognitive-runtime"));
 const AIQualityDashboard = lazy(() => import("@lyte/pages/ai-quality-dashboard"));
+const CompetitiveAtlasPage = lazy(() => import("./pages/competitive-atlas").then(m => ({ default: m.CompetitiveAtlasPage })));
 
 const PrismAtlasExecute = lazy(() => import("./operations/pages/atlas-execute"));
 const ImperiumAtlasExecute = lazy(() => import("./infrastructure/pages/atlas-execute"));
@@ -355,6 +356,8 @@ function AppShell() {
               <Route path="/governed-cockpit" component={() => <GovernedCockpitPage />} />
               <Route path="/demo" component={() => <DemoLaunchpadPage />} />
               <Route path="/demo-launchpad" component={() => <DemoLaunchpadPage />} />
+              <Route path="/competitive-atlas" component={() => <CompetitiveAtlasPage />} />
+              <Route path="/strategy/competitive-atlas" component={() => <CompetitiveAtlasPage />} />
 
               <Route path="/cognitive/memory" component={() => <CognitiveMemory />} />
               <Route path="/cognitive/planner" component={() => <CognitivePlanner />} />

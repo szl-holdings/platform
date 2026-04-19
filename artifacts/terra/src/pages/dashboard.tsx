@@ -252,6 +252,59 @@ export default function TerraIntelligence() {
         </div>
       </div>
 
+      {/* Opportunity Score Ranking — inspired by CoStar ranked property results */}
+      {OPPORTUNITY_QUEUE.length > 0 && (() => {
+        const scored = OPPORTUNITY_QUEUE.slice(0, 5).map((o, i) => {
+          const confidenceScore = o.confidence;
+          const urgencyScore = o.flag === "urgent" ? 30 : o.flag === "active" ? 18 : 8;
+          const valueScore = (() => {
+            const v = parseFloat(o.value?.replace(/[$M]/g, "") || "0");
+            return Math.min(30, Math.round(v * 3));
+          })();
+          const total = Math.min(100, Math.round(confidenceScore * 0.4 + urgencyScore + valueScore));
+          return { ...o, opportunityScore: total, rank: i + 1 };
+        }).sort((a, b) => b.opportunityScore - a.opportunityScore);
+
+        return (
+          <div className="rounded-xl border overflow-hidden" style={{ borderColor: DS.border, background: DS.surface }}>
+            <div className="flex items-center justify-between px-4 py-2.5 border-b" style={{ borderColor: DS.borderMuted }}>
+              <div className="flex items-center gap-2">
+                <TrendingUp className="w-3.5 h-3.5" style={{ color: DS.accent.gold }} />
+                <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: `${DS.accent.gold}99` }}>Opportunity Score Ranking</span>
+                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ background: `${DS.accent.gold}10`, border: `1px solid ${DS.accent.gold}20`, color: DS.accent.gold }}>AI-scored</span>
+              </div>
+              <Link href="/pipeline" className="text-[9px] font-mono" style={{ color: DS.text.muted }}>Full pipeline →</Link>
+            </div>
+            <div className="divide-y" style={{ borderColor: DS.borderMuted }}>
+              {scored.map((o) => {
+                const scoreColor = o.opportunityScore >= 70 ? DS.accent.green : o.opportunityScore >= 45 ? DS.accent.gold : DS.text.muted;
+                return (
+                  <div key={o.address} className="flex items-center gap-3 px-4 py-2.5">
+                    <div className="text-[10px] font-mono font-bold w-4 text-right flex-shrink-0" style={{ color: DS.text.muted }}>#{o.rank}</div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[11px] font-semibold truncate" style={{ color: "rgba(255,255,255,0.8)" }}>{o.address}</div>
+                      <div className="text-[9px] font-mono" style={{ color: DS.text.muted }}>{o.type} · {o.stage} · {o.value}</div>
+                    </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <div className="w-16 h-1 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
+                        <div className="h-full rounded-full" style={{ width: `${o.opportunityScore}%`, background: scoreColor }} />
+                      </div>
+                      <div className="text-[11px] font-bold font-mono w-8 text-right" style={{ color: scoreColor }}>{o.opportunityScore}</div>
+                    </div>
+                    <div className="text-[8px] font-mono px-1.5 py-0.5 rounded flex-shrink-0" style={{ background: o.flag === "urgent" ? `${DS.accent.red}10` : o.flag === "active" ? `${DS.accent.gold}10` : "rgba(255,255,255,0.04)", color: o.flag === "urgent" ? DS.accent.red : o.flag === "active" ? DS.accent.gold : DS.text.muted, border: `1px solid ${o.flag === "urgent" ? DS.accent.red : o.flag === "active" ? DS.accent.gold : "rgba(255,255,255,0.05)"}20` }}>
+                      {o.nextAction}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="px-4 py-2 border-t" style={{ borderColor: DS.borderMuted }}>
+              <div className="text-[8px] font-mono" style={{ color: DS.text.muted }}>Score = distress signal weight (40%) + urgency flag (30%) + deal value (30%) · Updated on each data refresh</div>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Doctrine Modules */}
       <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
         {DOCTRINE_MODULES.map((mod) => (

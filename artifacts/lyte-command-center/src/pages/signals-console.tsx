@@ -224,6 +224,62 @@ function SignalCard({ sig, expanded, onToggle }: { sig: SignalItem; expanded: bo
   );
 }
 
+const NL_EXAMPLES = [
+  "show revenue risk signals escalated this week",
+  "which signals have ownership gaps over 30 days?",
+  "list policy violations with critical severity",
+  "workflows with budget leakage above $500K",
+];
+
+function NLSignalQueryBar({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [active, setActive] = useState(false);
+  return (
+    <div className="rounded-xl p-4 space-y-3" style={{ background: "rgba(245,158,11,0.04)", border: "1px solid rgba(245,158,11,0.12)" }}>
+      <div className="flex items-center gap-2">
+        <Search className="w-3.5 h-3.5 text-amber-400/50" />
+        <span className="text-[9px] font-mono uppercase tracking-widest text-amber-400/40">Signal Intelligence Query</span>
+        <span className="text-[8px] font-mono px-1.5 py-0.5 rounded" style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.15)", color: "#fbbf24" }}>NL-powered</span>
+      </div>
+      <div className="flex gap-2">
+        <input
+          type="text"
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          onFocus={() => setActive(true)}
+          onBlur={() => setActive(false)}
+          placeholder="Ask in plain English — e.g. 'show revenue risk signals escalated this week'"
+          className="flex-1 bg-transparent text-xs text-amber-100/70 placeholder:text-amber-400/20 outline-none"
+          style={{
+            background: "rgba(245,158,11,0.025)",
+            border: `1px solid ${active ? "rgba(245,158,11,0.3)" : "rgba(245,158,11,0.08)"}`,
+            borderRadius: 8,
+            padding: "7px 12px",
+            transition: "border-color 0.15s",
+          }}
+        />
+        <button
+          className="px-3 py-2 rounded-lg text-[9px] font-mono font-bold uppercase tracking-wider transition-colors"
+          style={{ background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.2)", color: "#fbbf24" }}
+        >
+          Query
+        </button>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {NL_EXAMPLES.map(ex => (
+          <button
+            key={ex}
+            onClick={() => onChange(ex)}
+            className="text-[8px] font-mono text-amber-400/30 hover:text-amber-300 transition-colors px-2 py-1 rounded"
+            style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)" }}
+          >
+            {ex}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function SignalsConsolePage() {
   const [search, setSearch] = useState("");
   const [filterSeverity, setFilterSeverity] = useState<string>("all");
@@ -265,6 +321,8 @@ export default function SignalsConsolePage() {
           </div>
         </div>
       </div>
+
+      <NLSignalQueryBar value={search} onChange={setSearch} />
 
       <div className="flex flex-wrap gap-2">
         {(["all", "critical", "high", "medium", "low"] as const).map(sev => {
