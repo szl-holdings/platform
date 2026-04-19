@@ -11,8 +11,129 @@ import {
   parsePagination,
 } from "../lib/api-response";
 import { logger } from "../lib/logger";
+import {
+  POLICY_TIER_DESCRIPTIONS,
+  TIER_RISK_LEVEL,
+  TIER_NUMBER,
+  TIER_CONTROLS,
+  PolicyTierSchema,
+  type GuardianRule,
+  type PolicyTier,
+} from "@workspace/guardian";
+import { getGuardianEngine, syncGuardianPolicies } from "../lib/guardian-engine";
 
 const router: IRouter = Router();
+
+interface MatchedRuleDetails {
+  id: string;
+  name: string;
+  description?: string;
+  tier: string;
+  action: string;
+  conditions: GuardianRule["conditions"];
+  priority: number;
+  enabled: boolean;
+  owner?: string;
+  tags: string[];
+  source: "guardian-engine" | "unknown";
+}
+
+interface TierDetails {
+  tier: PolicyTier;
+  tierNumber: number;
+  description: string;
+  riskLevel: number;
+  approvalGate: "none" | "single" | "dual";
+  requiresRollback: boolean;
+  redactPII: boolean;
+  allowExternalComms: boolean;
+}
+
+function lookupTierDetails(tier: unknown): TierDetails | null {
+  if (typeof tier !== "string") return null;
+  const parsed = PolicyTierSchema.safeParse(tier);
+  if (!parsed.success) return null;
+  const t = parsed.data;
+  const controls = TIER_CONTROLS[t];
+  return {
+    tier: t,
+    tierNumber: TIER_NUMBER[t],
+    description: POLICY_TIER_DESCRIPTIONS[t],
+    riskLevel: TIER_RISK_LEVEL[t],
+    approvalGate: controls.approvalGate,
+    requiresRollback: controls.requiresRollback,
+    redactPII: controls.redactPII,
+    allowExternalComms: controls.allowExternalComms,
+  };
+}
+
+function lookupMatchedRule(matchedRuleId: unknown): MatchedRuleDetails | null {
+  if (typeof matchedRuleId !== "string" || matchedRuleId.length === 0) return null;
+  const rule = getGuardianEngine().getRules().find((r: GuardianRule) => r.id === matchedRuleId);
+  if (!rule) return null;
+  return {
+    id: rule.id,
+    name: rule.name,
+    description: rule.description,
+    tier: rule.tier,
+    action: rule.action,
+    conditions: rule.conditions ?? [],
+    priority: rule.priority,
+    enabled: rule.enabled,
+    owner: rule.owner,
+    tags: rule.tags ?? [],
+    source: "guardian-engine",
+  };
+}
+
+interface ApprovalLike {
+  payload?: Record<string, unknown> | null;
+  [k: string]: unknown;
+}
+
+/**
+ * Hydrate an approval row with the live Guardian rule + tier metadata so
+ * operators can see the full policy context inline. The hydrated values
+ * always reflect the current rule registry — they are never persisted onto
+ * the approval row, so policy edits are picked up immediately.
+ */
+function hydrateApproval<T extends ApprovalLike>(approval: T): T {
+  const payload = (approval.payload ?? {}) as Record<string, unknown>;
+  const matchedRuleDetails = lookupMatchedRule(payload["matchedRuleId"]);
+  const tierDetails =
+    lookupTierDetails(payload["tier"]) ??
+    (matchedRuleDetails ? lookupTierDetails(matchedRuleDetails.tier) : null);
+
+  if (!matchedRuleDetails && !tierDetails) return approval;
+
+  return {
+    ...approval,
+    payload: {
+      ...payload,
+      ...(matchedRuleDetails ? { matchedRuleDetails } : {}),
+      ...(tierDetails ? { tierDetails } : {}),
+    },
+  };
+}
+
+async function hydrateApprovals<T extends ApprovalLike>(rows: T[]): Promise<T[]> {
+  if (rows.length === 0) return rows;
+  // Refresh the engine if any approval references a rule we don't recognise.
+  const engine = getGuardianEngine();
+  const knownIds = new Set(engine.getRules().map((r: GuardianRule) => r.id));
+  const needsSync = rows.some((row) => {
+    const id = (row.payload as Record<string, unknown> | null)?.["matchedRuleId"];
+    return typeof id === "string" && id.length > 0 && !knownIds.has(id);
+  });
+  if (needsSync) {
+    try {
+      await syncGuardianPolicies(false);
+    } catch (err) {
+      logger.debug({ err }, "approvals.hydrate.sync-skipped");
+    }
+  }
+  return rows.map((row) => hydrateApproval(row));
+}
 
 const ADMIN_ROLES = new Set(["super_admin", "admin"]);
 
@@ -129,7 +250,8 @@ router.get("/approvals", authMiddleware(), requireRole("super_admin", "admin", "
             })
           : await listPendingApprovals({ orgId, limit });
 
-    sendSuccess(res, results, 200, { page, limit, total: results.length });
+    const hydrated = await hydrateApprovals(results);
+    sendSuccess(res, hydrated, 200, { page, limit, total: hydrated.length });
   } catch (err) {
     handleRouteError(res, err, "Failed to list approvals");
   }
@@ -147,7 +269,8 @@ router.get("/approvals/:id", authMiddleware(), async (req: Request, res: Respons
     const approval = await getApprovalById(id);
     if (!approval) { sendNotFound(res, "Approval"); return; }
 
-    sendSuccess(res, approval);
+    const [hydrated] = await hydrateApprovals([approval as ApprovalLike]);
+    sendSuccess(res, hydrated);
   } catch (err) {
     handleRouteError(res, err, "Failed to get approval");
   }

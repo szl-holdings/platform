@@ -26,6 +26,37 @@ type ApprovalStatus =
 
 type ApprovalPriority = "low" | "medium" | "high" | "critical";
 
+interface RuleCondition {
+  field: string;
+  operator: string;
+  value: unknown;
+}
+
+interface MatchedRuleDetails {
+  id: string;
+  name: string;
+  description?: string;
+  tier: string;
+  action: string;
+  conditions: RuleCondition[];
+  priority: number;
+  enabled: boolean;
+  owner?: string;
+  tags: string[];
+  source: "guardian-engine" | "unknown";
+}
+
+interface TierDetails {
+  tier: string;
+  tierNumber: number;
+  description: string;
+  riskLevel: number;
+  approvalGate: "none" | "single" | "dual";
+  requiresRollback: boolean;
+  redactPII: boolean;
+  allowExternalComms: boolean;
+}
+
 interface ApprovalPayload {
   runId?: string;
   workflowId?: string;
@@ -37,6 +68,8 @@ interface ApprovalPayload {
   tier?: string | null;
   requiredApprovers?: string[];
   context?: Record<string, unknown>;
+  matchedRuleDetails?: MatchedRuleDetails | null;
+  tierDetails?: TierDetails | null;
   [k: string]: unknown;
 }
 
@@ -127,6 +160,8 @@ function ApprovalDetail({ approval }: { approval: ApprovalRequest }) {
 
   const payload = approval.payload ?? {};
   const ctx = (payload.context ?? {}) as Record<string, unknown>;
+  const rule = payload.matchedRuleDetails ?? null;
+  const tier = payload.tierDetails ?? null;
 
   return (
     <div className="border-t px-4 pb-4 pt-3 space-y-3" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
@@ -141,11 +176,14 @@ function ApprovalDetail({ approval }: { approval: ApprovalRequest }) {
         </div>
       )}
 
+      {rule && <MatchedRuleCard rule={rule} />}
+      {tier && <TierCard tier={tier} />}
+
       <div className="grid grid-cols-2 gap-2 text-[10px]">
-        {payload.matchedRuleId && (
+        {payload.matchedRuleId && !rule && (
           <Field label="Matched Rule" value={payload.matchedRuleId} mono />
         )}
-        {payload.tier && <Field label="Policy Tier" value={payload.tier} mono />}
+        {payload.tier && !tier && <Field label="Policy Tier" value={payload.tier} mono />}
         {payload.runId && <Field label="Run ID" value={payload.runId} mono />}
         {payload.workflowId && <Field label="Workflow" value={payload.workflowId} mono />}
         {payload.stepId && <Field label="Step" value={payload.stepId} mono />}
@@ -219,6 +257,157 @@ function ApprovalDetail({ approval }: { approval: ApprovalRequest }) {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function tierRiskColor(level: number): string {
+  if (level >= 5) return "#ef4444";
+  if (level >= 4) return "#f59e0b";
+  if (level >= 3) return "#8b7ac8";
+  if (level >= 2) return "#4B8BDB";
+  return "#10b981";
+}
+
+function MatchedRuleCard({ rule }: { rule: MatchedRuleDetails }) {
+  return (
+    <div
+      className="rounded-lg p-3 space-y-2"
+      style={{ background: "rgba(139,122,200,0.05)", border: "1px solid rgba(139,122,200,0.18)" }}
+    >
+      <div className="flex items-center gap-2 flex-wrap">
+        <Shield className="w-3 h-3" style={{ color: "rgba(139,122,200,0.85)" }} />
+        <span
+          className="text-[9px] font-bold uppercase tracking-widest"
+          style={{ color: "rgba(139,122,200,0.85)" }}
+        >
+          Guardian Rule
+        </span>
+        <span className="text-[11px] font-semibold text-white">{rule.name}</span>
+        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ color: "rgba(255,255,255,0.5)", background: "rgba(255,255,255,0.04)" }}>
+          {rule.id}
+        </span>
+        <span
+          className="text-[9px] font-mono px-1.5 py-0.5 rounded ml-auto"
+          style={{ color: "#4B8BDB", background: "rgba(75,139,219,0.08)", border: "1px solid rgba(75,139,219,0.18)" }}
+          title={`Engine action when this rule matches: ${rule.action}`}
+        >
+          {rule.action}
+        </span>
+      </div>
+
+      {rule.description && (
+        <div className="text-[11px] leading-snug" style={{ color: "rgba(255,255,255,0.7)" }}>
+          {rule.description}
+        </div>
+      )}
+
+      {rule.conditions.length > 0 && (
+        <div>
+          <div className="text-[9px] font-bold uppercase tracking-widest mb-1" style={{ color: "rgba(255,255,255,0.35)" }}>
+            Conditions ({rule.conditions.length})
+          </div>
+          <div className="space-y-1">
+            {rule.conditions.map((c, i) => (
+              <div
+                key={`${c.field}-${i}`}
+                className="text-[10px] font-mono px-2 py-1 rounded flex items-center gap-2 flex-wrap"
+                style={{ background: "rgba(0,0,0,0.25)", color: "rgba(255,255,255,0.65)", border: "1px solid rgba(255,255,255,0.04)" }}
+              >
+                <span style={{ color: "#8b7ac8" }}>{c.field}</span>
+                <span style={{ color: "rgba(255,255,255,0.4)" }}>{c.operator}</span>
+                <span style={{ color: "rgba(255,255,255,0.75)" }}>
+                  {typeof c.value === "string" ? c.value : JSON.stringify(c.value)}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="flex items-center gap-2 flex-wrap text-[9px]" style={{ color: "rgba(255,255,255,0.4)" }}>
+        <span>priority {rule.priority}</span>
+        {rule.owner && <span>· owner {rule.owner}</span>}
+        {!rule.enabled && (
+          <span style={{ color: "#ef4444" }}>· disabled</span>
+        )}
+        {rule.tags.length > 0 && (
+          <span className="flex items-center gap-1 flex-wrap">
+            ·
+            {rule.tags.map((t) => (
+              <span
+                key={t}
+                className="px-1 py-0.5 rounded font-mono"
+                style={{ background: "rgba(255,255,255,0.04)", color: "rgba(255,255,255,0.55)" }}
+              >
+                {t}
+              </span>
+            ))}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function TierCard({ tier }: { tier: TierDetails }) {
+  const color = tierRiskColor(tier.riskLevel);
+  const gateLabel =
+    tier.approvalGate === "dual"
+      ? "Dual approval required"
+      : tier.approvalGate === "single"
+        ? "Single approval required"
+        : "No approval gate";
+  const summary = `${tier.description}\n\nApproval gate: ${gateLabel}\nRisk level: ${tier.riskLevel} / 6\nRollback required: ${tier.requiresRollback ? "yes" : "no"}\nPII redacted: ${tier.redactPII ? "yes" : "no"}\nExternal comms: ${tier.allowExternalComms ? "allowed" : "blocked"}`;
+  return (
+    <div
+      className="rounded-lg p-3 space-y-2"
+      style={{ background: `${color}10`, border: `1px solid ${color}30` }}
+      title={summary}
+    >
+      <div className="flex items-center gap-2 flex-wrap">
+        <span
+          className="text-[9px] font-bold uppercase tracking-widest"
+          style={{ color }}
+        >
+          Policy Tier
+        </span>
+        <span className="text-[11px] font-mono font-semibold" style={{ color: "rgba(255,255,255,0.9)" }}>
+          T{tier.tierNumber} · {tier.tier}
+        </span>
+        <span
+          className="text-[9px] font-mono px-1.5 py-0.5 rounded ml-auto"
+          style={{ color, background: `${color}15`, border: `1px solid ${color}30` }}
+        >
+          risk {tier.riskLevel}/6
+        </span>
+      </div>
+      <div className="text-[11px] leading-snug" style={{ color: "rgba(255,255,255,0.7)" }}>
+        {tier.description}
+      </div>
+      <div className="flex items-center gap-2 flex-wrap text-[9px]" style={{ color: "rgba(255,255,255,0.45)" }}>
+        <span
+          className="px-1.5 py-0.5 rounded font-mono"
+          style={{ background: "rgba(255,255,255,0.04)", color: "rgba(255,255,255,0.6)" }}
+        >
+          {gateLabel}
+        </span>
+        {tier.requiresRollback && (
+          <span className="px-1.5 py-0.5 rounded font-mono" style={{ background: "rgba(245,158,11,0.08)", color: "#f59e0b" }}>
+            rollback required
+          </span>
+        )}
+        {tier.redactPII && (
+          <span className="px-1.5 py-0.5 rounded font-mono" style={{ background: "rgba(75,139,219,0.08)", color: "#4B8BDB" }}>
+            PII redacted
+          </span>
+        )}
+        {!tier.allowExternalComms && (
+          <span className="px-1.5 py-0.5 rounded font-mono" style={{ background: "rgba(139,122,200,0.08)", color: "#8b7ac8" }}>
+            no external comms
+          </span>
+        )}
+      </div>
     </div>
   );
 }
