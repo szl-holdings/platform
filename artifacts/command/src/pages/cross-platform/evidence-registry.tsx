@@ -39,6 +39,12 @@ interface EvidenceNode {
   ref: string;
   summary: string;
   entityId: string;
+  /**
+   * Authoritative owning product for the entity, provided by the API. This is
+   * the originating product (the earliest trace that recorded the entity).
+   * UI prefers this over the local string-prefix heuristic.
+   */
+  entityOwner?: string;
   tags: string[];
   capturedAt: string;
   traceId: string;
@@ -180,7 +186,7 @@ export function EvidenceRegistryPage() {
                   <div className="flex items-center gap-2 flex-wrap mb-0.5">
                     <span className="text-[10px] font-mono font-bold" style={{ color: "#8b7ac8" }}>{node.ref}</span>
                     {(() => {
-                      const owner = inferProductForEntity(node.entityId, [node.product]);
+                      const owner = node.entityOwner ?? inferProductForEntity(node.entityId, [node.product]);
                       const entityUrl = productEntityUrl(owner, node.entityId);
                       const ownerColor = PRODUCT_COLORS[owner] ?? "#8b7ac8";
                       if (!entityUrl) {

@@ -124,6 +124,32 @@ function parseTimeWindow(query: Record<string, unknown>): { after?: string; befo
   return { after, before };
 }
 
+/**
+ * Compute the authoritative owning product for each entity across the given
+ * trace set. "Owner" = the product domain of the earliest trace that recorded
+ * the entity (the originating product). Used by both correlations and evidence
+ * endpoints so the UI does not need to guess via string-prefix heuristics.
+ *
+ * Only domains in PRODUCTS contribute. Traces with non-product domains or no
+ * domain are skipped when assigning ownership.
+ */
+function buildEntityOwnerMap(traces: TraceRecord[]): Map<string, Product> {
+  const owners = new Map<string, Product>();
+  const sorted = [...traces].sort(
+    (a, b) => new Date(a.startedAt).getTime() - new Date(b.startedAt).getTime(),
+  );
+  const productSet = new Set<string>(PRODUCTS);
+  for (const t of sorted) {
+    const dom = domainFromTrace(t.metadata);
+    if (!dom || !productSet.has(dom)) continue;
+    const entityIds = defaultQueryEngine.getEntitiesForTrace(t.traceId);
+    for (const eid of entityIds) {
+      if (!owners.has(eid)) owners.set(eid, dom as Product);
+    }
+  }
+  return owners;
+}
+
 // ────────────────────────────────────────────────────────────────────────────
 // Cross-platform correlation alert emission
 //
@@ -341,6 +367,12 @@ router.get(
         }
       }
 
+      // Authoritative entity → owning product map. The trace store knows which
+      // trace recorded each entity; the owner is the originating product (the
+      // earliest trace's domain). The UI consumes this so it does not need to
+      // guess via string-prefix heuristics.
+      const entityOwnerMap = buildEntityOwnerMap(allTraces);
+
       const correlations: Array<{
         correlationId: string;
         rule: string;
@@ -348,6 +380,7 @@ router.get(
         description: string;
         products: string[];
         entityIds: string[];
+        entityOwners: Record<string, string>;
         traceRefs: Array<{ traceId: string; domain: string; drillUrl: string }>;
         strength: number;
         outcome: string;
@@ -391,6 +424,9 @@ router.get(
             `or counterparty across the portfolio.`,
           products,
           entityIds: [eid],
+          // Only emit an owner when authoritatively known from the trace
+          // store. UI falls back to its local heuristic when omitted.
+          entityOwners: entityOwnerMap.has(eid) ? { [eid]: entityOwnerMap.get(eid)! } : {},
           traceRefs,
           strength: Math.min(0.6 + (domainSet.size - 2) * 0.12 + (hasBlock ? 0.1 : 0), 0.98),
           outcome: hasBlock ? "escalated" : hasError ? "under-review" : "informational",
@@ -463,6 +499,7 @@ router.get(
             `across product boundaries.`,
           products,
           entityIds: [],
+          entityOwners: {},
           traceRefs: pairTraces.map((pt) => ({
             ...pt,
             drillUrl: `${PRODUCT_META[pt.domain as Product]?.drillBase ?? "/"}?traceId=${pt.traceId}`,
@@ -564,6 +601,9 @@ router.get(
 
       const traces = filterByOrg(defaultQueryEngine.query(traceFilter).traces, orgSlug);
 
+      // Authoritative entity → owning product map (originating product).
+      const entityOwnerMap = buildEntityOwnerMap(traces);
+
       const nodes: Array<{
         evidenceId: string;
         product: string;
@@ -571,6 +611,9 @@ router.get(
         ref: string;
         summary: string;
         entityId: string;
+        // Optional — only populated when authoritatively known from the trace
+        // store. UI falls back to its local heuristic when absent.
+        entityOwner?: Product;
         tags: string[];
         capturedAt: string;
         traceId: string;
@@ -583,6 +626,7 @@ router.get(
         const drillBase = prodMeta?.drillBase ?? "/";
         const entityIds = defaultQueryEngine.getEntitiesForTrace(t.traceId);
         const primaryEntity = entityIds[0] ?? t.agentId ?? t.traceId;
+        const primaryEntityOwner = entityOwnerMap.get(primaryEntity);
 
         // Guardrail results → policy-decision evidence nodes
         for (const g of t.guardrailResults) {
@@ -593,6 +637,7 @@ router.get(
             ref: g.guardId,
             summary: `[${dom}] Guardian ${g.tier} ${g.outcome}: ${g.reason ?? "no reason"}`,
             entityId: primaryEntity,
+            entityOwner: primaryEntityOwner,
             tags: ["guardrail", g.outcome, g.tier, dom],
             capturedAt: t.startedAt,
             traceId: t.traceId,
@@ -609,6 +654,7 @@ router.get(
             ref: e.code,
             summary: `[${dom}] Error ${e.code}: ${e.message}`,
             entityId: primaryEntity,
+            entityOwner: primaryEntityOwner,
             tags: ["error", e.code, dom],
             capturedAt: e.timestamp,
             traceId: t.traceId,
@@ -625,6 +671,7 @@ router.get(
             ref: v.verifierId,
             summary: `[${dom}] Verifier ${v.verifierId} at step "${v.step}": ${v.outcome}${v.reason ? ` — ${v.reason}` : ""}`,
             entityId: primaryEntity,
+            entityOwner: primaryEntityOwner,
             tags: ["verifier", v.outcome, dom],
             capturedAt: v.timestamp,
             traceId: t.traceId,
@@ -643,6 +690,7 @@ router.get(
               `[${dom}] Run ${t.status} — agent ${t.agentId ?? "unknown"}, ` +
               `${t.latencyMs ?? 0}ms, ${t.totalTokens ?? 0} tokens`,
             entityId: primaryEntity,
+            entityOwner: primaryEntityOwner,
             tags: ["run", t.status, dom, ...(t.agentId ? [t.agentId] : [])],
             capturedAt: t.startedAt,
             traceId: t.traceId,

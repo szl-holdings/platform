@@ -49,6 +49,12 @@ interface Correlation {
   description: string;
   products: string[];
   entityIds: string[];
+  /**
+   * Authoritative entity → owning product map provided by the API. The owner
+   * is the originating product (the earliest trace that recorded the entity).
+   * UI prefers this over the local string-prefix heuristic.
+   */
+  entityOwners?: Record<string, string>;
   traceRefs: TraceRef[];
   strength: number;
   outcome: string;
@@ -229,7 +235,8 @@ export function SignalCorrelationPage() {
                             <div className="text-[9px] uppercase tracking-widest font-mono mb-2" style={{ color: "rgba(255,255,255,0.2)" }}>Shared Entities</div>
                             <div className="flex flex-wrap gap-1.5 mb-3">
                               {c.entityIds.map((e) => {
-                                const owner = inferProductForEntity(e, c.products);
+                                const apiOwner = c.entityOwners?.[e];
+                                const owner = apiOwner ?? inferProductForEntity(e, c.products);
                                 const url = productEntityUrl(owner, e);
                                 const ownerColor = PRODUCT_COLORS[owner] ?? "#8b7ac8";
                                 if (!url) {
