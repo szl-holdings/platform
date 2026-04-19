@@ -1,6 +1,7 @@
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useUserPreferences } from "@szl-holdings/shared-ui";
 import {
   LayoutDashboard, AlertTriangle, GitBranch, Activity,
   Thermometer, Layers, ChevronRight, Menu, X, BookOpen, Brain,
@@ -189,9 +190,26 @@ function Sidebar({ expanded, onToggle }: { expanded: boolean; onToggle: () => vo
 }
 
 function AppShell({ children }: { children: React.ReactNode }) {
-  const [sidebarExpanded, setSidebarExpanded] = useState(true);
+  const { prefs, setPreference, isLoaded } = useUserPreferences();
+  const [sidebarExpanded, setSidebarExpanded] = useState(() => !prefs.sidebar_collapsed);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [location] = useLocation();
+  const userOverriddenSidebarRef = useRef(false);
+
+  useEffect(() => {
+    if (isLoaded && !userOverriddenSidebarRef.current) {
+      setSidebarExpanded(!prefs.sidebar_collapsed);
+    }
+  }, [isLoaded, prefs.sidebar_collapsed]);
+
+  const toggleSidebar = useCallback(() => {
+    userOverriddenSidebarRef.current = true;
+    setSidebarExpanded((prev) => {
+      const next = !prev;
+      setPreference("sidebar_collapsed", !next);
+      return next;
+    });
+  }, [setPreference]);
 
   const currentPage = ALL_NAV_ITEMS.find(n => location === n.href || location.startsWith(n.href + "/"));
 
@@ -199,7 +217,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
     <div className="flex h-screen overflow-hidden bg-background">
       {/* Desktop sidebar */}
       <div className="hidden md:flex">
-        <Sidebar expanded={sidebarExpanded} onToggle={() => setSidebarExpanded(v => !v)} />
+        <Sidebar expanded={sidebarExpanded} onToggle={toggleSidebar} />
       </div>
 
       {/* Mobile sidebar overlay */}

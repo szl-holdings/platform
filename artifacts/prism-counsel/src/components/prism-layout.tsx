@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import {
   LayoutDashboard, Network, BarChart3, FileStack, Shield, Settings,
   ChevronLeft, ChevronRight, Scale, Bell, Search, Menu, X
 } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { useUserPreferences } from "@szl-holdings/shared-ui";
 import { GettingStartedChecklist } from "@szl-holdings/shared-ui/onboarding";
 import { PRISM_ONBOARDING_CONFIG } from "@/onboarding-config";
 
@@ -52,25 +53,27 @@ const NAV_SECTIONS: NavSection[] = [
   },
 ];
 
-const COLLAPSE_KEY = "prism-counsel-sidebar-collapsed";
-
 export function PrismLayout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
-  const [collapsed, setCollapsed] = useState(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem(COLLAPSE_KEY) === "true";
-    }
-    return false;
-  });
+  const { prefs, setPreference, isLoaded } = useUserPreferences();
+  const [collapsed, setCollapsed] = useState(() => prefs.sidebar_collapsed);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const userOverriddenSidebarRef = useRef(false);
 
-  const toggle = () => {
+  useEffect(() => {
+    if (isLoaded && !userOverriddenSidebarRef.current) {
+      setCollapsed(prefs.sidebar_collapsed);
+    }
+  }, [isLoaded, prefs.sidebar_collapsed]);
+
+  const toggle = useCallback(() => {
+    userOverriddenSidebarRef.current = true;
     setCollapsed((v) => {
       const next = !v;
-      localStorage.setItem(COLLAPSE_KEY, String(next));
+      setPreference("sidebar_collapsed", next);
       return next;
     });
-  };
+  }, [setPreference]);
 
   const isActive = (href: string) => {
     const clean = location.replace(/\/$/, "") || "/";

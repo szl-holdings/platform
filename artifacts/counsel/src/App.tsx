@@ -1,8 +1,8 @@
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { Switch, Route, Router as WouterRouter, Redirect, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@szl-holdings/shared-ui/ui/sonner";
-import { AnalyticsProvider } from "@szl-holdings/shared-ui";
+import { AnalyticsProvider, useUserPreferences } from "@szl-holdings/shared-ui";
 import {
   LayoutDashboard, Scale, Clock, Network, BarChart3, ShieldAlert,
   Zap, Bell, CheckCircle2, Shield, Menu, Briefcase
@@ -194,8 +194,25 @@ function DashboardRouter() {
 
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const { prefs, setPreference, isLoaded } = useUserPreferences();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => prefs.sidebar_collapsed);
   const [sidebarHovered, setSidebarHovered] = useState(false);
+  const userOverriddenSidebarRef = useRef(false);
+
+  useEffect(() => {
+    if (isLoaded && !userOverriddenSidebarRef.current) {
+      setSidebarCollapsed(prefs.sidebar_collapsed);
+    }
+  }, [isLoaded, prefs.sidebar_collapsed]);
+
+  const toggleCollapsed = useCallback(() => {
+    userOverriddenSidebarRef.current = true;
+    setSidebarCollapsed((prev) => {
+      const next = !prev;
+      setPreference("sidebar_collapsed", next);
+      return next;
+    });
+  }, [setPreference]);
 
   const sidebarExpanded = !sidebarCollapsed || sidebarHovered;
 
@@ -214,7 +231,7 @@ export default function App() {
                 <CounselSidebarContent
                   expanded={sidebarExpanded}
                   onMobileClose={() => setSidebarOpen(false)}
-                  onToggleCollapse={() => setSidebarCollapsed((v) => !v)}
+                  onToggleCollapse={toggleCollapsed}
                 />
               }
               mobileOpen={sidebarOpen}
