@@ -286,66 +286,14 @@ export async function initDurablePersistence(): Promise<void> {
 
     try {
       const { setHistoryAdapter } = await import("@szl-holdings/action-engine");
-      const { dbRecordRun, dbListRuns, dbGetRunById, dbGetHistoryStats } = await import("./decisioning-store");
-      type WorkflowRun = import("@szl-holdings/action-engine").WorkflowRun;
-      type StoredRun = import("./decisioning-store").StoredRun;
-
-      /** Convert a WorkflowRun (action-engine shape) to a StoredRun (DB shape). */
-      function workflowRunToStored(run: WorkflowRun): StoredRun {
-        return {
-          runId: run.runId,
-          workflowId: run.workflowId,
-          workflowName: run.workflowName,
-          domain: (run.metadata?.domain as string | undefined) ?? "unknown",
-          status: run.status,
-          initiatedBy: run.initiatedBy,
-          approvedBy: run.approvedBy,
-          tenantId: run.tenantId,
-          recommendationId: run.recommendationId,
-          isDryRun: run.isDryRun ?? false,
-          isSimulation: run.isSimulation ?? false,
-          requiresApproval: run.approvalState === "pending" || (run.steps ?? []).some((s: { requiresApproval?: boolean }) => s.requiresApproval),
-          durationMs: run.completedAt != null ? run.completedAt - run.startedAt : undefined,
-          steps: run.steps ?? [],
-          auditTrail: run.auditTrail ?? [],
-          policyEvaluation: run.policyEvaluation,
-          cost: { estimated: run.estimatedCostUsd, actual: run.actualCostUsd },
-          metadata: run.metadata ?? {},
-          startedAt: new Date(run.startedAt).toISOString(),
-          completedAt: run.completedAt != null ? new Date(run.completedAt).toISOString() : null,
-        };
-      }
-
-      /** Convert a StoredRun (DB shape) to a WorkflowRun (action-engine shape). */
-      function storedToWorkflowRun(stored: StoredRun): WorkflowRun {
-        const startedAt = typeof stored.startedAt === "string"
-          ? new Date(stored.startedAt).getTime()
-          : Number(stored.startedAt);
-        const completedAt = stored.completedAt != null
-          ? new Date(stored.completedAt).getTime()
-          : undefined;
-        return {
-          runId: stored.runId,
-          workflowId: stored.workflowId,
-          workflowName: stored.workflowName,
-          tenantId: stored.tenantId,
-          initiatedBy: stored.initiatedBy,
-          approvedBy: stored.approvedBy,
-          recommendationId: stored.recommendationId,
-          executionMode: "manual" as const,
-          isDryRun: stored.isDryRun,
-          isSimulation: stored.isSimulation,
-          status: stored.status as WorkflowRun["status"],
-          currentStepIndex: 0,
-          steps: (stored.steps ?? []) as WorkflowRun["steps"],
-          approvalState: stored.approvedBy ? "approved" as const : "none" as const,
-          policyEvaluation: stored.policyEvaluation as Record<string, unknown> | undefined,
-          auditTrail: (stored.auditTrail ?? []) as WorkflowRun["auditTrail"],
-          startedAt,
-          completedAt,
-          metadata: stored.metadata as Record<string, unknown> | undefined,
-        };
-      }
+      const {
+        dbRecordRun,
+        dbListRuns,
+        dbGetRunById,
+        dbGetHistoryStats,
+        workflowRunToStored,
+        storedToWorkflowRun,
+      } = await import("./decisioning-store");
 
       setHistoryAdapter({
         recordRun: async (run) => { await dbRecordRun(workflowRunToStored(run)); },

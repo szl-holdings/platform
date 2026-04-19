@@ -45,6 +45,7 @@ import {
 import { db, atlasSignalsTable, atlasEvidenceTable, atlasOutcomesTable, atlasRunsTable } from "@szl-holdings/db";
 import { eq, and, desc } from "drizzle-orm";
 import { logger } from "./logger.js";
+import { dbRecordWorkflowRun } from "./decisioning-store.js";
 
 // ─── Signal Store (DB-backed) ─────────────────────────────────────────────────
 
@@ -884,6 +885,16 @@ export async function executedomainWorkflow(req: DomainExecutionRequest): Promis
   });
 
   await recordRun(result.run);
+
+  // Defensive direct persistence: even if the action-engine history adapter
+  // has not been wired (e.g. during early bootstrap or in tests that don't
+  // call initDurablePersistence), write the run row directly so the
+  // /:domain/atlas/runs timeline survives a server restart.
+  try {
+    await dbRecordWorkflowRun(result.run);
+  } catch (err) {
+    logger.warn({ err, runId: result.run.runId, domain: req.domain }, "atlas:run direct persistence failed");
+  }
 
   if (!req.isDryRun && !req.isSimulation) {
     const signals = req.signalIds

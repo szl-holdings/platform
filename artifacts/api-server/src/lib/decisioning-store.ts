@@ -6,6 +6,7 @@
  * for the API server context, enabling cross-session audit trails and history pages.
  */
 import { pool } from "@szl-holdings/db";
+import type { WorkflowRun } from "@szl-holdings/action-engine";
 import { logger } from "./logger";
 
 export interface StoredRun {
@@ -99,6 +100,82 @@ export async function dbRecordRun(run: StoredRun): Promise<void> {
   } catch (err) {
     logger.warn({ err, runId: run.runId }, "[DecisioningStore] Failed to persist run — falling back silently");
   }
+}
+
+/**
+ * Convert an action-engine WorkflowRun into the StoredRun shape used for
+ * persistence in szl_decisioning_runs.
+ */
+export function workflowRunToStored(run: WorkflowRun): StoredRun {
+  return {
+    runId: run.runId,
+    workflowId: run.workflowId,
+    workflowName: run.workflowName,
+    domain: (run.metadata?.domain as string | undefined) ?? "unknown",
+    status: run.status,
+    initiatedBy: run.initiatedBy,
+    approvedBy: run.approvedBy,
+    tenantId: run.tenantId,
+    recommendationId: run.recommendationId,
+    isDryRun: run.isDryRun ?? false,
+    isSimulation: run.isSimulation ?? false,
+    requiresApproval:
+      run.approvalState === "pending" ||
+      (run.steps ?? []).some((s: { requiresApproval?: boolean }) => s.requiresApproval),
+    durationMs: run.completedAt != null ? run.completedAt - run.startedAt : undefined,
+    steps: run.steps ?? [],
+    auditTrail: run.auditTrail ?? [],
+    policyEvaluation: run.policyEvaluation,
+    cost: { estimated: run.estimatedCostUsd, actual: run.actualCostUsd },
+    metadata: run.metadata ?? {},
+    startedAt: new Date(run.startedAt).toISOString(),
+    completedAt: run.completedAt != null ? new Date(run.completedAt).toISOString() : null,
+  };
+}
+
+/**
+ * Persist an action-engine WorkflowRun directly into szl_decisioning_runs,
+ * bypassing the action-engine history adapter. This is used by callers (such
+ * as the ATLAS execution engine) that must guarantee runs survive a server
+ * restart even if the global history adapter has not yet been wired.
+ */
+export async function dbRecordWorkflowRun(run: WorkflowRun): Promise<void> {
+  await dbRecordRun(workflowRunToStored(run));
+}
+
+/**
+ * Convert a StoredRun (DB shape) back to an action-engine WorkflowRun shape.
+ * Used by code paths that need to rehydrate a persisted run for replay or
+ * timeline display.
+ */
+export function storedToWorkflowRun(stored: StoredRun): WorkflowRun {
+  const startedAt = typeof stored.startedAt === "string"
+    ? new Date(stored.startedAt).getTime()
+    : Number(stored.startedAt);
+  const completedAt = stored.completedAt != null
+    ? new Date(stored.completedAt).getTime()
+    : undefined;
+  return {
+    runId: stored.runId,
+    workflowId: stored.workflowId,
+    workflowName: stored.workflowName,
+    tenantId: stored.tenantId,
+    initiatedBy: stored.initiatedBy,
+    approvedBy: stored.approvedBy,
+    recommendationId: stored.recommendationId,
+    executionMode: "manual" as const,
+    isDryRun: stored.isDryRun,
+    isSimulation: stored.isSimulation,
+    status: stored.status as WorkflowRun["status"],
+    currentStepIndex: 0,
+    steps: (stored.steps ?? []) as WorkflowRun["steps"],
+    approvalState: stored.approvedBy ? ("approved" as const) : ("none" as const),
+    policyEvaluation: stored.policyEvaluation as Record<string, unknown> | undefined,
+    auditTrail: (stored.auditTrail ?? []) as WorkflowRun["auditTrail"],
+    startedAt,
+    completedAt,
+    metadata: stored.metadata as Record<string, unknown> | undefined,
+  };
 }
 
 export async function dbListRuns(filter: RunFilter = {}): Promise<{ runs: StoredRun[]; total: number }> {

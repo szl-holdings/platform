@@ -76,6 +76,9 @@ vi.mock("../lib/logger.js", () => ({
 vi.mock("../lib/decisioning-store.js", () => ({
   dbListRuns: vi.fn().mockResolvedValue({ runs: [], total: 0 }),
   dbGetRunById: vi.fn().mockResolvedValue(null),
+  dbRecordWorkflowRun: vi.fn().mockResolvedValue(undefined),
+  dbCancelRun: vi.fn().mockResolvedValue(true),
+  dbApproveRun: vi.fn().mockResolvedValue(true),
 }));
 
 vi.mock("../middlewares/auth.js", () => ({
