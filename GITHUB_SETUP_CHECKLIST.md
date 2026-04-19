@@ -22,13 +22,19 @@
 | License | ✅ `LICENSE.md` |
 | Code of Conduct | ✅ `CODE_OF_CONDUCT.md` |
 | CI workflows | ✅ 13 workflows configured (ci, codeql, security, deploy, e2e, lighthouse, etc.) |
-| Branch protection | ⬜ Not yet applied — apply after first push |
-| Repo description + topics | ⬜ Set manually in GitHub repo settings |
-| Pinned repos | ⬜ Pin manually in GitHub org settings |
-| Dependabot alerts | ⬜ Enable in repo security settings |
-| CodeQL scanning | ⬜ Enable in repo security settings |
-| Secret scanning | ⬜ Enable in repo security settings |
-| Environments | ⬜ Create `staging` and `production` environments |
+| Branch protection | ✅ Applied to both `master` (default) and `main` (1 review, code owners, required checks, strict, no force push, enforce admins) |
+| Repo description + topics | ✅ Applied (description, homepage, 8 topics from task spec) |
+| Merge settings | ✅ Squash-only, auto-delete head branches, auto-merge enabled |
+| Dependabot alerts | ✅ Enabled |
+| Dependabot security updates | ✅ Enabled |
+| CodeQL scanning | ✅ Enabled (workflow committed; analysis runs on push/PR) |
+| Secret scanning | ✅ Enabled |
+| Secret scanning push protection | ✅ Enabled |
+| Environments | ✅ `staging` and `production` created (protected branches policy) |
+| Pinned repos | ⬜ Manual — requires `admin:org` scope; pin via org Customize page |
+| Social preview image | ⬜ Manual — no public REST API; upload via repo Settings → General |
+| Environment secrets | ⬜ Manual — add `REPLIT_DEPLOY_TOKEN`, `REPLIT_APP_ID`, staging variants |
+| Required reviewer on `production` env | ⬜ Manual — add at least 1 required reviewer in env settings |
 
 ---
 
