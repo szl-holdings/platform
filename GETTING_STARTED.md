@@ -1,9 +1,24 @@
 # Getting Started — SZL Holdings
 
-**Version:** 1.0 · **Last updated:** April 2026  
+**Version:** 1.1 · **Last updated:** April 2026  
 **Audience:** New users, design partners, enterprise evaluators
 
 This guide covers everything you need to start using the SZL Holdings governed decision platform. From first login through your first governed workflow, you will be operational in under 30 minutes.
+
+---
+
+## Quick Start — Hosted Onboarding Wizard (Recommended)
+
+The platform now ships a hosted, four-step onboarding wizard. There is **no need to clone the repo or run any CLI command** (such as `pnpm seed:demo`) to evaluate the product.
+
+1. Sign in to the platform
+2. Navigate to **Lyte → Get Started** (or open `/lyte/onboarding` directly)
+3. Walk the four steps: **Org setup → Seed demo workspace → Land in your first view → Walk a governed decision loop**
+4. The wizard stores your progress in the browser; you can re-run it any time from the same URL
+
+The wizard provisions realistic demo signals, recommendations, and sealed proofs entirely from the UI — suitable for self-serve enterprise evaluators and design partners who do not have repository access.
+
+> Engineers running locally can still seed via `pnpm seed:demo`, but it is no longer required.
 
 ---
 

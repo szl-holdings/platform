@@ -6,12 +6,13 @@ import {
   LayoutDashboard, AlertTriangle, GitBranch, Activity,
   Thermometer, Layers, ChevronRight, Menu, X, BookOpen, Brain,
   ChevronDown, Zap, Shield, Users, Radio, Network, Workflow,
-  Terminal, Library, Lock, FlaskConical
+  Terminal, Library, Lock, FlaskConical, Compass
 } from "lucide-react";
 
 
 // New 9 flagship surfaces + Decision Twin
 const OverviewPage = lazy(() => import("@/pages/overview"));
+const OnboardingPage = lazy(() => import("@/pages/onboarding"));
 const SignalsConsolePage = lazy(() => import("@/pages/signals-console"));
 const DecisionTwinPage = lazy(() => import("@/pages/decision-twin"));
 const EntityGraphPage = lazy(() => import("@/pages/entity-graph"));
@@ -60,6 +61,7 @@ const NAV_GROUPS: NavGroup[] = [
   {
     label: "Command",
     items: [
+      { label: "Get Started", href: "/onboarding", icon: <Compass className="w-3.5 h-3.5" />, badge: "NEW", badgeColor: "amber" },
       { label: "Overview", href: "/overview", icon: <LayoutDashboard className="w-3.5 h-3.5" />, badge: "6 critical", badgeColor: "red" },
       { label: "Signals Console", href: "/signals", icon: <Radio className="w-3.5 h-3.5" />, badge: "47", badgeColor: "red" },
       { label: "Entity Graph", href: "/entities", icon: <Network className="w-3.5 h-3.5" /> },
@@ -280,6 +282,8 @@ function DashboardRoutes() {
   return (
     <AppShell>
       <Switch>
+        {/* Onboarding wizard (FLOW-001) */}
+        <Route path="/onboarding" component={OnboardingPage} />
         {/* 9 flagship surfaces */}
         <Route path="/overview" component={OverviewPage} />
         <Route path="/signals" component={SignalsConsolePage} />

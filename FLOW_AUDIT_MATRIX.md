@@ -143,7 +143,7 @@ This matrix documents every significant user and admin flow across the SZL Holdi
 | Category | Critical Gaps | Open Items |
 |----------|--------------|------------|
 | Auth / Identity | MFA not implemented | KG026 |
-| Onboarding | No new-user guided wizard | FLOW-001 |
+| Onboarding | No new-user guided wizard | FLOW-001 — ✅ Resolved Apr-2026. Hosted four-step wizard live at `/lyte/onboarding`; empty-state banner on Lyte Overview routes new users into it. |
 | Billing | Live billing integration incomplete | FLOW-002 |
 | Support | No SLA enforcement automation | FLOW-003 |
 | Mobile | Push notification deep linking missing | Separate task queued |

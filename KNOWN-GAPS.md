@@ -151,7 +151,7 @@ Operational gaps, process health, test coverage, observability, team ownership.
 
 | ID | Gap | Area | Severity | Status |
 |----|-----|------|----------|--------|
-| FLOW-001 | No new-user guided onboarding wizard — FIRST_10_MINUTES.md describes ideal state; actual UI has sparse empty states | Onboarding | P1 | ⚠️ Open |
+| FLOW-001 | No new-user guided onboarding wizard — FIRST_10_MINUTES.md describes ideal state; actual UI has sparse empty states | Onboarding | P1 | ✅ Resolved Apr-2026. Hosted four-step onboarding wizard shipped at `/lyte/onboarding` (`artifacts/lyte-command-center/src/pages/onboarding.tsx`). Steps: org setup, one-click demo seed, first-view orientation, governed decision loop walkthrough. Empty-state banner on Lyte Overview deep-links new users into the wizard until completion is recorded in browser storage. RT-005 also closed (GETTING_STARTED.md updated to reference hosted wizard, no longer requires `pnpm seed:demo`). |
 | FLOW-002 | Live billing integration not fully wired for all billing flows | Billing | P1 | ⚠️ Open — Sprint 3 |
 | FLOW-003 | No SLA enforcement automation in support intake flow | Support Ops | P2 | ⚠️ Open — Sprint 4 |
 | FLOW-004 | No escalation path for timed-out approvals | Approvals | P2 | ⚠️ Open — Sprint 4 |

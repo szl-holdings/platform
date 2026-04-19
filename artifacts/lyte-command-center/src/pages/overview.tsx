@@ -1,6 +1,7 @@
-import { useState } from "react";
-import { Shield, TrendingUp, TrendingDown, Minus, AlertTriangle, CheckCircle2, Clock, ArrowRight, Brain, Zap, Users, ChevronRight } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Shield, TrendingUp, TrendingDown, Minus, AlertTriangle, CheckCircle2, Clock, ArrowRight, Brain, Zap, Users, ChevronRight, Compass } from "lucide-react";
 import { Link } from "wouter";
+import { isOnboardingComplete } from "@/pages/onboarding";
 import {
   overviewMetrics, overviewSummary, signalItems, decisionRecommendations, workflowItems,
   type OverviewMetric, type SignalItem, type DecisionRecommendation, type WorkflowItem,
@@ -91,12 +92,38 @@ function WorkflowRow({ wf }: { wf: WorkflowItem }) {
 
 export default function OverviewPage() {
   const [summaryExpanded, setSummaryExpanded] = useState(false);
+  const [showOnboardingBanner, setShowOnboardingBanner] = useState(false);
+  useEffect(() => {
+    setShowOnboardingBanner(!isOnboardingComplete());
+  }, []);
   const criticalSignals = signalItems.filter(s => s.severity === "critical").slice(0, 5);
   const criticalRecs = decisionRecommendations.filter(r => r.urgency === "critical" || r.urgency === "urgent");
   const atRiskWorkflows = workflowItems.filter(w => w.status !== "on_track" && w.status !== "complete").slice(0, 5);
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
+      {showOnboardingBanner && (
+        <Link
+          href="/onboarding"
+          data-testid="onboarding-banner"
+          className="cockpit-panel block p-4 border border-amber-400/40 bg-amber-500/5 hover:bg-amber-500/10 transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-md bg-amber-500/15 border border-amber-500/30 flex items-center justify-center shrink-0">
+              <Compass className="w-4 h-4 text-amber-300" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-amber-100">Set up your workspace in 4 steps</p>
+              <p className="text-[11px] text-amber-300/60 mt-0.5">
+                Configure your org, seed demo data, and walk a governed decision loop — no engineer required.
+              </p>
+            </div>
+            <span className="text-[11px] font-mono text-amber-300/70 inline-flex items-center gap-1 shrink-0">
+              Start <ArrowRight className="w-3 h-3" />
+            </span>
+          </div>
+        </Link>
+      )}
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
