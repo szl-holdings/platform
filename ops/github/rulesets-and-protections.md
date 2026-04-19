@@ -35,6 +35,69 @@ This document defines the exact branch protection and ruleset configuration requ
 
 ---
 
+## End-to-end gate verification (task #2043, 2026-04-19)
+
+A throwaway PR was opened to verify that branch protection actually blocks a PR introducing known high/critical CVEs.
+
+### Test PR
+
+- **PR:** [szl-holdings/szl-holdings-platform#25](https://github.com/szl-holdings/szl-holdings-platform/pull/25) — `verify(security): prove branch protection blocks vulnerable deps (task #2043)`
+- **Branch:** `verify/security-gates-2026-04-19` (deleted after verification)
+- **Base:** `master`
+- **Change:** Added two known-vulnerable dependencies to root `package.json`:
+  - `minimist@1.2.5` — CVE-2021-44906 (Critical, prototype pollution)
+  - `lodash@4.17.20` — CVE-2021-23337 (High, command injection)
+
+### Result
+
+| Aspect | Status | Evidence |
+|---|---|---|
+| PR opened against protected branch | ✅ | `POST /repos/.../pulls` → 201 |
+| Merge button disabled | ✅ | `GET /repos/.../pulls/25` → `mergeable_state: "blocked"` |
+| Branch protection enforces required checks | ✅ | Combined status: `pending`; required checks not satisfied |
+| `Dependency Review` workflow ran on the PR | ❌ | `GET /repos/.../commits/{sha}/check-runs` → `total_count: 0` |
+| `CodeQL Analysis / analyze` workflow ran on the PR | ❌ | Same — no check runs at all |
+| `Dependency Review` actively *failed* on the CVEs | ❌ **NOT PROVEN** | Workflow never executed |
+
+### Critical gap discovered
+
+The required workflow files (`dependency-review.yml`, `codeql.yml`, `ci.yml`, `e2e.yml`, `lighthouse.yml`, `security.yml`) exist in this Replit workspace under `.github/workflows/` but **are not present in the GitHub repository**:
+
+```
+GET /repos/szl-holdings/szl-holdings-platform/contents/.github/workflows
+→ 404 Not Found
+```
+
+The only workflow registered in GitHub Actions is the auto-generated `Dependabot Updates`. Because the actual workflow files were never pushed to the remote, the required checks will *always* be pending, which means:
+
+- ✅ **Negative case proven:** merging is blocked when the required checks have not reported (mergeable_state = `blocked`).
+- ❌ **Positive case NOT proven:** we cannot demonstrate that `Dependency Review` actively fails on a known CVE, because the workflow does not run.
+
+This is the equivalent of "the alarm wiring is in place, but the alarm itself was never installed." Branch protection is doing its job by refusing to merge — but if the workflows ever do get pushed and start passing trivially (e.g. they crash before the gate runs), nothing here would catch a regression. The verification needs to be re-run once the workflow files are actually present in the repo.
+
+### Cleanup
+
+- The verification PR was closed without merging.
+- The vulnerable-dep commit on the verification branch was reverted (the branch was rolled back to the original `package.json` content).
+- The verification branch was deleted via `DELETE /repos/.../git/refs/heads/verify/security-gates-2026-04-19` → 204.
+
+### Why the positive case could not be completed from this environment
+
+We attempted a second variant — a single PR adding *both* the workflow YAML files (so they would run from the PR head) *and* the vulnerable dependencies. GitHub rejected the writes with `404 Not Found` on `PUT /repos/.../contents/.github/workflows/dependency-review.yml`. The Replit GitHub connector's OAuth token holds scopes `read:org, read:project, read:user, repo, user:email` — it does **not** hold the `workflow` scope, and GitHub blocks any API write that touches `.github/workflows/*` without that scope. The fallback branch was deleted; no workflow files were left in the repo.
+
+### Unblock playbook (to finish task #2043 end-to-end)
+
+Run these steps from a local clone with normal `git` credentials (which have full repo access including workflow files), or re-issue the connector with the `workflow` scope:
+
+1. From a local clone of `szl-holdings/szl-holdings-platform`, copy the `.github/workflows/` directory from this Replit workspace and `git push` it to `master` (and `main`).
+2. Confirm the Actions tab now lists `Dependency Review`, `CodeQL Analysis`, `CI Gate`, `E2E Gate`, `Lighthouse Gate`, and `Security Audit & SBOM`.
+3. Re-create branch `verify/security-gates` with the same `package.json` change (add `minimist@1.2.5` and `lodash@4.17.20`).
+4. Open a PR against `master` and wait for `Dependency Review` to report `conclusion: failure`.
+5. Capture a screenshot of the failed check + the disabled merge button and append it to this section.
+6. Close the PR and delete the branch.
+
+---
+
 ## Target Branch: `main` (and `master` if present)
 
 Both `main` and `master` should have identical protection rules applied. The canonical default branch is `main`; `master` is kept for legacy compatibility.
