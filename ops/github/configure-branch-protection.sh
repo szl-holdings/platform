@@ -29,7 +29,7 @@ GRAPHQL="https://api.github.com/graphql"
 AUTH_HEADER="Authorization: Bearer ${TOKEN}"
 CT_HEADER="Content-Type: application/json"
 
-STATUS_CHECKS='["CI Gate","E2E Gate","Lighthouse Gate","CodeQL Analysis / analyze","Dependency Review"]'
+STATUS_CHECKS='["CI Gate","E2E Gate","Lighthouse Gate","CodeQL Analysis / analyze","Dependency Review","Security Audit & SBOM / Security Gate (blocking)"]'
 
 # ── Step 1: Resolve the repository node ID ────────────────────────────────────
 echo "Resolving repository ID for ${OWNER}/${REPO}…"

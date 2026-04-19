@@ -64,6 +64,7 @@ The following status checks must be listed as required in the branch ruleset:
 | `Lighthouse Gate` | `lighthouse.yml` | Perf/accessibility thresholds enforced |
 | `CodeQL Analysis / analyze` | `codeql.yml` | SAST must complete without critical findings |
 | `Dependency Review` | `dependency-review.yml` | No high/critical CVE introductions |
+| `Security Audit & SBOM / Security Gate (blocking)` | `security.yml` | Fan-in gate: secret scanning (Gitleaks), dependency vulnerability scan, and lockfile integrity must all pass |
 
 > **Note**: GitHub requires status checks to have run at least once before they can be selected as required checks in the UI. Merge a test PR first if adding a new check.
 
