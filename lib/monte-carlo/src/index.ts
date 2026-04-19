@@ -27,8 +27,27 @@ export type {
 
 export { runParallelChunks, isWorkerAvailable } from "./parallel.js";
 
-export { runScenarioSimulation } from "./scenario-simulation.js";
-export type { MonteCarloResult, MonteCarloOutputStat } from "./scenario-simulation.js";
+export {
+  runScenarioSimulation,
+  simulateScenarioShard,
+  aggregateScenarioShards,
+} from "./scenario-simulation.js";
+export type {
+  MonteCarloResult,
+  MonteCarloOutputStat,
+  ScenarioShardSamples,
+} from "./scenario-simulation.js";
+
+export {
+  runScenarioInPool,
+  planShards,
+  planPoolSize,
+} from "./scenario-pool.js";
+export type {
+  ScenarioPoolOptions,
+  WorkerFactory,
+  WorkerLike,
+} from "./scenario-pool.js";
 
 export {
   applyTweak,

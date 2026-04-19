@@ -18,7 +18,8 @@
     "./scenarios": "./src/scenarios.ts",
     "./schema": "./src/schema.ts",
     "./scenario-simulation": "./src/scenario-simulation.ts",
-    "./scenario-simulation.worker": "./src/scenario-simulation.worker.ts"
+    "./scenario-simulation.worker": "./src/scenario-simulation.worker.ts",
+    "./scenario-pool": "./src/scenario-pool.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json --noEmit",

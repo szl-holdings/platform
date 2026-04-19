@@ -4,6 +4,7 @@ import {
   runScenarioSimulation as runScenarioSimulationSync,
   type MonteCarloResult,
 } from "@szl-holdings/monte-carlo/scenario-simulation";
+import { runScenarioInPool } from "@szl-holdings/monte-carlo/scenario-pool";
 import type { ScenarioDefinition, InputVariable } from "@szl-holdings/monte-carlo/schema";
 import {
   type DriverTweak,
@@ -23,22 +24,6 @@ const TERRA_ACCENT = LANE_ACCENT_HEX.terra.primary;
 
 export type { MonteCarloResult };
 export { runScenarioSimulationSync as runScenarioSimulation };
-
-interface WorkerRequest {
-  requestId: number;
-  scenarioId: string;
-  iterations: number;
-}
-type WorkerResponse =
-  | {
-      requestId: number;
-      type: "progress";
-      completed: number;
-      total: number;
-      validIterations: number;
-    }
-  | { requestId: number; type: "result"; ok: true; result: MonteCarloResult }
-  | { requestId: number; type: "error"; ok: false; error: string };
 
 interface SimulationProgressState {
   completed: number;
@@ -98,26 +83,11 @@ export function RiskSimulationPanel({
   const [running, setRunning] = useState<boolean>(true);
   const [progress, setProgress] = useState<SimulationProgressState | null>(null);
   const [runKey, setRunKey] = useState<number>(0);
-  const workerRef = useRef<Worker | null>(null);
   const requestIdRef = useRef<number>(0);
   const [tweaks, setTweaks] = useState<Record<string, DriverTweak>>({});
   const [showTweaks, setShowTweaks] = useState<boolean>(false);
   const [appliedTweaks, setAppliedTweaks] = useState<Record<string, DriverTweak>>({});
   const [baseline, setBaseline] = useState<BaselineSnapshot | null>(null);
-
-  useEffect(() => {
-    let worker: Worker | null = null;
-    try {
-      worker = new RiskSimulationWorker();
-      workerRef.current = worker;
-    } catch {
-      workerRef.current = null;
-    }
-    return () => {
-      worker?.terminate();
-      workerRef.current = null;
-    };
-  }, []);
 
   useEffect(() => {
     setTweaks({});
@@ -140,53 +110,58 @@ export function RiskSimulationPanel({
     setRunning(true);
     setProgress(null);
     const requestId = ++requestIdRef.current;
-    const worker = workerRef.current;
     const tweaksActive = modifiedIds.size > 0;
+    let cancelled = false;
 
-    // Worker only knows registered scenarios by id and cannot apply
+    // Workers only know registered scenarios by id and cannot apply
     // user-supplied driver tweaks, so we fall back to a synchronous run
     // on the main thread whenever overrides are in effect.
-    if (worker && !tweaksActive) {
-      const handler = (event: MessageEvent<WorkerResponse>) => {
-        if (event.data.requestId !== requestId) return;
-        if (event.data.type === "progress") {
-          setProgress({
-            completed: event.data.completed,
-            total: event.data.total,
-          });
-          return;
-        }
-        worker.removeEventListener("message", handler);
-        if (event.data.type === "result") {
-          setResult(event.data.result);
-          setProgress(null);
-          setRunning(false);
-        } else {
-          // Worker reported an error (e.g. unknown scenario id) — fall
-          // back to a synchronous run on the main thread so the panel
-          // still shows results instead of getting stuck.
-          // eslint-disable-next-line no-console
-          console.warn("[risk-simulation] worker error, falling back:", event.data.error);
-          try {
-            const r = runScenarioSimulationSync(effectiveScenario, iterCount);
-            if (requestId === requestIdRef.current) setResult(r);
-          } finally {
-            if (requestId === requestIdRef.current) {
-              setProgress(null);
-              setRunning(false);
+    if (!tweaksActive) {
+      let workerCreationFailed = false;
+      try {
+        // Probe the worker constructor; if it throws we'll fall through
+        // to the synchronous path below.
+        new RiskSimulationWorker().terminate();
+      } catch {
+        workerCreationFailed = true;
+      }
+      if (!workerCreationFailed) {
+        runScenarioInPool({
+          scenario: effectiveScenario,
+          iterations: iterCount,
+          workerFactory: () => new RiskSimulationWorker(),
+          onProgress: (p) => {
+            if (cancelled || requestId !== requestIdRef.current) return;
+            setProgress({ completed: p.completed, total: p.total });
+          },
+        })
+          .then((r) => {
+            if (cancelled || requestId !== requestIdRef.current) return;
+            setResult(r);
+            setProgress(null);
+            setRunning(false);
+          })
+          .catch((err) => {
+            if (cancelled || requestId !== requestIdRef.current) return;
+            // eslint-disable-next-line no-console
+            console.warn("[risk-simulation] worker pool error, falling back:", err);
+            try {
+              const r = runScenarioSimulationSync(effectiveScenario, iterCount);
+              if (requestId === requestIdRef.current) setResult(r);
+            } finally {
+              if (requestId === requestIdRef.current) {
+                setProgress(null);
+                setRunning(false);
+              }
             }
-          }
-        }
-      };
-      worker.addEventListener("message", handler);
-      const req: WorkerRequest = { requestId, scenarioId: scenario.id, iterations: iterCount };
-      worker.postMessage(req);
-      return () => {
-        worker.removeEventListener("message", handler);
-      };
+          });
+        return () => {
+          cancelled = true;
+        };
+      }
     }
 
-    // Fallback: synchronous run via setTimeout if worker is unavailable
+    // Fallback: synchronous run via setTimeout if workers are unavailable
     // or if driver tweaks are active.
     const handle = window.setTimeout(() => {
       try {
@@ -199,7 +174,10 @@ export function RiskSimulationPanel({
         }
       }
     }, 30);
-    return () => window.clearTimeout(handle);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(handle);
+    };
   }, [effectiveScenario, scenario.id, iterCount, runKey, modifiedIds]);
 
   const pendingChanges = useMemo(() => {
