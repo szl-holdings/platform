@@ -29,6 +29,7 @@ const STORE_URL = "/api/action-store";
 type RiskActionState = { type: "playbook" | "ticket"; status: "running" | "done"; result?: string; ticketId?: string; ticketUrl?: string; at?: string; actor?: string };
 type OppDecision = { decision: "accept" | "reject" | "snooze"; reason?: string; snoozeUntil?: string; at: string; actor?: string };
 type RecDecision = { decision: "accept" | "reject" | "snooze"; reason?: string; snoozeUntil?: string; at: string; actor?: string };
+type RiskLinearOverride = { teamKey?: string | null; labels?: string[] };
 
 const CURRENT_ACTOR = "You (Operator)";
 
@@ -37,6 +38,7 @@ interface ActionStore {
   riskActions: Record<string, RiskActionState>;
   oppDecisions: Record<string, OppDecision>;
   recDecisions: Record<string, RecDecision>;
+  riskLinearOverrides: Record<string, RiskLinearOverride>;
 }
 
 type ActionStorePatch = Partial<{
@@ -44,10 +46,11 @@ type ActionStorePatch = Partial<{
   riskActions: Record<string, RiskActionState | null>;
   oppDecisions: Record<string, OppDecision | null>;
   recDecisions: Record<string, RecDecision | null>;
+  riskLinearOverrides: Record<string, RiskLinearOverride | null>;
 }>;
 
 function emptyStore(): ActionStore {
-  return { riskOwners: {}, riskActions: {}, oppDecisions: {}, recDecisions: {} };
+  return { riskOwners: {}, riskActions: {}, oppDecisions: {}, recDecisions: {}, riskLinearOverrides: {} };
 }
 
 function readCache(): ActionStore {
@@ -68,8 +71,9 @@ function applyPatchLocal(prev: ActionStore, patch: ActionStorePatch): ActionStor
     riskActions: { ...prev.riskActions },
     oppDecisions: { ...prev.oppDecisions },
     recDecisions: { ...prev.recDecisions },
+    riskLinearOverrides: { ...prev.riskLinearOverrides },
   };
-  for (const key of ["riskOwners", "riskActions", "oppDecisions", "recDecisions"] as const) {
+  for (const key of ["riskOwners", "riskActions", "oppDecisions", "recDecisions", "riskLinearOverrides"] as const) {
     const slice = patch[key];
     if (!slice) continue;
     for (const [id, value] of Object.entries(slice)) {
@@ -668,6 +672,33 @@ function RiskRegisterModule() {
   const [teamsErr, setTeamsErr] = useState<string | null>(null);
   const [adminOpen, setAdminOpen] = useState(false);
   const [savingDefault, setSavingDefault] = useState(false);
+  const [advancedOpen, setAdvancedOpen] = useState<string | null>(null);
+  const [labelDraft, setLabelDraft] = useState<Record<string, string>>({});
+
+  function setOverride(riskId: string, next: RiskLinearOverride | null) {
+    if (next === null || (!next.teamKey && (!next.labels || next.labels.length === 0))) {
+      patch({ riskLinearOverrides: { [riskId]: null } });
+    } else {
+      patch({ riskLinearOverrides: { [riskId]: next } });
+    }
+  }
+
+  function addLabel(riskId: string, current: RiskLinearOverride) {
+    const draft = (labelDraft[riskId] ?? "").trim();
+    if (!draft) return;
+    const existing = current.labels ?? [];
+    if (existing.includes(draft)) {
+      setLabelDraft(d => ({ ...d, [riskId]: "" }));
+      return;
+    }
+    setOverride(riskId, { ...current, labels: [...existing, draft].slice(0, 10) });
+    setLabelDraft(d => ({ ...d, [riskId]: "" }));
+  }
+
+  function removeLabel(riskId: string, current: RiskLinearOverride, label: string) {
+    const next = (current.labels ?? []).filter(l => l !== label);
+    setOverride(riskId, { ...current, labels: next });
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -775,6 +806,12 @@ function RiskRegisterModule() {
       `Created from SZL Holdings Business State (risk id: ${risk.id}).`,
     ].join("\n");
 
+    const override = store.riskLinearOverrides[riskId] ?? {};
+    const baseLabels = [`domain:${risk.domain}`, `severity:${risk.level}`, "szl-business-state"];
+    const extraLabels = (override.labels ?? []).filter(l => l && !baseLabels.includes(l));
+    const labels = [...baseLabels, ...extraLabels];
+    const teamKey = override.teamKey && override.teamKey.trim().length > 0 ? override.teamKey.trim() : undefined;
+
     try {
       const response = await fetch("/api/linear/create-ticket", {
         method: "POST",
@@ -784,7 +821,8 @@ function RiskRegisterModule() {
           description,
           priority: priorityMap[risk.level] ?? 3,
           assigneeName: risk.owner,
-          labels: [`domain:${risk.domain}`, `severity:${risk.level}`, "szl-business-state"],
+          labels,
+          ...(teamKey ? { teamKey } : {}),
         }),
       });
       const json = await response.json().catch(() => null);
@@ -989,7 +1027,81 @@ function RiskRegisterModule() {
                       <a href="/command" style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "10px", fontWeight: 600, padding: "5px 12px", borderRadius: "6px", background: `${ACCENT}15`, border: `1px solid ${ACCENT}30`, color: ACCENT, cursor: "pointer", textDecoration: "none" }}>
                         <ExternalLink style={{ width: 10, height: 10 }} /> Escalate to Command
                       </a>
+                      {(() => {
+                        const override = store.riskLinearOverrides[risk.id] ?? {};
+                        const hasOverride = !!(override.teamKey || (override.labels && override.labels.length > 0));
+                        const isOpen = advancedOpen === risk.id;
+                        return (
+                          <button
+                            onClick={() => setAdvancedOpen(isOpen ? null : risk.id)}
+                            style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "10px", fontWeight: 600, padding: "5px 12px", borderRadius: "6px", background: hasOverride ? `${ACCENT}20` : "hsla(0,0%,100%,0.04)", border: `1px solid ${hasOverride ? `${ACCENT}50` : BORDER}`, color: hasOverride ? ACCENT : "rgba(255,255,255,0.55)", cursor: "pointer" }}
+                          >
+                            <Layers style={{ width: 10, height: 10 }} />
+                            {isOpen ? "Hide advanced" : hasOverride ? "Advanced (overridden)" : "Advanced"}
+                          </button>
+                        );
+                      })()}
                     </div>
+                    {advancedOpen === risk.id && (() => {
+                      const override = store.riskLinearOverrides[risk.id] ?? {};
+                      const draft = labelDraft[risk.id] ?? "";
+                      return (
+                        <div style={{ marginTop: "0.625rem", padding: "0.625rem 0.75rem", background: "hsla(0,0%,100%,0.02)", border: `1px solid ${BORDER}`, borderRadius: "0.5rem", display: "flex", flexDirection: "column", gap: "0.625rem" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
+                            <span style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "rgba(255,255,255,0.45)" }}>Linear overrides for this risk</span>
+                            <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.35)" }}>· remembered for next ticket from this row</span>
+                          </div>
+                          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
+                            <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.45)", minWidth: 60 }}>Team</span>
+                            <select
+                              value={override.teamKey ?? ""}
+                              onChange={e => setOverride(risk.id, { ...override, teamKey: e.target.value || null })}
+                              disabled={teams.length === 0}
+                              style={{ fontSize: "11px", background: "hsla(0,0%,100%,0.06)", border: `1px solid ${BORDER}`, borderRadius: "4px", padding: "3px 6px", color: "rgba(255,255,255,0.85)", outline: "none", minWidth: "220px" }}
+                            >
+                              <option value="">— Use workspace default ({defaultTeamLabel ?? (teams[0] ? `${teams[0].key}` : "auto")}) —</option>
+                              {teams.map(t => (
+                                <option key={t.id} value={t.key}>{t.key} · {t.name}</option>
+                              ))}
+                            </select>
+                            {teamsErr && <span style={{ fontSize: "10px", color: "#f97316" }}>{teamsErr}</span>}
+                          </div>
+                          <div style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem", flexWrap: "wrap" }}>
+                            <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.45)", minWidth: 60, paddingTop: 4 }}>Labels</span>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem", flex: 1, minWidth: 220 }}>
+                              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.25rem" }}>
+                                {(override.labels ?? []).map(label => (
+                                  <span key={label} style={{ display: "inline-flex", alignItems: "center", gap: "4px", fontSize: "10px", padding: "2px 6px", borderRadius: "3px", background: `${ACCENT}20`, color: ACCENT, border: `1px solid ${ACCENT}40` }}>
+                                    {label}
+                                    <button onClick={() => removeLabel(risk.id, override, label)} style={{ background: "transparent", border: "none", color: ACCENT, cursor: "pointer", padding: 0, display: "flex", alignItems: "center" }} aria-label={`Remove label ${label}`}>
+                                      <X style={{ width: 9, height: 9 }} />
+                                    </button>
+                                  </span>
+                                ))}
+                                {(!override.labels || override.labels.length === 0) && (
+                                  <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.3)" }}>None — domain & severity tags are still added automatically.</span>
+                                )}
+                              </div>
+                              <div style={{ display: "flex", gap: "0.375rem", alignItems: "center" }}>
+                                <input
+                                  value={draft}
+                                  onChange={e => setLabelDraft(d => ({ ...d, [risk.id]: e.target.value }))}
+                                  onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); addLabel(risk.id, override); } }}
+                                  placeholder="e.g. sla:p1 or customer:acme"
+                                  style={{ fontSize: "11px", background: "hsla(0,0%,100%,0.06)", border: `1px solid ${BORDER}`, borderRadius: "4px", padding: "3px 6px", color: "rgba(255,255,255,0.85)", outline: "none", flex: 1, minWidth: 160 }}
+                                />
+                                <button onClick={() => addLabel(risk.id, override)} disabled={!draft.trim()} style={{ fontSize: "10px", fontWeight: 700, padding: "3px 9px", borderRadius: "4px", background: draft.trim() ? `${ACCENT}25` : "hsla(0,0%,100%,0.04)", border: `1px solid ${draft.trim() ? `${ACCENT}50` : BORDER}`, color: draft.trim() ? ACCENT : "rgba(255,255,255,0.3)", cursor: draft.trim() ? "pointer" : "not-allowed" }}>Add</button>
+                              </div>
+                            </div>
+                          </div>
+                          {(override.teamKey || (override.labels && override.labels.length > 0)) && (
+                            <div>
+                              <button onClick={() => setOverride(risk.id, null)} style={{ fontSize: "10px", padding: "3px 9px", borderRadius: "4px", background: "transparent", border: `1px solid ${BORDER}`, color: "rgba(255,255,255,0.55)", cursor: "pointer" }}>Clear overrides</button>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
               )}

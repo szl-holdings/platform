@@ -46,7 +46,13 @@ import { jsonObjectBodySchema, validateBody } from "../lib/validation";
 const NAMESPACE = "szl.actionStore";
 const KEY = "default";
 
-const TOP_LEVEL_KEYS = ["riskOwners", "riskActions", "oppDecisions", "recDecisions"] as const;
+const TOP_LEVEL_KEYS = [
+  "riskOwners",
+  "riskActions",
+  "oppDecisions",
+  "recDecisions",
+  "riskLinearOverrides",
+] as const;
 type TopLevelKey = typeof TOP_LEVEL_KEYS[number];
 
 type ActionStore = Record<TopLevelKey, Record<string, unknown>>;
@@ -56,10 +62,17 @@ const EMPTY_STORE: ActionStore = {
   riskActions: {},
   oppDecisions: {},
   recDecisions: {},
+  riskLinearOverrides: {},
 };
 
 function normalize(raw: unknown): ActionStore {
-  const out: ActionStore = { riskOwners: {}, riskActions: {}, oppDecisions: {}, recDecisions: {} };
+  const out: ActionStore = {
+    riskOwners: {},
+    riskActions: {},
+    oppDecisions: {},
+    recDecisions: {},
+    riskLinearOverrides: {},
+  };
   if (raw && typeof raw === "object") {
     for (const k of TOP_LEVEL_KEYS) {
       const v = (raw as Record<string, unknown>)[k];
@@ -78,10 +91,10 @@ async function loadStore(): Promise<ActionStore> {
       .from(platformSettingsTable)
       .where(and(eq(platformSettingsTable.namespace, NAMESPACE), eq(platformSettingsTable.key, KEY)))
       .limit(1);
-    if (!row) return { ...EMPTY_STORE, riskOwners: {}, riskActions: {}, oppDecisions: {}, recDecisions: {} };
+    if (!row) return { riskOwners: {}, riskActions: {}, oppDecisions: {}, recDecisions: {}, riskLinearOverrides: {} };
     return normalize(row.value);
   } catch {
-    return { riskOwners: {}, riskActions: {}, oppDecisions: {}, recDecisions: {} };
+    return { riskOwners: {}, riskActions: {}, oppDecisions: {}, recDecisions: {}, riskLinearOverrides: {} };
   }
 }
 
@@ -115,6 +128,7 @@ function mergePatch(current: ActionStore, patch: Record<string, unknown>): Actio
     riskActions: { ...current.riskActions },
     oppDecisions: { ...current.oppDecisions },
     recDecisions: { ...current.recDecisions },
+    riskLinearOverrides: { ...current.riskLinearOverrides },
   };
   for (const key of TOP_LEVEL_KEYS) {
     const slice = patch[key];
