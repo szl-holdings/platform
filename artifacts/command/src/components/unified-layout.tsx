@@ -25,7 +25,8 @@ const WORKSPACE_TABS: { mode: WorkspaceMode; label: string; icon: typeof LayoutD
   { mode: "infrastructure", label: "Infrastructure", sublabel: "IMPERIUM", icon: Shield },
 ];
 
-type NavGroup = { section: string; items: { href: string; label: string; icon: typeof LayoutDashboard }[] };
+type NavItemDef = { href: string; label: string; icon: typeof LayoutDashboard; external?: boolean };
+type NavGroup = { section: string; items: NavItemDef[] };
 
 const STRATEGY_NAV: NavGroup[] = [
   {
@@ -33,6 +34,8 @@ const STRATEGY_NAV: NavGroup[] = [
     items: [
       { href: "/strategy/atlas-runtime", label: "Cross-Domain Twin View", icon: Layers },
       { href: "/strategy/worldline-registry", label: "Worldline Registry", icon: GitBranch },
+      { href: "/vessels/atlas-runtime", label: "Vessels ATLAS Runtime", icon: Satellite, external: true },
+      { href: "/terra/atlas-runtime", label: "Terra ATLAS Runtime", icon: Map, external: true },
     ],
   },
   {
@@ -197,19 +200,30 @@ function SectionHeader({ label }: { label: string }) {
   );
 }
 
-function NavItem({ href, label, icon: Icon, isActive, accent, badge }: {
-  href: string; label: string; icon: typeof LayoutDashboard; isActive: boolean; accent: string; badge?: ReactNode;
+function NavItem({ href, label, icon: Icon, isActive, accent, badge, external }: {
+  href: string; label: string; icon: typeof LayoutDashboard; isActive: boolean; accent: string; badge?: ReactNode; external?: boolean;
 }) {
-  return (
-    <Link
-      href={href}
-      className="flex items-center gap-2 px-2.5 py-[5px] text-[10px] font-medium transition-all relative group rounded"
-      style={{ color: isActive ? accent : "rgba(255,255,255,0.5)", background: isActive ? `${accent}12` : "transparent" }}
-    >
+  const className = "flex items-center gap-2 px-2.5 py-[5px] text-[10px] font-medium transition-all relative group rounded";
+  const style = { color: isActive ? accent : "rgba(255,255,255,0.5)", background: isActive ? `${accent}12` : "transparent" } as const;
+  const inner = (
+    <>
       {isActive && <div className="absolute left-0 top-1 bottom-1 w-[2px] rounded-r" style={{ background: accent }} />}
       <Icon className="w-3 h-3 shrink-0" style={{ color: isActive ? accent : "rgba(255,255,255,0.3)", opacity: isActive ? 1 : 0.7 }} />
       <span className="flex-1 truncate">{label}</span>
       {badge}
+      {external && <ChevronRight className="w-2.5 h-2.5 shrink-0 -rotate-45" style={{ color: "rgba(255,255,255,0.25)" }} />}
+    </>
+  );
+  if (external) {
+    return (
+      <a href={href} className={className} style={style}>
+        {inner}
+      </a>
+    );
+  }
+  return (
+    <Link href={href} className={className} style={style}>
+      {inner}
     </Link>
   );
 }
@@ -536,6 +550,7 @@ function UnifiedLayoutInner({ children, mode, onModeChange }: {
                     isActive={isActive}
                     accent={accent}
                     badge={badge}
+                    external={item.external}
                   />
                 );
               })}
