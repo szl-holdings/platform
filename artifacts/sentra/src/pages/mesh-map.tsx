@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Network, Shield, Key, Server, AlertTriangle, ChevronRight, Activity, Bot, Filter } from "lucide-react";
-import { agentMesh, MESH_AGENT_DISPLAY_NAMES, type MeshSecret, type McpServer } from "@/data/agent-mesh";
+import { Shield, Key, Server, AlertTriangle, ChevronRight, Activity, Bot, Filter, RefreshCw } from "lucide-react";
+import { MESH_AGENT_DISPLAY_NAMES, useAgentMesh } from "@/data/agent-mesh";
 import { cn } from "@szl-holdings/shared-ui/utils";
 
 type FilterChip = "all" | "critical" | "secrets" | "outbound" | "cross-agent";
@@ -43,7 +43,8 @@ function SubIndexBar({ label, value }: { label: string; value: number }) {
 export default function MeshMap() {
   const [activeFilter, setActiveFilter] = useState<FilterChip>("all");
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
-  const { runtimes, mcpServers, secrets, exposures, resilienceIndex } = agentMesh;
+  const { state, source, loading, refresh, scannedFiles } = useAgentMesh();
+  const { runtimes, mcpServers, secrets, exposures, resilienceIndex } = state;
 
   const criticalExposureIds = new Set(
     exposures.filter(e => e.severity === "critical").flatMap(e => [
@@ -90,20 +91,49 @@ export default function MeshMap() {
           <h1 className="text-3xl font-display font-bold text-slate-100">Mesh Map</h1>
           <p className="text-slate-400 mt-1">Agent runtime → secret/token → MCP server → egress topology</p>
         </div>
-        <div className={cn(
-          "flex items-center gap-4 px-5 py-3 rounded-lg border",
-          GRADE_BG[resilienceIndex.grade]
-        )}>
-          <div className="text-center">
-            <div className="text-[10px] text-slate-500 font-mono uppercase mb-0.5">Mesh Resilience Index</div>
-            <div className={cn("text-3xl font-display font-bold", GRADE_COLOR[resilienceIndex.grade])}>
-              {resilienceIndex.grade} · {resilienceIndex.overall}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => { void refresh(); }}
+            disabled={loading}
+            className={cn(
+              "flex items-center gap-2 px-3 py-2 rounded border text-[11px] font-mono uppercase font-bold transition-colors",
+              loading
+                ? "border-slate-700 bg-slate-800 text-slate-500 cursor-wait"
+                : "border-slate-700 bg-slate-800/60 text-slate-300 hover:border-red-500/40 hover:text-red-300"
+            )}
+            title="Re-run telemetry scan against configured MCP config files"
+          >
+            <RefreshCw className={cn("w-3 h-3", loading && "animate-spin")} />
+            {loading ? "Scanning…" : "Rescan"}
+          </button>
+          <div className={cn(
+            "flex items-center gap-4 px-5 py-3 rounded-lg border",
+            GRADE_BG[resilienceIndex.grade]
+          )}>
+            <div className="text-center">
+              <div className="text-[10px] text-slate-500 font-mono uppercase mb-0.5 flex items-center justify-center gap-1.5">
+                Mesh Resilience Index
+                <span className={cn(
+                  "text-[8px] px-1 py-0.5 rounded border font-mono",
+                  source === "live"
+                    ? "border-emerald-500/40 text-emerald-400 bg-emerald-500/10"
+                    : "border-slate-600 text-slate-400 bg-slate-800/40"
+                )}>
+                  {source === "live" ? "LIVE" : "SEED"}
+                </span>
+              </div>
+              <div className={cn("text-3xl font-display font-bold", GRADE_COLOR[resilienceIndex.grade])}>
+                {resilienceIndex.grade} · {resilienceIndex.overall}
+              </div>
             </div>
-          </div>
-          <div className="w-px h-10 bg-slate-700" />
-          <div className="text-[10px] text-slate-500 font-mono">
-            <div>Computed {new Date(resilienceIndex.computedAt).toLocaleTimeString()}</div>
-            <div className="mt-1">{exposures.filter(e => e.status === "open").length} open exposures</div>
+            <div className="w-px h-10 bg-slate-700" />
+            <div className="text-[10px] text-slate-500 font-mono">
+              <div>Computed {new Date(resilienceIndex.computedAt).toLocaleTimeString()}</div>
+              <div className="mt-1">{exposures.filter(e => e.status === "open").length} open exposures</div>
+              {source === "live" && scannedFiles.length > 0 && (
+                <div className="mt-1 text-emerald-400/80">{scannedFiles.length} file{scannedFiles.length === 1 ? "" : "s"} scanned</div>
+              )}
+            </div>
           </div>
         </div>
       </header>

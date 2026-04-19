@@ -156,6 +156,11 @@ const PUBLIC_PREFIXES = [
   // Infrastructure status — lightweight public health summary used by the
   // Legatus infrastructure console to show live AquilaScore and threat level.
   "/api/infrastructure/",
+  // Agent Mesh telemetry — read-only GET state/index plus POST scan that
+  // re-reads local config files and refreshes the resilience index. Public
+  // so Sentra's Mesh Map and Pulse's MeshCard can render live data in the
+  // unauthenticated demo experience.
+  "/api/agent-mesh/",
   // Pulse one-click email unsubscribe — token-protected, accessed from
   // recipient's inbox without a session. Mounted before authMiddleware in
   // routes/pulse.ts; this entry whitelists it past the global auth enforcer.

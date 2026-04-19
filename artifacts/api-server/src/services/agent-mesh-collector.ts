@@ -1,0 +1,897 @@
+import fs from "fs";
+import path from "path";
+import os from "os";
+import crypto from "crypto";
+import { db } from "@szl-holdings/db";
+import {
+  agentMeshRuntimesTable,
+  agentMeshMcpServersTable,
+  agentMeshSecretsTable,
+  agentMeshEdgesTable,
+  agentMeshExposuresTable,
+  agentMeshContainmentRulesTable,
+  agentMeshDriftSnapshotsTable,
+  agentMeshResilienceIndexTable,
+} from "@szl-holdings/db";
+import { sql, desc } from "drizzle-orm";
+import { logger } from "../lib/logger";
+
+export type TrustState = "trusted" | "unverified" | "quarantined";
+
+interface RuntimeRow {
+  id: string;
+  name: string;
+  version: string;
+  sourceRegistry: string;
+  trustState: TrustState;
+  configFiles: string[];
+  activeAgentIds: string[];
+  lastSeen: string;
+}
+
+interface McpRow {
+  id: string;
+  name: string;
+  packageRef: string;
+  version: string;
+  pinned: boolean;
+  sourceRegistry: string;
+  trustState: TrustState;
+  runtimeIds: string[];
+  allowedEgressDomains: string[];
+  detectedEgressDomains: string[];
+  lastSeen: string;
+}
+
+interface SecretRow {
+  id: string;
+  label: string;
+  format: "github-pat" | "api-key" | "oauth-token" | "env-var";
+  foundInFile: string;
+  entropy: number;
+  reachableByAgentIds: string[];
+  reachableByMcpIds: string[];
+  lastDetectedAt: string;
+}
+
+interface EdgeRow {
+  id: string;
+  agentId: string;
+  mcpServerId: string;
+  tools: string[];
+  dataReadPaths: string[];
+  detectedAt: string;
+}
+
+interface ExposureRow {
+  id: string;
+  title: string;
+  severity: "critical" | "high" | "medium" | "low";
+  affectedAgentIds: string[];
+  affectedSecretIds: string[];
+  affectedMcpIds: string[];
+  explanation: string;
+  owaspCategory: string;
+  owaspRef: string;
+  cveRefs: string[];
+  fixType: string;
+  fixLabel: string;
+  proofHash: string;
+  status: "open" | "fix-pending" | "resolved";
+  detectedAt: string;
+}
+
+interface ResilienceIndexRow {
+  overall: number;
+  grade: "A" | "B" | "C" | "D" | "F";
+  secretHygiene: number;
+  permissionSurface: number;
+  supplyChain: number;
+  egressContainment: number;
+  scheduleHygiene: number;
+  instructionTamperingRisk: number;
+  crossAgentBlastRadius: number;
+  openExposures: number;
+  pendingApprovals: number;
+  topExposure: string | null;
+  computedAt: string;
+}
+
+export interface ScanResult {
+  scannedFiles: string[];
+  runtimes: RuntimeRow[];
+  mcpServers: McpRow[];
+  secrets: SecretRow[];
+  edges: EdgeRow[];
+  exposures: ExposureRow[];
+  resilienceIndex: ResilienceIndexRow;
+  scannedAt: string;
+}
+
+// ---------- Path discovery ----------
+
+const ENV_PATHS_KEY = "AGENT_MESH_CONFIG_PATHS";
+
+function defaultConfigCandidates(): string[] {
+  const home = os.homedir();
+  const cwd = process.cwd();
+  return [
+    // Claude Desktop
+    path.join(home, "Library", "Application Support", "Claude", "claude_desktop_config.json"),
+    path.join(home, ".config", "Claude", "claude_desktop_config.json"),
+    path.join(home, "AppData", "Roaming", "Claude", "claude_desktop_config.json"),
+    // Cursor
+    path.join(home, ".cursor", "mcp.json"),
+    // Claude Code
+    path.join(home, ".claude", "settings.json"),
+    path.join(home, ".claude", "CLAUDE.md"),
+    path.join(home, "CLAUDE.md"),
+    path.join(cwd, "CLAUDE.md"),
+    // Codex
+    path.join(home, ".codex", "config.json"),
+    // Generic mcp.json fallbacks
+    path.join(cwd, "mcp.json"),
+    path.join(cwd, ".mcp.json"),
+  ];
+}
+
+export function resolveScanPaths(extra: string[] = []): string[] {
+  const env = (process.env[ENV_PATHS_KEY] ?? "")
+    .split(/[,\n]/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const all = [...env, ...extra, ...defaultConfigCandidates()];
+  return Array.from(new Set(all.map((p) => path.resolve(p))));
+}
+
+// ---------- Parsing helpers ----------
+
+const SECRET_PATTERNS: { format: SecretRow["format"]; rx: RegExp }[] = [
+  { format: "github-pat", rx: /^(ghp|ghs|gho|ghr|github_pat)_[A-Za-z0-9_]{20,}$/ },
+  { format: "oauth-token", rx: /^(xox[bopa]|sk-)[A-Za-z0-9-_]{16,}$/ },
+  { format: "api-key", rx: /^[A-Za-z0-9_\-]{24,}$/ },
+];
+
+function shannonEntropy(s: string): number {
+  if (!s) return 0;
+  const map = new Map<string, number>();
+  for (const ch of s) map.set(ch, (map.get(ch) ?? 0) + 1);
+  let h = 0;
+  for (const c of map.values()) {
+    const p = c / s.length;
+    h -= p * Math.log2(p);
+  }
+  return Number(h.toFixed(2));
+}
+
+function classifySecret(label: string, value: string): SecretRow["format"] | null {
+  const upper = label.toUpperCase();
+  if (upper.includes("TOKEN") && /^(ghp|ghs|gho|ghr|github_pat)_/.test(value)) return "github-pat";
+  for (const { format, rx } of SECRET_PATTERNS) {
+    if (rx.test(value)) return format;
+  }
+  if (/(KEY|TOKEN|SECRET|PASSWORD|PAT)$/i.test(label) && value.length >= 16) return "env-var";
+  return null;
+}
+
+function safeParseJson(raw: string): Record<string, unknown> | null {
+  try { return JSON.parse(raw) as Record<string, unknown>; } catch { return null; }
+}
+
+function trustForRegistry(registry: string, packageRef: string): TrustState {
+  if (registry === "anthropic.com" || registry === "cursor.sh") return "trusted";
+  if (packageRef.startsWith("@modelcontextprotocol/")) return "trusted";
+  if (/^mcp-(ext|unknown|test)/.test(packageRef)) return "quarantined";
+  return "unverified";
+}
+
+function inferRegistryFromPackage(pkg: string): string {
+  if (pkg.startsWith("@modelcontextprotocol/") || pkg.startsWith("mcp-")) return "registry.npmjs.org";
+  return "unknown";
+}
+
+function isPinnedArgs(args: string[] | undefined): boolean {
+  if (!args) return false;
+  return args.some((a) => /@\d+\.\d+\.\d+(?:[-+][\w.-]+)?$/.test(a));
+}
+
+function gradeFor(overall: number): "A" | "B" | "C" | "D" | "F" {
+  if (overall >= 90) return "A";
+  if (overall >= 75) return "B";
+  if (overall >= 60) return "C";
+  if (overall >= 40) return "D";
+  return "F";
+}
+
+// ---------- Per-file collectors ----------
+
+interface ParseContext {
+  runtimes: Map<string, RuntimeRow>;
+  mcpServers: Map<string, McpRow>;
+  secrets: Map<string, SecretRow>;
+  edges: EdgeRow[];
+  exposures: ExposureRow[];
+  scannedFiles: string[];
+}
+
+function ensureMcp(ctx: ParseContext, name: string, runtimeId: string, raw: { command?: string; args?: string[]; env?: Record<string, string> }): McpRow {
+  const id = `mcp-${name}`;
+  let row = ctx.mcpServers.get(id);
+  const args = raw.args ?? [];
+  const packageRef = args.find((a) => a.startsWith("@") || a.startsWith("mcp-")) ?? args[args.length - 1] ?? name;
+  const cleanRef = packageRef.replace(/@\d.*$/, "");
+  const versionMatch = packageRef.match(/@(\d[\w.\-+]*)$/);
+  const version = versionMatch ? versionMatch[1] : "unpinned";
+  const sourceRegistry = inferRegistryFromPackage(cleanRef);
+  if (!row) {
+    row = {
+      id,
+      name,
+      packageRef: cleanRef,
+      version,
+      pinned: isPinnedArgs(args),
+      sourceRegistry,
+      trustState: trustForRegistry(sourceRegistry, cleanRef),
+      runtimeIds: [],
+      allowedEgressDomains: [],
+      detectedEgressDomains: [],
+      lastSeen: new Date().toISOString(),
+    };
+    ctx.mcpServers.set(id, row);
+  }
+  if (!row.runtimeIds.includes(runtimeId)) row.runtimeIds.push(runtimeId);
+  if (raw.env) {
+    for (const [envKey, envVal] of Object.entries(raw.env)) {
+      // Detect domains in env (e.g. ALLOWED_HOSTS or BASE_URL)
+      const domainMatch = String(envVal).match(/https?:\/\/([^/\s"]+)/g);
+      if (domainMatch) {
+        for (const m of domainMatch) {
+          const host = m.replace(/^https?:\/\//, "");
+          if (!row.allowedEgressDomains.includes(host)) row.allowedEgressDomains.push(host);
+        }
+      }
+      // Secret extraction
+      const fmt = classifySecret(envKey, String(envVal));
+      if (fmt) {
+        const secretId = `secret-${envKey.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
+        const existing = ctx.secrets.get(secretId);
+        const reachableMcpIds = existing?.reachableByMcpIds ?? [];
+        if (!reachableMcpIds.includes(id)) reachableMcpIds.push(id);
+        ctx.secrets.set(secretId, {
+          id: secretId,
+          label: envKey,
+          format: fmt,
+          foundInFile: ctx.scannedFiles[ctx.scannedFiles.length - 1] ?? "",
+          entropy: shannonEntropy(String(envVal)),
+          reachableByAgentIds: existing?.reachableByAgentIds ?? [],
+          reachableByMcpIds: reachableMcpIds,
+          lastDetectedAt: new Date().toISOString(),
+        });
+      }
+    }
+  }
+  return row;
+}
+
+function parseClaudeDesktopConfig(ctx: ParseContext, file: string, contents: string): void {
+  const json = safeParseJson(contents);
+  if (!json) return;
+  const runtimeId = "rt-claude-desktop";
+  const agentId = "agent-claude-main";
+  const runtime: RuntimeRow = ctx.runtimes.get(runtimeId) ?? {
+    id: runtimeId,
+    name: "Claude Desktop",
+    version: String(json.version ?? "0.9.x"),
+    sourceRegistry: "anthropic.com",
+    trustState: "trusted",
+    configFiles: [],
+    activeAgentIds: [agentId],
+    lastSeen: new Date().toISOString(),
+  };
+  if (!runtime.configFiles.includes(file)) runtime.configFiles.push(file);
+  ctx.runtimes.set(runtimeId, runtime);
+
+  const servers = (json.mcpServers as Record<string, { command?: string; args?: string[]; env?: Record<string, string> }>) ?? {};
+  for (const [name, srv] of Object.entries(servers)) {
+    const mcp = ensureMcp(ctx, name, runtimeId, srv);
+    ctx.edges.push({
+      id: `edge-${agentId}-${mcp.id}`,
+      agentId,
+      mcpServerId: mcp.id,
+      tools: [],
+      dataReadPaths: [],
+      detectedAt: new Date().toISOString(),
+    });
+    // Mark secrets reachable by this agent
+    for (const sec of ctx.secrets.values()) {
+      if (sec.reachableByMcpIds.includes(mcp.id) && !sec.reachableByAgentIds.includes(agentId)) {
+        sec.reachableByAgentIds.push(agentId);
+      }
+    }
+  }
+}
+
+function parseCursorMcp(ctx: ParseContext, file: string, contents: string): void {
+  const json = safeParseJson(contents);
+  if (!json) return;
+  const runtimeId = "rt-cursor";
+  const agentId = "agent-cursor-composer";
+  const runtime: RuntimeRow = ctx.runtimes.get(runtimeId) ?? {
+    id: runtimeId,
+    name: "Cursor",
+    version: "unknown",
+    sourceRegistry: "cursor.sh",
+    trustState: "trusted",
+    configFiles: [],
+    activeAgentIds: [agentId],
+    lastSeen: new Date().toISOString(),
+  };
+  if (!runtime.configFiles.includes(file)) runtime.configFiles.push(file);
+  ctx.runtimes.set(runtimeId, runtime);
+
+  const servers = (json.mcpServers as Record<string, { command?: string; args?: string[]; env?: Record<string, string> }>) ?? {};
+  for (const [name, srv] of Object.entries(servers)) {
+    const mcp = ensureMcp(ctx, name, runtimeId, srv);
+    ctx.edges.push({
+      id: `edge-${agentId}-${mcp.id}`,
+      agentId,
+      mcpServerId: mcp.id,
+      tools: [],
+      dataReadPaths: [],
+      detectedAt: new Date().toISOString(),
+    });
+    for (const sec of ctx.secrets.values()) {
+      if (sec.reachableByMcpIds.includes(mcp.id) && !sec.reachableByAgentIds.includes(agentId)) {
+        sec.reachableByAgentIds.push(agentId);
+      }
+    }
+  }
+}
+
+function parseClaudeCodeSettings(ctx: ParseContext, file: string, contents: string): void {
+  const json = safeParseJson(contents);
+  if (!json) return;
+  const runtimeId = "rt-claude-code";
+  const agentId = "agent-claude-code";
+  const runtime: RuntimeRow = ctx.runtimes.get(runtimeId) ?? {
+    id: runtimeId,
+    name: "Claude Code",
+    version: String(json.version ?? "unknown"),
+    sourceRegistry: "registry.npmjs.org",
+    trustState: "trusted",
+    configFiles: [],
+    activeAgentIds: [agentId],
+    lastSeen: new Date().toISOString(),
+  };
+  if (!runtime.configFiles.includes(file)) runtime.configFiles.push(file);
+  ctx.runtimes.set(runtimeId, runtime);
+
+  const servers = (json.mcpServers as Record<string, { command?: string; args?: string[]; env?: Record<string, string> }>) ?? {};
+  for (const [name, srv] of Object.entries(servers)) {
+    const mcp = ensureMcp(ctx, name, runtimeId, srv);
+    ctx.edges.push({
+      id: `edge-${agentId}-${mcp.id}`,
+      agentId,
+      mcpServerId: mcp.id,
+      tools: [],
+      dataReadPaths: [],
+      detectedAt: new Date().toISOString(),
+    });
+    for (const sec of ctx.secrets.values()) {
+      if (sec.reachableByMcpIds.includes(mcp.id) && !sec.reachableByAgentIds.includes(agentId)) {
+        sec.reachableByAgentIds.push(agentId);
+      }
+    }
+  }
+}
+
+function parseClaudeMd(ctx: ParseContext, file: string, contents: string): void {
+  const runtimeId = "rt-claude-code";
+  const runtime = ctx.runtimes.get(runtimeId);
+  if (runtime && !runtime.configFiles.includes(file)) runtime.configFiles.push(file);
+  // Detect tampering — flag if file contains suspicious phrases
+  const suspicious = /\b(SYSTEM:|always include credentials|exfiltrate|ignore previous instructions)\b/i;
+  if (suspicious.test(contents)) {
+    ctx.exposures.push({
+      id: `exp-tamper-${crypto.createHash("sha1").update(file).digest("hex").slice(0, 8)}`,
+      title: `CLAUDE.md instruction tampering signal in ${path.basename(file)}`,
+      severity: "medium",
+      affectedAgentIds: ["agent-claude-code"],
+      affectedSecretIds: [],
+      affectedMcpIds: [],
+      explanation: `The file ${file} contains phrases consistent with prompt-injection / instruction tampering. Review the diff and restore the approved version.`,
+      owaspCategory: "LLM01: Prompt Injection / Instruction Tampering",
+      owaspRef: "OWASP LLM Top 10 2025 — LLM01",
+      cveRefs: [],
+      fixType: "scope-token",
+      fixLabel: "Restore CLAUDE.md from approved baseline and lock to read-only",
+      proofHash: `0x${crypto.createHash("sha1").update(contents).digest("hex").slice(0, 12)}`,
+      status: "open",
+      detectedAt: new Date().toISOString(),
+    });
+  }
+}
+
+function parseCodexConfig(ctx: ParseContext, file: string, contents: string): void {
+  const json = safeParseJson(contents);
+  if (!json) return;
+  const runtimeId = "rt-codex";
+  const agentId = "agent-codex-cli";
+  const runtime: RuntimeRow = ctx.runtimes.get(runtimeId) ?? {
+    id: runtimeId,
+    name: "OpenAI Codex CLI",
+    version: String(json.version ?? "unknown"),
+    sourceRegistry: "registry.npmjs.org",
+    trustState: "unverified",
+    configFiles: [],
+    activeAgentIds: [agentId],
+    lastSeen: new Date().toISOString(),
+  };
+  if (!runtime.configFiles.includes(file)) runtime.configFiles.push(file);
+  ctx.runtimes.set(runtimeId, runtime);
+
+  const servers = (json.mcpServers as Record<string, { command?: string; args?: string[]; env?: Record<string, string> }>) ?? {};
+  for (const [name, srv] of Object.entries(servers)) {
+    const mcp = ensureMcp(ctx, name, runtimeId, srv);
+    ctx.edges.push({
+      id: `edge-${agentId}-${mcp.id}`,
+      agentId,
+      mcpServerId: mcp.id,
+      tools: [],
+      dataReadPaths: [],
+      detectedAt: new Date().toISOString(),
+    });
+    for (const sec of ctx.secrets.values()) {
+      if (sec.reachableByMcpIds.includes(mcp.id) && !sec.reachableByAgentIds.includes(agentId)) {
+        sec.reachableByAgentIds.push(agentId);
+      }
+    }
+  }
+}
+
+// ---------- Resilience computation ----------
+
+function computeResilienceIndex(ctx: ParseContext): ResilienceIndexRow {
+  const runtimes = [...ctx.runtimes.values()];
+  const mcps = [...ctx.mcpServers.values()];
+  const secrets = [...ctx.secrets.values()];
+
+  // Synthesize core exposures from collected facts.
+  const synthesized: ExposureRow[] = [];
+
+  // 1) Cross-agent secret blast radius
+  for (const sec of secrets) {
+    if (sec.reachableByAgentIds.length >= 2) {
+      synthesized.push({
+        id: `exp-secret-${sec.id}`,
+        title: `${sec.label} reachable by ${sec.reachableByAgentIds.length} agents and ${sec.reachableByMcpIds.length} MCP servers — blast radius ${sec.reachableByAgentIds.length >= 3 ? "critical" : "high"}`,
+        severity: sec.reachableByAgentIds.length >= 3 ? "critical" : "high",
+        affectedAgentIds: sec.reachableByAgentIds,
+        affectedSecretIds: [sec.id],
+        affectedMcpIds: sec.reachableByMcpIds,
+        explanation: `Secret ${sec.label} (${sec.format}) is reachable across multiple agents via shared MCP servers. Compromise of any single agent grants full access. Rotate and scope to least-privilege.`,
+        owaspCategory: "LLM08: Excessive Agency / Credential Exfiltration",
+        owaspRef: "OWASP LLM Top 10 2025 — LLM08",
+        cveRefs: [],
+        fixType: "rotate-secret",
+        fixLabel: `Rotate ${sec.label} and scope to least-privilege`,
+        proofHash: `0x${crypto.createHash("sha1").update(sec.id + sec.lastDetectedAt).digest("hex").slice(0, 12)}`,
+        status: "open",
+        detectedAt: new Date().toISOString(),
+      });
+    }
+  }
+
+  // 2) Quarantined / unverified MCP servers
+  for (const mcp of mcps) {
+    if (mcp.trustState === "quarantined") {
+      synthesized.push({
+        id: `exp-quarantine-${mcp.id}`,
+        title: `Unverified MCP server ${mcp.name} detected — supply chain injection risk`,
+        severity: "critical",
+        affectedAgentIds: [],
+        affectedSecretIds: [],
+        affectedMcpIds: [mcp.id],
+        explanation: `${mcp.packageRef} was registered without registry verification. Quarantine immediately and revoke agent access.`,
+        owaspCategory: "Agentic-03: Supply Chain Injection / MCP Trojan",
+        owaspRef: "OWASP Agentic AI Top 10 2026 — A03",
+        cveRefs: [],
+        fixType: "quarantine-server",
+        fixLabel: `Quarantine ${mcp.name} and revoke agent MCP access`,
+        proofHash: `0x${crypto.createHash("sha1").update(mcp.id + mcp.lastSeen).digest("hex").slice(0, 12)}`,
+        status: "fix-pending",
+        detectedAt: new Date().toISOString(),
+      });
+    }
+  }
+
+  // 3) Unpinned servers
+  const unpinned = mcps.filter((m) => !m.pinned);
+  if (unpinned.length > 0) {
+    synthesized.push({
+      id: "exp-unpinned",
+      title: `${unpinned.length} MCP server${unpinned.length === 1 ? "" : "s"} unpinned — version drift attack surface`,
+      severity: "high",
+      affectedAgentIds: [],
+      affectedSecretIds: [],
+      affectedMcpIds: unpinned.map((m) => m.id),
+      explanation: `These servers rely on floating registry resolution. A malicious publisher could inject a tampered version on the next install.`,
+      owaspCategory: "Agentic-03: Supply Chain Injection",
+      owaspRef: "OWASP Agentic AI Top 10 2026 — A03",
+      cveRefs: [],
+      fixType: "pin-version",
+      fixLabel: `Pin ${unpinned.map((m) => m.name).slice(0, 5).join(", ")}`,
+      proofHash: `0x${crypto.createHash("sha1").update(unpinned.map((m) => m.id).join(",")).digest("hex").slice(0, 12)}`,
+      status: "open",
+      detectedAt: new Date().toISOString(),
+    });
+  }
+
+  // Combine with already-collected exposures (e.g. CLAUDE.md tampering).
+  const allExposures = [...ctx.exposures, ...synthesized];
+  ctx.exposures.splice(0, ctx.exposures.length, ...allExposures);
+
+  const openCount = allExposures.filter((e) => e.status !== "resolved").length;
+  const criticalCount = allExposures.filter((e) => e.severity === "critical").length;
+  const highCount = allExposures.filter((e) => e.severity === "high").length;
+
+  // Subscores (0-100, higher is healthier).
+  const secretHygiene = Math.max(0, 100 - secrets.reduce((acc, s) => acc + (s.reachableByAgentIds.length >= 2 ? 35 : 10), 0));
+  const permissionSurface = Math.max(0, 100 - ctx.edges.length * 4);
+  const supplyChain = Math.max(0, 100 - unpinned.length * 12 - mcps.filter((m) => m.trustState !== "trusted").length * 18);
+  const egressContainment = Math.max(0, 100 - mcps.reduce((acc, m) => {
+    const overflow = Math.max(0, m.detectedEgressDomains.length - m.allowedEgressDomains.length);
+    return acc + overflow * 12;
+  }, 0));
+  const scheduleHygiene = runtimes.length > 0 ? 80 : 100;
+  const instructionTamperingRisk = Math.max(0, 100 - ctx.exposures.filter((e) => e.owaspCategory.startsWith("LLM01")).length * 35);
+  const crossAgentBlastRadius = Math.max(0, 100 - secrets.reduce((acc, s) => acc + (s.reachableByAgentIds.length * 15), 0));
+
+  const overall = Math.round(
+    secretHygiene * 0.22 +
+      permissionSurface * 0.16 +
+      supplyChain * 0.18 +
+      egressContainment * 0.13 +
+      scheduleHygiene * 0.07 +
+      instructionTamperingRisk * 0.10 +
+      crossAgentBlastRadius * 0.14,
+  );
+
+  const top = [...allExposures].sort((a, b) => severityWeight(b.severity) - severityWeight(a.severity))[0];
+
+  return {
+    overall,
+    grade: gradeFor(overall),
+    secretHygiene: Math.round(secretHygiene),
+    permissionSurface: Math.round(permissionSurface),
+    supplyChain: Math.round(supplyChain),
+    egressContainment: Math.round(egressContainment),
+    scheduleHygiene: Math.round(scheduleHygiene),
+    instructionTamperingRisk: Math.round(instructionTamperingRisk),
+    crossAgentBlastRadius: Math.round(crossAgentBlastRadius),
+    openExposures: openCount,
+    pendingApprovals: criticalCount + Math.min(highCount, 3),
+    topExposure: top?.title ?? null,
+    computedAt: new Date().toISOString(),
+  };
+}
+
+function severityWeight(s: string): number {
+  return { critical: 4, high: 3, medium: 2, low: 1 }[s] ?? 0;
+}
+
+// ---------- Public API ----------
+
+export async function runMeshScan(opts: { extraPaths?: string[]; orgId?: number | null } = {}): Promise<ScanResult> {
+  const candidates = resolveScanPaths(opts.extraPaths ?? []);
+  const ctx: ParseContext = {
+    runtimes: new Map(),
+    mcpServers: new Map(),
+    secrets: new Map(),
+    edges: [],
+    exposures: [],
+    scannedFiles: [],
+  };
+
+  for (const file of candidates) {
+    let stats: fs.Stats;
+    try {
+      stats = fs.statSync(file);
+    } catch {
+      continue;
+    }
+    if (!stats.isFile()) continue;
+    let contents: string;
+    try {
+      contents = fs.readFileSync(file, "utf-8");
+    } catch (err) {
+      logger.debug({ err, file }, "[agent-mesh-collector] failed to read file");
+      continue;
+    }
+    ctx.scannedFiles.push(file);
+    const base = path.basename(file).toLowerCase();
+    try {
+      if (base === "claude_desktop_config.json") parseClaudeDesktopConfig(ctx, file, contents);
+      else if (base === "mcp.json" || base === ".mcp.json") parseCursorMcp(ctx, file, contents);
+      else if (base === "settings.json" && file.includes(".claude")) parseClaudeCodeSettings(ctx, file, contents);
+      else if (base === "claude.md") parseClaudeMd(ctx, file, contents);
+      else if (file.includes(".codex")) parseCodexConfig(ctx, file, contents);
+    } catch (err) {
+      logger.warn({ err, file }, "[agent-mesh-collector] parse error — skipping file");
+    }
+  }
+
+  const resilienceIndex = computeResilienceIndex(ctx);
+
+  const result: ScanResult = {
+    scannedFiles: ctx.scannedFiles,
+    runtimes: [...ctx.runtimes.values()],
+    mcpServers: [...ctx.mcpServers.values()],
+    secrets: [...ctx.secrets.values()],
+    edges: ctx.edges,
+    exposures: ctx.exposures,
+    resilienceIndex,
+    scannedAt: new Date().toISOString(),
+  };
+
+  await persistScan(result, opts.orgId ?? null);
+  return result;
+}
+
+async function persistScan(result: ScanResult, orgId: number | null): Promise<void> {
+  try {
+    // Wipe and reseed the per-org slice so the table reflects the latest scan.
+    await db.execute(sql`DELETE FROM agent_mesh_runtimes WHERE org_id IS NOT DISTINCT FROM ${orgId}`);
+    await db.execute(sql`DELETE FROM agent_mesh_mcp_servers WHERE org_id IS NOT DISTINCT FROM ${orgId}`);
+    await db.execute(sql`DELETE FROM agent_mesh_secrets WHERE org_id IS NOT DISTINCT FROM ${orgId}`);
+    await db.execute(sql`DELETE FROM agent_mesh_edges WHERE org_id IS NOT DISTINCT FROM ${orgId}`);
+    await db.execute(sql`DELETE FROM agent_mesh_exposures WHERE org_id IS NOT DISTINCT FROM ${orgId}`);
+
+    if (result.runtimes.length) {
+      await db.insert(agentMeshRuntimesTable).values(
+        result.runtimes.map((r) => ({
+          id: r.id,
+          orgId,
+          name: r.name,
+          version: r.version,
+          sourceRegistry: r.sourceRegistry,
+          trustState: r.trustState,
+          configFiles: r.configFiles,
+          activeAgentIds: r.activeAgentIds,
+          lastSeen: new Date(r.lastSeen),
+          updatedAt: new Date(),
+        })),
+      );
+    }
+    if (result.mcpServers.length) {
+      await db.insert(agentMeshMcpServersTable).values(
+        result.mcpServers.map((m) => ({
+          id: m.id,
+          orgId,
+          name: m.name,
+          packageRef: m.packageRef,
+          version: m.version,
+          pinned: m.pinned,
+          sourceRegistry: m.sourceRegistry,
+          trustState: m.trustState,
+          runtimeIds: m.runtimeIds,
+          allowedEgressDomains: m.allowedEgressDomains,
+          detectedEgressDomains: m.detectedEgressDomains,
+          lastSeen: new Date(m.lastSeen),
+          updatedAt: new Date(),
+        })),
+      );
+    }
+    if (result.secrets.length) {
+      await db.insert(agentMeshSecretsTable).values(
+        result.secrets.map((s) => ({
+          id: s.id,
+          orgId,
+          label: s.label,
+          format: s.format,
+          foundInFile: s.foundInFile,
+          entropy: s.entropy,
+          reachableByAgentIds: s.reachableByAgentIds,
+          reachableByMcpIds: s.reachableByMcpIds,
+          lastDetectedAt: new Date(s.lastDetectedAt),
+          updatedAt: new Date(),
+        })),
+      );
+    }
+    if (result.edges.length) {
+      await db.insert(agentMeshEdgesTable).values(
+        result.edges.map((e) => ({
+          id: e.id,
+          orgId,
+          agentId: e.agentId,
+          mcpServerId: e.mcpServerId,
+          tools: e.tools,
+          dataReadPaths: e.dataReadPaths,
+          detectedAt: new Date(e.detectedAt),
+        })),
+      );
+    }
+    if (result.exposures.length) {
+      await db.insert(agentMeshExposuresTable).values(
+        result.exposures.map((e) => ({
+          id: e.id,
+          orgId,
+          title: e.title,
+          severity: e.severity,
+          affectedAgentIds: e.affectedAgentIds,
+          affectedSecretIds: e.affectedSecretIds,
+          affectedMcpIds: e.affectedMcpIds,
+          explanation: e.explanation,
+          owaspCategory: e.owaspCategory,
+          owaspRef: e.owaspRef,
+          cveRefs: e.cveRefs,
+          fixType: e.fixType,
+          fixLabel: e.fixLabel,
+          proofHash: e.proofHash,
+          status: e.status,
+          detectedAt: new Date(e.detectedAt),
+          updatedAt: new Date(),
+        })),
+      );
+    }
+
+    await db.insert(agentMeshResilienceIndexTable).values({
+      orgId,
+      overall: result.resilienceIndex.overall,
+      grade: result.resilienceIndex.grade,
+      secretHygiene: result.resilienceIndex.secretHygiene,
+      permissionSurface: result.resilienceIndex.permissionSurface,
+      supplyChain: result.resilienceIndex.supplyChain,
+      egressContainment: result.resilienceIndex.egressContainment,
+      scheduleHygiene: result.resilienceIndex.scheduleHygiene,
+      instructionTamperingRisk: result.resilienceIndex.instructionTamperingRisk,
+      crossAgentBlastRadius: result.resilienceIndex.crossAgentBlastRadius,
+      openExposures: result.resilienceIndex.openExposures,
+      pendingApprovals: result.resilienceIndex.pendingApprovals,
+      topExposure: result.resilienceIndex.topExposure,
+      computedAt: new Date(result.resilienceIndex.computedAt),
+    });
+  } catch (err) {
+    logger.warn({ err }, "[agent-mesh-collector] persistence failed — scan still returned in-memory");
+  }
+}
+
+export interface MeshState {
+  runtimes: RuntimeRow[];
+  mcpServers: McpRow[];
+  secrets: SecretRow[];
+  edges: EdgeRow[];
+  exposures: ExposureRow[];
+  containmentRules: unknown[];
+  driftSnapshots: unknown[];
+  resilienceIndex: ResilienceIndexRow | null;
+  source: "live" | "empty";
+  scannedFiles: string[];
+}
+
+export async function loadMeshState(orgId: number | null = null): Promise<MeshState> {
+  try {
+    const [runtimes, mcps, secrets, edges, exposures, rules, drifts, latestIndex] = await Promise.all([
+      db.execute(sql`SELECT * FROM agent_mesh_runtimes WHERE org_id IS NOT DISTINCT FROM ${orgId}`),
+      db.execute(sql`SELECT * FROM agent_mesh_mcp_servers WHERE org_id IS NOT DISTINCT FROM ${orgId}`),
+      db.execute(sql`SELECT * FROM agent_mesh_secrets WHERE org_id IS NOT DISTINCT FROM ${orgId}`),
+      db.execute(sql`SELECT * FROM agent_mesh_edges WHERE org_id IS NOT DISTINCT FROM ${orgId}`),
+      db.execute(sql`SELECT * FROM agent_mesh_exposures WHERE org_id IS NOT DISTINCT FROM ${orgId}`),
+      db.execute(sql`SELECT * FROM agent_mesh_containment_rules WHERE org_id IS NOT DISTINCT FROM ${orgId}`),
+      db.execute(sql`SELECT * FROM agent_mesh_drift_snapshots WHERE org_id IS NOT DISTINCT FROM ${orgId} ORDER BY changed_at DESC LIMIT 50`),
+      db.select().from(agentMeshResilienceIndexTable).orderBy(desc(agentMeshResilienceIndexTable.computedAt)).limit(1),
+    ]);
+
+    const runtimeRows = (runtimes.rows as Record<string, unknown>[]).map(rowToRuntime);
+    const idx = latestIndex[0];
+
+    const empty = runtimeRows.length === 0 && (mcps.rows as unknown[]).length === 0;
+
+    return {
+      runtimes: runtimeRows,
+      mcpServers: (mcps.rows as Record<string, unknown>[]).map(rowToMcp),
+      secrets: (secrets.rows as Record<string, unknown>[]).map(rowToSecret),
+      edges: (edges.rows as Record<string, unknown>[]).map(rowToEdge),
+      exposures: (exposures.rows as Record<string, unknown>[]).map(rowToExposure),
+      containmentRules: rules.rows as unknown[],
+      driftSnapshots: drifts.rows as unknown[],
+      resilienceIndex: idx ? {
+        overall: idx.overall,
+        grade: idx.grade as "A" | "B" | "C" | "D" | "F",
+        secretHygiene: idx.secretHygiene,
+        permissionSurface: idx.permissionSurface,
+        supplyChain: idx.supplyChain,
+        egressContainment: idx.egressContainment,
+        scheduleHygiene: idx.scheduleHygiene,
+        instructionTamperingRisk: idx.instructionTamperingRisk,
+        crossAgentBlastRadius: idx.crossAgentBlastRadius,
+        openExposures: idx.openExposures,
+        pendingApprovals: idx.pendingApprovals,
+        topExposure: idx.topExposure,
+        computedAt: idx.computedAt instanceof Date ? idx.computedAt.toISOString() : String(idx.computedAt),
+      } : null,
+      source: empty && !idx ? "empty" : "live",
+      scannedFiles: [],
+    };
+  } catch (err) {
+    logger.warn({ err }, "[agent-mesh-collector] loadMeshState failed");
+    return {
+      runtimes: [], mcpServers: [], secrets: [], edges: [], exposures: [],
+      containmentRules: [], driftSnapshots: [], resilienceIndex: null,
+      source: "empty", scannedFiles: [],
+    };
+  }
+}
+
+function rowToRuntime(r: Record<string, unknown>): RuntimeRow {
+  return {
+    id: String(r["id"]),
+    name: String(r["name"]),
+    version: String(r["version"] ?? "unknown"),
+    sourceRegistry: String(r["source_registry"] ?? "unknown"),
+    trustState: (r["trust_state"] as TrustState) ?? "unverified",
+    configFiles: (r["config_files"] as string[]) ?? [],
+    activeAgentIds: (r["active_agent_ids"] as string[]) ?? [],
+    lastSeen: r["last_seen"] instanceof Date ? (r["last_seen"] as Date).toISOString() : String(r["last_seen"]),
+  };
+}
+
+function rowToMcp(r: Record<string, unknown>): McpRow {
+  return {
+    id: String(r["id"]),
+    name: String(r["name"]),
+    packageRef: String(r["package_ref"] ?? ""),
+    version: String(r["version"] ?? "unknown"),
+    pinned: Boolean(r["pinned"]),
+    sourceRegistry: String(r["source_registry"] ?? "unknown"),
+    trustState: (r["trust_state"] as TrustState) ?? "unverified",
+    runtimeIds: (r["runtime_ids"] as string[]) ?? [],
+    allowedEgressDomains: (r["allowed_egress_domains"] as string[]) ?? [],
+    detectedEgressDomains: (r["detected_egress_domains"] as string[]) ?? [],
+    lastSeen: r["last_seen"] instanceof Date ? (r["last_seen"] as Date).toISOString() : String(r["last_seen"]),
+  };
+}
+
+function rowToSecret(r: Record<string, unknown>): SecretRow {
+  return {
+    id: String(r["id"]),
+    label: String(r["label"]),
+    format: (r["format"] as SecretRow["format"]) ?? "env-var",
+    foundInFile: String(r["found_in_file"] ?? ""),
+    entropy: Number(r["entropy"] ?? 0),
+    reachableByAgentIds: (r["reachable_by_agent_ids"] as string[]) ?? [],
+    reachableByMcpIds: (r["reachable_by_mcp_ids"] as string[]) ?? [],
+    lastDetectedAt: r["last_detected_at"] instanceof Date ? (r["last_detected_at"] as Date).toISOString() : String(r["last_detected_at"]),
+  };
+}
+
+function rowToEdge(r: Record<string, unknown>): EdgeRow {
+  return {
+    id: String(r["id"]),
+    agentId: String(r["agent_id"]),
+    mcpServerId: String(r["mcp_server_id"]),
+    tools: (r["tools"] as string[]) ?? [],
+    dataReadPaths: (r["data_read_paths"] as string[]) ?? [],
+    detectedAt: r["detected_at"] instanceof Date ? (r["detected_at"] as Date).toISOString() : String(r["detected_at"]),
+  };
+}
+
+function rowToExposure(r: Record<string, unknown>): ExposureRow {
+  return {
+    id: String(r["id"]),
+    title: String(r["title"]),
+    severity: (r["severity"] as ExposureRow["severity"]) ?? "medium",
+    affectedAgentIds: (r["affected_agent_ids"] as string[]) ?? [],
+    affectedSecretIds: (r["affected_secret_ids"] as string[]) ?? [],
+    affectedMcpIds: (r["affected_mcp_ids"] as string[]) ?? [],
+    explanation: String(r["explanation"] ?? ""),
+    owaspCategory: String(r["owasp_category"] ?? ""),
+    owaspRef: String(r["owasp_ref"] ?? ""),
+    cveRefs: (r["cve_refs"] as string[]) ?? [],
+    fixType: String(r["fix_type"] ?? "scope-token"),
+    fixLabel: String(r["fix_label"] ?? ""),
+    proofHash: String(r["proof_hash"] ?? ""),
+    status: (r["status"] as ExposureRow["status"]) ?? "open",
+    detectedAt: r["detected_at"] instanceof Date ? (r["detected_at"] as Date).toISOString() : String(r["detected_at"]),
+  };
+}

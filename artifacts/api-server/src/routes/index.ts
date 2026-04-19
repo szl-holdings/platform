@@ -67,6 +67,7 @@ import lyteSurfacesRouter from "./lyte-surfaces";
 import lyteIntelRouter from "./lyte-intel";
 import riskEvidenceRouter from "./risk-evidence";
 import competitiveIntelTopRouter from "./competitive-intel";
+import agentMeshRouter from "./agent-mesh";
 
 const router: IRouter = Router();
 
@@ -153,6 +154,12 @@ router.use("/competitive-intel", competitiveIntelTopRouter);
 // localStorage). Mounted BEFORE guardianPolicyCheck and exempted in the
 // global-auth-enforcer / csrf middleware allowlists.
 router.use(riskEvidenceRouter);
+
+// Agent Mesh telemetry — public read-only state + scan endpoints used by
+// Sentra's Mesh Map and Pulse's MeshCard. Mounted BEFORE guardianPolicyCheck
+// so unauthenticated demo views can hydrate. Scan is also public (no
+// destructive side-effects beyond rewriting the per-org telemetry slice).
+router.use(agentMeshRouter);
 
 // Lyte legacy surfaces — read-only public GET endpoints backing the 5 legacy
 // decision-intelligence pages. Mounted BEFORE lyte.register so the

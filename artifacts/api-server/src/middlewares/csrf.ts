@@ -69,6 +69,10 @@ const EXEMPT_PATHS = new Set([
   // surface to clear in-memory scenario state without a browser session.
   // No per-user state modified; memory flush is safe without CSRF protection.
   "/api/demo/reset",
+  // Agent Mesh telemetry rescan — public POST that re-reads local config files
+  // and refreshes the resilience index for the demo. No per-user state mutated;
+  // path is also in the unauthenticated PUBLIC_PREFIXES allowlist.
+  "/api/agent-mesh/scan",
 ]);
 
 // Risk evidence store — public POST/DELETE endpoints accept any

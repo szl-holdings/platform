@@ -609,6 +609,122 @@ export const MESH_AGENT_DISPLAY_NAMES: Record<string, string> = {
   "agent-claude-code": "Claude Code",
 };
 
+// Live telemetry loader — talks to /api/agent-mesh/state, with the seed
+// (`agentMesh` above) as a fallback when the API is unreachable, returns
+// an empty payload, or fails. The UI can call `useAgentMesh()` to get a
+// reactive state object and a `refresh()` callback that re-runs a scan.
+
+export interface UseAgentMeshResult {
+  state: AgentMeshState;
+  source: "live" | "seed";
+  loading: boolean;
+  refresh: () => Promise<void>;
+  scannedFiles: string[];
+}
+
+import { useEffect, useRef, useState, useCallback } from "react";
+
+interface ApiState {
+  runtimes: AgentRuntime[];
+  mcpServers: McpServer[];
+  secrets: MeshSecret[];
+  edges: AgentToolEdge[];
+  exposures: MeshExposure[];
+  containmentRules?: ContainmentRule[];
+  driftSnapshots?: MeshDriftSnapshot[];
+  resilienceIndex: MeshResilienceIndex | null;
+  source: "live" | "empty";
+  scannedFiles?: string[];
+}
+
+function isLivePayload(p: ApiState | null | undefined): boolean {
+  return !!p && p.source === "live" && Array.isArray(p.runtimes) && p.runtimes.length > 0 && !!p.resilienceIndex;
+}
+
+function mergeWithSeed(api: ApiState): AgentMeshState {
+  // The collector populates runtimes / mcps / secrets / edges / exposures and
+  // the resilience index from the live config files. Containment rules and
+  // historical drift snapshots are operator-defined and remain seeded until
+  // the operator console writes them — so we keep the seed values for those.
+  return {
+    runtimes: api.runtimes,
+    mcpServers: api.mcpServers,
+    secrets: api.secrets,
+    edges: api.edges,
+    exposures: api.exposures,
+    containmentRules: api.containmentRules?.length ? api.containmentRules : agentMesh.containmentRules,
+    driftSnapshots: api.driftSnapshots?.length ? api.driftSnapshots : agentMesh.driftSnapshots,
+    resilienceIndex: api.resilienceIndex ?? agentMesh.resilienceIndex,
+  };
+}
+
+export async function loadAgentMesh(): Promise<{ state: AgentMeshState; source: "live" | "seed"; scannedFiles: string[] }> {
+  try {
+    const res = await fetch("/api/agent-mesh/state", { credentials: "include" });
+    if (!res.ok) return { state: agentMesh, source: "seed", scannedFiles: [] };
+    const data = (await res.json()) as ApiState;
+    if (!isLivePayload(data)) return { state: agentMesh, source: "seed", scannedFiles: data.scannedFiles ?? [] };
+    return { state: mergeWithSeed(data), source: "live", scannedFiles: data.scannedFiles ?? [] };
+  } catch {
+    return { state: agentMesh, source: "seed", scannedFiles: [] };
+  }
+}
+
+export async function triggerMeshScan(): Promise<{ state: AgentMeshState; source: "live" | "seed"; scannedFiles: string[] }> {
+  try {
+    const res = await fetch("/api/agent-mesh/scan", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({}),
+    });
+    if (!res.ok) return loadAgentMesh();
+    const data = (await res.json()) as ApiState & { scannedFiles?: string[] };
+    if (!isLivePayload(data)) return { state: agentMesh, source: "seed", scannedFiles: data.scannedFiles ?? [] };
+    return { state: mergeWithSeed(data), source: "live", scannedFiles: data.scannedFiles ?? [] };
+  } catch {
+    return loadAgentMesh();
+  }
+}
+
+export function useAgentMesh(): UseAgentMeshResult {
+  const [state, setState] = useState<AgentMeshState>(agentMesh);
+  const [source, setSource] = useState<"live" | "seed">("seed");
+  const [loading, setLoading] = useState<boolean>(true);
+  const [scannedFiles, setScannedFiles] = useState<string[]>([]);
+  const mounted = useRef(true);
+
+  useEffect(() => {
+    mounted.current = true;
+    return () => { mounted.current = false; };
+  }, []);
+
+  const refresh = useCallback(async () => {
+    setLoading(true);
+    const next = await triggerMeshScan();
+    if (!mounted.current) return;
+    setState(next.state);
+    setSource(next.source);
+    setScannedFiles(next.scannedFiles);
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const next = await loadAgentMesh();
+      if (cancelled || !mounted.current) return;
+      setState(next.state);
+      setSource(next.source);
+      setScannedFiles(next.scannedFiles);
+      setLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  return { state, source, loading, refresh, scannedFiles };
+}
+
 export const DISALLOWED_TERMS = [
   "RootShield", "Skill Shield", "Context Shield", "Posture Score",
   "Lakera Guard", "Lakera", "Runlayer", "GitGuardian",

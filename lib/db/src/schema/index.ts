@@ -155,3 +155,4 @@ export * from "./aegis_modules";
 export * from "./signal_mesh";
 export * from "./self_healing";
 export * from "./lyte_surfaces";
+export * from "./agent_mesh";
