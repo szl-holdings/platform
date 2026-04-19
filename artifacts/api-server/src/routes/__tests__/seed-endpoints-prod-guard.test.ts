@@ -222,6 +222,38 @@ describe("seed endpoints — production guard", () => {
     expectBlocked(res);
   });
 
+  it("POST /admin/seed/reset-demo returns 403 when RUNTIME_MODE=production", async () => {
+    process.env.NODE_ENV = "development";
+    delete (process.env as Record<string, string | undefined>).APP_ENV;
+    process.env.RUNTIME_MODE = "production";
+    try {
+      const mod: any = await import("../admin/seed.js" as any);
+      const app = express();
+      app.use(express.json());
+      const router = express.Router();
+      mod.register(router);
+      app.use(router);
+      const res = await request(app).post("/admin/seed/reset-demo").send({});
+      expect(res.status).toBe(403);
+      expect(res.body.code).toBe("SEED_DISABLED_IN_PRODUCTION");
+    } finally {
+      delete (process.env as Record<string, string | undefined>).RUNTIME_MODE;
+    }
+  });
+
+  it("POST /admin/seed/reset-demo returns 403 when NODE_ENV=production", async () => {
+    process.env.NODE_ENV = "production";
+    const mod: any = await import("../admin/seed.js" as any);
+    const app = express();
+    app.use(express.json());
+    const router = express.Router();
+    mod.register(router);
+    app.use(router);
+    const res = await request(app).post("/admin/seed/reset-demo").send({});
+    expect(res.status).toBe(403);
+    expect(res.body.code).toBe("SEED_DISABLED_IN_PRODUCTION");
+  });
+
   it("blocks when only APP_ENV=production (NODE_ENV=development)", async () => {
     process.env.NODE_ENV = "development";
     process.env.APP_ENV = "production";

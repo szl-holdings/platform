@@ -132,7 +132,7 @@
 | `DEMO_MODE` | Enables mock fallbacks | **real** |
 | `AI_INTEGRATIONS_OPENAI_API_KEY` | OpenAI via Replit proxy | **real** (Replit-managed) |
 | `AI_INTEGRATIONS_ANTHROPIC_API_KEY` | Anthropic via Replit proxy | **real** (Replit-managed) |
-| `MAPBOX_TOKEN` | Maps in terra | **dead** — not configured, maps blank |
+| `MAPBOX_ACCESS_TOKEN` (server) + `VITE_MAPBOX_TOKEN` (frontend) | Maps in terra | configured — Terra reads via `/api/config/mapbox-token` (legacy `MAPBOX_TOKEN` was a docs-only name; never wired in code) |
 | `SENTRY_DSN` | Error telemetry | **stub** — SDK present, external uptime monitor not confirmed live |
 | `EXPO_ACCESS_TOKEN` | Mobile push | **stub** — deep linking not wired |
 | `STRIPE_SECRET_KEY` | Payments | **stub** — wired in config but no live payment flow |

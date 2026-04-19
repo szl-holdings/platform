@@ -10,7 +10,8 @@
 **Artifact:** `api-server` — `src/routes/admin/seed.ts`  
 **Issue:** The `/api/admin/seed` endpoint seeds destructive demo data. `RUNTIME_MODE` and `DEMO_MODE` checks exist in startup validation, but the seed endpoint's own guard against `NODE_ENV=production` or `RUNTIME_MODE=production` has not been verified in code. In a misconfigured deployment this could corrupt live data.  
 **Evidence:** `ENABLE_DEMO_SEED` env var controls auto-seed at startup; route-level guard for the manual POST endpoint is unconfirmed.  
-**Remediation:** Add explicit `if (process.env.NODE_ENV === 'production' || process.env.RUNTIME_MODE === 'production') return 403` guard at route entry.
+**Remediation:** Add explicit `if (process.env.NODE_ENV === 'production' || process.env.RUNTIME_MODE === 'production') return 403` guard at route entry.  
+**Status (Apr 19, 2026):** RESOLVED — `POST /admin/seed/reset-demo` now refuses with HTTP 403 + `code: SEED_DISABLED_IN_PRODUCTION` whenever `RUNTIME_MODE`, `NODE_ENV`, or `APP_ENV` is `production` (delegates to the central `seed-guard` helper).
 
 ### P0-002: Input validation covers only 12% of API routes
 **Artifact:** `api-server`  
@@ -26,7 +27,8 @@
 **Artifact:** `terra`  
 **Issue:** No `MAPBOX_TOKEN` configured. All map-based views (spatial walkthrough, neighborhood momentum, climate risk) render blank.  
 **Impact:** Demos of Terra's spatial intelligence are not presentable.  
-**Remediation:** Set `MAPBOX_TOKEN` in environment secrets. (Free tier sufficient for demos.)
+**Remediation:** Set `MAPBOX_TOKEN` in environment secrets. (Free tier sufficient for demos.)  
+**Status (Apr 19, 2026):** RESOLVED — corrected env var name. Terra reads `MAPBOX_ACCESS_TOKEN` (server-side, served via `GET /api/config/mapbox-token` to `useMapboxToken`) and `VITE_MAPBOX_TOKEN` (frontend build). Both are configured. The legacy `MAPBOX_TOKEN` referenced in this audit was never wired in code; updates to `system-inventory.md` reflect the actual variable names.
 
 ### P1-002: AIS telemetry is fully simulated — "live fleet" claim is false
 **Artifact:** `vessels`, `szl-holdings`  
@@ -38,7 +40,8 @@
 **Artifact:** `szl-holdings`  
 **Issue:** Dashboard and marketing copy contain: "52,000+ vessels monitored," "2.4M+ signals processed per day," "< 4 min average signal detection time," "31,200+ simulations executed," "34 days before formal designation" (dark vessel lead time). None of these are derived from live instrumentation.  
 **Impact:** Material misrepresentation risk in investor or enterprise presentations.  
-**Remediation:** Replace hardcoded numbers with either (a) registry-sourced values tagged `[demo]`, or (b) remove until live instrumentation confirms them.
+**Remediation:** Replace hardcoded numbers with either (a) registry-sourced values tagged `[demo]`, or (b) remove until live instrumentation confirms them.  
+**Status (Apr 19, 2026):** RESOLVED — every listed claim now flows through `artifacts/szl-holdings/src/lib/claims.ts` → `packages/config/src/public-claims.ts` and renders via `metricDisplay()` so each value carries its `[Demo]` or `[Projected]` suffix. Verified end-to-end by `pnpm tsx scripts/smoke-claims-registry.ts` (208/208), including a subprocess assertion that the rendered metric strings include the labels.
 
 ### P1-004: Pulse briefing falls back silently to synthetic drift data
 **Artifact:** `pulse`, `api-server/src/routes/pulse.ts`  

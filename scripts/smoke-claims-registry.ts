@@ -267,8 +267,9 @@ const claimsAdapterPath = resolve(
 const claimsAdapterSource = readFileSync(claimsAdapterPath, "utf8");
 
 check(
-  'claims.ts imports from "@szl-holdings/config/public-claims"',
-  claimsAdapterSource.includes('@szl-holdings/config/public-claims')
+  'claims.ts imports from the public-claims registry package',
+  claimsAdapterSource.includes('@szl-holdings/platform-registry/public-claims') ||
+    claimsAdapterSource.includes('@szl-holdings/config/public-claims')
 );
 
 check(
