@@ -1,9 +1,15 @@
 /**
  * Demo Seed Runner
  *
- * Writes all four demo narratives to the database using the alloy_* tables
- * (signals, workflows, workflow_runs, approvals, actions, artifacts) and
- * domain-specific tables (lyte_signals, lyte_command_cards, etc).
+ * Writes the four production demo narratives (Business / Security /
+ * Maritime / Legal) to the database using the alloy_* tables (signals,
+ * workflows, workflow_runs, approvals, actions, artifacts) and domain-
+ * specific tables (lyte_signals, lyte_command_cards, etc).
+ *
+ * NOTE: A fifth narrative — Terra distress diligence (1847 Flatbush Ave) —
+ * is exported from this package as `TERRA_DISTRESS_NARRATIVE` for use in the
+ * Terra app's self-serve guided demo, but is not yet wired into the database
+ * seed runner here. Wire it up when Terra needs server-side seeded state.
  *
  * Idempotency strategy:
  * - clearDemoData() removes all demo-tagged rows before seeding (reliable reset)
@@ -88,7 +94,7 @@ async function ensureDemoWorkspace(): Promise<number> {
 
   const [created] = await db
     .insert(lyteWorkspacesTable)
-    .values({ name: "SZL Holdings Demo", description: "Demo workspace for all four SZL Holdings narratives", ownerId: "demo" })
+    .values({ name: "SZL Holdings Demo", description: "Demo workspace for the four database-seeded SZL Holdings narratives (Business, Security, Maritime, Legal)", ownerId: "demo" })
     .returning({ id: lyteWorkspacesTable.id });
   return created!.id;
 }
@@ -777,14 +783,15 @@ async function seedLegalNarrative() {
 // ─── Main Runner ──────────────────────────────────────────────────────────────
 
 export async function seedAllNarratives() {
-  console.log("[demo-seed] Starting demo seed for all four narratives...");
+  console.log("[demo-seed] Starting demo seed for the four database-backed narratives (Business, Security, Maritime, Legal)...");
   await clearDemoData();
   await seedBusinessNarrative();
   await seedSecurityNarrative();
   await seedMaritimeNarrative();
   await seedLegalNarrative();
   await seedCarlotaAdvisoryData();
-  console.log("[demo-seed] All four narratives seeded successfully.");
+  console.log("[demo-seed] Four database-backed narratives seeded successfully.");
+  console.log("[demo-seed] Note: Terra distress narrative is in-app only (see TERRA_DISTRESS_NARRATIVE).");
 }
 
 export async function seedNarrative(id: "business" | "security" | "maritime" | "legal") {

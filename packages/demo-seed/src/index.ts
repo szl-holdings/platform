@@ -91,3 +91,6 @@ export const SIGNAL_MESH_NARRATIVES = [
 
 export { LYTE_STALLED_APPROVAL_NARRATIVE } from "./narrative-lyte-stalled-approval";
 export type { LyteStalledApprovalNarrative, LyteRecommendation, LyteSignal, SimulationScenario } from "./narrative-lyte-stalled-approval";
+
+export { TERRA_DISTRESS_NARRATIVE } from "./narrative-terra-distress";
+export type { TerraDistressNarrative } from "./narrative-terra-distress";

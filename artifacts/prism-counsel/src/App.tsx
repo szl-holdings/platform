@@ -7,6 +7,8 @@ import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persist
 import { persistQueryClient } from "@tanstack/query-persist-client-core";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
 import { SandboxModeProvider, SandboxModeBanner, useSandboxMode } from "@szl-holdings/shared-ui/sandbox-mode";
+import { DemoNarrativeSidebar } from "@szl-holdings/shared-ui/demo-narrative-sidebar";
+import { PRISM_DEMO_NARRATIVE } from "@/data/demo-narrative";
 import { AnalyticsProvider } from "@szl-holdings/shared-ui/analytics-provider";
 import { PRISM_ONBOARDING_CONFIG } from "@/onboarding-config";
 import { McpOverlay } from "@szl-holdings/mcp-client";
@@ -122,6 +124,13 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
             <PrivateRouter />
           </div>
         </div>
+        <DemoNarrativeSidebar
+          title={PRISM_DEMO_NARRATIVE.title}
+          scenario={PRISM_DEMO_NARRATIVE.scenario}
+          steps={PRISM_DEMO_NARRATIVE.steps}
+          accentColor={PRISM_ACCENT}
+          storageKey="prism-counsel-demo-narrative"
+        />
         <CommandPalette open={cmdOpen} onClose={() => setCmdOpen(false)} commands={prismCommands} appName="PRISM Counsel" accentColor={PRISM_ACCENT} />
         <OnboardingWizard config={PRISM_ONBOARDING_CONFIG} />
       </PowerUserProvider>
@@ -161,6 +170,15 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
           <PrivateRouter />
         </div>
       </div>
+      {sandboxActive && (
+        <DemoNarrativeSidebar
+          title={PRISM_DEMO_NARRATIVE.title}
+          scenario={PRISM_DEMO_NARRATIVE.scenario}
+          steps={PRISM_DEMO_NARRATIVE.steps}
+          accentColor={PRISM_ACCENT}
+          storageKey="prism-counsel-demo-narrative"
+        />
+      )}
       <CommandPalette open={cmdOpen} onClose={() => setCmdOpen(false)} commands={prismCommands} appName="PRISM Counsel" accentColor={PRISM_ACCENT} />
       <OnboardingWizard config={PRISM_ONBOARDING_CONFIG} />
     </PowerUserProvider>

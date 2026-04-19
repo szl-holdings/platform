@@ -111,6 +111,7 @@
     "./agent-insights-widget": "./src/agent-insights-widget.tsx",
     "./core-observability-data": "./src/core-observability-data.ts",
     "./sandbox-mode": "./src/sandbox-mode.tsx",
+    "./demo-narrative-sidebar": "./src/demo-narrative-sidebar.tsx",
     "./operational-primitives": "./src/operational-primitives.tsx",
     "./ai-status-bar": "./src/ai-status-bar.tsx",
     "./ai-insight-card": "./src/ai-insight-card.tsx",

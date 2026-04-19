@@ -171,6 +171,45 @@ Rivera v. Apex Mobility Group — a personal injury matter with an estimated val
 
 ---
 
+## Narrative 5: Real Estate / Distress Diligence / Acquisition
+
+**Pack:** Terra  
+**Persona:** Marcus Holt (Managing Partner) — Apex Capital Partners  
+**Duration:** 12 minutes  
+**Audience best fit:** Distressed-asset acquirers, multifamily sponsors, family-office RE allocators, regional-bank OREO desks
+
+### Scenario
+
+1847 Flatbush Ave, Brooklyn — a 12-unit multifamily owned by GreenHouse Realty LLC — has been in lis pendens for 136 days with no cure plan filed. Three days ago, NYC Department of Finance filed a $147,000 tax lien against the same property. Terra detected the compounded distress signal, assembled a Property Twin spanning title, tax, ownership, comparable sales, climate, zoning, rent roll, and lender posture, and surfaced a defensive offer recommendation of $1.95M – $2.10M against a $3.45M ARV.
+
+### Flow
+
+| Step | What Happens | Where to Show |
+|------|-------------|---------------|
+| **1. Signal** | Compounded distress detected — active lis pendens (136 days) plus newly filed $147K tax lien | Terra / Distress Engine |
+| **2. Context** | Property Twin assembled — 11 signals: title, tax, ownership graph (LLC's other 4 holdings), lender posture, 90-day comps, rent roll, climate band, zoning, permits, owner outreach, auction window | Terra / Property Twin |
+| **3. Recommendation** | Underwriting Copilot recommends defensive offer band $1.95M – $2.10M with $3.45M ARV reserve. Confidence: 91% | Terra / Underwriting Copilot |
+| **4. Approval** | Marcus reviews, approves in 2.5 hours, notes to pull fresh title abstract and watchlist the LLC's other properties | Terra / Approval Review |
+| **5. Execution** | Diligence file opened, title ordered, offer letter generated, comps exported, rent roll abstracted, watchlist created, SPV staged | Terra / Diligence Room |
+| **6. Outcome** | Owner counters at $2.18M in 6 days. LOI signed at $2.05M. Closing scheduled 2026-06-12 | Terra / Pipeline |
+| **7. Proof Chain** | Every signal, every AI action, every approval, every diligence step logged with actor attribution | Terra / Trust & Provenance |
+| **8. Summary** | "Compounded distress detected, defensive offer accepted in 9 days, $1.4M ARV upside" | Terra / Executive Overview |
+
+### Key Talking Points
+
+- "Terra didn't wait for a broker to flag this. It detected the tax lien stacking onto the lis pendens and surfaced the opportunity the same day."
+- "The Property Twin spans 11 signals across title, tax, ownership, comps, climate, zoning, rent roll, and lender posture — assembled into one surface, not 11 tabs."
+- "The defensive offer band is grounded in equity cushion math, three fresh comps, and a rent-roll upside model — not a gut number."
+- "When the owner's other properties get flagged, those go to a watchlist automatically. The next signal becomes a richer, faster decision."
+- "The proof chain is what we hand to the LP, the bank, and the title company. Every step is timestamped and attributable."
+
+### Value Framing
+
+- **Without Terra:** Compounded distress gets discovered weeks after a tax lien filing. Property Twin is assembled by a junior analyst across 4–5 separate data sources. Defensive offer math is a spreadsheet. Watchlists are tribal knowledge.
+- **With Terra:** Compounded distress detected the same day. Property Twin assembled automatically. Defensive offer band recommended with confidence score. Watchlist auto-extended. Proof chain ready for LP and lender review.
+
+---
+
 ## Cross-Narrative Talking Points
 
 These apply regardless of which narrative you're showing:
@@ -196,6 +235,7 @@ These apply regardless of which narrative you're showing:
 | Captain James Wren | Operator | Vessels | Approve + execute, full raw signals |
 | Priya Nair (SOC Analyst) | Analyst | Aegis | Execute (no approve), full raw signals |
 | Sophia Marchetti (Attorney) | Operator | PRISM Counsel | Approve + execute, view financials |
+| Marcus Holt (Apex Capital) | Operator | Terra | Approve + execute, view financials, full raw signals |
 | Robert Tanner (CCO) | Auditor | Vessels + Lyte | Read-only audit, export only |
 
 ---

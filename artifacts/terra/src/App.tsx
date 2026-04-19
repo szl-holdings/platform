@@ -2,7 +2,9 @@ import { CookieBanner } from "@szl-holdings/shared-ui/cookie-banner";
 import { lazy, Suspense, useEffect, useRef } from "react";
 import { Switch, Route, Router as WouterRouter, Redirect, useLocation } from "wouter";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
-import { SandboxModeProvider, SandboxModeBanner } from "@szl-holdings/shared-ui/sandbox-mode";
+import { SandboxModeProvider, SandboxModeBanner, useSandboxMode } from "@szl-holdings/shared-ui/sandbox-mode";
+import { DemoNarrativeSidebar } from "@szl-holdings/shared-ui/demo-narrative-sidebar";
+import { TERRA_DEMO_NARRATIVE } from "@/data/demo-narrative";
 import { AnalyticsProvider } from "@szl-holdings/shared-ui/analytics-provider";
 import { McpOverlay } from "@szl-holdings/mcp-client";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
@@ -256,6 +258,20 @@ const terraShortcuts: KeyboardShortcut[] = [
   { key: "E", description: "Deals", category: "Navigation" },
 ];
 
+function TerraDemoNarrativeOverlay() {
+  const { sandboxActive } = useSandboxMode();
+  if (!sandboxActive) return null;
+  return (
+    <DemoNarrativeSidebar
+      title={TERRA_DEMO_NARRATIVE.title}
+      scenario={TERRA_DEMO_NARRATIVE.scenario}
+      steps={TERRA_DEMO_NARRATIVE.steps}
+      accentColor={TERRA_ACCENT}
+      storageKey="terra-demo-narrative"
+    />
+  );
+}
+
 function PrivateApp({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v: boolean) => void }) {
   return (
     <PowerUserProvider shortcuts={terraShortcuts} appName="Terra" accentColor={TERRA_ACCENT}>
@@ -268,6 +284,7 @@ function PrivateApp({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
           </TerraLayout>
         </div>
       </div>
+      <TerraDemoNarrativeOverlay />
       <CommandPalette
         open={cmdOpen}
         onClose={() => setCmdOpen(false)}
@@ -286,6 +303,13 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
 
   const params = new URLSearchParams(window.location.search);
   const demoMode = params.get("view") === "app" || params.get("demo") === "true";
+  const { sandboxActive, enableSandbox } = useSandboxMode();
+
+  useEffect(() => {
+    if (demoMode && !sandboxActive) {
+      enableSandbox();
+    }
+  }, [demoMode, sandboxActive, enableSandbox]);
 
   useEffect(() => {
     if (!prevAuth.current && isAuthenticated) {

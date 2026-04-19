@@ -28,6 +28,7 @@ Complete this checklist 30–60 minutes before any demo session.
 - [ ] Confirm MV Soltana is visible in the Vessels fleet dashboard with an active alert
 - [ ] Confirm Rivera matter is in the PRISM Counsel dashboard with a clock violation badge
 - [ ] Confirm the credential stuffing incident is in the Aegis SOC queue
+- [ ] Confirm 1847 Flatbush Ave (compounded distress: lis pendens + tax lien) is at the top of the Terra distress queue
 
 ### Devices
 
@@ -54,6 +55,7 @@ In the demo environment, personas are configured via the demo toolbar at the bot
 | Captain James Wren | `operator` | Vessels maritime demo |
 | Robert Tanner (CCO) | `auditor` | Vessels — read-only compliance view |
 | Sophia Marchetti | `operator` | PRISM Counsel legal demo |
+| Marcus Holt (Apex Capital) | `operator` | Terra real-estate distress demo |
 
 ### Role-Based View Differences
 
@@ -70,7 +72,7 @@ In the demo environment, personas are configured via the demo toolbar at the bot
 
 ## 3. Demo Flow — Recommended Run Order
 
-### Full Platform Demo (45–60 minutes)
+### Full Platform Demo (60–75 minutes)
 
 Best for: Series A investors, strategic partners, enterprise executive evaluators
 
@@ -80,9 +82,12 @@ Best for: Series A investors, strategic partners, enterprise executive evaluator
 | 5–17 min | Narrative 1: Business Observability | Lyte | Marcus Holt (CFO) |
 | 17–29 min | Narrative 3: Maritime / Sanctions | Vessels | James Wren → Robert Tanner |
 | 29–41 min | Narrative 2: Security / SOC | Aegis | Priya Nair → Diana Reyes |
-| 41–48 min | Narrative 4: Legal / PRISM Counsel | PRISM Counsel | Sophia Marchetti |
-| 48–53 min | Platform compounding thesis | SZL Holdings architecture view | — |
-| 53–60 min | Mobile (optional) + Q&A | CORTEX | — |
+| 41–53 min | Narrative 4: Legal / PRISM Counsel | PRISM Counsel | Sophia Marchetti |
+| 53–65 min | Narrative 5: Real Estate / Distress Diligence | Terra | Marcus Holt (Apex Capital) |
+| 65–70 min | Platform compounding thesis | SZL Holdings architecture view | — |
+| 70–75 min | Mobile (optional) + Q&A | CORTEX | — |
+
+For self-serve prospect exploration, send a direct deep link with `?demo=true` to any of the five product apps. Each app auto-enables Demo Mode and surfaces a guided walkthrough sidebar (steps mirror the talking script below).
 
 ### Condensed Demo (20–25 minutes)
 
@@ -179,6 +184,7 @@ Complete these within 24 hours of every demo.
 | Security / Aegis | Credential stuffing, CVSS 9.1, 2,400 attempts — contained in 23 min | 0 accounts compromised |
 | Maritime / Vessels | AIS dark 134 min, OFAC corridor — cleared in 4.5 hours | Demurrage $112K recoverable |
 | Legal / PRISM Counsel | Reg 68 clock violation — insurer responded in 5 days | Settlement conference: $395K offer |
+| Real Estate / Terra | Brooklyn multifamily, lis pendens + tax lien — LOI in 9 days | $2.05M acquisition vs. $3.45M ARV |
 
 ---
 
