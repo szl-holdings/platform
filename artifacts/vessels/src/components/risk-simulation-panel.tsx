@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { sample } from "@szl-holdings/monte-carlo/distributions";
 import type { ScenarioDefinition } from "@szl-holdings/monte-carlo/schema";
 import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";
+import { SaveRiskRunButton, type SavedRiskRun } from "@szl-holdings/shared-ui/risk-evidence";
 import { Activity, BarChart3, Layers, RefreshCw } from "lucide-react";
 
 const VESSELS_ACCENT = LANE_ACCENT_HEX.vessels.primaryLight;
@@ -147,6 +148,7 @@ interface RiskSimulationPanelProps {
   accentColor?: string;
   title?: string;
   subtitle?: string;
+  evidenceDomain?: string;
 }
 
 export function RiskSimulationPanel({
@@ -155,6 +157,7 @@ export function RiskSimulationPanel({
   accentColor = VESSELS_ACCENT,
   title,
   subtitle,
+  evidenceDomain = "vessels",
 }: RiskSimulationPanelProps) {
   const [result, setResult] = useState<MonteCarloResult | null>(null);
   const [iterCount, setIterCount] = useState<number>(iterations);
@@ -224,6 +227,52 @@ export function RiskSimulationPanel({
             <RefreshCw className={`w-3 h-3 ${running ? "animate-spin" : ""}`} />
             {running ? "Running…" : "Re-run"}
           </button>
+          <SaveRiskRunButton
+            domain={evidenceDomain}
+            accentColor={accentColor}
+            disabled={running || !result}
+            build={() => {
+              if (!result) return null;
+              const payload: Omit<SavedRiskRun, "evidenceId" | "savedAt"> = {
+                scenarioId: scenario.id,
+                scenarioVersion: scenario.version,
+                scenarioTitle: title ?? scenario.title,
+                domain: scenario.domain,
+                iterations: result.iterations,
+                validIterations: result.validIterations,
+                durationMs: result.durationMs,
+                metrics: scenario.outputs
+                  .map(o => {
+                    const m = result.metrics[o.id];
+                    if (!m) return null;
+                    return {
+                      id: o.id,
+                      label: m.label,
+                      format: m.format,
+                      mean: m.mean,
+                      p5: m.p5,
+                      p25: m.p25,
+                      p50: m.p50,
+                      p75: m.p75,
+                      p95: m.p95,
+                      min: m.min,
+                      max: m.max,
+                      stdDev: m.stdDev,
+                    };
+                  })
+                  .filter((x): x is NonNullable<typeof x> => x !== null),
+                sensitivities: result.inputSensitivity.map(s => ({ inputId: s.inputId, label: s.label, impact: s.impact })),
+                inputs: scenario.inputs.map(inp => ({
+                  id: inp.id,
+                  label: inp.label,
+                  unit: inp.unit,
+                  format: inp.format,
+                  distribution: inp.distribution,
+                })),
+              };
+              return payload;
+            }}
+          />
         </div>
       </div>
 

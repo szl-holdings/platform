@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { ProofEnvelope, AutonomyModeToggle, type AutonomyMode, type EvidenceSource, type PolicyState, productAccent } from "@szl-holdings/design-system";
+import { RiskEvidenceList } from "@szl-holdings/shared-ui/risk-evidence";
 import { Ship, AlertTriangle, Navigation, Anchor } from "lucide-react";
 
 const ACCENT = productAccent.vessels;
@@ -165,6 +166,13 @@ export default function GovernedCockpit() {
             </div>
           </div>
         </ProofEnvelope>
+
+        <RiskEvidenceList
+          domain="vessels"
+          domainLabel="Voyage & Charter Risk"
+          accentColor={ACCENT}
+          emptyHint="No risk-simulation runs have been cited yet. Open Risk Simulation and use Save run as evidence to attach voyage cost percentiles to a routing or counterparty decision."
+        />
       </div>
     </div>
   );

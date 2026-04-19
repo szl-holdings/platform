@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
+import { RiskEvidenceList } from "@szl-holdings/shared-ui/risk-evidence";
 import { propertyTwins, type PropertyApproval } from "@/data/property-twin";
 
 const ACCENT = "#40856a";
@@ -223,6 +224,15 @@ export default function ApprovalReview() {
             <ApprovalCard key={a.id} approval={a} onAction={handleAction} />
           ))
         )}
+      </div>
+
+      <div className="mt-6">
+        <RiskEvidenceList
+          domain="terra"
+          domainLabel="Cited Risk Simulations"
+          accentColor={ACCENT}
+          emptyHint="Reviewers can cite Monte Carlo runs by opening Risk Simulation and using Save run as evidence. Cited runs appear here for inclusion in approval decisions and export packets."
+        />
       </div>
 
       <div className="mt-8 rounded-xl border p-4" style={{ background: "rgba(255,255,255,0.02)", borderColor: "rgba(255,255,255,0.06)" }}>

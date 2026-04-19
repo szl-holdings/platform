@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { ProofEnvelope, AutonomyModeToggle, type AutonomyMode, type EvidenceSource, type PolicyState, productAccent } from "@szl-holdings/design-system";
+import { RiskEvidenceList } from "@szl-holdings/shared-ui/risk-evidence";
 import { Building2, TrendingUp, AlertTriangle, MapPin } from "lucide-react";
 
 const ACCENT = productAccent.terra;
@@ -159,6 +160,13 @@ export default function GovernedCockpit() {
             </div>
           </div>
         </ProofEnvelope>
+
+        <RiskEvidenceList
+          domain="terra"
+          domainLabel="Property Underwriting"
+          accentColor={ACCENT}
+          emptyHint="No risk-simulation runs have been cited yet. Open Risk Simulation and use Save run as evidence to attach percentile bands and sensitivities to a covenant or acquisition decision."
+        />
       </div>
     </div>
   );

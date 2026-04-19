@@ -200,7 +200,8 @@
     "./crdt-entity-panel": "./src/crdt-entity-panel.tsx",
     "./web-push-registration": "./src/web-push-registration.ts",
     "./admin-audit-trail": "./src/admin-audit-trail.tsx",
-    "./evidence-explorer": "./src/evidence-explorer.tsx"
+    "./evidence-explorer": "./src/evidence-explorer.tsx",
+    "./risk-evidence": "./src/risk-evidence.tsx"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.4",
