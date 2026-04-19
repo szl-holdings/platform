@@ -4,7 +4,6 @@ import { tenantScope } from "../../middlewares/tenant-scope";
 
 import lyteRouter from "../lyte";
 import lyteBillingRouter from "../lyte-billing";
-import lytePlatformRouter from "../lyte-platform";
 import lyteLiveRouter from "../lyte-live";
 import lyteObservabilityRouter from "../lyte-observability";
 import lyteExtendedRouter from "../lyte-extended";
@@ -13,6 +12,14 @@ import lyteCognitiveRouter from "../lyte-cognitive";
 const _readLimiter = perUserApiSlidingLimiter;
 const _writeLimiter = perUserWriteSlidingLimiter;
 
+// Canonical Lyte API surface (post task #2330 consolidation):
+//   - /lyte/<resource>            CRUD over Lyte-domain tables (lyte.ts)
+//   - /lyte/live/<feed>           Live external/computed feeds (lyte-live.ts + lyte.ts)
+//   - /lyte/billing/*             Billing surface (lyte-billing.ts)
+//   - /lyte/observability/*       Observability surface (lyte-observability.ts)
+//   - /lyte/cognitive/*           Cognitive surface (lyte-cognitive.ts)
+// The previous /lyte/platform/* layer (lyte-platform.ts) was removed because no
+// frontend, scheduler, or test referenced it. Reintroduce only with a real consumer.
 export function register(router: IRouter): void {
   router.use("/lyte", tenantScope({ required: true }));
 
@@ -22,9 +29,6 @@ export function register(router: IRouter): void {
 
   router.use("/lyte", lyteExtendedRouter);
   router.use(lyteObservabilityRouter);
-
-  router.use("/lyte/platform", _readLimiter);
-  router.use(lytePlatformRouter);
 
   router.use(lyteRouter);
 

@@ -179,7 +179,7 @@ The Terra routes group (`artifacts/api-server/src/routes/groups/terra.ts`) was d
 
 | Overlap | Files | Notes |
 |---------|-------|-------|
-| `/lyte/signals` vs `/lyte/platform/signals` vs `/lyte/live/signals` | `lyte.ts`, `lyte-platform.ts`, `lyte-live.ts` | Platform/live splits are intentional architectural layers; not safe to merge without frontend audit |
+| ~~`/lyte/signals` vs `/lyte/platform/signals` vs `/lyte/live/signals`~~ | `lyte.ts`, ~~`lyte-platform.ts`~~, `lyte-live.ts` | **Resolved (task #2330).** Frontend audit found no callers of `/lyte/platform/*` (signals, actions, readiness, views, dashboards, comments). `lyte-platform.ts` deleted and deregistered. Canonical paths: `/lyte/signals` for stored Lyte-domain signals (CRUD), `/lyte/live/signals` for live external feed snapshots. |
 | `/api/counsel/*` vs `/api/prism-counsel/*` | `counsel.ts`, `prism-counsel-core.ts` | Two separate product surfaces (Counsel and PRISM Counsel); different artifacts |
 
 ---
