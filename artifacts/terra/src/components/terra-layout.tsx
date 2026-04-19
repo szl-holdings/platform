@@ -16,6 +16,13 @@ import { SidebarNav, type SidebarNavSection, DashboardShell as SharedDashboardSh
 import { useQuery } from "@tanstack/react-query";
 import { colors, spacing } from "@szl-holdings/shared-ui/tokens";
 import { ServiceStatusRail } from "@szl-holdings/shared-ui/service-status-rail";
+import { PolicyModeBadge } from "@/components/policy-mode-badge";
+
+function pathToTerraActionType(path: string): string | undefined {
+  const seg = path.replace(/^\/+/, "").split("/")[0];
+  if (!seg || seg === "dashboard") return undefined;
+  return seg;
+}
 
 const TERRA_ACCENT = LANE_ACCENT_HEX.terra.primary;
 const SIDEBAR_BG = "#080b0d";
@@ -152,6 +159,7 @@ export function TerraLayout({ children }: { children: ReactNode }) {
   const userOverriddenSidebarRef = useRef(false);
   const { status: wsStatus } = useRealtimeChannel("terra-signals");
   const { replay: replayOnboarding } = useOnboardingState("terra");
+  const terraActionType = pathToTerraActionType(location);
 
   useEffect(() => {
     if (isLoaded && !userOverriddenSidebarRef.current) {
@@ -263,6 +271,7 @@ export function TerraLayout({ children }: { children: ReactNode }) {
         </span>
       </div>
       <div className="flex items-center gap-3">
+        <PolicyModeBadge product="terra" actionType={terraActionType} />
         <RealtimeStatusIndicator status={wsStatus} compact />
         <button
           className="relative p-1.5 rounded-lg hover:bg-white/5 transition-colors"

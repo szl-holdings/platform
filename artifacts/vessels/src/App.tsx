@@ -38,7 +38,14 @@ import { SidebarNav, type SidebarNavSection } from "@szl-holdings/shared-ui/desi
 import { DashboardShell as SharedDashboardShell } from "@szl-holdings/shared-ui/design-system";
 import { StaleIndicator } from "@szl-holdings/shared-ui/stale-indicator";
 import { ServiceStatusRail } from "@szl-holdings/shared-ui/service-status-rail";
+import { PolicyModeBadge } from "@/components/policy-mode-badge";
 import MarketingHomePage from "@/pages/marketing-home";
+
+function pathToVesselsActionType(path: string): string | undefined {
+  const seg = path.replace(/^\/+/, "").split("/")[0];
+  if (!seg || seg === "dashboard" || seg === "marketing") return undefined;
+  return seg;
+}
 
 const VESSELS_ACCENT = LANE_ACCENT_HEX.vessels.primaryLight;
 
@@ -710,6 +717,8 @@ function VesselsDashboard({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpe
     });
   };
   const sidebarExpanded = !sidebarCollapsed && (sidebarHovered || sidebarOpen);
+  const [topbarLocation] = useLocation();
+  const topbarActionType = pathToVesselsActionType(topbarLocation);
   const { status: wsStatus } = useRealtimeChannel("vessel-positions");
   const { syncState: vesselsSyncState, lastSyncedAt: vesselsLastSynced, pendingCount: vesselsPending, conflictCount: vesselsConflicts } = useWebSyncStatus({
     domain: "vessels",
@@ -736,14 +745,17 @@ function VesselsDashboard({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpe
           theme={{ sidebarBg: "#060e1a", pageBg: "#060e1a", headerBg: toAlpha("#060e1a", 0.92) }}
           accentColor={VESSELS_ACCENT}
           topbar={
-            <div className="flex items-center gap-3 w-full md:hidden">
-              <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-1.5 rounded transition-colors" style={{ color: toAlpha(VESSELS_ACCENT, 0.5) }} aria-label="Toggle navigation">
+            <div className="flex items-center gap-3 w-full">
+              <button onClick={() => setSidebarOpen(!sidebarOpen)} className="md:hidden p-1.5 rounded transition-colors" style={{ color: toAlpha(VESSELS_ACCENT, 0.5) }} aria-label="Toggle navigation">
                 <Menu className="w-4 h-4" />
               </button>
-              <span className="text-[10px] font-mono uppercase tracking-wider" style={{ color: toAlpha(VESSELS_ACCENT, 0.8) }}>Vessels Maritime Intelligence</span>
+              <span className="md:hidden text-[10px] font-mono uppercase tracking-wider" style={{ color: toAlpha(VESSELS_ACCENT, 0.8) }}>Vessels Maritime Intelligence</span>
               <div className="ml-auto pr-1 flex items-center gap-2">
-                <SyncStatusBadge syncState={vesselsSyncState} lastSyncedAt={vesselsLastSynced} pendingCount={vesselsPending} conflictCount={vesselsConflicts} size="xs" showLabel={false} />
-                <RealtimeStatusIndicator status={wsStatus} compact />
+                <PolicyModeBadge product="vessels" actionType={topbarActionType} />
+                <span className="md:hidden flex items-center gap-2">
+                  <SyncStatusBadge syncState={vesselsSyncState} lastSyncedAt={vesselsLastSynced} pendingCount={vesselsPending} conflictCount={vesselsConflicts} size="xs" showLabel={false} />
+                  <RealtimeStatusIndicator status={wsStatus} compact />
+                </span>
               </div>
             </div>
           }

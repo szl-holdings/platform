@@ -5,6 +5,13 @@ import {
   GraduationCap, Users, FolderOpen, Clock, BookOpen, BarChart3,
   CheckCircle, ChevronDown, Sparkles, Lightbulb, Zap, Shield,
 } from "lucide-react";
+import { PolicyModeBadge } from "@/components/policy-mode-badge";
+
+function pathToCarlotaActionType(path: string): string | undefined {
+  const seg = path.replace(/^\/+/, "").split("/")[0];
+  if (!seg || seg === "consulting-os") return undefined;
+  return seg;
+}
 
 type NavItem = {
   href: string;
@@ -78,6 +85,7 @@ export default function PlatformSidebar() {
     advisory: true,
     operations: true,
   });
+  const carlotaActionType = pathToCarlotaActionType(location);
 
   return (
     <aside
@@ -148,6 +156,10 @@ export default function PlatformSidebar() {
             </span>
           </div>
       </Link>
+
+      <div style={{ marginBottom: 18, padding: "0 4px" }}>
+        <PolicyModeBadge product="carlota-jo" actionType={carlotaActionType} />
+      </div>
 
       {GROUPS.map((group) => {
         const open = openGroups[group.id];
