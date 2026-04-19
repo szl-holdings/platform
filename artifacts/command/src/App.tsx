@@ -112,6 +112,8 @@ const CognitiveEvals = lazy(() => import("./pages/cognitive/evals"));
 const CognitivePolicies = lazy(() => import("./pages/cognitive/policies"));
 const PolicyApprovalsPage = lazy(() => import("./pages/policy-approvals"));
 const PolicyManagerPage = lazy(() => import("./pages/policy-manager"));
+const GovernanceTiersPage = lazy(() => import("./pages/governance-tiers"));
+const GuardrailConfigsPage = lazy(() => import("./pages/guardrail-configs"));
 const ApprovalsCenter = lazy(() => import("@lyte/pages/approvals-center"));
 const CommandInbox = lazy(() => import("@lyte/pages/command-inbox"));
 const OwnershipMap = lazy(() => import("@lyte/pages/ownership-map-new"));
@@ -285,6 +287,8 @@ function AppShell() {
               <Route path="/operations/approvals" component={() => <ApprovalsCenter />} />
               <Route path="/operations/policy-approvals" component={() => <PolicyApprovalsPage />} />
               <Route path="/operations/policy-manager" component={() => <PolicyManagerPage />} />
+              <Route path="/operations/governance-tiers" component={() => <GovernanceTiersPage />} />
+              <Route path="/operations/guardrail-configs" component={() => <GuardrailConfigsPage />} />
               <Route path="/operations/inbox" component={() => <CommandInbox />} />
               <Route path="/operations/ownership" component={() => <OwnershipMap />} />
               <Route path="/operations/escalation" component={() => <EscalationCenter />} />
