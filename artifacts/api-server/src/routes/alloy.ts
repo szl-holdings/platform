@@ -1407,8 +1407,124 @@ router.post("/alloy/recommend", authMiddleware(), validateBody(recommendBodySche
       metadata: { ...(req.body.metadata ?? {}), tenantOrgId },
     });
 
+    // When autonomy gating returned "queue" or "draft", persist a pending row
+    // in the operator approval inbox so the human gate is actually visible.
+    // Without this, /alloy/recommend would silently return a recommendation
+    // marked "requires-approval" with no way for an operator to act on it.
+    let approval: Awaited<ReturnType<typeof import("@szl-holdings/covenant-policy").createApprovalRequest>> | null = null;
+    let draftArtifactId: number | null = null;
+    if (decision.disposition === "queue" || decision.disposition === "draft") {
+      try {
+        const urgencyToPriority: Record<string, "low" | "medium" | "high" | "critical"> = {
+          routine: "low",
+          moderate: "medium",
+          urgent: "high",
+          critical: "critical",
+        };
+        const priority = urgencyToPriority[req.body.urgency ?? "routine"] ?? "medium";
+        const suggestedAction = req.body.suggestedAction ?? req.body.title;
+
+        if (decision.disposition === "draft") {
+          try {
+            const [artifact] = await db.insert(alloyArtifactsTable).values({
+              workflowRunId: null,
+              workflowId: null,
+              orgId: tenantOrgId,
+              title: req.body.title,
+              artifactType: "recommendation",
+              content: {
+                recommendationId: result.id,
+                runId: result.runId,
+                traceId: result.traceId,
+                domain: req.body.domain,
+                summary: req.body.summary,
+                reasoning: req.body.reasoning,
+                suggestedAction,
+                policyReason: decision.policyReason,
+                autonomyMode: effectiveMode,
+              },
+              status: "pending_review",
+              approvalStatus: "pending",
+            }).returning();
+            draftArtifactId = artifact.id;
+          } catch (err) {
+            logger.warn({ err, recommendationId: result.id }, "alloy.recommend.draft-artifact-insert-failed");
+          }
+        }
+
+        const { createApprovalRequest } = await import("@szl-holdings/covenant-policy");
+        approval = await createApprovalRequest({
+          orgId: tenantOrgId,
+          resourceType: "alloy_recommendation",
+          resourceId: result.id,
+          title: req.body.title,
+          description: decision.policyReason ?? req.body.summary,
+          actionClass: "general",
+          priority,
+          requestedById: req.user?.id ?? null,
+          requestedByRole: req.user?.roles?.[0],
+          requiredApproverRole: undefined,
+          correlationId: result.runId,
+          serviceAttribution: "alloy.recommend",
+          payload: {
+            recommendationId: result.id,
+            runId: result.runId,
+            traceId: result.traceId,
+            domain: req.body.domain,
+            autonomyMode: effectiveMode,
+            disposition: decision.disposition,
+            policyState: decision.policyState,
+            policyReason: decision.policyReason,
+            suggestedAction,
+            summary: req.body.summary,
+            confidence: result.confidence,
+            urgency: req.body.urgency ?? "routine",
+            draftArtifactId,
+          },
+          metadata: {
+            source: "alloy.recommend",
+            tenantOrgId,
+          },
+        });
+
+        logger.info(
+          {
+            approvalId: approval.id,
+            recommendationId: result.id,
+            disposition: decision.disposition,
+            mode: effectiveMode,
+            domain: req.body.domain,
+            tenantOrgId,
+          },
+          "alloy.recommend.approval-queued",
+        );
+      } catch (err) {
+        logger.warn(
+          { err, recommendationId: result.id, tenantOrgId },
+          "alloy.recommend.approval-create-failed",
+        );
+      }
+    }
+
     logger.info({ recommendationId: result.id, domain: result.domain, confidence: result.confidence, tenantOrgId }, "Recommendation generated via Alloy");
-    return sendCreated(res, result);
+    return sendCreated(res, {
+      ...result,
+      autonomyDecision: {
+        mode: effectiveMode,
+        disposition: decision.disposition,
+        policyState: decision.policyState,
+        policyReason: decision.policyReason,
+      },
+      approval: approval
+        ? {
+            id: approval.id,
+            status: approval.status,
+            priority: approval.priority,
+            expiresAt: approval.expiresAt,
+          }
+        : null,
+      draftArtifactId,
+    });
   } catch (err) {
     handleRouteError(res, err, "Failed to generate recommendation");
   }
