@@ -26,6 +26,12 @@ const ACCENT = "#d4a054";
 
 type ApprovalStatus = "pending" | "approved" | "rejected" | "expired" | "cancelled";
 
+interface ResolvedActor {
+  id: number;
+  displayName: string;
+  email?: string | null;
+}
+
 interface ActionApproval {
   id: number;
   requestId: string;
@@ -36,13 +42,24 @@ interface ActionApproval {
   workflowId?: string;
   status: ApprovalStatus;
   decisionReason?: string;
+  requestedById?: number;
+  requestedBy?: ResolvedActor;
   approvedById?: number;
+  approvedBy?: ResolvedActor;
   approvedAt?: string;
   rejectedById?: number;
+  rejectedBy?: ResolvedActor;
   rejectedAt?: string;
   payload: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
+}
+
+function actorLabel(actor: ResolvedActor | undefined, fallbackId: number | undefined): string {
+  if (actor) {
+    return actor.email ? `${actor.displayName} (${actor.email})` : actor.displayName;
+  }
+  return fallbackId !== undefined ? `user #${fallbackId}` : "unknown user";
 }
 
 interface ToolManifest {
@@ -409,10 +426,16 @@ function ApprovalRow({
           {!isPending && (approval.approvedAt || approval.rejectedAt) && (
             <div className="mt-2 text-[10px] font-mono" style={{ color: "rgba(255,255,255,0.4)" }}>
               {approval.status === "approved"
-                ? `Approved by user #${approval.approvedById ?? "?"} · ${new Date(approval.approvedAt!).toLocaleString()}`
+                ? `Approved by ${actorLabel(approval.approvedBy, approval.approvedById)} · ${new Date(approval.approvedAt!).toLocaleString()}`
                 : approval.status === "rejected"
-                  ? `Rejected by user #${approval.rejectedById ?? "?"} · ${new Date(approval.rejectedAt!).toLocaleString()}`
+                  ? `Rejected by ${actorLabel(approval.rejectedBy, approval.rejectedById)} · ${new Date(approval.rejectedAt!).toLocaleString()}`
                   : null}
+            </div>
+          )}
+
+          {(approval.requestedBy || approval.requestedById !== undefined) && (
+            <div className="mt-1 text-[10px] font-mono" style={{ color: "rgba(255,255,255,0.35)" }}>
+              Requested by {actorLabel(approval.requestedBy, approval.requestedById)}
             </div>
           )}
 

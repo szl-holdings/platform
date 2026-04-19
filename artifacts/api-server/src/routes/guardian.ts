@@ -49,6 +49,7 @@ import {
   toolMeshToolPermissionsTable,
   toolMeshActionApprovalsTable,
   auditEventsTable,
+  usersTable,
   type GuardianPolicy,
   type GuardianPolicyAssignment,
   type GuardrailConfig,
@@ -535,7 +536,35 @@ function permissionRowToApi(row: ToolMeshToolPermission) {
   };
 }
 
-function approvalRowToApi(row: ToolMeshActionApproval) {
+interface ResolvedActor {
+  id: number;
+  displayName: string;
+  email: string | null;
+}
+
+type ActorMap = Map<number, ResolvedActor>;
+
+async function resolveActorMap(ids: Array<number | null | undefined>): Promise<ActorMap> {
+  const map: ActorMap = new Map();
+  const unique = Array.from(new Set(ids.filter((v): v is number => typeof v === "number" && v > 0)));
+  if (unique.length === 0) return map;
+  const rows = await db
+    .select({ id: usersTable.id, displayName: usersTable.displayName, email: usersTable.email })
+    .from(usersTable)
+    .where(sql`${usersTable.id} IN (${sql.join(unique.map(v => sql`${v}`), sql`, `)})`);
+  for (const r of rows) {
+    map.set(r.id, { id: r.id, displayName: r.displayName, email: r.email ?? null });
+  }
+  return map;
+}
+
+function actorOrUndefined(id: number | null | undefined, actors: ActorMap): ResolvedActor | undefined {
+  if (typeof id !== "number" || id <= 0) return undefined;
+  return actors.get(id);
+}
+
+function approvalRowToApi(row: ToolMeshActionApproval, actors?: ActorMap) {
+  const map = actors ?? new Map<number, ResolvedActor>();
   return {
     id: row.id,
     requestId: row.requestId,
@@ -546,9 +575,13 @@ function approvalRowToApi(row: ToolMeshActionApproval) {
     workflowId: row.workflowId ?? undefined,
     status: row.status,
     decisionReason: row.decisionReason ?? undefined,
+    requestedById: row.requestedById ?? undefined,
+    requestedBy: actorOrUndefined(row.requestedById, map),
     approvedById: row.approvedById ?? undefined,
+    approvedBy: actorOrUndefined(row.approvedById, map),
     approvedAt: row.approvedAt instanceof Date ? row.approvedAt.toISOString() : row.approvedAt ?? undefined,
     rejectedById: row.rejectedById ?? undefined,
+    rejectedBy: actorOrUndefined(row.rejectedById, map),
     rejectedAt: row.rejectedAt instanceof Date ? row.rejectedAt.toISOString() : row.rejectedAt ?? undefined,
     payload: (row.payload as Record<string, unknown>) ?? {},
     createdAt: row.createdAt instanceof Date ? row.createdAt.toISOString() : row.createdAt,
@@ -1048,30 +1081,36 @@ router.delete("/tools/:toolId/permissions/:permissionId", validateBody(jsonObjec
 router.get("/actions", authMiddleware(), requireRole("super_admin", "admin", "ops", "analyst"), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { page, limit } = parsePagination(req.query as Record<string, unknown>);
-    const outcome = req.query["outcome"] as string | undefined;
-    const tier = req.query["tier"] as string | undefined;
+    const status = req.query["status"] as string | undefined;
     const agentId = req.query["agentId"] as string | undefined;
+    const toolId = req.query["toolId"] as string | undefined;
     const user = req.user;
 
     const conditions: Parameters<typeof and>[0][] = [];
     if (!isAdminUser(user)) {
       const orgId = userOrgId(user);
       if (orgId === null) { sendForbidden(res, "No organization membership — cannot access governance records"); return; }
-      conditions.push(eq(guardianActionsTable.orgId, orgId));
+      conditions.push(eq(toolMeshActionApprovalsTable.orgId, orgId));
     }
-    if (outcome) conditions.push(eq(guardianActionsTable.outcome, outcome as any));
-    if (tier) conditions.push(eq(guardianActionsTable.tier, tier as any));
-    if (agentId) conditions.push(eq(guardianActionsTable.agentId, agentId));
+    if (status) conditions.push(eq(toolMeshActionApprovalsTable.status, status as any));
+    if (agentId) conditions.push(eq(toolMeshActionApprovalsTable.agentId, agentId));
+    if (toolId) conditions.push(eq(toolMeshActionApprovalsTable.toolId, toolId));
 
     const where = conditions.length > 0 ? and(...conditions) : undefined;
     const offset = (page - 1) * limit;
 
     const [rows, totalRow] = await Promise.all([
-      db.select().from(guardianActionsTable).where(where as ReturnType<typeof and>).orderBy(desc(guardianActionsTable.createdAt)).limit(limit).offset(offset),
-      db.select({ count: sql<number>`count(*)::int` }).from(guardianActionsTable).where(where as ReturnType<typeof and>),
+      db.select().from(toolMeshActionApprovalsTable).where(where as ReturnType<typeof and>).orderBy(desc(toolMeshActionApprovalsTable.createdAt)).limit(limit).offset(offset),
+      db.select({ count: sql<number>`count(*)::int` }).from(toolMeshActionApprovalsTable).where(where as ReturnType<typeof and>),
     ]);
 
-    sendSuccess(res, rows, 200, { page, limit, total: totalRow[0]?.count ?? 0 });
+    const actorIds: Array<number | null | undefined> = [];
+    for (const r of rows) {
+      actorIds.push(r.approvedById, r.rejectedById, r.requestedById);
+    }
+    const actors = await resolveActorMap(actorIds);
+
+    sendSuccess(res, rows.map(r => approvalRowToApi(r, actors)), 200, { page, limit, total: totalRow[0]?.count ?? 0 });
   } catch (err) {
     handleRouteError(res, err, "Failed to list guardian actions");
   }
@@ -1081,14 +1120,15 @@ router.get("/actions/:id", authMiddleware(), async (req: Request, res: Response)
   try {
     const id = parseInt(req.params["id"] as string, 10);
     if (isNaN(id)) { sendBadRequest(res, "Invalid action ID"); return; }
-    const [action] = await db.select().from(guardianActionsTable).where(eq(guardianActionsTable.id, id)).limit(1);
+    const [action] = await db.select().from(toolMeshActionApprovalsTable).where(eq(toolMeshActionApprovalsTable.id, id)).limit(1);
     if (!action) { sendNotFound(res, "Guardian action not found"); return; }
     if (!isAdminUser(req.user)) {
       const orgId = userOrgId(req.user);
       if (orgId === null) { sendForbidden(res, "No organization membership — cannot access governance records"); return; }
       if (action.orgId !== orgId) { sendNotFound(res, "Guardian action not found"); return; }
     }
-    sendSuccess(res, action);
+    const actors = await resolveActorMap([action.approvedById, action.rejectedById, action.requestedById]);
+    sendSuccess(res, approvalRowToApi(action, actors));
   } catch (err) {
     handleRouteError(res, err, "Failed to get guardian action");
   }
