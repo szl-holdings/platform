@@ -144,6 +144,8 @@ export default defineConfig({
       "tests/**/*.test.ts",
       "tests/**/*.spec.ts",
       "lib/scene-export/src/__tests__/**/*.test.ts",
+      "lib/shared-ui/src/**/*.test.ts",
+      "lib/shared-ui/src/**/*.test.tsx",
       "packages/ontology/src/**/*.test.ts",
       "packages/constellation/src/**/*.test.ts",
       "packages/guardian/src/**/*.test.ts",
