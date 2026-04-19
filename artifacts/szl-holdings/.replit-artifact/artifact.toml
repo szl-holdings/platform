@@ -15,7 +15,7 @@ paths = [ "/" ]
 localPort = 21130
 
 [services.development]
-run = "bash -c 'cd /home/runner/workspace/artifacts/szl-holdings && exec node_modules/.bin/vite --config vite.config.ts --host 0.0.0.0'"
+run = "bash -c 'cd /home/runner/workspace/artifacts/szl-holdings && exec node_modules/.bin/vite --config vite.config.ts --host ::'"
 
 [services.production]
 build = [ "pnpm", "--filter", "@workspace/szl-holdings", "run", "build" ]

@@ -19,7 +19,7 @@ function sharedProxyPlugin(): Plugin {
   return {
     name: "shared-proxy",
     apply: "serve",
-    configureServer(server) {
+    async configureServer(server) {
       server.middlewares.use((req, res, next) => {
         const url = req.url ?? "/";
         if (url === "/" || url === "/__health" || url === "/health") {
@@ -50,11 +50,22 @@ function sharedProxyPlugin(): Plugin {
         });
         req.pipe(upstream, { end: true });
       });
-      proxyServer.listen({ port: SHARED_PROXY_PORT, host: "0.0.0.0", reusePort: true }, () => {
-        console.log("[shared-proxy] Listening on port " + SHARED_PROXY_PORT + " (reusePort)");
-      });
-      proxyServer.on("error", (err: NodeJS.ErrnoException) => {
-        console.warn("[shared-proxy] Bind error:", err.code);
+      await new Promise<void>((resolve) => {
+        let settled = false;
+        const finish = () => {
+          if (!settled) {
+            settled = true;
+            resolve();
+          }
+        };
+        proxyServer.once("error", (err: NodeJS.ErrnoException) => {
+          console.warn("[shared-proxy] Bind error:", err.code);
+          finish();
+        });
+        proxyServer.listen({ port: SHARED_PROXY_PORT, host: "::", reusePort: true }, () => {
+          console.log("[shared-proxy] Listening on port " + SHARED_PROXY_PORT + " (reusePort, dual-stack)");
+          finish();
+        });
       });
       proxyServer.on("upgrade", (req, socket, head) => {
         const url = req.url || "/";
