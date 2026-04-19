@@ -25,6 +25,21 @@ interface Alert {
   status: AlertStatus;
   category: string;
   assignee?: string;
+  acknowledgedBy?: string;
+  acknowledgedById?: number;
+  acknowledgedAt?: string;
+}
+
+function formatAcknowledgedAt(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  const diffMs = Date.now() - d.getTime();
+  const m = Math.floor(diffMs / 60000);
+  if (m < 1) return "just now";
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  return d.toLocaleString();
 }
 
 const INITIAL_ALERTS: Alert[] = [
@@ -292,6 +307,14 @@ export default function AlertsPage() {
                         <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ backgroundColor: "var(--color-bg-elevated)", color: "var(--color-fg-muted)", border: "1px solid var(--color-surface-border)" }}>{alert.category}</span>
                       </div>
                       <div className="text-sm font-semibold truncate" style={{ color: "var(--color-fg-primary)" }}>{alert.title}</div>
+                      {alert.status === "acknowledged" && (alert.acknowledgedBy || alert.acknowledgedAt) && (
+                        <div className="text-[10px] font-mono mt-0.5 truncate" style={{ color: "var(--color-fg-muted)" }}>
+                          <CheckCircle2 className="w-2.5 h-2.5 inline-block mr-1 -mt-0.5" style={{ color: "var(--color-medium)" }} />
+                          Acknowledged
+                          {alert.acknowledgedBy ? ` by ${alert.acknowledgedBy}` : ""}
+                          {alert.acknowledgedAt ? ` · ${formatAcknowledgedAt(alert.acknowledgedAt)}` : ""}
+                        </div>
+                      )}
                       {isSelected && (
                         <div className="text-xs mt-1 leading-relaxed" style={{ color: "var(--color-fg-muted)" }}>{alert.description}</div>
                       )}

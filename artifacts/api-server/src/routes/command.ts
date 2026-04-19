@@ -672,6 +672,12 @@ type CommandAlert = {
   // Optional deep-link metadata. Cross-platform correlation alerts populate
   // these so the inbox card can navigate back to the Signal Correlation page.
   correlationId?: string; href?: string;
+  // Audit fields populated when an operator has acted on the alert. The UI
+  // surfaces "Acknowledged by X at Y" so compliance can trace who silenced
+  // a cross-platform correlation.
+  acknowledgedBy?: string;
+  acknowledgedById?: number;
+  acknowledgedAt?: string;
 };
 
 /**
@@ -691,10 +697,17 @@ type CommandAlert = {
  * (they fall back to active) so operators don't have to manually
  * un-snooze when the timer expires.
  */
+type AlertStateEntry = {
+  state: "acknowledged" | "snoozed" | "resolved";
+  snoozedUntil: Date | null;
+  updatedById: number | null;
+  updatedAt: Date | null;
+};
+
 async function loadAlertStates(
   tenantId: string | null,
-): Promise<Map<string, { state: "acknowledged" | "snoozed" | "resolved"; snoozedUntil: Date | null }>> {
-  const out = new Map<string, { state: "acknowledged" | "snoozed" | "resolved"; snoozedUntil: Date | null }>();
+): Promise<Map<string, AlertStateEntry>> {
+  const out = new Map<string, AlertStateEntry>();
   try {
     const key = tenantKey(tenantId);
     // Include rows with the matching tenant AND the global sentinel so
@@ -725,7 +738,12 @@ async function loadAlertStates(
         out.delete(r.alertId);
         continue;
       }
-      out.set(r.alertId, { state: effective, snoozedUntil });
+      out.set(r.alertId, {
+        state: effective,
+        snoozedUntil,
+        updatedById: r.updatedById ?? null,
+        updatedAt: r.updatedAt ?? null,
+      });
     }
   } catch (err) {
     logger.warn({ err }, "command.loadAlertStates failed; treating all alerts as active");
@@ -907,7 +925,8 @@ async function computeAlerts(
  */
 function applyAlertStates(
   alerts: CommandAlert[],
-  states: Map<string, { state: "acknowledged" | "snoozed" | "resolved"; snoozedUntil: Date | null }>,
+  states: Map<string, AlertStateEntry>,
+  userNames: Map<number, string>,
 ): CommandAlert[] {
   const out: CommandAlert[] = [];
   for (const a of alerts) {
@@ -918,8 +937,38 @@ function applyAlertStates(
     }
     if (s.state === "resolved") continue; // hide entirely
     if (s.state === "snoozed") continue;  // hide until snooze elapses
-    // acknowledged — keep but mark
-    out.push({ ...a, status: "acknowledged" });
+    // acknowledged — keep but mark, surfacing audit fields so the inbox
+    // can render "Acknowledged by X at Y".
+    const acknowledgedBy =
+      s.updatedById != null ? userNames.get(s.updatedById) ?? null : null;
+    out.push({
+      ...a,
+      status: "acknowledged",
+      ...(acknowledgedBy ? { acknowledgedBy } : {}),
+      ...(s.updatedById != null ? { acknowledgedById: s.updatedById } : {}),
+      ...(s.updatedAt ? { acknowledgedAt: s.updatedAt.toISOString() } : {}),
+    });
+  }
+  return out;
+}
+
+/**
+ * Resolve user display names for the given updatedById values in a single
+ * query so the inbox can render "Acknowledged by X" without N+1 lookups.
+ */
+async function loadUserDisplayNames(
+  ids: number[],
+): Promise<Map<number, string>> {
+  const out = new Map<number, string>();
+  if (ids.length === 0) return out;
+  try {
+    const rows = await db
+      .select({ id: usersTable.id, displayName: usersTable.displayName })
+      .from(usersTable)
+      .where(inArray(usersTable.id, ids));
+    for (const r of rows) out.set(r.id, r.displayName);
+  } catch (err) {
+    logger.warn({ err }, "command.loadUserDisplayNames failed");
   }
   return out;
 }
@@ -930,7 +979,15 @@ router.get("/alerts", requireAnyAuth(), async (req: Request, res: Response) => {
     const isAdmin = req.user?.roles?.some((r) => r === "super_admin" || r === "admin") ?? false;
     const rawAlerts = await computeAlerts({ tenantId, isAdmin });
     const states = await loadAlertStates(tenantId);
-    const alerts = applyAlertStates(rawAlerts, states);
+    const userIds = Array.from(
+      new Set(
+        Array.from(states.values())
+          .map((s) => s.updatedById)
+          .filter((id): id is number => typeof id === "number"),
+      ),
+    );
+    const userNames = await loadUserDisplayNames(userIds);
+    const alerts = applyAlertStates(rawAlerts, states, userNames);
 
     // Counts include snoozed/resolved that were filtered out, since the UI
     // surfaces them as separate buckets in the summary cards. We only count
@@ -976,7 +1033,9 @@ router.get("/alerts/count", requireAnyAuth(), async (req: Request, res: Response
     const isAdmin = req.user?.roles?.some((r) => r === "super_admin" || r === "admin") ?? false;
     const rawAlerts = await computeAlerts({ tenantId, isAdmin });
     const states = await loadAlertStates(tenantId);
-    const alerts = applyAlertStates(rawAlerts, states);
+    // The badge count only depends on which alerts are still active, so we
+    // skip resolving display names — they're only needed for the inbox UI.
+    const alerts = applyAlertStates(rawAlerts, states, new Map());
     const active = alerts.filter((a) => a.status === "active").length;
     sendSuccess(res, { count: active, generatedAt: new Date().toISOString() });
   } catch (err) {
