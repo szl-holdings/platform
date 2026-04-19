@@ -5,6 +5,19 @@
 
 ---
 
+## Demo Leave-Behind PDFs
+
+The branded leave-behind PDFs handed out after a demo are generated from the
+`*-leavebehind.md` companion files (1-page distillations of the long-form
+briefs). Long-form briefs remain the canonical source for live demos.
+
+- Sources: `executive-demo-brief-leavebehind.md`, `operator-demo-brief-leavebehind.md`
+- Outputs: `executive-demo-brief.pdf`, `operator-demo-brief.pdf`
+- Regenerate: `pnpm --filter @workspace/scripts run generate:demo-briefs`
+  (uses the SZL palette; enforces a 2-page maximum per brief).
+
+---
+
 ## Document Index
 
 ### Phase A: Category and Positioning
