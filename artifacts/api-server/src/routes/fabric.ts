@@ -24,6 +24,8 @@ import { connectorHub } from "@szl-holdings/services";
 import { getSignals as getAtlasSignals } from "../lib/atlas-execution-engine";
 import { dbListRuns } from "../lib/decisioning-store";
 import { authMiddleware } from "../middlewares/auth";
+import { validateBody, jsonObjectBodySchema } from "../lib/validation";
+import { sendSuccess, sendBadRequest, sendForbidden, handleRouteError } from "../lib/api-response";
 import { logger } from "../lib/logger";
 
 /**
@@ -507,6 +509,66 @@ router.get("/fabric/snapshot", optionalAuth, async (req: Request, res: Response)
   } catch (err) {
     logger.error({ err }, "fabric snapshot error");
     res.status(500).json({ error: "Failed to build snapshot" });
+  }
+});
+
+/**
+ * Inline approval action for the Fabric Approvals panel — DEMO ONLY.
+ *
+ * The Fabric snapshot exposes synthetic approval IDs (e.g. "apv-001") that
+ * have no row in the approvals table. This endpoint exists solely to
+ * acknowledge actions on those synthetic entries so the UI's optimistic
+ * remove + toast flow works in the demo posture. Real (numeric) approvals
+ * MUST be mutated through the canonical POST /approvals/:id/review route,
+ * which enforces reviewer role, tenant scope, and run-manager writeback.
+ *
+ * Body: { approvalId: string, action: "approve" | "dismiss", note?: string }
+ */
+router.post("/fabric/approvals/inline-action", optionalAuth, validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+  if (!requireAuthInProduction(req, res)) return;
+  try {
+    const { approvalId, action } = req.body as {
+      approvalId?: string | number;
+      action?: string;
+      note?: string;
+    };
+
+    if (approvalId === undefined || approvalId === null || approvalId === "") {
+      sendBadRequest(res, "approvalId is required");
+      return;
+    }
+    if (!action || !["approve", "dismiss"].includes(action)) {
+      sendBadRequest(res, "action must be one of: approve, dismiss");
+      return;
+    }
+
+    const decision = action === "approve" ? "approved" : "rejected";
+    const idStr = String(approvalId);
+    if (/^\d+$/.test(idStr)) {
+      // Real DB-backed approval — refuse and direct callers to the canonical
+      // approvals route so all auth, tenant, and ledger-writeback guarantees
+      // stay centralized in one handler.
+      sendBadRequest(
+        res,
+        "Numeric approval IDs must be reviewed via POST /approvals/:id/review",
+      );
+      return;
+    }
+
+    logger.info(
+      {
+        approvalId: idStr,
+        action,
+        decision,
+        actorId: req.user?.id ?? null,
+        actorRole: req.user?.roles?.[0] ?? null,
+        correlationId: (req as unknown as { correlationId?: string }).correlationId,
+      },
+      "fabric.approvals.inline-action.demo",
+    );
+    sendSuccess(res, { approvalId: idStr, action, decision });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to process inline approval action");
   }
 });
 

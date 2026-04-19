@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "wouter";
 import {
-  Activity, AlertTriangle, Bell, CheckSquare, Cpu,
-  GitBranch, Globe2, LayoutGrid, RefreshCw, Radio, Shield,
+  Activity, AlertTriangle, Bell, Check, CheckSquare, Cpu,
+  GitBranch, Globe2, LayoutGrid, Loader2, RefreshCw, Radio, Shield, X,
   Zap, ChevronRight, Wifi, WifiOff, Network, Server,
   TrendingUp,
 } from "lucide-react";
+import { Toaster } from "@szl-holdings/shared-ui/ui/sonner";
+import { toast } from "sonner";
 import { RecommendationCard } from "@szl-holdings/design-system/cockpit/recommendation-card";
 import { RunTimeline, type RunSpan } from "@szl-holdings/design-system/cockpit/run-timeline";
 import { FreshnessChip } from "@szl-holdings/design-system/proof/freshness-chip";
@@ -316,8 +318,28 @@ function RecsPanel({ recs, onDrill }: { recs: Rec[]; onDrill: (r: Rec) => void }
 // ---------------------------------------------------------------------------
 // Panel: Approvals Waiting — uses ApprovalDialog + PolicyStateChip
 // ---------------------------------------------------------------------------
-function ApprovalsPanel({ approvals, onDrill }: { approvals: Approval[]; onDrill: (a: Approval) => void }) {
+function ApprovalsPanel({
+  approvals,
+  onDrill,
+  onAction,
+}: {
+  approvals: Approval[];
+  onDrill: (a: Approval) => void;
+  onAction: (approval: Approval, action: "approve" | "dismiss") => Promise<void>;
+}) {
   const [dialogApproval, setDialogApproval] = useState<Approval | null>(null);
+  const [pendingId, setPendingId] = useState<string | null>(null);
+
+  async function handleInline(e: React.MouseEvent, a: Approval, action: "approve" | "dismiss") {
+    e.stopPropagation();
+    if (pendingId) return;
+    setPendingId(a.approvalId);
+    try {
+      await onAction(a, action);
+    } finally {
+      setPendingId(null);
+    }
+  }
 
   return (
     <>
@@ -332,6 +354,7 @@ function ApprovalsPanel({ approvals, onDrill }: { approvals: Approval[]; onDrill
           {approvals.map((a) => {
             const uc = { critical: "#ef4444", high: "#f97316", medium: "#f59e0b", low: "#22c55e" }[a.urgency] ?? "#64748b";
             const pc = PRODUCT_COLORS[a.product] ?? "#64748b";
+            const isPending = pendingId === a.approvalId;
             return (
               <div key={a.approvalId}
                 className="px-4 py-3 hover:bg-white/5 transition-colors cursor-pointer"
@@ -353,6 +376,28 @@ function ApprovalsPanel({ approvals, onDrill }: { approvals: Approval[]; onDrill
                     <p className="text-[9px] mt-0.5 font-mono" style={{ color: "rgba(255,255,255,0.25)" }}>{a.policy}</p>
                   </div>
                   <Badge label={a.urgency} color={uc} />
+                </div>
+                <div className="flex items-center gap-2 mt-2 pl-4">
+                  <button
+                    type="button"
+                    disabled={isPending}
+                    onClick={(e) => handleInline(e, a, "approve")}
+                    data-testid={`button-approve-${a.approvalId}`}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[10px] font-semibold uppercase tracking-wide transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    style={{ background: "rgba(34,197,94,0.15)", border: "1px solid rgba(34,197,94,0.4)", color: "#22c55e" }}>
+                    {isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
+                    Approve
+                  </button>
+                  <button
+                    type="button"
+                    disabled={isPending}
+                    onClick={(e) => handleInline(e, a, "dismiss")}
+                    data-testid={`button-dismiss-${a.approvalId}`}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[10px] font-semibold uppercase tracking-wide transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    style={{ background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.35)", color: "#ef4444" }}>
+                    {isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <X className="w-3 h-3" />}
+                    Dismiss
+                  </button>
                 </div>
               </div>
             );
@@ -525,12 +570,21 @@ export function GlobalFabricPage() {
   const [snap, setSnap] = useState<Snapshot | null>(null);
   const [streamStatus, setStreamStatus] = useState<"connecting" | "live" | "polling">("connecting");
   const esRef = useRef<EventSource | null>(null);
+  // Approvals the operator has acted on inline. The SSE stream re-broadcasts
+  // the full approvals array every few seconds, so without this guard an
+  // approved/dismissed card would re-appear in the panel.
+  const actedApprovalIdsRef = useRef<Set<string>>(new Set());
+  const filterActed = useCallback((list: Approval[]): Approval[] => {
+    const acted = actedApprovalIdsRef.current;
+    if (acted.size === 0) return list;
+    return list.filter((a) => !acted.has(String(a.approvalId)));
+  }, []);
 
   const pollSnapshot = useCallback(() => {
     fetch(apiUrl("/fabric/snapshot"), { credentials: "include" })
       .then(r => r.json())
       .then((data: Snapshot) => {
-        setSnap(data);
+        setSnap({ ...data, approvals: filterActed(data.approvals) });
         pushAuditEvent({
           eventId: `fabric-poll-${Date.now()}`,
           kind: "system",
@@ -551,7 +605,7 @@ export function GlobalFabricPage() {
 
       es.addEventListener("snapshot", (e: MessageEvent) => {
         const data: Snapshot = JSON.parse(e.data);
-        setSnap(data);
+        setSnap({ ...data, approvals: filterActed(data.approvals) });
         setStreamStatus("live");
         pushAuditEvent({
           eventId: `fabric-connect-${Date.now()}`,
@@ -586,7 +640,7 @@ export function GlobalFabricPage() {
       es.addEventListener("runs",            (e: MessageEvent) => { const { runs } = JSON.parse(e.data); setSnap(prev => prev ? { ...prev, runs } : prev); });
       es.addEventListener("alerts",          (e: MessageEvent) => { const { alerts } = JSON.parse(e.data); setSnap(prev => prev ? { ...prev, alerts } : prev); });
       es.addEventListener("recommendations", (e: MessageEvent) => { const { recommendations } = JSON.parse(e.data); setSnap(prev => prev ? { ...prev, recommendations } : prev); });
-      es.addEventListener("approvals",       (e: MessageEvent) => { const { approvals } = JSON.parse(e.data); setSnap(prev => prev ? { ...prev, approvals } : prev); });
+      es.addEventListener("approvals",       (e: MessageEvent) => { const { approvals } = JSON.parse(e.data); setSnap(prev => prev ? { ...prev, approvals: filterActed(approvals) } : prev); });
       es.addEventListener("system_health",   (e: MessageEvent) => { const { systemHealth } = JSON.parse(e.data); setSnap(prev => prev ? { ...prev, systemHealth } : prev); });
       es.addEventListener("connectors",      (e: MessageEvent) => { const { connectors } = JSON.parse(e.data); setSnap(prev => prev ? { ...prev, connectors } : prev); });
 
@@ -683,6 +737,114 @@ export function GlobalFabricPage() {
     openEvidenceDrawer(r.title, items);
   }
 
+  const handleApprovalAction = useCallback(
+    async (approval: Approval, action: "approve" | "dismiss") => {
+      const verb = action === "approve" ? "Approving" : "Dismissing";
+      const past = action === "approve" ? "approved" : "dismissed";
+
+      // Optimistic update — remove the card immediately and remember the
+      // ID so the SSE re-stream doesn't bring it back.
+      actedApprovalIdsRef.current.add(String(approval.approvalId));
+      setSnap((prev) =>
+        prev
+          ? { ...prev, approvals: prev.approvals.filter((a) => a.approvalId !== approval.approvalId) }
+          : prev,
+      );
+
+      pushAuditEvent({
+        eventId: `apv-action-${approval.approvalId}-${Date.now()}`,
+        kind: "policy-gate",
+        actor: "operator",
+        actorType: "human",
+        action: `${verb} approval: ${approval.title}`,
+        detail: `Policy: ${approval.policy} · Run: ${approval.runId}`,
+        timestamp: new Date().toISOString(),
+        outcome: "pending",
+      });
+
+      try {
+        // Ensure a CSRF cookie is present (POST endpoints require X-CSRF-Token).
+        let csrfMatch = document.cookie.split(";").find((c) => c.trim().startsWith("csrf_token="));
+        if (!csrfMatch) {
+          try {
+            await fetch(apiUrl("/csrf-token"), { credentials: "include" });
+            csrfMatch = document.cookie.split(";").find((c) => c.trim().startsWith("csrf_token="));
+          } catch {
+            /* ignore — request will fail with a clear error below */
+          }
+        }
+        const csrfToken = csrfMatch ? decodeURIComponent(csrfMatch.split("=")[1] ?? "") : undefined;
+
+        // Real DB-backed approvals (numeric IDs) go through the canonical
+        // /approvals/:id/review endpoint so role/tenant guards and the
+        // run-manager ledger writeback stay centralized. Synthetic demo IDs
+        // from the Fabric snapshot use the demo-only fabric inline endpoint.
+        const idStr = String(approval.approvalId);
+        const isNumericId = /^\d+$/.test(idStr);
+        const endpoint = isNumericId
+          ? `/approvals/${idStr}/review`
+          : "/fabric/approvals/inline-action";
+        const decisionForCanonical = action === "approve" ? "approved" : "rejected";
+        const body = isNumericId
+          ? { decision: decisionForCanonical }
+          : { approvalId: idStr, action };
+
+        const res = await fetch(apiUrl(endpoint), {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            ...(csrfToken ? { "x-csrf-token": csrfToken } : {}),
+          },
+          body: JSON.stringify(body),
+        });
+        if (!res.ok) {
+          let message = `Request failed (${res.status})`;
+          try {
+            const data = (await res.json()) as { error?: { message?: string }; message?: string };
+            message = data?.error?.message ?? data?.message ?? message;
+          } catch {
+            /* keep default */
+          }
+          throw new Error(message);
+        }
+        toast.success(`Approval ${past}`, { description: approval.title });
+        pushAuditEvent({
+          eventId: `apv-action-ok-${approval.approvalId}-${Date.now()}`,
+          kind: "policy-gate",
+          actor: "operator",
+          actorType: "human",
+          action: `Approval ${past}: ${approval.title}`,
+          timestamp: new Date().toISOString(),
+          outcome: "success",
+        });
+      } catch (err) {
+        // Rollback optimistic update
+        actedApprovalIdsRef.current.delete(String(approval.approvalId));
+        setSnap((prev) =>
+          prev
+            ? prev.approvals.some((a) => a.approvalId === approval.approvalId)
+              ? prev
+              : { ...prev, approvals: [approval, ...prev.approvals] }
+            : prev,
+        );
+        const msg = err instanceof Error ? err.message : "Unknown error";
+        toast.error(`Could not ${action} approval`, { description: msg });
+        pushAuditEvent({
+          eventId: `apv-action-err-${approval.approvalId}-${Date.now()}`,
+          kind: "policy-gate",
+          actor: "operator",
+          actorType: "human",
+          action: `Failed to ${action} approval: ${approval.title}`,
+          detail: msg,
+          timestamp: new Date().toISOString(),
+          outcome: "failure",
+        });
+      }
+    },
+    [pushAuditEvent],
+  );
+
   function drillApproval(a: Approval) {
     pushAuditEvent({
       eventId: `drill-apv-${a.approvalId}-${Date.now()}`,
@@ -770,11 +932,12 @@ export function GlobalFabricPage() {
           <RunsPanel runs={runs} onDrill={drillRun} />
           <AlertsPanel alerts={alerts} onDrill={drillAlert} />
           <RecsPanel recs={recommendations} onDrill={drillRec} />
-          <ApprovalsPanel approvals={approvals} onDrill={drillApproval} />
+          <ApprovalsPanel approvals={approvals} onDrill={drillApproval} onAction={handleApprovalAction} />
           <ConnectorsPanel connectors={connectors} />
           <SystemHealthPanel health={systemHealth} />
         </div>
       </div>
+      <Toaster richColors closeButton position="bottom-right" />
     </div>
   );
 }
