@@ -41,6 +41,7 @@ const STRATEGY_NAV: NavGroup[] = [
   {
     section: "Command",
     items: [
+      { href: "/demo", label: "Demo Launchpad", icon: Play },
       { href: "/strategy", label: "Governed Decision Loop", icon: LayoutDashboard },
       { href: "/strategy/enterprise-state", label: "Enterprise State", icon: Building },
       { href: "/strategy/executive-briefing", label: "Executive Briefing", icon: FileText },

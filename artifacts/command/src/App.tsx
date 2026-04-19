@@ -96,6 +96,7 @@ const AlloyPolicyCompiler = lazy(() => import("@lyte/pages/alloy-policy-compiler
 const CognitiveCommandCenter = lazy(() => import("./pages/cognitive/index"));
 const AlloyProofPage = lazy(() => import("./pages/alloy-proof").then(m => ({ default: m.AlloyProofPage })));
 const GovernedCockpitPage = lazy(() => import("./pages/governed-cockpit"));
+const DemoLaunchpadPage = lazy(() => import("./pages/demo-launchpad").then(m => ({ default: m.DemoLaunchpad })));
 const GlobalFabricPage = lazy(() => import("./pages/operations/fabric").then((m) => ({ default: m.GlobalFabricPage })));
 const SelfModelConsole = lazy(() => import("./pages/cognitive/self-model"));
 const WorldModelExplorer = lazy(() => import("./pages/cognitive/world-model"));
@@ -352,6 +353,8 @@ function AppShell() {
               <Route path="/operations/alloy/trust-console" component={() => <TrustConsole />} />
               <Route path="/operations/alloy/proof" component={() => <AlloyProofPage />} />
               <Route path="/governed-cockpit" component={() => <GovernedCockpitPage />} />
+              <Route path="/demo" component={() => <DemoLaunchpadPage />} />
+              <Route path="/demo-launchpad" component={() => <DemoLaunchpadPage />} />
 
               <Route path="/cognitive/memory" component={() => <CognitiveMemory />} />
               <Route path="/cognitive/planner" component={() => <CognitivePlanner />} />

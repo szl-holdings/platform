@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Shield, CheckCircle2, AlertTriangle, Lock, BookOpen, ChevronDown, ChevronUp, Zap } from "lucide-react";
+import { Shield, CheckCircle2, AlertTriangle, Lock, BookOpen, ChevronDown, ChevronUp, Zap, Code2, ExternalLink, GitBranch } from "lucide-react";
 import { policyRules, policyEvaluationLog, type PolicyRule } from "@/data/seed";
 
 const EFFECT_CONFIG: Record<string, { label: string; color: string; bg: string; border: string }> = {
@@ -129,6 +129,8 @@ export default function PolicyCenterPage() {
   const totalTriggers = policyRules.reduce((sum, r) => sum + r.triggerCount, 0);
   const recentBlocks = policyEvaluationLog.filter(e => e.outcome === "blocked").length;
 
+  const BASE_COMMAND = window.location.origin + "/command";
+
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-5">
       <div className="flex items-start justify-between gap-4">
@@ -136,6 +138,44 @@ export default function PolicyCenterPage() {
           <h1 className="text-lg font-semibold text-amber-100 font-display">Policy Center</h1>
           <p className="text-xs text-amber-400/50 mt-0.5">{policyRules.length} active policies — governing all agent actions and approvals</p>
         </div>
+        <div className="flex items-center gap-2">
+          <a
+            href={`${BASE_COMMAND}/operations/alloy/policy-compiler`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all border border-amber-500/20 bg-amber-500/8 text-amber-300 hover:bg-amber-500/15 hover:border-amber-500/35"
+          >
+            <Code2 className="w-3 h-3" />
+            Compile New Policy
+            <ExternalLink className="w-2.5 h-2.5 opacity-60" />
+          </a>
+          <div className="proof-badge">
+            <GitBranch className="w-2.5 h-2.5" />
+            ALLOY-POLICY
+          </div>
+        </div>
+      </div>
+
+      {/* Policy Compiler CTA banner */}
+      <div className="cockpit-panel border border-amber-500/15 p-4 flex items-start gap-3">
+        <div className="w-8 h-8 rounded bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0">
+          <Code2 className="w-4 h-4 text-amber-400" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-semibold text-amber-100">Policy Compiler — Alloy</p>
+          <p className="text-[10px] text-amber-400/50 mt-0.5 leading-snug">
+            Write operating rules in plain English and compile them into validated, versioned, rollback-able policy objects. The Policy Compiler is Alloy's signature innovation.
+          </p>
+        </div>
+        <a
+          href={`${BASE_COMMAND}/operations/alloy/policy-compiler`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium shrink-0 transition-all border border-amber-500/20 bg-amber-500/8 text-amber-300 hover:bg-amber-500/15"
+        >
+          Open Compiler
+          <ExternalLink className="w-2.5 h-2.5 opacity-60" />
+        </a>
       </div>
 
       {/* Summary */}

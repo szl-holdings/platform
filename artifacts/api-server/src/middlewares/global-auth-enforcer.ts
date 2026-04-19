@@ -133,6 +133,10 @@ const PUBLIC_PREFIXES = [
   // Simulation what-if engine — POST route is public so the Strategy simulation
   // page can compute cross-domain scenario impacts in demo mode without a session.
   "/api/simulation/",
+  // Demo reset — POST /api/demo/reset is public so the Demo Launchpad presenter
+  // can reset scenario state without being logged in. Mounted pre-auth in app.ts;
+  // this PUBLIC_PREFIXES entry is kept as defense-in-depth, scoped to exact path only.
+  "/api/demo/reset",
   // Infrastructure status — lightweight public health summary used by the
   // Legatus infrastructure console to show live AquilaScore and threat level.
   "/api/infrastructure/",

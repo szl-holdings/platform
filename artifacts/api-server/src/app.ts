@@ -12,6 +12,7 @@ import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 import { randomBytes } from "crypto";
 import router from "./routes";
+import demoResetRouter from "./routes/demo-reset";
 import { logger } from "./lib/logger";
 import { sendError, sendForbidden, sendNotFound, sendUnauthorized } from "./lib/api-response";
 import { correlationMiddleware } from "./middlewares/correlation";
@@ -512,6 +513,10 @@ app.get("/api/csrf-token", (req: Request, res: Response) => {
 });
 
 app.use("/api", etagMiddleware);
+// Demo reset — mounted BEFORE globalAuthEnforcer so it is accessible without a
+// browser session. This is a safe unauthenticated surface: it only clears
+// in-memory scenario state and returns a manifest of what was reset.
+app.use("/api", demoResetRouter);
 app.use(globalAuthEnforcer);
 app.use("/api", router);
 

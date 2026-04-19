@@ -1,0 +1,123 @@
+{
+  "auditDate": "2026-04-19",
+  "version": "1.0.0",
+  "platform": "SZL Holdings — Governed Operational Intelligence",
+  "summary": {
+    "total": 89,
+    "working": 72,
+    "partial": 7,
+    "dormant": 6,
+    "mock": 2,
+    "broken": 0,
+    "workingPct": 81,
+    "partialPct": 8,
+    "dormantPct": 7,
+    "mockPct": 2,
+    "brokenPct": 0
+  },
+  "signatureInnovations": [
+    {
+      "name": "Decision Twin",
+      "domain": "Lyte",
+      "route": "/lyte/decision-twin",
+      "status": "working",
+      "linesOfCode": 761,
+      "description": "Simulate approve/delay/reroute/escalate with downstream impact, assumptions, confidence bands, audit trail"
+    },
+    {
+      "name": "Policy Compiler",
+      "domain": "Alloy",
+      "route": "/command/operations/alloy/policy-compiler",
+      "status": "working",
+      "linesOfCode": 1252,
+      "description": "Plain-English → structured, validated, versioned, rollback-able policy objects with workflow coverage"
+    },
+    {
+      "name": "Why This Property Now",
+      "domain": "Terra",
+      "route": "/terra/why-this-property-now",
+      "status": "working",
+      "linesOfCode": 912,
+      "description": "Ranked acquisition thesis: liens, violations, transfer anomalies, ownership complexity, neighborhood trend, timing"
+    },
+    {
+      "name": "Adversary Narrative Engine",
+      "domain": "Aegis",
+      "route": "/aegis/adversary-narrative-engine",
+      "status": "working",
+      "linesOfCode": 1806,
+      "description": "Readable incident storyline: attack chain, MITRE mapping, affected assets, confidence, exec + analyst modes"
+    },
+    {
+      "name": "Voyage Risk Twin",
+      "domain": "Vessels",
+      "route": "/vessels/voyage-risk-twin",
+      "status": "working",
+      "linesOfCode": 1063,
+      "description": "Route-level risk: AIS gaps, sanctions, weather, voyage economics → explained risk + alternatives + compliance packet"
+    },
+    {
+      "name": "White-Glove Command",
+      "domain": "Carlota Jo",
+      "route": "/carlota-jo/concierge",
+      "status": "working",
+      "linesOfCode": null,
+      "description": "Service lanes, VIP preference memory, escalation playbooks, quiet activity log, full service-lifecycle states"
+    }
+  ],
+  "workflows": [
+    { "name": "szl-holdings: web", "status": "running", "port": 21130 },
+    { "name": "api-server: api", "status": "running", "port": 8080 },
+    { "name": "command: web", "status": "running", "port": 5000 },
+    { "name": "lyte-command-center: web", "status": "running", "port": 7099, "fixedThisAudit": true },
+    { "name": "terra: web", "status": "running", "port": 6000 },
+    { "name": "aegis: web", "status": "running", "port": 3002 },
+    { "name": "vessels: web", "status": "running", "port": 8099 },
+    { "name": "carlota-jo: web", "status": "running", "port": 8098 },
+    { "name": "sentra: web", "status": "running", "port": 4099 },
+    { "name": "counsel: web", "status": "running", "port": 4199, "fixedThisAudit": true },
+    { "name": "prism-counsel: web", "status": "running", "port": 7100 },
+    { "name": "pulse: web", "status": "running", "port": 5201 },
+    { "name": "mockup-sandbox: web", "status": "running", "port": 8008 },
+    { "name": "szl-holdings-mobile: expo", "status": "running", "port": 8085 },
+    { "name": "szl-demo-video: web", "status": "running", "port": 8765 },
+    { "name": "smoke-test-integrations", "status": "passed", "note": "8/8 integrations configured" },
+    { "name": "check-deprecated-links", "status": "passed", "note": "No deprecated nav links" }
+  ],
+  "commercialSwitches": [
+    { "name": "Stripe", "status": "active", "mode": "test", "smokeTest": "PASS" },
+    { "name": "Mapbox", "status": "active", "mode": "live" },
+    { "name": "Google Maps", "status": "active", "mode": "live" },
+    { "name": "PostHog", "status": "active", "mode": "live" },
+    { "name": "Amplitude", "status": "active", "mode": "live" },
+    { "name": "Sentry", "status": "active", "mode": "live" },
+    { "name": "Email (Resend)", "status": "dormant", "fix": "Add RESEND_API_KEY" },
+    { "name": "Redis", "status": "dormant", "fix": "Add REDIS_URL" },
+    { "name": "SSO/SCIM", "status": "dormant", "fix": "Configure IdP credentials" },
+    { "name": "AIS Live Feed", "status": "mock", "fix": "Add MARINETRAFFIC_API_KEY" }
+  ],
+  "liveDataSources": [
+    { "source": "NYC Open Data", "domain": "Terra", "classification": "LIVE", "license": "CC0", "pollInterval": "on-demand" },
+    { "source": "STIX/TAXII (MISP)", "domain": "Aegis", "classification": "LIVE", "pollInterval": 900 },
+    { "source": "OFAC SDN List", "domain": "Aegis, Vessels", "classification": "LIVE", "pollInterval": 21600 },
+    { "source": "EU Consolidated List", "domain": "Aegis, Vessels", "classification": "LIVE", "pollInterval": 21600 },
+    { "source": "UN Security Council List", "domain": "Aegis, Vessels", "classification": "LIVE", "pollInterval": 21600 },
+    { "source": "Stripe (test mode)", "domain": "Platform", "classification": "LIVE", "note": "Test keys" }
+  ],
+  "gaps": {
+    "p1": [
+      { "id": "GAP-001", "description": "Email not activated", "fix": "Add RESEND_API_KEY", "effort": "5 minutes" },
+      { "id": "GAP-002", "description": "Carlota Jo Stripe checkout not wired", "fix": "Build /checkout page", "effort": "1 day" },
+      { "id": "GAP-003", "description": "Vessels AIS demo-only", "fix": "Add MARINETRAFFIC_API_KEY", "effort": "2 hours" }
+    ],
+    "p2": [
+      { "id": "GAP-004", "description": "DB tables missing", "fix": "pnpm seed:all", "effort": "2 hours" },
+      { "id": "GAP-005", "description": "SSO not configured", "fix": "Configure IdP", "effort": "3 days" },
+      { "id": "GAP-006", "description": "Pulse not AI-generated", "fix": "Connect AI provider", "effort": "3 days" },
+      { "id": "GAP-007", "description": "Terra ETL no health UI", "fix": "Build ingestion status page", "effort": "1 day" },
+      { "id": "GAP-008", "description": "SIEM connectors stubbed", "fix": "Wire one reference vendor", "effort": "1 week" }
+    ]
+  },
+  "generatedBy": "SZL Singularity Program — Task #2239",
+  "nextAuditRecommended": "2026-05-19"
+}
