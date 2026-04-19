@@ -159,6 +159,20 @@ The following status checks must be listed as required in the branch ruleset:
 
 > **Note**: GitHub requires status checks to have run at least once before they can be selected as required checks in the UI. Merge a test PR first if adding a new check.
 
+### Continuous secret scanning (non-blocking, post-merge)
+
+In addition to the PR-time Gitleaks gate above, the repo runs continuous
+secret scanning so any credential that slips past the PR gate (or that
+existed before the gate was added) is caught daily:
+
+| Layer | Where | Cadence |
+|---|---|---|
+| GitHub native secret scanning + push protection | Repo Settings → Code security (must be **Enabled** — public repos get this free) | Continuous (push-time + history) |
+| `Secret Scan (Scheduled — main)` workflow | `.github/workflows/secret-scan-scheduled.yml` | Daily 06:17 UTC + manual dispatch; uploads SARIF to the Security tab and opens a triage issue on any finding |
+
+Triage flow and one-time enablement steps for the GitHub-native toggles
+are in [`secret-scanning-runbook.md`](./secret-scanning-runbook.md).
+
 ---
 
 ## GitHub Environment Protection Rules
