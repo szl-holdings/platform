@@ -20,6 +20,7 @@ import type { ActivationStep } from "@szl-holdings/shared-ui/onboarding";
 import { GitBranch, Zap, Map } from "lucide-react";
 import { EcosystemAppsGrid } from "../components/ecosystem-apps-grid";
 import { AtlasKpiSection } from "../components/atlas-kpi-section";
+import { DemoLaunchpadPanel } from "../components/demo-launchpad-panel";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -135,6 +136,7 @@ export function Dashboard() {
               onNavigate={handleNavigate}
             />
           )}
+          <DemoLaunchpadPanel />
         </div>
 
         <EcosystemPulse
