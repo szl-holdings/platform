@@ -22,6 +22,16 @@ import request from "supertest";
 
 const _auditInserts: Array<Record<string, unknown>> = [];
 
+/**
+ * Tiny in-memory simulation of the `alloy_autonomy_modes` table — just enough
+ * to back the upsert + lookup the routes perform end-to-end. Keyed by
+ * `${tenantOrgId ?? "null"}::${domain}`.
+ */
+const _autonomyRows = new Map<string, Record<string, unknown>>();
+function _autonomyKey(tenantOrgId: number | null | undefined, domain: string): string {
+  return `${tenantOrgId == null ? "null" : tenantOrgId}::${domain}`;
+}
+
 function makeOpsUser() {
   return {
     id: 42,
@@ -40,19 +50,51 @@ let _currentUser = makeOpsUser();
 
 vi.mock("@szl-holdings/db", () => {
   const col = (name: string) => ({ _colName: name });
+  /**
+   * Walk a (possibly nested) drizzle `where(and(eq(...), eq(...)))` predicate
+   * tree and return a flat list of `{ col, val, op }` filters. Good enough to
+   * back the autonomy-modes lookups in this test.
+   */
+  function flattenWhere(node: unknown, out: Array<{ col?: string; val?: unknown; op: string }> = []): typeof out {
+    if (!node || typeof node !== "object") return out;
+    const n = node as { op?: string; col?: { _colName?: string }; val?: unknown; conds?: unknown[] };
+    if (n.op === "and" && Array.isArray(n.conds)) {
+      n.conds.forEach((c) => flattenWhere(c, out));
+    } else if (n.op === "eq" || n.op === "isNull") {
+      out.push({ op: n.op, col: n.col?._colName, val: n.val });
+    }
+    return out;
+  }
   return {
     db: {
       select() {
+        const state: { table?: { _name?: string }; filters: Array<{ col?: string; val?: unknown; op: string }> } = { filters: [] };
+        const buildResult = (): unknown[] => {
+          if (state.table?._name === "alloy_autonomy_modes") {
+            const tenantOrgId = state.filters.find((f) => f.col === "tenant_org_id")
+              ? (state.filters.find((f) => f.col === "tenant_org_id")!.val as number)
+              : (state.filters.find((f) => f.op === "isNull" && f.col === "tenant_org_id") ? null : undefined);
+            const domainFilter = state.filters.find((f) => f.col === "domain");
+            const rows: Record<string, unknown>[] = [];
+            for (const row of _autonomyRows.values()) {
+              if (tenantOrgId !== undefined && row.tenantOrgId !== tenantOrgId) continue;
+              if (domainFilter && row.domain !== domainFilter.val) continue;
+              rows.push(row);
+            }
+            return rows;
+          }
+          return [];
+        };
         const chain: Record<string, unknown> = {
-          from: () => chain,
-          where: () => chain,
+          from: (table: { _name?: string }) => { state.table = table; return chain; },
+          where: (predicate: unknown) => { state.filters.push(...flattenWhere(predicate)); return chain; },
           innerJoin: () => chain,
           orderBy: () => chain,
           groupBy: () => chain,
-          limit: () => Promise.resolve([]),
-          offset: () => Promise.resolve([]),
+          limit: () => Promise.resolve(buildResult()),
+          offset: () => Promise.resolve(buildResult()),
           then: (resolve: (v: unknown) => unknown, reject?: (e: unknown) => unknown) =>
-            Promise.resolve([]).then(resolve, reject),
+            Promise.resolve(buildResult()).then(resolve, reject),
         };
         return chain;
       },
@@ -62,10 +104,29 @@ vi.mock("@szl-holdings/db", () => {
             if (table?._name === "alloy_audit_log") {
               _auditInserts.push(row);
             }
+            const upsertAutonomy = (set?: Record<string, unknown>) => {
+              const tenantOrgId = (row as { tenantOrgId?: number | null }).tenantOrgId ?? null;
+              const domain = String((row as { domain?: string }).domain ?? "");
+              const key = _autonomyKey(tenantOrgId, domain);
+              const existing = _autonomyRows.get(key);
+              const merged = existing ? { ...existing, ...(set ?? {}) } : { ...row };
+              _autonomyRows.set(key, merged);
+              return merged;
+            };
             const result = {
-              returning: () => Promise.resolve([row]),
-              onConflictDoUpdate: (_args: unknown) => ({
-                returning: () => Promise.resolve([row]),
+              returning: () => {
+                if (table?._name === "alloy_autonomy_modes") {
+                  return Promise.resolve([upsertAutonomy()]);
+                }
+                return Promise.resolve([row]);
+              },
+              onConflictDoUpdate: (args: { set?: Record<string, unknown> }) => ({
+                returning: () => {
+                  if (table?._name === "alloy_autonomy_modes") {
+                    return Promise.resolve([upsertAutonomy(args?.set)]);
+                  }
+                  return Promise.resolve([row]);
+                },
               }),
               onConflictDoNothing: (_args?: unknown) => ({
                 returning: () => Promise.resolve([row]),
@@ -83,7 +144,10 @@ vi.mock("@szl-holdings/db", () => {
         };
         return chain;
       },
-      delete() {
+      delete(table: { _name?: string }) {
+        if (table?._name === "alloy_autonomy_modes") {
+          _autonomyRows.clear();
+        }
         return { where: () => Promise.resolve() };
       },
     },
@@ -222,9 +286,10 @@ describe("Autonomy mode → /alloy/recommend (end-to-end)", () => {
   beforeEach(async () => {
     _auditInserts.length = 0;
     _currentUser = makeOpsUser();
-    // Reset the in-memory autonomy store so each test starts clean.
+    // Reset the autonomy store so each test starts clean.
+    _autonomyRows.clear();
     const { _clearAutonomyStore } = await import("../../lib/autonomy-store.js");
-    _clearAutonomyStore();
+    await _clearAutonomyStore();
   });
 
   it("PATCH observe → /alloy/recommend returns 409 AUTONOMY_BLOCKED, audit row written", async () => {

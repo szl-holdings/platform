@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import {
   _clearAutonomyStore,
   evaluateAutonomyForAction,
@@ -10,6 +10,36 @@ import {
 
 beforeEach(async () => {
   await _clearAutonomyStore();
+});
+
+describe("autonomy-store persistence (survives module re-import)", () => {
+  it("a mode set before a 'restart' is still observed afterward", async () => {
+    // Simulate: operator picks approved-act, then the api-server is
+    // redeployed (the module is re-imported with a fresh module-level state).
+    await setAutonomyMode({
+      tenantOrgId: 11,
+      domain: "demo.persistence",
+      mode: "approved-act",
+      updatedBy: "ops@szl.test",
+      reason: "post-restart survivability check",
+    });
+
+    // Force a fresh import of the store to mimic a process restart — any
+    // module-level cache is rebuilt from scratch. The persisted Postgres row
+    // is what guarantees the mode survives.
+    vi.resetModules();
+    const fresh = await import("../autonomy-store");
+    const rec = await fresh.getAutonomyMode(11, "demo.persistence");
+    expect(rec.mode).toBe("approved-act");
+    expect(rec.tenantOrgId).toBe(11);
+    expect(rec.updatedBy).toBe("ops@szl.test");
+    expect(rec.reason).toBe("post-restart survivability check");
+
+    // And the evaluator on the fresh module sees the same persisted mode.
+    const decision = await fresh.evaluateAutonomyForAction(11, "demo.persistence");
+    expect(decision.policyState).toBe("allowed");
+    expect(decision.disposition).toBe("execute");
+  });
 });
 
 describe("autonomy-store", () => {
