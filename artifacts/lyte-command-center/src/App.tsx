@@ -3,6 +3,13 @@ import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useUserPreferences } from "@szl-holdings/shared-ui/use-user-preferences";
 import {
+  SentientLayer,
+  useSentientLayer,
+  type SentientUpdate,
+  type SentientAction,
+  type SentientCrossLink,
+} from "@szl-holdings/shared-ui/sentient-layer";
+import {
   LayoutDashboard, AlertTriangle, GitBranch, Activity,
   Thermometer, Layers, ChevronRight, Menu, X, BookOpen, Brain,
   ChevronDown, Zap, Shield, Users, Radio, Network, Workflow,
@@ -194,12 +201,35 @@ function Sidebar({ expanded, onToggle }: { expanded: boolean; onToggle: () => vo
   );
 }
 
+const LYTE_ACCENT = "#fbbf24";
+
+const SENTIENT_UPDATES: SentientUpdate[] = [
+  { id: "lu1", headline: "Vantex approval chain still void at step 1 — 47 days stalled", surface: "Lyte", entityLabel: "Vantex Acquisition", severity: "critical", timestamp: new Date(Date.now() - 8 * 60000).toISOString(), href: "/decisions" },
+  { id: "lu2", headline: "$4.2M Q2 revenue at risk — close probability collapsed 84% → 31%", surface: "Lyte", entityLabel: "Vantex Acquisition", severity: "critical", timestamp: new Date(Date.now() - 22 * 60000).toISOString(), href: "/overview" },
+  { id: "lu3", headline: "3 escalation attempts blocked by policy — manual override required", surface: "Lyte", entityLabel: "Procurement Approval Chain", severity: "warning", timestamp: new Date(Date.now() - 47 * 60000).toISOString(), href: "/policies" },
+  { id: "lu4", headline: "Stratford Partners shows identical pattern — $1.8M secondary risk", surface: "Lyte", entityLabel: "Stratford Expansion", severity: "warning", timestamp: new Date(Date.now() - 3 * 3600000).toISOString(), href: "/signals" },
+  { id: "lu5", headline: "Buyer engagement decay — David Chen silent for 28 days", surface: "Lyte", entityLabel: "Vantex Acquisition", severity: "info", timestamp: new Date(Date.now() - 5 * 3600000).toISOString(), href: "/signals" },
+];
+
+const SENTIENT_ACTIONS: SentientAction[] = [
+  { id: "la1", label: "Invoke CFO override — reassign Vantex chain to Sarah Kim", description: "Voids the stalled approval chain, transfers ownership to VP BD, and restarts the deal. Reversible. Estimated ARR recovery: $4.2M.", confidence: 0.92, policyVerdict: "requires_approval", href: "/decisions" },
+  { id: "la2", label: "Trigger portfolio-wide approval-gap audit", description: "Lyte detected 3/14 portfolio companies showing similar void-owner patterns. Audit prevents an estimated $7.2M further crystallization in Q2.", confidence: 0.84, policyVerdict: "requires_approval", href: "/decisions" },
+  { id: "la3", label: "Re-engage David Chen via warm reactivation sequence", description: "Buyer last replied 28 days ago. Auto-drafted reactivation message ready for review. Low blast radius.", confidence: 0.79, policyVerdict: "allowed", href: "/runs" },
+];
+
+const SENTIENT_CROSS_LINKS: SentientCrossLink[] = [
+  { id: "lcl1", surface: "Counsel", surfaceAccent: "#8b5cf6", label: "Vantex legal review package — blocked 30 days", description: "PRISM Counsel cannot advance the Vantex legal package until procurement clearance is restored.", href: "/counsel/dashboard", preservedContext: { surface: "lyte", entity: "lyte-del-legal-001" } },
+  { id: "lcl2", surface: "Vessels", surfaceAccent: "#0ea5e9", label: "MV Atlantic Falcon voyage tied to Vantex acquisition", description: "Vessels has an active voyage whose financing is contingent on the Vantex deal closing in Q2.", href: "/vessels/fleet", preservedContext: { surface: "lyte", entity: "lyte-opp-vantex-001" } },
+  { id: "lcl3", surface: "Sentra", surfaceAccent: "#ef4444", label: "Vantex endpoints flagged in CVE-2024-21412 sweep", description: "Sentra has 3 Vantex-linked assets in active threat scope — coordinate before re-engaging buyer.", href: "/sentra/threats", preservedContext: { surface: "lyte", entity: "lyte-opp-vantex-001" } },
+];
+
 function AppShell({ children }: { children: React.ReactNode }) {
   const { prefs, setPreference, isLoaded } = useUserPreferences();
   const [sidebarExpanded, setSidebarExpanded] = useState(() => !prefs.sidebar_collapsed);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [location] = useLocation();
   const userOverriddenSidebarRef = useRef(false);
+  const { open: sentientOpen, show: sentientShow, hide: sentientHide } = useSentientLayer();
 
   useEffect(() => {
     if (isLoaded && !userOverriddenSidebarRef.current) {
@@ -274,6 +304,21 @@ function AppShell({ children }: { children: React.ReactNode }) {
           </Suspense>
         </main>
       </div>
+
+      <SentientLayer
+        open={sentientOpen}
+        onClose={sentientHide}
+        onOpen={sentientShow}
+        surfaceId="lyte"
+        surfaceName="Lyte Decision Intelligence"
+        accentColor={LYTE_ACCENT}
+        entityType="Opportunity"
+        entityLabel="Vantex Acquisition — Q2 Close"
+        timeRange="Last 6h"
+        updates={SENTIENT_UPDATES}
+        actions={SENTIENT_ACTIONS}
+        crossLinks={SENTIENT_CROSS_LINKS}
+      />
     </div>
   );
 }
