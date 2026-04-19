@@ -11,9 +11,81 @@ import {
 } from "@szl-holdings/scene-export";
 import type { SceneSnapshot, BranchPackage, ProofBundle } from "@szl-holdings/scene-export";
 import { sendSuccess, sendError, sendBadRequest, handleRouteError } from "../lib/api-response";
+import { db, auditEventsTable } from "@szl-holdings/db";
+import { logger } from "../lib/logger";
 
 import { anyQuerySchema, jsonObjectBodySchema, validateBody, validateQuery } from "../lib/validation";
 const router: IRouter = Router();
+
+/**
+ * Sentinel error thrown when an ATLAS export audit write fails. Routes catch
+ * this and fail the export response so a successful export can never occur
+ * without a corresponding entry in audit_events (fail-closed compliance).
+ */
+class AtlasExportAuditError extends Error {
+  constructor(message: string, public readonly cause?: unknown) {
+    super(message);
+    this.name = "AtlasExportAuditError";
+  }
+}
+
+/**
+ * Record an audit event for an ATLAS scene/branch/proof-bundle export.
+ *
+ * Governance & compliance require that every successful export be traceable —
+ * who exported what, when, and in which format. We write to audit_events
+ * (visible via /audit/events) before returning the export to the caller. If
+ * the audit write fails, this throws AtlasExportAuditError so the route can
+ * fail the response — fail-closed: no export response without an audit row.
+ * The event is written even when the underlying exporter returns a stub or
+ * empty payload so the trail is complete.
+ */
+async function recordAtlasExportAudit(params: {
+  req: Request;
+  action: string;
+  entityType: string;
+  entityId: string | null;
+  format: string;
+  details?: Record<string, unknown>;
+}): Promise<void> {
+  try {
+    await db.insert(auditEventsTable).values({
+      userId: params.req.user?.id ?? null,
+      action: params.action,
+      entityType: params.entityType,
+      entityId: params.entityId ?? undefined,
+      newValues: {
+        format: params.format,
+        ...(params.details ?? {}),
+      },
+      ipAddress: params.req.ip ?? null,
+      userAgent: params.req.get("user-agent") ?? null,
+      product: "atlas",
+    });
+  } catch (err) {
+    logger.error(
+      { err, action: params.action, entityId: params.entityId },
+      "Failed to write ATLAS export audit event — failing export request",
+    );
+    throw new AtlasExportAuditError(
+      "Failed to record audit event for ATLAS export",
+      err,
+    );
+  }
+}
+
+function handleAuditFailure(res: Response, err: unknown): boolean {
+  if (err instanceof AtlasExportAuditError) {
+    sendError(
+      res,
+      "Export blocked: audit log unavailable. Please retry.",
+      503,
+      "AUDIT_LOG_UNAVAILABLE",
+    );
+    return true;
+  }
+  return false;
+}
 
 const atlasExportRateLimit = rateLimit({
   windowMs: 60 * 1000,
@@ -67,8 +139,17 @@ router.get(
       };
 
       const result = exportJsonSnapshot(snapshot);
+      await recordAtlasExportAudit({
+        req,
+        action: "atlas.snapshot.export",
+        entityType: "atlas_scene",
+        entityId: sceneId,
+        format: result.format,
+        details: { domain, entityType, entityId },
+      });
       sendSuccess(res, result);
     } catch (err) {
+      if (handleAuditFailure(res, err)) return;
       if (err instanceof Error && err.message.includes("required")) {
         sendBadRequest(res, err.message);
         return;
@@ -117,8 +198,22 @@ router.post(
       };
 
       const result = exportBranchPackage(branchPackage);
+      await recordAtlasExportAudit({
+        req,
+        action: "atlas.branch.export",
+        entityType: "atlas_branch",
+        entityId: branchPackage.branchId,
+        format: result.format,
+        details: {
+          parentSceneId: branchPackage.parentSceneId,
+          branchLabel: branchPackage.branchLabel,
+          domain: branchPackage.domain,
+          correlationId: branchPackage.correlationId,
+        },
+      });
       sendSuccess(res, result);
     } catch (err) {
+      if (handleAuditFailure(res, err)) return;
       if (err instanceof Error && err.message.includes("required")) {
         sendBadRequest(res, err.message);
         return;
@@ -168,8 +263,24 @@ router.post(
       };
 
       const result = exportProofBundle(proofBundle);
+      await recordAtlasExportAudit({
+        req,
+        action: "atlas.proof_bundle.export",
+        entityType: "atlas_proof_bundle",
+        entityId: proofBundle.bundleId,
+        format: result.format,
+        details: {
+          contentId: proofBundle.contentId,
+          contentType: proofBundle.contentType,
+          sourceClass: proofBundle.sourceClass,
+          confidenceScore: proofBundle.confidenceScore,
+          serviceAttribution: proofBundle.serviceAttribution,
+          correlationId: proofBundle.correlationId,
+        },
+      });
       sendSuccess(res, result);
     } catch (err) {
+      if (handleAuditFailure(res, err)) return;
       if (err instanceof Error && err.message.includes("required")) {
         sendBadRequest(res, err.message);
         return;
@@ -214,8 +325,21 @@ router.get(
       });
 
       const result = exportOpenUSDManifest(manifest);
+      await recordAtlasExportAudit({
+        req,
+        action: "atlas.openusd.export",
+        entityType: "atlas_scene",
+        entityId: sceneId,
+        format: result.format,
+        details: {
+          domain,
+          entityId: entityId ?? sceneId,
+          proofChainId: resolvedProofChainId,
+        },
+      });
       sendSuccess(res, result);
     } catch (err) {
+      if (handleAuditFailure(res, err)) return;
       if (err instanceof Error && err.message.includes("required")) {
         sendBadRequest(res, err.message);
         return;

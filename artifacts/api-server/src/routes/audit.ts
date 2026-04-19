@@ -7,7 +7,7 @@ import { isFlagEnabled } from "../lib/platform-flags";
 
 const router: IRouter = Router();
 
-router.get("/audit/activity", authMiddleware(), requireRole("ops", "analyst"), async (_req, res) => {
+router.get("/audit/activity", authMiddleware(), requireRole("ops", "analyst", "compliance"), async (_req, res) => {
   const enabled = await isFlagEnabled("internal_audit_console_enabled");
   if (!enabled) {
     res.status(403).json({ error: "Feature not available", feature: "internal_audit_console_enabled", fallback: { logs: [] } });
@@ -21,7 +21,7 @@ router.get("/audit/activity", authMiddleware(), requireRole("ops", "analyst"), a
   }
 });
 
-router.get("/audit/events", authMiddleware(), requireRole("ops", "analyst"), async (_req, res) => {
+router.get("/audit/events", authMiddleware(), requireRole("ops", "analyst", "compliance"), async (_req, res) => {
   const enabled = await isFlagEnabled("internal_audit_console_enabled");
   if (!enabled) {
     res.status(403).json({ error: "Feature not available", feature: "internal_audit_console_enabled", fallback: { events: [] } });

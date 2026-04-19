@@ -29,11 +29,39 @@ vi.mock("drizzle-orm", async () => {
   return { eq: noop, and: noop, or: noop, desc: noop, sql: noop, ilike: noop };
 });
 
+const auditInsertCalls: Array<Record<string, unknown>> = [];
+let auditInsertShouldFail = false;
+
 vi.mock("@szl-holdings/db", () => {
   const stubTable = {};
   const db = {
     select: () => ({ from: () => ({ where: () => Promise.resolve([]) }) }),
-    insert: () => ({ values: () => ({ returning: () => Promise.resolve([{ id: 1 }]) }) }),
+    insert: (_table: unknown) => ({
+      values: (vals: Record<string, unknown>) => {
+        if (auditInsertShouldFail) {
+          // Return a thenable that rejects so `await db.insert(...).values(...)`
+          // and `.returning()` both fail — simulates a real DB write error.
+          const rejection = Promise.reject(
+            new Error("simulated audit_events insert failure"),
+          );
+          // Prevent unhandled-rejection noise: attach a no-op handler now;
+          // tests will await this rejection through the route.
+          rejection.catch(() => {});
+          return {
+            returning: () => rejection,
+            then: (onFulfilled: unknown, onRejected: unknown) =>
+              rejection.then(
+                onFulfilled as never,
+                onRejected as never,
+              ),
+            catch: (onRejected: unknown) =>
+              rejection.catch(onRejected as never),
+          };
+        }
+        auditInsertCalls.push(vals);
+        return { returning: () => Promise.resolve([{ id: 1 }]) };
+      },
+    }),
     update: () => ({ set: () => ({ where: () => ({ returning: () => Promise.resolve([]) }) }) }),
     delete: () => ({ where: () => Promise.resolve([]) }),
   };
@@ -53,6 +81,7 @@ vi.mock("@szl-holdings/db", () => {
       toCanonicalRole: (r: string) => r,
       sessionsTable: stubTable,
       usersTable: stubTable,
+      auditEventsTable: stubTable,
       featureFlagsTable: stubTable,
       featureFlagOverridesTable: stubTable,
     } as Record<string, unknown>,
@@ -451,6 +480,136 @@ describe("ATLAS Scene Export Routes", () => {
         .query({ proofChainId: "1.7" });
 
       expect(res.status).toBe(400);
+    });
+  });
+
+  describe("Audit trail", () => {
+    it("records an audit event when a scene snapshot is exported", async () => {
+      authUser = { id: 42, role: "operator" };
+      atlasEnabled = true;
+      auditInsertCalls.length = 0;
+
+      const res = await request(app).get("/atlas/snapshot/audit-scene-001");
+      expect(res.status).toBe(200);
+
+      expect(auditInsertCalls.length).toBeGreaterThanOrEqual(1);
+      const event = auditInsertCalls[auditInsertCalls.length - 1];
+      expect(event.action).toBe("atlas.snapshot.export");
+      expect(event.entityType).toBe("atlas_scene");
+      expect(event.entityId).toBe("audit-scene-001");
+      expect(event.userId).toBe(42);
+      expect(event.product).toBe("atlas");
+      expect((event.newValues as { format: string }).format).toBe("json_snapshot");
+    });
+
+    it("records an audit event when a branch package is exported", async () => {
+      authUser = { id: 7, role: "ops" };
+      atlasEnabled = true;
+      auditInsertCalls.length = 0;
+
+      const body = {
+        parentSceneId: "audit-parent",
+        branchId: "audit-branch-01",
+        hypothesis: "What if we audit?",
+        deltaState: {},
+        outcomeProjections: [],
+      };
+      const res = await request(app).post("/atlas/branch/export").send(body);
+      expect(res.status).toBe(200);
+
+      const event = auditInsertCalls[auditInsertCalls.length - 1];
+      expect(event.action).toBe("atlas.branch.export");
+      expect(event.entityType).toBe("atlas_branch");
+      expect(event.entityId).toBe("audit-branch-01");
+      expect(event.userId).toBe(7);
+    });
+
+    it("records an audit event when a proof bundle is exported", async () => {
+      authUser = { id: 9, role: "operator" };
+      atlasEnabled = true;
+      auditInsertCalls.length = 0;
+
+      const body = {
+        bundleId: "audit-bundle-01",
+        contentId: "audit-content-01",
+        confidenceScore: 0.42,
+      };
+      const res = await request(app).post("/atlas/proof-bundle/export").send(body);
+      expect(res.status).toBe(200);
+
+      const event = auditInsertCalls[auditInsertCalls.length - 1];
+      expect(event.action).toBe("atlas.proof_bundle.export");
+      expect(event.entityType).toBe("atlas_proof_bundle");
+      expect(event.entityId).toBe("audit-bundle-01");
+    });
+
+    it("records an audit event when an OpenUSD manifest is exported", async () => {
+      authUser = { id: 11, role: "operator" };
+      atlasEnabled = true;
+      auditInsertCalls.length = 0;
+
+      const res = await request(app).get("/atlas/export/openusd/audit-usd-scene");
+      expect(res.status).toBe(200);
+
+      const event = auditInsertCalls[auditInsertCalls.length - 1];
+      expect(event.action).toBe("atlas.openusd.export");
+      expect(event.entityType).toBe("atlas_scene");
+      expect(event.entityId).toBe("audit-usd-scene");
+      expect((event.newValues as { format: string }).format).toBe("openusd_manifest");
+    });
+
+    it("does NOT record an audit event when the export is rejected by validation", async () => {
+      authUser = { id: 1, role: "operator" };
+      atlasEnabled = true;
+      auditInsertCalls.length = 0;
+
+      const res = await request(app)
+        .post("/atlas/branch/export")
+        .send({ branchId: "x", hypothesis: "y" });
+      expect(res.status).toBe(400);
+      expect(auditInsertCalls.length).toBe(0);
+    });
+
+    it("does NOT record an audit event when the feature flag is disabled", async () => {
+      authUser = { id: 1, role: "operator" };
+      atlasEnabled = false;
+      auditInsertCalls.length = 0;
+
+      const res = await request(app).get("/atlas/snapshot/audit-disabled");
+      expect(res.status).toBe(503);
+      expect(auditInsertCalls.length).toBe(0);
+
+      atlasEnabled = true;
+    });
+
+    it("FAILS the export with 503 AUDIT_LOG_UNAVAILABLE when the audit write fails (snapshot)", async () => {
+      authUser = { id: 1, role: "operator" };
+      atlasEnabled = true;
+      auditInsertShouldFail = true;
+
+      const res = await request(app).get("/atlas/snapshot/audit-fail-scene");
+      expect(res.status).toBe(503);
+      expect(res.body.code).toBe("AUDIT_LOG_UNAVAILABLE");
+
+      auditInsertShouldFail = false;
+    });
+
+    it("FAILS the export with 503 AUDIT_LOG_UNAVAILABLE when the audit write fails (proof bundle)", async () => {
+      authUser = { id: 1, role: "operator" };
+      atlasEnabled = true;
+      auditInsertShouldFail = true;
+
+      const res = await request(app)
+        .post("/atlas/proof-bundle/export")
+        .send({
+          bundleId: "fail-bundle",
+          contentId: "fail-content",
+          confidenceScore: 0.5,
+        });
+      expect(res.status).toBe(503);
+      expect(res.body.code).toBe("AUDIT_LOG_UNAVAILABLE");
+
+      auditInsertShouldFail = false;
     });
   });
 
