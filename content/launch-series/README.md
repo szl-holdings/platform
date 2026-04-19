@@ -144,20 +144,37 @@ Each `screenshots/README.md` lists the exact shot list for that post. The filena
 |-----|-----|-------|
 | `v1.0-standby` | https://github.com/szl-holdings/szl-holdings-platform/releases/tag/v1.0-standby | Wave 3 launch standby — 10 deployed artifacts, 700+ tables, 11-role RBAC, 9 schema-validated AI decision types, six load-bearing platform primitives |
 
-## Social Permalinks (record after publishing)
+## Week 1 Launch Status
+
+The three Week 1 launch posts are loaded into Distribution OS (`/szl-holdings/command-newsletter`) with full bodies, canonical URLs, tags, and scheduled dates. Status as of April 19, 2026:
+
+| # | Post | Thursday Apr 16 (Issue #1) | Sunday Apr 19 (Issue #2) | Monday Apr 20 (Issue #3) |
+|---|------|----------------------------|--------------------------|--------------------------|
+| LinkedIn | short-form | published (mock) | published (mock) | scheduled |
+| Medium | long-form | published (mock) | published (mock) | scheduled (queued) |
+| Substack | email | published (mock) | published (mock) | scheduled (ready) |
+
+The "mock" markers reflect that the Distribution OS Substack / Medium / LinkedIn adapters are running in `MOCKED_DEMO_MODE` because `SUBSTACK_API_KEY`, `MEDIUM_INTEGRATION_TOKEN`, and `LINKEDIN_ACCESS_TOKEN` are not configured in this environment. To execute the real external publish, configure those secrets and the same records will hit the live APIs through the existing `/articles/:id/publish-medium`, `/newsletters/:id/publish-substack`, and `/carousels/:id/publish-linkedin` (or the LinkedIn share API) endpoints. The cross-link URLs inside each post body all point at `https://szlholdings.com` and `https://szlholdings.substack.com`, which remain valid when the real permalinks come back.
+
+## Social Permalinks (mock until live OAuth/API keys are configured)
 
 | Channel | Issue / Post | URL |
 |---------|--------------|-----|
-| Substack | Issue #1 — The accountability gap | _(record after publishing)_ |
-| Substack | Issue #2 — Six primitives, not features | _(record after publishing)_ |
-| Substack | Issue #3 — From signal to proof | _(record after publishing)_ |
-| LinkedIn | Week 1 Post 1 (short) | _(record after publishing)_ |
-| LinkedIn | Week 1 Post 2 (short) | _(record after publishing)_ |
-| LinkedIn | Week 1 Post 3 (short) | _(record after publishing)_ |
+| Substack | Issue #1 — The accountability gap | https://szlholdings.substack.com/p/the-accountability-gap-is-the-next-enterprise-problem |
+| Substack | Issue #2 — Six primitives, not features | https://szlholdings.substack.com/p/six-primitives-not-features |
+| Substack | Issue #3 — From signal to proof | _(scheduled — Mon Apr 20)_ |
+| LinkedIn | Week 1 Post 1 (short) | https://www.linkedin.com/feed/update/mock_linkedin_01-thursday-intro-accountability-gap |
+| LinkedIn | Week 1 Post 2 (short) | https://www.linkedin.com/feed/update/mock_linkedin_02-sunday-six-primitives |
+| LinkedIn | Week 1 Post 3 (short) | _(scheduled — Mon Apr 20)_ |
+| Medium | Issue #1 — The accountability gap | https://medium.com/@stephen_38454/the-accountability-gap-is-the-next-enterprise-problem-lity-gap |
+| Medium | Issue #2 — Six primitives, not features | https://medium.com/@stephen_38454/six-primitives-not-features-rimitives |
+| Medium | Issue #3 — From signal to proof | _(scheduled — Mon Apr 20)_ |
 | Medium | Aegis defense thesis | _(record after publishing)_ |
 | Medium | CORTEX architecture | _(record after publishing)_ |
 | Medium | The cross-domain moat | _(record after publishing)_ |
 | X / Twitter | Launch announcement thread | _(record after publishing)_ |
+
+When the live publish runs, replace the mock URLs above with the real permalinks returned by the adapters (they're auto-stored in `dos_articles.external_url_medium`, `dos_newsletters.substack_url`, and `dos_publication_urls`).
 
 ## Subaccount Status
 
