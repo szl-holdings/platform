@@ -6,6 +6,15 @@ Interactive investor pitch deck and ATLAS runtime demonstration. Contains the Se
 **Preview path:** `/aegis/`
 **Artifact dir:** `artifacts/aegis/`
 
+## Screenshots
+
+| View | Path |
+|------|------|
+| Hero — Deck cover | `media/screenshots/aegis/hero.png` |
+| Deck slides view | `media/screenshots/aegis/deck.png` |
+
+Regenerate: `bash scripts/capture-screenshots.sh aegis`
+
 ## Local development
 
 ```bash

@@ -11,24 +11,24 @@ export const SOCIAL_CUT_CONFIGS: Record<SocialCut, {
 }> = {
   full: {
     label: 'Full Demo',
-    duration: '70s',
+    duration: '77s',
     description: 'Complete platform walkthrough',
     sceneRange: [0, 4],
-    durations: { open: 12000, reel: 18000, fabric: 18000, cortex: 10000, close: 12000 },
+    durations: { open: 12000, reel: 25000, fabric: 18000, cortex: 10000, close: 12000 },
   },
   '60s': {
     label: '60s Cut',
-    duration: '60s',
+    duration: '62s',
     description: 'Platform overview + proof',
     sceneRange: [0, 3],
-    durations: { open: 10000, reel: 15000, fabric: 20000, close: 15000 },
+    durations: { open: 10000, reel: 22000, fabric: 20000, close: 10000 },
   },
   '30s': {
     label: '30s Cut',
     duration: '30s',
     description: 'Value proposition + close',
     sceneRange: [0, 2],
-    durations: { open: 8000, reel: 12000, close: 10000 },
+    durations: { open: 8000, reel: 14000, close: 8000 },
   },
   '15s': {
     label: '15s Cut',

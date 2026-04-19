@@ -6,6 +6,15 @@ Domain pack for maritime fleet intelligence. Covers AIS vessel tracking, voyage 
 **Preview path:** `/vessels/`
 **Artifact dir:** `artifacts/vessels/`
 
+## Screenshots
+
+| View | Path |
+|------|------|
+| Hero — Fleet overview | `media/screenshots/vessels/hero.png` |
+| Fleet map view | `media/screenshots/vessels/fleet.png` |
+
+Regenerate: `bash scripts/capture-screenshots.sh vessels`
+
 ## Local development
 
 ```bash

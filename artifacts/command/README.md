@@ -6,6 +6,15 @@ The primary operations command surface for SZL Holdings. Merges the former Lyte 
 **Preview path:** `/command/`
 **Artifact dir:** `artifacts/command/`
 
+## Screenshots
+
+| View | Path |
+|------|------|
+| Hero — Command overview | `media/screenshots/command/hero.png` |
+| Strategy dashboard | `media/screenshots/command/dashboard.png` |
+
+Regenerate: `bash scripts/capture-screenshots.sh command`
+
 ## Local development
 
 ```bash

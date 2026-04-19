@@ -8,11 +8,15 @@ export function Scene2() {
   useEffect(() => {
     const timers = [
       setTimeout(() => setActiveSurface(0), 0),      // Pulse
-      setTimeout(() => setActiveSurface(1), 3000),   // Vessels
-      setTimeout(() => setActiveSurface(2), 6000),   // Terra
-      setTimeout(() => setActiveSurface(3), 9000),   // Aegis
-      setTimeout(() => setActiveSurface(4), 12000),  // Carlota Jo
-      setTimeout(() => setActiveSurface(5), 15000),  // Unified Command
+      setTimeout(() => setActiveSurface(1), 2500),   // Vessels
+      setTimeout(() => setActiveSurface(2), 5000),   // Terra
+      setTimeout(() => setActiveSurface(3), 7500),   // Aegis
+      setTimeout(() => setActiveSurface(4), 10000),  // Carlota Jo
+      setTimeout(() => setActiveSurface(5), 12500),  // Sentra
+      setTimeout(() => setActiveSurface(6), 15000),  // Lyte
+      setTimeout(() => setActiveSurface(7), 17500),  // PRISM Counsel
+      setTimeout(() => setActiveSurface(8), 20000),  // Counsel
+      setTimeout(() => setActiveSurface(9), 22500),  // Unified Command
     ];
     return () => timers.forEach(t => clearTimeout(t));
   }, []);
@@ -157,6 +161,91 @@ export function Scene2() {
           </div>
           <div className="font-mono text-[0.6vw] mt-[3vh] px-[1vw] py-[0.5vh] bg-[var(--color-bg-base)] inline-block border border-[var(--color-border)] rounded-full text-[var(--color-text-muted)]">
             POLICY: ADVISORY ALLOW
+          </div>
+        </div>
+      )
+    },
+    {
+      name: "Sentra",
+      desc: "CYBER POSTURE",
+      color: "var(--color-critical)",
+      mock: (
+        <div className="w-[40vw] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg overflow-hidden p-[2vw]">
+          <div className="font-mono text-[0.8vw] text-[var(--color-critical)] mb-[1vh]">CYBER POSTURE</div>
+          <div className="font-display text-[2vw] text-[var(--color-text-primary)] border-b border-[var(--color-border)] pb-[1.5vh] mb-[1.5vh]">
+            Critical Infrastructure Monitor
+          </div>
+          <div className="flex justify-between items-center bg-[var(--color-bg-base)] border border-[var(--color-critical)]/30 p-[1vw] rounded mb-[2vh]">
+            <div className="font-mono text-[0.8vw] text-[var(--color-critical)]">ELEVATED · 3 ACTIVE INCIDENTS</div>
+            <div className="w-2 h-2 rounded-full bg-[var(--color-critical)] animate-pulse" />
+          </div>
+          <div className="font-mono text-[0.6vw] mt-[1vh] px-[1vw] py-[0.5vh] bg-[var(--color-bg-base)] inline-block border border-[var(--color-border)] rounded-full text-[var(--color-warning)]">
+            GUARDIAN APPROVAL REQUIRED
+          </div>
+        </div>
+      )
+    },
+    {
+      name: "Lyte",
+      desc: "DECISION INTELLIGENCE",
+      color: "var(--color-lyte-cyan)",
+      mock: (
+        <div className="w-[40vw] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg overflow-hidden p-[2vw]">
+          <div className="font-mono text-[0.8vw] text-[var(--color-lyte-cyan)] mb-[1vh]">DECISION INTELLIGENCE</div>
+          <div className="font-display text-[2vw] text-[var(--color-text-primary)] border-b border-[var(--color-border)] pb-[1.5vh] mb-[1.5vh]">
+            Q2 Rebalancing Decision
+          </div>
+          <div className="flex justify-between items-end mb-[2vh]">
+            <div>
+              <div className="font-mono text-[0.6vw] text-[var(--color-text-muted)]">SCORE</div>
+              <div className="font-mono text-[2vw] text-[var(--color-lyte-cyan)] leading-none">92 CONFIDENCE</div>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-[1vw]">
+            <div className="bg-[var(--color-lyte-cyan)]/10 text-[var(--color-lyte-cyan)] p-[1vw] rounded text-center border border-[var(--color-lyte-cyan)]/30 font-mono text-[0.7vw]">
+              APPROVE (HUMAN REVIEW REQUIRED)
+            </div>
+            <div className="bg-[var(--color-bg-base)] text-[var(--color-text-muted)] p-[1vw] rounded text-center border border-[var(--color-border)] font-mono text-[0.7vw]">
+              DEFER
+            </div>
+          </div>
+        </div>
+      )
+    },
+    {
+      name: "PRISM Counsel",
+      desc: "LEGAL COMMAND",
+      color: "hsl(263,52%,55%)",
+      mock: (
+        <div className="w-[40vw] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg overflow-hidden p-[2vw]">
+          <div className="font-mono text-[0.8vw] mb-[1vh]" style={{ color: "hsl(263,52%,55%)" }}>LEGAL COMMAND</div>
+          <div className="font-display text-[2vw] text-[var(--color-text-primary)] border-b border-[var(--color-border)] pb-[1.5vh] mb-[1.5vh]">
+            Santander v. Pacific Meridian VLCC
+          </div>
+          <div className="flex justify-between items-center mb-[2vh]">
+            <div className="font-mono text-[0.8vw] text-[var(--color-text-primary)]">MATTER ACTIVE · 3 OPEN TASKS</div>
+          </div>
+          <div className="font-mono text-[0.7vw] mt-[1vh] px-[1.5vw] py-[0.8vh] bg-[var(--color-critical)]/10 inline-block border border-[var(--color-critical)]/30 rounded text-[var(--color-critical)]">
+            HIGH EXPOSURE: $2.1M
+          </div>
+        </div>
+      )
+    },
+    {
+      name: "Counsel",
+      desc: "LEGAL MATTERS",
+      color: "hsl(246,48%,60%)",
+      mock: (
+        <div className="w-[40vw] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg overflow-hidden p-[2vw]">
+          <div className="font-mono text-[0.8vw] mb-[1vh]" style={{ color: "hsl(246,48%,60%)" }}>LEGAL MATTERS</div>
+          <div className="font-display text-[2vw] text-[var(--color-text-primary)] border-b border-[var(--color-border)] pb-[1.5vh] mb-[1.5vh]">
+            Maritime Exposure Assessment
+          </div>
+          <div className="flex justify-between items-center mb-[2vh] bg-[var(--color-bg-base)] border border-[var(--color-warning)]/30 p-[1vw] rounded">
+            <div className="font-mono text-[0.8vw] text-[var(--color-warning)]">URGENT · 12h DEADLINE</div>
+          </div>
+          <div className="font-mono text-[0.6vw] mt-[1vh] px-[1vw] py-[0.5vh] bg-[var(--color-bg-base)] inline-block border border-[var(--color-border)] rounded-full text-[var(--color-text-muted)]">
+            HUMAN REVIEW LOCKED
           </div>
         </div>
       )

@@ -6,6 +6,15 @@ Primary public-facing web application. Serves the corporate site, product pages,
 **Preview path:** `/`
 **Artifact dir:** `artifacts/szl-holdings/`
 
+## Screenshots
+
+| View | Path |
+|------|------|
+| Hero — Dashboard overview | `media/screenshots/szl-holdings/hero.png` |
+| Portfolio view | `media/screenshots/szl-holdings/portfolio.png` |
+
+Regenerate: `bash scripts/capture-screenshots.sh szl-holdings`
+
 ## Local development
 
 ```bash

@@ -6,6 +6,15 @@ Domain pack for real estate intelligence. Surfaces distress pipeline monitoring,
 **Preview path:** `/terra/`
 **Artifact dir:** `artifacts/terra/`
 
+## Screenshots
+
+| View | Path |
+|------|------|
+| Hero — Portfolio overview | `media/screenshots/terra/hero.png` |
+| Portfolio view | `media/screenshots/terra/portfolio.png` |
+
+Regenerate: `bash scripts/capture-screenshots.sh terra`
+
 ## Local development
 
 ```bash

@@ -14,7 +14,7 @@ import type { SocialCut } from './SocialCutSelector';
 
 const FULL_SCENE_DURATIONS = {
   open: 12000,
-  reel: 18000,
+  reel: 25000,
   fabric: 18000,
   cortex: 10000,
   close: 12000,

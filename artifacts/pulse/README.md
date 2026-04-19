@@ -6,6 +6,15 @@ Generates narrative intelligence briefings synthesized from live platform signal
 **Preview path:** `/pulse/`
 **Artifact dir:** `artifacts/pulse/`
 
+## Screenshots
+
+| View | Path |
+|------|------|
+| Hero — Briefing reader | `media/screenshots/pulse/hero.png` |
+| Brief view | `media/screenshots/pulse/brief.png` |
+
+Regenerate: `bash scripts/capture-screenshots.sh pulse`
+
 ## Local development
 
 ```bash

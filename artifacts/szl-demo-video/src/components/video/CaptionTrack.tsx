@@ -65,19 +65,23 @@ export const FULL_CAPTIONS: Caption[] = [
   { startMs: 20200, endMs: 24000, text: "Terra detects distressed assets and turns signals into acquisition briefs." },
   { startMs: 24200, endMs: 28000, text: "Aegis unifies your security posture from SOC to boardroom." },
   { startMs: 28200, endMs: 30500, text: "Carlota Jo coordinates your strategic advisory layer." },
+  { startMs: 28400, endMs: 30800, text: "Sentra hardens your cyber perimeter with AI-driven threat correlation." },
+  { startMs: 30900, endMs: 33200, text: "Lyte brings decision intelligence to every governed choice across the portfolio." },
+  { startMs: 33300, endMs: 35400, text: "PRISM Counsel surfaces legal exposure before matters become crises." },
+  { startMs: 35500, endMs: 37000, text: "Counsel tracks every obligation, deadline, and risk in one governed surface." },
 
-  { startMs: 31000, endMs: 35000, text: "The Alloy Fabric is the agentic backbone connecting every surface." },
-  { startMs: 35200, endMs: 39000, text: "Agents collaborate, delegate, and verify — without human bottlenecks." },
-  { startMs: 39200, endMs: 44000, text: "Every action is logged with full reasoning: why it ran, what it chose, what it rejected." },
-  { startMs: 44200, endMs: 48500, text: "The audit trail is immutable. Governance isn't an afterthought — it's the architecture." },
+  { startMs: 38000, endMs: 42000, text: "The Alloy Fabric is the agentic backbone connecting every surface." },
+  { startMs: 42200, endMs: 46000, text: "Agents collaborate, delegate, and verify — without human bottlenecks." },
+  { startMs: 46200, endMs: 51000, text: "Every action is logged with full reasoning: why it ran, what it chose, what it rejected." },
+  { startMs: 51200, endMs: 55500, text: "The audit trail is immutable. Governance isn't an afterthought — it's the architecture." },
 
-  { startMs: 49500, endMs: 53500, text: "Cortex intelligence learns from every decision across the portfolio." },
-  { startMs: 53700, endMs: 57500, text: "Cross-domain correlations surface what siloed systems miss." },
-  { startMs: 57700, endMs: 59500, text: "Confidence scores, not black boxes." },
+  { startMs: 56500, endMs: 60500, text: "Cortex intelligence learns from every decision across the portfolio." },
+  { startMs: 60700, endMs: 64500, text: "Cross-domain correlations surface what siloed systems miss." },
+  { startMs: 64700, endMs: 66500, text: "Confidence scores, not black boxes." },
 
-  { startMs: 60500, endMs: 64000, text: "This is the future of enterprise AI: decisive, auditable, and governed." },
-  { startMs: 64200, endMs: 67500, text: "Autonomous enough to act. Controlled enough to trust." },
-  { startMs: 67800, endMs: 70000, text: "SZL Holdings — governed autonomy at enterprise scale." },
+  { startMs: 67500, endMs: 71000, text: "This is the future of enterprise AI: decisive, auditable, and governed." },
+  { startMs: 71200, endMs: 74500, text: "Autonomous enough to act. Controlled enough to trust." },
+  { startMs: 74800, endMs: 77000, text: "SZL Holdings — governed autonomy at enterprise scale." },
 ];
 
 export const TRANSCRIPT_TEXT = FULL_CAPTIONS.map((c) => c.text).join(' ');
