@@ -39,7 +39,7 @@ import { SidebarNav, type SidebarNavSection } from "@szl-holdings/shared-ui/desi
 import { DashboardShell as SharedDashboardShell } from "@szl-holdings/shared-ui/design-system";
 import { StaleIndicator } from "@szl-holdings/shared-ui/stale-indicator";
 import { ServiceStatusRail } from "@szl-holdings/shared-ui/service-status-rail";
-import { PolicyModeBadge } from "@/components/policy-mode-badge";
+import { PolicyModeBadge } from "@szl-holdings/design-system/proof/policy-mode-badge";
 import MarketingHomePage from "@/pages/marketing-home";
 
 function pathToVesselsActionType(path: string): string | undefined {

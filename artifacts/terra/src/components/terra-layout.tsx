@@ -16,7 +16,7 @@ import { SidebarNav, type SidebarNavSection, DashboardShell as SharedDashboardSh
 import { useQuery } from "@tanstack/react-query";
 import { colors, spacing } from "@szl-holdings/shared-ui/tokens";
 import { ServiceStatusRail } from "@szl-holdings/shared-ui/service-status-rail";
-import { PolicyModeBadge } from "@/components/policy-mode-badge";
+import { PolicyModeBadge } from "@szl-holdings/design-system/proof/policy-mode-badge";
 
 function pathToTerraActionType(path: string): string | undefined {
   const seg = path.replace(/^\/+/, "").split("/")[0];
