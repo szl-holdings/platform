@@ -19,6 +19,12 @@ import { eq, desc, asc, and, gte, count, sql } from "drizzle-orm";
 import { authMiddleware } from "../../middlewares/auth";
 import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../../lib/validation";
 import { guardSeedInProduction } from "../../lib/seed-guard";
+import {
+  publishArticleToMedium,
+  publishCarouselToLinkedIn,
+  publishNewsletterToSubstack,
+  publishXPost,
+} from "../../jobs/launch-publish-scheduler";
 
 const router = Router();
 const requireAuth = authMiddleware({ required: true });
@@ -26,124 +32,65 @@ const requireAuth = authMiddleware({ required: true });
 // ─── Publishing Endpoints ─────────────────────────────────────────────────────
 
 router.post("/x-posts/:id/publish", validateBody(jsonObjectBodySchema), requireAuth, async (req: Request, res: Response): Promise<void> => {
-  const [post] = await db.select().from(dosXPostsTable).where(eq(dosXPostsTable.id, Number(req.params.id)));
-  if (!post) return void res.status(404).json({ error: "X post not found" });
-  if (post.status === "sent") return void res.status(400).json({ error: "Already published" });
-
+  const id = Number(req.params.id);
+  const [existing] = await db.select().from(dosXPostsTable).where(eq(dosXPostsTable.id, id));
+  if (!existing) return void res.status(404).json({ error: "X post not found" });
+  if (existing.status === "sent") return void res.status(400).json({ error: "Already published" });
   try {
-    const { XTwitterAdapter } = await import("@szl-holdings/services");
-    const adapter = new XTwitterAdapter();
-
-    if (post.postType === "thread" && post.threadJson) {
-      const tweets = (post.threadJson as unknown as string[]);
-      const results = await adapter.postThread(tweets);
-      const firstResult = results[0];
-      if (!firstResult?.posted) {
-        await db.update(dosXPostsTable).set({ status: "failed", errorMessage: firstResult?.error || "Unknown error", retryCount: (post.retryCount || 0) + 1, updatedAt: new Date() }).where(eq(dosXPostsTable.id, post.id));
-        return void res.status(502).json({ error: firstResult?.error, results });
-      }
-      const [updated] = await db.update(dosXPostsTable).set({
-        status: "sent", sentAt: new Date(), externalPostId: firstResult.externalPostId || null,
-        externalPostUrl: firstResult.externalPostUrl || null, errorMessage: null, updatedAt: new Date(),
-      }).where(eq(dosXPostsTable.id, post.id)).returning();
-      return void res.json({ post: updated, results, mock: firstResult.mock });
-    }
-
-    const result = await adapter.postTweet(post.body);
-    if (!result.posted) {
-      await db.update(dosXPostsTable).set({ status: "failed", errorMessage: result.error || "Unknown error", retryCount: (post.retryCount || 0) + 1, updatedAt: new Date() }).where(eq(dosXPostsTable.id, post.id));
-      return void res.status(502).json({ error: result.error });
-    }
-    const [updated] = await db.update(dosXPostsTable).set({
-      status: "sent", sentAt: new Date(), externalPostId: result.externalPostId || null,
-      externalPostUrl: result.externalPostUrl || null, errorMessage: null, updatedAt: new Date(),
-    }).where(eq(dosXPostsTable.id, post.id)).returning();
-    res.json({ post: updated, mock: result.mock });
+    const result = await publishXPost(id);
+    if (!result.ok) return void res.status(502).json({ error: result.error });
+    const [post] = await db.select().from(dosXPostsTable).where(eq(dosXPostsTable.id, id));
+    res.json({ post, externalUrl: result.externalUrl, mock: result.mock });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    await db.update(dosXPostsTable).set({ status: "failed", errorMessage: msg, retryCount: (post.retryCount || 0) + 1, updatedAt: new Date() }).where(eq(dosXPostsTable.id, post.id));
+    await db.update(dosXPostsTable).set({ status: "failed", errorMessage: msg, retryCount: (existing.retryCount || 0) + 1, updatedAt: new Date() }).where(eq(dosXPostsTable.id, existing.id));
     res.status(500).json({ error: msg });
   }
 });
 
 router.post("/articles/:id/publish-medium", validateBody(jsonObjectBodySchema), requireAuth, async (req: Request, res: Response): Promise<void> => {
-  const [article] = await db.select().from(dosArticlesTable).where(eq(dosArticlesTable.id, Number(req.params.id)));
-  if (!article) return void res.status(404).json({ error: "Article not found" });
-
+  const id = Number(req.params.id);
   try {
-    const { MediumAdapter } = await import("@szl-holdings/services");
-    const adapter = new MediumAdapter();
-    const content = article.bodyMarkdown || article.bodyHtml || "";
-    if (!content) return void res.status(400).json({ error: "Article has no body content" });
-
-    const result = await adapter.publishArticle({
-      title: article.title,
-      content,
-      contentFormat: article.bodyMarkdown ? "markdown" : "html",
-      tags: article.tags as string[] || [],
-      publishStatus: (req.body.publishStatus as "public" | "draft" | "unlisted") || "draft",
-    });
-
-    if (!result.published) return void res.status(502).json({ error: result.error });
-
-    const [updated] = await db.update(dosArticlesTable).set({
-      status: "published", mediumStatus: "published", externalUrlMedium: result.externalUrl || null, publishedMediumAt: new Date(), updatedAt: new Date(),
-    }).where(eq(dosArticlesTable.id, article.id)).returning();
-    res.json({ article: updated, mock: result.mock, externalUrl: result.externalUrl });
+    const result = await publishArticleToMedium(
+      id,
+      (req.body.publishStatus as "public" | "draft" | "unlisted") || "draft",
+    );
+    if (!result.ok) {
+      const status = result.error === "Article not found" ? 404 : result.error === "Article has no body content" ? 400 : 502;
+      return void res.status(status).json({ error: result.error });
+    }
+    const [article] = await db.select().from(dosArticlesTable).where(eq(dosArticlesTable.id, id));
+    res.json({ article, mock: result.mock, externalUrl: result.externalUrl });
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
   }
 });
 
-router.post("/newsletters/:id/publish-substack", validateBody(jsonObjectBodySchema), requireAuth, async (req: Request, res: Response): Promise<void> => {
-  const [nl] = await db.select().from(dosNewslettersTable).where(eq(dosNewslettersTable.id, Number(req.params.id)));
-  if (!nl) return void res.status(404).json({ error: "Newsletter not found" });
-
+router.post("/newsletters/:id/publish-substack", validateBody(jsonObjectBodySchema), requireAuth, async (_req: Request, res: Response): Promise<void> => {
+  const id = Number(_req.params.id);
   try {
-    const { SubstackAdapter } = await import("@szl-holdings/services");
-    const adapter = new SubstackAdapter();
-    const body = nl.mainStoryMarkdown || nl.mainStoryHtml || "";
-    if (!body) return void res.status(400).json({ error: "Newsletter has no body content" });
-
-    const result = await adapter.publishNewsletter({
-      title: nl.title,
-      subtitle: nl.subtitle || undefined,
-      body,
-      bodyFormat: nl.mainStoryMarkdown ? "markdown" : "html",
-    });
-
-    if (!result.published) return void res.status(502).json({ error: result.error });
-
-    const [updated] = await db.update(dosNewslettersTable).set({
-      status: "published", substackUrl: result.externalUrl || null, updatedAt: new Date(),
-    }).where(eq(dosNewslettersTable.id, nl.id)).returning();
-    res.json({ newsletter: updated, mock: result.mock, externalUrl: result.externalUrl });
+    const result = await publishNewsletterToSubstack(id);
+    if (!result.ok) {
+      const status = result.error === "Newsletter not found" ? 404 : result.error === "Newsletter has no body content" ? 400 : 502;
+      return void res.status(status).json({ error: result.error });
+    }
+    const [newsletter] = await db.select().from(dosNewslettersTable).where(eq(dosNewslettersTable.id, id));
+    res.json({ newsletter, mock: result.mock, externalUrl: result.externalUrl });
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
   }
 });
 
-router.post("/carousels/:id/publish-linkedin", validateBody(jsonObjectBodySchema), requireAuth, async (req: Request, res: Response): Promise<void> => {
-  const [carousel] = await db.select().from(dosCarouselProjectsTable).where(eq(dosCarouselProjectsTable.id, Number(req.params.id)));
-  if (!carousel) return void res.status(404).json({ error: "Carousel not found" });
-
+router.post("/carousels/:id/publish-linkedin", validateBody(jsonObjectBodySchema), requireAuth, async (_req: Request, res: Response): Promise<void> => {
+  const id = Number(_req.params.id);
   try {
-    const { LinkedInAdapter } = await import("@szl-holdings/services");
-    const adapter = new LinkedInAdapter();
-    const caption = carousel.linkedinShortCaption || carousel.linkedinLongCaption || `${carousel.title} — by SZL Holdings`;
-
-    const result = await adapter.sharePost({
-      text: caption,
-      articleUrl: carousel.ctaUrl || undefined,
-      articleTitle: carousel.title,
-    });
-
-    if (!result.posted) return void res.status(502).json({ error: result.error });
-
-    const [updated] = await db.update(dosCarouselProjectsTable).set({
-      status: "published", updatedAt: new Date(),
-    }).where(eq(dosCarouselProjectsTable.id, carousel.id)).returning();
-    res.json({ carousel: updated, mock: result.mock, externalUrl: result.externalUrl });
+    const result = await publishCarouselToLinkedIn(id);
+    if (!result.ok) {
+      const status = result.error === "Carousel not found" ? 404 : 502;
+      return void res.status(status).json({ error: result.error });
+    }
+    const [carousel] = await db.select().from(dosCarouselProjectsTable).where(eq(dosCarouselProjectsTable.id, id));
+    res.json({ carousel, mock: result.mock, externalUrl: result.externalUrl });
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
   }

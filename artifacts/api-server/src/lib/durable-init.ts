@@ -320,6 +320,7 @@ const DEFAULT_SCHEDULES: ScheduleDefinition[] = [
   { name: "platform_jira_sprint_health_scan_hourly", jobType: PLATFORM_JOB_TYPES.JIRA_SPRINT_HEALTH_SCAN, cronExpression: "0 * * * *", payload: {}, maxRetries: 2 },
   { name: "notification_email_digest_daily", jobType: PLATFORM_JOB_TYPES.NOTIFICATION_DIGEST, cronExpression: "0 8 * * *", payload: { since: "24h" }, maxRetries: 2 },
   { name: "data_retention_sweep_weekly", jobType: PLATFORM_JOB_TYPES.DATA_RETENTION_SWEEP, cronExpression: "0 2 * * 0", payload: {}, maxRetries: 1 },
+  { name: "launch_publish_scan_5m", jobType: NAMED_JOB_TYPES.LAUNCH_PUBLISH_SCAN, cronExpression: "*/5 * * * *", payload: {}, maxRetries: 1 },
 ] as const;
 
 export async function startDurableQueue(): Promise<void> {
