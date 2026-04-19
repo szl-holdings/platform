@@ -16,6 +16,7 @@ import {
 import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";
 import { SaveRiskRunButton, type SavedRiskRun } from "@szl-holdings/shared-ui/risk-evidence";
 import { Activity, BarChart3, Layers, RefreshCw, Sliders, RotateCcw, ChevronDown, ChevronUp, BookmarkPlus, X } from "lucide-react";
+import { DriverTweakPresets } from "@szl-holdings/shared-ui/driver-tweak-presets";
 import RiskSimulationWorker from "@/workers/risk-simulation.worker?worker";
 
 const VESSELS_ACCENT = LANE_ACCENT_HEX.vessels.primaryLight;
@@ -206,6 +207,11 @@ export function RiskSimulationPanel({
     setBaseline({ result, capturedAt: Date.now(), tweakCount: modifiedIds.size });
   };
   const clearBaseline = () => setBaseline(null);
+  const loadPresetTweaks = (preset: Record<string, DriverTweak>) => {
+    setTweaks(preset);
+    setAppliedTweaks(preset);
+    setRunKey((k) => k + 1);
+  };
 
   const primary = scenario.outputs[0];
   const primaryMetric = primary ? result?.metrics[primary.id] : undefined;
@@ -376,6 +382,8 @@ export function RiskSimulationPanel({
           pendingChanges={pendingChanges}
           modifiedIds={modifiedIds}
           running={running}
+          presetScopeKey={`${evidenceDomain}:${scenario.id}`}
+          onLoadPreset={loadPresetTweaks}
         />
       )}
 
@@ -642,6 +650,8 @@ interface DriverTweaksPanelProps {
   pendingChanges: boolean;
   modifiedIds: Set<string>;
   running: boolean;
+  presetScopeKey: string;
+  onLoadPreset: (tweaks: Record<string, DriverTweak>) => void;
 }
 
 function formatDriverValue(value: number, format?: string): string {
@@ -668,6 +678,8 @@ function DriverTweaksPanel({
   pendingChanges,
   modifiedIds,
   running,
+  presetScopeKey,
+  onLoadPreset,
 }: DriverTweaksPanelProps) {
   return (
     <div
@@ -681,7 +693,13 @@ function DriverTweaksPanel({
             Driver Assumptions — override before re-running
           </h4>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <DriverTweakPresets
+            scopeKey={presetScopeKey}
+            accentColor={accentColor}
+            currentTweaks={tweaks}
+            onLoad={onLoadPreset}
+          />
           <button
             onClick={onResetAll}
             className="flex items-center gap-1 text-[10px] font-medium rounded-md px-2 py-1 transition-colors text-white/70 hover:text-white"

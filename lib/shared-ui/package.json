@@ -134,6 +134,7 @@
     "./AutonomyDial": "./src/AutonomyDial.tsx",
     "./PolicyVerdictBadge": "./src/PolicyVerdictBadge.tsx",
     "./monte-carlo-viz": "./src/monte-carlo-viz.tsx",
+    "./driver-tweak-presets": "./src/driver-tweak-presets.tsx",
     "./knowledge-graph-viz": "./src/knowledge-graph-viz.tsx",
     "./constellation-graph": "./src/constellation-graph.tsx",
     "./cortex-entity-graph": "./src/cortex-entity-graph.tsx",
