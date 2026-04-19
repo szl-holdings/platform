@@ -1,17 +1,28 @@
-import { lazy, Suspense, useState, useCallback, useEffect, type ComponentType } from "react";
+import { lazy, Suspense, useState, useCallback, useEffect, useRef, type ComponentType, type ReactNode } from "react";
 import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
-  Layers, RotateCcw, GitBranch, Shield, Menu, X, ChevronRight, ChevronDown, Presentation, Play,
+  Layers, RotateCcw, GitBranch, Shield, Menu, Presentation, Play,
   Home as HomeIcon, AlertTriangle, Bug, Search, Crosshair, Network, Eye, Activity, Zap, Radio,
-  Brain, FileSearch, Server, Lock, Users, Database, Settings as SettingsIcon, BarChart3, Target,
+  Brain, Server, Lock, Users, Database, Settings as SettingsIcon, BarChart3, Target,
   ClipboardList, FileText, ListChecks, GitMerge, Cpu, Terminal, Workflow, ShieldCheck,
   TrendingUp, DollarSign, Globe, Hexagon, Boxes, BookOpen, Briefcase, Scale, Ticket, LifeBuoy,
   PieChart, Map, Wrench, Headphones, Receipt, Compass, Sparkles, MessageSquare, FileCode,
   Telescope, Microscope, Beaker, Bot, Layers3, Gauge, Heart, Atom, Filter, FlaskConical,
-  Building2, Landmark, Banknote, ShieldAlert, Fingerprint, Camera, Antenna, KeyRound, Swords,
+  Building2, Landmark, Banknote, ShieldAlert, Fingerprint, Antenna, KeyRound, Swords,
 } from "lucide-react";
-import { cn } from "@szl-holdings/shared-ui/utils";
+import { AnalyticsProvider } from "@szl-holdings/shared-ui/analytics-provider";
+import { useUserPreferences, useEffectiveAccent } from "@szl-holdings/shared-ui/use-user-preferences";
+import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
+import { SidebarNav, type SidebarNavSection } from "@szl-holdings/shared-ui/design-system";
+import { DashboardShell as SharedDashboardShell } from "@szl-holdings/shared-ui/design-system";
+import {
+  CommandPalette,
+  useCommandPalette,
+  getEcosystemSwitchCommands,
+  createBaselineWebActions,
+  type CommandItem,
+} from "@szl-holdings/shared-ui/command-palette";
 import { DemoPersonaProvider, DemoPersonaSwitcher } from "@szl-holdings/shared-ui/demo-persona-switcher";
 
 import S01Cover from "./pages/slides/S01Cover";
@@ -32,13 +43,15 @@ const queryClient = new QueryClient({
 });
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+const AEGIS_BRAND_ACCENT = "#ef4444";
 
 type LazyComp = ReturnType<typeof lazy>;
+type IconComp = ComponentType<{ className?: string }>;
 
 type NavItem = {
   path: string;
   label: string;
-  icon: ComponentType<{ className?: string }>;
+  icon: IconComp;
   comp: LazyComp;
 };
 
@@ -294,6 +307,13 @@ const NAV_SECTIONS: NavSection[] = [
 
 const ALL_ROUTES: NavItem[] = NAV_SECTIONS.flatMap((s) => s.items);
 
+const SLIDES_NAV: NavItem = {
+  path: "/slides",
+  label: "Investor Deck",
+  icon: Presentation,
+  comp: L(() => import("./pages/aegis-home")),
+};
+
 function PageLoader() {
   return (
     <div className="flex items-center justify-center h-full min-h-[300px]">
@@ -302,152 +322,133 @@ function PageLoader() {
   );
 }
 
-function AegisSidebar({ mobileOpen, onClose }: { mobileOpen: boolean; onClose: () => void }) {
-  const [location] = useLocation();
+function renderIcon(Icon: IconComp): ReactNode {
+  return <Icon className="w-3.5 h-3.5" />;
+}
 
-  const [openSections, setOpenSections] = useState<Record<string, boolean>>(() => {
-    const map: Record<string, boolean> = {};
-    for (const sec of NAV_SECTIONS) {
-      map[sec.id] = sec.items.some((i) => i.path === location);
-    }
-    return map;
-  });
+function buildSidebarSections(): SidebarNavSection[] {
+  const intro: SidebarNavSection = {
+    id: "intro",
+    items: [
+      { id: "/", label: "Home", href: "/", icon: <HomeIcon className="w-3.5 h-3.5" /> },
+      { id: SLIDES_NAV.path, label: SLIDES_NAV.label, href: SLIDES_NAV.path, icon: renderIcon(SLIDES_NAV.icon) },
+    ],
+  };
+  const sections: SidebarNavSection[] = NAV_SECTIONS.map((sec) => ({
+    id: sec.id,
+    label: sec.label,
+    items: sec.items.map((item) => ({
+      id: item.path,
+      label: item.label,
+      href: item.path,
+      icon: renderIcon(item.icon),
+    })),
+  }));
+  return [intro, ...sections];
+}
 
-  useEffect(() => {
-    setOpenSections((prev) => {
-      const next = { ...prev };
-      let changed = false;
-      for (const sec of NAV_SECTIONS) {
-        if (sec.items.some((i) => i.path === location) && !next[sec.id]) {
-          next[sec.id] = true;
-          changed = true;
-        }
-      }
-      return changed ? next : prev;
-    });
-  }, [location]);
-
-  const toggle = (id: string) => setOpenSections((s) => ({ ...s, [id]: !s[id] }));
+function AegisSidebarContent({
+  expanded,
+  onMobileClose,
+  onToggleCollapse,
+}: {
+  expanded: boolean;
+  onMobileClose?: () => void;
+  onToggleCollapse?: () => void;
+}) {
+  const [location, navigate] = useLocation();
+  const accent = useEffectiveAccent(AEGIS_BRAND_ACCENT);
+  const sections = buildSidebarSections();
 
   return (
-    <>
-      {mobileOpen && <div className="fixed inset-0 z-30 bg-black/60 lg:hidden" onClick={onClose} />}
-      <aside
-        className={cn(
-          "fixed inset-y-0 left-0 z-40 w-64 flex flex-col bg-[#09060e] border-r border-red-500/10 transition-transform duration-200",
-          "lg:translate-x-0 lg:static lg:z-auto",
-          mobileOpen ? "translate-x-0" : "-translate-x-full",
-        )}
-      >
-        <div className="flex items-center gap-2 px-4 py-4 border-b border-red-500/10">
-          <div className="w-6 h-6 rounded-md bg-red-500/10 border border-red-500/20 flex items-center justify-center">
-            <Shield className="w-3.5 h-3.5 text-red-400" />
+    <SidebarNav
+      sections={sections}
+      currentPath={location}
+      accentColor={accent}
+      collapsed={!expanded}
+      onNavigate={(item) => {
+        if (item.href) navigate(item.href);
+        onMobileClose?.();
+      }}
+      header={
+        <div className="flex items-center gap-2.5">
+          <div
+            className="w-8 h-8 rounded-md flex items-center justify-center shrink-0"
+            style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.12)" }}
+          >
+            <Shield className="w-4 h-4 text-red-400" />
           </div>
-          <div>
-            <p className="text-[11px] font-bold text-red-100 leading-tight">AEGIS</p>
-            <p className="text-[9px] text-red-400/50 leading-tight">SZL Holdings</p>
-          </div>
-          <button onClick={onClose} className="ml-auto lg:hidden text-red-400/50 hover:text-red-300">
-            <X className="w-4 h-4" />
-          </button>
+          {expanded && (
+            <div className="flex-1 min-w-0">
+              <h1 className="text-sm font-semibold text-red-50 truncate tracking-tight">Aegis</h1>
+              <p className="text-[10px] truncate font-mono uppercase tracking-wider text-red-400/40">
+                SZL Holdings
+              </p>
+            </div>
+          )}
         </div>
-
-        <nav className="flex-1 overflow-y-auto p-3 space-y-1">
-          <Link
-            href="/"
-            className={cn(
-              "flex items-center gap-2 px-3 py-2 rounded-lg text-xs transition-colors",
-              location === "/"
-                ? "bg-red-500/10 text-red-300 border border-red-500/20"
-                : "text-red-400/50 hover:text-red-300 hover:bg-red-500/5",
-            )}
-            onClick={onClose}
-          >
-            <HomeIcon className="w-3.5 h-3.5" />
-            Home
-          </Link>
-          <Link
-            href="/slides"
-            className={cn(
-              "flex items-center gap-2 px-3 py-2 rounded-lg text-xs transition-colors",
-              location.startsWith("/slides") || location.startsWith("/slide")
-                ? "bg-red-500/10 text-red-300 border border-red-500/20"
-                : "text-red-400/50 hover:text-red-300 hover:bg-red-500/5",
-            )}
-            onClick={onClose}
-          >
-            <Presentation className="w-3.5 h-3.5" />
-            Investor Deck
-          </Link>
-
-          {NAV_SECTIONS.map((section) => {
-            const isOpen = openSections[section.id];
-            return (
-              <div key={section.id} className="pt-3">
-                <button
-                  onClick={() => toggle(section.id)}
-                  className="w-full flex items-center gap-1 px-3 mb-1 text-[9px] font-bold uppercase tracking-widest text-red-400/40 hover:text-red-300 transition-colors"
-                >
-                  {isOpen ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
-                  {section.label}
-                </button>
-                {isOpen && (
-                  <div className="space-y-0.5">
-                    {section.items.map(({ path, label, icon: Icon }) => {
-                      const isActive = location === path;
-                      return (
-                        <Link
-                          key={path}
-                          href={path}
-                          className={cn(
-                            "flex items-center gap-2 px-3 py-1.5 rounded-lg text-[11px] transition-colors",
-                            isActive
-                              ? "bg-red-500/10 text-red-300 border border-red-500/20"
-                              : "text-red-400/50 hover:text-red-300 hover:bg-red-500/5",
-                          )}
-                          onClick={onClose}
-                        >
-                          <Icon className="w-3 h-3 shrink-0" />
-                          <span className="truncate">{label}</span>
-                          {isActive && <ChevronRight className="w-3 h-3 ml-auto shrink-0" />}
-                        </Link>
-                      );
-                    })}
-                  </div>
-                )}
+      }
+      footer={
+        expanded ? (
+          <div className="space-y-2">
+            <div
+              className="rounded-lg px-3 py-2"
+              style={{ background: "rgba(239,68,68,0.04)", border: "1px solid rgba(239,68,68,0.08)" }}
+            >
+              <div className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
+                <span className="text-[10px] font-mono uppercase tracking-wider text-red-400/70">
+                  Aegis Runtime Live
+                </span>
               </div>
-            );
-          })}
-        </nav>
-
-        <div className="p-3 border-t border-red-500/10">
-          <div className="flex items-center gap-2 px-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
-            <span className="text-[10px] text-red-400/50 font-mono">AEGIS RUNTIME LIVE</span>
+            </div>
+            <button
+              onClick={onToggleCollapse}
+              className="flex items-center justify-center w-full py-1 text-[10px] rounded transition-colors hover:bg-white/5 text-red-400/40"
+              aria-label="Collapse sidebar"
+            >
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                <path d="M8 2L5 6l3 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
           </div>
-        </div>
-      </aside>
-    </>
+        ) : (
+          <button
+            onClick={onToggleCollapse}
+            className="flex items-center justify-center w-7 h-7 mx-auto rounded transition-colors hover:bg-white/5 text-red-400/40"
+            aria-label="Expand sidebar"
+          >
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+              <path d="M4 2l3 4-3 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+        )
+      }
+    />
   );
 }
 
-function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const [mobileOpen, setMobileOpen] = useState(false);
-
+function DashboardRoutes() {
   return (
-    <div className="flex h-screen overflow-hidden bg-[#080510]">
-      <AegisSidebar mobileOpen={mobileOpen} onClose={() => setMobileOpen(false)} />
-      <div className="flex-1 flex flex-col min-w-0">
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-red-500/10 bg-[#09060e]/80 backdrop-blur-sm lg:hidden">
-          <button onClick={() => setMobileOpen(true)} className="text-red-400/60 hover:text-red-300">
-            <Menu className="w-4 h-4" />
-          </button>
-          <Shield className="w-4 h-4 text-red-400" />
-          <span className="text-sm font-bold text-red-100">AEGIS</span>
+    <Switch>
+      {ALL_ROUTES.map(({ path, comp: Comp }) => (
+        <Route key={path} path={path}>
+          <Suspense fallback={<PageLoader />}>
+            <Comp />
+          </Suspense>
+        </Route>
+      ))}
+      <Route>
+        <div className="flex flex-col items-center justify-center h-full p-10 text-center">
+          <Shield className="w-10 h-10 text-red-400/50 mb-4" />
+          <h1 className="text-xl font-bold text-red-100 mb-2">Page not found</h1>
+          <p className="text-sm text-red-400/60 mb-6">That route isn't wired up yet.</p>
+          <Link href="/" className="text-xs text-red-300 hover:text-red-200 underline">
+            Return home
+          </Link>
         </div>
-        <main className="flex-1 overflow-y-auto">{children}</main>
-      </div>
-    </div>
+      </Route>
+    </Switch>
   );
 }
 
@@ -565,60 +566,164 @@ function SlideDeck() {
 
 const HomePage = lazy(() => import("./pages/aegis-home"));
 
-function AppRoutes() {
-  return (
-    <Switch>
-      <Route path="/slides">
-        <SlideDeck />
-      </Route>
-      <Route path="/slides/:num">
-        <SlideDeck />
-      </Route>
-      <Route path="/slide:num">
-        <SlideDeck />
-      </Route>
+function AppShell({
+  sidebarOpen,
+  setSidebarOpen,
+  sidebarCollapsed,
+  onToggleCollapse,
+  sidebarHovered,
+  setSidebarHovered,
+}: {
+  sidebarOpen: boolean;
+  setSidebarOpen: (v: boolean) => void;
+  sidebarCollapsed: boolean;
+  onToggleCollapse: () => void;
+  sidebarHovered: boolean;
+  setSidebarHovered: (v: boolean) => void;
+}) {
+  const [location, navigate] = useLocation();
+  const accent = useEffectiveAccent(AEGIS_BRAND_ACCENT);
+  const sidebarExpanded = !sidebarCollapsed || sidebarHovered;
 
-      {ALL_ROUTES.map(({ path, comp: Comp }) => (
-        <Route key={path} path={path}>
-          <DashboardLayout>
-            <Suspense fallback={<PageLoader />}>
-              <Comp />
-            </Suspense>
-          </DashboardLayout>
-        </Route>
-      ))}
+  const navCommands: CommandItem[] = ALL_ROUTES.map((item) => ({
+    id: `nav-${item.path}`,
+    label: item.label,
+    group: "Navigate",
+    action: () => navigate(item.path),
+  }));
 
-      <Route path="/">
-        <Suspense fallback={<PageLoader />}>
+  const paletteCommands: CommandItem[] = [
+    ...createBaselineWebActions(navigate),
+    ...getEcosystemSwitchCommands("aegis"),
+    { id: "nav-home", label: "Home", group: "Navigate", action: () => navigate("/") },
+    { id: "nav-slides", label: "Investor Deck", group: "Navigate", action: () => navigate("/slides") },
+    ...navCommands,
+  ];
+  const { open: paletteOpen, setOpen: setPaletteOpen } = useCommandPalette(paletteCommands);
+
+  const isSlides = location.startsWith("/slides") || location.startsWith("/slide");
+
+  if (isSlides) {
+    return <SlideDeck />;
+  }
+
+  if (location === "/" || location === "") {
+    return (
+      <>
+        <EcosystemNav
+          currentAppId="aegis"
+          currentAppName="Aegis"
+          accentColor={accent}
+        />
+        <Suspense fallback={<div style={{ height: "100vh", background: "#080510" }} />}>
           <HomePage />
         </Suspense>
-      </Route>
+        <CommandPalette
+          open={paletteOpen}
+          onClose={() => setPaletteOpen(false)}
+          commands={paletteCommands}
+          appName="Aegis"
+          accentColor={accent}
+          placeholder="Search Aegis — pages, entities, actions..."
+        />
+      </>
+    );
+  }
 
-      <Route>
-        <DashboardLayout>
-          <div className="flex flex-col items-center justify-center h-full p-10 text-center">
-            <Shield className="w-10 h-10 text-red-400/50 mb-4" />
-            <h1 className="text-xl font-bold text-red-100 mb-2">Page not found</h1>
-            <p className="text-sm text-red-400/60 mb-6">That route isn't wired up yet.</p>
-            <Link href="/" className="text-xs text-red-300 hover:text-red-200 underline">
-              Return home
-            </Link>
+  return (
+    <div className="flex flex-col h-screen" style={{ background: "#080510" }}>
+      <EcosystemNav
+        currentAppId="aegis"
+        currentAppName="Aegis"
+        accentColor={accent}
+      />
+      <SharedDashboardShell
+        sidebar={
+          <AegisSidebarContent
+            expanded={sidebarExpanded}
+            onMobileClose={() => setSidebarOpen(false)}
+            onToggleCollapse={onToggleCollapse}
+          />
+        }
+        mobileOpen={sidebarOpen}
+        onMobileClose={() => setSidebarOpen(false)}
+        sidebarWidth={sidebarExpanded ? "14rem" : "3.5rem"}
+        sidebarEvents={{
+          onMouseEnter: () => setSidebarHovered(true),
+          onMouseLeave: () => setSidebarHovered(false),
+        }}
+        theme={{ sidebarBg: "#09060e", pageBg: "#080510", headerBg: "rgba(9,6,14,0.92)" }}
+        accentColor={accent}
+        topbar={
+          <div className="flex items-center gap-3 w-full md:hidden">
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="p-1.5 rounded transition-colors text-red-400/50"
+              aria-label="Toggle navigation"
+            >
+              <Menu className="w-4 h-4" />
+            </button>
+            <span className="text-[10px] font-mono uppercase tracking-wider text-red-400/80">
+              Aegis
+            </span>
           </div>
-        </DashboardLayout>
-      </Route>
-    </Switch>
+        }
+      >
+        <main data-szl-shell-main className="flex-1 overflow-auto h-full">
+          <DashboardRoutes />
+        </main>
+      </SharedDashboardShell>
+      <CommandPalette
+        open={paletteOpen}
+        onClose={() => setPaletteOpen(false)}
+        commands={paletteCommands}
+        appName="Aegis"
+        accentColor={accent}
+        placeholder="Search Aegis — pages, entities, actions..."
+      />
+    </div>
   );
 }
 
 export default function App() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { prefs, setPreference, isLoaded } = useUserPreferences();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => prefs.sidebar_collapsed);
+  const [sidebarHovered, setSidebarHovered] = useState(false);
+  const userOverriddenSidebarRef = useRef(false);
+
+  useEffect(() => {
+    if (isLoaded && !userOverriddenSidebarRef.current) {
+      setSidebarCollapsed(prefs.sidebar_collapsed);
+    }
+  }, [isLoaded, prefs.sidebar_collapsed]);
+
+  const toggleCollapsed = useCallback(() => {
+    userOverriddenSidebarRef.current = true;
+    setSidebarCollapsed((prev) => {
+      const next = !prev;
+      setPreference("sidebar_collapsed", next);
+      return next;
+    });
+  }, [setPreference]);
+
   return (
-    <QueryClientProvider client={queryClient}>
-      <DemoPersonaProvider>
-        <WouterRouter base={BASE}>
-          <AppRoutes />
-        </WouterRouter>
-        <DemoPersonaSwitcher />
-      </DemoPersonaProvider>
-    </QueryClientProvider>
+    <AnalyticsProvider appName="aegis">
+      <QueryClientProvider client={queryClient}>
+        <DemoPersonaProvider>
+          <WouterRouter base={BASE}>
+            <AppShell
+              sidebarOpen={sidebarOpen}
+              setSidebarOpen={setSidebarOpen}
+              sidebarCollapsed={sidebarCollapsed}
+              onToggleCollapse={toggleCollapsed}
+              sidebarHovered={sidebarHovered}
+              setSidebarHovered={setSidebarHovered}
+            />
+          </WouterRouter>
+          <DemoPersonaSwitcher />
+        </DemoPersonaProvider>
+      </QueryClientProvider>
+    </AnalyticsProvider>
   );
 }
