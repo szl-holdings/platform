@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { FlaskConical, Play, GitCompare, Shield, Cpu, Brain, DollarSign, Clock, CheckCircle, XCircle, AlertTriangle, ChevronDown, ChevronRight } from "lucide-react";
-import { apiUrl, fetchJson, tracedFetch, emitSpan, ACCENT } from "./cognitive/shared";
+import { apiUrl, fetchJson, tracedFetch, emitSpan, ACCENT, AGENT_RUN_ATTRS } from "./cognitive/shared";
 import { AuditRail } from "@szl-holdings/design-system/cockpit/audit-rail";
 import type { AuditEvent } from "@szl-holdings/design-system/cockpit/audit-rail";
 
@@ -333,18 +333,18 @@ function VariantComparePanel({ runs }: { runs: EvalRunSummary[] }) {
       emitSpan({
         name: "eval_studio.variant_replay",
         attributes: {
-          "agent.eval.suite_id": baseline.suiteId,
-          "agent.eval.run_id": variantRun.runId,
+          [AGENT_RUN_ATTRS.EVAL_SUITE_ID]: baseline.suiteId,
+          [AGENT_RUN_ATTRS.EVAL_RUN_ID]: variantRun.runId,
           "agent.eval.baseline_run_id": baseline.runId,
-          "agent.eval.pass_rate": variantRun.passRate,
-          "agent.eval.avg_score": variantRun.avgScore,
+          [AGENT_RUN_ATTRS.EVAL_PASS_RATE]: variantRun.passRate,
+          [AGENT_RUN_ATTRS.EVAL_AVG_SCORE]: variantRun.avgScore,
           "agent.eval.avg_latency_ms": variantRun.avgLatencyMs,
           "agent.eval.total_cost_usd": variantRun.totalCostUsd,
-          "agent.eval.has_regression": variantRun.hasRegression,
+          [AGENT_RUN_ATTRS.EVAL_HAS_REGRESSION]: variantRun.hasRegression,
           "agent.eval.regression_severity": variantRun.regressionSeverity,
-          "agent.eval.variant_model": variant.model,
-          "agent.eval.variant_strategy": variant.strategy,
-          "agent.eval.variant_prompt": variant.prompt,
+          [AGENT_RUN_ATTRS.EVAL_VARIANT_MODEL]: variant.model,
+          [AGENT_RUN_ATTRS.EVAL_VARIANT_STRATEGY]: variant.strategy,
+          [AGENT_RUN_ATTRS.EVAL_VARIANT_PROMPT]: variant.prompt,
         },
         durationMs: Math.round(performance.now() - start),
         status: "ok",
@@ -357,11 +357,11 @@ function VariantComparePanel({ runs }: { runs: EvalRunSummary[] }) {
       emitSpan({
         name: "eval_studio.variant_replay",
         attributes: {
-          "agent.eval.suite_id": baseline.suiteId,
+          [AGENT_RUN_ATTRS.EVAL_SUITE_ID]: baseline.suiteId,
           "agent.eval.baseline_run_id": baseline.runId,
-          "agent.eval.variant_model": variant.model,
-          "agent.eval.variant_strategy": variant.strategy,
-          "agent.eval.variant_prompt": variant.prompt,
+          [AGENT_RUN_ATTRS.EVAL_VARIANT_MODEL]: variant.model,
+          [AGENT_RUN_ATTRS.EVAL_VARIANT_STRATEGY]: variant.strategy,
+          [AGENT_RUN_ATTRS.EVAL_VARIANT_PROMPT]: variant.prompt,
         },
         durationMs: Math.round(performance.now() - start),
         status: "error",
@@ -646,8 +646,8 @@ export default function EvalStudio() {
     emitSpan({
       name: "page.load",
       attributes: {
-        "app.page_load.path": "/operations/eval-studio",
-        "app.page_load.latency_ms": Math.round(loadedAt - pageLoadRef.current),
+        [AGENT_RUN_ATTRS.PAGE_LOAD_PATH]: "/operations/eval-studio",
+        [AGENT_RUN_ATTRS.PAGE_LOAD_LATENCY_MS]: Math.round(loadedAt - pageLoadRef.current),
       },
       durationMs: Math.round(loadedAt - pageLoadRef.current),
       status: "ok",
@@ -659,7 +659,7 @@ export default function EvalStudio() {
     queryFn: () => tracedFetch<EvalsApiResponse>(
       "eval_studio.suites.fetch",
       apiUrl("/evals"),
-      { "app.page_load.path": "/operations/eval-studio" }
+      { [AGENT_RUN_ATTRS.PAGE_LOAD_PATH]: "/operations/eval-studio" }
     ),
     staleTime: 60_000,
   });
@@ -693,12 +693,12 @@ export default function EvalStudio() {
       emitSpan({
         name: "eval_studio.suite_run",
         attributes: {
-          "agent.eval.suite_id": suite.suiteId,
-          "agent.eval.run_id": result?.runId ?? "",
-          "agent.eval.pass_rate": result?.passRate ?? 0,
-          "agent.eval.avg_score": result?.avgScore ?? 0,
-          "agent.eval.has_regression": result?.hasRegression ?? false,
-          "app.page_load.path": "/operations/eval-studio",
+          [AGENT_RUN_ATTRS.EVAL_SUITE_ID]: suite.suiteId,
+          [AGENT_RUN_ATTRS.EVAL_RUN_ID]: result?.runId ?? "",
+          [AGENT_RUN_ATTRS.EVAL_PASS_RATE]: result?.passRate ?? 0,
+          [AGENT_RUN_ATTRS.EVAL_AVG_SCORE]: result?.avgScore ?? 0,
+          [AGENT_RUN_ATTRS.EVAL_HAS_REGRESSION]: result?.hasRegression ?? false,
+          [AGENT_RUN_ATTRS.PAGE_LOAD_PATH]: "/operations/eval-studio",
         },
         durationMs: Math.round(performance.now() - start),
         status: "ok",
@@ -709,8 +709,8 @@ export default function EvalStudio() {
       emitSpan({
         name: "eval_studio.suite_run",
         attributes: {
-          "agent.eval.suite_id": suite.suiteId,
-          "app.page_load.path": "/operations/eval-studio",
+          [AGENT_RUN_ATTRS.EVAL_SUITE_ID]: suite.suiteId,
+          [AGENT_RUN_ATTRS.PAGE_LOAD_PATH]: "/operations/eval-studio",
         },
         durationMs: Math.round(performance.now() - start),
         status: "error",

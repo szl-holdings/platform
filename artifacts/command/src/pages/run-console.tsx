@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
-import { ACCENT, DOMAIN_COLORS, DOMAIN_ICONS, apiUrl, fetchJson } from "./cognitive/shared";
+import { ACCENT, DOMAIN_COLORS, DOMAIN_ICONS, apiUrl, fetchJson, emitSpan, AGENT_RUN_ATTRS } from "./cognitive/shared";
 
 function getCsrfToken(): string | undefined {
   const match = document.cookie.split(";").find((c) => c.trim().startsWith("csrf_token="));
@@ -288,6 +288,7 @@ export function RunConsole() {
   const loadRuns = useCallback(async () => {
     setLoading(true);
     setError(null);
+    const start = performance.now();
     try {
       const params = new URLSearchParams();
       if (filterDomain !== "all") params.set("domain", filterDomain);
@@ -298,9 +299,31 @@ export function RunConsole() {
       const data = await fetchJson<RunsApiResponse>(apiUrl(`/runs${qs ? `?${qs}` : ""}`));
       setRuns(data.runs);
       setTotal(data.total);
+      emitSpan({
+        name: "run_console.list",
+        attributes: {
+          [AGENT_RUN_ATTRS.RUN_DOMAIN]: filterDomain,
+          [AGENT_RUN_ATTRS.RUN_OUTCOME]: filterOutcome,
+          [AGENT_RUN_ATTRS.RUN_AUTONOMY_MODE]: filterAutonomy,
+          [AGENT_RUN_ATTRS.PAGE_LOAD_PATH]: "/operations/runs",
+          "run_console.results_count": data.total,
+        },
+        durationMs: Math.round(performance.now() - start),
+        status: "ok",
+      });
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Failed to load runs";
       setError(msg.startsWith("HTTP 401") ? "Sign in to view agent runs." : msg);
+      emitSpan({
+        name: "run_console.list",
+        attributes: {
+          [AGENT_RUN_ATTRS.RUN_DOMAIN]: filterDomain,
+          [AGENT_RUN_ATTRS.PAGE_LOAD_PATH]: "/operations/runs",
+        },
+        durationMs: Math.round(performance.now() - start),
+        status: "error",
+        errorMessage: msg,
+      });
     } finally {
       setLoading(false);
     }
@@ -311,10 +334,32 @@ export function RunConsole() {
   async function handleSelectRun(run: RunSummary) {
     setDetailLoading(true);
     setReplayResult(null);
+    const start = performance.now();
     try {
       const data = await fetchJson<RunDetail>(apiUrl(`/runs/${run.runId}`));
       setSelectedRun(data);
-    } catch {
+      emitSpan({
+        name: "run_console.detail",
+        attributes: {
+          [AGENT_RUN_ATTRS.RUN_ID]: data.runId,
+          [AGENT_RUN_ATTRS.RUN_DOMAIN]: data.domain,
+          [AGENT_RUN_ATTRS.RUN_OUTCOME]: data.outcome,
+          [AGENT_RUN_ATTRS.RUN_AUTONOMY_MODE]: data.autonomyMode,
+          [AGENT_RUN_ATTRS.RUN_OBJECTIVE]: data.objective,
+          [AGENT_RUN_ATTRS.RUN_LATENCY_MS]: data.latencyMs,
+          [AGENT_RUN_ATTRS.RUN_COST_USD]: data.costUsd,
+          [AGENT_RUN_ATTRS.RUN_TOTAL_TOKENS]: data.totalTokens,
+          [AGENT_RUN_ATTRS.RUN_TOOL_CALL_COUNT]: data.toolCallCount,
+          [AGENT_RUN_ATTRS.RUN_EVIDENCE_COUNT]: data.evidenceCount,
+          [AGENT_RUN_ATTRS.RUN_POLICY_GATE_COUNT]: data.policyDecisionCount,
+          [AGENT_RUN_ATTRS.RUN_APPROVAL_COUNT]: data.approvalCount,
+          [AGENT_RUN_ATTRS.RUN_USER_ID]: data.userId,
+          [AGENT_RUN_ATTRS.RUN_HAS_FAILURE]: data.outcome === "failed" || data.outcome === "blocked",
+        },
+        durationMs: Math.round(performance.now() - start),
+        status: "ok",
+      });
+    } catch (err) {
       const summaryDetail: RunDetail = {
         ...run,
         toolCalls: [],
@@ -325,6 +370,16 @@ export function RunConsole() {
         spans: [],
       };
       setSelectedRun(summaryDetail);
+      emitSpan({
+        name: "run_console.detail",
+        attributes: {
+          [AGENT_RUN_ATTRS.RUN_ID]: run.runId,
+          [AGENT_RUN_ATTRS.RUN_DOMAIN]: run.domain,
+        },
+        durationMs: Math.round(performance.now() - start),
+        status: "error",
+        errorMessage: err instanceof Error ? err.message : String(err),
+      });
     } finally {
       setDetailLoading(false);
     }
@@ -333,6 +388,7 @@ export function RunConsole() {
   async function handleReplay(runId: string) {
     setReplaying(true);
     setReplayResult(null);
+    const start = performance.now();
     try {
       const csrfToken = getCsrfToken();
       const data = await fetchJson<ReplayResult>(apiUrl(`/runs/${runId}/replay`), {
@@ -344,8 +400,34 @@ export function RunConsole() {
         },
       });
       setReplayResult(data);
+      emitSpan({
+        name: "run_console.replay",
+        attributes: {
+          [AGENT_RUN_ATTRS.RUN_ID]: runId,
+          [AGENT_RUN_ATTRS.RUN_OUTCOME]: data.replayedRun.outcome,
+          [AGENT_RUN_ATTRS.RUN_DOMAIN]: data.replayedRun.domain,
+          [AGENT_RUN_ATTRS.RUN_LATENCY_MS]: data.replayedRun.latencyMs,
+          [AGENT_RUN_ATTRS.RUN_COST_USD]: data.replayedRun.costUsd,
+          [AGENT_RUN_ATTRS.RUN_RETRY_COUNT]: 1,
+          "run_console.replay.id": data.replayId,
+          "run_console.replay.deterministic_score": data.deterministicScore,
+          "run_console.replay.outcome_changed": data.diff.outcomeDiff.changed,
+          "run_console.replay.span_diff_count": data.diff.spanDiffs.filter((d) => d.changed).length,
+        },
+        durationMs: Math.round(performance.now() - start),
+        status: "ok",
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Replay failed");
+      emitSpan({
+        name: "run_console.replay",
+        attributes: {
+          [AGENT_RUN_ATTRS.RUN_ID]: runId,
+        },
+        durationMs: Math.round(performance.now() - start),
+        status: "error",
+        errorMessage: err instanceof Error ? err.message : String(err),
+      });
     } finally {
       setReplaying(false);
     }

@@ -12,6 +12,7 @@ import { commandConfig } from "@szl-holdings/shared-ui/copilot-configs";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
 import { CommandBar } from "./components/command-bar";
 import { UnifiedLayout, type WorkspaceMode } from "./components/unified-layout";
+import { recordPageLoad } from "./pages/cognitive/shared";
 import { DemoModeProvider } from "@lyte/lib/demo-mode";
 
 const BASE = import.meta.env.BASE_URL;
@@ -187,6 +188,14 @@ function AppShell() {
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, []);
+
+  useEffect(() => {
+    const start = performance.now();
+    const raf = requestAnimationFrame(() => {
+      recordPageLoad(location, performance.now() - start);
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [location]);
 
   if (isMarketing) {
     return (

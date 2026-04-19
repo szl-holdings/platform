@@ -4,9 +4,11 @@ import { ErrorBoundary } from "@szl-holdings/shared-ui/error-boundary";
 import { initSentry, initAnalytics } from "@szl-holdings/observability/react";
 import App from "./App";
 import "./index.css";
+import { initTelemetry } from "./telemetry";
 
 initSentry({ appSlug: "command", tracesSampleRate: 0.2 });
 initAnalytics({ appSlug: "command" });
+initTelemetry({ serviceName: "command-web" });
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

@@ -1,3 +1,8 @@
+import { AGENT_RUN_ATTRS } from "@szl-holdings/telemetry-standards/genai";
+import { recordSpan, withSpan } from "../../telemetry";
+
+export { AGENT_RUN_ATTRS };
+
 export const ACCENT = "#8b7ac8";
 
 export const DOMAIN_COLORS: Record<string, string> = {
@@ -26,16 +31,55 @@ export function apiUrl(path: string) {
 }
 
 export async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(url, {
-    credentials: "include",
-    headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
-    ...init,
-  });
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(`HTTP ${res.status}: ${text || res.statusText}`);
+  const method = init?.method ?? "GET";
+  const start = performance.now();
+  try {
+    const res = await fetch(url, {
+      credentials: "include",
+      headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
+      ...init,
+    });
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      const err = new Error(`HTTP ${res.status}: ${text || res.statusText}`) as Error & { httpStatus?: number };
+      err.httpStatus = res.status;
+      throw err;
+    }
+    const result = (await res.json()) as T;
+    recordSpan({
+      name: "app.api_call",
+      attributes: {
+        [AGENT_RUN_ATTRS.API_CALL_PATH]: url,
+        [AGENT_RUN_ATTRS.API_CALL_METHOD]: method,
+        [AGENT_RUN_ATTRS.API_CALL_STATUS]: res.status,
+        [AGENT_RUN_ATTRS.API_CALL_LATENCY_MS]: Math.round(performance.now() - start),
+      },
+      durationMs: Math.round(performance.now() - start),
+      status: "ok",
+    });
+    return result;
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    const status =
+      (err as { httpStatus?: number })?.httpStatus ??
+      (() => {
+        const m = /HTTP\s+(\d+)/i.exec(message);
+        return m ? Number(m[1]) : 0;
+      })();
+    recordSpan({
+      name: "app.api_call",
+      attributes: {
+        [AGENT_RUN_ATTRS.API_CALL_PATH]: url,
+        [AGENT_RUN_ATTRS.API_CALL_METHOD]: method,
+        [AGENT_RUN_ATTRS.API_CALL_STATUS]: status,
+        [AGENT_RUN_ATTRS.API_CALL_LATENCY_MS]: Math.round(performance.now() - start),
+      },
+      durationMs: Math.round(performance.now() - start),
+      status: "error",
+      errorMessage: message,
+    });
+    throw err;
   }
-  return res.json() as Promise<T>;
 }
 
 export interface OtelSpan {
@@ -48,41 +92,14 @@ export interface OtelSpan {
   timestamp: number;
 }
 
-let _spanBuffer: OtelSpan[] = [];
-let _flushTimer: ReturnType<typeof setTimeout> | null = null;
-
-function scheduleFlush() {
-  if (_flushTimer) return;
-  _flushTimer = setTimeout(() => {
-    _flushTimer = null;
-    const batch = _spanBuffer.splice(0);
-    if (batch.length === 0) return;
-    const url = apiUrl("/telemetry/events");
-    fetch(url, {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        app: "command",
-        events: batch.map((s) => ({
-          name: s.name,
-          timestamp: s.timestamp,
-          properties: {
-            ...s.attributes,
-            duration_ms: s.durationMs,
-            status: s.status,
-            ...(s.errorMessage ? { error: s.errorMessage } : {}),
-            ...(s.traceId ? { trace_id: s.traceId } : {}),
-          },
-        })),
-      }),
-    }).catch(() => {});
-  }, 300);
-}
-
 export function emitSpan(span: Omit<OtelSpan, "timestamp">) {
-  _spanBuffer.push({ ...span, timestamp: Date.now() });
-  scheduleFlush();
+  recordSpan({
+    name: span.name,
+    attributes: span.attributes,
+    durationMs: span.durationMs,
+    status: span.status,
+    errorMessage: span.errorMessage,
+  });
 }
 
 export async function tracedFetch<T>(
@@ -91,26 +108,28 @@ export async function tracedFetch<T>(
   attributes: Record<string, unknown>,
   init?: RequestInit
 ): Promise<T> {
-  const start = performance.now();
-  try {
-    const result = await fetchJson<T>(url, init);
-    emitSpan({
-      name,
-      attributes: { ...attributes, "app.api_call.path": url, "app.api_call.method": init?.method ?? "GET", "app.api_call.status": 200 },
-      durationMs: performance.now() - start,
-      status: "ok",
-    });
-    return result;
-  } catch (err) {
-    emitSpan({
-      name,
-      attributes: { ...attributes, "app.api_call.path": url, "app.api_call.method": init?.method ?? "GET", "app.api_call.status": 0 },
-      durationMs: performance.now() - start,
-      status: "error",
-      errorMessage: err instanceof Error ? err.message : String(err),
-    });
-    throw err;
-  }
+  return withSpan(
+    name,
+    {
+      ...attributes,
+      [AGENT_RUN_ATTRS.API_CALL_PATH]: url,
+      [AGENT_RUN_ATTRS.API_CALL_METHOD]: init?.method ?? "GET",
+    },
+    () => fetchJson<T>(url, init),
+  );
+}
+
+export function recordPageLoad(path: string, durationMs: number, extra: Record<string, unknown> = {}) {
+  recordSpan({
+    name: "app.page_load",
+    attributes: {
+      [AGENT_RUN_ATTRS.PAGE_LOAD_PATH]: path,
+      [AGENT_RUN_ATTRS.PAGE_LOAD_LATENCY_MS]: Math.round(durationMs),
+      ...extra,
+    },
+    durationMs: Math.round(durationMs),
+    status: "ok",
+  });
 }
 
 export const OUTCOME_COLORS: Record<string, string> = {

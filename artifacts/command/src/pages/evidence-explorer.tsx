@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Search, Database, GitBranch, AlertTriangle, CheckCircle, Clock, ExternalLink, ChevronRight } from "lucide-react";
-import { apiUrl, fetchJson, tracedFetch, emitSpan, ACCENT } from "./cognitive/shared";
+import { apiUrl, fetchJson, tracedFetch, emitSpan, ACCENT, AGENT_RUN_ATTRS } from "./cognitive/shared";
 import { ConfidenceMeter } from "@szl-holdings/design-system/proof/confidence-meter";
 import { FreshnessChip } from "@szl-holdings/design-system/proof/freshness-chip";
 import { PolicyStateChip, type PolicyState } from "@szl-holdings/design-system/proof/policy-state-chip";
@@ -276,7 +276,7 @@ function EntityDetailPanel({
     queryFn: () => tracedFetch<WhyResponse>(
       "evidence_explorer.entity_why.fetch",
       apiUrl(`/evidence-graph/why/${entity.entityId}`),
-      { "agent.evidence.entity_id": entity.entityId, "agent.run.domain": entity.domain }
+      { [AGENT_RUN_ATTRS.EVIDENCE_ENTITY_ID]: entity.entityId, [AGENT_RUN_ATTRS.RUN_DOMAIN]: entity.domain }
     ),
     staleTime: 15_000,
     refetchInterval: REFRESH_INTERVAL_MS,
@@ -384,9 +384,9 @@ export default function EvidenceExplorer() {
     emitSpan({
       name: "page.load",
       attributes: {
-        "app.page_load.path": "/operations/evidence-explorer",
-        "app.page_load.latency_ms": Math.round(loadedAt - pageLoadRef.current),
-        "agent.run.domain": "platform",
+        [AGENT_RUN_ATTRS.PAGE_LOAD_PATH]: "/operations/evidence-explorer",
+        [AGENT_RUN_ATTRS.PAGE_LOAD_LATENCY_MS]: Math.round(loadedAt - pageLoadRef.current),
+        [AGENT_RUN_ATTRS.RUN_DOMAIN]: "platform",
       },
       durationMs: Math.round(loadedAt - pageLoadRef.current),
       status: "ok",
@@ -402,7 +402,7 @@ export default function EvidenceExplorer() {
       return tracedFetch<{ entities: EntitySnapshot[]; total: number }>(
         "evidence_explorer.entities.fetch",
         url,
-        { "app.page_load.path": "/operations/evidence-explorer", "agent.evidence.kind": "normalized", domain: domainFilter }
+        { [AGENT_RUN_ATTRS.PAGE_LOAD_PATH]: "/operations/evidence-explorer", [AGENT_RUN_ATTRS.EVIDENCE_KIND]: "normalized", domain: domainFilter }
       );
     },
     staleTime: 15_000,
@@ -420,7 +420,7 @@ export default function EvidenceExplorer() {
       return tracedFetch<{ recommendations: Recommendation[]; total: number }>(
         "evidence_explorer.recommendations.fetch",
         url,
-        { "app.page_load.path": "/operations/evidence-explorer", domain: domainFilter }
+        { [AGENT_RUN_ATTRS.PAGE_LOAD_PATH]: "/operations/evidence-explorer", domain: domainFilter }
       );
     },
     staleTime: 15_000,
@@ -436,9 +436,9 @@ export default function EvidenceExplorer() {
       "evidence_explorer.rec_chain.fetch",
       apiUrl(`/evidence-graph/recommendations/${selectedRec!.recommendationId}`),
       {
-        "agent.evidence.entity_id": selectedRec!.recommendationId,
-        "agent.run.domain": selectedRec!.domain,
-        "app.page_load.path": "/operations/evidence-explorer",
+        [AGENT_RUN_ATTRS.EVIDENCE_ENTITY_ID]: selectedRec!.recommendationId,
+        [AGENT_RUN_ATTRS.RUN_DOMAIN]: selectedRec!.domain,
+        [AGENT_RUN_ATTRS.PAGE_LOAD_PATH]: "/operations/evidence-explorer",
       }
     ),
     staleTime: 15_000,
