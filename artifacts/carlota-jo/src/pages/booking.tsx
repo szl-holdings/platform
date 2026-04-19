@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Check, Calendar, User, ArrowLeft, ArrowRight, Shield } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { formatDate as formatSharedDate } from "@szl-holdings/shared-ui/utils";
 
 const SERVICES = [
   { id: "residence-operations", title: "Residence Operations", desc: "Day-to-day management of a primary or secondary residence." },
@@ -31,8 +32,9 @@ function getNextBusinessDays(): string[] {
 }
 
 function formatDate(dateStr: string) {
-  const d = new Date(dateStr + "T12:00:00");
-  return d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+  return formatSharedDate(new Date(dateStr + "T12:00:00"), {
+    intlOptions: { weekday: "short", month: "short", day: "numeric" },
+  });
 }
 
 type Step = "service" | "schedule" | "details" | "review";

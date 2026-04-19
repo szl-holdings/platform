@@ -13,6 +13,7 @@ import * as WebBrowser from "expo-web-browser";
 import { AppState, Platform, type AppStateStatus } from "react-native";
 import { identifyUser, resetUser } from "@/lib/analytics";
 import { setSentryUser, clearSentryUser } from "@/lib/sentry";
+import { setMobileUserTimeZone } from "@szl-holdings/mobile-shared/utils";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -449,6 +450,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       clearSentryUser();
     }
   }, [user]);
+
+  // Sync the saved IANA time zone preference from the server so the shared
+  // mobile formatters (`@szl-holdings/mobile-shared/utils`) render visible
+  // timestamps in the user's chosen zone instead of the device default.
+  useEffect(() => {
+    if (!user || !accessToken) {
+      setMobileUserTimeZone(null);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const apiBase = getApiBaseUrl();
+        const res = await fetch(`${apiBase}/api/preferences`, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        if (!res.ok || cancelled) return;
+        const json = await res.json().catch(() => null);
+        const prefs = json?.data ?? json;
+        const zone = prefs?.time_zone;
+        setMobileUserTimeZone(typeof zone === "string" ? zone : null);
+      } catch (err) {
+        if (!cancelled) {
+          console.warn("[Auth] Failed to load user preferences:", err);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user, accessToken]);
 
   useEffect(() => {
     if (!response || response.type !== "success" || !request) return;

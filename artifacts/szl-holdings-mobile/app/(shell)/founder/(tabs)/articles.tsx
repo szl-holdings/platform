@@ -13,6 +13,7 @@ import { useRouter } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { formatDate as formatSharedDate } from "@szl-holdings/mobile-shared/utils";
 
 const ACCENT = "#6366f1";
 const BG = "#0a0a0a";
@@ -96,11 +97,7 @@ const ARTICLES_FALLBACK: Article[] = [
 function formatDate(iso?: string | null) {
   if (!iso) return "";
   try {
-    return new Date(iso).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
+    return formatSharedDate(new Date(iso));
   } catch {
     return "";
   }

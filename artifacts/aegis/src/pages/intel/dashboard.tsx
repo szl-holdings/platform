@@ -1,16 +1,14 @@
-import { useInterval } from "@szl-holdings/shared-ui/use-interval";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { Brain, FlaskConical, Cpu, Lightbulb, Activity, TrendingUp, TrendingDown, ArrowRight, Radio, Shield, Zap, ChevronUp, ChevronDown, ArrowUpDown, GitBranch, BarChart3, Layers, CheckCircle, AlertCircle, Clock, DollarSign, GitMerge, Users } from "lucide-react";
 import { ActivityFeed } from "@szl-holdings/shared-ui/collaboration";
 import { Link } from "wouter";
 import { projects, experiments, models, insights, getResearchHealthScore } from "@/data/seed-data";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { LiveClock as SharedLiveClock } from "@szl-holdings/shared-ui/live-clock";
 import { DataStateBadge } from "@szl-holdings/shared-ui/data-state-badge";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from "recharts";
 
 function LiveClock() {
-  const [time, setTime] = useState(new Date());
-  useInterval(() => setTime(new Date()), 1000);
   return (
     <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground">
       <div className="flex items-center gap-1.5">
@@ -18,7 +16,7 @@ function LiveClock() {
         <span className="uppercase tracking-wider text-emerald-400 text-[10px] font-semibold">Systems Nominal</span>
       </div>
       <span className="text-border">·</span>
-      <span>{time.toLocaleTimeString("en-US", { hour12: false })}</span>
+      <SharedLiveClock format="local" />
     </div>
   );
 }

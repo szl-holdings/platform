@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import servicesData from "@/data/services.json";
 import tiersData from "@/data/tiers.json";
 import { trackEvent } from "@szl-holdings/observability/react";
+import { formatDate as formatSharedDate } from "@szl-holdings/shared-ui/utils";
 
 type Step = "service" | "tier" | "schedule" | "details" | "confirmation";
 
@@ -194,11 +195,8 @@ export default function BookingFlow() {
   };
 
   const formatDate = (dateStr: string) => {
-    const d = new Date(dateStr + "T12:00:00");
-    return d.toLocaleDateString("en-US", {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
+    return formatSharedDate(new Date(dateStr + "T12:00:00"), {
+      intlOptions: { weekday: "short", month: "short", day: "numeric" },
     });
   };
 

@@ -7,7 +7,8 @@
     ".": "./src/index.ts",
     "./components": "./src/components/index.ts",
     "./hooks": "./src/hooks/index.ts",
-    "./notifications": "./src/push-index.ts"
+    "./notifications": "./src/push-index.ts",
+    "./utils": "./src/utils.ts"
   },
   "peerDependencies": {
     "@react-native-async-storage/async-storage": "*",

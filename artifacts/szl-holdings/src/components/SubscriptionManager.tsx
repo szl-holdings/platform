@@ -5,6 +5,7 @@ import {
   TrendingUp, Calendar,
 } from "lucide-react";
 import { trackEvent } from "@szl-holdings/observability/react";
+import { formatDate as formatSharedDate } from "@szl-holdings/shared-ui/utils";
 
 interface Subscription {
   id: string;
@@ -54,15 +55,11 @@ function formatCents(cents: number, currency = "usd") {
 }
 
 function formatDate(ts: number) {
-  return new Date(ts * 1000).toLocaleDateString("en-US", {
-    month: "short", day: "numeric", year: "numeric",
-  });
+  return formatSharedDate(new Date(ts * 1000));
 }
 
 function formatDateMs(ts: number) {
-  return new Date(ts).toLocaleDateString("en-US", {
-    month: "short", day: "numeric", year: "numeric",
-  });
+  return formatSharedDate(new Date(ts));
 }
 
 export function SubscriptionManager({

@@ -13,6 +13,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
+import { formatDate as formatSharedDate } from "@szl-holdings/mobile-shared/utils";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -82,10 +83,8 @@ function useAllCaseStudies() {
 function formatDate(dateStr?: string | null) {
   if (!dateStr) return null;
   try {
-    return new Date(dateStr).toLocaleDateString("en-US", {
-      month: "long",
-      day: "numeric",
-      year: "numeric",
+    return formatSharedDate(new Date(dateStr), {
+      intlOptions: { month: "long", day: "numeric", year: "numeric" },
     });
   } catch {
     return null;

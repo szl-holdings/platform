@@ -6,6 +6,7 @@ import {
   LinkIcon, ExternalLink, CheckCircle2, Clock, FileText,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { formatDate as formatSharedDate } from "@szl-holdings/shared-ui/utils";
 import { apiFetchAdmin } from "./api";
 
 // ─── Revenue Analytics Panel ──────────────────────────────────────────────────
@@ -76,8 +77,7 @@ function RevenuePanel() {
   const formatCents = (cents: number, currency = "usd") =>
     new Intl.NumberFormat("en-US", { style: "currency", currency }).format(cents / 100);
 
-  const formatDate = (ts: number) =>
-    new Date(ts * 1000).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  const formatDate = (ts: number) => formatSharedDate(new Date(ts * 1000));
 
   if (loading) {
     return (

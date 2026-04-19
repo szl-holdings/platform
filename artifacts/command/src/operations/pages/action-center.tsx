@@ -6,6 +6,7 @@ import { useRealtimeChannel } from "@szl-holdings/shared-ui/use-realtime-channel
 import { doctrineEventBus } from "@szl-holdings/observability";
 import { DoctrineLayerBadge } from "@szl-holdings/shared-ui/doctrine-layer-badge";
 import { cn } from "@lyte/lib/utils";
+import { resolveTimeZone } from "@szl-holdings/shared-ui/utils";
 import { api, type LyteAction } from "@lyte/lib/api";
 import { LyteGraphQLPanel } from "@lyte/components/graphql-data-panel";
 
@@ -17,8 +18,11 @@ function formatCurrency(n: number): string {
 
 function formatDate(iso?: string): string {
   if (!iso) return "TBD";
-  const d = new Date(iso);
-  return d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "short",
+    timeZone: resolveTimeZone(),
+  }).format(new Date(iso));
 }
 
 const urgencyConfig = {

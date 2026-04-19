@@ -25,7 +25,15 @@ export interface FormatDateOptions {
   timeZone?: string | null;
   /** Locale override. Defaults to "en-US" to keep output stable across surfaces. */
   locale?: string;
+  /** Override the default Intl options (month/day/year). */
+  intlOptions?: Intl.DateTimeFormatOptions;
 }
+
+const DEFAULT_DATE_OPTIONS: Intl.DateTimeFormatOptions = {
+  month: "short",
+  day: "numeric",
+  year: "numeric",
+};
 
 export function formatDate(
   dateString: string | Date,
@@ -33,9 +41,7 @@ export function formatDate(
 ): string {
   const date = typeof dateString === "string" ? new Date(dateString) : dateString;
   return new Intl.DateTimeFormat(options.locale ?? "en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
+    ...(options.intlOptions ?? DEFAULT_DATE_OPTIONS),
     timeZone: resolveTimeZone(options.timeZone),
   }).format(date);
 }

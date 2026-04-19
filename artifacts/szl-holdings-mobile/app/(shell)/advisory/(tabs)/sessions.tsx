@@ -1,5 +1,6 @@
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import { formatDate as formatSharedDate } from "@szl-holdings/mobile-shared/utils";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useState, useCallback } from "react";
 import {
@@ -50,9 +51,18 @@ function getNextBusinessDays(): string[] {
 function formatDate(dateStr: string): { day: string; date: string; month: string } {
   const d = new Date(dateStr + "T12:00:00");
   return {
-    day: d.toLocaleDateString("en-GB", { weekday: "short" }).toUpperCase(),
-    date: d.getDate().toString(),
-    month: d.toLocaleDateString("en-GB", { month: "short" }).toUpperCase(),
+    day: formatSharedDate(d, {
+      locale: "en-GB",
+      intlOptions: { weekday: "short" },
+    }).toUpperCase(),
+    date: formatSharedDate(d, {
+      locale: "en-GB",
+      intlOptions: { day: "numeric" },
+    }),
+    month: formatSharedDate(d, {
+      locale: "en-GB",
+      intlOptions: { month: "short" },
+    }).toUpperCase(),
   };
 }
 

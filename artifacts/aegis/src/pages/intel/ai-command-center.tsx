@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { useInterval } from "@szl-holdings/shared-ui/use-interval";
 import { Activity, Brain, Cpu, Globe, Shield, Zap, ChevronRight, Circle, Radio, TrendingUp, AlertCircle, CheckCircle2, Clock } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { LiveClock as SharedLiveClock } from "@szl-holdings/shared-ui/live-clock";
 import { Link } from "wouter";
 
 const ECOSYSTEM_APPS = [
@@ -212,14 +212,12 @@ function AgentCard({ agent }: { agent: AgentNode }) {
 }
 
 function LiveClock() {
-  const [time, setTime] = useState(new Date());
-  useInterval(() => setTime(new Date()), 1000);
   return (
     <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground">
       <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse inline-block" />
       <span className="text-emerald-400 font-semibold text-[10px] uppercase tracking-wider">Orchestration Engine Active</span>
       <span className="text-border">·</span>
-      <span>{time.toLocaleTimeString("en-US", { hour12: false })}</span>
+      <SharedLiveClock format="local" />
     </div>
   );
 }
