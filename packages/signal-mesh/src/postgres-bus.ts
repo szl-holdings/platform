@@ -11,8 +11,31 @@
  * to show recent activity immediately after a boot.
  */
 
-import { desc, lt } from "drizzle-orm";
+import { desc, lt, getTableColumns, sql, type SQL } from "drizzle-orm";
 import type { PgColumn, PgTable } from "drizzle-orm/pg-core";
+
+const BATCH_SIZE = 500;
+
+function buildExcludedSet(
+  table: PgTable,
+  sampleRow: Record<string, unknown>,
+): Record<string, SQL> {
+  const cols = getTableColumns(table) as Record<string, { name: string }>;
+  const set: Record<string, SQL> = {};
+  for (const key of Object.keys(sampleRow)) {
+    const col = cols[key];
+    if (col) set[key] = sql.raw(`excluded."${col.name}"`);
+  }
+  return set;
+}
+
+function chunk<T>(arr: T[], size: number): T[][] {
+  if (arr.length <= size) return [arr];
+  const out: T[][] = [];
+  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+  return out;
+}
+
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import type { Signal } from "@workspace/ontology/signal";
 import type { SignalBusStore } from "./bus.js";
@@ -93,39 +116,45 @@ export class PostgresSignalBusStore implements SignalBusStore {
     this.pending.clear();
     let saved = 0;
     try {
-      for (const signal of writes) {
+      const rows = writes.map((signal) => ({
+        signalId: signal.signalId,
+        source: signal.source,
+        type: signal.type,
+        domain: signal.domain,
+        severity: signal.severity ?? null,
+        stage: signal.stage,
+        tenantId: signal.tenantId ?? null,
+        sessionId: signal.sessionId ?? null,
+        freshness: signal.freshness,
+        confidence: signal.confidence,
+        occurredAt: new Date(signal.occurredAt),
+        receivedAt: new Date(signal.receivedAt),
+        processedAt: signal.processedAt ? new Date(signal.processedAt) : null,
+        expiresAt: signal.expiresAt ? new Date(signal.expiresAt) : null,
+        payload: { signal },
+      }));
+      const updateSet = buildExcludedSet(this.opts.signalsTable, rows[0]!);
+      const batches = chunk(rows, BATCH_SIZE);
+      for (let i = 0; i < batches.length; i++) {
+        const batchRows = batches[i]!;
+        const batchSignals = writes.slice(i * BATCH_SIZE, i * BATCH_SIZE + batchRows.length);
         try {
-          const row = {
-            signalId: signal.signalId,
-            source: signal.source,
-            type: signal.type,
-            domain: signal.domain,
-            severity: signal.severity ?? null,
-            stage: signal.stage,
-            tenantId: signal.tenantId ?? null,
-            sessionId: signal.sessionId ?? null,
-            freshness: signal.freshness,
-            confidence: signal.confidence,
-            occurredAt: new Date(signal.occurredAt),
-            receivedAt: new Date(signal.receivedAt),
-            processedAt: signal.processedAt ? new Date(signal.processedAt) : null,
-            expiresAt: signal.expiresAt ? new Date(signal.expiresAt) : null,
-            payload: { signal },
-          };
           await this.opts.db
             .insert(this.opts.signalsTable)
-            .values(row as never)
+            .values(batchRows as never)
             .onConflictDoUpdate({
               target: this.opts.signalsTable.signalId,
-              set: row as never,
+              set: updateSet as never,
             });
-          saved++;
+          saved += batchRows.length;
         } catch (err) {
           this.opts.logger?.warn?.(
-            { err, signalId: signal.signalId },
-            "PostgresSignalBusStore: upsert failed; re-queuing",
+            { err, batchSize: batchRows.length },
+            "PostgresSignalBusStore: batch upsert failed; re-queuing",
           );
-          this.pending.set(signal.signalId, signal);
+          for (const signal of batchSignals) {
+            this.pending.set(signal.signalId, signal);
+          }
         }
       }
       return { saved };

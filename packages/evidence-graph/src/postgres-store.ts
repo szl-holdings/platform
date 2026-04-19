@@ -6,8 +6,30 @@
  * persists records to PostgreSQL so they survive process restarts.
  */
 
-import { desc, eq, inArray, lt } from "drizzle-orm";
+import { desc, eq, inArray, lt, getTableColumns, sql, type SQL } from "drizzle-orm";
 import type { PgColumn, PgTable } from "drizzle-orm/pg-core";
+
+const BATCH_SIZE = 500;
+
+function buildExcludedSet(
+  table: PgTable,
+  sampleRow: Record<string, unknown>,
+): Record<string, SQL> {
+  const cols = getTableColumns(table) as Record<string, { name: string }>;
+  const set: Record<string, SQL> = {};
+  for (const key of Object.keys(sampleRow)) {
+    const col = cols[key];
+    if (col) set[key] = sql.raw(`excluded."${col.name}"`);
+  }
+  return set;
+}
+
+function chunkArray<T>(arr: T[], size: number): T[][] {
+  if (arr.length <= size) return [arr];
+  const out: T[][] = [];
+  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+  return out;
+}
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import type { EvidenceItem, Recommendation } from "@workspace/ontology";
 // Import EntitySnapshot/EntityRegistryBackend directly to avoid the
@@ -143,53 +165,104 @@ export class PostgresEvidenceStore implements EvidenceStoreBackend {
     this.flushing = true;
     const writes = Array.from(this.pending.values());
     this.pending.clear();
-    let saved = 0;
     try {
-      for (const item of writes) {
+      const rows = writes.map((item) => ({
+        evidenceId: item.evidenceId,
+        type: item.type,
+        domain: item.domain,
+        signalId: item.signalId ?? null,
+        summary: item.summary,
+        confidence: item.confidence,
+        freshness: item.freshness,
+        weight: item.weight,
+        observedAt: new Date(item.observedAt),
+        expiresAt: item.expiresAt ? new Date(item.expiresAt) : null,
+        payload: { evidenceItem: item },
+      }));
+      const updateSet = buildExcludedSet(this.opts.evidenceItemsTable, rows[0]!);
+
+      // Track which evidence rows were successfully upserted in this flush so
+      // that links are only attempted for those (preserving the prior
+      // per-item atomic relationship between evidence row + its links).
+      // `requeued` tracks evidence ids that failed (either at the row upsert
+      // or at the link insert step) so that `saved` only counts items whose
+      // evidence row + links both persisted, matching the prior per-item
+      // accounting.
+      const itemsByEvidenceId = new Map<string, EvidenceItem>();
+      for (const item of writes) itemsByEvidenceId.set(item.evidenceId, item);
+      const succeededItems: EvidenceItem[] = [];
+      const requeued = new Set<string>();
+
+      const rowBatches = chunkArray(rows, BATCH_SIZE);
+      for (let i = 0; i < rowBatches.length; i++) {
+        const batchRows = rowBatches[i]!;
+        const batchItems = writes.slice(i * BATCH_SIZE, i * BATCH_SIZE + batchRows.length);
         try {
-          const row = {
-            evidenceId: item.evidenceId,
-            type: item.type,
-            domain: item.domain,
-            signalId: item.signalId ?? null,
-            summary: item.summary,
-            confidence: item.confidence,
-            freshness: item.freshness,
-            weight: item.weight,
-            observedAt: new Date(item.observedAt),
-            expiresAt: item.expiresAt ? new Date(item.expiresAt) : null,
-            payload: { evidenceItem: item },
-          };
           await this.opts.db
             .insert(this.opts.evidenceItemsTable)
-            .values(row as never)
+            .values(batchRows as never)
             .onConflictDoUpdate({
               target: this.opts.evidenceItemsTable.evidenceId,
-              set: row as never,
+              set: updateSet as never,
             });
-
-          if (item.entityRefs.length > 0) {
-            const links = item.entityRefs.map((ref) => ({
-              evidenceId: item.evidenceId,
-              entityId: ref.entityId,
-              entityType: ref.entityType,
-              domain: ref.domain ?? item.domain,
-            }));
-            await this.opts.db
-              .insert(this.opts.evidenceEntityLinksTable)
-              .values(links as never)
-              .onConflictDoNothing();
-          }
-          saved++;
+          for (const item of batchItems) succeededItems.push(item);
         } catch (err) {
           this.opts.logger?.warn?.(
-            { err, evidenceId: item.evidenceId },
-            "PostgresEvidenceStore: upsert failed; re-queuing",
+            { err, batchSize: batchRows.length },
+            "PostgresEvidenceStore: batch upsert failed; re-queuing",
           );
-          this.pending.set(item.evidenceId, item);
+          for (const item of batchItems) {
+            this.pending.set(item.evidenceId, item);
+            requeued.add(item.evidenceId);
+          }
         }
       }
-      return { saved };
+
+      // Build links only for evidence items that were successfully persisted
+      // in this flush. On link batch failure, re-queue the affected evidence
+      // items so the link work is retried alongside the evidence row on the
+      // next flush — matching the prior per-item failure semantics.
+      const linkRows: Array<{
+        evidenceId: string;
+        entityId: string;
+        entityType: string;
+        domain: string;
+      }> = [];
+      for (const item of succeededItems) {
+        for (const ref of item.entityRefs) {
+          linkRows.push({
+            evidenceId: item.evidenceId,
+            entityId: ref.entityId,
+            entityType: ref.entityType,
+            domain: ref.domain ?? item.domain,
+          });
+        }
+      }
+
+      if (linkRows.length > 0) {
+        for (const linkBatch of chunkArray(linkRows, BATCH_SIZE)) {
+          try {
+            await this.opts.db
+              .insert(this.opts.evidenceEntityLinksTable)
+              .values(linkBatch as never)
+              .onConflictDoNothing();
+          } catch (err) {
+            const affected = new Set(linkBatch.map((l) => l.evidenceId));
+            this.opts.logger?.warn?.(
+              { err, batchSize: linkBatch.length, affected: affected.size },
+              "PostgresEvidenceStore: entity link batch insert failed; re-queuing affected evidence",
+            );
+            for (const evidenceId of affected) {
+              const item = itemsByEvidenceId.get(evidenceId);
+              if (item) {
+                this.pending.set(evidenceId, item);
+                requeued.add(evidenceId);
+              }
+            }
+          }
+        }
+      }
+      return { saved: writes.length - requeued.size };
     } finally {
       this.flushing = false;
     }
@@ -347,37 +420,43 @@ export class PostgresRecommendationStore implements RecommendationStoreBackend {
     this.pending.clear();
     let saved = 0;
     try {
-      for (const rec of writes) {
+      const rows = writes.map((rec) => ({
+        recommendationId: rec.recommendationId,
+        domain: rec.domain,
+        title: rec.title,
+        suggestedAction: rec.suggestedAction,
+        status: rec.status,
+        confidence: rec.confidence,
+        freshness: rec.freshness,
+        tenantId: rec.tenantId ?? null,
+        generatedBy: rec.generatedBy ?? null,
+        generatedAt: new Date(rec.generatedAt),
+        expiresAt: rec.expiresAt ? new Date(rec.expiresAt) : null,
+        resolvedAt: rec.resolvedAt ? new Date(rec.resolvedAt) : null,
+        payload: { recommendation: rec },
+      }));
+      const updateSet = buildExcludedSet(this.opts.recommendationsTable, rows[0]!);
+      const batches = chunkArray(rows, BATCH_SIZE);
+      for (let i = 0; i < batches.length; i++) {
+        const batchRows = batches[i]!;
+        const batchRecs = writes.slice(i * BATCH_SIZE, i * BATCH_SIZE + batchRows.length);
         try {
-          const row = {
-            recommendationId: rec.recommendationId,
-            domain: rec.domain,
-            title: rec.title,
-            suggestedAction: rec.suggestedAction,
-            status: rec.status,
-            confidence: rec.confidence,
-            freshness: rec.freshness,
-            tenantId: rec.tenantId ?? null,
-            generatedBy: rec.generatedBy ?? null,
-            generatedAt: new Date(rec.generatedAt),
-            expiresAt: rec.expiresAt ? new Date(rec.expiresAt) : null,
-            resolvedAt: rec.resolvedAt ? new Date(rec.resolvedAt) : null,
-            payload: { recommendation: rec },
-          };
           await this.opts.db
             .insert(this.opts.recommendationsTable)
-            .values(row as never)
+            .values(batchRows as never)
             .onConflictDoUpdate({
               target: this.opts.recommendationsTable.recommendationId,
-              set: row as never,
+              set: updateSet as never,
             });
-          saved++;
+          saved += batchRows.length;
         } catch (err) {
           this.opts.logger?.warn?.(
-            { err, recommendationId: rec.recommendationId },
-            "PostgresRecommendationStore: upsert failed; re-queuing",
+            { err, batchSize: batchRows.length },
+            "PostgresRecommendationStore: batch upsert failed; re-queuing",
           );
-          this.pending.set(rec.recommendationId, rec);
+          for (const rec of batchRecs) {
+            this.pending.set(rec.recommendationId, rec);
+          }
         }
       }
       return { saved };
@@ -527,35 +606,42 @@ export class PostgresEntityRegistry implements EntityRegistryBackend {
     this.pending.clear();
     let saved = 0;
     try {
-      for (const snap of writes) {
+      const now = new Date();
+      const rows = writes.map((snap) => ({
+        entityId: snap.entityId,
+        snapshotId: snap.snapshotId,
+        entityType: snap.entityType,
+        domain: snap.domain,
+        displayName: snap.displayName,
+        health: snap.health,
+        tenantId: snap.tenantId ?? null,
+        snapshotAt: new Date(snap.snapshotAt),
+        validUntil: snap.validUntil ? new Date(snap.validUntil) : null,
+        payload: { snapshot: snap },
+        updatedAt: now,
+      }));
+      const updateSet = buildExcludedSet(this.opts.entitySnapshotsTable, rows[0]!);
+      const batches = chunkArray(rows, BATCH_SIZE);
+      for (let i = 0; i < batches.length; i++) {
+        const batchRows = batches[i]!;
+        const batchSnaps = writes.slice(i * BATCH_SIZE, i * BATCH_SIZE + batchRows.length);
         try {
-          const row = {
-            entityId: snap.entityId,
-            snapshotId: snap.snapshotId,
-            entityType: snap.entityType,
-            domain: snap.domain,
-            displayName: snap.displayName,
-            health: snap.health,
-            tenantId: snap.tenantId ?? null,
-            snapshotAt: new Date(snap.snapshotAt),
-            validUntil: snap.validUntil ? new Date(snap.validUntil) : null,
-            payload: { snapshot: snap },
-            updatedAt: new Date(),
-          };
           await this.opts.db
             .insert(this.opts.entitySnapshotsTable)
-            .values(row as never)
+            .values(batchRows as never)
             .onConflictDoUpdate({
               target: this.opts.entitySnapshotsTable.entityId,
-              set: row as never,
+              set: updateSet as never,
             });
-          saved++;
+          saved += batchRows.length;
         } catch (err) {
           this.opts.logger?.warn?.(
-            { err, entityId: snap.entityId },
-            "PostgresEntityRegistry: upsert failed; re-queuing",
+            { err, batchSize: batchRows.length },
+            "PostgresEntityRegistry: batch upsert failed; re-queuing",
           );
-          this.pending.set(snap.entityId, snap);
+          for (const snap of batchSnaps) {
+            this.pending.set(snap.entityId, snap);
+          }
         }
       }
       return { saved };
