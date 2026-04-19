@@ -60,6 +60,7 @@ import demoGovernedScenariosRouter from "./demo-governed-scenarios";
 import counselRouter from "./counsel";
 import fabricRouter from "./fabric";
 import actionStoreRouter from "./action-store";
+import lyteSurfacesRouter from "./lyte-surfaces";
 
 const router: IRouter = Router();
 
@@ -118,6 +119,12 @@ router.use(fabricRouter);
 // unauthenticated; mounted BEFORE guardianPolicyCheck and exempted in the
 // global-auth-enforcer / csrf middleware allowlists.
 router.use(actionStoreRouter);
+
+// Lyte legacy surfaces — read-only public GET endpoints backing the 5 legacy
+// decision-intelligence pages. Mounted BEFORE lyte.register so the
+// tenantScope middleware registered at "/lyte" never intercepts these routes.
+// Exact paths are whitelisted in global-auth-enforcer.ts.
+router.use(lyteSurfacesRouter);
 
 // Global Guardian policy check — derives category from request path and
 // applies to every agent-facing route family. Read-only methods skip

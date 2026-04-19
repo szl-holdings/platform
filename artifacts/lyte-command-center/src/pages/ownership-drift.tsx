@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from "recharts";
-import { GitBranch, Clock, Users, ChevronDown, ChevronUp, Shield, CheckCircle2, UserCheck } from "lucide-react";
-import { driftItems, driftHistory, type DriftItem } from "@/data/seed";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from "recharts";
+import { GitBranch, AlertTriangle, Clock, Users, ChevronDown, ChevronUp, Shield, ExternalLink, CheckCircle2, UserCheck } from "lucide-react";
+import { type DriftItem } from "@/data/seed";
+import { useOwnershipDrift } from "@/data/api";
 import { claimDrift, resolveDrift, useInterventions, formatTimestamp, bootstrapInterventions } from "@/data/interventions";
 
 function ProofBadge({ ref: proofRef }: { ref: string }) {
@@ -256,7 +257,16 @@ export default function OwnershipDriftPage() {
   useEffect(() => { void bootstrapInterventions(); }, []);
 
   const [filter, setFilter] = useState<"all" | "critical" | "warn" | "info">("all");
+  const { data, isLoading, error } = useOwnershipDrift();
 
+  if (isLoading) {
+    return <div className="p-6 text-xs font-mono text-amber-400/50">Loading ownership drift…</div>;
+  }
+  if (error || !data) {
+    return <div className="p-6 text-xs font-mono text-red-400/70">Failed to load ownership drift data.</div>;
+  }
+  const driftItems = data.items;
+  const driftHistory = data.history;
   const filtered = filter === "all" ? driftItems : driftItems.filter(d => d.status === filter);
   const critical = driftItems.filter(d => d.status === "critical").length;
   const warn = driftItems.filter(d => d.status === "warn").length;

@@ -1,7 +1,8 @@
 import { useState } from "react";
 import type { TooltipProps } from "recharts";
 import { Thermometer, Shield } from "lucide-react";
-import { pressureCells, type PressureCell } from "@/data/seed";
+import { type PressureCell } from "@/data/seed";
+import { usePressureMap } from "@/data/api";
 
 type Dimension = "team" | "account" | "program" | "sponsor";
 
@@ -59,7 +60,15 @@ export default function PressureMapPage() {
   const [selectedCell, setSelectedCell] = useState<PressureCell | null>(null);
   const [dim, setDim] = useState<Dimension>("team");
   const [filterVal, setFilterVal] = useState<string>("all");
+  const { data, isLoading, error } = usePressureMap();
 
+  if (isLoading) {
+    return <div className="p-6 text-xs font-mono text-amber-400/50">Loading pressure map…</div>;
+  }
+  if (error || !data) {
+    return <div className="p-6 text-xs font-mono text-red-400/70">Failed to load pressure map data.</div>;
+  }
+  const pressureCells = data.cells;
   const uniqueVals = [...new Set(pressureCells.map(c => c[dim]))].sort();
 
   const displayed = filterVal === "all"

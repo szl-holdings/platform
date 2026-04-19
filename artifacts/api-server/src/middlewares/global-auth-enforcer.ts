@@ -65,6 +65,14 @@ const PUBLIC_EXACT_PATHS = new Set([
   // so risk owner assignments and decisions sync across team members. Public
   // and unauthenticated like the rest of those demo surfaces.
   "/api/action-store",
+  // Lyte legacy surfaces — read-only public GET endpoints backing the 5
+  // decision-intelligence pages (Ownership Drift, Pressure Map, Action Debt
+  // Index, Decision Replay, Board View). See routes/lyte-surfaces.ts.
+  "/api/lyte/ownership-drift",
+  "/api/lyte/pressure-map",
+  "/api/lyte/action-debt",
+  "/api/lyte/decision-replay",
+  "/api/lyte/board-view",
 ]);
 
 const PUBLIC_PREFIXES = [
@@ -194,6 +202,12 @@ export function globalAuthEnforcer(
       next();
       return;
     }
+  }
+
+  // Lyte Decision Replay sub-paths: /api/lyte/decision-replay/:id
+  if (req.method === "GET" && path.startsWith("/api/lyte/decision-replay/")) {
+    next();
+    return;
   }
 
   // PRISM Counsel GC matters — read-only GET routes are public so the

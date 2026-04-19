@@ -29,6 +29,7 @@ import { seedAiBudgetPolicies } from "./lib/seed-ai-budget";
 import { seedMspData } from "./lib/seed-msp";
 import { seedDreamscapeData } from "./lib/seed-dreamscape";
 import { seedLyteActions } from "./lib/seed-lyte-actions";
+import { seedLyteSurfaces } from "./lib/seed-lyte-surfaces";
 import { seedTerraPortfolioModules } from "./routes/terra-portfolio-intel";
 import { isSeedDataAllowed, resolveRuntimeMode } from "@szl-holdings/config";
 import { buildGraphQLMiddleware } from "./graphql/index.js";
@@ -280,6 +281,9 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
       });
       seedLyteActions().catch(err => {
         logger.warn({ err }, "[seed-lyte-actions] Lyte action queue seed failed (non-fatal)");
+      });
+      seedLyteSurfaces().catch(err => {
+        logger.warn({ err }, "[seed-lyte-surfaces] Lyte surfaces seed failed (non-fatal)");
       });
       seedTerraPortfolioModules().catch(err => {
         logger.warn({ err }, "[seed-terra-portfolio-modules] Terra portfolio module seed failed (non-fatal)");

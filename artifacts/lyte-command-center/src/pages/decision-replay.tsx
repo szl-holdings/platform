@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "wouter";
-import { Activity, Shield, User, Zap, Brain, AlertTriangle, ChevronRight, UserCheck, CheckCircle2, UserCog } from "lucide-react";
-import { replayScenarios, type ReplayEvent, type ReplayScenario } from "@/data/seed";
+import { Activity, Shield, User, Zap, Brain, AlertTriangle, ChevronRight, UserCheck, CheckCircle2, UserCog, Clock } from "lucide-react";
+import { type ReplayEvent, type ReplayScenario } from "@/data/seed";
 import { useInterventions, bootstrapInterventions, formatTimestamp, type Intervention } from "@/data/interventions";
+import { useDecisionReplay } from "@/data/api";
 
 const INTERVENTION_ICON: Record<Intervention["type"], React.ReactNode> = {
   claim: <UserCheck className="w-3 h-3 text-amber-300" />,
@@ -131,12 +132,26 @@ export default function DecisionReplayPage() {
   useEffect(() => { void bootstrapInterventions(); }, []);
 
   const params = useParams<{ id?: string }>();
-  const initialScenario = params.id
-    ? (replayScenarios.find(s => s.id === params.id) ?? replayScenarios[0])
-    : replayScenarios[0];
-  const [activeScenario, setActiveScenario] = useState<ReplayScenario>(initialScenario);
+  const { data, isLoading, error } = useDecisionReplay();
+  const [activeScenario, setActiveScenario] = useState<ReplayScenario | null>(null);
+  const [activeEvent, setActiveEvent] = useState<string | null>(null);
   const { log: interventionLog } = useInterventions();
 
+  useEffect(() => {
+    if (!data?.scenarios?.length) return;
+    const initial = params.id
+      ? (data.scenarios.find(s => s.id === params.id) ?? data.scenarios[0])
+      : data.scenarios[0];
+    setActiveScenario(prev => prev?.id === initial.id ? prev : initial);
+  }, [data, params.id]);
+
+  if (isLoading) {
+    return <div className="p-6 text-xs font-mono text-amber-400/50">Loading decision replay…</div>;
+  }
+  if (error || !data || !activeScenario) {
+    return <div className="p-6 text-xs font-mono text-red-400/70">Failed to load decision replay data.</div>;
+  }
+  const replayScenarios = data.scenarios;
   const alloyEvents = activeScenario.events.filter(e => e.evidenceType === "alloy").length;
   const humanEvents = activeScenario.events.filter(e => e.evidenceType === "human").length;
 

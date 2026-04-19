@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { Layers, Shield, AlertTriangle, Clock, TrendingUp, ChevronDown, ChevronUp, UserCog, CheckCircle2 } from "lucide-react";
-import { debtItems, debtScoreHistory, type DebtItem } from "@/data/seed";
+import { type DebtItem } from "@/data/seed";
+import { useActionDebt } from "@/data/api";
 import { reassignDebt, addressDebt, useInterventions, formatTimestamp, bootstrapInterventions } from "@/data/interventions";
 
 const TYPE_LABELS: Record<DebtItem["type"], string> = {
@@ -301,7 +302,16 @@ export default function ActionDebtPage() {
 
   const [typeFilter, setTypeFilter] = useState<"all" | DebtItem["type"]>("all");
   const [sortBy, setSortBy] = useState<"score" | "age">("score");
+  const { data, isLoading, error } = useActionDebt();
 
+  if (isLoading) {
+    return <div className="p-6 text-xs font-mono text-amber-400/50">Loading action debt…</div>;
+  }
+  if (error || !data) {
+    return <div className="p-6 text-xs font-mono text-red-400/70">Failed to load action debt data.</div>;
+  }
+  const debtItems = data.items;
+  const debtScoreHistory = data.history;
   const filtered = typeFilter === "all" ? debtItems : debtItems.filter(d => d.type === typeFilter);
   const sorted = [...filtered].sort((a, b) => sortBy === "score" ? b.score - a.score : b.ageDays - a.ageDays);
 

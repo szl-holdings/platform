@@ -1,7 +1,8 @@
-import { LayoutDashboard, Shield, AlertTriangle, TrendingUp, TrendingDown, Minus, Clock, ArrowRight, Zap, Brain, Users } from "lucide-react";
-import { boardMetrics, boardRisks, driftItems, debtItems, type BoardMetric, type BoardRisk } from "@/data/seed";
+import { LayoutDashboard, Shield, AlertTriangle, TrendingUp, TrendingDown, Minus, CheckCircle2, Clock, ArrowRight, Zap, Brain, Users } from "lucide-react";
+import { driftItems, debtItems, type BoardMetric, type BoardRisk } from "@/data/seed";
 import { useEffect } from "react";
 import { useInterventions, bootstrapInterventions } from "@/data/interventions";
+import { useBoardView } from "@/data/api";
 import { Link } from "wouter";
 
 function MetricCard({ metric }: { metric: BoardMetric }) {
@@ -89,6 +90,15 @@ function RiskCard({ risk }: { risk: BoardRisk }) {
 export default function BoardViewPage() {
   useEffect(() => { void bootstrapInterventions(); }, []);
 
+  const { data, isLoading, error } = useBoardView();
+  if (isLoading) {
+    return <div className="p-6 text-xs font-mono text-amber-400/50">Loading board view…</div>;
+  }
+  if (error || !data) {
+    return <div className="p-6 text-xs font-mono text-red-400/70">Failed to load board view data.</div>;
+  }
+  const boardMetrics = data.metrics;
+  const boardRisks = data.risks;
   const critical = boardRisks.filter(r => r.severity === "critical");
   const high = boardRisks.filter(r => r.severity === "high");
   const medium = boardRisks.filter(r => r.severity === "medium");
