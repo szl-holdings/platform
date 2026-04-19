@@ -1,7 +1,9 @@
 import { useState, useMemo } from "react";
-import { Scale, Eye, Edit, Download, Lock, AlertTriangle, ChevronUp, ChevronDown, Shield } from "lucide-react";
-import { useMatters, getPrivilegeColor } from "@/data/matters";
-import type { AuditAction } from "@/data/matters";
+import { Scale, Eye, Edit, Download, Lock, AlertTriangle, ChevronUp, ChevronDown, Shield, Plus, X } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useCounselAppendAuditEntry, getCounselListMattersQueryKey } from "@szl-holdings/api-client-react";
+import { useMatters } from "@/data/matters";
+import type { AuditAction, Matter } from "@/data/matters";
 
 const ACCENT = "#a78bfa";
 
@@ -27,6 +29,96 @@ const ACTION_COLORS: Record<AuditAction, string> = {
   "privilege-changed": "#f97316",
 };
 
+const AUDIT_ACTIONS: AuditAction[] = ["viewed", "edited", "exported", "redacted", "accessed-wall", "escalated", "deadline-updated", "privilege-changed"];
+
+function NewAuditEntryModal({ matters, defaultMatterId, onClose }: { matters: Matter[]; defaultMatterId: string; onClose: () => void }) {
+  const queryClient = useQueryClient();
+  const append = useCounselAppendAuditEntry();
+  const [matterId, setMatterId] = useState(defaultMatterId);
+  const [user, setUser] = useState("");
+  const [role, setRole] = useState("Partner");
+  const [action, setAction] = useState<AuditAction>("viewed");
+  const [detail, setDetail] = useState("");
+  const [ip, setIp] = useState("");
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    if (!matterId || !user.trim() || !role.trim() || !detail.trim()) {
+      setError("Please fill in matter, user, role, and detail.");
+      return;
+    }
+    append.mutate(
+      { data: { matterId, user: user.trim(), role: role.trim(), action, detail: detail.trim(), ip: ip.trim() || undefined } },
+      {
+        onSuccess: async () => {
+          await queryClient.invalidateQueries({ queryKey: getCounselListMattersQueryKey() });
+          onClose();
+        },
+        onError: (err: unknown) => {
+          setError(err instanceof Error ? err.message : "Failed to add audit entry.");
+        },
+      },
+    );
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}>
+      <div className="w-full max-w-lg rounded-2xl border border-white/10 p-6" style={{ background: "rgba(15,15,20,0.98)" }}>
+        <div className="flex items-start justify-between mb-4">
+          <h2 className="text-base font-semibold font-display text-white/90">Append Audit Entry</h2>
+          <button onClick={onClose} className="text-white/40 hover:text-white/80" aria-label="Close"><X className="w-4 h-4" /></button>
+        </div>
+        <form onSubmit={handleSubmit} className="space-y-3" data-testid="form-new-audit">
+          <Field label="Matter *">
+            <select data-testid="select-audit-matter" value={matterId} onChange={(e) => setMatterId(e.target.value)} className={inputCls}>
+              <option value="">Select matter…</option>
+              {matters.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
+            </select>
+          </Field>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="User *">
+              <input data-testid="input-audit-user" required value={user} onChange={(e) => setUser(e.target.value)} className={inputCls} placeholder="m.farooq" />
+            </Field>
+            <Field label="Role *">
+              <input data-testid="input-audit-role" required value={role} onChange={(e) => setRole(e.target.value)} className={inputCls} />
+            </Field>
+            <Field label="Action">
+              <select data-testid="select-audit-action" value={action} onChange={(e) => setAction(e.target.value as AuditAction)} className={inputCls}>
+                {AUDIT_ACTIONS.map((a) => <option key={a} value={a}>{a}</option>)}
+              </select>
+            </Field>
+            <Field label="IP Address">
+              <input value={ip} onChange={(e) => setIp(e.target.value)} className={inputCls} placeholder="10.0.0.1" />
+            </Field>
+          </div>
+          <Field label="Detail *">
+            <textarea data-testid="input-audit-detail" required rows={3} value={detail} onChange={(e) => setDetail(e.target.value)} className={inputCls} placeholder="What happened" />
+          </Field>
+          {error && <div className="text-[11px] text-red-400 px-3 py-2 rounded-lg" style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)" }}>{error}</div>}
+          <div className="flex items-center justify-end gap-2 pt-2">
+            <button type="button" onClick={onClose} className="text-xs px-3 py-2 rounded-lg border border-white/10 text-white/60 hover:text-white/90 transition-all">Cancel</button>
+            <button type="submit" data-testid="button-create-audit" disabled={append.isPending} className="text-xs px-4 py-2 rounded-lg font-semibold transition-all disabled:opacity-50" style={{ background: "rgba(167,139,250,0.18)", color: ACCENT, border: "1px solid rgba(167,139,250,0.35)" }}>
+              {append.isPending ? "Adding…" : "Add Entry"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+const inputCls = "w-full text-xs bg-white/5 border border-white/10 rounded-lg px-2.5 py-1.5 text-white/85 placeholder:text-white/25 focus:outline-none focus:border-purple-500/40";
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="block">
+      <span className="text-[10px] text-white/35 uppercase tracking-wider block mb-1">{label}</span>
+      {children}
+    </label>
+  );
+}
+
 interface AuditEntryWithMatter {
   matterId: string;
   matterName: string;
@@ -43,6 +135,7 @@ export default function AuditTrailPage() {
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [actionFilter, setActionFilter] = useState<AuditAction | "all">("all");
   const [matterFilter, setMatterFilter] = useState("all");
+  const [showNewEntry, setShowNewEntry] = useState(false);
   const { matters } = useMatters();
 
   const allEntries: AuditEntryWithMatter[] = useMemo(() => {
@@ -70,11 +163,31 @@ export default function AuditTrailPage() {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center gap-2 mb-1">
-        <Scale className="w-4 h-4" style={{ color: ACCENT }} />
-        <h1 className="text-lg font-semibold font-display text-white/90">Audit Trail</h1>
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <Scale className="w-4 h-4" style={{ color: ACCENT }} />
+            <h1 className="text-lg font-semibold font-display text-white/90">Audit Trail</h1>
+          </div>
+          <p className="text-xs text-white/30">Immutable log of all access, edits, exports, and privilege changes</p>
+        </div>
+        <button
+          onClick={() => setShowNewEntry(true)}
+          data-testid="button-new-audit-entry"
+          className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border font-semibold transition-all"
+          style={{ background: "rgba(167,139,250,0.15)", color: ACCENT, borderColor: "rgba(167,139,250,0.35)" }}
+        >
+          <Plus className="w-3 h-3" />
+          New Entry
+        </button>
       </div>
-      <p className="text-xs text-white/30">Immutable log of all access, edits, exports, and privilege changes</p>
+      {showNewEntry && (
+        <NewAuditEntryModal
+          matters={matters}
+          defaultMatterId={matterFilter !== "all" ? matterFilter : (matters[0]?.id ?? "")}
+          onClose={() => setShowNewEntry(false)}
+        />
+      )}
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[

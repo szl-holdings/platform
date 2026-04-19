@@ -1,7 +1,9 @@
 import { useState, useMemo } from "react";
 import { useLocation } from "wouter";
-import { Scale, AlertTriangle, Clock, Filter, ChevronDown, Lock, Shield, Eye, Network } from "lucide-react";
+import { Scale, AlertTriangle, Clock, Filter, ChevronDown, Lock, Shield, Eye, Network, Plus, X } from "lucide-react";
 import { GraphCanvas } from "@szl-holdings/design-system";
+import { useQueryClient } from "@tanstack/react-query";
+import { useCounselCreateMatter, getCounselListMattersQueryKey } from "@szl-holdings/api-client-react";
 import { useMatters, getPressureColor, getPressureLabel, getStatusColor, getPrivilegeColor, formatCurrency, formatDeadline, daysUntil } from "@/data/matters";
 import type { Matter, MatterStatus, MatterType, PrivilegeLevel } from "@/data/matters";
 import { buildGraph } from "@/lib/obligation-graph-builder";
@@ -86,12 +88,209 @@ function PressureMeter({ score }: { score: number }) {
   );
 }
 
+interface NewMatterForm {
+  name: string;
+  clientName: string;
+  matterNumber: string;
+  type: MatterType;
+  status: MatterStatus;
+  privilegeLevel: PrivilegeLevel;
+  leadCounsel: string;
+  jurisdiction: string;
+  summary: string;
+  nextDeadline: string;
+  nextDeadlineLabel: string;
+  pressureScore: number;
+  complexityScore: number;
+  estimatedExposure: string;
+  tagsRaw: string;
+}
+
+function todayIso(): string {
+  return new Date().toISOString().split("T")[0] as string;
+}
+function plusDaysIso(days: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return d.toISOString().split("T")[0] as string;
+}
+
+function emptyForm(): NewMatterForm {
+  return {
+    name: "",
+    clientName: "",
+    matterNumber: "",
+    type: "litigation",
+    status: "active",
+    privilegeLevel: "confidential",
+    leadCounsel: "",
+    jurisdiction: "",
+    summary: "",
+    nextDeadline: plusDaysIso(30),
+    nextDeadlineLabel: "Initial review",
+    pressureScore: 50,
+    complexityScore: 50,
+    estimatedExposure: "",
+    tagsRaw: "",
+  };
+}
+
+function NewMatterModal({ onClose, onCreated }: { onClose: () => void; onCreated: () => void }) {
+  const [form, setForm] = useState<NewMatterForm>(emptyForm());
+  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const create = useCounselCreateMatter();
+
+  const set = <K extends keyof NewMatterForm>(k: K, v: NewMatterForm[K]) => setForm((f) => ({ ...f, [k]: v }));
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    if (!form.name.trim() || !form.clientName.trim() || !form.matterNumber.trim() || !form.leadCounsel.trim() || !form.jurisdiction.trim() || !form.summary.trim()) {
+      setError("Please fill in all required fields.");
+      return;
+    }
+    const exposure = form.estimatedExposure.trim();
+    const exposureNum = exposure === "" ? null : Number(exposure.replace(/,/g, ""));
+    if (exposureNum !== null && Number.isNaN(exposureNum)) {
+      setError("Estimated exposure must be a number.");
+      return;
+    }
+    create.mutate(
+      {
+        data: {
+          name: form.name.trim(),
+          clientName: form.clientName.trim(),
+          matterNumber: form.matterNumber.trim(),
+          type: form.type,
+          status: form.status,
+          privilegeLevel: form.privilegeLevel,
+          pressureScore: Math.max(0, Math.min(100, Math.round(form.pressureScore))),
+          complexityScore: Math.max(0, Math.min(100, Math.round(form.complexityScore))),
+          openedDate: todayIso(),
+          nextDeadline: form.nextDeadline,
+          nextDeadlineLabel: form.nextDeadlineLabel.trim() || "Initial review",
+          leadCounsel: form.leadCounsel.trim(),
+          jurisdiction: form.jurisdiction.trim(),
+          estimatedExposure: exposureNum,
+          summary: form.summary.trim(),
+          tags: form.tagsRaw.split(",").map((t) => t.trim()).filter(Boolean),
+          wall: { enabled: false, reason: "", blockedRoles: [], approvedUsers: [], createdAt: "", createdBy: "" },
+          parties: [],
+        },
+      },
+      {
+        onSuccess: async () => {
+          await queryClient.invalidateQueries({ queryKey: getCounselListMattersQueryKey() });
+          onCreated();
+        },
+        onError: (err: unknown) => {
+          const msg = err instanceof Error ? err.message : "Failed to create matter.";
+          setError(msg);
+        },
+      },
+    );
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}>
+      <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-white/10 p-6" style={{ background: "rgba(15,15,20,0.98)" }}>
+        <div className="flex items-start justify-between mb-4">
+          <div>
+            <h2 className="text-base font-semibold font-display text-white/90">New Matter</h2>
+            <p className="text-xs text-white/40 mt-1">Open a new legal matter. Obligations, audit, and proof-chain entries can be added after creation.</p>
+          </div>
+          <button onClick={onClose} className="text-white/40 hover:text-white/80 transition-colors" aria-label="Close">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+        <form onSubmit={handleSubmit} className="space-y-3" data-testid="form-new-matter">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Field label="Matter Name *">
+              <input data-testid="input-matter-name" required value={form.name} onChange={(e) => set("name", e.target.value)} className={inputCls} placeholder="Apex — Series C Acquisition" />
+            </Field>
+            <Field label="Matter Number *">
+              <input data-testid="input-matter-number" required value={form.matterNumber} onChange={(e) => set("matterNumber", e.target.value)} className={inputCls} placeholder="2026-MA-001" />
+            </Field>
+            <Field label="Client Name *">
+              <input data-testid="input-client-name" required value={form.clientName} onChange={(e) => set("clientName", e.target.value)} className={inputCls} placeholder="Apex Capital Partners LP" />
+            </Field>
+            <Field label="Lead Counsel *">
+              <input data-testid="input-lead-counsel" required value={form.leadCounsel} onChange={(e) => set("leadCounsel", e.target.value)} className={inputCls} placeholder="M. Farooq" />
+            </Field>
+            <Field label="Type">
+              <select data-testid="select-matter-type" value={form.type} onChange={(e) => set("type", e.target.value as MatterType)} className={inputCls}>
+                {(["litigation","ip","transaction","regulatory","employment","contract","real-estate"] as MatterType[]).map((t) => <option key={t} value={t}>{t}</option>)}
+              </select>
+            </Field>
+            <Field label="Status">
+              <select data-testid="select-matter-status" value={form.status} onChange={(e) => set("status", e.target.value as MatterStatus)} className={inputCls}>
+                {(["active","pending","escalated","on-hold","closed"] as MatterStatus[]).map((s) => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </Field>
+            <Field label="Privilege Level">
+              <select data-testid="select-privilege-level" value={form.privilegeLevel} onChange={(e) => set("privilegeLevel", e.target.value as PrivilegeLevel)} className={inputCls}>
+                {(["public","confidential","privileged","restricted"] as PrivilegeLevel[]).map((p) => <option key={p} value={p}>{p}</option>)}
+              </select>
+            </Field>
+            <Field label="Jurisdiction *">
+              <input data-testid="input-jurisdiction" required value={form.jurisdiction} onChange={(e) => set("jurisdiction", e.target.value)} className={inputCls} placeholder="Delaware / Federal" />
+            </Field>
+            <Field label="Next Deadline">
+              <input data-testid="input-next-deadline" type="date" value={form.nextDeadline} onChange={(e) => set("nextDeadline", e.target.value)} className={inputCls} />
+            </Field>
+            <Field label="Deadline Label">
+              <input data-testid="input-deadline-label" value={form.nextDeadlineLabel} onChange={(e) => set("nextDeadlineLabel", e.target.value)} className={inputCls} placeholder="HSR Filing" />
+            </Field>
+            <Field label="Pressure Score (0-100)">
+              <input type="number" min={0} max={100} value={form.pressureScore} onChange={(e) => set("pressureScore", Number(e.target.value))} className={inputCls} />
+            </Field>
+            <Field label="Complexity Score (0-100)">
+              <input type="number" min={0} max={100} value={form.complexityScore} onChange={(e) => set("complexityScore", Number(e.target.value))} className={inputCls} />
+            </Field>
+            <Field label="Estimated Exposure ($)">
+              <input value={form.estimatedExposure} onChange={(e) => set("estimatedExposure", e.target.value)} className={inputCls} placeholder="e.g. 25000000" />
+            </Field>
+            <Field label="Tags (comma separated)">
+              <input value={form.tagsRaw} onChange={(e) => set("tagsRaw", e.target.value)} className={inputCls} placeholder="M&A, Antitrust" />
+            </Field>
+          </div>
+          <Field label="Summary *">
+            <textarea data-testid="input-summary" required rows={3} value={form.summary} onChange={(e) => set("summary", e.target.value)} className={inputCls} placeholder="Brief description of the matter and its current posture." />
+          </Field>
+          {error && (
+            <div className="text-[11px] text-red-400 px-3 py-2 rounded-lg" style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)" }}>{error}</div>
+          )}
+          <div className="flex items-center justify-end gap-2 pt-2">
+            <button type="button" onClick={onClose} className="text-xs px-3 py-2 rounded-lg border border-white/10 text-white/60 hover:text-white/90 hover:border-white/20 transition-all">Cancel</button>
+            <button type="submit" data-testid="button-create-matter" disabled={create.isPending} className="text-xs px-4 py-2 rounded-lg font-semibold transition-all disabled:opacity-50" style={{ background: "rgba(167,139,250,0.18)", color: ACCENT, border: "1px solid rgba(167,139,250,0.35)" }}>
+              {create.isPending ? "Creating…" : "Create Matter"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+const inputCls = "w-full text-xs bg-white/5 border border-white/10 rounded-lg px-2.5 py-1.5 text-white/85 placeholder:text-white/25 focus:outline-none focus:border-purple-500/40";
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="block">
+      <span className="text-[10px] text-white/35 uppercase tracking-wider block mb-1">{label}</span>
+      {children}
+    </label>
+  );
+}
+
 export default function MatterBoard() {
   const [, navigate] = useLocation();
   const [statusFilter, setStatusFilter] = useState<MatterStatus | "all">("all");
   const [typeFilter, setTypeFilter] = useState<MatterType | "all">("all");
   const [sortBy, setSortBy] = useState<"pressure" | "deadline" | "exposure">("pressure");
   const [showFilters, setShowFilters] = useState(false);
+  const [showNewMatter, setShowNewMatter] = useState(false);
   const { matters, isLoading } = useMatters();
 
   const totalExposure = matters.reduce((s, m) => s + (m.estimatedExposure || 0), 0);
@@ -124,15 +323,29 @@ export default function MatterBoard() {
           <h1 className="text-lg font-semibold font-display text-white/90">Matter Board</h1>
           <p className="text-xs text-white/30 mt-0.5">{matters.length} active matters · {criticalCount} critical</p>
         </div>
-        <button
-          onClick={() => setShowFilters((v) => !v)}
-          className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-white/10 text-white/40 hover:text-white/70 hover:border-white/20 transition-all"
-        >
-          <Filter className="w-3 h-3" />
-          Filters
-          <ChevronDown className={`w-3 h-3 transition-transform ${showFilters ? "rotate-180" : ""}`} />
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowNewMatter(true)}
+            data-testid="button-new-matter"
+            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border font-semibold transition-all"
+            style={{ background: "rgba(167,139,250,0.15)", color: ACCENT, borderColor: "rgba(167,139,250,0.35)" }}
+          >
+            <Plus className="w-3 h-3" />
+            New Matter
+          </button>
+          <button
+            onClick={() => setShowFilters((v) => !v)}
+            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-white/10 text-white/40 hover:text-white/70 hover:border-white/20 transition-all"
+          >
+            <Filter className="w-3 h-3" />
+            Filters
+            <ChevronDown className={`w-3 h-3 transition-transform ${showFilters ? "rotate-180" : ""}`} />
+          </button>
+        </div>
       </div>
+      {showNewMatter && (
+        <NewMatterModal onClose={() => setShowNewMatter(false)} onCreated={() => setShowNewMatter(false)} />
+      )}
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[

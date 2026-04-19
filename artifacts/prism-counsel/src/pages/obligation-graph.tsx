@@ -6,14 +6,56 @@ import {
   Zap, Hash, RotateCcw, Move
 } from "lucide-react";
 import { GraphCanvas } from "@szl-holdings/design-system";
+import { useQueryClient } from "@tanstack/react-query";
+import { useCounselUpdateObligation, getCounselListMattersQueryKey } from "@szl-holdings/api-client-react";
 import {
   useMatters, findMatterById, getPrivilegeColor, getObligationStatusColor,
   formatDeadline, daysUntil
 } from "@/data/matters";
-import type { Obligation, Party, PartyRole, ProofChainEntry } from "@/data/matters";
+import type { Obligation, ObligationStatus, Party, PartyRole, ProofChainEntry } from "@/data/matters";
 import {
   buildGraph, ACCENT, FILING_COLOR, CRITICAL_COLOR, ROLE_COLORS,
 } from "@/lib/obligation-graph-builder";
+
+const STATUS_VALUES: ObligationStatus[] = ["pending", "in-progress", "complete", "overdue", "at-risk"];
+
+function ObligationStatusSelect({ obligation }: { obligation: Obligation }) {
+  const queryClient = useQueryClient();
+  const update = useCounselUpdateObligation();
+  const [optimistic, setOptimistic] = useState<ObligationStatus | null>(null);
+  const value = optimistic ?? obligation.status;
+  const handleChange = (next: ObligationStatus) => {
+    if (next === obligation.status) return;
+    setOptimistic(next);
+    const completedDate = next === "complete" ? new Date().toISOString().split("T")[0] : undefined;
+    update.mutate(
+      {
+        id: obligation.id,
+        data: { matterId: obligation.matterId, status: next, ...(completedDate ? { completedDate } : {}) },
+      },
+      {
+        onSuccess: async () => {
+          await queryClient.invalidateQueries({ queryKey: getCounselListMattersQueryKey() });
+          setOptimistic(null);
+        },
+        onError: () => { setOptimistic(null); },
+      },
+    );
+  };
+  return (
+    <select
+      data-testid={`select-obligation-status-${obligation.id}`}
+      value={value}
+      onClick={(e) => e.stopPropagation()}
+      onChange={(e) => { e.stopPropagation(); handleChange(e.target.value as ObligationStatus); }}
+      disabled={update.isPending}
+      className="text-[10px] bg-white/5 border border-white/10 rounded px-1.5 py-0.5 text-white/70 focus:outline-none focus:border-purple-500/40 disabled:opacity-50"
+      style={{ color: getObligationStatusColor(value) }}
+    >
+      {STATUS_VALUES.map((s) => <option key={s} value={s} style={{ color: "#000" }}>{s}</option>)}
+    </select>
+  );
+}
 
 const STATUS_ICONS: Record<string, React.ReactNode> = {
   complete: <CheckCircle className="w-3 h-3 text-green-400" />,
@@ -203,7 +245,7 @@ function ObligationCard({ obligation, allObligations, index }: { obligation: Obl
                   </span>
                 </div>
               </div>
-              <div className="flex items-center gap-3 mt-1.5 text-[10px]">
+              <div className="flex items-center gap-3 mt-1.5 text-[10px] flex-wrap">
                 <div className="flex items-center gap-1" style={{ color }}>
                   <Clock className="w-2.5 h-2.5" />
                   {formatDeadline(obligation.dueDate)}
@@ -216,6 +258,8 @@ function ObligationCard({ obligation, allObligations, index }: { obligation: Obl
                     <span className="font-mono text-white/30">{obligation.courtId}</span>
                   </>
                 )}
+                <span className="text-white/30">·</span>
+                <ObligationStatusSelect obligation={obligation} />
               </div>
             </div>
             <ChevronDown className={`w-3.5 h-3.5 text-white/20 shrink-0 mt-1 transition-transform ${expanded ? "rotate-180" : ""}`} />

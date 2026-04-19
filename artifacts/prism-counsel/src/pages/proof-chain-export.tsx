@@ -3,13 +3,130 @@ import { useRoute } from "wouter";
 import {
   FileStack, Download, Shield, Lock, Clock, Hash, Eye, EyeOff,
   ChevronDown, FileText, Scale, MessageSquare, Gavel, Cpu, CheckCircle,
-  AlertTriangle, Filter
+  AlertTriangle, Filter, Plus, X
 } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useCounselAppendProofChainEntry, getCounselListMattersQueryKey } from "@szl-holdings/api-client-react";
 import {
   useMatters, findMatterById, getPrivilegeColor,
   formatCurrency
 } from "@/data/matters";
 import type { ProofChainEntry, PrivilegeLevel } from "@/data/matters";
+
+const PROOF_EVENT_TYPES: ProofChainEntry["eventType"][] = ["filing", "communication", "discovery", "order", "settlement", "hearing", "deadline", "expert-report"];
+const PRIVILEGE_LEVELS: PrivilegeLevel[] = ["public", "confidential", "privileged", "restricted"];
+
+function NewProofEntryModal({ matterId, matterName, onClose }: { matterId: string; matterName: string; onClose: () => void }) {
+  const queryClient = useQueryClient();
+  const append = useCounselAppendProofChainEntry();
+  const [eventType, setEventType] = useState<ProofChainEntry["eventType"]>("filing");
+  const [title, setTitle] = useState("");
+  const [summary, setSummary] = useState("");
+  const [privilegeLevel, setPrivilegeLevel] = useState<PrivilegeLevel>("confidential");
+  const [author, setAuthor] = useState("");
+  const [partiesRaw, setPartiesRaw] = useState("");
+  const [documentRef, setDocumentRef] = useState("");
+  const [redacted, setRedacted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const inputCls2 = "w-full text-xs bg-white/5 border border-white/10 rounded-lg px-2.5 py-1.5 text-white/85 placeholder:text-white/25 focus:outline-none focus:border-purple-500/40";
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    if (!title.trim() || !summary.trim() || !author.trim()) {
+      setError("Title, summary, and author are required.");
+      return;
+    }
+    append.mutate(
+      {
+        data: {
+          matterId,
+          eventType,
+          title: title.trim(),
+          summary: summary.trim(),
+          privilegeLevel,
+          author: author.trim(),
+          parties: partiesRaw.split(",").map((p) => p.trim()).filter(Boolean),
+          documentRef: documentRef.trim() || undefined,
+          redacted,
+        },
+      },
+      {
+        onSuccess: async () => {
+          await queryClient.invalidateQueries({ queryKey: getCounselListMattersQueryKey() });
+          onClose();
+        },
+        onError: (err: unknown) => {
+          setError(err instanceof Error ? err.message : "Failed to add proof entry.");
+        },
+      },
+    );
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}>
+      <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border border-white/10 p-6" style={{ background: "rgba(15,15,20,0.98)" }}>
+        <div className="flex items-start justify-between mb-4">
+          <div>
+            <h2 className="text-base font-semibold font-display text-white/90">Append Proof-Chain Entry</h2>
+            <p className="text-[11px] text-white/40 mt-0.5 truncate">{matterName}</p>
+          </div>
+          <button onClick={onClose} className="text-white/40 hover:text-white/80" aria-label="Close"><X className="w-4 h-4" /></button>
+        </div>
+        <form onSubmit={handleSubmit} className="space-y-3" data-testid="form-new-proof">
+          <div className="grid grid-cols-2 gap-3">
+            <label className="block">
+              <span className="text-[10px] text-white/35 uppercase tracking-wider block mb-1">Event Type</span>
+              <select data-testid="select-proof-event-type" value={eventType} onChange={(e) => setEventType(e.target.value as ProofChainEntry["eventType"])} className={inputCls2}>
+                {PROOF_EVENT_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+              </select>
+            </label>
+            <label className="block">
+              <span className="text-[10px] text-white/35 uppercase tracking-wider block mb-1">Privilege Level</span>
+              <select data-testid="select-proof-privilege" value={privilegeLevel} onChange={(e) => setPrivilegeLevel(e.target.value as PrivilegeLevel)} className={inputCls2}>
+                {PRIVILEGE_LEVELS.map((p) => <option key={p} value={p}>{p}</option>)}
+              </select>
+            </label>
+          </div>
+          <label className="block">
+            <span className="text-[10px] text-white/35 uppercase tracking-wider block mb-1">Title *</span>
+            <input data-testid="input-proof-title" required value={title} onChange={(e) => setTitle(e.target.value)} className={inputCls2} placeholder="Motion to Compel filed" />
+          </label>
+          <label className="block">
+            <span className="text-[10px] text-white/35 uppercase tracking-wider block mb-1">Summary *</span>
+            <textarea data-testid="input-proof-summary" required rows={3} value={summary} onChange={(e) => setSummary(e.target.value)} className={inputCls2} />
+          </label>
+          <div className="grid grid-cols-2 gap-3">
+            <label className="block">
+              <span className="text-[10px] text-white/35 uppercase tracking-wider block mb-1">Author *</span>
+              <input data-testid="input-proof-author" required value={author} onChange={(e) => setAuthor(e.target.value)} className={inputCls2} placeholder="M. Farooq" />
+            </label>
+            <label className="block">
+              <span className="text-[10px] text-white/35 uppercase tracking-wider block mb-1">Document Ref</span>
+              <input value={documentRef} onChange={(e) => setDocumentRef(e.target.value)} className={inputCls2} placeholder="ECF No. 92" />
+            </label>
+          </div>
+          <label className="block">
+            <span className="text-[10px] text-white/35 uppercase tracking-wider block mb-1">Parties (comma separated)</span>
+            <input value={partiesRaw} onChange={(e) => setPartiesRaw(e.target.value)} className={inputCls2} placeholder="Apex Capital, FTC" />
+          </label>
+          <label className="flex items-center gap-2 text-xs text-white/60">
+            <input type="checkbox" checked={redacted} onChange={(e) => setRedacted(e.target.checked)} />
+            Mark as redacted
+          </label>
+          {error && <div className="text-[11px] text-red-400 px-3 py-2 rounded-lg" style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)" }}>{error}</div>}
+          <div className="flex items-center justify-end gap-2 pt-2">
+            <button type="button" onClick={onClose} className="text-xs px-3 py-2 rounded-lg border border-white/10 text-white/60 hover:text-white/90 transition-all">Cancel</button>
+            <button type="submit" data-testid="button-create-proof" disabled={append.isPending} className="text-xs px-4 py-2 rounded-lg font-semibold transition-all disabled:opacity-50" style={{ background: "rgba(167,139,250,0.18)", color: ACCENT, border: "1px solid rgba(167,139,250,0.35)" }}>
+              {append.isPending ? "Adding…" : "Add Entry"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
 
 const ACCENT = "#a78bfa";
 
@@ -138,6 +255,7 @@ export default function ProofChainExport() {
   const [showHashes, setShowHashes] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [generated, setGenerated] = useState(false);
+  const [showNewProof, setShowNewProof] = useState(false);
 
   const effectiveId = selectedMatterId || matters[0]?.id || "";
   const matter = useMemo(() => findMatterById(matters, effectiveId) ?? matters[0], [matters, effectiveId]);
@@ -264,7 +382,23 @@ export default function ProofChainExport() {
           </div>
           <p className="text-xs text-white/30">Privilege-aware chronological timeline bundle · Court-ready export</p>
         </div>
+        <button
+          onClick={() => setShowNewProof(true)}
+          data-testid="button-new-proof-entry"
+          className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border font-semibold transition-all"
+          style={{ background: "rgba(167,139,250,0.15)", color: ACCENT, borderColor: "rgba(167,139,250,0.35)" }}
+        >
+          <Plus className="w-3 h-3" />
+          New Proof Entry
+        </button>
       </div>
+      {showNewProof && (
+        <NewProofEntryModal
+          matterId={matter.id}
+          matterName={matter.name}
+          onClose={() => setShowNewProof(false)}
+        />
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-1 space-y-4">

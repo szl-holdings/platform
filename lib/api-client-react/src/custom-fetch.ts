@@ -17,6 +17,8 @@ const DEFAULT_JSON_ACCEPT = "application/json, application/problem+json";
 
 let _baseUrl: string | null = null;
 let _authTokenGetter: AuthTokenGetter | null = null;
+let _csrfTokenGetter: AuthTokenGetter | null = null;
+const MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
 /**
  * Set a base URL that is prepended to every relative request URL
@@ -39,6 +41,17 @@ export function setBaseUrl(url: string | null): void {
  */
 export function setAuthTokenGetter(getter: AuthTokenGetter | null): void {
   _authTokenGetter = getter;
+}
+
+/**
+ * Register a getter that supplies a CSRF token. When set, the returned token
+ * is attached as the `X-CSRF-Token` header on mutating requests
+ * (POST/PUT/PATCH/DELETE) that don't already have one.
+ *
+ * Pass `null` to clear the getter.
+ */
+export function setCsrfTokenGetter(getter: AuthTokenGetter | null): void {
+  _csrfTokenGetter = getter;
 }
 
 function isRequest(input: RequestInfo | URL): input is Request {
@@ -352,6 +365,17 @@ export async function customFetch<T = unknown>(
     const token = await _authTokenGetter();
     if (token) {
       headers.set("authorization", `Bearer ${token}`);
+    }
+  }
+
+  if (
+    _csrfTokenGetter &&
+    MUTATING_METHODS.has(method) &&
+    !headers.has("x-csrf-token")
+  ) {
+    const token = await _csrfTokenGetter();
+    if (token) {
+      headers.set("x-csrf-token", token);
     }
   }
 
