@@ -1,12 +1,33 @@
 /**
- * Seed Endpoints Production Guard — Integration Tests
+ * Seed / Demo-Data Endpoints — Production Guard Coverage
  *
- * Verifies that all seven other seed/demo-data endpoints are blocked when the
- * runtime environment is production (NODE_ENV or APP_ENV === "production"),
- * mirroring the existing guard on POST /firestorm/seed.
+ * Audit of every admin / demo-data POST endpoint that mutates state and the
+ * production-guard status as of this test file:
  *
- * The guard returns HTTP 404 with body `{ code: "SEED_DISABLED_IN_PRODUCTION" }`,
- * matching the response shape used by the firestorm seed guard for consistency.
+ *   GUARDED (returns 404 + SEED_DISABLED_IN_PRODUCTION when guarded by
+ *   `guardSeedInProduction`, or 403 for the older `RUNTIME_MODE`-aware
+ *   `/admin/seed/reset-demo` handler):
+ *     - POST /firestorm/seed                     (assets-cases.ts)
+ *     - POST /digital-twins/demo/seed            (digital-twins.ts)
+ *     - POST /fusion/demo/seed                   (fusion.ts)
+ *     - POST /aegis/ot-ics/demo/seed             (ot-ics.ts)
+ *     - POST /vessels/seed                       (vessels-extended.ts)
+ *     - POST /certification/seed                 (certification-readiness.ts)
+ *     - POST /terra/cognitive/covenants/seed     (terra-cognitive.ts)
+ *     - POST /seed                               (distribution-os/publishing.ts)
+ *     - POST /admin/seed/reset-demo              (admin/seed.ts)
+ *     - POST /admin/seed                         (admin/system.ts)        [added]
+ *     - POST /admin/seed/reset                   (admin/system.ts)        [added]
+ *     - POST /demo/reset                         (demo-reset.ts)          [added]
+ *     - POST /ownership/seed-preferred-template  (ownership-control.ts)   [added]
+ *
+ *   INTENTIONALLY UNGUARDED (real production admin operations — NOT seed /
+ *   demo / fixture installers):
+ *     - admin/users.ts            (user management, role changes, sessions)
+ *     - admin/flags.ts            (feature flag management)
+ *     - admin/integrations.ts     (connector enable/sync/test)
+ *     - admin/support.ts          (support queue & KB articles)
+ *     - admin/system.ts (other)   (artifact approvals, push broadcast, etc)
  *
  * Each route module is imported via vi.mock-stubbed dependencies so the real
  * production-guard code path is exercised without touching DBs, AI engines,
@@ -60,7 +81,36 @@ vi.mock("@szl-holdings/observability", () => ({
     recordAuthFailure: vi.fn(),
     recordRequest: vi.fn(),
     recordError: vi.fn(),
+    getSnapshot: () => ({}),
+    getActiveAlerts: () => [],
   },
+  seededRng: () => () => 0,
+  MetricTimeSeriesSimulator: class {
+    constructor(_seed?: number) {}
+    next() { return 0; }
+    sample() { return []; }
+  },
+}));
+
+vi.mock("@szl-holdings/forge-runtime", () => ({
+  durableJobQueue: {
+    getStats: vi.fn().mockResolvedValue({ failed: 0, completed: 0 }),
+    getRecentJobs: vi.fn().mockResolvedValue([]),
+  },
+}));
+
+vi.mock("@szl-holdings/services", () => ({ services: [] }));
+
+vi.mock("../../lib/lyte-observability-seed.js", () => ({
+  seedLyteObservability: vi.fn().mockResolvedValue({}),
+}));
+
+vi.mock("../../lib/platform-flags.js", () => ({
+  isFlagEnabled: vi.fn().mockResolvedValue(true),
+}));
+
+vi.mock("../../lib/activity-logger.js", () => ({
+  logActivity: vi.fn().mockResolvedValue(undefined),
 }));
 
 const makeTable = () =>
@@ -73,13 +123,16 @@ drizzleChain.innerJoin = () => drizzleChain;
 drizzleChain.leftJoin = () => drizzleChain;
 drizzleChain.orderBy = () => drizzleChain;
 drizzleChain.groupBy = () => drizzleChain;
-drizzleChain.limit = () => Promise.resolve([]);
-drizzleChain.offset = () => Promise.resolve([]);
+// Return an enabled-flag-shaped row so router-level feature-flag guards
+// (e.g. ownershipOsGuard) treat the flag as enabled and let the request
+// through to the seed handler where the production guard runs.
+drizzleChain.limit = () => Promise.resolve([{ isEnabled: true }]);
+drizzleChain.offset = () => Promise.resolve([{ isEnabled: true }]);
 drizzleChain.then = (resolve: (v: unknown[]) => unknown) =>
-  Promise.resolve([]).then(resolve);
+  Promise.resolve([{ isEnabled: true }]).then(resolve);
 
 vi.mock("@szl-holdings/db", () => {
-  const mockDb = {
+  const mockDb: any = {
     select: () => drizzleChain,
     insert: () => ({
       values: () => ({
@@ -93,27 +146,39 @@ vi.mock("@szl-holdings/db", () => {
     transaction: async (fn: (tx: any) => Promise<unknown>) => fn(mockDb),
   };
 
-  return new Proxy(
-    {
-      db: mockDb,
-      pool: { query: vi.fn().mockResolvedValue({ rows: [] }) },
-      ROLE_HIERARCHY: {},
-      isReadOnlyRole: () => false,
-      toCanonicalRole: (r: string) => r,
+  // Vitest's mock-module wrapper validates exports against the factory return,
+  // so any table/schema name imported by a route must be enumerated here.
+  // Use a Proxy as the namespace object (vitest-compatible) — `ownKeys`/`has`
+  // make every "*Table" / "insert*Schema" name look like an export.
+  const base: Record<string, any> = {
+    db: mockDb,
+    pool: { query: vi.fn().mockResolvedValue({ rows: [] }) },
+    ROLE_HIERARCHY: {},
+    isReadOnlyRole: () => false,
+    toCanonicalRole: (r: string) => r,
+  };
+
+  return new Proxy(base, {
+    get: (target, prop: string) => {
+      if (prop in target) return target[prop];
+      if (typeof prop !== "string") return undefined;
+      if (prop.endsWith("Table") || prop.endsWith("View")) return makeTable();
+      if (prop.startsWith("insert") && prop.endsWith("Schema")) {
+        return { parse: (v: unknown) => v, partial: () => ({ parse: (v: unknown) => v }) };
+      }
+      if (prop === "__esModule") return true;
+      return undefined;
     },
-    {
-      get: (target: any, prop: string) => {
-        if (prop in target) return target[prop];
-        // Tables: anything ending in "Table"
-        if (prop.endsWith("Table")) return makeTable();
-        // Insert schemas: zod-like passthrough
-        if (prop.startsWith("insert") && prop.endsWith("Schema")) {
-          return { parse: (v: unknown) => v, partial: () => ({ parse: (v: unknown) => v }) };
-        }
-        return undefined;
-      },
+    has: (target, prop) => {
+      if (prop in target) return true;
+      if (typeof prop !== "string") return false;
+      return (
+        prop.endsWith("Table") ||
+        prop.endsWith("View") ||
+        (prop.startsWith("insert") && prop.endsWith("Schema"))
+      );
     },
-  );
+  });
 });
 
 vi.mock("@szl-holdings/ai-engine", () => {
@@ -259,6 +324,40 @@ describe("seed endpoints — production guard", () => {
     process.env.APP_ENV = "production";
     const app = await buildAppWithRouter(() => import("../fusion.js") as any);
     const res = await request(app).post("/fusion/demo/seed").send({});
+    expectBlocked(res);
+  });
+
+  it("POST /demo/reset returns 404 in production", async () => {
+    const app = await buildAppWithRouter(() => import("../demo-reset.js") as any);
+    const res = await request(app).post("/demo/reset").send({});
+    expectBlocked(res);
+  });
+
+  it("POST /ownership/seed-preferred-template returns 404 in production", async () => {
+    const app = await buildAppWithRouter(() => import("../ownership-control.js") as any);
+    const res = await request(app).post("/ownership/seed-preferred-template").send({});
+    expectBlocked(res);
+  });
+
+  it("POST /admin/seed (lyte observability seed) returns 404 in production", async () => {
+    const mod: any = await import("../admin/system.js" as any);
+    const app = express();
+    app.use(express.json());
+    const router = express.Router();
+    mod.register(router);
+    app.use(router);
+    const res = await request(app).post("/admin/seed").send({});
+    expectBlocked(res);
+  });
+
+  it("POST /admin/seed/reset (lyte observability reset) returns 404 in production", async () => {
+    const mod: any = await import("../admin/system.js" as any);
+    const app = express();
+    app.use(express.json());
+    const router = express.Router();
+    mod.register(router);
+    app.use(router);
+    const res = await request(app).post("/admin/seed/reset").send({});
     expectBlocked(res);
   });
 });

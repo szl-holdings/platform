@@ -15,6 +15,7 @@ import { sendError, sendNotFound, sendForbidden, sendBadRequest } from "../../li
 import { z } from "zod";
 import { services } from "@szl-holdings/services";
 import { logActivity } from "../../lib/activity-logger.js";
+import { guardSeedInProduction } from "../../lib/seed-guard.js";
 
 const reasonSchema = z.object({ reason: z.string().max(2000).optional() });
 const broadcastSchema = z.object({
@@ -327,6 +328,7 @@ export function register(router: IRouter): void {
   });
 
   router.post("/admin/seed", validateBody(jsonObjectBodySchema), async (_req, res) => {
+    if (guardSeedInProduction(res)) return;
     try {
       const results = await seedLyteObservability();
       res.json({ success: true, seededAt: new Date().toISOString(), tables: Object.entries(results).map(([name, rows]) => ({ name, rows })) });
@@ -337,6 +339,7 @@ export function register(router: IRouter): void {
   });
 
   router.post("/admin/seed/reset", validateBody(jsonObjectBodySchema), async (_req, res) => {
+    if (guardSeedInProduction(res)) return;
     try {
       const results = await seedLyteObservability();
       res.json({ success: true, resetAt: new Date().toISOString(), message: "All observability data re-seeded", tables: Object.entries(results).map(([name, rows]) => ({ name, rows })) });

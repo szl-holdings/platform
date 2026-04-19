@@ -20,6 +20,7 @@ import { handleRouteError, sendSuccess, sendNotFound, parsePagination } from "..
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 import type { Request, Response, NextFunction } from "express";
 import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { guardSeedInProduction } from "../lib/seed-guard";
 
 const router: IRouter = Router();
 
@@ -581,6 +582,7 @@ router.delete("/ownership/decision-log/:id", validateBody(jsonObjectBodySchema),
 // ─── SEED: Mom-Led Preferred Template ────────────────────────────────────────
 
 router.post("/ownership/seed-preferred-template", validateBody(jsonObjectBodySchema), async (req, res) => {
+  if (guardSeedInProduction(res)) return;
   try {
     const existing = await db
       .select()
