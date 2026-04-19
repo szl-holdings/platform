@@ -4,7 +4,8 @@ import {
   Activity, AlertTriangle, Bell, Check, CheckSquare, Cpu,
   GitBranch, Globe2, LayoutGrid, Loader2, RefreshCw, Radio, Shield, X,
   Zap, ChevronRight, Wifi, WifiOff, Network, Server,
-  TrendingUp,
+  TrendingUp, ChevronDown, ChevronUp, Maximize2, Minimize2,
+  RotateCcw,
 } from "lucide-react";
 import { Toaster } from "@szl-holdings/shared-ui/ui/sonner";
 import { toast } from "sonner";
@@ -78,28 +79,74 @@ function Badge({ label, color }: { label: string; color?: string }) {
   );
 }
 
-function PanelHeader({ icon: Icon, title, count, accent, right }: {
+interface PanelLayoutCtl {
+  collapsed: boolean;
+  pinned: boolean;
+  anyPinned: boolean;
+  onToggleCollapse: () => void;
+  onTogglePin: () => void;
+}
+
+function PanelHeader({ icon: Icon, title, count, accent, right, layout }: {
   icon: typeof Activity; title: string; count?: number; accent?: string; right?: React.ReactNode;
+  layout?: PanelLayoutCtl;
 }) {
   const a = accent ?? "#8b7ac8";
   return (
-    <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-      <div className="flex items-center gap-2">
-        <Icon className="w-3.5 h-3.5" style={{ color: a }} />
-        <span className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: a }}>{title}</span>
+    <div className="flex items-center justify-between gap-2 px-4 py-3 border-b shrink-0" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+      <div className="flex items-center gap-2 min-w-0">
+        <Icon className="w-3.5 h-3.5 shrink-0" style={{ color: a }} />
+        <span className="text-[11px] font-semibold uppercase tracking-widest truncate" style={{ color: a }}>{title}</span>
         {count !== undefined && (
-          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded" style={{ background: `${a}18`, color: a }}>{count}</span>
+          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded shrink-0" style={{ background: `${a}18`, color: a }}>{count}</span>
         )}
       </div>
-      {right}
+      <div className="flex items-center gap-1.5 shrink-0">
+        {right}
+        {layout && (
+          <div className="flex items-center gap-0.5 ml-1 pl-1.5" style={{ borderLeft: "1px solid rgba(255,255,255,0.06)" }}>
+            <button
+              type="button"
+              onClick={layout.onTogglePin}
+              aria-label={layout.pinned ? `Unpin ${title}` : `Pin ${title}`}
+              aria-pressed={layout.pinned}
+              title={layout.pinned ? "Unpin panel" : "Pin to maximised view"}
+              className="p-1 rounded hover:bg-white/10 transition-colors"
+              style={{ color: layout.pinned ? a : "rgba(255,255,255,0.45)" }}>
+              {layout.pinned ? <Minimize2 className="w-3 h-3" /> : <Maximize2 className="w-3 h-3" />}
+            </button>
+            {!layout.pinned && (
+              <button
+                type="button"
+                onClick={layout.onToggleCollapse}
+                aria-label={layout.collapsed ? `Expand ${title}` : `Collapse ${title}`}
+                aria-expanded={!layout.collapsed}
+                title={layout.collapsed ? "Expand panel" : "Collapse panel"}
+                className="p-1 rounded hover:bg-white/10 transition-colors"
+                style={{ color: "rgba(255,255,255,0.45)" }}>
+                {layout.collapsed ? <ChevronDown className="w-3 h-3" /> : <ChevronUp className="w-3 h-3" />}
+              </button>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
-function Panel({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+function Panel({ children, className = "", layout }: { children: React.ReactNode; className?: string; layout?: PanelLayoutCtl }) {
+  const collapsed = layout?.collapsed ?? false;
+  const pinned = layout?.pinned ?? false;
   return (
-    <div className={`rounded-xl flex flex-col overflow-hidden ${className}`}
-      style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+    <div
+      className={`rounded-xl flex flex-col overflow-hidden ${className}`}
+      style={{
+        background: "rgba(255,255,255,0.03)",
+        border: `1px solid ${pinned ? "rgba(139,122,200,0.35)" : "rgba(255,255,255,0.07)"}`,
+        boxShadow: pinned ? "0 0 0 1px rgba(139,122,200,0.15), 0 12px 40px rgba(0,0,0,0.4)" : undefined,
+        minHeight: collapsed ? 0 : undefined,
+        gridRow: collapsed ? "span 1" : undefined,
+      }}>
       {children}
     </div>
   );
@@ -108,10 +155,11 @@ function Panel({ children, className = "" }: { children: React.ReactNode; classN
 // ---------------------------------------------------------------------------
 // Panel: Products
 // ---------------------------------------------------------------------------
-function ProductsPanel({ products }: { products: Product[] }) {
+function ProductsPanel({ products, layout }: { products: Product[]; layout: PanelLayoutCtl }) {
   return (
-    <Panel>
-      <PanelHeader icon={LayoutGrid} title="Products" count={products.length} accent="#8b7ac8" />
+    <Panel layout={layout}>
+      <PanelHeader icon={LayoutGrid} title="Products" count={products.length} accent="#8b7ac8" layout={layout} />
+      {layout.collapsed ? null : (
       <div className="flex-1 overflow-y-auto p-3 grid grid-cols-2 gap-2">
         {products.map((p) => (
           <div key={p.id} className="rounded-lg p-3 flex flex-col gap-1.5 cursor-pointer hover:bg-white/5 transition-colors"
@@ -134,6 +182,7 @@ function ProductsPanel({ products }: { products: Product[] }) {
           </div>
         ))}
       </div>
+      )}
     </Panel>
   );
 }
@@ -141,10 +190,11 @@ function ProductsPanel({ products }: { products: Product[] }) {
 // ---------------------------------------------------------------------------
 // Panel: Active Signals — uses ConfidenceMeter + FreshnessChip + PolicyStateChip
 // ---------------------------------------------------------------------------
-function SignalsPanel({ signals, onDrill }: { signals: Signal[]; onDrill: (sig: Signal) => void }) {
+function SignalsPanel({ signals, onDrill, layout }: { signals: Signal[]; onDrill: (sig: Signal) => void; layout: PanelLayoutCtl }) {
   return (
-    <Panel>
-      <PanelHeader icon={Radio} title="Active Signals" count={signals.length} accent="#0ea5e9" />
+    <Panel layout={layout}>
+      <PanelHeader icon={Radio} title="Active Signals" count={signals.length} accent="#0ea5e9" layout={layout} />
+      {layout.collapsed ? null : (
       <div className="flex-1 overflow-y-auto divide-y">
         {signals.map((s) => {
           const sc = SEVERITY_COLORS[s.severity] ?? "#64748b";
@@ -171,6 +221,7 @@ function SignalsPanel({ signals, onDrill }: { signals: Signal[]; onDrill: (sig: 
           );
         })}
       </div>
+      )}
     </Panel>
   );
 }
@@ -198,11 +249,12 @@ function syntheticSpans(run: Run): RunSpan[] {
 // ---------------------------------------------------------------------------
 // Panel: Active Runs — uses RunTimeline
 // ---------------------------------------------------------------------------
-function RunsPanel({ runs, onDrill }: { runs: Run[]; onDrill: (r: Run) => void }) {
+function RunsPanel({ runs, onDrill, layout }: { runs: Run[]; onDrill: (r: Run) => void; layout: PanelLayoutCtl }) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   return (
-    <Panel>
-      <PanelHeader icon={Activity} title="Active Runs" count={runs.filter(r => r.status !== "completed").length} accent="#d4a054" />
+    <Panel layout={layout}>
+      <PanelHeader icon={Activity} title="Active Runs" count={runs.filter(r => r.status !== "completed").length} accent="#d4a054" layout={layout} />
+      {layout.collapsed ? null : (
       <div className="flex-1 overflow-y-auto divide-y">
         {runs.map((r) => {
           const sc = STATUS_COLORS[r.status] ?? "#64748b";
@@ -241,6 +293,7 @@ function RunsPanel({ runs, onDrill }: { runs: Run[]; onDrill: (r: Run) => void }
           );
         })}
       </div>
+      )}
     </Panel>
   );
 }
@@ -248,13 +301,15 @@ function RunsPanel({ runs, onDrill }: { runs: Run[]; onDrill: (r: Run) => void }
 // ---------------------------------------------------------------------------
 // Panel: Alerts
 // ---------------------------------------------------------------------------
-function AlertsPanel({ alerts, onDrill }: { alerts: Alert[]; onDrill: (a: Alert) => void }) {
+function AlertsPanel({ alerts, onDrill, layout }: { alerts: Alert[]; onDrill: (a: Alert) => void; layout: PanelLayoutCtl }) {
   const open = alerts.filter(a => a.status === "open");
   return (
-    <Panel>
+    <Panel layout={layout}>
       <PanelHeader icon={Bell} title="Alerts" count={open.length} accent="#ef4444"
+        layout={layout}
         right={<Link href="/operations/alerts"><a className="text-[10px] flex items-center gap-1 hover:opacity-70 transition-opacity" style={{ color: "rgba(255,255,255,0.3)" }}>All <ChevronRight className="w-3 h-3" /></a></Link>}
       />
+      {layout.collapsed ? null : (
       <div className="flex-1 overflow-y-auto divide-y">
         {alerts.map((a) => {
           const sc = SEVERITY_COLORS[a.severity] ?? "#64748b";
@@ -277,6 +332,7 @@ function AlertsPanel({ alerts, onDrill }: { alerts: Alert[]; onDrill: (a: Alert)
           );
         })}
       </div>
+      )}
     </Panel>
   );
 }
@@ -284,14 +340,16 @@ function AlertsPanel({ alerts, onDrill }: { alerts: Alert[]; onDrill: (a: Alert)
 // ---------------------------------------------------------------------------
 // Panel: Recommendations — uses RecommendationCard from design system
 // ---------------------------------------------------------------------------
-function RecsPanel({ recs, onDrill }: { recs: Rec[]; onDrill: (r: Rec) => void }) {
+function RecsPanel({ recs, onDrill, layout }: { recs: Rec[]; onDrill: (r: Rec) => void; layout: PanelLayoutCtl }) {
   return (
-    <Panel>
+    <Panel layout={layout}>
       <PanelHeader icon={TrendingUp} title="Recommendations"
         count={recs.filter(r => r.status === "pending" || r.status === "awaiting_approval").length}
         accent="#22c55e"
+        layout={layout}
         right={<Link href="/operations/recommendations"><a className="text-[10px] flex items-center gap-1 hover:opacity-70 transition-opacity" style={{ color: "rgba(255,255,255,0.3)" }}>All <ChevronRight className="w-3 h-3" /></a></Link>}
       />
+      {layout.collapsed ? null : (
       <div className="flex-1 overflow-y-auto p-2 space-y-2">
         {recs.map((r) => {
           const policyState: PolicyState = r.status === "awaiting_approval" ? "requires-approval" : r.status === "applied" ? "allowed" : "allowed";
@@ -311,6 +369,7 @@ function RecsPanel({ recs, onDrill }: { recs: Rec[]; onDrill: (r: Rec) => void }
           );
         })}
       </div>
+      )}
     </Panel>
   );
 }
@@ -322,10 +381,12 @@ function ApprovalsPanel({
   approvals,
   onDrill,
   onAction,
+  layout,
 }: {
   approvals: Approval[];
   onDrill: (a: Approval) => void;
   onAction: (approval: Approval, action: "approve" | "dismiss") => Promise<void>;
+  layout: PanelLayoutCtl;
 }) {
   const [dialogApproval, setDialogApproval] = useState<Approval | null>(null);
   const [pendingId, setPendingId] = useState<string | null>(null);
@@ -343,10 +404,12 @@ function ApprovalsPanel({
 
   return (
     <>
-      <Panel>
+      <Panel layout={layout}>
         <PanelHeader icon={CheckSquare} title="Approvals Waiting" count={approvals.length} accent="#f59e0b"
+          layout={layout}
           right={<Link href="/operations/approvals"><a className="text-[10px] flex items-center gap-1 hover:opacity-70 transition-opacity" style={{ color: "rgba(255,255,255,0.3)" }}>Review <ChevronRight className="w-3 h-3" /></a></Link>}
         />
+        {layout.collapsed ? null : (
         <div className="flex-1 overflow-y-auto divide-y">
           {approvals.length === 0 && (
             <div className="flex items-center justify-center h-20 text-xs" style={{ color: "rgba(255,255,255,0.25)" }}>No pending approvals</div>
@@ -403,6 +466,7 @@ function ApprovalsPanel({
             );
           })}
         </div>
+        )}
       </Panel>
 
       {dialogApproval && (
@@ -425,13 +489,15 @@ function ApprovalsPanel({
 // ---------------------------------------------------------------------------
 // Panel: Connector Health — uses FreshnessChip
 // ---------------------------------------------------------------------------
-function ConnectorsPanel({ connectors }: { connectors: Connector[] }) {
+function ConnectorsPanel({ connectors, layout }: { connectors: Connector[]; layout: PanelLayoutCtl }) {
   const degraded = connectors.filter(c => c.status !== "healthy");
   return (
-    <Panel>
+    <Panel layout={layout}>
       <PanelHeader icon={Network} title="Connector Health" accent="#0ea5e9"
+        layout={layout}
         right={degraded.length > 0 ? <Badge label={`${degraded.length} degraded`} color="#f97316" /> : <Badge label="All healthy" color="#22c55e" />}
       />
+      {layout.collapsed ? null : (
       <div className="flex-1 overflow-y-auto divide-y">
         {connectors.map((c) => {
           const sc = STATUS_COLORS[c.status] ?? "#22c55e";
@@ -455,6 +521,7 @@ function ConnectorsPanel({ connectors }: { connectors: Connector[] }) {
           );
         })}
       </div>
+      )}
     </Panel>
   );
 }
@@ -471,20 +538,24 @@ const SYS_ICONS: Record<string, typeof Server> = {
   policyEngine: Shield, connectorHub: Network, database: Server,
 };
 
-function SystemHealthPanel({ health }: { health: SystemHealth | null }) {
+function SystemHealthPanel({ health, layout }: { health: SystemHealth | null; layout: PanelLayoutCtl }) {
   if (!health) return (
-    <Panel>
-      <PanelHeader icon={Cpu} title="System Health" accent="#22c55e" />
-      <div className="flex items-center justify-center h-24 text-xs" style={{ color: "rgba(255,255,255,0.25)" }}>Loading…</div>
+    <Panel layout={layout}>
+      <PanelHeader icon={Cpu} title="System Health" accent="#22c55e" layout={layout} />
+      {layout.collapsed ? null : (
+        <div className="flex items-center justify-center h-24 text-xs" style={{ color: "rgba(255,255,255,0.25)" }}>Loading…</div>
+      )}
     </Panel>
   );
   const entries = Object.entries(health) as [string, SysService][];
   const degraded = entries.filter(([, v]) => v.status !== "healthy").length;
   return (
-    <Panel>
+    <Panel layout={layout}>
       <PanelHeader icon={Cpu} title="System Health" accent="#22c55e"
+        layout={layout}
         right={degraded > 0 ? <Badge label={`${degraded} issue${degraded > 1 ? "s" : ""}`} color="#f97316" /> : <Badge label="All systems go" color="#22c55e" />}
       />
+      {layout.collapsed ? null : (
       <div className="flex-1 overflow-y-auto divide-y">
         {entries.map(([key, svc]) => {
           const sc = STATUS_COLORS[svc.status] ?? "#22c55e";
@@ -504,6 +575,7 @@ function SystemHealthPanel({ health }: { health: SystemHealth | null }) {
           );
         })}
       </div>
+      )}
     </Panel>
   );
 }
@@ -563,6 +635,97 @@ function CorrelationCard({ corr, snap }: { corr: Correlation; snap: Snapshot | n
 }
 
 // ---------------------------------------------------------------------------
+// Panel layout — collapse, pin-to-maximise, persistence
+// ---------------------------------------------------------------------------
+type PanelId = "products" | "signals" | "runs" | "alerts" | "recommendations" | "approvals" | "connectors" | "systemHealth";
+
+const PANEL_IDS: PanelId[] = [
+  "products", "signals", "runs", "alerts",
+  "recommendations", "approvals", "connectors", "systemHealth",
+];
+
+const PANEL_LABELS: Record<PanelId, string> = {
+  products: "Products",
+  signals: "Active Signals",
+  runs: "Active Runs",
+  alerts: "Alerts",
+  recommendations: "Recommendations",
+  approvals: "Approvals Waiting",
+  connectors: "Connector Health",
+  systemHealth: "System Health",
+};
+
+interface FabricLayoutState {
+  collapsed: Record<PanelId, boolean>;
+  pinned: PanelId | null;
+}
+
+const DEFAULT_LAYOUT: FabricLayoutState = {
+  collapsed: PANEL_IDS.reduce((acc, id) => ({ ...acc, [id]: false }), {} as Record<PanelId, boolean>),
+  pinned: null,
+};
+
+const LAYOUT_STORAGE_KEY = "szl.fabric.panel-layout.v1";
+
+function loadStoredLayout(): FabricLayoutState {
+  if (typeof window === "undefined") return DEFAULT_LAYOUT;
+  try {
+    const raw = window.localStorage.getItem(LAYOUT_STORAGE_KEY);
+    if (!raw) return DEFAULT_LAYOUT;
+    const parsed = JSON.parse(raw) as Partial<FabricLayoutState>;
+    const collapsed: Record<PanelId, boolean> = { ...DEFAULT_LAYOUT.collapsed };
+    if (parsed.collapsed && typeof parsed.collapsed === "object") {
+      for (const id of PANEL_IDS) {
+        const v = (parsed.collapsed as Record<string, unknown>)[id];
+        if (typeof v === "boolean") collapsed[id] = v;
+      }
+    }
+    const pinned = parsed.pinned && PANEL_IDS.includes(parsed.pinned as PanelId)
+      ? (parsed.pinned as PanelId)
+      : null;
+    return { collapsed, pinned };
+  } catch {
+    return DEFAULT_LAYOUT;
+  }
+}
+
+function useFabricLayout() {
+  const [state, setState] = useState<FabricLayoutState>(() => loadStoredLayout());
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      window.localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(state));
+    } catch {
+      /* storage may be unavailable (private mode, quota) — silently ignore */
+    }
+  }, [state]);
+
+  const toggleCollapse = useCallback((id: PanelId) => {
+    setState((s) => ({ ...s, collapsed: { ...s.collapsed, [id]: !s.collapsed[id] } }));
+  }, []);
+
+  const togglePin = useCallback((id: PanelId) => {
+    setState((s) => {
+      if (s.pinned === id) return { ...s, pinned: null };
+      return { ...s, pinned: id, collapsed: { ...s.collapsed, [id]: false } };
+    });
+  }, []);
+
+  const reset = useCallback(() => setState(DEFAULT_LAYOUT), []);
+
+  const ctlFor = useCallback((id: PanelId): PanelLayoutCtl => ({
+    collapsed: state.collapsed[id],
+    pinned: state.pinned === id,
+    anyPinned: state.pinned !== null,
+    onToggleCollapse: () => toggleCollapse(id),
+    onTogglePin: () => togglePin(id),
+  }), [state, toggleCollapse, togglePin]);
+
+  return { state, ctlFor, reset };
+}
+
+// ---------------------------------------------------------------------------
 // Main Page
 // ---------------------------------------------------------------------------
 export function GlobalFabricPage() {
@@ -579,6 +742,7 @@ export function GlobalFabricPage() {
     if (acted.size === 0) return list;
     return list.filter((a) => !acted.has(String(a.approvalId)));
   }, []);
+  const { state: layoutState, ctlFor, reset: resetLayout } = useFabricLayout();
 
   const pollSnapshot = useCallback(() => {
     fetch(apiUrl("/fabric/snapshot"), { credentials: "include" })
@@ -911,6 +1075,16 @@ export function GlobalFabricPage() {
               <RefreshCw className="w-3 h-3" />
               Refresh
             </button>
+            {(layoutState.pinned !== null || PANEL_IDS.some(id => layoutState.collapsed[id])) && (
+              <button
+                onClick={resetLayout}
+                title="Reset panel layout"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded text-[10px] hover:opacity-80 transition-opacity"
+                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.55)" }}>
+                <RotateCcw className="w-3 h-3" />
+                Reset layout
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -924,18 +1098,37 @@ export function GlobalFabricPage() {
         </div>
       )}
 
-      {/* Main 8-panel grid */}
+      {/* Main panel grid (or maximised single panel when one is pinned) */}
       <div className="flex-1 overflow-y-auto p-4">
-        <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gridAutoRows: "minmax(280px, auto)" }}>
-          <ProductsPanel products={products} />
-          <SignalsPanel signals={signals} onDrill={drillSignal} />
-          <RunsPanel runs={runs} onDrill={drillRun} />
-          <AlertsPanel alerts={alerts} onDrill={drillAlert} />
-          <RecsPanel recs={recommendations} onDrill={drillRec} />
-          <ApprovalsPanel approvals={approvals} onDrill={drillApproval} onAction={handleApprovalAction} />
-          <ConnectorsPanel connectors={connectors} />
-          <SystemHealthPanel health={systemHealth} />
-        </div>
+        {layoutState.pinned ? (
+          <div className="h-full flex flex-col gap-3">
+            <div className="flex items-center gap-2 text-[10px]" style={{ color: "rgba(255,255,255,0.45)" }}>
+              <Maximize2 className="w-3 h-3" style={{ color: "#8b7ac8" }} />
+              <span>Focused on <span className="text-white font-semibold">{PANEL_LABELS[layoutState.pinned]}</span> — other panels are hidden.</span>
+            </div>
+            <div className="flex-1 min-h-0">
+              {layoutState.pinned === "products"        && <ProductsPanel products={products} layout={ctlFor("products")} />}
+              {layoutState.pinned === "signals"         && <SignalsPanel signals={signals} onDrill={drillSignal} layout={ctlFor("signals")} />}
+              {layoutState.pinned === "runs"            && <RunsPanel runs={runs} onDrill={drillRun} layout={ctlFor("runs")} />}
+              {layoutState.pinned === "alerts"          && <AlertsPanel alerts={alerts} onDrill={drillAlert} layout={ctlFor("alerts")} />}
+              {layoutState.pinned === "recommendations" && <RecsPanel recs={recommendations} onDrill={drillRec} layout={ctlFor("recommendations")} />}
+              {layoutState.pinned === "approvals"       && <ApprovalsPanel approvals={approvals} onDrill={drillApproval} onAction={handleApprovalAction} layout={ctlFor("approvals")} />}
+              {layoutState.pinned === "connectors"      && <ConnectorsPanel connectors={connectors} layout={ctlFor("connectors")} />}
+              {layoutState.pinned === "systemHealth"    && <SystemHealthPanel health={systemHealth} layout={ctlFor("systemHealth")} />}
+            </div>
+          </div>
+        ) : (
+          <div className="grid gap-4 items-start" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gridAutoRows: "minmax(280px, auto)" }}>
+            <ProductsPanel products={products} layout={ctlFor("products")} />
+            <SignalsPanel signals={signals} onDrill={drillSignal} layout={ctlFor("signals")} />
+            <RunsPanel runs={runs} onDrill={drillRun} layout={ctlFor("runs")} />
+            <AlertsPanel alerts={alerts} onDrill={drillAlert} layout={ctlFor("alerts")} />
+            <RecsPanel recs={recommendations} onDrill={drillRec} layout={ctlFor("recommendations")} />
+            <ApprovalsPanel approvals={approvals} onDrill={drillApproval} onAction={handleApprovalAction} layout={ctlFor("approvals")} />
+            <ConnectorsPanel connectors={connectors} layout={ctlFor("connectors")} />
+            <SystemHealthPanel health={systemHealth} layout={ctlFor("systemHealth")} />
+          </div>
+        )}
       </div>
       <Toaster richColors closeButton position="bottom-right" />
     </div>
