@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ExternalLink, TrendingUp, Zap, CheckCircle2, Circle, ChevronDown, ChevronRight, Target, Shield, Scale, Building2, Ship, Brain, BarChart3, Cpu, Star, XCircle, Clock, PauseCircle, Download, StickyNote, Radio, X, RefreshCw, ArrowUpRight } from "lucide-react";
+import { ExternalLink, TrendingUp, Zap, CheckCircle2, Circle, ChevronDown, ChevronRight, Target, Shield, Scale, Building2, Ship, Brain, BarChart3, Cpu, Star, XCircle, Clock, PauseCircle, Download, StickyNote, Radio, X, RefreshCw, ArrowUpRight, Plus, Trash2, Play, Pause, Settings, AlertCircle } from "lucide-react";
 
 type AdoptionStatus = "adopted" | "in-progress" | "evaluating" | "rejected" | "deferred";
 
@@ -1000,7 +1000,348 @@ function useIntelMonitor() {
     }
   }
 
-  return { alerts, status, loading, refreshing, error, dismiss, refresh };
+  return { alerts, status, loading, refreshing, error, dismiss, refresh, reload: loadAlerts };
+}
+
+interface ManagedFeed {
+  id: string;
+  laneId: string;
+  champion: string;
+  feedUrl: string;
+  homeUrl: string;
+  paused?: boolean;
+  recommendationHint?: Recommendation | null;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+const REC_OPTIONS: Array<{ value: "" | Recommendation; label: string }> = [
+  { value: "", label: "Auto (heuristic)" },
+  { value: "adopt", label: "Adopt" },
+  { value: "counter", label: "Counter" },
+  { value: "monitor", label: "Monitor" },
+];
+
+async function readCsrf(): Promise<string | null> {
+  const m = document.cookie.split(";").find(c => c.trim().startsWith("csrf_token="));
+  if (m) return decodeURIComponent(m.split("=")[1] ?? "");
+  try {
+    await fetch("/api/csrf-token", { credentials: "include" });
+    const m2 = document.cookie.split(";").find(c => c.trim().startsWith("csrf_token="));
+    return m2 ? decodeURIComponent(m2.split("=")[1] ?? "") : null;
+  } catch {
+    return null;
+  }
+}
+
+interface ManageFeedsPanelProps {
+  onChanged: () => void;
+}
+
+function ManageFeedsPanel({ onChanged }: ManageFeedsPanelProps) {
+  const [open, setOpen] = useState(false);
+  const [admin, setAdmin] = useState<boolean | null>(null);
+  const [feeds, setFeeds] = useState<ManagedFeed[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [busyId, setBusyId] = useState<string | null>(null);
+
+  const [draftChampion, setDraftChampion] = useState("");
+  const [draftLane, setDraftLane] = useState(LANES[0]?.id ?? "");
+  const [draftFeedUrl, setDraftFeedUrl] = useState("");
+  const [draftHomeUrl, setDraftHomeUrl] = useState("");
+  const [draftHint, setDraftHint] = useState<"" | Recommendation>("");
+  const [adding, setAdding] = useState(false);
+
+  async function loadFeeds() {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/competitive-intel/feeds", { credentials: "include" });
+      if (res.status === 401 || res.status === 403) {
+        setAdmin(false);
+        return;
+      }
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+      setAdmin(true);
+      setFeeds(Array.isArray(json?.feeds) ? json.feeds : Array.isArray(json?.data?.feeds) ? json.data.feeds : []);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to load feeds");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => { void loadFeeds(); }, []);
+
+  async function handleAdd(e: React.FormEvent) {
+    e.preventDefault();
+    if (!draftChampion.trim() || !draftFeedUrl.trim() || !draftLane) return;
+    setAdding(true);
+    setError(null);
+    try {
+      const csrf = await readCsrf();
+      const res = await fetch("/api/competitive-intel/feeds", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json", ...(csrf ? { "X-CSRF-Token": csrf } : {}) },
+        body: JSON.stringify({
+          champion: draftChampion.trim(),
+          laneId: draftLane,
+          feedUrl: draftFeedUrl.trim(),
+          homeUrl: draftHomeUrl.trim() || undefined,
+          recommendationHint: draftHint || undefined,
+        }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body?.error?.message ?? body?.error ?? `HTTP ${res.status}`);
+      }
+      setDraftChampion("");
+      setDraftFeedUrl("");
+      setDraftHomeUrl("");
+      setDraftHint("");
+      await loadFeeds();
+      onChanged();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to add feed");
+    } finally {
+      setAdding(false);
+    }
+  }
+
+  async function patchFeed(id: string, patch: Record<string, unknown>) {
+    setBusyId(id);
+    setError(null);
+    try {
+      const csrf = await readCsrf();
+      const res = await fetch(`/api/competitive-intel/feeds/${encodeURIComponent(id)}`, {
+        method: "PATCH",
+        credentials: "include",
+        headers: { "Content-Type": "application/json", ...(csrf ? { "X-CSRF-Token": csrf } : {}) },
+        body: JSON.stringify(patch),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body?.error?.message ?? body?.error ?? `HTTP ${res.status}`);
+      }
+      await loadFeeds();
+      onChanged();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to update feed");
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function removeFeed(id: string, champion: string) {
+    if (typeof window !== "undefined" && !window.confirm(`Remove tracked competitor "${champion}"?`)) return;
+    setBusyId(id);
+    setError(null);
+    try {
+      const csrf = await readCsrf();
+      const res = await fetch(`/api/competitive-intel/feeds/${encodeURIComponent(id)}`, {
+        method: "DELETE",
+        credentials: "include",
+        headers: csrf ? { "X-CSRF-Token": csrf } : {},
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      await loadFeeds();
+      onChanged();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to remove feed");
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  if (admin === false) return null;
+  if (admin === null && !loading) return null;
+
+  const totalCount = feeds.length;
+  const activeCount = feeds.filter(f => !f.paused).length;
+
+  return (
+    <div className="rounded-xl overflow-hidden" style={{ background: "rgba(140,120,200,0.04)", border: "1px solid rgba(140,120,200,0.18)" }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center justify-between p-4 text-left hover:bg-white/5 transition-colors"
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(140,120,200,0.1)", border: "1px solid rgba(140,120,200,0.25)" }}>
+            <Settings className="w-4 h-4" style={{ color: "#a78bfa" }} />
+          </div>
+          <div>
+            <div className="text-sm font-semibold text-white/85">Manage tracked competitors</div>
+            <div className="text-[11px] text-white/45 mt-0.5">
+              {activeCount} active · {totalCount - activeCount} paused · admin only · changes persist
+            </div>
+          </div>
+        </div>
+        {open ? <ChevronDown className="w-4 h-4 text-white/30" /> : <ChevronRight className="w-4 h-4 text-white/30" />}
+      </button>
+
+      {open && (
+        <div className="border-t border-white/5 p-5 space-y-5">
+          {error && (
+            <div className="flex items-start gap-2 rounded-md p-3 text-xs" style={{ background: "rgba(244,63,94,0.08)", border: "1px solid rgba(244,63,94,0.25)", color: "#fda4af" }}>
+              <AlertCircle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
+              <span>{error}</span>
+            </div>
+          )}
+
+          <form onSubmit={handleAdd} className="rounded-lg p-4 space-y-3" style={{ background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.06)" }}>
+            <div className="text-[10px] font-mono uppercase tracking-widest text-white/35">Add a feed</div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <label className="space-y-1">
+                <span className="text-[10px] font-mono uppercase tracking-wider text-white/40">Champion</span>
+                <input
+                  required
+                  value={draftChampion}
+                  onChange={e => setDraftChampion(e.target.value)}
+                  placeholder="e.g. Sevenseas Maritime AI"
+                  className="w-full text-xs text-white/85 bg-black/30 border border-white/10 rounded-md px-3 py-2 focus:outline-none focus:border-white/25 placeholder:text-white/20"
+                />
+              </label>
+              <label className="space-y-1">
+                <span className="text-[10px] font-mono uppercase tracking-wider text-white/40">Lane</span>
+                <select
+                  value={draftLane}
+                  onChange={e => setDraftLane(e.target.value)}
+                  className="w-full text-xs text-white/85 bg-black/30 border border-white/10 rounded-md px-3 py-2 focus:outline-none focus:border-white/25"
+                >
+                  {LANES.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
+                </select>
+              </label>
+              <label className="space-y-1 md:col-span-2">
+                <span className="text-[10px] font-mono uppercase tracking-wider text-white/40">RSS / Atom feed URL</span>
+                <input
+                  required
+                  value={draftFeedUrl}
+                  onChange={e => setDraftFeedUrl(e.target.value)}
+                  placeholder="https://example.com/blog/feed/"
+                  className="w-full text-xs text-white/85 bg-black/30 border border-white/10 rounded-md px-3 py-2 focus:outline-none focus:border-white/25 placeholder:text-white/20"
+                />
+              </label>
+              <label className="space-y-1">
+                <span className="text-[10px] font-mono uppercase tracking-wider text-white/40">Homepage (optional)</span>
+                <input
+                  value={draftHomeUrl}
+                  onChange={e => setDraftHomeUrl(e.target.value)}
+                  placeholder="https://example.com/blog/"
+                  className="w-full text-xs text-white/85 bg-black/30 border border-white/10 rounded-md px-3 py-2 focus:outline-none focus:border-white/25 placeholder:text-white/20"
+                />
+              </label>
+              <label className="space-y-1">
+                <span className="text-[10px] font-mono uppercase tracking-wider text-white/40">Recommendation hint</span>
+                <select
+                  value={draftHint}
+                  onChange={e => setDraftHint(e.target.value as "" | Recommendation)}
+                  className="w-full text-xs text-white/85 bg-black/30 border border-white/10 rounded-md px-3 py-2 focus:outline-none focus:border-white/25"
+                >
+                  {REC_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
+              </label>
+            </div>
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                disabled={adding}
+                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-[11px] font-mono uppercase tracking-wider disabled:opacity-50"
+                style={{ background: "rgba(140,120,200,0.12)", border: "1px solid rgba(140,120,200,0.3)", color: "#c4b5fd" }}
+              >
+                <Plus className="w-3 h-3" />
+                {adding ? "Adding…" : "Add competitor"}
+              </button>
+            </div>
+          </form>
+
+          <div className="space-y-2">
+            <div className="text-[10px] font-mono uppercase tracking-widest text-white/35">Tracked feeds · {feeds.length}</div>
+            {loading && feeds.length === 0 && (
+              <div className="text-xs text-white/40 px-3 py-4">Loading…</div>
+            )}
+            {!loading && feeds.length === 0 && (
+              <div className="text-xs text-white/40 px-3 py-4">No feeds yet. Add one above.</div>
+            )}
+            {feeds.map(feed => {
+              const lane = LANES.find(l => l.id === feed.laneId);
+              const accent = lane?.accentColor ?? "#8b7ac8";
+              const busy = busyId === feed.id;
+              return (
+                <div key={feed.id} className="rounded-lg p-3" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)" }}>
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold text-white/85 truncate">{feed.champion}</span>
+                        {feed.paused && (
+                          <span className="text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.55)", border: "1px solid rgba(255,255,255,0.1)" }}>
+                            paused
+                          </span>
+                        )}
+                        {feed.recommendationHint && (
+                          <span className="text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ background: `${accent}14`, border: `1px solid ${accent}30`, color: accent }}>
+                            hint: {feed.recommendationHint}
+                          </span>
+                        )}
+                      </div>
+                      <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] font-mono text-white/35">
+                        <span style={{ color: accent }}>{lane?.name ?? feed.laneId}</span>
+                        <a href={feed.feedUrl} target="_blank" rel="noopener noreferrer" className="truncate hover:text-white/70 transition-colors max-w-[28rem]">
+                          {feed.feedUrl}
+                        </a>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <select
+                        value={feed.laneId}
+                        disabled={busy}
+                        onChange={e => void patchFeed(feed.id, { laneId: e.target.value })}
+                        aria-label={`Lane for ${feed.champion}`}
+                        className="text-[10px] text-white/75 bg-black/30 border border-white/10 rounded-md px-2 py-1 focus:outline-none focus:border-white/25"
+                      >
+                        {LANES.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
+                      </select>
+                      <select
+                        value={feed.recommendationHint ?? ""}
+                        disabled={busy}
+                        onChange={e => void patchFeed(feed.id, { recommendationHint: e.target.value || null })}
+                        aria-label={`Recommendation hint for ${feed.champion}`}
+                        className="text-[10px] text-white/75 bg-black/30 border border-white/10 rounded-md px-2 py-1 focus:outline-none focus:border-white/25"
+                      >
+                        {REC_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                      </select>
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => void patchFeed(feed.id, { paused: !feed.paused })}
+                        className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-mono uppercase tracking-wider text-white/65 hover:text-white border border-white/10 hover:border-white/25 disabled:opacity-50"
+                        title={feed.paused ? "Resume polling" : "Pause polling"}
+                      >
+                        {feed.paused ? <Play className="w-2.5 h-2.5" /> : <Pause className="w-2.5 h-2.5" />}
+                        {feed.paused ? "Resume" : "Pause"}
+                      </button>
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => void removeFeed(feed.id, feed.champion)}
+                        className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-mono uppercase tracking-wider text-rose-300/80 hover:text-rose-200 border border-rose-500/20 hover:border-rose-500/40 disabled:opacity-50"
+                        title="Remove feed"
+                      >
+                        <Trash2 className="w-2.5 h-2.5" />
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export function CompetitiveAtlasPage() {
@@ -1057,7 +1398,7 @@ export function CompetitiveAtlasPage() {
 
   const overrideCount = Object.keys(overrides).length;
 
-  const { alerts, status, refreshing, dismiss, refresh } = useIntelMonitor();
+  const { alerts, status, refreshing, dismiss, refresh, reload } = useIntelMonitor();
   const alertsByLane = useMemo(() => {
     const map = new Map<string, IntelAlert[]>();
     for (const a of alerts) {
@@ -1128,6 +1469,8 @@ export function CompetitiveAtlasPage() {
             {refreshing ? "Polling…" : "Poll feeds"}
           </button>
         </div>
+
+        <ManageFeedsPanel onChanged={() => { void reload(); }} />
 
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
           {[

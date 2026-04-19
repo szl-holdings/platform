@@ -282,5 +282,80 @@
   },
   "lastFullPollAt": "2026-04-19T20:58:18.280Z",
   "pollRunCount": 1,
-  "seededAt": "2026-04-19T20:57:34.496Z"
+  "seededAt": "2026-04-19T20:57:34.496Z",
+  "feeds": [
+    {
+      "id": "crowdstrike-blog",
+      "laneId": "cyber",
+      "champion": "CrowdStrike",
+      "feedUrl": "https://www.crowdstrike.com/blog/feed/",
+      "homeUrl": "https://www.crowdstrike.com/blog/",
+      "createdAt": "2026-04-19T22:23:58.118Z",
+      "updatedAt": "2026-04-19T22:23:58.118Z"
+    },
+    {
+      "id": "darktrace-blog",
+      "laneId": "cyber",
+      "champion": "Darktrace",
+      "feedUrl": "https://darktrace.com/blog/rss.xml",
+      "homeUrl": "https://darktrace.com/blog",
+      "createdAt": "2026-04-19T22:23:58.118Z",
+      "updatedAt": "2026-04-19T22:23:58.118Z"
+    },
+    {
+      "id": "clio-blog",
+      "laneId": "legal",
+      "champion": "Clio",
+      "feedUrl": "https://www.clio.com/blog/feed/",
+      "homeUrl": "https://www.clio.com/blog/",
+      "createdAt": "2026-04-19T22:23:58.118Z",
+      "updatedAt": "2026-04-19T22:23:58.118Z"
+    },
+    {
+      "id": "costar-news",
+      "laneId": "real-estate",
+      "champion": "CoStar",
+      "feedUrl": "https://www.costar.com/rss/news.xml",
+      "homeUrl": "https://www.costar.com/news",
+      "createdAt": "2026-04-19T22:23:58.118Z",
+      "updatedAt": "2026-04-19T22:23:58.118Z"
+    },
+    {
+      "id": "windward-blog",
+      "laneId": "maritime",
+      "champion": "Windward",
+      "feedUrl": "https://windward.ai/feed/",
+      "homeUrl": "https://windward.ai/blog/",
+      "createdAt": "2026-04-19T22:23:58.118Z",
+      "updatedAt": "2026-04-19T22:23:58.118Z"
+    },
+    {
+      "id": "palantir-blog",
+      "laneId": "executive-briefing",
+      "champion": "Palantir",
+      "feedUrl": "https://blog.palantir.com/feed",
+      "homeUrl": "https://blog.palantir.com/",
+      "createdAt": "2026-04-19T22:23:58.118Z",
+      "updatedAt": "2026-04-19T22:23:58.118Z"
+    },
+    {
+      "id": "thoughtspot-blog",
+      "laneId": "decision-intelligence",
+      "champion": "ThoughtSpot",
+      "feedUrl": "https://www.thoughtspot.com/blog/rss.xml",
+      "homeUrl": "https://www.thoughtspot.com/blog",
+      "createdAt": "2026-04-19T22:23:58.118Z",
+      "updatedAt": "2026-04-19T22:23:58.118Z"
+    },
+    {
+      "id": "palantir-foundry-blog",
+      "laneId": "holdings-strategy",
+      "champion": "Palantir Foundry",
+      "feedUrl": "https://blog.palantir.com/feed",
+      "homeUrl": "https://blog.palantir.com/",
+      "createdAt": "2026-04-19T22:23:58.118Z",
+      "updatedAt": "2026-04-19T22:23:58.118Z"
+    }
+  ],
+  "feedsSeededAt": "2026-04-19T22:23:58.118Z"
 }

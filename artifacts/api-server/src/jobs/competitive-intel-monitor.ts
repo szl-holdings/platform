@@ -33,6 +33,10 @@ export interface ChampionFeed {
   champion: string;
   feedUrl: string;
   homeUrl: string;
+  paused?: boolean;
+  recommendationHint?: Recommendation;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface IntelAlert {
@@ -71,7 +75,7 @@ interface PollResult {
 
 // ─── Champion feeds ──────────────────────────────────────────────────────────
 
-export const CHAMPION_FEEDS: ChampionFeed[] = [
+export const DEFAULT_CHAMPION_FEEDS: ChampionFeed[] = [
   // Cyber Resilience
   {
     id: "crowdstrike-blog",
@@ -148,6 +152,8 @@ interface PersistedState {
   lastFullPollAt: string | null;
   pollRunCount: number;
   seededAt: string | null;
+  feeds: ChampionFeed[];
+  feedsSeededAt: string | null;
 }
 
 const state: PersistedState = {
@@ -156,7 +162,16 @@ const state: PersistedState = {
   lastFullPollAt: null,
   pollRunCount: 0,
   seededAt: null,
+  feeds: [],
+  feedsSeededAt: null,
 };
+
+/**
+ * Live, mutable list of champion feeds. Backed by `state.feeds` which is
+ * persisted to disk so analyst-managed additions/removals survive restart.
+ * Exposed as an export so existing callers (routes, tests, jobs) keep working.
+ */
+export const CHAMPION_FEEDS: ChampionFeed[] = state.feeds;
 
 let _loaded = false;
 let _writePending: Promise<void> | null = null;
@@ -179,11 +194,30 @@ async function ensureLoaded(): Promise<void> {
     if (typeof parsed.seededAt === "string" || parsed.seededAt === null) {
       state.seededAt = parsed.seededAt ?? null;
     }
+    if (Array.isArray(parsed.feeds)) {
+      // Mutate in place so the exported CHAMPION_FEEDS reference stays valid
+      state.feeds.length = 0;
+      state.feeds.push(...parsed.feeds);
+    }
+    if (typeof parsed.feedsSeededAt === "string" || parsed.feedsSeededAt === null) {
+      state.feedsSeededAt = parsed.feedsSeededAt ?? null;
+    }
   } catch (err) {
     const code = (err as NodeJS.ErrnoException).code;
     if (code !== "ENOENT") {
       logger.warn({ err }, "[competitive-intel] Failed to load persisted state — starting fresh");
     }
+  }
+  // Seed defaults the first time we load (or if persisted feed list is empty)
+  if (!state.feedsSeededAt || state.feeds.length === 0) {
+    const now = new Date().toISOString();
+    for (const f of DEFAULT_CHAMPION_FEEDS) {
+      if (!state.feeds.some(existing => existing.id === f.id)) {
+        state.feeds.push({ ...f, createdAt: now, updatedAt: now });
+      }
+    }
+    state.feedsSeededAt = now;
+    await persistSoon();
   }
   ensureFeedHealth();
   if (!state.seededAt) {
@@ -194,7 +228,7 @@ async function ensureLoaded(): Promise<void> {
 }
 
 function ensureFeedHealth(): void {
-  for (const feed of CHAMPION_FEEDS) {
+  for (const feed of state.feeds) {
     if (!state.feedHealth[feed.id]) {
       state.feedHealth[feed.id] = {
         feedId: feed.id,
@@ -448,6 +482,12 @@ function alertIdFor(feedId: string, item: ParsedItem): string {
 
 async function pollFeed(feed: ChampionFeed): Promise<number> {
   const health = state.feedHealth[feed.id];
+  if (!health) return 0;
+  if (feed.paused) {
+    health.lastPolledAt = new Date().toISOString();
+    health.lastError = "paused";
+    return 0;
+  }
   health.lastPolledAt = new Date().toISOString();
   let xml: string;
   try {
@@ -479,7 +519,11 @@ async function pollFeed(feed: ChampionFeed): Promise<number> {
     if (Number.isFinite(pub) && pub < cutoff) continue;
     const id = alertIdFor(feed.id, item);
     if (state.alerts.some(a => a.id === id)) continue;
-    const { rec, reason } = classifyRecommendation(item.title, item.summary);
+    const auto = classifyRecommendation(item.title, item.summary);
+    const rec: Recommendation = feed.recommendationHint ?? auto.rec;
+    const reason = feed.recommendationHint
+      ? `Analyst hint for ${feed.champion}: treat as ${feed.recommendationHint}.`
+      : auto.reason;
     state.alerts.push({
       id,
       laneId: feed.laneId,
@@ -503,16 +547,18 @@ async function pollFeed(feed: ChampionFeed): Promise<number> {
 
 export async function pollAllFeeds(): Promise<PollResult> {
   await ensureLoaded();
+  ensureFeedHealth();
   const start = Date.now();
   let success = 0;
   let newAlerts = 0;
+  const activeFeeds = state.feeds.filter(f => !f.paused);
 
   await Promise.allSettled(
-    CHAMPION_FEEDS.map(async feed => {
+    activeFeeds.map(async feed => {
       try {
         const created = await pollFeed(feed);
         newAlerts += created;
-        if (state.feedHealth[feed.id].lastError == null) success++;
+        if (state.feedHealth[feed.id]?.lastError == null) success++;
       } catch (err) {
         logger.warn({ err, feedId: feed.id }, "[competitive-intel] pollFeed threw");
       }
@@ -539,7 +585,7 @@ export async function pollAllFeeds(): Promise<PollResult> {
   await persistSoon();
 
   const result: PollResult = {
-    polledFeeds: CHAMPION_FEEDS.length,
+    polledFeeds: activeFeeds.length,
     successfulFeeds: success,
     newAlerts,
     durationMs: Date.now() - start,
@@ -587,6 +633,155 @@ export async function getMonitorStatus(): Promise<{
   };
 }
 
+// ─── Feed management (admin) ─────────────────────────────────────────────────
+
+const VALID_RECOMMENDATIONS: Recommendation[] = ["adopt", "counter", "monitor"];
+
+function slugify(input: string): string {
+  return input
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 60);
+}
+
+function uniqueFeedId(base: string): string {
+  const root = slugify(base) || "feed";
+  if (!state.feeds.some(f => f.id === root)) return root;
+  let i = 2;
+  while (state.feeds.some(f => f.id === `${root}-${i}`)) i++;
+  return `${root}-${i}`;
+}
+
+export interface FeedInput {
+  champion: string;
+  laneId: string;
+  feedUrl: string;
+  homeUrl?: string;
+  paused?: boolean;
+  recommendationHint?: Recommendation | null;
+}
+
+export interface FeedUpdate {
+  champion?: string;
+  laneId?: string;
+  feedUrl?: string;
+  homeUrl?: string;
+  paused?: boolean;
+  recommendationHint?: Recommendation | null;
+}
+
+function validateUrl(value: string, field: string): string {
+  const trimmed = String(value ?? "").trim();
+  if (!trimmed) throw new Error(`${field} is required`);
+  let parsed: URL;
+  try {
+    parsed = new URL(trimmed);
+  } catch {
+    throw new Error(`${field} must be a valid URL`);
+  }
+  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+    throw new Error(`${field} must use http or https`);
+  }
+  return trimmed;
+}
+
+export async function listFeeds(): Promise<ChampionFeed[]> {
+  await ensureLoaded();
+  return state.feeds.map(f => ({ ...f }));
+}
+
+export async function addFeed(input: FeedInput, actor?: string): Promise<ChampionFeed> {
+  await ensureLoaded();
+  const champion = String(input.champion ?? "").trim();
+  const laneId = String(input.laneId ?? "").trim();
+  if (!champion) throw new Error("champion is required");
+  if (!laneId) throw new Error("laneId is required");
+  const feedUrl = validateUrl(input.feedUrl, "feedUrl");
+  const homeUrl = input.homeUrl ? validateUrl(input.homeUrl, "homeUrl") : feedUrl;
+  if (input.recommendationHint && !VALID_RECOMMENDATIONS.includes(input.recommendationHint)) {
+    throw new Error("recommendationHint must be adopt | counter | monitor");
+  }
+  if (state.feeds.some(f => f.feedUrl.toLowerCase() === feedUrl.toLowerCase() && f.laneId === laneId)) {
+    throw new Error("A feed with this URL already exists in this lane");
+  }
+  const now = new Date().toISOString();
+  const feed: ChampionFeed = {
+    id: uniqueFeedId(`${laneId}-${champion}`),
+    laneId,
+    champion,
+    feedUrl,
+    homeUrl,
+    paused: input.paused === true,
+    recommendationHint: input.recommendationHint ?? undefined,
+    createdAt: now,
+    updatedAt: now,
+  };
+  state.feeds.push(feed);
+  ensureFeedHealth();
+  await persistSoon();
+  logger.info({ feedId: feed.id, actor }, "[competitive-intel] Feed added");
+  return { ...feed };
+}
+
+export async function updateFeed(id: string, patch: FeedUpdate, actor?: string): Promise<ChampionFeed | null> {
+  await ensureLoaded();
+  const feed = state.feeds.find(f => f.id === id);
+  if (!feed) return null;
+  if (patch.champion !== undefined) {
+    const v = String(patch.champion).trim();
+    if (!v) throw new Error("champion cannot be empty");
+    feed.champion = v;
+  }
+  if (patch.laneId !== undefined) {
+    const v = String(patch.laneId).trim();
+    if (!v) throw new Error("laneId cannot be empty");
+    feed.laneId = v;
+  }
+  if (patch.feedUrl !== undefined) feed.feedUrl = validateUrl(patch.feedUrl, "feedUrl");
+  if (patch.homeUrl !== undefined) feed.homeUrl = validateUrl(patch.homeUrl, "homeUrl");
+  // Reject (laneId, feedUrl) collisions with another feed (mirrors addFeed behavior)
+  if (patch.feedUrl !== undefined || patch.laneId !== undefined) {
+    if (state.feeds.some(f => f.id !== feed.id && f.laneId === feed.laneId && f.feedUrl.toLowerCase() === feed.feedUrl.toLowerCase())) {
+      throw new Error("A feed with this URL already exists in this lane");
+    }
+  }
+  if (patch.paused !== undefined) feed.paused = patch.paused === true;
+  if (patch.recommendationHint !== undefined) {
+    if (patch.recommendationHint === null) {
+      delete feed.recommendationHint;
+    } else if (VALID_RECOMMENDATIONS.includes(patch.recommendationHint)) {
+      feed.recommendationHint = patch.recommendationHint;
+    } else {
+      throw new Error("recommendationHint must be adopt | counter | monitor");
+    }
+  }
+  feed.updatedAt = new Date().toISOString();
+  // Reflect new champion/laneId on health record
+  const health = state.feedHealth[feed.id];
+  if (health) {
+    health.champion = feed.champion;
+    health.laneId = feed.laneId;
+  }
+  await persistSoon();
+  logger.info({ feedId: id, actor }, "[competitive-intel] Feed updated");
+  return { ...feed };
+}
+
+export async function removeFeed(id: string, actor?: string): Promise<boolean> {
+  await ensureLoaded();
+  const idx = state.feeds.findIndex(f => f.id === id);
+  if (idx < 0) return false;
+  state.feeds.splice(idx, 1);
+  delete state.feedHealth[id];
+  // Drop alerts owned by the removed feed so the UI doesn't show orphans
+  state.alerts = state.alerts.filter(a => !a.id.startsWith(`${id}-`));
+  await persistSoon();
+  logger.info({ feedId: id, actor }, "[competitive-intel] Feed removed");
+  return true;
+}
+
 // ─── Daily timer (in-process fallback) ───────────────────────────────────────
 
 let _timer: ReturnType<typeof setInterval> | null = null;
@@ -598,7 +793,7 @@ export function startCompetitiveIntelMonitor(): void {
   _timer = setInterval(() => {
     pollAllFeeds().catch(err => logger.error({ err }, "[competitive-intel] scheduled poll failed"));
   }, POLL_INTERVAL_MS);
-  logger.info({ intervalMs: POLL_INTERVAL_MS, feeds: CHAMPION_FEEDS.length }, "[competitive-intel] Monitor started");
+  logger.info({ intervalMs: POLL_INTERVAL_MS, feeds: state.feeds.length }, "[competitive-intel] Monitor started");
 }
 
 export function stopCompetitiveIntelMonitor(): void {
