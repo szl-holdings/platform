@@ -9,6 +9,7 @@ import { useRealtimeChannel } from "@szl-holdings/shared-ui/use-realtime-channel
 import { useOnboardingAnalytics } from "@szl-holdings/shared-ui/onboarding";
 import { CommandPalette, useCommandPalette, getEcosystemSwitchCommands, createBaselineWebActions, useRegisterCommands, type CommandItem } from "@szl-holdings/shared-ui/command-palette";
 import { ServiceStatusRail } from "@szl-holdings/shared-ui/service-status-rail";
+import { useAtlasApprovalsBadge } from "@/alloy/hooks/use-atlas-approvals-badge";
 
 const ALLOY_ACCENT = "#4B8BDB";
 
@@ -148,11 +149,12 @@ const MCP_NAV = [
   { href: "/alloy/mcp-tools", label: "Custom Tool Creator", icon: Code2, badge: "New" },
 ];
 
-function NavItem({ href, label, icon: Icon, exact, badge, onClick }: {
-  href: string; label: string; icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>; exact?: boolean; badge?: string; onClick?: () => void;
+function NavItem({ href, label, icon: Icon, exact, badge, count, pulse, onClick }: {
+  href: string; label: string; icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>; exact?: boolean; badge?: string; count?: number; pulse?: boolean; onClick?: () => void;
 }) {
   const [location] = useLocation();
   const isActive = exact ? (location === href || location === href + "/") : location.startsWith(href);
+  const showCount = typeof count === "number" && count > 0;
   return (
     <Link href={href} onClick={onClick} className={cn(
       "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 group relative",
@@ -161,7 +163,24 @@ function NavItem({ href, label, icon: Icon, exact, badge, onClick }: {
       {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-r-full" style={{ background: "#4B8BDB" }} />}
       <Icon className={cn("w-3.5 h-3.5 shrink-0", !isActive && "text-slate-500 group-hover:text-slate-300")} style={isActive ? { color: "#4B8BDB" } : undefined} />
       <span className="flex-1">{label}</span>
-      {badge && !isActive && (
+      {showCount && (
+        <span
+          className="relative inline-flex items-center justify-center text-[9px] font-bold font-mono px-1.5 py-0.5 rounded-full min-w-[18px] text-center"
+          style={{ color: "#fff", background: "#f59e0b", boxShadow: pulse ? "0 0 0 0 rgba(245,158,11,0.6)" : undefined }}
+          aria-label={`${count} pending ${pulse ? "(new items)" : ""}`}
+          data-testid={`nav-badge-${href.replace(/\//g, "-")}`}
+        >
+          {pulse && (
+            <span
+              className="absolute inset-0 rounded-full animate-ping"
+              style={{ background: "rgba(245,158,11,0.55)" }}
+              aria-hidden="true"
+            />
+          )}
+          <span className="relative">{count > 99 ? "99+" : count}</span>
+        </span>
+      )}
+      {badge && !showCount && !isActive && (
         <span className="text-[8px] font-bold uppercase tracking-widest px-1 py-0.5 rounded" style={{ color: "#4B8BDB", background: "rgba(75,139,219,0.12)" }}>{badge}</span>
       )}
     </Link>
@@ -233,6 +252,7 @@ function buildAlloyCommands(navigate: (path: string) => void): CommandItem[] {
 export function AlloyLayout({ children }: { children: ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { status: wsStatus } = useRealtimeChannel("workflow-runs");
+  const { pendingCount: atlasPendingCount, newCount: atlasNewCount } = useAtlasApprovalsBadge();
   const [, navigate] = useLocation();
   const [workflowCmds, setWorkflowCmds] = useState<CommandItem[]>([]);
   const { trackTourCompleted, trackTourSkipped } = useOnboardingAnalytics({ platform: "szl", tourId: "szl-alloy" });
@@ -350,9 +370,18 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
             ))}
 
             <div className="text-[9px] uppercase tracking-widest px-3 mb-1 mt-4 font-medium" style={{ color: "rgba(139,122,200,0.7)" }}>ATLAS Spatial</div>
-            {ATLAS_NAV.map(item => (
-              <NavItem key={item.href} {...item} onClick={() => setSidebarOpen(false)} />
-            ))}
+            {ATLAS_NAV.map(item => {
+              const isAtlasApprovals = item.href === "/alloy/atlas-approvals";
+              return (
+                <NavItem
+                  key={item.href}
+                  {...item}
+                  count={isAtlasApprovals ? atlasPendingCount : undefined}
+                  pulse={isAtlasApprovals && atlasNewCount > 0}
+                  onClick={() => setSidebarOpen(false)}
+                />
+              );
+            })}
 
             <div className="text-[9px] uppercase tracking-widest px-3 mb-1 mt-4 font-medium" style={{ color: "rgba(255,255,255,0.25)" }}>Intelligence</div>
             {COMMAND_NAV.map(item => (

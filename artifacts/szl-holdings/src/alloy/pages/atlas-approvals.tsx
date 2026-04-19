@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { GitBranch, CheckCircle, XCircle, AlertTriangle, Clock, ChevronRight, Shield, Zap, Target, Eye, ArrowRight, Loader2, RefreshCw } from "lucide-react";
 import { apiRequest } from "@/lib/api";
+import { useAtlasApprovalsBadge, ATLAS_APPROVALS_BADGE_QUERY_KEY } from "@/alloy/hooks/use-atlas-approvals-badge";
 
 type ApprovalStatus = "pending" | "approved" | "rejected" | "escalated" | "revised" | "expired" | "withdrawn";
 type RiskLevel = "critical" | "high" | "medium" | "low";
@@ -274,8 +275,18 @@ export default function AlloyAtlasApprovals() {
       return Array.isArray(result) ? result : (result as { data: ApiApproval[] }).data ?? [];
     },
     staleTime: 15000,
+    refetchInterval: 30000,
+    refetchIntervalInBackground: false,
     retry: 1,
   });
+
+  const { markAllSeen } = useAtlasApprovalsBadge();
+  useEffect(() => {
+    markAllSeen();
+  }, [markAllSeen]);
+  useEffect(() => {
+    if (apiData) markAllSeen();
+  }, [apiData, markAllSeen]);
 
   const [localOverrides, setLocalOverrides] = useState<Record<string, ApprovalStatus>>({});
   const [updatingIds, setUpdatingIds] = useState<Set<string>>(new Set());
@@ -287,6 +298,8 @@ export default function AlloyAtlasApprovals() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["atlas-approvals"] });
+      queryClient.invalidateQueries({ queryKey: ATLAS_APPROVALS_BADGE_QUERY_KEY });
+      markAllSeen();
     },
   });
 
@@ -297,6 +310,8 @@ export default function AlloyAtlasApprovals() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["atlas-approvals"] });
+      queryClient.invalidateQueries({ queryKey: ATLAS_APPROVALS_BADGE_QUERY_KEY });
+      markAllSeen();
     },
   });
 
