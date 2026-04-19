@@ -1,14 +1,5 @@
-import { ExternalLink, Network, AlertTriangle, TrendingDown, Clock, Shield } from "lucide-react";
-
-const MESH_DATA = {
-  index: 38,
-  grade: "D",
-  trend: -4,
-  topExposure: "GITHUB_TOKEN reachable by 4 agents — blast radius critical",
-  pendingApprovals: 3,
-  openExposures: 4,
-  computedAt: new Date(Date.now() - 5 * 60_000).toISOString(),
-};
+import { ExternalLink, Network, AlertTriangle, TrendingDown, TrendingUp, Clock, Shield } from "lucide-react";
+import { useMeshSnapshot } from "../lib/mesh-bridge";
 
 const GRADE_COLOR: Record<string, string> = {
   A: "#4eca8b",
@@ -19,8 +10,10 @@ const GRADE_COLOR: Record<string, string> = {
 };
 
 export default function MeshCard() {
+  const MESH_DATA = useMeshSnapshot();
   const gradeColor = GRADE_COLOR[MESH_DATA.grade] ?? "#e05050";
   const sentraHref = "/sentra/mesh/map";
+  const TrendIcon = MESH_DATA.trend >= 0 ? TrendingUp : TrendingDown;
 
   return (
     <div style={{
@@ -73,7 +66,7 @@ export default function MeshCard() {
             {MESH_DATA.index}
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 3, justifyContent: "center", marginTop: 4 }}>
-            <TrendingDown size={10} color={gradeColor} />
+            <TrendIcon size={10} color={gradeColor} />
             <span style={{ fontSize: "0.62rem", color: gradeColor, fontFamily: "JetBrains Mono, monospace" }}>
               {MESH_DATA.trend > 0 ? "+" : ""}{MESH_DATA.trend} vs yesterday
             </span>
