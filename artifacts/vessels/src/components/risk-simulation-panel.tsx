@@ -15,7 +15,7 @@ import {
 } from "@szl-holdings/monte-carlo";
 import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";
 import { SaveRiskRunButton, type SavedRiskRun } from "@szl-holdings/shared-ui/risk-evidence";
-import { Activity, BarChart3, Layers, RefreshCw, Sliders, RotateCcw, ChevronDown, ChevronUp } from "lucide-react";
+import { Activity, BarChart3, Layers, RefreshCw, Sliders, RotateCcw, ChevronDown, ChevronUp, BookmarkPlus, X } from "lucide-react";
 import RiskSimulationWorker from "@/workers/risk-simulation.worker?worker";
 
 const VESSELS_ACCENT = LANE_ACCENT_HEX.vessels.primaryLight;
@@ -44,6 +44,25 @@ function formatValue(value: number, format?: string): string {
   return value.toLocaleString(undefined, { maximumFractionDigits: 2 });
 }
 
+function formatSignedValue(value: number, format?: string): string {
+  if (!isFinite(value)) return "—";
+  const sign = value > 0 ? "+" : value < 0 ? "−" : "";
+  return `${sign}${formatValue(Math.abs(value), format)}`;
+}
+
+function formatPctDelta(curr: number, base: number): string {
+  if (!isFinite(curr) || !isFinite(base) || base === 0) return "—";
+  const pct = ((curr - base) / Math.abs(base)) * 100;
+  const sign = pct > 0 ? "+" : pct < 0 ? "−" : "";
+  return `${sign}${Math.abs(pct).toFixed(1)}%`;
+}
+
+interface BaselineSnapshot {
+  result: MonteCarloResult;
+  capturedAt: number;
+  tweakCount: number;
+}
+
 interface RiskSimulationPanelProps {
   scenario: ScenarioDefinition;
   iterations?: number;
@@ -70,6 +89,7 @@ export function RiskSimulationPanel({
   const [tweaks, setTweaks] = useState<Record<string, DriverTweak>>({});
   const [showTweaks, setShowTweaks] = useState<boolean>(false);
   const [appliedTweaks, setAppliedTweaks] = useState<Record<string, DriverTweak>>({});
+  const [baseline, setBaseline] = useState<BaselineSnapshot | null>(null);
 
   useEffect(() => {
     let worker: Worker | null = null;
@@ -88,6 +108,7 @@ export function RiskSimulationPanel({
   useEffect(() => {
     setTweaks({});
     setAppliedTweaks({});
+    setBaseline(null);
   }, [scenario.id]);
 
   const modifiedIds = useMemo(
@@ -180,6 +201,11 @@ export function RiskSimulationPanel({
     setAppliedTweaks({ ...tweaks });
     setRunKey((k) => k + 1);
   };
+  const captureBaseline = () => {
+    if (!result) return;
+    setBaseline({ result, capturedAt: Date.now(), tweakCount: modifiedIds.size });
+  };
+  const clearBaseline = () => setBaseline(null);
 
   const primary = scenario.outputs[0];
   const primaryMetric = primary ? result?.metrics[primary.id] : undefined;
@@ -195,9 +221,27 @@ export function RiskSimulationPanel({
   }, [result, scenario]);
 
   const maxP95 = useMemo(() => {
-    if (metricRows.length === 0) return 0;
-    return Math.max(...metricRows.map(r => Math.abs(r.stat?.p95 ?? 0)), 0.0001);
-  }, [metricRows]);
+    const vals = metricRows.map((r) => Math.abs(r.stat?.p95 ?? 0));
+    if (baseline) {
+      for (const o of scenario.outputs) {
+        const m = baseline.result.metrics[o.id];
+        if (m) vals.push(Math.abs(m.p95));
+      }
+    }
+    return Math.max(...vals, 0.0001);
+  }, [metricRows, baseline, scenario]);
+
+  const baselineCapturedLabel = useMemo(() => {
+    if (!baseline) return null;
+    const t = new Date(baseline.capturedAt);
+    const hh = String(t.getHours()).padStart(2, "0");
+    const mm = String(t.getMinutes()).padStart(2, "0");
+    const ss = String(t.getSeconds()).padStart(2, "0");
+    const tweakDesc = baseline.tweakCount === 0
+      ? "no tweaks"
+      : `${baseline.tweakCount} tweak${baseline.tweakCount === 1 ? "" : "s"}`;
+    return `Baseline captured ${hh}:${mm}:${ss} · ${tweakDesc}`;
+  }, [baseline]);
 
   return (
     <div className="space-y-5">
@@ -249,6 +293,28 @@ export function RiskSimulationPanel({
             <RefreshCw className={`w-3 h-3 ${running ? "animate-spin" : ""}`} />
             {running ? "Running…" : "Re-run"}
           </button>
+          {baseline ? (
+            <button
+              onClick={clearBaseline}
+              className="flex items-center gap-1.5 text-[11px] font-medium rounded-md px-2.5 py-1.5 transition-colors text-white/80 hover:text-white"
+              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.15)" }}
+              aria-label="Clear saved baseline"
+            >
+              <X className="w-3 h-3" />
+              Clear baseline
+            </button>
+          ) : (
+            <button
+              onClick={captureBaseline}
+              disabled={running || !result}
+              className="flex items-center gap-1.5 text-[11px] font-medium rounded-md px-2.5 py-1.5 transition-colors text-white/80 hover:text-white disabled:opacity-40"
+              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.15)" }}
+              aria-label="Capture current run as baseline"
+            >
+              <BookmarkPlus className="w-3 h-3" />
+              Capture baseline
+            </button>
+          )}
           <SaveRiskRunButton
             domain={evidenceDomain}
             accentColor={accentColor}
@@ -339,9 +405,25 @@ export function RiskSimulationPanel({
             Output Distributions — {result?.scenarioId ?? scenario.id}
           </h3>
         </div>
+        {baselineCapturedLabel && (
+          <div
+            className="flex items-center justify-between gap-3 mb-3 px-2.5 py-1.5 rounded-md text-[10px] font-mono"
+            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.6)" }}
+          >
+            <span className="flex items-center gap-2">
+              <span className="inline-block w-2 h-2 rounded-sm" style={{ background: "rgba(255,255,255,0.35)" }} />
+              {baselineCapturedLabel}
+            </span>
+            <span className="flex items-center gap-2" style={{ color: accentColor }}>
+              <span className="inline-block w-2 h-2 rounded-sm" style={{ background: accentColor }} />
+              current run
+            </span>
+          </div>
+        )}
         <div className="space-y-4">
           {metricRows.map(({ id, label, format, stat }, rowIdx) => {
             if (!stat) return null;
+            const baseStat = baseline?.result.metrics[id];
             const p95 = Math.abs(stat.p95);
             const p5 = Math.abs(stat.p5);
             const mean = Math.abs(stat.mean);
@@ -350,13 +432,27 @@ export function RiskSimulationPanel({
             const iqrPct = Math.max(0, p95Pct - p5Pct);
             const meanPct = maxP95 > 0 ? Math.min(100, (mean / maxP95) * 100) : 0;
             const delay = rowIdx * 0.1;
+            const meanDelta = baseStat ? stat.mean - baseStat.mean : 0;
             return (
               <div key={id}>
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="text-[12px] font-semibold text-white">{label}</span>
-                  <span className="text-sm font-bold text-white">
+                  <span className="text-sm font-bold text-white flex items-baseline gap-2">
                     {formatValue(stat.mean, format)}{" "}
                     <span className="text-[10px] font-normal" style={{ color: "rgba(255,255,255,0.4)" }}>(mean)</span>
+                    {baseStat && (
+                      <span
+                        className="text-[10px] font-mono px-1.5 py-0.5 rounded"
+                        style={{
+                          color: accentColor,
+                          background: `${accentColor}15`,
+                          border: `1px solid ${accentColor}30`,
+                        }}
+                        title={`Baseline mean ${formatValue(baseStat.mean, format)}`}
+                      >
+                        Δ {formatSignedValue(meanDelta, format)} ({formatPctDelta(stat.mean, baseStat.mean)})
+                      </span>
+                    )}
                   </span>
                 </div>
                 <div className="relative h-6 rounded-md overflow-hidden" style={{ background: "rgba(255,255,255,0.05)" }}>
@@ -381,6 +477,31 @@ export function RiskSimulationPanel({
                     transition={{ duration: 0.7, delay: delay + 0.2, ease: "easeOut" }}
                   />
                 </div>
+                {baseStat && (() => {
+                  const bP95 = Math.abs(baseStat.p95);
+                  const bP5 = Math.abs(baseStat.p5);
+                  const bMean = Math.abs(baseStat.mean);
+                  const bP95Pct = maxP95 > 0 ? Math.min(100, (bP95 / maxP95) * 100) : 0;
+                  const bP5Pct = maxP95 > 0 ? Math.min(100, (bP5 / maxP95) * 100) : 0;
+                  const bIqrPct = Math.max(0, bP95Pct - bP5Pct);
+                  const bMeanPct = maxP95 > 0 ? Math.min(100, (bMean / maxP95) * 100) : 0;
+                  return (
+                    <div className="relative h-3 rounded-md overflow-hidden mt-1" style={{ background: "rgba(255,255,255,0.03)" }}>
+                      <div
+                        className="absolute top-0 left-0 h-full rounded-md"
+                        style={{ background: "rgba(255,255,255,0.10)", width: `${bP95Pct}%` }}
+                      />
+                      <div
+                        className="absolute top-0.5 bottom-0.5 rounded-sm"
+                        style={{ background: "rgba(255,255,255,0.25)", left: `${bP5Pct}%`, width: `${bIqrPct}%` }}
+                      />
+                      <div
+                        className="absolute top-0 bottom-0 w-0.5"
+                        style={{ background: "rgba(255,255,255,0.6)", left: `${bMeanPct}%` }}
+                      />
+                    </div>
+                  );
+                })()}
                 <div className="flex justify-between text-[9px] mt-1 font-mono" style={{ color: "rgba(255,255,255,0.4)" }}>
                   <span>P5: {formatValue(stat.p5, format)}</span>
                   <span>P25: {formatValue(stat.p25, format)}</span>
@@ -388,6 +509,15 @@ export function RiskSimulationPanel({
                   <span>P75: {formatValue(stat.p75, format)}</span>
                   <span>P95: {formatValue(stat.p95, format)}</span>
                 </div>
+                {baseStat && (
+                  <div className="flex justify-between text-[9px] mt-0.5 font-mono" style={{ color: "rgba(255,255,255,0.3)" }}>
+                    <span>base P5: {formatValue(baseStat.p5, format)}</span>
+                    <span>P25: {formatValue(baseStat.p25, format)}</span>
+                    <span>P50: {formatValue(baseStat.p50, format)}</span>
+                    <span>P75: {formatValue(baseStat.p75, format)}</span>
+                    <span>P95: {formatValue(baseStat.p95, format)}</span>
+                  </div>
+                )}
               </div>
             );
           })}
@@ -433,32 +563,68 @@ export function RiskSimulationPanel({
             <Activity className="w-3.5 h-3.5" style={{ color: accentColor }} />
             <h4 className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.55)" }}>Risk Bands</h4>
           </div>
-          {primary && primaryMetric && (
-            <>
-              <div>
-                <div className="text-[9px] uppercase tracking-wider mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>Standard Deviation</div>
-                <div className="text-sm font-bold text-white">{formatValue(primaryMetric.stdDev, primary.format)}</div>
+          {primary && primaryMetric && (() => {
+            const basePrimary = baseline?.result.metrics[primary.id];
+            const renderDelta = (curr: number, base: number | undefined) => {
+              if (base === undefined || !isFinite(base)) return null;
+              return (
+                <span
+                  className="ml-2 text-[9px] font-mono px-1 py-0.5 rounded"
+                  style={{ color: accentColor, background: `${accentColor}15`, border: `1px solid ${accentColor}30` }}
+                >
+                  Δ {formatSignedValue(curr - base, primary.format)} ({formatPctDelta(curr, base)})
+                </span>
+              );
+            };
+            const baseLine = (text: string) => (
+              <div className="text-[10px] font-mono mt-0.5" style={{ color: "rgba(255,255,255,0.4)" }}>
+                base · {text}
               </div>
-              <div>
-                <div className="text-[9px] uppercase tracking-wider mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>90% Confidence Band</div>
-                <div className="text-sm font-semibold text-white">
-                  {formatValue(primaryMetric.p5, primary.format)} – {formatValue(primaryMetric.p95, primary.format)}
+            );
+            return (
+              <>
+                <div>
+                  <div className="text-[9px] uppercase tracking-wider mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>Standard Deviation</div>
+                  <div className="text-sm font-bold text-white flex items-center flex-wrap">
+                    {formatValue(primaryMetric.stdDev, primary.format)}
+                    {renderDelta(primaryMetric.stdDev, basePrimary?.stdDev)}
+                  </div>
+                  {basePrimary && baseLine(formatValue(basePrimary.stdDev, primary.format))}
                 </div>
-              </div>
-              <div>
-                <div className="text-[9px] uppercase tracking-wider mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>50% Interquartile</div>
-                <div className="text-sm font-semibold text-white">
-                  {formatValue(primaryMetric.p25, primary.format)} – {formatValue(primaryMetric.p75, primary.format)}
+                <div>
+                  <div className="text-[9px] uppercase tracking-wider mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>90% Confidence Band</div>
+                  <div className="text-sm font-semibold text-white flex items-center flex-wrap">
+                    {formatValue(primaryMetric.p5, primary.format)} – {formatValue(primaryMetric.p95, primary.format)}
+                    {renderDelta(primaryMetric.p95 - primaryMetric.p5, basePrimary ? basePrimary.p95 - basePrimary.p5 : undefined)}
+                  </div>
+                  {basePrimary && baseLine(`${formatValue(basePrimary.p5, primary.format)} – ${formatValue(basePrimary.p95, primary.format)}`)}
                 </div>
-              </div>
-              <div>
-                <div className="text-[9px] uppercase tracking-wider mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>Range</div>
-                <div className="text-sm font-mono text-white">
-                  {formatValue(primaryMetric.min, primary.format)} → {formatValue(primaryMetric.max, primary.format)}
+                <div>
+                  <div className="text-[9px] uppercase tracking-wider mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>50% Interquartile</div>
+                  <div className="text-sm font-semibold text-white flex items-center flex-wrap">
+                    {formatValue(primaryMetric.p25, primary.format)} – {formatValue(primaryMetric.p75, primary.format)}
+                    {renderDelta(primaryMetric.p75 - primaryMetric.p25, basePrimary ? basePrimary.p75 - basePrimary.p25 : undefined)}
+                  </div>
+                  {basePrimary && baseLine(`${formatValue(basePrimary.p25, primary.format)} – ${formatValue(basePrimary.p75, primary.format)}`)}
                 </div>
-              </div>
-            </>
-          )}
+                <div>
+                  <div className="text-[9px] uppercase tracking-wider mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>Range</div>
+                  <div className="text-sm font-mono text-white">
+                    {formatValue(primaryMetric.min, primary.format)} → {formatValue(primaryMetric.max, primary.format)}
+                  </div>
+                  {basePrimary && baseLine(`${formatValue(basePrimary.min, primary.format)} → ${formatValue(basePrimary.max, primary.format)}`)}
+                </div>
+                <div>
+                  <div className="text-[9px] uppercase tracking-wider mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>Mean</div>
+                  <div className="text-sm font-bold text-white flex items-center flex-wrap">
+                    {formatValue(primaryMetric.mean, primary.format)}
+                    {renderDelta(primaryMetric.mean, basePrimary?.mean)}
+                  </div>
+                  {basePrimary && baseLine(formatValue(basePrimary.mean, primary.format))}
+                </div>
+              </>
+            );
+          })()}
         </div>
       </div>
     </div>
