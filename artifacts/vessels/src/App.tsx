@@ -276,7 +276,7 @@ function DemoModeBanner() {
     refetchInterval: 60000,
   });
 
-  if (!data) return null;
+  if (!data || !data.summary) return null;
   const hasDemoMode = data.summary.mockedDemoMode > 0;
   const hasUnhealthy = data.summary.manualRequired > 0;
   if (!hasDemoMode && !hasUnhealthy) return null;

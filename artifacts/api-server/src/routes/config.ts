@@ -45,12 +45,11 @@ router.post("/config/verify-admin-pin", pinLimit, validateBody(adminPinVerifySch
   res.json({ ok: true });
 });
 
-router.get("/config/mapbox-token", configLimit, (req: Request, res: Response) => {
-  if (!req.isAuthenticated()) {
-    res.status(401).json({ error: "Authentication required" });
-    return;
-  }
-
+router.get("/config/mapbox-token", configLimit, (_req: Request, res: Response) => {
+  // Mapbox publishable tokens (pk.*) are intentionally public and protected
+  // via URL allowlists configured in the Mapbox account, so this endpoint is
+  // intentionally unauthenticated. This lets demo-mode visitors and
+  // pre-auth marketing pages render the maritime and property maps.
   const token = process.env.MAPBOX_ACCESS_TOKEN;
   if (!token) {
     res.json({ configured: false, token: null, message: "MAPBOX_ACCESS_TOKEN is not set." });

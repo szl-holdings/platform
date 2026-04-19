@@ -310,12 +310,15 @@ export default function PropertyMap({ properties, token, height = "100%", showPa
     }
   }, [mapLoaded, selectedProperty]);
 
-  if (mapError) {
+  if (!token || mapError) {
     return (
       <div className="flex items-center justify-center rounded-xl" style={{ height, background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
-        <div className="text-center space-y-2">
+        <div className="text-center space-y-2 px-6">
           <Building2 className="w-8 h-8 mx-auto" style={{ color: "rgba(200,160,96,0.3)" }} />
-          <p className="text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>Map failed to load</p>
+          <p className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.4)" }}>Map unavailable</p>
+          <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.25)" }}>
+            {!token ? "MAPBOX_ACCESS_TOKEN is not configured" : "Mapbox failed to load"}
+          </p>
         </div>
       </div>
     );

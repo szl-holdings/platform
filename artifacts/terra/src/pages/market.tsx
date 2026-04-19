@@ -78,7 +78,7 @@ function TableRowSkeleton() {
 }
 
 export default function MarketPage() {
-  const { token } = useMapboxToken();
+  const { token, isLoading: tokenLoading } = useMapboxToken();
   const { data: liveData, isLoading, isError, refetch, isFetching } = useQuery<{ data: MarketIntelligence }>({
     queryKey: ["terra-market-intelligence"],
     queryFn: () => apiFetch<{ data: MarketIntelligence }>("/terra/market-intelligence"),
@@ -393,9 +393,15 @@ export default function MarketPage() {
             }>
               <PropertyMap properties={properties} token={token} height="360px" showPanel={false} />
             </Suspense>
-          ) : (
+          ) : tokenLoading ? (
             <div className="absolute inset-0 flex items-center justify-center bg-[#08101e]">
-              <p className="text-xs text-terra-text-muted">Map token loading…</p>
+              <div className="w-6 h-6 border-2 border-terra-primary/30 border-t-terra-primary rounded-full animate-spin" />
+            </div>
+          ) : (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#08101e] gap-1 px-6 text-center">
+              <Map className="w-6 h-6 text-terra-text-muted/40" />
+              <p className="text-xs text-terra-text-muted">Map unavailable</p>
+              <p className="text-[10px] text-terra-text-muted/60">MAPBOX_ACCESS_TOKEN is not configured</p>
             </div>
           )}
         </div>

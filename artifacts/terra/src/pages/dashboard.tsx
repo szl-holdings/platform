@@ -154,7 +154,7 @@ export default function TerraIntelligence() {
   const criticalSignals = liveAlerts.filter(a => a.severity === "critical");
   const topDeals = liveDeals.sort((a, b) => (Number(b.price) || 0) - (Number(a.price) || 0)).slice(0, 5);
   const topAgents = [...agents].sort((a, b) => b.commissionMTD - a.commissionMTD).slice(0, 4);
-  const { token: mapToken } = useMapboxToken();
+  const { token: mapToken, isLoading: mapTokenLoading } = useMapboxToken();
   const [showMap, setShowMap] = useState(false);
   const portfolioValue = properties.reduce((s, p) => s + (p.value ?? 0), 0);
   const portfolioLabel = portfolioValue >= 1e9 ? `$${(portfolioValue / 1e9).toFixed(1)}B` : portfolioValue >= 1e6 ? `$${(portfolioValue / 1e6).toFixed(0)}M` : "—";
@@ -539,11 +539,16 @@ export default function TerraIntelligence() {
               <Suspense fallback={<div className="flex items-center justify-center h-full"><div className="w-5 h-5 border-2 rounded-full animate-spin" style={{ borderColor: `${DS.accent.gold}20`, borderTopColor: DS.accent.gold }} /></div>}>
                 <PropertyMap properties={properties} token={mapToken} height="300px" showPanel={false} />
               </Suspense>
+            ) : mapTokenLoading ? (
+              <div className="flex items-center justify-center h-full">
+                <div className="w-5 h-5 border-2 rounded-full animate-spin" style={{ borderColor: `${DS.accent.gold}20`, borderTopColor: DS.accent.gold }} />
+              </div>
             ) : (
               <div className="flex items-center justify-center h-full">
-                <div className="text-center space-y-1">
+                <div className="text-center space-y-1 px-4">
                   <Globe className="w-5 h-5 mx-auto" style={{ color: `${DS.accent.gold}30` }} />
-                  <p className="text-[10px]" style={{ color: DS.text.muted }}>Map loading…</p>
+                  <p className="text-[10px] font-medium" style={{ color: DS.text.muted }}>Map unavailable</p>
+                  <p className="text-[9px]" style={{ color: DS.text.muted, opacity: 0.6 }}>MAPBOX_ACCESS_TOKEN is not configured</p>
                 </div>
               </div>
             )}

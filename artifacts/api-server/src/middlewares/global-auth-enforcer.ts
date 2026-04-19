@@ -80,6 +80,11 @@ const PUBLIC_EXACT_PATHS = new Set([
   "/api/lyte/action-debt",
   "/api/lyte/decision-replay",
   "/api/lyte/board-view",
+  // Mapbox publishable-token discovery endpoint. Returns a pk.* token that is
+  // intentionally public (Mapbox enforces URL allowlists on the token itself),
+  // so demo-mode visitors and pre-auth marketing pages can render the Vessels
+  // fleet map and Terra property maps without a session. Rate-limited inline.
+  "/api/config/mapbox-token",
 ]);
 
 const PUBLIC_PREFIXES = [

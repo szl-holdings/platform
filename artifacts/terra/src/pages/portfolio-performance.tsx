@@ -30,7 +30,7 @@ const statusStyle: Record<string, string> = {
 };
 
 export default function PortfolioPerformance() {
-  const { token } = useMapboxToken();
+  const { token, isLoading: tokenLoading } = useMapboxToken();
   const totalValue = 128;
   const avgIRR = portfolio.reduce((a, p) => a + p.irr, 0) / portfolio.length;
 
@@ -91,9 +91,15 @@ export default function PortfolioPerformance() {
               }>
                 <PropertyMap properties={properties} token={token} height="300px" showPanel={false} />
               </Suspense>
-            ) : (
+            ) : tokenLoading ? (
               <div className="absolute inset-0 flex items-center justify-center bg-[#08101e]">
-                <p className="text-xs text-muted-foreground">Loading map…</p>
+                <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+              </div>
+            ) : (
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#08101e] gap-1 px-6 text-center">
+                <Map className="w-6 h-6 text-muted-foreground/40" />
+                <p className="text-xs text-muted-foreground">Map unavailable</p>
+                <p className="text-[10px] text-muted-foreground/60">MAPBOX_ACCESS_TOKEN is not configured</p>
               </div>
             )}
           </div>
