@@ -15,7 +15,7 @@ import { useWebSyncStatus } from "@szl-holdings/shared-ui/use-web-sync-status";
 import { useUserPreferences } from "@szl-holdings/shared-ui/use-user-preferences";
 import { UserButton } from "@szl-holdings/shared-ui/UserButton";
 import {
-  Ship, AlertTriangle, Activity, LayoutDashboard, WifiOff, BarChart3, ChevronDown, User, ChevronRight, DollarSign, Wrench, MapPin, Radio, List, Globe, Navigation, EyeOff, ShieldAlert, Shield, Anchor, Brain, Menu, FileText, TrendingUp, Calculator, Zap, Cpu, Leaf, Waves, Fuel, Layers, RotateCcw, GitBranch, Network, Users, Link2
+  Ship, AlertTriangle, Activity, LayoutDashboard, WifiOff, BarChart3, ChevronDown, User, ChevronRight, DollarSign, Wrench, MapPin, Radio, List, Globe, Navigation, EyeOff, ShieldAlert, Shield, Anchor, Brain, Menu, FileText, TrendingUp, Calculator, Zap, Cpu, Leaf, Waves, Fuel, Layers, RotateCcw, GitBranch, Network, Users, Link2, Database
 } from "lucide-react";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
 import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
@@ -174,6 +174,7 @@ const RouteRiskPage = lazy(() => import("@/pages/route-risk"));
 const ConstellationPage = lazy(() => import("@/pages/constellation"));
 const VesselsApprovalReviewPage = lazy(() => import("@/pages/vessels-approval-review"));
 const TrustProvenancePage = lazy(() => import("@/pages/trust-provenance"));
+const VesselsEvidencePage = lazy(() => import("@/pages/evidence"));
 const DisruptionForecastPage = lazy(() => import("@/pages/disruption-forecast"));
 const DarkFleetEconomicsPage = lazy(() => import("@/pages/dark-fleet-economics"));
 const VoyagePnLPage = lazy(() => import("@/pages/voyage-pnl"));
@@ -435,6 +436,7 @@ function VesselsSidebarContent({ expanded, onMobileClose, onToggleCollapse }: { 
         { id: "route-risk", label: "Route Risk", href: "/route-risk", icon: <Navigation className="w-3.5 h-3.5" /> },
         { id: "approval-review", label: "Review & Approval", href: "/approval-review", icon: <Shield className="w-3.5 h-3.5" /> },
         { id: "trust-provenance", label: "Trust & Provenance", href: "/trust-provenance", icon: <Shield className="w-3.5 h-3.5" /> },
+        { id: "evidence", label: "Evidence", href: "/evidence", icon: <Database className="w-3.5 h-3.5" /> },
       ],
     },
     {
@@ -610,6 +612,7 @@ function DashboardRouter() {
         <Route path="/constellation" component={ConstellationPage} />
         <Route path="/approval-review" component={VesselsApprovalReviewPage} />
         <Route path="/trust-provenance" component={TrustProvenancePage} />
+        <Route path="/evidence" component={VesselsEvidencePage} />
         <Route path="/disruption-forecast" component={DisruptionForecastPage} />
         <Route path="/dark-fleet-economics" component={DarkFleetEconomicsPage} />
         <Route path="/voyage-pnl" component={VoyagePnLPage} />

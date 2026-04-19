@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import {
-  LayoutDashboard, Network, BarChart3, FileStack, Shield, Settings,
+  LayoutDashboard, Network, BarChart3, FileStack, Shield, Settings, Database,
   ChevronLeft, ChevronRight, Scale, Bell, Search, Menu, X
 } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
@@ -34,6 +34,7 @@ const NAV_SECTIONS: NavSection[] = [
       { id: "obligation-graph", label: "Obligation Graph", icon: <Network className="w-3.5 h-3.5" />, href: "/obligation-graph" },
       { id: "deadline-heatmap", label: "Deadline Heatmap", icon: <BarChart3 className="w-3.5 h-3.5" />, href: "/deadline-heatmap" },
       { id: "proof-chain", label: "Proof Chain Export", icon: <FileStack className="w-3.5 h-3.5" />, href: "/proof-chain" },
+      { id: "evidence", label: "Evidence", icon: <Database className="w-3.5 h-3.5" />, href: "/evidence" },
     ],
   },
   {

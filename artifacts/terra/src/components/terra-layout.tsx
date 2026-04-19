@@ -57,6 +57,7 @@ const NAV_SECTIONS: SidebarNavSection[] = [
     items: [
       { id: "pipeline", href: "/pipeline", label: "Pipeline", icon: <Activity className="w-full h-full" /> },
       { id: "investor-mode", href: "/investor-mode", label: "Ownership", icon: <Globe className="w-full h-full" /> },
+      { id: "evidence", href: "/evidence", label: "Evidence", icon: <FileSearch className="w-full h-full" /> },
     ],
   },
   {

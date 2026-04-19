@@ -615,3 +615,8 @@ export {
   type EvalsStripProps,
   type EvalResult,
 } from "./RunConsole";
+export {
+  EvidenceExplorer,
+  type EvidenceExplorerProps,
+  type EvidenceSignalDomain,
+} from "./evidence-explorer";

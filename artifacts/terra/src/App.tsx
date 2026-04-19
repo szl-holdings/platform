@@ -53,6 +53,7 @@ const Automations = lazy(() => import("@/pages/automations"));
 const BrokerOverview = lazy(() => import("@/pages/broker-overview"));
 const Ingestion = lazy(() => import("@/pages/ingestion"));
 const InvestorMode = lazy(() => import("@/pages/investor-mode"));
+const TerraEvidencePage = lazy(() => import("@/pages/evidence"));
 const Pipeline = lazy(() => import("@/pages/pipeline"));
 const TerraMarketingLanding = lazy(() => import("@/pages/marketing-landing"));
 const InvestmentReadinessPage = lazy(() => import("@/pages/investment-readiness"));
@@ -159,6 +160,7 @@ function PrivateRouter() {
         <Route path="/distress-pipeline" component={DistressPipeline} />
         <Route path="/portfolio-dashboard" component={PortfolioDashboard} />
         <Route path="/investor-mode" component={InvestorMode} />
+        <Route path="/evidence" component={TerraEvidencePage} />
         <Route path="/pipeline" component={Pipeline} />
         <Route path="/property-map" component={PropertyMapPage} />
         <Route path="/property/:id" component={PropertyDetail} />

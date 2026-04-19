@@ -43,6 +43,7 @@ const DeadlineHeatmap = lazy(() => import("@/pages/deadline-heatmap"));
 const ProofChainExport = lazy(() => import("@/pages/proof-chain-export"));
 const PrivilegeControls = lazy(() => import("@/pages/privilege-controls"));
 const AuditTrailPage = lazy(() => import("@/pages/audit-trail"));
+const PrismEvidencePage = lazy(() => import("@/pages/evidence"));
 
 function PageLoader() {
   return (
@@ -67,6 +68,7 @@ function PrivateRouter() {
           <Route path="/proof-chain/:matterId" component={ProofChainExport} />
           <Route path="/privilege" component={PrivilegeControls} />
           <Route path="/audit" component={AuditTrailPage} />
+          <Route path="/evidence" component={PrismEvidencePage} />
           <Route component={() => <Redirect to="/matters" />} />
         </Switch>
       </Suspense>
