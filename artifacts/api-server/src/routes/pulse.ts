@@ -113,6 +113,19 @@ if (process.env.NODE_ENV !== "production") {
     }
   });
 
+  router.post("/demo/export/pdf", validateBody(jsonObjectBodySchema), demoRateLimit, async (req: Request, res: Response): Promise<void> => {
+    if (!verifyDemoPin(req, res)) return;
+    const briefingId: string | undefined = (req.body as { briefingId?: string } | undefined)?.briefingId;
+    let brief: Briefing | null = null;
+    try {
+      brief = briefingId ? await getBriefingById(briefingId) : await getLatestBriefing();
+    } catch {
+      brief = null;
+    }
+    if (!brief) brief = (briefingId ? DEMO_BRIEFINGS.find((b) => b.id === briefingId) : DEMO_BRIEFINGS[0]) ?? DEMO_BRIEFINGS[0]!;
+    renderBriefingPdf(res, brief);
+  });
+
   router.get("/demo/dissents", demoRateLimit, async (req: Request, res: Response): Promise<void> => {
     if (!verifyDemoPin(req, res)) return;
     try {
@@ -1369,6 +1382,303 @@ router.patch("/dissents/:id", validateBody(jsonObjectBodySchema), requireRole("o
   res.json({ success: true, dissent: rowToDissent(row!) });
 });
 
+// ─── PDF rendering ────────────────────────────────────────────────────────────
+// Pulse editorial branding: ink-blue header band with gold rule, serif body
+// (built-in Times) for an FT/Economist-style executive leave-behind.
+const PULSE_INK = "#0a0f1e";
+const PULSE_GOLD = "#c8a84b";
+const PULSE_TEXT = "#1a1f2e";
+const PULSE_TEXT_DIM = "#4a5468";
+const PULSE_RULE = "#c0c8d4";
+const PULSE_RED = "#b8453d";
+const PULSE_AMBER = "#b8772a";
+
+function riskColor(risk: string): string {
+  if (risk === "CRITICAL") return PULSE_RED;
+  if (risk === "HIGH") return "#c8612e";
+  if (risk === "MEDIUM") return PULSE_AMBER;
+  return "#3d7a4f";
+}
+
+function priorityColor(priority: string): string {
+  if (priority === "P0") return PULSE_RED;
+  if (priority === "P1") return "#c8612e";
+  if (priority === "P2") return PULSE_GOLD;
+  return "#3d7a4f";
+}
+
+function drawPulseHeader(doc: PDFKit.PDFDocument, brief: Briefing): void {
+  const pageW = doc.page.width;
+  const bandH = 78;
+  // Ink header band
+  doc.save();
+  doc.rect(0, 0, pageW, bandH).fill(PULSE_INK);
+  // Gold rule under the band
+  doc.rect(0, bandH, pageW, 2).fill(PULSE_GOLD);
+  doc.restore();
+
+  // Wordmark + classification inside the band
+  doc.fillColor("#ffffff").font("Times-Bold").fontSize(26).text("PULSE", 54, 22, { lineBreak: false });
+  doc.fillColor(PULSE_GOLD).font("Times-Italic").fontSize(9).text(
+    "SZL HOLDINGS · MULTI-AGENT EXECUTIVE BRIEFING",
+    54,
+    52,
+    { lineBreak: false },
+  );
+
+  // Right side: edition + classification
+  const rightX = pageW - 54;
+  doc.fillColor("#ffffff").font("Helvetica").fontSize(8).text(
+    brief.edition.toUpperCase(),
+    rightX - 220,
+    24,
+    { width: 220, align: "right", lineBreak: false },
+  );
+  doc.fillColor(PULSE_GOLD).font("Helvetica-Bold").fontSize(8).text(
+    brief.classification,
+    rightX - 220,
+    40,
+    { width: 220, align: "right", lineBreak: false },
+  );
+  const dateLabel = new Date(brief.date).toLocaleDateString("en-US", {
+    weekday: "long", year: "numeric", month: "long", day: "numeric",
+  }).toUpperCase();
+  doc.fillColor("#a8b4c8").font("Helvetica").fontSize(8).text(
+    dateLabel,
+    rightX - 220,
+    54,
+    { width: 220, align: "right", lineBreak: false },
+  );
+
+  // Reset cursor below the band with breathing room
+  doc.y = bandH + 22;
+  doc.x = 54;
+}
+
+function drawFooter(doc: PDFKit.PDFDocument, brief: Briefing, pageNum: number, total: number): void {
+  const pageW = doc.page.width;
+  const pageH = doc.page.height;
+  const y = pageH - 36;
+  doc.save();
+  doc.moveTo(54, y).lineTo(pageW - 54, y).lineWidth(0.5).strokeColor(PULSE_RULE).stroke();
+  doc.fillColor(PULSE_TEXT_DIM).font("Helvetica").fontSize(7.5).text(
+    `Pulse · ${brief.id} · Generated ${new Date(brief.generatedAt).toUTCString()}`,
+    54,
+    y + 8,
+    { lineBreak: false },
+  );
+  doc.fillColor(PULSE_TEXT_DIM).font("Helvetica").fontSize(7.5).text(
+    `Page ${pageNum} of ${total}`,
+    pageW - 154,
+    y + 8,
+    { width: 100, align: "right", lineBreak: false },
+  );
+  doc.restore();
+}
+
+function drawSectionRule(doc: PDFKit.PDFDocument): void {
+  const y = doc.y + 4;
+  doc.save();
+  doc.moveTo(54, y).lineTo(doc.page.width - 54, y).lineWidth(0.5).strokeColor(PULSE_RULE).stroke();
+  doc.restore();
+  doc.y = y + 8;
+}
+
+function drawPill(
+  doc: PDFKit.PDFDocument,
+  text: string,
+  x: number,
+  y: number,
+  bg: string,
+  fg: string,
+): number {
+  const padX = 6;
+  const h = 13;
+  doc.font("Helvetica-Bold").fontSize(7);
+  const w = doc.widthOfString(text) + padX * 2;
+  doc.save();
+  doc.roundedRect(x, y, w, h, 2).fill(bg);
+  doc.fillColor(fg).text(text, x + padX, y + 3.2, { lineBreak: false, width: w - padX * 2 });
+  doc.restore();
+  return w;
+}
+
+function renderBriefingPdf(res: Response, brief: Briefing): void {
+  const enriched = withAgentNames(brief);
+  const doc = new PDFDocument({
+    size: "LETTER",
+    margins: { top: 54, bottom: 54, left: 54, right: 54 },
+    bufferPages: true,
+    info: {
+      Title: `Pulse Brief · ${enriched.date}`,
+      Author: "SZL Holdings · Pulse",
+      Subject: enriched.headline,
+      Keywords: `pulse, briefing, ${enriched.domains.join(", ")}`,
+    },
+  });
+
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader("Content-Disposition", `attachment; filename="pulse-${enriched.date}.pdf"`);
+  res.setHeader("Cache-Control", "private, no-store");
+  doc.pipe(res);
+
+  drawPulseHeader(doc, enriched);
+  doc.on("pageAdded", () => drawPulseHeader(doc, enriched));
+
+  // Headline + lead
+  doc.fillColor(PULSE_TEXT).font("Times-Bold").fontSize(18).text(enriched.headline, { align: "left" });
+  doc.moveDown(0.4);
+  doc.fillColor(PULSE_TEXT_DIM).font("Times-Italic").fontSize(11).text(enriched.leadSentence, { align: "left" });
+  doc.moveDown(0.6);
+
+  // Risk / confidence pill row
+  const pillY = doc.y;
+  let pillX = 54;
+  pillX += drawPill(doc, `OVERALL RISK · ${enriched.overallRisk}`, pillX, pillY, riskColor(enriched.overallRisk), "#ffffff") + 6;
+  pillX += drawPill(doc, `CONFIDENCE · ${(enriched.overallConfidence * 100).toFixed(0)}%`, pillX, pillY, PULSE_INK, PULSE_GOLD) + 6;
+  pillX += drawPill(doc, `${enriched.sections.length} DOMAIN SECTIONS`, pillX, pillY, "#e5e9f2", PULSE_TEXT) + 6;
+  doc.y = pillY + 22;
+  drawSectionRule(doc);
+
+  // Recommended Actions — front and center for executives
+  if (enriched.recommendedActions.length) {
+    doc.fillColor(PULSE_INK).font("Times-Bold").fontSize(13).text("Recommended Actions — Today");
+    doc.moveDown(0.4);
+    for (const a of enriched.recommendedActions) {
+      if (doc.y > doc.page.height - 120) doc.addPage();
+      const rowY = doc.y;
+      const pColor = priorityColor(a.priority);
+      // Priority badge
+      doc.save();
+      doc.roundedRect(54, rowY, 28, 16, 2).fill(pColor);
+      doc.fillColor("#ffffff").font("Helvetica-Bold").fontSize(9).text(a.priority, 54, rowY + 4, { width: 28, align: "center", lineBreak: false });
+      doc.restore();
+      // Action text
+      doc.fillColor(PULSE_TEXT).font("Times-Bold").fontSize(11).text(a.action, 92, rowY, { width: doc.page.width - 54 - 92 });
+      doc.fillColor(PULSE_TEXT_DIM).font("Times-Italic").fontSize(9.5).text(a.rationale, 92, doc.y + 2, { width: doc.page.width - 54 - 92 });
+      doc.fillColor(PULSE_TEXT_DIM).font("Helvetica").fontSize(8.5).text(`Owner: ${a.owner}   ·   Due: ${a.dueBy}`, 92, doc.y + 2);
+      doc.x = 54;
+      doc.moveDown(0.6);
+    }
+    drawSectionRule(doc);
+  }
+
+  // Domain sections
+  doc.fillColor(PULSE_INK).font("Times-Bold").fontSize(13).text("Domain Intelligence");
+  doc.moveDown(0.4);
+
+  for (const section of enriched.sections) {
+    if (doc.y > doc.page.height - 180) doc.addPage();
+
+    // Section header row: title + agent + risk + confidence
+    const headerY = doc.y;
+    const agentName = (section as { agentName?: string }).agentName ?? section.agentId;
+    doc.fillColor(PULSE_INK).font("Times-Bold").fontSize(13).text(section.title, 54, headerY, { lineBreak: false });
+    // Right side meta pills
+    const rightX = doc.page.width - 54;
+    let metaX = rightX;
+    const confW = doc.font("Helvetica-Bold").fontSize(7).widthOfString(`CONF ${(section.confidence * 100).toFixed(0)}%`) + 12;
+    metaX -= confW;
+    drawPill(doc, `CONF ${(section.confidence * 100).toFixed(0)}%`, metaX, headerY + 1, PULSE_INK, PULSE_GOLD);
+    const riskW = doc.font("Helvetica-Bold").fontSize(7).widthOfString(section.riskLevel) + 12;
+    metaX -= riskW + 6;
+    drawPill(doc, section.riskLevel, metaX, headerY + 1, riskColor(section.riskLevel), "#ffffff");
+
+    doc.x = 54;
+    doc.y = headerY + 18;
+    doc.fillColor(PULSE_TEXT_DIM).font("Helvetica").fontSize(8.5).text(
+      `${agentName} · ${section.confidenceLabel} confidence · Updated ${new Date(section.lastUpdated).toUTCString()}`,
+    );
+    doc.moveDown(0.4);
+
+    // Key judgment in a tinted box
+    const judgY = doc.y;
+    const innerW = doc.page.width - 108;
+    doc.save();
+    doc.rect(54, judgY, 3, 0).fill(PULSE_GOLD);
+    doc.fillColor(PULSE_TEXT).font("Times-Bold").fontSize(10.5).text("KEY JUDGMENT", 64, judgY, { width: innerW - 10 });
+    doc.fillColor(PULSE_TEXT).font("Times-Roman").fontSize(11).text(section.keyJudgment, 64, doc.y + 1, { width: innerW - 10 });
+    const judgEndY = doc.y + 4;
+    doc.rect(54, judgY, 3, judgEndY - judgY).fill(PULSE_GOLD);
+    doc.restore();
+    doc.x = 54;
+    doc.y = judgEndY + 8;
+
+    // Narrative paragraphs
+    for (const para of section.narrative) {
+      if (doc.y > doc.page.height - 100) doc.addPage();
+      doc.fillColor(PULSE_TEXT).font("Times-Roman").fontSize(10.5).text(para, 54, doc.y, {
+        align: "justify",
+        width: doc.page.width - 108,
+      });
+      doc.moveDown(0.3);
+    }
+
+    // Two-column key findings + assumptions/gaps
+    if (section.keyFindings.length) {
+      if (doc.y > doc.page.height - 140) doc.addPage();
+      doc.moveDown(0.2);
+      doc.fillColor(PULSE_INK).font("Times-Bold").fontSize(10).text("Key findings");
+      doc.moveDown(0.15);
+      for (const f of section.keyFindings) {
+        const lineY = doc.y;
+        // Severity dot
+        doc.save();
+        doc.circle(58, lineY + 5, 2.5).fill(riskColor(f.severity));
+        doc.restore();
+        doc.fillColor(PULSE_TEXT_DIM).font("Helvetica-Bold").fontSize(8).text(`[${f.severity}]`, 64, lineY, { lineBreak: false });
+        const sevW = doc.widthOfString(`[${f.severity}] `) + 4;
+        doc.fillColor(PULSE_TEXT).font("Times-Roman").fontSize(10).text(f.finding, 64 + sevW, lineY, {
+          width: doc.page.width - 108 - sevW,
+        });
+        doc.x = 54;
+      }
+    }
+
+    if (section.assumptions.length) {
+      doc.moveDown(0.25);
+      doc.fillColor(PULSE_INK).font("Times-Bold").fontSize(10).text("Key assumptions");
+      doc.moveDown(0.1);
+      for (const a of section.assumptions) {
+        doc.fillColor(PULSE_TEXT).font("Times-Roman").fontSize(10).text(`•  ${a}`, 64, doc.y, { width: doc.page.width - 118 });
+        doc.x = 54;
+      }
+    }
+
+    if (section.gaps.length) {
+      doc.moveDown(0.25);
+      doc.fillColor(PULSE_AMBER).font("Times-Bold").fontSize(10).text("Gaps & confidence limiters");
+      doc.moveDown(0.1);
+      for (const g of section.gaps) {
+        doc.fillColor(PULSE_TEXT).font("Times-Roman").fontSize(10).text(`•  ${g}`, 64, doc.y, { width: doc.page.width - 118 });
+        doc.x = 54;
+      }
+    }
+
+    doc.moveDown(0.6);
+    drawSectionRule(doc);
+  }
+
+  // Closing colophon
+  if (doc.y > doc.page.height - 90) doc.addPage();
+  doc.fillColor(PULSE_TEXT_DIM).font("Times-Italic").fontSize(9).text(
+    "Synthesized by the Nuro Mesh agent collective and curated by Alloy. All confidence figures are calibrated against reported gaps and assumptions; readers should weight recommended actions accordingly.",
+    54,
+    doc.y,
+    { width: doc.page.width - 108, align: "justify" },
+  );
+
+  // Per-page footer with brief id and "Page N of M" — uses the bufferPages
+  // option so we can iterate every page after layout is finalized.
+  const range = doc.bufferedPageRange();
+  for (let i = 0; i < range.count; i += 1) {
+    doc.switchToPage(range.start + i);
+    drawFooter(doc, enriched, i + 1, range.count);
+  }
+
+  doc.end();
+}
+
 router.post("/export/pdf", validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
   const briefingId: string | undefined = req.body?.briefingId;
   const brief = briefingId
@@ -1378,77 +1688,7 @@ router.post("/export/pdf", validateBody(jsonObjectBodySchema), async (req: Reque
     sendNotFound(res, "Briefing");
     return;
   }
-  const enriched = withAgentNames(brief);
-
-  const doc = new PDFDocument({ size: "LETTER", margin: 54, info: {
-    Title: `Pulse Brief · ${enriched.date}`,
-    Author: "SZL Holdings · Pulse",
-    Subject: enriched.headline,
-  }});
-  res.setHeader("Content-Type", "application/pdf");
-  res.setHeader("Content-Disposition", `attachment; filename="pulse-${enriched.date}.pdf"`);
-  doc.pipe(res);
-
-  doc.fontSize(9).fillColor("#b45309").text(enriched.classification, { align: "right" });
-  doc.moveDown(0.2);
-  doc.fillColor("#111").fontSize(22).font("Helvetica-Bold").text("PULSE");
-  doc.fontSize(10).font("Helvetica").fillColor("#555").text(enriched.edition);
-  doc.moveDown(0.8);
-
-  doc.fillColor("#111").fontSize(14).font("Helvetica-Bold").text(enriched.headline, { align: "left" });
-  doc.moveDown(0.4);
-  doc.fontSize(10).font("Helvetica-Oblique").fillColor("#333").text(enriched.leadSentence);
-  doc.moveDown(0.6);
-  doc.fontSize(9).fillColor("#555").font("Helvetica").text(
-    `Overall risk: ${enriched.overallRisk}   ·   Confidence: ${(enriched.overallConfidence * 100).toFixed(0)}%   ·   Generated ${enriched.generatedAt}`,
-  );
-  doc.moveTo(doc.x, doc.y + 6).lineTo(doc.page.width - 54, doc.y + 6).strokeColor("#bbb").stroke();
-  doc.moveDown(1);
-
-  for (const section of enriched.sections) {
-    if (doc.y > doc.page.height - 120) doc.addPage();
-    doc.fillColor("#111").fontSize(13).font("Helvetica-Bold").text(section.title);
-    doc.fontSize(9).fillColor("#666").font("Helvetica").text(
-      `${(section as { agentName?: string }).agentName ?? section.agentId} · Risk ${section.riskLevel} · Confidence ${(section.confidence * 100).toFixed(0)}% (${section.confidenceLabel})`,
-    );
-    doc.moveDown(0.3);
-    doc.fillColor("#111").fontSize(10).font("Helvetica-Bold").text("Key judgment");
-    doc.font("Helvetica").fillColor("#222").text(section.keyJudgment);
-    doc.moveDown(0.4);
-    for (const para of section.narrative) {
-      doc.font("Helvetica").fillColor("#222").fontSize(10).text(para, { align: "justify" });
-      doc.moveDown(0.3);
-    }
-    if (section.keyFindings.length) {
-      doc.moveDown(0.2).font("Helvetica-Bold").fontSize(10).fillColor("#111").text("Key findings");
-      for (const f of section.keyFindings) {
-        doc.font("Helvetica").fontSize(10).fillColor("#222").text(`• [${f.severity}] ${f.finding}`);
-      }
-    }
-    if (section.assumptions.length) {
-      doc.moveDown(0.2).font("Helvetica-Bold").fontSize(10).fillColor("#111").text("Assumptions");
-      for (const a of section.assumptions) doc.font("Helvetica").fontSize(10).fillColor("#222").text(`• ${a}`);
-    }
-    if (section.gaps.length) {
-      doc.moveDown(0.2).font("Helvetica-Bold").fontSize(10).fillColor("#b45309").text("Gaps / confidence limiters");
-      for (const g of section.gaps) doc.font("Helvetica").fontSize(10).fillColor("#222").text(`• ${g}`);
-    }
-    doc.moveDown(0.8);
-  }
-
-  if (enriched.recommendedActions.length) {
-    if (doc.y > doc.page.height - 160) doc.addPage();
-    doc.fillColor("#111").fontSize(13).font("Helvetica-Bold").text("Recommended actions");
-    doc.moveDown(0.3);
-    for (const a of enriched.recommendedActions) {
-      doc.font("Helvetica-Bold").fontSize(10).fillColor("#111").text(`[${a.priority}] ${a.action}`);
-      doc.font("Helvetica").fontSize(9).fillColor("#444").text(`Owner: ${a.owner} · Due: ${a.dueBy}`);
-      doc.font("Helvetica-Oblique").fontSize(9).fillColor("#555").text(a.rationale);
-      doc.moveDown(0.4);
-    }
-  }
-
-  doc.end();
+  renderBriefingPdf(res, brief);
 });
 
 export default router;

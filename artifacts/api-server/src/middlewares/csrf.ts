@@ -87,6 +87,10 @@ function isExempt(path: string): boolean {
   // Non-production demo PIN verification — stateless read-only PIN check;
   // no session or user state is modified on the server side.
   if (process.env.NODE_ENV !== "production" && path === "/api/pulse/demo/verify") return true;
+  // Non-production demo PDF export — POST authenticated by the x-demo-token
+  // header (PIN), which an attacker cannot forge cross-origin without the PIN.
+  // No server state mutated; the route only renders a PDF response.
+  if (process.env.NODE_ENV !== "production" && path === "/api/pulse/demo/export/pdf") return true;
   return false;
 }
 

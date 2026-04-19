@@ -325,6 +325,49 @@ async function rawFetch<T>(path: string, init?: RequestInit): Promise<T> {
   return (await res.json()) as T;
 }
 
+export async function exportBriefingPdf(briefingId: string, briefingDate: string): Promise<void> {
+  const isDemo = isDemoMode();
+  const path = isDemo ? "/api/pulse/demo/export/pdf" : "/api/pulse/export/pdf";
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (isDemo) {
+    const token = sessionStorage.getItem(DEMO_TOKEN_KEY);
+    if (!token) throw new Error("demo_session_expired");
+    headers["x-demo-token"] = token;
+  } else {
+    const token = await ensureCsrfToken();
+    if (token) headers["x-csrf-token"] = token;
+  }
+  const res = await fetch(path, {
+    method: "POST",
+    credentials: "include",
+    headers,
+    body: JSON.stringify({ briefingId }),
+  });
+  if (!res.ok) {
+    let detail = "";
+    try {
+      const body = await res.json();
+      detail = (body as { error?: string } | null)?.error ?? "";
+    } catch {
+      // body wasn't JSON — keep generic message
+    }
+    throw new Error(`PDF export failed: ${res.status} ${res.statusText}${detail ? ` — ${detail}` : ""}`);
+  }
+  const ct = res.headers.get("content-type") ?? "";
+  if (!ct.includes("application/pdf")) {
+    throw new Error("Server did not return a PDF");
+  }
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `pulse-${briefingDate}.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
 export function useExecutiveBrief() {
   return useQuery({
     queryKey: ["pulse", "executive-brief"],

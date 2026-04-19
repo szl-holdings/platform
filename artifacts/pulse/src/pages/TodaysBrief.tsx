@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { AlertTriangle, ChevronDown, ChevronUp, ExternalLink, Clock, Shield, Zap, Sparkles } from "lucide-react";
+import { AlertTriangle, ChevronDown, ChevronUp, ExternalLink, Clock, Shield, Zap, Sparkles, Download } from "lucide-react";
 import { getRiskColor, AGENTS, type BriefingSection, type RiskLevel } from "../lib/data";
-import { useTodaysBrief, useGenerateBriefing, isDemoMode } from "../lib/api";
+import { useTodaysBrief, useGenerateBriefing, isDemoMode, exportBriefingPdf } from "../lib/api";
 import AgentBadge from "../components/AgentBadge";
 import ConfidenceChip from "../components/ConfidenceChip";
 import { ProofEnvelope, type AutonomyMode } from "@szl-holdings/design-system";
@@ -150,11 +150,23 @@ function SectionCard({ section }: { section: BriefingSection }) {
 export default function TodaysBrief() {
   const { data: brief, isLoading, error } = useTodaysBrief();
   const generate = useGenerateBriefing();
+  const [exporting, setExporting] = useState(false);
   const handleGenerate = async () => {
     try {
       await generate.mutateAsync();
     } catch (e) {
       alert(`Live generation failed: ${e instanceof Error ? e.message : String(e)}`);
+    }
+  };
+  const handleExport = async () => {
+    if (!brief) return;
+    setExporting(true);
+    try {
+      await exportBriefingPdf(brief.id, brief.date);
+    } catch (e) {
+      alert(`PDF export failed: ${e instanceof Error ? e.message : String(e)}`);
+    } finally {
+      setExporting(false);
     }
   };
 
@@ -235,7 +247,21 @@ export default function TodaysBrief() {
                   {generate.isPending ? "Generating…" : "Generate Live Briefing"}
                 </button>
               )}
-              {/* PDF export: activate by wiring /api/pulse/export/pdf handler */}
+              <button
+                onClick={handleExport}
+                disabled={exporting}
+                title="Download a branded PDF of this briefing"
+                style={{
+                  display: "flex", alignItems: "center", gap: 6,
+                  padding: "8px 14px", borderRadius: 6,
+                  background: "rgba(200,168,75,0.10)", border: "1px solid rgba(200,168,75,0.45)",
+                  color: "var(--pulse-gold)", fontSize: "0.78rem", fontWeight: 600,
+                  cursor: exporting ? "wait" : "pointer",
+                }}
+              >
+                <Download size={13} />
+                {exporting ? "Preparing PDF…" : "Export PDF"}
+              </button>
             </div>
           </div>
         </div>
