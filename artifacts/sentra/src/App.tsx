@@ -3,7 +3,7 @@ import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@szl-holdings/shared-ui/ui/sonner";
 import { AnalyticsProvider } from "@szl-holdings/shared-ui/analytics-provider";
-import { useUserPreferences } from "@szl-holdings/shared-ui/use-user-preferences";
+import { useUserPreferences, useEffectiveAccent } from "@szl-holdings/shared-ui/use-user-preferences";
 import {
   LayoutDashboard, ShieldAlert, Shield, Activity, Zap, Cpu,
   AlertTriangle, RotateCcw, BarChart3, Lock, ShieldCheck, Menu
@@ -31,7 +31,7 @@ const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
 });
 
-const SENTRA_ACCENT = "#ef4444";
+const SENTRA_BRAND_ACCENT = "#ef4444";
 
 function PageLoader() {
   return (
@@ -51,6 +51,7 @@ function SentraSidebarContent({
   onToggleCollapse?: () => void;
 }) {
   const [location, navigate] = useLocation();
+  const accent = useEffectiveAccent(SENTRA_BRAND_ACCENT);
 
   const sections: SidebarNavSection[] = [
     {
@@ -88,7 +89,7 @@ function SentraSidebarContent({
     <SidebarNav
       sections={sections}
       currentPath={location}
-      accentColor={SENTRA_ACCENT}
+      accentColor={accent}
       collapsed={!expanded}
       onNavigate={(item) => {
         if (item.href) navigate(item.href);
@@ -209,6 +210,7 @@ function AppShell({
   setSidebarHovered: (v: boolean) => void;
 }) {
   const [location] = useLocation();
+  const accent = useEffectiveAccent(SENTRA_BRAND_ACCENT);
   const sidebarExpanded = !sidebarCollapsed || sidebarHovered;
 
   if (location.startsWith("/resilience")) {
@@ -225,7 +227,7 @@ function AppShell({
         <EcosystemNav
           currentAppId="sentra"
           currentAppName="Sentra Cyber Resilience"
-          accentColor={SENTRA_ACCENT}
+          accentColor={accent}
         />
         <Suspense fallback={<div style={{ height: "100vh", background: "#0a0606" }} />}>
           <SentraLandingPage />
@@ -240,7 +242,7 @@ function AppShell({
       <EcosystemNav
         currentAppId="sentra"
         currentAppName="Sentra Cyber Resilience"
-        accentColor={SENTRA_ACCENT}
+        accentColor={accent}
       />
       <SharedDashboardShell
         sidebar={
@@ -258,7 +260,7 @@ function AppShell({
           onMouseLeave: () => setSidebarHovered(false),
         }}
         theme={{ sidebarBg: "#060e1a", pageBg: "#060e1a", headerBg: "rgba(6,14,26,0.92)" }}
-        accentColor={SENTRA_ACCENT}
+        accentColor={accent}
         topbar={
           <div className="flex items-center gap-3 w-full md:hidden">
             <button
@@ -274,7 +276,7 @@ function AppShell({
           </div>
         }
       >
-        <main className="flex-1 overflow-auto h-full">
+        <main data-szl-shell-main className="flex-1 overflow-auto h-full">
           <DashboardRouter />
         </main>
       </SharedDashboardShell>

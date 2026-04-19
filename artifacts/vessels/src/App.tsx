@@ -12,7 +12,7 @@ import { RealtimeStatusIndicator } from "@szl-holdings/shared-ui/realtime-status
 import { OnboardingWizard, GettingStartedChecklist, useOnboardingState, type OnboardingConfig } from "@szl-holdings/shared-ui/onboarding";
 import { SyncStatusBadge } from "@szl-holdings/shared-ui/sync-status-badge";
 import { useWebSyncStatus } from "@szl-holdings/shared-ui/use-web-sync-status";
-import { useUserPreferences } from "@szl-holdings/shared-ui/use-user-preferences";
+import { useUserPreferences, useEffectiveAccent } from "@szl-holdings/shared-ui/use-user-preferences";
 import { UserButton } from "@szl-holdings/shared-ui/UserButton";
 import {
   Ship, AlertTriangle, Activity, LayoutDashboard, WifiOff, BarChart3, ChevronDown, User, ChevronRight, DollarSign, Wrench, MapPin, Radio, List, Globe, Navigation, EyeOff, ShieldAlert, Shield, Anchor, Brain, Menu, FileText, TrendingUp, Calculator, Zap, Cpu, Leaf, Waves, Fuel, Layers, RotateCcw, GitBranch, Network, Users, Link2, Database
@@ -48,7 +48,7 @@ function pathToVesselsActionType(path: string): string | undefined {
   return seg;
 }
 
-const VESSELS_ACCENT = LANE_ACCENT_HEX.vessels.primaryLight;
+const VESSELS_BRAND_ACCENT = LANE_ACCENT_HEX.vessels.primaryLight;
 
 const _vesselsStorage = new IndexedDBAdapter({ dbName: "szl-vessels-offline" });
 const _vesselsConflictResolver = new ConflictResolver({ storage: _vesselsStorage });
@@ -83,7 +83,7 @@ export async function vesselsReplayQueue(token: string | null): Promise<{ replay
 const VESSELS_ONBOARDING_CONFIG: OnboardingConfig = {
   appId: "vessels",
   appName: "Vessels",
-  accentColor: VESSELS_ACCENT,
+  accentColor: VESSELS_BRAND_ACCENT,
   steps: [
     {
       id: "welcome",
@@ -350,6 +350,7 @@ const VESSELS_COLLAPSE_KEY = "vessels-sidebar-collapsed";
 
 function VesselsSidebarContent({ expanded, onMobileClose, onToggleCollapse }: { expanded: boolean; onMobileClose?: () => void; onToggleCollapse?: () => void }) {
   const [location, navigate] = useLocation();
+  const accent = useEffectiveAccent(VESSELS_BRAND_ACCENT);
 
   const primarySections: SidebarNavSection[] = [
     {
@@ -463,12 +464,12 @@ function VesselsSidebarContent({ expanded, onMobileClose, onToggleCollapse }: { 
 
   const fleetStatusFooter = expanded ? (
     <div className="space-y-3">
-      <div className="rounded-lg px-3 py-3" style={{ background: toAlpha(VESSELS_ACCENT, 0.04), border: `1px solid ${toAlpha(VESSELS_ACCENT, 0.08)}` }}>
-        <div className="text-[9px] uppercase tracking-widest font-medium mb-2" style={{ color: toAlpha(VESSELS_ACCENT, 0.5) }}>Fleet Status</div>
+      <div className="rounded-lg px-3 py-3" style={{ background: toAlpha(VESSELS_BRAND_ACCENT, 0.04), border: `1px solid ${toAlpha(VESSELS_BRAND_ACCENT, 0.08)}` }}>
+        <div className="text-[9px] uppercase tracking-widest font-medium mb-2" style={{ color: toAlpha(VESSELS_BRAND_ACCENT, 0.5) }}>Fleet Status</div>
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
             <span className="text-[10px] text-white/35">Vessels tracked</span>
-            <span className="text-[9px] font-mono" style={{ color: VESSELS_ACCENT }}>1,247 live</span>
+            <span className="text-[9px] font-mono" style={{ color: VESSELS_BRAND_ACCENT }}>1,247 live</span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-[10px] text-white/35">Distress signals</span>
@@ -483,7 +484,7 @@ function VesselsSidebarContent({ expanded, onMobileClose, onToggleCollapse }: { 
           </div>
         </div>
         <div className="mt-2 h-0.5 rounded-full overflow-hidden bg-white/6">
-          <div className="h-full rounded-full" style={{ width: "94%", background: `linear-gradient(90deg, ${VESSELS_ACCENT}, ${toAlpha(VESSELS_ACCENT, 0.6)})` }} />
+          <div className="h-full rounded-full" style={{ width: "94%", background: `linear-gradient(90deg, ${VESSELS_BRAND_ACCENT}, ${toAlpha(VESSELS_BRAND_ACCENT, 0.6)})` }} />
         </div>
         <div className="flex justify-between mt-0.5">
           <span className="text-[8px] text-white/20">AIS coverage</span>
@@ -500,13 +501,13 @@ function VesselsSidebarContent({ expanded, onMobileClose, onToggleCollapse }: { 
         />
       )}
       <Link href="/platform">
-        <div className="w-full text-xs font-medium text-center px-3 py-2 rounded-lg cursor-pointer transition-colors" style={{ background: toAlpha(VESSELS_ACCENT, 0.10), color: VESSELS_ACCENT }}>
+        <div className="w-full text-xs font-medium text-center px-3 py-2 rounded-lg cursor-pointer transition-colors" style={{ background: toAlpha(VESSELS_BRAND_ACCENT, 0.10), color: VESSELS_BRAND_ACCENT }}>
           Request demo
         </div>
       </Link>
       <UserButton showName className="w-full" />
       <RoleSelector expanded={expanded} />
-      <PackBanner vertical="Maritime Intelligence Pack" accentColor={VESSELS_ACCENT} compact />
+      <PackBanner vertical="Maritime Intelligence Pack" accentColor={VESSELS_BRAND_ACCENT} compact />
     </div>
   ) : (
     <div className="space-y-2">
@@ -519,19 +520,19 @@ function VesselsSidebarContent({ expanded, onMobileClose, onToggleCollapse }: { 
     <SidebarNav
       sections={primarySections}
       currentPath={location}
-      accentColor={VESSELS_ACCENT}
+      accentColor={accent}
       collapsed={!expanded}
       onNavigate={(item) => { if (item.href) navigate(item.href); onMobileClose?.(); }}
       header={
         <Link href="/">
           <div className="flex items-center gap-2.5 cursor-pointer hover:opacity-80 transition-opacity">
-            <div className="w-8 h-8 rounded-md flex items-center justify-center shrink-0" style={{ background: toAlpha(VESSELS_ACCENT, 0.08), border: `1px solid ${toAlpha(VESSELS_ACCENT, 0.12)}` }}>
-              <Ship className="w-4 h-4" style={{ color: VESSELS_ACCENT }} />
+            <div className="w-8 h-8 rounded-md flex items-center justify-center shrink-0" style={{ background: toAlpha(VESSELS_BRAND_ACCENT, 0.08), border: `1px solid ${toAlpha(VESSELS_BRAND_ACCENT, 0.12)}` }}>
+              <Ship className="w-4 h-4" style={{ color: VESSELS_BRAND_ACCENT }} />
             </div>
             {expanded && (
               <div className="flex-1 min-w-0">
                 <h1 className="text-sm font-semibold text-sky-50 truncate tracking-tight">Vessels</h1>
-                <p className="text-[10px] truncate font-mono uppercase tracking-wider" style={{ color: toAlpha(VESSELS_ACCENT, 0.4) }}>Maritime Intelligence Pack</p>
+                <p className="text-[10px] truncate font-mono uppercase tracking-wider" style={{ color: toAlpha(VESSELS_BRAND_ACCENT, 0.4) }}>Maritime Intelligence Pack</p>
               </div>
             )}
           </div>
@@ -543,7 +544,7 @@ function VesselsSidebarContent({ expanded, onMobileClose, onToggleCollapse }: { 
           <button
             onClick={onToggleCollapse}
             className="flex items-center justify-center w-full py-1 text-[10px] rounded transition-colors hover:bg-white/5"
-            style={{ color: toAlpha(VESSELS_ACCENT, 0.4) }}
+            style={{ color: toAlpha(VESSELS_BRAND_ACCENT, 0.4) }}
             aria-label="Collapse sidebar"
           >
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
@@ -555,7 +556,7 @@ function VesselsSidebarContent({ expanded, onMobileClose, onToggleCollapse }: { 
         <button
           onClick={onToggleCollapse}
           className="flex items-center justify-center w-7 h-7 mx-auto rounded transition-colors hover:bg-white/5"
-          style={{ color: toAlpha(VESSELS_ACCENT, 0.4) }}
+          style={{ color: toAlpha(VESSELS_BRAND_ACCENT, 0.4) }}
           aria-label="Expand sidebar"
         >
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
@@ -703,6 +704,7 @@ function VesselsDashboard({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpe
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarHovered, setSidebarHovered] = useState(false);
   const { prefs, setPreference, isLoaded } = useUserPreferences();
+  const accent = useEffectiveAccent(VESSELS_BRAND_ACCENT);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => prefs.sidebar_collapsed);
   const userOverriddenSidebarRef = useRef(false);
 
@@ -732,12 +734,12 @@ function VesselsDashboard({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpe
     getConflictCount: () => _vesselsConflictResolver.getConflictCount("vessels"),
   });
   return (
-    <PowerUserProvider shortcuts={vesselsShortcuts} appName="Vessels" accentColor={VESSELS_ACCENT}>
+    <PowerUserProvider shortcuts={vesselsShortcuts} appName="Vessels" accentColor={accent}>
       <div className="flex flex-col h-screen" style={{ background: "#060e1a" }}>
-        <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:rounded-lg focus:text-sm focus:font-medium" style={{ background: VESSELS_ACCENT, color: "#fff" }}>
+        <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:rounded-lg focus:text-sm focus:font-medium" style={{ background: accent, color: "#fff" }}>
           Skip to main content
         </a>
-        <EcosystemNav currentAppId="vessels" currentAppName="Vessels Maritime Intelligence" accentColor={VESSELS_ACCENT} />
+        <EcosystemNav currentAppId="vessels" currentAppName="Vessels Maritime Intelligence" accentColor={accent} />
         <SandboxModeBanner />
         <DemoModeBanner />
         <SharedDashboardShell
@@ -747,13 +749,13 @@ function VesselsDashboard({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpe
           sidebarWidth={sidebarExpanded ? "13rem" : "3.5rem"}
           sidebarEvents={{ onMouseEnter: () => setSidebarHovered(true), onMouseLeave: () => setSidebarHovered(false) }}
           theme={{ sidebarBg: "#060e1a", pageBg: "#060e1a", headerBg: toAlpha("#060e1a", 0.92) }}
-          accentColor={VESSELS_ACCENT}
+          accentColor={accent}
           topbar={
             <div className="flex items-center gap-3 w-full">
-              <button onClick={() => setSidebarOpen(!sidebarOpen)} className="md:hidden p-1.5 rounded transition-colors" style={{ color: toAlpha(VESSELS_ACCENT, 0.5) }} aria-label="Toggle navigation">
+              <button onClick={() => setSidebarOpen(!sidebarOpen)} className="md:hidden p-1.5 rounded transition-colors" style={{ color: toAlpha(VESSELS_BRAND_ACCENT, 0.5) }} aria-label="Toggle navigation">
                 <Menu className="w-4 h-4" />
               </button>
-              <span className="md:hidden text-[10px] font-mono uppercase tracking-wider" style={{ color: toAlpha(VESSELS_ACCENT, 0.8) }}>Vessels Maritime Intelligence</span>
+              <span className="md:hidden text-[10px] font-mono uppercase tracking-wider" style={{ color: toAlpha(VESSELS_BRAND_ACCENT, 0.8) }}>Vessels Maritime Intelligence</span>
               <div className="ml-auto pr-1 flex items-center gap-2">
                 <PolicyModeBadge product="vessels" actionType={topbarActionType} />
                 <span className="md:hidden flex items-center gap-2">
@@ -764,7 +766,7 @@ function VesselsDashboard({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpe
             </div>
           }
         >
-          <main id="main-content" role="main" className="flex-1 overflow-auto h-full" tabIndex={-1}>
+          <main id="main-content" data-szl-shell-main role="main" className="flex-1 overflow-auto h-full" tabIndex={-1}>
             <DashboardRouter />
           </main>
         </SharedDashboardShell>
@@ -778,7 +780,7 @@ function VesselsDashboard({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpe
         onClose={() => setCmdOpen(false)}
         commands={vesselsCommands}
         appName="Vessels"
-        accentColor={VESSELS_ACCENT}
+        accentColor={accent}
       />
       <OnboardingWizard config={VESSELS_ONBOARDING_CONFIG} onComplete={trackTourCompleted} onSkip={trackTourSkipped} />
     </PowerUserProvider>
@@ -834,7 +836,7 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
 
   if (isDashboard) {
     return (
-      <PrivateAppGuard appName="Vessels" accentColor={VESSELS_ACCENT}>
+      <PrivateAppGuard appName="Vessels" accentColor={VESSELS_BRAND_ACCENT}>
         <VesselsDashboard cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />
       </PrivateAppGuard>
     );
@@ -870,7 +872,7 @@ function App() {
     <SandboxModeProvider>
       <DemoModeProvider>
         <QueryClientProvider client={queryClient}>
-          <StaleIndicator accentColor={VESSELS_ACCENT} />
+          <StaleIndicator accentColor={VESSELS_BRAND_ACCENT} />
           <AuthProvider>
             <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
               <AppContent cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />

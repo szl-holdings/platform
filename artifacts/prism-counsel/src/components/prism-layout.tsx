@@ -5,11 +5,11 @@ import {
   ChevronLeft, ChevronRight, Scale, Bell, Search, Menu, X
 } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
-import { useUserPreferences } from "@szl-holdings/shared-ui/use-user-preferences";
+import { useUserPreferences, useEffectiveAccent } from "@szl-holdings/shared-ui/use-user-preferences";
 import { GettingStartedChecklist } from "@szl-holdings/shared-ui/onboarding";
 import { PRISM_ONBOARDING_CONFIG } from "@/onboarding-config";
 
-const ACCENT = "#a78bfa";
+const PRISM_BRAND_ACCENT = "#a78bfa";
 
 interface NavItem {
   id: string;
@@ -57,6 +57,9 @@ const NAV_SECTIONS: NavSection[] = [
 export function PrismLayout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const { prefs, setPreference, isLoaded } = useUserPreferences();
+  // User-personalized accent for nav active state, focus rings, action buttons.
+  // Brand chrome (logo lockup, "PRISM" wordmark) keeps the workspace brand color.
+  const ACCENT = useEffectiveAccent(PRISM_BRAND_ACCENT);
   const [collapsed, setCollapsed] = useState(() => prefs.sidebar_collapsed);
   const [mobileOpen, setMobileOpen] = useState(false);
   const userOverriddenSidebarRef = useRef(false);
@@ -85,11 +88,11 @@ export function PrismLayout({ children }: { children: React.ReactNode }) {
     <div className="flex flex-col h-full">
       <div className={cn("flex items-center gap-3 px-4 py-4 border-b border-white/5 shrink-0", collapsed && "justify-center px-2")}>
         <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(167,139,250,0.15)", border: "1px solid rgba(167,139,250,0.3)" }}>
-          <Scale className="w-3.5 h-3.5" style={{ color: ACCENT }} />
+          <Scale className="w-3.5 h-3.5" style={{ color: PRISM_BRAND_ACCENT }} />
         </div>
         {!collapsed && (
           <div>
-            <p className="text-xs font-semibold tracking-wide font-display" style={{ color: ACCENT }}>PRISM</p>
+            <p className="text-xs font-semibold tracking-wide font-display" style={{ color: PRISM_BRAND_ACCENT }}>PRISM</p>
             <p className="text-[10px] text-white/30 -mt-0.5">Legal Command</p>
           </div>
         )}
@@ -207,7 +210,7 @@ export function PrismLayout({ children }: { children: React.ReactNode }) {
             <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold" style={{ background: "rgba(167,139,250,0.15)", color: ACCENT }}>P</div>
           </div>
         </header>
-        <main className="flex-1 overflow-y-auto">
+        <main data-szl-shell-main className="flex-1 overflow-y-auto">
           {children}
         </main>
       </div>

@@ -119,9 +119,36 @@ function ensureBaselineStyle() {
   _baselineStyleInjected = true;
   const style = document.createElement("style");
   style.setAttribute("data-szl-preferences", "baseline");
+  // Density rules:
+  //   - Root font-size shifts so all rem-based Tailwind spacing (p-*, gap-*,
+  //     etc.) tightens proportionally — this carries shell, header, and
+  //     content padding for free without overriding workspace-specific values.
+  //   - Table cells tighten globally — every workspace renders dense tables
+  //     and benefits from the row-height reduction.
+  //   - Opt-in `[data-szl-density-card]` and `[data-szl-density-card-stack]`
+  //     selectors let workspaces tighten card spacing where they want it.
+  //   - `[data-szl-shell-main]` is a marker hook for the primary scrolling
+  //     container so future per-workspace tweaks (or future global rules) can
+  //     target it without each workspace having to wire up a class. We do not
+  //     set padding from here — that would regress shells whose <main> has no
+  //     base padding by adding spacing instead of tightening it.
   style.textContent = `
 html[data-szl-density="comfortable"] { font-size: 16px; }
 html[data-szl-density="compact"] { font-size: 14px; }
+
+html[data-szl-density="compact"] table th,
+html[data-szl-density="compact"] table td {
+  padding-top: 0.375rem;
+  padding-bottom: 0.375rem;
+  line-height: 1.25;
+}
+
+html[data-szl-density="compact"] [data-szl-density-card] {
+  padding: 0.625rem;
+}
+html[data-szl-density="compact"] [data-szl-density-card-stack] > * + * {
+  margin-top: 0.5rem;
+}
 `.trim();
   document.head.appendChild(style);
 }
@@ -340,3 +367,41 @@ export function useUserPreferences(): UseUserPreferencesResult {
 }
 
 export { NAMESPACE as PREFERENCES_NAMESPACE };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Workspace personalization helpers
+//
+// Pattern for new workspaces:
+//   1. Pick a brand-default accent (e.g. `LANE_ACCENT_HEX.terra.primary`).
+//   2. In your layout, derive the chrome accent with `useEffectiveAccent(brand)`.
+//      Pass that value into <SidebarNav accentColor={...} />, focus rings,
+//      action buttons, and selection highlights so the user's `accent_color`
+//      preference travels through. Keep brand-identity surfaces (logo lockup,
+//      hero gradients) on the brand color so the workspace stays recognisable.
+//   3. Mark the scrolling content element with `data-szl-shell-main` as a
+//      future-proof hook so global rules can target it later. Compact mode
+//      already tightens any rem-based padding on that element via the root
+//      font-size shift — no per-workspace work needed.
+//      Use `data-szl-density-card` on cards (or `data-szl-density-card-stack`
+//      on a parent that vertically stacks cards) when you want compact mode
+//      to tighten card padding/spacing too.
+//   4. Tables get tighter row heights for free under compact mode.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Returns the user's chosen accent color, falling back to the workspace brand
+ * when no override is set. Subscribes to preference changes so the hook re-runs
+ * when the user picks a new color in Settings.
+ */
+export function useEffectiveAccent(brandFallback: string): string {
+  const { prefs } = useUserPreferences();
+  return prefs.accent_color ?? brandFallback;
+}
+
+/**
+ * Synchronous accessor for the effective accent — useful in non-React code
+ * (event handlers, formatting helpers) that already has the brand fallback.
+ */
+export function getEffectiveAccent(brandFallback: string): string {
+  return _prefs.accent_color ?? brandFallback;
+}

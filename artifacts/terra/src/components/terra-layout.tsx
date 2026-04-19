@@ -1,6 +1,6 @@
 import { RealtimeStatusIndicator } from "@szl-holdings/shared-ui/realtime-status-indicator";
 import { GettingStartedChecklist, OnboardingWizard, useOnboardingState, type OnboardingConfig } from "@szl-holdings/shared-ui/onboarding";
-import { useUserPreferences } from "@szl-holdings/shared-ui/use-user-preferences";
+import { useUserPreferences, useEffectiveAccent } from "@szl-holdings/shared-ui/use-user-preferences";
 import { Link, useLocation } from "wouter";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { toAlpha } from "@szl-holdings/shared-ui/utils";
@@ -24,14 +24,14 @@ function pathToTerraActionType(path: string): string | undefined {
   return seg;
 }
 
-const TERRA_ACCENT = LANE_ACCENT_HEX.terra.primary;
+const TERRA_BRAND_ACCENT = LANE_ACCENT_HEX.terra.primary;
 const SIDEBAR_BG = "#080b0d";
 const HEADER_BG = toAlpha("#080b0d", 0.92);
 
 const TERRA_ONBOARDING_CONFIG: OnboardingConfig = {
   appId: "terra",
   appName: "Terra",
-  accentColor: TERRA_ACCENT,
+  accentColor: TERRA_BRAND_ACCENT,
   steps: [
     { id: "welcome", title: "Welcome to Terra", description: "Terra is your real estate intelligence platform — distress detection, deal pipeline, market analytics, and ownership intelligence for institutional-grade property operations.", placement: "center", icon: Building2 },
     { id: "dashboard", title: "Portfolio Overview", description: "The Overview dashboard gives you a real-time snapshot of your portfolio — active deals, distress signals, market conditions, and KPI performance across all assets.", targetSelector: "a[href='/dashboard']", placement: "right", icon: LayoutDashboard },
@@ -155,6 +155,10 @@ export function TerraLayout({ children }: { children: ReactNode }) {
   const [location, navigate] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { prefs, setPreference, isLoaded } = useUserPreferences();
+  // User-personalized accent for non-brand chrome (sidebar nav active state,
+  // focus rings, top-bar live dot, skip link). Falls back to TERRA_BRAND_ACCENT
+  // when the user has no preference set.
+  const accent = useEffectiveAccent(TERRA_BRAND_ACCENT);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => prefs.sidebar_collapsed);
   const userOverriddenSidebarRef = useRef(false);
   const { status: wsStatus } = useRealtimeChannel("terra-signals");
@@ -183,7 +187,7 @@ export function TerraLayout({ children }: { children: ReactNode }) {
     retry: 1,
   });
   const sidebarDataMode = (!apiDown && apiHealth?.dataMode === "live") ? "Live" : "Demo";
-  const sidebarModeColor = sidebarDataMode === "Live" ? TERRA_ACCENT : colors.semantic.warning;
+  const sidebarModeColor = sidebarDataMode === "Live" ? accent : colors.semantic.warning;
 
   const sidebarHeader = (
     <div className="h-14 flex items-center px-2">
@@ -191,11 +195,11 @@ export function TerraLayout({ children }: { children: ReactNode }) {
         <div
           className="p-1.5 rounded-lg"
           style={{
-            background: toAlpha(TERRA_ACCENT, 0.12),
-            border: `1px solid ${toAlpha(TERRA_ACCENT, 0.22)}`,
+            background: toAlpha(TERRA_BRAND_ACCENT, 0.12),
+            border: `1px solid ${toAlpha(TERRA_BRAND_ACCENT, 0.22)}`,
           }}
         >
-          <Building2 className="w-4 h-4" style={{ color: TERRA_ACCENT }} />
+          <Building2 className="w-4 h-4" style={{ color: TERRA_BRAND_ACCENT }} />
         </div>
         <div className="flex flex-col">
           <span className="font-bold text-sm tracking-tight text-white leading-none">Terra</span>
@@ -214,7 +218,7 @@ export function TerraLayout({ children }: { children: ReactNode }) {
           appId={TERRA_ONBOARDING_CONFIG.appId}
           appName={TERRA_ONBOARDING_CONFIG.appName}
           items={TERRA_ONBOARDING_CONFIG.checklist}
-          accentColor={TERRA_ACCENT}
+          accentColor={TERRA_BRAND_ACCENT}
           onReplayTour={replayOnboarding}
           collapsed
         />
@@ -222,11 +226,11 @@ export function TerraLayout({ children }: { children: ReactNode }) {
       <div
         className="rounded-lg p-2.5 space-y-1.5"
         style={{
-          background: toAlpha(TERRA_ACCENT, 0.04),
-          border: `1px solid ${toAlpha(TERRA_ACCENT, 0.08)}`,
+          background: toAlpha(TERRA_BRAND_ACCENT, 0.04),
+          border: `1px solid ${toAlpha(TERRA_BRAND_ACCENT, 0.08)}`,
         }}
       >
-        <div className="text-[9px] uppercase tracking-widest font-semibold" style={{ color: toAlpha(TERRA_ACCENT, 0.55) }}>
+        <div className="text-[9px] uppercase tracking-widest font-semibold" style={{ color: toAlpha(TERRA_BRAND_ACCENT, 0.55) }}>
           System State
         </div>
         <div className="flex items-center justify-between">
@@ -263,7 +267,7 @@ export function TerraLayout({ children }: { children: ReactNode }) {
         </button>
         <span
           className="w-1.5 h-1.5 rounded-full hidden sm:block"
-          style={{ background: toAlpha(TERRA_ACCENT, 0.7) }}
+          style={{ background: toAlpha(accent, 0.7) }}
           aria-hidden="true"
         />
         <span className="hidden sm:block font-mono text-[10px]" style={{ color: colors.text.muted }}>
@@ -293,7 +297,7 @@ export function TerraLayout({ children }: { children: ReactNode }) {
     <button
       onClick={toggleCollapsed}
       className="flex items-center justify-center p-1.5 rounded-lg transition-colors hover:bg-white/5"
-      style={{ color: toAlpha(TERRA_ACCENT, 0.5) }}
+      style={{ color: toAlpha(TERRA_BRAND_ACCENT, 0.5) }}
       aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
     >
       {sidebarCollapsed
@@ -306,7 +310,7 @@ export function TerraLayout({ children }: { children: ReactNode }) {
     <SidebarNav
       sections={NAV_SECTIONS}
       currentPath={location}
-      accentColor={TERRA_ACCENT}
+      accentColor={accent}
       collapsed={sidebarCollapsed}
       header={sidebarCollapsed ? collapseButton : sidebarHeader}
       footer={sidebarCollapsed ? undefined : (
@@ -324,7 +328,7 @@ export function TerraLayout({ children }: { children: ReactNode }) {
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:rounded-lg focus:text-sm focus:font-medium"
-        style={{ background: TERRA_ACCENT, color: "#fff" }}
+        style={{ background: accent, color: "#fff" }}
       >
         Skip to main content
       </a>
@@ -335,9 +339,9 @@ export function TerraLayout({ children }: { children: ReactNode }) {
         onMobileClose={() => setSidebarOpen(false)}
         sidebarWidth={sidebarCollapsed ? "3.5rem" : "14rem"}
         theme={{ sidebarBg: SIDEBAR_BG, pageBg: colors.background.primary, headerBg: HEADER_BG }}
-        accentColor={TERRA_ACCENT}
+        accentColor={accent}
       >
-        <main id="main-content" className="flex-1 overflow-auto p-4 md:p-5" role="main" tabIndex={-1}>
+        <main id="main-content" data-szl-shell-main className="flex-1 overflow-auto p-4 md:p-5" role="main" tabIndex={-1}>
           <SectionErrorBoundary sectionName="Terra">
             {children}
           </SectionErrorBoundary>
