@@ -75,12 +75,19 @@ async function assertNotGenericNotFound(page: Page, testInfo: import("@playwrigh
 let vesselsAvailable = true;
 let terraAvailable = true;
 let commandAvailable = true;
+let aegisAvailable = true;
+let carlotaAvailable = true;
+
+const AEGIS_BASE = process.env.AEGIS_BASE_PATH ?? "/aegis";
+const CARLOTA_BASE = process.env.CARLOTA_BASE_PATH ?? "/carlota-jo";
 
 test.beforeAll(async ({ browser }) => {
   const page = await browser.newPage();
   vesselsAvailable = await isReachable(page, `${VESSELS_BASE}/`);
   terraAvailable = await isReachable(page, `${TERRA_BASE}/`);
   commandAvailable = await isReachable(page, `${COMMAND_BASE}/`);
+  aegisAvailable = await isReachable(page, `${AEGIS_BASE}/`);
+  carlotaAvailable = await isReachable(page, `${CARLOTA_BASE}/`);
   await page.close();
 });
 
@@ -274,5 +281,120 @@ test.describe("Correlation deep-links — drill-through to detail pages", () => 
       ).toBe(true);
     }
     if (popup) await popup.close().catch(() => null);
+  });
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Per-product drill-through smoke tests.
+  //
+  // The static checker (scripts/qa/check-correlation-deeplinks.js) already
+  // catches helper drift. These browser-driven tests catch the runtime
+  // failure mode the static checker can't see: the URL parses but the
+  // artifact serves a generic 404 / catch-all instead of the intended
+  // surface (the same regression #1897 caught for vessels + terra).
+  //
+  // Coverage MUST match every ProductKey in
+  // artifacts/command/src/pages/cross-platform/product-links.ts. The
+  // PRODUCT_KEYS constant below is asserted against that list further
+  // down so a new product cannot be added to the helper without also
+  // appearing here.
+  // ─────────────────────────────────────────────────────────────────────────
+
+  type ProductCoverage = {
+    product: string;
+    available: () => boolean;
+    dashboardUrl: string;
+    entityUrl: string;
+    domain: RegExp;
+  };
+
+  const PRISM_FIXTURE_ID = process.env.E2E_PRISM_MATTER_ID ?? "matter-001";
+  const AEGIS_FIXTURE_ID = process.env.E2E_AEGIS_FINDING_ID ?? "finding-001";
+  const CARLOTA_FIXTURE_ID = process.env.E2E_CARLOTA_INQUIRY_ID ?? "inq-001";
+  const LYTE_FIXTURE_ID = process.env.E2E_LYTE_ENTITY_ID ?? "inc-001";
+
+  // Mirror of productDashboardUrl + productEntityUrl for the keys not
+  // covered by the more specific tests above. Domain regexes are loose
+  // on purpose — we are guarding against the route falling back to a
+  // generic 404, not asserting product UX content.
+  const PRODUCT_COVERAGE: ProductCoverage[] = [
+    {
+      product: "prism",
+      available: () => commandAvailable,
+      dashboardUrl: `${COMMAND_BASE}/operations/prism`,
+      entityUrl: `${COMMAND_BASE}/operations/prism?entity=${encodeURIComponent(PRISM_FIXTURE_ID)}`,
+      domain: /prism|matter|legal|counsel|obligation|deadline|filing|operations/i,
+    },
+    {
+      product: "aegis",
+      available: () => aegisAvailable,
+      dashboardUrl: `${AEGIS_BASE}/`,
+      entityUrl: `${AEGIS_BASE}/?entity=${encodeURIComponent(AEGIS_FIXTURE_ID)}`,
+      domain: /aegis|szl|investor|pitch|deck|slide|holdings|governed|autonomy/i,
+    },
+    {
+      product: "carlota",
+      available: () => carlotaAvailable,
+      dashboardUrl: `${CARLOTA_BASE}/`,
+      entityUrl: `${CARLOTA_BASE}/inquiries?entity=${encodeURIComponent(CARLOTA_FIXTURE_ID)}`,
+      domain: /carlota|consulting|inquir|engage|advisory|client|services|methodology/i,
+    },
+    {
+      product: "lyte",
+      available: () => commandAvailable,
+      dashboardUrl: `${COMMAND_BASE}/operations`,
+      entityUrl: `${COMMAND_BASE}/operations?entity=${encodeURIComponent(LYTE_FIXTURE_ID)}`,
+      domain: /operations|lyte|incident|signal|decision|run|workflow|overview/i,
+    },
+  ];
+
+  for (const cov of PRODUCT_COVERAGE) {
+    test(`${cov.product}: productDashboardUrl(${cov.product}) renders a real surface, not a 404`, async ({ page }, testInfo) => {
+      if (!cov.available()) testInfo.skip();
+      const body = await navigateWithUpstreamRetry(page, cov.dashboardUrl);
+      await assertNotGenericNotFound(page, testInfo, body);
+      expect(
+        cov.domain.test(body),
+        `${cov.product} dashboard ${cov.dashboardUrl} lacks expected domain content. Body:\n${body.slice(0, 500)}`,
+      ).toBe(true);
+    });
+
+    test(`${cov.product}: productEntityUrl(${cov.product}, ...) renders a real surface, not a 404`, async ({ page }, testInfo) => {
+      if (!cov.available()) testInfo.skip();
+      const body = await navigateWithUpstreamRetry(page, cov.entityUrl);
+      await assertNotGenericNotFound(page, testInfo, body);
+      expect(
+        cov.domain.test(body),
+        `${cov.product} entity ${cov.entityUrl} lacks expected domain content. Body:\n${body.slice(0, 500)}`,
+      ).toBe(true);
+    });
+  }
+
+  // Coverage guard — fail (not skip) if a new ProductKey is introduced
+  // in artifacts/command/src/pages/cross-platform/product-links.ts and
+  // this spec is not extended to cover it. Vessels + terra are covered
+  // by the dedicated detail-page tests above, the rest by
+  // PRODUCT_COVERAGE.
+  test("coverage: every ProductKey in product-links.ts has a deep-link test", () => {
+    const PRODUCT_KEYS = ["lyte", "vessels", "terra", "prism", "aegis", "carlota"] as const;
+    const coveredByTable = new Set(PRODUCT_COVERAGE.map((c) => c.product));
+    const coveredByDetailTests = new Set(["vessels", "terra"]);
+    const missing = PRODUCT_KEYS.filter(
+      (k) => !coveredByTable.has(k) && !coveredByDetailTests.has(k),
+    );
+    expect(
+      missing,
+      `Missing deep-link coverage for ProductKey(s): ${JSON.stringify(missing)}. ` +
+        `Add an entry to PRODUCT_COVERAGE in tests/e2e/correlation-deeplinks.spec.ts ` +
+        `or a dedicated detail-page test.`,
+    ).toEqual([]);
+
+    // And no stale entries — the table must not list a product that is
+    // no longer in ProductKey.
+    const stale = [...coveredByTable].filter((p) => !(PRODUCT_KEYS as readonly string[]).includes(p));
+    expect(
+      stale,
+      `PRODUCT_COVERAGE references unknown product(s): ${JSON.stringify(stale)}. ` +
+        `Sync with ProductKey in artifacts/command/src/pages/cross-platform/product-links.ts.`,
+    ).toEqual([]);
   });
 });
