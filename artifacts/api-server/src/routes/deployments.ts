@@ -18,7 +18,14 @@
  */
 
 import { Router, type IRouter, type Request, type Response } from "express";
-import { db, deploymentsTable, usersTable, type Deployment } from "@szl-holdings/db";
+import {
+  db,
+  deploymentsTable,
+  usersTable,
+  notificationsTable,
+  notificationPreferencesTable,
+  type Deployment,
+} from "@szl-holdings/db";
 import { and, asc, desc, eq, inArray, or } from "drizzle-orm";
 import {
   sendSuccess,
@@ -31,6 +38,8 @@ import { authMiddleware, denyIfReadOnly, requireRole } from "../middlewares/auth
 import { perUserApiSlidingLimiter, perUserWriteSlidingLimiter } from "../middlewares/sliding-window-limiter";
 import { logger } from "../lib/logger";
 import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
+import { publish, WS_CHANNELS } from "../lib/websocket";
+import { dispatchToExternalChannels } from "./notifications";
 
 const router: IRouter = Router();
 
@@ -211,6 +220,143 @@ async function getActive(appId: string, env: string): Promise<Deployment | undef
   return rows[0];
 }
 
+/**
+ * Notify the owning team and the original deployer that a rollback occurred.
+ *
+ * Recipients:
+ *   - Every active user whose `team` matches the app's owning team
+ *   - The user who originally deployed the version that was rolled back
+ *     (resolved from the `deployedBy` principal string via `lookupDeployers`)
+ *   - The operator who performed the rollback is always excluded, even if
+ *     they were also the original deployer of the bad version. They just
+ *     clicked the button — they know. This intentionally takes precedence
+ *     over the "notify previous deployer" rule for the actor==deployer case.
+ *
+ * Preferences:
+ *   - In-app delivery is gated on `notification_preferences.inAppEnabled`
+ *     (default true if no row exists). Users who opted out of in-app get
+ *     no notifications row inserted and no websocket push.
+ *   - External channels (email/sms/slack) are dispatched independently
+ *     through `dispatchToExternalChannels`, which checks each channel's
+ *     own preference. A user who opted out of in-app but kept email on
+ *     still receives the rollback email.
+ *
+ * Failures are logged but never thrown — a notification problem should not
+ * roll a successful rollback back into a failure.
+ */
+async function notifyRollback(params: {
+  appId: string;
+  appName: string;
+  environment: string;
+  fromVersion: string;
+  toVersion: string;
+  rolledBackBy: string;
+  rolledBackByUserId: number;
+  previousDeployedBy: string;
+}): Promise<void> {
+  try {
+    const team = ownerTeamFor(params.appId);
+    const recipientIds = new Set<number>();
+
+    const teamUsers = await db
+      .select({ id: usersTable.id })
+      .from(usersTable)
+      .where(eq(usersTable.team, team));
+    for (const u of teamUsers) recipientIds.add(u.id);
+
+    const deployerLookup = await lookupDeployers([params.previousDeployedBy]);
+    const previousDeployer = deployerLookup.get(params.previousDeployedBy);
+    if (previousDeployer) recipientIds.add(previousDeployer.id);
+
+    recipientIds.delete(params.rolledBackByUserId);
+
+    if (recipientIds.size === 0) {
+      logger.info(
+        { appId: params.appId, team },
+        "Rollback notification: no recipients to notify",
+      );
+      return;
+    }
+
+    const appUrl = process.env["APP_URL"] ?? process.env["VITE_APP_URL"] ?? "";
+    const actionUrl = `${appUrl}/command/operations/deployments`;
+    const title = `Rollback: ${params.appName} (${params.environment})`;
+    const message =
+      `${params.rolledBackBy} rolled back ${params.appName} in ${params.environment} ` +
+      `from ${params.fromVersion} to ${params.toVersion}.`;
+
+    const recipientArray = Array.from(recipientIds);
+    const prefRows = await db
+      .select({
+        userId: notificationPreferencesTable.userId,
+        inAppEnabled: notificationPreferencesTable.inAppEnabled,
+      })
+      .from(notificationPreferencesTable)
+      .where(inArray(notificationPreferencesTable.userId, recipientArray));
+    const inAppPrefs = new Map(prefRows.map((p) => [p.userId, p.inAppEnabled]));
+
+    let inAppDelivered = 0;
+    let inAppSkipped = 0;
+    for (const userId of recipientArray) {
+      // Default behavior when no prefs row exists: in-app on.
+      const inAppOn = inAppPrefs.has(userId) ? inAppPrefs.get(userId)! : true;
+
+      let notificationId = 0;
+      if (inAppOn) {
+        const [notif] = await db
+          .insert(notificationsTable)
+          .values({
+            userId,
+            type: "warning",
+            channel: "in_app",
+            title,
+            message,
+            actionUrl,
+          })
+          .returning();
+        if (notif) {
+          notificationId = notif.id;
+          publish(WS_CHANNELS.NOTIFICATIONS, "new_notification", notif);
+          inAppDelivered++;
+        }
+      } else {
+        inAppSkipped++;
+      }
+
+      // External channels are dispatched regardless of the in-app preference.
+      // dispatchToExternalChannels itself enforces email/sms/slack opt-ins.
+      // notificationId may be 0 here when no in-app row was inserted; the
+      // dispatch consumer uses it for logging only and tolerates that.
+      void dispatchToExternalChannels({
+        notificationId,
+        userId,
+        type: "warning",
+        title,
+        message,
+        actionUrl,
+      });
+    }
+
+    logger.info(
+      {
+        appId: params.appId,
+        team,
+        recipients: recipientArray.length,
+        inAppDelivered,
+        inAppSkipped,
+        from: params.fromVersion,
+        to: params.toVersion,
+      },
+      "Rollback notifications dispatched",
+    );
+  } catch (err) {
+    logger.error(
+      { err, appId: params.appId },
+      "Failed to send rollback notifications",
+    );
+  }
+}
+
 router.get("/deployments", authMiddleware({ required: false }), perUserApiSlidingLimiter, validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const env = (req.query.environment as string) ?? "production";
@@ -381,6 +527,18 @@ router.post("/deployments/:appId/rollback", authMiddleware({ required: true }), 
       { appId, from: result.previous.version, to: result.rolled.version },
       "Rollback executed",
     );
+
+    void notifyRollback({
+      appId,
+      appName: result.previous.appName,
+      environment: env,
+      fromVersion: result.previous.version,
+      toVersion: result.rolled.version,
+      rolledBackBy: deployedBy,
+      rolledBackByUserId: req.user!.id,
+      previousDeployedBy: result.previous.deployedBy,
+    });
+
     const enriched = await recordsWithUsers([result.previous, result.rolled]);
     return sendSuccess(res, {
       rolledBack: true,

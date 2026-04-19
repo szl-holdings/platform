@@ -15,7 +15,7 @@ const router: IRouter = Router();
 const validTypes = ["info", "warning", "error", "success", "action_required"] as const;
 const validChannels = ["in_app", "email", "sms", "slack"] as const;
 
-async function dispatchToExternalChannels(params: {
+export async function dispatchToExternalChannels(params: {
   notificationId: number;
   userId: number;
   type: string;
