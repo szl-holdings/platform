@@ -89,7 +89,7 @@ pnpm lint
 
 ## How to Deploy
 
-See [DEPLOYMENT_READINESS.md](DEPLOYMENT_READINESS.md) and [RELEASE_PROCESS.md](RELEASE_PROCESS.md) for the full workflow.
+See [DEPLOYMENT-GUIDE.md](DEPLOYMENT-GUIDE.md) and [RELEASE_PROCESS.md](RELEASE_PROCESS.md) for the full workflow.
 
 **Summary:**
 1. Run pre-release checklist from [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md)
@@ -168,7 +168,7 @@ Demo data is **never** used in production. The database environment is isolated 
 
 ## Environment Variables
 
-See [ENV_MATRIX.md](ENV_MATRIX.md) for the full environment variable reference.
+See [Environment Matrix](ops/infra/environment-matrix.md) for the full environment variable reference.
 
 Critical variables required for full functionality:
 - `DATABASE_URL` — PostgreSQL connection string

@@ -170,7 +170,7 @@ node scripts/qa/check-demo-seed.js
 - [ ] Demo seed integrity check
 - [ ] Lighthouse ≥ 85 on landing page
 - [ ] Mobile view verified (physical device or BrowserStack)
-- [ ] Full [DEPLOYMENT_READINESS.md](DEPLOYMENT_READINESS.md) completed
+- [ ] Full [DEPLOYMENT-GUIDE.md](DEPLOYMENT-GUIDE.md) completed
 
 ---
 

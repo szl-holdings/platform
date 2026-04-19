@@ -21,7 +21,7 @@ The platform is a pnpm monorepo using TypeScript 5.9, React 19, Vite, and Node.j
 -   **Workflow Engine:** Orchestrates durable business processes.
 -   **Event Fabric (PRISM Bus):** A cross-domain event bus for signal routing.
 
-**Monorepo Structure:** The monorepo includes active and archived artifact directories, shared library packages for infrastructure and primitives, and dedicated packages for business observability, AI Control Plane, and NVIDIA-Ready Modules. The database schema consists of 569 tables managed by Drizzle ORM.
+**Monorepo Structure:** The monorepo includes active and archived artifact directories, shared library packages for infrastructure and primitives, and dedicated packages for business observability, AI Control Plane, and NVIDIA-Ready Modules. The database schema is managed by Drizzle ORM across ~700 tables in `lib/db/src/schema/` (154 schema files). The `skill_library.ts` schema file was removed (dead duplicate of `cognitive_runtime.ts`'s `skill_runs` table). The `/beacon/*` Terra route alias was removed — canonical Terra routes are `/terra/*` only. Full consolidation report: `launch/data/db_consolidation.md`.
 
 **Business Observability Fabric (ATLAS):** Implemented via `@szl-holdings/observability-core`, `@szl-holdings/business-events`, and `@szl-holdings/telemetry-standards` for OpenTelemetry setup, event emission, and semantic conventions.
 

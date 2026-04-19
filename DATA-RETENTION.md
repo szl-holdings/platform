@@ -145,6 +145,6 @@ Legal holds override standard retention periods:
 |----------|------|
 | Trust Center Index | [TRUST_CENTER_INDEX.md](TRUST_CENTER_INDEX.md) |
 | Tenancy Model | [TENANCY-MODEL.md](TENANCY-MODEL.md) |
-| Backup & Recovery | [BACKUP_AND_RECOVERY.md](BACKUP_AND_RECOVERY.md) |
+| Backup & Recovery | [BACKUP-RESTORE.md](BACKUP-RESTORE.md) |
 | Access Control Matrix | [ACCESS-CONTROL-MATRIX.md](ACCESS-CONTROL-MATRIX.md) |
 | Proof and Policy Model | [PROOF_AND_POLICY_MODEL.md](PROOF_AND_POLICY_MODEL.md) |

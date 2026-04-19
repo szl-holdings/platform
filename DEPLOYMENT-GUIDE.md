@@ -190,7 +190,7 @@ For full blocker details, resolution guidance, and the formal sign-off table, se
 
 ## Pre-Deployment Checklist
 
-Complete this checklist before every production deployment. Full version: [DEPLOYMENT_READINESS.md](DEPLOYMENT_READINESS.md).
+Complete this checklist before every production deployment. Full version: [DEPLOYMENT-GUIDE.md](DEPLOYMENT-GUIDE.md).
 
 ### Environment & Secrets
 - [ ] `DATABASE_URL` points to the correct production connection string
@@ -328,7 +328,7 @@ eas submit --platform all
 
 ---
 
-*See also: [OPERATIONS-RUNBOOK.md](OPERATIONS-RUNBOOK.md) · [DEPLOYMENT_READINESS.md](DEPLOYMENT_READINESS.md) · [docs/deployment.md](docs/deployment.md)*
+*See also: [OPERATIONS-RUNBOOK.md](OPERATIONS-RUNBOOK.md) · [DEPLOYMENT-GUIDE.md](DEPLOYMENT-GUIDE.md) · [docs/deployment.md](docs/deployment.md)*
 ---
 
 ### GitHub Actions Workflows
@@ -369,6 +369,6 @@ The `scripts/post-merge.sh` script runs automatically after task branch merges:
 
 ---
 
-*See also: [OPERATIONS-RUNBOOK.md](OPERATIONS-RUNBOOK.md) · [DEPLOYMENT_READINESS.md](DEPLOYMENT_READINESS.md) · [docs/deployment.md](docs/deployment.md)*
+*See also: [OPERATIONS-RUNBOOK.md](OPERATIONS-RUNBOOK.md) · [DEPLOYMENT-GUIDE.md](DEPLOYMENT-GUIDE.md) · [docs/deployment.md](docs/deployment.md)*
 
 *Last verified against source code: 2026-04-18 — Observability env vars and LB-002/LB-003/LB-006 resolution documented*

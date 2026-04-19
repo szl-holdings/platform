@@ -4,7 +4,7 @@
 
 **Governed decision infrastructure — connecting what is observable to what is executable, with full attribution.**
 
-[Architecture](./ARCHITECTURE.md) · [Platform Primitives](./PLATFORM_PRIMITIVES.md) · [Trust Center](./docs/trust/trust-center.md) · [Security](./SECURITY.md) · [Investor Docs](./docs/investor/platform-thesis.md)
+[Architecture](./architecture.md) · [Platform Primitives](./PLATFORM_PRIMITIVES.md) · [Trust Center](./docs/trust/trust-center.md) · [Security](./SECURITY.md) · [Investor Docs](./docs/investor/platform-thesis.md)
 
 ---
 
@@ -145,7 +145,7 @@ The six platform primitives define what is structurally different from dashboard
 +-----------------------------------------------------------------------+
 ```
 
-See [PLATFORM_PRIMITIVES.md](PLATFORM_PRIMITIVES.md) for the full specification of each primitive and [ARCHITECTURE.md](ARCHITECTURE.md) for the service topology.
+See [PLATFORM_PRIMITIVES.md](PLATFORM_PRIMITIVES.md) for the full specification of each primitive and [architecture.md](architecture.md) for the service topology.
 
 ---
 
@@ -251,7 +251,7 @@ See [DEPLOYMENT-GUIDE.md](DEPLOYMENT-GUIDE.md) for staging and production deploy
 
 | Document | Purpose |
 |----------|---------|
-| [ARCHITECTURE.md](ARCHITECTURE.md) | System architecture: topology, stack, design principles |
+| [architecture.md](architecture.md) | System architecture: topology, stack, design principles (v4.0, canonical) |
 | [PLATFORM_PRIMITIVES.md](PLATFORM_PRIMITIVES.md) | The six core abstractions |
 | [DATA-MODEL.md](DATA-MODEL.md) | Entity-relationship overview of the core database schema |
 | [API-SPEC.md](API-SPEC.md) | API surface: route inventory, auth model, rate limiting |

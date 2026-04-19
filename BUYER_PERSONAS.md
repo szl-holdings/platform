@@ -165,7 +165,7 @@ We never sell to one without addressing the other two. A successful close requir
 - **Diligence packet** ([TECHNICAL_DILIGENCE_PACKET.md](TECHNICAL_DILIGENCE_PACKET.md))
 - **Trust Center** ([TRUST_CENTER_INDEX.md](TRUST_CENTER_INDEX.md))
 - **Known Gaps** document — yes, we send it
-- **Architecture diagram + access control matrix** ([ARCHITECTURE.md](ARCHITECTURE.md), [ACCESS-CONTROL-MATRIX.md](ACCESS-CONTROL-MATRIX.md))
+- **Architecture diagram + access control matrix** ([architecture.md](architecture.md), [ACCESS-CONTROL-MATRIX.md](ACCESS-CONTROL-MATRIX.md))
 
 ### Disqualifiers
 

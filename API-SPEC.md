@@ -2,7 +2,7 @@
 
 **Date:** April 2026 | **Audience:** Technical advisors, integration engineers, enterprise evaluators
 
-**Related:** [ARCHITECTURE.md](ARCHITECTURE.md) · [DATA-MODEL.md](DATA-MODEL.md) · [ACCESS-CONTROL-MATRIX.md](ACCESS-CONTROL-MATRIX.md)
+**Related:** [architecture.md](architecture.md) · [DATA-MODEL.md](DATA-MODEL.md) · [ACCESS-CONTROL-MATRIX.md](ACCESS-CONTROL-MATRIX.md)
 
 ---
 

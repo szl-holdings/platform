@@ -2,7 +2,7 @@
 
 **Version:** 1.0 · **Last updated:** April 2026
 **Audience:** Internal team, design partners, enterprise buyers evaluating operational readiness
-**Supersedes:** [SUPPORT_MODEL.md](SUPPORT_MODEL.md)
+**Supersedes:** [SUPPORT_OPERATIONS.md](SUPPORT_OPERATIONS.md)
 **Companion docs:** [SEVERITY_MODEL.md](SEVERITY_MODEL.md) · [INCIDENT_COMMAND_PLAYBOOK.md](INCIDENT_COMMAND_PLAYBOOK.md) · [CUSTOMER_ESCALATION_MATRIX.md](CUSTOMER_ESCALATION_MATRIX.md)
 
 ---

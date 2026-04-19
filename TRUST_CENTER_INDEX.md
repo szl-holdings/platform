@@ -241,7 +241,7 @@ For enterprise evaluators completing a formal security or technical review:
 | [ACCESS-CONTROL-MATRIX.md](ACCESS-CONTROL-MATRIX.md) | Full RBAC and permission documentation |
 | [SECURITY-CHECKLIST.md](SECURITY-CHECKLIST.md) | Security controls mapped to implementation |
 | [KNOWN-GAPS.md](KNOWN-GAPS.md) | Transparent gap register with severity and remediation status |
-| [ARCHITECTURE.md](ARCHITECTURE.md) | System architecture — topology, stack, design principles |
+| [architecture.md](architecture.md) | System architecture — topology, stack, design principles |
 | [DATA-MODEL.md](DATA-MODEL.md) | Database schema overview |
 | [API-SPEC.md](API-SPEC.md) | API surface: routes, auth, rate limiting |
 | [PROOF_AND_POLICY_MODEL.md](PROOF_AND_POLICY_MODEL.md) | Trust recording and enforcement model |

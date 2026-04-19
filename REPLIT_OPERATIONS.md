@@ -54,7 +54,7 @@ server: {
 
 ## Environment Variables
 
-Environment variables are managed through Replit Secrets (not `.env` files). See [ENV_MATRIX.md](ENV_MATRIX.md) for the complete variable reference.
+Environment variables are managed through Replit Secrets (not `.env` files). See [Environment Matrix](ops/infra/environment-matrix.md) for the complete variable reference.
 
 **How to add a secret:**
 1. Open the Replit Secrets panel

@@ -105,7 +105,7 @@ Target trigger date: Q4 2026.
 
 | Item | Status |
 |------|--------|
-| Architecture documentation | ✅ [ARCHITECTURE.md](ARCHITECTURE.md), [SYSTEM-OVERVIEW.md](SYSTEM-OVERVIEW.md) |
+| Architecture documentation | ✅ [architecture.md](architecture.md), [SYSTEM-OVERVIEW.md](SYSTEM-OVERVIEW.md) |
 | Six primitives documented | ✅ [PLATFORM_PRIMITIVES.md](PLATFORM_PRIMITIVES.md) |
 | Five domain packs in production | ✅ [DOMAIN_PACK_CATALOG.md](DOMAIN_PACK_CATALOG.md) |
 | Cross-domain proof in production | 🟡 Demo-ready; awaiting customer evidence |

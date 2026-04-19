@@ -5,7 +5,7 @@
 
 > Canonical reference for the monorepo's shared package graph, ownership boundaries, and inter-package dependency relationships.
 
-**Related:** [ARCHITECTURE.md](ARCHITECTURE.md) · [AUDIT_FINDINGS_REGISTER.md](AUDIT_FINDINGS_REGISTER.md) · [API-SPEC.md](API-SPEC.md)
+**Related:** [architecture.md](architecture.md) · [AUDIT_FINDINGS_REGISTER.md](AUDIT_FINDINGS_REGISTER.md) · [API-SPEC.md](API-SPEC.md)
 
 ---
 

@@ -32,7 +32,7 @@ They will not be impressed by UI polish. They will press on tenancy, identity, a
 | Tab | URL | State |
 |-----|-----|-------|
 | Trust Center | `/trust` | Open |
-| Architecture diagram | [ARCHITECTURE.md](ARCHITECTURE.md) rendered | Pinned |
+| Architecture diagram | [architecture.md](architecture.md) rendered | Pinned |
 | Access Control Matrix | [ACCESS-CONTROL-MATRIX.md](ACCESS-CONTROL-MATRIX.md) | Pinned |
 | Proof Chain viewer | Linked | Showing today's chain |
 | Covenant Policy admin | `/admin/covenant-policy` | Showing template list |
@@ -48,7 +48,7 @@ Pre-flight: confirm a recent OTEL trace, confirm tenant isolation behavior with 
 
 ### 0:00 — Open with the architecture (10 min)
 
-Walk the architecture diagram from [ARCHITECTURE.md](ARCHITECTURE.md). Cover:
+Walk the architecture diagram from [architecture.md](architecture.md). Cover:
 
 - The six primitives: Event Fabric (Prism Bus), Outcome Graph, Proof Chain, Covenant Policy, Monte Carlo, Workflow Engine
 - The two execution surfaces: Lyte (operator), CORTEX (mobile)

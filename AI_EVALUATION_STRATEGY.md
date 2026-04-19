@@ -3,7 +3,7 @@
 **Version:** 1.0 · **Date:** April 2026
 **Audience:** Engineers, data scientists, AI safety reviewers, domain pack authors, enterprise evaluators
 
-**Related:** [MCP_GATEWAY_STRATEGY.md](MCP_GATEWAY_STRATEGY.md) · [ARCHITECTURE.md](ARCHITECTURE.md) · [API-SPEC.md](API-SPEC.md) · [ANALYTICS-EVENTS.md](ANALYTICS-EVENTS.md)
+**Related:** [MCP_GATEWAY_STRATEGY.md](MCP_GATEWAY_STRATEGY.md) · [architecture.md](architecture.md) · [API-SPEC.md](API-SPEC.md) · [ANALYTICS-EVENTS.md](ANALYTICS-EVENTS.md)
 
 ---
 

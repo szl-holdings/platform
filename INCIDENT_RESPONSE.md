@@ -200,5 +200,5 @@ Security disclosures: [security@szlholdings.com](mailto:security@szlholdings.com
 - [RUNBOOK_DEPLOYMENT.md](infra/runbooks/RUNBOOK_DEPLOYMENT.md)
 - [RUNBOOK_ROLLBACK.md](infra/runbooks/RUNBOOK_ROLLBACK.md)
 - [RUNBOOK_SECRETS.md](infra/runbooks/RUNBOOK_SECRETS.md)
-- [SUPPORT_MODEL.md](SUPPORT_MODEL.md)
-- [BACKUP_AND_RECOVERY.md](BACKUP_AND_RECOVERY.md)
+- [SUPPORT_OPERATIONS.md](SUPPORT_OPERATIONS.md)
+- [BACKUP-RESTORE.md](BACKUP-RESTORE.md)

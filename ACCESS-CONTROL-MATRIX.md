@@ -5,7 +5,7 @@
 
 > This document consolidates and expands `docs/ACCESS_CONTROL.md` with per-artifact and per-route role/permission mappings. The source policy document remains at `docs/ACCESS_CONTROL.md`. See `ROUTE_INVENTORY.md` for the complete route inventory.
 
-**Related:** [SECURITY-CHECKLIST.md](SECURITY-CHECKLIST.md) · [API-SPEC.md](API-SPEC.md) · [ARCHITECTURE.md](ARCHITECTURE.md)
+**Related:** [SECURITY-CHECKLIST.md](SECURITY-CHECKLIST.md) · [API-SPEC.md](API-SPEC.md) · [architecture.md](architecture.md)
 
 ---
 

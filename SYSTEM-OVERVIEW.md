@@ -3,7 +3,7 @@
 **Version:** 1.0 · **Last updated:** April 2026
 **Audience:** Non-technical stakeholders, investors, strategic partners, technical advisors
 
-**Related:** [ARCHITECTURE.md](ARCHITECTURE.md) · [PRODUCT-SURFACES.md](PRODUCT-SURFACES.md) · [KNOWN-GAPS.md](KNOWN-GAPS.md)
+**Related:** [architecture.md](architecture.md) · [PRODUCT-SURFACES.md](PRODUCT-SURFACES.md) · [KNOWN-GAPS.md](KNOWN-GAPS.md)
 
 ---
 
@@ -324,7 +324,7 @@ All platforms are at **Functional Alpha** status — full feature sets with seed
 
 | Document | Path |
 |----------|------|
-| Architecture (detailed) | [ARCHITECTURE.md](ARCHITECTURE.md) |
+| Architecture (detailed) | [architecture.md](architecture.md) |
 | Platform primitives | [PLATFORM_PRIMITIVES.md](PLATFORM_PRIMITIVES.md) |
 | Category positioning | [CATEGORY_POSITIONING.md](CATEGORY_POSITIONING.md) |
 | Product surfaces | [PRODUCT-SURFACES.md](PRODUCT-SURFACES.md) |

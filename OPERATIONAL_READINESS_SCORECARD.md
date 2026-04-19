@@ -129,7 +129,7 @@ All access control mechanisms are implemented and verified. Production secret co
 
 | Item | Status | Owner | Notes |
 |------|--------|-------|-------|
-| Support model documented (SUPPORT_MODEL.md) | 🟢 | Operations | Current as of Apr 2026 |
+| Support model documented (SUPPORT_OPERATIONS.md) | 🟢 | Operations | Current as of Apr 2026 |
 | INCIDENT_RESPONSE.md current | 🟢 | Engineering | Version 2.0, Apr 2026 |
 | Incident severity matrix defined | 🟢 | Engineering | INCIDENT_SEVERITY_MATRIX.md current |
 | Backup and recovery documented (RPO 1h, RTO 4h) | 🟢 | Engineering | BACKUP_AND_RECOVERY.md current |

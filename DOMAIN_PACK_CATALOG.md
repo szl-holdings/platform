@@ -201,4 +201,4 @@ Once approved, the pack is added to this document, [PRODUCT_PACKAGING.md](PRODUC
 | Platform primitives | [PLATFORM_PRIMITIVES.md](PLATFORM_PRIMITIVES.md) |
 | Category positioning | [CATEGORY_POSITIONING.md](CATEGORY_POSITIONING.md) |
 | Access control matrix | [ACCESS-CONTROL-MATRIX.md](ACCESS-CONTROL-MATRIX.md) |
-| Architecture | [ARCHITECTURE.md](ARCHITECTURE.md) |
+| Architecture | [architecture.md](architecture.md) |

@@ -331,7 +331,7 @@ See `docs/disaster-recovery.md` for the full restore playbook and `BACKUP_AND_RE
 | Architecture | `ARCHITECTURE.md` |
 **Date:** April 2026 | **Audience:** Technical advisors, engineers, enterprise evaluators
 
-**Related:** [ARCHITECTURE.md](ARCHITECTURE.md) · [API-SPEC.md](API-SPEC.md) · [ACCESS-CONTROL-MATRIX.md](ACCESS-CONTROL-MATRIX.md)
+**Related:** [architecture.md](architecture.md) · [API-SPEC.md](API-SPEC.md) · [ACCESS-CONTROL-MATRIX.md](ACCESS-CONTROL-MATRIX.md)
 
 ---
 

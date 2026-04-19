@@ -2,7 +2,7 @@
 
 **Version:** 1.0 | **Date:** April 2026 | **Audience:** Engineers, release owners, operators
 
-**Related:** [RELEASE_INTELLIGENCE.md](RELEASE_INTELLIGENCE.md) · [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md) · [DEPLOYMENT-GUIDE.md](DEPLOYMENT-GUIDE.md) · [ENV_MATRIX.md](ENV_MATRIX.md)
+**Related:** [RELEASE_INTELLIGENCE.md](RELEASE_INTELLIGENCE.md) · [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md) · [DEPLOYMENT-GUIDE.md](DEPLOYMENT-GUIDE.md) · [Environment Matrix](ops/infra/environment-matrix.md)
 
 ---
 

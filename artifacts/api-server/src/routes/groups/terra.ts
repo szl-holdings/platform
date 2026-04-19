@@ -27,16 +27,11 @@ export function register(router: IRouter): void {
   router.use(terraWhyThisPropertyRouter);
 
   router.use("/terra", tenantScope({ required: true }));
-  router.use("/beacon", tenantScope({ required: true }));
 
   router.use("/terra", _readLimiter);
   router.use(terraRouter);
-  router.use("/beacon", _readLimiter);
-  router.use(terraRouter);
 
   router.use("/terra", _readLimiter);
-  router.use(terraDistressRouter);
-  router.use("/beacon", _readLimiter);
   router.use(terraDistressRouter);
 
   router.use("/terra", _readLimiter);
@@ -44,22 +39,14 @@ export function register(router: IRouter): void {
 
   router.use("/terra", _writeLimiter);
   router.use(terraCrmRouter);
-  router.use("/beacon", _writeLimiter);
-  router.use(terraCrmRouter);
 
   router.use("/terra", _readLimiter);
   router.use(terraLiveRouter);
-  router.use("/beacon", _readLimiter);
-  router.use(terraLiveRouter);
 
   router.use("/terra", _readLimiter);
-  router.use(terraCognitiveRouter);
-  router.use("/beacon", _readLimiter);
   router.use(terraCognitiveRouter);
 
   router.use("/terra", _writeLimiter);
-  router.use(terraModulesRouter);
-  router.use("/beacon", _writeLimiter);
   router.use(terraModulesRouter);
 
   router.use("/terra", _readLimiter);

@@ -385,5 +385,5 @@ This loop runs across every domain pack. The domain determines the signal source
 | Category positioning | [CATEGORY_POSITIONING.md](CATEGORY_POSITIONING.md) |
 | Proof and policy model | [PROOF_AND_POLICY_MODEL.md](PROOF_AND_POLICY_MODEL.md) |
 | Decision simulation | [DECISION_SIMULATION.md](DECISION_SIMULATION.md) |
-| Architecture | [ARCHITECTURE.md](ARCHITECTURE.md) |
+| Architecture | [architecture.md](architecture.md) |
 | System overview | [SYSTEM-OVERVIEW.md](SYSTEM-OVERVIEW.md) |

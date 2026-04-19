@@ -76,7 +76,7 @@ All surfaces share six platform primitives — see [PLATFORM_PRIMITIVES.md](PLAT
 
 ## Web Applications
 
-**Related:** [ARCHITECTURE.md](ARCHITECTURE.md) · [SYSTEM-OVERVIEW.md](SYSTEM-OVERVIEW.md) · [API-SPEC.md](API-SPEC.md) · [ACCESS-CONTROL-MATRIX.md](ACCESS-CONTROL-MATRIX.md)
+**Related:** [architecture.md](architecture.md) · [SYSTEM-OVERVIEW.md](SYSTEM-OVERVIEW.md) · [API-SPEC.md](API-SPEC.md) · [ACCESS-CONTROL-MATRIX.md](ACCESS-CONTROL-MATRIX.md)
 
 ### Lyte — Business Observability
 

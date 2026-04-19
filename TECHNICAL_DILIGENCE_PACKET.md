@@ -128,7 +128,7 @@ Mobile Clients (Expo/RN)    →  artifacts/api-server
 | IaC | Azure Bicep (App Service, PostgreSQL, Key Vault, Redis, CDN) |
 | API format | OpenAPI 3.1, GraphQL (Apollo), MCP |
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for the full architecture reference.
+See [architecture.md](architecture.md) for the full architecture reference.
 
 ### 1.6 Representative Product Surfaces
 
@@ -303,7 +303,7 @@ sessionRefreshPolicy → globalAuthEnforcer → tenantScope
 | Backup frequency | Continuous WAL + daily snapshots |
 | Retention | 30 days |
 
-See [BACKUP_AND_RECOVERY.md](BACKUP_AND_RECOVERY.md) and [ops/infra/recovery-and-backup-model.md](ops/infra/recovery-and-backup-model.md).
+See [BACKUP-RESTORE.md](BACKUP-RESTORE.md) and [ops/infra/recovery-and-backup-model.md](ops/infra/recovery-and-backup-model.md).
 
 ### 5.5 Incident Response
 
@@ -526,7 +526,7 @@ Three new P1 gaps were discovered in the Phase 2–3 architecture and tenancy ha
 
 | Document | Purpose |
 |----------|---------|
-| [ARCHITECTURE.md](ARCHITECTURE.md) | Full architecture reference |
+| [architecture.md](architecture.md) | Full architecture reference |
 | [SYSTEM-OVERVIEW.md](SYSTEM-OVERVIEW.md) | Platform overview for non-technical stakeholders |
 | [ACCESS-CONTROL-MATRIX.md](ACCESS-CONTROL-MATRIX.md) | Full role/route/permission mappings |
 | [TENANCY-MODEL.md](TENANCY-MODEL.md) | Multi-tenant isolation model and assumptions |

@@ -2,7 +2,7 @@
 
 **Version:** 2.0 | **Date:** April 2026 | **Audience:** Engineers, operators, on-call responders
 
-**Related:** [ARCHITECTURE.md](ARCHITECTURE.md) · [DEPLOYMENT-GUIDE.md](DEPLOYMENT-GUIDE.md) · [KNOWN-GAPS.md](KNOWN-GAPS.md)
+**Related:** [architecture.md](architecture.md) · [DEPLOYMENT-GUIDE.md](DEPLOYMENT-GUIDE.md) · [KNOWN-GAPS.md](KNOWN-GAPS.md)
 
 ---
 
@@ -598,7 +598,7 @@ cat artifact.toml  # or check .replit artifact registrations
 
 | Document | Source of Truth | Last Verified | Drift Risk | Re-verify When |
 |----------|----------------|---------------|------------|----------------|
-| [ARCHITECTURE.md](ARCHITECTURE.md) | `artifacts/`, `lib/`, `artifacts/api-server/src/` | 2026-04-17 | Medium — monorepo structure and table counts drift with every schema/artifact change | New artifact added/archived; significant schema growth |
+| [architecture.md](architecture.md) | `artifacts/`, `lib/`, `artifacts/api-server/src/` | 2026-04-17 | Medium — monorepo structure and table counts drift with every schema/artifact change | New artifact added/archived; significant schema growth |
 | [API-SPEC.md](API-SPEC.md) | `artifacts/api-server/src/routes/`, `lib/api-spec/openapi.yaml` | 2026-04-16 | High — ~140 route files; new route groups added frequently | Any new route group or auth model change |
 | [DATA-MODEL.md](DATA-MODEL.md) | `lib/db/src/schema/` (132 files, 799 tables) | 2026-04-17 | High — 799 tables across 132 schema files; changes with every schema migration | Any `pnpm --filter db push` in dev or `db:migrate` in prod |
 | [PRODUCT-SURFACES.md](PRODUCT-SURFACES.md) | `artifacts/` directory + registered artifact list | 2026-04-17 | Medium — artifact status, component counts, and deprecated surfaces drift | New artifact registered, archived, or status-changed |
@@ -609,7 +609,7 @@ cat artifact.toml  # or check .replit artifact registrations
 
 ---
 
-*See also: [DEPLOYMENT-GUIDE.md](DEPLOYMENT-GUIDE.md) · [INCIDENT_RESPONSE.md](INCIDENT_RESPONSE.md) · [docs/ops-runbook.md](docs/ops-runbook.md) · [REPLIT_OPERATIONS.md](REPLIT_OPERATIONS.md) · [ARCHITECTURE.md](ARCHITECTURE.md) · [KNOWN-GAPS.md](KNOWN-GAPS.md) · [ENV_MATRIX.md](ENV_MATRIX.md) · [BACKUP_AND_RECOVERY.md](BACKUP_AND_RECOVERY.md)*
+*See also: [DEPLOYMENT-GUIDE.md](DEPLOYMENT-GUIDE.md) · [INCIDENT_RESPONSE.md](INCIDENT_RESPONSE.md) · [docs/ops-runbook.md](docs/ops-runbook.md) · [REPLIT_OPERATIONS.md](REPLIT_OPERATIONS.md) · [architecture.md](architecture.md) · [KNOWN-GAPS.md](KNOWN-GAPS.md) · [Environment Matrix](ops/infra/environment-matrix.md) · [BACKUP-RESTORE.md](BACKUP-RESTORE.md)*
 
 ---
 
