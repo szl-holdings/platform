@@ -35,6 +35,10 @@ let retentionTimer: ReturnType<typeof setInterval> | undefined;
 
 const TRACE_RETENTION_DAYS = parseInt(process.env.TRACE_RETENTION_DAYS ?? "30", 10);
 const MEMORY_EPHEMERAL_MAX_AGE_MIN = parseInt(process.env.MEMORY_EPHEMERAL_MAX_AGE_MIN ?? "60", 10);
+const SIGNAL_RETENTION_DAYS = parseInt(process.env.SIGNAL_RETENTION_DAYS ?? "30", 10);
+const EVIDENCE_RETENTION_DAYS = parseInt(process.env.EVIDENCE_RETENTION_DAYS ?? "30", 10);
+const RECOMMENDATION_RETENTION_DAYS = parseInt(process.env.RECOMMENDATION_RETENTION_DAYS ?? "90", 10);
+const ENTITY_SNAPSHOT_RETENTION_DAYS = parseInt(process.env.ENTITY_SNAPSHOT_RETENTION_DAYS ?? "180", 10);
 const RETENTION_INTERVAL_MS = parseInt(process.env.PERSISTENCE_RETENTION_INTERVAL_MS ?? `${60 * 60 * 1000}`, 10);
 const FLUSH_INTERVAL_MS = parseInt(process.env.PERSISTENCE_FLUSH_INTERVAL_MS ?? "1000", 10);
 const TRACE_HYDRATE_LIMIT = parseInt(process.env.TRACE_HYDRATE_LIMIT ?? "1000", 10);
@@ -350,6 +354,10 @@ export async function initDurablePersistence(): Promise<void> {
 export async function runRetentionSweep(): Promise<{
   tracesEvicted: { cacheRemoved: number; dbRemoved: number };
   memoryEvicted: { cacheRemoved: number; dbRemoved: number };
+  signalsEvicted: { dbRemoved: number };
+  evidenceEvicted: { cacheRemoved: number; dbRemoved: number };
+  recommendationsEvicted: { cacheRemoved: number; dbRemoved: number };
+  entitiesEvicted: { cacheRemoved: number; dbRemoved: number };
 }> {
   const tracesEvicted = traceStore
     ? await traceStore.runRetention(TRACE_RETENTION_DAYS)
@@ -357,7 +365,60 @@ export async function runRetentionSweep(): Promise<{
   const memoryEvicted = memoryStore
     ? await memoryStore.runRetention({ ephemeralMaxAgeMinutes: MEMORY_EPHEMERAL_MAX_AGE_MIN })
     : { cacheRemoved: 0, dbRemoved: 0 };
-  return { tracesEvicted, memoryEvicted };
+  const signalsEvicted = signalBusStore
+    ? await signalBusStore.runRetention(SIGNAL_RETENTION_DAYS).catch((err) => {
+        logger.warn({ err }, "[persistence] Signal retention failed");
+        return { dbRemoved: 0 };
+      })
+    : { dbRemoved: 0 };
+  const evidenceEvicted = evidenceStore
+    ? await evidenceStore.runRetention(EVIDENCE_RETENTION_DAYS).catch((err) => {
+        logger.warn({ err }, "[persistence] Evidence retention failed");
+        return { cacheRemoved: 0, dbRemoved: 0 };
+      })
+    : { cacheRemoved: 0, dbRemoved: 0 };
+  const recommendationsEvicted = recommendationStore
+    ? await recommendationStore.runRetention(RECOMMENDATION_RETENTION_DAYS).catch((err) => {
+        logger.warn({ err }, "[persistence] Recommendation retention failed");
+        return { cacheRemoved: 0, dbRemoved: 0 };
+      })
+    : { cacheRemoved: 0, dbRemoved: 0 };
+  const entitiesEvicted = entityRegistry
+    ? await entityRegistry.runRetention(ENTITY_SNAPSHOT_RETENTION_DAYS).catch((err) => {
+        logger.warn({ err }, "[persistence] Entity snapshot retention failed");
+        return { cacheRemoved: 0, dbRemoved: 0 };
+      })
+    : { cacheRemoved: 0, dbRemoved: 0 };
+
+  if (
+    signalsEvicted.dbRemoved > 0 ||
+    evidenceEvicted.dbRemoved > 0 ||
+    recommendationsEvicted.dbRemoved > 0 ||
+    entitiesEvicted.dbRemoved > 0
+  ) {
+    logger.info(
+      {
+        signals: signalsEvicted.dbRemoved,
+        evidence: evidenceEvicted.dbRemoved,
+        recommendations: recommendationsEvicted.dbRemoved,
+        entities: entitiesEvicted.dbRemoved,
+        signalRetentionDays: SIGNAL_RETENTION_DAYS,
+        evidenceRetentionDays: EVIDENCE_RETENTION_DAYS,
+        recommendationRetentionDays: RECOMMENDATION_RETENTION_DAYS,
+        entitySnapshotRetentionDays: ENTITY_SNAPSHOT_RETENTION_DAYS,
+      },
+      "[persistence] Signal Mesh retention sweep pruned old records",
+    );
+  }
+
+  return {
+    tracesEvicted,
+    memoryEvicted,
+    signalsEvicted,
+    evidenceEvicted,
+    recommendationsEvicted,
+    entitiesEvicted,
+  };
 }
 
 /**

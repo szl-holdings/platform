@@ -11,7 +11,7 @@
  * to show recent activity immediately after a boot.
  */
 
-import { desc } from "drizzle-orm";
+import { desc, lt } from "drizzle-orm";
 import type { PgColumn, PgTable } from "drizzle-orm/pg-core";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import type { Signal } from "@workspace/ontology/signal";
@@ -131,6 +131,34 @@ export class PostgresSignalBusStore implements SignalBusStore {
       return { saved };
     } finally {
       this.flushing = false;
+    }
+  }
+
+  /**
+   * Delete signals from the database whose `receivedAt` is older than
+   * `maxAgeDays`. Returns the number of rows removed. The in-memory bus
+   * buffer self-caps via SignalBus.MAX_BUFFER so no cache pruning is
+   * needed here.
+   */
+  async runRetention(maxAgeDays?: number): Promise<{ dbRemoved: number }> {
+    const days = maxAgeDays ?? 0;
+    if (!days || days <= 0) return { dbRemoved: 0 };
+    const cutoff = new Date(Date.now() - days * 86400000);
+    try {
+      const result = await this.opts.db
+        .delete(this.opts.signalsTable)
+        .where(lt(this.opts.signalsTable.receivedAt, cutoff));
+      const dbRemoved = (result as { rowCount?: number }).rowCount ?? 0;
+      if (dbRemoved > 0) {
+        this.opts.logger?.info?.(
+          { dbRemoved, cutoff: cutoff.toISOString(), maxAgeDays: days },
+          "PostgresSignalBusStore: retention pruned signals",
+        );
+      }
+      return { dbRemoved };
+    } catch (err) {
+      this.opts.logger?.warn?.({ err }, "PostgresSignalBusStore: retention failed");
+      return { dbRemoved: 0 };
     }
   }
 

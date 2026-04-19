@@ -115,6 +115,27 @@ export class InMemoryEvidenceStore implements EvidenceStoreBackend {
   count(): number {
     return this.items.size;
   }
+
+  delete(evidenceId: string): boolean {
+    const item = this.items.get(evidenceId);
+    if (!item) return false;
+    this.items.delete(evidenceId);
+    for (const ref of item.entityRefs) {
+      const set = this.entityLinks.get(ref.entityId);
+      if (set) {
+        set.delete(evidenceId);
+        if (set.size === 0) this.entityLinks.delete(ref.entityId);
+      }
+    }
+    if (item.signalId) {
+      const set = this.entityLinks.get(`signal:${item.signalId}`);
+      if (set) {
+        set.delete(evidenceId);
+        if (set.size === 0) this.entityLinks.delete(`signal:${item.signalId}`);
+      }
+    }
+    return true;
+  }
 }
 
 export class InMemoryRecommendationStore implements RecommendationStoreBackend {
@@ -166,6 +187,10 @@ export class InMemoryRecommendationStore implements RecommendationStoreBackend {
 
   count(): number {
     return this.recs.size;
+  }
+
+  delete(recommendationId: string): boolean {
+    return this.recs.delete(recommendationId);
   }
 }
 

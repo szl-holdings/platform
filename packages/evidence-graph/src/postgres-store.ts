@@ -6,7 +6,7 @@
  * persists records to PostgreSQL so they survive process restarts.
  */
 
-import { desc, eq, inArray } from "drizzle-orm";
+import { desc, eq, inArray, lt } from "drizzle-orm";
 import type { PgColumn, PgTable } from "drizzle-orm/pg-core";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import type { EvidenceItem, Recommendation } from "@workspace/ontology";
@@ -194,6 +194,54 @@ export class PostgresEvidenceStore implements EvidenceStoreBackend {
     }
   }
 
+  /**
+   * Delete evidence items (and their entity links) older than `maxAgeDays`
+   * based on `observedAt`. Also drops matching items from the in-memory
+   * cache so list/get queries no longer return them.
+   */
+  async runRetention(maxAgeDays?: number): Promise<{ cacheRemoved: number; dbRemoved: number }> {
+    const days = maxAgeDays ?? 0;
+    if (!days || days <= 0) return { cacheRemoved: 0, dbRemoved: 0 };
+    const cutoff = new Date(Date.now() - days * 86400000);
+
+    let cacheRemoved = 0;
+    // Walk the entire cache (list() applies a default page limit), so iterate
+    // over all items via a sufficiently large list cap.
+    const all = this.cache.list({ limit: Number.MAX_SAFE_INTEGER });
+    for (const item of all) {
+      if (new Date(item.observedAt) < cutoff) {
+        if (this.cache.delete(item.evidenceId)) cacheRemoved++;
+      }
+    }
+
+    let dbRemoved = 0;
+    try {
+      const expired = (await this.opts.db
+        .select({ id: this.opts.evidenceItemsTable.evidenceId })
+        .from(this.opts.evidenceItemsTable)
+        .where(lt(this.opts.evidenceItemsTable.observedAt, cutoff))) as Array<{ id: string }>;
+      const ids = expired.map((r) => r.id);
+      if (ids.length > 0) {
+        await this.opts.db
+          .delete(this.opts.evidenceEntityLinksTable)
+          .where(inArray(this.opts.evidenceEntityLinksTable.evidenceId, ids));
+        const result = await this.opts.db
+          .delete(this.opts.evidenceItemsTable)
+          .where(inArray(this.opts.evidenceItemsTable.evidenceId, ids));
+        dbRemoved = (result as { rowCount?: number }).rowCount ?? ids.length;
+      }
+      if (dbRemoved > 0 || cacheRemoved > 0) {
+        this.opts.logger?.info?.(
+          { dbRemoved, cacheRemoved, cutoff: cutoff.toISOString(), maxAgeDays: days },
+          "PostgresEvidenceStore: retention pruned evidence",
+        );
+      }
+    } catch (err) {
+      this.opts.logger?.warn?.({ err }, "PostgresEvidenceStore: retention failed");
+    }
+    return { cacheRemoved, dbRemoved };
+  }
+
   async stop(): Promise<void> {
     if (this.flushTimer) {
       clearInterval(this.flushTimer);
@@ -325,6 +373,41 @@ export class PostgresRecommendationStore implements RecommendationStoreBackend {
     } finally {
       this.flushing = false;
     }
+  }
+
+  /**
+   * Delete recommendations older than `maxAgeDays` based on `generatedAt`.
+   * Also drops matching items from the in-memory cache.
+   */
+  async runRetention(maxAgeDays?: number): Promise<{ cacheRemoved: number; dbRemoved: number }> {
+    const days = maxAgeDays ?? 0;
+    if (!days || days <= 0) return { cacheRemoved: 0, dbRemoved: 0 };
+    const cutoff = new Date(Date.now() - days * 86400000);
+
+    let cacheRemoved = 0;
+    const all = this.cache.list({ limit: Number.MAX_SAFE_INTEGER });
+    for (const rec of all) {
+      if (new Date(rec.generatedAt) < cutoff) {
+        if (this.cache.delete(rec.recommendationId)) cacheRemoved++;
+      }
+    }
+
+    let dbRemoved = 0;
+    try {
+      const result = await this.opts.db
+        .delete(this.opts.recommendationsTable)
+        .where(lt(this.opts.recommendationsTable.generatedAt, cutoff));
+      dbRemoved = (result as { rowCount?: number }).rowCount ?? 0;
+      if (dbRemoved > 0 || cacheRemoved > 0) {
+        this.opts.logger?.info?.(
+          { dbRemoved, cacheRemoved, cutoff: cutoff.toISOString(), maxAgeDays: days },
+          "PostgresRecommendationStore: retention pruned recommendations",
+        );
+      }
+    } catch (err) {
+      this.opts.logger?.warn?.({ err }, "PostgresRecommendationStore: retention failed");
+    }
+    return { cacheRemoved, dbRemoved };
   }
 
   async stop(): Promise<void> {
@@ -468,6 +551,43 @@ export class PostgresEntityRegistry implements EntityRegistryBackend {
     } finally {
       this.flushing = false;
     }
+  }
+
+  /**
+   * Delete entity snapshots whose `snapshotAt` is older than `maxAgeDays`
+   * (i.e. entities that haven't been refreshed in a long time). Also drops
+   * matching entries from the in-memory cache. Use a generous default
+   * since snapshots represent current entity state, not time-series.
+   */
+  async runRetention(maxAgeDays?: number): Promise<{ cacheRemoved: number; dbRemoved: number }> {
+    const days = maxAgeDays ?? 0;
+    if (!days || days <= 0) return { cacheRemoved: 0, dbRemoved: 0 };
+    const cutoff = new Date(Date.now() - days * 86400000);
+
+    let cacheRemoved = 0;
+    for (const [entityId, snap] of this.cache) {
+      if (new Date(snap.snapshotAt) < cutoff) {
+        this.cache.delete(entityId);
+        cacheRemoved++;
+      }
+    }
+
+    let dbRemoved = 0;
+    try {
+      const result = await this.opts.db
+        .delete(this.opts.entitySnapshotsTable)
+        .where(lt(this.opts.entitySnapshotsTable.snapshotAt, cutoff));
+      dbRemoved = (result as { rowCount?: number }).rowCount ?? 0;
+      if (dbRemoved > 0 || cacheRemoved > 0) {
+        this.opts.logger?.info?.(
+          { dbRemoved, cacheRemoved, cutoff: cutoff.toISOString(), maxAgeDays: days },
+          "PostgresEntityRegistry: retention pruned entity snapshots",
+        );
+      }
+    } catch (err) {
+      this.opts.logger?.warn?.({ err }, "PostgresEntityRegistry: retention failed");
+    }
+    return { cacheRemoved, dbRemoved };
   }
 
   async stop(): Promise<void> {
