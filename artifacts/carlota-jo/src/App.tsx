@@ -76,6 +76,11 @@ const StrategicReadinessPage = lazy(() => import("@/pages/strategic-readiness"))
 const DeliverableWorkflow = lazy(() => import("@/pages/deliverable-workflow"));
 const ProfitabilityAnalytics = lazy(() => import("@/pages/profitability-analytics"));
 const CarlotaJoAtlasExecute = lazy(() => import("@/pages/atlas-execute"));
+const ConciergeCommand = lazy(() => import("@/pages/concierge/index"));
+const ConciergeClients = lazy(() => import("@/pages/concierge/clients"));
+const ConciergePlaybooks = lazy(() => import("@/pages/concierge/playbooks"));
+const ConciergeRequests = lazy(() => import("@/pages/concierge/requests"));
+const ConciergeComms = lazy(() => import("@/pages/concierge/communications"));
 
 function PageLoader() {
   return (
@@ -195,6 +200,14 @@ function Router() {
         <Route path="/atlas-execute" component={CarlotaJoAtlasExecute} />
         <Route path="/governed-cockpit" component={GovernedCockpitPage} />
         <Route path="/readiness-checklist" component={ReadinessChecklistPage} />
+
+        {/* White-Glove Command — concierge suite */}
+        <Route path="/concierge" component={ConciergeCommand} />
+        <Route path="/concierge/clients" component={ConciergeClients} />
+        <Route path="/concierge/playbooks" component={ConciergePlaybooks} />
+        <Route path="/concierge/requests" component={ConciergeRequests} />
+        <Route path="/concierge/communications" component={ConciergeComms} />
+
         <Route component={NotFound} />
       </Switch>
     </Suspense>

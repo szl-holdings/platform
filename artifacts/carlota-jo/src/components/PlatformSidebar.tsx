@@ -4,6 +4,7 @@ import {
   Cpu, FileText, Network, Radar, Activity, Heart, TrendingUp,
   GraduationCap, Users, FolderOpen, Clock, BookOpen, BarChart3,
   CheckCircle, ChevronDown, Sparkles, Lightbulb, Zap, Shield,
+  Crown, Star, MessageSquare, BookMarked,
 } from "lucide-react";
 import { PolicyModeBadge } from "@/components/policy-mode-badge";
 
@@ -55,7 +56,16 @@ const ATLAS_ITEMS: NavItem[] = [
   { href: "/governed-cockpit", label: "Governed Intelligence", icon: Shield },
 ];
 
+const CONCIERGE_ITEMS: NavItem[] = [
+  { href: "/concierge", label: "Concierge Atelier", icon: Crown },
+  { href: "/concierge/clients", label: "Household Dossiers", icon: BookMarked },
+  { href: "/concierge/playbooks", label: "Service Choreographies", icon: Star },
+  { href: "/concierge/requests", label: "Active Requests", icon: Activity },
+  { href: "/concierge/communications", label: "Correspondence", icon: MessageSquare },
+];
+
 const GROUPS: NavGroup[] = [
+  { id: "concierge", label: "White-Glove Command", items: CONCIERGE_ITEMS },
   { id: "advisory", label: "Advisory", items: ADVISORY },
   { id: "operations", label: "Operations", items: OPERATIONS },
   { id: "atlas", label: "ATLAS Execution", items: ATLAS_ITEMS },
@@ -71,6 +81,8 @@ export const PLATFORM_PATHS: string[] = [
   "/consulting-os",
   ...ADVISORY.map((i) => i.href),
   ...OPERATIONS.map((i) => i.href),
+  ...CONCIERGE_ITEMS.map((i) => i.href),
+  ...ATLAS_ITEMS.map((i) => i.href),
 ];
 
 export function isPlatformRoute(pathname: string): boolean {
@@ -82,8 +94,10 @@ export const PLATFORM_SIDEBAR_WIDTH = 248;
 export default function PlatformSidebar() {
   const [location] = useLocation();
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
+    concierge: true,
     advisory: true,
-    operations: true,
+    operations: false,
+    atlas: false,
   });
   const carlotaActionType = pathToCarlotaActionType(location);
 
