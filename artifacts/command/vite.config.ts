@@ -15,11 +15,89 @@ const basePath = process.env.BASE_PATH || "/command/";
 // Shared proxy port — hardcoded; do not use a PROXY_PORT env var to override this.
 const SHARED_PROXY_PORT = 9090;
 
+// Bind the shared proxy port at module-load time so the platform health check
+// sees an open port within milliseconds of process start, rather than waiting
+// for all Vite plugins (tailwind, react, cartographer, dev-banner) to finish
+// initializing inside `configureServer`. This makes startup deterministic
+// under BASE_PATH=/command/ and EMBED_API_SERVER=false.
+const proxyServer = http.createServer((req: any, res: any) => {
+  const url = req.url || "/";
+  if (url === "/" || url === "/health" || url === "/__health") {
+    res.writeHead(200, { "Content-Type": "text/plain" });
+    res.end("OK");
+    return;
+  }
+  const normalizedUrl = url.endsWith("/") ? url : url + "/";
+  const route = PROXY_ROUTES.find((r: any) => normalizedUrl.startsWith(r.prefix));
+  const targetPort = route ? route.port : vitePort;
+  const upstream = http.request(
+    {
+      hostname: "127.0.0.1",
+      port: targetPort,
+      path: url,
+      method: req.method,
+      headers: { ...req.headers, host: "localhost:" + targetPort },
+    },
+    (upRes: any) => {
+      res.writeHead(upRes.statusCode || 200, upRes.headers);
+      upRes.pipe(res, { end: true });
+    },
+  );
+  upstream.on("error", () => {
+    if (!res.headersSent) {
+      res.writeHead(503, { "Content-Type": "text/plain" });
+      res.end("Upstream not ready on port " + targetPort);
+    }
+  });
+  req.pipe(upstream, { end: true });
+});
+
+proxyServer.on("upgrade", (req, socket, head) => {
+  const url = req.url || "/";
+  const normalizedUrl = url.endsWith("/") ? url : url + "/";
+  const route = PROXY_ROUTES.find((r) => normalizedUrl.startsWith(r.prefix));
+  const targetPort = route ? route.port : vitePort;
+  const conn = net.connect(targetPort, "127.0.0.1", () => {
+    const rawHeaders = Object.entries(req.headers)
+      .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(", ") : v}`)
+      .join("\r\n");
+    conn.write(`${req.method} ${url} HTTP/1.1\r\n${rawHeaders}\r\n\r\n`);
+    if (head && head.length) conn.write(head);
+    socket.pipe(conn);
+    conn.pipe(socket);
+  });
+  conn.on("error", () => socket.destroy());
+  socket.on("error", () => conn.destroy());
+});
+
+proxyServer.on("error", (err: NodeJS.ErrnoException) => {
+  console.warn("[shared-proxy] Server error:", err.code);
+});
+
+// Only eager-bind in dev-serve mode. `vite build` and `vite preview` should
+// not try to occupy the shared-proxy port (avoids spurious bind conflicts
+// during CI builds and production preview).
+const isDevServe =
+  !process.argv.includes("build") && !process.argv.includes("preview");
+
+if (isDevServe) {
+  proxyServer.listen(
+    { port: SHARED_PROXY_PORT, host: "::", reusePort: true },
+    () => {
+      console.log(
+        "[shared-proxy] Listening on port " +
+          SHARED_PROXY_PORT +
+          " (reusePort, dual-stack, eager-bind)",
+      );
+    },
+  );
+}
+
 function sharedProxyPlugin(): Plugin {
   return {
     name: "shared-proxy",
     apply: "serve",
-    async configureServer(server) {
+    configureServer(server) {
       server.middlewares.use((req, res, next) => {
         const url = req.url ?? "/";
         if (url === "/" || url === "/__health" || url === "/health") {
@@ -28,61 +106,6 @@ function sharedProxyPlugin(): Plugin {
           return;
         }
         next();
-      });
-
-      const proxyServer = http.createServer((req: any, res: any) => {
-        const url = req.url || "/";
-        if (url === "/" || url === "/health" || url === "/__health") {
-          res.writeHead(200, { "Content-Type": "text/plain" });
-          res.end("OK");
-          return;
-        }
-        const normalizedUrl = url.endsWith("/") ? url : url + "/";
-        const route = PROXY_ROUTES.find((r: any) => normalizedUrl.startsWith(r.prefix));
-        const targetPort = route ? route.port : vitePort;
-        const upstream = http.request(
-          { hostname: "127.0.0.1", port: targetPort, path: url, method: req.method,
-            headers: { ...req.headers, host: "localhost:" + targetPort } },
-          (upRes: any) => { res.writeHead(upRes.statusCode || 200, upRes.headers); upRes.pipe(res, { end: true }); }
-        );
-        upstream.on("error", () => {
-          if (!res.headersSent) { res.writeHead(503, { "Content-Type": "text/plain" }); res.end("Upstream not ready on port " + targetPort); }
-        });
-        req.pipe(upstream, { end: true });
-      });
-      await new Promise<void>((resolve) => {
-        let settled = false;
-        const finish = () => {
-          if (!settled) {
-            settled = true;
-            resolve();
-          }
-        };
-        proxyServer.once("error", (err: NodeJS.ErrnoException) => {
-          console.warn("[shared-proxy] Bind error:", err.code);
-          finish();
-        });
-        proxyServer.listen({ port: SHARED_PROXY_PORT, host: "::", reusePort: true }, () => {
-          console.log("[shared-proxy] Listening on port " + SHARED_PROXY_PORT + " (reusePort, dual-stack)");
-          finish();
-        });
-      });
-      proxyServer.on("upgrade", (req, socket, head) => {
-        const url = req.url || "/";
-        const normalizedUrl = url.endsWith("/") ? url : url + "/";
-        const route = PROXY_ROUTES.find((r) => normalizedUrl.startsWith(r.prefix));
-        const targetPort = route ? route.port : vitePort;
-        const conn = net.connect(targetPort, "127.0.0.1", () => {
-          const rawHeaders = Object.entries(req.headers)
-            .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(", ") : v}`)
-            .join("\r\n");
-          conn.write(`${req.method} ${url} HTTP/1.1\r\n${rawHeaders}\r\n\r\n`);
-          if (head && head.length) conn.write(head);
-          socket.pipe(conn);
-          conn.pipe(socket);
-        });
-        conn.on("error", () => socket.destroy());
-        socket.on("error", () => conn.destroy());
       });
     },
   };
