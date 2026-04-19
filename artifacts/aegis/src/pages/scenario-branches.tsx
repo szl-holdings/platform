@@ -43,6 +43,27 @@ interface ApiBranch {
     recommended?: boolean;
     trigger?: string;
   };
+  /**
+   * Server-computed simulation fields derived from the latest drift assessment
+   * for this branch's twin. Returned by GET /atlas/spatial/branches when
+   * assessment data exists. Preferred over `parameters` when both are present
+   * for any individual field (parameters are admin-curated overrides).
+   */
+  simulation?: {
+    blastRadius: number;
+    assetsAffected: number;
+    probability: number;
+    driftFromBaseline: number;
+    outcome: BranchOutcome;
+    mttr: string;
+    costImpact: string;
+    trigger: string;
+    controlGaps: string[];
+    actions: string[];
+    driftStatus: string;
+    driftScore: number;
+    assessedAt: string;
+  } | null;
 }
 
 const OUTCOME_CONFIG: Record<BranchOutcome, { color: string; label: string; icon: typeof CheckCircle }> = {
@@ -122,22 +143,42 @@ const SEED_BRANCHES: ScenarioBranch[] = [
   },
 ];
 
+/**
+ * Three-tier resolution per field:
+ *   1. parameters.X        — admin-curated override stored on the branch
+ *   2. simulation.X        — server-computed from latest drift assessment
+ *   3. deterministic seed  — last-resort static placeholder (never random)
+ *
+ * `Math.random()` was previously used for missing fields, which made the page
+ * lie about state and made tests/screenshots flake — removed entirely.
+ */
 function apiBranchToScenario(b: ApiBranch, idx: number): ScenarioBranch {
   const params = b.parameters ?? {};
-  const outcome = (params.outcome as BranchOutcome) ?? STATUS_OUTCOME_MAP[b.status] ?? "recovering";
+  const sim = b.simulation ?? null;
+  const outcome =
+    (params.outcome as BranchOutcome) ??
+    sim?.outcome ??
+    STATUS_OUTCOME_MAP[b.status] ??
+    "recovering";
   return {
     id: b.id,
     name: b.branchName,
-    trigger: params.trigger ?? `Scenario branch created for ${b.twinCategory ?? "twin"} analysis`,
-    probability: params.probability ?? Math.floor(Math.random() * 40) + 5,
-    blastRadius: params.blastRadius ?? Math.floor(Math.random() * 60) + 5,
-    assetsAffected: params.assetsAffected ?? Math.floor(Math.random() * 10) + 1,
+    trigger:
+      params.trigger ??
+      sim?.trigger ??
+      `Scenario branch created for ${b.twinCategory ?? "twin"} analysis`,
+    probability: params.probability ?? sim?.probability ?? 25,
+    blastRadius: params.blastRadius ?? sim?.blastRadius ?? 20,
+    assetsAffected: params.assetsAffected ?? sim?.assetsAffected ?? 1,
     outcome,
-    mttr: params.mttr ?? "2h 00m",
-    costImpact: params.costImpact ?? "$500K",
-    driftFromBaseline: params.driftFromBaseline ?? Math.floor(Math.random() * 30) + 2,
-    actions: params.actions ?? ["Review twin state", "Apply remediation playbook", "Notify stakeholders"],
-    controlGaps: params.controlGaps ?? [],
+    mttr: params.mttr ?? sim?.mttr ?? "2h 00m",
+    costImpact: params.costImpact ?? sim?.costImpact ?? "$500K",
+    driftFromBaseline: params.driftFromBaseline ?? sim?.driftFromBaseline ?? 10,
+    actions:
+      params.actions ??
+      sim?.actions ??
+      ["Review twin state", "Apply remediation playbook", "Notify stakeholders"],
+    controlGaps: params.controlGaps ?? sim?.controlGaps ?? [],
     recommended: idx === 0,
   };
 }

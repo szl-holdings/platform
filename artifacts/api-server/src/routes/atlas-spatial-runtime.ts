@@ -329,6 +329,138 @@ router.post("/atlas/spatial/branches", authMiddleware(), validateBody(jsonObject
   }
 });
 
+/**
+ * Build a `simulation` block per branch from the latest drift assessment for
+ * that branch's twin. The Blast Radius Simulation page (artifacts/aegis
+ * /src/pages/scenario-branches.tsx) consumes this so its blast-radius bars,
+ * assets-affected count, MTTR, cost-impact tier and outcome class reflect
+ * real twin drift instead of hard-coded seed values.
+ *
+ * Mapping:
+ *   driftScore (0..1)         → blastRadius / driftFromBaseline (0..100, rounded)
+ *   adjustedConfidence        → probability (1 - confidence, 0..100)
+ *   divergentFields.length    → assetsAffected (clamped 1..50) + controlGaps (top 4 field names)
+ *   driftStatus               → outcome class (blocked|degraded|watch|stable)
+ *                               + mttr/cost tier
+ *   blockedReason / divergent → trigger summary
+ *
+ * Returns null when no assessment exists yet, so the client can fall back to
+ * any admin-saved `parameters` (or finally to the seeded defaults).
+ */
+type AtlasOutcome = "contained" | "escalated" | "catastrophic" | "recovering";
+interface BranchSimulation {
+  blastRadius: number;
+  assetsAffected: number;
+  probability: number;
+  driftFromBaseline: number;
+  outcome: AtlasOutcome;
+  mttr: string;
+  costImpact: string;
+  trigger: string;
+  controlGaps: string[];
+  actions: string[];
+  driftStatus: string;
+  driftScore: number;
+  assessedAt: string;
+}
+
+function clamp(n: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, n));
+}
+
+function buildBranchSimulation(
+  assessment: import("@szl-holdings/atlas-spatial-runtime").DriftAssessment | null,
+  branchName: string,
+): BranchSimulation | null {
+  if (!assessment) return null;
+
+  const driftScore = typeof assessment.driftScore === "number" ? assessment.driftScore : 0;
+  const adjustedConfidence =
+    typeof assessment.adjustedConfidence === "number" ? assessment.adjustedConfidence : 0.5;
+  const divergent = Array.isArray(assessment.divergentFields) ? assessment.divergentFields : [];
+
+  const blastRadius = clamp(Math.round(driftScore * 100), 0, 100);
+  const driftFromBaseline = blastRadius;
+  const probability = clamp(Math.round((1 - adjustedConfidence) * 100), 1, 99);
+  const assetsAffected = clamp(divergent.length || 1, 1, 50);
+
+  const status = assessment.driftStatus;
+  const outcome: AtlasOutcome =
+    status === "blocked"
+      ? "catastrophic"
+      : status === "degraded"
+        ? "escalated"
+        : status === "watch"
+          ? "recovering"
+          : "contained";
+
+  // Heuristic MTTR / cost tier from drift status. These are not authoritative
+  // financial figures — they are operating-tier indicators driven by live
+  // drift, intentionally bucketed (not random) so repeat polls are stable.
+  const mttr =
+    status === "blocked"
+      ? "11d 4h"
+      : status === "degraded"
+        ? "6h 48m"
+        : status === "watch"
+          ? "1h 22m"
+          : "0h 45m";
+  const costImpact =
+    status === "blocked"
+      ? "$8.4M"
+      : status === "degraded"
+        ? "$1.8M"
+        : status === "watch"
+          ? "$240K"
+          : "$80K";
+
+  const controlGaps = divergent
+    .slice(0, 4)
+    .map((d) => `Drift on ${String(d.field)} (Δ ${(d.divergenceScore ?? 0).toFixed(2)})`);
+
+  const actions =
+    status === "blocked"
+      ? [
+          "Quarantine affected twin and freeze downstream actions",
+          "Open IR ticket and engage on-call SRE",
+          "Run full forensic snapshot before remediation",
+        ]
+      : status === "degraded"
+        ? [
+            "Notify owning team and request manual review",
+            "Restrict twin to read-only until drift resolves",
+            "Replay last good snapshot to compare divergence",
+          ]
+        : status === "watch"
+          ? [
+              "Tag twin for accelerated re-sync next cycle",
+              "Confirm trusted source delta is expected",
+            ]
+          : ["Continue normal monitoring cadence"];
+
+  const trigger = assessment.blockedReason
+    ? assessment.blockedReason
+    : divergent.length > 0
+      ? `${divergent.length} divergent field${divergent.length === 1 ? "" : "s"} detected on ${assessment.twinId} — branch "${branchName}"`
+      : `Latest drift assessment for ${assessment.twinId} is ${status}`;
+
+  return {
+    blastRadius,
+    assetsAffected,
+    probability,
+    driftFromBaseline,
+    outcome,
+    mttr,
+    costImpact,
+    trigger,
+    controlGaps,
+    actions,
+    driftStatus: status,
+    driftScore: Number(driftScore.toFixed(3)),
+    assessedAt: String(assessment.assessedAt ?? new Date().toISOString()),
+  };
+}
+
 router.get("/atlas/spatial/branches", authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
   try {
     const { twinId, entityId, twinCategory, status, limit } = req.query as {
@@ -339,7 +471,7 @@ router.get("/atlas/spatial/branches", authMiddleware(), validateQuery(listQueryS
       limit?: string;
     };
 
-    const { listBranches } = await import("@szl-holdings/atlas-spatial-runtime");
+    const { listBranches, getLatestDriftAssessment } = await import("@szl-holdings/atlas-spatial-runtime");
     const user = req.user;
     const orgId = user?.orgs?.[0]?.orgId ?? undefined;
 
@@ -352,7 +484,34 @@ router.get("/atlas/spatial/branches", authMiddleware(), validateQuery(listQueryS
       limit: limit ? Math.min(Number(limit), 100) : 50,
     });
 
-    sendSuccess(res, { branches, count: branches.length });
+    // Cache one assessment per twinId — many branches usually share a twin.
+    const assessmentByTwin = new Map<
+      string,
+      import("@szl-holdings/atlas-spatial-runtime").DriftAssessment | null
+    >();
+    let liveSimulationCount = 0;
+    const enriched = await Promise.all(
+      branches.map(async (b) => {
+        let assessment = assessmentByTwin.get(b.twinId);
+        if (assessment === undefined) {
+          try {
+            assessment = await getLatestDriftAssessment(b.twinId);
+          } catch {
+            assessment = null;
+          }
+          assessmentByTwin.set(b.twinId, assessment ?? null);
+        }
+        const simulation = buildBranchSimulation(assessment ?? null, b.name);
+        if (simulation) liveSimulationCount += 1;
+        return { ...b, simulation };
+      }),
+    );
+
+    sendSuccess(res, {
+      branches: enriched,
+      count: enriched.length,
+      liveSimulationCount,
+    });
   } catch (err) {
     handleRouteError(res, err, "Internal server error");
   }
