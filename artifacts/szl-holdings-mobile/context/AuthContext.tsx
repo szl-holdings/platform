@@ -3,20 +3,25 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
 import * as AuthSession from "expo-auth-session";
 import * as SecureStore from "expo-secure-store";
 import * as WebBrowser from "expo-web-browser";
-import { Platform } from "react-native";
+import { AppState, Platform, type AppStateStatus } from "react-native";
 import { identifyUser, resetUser } from "@/lib/analytics";
 import { setSentryUser, clearSentryUser } from "@/lib/sentry";
 
 WebBrowser.maybeCompleteAuthSession();
 
 export const AUTH_TOKEN_KEY = "cortex_auth_token";
+export const AUTH_REFRESH_TOKEN_KEY = "cortex_refresh_token";
+export const AUTH_TOKEN_EXPIRES_AT_KEY = "cortex_token_expires_at";
+export const AUTH_REFRESH_EXPIRES_AT_KEY = "cortex_refresh_token_expires_at";
 const ISSUER_URL = process.env.EXPO_PUBLIC_ISSUER_URL ?? "https://replit.com/oidc";
+const REFRESH_LEAD_MS = 5 * 60 * 1000;
 
 // ---------------------------------------------------------------------------
 // Session-revocation signaling
@@ -108,6 +113,13 @@ export interface AuthUser {
   roles: string[];
 }
 
+interface StoredTokens {
+  token: string;
+  refreshToken: string | null;
+  expiresAt: string | null;
+  refreshTokenExpiresAt: string | null;
+}
+
 interface AuthContextValue {
   user: AuthUser | null;
   isLoading: boolean;
@@ -149,31 +161,65 @@ function getClientId(): string {
   return process.env.EXPO_PUBLIC_REPL_ID ?? "";
 }
 
-async function secureGetToken(): Promise<string | null> {
+async function secureGet(key: string): Promise<string | null> {
   if (Platform.OS === "web") {
-    return typeof window !== "undefined"
-      ? window.localStorage.getItem(AUTH_TOKEN_KEY)
-      : null;
+    return typeof window !== "undefined" ? window.localStorage.getItem(key) : null;
   }
-  return SecureStore.getItemAsync(AUTH_TOKEN_KEY);
+  return SecureStore.getItemAsync(key);
 }
 
-async function secureSetToken(token: string): Promise<void> {
+async function secureSet(key: string, value: string): Promise<void> {
   if (Platform.OS === "web") {
-    if (typeof window !== "undefined")
-      window.localStorage.setItem(AUTH_TOKEN_KEY, token);
+    if (typeof window !== "undefined") window.localStorage.setItem(key, value);
     return;
   }
-  return SecureStore.setItemAsync(AUTH_TOKEN_KEY, token);
+  return SecureStore.setItemAsync(key, value);
 }
 
-async function secureDelToken(): Promise<void> {
+async function secureDel(key: string): Promise<void> {
   if (Platform.OS === "web") {
-    if (typeof window !== "undefined")
-      window.localStorage.removeItem(AUTH_TOKEN_KEY);
+    if (typeof window !== "undefined") window.localStorage.removeItem(key);
     return;
   }
-  return SecureStore.deleteItemAsync(AUTH_TOKEN_KEY);
+  return SecureStore.deleteItemAsync(key);
+}
+
+async function readStoredTokens(): Promise<StoredTokens | null> {
+  const token = await secureGet(AUTH_TOKEN_KEY);
+  if (!token) return null;
+  const [refreshToken, expiresAt, refreshTokenExpiresAt] = await Promise.all([
+    secureGet(AUTH_REFRESH_TOKEN_KEY),
+    secureGet(AUTH_TOKEN_EXPIRES_AT_KEY),
+    secureGet(AUTH_REFRESH_EXPIRES_AT_KEY),
+  ]);
+  return { token, refreshToken, expiresAt, refreshTokenExpiresAt };
+}
+
+async function persistTokens(tokens: StoredTokens): Promise<void> {
+  await secureSet(AUTH_TOKEN_KEY, tokens.token);
+  if (tokens.refreshToken) await secureSet(AUTH_REFRESH_TOKEN_KEY, tokens.refreshToken);
+  else await secureDel(AUTH_REFRESH_TOKEN_KEY);
+  if (tokens.expiresAt) await secureSet(AUTH_TOKEN_EXPIRES_AT_KEY, tokens.expiresAt);
+  else await secureDel(AUTH_TOKEN_EXPIRES_AT_KEY);
+  if (tokens.refreshTokenExpiresAt)
+    await secureSet(AUTH_REFRESH_EXPIRES_AT_KEY, tokens.refreshTokenExpiresAt);
+  else await secureDel(AUTH_REFRESH_EXPIRES_AT_KEY);
+}
+
+async function clearStoredTokens(): Promise<void> {
+  await Promise.all([
+    secureDel(AUTH_TOKEN_KEY),
+    secureDel(AUTH_REFRESH_TOKEN_KEY),
+    secureDel(AUTH_TOKEN_EXPIRES_AT_KEY),
+    secureDel(AUTH_REFRESH_EXPIRES_AT_KEY),
+  ]);
+}
+
+function tokenIsNearExpiry(expiresAt: string | null, now = Date.now()): boolean {
+  if (!expiresAt) return false;
+  const t = Date.parse(expiresAt);
+  if (Number.isNaN(t)) return false;
+  return t - now <= REFRESH_LEAD_MS;
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -184,18 +230,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     () => getSessionRevocation(),
   );
 
+  const tokensRef = useRef<StoredTokens | null>(null);
+  const refreshInFlightRef = useRef<Promise<StoredTokens | null> | null>(null);
+
+  const wipeAuth = useCallback(async () => {
+    tokensRef.current = null;
+    await clearStoredTokens();
+    setAccessToken(null);
+    setUser(null);
+  }, []);
+
   useEffect(() => {
     return subscribeSessionRevocation((info) => {
       setSessionRevocation(info);
       if (info) {
         // Drop any locally cached identity so the auth screen renders.
-        secureDelToken().catch(() => {});
-        setAccessToken(null);
-        setUser(null);
+        wipeAuth().catch(() => {});
         setIsLoading(false);
       }
     });
-  }, []);
+  }, [wipeAuth]);
 
   const discovery = AuthSession.useAutoDiscovery(ISSUER_URL);
   const redirectUri = AuthSession.makeRedirectUri();
@@ -210,40 +264,140 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     discovery,
   );
 
+  /**
+   * Rotate the refresh token. Concurrent callers share the in-flight
+   * request. Returns the new tokens, or null if the user must re-login.
+   */
+  const refreshTokens = useCallback(async (): Promise<StoredTokens | null> => {
+    if (refreshInFlightRef.current) return refreshInFlightRef.current;
+    const current = tokensRef.current;
+    if (!current?.refreshToken) {
+      await wipeAuth();
+      return null;
+    }
+    refreshInFlightRef.current = (async () => {
+      try {
+        const apiBase = getApiBaseUrl();
+        const res = await fetch(`${apiBase}/api/auth/refresh`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ refreshToken: current.refreshToken }),
+        });
+        const json = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          if (json?.code === "REFRESH_TOKEN_REPLAY") {
+            console.warn("[Auth] Refresh token replay detected; forcing re-login");
+            recordSessionRevocation({
+              code: "REFRESH_TOKEN_REPLAY",
+              message: pickServerMessageFromBody(json) ?? undefined,
+            });
+            await wipeAuth();
+            return null;
+          }
+          if (res.status === 401) {
+            await wipeAuth();
+            return null;
+          }
+          throw new Error(json?.message ?? json?.error ?? `Refresh failed (${res.status})`);
+        }
+        const data = json?.data ?? json;
+        if (!data?.token || !data?.refreshToken) {
+          throw new Error("Malformed refresh response");
+        }
+        const next: StoredTokens = {
+          token: data.token,
+          refreshToken: data.refreshToken,
+          expiresAt: data.expiresAt ?? null,
+          refreshTokenExpiresAt: data.refreshTokenExpiresAt ?? null,
+        };
+        tokensRef.current = next;
+        await persistTokens(next);
+        setAccessToken(next.token);
+        return next;
+      } finally {
+        refreshInFlightRef.current = null;
+      }
+    })();
+    return refreshInFlightRef.current;
+  }, [wipeAuth]);
+
   const fetchUser = useCallback(async () => {
     try {
-      const token = await secureGetToken();
-      if (!token) {
+      let stored = tokensRef.current ?? (await readStoredTokens());
+      if (!stored) {
         setAccessToken(null);
         setUser(null);
         setIsLoading(false);
         return;
+      }
+      tokensRef.current = stored;
+
+      // Pre-emptively rotate if we're inside the lead window.
+      if (tokenIsNearExpiry(stored.expiresAt)) {
+        const refreshed = await refreshTokens().catch(() => null);
+        if (refreshed) stored = refreshed;
       }
 
       const apiBase = getApiBaseUrl();
-      const res = await fetch(`${apiBase}/api/auth/me`, {
-        headers: { Authorization: `Bearer ${token}` },
+      let res = await fetch(`${apiBase}/api/auth/me`, {
+        headers: { Authorization: `Bearer ${stored.token}` },
       });
 
-      if (!res.ok) {
-        if (res.status === 401) {
-          const body = await res.clone().json().catch(() => null);
-          const code = pickRevocationCodeFromBody(body);
-          if (code) {
-            recordSessionRevocation({
-              code,
-              message: pickServerMessageFromBody(body) ?? undefined,
+      if (res.status === 401) {
+        // Before trying refresh, clone the response to check for revocation codes in the original failure.
+        const body = await res.clone().json().catch(() => null);
+        const code = pickRevocationCodeFromBody(body);
+
+        if (stored.refreshToken && !code) {
+          const refreshed = await refreshTokens().catch(() => null);
+          if (refreshed) {
+            const retry = await fetch(`${apiBase}/api/auth/me`, {
+              headers: { Authorization: `Bearer ${refreshed.token}` },
             });
+            if (retry.ok) {
+              const json = await retry.json();
+              const data = json.data ?? json;
+              if (data?.id) {
+                setAccessToken(refreshed.token);
+                setUser({
+                  id: String(data.id),
+                  displayName: data.displayName ?? null,
+                  email: data.email ?? null,
+                  avatarUrl: data.avatarUrl ?? null,
+                  roles: Array.isArray(data.roles) ? data.roles : [],
+                });
+                setIsLoading(false);
+                return;
+              }
+            }
+            res = retry; // use the retry response for further checks if it's not ok
           }
         }
-        await secureDelToken();
-        setAccessToken(null);
-        setUser(null);
+
+        // If we're still here, it means refresh failed or was skipped.
+        // If we didn't check for revocation code yet (because we tried refresh), check now.
+        const finalBody = res === (await res.clone()) ? body : await res.clone().json().catch(() => null);
+        const finalCode = pickRevocationCodeFromBody(finalBody) || code;
+
+        if (finalCode) {
+          recordSessionRevocation({
+            code: finalCode,
+            message: pickServerMessageFromBody(finalBody || body) ?? undefined,
+          });
+        }
+
+        await wipeAuth();
         setIsLoading(false);
         return;
       }
 
-      setAccessToken(token);
+      if (!res.ok) {
+        await wipeAuth();
+        setIsLoading(false);
+        return;
+      }
+
+      setAccessToken(stored.token);
 
       const json = await res.json();
       const data = json.data ?? json;
@@ -256,9 +410,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           roles: Array.isArray(data.roles) ? data.roles : [],
         });
       } else {
-        await secureDelToken();
-        setAccessToken(null);
-        setUser(null);
+        await wipeAuth();
       }
     } catch {
       setAccessToken(null);
@@ -266,11 +418,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [refreshTokens, wipeAuth]);
 
   useEffect(() => {
     fetchUser();
   }, [fetchUser]);
+
+  // Refresh on app foreground — silently extends the session so users
+  // who background the app for hours don't get bounced back to login.
+  useEffect(() => {
+    const sub = AppState.addEventListener("change", (state: AppStateStatus) => {
+      if (state !== "active") return;
+      const stored = tokensRef.current;
+      if (!stored?.refreshToken) return;
+      if (tokenIsNearExpiry(stored.expiresAt)) {
+        refreshTokens().catch((err) => {
+          console.warn("[Auth] Foreground refresh failed:", err);
+        });
+      }
+    });
+    return () => sub.remove();
+  }, [refreshTokens]);
 
   useEffect(() => {
     if (user) {
@@ -309,8 +477,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setIsLoading(false);
           return;
         }
-        await secureSetToken(accessToken);
-        setAccessToken(accessToken);
+        const stored: StoredTokens = {
+          token: accessToken,
+          refreshToken: tokenData.refreshToken ?? tokenData.refresh_token ?? null,
+          expiresAt: tokenData.expiresAt ?? null,
+          refreshTokenExpiresAt: tokenData.refreshTokenExpiresAt ?? null,
+        };
+        tokensRef.current = stored;
+        await persistTokens(stored);
+        setAccessToken(stored.token);
         await fetchUser();
       } catch (err) {
         console.error("[Auth] Token exchange error:", err);
@@ -335,21 +510,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(async () => {
     try {
-      const token = await secureGetToken();
-      if (token) {
+      const stored = tokensRef.current ?? (await readStoredTokens());
+      if (stored?.token) {
         const apiBase = getApiBaseUrl();
         await fetch(`${apiBase}/api/mobile-auth/logout`, {
           method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${stored.token}` },
         });
       }
     } catch {
     } finally {
-      await secureDelToken();
-      setAccessToken(null);
-      setUser(null);
+      await wipeAuth();
     }
-  }, []);
+  }, [wipeAuth]);
 
   return (
     <AuthContext.Provider

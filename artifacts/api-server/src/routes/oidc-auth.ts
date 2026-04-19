@@ -19,6 +19,7 @@ import {
   isAzureAdConfigured,
   isProvisionedTenant,
 } from "../lib/auth";
+import { createSessionWithRefresh } from "../middlewares/session-policy";
 import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
@@ -214,13 +215,19 @@ router.post("/mobile-auth/token-exchange", validateBody(jsonObjectBodySchema), a
     }
 
     const user = await upsertUserFromOidc(claims as unknown as Record<string, unknown>);
-    const token = await createOidcSession(
-      user.id,
-      req.ip ?? null,
-      req.headers["user-agent"] ?? null,
-    );
+    const created = await createSessionWithRefresh({
+      userId: user.id,
+      ipAddress: req.ip ?? null,
+      userAgent: req.headers["user-agent"] ?? null,
+      reason: "mobile_token_exchange",
+    });
 
-    res.json({ token });
+    res.json({
+      token: created.token,
+      refreshToken: created.refreshToken,
+      expiresAt: created.expiresAt.toISOString(),
+      refreshTokenExpiresAt: created.refreshTokenExpiresAt.toISOString(),
+    });
   } catch (err) {
     req.log?.error({ err }, "Mobile token exchange error");
     res.status(500).json({ error: "Token exchange failed" });

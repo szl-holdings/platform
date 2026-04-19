@@ -108,7 +108,7 @@ export * from "./explainability-panel";
 export * from "./design-system";
 export * from "./command-mode";
 export { default as AppObservabilityPage } from "./AppObservabilityPage";
-export { apiFetch, graphqlRequest, ApiError, isAuthError, type PaginationMeta, type PaginatedResponse, type ApiFetchOptions, type GraphQLRequestOptions } from "./api-fetch";
+export { apiFetch, graphqlRequest, ApiError, isAuthError, setAuthTokens, getAuthTokens, getAccessToken, clearAuthTokens, onAuthCleared, refreshAccessToken, installAuthClearedRedirect, registerSecureTokenStorage, hydrateAuthTokensFromSecureStorage, type AuthTokens, type AuthClearedReason, type PaginationMeta, type PaginatedResponse, type ApiFetchOptions, type GraphQLRequestOptions } from "./api-fetch";
 export { useNotificationCenter, type LiveNotification, type ApiNotification, type NotificationCenterState } from "./notification-center";
 export { AgentInsightsWidget, type KnowledgeEntry as AgentKnowledgeEntry, type AgentRun } from "./agent-insights-widget";
 export { ExplainabilityDrawer, useExplainability, ExplainButton, type ExplainabilityMetadata, type ExplainabilityDrawerProps } from "./explainability";

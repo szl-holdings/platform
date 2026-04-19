@@ -1,6 +1,7 @@
 import { createRoot } from "react-dom/client";
 import { HelmetProvider } from "react-helmet-async";
 import { ErrorBoundary } from "@szl-holdings/shared-ui/error-boundary";
+import { installAuthClearedRedirect } from "@szl-holdings/shared-ui/api-fetch";
 import { configurePlausible } from "@szl-holdings/analytics";
 import { initSentry, initWebVitals, initAnalytics } from "@szl-holdings/observability/react";
 import { GraphQLProvider } from "@szl-holdings/graphql-client/provider";
@@ -17,6 +18,7 @@ configurePlausible({
 initSentry({ appSlug: "szl-holdings", tracesSampleRate: 0.2 });
 initWebVitals("szl-holdings", "/api/");
 initAnalytics({ appSlug: "szl-holdings" });
+installAuthClearedRedirect("/api/login");
 
 createRoot(document.getElementById("root")!).render(
   <HelmetProvider>

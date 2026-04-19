@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@szl-holdings/shared-ui/ui/button";
+import { setAuthTokens } from "@szl-holdings/shared-ui/api-fetch";
 import { Link } from "wouter";
 
 type VerifyState = "loading" | "success" | "error" | "expired";
@@ -28,6 +29,14 @@ export function MarketingVerifyEmail() {
         if (res.ok) {
           if (data.data?.token) {
             sessionStorage.setItem("session_token", data.data.token);
+            if (data.data?.refreshToken && data.data?.expiresAt && data.data?.refreshTokenExpiresAt) {
+              setAuthTokens({
+                token: data.data.token,
+                refreshToken: data.data.refreshToken,
+                expiresAt: data.data.expiresAt,
+                refreshTokenExpiresAt: data.data.refreshTokenExpiresAt,
+              });
+            }
           }
           setState("success");
         } else if (res.status === 410 || data.error?.toLowerCase().includes("expired")) {
