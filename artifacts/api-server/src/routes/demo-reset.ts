@@ -5,9 +5,10 @@ import { logger } from "../lib/logger";
 import { defaultMemoryStore } from "@workspace/memory-fabric/store";
 import { guardSeedInProduction } from "../lib/seed-guard";
 
+import { jsonObjectBodySchema, validateBody } from "../lib/validation";
 const router: IRouter = Router();
 
-router.post("/demo/reset", async (req, res) => {
+router.post("/demo/reset", validateBody(jsonObjectBodySchema), async (req, res) => {
   if (guardSeedInProduction(res)) return;
   const sessionId = randomUUID();
   const resetAt = new Date().toISOString();

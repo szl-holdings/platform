@@ -1,7 +1,7 @@
 import { Router, type IRouter, type Request, type Response, type RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
 import multer from "multer";
-import { carlotaInquirySchema, carlotaInquiryUpdateSchema, carlotaReservationSchema, jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery, carlotaRadarSignalsQuerySchema, carlotaRadarCompetitorsQuerySchema, carlotaRadarCompetitorsBodySchema } from "../lib/validation";
+import { carlotaInquirySchema, carlotaInquiryUpdateSchema, carlotaRadarCompetitorsBodySchema, carlotaRadarCompetitorsQuerySchema, carlotaRadarSignalsQuerySchema, carlotaReservationSchema, jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 import {
   db,
   carlotaInquiriesTable,
@@ -1588,7 +1588,7 @@ router.put("/carlota/radar/notification-preferences", authMiddleware(), validate
   } catch (err) { handleRouteError(res, err, "Failed to update radar notification preferences"); }
 });
 
-router.post("/carlota/radar/notification-preferences/flush-digest", authMiddleware(), async (req, res) => {
+router.post("/carlota/radar/notification-preferences/flush-digest", validateBody(jsonObjectBodySchema), authMiddleware(), async (req, res) => {
   try {
     const userId = req.user!.id;
     const [prefs] = await db.select().from(carlotaRadarNotifPrefsTable).where(eq(carlotaRadarNotifPrefsTable.userId, userId)).limit(1);

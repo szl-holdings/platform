@@ -161,6 +161,9 @@ const PUBLIC_FILE_BASENAMES = new Set([
   "page-view-tracking.ts",
   // Newsletter subscribe proxy — public marketing capture
   "newsletter.ts",
+  // Demo reset — POST /api/demo/reset is in enforcer allowlist (public so the
+  // Demo Launchpad presenter can reset state without auth in demo mode).
+  "demo-reset.ts",
   // Terra cognitive read routes — intentionally optional auth (richer when authed)
   "terra-cognitive.ts",
   // Federation agent discovery
@@ -569,7 +572,48 @@ if (strictMode) {
     unclassified.length > 0 ||
     validationTotals.unvalidatedBody > 0 ||
     validationTotals.unvalidatedQuery > 0;
-  if (hasIssues) process.exit(1);
+  if (hasIssues) {
+    console.error("\n✗  Route Security Matrix --strict: regression detected.\n");
+    if (unclassified.length > 0) {
+      console.error(
+        `  • ${unclassified.length} route file(s) are UNCLASSIFIED — add explicit ` +
+          `auth enforcement, register them in a group with auth middleware, or ` +
+          `add them to the PUBLIC allowlist in global-auth-enforcer.ts.`,
+      );
+    }
+    if (validationTotals.unvalidatedBody > 0 || validationTotals.unvalidatedQuery > 0) {
+      console.error(
+        `  • ${validationTotals.unvalidatedBody} mutating handler(s) missing validateBody, ` +
+          `${validationTotals.unvalidatedQuery} handler(s) reading req.query without validateQuery.`,
+      );
+      const sample = filesWithUnvalidated.slice(0, 5).map(e => {
+        const v = e.validation;
+        const ex = v.unvalidatedExamples.join("; ");
+        return `      - ${e.relPath}  body=${v.unvalidatedBody} query=${v.unvalidatedQuery}  e.g. ${ex}`;
+      });
+      if (sample.length > 0) {
+        console.error(`\n    Files needing validation (first ${sample.length} of ${filesWithUnvalidated.length}):`);
+        for (const line of sample) console.error(line);
+      }
+      console.error(
+        "\n  How to fix:\n" +
+          "    1) Preferred — add a route-specific Zod schema in src/lib/validation.ts and\n" +
+          "       wire it as the first middleware:\n" +
+          "         router.post(\"/path\", validateBody(myRouteSchema), handler)\n" +
+          "    2) Fast unblock — install the baseline safety net automatically:\n" +
+          "         pnpm --filter @workspace/api-server exec tsx \\\n" +
+          "           src/scripts/apply-validation-codemod.ts\n" +
+          "       This adds validateBody(jsonObjectBodySchema) /\n" +
+          "       validateQuery(anyQuerySchema) to any new mutating routes so the\n" +
+          "       gate goes green; tighten the schema in a follow-up PR.",
+      );
+    }
+    console.error(
+      "\n  Re-run locally to verify:\n" +
+        "    pnpm --filter @workspace/api-server run audit:route-security:strict\n",
+    );
+    process.exit(1);
+  }
 }
 
 // --strict-auth is the CI-gate flag: it fails ONLY when one or more route

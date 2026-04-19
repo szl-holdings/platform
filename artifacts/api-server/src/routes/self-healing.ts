@@ -598,7 +598,7 @@ router.delete("/self-healing/policies/:id", validateBody(jsonObjectBodySchema), 
   }
 });
 
-router.get("/self-healing/policies/:id/history", authMiddleware({ required: true }), requireRole("admin", "operator", "ops_manager", "platform_admin", "founder_admin", "super_admin"), async (req: Request, res: Response) => {
+router.get("/self-healing/policies/:id/history", validateQuery(anyQuerySchema), authMiddleware({ required: true }), requireRole("admin", "operator", "ops_manager", "platform_admin", "founder_admin", "super_admin"), async (req: Request, res: Response) => {
   try {
     await ensureSeeded();
     const { id } = req.params as { id: string };

@@ -242,7 +242,7 @@ router.post(
   },
 );
 
-router.delete("/risk-evidence/:domain/:evidenceId", async (req: Request, res: Response) => {
+router.delete("/risk-evidence/:domain/:evidenceId", validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
   try {
     const { domain, evidenceId } = req.params;
     if (!isValidDomain(domain)) {
