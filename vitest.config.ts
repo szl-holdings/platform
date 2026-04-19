@@ -134,6 +134,7 @@ export default defineConfig({
       { find: "@workspace/cognitive-runtime/checkpoint", replacement: resolve(__dirname, "packages/cognitive-runtime/src/checkpoint.ts") },
       { find: "@workspace/cognitive-runtime/orchestrator", replacement: resolve(__dirname, "packages/cognitive-runtime/src/orchestrator.ts") },
       { find: "@workspace/cognitive-runtime", replacement: resolve(__dirname, "packages/cognitive-runtime/src/index.ts") },
+      { find: "@szl-holdings/business-events", replacement: resolve(__dirname, "packages/business-events/src/index.ts") },
     ],
   },
   test: {
@@ -143,7 +144,7 @@ export default defineConfig({
       "tests/**/*.test.ts",
       "tests/**/*.spec.ts",
       "lib/scene-export/src/__tests__/**/*.test.ts",
-      "packages/ontology/src/test/**/*.test.ts",
+      "packages/ontology/src/**/*.test.ts",
       "packages/constellation/src/**/*.test.ts",
       "packages/guardian/src/**/*.test.ts",
       "packages/trace-graph/src/**/*.test.ts",
@@ -160,6 +161,11 @@ export default defineConfig({
       "packages/verifier/src/**/*.test.ts",
       "packages/skill-library/src/**/*.test.ts",
       "packages/cognitive-runtime/src/**/*.test.ts",
+      "packages/policy-engine/src/**/*.test.ts",
+      "packages/action-engine/src/**/*.test.ts",
+      "packages/connectors/src/**/*.test.ts",
+      "packages/telemetry-standards/src/**/*.test.ts",
+      "scripts/**/*.test.js",
     ],
     exclude: [
       "tests/e2e/**",

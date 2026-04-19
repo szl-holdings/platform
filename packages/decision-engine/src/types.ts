@@ -44,7 +44,7 @@ export const RecommendationSchema = z.object({
     label: z.string(),
     value: z.string(),
     source: z.string().optional(),
-  })).optional(),
+  })).min(1, "Recommendation must include at least one evidence item"),
   createdAt: z.number(),
   expiresAt: z.number().optional(),
 });

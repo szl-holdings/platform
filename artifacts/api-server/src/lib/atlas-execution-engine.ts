@@ -29,6 +29,7 @@ import {
   checkAction,
   type Policy,
   type EvaluationRequest,
+  type PolicyEvaluation,
   type PolicyEvaluationResult,
 } from "@szl-holdings/policy-engine";
 import {
@@ -851,6 +852,14 @@ export interface DomainExecutionRequest {
   tenantId?: string;
   initiatedBy?: string;
   metadata?: Record<string, unknown>;
+  /**
+   * Structured PolicyEvaluation produced by buildPolicyEvaluation() — required for live execution.
+   * for live (non-dry-run, non-simulation) executions. The action-engine runtime
+   * enforces this at the Zod layer; this field is threaded here so that the CI
+   * static gate (check-proof-chain.js Gate 1) can verify the proof-chain is
+   * attached at the call site rather than relying on a dynamic bypass expression.
+   */
+  policyEvaluation?: PolicyEvaluation;
 }
 
 export async function executedomainWorkflow(req: DomainExecutionRequest): Promise<ActionEngineResult> {
@@ -865,6 +874,7 @@ export async function executedomainWorkflow(req: DomainExecutionRequest): Promis
     isDryRun: req.isDryRun ?? false,
     isSimulation: req.isSimulation ?? false,
     approvedBy: req.approvedBy,
+    policyEvaluation: req.policyEvaluation,
     metadata: {
       signalIds: req.signalIds,
       atlasExecutionPattern: true,

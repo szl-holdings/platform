@@ -286,6 +286,11 @@ export class SignalPipeline {
       },
       confidence: Math.min(signal.confidence + score * 0.1, 1),
       freshness: signal.freshness,
+      projectedImpact: impactUsd != null
+        ? `Executing recommended action is estimated to protect or recover $${impactUsd.toLocaleString()} in ${signal.domain} domain value.`
+        : `Executing recommended action addresses the ${signal.severity ?? "elevated"}-severity signal and reduces operational exposure in ${signal.domain}.`,
+      projectedRisk: `Without action, the ${signal.type} signal (severity: ${signal.severity ?? "unknown"}, score: ${score.toFixed(2)}) remains unresolved and exposure escalates${correlated.length > 0 ? ` — correlated with ${correlated.length} additional signal(s)` : ""}.`,
+      policyEvaluation: { outcome: "pending", policyIds: [] },
       projectedImpactUsd: impactUsd,
       evidenceIds: evidenceItems.map((e) => e.evidenceId),
       signalIds: [signal.signalId, ...correlated.map((c) => c.signalId)],

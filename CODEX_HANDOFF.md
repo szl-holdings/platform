@@ -125,6 +125,75 @@ The following are confirmed next-phase work items, in rough priority order:
 
 ---
 
+## CI Hardening — Proof-Chain & Domain Checks (Added 2026-04-18)
+
+Task #1810 added an automated proof-chain and domain-logic test layer. Every agent reading this must understand these gates before touching `packages/policy-engine`, `packages/action-engine`, `packages/trace-graph`, `packages/connectors`, or `packages/telemetry-standards`.
+
+### What Was Added
+
+| Check | Command | Gate |
+|-------|---------|------|
+| Policy-engine (37 tests — all 5 modes) | `pnpm vitest run packages/policy-engine/src/policy-engine.test.ts` | `proof-chain-checks` CI job |
+| Action-engine (24 tests — policyEvaluation contract, Zod schema enforcement, malformed-payload rejection + `{}`/partial rejection) | `pnpm vitest run packages/action-engine/src/action-engine.test.ts` | `proof-chain-checks` CI job |
+| Run-trace E2E (28 tests — waterfall, replay, regression) | `pnpm vitest run packages/trace-graph/src/run-trace-e2e.test.ts` | `proof-chain-checks` CI job |
+| Connector normalization (65 tests — all 9 adapters) | `pnpm vitest run packages/connectors/src/connector-normalization.test.ts` | `proof-chain-checks` CI job |
+| Telemetry coverage (65 tests — surfaces + contract shapes + runtime spans) | `pnpm vitest run packages/telemetry-standards/src/telemetry-coverage.test.ts` | `proof-chain-checks` CI job |
+| Telemetry E2E (7 tests — boot runtime, complete workflow, verify span set) | `pnpm vitest run packages/telemetry-standards/src/telemetry-e2e.test.ts` | `proof-chain-checks` CI job |
+| Recommendation rendering (12 tests — all 5 product domains, 8-field proof-chain shape, schema invariants) | `pnpm vitest run packages/ontology/src/recommendation-rendering.test.ts` | `proof-chain-checks` CI job |
+| Proof-chain checker unit tests (44 tests — Gates 1–4 positive/negative, 8-field Gate 3, literal-true bypass enforcement, Gate 4 as-Recommendation assertion ban; helper unit tests) | `pnpm vitest run scripts/check-proof-chain.test.js` | `proof-chain-checks` CI job |
+| Proof-chain static check (Gates 1–3) | `node scripts/check-proof-chain.js` | `proof-chain-checks` CI job |
+
+**Total: 286 tests + 1 static check (4 active gates), all passing as of 2026-04-18.**
+
+### Proof-Chain Contract
+
+Every call to `executeWorkflow()` must include exactly one of:
+- `policyEvaluation: <PolicyEvaluation>` — production path
+- `policyEvaluationOverride: true` — explicit test/demo override  
+- `isDryRun: true` or `isSimulation: true` — simulation paths
+
+Every call to `buildPolicyEvaluation()` (the sole factory for `PolicyEvaluation` objects) must supply all five mandatory proof-chain arguments:
+- `evidenceChain` — array of evidence objects grounding the decision
+- `freshnessScore` — 0–1 numeric freshness of the evidence set
+- `confidence` — 0–1 numeric confidence in the evaluation outcome
+- `projectedImpact` — human-readable statement of expected impact
+- `projectedRisk` — human-readable risk assessment
+
+`policyResult` (the sixth proof-chain field) is computed internally and enforced on the `PolicyEvaluation` return type by TypeScript. `projectedImpact` and `projectedRisk` are now required (non-optional) on the `PolicyEvaluation` type in `packages/policy-engine/src/types.ts`.
+
+Every call to `createRecommendation()` (Gate 3) must supply all eight mandatory recommendation proof-chain fields:
+- `evidenceIds` — array of evidence IDs grounding the recommendation
+- `confidence` — 0–1 numeric confidence in the recommendation
+- `freshness` — 0–1 numeric freshness of the evidence set
+- `rationale` — human-readable justification (the “why” of the recommendation)
+- `domain` — operational domain tag (maritime, legal, finance, security, real-estate)
+- `projectedImpact` — human-readable expected impact if action is taken
+- `projectedRisk` — human-readable risk if action is NOT taken
+- `policyEvaluation` — explicit policy status at construction time (`{ outcome, policyIds }` — use `{ outcome: "pending", policyIds: [] }` when deferred)
+
+Failure to include any of these causes `scripts/check-proof-chain.js` to exit non-zero and block CI.
+
+### Parser Design — Bracket-Bounded AST Analysis
+
+`scripts/check-proof-chain.js` uses bracket-bounded extraction rather than fixed-window text scanning:
+
+- `extractArgBlock(src, offset)` — walks from a call site offset, tracking brace/bracket depth to isolate exactly the current call's argument span (no spill into adjacent calls).
+- `removeNestedBraces(src)` — strips content at depth ≥ 2, exposing only top-level argument keys. This prevents false-positives from identically-named fields inside nested arrays (e.g. `confidence` inside an `evidenceChain` item no longer satisfies the top-level `confidence:` requirement).
+
+### Policy Modes (lock-in)
+
+The five governance modes in `packages/policy-engine/src/modes.ts` are tested exhaustively and locked in:
+
+| Mode | Behavior |
+|------|----------|
+| `observe` | Log and monitor only; no action taken |
+| `recommend` | Surface recommendation to operator; no execution |
+| `draft` | Produce a draft artifact for human review before any action |
+| `approval-required` | Queue for explicit human approval before execution |
+| `auto-within-guardrails` | Execute autonomously when confidence, cost, and scope meet thresholds |
+
+---
+
 ## Known Gaps
 
 | Gap | Risk | Mitigation |

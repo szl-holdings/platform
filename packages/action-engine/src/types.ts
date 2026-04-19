@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { PolicyEvaluationSchema } from "@szl-holdings/policy-engine";
 
 export const ExecutionModeSchema = z.enum(["manual", "semi_auto", "autonomous"]);
 export type ExecutionMode = z.infer<typeof ExecutionModeSchema>;
@@ -66,7 +67,7 @@ export const WorkflowRunSchema = z.object({
   approvedBy: z.string().optional(),
   approvedAt: z.number().optional(),
   rejectionReason: z.string().optional(),
-  policyEvaluation: z.record(z.unknown()).optional(),
+  policyEvaluation: PolicyEvaluationSchema.optional(),
   auditTrail: z.array(z.object({
     at: z.number(),
     actor: z.string().optional(),

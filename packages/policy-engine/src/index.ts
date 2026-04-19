@@ -60,9 +60,9 @@ export function buildPolicyEvaluation(params: {
   environment?: PolicyEvaluation["environment"];
   windowValid?: boolean;
   projectedCostUsd?: number;
-  projectedImpact?: string;
-  projectedRisk?: string;
-  evidenceChain?: PolicyEvaluation["evidenceChain"];
+  projectedImpact: string;
+  projectedRisk: string;
+  evidenceChain: PolicyEvaluation["evidenceChain"];
   evaluatedBy?: string;
   evaluationRequest?: EvaluationRequest;
 }): PolicyEvaluation {

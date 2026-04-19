@@ -7,6 +7,7 @@ import type {
   ActionEngineResult,
 } from "./types.js";
 import type { PolicyEvaluation } from "@szl-holdings/policy-engine";
+import { PolicyEvaluationSchema } from "@szl-holdings/policy-engine";
 
 export type StepHandler = (
   parameters: Record<string, unknown>,
@@ -55,7 +56,7 @@ export async function executeWorkflow(params: {
   isSimulation?: boolean;
   approvedBy?: string;
   /** Structured PolicyEvaluation — required for live execution */
-  policyEvaluation?: PolicyEvaluation | Record<string, unknown>;
+  policyEvaluation?: PolicyEvaluation;
   /** Set true in tests/demos to bypass the policy-evaluation requirement */
   policyEvaluationOverride?: boolean;
   metadata?: Record<string, unknown>;
@@ -81,7 +82,19 @@ export async function executeWorkflow(params: {
     );
   }
 
-  const pe = policyEvaluation as PolicyEvaluation | undefined;
+  if (policyEvaluation && !isDryRun && !isSimulation) {
+    const parsed = PolicyEvaluationSchema.safeParse(policyEvaluation);
+    if (!parsed.success) {
+      const issues = parsed.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; ");
+      throw new Error(
+        `executeWorkflow: policyEvaluation for workflow '${definition.id}' failed schema validation. ` +
+        `Use buildPolicyEvaluation() from @workspace/policy-engine to construct a valid PolicyEvaluation. ` +
+        `Validation errors: ${issues}`
+      );
+    }
+  }
+
+  const pe = policyEvaluation;
 
   if (pe && pe.blockedReason && !isDryRun && !isSimulation) {
     const blockedRun: WorkflowRun = {
@@ -98,7 +111,7 @@ export async function executeWorkflow(params: {
       currentStepIndex: 0,
       steps: definition.steps.map((s: WorkflowStep) => ({ stepId: s.id, stepName: s.name, startedAt: 0, status: "pending" })),
       approvalState: "none",
-      policyEvaluation: policyEvaluation as Record<string, unknown>,
+      policyEvaluation,
       auditTrail: [{
         at: Date.now(),
         actor: initiatedBy,

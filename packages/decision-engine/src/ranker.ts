@@ -66,7 +66,11 @@ export function rankSignalGroups(
       suggestedAction: group.suggestedAction,
       suggestedOwner: group.suggestedOwner,
       estimatedCostUsd: group.estimatedCostUsd,
-      evidence: group.evidence,
+      evidence: (group.evidence && group.evidence.length > 0)
+        ? group.evidence
+        : group.signals.length > 0
+          ? group.signals.slice(0, 3).map(s => ({ label: s.source, value: s.type, source: s.source }))
+          : [{ label: "system", value: "no source signals available — review required" }],
       policyState: "unchecked",
       approvalState: "none",
       executionStatus: "none",

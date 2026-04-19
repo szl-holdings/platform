@@ -178,8 +178,8 @@ router.post("/policy-modes/evaluate", authMiddleware(), validateBody(jsonObjectB
       freshnessScore: body.freshnessScore ?? 1.0,
       environment: body.environment ?? "production",
       projectedCostUsd: body.projectedCostUsd,
-      projectedImpact: body.projectedImpact,
-      projectedRisk: body.projectedRisk,
+      projectedImpact: body.projectedImpact ?? "Not specified — caller must supply projectedImpact for production use.",
+      projectedRisk: body.projectedRisk ?? "Not specified — caller must supply projectedRisk for production use.",
       evidenceChain: body.evidenceChain ?? [],
       evaluatedBy: user?.displayName ?? user?.email ?? "api",
     });

@@ -96,8 +96,8 @@ export interface PolicyEvaluation {
   environment: "development" | "staging" | "production";
   windowValid: boolean;
   projectedCostUsd?: number;
-  projectedImpact?: string;
-  projectedRisk?: string;
+  projectedImpact: string;
+  projectedRisk: string;
   evidenceChain: Array<{
     source: string;
     summary: string;
@@ -109,3 +109,39 @@ export interface PolicyEvaluation {
   evaluatedAt: number;
   evaluatedBy?: string;
 }
+
+/**
+ * Zod schema for runtime validation of PolicyEvaluation shape.
+ * Ensures malformed objects (empty {}, partial payloads, type-cast bypasses)
+ * are rejected at the action-engine boundary before execution begins.
+ */
+export const PolicyEvaluationSchema = z.object({
+  evaluationId: z.string().min(1),
+  mode: z.string().min(1),
+  action: z.string().min(1),
+  actionType: z.string().optional(),
+  product: z.string().optional(),
+  workspace: z.string().optional(),
+  subjectRoles: z.array(z.string()),
+  entitySensitivity: z.enum(["public", "internal", "confidential", "restricted"]),
+  confidence: z.number().min(0).max(1),
+  freshnessScore: z.number().min(0).max(1),
+  environment: z.enum(["development", "staging", "production"]),
+  windowValid: z.boolean(),
+  projectedCostUsd: z.number().optional(),
+  projectedImpact: z.string().min(1),
+  projectedRisk: z.string().min(1),
+  evidenceChain: z.array(z.object({
+    source: z.string(),
+    summary: z.string(),
+    confidence: z.number(),
+    freshness: z.number(),
+  })),
+  policyResult: z.object({
+    effect: z.string(),
+    allowed: z.boolean(),
+  }).passthrough(),
+  blockedReason: z.string().optional(),
+  evaluatedAt: z.number(),
+  evaluatedBy: z.string().optional(),
+});

@@ -1,6 +1,6 @@
 # Test Strategy — SZL Holdings Platform
 
-**Last updated:** 2026-04-16  
+**Last updated:** 2026-04-18  
 **Owner:** Engineering / QA Lead  
 **Audience:** VP Engineering, Engineering Leads, QA
 
@@ -135,6 +135,12 @@ The following paths must never regress and must be covered by automated tests be
 | Billing events | Integration | ❌ Gap — no tests |
 | Webhook delivery | Integration | ❌ Gap — no tests |
 | Role-based access enforcement | Unit | ✅ |
+| Policy evaluation enforcement (all 5 modes) | Domain Unit | ✅ (2026-04-18) |
+| Action-engine policyEvaluation contract | Domain Unit | ✅ (2026-04-18) |
+| Run trace E2E waterfall + replay | Domain Unit | ✅ (2026-04-18) |
+| Connector normalization (all 9 adapters) | Domain Unit | ✅ (2026-04-18) |
+| Telemetry event coverage (8 event categories) | Domain Unit | ✅ (2026-04-18) |
+| Proof-chain static check (executeWorkflow gate) | Static / CI | ✅ (2026-04-18) |
 
 ---
 
@@ -196,6 +202,94 @@ The following tests **must pass** before any release is tagged:
 | TG-006 | GraphQL resolver tenant scoping partial | P2 | Sprint 4 |
 | TG-007 | Mobile E2E tests absent (Expo) | P2 | Sprint 4 |
 | TG-008 | Systematic WCAG accessibility testing absent (KG025) | P2 | Sprint 4 |
+
+---
+
+## 9. CI Hardening — Domain Logic & Proof-Chain Checks (Added 2026-04-18)
+
+This section documents the domain-logic test suites and static analysis gate added as part of CI hardening task #1810.
+
+### 9.1 Domain-Logic Test Suites
+
+| Suite | File | Tests | What It Covers |
+|-------|------|-------|----------------|
+| Policy Engine | `packages/policy-engine/src/policy-engine.test.ts` | 37 | All 5 governance modes (observe, recommend, draft, approval-required, auto-within-guardrails), scope matching, confidence thresholds, effects, and blockedReason |
+| Action Engine | `packages/action-engine/src/action-engine.test.ts` | 24 | policyEvaluation enforcement contract (including Zod schema validation — empty {} and partial objects rejected), happy-path lifecycle, approval gate, rollback handling, dry-run/simulation bypass |
+| Run Trace E2E | `packages/trace-graph/src/run-trace-e2e.test.ts` | 28 | Full waterfall session (start → spans → tool calls → complete), TraceReplayer visitor pattern, span parentage tree, regression detection via compareTraces |
+| Connector Normalization | `packages/connectors/src/connector-normalization.test.ts` | 65 | All 9 demo adapters (AIS, Reuters, Alpaca, CourtListener, PropertyRadar, LinkedIn, HubSpot, Salesforce, Stripe) — schema validation and field normalization |
+| Telemetry Coverage | `packages/telemetry-standards/src/telemetry-coverage.test.ts` | 65 | 8 telemetry surface sections + Section 14: contract-shape validation (GenAIModelCallContract, AgentRunContract, GenAIToolCallContract, GenAIAgentStepContract, GenAIRetrievalContract, AgentPolicyGateContract, AgentHandoffContract) + dot-notation naming enforcement + 10 runtime atlasEventBus span validation tests |
+| Telemetry E2E | `packages/telemetry-standards/src/telemetry-e2e.test.ts` | 7 | Full governed-autonomy workflow (transactionStarted → KPI ingestion → riskDetected → recommendationGenerated → policyViolation → actionApproved → actionExecuted → outcomeRealized → transactionCompleted); verifies connector_syncs, worker_jobs, agent_runs, approvals, model/tool call, feedback, and policy gate surfaces each emit expected span class |
+| Recommendation Rendering | `packages/ontology/src/recommendation-rendering.test.ts` | 16 | `createRecommendation()` for all 5 product domains (maritime/Vessels, legal/Counsel, security/Sentra, finance/Treasury, real-estate/Terra); asserts all 8 Gate-3 proof-chain fields are present, policyEvaluation has correct shape, numeric fields are in valid ranges, evidenceIds is non-empty, and cross-domain schema invariants hold; + 4 schema boundary negative tests (empty `{}`, partial, missing confidence) proving non-factory literals are rejected by RecommendationSchema |
+| Proof-Chain Checker | `scripts/check-proof-chain.test.js` | 44 | Positive and negative fixtures for Gates 1–4: executeWorkflow() gate (literal-true bypass enforcement), buildPolicyEvaluation() 5-field enforcement, createRecommendation() 8-field Gate 3, Gate 4 `as Recommendation` type assertion ban (covers JSON.parse casts, DB row mappers, transport adapters); + extractArgBlock() and removeNestedBraces() helper unit tests |
+
+**Run all domain tests + checker tests:**
+```bash
+pnpm vitest run packages/policy-engine/src/policy-engine.test.ts \
+  packages/action-engine/src/action-engine.test.ts \
+  packages/trace-graph/src/run-trace-e2e.test.ts \
+  packages/connectors/src/connector-normalization.test.ts \
+  packages/telemetry-standards/src/telemetry-coverage.test.ts \
+  packages/telemetry-standards/src/telemetry-e2e.test.ts \
+  packages/ontology/src/recommendation-rendering.test.ts \
+  scripts/check-proof-chain.test.js
+```
+
+### 9.2 Proof-Chain Static Check
+
+**File:** `scripts/check-proof-chain.js`
+
+**What it checks:**
+
+Gate 1 — every `executeWorkflow()` call site must supply one of:
+  - `policyEvaluation: <PolicyEvaluation>` — production calls
+  - `policyEvaluationOverride: true` — explicit test/demo override
+  - `isDryRun: true` — simulation mode
+  - `isSimulation: true` — simulation mode
+
+Gate 2 — every `buildPolicyEvaluation()` call site (the sole `PolicyEvaluation` factory) must supply all five proof-chain fields:
+  - `evidenceChain` — array of evidence objects grounding the decision
+  - `freshnessScore` — 0–1 freshness score for the evidence set
+  - `confidence` — 0–1 confidence in the evaluation outcome
+  - `projectedImpact` — human-readable statement of expected impact
+  - `projectedRisk` — human-readable risk assessment
+
+Note: `projectedImpact` and `projectedRisk` are required (non-optional) on the `PolicyEvaluation` type (`packages/policy-engine/src/types.ts`), providing dual enforcement — TypeScript at compile time, this script at CI time.
+
+Gate 3 — every `createRecommendation()` call site must supply all eight recommendation proof-chain fields:
+  - `evidenceIds` — array of evidence IDs grounding the recommendation
+  - `confidence` — 0–1 confidence score
+  - `freshness` — 0–1 freshness of the evidence set
+  - `rationale` — human-readable justification (the “why” of the recommendation)
+  - `domain` — operational domain tag (maritime, legal, finance, security, real-estate)
+  - `projectedImpact` — human-readable statement of expected impact if action is taken
+  - `projectedRisk` — human-readable risk statement if action is NOT taken
+  - `policyEvaluation` — explicit policy status at construction time ({ outcome, policyIds })
+
+**Scope note (Gates 3 + 4 together):** Gate 3 detects `createRecommendation(...)` factory call sites only. Non-factory Recommendation object construction (e.g. raw object literals, serialization adapters, `JSON.parse(...)` casts) is caught by Gate 4: `as Recommendation` type assertion ban. Together, Gates 3+4 are backed by three additional layers: (a) the `RecommendationInput` TypeScript type (compile-time enforcement — all 8 fields are typed and required), (b) the `RecommendationSchema` Zod schema validation at runtime, and (c) the `recommendation-rendering.test.ts` suite which validates complete proof-chain shape across all 5 product domains. On the action-engine boundary, `PolicyEvaluationSchema` (defined in `packages/policy-engine/src/types.ts`) enforces the full PolicyEvaluation shape at runtime — empty objects, partial payloads, and `as PolicyEvaluation` type casts are all rejected before workflow execution begins.
+
+**Parser design:** The checker uses bracket-bounded extraction (`extractArgBlock` + `removeNestedBraces`) rather than fixed-window text scanning. `removeNestedBraces` strips content at brace depth ≥ 2, so a `confidence:` key appearing only inside a nested `evidenceChain` item does NOT satisfy the Gate 2 top-level `confidence` requirement. All gate checks are covered by positive and negative unit test fixtures in `scripts/check-proof-chain.test.js`.
+
+**Known limitation:** The static checker is regex/bracket heuristic-based, not full-AST. It correctly handles current patterns, but unusual indirection or syntax variants may bypass detection. Mitigation path: Gate 1–4 are backstopped by (a) TypeScript compile-time enforcement, (b) Zod runtime validation at executor boundary (`PolicyEvaluationSchema`, `RecommendationSchema`), and (c) domain test suites that validate proof-chain shape end-to-end. A future ESLint custom rule or TS transformer can replace the regex layer once call-site patterns stabilize.
+
+- Scans `packages/` and `artifacts/api-server/src/` (the only artifact that calls `executeWorkflow`)
+- Skips `.test.ts`, `.spec.ts`, and `dist/` output
+- Skips files larger than 500 KB
+
+**Run:**
+```bash
+node scripts/check-proof-chain.js
+```
+
+**CI integration:** The `proof-chain-checks` job in `.github/workflows/ci.yml` runs this check and all 5 domain test suites. It is a required gate in `ci-gate`.
+
+### 9.3 CI Gate Wiring
+
+The `.github/workflows/ci.yml` `ci-gate` job requires:
+- `proof-chain-checks` (new) — static proof-chain check + all 5 domain test suites
+- `test` — existing unit/component test suite
+- `typecheck` — TypeScript compilation
+
+Any failure in `proof-chain-checks` blocks merge.
 
 ---
 

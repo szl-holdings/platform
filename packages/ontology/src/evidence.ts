@@ -202,6 +202,8 @@ export const RecommendationSchema = z.object({
 
   confidence: z.number().min(0).max(1),
   freshness: z.number().min(0).max(1),
+  projectedImpact: z.string(),
+  projectedRisk: z.string(),
   projectedImpactUsd: z.number().optional(),
   projectedRiskReductionPct: z.number().min(0).max(100).optional(),
   projectedRiskIncreaseUsd: z.number().optional(),
@@ -231,13 +233,28 @@ export const RecommendationSchema = z.object({
 });
 export type Recommendation = z.infer<typeof RecommendationSchema>;
 
+export type RecommendationPolicyStatus = {
+  outcome: "allow" | "require-approval" | "block" | "pending";
+  policyIds?: string[];
+  reason?: string;
+  evaluatedAt?: string;
+};
+
 export type RecommendationInput = Omit<
   Recommendation,
   | "recommendationId"
   | "schemaVersion"
   | "status"
-  | "policyEvaluation"
->;
+> & {
+  /**
+   * Policy status at recommendation construction time.
+   * Must be explicitly passed at every call site to ensure the proof-chain is
+   * auditable from creation through action execution.
+   * Use { outcome: "pending", policyIds: [] } for newly constructed recommendations
+   * that have not yet been evaluated by the policy engine.
+   */
+  policyEvaluation: RecommendationPolicyStatus;
+};
 
 export function createRecommendation(input: RecommendationInput): Recommendation {
   return RecommendationSchema.parse({
