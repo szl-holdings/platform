@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { AlertTriangle, ChevronDown, ChevronUp, Download, ExternalLink, Clock, Shield, Zap } from "lucide-react";
+import { AlertTriangle, ChevronDown, ChevronUp, Download, ExternalLink, Clock, Shield, Zap, Sparkles } from "lucide-react";
 import { getRiskColor, AGENTS, type BriefingSection, type RiskLevel } from "../lib/data";
-import { useTodaysBrief, isDemoMode } from "../lib/api";
+import { useTodaysBrief, useGenerateBriefing, isDemoMode } from "../lib/api";
 import AgentBadge from "../components/AgentBadge";
 import ConfidenceChip from "../components/ConfidenceChip";
 import { ProofEnvelope, type AutonomyMode } from "@szl-holdings/design-system";
@@ -150,6 +150,14 @@ function SectionCard({ section }: { section: BriefingSection }) {
 export default function TodaysBrief() {
   const [exportLoading, setExportLoading] = useState(false);
   const { data: brief, isLoading, error } = useTodaysBrief();
+  const generate = useGenerateBriefing();
+  const handleGenerate = async () => {
+    try {
+      await generate.mutateAsync();
+    } catch (e) {
+      alert(`Live generation failed: ${e instanceof Error ? e.message : String(e)}`);
+    }
+  };
 
   if (isLoading) {
     return <div style={{ padding: 40, color: "var(--pulse-text-muted)", fontSize: "0.9rem" }}>Loading today's brief…</div>;
@@ -236,20 +244,39 @@ export default function TodaysBrief() {
               <RiskBadge risk={brief.overallRisk} />
               <ConfidenceChip score={brief.overallConfidence} />
             </div>
-            <button
-              onClick={handleExport}
-              disabled={exportLoading}
-              style={{
-                display: "flex", alignItems: "center", gap: 6,
-                padding: "8px 14px", borderRadius: 6,
-                background: "rgba(200,168,75,0.1)", border: "1px solid rgba(200,168,75,0.3)",
-                color: "var(--pulse-gold)", fontSize: "0.78rem", fontWeight: 600,
-                cursor: "pointer",
-              }}
-            >
-              <Download size={13} />
-              {exportLoading ? "Generating…" : "Export PDF"}
-            </button>
+            <div style={{ display: "flex", gap: 6 }}>
+              {!isDemoMode() && (
+                <button
+                  onClick={handleGenerate}
+                  disabled={generate.isPending}
+                  title="Synthesize a fresh briefing from the agent collective"
+                  style={{
+                    display: "flex", alignItems: "center", gap: 6,
+                    padding: "8px 14px", borderRadius: 6,
+                    background: "rgba(120,180,255,0.10)", border: "1px solid rgba(120,180,255,0.35)",
+                    color: "#9bc4ff", fontSize: "0.78rem", fontWeight: 600,
+                    cursor: generate.isPending ? "wait" : "pointer",
+                  }}
+                >
+                  <Sparkles size={13} />
+                  {generate.isPending ? "Generating…" : "Generate Live Briefing"}
+                </button>
+              )}
+              <button
+                onClick={handleExport}
+                disabled={exportLoading}
+                style={{
+                  display: "flex", alignItems: "center", gap: 6,
+                  padding: "8px 14px", borderRadius: 6,
+                  background: "rgba(200,168,75,0.1)", border: "1px solid rgba(200,168,75,0.3)",
+                  color: "var(--pulse-gold)", fontSize: "0.78rem", fontWeight: 600,
+                  cursor: "pointer",
+                }}
+              >
+                <Download size={13} />
+                {exportLoading ? "Generating…" : "Export PDF"}
+              </button>
+            </div>
           </div>
         </div>
 

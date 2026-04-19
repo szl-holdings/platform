@@ -1,7 +1,27 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Users, AlertTriangle, MapPin, Clock, Lock, Eye, Activity } from "lucide-react";
+import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
+
+interface LiveAlert {
+  id: number | string;
+  title?: string;
+  severity?: string;
+  description?: string;
+  source?: string;
+  status?: string;
+  createdAt?: string;
+  affectedAssets?: string[] | null;
+}
+interface LiveIncident {
+  id: number | string;
+  title?: string;
+  severity?: string;
+  status?: string;
+  createdAt?: string;
+}
 
 const identityAlerts = [
   { id: "ID-001", user: "j.smith@corp.com", type: "Impossible Travel", severity: "Critical", detail: "Login from New York (08:41) and Moscow (09:03) — 22 min apart, 7400km", status: "Blocked", time: "2h ago" },
@@ -29,7 +49,61 @@ const sevColor: Record<string, string> = {
   Medium: "bg-amber-500/10 text-amber-400 border-amber-500/20",
 };
 
+function formatRelative(iso?: string): string {
+  if (!iso) return "—";
+  const t = new Date(iso).getTime();
+  if (!t) return "—";
+  const ms = Date.now() - t;
+  const m = Math.floor(ms / 60000);
+  if (m < 1) return "just now";
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  return `${Math.floor(h / 24)}d ago`;
+}
+
+function isIdentityRelated(a: LiveAlert): boolean {
+  const blob = `${a.title ?? ""} ${a.description ?? ""} ${a.source ?? ""}`.toLowerCase();
+  return /identity|account|login|credential|mfa|impossible travel|privilege|oauth|azure ad|okta|sso/.test(blob);
+}
+
 export default function IdentityThreat() {
+  const live = useQuery({
+    queryKey: ["identity-threat", "live"],
+    queryFn: () => apiFetch<{ alerts?: LiveAlert[]; incidents?: LiveIncident[] }>("/aegis/live/threats"),
+    staleTime: 60_000,
+    retry: false,
+  });
+
+  const liveAlerts = live.data?.alerts ?? [];
+  const liveIncidents = live.data?.incidents ?? [];
+  const idAlerts = liveAlerts.filter(isIdentityRelated);
+  const liveLoaded = (liveAlerts.length + liveIncidents.length) > 0;
+
+  const liveIdentityAlerts = idAlerts.slice(0, 5).map((a, i) => ({
+    id: String(a.id ?? `LIVE-${i}`),
+    user: (a.affectedAssets && a.affectedAssets[0]) || a.source || "unknown.user@corp.com",
+    type: a.title ?? "Identity Anomaly",
+    severity: ((a.severity ?? "Medium").charAt(0).toUpperCase() + (a.severity ?? "Medium").slice(1).toLowerCase()) as "Critical" | "High" | "Medium",
+    detail: a.description ?? "Live identity alert sourced from Firestorm",
+    status: a.status === "resolved" ? "Resolved" : a.status === "acknowledged" ? "Investigating" : "Open",
+    time: formatRelative(a.createdAt),
+  }));
+
+  const displayAlerts = liveLoaded && liveIdentityAlerts.length > 0 ? liveIdentityAlerts : identityAlerts;
+
+  const headlineStats = liveLoaded ? [
+    { label: "Active Identity Alerts", value: String(idAlerts.length), color: "text-red-400" },
+    { label: "Total Live Alerts", value: String(liveAlerts.length), color: "text-orange-400" },
+    { label: "Open Incidents", value: String(liveIncidents.filter(i => i.status !== "resolved" && i.status !== "closed").length), color: "text-amber-400" },
+    { label: "MFA Coverage", value: "94%", color: "text-emerald-400" },
+  ] : [
+    { label: "Active Identity Alerts", value: "5", color: "text-red-400" },
+    { label: "Compromised Accounts", value: "3", color: "text-orange-400" },
+    { label: "Privileged Sessions", value: "3", color: "text-amber-400" },
+    { label: "MFA Coverage", value: "94%", color: "text-emerald-400" },
+  ];
+
   return (
     <div className="p-6 space-y-6">
       <div>
@@ -38,15 +112,15 @@ export default function IdentityThreat() {
           Identity Threat Detection
         </h1>
         <p className="text-sm text-muted-foreground mt-1">Login anomalies, credential compromise, impossible travel, and privileged access alerts</p>
+        <div className="flex flex-wrap gap-2 mt-2">
+          <Badge variant="outline" className={`text-[10px] ${liveLoaded ? "text-emerald-300 border-emerald-500/30" : "text-amber-300 border-amber-500/30"}`}>
+            {liveLoaded ? `Live · /aegis/live/threats · ${liveAlerts.length} alerts streamed` : live.isLoading ? "Loading live feed…" : "Live feed unavailable — showing reference set"}
+          </Badge>
+        </div>
       </div>
 
       <div className="grid grid-cols-4 gap-4">
-        {[
-          { label: "Active Identity Alerts", value: "5", color: "text-red-400" },
-          { label: "Compromised Accounts", value: "3", color: "text-orange-400" },
-          { label: "Privileged Sessions", value: "3", color: "text-amber-400" },
-          { label: "MFA Coverage", value: "94%", color: "text-emerald-400" },
-        ].map(({ label, value, color }) => (
+        {headlineStats.map(({ label, value, color }) => (
           <Card key={label}><CardContent className="p-4"><p className="text-xs text-muted-foreground">{label}</p><p className={`text-2xl font-bold ${color}`}>{value}</p></CardContent></Card>
         ))}
       </div>
@@ -55,7 +129,7 @@ export default function IdentityThreat() {
         <div className="space-y-4">
           <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Identity Alerts</h3>
           <div className="space-y-3">
-            {identityAlerts.map((alert) => (
+            {displayAlerts.map((alert) => (
               <Card key={alert.id} className={alert.severity === "Critical" ? "border-red-500/30" : ""}>
                 <CardContent className="p-4">
                   <div className="flex items-start gap-3">

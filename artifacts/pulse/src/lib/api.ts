@@ -161,6 +161,25 @@ export interface FileDissentInput {
   impactIfCorrect?: string;
 }
 
+export function useGenerateBriefing() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => {
+      if (isDemoMode()) {
+        return Promise.reject(new Error("Live AI generation is disabled in demo mode. Sign in to generate a fresh briefing."));
+      }
+      return apiFetch<{ success: true; briefing: Briefing; briefingId: string; message: string }>(
+        "/api/pulse/briefings/generate",
+        { method: "POST", body: JSON.stringify({}) },
+      );
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["pulse", "today"] });
+      qc.invalidateQueries({ queryKey: ["pulse", "briefings"] });
+    },
+  });
+}
+
 export function useFileDissent() {
   const qc = useQueryClient();
   return useMutation({

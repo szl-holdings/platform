@@ -61,14 +61,9 @@
 
 | Avoid | Why |
 |-------|-----|
-| Vessels → Insurance module | UI complete; no data connected |
-| Vessels → Trading module | UI complete; no data connected |
 | Vessels → Platform module | UI complete; no data connected |
 | Vessels → Tracking (if no Mapbox) | Map blank |
-| Aegis → CISO Dashboard | KPIs not yet wired |
-| Aegis → Any of the 8 new security modules | UI only |
-| Pulse → "Generate Live Briefing" (if button exists) | Not yet AI-wired |
-| Pulse → PDF Export | Not implemented |
+| Aegis → 5 of the 8 new security modules (Deception Grid, OT/ICS, Phishing Sim, DLP, ASM) | UI only — CISO Dashboard, ITDR, Sentinel are now live |
 | szl-holdings → Autopilot genome score | Hardcoded placeholder |
 | Command → CORTEX badge counts | Not wired to live counts |
 

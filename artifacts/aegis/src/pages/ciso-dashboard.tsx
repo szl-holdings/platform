@@ -1,7 +1,9 @@
 import { Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { Button } from "@szl-holdings/shared-ui/ui/button";
+import { api } from "@/lib/api";
 import {
   Shield,
   ShieldCheck,
@@ -276,7 +278,7 @@ const totalAvoided = roiPanel.reduce((s, r) => s + r.avoided, 0);
 const programSpend = 14.2;
 const roiMultiple = (totalAvoided / programSpend).toFixed(1);
 
-const headlineKpis = [
+const STATIC_HEADLINE_KPIS = [
   { label: "Aggregate Risk Score", value: "53", suffix: "/ 100", trend: "-19 QoQ", good: true, icon: Shield },
   { label: "Open Critical Findings", value: "46", suffix: "", trend: "-31% QoQ", good: true, icon: AlertTriangle },
   { label: "Mean Time to Contain", value: "18", suffix: "min", trend: "-42% QoQ", good: true, icon: TrendingDown },
@@ -292,8 +294,71 @@ function statusBadge(status: Module["status"]) {
   return <Badge variant="outline" className={map[status]}>{status}</Badge>;
 }
 
+interface ThreatSummaryData {
+  activeThreats?: number;
+  criticalAlerts?: number;
+  incidentsOpenLast24h?: number;
+  meanTimeToDetect?: string;
+  meanTimeToRespond?: string;
+}
+interface ComplianceSummaryData {
+  overallScore?: number;
+  dbControls?: { total?: number; passing?: number; failing?: number; inProgress?: number };
+}
+interface AssetRiskItem { entity?: string; type?: string; risk?: number; status?: string }
+interface AssetRiskData {
+  dbAssets?: AssetRiskItem[];
+  aptEntities?: AssetRiskItem[];
+}
 export default function CisoDashboard() {
   const radial = [{ name: "ZT", uv: 78, fill: "#22d3ee" }];
+
+  const threatSummary = useQuery<ThreatSummaryData>({
+    queryKey: ["ciso", "threat-summary"],
+    queryFn: () => api.liveData.threatSummary() as Promise<ThreatSummaryData>,
+    staleTime: 60_000,
+    retry: false,
+  });
+  const complianceQuery = useQuery<ComplianceSummaryData>({
+    queryKey: ["ciso", "compliance-summary"],
+    queryFn: () => api.liveData.complianceSummary() as Promise<ComplianceSummaryData>,
+    staleTime: 60_000,
+    retry: false,
+  });
+  const assetRisk = useQuery<AssetRiskData>({
+    queryKey: ["ciso", "asset-risk"],
+    queryFn: () => api.liveData.assetRisk() as Promise<AssetRiskData>,
+    staleTime: 60_000,
+    retry: false,
+  });
+
+  const ts = threatSummary.data;
+  const cp = complianceQuery.data;
+  const ar = assetRisk.data;
+  const liveLoaded = !!(ts || cp || ar);
+
+  const dbAssets = ar?.dbAssets ?? [];
+  const aggregateRisk = dbAssets.length > 0
+    ? Math.round(dbAssets.reduce((s, a) => s + (a.risk ?? 0), 0) / dbAssets.length)
+    : null;
+  const openCriticals = ts ? (ts.criticalAlerts ?? 0) + (ts.incidentsOpenLast24h ?? 0) : null;
+  const mttr = ts?.meanTimeToRespond ?? null;
+  const overallCompliance = cp?.overallScore ?? null;
+
+  const headlineKpis = liveLoaded ? [
+    aggregateRisk != null
+      ? { label: "Aggregate Risk Score", value: String(aggregateRisk), suffix: "/ 100", trend: "Live · /firestorm/live/asset-risk", good: aggregateRisk < 60, icon: Shield }
+      : STATIC_HEADLINE_KPIS[0],
+    openCriticals != null
+      ? { label: "Open Critical Findings", value: String(openCriticals), suffix: "", trend: `${ts?.activeThreats ?? 0} active threats live`, good: openCriticals < 10, icon: AlertTriangle }
+      : STATIC_HEADLINE_KPIS[1],
+    mttr
+      ? { label: "Mean Time to Respond", value: mttr, suffix: "", trend: `MTTD ${ts?.meanTimeToDetect ?? "—"}`, good: true, icon: TrendingDown }
+      : STATIC_HEADLINE_KPIS[2],
+    overallCompliance != null
+      ? { label: "Compliance Posture", value: `${overallCompliance}`, suffix: "%", trend: `${cp?.dbControls?.passing ?? 0}/${cp?.dbControls?.total ?? 0} controls passing`, good: overallCompliance >= 75, icon: DollarSign }
+      : STATIC_HEADLINE_KPIS[3],
+  ] : STATIC_HEADLINE_KPIS;
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">

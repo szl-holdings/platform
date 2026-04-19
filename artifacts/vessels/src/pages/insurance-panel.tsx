@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { Shield, AlertTriangle, DollarSign, FileText, CheckCircle2, Clock, Ship, TrendingUp, Activity } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Shield, AlertTriangle, DollarSign, FileText, TrendingUp, Activity } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 
@@ -32,81 +33,120 @@ interface VesselInsurance {
   flags: string[];
 }
 
-const POLICIES: VesselInsurance[] = [
-  {
-    vessel: "Pacific Navigator", imo: "9234567",
-    underwritingScore: 42,
-    hmInsurer: "Lloyd's of London — Syndicate 4472", hmValue: 48_000_000, hmPremium: 384_000,
-    piClub: "UK P&I Club", piDeductible: 50_000,
-    warRiskZones: ["Persian Gulf", "Black Sea", "Red Sea"],
-    claimHistory12m: 2, openClaims: 1, nextRenewal: "2026-12-01",
-    flags: ["PSC detention increases H&M premium at renewal", "War risk additional premium due for Persian Gulf transit"],
-  },
-  {
-    vessel: "Arctic Breeze", imo: "9876543",
-    underwritingScore: 88,
-    hmInsurer: "Norwegian Hull Club", hmValue: 62_000_000, hmPremium: 434_000,
-    piClub: "Gard P&I", piDeductible: 25_000,
-    warRiskZones: [],
-    claimHistory12m: 0, openClaims: 0, nextRenewal: "2026-08-01",
-    flags: [],
-  },
-  {
-    vessel: "Meridian Bulk", imo: "9456789",
-    underwritingScore: 71,
-    hmInsurer: "Britannia P&I / Tokio Marine", hmValue: 35_000_000, hmPremium: 262_500,
-    piClub: "Britannia P&I Club", piDeductible: 30_000,
-    warRiskZones: ["Red Sea"],
-    claimHistory12m: 1, openClaims: 0, nextRenewal: "2027-01-01",
-    flags: ["Cargo claim settled Jan 2026 — watch for repeat on similar routes"],
-  },
-  {
-    vessel: "Cape Resolute", imo: "9123456",
-    underwritingScore: 59,
-    hmInsurer: "West of England P&I Club", hmValue: 41_000_000, hmPremium: 328_000,
-    piClub: "West of England P&I Club", piDeductible: 40_000,
-    warRiskZones: ["Black Sea", "Red Sea"],
-    claimHistory12m: 1, openClaims: 1, nextRenewal: "2026-11-01",
-    flags: ["Sewage treatment plant repair — potential P&I MARPOL exposure", "Black Sea war risk additional premium not yet agreed for upcoming voyage"],
-  },
-];
+interface ApiPolicy {
+  id: number;
+  policyNumber?: string;
+  vesselName?: string;
+  vesselImo?: string;
+  vesselMmsi?: string;
+  carrier?: string;
+  syndicateCode?: string;
+  coverageType?: string;
+  coverageLimitUsd?: number | string;
+  deductibleUsd?: number | string;
+  premiumUsd?: number | string;
+  status?: string;
+  effectiveAt?: string;
+  expiresAt?: string;
+  claimsCount?: number;
+  totalClaimsUsd?: number | string;
+}
 
-const CLAIMS: Claim[] = [
-  {
-    id: "CLM-001", vessel: "Pacific Navigator", type: "H&M",
-    description: "Cargo hold flooding — water ingress via compromised hatch seal during South Atlantic transit",
-    dateReported: "2026-02-18", estimatedAmount: 780_000, status: "under_review",
-    insurer: "Lloyd's Syndicate 4472", adjustor: "J. Morgan & Associates",
+interface ApiClaim {
+  id: number;
+  claimRef?: string;
+  policyId?: number;
+  vesselName?: string;
+  incidentType?: string;
+  incidentDescription?: string;
+  incidentLocation?: string;
+  incidentAt?: string;
+  filedAt?: string;
+  claimedAmountUsd?: number | string;
+  reserveAmountUsd?: number | string;
+  status?: string;
+  adjustorNotes?: string;
+}
+
+interface PortfolioSummary {
+  activePolicies: number;
+  totalPolicies: number;
+  totalGrossWrittenPremium: number;
+  totalExposure: number;
+  openClaims: number;
+  totalClaims: number;
+  totalReserves: number;
+  totalPaidClaims: number;
+  lossRatioPercent: number;
+}
+
+const numericValue = (v: number | string | null | undefined, fallback = 0) => {
+  if (v == null) return fallback;
+  const n = typeof v === "number" ? v : parseFloat(v);
+  return Number.isFinite(n) ? n : fallback;
+};
+
+const claimTypeFor = (t?: string): Claim["type"] => {
+  const k = (t ?? "").toLowerCase();
+  if (k.includes("p&i") || k.includes("pi") || k.includes("pollution") || k.includes("liability")) return "P&I";
+  if (k.includes("war") || k.includes("piracy")) return "War Risk";
+  if (k.includes("cargo")) return "Cargo";
+  return "H&M";
+};
+
+const claimStatusFor = (s?: string): Claim["status"] => {
+  const k = (s ?? "").toLowerCase();
+  if (k === "settled" || k === "closed") return "settled";
+  if (k === "denied" || k === "rejected") return "denied";
+  if (k === "under_review" || k === "in_review" || k === "investigating") return "under_review";
+  return "open";
+};
+
+const policyToVesselInsurance = (p: ApiPolicy): VesselInsurance => {
+  const limit = numericValue(p.coverageLimitUsd);
+  const premium = numericValue(p.premiumUsd);
+  const ratio = limit > 0 ? premium / limit : 0.005;
+  const baseScore = Math.min(98, Math.max(20, Math.round(95 - ratio * 8000)));
+  const claimPenalty = Math.min(25, (p.claimsCount ?? 0) * 12);
+  const score = Math.max(15, baseScore - claimPenalty);
+  const flags: string[] = [];
+  if ((p.claimsCount ?? 0) > 0) flags.push(`${p.claimsCount} claim${p.claimsCount === 1 ? "" : "s"} on policy ${p.policyNumber ?? p.id} — review at next renewal`);
+  if (p.status && p.status !== "active") flags.push(`Policy status: ${p.status}`);
+  return {
+    vessel: p.vesselName ?? `Vessel ${p.id}`,
+    imo: p.vesselImo ?? p.vesselMmsi ?? "—",
+    underwritingScore: score,
+    hmInsurer: p.carrier ?? "Lloyd's of London",
+    hmValue: limit,
+    hmPremium: premium,
+    piClub: p.syndicateCode ?? p.carrier ?? "P&I Club",
+    piDeductible: numericValue(p.deductibleUsd),
+    warRiskZones: [],
+    claimHistory12m: p.claimsCount ?? 0,
+    openClaims: p.claimsCount ?? 0,
+    nextRenewal: (p.expiresAt ?? "").slice(0, 10) || "—",
+    flags,
+  };
+};
+
+const apiClaimToClaim = (c: ApiClaim, policies: ApiPolicy[]): Claim => {
+  const policy = policies.find((p) => p.id === c.policyId);
+  return {
+    id: c.claimRef ?? `CLM-${c.id}`,
+    vessel: c.vesselName ?? policy?.vesselName ?? "—",
+    type: claimTypeFor(c.incidentType),
+    description: c.incidentDescription ?? c.incidentType ?? "—",
+    dateReported: (c.filedAt ?? c.incidentAt ?? "").slice(0, 10) || "—",
+    estimatedAmount: numericValue(c.claimedAmountUsd ?? c.reserveAmountUsd),
+    status: claimStatusFor(c.status),
+    insurer: policy?.carrier ?? "—",
+    adjustor: c.adjustorNotes ? "Adjustor assigned" : "Pending appointment",
     correspondence: [
-      { date: "2026-02-18", party: "Owner → Insurer", summary: "Initial notification of incident and survey request" },
-      { date: "2026-02-22", party: "Adjustor", summary: "Average adjustor appointed — attending Rotterdam survey" },
-      { date: "2026-03-10", party: "Insurer → Owner", summary: "Survey report received — causation review in progress. Liability not yet admitted" },
-      { date: "2026-04-01", party: "Owner → Insurer", summary: "Submitted repair invoices $542,000 + consequential loss claim $238,000" },
+      { date: (c.filedAt ?? "").slice(0, 10) || "—", party: "Owner → Insurer", summary: `Claim ${c.claimRef ?? c.id} filed for ${c.incidentType ?? "incident"} at ${c.incidentLocation ?? "unknown location"}` },
+      ...(c.adjustorNotes ? [{ date: (c.filedAt ?? "").slice(0, 10) || "—", party: "Adjustor", summary: c.adjustorNotes }] : []),
     ],
-  },
-  {
-    id: "CLM-002", vessel: "Cape Resolute", type: "P&I",
-    description: "MARPOL potential violation — sewage treatment plant overboard valve (now repaired). Port Authority in Houston filed notice",
-    dateReported: "2026-04-03", estimatedAmount: 120_000, status: "open",
-    insurer: "West of England P&I Club", adjustor: "P&I Club Correspondent — Houston",
-    correspondence: [
-      { date: "2026-04-03", party: "Master → Owner", summary: "USCG notice of potential MARPOL violation filed post-inspection" },
-      { date: "2026-04-04", party: "Owner → P&I Club", summary: "Club notified, correspondent appointed in Houston" },
-      { date: "2026-04-08", party: "P&I Club Correspondent", summary: "Preliminary review — repair documentation reviewed. Penalty estimate $80-120K" },
-    ],
-  },
-  {
-    id: "CLM-003", vessel: "Meridian Bulk", type: "Cargo",
-    description: "Wet damage — soybeans cargo contamination due to condensation in cargo holds during Santos → Ningbo voyage",
-    dateReported: "2025-12-14", estimatedAmount: 210_000, status: "settled",
-    insurer: "Tokio Marine (Cargo)", adjustor: "China P&I Bureau",
-    correspondence: [
-      { date: "2025-12-14", party: "Charterer → Owner", summary: "Formal cargo damage claim received for 2,400MT soybeans" },
-      { date: "2026-01-10", party: "Adjustor", summary: "Survey completed Ningbo — confirmed 2,200MT damaged, moisture cause" },
-      { date: "2026-01-28", party: "Insurer", summary: "Settlement agreed: $198,000 — claim closed" },
-    ],
-  },
-];
+  };
+};
 
 const statusConfig: Record<string, { color: string; label: string }> = {
   open: { color: "text-red-400 bg-red-500/10 border-red-500/20", label: "Open" },
@@ -118,14 +158,49 @@ const statusConfig: Record<string, { color: string; label: string }> = {
 const scoreColor = (score: number) =>
   score >= 80 ? "text-emerald-400" : score >= 60 ? "text-amber-400" : score >= 40 ? "text-orange-400" : "text-red-400";
 
+async function fetchJson<T>(url: string): Promise<T> {
+  const res = await fetch(url, { credentials: "include" });
+  if (!res.ok) throw new Error(`Request failed: ${res.status}`);
+  return res.json() as Promise<T>;
+}
+
 export default function InsurancePanelPage() {
   const [tab, setTab] = useState<"policies" | "claims">("policies");
-  const [selectedClaim, setSelectedClaim] = useState<Claim | null>(CLAIMS[0]);
 
-  const totalOpenClaims = CLAIMS.filter(c => c.status !== "settled" && c.status !== "denied").length;
-  const totalExposure = CLAIMS.filter(c => c.status !== "settled").reduce((a, c) => a + c.estimatedAmount, 0);
-  const totalPremium = POLICIES.reduce((a, p) => a + p.hmPremium, 0);
-  const avgScore = Math.round(POLICIES.reduce((a, p) => a + p.underwritingScore, 0) / POLICIES.length);
+  const policiesQuery = useQuery({
+    queryKey: ["vessels-insurance-policies"],
+    queryFn: () => fetchJson<{ policies: ApiPolicy[] }>("/api/vessels/insurance/policies"),
+    staleTime: 60_000,
+  });
+  const claimsQuery = useQuery({
+    queryKey: ["vessels-insurance-claims"],
+    queryFn: () => fetchJson<{ claims: ApiClaim[] }>("/api/vessels/insurance/claims"),
+    staleTime: 60_000,
+  });
+  const summaryQuery = useQuery({
+    queryKey: ["vessels-insurance-summary"],
+    queryFn: () => fetchJson<PortfolioSummary>("/api/vessels/insurance/portfolio-summary"),
+    staleTime: 60_000,
+  });
+
+  const apiPolicies = policiesQuery.data?.policies ?? [];
+  const apiClaims = claimsQuery.data?.claims ?? [];
+  const POLICIES = useMemo(() => apiPolicies.map(policyToVesselInsurance), [apiPolicies]);
+  const CLAIMS = useMemo(() => apiClaims.map((c) => apiClaimToClaim(c, apiPolicies)), [apiClaims, apiPolicies]);
+
+  const [selectedClaim, setSelectedClaim] = useState<Claim | null>(null);
+  useEffect(() => {
+    if (!selectedClaim && CLAIMS.length > 0) setSelectedClaim(CLAIMS[0]);
+  }, [CLAIMS, selectedClaim]);
+
+  const summary = summaryQuery.data;
+  const totalOpenClaims = summary?.openClaims ?? CLAIMS.filter(c => c.status !== "settled" && c.status !== "denied").length;
+  const totalExposure = summary?.totalReserves ?? CLAIMS.filter(c => c.status !== "settled").reduce((a, c) => a + c.estimatedAmount, 0);
+  const totalPremium = summary?.totalGrossWrittenPremium ?? POLICIES.reduce((a, p) => a + p.hmPremium, 0);
+  const avgScore = POLICIES.length > 0 ? Math.round(POLICIES.reduce((a, p) => a + p.underwritingScore, 0) / POLICIES.length) : 0;
+
+  const isLoading = policiesQuery.isLoading || claimsQuery.isLoading;
+  const loadError = policiesQuery.error || claimsQuery.error;
 
   return (
     <div className="p-6 space-y-6">
@@ -135,7 +210,13 @@ export default function InsurancePanelPage() {
           Insurance & P&I Panel
         </h1>
         <p className="text-xs text-sky-400/50 mt-0.5">Hull & machinery claims, P&I club correspondence, and underwriting risk scores feeding from the vessel risk engine</p>
-        <Badge variant="outline" className="text-[9px] mt-1 text-sky-400/30 border-sky-500/15">Simulated data — for demonstration purposes</Badge>
+        <div className="flex flex-wrap gap-2 mt-1">
+          <Badge variant="outline" className="text-[9px] text-sky-400/40 border-sky-500/15">
+            Live · /api/vessels/insurance · {apiPolicies.length} polic{apiPolicies.length === 1 ? "y" : "ies"} · {apiClaims.length} claim{apiClaims.length === 1 ? "" : "s"}
+          </Badge>
+          {isLoading && <Badge variant="outline" className="text-[9px] text-amber-300/70 border-amber-500/20">Loading…</Badge>}
+          {loadError && <Badge variant="outline" className="text-[9px] text-red-300 border-red-500/30">API error — showing whatever loaded</Badge>}
+        </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
