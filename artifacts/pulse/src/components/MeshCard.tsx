@@ -49,7 +49,7 @@ function useMeshIndex(): MeshIndex {
 
   useEffect(() => {
     let cancelled = false;
-    (async () => {
+    const fetchLive = async () => {
       try {
         const res = await fetch("/api/agent-mesh/index", { credentials: "include" });
         if (!res.ok) return;
@@ -70,8 +70,15 @@ function useMeshIndex(): MeshIndex {
       } catch {
         // keep bridge/seed
       }
-    })();
-    return () => { cancelled = true; };
+    };
+    void fetchLive();
+    // The mesh collector runs on a 15-min server schedule; polling once a
+    // minute keeps the briefing card current without a page reload.
+    const id = window.setInterval(() => { void fetchLive(); }, 60_000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(id);
+    };
   }, []);
   return data;
 }

@@ -321,6 +321,7 @@ const DEFAULT_SCHEDULES: ScheduleDefinition[] = [
   { name: "notification_email_digest_daily", jobType: PLATFORM_JOB_TYPES.NOTIFICATION_DIGEST, cronExpression: "0 8 * * *", payload: { since: "24h" }, maxRetries: 2 },
   { name: "data_retention_sweep_weekly", jobType: PLATFORM_JOB_TYPES.DATA_RETENTION_SWEEP, cronExpression: "0 2 * * 0", payload: {}, maxRetries: 1 },
   { name: "launch_publish_scan_5m", jobType: NAMED_JOB_TYPES.LAUNCH_PUBLISH_SCAN, cronExpression: "*/5 * * * *", payload: {}, maxRetries: 1 },
+  { name: "mesh_telemetry_scan_15m", jobType: NAMED_JOB_TYPES.MESH_TELEMETRY_SCAN, cronExpression: "*/15 * * * *", payload: {}, maxRetries: 1 },
 ] as const;
 
 export async function startDurableQueue(): Promise<void> {

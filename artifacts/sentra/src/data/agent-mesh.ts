@@ -687,6 +687,11 @@ export async function triggerMeshScan(): Promise<{ state: AgentMeshState; source
   }
 }
 
+// Auto-refresh interval for the Mesh Map. The collector itself is re-run on a
+// 15-minute server schedule; we poll the read endpoint more frequently so a
+// freshly-persisted scan shows up in the UI without a manual reload.
+const AUTO_REFRESH_INTERVAL_MS = 60_000;
+
 export function useAgentMesh(): UseAgentMeshResult {
   const [state, setState] = useState<AgentMeshState>(agentMesh);
   const [source, setSource] = useState<"live" | "seed">("seed");
@@ -711,15 +716,20 @@ export function useAgentMesh(): UseAgentMeshResult {
 
   useEffect(() => {
     let cancelled = false;
-    (async () => {
+    const tick = async () => {
       const next = await loadAgentMesh();
       if (cancelled || !mounted.current) return;
       setState(next.state);
       setSource(next.source);
       setScannedFiles(next.scannedFiles);
       setLoading(false);
-    })();
-    return () => { cancelled = true; };
+    };
+    void tick();
+    const id = window.setInterval(() => { void tick(); }, AUTO_REFRESH_INTERVAL_MS);
+    return () => {
+      cancelled = true;
+      window.clearInterval(id);
+    };
   }, []);
 
   return { state, source, loading, refresh, scannedFiles };

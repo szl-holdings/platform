@@ -27,6 +27,7 @@ export const NAMED_JOB_TYPES = {
   DAILY_PULSE_BRIEFING_DIGEST: "daily_pulse_briefing_digest",
   DAILY_COMPETITIVE_INTEL_POLL: "daily_competitive_intel_poll",
   LAUNCH_PUBLISH_SCAN: "launch_publish_scan",
+  MESH_TELEMETRY_SCAN: "mesh_telemetry_scan",
 } as const;
 
 export type NamedJobType = typeof NAMED_JOB_TYPES[keyof typeof NAMED_JOB_TYPES];
@@ -75,6 +76,7 @@ registerEntry({ type: NAMED_JOB_TYPES.ATLAS_SNAPSHOT_COMPACTION, name: "ATLAS Sn
 registerEntry({ type: NAMED_JOB_TYPES.ATLAS_RETENTION_PRUNE, name: "ATLAS Retention Prune", description: "Deletes records from atlas_signals, atlas_evidence, atlas_outcomes, and atlas_runs older than the configured retention threshold (defaults to 90 days, override via ATLAS_RETENTION_DAYS env var or job payload retainDays). Prevents unbounded growth of ATLAS persistence tables.", schedule: "daily", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.DAILY_COMPETITIVE_INTEL_POLL, name: "Daily Competitive Intel Poll", description: "Polls product blogs / RSS feeds for the champions tracked in the SZL Competitive Atlas (CrowdStrike, Clio, CoStar, Windward, Palantir, ThoughtSpot, Darktrace) and surfaces new major-feature announcements as Intel Update alerts in the Command Competitive Atlas page with adopt/counter/monitor recommendations.", schedule: "daily", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.LAUNCH_PUBLISH_SCAN, name: "Launch Publish Scheduler", description: "Sweeps Distribution OS (dos_articles, dos_carousel_projects, dos_x_posts, dos_content_calendar_items) every 5 minutes for items whose scheduled publish time has arrived but whose status is still ready/approved/queued/scheduled, and triggers the matching Medium / Substack / LinkedIn / X publish helper. Newsletters auto-publish only when pinned to a calendar slot whose scheduledDate has arrived. Successful publishes flip the source row to published and record the external URL; failures are retried with per-item exponential backoff (1 min → 1 hr cap, terminal flip after 5 attempts) and surfaced on the Distribution OS dashboard via dos_automation_runs.", schedule: "minutely" as JobScheduleEntry["schedule"], enabled: true });
+registerEntry({ type: NAMED_JOB_TYPES.MESH_TELEMETRY_SCAN, name: "Agent Mesh Telemetry Scan", description: "Re-scans local agent runtime config files (Claude Desktop, Cursor, Claude Code, Codex), refreshes the Sentra Mesh Map data, recomputes the resilience index, and fires Sentra alerts whenever the overall index or any sub-index drops materially since the last run. Runs every 15 minutes per scheduled org.", schedule: "hourly", enabled: true });
 
 durableJobQueue.register(NAMED_JOB_TYPES.LAUNCH_PUBLISH_SCAN, async (job) => {
   const start = Date.now();
@@ -99,6 +101,62 @@ durableJobQueue.register(NAMED_JOB_TYPES.LAUNCH_PUBLISH_SCAN, async (job) => {
   } catch (err) {
     logger.error({ err, jobId: job.id }, "launch_publish_scan: fatal");
     updateRegistry(NAMED_JOB_TYPES.LAUNCH_PUBLISH_SCAN, { lastStatus: "failed", lastDurationMs: Date.now() - start, failCount: (jobRegistry.get(NAMED_JOB_TYPES.LAUNCH_PUBLISH_SCAN)?.failCount || 0) + 1 });
+  }
+});
+
+durableJobQueue.register(NAMED_JOB_TYPES.MESH_TELEMETRY_SCAN, async (job) => {
+  const start = Date.now();
+  logger.info({ jobId: job.id }, "mesh_telemetry_scan: starting scheduled scan");
+  try {
+    const { runScheduledMeshScan } = await import("../services/agent-mesh-collector");
+    const report = await runScheduledMeshScan();
+    const summary = report.succeeded.map((r) => ({
+      orgId: r.orgId,
+      overall: r.result.resilienceIndex.overall,
+      grade: r.result.resilienceIndex.grade,
+      openExposures: r.result.resilienceIndex.openExposures,
+      runtimes: r.result.runtimes.length,
+      mcpServers: r.result.mcpServers.length,
+    }));
+    const totalAttempted = report.succeeded.length + report.failed.length;
+    const hasFailures = report.failed.length > 0;
+    const allFailed = totalAttempted > 0 && report.succeeded.length === 0;
+    const status: "completed" | "partial" | "failed" = allFailed ? "failed" : hasFailures ? "partial" : "completed";
+
+    serverTelemetry.recordBusinessEvent({
+      type: "mesh_telemetry_scan_completed",
+      domain: "sentra",
+      durationMs: Date.now() - start,
+      success: !allFailed,
+      metadata: {
+        status,
+        attempted: totalAttempted,
+        succeeded: report.succeeded.length,
+        failed: report.failed.length,
+        scans: summary,
+        failures: report.failed,
+      },
+    });
+    updateRegistry(NAMED_JOB_TYPES.MESH_TELEMETRY_SCAN, {
+      lastStatus: status === "failed" ? "failed" : "completed",
+      lastDurationMs: Date.now() - start,
+      ...(hasFailures
+        ? { failCount: (jobRegistry.get(NAMED_JOB_TYPES.MESH_TELEMETRY_SCAN)?.failCount || 0) + 1 }
+        : {}),
+    });
+    logger.info({ jobId: job.id, status, succeeded: report.succeeded.length, failed: report.failed.length }, "mesh_telemetry_scan: complete");
+
+    if (allFailed) {
+      throw new Error(`mesh_telemetry_scan: all ${totalAttempted} org scans failed`);
+    }
+  } catch (err) {
+    logger.error({ err, jobId: job.id }, "mesh_telemetry_scan: fatal");
+    updateRegistry(NAMED_JOB_TYPES.MESH_TELEMETRY_SCAN, {
+      lastStatus: "failed",
+      lastDurationMs: Date.now() - start,
+      failCount: (jobRegistry.get(NAMED_JOB_TYPES.MESH_TELEMETRY_SCAN)?.failCount || 0) + 1,
+    });
+    throw err;
   }
 });
 

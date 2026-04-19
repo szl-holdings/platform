@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import os from "os";
 import crypto from "crypto";
-import { db } from "@szl-holdings/db";
+import { db, auditEventsTable } from "@szl-holdings/db";
 import {
   agentMeshRuntimesTable,
   agentMeshMcpServersTable,
@@ -13,8 +13,9 @@ import {
   agentMeshDriftSnapshotsTable,
   agentMeshResilienceIndexTable,
 } from "@szl-holdings/db";
-import { sql, desc } from "drizzle-orm";
+import { sql, desc, eq } from "drizzle-orm";
 import { logger } from "../lib/logger";
+import { serverTelemetry } from "@szl-holdings/observability";
 
 export type TrustState = "trusted" | "unverified" | "quarantined";
 
@@ -635,7 +636,217 @@ export async function runMeshScan(opts: { extraPaths?: string[]; orgId?: number 
   };
 
   await persistScan(result, opts.orgId ?? null);
+  await detectAndRaiseResilienceDrop(result, opts.orgId ?? null);
   return result;
+}
+
+// ---------- Drop detection & alerts ----------
+
+const DROP_OVERALL_THRESHOLD = Number(process.env["MESH_ALERT_DROP_THRESHOLD"] ?? "10");
+const SUBINDEX_DROP_THRESHOLD = Number(process.env["MESH_ALERT_SUBINDEX_THRESHOLD"] ?? "15");
+
+type SubIndexKey =
+  | "secretHygiene"
+  | "permissionSurface"
+  | "supplyChain"
+  | "egressContainment"
+  | "scheduleHygiene"
+  | "instructionTamperingRisk"
+  | "crossAgentBlastRadius";
+
+const SUBINDEX_KEYS: SubIndexKey[] = [
+  "secretHygiene",
+  "permissionSurface",
+  "supplyChain",
+  "egressContainment",
+  "scheduleHygiene",
+  "instructionTamperingRisk",
+  "crossAgentBlastRadius",
+];
+
+async function detectAndRaiseResilienceDrop(result: ScanResult, orgId: number | null): Promise<void> {
+  try {
+    // Read the previous index for this org (the one inserted just before this run).
+    const previousRows = await db
+      .select()
+      .from(agentMeshResilienceIndexTable)
+      .where(orgId === null
+        ? sql`${agentMeshResilienceIndexTable.orgId} IS NULL`
+        : eq(agentMeshResilienceIndexTable.orgId, orgId))
+      .orderBy(desc(agentMeshResilienceIndexTable.computedAt))
+      .limit(2);
+
+    // The most recent row is the one we just persisted. The second is the prior.
+    const prior = previousRows[1];
+    if (!prior) return;
+
+    const current = result.resilienceIndex;
+    const overallDrop = prior.overall - current.overall;
+    const subIndexBefore: Record<typeof SUBINDEX_KEYS[number], number> = {
+      secretHygiene: prior.secretHygiene,
+      permissionSurface: prior.permissionSurface,
+      supplyChain: prior.supplyChain,
+      egressContainment: prior.egressContainment,
+      scheduleHygiene: prior.scheduleHygiene,
+      instructionTamperingRisk: prior.instructionTamperingRisk,
+      crossAgentBlastRadius: prior.crossAgentBlastRadius,
+    };
+    const droppedSubIndices: { key: string; from: number; to: number; delta: number }[] = [];
+    for (const key of SUBINDEX_KEYS) {
+      const before = subIndexBefore[key];
+      const after = current[key];
+      const delta = before - after;
+      if (delta >= SUBINDEX_DROP_THRESHOLD) {
+        droppedSubIndices.push({ key: String(key), from: before, to: after, delta });
+      }
+    }
+    const gradeSlipped = prior.grade !== current.grade
+      && severityGradeWeight(current.grade) > severityGradeWeight(prior.grade as ResilienceIndexRow["grade"]);
+
+    if (overallDrop < DROP_OVERALL_THRESHOLD && droppedSubIndices.length === 0 && !gradeSlipped) {
+      return;
+    }
+
+    const severity: "warning" | "critical" = overallDrop >= DROP_OVERALL_THRESHOLD * 2 || current.grade === "F"
+      ? "critical"
+      : "warning";
+
+    const reasonParts: string[] = [];
+    if (overallDrop >= DROP_OVERALL_THRESHOLD) {
+      reasonParts.push(`overall ${prior.overall} → ${current.overall} (−${overallDrop})`);
+    }
+    if (gradeSlipped) {
+      reasonParts.push(`grade ${prior.grade} → ${current.grade}`);
+    }
+    for (const s of droppedSubIndices) {
+      reasonParts.push(`${s.key} ${s.from} → ${s.to} (−${s.delta})`);
+    }
+    const reason = reasonParts.join(" · ");
+
+    logger.warn({ orgId, overallDrop, gradeSlipped, droppedSubIndices, current: current.overall }, "[agent-mesh-collector] resilience drop detected");
+
+    // Surface in the platform telemetry alert feed (visible in Sentra ops dashboards).
+    try {
+      serverTelemetry.raiseAlert({
+        type: "agent_mesh_resilience_drop",
+        message: `Sentra: agent-mesh resilience dropped — ${reason}`,
+        severity,
+        metadata: {
+          orgId,
+          overall: current.overall,
+          previousOverall: prior.overall,
+          grade: current.grade,
+          previousGrade: prior.grade,
+          topExposure: current.topExposure,
+          openExposures: current.openExposures,
+          droppedSubIndices,
+          computedAt: current.computedAt,
+        },
+      });
+    } catch (err) {
+      logger.debug({ err }, "[agent-mesh-collector] raiseAlert failed");
+    }
+
+    // Persist a durable audit trail entry so Sentra and Pulse digests can replay drops.
+    try {
+      await db.insert(auditEventsTable).values({
+        action: "agent_mesh_resilience_drop",
+        entityType: "agent_mesh_resilience_index",
+        entityId: orgId !== null ? String(orgId) : null,
+        newValues: {
+          orgId,
+          severity,
+          reason,
+          overall: current.overall,
+          previousOverall: prior.overall,
+          grade: current.grade,
+          previousGrade: prior.grade,
+          topExposure: current.topExposure,
+          openExposures: current.openExposures,
+          pendingApprovals: current.pendingApprovals,
+          droppedSubIndices,
+          computedAt: current.computedAt,
+        },
+      });
+    } catch (err) {
+      logger.debug({ err }, "[agent-mesh-collector] audit insert failed");
+    }
+  } catch (err) {
+    logger.warn({ err }, "[agent-mesh-collector] drop detection failed");
+  }
+}
+
+function severityGradeWeight(g: ResilienceIndexRow["grade"]): number {
+  return { A: 1, B: 2, C: 3, D: 4, F: 5 }[g] ?? 0;
+}
+
+export interface ScheduledMeshScanReport {
+  succeeded: { orgId: number | null; result: ScanResult }[];
+  failed: { orgId: number | null; error: string }[];
+  scannedAt: string;
+}
+
+/**
+ * Run a scheduled mesh telemetry scan for every active tenant plus the global
+ * (orgId=null) slice. Active tenants are discovered from the `organizations`
+ * table at runtime (status='active' AND is_active=true), so newly created
+ * orgs are picked up on the next tick without configuration changes.
+ *
+ * The optional `MESH_SCHEDULED_ORG_IDS` env var can supplement discovery with
+ * additional org ids (e.g. for orgs in unusual states), and the optional
+ * `MESH_SCHEDULED_ONLY_ORG_IDS` env var can restrict scans to an explicit
+ * allow-list. Returns a structured report so the scheduler can record
+ * partial-failure status.
+ */
+export async function runScheduledMeshScan(): Promise<ScheduledMeshScanReport> {
+  const onlyEnv = (process.env["MESH_SCHEDULED_ONLY_ORG_IDS"] ?? "")
+    .split(",").map((s) => s.trim()).filter(Boolean)
+    .map((s) => Number.parseInt(s, 10)).filter(Number.isFinite);
+
+  let targets: (number | null)[];
+  if (onlyEnv.length > 0) {
+    targets = [...onlyEnv];
+  } else {
+    const discovered = await discoverActiveOrgIds();
+    const extraEnv = (process.env["MESH_SCHEDULED_ORG_IDS"] ?? "")
+      .split(",").map((s) => s.trim()).filter(Boolean)
+      .map((s) => Number.parseInt(s, 10)).filter(Number.isFinite);
+    const merged = new Set<number | null>([null, ...discovered, ...extraEnv]);
+    targets = Array.from(merged);
+  }
+
+  const succeeded: ScheduledMeshScanReport["succeeded"] = [];
+  const failed: ScheduledMeshScanReport["failed"] = [];
+  for (const orgId of targets) {
+    try {
+      const result = await runMeshScan({ orgId });
+      succeeded.push({ orgId, result });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      logger.warn({ err, orgId }, "[agent-mesh-collector] scheduled scan failed for org");
+      failed.push({ orgId, error: message });
+    }
+  }
+  return { succeeded, failed, scannedAt: new Date().toISOString() };
+}
+
+async function discoverActiveOrgIds(): Promise<number[]> {
+  try {
+    // Use raw SQL to avoid a hard dependency on the organizations schema export
+    // here — the table is part of the shared db schema but not always in the
+    // collector's narrow imports. Safe: read-only, no user input interpolated.
+    const rows = await db.execute(
+      sql`SELECT id FROM organizations WHERE status = 'active' AND is_active = true`,
+    );
+    const list = (rows as unknown as { rows?: { id: number }[] }).rows
+      ?? (rows as unknown as { id: number }[]);
+    return Array.from(list)
+      .map((r) => Number(r.id))
+      .filter((n) => Number.isFinite(n));
+  } catch (err) {
+    logger.warn({ err }, "[agent-mesh-collector] could not discover active orgs; scanning global slice only");
+    return [];
+  }
 }
 
 async function persistScan(result: ScanResult, orgId: number | null): Promise<void> {
