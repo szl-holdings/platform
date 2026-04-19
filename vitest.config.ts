@@ -83,6 +83,7 @@ export default defineConfig({
       { find: "@workspace/alloy/ledger", replacement: resolve(__dirname, "packages/alloy/src/ledger.ts") },
       { find: "@workspace/alloy/model-router", replacement: resolve(__dirname, "packages/alloy/src/model-router.ts") },
       { find: "@workspace/alloy/workflow", replacement: resolve(__dirname, "packages/alloy/src/workflow.ts") },
+      { find: "@workspace/alloy/plan-orchestrator", replacement: resolve(__dirname, "packages/alloy/src/plan-orchestrator.ts") },
       { find: "@workspace/alloy", replacement: resolve(__dirname, "packages/alloy/src/index.ts") },
       { find: "@workspace/cognitive-observability/metrics", replacement: resolve(__dirname, "packages/cognitive-observability/src/metrics.ts") },
       { find: "@workspace/cognitive-observability/collector", replacement: resolve(__dirname, "packages/cognitive-observability/src/collector.ts") },

@@ -32,11 +32,16 @@
     "./workflow": {
       "types": "./dist/workflow.d.ts",
       "import": "./src/workflow.ts"
+    },
+    "./plan-orchestrator": {
+      "types": "./dist/plan-orchestrator.d.ts",
+      "import": "./src/plan-orchestrator.ts"
     }
   },
   "dependencies": {
     "@szl-holdings/action-engine": "workspace:*",
     "@workspace/guardian": "workspace:*",
+    "@workspace/planner": "workspace:*",
     "@workspace/tool-mesh": "workspace:*",
     "@workspace/trace-graph": "workspace:*",
     "zod": "catalog:"

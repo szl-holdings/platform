@@ -2980,6 +2980,9 @@ importers:
       '@workspace/guardian':
         specifier: workspace:*
         version: link:../guardian
+      '@workspace/planner':
+        specifier: workspace:*
+        version: link:../planner
       '@workspace/tool-mesh':
         specifier: workspace:*
         version: link:../tool-mesh
