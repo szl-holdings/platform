@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import {
   Cpu, FileText, Network, Radar, Activity, Heart, TrendingUp,
   GraduationCap, Users, FolderOpen, Clock, BookOpen, BarChart3,
-  CheckCircle, ChevronDown, Sparkles, Lightbulb, Zap,
+  CheckCircle, ChevronDown, Sparkles, Lightbulb, Zap, Shield,
 } from "lucide-react";
 
 type NavItem = {
@@ -45,6 +45,7 @@ const OPERATIONS: NavItem[] = [
 
 const ATLAS_ITEMS: NavItem[] = [
   { href: "/atlas-execute", label: "Run Workflow", icon: Zap },
+  { href: "/governed-cockpit", label: "Governed Intelligence", icon: Shield },
 ];
 
 const GROUPS: NavGroup[] = [

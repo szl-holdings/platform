@@ -235,6 +235,7 @@ const primaryNavItems = [
   { path: "/dashboard/routes", label: "Routes", icon: Navigation },
   { path: "/dashboard/alerts", label: "Alerts", icon: AlertTriangle },
   { path: "/dashboard/reports", label: "Reports", icon: BarChart3 },
+  { path: "/governed-cockpit", label: "Governed Intelligence", icon: Shield },
   { path: "/dashboard/billing", label: "Billing", icon: DollarSign },
   { path: "/dashboard/settings", label: "Settings", icon: Wrench },
 ];

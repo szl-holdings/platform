@@ -122,6 +122,7 @@ const NAV_SECTIONS: SidebarNavSection[] = [
       { id: "distress-forecast", href: "/distress-forecast", label: "Distress Forecast", icon: <AlertTriangle className="w-full h-full" /> },
       { id: "underwriting-copilot", href: "/underwriting-copilot", label: "Underwriting Copilot", icon: <Brain className="w-full h-full" /> },
       { id: "diligence-room", href: "/diligence-room", label: "Diligence Room", icon: <Layers className="w-full h-full" /> },
+      { id: "governed-cockpit", href: "/governed-cockpit", label: "Governed Intelligence", icon: <Shield className="w-full h-full" /> },
     ],
   },
   {

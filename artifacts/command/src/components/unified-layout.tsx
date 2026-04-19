@@ -98,6 +98,7 @@ const OPERATIONS_NAV: NavGroup[] = [
       { href: "/operations/policy-approvals", label: "Policy Approvals", icon: ShieldCheck },
       { href: "/operations/policy-manager", label: "Policy Manager", icon: ShieldCheck },
       { href: "/operations/trust-audit", label: "Proof Chain Audit", icon: Shield },
+      { href: "/governed-cockpit", label: "Governed Intelligence", icon: Shield },
       { href: "/operations/inbox", label: "Command Inbox", icon: Inbox },
     ],
   },

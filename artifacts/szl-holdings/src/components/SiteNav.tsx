@@ -15,6 +15,7 @@ const NAV_ITEMS = [
     highlight: false,
     children: [
       { label: "Platform Overview", href: "/platform", note: "Governed decision operating system" },
+      { label: "Governed Intelligence", href: "/governed-cockpit", note: "Proof envelope cockpit" },
       { label: "Lyte", href: "/lyte", note: "Operational nerve center" },
       { label: "Lyte · Decision Theater", href: "/lyte/decision-theater", note: "Governed decision flow" },
       { label: "Lyte · Signal Fusion", href: "/lyte/signal-fusion", note: "Cross-domain signal aggregation" },
@@ -104,6 +105,7 @@ const NAV_LINKS_MOBILE = [
   { label: "Investor Relations", href: "/investor", primary: true },
   { label: "— Platform —", href: "/platform", primary: false, section: true },
   { label: "Platform Overview", href: "/platform", primary: false },
+  { label: "Governed Intelligence", href: "/governed-cockpit", primary: false },
   { label: "Lyte", href: "/lyte", primary: false },
   { label: "Lyte · Decision Theater", href: "/lyte/decision-theater", primary: false },
   { label: "Lyte · Signal Fusion", href: "/lyte/signal-fusion", primary: false },

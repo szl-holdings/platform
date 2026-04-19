@@ -242,7 +242,7 @@ const NAV_SECTIONS: NavSection[] = [
       { path: "/governance/operator-analytics", label: "Operator Analytics", icon: BarChart3, comp: L(() => import("./pages/governance/operator-analytics")) },
       { path: "/governance/trust-analytics", label: "Trust Analytics", icon: ShieldCheck, comp: L(() => import("./pages/governance/trust-analytics")) },
       { path: "/governance/trust-positioning", label: "Trust Positioning", icon: Target, comp: L(() => import("./pages/governance/trust-positioning")) },
-      { path: "/governed-cockpit", label: "Governed Cockpit", icon: Terminal, comp: L(() => import("./pages/governed-cockpit")) },
+      { path: "/governed-cockpit", label: "Governed Intelligence", icon: Shield, comp: L(() => import("./pages/governed-cockpit")) },
     ],
   },
   {

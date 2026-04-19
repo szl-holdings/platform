@@ -512,6 +512,7 @@ export default function CortexIntelligenceScreen() {
                 { route: "/(shell)/intelligence/executive-brief", label: "Executive Brief", icon: "file-text" as const, color: ACCENT, sub: "Daily · Weekly · Live snapshot" },
                 { route: "/(shell)/intelligence/secure-quick-actions", label: "Quick Actions", icon: "shield" as const, color: "#6366f1", sub: "Guardian-scoped · Rollback" },
                 { route: "/(shell)/intelligence/run-review", label: "Run Review", icon: "activity" as const, color: "#22c55e", sub: "Cognitive loop traces" },
+                { route: "/(shell)/intelligence/proof-envelope", label: "Proof Envelope", icon: "shield" as const, color: "#0ea5e9", sub: "Governed Intelligence cockpit" },
               ].map(({ route, label, icon, color, sub }) => (
                 <TouchableOpacity
                   key={route}
