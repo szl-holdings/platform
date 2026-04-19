@@ -519,6 +519,7 @@ export default function LytePage() {
     title: "Lyte — Operational Nerve Center | SZL Holdings",
     description: "Lyte is the governed command surface where the Governed Decision Loop plays out: Signal Ingestion, Risk Surface, Governed Decision with Covenant Policy, and Proof Chain recording — all in one persistent operator interface.",
     canonical: "https://szlholdings.com/lyte",
+    ogImage: "https://szlholdings.com/og/og-lyte.jpg",
   });
 
   const [activeSignal, setActiveSignal] = useState<string>("s1");

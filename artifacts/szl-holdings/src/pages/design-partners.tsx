@@ -79,6 +79,7 @@ export default function DesignPartnersPage() {
     description:
       "Work directly with SZL to instrument one high-friction workflow, prove measurable improvement, and expand from a proven foundation.",
     canonical: "https://szlholdings.com/design-partners",
+    ogImage: "https://szlholdings.com/og/og-design-partners.jpg",
   });
 
   return (

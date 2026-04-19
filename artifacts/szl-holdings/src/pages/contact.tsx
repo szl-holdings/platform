@@ -41,6 +41,7 @@ export default function ContactPage() {
     title: "Contact — SZL Holdings",
     description: "Demo requests, design partner sessions, general inquiries, media, and security disclosures. All conversations go directly to the founder.",
     canonical: "https://szlholdings.com/contact",
+    ogImage: "https://szlholdings.com/og/og-contact.jpg",
   });
 
   const utms = useUtm();

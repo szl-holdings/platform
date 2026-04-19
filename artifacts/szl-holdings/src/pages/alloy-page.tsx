@@ -154,6 +154,7 @@ export default function AlloyPage() {
     title: "Alloy — Execution Fabric & Action Spine | SZL Holdings",
     description: "Alloy is the execution Primitive beneath every SZL Holdings domain pack. Governed workflow orchestration, Covenant Policy enforcement, Proof Chain recording, and Outcome Graph tracking — from signal ingestion to verified execution.",
     canonical: "https://szlholdings.com/platform/alloy",
+    ogImage: "https://szlholdings.com/og/og-alloy.jpg",
   });
 
   return (

@@ -58,6 +58,7 @@ export default function HowItWorksPage() {
     title: "How It Works · SZL Holdings",
     description: "The SZL governed decision system transforms raw signals into auditable business action through a four-step loop: Signal Ingestion → Risk Surface → Governed Decision → Proof Chain.",
     canonical: "https://szlholdings.com/how-it-works",
+    ogImage: "https://szlholdings.com/og/og-how-it-works.jpg",
   });
 
   return (

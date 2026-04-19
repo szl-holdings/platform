@@ -31,6 +31,7 @@ export default function PricingPage() {
     title: "Pilot Program — Lyte + Alloy | SZL Holdings",
     description: "3-month design partner engagement: Lyte + Alloy instrumented against your operational data. Governed decision intelligence and execution accountability, live in your environment.",
     canonical: "https://szlholdings.com/pricing",
+    ogImage: "https://szlholdings.com/og/og-pricing.jpg",
   });
 
   return (
