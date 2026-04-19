@@ -976,7 +976,7 @@
     {
       "id": "CAP-073",
       "product": "Packages (Marketplace)",
-      "capability_name": "Core packages — atlas-core, atlas-types, atlas-events, config, ontology, telemetry-standards, observability-core",
+      "capability_name": "Core packages — atlas-core, atlas-events, config, ontology, telemetry-standards, observability-core",
       "claim_source": "packages exploration",
       "route_or_module": "packages/atlas-core/, packages/config/, packages/ontology/, etc.",
       "status": "live",

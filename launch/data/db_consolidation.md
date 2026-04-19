@@ -123,10 +123,9 @@ Run `pnpm db:migrate` to create `platform_settings`, `eval_forge_suites`, and `e
 |---------|------|----------|
 | `@workspace/ontology` | Canonical entity, signal, evidence, and recommendation type definitions; Zod-validated schemas for the signal mesh | "Grammar" — active data flowing through system |
 | `@szl-holdings/atlas-core` | ATLAS Enterprise State Model: canonical schema, primitives, and Zod validation for business entities | "Dictionary" — static/architectural entities reasoned about |
-| `@szl-holdings/atlas-types` | Re-exports all types from `atlas-core` with convenience aliases | Pure passthrough; exists to provide a stable public API contract |
 | `@szl-holdings/atlas-events` | ATLAS standardized event taxonomy; domain event routing | Event taxonomy only |
 
-**Note on `atlas-types`:** This package is a pure re-export of `atlas-core`. It exists to provide a stable versioned public surface that downstream consumers can import from without coupling to `atlas-core` internals. This is a legitimate pattern — not a duplicate. If the team wants to collapse it, replace all `@szl-holdings/atlas-types` imports with `@szl-holdings/atlas-core` imports and delete the package.
+**Note on `atlas-types` (removed):** Previously a pure re-export of `atlas-core`. The passthrough package was deleted; all consumers now import directly from `@szl-holdings/atlas-core`.
 
 ### Eval Cluster
 
@@ -271,7 +270,7 @@ These are documented for future consolidation but not deleted in this sweep beca
 
 | Item | Decision | Reason |
 |------|---------|--------|
-| `atlas-types` package | Keep (document boundary) | Legitimate stable-surface passthrough pattern; deleting requires search-and-replace across all callers |
+| `atlas-types` package | Removed | Deleted; was a pure re-export of `atlas-core` with no consumers — callers now import from `@szl-holdings/atlas-core` directly |
 | `policy-engine` vs `guardian` | Keep both (document boundary) | Confirmed distinct layers: evaluate vs. runtime-enforce |
 | Sales / launch docs (topic clusters) | Keep (deferred) | Each doc has unique content; merging requires editorial work, not code changes |
 | `/lyte/*` route overlaps | Keep (deferred) | Platform/live split is intentional architecture; requires frontend audit before safe removal |
