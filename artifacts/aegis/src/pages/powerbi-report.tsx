@@ -2,7 +2,7 @@ import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 import { useState } from "react";
 import { BarChart3, Shield, AlertTriangle, CheckCircle2, Activity, Loader2, Info } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
-import { PowerBiEmbed, type PowerBiEmbedConfig } from "@szl-holdings/shared-ui";
+import { PowerBiEmbed, type PowerBiEmbedConfig } from "@szl-holdings/shared-ui/powerbi-embed";
 
 const SAMPLE_METRICS = [
   { label: "Overall Risk Score", value: "34", unit: "/ 100", delta: "-8 pts", up: false, color: "text-emerald-400" },

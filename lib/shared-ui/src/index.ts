@@ -97,16 +97,202 @@ export {
   type BrandTheme,
   type BrandSlug,
 } from "./themes";
-export * from "./lane-colors";
-export * from "./powerbi-embed";
-export * from "./premium-components";
-export * from "./intelligence-philosophy";
-export * from "./lens-bar";
-export * from "./doctrine-layer";
-export * from "./doctrine-layer-badge";
-export * from "./explainability-panel";
-export * from "./design-system";
-export * from "./command-mode";
+export { LANE_ACCENT_HEX, type LaneName } from "./lane-colors";
+export { PowerBiEmbed, type PowerBiEmbedConfig } from "./powerbi-embed";
+export {
+  kpiRibbon,
+  chartContainer,
+  dataTableShell,
+  statusPill,
+  alertBanner,
+  modalDrawer,
+  skeletonLoader,
+  premiumFormElements,
+} from "./premium-components";
+export {
+  IntelligencePhilosophy,
+  IntelligenceMaturityBadge,
+  LensTag,
+} from "./intelligence-philosophy";
+export { LensBar, LensBarGrid, PostureScore } from "./lens-bar";
+export {
+  DOCTRINE_LAYER_COLORS,
+  DOCTRINE_LAYER_DESCRIPTIONS,
+  DOCTRINE_APP_MAP,
+  DOCTRINE_LAYER_ORDER,
+  getDoctrineConfig,
+  getAppsByLayer,
+  formatLayerLabel,
+  type DoctrineLayerConfig,
+  type DoctrineLayer,
+  type DoctrineContextModel,
+  type ExplainabilityModel,
+  type NormalizedEvent,
+} from "./doctrine-layer";
+export {
+  DoctrineLayerBadge,
+  LayerPill,
+  type DoctrineLayerBadgeProps,
+} from "./doctrine-layer-badge";
+export { ExplainabilityPanel, ExplainabilityToggle } from "./explainability-panel";
+export {
+  SiteHeader,
+  type NavItem,
+  type SiteHeaderProps,
+} from "./design-system/SiteHeader";
+export {
+  SiteFooter,
+  type FooterLinkGroup,
+  type SiteFooterProps,
+} from "./design-system/SiteFooter";
+export {
+  HeroBlock,
+  type HeroBadge,
+  type HeroAction,
+  type HeroBlockProps,
+} from "./design-system/HeroBlock";
+export {
+  CTAGroup,
+  type CTAItem,
+  type CTAGroupProps,
+} from "./design-system/CTAGroup";
+export {
+  FeatureGrid,
+  type Feature,
+  type FeatureGridProps,
+} from "./design-system/FeatureGrid";
+export {
+  VentureCard,
+  type VentureStatus,
+  type VentureMetric,
+  type VentureCardData,
+  type VentureCardProps,
+} from "./design-system/VentureCard";
+export {
+  ServiceCard,
+  type ServiceCardProps,
+} from "./design-system/ServiceCard";
+export {
+  ArticleCard,
+  type ArticleCardProps,
+} from "./design-system/ArticleCard";
+export {
+  CaseStudyCard,
+  type CaseStudyMetric,
+  type CaseStudyCardProps,
+} from "./design-system/CaseStudyCard";
+export {
+  KPIStrip,
+  type KPIItem,
+  type KPIStripProps,
+} from "./design-system/KPIStrip";
+export {
+  MetricCard,
+  type MetricCardProps,
+} from "./design-system/MetricCard";
+export {
+  WatchlistTable,
+  type WatchlistColumn,
+  type WatchlistTableProps,
+} from "./design-system/WatchlistTable";
+export {
+  ConfidenceBadge,
+  type ConfidenceBadgeLevel,
+  type ConfidenceBadgeProps,
+} from "./design-system/ConfidenceBadge";
+export {
+  PressureBadge,
+  type PressureLevel,
+  type PressureBadgeProps,
+} from "./design-system/PressureBadge";
+export {
+  ReviewStateBadge,
+  type ReviewState,
+  type ReviewStateBadgeProps,
+} from "./design-system/ReviewStateBadge";
+export {
+  Timeline,
+  type TimelineEntry,
+  type TimelineProps,
+} from "./design-system/Timeline";
+export {
+  InquiryForm,
+  type InquiryType,
+  type InquiryTypeConfig,
+  type InquiryFormProps,
+} from "./design-system/InquiryForm";
+export {
+  DashboardShell,
+  type DashboardShellTheme,
+  type DashboardShellProps,
+} from "./design-system/DashboardShell";
+export {
+  SidebarNav,
+  type SidebarNavItem,
+  type SidebarNavSection,
+  type SidebarNavProps,
+} from "./design-system/SidebarNav";
+export {
+  DataTable,
+  type DataTableColumn,
+  type DataTableProps,
+} from "./design-system/DataTable";
+export {
+  AlertCard,
+  type AlertSeverity,
+  type AlertCardProps,
+} from "./design-system/AlertCard";
+export {
+  LoadingSkeleton,
+  type LoadingSkeletonProps,
+} from "./design-system/LoadingSkeleton";
+export {
+  AccessDenied,
+  type AccessDeniedProps,
+} from "./design-system/AccessDenied";
+export {
+  AuditDrawer,
+  type AuditEntry,
+  type AuditDrawerProps,
+} from "./design-system/AuditDrawer";
+export {
+  EvidenceDrawer,
+  type EvidenceSource,
+  type EvidenceDrawerProps,
+} from "./design-system/EvidenceDrawer";
+export {
+  ChartContainer,
+  type ChartContainerProps,
+} from "./design-system/ChartContainer";
+export {
+  ExportPanel,
+  type ExportFormat,
+  type ExportPanelProps,
+} from "./design-system/ExportPanel";
+export {
+  ApprovalStack,
+  type ApprovalStateKey,
+  type Approver,
+  type ApprovalStackProps,
+} from "./design-system/ApprovalStack";
+export {
+  GraphQLDataPanel,
+  type GraphQLDataSection,
+  type GraphQLDataPanelProps,
+} from "./design-system/GraphQLDataPanel";
+export {
+  CommandModeSignalCard,
+  CommandModeSurface,
+  StatusBadge,
+  APPROVED_CTAS,
+  APPROVED_STATUSES,
+  type CommandModeSignalLevel,
+  type CommandModeStatus,
+  type CommandModeSignal,
+  type CommandModeSurfaceProps,
+  type StatusBadgeProps,
+  type ApprovedCTA,
+} from "./command-mode";
 export { default as AppObservabilityPage } from "./AppObservabilityPage";
 export { apiFetch, graphqlRequest, ApiError, isAuthError, setAuthTokens, getAuthTokens, getAccessToken, clearAuthTokens, onAuthCleared, refreshAccessToken, installAuthClearedRedirect, registerSecureTokenStorage, hydrateAuthTokensFromSecureStorage, type AuthTokens, type AuthClearedReason, type PaginationMeta, type PaginatedResponse, type ApiFetchOptions, type GraphQLRequestOptions } from "./api-fetch";
 export { useNotificationCenter, type LiveNotification, type ApiNotification, type NotificationCenterState } from "./notification-center";
@@ -473,7 +659,15 @@ export {
   type SettingsRowProps,
   type SettingsCardProps,
 } from "./settings-shell";
-export * from "./use-user-prefs";
+export {
+  setUserPref,
+  getUserPref,
+  useUserPrefs,
+  useUserPref,
+  useSidebarCollapsed,
+  useNotificationSound,
+  type UserPrefs,
+} from "./use-user-prefs";
 export {
   OnboardingWizard,
   GettingStartedChecklist,

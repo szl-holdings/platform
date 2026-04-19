@@ -9,7 +9,7 @@ import {
   LayoutDashboard, Globe2, Activity, Zap, Shield, Network, Cpu, BookOpen, Radio, Brain, Heart, AlertTriangle, Workflow, Inbox, Settings, Users, Flag, FileText, Database, Play, CheckSquare, Download, GitBranch, Send, TrendingUp, DollarSign, RotateCcw, Calculator, Bot, Monitor, Building, BellOff, Code, Target, Phone, Calendar, Layers, Map, Crown, ChevronRight, Menu, X, BarChart3, Clapperboard, Power, Bell, Lock, GitCommit, Sigma, FlaskConical, ShieldCheck, Globe, Archive, GitMerge, CheckCircle2, Lightbulb, Satellite
 } from "lucide-react";
 import { MultiplayerSessionBanner } from "@szl-holdings/shared-ui/multiplayer-session";
-import { useDemoMode, MODE_LABELS, MODE_COLORS, MODE_ICONS } from "@szl-holdings/shared-ui";
+import { useDemoMode, MODE_LABELS, MODE_COLORS, MODE_ICONS } from "@szl-holdings/shared-ui/demo-mode";
 
 export type WorkspaceMode = "strategy" | "operations" | "infrastructure";
 

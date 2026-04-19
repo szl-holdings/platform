@@ -1,7 +1,7 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useUserPreferences } from "@szl-holdings/shared-ui";
+import { useUserPreferences } from "@szl-holdings/shared-ui/use-user-preferences";
 import {
   LayoutDashboard, AlertTriangle, GitBranch, Activity,
   Thermometer, Layers, ChevronRight, Menu, X, BookOpen, Brain,

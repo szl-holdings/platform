@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, CheckCircle, Clock, User, Shield, ArrowUpRight, Target, RefreshCw, Bell, X } from "lucide-react";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
-import { useRealtimeChannel } from "@szl-holdings/shared-ui";
+import { useRealtimeChannel } from "@szl-holdings/shared-ui/use-realtime-channel";
 import { LiveDataBadge } from "@/lib/live-badge";
 import { api } from "../lib/api";
 

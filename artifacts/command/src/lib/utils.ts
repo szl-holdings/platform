@@ -1,4 +1,4 @@
-export { cn } from "@szl-holdings/shared-ui";
+export { cn } from "@szl-holdings/shared-ui/utils";
 
 export function getSeverityColor(severity: string) {
   switch (severity.toLowerCase()) {

@@ -2,7 +2,8 @@ import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react"
 import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@szl-holdings/shared-ui/ui/sonner";
-import { AnalyticsProvider, useUserPreferences } from "@szl-holdings/shared-ui";
+import { AnalyticsProvider } from "@szl-holdings/shared-ui/analytics-provider";
+import { useUserPreferences } from "@szl-holdings/shared-ui/use-user-preferences";
 import {
   LayoutDashboard, Scale, Clock, Network, BarChart3, ShieldAlert,
   Zap, Bell, CheckCircle2, Shield, Menu, Briefcase

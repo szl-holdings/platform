@@ -7,7 +7,8 @@ import { CommandPalette, useCommandPalette, type CommandItem } from "@szl-holdin
 import { McpOverlay } from "@szl-holdings/mcp-client";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
 import { PowerUserProvider, type KeyboardShortcut } from "@szl-holdings/shared-ui/keyboard-shortcuts";
-import { SandboxModeProvider, AnalyticsProvider } from "@szl-holdings/shared-ui";
+import { SandboxModeProvider } from "@szl-holdings/shared-ui/sandbox-mode";
+import { AnalyticsProvider } from "@szl-holdings/shared-ui/analytics-provider";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
 import { useAuth } from "@szl-holdings/replit-auth-web";
 import { identifyAnalyticsUser, resetAnalyticsUser, setUser as setSentryUser, clearUser as clearSentryUser } from "@szl-holdings/observability/react";

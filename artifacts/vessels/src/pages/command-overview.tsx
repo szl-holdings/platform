@@ -6,7 +6,7 @@ import { useAuth } from "@/contexts/auth-context";
 import {
   Ship, AlertTriangle, Clock, Wrench, TrendingUp, TrendingDown, ChevronRight, Activity, DollarSign, Fuel, CloudLightning, BarChart3, CheckCircle2, XCircle, Minus, RefreshCw, EyeOff, ShieldAlert, Navigation, FileSignature, Users, Shield, Anchor, Layers, Bookmark, BookmarkCheck, CalendarRange, ChevronDown, Flame, Circle, Grid2X2, GitBranch, } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
-import { CommandModeSurface, type CommandModeSignal } from "@szl-holdings/shared-ui";
+import { CommandModeSurface, type CommandModeSignal } from "@szl-holdings/shared-ui/command-mode";
 import { useVessels, useFleetExceptions, useVoyages, useMaintenance } from "@/hooks/use-vessels-data";
 import { useQueryClient } from "@tanstack/react-query";
 import { PackBanner } from "@szl-holdings/shared-ui/pack-banner";

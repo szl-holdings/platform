@@ -1,4 +1,4 @@
-import { GraphQLDataPanel } from "@szl-holdings/shared-ui";
+import { GraphQLDataPanel } from "@szl-holdings/shared-ui/design-system";
 import { useFirestormAssessments, useFirestormIncidents } from "@szl-holdings/graphql-client/hooks";
 
 export function AegisGraphQLPanel() {
