@@ -21,8 +21,18 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { sendSuccess, handleRouteError } from "../lib/api-response";
 import { requireAnyAuth, requireRole } from "../middlewares/auth";
-import { db, intelligenceCacheTable, pcMattersTable, pcDeadlinesTable, fundNavRecordsTable, fundPortfolioFinancialsTable, usersTable, guardianPoliciesTable, guardianActionsTable, maritimeVesselsTable, lyteMetricsTable, lyteAlertsTable, lyteAlertEventsTable, usageEventsTable, approvalRequestsTable, approvalAuditTrailTable, healthChecksTable, deploymentsTable, activityLogTable } from "@szl-holdings/db";
-import { eq, desc, count, sql, and, gte, lte } from "drizzle-orm";
+import { db, intelligenceCacheTable, pcMattersTable, pcDeadlinesTable, fundNavRecordsTable, fundPortfolioFinancialsTable, usersTable, guardianPoliciesTable, guardianActionsTable, maritimeVesselsTable, lyteMetricsTable, lyteAlertsTable, lyteAlertEventsTable, usageEventsTable, approvalRequestsTable, approvalAuditTrailTable, healthChecksTable, deploymentsTable, activityLogTable, commandInboxAlertStatesTable, GLOBAL_TENANT_SENTINEL } from "@szl-holdings/db";
+import { eq, desc, count, sql, and, gte, lte, isNull, or, inArray } from "drizzle-orm";
+
+/**
+ * Coalesce a possibly-null tenant id into the persisted sentinel value.
+ * The DB column is NOT NULL with default GLOBAL_TENANT_SENTINEL so the
+ * unique (alertId, tenantId) index works without Postgres NULL semantics.
+ */
+function tenantKey(tenantId: string | null): string {
+  return tenantId == null || tenantId === "" ? GLOBAL_TENANT_SENTINEL : tenantId;
+}
+import { z } from "zod";
 import { logger } from "../lib/logger";
 import os from "os";
 import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
@@ -675,6 +685,54 @@ type CommandAlert = {
  * — those events are tenant-tagged at publish time and must not leak across
  * orgs. Pass `{ isAdmin: true }` to opt into the cross-tenant view.
  */
+/**
+ * Load persisted operator state for inbox alerts. Snoozed rows whose
+ * snoozedUntil has already elapsed are treated as no longer snoozed
+ * (they fall back to active) so operators don't have to manually
+ * un-snooze when the timer expires.
+ */
+async function loadAlertStates(
+  tenantId: string | null,
+): Promise<Map<string, { state: "acknowledged" | "snoozed" | "resolved"; snoozedUntil: Date | null }>> {
+  const out = new Map<string, { state: "acknowledged" | "snoozed" | "resolved"; snoozedUntil: Date | null }>();
+  try {
+    const key = tenantKey(tenantId);
+    // Include rows with the matching tenant AND the global sentinel so
+    // demo-mode dismissals persist for unauthenticated callers and so
+    // tenant operators see their own actions regardless of whether the
+    // upstream alert was tagged.
+    const rows = await db
+      .select()
+      .from(commandInboxAlertStatesTable)
+      .where(
+        key === GLOBAL_TENANT_SENTINEL
+          ? eq(commandInboxAlertStatesTable.tenantId, GLOBAL_TENANT_SENTINEL)
+          : or(
+              eq(commandInboxAlertStatesTable.tenantId, key),
+              eq(commandInboxAlertStatesTable.tenantId, GLOBAL_TENANT_SENTINEL),
+            ),
+      );
+    const now = Date.now();
+    // Deterministic precedence: tenant-scoped rows override globals for the
+    // same alertId, so write globals first then let tenant rows overwrite.
+    const globals = rows.filter((r) => r.tenantId === GLOBAL_TENANT_SENTINEL);
+    const tenantRows = rows.filter((r) => r.tenantId !== GLOBAL_TENANT_SENTINEL);
+    for (const r of [...globals, ...tenantRows]) {
+      const effective: "acknowledged" | "snoozed" | "resolved" = r.state;
+      const snoozedUntil = r.snoozedUntil ?? null;
+      if (effective === "snoozed" && snoozedUntil && snoozedUntil.getTime() <= now) {
+        // Snooze has expired — treat as not-set so the alert returns to active.
+        out.delete(r.alertId);
+        continue;
+      }
+      out.set(r.alertId, { state: effective, snoozedUntil });
+    }
+  } catch (err) {
+    logger.warn({ err }, "command.loadAlertStates failed; treating all alerts as active");
+  }
+  return out;
+}
+
 async function computeAlerts(
   caller: { tenantId: string | null; isAdmin: boolean } = { tenantId: null, isAdmin: true },
 ): Promise<CommandAlert[]> {
@@ -836,19 +894,62 @@ async function computeAlerts(
   return alerts;
 }
 
+/**
+ * Apply persisted operator state to the freshly-built alert list.
+ *
+ * - "resolved" alerts are dropped entirely (operator marked them done).
+ * - "snoozed" alerts whose snoozedUntil > now are dropped from the active
+ *   feed but counted under `snoozed`. Expired snoozes are already
+ *   filtered to "no state" by loadAlertStates so they reappear as active.
+ * - "acknowledged" alerts remain visible but their status flips to
+ *   "acknowledged" so the UI can render them differently and they no
+ *   longer count toward the "active" badge.
+ */
+function applyAlertStates(
+  alerts: CommandAlert[],
+  states: Map<string, { state: "acknowledged" | "snoozed" | "resolved"; snoozedUntil: Date | null }>,
+): CommandAlert[] {
+  const out: CommandAlert[] = [];
+  for (const a of alerts) {
+    const s = states.get(a.id);
+    if (!s) {
+      out.push(a);
+      continue;
+    }
+    if (s.state === "resolved") continue; // hide entirely
+    if (s.state === "snoozed") continue;  // hide until snooze elapses
+    // acknowledged — keep but mark
+    out.push({ ...a, status: "acknowledged" });
+  }
+  return out;
+}
+
 router.get("/alerts", requireAnyAuth(), async (req: Request, res: Response) => {
   try {
     const tenantId = req.user?.orgs?.[0]?.orgId?.toString() ?? null;
     const isAdmin = req.user?.roles?.some((r) => r === "super_admin" || r === "admin") ?? false;
-    const alerts = await computeAlerts({ tenantId, isAdmin });
+    const rawAlerts = await computeAlerts({ tenantId, isAdmin });
+    const states = await loadAlertStates(tenantId);
+    const alerts = applyAlertStates(rawAlerts, states);
+
+    // Counts include snoozed/resolved that were filtered out, since the UI
+    // surfaces them as separate buckets in the summary cards. We only count
+    // states for alertIds that are still produced by the live builder so
+    // orphaned rows (e.g. correlations that have aged out of the bus
+    // history) don't inflate the snoozed badge.
+    const liveAlertIds = new Set(rawAlerts.map((a) => a.id));
+    const snoozedCount = Array.from(states.entries()).filter(
+      ([id, s]) => s.state === "snoozed" && liveAlertIds.has(id),
+    ).length;
+    const acknowledgedCount = alerts.filter((a) => a.status === "acknowledged").length;
 
     sendSuccess(res, {
       alerts,
       counts: {
         active: alerts.filter((a) => a.status === "active").length,
         critical: alerts.filter((a) => a.priority === "critical" && a.status === "active").length,
-        acknowledged: 0,
-        snoozed: 0,
+        acknowledged: acknowledgedCount,
+        snoozed: snoozedCount,
       },
       generatedAt: new Date().toISOString(),
       dataSource: alerts.length > 0 ? "live" : "empty",
@@ -868,11 +969,14 @@ router.get("/alerts", requireAnyAuth(), async (req: Request, res: Response) => {
  */
 router.get("/alerts/count", requireAnyAuth(), async (req: Request, res: Response) => {
   try {
-    // Re-use the same builder as /alerts so the badge count cannot drift
-    // from the inbox total. Equivalent to alerts.counts.active.
+    // Re-use the same builder + state filter as /alerts so the badge count
+    // cannot drift from the inbox total (acknowledged/snoozed/resolved
+    // alerts are excluded from the active count).
     const tenantId = req.user?.orgs?.[0]?.orgId?.toString() ?? null;
     const isAdmin = req.user?.roles?.some((r) => r === "super_admin" || r === "admin") ?? false;
-    const alerts = await computeAlerts({ tenantId, isAdmin });
+    const rawAlerts = await computeAlerts({ tenantId, isAdmin });
+    const states = await loadAlertStates(tenantId);
+    const alerts = applyAlertStates(rawAlerts, states);
     const active = alerts.filter((a) => a.status === "active").length;
     sendSuccess(res, { count: active, generatedAt: new Date().toISOString() });
   } catch (err) {
@@ -880,6 +984,94 @@ router.get("/alerts/count", requireAnyAuth(), async (req: Request, res: Response
     handleRouteError(res, err, "Failed to load alert count");
   }
 });
+
+/**
+ * POST /api/command/alerts/:alertId/state
+ *
+ * Body: { state: "acknowledged" | "snoozed" | "resolved" | "active",
+ *         snoozeMinutes?: number  // required when state === "snoozed" }
+ *
+ * Records an operator action against an inbox alert so it stops
+ * re-surfacing in the active feed on every poll. Persisted in
+ * command_inbox_alert_states keyed by (alertId, tenantId) so the
+ * decision survives api-server restarts.
+ *
+ * Sending state="active" deletes the row, restoring the alert to its
+ * default (active) status — used for "undo" / "un-snooze".
+ */
+const alertStateBodySchema = z.object({
+  state: z.enum(["acknowledged", "snoozed", "resolved", "active"]),
+  snoozeMinutes: z.number().int().positive().max(60 * 24 * 30).optional(),
+});
+
+router.post(
+  "/alerts/:alertId/state",
+  requireAnyAuth(),
+  validateBody(alertStateBodySchema),
+  async (req: Request, res: Response) => {
+    try {
+      const alertId = req.params["alertId"];
+      if (!alertId || alertId.length > 200) {
+        return handleRouteError(res, new Error("Invalid alertId"), "Invalid alertId");
+      }
+      const { state, snoozeMinutes } = req.body as z.infer<typeof alertStateBodySchema>;
+      const tenantId = req.user?.orgs?.[0]?.orgId?.toString() ?? null;
+      const updatedById = typeof req.user?.id === "number" ? req.user.id : null;
+
+      const key = tenantKey(tenantId);
+
+      // "active" = clear any persisted state row.
+      if (state === "active") {
+        await db
+          .delete(commandInboxAlertStatesTable)
+          .where(
+            and(
+              eq(commandInboxAlertStatesTable.alertId, alertId),
+              eq(commandInboxAlertStatesTable.tenantId, key),
+            ),
+          );
+        return sendSuccess(res, { alertId, state, tenantId: key });
+      }
+
+      // Compute snoozedUntil. Snooze without an explicit duration defaults
+      // to 60 minutes — matches the "Snooze 1h" button in the inbox UI.
+      const snoozedUntil =
+        state === "snoozed"
+          ? new Date(Date.now() + (snoozeMinutes ?? 60) * 60_000)
+          : null;
+
+      // Upsert keyed on (alertId, tenantId). The unique index supports
+      // ON CONFLICT — tenantId is NOT NULL so PG's NULL-ne-NULL semantics
+      // can't sneak in a duplicate global row.
+      await db
+        .insert(commandInboxAlertStatesTable)
+        .values({
+          alertId,
+          tenantId: key,
+          state,
+          snoozedUntil,
+          updatedById,
+        })
+        .onConflictDoUpdate({
+          target: [
+            commandInboxAlertStatesTable.alertId,
+            commandInboxAlertStatesTable.tenantId,
+          ],
+          set: {
+            state,
+            snoozedUntil,
+            updatedById,
+            updatedAt: new Date(),
+          },
+        });
+
+      sendSuccess(res, { alertId, state, snoozedUntil, tenantId: key });
+    } catch (err) {
+      logger.error({ err }, "command alerts/state update error");
+      handleRouteError(res, err, "Failed to update alert state");
+    }
+  },
+);
 
 // ── Shared cost constants ─────────────────────────────────────────────────────
 // These are the single source of truth for unit costs and domain budgets.

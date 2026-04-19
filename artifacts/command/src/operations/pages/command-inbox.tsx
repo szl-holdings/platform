@@ -1,12 +1,246 @@
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { DataStateBadge } from "@szl-holdings/shared-ui/data-state-badge";
 import { useState, useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
 import {
   Heart, AlertTriangle, Brain, Radio, Workflow,
   ArrowRight, User, ExternalLink, Clock, ChevronRight,
-  TrendingDown, Shield, Zap, Activity, Eye
+  TrendingDown, Shield, Zap, Activity, Eye,
+  Bell, BellOff, CheckCircle2, AlarmClock, Undo2,
 } from "lucide-react";
+
+// ---------------------------------------------------------------------------
+// Cross-Platform Correlation Alerts (live, persistable)
+//
+// These are the alerts surfaced from /api/command/alerts (driven by the
+// prism-bus correlation stream + other domain feeds). Operators can
+// acknowledge, snooze, or resolve them; state survives api-server
+// restarts via the command_inbox_alert_states table.
+// ---------------------------------------------------------------------------
+
+type CommandAlertStatus = "active" | "acknowledged" | "snoozed" | "resolved";
+type CommandAlertPriority = "critical" | "high" | "medium" | "low";
+
+interface CommandAlert {
+  id: string;
+  domain: string;
+  domainColor: string;
+  priority: CommandAlertPriority;
+  title: string;
+  description: string;
+  time: string;
+  status: CommandAlertStatus;
+  category: string;
+  href?: string;
+}
+
+interface CommandAlertsResponse {
+  alerts: CommandAlert[];
+  counts: { active: number; critical: number; acknowledged: number; snoozed: number };
+  generatedAt: string;
+  dataSource: "live" | "empty";
+}
+
+const SNOOZE_PRESETS: Array<{ label: string; minutes: number }> = [
+  { label: "15m", minutes: 15 },
+  { label: "1h", minutes: 60 },
+  { label: "4h", minutes: 240 },
+  { label: "24h", minutes: 1440 },
+];
+
+function CommandInboxAlerts() {
+  const qc = useQueryClient();
+  const { data, isLoading } = useQuery<CommandAlertsResponse>({
+    queryKey: ["command-alerts"],
+    queryFn: async () => {
+      const res = await fetch("/api/command/alerts", { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to load alerts");
+      const json = await res.json();
+      return (json?.data ?? json) as CommandAlertsResponse;
+    },
+    refetchInterval: 30_000,
+    staleTime: 15_000,
+  });
+
+  const [snoozeOpenFor, setSnoozeOpenFor] = useState<string | null>(null);
+  const [pendingId, setPendingId] = useState<string | null>(null);
+
+  async function postState(
+    id: string,
+    body: { state: CommandAlertStatus | "active"; snoozeMinutes?: number },
+  ) {
+    setPendingId(id);
+    try {
+      // Best-effort CSRF — fetch a fresh token if we don't have one yet.
+      let csrfToken = "";
+      try {
+        const csrfRes = await fetch("/api/csrf-token", { credentials: "include" });
+        if (csrfRes.ok) {
+          const j = await csrfRes.json();
+          csrfToken = j?.data?.token ?? j?.token ?? "";
+        }
+      } catch { /* tolerate */ }
+
+      const res = await fetch(`/api/command/alerts/${encodeURIComponent(id)}/state`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          ...(csrfToken ? { "X-CSRF-Token": csrfToken } : {}),
+        },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        // Surface the failure but still revalidate so the UI doesn't lie.
+        // eslint-disable-next-line no-console
+        console.warn("alert state update failed", res.status);
+      }
+      await qc.invalidateQueries({ queryKey: ["command-alerts"] });
+      await qc.invalidateQueries({ queryKey: ["ops-badge-counts"] });
+    } finally {
+      setPendingId(null);
+      setSnoozeOpenFor(null);
+    }
+  }
+
+  const alerts = data?.alerts ?? [];
+  const counts = data?.counts ?? { active: 0, critical: 0, acknowledged: 0, snoozed: 0 };
+
+  return (
+    <div className="rounded-xl border" style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.012)" }}>
+      <div className="px-4 py-3 flex items-center gap-3 border-b" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
+        <Bell className="w-3.5 h-3.5" style={{ color: "#a78bfa" }} />
+        <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "#a78bfa" }}>
+          Command Inbox — Cross-Platform Alerts
+        </span>
+        <span className="text-[10px] font-mono" style={{ color: "rgba(255,255,255,0.25)" }}>
+          ({counts.active} active · {counts.acknowledged} ack · {counts.snoozed} snoozed)
+        </span>
+        <div className="ml-auto flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#6b8f71" }} />
+          <span className="text-[9px] font-mono" style={{ color: "rgba(107,143,113,0.7)" }}>live</span>
+        </div>
+      </div>
+
+      {isLoading && (
+        <div className="px-4 py-6 text-[11px]" style={{ color: "rgba(255,255,255,0.35)" }}>
+          Loading correlation alerts…
+        </div>
+      )}
+
+      {!isLoading && alerts.length === 0 && (
+        <div className="px-4 py-6 flex items-center gap-2 text-[11px]" style={{ color: "rgba(255,255,255,0.35)" }}>
+          <BellOff className="w-3 h-3" /> No active correlation alerts. Snoozed and resolved items have been dismissed.
+        </div>
+      )}
+
+      <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
+        {alerts.map((a) => {
+          const isAck = a.status === "acknowledged";
+          const isPending = pendingId === a.id;
+          const snoozeOpen = snoozeOpenFor === a.id;
+          const priorityColor =
+            a.priority === "critical" ? "#c45a4a" :
+            a.priority === "high" ? "#c8953c" :
+            a.priority === "medium" ? "#d4a054" :
+            "rgba(255,255,255,0.4)";
+          return (
+            <div key={a.id} className="px-4 py-3 flex items-start gap-3" style={{ borderTop: "1px solid rgba(255,255,255,0.03)" }}>
+              <div
+                className="shrink-0 mt-0.5 w-7 h-7 rounded-lg flex items-center justify-center"
+                style={{ background: `${a.domainColor}15`, border: `1px solid ${a.domainColor}25`, color: a.domainColor }}
+              >
+                <span className="text-[10px] font-bold">{a.domain[0]}</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                  <span className="text-[9px] font-mono uppercase tracking-wider" style={{ color: a.domainColor }}>{a.domain}</span>
+                  <span className="text-[9px] font-mono uppercase" style={{ color: priorityColor }}>{a.priority}</span>
+                  <span className="text-[9px] px-1.5 py-0.5 rounded" style={{ color: "rgba(255,255,255,0.4)", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                    {a.category}
+                  </span>
+                  {isAck && (
+                    <span className="text-[9px] font-mono uppercase" style={{ color: "#6b8f71" }}>acknowledged</span>
+                  )}
+                </div>
+                <div className="text-[12px] font-semibold text-white truncate">{a.title}</div>
+                <div className="text-[10px] mt-0.5 leading-relaxed" style={{ color: "rgba(255,255,255,0.4)" }}>{a.description}</div>
+                <div className="flex items-center gap-2 mt-2 flex-wrap">
+                  {!isAck && (
+                    <button
+                      disabled={isPending}
+                      onClick={() => postState(a.id, { state: "acknowledged" })}
+                      className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium disabled:opacity-50"
+                      style={{ background: "rgba(107,143,113,0.1)", border: "1px solid rgba(107,143,113,0.3)", color: "#6b8f71" }}
+                    >
+                      <CheckCircle2 className="w-3 h-3" /> Acknowledge
+                    </button>
+                  )}
+                  <div className="relative">
+                    <button
+                      disabled={isPending}
+                      onClick={() => setSnoozeOpenFor(snoozeOpen ? null : a.id)}
+                      className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium disabled:opacity-50"
+                      style={{ background: "rgba(212,160,84,0.08)", border: "1px solid rgba(212,160,84,0.25)", color: "#d4a054" }}
+                    >
+                      <AlarmClock className="w-3 h-3" /> Snooze <ChevronRight className="w-2.5 h-2.5 -mr-1" style={{ transform: snoozeOpen ? "rotate(90deg)" : "none" }} />
+                    </button>
+                    {snoozeOpen && (
+                      <div
+                        className="absolute z-10 mt-1 left-0 rounded-md flex"
+                        style={{ background: "#0f1115", border: "1px solid rgba(255,255,255,0.08)" }}
+                      >
+                        {SNOOZE_PRESETS.map((p) => (
+                          <button
+                            key={p.minutes}
+                            onClick={() => postState(a.id, { state: "snoozed", snoozeMinutes: p.minutes })}
+                            className="px-2 py-1 text-[10px] font-mono hover:bg-white/5"
+                            style={{ color: "#d4a054" }}
+                          >
+                            {p.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <button
+                    disabled={isPending}
+                    onClick={() => postState(a.id, { state: "resolved" })}
+                    className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium disabled:opacity-50"
+                    style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.6)" }}
+                  >
+                    <BellOff className="w-3 h-3" /> Resolve
+                  </button>
+                  {isAck && (
+                    <button
+                      disabled={isPending}
+                      onClick={() => postState(a.id, { state: "active" })}
+                      className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium disabled:opacity-50"
+                      style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.5)" }}
+                    >
+                      <Undo2 className="w-3 h-3" /> Undo
+                    </button>
+                  )}
+                  {a.href && (
+                    <a
+                      href={a.href}
+                      className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium ml-auto"
+                      style={{ background: "rgba(139,122,200,0.1)", border: "1px solid rgba(139,122,200,0.25)", color: "#a78bfa" }}
+                    >
+                      <ExternalLink className="w-3 h-3" /> Drill in
+                    </a>
+                  )}
+                </div>
+              </div>
+              <span className="text-[10px] font-mono shrink-0" style={{ color: "rgba(255,255,255,0.3)" }}>{a.time}</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 const PRISM_CARDS = [
   {
@@ -229,6 +463,8 @@ export default function LyteOverview() {
           ))}
         </div>
       </div>
+
+      <CommandInboxAlerts />
 
       <div className="grid grid-cols-5 gap-3">
         {PRISM_CARDS.map((card) => (

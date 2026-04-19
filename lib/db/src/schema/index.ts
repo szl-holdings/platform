@@ -3,6 +3,7 @@ export * from "./auth";
 export * from "./organizations";
 export * from "./connectors";
 export * from "./notifications";
+export * from "./command_inbox_alert_states";
 export * from "./activity";
 export * from "./api_keys";
 export * from "./feature_flags";

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { OpsLayout } from "../components/ops-layout";
 import { Bell, BellOff, ArrowUpRight, Clock, CheckCircle2, AlarmClock, ChevronDown, Filter, Settings, XCircle } from "lucide-react";
 import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
@@ -55,6 +55,7 @@ const STATUS_ICONS: Record<AlertStatus, React.ElementType> = {
 };
 
 export default function AlertsPage() {
+  const queryClient = useQueryClient();
   const { data: apiData } = useQuery<ApiAlertsResponse>({
     queryKey: ["command-alerts"],
     queryFn: async () => {
@@ -88,16 +89,44 @@ export default function AlertsPage() {
     return true;
   });
 
-  const counts = {
+  // Prefer server-provided counts: snoozed/resolved alerts are filtered out
+  // of `alerts` server-side, so a client-side recompute would always report
+  // 0 snoozed and undercount the rest. Fall back to local counts only when
+  // running against the static seed data (no API yet).
+  const counts = apiData?.counts ?? {
     active: alerts.filter((a) => a.status === "active").length,
     critical: alerts.filter((a) => a.priority === "critical" && a.status === "active").length,
     acknowledged: alerts.filter((a) => a.status === "acknowledged").length,
     snoozed: alerts.filter((a) => a.status === "snoozed").length,
   };
 
-  const updateStatus = (id: string, status: AlertStatus) => {
+  const updateStatus = async (id: string, status: AlertStatus) => {
+    // Optimistic local update — the server is the source of truth and the
+    // next refetch will reconcile (e.g. snooze drops the row entirely).
     setAlerts((prev) => prev.map((a) => (a.id === id ? { ...a, status } : a)));
     if (selected === id && status === "resolved") setSelected(null);
+    try {
+      const body =
+        status === "snoozed"
+          ? { state: "snoozed", snoozeMinutes: 60 }
+          : { state: status };
+      const res = await fetch(`/api/command/alerts/${encodeURIComponent(id)}/state`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        // Roll back optimistic update on failure so the UI doesn't lie.
+        await queryClient.invalidateQueries({ queryKey: ["command-alerts"] });
+        return;
+      }
+      // Revalidate so badge counts and snooze/resolve filtering are accurate.
+      await queryClient.invalidateQueries({ queryKey: ["command-alerts"] });
+      await queryClient.invalidateQueries({ queryKey: ["ops-badge-counts"] });
+    } catch {
+      await queryClient.invalidateQueries({ queryKey: ["command-alerts"] });
+    }
   };
 
   const selectedAlert = alerts.find((a) => a.id === selected);
