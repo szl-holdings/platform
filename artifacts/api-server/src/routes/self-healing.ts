@@ -1,8 +1,8 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, sendNoContent, handleRouteError } from "../lib/api-response";
 import { authMiddleware, requireRole, type AuthenticatedUser } from "../middlewares/auth";
-import { db, selfHealingPatternsTable, selfHealingRunsTable, alloyAuditLogTable } from "@szl-holdings/db";
-import { and, desc, eq, sql } from "drizzle-orm";
+import { db, selfHealingPatternsTable, selfHealingRunsTable, alloyAuditLogTable, usersTable } from "@szl-holdings/db";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { randomBytes } from "crypto";
 import { z } from "zod";
 import { logger } from "../lib/logger";
@@ -58,6 +58,9 @@ interface FailurePattern {
   enabled: boolean;
   trigger: string;
   runbook: string;
+  lastEditedAt?: number;
+  lastEditedBy?: string;
+  lastEditedAction?: string;
 }
 
 interface SeedPattern {
@@ -256,6 +259,37 @@ async function loadPatterns(): Promise<FailurePattern[]> {
   const aggByKey = new Map<string, typeof aggRows[number]>();
   for (const a of aggRows) aggByKey.set(a.patternKey, a);
 
+  const patternKeys = patternRows.map(p => p.patternKey);
+  type LastEdit = { action: string; createdAt: Date; displayName: string | null; email: string | null };
+  const lastEditByKey = new Map<string, LastEdit>();
+  if (patternKeys.length > 0) {
+    const auditRows = await db
+      .select({
+        resourceId: alloyAuditLogTable.resourceId,
+        action: alloyAuditLogTable.action,
+        createdAt: alloyAuditLogTable.createdAt,
+        displayName: usersTable.displayName,
+        email: usersTable.email,
+      })
+      .from(alloyAuditLogTable)
+      .leftJoin(usersTable, eq(alloyAuditLogTable.userId, usersTable.id))
+      .where(and(
+        eq(alloyAuditLogTable.resourceType, "self_healing_pattern"),
+        inArray(alloyAuditLogTable.resourceId, patternKeys),
+      ))
+      .orderBy(desc(alloyAuditLogTable.createdAt));
+    for (const r of auditRows) {
+      if (!r.resourceId) continue;
+      if (lastEditByKey.has(r.resourceId)) continue;
+      lastEditByKey.set(r.resourceId, {
+        action: r.action,
+        createdAt: r.createdAt,
+        displayName: r.displayName,
+        email: r.email,
+      });
+    }
+  }
+
   return patternRows.map(p => {
     const a = aggByKey.get(p.patternKey);
     const total = a?.total ?? 0;
@@ -265,6 +299,7 @@ async function loadPatterns(): Promise<FailurePattern[]> {
     const mttrCount = a?.mttrCount ?? 0;
     const successRate = eligible > 0 ? Math.round((completed / eligible) * 1000) / 10 : 0;
     const avgMttrSavedMins = mttrCount > 0 ? Math.round(mttrSum / mttrCount) : 0;
+    const edit = lastEditByKey.get(p.patternKey);
     return {
       id: p.patternKey,
       name: p.name,
@@ -275,6 +310,9 @@ async function loadPatterns(): Promise<FailurePattern[]> {
       enabled: p.enabled,
       trigger: p.trigger,
       runbook: p.runbook,
+      lastEditedAt: edit ? edit.createdAt.getTime() : undefined,
+      lastEditedBy: edit ? (edit.displayName ?? edit.email ?? "system") : undefined,
+      lastEditedAction: edit?.action,
     };
   });
 }
@@ -387,11 +425,15 @@ router.get("/self-healing/stats", authMiddleware({ required: false }), async (_r
   }
 });
 
-router.get("/self-healing/policies", authMiddleware({ required: false }), async (_req: Request, res: Response) => {
+router.get("/self-healing/policies", authMiddleware({ required: false }), async (req: Request, res: Response) => {
   try {
     await ensureSeeded();
     const policies = await loadPatterns();
-    sendSuccess(res, { policies });
+    const user = (req as Request & { user?: AuthenticatedUser }).user;
+    const responsePolicies = user
+      ? policies
+      : policies.map(({ lastEditedBy: _lb, lastEditedAction: _la, lastEditedAt: _lt, ...rest }) => rest);
+    sendSuccess(res, { policies: responsePolicies });
   } catch (err) {
     handleRouteError(res, err, "Failed to fetch self-healing policies");
   }
@@ -553,6 +595,55 @@ router.delete("/self-healing/policies/:id", validateBody(jsonObjectBodySchema), 
     sendNoContent(res);
   } catch (err) {
     handleRouteError(res, err, "Failed to delete self-healing pattern");
+  }
+});
+
+router.get("/self-healing/policies/:id/history", authMiddleware({ required: true }), requireRole("admin", "operator", "ops_manager", "platform_admin", "founder_admin", "super_admin"), async (req: Request, res: Response) => {
+  try {
+    await ensureSeeded();
+    const { id } = req.params as { id: string };
+    const limitRaw = (req.query as { limit?: string }).limit;
+    const limit = Math.min(Math.max(parseInt(limitRaw ?? "20", 10) || 20, 1), 100);
+
+    const exists = await db
+      .select({ id: selfHealingPatternsTable.id })
+      .from(selfHealingPatternsTable)
+      .where(eq(selfHealingPatternsTable.patternKey, id))
+      .limit(1);
+    if (exists.length === 0) { sendNotFound(res, "Pattern"); return; }
+
+    const rows = await db
+      .select({
+        id: alloyAuditLogTable.id,
+        action: alloyAuditLogTable.action,
+        createdAt: alloyAuditLogTable.createdAt,
+        before: alloyAuditLogTable.before,
+        after: alloyAuditLogTable.after,
+        userId: alloyAuditLogTable.userId,
+        displayName: usersTable.displayName,
+        email: usersTable.email,
+      })
+      .from(alloyAuditLogTable)
+      .leftJoin(usersTable, eq(alloyAuditLogTable.userId, usersTable.id))
+      .where(and(
+        eq(alloyAuditLogTable.resourceType, "self_healing_pattern"),
+        eq(alloyAuditLogTable.resourceId, id),
+      ))
+      .orderBy(desc(alloyAuditLogTable.createdAt))
+      .limit(limit);
+
+    const entries = rows.map((r) => ({
+      id: r.id,
+      action: r.action,
+      at: r.createdAt.getTime(),
+      actor: r.displayName ?? r.email ?? (r.userId != null ? `user#${r.userId}` : "system"),
+      actorEmail: r.email ?? undefined,
+      before: r.before ?? null,
+      after: r.after ?? null,
+    }));
+    sendSuccess(res, { entries });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to fetch self-healing pattern history");
   }
 });
 

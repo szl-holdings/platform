@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { CheckCircle, Clock, Shield, Activity, RotateCcw, RefreshCw, ChevronRight, Plus, Pencil, Trash2, X } from "lucide-react";
+import { CheckCircle, Clock, Shield, Activity, RotateCcw, RefreshCw, ChevronRight, Plus, Pencil, Trash2, X, History } from "lucide-react";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 
 const GOLD = "#d4a054";
@@ -47,6 +47,19 @@ interface FailurePattern {
   enabled: boolean;
   trigger: string;
   runbook: string;
+  lastEditedAt?: number;
+  lastEditedBy?: string;
+  lastEditedAction?: string;
+}
+
+interface PatternHistoryEntry {
+  id: number;
+  action: string;
+  at: number;
+  actor: string;
+  actorEmail?: string;
+  before: Record<string, unknown> | null;
+  after: Record<string, unknown> | null;
 }
 
 interface StatsResponse {
@@ -162,7 +175,7 @@ function RunCard({ run }: { run: RemediationRun }) {
   );
 }
 
-function PatternRow({ p, onToggle, onEdit, onDelete }: { p: FailurePattern; onToggle: (id: string) => void; onEdit: (p: FailurePattern) => void; onDelete: (p: FailurePattern) => void }) {
+function PatternRow({ p, onToggle, onEdit, onDelete, onHistory }: { p: FailurePattern; onToggle: (id: string) => void; onEdit: (p: FailurePattern) => void; onDelete: (p: FailurePattern) => void; onHistory: (p: FailurePattern) => void }) {
   const tc = TYPE_COLOR[p.type];
   return (
     <div className="flex items-center gap-3 py-2.5 px-3 rounded-lg" style={{ background: DS.surface, border: `1px solid ${DS.border}` }}>
@@ -178,6 +191,12 @@ function PatternRow({ p, onToggle, onEdit, onDelete }: { p: FailurePattern; onTo
           <span className="text-[8px] px-1 py-0.5 rounded uppercase font-mono shrink-0" style={{ background: `${tc}15`, color: tc }}>{p.type}</span>
         </div>
         <div className="text-[9px] mt-0.5 truncate" style={{ color: DS.text.muted }}>{p.trigger}</div>
+        {p.lastEditedAt && (
+          <div className="text-[9px] mt-0.5 truncate" style={{ color: DS.text.muted }}>
+            <span style={{ color: DS.text.secondary }}>{p.lastEditedAction === "create" ? "Created" : p.lastEditedAction === "delete" ? "Deleted" : "Edited"}</span> by{" "}
+            <span style={{ color: DS.text.secondary }}>{p.lastEditedBy ?? "system"}</span> · {fmtAgo(p.lastEditedAt)}
+          </div>
+        )}
       </div>
       <div className="text-right shrink-0">
         <div className="text-[10px] font-mono" style={{ color: "#10b981" }}>{p.successRate}%</div>
@@ -188,6 +207,14 @@ function PatternRow({ p, onToggle, onEdit, onDelete }: { p: FailurePattern; onTo
         <div className="text-[8px]" style={{ color: DS.text.muted }}>avg MTTR saved</div>
       </div>
       <div className="flex items-center gap-1 shrink-0">
+        <button
+          onClick={() => onHistory(p)}
+          className="p-1.5 rounded hover:bg-white/5 transition-colors"
+          style={{ color: DS.text.muted }}
+          title="View change history"
+        >
+          <History className="w-3 h-3" />
+        </button>
         <button
           onClick={() => onEdit(p)}
           className="p-1.5 rounded hover:bg-white/5 transition-colors"
@@ -359,10 +386,135 @@ function PatternEditorModal({
   );
 }
 
+function actionLabel(action: string): string {
+  switch (action) {
+    case "create": return "Created";
+    case "update": return "Updated";
+    case "delete": return "Deleted";
+    case "toggle": return "Toggled";
+    default: return action;
+  }
+}
+
+function actionColor(action: string): string {
+  switch (action) {
+    case "create": return "#10b981";
+    case "update": return "#3b82f6";
+    case "delete": return "#ef4444";
+    case "toggle": return "#f59e0b";
+    default: return DS.text.secondary;
+  }
+}
+
+function diffFields(before: Record<string, unknown> | null, after: Record<string, unknown> | null): Array<{ key: string; from: unknown; to: unknown }> {
+  if (!before || !after) return [];
+  const keys = ["name", "type", "trigger", "runbook", "enabled"];
+  const out: Array<{ key: string; from: unknown; to: unknown }> = [];
+  for (const k of keys) {
+    if (JSON.stringify((before as Record<string, unknown>)[k]) !== JSON.stringify((after as Record<string, unknown>)[k])) {
+      out.push({ key: k, from: (before as Record<string, unknown>)[k], to: (after as Record<string, unknown>)[k] });
+    }
+  }
+  return out;
+}
+
+function PatternHistoryPanel({ pattern, onClose }: { pattern: FailurePattern; onClose: () => void }) {
+  const historyQuery = useQuery<{ entries: PatternHistoryEntry[] }>({
+    queryKey: ["self-healing-pattern-history", pattern.id],
+    queryFn: () => apiFetch<{ entries: PatternHistoryEntry[] }>(`/self-healing/policies/${pattern.id}/history`),
+  });
+  const entries = historyQuery.data?.entries ?? [];
+
+  return (
+    <div className="fixed inset-0 z-50 flex justify-end" style={{ background: "rgba(0,0,0,0.55)" }} onClick={onClose}>
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-md h-full overflow-y-auto border-l p-5"
+        style={{ background: "#0a0a0a", borderColor: DS.border }}
+      >
+        <div className="flex items-start justify-between mb-1">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <History className="w-3.5 h-3.5" style={{ color: GOLD }} />
+              <h2 className="text-[13px] font-semibold truncate" style={{ color: DS.text.primary }}>Change history</h2>
+            </div>
+            <div className="text-[10px] truncate" style={{ color: DS.text.muted }}>{pattern.name}</div>
+            <div className="text-[9px] font-mono mt-0.5" style={{ color: DS.text.muted }}>#{pattern.id}</div>
+          </div>
+          <button onClick={onClose} className="p-1 rounded hover:bg-white/5 shrink-0" style={{ color: DS.text.muted }}>
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        <div className="text-[9px] uppercase tracking-widest mt-4 mb-2" style={{ color: DS.text.muted }}>
+          Audit entries · platform_audit_log
+        </div>
+
+        {historyQuery.isLoading && (
+          <div className="flex items-center justify-center h-24" style={{ color: DS.text.muted }}>
+            <div className="w-5 h-5 border-2 rounded-full animate-spin mr-2" style={{ borderColor: "rgba(212,160,84,0.25)", borderTopColor: GOLD }} />
+            <span className="text-[11px]">Loading history...</span>
+          </div>
+        )}
+
+        {historyQuery.isError && (
+          <div className="text-[10px] px-3 py-2 rounded-lg" style={{ background: "rgba(239,68,68,0.08)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)" }}>
+            Failed to load history: {(historyQuery.error as Error)?.message ?? "unknown error"}
+          </div>
+        )}
+
+        {!historyQuery.isLoading && !historyQuery.isError && entries.length === 0 && (
+          <div className="text-[10px] px-3 py-4 rounded-lg text-center" style={{ background: DS.surface, color: DS.text.muted, border: `1px solid ${DS.border}` }}>
+            No audit entries recorded for this pattern yet.
+          </div>
+        )}
+
+        <div className="space-y-2">
+          {entries.map((e) => {
+            const ac = actionColor(e.action);
+            const diffs = diffFields(e.before, e.after);
+            return (
+              <div key={e.id} className="rounded-lg border p-3" style={{ background: DS.surface, borderColor: DS.border }}>
+                <div className="flex items-center justify-between gap-2 mb-1">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="text-[8px] px-1.5 py-0.5 rounded font-bold uppercase" style={{ background: `${ac}15`, color: ac }}>
+                      {actionLabel(e.action)}
+                    </span>
+                    <span className="text-[10px] font-medium truncate" style={{ color: DS.text.primary }}>{e.actor}</span>
+                  </div>
+                  <span className="text-[9px] font-mono shrink-0" style={{ color: DS.text.muted }}>{fmtAgo(e.at)}</span>
+                </div>
+                {e.actorEmail && e.actorEmail !== e.actor && (
+                  <div className="text-[9px] mb-1 truncate" style={{ color: DS.text.muted }}>{e.actorEmail}</div>
+                )}
+                <div className="text-[9px] font-mono" style={{ color: DS.text.muted }}>
+                  {new Date(e.at).toLocaleString()}
+                </div>
+                {e.action === "update" && diffs.length > 0 && (
+                  <div className="mt-2 space-y-1">
+                    {diffs.map((d) => (
+                      <div key={d.key} className="text-[9px]" style={{ color: DS.text.secondary }}>
+                        <span className="uppercase tracking-widest" style={{ color: DS.text.muted }}>{d.key}:</span>{" "}
+                        <span style={{ color: "#ef4444" }} className="line-through">{String(d.from ?? "—")}</span>{" → "}
+                        <span style={{ color: "#10b981" }}>{String(d.to ?? "—")}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function SelfHealingPage() {
   const [tab, setTab] = useState<"runs" | "patterns">("runs");
   const [editor, setEditor] = useState<{ mode: "create" } | { mode: "edit"; pattern: FailurePattern } | null>(null);
   const [editorError, setEditorError] = useState<string | null>(null);
+  const [historyPattern, setHistoryPattern] = useState<FailurePattern | null>(null);
   const qc = useQueryClient();
 
   const statsQuery = useQuery<StatsResponse>({
@@ -575,6 +727,7 @@ export default function SelfHealingPage() {
                   onToggle={(id) => toggleMutation.mutate(id)}
                   onEdit={(pattern) => { setEditorError(null); setEditor({ mode: "edit", pattern }); }}
                   onDelete={handleDeletePattern}
+                  onHistory={(pattern) => setHistoryPattern(pattern)}
                 />
               ))}
               {deleteMutation.isError && (
@@ -595,6 +748,13 @@ export default function SelfHealingPage() {
         onClose={() => { setEditor(null); setEditorError(null); }}
         onSave={handleSavePattern}
       />
+
+      {historyPattern && (
+        <PatternHistoryPanel
+          pattern={historyPattern}
+          onClose={() => setHistoryPattern(null)}
+        />
+      )}
     </div>
   );
 }
