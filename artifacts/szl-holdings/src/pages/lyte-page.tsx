@@ -16,6 +16,7 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 import { ProofDrawer, SAMPLE_PROOF_RECORD } from "@/components/ProofDrawer";
 import type { ProofRecord } from "@/components/ProofDrawer";
 import { apiRequest } from "@/lib/api";
+import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 
 const BG = "hsl(214,16%,4%)";
 const BORDER = "hsla(0,0%,100%,0.07)";
@@ -533,7 +534,10 @@ export default function LytePage() {
   const [filterSev, setFilterSev] = useState<string>("all");
   const [wsConnected, setWsConnected] = useState(false);
   const [pulseFlash, setPulseFlash] = useState(false);
+  const [newSignalCount, setNewSignalCount] = useState(0);
   const lastPushAtRef = useRef<number>(0);
+  const streamScrollRef = useRef<HTMLDivElement | null>(null);
+  const isScrolledRef = useRef<boolean>(false);
   const queryClient = useQueryClient();
 
   const signalsQuery = useQuery<SignalItem[]>({
@@ -607,11 +611,25 @@ export default function LytePage() {
           const incoming = mapApiSignal(msg.data, 0);
           lastPushAtRef.current = Date.now();
 
+          let wasNew = false;
           queryClient.setQueryData<SignalItem[]>(["lyte", "signals"], (prev) => {
             const list = prev ?? [];
             if (list.some((s) => s.id === incoming.id)) return list;
+            wasNew = true;
             return [incoming, ...list].slice(0, 20);
           });
+
+          if (wasNew) {
+            if (isScrolledRef.current) {
+              setNewSignalCount((n) => n + 1);
+            }
+            if (incoming.severity === "critical") {
+              toast.error(incoming.title, {
+                description: incoming.detail,
+                duration: 8000,
+              });
+            }
+          }
 
           setPulseFlash(true);
           if (flashTimer) clearTimeout(flashTimer);
@@ -821,18 +839,70 @@ export default function LytePage() {
                   <LivePulse healthy={isStreamHealthy} flash={pulseFlash} />
                 </div>
 
-                <div style={{ padding: "0.5rem", display: "flex", flexDirection: "column", gap: "0.25rem", overflowY: "auto", flex: 1 }}>
-                  {filteredSignals.map(s => (
-                    <SignalRow
-                      key={s.id}
-                      sig={s}
-                      active={activeSignal === s.id}
-                      onClick={() => {
-                        setActiveSignal(s.id);
-                        if (s.correlatedTo) setActiveSit(s.correlatedTo);
-                      }}
-                    />
-                  ))}
+                <div style={{ position: "relative", flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
+                  <AnimatePresence>
+                    {newSignalCount > 0 && (
+                      <m.button
+                        key="new-signals-pill"
+                        initial={{ opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -8 }}
+                        transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                        onClick={() => {
+                          streamScrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+                          setNewSignalCount(0);
+                        }}
+                        data-testid="button-new-signals-pill"
+                        style={{
+                          position: "absolute",
+                          top: "0.5rem",
+                          left: "50%",
+                          transform: "translateX(-50%)",
+                          zIndex: 4,
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "0.4rem",
+                          padding: "0.35rem 0.75rem",
+                          borderRadius: 999,
+                          background: LYTE,
+                          color: "hsl(214,18%,4%)",
+                          border: "none",
+                          fontSize: "0.6875rem",
+                          fontFamily: MONO,
+                          fontWeight: 700,
+                          letterSpacing: "0.06em",
+                          textTransform: "uppercase",
+                          cursor: "pointer",
+                          boxShadow: `0 6px 18px ${LYTE}40, 0 0 0 1px ${LYTE}60`,
+                        }}
+                      >
+                        <ArrowRight size={11} style={{ transform: "rotate(-90deg)" }} />
+                        {newSignalCount} new {newSignalCount === 1 ? "signal" : "signals"}
+                      </m.button>
+                    )}
+                  </AnimatePresence>
+                  <div
+                    ref={streamScrollRef}
+                    onScroll={(e) => {
+                      const el = e.currentTarget;
+                      const scrolled = el.scrollTop > 24;
+                      isScrolledRef.current = scrolled;
+                      if (!scrolled && newSignalCount > 0) setNewSignalCount(0);
+                    }}
+                    style={{ padding: "0.5rem", display: "flex", flexDirection: "column", gap: "0.25rem", overflowY: "auto", flex: 1 }}
+                  >
+                    {filteredSignals.map(s => (
+                      <SignalRow
+                        key={s.id}
+                        sig={s}
+                        active={activeSignal === s.id}
+                        onClick={() => {
+                          setActiveSignal(s.id);
+                          if (s.correlatedTo) setActiveSit(s.correlatedTo);
+                        }}
+                      />
+                    ))}
+                  </div>
                 </div>
 
                 <div style={{ padding: "0.75rem", borderTop: `1px solid ${BORDER}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
