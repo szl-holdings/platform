@@ -102,7 +102,7 @@ function UseCaseLane({ useCase, color, delay }: { useCase: typeof USE_CASES[0]; 
 export default function SolutionsAegisPage() {
   usePageMeta({
     title: "Aegis — Security & Defense Intelligence · SZL Holdings",
-    description: "SOC command, MITRE ATT&CK mapping, SOAR playbooks, AI triage with human approval gates. Aegis is the security & defense domain pack — built on the same governance infrastructure as every SZL product.",
+    description: "SOC command, MITRE ATT&CK mapping, SOAR playbooks, policy-gated triage with human approval. Aegis is the security & defense domain pack — built on the same governance infrastructure as every SZL product.",
     canonical: "https://szlholdings.com/solutions/aegis",
     ogImage: "https://szlholdings.com/og/og-aegis.jpg",
   });

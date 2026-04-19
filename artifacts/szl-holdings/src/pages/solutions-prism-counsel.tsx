@@ -33,9 +33,9 @@ const USE_CASES = [
     steps: [
       { signal: true, text: "Signal fires — adjuster at Empire Mutual has gone silent for 31 days, outside their documented response pattern for bodily injury files" },
       { text: "PRISM Counsel surfaces insurer behavior intel: this adjuster typically responds within 18 days; silence at 30+ days preceded reserve increases in 4 of 6 prior matters" },
-      { text: "Settlement band forecast updated — AI recommendation surfaces a narrower offer window based on reserve movement pattern, with source citations" },
+      { text: "Settlement band forecast updated — governed recommendation surfaces a narrower offer window based on reserve movement pattern, with source citations" },
       { text: "Supervising partner reviews recommendation and approves accelerated outreach strategy — deadline for response demand set, client notified" },
-      { proof: true, text: "Proof Chain logs the signal, AI recommendation, source citations, and partner approval — defensible record for any subsequent dispute over negotiation conduct" },
+      { proof: true, text: "Proof Chain logs the signal, governed recommendation, source citations, and partner approval — defensible record for any subsequent dispute over negotiation conduct" },
     ],
   },
   {
@@ -102,7 +102,7 @@ function UseCaseLane({ useCase, delay }: { useCase: typeof USE_CASES[0]; delay: 
 export default function SolutionsPrismCounselPage() {
   usePageMeta({
     title: "PRISM Counsel — Legal Intelligence · SZL Holdings",
-    description: "AI-assisted legal operations with approval gates, proof chain, and immutable audit trail. PRISM Counsel is the legal intelligence domain pack — built on the same governance infrastructure as every SZL product.",
+    description: "Evidence-assisted legal operations with approval gates, proof chain, and immutable audit trail. PRISM Counsel is the legal intelligence domain pack — built on the same governance infrastructure as every SZL product.",
     canonical: "https://szlholdings.com/solutions/prism-counsel",
     ogImage: "https://szlholdings.com/og/og-prism-counsel.jpg",
   });
@@ -264,7 +264,7 @@ export default function SolutionsPrismCounselPage() {
             "Discovery tracker with deadline compliance",
             "Insurer behavior profiling with response pattern analysis",
             "Venue and part intelligence with velocity forecasting",
-            "AI recommendations with source citations and confidence scoring",
+            "Governed recommendations with source citations and confidence scoring",
             "Role-based approval workflows for consequential actions",
             "No-fault PIP claim tracking with Regulation 68 clocks",
             "Communication silence window monitoring and escalation",
@@ -313,7 +313,7 @@ export default function SolutionsPrismCounselPage() {
             <h3 className="text-sm font-semibold text-slate-200 mb-2">Trust & Governance</h3>
             <ul className="space-y-1.5 text-[11px] text-slate-400">
               <li>Human approval on every consequential action</li>
-              <li>Source-grounded AI with defensibility scoring</li>
+              <li>Source-grounded recommendations with defensibility scoring</li>
               <li>Privilege-aware architecture</li>
               <li>Immutable audit trail</li>
               <li>Role-based access control</li>

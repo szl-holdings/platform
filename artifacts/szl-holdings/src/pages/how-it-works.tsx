@@ -25,7 +25,7 @@ const STACK_LAYERS = [
     number: "03",
     title: "Governed Decision",
     subtitle: "Lyte Command Layer + Covenant Policy + Alloy",
-    desc: "Lyte surfaces the Risk Surface as actionable intelligence — AI recommendations with source citations and confidence scores, not static dashboards. Covenant Policy determines who can approve, what conditions apply, and when human-in-the-loop is required. Alloy then orchestrates the approved action as a durable, auditable workflow with escalation paths and SLA tracking.",
+    desc: "Lyte surfaces the Risk Surface as actionable intelligence — governed recommendations with source citations and confidence scores, not static dashboards. Covenant Policy determines who can approve, what conditions apply, and when human-in-the-loop is required. Alloy then orchestrates the approved action as a durable, auditable workflow with escalation paths and SLA tracking.",
     icon: Zap,
     color: "#d4a054",
   },

@@ -66,7 +66,7 @@ const sections = [
       },
       {
         label: "Agent accountability",
-        body: "AI-assisted outputs are logged alongside human actions. When an agent recommendation leads to a confirmed action, the full chain is preserved: signal → recommendation → review → execution.",
+        body: "Agent-assisted outputs are logged alongside human actions. When an agent recommendation leads to a confirmed action, the full chain is preserved: signal → recommendation → review → execution.",
       },
       {
         label: "Queryable records",

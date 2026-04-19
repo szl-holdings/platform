@@ -53,7 +53,7 @@ const SECTIONS = [
 const KEY_QUESTIONS = [
   { q: "How does the agent pipeline work?", a: "Six stages: Ingest → Parse → Enrich → Decide → Approve → Execute. Each stage is auditable and HITL gates sit at Approve." },
   { q: "How is multi-tenancy enforced?", a: "At the database query layer and middleware — scoped by org context, not just filtered in application code." },
-  { q: "What is the Proof Chain?", a: "A cryptographic record attached to every AI-driven action and export, providing tamper-evident decision lineage." },
+  { q: "What is the Proof Chain?", a: "A cryptographic record attached to every agent-driven action and export, providing tamper-evident decision lineage." },
   { q: "How is the governed inference layer managed?", a: "Model selection is deterministic per signal type. Client data never flows back to model training pipelines." },
 ];
 
