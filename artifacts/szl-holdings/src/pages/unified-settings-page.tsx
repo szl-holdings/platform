@@ -7,6 +7,7 @@ import {
   Bell, BellOff, Shield, Key, Lock, Users, Loader2, Globe, Mail, Building2, RefreshCw, Layers, FileText, Save, CheckCircle, AlertTriangle, PanelLeftClose, PanelLeftOpen, PanelLeft, Volume2, VolumeX, Palette, Rows3, Maximize2, Clock, X, } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUserPreferences } from "@szl-holdings/shared-ui/use-user-preferences";
+import { formatDateTime } from "@szl-holdings/shared-ui/utils";
 
 const API = "/api";
 
@@ -442,7 +443,7 @@ function AuditLogPanel() {
                 )}
               </div>
               <span className="text-[10px] text-muted-foreground shrink-0 tabular-nums">
-                {new Date(entry.createdAt).toLocaleString()}
+                {formatDateTime(entry.createdAt, { withSeconds: false })}
               </span>
             </div>
           ))}

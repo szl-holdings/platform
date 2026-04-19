@@ -258,6 +258,31 @@ if (typeof window !== "undefined") {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Synchronous accessors — let non-React code (e.g. shared formatting helpers)
+// read the current preference snapshot without subscribing.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export function getUserPreferencesSync(): UserPreferences {
+  return _prefs;
+}
+
+/**
+ * Returns the user's chosen IANA time zone, or `undefined` if no preference is
+ * set. `undefined` is the right sentinel for `Intl.DateTimeFormat({ timeZone })`
+ * — the formatter falls back to the runtime's default zone.
+ */
+export function getUserTimeZone(): string | undefined {
+  return _prefs.time_zone ?? undefined;
+}
+
+/**
+ * Subscribe to preference changes from non-React code. Returns an unsubscribe.
+ */
+export function subscribeUserPreferences(listener: Listener): () => void {
+  return subscribe(listener);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Shared setter — can also be called outside React (e.g. from an event handler)
 // ─────────────────────────────────────────────────────────────────────────────
 

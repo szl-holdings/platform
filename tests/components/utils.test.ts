@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { cn, formatDate, formatCurrency, formatNumber } from "../../lib/shared-ui/src/utils";
+import { cn, formatDate, formatDateTime, formatTime, formatCurrency, formatNumber, resolveTimeZone } from "../../lib/shared-ui/src/utils";
+import { setUserPreference } from "../../lib/shared-ui/src/use-user-preferences";
 
 describe("cn (class merge utility)", () => {
   it("merges class names correctly", () => {
@@ -70,5 +71,56 @@ describe("formatNumber", () => {
 
   it("formats zero", () => {
     expect(formatNumber(0)).toBe("0");
+  });
+});
+
+describe("time zone–aware formatters", () => {
+  // 2024-06-01T05:30:00Z → 22:30 the previous day in Los Angeles, 14:30 in Tokyo
+  const ISO = "2024-06-01T05:30:00Z";
+
+  afterEach(() => {
+    // Reset preference so tests stay isolated
+    setUserPreference("time_zone", null);
+  });
+
+  it("respects an explicit time zone override on formatDateTime", () => {
+    const la = formatDateTime(ISO, { timeZone: "America/Los_Angeles", withSeconds: false });
+    const tokyo = formatDateTime(ISO, { timeZone: "Asia/Tokyo", withSeconds: false });
+    expect(la).toMatch(/May 31/);
+    expect(la).toMatch(/10:30/);
+    expect(tokyo).toMatch(/Jun 1/);
+    expect(tokyo).toMatch(/2:30/);
+  });
+
+  it("formatTime honors an explicit time zone", () => {
+    expect(formatTime(ISO, { timeZone: "Asia/Tokyo", withSeconds: false, hour12: false })).toMatch(/14:30/);
+    expect(formatTime(ISO, { timeZone: "Europe/London", withSeconds: false, hour12: false })).toMatch(/06:30/);
+  });
+
+  it("formatDate honors an explicit time zone for date rollover", () => {
+    expect(formatDate(ISO, { timeZone: "America/Los_Angeles" })).toMatch(/May 31/);
+    expect(formatDate(ISO, { timeZone: "Asia/Tokyo" })).toMatch(/Jun 1/);
+  });
+
+  it("uses the user preference when no override is provided", () => {
+    setUserPreference("time_zone", "Asia/Tokyo");
+    expect(formatTime(ISO, { withSeconds: false, hour12: false })).toMatch(/14:30/);
+    setUserPreference("time_zone", "America/Los_Angeles");
+    expect(formatTime(ISO, { withSeconds: false, hour12: false })).toMatch(/22:30/);
+  });
+
+  it("resolveTimeZone falls back to user preference and then runtime default", () => {
+    setUserPreference("time_zone", "Asia/Tokyo");
+    expect(resolveTimeZone()).toBe("Asia/Tokyo");
+    expect(resolveTimeZone("Europe/Paris")).toBe("Europe/Paris");
+    expect(resolveTimeZone(null)).toBeUndefined();
+    setUserPreference("time_zone", null);
+    expect(resolveTimeZone()).toBeUndefined();
+  });
+
+  it("ignores invalid preference values (validation in store)", () => {
+    setUserPreference("time_zone", "Not/A_Zone" as never);
+    // Invalid value never makes it into the store, so resolveTimeZone stays undefined
+    expect(resolveTimeZone()).toBeUndefined();
   });
 });

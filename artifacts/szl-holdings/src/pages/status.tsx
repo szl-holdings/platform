@@ -3,6 +3,7 @@ import { m } from "framer-motion";
 import { CheckCircle, AlertTriangle, XCircle, Clock, RefreshCw, Bell, ChevronDown, ChevronUp, Activity, Shield } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { formatDateTime } from "@szl-holdings/shared-ui/utils";
 
 
 interface ServiceStatus {
@@ -419,7 +420,7 @@ export default function StatusPage() {
 
             {data && (
               <div style={{ fontSize: 11, color: "hsl(210,5%,38%)", marginTop: "0.75rem" }}>
-                Last updated: {new Date(data.lastChecked).toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                Last updated: {formatDateTime(data.lastChecked, { withSeconds: false })}
               </div>
             )}
           </m.div>

@@ -6,6 +6,7 @@ import { DataStateBadge } from "@/components/DataStateBadge";
 import { useAuth } from "@szl-holdings/replit-auth-web";
 import { Lock, TrendingUp, Ship, Layers, Eye, Shield, Sparkles, BarChart3, ArrowUpRight, RefreshCw, Activity, Zap, Play, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
 import { PageDataSkeleton } from "@szl-holdings/shared-ui/page-data-skeleton";
+import { formatTime } from "@szl-holdings/shared-ui/utils";
 
 interface KpiData {
   checkedAt: string;
@@ -446,7 +447,7 @@ export default function KpiDashboardPage() {
                   </h1>
                 </div>
                 <p style={{ fontSize: "13px", color: "hsl(210,5%,50%)" }}>
-                  {data ? `Last updated ${new Date(data.checkedAt).toLocaleTimeString()}` : loading ? "Loading…" : "Real-time aggregate metrics across all platforms."}
+                  {data ? `Last updated ${formatTime(data.checkedAt)}` : loading ? "Loading…" : "Real-time aggregate metrics across all platforms."}
                 </p>
               </m.div>
 

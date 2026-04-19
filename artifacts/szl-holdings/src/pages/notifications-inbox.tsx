@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Bell, Check, CheckCheck, Filter, RefreshCw, Trash2, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PageDataSkeleton } from "@szl-holdings/shared-ui/page-data-skeleton";
+import { formatDateTime } from "@szl-holdings/shared-ui/utils";
 
 interface Notification {
   id: number;
@@ -94,7 +95,12 @@ function NotificationRow({
               </span>
             )}
           </div>
-          <span className="text-[10px] text-muted-foreground shrink-0">{formatRelative(notification.createdAt)}</span>
+          <span
+            className="text-[10px] text-muted-foreground shrink-0"
+            title={formatDateTime(notification.createdAt, { withSeconds: false })}
+          >
+            {formatRelative(notification.createdAt)}
+          </span>
         </div>
 
         <p className={cn("text-sm font-medium mb-0.5", notification.isRead ? "text-foreground/60" : "text-foreground")}>
