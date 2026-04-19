@@ -174,6 +174,129 @@ router.post("/plans", authMiddleware(), validateBody(jsonObjectBodySchema), asyn
   }
 });
 
+router.get("/plans/:id/fallbacks", authMiddleware(), async (req, res) => {
+  try {
+    const user = requireUser(req);
+    if (!user) {
+      sendForbidden(res, "authentication required");
+      return;
+    }
+    const plan = await defaultPlanStore.get(req.params.id as string);
+    if (!plan) {
+      sendNotFound(res, "Plan not found");
+      return;
+    }
+    if (!callerOwnsPlan(user, plan)) {
+      sendNotFound(res, "Plan not found");
+      return;
+    }
+    const fallbacks = await getPlanFallbacks(plan);
+    sendSuccess(res, { items: fallbacks, total: fallbacks.length });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to list fallbacks");
+  }
+});
+
+/**
+ * Approve or deny a gated step on a plan. Approve clears the requiredApproval
+ * flag and marks the step ready; deny marks the step skipped with the reason
+ * recorded in step metadata. Approval decisions are recorded in plan metadata
+ * as an audit trail keyed by step id.
+ */
+async function decideStep(
+  req: Request,
+  res: import("express").Response,
+  decision: "approved" | "denied",
+): Promise<void> {
+  const user = requireUser(req);
+  if (!user) {
+    sendForbidden(res, "authentication required");
+    return;
+  }
+  const planId = req.params.id as string;
+  const stepId = req.params.stepId as string;
+  const plan = await defaultPlanStore.get(planId);
+  if (!plan) {
+    sendNotFound(res, "Plan not found");
+    return;
+  }
+  if (!callerOwnsPlan(user, plan)) {
+    sendNotFound(res, "Plan not found");
+    return;
+  }
+  const step = plan.steps.find((s) => s.stepId === stepId);
+  if (!step) {
+    sendNotFound(res, "Step not found");
+    return;
+  }
+  if (!step.requiredApproval) {
+    sendBadRequest(res, "Step does not require approval");
+    return;
+  }
+  const note =
+    typeof (req.body as { note?: unknown })?.note === "string"
+      ? ((req.body as { note?: string }).note ?? "").slice(0, 500)
+      : "";
+  const decidedAt = Date.now();
+  const decisions = (plan.metadata["stepDecisions"] as
+    | Record<string, unknown>
+    | undefined) ?? {};
+  const audit = {
+    decision,
+    actorId: user.id ?? null,
+    actorRole: user.roles?.[0] ?? null,
+    note: note || undefined,
+    at: decidedAt,
+  };
+  const nextMetadata = {
+    ...plan.metadata,
+    stepDecisions: { ...decisions, [stepId]: audit },
+  };
+  if (decision === "approved") {
+    step.requiredApproval = false;
+    step.status = "ready";
+  } else {
+    step.status = "skipped";
+  }
+  step.metadata = {
+    ...step.metadata,
+    approvalDecision: audit,
+  };
+  await defaultPlanStore.put({
+    ...plan,
+    metadata: nextMetadata,
+    updatedAt: decidedAt,
+  });
+  const updated = await defaultPlanStore.get(planId);
+  sendSuccess(res, updated ?? plan);
+}
+
+router.post(
+  "/plans/:id/steps/:stepId/approve",
+  authMiddleware(),
+  validateBody(jsonObjectBodySchema),
+  async (req, res) => {
+    try {
+      await decideStep(req, res, "approved");
+    } catch (err) {
+      handleRouteError(res, err, "Failed to approve step");
+    }
+  },
+);
+
+router.post(
+  "/plans/:id/steps/:stepId/deny",
+  authMiddleware(),
+  validateBody(jsonObjectBodySchema),
+  async (req, res) => {
+    try {
+      await decideStep(req, res, "denied");
+    } catch (err) {
+      handleRouteError(res, err, "Failed to deny step");
+    }
+  },
+);
+
 router.post("/plans/:id/replay", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
   try {
     const user = requireUser(req);
