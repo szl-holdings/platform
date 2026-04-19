@@ -25,7 +25,7 @@ const BORDER = "hsla(0,0%,100%,0.07)";
 const STORE_KEY = "szl:actionStore";
 const STORE_URL = "/api/action-store";
 
-type RiskActionState = { type: "playbook" | "ticket"; status: "running" | "done"; result?: string; ticketId?: string };
+type RiskActionState = { type: "playbook" | "ticket"; status: "running" | "done"; result?: string; ticketId?: string; ticketUrl?: string };
 type OppDecision = { decision: "accept" | "reject" | "snooze"; reason?: string; snoozeUntil?: string; at: string };
 type RecDecision = { decision: "accept" | "reject" | "snooze"; reason?: string; snoozeUntil?: string; at: string };
 
@@ -602,10 +602,48 @@ function RiskRegisterModule() {
     }, 2500);
   }
 
-  function handleTicket(riskId: string, risk: typeof RISK_REGISTER[number]) {
-    const ticketId = `ENG-${Math.floor(1000 + Math.random() * 9000)}`;
-    patch({ riskActions: { [riskId]: { type: "ticket", status: "done", ticketId } } });
-    show(`Linear ticket ${ticketId} created — "Add index on distress_score + borough" assigned to ${risk.owner}.`, "success");
+  async function handleTicket(riskId: string, risk: typeof RISK_REGISTER[number]) {
+    patch({ riskActions: { [riskId]: { type: "ticket", status: "running" } } });
+    show("Creating Linear ticket…", "info", 2000);
+
+    const priorityMap: Record<string, number> = { critical: 1, high: 2, medium: 3, low: 4 };
+    const description = [
+      `**Risk:** ${risk.title}`,
+      `**Domain:** ${risk.domain}`,
+      `**Severity:** ${risk.level} (impact ${risk.impact}, probability ${Math.round(risk.probability * 100)}%)`,
+      `**Mitigation:** ${risk.mitigation}`,
+      ``,
+      `Created from SZL Holdings Business State (risk id: ${risk.id}).`,
+    ].join("\n");
+
+    try {
+      const response = await fetch("/api/linear/create-ticket", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: `[${risk.domain.toUpperCase()}] ${risk.title}`,
+          description,
+          priority: priorityMap[risk.level] ?? 3,
+          assigneeName: risk.owner,
+        }),
+      });
+      const json = await response.json().catch(() => null);
+      if (!response.ok || !json?.identifier) {
+        const errMsg = json?.error || `Linear ticket creation failed (HTTP ${response.status})`;
+        patch({ riskActions: { [riskId]: null } });
+        show(errMsg, "error", 6000);
+        return;
+      }
+      patch({
+        riskActions: {
+          [riskId]: { type: "ticket", status: "done", ticketId: json.identifier, ticketUrl: json.url },
+        },
+      });
+      show(`Linear ticket ${json.identifier} created — assigned to ${json.assignee?.name ?? risk.owner}.`, "success");
+    } catch (err) {
+      patch({ riskActions: { [riskId]: null } });
+      show(`Could not reach Linear: ${(err as Error).message}`, "error", 6000);
+    }
   }
 
   function handleSaveOwner(riskId: string) {
@@ -708,10 +746,19 @@ function RiskRegisterModule() {
                         )
                       )}
                       {risk.id === "r2" && (
-                        riskAction?.status === "done" ? (
+                        riskAction?.type === "ticket" && riskAction.status === "running" ? (
+                          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "10px", color: "#f59e0b" }}>
+                            <RefreshCw style={{ width: 11, height: 11, animation: "spin 1s linear infinite" }} />
+                            Creating Linear ticket…
+                          </div>
+                        ) : riskAction?.type === "ticket" && riskAction.status === "done" ? (
                           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "10px", color: "#22c55e" }}>
                             <CheckCircle2 style={{ width: 11, height: 11 }} />
-                            Ticket <strong>{riskAction.ticketId}</strong> created — index migration queued.
+                            {riskAction.ticketUrl ? (
+                              <>Ticket <a href={riskAction.ticketUrl} target="_blank" rel="noopener noreferrer" style={{ color: "#22c55e", fontWeight: 700 }}>{riskAction.ticketId}</a> created in Linear.</>
+                            ) : (
+                              <>Ticket <strong>{riskAction.ticketId}</strong> created — index migration queued.</>
+                            )}
                           </div>
                         ) : (
                           <button onClick={() => handleTicket(risk.id, risk)} style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "10px", fontWeight: 700, padding: "5px 12px", borderRadius: "6px", background: "#f59e0b20", border: "1px solid #f59e0b40", color: "#f59e0b", cursor: "pointer" }}>
