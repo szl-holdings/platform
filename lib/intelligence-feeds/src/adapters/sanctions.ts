@@ -162,7 +162,7 @@ export class SanctionsFeedAdapter extends BaseFeedAdapter {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 10_000);
     try {
-      const res = await fetch("https://www.treasury.gov/ofac/downloads/sdnlist.txt", {
+      const res = await fetch("https://ofac.treasury.gov/system/files/2021-09/sdnlist.txt", {
         method: "HEAD",
         signal: controller.signal,
       });
@@ -225,7 +225,7 @@ export class SanctionsFeedAdapter extends BaseFeedAdapter {
     const timeout = setTimeout(() => controller.abort(), this.config.timeout);
 
     try {
-      const url = "https://www.treasury.gov/ofac/downloads/sdn.json";
+      const url = "https://ofac.treasury.gov/system/files/2021-09/sdn.json";
       const response = await fetch(url, { signal: controller.signal, headers: { "Accept": "application/json" } });
 
       if (!response.ok) throw new Error(`OFAC SDN HTTP ${response.status}`);

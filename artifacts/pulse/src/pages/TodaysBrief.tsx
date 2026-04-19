@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AlertTriangle, ChevronDown, ChevronUp, Download, ExternalLink, Clock, Shield, Zap, Sparkles } from "lucide-react";
+import { AlertTriangle, ChevronDown, ChevronUp, ExternalLink, Clock, Shield, Zap, Sparkles } from "lucide-react";
 import { getRiskColor, AGENTS, type BriefingSection, type RiskLevel } from "../lib/data";
 import { useTodaysBrief, useGenerateBriefing, isDemoMode } from "../lib/api";
 import AgentBadge from "../components/AgentBadge";
@@ -148,7 +148,6 @@ function SectionCard({ section }: { section: BriefingSection }) {
 }
 
 export default function TodaysBrief() {
-  const [exportLoading, setExportLoading] = useState(false);
   const { data: brief, isLoading, error } = useTodaysBrief();
   const generate = useGenerateBriefing();
   const handleGenerate = async () => {
@@ -165,32 +164,6 @@ export default function TodaysBrief() {
   if (error || !brief) {
     return <div style={{ padding: 40, color: "#e05050", fontSize: "0.9rem" }}>Failed to load today's brief{error instanceof Error ? `: ${error.message}` : ""}.</div>;
   }
-
-  const handleExport = async () => {
-    setExportLoading(true);
-    try {
-      const res = await fetch("/api/pulse/export/pdf", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ briefingId: brief.id }),
-      });
-      if (!res.ok) throw new Error(`Export failed: ${res.status}`);
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `pulse-${brief.date}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-    } catch (e) {
-      alert(`PDF export failed: ${e instanceof Error ? e.message : String(e)}`);
-    } finally {
-      setExportLoading(false);
-    }
-  };
 
   return (
     <div style={{ padding: "0 0 40px" }}>
@@ -262,20 +235,7 @@ export default function TodaysBrief() {
                   {generate.isPending ? "Generating…" : "Generate Live Briefing"}
                 </button>
               )}
-              <button
-                onClick={handleExport}
-                disabled={exportLoading}
-                style={{
-                  display: "flex", alignItems: "center", gap: 6,
-                  padding: "8px 14px", borderRadius: 6,
-                  background: "rgba(200,168,75,0.1)", border: "1px solid rgba(200,168,75,0.3)",
-                  color: "var(--pulse-gold)", fontSize: "0.78rem", fontWeight: 600,
-                  cursor: "pointer",
-                }}
-              >
-                <Download size={13} />
-                {exportLoading ? "Generating…" : "Export PDF"}
-              </button>
+              {/* PDF export: activate by wiring /api/pulse/export/pdf handler */}
             </div>
           </div>
         </div>

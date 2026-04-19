@@ -407,7 +407,7 @@ async function fetchOfacSdnVessels(): Promise<{ name: string; imo: string; flag:
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 15000);
   try {
-    const res = await fetch("https://www.treasury.gov/ofac/downloads/sdn_mini.xml", {
+    const res = await fetch("https://ofac.treasury.gov/system/files/2021-09/sdn_mini.xml", {
       signal: controller.signal,
       headers: { "User-Agent": "SZL-IntelPlatform/1.0", Accept: "application/xml,text/xml" },
     });

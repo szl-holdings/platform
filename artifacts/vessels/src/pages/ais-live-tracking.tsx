@@ -452,12 +452,12 @@ export default function AisLiveTrackingPage() {
           {apiMeta ? (
             <div className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-medium" style={{ background: apiMeta.liveData ? "rgba(34,197,94,0.12)" : "rgba(251,191,36,0.12)", color: apiMeta.liveData ? "#22c55e" : "#fbbf24" }}>
               {apiMeta.liveData ? <Wifi className="w-3 h-3" /> : <Satellite className="w-3 h-3" />}
-              {apiMeta.liveData ? "Live" : "CACHED"} · {apiMeta.dataSource}
+              {apiMeta.liveData ? "Live" : "Demo Data"} · {apiMeta.dataSource}
             </div>
           ) : (
-            <div className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-medium" style={{ background: "rgba(56,189,248,0.12)", color: ACCENT }}>
-              <Globe className="w-3 h-3" />
-              Global AIS Coverage
+            <div className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-medium" style={{ background: "rgba(251,191,36,0.12)", color: "#fbbf24" }}>
+              <Satellite className="w-3 h-3" />
+              Demo Data · Loading…
             </div>
           )}
           {error && (
