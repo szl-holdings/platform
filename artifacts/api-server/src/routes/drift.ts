@@ -201,6 +201,17 @@ router.get("/drift/:domain", async (req: Request, res: Response) => {
   }
 });
 
+/**
+ * Sample drift in the background and persist a snapshot.
+ * Exposed so a scheduler in `index.ts` can keep the Pulse Drift Trend chart
+ * growing on its own without depending on a user opening the System Health page.
+ */
+export async function sampleAndPersistDrift(): Promise<DriftSummary> {
+  const summary = await buildDriftSummary();
+  await persistSnapshot(summary);
+  return summary;
+}
+
 router.post("/drift/reset", validateBody(jsonObjectBodySchema), async (_req: Request, res: Response) => {
   try {
     await db.delete(driftSnapshotsTable);

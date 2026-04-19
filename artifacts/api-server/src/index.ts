@@ -161,6 +161,31 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
   }, alertEvalIntervalMs);
   alertEvalInterval.unref();
 
+  // Schedule background drift sampling so the Pulse Drift Trend chart grows
+  // continuously even when nobody opens the System Health page. Configurable
+  // via DRIFT_SAMPLE_INTERVAL_MINUTES (default: 15 minutes, minimum: 1).
+  const driftSampleIntervalMinutes = Math.max(
+    1,
+    parseInt(process.env["DRIFT_SAMPLE_INTERVAL_MINUTES"] ?? "15", 10) || 15
+  );
+  const driftSampleIntervalMs = driftSampleIntervalMinutes * 60 * 1000;
+  logger.info({ intervalMinutes: driftSampleIntervalMinutes }, "[drift] Scheduling automatic drift sampling");
+  const driftSampleInterval = setInterval(() => {
+    import("./routes/drift.js").then(({ sampleAndPersistDrift }) => {
+      sampleAndPersistDrift()
+        .then((summary) => {
+          logger.info(
+            { measuredAt: summary.measuredAt, overallDriftScore: summary.overallDriftScore, status: summary.status },
+            "[drift] Background drift snapshot recorded"
+          );
+        })
+        .catch((err) => {
+          logger.warn({ err }, "[drift] Background drift sampling failed (non-fatal)");
+        });
+    }).catch((err) => logger.warn({ err }, "[drift] Failed to load drift module for scheduling"));
+  }, driftSampleIntervalMs);
+  driftSampleInterval.unref();
+
   import("./routes/rmm").then(m => m.startSyncScheduler()).catch(err => logger.warn({ err }, "RMM sync scheduler start failed (non-fatal)"));
   pingRedis().catch(err => logger.warn({ err }, "[redis] Startup ping failed (non-fatal)"));
   prewarmIntelligenceCache().catch(err => {
