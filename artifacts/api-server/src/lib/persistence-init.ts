@@ -39,6 +39,7 @@ const SIGNAL_RETENTION_DAYS = parseInt(process.env.SIGNAL_RETENTION_DAYS ?? "30"
 const EVIDENCE_RETENTION_DAYS = parseInt(process.env.EVIDENCE_RETENTION_DAYS ?? "30", 10);
 const RECOMMENDATION_RETENTION_DAYS = parseInt(process.env.RECOMMENDATION_RETENTION_DAYS ?? "90", 10);
 const ENTITY_SNAPSHOT_RETENTION_DAYS = parseInt(process.env.ENTITY_SNAPSHOT_RETENTION_DAYS ?? "180", 10);
+const CHECKPOINT_RETENTION_HOURS = parseInt(process.env.CHECKPOINT_RETENTION_HOURS ?? "24", 10);
 const RETENTION_INTERVAL_MS = parseInt(process.env.PERSISTENCE_RETENTION_INTERVAL_MS ?? `${60 * 60 * 1000}`, 10);
 const FLUSH_INTERVAL_MS = parseInt(process.env.PERSISTENCE_FLUSH_INTERVAL_MS ?? "1000", 10);
 const TRACE_HYDRATE_LIMIT = parseInt(process.env.TRACE_HYDRATE_LIMIT ?? "1000", 10);
@@ -358,6 +359,7 @@ export async function runRetentionSweep(): Promise<{
   evidenceEvicted: { cacheRemoved: number; dbRemoved: number };
   recommendationsEvicted: { cacheRemoved: number; dbRemoved: number };
   entitiesEvicted: { cacheRemoved: number; dbRemoved: number };
+  checkpointsEvicted: { cacheRemoved: number; dbRemoved: number };
 }> {
   const tracesEvicted = traceStore
     ? await traceStore.runRetention(TRACE_RETENTION_DAYS)
@@ -389,12 +391,19 @@ export async function runRetentionSweep(): Promise<{
         return { cacheRemoved: 0, dbRemoved: 0 };
       })
     : { cacheRemoved: 0, dbRemoved: 0 };
+  const checkpointsEvicted = checkpointStore
+    ? await checkpointStore.runRetention(CHECKPOINT_RETENTION_HOURS * 60 * 60 * 1000).catch((err) => {
+        logger.warn({ err }, "[persistence] Checkpoint retention failed");
+        return { cacheRemoved: 0, dbRemoved: 0 };
+      })
+    : { cacheRemoved: 0, dbRemoved: 0 };
 
   if (
     signalsEvicted.dbRemoved > 0 ||
     evidenceEvicted.dbRemoved > 0 ||
     recommendationsEvicted.dbRemoved > 0 ||
-    entitiesEvicted.dbRemoved > 0
+    entitiesEvicted.dbRemoved > 0 ||
+    checkpointsEvicted.dbRemoved > 0
   ) {
     logger.info(
       {
@@ -402,10 +411,12 @@ export async function runRetentionSweep(): Promise<{
         evidence: evidenceEvicted.dbRemoved,
         recommendations: recommendationsEvicted.dbRemoved,
         entities: entitiesEvicted.dbRemoved,
+        checkpoints: checkpointsEvicted.dbRemoved,
         signalRetentionDays: SIGNAL_RETENTION_DAYS,
         evidenceRetentionDays: EVIDENCE_RETENTION_DAYS,
         recommendationRetentionDays: RECOMMENDATION_RETENTION_DAYS,
         entitySnapshotRetentionDays: ENTITY_SNAPSHOT_RETENTION_DAYS,
+        checkpointRetentionHours: CHECKPOINT_RETENTION_HOURS,
       },
       "[persistence] Signal Mesh retention sweep pruned old records",
     );
@@ -418,6 +429,7 @@ export async function runRetentionSweep(): Promise<{
     evidenceEvicted,
     recommendationsEvicted,
     entitiesEvicted,
+    checkpointsEvicted,
   };
 }
 
