@@ -1,12 +1,28 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { randomUUID } from "crypto";
+import {
+  db,
+  agentMeshContainmentRulesTable,
+  agentMeshGatewayEventsTable,
+  agentMeshExposuresTable,
+  approvalRequestsTable,
+} from "@szl-holdings/db";
+import { and, count, desc, eq, isNull, sql } from "drizzle-orm";
 import { sendSuccess, sendError, handleRouteError } from "../lib/api-response";
+import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
 
 type EnforcementMode = "log-only" | "block" | "quarantine";
 type Tier = "critical" | "elevated" | "standard";
 type Decision = "allowed" | "logged" | "blocked" | "quarantined";
+
+interface PendingModeChange {
+  requestedMode: EnforcementMode;
+  requestedBy: string;
+  requestedAt: string;
+  guardianApprovalId: string;
+}
 
 interface GatewayRule {
   id: string;
@@ -17,33 +33,28 @@ interface GatewayRule {
   allowedMcpServers: string[];
   allowedTools: string[];
   allowedEgressDomains: string[];
-  pendingModeChange?: {
-    requestedMode: EnforcementMode;
-    requestedBy: string;
-    requestedAt: string;
-    guardianApprovalId: string;
-  };
-}
-
-interface GatewayEvent {
-  id: string;
-  ruleId: string;
-  agentClass: string;
-  mcpServerId: string;
-  tool: string;
-  egressDomain?: string;
-  decision: Decision;
-  reason: string;
-  enforcementMode: EnforcementMode;
-  linkedExposureId?: string;
-  occurredAt: string;
+  pendingModeChange?: PendingModeChange;
 }
 
 const GATEWAY_ENDPOINT = process.env["MCP_GATEWAY_ENDPOINT"]
   ?? "https://mcp-gateway.sentra.szl.local/v1/proxy";
 
-const rules = new Map<string, GatewayRule>([
-  ["rule-claude-standard", {
+const startedAt = Date.now();
+
+// Default gateway-managed rules. These are seeded into the database on
+// first access so the rules survive restarts. The id is the stable key
+// used for upserts.
+const DEFAULT_RULES: Array<{
+  id: string;
+  name: string;
+  agentClass: string;
+  tier: Tier;
+  enforcementMode: EnforcementMode;
+  allowedMcpServers: string[];
+  allowedTools: string[];
+  allowedEgressDomains: string[];
+}> = [
+  {
     id: "rule-claude-standard",
     name: "Claude Standard Policy",
     agentClass: "claude-desktop",
@@ -52,8 +63,8 @@ const rules = new Map<string, GatewayRule>([
     allowedMcpServers: ["mcp-github", "mcp-filesystem", "mcp-sequential-thinking"],
     allowedTools: ["read_file", "list_directory", "brave_web_search", "sequentialthinking"],
     allowedEgressDomains: ["api.github.com", "api.search.brave.com"],
-  }],
-  ["rule-cursor-elevated", {
+  },
+  {
     id: "rule-cursor-elevated",
     name: "Cursor Elevated Policy",
     agentClass: "cursor",
@@ -62,8 +73,8 @@ const rules = new Map<string, GatewayRule>([
     allowedMcpServers: ["mcp-github", "mcp-filesystem", "mcp-sequential-thinking"],
     allowedTools: ["read_file", "write_file", "list_directory", "create_pull_request", "sequentialthinking"],
     allowedEgressDomains: ["api.github.com"],
-  }],
-  ["rule-codex-restricted", {
+  },
+  {
     id: "rule-codex-restricted",
     name: "Codex CLI Restricted Policy",
     agentClass: "codex-cli",
@@ -72,12 +83,87 @@ const rules = new Map<string, GatewayRule>([
     allowedMcpServers: ["mcp-filesystem"],
     allowedTools: ["read_file", "write_file"],
     allowedEgressDomains: [],
-  }],
-]);
+  },
+];
 
-const events: GatewayEvent[] = [];
-const stats = { calls: 0, blocked: 0, quarantined: 0, logged: 0, allowed: 0 };
-const startedAt = Date.now();
+let seedPromise: Promise<void> | null = null;
+async function ensureSeeded(): Promise<void> {
+  if (seedPromise) return seedPromise;
+  seedPromise = (async () => {
+    try {
+      for (const r of DEFAULT_RULES) {
+        await db
+          .insert(agentMeshContainmentRulesTable)
+          .values({
+            id: r.id,
+            orgId: null,
+            name: r.name,
+            agentClass: r.agentClass,
+            allowedMcpServers: r.allowedMcpServers,
+            allowedTools: r.allowedTools,
+            allowedReadPaths: [],
+            allowedEgressDomains: r.allowedEgressDomains,
+            tier: r.tier,
+            enforcementMode: r.enforcementMode,
+            violationCount: 0,
+            lastEvaluatedAt: new Date(),
+          })
+          .onConflictDoNothing({ target: agentMeshContainmentRulesTable.id });
+      }
+    } catch (err) {
+      logger.warn({ err }, "[mcp-gateway] failed to seed default containment rules");
+      // Allow retry on next call.
+      seedPromise = null;
+      throw err;
+    }
+  })();
+  return seedPromise;
+}
+
+function rowToRule(row: typeof agentMeshContainmentRulesTable.$inferSelect): GatewayRule {
+  return {
+    id: row.id,
+    name: row.name,
+    agentClass: row.agentClass,
+    tier: (row.tier as Tier) ?? "standard",
+    enforcementMode: (row.enforcementMode as EnforcementMode) ?? "log-only",
+    allowedMcpServers: row.allowedMcpServers ?? [],
+    allowedTools: row.allowedTools ?? [],
+    allowedEgressDomains: row.allowedEgressDomains ?? [],
+    pendingModeChange: (row.pendingModeChange ?? undefined) as PendingModeChange | undefined,
+  };
+}
+
+async function loadRules(): Promise<GatewayRule[]> {
+  const rows = await db
+    .select()
+    .from(agentMeshContainmentRulesTable)
+    .where(isNull(agentMeshContainmentRulesTable.orgId));
+  return rows.map(rowToRule);
+}
+
+async function findRuleForAgentClass(agentClass: string): Promise<GatewayRule | undefined> {
+  const rows = await db
+    .select()
+    .from(agentMeshContainmentRulesTable)
+    .where(and(
+      isNull(agentMeshContainmentRulesTable.orgId),
+      eq(agentMeshContainmentRulesTable.agentClass, agentClass),
+    ))
+    .limit(1);
+  const row = rows[0];
+  return row ? rowToRule(row) : undefined;
+}
+
+async function findRuleById(ruleId: string): Promise<GatewayRule | undefined> {
+  const rows = await db
+    .select()
+    .from(agentMeshContainmentRulesTable)
+    .where(eq(agentMeshContainmentRulesTable.id, ruleId))
+    .limit(1);
+  const row = rows[0];
+  return row ? rowToRule(row) : undefined;
+}
 
 function evaluateRule(rule: GatewayRule, params: {
   mcpServerId: string;
@@ -99,50 +185,118 @@ function evaluateRule(rule: GatewayRule, params: {
   return { violation: false, reason: "matches policy" };
 }
 
-function recordEvent(evt: GatewayEvent) {
-  events.unshift(evt);
-  if (events.length > 200) events.length = 200;
-  stats.calls++;
-  if (evt.decision === "blocked") stats.blocked++;
-  else if (evt.decision === "quarantined") stats.quarantined++;
-  else if (evt.decision === "logged") stats.logged++;
-  else stats.allowed++;
-}
-
-function findRuleForAgentClass(agentClass: string): GatewayRule | undefined {
-  for (const rule of rules.values()) {
-    if (rule.agentClass === agentClass) return rule;
+async function loadStats(): Promise<{
+  calls: number;
+  blocked: number;
+  quarantined: number;
+  logged: number;
+  allowed: number;
+}> {
+  const rows = await db
+    .select({
+      decision: agentMeshGatewayEventsTable.decision,
+      c: count(),
+    })
+    .from(agentMeshGatewayEventsTable)
+    .groupBy(agentMeshGatewayEventsTable.decision);
+  const stats = { calls: 0, blocked: 0, quarantined: 0, logged: 0, allowed: 0 };
+  for (const r of rows) {
+    const c = Number(r.c ?? 0);
+    stats.calls += c;
+    if (r.decision === "blocked") stats.blocked += c;
+    else if (r.decision === "quarantined") stats.quarantined += c;
+    else if (r.decision === "logged") stats.logged += c;
+    else if (r.decision === "allowed") stats.allowed += c;
   }
-  return undefined;
+  return stats;
 }
 
-router.get("/mcp-gateway/config", (_req: Request, res: Response) => {
+function buildExposureRow(opts: {
+  rule: GatewayRule;
+  decision: Decision;
+  reason: string;
+  mcpServerId: string;
+  tool: string;
+}) {
+  const id = `exp-gw-${randomUUID().slice(0, 8)}`;
+  const severity = opts.decision === "quarantined"
+    ? "critical"
+    : opts.rule.tier === "critical" ? "high" : "medium";
+  return {
+    id,
+    orgId: null,
+    title: opts.decision === "quarantined"
+      ? `Gateway quarantined ${opts.rule.agentClass} call to ${opts.mcpServerId}/${opts.tool}`
+      : `Gateway blocked ${opts.rule.agentClass} call to ${opts.mcpServerId}/${opts.tool}`,
+    severity,
+    affectedAgentIds: [] as string[],
+    affectedSecretIds: [] as string[],
+    affectedMcpIds: [opts.mcpServerId],
+    explanation: opts.reason,
+    owaspCategory: "LLM06: Excessive Agency",
+    owaspRef: "OWASP-LLM06",
+    cveRefs: [] as string[],
+    fixType: "scope-token",
+    fixLabel: `Tighten ${opts.rule.name} or expand allowlist`,
+    proofHash: "",
+    status: "open",
+    detectedAt: new Date(),
+    updatedAt: new Date(),
+  };
+}
+
+router.get("/mcp-gateway/config", async (_req: Request, res: Response) => {
   try {
+    await ensureSeeded();
+    const [rules, stats] = await Promise.all([loadRules(), loadStats()]);
     const uptime = Math.floor((Date.now() - startedAt) / 1000);
     return sendSuccess(res, {
       endpoint: GATEWAY_ENDPOINT,
       status: "online" as const,
       protocolVersion: "2024-11-05",
       uptimeSeconds: uptime,
-      stats: { ...stats },
-      rules: Array.from(rules.values()),
+      stats,
+      rules,
     });
   } catch (err) {
     return handleRouteError(res, err, "mcp-gateway-config");
   }
 });
 
-router.get("/mcp-gateway/events", (req: Request, res: Response) => {
+router.get("/mcp-gateway/events", async (req: Request, res: Response) => {
   try {
+    await ensureSeeded();
     const limit = Math.min(Number(req.query["limit"] ?? 50), 200);
-    return sendSuccess(res, { events: events.slice(0, limit), total: events.length });
+    const rows = await db
+      .select()
+      .from(agentMeshGatewayEventsTable)
+      .orderBy(desc(agentMeshGatewayEventsTable.occurredAt))
+      .limit(limit);
+    const [{ c: total } = { c: 0 }] = await db
+      .select({ c: count() })
+      .from(agentMeshGatewayEventsTable);
+    const events = rows.map((r) => ({
+      id: r.id,
+      ruleId: r.ruleId,
+      agentClass: r.agentClass,
+      mcpServerId: r.mcpServerId,
+      tool: r.tool,
+      egressDomain: r.egressDomain ?? undefined,
+      decision: r.decision,
+      reason: r.reason,
+      enforcementMode: r.enforcementMode,
+      linkedExposureId: r.linkedExposureId ?? undefined,
+      occurredAt: r.occurredAt instanceof Date ? r.occurredAt.toISOString() : String(r.occurredAt),
+    }));
+    return sendSuccess(res, { events, total: Number(total ?? 0) });
   } catch (err) {
     return handleRouteError(res, err, "mcp-gateway-events");
   }
 });
 
-router.post("/mcp-gateway/proxy", (req: Request, res: Response) => {
+router.post("/mcp-gateway/proxy", async (req: Request, res: Response) => {
   try {
+    await ensureSeeded();
     const body = (req.body ?? {}) as Record<string, unknown>;
     const agentClass = String(body["agentClass"] ?? "");
     const mcpServerId = String(body["mcpServerId"] ?? "");
@@ -153,7 +307,7 @@ router.post("/mcp-gateway/proxy", (req: Request, res: Response) => {
       return sendError(res, "agentClass, mcpServerId, and tool are required", 400);
     }
 
-    const rule = findRuleForAgentClass(agentClass);
+    const rule = await findRuleForAgentClass(agentClass);
     if (!rule) {
       return sendError(res, `No containment rule registered for agent class '${agentClass}'`, 404);
     }
@@ -167,7 +321,6 @@ router.post("/mcp-gateway/proxy", (req: Request, res: Response) => {
       // Quarantine mode rejects every call from this agent class until the
       // rule is cleared, regardless of whether the specific call violates.
       decision = "quarantined";
-      linkedExposureId = `exp-gw-${randomUUID().slice(0, 8)}`;
       effectiveReason = evaluation.violation
         ? `Quarantine: ${evaluation.reason}`
         : "Quarantine: agent class is fully isolated from MCP traffic";
@@ -177,23 +330,56 @@ router.post("/mcp-gateway/proxy", (req: Request, res: Response) => {
       } else {
         decision = "blocked";
       }
-      linkedExposureId = `exp-gw-${randomUUID().slice(0, 8)}`;
     }
 
-    const evt: GatewayEvent = {
-      id: `gw-evt-${randomUUID().slice(0, 8)}`,
-      ruleId: rule.id,
-      agentClass,
-      mcpServerId,
-      tool,
-      egressDomain,
-      decision,
-      reason: effectiveReason,
-      enforcementMode: rule.enforcementMode,
-      linkedExposureId,
-      occurredAt: new Date().toISOString(),
-    };
-    recordEvent(evt);
+    const eventId = `gw-evt-${randomUUID().slice(0, 8)}`;
+    const occurredAt = new Date();
+    const exposureRow = (decision === "blocked" || decision === "quarantined")
+      ? buildExposureRow({ rule, decision, reason: effectiveReason, mcpServerId, tool })
+      : null;
+    const incrementViolation = decision !== "allowed";
+
+    // All persistence — exposure (if any), gateway event, and rule
+    // counters — runs in a single transaction so we never return a
+    // linkedExposureId or eventId that wasn't actually committed.
+    try {
+      await db.transaction(async (tx) => {
+        if (exposureRow) {
+          await tx.insert(agentMeshExposuresTable).values(exposureRow);
+        }
+        await tx.insert(agentMeshGatewayEventsTable).values({
+          id: eventId,
+          orgId: null,
+          ruleId: rule.id,
+          agentClass,
+          mcpServerId,
+          tool,
+          egressDomain: egressDomain ?? null,
+          decision,
+          reason: effectiveReason,
+          enforcementMode: rule.enforcementMode,
+          linkedExposureId: exposureRow ? exposureRow.id : null,
+          occurredAt,
+        });
+        if (incrementViolation) {
+          await tx
+            .update(agentMeshContainmentRulesTable)
+            .set({
+              violationCount: sql`${agentMeshContainmentRulesTable.violationCount} + 1`,
+              lastEvaluatedAt: occurredAt,
+            })
+            .where(eq(agentMeshContainmentRulesTable.id, rule.id));
+        }
+      });
+    } catch (err) {
+      logger.error(
+        { err, eventId, ruleId: rule.id, decision },
+        "[mcp-gateway] failed to persist gateway decision; rejecting request",
+      );
+      return sendError(res, "Failed to persist gateway decision", 500);
+    }
+
+    linkedExposureId = exposureRow ? exposureRow.id : undefined;
 
     const passthrough = decision === "allowed" || decision === "logged";
     return sendSuccess(res, {
@@ -203,18 +389,19 @@ router.post("/mcp-gateway/proxy", (req: Request, res: Response) => {
       ruleId: rule.id,
       enforcementMode: rule.enforcementMode,
       linkedExposureId,
-      eventId: evt.id,
+      eventId,
     });
   } catch (err) {
     return handleRouteError(res, err, "mcp-gateway-proxy");
   }
 });
 
-router.patch("/mcp-gateway/rules/:ruleId/enforcement-mode", (req: Request, res: Response) => {
+router.patch("/mcp-gateway/rules/:ruleId/enforcement-mode", async (req: Request, res: Response) => {
   try {
+    await ensureSeeded();
     const ruleId = req.params["ruleId"];
     if (!ruleId) return sendError(res, "ruleId is required", 400);
-    const rule = rules.get(ruleId);
+    const rule = await findRuleById(ruleId);
     if (!rule) return sendError(res, `Rule '${ruleId}' not found`, 404);
 
     const body = (req.body ?? {}) as Record<string, unknown>;
@@ -225,25 +412,78 @@ router.patch("/mcp-gateway/rules/:ruleId/enforcement-mode", (req: Request, res: 
     const requestedBy = String(body["requestedBy"] ?? "operator");
 
     if (rule.tier === "critical" && rule.enforcementMode !== requestedMode) {
-      rule.pendingModeChange = {
-        requestedMode,
-        requestedBy,
-        requestedAt: new Date().toISOString(),
-        guardianApprovalId: `approval-mcp-gw-${randomUUID().slice(0, 8)}`,
-      };
-      rules.set(ruleId, rule);
+      // Persist the pending mode change AND open an entry in the
+      // approvals queue in a single transaction. If either side fails
+      // we abort — we never want a rule sitting in 'pending' state
+      // without a real approval row to back it.
+      const requestedAt = new Date();
+      let pendingModeChange: PendingModeChange;
+      try {
+        pendingModeChange = await db.transaction(async (tx) => {
+          const [inserted] = await tx
+            .insert(approvalRequestsTable)
+            .values({
+              resourceType: "policy",
+              resourceId: ruleId,
+              title: `MCP gateway: change ${rule.name} enforcement to '${requestedMode}'`,
+              description:
+                `Critical-tier containment rule '${rule.name}' (agent class ${rule.agentClass}) ` +
+                `requested mode change from '${rule.enforcementMode}' to '${requestedMode}'.`,
+              actionClass: "policy.enforcement-mode",
+              priority: "high",
+              status: "pending",
+              requestedByRole: requestedBy,
+              requiredApproverRole: "guardian",
+              correlationId: ruleId,
+              serviceAttribution: "mcp-gateway",
+              payload: {
+                ruleId,
+                currentMode: rule.enforcementMode,
+                requestedMode,
+                tier: rule.tier,
+              },
+            })
+            .returning({ id: approvalRequestsTable.id });
+          if (!inserted?.id) {
+            throw new Error("approval_requests insert returned no id");
+          }
+          const pmc: PendingModeChange = {
+            requestedMode,
+            requestedBy,
+            requestedAt: requestedAt.toISOString(),
+            guardianApprovalId: `approval-${inserted.id}`,
+          };
+          await tx
+            .update(agentMeshContainmentRulesTable)
+            .set({ pendingModeChange: pmc })
+            .where(eq(agentMeshContainmentRulesTable.id, ruleId));
+          return pmc;
+        });
+      } catch (err) {
+        logger.error({ err, ruleId }, "[mcp-gateway] failed to enqueue guardian approval — rejecting mode change");
+        return sendError(res, "Failed to enqueue Guardian approval for critical-tier mode change", 500);
+      }
+
+      const updated = await findRuleById(ruleId);
       return sendSuccess(res, {
         applied: false,
         pendingApproval: true,
-        rule,
+        rule: updated ?? { ...rule, pendingModeChange },
         message: "Critical-tier mode changes require Guardian approval before taking effect.",
       });
     }
 
-    rule.enforcementMode = requestedMode;
-    rule.pendingModeChange = undefined;
-    rules.set(ruleId, rule);
-    return sendSuccess(res, { applied: true, pendingApproval: false, rule });
+    await db
+      .update(agentMeshContainmentRulesTable)
+      .set({ enforcementMode: requestedMode, pendingModeChange: null })
+      .where(eq(agentMeshContainmentRulesTable.id, ruleId));
+
+    const updated = await findRuleById(ruleId);
+    return sendSuccess(res, {
+      applied: true,
+      pendingApproval: false,
+      rule: updated ?? { ...rule, enforcementMode: requestedMode, pendingModeChange: undefined },
+    });
   } catch (err) {
     return handleRouteError(res, err, "mcp-gateway-mode");
   }

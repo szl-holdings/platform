@@ -99,9 +99,39 @@ export const agentMeshContainmentRulesTable = pgTable("agent_mesh_containment_ru
   allowedReadPaths: jsonb("allowed_read_paths").$type<string[]>().notNull().default([]),
   allowedEgressDomains: jsonb("allowed_egress_domains").$type<string[]>().notNull().default([]),
   tier: text("tier").notNull().default("standard"),
+  enforcementMode: text("enforcement_mode").notNull().default("log-only"),
+  pendingModeChange: jsonb("pending_mode_change").$type<{
+    requestedMode: string;
+    requestedBy: string;
+    requestedAt: string;
+    guardianApprovalId: string;
+  } | null>(),
   violationCount: integer("violation_count").notNull().default(0),
   lastEvaluatedAt: timestamp("last_evaluated_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+export const agentMeshGatewayEventsTable = pgTable(
+  "agent_mesh_gateway_events",
+  {
+    id: text("id").primaryKey(),
+    orgId: integer("org_id"),
+    ruleId: text("rule_id").notNull(),
+    agentClass: text("agent_class").notNull(),
+    mcpServerId: text("mcp_server_id").notNull(),
+    tool: text("tool").notNull(),
+    egressDomain: text("egress_domain"),
+    decision: text("decision").notNull(),
+    reason: text("reason").notNull().default(""),
+    enforcementMode: text("enforcement_mode").notNull(),
+    linkedExposureId: text("linked_exposure_id"),
+    occurredAt: timestamp("occurred_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    occurredAtIdx: index("agent_mesh_gateway_events_occurred_at_idx").on(t.occurredAt),
+    ruleIdx: index("agent_mesh_gateway_events_rule_idx").on(t.ruleId),
+    decisionIdx: index("agent_mesh_gateway_events_decision_idx").on(t.decision),
+  }),
+);
 
 export const agentMeshDriftSnapshotsTable = pgTable("agent_mesh_drift_snapshots", {
   id: text("id").primaryKey(),
