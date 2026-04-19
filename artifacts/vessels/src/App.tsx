@@ -37,6 +37,7 @@ import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";
 import { SidebarNav, type SidebarNavSection } from "@szl-holdings/shared-ui/design-system";
 import { DashboardShell as SharedDashboardShell } from "@szl-holdings/shared-ui/design-system";
 import { StaleIndicator } from "@szl-holdings/shared-ui/stale-indicator";
+import { ServiceStatusRail } from "@szl-holdings/shared-ui/service-status-rail";
 import MarketingHomePage from "@/pages/marketing-home";
 
 const VESSELS_ACCENT = LANE_ACCENT_HEX.vessels.primaryLight;
@@ -743,6 +744,9 @@ function VesselsDashboard({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpe
             <DashboardRouter />
           </main>
         </SharedDashboardShell>
+        <div className="fixed bottom-0 left-0 right-0 z-40">
+          <ServiceStatusRail />
+        </div>
       </div>
       <Toaster />
       <CommandPalette

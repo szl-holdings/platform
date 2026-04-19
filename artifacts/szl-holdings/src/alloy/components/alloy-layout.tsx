@@ -8,6 +8,7 @@ import { Zap, Activity, GitBranch, Network, Shield, BarChart2, ChevronRight, Bel
 import { useRealtimeChannel } from "@szl-holdings/shared-ui/use-realtime-channel";
 import { useOnboardingAnalytics } from "@szl-holdings/shared-ui/onboarding";
 import { CommandPalette, useCommandPalette, getEcosystemSwitchCommands, createBaselineWebActions, useRegisterCommands, type CommandItem } from "@szl-holdings/shared-ui/command-palette";
+import { ServiceStatusRail } from "@szl-holdings/shared-ui/service-status-rail";
 
 const ALLOY_ACCENT = "#4B8BDB";
 
@@ -489,6 +490,7 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
             {children}
           </SectionErrorBoundary>
         </main>
+        <ServiceStatusRail />
       </div>
 
       <OnboardingWizard config={SZL_ONBOARDING_CONFIG} onComplete={trackTourCompleted} onSkip={trackTourSkipped} />

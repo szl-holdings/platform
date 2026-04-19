@@ -45,6 +45,7 @@
     "./hooks/use-toast": "./src/hooks/use-toast.ts",
     "./hooks/use-optimistic-mutation": "./src/hooks/use-optimistic-mutation.ts",
     "./stale-indicator": "./src/stale-indicator.tsx",
+    "./service-status-rail": "./src/service-status-rail.tsx",
     "./ui/accordion": "./src/ui/accordion.tsx",
     "./ui/alert-dialog": "./src/ui/alert-dialog.tsx",
     "./ui/alert": "./src/ui/alert.tsx",

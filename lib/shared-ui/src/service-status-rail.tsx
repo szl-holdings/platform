@@ -1,7 +1,14 @@
 import { useState, useEffect, useCallback } from "react";
 import { CheckCircle, AlertTriangle, RefreshCw, WifiOff } from "lucide-react";
 
-const API_BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "";
+const API_BASE = (() => {
+  try {
+    const env = (import.meta as unknown as { env?: Record<string, string | undefined> }).env;
+    return env?.VITE_API_BASE_URL ?? "";
+  } catch {
+    return "";
+  }
+})();
 
 type ProbeStatus = "ok" | "degraded" | "error" | "not_configured" | "connected" | "unavailable" | "backpressure" | string;
 type OverallStatus = "healthy" | "degraded" | "warning" | string;

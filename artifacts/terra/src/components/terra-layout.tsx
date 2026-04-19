@@ -15,6 +15,7 @@ import { useOnboardingAnalytics } from "@szl-holdings/shared-ui/onboarding";
 import { SidebarNav, type SidebarNavSection, DashboardShell as SharedDashboardShell } from "@szl-holdings/shared-ui/design-system";
 import { useQuery } from "@tanstack/react-query";
 import { colors, spacing } from "@szl-holdings/shared-ui/tokens";
+import { ServiceStatusRail } from "@szl-holdings/shared-ui/service-status-rail";
 
 const TERRA_ACCENT = LANE_ACCENT_HEX.terra.primary;
 const SIDEBAR_BG = "#080b0d";
@@ -330,6 +331,9 @@ export function TerraLayout({ children }: { children: ReactNode }) {
           </SectionErrorBoundary>
         </main>
       </SharedDashboardShell>
+      <div className="fixed bottom-0 left-0 right-0 z-40">
+        <ServiceStatusRail />
+      </div>
       <OnboardingWizard config={TERRA_ONBOARDING_CONFIG} onComplete={trackTourCompleted} onSkip={trackTourSkipped} />
     </>
   );
