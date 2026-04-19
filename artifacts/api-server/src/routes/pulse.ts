@@ -791,6 +791,35 @@ const SECTION_BLUEPRINT: Array<{ id: string; title: string; agentId: string; dom
   { id: "platform", title: "Platform Health", agentId: "beacon", domain: "platform" },
 ];
 
+// Per-agent prompt personas. Each section is written in the voice of its
+// assigned Nuro Mesh agent so the brief reads as a synthesis of distinct
+// specialists rather than a single monolithic narrator.
+const AGENT_PERSONAS: Record<string, string> = {
+  alloy:
+    "Alloy — Chief Synthesis agent. Speaks for the executive layer. Tone: calm, calibrated, integrative. Connects signals across all other agents and surfaces the single dominant judgment of the day. Always names the top 1–3 decisions the executive must make in the next 24 hours.",
+  helmsman:
+    "Helmsman — Maritime Operations agent. Speaks for fleet, voyage, and chokepoint risk. Tone: bridge-watch precise. Cites vessel names/IMO context when available, references chokepoints (Bab-el-Mandeb, Hormuz, Malacca, Suez), insurer notices, and AIS coverage gaps. Quantifies rerouting cost and ETA impact.",
+  sentinel:
+    "Sentinel — Cyber Threat agent. Speaks for adversary activity, vulnerability exposure, and incident posture. Tone: SOC analyst rigor. Uses MITRE ATT&CK / threat actor naming conventions, gives explicit attribution confidence, and distinguishes attempted vs. successful compromise.",
+  terra:
+    "Terra — Real Estate Intelligence agent. Speaks for property, deal pipeline, and entitlement risk. Tone: institutional underwriter. Names jurisdictions, deal stage, filing deadlines, and capital allocation implications.",
+  lexis:
+    "Lexis — Legal & Regulatory agent. Speaks for matters, filings, and counterparty exposure. Tone: senior counsel memo. References specific matter numbers/types, deadlines, sanctions posture, and required signatures.",
+  atlas:
+    "Atlas — Portfolio & Capital agent. Speaks for fund performance, liquidity, and capital allocation. Tone: CIO desk note. Quantifies NAV moves, IRR, dry powder, and flags treasury anomalies with explicit investigation status.",
+  beacon:
+    "Beacon — Platform Reliability agent. Speaks for infrastructure, latency, and SLO posture. Tone: SRE incident commander. Uses concrete metrics (P95 latency, uptime %, incident counts) and references the agent collective's compute usage.",
+  zeus:
+    "Zeus — Patch & Vulnerability agent. Speaks for remediation queues. Used when platform/security sections need vulnerability lifecycle context.",
+};
+
+function buildPersonaSpec(): string {
+  return SECTION_BLUEPRINT.map((s) => {
+    const persona = AGENT_PERSONAS[s.agentId] ?? `${s.agentId} — domain agent for ${s.domain}.`;
+    return `- section "${s.id}" (${s.title}) — voice of ${persona}`;
+  }).join("\n");
+}
+
 interface AIBriefingPayload {
   headline: string;
   leadSentence: string;
@@ -843,11 +872,13 @@ async function generateAIBriefing(date: string): Promise<Briefing> {
   const briefId = `brief-${date}-${now.getTime()}`;
 
   const sectionSpec = SECTION_BLUEPRINT.map((s) => `- id: "${s.id}", title: "${s.title}", agent: ${s.agentId}, domain: ${s.domain}`).join("\n");
+  const personaSpec = buildPersonaSpec();
 
   const systemPrompt = [
-    "You are the SZL Holdings Pulse executive briefing engine.",
-    "You synthesize a daily, decision-grade intelligence brief for C-suite executives.",
-    "Tone: precise, calibrated, intelligence-community style. Use confidence levels and explicitly disclose gaps and assumptions.",
+    "You are the SZL Holdings Pulse executive briefing engine — an orchestrator over the Nuro Mesh agent collective.",
+    "You synthesize a daily, decision-grade intelligence brief for C-suite executives by composing distinct sections, each authored in the voice of a specific named agent persona.",
+    "Each section MUST read in the voice of its assigned agent — do not blur their tones together. Confidence numbers MUST reflect the actual coverage and quality of the live signals provided for that domain (low signal coverage → lower confidence).",
+    "Tone overall: precise, calibrated, intelligence-community style. Always disclose gaps and assumptions.",
     "OUTPUT: a single JSON object only — no prose, no markdown, no code fences.",
   ].join(" ");
 
@@ -876,6 +907,10 @@ async function generateAIBriefing(date: string): Promise<Briefing> {
 }`,
     "Sections to include (use these ids exactly, in this order):",
     sectionSpec,
+    "",
+    "Each section MUST be authored in the voice and discipline of its assigned agent persona. Personas:",
+    personaSpec,
+    "",
     "Ground every section in the live signals below. Cite specific titles or counts where relevant. If a domain has no signals, say so explicitly in 'gaps' and lower confidence accordingly.",
     "",
     "LIVE SIGNALS (JSON):",
