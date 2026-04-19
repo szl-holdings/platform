@@ -15,6 +15,9 @@
  *   POST /admin/tenants               (tenantCreateSchema)
  *   GET  /notifications               (pagination metadata)
  *   GET  /billing/subscriptions       (pagination metadata)
+ *   GET  /billing/invoices            (pagination metadata)
+ *   GET  /auth/users                  (pagination metadata)
+ *   GET  /admin/tenants               (list-shape contract)
  */
 
 import { describe, it, expect, vi, beforeAll } from "vitest";
@@ -419,5 +422,136 @@ describe("GET /billing/subscriptions — pagination metadata", () => {
     const body = res.body as { error: string; details: { issues: unknown[] } };
     expect(body.error).toBeTruthy();
     expect(Array.isArray(body.details?.issues)).toBe(true);
+  });
+});
+
+// ===========================================================================
+// GET /billing/invoices  — Pagination metadata shape
+// ===========================================================================
+
+describe("GET /billing/invoices — pagination metadata", () => {
+  const app = buildApp(billingRouter as unknown as ExpressRouter);
+
+  it("returns { data, meta: { page, limit, offset } } with default pagination", async () => {
+    const res = await request(app).get("/billing/invoices");
+
+    expect(res.status).toBe(200);
+    const body = res.body as PaginatedBody;
+    expect(Array.isArray(body.data)).toBe(true);
+    expect(body.meta).toBeDefined();
+    expect(typeof body.meta.page).toBe("number");
+    expect(typeof body.meta.limit).toBe("number");
+    expect(typeof body.meta.offset).toBe("number");
+  });
+
+  it("uses default page=1, limit=50, offset=0 when no query is provided", async () => {
+    const res = await request(app).get("/billing/invoices");
+
+    expect(res.status).toBe(200);
+    const body = res.body as PaginatedBody;
+    expect(body.meta.page).toBe(1);
+    expect(body.meta.limit).toBe(50);
+    expect(body.meta.offset).toBe(0);
+  });
+
+  it("reflects custom page and limit in meta (offset = (page-1) * limit)", async () => {
+    const res = await request(app).get("/billing/invoices?page=4&limit=15");
+
+    expect(res.status).toBe(200);
+    const body = res.body as PaginatedBody;
+    expect(body.meta.page).toBe(4);
+    expect(body.meta.limit).toBe(15);
+    expect(body.meta.offset).toBe(45);
+  });
+
+  it("rejects an excessive limit with 400 (enforced by query validation)", async () => {
+    const res = await request(app).get("/billing/invoices?limit=9999");
+
+    expect(res.status).toBe(400);
+    const body = res.body as { error: string; details: { issues: unknown[] } };
+    expect(body.error).toBeTruthy();
+    expect(Array.isArray(body.details?.issues)).toBe(true);
+  });
+});
+
+// ===========================================================================
+// GET /auth/users  — Pagination metadata shape
+// ===========================================================================
+
+describe("GET /auth/users — pagination metadata", () => {
+  const app = buildApp(authRouter as unknown as ExpressRouter);
+
+  it("returns { data, meta: { page, limit, offset } } with default pagination", async () => {
+    const res = await request(app).get("/auth/users");
+
+    expect(res.status).toBe(200);
+    const body = res.body as PaginatedBody;
+    expect(Array.isArray(body.data)).toBe(true);
+    expect(body.meta).toBeDefined();
+    expect(typeof body.meta.page).toBe("number");
+    expect(typeof body.meta.limit).toBe("number");
+    expect(typeof body.meta.offset).toBe("number");
+  });
+
+  it("uses default page=1, limit=50, offset=0 when no query is provided", async () => {
+    const res = await request(app).get("/auth/users");
+
+    expect(res.status).toBe(200);
+    const body = res.body as PaginatedBody;
+    expect(body.meta.page).toBe(1);
+    expect(body.meta.limit).toBe(50);
+    expect(body.meta.offset).toBe(0);
+  });
+
+  it("reflects custom page and limit in meta (offset = (page-1) * limit)", async () => {
+    const res = await request(app).get("/auth/users?page=5&limit=10");
+
+    expect(res.status).toBe(200);
+    const body = res.body as PaginatedBody;
+    expect(body.meta.page).toBe(5);
+    expect(body.meta.limit).toBe(10);
+    expect(body.meta.offset).toBe(40);
+  });
+
+  it("rejects an excessive limit with 400 (enforced by query validation)", async () => {
+    const res = await request(app).get("/auth/users?limit=9999");
+
+    expect(res.status).toBe(400);
+    const body = res.body as { error: string; details: { issues: unknown[] } };
+    expect(body.error).toBeTruthy();
+    expect(Array.isArray(body.details?.issues)).toBe(true);
+  });
+});
+
+// ===========================================================================
+// GET /admin/tenants  — List response shape contract
+// ---------------------------------------------------------------------------
+// NOTE: Unlike the other list endpoints in this file, /admin/tenants does not
+// emit { data, meta: { page, limit, offset } }. It returns the legacy shape
+// { count, tenants: [...] } that existing admin UIs (AzurePanel, tenant
+// branding, SCIM, etc.) consume directly. Tests here lock in the actual
+// contract so future refactors don't silently break those frontends.
+// ===========================================================================
+
+describe("GET /admin/tenants — list response contract", () => {
+  const app = buildApp(tenantProvisioningRouter as unknown as ExpressRouter);
+
+  it("returns 200 with a { count, tenants[] } envelope", async () => {
+    const res = await request(app).get("/admin/tenants");
+
+    expect(res.status).toBe(200);
+    const body = res.body as { count: number; tenants: unknown[] };
+    expect(typeof body.count).toBe("number");
+    expect(Array.isArray(body.tenants)).toBe(true);
+    expect(body.count).toBe(body.tenants.length);
+  });
+
+  it("ignores page/limit query params without erroring (endpoint is unpaginated)", async () => {
+    const res = await request(app).get("/admin/tenants?page=2&limit=10");
+
+    expect(res.status).toBe(200);
+    const body = res.body as { count: number; tenants: unknown[] };
+    expect(Array.isArray(body.tenants)).toBe(true);
+    expect(typeof body.count).toBe("number");
   });
 });
