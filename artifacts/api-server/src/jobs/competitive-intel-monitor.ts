@@ -53,6 +53,19 @@ export interface IntelAlert {
   dismissed: boolean;
   dismissedAt?: string;
   source: "rss" | "seed";
+  /**
+   * ISO timestamp when this alert was pushed to Slack/email. Set the first
+   * time `notifyNewAlerts` includes the alert in a dispatch so we never
+   * re-notify on subsequent poll cycles even if the alert is later
+   * dismissed and undismissed.
+   */
+  notifiedAt?: string;
+}
+
+export interface LaneInfo {
+  laneId: string;
+  champions: string[];
+  muted: boolean;
 }
 
 export interface FeedHealth {
@@ -154,6 +167,12 @@ interface PersistedState {
   seededAt: string | null;
   feeds: ChampionFeed[];
   feedsSeededAt: string | null;
+  /**
+   * Per-lane mute switches. When true, the notifier skips Slack/email
+   * dispatch for new alerts in that lane. The alert still appears on the
+   * Atlas page — only the push side is suppressed.
+   */
+  mutedLanes: Record<string, boolean>;
 }
 
 const state: PersistedState = {
@@ -164,6 +183,7 @@ const state: PersistedState = {
   seededAt: null,
   feeds: [],
   feedsSeededAt: null,
+  mutedLanes: {},
 };
 
 /**
@@ -201,6 +221,9 @@ async function ensureLoaded(): Promise<void> {
     }
     if (typeof parsed.feedsSeededAt === "string" || parsed.feedsSeededAt === null) {
       state.feedsSeededAt = parsed.feedsSeededAt ?? null;
+    }
+    if (parsed.mutedLanes && typeof parsed.mutedLanes === "object") {
+      state.mutedLanes = parsed.mutedLanes as Record<string, boolean>;
     }
   } catch (err) {
     const code = (err as NodeJS.ErrnoException).code;
@@ -512,6 +535,7 @@ async function pollFeed(feed: ChampionFeed): Promise<number> {
 
   let created = 0;
   const cutoff = Date.now() - 30 * 24 * 3600_000; // ignore items older than 30d
+  const _newAlerts: IntelAlert[] = [];
 
   for (const item of items.slice(0, 25)) {
     if (!isMajorFeatureAnnouncement(item.title, item.summary)) continue;
@@ -524,7 +548,7 @@ async function pollFeed(feed: ChampionFeed): Promise<number> {
     const reason = feed.recommendationHint
       ? `Analyst hint for ${feed.champion}: treat as ${feed.recommendationHint}.`
       : auto.reason;
-    state.alerts.push({
+    const alert: IntelAlert = {
       id,
       laneId: feed.laneId,
       champion: feed.champion,
@@ -537,13 +561,20 @@ async function pollFeed(feed: ChampionFeed): Promise<number> {
       recommendationReason: reason,
       dismissed: false,
       source: "rss",
-    });
+    };
+    state.alerts.push(alert);
+    _newAlerts.push(alert);
     created++;
     health.alertsCreated++;
   }
 
+  // Stash the new alerts on the feed-level scratch so the caller (pollAllFeeds)
+  // can collect them after Promise.allSettled without re-iterating state.
+  _newAlertsByFeed.set(feed.id, _newAlerts);
   return created;
 }
+
+const _newAlertsByFeed = new Map<string, IntelAlert[]>();
 
 export async function pollAllFeeds(): Promise<PollResult> {
   await ensureLoaded();
@@ -552,6 +583,8 @@ export async function pollAllFeeds(): Promise<PollResult> {
   let success = 0;
   let newAlerts = 0;
   const activeFeeds = state.feeds.filter(f => !f.paused);
+
+  _newAlertsByFeed.clear();
 
   await Promise.allSettled(
     activeFeeds.map(async feed => {
@@ -564,6 +597,37 @@ export async function pollAllFeeds(): Promise<PollResult> {
       }
     }),
   );
+
+  // Collect everything we just created so the notifier can decide what to push.
+  const justCreated: IntelAlert[] = [];
+  for (const arr of _newAlertsByFeed.values()) justCreated.push(...arr);
+  _newAlertsByFeed.clear();
+
+  // Also include recent alerts whose previous notification attempt failed
+  // (notifiedAt is still unset). Capped at 7 days so a permanently-broken
+  // webhook can't grow the retry batch unbounded.
+  const RETRY_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
+  const cutoff = Date.now() - RETRY_WINDOW_MS;
+  const justCreatedIds = new Set(justCreated.map((a) => a.id));
+  const retries = state.alerts.filter(
+    (a) =>
+      !a.notifiedAt &&
+      !a.dismissed &&
+      !justCreatedIds.has(a.id) &&
+      new Date(a.detectedAt).getTime() >= cutoff,
+  );
+  const toNotify = [...justCreated, ...retries];
+
+  // Notify Slack/email for high-confidence, non-muted, non-dismissed alerts.
+  // Errors are swallowed so a flaky webhook never breaks the poll cycle.
+  if (toNotify.length > 0) {
+    try {
+      const { notifyNewAlerts } = await import("../lib/competitive-intel-notifications");
+      await notifyNewAlerts(toNotify);
+    } catch (err) {
+      logger.warn({ err }, "[competitive-intel] notifyNewAlerts failed");
+    }
+  }
 
   // Cap total alert history per lane to keep state file bounded
   const MAX_PER_LANE = 50;
@@ -614,6 +678,59 @@ export async function dismissAlert(id: string, actor?: string): Promise<IntelAle
   await persistSoon();
   logger.info({ alertId: id, actor }, "[competitive-intel] Alert dismissed");
   return alert;
+}
+
+export async function listLanes(): Promise<LaneInfo[]> {
+  await ensureLoaded();
+  const byLane = new Map<string, Set<string>>();
+  for (const f of CHAMPION_FEEDS) {
+    const set = byLane.get(f.laneId) ?? new Set<string>();
+    set.add(f.champion);
+    byLane.set(f.laneId, set);
+  }
+  return Array.from(byLane.entries())
+    .map(([laneId, champs]) => ({
+      laneId,
+      champions: Array.from(champs).sort(),
+      muted: !!state.mutedLanes[laneId],
+    }))
+    .sort((a, b) => a.laneId.localeCompare(b.laneId));
+}
+
+export function isLaneMuted(laneId: string): boolean {
+  return !!state.mutedLanes[laneId];
+}
+
+export async function setLaneMute(laneId: string, muted: boolean): Promise<LaneInfo | null> {
+  await ensureLoaded();
+  const known = CHAMPION_FEEDS.some(f => f.laneId === laneId);
+  if (!known) return null;
+  if (muted) state.mutedLanes[laneId] = true;
+  else delete state.mutedLanes[laneId];
+  await persistSoon();
+  logger.info({ laneId, muted }, "[competitive-intel] Lane mute updated");
+  const lanes = await listLanes();
+  return lanes.find(l => l.laneId === laneId) ?? null;
+}
+
+/**
+ * Mark the given alert IDs as notified so the next poll cycle does not
+ * dispatch them again. Caller (notifier) decides which IDs were actually
+ * pushed to Slack/email.
+ */
+export async function markAlertsNotified(ids: string[]): Promise<void> {
+  if (ids.length === 0) return;
+  await ensureLoaded();
+  const set = new Set(ids);
+  const stamp = new Date().toISOString();
+  let touched = 0;
+  for (const a of state.alerts) {
+    if (set.has(a.id) && !a.notifiedAt) {
+      a.notifiedAt = stamp;
+      touched++;
+    }
+  }
+  if (touched > 0) await persistSoon();
 }
 
 export async function getMonitorStatus(): Promise<{

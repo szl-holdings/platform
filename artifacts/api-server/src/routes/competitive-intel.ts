@@ -9,6 +9,8 @@
  *   GET  /api/competitive-intel/status        — feed health + last poll metadata
  *   POST /api/competitive-intel/alerts/:id/dismiss
  *   POST /api/competitive-intel/refresh       — manual poll trigger
+ *   GET  /api/competitive-intel/lanes         — lanes + mute state
+ *   POST /api/competitive-intel/lanes/:laneId/mute   — body { muted: boolean }
  */
 
 import { Router, type IRouter, type Request, type Response } from "express";
@@ -19,6 +21,8 @@ import {
   dismissAlert,
   getMonitorStatus,
   pollAllFeeds,
+  listLanes,
+  setLaneMute,
   CHAMPION_FEEDS,
   listFeeds,
   addFeed,
@@ -143,6 +147,36 @@ router.delete("/feeds/:id", adminGuard, async (req: Request, res: Response) => {
     sendSuccess(res, { id, removed: true });
   } catch (err) {
     handleRouteError(res, err, "competitive-intel:remove-feed");
+  }
+});
+
+// ─── Lane mute controls ─────────────────────────────────────────────────────
+
+router.get("/lanes", async (_req: Request, res: Response) => {
+  try {
+    const lanes = await listLanes();
+    sendSuccess(res, { lanes, count: lanes.length });
+  } catch (err) {
+    handleRouteError(res, err, "competitive-intel:list-lanes");
+  }
+});
+
+router.post("/lanes/:laneId/mute", async (req: Request, res: Response) => {
+  try {
+    const laneId = req.params.laneId;
+    const muted = (req.body as { muted?: unknown } | null)?.muted;
+    if (typeof muted !== "boolean") {
+      sendError(res, "Body must include { muted: boolean }", 400, "INVALID_BODY");
+      return;
+    }
+    const lane = await setLaneMute(laneId, muted);
+    if (!lane) {
+      sendError(res, "Unknown lane", 404, "LANE_NOT_FOUND");
+      return;
+    }
+    sendSuccess(res, lane);
+  } catch (err) {
+    handleRouteError(res, err, "competitive-intel:lane-mute");
   }
 });
 
