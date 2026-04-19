@@ -298,6 +298,7 @@ export function OfflineQueuePanel({
   const [loaded, setLoaded] = useState(false);
   const [recentlyClearedAt, setRecentlyClearedAt] = useState<number | null>(null);
   const [retryingId, setRetryingId] = useState<string | null>(null);
+  const [bulkBusy, setBulkBusy] = useState<null | "retry" | "discard">(null);
 
   const suppressSyncedBannerRef = React.useRef(false);
 
@@ -353,6 +354,57 @@ export function OfflineQueuePanel({
     },
     [refresh, onChanged, retryingId]
   );
+
+  const handleRetryAll = useCallback(async () => {
+    if (bulkBusy || retryingId) return;
+    const snapshot = items.slice();
+    if (snapshot.length === 0) return;
+    setBulkBusy("retry");
+    let succeeded = 0;
+    let failed = 0;
+    for (const item of snapshot) {
+      const result = await retryItem(item);
+      if (result.ok) succeeded += 1;
+      else failed += 1;
+    }
+    setBulkBusy(null);
+    suppressSyncedBannerRef.current = failed > 0;
+    await refresh();
+    if (succeeded > 0) onChanged?.();
+    Alert.alert(
+      "Retry all",
+      `${succeeded} of ${snapshot.length} action${snapshot.length !== 1 ? "s" : ""} synced.${
+        failed > 0 ? ` ${failed} still queued.` : ""
+      }`
+    );
+  }, [items, bulkBusy, retryingId, refresh, onChanged]);
+
+  const handleDiscardAll = useCallback(() => {
+    if (bulkBusy || retryingId) return;
+    const snapshot = items.slice();
+    if (snapshot.length === 0) return;
+    Alert.alert(
+      "Discard all queued actions",
+      `Remove all ${snapshot.length} queued actions? They will not be submitted.`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Discard all",
+          style: "destructive",
+          onPress: async () => {
+            setBulkBusy("discard");
+            for (const item of snapshot) {
+              await discardItem(item);
+            }
+            setBulkBusy(null);
+            suppressSyncedBannerRef.current = true;
+            await refresh();
+            onChanged?.();
+          },
+        },
+      ]
+    );
+  }, [items, bulkBusy, retryingId, refresh, onChanged]);
 
   const handleDiscard = useCallback(
     (item: UnifiedQueuedItem) => {
@@ -424,6 +476,54 @@ export function OfflineQueuePanel({
           style={{ marginLeft: 6 }}
         />
       </TouchableOpacity>
+
+      {expanded && items.length >= 2 && (
+        <View
+          style={[
+            styles.bulkBar,
+            { borderColor: colors.border ?? "#1e2433", backgroundColor: (colors.background ?? "#070a14") + "60" },
+          ]}
+        >
+          <TouchableOpacity
+            onPress={handleRetryAll}
+            disabled={bulkBusy !== null || retryingId !== null}
+            style={[
+              styles.bulkBtn,
+              { borderColor: ACCENT + "55", backgroundColor: ACCENT + "18" },
+              (bulkBusy !== null || retryingId !== null) && { opacity: 0.5 },
+            ]}
+            hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+          >
+            {bulkBusy === "retry" ? (
+              <ActivityIndicator size="small" color={ACCENT} />
+            ) : (
+              <>
+                <Feather name="upload-cloud" size={12} color={ACCENT} />
+                <Text style={[styles.bulkBtnText, { color: ACCENT }]}>Retry all ({items.length})</Text>
+              </>
+            )}
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={handleDiscardAll}
+            disabled={bulkBusy !== null || retryingId !== null}
+            style={[
+              styles.bulkBtn,
+              { borderColor: RED + "55", backgroundColor: RED + "18" },
+              (bulkBusy !== null || retryingId !== null) && { opacity: 0.5 },
+            ]}
+            hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+          >
+            {bulkBusy === "discard" ? (
+              <ActivityIndicator size="small" color={RED} />
+            ) : (
+              <>
+                <Feather name="trash-2" size={12} color={RED} />
+                <Text style={[styles.bulkBtnText, { color: RED }]}>Discard all</Text>
+              </>
+            )}
+          </TouchableOpacity>
+        </View>
+      )}
 
       {expanded && (
         <View style={styles.list}>
@@ -507,6 +607,29 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 12, fontWeight: "700", letterSpacing: 0.3 },
   headerHint: { fontSize: 9, fontWeight: "700", letterSpacing: 0.6 },
   list: { paddingHorizontal: 10, paddingBottom: 10, gap: 8 },
+  bulkBar: {
+    flexDirection: "row",
+    gap: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    marginHorizontal: 10,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderRadius: 8,
+  },
+  bulkBtn: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 6,
+    borderWidth: 1,
+    minHeight: 30,
+  },
+  bulkBtnText: { fontSize: 11, fontWeight: "700", letterSpacing: 0.3 },
   itemRow: {
     flexDirection: "row",
     alignItems: "center",
