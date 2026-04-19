@@ -25,13 +25,16 @@ Enable **"Require status checks to pass before merging"** and add the following 
 
 | Status Check | Workflow | Description |
 |---|---|---|
-| `CI Gate` | `.github/workflows/ci.yml` | Aggregate gate — lint, typecheck, test, build |
+| `CI Gate` | `.github/workflows/ci.yml` | Aggregate gate — lint, typecheck, test, build, smoke, proof-chain |
+| `Readiness Gate (smoke:product-mode)` | `.github/workflows/ci.yml` | Product-mode smoke test — surfaces readiness directly on PRs |
 | `E2E Gate` | `.github/workflows/e2e.yml` | Aggregate E2E gate |
 | `Lighthouse Gate` | `.github/workflows/lighthouse.yml` | Performance score thresholds |
 | `dependency-review` | `.github/workflows/dependency-review.yml` | Vulnerability scan on dependency changes |
 | `analyze` | `.github/workflows/codeql.yml` | CodeQL security analysis |
 
 > **Tip:** `CI Gate` and `E2E Gate` are aggregate jobs — requiring these two (plus `Lighthouse Gate` and `dependency-review`) gives clean PR feedback while covering all required checks underneath.
+>
+> **Decision — surface `Readiness Gate (smoke:product-mode)` as its own required check:** the readiness smoke job is already aggregated inside `CI Gate` (see `.github/workflows/ci.yml` — the `ci-gate` job lists `readiness-gate` in its `needs`). However, we additionally require it as a named status check so reviewers can see at a glance on the PR whether the product-mode smoke test passed without drilling into the `CI Gate` logs. The job name in branch protection must match the workflow job's `name:` exactly: `Readiness Gate (smoke:product-mode)`.
 
 ### Lighthouse Score Thresholds
 
