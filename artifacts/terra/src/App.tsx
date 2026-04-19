@@ -107,6 +107,7 @@ const CovenantMonitoringPage = lazy(() => import("@/pages/covenant-monitoring"))
 const DistressForecastPage = lazy(() => import("@/pages/distress-forecast"));
 const UnderwritingCopilotPage = lazy(() => import("@/pages/underwriting-copilot"));
 const DiligenceRoomPage = lazy(() => import("@/pages/diligence-room"));
+const RiskSimulationPage = lazy(() => import("@/pages/risk-simulation"));
 
 function PageLoader() {
   return (
@@ -209,6 +210,7 @@ function PrivateRouter() {
         <Route path="/underwriting-copilot" component={UnderwritingCopilotPage} />
         <Route path="/diligence-room" component={DiligenceRoomPage} />
         <Route path="/governed-cockpit" component={GovernedCockpitPage} />
+        <Route path="/risk-simulation" component={RiskSimulationPage} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>

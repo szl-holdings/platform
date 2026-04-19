@@ -213,6 +213,7 @@ const CounterpartyRiskMapPage = lazy(() => import("@/pages/counterparty-risk-map
 const VoyageTwinPage = lazy(() => import("@/pages/voyage-twin"));
 const GovernedCockpitPage = lazy(() => import("@/pages/governed-cockpit"));
 const GeoDecisionCenterPage = lazy(() => import("@/pages/geo-decision-center"));
+const RiskSimulationPage = lazy(() => import("@/pages/risk-simulation"));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -419,6 +420,7 @@ function VesselsSidebarContent({ expanded, onMobileClose, onToggleCollapse }: { 
         { id: "trade-flow-heatmap", label: "Trade Flow Heatmap", href: "/trade-flow-heatmap", icon: <BarChart3 className="w-3.5 h-3.5" /> },
         { id: "intelligence-briefs", label: "Intelligence Briefs", href: "/intelligence-briefs", icon: <Zap className="w-3.5 h-3.5" /> },
         { id: "trading-desk", label: "Trading Desk", href: "/trading-desk", icon: <TrendingUp className="w-3.5 h-3.5" /> },
+        { id: "risk-simulation", label: "Risk Simulation", href: "/risk-simulation", icon: <Calculator className="w-3.5 h-3.5" /> },
       ],
     },
     {
@@ -642,6 +644,7 @@ function DashboardRouter() {
         <Route path="/voyage-twin" component={VoyageTwinPage} />
         <Route path="/governed-cockpit" component={GovernedCockpitPage} />
         <Route path="/geo-decision-center" component={GeoDecisionCenterPage} />
+        <Route path="/risk-simulation" component={RiskSimulationPage} />
         <Route>
           <div className="flex items-center justify-center h-full">
             <p className="text-sky-400/40">Page not found</p>

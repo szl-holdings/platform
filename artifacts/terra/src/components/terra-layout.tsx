@@ -68,6 +68,7 @@ const NAV_SECTIONS: SidebarNavSection[] = [
       { id: "atlas-runtime", href: "/atlas-runtime", label: "Spatial Assets", icon: <MapPin className="w-full h-full" /> },
       { id: "property-replay", href: "/replay", label: "Property Replay", icon: <RefreshCw className="w-full h-full" /> },
       { id: "scenario-branches", href: "/scenario-branches", label: "Scenario Branches", icon: <GitBranch className="w-full h-full" /> },
+      { id: "risk-simulation", href: "/risk-simulation", label: "Risk Simulation", icon: <Calculator className="w-full h-full" /> },
       { id: "constellation", href: "/constellation", label: "Constellation", icon: <Network className="w-full h-full" /> },
     ],
   },
