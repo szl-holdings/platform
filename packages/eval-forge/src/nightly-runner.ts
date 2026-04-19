@@ -1,10 +1,27 @@
 import { runEvalSuite, checkRunRegression } from "./runtime.js";
 import { FORGE_SUITES } from "./suites/index.js";
 import type { EvalSuiteDef, EvalExecutor, EvalRunReport } from "./types.js";
+import { buildSuiteExecutor, type EvalInferFn } from "./executors.js";
 
 export interface NightlyRunOptions {
   suites?: EvalSuiteDef[];
+  /**
+   * Single executor used for every suite. Mutually exclusive with
+   * `executorFactory` and `infer`. If none of these are provided the runner
+   * falls back to the heuristic stub so existing CI runs keep working.
+   */
   executor?: EvalExecutor;
+  /**
+   * Per-suite executor factory. Use this when each eval type needs a
+   * different real executor (the typical case for production runs).
+   */
+  executorFactory?: (suite: EvalSuiteDef) => EvalExecutor;
+  /**
+   * Inference function injected into the built-in per-eval-type executors.
+   * Pass this to wire real model calls in one line. Ignored when an explicit
+   * `executor` or `executorFactory` is provided.
+   */
+  infer?: EvalInferFn;
   baselineStore?: Map<string, EvalRunReport>;
   regressionThresholdPct?: number;
   triggeredBy?: string;
@@ -49,12 +66,24 @@ const stubExecutor: EvalExecutor = async (input, caseId, domain) => {
 export async function runNightlyEvals(opts: NightlyRunOptions = {}): Promise<NightlyRunSummary> {
   const {
     suites = FORGE_SUITES,
-    executor = stubExecutor,
+    executor,
+    executorFactory,
+    infer,
     baselineStore = new Map(),
     regressionThresholdPct = 5,
     triggeredBy = "nightly-cron",
     verbose = false,
   } = opts;
+
+  // Resolve which executor to use for a given suite. Precedence:
+  //   explicit `executor` → `executorFactory` → `infer` (build a per-eval-type
+  //   executor backed by the injected inference fn) → built-in heuristic stub.
+  const resolveExecutor = (suite: EvalSuiteDef): EvalExecutor => {
+    if (executor) return executor;
+    if (executorFactory) return executorFactory(suite);
+    if (infer) return buildSuiteExecutor(suite, infer);
+    return stubExecutor;
+  };
 
   const startTime = Date.now();
   const runAt = new Date().toISOString();
@@ -73,7 +102,7 @@ export async function runNightlyEvals(opts: NightlyRunOptions = {}): Promise<Nig
       console.log(`[Eval Forge]   Running: ${suite.name} (${suite.evalType}, ${suite.cases.length} cases)`);
     }
 
-    const report = await runEvalSuite(suite, executor, {
+    const report = await runEvalSuite(suite, resolveExecutor(suite), {
       triggeredBy,
       maxConcurrency: 5,
     });

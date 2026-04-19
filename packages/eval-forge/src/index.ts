@@ -4,6 +4,7 @@ export * from "./graders.js";
 export * from "./runtime.js";
 export * from "./nightly-runner.js";
 export * from "./suites/index.js";
+export * from "./executors.js";
 
 export { runCli } from "./cli.js";
 

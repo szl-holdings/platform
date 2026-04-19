@@ -26,6 +26,7 @@ import {
   persistEvalForgeRun,
   loadRecentRunsFromDb,
 } from "../lib/eval-forge-store";
+import { defaultExecutorFactory, buildDefaultExecutor } from "../lib/eval-executors";
 import {validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
@@ -59,6 +60,7 @@ async function runAndPersistNightly(): Promise<void> {
     const summary = await runNightlyEvals({
       triggeredBy: "nightly-cron",
       baselineStore,
+      executorFactory: defaultExecutorFactory,
       verbose: false,
     });
     for (const report of summary.suiteReports) {
@@ -68,23 +70,18 @@ async function runAndPersistNightly(): Promise<void> {
   } catch {}
 }
 
-scheduleNightlyRun(2, { triggeredBy: "nightly-cron", verbose: false })
+scheduleNightlyRun(2, { triggeredBy: "nightly-cron", executorFactory: defaultExecutorFactory, verbose: false })
   .then(({ unschedule }: { unschedule: () => void }) => {
     process.once("SIGTERM", unschedule);
     process.once("SIGINT", unschedule);
   })
   .catch(() => {});
 
-function defaultExecutor(input: any, caseId: string, domain: string) {
-  const start = Date.now();
-  return Promise.resolve({
-    output: { ...input, _stub: true, caseId, domain },
-    model: "stub-executor-v1",
-    latencyMs: Date.now() - start,
-    tokensUsed: 0,
-    costUsd: 0,
-  });
-}
+// `defaultExecutor` is now resolved per-suite via `buildDefaultExecutor`,
+// which selects a real per-eval-type executor backed by the production AI
+// gateway (`gatewayInfer`). Each executor returns shaped output the matching
+// grader can score, so eval results reflect real model behaviour rather than
+// echoing case input.
 
 // ---------------------------------------------------------------------------
 // Variant replay support
@@ -493,7 +490,7 @@ router.post(
         .filter((r) => r.suiteId === suiteId)
         .sort((a, b) => b.runAt.localeCompare(a.runAt))[0];
 
-      const report = await runEvalSuite(suite, defaultExecutor, {
+      const report = await runEvalSuite(suite, buildDefaultExecutor(suite), {
         triggeredBy,
         maxConcurrency: 5,
       });
