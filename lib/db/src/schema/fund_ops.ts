@@ -169,6 +169,7 @@ export const fundLpReportsTable = pgTable("fund_lp_reports", {
   managementFeesPaid: numeric("management_fees_paid", { precision: 18, scale: 2 }),
   carriedInterestAccrued: numeric("carried_interest_accrued", { precision: 18, scale: 2 }),
   carriedInterestPaid: numeric("carried_interest_paid", { precision: 18, scale: 2 }),
+  preferredReturnAccrued: numeric("preferred_return_accrued", { precision: 18, scale: 2 }),
   preferredReturnRate: numeric("preferred_return_rate", { precision: 6, scale: 4 }),
   carryRate: numeric("carry_rate", { precision: 6, scale: 4 }),
   managementFeeRate: numeric("management_fee_rate", { precision: 6, scale: 4 }),

@@ -145,6 +145,7 @@ export default function NavDashboardPage() {
     id: number; reportingPeriod: string; status: string; fundNav: string | null;
     netIrr: string | null; tvpi: string | null; dpi: string | null; createdAt: string;
     managementFeesAccrued: string | null; carriedInterestAccrued: string | null;
+    preferredReturnAccrued: string | null;
     preferredReturnRate: string | null; calledCapital: string | null;
     periodStart: string | null;
   };
@@ -220,9 +221,10 @@ export default function NavDashboardPage() {
       const curCarry = parseFloat(r.carriedInterestAccrued ?? "0");
       const priorCarry = prior ? parseFloat(prior.carriedInterestAccrued ?? "0") : 0;
       const carryAccrual = Math.max(0, curCarry - priorCarry);
+      const savedPref = r.preferredReturnAccrued != null ? parseFloat(r.preferredReturnAccrued) : null;
       const calledCap = parseFloat(r.calledCapital ?? "0");
       const prefRate = parseFloat(r.preferredReturnRate ?? "0");
-      const prefReturn = calledCap * prefRate * 0.25;
+      const prefReturn = savedPref ?? calledCap * prefRate * 0.25;
       return { period: r.reportingPeriod, managementFee, carryAccrual, prefReturn };
     });
   }, [lpReportRows]);
