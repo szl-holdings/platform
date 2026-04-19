@@ -31,11 +31,39 @@ vi.mock("drizzle-orm", async () => {
 
 const auditInsertCalls: Array<Record<string, unknown>> = [];
 let auditInsertShouldFail = false;
+// Mutable result returned by the spatial-twin-snapshot lookup. Tests assign
+// to this to simulate "scene exists" vs "scene missing" DB states.
+let spatialSnapshotRows: unknown[] = [];
 
 vi.mock("@szl-holdings/db", () => {
   const stubTable = {};
+  const spatialTwinSnapshotsTable = {
+    twinId: "twin_id",
+    snapshotAt: "snapshot_at",
+    sequenceNumber: "sequence_number",
+  };
+  const spatialChain = (rowsRef: () => unknown[]) => {
+    const thenable = {
+      where: () => thenable,
+      orderBy: () => thenable,
+      limit: () => Promise.resolve(rowsRef()),
+      then: (resolve: (v: unknown[]) => void, reject?: (e: unknown) => void) =>
+        Promise.resolve(rowsRef()).then(resolve, reject),
+    };
+    return thenable;
+  };
+  const emptyChain = {
+    where: () => Promise.resolve([]),
+  };
   const db = {
-    select: () => ({ from: () => ({ where: () => Promise.resolve([]) }) }),
+    select: () => ({
+      from: (table: unknown) => {
+        if (table === spatialTwinSnapshotsTable) {
+          return spatialChain(() => spatialSnapshotRows);
+        }
+        return emptyChain;
+      },
+    }),
     insert: (_table: unknown) => ({
       values: (vals: Record<string, unknown>) => {
         if (auditInsertShouldFail) {
@@ -68,6 +96,7 @@ vi.mock("@szl-holdings/db", () => {
   return new Proxy(
     {
       db,
+      spatialTwinSnapshotsTable,
       ROLE_HIERARCHY: {
         super_admin: ["super_admin", "admin", "ops", "exec", "operator"],
         admin: ["admin", "ops", "exec", "operator"],
@@ -167,22 +196,69 @@ beforeAll(async () => {
 // Tests
 // ---------------------------------------------------------------------------
 
+// Helper to build a fake DB row matching SpatialTwinSnapshot shape.
+function buildSnapshotRow(overrides: Record<string, unknown> = {}): Record<string, unknown> {
+  return {
+    id: 100,
+    orgId: 1,
+    twinId: "test-scene-001",
+    entityId: "entity-001",
+    twinCategory: "vessel",
+    sequenceNumber: 1,
+    state: { sample: true, route: "Suez" },
+    predictedStates: [],
+    alerts: [],
+    confidenceScore: 0.9,
+    parentSnapshotId: null,
+    derivedBranchId: null,
+    proofChainId: 42,
+    modelLane: null,
+    promptHash: null,
+    renderedArtifactHash: null,
+    sourceEvidenceList: [],
+    coordinates: null,
+    spatialContext: {},
+    metadata: { correlationId: "corr-xyz" },
+    snapshotAt: new Date("2026-04-19T12:00:00Z"),
+    createdAt: new Date("2026-04-19T12:00:00Z"),
+    ...overrides,
+  };
+}
+
 describe("ATLAS Scene Export Routes", () => {
   describe("GET /atlas/snapshot/:sceneId", () => {
-    it("returns 200 with a json_snapshot payload for an authenticated operator", async () => {
+    it("returns 200 with a json_snapshot payload populated from the persisted DB row", async () => {
       authUser = { id: 1, role: "operator" };
       atlasEnabled = true;
+      spatialSnapshotRows = [buildSnapshotRow({ twinId: "test-scene-001" })];
 
       const res = await request(app).get("/atlas/snapshot/test-scene-001");
       expect(res.status).toBe(200);
       expect(res.body.format).toBe("json_snapshot");
       expect(res.body.adapterVersion).toBe("1.0.0");
       expect(res.body.payload).toBeDefined();
+      const snapshot = res.body.payload?.snapshot;
+      // State must come from the DB row, not be an empty stub.
+      expect(snapshot?.state).toEqual({ sample: true, route: "Suez" });
+      expect(snapshot?.proofChainId).toBe(42);
+      expect(snapshot?.correlationId).toBe("corr-xyz");
+      expect(snapshot?.capturedAt).toBe("2026-04-19T12:00:00.000Z");
+    });
+
+    it("returns 404 when the sceneId does not exist in the DB", async () => {
+      authUser = { id: 1, role: "operator" };
+      atlasEnabled = true;
+      spatialSnapshotRows = [];
+
+      const res = await request(app).get("/atlas/snapshot/missing-scene-zzz");
+      expect(res.status).toBe(404);
+      expect(res.body.code).toBe("NOT_FOUND");
     });
 
     it("reflects sceneId from URL param in the snapshot payload", async () => {
       authUser = { id: 1, role: "operator" };
       atlasEnabled = true;
+      spatialSnapshotRows = [buildSnapshotRow({ twinId: "my-special-scene-42" })];
 
       const res = await request(app).get("/atlas/snapshot/my-special-scene-42");
       expect(res.status).toBe(200);
@@ -221,9 +297,10 @@ describe("ATLAS Scene Export Routes", () => {
       authUser = { id: 1, role: "operator" };
     });
 
-    it("accepts domain and entityType as query params", async () => {
+    it("accepts domain and entityType as query params overriding DB values", async () => {
       authUser = { id: 1, role: "operator" };
       atlasEnabled = true;
+      spatialSnapshotRows = [buildSnapshotRow({ twinId: "vessel-scene-01" })];
 
       const res = await request(app)
         .get("/atlas/snapshot/vessel-scene-01")
@@ -234,6 +311,25 @@ describe("ATLAS Scene Export Routes", () => {
       expect(snapshot?.domain).toBe("maritime");
       expect(snapshot?.entityType).toBe("vessel");
       expect(snapshot?.entityId).toBe("IMO-9876543");
+    });
+
+    it("falls back to row.twinCategory and row.entityId when no overrides are provided", async () => {
+      authUser = { id: 1, role: "operator" };
+      atlasEnabled = true;
+      spatialSnapshotRows = [
+        buildSnapshotRow({
+          twinId: "vessel-scene-fallback",
+          twinCategory: "vessel",
+          entityId: "IMO-RAW-DB-ID",
+        }),
+      ];
+
+      const res = await request(app).get("/atlas/snapshot/vessel-scene-fallback");
+      expect(res.status).toBe(200);
+      const snapshot = res.body.payload?.snapshot;
+      expect(snapshot?.domain).toBe("vessel");
+      expect(snapshot?.entityType).toBe("vessel");
+      expect(snapshot?.entityId).toBe("IMO-RAW-DB-ID");
     });
   });
 
@@ -376,20 +472,33 @@ describe("ATLAS Scene Export Routes", () => {
   });
 
   describe("GET /atlas/export/openusd/:sceneId", () => {
-    it("returns 200 with openusd_manifest payload for an authenticated operator", async () => {
+    it("returns 200 with openusd_manifest payload populated from the persisted DB row", async () => {
       authUser = { id: 1, role: "operator" };
       atlasEnabled = true;
+      spatialSnapshotRows = [buildSnapshotRow({ twinId: "scene-openusd-001" })];
 
       const res = await request(app).get("/atlas/export/openusd/scene-openusd-001");
       expect(res.status).toBe(200);
       expect(res.body.format).toBe("openusd_manifest");
       expect(res.body.warnings).toBeDefined();
       expect(res.body.warnings.length).toBeGreaterThan(0);
+      expect(res.body.payload?.manifest?.customLayerData?.proofChainId).toBe(42);
+    });
+
+    it("returns 404 when the sceneId does not exist in the DB", async () => {
+      authUser = { id: 1, role: "operator" };
+      atlasEnabled = true;
+      spatialSnapshotRows = [];
+
+      const res = await request(app).get("/atlas/export/openusd/missing-openusd-zzz");
+      expect(res.status).toBe(404);
+      expect(res.body.code).toBe("NOT_FOUND");
     });
 
     it("USDA text in payload starts with #usda 1.0", async () => {
       authUser = { id: 1, role: "operator" };
       atlasEnabled = true;
+      spatialSnapshotRows = [buildSnapshotRow({ twinId: "scene-usda-test" })];
 
       const res = await request(app).get("/atlas/export/openusd/scene-usda-test");
       expect(res.status).toBe(200);
@@ -399,6 +508,7 @@ describe("ATLAS Scene Export Routes", () => {
     it("accepts domain as a query param and reflects it in manifest", async () => {
       authUser = { id: 1, role: "operator" };
       atlasEnabled = true;
+      spatialSnapshotRows = [buildSnapshotRow({ twinId: "vessel-scene-02" })];
 
       const res = await request(app)
         .get("/atlas/export/openusd/vessel-scene-02")
@@ -442,6 +552,7 @@ describe("ATLAS Scene Export Routes", () => {
     it("admin role is permitted (operator or above)", async () => {
       authUser = { id: 3, role: "admin" };
       atlasEnabled = true;
+      spatialSnapshotRows = [buildSnapshotRow({ twinId: "scene-admin" })];
 
       const res = await request(app).get("/atlas/export/openusd/scene-admin");
       expect(res.status).toBe(200);
@@ -488,6 +599,7 @@ describe("ATLAS Scene Export Routes", () => {
       authUser = { id: 42, role: "operator" };
       atlasEnabled = true;
       auditInsertCalls.length = 0;
+      spatialSnapshotRows = [buildSnapshotRow({ twinId: "audit-scene-001" })];
 
       const res = await request(app).get("/atlas/snapshot/audit-scene-001");
       expect(res.status).toBe(200);
@@ -547,6 +659,7 @@ describe("ATLAS Scene Export Routes", () => {
       authUser = { id: 11, role: "operator" };
       atlasEnabled = true;
       auditInsertCalls.length = 0;
+      spatialSnapshotRows = [buildSnapshotRow({ twinId: "audit-usd-scene" })];
 
       const res = await request(app).get("/atlas/export/openusd/audit-usd-scene");
       expect(res.status).toBe(200);
@@ -586,6 +699,7 @@ describe("ATLAS Scene Export Routes", () => {
       authUser = { id: 1, role: "operator" };
       atlasEnabled = true;
       auditInsertShouldFail = true;
+      spatialSnapshotRows = [buildSnapshotRow({ twinId: "audit-fail-scene" })];
 
       const res = await request(app).get("/atlas/snapshot/audit-fail-scene");
       expect(res.status).toBe(503);

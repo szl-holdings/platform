@@ -10,8 +10,9 @@ import {
   buildOpenUSDManifest,
 } from "@szl-holdings/scene-export";
 import type { SceneSnapshot, BranchPackage, ProofBundle } from "@szl-holdings/scene-export";
-import { sendSuccess, sendError, sendBadRequest, handleRouteError } from "../lib/api-response";
-import { db, auditEventsTable } from "@szl-holdings/db";
+import { sendSuccess, sendError, sendBadRequest, sendNotFound, handleRouteError } from "../lib/api-response";
+import { db, auditEventsTable, spatialTwinSnapshotsTable, type SpatialTwinSnapshot } from "@szl-holdings/db";
+import { eq, desc } from "drizzle-orm";
 import { logger } from "../lib/logger";
 
 import { anyQuerySchema, jsonObjectBodySchema, validateBody, validateQuery } from "../lib/validation";
@@ -113,6 +114,25 @@ async function checkAtlasEnabled(res: Response): Promise<boolean> {
   return true;
 }
 
+/**
+ * Loads the most recent persisted spatial twin snapshot for a given sceneId.
+ * In this codebase the route param `sceneId` corresponds to the
+ * `spatial_twin_snapshots.twin_id` column (the ATLAS scenes table). The
+ * latest snapshot is selected by snapshotAt desc + sequenceNumber desc.
+ *
+ * Returns `null` when no snapshot exists for the sceneId so callers can
+ * respond with 404.
+ */
+async function loadLatestSpatialSnapshot(sceneId: string): Promise<SpatialTwinSnapshot | null> {
+  const rows = await db
+    .select()
+    .from(spatialTwinSnapshotsTable)
+    .where(eq(spatialTwinSnapshotsTable.twinId, sceneId))
+    .orderBy(desc(spatialTwinSnapshotsTable.snapshotAt), desc(spatialTwinSnapshotsTable.sequenceNumber))
+    .limit(1);
+  return rows[0] ?? null;
+}
+
 router.get(
   "/atlas/snapshot/:sceneId", validateQuery(anyQuerySchema),
   authMiddleware(),
@@ -122,20 +142,31 @@ router.get(
     try {
       if (!(await checkAtlasEnabled(res))) return;
 
-      const { sceneId } = req.params;
-      const {
-        domain = "default",
-        entityType = "scene",
-        entityId = sceneId,
-      } = req.query as Record<string, string>;
+      const sceneId = String(req.params.sceneId);
+      const query = req.query as Record<string, string>;
+      const domainOverride = query.domain;
+      const entityTypeOverride = query.entityType;
+      const entityIdOverride = query.entityId;
+
+      const row = await loadLatestSpatialSnapshot(sceneId);
+      if (!row) {
+        sendNotFound(res, `ATLAS scene "${sceneId}"`);
+        return;
+      }
+
+      const metadata = (row.metadata ?? {}) as Record<string, unknown>;
+      const correlationId = typeof metadata.correlationId === "string" ? metadata.correlationId : null;
 
       const snapshot: SceneSnapshot = {
         sceneId,
-        domain,
-        entityType,
-        entityId,
-        capturedAt: new Date().toISOString(),
-        state: {},
+        domain: domainOverride ?? row.twinCategory ?? "default",
+        entityType: entityTypeOverride ?? row.twinCategory ?? "scene",
+        entityId: entityIdOverride ?? row.entityId,
+        capturedAt: (row.snapshotAt instanceof Date ? row.snapshotAt : new Date(row.snapshotAt as unknown as string)).toISOString(),
+        state: (row.state ?? {}) as Record<string, unknown>,
+        proofChainId: row.proofChainId ?? null,
+        correlationId,
+        metadata,
       };
 
       const result = exportJsonSnapshot(snapshot);
@@ -145,7 +176,11 @@ router.get(
         entityType: "atlas_scene",
         entityId: sceneId,
         format: result.format,
-        details: { domain, entityType, entityId },
+        details: {
+          domain: snapshot.domain,
+          entityType: snapshot.entityType,
+          entityId: snapshot.entityId,
+        },
       });
       sendSuccess(res, result);
     } catch (err) {
@@ -299,14 +334,13 @@ router.get(
     try {
       if (!(await checkAtlasEnabled(res))) return;
 
-      const { sceneId } = req.params;
-      const {
-        domain = "default",
-        entityId,
-        proofChainId,
-      } = req.query as Record<string, string>;
+      const sceneId = String(req.params.sceneId);
+      const query = req.query as Record<string, string>;
+      const domainOverride = query.domain;
+      const entityIdOverride = query.entityId;
+      const proofChainId: string | undefined = query.proofChainId;
 
-      let resolvedProofChainId: number | null = null;
+      let resolvedProofChainId: number | null | undefined;
       if (proofChainId !== undefined) {
         const parsed = Number(proofChainId);
         if (!Number.isInteger(parsed) || parsed < 0) {
@@ -316,12 +350,18 @@ router.get(
         resolvedProofChainId = parsed;
       }
 
+      const row = await loadLatestSpatialSnapshot(sceneId);
+      if (!row) {
+        sendNotFound(res, `ATLAS scene "${sceneId}"`);
+        return;
+      }
+
       const manifest = buildOpenUSDManifest({
         stage: `/ATLAS/${sceneId}`,
-        domain,
-        entityId: entityId ?? sceneId,
-        proofChainId: resolvedProofChainId,
-        sceneState: {},
+        domain: domainOverride ?? row.twinCategory ?? "default",
+        entityId: entityIdOverride ?? row.entityId,
+        proofChainId: resolvedProofChainId !== undefined ? resolvedProofChainId : (row.proofChainId ?? null),
+        sceneState: (row.state ?? {}) as Record<string, unknown>,
       });
 
       const result = exportOpenUSDManifest(manifest);
@@ -332,9 +372,9 @@ router.get(
         entityId: sceneId,
         format: result.format,
         details: {
-          domain,
-          entityId: entityId ?? sceneId,
-          proofChainId: resolvedProofChainId,
+          domain: manifest.domain,
+          entityId: manifest.customLayerData.entityId ?? sceneId,
+          proofChainId: manifest.customLayerData.proofChainId ?? null,
         },
       });
       sendSuccess(res, result);
