@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
-import { Radar, TrendingUp, TrendingDown, Minus, AlertCircle, Sparkles, Clock, Loader2, ChevronDown, ChevronUp, Settings2, X, Plus, RefreshCw, ExternalLink } from "lucide-react";
+import { Radar, TrendingUp, TrendingDown, Minus, AlertCircle, Sparkles, Clock, Loader2, ChevronDown, ChevronUp, Settings2, X, Plus, RefreshCw, ExternalLink, Bell, BellOff, Mail, Save } from "lucide-react";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import ClientScopeSwitcher, { useClientScope } from "@/components/ClientScopeSwitcher";
@@ -91,6 +91,56 @@ function loadCompetitorList(clientId: string | null): string[] {
   return DEFAULT_COMPETITOR_NAMES;
 }
 
+const SEEN_HIGH_IMPACT_KEY = "carlota-radar-seen-high-impact";
+const ALERT_TOAST_LIMIT = 5;
+
+function hashSignalKey(competitor: string, event: string, date: string): string {
+  return `${competitor.toLowerCase()}|${event.toLowerCase()}|${date}`;
+}
+
+function loadSeenHighImpact(): Set<string> {
+  if (typeof window === "undefined") return new Set();
+  try {
+    const raw = localStorage.getItem(SEEN_HIGH_IMPACT_KEY);
+    if (!raw) return new Set();
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) return new Set(parsed.filter((s) => typeof s === "string"));
+  } catch {}
+  return new Set();
+}
+
+function saveSeenHighImpact(set: Set<string>) {
+  if (typeof window === "undefined") return;
+  try {
+    const arr = Array.from(set).slice(-500);
+    localStorage.setItem(SEEN_HIGH_IMPACT_KEY, JSON.stringify(arr));
+  } catch {}
+}
+
+type RadarPrefs = {
+  enabled: boolean;
+  emailEnabled: boolean;
+  inAppEnabled: boolean;
+  email: string | null;
+  frequency: "instant" | "daily" | "weekly";
+  competitors: string[] | null;
+  pendingDigestCount: number;
+  lastDigestAt: string | null;
+  exists?: boolean;
+};
+
+const DEFAULT_PREFS: RadarPrefs = {
+  enabled: true,
+  emailEnabled: true,
+  inAppEnabled: true,
+  email: null,
+  frequency: "instant",
+  competitors: null,
+  pendingDigestCount: 0,
+  lastDigestAt: null,
+  exists: false,
+};
+
 function loadRefreshInterval(): number {
   if (typeof window === "undefined") return 5 * 60_000;
   try {
@@ -132,6 +182,13 @@ export default function CompetitiveRadar() {
   const [liveData, setLiveData] = useState<boolean>(false);
   const [sourceLabel, setSourceLabel] = useState<string>("");
   const [liveSignalCount, setLiveSignalCount] = useState<number>(0);
+  const [prefs, setPrefs] = useState<RadarPrefs>(DEFAULT_PREFS);
+  const [prefsDraft, setPrefsDraft] = useState<RadarPrefs>(DEFAULT_PREFS);
+  const [showNotifSettings, setShowNotifSettings] = useState(false);
+  const [savingPrefs, setSavingPrefs] = useState(false);
+  const [prefsMessage, setPrefsMessage] = useState<string | null>(null);
+  const [alertSignals, setAlertSignals] = useState<CompetitorSignal[]>([]);
+  const seenHighImpactRef = useRef<Set<string>>(loadSeenHighImpact());
   const trackedRef = useRef(tracked);
   trackedRef.current = tracked;
   const clientIdRef = useRef(clientId);
@@ -242,6 +299,112 @@ export default function CompetitiveRadar() {
   }, []);
 
   useEffect(() => { void loadData(); }, [loadData, tracked, clientId]);
+
+  // Detect new high-impact signals on every signals update; show toast
+  // ONLY when the user has explicitly enabled in-app alerts. Until prefs
+  // have loaded (prefs.exists === false on first load) we mark signals as
+  // seen silently so the user doesn't get a deluge of "new" alerts the
+  // first time they open the page.
+  useEffect(() => {
+    if (signals.length === 0) return;
+    const fresh: CompetitorSignal[] = [];
+    for (const s of signals) {
+      if (s.impact !== "high") continue;
+      if (s.competitor.toLowerCase().includes("(portfolio)")) continue;
+      const key = hashSignalKey(s.competitor, s.event, s.date);
+      if (!seenHighImpactRef.current.has(key)) {
+        fresh.push(s);
+        seenHighImpactRef.current.add(key);
+      }
+    }
+    if (fresh.length === 0) return;
+    saveSeenHighImpact(seenHighImpactRef.current);
+    const inAppOn = prefs.exists && prefs.enabled && prefs.inAppEnabled;
+    if (!inAppOn) return;
+    setAlertSignals((prev) => [...fresh.slice(0, ALERT_TOAST_LIMIT), ...prev].slice(0, ALERT_TOAST_LIMIT));
+  }, [signals, prefs.exists, prefs.enabled, prefs.inAppEnabled]);
+
+  // If the user disables in-app alerts (or alerts entirely) clear any
+  // toasts currently on screen so the UI stays consistent with prefs.
+  useEffect(() => {
+    if (!prefs.exists) return;
+    if (!prefs.enabled || !prefs.inAppEnabled) {
+      setAlertSignals((prev) => (prev.length === 0 ? prev : []));
+    }
+  }, [prefs.exists, prefs.enabled, prefs.inAppEnabled]);
+
+  const dismissAlert = useCallback((idx: number) => {
+    setAlertSignals((prev) => prev.filter((_, i) => i !== idx));
+  }, []);
+
+  const dismissAllAlerts = useCallback(() => setAlertSignals([]), []);
+
+  // Load notification preferences once.
+  const loadPrefs = useCallback(async () => {
+    try {
+      const res = await fetch(`${API}/carlota/radar/notification-preferences`, { credentials: "include" });
+      if (!res.ok) return;
+      const json = await res.json();
+      const data = (json.data ?? json) as RadarPrefs;
+      setPrefs(data);
+      setPrefsDraft(data);
+    } catch {}
+  }, []);
+
+  useEffect(() => { void loadPrefs(); }, [loadPrefs]);
+
+  const savePrefs = useCallback(async () => {
+    setSavingPrefs(true);
+    setPrefsMessage(null);
+    try {
+      const res = await fetch(`${API}/carlota/radar/notification-preferences`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          enabled: prefsDraft.enabled,
+          emailEnabled: prefsDraft.emailEnabled,
+          inAppEnabled: prefsDraft.inAppEnabled,
+          email: prefsDraft.email,
+          frequency: prefsDraft.frequency,
+          competitors: prefsDraft.competitors,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        setPrefsMessage(json.error || "Failed to save");
+        return;
+      }
+      const data = (json.data ?? json) as RadarPrefs;
+      setPrefs(data);
+      setPrefsDraft(data);
+      setPrefsMessage("Preferences saved");
+      setTimeout(() => setPrefsMessage(null), 2500);
+    } catch {
+      setPrefsMessage("Failed to save");
+    } finally {
+      setSavingPrefs(false);
+    }
+  }, [prefsDraft]);
+
+  const flushDigest = useCallback(async () => {
+    setSavingPrefs(true);
+    try {
+      const res = await fetch(`${API}/carlota/radar/notification-preferences/flush-digest`, {
+        method: "POST",
+        credentials: "include",
+      });
+      const json = await res.json();
+      const data = json.data ?? json;
+      setPrefsMessage(`Sent digest with ${data.sent ?? 0} signal${(data.sent ?? 0) === 1 ? "" : "s"}`);
+      setTimeout(() => setPrefsMessage(null), 3000);
+      await loadPrefs();
+    } catch {
+      setPrefsMessage("Failed to send digest");
+    } finally {
+      setSavingPrefs(false);
+    }
+  }, [loadPrefs]);
 
   useEffect(() => {
     if (refreshIntervalMs <= 0) return;
@@ -373,12 +536,162 @@ Return ONLY valid JSON, no markdown.`;
             <Settings2 className="w-3 h-3" />
             Competitors
           </button>
+          <button
+            onClick={() => setShowNotifSettings((s) => !s)}
+            className="text-xs px-3 py-1.5 rounded-lg border border-border hover:bg-muted/50 transition-colors flex items-center gap-1.5"
+            title="Configure alert notifications"
+          >
+            {prefs.enabled ? <Bell className="w-3 h-3" /> : <BellOff className="w-3 h-3" />}
+            Alerts
+            {prefs.exists && prefs.enabled && (
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: "var(--color-gold-dim)", color: GOLD }}>
+                {prefs.frequency}
+              </span>
+            )}
+          </button>
           <button onClick={generateWeeklyBrief} disabled={generatingBrief} className="text-xs px-4 py-1.5 rounded-lg text-white flex items-center gap-1.5 hover:opacity-90 transition-opacity disabled:opacity-60" style={{ background: GOLD }}>
             {generatingBrief ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
             {generatingBrief ? "Generating…" : "Generate Weekly Brief"}
           </button>
         </div>
       </div>
+
+      {alertSignals.length > 0 && (
+        <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
+          <Card className="border-l-4" style={{ borderLeftColor: "var(--color-red-500, #dc2626)" }}>
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <Bell className="w-4 h-4 text-red-600 animate-pulse" />
+                  {alertSignals.length} new high-impact signal{alertSignals.length === 1 ? "" : "s"}
+                </CardTitle>
+                <button onClick={dismissAllAlerts} className="text-xs text-muted-foreground hover:text-foreground" title="Dismiss all alerts">
+                  Dismiss all
+                </button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {alertSignals.map((s, i) => (
+                <div key={`${s.competitor}-${s.event}-${i}`} className="flex items-start justify-between gap-3 p-2 rounded-lg border border-red-100 bg-red-50/50">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap mb-1">
+                      <span className="text-xs font-medium text-red-700">{s.competitor}</span>
+                      <DirectionBadge direction={s.direction} />
+                      <span className="text-xs text-muted-foreground">{s.date}</span>
+                    </div>
+                    <p className="text-xs text-foreground">{s.event}</p>
+                    {s.url && s.url !== "#" && (
+                      <a href={s.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs mt-1 hover:underline" style={{ color: GOLD }}>
+                        Open article <ExternalLink className="w-3 h-3" />
+                      </a>
+                    )}
+                  </div>
+                  <button onClick={() => dismissAlert(i)} className="shrink-0 text-muted-foreground hover:text-foreground" title="Dismiss">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
+              {!prefs.exists && (
+                <p className="text-xs text-muted-foreground pt-1">
+                  Tip: open <button onClick={() => setShowNotifSettings(true)} className="underline" style={{ color: GOLD }}>Alerts</button> to receive these by email or as a daily digest.
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
+
+      {showNotifSettings && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Bell className="w-4 h-4" style={{ color: GOLD }} />
+              Alert Notifications
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-xs text-muted-foreground">
+              Get notified when a new high-impact signal lands for one of your tracked competitors. We only alert on signals classified as <strong>high impact</strong>; everything else still appears in the feed below.
+            </p>
+
+            <label className="flex items-center gap-2 text-xs">
+              <input type="checkbox" checked={prefsDraft.enabled} onChange={(e) => setPrefsDraft({ ...prefsDraft, enabled: e.target.checked })} />
+              Enable high-impact alerts
+            </label>
+
+            <div className={`grid gap-3 sm:grid-cols-2 ${prefsDraft.enabled ? "" : "opacity-50 pointer-events-none"}`}>
+              <label className="flex items-center gap-2 text-xs">
+                <input type="checkbox" checked={prefsDraft.inAppEnabled} onChange={(e) => setPrefsDraft({ ...prefsDraft, inAppEnabled: e.target.checked })} />
+                In-app toast on this page
+              </label>
+              <label className="flex items-center gap-2 text-xs">
+                <input type="checkbox" checked={prefsDraft.emailEnabled} onChange={(e) => setPrefsDraft({ ...prefsDraft, emailEnabled: e.target.checked })} />
+                Email notifications
+              </label>
+            </div>
+
+            <div className={`grid gap-3 sm:grid-cols-2 ${prefsDraft.enabled ? "" : "opacity-50 pointer-events-none"}`}>
+              <div>
+                <label className="text-xs font-medium block mb-1">Email address</label>
+                <div className="flex items-center gap-2">
+                  <Mail className="w-3.5 h-3.5 text-muted-foreground" />
+                  <input
+                    type="email"
+                    placeholder="you@firm.com"
+                    value={prefsDraft.email ?? ""}
+                    onChange={(e) => setPrefsDraft({ ...prefsDraft, email: e.target.value || null })}
+                    className="flex-1 text-xs px-3 py-1.5 rounded-lg border border-border bg-background"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="text-xs font-medium block mb-1">Frequency</label>
+                <select
+                  value={prefsDraft.frequency}
+                  onChange={(e) => setPrefsDraft({ ...prefsDraft, frequency: e.target.value as "instant" | "daily" | "weekly" })}
+                  className="w-full text-xs px-3 py-1.5 rounded-lg border border-border bg-background"
+                >
+                  <option value="instant">Instant — every high-impact signal</option>
+                  <option value="daily">Daily digest</option>
+                  <option value="weekly">Weekly digest</option>
+                </select>
+              </div>
+            </div>
+
+            <p className="text-xs text-muted-foreground">
+              Alerts respect your tracked competitor list above ({tracked.length} tracked).
+            </p>
+
+            <div className="flex items-center gap-2 flex-wrap pt-1">
+              <button
+                onClick={savePrefs}
+                disabled={savingPrefs}
+                className="text-xs px-3 py-1.5 rounded-lg text-white flex items-center gap-1.5 hover:opacity-90 transition-opacity disabled:opacity-60"
+                style={{ background: GOLD }}
+              >
+                {savingPrefs ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+                Save preferences
+              </button>
+              {prefs.exists && prefs.frequency !== "instant" && prefs.pendingDigestCount > 0 && (
+                <button
+                  onClick={flushDigest}
+                  disabled={savingPrefs}
+                  className="text-xs px-3 py-1.5 rounded-lg border border-border hover:bg-muted/50 transition-colors disabled:opacity-60"
+                  title="Send the queued digest right now"
+                >
+                  Send digest now ({prefs.pendingDigestCount} queued)
+                </button>
+              )}
+              {prefs.exists && prefs.lastDigestAt && (
+                <span className="text-xs text-muted-foreground">
+                  Last digest: {new Date(prefs.lastDigestAt).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}
+                </span>
+              )}
+              {prefsMessage && <span className="text-xs" style={{ color: GOLD }}>{prefsMessage}</span>}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {showSettings && (
         <Card>

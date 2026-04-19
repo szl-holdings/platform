@@ -817,6 +817,65 @@ function carlotaBrand(content: string): string {
 </html>`;
 }
 
+export interface CarlotaRadarSignalSummary {
+  competitor: string;
+  event: string;
+  date: string;
+  detail: string;
+  url?: string;
+  source?: string;
+}
+
+export function buildCarlotaRadarAlertEmail(opts: {
+  recipientName?: string;
+  signal: CarlotaRadarSignalSummary;
+  radarUrl?: string;
+}): { subject: string; html: string } {
+  const radarUrl = opts.radarUrl || `${process.env.VITE_APP_URL || "https://carlotajo.com"}/carlota-jo/competitive-radar`;
+  const subject = `[High impact] ${opts.signal.competitor}: ${opts.signal.event.slice(0, 80)}`;
+  const html = carlotaBrand(`
+    <h2 style="color:#a07850;">High-impact competitor signal</h2>
+    <p>${opts.recipientName ? `${opts.recipientName}, a` : "A"} new high-impact signal has landed on your competitive radar.</p>
+    <div class="highlight">
+      <p class="label">${opts.signal.competitor} · ${opts.signal.date}</p>
+      <p style="font-weight:600;margin:4px 0 8px;">${opts.signal.event}</p>
+      <p style="font-size:13px;color:#555;">${opts.signal.detail}</p>
+      ${opts.signal.source ? `<p style="font-size:11px;color:#888;margin-top:8px;">Source: ${opts.signal.source}</p>` : ""}
+    </div>
+    ${opts.signal.url ? `<p><a href="${opts.signal.url}" style="color:#a07850;">Open original article →</a></p>` : ""}
+    <a class="cta" href="${radarUrl}">Open Competitive Radar</a>
+    <p style="font-size:11px;color:#999;margin-top:16px;">Manage your alert preferences from the radar settings panel.</p>
+  `);
+  return { subject, html };
+}
+
+export function buildCarlotaRadarDigestEmail(opts: {
+  recipientName?: string;
+  frequency: "daily" | "weekly";
+  signals: CarlotaRadarSignalSummary[];
+  radarUrl?: string;
+}): { subject: string; html: string } {
+  const radarUrl = opts.radarUrl || `${process.env.VITE_APP_URL || "https://carlotajo.com"}/carlota-jo/competitive-radar`;
+  const window = opts.frequency === "daily" ? "today" : "this week";
+  const subject = `Competitive Radar — ${opts.signals.length} high-impact signal${opts.signals.length === 1 ? "" : "s"} ${window}`;
+  const items = opts.signals.map(s => `
+    <div style="border-left:3px solid #c9a97a;padding:8px 12px;margin:8px 0;background:#faf7f2;">
+      <p style="margin:0;font-size:11px;color:#a07850;text-transform:uppercase;letter-spacing:0.1em;">${s.competitor} · ${s.date}</p>
+      <p style="margin:4px 0;font-weight:600;">${s.event}</p>
+      <p style="margin:0;font-size:12px;color:#555;">${s.detail}</p>
+      ${s.url ? `<p style="margin:6px 0 0;"><a href="${s.url}" style="font-size:11px;color:#a07850;">Open article →</a></p>` : ""}
+    </div>
+  `).join("");
+  const html = carlotaBrand(`
+    <h2 style="color:#a07850;">Competitive Radar — ${opts.frequency === "daily" ? "Daily" : "Weekly"} digest</h2>
+    <p>${opts.recipientName ? `${opts.recipientName},` : ""} ${opts.signals.length} high-impact competitor signal${opts.signals.length === 1 ? "" : "s"} landed ${window}.</p>
+    ${items}
+    <a class="cta" href="${radarUrl}">Open Competitive Radar</a>
+    <p style="font-size:11px;color:#999;margin-top:16px;">Manage your alert preferences from the radar settings panel.</p>
+  `);
+  return { subject, html };
+}
+
 export function buildCarlotaContactAckEmail(name: string): string {
   return carlotaBrand(`
     <h2>Inquiry received.</h2>

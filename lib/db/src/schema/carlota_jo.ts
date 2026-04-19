@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp, integer, numeric, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, integer, numeric, jsonb, boolean, uniqueIndex, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -160,3 +160,42 @@ export const carlotaRadarCompetitorsTable = pgTable("carlota_radar_competitors",
 export const insertCarlotaRadarCompetitorsSchema = createInsertSchema(carlotaRadarCompetitorsTable).omit({ id: true, createdAt: true, updatedAt: true });
 export type InsertCarlotaRadarCompetitors = z.infer<typeof insertCarlotaRadarCompetitorsSchema>;
 export type CarlotaRadarCompetitors = typeof carlotaRadarCompetitorsTable.$inferSelect;
+
+export type CarlotaRadarPendingSignal = {
+  competitor: string;
+  event: string;
+  date: string;
+  url: string;
+  source: string;
+  detail: string;
+  capturedAt: string;
+};
+
+export const carlotaRadarNotifPrefsTable = pgTable("carlota_radar_notif_prefs", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().unique(),
+  organizationId: integer("organization_id"),
+  enabled: boolean("enabled").notNull().default(true),
+  emailEnabled: boolean("email_enabled").notNull().default(true),
+  inAppEnabled: boolean("in_app_enabled").notNull().default(true),
+  email: text("email"),
+  frequency: text("frequency", { enum: ["instant", "daily", "weekly"] }).notNull().default("instant"),
+  competitors: jsonb("competitors").$type<string[] | null>().default(null),
+  pendingDigest: jsonb("pending_digest").$type<CarlotaRadarPendingSignal[]>().notNull().default([]),
+  lastDigestAt: timestamp("last_digest_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export type CarlotaRadarNotifPrefs = typeof carlotaRadarNotifPrefsTable.$inferSelect;
+
+export const carlotaRadarSeenSignalsTable = pgTable("carlota_radar_seen_signals", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  signalHash: text("signal_hash").notNull(),
+  competitor: text("competitor").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => ({
+  uniq: uniqueIndex("carlota_radar_seen_user_hash_idx").on(table.userId, table.signalHash),
+  byUser: index("carlota_radar_seen_user_idx").on(table.userId),
+}));

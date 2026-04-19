@@ -16,8 +16,12 @@ import {
   carlotaScenariosTable,
   carlotaEngagementsTable,
   carlotaRadarCompetitorsTable,
+  carlotaRadarNotifPrefsTable,
+  carlotaRadarSeenSignalsTable,
+  type CarlotaRadarPendingSignal,
 } from "@szl-holdings/db";
-import { eq, desc, sql, and } from "drizzle-orm";
+import { eq, desc, sql, and, inArray } from "drizzle-orm";
+import { createHash } from "crypto";
 import { sendSuccess, sendNotFound, handleRouteError, sendBadRequest, parsePagination } from "../lib/api-response";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 import { services } from "@szl-holdings/services";
@@ -28,7 +32,10 @@ import {
   sendEmail,
   buildCarlotaContactAckEmail,
   buildCarlotaInquiryNotificationEmail,
+  buildCarlotaRadarAlertEmail,
+  buildCarlotaRadarDigestEmail,
   CARLOTA_ADMIN_EMAIL,
+  type CarlotaRadarSignalSummary,
 } from "../lib/email";
 
 const portalUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
@@ -1216,6 +1223,171 @@ router.put("/carlota/radar-competitors", authMiddleware(), validateBody(carlotaR
   } catch (err) { handleRouteError(res, err, "Failed to save tracked competitors"); }
 });
 
+function hashRadarSignal(competitor: string, event: string, date: string): string {
+  return createHash("sha1").update(`${competitor.toLowerCase()}|${event.toLowerCase()}|${date}`).digest("hex").slice(0, 24);
+}
+
+const CARLOTA_RADAR_URL = `${process.env.VITE_APP_URL || "https://carlotajo.com"}/carlota-jo/competitive-radar`;
+
+function digestWindowMs(frequency: string): number {
+  if (frequency === "weekly") return 7 * 24 * 60 * 60 * 1000;
+  return 24 * 60 * 60 * 1000;
+}
+
+async function flushPendingDigest(prefs: typeof carlotaRadarNotifPrefsTable.$inferSelect, recipientName?: string): Promise<{ sent: number }> {
+  const pending = (prefs.pendingDigest ?? []) as CarlotaRadarPendingSignal[];
+  if (!prefs.enabled || !prefs.emailEnabled || pending.length === 0 || !prefs.email) {
+    if (pending.length > 0) {
+      await db.update(carlotaRadarNotifPrefsTable)
+        .set({ pendingDigest: [], lastDigestAt: new Date(), updatedAt: new Date() })
+        .where(eq(carlotaRadarNotifPrefsTable.id, prefs.id));
+    }
+    return { sent: 0 };
+  }
+  const summaries: CarlotaRadarSignalSummary[] = pending.map(p => ({
+    competitor: p.competitor,
+    event: p.event,
+    date: p.date,
+    detail: p.detail,
+    url: p.url,
+    source: p.source,
+  }));
+  const { subject, html } = buildCarlotaRadarDigestEmail({
+    recipientName,
+    frequency: prefs.frequency === "weekly" ? "weekly" : "daily",
+    signals: summaries,
+    radarUrl: CARLOTA_RADAR_URL,
+  });
+  try {
+    const result = await sendEmail({ to: prefs.email, subject, html });
+    if (!result.success) {
+      logger.warn({ err: result.error, userId: prefs.userId }, "[carlota-radar] digest email failed");
+    }
+  } catch (err) {
+    logger.warn({ err, userId: prefs.userId }, "[carlota-radar] digest email threw");
+  }
+  await db.update(carlotaRadarNotifPrefsTable)
+    .set({ pendingDigest: [], lastDigestAt: new Date(), updatedAt: new Date() })
+    .where(eq(carlotaRadarNotifPrefsTable.id, prefs.id));
+  return { sent: summaries.length };
+}
+
+async function processNewHighImpactSignals(
+  userId: number,
+  orgId: number | null,
+  trackedCompetitors: string[],
+  signals: Array<{ competitor: string; event: string; impact: string; direction: string; date: string; detail: string; url?: string; source?: string }>,
+  recipientFallbackEmail?: string,
+  recipientName?: string,
+): Promise<void> {
+  try {
+    const [prefs] = await db.select().from(carlotaRadarNotifPrefsTable).where(eq(carlotaRadarNotifPrefsTable.userId, userId)).limit(1);
+    if (prefs && !prefs.enabled) return;
+
+    const trackedLower = new Set((prefs?.competitors ?? trackedCompetitors).map(c => c.toLowerCase()));
+    const candidates = signals
+      .filter(s => s.impact === "high" && trackedLower.has(s.competitor.toLowerCase()) && !s.competitor.toLowerCase().includes("(portfolio)"))
+      .slice(0, 30);
+    if (candidates.length === 0) {
+      if (prefs && prefs.frequency !== "instant") {
+        const since = prefs.lastDigestAt ? prefs.lastDigestAt.getTime() : 0;
+        if (Date.now() - since >= digestWindowMs(prefs.frequency) && (prefs.pendingDigest ?? []).length > 0) {
+          await flushPendingDigest(prefs, recipientName);
+        }
+      }
+      return;
+    }
+
+    const hashes = candidates.map(s => hashRadarSignal(s.competitor, s.event, s.date));
+    const seenRows = await db.select({ signalHash: carlotaRadarSeenSignalsTable.signalHash })
+      .from(carlotaRadarSeenSignalsTable)
+      .where(and(eq(carlotaRadarSeenSignalsTable.userId, userId), inArray(carlotaRadarSeenSignalsTable.signalHash, hashes)));
+    const seenSet = new Set(seenRows.map(r => r.signalHash));
+    const fresh = candidates
+      .map((s, i) => ({ signal: s, hash: hashes[i] }))
+      .filter(x => !seenSet.has(x.hash));
+    if (fresh.length === 0) {
+      if (prefs && prefs.frequency !== "instant") {
+        const since = prefs.lastDigestAt ? prefs.lastDigestAt.getTime() : 0;
+        if (Date.now() - since >= digestWindowMs(prefs.frequency) && (prefs.pendingDigest ?? []).length > 0) {
+          await flushPendingDigest(prefs, recipientName);
+        }
+      }
+      return;
+    }
+
+    // Record as seen (ignore conflicts)
+    await db.insert(carlotaRadarSeenSignalsTable)
+      .values(fresh.map(f => ({ userId, signalHash: f.hash, competitor: f.signal.competitor })))
+      .onConflictDoNothing();
+
+    if (!prefs) {
+      // No preferences row → default behaviour: in-app broadcast only, no email.
+      broadcastWs("bookings", "carlota-radar-alert", {
+        userId,
+        signals: fresh.map(f => ({ competitor: f.signal.competitor, event: f.signal.event, date: f.signal.date, url: f.signal.url ?? "", source: f.signal.source ?? "" })),
+      });
+      return;
+    }
+
+    const summaries: CarlotaRadarSignalSummary[] = fresh.map(f => ({
+      competitor: f.signal.competitor,
+      event: f.signal.event,
+      date: f.signal.date,
+      detail: f.signal.detail,
+      url: f.signal.url,
+      source: f.signal.source,
+    }));
+
+    if (prefs.inAppEnabled) {
+      broadcastWs("bookings", "carlota-radar-alert", { userId, signals: summaries });
+    }
+
+    if (prefs.frequency === "instant") {
+      if (prefs.emailEnabled) {
+        const recipient = prefs.email || recipientFallbackEmail;
+        if (recipient) {
+          for (const summary of summaries.slice(0, 5)) {
+            const { subject, html } = buildCarlotaRadarAlertEmail({ recipientName, signal: summary, radarUrl: CARLOTA_RADAR_URL });
+            try {
+              const r = await sendEmail({ to: recipient, subject, html });
+              if (!r.success) logger.warn({ err: r.error, userId }, "[carlota-radar] instant alert email failed");
+            } catch (err) {
+              logger.warn({ err, userId }, "[carlota-radar] instant alert email threw");
+            }
+          }
+        }
+      }
+    } else {
+      // Append to pending digest, optionally flush when window elapsed
+      const now = new Date();
+      const newPending: CarlotaRadarPendingSignal[] = [
+        ...((prefs.pendingDigest ?? []) as CarlotaRadarPendingSignal[]),
+        ...summaries.map(s => ({
+          competitor: s.competitor,
+          event: s.event,
+          date: s.date,
+          detail: s.detail,
+          url: s.url ?? "",
+          source: s.source ?? "",
+          capturedAt: now.toISOString(),
+        })),
+      ].slice(-100);
+      await db.update(carlotaRadarNotifPrefsTable)
+        .set({ pendingDigest: newPending, updatedAt: now })
+        .where(eq(carlotaRadarNotifPrefsTable.id, prefs.id));
+
+      const since = prefs.lastDigestAt ? prefs.lastDigestAt.getTime() : 0;
+      if (Date.now() - since >= digestWindowMs(prefs.frequency)) {
+        const [refreshed] = await db.select().from(carlotaRadarNotifPrefsTable).where(eq(carlotaRadarNotifPrefsTable.id, prefs.id)).limit(1);
+        if (refreshed) await flushPendingDigest(refreshed, recipientName);
+      }
+    }
+  } catch (err) {
+    logger.warn({ err, userId }, "[carlota-radar] processNewHighImpactSignals failed");
+  }
+}
+
 router.get("/carlota/radar-signals", authMiddleware(), validateQuery(carlotaRadarSignalsQuerySchema), async (req, res) => {
   try {
     const userId = req.user!.id;
@@ -1295,6 +1467,13 @@ router.get("/carlota/radar-signals", authMiddleware(), validateQuery(carlotaRada
       market: Math.min(95, baseMarket + i),
     }));
 
+    // Fire-and-forget alert dispatch for high-impact signals matching tracked competitors
+    if (req.user) {
+      const fallbackEmail = req.user.email ?? undefined;
+      const recipientName = req.user.displayName;
+      void processNewHighImpactSignals(req.user.id, orgId, competitorList, newsFeedSignals, fallbackEmail, recipientName);
+    }
+
     sendSuccess(res, {
       signals: [...portfolioSignals, ...newsFeedSignals],
       portfolioSignalCount: portfolioSignals.length,
@@ -1308,6 +1487,120 @@ router.get("/carlota/radar-signals", authMiddleware(), validateQuery(carlotaRada
       clientId: clientId ?? null,
     });
   } catch (err) { handleRouteError(res, err, "Failed to fetch radar signals"); }
+});
+
+// ── Radar notification preferences ─────────────────────────────────────────────
+
+const DEFAULT_RADAR_PREFS = {
+  enabled: true,
+  emailEnabled: true,
+  inAppEnabled: true,
+  email: null as string | null,
+  frequency: "instant" as "instant" | "daily" | "weekly",
+  competitors: null as string[] | null,
+  pendingDigestCount: 0,
+  lastDigestAt: null as string | null,
+};
+
+router.get("/carlota/radar/notification-preferences", authMiddleware(), async (req, res) => {
+  try {
+    const userId = req.user!.id;
+    const [row] = await db.select().from(carlotaRadarNotifPrefsTable).where(eq(carlotaRadarNotifPrefsTable.userId, userId)).limit(1);
+    if (!row) {
+      sendSuccess(res, { ...DEFAULT_RADAR_PREFS, email: req.user?.email ?? null, exists: false });
+      return;
+    }
+    sendSuccess(res, {
+      enabled: row.enabled,
+      emailEnabled: row.emailEnabled,
+      inAppEnabled: row.inAppEnabled,
+      email: row.email,
+      frequency: row.frequency,
+      competitors: row.competitors,
+      pendingDigestCount: (row.pendingDigest ?? []).length,
+      lastDigestAt: row.lastDigestAt ? row.lastDigestAt.toISOString() : null,
+      exists: true,
+    });
+  } catch (err) { handleRouteError(res, err, "Failed to fetch radar notification preferences"); }
+});
+
+router.put("/carlota/radar/notification-preferences", authMiddleware(), validateBody(jsonObjectBodySchema), async (req, res) => {
+  try {
+    const userId = req.user!.id;
+    const orgId = req.user?.orgs[0]?.orgId ?? null;
+    const body = req.body as {
+      enabled?: boolean;
+      emailEnabled?: boolean;
+      inAppEnabled?: boolean;
+      email?: string | null;
+      frequency?: "instant" | "daily" | "weekly";
+      competitors?: string[] | null;
+    };
+
+    if (body.email != null && body.email !== "" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email)) {
+      sendBadRequest(res, "Invalid email address");
+      return;
+    }
+    if (body.frequency != null && !["instant", "daily", "weekly"].includes(body.frequency)) {
+      sendBadRequest(res, "frequency must be instant, daily, or weekly");
+      return;
+    }
+    if (body.competitors != null) {
+      if (!Array.isArray(body.competitors) || body.competitors.some(c => typeof c !== "string") || body.competitors.length > 24) {
+        sendBadRequest(res, "competitors must be an array of up to 24 strings");
+        return;
+      }
+    }
+
+    const update = {
+      enabled: body.enabled ?? true,
+      emailEnabled: body.emailEnabled ?? true,
+      inAppEnabled: body.inAppEnabled ?? true,
+      email: body.email === "" ? null : (body.email ?? null),
+      frequency: body.frequency ?? "instant",
+      competitors: body.competitors ?? null,
+      organizationId: orgId,
+      updatedAt: new Date(),
+    };
+
+    const [existing] = await db.select().from(carlotaRadarNotifPrefsTable).where(eq(carlotaRadarNotifPrefsTable.userId, userId)).limit(1);
+    let row;
+    if (existing) {
+      [row] = await db.update(carlotaRadarNotifPrefsTable)
+        .set(update)
+        .where(eq(carlotaRadarNotifPrefsTable.userId, userId))
+        .returning();
+    } else {
+      [row] = await db.insert(carlotaRadarNotifPrefsTable)
+        .values({ userId, ...update })
+        .returning();
+    }
+    sendSuccess(res, {
+      enabled: row.enabled,
+      emailEnabled: row.emailEnabled,
+      inAppEnabled: row.inAppEnabled,
+      email: row.email,
+      frequency: row.frequency,
+      competitors: row.competitors,
+      pendingDigestCount: (row.pendingDigest ?? []).length,
+      lastDigestAt: row.lastDigestAt ? row.lastDigestAt.toISOString() : null,
+      exists: true,
+    });
+  } catch (err) { handleRouteError(res, err, "Failed to update radar notification preferences"); }
+});
+
+router.post("/carlota/radar/notification-preferences/flush-digest", authMiddleware(), async (req, res) => {
+  try {
+    const userId = req.user!.id;
+    const [prefs] = await db.select().from(carlotaRadarNotifPrefsTable).where(eq(carlotaRadarNotifPrefsTable.userId, userId)).limit(1);
+    if (!prefs) {
+      sendSuccess(res, { sent: 0, message: "No preferences configured" });
+      return;
+    }
+    const recipientName = (req.user as unknown as { name?: string }).name;
+    const result = await flushPendingDigest(prefs, recipientName);
+    sendSuccess(res, result);
+  } catch (err) { handleRouteError(res, err, "Failed to flush radar digest"); }
 });
 
 // ── ROI metrics (auth-gated, engagement-derived analytics) ─────────────────────
