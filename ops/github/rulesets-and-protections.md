@@ -1,6 +1,8 @@
 # Branch Rulesets and Protections — SZL Holdings Platform
 
-Last updated: 2026-04-18
+Last updated: 2026-04-19
+
+> **Resolved (2026-04-19):** Repository was made **public** to unlock the branch protection API (alternative to the GitHub Team upgrade). Branch protection is now active on both `main` and `master` with all five required status checks. The repo is owned by the `szl-holdings` organization (the earlier `stephenlutar2-hash` reference was incorrect and has been fixed throughout this directory).
 
 This document defines the exact branch protection and ruleset configuration required for the repository. It pairs with `/ops/github/manual-click-paths.md` which provides the step-by-step GitHub UI instructions.
 
@@ -12,13 +14,24 @@ This document defines the exact branch protection and ruleset configuration requ
 |------|--------|-------|
 | `codeql.yml` workflow | **Done** | Runs on every PR; job name `analyze` |
 | `dependency-review.yml` workflow | **Done** | Runs on every PR; fails on high/critical CVE |
-| `main-protection` ruleset created | **Pending** | Must be done in GitHub UI (see manual-click-paths.md §2) |
-| `CodeQL Analysis / analyze` as required check | **Pending** | Requires ruleset to be active |
-| `Dependency Review` as required check | **Pending** | Requires ruleset to be active |
+| Branch protection on `main` | **Done** | Applied 2026-04-19 via REST API (equivalent of `configure-branch-protection.sh`) |
+| Branch protection on `master` | **Done** | Applied 2026-04-19 — all six required checks active |
+| `CodeQL Analysis / analyze` as required check | **Done** | Listed in required contexts on both branches |
+| `Dependency Review` as required check | **Done** | Listed in required contexts on both branches |
+| `Security Audit & SBOM / Security Gate (blocking)` as required check | **Done** | Listed in required contexts on both branches |
 
-> **Why pending?** The GitHub branch protection and Rulesets APIs require **GitHub Team** (for private org repos) or a public repository. This repo is currently private on the free org plan. Options to unblock:
-> - Upgrade the organization to **GitHub Team** — unlocks the Rulesets API and the `ops/github/configure-branch-protection.sh` script can then configure everything in one command.
-> - **Until then**, the two security workflows run on every PR and will report failures, but a determined reviewer can still merge. Manual discipline is required.
+### Verification evidence (2026-04-19)
+
+`GET /repos/szl-holdings/szl-holdings-platform/branches/{main,master}/protection` returned identical config on both branches:
+
+- `required_status_checks.strict: true`
+- `required_status_checks.contexts: ["CI Gate","E2E Gate","Lighthouse Gate","CodeQL Analysis / analyze","Dependency Review","Security Audit & SBOM / Security Gate (blocking)"]`
+- `enforce_admins.enabled: true`
+- `required_pull_request_reviews.required_approving_review_count: 1`
+- `required_pull_request_reviews.require_code_owner_reviews: true`
+- `allow_force_pushes: false`, `allow_deletions: false`, `required_conversation_resolution: true`
+
+> **How it was unblocked:** Repository visibility was changed from private to **public**. This is the no-cost alternative to upgrading the org to GitHub Team — both unlock the branch protection API. If the repo needs to be made private again later, the org must first be upgraded to GitHub Team or the protection rules will become unenforceable.
 
 ---
 

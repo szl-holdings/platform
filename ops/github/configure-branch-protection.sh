@@ -17,11 +17,11 @@
 # "Administration" read+write on this repository.
 #
 # After running, verify at:
-#   https://github.com/stephenlutar2-hash/szl-holdings-platform/settings/branches
+#   https://github.com/szl-holdings/szl-holdings-platform/settings/branches
 
 set -euo pipefail
 
-OWNER="stephenlutar2-hash"
+OWNER="szl-holdings"
 REPO="szl-holdings-platform"
 TOKEN="${GH_TOKEN:?GH_TOKEN env var is required}"
 GRAPHQL="https://api.github.com/graphql"
@@ -91,3 +91,5 @@ fi
 echo ""
 echo "Branch protection applied.  Verify at:"
 echo "  https://github.com/${OWNER}/${REPO}/settings/branches"
+echo ""
+echo "Note: the repo's default branch is 'master'; both 'main' and 'master' patterns are configured."

@@ -1,6 +1,8 @@
 # Manual Click Paths — GitHub UI Configuration
 
-Last updated: 2026-04-16
+Last updated: 2026-04-19
+
+> **Owner note (2026-04-19):** All URLs below use `szl-holdings` (the org that owns the repo). Earlier versions of this document referenced `stephenlutar2-hash`; that was incorrect.
 
 This document provides exact step-by-step instructions for GitHub UI changes that cannot be automated via code. Complete these once when setting up a new repository or after major configuration resets.
 
@@ -8,7 +10,7 @@ This document provides exact step-by-step instructions for GitHub UI changes tha
 
 ## 1. Set the Default Branch to `main`
 
-1. Go to: `https://github.com/stephenlutar2-hash/szl-holdings-platform/settings`
+1. Go to: `https://github.com/szl-holdings/szl-holdings-platform/settings`
 2. Scroll to **Default branch**
 3. Click the pencil icon (edit)
 4. Select `main` from the dropdown
@@ -19,25 +21,18 @@ This document provides exact step-by-step instructions for GitHub UI changes tha
 
 ## 2. Configure Branch Ruleset for `main`
 
-> **Status: PENDING** — This step has not been completed. The `CodeQL Analysis / analyze` and
-> `Dependency Review` checks run on every PR but are not yet enforced as required status checks,
-> meaning a PR with a critical finding can still be merged.
->
-> **Prerequisite:** The GitHub API for branch protection on private org repos requires **GitHub Team**.
-> If the organization has been upgraded, run the automated script instead of the UI steps below:
+> **Status: DONE (2026-04-19)** — Branch protection is active on both `main` and `master` with all
+> five required status checks. The repo was made public to unlock the branch protection API. The UI
+> steps below are kept for reference / re-application after a configuration reset. To re-apply
+> programmatically:
 >
 > ```bash
 > GH_TOKEN=<admin-pat> bash ops/github/configure-branch-protection.sh
 > ```
->
-> The PAT needs the `repo` scope (or a fine-grained PAT with Administration read+write). The script
-> configures both `main` and `master` and sets all five required status checks in one shot.
->
-> If still on the free plan, complete the UI steps below manually.
 
 ### Navigate to rulesets
 
-1. Go to: `https://github.com/stephenlutar2-hash/szl-holdings-platform/settings/rules`
+1. Go to: `https://github.com/szl-holdings/szl-holdings-platform/settings/rules`
 2. Click **New ruleset**
 3. Select **New branch ruleset**
 
@@ -76,6 +71,7 @@ After enabling "Require status checks to pass":
    - `Lighthouse Gate`
    - `CodeQL Analysis / analyze`
    - `Dependency Review`
+   - `Security Audit & SBOM / Security Gate (blocking)`
 3. Click **Add** for each
 
 **Save:**
@@ -88,7 +84,7 @@ After enabling "Require status checks to pass":
 
 ### Create `staging` environment
 
-1. Go to: `https://github.com/stephenlutar2-hash/szl-holdings-platform/settings/environments`
+1. Go to: `https://github.com/szl-holdings/szl-holdings-platform/settings/environments`
 2. Click **New environment**
 3. Name: `staging`
 4. Click **Configure environment**
@@ -122,7 +118,7 @@ To view or delete repository-level secrets: **Settings → Secrets and variables
 
 ## 5. Configure General Repository Settings
 
-1. Go to: `https://github.com/stephenlutar2-hash/szl-holdings-platform/settings`
+1. Go to: `https://github.com/szl-holdings/szl-holdings-platform/settings`
 
 **Merge button settings** (scroll to "Pull Requests"):
 - Allow merge commits: **On** (for release branches)
@@ -138,7 +134,7 @@ To view or delete repository-level secrets: **Settings → Secrets and variables
 
 Dependabot is configured via `.github/dependabot.yml` (already in the repository). To verify it is active:
 
-1. Go to: `https://github.com/stephenlutar2-hash/szl-holdings-platform/settings/security_analysis`
+1. Go to: `https://github.com/szl-holdings/szl-holdings-platform/settings/security_analysis`
 2. Scroll to **Dependabot**
 3. Verify:
    - Dependabot alerts: **Enabled**
@@ -149,7 +145,7 @@ Dependabot is configured via `.github/dependabot.yml` (already in the repository
 
 ## 7. Enable GitHub Advanced Security (if available on plan)
 
-1. Go to: `https://github.com/stephenlutar2-hash/szl-holdings-platform/settings/security_analysis`
+1. Go to: `https://github.com/szl-holdings/szl-holdings-platform/settings/security_analysis`
 2. Under **Code scanning**, click **Set up** → **Advanced** (to use the repo's `codeql.yml` workflow)
 3. Under **Secret scanning**:
    - Secret scanning: **Enable**
@@ -159,7 +155,7 @@ Dependabot is configured via `.github/dependabot.yml` (already in the repository
 
 ## 8. Configure Repository Topics and Description
 
-1. Go to: `https://github.com/stephenlutar2-hash/szl-holdings-platform`
+1. Go to: `https://github.com/szl-holdings/szl-holdings-platform`
 2. Click the gear icon next to **About** (top right of the description area)
 3. Set **Description**: `SZL Holdings unified intelligence and command platform`
 4. Add **Topics**: `pnpm-workspace`, `typescript`, `react`, `replit`, `monorepo`
@@ -184,7 +180,7 @@ To verify:
 ## 10. Configure Notifications
 
 For the repository owner:
-1. Go to: `https://github.com/stephenlutar2-hash/szl-holdings-platform`
+1. Go to: `https://github.com/szl-holdings/szl-holdings-platform`
 2. Click **Watch** → **Custom**
 3. Enable: Issues, Pull requests, Releases, Security alerts, Deployments
 4. Click **Apply**
