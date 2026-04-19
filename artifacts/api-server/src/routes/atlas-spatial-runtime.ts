@@ -182,6 +182,85 @@ router.post("/atlas/spatial/drift/assess", authMiddleware(), validateBody(jsonOb
   }
 });
 
+router.get("/atlas/spatial/twins/sync-status", authMiddleware(), validateQuery(listQuerySchema), async (req: Request, res: Response) => {
+  try {
+    const { ids } = req.query as { ids?: string };
+    const twinIds = (ids ?? "")
+      .split(",")
+      .map(s => s.trim())
+      .filter(Boolean)
+      .slice(0, 50);
+
+    if (twinIds.length === 0) {
+      sendSuccess(res, { statuses: [], count: 0, generatedAt: new Date().toISOString() });
+      return;
+    }
+
+    const { getLatestDriftAssessment } = await import("@szl-holdings/atlas-spatial-runtime");
+    const { getSnapshotHistory } = await import("@szl-holdings/ai-engine/digital-twins/twin-engine-spatial");
+    const user = req.user;
+    const orgId = user?.orgs?.[0]?.orgId ?? undefined;
+    const now = Date.now();
+
+    const statuses = await Promise.all(twinIds.map(async (twinId) => {
+      try {
+        const [snapshots, drift] = await Promise.all([
+          getSnapshotHistory(twinId, { limit: 1, orgId }).catch(() => []),
+          getLatestDriftAssessment(twinId, orgId).catch(() => null),
+        ]);
+
+        const latestSnapshot = snapshots[0] ?? null;
+        const lastSyncAt = latestSnapshot?.snapshotAt
+          ? new Date(latestSnapshot.snapshotAt).toISOString()
+          : drift?.assessedAt ?? null;
+        const ageSeconds = lastSyncAt ? Math.max(0, Math.round((now - new Date(lastSyncAt).getTime()) / 1000)) : null;
+
+        const rawDrift = drift?.driftScore ?? null;
+        const driftScore = rawDrift != null
+          ? Math.round(Math.max(0, Math.min(1, rawDrift)) * 100)
+          : null;
+
+        let syncState: "fresh" | "stale" | "degraded" | "unknown";
+        if (lastSyncAt == null) {
+          syncState = "unknown";
+        } else if (drift?.driftStatus === "blocked" || drift?.driftStatus === "degraded") {
+          syncState = "degraded";
+        } else if (ageSeconds != null && ageSeconds > 600) {
+          syncState = "stale";
+        } else {
+          syncState = "fresh";
+        }
+
+        return {
+          twinId,
+          lastSyncAt,
+          ageSeconds,
+          driftScore,
+          driftStatus: drift?.driftStatus ?? null,
+          confidence: drift?.adjustedConfidence ?? null,
+          syncState,
+          hasLiveData: lastSyncAt != null,
+        };
+      } catch {
+        return {
+          twinId,
+          lastSyncAt: null,
+          ageSeconds: null,
+          driftScore: null,
+          driftStatus: null,
+          confidence: null,
+          syncState: "unknown" as const,
+          hasLiveData: false,
+        };
+      }
+    }));
+
+    sendSuccess(res, { statuses, count: statuses.length, generatedAt: new Date().toISOString() });
+  } catch (err) {
+    handleRouteError(res, err, "Internal server error");
+  }
+});
+
 router.get("/atlas/spatial/drift/:twinId/latest", authMiddleware(), async (req: Request, res: Response) => {
   try {
     const { twinId } = req.params as { twinId: string };

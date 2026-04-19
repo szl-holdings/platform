@@ -1,7 +1,26 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useSafeMode } from "../lib/use-safe-mode";
 import { useQuery } from "@tanstack/react-query";
-import { Layers, Activity, AlertTriangle, CheckCircle, Clock, Shield, Globe, ChevronRight, X, GitBranch, Zap, Server, Network, Eye, Lock, RefreshCw, Loader2 } from "lucide-react";
+import { Layers, Activity, AlertTriangle, CheckCircle, Clock, Shield, Globe, ChevronRight, X, GitBranch, Zap, Server, Network, Eye, Lock, RefreshCw, Loader2, Radio, WifiOff } from "lucide-react";
+
+interface TwinSyncStatus {
+  twinId: string;
+  lastSyncAt: string | null;
+  ageSeconds: number | null;
+  driftScore: number | null;
+  driftStatus: "stable" | "watch" | "degraded" | "blocked" | null;
+  confidence: number | null;
+  syncState: "fresh" | "stale" | "degraded" | "unknown";
+  hasLiveData: boolean;
+}
+
+function formatAge(seconds: number | null): string {
+  if (seconds == null) return "—";
+  if (seconds < 60) return `${seconds}s ago`;
+  if (seconds < 3600) return `${Math.round(seconds / 60)}m ago`;
+  if (seconds < 86400) return `${Math.round(seconds / 3600)}h ago`;
+  return `${Math.round(seconds / 86400)}d ago`;
+}
 
 type TwinState = "stable" | "degraded" | "awaiting_approval";
 type Domain = "aegis" | "terra" | "vessels" | "alloy" | "prism" | "lyte";
@@ -115,6 +134,22 @@ function useAtlasBranches() {
   });
 }
 
+function useTwinSyncStatuses(twinIds: string[]) {
+  const idsParam = twinIds.join(",");
+  return useQuery<{ statuses: TwinSyncStatus[]; count: number; generatedAt: string }>({
+    queryKey: ["command-twin-sync-status", idsParam],
+    queryFn: () => fetch(`/api/atlas/spatial/twins/sync-status?ids=${encodeURIComponent(idsParam)}`).then(r => {
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return r.json();
+    }).then(r => r.data ?? r),
+    enabled: twinIds.length > 0,
+    refetchInterval: 30000,
+    refetchIntervalInBackground: false,
+    staleTime: 15000,
+    retry: 1,
+  });
+}
+
 function useFirestormIncidents() {
   return useQuery<FirestormIncident[]>({
     queryKey: ["command-firestorm-incidents"],
@@ -136,19 +171,43 @@ export function AtlasRuntimePage() {
   const { data: branchData, isLoading: loadingBranches, refetch: refetchBranches } = useAtlasBranches();
   const { data: incidentData, isLoading: loadingIncidents, refetch: refetchIncidents } = useFirestormIncidents();
 
+  const seedTwinIds = useMemo(() => SEED_TWINS.map(t => t.id), []);
+  const { data: syncData, isLoading: loadingSync, refetch: refetchSync, dataUpdatedAt: syncUpdatedAt, isFetching: fetchingSync } = useTwinSyncStatuses(seedTwinIds);
+  const syncMap = useMemo(() => {
+    const m = new Map<string, TwinSyncStatus>();
+    for (const s of syncData?.statuses ?? []) m.set(s.twinId, s);
+    return m;
+  }, [syncData]);
+  const liveSyncCount = (syncData?.statuses ?? []).filter(s => s.hasLiveData).length;
+
   const apiBranchCount = branchData?.count ?? 0;
   const liveIncidents = Array.isArray(incidentData) ? incidentData : [];
   const openIncidents = liveIncidents.filter(i => i.status !== "resolved");
   const criticalIncidents = openIncidents.filter(i => i.severity === "critical");
 
-  const TWINS: CrossDomainTwin[] = SEED_TWINS.map(tw => {
-    if (tw.domain !== "aegis" || openIncidents.length === 0) return tw;
-    const extraPending = criticalIncidents.length > 0 ? Math.max(0, criticalIncidents.length - tw.pendingActions) : 0;
-    const liveState: TwinState = criticalIncidents.length >= 3 ? "degraded" : tw.state;
-    const liveSummary = openIncidents.length > 0 && tw.id === "tw-aeg-001"
-      ? `${openIncidents.length} open incident${openIncidents.length !== 1 ? "s" : ""} — ${criticalIncidents.length} critical — live from Firestorm`
-      : tw.summary;
-    return { ...tw, state: liveState, pendingActions: tw.pendingActions + extraPending, summary: liveSummary };
+  const TWINS: Array<CrossDomainTwin & { sync?: TwinSyncStatus }> = SEED_TWINS.map(tw => {
+    const sync = syncMap.get(tw.id);
+    let merged: CrossDomainTwin = tw;
+
+    if (sync && sync.hasLiveData) {
+      const liveDrift = sync.driftScore ?? tw.driftScore;
+      const liveLastSync = sync.ageSeconds != null ? formatAge(sync.ageSeconds) : tw.lastSync;
+      let liveState: TwinState = tw.state;
+      if (sync.syncState === "degraded") liveState = "degraded";
+      else if (sync.syncState === "stale" && tw.state === "stable") liveState = "degraded";
+      merged = { ...tw, driftScore: liveDrift, lastSync: liveLastSync, state: liveState };
+    }
+
+    if (merged.domain === "aegis" && openIncidents.length > 0) {
+      const extraPending = criticalIncidents.length > 0 ? Math.max(0, criticalIncidents.length - merged.pendingActions) : 0;
+      const liveState: TwinState = criticalIncidents.length >= 3 ? "degraded" : merged.state;
+      const liveSummary = openIncidents.length > 0 && merged.id === "tw-aeg-001"
+        ? `${openIncidents.length} open incident${openIncidents.length !== 1 ? "s" : ""} — ${criticalIncidents.length} critical — live from Firestorm`
+        : merged.summary;
+      merged = { ...merged, state: liveState, pendingActions: merged.pendingActions + extraPending, summary: liveSummary };
+    }
+
+    return { ...merged, sync };
   });
 
   const visibleTwins = safeMode ? TWINS.filter(t => t.state === "stable" && t.proofState === "verified") : TWINS;
@@ -157,12 +216,13 @@ export function AtlasRuntimePage() {
   const awaiting = TWINS.filter(t => t.state === "awaiting_approval");
   const pendingTotal = TWINS.reduce((s, t) => s + t.pendingActions, 0);
 
-  const isLoading = loadingBranches || loadingIncidents;
+  const isLoading = loadingBranches || loadingIncidents || loadingSync;
 
   function handleSync() {
     setLastRefresh(new Date());
     refetchBranches();
     refetchIncidents();
+    refetchSync();
   }
 
   return (
@@ -213,6 +273,30 @@ export function AtlasRuntimePage() {
           </div>
         ))}
       </div>
+
+      {!safeMode && (
+        <div className="rounded-xl border px-4 py-2.5 flex items-center gap-3 flex-wrap" style={{ borderColor: liveSyncCount > 0 ? "rgba(16,185,129,0.15)" : "rgba(255,255,255,0.07)", background: liveSyncCount > 0 ? "rgba(16,185,129,0.03)" : "rgba(255,255,255,0.015)" }}>
+          {liveSyncCount > 0 ? (
+            <>
+              <Radio className="w-3 h-3 shrink-0 animate-pulse" style={{ color: "#10b981" }} />
+              <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.55)" }}>
+                Live twin sync: <span className="font-bold font-mono" style={{ color: "#10b981" }}>{liveSyncCount}</span> of {seedTwinIds.length} twins reporting from ATLAS spatial runtime · auto-polling every 30s
+              </span>
+            </>
+          ) : (
+            <>
+              <WifiOff className="w-3 h-3 shrink-0" style={{ color: "rgba(255,255,255,0.35)" }} />
+              <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.4)" }}>
+                No live twin sync data — showing seeded baseline. Polling /api/atlas/spatial/twins/sync-status every 30s.
+              </span>
+            </>
+          )}
+          <span className="ml-auto flex items-center gap-1.5 text-[9px] font-mono" style={{ color: "rgba(255,255,255,0.3)" }}>
+            {fetchingSync && <Loader2 className="w-2.5 h-2.5 animate-spin" />}
+            {syncUpdatedAt > 0 ? `updated ${new Date(syncUpdatedAt).toLocaleTimeString()}` : "awaiting first sync"}
+          </span>
+        </div>
+      )}
 
       {liveIncidents.length > 0 && !safeMode && (
         <div className="rounded-xl border px-4 py-2.5 flex items-center gap-3" style={{ borderColor: "rgba(239,68,68,0.12)", background: "rgba(239,68,68,0.02)" }}>
@@ -281,16 +365,42 @@ export function AtlasRuntimePage() {
                 <div className="text-[10px] leading-snug mb-3" style={{ color: "rgba(255,255,255,0.45)" }}>{tw.summary}</div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                  {[
-                    { label: "Drift", value: `Δ${tw.driftScore}%`, color: tw.driftScore <= 5 ? "#10b981" : tw.driftScore <= 15 ? "#f59e0b" : "#ef4444" },
-                    { label: "Sync", value: tw.lastSync, color: "rgba(255,255,255,0.5)" },
-                    { label: "Actions", value: `${tw.pendingActions}`, color: tw.pendingActions > 0 ? "#f59e0b" : "#10b981" },
-                  ].map(s2 => (
-                    <div key={s2.label} className="rounded-lg p-2 text-center" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.05)" }}>
-                      <div className="text-[8px] uppercase tracking-widest mb-0.5" style={{ color: "rgba(255,255,255,0.25)" }}>{s2.label}</div>
-                      <div className="text-[10px] font-bold font-mono" style={{ color: s2.color }}>{s2.value}</div>
-                    </div>
-                  ))}
+                  {(() => {
+                    const sync = tw.sync;
+                    const isLive = !!sync?.hasLiveData;
+                    const isStale = sync?.syncState === "stale";
+                    const isDegradedSync = sync?.syncState === "degraded";
+                    const syncBorder = isDegradedSync
+                      ? "1px solid rgba(239,68,68,0.3)"
+                      : isStale
+                        ? "1px solid rgba(245,158,11,0.3)"
+                        : isLive
+                          ? "1px solid rgba(16,185,129,0.25)"
+                          : "1px solid rgba(255,255,255,0.05)";
+                    const syncBg = isDegradedSync
+                      ? "rgba(239,68,68,0.06)"
+                      : isStale
+                        ? "rgba(245,158,11,0.06)"
+                        : isLive
+                          ? "rgba(16,185,129,0.04)"
+                          : "rgba(255,255,255,0.03)";
+                    const syncColor = isDegradedSync ? "#ef4444" : isStale ? "#f59e0b" : isLive ? "#10b981" : "rgba(255,255,255,0.5)";
+                    const syncLabel = isDegradedSync ? "Sync · Degraded" : isStale ? "Sync · Stale" : isLive ? "Sync · Live" : "Sync";
+                    const cells = [
+                      { label: "Drift", value: `Δ${tw.driftScore}%`, color: tw.driftScore <= 5 ? "#10b981" : tw.driftScore <= 15 ? "#f59e0b" : "#ef4444", border: "1px solid rgba(255,255,255,0.05)", bg: "rgba(255,255,255,0.03)" },
+                      { label: syncLabel, value: tw.lastSync, color: syncColor, border: syncBorder, bg: syncBg },
+                      { label: "Actions", value: `${tw.pendingActions}`, color: tw.pendingActions > 0 ? "#f59e0b" : "#10b981", border: "1px solid rgba(255,255,255,0.05)", bg: "rgba(255,255,255,0.03)" },
+                    ];
+                    return cells.map(s2 => (
+                      <div key={s2.label} className="rounded-lg p-2 text-center" style={{ background: s2.bg, border: s2.border }}>
+                        <div className="text-[8px] uppercase tracking-widest mb-0.5 flex items-center justify-center gap-1" style={{ color: "rgba(255,255,255,0.3)" }}>
+                          {s2.label === syncLabel && isLive && !isStale && !isDegradedSync && <span className="w-1 h-1 rounded-full animate-pulse" style={{ background: "#10b981" }} />}
+                          {s2.label}
+                        </div>
+                        <div className="text-[10px] font-bold font-mono" style={{ color: s2.color }}>{s2.value}</div>
+                      </div>
+                    ));
+                  })()}
                 </div>
 
                 {selectedTwin?.id === tw.id && (
