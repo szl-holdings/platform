@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Zap, CheckCircle, Clock, AlertTriangle, Shield, Activity, RotateCcw, RefreshCw, ChevronRight } from "lucide-react";
+import { CheckCircle, Clock, Shield, Activity, RotateCcw, RefreshCw, ChevronRight, Plus, Pencil, Trash2, X } from "lucide-react";
 import { apiFetch } from "@szl-holdings/shared-ui/api-fetch";
 
 const GOLD = "#d4a054";
@@ -162,7 +162,7 @@ function RunCard({ run }: { run: RemediationRun }) {
   );
 }
 
-function PatternRow({ p, onToggle }: { p: FailurePattern; onToggle: (id: string) => void }) {
+function PatternRow({ p, onToggle, onEdit, onDelete }: { p: FailurePattern; onToggle: (id: string) => void; onEdit: (p: FailurePattern) => void; onDelete: (p: FailurePattern) => void }) {
   const tc = TYPE_COLOR[p.type];
   return (
     <div className="flex items-center gap-3 py-2.5 px-3 rounded-lg" style={{ background: DS.surface, border: `1px solid ${DS.border}` }}>
@@ -173,8 +173,11 @@ function PatternRow({ p, onToggle }: { p: FailurePattern; onToggle: (id: string)
         title={p.enabled ? "Click to disable" : "Click to enable"}
       />
       <div className="flex-1 min-w-0">
-        <div className="text-[11px] font-medium" style={{ color: DS.text.primary }}>{p.name}</div>
-        <div className="text-[9px] mt-0.5" style={{ color: DS.text.muted }}>{p.trigger}</div>
+        <div className="flex items-center gap-2">
+          <div className="text-[11px] font-medium truncate" style={{ color: DS.text.primary }}>{p.name}</div>
+          <span className="text-[8px] px-1 py-0.5 rounded uppercase font-mono shrink-0" style={{ background: `${tc}15`, color: tc }}>{p.type}</span>
+        </div>
+        <div className="text-[9px] mt-0.5 truncate" style={{ color: DS.text.muted }}>{p.trigger}</div>
       </div>
       <div className="text-right shrink-0">
         <div className="text-[10px] font-mono" style={{ color: "#10b981" }}>{p.successRate}%</div>
@@ -184,12 +187,182 @@ function PatternRow({ p, onToggle }: { p: FailurePattern; onToggle: (id: string)
         <div className="text-[10px] font-mono" style={{ color: GOLD }}>~{p.avgMttrSavedMins}m</div>
         <div className="text-[8px]" style={{ color: DS.text.muted }}>avg MTTR saved</div>
       </div>
+      <div className="flex items-center gap-1 shrink-0">
+        <button
+          onClick={() => onEdit(p)}
+          className="p-1.5 rounded hover:bg-white/5 transition-colors"
+          style={{ color: DS.text.muted }}
+          title="Edit pattern"
+        >
+          <Pencil className="w-3 h-3" />
+        </button>
+        <button
+          onClick={() => onDelete(p)}
+          className="p-1.5 rounded hover:bg-white/5 transition-colors"
+          style={{ color: DS.text.muted }}
+          title="Delete pattern"
+        >
+          <Trash2 className="w-3 h-3" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+const PATTERN_TYPES: PatternType[] = ["restart", "scale", "failover", "clear_queue", "rollback"];
+
+interface PatternFormState {
+  name: string;
+  type: PatternType;
+  trigger: string;
+  runbook: string;
+  enabled: boolean;
+}
+
+function emptyForm(): PatternFormState {
+  return { name: "", type: "restart", trigger: "", runbook: "", enabled: true };
+}
+
+function PatternEditorModal({
+  open,
+  initial,
+  saving,
+  errorMessage,
+  onClose,
+  onSave,
+}: {
+  open: boolean;
+  initial: { mode: "create" } | { mode: "edit"; pattern: FailurePattern } | null;
+  saving: boolean;
+  errorMessage: string | null;
+  onClose: () => void;
+  onSave: (form: PatternFormState) => void;
+}) {
+  const [form, setForm] = useState<PatternFormState>(emptyForm());
+
+  useEffect(() => {
+    if (!open || !initial) return;
+    if (initial.mode === "edit") {
+      const p = initial.pattern;
+      setForm({ name: p.name, type: p.type, trigger: p.trigger, runbook: p.runbook, enabled: p.enabled });
+    } else {
+      setForm(emptyForm());
+    }
+  }, [open, initial]);
+
+  if (!open || !initial) return null;
+
+  const title = initial.mode === "create" ? "Add pattern" : "Edit pattern";
+  const canSubmit = form.name.trim().length > 0 && form.trigger.trim().length > 0 && form.runbook.trim().length > 0;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.6)" }} onClick={onClose}>
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-lg rounded-xl border p-5"
+        style={{ background: "#0a0a0a", borderColor: DS.border }}
+      >
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-[13px] font-semibold" style={{ color: DS.text.primary }}>{title}</h2>
+          <button onClick={onClose} className="p-1 rounded hover:bg-white/5" style={{ color: DS.text.muted }}>
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        <div className="space-y-3">
+          <label className="block">
+            <span className="text-[9px] uppercase tracking-widest" style={{ color: DS.text.muted }}>Name</span>
+            <input
+              value={form.name}
+              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+              className="w-full mt-1 px-3 py-2 rounded-lg text-[12px] outline-none focus:ring-1"
+              style={{ background: DS.surface, border: `1px solid ${DS.border}`, color: DS.text.primary }}
+              placeholder="e.g., Service Restart on OOM"
+              maxLength={200}
+            />
+          </label>
+
+          <label className="block">
+            <span className="text-[9px] uppercase tracking-widest" style={{ color: DS.text.muted }}>Type</span>
+            <select
+              value={form.type}
+              onChange={(e) => setForm((f) => ({ ...f, type: e.target.value as PatternType }))}
+              className="w-full mt-1 px-3 py-2 rounded-lg text-[12px] outline-none"
+              style={{ background: DS.surface, border: `1px solid ${DS.border}`, color: DS.text.primary }}
+            >
+              {PATTERN_TYPES.map((t) => (
+                <option key={t} value={t} style={{ background: "#0a0a0a" }}>{t}</option>
+              ))}
+            </select>
+          </label>
+
+          <label className="block">
+            <span className="text-[9px] uppercase tracking-widest" style={{ color: DS.text.muted }}>Trigger</span>
+            <input
+              value={form.trigger}
+              onChange={(e) => setForm((f) => ({ ...f, trigger: e.target.value }))}
+              className="w-full mt-1 px-3 py-2 rounded-lg text-[12px] outline-none"
+              style={{ background: DS.surface, border: `1px solid ${DS.border}`, color: DS.text.primary }}
+              placeholder="e.g., CPU > 85% for 5 consecutive minutes"
+              maxLength={500}
+            />
+          </label>
+
+          <label className="block">
+            <span className="text-[9px] uppercase tracking-widest" style={{ color: DS.text.muted }}>Runbook</span>
+            <textarea
+              value={form.runbook}
+              onChange={(e) => setForm((f) => ({ ...f, runbook: e.target.value }))}
+              rows={3}
+              className="w-full mt-1 px-3 py-2 rounded-lg text-[12px] outline-none resize-none"
+              style={{ background: DS.surface, border: `1px solid ${DS.border}`, color: DS.text.primary }}
+              placeholder="e.g., RUNBOOK-001: Drain → Restart → Health-check → Reroute"
+              maxLength={2000}
+            />
+          </label>
+
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={form.enabled}
+              onChange={(e) => setForm((f) => ({ ...f, enabled: e.target.checked }))}
+            />
+            <span className="text-[11px]" style={{ color: DS.text.secondary }}>Enabled</span>
+          </label>
+
+          {errorMessage && (
+            <div className="text-[10px] px-3 py-2 rounded-lg" style={{ background: "rgba(239,68,68,0.08)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)" }}>
+              {errorMessage}
+            </div>
+          )}
+        </div>
+
+        <div className="flex items-center justify-end gap-2 mt-5">
+          <button
+            onClick={onClose}
+            className="px-3 py-1.5 rounded-lg text-[11px]"
+            style={{ background: DS.surface, color: DS.text.secondary, border: `1px solid ${DS.border}` }}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => onSave(form)}
+            disabled={!canSubmit || saving}
+            className="px-3 py-1.5 rounded-lg text-[11px] font-semibold disabled:opacity-50"
+            style={{ background: GOLD, color: "#0a0a0a" }}
+          >
+            {saving ? "Saving..." : "Save pattern"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
 
 export default function SelfHealingPage() {
   const [tab, setTab] = useState<"runs" | "patterns">("runs");
+  const [editor, setEditor] = useState<{ mode: "create" } | { mode: "edit"; pattern: FailurePattern } | null>(null);
+  const [editorError, setEditorError] = useState<string | null>(null);
   const qc = useQueryClient();
 
   const statsQuery = useQuery<StatsResponse>({
@@ -214,6 +387,11 @@ export default function SelfHealingPage() {
     return m ? decodeURIComponent(m.split("=")[1]!) : undefined;
   };
 
+  const invalidatePolicies = () => {
+    void qc.invalidateQueries({ queryKey: ["self-healing-policies"] });
+    void qc.invalidateQueries({ queryKey: ["self-healing-stats"] });
+  };
+
   const toggleMutation = useMutation({
     mutationFn: (id: string) => {
       const csrfToken = getCsrfToken();
@@ -222,11 +400,67 @@ export default function SelfHealingPage() {
         headers: csrfToken ? { "x-csrf-token": csrfToken } : undefined,
       });
     },
-    onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: ["self-healing-policies"] });
-      void qc.invalidateQueries({ queryKey: ["self-healing-stats"] });
-    },
+    onSuccess: invalidatePolicies,
   });
+
+  const createMutation = useMutation({
+    mutationFn: (form: PatternFormState) => {
+      const csrfToken = getCsrfToken();
+      return apiFetch<{ policy: FailurePattern }>(`/self-healing/policies`, {
+        method: "POST",
+        headers: csrfToken ? { "x-csrf-token": csrfToken } : undefined,
+        body: JSON.stringify(form),
+      });
+    },
+    onSuccess: () => {
+      invalidatePolicies();
+      setEditor(null);
+      setEditorError(null);
+    },
+    onError: (err: Error) => setEditorError(err.message || "Failed to create pattern"),
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, form }: { id: string; form: PatternFormState }) => {
+      const csrfToken = getCsrfToken();
+      return apiFetch<{ policy: FailurePattern }>(`/self-healing/policies/${id}`, {
+        method: "PUT",
+        headers: csrfToken ? { "x-csrf-token": csrfToken } : undefined,
+        body: JSON.stringify(form),
+      });
+    },
+    onSuccess: () => {
+      invalidatePolicies();
+      setEditor(null);
+      setEditorError(null);
+    },
+    onError: (err: Error) => setEditorError(err.message || "Failed to update pattern"),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => {
+      const csrfToken = getCsrfToken();
+      return apiFetch<void>(`/self-healing/policies/${id}`, {
+        method: "DELETE",
+        headers: csrfToken ? { "x-csrf-token": csrfToken } : undefined,
+      });
+    },
+    onSuccess: invalidatePolicies,
+  });
+
+  const handleSavePattern = (form: PatternFormState) => {
+    setEditorError(null);
+    if (editor?.mode === "edit") {
+      updateMutation.mutate({ id: editor.pattern.id, form });
+    } else {
+      createMutation.mutate(form);
+    }
+  };
+
+  const handleDeletePattern = (p: FailurePattern) => {
+    if (typeof window !== "undefined" && !window.confirm(`Delete pattern "${p.name}"? This cannot be undone.`)) return;
+    deleteMutation.mutate(p.id);
+  };
 
   const stats = statsQuery.data;
   const runs = runsQuery.data?.runs ?? [];
@@ -320,8 +554,18 @@ export default function SelfHealingPage() {
                 </div>
               )}
               {!policiesQuery.isLoading && (
-                <div className="text-[10px] mb-3" style={{ color: DS.text.muted }}>
-                  {policies.filter(p => p.enabled).length} patterns active · {policies.filter(p => !p.enabled).length} disabled
+                <div className="flex items-center justify-between mb-3">
+                  <div className="text-[10px]" style={{ color: DS.text.muted }}>
+                    {policies.filter(p => p.enabled).length} patterns active · {policies.filter(p => !p.enabled).length} disabled
+                  </div>
+                  <button
+                    onClick={() => { setEditorError(null); setEditor({ mode: "create" }); }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold"
+                    style={{ background: GOLD, color: "#0a0a0a" }}
+                  >
+                    <Plus className="w-3 h-3" />
+                    Add pattern
+                  </button>
                 </div>
               )}
               {policies.map(p => (
@@ -329,12 +573,28 @@ export default function SelfHealingPage() {
                   key={p.id}
                   p={p}
                   onToggle={(id) => toggleMutation.mutate(id)}
+                  onEdit={(pattern) => { setEditorError(null); setEditor({ mode: "edit", pattern }); }}
+                  onDelete={handleDeletePattern}
                 />
               ))}
+              {deleteMutation.isError && (
+                <div className="text-[10px] px-3 py-2 rounded-lg mt-2" style={{ background: "rgba(239,68,68,0.08)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)" }}>
+                  Failed to delete pattern: {(deleteMutation.error as Error)?.message ?? "unknown error"}
+                </div>
+              )}
             </div>
           )}
         </>
       )}
+
+      <PatternEditorModal
+        open={editor !== null}
+        initial={editor}
+        saving={createMutation.isPending || updateMutation.isPending}
+        errorMessage={editorError}
+        onClose={() => { setEditor(null); setEditorError(null); }}
+        onSave={handleSavePattern}
+      />
     </div>
   );
 }

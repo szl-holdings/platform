@@ -1,8 +1,11 @@
 import { Router, type IRouter, type Request, type Response } from "express";
-import { sendSuccess, sendNotFound, handleRouteError } from "../lib/api-response";
-import { authMiddleware } from "../middlewares/auth";
-import { db, selfHealingPatternsTable, selfHealingRunsTable } from "@szl-holdings/db";
+import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, sendNoContent, handleRouteError } from "../lib/api-response";
+import { authMiddleware, requireRole, type AuthenticatedUser } from "../middlewares/auth";
+import { db, selfHealingPatternsTable, selfHealingRunsTable, alloyAuditLogTable } from "@szl-holdings/db";
 import { and, desc, eq, sql } from "drizzle-orm";
+import { randomBytes } from "crypto";
+import { z } from "zod";
+import { logger } from "../lib/logger";
 
 import { anyQuerySchema, jsonObjectBodySchema, validateBody, validateQuery } from "../lib/validation";
 import {
@@ -373,6 +376,165 @@ router.get("/self-healing/policies", authMiddleware({ required: false }), async 
     sendSuccess(res, { policies });
   } catch (err) {
     handleRouteError(res, err, "Failed to fetch self-healing policies");
+  }
+});
+
+const PATTERN_TYPES = ["restart", "scale", "failover", "clear_queue", "rollback"] as const;
+
+const createPatternSchema = z.object({
+  patternKey: z.string().min(1).max(100).regex(/^[a-z0-9-_]+$/i).optional(),
+  name: z.string().min(1).max(200).trim(),
+  type: z.enum(PATTERN_TYPES),
+  trigger: z.string().min(1).max(500).trim(),
+  runbook: z.string().min(1).max(2000).trim(),
+  enabled: z.boolean().optional().default(true),
+});
+
+const updatePatternSchema = z.object({
+  name: z.string().min(1).max(200).trim().optional(),
+  type: z.enum(PATTERN_TYPES).optional(),
+  trigger: z.string().min(1).max(500).trim().optional(),
+  runbook: z.string().min(1).max(2000).trim().optional(),
+  enabled: z.boolean().optional(),
+}).refine((d) => Object.keys(d).length > 0, { message: "At least one field is required" });
+
+async function writePatternAudit(params: {
+  userId?: number | null;
+  action: "create" | "update" | "delete" | "toggle";
+  resourceId: string;
+  before?: unknown;
+  after?: unknown;
+}) {
+  try {
+    await db.insert(alloyAuditLogTable).values({
+      orgId: null,
+      userId: params.userId ?? null,
+      action: params.action,
+      resourceType: "self_healing_pattern",
+      resourceId: params.resourceId,
+      before: (params.before as Record<string, unknown>) ?? null,
+      after: (params.after as Record<string, unknown>) ?? null,
+    });
+  } catch (err) {
+    logger.warn({ err }, "Failed to write audit log for self-healing pattern");
+  }
+}
+
+function generatePatternKey(): string {
+  return `p-${randomBytes(6).toString("hex")}`;
+}
+
+router.post("/self-healing/policies", validateBody(jsonObjectBodySchema), authMiddleware({ required: true }), requireRole("admin"), async (req: Request, res: Response) => {
+  try {
+    await ensureSeeded();
+    const parsed = createPatternSchema.safeParse(req.body);
+    if (!parsed.success) { sendBadRequest(res, parsed.error.message); return; }
+    const data = parsed.data;
+    const user = req.user as AuthenticatedUser | undefined;
+
+    const patternKey = data.patternKey ?? generatePatternKey();
+
+    const existing = await db
+      .select({ id: selfHealingPatternsTable.id })
+      .from(selfHealingPatternsTable)
+      .where(eq(selfHealingPatternsTable.patternKey, patternKey))
+      .limit(1);
+    if (existing.length > 0) { sendBadRequest(res, "A pattern with that key already exists"); return; }
+
+    const [created] = await db.insert(selfHealingPatternsTable).values({
+      patternKey,
+      name: data.name,
+      type: data.type,
+      trigger: data.trigger,
+      runbook: data.runbook,
+      enabled: data.enabled ?? true,
+    }).returning();
+
+    await writePatternAudit({
+      userId: user?.id,
+      action: "create",
+      resourceId: patternKey,
+      after: created,
+    });
+
+    const policies = await loadPatterns();
+    const policy = policies.find((p) => p.id === patternKey);
+    sendCreated(res, { policy });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to create self-healing pattern");
+  }
+});
+
+router.put("/self-healing/policies/:id", validateBody(jsonObjectBodySchema), authMiddleware({ required: true }), requireRole("admin"), async (req: Request, res: Response) => {
+  try {
+    await ensureSeeded();
+    const { id } = req.params as { id: string };
+    const parsed = updatePatternSchema.safeParse(req.body);
+    if (!parsed.success) { sendBadRequest(res, parsed.error.message); return; }
+    const user = req.user as AuthenticatedUser | undefined;
+
+    const existing = await db
+      .select()
+      .from(selfHealingPatternsTable)
+      .where(eq(selfHealingPatternsTable.patternKey, id))
+      .limit(1);
+    if (existing.length === 0) { sendNotFound(res, "Pattern"); return; }
+
+    const updates: Partial<typeof selfHealingPatternsTable.$inferInsert> = { updatedAt: new Date() };
+    const data = parsed.data;
+    if (data.name !== undefined) updates.name = data.name;
+    if (data.type !== undefined) updates.type = data.type;
+    if (data.trigger !== undefined) updates.trigger = data.trigger;
+    if (data.runbook !== undefined) updates.runbook = data.runbook;
+    if (data.enabled !== undefined) updates.enabled = data.enabled;
+
+    const [updated] = await db
+      .update(selfHealingPatternsTable)
+      .set(updates)
+      .where(eq(selfHealingPatternsTable.patternKey, id))
+      .returning();
+
+    await writePatternAudit({
+      userId: user?.id,
+      action: "update",
+      resourceId: id,
+      before: existing[0],
+      after: updated,
+    });
+
+    const policies = await loadPatterns();
+    const policy = policies.find((p) => p.id === id);
+    sendSuccess(res, { policy });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to update self-healing pattern");
+  }
+});
+
+router.delete("/self-healing/policies/:id", authMiddleware({ required: true }), requireRole("admin"), async (req: Request, res: Response) => {
+  try {
+    await ensureSeeded();
+    const { id } = req.params as { id: string };
+
+    const existing = await db
+      .select()
+      .from(selfHealingPatternsTable)
+      .where(eq(selfHealingPatternsTable.patternKey, id))
+      .limit(1);
+    if (existing.length === 0) { sendNotFound(res, "Pattern"); return; }
+    const user = req.user as AuthenticatedUser | undefined;
+
+    await db.delete(selfHealingPatternsTable).where(eq(selfHealingPatternsTable.patternKey, id));
+
+    await writePatternAudit({
+      userId: user?.id,
+      action: "delete",
+      resourceId: id,
+      before: existing[0],
+    });
+
+    sendNoContent(res);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to delete self-healing pattern");
   }
 });
 
