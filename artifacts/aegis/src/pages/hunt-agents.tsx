@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Search, Brain, Play, RefreshCw, CheckCircle, Clock, Database, Activity, AlertTriangle, Zap, ChevronRight, Eye, TrendingUp, Target, Network } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
+import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
 
 interface HuntAgent {
   id: string;
@@ -164,6 +165,15 @@ export default function HuntAgents() {
         <div>
           <h2 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">Hunt Reports</h2>
           <div className="space-y-1.5">
+            {HUNTS.length === 0 && (
+              <EmptyState
+                icon={CheckCircle}
+                headline="No hunts in flight"
+                description="Hunt agents are idle — launch a new hunt to formulate fresh hypotheses."
+                accentColor="#10b981"
+                compact
+              />
+            )}
             {HUNTS.map(hunt => (
               <button
                 key={hunt.id}

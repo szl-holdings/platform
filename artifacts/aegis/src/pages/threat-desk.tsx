@@ -120,7 +120,15 @@ export default function ThreatDesk() {
             <RefreshCw size={12} style={{ color: "rgba(255,255,255,0.3)" }} />
           </button>
         </div>
-        {threatTwins.map(t => (
+        {threatTwins.length === 0 ? (
+          <EmptyState
+            icon={CheckCircle}
+            headline="No active threat twins"
+            description="No threats are tracked right now — new detections will surface here."
+            accentColor="#10b981"
+            compact
+          />
+        ) : threatTwins.map(t => (
           <ThreatCard key={t.id} threat={t} selected={t.id === selectedId} onSelect={() => setSelectedId(t.id)} />
         ))}
       </aside>

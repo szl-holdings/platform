@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Clock, AlertTriangle, CheckCircle2, DollarSign, Ship, FileText, TrendingDown, TrendingUp, Calculator } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
+import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
 
 interface LaytimeEvent {
   event: string;
@@ -251,7 +252,14 @@ export default function DemurragePage() {
       </div>
 
       <div className="space-y-3">
-        {CASES.map(c => <DemurrageCard key={c.id} c={c} />)}
+        {CASES.length === 0 ? (
+          <EmptyState
+            icon={CheckCircle2}
+            headline="No demurrage exposure"
+            description="Every voyage is operating within laytime — no demurrage or despatch claims are open."
+            accentColor="#10b981"
+          />
+        ) : CASES.map(c => <DemurrageCard key={c.id} c={c} />)}
       </div>
     </div>
   );

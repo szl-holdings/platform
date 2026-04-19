@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { FileText, Plus, Clock, CheckCircle2, AlertTriangle, DollarSign, Calendar, Ship, ChevronDown, ChevronUp, Sparkles, Brain } from "lucide-react";
+import { FileText, Plus, Clock, CheckCircle2, AlertTriangle, DollarSign, Calendar, Ship, ChevronDown, ChevronUp, Sparkles, Brain, Filter } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
+import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
 
 type FixtureStatus = "draft" | "negotiated" | "fixed" | "performing" | "completed";
 
@@ -317,13 +318,24 @@ export default function CharterPartyPage() {
       </div>
 
       <div className="space-y-3">
-        {filtered.map(f => <FixtureCard key={f.id} fixture={f} />)}
-        {filtered.length === 0 && (
-          <div className="text-center py-12">
-            <FileText className="w-8 h-8 text-sky-400/20 mx-auto mb-2" />
-            <p className="text-sm text-sky-400/40">No fixtures match current filters</p>
-          </div>
-        )}
+        {filtered.length === 0 ? (
+          stats.total === 0 ? (
+            <EmptyState
+              icon={CheckCircle2}
+              headline="No charter fixtures on the books"
+              description="The fixture book is clear — start a new fixture to begin negotiations."
+              accentColor="#10b981"
+            />
+          ) : (
+            <EmptyState
+              icon={Filter}
+              headline="No fixtures match these filters"
+              description="Adjust the status or charter-type filters to expand the fixture list."
+              accentColor="#38bdf8"
+              action={{ label: "Reset filters", onClick: () => { setStatusFilter("all"); setTypeFilter("all"); } }}
+            />
+          )
+        ) : filtered.map(f => <FixtureCard key={f.id} fixture={f} />)}
       </div>
     </div>
   );

@@ -1,10 +1,11 @@
 // @ts-nocheck
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import { Home, Search, Filter, MapPin, Clock, TrendingDown, Eye, ChevronDown, X, Building2, ArrowRight, Radio } from "lucide-react";
+import { Home, Search, Filter, MapPin, Clock, TrendingDown, Eye, ChevronDown, X, Building2, ArrowRight, Radio, CheckCircle } from "lucide-react";
 import { listings, type Listing } from "@/data/brokerage";
 import { RiskBadge, StageBadge, formatCurrency, AgentAvatar, PropertyDrawer } from "@/components/brokerage-ui";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
 import { useLocation } from "wouter";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 
@@ -294,7 +295,24 @@ export default function ListingsPage() {
       {/* Results count */}
       <p className="text-xs text-terra-text-muted">{filtered.length} listings</p>
 
-      {view === "grid" ? (
+      {filtered.length === 0 ? (
+        listings.length === 0 ? (
+          <EmptyState
+            icon={CheckCircle}
+            headline="No active listings"
+            description="The inventory board is clear — every listing has closed or been withdrawn."
+            accentColor="#10b981"
+          />
+        ) : (
+          <EmptyState
+            icon={Filter}
+            headline="No listings match these filters"
+            description="Adjust the search, status, or risk filters to widen the inventory view."
+            accentColor="#c87941"
+            action={{ label: "Reset filters", onClick: () => { setSearch(""); setStatusFilter("all"); setRiskFilter("all"); } }}
+          />
+        )
+      ) : view === "grid" ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filtered.map(listing => (
             <ListingCard key={listing.id} listing={listing} />

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Inbox, User, Clock, ArrowRight, Filter, CheckCircle, AlertTriangle, Star } from "lucide-react";
+import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
 
 const TERRA_ACCENT = "#c87941";
 
@@ -138,6 +139,24 @@ export default function InquiriesCommand() {
 
       <div style={{ display: "grid", gridTemplateColumns: selectedInquiry ? "1fr 380px" : "1fr", gap: "1rem" }}>
         <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}>
+          {filtered.length === 0 && (
+            statusFilter === "all" ? (
+              <EmptyState
+                icon={CheckCircle}
+                headline="No inquiries waiting"
+                description="Every inquiry has been routed and assigned — the inbox is clear."
+                accentColor="#10b981"
+              />
+            ) : (
+              <EmptyState
+                icon={Filter}
+                headline={`No ${statusFilter.replace(/_/g, " ")} inquiries`}
+                description="Switch to a different status to see other inquiries in the routing queue."
+                accentColor={TERRA_ACCENT}
+                action={{ label: "Show all inquiries", onClick: () => setStatusFilter("all") }}
+              />
+            )
+          )}
           {filtered.map((inquiry, i) => {
             const sc = STATUS_CONFIG[inquiry.status];
             const isSelected = selected === inquiry.id;

@@ -1,9 +1,10 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { DollarSign, Clock, CheckCircle, AlertTriangle, ArrowLeftRight } from "lucide-react";
+import { DollarSign, Clock, CheckCircle, AlertTriangle, ArrowLeftRight, Filter } from "lucide-react";
 import { offers, type Offer } from "@/data/brokerage";
 import { RiskBadge, ApprovalChip, formatCurrency, ConfidenceBadge } from "@/components/brokerage-ui";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
 
 function timeUntil(dateStr: string) {
   const diff = new Date(dateStr).getTime() - Date.now();
@@ -274,9 +275,28 @@ export default function OffersPage() {
       ))}
 
       {/* Offer Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {filtered.map(offer => <OfferCard key={offer.id} offer={offer} />)}
-      </div>
+      {filtered.length === 0 ? (
+        offers.length === 0 ? (
+          <EmptyState
+            icon={CheckCircle}
+            headline="No live offers"
+            description="The deal book is quiet — every offer has been settled or withdrawn."
+            accentColor="#10b981"
+          />
+        ) : (
+          <EmptyState
+            icon={Filter}
+            headline="No offers match these filters"
+            description="Adjust the direction or status filter to see more of the deal book."
+            accentColor="#c87941"
+            action={{ label: "Reset filters", onClick: () => { setDirectionFilter("all"); setStatusFilter("all"); } }}
+          />
+        )
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {filtered.map(offer => <OfferCard key={offer.id} offer={offer} />)}
+        </div>
+      )}
     </div>
   );
 }

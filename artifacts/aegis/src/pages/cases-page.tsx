@@ -502,7 +502,24 @@ export default function CasesPage() {
               <div className="w-6 h-6 border-2 border-red-500/40 border-t-red-400 rounded-full animate-spin" />
             </div>
           ) : filtered.length === 0 ? (
-            <EmptyState icon={Briefcase} headline="No cases found" compact />
+            cases.length === 0 ? (
+              <EmptyState
+                icon={CheckCircle}
+                headline="No open cases"
+                description="The case queue is clear — every reported issue has been triaged or resolved."
+                accentColor="#10b981"
+                compact
+              />
+            ) : (
+              <EmptyState
+                icon={Filter}
+                headline="No cases match these filters"
+                description="Try widening the search, status, or priority filter to see other cases."
+                accentColor="#8b7ac8"
+                action={{ label: "Reset filters", onClick: () => { setSearch(""); setStatusFilter("all"); setPriorityFilter("all"); } }}
+                compact
+              />
+            )
           ) : (
             filtered.map((c) => {
               const pc = priorityConfig[c.priority];

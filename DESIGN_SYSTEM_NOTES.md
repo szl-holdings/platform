@@ -178,13 +178,31 @@ Modals for **detail views / context** — use `Sheet` (sliding panel from right)
 
 ### Domain-Specific Empty State Guidelines
 
-| Surface | Empty State Headline | Guidance |
-|---------|---------------------|---------|
-| Aegis alerts | "No active alerts" | "Alert thresholds are met — the environment is clean." |
-| Vessels fleet | "No vessels matching filters" | "Adjust date range or vessel class filters to expand results." |
-| Terra distress | "No distressed properties in pipeline" | "The pipeline is clear. Adjust borough filters or expand date range." |
-| Command action queue | "Action queue is clear" | "All signals have been addressed. No pending decisions." |
-| Carlota Jo inquiries | "No active inquiries" | "All client inquiries have been resolved." |
+Two-branch pattern: distinguish **all-clear** (entire data source is empty — operator should feel reassured) from **filter-empty** (data exists but current filters exclude everything — offer a reset action).
+
+- **All-clear:** green accent `#10b981`, `CheckCircle` / `CheckCircle2` icon, no action button. Reassuring copy ("the queue is clear", "no exposure").
+- **Filter-empty:** pack accent (Aegis violet `#8b7ac8`, Vessels sky `#38bdf8`, Terra copper `#c87941`), `Filter` icon, and a `Reset filters` / `Show all` action that clears the state hooks driving the filter.
+
+| Surface | All-clear headline | Filter-empty headline | Reset action |
+|---------|---------------------|------------------------|--------------|
+| Aegis alerts | "No active alerts" | "No alerts match these filters" | Reset severity/status |
+| Aegis cases | "All cases triaged" | "No cases match these filters" | Reset filters |
+| Aegis investigations (timeline/entities/signals/evidence) | "No timeline activity yet" / "No entities linked yet" / "No correlated signals" / "No evidence collected yet" | — | — (live case data only) |
+| Aegis watchlists | "No watchlists configured" | "No watchlists match this type" | Show all types |
+| Aegis hunt agents | "No hunts in flight" | — | — |
+| Aegis threat desk | "No active threat twins" | — | — |
+| Vessels fleet | "No vessels matching filters" | "Adjust date range or vessel class filters" | Reset filters |
+| Vessels exception queue | "Fleet is exception-free" | "No {filter} exceptions" | Show all |
+| Vessels voyage P&L | "No voyages awaiting modeling" | — | — |
+| Vessels demurrage | "No demurrage exposure" | — | — |
+| Vessels charter party | "No charter fixtures on the books" | "No fixtures match these filters" | Reset filters |
+| Terra distress | "No distressed properties in pipeline" | "The pipeline is clear" | Reset filters |
+| Terra offers | "No live offers" | "No offers match these filters" | Reset filters |
+| Terra transactions | "No transactions in flight" | — | — |
+| Terra inquiries | "No inquiries waiting" | "No {status} inquiries" | Show all inquiries |
+| Terra listings | "No active listings" | "No listings match these filters" | Reset filters |
+| Command action queue | "Action queue is clear" | — | — |
+| Carlota Jo inquiries | "No active inquiries" | — | — |
 
 ---
 

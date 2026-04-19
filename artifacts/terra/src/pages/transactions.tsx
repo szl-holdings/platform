@@ -4,6 +4,7 @@ import { ClipboardList, CheckCircle, Clock, AlertTriangle, ChevronDown, ChevronU
 import { transactions, type Transaction, type TransactionStep } from "@/data/brokerage";
 import { formatCurrency, WorkflowTraceView, AuditPanel } from "@/components/brokerage-ui";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
 
 const stepStatusConfig = {
   complete: { color: "bg-emerald-500", ring: "border-emerald-500/30", label: "Complete", textColor: "text-emerald-400" },
@@ -193,7 +194,14 @@ export default function TransactionsPage() {
       </div>
 
       <div className="space-y-6">
-        {transactions.map(tx => <TransactionView key={tx.id} tx={tx} />)}
+        {transactions.length === 0 ? (
+          <EmptyState
+            icon={CheckCircle}
+            headline="No transactions in flight"
+            description="Every accepted offer has closed — the workflow board is clear."
+            accentColor="#10b981"
+          />
+        ) : transactions.map(tx => <TransactionView key={tx.id} tx={tx} />)}
       </div>
     </div>
   );

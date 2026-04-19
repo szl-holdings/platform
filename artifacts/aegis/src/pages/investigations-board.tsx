@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { TradecraftPanel, RelatedCasesPanel, EvidenceIndexPanel } from "@/components/tradecraft-panel";
 import { useStandardMutation, useStandardQuery } from "@szl-holdings/api-client-react";
+import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
 
 const FALLBACK_CASE = {
   id: "CASE-0041",
@@ -362,6 +363,15 @@ export default function InvestigationsBoard() {
       <div className="flex-1 overflow-y-auto px-6 py-5">
         {activeSection === "timeline" && (
           <div className="space-y-4">
+            {timeline.length === 0 && (
+              <EmptyState
+                icon={CheckCircle2}
+                headline="No timeline activity yet"
+                description="No events, evidence, or analyst notes have been recorded for this case."
+                accentColor="#10b981"
+                compact
+              />
+            )}
             <div className="relative pl-4">
               <div className="absolute left-0 top-0 bottom-0 w-px bg-white/10" />
               {timeline.map((ev, i) => {
@@ -412,6 +422,15 @@ export default function InvestigationsBoard() {
 
         {activeSection === "entities" && (
           <div className="space-y-3">
+            {entities.length === 0 && (
+              <EmptyState
+                icon={CheckCircle2}
+                headline="No entities linked yet"
+                description="Hosts, identities, and network indicators will appear here as evidence is collected."
+                accentColor="#10b981"
+                compact
+              />
+            )}
             {entities.map(ent => (
               <div key={ent.id} className="flex items-center gap-4 bg-white/[0.025] border border-white/5 rounded-xl px-4 py-3">
                 <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: (ENTITY_COLORS[ent.type] ?? "#3b82f6") + "18" }}>
@@ -430,6 +449,15 @@ export default function InvestigationsBoard() {
 
         {activeSection === "signals" && (
           <div className="space-y-3">
+            {signals.length === 0 && (
+              <EmptyState
+                icon={CheckCircle2}
+                headline="No correlated signals"
+                description="Detection-engine signals tied to this case will appear here as they fire."
+                accentColor="#10b981"
+                compact
+              />
+            )}
             {signals.map(sig => (
               <div key={sig.id} className="bg-white/[0.025] border border-white/5 rounded-xl px-4 py-3">
                 <div className="flex items-start justify-between gap-3">
@@ -450,6 +478,15 @@ export default function InvestigationsBoard() {
 
         {activeSection === "evidence" && (
           <div className="space-y-3">
+            {caseEvidence.length === 0 && (
+              <EmptyState
+                icon={CheckCircle2}
+                headline="No evidence collected yet"
+                description="Captures, log artifacts, and exhibits added to this case will be listed here."
+                accentColor="#10b981"
+                compact
+              />
+            )}
             {caseEvidence.map(ev => (
               <div key={ev.id} className="bg-white/[0.025] border border-white/5 rounded-xl px-4 py-3">
                 <div className="flex items-start justify-between gap-3">

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AlertTriangle, Anchor, Shield, Clock, User, CheckCircle, ArrowUpRight } from "lucide-react";
+import { AlertTriangle, Anchor, Shield, Clock, User, CheckCircle, ArrowUpRight, Filter } from "lucide-react";
 import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
 import { useFleetExceptions } from "@/hooks/use-vessels-data";
 
@@ -158,7 +158,22 @@ export default function ExceptionQueue() {
 
       <div className="space-y-3">
         {displayed.length === 0 ? (
-          <EmptyState icon={CheckCircle} headline="No exceptions" description="No exceptions match the current filter." accentColor={ACCENT} />
+          exceptions.length === 0 || openCount === 0 ? (
+            <EmptyState
+              icon={CheckCircle}
+              headline="Fleet is exception-free"
+              description="No AIS gaps, deviations, detentions, or cert issues are open across the fleet."
+              accentColor="#10b981"
+            />
+          ) : (
+            <EmptyState
+              icon={Filter}
+              headline={`No ${filter} exceptions`}
+              description="Switch filters to see exceptions in other states."
+              accentColor={ACCENT}
+              action={{ label: "Show all", onClick: () => setFilter("all") }}
+            />
+          )
         ) : (
           displayed.map(e => (
             <ExceptionCard key={e.id} exc={e} onResolve={id => setResolved(prev => new Set([...prev, id]))} />

@@ -1,5 +1,6 @@
-import { Eye, Plus, AlertTriangle, Shield, Globe, Hash, Clock, Target, Filter } from "lucide-react";
+import { Eye, Plus, AlertTriangle, Shield, Globe, Hash, Clock, Target, Filter, CheckCircle } from "lucide-react";
 import { useState } from "react";
+import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
 
 interface WatchlistItem {
   id: string;
@@ -69,7 +70,26 @@ export default function Watchlists() {
 
       <div className="rounded-xl border border-border bg-card overflow-hidden">
         <div className="divide-y divide-border">
-          {filtered.map((item) => {
+          {filtered.length === 0 ? (
+            watchlistItems.length === 0 ? (
+              <EmptyState
+                icon={CheckCircle}
+                headline="No indicators on watch"
+                description="Threat intel feeds are quiet — no IOCs are being monitored right now."
+                accentColor="#10b981"
+                compact
+              />
+            ) : (
+              <EmptyState
+                icon={Filter}
+                headline={`No ${typeFilter.toUpperCase()} indicators on watch`}
+                description="Switch to another indicator type to inspect what's being monitored."
+                accentColor="#8b7ac8"
+                action={{ label: "Show all types", onClick: () => setTypeFilter("all") }}
+                compact
+              />
+            )
+          ) : filtered.map((item) => {
             const TypeIcon = typeIcons[item.type] || Globe;
             return (
               <div key={item.id} className="p-4 hover:bg-muted/30 transition-colors">

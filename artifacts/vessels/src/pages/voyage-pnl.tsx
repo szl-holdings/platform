@@ -6,9 +6,10 @@ import { cn } from "@szl-holdings/shared-ui/utils";
 import {
   DollarSign, TrendingUp, TrendingDown, Ship, Fuel, Clock, Anchor,
   Wind, Navigation, AlertTriangle, BarChart3, ChevronDown, ChevronRight,
-  Calculator, Sliders, Zap, Activity
+  Calculator, Sliders, Zap, Activity, CheckCircle2
 } from "lucide-react";
 import { BarChart, Bar, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid, LineChart, Line, Cell } from "recharts";
+import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
 
 // Baltic Exchange-style TCE benchmarks per vessel class (USD/day)
 // Mirrors the data on the Freight Rate Benchmarking page (freight-rates.tsx)
@@ -547,7 +548,14 @@ export default function VoyagePnL() {
           <p className="text-xs font-semibold text-sky-200">Voyage Assessments</p>
           <p className="text-[10px] text-sky-400/40">Expand to compare scenarios</p>
         </div>
-        {VOYAGES.map(v => (
+        {VOYAGES.length === 0 ? (
+          <EmptyState
+            icon={CheckCircle2}
+            headline="No voyages awaiting modeling"
+            description="Every booked voyage has been priced — model a new voyage when one is fixed."
+            accentColor="#10b981"
+          />
+        ) : VOYAGES.map(v => (
           <VoyagePnLCard key={v.id} voyage={v} />
         ))}
       </div>
