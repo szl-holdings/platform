@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@szl-holdings/shared-ui/ui/card";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
-import { Radar, TrendingUp, TrendingDown, Minus, AlertCircle, Sparkles, Clock, Loader2, ChevronDown, ChevronUp } from "lucide-react";
+import { Radar, TrendingUp, TrendingDown, Minus, AlertCircle, Sparkles, Clock, Loader2, ChevronDown, ChevronUp, Settings2, X, Plus, RefreshCw, ExternalLink } from "lucide-react";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
 
@@ -15,6 +15,8 @@ type CompetitorSignal = {
   direction: "threat" | "opportunity" | "neutral";
   date: string;
   detail: string;
+  source?: string;
+  url?: string;
 };
 
 type IntelBrief = {
@@ -54,6 +56,40 @@ function DirectionBadge({ direction }: { direction: "threat" | "opportunity" | "
 
 const API = import.meta.env.BASE_URL + "api";
 
+const DEFAULT_COMPETITOR_NAMES = ["McKinsey & Company", "BCG", "Bain & Company", "Oliver Wyman", "Roland Berger", "Kearney"];
+const COMPETITORS_STORAGE_KEY = "carlota-radar-competitors";
+const REFRESH_INTERVAL_STORAGE_KEY = "carlota-radar-refresh-interval";
+
+const REFRESH_OPTIONS: Array<{ label: string; value: number }> = [
+  { label: "Off", value: 0 },
+  { label: "1 min", value: 60_000 },
+  { label: "5 min", value: 5 * 60_000 },
+  { label: "15 min", value: 15 * 60_000 },
+  { label: "1 hr", value: 60 * 60_000 },
+];
+
+function loadCompetitorList(): string[] {
+  if (typeof window === "undefined") return DEFAULT_COMPETITOR_NAMES;
+  try {
+    const raw = localStorage.getItem(COMPETITORS_STORAGE_KEY);
+    if (!raw) return DEFAULT_COMPETITOR_NAMES;
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed) && parsed.every((s) => typeof s === "string") && parsed.length > 0) return parsed;
+  } catch {}
+  return DEFAULT_COMPETITOR_NAMES;
+}
+
+function loadRefreshInterval(): number {
+  if (typeof window === "undefined") return 5 * 60_000;
+  try {
+    const raw = localStorage.getItem(REFRESH_INTERVAL_STORAGE_KEY);
+    if (raw == null) return 5 * 60_000;
+    const n = Number(raw);
+    if (REFRESH_OPTIONS.some((o) => o.value === n)) return n;
+  } catch {}
+  return 5 * 60_000;
+}
+
 export default function CompetitiveRadar() {
   usePageMeta({
     title: "Competitive Intelligence Radar | Carlota Jo",
@@ -67,36 +103,75 @@ export default function CompetitiveRadar() {
   const [signals, setSignals] = useState<CompetitorSignal[]>([]);
   const [marketTrend, setMarketTrend] = useState<MarketTrendPoint[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(new Date());
   const [generatingBrief, setGeneratingBrief] = useState(false);
   const [companyContext] = useState({ name: "Carlota Jo Consulting", industry: "Management Consulting" });
+  const [tracked, setTracked] = useState<string[]>(() => loadCompetitorList());
+  const [refreshIntervalMs, setRefreshIntervalMs] = useState<number>(() => loadRefreshInterval());
+  const [showSettings, setShowSettings] = useState(false);
+  const [newCompetitor, setNewCompetitor] = useState("");
+  const [liveData, setLiveData] = useState<boolean>(false);
+  const [sourceLabel, setSourceLabel] = useState<string>("");
+  const [liveSignalCount, setLiveSignalCount] = useState<number>(0);
+  const trackedRef = useRef(tracked);
+  trackedRef.current = tracked;
 
   useEffect(() => {
-    async function loadData() {
-      setLoading(true);
-      try {
-        const radarRes = await fetch(`${API}/carlota/radar-signals`, { credentials: "include" });
-        if (radarRes.ok) {
-          const json = await radarRes.json();
-          const data = json.data ?? json;
-          if (Array.isArray(data.signals) && data.signals.length > 0) {
-            setSignals(data.signals);
-          }
-          if (Array.isArray(data.competitors) && data.competitors.length > 0) {
-            setCompetitors(data.competitors);
-          }
-          if (Array.isArray(data.marketTrend) && data.marketTrend.length > 0) {
-            setMarketTrend(data.marketTrend);
-          }
-        }
-      } catch {
-      } finally {
-        setLastUpdated(new Date());
-        setLoading(false);
+    try { localStorage.setItem(COMPETITORS_STORAGE_KEY, JSON.stringify(tracked)); } catch {}
+  }, [tracked]);
+
+  useEffect(() => {
+    try { localStorage.setItem(REFRESH_INTERVAL_STORAGE_KEY, String(refreshIntervalMs)); } catch {}
+  }, [refreshIntervalMs]);
+
+  const loadData = useCallback(async (opts: { silent?: boolean } = {}) => {
+    if (opts.silent) setRefreshing(true); else setLoading(true);
+    try {
+      const list = trackedRef.current;
+      const qs = list.length > 0 ? `?competitors=${encodeURIComponent(list.join(","))}` : "";
+      const radarRes = await fetch(`${API}/carlota/radar-signals${qs}`, { credentials: "include" });
+      if (radarRes.ok) {
+        const json = await radarRes.json();
+        const data = json.data ?? json;
+        if (Array.isArray(data.signals)) setSignals(data.signals);
+        if (Array.isArray(data.competitors)) setCompetitors(data.competitors);
+        if (Array.isArray(data.marketTrend)) setMarketTrend(data.marketTrend);
+        setLiveData(Boolean(data.liveData));
+        setSourceLabel(typeof data.sourceLabel === "string" ? data.sourceLabel : "");
+        setLiveSignalCount(typeof data.liveSignalCount === "number" ? data.liveSignalCount : 0);
       }
+    } catch {
+    } finally {
+      setLastUpdated(new Date());
+      setLoading(false);
+      setRefreshing(false);
     }
-    void loadData();
   }, []);
+
+  useEffect(() => { void loadData(); }, [loadData, tracked]);
+
+  useEffect(() => {
+    if (refreshIntervalMs <= 0) return;
+    const id = window.setInterval(() => { void loadData({ silent: true }); }, refreshIntervalMs);
+    return () => window.clearInterval(id);
+  }, [refreshIntervalMs, loadData]);
+
+  const addCompetitor = () => {
+    const name = newCompetitor.trim();
+    if (!name) return;
+    if (tracked.some((c) => c.toLowerCase() === name.toLowerCase())) { setNewCompetitor(""); return; }
+    if (tracked.length >= 12) return;
+    setTracked([...tracked, name]);
+    setNewCompetitor("");
+  };
+
+  const removeCompetitor = (name: string) => {
+    if (tracked.length <= 1) return;
+    setTracked(tracked.filter((c) => c !== name));
+  };
+
+  const resetCompetitors = () => setTracked(DEFAULT_COMPETITOR_NAMES);
 
   const generateWeeklyBrief = async () => {
     setGeneratingBrief(true);
@@ -165,18 +240,80 @@ Return ONLY valid JSON, no markdown.`;
             <span className="text-xs font-medium uppercase tracking-widest" style={{ color: GOLD }}>Competitive Intelligence Radar</span>
           </div>
           <h1 className="text-2xl" style={{ fontFamily: "var(--font-serif)" }}>Competitive Landscape Monitor</h1>
-          <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1.5">
+          <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1.5 flex-wrap">
             <Clock className="w-3.5 h-3.5" />
             Last updated {lastUpdated.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })} — {lastUpdated.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+            {refreshing && <Loader2 className="w-3 h-3 animate-spin" />}
+            {sourceLabel && (
+              <span className="text-xs px-2 py-0.5 rounded-full border" style={{ borderColor: liveData ? "var(--color-gold-border)" : "var(--color-stone-300)", background: liveData ? "var(--color-gold-dim)" : "transparent", color: liveData ? GOLD : "var(--color-muted-foreground)" }}>
+                {sourceLabel}
+              </span>
+            )}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+          <select
+            value={refreshIntervalMs}
+            onChange={(e) => setRefreshIntervalMs(Number(e.target.value))}
+            className="text-xs px-2 py-1.5 rounded-lg border border-border bg-background"
+            title="Auto-refresh interval"
+          >
+            {REFRESH_OPTIONS.map((o) => <option key={o.value} value={o.value}>Auto: {o.label}</option>)}
+          </select>
+          <button onClick={() => loadData()} disabled={loading || refreshing} className="text-xs px-3 py-1.5 rounded-lg border border-border hover:bg-muted/50 transition-colors flex items-center gap-1.5 disabled:opacity-60" title="Refresh now">
+            <RefreshCw className={`w-3 h-3 ${refreshing ? "animate-spin" : ""}`} />
+            Refresh
+          </button>
+          <button onClick={() => setShowSettings((s) => !s)} className="text-xs px-3 py-1.5 rounded-lg border border-border hover:bg-muted/50 transition-colors flex items-center gap-1.5" title="Configure tracked competitors">
+            <Settings2 className="w-3 h-3" />
+            Competitors
+          </button>
           <button onClick={generateWeeklyBrief} disabled={generatingBrief} className="text-xs px-4 py-1.5 rounded-lg text-white flex items-center gap-1.5 hover:opacity-90 transition-opacity disabled:opacity-60" style={{ background: GOLD }}>
             {generatingBrief ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
             {generatingBrief ? "Generating…" : "Generate Weekly Brief"}
           </button>
         </div>
       </div>
+
+      {showSettings && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Settings2 className="w-4 h-4" style={{ color: GOLD }} />
+              Tracked Competitors ({tracked.length}/12)
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-xs text-muted-foreground">Add or remove competitors to monitor. Live news is pulled per-competitor and refreshed at the chosen interval. Saved locally to this browser.</p>
+            <div className="flex flex-wrap gap-2">
+              {tracked.map((name) => (
+                <span key={name} className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border" style={{ borderColor: "var(--color-gold-border)", background: "var(--color-gold-dim)" }}>
+                  {name}
+                  <button onClick={() => removeCompetitor(name)} disabled={tracked.length <= 1} className="hover:opacity-70 disabled:opacity-30" title={tracked.length <= 1 ? "At least one competitor required" : `Remove ${name}`}>
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <input
+                value={newCompetitor}
+                onChange={(e) => setNewCompetitor(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addCompetitor(); } }}
+                placeholder="Add a competitor (e.g. EY-Parthenon)"
+                maxLength={80}
+                className="flex-1 text-xs px-3 py-1.5 rounded-lg border border-border bg-background"
+              />
+              <button onClick={addCompetitor} disabled={!newCompetitor.trim() || tracked.length >= 12} className="text-xs px-3 py-1.5 rounded-lg text-white flex items-center gap-1.5 hover:opacity-90 transition-opacity disabled:opacity-60" style={{ background: GOLD }}>
+                <Plus className="w-3 h-3" /> Add
+              </button>
+              <button onClick={resetCompetitors} className="text-xs px-3 py-1.5 rounded-lg border border-border hover:bg-muted/50 transition-colors">
+                Reset to defaults
+              </button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {loading && (
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -190,7 +327,7 @@ Return ONLY valid JSON, no markdown.`;
           { label: "Signals This Week", value: signals.length > 0 ? String(signals.length) : "—", sub: signals.length > 0 ? `${signals.filter(s => s.direction === "threat").length} threats · ${signals.filter(s => s.direction === "opportunity").length} opportunities` : "No signals loaded", color: "text-foreground" },
           { label: "High-Impact Events", value: signals.length > 0 ? String(signals.filter(s => s.impact === "high").length) : "—", sub: signals.filter(s => s.impact === "high").length > 0 ? "Require immediate attention" : "No high-impact signals", color: signals.filter(s => s.impact === "high").length > 0 ? "text-red-600" : "text-foreground" },
           { label: "Tracked Competitors", value: competitors.length > 0 ? String(competitors.length) : "—", sub: competitors.length > 0 ? `${competitors.filter(c => c.trend === "up").length} trending up` : "No competitors tracked", color: "text-foreground" },
-          { label: "Data Sources", value: !loading && (signals.length > 0 || competitors.length > 0) ? "Live" : "—", sub: !loading && (signals.length > 0 || competitors.length > 0) ? "Connected" : loading ? "Loading…" : "No data available", color: !loading && (signals.length > 0 || competitors.length > 0) ? "text-emerald-600" : "text-foreground" },
+          { label: "Live News Signals", value: !loading ? String(liveSignalCount) : "—", sub: liveData ? `From ${tracked.length} tracked competitor${tracked.length === 1 ? "" : "s"}` : loading ? "Loading…" : "Live news unavailable — using curated intel", color: liveData ? "text-emerald-600" : "text-foreground" },
         ].map((stat, i) => (
           <Card key={i}>
             <CardContent className="pt-4">
@@ -260,8 +397,24 @@ Return ONLY valid JSON, no markdown.`;
                     </div>
                   </button>
                   {expandedSignal === i && (
-                    <div className="px-3 pb-3 border-t border-border bg-muted/30">
+                    <div className="px-3 pb-3 border-t border-border bg-muted/30 space-y-2">
                       <p className="text-xs text-muted-foreground pt-2 leading-relaxed">{signal.detail}</p>
+                      {(signal.source || signal.url) && (
+                        <div className="flex items-center justify-between gap-2 text-xs">
+                          {signal.source ? <span className="text-muted-foreground">Source: {signal.source}</span> : <span />}
+                          {signal.url && signal.url !== "#" && (
+                            <a
+                              href={signal.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 hover:underline"
+                              style={{ color: GOLD }}
+                            >
+                              Open article <ExternalLink className="w-3 h-3" />
+                            </a>
+                          )}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

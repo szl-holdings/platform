@@ -870,6 +870,65 @@ router.get("/carlota/engagements", authMiddleware(), async (req, res) => {
 
 // ── Competitive radar signals (auth-gated market intelligence) ─────────────────
 
+const DEFAULT_COMPETITORS = [
+  { name: "McKinsey & Company", share: 18 },
+  { name: "BCG", share: 15 },
+  { name: "Bain & Company", share: 12 },
+  { name: "Oliver Wyman", share: 9 },
+  { name: "Roland Berger", share: 7 },
+  { name: "Kearney", share: 6 },
+];
+
+const THREAT_KEYWORDS = /\b(launch|launches|launched|expands?|expanded|expansion|raises?|raised|funding|acquir(e|es|ed|ing|ition)|hires?|hired|partnership|partners? with|wins?|won|growth|grew|profit|surge|breakthrough|deal|contract|appoint|invest)\b/i;
+const OPPORTUNITY_KEYWORDS = /\b(layoffs?|cuts?|cut jobs|departures?|departed|resign|resigned|decline|declines|declined|lawsuit|sued|fine|fined|penalt|scandal|conflict|miss|missed|loss|losses|downsiz|shrink|leaves|leaving|exit|departure|investigation|probe|controversy)\b/i;
+const HIGH_IMPACT_KEYWORDS = /\b(billion|massive|major|biggest|landmark|unprecedented|crisis|collapse|merger|acquisition|ceo|chief executive|board)\b/i;
+
+function classifySignal(text: string): { direction: "threat" | "opportunity" | "neutral"; impact: "high" | "medium" | "low" } {
+  const direction = OPPORTUNITY_KEYWORDS.test(text) ? "opportunity" : THREAT_KEYWORDS.test(text) ? "threat" : "neutral";
+  const impact = HIGH_IMPACT_KEYWORDS.test(text) ? "high" : "medium";
+  return { direction, impact };
+}
+
+function decodeXmlEntities(s: string): string {
+  return s.replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&apos;/g, "'");
+}
+
+async function fetchCompetitorNews(competitor: string, max = 5): Promise<Array<{ competitor: string; event: string; impact: "high" | "medium" | "low"; direction: "threat" | "opportunity" | "neutral"; date: string; detail: string; url: string; source: string }>> {
+  const q = encodeURIComponent(`"${competitor}" consulting OR strategy OR firm`);
+  const url = `https://news.google.com/rss/search?q=${q}&hl=en-GB&gl=GB&ceid=GB:en`;
+  try {
+    const xml = await fetchText(url, 8000);
+    const items: Array<{ competitor: string; event: string; impact: "high" | "medium" | "low"; direction: "threat" | "opportunity" | "neutral"; date: string; detail: string; url: string; source: string }> = [];
+    for (const match of xml.matchAll(/<item>([\s\S]*?)<\/item>/g)) {
+      const item = match[1] ?? "";
+      const titleRaw = item.match(/<title>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/title>/)?.[1] ?? "";
+      const linkRaw = item.match(/<link>(.*?)<\/link>/)?.[1] ?? "#";
+      const dateRaw = item.match(/<pubDate>(.*?)<\/pubDate>/)?.[1] ?? new Date().toUTCString();
+      const sourceRaw = item.match(/<source[^>]*>(.*?)<\/source>/)?.[1] ?? "Google News";
+      const descRaw = item.match(/<description>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/description>/)?.[1] ?? "";
+      const title = decodeXmlEntities(titleRaw).trim();
+      const description = decodeXmlEntities(descRaw).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+      if (!title) continue;
+      const { direction, impact } = classifySignal(`${title} ${description}`);
+      const dateObj = new Date(dateRaw);
+      items.push({
+        competitor,
+        event: title,
+        impact,
+        direction,
+        date: isNaN(dateObj.getTime()) ? new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : dateObj.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
+        detail: description || `${decodeXmlEntities(sourceRaw)} reports on ${competitor}. Read more for full context.`,
+        url: linkRaw.trim(),
+        source: decodeXmlEntities(sourceRaw),
+      });
+      if (items.length >= max) break;
+    }
+    return items;
+  } catch {
+    return [];
+  }
+}
+
 router.get("/carlota/radar-signals", authMiddleware(), async (req, res) => {
   try {
     const userId = req.user!.id;
@@ -885,33 +944,69 @@ router.get("/carlota/radar-signals", authMiddleware(), async (req, res) => {
     const portfolioSignals = atRisk.map(e => ({
       competitor: `${e.client} (Portfolio)`,
       event: `${e.engagement} — cost at ${Math.round((Number(e.costToDate) / Number(e.contractedValue)) * 100)}% of contracted value${(e.scopeCreepHours ?? 0) > 30 ? ` with ${e.scopeCreepHours}h scope creep` : ""}`,
-      impact: "high",
+      impact: "high" as const,
       direction: "threat" as const,
       date: e.createdAt ? new Date(e.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
       detail: `Engagement margin at risk. Contracted: £${Number(e.contractedValue).toLocaleString()} — Cost to date: £${Number(e.costToDate).toLocaleString()}. ${(e.scopeCreepHours ?? 0) > 30 ? `Scope creep: ${e.scopeCreepHours}h billed.` : ""}`,
+      source: "Portfolio analytics",
+      url: "",
     }));
+
+    const competitorsParam = typeof req.query.competitors === "string" && req.query.competitors.trim().length > 0
+      ? String(req.query.competitors).split(",").map(s => s.trim()).filter(Boolean).slice(0, 12)
+      : null;
+    const competitorList = competitorsParam ?? DEFAULT_COMPETITORS.map(c => c.name);
+    const shareLookup = new Map(DEFAULT_COMPETITORS.map(c => [c.name.toLowerCase(), c.share]));
+
+    const cacheKey = `carlota-radar-news:${competitorList.map(c => c.toLowerCase()).sort().join("|")}`;
+    const newsResult = await getCached(cacheKey, 10 * 60 * 1000, async () => {
+      const results = await Promise.all(competitorList.map(name => fetchCompetitorNews(name, 4)));
+      return results.flat();
+    });
+
+    const liveSignals = (newsResult ?? []).slice(0, 30);
+    const liveCount = liveSignals.length;
+    const useFallback = liveCount === 0;
+    const newsFeedSignals = useFallback ? SEED_RADAR_SIGNALS.map(s => ({ ...s, source: "Carlota Jo intel desk", url: "" })) : liveSignals;
+
+    const signalCounts = new Map<string, { threats: number; opportunities: number; total: number }>();
+    for (const s of liveSignals) {
+      const key = s.competitor.toLowerCase();
+      const c = signalCounts.get(key) ?? { threats: 0, opportunities: 0, total: 0 };
+      c.total += 1;
+      if (s.direction === "threat") c.threats += 1;
+      else if (s.direction === "opportunity") c.opportunities += 1;
+      signalCounts.set(key, c);
+    }
+
+    const competitorEntries = competitorList.map(name => {
+      const c = signalCounts.get(name.toLowerCase()) ?? { threats: 0, opportunities: 0, total: 0 };
+      const score = Math.max(30, Math.min(95, 50 + c.threats * 7 - c.opportunities * 4 + (shareLookup.get(name.toLowerCase()) ?? 5)));
+      const trend = c.threats > c.opportunities ? "up" : c.opportunities > c.threats ? "down" : "flat";
+      const share = shareLookup.get(name.toLowerCase()) ?? Math.max(2, Math.round(100 / competitorList.length / 1.5));
+      return { name, score, trend, share };
+    });
+
+    const months = ["Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr"];
+    const baseYou = 56;
+    const baseMarket = 62;
+    const liveBoost = Math.min(8, Math.round(liveCount / 4));
+    const marketTrend = months.map((m, i) => ({
+      month: m,
+      you: Math.min(95, baseYou + i * 3 + (i === months.length - 1 ? liveBoost : 0)),
+      market: Math.min(95, baseMarket + i),
+    }));
+
     sendSuccess(res, {
-      signals: [...portfolioSignals, ...SEED_RADAR_SIGNALS],
+      signals: [...portfolioSignals, ...newsFeedSignals],
       portfolioSignalCount: portfolioSignals.length,
-      count: portfolioSignals.length + SEED_RADAR_SIGNALS.length,
+      liveSignalCount: liveCount,
+      count: portfolioSignals.length + newsFeedSignals.length,
+      liveData: !useFallback,
+      sourceLabel: useFallback ? "Curated intel desk (live news unavailable)" : "Google News + portfolio analytics",
       lastUpdated: new Date().toISOString(),
-      competitors: [
-        { name: "McKinsey & Company", score: 91, trend: "up", share: 18 },
-        { name: "BCG", score: 87, trend: "flat", share: 15 },
-        { name: "Bain & Company", score: 79, trend: "down", share: 12 },
-        { name: "Oliver Wyman", score: 68, trend: "down", share: 9 },
-        { name: "Roland Berger", score: 61, trend: "up", share: 7 },
-        { name: "Kearney", score: 57, trend: "flat", share: 6 },
-      ],
-      marketTrend: [
-        { month: "Oct", you: 56, market: 62 },
-        { month: "Nov", you: 58, market: 61 },
-        { month: "Dec", you: 61, market: 60 },
-        { month: "Jan", you: 63, market: 62 },
-        { month: "Feb", you: 67, market: 63 },
-        { month: "Mar", you: 71, market: 64 },
-        { month: "Apr", you: 74, market: 65 },
-      ],
+      competitors: competitorEntries,
+      marketTrend,
     });
   } catch (err) { handleRouteError(res, err, "Failed to fetch radar signals"); }
 });
