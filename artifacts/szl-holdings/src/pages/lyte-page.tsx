@@ -6,7 +6,7 @@ import {
   Eye, Radio, AlertTriangle, CheckCircle2, Clock, ArrowRight,
   Shield, Ship, Building2, Briefcase, Activity, Filter,
   ChevronRight, Zap, Lock, Database, GitBranch, Users,
-  TrendingUp, Bell, Circle, Dot, X, Layers, Target,
+  TrendingUp, Bell, BellOff, Circle, Dot, X, Layers, Target,
   BarChart3, ShieldCheck, FileCheck, BookOpen, RefreshCw,
   Play, MoreHorizontal, ArrowUpRight, Workflow, Brain,
 } from "lucide-react";
@@ -29,6 +29,18 @@ const LYTE = "hsl(192,72%,48%)";
 const MONO = "var(--font-mono)";
 
 type SignalSeverity = "critical" | "high" | "medium" | "info";
+
+type ToastThreshold = "off" | "critical" | "high" | "medium";
+const TOAST_THRESHOLDS: ToastThreshold[] = ["off", "critical", "high", "medium"];
+const TOAST_THRESHOLD_KEY = "lyte:toast-threshold";
+const SEV_RANK: Record<SignalSeverity, number> = { info: 0, medium: 1, high: 2, critical: 3 };
+const THRESHOLD_RANK: Record<ToastThreshold, number> = { off: 99, critical: 3, high: 2, medium: 1 };
+const THRESHOLD_LABEL: Record<ToastThreshold, string> = {
+  off: "Muted",
+  critical: "Critical",
+  high: "High+",
+  medium: "Medium+",
+};
 
 const SEV_COLOR: Record<SignalSeverity, string> = {
   critical: "hsl(0,72%,54%)",
@@ -535,6 +547,18 @@ export default function LytePage() {
   const [wsConnected, setWsConnected] = useState(false);
   const [pulseFlash, setPulseFlash] = useState(false);
   const [newSignalCount, setNewSignalCount] = useState(0);
+  const [toastThreshold, setToastThreshold] = useState<ToastThreshold>(() => {
+    if (typeof window === "undefined") return "critical";
+    const stored = window.localStorage.getItem(TOAST_THRESHOLD_KEY);
+    return TOAST_THRESHOLDS.includes(stored as ToastThreshold) ? (stored as ToastThreshold) : "critical";
+  });
+  const toastThresholdRef = useRef<ToastThreshold>(toastThreshold);
+  useEffect(() => {
+    toastThresholdRef.current = toastThreshold;
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(TOAST_THRESHOLD_KEY, toastThreshold);
+    }
+  }, [toastThreshold]);
   const lastPushAtRef = useRef<number>(0);
   const streamScrollRef = useRef<HTMLDivElement | null>(null);
   const isScrolledRef = useRef<boolean>(false);
@@ -623,7 +647,8 @@ export default function LytePage() {
             if (isScrolledRef.current) {
               setNewSignalCount((n) => n + 1);
             }
-            if (incoming.severity === "critical") {
+            const threshold = toastThresholdRef.current;
+            if (SEV_RANK[incoming.severity] >= THRESHOLD_RANK[threshold]) {
               toast.error(incoming.title, {
                 description: incoming.detail,
                 duration: 8000,
@@ -829,14 +854,48 @@ export default function LytePage() {
 
               {/* LEFT RAIL: Signal Stream */}
               <div style={{ background: BG, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-                <div style={{ padding: "0.875rem", borderBottom: `1px solid ${BORDER}`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <div style={{ padding: "0.875rem", borderBottom: `1px solid ${BORDER}`, display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.5rem" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", minWidth: 0 }}>
                     <Radio size={12} style={{ color: LYTE }} />
                     <span style={{ fontSize: "0.6875rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: TEXT_FAINT }}>
                       Signal Stream
                     </span>
                   </div>
-                  <LivePulse healthy={isStreamHealthy} flash={pulseFlash} />
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const i = TOAST_THRESHOLDS.indexOf(toastThreshold);
+                        setToastThreshold(TOAST_THRESHOLDS[(i + 1) % TOAST_THRESHOLDS.length]!);
+                      }}
+                      data-testid="button-toast-threshold"
+                      title={
+                        toastThreshold === "off"
+                          ? "Toasts muted — click to enable critical alerts"
+                          : `Toast alerts: ${THRESHOLD_LABEL[toastThreshold]} — click to change`
+                      }
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "0.3rem",
+                        padding: "0.2rem 0.45rem",
+                        borderRadius: 4,
+                        border: `1px solid ${toastThreshold === "off" ? BORDER : LYTE + "30"}`,
+                        background: toastThreshold === "off" ? "transparent" : `${LYTE}10`,
+                        color: toastThreshold === "off" ? TEXT_FAINT : LYTE,
+                        fontSize: "0.575rem",
+                        fontFamily: MONO,
+                        fontWeight: 700,
+                        letterSpacing: "0.08em",
+                        textTransform: "uppercase",
+                        cursor: "pointer",
+                      }}
+                    >
+                      {toastThreshold === "off" ? <BellOff size={10} /> : <Bell size={10} />}
+                      <span>{THRESHOLD_LABEL[toastThreshold]}</span>
+                    </button>
+                    <LivePulse healthy={isStreamHealthy} flash={pulseFlash} />
+                  </div>
                 </div>
 
                 <div style={{ position: "relative", flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
