@@ -4,10 +4,18 @@ import {
   runScenarioSimulation as runScenarioSimulationSync,
   type MonteCarloResult,
 } from "@szl-holdings/monte-carlo/scenario-simulation";
-import type { ScenarioDefinition } from "@szl-holdings/monte-carlo/schema";
+import type { ScenarioDefinition, InputVariable } from "@szl-holdings/monte-carlo/schema";
+import {
+  type DriverTweak,
+  IDENTITY_TWEAK,
+  isIdentityTweak,
+  tweakedInputs,
+  tweakSummary,
+  distributionSupportsSpread,
+} from "@szl-holdings/monte-carlo";
 import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";
 import { SaveRiskRunButton, type SavedRiskRun } from "@szl-holdings/shared-ui/risk-evidence";
-import { Activity, BarChart3, Layers, RefreshCw } from "lucide-react";
+import { Activity, BarChart3, Layers, RefreshCw, Sliders, RotateCcw, ChevronDown, ChevronUp } from "lucide-react";
 import RiskSimulationWorker from "@/workers/risk-simulation.worker?worker";
 
 const TERRA_ACCENT = LANE_ACCENT_HEX.terra.primary;
@@ -59,6 +67,9 @@ export function RiskSimulationPanel({
   const [runKey, setRunKey] = useState<number>(0);
   const workerRef = useRef<Worker | null>(null);
   const requestIdRef = useRef<number>(0);
+  const [tweaks, setTweaks] = useState<Record<string, DriverTweak>>({});
+  const [showTweaks, setShowTweaks] = useState<boolean>(false);
+  const [appliedTweaks, setAppliedTweaks] = useState<Record<string, DriverTweak>>({});
 
   useEffect(() => {
     let worker: Worker | null = null;
@@ -75,11 +86,31 @@ export function RiskSimulationPanel({
   }, []);
 
   useEffect(() => {
+    setTweaks({});
+    setAppliedTweaks({});
+  }, [scenario.id]);
+
+  const modifiedIds = useMemo(
+    () => new Set(Object.keys(appliedTweaks).filter((id) => !isIdentityTweak(appliedTweaks[id]))),
+    [appliedTweaks],
+  );
+
+  const effectiveScenario = useMemo<ScenarioDefinition>(() => {
+    if (modifiedIds.size === 0) return scenario;
+    const inputs = tweakedInputs(scenario.inputs, appliedTweaks);
+    return { ...scenario, inputs };
+  }, [scenario, appliedTweaks, modifiedIds]);
+
+  useEffect(() => {
     setRunning(true);
     const requestId = ++requestIdRef.current;
     const worker = workerRef.current;
+    const tweaksActive = modifiedIds.size > 0;
 
-    if (worker) {
+    // Worker only knows registered scenarios by id and cannot apply
+    // user-supplied driver tweaks, so we fall back to a synchronous run
+    // on the main thread whenever overrides are in effect.
+    if (worker && !tweaksActive) {
       const handler = (event: MessageEvent<WorkerResponse>) => {
         if (event.data.requestId !== requestId) return;
         worker.removeEventListener("message", handler);
@@ -93,7 +124,7 @@ export function RiskSimulationPanel({
           // eslint-disable-next-line no-console
           console.warn("[risk-simulation] worker error, falling back:", event.data.error);
           try {
-            const r = runScenarioSimulationSync(scenario, iterCount);
+            const r = runScenarioSimulationSync(effectiveScenario, iterCount);
             if (requestId === requestIdRef.current) setResult(r);
           } finally {
             if (requestId === requestIdRef.current) setRunning(false);
@@ -109,16 +140,46 @@ export function RiskSimulationPanel({
     }
 
     // Fallback: synchronous run via setTimeout if worker is unavailable
+    // or if driver tweaks are active.
     const handle = window.setTimeout(() => {
       try {
-        const r = runScenarioSimulationSync(scenario, iterCount);
+        const r = runScenarioSimulationSync(effectiveScenario, iterCount);
         if (requestId === requestIdRef.current) setResult(r);
       } finally {
         if (requestId === requestIdRef.current) setRunning(false);
       }
     }, 30);
     return () => window.clearTimeout(handle);
-  }, [scenario, iterCount, runKey]);
+  }, [effectiveScenario, scenario.id, iterCount, runKey, modifiedIds]);
+
+  const pendingChanges = useMemo(() => {
+    const ids = new Set([...Object.keys(tweaks), ...Object.keys(appliedTweaks)]);
+    for (const id of ids) {
+      const a = tweaks[id] ?? IDENTITY_TWEAK;
+      const b = appliedTweaks[id] ?? IDENTITY_TWEAK;
+      if (Math.abs(a.meanMultiplier - b.meanMultiplier) > 1e-9) return true;
+      if (Math.abs(a.spreadMultiplier - b.spreadMultiplier) > 1e-9) return true;
+    }
+    return false;
+  }, [tweaks, appliedTweaks]);
+
+  const updateTweak = (id: string, patch: Partial<DriverTweak>) => {
+    setTweaks((prev) => {
+      const current = prev[id] ?? IDENTITY_TWEAK;
+      return { ...prev, [id]: { ...current, ...patch } };
+    });
+  };
+  const resetInput = (id: string) => {
+    setTweaks((prev) => ({ ...prev, [id]: { ...IDENTITY_TWEAK } }));
+  };
+  const resetAll = () => {
+    setTweaks({});
+    setAppliedTweaks({});
+  };
+  const applyAndRun = () => {
+    setAppliedTweaks({ ...tweaks });
+    setRunKey((k) => k + 1);
+  };
 
   const primary = scenario.outputs[0];
   const primaryMetric = primary ? result?.metrics[primary.id] : undefined;
@@ -162,6 +223,22 @@ export function RiskSimulationPanel({
             <option value={50000}>50,000 iter</option>
             <option value={100000}>100,000 iter</option>
           </select>
+          <button
+            onClick={() => setShowTweaks((s) => !s)}
+            className="flex items-center gap-1.5 text-[11px] font-medium rounded-md px-2.5 py-1.5 transition-colors text-white/80 hover:text-white"
+            style={{ background: modifiedIds.size > 0 ? `${accentColor}20` : "rgba(255,255,255,0.04)", border: `1px solid ${modifiedIds.size > 0 ? `${accentColor}40` : "rgba(255,255,255,0.1)"}` }}
+            aria-label="Toggle driver tweaks"
+            aria-expanded={showTweaks}
+          >
+            <Sliders className="w-3 h-3" />
+            Tweak Drivers
+            {modifiedIds.size > 0 && (
+              <span className="ml-1 px-1.5 py-0.5 rounded text-[9px] font-mono" style={{ background: accentColor, color: "#000" }}>
+                {modifiedIds.size}
+              </span>
+            )}
+            {showTweaks ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+          </button>
           <button
             onClick={() => setRunKey(k => k + 1)}
             disabled={running}
@@ -207,7 +284,7 @@ export function RiskSimulationPanel({
                   })
                   .filter((x): x is NonNullable<typeof x> => x !== null),
                 sensitivities: result.inputSensitivity.map(s => ({ inputId: s.inputId, label: s.label, impact: s.impact })),
-                inputs: scenario.inputs.map(inp => ({
+                inputs: effectiveScenario.inputs.map(inp => ({
                   id: inp.id,
                   label: inp.label,
                   unit: inp.unit,
@@ -220,6 +297,21 @@ export function RiskSimulationPanel({
           />
         </div>
       </div>
+
+      {showTweaks && (
+        <DriverTweaksPanel
+          inputs={scenario.inputs}
+          tweaks={tweaks}
+          accentColor={accentColor}
+          onChange={updateTweak}
+          onResetInput={resetInput}
+          onResetAll={resetAll}
+          onApply={applyAndRun}
+          pendingChanges={pendingChanges}
+          modifiedIds={modifiedIds}
+          running={running}
+        />
+      )}
 
       <div className="rounded-xl border p-4 grid grid-cols-2 md:grid-cols-4 gap-4" style={{ borderColor: "rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.02)" }}>
         <div>
@@ -313,7 +405,14 @@ export function RiskSimulationPanel({
           <div className="space-y-2">
             {result?.inputSensitivity.slice(0, 8).map((item, i) => (
               <div key={item.inputId} className="flex items-center gap-2">
-                <span className="text-[11px] w-44 truncate flex-shrink-0" style={{ color: "rgba(255,255,255,0.6)" }}>{item.label}</span>
+                <span className="text-[11px] w-44 truncate flex-shrink-0 flex items-center gap-1.5" style={{ color: "rgba(255,255,255,0.6)" }}>
+                  {item.label}
+                  {modifiedIds.has(item.inputId) && (
+                    <span className="px-1 py-0.5 rounded text-[8px] font-mono uppercase tracking-wider" style={{ background: `${accentColor}30`, color: accentColor }}>
+                      tweaked
+                    </span>
+                  )}
+                </span>
                 <div className="flex-1 h-3 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.05)" }}>
                   <motion.div
                     className="h-full rounded-full"
@@ -361,6 +460,158 @@ export function RiskSimulationPanel({
             </>
           )}
         </div>
+      </div>
+    </div>
+  );
+}
+
+interface DriverTweaksPanelProps {
+  inputs: InputVariable[];
+  tweaks: Record<string, DriverTweak>;
+  accentColor: string;
+  onChange: (id: string, patch: Partial<DriverTweak>) => void;
+  onResetInput: (id: string) => void;
+  onResetAll: () => void;
+  onApply: () => void;
+  pendingChanges: boolean;
+  modifiedIds: Set<string>;
+  running: boolean;
+}
+
+function formatDriverValue(value: number, format?: string): string {
+  if (!isFinite(value)) return "—";
+  if (format === "currency") {
+    const abs = Math.abs(value);
+    if (abs >= 1_000_000) return `$${(value / 1_000_000).toFixed(2)}M`;
+    if (abs >= 1000) return `$${(value / 1000).toFixed(1)}K`;
+    return `$${value.toFixed(2)}`;
+  }
+  if (format === "percentage") return `${(value * 100).toFixed(1)}%`;
+  if (format === "years") return `${value.toFixed(1)}y`;
+  return value.toLocaleString(undefined, { maximumFractionDigits: 3 });
+}
+
+function DriverTweaksPanel({
+  inputs,
+  tweaks,
+  accentColor,
+  onChange,
+  onResetInput,
+  onResetAll,
+  onApply,
+  pendingChanges,
+  modifiedIds,
+  running,
+}: DriverTweaksPanelProps) {
+  return (
+    <div
+      className="rounded-xl border p-4"
+      style={{ borderColor: `${accentColor}30`, background: `${accentColor}08` }}
+    >
+      <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
+        <div className="flex items-center gap-2">
+          <Sliders className="w-3.5 h-3.5" style={{ color: accentColor }} />
+          <h4 className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.7)" }}>
+            Driver Assumptions — override before re-running
+          </h4>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onResetAll}
+            className="flex items-center gap-1 text-[10px] font-medium rounded-md px-2 py-1 transition-colors text-white/70 hover:text-white"
+            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}
+            aria-label="Reset all drivers to baseline"
+          >
+            <RotateCcw className="w-3 h-3" />
+            Reset to baseline
+          </button>
+          <button
+            onClick={onApply}
+            disabled={running || !pendingChanges}
+            className="flex items-center gap-1 text-[10px] font-semibold rounded-md px-2.5 py-1 transition-colors disabled:opacity-40"
+            style={{ background: accentColor, color: "#000" }}
+            aria-label="Apply tweaks and re-run simulation"
+          >
+            <RefreshCw className={`w-3 h-3 ${running ? "animate-spin" : ""}`} />
+            {pendingChanges ? "Apply & re-run" : "No changes"}
+          </button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-3">
+        {inputs.map((inp) => {
+          const t = tweaks[inp.id] ?? IDENTITY_TWEAK;
+          const baseline = tweakSummary(inp.distribution);
+          const projectedCenter = baseline.center * t.meanMultiplier;
+          const projectedSpread = baseline.spread * t.spreadMultiplier;
+          const supportsSpread = distributionSupportsSpread(inp.distribution);
+          const isModified = modifiedIds.has(inp.id) || !isIdentityTweak(t);
+          return (
+            <div key={inp.id} className="rounded-md p-2.5" style={{ background: "rgba(0,0,0,0.25)", border: `1px solid ${isModified ? `${accentColor}40` : "rgba(255,255,255,0.06)"}` }}>
+              <div className="flex items-center justify-between gap-2 mb-1.5">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <span className="text-[11px] font-medium text-white truncate">{inp.label}</span>
+                  {isModified && (
+                    <span className="px-1 py-0.5 rounded text-[8px] font-mono uppercase" style={{ background: `${accentColor}30`, color: accentColor }}>
+                      modified
+                    </span>
+                  )}
+                </div>
+                <button
+                  onClick={() => onResetInput(inp.id)}
+                  className="text-[9px] text-white/40 hover:text-white/80 transition-colors flex-shrink-0"
+                  aria-label={`Reset ${inp.label}`}
+                >
+                  reset
+                </button>
+              </div>
+              <div className="flex items-center justify-between text-[9px] font-mono mb-2" style={{ color: "rgba(255,255,255,0.5)" }}>
+                <span>baseline {formatDriverValue(baseline.center, inp.format)}{supportsSpread && baseline.spread > 0 ? ` ± ${formatDriverValue(baseline.spread, inp.format)}` : ""}</span>
+                <span style={{ color: isModified ? accentColor : "rgba(255,255,255,0.5)" }}>
+                  → {formatDriverValue(projectedCenter, inp.format)}{supportsSpread && projectedSpread > 0 ? ` ± ${formatDriverValue(projectedSpread, inp.format)}` : ""}
+                </span>
+              </div>
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2">
+                  <span className="text-[9px] uppercase tracking-wider w-12 flex-shrink-0" style={{ color: "rgba(255,255,255,0.45)" }}>Mean</span>
+                  <input
+                    type="range"
+                    min={0.5}
+                    max={1.5}
+                    step={0.01}
+                    value={t.meanMultiplier}
+                    onChange={(e) => onChange(inp.id, { meanMultiplier: Number(e.target.value) })}
+                    className="flex-1 accent-current"
+                    style={{ accentColor }}
+                    aria-label={`${inp.label} mean multiplier`}
+                  />
+                  <span className="text-[10px] font-mono w-12 text-right" style={{ color: Math.abs(t.meanMultiplier - 1) > 1e-9 ? accentColor : "rgba(255,255,255,0.6)" }}>
+                    {(t.meanMultiplier * 100).toFixed(0)}%
+                  </span>
+                </div>
+                {supportsSpread && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-[9px] uppercase tracking-wider w-12 flex-shrink-0" style={{ color: "rgba(255,255,255,0.45)" }}>Spread</span>
+                    <input
+                      type="range"
+                      min={0}
+                      max={3}
+                      step={0.05}
+                      value={t.spreadMultiplier}
+                      onChange={(e) => onChange(inp.id, { spreadMultiplier: Number(e.target.value) })}
+                      className="flex-1"
+                      style={{ accentColor }}
+                      aria-label={`${inp.label} spread multiplier`}
+                    />
+                    <span className="text-[10px] font-mono w-12 text-right" style={{ color: Math.abs(t.spreadMultiplier - 1) > 1e-9 ? accentColor : "rgba(255,255,255,0.6)" }}>
+                      {t.spreadMultiplier.toFixed(2)}×
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

@@ -31,6 +31,16 @@ export { runScenarioSimulation } from "./scenario-simulation.js";
 export type { MonteCarloResult, MonteCarloOutputStat } from "./scenario-simulation.js";
 
 export {
+  applyTweak,
+  tweakedInputs,
+  tweakSummary,
+  isIdentityTweak,
+  distributionSupportsSpread,
+  IDENTITY_TWEAK,
+} from "./tweaks.js";
+export type { DriverTweak } from "./tweaks.js";
+
+export {
   VESSELS_VOYAGE_COST,
   TERRA_PROPERTY_RETURNS,
   SZL_FUND_EXIT,
