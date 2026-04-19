@@ -204,40 +204,5 @@ export const insertVesselCommandWorkflowSchema = createInsertSchema(vesselsComma
 export type InsertVesselCommandWorkflow = z.infer<typeof insertVesselCommandWorkflowSchema>;
 export type VesselCommandWorkflow = typeof vesselsCommandWorkflowsTable.$inferSelect;
 
-// ─── Bills of Lading (Blockchain BoL) ──────────────────────────────────────
-
-export const vesselsBillsOfLadingTable = pgTable("vessels_bills_of_lading", {
-  id: text("id").primaryKey(),
-  vesselName: text("vessel_name").notNull(),
-  imo: text("imo"),
-  voyageId: text("voyage_id"),
-  shipper: text("shipper").notNull(),
-  consignee: text("consignee").notNull(),
-  notifyParty: text("notify_party"),
-  cargo: text("cargo").notNull(),
-  quantity: text("quantity"),
-  quantityMt: numeric("quantity_mt").notNull().default("0"),
-  unit: text("unit"),
-  originPort: text("origin_port").notNull(),
-  destinationPort: text("destination_port").notNull(),
-  status: text("status").notNull().default("issued"),
-  lcRef: text("lc_ref"),
-  lcIssuer: text("lc_issuer"),
-  lcAmount: numeric("lc_amount").notNull().default("0"),
-  lcStatus: text("lc_status"),
-  autoLcRelease: boolean("auto_lc_release").notNull().default(true),
-  transferCount: integer("transfer_count").notNull().default(0),
-  deliveryConfirmed: boolean("delivery_confirmed").notNull().default(false),
-  createdAt: text("created_at").notNull(),
-  updatedAt: text("updated_at").notNull(),
-});
-
-export const vesselsBolChainEventsTable = pgTable("vessels_bol_chain_events", {
-  id: serial("id").primaryKey(),
-  bolId: text("bol_id").notNull().references(() => vesselsBillsOfLadingTable.id, { onDelete: "cascade" }),
-  sequence: integer("sequence").notNull(),
-  eventType: text("event_type").notNull(),
-  actor: text("actor").notNull(),
-  eventTimestamp: text("event_timestamp").notNull(),
-  confirmed: boolean("confirmed").notNull().default(true),
-});
+// Bills of Lading (BoL) tables live in ./vessels_bol.ts and are re-exported
+// from ./index.ts. Do not redefine them here — duplicate exports break esbuild.

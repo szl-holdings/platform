@@ -134,7 +134,10 @@ export * from "./deployments";
 export * from "./cognitive_runtime";
 export * from "./ai_evals";
 
-export * from "./skill_library";
+// ./skill_library is intentionally NOT re-exported: its `skill_runs` table
+// duplicates the canonical one in ./cognitive_runtime and produces a
+// "duplicated index name across public schema" warning from drizzle-kit.
+// The file is kept for reference but is dead code.
 export * from "./signal_chain_executions";
 export * from "./ot_ics";
 export * from "./page_view_events";
