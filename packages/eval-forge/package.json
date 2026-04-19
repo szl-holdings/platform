@@ -46,6 +46,7 @@
     "run-suite": "tsx src/cli.ts"
   },
   "dependencies": {
+    "@szl-holdings/evals-core": "workspace:*",
     "zod": "catalog:"
   },
   "devDependencies": {

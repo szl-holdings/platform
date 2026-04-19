@@ -24,6 +24,10 @@
     "./compare": {
       "types": "./dist/compare.d.ts",
       "import": "./src/compare.ts"
+    },
+    "./grader-primitives": {
+      "types": "./dist/grader-primitives.d.ts",
+      "import": "./src/grader-primitives.ts"
     }
   },
   "dependencies": {
