@@ -59,6 +59,7 @@ import policyModesRouter from "./policy-modes";
 import demoGovernedScenariosRouter from "./demo-governed-scenarios";
 import counselRouter from "./counsel";
 import fabricRouter from "./fabric";
+import narrativesRouter from "./narratives";
 import actionStoreRouter from "./action-store";
 import lyteSurfacesRouter from "./lyte-surfaces";
 
@@ -112,6 +113,11 @@ crossPlatform.register(router);
 // products, signals, runs, alerts, recommendations, approvals, connector health
 // and system health. Public in demo/dev mode so the Fabric page works without auth.
 router.use(fabricRouter);
+
+// Public read-only narrative payloads (Sentra, Counsel) for the demo
+// Decision Center pages. Mounted BEFORE guardianPolicyCheck.
+// /api/narratives/ is in PUBLIC_PREFIXES in global-auth-enforcer.ts.
+router.use(narrativesRouter);
 
 // Shared action store — persists risk owner assignments and decisions for the
 // Business State / Enterprise State pages so all team members see the same

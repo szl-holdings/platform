@@ -38,6 +38,12 @@ import {
 import { VESSELS_PORT_CONGESTION_NARRATIVE } from "./narrative-vessels-port-congestion.js";
 import { CARLOTA_JO_ESTATE_NARRATIVE } from "./narrative-carlota-jo-estate.js";
 import { SZL_TREASURY_NARRATIVE } from "./narrative-szl-treasury.js";
+import { SENTRA_RANSOMWARE_NARRATIVE } from "./narrative-sentra-ransomware.js";
+import { COUNSEL_DEADLINE_NARRATIVE } from "./narrative-counsel-deadline.js";
+import {
+  registerNarrativeMeshEntry,
+  clearNarrativeMeshIndex,
+} from "./narrative-mesh-index.js";
 
 export async function seedSignalMesh(opts: { startConnectors?: boolean } = {}): Promise<{
   signalsSeeded: number;
@@ -49,6 +55,7 @@ export async function seedSignalMesh(opts: { startConnectors?: boolean } = {}): 
   console.log("[seed-signal-mesh] Starting signal mesh seed...");
 
   registerEntities();
+  clearNarrativeMeshIndex();
 
   let totalSignals = 0;
   let totalEvidence = 0;
@@ -58,6 +65,8 @@ export async function seedSignalMesh(opts: { startConnectors?: boolean } = {}): 
     VESSELS_PORT_CONGESTION_NARRATIVE,
     CARLOTA_JO_ESTATE_NARRATIVE,
     SZL_TREASURY_NARRATIVE,
+    SENTRA_RANSOMWARE_NARRATIVE,
+    COUNSEL_DEADLINE_NARRATIVE,
   ]) {
     console.log(`[seed-signal-mesh] Seeding narrative: ${narrative.title}`);
 
@@ -84,6 +93,14 @@ export async function seedSignalMesh(opts: { startConnectors?: boolean } = {}): 
     for (const ref of recommendation.entityRefs) {
       defaultEntityRegistry.linkRecommendation(ref.entityId, recommendation.recommendationId);
     }
+
+    registerNarrativeMeshEntry({
+      narrativeId: narrative.id,
+      recommendationId: recommendation.recommendationId,
+      signalIds: signals.map((s) => s.signalId),
+      evidenceItemIds: evidenceItems.map((e) => e.evidenceId),
+      seededAt: new Date().toISOString(),
+    });
 
     totalSignals += signals.length;
     totalEvidence += evidenceItems.length;
@@ -149,6 +166,16 @@ function registerEntities(): void {
     { entityId: "book-commodity-derivatives", entityType: "custom", domain: "finance", displayName: "Commodity Derivative Book", health: "at-risk", riskScore: 65, attributes: { unrealizedLossUsd: 2_800_000, threshold: 2_000_000 }, snapshotAt: now },
     { entityId: "matter-001", entityType: "custom", domain: "legal", displayName: "Soltana Vessel Compliance Review", health: "at-risk", attributes: { deadlineHours: 48, type: "regulatory-filing" }, snapshotAt: now },
     { entityId: "client-arcturus", entityType: "organization", domain: "legal", displayName: "Arcturus Shipping", health: "degraded", attributes: { retainerBalanceUsd: 8_500, threshold: 10_000 }, snapshotAt: now },
+    // Sentra — OT ransomware narrative
+    { entityId: "asset-scada-01", entityType: "custom", domain: "security", displayName: "SCADA Production Server", health: "at-risk", riskScore: 92, attributes: { segment: "OT", criticality: "tier-1" }, snapshotAt: now },
+    { entityId: "asset-hmi-04", entityType: "custom", domain: "security", displayName: "HMI Workstation - Line 4", health: "at-risk", riskScore: 84, attributes: { segment: "OT", criticality: "tier-2" }, snapshotAt: now },
+    { entityId: "asset-plc-12", entityType: "custom", domain: "security", displayName: "PLC Controller - Zone B", health: "at-risk", riskScore: 80, attributes: { segment: "OT", criticality: "tier-2" }, snapshotAt: now },
+    { entityId: "threat-c2-99", entityType: "custom", domain: "security", displayName: "Anomalous C2 Beacon", health: "degraded", attributes: { destinationIp: "185.220.101.42" }, snapshotAt: now },
+    // Counsel — deadline narrative
+    { entityId: "matter-meridian-compliance-v3", entityType: "custom", domain: "legal", displayName: "Meridian Compliance v.3", health: "at-risk", riskScore: 78, attributes: { exposureUsd: 4_100_000, deadlineDays: 11 }, snapshotAt: now },
+    { entityId: "firm-morrison-vance", entityType: "organization", domain: "legal", displayName: "Morrison & Vance LLP", health: "degraded", attributes: { overdueDeliverables: 3 }, snapshotAt: now },
+    { entityId: "obl-discovery-001", entityType: "custom", domain: "legal", displayName: "Discovery Request #001", health: "at-risk", attributes: { daysOverdue: 18 }, snapshotAt: now },
+    { entityId: "obl-filing-001", entityType: "custom", domain: "legal", displayName: "Regulatory Filing", health: "at-risk", attributes: { daysRemaining: 11 }, snapshotAt: now },
   ];
 
   for (const input of entities) {

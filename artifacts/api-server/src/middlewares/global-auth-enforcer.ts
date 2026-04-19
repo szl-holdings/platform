@@ -126,6 +126,10 @@ const PUBLIC_PREFIXES = [
   // Infrastructure status — lightweight public health summary used by the
   // Legatus infrastructure console to show live AquilaScore and threat level.
   "/api/infrastructure/",
+  // Demo narrative payloads (Sentra ransomware, Counsel deadline) — read-only.
+  // Backs the Decision Center pages with the same signal/evidence/recommendation
+  // bundle that gets seeded into the live signal mesh at boot.
+  "/api/narratives/",
   // Global Operations Fabric — snapshot + SSE stream for the Fabric page.
   // Public prefix bypasses this enforcer so the route handler can apply its own
   // production/demo guard: in production the handler checks req.user and returns

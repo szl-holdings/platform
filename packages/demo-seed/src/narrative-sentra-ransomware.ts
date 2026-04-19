@@ -84,7 +84,7 @@ export const SENTRA_RANSOMWARE_NARRATIVE = {
 
       createSignal({
         source: "connector",
-        type: "drift",
+        type: "compliance-flag",
         domain: "security",
         occurredAt: new Date(now - 180 * 60_000).toISOString(),
         freshness: 0.8,
@@ -113,7 +113,7 @@ export const SENTRA_RANSOMWARE_NARRATIVE = {
         tags: ["ransomware", "payload"],
       }),
       createEvidenceItem({
-        type: "threat-intel",
+        type: "external-data",
         domain: "security",
         signalId: signals[1]?.signalId,
         entityRefs: [this.entities.c2Beacon],
@@ -125,7 +125,7 @@ export const SENTRA_RANSOMWARE_NARRATIVE = {
         tags: ["c2", "threat-intel"],
       }),
       createEvidenceItem({
-        type: "resilience-audit",
+        type: "threshold-trigger",
         domain: "security",
         signalId: signals[2]?.signalId,
         entityRefs: [this.entities.scadaServer],
@@ -161,7 +161,7 @@ export const SENTRA_RANSOMWARE_NARRATIVE = {
         "4-signal correlation cluster (Payload + C2 + Backup Failure + IR Drift). " +
         "Current recovery posture 42%. SCADA server backup exceeds 72h staleness. " +
         "High confidence match for 'Phantom Cluster' ransomware TTPs.",
-      suggestedAction: "isolate_and_recover",
+      suggestedAction: "quarantine",
       actionPayload: {
         assetsToIsolate: ["asset-scada-01", "asset-hmi-04", "asset-plc-12"],
         recoveryPriority: "high",
