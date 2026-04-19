@@ -192,6 +192,216 @@ function buildFilterSearch(current: URLSearchParams, f: PersistedFilters): strin
   return next.toString();
 }
 
+/**
+ * Build the structured JSON evidence payload for a highlighted path. Used by
+ * the "Export path" action in the summary banner so investigators can attach
+ * the chain to a case file. Mirrors the shape returned by
+ * GET /graph/entities/:fromId/path/:toId so downstream tools can re-hydrate it.
+ */
+export interface PathExportPayload {
+  schemaVersion: 1;
+  exportedAt: string;
+  hostDomain: string | null;
+  origin: { id: string; name: string; entityType?: string | null; domain?: string | null };
+  target: { id: string; name: string; entityType?: string | null; domain?: string | null };
+  found: boolean;
+  depth: number;
+  maxDepth: number;
+  hopCount: number;
+  crossDomainStepCount: number;
+  hops: Array<{
+    index: number;
+    isCrossDomain: boolean;
+    relationshipType: string;
+    edgeId: string;
+    from: { id: string; name: string; entityType?: string | null; domain?: string | null };
+    to: { id: string; name: string; entityType?: string | null; domain?: string | null };
+  }>;
+  nodes: Array<{ id: string; name: string; entityType?: string | null; domain?: string | null }>;
+  edges: Array<{ id: string; fromNodeId: string; toNodeId: string; relationshipType: string }>;
+}
+
+export function buildPathExportPayload(
+  highlight: {
+    from: { id: string; name: string };
+    to: { id: string; name: string };
+    found: boolean;
+    depth: number;
+    nodes: ConstellationGraphNode[];
+    edges: ConstellationGraphEdge[];
+    crossDomainSteps: number[];
+    maxDepth: number;
+  },
+  hostDomain: string | null,
+): PathExportPayload {
+  const crossSet = new Set(highlight.crossDomainSteps);
+  const slim = (n: ConstellationGraphNode) => ({
+    id: n.id,
+    name: n.name,
+    entityType: n.entityType ?? null,
+    domain: n.domain ?? null,
+  });
+  const originNode = highlight.nodes[0];
+  const targetNode = highlight.nodes[highlight.nodes.length - 1];
+  const origin = originNode
+    ? slim(originNode)
+    : { id: highlight.from.id, name: highlight.from.name, entityType: null, domain: null };
+  const target = targetNode
+    ? slim(targetNode)
+    : { id: highlight.to.id, name: highlight.to.name, entityType: null, domain: null };
+  const hops = highlight.edges.map((edge, i) => {
+    const fromNode = highlight.nodes[i];
+    const toNode = highlight.nodes[i + 1];
+    return {
+      index: i,
+      isCrossDomain: crossSet.has(i),
+      relationshipType: edge.relationshipType,
+      edgeId: edge.id,
+      from: fromNode
+        ? slim(fromNode)
+        : { id: edge.fromNodeId, name: edge.fromNodeId, entityType: null, domain: null },
+      to: toNode
+        ? slim(toNode)
+        : { id: edge.toNodeId, name: edge.toNodeId, entityType: null, domain: null },
+    };
+  });
+  return {
+    schemaVersion: 1,
+    exportedAt: new Date().toISOString(),
+    hostDomain,
+    origin,
+    target,
+    found: highlight.found,
+    depth: highlight.depth,
+    maxDepth: highlight.maxDepth,
+    hopCount: hops.length,
+    crossDomainStepCount: highlight.crossDomainSteps.length,
+    hops,
+    nodes: highlight.nodes.map(slim),
+    edges: highlight.edges.map((e) => ({
+      id: e.id,
+      fromNodeId: e.fromNodeId,
+      toNodeId: e.toNodeId,
+      relationshipType: e.relationshipType,
+    })),
+  };
+}
+
+export function buildPathExportMarkdown(payload: PathExportPayload): string {
+  const lines: string[] = [];
+  lines.push(`# Constellation Path — ${payload.origin.name} → ${payload.target.name}`);
+  lines.push("");
+  lines.push(`- Exported: ${payload.exportedAt}`);
+  if (payload.hostDomain) lines.push(`- Host domain: ${payload.hostDomain}`);
+  if (payload.found) {
+    lines.push(`- Hops: ${payload.depth}`);
+    lines.push(`- Cross-domain steps: ${payload.crossDomainStepCount}`);
+  } else {
+    lines.push(`- Result: no path found within ${payload.maxDepth} hops on each side`);
+  }
+  lines.push("");
+  const fmt = (n: { name: string; entityType?: string | null; domain?: string | null }) => {
+    const parts = [n.name];
+    const meta = [n.entityType, n.domain].filter(Boolean).join(" · ");
+    if (meta) parts.push(`(${meta})`);
+    return parts.join(" ");
+  };
+  lines.push(`**Origin:** ${fmt(payload.origin)}`);
+  lines.push(`**Target:** ${fmt(payload.target)}`);
+  if (payload.hops.length > 0) {
+    lines.push("");
+    lines.push("## Hops");
+    lines.push("");
+    for (const hop of payload.hops) {
+      const tag = hop.isCrossDomain ? " _(cross-domain)_" : "";
+      lines.push(
+        `${hop.index + 1}. ${fmt(hop.from)} —[${hop.relationshipType}]→ ${fmt(hop.to)}${tag}`,
+      );
+    }
+  }
+  lines.push("");
+  return lines.join("\n");
+}
+
+/**
+ * Serialize an SVG element into a standalone document string suitable for
+ * rasterising via an Image + canvas. Inlines computed font/colour styles so
+ * the offline image looks like the on-screen one.
+ */
+function serializeSvgForExport(svg: SVGSVGElement): string {
+  const clone = svg.cloneNode(true) as SVGSVGElement;
+  if (!clone.getAttribute("xmlns")) clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+  if (!clone.getAttribute("xmlns:xlink"))
+    clone.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
+  // Paint a dark background rect so the PNG isn't transparent — matches the
+  // canvas gradient operators see on screen closely enough for evidence use.
+  const w = svg.viewBox.baseVal.width || svg.clientWidth || 800;
+  const h = svg.viewBox.baseVal.height || svg.clientHeight || 460;
+  const bg = clone.ownerDocument!.createElementNS("http://www.w3.org/2000/svg", "rect");
+  bg.setAttribute("x", "0");
+  bg.setAttribute("y", "0");
+  bg.setAttribute("width", String(w));
+  bg.setAttribute("height", String(h));
+  bg.setAttribute("fill", "#0a0f1c");
+  clone.insertBefore(bg, clone.firstChild);
+  return new XMLSerializer().serializeToString(clone);
+}
+
+async function svgToPngBlob(svg: SVGSVGElement, scale = 2): Promise<Blob> {
+  const w = svg.viewBox.baseVal.width || svg.clientWidth || 800;
+  const h = svg.viewBox.baseVal.height || svg.clientHeight || 460;
+  const source = serializeSvgForExport(svg);
+  const svgBlob = new Blob([source], { type: "image/svg+xml;charset=utf-8" });
+  const url = URL.createObjectURL(svgBlob);
+  try {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    await new Promise<void>((resolve, reject) => {
+      img.onload = () => resolve();
+      img.onerror = () => reject(new Error("Failed to render path image"));
+      img.src = url;
+    });
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(w * scale);
+    canvas.height = Math.round(h * scale);
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("Canvas not supported");
+    ctx.fillStyle = "#0a0f1c";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    return await new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob(
+        (blob) => (blob ? resolve(blob) : reject(new Error("PNG encoding failed"))),
+        "image/png",
+      );
+    });
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
+function downloadBlob(blob: Blob, filename: string): void {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  // Defer revoke so the browser has time to read the blob for download.
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function slugifyForFilename(input: string): string {
+  return (
+    input
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 40) || "node"
+  );
+}
+
 interface SimNode {
   id: string;
   ref: ConstellationGraphNode;
@@ -384,6 +594,7 @@ export function ConstellationGraph({
   const [savedViewsError, setSavedViewsError] = useState<string | null>(null);
   const [activeSavedViewId, setActiveSavedViewId] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const svgRef = useRef<SVGSVGElement | null>(null);
   const simRef = useRef<SimNode[]>([]);
   const alphaRef = useRef(1);
   const [, force] = useState(0);
@@ -946,6 +1157,7 @@ export function ConstellationGraph({
     setPathError(null);
     setPathHighlight(null);
     setPathStepsOpen(true);
+    setPathExportError(null);
   }, [graphKey]);
 
   // Compute the cutoff time for the freshness window filter
@@ -1474,6 +1686,49 @@ export function ConstellationGraph({
     },
     [expanding],
   );
+
+  // "Export path" — package the highlighted chain as a downloadable evidence
+  // bundle so investigators can attach it to a case file. Triggers three
+  // downloads from the same user gesture: a PNG of the canvas (path-only when
+  // possible), the structured chain as JSON, and a human-readable Markdown
+  // summary. PNG capture is best-effort; JSON/Markdown always succeed.
+  const [pathExportBusy, setPathExportBusy] = useState(false);
+  const [pathExportError, setPathExportError] = useState<string | null>(null);
+  const exportPath = useCallback(async () => {
+    if (!pathHighlight || !pathHighlight.found) return;
+    setPathExportBusy(true);
+    setPathExportError(null);
+    try {
+      const payload = buildPathExportPayload(pathHighlight, domain ?? null);
+      const md = buildPathExportMarkdown(payload);
+      const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+      const base = `constellation-path-${slugifyForFilename(pathHighlight.from.name)}-to-${slugifyForFilename(pathHighlight.to.name)}-${stamp}`;
+      downloadBlob(
+        new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" }),
+        `${base}.json`,
+      );
+      downloadBlob(
+        new Blob([md], { type: "text/markdown;charset=utf-8" }),
+        `${base}.md`,
+      );
+      if (svgRef.current) {
+        try {
+          const png = await svgToPngBlob(svgRef.current);
+          downloadBlob(png, `${base}.png`);
+        } catch (imgErr) {
+          // PNG is best-effort — keep the JSON/Markdown downloads but surface
+          // the failure so operators know the image step didn't run.
+          setPathExportError(
+            (imgErr as Error)?.message ?? "Could not capture path image",
+          );
+        }
+      }
+    } catch (err) {
+      setPathExportError((err as Error)?.message ?? "Failed to export path");
+    } finally {
+      setPathExportBusy(false);
+    }
+  }, [pathHighlight, domain]);
 
   const findPath = useCallback(
     async (from: ConstellationGraphNode, to: ConstellationGraphNode) => {
@@ -2073,6 +2328,29 @@ export function ConstellationGraph({
               </>
             )}
           </span>
+          {pathHighlight.found && (
+            <button
+              onClick={exportPath}
+              disabled={pathExportBusy}
+              data-testid="constellation-path-export"
+              title="Download a PNG of the highlighted canvas plus a JSON and Markdown summary of the chain"
+              style={{
+                fontSize: 10,
+                padding: "3px 8px",
+                borderRadius: 4,
+                border: "1px solid rgba(251,191,36,0.5)",
+                background: "rgba(251,191,36,0.12)",
+                color: "#fde68a",
+                cursor: pathExportBusy ? "wait" : "pointer",
+                opacity: pathExportBusy ? 0.6 : 1,
+                fontWeight: 600,
+                letterSpacing: "0.04em",
+                textTransform: "uppercase",
+              }}
+            >
+              {pathExportBusy ? "Exporting…" : "Export path"}
+            </button>
+          )}
           <button
             onClick={() => setPathHighlight(null)}
             data-testid="constellation-path-clear"
@@ -2087,6 +2365,42 @@ export function ConstellationGraph({
             }}
           >
             Clear
+          </button>
+        </div>
+      )}
+      {pathExportError && (
+        <div
+          role="alert"
+          data-testid="constellation-path-export-error"
+          style={{
+            marginBottom: 8,
+            padding: "6px 10px",
+            borderRadius: 6,
+            background: "rgba(251,191,36,0.08)",
+            border: "1px solid rgba(251,191,36,0.4)",
+            fontSize: 11,
+            color: "#fde68a",
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+          }}
+        >
+          <span>Path image couldn't be captured: {pathExportError}. JSON and Markdown were still saved.</span>
+          <button
+            type="button"
+            onClick={() => setPathExportError(null)}
+            style={{
+              marginLeft: "auto",
+              fontSize: 10,
+              padding: "2px 6px",
+              borderRadius: 4,
+              border: "1px solid rgba(255,255,255,0.2)",
+              background: "transparent",
+              color: "#cbd5e1",
+              cursor: "pointer",
+            }}
+          >
+            Dismiss
           </button>
         </div>
       )}
@@ -2157,7 +2471,7 @@ export function ConstellationGraph({
             <div style={{ fontSize: 12, color: "#94a3b8" }}>No entities in this Constellation subgraph yet.</div>
           </div>
         ) : (
-          <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{ display: "block" }}>
+          <svg ref={svgRef} width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{ display: "block" }}>
             <defs>
               <marker id="arrow-internal" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
                 <path d="M 0 0 L 10 5 L 0 10 z" fill={accentColor} opacity="0.55" />
