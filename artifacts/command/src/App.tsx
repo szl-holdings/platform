@@ -15,6 +15,7 @@ import { CommandBar } from "./components/command-bar";
 import { UnifiedLayout, type WorkspaceMode } from "./components/unified-layout";
 import { recordPageLoad } from "./pages/cognitive/shared";
 import { DemoModeProvider } from "@lyte/lib/demo-mode";
+import { DemoPersonaProvider, DemoPersonaSwitcher } from "@szl-holdings/shared-ui/demo-persona-switcher";
 
 const BASE = import.meta.env.BASE_URL;
 const CorrelationMapPage = lazy(() => import("./pages/correlation-map").then((m) => ({ default: m.CorrelationMapPage })));
@@ -400,11 +401,14 @@ function App() {
       <PrismBusProvider domain="lyte">
         <SandboxModeProvider>
           <DemoModeProvider>
+            <DemoPersonaProvider>
             <QueryClientProvider client={queryClient}>
               <WouterRouter base={BASE.replace(/\/$/, "")}>
                 <AppShell />
               </WouterRouter>
             </QueryClientProvider>
+            <DemoPersonaSwitcher />
+            </DemoPersonaProvider>
           </DemoModeProvider>
         </SandboxModeProvider>
       </PrismBusProvider>

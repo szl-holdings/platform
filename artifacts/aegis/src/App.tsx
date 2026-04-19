@@ -12,6 +12,7 @@ import {
   Building2, Landmark, Banknote, ShieldAlert, Fingerprint, Camera, Antenna, KeyRound, Swords,
 } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { DemoPersonaProvider, DemoPersonaSwitcher } from "@szl-holdings/shared-ui/demo-persona-switcher";
 
 import S01Cover from "./pages/slides/S01Cover";
 import S02SeriesProblem from "./pages/slides/S02SeriesProblem";
@@ -612,9 +613,12 @@ function AppRoutes() {
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <WouterRouter base={BASE}>
-        <AppRoutes />
-      </WouterRouter>
+      <DemoPersonaProvider>
+        <WouterRouter base={BASE}>
+          <AppRoutes />
+        </WouterRouter>
+        <DemoPersonaSwitcher />
+      </DemoPersonaProvider>
     </QueryClientProvider>
   );
 }

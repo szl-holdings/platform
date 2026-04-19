@@ -31,7 +31,8 @@ import { useOnboardingAnalytics } from "@szl-holdings/shared-ui/onboarding";
 import { IndexedDBAdapter, CommandQueue, ConflictResolver } from "@szl-holdings/offline-engine";
 import { CommandPalette, useCommandPalette, getEcosystemSwitchCommands, createBaselineWebActions, type CommandItem } from "@szl-holdings/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@szl-holdings/shared-ui/keyboard-shortcuts";
-import { DemoModeProvider } from "@szl-holdings/shared-ui/demo-mode";
+import { DemoModeProvider, useDemoMode } from "@szl-holdings/shared-ui/demo-mode";
+import { DemoPersonaProvider, DemoPersonaSwitcher, DemoPersonaModeBridge } from "@szl-holdings/shared-ui/demo-persona-switcher";
 import { SandboxModeProvider, SandboxModeBanner } from "@szl-holdings/shared-ui/sandbox-mode";
 import { PackBanner } from "@szl-holdings/shared-ui/pack-banner";
 import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";
@@ -863,6 +864,11 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
   );
 }
 
+function DemoPersonaModeBridgeWired() {
+  const { setMode } = useDemoMode();
+  return <DemoPersonaModeBridge setMode={setMode} />;
+}
+
 function App() {
   const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(vesselsCommands);
 
@@ -871,6 +877,8 @@ function App() {
     <PrismBusProvider domain="vessels">
     <SandboxModeProvider>
       <DemoModeProvider>
+        <DemoPersonaProvider>
+        <DemoPersonaModeBridgeWired />
         <QueryClientProvider client={queryClient}>
           <StaleIndicator accentColor={VESSELS_BRAND_ACCENT} />
           <AuthProvider>
@@ -881,6 +889,8 @@ function App() {
           <AgentCopilot config={helmsmanConfig} />
           <McpOverlay domain="vessels" />
         </QueryClientProvider>
+        <DemoPersonaSwitcher />
+        </DemoPersonaProvider>
       </DemoModeProvider>
     </SandboxModeProvider>
     </PrismBusProvider>

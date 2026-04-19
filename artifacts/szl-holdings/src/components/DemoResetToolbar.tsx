@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { RefreshCw, CheckCircle, AlertTriangle, Loader2 } from "lucide-react";
+import { RefreshCw, CheckCircle, AlertTriangle, Loader2, Lock } from "lucide-react";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
+import { useDemoPersona } from "@szl-holdings/shared-ui/demo-persona-switcher";
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
 
@@ -39,6 +40,8 @@ export function DemoResetToolbar() {
   const [status, setStatus] = useState<StatusResponse | null>(null);
   const [narrative, setNarrative] = useState<string>("all");
   const [state, setState] = useState<ResetState>({ kind: "idle" });
+  const { persona, permissions } = useDemoPersona();
+  const canReset = permissions.canExecute;
 
   useEffect(() => {
     let cancelled = false;
@@ -76,6 +79,12 @@ export function DemoResetToolbar() {
 
   const handleReset = async () => {
     if (state.kind === "running") return;
+    if (!canReset) {
+      const msg = `${persona.name} (${persona.title}) is not permitted to execute resets in this demo persona.`;
+      setState({ kind: "error", message: msg });
+      toast.error(msg);
+      return;
+    }
     setState({ kind: "running", startedAt: Date.now() });
     try {
       const response = await fetch(`${BASE}/api/demo/reset`, {
@@ -174,25 +183,31 @@ export function DemoResetToolbar() {
       <button
         type="button"
         data-testid="demo-reset-button"
+        data-persona-can-execute={canReset ? "true" : "false"}
         onClick={handleReset}
-        disabled={isRunning}
+        disabled={isRunning || !canReset}
+        title={canReset ? undefined : `${persona.title} cannot execute demo resets in this persona`}
         style={{
           display: "inline-flex",
           alignItems: "center",
           gap: "0.375rem",
           padding: "0.375rem 0.75rem",
           borderRadius: "5px",
-          background: isRunning ? "hsla(38,72%,58%,0.05)" : "hsla(38,72%,58%,0.14)",
-          border: "1px solid hsla(38,72%,58%,0.4)",
-          color: "hsl(38,72%,72%)",
+          background: !canReset
+            ? "hsla(0,0%,100%,0.03)"
+            : isRunning
+            ? "hsla(38,72%,58%,0.05)"
+            : "hsla(38,72%,58%,0.14)",
+          border: !canReset ? "1px solid hsla(0,0%,100%,0.08)" : "1px solid hsla(38,72%,58%,0.4)",
+          color: !canReset ? "hsl(210,5%,45%)" : "hsl(38,72%,72%)",
           fontSize: "12px",
           fontWeight: 600,
-          cursor: isRunning ? "not-allowed" : "pointer",
+          cursor: isRunning || !canReset ? "not-allowed" : "pointer",
           transition: "all 0.18s",
         }}
       >
-        <RefreshCw size={11} className={isRunning ? "animate-spin" : ""} />
-        {isRunning ? "Resetting…" : "Reset Demo"}
+        {!canReset ? <Lock size={11} /> : <RefreshCw size={11} className={isRunning ? "animate-spin" : ""} />}
+        {!canReset ? "Reset locked for this persona" : isRunning ? "Resetting…" : "Reset Demo"}
       </button>
 
       {elapsedLabel && (

@@ -162,6 +162,7 @@
     "./use-interval": "./src/use-interval.ts",
     "./api-fetch": "./src/api-fetch.ts",
     "./demo-mode": "./src/demo-mode.tsx",
+    "./demo-persona-switcher": "./src/demo-persona-switcher.tsx",
     "./analytics-provider": "./src/analytics-provider.tsx",
     "./analytics": "./src/analytics/index.ts",
     "./feature-flag-gate": "./src/feature-flag-gate.tsx",

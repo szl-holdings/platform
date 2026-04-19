@@ -11,7 +11,8 @@ import { Switch, Route, Router as WouterRouter, Redirect, useLocation } from "wo
 import { analytics as szlAnalytics } from "@/lib/analytics";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LazyMotion, domMax } from "framer-motion";
-import { DemoModeProvider } from "@szl-holdings/shared-ui/demo-mode";
+import { DemoModeProvider, useDemoMode } from "@szl-holdings/shared-ui/demo-mode";
+import { DemoPersonaProvider, DemoPersonaSwitcher, DemoPersonaModeBridge } from "@szl-holdings/shared-ui/demo-persona-switcher";
 import { SandboxModeProvider } from "@szl-holdings/shared-ui/sandbox-mode";
 import { AnalyticsProvider } from "@szl-holdings/shared-ui/analytics-provider";
 import { McpOverlay } from "@szl-holdings/mcp-client";
@@ -464,6 +465,11 @@ async function handleDemoReset() {
   }
 }
 
+function DemoPersonaModeBridgeWired() {
+  const { setMode } = useDemoMode();
+  return <DemoPersonaModeBridge setMode={setMode} />;
+}
+
 function App() {
   return (
     <AppModeProvider>
@@ -471,6 +477,8 @@ function App() {
     <PrismBusProvider domain="szl-holdings">
     <SandboxModeProvider>
     <DemoModeProvider>
+    <DemoPersonaProvider>
+    <DemoPersonaModeBridgeWired />
     <QueryClientProvider client={queryClient}>
       <ProductionConfirmProvider>
       <ProductionConfirmRegistrar />
@@ -1525,6 +1533,8 @@ function App() {
       <CookieBanner privacyUrl="/legal/privacy" accentColor={SZL_ACCENT} />
       </ProductionConfirmProvider>
     </QueryClientProvider>
+    <DemoPersonaSwitcher />
+    </DemoPersonaProvider>
     </DemoModeProvider>
     </SandboxModeProvider>
     </PrismBusProvider>
