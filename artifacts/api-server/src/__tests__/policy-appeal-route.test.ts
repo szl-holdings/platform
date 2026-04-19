@@ -107,10 +107,10 @@ describe("POST /api/audit-log/policy-appeal — 401 unauthenticated", () => {
     expect(res.status).toBe(401);
     const body = res.body as ErrorBody;
     expect(body.code).toBe("UNAUTHORIZED");
-    expect(logger.info).not.toHaveBeenCalledWith(
-      expect.anything(),
-      "policy.appeal.recorded",
+    const recordedCalls = (logger.info as unknown as ReturnType<typeof vi.fn>).mock.calls.filter(
+      (c) => c[1] === "policy.appeal.recorded",
     );
+    expect(recordedCalls).toHaveLength(0);
   });
 });
 
@@ -241,7 +241,7 @@ describe("POST /api/audit-log/policy-appeal — 201 happy path + structured audi
     expect(body.action).toBe("appeal");
     expect(body.actorId).toBe(4242);
     expect(typeof body.recordedAt).toBe("string");
-    expect(() => new Date(body.recordedAt)).not.toThrow();
+    expect(Number.isNaN(Date.parse(body.recordedAt))).toBe(false);
 
     // The structured audit log line — the heart of the audit-integrity
     // guarantee this endpoint exists to provide.
