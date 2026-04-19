@@ -663,6 +663,7 @@ function RiskRegisterModule() {
   const { toasts, show, dismiss } = useToasts();
 
   const [defaultTeamKey, setDefaultTeamKey] = useState<string | null>(null);
+  const [autoCreateLabels, setAutoCreateLabels] = useState<boolean>(true);
   const [teams, setTeams] = useState<LinearTeamOption[]>([]);
   const [teamsErr, setTeamsErr] = useState<string | null>(null);
   const [adminOpen, setAdminOpen] = useState(false);
@@ -674,8 +675,9 @@ function RiskRegisterModule() {
       .then(r => (r.ok ? r.json() : null))
       .then(json => {
         if (cancelled || !json) return;
-        const data = (json.data ?? json) as { defaultTeamKey?: string | null };
+        const data = (json.data ?? json) as { defaultTeamKey?: string | null; autoCreateLabels?: boolean };
         setDefaultTeamKey(data?.defaultTeamKey ?? null);
+        if (typeof data?.autoCreateLabels === "boolean") setAutoCreateLabels(data.autoCreateLabels);
       })
       .catch(() => {});
     fetch("/api/linear/teams", { credentials: "include" })
@@ -693,37 +695,54 @@ function RiskRegisterModule() {
     return () => { cancelled = true; };
   }, []);
 
-  async function handleSaveDefaultTeam(nextKey: string | null) {
+  async function saveLinearSettings(
+    patchBody: { defaultTeamKey?: string | null; autoCreateLabels?: boolean },
+    successMsg: string,
+  ) {
     setSavingDefault(true);
     try {
       const r = await fetch("/api/linear/settings", {
         method: "PUT",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ defaultTeamKey: nextKey }),
+        body: JSON.stringify(patchBody),
       });
       const json = await r.json().catch(() => null);
       if (!r.ok) {
         const msg =
           r.status === 401 || r.status === 403
-            ? "You need an admin role to change the default Linear team."
-            : json?.error || `Could not save default team (HTTP ${r.status})`;
+            ? "You need an admin role to change Linear settings."
+            : json?.error || `Could not save Linear settings (HTTP ${r.status})`;
         show(msg, "error", 6000);
         return;
       }
-      const data = (json.data ?? json) as { defaultTeamKey?: string | null };
-      setDefaultTeamKey(data?.defaultTeamKey ?? null);
-      show(
-        nextKey
-          ? `Default Linear team set to ${nextKey}.`
-          : "Default Linear team cleared — falls back to the workspace's first team.",
-        "success",
-      );
+      const data = (json.data ?? json) as { defaultTeamKey?: string | null; autoCreateLabels?: boolean };
+      if ("defaultTeamKey" in data) setDefaultTeamKey(data.defaultTeamKey ?? null);
+      if (typeof data.autoCreateLabels === "boolean") setAutoCreateLabels(data.autoCreateLabels);
+      show(successMsg, "success");
     } catch (err) {
-      show(`Could not save default team: ${(err as Error).message}`, "error", 6000);
+      show(`Could not save Linear settings: ${(err as Error).message}`, "error", 6000);
     } finally {
       setSavingDefault(false);
     }
+  }
+
+  function handleSaveDefaultTeam(nextKey: string | null) {
+    void saveLinearSettings(
+      { defaultTeamKey: nextKey },
+      nextKey
+        ? `Default Linear team set to ${nextKey}.`
+        : "Default Linear team cleared — falls back to the workspace's first team.",
+    );
+  }
+
+  function handleToggleAutoCreate(next: boolean) {
+    void saveLinearSettings(
+      { autoCreateLabels: next },
+      next
+        ? "Auto-create missing labels enabled — domain & severity tags now self-heal."
+        : "Auto-create disabled — missing labels will be surfaced as warnings instead.",
+    );
   }
 
   const defaultTeamLabel = (() => {
@@ -781,6 +800,18 @@ function RiskRegisterModule() {
         },
       });
       show(`Linear ticket ${json.identifier} created — assigned to ${json.assignee?.name ?? risk.owner}.`, "success");
+      const created = Array.isArray(json.createdLabels) ? (json.createdLabels as string[]) : [];
+      const skipped = Array.isArray(json.skippedLabels) ? (json.skippedLabels as string[]) : [];
+      if (created.length > 0) {
+        show(`Auto-created missing label${created.length > 1 ? "s" : ""}: ${created.join(", ")}`, "info", 5000);
+      }
+      if (skipped.length > 0) {
+        show(
+          `Heads up — these labels weren't applied: ${skipped.join(", ")}. ${autoCreateLabels ? "Linear refused the auto-create." : "Auto-create is off in admin."}`,
+          "error",
+          7000,
+        );
+      }
     } catch (err) {
       patch({ riskActions: { [riskId]: null } });
       show(`Could not reach Linear: ${(err as Error).message}`, "error", 6000);
@@ -831,8 +862,18 @@ function RiskRegisterModule() {
               ))}
             </select>
             <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.35)" }}>
-              Each ticket is also tagged with <code style={{ fontSize: "10px", padding: "0 4px", background: "hsla(0,0%,100%,0.05)", borderRadius: 3 }}>domain:&lt;name&gt;</code> and <code style={{ fontSize: "10px", padding: "0 4px", background: "hsla(0,0%,100%,0.05)", borderRadius: 3 }}>severity:&lt;level&gt;</code> when those labels exist in Linear.
+              Each ticket is also tagged with <code style={{ fontSize: "10px", padding: "0 4px", background: "hsla(0,0%,100%,0.05)", borderRadius: 3 }}>domain:&lt;name&gt;</code> and <code style={{ fontSize: "10px", padding: "0 4px", background: "hsla(0,0%,100%,0.05)", borderRadius: 3 }}>severity:&lt;level&gt;</code>.
             </span>
+            <label style={{ display: "flex", alignItems: "center", gap: "0.4rem", marginLeft: "auto", fontSize: "10px", color: "rgba(255,255,255,0.7)", cursor: savingDefault ? "wait" : "pointer" }}>
+              <input
+                type="checkbox"
+                checked={autoCreateLabels}
+                disabled={savingDefault}
+                onChange={e => handleToggleAutoCreate(e.target.checked)}
+                style={{ accentColor: ACCENT, cursor: savingDefault ? "wait" : "pointer" }}
+              />
+              Auto-create missing labels
+            </label>
           </div>
         )}
       </div>

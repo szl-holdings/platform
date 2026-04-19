@@ -24,46 +24,69 @@ const router: IRouter = Router();
 const VALID_PRIORITIES = new Set<number>([0, 1, 2, 3, 4]);
 const SETTINGS_NAMESPACE = "szl.linear";
 const DEFAULT_TEAM_KEY = "defaultTeamKey";
+const AUTO_CREATE_LABELS_KEY = "autoCreateLabels";
 
 interface LinearSettings {
   defaultTeamKey: string | null;
+  autoCreateLabels: boolean;
+}
+
+async function loadSetting(key: string): Promise<unknown> {
+  const [row] = await db
+    .select()
+    .from(platformSettingsTable)
+    .where(
+      and(
+        eq(platformSettingsTable.namespace, SETTINGS_NAMESPACE),
+        eq(platformSettingsTable.key, key),
+      ),
+    )
+    .limit(1);
+  return row?.value;
 }
 
 async function loadSettings(): Promise<LinearSettings> {
   try {
-    const [row] = await db
-      .select()
-      .from(platformSettingsTable)
-      .where(
-        and(
-          eq(platformSettingsTable.namespace, SETTINGS_NAMESPACE),
-          eq(platformSettingsTable.key, DEFAULT_TEAM_KEY),
-        ),
-      )
-      .limit(1);
-    const value = row?.value;
-    if (typeof value === "string" && value.trim().length > 0) {
-      return { defaultTeamKey: value };
+    const teamRaw = await loadSetting(DEFAULT_TEAM_KEY);
+    let defaultTeamKey: string | null = null;
+    if (typeof teamRaw === "string" && teamRaw.trim().length > 0) {
+      defaultTeamKey = teamRaw;
+    } else if (teamRaw && typeof teamRaw === "object" && "defaultTeamKey" in teamRaw) {
+      const v = (teamRaw as { defaultTeamKey?: unknown }).defaultTeamKey;
+      defaultTeamKey = typeof v === "string" && v.trim().length > 0 ? v : null;
     }
-    if (value && typeof value === "object" && "defaultTeamKey" in value) {
-      const v = (value as { defaultTeamKey?: unknown }).defaultTeamKey;
-      return { defaultTeamKey: typeof v === "string" && v.trim().length > 0 ? v : null };
+
+    const autoRaw = await loadSetting(AUTO_CREATE_LABELS_KEY);
+    let autoCreateLabels = true; // default on — restores closed-loop behaviour
+    if (typeof autoRaw === "boolean") {
+      autoCreateLabels = autoRaw;
+    } else if (typeof autoRaw === "string") {
+      autoCreateLabels = autoRaw === "true";
+    } else if (autoRaw && typeof autoRaw === "object" && "autoCreateLabels" in autoRaw) {
+      const v = (autoRaw as { autoCreateLabels?: unknown }).autoCreateLabels;
+      if (typeof v === "boolean") autoCreateLabels = v;
     }
-    return { defaultTeamKey: null };
+
+    return { defaultTeamKey, autoCreateLabels };
   } catch (err) {
     logger.warn({ err }, "linear: failed to load settings");
-    return { defaultTeamKey: null };
+    return { defaultTeamKey: null, autoCreateLabels: true };
   }
 }
 
-async function saveDefaultTeamKey(teamKey: string | null): Promise<void> {
+async function upsertSetting(
+  key: string,
+  value: unknown,
+  valueType: "string" | "boolean",
+  meta: { label: string; description: string },
+): Promise<void> {
   const [existing] = await db
     .select({ id: platformSettingsTable.id })
     .from(platformSettingsTable)
     .where(
       and(
         eq(platformSettingsTable.namespace, SETTINGS_NAMESPACE),
-        eq(platformSettingsTable.key, DEFAULT_TEAM_KEY),
+        eq(platformSettingsTable.key, key),
       ),
     )
     .limit(1);
@@ -71,21 +94,36 @@ async function saveDefaultTeamKey(teamKey: string | null): Promise<void> {
   if (existing) {
     await db
       .update(platformSettingsTable)
-      .set({ value: teamKey as never, valueType: "string", updatedAt: new Date() })
+      .set({ value: value as never, valueType, updatedAt: new Date() })
       .where(eq(platformSettingsTable.id, existing.id));
   } else {
     await db.insert(platformSettingsTable).values({
       namespace: SETTINGS_NAMESPACE,
-      key: DEFAULT_TEAM_KEY,
-      value: teamKey as never,
-      valueType: "string",
+      key,
+      value: value as never,
+      valueType,
       category: "integration",
-      label: "Linear default team key",
-      description:
-        "Linear team key (e.g. ENG) where new risk tickets land when the caller does not specify one.",
+      label: meta.label,
+      description: meta.description,
       isPublic: true,
     });
   }
+}
+
+async function saveDefaultTeamKey(teamKey: string | null): Promise<void> {
+  await upsertSetting(DEFAULT_TEAM_KEY, teamKey, "string", {
+    label: "Linear default team key",
+    description:
+      "Linear team key (e.g. ENG) where new risk tickets land when the caller does not specify one.",
+  });
+}
+
+async function saveAutoCreateLabels(enabled: boolean): Promise<void> {
+  await upsertSetting(AUTO_CREATE_LABELS_KEY, enabled, "boolean", {
+    label: "Linear auto-create missing labels",
+    description:
+      "When enabled, labels referenced on a risk ticket that don't exist in the Linear team are created automatically with a deterministic colour. When disabled, missing labels are returned in the create-ticket response as `skippedLabels` and surfaced as a warning in the operator UI.",
+  });
 }
 
 router.get("/linear/settings", async (_req: Request, res: Response) => {
@@ -103,21 +141,38 @@ router.put(
   validateBody(jsonObjectBodySchema),
   async (req: Request, res: Response) => {
     try {
-      const body = req.body as { defaultTeamKey?: unknown };
-      if (
-        body.defaultTeamKey !== null &&
-        body.defaultTeamKey !== undefined &&
-        (typeof body.defaultTeamKey !== "string" || body.defaultTeamKey.length > 64)
-      ) {
-        sendBadRequest(res, "defaultTeamKey must be a string (≤64 chars) or null");
-        return;
+      const body = req.body as { defaultTeamKey?: unknown; autoCreateLabels?: unknown };
+
+      // defaultTeamKey: optional in PATCH-style updates, only validated when present.
+      let nextTeam: string | null | undefined;
+      if (body.defaultTeamKey !== undefined) {
+        if (
+          body.defaultTeamKey !== null &&
+          (typeof body.defaultTeamKey !== "string" || body.defaultTeamKey.length > 64)
+        ) {
+          sendBadRequest(res, "defaultTeamKey must be a string (≤64 chars) or null");
+          return;
+        }
+        nextTeam =
+          typeof body.defaultTeamKey === "string" && body.defaultTeamKey.trim().length > 0
+            ? body.defaultTeamKey.trim()
+            : null;
       }
-      const next =
-        typeof body.defaultTeamKey === "string" && body.defaultTeamKey.trim().length > 0
-          ? body.defaultTeamKey.trim()
-          : null;
-      await saveDefaultTeamKey(next);
-      sendSuccess(res, { defaultTeamKey: next });
+
+      let nextAuto: boolean | undefined;
+      if (body.autoCreateLabels !== undefined) {
+        if (typeof body.autoCreateLabels !== "boolean") {
+          sendBadRequest(res, "autoCreateLabels must be a boolean");
+          return;
+        }
+        nextAuto = body.autoCreateLabels;
+      }
+
+      if (nextTeam !== undefined) await saveDefaultTeamKey(nextTeam);
+      if (nextAuto !== undefined) await saveAutoCreateLabels(nextAuto);
+
+      const settings = await loadSettings();
+      sendSuccess(res, settings);
     } catch (err) {
       handleRouteError(res, err, "Failed to update Linear settings");
     }
@@ -194,9 +249,9 @@ router.post(
         return;
       }
 
+      const settings = await loadSettings();
       let teamKey = body.teamKey;
       if (!teamKey || typeof teamKey !== "string" || teamKey.trim().length === 0) {
-        const settings = await loadSettings();
         teamKey = settings.defaultTeamKey ?? undefined;
       }
 
@@ -207,10 +262,20 @@ router.post(
         assigneeName: body.assigneeName,
         teamKey,
         labels,
+        autoCreateLabels: settings.autoCreateLabels,
       });
 
       logger.info(
-        { identifier: issue.identifier, url: issue.url, team: issue.team.key, labels },
+        {
+          identifier: issue.identifier,
+          url: issue.url,
+          team: issue.team.key,
+          requestedLabels: labels,
+          appliedLabels: issue.appliedLabels,
+          createdLabels: issue.createdLabels,
+          skippedLabels: issue.skippedLabels,
+          autoCreateLabels: settings.autoCreateLabels,
+        },
         "linear: issue created",
       );
 
@@ -223,6 +288,9 @@ router.post(
         team: issue.team,
         assignee: issue.assignee,
         createdAt: issue.createdAt,
+        appliedLabels: issue.appliedLabels,
+        createdLabels: issue.createdLabels,
+        skippedLabels: issue.skippedLabels,
       });
     } catch (err) {
       const message = (err as Error).message ?? "";

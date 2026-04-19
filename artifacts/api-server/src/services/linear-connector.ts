@@ -117,26 +117,84 @@ async function getDefaultTeam(preferredKey?: string): Promise<LinearTeam> {
 
 interface LinearLabel { id: string; name: string; team: { id: string } | null }
 
-async function findLabelIdsByNames(teamId: string, names: string[]): Promise<string[]> {
-  if (names.length === 0) return [];
+interface ResolvedLabels {
+  // Labels we already had IDs for (existed in the workspace).
+  matched: Array<{ id: string; name: string }>;
+  // Names that did not match any existing label.
+  missing: string[];
+}
+
+async function resolveLabels(teamId: string, names: string[]): Promise<ResolvedLabels> {
+  if (names.length === 0) return { matched: [], missing: [] };
   const data = await linearGraphQL<{ issueLabels: { nodes: LinearLabel[] } }>(
     `query Labels { issueLabels(first: 250) { nodes { id name team { id } } } }`,
     {},
   );
-  const wanted = new Set(names.map((n) => n.toLowerCase()));
-  const matches = data.issueLabels.nodes.filter(
+  const wanted = new Map<string, string>(); // lowercase -> original casing
+  for (const n of names) {
+    const key = n.toLowerCase();
+    if (!wanted.has(key)) wanted.set(key, n);
+  }
+  const candidates = data.issueLabels.nodes.filter(
     (l) => wanted.has(l.name.toLowerCase()) && (l.team === null || l.team.id === teamId),
   );
   // De-dup by name; prefer team-scoped over workspace-scoped when both exist.
   const byName = new Map<string, LinearLabel>();
-  for (const m of matches) {
+  for (const m of candidates) {
     const key = m.name.toLowerCase();
     const existing = byName.get(key);
     if (!existing || (existing.team === null && m.team?.id === teamId)) {
       byName.set(key, m);
     }
   }
-  return Array.from(byName.values()).map((l) => l.id);
+  const matched = Array.from(byName.values()).map((l) => ({ id: l.id, name: l.name }));
+  const matchedKeys = new Set(byName.keys());
+  const missing: string[] = [];
+  for (const [key, original] of wanted.entries()) {
+    if (!matchedKeys.has(key)) missing.push(original);
+  }
+  return { matched, missing };
+}
+
+// Deterministic pastel-on-dark palette for auto-created labels: same name
+// always gets the same color, so labels stay visually consistent across runs.
+const LABEL_COLOR_PALETTE = [
+  "#6366f1", "#8b5cf6", "#a855f7", "#d946ef", "#ec4899",
+  "#f43f5e", "#ef4444", "#f97316", "#f59e0b", "#eab308",
+  "#84cc16", "#22c55e", "#10b981", "#14b8a6", "#06b6d4",
+  "#0ea5e9", "#3b82f6",
+];
+
+function colorForLabelName(name: string): string {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = (hash * 31 + name.charCodeAt(i)) | 0;
+  }
+  const idx = Math.abs(hash) % LABEL_COLOR_PALETTE.length;
+  return LABEL_COLOR_PALETTE[idx]!;
+}
+
+async function createLinearLabel(
+  teamId: string,
+  name: string,
+): Promise<{ id: string; name: string }> {
+  const mutation = `
+    mutation CreateLabel($input: IssueLabelCreateInput!) {
+      issueLabelCreate(input: $input) {
+        success
+        issueLabel { id name }
+      }
+    }
+  `;
+  const data = await linearGraphQL<{
+    issueLabelCreate: { success: boolean; issueLabel: { id: string; name: string } | null };
+  }>(mutation, {
+    input: { teamId, name, color: colorForLabelName(name) },
+  });
+  if (!data.issueLabelCreate.success || !data.issueLabelCreate.issueLabel) {
+    throw new Error(`Linear rejected label creation for "${name}"`);
+  }
+  return data.issueLabelCreate.issueLabel;
 }
 
 async function findUserIdByName(name: string): Promise<string | null> {
@@ -161,9 +219,13 @@ export interface CreateLinearIssueInput {
   // user matches, the issue is created unassigned (no error is raised).
   assigneeName?: string;
   teamKey?: string;
-  // Best-effort exact-match against existing Linear label `name`s. Names that
-  // do not match an existing label are silently skipped (no auto-create).
+  // Best-effort exact-match against existing Linear label `name`s. Behaviour
+  // for names that don't match an existing label is controlled by
+  // `autoCreateLabels`: when true (the default) the missing labels are created
+  // in the resolved team with a deterministic colour; when false they are
+  // returned in `skippedLabels` and the issue is created without them.
   labels?: string[];
+  autoCreateLabels?: boolean;
 }
 
 export interface CreatedLinearIssue {
@@ -175,6 +237,13 @@ export interface CreatedLinearIssue {
   team: { id: string; key: string; name: string };
   assignee: { id: string; name: string } | null;
   createdAt: string;
+  // Label names that were attached to the issue (existing matches).
+  appliedLabels: string[];
+  // Label names that were created on demand and attached to the issue.
+  createdLabels: string[];
+  // Label names that were requested but not attached (auto-create disabled
+  // or label creation failed). Operators see these as a UI warning.
+  skippedLabels: string[];
 }
 
 export async function createLinearIssue(input: CreateLinearIssueInput): Promise<CreatedLinearIssue> {
@@ -206,12 +275,40 @@ export async function createLinearIssue(input: CreateLinearIssueInput): Promise<
     }
   `;
 
-  let labelIds: string[] = [];
+  const labelIds: string[] = [];
+  const appliedLabels: string[] = [];
+  const createdLabels: string[] = [];
+  const skippedLabels: string[] = [];
+  const autoCreate = input.autoCreateLabels !== false; // default true
+
   if (input.labels && input.labels.length > 0) {
     try {
-      labelIds = await findLabelIdsByNames(team.id, input.labels);
+      const resolved = await resolveLabels(team.id, input.labels);
+      for (const m of resolved.matched) {
+        labelIds.push(m.id);
+        appliedLabels.push(m.name);
+      }
+      if (resolved.missing.length > 0) {
+        if (autoCreate) {
+          for (const name of resolved.missing) {
+            try {
+              const created = await createLinearLabel(team.id, name);
+              labelIds.push(created.id);
+              createdLabels.push(created.name);
+            } catch (err) {
+              logger.warn({ err, label: name, teamId: team.id }, "linear: auto-create label failed");
+              skippedLabels.push(name);
+            }
+          }
+        } else {
+          skippedLabels.push(...resolved.missing);
+        }
+      }
     } catch (err) {
       logger.warn({ err, labels: input.labels }, "linear: label lookup failed");
+      // Lookup failed entirely — surface every requested label as skipped so
+      // operators see why nothing got tagged instead of silently dropping them.
+      skippedLabels.push(...input.labels);
     }
   }
 
@@ -227,13 +324,21 @@ export async function createLinearIssue(input: CreateLinearIssueInput): Promise<
   };
 
   const data = await linearGraphQL<{
-    issueCreate: { success: boolean; issue: CreatedLinearIssue };
+    issueCreate: {
+      success: boolean;
+      issue: Omit<CreatedLinearIssue, "appliedLabels" | "createdLabels" | "skippedLabels">;
+    };
   }>(mutation, variables);
 
   if (!data.issueCreate.success || !data.issueCreate.issue) {
     throw new Error("Linear rejected the issue creation request");
   }
-  return data.issueCreate.issue;
+  return {
+    ...data.issueCreate.issue,
+    appliedLabels,
+    createdLabels,
+    skippedLabels,
+  };
 }
 
 export function isLinearConfigured(): boolean {
