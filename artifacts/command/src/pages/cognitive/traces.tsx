@@ -67,9 +67,11 @@ interface ApiTrace {
 }
 
 interface ApiTracesResponse {
-  data: ApiTrace[];
+  data: ApiTrace[] | { traces: ApiTrace[]; total: number; limit: number; offset: number };
   meta?: { total?: number };
 }
+
+const PAGE_SIZE = 50;
 
 const SEEDED_TRACES: TraceRun[] = [
   {
@@ -528,17 +530,38 @@ export default function CognitiveTraces() {
   const [selectedTraceId, setSelectedTraceId] = useState<string>(initialTraceId);
   const [activePhaseIndex, setActivePhaseIndex] = useState(0);
   const [filterDomain, setFilterDomain] = useState("all");
+  const [page, setPage] = useState(0);
 
+  const offset = page * PAGE_SIZE;
   const tracesQuery = useStandardQuery<ApiTracesResponse>({
-    queryKey: ["cognitive", "traces"],
-    queryFn: () => fetchJson<ApiTracesResponse>(apiUrl("/traces?limit=50")),
+    queryKey: ["cognitive", "traces", page],
+    queryFn: () => fetchJson<ApiTracesResponse>(apiUrl(`/traces?limit=${PAGE_SIZE}&offset=${offset}`)),
     retry: 1,
     staleTime: 30_000,
   });
 
-  const liveTraces: TraceRun[] = (tracesQuery.data?.data ?? []).map(apiTraceToTraceRun);
-  const traces: TraceRun[] = liveTraces.length > 0 ? liveTraces : SEEDED_TRACES;
-  const isLiveData = liveTraces.length > 0;
+  // The traces endpoint returns either a bare array (legacy) or
+  // { traces, total, limit, offset } (paginated). Normalize both shapes.
+  const apiPayload = tracesQuery.data?.data;
+  const apiTraces: ApiTrace[] = Array.isArray(apiPayload)
+    ? apiPayload
+    : (apiPayload?.traces ?? []);
+  const totalTraces: number = Array.isArray(apiPayload)
+    ? apiPayload.length
+    : (apiPayload?.total ?? 0);
+
+  const liveTraces: TraceRun[] = apiTraces.map(apiTraceToTraceRun);
+  // Only fall back to seeded sample traces when the API hasn't successfully
+  // returned anything yet (loading or errored). Once we have a successful
+  // paginated response we trust it, including a legitimately empty page —
+  // otherwise paging past the last entry would silently switch to demo data.
+  const apiResponded = tracesQuery.isSuccess;
+  const showSeeded = !apiResponded && liveTraces.length === 0;
+  const traces: TraceRun[] = showSeeded ? SEEDED_TRACES : liveTraces;
+  const isLiveData = apiResponded;
+  const totalPages = Math.max(1, Math.ceil(totalTraces / PAGE_SIZE));
+  const hasPrev = page > 0;
+  const hasNext = isLiveData && offset + PAGE_SIZE < totalTraces;
 
   useEffect(() => {
     if (traces.length > 0 && !traces.find(t => t.id === selectedTraceId)) {
@@ -613,6 +636,52 @@ export default function CognitiveTraces() {
                 ))}
               </div>
             </div>
+            {isLiveData && totalTraces > 0 && (
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginBottom: 8, padding: "6px 8px", background: "rgba(255,255,255,0.02)", borderRadius: 6 }}>
+                <button
+                  onClick={() => { if (hasPrev) { setPage(p => Math.max(0, p - 1)); setActivePhaseIndex(0); } }}
+                  disabled={!hasPrev || tracesQuery.isFetching}
+                  style={{
+                    background: hasPrev ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.02)",
+                    color: hasPrev ? "#e2e8f0" : "#475569",
+                    border: "1px solid rgba(255,255,255,0.07)",
+                    borderRadius: 4,
+                    padding: "3px 10px",
+                    fontSize: 11,
+                    fontWeight: 600,
+                    cursor: hasPrev && !tracesQuery.isFetching ? "pointer" : "not-allowed",
+                  }}
+                  title="Newer page"
+                >
+                  ← Newer
+                </button>
+                <span style={{ fontSize: 10, color: "#64748b" }}>
+                  Page {page + 1} of {totalPages} · {totalTraces.toLocaleString()} total
+                </span>
+                <button
+                  onClick={() => { if (hasNext) { setPage(p => p + 1); setActivePhaseIndex(0); } }}
+                  disabled={!hasNext || tracesQuery.isFetching}
+                  style={{
+                    background: hasNext ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.02)",
+                    color: hasNext ? "#e2e8f0" : "#475569",
+                    border: "1px solid rgba(255,255,255,0.07)",
+                    borderRadius: 4,
+                    padding: "3px 10px",
+                    fontSize: 11,
+                    fontWeight: 600,
+                    cursor: hasNext && !tracesQuery.isFetching ? "pointer" : "not-allowed",
+                  }}
+                  title="Older page"
+                >
+                  Older →
+                </button>
+              </div>
+            )}
+            {isLiveData && filtered.length === 0 && (
+              <div style={{ background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(255,255,255,0.1)", borderRadius: 8, padding: "16px 14px", color: "#64748b", fontSize: 12, textAlign: "center" }}>
+                No traces on this page.
+              </div>
+            )}
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {filtered.map(trace => {
                 const isSelected = selectedTrace.id === trace.id;

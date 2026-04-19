@@ -1,6 +1,27 @@
 import type { TraceRecord } from "./schema.js";
 import type { TraceStore } from "./store.js";
-import { defaultTraceStore } from "./store.js";
+import { defaultTraceStore, MutableTraceStore } from "./store.js";
+import type {
+  PostgresTraceHistoryFilter,
+  PostgresTraceHistoryResult,
+} from "./postgres-store.js";
+
+/**
+ * Optional capability marker — if a TraceStore backend implements this, the
+ * query engine can transparently delegate to durable storage so callers see
+ * the full historical record, not just the in-memory cache window.
+ */
+interface HistoricalTraceStore {
+  queryHistory(filter: PostgresTraceHistoryFilter): Promise<PostgresTraceHistoryResult<TraceRecord>>;
+}
+
+function getHistoricalBackend(store: TraceStore): HistoricalTraceStore | undefined {
+  const candidate: unknown = store instanceof MutableTraceStore ? store.getBackend() : store;
+  if (candidate && typeof (candidate as { queryHistory?: unknown }).queryHistory === "function") {
+    return candidate as HistoricalTraceStore;
+  }
+  return undefined;
+}
 
 export interface TraceQueryFilter {
   traceId?: string;
@@ -119,6 +140,51 @@ export class TraceQueryEngine {
 
   getById(traceId: string): TraceRecord | undefined {
     return this.store.get(traceId);
+  }
+
+  /**
+   * Async query that prefers a durable backend (e.g. PostgresTraceStore) so
+   * results are not capped by the in-memory cache window. Falls back to the
+   * synchronous in-memory `query` when no historical backend is available.
+   *
+   * Entity-link filtering is still applied client-side because trace↔entity
+   * links live on this engine instance, not in the trace row.
+   */
+  async queryAsync(filter: TraceQueryFilter = {}): Promise<TraceQueryResult> {
+    const backend = getHistoricalBackend(this.store);
+    if (!backend) {
+      return this.query(filter);
+    }
+
+    const result = await backend.queryHistory({
+      traceId: filter.traceId,
+      requestId: filter.requestId,
+      sessionId: filter.sessionId,
+      workflowId: filter.workflowId,
+      agentId: filter.agentId,
+      domain: filter.domain,
+      model: filter.model,
+      status: filter.status,
+      after: filter.after,
+      before: filter.before,
+      hasErrors: filter.hasErrors,
+      hasPolicyBlock: filter.hasPolicyBlock,
+      limit: filter.limit ?? 50,
+      offset: filter.offset ?? 0,
+    });
+
+    let traces = result.traces;
+    if (filter.entityId) {
+      const idSet = new Set(this.getTracesForEntity(filter.entityId));
+      traces = traces.filter((t) => idSet.has(t.traceId));
+    }
+
+    return {
+      traces,
+      total: result.total,
+      limit: result.limit,
+      offset: result.offset,
+    };
   }
 }
 

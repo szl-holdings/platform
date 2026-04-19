@@ -55,7 +55,7 @@ router.get("/traces", authMiddleware(), validateQuery(listQuerySchema), async (r
     filter.limit = rawLimit;
     filter.offset = rawOffset;
 
-    const result = defaultQueryEngine.query(filter);
+    const result = await defaultQueryEngine.queryAsync(filter);
     sendSuccess(res, result);
   } catch (err) {
     handleRouteError(res, err, "Failed to query traces");

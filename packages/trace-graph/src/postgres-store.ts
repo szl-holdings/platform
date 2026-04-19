@@ -1,4 +1,4 @@
-import { desc, type InferInsertModel, inArray, lt } from "drizzle-orm";
+import { and, desc, eq, gte, lte, sql, type InferInsertModel, type SQL, inArray, lt } from "drizzle-orm";
 import type { PgColumn, PgTable } from "drizzle-orm/pg-core";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import type { TraceRecord } from "./schema.js";
@@ -18,6 +18,46 @@ export interface PostgresTraceStoreLogger {
 export interface TracesTableLike extends PgTable {
   traceId: PgColumn;
   startedAt: PgColumn;
+  // Optional indexed columns used by historical queryHistory. They are present
+  // on the production schema but typed as optional here so test doubles and
+  // older schemas remain compatible.
+  requestId?: PgColumn;
+  sessionId?: PgColumn;
+  workflowId?: PgColumn;
+  agentId?: PgColumn;
+  domain?: PgColumn;
+  model?: PgColumn;
+  status?: PgColumn;
+  outputs?: PgColumn;
+}
+
+/**
+ * Filter shape accepted by `PostgresTraceStore.queryHistory`. Mirrors the
+ * synchronous in-memory `TraceQueryFilter` so the query engine can transparently
+ * delegate to the DB when a backend supports it.
+ */
+export interface PostgresTraceHistoryFilter {
+  traceId?: string;
+  requestId?: string;
+  sessionId?: string;
+  workflowId?: string;
+  agentId?: string;
+  domain?: string;
+  model?: string;
+  status?: string;
+  after?: string;
+  before?: string;
+  hasErrors?: boolean;
+  hasPolicyBlock?: boolean;
+  limit?: number;
+  offset?: number;
+}
+
+export interface PostgresTraceHistoryResult<T = unknown> {
+  traces: T[];
+  total: number;
+  limit: number;
+  offset: number;
 }
 
 export interface PostgresTraceStoreOptions {
@@ -141,6 +181,77 @@ export class PostgresTraceStore implements TraceStore {
 
   count(): number {
     return this.cache.size;
+  }
+
+  /**
+   * Query the underlying `traces` table directly with paginated, filtered
+   * historical results — independent of the in-memory cache window. This is
+   * what powers the trace explorer UI's "browse the full history" mode.
+   *
+   * Filters on indexed columns (`agentId`, `workflowId`, `sessionId`,
+   * `requestId`, `domain`, `model`, `status`, `startedAt`) are applied at the
+   * SQL level. `hasErrors` and `hasPolicyBlock` are best-effort post-filters
+   * applied to the page after fetch (the `total` reported is the unfiltered
+   * count for the SQL predicates, since walking JSON for an exact count would
+   * require scanning every matching row).
+   */
+  async queryHistory(
+    filter: PostgresTraceHistoryFilter = {},
+  ): Promise<PostgresTraceHistoryResult<TraceRecord>> {
+    const limit = Math.min(Math.max(filter.limit ?? 50, 1), 500);
+    const offset = Math.max(filter.offset ?? 0, 0);
+    const t = this.opts.tracesTable;
+
+    const conds: SQL[] = [];
+    if (filter.traceId) conds.push(eq(t.traceId, filter.traceId));
+    if (filter.requestId && t.requestId) conds.push(eq(t.requestId, filter.requestId));
+    if (filter.sessionId && t.sessionId) conds.push(eq(t.sessionId, filter.sessionId));
+    if (filter.workflowId && t.workflowId) conds.push(eq(t.workflowId, filter.workflowId));
+    if (filter.agentId && t.agentId) conds.push(eq(t.agentId, filter.agentId));
+    if (filter.domain && t.domain) conds.push(eq(t.domain, filter.domain));
+    if (filter.model && t.model) conds.push(eq(t.model, filter.model));
+    if (filter.status && t.status) conds.push(eq(t.status, filter.status));
+    if (filter.after) conds.push(gte(t.startedAt, new Date(filter.after)));
+    if (filter.before) conds.push(lte(t.startedAt, new Date(filter.before)));
+
+    const whereClause = conds.length > 0 ? and(...conds) : undefined;
+
+    try {
+      const baseSelect = this.opts.db.select().from(this.opts.tracesTable);
+      const baseCount = this.opts.db
+        .select({ count: sql<number>`cast(count(*) as int)` })
+        .from(this.opts.tracesTable);
+
+      const [rows, totals] = await Promise.all([
+        whereClause
+          ? baseSelect.where(whereClause).orderBy(desc(t.startedAt)).limit(limit).offset(offset)
+          : baseSelect.orderBy(desc(t.startedAt)).limit(limit).offset(offset),
+        whereClause ? baseCount.where(whereClause) : baseCount,
+      ]);
+
+      let traces: TraceRecord[] = [];
+      for (const row of rows) {
+        const rec = fromRow(row);
+        if (rec) traces.push(rec);
+      }
+
+      // Best-effort post-filters that depend on JSON content.
+      if (filter.hasErrors === true) traces = traces.filter((t) => t.errors.length > 0);
+      if (filter.hasErrors === false) traces = traces.filter((t) => t.errors.length === 0);
+      if (filter.hasPolicyBlock === true) {
+        traces = traces.filter((t) => t.guardrailResults.some((g) => g.outcome === "block"));
+      }
+
+      const total = (totals[0]?.count as number | undefined) ?? traces.length;
+
+      return { traces, total, limit, offset };
+    } catch (err) {
+      this.opts.logger?.error?.(
+        { err },
+        "PostgresTraceStore: queryHistory failed",
+      );
+      return { traces: [], total: 0, limit, offset };
+    }
   }
 
   async hydrate(limit?: number): Promise<number> {
