@@ -72,6 +72,11 @@ tags:
     description: Data export builder — domain-specific exports, download history, and preview
   - name: webhooks
     description: Webhook management — register endpoints, list deliveries, and receive Stripe-style signed event notifications for decision lifecycle events
+  - name: atlas
+    description: |
+      ATLAS Spatial Runtime — scene snapshot, branch, proof bundle, and OpenUSD manifest exports.
+      All ATLAS routes are gated by the `ENABLE_ATLAS_SPATIAL_RUNTIME` platform feature flag and
+      will return `503 FEATURE_DISABLED` when the flag is off.
 paths:
   /healthz:
     get:
@@ -7952,6 +7957,226 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
 
+  /atlas/snapshot/{sceneId}:
+    get:
+      operationId: exportAtlasSnapshot
+      tags: [atlas]
+      summary: Export an ATLAS scene snapshot
+      description: |
+        Returns a serialized JSON snapshot of an ATLAS scene as an `ExportAdapterResult`.
+        Requires operator+ role (`operator`, `ops`, `exec`, `admin`, `super_admin`).
+        Gated by the `ENABLE_ATLAS_SPATIAL_RUNTIME` feature flag — returns `503 FEATURE_DISABLED`
+        when the flag is off. Rate limited to 60 requests per minute per client.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: sceneId
+          required: true
+          schema: { type: string }
+          description: Identifier of the ATLAS scene to snapshot.
+        - in: query
+          name: domain
+          schema: { type: string, default: default }
+          description: Domain that owns the scene (e.g. `terra`, `vessels`).
+        - in: query
+          name: entityType
+          schema: { type: string, default: scene }
+          description: Type of entity the scene represents.
+        - in: query
+          name: entityId
+          schema: { type: string }
+          description: Entity identifier; defaults to `sceneId` when omitted.
+      responses:
+        "200":
+          description: Snapshot exported successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExportAdapterResult"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "503":
+          description: ATLAS Spatial Runtime feature flag disabled.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: { type: string, example: "ATLAS Spatial Runtime is currently unavailable." }
+                  code: { type: string, example: FEATURE_DISABLED }
+                  requestId: { type: string }
+                  correlationId: { type: string }
+                  details:
+                    type: object
+                    properties:
+                      feature: { type: string, example: ENABLE_ATLAS_SPATIAL_RUNTIME }
+
+  /atlas/branch/export:
+    post:
+      operationId: exportAtlasBranchPackage
+      tags: [atlas]
+      summary: Export an ATLAS branch package
+      description: |
+        Serializes a branch package (parent scene, hypothesis, delta state, and outcome projections)
+        and returns it as an `ExportAdapterResult`. Requires operator+ role.
+        Gated by the `ENABLE_ATLAS_SPATIAL_RUNTIME` feature flag — returns `503 FEATURE_DISABLED`
+        when the flag is off. Rate limited to 60 requests per minute per client.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AtlasBranchPackageInput"
+      responses:
+        "200":
+          description: Branch package exported successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExportAdapterResult"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "503":
+          description: ATLAS Spatial Runtime feature flag disabled.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: { type: string, example: "ATLAS Spatial Runtime is currently unavailable." }
+                  code: { type: string, example: FEATURE_DISABLED }
+                  requestId: { type: string }
+                  correlationId: { type: string }
+                  details:
+                    type: object
+                    properties:
+                      feature: { type: string, example: ENABLE_ATLAS_SPATIAL_RUNTIME }
+
+  /atlas/proof-bundle/export:
+    post:
+      operationId: exportAtlasProofBundle
+      tags: [atlas]
+      summary: Export an ATLAS proof bundle
+      description: |
+        Serializes a proof bundle (citations, approval chain, confidence score, and provenance)
+        and returns it as an `ExportAdapterResult`. Requires operator+ role.
+        Gated by the `ENABLE_ATLAS_SPATIAL_RUNTIME` feature flag — returns `503 FEATURE_DISABLED`
+        when the flag is off. Rate limited to 60 requests per minute per client.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AtlasProofBundleInput"
+      responses:
+        "200":
+          description: Proof bundle exported successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExportAdapterResult"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "503":
+          description: ATLAS Spatial Runtime feature flag disabled.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: { type: string, example: "ATLAS Spatial Runtime is currently unavailable." }
+                  code: { type: string, example: FEATURE_DISABLED }
+                  requestId: { type: string }
+                  correlationId: { type: string }
+                  details:
+                    type: object
+                    properties:
+                      feature: { type: string, example: ENABLE_ATLAS_SPATIAL_RUNTIME }
+
+  /atlas/export/openusd/{sceneId}:
+    get:
+      operationId: exportAtlasOpenUSDManifest
+      tags: [atlas]
+      summary: Export an OpenUSD manifest for an ATLAS scene
+      description: |
+        Builds and serializes an OpenUSD (Universal Scene Description) manifest for the given
+        ATLAS scene and returns it as an `ExportAdapterResult`. Requires operator+ role.
+        Gated by the `ENABLE_ATLAS_SPATIAL_RUNTIME` feature flag — returns `503 FEATURE_DISABLED`
+        when the flag is off. Rate limited to 60 requests per minute per client.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: sceneId
+          required: true
+          schema: { type: string }
+          description: Identifier of the ATLAS scene to export.
+        - in: query
+          name: domain
+          schema: { type: string, default: default }
+          description: Domain that owns the scene.
+        - in: query
+          name: entityId
+          schema: { type: string }
+          description: Entity identifier; defaults to `sceneId` when omitted.
+        - in: query
+          name: proofChainId
+          schema: { type: integer, minimum: 0 }
+          description: Optional non-negative integer linking the export to a proof chain entry.
+      responses:
+        "200":
+          description: OpenUSD manifest exported successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExportAdapterResult"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "503":
+          description: ATLAS Spatial Runtime feature flag disabled.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: { type: string, example: "ATLAS Spatial Runtime is currently unavailable." }
+                  code: { type: string, example: FEATURE_DISABLED }
+                  requestId: { type: string }
+                  correlationId: { type: string }
+                  details:
+                    type: object
+                    properties:
+                      feature: { type: string, example: ENABLE_ATLAS_SPATIAL_RUNTIME }
+
 components:
   securitySchemes:
     bearerAuth:
@@ -8055,6 +8280,99 @@ components:
       description: Unix epoch (seconds) when the current window resets.
       schema: { type: integer }
   schemas:
+    ExportAdapterResult:
+      type: object
+      description: |
+        Standard ATLAS export adapter envelope returned directly as the 200 response body
+        by all ATLAS export endpoints (no outer wrapper).
+      required: [format, payload, generatedAt, adapterVersion]
+      properties:
+        format:
+          type: string
+          description: Output format identifier (e.g. `atlas.scene-snapshot.v1`, `atlas.openusd.v1`).
+        payload:
+          description: Serialized export payload. Shape varies by adapter.
+        sizeEstimateBytes:
+          type: integer
+          minimum: 0
+          description: Estimated payload size in bytes.
+        generatedAt:
+          type: string
+          format: date-time
+          description: ISO-8601 timestamp when the export was generated.
+        adapterVersion:
+          type: string
+          description: Version string of the adapter that produced the result.
+        warnings:
+          type: array
+          items: { type: string }
+          description: Non-fatal warnings emitted during serialization.
+    AtlasBranchPackageInput:
+      type: object
+      required: [parentSceneId, branchId, hypothesis]
+      properties:
+        parentSceneId: { type: string, description: ID of the parent scene this branch derives from. }
+        branchId: { type: string, description: Unique identifier for this branch. }
+        branchLabel: { type: string, description: Human-readable label; defaults to `branchId`. }
+        domain: { type: string, default: default }
+        branchedAt: { type: string, format: date-time, description: ISO-8601 timestamp; defaults to now. }
+        hypothesis: { type: string, description: Description of the scenario or hypothesis being explored. }
+        deltaState:
+          type: object
+          additionalProperties: true
+          description: Map of state changes relative to the parent scene.
+        outcomeProjections:
+          type: array
+          items:
+            type: object
+            required: [label, probability, impact, metrics]
+            properties:
+              label: { type: string }
+              probability: { type: number, minimum: 0, maximum: 1 }
+              impact: { type: string }
+              metrics:
+                type: object
+                additionalProperties: { type: number }
+        approvedBy: { type: ["string", "null"] }
+        correlationId: { type: ["string", "null"] }
+        metadata:
+          type: object
+          additionalProperties: true
+    AtlasProofBundleInput:
+      type: object
+      required: [bundleId, contentId, confidenceScore]
+      properties:
+        bundleId: { type: string }
+        contentId: { type: string }
+        contentType: { type: string, default: unknown }
+        sourceClass: { type: string, default: unknown }
+        confidenceScore: { type: number, minimum: 0, maximum: 1 }
+        serviceAttribution: { type: string, default: atlas }
+        modelVersion: { type: ["string", "null"] }
+        citations:
+          type: array
+          items:
+            type: object
+            required: [source]
+            properties:
+              source: { type: string }
+              excerpt: { type: string }
+              url: { type: string }
+        approvalChain:
+          type: array
+          items:
+            type: object
+            required: [approverRole, approvedAt, decision]
+            properties:
+              approverRole: { type: string }
+              approvedAt: { type: string, format: date-time }
+              decision: { type: string, enum: [approved, rejected, escalated] }
+              rationale: { type: string }
+        generatedAt: { type: string, format: date-time, description: ISO-8601 timestamp; defaults to now. }
+        correlationId: { type: ["string", "null"] }
+        metadata:
+          type: object
+          additionalProperties: true
     UploadUrlRequest:
       type: object
       required: [name, size, contentType]
