@@ -204,6 +204,11 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
     const { initAiEvalsPersistence } = await import("./lib/ai-evals-persistence.js");
     await initAiEvalsPersistence();
 
+    // Step 2b-3: Bridge per-product domain events into the global signal
+    // mesh so the Fabric page reflects live product activity.
+    const { initSignalMeshBridge } = await import("./lib/domain-events/signal-mesh-bridge.js");
+    initSignalMeshBridge();
+
     // Step 2c: Hydrate the shared Guardian decision engine from policy rows
     // and warm the Alloy RunManager singleton so any agent endpoint can
     // submit work as soon as the server starts accepting traffic.
