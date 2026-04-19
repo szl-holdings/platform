@@ -150,6 +150,45 @@ export const PLATFORM_FLAGS = [
     isEnabled: false,
     rolloutPercentage: 0,
   },
+  // ── Live integration gates (P1 gap-register items) ─────────────────────────
+  // These flags default OFF to preserve the demo/seeded-data experience.
+  // Each one requires a corresponding secret to be configured in addition to
+  // enabling the flag. See docs/ops/gap-register.md for per-item acceptance tests.
+  {
+    key: "live_ais_feed_enabled",
+    name: "Vessels — Live AIS Feed",
+    description: "Routes vessel position polling through a live AIS provider (AISHub or MarineTraffic). When disabled the FeedScheduler still runs in simulation mode using seeded vessel positions. Requires AIS_API_KEY. See gap-register P1-005.",
+    isEnabled: false,
+    rolloutPercentage: 0,
+  },
+  {
+    key: "live_stripe_billing_enabled",
+    name: "Billing — Stripe Live Mode",
+    description: "Activates Stripe live-mode billing. When disabled the platform runs in Stripe test mode and no real payments are processed. Requires STRIPE_SECRET_KEY starting with sk_live_ and STRIPE_WEBHOOK_SECRET. See gap-register P1-001.",
+    isEnabled: false,
+    rolloutPercentage: 0,
+  },
+  {
+    key: "live_email_delivery_enabled",
+    name: "Notifications — Live Email Delivery",
+    description: "Enables transactional email delivery via Resend. When disabled all outbound email (booking confirmations, invitations, Pulse digests) is silently dropped with a log warning. Requires RESEND_API_KEY. See gap-register P1-002.",
+    isEnabled: false,
+    rolloutPercentage: 0,
+  },
+  {
+    key: "live_otel_export_enabled",
+    name: "Observability — OTEL Export",
+    description: "Enables telemetry export to an OpenTelemetry collector (e.g. New Relic, Grafana Cloud). When disabled traces remain in-process only. Requires OTEL_EXPORTER_OTLP_ENDPOINT. See gap-register P1-003.",
+    isEnabled: false,
+    rolloutPercentage: 0,
+  },
+  {
+    key: "live_mapbox_tiles_enabled",
+    name: "Terra — Live Mapbox Tiles",
+    description: "Enables Mapbox tile rendering on the Terra distress property map and SZL Holdings Mobile. When disabled the map renders in a placeholder/no-tile state. Requires MAPBOX_ACCESS_TOKEN / VITE_MAPBOX_TOKEN. See gap-register P1-004.",
+    isEnabled: false,
+    rolloutPercentage: 0,
+  },
 ] as const;
 
 export type PlatformFlagKey = typeof PLATFORM_FLAGS[number]["key"];

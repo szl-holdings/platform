@@ -44,16 +44,11 @@ const d = HAS_DB ? describe : describe.skip;
 // router still calls req.user?.* so we provide a stub.
 // ---------------------------------------------------------------------------
 
-const mockAuthUser = {
-  id: undefined as number | undefined,
-  email: "atlas-persistence@example.com",
-  roles: ["super_admin"],
-  orgs: [] as Array<{ orgId: number; orgSlug: string; orgName: string; role: string }>,
-};
-
 vi.mock("../middlewares/auth.js", () => ({
   authMiddleware: (_opts?: unknown) => (req: Request, _res: Response, next: NextFunction) => {
-    (req as unknown as { user: typeof mockAuthUser }).user = mockAuthUser;
+    // Mark as an internal service agent so tenant context is not derived from
+    // user orgs — the test controls tenantId via the request body directly.
+    (req as unknown as { isInternalAgent: boolean }).isInternalAgent = true;
     next();
   },
   requireRole: () => (_req: Request, _res: Response, next: NextFunction) => next(),

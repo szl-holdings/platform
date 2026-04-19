@@ -98,6 +98,19 @@ export const insertSessionSchema = createInsertSchema(sessionsTable).omit({ id: 
 export type InsertSession = z.infer<typeof insertSessionSchema>;
 export type Session = typeof sessionsTable.$inferSelect;
 
+export const mfaSecretsTable = pgTable("mfa_secrets", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
+  secret: text("secret").notNull(),
+  enabled: boolean("enabled").notNull().default(false),
+  enabledAt: timestamp("enabled_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (table) => [
+  uniqueIndex("mfa_secrets_user_unique").on(table.userId),
+]);
+
+export type MfaSecret = typeof mfaSecretsTable.$inferSelect;
+
 export type PlatformRole =
   | "anonymous_visitor"
   | "founder_admin"

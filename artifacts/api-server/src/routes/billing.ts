@@ -6,6 +6,7 @@ import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 import { services } from "@szl-holdings/services";
 import { logger } from "../lib/logger";
 import { isFlagEnabled } from "../lib/platform-flags";
+import { requireStripeLive } from "../lib/stripe-gate";
 import { billingCheckoutSchema, billingCommandSubscribeSchema, billingCustomerPortalSchema, cancelSubscriptionSchema, jsonObjectBodySchema, listQuerySchema, planSubscribeSchema, stripeCheckoutSchema, updateSubscriptionSchema, validateBody, validateQuery } from "../lib/validation";
 import { z } from "zod";
 
@@ -63,7 +64,7 @@ router.get("/billing/products", async (_req, res) => {
   }
 });
 
-router.post("/billing/checkout", validateBody(billingCheckoutSchema), async (req: Request, res: Response) => {
+router.post("/billing/checkout", validateBody(billingCheckoutSchema), requireStripeLive, async (req: Request, res: Response) => {
   try {
     const { priceId, mode, successUrl, cancelUrl, customerEmail } = req.body as z.infer<typeof billingCheckoutSchema>;
 
@@ -125,7 +126,7 @@ router.get("/billing/subscription-status", validateQuery(listQuerySchema), async
   }
 });
 
-router.post("/billing/customer-portal", validateBody(billingCustomerPortalSchema), async (req: Request, res: Response) => {
+router.post("/billing/customer-portal", validateBody(billingCustomerPortalSchema), requireStripeLive, async (req: Request, res: Response) => {
   const portalEnabled = await isFlagEnabled("pilot_customer_portal_enabled");
   if (!portalEnabled) {
     sendForbidden(res, "Feature not available: pilot_customer_portal_enabled");
@@ -141,7 +142,7 @@ router.post("/billing/customer-portal", validateBody(billingCustomerPortalSchema
   }
 });
 
-router.post("/billing/portal-session", validateBody(jsonObjectBodySchema), authMiddleware(), async (req: Request, res: Response) => {
+router.post("/billing/portal-session", validateBody(jsonObjectBodySchema), authMiddleware(), requireStripeLive, async (req: Request, res: Response) => {
   try {
     const returnUrl = (req.body as { returnUrl?: string }).returnUrl ?? req.headers.referer ?? "/";
     const user = (req as unknown as { user?: { email?: string; id?: string } }).user;
@@ -425,7 +426,7 @@ router.post("/billing/webhooks", validateBody(jsonObjectBodySchema), async (req:
   }
 });
 
-router.post("/stripe/checkout", validateBody(stripeCheckoutSchema), async (req: Request, res: Response) => {
+router.post("/stripe/checkout", validateBody(stripeCheckoutSchema), requireStripeLive, async (req: Request, res: Response) => {
   try {
     const { tierId, tierName, service, email, successUrl, cancelUrl } = req.body as z.infer<typeof stripeCheckoutSchema>;
 
@@ -477,7 +478,7 @@ router.get("/billing/command/plans", (_req, res) => {
   sendSuccess(res, plans);
 });
 
-router.post("/billing/command/subscribe", validateBody(billingCommandSubscribeSchema), async (req: Request, res: Response) => {
+router.post("/billing/command/subscribe", validateBody(billingCommandSubscribeSchema), requireStripeLive, async (req: Request, res: Response) => {
   try {
     const { planId, email, successUrl, cancelUrl } = req.body as z.infer<typeof billingCommandSubscribeSchema>;
 
@@ -528,7 +529,7 @@ router.get("/billing/terra/plans", (_req, res) => {
   sendSuccess(res, plans);
 });
 
-router.post("/billing/terra/subscribe", authMiddleware({ required: false }), validateBody(planSubscribeSchema), async (req: Request, res: Response) => {
+router.post("/billing/terra/subscribe", validateBody(planSubscribeSchema), authMiddleware({ required: false }), requireStripeLive, async (req: Request, res: Response) => {
   try {
     const { planId, email, successUrl, cancelUrl } = req.body as z.infer<typeof planSubscribeSchema>;
 
@@ -559,7 +560,7 @@ router.post("/billing/terra/subscribe", authMiddleware({ required: false }), val
   }
 });
 
-router.post("/billing/terra/metered-usage", authMiddleware(), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/billing/terra/metered-usage", validateBody(jsonObjectBodySchema), authMiddleware(), requireStripeLive, async (req: Request, res: Response) => {
   try {
     const { subscriptionItemId, quantity, action, timestamp } = req.body as {
       subscriptionItemId?: string;
@@ -677,7 +678,7 @@ async function handleAegisEnterpriseQuote(req: Request, res: Response): Promise<
   }
 }
 
-router.post("/billing/aegis/enterprise-quote", validateBody(jsonObjectBodySchema), authMiddleware({ required: false }), handleAegisEnterpriseQuote);
+router.post("/billing/aegis/enterprise-quote", validateBody(jsonObjectBodySchema), authMiddleware({ required: false }), requireStripeLive, handleAegisEnterpriseQuote);
 
 router.post("/billing/sync-plans", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("admin", "super_admin"), async (_req: Request, res: Response) => {
   try {
@@ -732,7 +733,7 @@ router.post("/billing/sync-plans", validateBody(jsonObjectBodySchema), authMiddl
   }
 });
 
-router.post("/billing/cancel-subscription", authMiddleware(), validateBody(cancelSubscriptionSchema), async (req: Request, res: Response) => {
+router.post("/billing/cancel-subscription", validateBody(cancelSubscriptionSchema), authMiddleware(), requireStripeLive, async (req: Request, res: Response) => {
   try {
     const { subscriptionId, cancelImmediately } = req.body as z.infer<typeof cancelSubscriptionSchema>;
 
@@ -776,7 +777,7 @@ router.post("/billing/cancel-subscription", authMiddleware(), validateBody(cance
   }
 });
 
-router.post("/billing/update-subscription", authMiddleware(), validateBody(updateSubscriptionSchema), async (req: Request, res: Response) => {
+router.post("/billing/update-subscription", validateBody(updateSubscriptionSchema), authMiddleware(), requireStripeLive, async (req: Request, res: Response) => {
   try {
     const { subscriptionId, newPriceId } = req.body as z.infer<typeof updateSubscriptionSchema>;
 
@@ -880,7 +881,7 @@ router.get("/billing/revenue-analytics", authMiddleware(), requireRole("ops", "a
   }
 });
 
-router.post("/billing/aegis/invoice", authMiddleware(), requireRole("admin", "super_admin"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/billing/aegis/invoice", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("admin", "super_admin"), requireStripeLive, async (req: Request, res: Response) => {
   try {
     const { customerId, lineItems, dueDate, notes } = req.body as {
       customerId?: string;

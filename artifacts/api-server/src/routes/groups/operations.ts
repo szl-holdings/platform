@@ -37,6 +37,7 @@ export function register(router: IRouter): void {
   router.use("/business-events", _writeLimiter);
   router.use(businessEventsRouter);
 
+  router.use("/linear", tenantScope({ required: true }));
   router.use("/linear", _writeLimiter);
   router.use(linearRouter);
 }

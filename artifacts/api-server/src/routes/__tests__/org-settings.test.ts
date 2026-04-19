@@ -192,8 +192,17 @@ vi.mock("@szl-holdings/db", () => {
 vi.mock("drizzle-orm", () => ({
   eq: (col: unknown, val: unknown) => ({ op: "eq", col, val }),
   and: (...conds: unknown[]) => ({ op: "and", conds }),
+  or: (...conds: unknown[]) => ({ op: "or", conds }),
   ne: (col: unknown, val: unknown) => ({ op: "ne", col, val }),
   gte: (col: unknown, val: unknown) => ({ op: "gte", col, val }),
+  gt: (col: unknown, val: unknown) => ({ op: "gt", col, val }),
+  lt: (col: unknown, val: unknown) => ({ op: "lt", col, val }),
+  lte: (col: unknown, val: unknown) => ({ op: "lte", col, val }),
+  isNull: (col: unknown) => ({ op: "isNull", col }),
+  isNotNull: (col: unknown) => ({ op: "isNotNull", col }),
+  not: (expr: unknown) => ({ op: "not", expr }),
+  desc: (col: unknown) => ({ op: "desc", col }),
+  asc: (col: unknown) => ({ op: "asc", col }),
   sql: Object.assign(
     (strings: TemplateStringsArray, ...values: unknown[]) => ({ op: "sql", strings, values }),
     { raw: (s: string) => s }

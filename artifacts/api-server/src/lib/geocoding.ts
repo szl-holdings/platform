@@ -151,10 +151,13 @@ async function reverseGeocodeViaGoogle(lat: number, lng: number): Promise<Revers
 
 export async function geocodeAddress(address: string): Promise<GeocodeResult> {
   if (process.env.MAPBOX_ACCESS_TOKEN) {
-    try {
-      return await geocodeViaMapbox(address);
-    } catch (err) {
-      logger.warn({ err }, "Mapbox geocode failed, trying Google Maps fallback");
+    const { isFlagEnabled } = await import("./platform-flags");
+    if (await isFlagEnabled("live_mapbox_tiles_enabled")) {
+      try {
+        return await geocodeViaMapbox(address);
+      } catch (err) {
+        logger.warn({ err }, "Mapbox geocode failed, trying Google Maps fallback");
+      }
     }
   }
 
@@ -167,10 +170,13 @@ export async function geocodeAddress(address: string): Promise<GeocodeResult> {
 
 export async function reverseGeocode(lat: number, lng: number): Promise<ReverseGeocodeResult> {
   if (process.env.MAPBOX_ACCESS_TOKEN) {
-    try {
-      return await reverseGeocodeViaMapbox(lat, lng);
-    } catch (err) {
-      logger.warn({ err }, "Mapbox reverse geocode failed, trying Google Maps fallback");
+    const { isFlagEnabled } = await import("./platform-flags");
+    if (await isFlagEnabled("live_mapbox_tiles_enabled")) {
+      try {
+        return await reverseGeocodeViaMapbox(lat, lng);
+      } catch (err) {
+        logger.warn({ err }, "Mapbox reverse geocode failed, trying Google Maps fallback");
+      }
     }
   }
 

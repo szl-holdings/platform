@@ -5,6 +5,7 @@ import { sendSuccess, sendNotFound, sendError, sendBadRequest, handleRouteError 
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { services } from "@szl-holdings/services";
 import { logger } from "../lib/logger";
+import { requireStripeLive } from "../lib/stripe-gate";
 import { validateBody, jsonObjectBodySchema, validateQuery, listQuerySchema} from "../lib/validation";
 
 const router: IRouter = Router();
@@ -77,7 +78,7 @@ router.get("/lyte/billing/plans", (_req, res) => {
   sendSuccess(res, plans);
 });
 
-router.post("/lyte/billing/pilot-checkout", authMiddleware({ required: false }), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/lyte/billing/pilot-checkout", validateBody(jsonObjectBodySchema), authMiddleware({ required: false }), requireStripeLive, async (req: Request, res: Response) => {
   try {
     const { planId, email, companyName, contactName, successUrl, cancelUrl } = req.body as {
       planId?: string;
@@ -153,7 +154,7 @@ router.post("/lyte/billing/pilot-checkout", authMiddleware({ required: false }),
   }
 });
 
-router.post("/lyte/billing/create-invoice", authMiddleware(), requireRole("admin", "super_admin", "ops"), validateBody(jsonObjectBodySchema), async (req: Request, res: Response) => {
+router.post("/lyte/billing/create-invoice", validateBody(jsonObjectBodySchema), authMiddleware(), requireRole("admin", "super_admin", "ops"), requireStripeLive, async (req: Request, res: Response) => {
   try {
     const { customerId, email, companyName, lineItems, dueDate, notes } = req.body as {
       customerId?: string;

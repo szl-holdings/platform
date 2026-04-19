@@ -18,8 +18,19 @@ import { randomUUID } from "crypto";
 const HAS_DB = Boolean(process.env.DATABASE_URL);
 const d = HAS_DB ? describe : describe.skip;
 
+const mockBolUser = {
+  id: 99,
+  email: "bol-test@example.com",
+  displayName: "BOL Test User",
+  roles: ["admin"],
+  orgs: [{ orgId: 1, orgSlug: "test-org", orgName: "Test Org", role: "admin" }],
+};
+
 vi.mock("../middlewares/auth.js", () => ({
-  authMiddleware: () => (_req: Request, _res: Response, next: NextFunction) => next(),
+  authMiddleware: () => (req: Request, _res: Response, next: NextFunction) => {
+    (req as unknown as { user: typeof mockBolUser }).user = mockBolUser;
+    next();
+  },
   requireRole: () => (_req: Request, _res: Response, next: NextFunction) => next(),
   requireAnyAuth: () => (_req: Request, _res: Response, next: NextFunction) => next(),
   denyIfReadOnly: () => (_req: Request, _res: Response, next: NextFunction) => next(),
@@ -126,7 +137,7 @@ d("Vessels BoL persistence (Task #1847)", () => {
     expect(reloaded.chain[0].eventType).toBe("BoL Created");
     expect(reloaded.chain[0].actor).toBe(uniqueShipper);
     expect(reloaded.chain[1].eventType).toBe("BoL Transferred");
-    expect(reloaded.chain[1].actor).toBe(transferConsignee);
+    expect(reloaded.chain[1].actor).toBe(mockBolUser.displayName);
     expect(reloaded.chain[1].prevHash).toBe(reloaded.chain[0].hash);
 
     const verify = await request(app2).get(`/api/vessels/modules/bills-of-lading/${createdId}/verify`);

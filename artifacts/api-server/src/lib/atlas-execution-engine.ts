@@ -349,7 +349,10 @@ export async function getEvaluationHooks(domain: string, tenantId?: string): Pro
   return rows.map(rowToHookRecord);
 }
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export async function getEvaluationHookById(hookId: string, tenantId?: string): Promise<EvaluationHookRecord | undefined> {
+  if (!UUID_RE.test(hookId)) return undefined;
   const where = tenantId
     ? and(eq(atlasRunsTable.id, hookId), eq(atlasRunsTable.tenantId, tenantId))
     : eq(atlasRunsTable.id, hookId);

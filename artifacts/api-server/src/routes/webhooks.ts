@@ -6,15 +6,25 @@ import { authMiddleware } from "../middlewares/auth";
 import { sendSuccess, sendBadRequest, sendNotFound, sendError, handleRouteError } from "../lib/api-response";
 import { logger } from "../lib/logger";
 import { jsonObjectBodySchema, listQuerySchema, validateBody, validateQuery } from "../lib/validation";
+import { validateExternalUrlSync, validateExternalUrl } from "../lib/ssrf-guard";
+
+function ssrfSafeUrl(url: string): boolean {
+  const result = validateExternalUrlSync(url);
+  return result.valid;
+}
 
 const webhookEndpointSchema = z.object({
-  url: z.string().url("url must be a valid URL"),
+  url: z.string().url("url must be a valid URL").refine(ssrfSafeUrl, {
+    message: "Webhook URL targets a disallowed host — private, internal, or non-HTTPS addresses are not permitted",
+  }),
   eventTypes: z.union([z.literal("*"), z.array(z.string())]).optional().default("*"),
   description: z.string().optional(),
 });
 
 const webhookEndpointUpdateSchema = z.object({
-  url: z.string().url("url must be a valid URL").optional(),
+  url: z.string().url("url must be a valid URL").refine(ssrfSafeUrl, {
+    message: "Webhook URL targets a disallowed host — private, internal, or non-HTTPS addresses are not permitted",
+  }).optional(),
   eventTypes: z.union([z.literal("*"), z.array(z.string())]).optional(),
   active: z.boolean().optional(),
   description: z.string().optional(),
@@ -139,6 +149,20 @@ async function attemptWebhookDelivery(
   endpoint: WebhookEndpoint,
   retryAttempt = 1,
 ): Promise<void> {
+  // Re-validate URL with async DNS resolution before each delivery attempt.
+  // Catches hostnames that resolve to internal/private addresses (DNS rebinding)
+  // that sync validation at registration time cannot detect.
+  const urlCheck = await validateExternalUrl(endpoint.url);
+  if (!urlCheck.valid) {
+    delivery.status = "failed";
+    delivery.error = `SSRF guard blocked delivery: ${urlCheck.reason}`;
+    delivery.deliveredAt = Date.now();
+    delivery.attempt = retryAttempt;
+    endpoint.failureCount++;
+    logger.error({ endpointId: endpoint.id, url: endpoint.url, reason: urlCheck.reason }, "Webhook delivery blocked by SSRF guard (DNS-aware check)");
+    return;
+  }
+
   const bodyStr = JSON.stringify(delivery.payload);
   const signature = signPayload(bodyStr, endpoint.secret);
 

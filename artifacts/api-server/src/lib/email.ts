@@ -1,5 +1,6 @@
 import nodemailer from "nodemailer";
 import { logger } from "./logger";
+import { isFlagEnabled } from "./platform-flags";
 
 interface EmailAttachment {
   filename: string;
@@ -153,6 +154,12 @@ export function hasEmailProviderConfigured(): boolean {
 }
 
 export async function sendEmail(options: EmailOptions): Promise<SendResult> {
+  const emailEnabled = await isFlagEnabled("live_email_delivery_enabled");
+  if (!emailEnabled) {
+    logger.debug({ to: options.to, subject: options.subject }, "[email] Delivery skipped — live_email_delivery_enabled flag is OFF");
+    return { success: false, error: "Email delivery is disabled (set live_email_delivery_enabled flag to activate)" };
+  }
+
   if (!hasEmailProviderConfigured()) {
     if (!_emailProviderWarningLogged) {
       logger.warn("No email provider configured (SENDGRID_API_KEY, RESEND_API_KEY, or SMTP credentials). Email delivery skipped.");

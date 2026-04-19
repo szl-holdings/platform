@@ -71,16 +71,29 @@ export async function bootstrapObservability(): Promise<void> {
 
   initServerSentry();
 
+  // live_otel_export_enabled flag gates external OTEL export.
+  // When OFF, SDK initializes in-process only (no network export).
+  // This preserves trace context propagation while preventing
+  // unintentional telemetry export to unconfigured collectors.
+  const { isFlagEnabled } = await import("./platform-flags");
+  const otelExportEnabled = await isFlagEnabled("live_otel_export_enabled");
+
   await initializeOpenTelemetry({
     serviceName: process.env.OTEL_SERVICE_NAME ?? "szl-api",
     serviceVersion: process.env.npm_package_version ?? "1.0.0",
-    otlpEndpoint: process.env.OTLP_ENDPOINT ?? process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
-    exportToAzureMonitor: !!process.env.AZURE_APP_INSIGHTS_CONNECTION_STRING,
-    exportToNewRelic: !!process.env.NEW_RELIC_LICENSE_KEY,
-    exportToConsole: process.env.OTEL_CONSOLE_EXPORT === "true",
+    otlpEndpoint: otelExportEnabled
+      ? (process.env.OTLP_ENDPOINT ?? process.env.OTEL_EXPORTER_OTLP_ENDPOINT)
+      : undefined,
+    exportToAzureMonitor: otelExportEnabled && !!process.env.AZURE_APP_INSIGHTS_CONNECTION_STRING,
+    exportToNewRelic: otelExportEnabled && !!process.env.NEW_RELIC_LICENSE_KEY,
+    exportToConsole: otelExportEnabled && process.env.OTEL_CONSOLE_EXPORT === "true",
   }).catch(err => {
     logger.warn({ err }, "[observability] OpenTelemetry initialization failed — continuing without OTel");
   });
+
+  if (!otelExportEnabled && (process.env.OTLP_ENDPOINT || process.env.OTEL_EXPORTER_OTLP_ENDPOINT)) {
+    logger.info("[observability] live_otel_export_enabled flag is OFF — OTEL export skipped (set flag to activate)");
+  }
 
   logObservabilityStatus();
 }

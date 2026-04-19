@@ -38,6 +38,7 @@
 ### P0-002 — Route Authentication Matrix Not Enforced by CI
 **Tracking:** GAP-002 (Security Audit), Series A gap register  
 **Product:** API Server  
+**Status: ✅ CLOSED** — `route-security-matrix` CI job confirmed present in `.github/workflows/ci.yml` blocking the `ci-gate` job. Runs `--strict-auth` on every PR; fails if any route file is missing auth classification.  
 **Note:** This is a CI process gap, not a capability gap. The RBAC capability (CAP-003) is `live`; the gap is that the `route-security-matrix.ts --strict` script exists but is not yet wired into the CI pipeline, meaning new unauthenticated routes can be merged without detection.  
 **Risk:** 15/170 top-level route files lack explicit auth middleware. Two routes found without auth enforcement during pen test (FINDING-001, resolved). No CI step automatically detects new routes added without auth. New routes can slip through without enforcement.  
 **Revenue Impact:** Auth regression could expose internal APIs to unauthenticated callers as the platform grows.  
@@ -53,6 +54,7 @@
 **Manifest ID:** CAP-008  
 **Product:** API Server / All billing-capable products  
 **Status in Manifest:** `partial`  
+**Feature Flag:** `live_stripe_billing_enabled` (default OFF) — registered in `platform-flags.ts`. Enable this flag AND configure the secret to activate live billing without any code change.  
 **Risk:** Revenue infrastructure is built (Checkout, Subscriptions, Invoicing, Customer Portal) but STRIPE_SECRET_KEY is test-mode only. No real transaction can be processed.  
 **Revenue Impact:** Directly blocks any monetization. Critical path to first dollar of ARR.  
 **Blocking Dependencies:** STRIPE_SECRET_KEY (live sk_live_...), STRIPE_WEBHOOK_SECRET, Stripe product/price IDs per tier configured.  
@@ -65,6 +67,7 @@
 **Manifest ID:** CAP-009  
 **Product:** API Server / All email-dependent workflows  
 **Status in Manifest:** `partial`  
+**Feature Flag:** `live_email_delivery_enabled` (default OFF) — registered in `platform-flags.ts`. When this flag is OFF, outbound email is silently dropped with a log warning, preserving demo stability. Enable flag AND set RESEND_API_KEY to activate.  
 **Risk:** RESEND_API_KEY not confirmed configured in production secrets. Carlota Jo booking confirmations, platform invite emails, Alloy digest, Pulse subscriptions, and Stripe receipts all fail silently.  
 **Revenue Impact:** Breaks every user-facing email touchpoint; unacceptable for any paying tenant.  
 **Blocking Dependencies:** RESEND_API_KEY or SENDGRID_API_KEY in Replit production secrets.  
@@ -77,6 +80,7 @@
 **Manifest IDs:** CAP-011, CAP-012  
 **Product:** API Server  
 **Status in Manifest:** `partial`  
+**Feature Flag:** `live_otel_export_enabled` (default OFF) — registered in `platform-flags.ts`. Enable flag AND set OTEL_EXPORTER_OTLP_ENDPOINT to activate live telemetry export.  
 **Risk:** OTEL_EXPORTER_OTLP_ENDPOINT and SENTRY_DSN not set in production. Platform is blind to performance regressions, silent errors, and P1 incidents in production.  
 **Revenue Impact:** Cannot meet enterprise SLA commitments without production observability. Any outage during a sales cycle is undetected and unmitigated.  
 **Blocking Dependencies:** OTEL collector endpoint (New Relic, Grafana Cloud, or Azure Monitor); SENTRY_DSN from a Sentry project.  
@@ -89,6 +93,7 @@
 **Manifest ID:** CAP-049  
 **Product:** Terra (Real Estate Intelligence), SZL Holdings Mobile  
 **Status in Manifest:** `partial`  
+**Feature Flag:** `live_mapbox_tiles_enabled` (default OFF) — registered in `platform-flags.ts`. Enable flag AND set MAPBOX_ACCESS_TOKEN / VITE_MAPBOX_TOKEN to activate live map tiles.  
 **Risk:** Mapbox integration code is complete but MAPBOX_ACCESS_TOKEN is not set. The distress property map — the live differentiator of Terra — renders blank. This is visible to any investor or customer opening the Terra dashboard.  
 **Revenue Impact:** Terra's entire spatial intelligence thesis fails on first impression without a working map.  
 **Blocking Dependencies:** MAPBOX_ACCESS_TOKEN / VITE_MAPBOX_TOKEN from a Mapbox account.  
@@ -101,6 +106,7 @@
 **Manifest ID:** CAP-040  
 **Product:** Vessels (Maritime Intelligence)  
 **Status in Manifest:** `stub`  
+**Feature Flag:** `live_ais_feed_enabled` (default OFF) — registered in `platform-flags.ts` and wired into `intelligence-feeds-init.ts`. The FeedScheduler only registers `AISFeedAdapter` when BOTH `AIS_FEED_ENABLED != false` AND this flag is ON. When OFF, vessel positions use seeded/simulated data (demo experience intact). Enable flag AND configure AIS_API_KEY to activate.  
 **Risk:** All AIS vessel positions are seeded/simulated. AIS_API_KEY not configured. The demo explicitly acknowledges this to investors but it limits credibility for maritime enterprise prospects.  
 **Revenue Impact:** Cannot close a maritime enterprise deal with simulated positions; a key Vessels competitive differentiator is absent.  
 **Blocking Dependencies:** Paid AIS data provider contract ($15–40K/yr), AIS_API_KEY.  
@@ -112,6 +118,7 @@
 ### P1-006 — SSRF Vulnerability on Webhook Delivery URLs
 **Manifest ID:** CAP-079  
 **Product:** API Server  
+**Status: ✅ CLOSED** — `validateExternalUrlSync` from `lib/ssrf-guard.ts` wired as a Zod `.refine()` on the `url` field in both `webhookEndpointSchema` (POST) and `webhookEndpointUpdateSchema` (PATCH). Blocks HTTP, private IPs (10.x, 172.16.x, 192.168.x), loopback (127.x), link-local (169.254.x), and localhost. Non-standard ports also blocked. DNS rebinding protection available via async `validateExternalUrl` in the guard.  
 **Status in Manifest:** `partial`  
 **Risk:** KG020b open — webhook delivery route does not validate destination URLs against SSRF host blocklist. A malicious tenant could register an internal metadata endpoint as a webhook target.  
 **Revenue Impact:** Enterprise security reviews will flag this; blocks SOC 2 Type II audit engagement.  
@@ -124,6 +131,8 @@
 ### P1-007 — MFA Not Implemented
 **Manifest ID:** CAP-082  
 **Product:** API Server (Auth)  
+**Status: ✅ CLOSED** — Full TOTP MFA implemented using `otplib`. New routes: `POST /auth/mfa/setup`, `POST /auth/mfa/enable`, `POST /auth/mfa/challenge`, `DELETE /auth/mfa`, `GET /auth/mfa/status`. Both login paths (`/auth/login` and `/auth/login-password`) check for enabled MFA and return `{mfa_required: true, mfa_challenge_token}` instead of issuing a session; the client then exchanges the challenge token + TOTP code via `/auth/mfa/challenge` to obtain a real session. `mfa_secrets` DB table added to schema; SQL migration `lib/db/drizzle/0072_mfa_secrets.sql` created. All MFA events written to audit trail. `otplib` installed in `@workspace/api-server`.  
+**Challenge Token Storage:** MFA challenge tokens are stored in Redis (key `mfac:<token>`, 5-min PX TTL, single-use GET+DEL) when `REDIS_URL` or `AZURE_REDIS_CONNECTION_STRING` is set. Falls back to an in-process Map when Redis is unavailable (acceptable for single-instance Replit deploy; horizontal scaling requires Redis). See `artifacts/api-server/src/routes/auth.ts` — `createMfaChallengeToken` / `consumeMfaChallengeToken`.  
 **Status in Manifest:** `stub`  
 **Risk:** Single-factor authentication only. Enterprise buyers, CISOs, and regulated sector customers will require MFA as a table-stakes feature.  
 **Revenue Impact:** Blocks enterprise sales cycles in financial services, legal, and security sectors.  
@@ -136,6 +145,7 @@
 ### P1-008 — CORS_ORIGINS Not Set for Custom Domain
 **Manifest ID:** CAP-083  
 **Product:** API Server / All web apps  
+**Status: ⚠️ CODE READY — awaits DevOps secret update** — CORS middleware in `artifacts/api-server/src/app.ts` already reads from `CORS_ORIGINS` env var (comma-separated, supports `*.` wildcard patterns). At DNS cutover, DevOps must set `CORS_ORIGINS=https://szlholdings.com,https://www.szlholdings.com,https://*.szlholdings.com` in Replit production secrets. No code change needed.  
 **Status in Manifest:** `partial`  
 **Risk:** CORS_ORIGINS set to `*.replit.app,*.replit.dev,*.repl.co`. When `szlholdings.com` goes live, all cross-origin API calls from the custom domain will fail with CORS errors.  
 **Revenue Impact:** The entire platform is broken for any user accessing the custom domain.  
@@ -148,6 +158,7 @@
 ### P1-009 — GitHub Actions Deploy Automation Not Wired
 **Manifest ID:** CAP-085  
 **Product:** Infrastructure  
+**Status: ⚠️ CODE READY — awaits GitHub secrets** — `deploy-staging.yml` and `deploy-production.yml` both exist and handle missing secrets gracefully (skip with warning instead of fail). Staging deploys on push to main; production deploys on published GitHub Release or `workflow_dispatch` with `confirm=deploy`. DevOps must add `REPLIT_DEPLOY_TOKEN`, `REPLIT_APP_ID`, `REPLIT_STAGING_DEPLOY_TOKEN`, `REPLIT_STAGING_APP_ID` to GitHub → Settings → Environments → staging / production.  
 **Status in Manifest:** `partial`  
 **Risk:** Staging and production deploy workflows defined but REPLIT_DEPLOY_TOKEN and REPLIT_APP_ID secrets not configured — deployments skipped. No automated deployment path to production.  
 **Revenue Impact:** Every production deployment requires manual intervention; introduces risk and slows release cadence.  

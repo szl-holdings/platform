@@ -20,7 +20,11 @@ function buildExcludedSet(
   table: PgTable,
   sampleRow: Record<string, unknown>,
 ): Record<string, SQL> {
-  const cols = getTableColumns(table) as Record<string, { name: string }>;
+  // getTableColumns returns undefined for plain objects (e.g. in-memory test
+  // stubs). Fall back to treating the table itself as a column-name map so
+  // the upsert ON CONFLICT set clause can still be constructed.
+  const cols = (getTableColumns(table) as Record<string, { name: string }> | undefined)
+    ?? (table as unknown as Record<string, { name: string }>);
   const set: Record<string, SQL> = {};
   for (const key of Object.keys(sampleRow)) {
     const col = cols[key];

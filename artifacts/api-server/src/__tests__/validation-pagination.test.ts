@@ -221,7 +221,9 @@ describe("POST /billing/checkout — validation", () => {
     expect((res.body as ErrorBody).code).toBe("BAD_REQUEST");
   });
 
-  it("passes validation and returns a checkout URL on a valid payload", async () => {
+  it("passes validation and returns a demo checkout response when live_stripe_billing_enabled flag is OFF", async () => {
+    // In the test environment the live_stripe_billing_enabled flag defaults to OFF,
+    // so the endpoint returns a demo-mode response instead of creating a real session.
     const res = await request(app)
       .post("/billing/checkout")
       .send({
@@ -231,9 +233,12 @@ describe("POST /billing/checkout — validation", () => {
       });
 
     expect(res.status).toBe(200);
-    const body = res.body as { url: string };
-    expect(typeof body.url).toBe("string");
-    expect(body.url.length).toBeGreaterThan(0);
+    const body = res.body as { demo: boolean; sessionId: string; url: null; message: string };
+    expect(body.demo).toBe(true);
+    expect(typeof body.sessionId).toBe("string");
+    expect(body.sessionId.startsWith("demo_session_")).toBe(true);
+    expect(body.url).toBeNull();
+    expect(typeof body.message).toBe("string");
   });
 });
 

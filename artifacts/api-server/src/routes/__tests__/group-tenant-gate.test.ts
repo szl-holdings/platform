@@ -54,6 +54,7 @@ vi.mock("../../lib/validation", () => ({
   jsonObjectBodySchema: {},
   validateQuery: () => (_req: Request, _res: Response, next: NextFunction) => next(),
   listQuerySchema: {},
+  anyQuerySchema: {},
 }));
 
 const stubRouter = () => {

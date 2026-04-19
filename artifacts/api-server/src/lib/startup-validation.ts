@@ -36,6 +36,8 @@ export const ENV_SPECS: EnvVarSpec[] = [
 
   { key: "STRIPE_SECRET_KEY", required: false, description: "Stripe secret key for payment processing", sensitive: true, group: "billing" },
 
+  { key: "MFA_SECRET_ENCRYPTION_KEY", required: false, description: "AES-256-GCM key (64 hex chars or 44 base64 chars = 32 bytes) for TOTP secret encryption at rest — required in production", sensitive: true, group: "auth" },
+
   { key: "GITHUB_TOKEN", required: false, description: "GitHub personal access token or OAuth token for repository integration", sensitive: true, group: "integrations" },
   { key: "AI_INTEGRATIONS_OPENAI_API_KEY", required: false, description: "Replit AI Integrations proxy key for OpenAI-compatible inference", sensitive: true, group: "integrations" },
   { key: "AI_INTEGRATIONS_ANTHROPIC_API_KEY", required: false, description: "Replit AI Integrations proxy key for Anthropic-compatible inference", sensitive: true, group: "integrations" },
@@ -188,6 +190,33 @@ export function validateStartupConfig(): ValidationResult {
       errors.push("CONNECTOR_ENCRYPTION_KEY must be exactly 64 hex characters (256 bits) — replace with a properly generated key.");
     } else {
       warnings.push("CONNECTOR_ENCRYPTION_KEY format is invalid (expected 64 hex chars) — verify before deploying to production");
+    }
+  }
+
+  const mfaEncKey = process.env.MFA_SECRET_ENCRYPTION_KEY;
+  if (!mfaEncKey) {
+    if (isProduction) {
+      errors.push(
+        "MFA_SECRET_ENCRYPTION_KEY is not set — TOTP secrets will be stored in plaintext, which is a production security violation. " +
+        "Generate a 64-char hex key (openssl rand -hex 32) and add it to secrets before deploying.",
+      );
+    } else {
+      warnings.push(
+        "MFA_SECRET_ENCRYPTION_KEY not set — TOTP secrets will fall back to plaintext storage (not safe for production). " +
+        "Set MFA_SECRET_ENCRYPTION_KEY before deploying.",
+      );
+    }
+  } else {
+    const isValidHex = /^[0-9a-fA-F]{64}$/.test(mfaEncKey);
+    const isValidBase64 = /^[A-Za-z0-9+/]{44}$/.test(mfaEncKey);
+    if (!isValidHex && !isValidBase64) {
+      if (isProduction) {
+        errors.push(
+          "MFA_SECRET_ENCRYPTION_KEY format is invalid (expected 64 hex chars or 44 base64 chars = 32 bytes) — replace with a properly generated key.",
+        );
+      } else {
+        warnings.push("MFA_SECRET_ENCRYPTION_KEY format is invalid (expected 64 hex chars or 44 base64 chars) — verify before deploying to production");
+      }
     }
   }
 

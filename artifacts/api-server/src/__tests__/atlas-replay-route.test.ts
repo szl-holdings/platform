@@ -73,7 +73,10 @@ vi.mock("../lib/decisioning-store.js", () => ({
 }));
 
 vi.mock("../middlewares/auth.js", () => ({
-  authMiddleware: (_opts?: unknown) => (_req: unknown, _res: unknown, next: () => void) => next(),
+  authMiddleware: (_opts?: unknown) => (req: Record<string, unknown>, _res: unknown, next: () => void) => {
+    req.isInternalAgent = true;
+    next();
+  },
 }));
 
 vi.mock("../middlewares/sliding-window-limiter.js", () => ({
@@ -181,7 +184,7 @@ describe("POST /:domain/atlas/evaluation-hooks/replay — HTTP guards", () => {
       .send({ hookId: "missing-hook" });
 
     expect(res.status).toBe(404);
-    expect(mockGetEvaluationHookById).toHaveBeenCalledWith("missing-hook");
+    expect(mockGetEvaluationHookById).toHaveBeenCalledWith("missing-hook", undefined);
     expect(mockExecutedomainWorkflow).not.toHaveBeenCalled();
   });
 

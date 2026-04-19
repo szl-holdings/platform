@@ -1,10 +1,11 @@
 import { Router, type IRouter } from "express";
-import { db, usersTable, sessionsTable, rolesTable, userRolesTable, organizationsTable, orgMembersTable, toCanonicalRole, type RoleName } from "@szl-holdings/db";
+import { db, usersTable, sessionsTable, rolesTable, userRolesTable, organizationsTable, orgMembersTable, mfaSecretsTable, toCanonicalRole, type RoleName } from "@szl-holdings/db";
 import { eq, desc, and } from "drizzle-orm";
-import { randomBytes, pbkdf2Sync, timingSafeEqual } from "crypto";
+import { randomBytes, pbkdf2Sync, timingSafeEqual, createCipheriv, createDecipheriv } from "crypto";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, sendNoContent, sendForbidden, sendError, handleRouteError, parsePagination } from "../lib/api-response";
 import { logActivity } from "../lib/activity-logger";
+import { logger } from "../lib/logger";
 import { createAuthService } from "@szl-holdings/auth";
 import { issueWsTicket } from "../lib/websocket.js";
 import { getSessionToken, getSessionUser } from "../lib/auth";
@@ -18,9 +19,105 @@ import {
 } from "../middlewares/session-policy";
 import { z } from "zod";
 import { jsonObjectBodySchema, listQuerySchema, loginPasswordSchema, validateBody, validateQuery } from "../lib/validation";
+import { generateSecret as otpGenerateSecret, verifySync as otpVerifySync, generateURI as otpGenerateURI } from "otplib";
+import { redisGet, redisSet, redisDel } from "../lib/redis-client.js";
 
 const router: IRouter = Router();
 const authService = createAuthService();
+
+interface MfaChallenge {
+  userId: number;
+  expiresAt: number;
+}
+
+// MFA challenge tokens use a dual-write strategy: always written to both Redis
+// (primary, TTL-backed) and an in-process Map (safety net). This guarantees
+// the token is findable on consume even if Redis has a transient failure
+// between create and consume.  On consume we try Redis first (authoritative,
+// single-use via GET+DEL), then fall through to the in-memory map if Redis
+// returns null (handles the Redis-down-at-create scenario).
+const _pendingMfaChallengesFallback = new Map<string, MfaChallenge>();
+const MFA_CHALLENGE_TTL_MS = 5 * 60 * 1000;
+const MFA_REDIS_PREFIX = "mfac:";
+
+async function createMfaChallengeToken(userId: number): Promise<string> {
+  const token = "mfac_" + randomBytes(24).toString("hex");
+  const challenge: MfaChallenge = { userId, expiresAt: Date.now() + MFA_CHALLENGE_TTL_MS };
+  // Dual-write: in-memory first (synchronous, always succeeds) then Redis
+  _pendingMfaChallengesFallback.set(token, challenge);
+  // Best-effort Redis write — failure is non-fatal; in-memory remains the fallback
+  await redisSet(MFA_REDIS_PREFIX + token, challenge, MFA_CHALLENGE_TTL_MS);
+  return token;
+}
+
+async function consumeMfaChallengeToken(token: string): Promise<number | null> {
+  // Try Redis first — single-use, TTL-backed, works across instances
+  const redisChallenge = await redisGet<MfaChallenge>(MFA_REDIS_PREFIX + token);
+  if (redisChallenge) {
+    await redisDel(MFA_REDIS_PREFIX + token);
+    _pendingMfaChallengesFallback.delete(token); // keep stores consistent
+    if (Date.now() > redisChallenge.expiresAt) return null;
+    return redisChallenge.userId;
+  }
+  // Fallback: in-memory store (handles Redis-down-at-create or Redis-unavailable env)
+  const challenge = _pendingMfaChallengesFallback.get(token);
+  if (!challenge) return null;
+  _pendingMfaChallengesFallback.delete(token);
+  if (Date.now() > challenge.expiresAt) return null;
+  return challenge.userId;
+}
+
+// ---------------------------------------------------------------------------
+// TOTP secret encryption — AES-256-GCM, application-layer
+// Set MFA_SECRET_ENCRYPTION_KEY to a 32-byte value (64 hex chars or 44-char
+// base64) in production. Without it, secrets are stored with a "plain:" prefix
+// and a startup warning is emitted. Encrypted secrets carry an "enc:" prefix
+// so legacy and newly-encrypted rows are distinguishable.
+// ---------------------------------------------------------------------------
+
+const _MFA_KEY_LOG_CACHE = { warned: false };
+
+function getMfaEncryptionKey(): Buffer | null {
+  const raw = process.env.MFA_SECRET_ENCRYPTION_KEY;
+  if (!raw) {
+    if (!_MFA_KEY_LOG_CACHE.warned) {
+      logger.warn("[mfa] MFA_SECRET_ENCRYPTION_KEY not set — TOTP secrets are stored without encryption. Set this variable in production.");
+      _MFA_KEY_LOG_CACHE.warned = true;
+    }
+    return null;
+  }
+  if (/^[0-9a-fA-F]{64}$/.test(raw)) return Buffer.from(raw, "hex");
+  const b64 = Buffer.from(raw, "base64");
+  if (b64.length === 32) return b64;
+  logger.error("[mfa] MFA_SECRET_ENCRYPTION_KEY must be 32 bytes (64 hex chars or 44 base64 chars) — ignoring malformed key.");
+  return null;
+}
+
+function encryptMfaSecret(plaintext: string): string {
+  const key = getMfaEncryptionKey();
+  if (!key) return "plain:" + plaintext;
+  const iv = randomBytes(12);
+  const cipher = createCipheriv("aes-256-gcm", key, iv);
+  const encrypted = Buffer.concat([cipher.update(plaintext, "utf8"), cipher.final()]);
+  const authTag = cipher.getAuthTag();
+  return "enc:" + iv.toString("hex") + ":" + authTag.toString("hex") + ":" + encrypted.toString("hex");
+}
+
+function decryptMfaSecret(stored: string): string {
+  if (stored.startsWith("enc:")) {
+    const key = getMfaEncryptionKey();
+    if (!key) throw new Error("MFA_SECRET_ENCRYPTION_KEY not set but encrypted secret found — cannot authenticate.");
+    const parts = stored.slice(4).split(":");
+    if (parts.length !== 3) throw new Error("Invalid encrypted MFA secret format.");
+    const [ivHex, authTagHex, ciphertextHex] = parts;
+    const decipher = createDecipheriv("aes-256-gcm", key, Buffer.from(ivHex, "hex"));
+    decipher.setAuthTag(Buffer.from(authTagHex, "hex"));
+    return decipher.update(Buffer.from(ciphertextHex, "hex")).toString("utf8") + decipher.final("utf8");
+  }
+  if (stored.startsWith("plain:")) return stored.slice(6);
+  // Legacy plaintext row (no prefix) — transparently readable; re-setup rotates to encrypted
+  return stored;
+}
 
 const loginBodySchema = z.object({
   credential: z.string().min(1, "credential is required"),
@@ -49,6 +146,18 @@ router.post("/auth/login", validateBody(loginBodySchema), async (req, res) => {
 
     if (!user.isActive) {
       sendError(res, "Account is disabled", 403, "ACCOUNT_DISABLED");
+      return;
+    }
+
+    const [mfaRecord] = await db
+      .select()
+      .from(mfaSecretsTable)
+      .where(eq(mfaSecretsTable.userId, user.id))
+      .limit(1);
+
+    if (mfaRecord?.enabled) {
+      const mfaChallengeToken = await createMfaChallengeToken(user.id);
+      sendSuccess(res, { mfa_required: true, mfa_challenge_token: mfaChallengeToken });
       return;
     }
 
@@ -487,6 +596,19 @@ router.post("/auth/login-password", validateBody(loginPasswordSchema), async (re
       return;
     }
 
+    const [mfaRecord] = await db
+      .select()
+      .from(mfaSecretsTable)
+      .where(eq(mfaSecretsTable.userId, user.id))
+      .limit(1);
+
+    if (mfaRecord?.enabled) {
+      await db.update(usersTable).set({ lastLoginAt: new Date(), updatedAt: new Date() }).where(eq(usersTable.id, user.id));
+      const mfaChallengeToken = await createMfaChallengeToken(user.id);
+      sendSuccess(res, { mfa_required: true, mfa_challenge_token: mfaChallengeToken });
+      return;
+    }
+
     const created = await createSessionWithRefresh({
       userId: user.id,
       ipAddress: req.ip ?? null,
@@ -506,6 +628,238 @@ router.post("/auth/login-password", validateBody(loginPasswordSchema), async (re
   } catch (err) {
     req.log?.error({ err }, "Password login failed");
     handleRouteError(res, err, "Password login failed");
+  }
+});
+
+const mfaSetupSchema = z.object({});
+
+router.post("/auth/mfa/setup", authMiddleware(), validateBody(mfaSetupSchema), async (req, res) => {
+  try {
+    const userId = req.user!.id;
+
+    const [existing] = await db
+      .select()
+      .from(mfaSecretsTable)
+      .where(eq(mfaSecretsTable.userId, userId))
+      .limit(1);
+
+    if (existing?.enabled) {
+      sendBadRequest(res, "MFA is already enabled. Disable it first to set up a new authenticator.");
+      return;
+    }
+
+    const secret = otpGenerateSecret();
+
+    const storedSecret = encryptMfaSecret(secret);
+
+    if (existing) {
+      await db
+        .update(mfaSecretsTable)
+        .set({ secret: storedSecret, enabled: false, enabledAt: null })
+        .where(eq(mfaSecretsTable.userId, userId));
+    } else {
+      await db.insert(mfaSecretsTable).values({ userId, secret: storedSecret, enabled: false });
+    }
+
+    const [user] = await db.select({ displayName: usersTable.displayName, email: usersTable.email }).from(usersTable).where(eq(usersTable.id, userId)).limit(1);
+    const label = user?.email ?? user?.displayName ?? `user_${userId}`;
+    const otpauthUri = otpGenerateURI({ issuer: "SZL Holdings", label, secret, strategy: "totp" });
+
+    sendSuccess(res, {
+      secret,
+      otpauthUri,
+      message: "Scan the QR code in your authenticator app, then call POST /auth/mfa/enable with a valid 6-digit code to activate MFA.",
+    });
+  } catch (err) {
+    req.log?.error({ err }, "MFA setup failed");
+    handleRouteError(res, err, "MFA setup failed");
+  }
+});
+
+const mfaEnableSchema = z.object({
+  code: z.string().length(6, "TOTP code must be exactly 6 digits").regex(/^\d{6}$/, "TOTP code must be 6 digits"),
+});
+
+router.post("/auth/mfa/enable", authMiddleware(), validateBody(mfaEnableSchema), async (req, res) => {
+  try {
+    const userId = req.user!.id;
+    const { code } = req.body as z.infer<typeof mfaEnableSchema>;
+
+    const [record] = await db
+      .select()
+      .from(mfaSecretsTable)
+      .where(eq(mfaSecretsTable.userId, userId))
+      .limit(1);
+
+    if (!record) {
+      sendBadRequest(res, "No MFA setup found. Call POST /auth/mfa/setup first.");
+      return;
+    }
+
+    if (record.enabled) {
+      sendBadRequest(res, "MFA is already enabled.");
+      return;
+    }
+
+    const isValid = otpVerifySync({ token: code, secret: decryptMfaSecret(record.secret) });
+    if (!isValid) {
+      sendError(res, "Invalid TOTP code. Please try again.", 400, "MFA_INVALID_CODE");
+      return;
+    }
+
+    await db
+      .update(mfaSecretsTable)
+      .set({ enabled: true, enabledAt: new Date() })
+      .where(eq(mfaSecretsTable.userId, userId));
+
+    await writeAuditEvent({
+      userId,
+      action: "mfa.enabled",
+      entityType: "user",
+      entityId: String(userId),
+      ipAddress: req.ip ?? null,
+      userAgent: req.headers["user-agent"] ?? null,
+      newValues: { enabled: true },
+    });
+
+    sendSuccess(res, { enabled: true, message: "MFA has been enabled for your account." });
+  } catch (err) {
+    req.log?.error({ err }, "MFA enable failed");
+    handleRouteError(res, err, "MFA enable failed");
+  }
+});
+
+const mfaChallengeSchema = z.object({
+  mfa_challenge_token: z.string().min(1, "mfa_challenge_token is required"),
+  code: z.string().length(6, "TOTP code must be exactly 6 digits").regex(/^\d{6}$/, "TOTP code must be 6 digits"),
+});
+
+router.post("/auth/mfa/challenge", validateBody(mfaChallengeSchema), async (req, res) => {
+  try {
+    const { mfa_challenge_token, code } = req.body as z.infer<typeof mfaChallengeSchema>;
+
+    const userId = await consumeMfaChallengeToken(mfa_challenge_token);
+    if (!userId) {
+      sendError(res, "MFA challenge token is invalid or expired. Please log in again.", 401, "MFA_CHALLENGE_EXPIRED");
+      return;
+    }
+
+    const [record] = await db
+      .select()
+      .from(mfaSecretsTable)
+      .where(eq(mfaSecretsTable.userId, userId))
+      .limit(1);
+
+    if (!record?.enabled) {
+      sendError(res, "MFA is not configured for this account.", 400, "MFA_NOT_CONFIGURED");
+      return;
+    }
+
+    const isValid = otpVerifySync({ token: code, secret: decryptMfaSecret(record.secret) });
+    if (!isValid) {
+      sendError(res, "Invalid TOTP code.", 401, "MFA_INVALID_CODE");
+      return;
+    }
+
+    const [user] = await db.select().from(usersTable).where(eq(usersTable.id, userId)).limit(1);
+    if (!user || !user.isActive) {
+      sendError(res, "Account is disabled.", 403, "ACCOUNT_DISABLED");
+      return;
+    }
+
+    const created = await createSessionWithRefresh({
+      userId,
+      ipAddress: req.ip ?? null,
+      userAgent: req.headers["user-agent"] ?? null,
+      reason: "mfa_challenge",
+    });
+
+    await db.update(usersTable).set({ lastLoginAt: new Date(), updatedAt: new Date() }).where(eq(usersTable.id, userId));
+
+    await writeAuditEvent({
+      userId,
+      action: "mfa.challenge_passed",
+      entityType: "session",
+      entityId: String(created.sessionId),
+      ipAddress: req.ip ?? null,
+      userAgent: req.headers["user-agent"] ?? null,
+    });
+
+    sendSuccess(res, {
+      token: created.token,
+      refreshToken: created.refreshToken,
+      expiresAt: created.expiresAt.toISOString(),
+      refreshTokenExpiresAt: created.refreshTokenExpiresAt.toISOString(),
+      user: { id: user.id, displayName: user.displayName, email: user.email },
+    });
+  } catch (err) {
+    req.log?.error({ err }, "MFA challenge failed");
+    handleRouteError(res, err, "MFA challenge failed");
+  }
+});
+
+const mfaDisableSchema = z.object({
+  code: z.string().length(6, "TOTP code must be exactly 6 digits").regex(/^\d{6}$/, "TOTP code must be 6 digits"),
+});
+
+router.delete("/auth/mfa", authMiddleware(), validateBody(mfaDisableSchema), async (req, res) => {
+  try {
+    const userId = req.user!.id;
+    const { code } = req.body as z.infer<typeof mfaDisableSchema>;
+
+    const [record] = await db
+      .select()
+      .from(mfaSecretsTable)
+      .where(eq(mfaSecretsTable.userId, userId))
+      .limit(1);
+
+    if (!record?.enabled) {
+      sendBadRequest(res, "MFA is not currently enabled.");
+      return;
+    }
+
+    const isValid = otpVerifySync({ token: code, secret: decryptMfaSecret(record.secret) });
+    if (!isValid) {
+      sendError(res, "Invalid TOTP code. MFA was not disabled.", 401, "MFA_INVALID_CODE");
+      return;
+    }
+
+    await db
+      .delete(mfaSecretsTable)
+      .where(eq(mfaSecretsTable.userId, userId));
+
+    await writeAuditEvent({
+      userId,
+      action: "mfa.disabled",
+      entityType: "user",
+      entityId: String(userId),
+      ipAddress: req.ip ?? null,
+      userAgent: req.headers["user-agent"] ?? null,
+      newValues: { enabled: false },
+    });
+
+    sendNoContent(res);
+  } catch (err) {
+    req.log?.error({ err }, "MFA disable failed");
+    handleRouteError(res, err, "MFA disable failed");
+  }
+});
+
+router.get("/auth/mfa/status", authMiddleware(), async (req, res) => {
+  try {
+    const userId = req.user!.id;
+    const [record] = await db
+      .select({ enabled: mfaSecretsTable.enabled, enabledAt: mfaSecretsTable.enabledAt })
+      .from(mfaSecretsTable)
+      .where(eq(mfaSecretsTable.userId, userId))
+      .limit(1);
+
+    sendSuccess(res, {
+      enabled: record?.enabled ?? false,
+      enabledAt: record?.enabledAt ?? null,
+    });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to get MFA status");
   }
 });
 

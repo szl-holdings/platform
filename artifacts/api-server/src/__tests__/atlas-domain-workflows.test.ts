@@ -82,7 +82,10 @@ vi.mock("../lib/decisioning-store.js", () => ({
 }));
 
 vi.mock("../middlewares/auth.js", () => ({
-  authMiddleware: (_opts?: unknown) => (_req: unknown, _res: unknown, next: () => void) => next(),
+  authMiddleware: (_opts?: unknown) => (req: unknown, _res: unknown, next: () => void) => {
+    (req as Record<string, unknown>).isInternalAgent = true;
+    next();
+  },
 }));
 
 vi.mock("../middlewares/sliding-window-limiter.js", () => ({
@@ -247,7 +250,7 @@ const DOMAIN_CASES = [
     payload: { requiresCounselReview: true, exposureUsd: 750_000, financialExposureUsd: 750_000, suggestedAction: "escalate-to-partner" },
     policyAction: "filing-submit",
     policyAttributes: { requiresCounselReview: true, exposureUsd: 750_000 },
-    isSimulationCapable: false,
+    isSimulationCapable: true,
     minSteps: 6,
   },
   {
@@ -284,8 +287,8 @@ const DOMAIN_CASES = [
 
 for (const tc of DOMAIN_CASES) {
   describe(`ATLAS engine pipeline — ${tc.domain} (${tc.workflowKey})`, () => {
-    it("ingests a domain signal and returns a well-formed record", () => {
-      const signal = ingestSignal({
+    it("ingests a domain signal and returns a well-formed record", async () => {
+      const signal = await ingestSignal({
         domain: tc.domain,
         signalType: tc.signalType,
         severity: tc.severity,
@@ -307,7 +310,7 @@ for (const tc of DOMAIN_CASES) {
     });
 
     it("evaluates signals through the decision engine and returns ranked recommendations", async () => {
-      const signal = ingestSignal({
+      const signal = await ingestSignal({
         domain: tc.domain,
         signalType: tc.signalType,
         severity: tc.severity,
@@ -329,7 +332,7 @@ for (const tc of DOMAIN_CASES) {
     });
 
     it("passes signal metadata to the decision engine correctly", async () => {
-      const signal = ingestSignal({
+      const signal = await ingestSignal({
         domain: tc.domain,
         signalType: tc.signalType,
         severity: tc.severity,
@@ -395,7 +398,7 @@ for (const tc of DOMAIN_CASES) {
       const run = makeWorkflowRun({ workflowId: tc.workflowKey, status: "completed" });
       mockExecuteWorkflow.mockResolvedValueOnce({ run, requiresApproval: false });
 
-      const signal = ingestSignal({
+      const signal = await ingestSignal({
         domain: tc.domain,
         signalType: tc.signalType,
         severity: tc.severity,
@@ -439,9 +442,9 @@ for (const tc of DOMAIN_CASES) {
       expect(execResult.run.status).toBe("completed");
     });
 
-    it("captures evidence and retrieves it for the domain", () => {
+    it("captures evidence and retrieves it for the domain", async () => {
       const workflowId = `wf-ev-${tc.domain}-${randomUUID()}`;
-      const ev = captureEvidence({
+      const ev = await captureEvidence({
         domain: tc.domain,
         workflowId,
         label: "Test Evidence",
@@ -456,13 +459,13 @@ for (const tc of DOMAIN_CASES) {
       expect(ev.immutable).toBe(true);
       expect(ev.capturedAt).toBeTruthy();
 
-      const stored = getEvidence(tc.domain, workflowId);
+      const stored = await getEvidence(tc.domain, workflowId);
       expect(stored.some(e => e.id === ev.id)).toBe(true);
     });
 
-    it("records an outcome and retrieves it for the domain", () => {
+    it("records an outcome and retrieves it for the domain", async () => {
       const workflowId = `wf-out-${tc.domain}-${randomUUID()}`;
-      const outcome = recordOutcome({
+      const outcome = await recordOutcome({
         domain: tc.domain,
         workflowId,
         title: `Test outcome — ${tc.domain}`,
@@ -478,7 +481,7 @@ for (const tc of DOMAIN_CASES) {
       expect(outcome.businessImpact?.financialImpactUsd).toBe(50_000);
       expect(outcome.recordedAt).toBeTruthy();
 
-      const stored = getOutcomes(tc.domain, 10);
+      const stored = await getOutcomes(tc.domain, 10);
       expect(stored.some(o => o.id === outcome.id)).toBe(true);
     });
   });
@@ -515,7 +518,7 @@ describe("POST /:domain/atlas/evaluation-hooks/replay — route-level integratio
 
   // Guard: hook belongs to a different domain → 403
   it("returns 403 when hook belongs to a different domain", async () => {
-    const alienSignal = ingestSignal({
+    const alienSignal = await ingestSignal({
       domain: "vessels",
       signalType: "ais-gap",
       severity: "medium",
@@ -528,7 +531,7 @@ describe("POST /:domain/atlas/evaluation-hooks/replay — route-level integratio
       tenantId: "t1",
     });
     const alienRun = makeWorkflowRun();
-    const alienHook = registerEvaluationHook({
+    const alienHook = await registerEvaluationHook({
       domain: "vessels",
       workflowId: alienRun.runId,
       workflowName: "Vessels Voyage Risk & Execution",
@@ -547,7 +550,7 @@ describe("POST /:domain/atlas/evaluation-hooks/replay — route-level integratio
   // Guard: non-replayable hook → 422
   it("returns 422 when hook is not marked as replayable", async () => {
     const nonReplayRun = makeWorkflowRun({ status: "failed" });
-    const nonReplayHook = registerEvaluationHook({
+    const nonReplayHook = await registerEvaluationHook({
       domain: "aegis",
       workflowId: nonReplayRun.runId,
       workflowName: "Aegis Security Incident Response",
@@ -581,7 +584,7 @@ describe("POST /:domain/atlas/evaluation-hooks/replay — route-level integratio
         dryRunSummary: `Replay of ${tc.workflowKey} completed`,
       });
 
-      const originalSignal = ingestSignal({
+      const originalSignal = await ingestSignal({
         domain: tc.domain,
         signalType: tc.signalType,
         severity: tc.severity,
@@ -595,7 +598,7 @@ describe("POST /:domain/atlas/evaluation-hooks/replay — route-level integratio
       });
 
       const originalRun = makeWorkflowRun({ workflowId: tc.workflowKey, status: "completed" });
-      const hook = registerEvaluationHook({
+      const hook = await registerEvaluationHook({
         domain: tc.domain,
         workflowId: originalRun.runId,
         workflowName: DOMAIN_WORKFLOWS[tc.workflowKey].name,
@@ -642,7 +645,7 @@ describe("POST /:domain/atlas/evaluation-hooks/replay — route-level integratio
     const replayRun = makeWorkflowRun({ workflowId: "imperium-remediation", isDryRun: true, status: "completed" });
     mockExecuteWorkflow.mockResolvedValueOnce({ run: replayRun, requiresApproval: false });
 
-    const sig = ingestSignal({
+    const sig = await ingestSignal({
       domain,
       signalType: "cost-anomaly",
       severity: "medium",
@@ -655,7 +658,7 @@ describe("POST /:domain/atlas/evaluation-hooks/replay — route-level integratio
       tenantId: "t1",
     });
     const origRun = makeWorkflowRun({ workflowId: "imperium-remediation" });
-    const hook = registerEvaluationHook({
+    const hook = await registerEvaluationHook({
       domain,
       workflowId: origRun.runId,
       workflowName: "IMPERIUM Infrastructure Remediation",
@@ -664,16 +667,17 @@ describe("POST /:domain/atlas/evaluation-hooks/replay — route-level integratio
       runSnapshot: origRun,
     });
 
-    const hooksBefore = getEvaluationHooks(domain).length;
+    const hooksBefore = (await getEvaluationHooks(domain)).length;
 
     await request(app)
       .post(`/${domain}/atlas/evaluation-hooks/replay`)
       .send({ hookId: hook.id, isDryRun: true });
 
-    const hooksAfter = getEvaluationHooks(domain);
+    const hooksAfter = await getEvaluationHooks(domain);
     expect(hooksAfter.length).toBe(hooksBefore + 1);
 
-    const replayRecord = hooksAfter[hooksAfter.length - 1];
+    // getEvaluationHooks orders by snapshotAt DESC — newest hook is first
+    const replayRecord = hooksAfter[0];
     expect(replayRecord.workflowName).toMatch(/\[REPLAY\]/);
     expect(replayRecord.replayable).toBe(false);
   });
@@ -684,7 +688,7 @@ describe("POST /:domain/atlas/evaluation-hooks/replay — route-level integratio
     const replayRun = makeWorkflowRun({ workflowId: "carlota-concierge-workflow", isDryRun: true, status: "completed" });
     mockExecuteWorkflow.mockResolvedValueOnce({ run: replayRun, requiresApproval: false });
 
-    const originalSignal = ingestSignal({
+    const originalSignal = await ingestSignal({
       domain,
       signalType: "booking-request",
       severity: "low",
@@ -697,7 +701,7 @@ describe("POST /:domain/atlas/evaluation-hooks/replay — route-level integratio
       tenantId: "t1",
     });
     const origRun = makeWorkflowRun({ workflowId: "carlota-concierge-workflow" });
-    const hook = registerEvaluationHook({
+    const hook = await registerEvaluationHook({
       domain,
       workflowId: origRun.runId,
       workflowName: "Carlota Jo Concierge Workflow",
@@ -706,13 +710,13 @@ describe("POST /:domain/atlas/evaluation-hooks/replay — route-level integratio
       runSnapshot: origRun,
     });
 
-    const signalsBefore = getSignals(domain, 200).length;
+    const signalsBefore = (await getSignals(domain, 10000)).length;
 
     await request(app)
       .post(`/${domain}/atlas/evaluation-hooks/replay`)
       .send({ hookId: hook.id, isDryRun: true });
 
-    const signalsAfter = getSignals(domain, 200);
+    const signalsAfter = await getSignals(domain, 10000);
     expect(signalsAfter.length).toBe(signalsBefore + 1);
   });
 });
@@ -727,7 +731,7 @@ describe("ATLAS evaluation hook store contract", () => {
     const run = makeWorkflowRun({ workflowId: "aegis-incident-response", isDryRun: false });
     mockExecuteWorkflow.mockResolvedValueOnce({ run, requiresApproval: false });
 
-    const signal = ingestSignal({
+    const signal = await ingestSignal({
       domain,
       signalType: "threat-detection",
       severity: "critical",
@@ -740,7 +744,7 @@ describe("ATLAS evaluation hook store contract", () => {
       tenantId: "t1",
     });
 
-    const hooksBefore = getEvaluationHooks(domain).length;
+    const hooksBefore = (await getEvaluationHooks(domain)).length;
 
     await executedomainWorkflow({
       domain,
@@ -751,10 +755,11 @@ describe("ATLAS evaluation hook store contract", () => {
       initiatedBy: "test-harness",
     });
 
-    const hooksAfter = getEvaluationHooks(domain);
+    const hooksAfter = await getEvaluationHooks(domain);
     expect(hooksAfter.length).toBe(hooksBefore + 1);
 
-    const hook = hooksAfter[hooksAfter.length - 1];
+    // getEvaluationHooks orders by snapshotAt DESC — newest hook is first
+    const hook = hooksAfter[0];
     expect(hook.domain).toBe(domain);
     expect(hook.replayable).toBe(true);
     expect(hook.runSnapshot.runId).toBe(run.runId);
@@ -765,7 +770,7 @@ describe("ATLAS evaluation hook store contract", () => {
     const run = makeWorkflowRun({ isDryRun: true, workflowId: "vessels-voyage-risk" });
     mockExecuteWorkflow.mockResolvedValueOnce({ run, requiresApproval: false, dryRunSummary: "ok" });
 
-    const hooksBefore = getEvaluationHooks(domain).length;
+    const hooksBefore = (await getEvaluationHooks(domain)).length;
 
     await executedomainWorkflow({
       domain,
@@ -775,7 +780,7 @@ describe("ATLAS evaluation hook store contract", () => {
       initiatedBy: "test-harness",
     });
 
-    expect(getEvaluationHooks(domain).length).toBe(hooksBefore);
+    expect((await getEvaluationHooks(domain)).length).toBe(hooksBefore);
   });
 
   it("simulation execution does NOT register an evaluation hook", async () => {
@@ -783,7 +788,7 @@ describe("ATLAS evaluation hook store contract", () => {
     const run = makeWorkflowRun({ isSimulation: true, workflowId: "terra-deal-underwriting" });
     mockExecuteWorkflow.mockResolvedValueOnce({ run, requiresApproval: false, simulationSummary: "ok" });
 
-    const hooksBefore = getEvaluationHooks(domain).length;
+    const hooksBefore = (await getEvaluationHooks(domain)).length;
 
     await executedomainWorkflow({
       domain,
@@ -793,13 +798,13 @@ describe("ATLAS evaluation hook store contract", () => {
       initiatedBy: "test-harness",
     });
 
-    expect(getEvaluationHooks(domain).length).toBe(hooksBefore);
+    expect((await getEvaluationHooks(domain)).length).toBe(hooksBefore);
   });
 
-  it("registerEvaluationHook stores a hook retrievable by ID with benchmark metrics", () => {
+  it("registerEvaluationHook stores a hook retrievable by ID with benchmark metrics", async () => {
     const domain = "prism-counsel";
     const fakeRun = makeWorkflowRun({ workflowId: "prism-matter-execution" });
-    const sig = ingestSignal({
+    const sig = await ingestSignal({
       domain,
       signalType: "court-order",
       severity: "high",
@@ -812,7 +817,7 @@ describe("ATLAS evaluation hook store contract", () => {
       tenantId: "t1",
     });
 
-    const hook = registerEvaluationHook({
+    const hook = await registerEvaluationHook({
       domain,
       workflowId: fakeRun.runId,
       workflowName: "PRISM Counsel Matter Execution",
@@ -835,13 +840,13 @@ describe("ATLAS evaluation hook store contract", () => {
     expect(hook.benchmarkMetrics?.stepsCompleted).toBe(6);
     expect(hook.benchmarkMetrics?.evidenceCount).toBe(3);
 
-    const retrieved = getEvaluationHookById(hook.id);
+    const retrieved = await getEvaluationHookById(hook.id);
     expect(retrieved?.id).toBe(hook.id);
     expect(retrieved?.signalSnapshot[0].id).toBe(sig.id);
   });
 
-  it("getEvaluationHookById returns undefined for an unknown ID", () => {
-    expect(getEvaluationHookById("no-such-hook")).toBeUndefined();
+  it("getEvaluationHookById returns undefined for an unknown ID", async () => {
+    expect(await getEvaluationHookById("no-such-hook")).toBeUndefined();
   });
 });
 

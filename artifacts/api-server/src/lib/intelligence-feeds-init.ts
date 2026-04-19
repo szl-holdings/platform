@@ -15,6 +15,7 @@ import { logger } from "./logger";
 import { db } from "@szl-holdings/db";
 import { entitiesTable } from "@szl-holdings/db";
 import { eq } from "drizzle-orm";
+import { isFlagEnabled } from "./platform-flags";
 import type { NormalizedFeedPayload } from "@szl-holdings/intelligence-feeds/feed-adapter";
 import type { OntologyEntity, OntologyRelationship } from "@szl-holdings/ai-engine/ontology/ontology-engine";
 
@@ -55,7 +56,8 @@ export async function startIntelligenceFeeds(): Promise<void> {
         import("@szl-holdings/ai-engine/ontology/ontology-engine"),
       ]);
 
-    const aisEnabled = process.env.AIS_FEED_ENABLED !== "false";
+    const aisEnabled = process.env.AIS_FEED_ENABLED !== "false"
+      && await isFlagEnabled("live_ais_feed_enabled");
     const stixEnabled = process.env.STIX_FEED_ENABLED !== "false";
     const sanctionsEnabled = process.env.SANCTIONS_FEED_ENABLED !== "false";
     const legalEnabled = process.env.LEGAL_FEED_ENABLED !== "false";
