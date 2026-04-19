@@ -4,11 +4,13 @@ import PDFDocument from "pdfkit";
 import { timingSafeEqual, createHash } from "crypto";
 import rateLimit from "express-rate-limit";
 import { and, desc, eq, gte, inArray, sql } from "drizzle-orm";
+import { randomBytes } from "crypto";
 import {
   db,
   pulseDissentsTable,
   pulseCustomBriefsTable,
   pulseBriefingsTable,
+  pulseEmailSubscriptionsTable,
   firestormFindingsTable,
   firestormAlertsTable,
   firestormIncidentsTable,
@@ -138,6 +140,36 @@ if (process.env.NODE_ENV !== "production") {
   });
 }
 // ─────────────────────────────────────────────────────────────────────────────
+
+// Public unsubscribe — accepts a one-shot token and cancels the subscription.
+// Mounted before the auth middleware so the link in delivered emails works
+// without requiring the recipient to be signed in.
+router.get("/unsubscribe", async (req: Request, res: Response): Promise<void> => {
+  const token = String(req.query.token ?? "").trim();
+  if (!token) {
+    res.status(400).type("html").send(`<html><body style="font-family:sans-serif;padding:40px;background:#0a0b0d;color:#fff;"><h2>Invalid unsubscribe link</h2><p>The unsubscribe token is missing.</p></body></html>`);
+    return;
+  }
+  const result = await db
+    .update(pulseEmailSubscriptionsTable)
+    .set({ status: "cancelled", updatedAt: new Date() })
+    .where(eq(pulseEmailSubscriptionsTable.unsubscribeToken, token))
+    .returning();
+  if (result.length === 0) {
+    res.status(404).type("html").send(`<html><body style="font-family:sans-serif;padding:40px;background:#0a0b0d;color:#fff;"><h2>Subscription not found</h2><p>This unsubscribe link is no longer valid.</p></body></html>`);
+    return;
+  }
+  const safeEmail = result[0]!.email
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  res.type("html").send(`<!DOCTYPE html><html><head><title>Unsubscribed</title></head><body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:40px;background:#0a0b0d;color:#e6e6e6;text-align:center;">
+    <div style="max-width:480px;margin:60px auto;padding:32px;background:#101216;border:1px solid rgba(200,168,75,0.2);border-radius:12px;">
+      <div style="font-size:11px;letter-spacing:0.14em;color:#c8a84b;text-transform:uppercase;margin-bottom:12px;">PULSE</div>
+      <h2 style="color:#fff;margin:0 0 12px;">You're unsubscribed</h2>
+      <p style="color:rgba(255,255,255,0.6);line-height:1.6;">${safeEmail} has been removed from the daily Pulse briefing list.</p>
+      <p style="color:rgba(255,255,255,0.4);font-size:13px;margin-top:20px;">You can resubscribe anytime from your Pulse settings.</p>
+    </div>
+  </body></html>`);
+});
 
 router.use(authMiddleware({ required: true }));
 
@@ -1691,4 +1723,159 @@ router.post("/export/pdf", validateBody(jsonObjectBodySchema), async (req: Reque
   renderBriefingPdf(res, brief);
 });
 
+// ─── Email subscriptions ──────────────────────────────────────────────────────
+
+const VALID_DOMAIN_KEYS: DomainKey[] = ["maritime", "security", "real_estate", "legal", "financial", "platform", "executive"];
+
+interface PublicSubscription {
+  id: number;
+  email: string;
+  domains: string[];
+  status: "active" | "paused" | "cancelled";
+  unsubscribeUrl: string;
+  lastSentAt: string | null;
+  createdAt: string;
+}
+
+function buildUnsubscribeUrl(token: string): string {
+  const origin = process.env.REPLIT_DEV_DOMAIN
+    ? `https://${process.env.REPLIT_DEV_DOMAIN}`
+    : "http://localhost:5201";
+  return `${origin}/api/pulse/unsubscribe?token=${encodeURIComponent(token)}`;
+}
+
+function rowToSubscription(row: typeof pulseEmailSubscriptionsTable.$inferSelect): PublicSubscription {
+  return {
+    id: row.id,
+    email: row.email,
+    domains: row.domains ?? [],
+    status: row.status,
+    unsubscribeUrl: buildUnsubscribeUrl(row.unsubscribeToken),
+    lastSentAt: row.lastSentAt ? row.lastSentAt.toISOString() : null,
+    createdAt: row.createdAt.toISOString(),
+  };
+}
+
+function normalizeEmail(raw: unknown): string | null {
+  if (typeof raw !== "string") return null;
+  const v = raw.trim().toLowerCase();
+  // RFC 5322 simplified
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return null;
+  if (v.length > 254) return null;
+  return v;
+}
+
+function normalizeDomains(raw: unknown): DomainKey[] {
+  if (!Array.isArray(raw)) return [];
+  const out: DomainKey[] = [];
+  for (const d of raw) {
+    if (typeof d === "string" && VALID_DOMAIN_KEYS.includes(d as DomainKey) && !out.includes(d as DomainKey)) {
+      out.push(d as DomainKey);
+    }
+  }
+  return out;
+}
+
+router.get("/subscriptions", async (req: Request, res: Response): Promise<void> => {
+  if (!req.user) { sendUnauthorized(res); return; }
+  const rows = await db
+    .select()
+    .from(pulseEmailSubscriptionsTable)
+    .where(eq(pulseEmailSubscriptionsTable.userId, req.user.id))
+    .orderBy(desc(pulseEmailSubscriptionsTable.createdAt));
+  res.json({ success: true, subscriptions: rows.map(rowToSubscription) });
+});
+
+router.post("/subscriptions", validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
+  if (!req.user) { sendUnauthorized(res); return; }
+  const email = normalizeEmail(req.body?.email ?? req.user.email);
+  if (!email) { sendBadRequest(res, "valid email is required"); return; }
+  const domains = normalizeDomains(req.body?.domains);
+
+  // Idempotent: if a non-cancelled subscription with this user+email exists,
+  // reactivate it and update domains rather than creating a duplicate.
+  const existing = await db
+    .select()
+    .from(pulseEmailSubscriptionsTable)
+    .where(and(
+      eq(pulseEmailSubscriptionsTable.userId, req.user.id),
+      eq(pulseEmailSubscriptionsTable.email, email),
+    ))
+    .limit(1);
+
+  if (existing.length > 0) {
+    const [row] = await db
+      .update(pulseEmailSubscriptionsTable)
+      .set({
+        domains,
+        status: "active",
+        updatedAt: new Date(),
+      })
+      .where(eq(pulseEmailSubscriptionsTable.id, existing[0]!.id))
+      .returning();
+    res.json({ success: true, subscription: rowToSubscription(row!), message: "Subscription reactivated." });
+    return;
+  }
+
+  const token = randomBytes(24).toString("hex");
+  const [row] = await db
+    .insert(pulseEmailSubscriptionsTable)
+    .values({
+      userId: req.user.id,
+      email,
+      domains,
+      status: "active",
+      unsubscribeToken: token,
+    })
+    .returning();
+  res.json({ success: true, subscription: rowToSubscription(row!), message: "Subscribed to daily Pulse briefing." });
+});
+
+router.patch("/subscriptions/:id", validateBody(jsonObjectBodySchema), async (req: Request, res: Response): Promise<void> => {
+  if (!req.user) { sendUnauthorized(res); return; }
+  const id = parseInt(String(req.params.id ?? ""), 10);
+  if (!Number.isFinite(id)) { sendBadRequest(res, "invalid subscription id"); return; }
+
+  const existing = await db
+    .select()
+    .from(pulseEmailSubscriptionsTable)
+    .where(and(eq(pulseEmailSubscriptionsTable.id, id), eq(pulseEmailSubscriptionsTable.userId, req.user.id)))
+    .limit(1);
+  if (existing.length === 0) { sendNotFound(res, "Subscription"); return; }
+
+  const updates: Partial<typeof pulseEmailSubscriptionsTable.$inferInsert> = { updatedAt: new Date() };
+  if (typeof req.body?.status === "string") {
+    if (!["active", "paused", "cancelled"].includes(req.body.status)) {
+      sendBadRequest(res, "status must be active, paused, or cancelled");
+      return;
+    }
+    updates.status = req.body.status;
+  }
+  if (Array.isArray(req.body?.domains)) {
+    updates.domains = normalizeDomains(req.body.domains);
+  }
+
+  const [row] = await db
+    .update(pulseEmailSubscriptionsTable)
+    .set(updates)
+    .where(eq(pulseEmailSubscriptionsTable.id, id))
+    .returning();
+  res.json({ success: true, subscription: rowToSubscription(row!) });
+});
+
+router.delete("/subscriptions/:id", async (req: Request, res: Response): Promise<void> => {
+  if (!req.user) { sendUnauthorized(res); return; }
+  const id = parseInt(String(req.params.id ?? ""), 10);
+  if (!Number.isFinite(id)) { sendBadRequest(res, "invalid subscription id"); return; }
+
+  const result = await db
+    .update(pulseEmailSubscriptionsTable)
+    .set({ status: "cancelled", updatedAt: new Date() })
+    .where(and(eq(pulseEmailSubscriptionsTable.id, id), eq(pulseEmailSubscriptionsTable.userId, req.user.id)))
+    .returning();
+  if (result.length === 0) { sendNotFound(res, "Subscription"); return; }
+  res.json({ success: true, subscription: rowToSubscription(result[0]!), message: "Subscription cancelled." });
+});
+
 export default router;
+

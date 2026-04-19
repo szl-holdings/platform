@@ -1342,3 +1342,152 @@ export function buildScheduledReportEmail(opts: ScheduledReportEmailOptions): { 
   return { subject, html, text };
 }
 
+
+export interface PulseBriefingEmailSection {
+  id: string;
+  title: string;
+  agentName?: string;
+  agentId: string;
+  riskLevel: string;
+  confidence: number;
+  confidenceLabel: string;
+  keyJudgment: string;
+  keyFindings: Array<{ finding: string; severity: string }>;
+}
+
+export interface PulseBriefingEmailOptions {
+  recipientName?: string;
+  briefingId: string;
+  date: string;
+  edition: string;
+  classification: string;
+  headline: string;
+  leadSentence: string;
+  overallRisk: string;
+  overallConfidence: number;
+  sections: PulseBriefingEmailSection[];
+  recommendedActions: Array<{ action: string; priority: string; owner: string; dueBy: string }>;
+  pulseUrl: string;
+  unsubscribeUrl: string;
+  manageUrl: string;
+  domainsFilter?: string[];
+}
+
+const RISK_COLORS: Record<string, string> = {
+  CRITICAL: "#b91c1c",
+  HIGH:     "#c2410c",
+  MEDIUM:   "#b45309",
+  LOW:      "#15803d",
+};
+
+function pulseBrand(content: string, footer: string): string {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Pulse Briefing</title>
+</head>
+<body style="margin:0;padding:0;background:#0a0b0d;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',sans-serif;color:#e6e6e6;">
+<div style="max-width:640px;margin:0 auto;padding:32px 16px;">
+  <div style="background:#101216;border:1px solid rgba(200,168,75,0.18);border-radius:12px;padding:32px;">
+    <div style="font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#c8a84b;margin-bottom:16px;">PULSE · AI EXECUTIVE BRIEFING</div>
+    ${content}
+    <div style="height:1px;background:rgba(255,255,255,0.08);margin:28px 0;"></div>
+    <div style="font-size:11px;color:rgba(255,255,255,0.4);line-height:1.7;">
+      ${footer}
+    </div>
+  </div>
+</div>
+</body>
+</html>`;
+}
+
+export function buildPulseBriefingEmail(opts: PulseBriefingEmailOptions): { subject: string; html: string; text: string } {
+  const filtered = opts.domainsFilter && opts.domainsFilter.length > 0
+    ? opts.sections.filter((s) => opts.domainsFilter!.includes(s.id ?? s.agentId) || opts.domainsFilter!.some((d) => s.title.toLowerCase().includes(d.replace(/_/g, " "))))
+    : opts.sections;
+  const sectionsToRender = filtered.length > 0 ? filtered : opts.sections;
+
+  const overallColor = RISK_COLORS[opts.overallRisk] ?? "#9ca3af";
+  const greeting = opts.recipientName ? `Good morning, ${escapeHtml(opts.recipientName)}.` : "Good morning.";
+
+  const sectionsHtml = sectionsToRender.map((s) => {
+    const color = RISK_COLORS[s.riskLevel] ?? "#9ca3af";
+    const findingsHtml = s.keyFindings.slice(0, 3).map((f) => {
+      const fc = RISK_COLORS[f.severity] ?? "#9ca3af";
+      return `<li style="margin:4px 0;color:rgba(255,255,255,0.78);font-size:13px;line-height:1.5;"><span style="color:${fc};font-weight:700;font-size:10px;letter-spacing:0.06em;">[${escapeHtml(f.severity)}]</span> ${escapeHtml(f.finding)}</li>`;
+    }).join("");
+    return `
+    <div style="border-left:3px solid ${color};padding:14px 18px;margin:14px 0;background:rgba(255,255,255,0.03);border-radius:0 6px 6px 0;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+        <span style="font-size:14px;font-weight:600;color:#fff;">${escapeHtml(s.title)}</span>
+        <span style="font-size:10px;color:rgba(255,255,255,0.4);">${escapeHtml(s.agentName ?? s.agentId)}</span>
+        <span style="font-size:10px;font-weight:700;color:${color};letter-spacing:0.08em;margin-left:auto;">${escapeHtml(s.riskLevel)} · ${(s.confidence * 100).toFixed(0)}% (${escapeHtml(s.confidenceLabel)})</span>
+      </div>
+      <p style="margin:0 0 10px;font-size:13px;color:rgba(255,255,255,0.85);line-height:1.55;">${escapeHtml(s.keyJudgment)}</p>
+      ${findingsHtml ? `<ul style="margin:8px 0 0;padding-left:18px;">${findingsHtml}</ul>` : ""}
+    </div>`;
+  }).join("");
+
+  const actionsHtml = opts.recommendedActions.length
+    ? `<div style="margin-top:24px;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#c8a84b;margin-bottom:10px;">Recommended Actions</div>
+        ${opts.recommendedActions.slice(0, 5).map((a) => `
+          <div style="padding:10px 14px;background:rgba(200,168,75,0.06);border:1px solid rgba(200,168,75,0.18);border-radius:6px;margin-bottom:8px;">
+            <div style="font-size:13px;color:#fff;font-weight:600;margin-bottom:4px;"><span style="color:#c8a84b;font-weight:700;">[${escapeHtml(a.priority)}]</span> ${escapeHtml(a.action)}</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.5);">Owner: ${escapeHtml(a.owner)} · Due: ${escapeHtml(a.dueBy)}</div>
+          </div>`).join("")}
+      </div>`
+    : "";
+
+  const html = pulseBrand(`
+    <div style="font-size:10px;letter-spacing:0.1em;color:#b45309;text-align:right;margin-bottom:8px;">${escapeHtml(opts.classification)}</div>
+    <p style="margin:0 0 6px;font-size:13px;color:rgba(255,255,255,0.55);">${greeting}</p>
+    <h1 style="margin:0 0 12px;font-size:20px;font-weight:600;color:#fff;line-height:1.3;">${escapeHtml(opts.headline)}</h1>
+    <p style="margin:0 0 16px;font-size:13px;color:rgba(255,255,255,0.7);line-height:1.6;">${escapeHtml(opts.leadSentence)}</p>
+    <div style="display:inline-block;padding:6px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:6px;font-size:11px;color:rgba(255,255,255,0.7);margin-bottom:8px;">
+      Overall risk <strong style="color:${overallColor};">${escapeHtml(opts.overallRisk)}</strong> · Confidence ${(opts.overallConfidence * 100).toFixed(0)}% · ${escapeHtml(opts.edition)}
+    </div>
+    ${sectionsHtml}
+    ${actionsHtml}
+    <div style="margin-top:28px;text-align:center;">
+      <a href="${opts.pulseUrl}" style="display:inline-block;padding:10px 20px;background:rgba(200,168,75,0.14);border:1px solid rgba(200,168,75,0.4);border-radius:6px;color:#c8a84b;text-decoration:none;font-size:13px;font-weight:600;">Read Full Briefing →</a>
+    </div>
+  `, `
+    SZL Holdings · Pulse — AI Executive Briefing<br />
+    You're receiving this because you subscribed to daily Pulse briefings.<br />
+    <a href="${opts.manageUrl}" style="color:rgba(200,168,75,0.7);">Manage subscription</a> · <a href="${opts.unsubscribeUrl}" style="color:rgba(200,168,75,0.7);">Unsubscribe</a>
+  `);
+
+  const textLines = [
+    `PULSE · AI EXECUTIVE BRIEFING — ${opts.date}`,
+    opts.classification,
+    "",
+    opts.headline,
+    "",
+    opts.leadSentence,
+    "",
+    `Overall risk: ${opts.overallRisk} · Confidence: ${(opts.overallConfidence * 100).toFixed(0)}%`,
+    "",
+    ...sectionsToRender.flatMap((s) => [
+      `── ${s.title} (${s.agentName ?? s.agentId}) — ${s.riskLevel} · ${(s.confidence * 100).toFixed(0)}% (${s.confidenceLabel})`,
+      s.keyJudgment,
+      ...s.keyFindings.slice(0, 3).map((f) => `  • [${f.severity}] ${f.finding}`),
+      "",
+    ]),
+    ...(opts.recommendedActions.length
+      ? ["RECOMMENDED ACTIONS:", ...opts.recommendedActions.slice(0, 5).map((a) => `  [${a.priority}] ${a.action} (Owner: ${a.owner}, Due: ${a.dueBy})`), ""]
+      : []),
+    `Read full briefing: ${opts.pulseUrl}`,
+    "",
+    `Manage subscription: ${opts.manageUrl}`,
+    `Unsubscribe: ${opts.unsubscribeUrl}`,
+  ];
+
+  return {
+    subject: `Pulse Brief · ${opts.date} · ${opts.headline.slice(0, 80)}`,
+    html,
+    text: textLines.join("\n"),
+  };
+}

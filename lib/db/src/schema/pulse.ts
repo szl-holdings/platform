@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp, jsonb, numeric, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, timestamp, jsonb, numeric, boolean } from "drizzle-orm/pg-core";
 
 export const pulseBriefingsTable = pgTable("pulse_briefings", {
   id: text("id").primaryKey(),
@@ -45,6 +45,19 @@ export const pulseCustomBriefsTable = pgTable("pulse_custom_briefs", {
   requestedAt: timestamp("requested_at").notNull().defaultNow(),
   status: text("status", { enum: ["pending", "generating", "complete", "failed"] }).notNull().default("pending"),
   briefingId: text("briefing_id"),
+});
+
+export const pulseEmailSubscriptionsTable = pgTable("pulse_email_subscriptions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  email: text("email").notNull(),
+  domains: jsonb("domains").$type<string[]>().notNull().default([]),
+  status: text("status", { enum: ["active", "paused", "cancelled"] }).notNull().default("active"),
+  unsubscribeToken: text("unsubscribe_token").notNull().unique(),
+  lastSentBriefingId: text("last_sent_briefing_id"),
+  lastSentAt: timestamp("last_sent_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 export const pulseExecBriefsTable = pgTable("pulse_exec_briefs", {

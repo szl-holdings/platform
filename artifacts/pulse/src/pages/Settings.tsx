@@ -1,8 +1,28 @@
 import { useState, useEffect, useRef } from "react";
-import { Bell, Clock, Globe, Shield, Zap, Check, CreditCard, ArrowRight, Loader } from "lucide-react";
+import { Bell, Clock, Globe, Shield, Zap, Check, CreditCard, ArrowRight, Loader, Mail, Pause, Play, X } from "lucide-react";
 import { trackEvent } from "@szl-holdings/observability/react";
 
 type Toggle = { key: string; label: string; description: string; value: boolean };
+
+type EmailSubscription = {
+  id: number;
+  email: string;
+  domains: string[];
+  status: "active" | "paused" | "cancelled";
+  unsubscribeUrl: string;
+  lastSentAt: string | null;
+  createdAt: string;
+};
+
+const SUBSCRIPTION_DOMAINS: Array<{ key: string; label: string }> = [
+  { key: "executive",   label: "Executive Synthesis" },
+  { key: "maritime",    label: "Maritime" },
+  { key: "security",    label: "Security & Threats" },
+  { key: "real_estate", label: "Real Estate" },
+  { key: "legal",       label: "Legal & Compliance" },
+  { key: "financial",   label: "Financial & Portfolio" },
+  { key: "platform",    label: "Platform Health" },
+];
 
 const NS = "pulse";
 
@@ -70,7 +90,102 @@ export default function Settings() {
   const [timeZone, setTimeZone] = useState("UTC");
   const [classification, setClassification] = useState("SZL-EXEC-RESTRICTED");
   const [defaultView, setDefaultView] = useState("today");
+
+  // Email subscription state
+  const [subscriptions, setSubscriptions] = useState<EmailSubscription[]>([]);
+  const [subEmail, setSubEmail] = useState("");
+  const [subDomains, setSubDomains] = useState<string[]>([]);
+  const [subBusy, setSubBusy] = useState(false);
+  const [subMessage, setSubMessage] = useState<string | null>(null);
+  const [subError, setSubError] = useState<string | null>(null);
+
   const initialised = useRef(false);
+
+  const refreshSubscriptions = async () => {
+    try {
+      const res = await fetch("/api/pulse/subscriptions", { credentials: "include" });
+      if (!res.ok) return;
+      const body = (await res.json()) as { subscriptions?: EmailSubscription[] };
+      setSubscriptions(body.subscriptions ?? []);
+    } catch {
+      // ignore
+    }
+  };
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubBusy(true);
+    setSubError(null);
+    setSubMessage(null);
+    try {
+      const res = await fetch("/api/pulse/subscriptions", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: subEmail.trim(), domains: subDomains }),
+      });
+      const body = (await res.json()) as { success?: boolean; message?: string; error?: string };
+      if (!res.ok || body.success === false) {
+        setSubError(body.error ?? `Failed (HTTP ${res.status})`);
+      } else {
+        setSubMessage(body.message ?? "Subscribed.");
+        trackEvent("pulse_email_subscribed", { domain_count: subDomains.length });
+        setSubEmail("");
+        setSubDomains([]);
+        await refreshSubscriptions();
+      }
+    } catch (err) {
+      setSubError(err instanceof Error ? err.message : "Subscription failed.");
+    } finally {
+      setSubBusy(false);
+    }
+  };
+
+  const updateSubscriptionStatus = async (id: number, status: "active" | "paused") => {
+    setSubBusy(true);
+    setSubError(null);
+    setSubMessage(null);
+    try {
+      const res = await fetch(`/api/pulse/subscriptions/${id}`, {
+        method: "PATCH",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+      if (!res.ok) {
+        const body = (await res.json().catch(() => ({}))) as { error?: string };
+        setSubError(body.error ?? `Failed (HTTP ${res.status})`);
+      } else {
+        setSubMessage(status === "paused" ? "Subscription paused." : "Subscription resumed.");
+        trackEvent("pulse_email_subscription_status_changed", { status });
+        await refreshSubscriptions();
+      }
+    } finally {
+      setSubBusy(false);
+    }
+  };
+
+  const cancelSubscription = async (id: number) => {
+    setSubBusy(true);
+    setSubError(null);
+    setSubMessage(null);
+    try {
+      const res = await fetch(`/api/pulse/subscriptions/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (!res.ok) {
+        const body = (await res.json().catch(() => ({}))) as { error?: string };
+        setSubError(body.error ?? `Failed (HTTP ${res.status})`);
+      } else {
+        setSubMessage("Subscription cancelled.");
+        trackEvent("pulse_email_subscription_cancelled", {});
+        await refreshSubscriptions();
+      }
+    } finally {
+      setSubBusy(false);
+    }
+  };
 
   useEffect(() => {
     if (initialised.current) return;
@@ -95,6 +210,7 @@ export default function Settings() {
       .catch((err) => {
         setLoadError(err instanceof Error ? err.message : "Failed to load settings");
       });
+    void refreshSubscriptions();
   }, []);
 
   const handleToggle = (key: string) => {
@@ -287,6 +403,119 @@ export default function Settings() {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Email Briefing Subscription */}
+      <div className="section-card" style={{ padding: "18px 20px", marginBottom: 16 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+          <Mail size={15} color="var(--pulse-text-muted)" />
+          <h3 style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--pulse-text)" }}>Daily Briefing Email</h3>
+        </div>
+        <p style={{ fontSize: "0.78rem", color: "var(--pulse-text-muted)", marginBottom: 14, lineHeight: 1.5 }}>
+          Receive the formatted Pulse briefing in your inbox every morning at 5:30 AM UTC. Choose specific domains or leave empty to receive all sections.
+        </p>
+
+        {(subMessage || subError) && (
+          <div style={{
+            marginBottom: 12, padding: "8px 12px", borderRadius: 6, fontSize: "0.78rem",
+            background: subError ? "rgba(224,80,80,0.1)" : "rgba(78,202,139,0.1)",
+            border: `1px solid ${subError ? "rgba(224,80,80,0.3)" : "rgba(78,202,139,0.3)"}`,
+            color: subError ? "#e05050" : "#4eca8b",
+          }}>
+            {subError ?? subMessage}
+          </div>
+        )}
+
+        {subscriptions.filter((s) => s.status !== "cancelled").length > 0 && (
+          <div style={{ marginBottom: 16, display: "flex", flexDirection: "column", gap: 8 }}>
+            {subscriptions.filter((s) => s.status !== "cancelled").map((sub) => (
+              <div key={sub.id} style={{
+                padding: "12px 14px", borderRadius: 6,
+                background: "rgba(0,0,0,0.18)", border: "1px solid var(--pulse-border)",
+                display: "flex", flexDirection: "column", gap: 8,
+              }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
+                    <Mail size={13} color={sub.status === "active" ? "var(--pulse-gold)" : "var(--pulse-text-muted)"} />
+                    <span style={{ fontSize: "0.85rem", fontWeight: 500, color: "var(--pulse-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {sub.email}
+                    </span>
+                    <span style={{
+                      fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase",
+                      padding: "2px 6px", borderRadius: 4,
+                      background: sub.status === "active" ? "rgba(78,202,139,0.12)" : "rgba(255,255,255,0.06)",
+                      color: sub.status === "active" ? "#4eca8b" : "var(--pulse-text-muted)",
+                    }}>{sub.status}</span>
+                  </div>
+                  <div style={{ display: "flex", gap: 6 }}>
+                    {sub.status === "active" ? (
+                      <button onClick={() => updateSubscriptionStatus(sub.id, "paused")} disabled={subBusy}
+                        style={{ display: "flex", alignItems: "center", gap: 4, padding: "5px 10px", borderRadius: 4, background: "rgba(255,255,255,0.04)", border: "1px solid var(--pulse-border)", color: "var(--pulse-text-muted)", fontSize: "0.72rem", cursor: subBusy ? "not-allowed" : "pointer" }}>
+                        <Pause size={11} /> Pause
+                      </button>
+                    ) : (
+                      <button onClick={() => updateSubscriptionStatus(sub.id, "active")} disabled={subBusy}
+                        style={{ display: "flex", alignItems: "center", gap: 4, padding: "5px 10px", borderRadius: 4, background: "rgba(78,202,139,0.1)", border: "1px solid rgba(78,202,139,0.3)", color: "#4eca8b", fontSize: "0.72rem", cursor: subBusy ? "not-allowed" : "pointer" }}>
+                        <Play size={11} /> Resume
+                      </button>
+                    )}
+                    <button onClick={() => cancelSubscription(sub.id)} disabled={subBusy}
+                      style={{ display: "flex", alignItems: "center", gap: 4, padding: "5px 10px", borderRadius: 4, background: "rgba(224,80,80,0.08)", border: "1px solid rgba(224,80,80,0.25)", color: "#e05050", fontSize: "0.72rem", cursor: subBusy ? "not-allowed" : "pointer" }}>
+                      <X size={11} /> Cancel
+                    </button>
+                  </div>
+                </div>
+                <div style={{ fontSize: "0.72rem", color: "var(--pulse-text-muted)" }}>
+                  {sub.domains.length === 0 ? "All domains" : `Domains: ${sub.domains.map((d) => SUBSCRIPTION_DOMAINS.find((x) => x.key === d)?.label ?? d).join(", ")}`}
+                  {sub.lastSentAt && <span> · Last sent {new Date(sub.lastSentAt).toLocaleString()}</span>}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <form onSubmit={handleSubscribe} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <div>
+            <label style={{ display: "block", fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--pulse-text-muted)", marginBottom: 6 }}>Delivery email</label>
+            <input type="email" value={subEmail} onChange={(e) => setSubEmail(e.target.value)} required placeholder="you@company.com"
+              style={{ width: "100%", padding: "9px 12px", borderRadius: 6, background: "var(--pulse-bg)", border: "1px solid var(--pulse-border)", color: "var(--pulse-text)", fontSize: "0.88rem", outline: "none", fontFamily: "inherit" }}
+            />
+          </div>
+          <div>
+            <label style={{ display: "block", fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--pulse-text-muted)", marginBottom: 6 }}>Domains (optional — leave empty for all)</label>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+              {SUBSCRIPTION_DOMAINS.map((d) => {
+                const selected = subDomains.includes(d.key);
+                return (
+                  <button key={d.key} type="button"
+                    onClick={() => setSubDomains((prev) => prev.includes(d.key) ? prev.filter((x) => x !== d.key) : [...prev, d.key])}
+                    style={{
+                      padding: "5px 10px", borderRadius: 14, fontSize: "0.74rem", cursor: "pointer",
+                      background: selected ? "rgba(200,168,75,0.18)" : "rgba(255,255,255,0.04)",
+                      border: `1px solid ${selected ? "rgba(200,168,75,0.45)" : "var(--pulse-border)"}`,
+                      color: selected ? "var(--pulse-gold)" : "var(--pulse-text-muted)",
+                    }}
+                  >
+                    {selected && <Check size={10} style={{ marginRight: 4, verticalAlign: "middle" }} />}
+                    {d.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <button type="submit" disabled={subBusy || !subEmail.trim()}
+            style={{
+              alignSelf: "flex-start", display: "flex", alignItems: "center", gap: 6,
+              padding: "8px 14px", borderRadius: 6,
+              background: "rgba(200,168,75,0.12)", border: "1px solid rgba(200,168,75,0.35)",
+              color: "var(--pulse-gold)", fontSize: "0.8rem", fontWeight: 600,
+              cursor: (subBusy || !subEmail.trim()) ? "not-allowed" : "pointer", opacity: (subBusy || !subEmail.trim()) ? 0.6 : 1,
+            }}
+          >
+            {subBusy ? <Loader size={13} style={{ animation: "spin 1s linear infinite" }} /> : <Mail size={13} />}
+            Subscribe to Daily Briefing
+          </button>
+        </form>
       </div>
 
       {/* Alloy agents info */}

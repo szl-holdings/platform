@@ -24,6 +24,7 @@ export const NAMED_JOB_TYPES = {
   DAILY_PROOF_CHAIN_DIGEST: "daily_proof_chain_digest",
   ATLAS_SNAPSHOT_COMPACTION: "atlas_snapshot_compaction",
   ATLAS_RETENTION_PRUNE: "atlas_retention_prune",
+  DAILY_PULSE_BRIEFING_DIGEST: "daily_pulse_briefing_digest",
 } as const;
 
 export type NamedJobType = typeof NAMED_JOB_TYPES[keyof typeof NAMED_JOB_TYPES];
@@ -49,6 +50,7 @@ function registerEntry(entry: Omit<JobScheduleEntry, "runCount" | "failCount">) 
 }
 
 registerEntry({ type: NAMED_JOB_TYPES.WEEKLY_ECOSYSTEM_HEALTH_BRIEFING, name: "Weekly Ecosystem Health Briefing", description: "Generates and delivers the weekly Ecosystem Autopilot briefing — capability maturity changes, drift alerts, feature usage trends, feedback sentiment shifts, and competitive positioning deltas. Delivered via email, Slack, and in-app notification.", schedule: "weekly", enabled: true });
+registerEntry({ type: NAMED_JOB_TYPES.DAILY_PULSE_BRIEFING_DIGEST, name: "Daily Pulse Briefing Digest", description: "Delivers the latest published Pulse briefing to all active email subscribers. Filters sections per subscription's domain selection and tracks last-sent briefing to prevent duplicate delivery.", schedule: "daily", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.DAILY_LYTE_DIGEST, name: "Daily Lyte Digest", description: "Summarizes the day's signals, incidents, and actions across the Lyte observability platform. Sends digest to subscribed operators.", schedule: "daily", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.DAILY_READINESS_DIGEST, name: "Daily Readiness Digest", description: "Compiles readiness program status across all active programs, flags dimension regressions, and surfaces at-risk milestones.", schedule: "daily", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.DAILY_EXCEPTION_SUMMARY, name: "Daily Exception Summary", description: "Aggregates active and recently resolved exceptions across Vessels, Lyte, and Terra. Produces end-of-day operations briefing.", schedule: "daily", enabled: true });
@@ -287,6 +289,116 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_LYTE_DIGEST, async (job) => {
   serverTelemetry.recordBusinessEvent({ type: "daily_lyte_digest_completed", domain: "lyte", durationMs: Date.now() - start, success: true, metadata: { date, sent, skipped, failed } });
   updateRegistry(NAMED_JOB_TYPES.DAILY_LYTE_DIGEST, { lastStatus: "completed", lastDurationMs: Date.now() - start });
   logger.info({ jobId: job.id, date }, "daily_lyte_digest: complete");
+});
+
+durableJobQueue.register(NAMED_JOB_TYPES.DAILY_PULSE_BRIEFING_DIGEST, async (job) => {
+  const start = Date.now();
+  logger.info({ jobId: job.id }, "daily_pulse_briefing_digest: starting delivery");
+  let sent = 0;
+  let skipped = 0;
+  let failed = 0;
+  let briefingId: string | null = null;
+  try {
+    const { db, pulseBriefingsTable, pulseEmailSubscriptionsTable } = await import("@szl-holdings/db");
+    const { eq, desc, and, ne, or, isNull } = await import("drizzle-orm");
+    const { buildPulseBriefingEmail } = await import("./email");
+    const { queueEmail } = await import("./queued-jobs");
+
+    const [briefing] = await db
+      .select()
+      .from(pulseBriefingsTable)
+      .where(eq(pulseBriefingsTable.status, "published"))
+      .orderBy(desc(pulseBriefingsTable.generatedAt))
+      .limit(1);
+
+    if (!briefing) {
+      logger.info({ jobId: job.id }, "daily_pulse_briefing_digest: no published briefing — skipping");
+      updateRegistry(NAMED_JOB_TYPES.DAILY_PULSE_BRIEFING_DIGEST, { lastStatus: "completed", lastDurationMs: Date.now() - start });
+      return;
+    }
+    briefingId = briefing.id;
+
+    const subscribers = await db
+      .select()
+      .from(pulseEmailSubscriptionsTable)
+      .where(and(
+        eq(pulseEmailSubscriptionsTable.status, "active"),
+        or(
+          isNull(pulseEmailSubscriptionsTable.lastSentBriefingId),
+          ne(pulseEmailSubscriptionsTable.lastSentBriefingId, briefing.id),
+        ),
+      ));
+
+    const baseUrl = process.env.APP_URL || (process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : "https://szlholdings.com");
+    const pulseUrl = `${baseUrl}/pulse/`;
+    const sections = (briefing.sections as Array<Record<string, unknown>>) ?? [];
+    const recommendedActions = (briefing.recommendedActions as Array<Record<string, unknown>>) ?? [];
+
+    for (const sub of subscribers) {
+      try {
+        const emailSections = sections.map((s) => ({
+          id: String(s.id ?? s.domain ?? ""),
+          title: String(s.title ?? "Briefing"),
+          agentId: String(s.agentId ?? ""),
+          agentName: s.agentName ? String(s.agentName) : undefined,
+          riskLevel: String(s.riskLevel ?? "MEDIUM"),
+          confidence: Number(s.confidence ?? 0),
+          confidenceLabel: String(s.confidenceLabel ?? ""),
+          keyJudgment: String(s.keyJudgment ?? s.judgment ?? ""),
+          keyFindings: Array.isArray(s.keyFindings)
+            ? (s.keyFindings as Array<Record<string, unknown>>).map((f) => ({
+                finding: String(f.finding ?? ""),
+                severity: String(f.severity ?? "MEDIUM"),
+              }))
+            : [],
+        }));
+        const filtered = (sub.domains && sub.domains.length > 0)
+          ? emailSections.filter((s) => sub.domains.some((d: string) => s.id === d || s.title.toLowerCase().includes(d.replace(/_/g, " "))))
+          : emailSections;
+        const sectionsToSend = filtered.length > 0 ? filtered : emailSections;
+
+        const email = buildPulseBriefingEmail({
+          briefingId: briefing.id,
+          date: briefing.date,
+          edition: briefing.edition,
+          classification: briefing.classification,
+          headline: briefing.headline,
+          leadSentence: briefing.leadSentence,
+          overallRisk: briefing.overallRisk,
+          overallConfidence: Number(briefing.overallConfidence),
+          sections: sectionsToSend,
+          recommendedActions: recommendedActions.map((a) => ({
+            action: String(a.action ?? ""),
+            priority: String(a.priority ?? "MEDIUM"),
+            owner: String(a.owner ?? ""),
+            dueBy: String(a.dueBy ?? ""),
+          })),
+          pulseUrl,
+          unsubscribeUrl: `${baseUrl}/api/pulse/unsubscribe?token=${encodeURIComponent(sub.unsubscribeToken)}`,
+          manageUrl: `${pulseUrl}settings`,
+          domainsFilter: sub.domains as string[] | undefined,
+        });
+
+        await queueEmail({ to: sub.email, subject: email.subject, html: email.html, text: email.text });
+
+        await db
+          .update(pulseEmailSubscriptionsTable)
+          .set({ lastSentBriefingId: briefing.id, lastSentAt: new Date(), updatedAt: new Date() })
+          .where(eq(pulseEmailSubscriptionsTable.id, sub.id));
+        sent++;
+      } catch (err) {
+        failed++;
+        logger.warn({ err, subscriptionId: sub.id }, "daily_pulse_briefing_digest: failed for subscription");
+      }
+    }
+    logger.info({ jobId: job.id, briefingId, sent, skipped, failed }, "daily_pulse_briefing_digest: delivery complete");
+  } catch (err) {
+    logger.error({ err, jobId: job.id }, "daily_pulse_briefing_digest: fatal error");
+    updateRegistry(NAMED_JOB_TYPES.DAILY_PULSE_BRIEFING_DIGEST, { lastStatus: "failed", lastDurationMs: Date.now() - start });
+    return;
+  }
+  serverTelemetry.recordBusinessEvent({ type: "daily_pulse_briefing_digest_completed", domain: "pulse", durationMs: Date.now() - start, success: true, metadata: { briefingId, sent, skipped, failed } });
+  updateRegistry(NAMED_JOB_TYPES.DAILY_PULSE_BRIEFING_DIGEST, { lastStatus: "completed", lastDurationMs: Date.now() - start });
 });
 
 durableJobQueue.register(NAMED_JOB_TYPES.DAILY_READINESS_DIGEST, async (job) => {

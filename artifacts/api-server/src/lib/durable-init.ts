@@ -292,6 +292,7 @@ const DEFAULT_SCHEDULES: ScheduleDefinition[] = [
   { name: "nyc_ingestion_6h", jobType: NYC_INGESTION_JOB_TYPE, cronExpression: "0 */6 * * *", payload: { sources: ["acris", "acris_master", "foreclosure_filings", "dof_liens", "hpd_violations"] }, maxRetries: 2 },
   { name: "nyc_extended_ingestion_8h", jobType: NYC_EXTENDED_INGESTION_JOB_TYPE, cronExpression: "0 */8 * * *", payload: { sources: ["rolling_sales", "tax_lien_sale_list", "hpd_complaints", "dob_violations", "nyc_311", "acris_parties", "map_pluto"] }, maxRetries: 2 },
   { name: "lyte_digest_daily", jobType: NAMED_JOB_TYPES.DAILY_LYTE_DIGEST, cronExpression: "0 8 * * *", payload: {}, maxRetries: 2 },
+  { name: "pulse_briefing_digest_daily", jobType: NAMED_JOB_TYPES.DAILY_PULSE_BRIEFING_DIGEST, cronExpression: "30 5 * * *", payload: {}, maxRetries: 2 },
   { name: "readiness_digest_daily", jobType: NAMED_JOB_TYPES.DAILY_READINESS_DIGEST, cronExpression: "0 8 * * *", payload: {}, maxRetries: 2 },
   { name: "exception_summary_daily", jobType: NAMED_JOB_TYPES.DAILY_EXCEPTION_SUMMARY, cronExpression: "0 8 * * *", payload: {}, maxRetries: 2 },
   { name: "artifact_cleanup_daily", jobType: NAMED_JOB_TYPES.DAILY_ARTIFACT_CLEANUP, cronExpression: "0 8 * * *", payload: {}, maxRetries: 2 },

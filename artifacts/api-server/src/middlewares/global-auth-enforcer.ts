@@ -156,6 +156,10 @@ const PUBLIC_PREFIXES = [
   // Infrastructure status — lightweight public health summary used by the
   // Legatus infrastructure console to show live AquilaScore and threat level.
   "/api/infrastructure/",
+  // Pulse one-click email unsubscribe — token-protected, accessed from
+  // recipient's inbox without a session. Mounted before authMiddleware in
+  // routes/pulse.ts; this entry whitelists it past the global auth enforcer.
+  "/api/pulse/unsubscribe",
   // Demo narrative payloads (Sentra ransomware, Counsel deadline) — read-only.
   // Backs the Decision Center pages with the same signal/evidence/recommendation
   // bundle that gets seeded into the live signal mesh at boot.
