@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback } from "react";
+import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -364,6 +365,12 @@ function PropertyDetailPanel({ property, onClose, onConvertToLead }: { property:
               <Target className="w-3 h-3" /> Open Deal
             </button>
           </div>
+          <Link href={`/why-this-property/${property.id}`}>
+            <button className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-white text-xs font-bold transition-colors"
+              style={{ background: "#ef4444" }}>
+              <Flame className="w-3.5 h-3.5" /> Why This Property Now — Full Analysis
+            </button>
+          </Link>
         </div>
       </div>
     </div>

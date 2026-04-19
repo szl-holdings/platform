@@ -12,6 +12,7 @@ import terraModulesRouter from "../terra-modules";
 import terraDigitalTwinRouter from "../terra-digital-twin";
 import terraPropertyIntelRouter from "../terra-property-intel";
 import terraPortfolioIntelRouter from "../terra-portfolio-intel";
+import terraWhyThisPropertyRouter from "../terra-why-this-property";
 
 const _readLimiter = perUserApiSlidingLimiter;
 const _writeLimiter = perUserWriteSlidingLimiter;
@@ -22,6 +23,8 @@ export function register(router: IRouter): void {
   // unauthenticated visitors can access property-scoped intelligence data.
   router.use(terraPropertyIntelRouter);
   router.use(terraPortfolioIntelRouter);
+  // Why This Property Now — public, demo-friendly, no auth required.
+  router.use(terraWhyThisPropertyRouter);
 
   router.use("/terra", tenantScope({ required: true }));
   router.use("/beacon", tenantScope({ required: true }));

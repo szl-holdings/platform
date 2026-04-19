@@ -29,6 +29,7 @@ const EXEMPTIONS = new Set([
   // operations.ts — admin-only routes gated by adminGuard, not tenantScope
   "operations.ts::/admin",      // admin dashboard routes (requireRole / adminGuard)
   "operations.ts::/command",    // command center (adminGuard transitively)
+  "operations.ts::/linear",     // Linear integration: gated by handler-level Replit connector auth, not tenantScope
 
   // billing.ts — partner-portal cross-org routes with handler-level membership checks
   "billing.ts::/org-branding",              // PUBLIC: white-label login page asset (no auth)

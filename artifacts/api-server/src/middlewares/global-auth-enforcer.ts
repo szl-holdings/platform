@@ -98,6 +98,10 @@ const PUBLIC_PREFIXES = [
   // seed-based portfolio/list data for the 6 intelligence modules. Public so the Terra demo
   // shows realistic results without a session.
   "/api/terra/portfolio/",
+  // Terra "Why This Property Now" engine — distress decomposition, ownership chain,
+  // financing stress, and neighborhood motion from live NYC open data. Public so the
+  // demo works without a session; NYC SODA API calls are made server-side.
+  "/api/terra/why-this-property/",
   // Carlota Jo time tracking & invoice persistence — publicly accessible from the
   // time-tracking page (which is unauthenticated like the rest of the marketing
   // demo). Backed by Postgres so the data syncs across devices.

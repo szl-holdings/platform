@@ -110,6 +110,7 @@ const DistressForecastPage = lazy(() => import("@/pages/distress-forecast"));
 const UnderwritingCopilotPage = lazy(() => import("@/pages/underwriting-copilot"));
 const DiligenceRoomPage = lazy(() => import("@/pages/diligence-room"));
 const RiskSimulationPage = lazy(() => import("@/pages/risk-simulation"));
+const WhyThisPropertyNow = lazy(() => import("@/pages/why-this-property-now"));
 
 function PageLoader() {
   return (
@@ -215,6 +216,8 @@ function PrivateRouter() {
         <Route path="/diligence-room" component={DiligenceRoomPage} />
         <Route path="/governed-cockpit" component={GovernedCockpitPage} />
         <Route path="/risk-simulation" component={RiskSimulationPage} />
+        <Route path="/why-this-property/:propertyId" component={WhyThisPropertyNow} />
+        <Route path="/why-this-property" component={WhyThisPropertyNow} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>
