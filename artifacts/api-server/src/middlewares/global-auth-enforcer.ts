@@ -61,6 +61,10 @@ const PUBLIC_EXACT_PATHS = new Set([
   // (which requires auth) is NOT covered by these allowlist entries.
   "/api/self-healing/stats",
   "/api/self-healing/policies",
+  // Shared action store — backs the Business State / Enterprise State pages
+  // so risk owner assignments and decisions sync across team members. Public
+  // and unauthenticated like the rest of those demo surfaces.
+  "/api/action-store",
 ]);
 
 const PUBLIC_PREFIXES = [

@@ -8,7 +8,12 @@ import {
 } from "lucide-react";
 import { Link } from "wouter";
 
-// ── Shared Action Store (same localStorage key as szl-holdings) ───────────────
+// ── Shared Action Store (server-backed, localStorage cache) ──────────────────
+//
+// Mirrors the SZL Holdings Business State store. Persists to the API server
+// at /api/action-store so risk owner assignments and decisions are visible
+// to every team member instead of only the local browser. localStorage is a
+// cache used for instant first paint while the server load is in flight.
 
 const STORE_KEY = "szl:actionStore";
 
@@ -21,24 +26,84 @@ interface ActionStore {
   recDecisions: Record<string, RecDecision>;
 }
 
-function loadStore(): ActionStore {
-  try {
-    const raw = localStorage.getItem(STORE_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch {}
+type ActionStorePatch = Partial<{
+  riskOwners: Record<string, string | null>;
+  riskActions: Record<string, ActionStore["riskActions"][string] | null>;
+  oppDecisions: Record<string, ActionStore["oppDecisions"][string] | null>;
+  recDecisions: Record<string, RecDecision | null>;
+}>;
+
+function emptyStore(): ActionStore {
   return { riskOwners: {}, riskActions: {}, oppDecisions: {}, recDecisions: {} };
 }
 
-function saveStore(s: ActionStore) {
+function readCache(): ActionStore {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (raw) return { ...emptyStore(), ...JSON.parse(raw) };
+  } catch {}
+  return emptyStore();
+}
+
+function writeCache(s: ActionStore) {
   try { localStorage.setItem(STORE_KEY, JSON.stringify(s)); } catch {}
 }
 
+function applyPatchLocal(prev: ActionStore, patch: ActionStorePatch): ActionStore {
+  const next: ActionStore = {
+    riskOwners: { ...prev.riskOwners },
+    riskActions: { ...prev.riskActions },
+    oppDecisions: { ...prev.oppDecisions },
+    recDecisions: { ...prev.recDecisions },
+  };
+  for (const key of ["riskOwners", "riskActions", "oppDecisions", "recDecisions"] as const) {
+    const slice = patch[key];
+    if (!slice) continue;
+    for (const [id, value] of Object.entries(slice)) {
+      if (value === null || value === undefined) {
+        delete (next[key] as Record<string, unknown>)[id];
+      } else {
+        (next[key] as Record<string, unknown>)[id] = value;
+      }
+    }
+  }
+  return next;
+}
+
 function useActionStore() {
-  const [store, setStore] = useState<ActionStore>(loadStore);
-  const update = useCallback((updater: (s: ActionStore) => ActionStore) => {
-    setStore(prev => { const next = updater(prev); saveStore(next); return next; });
+  const [store, setStore] = useState<ActionStore>(readCache);
+
+  useEffect(() => {
+    let cancelled = false;
+    const url = `${BASE}/api/action-store`;
+    fetch(url, { credentials: "include" })
+      .then(r => (r.ok ? r.json() : null))
+      .then(json => {
+        if (cancelled || !json) return;
+        const server = (json.data ?? json) as Partial<ActionStore>;
+        const merged = { ...emptyStore(), ...server };
+        setStore(merged);
+        writeCache(merged);
+      })
+      .catch(() => { /* keep cached store */ });
+    return () => { cancelled = true; };
   }, []);
-  return { store, update };
+
+  const patch = useCallback((partial: ActionStorePatch) => {
+    setStore(prev => {
+      const next = applyPatchLocal(prev, partial);
+      writeCache(next);
+      return next;
+    });
+    fetch(`${BASE}/api/action-store`, {
+      method: "PATCH",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(partial),
+    }).catch(() => { /* offline / network — local state retained */ });
+  }, []);
+
+  return { store, patch };
 }
 
 // ── Toast ─────────────────────────────────────────────────────────────────────
@@ -293,7 +358,7 @@ function RecommendationQueueSection() {
   const live = useLive();
   const recs = (live?.recommendations ?? RECOMMENDATIONS) as typeof RECOMMENDATIONS;
   const [expanded, setExpanded] = useState<string[]>([]);
-  const { store, update } = useActionStore();
+  const { store, patch } = useActionStore();
   const { toasts, show, dismiss } = useToasts();
   const [snoozeTarget, setSnoozeTarget] = useState<string | null>(null);
   const [snoozeInput, setSnoozeInput] = useState<{ reason: string; duration: string }>({ reason: "", duration: "7d" });
@@ -301,20 +366,20 @@ function RecommendationQueueSection() {
   const [rejectReason, setRejectReason] = useState("");
 
   function handleAccept(recId: string, title: string) {
-    update(s => ({ ...s, recDecisions: { ...s.recDecisions, [recId]: { decision: "accept", at: new Date().toISOString() } } }));
+    patch({ recDecisions: { [recId]: { decision: "accept", at: new Date().toISOString() } } });
     show(`Recommendation accepted — "${title}" queued for execution.`, "success");
   }
 
   function handleRejectSubmit(recId: string, title: string) {
     if (!rejectReason.trim()) return;
-    update(s => ({ ...s, recDecisions: { ...s.recDecisions, [recId]: { decision: "reject", reason: rejectReason.trim(), at: new Date().toISOString() } } }));
+    patch({ recDecisions: { [recId]: { decision: "reject", reason: rejectReason.trim(), at: new Date().toISOString() } } });
     show(`Recommendation rejected.`, "info");
     setRejectTarget(null);
     setRejectReason("");
   }
 
   function handleSnoozeSubmit(recId: string, title: string) {
-    update(s => ({ ...s, recDecisions: { ...s.recDecisions, [recId]: { decision: "snooze", reason: snoozeInput.reason, snoozeUntil: snoozeInput.duration, at: new Date().toISOString() } } }));
+    patch({ recDecisions: { [recId]: { decision: "snooze", reason: snoozeInput.reason, snoozeUntil: snoozeInput.duration, at: new Date().toISOString() } } });
     show(`Snoozed for ${snoozeInput.duration}${snoozeInput.reason ? ` — ${snoozeInput.reason}` : ""}.`, "info");
     setSnoozeTarget(null);
     setSnoozeInput({ reason: "", duration: "7d" });
@@ -408,7 +473,7 @@ function RecommendationQueueSection() {
                       <span style={{ fontSize: "10px", color: FG_MUT }}>
                         {decision.decision === "accept" ? "Accepted and queued." : decision.decision === "reject" ? `Rejected${decision.reason ? `: "${decision.reason}"` : ""}` : `Snoozed for ${decision.snoozeUntil}${decision.reason ? ` — ${decision.reason}` : ""}`}
                       </span>
-                      <button onClick={() => update(s => { const next = { ...s.recDecisions }; delete next[rec.id]; return { ...s, recDecisions: next }; })} style={{ fontSize: "9px", padding: "2px 8px", borderRadius: "4px", background: "transparent", border: `1px solid ${BORDER}`, color: FG_MUT, cursor: "pointer" }}>Undo</button>
+                      <button onClick={() => patch({ recDecisions: { [rec.id]: null } })} style={{ fontSize: "9px", padding: "2px 8px", borderRadius: "4px", background: "transparent", border: `1px solid ${BORDER}`, color: FG_MUT, cursor: "pointer" }}>Undo</button>
                     </div>
                   )}
                 </div>

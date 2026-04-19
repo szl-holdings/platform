@@ -64,6 +64,10 @@ const EXEMPT_PATHS = new Set([
   // Newsletter subscription — public anonymous marketing form embedded across portfolio
   // sites; no session or user state is modified, CSRF double-submit not applicable.
   "/api/newsletter/subscribe",
+  // Shared action store — public PATCH endpoint that backs the Business
+  // State / Enterprise State pages. Same exemption model as Carlota Jo time
+  // tracking: anonymous demo surface, no per-user session state.
+  "/api/action-store",
 ]);
 
 const GRAPHQL_PATHS = ["/api/graphql", "/graphql"];

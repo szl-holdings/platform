@@ -15,9 +15,15 @@ const ACCENT = "#8b7ac8";
 const BG_CARD = "hsla(0,0%,100%,0.025)";
 const BORDER = "hsla(0,0%,100%,0.07)";
 
-// ── Action Store (localStorage-backed shared state) ───────────────────────────
+// ── Action Store (server-backed shared state, localStorage cache) ─────────────
+//
+// Risk owner assignments and decisions are persisted to the API server
+// (/api/action-store) so every team member sees the same state. localStorage
+// is used only as a cache for instant first paint while the server load is
+// in flight.
 
 const STORE_KEY = "szl:actionStore";
+const STORE_URL = "/api/action-store";
 
 type RiskActionState = { type: "playbook" | "ticket"; status: "running" | "done"; result?: string; ticketId?: string };
 type OppDecision = { decision: "accept" | "reject" | "snooze"; reason?: string; snoozeUntil?: string; at: string };
@@ -30,28 +36,83 @@ interface ActionStore {
   recDecisions: Record<string, RecDecision>;
 }
 
-function loadStore(): ActionStore {
-  try {
-    const raw = localStorage.getItem(STORE_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch {}
+type ActionStorePatch = Partial<{
+  riskOwners: Record<string, string | null>;
+  riskActions: Record<string, RiskActionState | null>;
+  oppDecisions: Record<string, OppDecision | null>;
+  recDecisions: Record<string, RecDecision | null>;
+}>;
+
+function emptyStore(): ActionStore {
   return { riskOwners: {}, riskActions: {}, oppDecisions: {}, recDecisions: {} };
 }
 
-function saveStore(store: ActionStore) {
+function readCache(): ActionStore {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (raw) return { ...emptyStore(), ...JSON.parse(raw) };
+  } catch {}
+  return emptyStore();
+}
+
+function writeCache(store: ActionStore) {
   try { localStorage.setItem(STORE_KEY, JSON.stringify(store)); } catch {}
 }
 
+function applyPatchLocal(prev: ActionStore, patch: ActionStorePatch): ActionStore {
+  const next: ActionStore = {
+    riskOwners: { ...prev.riskOwners },
+    riskActions: { ...prev.riskActions },
+    oppDecisions: { ...prev.oppDecisions },
+    recDecisions: { ...prev.recDecisions },
+  };
+  for (const key of ["riskOwners", "riskActions", "oppDecisions", "recDecisions"] as const) {
+    const slice = patch[key];
+    if (!slice) continue;
+    for (const [id, value] of Object.entries(slice)) {
+      if (value === null || value === undefined) {
+        delete (next[key] as Record<string, unknown>)[id];
+      } else {
+        (next[key] as Record<string, unknown>)[id] = value;
+      }
+    }
+  }
+  return next;
+}
+
 function useActionStore() {
-  const [store, setStore] = useState<ActionStore>(loadStore);
-  const update = useCallback((updater: (s: ActionStore) => ActionStore) => {
+  const [store, setStore] = useState<ActionStore>(readCache);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch(STORE_URL, { credentials: "include" })
+      .then(r => (r.ok ? r.json() : null))
+      .then(json => {
+        if (cancelled || !json) return;
+        const server = (json.data ?? json) as Partial<ActionStore>;
+        const merged = { ...emptyStore(), ...server };
+        setStore(merged);
+        writeCache(merged);
+      })
+      .catch(() => { /* keep cached store */ });
+    return () => { cancelled = true; };
+  }, []);
+
+  const patch = useCallback((partial: ActionStorePatch) => {
     setStore(prev => {
-      const next = updater(prev);
-      saveStore(next);
+      const next = applyPatchLocal(prev, partial);
+      writeCache(next);
       return next;
     });
+    fetch(STORE_URL, {
+      method: "PATCH",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(partial),
+    }).catch(() => { /* offline / network — local state retained */ });
   }, []);
-  return { store, update };
+
+  return { store, patch };
 }
 
 // ── Toast Notification ─────────────────────────────────────────────────────────
@@ -529,27 +590,27 @@ function RiskRegisterModule() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [editingOwner, setEditingOwner] = useState<string | null>(null);
   const [ownerInput, setOwnerInput] = useState("");
-  const { store, update } = useActionStore();
+  const { store, patch } = useActionStore();
   const { toasts, show, dismiss } = useToasts();
 
   function handlePlaybook(riskId: string, riskTitle: string) {
-    update(s => ({ ...s, riskActions: { ...s.riskActions, [riskId]: { type: "playbook", status: "running" } } }));
+    patch({ riskActions: { [riskId]: { type: "playbook", status: "running" } } });
     show("Triggering credential rotation playbook…", "info", 2000);
     setTimeout(() => {
-      update(s => ({ ...s, riskActions: { ...s.riskActions, [riskId]: { type: "playbook", status: "done", result: "Credentials rotated. Pipeline reconnected at 14:38. Freshness restored." } } }));
+      patch({ riskActions: { [riskId]: { type: "playbook", status: "done", result: "Credentials rotated. Pipeline reconnected at 14:38. Freshness restored." } } });
       show("Playbook complete — Carlota CRM pipeline reconnected successfully.", "success");
     }, 2500);
   }
 
   function handleTicket(riskId: string, risk: typeof RISK_REGISTER[number]) {
     const ticketId = `ENG-${Math.floor(1000 + Math.random() * 9000)}`;
-    update(s => ({ ...s, riskActions: { ...s.riskActions, [riskId]: { type: "ticket", status: "done", ticketId } } }));
+    patch({ riskActions: { [riskId]: { type: "ticket", status: "done", ticketId } } });
     show(`Linear ticket ${ticketId} created — "Add index on distress_score + borough" assigned to ${risk.owner}.`, "success");
   }
 
   function handleSaveOwner(riskId: string) {
     if (!ownerInput.trim()) return;
-    update(s => ({ ...s, riskOwners: { ...s.riskOwners, [riskId]: ownerInput.trim() } }));
+    patch({ riskOwners: { [riskId]: ownerInput.trim() } });
     show(`Owner updated to "${ownerInput.trim()}" — synced to Command Portal.`, "success");
     setEditingOwner(null);
     setOwnerInput("");
@@ -679,7 +740,7 @@ function RiskRegisterModule() {
 function OpportunityModule() {
   const live = useLive();
   const opps = (live?.oppRegister ?? OPP_REGISTER) as typeof OPP_REGISTER;
-  const { store, update } = useActionStore();
+  const { store, patch } = useActionStore();
   const { toasts, show, dismiss } = useToasts();
   const [snoozeTarget, setSnoozeTarget] = useState<string | null>(null);
   const [snoozeInput, setSnoozeInput] = useState<{ reason: string; duration: string }>({ reason: "", duration: "7d" });
@@ -687,20 +748,20 @@ function OpportunityModule() {
   const [rejectReason, setRejectReason] = useState("");
 
   function handleAccept(oppId: string, title: string) {
-    update(s => ({ ...s, oppDecisions: { ...s.oppDecisions, [oppId]: { decision: "accept", at: new Date().toISOString() } } }));
+    patch({ oppDecisions: { [oppId]: { decision: "accept", at: new Date().toISOString() } } });
     show(`"${title}" accepted — added to sprint backlog.`, "success");
   }
 
   function handleRejectSubmit(oppId: string, title: string) {
     if (!rejectReason.trim()) return;
-    update(s => ({ ...s, oppDecisions: { ...s.oppDecisions, [oppId]: { decision: "reject", reason: rejectReason.trim(), at: new Date().toISOString() } } }));
+    patch({ oppDecisions: { [oppId]: { decision: "reject", reason: rejectReason.trim(), at: new Date().toISOString() } } });
     show(`"${title}" rejected.`, "info");
     setRejectTarget(null);
     setRejectReason("");
   }
 
   function handleSnoozeSubmit(oppId: string, title: string) {
-    update(s => ({ ...s, oppDecisions: { ...s.oppDecisions, [oppId]: { decision: "snooze", reason: snoozeInput.reason, snoozeUntil: snoozeInput.duration, at: new Date().toISOString() } } }));
+    patch({ oppDecisions: { [oppId]: { decision: "snooze", reason: snoozeInput.reason, snoozeUntil: snoozeInput.duration, at: new Date().toISOString() } } });
     show(`"${title}" snoozed for ${snoozeInput.duration}${snoozeInput.reason ? ` — ${snoozeInput.reason}` : ""}.`, "info");
     setSnoozeTarget(null);
     setSnoozeInput({ reason: "", duration: "7d" });

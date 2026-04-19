@@ -59,6 +59,7 @@ import policyModesRouter from "./policy-modes";
 import demoGovernedScenariosRouter from "./demo-governed-scenarios";
 import counselRouter from "./counsel";
 import fabricRouter from "./fabric";
+import actionStoreRouter from "./action-store";
 
 const router: IRouter = Router();
 
@@ -110,6 +111,13 @@ crossPlatform.register(router);
 // products, signals, runs, alerts, recommendations, approvals, connector health
 // and system health. Public in demo/dev mode so the Fabric page works without auth.
 router.use(fabricRouter);
+
+// Shared action store — persists risk owner assignments and decisions for the
+// Business State / Enterprise State pages so all team members see the same
+// synchronized state instead of per-browser localStorage. Public,
+// unauthenticated; mounted BEFORE guardianPolicyCheck and exempted in the
+// global-auth-enforcer / csrf middleware allowlists.
+router.use(actionStoreRouter);
 
 // Global Guardian policy check — derives category from request path and
 // applies to every agent-facing route family. Read-only methods skip
