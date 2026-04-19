@@ -3,9 +3,11 @@ import { Fingerprint, Clock, User } from "lucide-react";
 import type { EngineState } from "@/hooks/useDecisionEngine";
 import type { LiveAuditRecord } from "@/hooks/useLiveTheaterData";
 import { HelpTip } from "@szl-holdings/shared-ui/onboarding";
+import { ScenarioCitedRiskRuns } from "@szl-holdings/shared-ui/risk-evidence";
 
 export function ProofStage({ engine }: { engine: EngineState }) {
   const pr = engine.proofRecord;
+  const scenarioId = engine.monteCarloResult?.scenarioId;
   if (!pr) return <p className="text-sm text-muted-foreground">Generating proof record...</p>;
 
   return (
@@ -93,6 +95,15 @@ export function ProofStage({ engine }: { engine: EngineState }) {
           </div>
         </div>
       </div>
+      <ScenarioCitedRiskRuns
+        scenarioId={scenarioId}
+        title={scenarioId ? `Cited Risk Simulations · ${scenarioId}` : "Cited Risk Simulations"}
+        emptyHint={
+          scenarioId
+            ? `No simulation runs cited for scenario ${scenarioId}. Save a run from the Terra or Vessels Risk Simulation page to attach percentile bands and sensitivities to this proof envelope.`
+            : "No cited risk simulations yet. Save a run from Terra or Vessels to attach it here."
+        }
+      />
     </div>
   );
 }
@@ -208,6 +219,9 @@ export function LiveProofStage({ auditRecords, auditTotal, metrics }: {
           </div>
         </div>
       </div>
+      <ScenarioCitedRiskRuns
+        emptyHint="No cited risk simulations yet across Terra or Vessels. Save a Monte Carlo run from either product to attach percentile bands and sensitivities to the live audit chain."
+      />
     </div>
   );
 }

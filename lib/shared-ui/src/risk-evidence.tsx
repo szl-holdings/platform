@@ -238,6 +238,36 @@ export function useRiskRunEvidence(domain: string): SavedRiskRun[] {
   return runs;
 }
 
+export function useRiskRunEvidenceMulti(domains: readonly string[]): SavedRiskRun[] {
+  const key = domains.join("|");
+  const read = useCallback((): SavedRiskRun[] => {
+    const all = domains.flatMap(d => listRiskRunEvidence(d));
+    return all.sort((a, b) => (a.savedAt < b.savedAt ? 1 : -1));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
+  const [runs, setRuns] = useState<SavedRiskRun[]>(() => read());
+  useEffect(() => {
+    const refresh = () => setRuns(read());
+    refresh();
+    if (typeof window === "undefined") return;
+    const onCustom = (evt: Event) => {
+      const detail = (evt as CustomEvent<{ domain?: string }>).detail;
+      if (!detail?.domain || domains.includes(detail.domain)) refresh();
+    };
+    const onStorage = (evt: StorageEvent) => {
+      if (evt.key && domains.some(d => evt.key === storageKey(d))) refresh();
+    };
+    window.addEventListener(READ_EVENT, onCustom);
+    window.addEventListener("storage", onStorage);
+    return () => {
+      window.removeEventListener(READ_EVENT, onCustom);
+      window.removeEventListener("storage", onStorage);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key, read]);
+  return runs;
+}
+
 function formatValue(value: number, format?: string): string {
   if (!isFinite(value)) return "—";
   if (format === "currency") {
@@ -315,6 +345,108 @@ export function SaveRiskRunButton({ domain, build, disabled, accentColor = "#7a9
       {savedId ? <ClipboardCheck className="w-3 h-3" /> : <FileText className="w-3 h-3" />}
       {savedId ? `Saved ${savedId}` : saving ? "Saving…" : "Save run as evidence"}
     </button>
+  );
+}
+
+interface RiskRunDetailModalProps {
+  run: SavedRiskRun;
+  accentColor?: string;
+  onClose: () => void;
+}
+
+export function RiskRunDetailModal({ run: open, accentColor = "#7a99b8", onClose }: RiskRunDetailModalProps) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 py-8"
+      role="dialog"
+      aria-modal="true"
+      onClick={onClose}
+    >
+      <div
+        className="max-w-2xl w-full max-h-full overflow-auto rounded-xl border p-5"
+        style={{ background: "#0d1520", borderColor: "rgba(255,255,255,0.1)" }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-start justify-between gap-3 mb-3">
+          <div>
+            <div className="text-[10px] font-mono mb-1" style={{ color: accentColor }}>{open.evidenceId}</div>
+            <h3 className="text-sm font-semibold text-white">{open.scenarioTitle}</h3>
+            <div className="text-[10px] mt-1 font-mono" style={{ color: "rgba(255,255,255,0.4)" }}>
+              {open.scenarioId}{open.scenarioVersion ? `@${open.scenarioVersion}` : ""} · {open.domain} · {open.iterations.toLocaleString()} iter · {open.validIterations.toLocaleString()} valid · {open.durationMs.toFixed(0)}ms
+            </div>
+            <div className="text-[10px] mt-0.5 font-mono" style={{ color: "rgba(255,255,255,0.4)" }}>
+              Saved {new Date(open.savedAt).toLocaleString()}{open.savedBy ? ` · ${open.savedBy}` : ""}
+            </div>
+          </div>
+          <button onClick={onClose} className="text-white/50 hover:text-white" aria-label="Close">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {open.note && (
+          <p className="text-[12px] mb-4 italic" style={{ color: "rgba(255,255,255,0.6)" }}>“{open.note}”</p>
+        )}
+
+        <div className="mb-4">
+          <h4 className="text-[10px] font-semibold uppercase tracking-wider mb-2" style={{ color: "rgba(255,255,255,0.55)" }}>Output Percentiles</h4>
+          <div className="rounded-lg border overflow-hidden" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+            <table className="w-full text-[11px]">
+              <thead style={{ background: "rgba(255,255,255,0.04)", color: "rgba(255,255,255,0.5)" }}>
+                <tr>
+                  <th className="text-left px-2 py-1.5">Output</th>
+                  <th className="text-right px-2 py-1.5">P5</th>
+                  <th className="text-right px-2 py-1.5">P50</th>
+                  <th className="text-right px-2 py-1.5">P95</th>
+                  <th className="text-right px-2 py-1.5">Mean</th>
+                  <th className="text-right px-2 py-1.5">σ</th>
+                </tr>
+              </thead>
+              <tbody>
+                {open.metrics.map(m => (
+                  <tr key={m.id} className="border-t" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
+                    <td className="px-2 py-1.5 text-white">{m.label}</td>
+                    <td className="px-2 py-1.5 text-right font-mono text-white/80">{formatValue(m.p5, m.format)}</td>
+                    <td className="px-2 py-1.5 text-right font-mono text-white">{formatValue(m.p50, m.format)}</td>
+                    <td className="px-2 py-1.5 text-right font-mono text-white/80">{formatValue(m.p95, m.format)}</td>
+                    <td className="px-2 py-1.5 text-right font-mono text-white/80">{formatValue(m.mean, m.format)}</td>
+                    <td className="px-2 py-1.5 text-right font-mono text-white/60">{formatValue(m.stdDev, m.format)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="mb-4">
+          <h4 className="text-[10px] font-semibold uppercase tracking-wider mb-2 flex items-center gap-1.5" style={{ color: "rgba(255,255,255,0.55)" }}>
+            <Layers className="w-3 h-3" /> Top Sensitivities
+          </h4>
+          <ul className="space-y-1">
+            {open.sensitivities.slice(0, 6).map(s => (
+              <li key={s.inputId} className="flex items-center gap-2 text-[11px]">
+                <span className="flex-1 truncate text-white/70">{s.label}</span>
+                <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.05)" }}>
+                  <div className="h-full rounded-full" style={{ width: `${Math.min(100, Math.max(0, s.impact * 100))}%`, background: accentColor, opacity: 0.7 }} />
+                </div>
+                <span className="w-10 text-right font-mono text-white">{(s.impact * 100).toFixed(0)}%</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div>
+          <h4 className="text-[10px] font-semibold uppercase tracking-wider mb-2" style={{ color: "rgba(255,255,255,0.55)" }}>Input Distributions</h4>
+          <ul className="space-y-1">
+            {open.inputs.map(inp => (
+              <li key={inp.id} className="flex items-start gap-2 text-[11px]">
+                <span className="w-44 truncate text-white/70">{inp.label}</span>
+                <span className="font-mono text-white/80 break-all">{describeDistribution(inp.distribution)}{inp.unit ? ` ${inp.unit}` : ""}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -408,98 +540,136 @@ export function RiskEvidenceList({ domain, domainLabel, accentColor = "#7a99b8",
       </ul>
 
       {open && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 py-8"
-          role="dialog"
-          aria-modal="true"
-          onClick={() => setOpenId(null)}
-        >
-          <div
-            className="max-w-2xl w-full max-h-full overflow-auto rounded-xl border p-5"
-            style={{ background: "#0d1520", borderColor: "rgba(255,255,255,0.1)" }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-start justify-between gap-3 mb-3">
-              <div>
-                <div className="text-[10px] font-mono mb-1" style={{ color: accentColor }}>{open.evidenceId}</div>
-                <h3 className="text-sm font-semibold text-white">{open.scenarioTitle}</h3>
-                <div className="text-[10px] mt-1 font-mono" style={{ color: "rgba(255,255,255,0.4)" }}>
-                  {open.scenarioId}{open.scenarioVersion ? `@${open.scenarioVersion}` : ""} · {open.domain} · {open.iterations.toLocaleString()} iter · {open.validIterations.toLocaleString()} valid · {open.durationMs.toFixed(0)}ms
-                </div>
-                <div className="text-[10px] mt-0.5 font-mono" style={{ color: "rgba(255,255,255,0.4)" }}>
-                  Saved {new Date(open.savedAt).toLocaleString()}{open.savedBy ? ` · ${open.savedBy}` : ""}
-                </div>
-              </div>
-              <button onClick={() => setOpenId(null)} className="text-white/50 hover:text-white" aria-label="Close">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            {open.note && (
-              <p className="text-[12px] mb-4 italic" style={{ color: "rgba(255,255,255,0.6)" }}>“{open.note}”</p>
-            )}
-
-            <div className="mb-4">
-              <h4 className="text-[10px] font-semibold uppercase tracking-wider mb-2" style={{ color: "rgba(255,255,255,0.55)" }}>Output Percentiles</h4>
-              <div className="rounded-lg border overflow-hidden" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-                <table className="w-full text-[11px]">
-                  <thead style={{ background: "rgba(255,255,255,0.04)", color: "rgba(255,255,255,0.5)" }}>
-                    <tr>
-                      <th className="text-left px-2 py-1.5">Output</th>
-                      <th className="text-right px-2 py-1.5">P5</th>
-                      <th className="text-right px-2 py-1.5">P50</th>
-                      <th className="text-right px-2 py-1.5">P95</th>
-                      <th className="text-right px-2 py-1.5">Mean</th>
-                      <th className="text-right px-2 py-1.5">σ</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {open.metrics.map(m => (
-                      <tr key={m.id} className="border-t" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
-                        <td className="px-2 py-1.5 text-white">{m.label}</td>
-                        <td className="px-2 py-1.5 text-right font-mono text-white/80">{formatValue(m.p5, m.format)}</td>
-                        <td className="px-2 py-1.5 text-right font-mono text-white">{formatValue(m.p50, m.format)}</td>
-                        <td className="px-2 py-1.5 text-right font-mono text-white/80">{formatValue(m.p95, m.format)}</td>
-                        <td className="px-2 py-1.5 text-right font-mono text-white/80">{formatValue(m.mean, m.format)}</td>
-                        <td className="px-2 py-1.5 text-right font-mono text-white/60">{formatValue(m.stdDev, m.format)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <div className="mb-4">
-              <h4 className="text-[10px] font-semibold uppercase tracking-wider mb-2 flex items-center gap-1.5" style={{ color: "rgba(255,255,255,0.55)" }}>
-                <Layers className="w-3 h-3" /> Top Sensitivities
-              </h4>
-              <ul className="space-y-1">
-                {open.sensitivities.slice(0, 6).map(s => (
-                  <li key={s.inputId} className="flex items-center gap-2 text-[11px]">
-                    <span className="flex-1 truncate text-white/70">{s.label}</span>
-                    <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.05)" }}>
-                      <div className="h-full rounded-full" style={{ width: `${Math.min(100, Math.max(0, s.impact * 100))}%`, background: accentColor, opacity: 0.7 }} />
-                    </div>
-                    <span className="w-10 text-right font-mono text-white">{(s.impact * 100).toFixed(0)}%</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="text-[10px] font-semibold uppercase tracking-wider mb-2" style={{ color: "rgba(255,255,255,0.55)" }}>Input Distributions</h4>
-              <ul className="space-y-1">
-                {open.inputs.map(inp => (
-                  <li key={inp.id} className="flex items-start gap-2 text-[11px]">
-                    <span className="w-44 truncate text-white/70">{inp.label}</span>
-                    <span className="font-mono text-white/80 break-all">{describeDistribution(inp.distribution)}{inp.unit ? ` ${inp.unit}` : ""}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
+        <RiskRunDetailModal run={open} accentColor={accentColor} onClose={() => setOpenId(null)} />
       )}
+    </div>
+  );
+}
+
+interface ScenarioCitedRiskRunsProps {
+  /**
+   * Optional scenarioId to filter cited risk runs. When omitted, all runs across the
+   * given domains are listed (useful for live mode where a single canonical scenario
+   * isn't pinned).
+   */
+  scenarioId?: string;
+  /** Domains to scan (defaults to ["terra", "vessels"]). */
+  domains?: readonly string[];
+  /** Heading shown above the list. */
+  title?: string;
+  accentColor?: string;
+  emptyHint?: string;
+  className?: string;
+}
+
+export function ScenarioCitedRiskRuns({
+  scenarioId,
+  domains = ["terra", "vessels"],
+  title,
+  accentColor = "#14b8a6",
+  emptyHint,
+  className,
+}: ScenarioCitedRiskRunsProps) {
+  const allRuns = useRiskRunEvidenceMulti(domains);
+  const runs = useMemo(
+    () => (scenarioId ? allRuns.filter(r => r.scenarioId === scenarioId) : allRuns),
+    [allRuns, scenarioId],
+  );
+  const [openId, setOpenId] = useState<string | null>(null);
+  const open = useMemo(() => runs.find(r => r.evidenceId === openId) ?? null, [runs, openId]);
+
+  const heading = title ?? (scenarioId ? `Cited Risk Simulations · ${scenarioId}` : "Cited Risk Simulations");
+
+  return (
+    <div
+      className={`rounded-xl border p-4 ${className ?? ""}`}
+      style={{ borderColor: "rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.02)" }}
+      data-testid="dt-cited-risk-runs"
+      data-scenario-id={scenarioId}
+    >
+      <div className="flex items-center gap-2 mb-3">
+        <Sliders className="w-3.5 h-3.5" style={{ color: accentColor }} />
+        <h4 className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.55)" }}>
+          {heading}
+        </h4>
+        <span className="text-[10px] font-mono ml-auto" style={{ color: "rgba(255,255,255,0.35)" }}>
+          {runs.length}
+        </span>
+      </div>
+
+      {runs.length === 0 ? (
+        <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.4)" }}>
+          {emptyHint ??
+            (scenarioId
+              ? `No simulation runs cited for scenario ${scenarioId}. Save a run from the Terra or Vessels Risk Simulation page to attach percentile bands and sensitivities to this proof envelope.`
+              : "No simulation runs cited yet across Terra or Vessels.")}
+        </p>
+      ) : (
+        <ul className="space-y-2">
+          {runs.map(run => {
+            const primary = run.metrics[0];
+            return (
+              <li
+                key={`${run.domain}-${run.evidenceId}`}
+                className="rounded-lg border p-3"
+                style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.02)" }}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span
+                        className="text-[10px] font-mono px-1.5 py-0.5 rounded"
+                        style={{ background: `${accentColor}15`, color: accentColor }}
+                      >
+                        {run.evidenceId}
+                      </span>
+                      <span
+                        className="text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded"
+                        style={{ background: "rgba(255,255,255,0.04)", color: "rgba(255,255,255,0.55)" }}
+                      >
+                        {run.domain}
+                      </span>
+                      <span className="text-[11px] font-semibold text-white truncate">{run.scenarioTitle}</span>
+                    </div>
+                    <div className="text-[10px] mt-1 font-mono" style={{ color: "rgba(255,255,255,0.4)" }}>
+                      Scenario {run.scenarioId}{run.scenarioVersion ? `@${run.scenarioVersion}` : ""} · {run.iterations.toLocaleString()} iter ·{" "}
+                      {new Date(run.savedAt).toLocaleString([], { dateStyle: "short", timeStyle: "short" })}
+                    </div>
+                    {primary && (
+                      <div className="text-[11px] mt-1" style={{ color: "rgba(255,255,255,0.7)" }}>
+                        {primary.label} · P50 {formatValue(primary.p50, primary.format)} · P5–P95{" "}
+                        {formatValue(primary.p5, primary.format)} → {formatValue(primary.p95, primary.format)}
+                      </div>
+                    )}
+                    {run.note && (
+                      <div className="text-[11px] mt-1 italic" style={{ color: "rgba(255,255,255,0.5)" }}>
+                        “{run.note}”
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => setOpenId(run.evidenceId)}
+                      className="text-[10px] px-2 py-1 rounded-md"
+                      style={{
+                        background: `${accentColor}15`,
+                        color: accentColor,
+                        border: `1px solid ${accentColor}30`,
+                      }}
+                      data-testid={`dt-cited-risk-run-view-${run.evidenceId}`}
+                    >
+                      View
+                    </button>
+                  </div>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+
+      {open && <RiskRunDetailModal run={open} accentColor={accentColor} onClose={() => setOpenId(null)} />}
     </div>
   );
 }
