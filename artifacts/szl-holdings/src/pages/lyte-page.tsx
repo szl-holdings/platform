@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { m, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Eye, Radio, AlertTriangle, CheckCircle2, Clock, ArrowRight,
   Shield, Ship, Building2, Briefcase, Activity, Filter,
@@ -294,16 +294,21 @@ function DomainChip({ domain }: { domain: string }) {
   );
 }
 
-function LivePulse({ healthy = true }: { healthy?: boolean }) {
+function LivePulse({ healthy = true, flash = false }: { healthy?: boolean; flash?: boolean }) {
   const color = healthy ? "hsl(142,60%,48%)" : "hsl(30,90%,52%)";
   const textColor = healthy ? "hsl(142,60%,58%)" : "hsl(30,90%,62%)";
   const label = healthy ? "LIVE" : "DEGRADED";
+  const flashColor = "hsl(142,80%,55%)";
   return (
     <span style={{ position: "relative", display: "inline-flex", alignItems: "center", gap: "0.375rem" }}>
       <span style={{
         width: 6, height: 6, borderRadius: "50%",
-        background: color,
-        boxShadow: `0 0 6px ${color}`,
+        background: flash ? flashColor : color,
+        boxShadow: flash
+          ? `0 0 14px ${flashColor}, 0 0 4px ${flashColor}`
+          : `0 0 6px ${color}`,
+        transform: flash ? "scale(1.6)" : "scale(1)",
+        transition: "background 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease",
       }} />
       <span style={{
         fontSize: "0.6rem",
@@ -311,7 +316,8 @@ function LivePulse({ healthy = true }: { healthy?: boolean }) {
         fontWeight: 700,
         letterSpacing: "0.12em",
         textTransform: "uppercase",
-        color: textColor,
+        color: flash ? flashColor : textColor,
+        transition: "color 0.18s ease",
       }}>
         {label}
       </span>
@@ -525,6 +531,10 @@ export default function LytePage() {
   const [activeSignal, setActiveSignal] = useState<string>("s1");
   const [activeSit, setActiveSit] = useState<string>("sit1");
   const [filterSev, setFilterSev] = useState<string>("all");
+  const [wsConnected, setWsConnected] = useState(false);
+  const [pulseFlash, setPulseFlash] = useState(false);
+  const lastPushAtRef = useRef<number>(0);
+  const queryClient = useQueryClient();
 
   const signalsQuery = useQuery<SignalItem[]>({
     queryKey: ["lyte", "signals"],
@@ -562,10 +572,80 @@ export default function LytePage() {
   const liveSituations: SituationItem[] = incidentsQuery.data ?? SITUATION_BOARD;
   const govData = govQuery.data;
 
+  // Real-time signal pushes via WebSocket. Falls back to the 30s polling above
+  // if the WS layer is unavailable (server down, proxy blocking, etc.).
+  useEffect(() => {
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const wsUrl = `${protocol}//${window.location.host}/api/ws`;
+    let ws: WebSocket | null = null;
+    let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+    let flashTimer: ReturnType<typeof setTimeout> | null = null;
+    let dead = false;
+
+    function connect() {
+      if (dead) return;
+      try {
+        ws = new WebSocket(wsUrl);
+      } catch {
+        reconnectTimer = setTimeout(connect, 5000);
+        return;
+      }
+      ws.onopen = () => {
+        setWsConnected(true);
+        ws?.send(JSON.stringify({ type: "subscribe", channel: "lyte:signal:new" }));
+      };
+      ws.onmessage = (ev) => {
+        try {
+          const msg = JSON.parse(ev.data as string) as {
+            type: string;
+            channel?: string;
+            event?: string;
+            data?: ApiSignal;
+          };
+          if (msg.type !== "message" || msg.channel !== "lyte:signal:new" || !msg.data) return;
+
+          const incoming = mapApiSignal(msg.data, 0);
+          lastPushAtRef.current = Date.now();
+
+          queryClient.setQueryData<SignalItem[]>(["lyte", "signals"], (prev) => {
+            const list = prev ?? [];
+            if (list.some((s) => s.id === incoming.id)) return list;
+            return [incoming, ...list].slice(0, 20);
+          });
+
+          setPulseFlash(true);
+          if (flashTimer) clearTimeout(flashTimer);
+          flashTimer = setTimeout(() => setPulseFlash(false), 600);
+        } catch {
+          // ignore malformed frames
+        }
+      };
+      ws.onclose = () => {
+        setWsConnected(false);
+        if (!dead) reconnectTimer = setTimeout(connect, 5000);
+      };
+      ws.onerror = () => {
+        try { ws?.close(); } catch { /* ignore */ }
+      };
+    }
+
+    connect();
+
+    return () => {
+      dead = true;
+      if (reconnectTimer) clearTimeout(reconnectTimer);
+      if (flashTimer) clearTimeout(flashTimer);
+      try { ws?.close(); } catch { /* ignore */ }
+    };
+  }, [queryClient]);
+
   const STALE_THRESHOLD_MS = 90_000;
   const lastFetchedAt = signalsQuery.dataUpdatedAt ?? 0;
+  const lastSignalAt = Math.max(lastFetchedAt, lastPushAtRef.current);
   const isStreamHealthy = !signalsQuery.isError && (
-    !signalsQuery.isFetched || (Date.now() - lastFetchedAt) < STALE_THRESHOLD_MS
+    wsConnected ||
+    !signalsQuery.isFetched ||
+    (Date.now() - lastSignalAt) < STALE_THRESHOLD_MS
   );
 
   const liveGovStats = govData ? [
@@ -612,7 +692,7 @@ export default function LytePage() {
                   Lyte · Operational Nerve Center
                 </span>
                 <span style={{ width: 1, height: 12, background: BORDER }} />
-                <LivePulse healthy={isStreamHealthy} />
+                <LivePulse healthy={isStreamHealthy} flash={pulseFlash} />
               </div>
 
               <h1 style={{
@@ -738,7 +818,7 @@ export default function LytePage() {
                       Signal Stream
                     </span>
                   </div>
-                  <LivePulse healthy={isStreamHealthy} />
+                  <LivePulse healthy={isStreamHealthy} flash={pulseFlash} />
                 </div>
 
                 <div style={{ padding: "0.5rem", display: "flex", flexDirection: "column", gap: "0.25rem", overflowY: "auto", flex: 1 }}>

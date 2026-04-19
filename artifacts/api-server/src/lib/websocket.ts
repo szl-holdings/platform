@@ -654,6 +654,7 @@ export const WS_CHANNELS = {
   TERRA_SIGNALS: "terra-signals",
   LYTE_METRICS: "lyte-metrics",
   LYTE_METRICS_STREAM: "lyte:metrics-stream",
+  LYTE_SIGNAL_NEW: "lyte:signal:new",
   BOOKINGS: "bookings",
   NEXUS_INTELLIGENCE_FEED: "nexus:intelligence-feed",
   MONTE_CARLO_PROGRESS: "monte-carlo:progress",

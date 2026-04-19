@@ -27,6 +27,7 @@ import { eq, desc, sql, and } from "drizzle-orm";
 import { sendSuccess, sendNotFound, sendError, handleRouteError, parsePagination } from "../lib/api-response";
 import { authMiddleware, parseIdParam, denyIfReadOnly, requireRole } from "../middlewares/auth";
 import { broadcastWs } from "../lib/pubsub-bridge.js";
+import { publish, WS_CHANNELS } from "../lib/websocket.js";
 import { ingestLyteSystem } from "@szl-holdings/ai-engine/domain-embedding-hooks";
 import { logger } from "../lib/logger";
 
@@ -83,6 +84,7 @@ router.post("/lyte/signals", authMiddleware(), denyIfReadOnly(), validateBody(in
   try {
     const [row] = await db.insert(lyteSignalsTable).values(req.body).returning();
     broadcastWs("lyte-metrics", "signal-created", { id: row.id, type: row.sourceType, severity: row.severity });
+    publish(WS_CHANNELS.LYTE_SIGNAL_NEW, "signal-created", row);
     sendSuccess(res, row, 201);
   } catch (err) {
     handleRouteError(res, err, "Failed to create signal");
