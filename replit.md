@@ -54,6 +54,8 @@ The platform is a pnpm monorepo using TypeScript 5.9, React 19, Vite, and Node.j
 
 **OS Layer (Decision Center):** A unified "Operating System" layer in `lib/shared-ui/src/` provides shared primitives like `Recommendation`, `Evidence`, `PolicyVerdict`, `Run` types, and UI components such as `DecisionCenter.tsx` for ranked recommendations, `RunConsole.tsx` for trace viewing, and `AutonomyDial.tsx`.
 
+**One-of-One Platform Shell (Task #2308):** Four new canonical shared modules were added to `lib/shared-ui/src/` as part of the platform cohesion pass: `sentient-layer.tsx` (⌘J intelligence rail with Now/Next/Links tabs), `agent-run-card.tsx` (compact agent trace card), `incident-commander.tsx` (full incident management shell), `scenario-branches-panel.tsx` (Monte Carlo branch comparison). `⌘K` CommandPalette was wired into Sentra and Counsel. All 13 surfaces now share DashboardShell + EcosystemNav + CommandPalette chrome. Duplicate components removed from aegis/vessels/terra. SZL Holdings landing.tsx updated with "One Shell. Thirteen Surfaces." section. Audit docs at `docs/audit/one-of-one/`.
+
 **API Layers:** The platform includes a REST API, a GraphQL API using Apollo Server, and an MCP Gateway for tool integration.
 
 **Key Features:** Reporting & Analytics Engine, Authentication & RBAC, Alloy Execution Fabric for workflow orchestration, 12 specialized AI Agents, PRISM Bus, Monte Carlo Engine, Multi-Tenant Provisioning, and GCS-backed Object Storage.

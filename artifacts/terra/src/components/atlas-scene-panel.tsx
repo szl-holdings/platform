@@ -1,256 +1,196 @@
-import { useState, useEffect } from "react";
-import { GitBranch, Activity, Building2, ChevronDown, ChevronRight, TrendingUp, Target, Lock, RefreshCw, AlertTriangle } from "lucide-react";
-
-const BG = { surface: "#050a08", card: "#080e0a", inset: "#040807" };
-const BORDER = { muted: "rgba(255,255,255,0.07)" };
-const TEXT = { primary: "rgba(255,255,255,0.88)", secondary: "rgba(255,255,255,0.55)", tertiary: "rgba(255,255,255,0.28)" };
-const ACCENT = { green: "#40856a", amber: "#c8953c", red: "#c45a4a", blue: "#4a90b8" };
-
-const BASE = (import.meta.env.BASE_URL ?? "/terra/").replace(/\/$/, "");
-const API = BASE.replace("/terra", "/api");
-
-const TERRA_DEMO_SCENE = {
-  sceneId: "terra-property-distress-demo",
-  domain: "real_estate",
-  entityType: "property",
-  entityId: "PROP-BK-2026-0142",
-  driftScore: 0.74,
-  state: {
-    propertyId: "PROP-BK-2026-0142",
-    address: "842 Atlantic Ave, Brooklyn, NY 11238",
-    distressScore: 87,
-    lisPendens: true,
-    taxArrears: 142000,
-    estimatedArv: 2800000,
-    currentAskUsd: 1950000,
-    daysOnMarket: 214,
-  },
-  branches: [
-    {
-      branchId: "terra-direct-acquisition",
-      branchLabel: "Direct Acquisition — Pre-Foreclosure",
-      hypothesis: "Acquire pre-foreclosure at 65% ARV, settle tax arrears, reposition within 18 months.",
-      deltaState: {
-        acquisitionPriceUsd: 1820000,
-        taxArrearsSettled: true,
-        projectedExitUsd: 2750000,
-        holdPeriodMonths: 18,
-        projectedIrr: 0.24,
-      },
-      outcomeProjections: [
-        { label: "Successful repositioning at target price", probability: 0.66, impact: "high — 24% IRR, $930K net gain", metrics: { exitPriceUsd: 2750000, netGainUsd: 930000, irr: 0.24 } },
-        { label: "Market softens, 12-month hold extension", probability: 0.28, impact: "medium — 14% IRR, $560K net gain", metrics: { exitPriceUsd: 2380000, netGainUsd: 560000, irr: 0.14 } },
-        { label: "Structural issue discovered post-acquisition", probability: 0.06, impact: "high — $280K remediation, IRR breakeven", metrics: { exitPriceUsd: 2100000, netGainUsd: 0, irr: 0.0 } },
-      ],
-    },
-    {
-      branchId: "terra-note-purchase",
-      branchLabel: "Distressed Note Purchase",
-      hypothesis: "Purchase the delinquent mortgage note at a discount and pursue deed-in-lieu or modified foreclosure.",
-      deltaState: {
-        notePurchasePriceUsd: 1400000,
-        deedInLieuProbability: 0.55,
-        estimatedTimelineMonths: 9,
-        projectedIrr: 0.31,
-      },
-      outcomeProjections: [
-        { label: "Deed-in-lieu granted, fast close", probability: 0.55, impact: "high — 31% IRR, $1.05M net gain", metrics: { exitPriceUsd: 2450000, netGainUsd: 1050000, irr: 0.31 } },
-        { label: "Foreclosure required, 9-month delay", probability: 0.45, impact: "medium — 18% IRR, $630K net gain", metrics: { exitPriceUsd: 2030000, netGainUsd: 630000, irr: 0.18 } },
-      ],
-    },
-  ],
-  acquisitionRecommendations: [
-    { title: "Title search and lien clearance", priority: "critical", rationale: "Lis pendens and $142K tax arrears require clean title before acquisition." },
-    { title: "Schedule Phase I environmental", priority: "high", rationale: "Atlantic Ave corridor has historic contamination flags in EPA records." },
-    { title: "Contact owner pre-auction", priority: "high", rationale: "Days on market (214) and distress score (87) indicate motivated seller." },
-  ],
-};
-
-function DriftBar({ score }: { score: number }) {
-  const color = score >= 0.75 ? ACCENT.amber : score >= 0.5 ? ACCENT.amber : ACCENT.green;
-  const label = score >= 0.75 ? "Elevated Distress" : score >= 0.5 ? "Watch" : "Nominal";
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-1.5">
-        <span className="text-[9px] font-mono uppercase tracking-widest" style={{ color: TEXT.tertiary }}>Distress Drift</span>
-        <div className="flex items-center gap-1.5">
-          <span className="text-[9px] font-mono uppercase tracking-wider" style={{ color }}>{label}</span>
-          <span className="text-sm font-bold font-mono tabular-nums" style={{ color }}>{score.toFixed(2)}</span>
-        </div>
-      </div>
-      <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
-        <div
-          className="h-full rounded-full transition-all duration-700"
-          style={{ width: `${score * 100}%`, background: `linear-gradient(90deg, ${color}99, ${color})` }}
-        />
-      </div>
-      <div className="flex justify-between mt-1">
-        <span className="text-[8px] font-mono" style={{ color: TEXT.tertiary }}>0.00 baseline</span>
-        <span className="text-[8px] font-mono" style={{ color: TEXT.tertiary }}>1.00 max</span>
-      </div>
-    </div>
-  );
-}
-
-function BranchCard({ branch, defaultOpen = false }: { branch: typeof TERRA_DEMO_SCENE.branches[0]; defaultOpen?: boolean }) {
-  const [open, setOpen] = useState(defaultOpen);
-  return (
-    <div className="rounded-lg overflow-hidden border" style={{ borderColor: BORDER.muted, background: BG.inset }}>
-      <button
-        onClick={() => setOpen(v => !v)}
-        className="w-full flex items-start gap-2.5 px-3 py-2.5 hover:bg-white/[0.02] transition-colors text-left"
-      >
-        <GitBranch className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: ACCENT.green }} />
-        <div className="flex-1 min-w-0">
-          <p className="text-[11px] font-semibold leading-snug" style={{ color: TEXT.primary }}>{branch.branchLabel}</p>
-          <p className="text-[10px] mt-0.5 line-clamp-2" style={{ color: TEXT.secondary }}>{branch.hypothesis}</p>
-        </div>
-        {open ? <ChevronDown className="w-3 h-3 shrink-0 mt-0.5" style={{ color: TEXT.tertiary }} /> : <ChevronRight className="w-3 h-3 shrink-0 mt-0.5" style={{ color: TEXT.tertiary }} />}
-      </button>
-      {open && (
-        <div className="px-3 pb-3 border-t" style={{ borderColor: BORDER.muted }}>
-          <p className="text-[9px] uppercase tracking-wider font-semibold mt-2.5 mb-1.5" style={{ color: TEXT.tertiary }}>Outcome Projections</p>
-          <div className="space-y-1.5">
-            {branch.outcomeProjections.map((proj, i) => (
-              <div key={i} className="flex items-start gap-2 rounded px-2 py-1.5" style={{ background: "rgba(255,255,255,0.025)" }}>
-                <div
-                  className="text-[10px] font-bold font-mono tabular-nums mt-0.5 shrink-0 w-8 text-right"
-                  style={{ color: proj.probability >= 0.6 ? ACCENT.green : proj.probability >= 0.4 ? ACCENT.amber : ACCENT.red }}
-                >
-                  {Math.round(proj.probability * 100)}%
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[10px] font-medium leading-snug" style={{ color: TEXT.primary }}>{proj.label}</p>
-                  <p className="text-[9px] mt-0.5" style={{ color: TEXT.secondary }}>{proj.impact}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
+import { useState } from "react";
+import { Building2, TrendingUp, ShieldAlert, Clock, Activity } from "lucide-react";
 
 interface AtlasScenePanelProps {
   propertyId?: string;
+  vesselId?: string;
+  incidentId?: string;
   isDemo?: boolean;
 }
 
-export function AtlasScenePanel({ propertyId, isDemo = true }: AtlasScenePanelProps) {
-  const [scene] = useState(TERRA_DEMO_SCENE);
-  const [loading, setLoading] = useState(false);
-  const [liveMode, setLiveMode] = useState(false);
+type Tab = "location" | "financial" | "risk";
 
-  useEffect(() => {
-    if (!propertyId || isDemo) return;
-    setLoading(true);
-    fetch(`${API}/real_estate/atlas/signals?entityId=${propertyId}`)
-      .then(r => r.ok ? r.json() : null)
-      .then(d => { if (d) setLiveMode(true); })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [propertyId, isDemo]);
+const DEMO_PROPERTY = {
+  name: "22 Battery Park South",
+  address: "22 Battery Park South, New York, NY 10004",
+  type: "Class A Office",
+  sqft: "284,500 SF",
+  floors: 32,
+  yearBuilt: 1998,
+  ownership: "Fee Simple",
+  occupancy: 94.2,
+  noi: "$18.7M",
+  capRate: 6.8,
+  marketValue: "$274.8M",
+  lastSale: "Mar 2021 · $248.2M",
+  zone: "C5-3 (Central Commercial)",
+  far: 1.8,
+};
+
+const DEMO_FINANCIALS = [
+  { label: "Gross Revenue", value: "$23.4M", trend: "+4.2%", up: true },
+  { label: "Operating Expenses", value: "$4.7M", trend: "-1.8%", up: false },
+  { label: "NOI", value: "$18.7M", trend: "+5.1%", up: true },
+  { label: "Cap Rate", value: "6.8%", trend: "+0.3%", up: true },
+  { label: "Price / SF", value: "$966", trend: "+2.7%", up: true },
+  { label: "DSCR", value: "1.48×", trend: "+0.12×", up: true },
+];
+
+const DEMO_RISKS = [
+  { label: "Market Risk", score: 0.28, level: "LOW", detail: "Manhattan Class A office absorption +420K SF Q1 2026 — demand recovering", color: "#4ade80" },
+  { label: "Regulatory / Zoning", score: 0.52, level: "MEDIUM", detail: "FAR variance application pending — C5-3 → C6-4 requires CB1 approval", color: "#fbbf24" },
+  { label: "Tenant Concentration", score: 0.61, level: "HIGH", detail: "Largest tenant (FinServ LLC) = 38% of GLA — lease expires Q4 2027", color: "#f59e0b" },
+  { label: "Climate / Flood", score: 0.44, level: "MEDIUM", detail: "FEMA Zone AE — FloodGuard mitigation installed 2022, flood insurance current", color: "#fbbf24" },
+];
+
+const ACCENT = "#10b981";
+
+export function AtlasScenePanel({ propertyId, isDemo }: AtlasScenePanelProps) {
+  const [tab, setTab] = useState<Tab>("location");
+  const p = DEMO_PROPERTY;
+  const displayId = propertyId ? `PROP-${propertyId.slice(-6).toUpperCase()}` : "22 BATT PARK";
+
+  const tabs: { id: Tab; label: string; icon: typeof Building2 }[] = [
+    { id: "location", label: "Property Intel", icon: Building2 },
+    { id: "financial", label: "Financial", icon: TrendingUp },
+    { id: "risk", label: "Risk", icon: ShieldAlert },
+  ];
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Activity className="w-3.5 h-3.5" style={{ color: ACCENT.green }} />
-          <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: TEXT.secondary }}>ATLAS Scene</span>
-          <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ background: "rgba(64,133,106,0.12)", color: ACCENT.green, border: "1px solid rgba(64,133,106,0.2)" }}>
-            {scene.entityId}
+    <div
+      style={{
+        borderRadius: "0.75rem",
+        background: "rgba(16,185,129,0.04)",
+        border: "1px solid rgba(16,185,129,0.14)",
+        overflow: "hidden",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "1rem 1.25rem 0" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <Building2 style={{ width: 14, height: 14, color: ACCENT }} />
+          <span style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: ACCENT }}>
+            ATLAS Property Scene
           </span>
+          {isDemo && (
+            <span style={{ fontSize: "0.6rem", fontFamily: "monospace", padding: "0.1rem 0.4rem", borderRadius: "2rem", background: "rgba(16,185,129,0.1)", color: ACCENT, border: "1px solid rgba(16,185,129,0.25)" }}>
+              DEMO
+            </span>
+          )}
         </div>
-        <div className="flex items-center gap-1.5">
-          {loading && <RefreshCw className="w-3 h-3 animate-spin" style={{ color: TEXT.tertiary }} />}
-          <span
-            className="text-[8px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded"
-            style={{
-              background: liveMode ? "rgba(64,133,106,0.15)" : "rgba(184,151,90,0.12)",
-              color: liveMode ? ACCENT.green : ACCENT.amber,
-              border: `1px solid ${liveMode ? "rgba(64,133,106,0.25)" : "rgba(200,149,60,0.25)"}`,
-            }}
-          >
-            {liveMode ? "Live" : "Demo"}
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <span style={{ fontSize: "0.6875rem", fontFamily: "monospace", color: "rgba(255,255,255,0.35)" }}>{displayId}</span>
+          <span style={{ fontSize: "0.6rem", fontFamily: "monospace", padding: "0.15rem 0.5rem", borderRadius: "2rem", background: "rgba(16,185,129,0.1)", color: "#34d399", border: "1px solid rgba(16,185,129,0.25)" }}>
+            {p.occupancy}% OCC
           </span>
         </div>
       </div>
 
-      <div className="rounded-lg p-3" style={{ background: BG.card, border: `1px solid ${BORDER.muted}` }}>
-        <DriftBar score={scene.driftScore} />
+      <div style={{ display: "flex", gap: 0, borderBottom: "1px solid rgba(255,255,255,0.07)", margin: "0.875rem 1.25rem 0", paddingBottom: 0 }}>
+        {tabs.map((t) => {
+          const Icon = t.icon;
+          return (
+            <button
+              key={t.id}
+              onClick={() => setTab(t.id)}
+              style={{
+                fontSize: "0.6875rem", fontFamily: "monospace", fontWeight: 500,
+                padding: "0.4rem 0.875rem",
+                background: "none", border: "none", cursor: "pointer",
+                color: tab === t.id ? ACCENT : "rgba(255,255,255,0.3)",
+                borderBottom: tab === t.id ? `2px solid ${ACCENT}` : "2px solid transparent",
+                marginBottom: -1, transition: "color 0.12s",
+                display: "flex", alignItems: "center", gap: "0.3rem",
+              }}
+            >
+              <Icon style={{ width: 11, height: 11 }} />
+              {t.label}
+            </button>
+          );
+        })}
       </div>
 
-      <div className="rounded-lg p-3 space-y-2" style={{ background: BG.card, border: `1px solid ${BORDER.muted}` }}>
-        <p className="text-[9px] uppercase tracking-wider font-semibold" style={{ color: TEXT.tertiary }}>Scene State</p>
-        <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
-          <div className="col-span-2">
-            <span className="text-[9px]" style={{ color: TEXT.tertiary }}>Address</span>
-            <p className="text-[11px] font-semibold" style={{ color: TEXT.primary }}>{scene.state.address}</p>
+      <div style={{ padding: "1rem 1.25rem 1.25rem" }}>
+        {tab === "location" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.625rem" }}>
+              {[
+                { label: "Property", value: p.name },
+                { label: "Type", value: `${p.type} · ${p.floors}F` },
+                { label: "Address", value: p.address },
+                { label: "Built / SF", value: `${p.yearBuilt} · ${p.sqft}` },
+                { label: "Ownership", value: p.ownership },
+                { label: "Occupancy", value: `${p.occupancy}%` },
+                { label: "Zoning", value: p.zone },
+                { label: "FAR (current)", value: `${p.far} · variance pending` },
+              ].map(({ label, value }) => (
+                <div key={label} style={{ background: "rgba(255,255,255,0.03)", borderRadius: "0.375rem", padding: "0.5rem 0.625rem" }}>
+                  <p style={{ fontSize: "0.6rem", color: "rgba(255,255,255,0.3)", fontFamily: "monospace", letterSpacing: "0.06em", textTransform: "uppercase", margin: "0 0 0.2rem" }}>{label}</p>
+                  <p style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.85)", fontFamily: "monospace", margin: 0 }}>{value}</p>
+                </div>
+              ))}
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.5rem 0.625rem", background: "rgba(16,185,129,0.05)", borderRadius: "0.375rem", border: "1px solid rgba(16,185,129,0.12)" }}>
+              <Activity style={{ width: 12, height: 12, color: ACCENT, flexShrink: 0 }} />
+              <span style={{ fontSize: "0.6875rem", color: "rgba(255,255,255,0.55)", fontFamily: "monospace" }}>
+                Market value <strong style={{ color: "rgba(255,255,255,0.8)" }}>{p.marketValue}</strong> · last sale {p.lastSale}
+              </span>
+            </div>
           </div>
-          <div>
-            <span className="text-[9px]" style={{ color: TEXT.tertiary }}>Distress Score</span>
-            <p className="text-[11px] font-bold" style={{ color: ACCENT.amber }}>{scene.state.distressScore}/100</p>
-          </div>
-          <div>
-            <span className="text-[9px]" style={{ color: TEXT.tertiary }}>Days on Market</span>
-            <p className="text-[11px] font-semibold" style={{ color: TEXT.primary }}>{scene.state.daysOnMarket}</p>
-          </div>
-          <div>
-            <span className="text-[9px]" style={{ color: TEXT.tertiary }}>Est. ARV</span>
-            <p className="text-[11px] font-semibold" style={{ color: TEXT.primary }}>${(scene.state.estimatedArv / 1e6).toFixed(1)}M</p>
-          </div>
-          <div>
-            <span className="text-[9px]" style={{ color: TEXT.tertiary }}>Ask Price</span>
-            <p className="text-[11px] font-semibold" style={{ color: TEXT.primary }}>${(scene.state.currentAskUsd / 1e6).toFixed(1)}M</p>
-          </div>
-          <div>
-            <span className="text-[9px]" style={{ color: TEXT.tertiary }}>Tax Arrears</span>
-            <p className="text-[11px] font-semibold" style={{ color: ACCENT.red }}>${(scene.state.taxArrears / 1e3).toFixed(0)}K</p>
-          </div>
-          <div>
-            <span className="text-[9px]" style={{ color: TEXT.tertiary }}>Lis Pendens</span>
-            <p className="text-[11px] font-semibold" style={{ color: scene.state.lisPendens ? ACCENT.red : ACCENT.green }}>
-              {scene.state.lisPendens ? "Filed" : "Clear"}
+        )}
+
+        {tab === "financial" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.625rem" }}>
+              {DEMO_FINANCIALS.map((f) => (
+                <div key={f.label} style={{ background: "rgba(255,255,255,0.03)", borderRadius: "0.5rem", padding: "0.625rem 0.75rem" }}>
+                  <p style={{ fontSize: "0.6rem", color: "rgba(255,255,255,0.3)", fontFamily: "monospace", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 0.2rem" }}>{f.label}</p>
+                  <div style={{ display: "flex", alignItems: "baseline", gap: "0.4rem" }}>
+                    <span style={{ fontSize: "1rem", fontFamily: "monospace", fontWeight: 700, color: "rgba(255,255,255,0.9)" }}>{f.value}</span>
+                    <span style={{ fontSize: "0.6875rem", fontFamily: "monospace", color: f.up ? "#4ade80" : "#f87171" }}>{f.trend}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p style={{ fontSize: "0.6rem", color: "rgba(255,255,255,0.2)", fontFamily: "monospace", textTransform: "uppercase", letterSpacing: "0.08em", margin: "0.25rem 0 0" }}>
+              TTM financials · CapExOptimizationAgent monitoring · proforma available
             </p>
           </div>
-        </div>
-      </div>
+        )}
 
-      <div>
-        <p className="text-[9px] uppercase tracking-wider font-semibold mb-2" style={{ color: TEXT.tertiary }}>Acquisition Scenario Branches</p>
-        <div className="space-y-2">
-          {scene.branches.map((b, i) => (
-            <BranchCard key={b.branchId} branch={b} defaultOpen={i === 0} />
-          ))}
-        </div>
-      </div>
-
-      <div className="rounded-lg p-3" style={{ background: BG.card, border: `1px solid ${BORDER.muted}` }}>
-        <div className="flex items-center gap-1.5 mb-2.5">
-          <Target className="w-3 h-3" style={{ color: ACCENT.green }} />
-          <p className="text-[9px] uppercase tracking-wider font-semibold" style={{ color: TEXT.tertiary }}>Acquisition Recommendations</p>
-        </div>
-        <div className="space-y-1.5">
-          {scene.acquisitionRecommendations.map((r, i) => {
-            const col = r.priority === "critical" ? ACCENT.red : r.priority === "high" ? ACCENT.amber : ACCENT.green;
-            return (
-              <div key={i} className="flex items-start gap-2 rounded px-2 py-1.5" style={{ background: "rgba(255,255,255,0.02)", border: `1px solid ${BORDER.muted}` }}>
-                <AlertTriangle className="w-3 h-3 mt-0.5 shrink-0" style={{ color: col }} />
-                <div className="flex-1 min-w-0">
-                  <p className="text-[10px] font-semibold" style={{ color: TEXT.primary }}>{r.title}</p>
-                  <p className="text-[9px] mt-0.5" style={{ color: TEXT.secondary }}>{r.rationale}</p>
+        {tab === "risk" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+            {DEMO_RISKS.map((r) => (
+              <div key={r.label} style={{ background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: "0.5rem", padding: "0.75rem 0.875rem" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.5rem", marginBottom: "0.375rem" }}>
+                  <span style={{ fontSize: "0.8125rem", color: "rgba(255,255,255,0.8)", fontWeight: 500 }}>{r.label}</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                    <span style={{ fontSize: "0.6rem", fontFamily: "monospace", fontWeight: 600, padding: "0.15rem 0.5rem", borderRadius: "2rem", background: `${r.color}18`, color: r.color, border: `1px solid ${r.color}30` }}>
+                      {r.level}
+                    </span>
+                    <span style={{ fontSize: "0.75rem", fontFamily: "monospace", fontWeight: 700, color: r.color }}>{Math.round(r.score * 100)}%</span>
+                  </div>
                 </div>
-                <span className="text-[8px] uppercase font-mono px-1 py-0.5 rounded shrink-0" style={{ background: `${col}18`, color: col }}>{r.priority}</span>
+                <div style={{ height: 4, borderRadius: 2, background: "rgba(255,255,255,0.07)", marginBottom: "0.375rem" }}>
+                  <div style={{ height: "100%", borderRadius: 2, background: r.color, width: `${r.score * 100}%`, opacity: 0.7 }} />
+                </div>
+                <p style={{ fontSize: "0.6875rem", color: "rgba(255,255,255,0.4)", margin: 0 }}>{r.detail}</p>
               </div>
-            );
-          })}
-        </div>
+            ))}
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.5rem 0.625rem", background: "rgba(245,158,11,0.06)", borderRadius: "0.375rem", border: "1px solid rgba(245,158,11,0.15)" }}>
+              <ShieldAlert style={{ width: 12, height: 12, color: "#f59e0b", flexShrink: 0 }} />
+              <span style={{ fontSize: "0.6875rem", color: "rgba(255,255,255,0.55)", fontFamily: "monospace" }}>
+                Composite risk <strong style={{ color: "#fbbf24" }}>0.46 / MEDIUM</strong> — tenant renewal negotiation flagged for Counsel review
+              </span>
+            </div>
+          </div>
+        )}
       </div>
 
-      <div className="flex items-center gap-1.5 rounded px-2.5 py-1.5" style={{ background: "rgba(255,255,255,0.025)", border: `1px solid ${BORDER.muted}` }}>
-        <Lock className="w-3 h-3 shrink-0" style={{ color: TEXT.tertiary }} />
-        <p className="text-[9px]" style={{ color: TEXT.tertiary }}>Branch execution requires <span style={{ color: TEXT.secondary }}>investment_committee</span> approval — governed via Alloy proof chain</p>
+      <div style={{ padding: "0.625rem 1.25rem", borderTop: "1px solid rgba(255,255,255,0.05)", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+        <Clock style={{ width: 10, height: 10, color: "rgba(255,255,255,0.2)" }} />
+        <span style={{ fontSize: "0.6rem", fontFamily: "monospace", color: "rgba(255,255,255,0.2)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+          terra · atlas scene · market-signal integrated
+        </span>
       </div>
     </div>
   );

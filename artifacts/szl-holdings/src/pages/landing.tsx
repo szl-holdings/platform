@@ -153,10 +153,37 @@ const TRUST_PRINCIPLES = [
 const EVIDENCE_STATS = [
   { value: "700+", label: "Database tables", note: "116 schema files" },
   { value: "40+", label: "Shared packages", note: "pnpm monorepo" },
-  { value: "15", label: "Active artifacts", note: "web, mobile, API" },
+  { value: "13", label: "Active surfaces", note: "one platform shell" },
   { value: "11", label: "RBAC roles", note: "tenant isolation" },
   { value: "9", label: "Decision stages", note: "governed loop" },
   { value: "6", label: "Platform primitives", note: "all surfaces share" },
+];
+
+const ONE_SHELL_PRIMITIVES = [
+  {
+    key: "DashboardShell",
+    label: "Unified Shell",
+    note: "Collapsible sidebar, top-bar, mobile drawer — shared chrome across all 13 surfaces.",
+    color: LYTE,
+  },
+  {
+    key: "EcosystemNav",
+    label: "Ecosystem Nav",
+    note: "Jump instantly between Lyte, Sentra, Counsel, Vessels, Terra, PRISM and every domain pack.",
+    color: "hsl(260,60%,65%)",
+  },
+  {
+    key: "CommandPalette",
+    label: "⌘K Command Palette",
+    note: "Full-keyboard search across pages, entities, and actions — available in every surface.",
+    color: "hsl(215,60%,60%)",
+  },
+  {
+    key: "SentientLayer",
+    label: "⌘J Intelligence Rail",
+    note: "Persistent AI briefing layer: Now (live signals), Next (queued actions), Links (cross-domain).",
+    color: "hsl(340,52%,60%)",
+  },
 ];
 
 const AUDIENCE_PATHS = [
@@ -678,6 +705,42 @@ export default function HomePage() {
                     ))}
                   </div>
                   <p style={{ fontSize: "0.6875rem", fontFamily: MONO, color: TEXT_FAINT, margin: 0 }}>{tier.note}</p>
+                </m.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── One Shell. Thirteen Surfaces. ────────────────────────── */}
+        <section style={{ borderBottom: `1px solid ${BORDER}`, padding: "clamp(4rem,8vw,5.5rem) 0", background: "hsla(0,0%,100%,0.012)" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }} style={{ marginBottom: "3rem" }}>
+              <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: TEXT_FAINT, marginBottom: "0.75rem" }}>
+                Platform Design System
+              </p>
+              <h2 style={{ fontSize: "clamp(1.75rem,3.5vw,2.5rem)", fontWeight: 700, letterSpacing: "-0.026em", color: TEXT, maxWidth: "28ch", marginBottom: "1rem" }}>
+                One shell. Thirteen surfaces.
+              </h2>
+              <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: TEXT_SEC, maxWidth: "54ch" }}>
+                Every domain pack — Sentra, Counsel, Vessels, Terra, PRISM, Carlota Jo — runs inside the same shared shell. One navigation model, one design language, one intelligence rail. Not a design coincidence: a platform architecture decision.
+              </p>
+            </m.div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "1px", background: BORDER, borderRadius: "10px", overflow: "hidden", border: `1px solid ${BORDER}` }}>
+              {ONE_SHELL_PRIMITIVES.map((p, i) => (
+                <m.div
+                  key={p.key}
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.38, delay: i * 0.06 }}
+                  style={{ background: BG, padding: "1.75rem 1.5rem" }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem" }}>
+                    <span style={{ width: 6, height: 6, borderRadius: "50%", background: p.color, display: "inline-block", flexShrink: 0 }} />
+                    <span style={{ fontSize: "0.8125rem", fontWeight: 700, color: p.color }}>{p.label}</span>
+                  </div>
+                  <p style={{ fontSize: "0.8125rem", lineHeight: 1.65, color: TEXT_SEC, margin: 0 }}>{p.note}</p>
+                  <p style={{ fontSize: "0.5875rem", fontFamily: MONO, letterSpacing: "0.10em", textTransform: "uppercase", color: "hsla(0,0%,100%,0.2)", marginTop: "1rem", marginBottom: 0 }}>{p.key}</p>
                 </m.div>
               ))}
             </div>

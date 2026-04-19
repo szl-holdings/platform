@@ -1,281 +1,261 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { Loader2, AlertCircle, CheckCircle2, XCircle, Clock, Bot, Inbox } from "lucide-react";
+import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import {
+  useListAlloyApprovals,
+  useDecideAlloyApproval,
+  getListAlloyApprovalsQueryKey,
+  type AlloyApproval,
+} from "@szl-holdings/api-client-react";
+import { Loader2, CheckCircle, XCircle, Clock, AlertTriangle } from "lucide-react";
 
-interface ApprovalRecord {
-  id: number;
-  orgId: number | null;
-  resourceType: string;
-  resourceId: string;
-  title: string;
-  description?: string | null;
-  actionClass?: string | null;
-  priority?: string | null;
-  status: string;
-  createdAt?: string;
-  expiresAt?: string | null;
-  correlationId?: string | null;
-  payload?: Record<string, unknown> | null;
+interface AccentClasses {
+  text: string;
+  textMuted: string;
+  bg: string;
+  border: string;
+  button?: string;
 }
 
-interface Props {
-  domain: "vessels" | "terra";
+interface PendingAutonomyApprovalsPanelProps {
+  domain: string;
   accentColor: string;
-  accentClasses: {
-    text: string;
-    textMuted: string;
-    bg: string;
-    border: string;
-    button: string;
-  };
+  accentClasses: AccentClasses;
 }
 
-function priorityChip(priority: string | null | undefined) {
-  const p = (priority ?? "medium").toLowerCase();
-  const map: Record<string, { fg: string; bg: string; border: string }> = {
-    critical: { fg: "#ef4444", bg: "rgba(239,68,68,0.12)", border: "rgba(239,68,68,0.35)" },
-    high:     { fg: "#f59e0b", bg: "rgba(245,158,11,0.12)", border: "rgba(245,158,11,0.35)" },
-    medium:   { fg: "#0ea5e9", bg: "rgba(14,165,233,0.12)", border: "rgba(14,165,233,0.35)" },
-    low:      { fg: "#a1a1aa", bg: "rgba(161,161,170,0.12)", border: "rgba(161,161,170,0.35)" },
-  };
-  const c = map[p] ?? map["medium"]!;
-  return (
-    <span
-      className="text-[10px] font-medium uppercase tracking-wide px-2 py-0.5 rounded border"
-      style={{ color: c.fg, background: c.bg, borderColor: c.border }}
-    >
-      {p}
-    </span>
+function impactBadge(role: string) {
+  if (role.includes("compliance")) return { label: "CRITICAL", bg: "rgba(239,68,68,0.12)", color: "#f87171", border: "rgba(239,68,68,0.25)" };
+  if (role.includes("acquisitions") || role.includes("fleet")) return { label: "HIGH", bg: "rgba(245,158,11,0.12)", color: "#fbbf24", border: "rgba(245,158,11,0.25)" };
+  return { label: "MEDIUM", bg: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.4)", border: "rgba(255,255,255,0.1)" };
+}
+
+function waitHours(createdAt: string) {
+  return ((Date.now() - new Date(createdAt).getTime()) / 3600000).toFixed(1);
+}
+
+export function PendingAutonomyApprovalsPanel({
+  domain,
+  accentColor,
+  accentClasses,
+}: PendingAutonomyApprovalsPanelProps) {
+  const queryClient = useQueryClient();
+  const { data, isLoading, isError } = useListAlloyApprovals({ status: "pending", limit: 20 });
+  const decideMutation = useDecideAlloyApproval({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getListAlloyApprovalsQueryKey({ status: "pending" }) });
+        setDecidingId(null);
+        setNoteText("");
+        setVerdict(null);
+      },
+    },
+  });
+
+  const [decidingId, setDecidingId] = useState<string | null>(null);
+  const [verdict, setVerdict] = useState<"approve" | "reject" | null>(null);
+  const [noteText, setNoteText] = useState("");
+
+  const approvals: AlloyApproval[] = (data?.approvals ?? []).filter(
+    (a: AlloyApproval) => !a.artifactId || a.artifactId === domain,
   );
-}
 
-function timeAgo(iso?: string) {
-  if (!iso) return "";
-  const ms = Date.now() - new Date(iso).getTime();
-  if (ms < 0) return "just now";
-  const s = Math.floor(ms / 1000);
-  if (s < 60) return `${s}s ago`;
-  const m = Math.floor(s / 60);
-  if (m < 60) return `${m}m ago`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h ago`;
-  const d = Math.floor(h / 24);
-  return `${d}d ago`;
-}
-
-export function PendingAutonomyApprovalsPanel({ domain, accentColor, accentClasses }: Props) {
-  const [items, setItems] = useState<ApprovalRecord[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [busyId, setBusyId] = useState<number | null>(null);
-  const [notes, setNotes] = useState<Record<number, string>>({});
-  const [resultBanner, setResultBanner] = useState<{ id: number; kind: "approved" | "rejected"; ts: number } | null>(null);
-
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch(`/api/approvals?status=pending&limit=100`, { credentials: "include" });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const json = (await res.json()) as { data?: ApprovalRecord[] } | ApprovalRecord[];
-      const all = Array.isArray(json) ? json : (json.data ?? []);
-      const scoped = all.filter((a) => {
-        if (a.resourceType !== "alloy_recommendation") return false;
-        const payload = (a.payload ?? {}) as { domain?: string };
-        return (payload.domain ?? "").toLowerCase() === domain;
-      });
-      setItems(scoped);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load");
-    } finally {
-      setLoading(false);
-    }
-  }, [domain]);
-
-  useEffect(() => { void load(); }, [load]);
-
-  async function review(id: number, decision: "approved" | "rejected") {
-    setBusyId(id);
-    try {
-      const res = await fetch(`/api/approvals/${id}/review`, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ decision, note: notes[id] ?? undefined }),
-      });
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text || `HTTP ${res.status}`);
-      }
-      setItems((prev) => prev.filter((a) => a.id !== id));
-      setNotes((prev) => {
-        const next = { ...prev };
-        delete next[id];
-        return next;
-      });
-      setResultBanner({ id, kind: decision, ts: Date.now() });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : `Failed to ${decision} approval`);
-    } finally {
-      setBusyId(null);
-    }
+  function startDecide(id: string, v: "approve" | "reject") {
+    setDecidingId(id);
+    setVerdict(v);
+    setNoteText("");
   }
 
-  if (loading) {
-    return (
-      <div className={`flex flex-col items-center justify-center py-16 gap-3 ${accentClasses.textMuted}`}>
-        <Loader2 className="w-6 h-6 animate-spin" />
-        <span className="text-xs">Loading queued approvals…</span>
-      </div>
-    );
+  function cancelDecide() {
+    setDecidingId(null);
+    setVerdict(null);
+    setNoteText("");
   }
 
-  if (error) {
-    return (
-      <div className={`flex flex-col items-center justify-center py-16 gap-3 ${accentClasses.textMuted}`}>
-        <AlertCircle className="w-6 h-6" />
-        <span className="text-xs">Failed to load queued approvals</span>
-        <button
-          onClick={() => void load()}
-          className={`text-xs ${accentClasses.textMuted} hover:${accentClasses.text} border ${accentClasses.border} rounded px-3 py-1 transition-colors`}
-        >
-          Retry
-        </button>
-      </div>
-    );
+  function submitDecide(id: string) {
+    if (!verdict) return;
+    decideMutation.mutate({ id, data: { decision: verdict === "approve" ? "approve" : "reject", reason: noteText || undefined } });
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between px-1">
-        <p className={`text-xs ${accentClasses.textMuted}`}>
-          Pending autonomy decisions queued by /alloy/recommend (ask-to-act / draft) for the {domain} domain — approve or reject in place. Same audit trail as the operator inbox.
-        </p>
-        <button
-          data-testid="refresh-pending-approvals"
-          onClick={() => void load()}
-          className={`text-[11px] ${accentClasses.textMuted} hover:${accentClasses.text} border ${accentClasses.border} rounded px-2 py-1 transition-colors`}
+    <div
+      style={{
+        borderRadius: "0.75rem",
+        background: `${accentColor}07`,
+        border: `1px solid ${accentColor}18`,
+        padding: "1.5rem",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.25rem" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <span style={{ width: 6, height: 6, borderRadius: "50%", background: accentColor, display: "inline-block" }} />
+          <span style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: accentColor }}>
+            Pending Autonomy Approvals
+          </span>
+        </div>
+        <span
+          className={`text-[0.625rem] font-mono px-2 py-0.5 rounded-full ${accentClasses.bg} ${accentClasses.text}`}
+          style={{ border: `1px solid ${accentColor}25` }}
         >
-          Refresh
-        </button>
+          {isLoading ? "…" : `${approvals.length} pending`}
+        </span>
       </div>
 
-      {resultBanner && Date.now() - resultBanner.ts < 8000 && (
-        <div
-          className="text-xs px-3 py-2 rounded border flex items-center gap-2"
-          style={{
-            color: resultBanner.kind === "approved" ? "#22c55e" : "#ef4444",
-            background: resultBanner.kind === "approved" ? "rgba(34,197,94,0.08)" : "rgba(239,68,68,0.08)",
-            borderColor: resultBanner.kind === "approved" ? "rgba(34,197,94,0.30)" : "rgba(239,68,68,0.30)",
-          }}
-        >
-          {resultBanner.kind === "approved" ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
-          Approval #{resultBanner.id} {resultBanner.kind}. Decision logged to audit trail.
+      {isLoading && (
+        <div className="flex items-center justify-center py-10 gap-2" style={{ color: `${accentColor}60` }}>
+          <Loader2 className="w-4 h-4 animate-spin" />
+          <span className="text-xs font-mono">Loading approvals…</span>
         </div>
       )}
 
-      {items.length === 0 ? (
-        <div className={`flex flex-col items-center justify-center py-12 gap-2 ${accentClasses.textMuted}`}>
-          <Inbox className="w-6 h-6" />
-          <span className="text-xs">No queued autonomy items waiting for review.</span>
+      {isError && !isLoading && (
+        <div className="flex items-center gap-2 py-4" style={{ color: "rgba(239,68,68,0.7)" }}>
+          <AlertTriangle className="w-4 h-4" />
+          <span className="text-xs font-mono">Could not reach approvals API — check API server connectivity</span>
         </div>
-      ) : (
-        items.map((approval) => {
-          const payload = (approval.payload ?? {}) as Record<string, unknown>;
-          const recommendationId = String(payload["recommendationId"] ?? approval.resourceId);
-          const summary = String(payload["summary"] ?? approval.description ?? "");
-          const suggestedAction = (payload["suggestedAction"] ?? null) as Record<string, unknown> | null;
-          const autonomyMode = String(payload["autonomyMode"] ?? "");
-          const policyState = String(payload["policyState"] ?? "");
-          const policyReason = String(payload["policyReason"] ?? "");
-          const confidence = typeof payload["confidence"] === "number" ? (payload["confidence"] as number) : null;
-          const isBusy = busyId === approval.id;
+      )}
 
-          return (
-            <div
-              key={approval.id}
-              data-testid={`pending-approval-${approval.id}`}
-              className={`bg-slate-900/80 border ${accentClasses.border} rounded-xl p-4 space-y-3`}
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="space-y-1 min-w-0">
-                  <div className={`text-sm font-semibold ${accentClasses.text}`}>{approval.title}</div>
-                  <div className={`text-[11px] ${accentClasses.textMuted} flex items-center gap-2 flex-wrap`}>
-                    <Bot className="w-3 h-3" /> rec {recommendationId.substring(0, 12)}
-                    <Clock className="w-3 h-3" /> {timeAgo(approval.createdAt)}
-                    {autonomyMode && <span className="opacity-70">mode {autonomyMode}</span>}
-                    {policyState && <span className="opacity-70">policy {policyState}</span>}
-                    {confidence !== null && <span className="opacity-70">conf {(confidence * 100).toFixed(0)}%</span>}
+      {!isLoading && !isError && approvals.length === 0 && (
+        <div className="flex flex-col items-center justify-center py-8 gap-2">
+          <CheckCircle style={{ width: 24, height: 24, color: `${accentColor}40` }} />
+          <span className="text-xs font-mono" style={{ color: `${accentColor}60` }}>No pending approvals</span>
+          <span className="text-[0.6875rem]" style={{ color: "rgba(255,255,255,0.2)" }}>All autonomy actions approved or queued</span>
+        </div>
+      )}
+
+      {!isLoading && approvals.length > 0 && (
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}>
+          {approvals.map((item) => {
+            const badge = impactBadge(item.requiredRole);
+            const isExpanding = decidingId === item.id;
+            return (
+              <div
+                key={item.id}
+                style={{
+                  background: "rgba(255,255,255,0.025)",
+                  border: isExpanding ? `1px solid ${accentColor}30` : "1px solid rgba(255,255,255,0.07)",
+                  borderRadius: "0.5rem",
+                  padding: "0.875rem 1rem",
+                  transition: "border-color 0.15s",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "0.75rem", marginBottom: "0.5rem" }}>
+                  <p style={{ fontSize: "0.8125rem", color: "rgba(255,255,255,0.85)", lineHeight: 1.45, margin: 0 }}>
+                    {item.reason ?? `Approval required — ${item.requiredRole}`}
+                  </p>
+                  <span
+                    style={{
+                      fontSize: "0.6rem", fontFamily: "monospace", fontWeight: 600,
+                      letterSpacing: "0.08em", padding: "0.15rem 0.5rem", borderRadius: "2rem",
+                      flexShrink: 0, background: badge.bg, color: badge.color,
+                      border: `1px solid ${badge.border}`,
+                    }}
+                  >
+                    {badge.label}
+                  </span>
+                </div>
+
+                <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "0.625rem" }}>
+                  <span style={{ fontSize: "0.6875rem", color: "rgba(255,255,255,0.3)", fontFamily: "monospace" }}>
+                    {item.requestedBy}
+                  </span>
+                  <span style={{ fontSize: "0.6875rem", color: accentColor, fontFamily: "monospace" }}>
+                    role: {item.requiredRole}
+                  </span>
+                  <span style={{ fontSize: "0.6875rem", color: "rgba(255,255,255,0.25)", fontFamily: "monospace", display: "flex", alignItems: "center", gap: "0.25rem" }}>
+                    <Clock className="w-3 h-3 inline" />
+                    {waitHours(item.createdAt)}h waiting
+                  </span>
+                </div>
+
+                {!isExpanding && (
+                  <div style={{ display: "flex", gap: "0.5rem" }}>
+                    <button
+                      onClick={() => startDecide(item.id, "approve")}
+                      style={{
+                        fontSize: "0.6875rem", fontFamily: "monospace", fontWeight: 600,
+                        padding: "0.3rem 0.75rem", borderRadius: "0.375rem",
+                        background: "rgba(34,197,94,0.1)", color: "#4ade80",
+                        border: "1px solid rgba(34,197,94,0.2)", cursor: "pointer",
+                        display: "flex", alignItems: "center", gap: "0.3rem",
+                      }}
+                    >
+                      <CheckCircle className="w-3 h-3" /> Approve
+                    </button>
+                    <button
+                      onClick={() => startDecide(item.id, "reject")}
+                      style={{
+                        fontSize: "0.6875rem", fontFamily: "monospace", fontWeight: 600,
+                        padding: "0.3rem 0.75rem", borderRadius: "0.375rem",
+                        background: "rgba(239,68,68,0.1)", color: "#f87171",
+                        border: "1px solid rgba(239,68,68,0.2)", cursor: "pointer",
+                        display: "flex", alignItems: "center", gap: "0.3rem",
+                      }}
+                    >
+                      <XCircle className="w-3 h-3" /> Reject
+                    </button>
                   </div>
-                </div>
-                {priorityChip(approval.priority)}
+                )}
+
+                {isExpanding && (
+                  <div style={{ marginTop: "0.625rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                    <p style={{ fontSize: "0.6875rem", color: "rgba(255,255,255,0.5)", margin: 0, fontFamily: "monospace" }}>
+                      {verdict === "approve" ? "Approve" : "Reject"} — add audit note (optional):
+                    </p>
+                    <textarea
+                      value={noteText}
+                      onChange={(e) => setNoteText(e.target.value)}
+                      placeholder="Rationale for audit trail…"
+                      rows={2}
+                      style={{
+                        fontSize: "0.75rem", fontFamily: "monospace",
+                        background: "rgba(255,255,255,0.04)", color: "rgba(255,255,255,0.8)",
+                        border: `1px solid ${accentColor}28`, borderRadius: "0.375rem",
+                        padding: "0.5rem 0.625rem", resize: "vertical",
+                        outline: "none", width: "100%", boxSizing: "border-box",
+                      }}
+                    />
+                    <div style={{ display: "flex", gap: "0.5rem" }}>
+                      <button
+                        onClick={() => submitDecide(item.id)}
+                        disabled={decideMutation.isPending}
+                        style={{
+                          fontSize: "0.6875rem", fontFamily: "monospace", fontWeight: 600,
+                          padding: "0.3rem 0.75rem", borderRadius: "0.375rem",
+                          background: verdict === "approve" ? "rgba(34,197,94,0.15)" : "rgba(239,68,68,0.15)",
+                          color: verdict === "approve" ? "#4ade80" : "#f87171",
+                          border: `1px solid ${verdict === "approve" ? "rgba(34,197,94,0.3)" : "rgba(239,68,68,0.3)"}`,
+                          cursor: decideMutation.isPending ? "not-allowed" : "pointer",
+                          display: "flex", alignItems: "center", gap: "0.3rem",
+                          opacity: decideMutation.isPending ? 0.6 : 1,
+                        }}
+                      >
+                        {decideMutation.isPending
+                          ? <Loader2 className="w-3 h-3 animate-spin" />
+                          : verdict === "approve" ? <CheckCircle className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
+                        Confirm {verdict === "approve" ? "Approval" : "Rejection"}
+                      </button>
+                      <button
+                        onClick={cancelDecide}
+                        style={{
+                          fontSize: "0.6875rem", fontFamily: "monospace",
+                          padding: "0.3rem 0.75rem", borderRadius: "0.375rem",
+                          background: "rgba(255,255,255,0.04)", color: "rgba(255,255,255,0.4)",
+                          border: "1px solid rgba(255,255,255,0.1)", cursor: "pointer",
+                        }}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
-
-              {summary && <p className="text-xs text-slate-300/85 leading-relaxed">{summary}</p>}
-
-              {policyReason && (
-                <div className="text-[11px] text-amber-200/80 bg-amber-500/5 border border-amber-500/20 rounded px-2 py-1.5">
-                  <span className="font-semibold">Policy:</span> {policyReason}
-                </div>
-              )}
-
-              {suggestedAction && (
-                <details className="text-[11px]">
-                  <summary className={`cursor-pointer ${accentClasses.textMuted} hover:${accentClasses.text}`}>
-                    View suggested action payload
-                  </summary>
-                  <pre className="mt-2 p-2 rounded bg-black/30 text-slate-300/80 overflow-x-auto text-[10px]">
-                    {JSON.stringify(suggestedAction, null, 2)}
-                  </pre>
-                </details>
-              )}
-
-              <textarea
-                value={notes[approval.id] ?? ""}
-                onChange={(e) => setNotes((prev) => ({ ...prev, [approval.id]: e.target.value }))}
-                placeholder="Optional reviewer note (recorded on the audit trail)…"
-                className={`w-full text-xs bg-black/30 border ${accentClasses.border} rounded px-2 py-1.5 text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-1`}
-                style={{ ['--tw-ring-color' as string]: accentColor }}
-                rows={2}
-                data-testid={`approval-note-${approval.id}`}
-              />
-
-              <div className="flex items-center gap-2">
-                <button
-                  data-testid={`approve-approval-${approval.id}`}
-                  disabled={isBusy}
-                  onClick={() => void review(approval.id, "approved")}
-                  className="text-xs font-medium px-3 py-1.5 rounded border transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{
-                    color: "#22c55e",
-                    background: "rgba(34,197,94,0.10)",
-                    borderColor: "rgba(34,197,94,0.35)",
-                  }}
-                >
-                  {isBusy ? <Loader2 className="w-3 h-3 animate-spin inline" /> : <CheckCircle2 className="w-3 h-3 inline mr-1" />}
-                  Approve
-                </button>
-                <button
-                  data-testid={`reject-approval-${approval.id}`}
-                  disabled={isBusy}
-                  onClick={() => void review(approval.id, "rejected")}
-                  className="text-xs font-medium px-3 py-1.5 rounded border transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{
-                    color: "#ef4444",
-                    background: "rgba(239,68,68,0.10)",
-                    borderColor: "rgba(239,68,68,0.35)",
-                  }}
-                >
-                  <XCircle className="w-3 h-3 inline mr-1" />
-                  Reject
-                </button>
-                <span className="text-[10px] text-slate-500 ml-auto">approval #{approval.id}</span>
-              </div>
-            </div>
-          );
-        })
+            );
+          })}
+        </div>
       )}
+
+      <p style={{ fontSize: "0.625rem", fontFamily: "monospace", color: "rgba(255,255,255,0.2)", textTransform: "uppercase", letterSpacing: "0.1em", marginTop: "1rem", marginBottom: 0 }}>
+        {domain} · covenant-policy gated · decisions logged to audit trail
+      </p>
     </div>
   );
 }
-
-export default PendingAutonomyApprovalsPanel;

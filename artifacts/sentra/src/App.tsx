@@ -13,6 +13,8 @@ import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { SidebarNav, type SidebarNavSection } from "@szl-holdings/shared-ui/design-system";
 import { DashboardShell as SharedDashboardShell } from "@szl-holdings/shared-ui/design-system";
+import { CommandPalette, useCommandPalette, getEcosystemSwitchCommands, createBaselineWebActions, type CommandItem } from "@szl-holdings/shared-ui/command-palette";
+import { SentientLayer, useSentientLayer, type SentientUpdate, type SentientAction, type SentientCrossLink } from "@szl-holdings/shared-ui/sentient-layer";
 
 const DashboardPage = lazy(() => import("@/pages/dashboard"));
 const ResilienceScorecardPage = lazy(() => import("@/pages/resilience-scorecard"));
@@ -231,9 +233,46 @@ function AppShell({
   sidebarHovered: boolean;
   setSidebarHovered: (v: boolean) => void;
 }) {
-  const [location] = useLocation();
+  const [location, navigate] = useLocation();
   const accent = useEffectiveAccent(SENTRA_BRAND_ACCENT);
   const sidebarExpanded = !sidebarCollapsed || sidebarHovered;
+
+  const paletteCommands: CommandItem[] = [
+    ...createBaselineWebActions(navigate),
+    ...getEcosystemSwitchCommands("sentra"),
+    { id: "nav-dashboard", label: "Dashboard", group: "Navigate", action: () => navigate("/dashboard") },
+    { id: "nav-threats", label: "Threat Overview", group: "Navigate", action: () => navigate("/threats") },
+    { id: "nav-assets", label: "Asset Risk Graph", group: "Navigate", action: () => navigate("/assets") },
+    { id: "nav-recovery", label: "Recovery Readiness", group: "Navigate", action: () => navigate("/recovery") },
+    { id: "nav-incident", label: "Incident Commander", group: "Navigate", action: () => navigate("/incident") },
+    { id: "nav-exposure", label: "Exposure Board", group: "Navigate", action: () => navigate("/exposure") },
+    { id: "nav-controls", label: "Control Drift", group: "Navigate", action: () => navigate("/controls") },
+    { id: "nav-decisions", label: "Decision Center", group: "Navigate", action: () => navigate("/decision-center") },
+    { id: "nav-trust", label: "Trust & Provenance", group: "Navigate", action: () => navigate("/trust") },
+    { id: "nav-alerts", label: "Alerts", group: "Navigate", action: () => navigate("/alerts") },
+    { id: "nav-approvals", label: "Approvals", group: "Navigate", action: () => navigate("/approvals") },
+  ];
+  const { open: paletteOpen, setOpen: setPaletteOpen } = useCommandPalette(paletteCommands);
+  const { open: sentientOpen, show: sentientShow, hide: sentientHide } = useSentientLayer();
+
+  const sentientUpdates: SentientUpdate[] = [
+    { id: "u1", headline: "CVE-2024-21412: Critical NTLM bypass — 3 assets exposed", surface: "Sentra", severity: "critical", timestamp: new Date(Date.now() - 12 * 60000).toISOString(), href: "/threats" },
+    { id: "u2", headline: "Control drift detected — MFA policy deviation on 4 endpoints", surface: "Sentra", severity: "warning", timestamp: new Date(Date.now() - 38 * 60000).toISOString(), href: "/controls" },
+    { id: "u3", headline: "Resilience score improved: 73 → 81 after patch cycle", surface: "Sentra", severity: "info", timestamp: new Date(Date.now() - 2 * 3600000).toISOString(), href: "/dashboard" },
+    { id: "u4", headline: "Incident IC-2409 escalated to P1 — awaiting CISO approval", surface: "Sentra", severity: "critical", timestamp: new Date(Date.now() - 55 * 60000).toISOString(), href: "/incident" },
+  ];
+
+  const sentientActions: SentientAction[] = [
+    { id: "a1", label: "Isolate affected endpoints (4 hosts)", description: "Agent recommends network isolation for CVE-2024-21412 exposure. Confidence: 94%. Reversible within 15 min.", confidence: 0.94, policyVerdict: "requires_approval", href: "/approvals" },
+    { id: "a2", label: "Trigger emergency MFA re-enrollment", description: "Policy drift on SAML MFA — re-enrollment for 4 accounts recommended. Low blast radius.", confidence: 0.88, policyVerdict: "allowed", href: "/controls" },
+    { id: "a3", label: "Escalate IC-2409 to executive stakeholders", description: "P1 incident open >45 min with no CISO acknowledgement — auto-escalation recommended.", confidence: 0.91, policyVerdict: "requires_approval", href: "/incident" },
+  ];
+
+  const sentientCrossLinks: SentientCrossLink[] = [
+    { id: "cl1", surface: "Counsel", surfaceAccent: "#8b5cf6", label: "Active legal matter: data breach disclosure", description: "PRISM Counsel has a linked data-breach matter with a 72h regulatory disclosure deadline.", href: "/counsel/dashboard", preservedContext: { surface: "sentra", domain: "incident" } },
+    { id: "cl2", surface: "Lyte", surfaceAccent: "#0ea5e9", label: "3 pending decisions in Decision Center", description: "Lyte's Decision Center has 3 Sentra-sourced recommendations queued for approval.", href: "/lyte/decision-center", preservedContext: { surface: "sentra" } },
+    { id: "cl3", surface: "Vessels", surfaceAccent: "#0ea5e9", label: "Fleet asset under active threat — MV Atlantic Falcon", description: "Vessels flagged MV Atlantic Falcon's onboard systems for a related CVE exposure.", href: "/vessels/fleet", preservedContext: { surface: "sentra" } },
+  ];
 
   if (location.startsWith("/resilience")) {
     return (
@@ -302,6 +341,25 @@ function AppShell({
           <DashboardRouter />
         </main>
       </SharedDashboardShell>
+      <CommandPalette
+        open={paletteOpen}
+        onClose={() => setPaletteOpen(false)}
+        commands={paletteCommands}
+        appName="Sentra"
+        accentColor={accent}
+        placeholder="Search Sentra — pages, entities, actions..."
+      />
+      <SentientLayer
+        open={sentientOpen}
+        onClose={sentientHide}
+        onOpen={sentientShow}
+        surfaceId="sentra"
+        surfaceName="Sentra Cyber Resilience"
+        accentColor={accent}
+        updates={sentientUpdates}
+        actions={sentientActions}
+        crossLinks={sentientCrossLinks}
+      />
       <Toaster position="bottom-right" theme="dark" />
     </div>
   );

@@ -136,6 +136,7 @@ export default defineConfig({
     emptyOutDir: true,
     cssCodeSplit: true,
     rollupOptions: {
+      external: ["worker_threads"],
       output: {
         manualChunks(id): string | undefined {
           if (id.includes("node_modules")) {

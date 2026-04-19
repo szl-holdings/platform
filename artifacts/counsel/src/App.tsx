@@ -11,6 +11,8 @@ import {
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
 import { SidebarNav, type SidebarNavSection } from "@szl-holdings/shared-ui/design-system";
 import { DashboardShell as SharedDashboardShell } from "@szl-holdings/shared-ui/design-system";
+import { CommandPalette, useCommandPalette, getEcosystemSwitchCommands, createBaselineWebActions, type CommandItem } from "@szl-holdings/shared-ui/command-palette";
+import { SentientLayer, useSentientLayer, type SentientUpdate, type SentientAction, type SentientCrossLink } from "@szl-holdings/shared-ui/sentient-layer";
 
 const COUNSEL_ACCENT = "#8b5cf6";
 
@@ -192,7 +194,7 @@ function AppShell() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => prefs.sidebar_collapsed);
   const [sidebarHovered, setSidebarHovered] = useState(false);
   const userOverriddenSidebarRef = useRef(false);
-  const [location] = useLocation();
+  const [location, navigate] = useLocation();
 
   useEffect(() => {
     if (isLoaded && !userOverriddenSidebarRef.current) {
@@ -210,6 +212,42 @@ function AppShell() {
   }, [setPreference]);
 
   const sidebarExpanded = !sidebarCollapsed || sidebarHovered;
+
+  const paletteCommands: CommandItem[] = [
+    ...createBaselineWebActions(navigate),
+    ...getEcosystemSwitchCommands("counsel"),
+    { id: "nav-dashboard", label: "Dashboard", group: "Navigate", action: () => navigate("/dashboard") },
+    { id: "nav-matters", label: "Matter Overview", group: "Navigate", action: () => navigate("/matters") },
+    { id: "nav-obligations", label: "Obligation Timeline", group: "Navigate", action: () => navigate("/obligations") },
+    { id: "nav-dependencies", label: "Dependency Graph", group: "Navigate", action: () => navigate("/dependencies") },
+    { id: "nav-performance", label: "Counsel Performance", group: "Navigate", action: () => navigate("/performance") },
+    { id: "nav-risk", label: "Risk Exposure Desk", group: "Navigate", action: () => navigate("/risk") },
+    { id: "nav-decisions", label: "Decision Center", group: "Navigate", action: () => navigate("/decision-center") },
+    { id: "nav-alerts", label: "Alerts", group: "Navigate", action: () => navigate("/alerts") },
+    { id: "nav-approvals", label: "Approvals", group: "Navigate", action: () => navigate("/approvals") },
+    { id: "nav-trust", label: "Trust & Provenance", group: "Navigate", action: () => navigate("/trust") },
+  ];
+  const { open: paletteOpen, setOpen: setPaletteOpen } = useCommandPalette(paletteCommands);
+  const { open: sentientOpen, show: sentientShow, hide: sentientHide } = useSentientLayer();
+
+  const sentientUpdates: SentientUpdate[] = [
+    { id: "u1", headline: "Greenfield v. Apex: 14-day trial deadline — brief not filed", surface: "Counsel", severity: "critical", timestamp: new Date(Date.now() - 8 * 60000).toISOString(), href: "/obligations" },
+    { id: "u2", headline: "Matter 2024-SEC-441: opposing counsel response received", surface: "Counsel", severity: "info", timestamp: new Date(Date.now() - 45 * 60000).toISOString(), href: "/matters" },
+    { id: "u3", headline: "Exposure increased: $6.4M at risk — Greenfield + TechCo cluster", surface: "Counsel", severity: "warning", timestamp: new Date(Date.now() - 2 * 3600000).toISOString(), href: "/risk" },
+    { id: "u4", headline: "New dependency: Vessels sanctions matter linked to Apex case", surface: "Counsel", severity: "info", timestamp: new Date(Date.now() - 3 * 3600000).toISOString(), href: "/dependencies" },
+  ];
+
+  const sentientActions: SentientAction[] = [
+    { id: "a1", label: "File Greenfield brief — 14-day deadline in 96 hours", description: "Agent has drafted briefing outline with case citations. Requires counsel review before filing.", confidence: 0.89, policyVerdict: "requires_approval", href: "/matters" },
+    { id: "a2", label: "Generate demand letter — TechCo IP matter", description: "Demand letter template ready with $2.1M exposure framing. Low risk, routine action.", confidence: 0.92, policyVerdict: "allowed", href: "/decisions" },
+    { id: "a3", label: "Escalate 2024-SEC-441 to senior partner", description: "SEC response received with accelerated discovery timeline. Recommend immediate escalation.", confidence: 0.87, policyVerdict: "requires_approval", href: "/approvals" },
+  ];
+
+  const sentientCrossLinks: SentientCrossLink[] = [
+    { id: "cl1", surface: "Sentra", surfaceAccent: "#ef4444", label: "Sentra: data breach incident linked to Greenfield", description: "Sentra's IC-2409 incident is the source event for the Greenfield data breach matter.", href: "/sentra/incident", preservedContext: { surface: "counsel", matter: "greenfield" } },
+    { id: "cl2", surface: "Vessels", surfaceAccent: "#0ea5e9", label: "Vessels: MV Atlantic Falcon sanctions linkage", description: "Vessels flagged Apex Group as beneficiary of a sanctioned vessel voyage — linked to 2024-SEC-441.", href: "/vessels/sanctions", preservedContext: { surface: "counsel" } },
+    { id: "cl3", surface: "Lyte", surfaceAccent: "#0ea5e9", label: "Lyte: 2 legal decisions pending executive approval", description: "Lyte's Decision Center has 2 Counsel-sourced recommendations queued for executive sign-off.", href: "/lyte/decision-center", preservedContext: { surface: "counsel" } },
+  ];
 
   if (location === "/" || location === "") {
     return (
@@ -270,6 +308,25 @@ function AppShell() {
           <DashboardRouter />
         </main>
       </SharedDashboardShell>
+      <CommandPalette
+        open={paletteOpen}
+        onClose={() => setPaletteOpen(false)}
+        commands={paletteCommands}
+        appName="Counsel"
+        accentColor={COUNSEL_ACCENT}
+        placeholder="Search Counsel — matters, obligations, actions..."
+      />
+      <SentientLayer
+        open={sentientOpen}
+        onClose={sentientHide}
+        onOpen={sentientShow}
+        surfaceId="counsel"
+        surfaceName="Counsel Legal Matter Command"
+        accentColor={COUNSEL_ACCENT}
+        updates={sentientUpdates}
+        actions={sentientActions}
+        crossLinks={sentientCrossLinks}
+      />
       <Toaster position="bottom-right" theme="dark" />
     </div>
   );
