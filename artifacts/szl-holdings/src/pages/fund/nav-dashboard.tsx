@@ -142,7 +142,7 @@ export default function NavDashboardPage() {
   });
 
   type LpReport = {
-    id: number; period: string; status: string; navPerUnit: string | null;
+    id: number; reportingPeriod: string; status: string; fundNav: string | null;
     netIrr: string | null; tvpi: string | null; dpi: string | null; createdAt: string;
   };
   const { data: lpReportRows } = useQuery({
@@ -204,15 +204,19 @@ export default function NavDashboardPage() {
 
   const liveLpReports = useMemo(() => {
     if (!lpReportRows || lpReportRows.length === 0) return QUARTERLY_LP_REPORTS;
-    return lpReportRows.map(r => ({
-      period: r.period,
-      status: r.status === "ready" ? "ready" : "distributed",
-      navPerUnit: r.navPerUnit ? parseFloat(r.navPerUnit) : CURRENT_FUND.navPerUnit,
-      irr: r.netIrr ? parseFloat(r.netIrr) : CURRENT_FUND.netIrr,
-      tvpi: r.tvpi ? parseFloat(r.tvpi) : CURRENT_FUND.tvpi,
-      dpi: r.dpi ? parseFloat(r.dpi) : CURRENT_FUND.dpi,
-      generated: new Date(r.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
-    }));
+    return lpReportRows.map(r => {
+      const navUnits = 60_000_000;
+      const navPerUnit = r.fundNav ? parseFloat(r.fundNav) / navUnits : CURRENT_FUND.navPerUnit;
+      return {
+        period: r.reportingPeriod,
+        status: r.status === "approved" ? "ready" : r.status === "distributed" ? "distributed" : r.status,
+        navPerUnit,
+        irr: r.netIrr ? parseFloat(r.netIrr) : CURRENT_FUND.netIrr,
+        tvpi: r.tvpi ? parseFloat(r.tvpi) : CURRENT_FUND.tvpi,
+        dpi: r.dpi ? parseFloat(r.dpi) : CURRENT_FUND.dpi,
+        generated: new Date(r.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+      };
+    });
   }, [lpReportRows]);
 
   const activeNavHistory = liveNavHistory.length >= 2 ? liveNavHistory : NAV_HISTORY;

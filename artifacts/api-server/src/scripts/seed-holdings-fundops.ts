@@ -18,6 +18,8 @@ import {
   diligenceChecklistsTable,
   diligenceChecklistItemsTable,
   capTablePlaceholdersTable,
+  fundNavRecordsTable,
+  fundLpReportsTable,
 } from "@szl-holdings/db";
 
 function daysAgo(n: number) { return new Date(Date.now() - n * 86400000); }
@@ -28,7 +30,8 @@ export async function seedHoldingsFundops() {
 
   const existing = await db.select({ id: holdingsVenturesTable.id }).from(holdingsVenturesTable).limit(1);
   if (existing.length > 0) {
-    console.log("[seed-holdings-fundops] Data already seeded, skipping.");
+    console.log("[seed-holdings-fundops] Ventures already seeded, skipping main block.");
+    await seedFundNavLpReports();
     return { skipped: true };
   }
 
@@ -443,6 +446,273 @@ export async function seedHoldingsFundops() {
 
   console.log(`[seed-holdings-fundops] Seeded cap table placeholders`);
 
+  await seedFundNavLpReports();
+
   console.log("[seed-holdings-fundops] Holdings & Fund Ops seed complete.");
   return { seeded: true };
+}
+
+/**
+ * Seeds fund-level NAV snapshots and quarterly LP reports so the NAV dashboard
+ * charts render with live data instead of falling back to hardcoded fixtures.
+ * Idempotent: skips silently if records already exist.
+ */
+export async function seedFundNavLpReports() {
+  const existingFin = await db.select({ id: fundPortfolioFinancialsTable.id }).from(fundPortfolioFinancialsTable).limit(1);
+  if (existingFin.length === 0) {
+    await db.insert(fundPortfolioFinancialsTable).values([
+      {
+        companySlug: "vessels-maritime", companyName: "Vessels Maritime Intelligence",
+        periodType: "quarterly", periodLabel: "Q1 2026", periodStart: "2026-01-01", periodEnd: "2026-03-31",
+        reportingStatus: "final",
+        revenue: "700000", revenuePriorPeriod: "520000", grossProfit: "525000", grossMarginPct: "0.75",
+        operatingExpenses: "440000", ebitda: "85000", netIncome: "62000",
+        cashAndEquivalents: "3200000", totalAssets: "4100000", totalLiabilities: "800000", totalEquity: "3300000",
+        operatingCashFlow: "95000", freeCashFlow: "72000", burnRate: "-72000", runwayMonths: "22", capitalRaised: "4200000",
+      },
+      {
+        companySlug: "lyte-aiops", companyName: "Lyte AIOps",
+        periodType: "quarterly", periodLabel: "Q1 2026", periodStart: "2026-01-01", periodEnd: "2026-03-31",
+        reportingStatus: "final",
+        revenue: "1050000", revenuePriorPeriod: "800000", grossProfit: "840000", grossMarginPct: "0.80",
+        operatingExpenses: "720000", ebitda: "120000", netIncome: "88000",
+        cashAndEquivalents: "4800000", totalAssets: "5900000", totalLiabilities: "1100000", totalEquity: "4800000",
+        operatingCashFlow: "140000", freeCashFlow: "105000", burnRate: "-105000", runwayMonths: "28", capitalRaised: "6500000",
+      },
+      {
+        companySlug: "prism-counsel", companyName: "PRISM Counsel",
+        periodType: "quarterly", periodLabel: "Q1 2026", periodStart: "2026-01-01", periodEnd: "2026-03-31",
+        reportingStatus: "submitted",
+        revenue: "210000", revenuePriorPeriod: "95000", grossProfit: "168000", grossMarginPct: "0.80",
+        operatingExpenses: "195000", ebitda: "-27000", netIncome: "-31000",
+        cashAndEquivalents: "680000", totalAssets: "820000", totalLiabilities: "140000", totalEquity: "680000",
+        operatingCashFlow: "-28000", freeCashFlow: "-35000", burnRate: "35000", runwayMonths: "18", capitalRaised: "850000",
+      },
+      {
+        companySlug: "terra-realestate", companyName: "Terra Real Estate Intelligence",
+        periodType: "quarterly", periodLabel: "Q1 2026", periodStart: "2026-01-01", periodEnd: "2026-03-31",
+        reportingStatus: "final",
+        revenue: "155000", revenuePriorPeriod: "82000", grossProfit: "124000", grossMarginPct: "0.80",
+        operatingExpenses: "180000", ebitda: "-25000", netIncome: "-28000",
+        cashAndEquivalents: "540000", totalAssets: "640000", totalLiabilities: "100000", totalEquity: "540000",
+        operatingCashFlow: "-22000", freeCashFlow: "-30000", burnRate: "30000", runwayMonths: "14", capitalRaised: "750000",
+      },
+      {
+        companySlug: "aegis-security", companyName: "Aegis Defense & Intelligence",
+        periodType: "quarterly", periodLabel: "Q1 2026", periodStart: "2026-01-01", periodEnd: "2026-03-31",
+        reportingStatus: "submitted",
+        revenue: "95000", revenuePriorPeriod: "0", grossProfit: "76000", grossMarginPct: "0.80",
+        operatingExpenses: "165000", ebitda: "-70000", netIncome: "-72000",
+        cashAndEquivalents: "780000", totalAssets: "900000", totalLiabilities: "120000", totalEquity: "780000",
+        operatingCashFlow: "-65000", freeCashFlow: "-72000", burnRate: "72000", runwayMonths: "20", capitalRaised: "1100000",
+      },
+      {
+        companySlug: "carlota-jo-consulting", companyName: "Carlota Jo Consulting",
+        periodType: "quarterly", periodLabel: "Q1 2026", periodStart: "2026-01-01", periodEnd: "2026-03-31",
+        reportingStatus: "final",
+        revenue: "275000", revenuePriorPeriod: "248000", grossProfit: "220000", grossMarginPct: "0.80",
+        operatingExpenses: "165000", ebitda: "55000", netIncome: "48000",
+        cashAndEquivalents: "420000", totalAssets: "510000", totalLiabilities: "90000", totalEquity: "420000",
+        operatingCashFlow: "52000", freeCashFlow: "48000", runwayMonths: "99", capitalRaised: "0",
+      },
+    ]);
+    console.log("[seed-holdings-fundops] Seeded 6 portfolio financial records");
+  } else {
+    console.log("[seed-holdings-fundops] Portfolio financials already present, skipping.");
+  }
+
+  const existingNav = await db.select({ id: fundNavRecordsTable.id }).from(fundNavRecordsTable).limit(1);
+  if (existingNav.length === 0) {
+    // 6 quarterly NAV snapshots, Q4 2024 → Q1 2026. Cents-denominated integers.
+    await db.insert(fundNavRecordsTable).values([
+      {
+        navDate: "2024-12-31",
+        totalNavCents: 56_000_000_00,
+        calledCapitalCents: 44_000_000_00,
+        uncalledCommitmentsCents: 76_000_000_00,
+        distributedCents: 1_800_000_00,
+        unrealizedValueCents: 54_200_000_00,
+        managementFeesPaidCents: 320_000_00,
+        carryAccruedCents: 18_000_00,
+        grossIrr: "18.6000",
+        netIrr: "15.2000",
+        tvpi: "1.3100",
+        dpi: "0.0900",
+        rvpi: "1.2200",
+        notes: "Q4 2024 close — pre-Vessels Series A allocation",
+      },
+      {
+        navDate: "2025-03-31",
+        totalNavCents: 62_400_000_00,
+        calledCapitalCents: 48_000_000_00,
+        uncalledCommitmentsCents: 72_000_000_00,
+        distributedCents: 3_200_000_00,
+        unrealizedValueCents: 59_200_000_00,
+        managementFeesPaidCents: 480_000_00,
+        carryAccruedCents: 42_000_00,
+        grossIrr: "22.4000",
+        netIrr: "18.4000",
+        tvpi: "1.4800",
+        dpi: "0.1800",
+        rvpi: "1.3000",
+        notes: "Q1 2025 mark — Vessels Series A close",
+      },
+      {
+        navDate: "2025-06-30",
+        totalNavCents: 68_800_000_00,
+        calledCapitalCents: 52_000_000_00,
+        uncalledCommitmentsCents: 68_000_000_00,
+        distributedCents: 3_200_000_00,
+        unrealizedValueCents: 65_600_000_00,
+        managementFeesPaidCents: 642_000_00,
+        carryAccruedCents: 110_000_00,
+        grossIrr: "25.8000",
+        netIrr: "21.3000",
+        tvpi: "1.6600",
+        dpi: "0.3000",
+        rvpi: "1.3600",
+        notes: "Q2 2025 mark",
+      },
+      {
+        navDate: "2025-09-30",
+        totalNavCents: 74_200_000_00,
+        calledCapitalCents: 56_000_000_00,
+        uncalledCommitmentsCents: 64_000_000_00,
+        distributedCents: 5_800_000_00,
+        unrealizedValueCents: 68_400_000_00,
+        managementFeesPaidCents: 806_000_00,
+        carryAccruedCents: 204_000_00,
+        grossIrr: "28.2000",
+        netIrr: "24.1000",
+        tvpi: "1.8200",
+        dpi: "0.4100",
+        rvpi: "1.4100",
+        notes: "Q3 2025 mark — PRISM Counsel revenue inflection",
+      },
+      {
+        navDate: "2025-12-31",
+        totalNavCents: 79_100_000_00,
+        calledCapitalCents: 58_400_000_00,
+        uncalledCommitmentsCents: 61_600_000_00,
+        distributedCents: 7_200_000_00,
+        unrealizedValueCents: 71_900_000_00,
+        managementFeesPaidCents: 972_000_00,
+        carryAccruedCents: 332_000_00,
+        grossIrr: "30.4000",
+        netIrr: "26.8000",
+        tvpi: "1.9800",
+        dpi: "0.5200",
+        rvpi: "1.4600",
+        notes: "Q4 2025 year-end mark",
+      },
+      {
+        navDate: "2026-03-31",
+        totalNavCents: 84_200_000_00,
+        calledCapitalCents: 62_000_000_00,
+        uncalledCommitmentsCents: 58_000_000_00,
+        distributedCents: 9_400_000_00,
+        unrealizedValueCents: 74_800_000_00,
+        managementFeesPaidCents: 1_140_000_00,
+        carryAccruedCents: 488_000_00,
+        grossIrr: "32.1000",
+        netIrr: "28.4000",
+        tvpi: "2.1000",
+        dpi: "0.6200",
+        rvpi: "1.4800",
+        notes: "Q1 2026 mark-to-market — Lyte enterprise expansion",
+      },
+    ]);
+    console.log("[seed-holdings-fundops] Seeded 6 quarterly NAV records");
+  } else {
+    console.log("[seed-holdings-fundops] NAV records already present, skipping.");
+  }
+
+  const existingReports = await db.select({ id: fundLpReportsTable.id }).from(fundLpReportsTable).limit(1);
+  if (existingReports.length === 0) {
+    await db.insert(fundLpReportsTable).values([
+      {
+        reportType: "quarterly",
+        reportingPeriod: "Q1 2026",
+        periodStart: "2026-01-01",
+        periodEnd: "2026-03-31",
+        version: 1,
+        status: "approved",
+        grossIrr: "32.1000", netIrr: "28.4000", tvpi: "2.1000", dpi: "0.6200", rvpi: "1.4800",
+        fundNav: "84200000.00", totalCommitments: "120000000.00", calledCapital: "62000000.00",
+        distributedCapital: "9400000.00", unrealizedValue: "74800000.00",
+        managementFeesAccrued: "1140000.00", managementFeesPaid: "1140000.00",
+        carriedInterestAccrued: "488000.00", carriedInterestPaid: "0.00",
+        preferredReturnRate: "0.0800", carryRate: "0.2000", managementFeeRate: "0.0200",
+        narrativeSummary: "Strong quarter driven by Lyte enterprise expansion and Vessels NRR holding above 118%. NAV per unit reached $1.402.",
+        approvedBy: "Stephen L.",
+      },
+      {
+        reportType: "quarterly",
+        reportingPeriod: "Q4 2025",
+        periodStart: "2025-10-01",
+        periodEnd: "2025-12-31",
+        version: 1,
+        status: "distributed",
+        grossIrr: "30.4000", netIrr: "26.8000", tvpi: "1.9800", dpi: "0.5200", rvpi: "1.4600",
+        fundNav: "79100000.00", totalCommitments: "120000000.00", calledCapital: "58400000.00",
+        distributedCapital: "7200000.00", unrealizedValue: "71900000.00",
+        managementFeesAccrued: "972000.00", managementFeesPaid: "972000.00",
+        carriedInterestAccrued: "332000.00", carriedInterestPaid: "0.00",
+        preferredReturnRate: "0.0800", carryRate: "0.2000", managementFeeRate: "0.0200",
+        narrativeSummary: "Year-end mark. Distributions returned $2.0M to LPs in Q4. PRISM Counsel ARR doubled YoY.",
+        approvedBy: "Stephen L.", approvedAt: new Date("2026-01-12"), distributedAt: new Date("2026-01-15"),
+      },
+      {
+        reportType: "quarterly",
+        reportingPeriod: "Q3 2025",
+        periodStart: "2025-07-01",
+        periodEnd: "2025-09-30",
+        version: 1,
+        status: "distributed",
+        grossIrr: "28.2000", netIrr: "24.1000", tvpi: "1.8200", dpi: "0.4100", rvpi: "1.4100",
+        fundNav: "74200000.00", totalCommitments: "120000000.00", calledCapital: "56000000.00",
+        distributedCapital: "5800000.00", unrealizedValue: "68400000.00",
+        managementFeesAccrued: "806000.00", managementFeesPaid: "806000.00",
+        carriedInterestAccrued: "204000.00", carriedInterestPaid: "0.00",
+        preferredReturnRate: "0.0800", carryRate: "0.2000", managementFeeRate: "0.0200",
+        narrativeSummary: "PRISM Counsel revenue inflection. $2.6M distribution to LPs from Vessels secondary.",
+        approvedBy: "Stephen L.", approvedAt: new Date("2025-10-10"), distributedAt: new Date("2025-10-12"),
+      },
+      {
+        reportType: "quarterly",
+        reportingPeriod: "Q2 2025",
+        periodStart: "2025-04-01",
+        periodEnd: "2025-06-30",
+        version: 1,
+        status: "distributed",
+        grossIrr: "25.8000", netIrr: "21.3000", tvpi: "1.6600", dpi: "0.3000", rvpi: "1.3600",
+        fundNav: "68800000.00", totalCommitments: "120000000.00", calledCapital: "52000000.00",
+        distributedCapital: "3200000.00", unrealizedValue: "65600000.00",
+        managementFeesAccrued: "642000.00", managementFeesPaid: "642000.00",
+        carriedInterestAccrued: "110000.00", carriedInterestPaid: "0.00",
+        preferredReturnRate: "0.0800", carryRate: "0.2000", managementFeeRate: "0.0200",
+        narrativeSummary: "Steady quarter. Lyte AIOps crossed 25 enterprise customers.",
+        approvedBy: "Stephen L.", approvedAt: new Date("2025-07-12"), distributedAt: new Date("2025-07-14"),
+      },
+      {
+        reportType: "quarterly",
+        reportingPeriod: "Q1 2025",
+        periodStart: "2025-01-01",
+        periodEnd: "2025-03-31",
+        version: 1,
+        status: "distributed",
+        grossIrr: "22.4000", netIrr: "18.4000", tvpi: "1.4800", dpi: "0.1800", rvpi: "1.3000",
+        fundNav: "62400000.00", totalCommitments: "120000000.00", calledCapital: "48000000.00",
+        distributedCapital: "3200000.00", unrealizedValue: "59200000.00",
+        managementFeesAccrued: "480000.00", managementFeesPaid: "480000.00",
+        carriedInterestAccrued: "42000.00", carriedInterestPaid: "0.00",
+        preferredReturnRate: "0.0800", carryRate: "0.2000", managementFeeRate: "0.0200",
+        narrativeSummary: "Vessels Series A closed at $4.2M. Fund NAV crossed $60M for the first time.",
+        approvedBy: "Stephen L.", approvedAt: new Date("2025-04-12"), distributedAt: new Date("2025-04-14"),
+      },
+    ]);
+    console.log("[seed-holdings-fundops] Seeded 5 quarterly LP reports");
+  } else {
+    console.log("[seed-holdings-fundops] LP reports already present, skipping.");
+  }
 }

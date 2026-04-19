@@ -1,5 +1,5 @@
 import {
-  pgTable, text, serial, timestamp, integer, numeric, boolean, jsonb, index,
+  pgTable, text, serial, timestamp, integer, numeric, boolean, jsonb, index, bigint,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
@@ -375,13 +375,13 @@ export const fundDistributionLinesTable = pgTable("fund_distribution_lines", {
 export const fundNavRecordsTable = pgTable("fund_nav_records", {
   id: serial("id").primaryKey(),
   navDate: text("nav_date").notNull(),
-  totalNavCents: integer("total_nav_cents").notNull(),
-  calledCapitalCents: integer("called_capital_cents").notNull(),
-  uncalledCommitmentsCents: integer("uncalled_commitments_cents").notNull().default(0),
-  distributedCents: integer("distributed_cents").notNull().default(0),
-  unrealizedValueCents: integer("unrealized_value_cents").notNull().default(0),
-  managementFeesPaidCents: integer("management_fees_paid_cents").notNull().default(0),
-  carryAccruedCents: integer("carry_accrued_cents").notNull().default(0),
+  totalNavCents: bigint("total_nav_cents", { mode: "number" }).notNull(),
+  calledCapitalCents: bigint("called_capital_cents", { mode: "number" }).notNull(),
+  uncalledCommitmentsCents: bigint("uncalled_commitments_cents", { mode: "number" }).notNull().default(0),
+  distributedCents: bigint("distributed_cents", { mode: "number" }).notNull().default(0),
+  unrealizedValueCents: bigint("unrealized_value_cents", { mode: "number" }).notNull().default(0),
+  managementFeesPaidCents: bigint("management_fees_paid_cents", { mode: "number" }).notNull().default(0),
+  carryAccruedCents: bigint("carry_accrued_cents", { mode: "number" }).notNull().default(0),
   grossIrr: numeric("gross_irr", { precision: 8, scale: 4 }),
   netIrr: numeric("net_irr", { precision: 8, scale: 4 }),
   tvpi: numeric("tvpi", { precision: 8, scale: 4 }),
