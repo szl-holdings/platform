@@ -79,6 +79,17 @@ export const CARLOTA_JO_YEARS_EXPERIENCE: ClaimValue = {
   displayWithLabel: `${FOUNDER_YEARS_EXPERIENCE} years`,
 };
 
+// ─── Terra metrics (cross-surface mirror) ─────────────────────────────────────
+//
+// Terra's portfolio AUM also surfaces on the szl-holdings ventures landing.
+// Resolved from the same registry id so the value and [Demo] label stay in
+// lockstep with terra/src/lib/claims.ts.
+
+export const TERRA_PORTFOLIO_AUM = resolveClaim(
+  "terra-portfolio-aum",
+  "$4.2B+"
+);
+
 // ─── Platform tagline ─────────────────────────────────────────────────────────
 
 export const PLATFORM_TAGLINE = resolveClaim(

@@ -26,5 +26,5 @@ const resolveClaim = makeClaimResolver("terra/claims");
 
 export const TERRA_PORTFOLIO_AUM = resolveClaim(
   "terra-portfolio-aum",
-  "$4.2B+ assets under analysis"
+  "$4.2B+"
 );

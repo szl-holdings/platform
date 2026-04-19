@@ -19,6 +19,7 @@ import {
   VESSELS_COUNT,
   VESSELS_DARK_DETECTION_LEAD,
   AEGIS_SIMULATIONS,
+  TERRA_PORTFOLIO_AUM,
   metricDisplay,
 } from "../lib/claims";
 
@@ -375,7 +376,7 @@ export const ventures: Venture[] = [
     metrics: [
       { label: "Enterprise Clients", value: "34", trend: "up" },
       { label: "ARR", value: "$3.1M", trend: "up" },
-      { label: "Assets Under Analysis", value: "$4.2B+", trend: "up" },
+      { label: "Assets Under Analysis", value: metricDisplay(TERRA_PORTFOLIO_AUM), trend: "up" },
       { label: "Addressable Market", value: "$29B", trend: "up" },
     ],
     milestones: [

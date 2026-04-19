@@ -21,6 +21,7 @@ import {
   VESSELS_COUNT,
   VESSELS_DARK_DETECTION_LEAD,
   AEGIS_SIMULATIONS,
+  TERRA_PORTFOLIO_AUM,
   metricDisplay,
 } from "../src/lib/claims.ts";
 
@@ -102,9 +103,19 @@ check(
   `got: "${aegisSims}"`
 );
 
+// ─── Terra venture (cross-surface mirror) ─────────────────────────────────────
+
+const terraAum = findMetric("terra", "Assets Under Analysis");
+const expectedTerraAum = metricDisplay(TERRA_PORTFOLIO_AUM);
+check(
+  `Terra "Assets Under Analysis" renders from registry (expected: "${expectedTerraAum}")`,
+  terraAum === expectedTerraAum,
+  `got: "${terraAum}"`
+);
+
 // ─── Verify no venture uses a banned raw metric string ────────────────────────
 
-const bannedValues = ["< 4 min", "2.4M+", "< 3%", "52,000+", "34 days pre-designation", "31,200+"];
+const bannedValues = ["< 4 min", "2.4M+", "< 3%", "52,000+", "34 days pre-designation", "31,200+", "$4.2B+"];
 
 for (const venture of ventures) {
   for (const metric of venture.metrics ?? []) {

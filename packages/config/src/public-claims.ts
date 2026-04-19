@@ -232,7 +232,7 @@ export const PUBLIC_CLAIMS: PublicClaim[] = [
   {
     id: "terra-portfolio-aum",
     surface: "terra dashboard, carlota-jo case studies",
-    claim: "$4.2B+ assets under analysis",
+    claim: "$4.2B+",
     truthValue: "demo-data",
     source: "artifacts/terra/src/data, artifacts/carlota-jo case-studies",
     displayLabel: "[Demo]",
@@ -310,8 +310,6 @@ export const BANNED_HARDCODED_STRINGS: BannedHardcodedString[] = [
     value: "$4.2B+",
     claimId: "terra-portfolio-aum",
     reason: "Use TERRA_PORTFOLIO_AUM from the artifact's claims adapter.",
-    // Legacy: szl-holdings ventures.ts still hardcodes the Terra AUM metric.
-    legacyAllowedFiles: ["artifacts/szl-holdings/src/data/ventures.ts"],
   },
   {
     value: "99.97%",
