@@ -67,6 +67,9 @@ temp/
 *.backup
 *.sql.gz
 
+# Turbo cache (generated build artifacts)
+.turbo/
+
 # Transient runtime output
 nohup.out
 *.out
