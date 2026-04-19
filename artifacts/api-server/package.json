@@ -85,6 +85,7 @@
     "@types/pdfkit": "^0.17.5",
     "@workspace/alloy": "workspace:*",
     "@workspace/cognitive-runtime": "workspace:*",
+    "@workspace/demo-seed": "workspace:*",
     "@workspace/eval-forge": "workspace:*",
     "@workspace/eval-os": "workspace:*",
     "@workspace/executive-briefing": "workspace:*",

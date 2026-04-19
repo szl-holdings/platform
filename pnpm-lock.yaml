@@ -467,6 +467,9 @@ importers:
       '@workspace/cognitive-runtime':
         specifier: workspace:*
         version: link:../../packages/cognitive-runtime
+      '@workspace/demo-seed':
+        specifier: workspace:*
+        version: link:../../packages/demo-seed
       '@workspace/eval-forge':
         specifier: workspace:*
         version: link:../../packages/eval-forge

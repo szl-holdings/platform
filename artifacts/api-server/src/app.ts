@@ -510,9 +510,13 @@ app.get("/api/csrf-token", (req: Request, res: Response) => {
 });
 
 app.use("/api", etagMiddleware);
-// Demo reset — mounted BEFORE globalAuthEnforcer so it is accessible without a
-// browser session. This is a safe unauthenticated surface: it only clears
-// in-memory scenario state and returns a manifest of what was reset.
+// Demo reset — mounted BEFORE globalAuthEnforcer so the public status endpoint
+// (GET /api/demo/reset/status) and the production guard's 404 response can run
+// without requiring an authenticated browser session. The mutating
+// POST /api/demo/reset endpoint applies its own gates internally:
+//   1) `guardSeedInProduction` (404 in production)
+//   2) `DEMO_MODE=true` env flag (404 otherwise)
+//   3) `authMiddleware({ required: true })` + admin role check (401/403 otherwise)
 app.use("/api", demoResetRouter);
 app.use(globalAuthEnforcer);
 app.use("/api", router);

@@ -5,6 +5,7 @@ import { Link } from "wouter";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { DataStateBadge } from "@/components/DataStateBadge";
+import { DemoResetToolbar } from "@/components/DemoResetToolbar";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { useUtm } from "@/hooks/useUtm";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
@@ -344,6 +345,7 @@ export default function DemoPage() {
         {/* Hero */}
         <section style={{ padding: "3rem 0 2rem", borderBottom: "1px solid hsla(0,0%,100%,0.06)" }}>
           <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
+            <DemoResetToolbar />
             <m.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }}>
               <p style={{ fontSize: "0.6875rem", fontFamily: "var(--font-mono)", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(210,5%,40%)", marginBottom: "0.875rem" }}>
                 Product Demo
