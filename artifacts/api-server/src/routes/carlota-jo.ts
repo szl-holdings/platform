@@ -22,7 +22,7 @@ import {
 } from "@szl-holdings/db";
 import { eq, desc, sql, and, inArray } from "drizzle-orm";
 import { createHash } from "crypto";
-import { sendSuccess, sendNotFound, handleRouteError, sendBadRequest, parsePagination } from "../lib/api-response";
+import { sendSuccess, sendNotFound, handleRouteError, sendBadRequest, sendForbidden, parsePagination } from "../lib/api-response";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 import { services } from "@szl-holdings/services";
 import { logger } from "../lib/logger";
@@ -1007,19 +1007,85 @@ function getClientIdFromQuery(req: Request): ClientId | null {
   return null;
 }
 
+const CLIENT_ID_BY_NAME: Record<string, ClientId> = Object.fromEntries(
+  (Object.entries(CLIENT_NAME_BY_ID) as [ClientId, string][]).map(([id, name]) => [name.toLowerCase(), id]),
+) as Record<string, ClientId>;
+
+function isAdvisoryAdmin(user: Request["user"]): boolean {
+  if (!user) return false;
+  return user.roles.some((r) => r === "super_admin" || r === "admin" || r === "exec" || r === "editor");
+}
+
+async function getAutoClientIdForUser(userId: number): Promise<ClientId | null> {
+  const [acct] = await db.select({ displayName: clientAccountsTable.displayName })
+    .from(clientAccountsTable)
+    .where(eq(clientAccountsTable.primaryContactUserId, userId))
+    .limit(1);
+  if (!acct) return null;
+  return CLIENT_ID_BY_NAME[acct.displayName.trim().toLowerCase()] ?? null;
+}
+
+type ResolvedAdvisoryScope =
+  | { ok: true; clientId: ClientId | null; isAdmin: boolean; autoClientId: ClientId | null }
+  | { ok: false; status: number; message: string };
+
+/**
+ * Resolve the advisory clientId for the current request.
+ *
+ * - Admin/exec/editor users: honour ?clientId (or null = whole portfolio).
+ * - Regular client portal users with a linked clientAccount:
+ *   - The clientId is derived from the session and any conflicting
+ *     ?clientId param returns 403.
+ * - Regular users without a linked clientAccount: portfolio scope (null).
+ */
+async function resolveAdvisoryClientScope(req: Request): Promise<ResolvedAdvisoryScope> {
+  const userId = req.user!.id;
+  const isAdmin = isAdvisoryAdmin(req.user);
+  const queryClientId = getClientIdFromQuery(req);
+  const autoClientId = await getAutoClientIdForUser(userId);
+
+  if (isAdmin) {
+    return { ok: true, clientId: queryClientId, isAdmin: true, autoClientId };
+  }
+  if (autoClientId) {
+    if (queryClientId && queryClientId !== autoClientId) {
+      return { ok: false, status: 403, message: "You can only view data for your own client account." };
+    }
+    return { ok: true, clientId: autoClientId, isAdmin: false, autoClientId };
+  }
+  if (queryClientId) {
+    return { ok: false, status: 403, message: "You can only view data for your own client account." };
+  }
+  return { ok: true, clientId: null, isAdmin: false, autoClientId: null };
+}
+
 // ── Engagement P&L endpoints (auth-gated, DB-backed per org) ─────────────────
 
-router.get("/carlota/clients", authMiddleware({ required: false }), async (_req, res) => {
+router.get("/carlota/clients", authMiddleware(), requireRole("admin", "editor", "exec"), async (_req, res) => {
   try {
     sendSuccess(res, { clients: SEED_CLIENTS });
   } catch (err) { handleRouteError(res, err, "Failed to list advisory clients"); }
+});
+
+router.get("/carlota/my-scope", authMiddleware(), async (req, res) => {
+  try {
+    const userId = req.user!.id;
+    const isAdmin = isAdvisoryAdmin(req.user);
+    const autoClientId = await getAutoClientIdForUser(userId);
+    const autoClient = autoClientId
+      ? { id: autoClientId, name: CLIENT_NAME_BY_ID[autoClientId] }
+      : null;
+    sendSuccess(res, { isAdmin, autoClientId, autoClient });
+  } catch (err) { handleRouteError(res, err, "Failed to resolve advisory scope"); }
 });
 
 router.get("/carlota/engagements", authMiddleware(), async (req, res) => {
   try {
     const userId = req.user!.id;
     const orgId = req.user?.orgs[0]?.orgId ?? null;
-    const clientId = getClientIdFromQuery(req);
+    const scope = await resolveAdvisoryClientScope(req);
+    if (!scope.ok) { sendForbidden(res, scope.message); return; }
+    const clientId = scope.clientId;
     const scopeFilter = orgId
       ? eq(carlotaEngagementsTable.organizationId, orgId)
       : eq(carlotaEngagementsTable.createdByUserId, userId);
@@ -1161,7 +1227,9 @@ router.get("/carlota/radar-competitors", authMiddleware(), validateQuery(carlota
   try {
     const userId = req.user!.id;
     const orgId = req.user?.orgs[0]?.orgId ?? null;
-    const clientId = getClientIdFromQuery(req);
+    const scope = await resolveAdvisoryClientScope(req);
+    if (!scope.ok) { sendForbidden(res, scope.message); return; }
+    const clientId = scope.clientId;
     const [row] = await db.select().from(carlotaRadarCompetitorsTable)
       .where(radarCompetitorScopeFilter(orgId, userId, clientId));
     sendSuccess(res, {
@@ -1177,13 +1245,31 @@ router.put("/carlota/radar-competitors", authMiddleware(), validateBody(carlotaR
     const userId = req.user!.id;
     const orgId = req.user?.orgs[0]?.orgId ?? null;
     const body = req.body as { clientId?: string | null; competitors: string[] };
-    let clientId: ClientId | null = null;
+    let requestedClientId: ClientId | null = null;
     if (body.clientId != null && body.clientId !== "") {
       if (!isValidClientId(body.clientId)) {
         sendBadRequest(res, "Invalid clientId — must reference a known advisory client");
         return;
       }
-      clientId = body.clientId;
+      requestedClientId = body.clientId;
+    }
+    const isAdmin = isAdvisoryAdmin(req.user);
+    const autoClientId = await getAutoClientIdForUser(userId);
+    let clientId: ClientId | null;
+    if (isAdmin) {
+      clientId = requestedClientId;
+    } else if (autoClientId) {
+      if (requestedClientId && requestedClientId !== autoClientId) {
+        sendForbidden(res, "You can only edit data for your own client account.");
+        return;
+      }
+      clientId = autoClientId;
+    } else {
+      if (requestedClientId) {
+        sendForbidden(res, "You can only edit data for your own client account.");
+        return;
+      }
+      clientId = null;
     }
     const seen = new Set<string>();
     const competitors = body.competitors
@@ -1392,7 +1478,9 @@ router.get("/carlota/radar-signals", authMiddleware(), validateQuery(carlotaRada
   try {
     const userId = req.user!.id;
     const orgId = req.user?.orgs[0]?.orgId ?? null;
-    const clientId = getClientIdFromQuery(req);
+    const scope = await resolveAdvisoryClientScope(req);
+    if (!scope.ok) { sendForbidden(res, scope.message); return; }
+    const clientId = scope.clientId;
     const scopeFilter = orgId
       ? eq(carlotaEngagementsTable.organizationId, orgId)
       : eq(carlotaEngagementsTable.createdByUserId, userId);
@@ -1609,7 +1697,9 @@ router.get("/carlota/roi-metrics", authMiddleware(), async (req, res) => {
   try {
     const userId = req.user!.id;
     const orgId = req.user?.orgs[0]?.orgId ?? null;
-    const clientId = getClientIdFromQuery(req);
+    const scope = await resolveAdvisoryClientScope(req);
+    if (!scope.ok) { sendForbidden(res, scope.message); return; }
+    const clientId = scope.clientId;
     const scopeFilter = orgId
       ? eq(carlotaEngagementsTable.organizationId, orgId)
       : eq(carlotaEngagementsTable.createdByUserId, userId);

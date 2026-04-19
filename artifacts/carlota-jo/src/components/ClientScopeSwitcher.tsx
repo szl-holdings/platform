@@ -31,13 +31,53 @@ export function useClientScope(): {
   clientId: string | null;
   setClientId: (id: string | null) => void;
   clients: AdvisoryClient[];
+  isAdmin: boolean;
+  scopeLoaded: boolean;
 } {
   const [clientId, setClientIdState] = useState<string | null>(() => readClientIdFromUrl());
   const [clients, setClients] = useState<AdvisoryClient[]>(FALLBACK_CLIENTS);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const [scopeLoaded, setScopeLoaded] = useState<boolean>(false);
 
   useEffect(() => {
     let cancelled = false;
-    async function load() {
+    async function loadScope() {
+      try {
+        const res = await fetch(`${API}/carlota/my-scope`, { credentials: "include" });
+        if (!res.ok) {
+          if (!cancelled) setScopeLoaded(true);
+          return;
+        }
+        const json = await res.json();
+        const data = json.data ?? {};
+        if (cancelled) return;
+        const admin = Boolean(data.isAdmin);
+        setIsAdmin(admin);
+        if (admin) {
+          // Admins keep manual control via URL.
+          if (typeof data.autoClientId === "string" && !readClientIdFromUrl()) {
+            setClientIdState(data.autoClientId);
+            writeClientIdToUrl(data.autoClientId);
+          }
+        } else {
+          // Non-admins: lock to derived clientId, ignore any URL param.
+          const auto = typeof data.autoClientId === "string" ? data.autoClientId : null;
+          setClientIdState(auto);
+          writeClientIdToUrl(auto);
+        }
+        setScopeLoaded(true);
+      } catch {
+        if (!cancelled) setScopeLoaded(true);
+      }
+    }
+    void loadScope();
+    return () => { cancelled = true; };
+  }, []);
+
+  useEffect(() => {
+    if (!isAdmin) return;
+    let cancelled = false;
+    async function loadClients() {
       try {
         const res = await fetch(`${API}/carlota/clients`, { credentials: "include" });
         if (!res.ok) return;
@@ -48,16 +88,17 @@ export function useClientScope(): {
         }
       } catch { /* keep fallback */ }
     }
-    void load();
+    void loadClients();
     return () => { cancelled = true; };
-  }, []);
+  }, [isAdmin]);
 
   const setClientId = (id: string | null) => {
+    if (!isAdmin) return;
     setClientIdState(id);
     writeClientIdToUrl(id);
   };
 
-  return { clientId, setClientId, clients };
+  return { clientId, setClientId, clients, isAdmin, scopeLoaded };
 }
 
 export default function ClientScopeSwitcher({

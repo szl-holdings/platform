@@ -168,7 +168,7 @@ export default function CompetitiveRadar() {
   const [refreshing, setRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(new Date());
   const [generatingBrief, setGeneratingBrief] = useState(false);
-  const { clientId, setClientId, clients } = useClientScope();
+  const { clientId, setClientId, clients, isAdmin } = useClientScope();
   const activeClient = clients.find(c => c.id === clientId) ?? null;
   const [companyContext, setCompanyContext] = useState({ name: "Carlota Jo Consulting", industry: "Management Consulting" });
   const [tracked, setTracked] = useState<string[]>(() => loadCompetitorList(null));
@@ -519,7 +519,9 @@ Return ONLY valid JSON, no markdown.`;
           )}
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          <ClientScopeSwitcher clientId={clientId} onChange={setClientId} clients={clients} />
+          {isAdmin && (
+            <ClientScopeSwitcher clientId={clientId} onChange={setClientId} clients={clients} />
+          )}
           <select
             value={refreshIntervalMs}
             onChange={(e) => setRefreshIntervalMs(Number(e.target.value))}

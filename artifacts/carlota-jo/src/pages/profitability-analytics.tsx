@@ -33,7 +33,7 @@ export default function ProfitabilityAnalytics() {
   const [engagements, setEngagements] = useState<EngagementPnL[]>(STATIC_ENGAGEMENTS);
   const [marginHistory, setMarginHistory] = useState<{ month: string; margin: number }[]>(STATIC_MARGIN_HISTORY);
   const [loading, setLoading] = useState(true);
-  const { clientId, setClientId, clients } = useClientScope();
+  const { clientId, setClientId, clients, isAdmin } = useClientScope();
   const activeClientName = clients.find(c => c.id === clientId)?.name ?? null;
 
   useEffect(() => {
@@ -86,9 +86,11 @@ export default function ProfitabilityAnalytics() {
               </div>
               <span style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.1em", color: "#34D399", textTransform: "uppercase" }}>Engagement Profitability Analytics</span>
               {loading && <Loader2 size={14} color="#34D399" className="animate-spin" />}
-              <div style={{ marginLeft: "auto" }}>
-                <ClientScopeSwitcher clientId={clientId} onChange={setClientId} clients={clients} variant="dark" />
-              </div>
+              {isAdmin && (
+                <div style={{ marginLeft: "auto" }}>
+                  <ClientScopeSwitcher clientId={clientId} onChange={setClientId} clients={clients} variant="dark" />
+                </div>
+              )}
             </div>
             {activeClientName && (
               <div style={{ fontSize: 11, color: "#34D399", marginBottom: 8 }}>

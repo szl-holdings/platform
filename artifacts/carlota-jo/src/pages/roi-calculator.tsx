@@ -84,7 +84,7 @@ export default function ROICalculator() {
   const [conversionLift, setConversionLift] = useState(35);
   const [engagementLift, setEngagementLift] = useState(80);
   const [investment, setInvestment] = useState(7000);
-  const { clientId, setClientId, clients } = useClientScope();
+  const { clientId, setClientId, clients, isAdmin } = useClientScope();
   const activeClient = clients.find(c => c.id === clientId) ?? null;
 
   useEffect(() => {
@@ -146,7 +146,9 @@ export default function ROICalculator() {
               : `Track ROI across the portfolio and model your own engagement projections. Powered by ${metrics.caseStudies.length} client case studies.`}
           </p>
         </div>
-        <ClientScopeSwitcher clientId={clientId} onChange={setClientId} clients={clients} />
+        {isAdmin && (
+          <ClientScopeSwitcher clientId={clientId} onChange={setClientId} clients={clients} />
+        )}
       </div>
 
       {/* Portfolio benchmarks */}
