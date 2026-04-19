@@ -20,7 +20,8 @@
     "framer-motion": "catalog:",
     "recharts": "catalog:",
     "@szl-holdings/brand-registry": "workspace:*",
-    "@szl-holdings/config": "workspace:*"
+    "@szl-holdings/config": "workspace:*",
+    "@szl-holdings/domain-claims": "workspace:*"
   },
   "devDependencies": {
     "@replit/vite-plugin-cartographer": "catalog:",

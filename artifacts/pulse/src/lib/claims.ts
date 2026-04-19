@@ -14,39 +14,15 @@
  */
 
 import {
-  getClaim,
-  type ClaimTruthValue,
-} from "@szl-holdings/config/public-claims";
+  makeClaimResolver,
+  metricDisplay,
+  type ClaimValue,
+} from "@szl-holdings/domain-claims";
 
-export interface ClaimValue {
-  value: string;
-  label: string | null;
-  truthValue: ClaimTruthValue;
-  displayWithLabel: string;
-}
+export type { ClaimValue };
+export { metricDisplay };
 
-function resolveClaim(claimId: string, fallback: string): ClaimValue {
-  const claim = getClaim(claimId);
-  if (!claim) {
-    console.warn(
-      `[pulse/claims] Unknown claim id "${claimId}" — fallback "${fallback}".`
-    );
-    return {
-      value: fallback,
-      label: "[Synthesized]",
-      truthValue: "demo-data",
-      displayWithLabel: `${fallback} [Synthesized]`,
-    };
-  }
-  return {
-    value: claim.claim,
-    label: claim.displayLabel,
-    truthValue: claim.truthValue,
-    displayWithLabel: claim.displayLabel
-      ? `${claim.claim} ${claim.displayLabel}`
-      : claim.claim,
-  };
-}
+const resolveClaim = makeClaimResolver("pulse/claims");
 
 export const PULSE_FALLBACK_BRIEFING = resolveClaim(
   "pulse-fallback-briefing",
@@ -59,7 +35,3 @@ export const PULSE_FALLBACK_BRIEFING = resolveClaim(
  */
 export const PULSE_SYNTHESIZED_LABEL =
   PULSE_FALLBACK_BRIEFING.label ?? "[Synthesized]";
-
-export function metricDisplay(claimValue: ClaimValue): string {
-  return claimValue.displayWithLabel;
-}

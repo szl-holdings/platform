@@ -1,0 +1,17 @@
+{
+  "name": "@szl-holdings/domain-claims",
+  "version": "0.0.0",
+  "private": false,
+  "type": "module",
+  "description": "Shared domain-claims infrastructure: ClaimValue type, claim resolver factory, and metricDisplay helper. All artifacts import from here instead of defining their own copies.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  },
+  "dependencies": {
+    "@szl-holdings/config": "workspace:*"
+  }
+}

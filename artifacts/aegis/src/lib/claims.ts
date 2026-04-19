@@ -15,39 +15,15 @@
  */
 
 import {
-  getClaim,
-  type ClaimTruthValue,
-} from "@szl-holdings/config/public-claims";
+  makeClaimResolver,
+  metricDisplay,
+  type ClaimValue,
+} from "@szl-holdings/domain-claims";
 
-export interface ClaimValue {
-  value: string;
-  label: string | null;
-  truthValue: ClaimTruthValue;
-  displayWithLabel: string;
-}
+export type { ClaimValue };
+export { metricDisplay };
 
-function resolveClaim(claimId: string, fallback: string): ClaimValue {
-  const claim = getClaim(claimId);
-  if (!claim) {
-    console.warn(
-      `[aegis/claims] Unknown claim id "${claimId}" — fallback "${fallback}".`
-    );
-    return {
-      value: fallback,
-      label: "[Demo]",
-      truthValue: "pending",
-      displayWithLabel: `${fallback} [Demo]`,
-    };
-  }
-  return {
-    value: claim.claim,
-    label: claim.displayLabel,
-    truthValue: claim.truthValue,
-    displayWithLabel: claim.displayLabel
-      ? `${claim.claim} ${claim.displayLabel}`
-      : claim.claim,
-  };
-}
+const resolveClaim = makeClaimResolver("aegis/claims");
 
 export const AEGIS_SIMULATIONS = resolveClaim("aegis-simulations", "31,200+");
 export const AEGIS_MITRE_COVERAGE = resolveClaim(
@@ -62,7 +38,3 @@ export const AEGIS_MARKET_GOVERNED_DECISION = resolveClaim(
   "market-governed-decision",
   "$50.1B governed decision infrastructure market by 2030"
 );
-
-export function metricDisplay(claimValue: ClaimValue): string {
-  return claimValue.displayWithLabel;
-}

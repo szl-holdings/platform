@@ -39,9 +39,9 @@ export interface GraderResult {
 
 export type Grader = (ctx: GraderContext) => GraderResult | Promise<GraderResult>;
 
-const PASS_THRESHOLD = 0.7;
+export const PASS_THRESHOLD = 0.7;
 
-function fieldScore(output: Record<string, unknown>, groundTruth: Record<string, unknown>): { score: number; failures: string[] } {
+export function fieldScore(output: Record<string, unknown>, groundTruth: Record<string, unknown>): { score: number; failures: string[] } {
   const keys = Object.keys(groundTruth);
   if (keys.length === 0) return { score: 1.0, failures: [] };
   let matches = 0;

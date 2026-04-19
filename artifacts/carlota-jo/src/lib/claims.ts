@@ -12,41 +12,17 @@
  * Registry source:  packages/config/src/public-claims.ts
  */
 
+import { FOUNDER_YEARS_EXPERIENCE } from "@szl-holdings/config/public-claims";
 import {
-  getClaim,
-  FOUNDER_YEARS_EXPERIENCE,
-  type ClaimTruthValue,
-} from "@szl-holdings/config/public-claims";
+  makeClaimResolver,
+  metricDisplay,
+  type ClaimValue,
+} from "@szl-holdings/domain-claims";
 
-export interface ClaimValue {
-  value: string;
-  label: string | null;
-  truthValue: ClaimTruthValue;
-  displayWithLabel: string;
-}
+export type { ClaimValue };
+export { metricDisplay };
 
-function resolveClaim(claimId: string, fallback: string): ClaimValue {
-  const claim = getClaim(claimId);
-  if (!claim) {
-    console.warn(
-      `[carlota-jo/claims] Unknown claim id "${claimId}" — fallback "${fallback}".`
-    );
-    return {
-      value: fallback,
-      label: "[Demo]",
-      truthValue: "pending",
-      displayWithLabel: `${fallback} [Demo]`,
-    };
-  }
-  return {
-    value: claim.claim,
-    label: claim.displayLabel,
-    truthValue: claim.truthValue,
-    displayWithLabel: claim.displayLabel
-      ? `${claim.claim} ${claim.displayLabel}`
-      : claim.claim,
-  };
-}
+const resolveClaim = makeClaimResolver("carlota-jo/claims");
 
 export const CARLOTA_JO_RETENTION = resolveClaim("carlota-jo-retention", "98%");
 
@@ -60,7 +36,3 @@ export const CARLOTA_JO_YEARS_EXPERIENCE: ClaimValue = {
   truthValue: "verified",
   displayWithLabel: `${FOUNDER_YEARS_EXPERIENCE} years`,
 };
-
-export function metricDisplay(claimValue: ClaimValue): string {
-  return claimValue.displayWithLabel;
-}

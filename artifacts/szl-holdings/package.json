@@ -55,6 +55,7 @@
     "zod": "catalog:",
     "@szl-holdings/brand-registry": "workspace:*",
     "@szl-holdings/config": "workspace:*",
+    "@szl-holdings/domain-claims": "workspace:*",
     "@szl-holdings/platform-registry": "workspace:*"
   }
 }

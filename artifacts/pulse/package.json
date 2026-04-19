@@ -38,6 +38,7 @@
     "sonner": "^2.0.7",
     "zod": "catalog:",
     "@szl-holdings/brand-registry": "workspace:*",
-    "@szl-holdings/config": "workspace:*"
+    "@szl-holdings/config": "workspace:*",
+    "@szl-holdings/domain-claims": "workspace:*"
   }
 }

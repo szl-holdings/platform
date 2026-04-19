@@ -49,6 +49,7 @@
     "mapbox-gl": "^3.20.0",
     "@szl-holdings/offline-engine": "workspace:*",
     "@szl-holdings/brand-registry": "workspace:*",
-    "@szl-holdings/config": "workspace:*"
+    "@szl-holdings/config": "workspace:*",
+    "@szl-holdings/domain-claims": "workspace:*"
   }
 }

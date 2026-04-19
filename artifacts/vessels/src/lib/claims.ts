@@ -15,39 +15,15 @@
  */
 
 import {
-  getClaim,
-  type ClaimTruthValue,
-} from "@szl-holdings/config/public-claims";
+  makeClaimResolver,
+  metricDisplay,
+  type ClaimValue,
+} from "@szl-holdings/domain-claims";
 
-export interface ClaimValue {
-  value: string;
-  label: string | null;
-  truthValue: ClaimTruthValue;
-  displayWithLabel: string;
-}
+export type { ClaimValue };
+export { metricDisplay };
 
-function resolveClaim(claimId: string, fallback: string): ClaimValue {
-  const claim = getClaim(claimId);
-  if (!claim) {
-    console.warn(
-      `[vessels/claims] Unknown claim id "${claimId}" — fallback "${fallback}".`
-    );
-    return {
-      value: fallback,
-      label: "[Demo]",
-      truthValue: "pending",
-      displayWithLabel: `${fallback} [Demo]`,
-    };
-  }
-  return {
-    value: claim.claim,
-    label: claim.displayLabel,
-    truthValue: claim.truthValue,
-    displayWithLabel: claim.displayLabel
-      ? `${claim.claim} ${claim.displayLabel}`
-      : claim.claim,
-  };
-}
+const resolveClaim = makeClaimResolver("vessels/claims");
 
 export const VESSELS_COUNT = resolveClaim("vessels-count", "52,000+");
 export const VESSELS_DARK_DETECTION_LEAD = resolveClaim(
@@ -58,7 +34,3 @@ export const VESSELS_UPTIME_SLA = resolveClaim(
   "vessels-uptime-sla",
   "99.97% uptime SLA"
 );
-
-export function metricDisplay(claimValue: ClaimValue): string {
-  return claimValue.displayWithLabel;
-}

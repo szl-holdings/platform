@@ -14,42 +14,17 @@
  * Registry source:  packages/config/src/public-claims.ts
  */
 
+import { FOUNDER_YEARS_EXPERIENCE } from "@szl-holdings/platform-registry/public-claims";
 import {
-  getClaim,
-  FOUNDER_YEARS_EXPERIENCE,
-  type ClaimTruthValue,
-} from "@szl-holdings/platform-registry/public-claims";
+  makeClaimResolver,
+  metricDisplay,
+  type ClaimValue,
+} from "@szl-holdings/domain-claims";
 
-export interface ClaimValue {
-  value: string;
-  label: string | null;
-  truthValue: ClaimTruthValue;
-  displayWithLabel: string;
-}
+export type { ClaimValue };
+export { metricDisplay };
 
-function resolveClaim(claimId: string, fallback: string): ClaimValue {
-  const claim = getClaim(claimId);
-  if (!claim) {
-    console.warn(
-      `[claims] Unknown claim id "${claimId}" — falling back to hardcoded value "${fallback}". ` +
-        `Add this claim to packages/config/src/public-claims.ts.`
-    );
-    return {
-      value: fallback,
-      label: "[Demo]",
-      truthValue: "pending",
-      displayWithLabel: `${fallback} [Demo]`,
-    };
-  }
-  return {
-    value: claim.claim,
-    label: claim.displayLabel,
-    truthValue: claim.truthValue,
-    displayWithLabel: claim.displayLabel
-      ? `${claim.claim} ${claim.displayLabel}`
-      : claim.claim,
-  };
-}
+const resolveClaim = makeClaimResolver("szl-holdings/claims");
 
 // ─── Lyte / szl-holdings metrics ─────────────────────────────────────────────
 
@@ -97,10 +72,10 @@ export const CARLOTA_JO_RETENTION = resolveClaim(
  * Founder years experience is computed from the registered start year, not a
  * hardcoded string. This ensures the claim stays accurate as time passes.
  */
-export const CARLOTA_JO_YEARS_EXPERIENCE = {
+export const CARLOTA_JO_YEARS_EXPERIENCE: ClaimValue = {
   value: `${FOUNDER_YEARS_EXPERIENCE} years`,
   label: null,
-  truthValue: "verified" as ClaimTruthValue,
+  truthValue: "verified",
   displayWithLabel: `${FOUNDER_YEARS_EXPERIENCE} years`,
 };
 
@@ -111,13 +86,3 @@ export const PLATFORM_TAGLINE = resolveClaim(
   "Governed decision infrastructure — connecting what is observable to what is executable, with full attribution."
 );
 
-// ─── Helper for venture card metrics ─────────────────────────────────────────
-
-/**
- * Returns a metric value with the appropriate demo/projected label appended
- * when the claim is not verified. Use this in VentureCard components so the
- * label appears consistently next to each metric value.
- */
-export function metricDisplay(claimValue: ClaimValue): string {
-  return claimValue.displayWithLabel;
-}

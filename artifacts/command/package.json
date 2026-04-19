@@ -53,6 +53,7 @@
     "@opentelemetry/semantic-conventions": "^1.40.0",
     "@szl-holdings/brand-registry": "workspace:*",
     "@szl-holdings/config": "workspace:*",
+    "@szl-holdings/domain-claims": "workspace:*",
     "@szl-holdings/design-system": "workspace:*",
     "@szl-holdings/telemetry-standards": "workspace:*",
     "@szl-holdings/ui-command": "workspace:*",
