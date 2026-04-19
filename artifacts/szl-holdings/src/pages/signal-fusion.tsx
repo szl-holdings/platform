@@ -1,6 +1,8 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { m, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
+import { apiRequest } from "@/lib/api";
 import {
   Radio, Shield, Ship, Building2, Briefcase, Users, Zap, Layers,
   ArrowRight, AlertTriangle, CheckCircle2, Clock, Eye, Filter,
@@ -76,7 +78,7 @@ interface FusionSignal {
   metadata: Record<string, string>;
 }
 
-const FUSION_SIGNALS: FusionSignal[] = [
+const FUSION_SIGNALS_FALLBACK: FusionSignal[] = [
   {
     id: "sf1",
     domain: "Aegis",
@@ -166,20 +168,26 @@ const FUSION_SIGNALS: FusionSignal[] = [
   },
 ];
 
-const CORRELATION_PAIRS = [
-  { from: "sf1", to: "sf4", type: "causal" as const, strength: 0.87, label: "Exploit → Approval stall" },
-  { from: "sf1", to: "sf6", type: "causal" as const, strength: 0.51, label: "KEV → Cloud drift vector" },
-  { from: "sf2", to: "sf5", type: "temporal" as const, strength: 0.54, label: "Dark vessel ↔ Portfolio exposure" },
+interface CorrelationPair { from: string; to: string; type: "causal" | "temporal" | "semantic"; strength: number; label: string; }
+const CORRELATION_PAIRS_FALLBACK: CorrelationPair[] = [
+  { from: "sf1", to: "sf4", type: "causal", strength: 0.87, label: "Exploit → Approval stall" },
+  { from: "sf1", to: "sf6", type: "causal", strength: 0.51, label: "KEV → Cloud drift vector" },
+  { from: "sf2", to: "sf5", type: "temporal", strength: 0.54, label: "Dark vessel ↔ Portfolio exposure" },
 ];
 
-const DOMAIN_STATS = Object.entries(DOMAIN_CONFIG).map(([domain, cfg]) => ({
-  domain,
-  color: cfg.color,
-  icon: cfg.icon,
-  signalCount: FUSION_SIGNALS.filter(s => s.domain === domain).length,
-  criticalCount: FUSION_SIGNALS.filter(s => s.domain === domain && s.severity === "critical").length,
-  avgConfidence: FUSION_SIGNALS.filter(s => s.domain === domain).reduce((a, s) => a + s.confidence, 0) / Math.max(1, FUSION_SIGNALS.filter(s => s.domain === domain).length),
-})).filter(d => d.signalCount > 0);
+function computeDomainStats(signals: FusionSignal[]) {
+  return Object.entries(DOMAIN_CONFIG).map(([domain, cfg]) => {
+    const inDomain = signals.filter(s => s.domain === domain);
+    return {
+      domain,
+      color: cfg.color,
+      icon: cfg.icon,
+      signalCount: inDomain.length,
+      criticalCount: inDomain.filter(s => s.severity === "critical").length,
+      avgConfidence: inDomain.reduce((a, s) => a + s.confidence, 0) / Math.max(1, inDomain.length),
+    };
+  }).filter(d => d.signalCount > 0);
+}
 
 function ConfidenceBar({ value, color }: { value: number; color: string }) {
   return (
@@ -368,7 +376,21 @@ export default function SignalFusionPage() {
     return () => clearInterval(t);
   }, []);
 
-  const sig = FUSION_SIGNALS.find(s => s.id === activeSignal) ?? FUSION_SIGNALS[0];
+  const fusionQuery = useQuery<{ signals: FusionSignal[]; correlations: CorrelationPair[]; dataAvailable: boolean }>({
+    queryKey: ["lyte", "signal-fusion"],
+    queryFn: async () => {
+      const res = await apiRequest<{ signals: FusionSignal[]; correlations: CorrelationPair[]; dataAvailable: boolean }>("GET", "/api/lyte/signal-fusion");
+      return res;
+    },
+    refetchInterval: 30000,
+    staleTime: 15000,
+  });
+
+  const FUSION_SIGNALS: FusionSignal[] = fusionQuery.data?.signals ?? FUSION_SIGNALS_FALLBACK;
+  const CORRELATION_PAIRS: CorrelationPair[] = fusionQuery.data?.correlations ?? CORRELATION_PAIRS_FALLBACK;
+  const DOMAIN_STATS = useMemo(() => computeDomainStats(FUSION_SIGNALS), [FUSION_SIGNALS]);
+
+  const sig = FUSION_SIGNALS.find(s => s.id === activeSignal) ?? FUSION_SIGNALS[0]!;
   const cfg = DOMAIN_CONFIG[sig.domain];
   const Icon = cfg?.icon ?? Radio;
   const dc = cfg?.color ?? LYTE;
@@ -385,7 +407,7 @@ export default function SignalFusionPage() {
   const criticalCount = FUSION_SIGNALS.filter(s => s.severity === "critical").length;
   const highCount = FUSION_SIGNALS.filter(s => s.severity === "high").length;
   const correlatedCount = FUSION_SIGNALS.filter(s => s.correlatedWith.length > 0).length;
-  const avgConfidence = FUSION_SIGNALS.reduce((a, s) => a + s.confidence, 0) / FUSION_SIGNALS.length;
+  const avgConfidence = FUSION_SIGNALS.length > 0 ? FUSION_SIGNALS.reduce((a, s) => a + s.confidence, 0) / FUSION_SIGNALS.length : 0;
 
   return (
     <div style={{ minHeight: "100vh", background: BG, color: TEXT }}>

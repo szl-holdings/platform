@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { m, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
+import { apiRequest } from "@/lib/api";
 import {
   BookOpen, Shield, Ship, Building2, Briefcase, Users, Zap,
   ArrowRight, ChevronRight, Play, Clock, CheckCircle2,
@@ -60,7 +62,7 @@ const STAGE_COLORS: Record<string, string> = {
   Outcome: "#ef4444",
 };
 
-const SCHEMAS: DecisionSchema[] = [
+const SCHEMAS_FALLBACK: DecisionSchema[] = [
   {
     id: "sch1",
     name: "Cyber Incident Response",
@@ -261,7 +263,7 @@ const SCHEMAS: DecisionSchema[] = [
   },
 ];
 
-const CATEGORIES = [...new Set(SCHEMAS.map(s => s.category))];
+const ICON_MAP: Record<string, typeof Shield> = { Shield, Ship, Building2, Briefcase, Users, Layers };
 
 function ComplexityBadge({ complexity }: { complexity: string }) {
   const colors: Record<string, string> = { low: "hsl(142,60%,48%)", medium: "hsl(48,90%,52%)", high: "hsl(0,72%,54%)" };
@@ -315,7 +317,27 @@ export default function DecisionSchemaLibraryPage() {
   const [filterCat, setFilterCat] = useState<string>("all");
   const [filterComp, setFilterComp] = useState<string>("all");
 
-  const schema = SCHEMAS.find(s => s.id === activeSchema) ?? SCHEMAS[0];
+  interface SchemaApiRow extends Omit<DecisionSchema, "icon"> { iconKey: string; }
+  interface SchemaApiResponse { schemas: SchemaApiRow[]; categories: string[]; dataAvailable: boolean; }
+  const schemaQuery = useQuery<SchemaApiResponse>({
+    queryKey: ["lyte", "decision-schemas"],
+    queryFn: async () => {
+      const res = await apiRequest<SchemaApiResponse>("GET", "/api/lyte/decision-schemas");
+      return res;
+    },
+    refetchInterval: 60000,
+    staleTime: 30000,
+  });
+
+  const SCHEMAS: DecisionSchema[] = useMemo(() => {
+    if (schemaQuery.data?.schemas) {
+      return schemaQuery.data.schemas.map(s => ({ ...s, icon: ICON_MAP[s.iconKey] ?? Shield }));
+    }
+    return SCHEMAS_FALLBACK;
+  }, [schemaQuery.data]);
+  const CATEGORIES = useMemo(() => schemaQuery.data?.categories ?? [...new Set(SCHEMAS.map(s => s.category))], [schemaQuery.data, SCHEMAS]);
+
+  const schema = SCHEMAS.find(s => s.id === activeSchema) ?? SCHEMAS[0]!;
   const Icon = schema.icon;
 
   const filteredSchemas = SCHEMAS.filter(s =>
@@ -324,7 +346,7 @@ export default function DecisionSchemaLibraryPage() {
   );
 
   const totalUses = SCHEMAS.reduce((a, s) => a + s.timesUsed, 0);
-  const avgSuccess = SCHEMAS.reduce((a, s) => a + s.successRate, 0) / SCHEMAS.length;
+  const avgSuccess = SCHEMAS.length > 0 ? SCHEMAS.reduce((a, s) => a + s.successRate, 0) / SCHEMAS.length : 0;
 
   return (
     <div style={{ minHeight: "100vh", background: BG, color: TEXT }}>

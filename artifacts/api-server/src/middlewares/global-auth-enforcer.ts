@@ -85,6 +85,11 @@ const PUBLIC_EXACT_PATHS = new Set([
   // so demo-mode visitors and pre-auth marketing pages can render the Vessels
   // fleet map and Terra property maps without a session. Rate-limited inline.
   "/api/config/mapbox-token",
+  // Lyte intel surfaces — Signal Fusion, Governance Posture, Decision Schema
+  // Library. See routes/lyte-intel.ts.
+  "/api/lyte/signal-fusion",
+  "/api/lyte/governance-domains",
+  "/api/lyte/decision-schemas",
 ]);
 
 const PUBLIC_PREFIXES = [

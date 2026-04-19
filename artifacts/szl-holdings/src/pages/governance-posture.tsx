@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { m, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
+import { apiRequest } from "@/lib/api";
 import {
   ShieldCheck, CheckCircle2, AlertTriangle, XCircle, Clock, Shield,
   Ship, Building2, Briefcase, Users, Zap, Layers, ArrowRight,
@@ -45,7 +47,7 @@ interface DomainHealth {
   lastReviewed: string;
 }
 
-const DOMAIN_HEALTH: DomainHealth[] = [
+const DOMAIN_HEALTH_FALLBACK: DomainHealth[] = [
   {
     domain: "Aegis",
     color: "hsl(222,60%,60%)",
@@ -138,7 +140,8 @@ const DOMAIN_HEALTH: DomainHealth[] = [
   },
 ];
 
-const APPROVAL_QUEUE = [
+interface ApprovalItem { id: string; title: string; domain: string; priority: string; requestedBy: string; age: string; dueIn: string; status: string; }
+const APPROVAL_QUEUE_FALLBACK: ApprovalItem[] = [
   { id: "a1", title: "KEV response — isolation approval", domain: "Aegis", priority: "critical", requestedBy: "SOC Analyst", age: "4h", dueIn: "T-2h", status: "pending" },
   { id: "a2", title: "LP notification — NYC distressed portfolio", domain: "Terra", priority: "high", requestedBy: "Investment Lead", age: "18h", dueIn: "T-6h", status: "pending" },
   { id: "a3", title: "MV Adriatic Star — OFAC filing decision", domain: "Vessels", priority: "high", requestedBy: "Compliance Officer", age: "11h", dueIn: "T-12h", status: "escalated" },
@@ -146,23 +149,34 @@ const APPROVAL_QUEUE = [
   { id: "a5", title: "Cloud configuration change — sg-0xf823b1a", domain: "IMPERIUM", priority: "medium", requestedBy: "Cloud Ops", age: "4h", dueIn: "T-20h", status: "pending" },
 ];
 
-const VIOLATION_LOG = [
+interface ViolationItem { id: string; domain: string; type: string; detail: string; severity: string; timestamp: string; status: string; }
+const VIOLATION_LOG_FALLBACK: ViolationItem[] = [
   { id: "v1", domain: "Alloy", type: "SLA breach", detail: "Approval queue depth exceeded 72h threshold", severity: "high", timestamp: "2h ago", status: "open" },
   { id: "v2", domain: "Terra", type: "Override without justification", detail: "Policy gate bypassed on acquisition sign-off", severity: "high", timestamp: "1d ago", status: "open" },
   { id: "v3", domain: "Vessels", type: "Review state gap", detail: "AI recommendation exported without review completion", severity: "medium", timestamp: "3d ago", status: "resolved" },
   { id: "v4", domain: "IMPERIUM", type: "Configuration drift", detail: "Unrestricted egress rule persisted 4h after detection", severity: "medium", timestamp: "4h ago", status: "open" },
 ];
 
-const PLATFORM_METRICS = {
-  totalPolicies: DOMAIN_HEALTH.reduce((a, d) => a + d.policyCount, 0),
-  activePolicies: DOMAIN_HEALTH.reduce((a, d) => a + d.activePolicies, 0),
-  pendingApprovals: DOMAIN_HEALTH.reduce((a, d) => a + d.pendingApprovals, 0),
-  avgApprovalThroughput: DOMAIN_HEALTH.reduce((a, d) => a + d.approvalThroughputPct, 0) / DOMAIN_HEALTH.length,
-  avgOverrideRate: DOMAIN_HEALTH.reduce((a, d) => a + d.overrideRate, 0) / DOMAIN_HEALTH.length,
-  avgProofCoverage: DOMAIN_HEALTH.reduce((a, d) => a + d.proofCoverage, 0) / DOMAIN_HEALTH.length,
-  totalSlaBreaches: DOMAIN_HEALTH.reduce((a, d) => a + d.slaBreaches, 0),
-  avgMaturity: DOMAIN_HEALTH.reduce((a, d) => a + d.maturityScore, 0) / DOMAIN_HEALTH.length,
-};
+interface PlatformMetrics {
+  totalPolicies: number; activePolicies: number; pendingApprovals: number;
+  avgApprovalThroughput: number; avgOverrideRate: number; avgProofCoverage: number;
+  totalSlaBreaches: number; avgMaturity: number;
+}
+function computePlatformMetrics(domains: DomainHealth[]): PlatformMetrics {
+  const n = Math.max(1, domains.length);
+  return {
+    totalPolicies: domains.reduce((a, d) => a + d.policyCount, 0),
+    activePolicies: domains.reduce((a, d) => a + d.activePolicies, 0),
+    pendingApprovals: domains.reduce((a, d) => a + d.pendingApprovals, 0),
+    avgApprovalThroughput: domains.reduce((a, d) => a + d.approvalThroughputPct, 0) / n,
+    avgOverrideRate: domains.reduce((a, d) => a + d.overrideRate, 0) / n,
+    avgProofCoverage: domains.reduce((a, d) => a + d.proofCoverage, 0) / n,
+    totalSlaBreaches: domains.reduce((a, d) => a + d.slaBreaches, 0),
+    avgMaturity: domains.reduce((a, d) => a + d.maturityScore, 0) / n,
+  };
+}
+
+const ICON_MAP: Record<string, typeof Shield> = { Shield, Ship, Building2, Briefcase, Users, Layers };
 
 function ScoreBar({ value, color, max = 100 }: { value: number; color: string; max?: number }) {
   const pct = Math.min(100, (value / max) * 100);
@@ -224,7 +238,34 @@ export default function GovernancePosturePage() {
   const [activeTab, setActiveTab] = useState<"overview" | "approvals" | "violations" | "domains">("overview");
   const [activeDomain, setActiveDomain] = useState<string>("Aegis");
 
-  const domain = DOMAIN_HEALTH.find(d => d.domain === activeDomain) ?? DOMAIN_HEALTH[0];
+  interface GovApiResponse {
+    domains: Array<Omit<DomainHealth, "icon"> & { iconKey: string }>;
+    approvalQueue: ApprovalItem[];
+    violations: ViolationItem[];
+    platformMetrics: PlatformMetrics;
+    dataAvailable: boolean;
+  }
+  const govQuery = useQuery<GovApiResponse>({
+    queryKey: ["lyte", "governance-domains"],
+    queryFn: async () => {
+      const res = await apiRequest<GovApiResponse>("GET", "/api/lyte/governance-domains");
+      return res;
+    },
+    refetchInterval: 30000,
+    staleTime: 15000,
+  });
+
+  const DOMAIN_HEALTH: DomainHealth[] = useMemo(() => {
+    if (govQuery.data?.domains) {
+      return govQuery.data.domains.map(d => ({ ...d, icon: ICON_MAP[d.iconKey] ?? Shield }));
+    }
+    return DOMAIN_HEALTH_FALLBACK;
+  }, [govQuery.data]);
+  const APPROVAL_QUEUE = govQuery.data?.approvalQueue ?? APPROVAL_QUEUE_FALLBACK;
+  const VIOLATION_LOG = govQuery.data?.violations ?? VIOLATION_LOG_FALLBACK;
+  const PLATFORM_METRICS = govQuery.data?.platformMetrics ?? computePlatformMetrics(DOMAIN_HEALTH);
+
+  const domain = DOMAIN_HEALTH.find(d => d.domain === activeDomain) ?? DOMAIN_HEALTH[0]!;
   const DIcon = domain.icon;
 
   return (

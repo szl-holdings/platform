@@ -62,6 +62,7 @@ import fabricRouter from "./fabric";
 import narrativesRouter from "./narratives";
 import actionStoreRouter from "./action-store";
 import lyteSurfacesRouter from "./lyte-surfaces";
+import lyteIntelRouter from "./lyte-intel";
 import riskEvidenceRouter from "./risk-evidence";
 
 const router: IRouter = Router();
@@ -139,6 +140,7 @@ router.use(riskEvidenceRouter);
 // tenantScope middleware registered at "/lyte" never intercepts these routes.
 // Exact paths are whitelisted in global-auth-enforcer.ts.
 router.use(lyteSurfacesRouter);
+router.use(lyteIntelRouter);
 
 // Global Guardian policy check — derives category from request path and
 // applies to every agent-facing route family. Read-only methods skip
