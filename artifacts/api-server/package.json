@@ -16,6 +16,7 @@
     "seed:terra": "tsx src/scripts/seed-terra-distress.ts",
     "seed:ecosystem": "tsx src/scripts/seed-ecosystem.ts",
     "smoke:cognitive-runtime": "tsx src/scripts/smoke-cognitive-runtime.ts",
+    "generate:solution-briefs": "tsx src/scripts/generate-solution-briefs.ts",
     "audit:route-security": "tsx src/scripts/route-security-matrix.ts",
     "audit:route-security:strict": "tsx src/scripts/route-security-matrix.ts --strict",
     "audit:route-security:strict-auth": "tsx src/scripts/route-security-matrix.ts --strict-auth",

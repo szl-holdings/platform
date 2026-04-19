@@ -1,0 +1,52 @@
+{
+  "generated_at": "2026-04-19T13:00:07.612Z",
+  "manifest_generated": "2026-04-19",
+  "manifest_version": "1.0.0",
+  "briefs": [
+    {
+      "slug": "lyte",
+      "displayName": "Lyte — Decision Intelligence",
+      "productKey": "Lyte (Business Observability)",
+      "capabilityCount": 5,
+      "readinessScore": 73,
+      "bytes": 6727,
+      "file": "/briefs/lyte-solution-brief.pdf"
+    },
+    {
+      "slug": "aegis",
+      "displayName": "Aegis — Unified Defense & Intelligence",
+      "productKey": "Aegis (Defense & Intelligence)",
+      "capabilityCount": 7,
+      "readinessScore": 72,
+      "bytes": 7046,
+      "file": "/briefs/aegis-solution-brief.pdf"
+    },
+    {
+      "slug": "vessels",
+      "displayName": "Vessels — Maritime Intelligence",
+      "productKey": "Vessels (Maritime Intelligence)",
+      "capabilityCount": 7,
+      "readinessScore": 44,
+      "bytes": 7066,
+      "file": "/briefs/vessels-solution-brief.pdf"
+    },
+    {
+      "slug": "terra",
+      "displayName": "Terra — Real Estate Intelligence",
+      "productKey": "Terra (Real Estate Intelligence)",
+      "capabilityCount": 7,
+      "readinessScore": 65,
+      "bytes": 6887,
+      "file": "/briefs/terra-solution-brief.pdf"
+    },
+    {
+      "slug": "carlota-jo",
+      "displayName": "Carlota Jo — Private Advisory",
+      "productKey": "Carlota Jo (Private Advisory)",
+      "capabilityCount": 3,
+      "readinessScore": 92,
+      "bytes": 6467,
+      "file": "/briefs/carlota-jo-solution-brief.pdf"
+    }
+  ]
+}

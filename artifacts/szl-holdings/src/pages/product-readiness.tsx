@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { m } from "framer-motion";
-import { CheckCircle, Clock, AlertTriangle, XCircle, ChevronDown, ChevronRight, ExternalLink, BookOpen } from "lucide-react";
+import { CheckCircle, Clock, AlertTriangle, XCircle, ChevronDown, ChevronRight, ExternalLink, BookOpen, FileDown } from "lucide-react";
 import { Link } from "wouter";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -124,6 +124,75 @@ function ProductRow({ product }: { product: ProductSummary }) {
         </div>
       )}
     </div>
+  );
+}
+
+const SOLUTION_BRIEFS: Array<{ slug: string; product: string; label: string; href: string }> = [
+  { slug: "lyte", product: "Lyte (Business Observability)", label: "Lyte — Decision Intelligence", href: "/briefs/lyte-solution-brief.pdf" },
+  { slug: "aegis", product: "Aegis (Defense & Intelligence)", label: "Aegis — Unified Defense", href: "/briefs/aegis-solution-brief.pdf" },
+  { slug: "vessels", product: "Vessels (Maritime Intelligence)", label: "Vessels — Maritime Intelligence", href: "/briefs/vessels-solution-brief.pdf" },
+  { slug: "terra", product: "Terra (Real Estate Intelligence)", label: "Terra — Real Estate Intelligence", href: "/briefs/terra-solution-brief.pdf" },
+  { slug: "carlota-jo", product: "Carlota Jo (Private Advisory)", label: "Carlota Jo — Private Advisory", href: "/briefs/carlota-jo-solution-brief.pdf" },
+];
+
+function SolutionBriefDownloads({ products }: { products: ProductSummary[] }) {
+  const summaries = new Map(products.map(p => [p.product, p] as const));
+  return (
+    <section
+      aria-labelledby="solution-brief-downloads"
+      style={{
+        marginTop: "2.5rem",
+        padding: "1.5rem 1.75rem",
+        borderRadius: "12px",
+        border: "1px solid hsla(0,0%,100%,0.07)",
+        background: "hsla(0,0%,100%,0.015)",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "0.5rem" }}>
+        <FileDown size={14} style={{ color: "hsl(38,55%,62%)" }} />
+        <h2 id="solution-brief-downloads" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(38,55%,62%)", margin: 0 }}>
+          Solution Briefs
+        </h2>
+      </div>
+      <p style={{ fontSize: "13px", color: "hsl(210,5%,55%)", lineHeight: 1.6, marginBottom: "1.25rem", maxWidth: "60ch" }}>
+        Each brief is generated directly from the capability manifest — capability counts, status mix, top proof points, and open risks. Regenerated on every manifest change so the figures always match this page.
+      </p>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))", gap: "0.75rem" }}>
+        {SOLUTION_BRIEFS.map(brief => {
+          const summary = summaries.get(brief.product);
+          return (
+            <a
+              key={brief.slug}
+              href={brief.href}
+              download
+              data-testid={`download-solution-brief-${brief.slug}`}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: "0.75rem",
+                padding: "0.875rem 1rem",
+                borderRadius: "9px",
+                background: "hsla(0,0%,100%,0.025)",
+                border: "1px solid hsla(0,0%,100%,0.06)",
+                textDecoration: "none",
+                transition: "background 0.18s, border-color 0.18s",
+              }}
+            >
+              <div style={{ minWidth: 0 }}>
+                <p style={{ fontSize: "13px", fontWeight: 600, color: "hsl(38,12%,90%)", margin: 0, marginBottom: "0.2rem" }}>{brief.label}</p>
+                <p style={{ fontSize: "11.5px", color: "hsl(210,5%,50%)", margin: 0 }}>
+                  {summary
+                    ? `${summary.total} capabilities · ${summary.readinessScore}% readiness · PDF`
+                    : "PDF"}
+                </p>
+              </div>
+              <FileDown size={14} style={{ color: "hsl(210,5%,46%)", flexShrink: 0 }} />
+            </a>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 
@@ -260,6 +329,8 @@ export default function ProductReadinessPage() {
                 </m.div>
               ))}
             </div>
+
+            <SolutionBriefDownloads products={products} />
 
             <div style={{ marginTop: "2.5rem", display: "flex", flexWrap: "wrap" as const, gap: "1rem", alignItems: "center" }}>
               <div style={{ display: "flex", flexWrap: "wrap" as const, gap: "1rem" }}>

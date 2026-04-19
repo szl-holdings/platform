@@ -26,3 +26,10 @@ if [ ! -L "$MANIFEST_LINK" ] || [ "$(readlink "$MANIFEST_LINK")" != "$MANIFEST_T
   ln -s "$MANIFEST_TARGET" "$MANIFEST_LINK"
   echo "Restored capability manifest symlink: $MANIFEST_LINK -> $MANIFEST_TARGET"
 fi
+
+# Regenerate downloadable solution-brief PDFs from the platform capability
+# manifest so the corporate site never serves stale or broken assets. Runs
+# after the symlink fix above so the generator always reads the freshest
+# manifest. Non-fatal: a failure here must not block workflow reconciliation.
+timeout 60 pnpm --filter @workspace/api-server run generate:solution-briefs 2>&1 \
+  || echo "solution-brief regeneration failed (non-fatal)"
