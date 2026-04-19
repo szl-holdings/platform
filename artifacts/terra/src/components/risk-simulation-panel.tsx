@@ -1,134 +1,28 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { sample } from "@szl-holdings/monte-carlo/distributions";
+import {
+  runScenarioSimulation as runScenarioSimulationSync,
+  type MonteCarloResult,
+} from "@szl-holdings/monte-carlo/scenario-simulation";
 import type { ScenarioDefinition } from "@szl-holdings/monte-carlo/schema";
 import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";
 import { SaveRiskRunButton, type SavedRiskRun } from "@szl-holdings/shared-ui/risk-evidence";
 import { Activity, BarChart3, Layers, RefreshCw } from "lucide-react";
+import RiskSimulationWorker from "@/workers/risk-simulation.worker?worker";
 
 const TERRA_ACCENT = LANE_ACCENT_HEX.terra.primary;
 
-export interface MonteCarloResult {
+export type { MonteCarloResult };
+export { runScenarioSimulationSync as runScenarioSimulation };
+
+interface WorkerRequest {
+  requestId: number;
   scenarioId: string;
-  title: string;
-  description: string;
-  domain: string;
   iterations: number;
-  validIterations: number;
-  durationMs: number;
-  metrics: Record<string, {
-    label: string;
-    format?: string;
-    higherIsBetter?: boolean;
-    mean: number;
-    p5: number;
-    p25: number;
-    p50: number;
-    p75: number;
-    p95: number;
-    min: number;
-    max: number;
-    stdDev: number;
-  }>;
-  inputSensitivity: Array<{ inputId: string; label: string; impact: number }>;
 }
-
-function percentile(sorted: number[], p: number): number {
-  if (sorted.length === 0) return 0;
-  const idx = Math.max(0, Math.ceil(sorted.length * p / 100) - 1);
-  return sorted[idx]!;
-}
-
-function computeStdDev(values: number[], mean: number): number {
-  if (values.length < 2) return 0;
-  const variance = values.reduce((s, v) => s + (v - mean) ** 2, 0) / (values.length - 1);
-  return Math.sqrt(variance);
-}
-
-export function runScenarioSimulation(scenario: ScenarioDefinition, iterations: number): MonteCarloResult {
-  const start = performance.now();
-  const outputAccum: Record<string, number[]> = {};
-  for (const out of scenario.outputs) outputAccum[out.id] = [];
-  const inputAccum: Record<string, number[]> = {};
-  for (const inp of scenario.inputs) inputAccum[inp.id] = [];
-
-  let validIterations = 0;
-
-  for (let i = 0; i < iterations; i++) {
-    const inputs: Record<string, number> = {};
-    for (const inp of scenario.inputs) {
-      const val = sample(inp.distribution);
-      inputs[inp.id] = val;
-      inputAccum[inp.id]!.push(val);
-    }
-    try {
-      const outputs = scenario.calculate(inputs, i);
-      let valid = true;
-      if (scenario.constraints) {
-        for (const constraint of scenario.constraints) {
-          if (!constraint.check(outputs)) { valid = false; break; }
-        }
-      }
-      if (!valid) continue;
-      validIterations++;
-      for (const out of scenario.outputs) {
-        const v = outputs[out.id];
-        if (v !== undefined && isFinite(v)) outputAccum[out.id]!.push(v);
-      }
-    } catch { /* constraint violation */ }
-  }
-
-  const metrics: MonteCarloResult["metrics"] = {};
-  for (const out of scenario.outputs) {
-    const values = outputAccum[out.id] ?? [];
-    const sorted = [...values].sort((a, b) => a - b);
-    const mean = values.length > 0 ? values.reduce((s, v) => s + v, 0) / values.length : 0;
-    metrics[out.id] = {
-      label: out.label,
-      format: out.format,
-      higherIsBetter: out.higherIsBetter,
-      mean,
-      p5: percentile(sorted, 5),
-      p25: percentile(sorted, 25),
-      p50: percentile(sorted, 50),
-      p75: percentile(sorted, 75),
-      p95: percentile(sorted, 95),
-      min: sorted[0] ?? 0,
-      max: sorted[sorted.length - 1] ?? 0,
-      stdDev: computeStdDev(values, mean),
-    };
-  }
-
-  const primaryOutput = scenario.outputs[0];
-  const baseOutputs = primaryOutput ? (outputAccum[primaryOutput.id] ?? []) : [];
-  const baseMean = baseOutputs.length > 0 ? baseOutputs.reduce((s, v) => s + v, 0) / baseOutputs.length : 0;
-  const baseVar = baseOutputs.length > 0 ? baseOutputs.reduce((s, v) => s + (v - baseMean) ** 2, 0) / baseOutputs.length : 0;
-
-  const inputSensitivity = scenario.inputs.map(inp => {
-    const inputVals = inputAccum[inp.id]!;
-    const inputMean = inputVals.reduce((s, v) => s + v, 0) / inputVals.length;
-    let cov = 0;
-    for (let i = 0; i < Math.min(inputVals.length, baseOutputs.length); i++) {
-      cov += (inputVals[i]! - inputMean) * (baseOutputs[i]! - baseMean);
-    }
-    cov /= inputVals.length;
-    const inputVar = inputVals.reduce((s, v) => s + (v - inputMean) ** 2, 0) / inputVals.length;
-    const r2 = baseVar > 0 && inputVar > 0 ? (cov * cov) / (inputVar * baseVar) : 0;
-    return { inputId: inp.id, label: inp.label, impact: Math.sqrt(r2) };
-  }).sort((a, b) => b.impact - a.impact);
-
-  return {
-    scenarioId: scenario.id,
-    title: scenario.title,
-    description: scenario.description,
-    domain: scenario.domain,
-    iterations,
-    validIterations,
-    durationMs: performance.now() - start,
-    metrics,
-    inputSensitivity,
-  };
-}
+type WorkerResponse =
+  | { requestId: number; ok: true; result: MonteCarloResult }
+  | { requestId: number; ok: false; error: string };
 
 function formatValue(value: number, format?: string): string {
   if (!isFinite(value)) return "—";
@@ -163,15 +57,64 @@ export function RiskSimulationPanel({
   const [iterCount, setIterCount] = useState<number>(iterations);
   const [running, setRunning] = useState<boolean>(true);
   const [runKey, setRunKey] = useState<number>(0);
+  const workerRef = useRef<Worker | null>(null);
+  const requestIdRef = useRef<number>(0);
+
+  useEffect(() => {
+    let worker: Worker | null = null;
+    try {
+      worker = new RiskSimulationWorker();
+      workerRef.current = worker;
+    } catch {
+      workerRef.current = null;
+    }
+    return () => {
+      worker?.terminate();
+      workerRef.current = null;
+    };
+  }, []);
 
   useEffect(() => {
     setRunning(true);
+    const requestId = ++requestIdRef.current;
+    const worker = workerRef.current;
+
+    if (worker) {
+      const handler = (event: MessageEvent<WorkerResponse>) => {
+        if (event.data.requestId !== requestId) return;
+        worker.removeEventListener("message", handler);
+        if (event.data.ok) {
+          setResult(event.data.result);
+          setRunning(false);
+        } else {
+          // Worker reported an error (e.g. unknown scenario id) — fall
+          // back to a synchronous run on the main thread so the panel
+          // still shows results instead of getting stuck.
+          // eslint-disable-next-line no-console
+          console.warn("[risk-simulation] worker error, falling back:", event.data.error);
+          try {
+            const r = runScenarioSimulationSync(scenario, iterCount);
+            if (requestId === requestIdRef.current) setResult(r);
+          } finally {
+            if (requestId === requestIdRef.current) setRunning(false);
+          }
+        }
+      };
+      worker.addEventListener("message", handler);
+      const req: WorkerRequest = { requestId, scenarioId: scenario.id, iterations: iterCount };
+      worker.postMessage(req);
+      return () => {
+        worker.removeEventListener("message", handler);
+      };
+    }
+
+    // Fallback: synchronous run via setTimeout if worker is unavailable
     const handle = window.setTimeout(() => {
       try {
-        const r = runScenarioSimulation(scenario, iterCount);
-        setResult(r);
+        const r = runScenarioSimulationSync(scenario, iterCount);
+        if (requestId === requestIdRef.current) setResult(r);
       } finally {
-        setRunning(false);
+        if (requestId === requestIdRef.current) setRunning(false);
       }
     }, 30);
     return () => window.clearTimeout(handle);
@@ -216,6 +159,8 @@ export function RiskSimulationPanel({
             <option value={5000}>5,000 iter</option>
             <option value={10000}>10,000 iter</option>
             <option value={25000}>25,000 iter</option>
+            <option value={50000}>50,000 iter</option>
+            <option value={100000}>100,000 iter</option>
           </select>
           <button
             onClick={() => setRunKey(k => k + 1)}

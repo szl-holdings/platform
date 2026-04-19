@@ -647,6 +647,10 @@ export const DOMAIN_SCENARIO_LIBRARY: Record<string, ScenarioDefinition> = {
   [LYTE_CAPACITY_PLANNING.id]: LYTE_CAPACITY_PLANNING,
 };
 
+export function getScenarioById(id: string): ScenarioDefinition | undefined {
+  return DOMAIN_SCENARIO_LIBRARY[id];
+}
+
 export const SCENARIO_VARIANTS: Record<string, Array<{ id: string; label: string; description: string; overrides: Record<string, unknown> }>> = {
   [TERRA_PROPERTY_RETURNS.id]: [
     { id: "base", label: "Base Case", description: "Expected market conditions", overrides: {} },

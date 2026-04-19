@@ -27,6 +27,9 @@ export type {
 
 export { runParallelChunks, isWorkerAvailable } from "./parallel.js";
 
+export { runScenarioSimulation } from "./scenario-simulation.js";
+export type { MonteCarloResult, MonteCarloOutputStat } from "./scenario-simulation.js";
+
 export {
   VESSELS_VOYAGE_COST,
   TERRA_PROPERTY_RETURNS,
@@ -37,4 +40,5 @@ export {
   LYTE_CAPACITY_PLANNING,
   DOMAIN_SCENARIO_LIBRARY,
   SCENARIO_VARIANTS,
+  getScenarioById,
 } from "./scenarios.js";

@@ -16,7 +16,9 @@
     ".": "./src/index.ts",
     "./distributions": "./src/distributions.ts",
     "./scenarios": "./src/scenarios.ts",
-    "./schema": "./src/schema.ts"
+    "./schema": "./src/schema.ts",
+    "./scenario-simulation": "./src/scenario-simulation.ts",
+    "./scenario-simulation.worker": "./src/scenario-simulation.worker.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json --noEmit",
