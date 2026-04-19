@@ -229,6 +229,10 @@ export async function run(
         agentTier: ctx.agentTier,
         domain: ctx.domain,
         maxRetries: ctx.maxRetries,
+        maxBudgetUsd: ctx.maxBudgetUsd,
+        preferredProvider: ctx.preferredProvider,
+        preferredModel: ctx.preferredModel,
+        promptVersionId: ctx.promptVersionId,
       });
       recordPhase(planResult);
 
@@ -377,6 +381,10 @@ export async function run(
           agentTier: ctx.agentTier,
           domain: ctx.domain,
           maxRetries: ctx.maxRetries,
+          maxBudgetUsd: ctx.maxBudgetUsd,
+          preferredProvider: ctx.preferredProvider,
+          preferredModel: ctx.preferredModel,
+          promptVersionId: ctx.promptVersionId,
           revisionContext: revisionCtx,
         });
         recordPhase(replanResult);

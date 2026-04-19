@@ -17,6 +17,13 @@ export interface PlanPhaseOptions {
   maxRetries?: number;
   domain?: string;
   revisionContext?: PlanRevisionContext;
+  // Optional pinning of routing — used by callers (e.g. eval variant replay)
+  // that want every plan step to use a specific provider/model and prompt
+  // version. Overrides are applied AFTER the planner's normal routing so they
+  // win deterministically regardless of router heuristics.
+  preferredProvider?: string;
+  preferredModel?: string;
+  promptVersionId?: string;
 }
 
 export interface PlanPhaseOutput {
@@ -85,6 +92,28 @@ export async function planPhase(
         };
       }
     }
+  }
+
+  // Apply caller-pinned routing overrides. This is what allows eval variant
+  // replay to actually exercise a specific provider/model + prompt version
+  // through the cognitive loop (rather than only influencing observability
+  // metadata).
+  if (opts.preferredProvider || opts.preferredModel || opts.promptVersionId) {
+    plan!.steps = plan!.steps.map((step) => ({
+      ...step,
+      route: {
+        ...step.route,
+        modelProvider: opts.preferredProvider ?? step.route.modelProvider,
+        model: opts.preferredModel ?? step.route.model,
+        selectedBy: (opts.preferredProvider || opts.preferredModel)
+          ? "preferred"
+          : step.route.selectedBy,
+      },
+      metadata: {
+        ...step.metadata,
+        ...(opts.promptVersionId ? { promptVersionId: opts.promptVersionId } : {}),
+      },
+    }));
   }
 
   const output: PlanPhaseOutput = {

@@ -101,6 +101,18 @@ export const CognitiveContextSchema = z.object({
   verifierEnabled: z.boolean().default(true),
   reflectionEnabled: z.boolean().default(true),
   selfModelRuntimeId: z.string().optional(),
+  // Optional overrides used by eval variant replay (and any other caller that
+  // wants to pin a specific model / prompt version for an entire loop).
+  // - preferredProvider/preferredModel: forwarded to plan-phase routing so
+  //   every plan step's RouteDecision is pinned to this model.
+  // - promptVersionId: stamped onto each plan step's route metadata so the
+  //   downstream engines (planner/verifier/reflector) resolve this exact
+  //   prompt version from `@workspace/prompt-registry`.
+  // - maxBudgetUsd: forwarded to PlanContext for cost-aware routing.
+  preferredProvider: z.string().optional(),
+  preferredModel: z.string().optional(),
+  promptVersionId: z.string().optional(),
+  maxBudgetUsd: z.number().positive().optional(),
   metadata: z.record(z.unknown()).default({}),
 });
 export type CognitiveContext = z.input<typeof CognitiveContextSchema>;

@@ -204,12 +204,28 @@ interface VariantRunResult {
   triggeredBy: string;
 }
 
+interface VariantCaseEvent {
+  caseId: string;
+  label: string;
+  domain: string;
+  passed: boolean;
+  score: number;
+  latencyMs: number;
+  costUsd: number;
+  tokensUsed: number;
+  failureReason?: string;
+  progress: { completed: number; total: number };
+}
+
 function VariantComparePanel({ runs }: { runs: EvalRunSummary[] }) {
   const [baselineId, setBaselineId] = useState<string | null>(null);
   const [variant, setVariant] = useState({ model: "gpt-4o-mini", strategy: "default", prompt: "v2" });
   const [comparing, setComparing] = useState(false);
   const [compareResult, setCompareResult] = useState<{ baseline: EvalRunSummary; variant: VariantRunResult } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [liveCases, setLiveCases] = useState<VariantCaseEvent[]>([]);
+  const [progress, setProgress] = useState<{ completed: number; total: number } | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   const MODELS = ["gpt-4o-mini", "gpt-4o", "claude-3-5-sonnet", "claude-3-haiku", "gemini-1.5-pro"];
   const STRATEGIES = ["default", "chain-of-thought", "react", "reflection", "multi-agent"];
@@ -223,38 +239,109 @@ function VariantComparePanel({ runs }: { runs: EvalRunSummary[] }) {
     setComparing(true);
     setError(null);
     setCompareResult(null);
+    setLiveCases([]);
+    setProgress({ completed: 0, total: 0 });
     const start = performance.now();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     try {
       const csrfToken = getCsrfToken();
-      const result = await fetchJson<VariantRunResult>(apiUrl("/evals/run"), {
+      const url = apiUrl(`/evals/suites/${encodeURIComponent(baseline.suiteId)}/runs/variant`);
+      const response = await fetch(url, {
         method: "POST",
-        body: JSON.stringify({
-          suiteId: baseline.suiteId,
-          baselineRunId: baseline.runId,
-          triggeredBy: "variant-compare",
-          variantModel: variant.model,
-          variantStrategy: variant.strategy,
-          variantPrompt: variant.prompt,
-        }),
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
+          Accept: "text/event-stream",
           ...(csrfToken ? { "x-csrf-token": csrfToken } : {}),
         },
+        body: JSON.stringify({
+          model: variant.model,
+          strategy: variant.strategy,
+          promptId: variant.prompt,
+          baselineRunId: baseline.runId,
+          triggeredBy: "variant-compare",
+        }),
+        signal: controller.signal,
       });
+
+      if (!response.ok || !response.body) {
+        const text = await response.text().catch(() => "");
+        throw new Error(`HTTP ${response.status}: ${text || response.statusText}`);
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let completePayload: any = null;
+      let streamError: string | null = null;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const events = buffer.split("\n\n");
+        buffer = events.pop() ?? "";
+        for (const block of events) {
+          let eventName = "message";
+          let dataLine = "";
+          for (const line of block.split("\n")) {
+            if (line.startsWith("event:")) eventName = line.slice(6).trim();
+            else if (line.startsWith("data:")) dataLine += line.slice(5).trim();
+          }
+          if (!dataLine) continue;
+          let parsed: any;
+          try { parsed = JSON.parse(dataLine); } catch { continue; }
+
+          if (eventName === "start") {
+            setProgress({ completed: 0, total: parsed.totalCases ?? 0 });
+          } else if (eventName === "case") {
+            setLiveCases((prev) => [...prev, parsed as VariantCaseEvent]);
+            if (parsed.progress) setProgress(parsed.progress);
+          } else if (eventName === "complete") {
+            completePayload = parsed;
+          } else if (eventName === "error") {
+            streamError = parsed.message ?? "Variant replay failed";
+          }
+        }
+      }
+
+      if (streamError) throw new Error(streamError);
+      if (!completePayload) throw new Error("Stream ended before completion");
+
       const variantRun: VariantRunResult = {
-        ...result,
-        avgLatencyMs: (result as VariantRunResult).avgLatencyMs ?? 0,
-        totalCostUsd: (result as VariantRunResult).totalCostUsd ?? 0,
-        triggeredBy: "variant-compare",
+        runId: completePayload.runId,
+        suiteId: completePayload.suiteId,
+        suiteName: completePayload.suiteName,
+        domain: completePayload.domain,
+        passRate: completePayload.passRate,
+        avgScore: completePayload.avgScore,
+        totalCases: completePayload.totalCases,
+        passed: completePayload.passed,
+        failed: completePayload.failed,
+        hasRegression: completePayload.hasRegression ?? false,
+        regressionSeverity: completePayload.regressionSeverity ?? "none",
+        regressionNotes: completePayload.regressionNotes ?? [],
+        improvementNotes: completePayload.improvementNotes ?? [],
+        runAt: completePayload.runAt,
+        avgLatencyMs: completePayload.avgLatencyMs ?? 0,
+        totalCostUsd: completePayload.totalCostUsd ?? 0,
+        triggeredBy: completePayload.triggeredBy ?? "variant-compare",
       };
+
       emitSpan({
         name: "eval_studio.variant_replay",
         attributes: {
           "agent.eval.suite_id": baseline.suiteId,
           "agent.eval.run_id": variantRun.runId,
+          "agent.eval.baseline_run_id": baseline.runId,
           "agent.eval.pass_rate": variantRun.passRate,
           "agent.eval.avg_score": variantRun.avgScore,
+          "agent.eval.avg_latency_ms": variantRun.avgLatencyMs,
+          "agent.eval.total_cost_usd": variantRun.totalCostUsd,
           "agent.eval.has_regression": variantRun.hasRegression,
+          "agent.eval.regression_severity": variantRun.regressionSeverity,
           "agent.eval.variant_model": variant.model,
           "agent.eval.variant_strategy": variant.strategy,
           "agent.eval.variant_prompt": variant.prompt,
@@ -264,12 +351,14 @@ function VariantComparePanel({ runs }: { runs: EvalRunSummary[] }) {
       });
       setCompareResult({ baseline, variant: variantRun });
     } catch (err) {
+      if ((err as Error).name === "AbortError") return;
       const msg = err instanceof Error ? err.message : String(err);
       setError(msg);
       emitSpan({
         name: "eval_studio.variant_replay",
         attributes: {
           "agent.eval.suite_id": baseline.suiteId,
+          "agent.eval.baseline_run_id": baseline.runId,
           "agent.eval.variant_model": variant.model,
           "agent.eval.variant_strategy": variant.strategy,
           "agent.eval.variant_prompt": variant.prompt,
@@ -280,8 +369,13 @@ function VariantComparePanel({ runs }: { runs: EvalRunSummary[] }) {
       });
     } finally {
       setComparing(false);
+      abortRef.current = null;
     }
   }
+
+  useEffect(() => {
+    return () => { abortRef.current?.abort(); };
+  }, []);
 
   return (
     <div style={{ display: "grid", gridTemplateColumns: "1fr 360px", gap: 20 }}>
@@ -421,7 +515,9 @@ function VariantComparePanel({ runs }: { runs: EvalRunSummary[] }) {
               {comparing ? (
                 <>
                   <div style={{ width: 12, height: 12, border: "2px solid #fff8", borderTop: "2px solid #fff", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
-                  Running variant…
+                  {progress && progress.total > 0
+                    ? `Running ${progress.completed}/${progress.total}…`
+                    : "Running variant…"}
                 </>
               ) : (
                 <>
@@ -432,6 +528,56 @@ function VariantComparePanel({ runs }: { runs: EvalRunSummary[] }) {
             </button>
           </div>
         </div>
+
+        {(comparing || liveCases.length > 0) && (
+          <div style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 10, padding: 14 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: "#475569", textTransform: "uppercase", letterSpacing: 0.5 }}>
+                Live variant cases
+              </div>
+              <div style={{ fontSize: 10, color: "#64748b" }}>
+                {liveCases.filter((c) => c.passed).length} pass · {liveCases.filter((c) => !c.passed).length} fail
+              </div>
+            </div>
+            {progress && progress.total > 0 && (
+              <div style={{ height: 4, background: "rgba(255,255,255,0.05)", borderRadius: 2, overflow: "hidden", marginBottom: 10 }}>
+                <div style={{
+                  width: `${(progress.completed / progress.total) * 100}%`,
+                  height: "100%",
+                  background: ACCENT,
+                  transition: "width 0.2s",
+                }} />
+              </div>
+            )}
+            <div style={{ maxHeight: 180, overflowY: "auto", display: "flex", flexDirection: "column", gap: 4 }}>
+              {liveCases.slice(-30).reverse().map((c) => (
+                <div key={c.caseId} style={{
+                  display: "grid",
+                  gridTemplateColumns: "10px 1fr 60px 60px",
+                  gap: 6,
+                  padding: "4px 6px",
+                  fontSize: 10,
+                  alignItems: "center",
+                  background: "rgba(255,255,255,0.02)",
+                  borderRadius: 4,
+                }}>
+                  <span style={{
+                    width: 6, height: 6, borderRadius: "50%",
+                    background: c.passed ? "#22c55e" : "#ef4444",
+                  }} />
+                  <span style={{ color: "#94a3b8", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.label}</span>
+                  <span style={{ color: "#64748b", textAlign: "right" }}>{(c.score * 100).toFixed(0)}%</span>
+                  <span style={{ color: "#64748b", textAlign: "right" }}>{c.latencyMs}ms</span>
+                </div>
+              ))}
+              {liveCases.length === 0 && (
+                <div style={{ fontSize: 10, color: "#475569", padding: "6px 0", textAlign: "center" }}>
+                  Waiting for first case…
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {compareResult && (
           <div style={{ background: "rgba(255,255,255,0.02)", border: `1px solid ${ACCENT}40`, borderRadius: 10, padding: 18 }}>

@@ -31,6 +31,11 @@ export async function runEvalSuite(
     triggeredBy?: string;
     maxConcurrency?: number;
     traceStore?: Map<string, Record<string, unknown>>;
+    onCaseComplete?: (
+      result: EvalCaseResult,
+      progress: { completed: number; total: number },
+    ) => void | Promise<void>;
+    metadata?: Record<string, unknown>;
   } = {},
 ): Promise<EvalRunReport> {
   const {
@@ -38,84 +43,113 @@ export async function runEvalSuite(
     triggeredBy = "api",
     maxConcurrency = 5,
     traceStore,
+    onCaseComplete,
+    metadata: extraMetadata,
   } = options;
 
   const runAt = new Date().toISOString();
-  const caseResults: EvalCaseResult[] = [];
+  const totalCount = suite.cases.length;
+  // Pre-allocate so we can write each case into its original index, preserving
+  // suite order in the report regardless of completion order.
+  const caseResults: EvalCaseResult[] = new Array(totalCount);
+  let completedCount = 0;
 
-  for (let i = 0; i < suite.cases.length; i += maxConcurrency) {
-    const batch = suite.cases.slice(i, i + maxConcurrency);
-    const batchResults = await Promise.all(
-      batch.map(async (c): Promise<EvalCaseResult> => {
-        const expectedOutcome = c.expectedOutcome ?? "pass";
-        try {
-          const result = await executor(c.input, c.id, c.domain);
-          const trace = traceStore?.get(c.traceId ?? result.traceId ?? "");
-          const grader = getGrader(c.graderType);
-          const graderResult = await grader({
-            graderType: c.graderType,
-            caseId: c.id,
-            domain: c.domain,
-            input: c.input,
-            output: result.output,
-            groundTruth: c.groundTruth,
-            latencyMs: result.latencyMs,
-            costUsd: result.costUsd,
-            tokensUsed: result.tokensUsed,
-            traceId: c.traceId ?? result.traceId,
-            model: result.model,
-            metadata: {
-              ...result.metadata,
-              trace,
-              humanLabel: result.metadata?.humanLabel,
-              humanScore: result.metadata?.humanScore,
-            },
-          });
-          return {
-            caseId: c.id,
-            domain: c.domain,
-            label: c.label,
-            evalType: c.evalType,
-            graderType: c.graderType,
-            input: c.input,
-            output: result.output,
-            groundTruth: c.groundTruth,
-            passed: graderResult.passed,
-            score: graderResult.score,
-            expectedOutcome,
-            latencyMs: result.latencyMs,
-            tokensUsed: result.tokensUsed,
-            costUsd: result.costUsd,
-            model: result.model,
-            traceId: c.traceId ?? result.traceId,
-            failureReason: graderResult.failureReason,
-            graderDetails: graderResult.details,
-            tags: c.tags,
-          };
-        } catch (err) {
-          return {
-            caseId: c.id,
-            domain: c.domain,
-            label: c.label,
-            evalType: c.evalType,
-            graderType: c.graderType,
-            input: c.input,
-            output: {},
-            groundTruth: c.groundTruth,
-            passed: false,
-            score: 0,
-            expectedOutcome,
-            latencyMs: 0,
-            tokensUsed: 0,
-            costUsd: 0,
-            failureReason: err instanceof Error ? err.message : String(err),
-            tags: c.tags,
-          };
+  const runOne = async (c: EvalCase): Promise<EvalCaseResult> => {
+    const expectedOutcome = c.expectedOutcome ?? "pass";
+    try {
+      const result = await executor(c.input, c.id, c.domain);
+      const trace = traceStore?.get(c.traceId ?? result.traceId ?? "");
+      const grader = getGrader(c.graderType);
+      const graderResult = await grader({
+        graderType: c.graderType,
+        caseId: c.id,
+        domain: c.domain,
+        input: c.input,
+        output: result.output,
+        groundTruth: c.groundTruth,
+        latencyMs: result.latencyMs,
+        costUsd: result.costUsd,
+        tokensUsed: result.tokensUsed,
+        traceId: c.traceId ?? result.traceId,
+        model: result.model,
+        metadata: {
+          ...result.metadata,
+          trace,
+          humanLabel: result.metadata?.humanLabel,
+          humanScore: result.metadata?.humanScore,
+        },
+      });
+      return {
+        caseId: c.id,
+        domain: c.domain,
+        label: c.label,
+        evalType: c.evalType,
+        graderType: c.graderType,
+        input: c.input,
+        output: result.output,
+        groundTruth: c.groundTruth,
+        passed: graderResult.passed,
+        score: graderResult.score,
+        expectedOutcome,
+        latencyMs: result.latencyMs,
+        tokensUsed: result.tokensUsed,
+        costUsd: result.costUsd,
+        model: result.model,
+        traceId: c.traceId ?? result.traceId,
+        failureReason: graderResult.failureReason,
+        graderDetails: graderResult.details,
+        tags: c.tags,
+      };
+    } catch (err) {
+      return {
+        caseId: c.id,
+        domain: c.domain,
+        label: c.label,
+        evalType: c.evalType,
+        graderType: c.graderType,
+        input: c.input,
+        output: {},
+        groundTruth: c.groundTruth,
+        passed: false,
+        score: 0,
+        expectedOutcome,
+        latencyMs: 0,
+        tokensUsed: 0,
+        costUsd: 0,
+        failureReason: err instanceof Error ? err.message : String(err),
+        tags: c.tags,
+      };
+    }
+  };
+
+  // Worker-pool scheduler: keeps `maxConcurrency` cases running at a time and
+  // fires `onCaseComplete` the moment each individual case finishes, instead
+  // of waiting for the whole batch to settle. This is what gives the SSE
+  // stream its true real-time feel (a slow case no longer blocks fast ones
+  // in the same batch from being reported).
+  let nextIndex = 0;
+  const workerCount = Math.max(1, Math.min(maxConcurrency, totalCount));
+  const workers: Promise<void>[] = [];
+  for (let w = 0; w < workerCount; w++) {
+    workers.push((async () => {
+      while (true) {
+        const idx = nextIndex++;
+        if (idx >= totalCount) return;
+        const c = suite.cases[idx]!;
+        const result = await runOne(c);
+        caseResults[idx] = result;
+        if (onCaseComplete) {
+          completedCount += 1;
+          try {
+            await onCaseComplete(result, { completed: completedCount, total: totalCount });
+          } catch {
+            // Progress callbacks must never block eval execution.
+          }
         }
-      }),
-    );
-    caseResults.push(...batchResults);
+      }
+    })());
   }
+  await Promise.all(workers);
 
   const passed = caseResults.filter((r) => r.passed).length;
   const failed = caseResults.length - passed;
@@ -149,6 +183,7 @@ export async function runEvalSuite(
     totalTokensUsed,
     metrics,
     caseResults,
+    ...(extraMetadata ? { metadata: extraMetadata } : {}),
   };
 
   if (evalRunSink) {
