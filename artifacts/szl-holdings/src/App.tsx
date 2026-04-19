@@ -49,6 +49,7 @@ const InvestorsOverviewPage = lazy(() => import("@/pages/investors-overview-v2")
 const ArchitecturePage = lazy(() => import("@/pages/architecture-page"));
 const InvestorsArchitecturePage = lazy(() => import("@/pages/investors-architecture"));
 const InvestorsMoatPage = lazy(() => import("@/pages/investors-moat"));
+const MoatAssessmentPage = lazy(() => import("@/pages/moat-assessment"));
 const InvestorsRoadmapPage = lazy(() => import("@/pages/investors-roadmap"));
 const InvestorsTrustPage = lazy(() => import("@/pages/investors-trust"));
 const InvestorsDataRoomPage = lazy(() => import("@/pages/investors-data-room"));
@@ -771,6 +772,9 @@ function App() {
             </Route>
             <Route path="/investors/moat">
               <Suspense fallback={<PageLoader />}><InvestorsMoatPage /></Suspense>
+            </Route>
+            <Route path="/assessment">
+              <Suspense fallback={<PageLoader />}><MoatAssessmentPage /></Suspense>
             </Route>
             <Route path="/investors/roadmap">
               <Suspense fallback={<PageLoader />}><InvestorsRoadmapPage /></Suspense>

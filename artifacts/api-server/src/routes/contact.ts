@@ -151,5 +151,45 @@ router.get("/contact/requests", adminGuard, validateQuery(contactListQuerySchema
   }
 });
 
+const submissionsQuerySchema = z.object({
+  type: z.string().optional(),
+  app: z.string().optional(),
+  limit: z.coerce.number().int().min(1).max(200).default(100),
+  offset: z.coerce.number().int().min(0).default(0),
+});
+
+router.get("/contact/submissions", authMiddleware, adminGuard, validateQuery(submissionsQuerySchema), async (req: Request, res: Response) => {
+  try {
+    const { type, app, limit, offset } = req.query as unknown as z.infer<typeof submissionsQuerySchema>;
+
+    const conditions: string[] = [];
+    const params: unknown[] = [];
+    let idx = 1;
+
+    if (type) { conditions.push(`type = $${idx++}`); params.push(type); }
+    if (app) { conditions.push(`app = $${idx++}`); params.push(app); }
+
+    const where = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
+    params.push(limit, offset);
+
+    const result = await pool.query(
+      `SELECT id, type, app, company, role, message, status, metadata, created_at, updated_at
+       FROM platform_contact_requests ${where} ORDER BY created_at DESC LIMIT $${idx++} OFFSET $${idx}`,
+      params,
+    );
+    const countResult = await pool.query(
+      `SELECT COUNT(*)::int as total FROM platform_contact_requests ${where}`,
+      params.slice(0, -2),
+    );
+    sendSuccess(res, { submissions: result.rows }, 200, {
+      total: countResult.rows[0]?.total ?? 0,
+      limit,
+      offset,
+    });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to list diagnostic submissions");
+  }
+});
+
 export default router;
 export { hashEmail };

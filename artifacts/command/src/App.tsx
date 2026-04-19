@@ -62,6 +62,7 @@ const MarketingSignup = lazy(() => import("./pages/marketing/signup").then((m) =
 const MarketingOnboarding = lazy(() => import("./pages/marketing/onboarding").then((m) => ({ default: m.MarketingOnboarding })));
 const MarketingStatus = lazy(() => import("./pages/marketing/status").then((m) => ({ default: m.MarketingStatus })));
 const MarketingVerifyEmail = lazy(() => import("./pages/marketing/verify-email").then((m) => ({ default: m.MarketingVerifyEmail })));
+const MarketingLeads = lazy(() => import("./pages/marketing/leads").then((m) => ({ default: m.LeadQualificationView })));
 
 const AtlasRuntimePage = lazy(() => import("./pages/atlas-runtime").then(m => ({ default: m.AtlasRuntimePage })));
 const WorldlineRegistryPage = lazy(() => import("./pages/worldline-registry"));
@@ -199,6 +200,7 @@ function AppShell() {
           <Route path="/marketing/onboarding" component={() => <MarketingOnboarding />} />
           <Route path="/marketing/status" component={() => <MarketingStatus />} />
           <Route path="/marketing/verify-email" component={() => <MarketingVerifyEmail />} />
+          <Route path="/marketing/leads" component={() => <MarketingLeads />} />
         </Switch>
       </Suspense>
     );

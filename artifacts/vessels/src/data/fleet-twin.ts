@@ -521,3 +521,49 @@ export const routeTwins: RouteTwin[] = [
   { id: "route-002", name: "Gulf-Far East Lane", vesselId: "vessel-002", status: "normal" },
   { id: "route-003", name: "Indo-Pacific Route", vesselId: "vessel-003", status: "normal" },
 ];
+
+
+export const fleetExceptions: FleetException[] = [
+  {
+    id: "exc-001",
+    vesselId: "vessel-001",
+    entityName: "MV Avalon Spirit",
+    type: "ais_gap",
+    severity: "high",
+    status: "open",
+    description: "AIS signal lost for 6 hours in Gulf of Aden — possible transponder interference or intentional deactivation.",
+    detectedAt: new Date(Date.now() - 4 * 3600000).toISOString(),
+    assignedTo: "Maritime Intelligence",
+  },
+  {
+    id: "exc-002",
+    vesselId: "vessel-002",
+    entityName: "MV Orion Tide",
+    type: "route_deviation",
+    severity: "medium",
+    status: "investigating",
+    description: "Vessel deviated 42 nautical miles from planned route near Strait of Hormuz without prior notification.",
+    detectedAt: new Date(Date.now() - 18 * 3600000).toISOString(),
+    assignedTo: "Operations",
+  },
+  {
+    id: "exc-003",
+    entityName: "Fujairah Port",
+    type: "port_detention",
+    severity: "critical",
+    status: "escalated",
+    description: "Port State Control detained vessel pending deficiency rectification — 3 structural deficiencies cited.",
+    detectedAt: new Date(Date.now() - 2 * 86400000).toISOString(),
+    assignedTo: "Fleet Compliance",
+  },
+  {
+    id: "exc-004",
+    vesselId: "vessel-003",
+    entityName: "MV Pacific Vanguard",
+    type: "cert_expired",
+    severity: "medium",
+    status: "open",
+    description: "SOLAS safety certificate expired 4 days ago. Renewal documentation submitted but not yet processed.",
+    detectedAt: new Date(Date.now() - 5 * 86400000).toISOString(),
+  },
+];

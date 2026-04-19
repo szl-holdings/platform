@@ -13,6 +13,7 @@ import { SidebarNav, type SidebarNavSection } from "@szl-holdings/shared-ui/desi
 import { DashboardShell as SharedDashboardShell } from "@szl-holdings/shared-ui/design-system";
 
 const DashboardPage = lazy(() => import("@/pages/dashboard"));
+const ResilienceScorecardPage = lazy(() => import("@/pages/resilience-scorecard"));
 const ThreatOverviewPage = lazy(() => import("@/pages/threat-overview"));
 const AssetRiskGraphPage = lazy(() => import("@/pages/asset-risk-graph"));
 const RecoveryReadinessPage = lazy(() => import("@/pages/recovery-readiness"));
@@ -168,6 +169,7 @@ function DashboardRouter() {
     <Suspense fallback={<PageLoader />}>
       <Switch>
         <Route path="/dashboard" component={DashboardPage} />
+        <Route path="/resilience" component={ResilienceScorecardPage} />
         <Route path="/threats" component={ThreatOverviewPage} />
         <Route path="/assets" component={AssetRiskGraphPage} />
         <Route path="/recovery" component={RecoveryReadinessPage} />
@@ -188,6 +190,80 @@ function DashboardRouter() {
         </Route>
       </Switch>
     </Suspense>
+  );
+}
+
+function AppShell({
+  sidebarOpen,
+  setSidebarOpen,
+  sidebarCollapsed,
+  onToggleCollapse,
+  sidebarHovered,
+  setSidebarHovered,
+}: {
+  sidebarOpen: boolean;
+  setSidebarOpen: (v: boolean) => void;
+  sidebarCollapsed: boolean;
+  onToggleCollapse: () => void;
+  sidebarHovered: boolean;
+  setSidebarHovered: (v: boolean) => void;
+}) {
+  const [location] = useLocation();
+  const sidebarExpanded = !sidebarCollapsed || sidebarHovered;
+
+  if (location.startsWith("/resilience")) {
+    return (
+      <Suspense fallback={<div style={{ height: "100vh", background: "#060e1a" }} />}>
+        <ResilienceScorecardPage />
+      </Suspense>
+    );
+  }
+
+  return (
+    <div className="flex flex-col h-screen" style={{ background: "#060e1a" }}>
+      <EcosystemNav
+        currentAppId="sentra"
+        currentAppName="Sentra Cyber Resilience"
+        accentColor={SENTRA_ACCENT}
+      />
+      <SharedDashboardShell
+        sidebar={
+          <SentraSidebarContent
+            expanded={sidebarExpanded}
+            onMobileClose={() => setSidebarOpen(false)}
+            onToggleCollapse={onToggleCollapse}
+          />
+        }
+        mobileOpen={sidebarOpen}
+        onMobileClose={() => setSidebarOpen(false)}
+        sidebarWidth={sidebarExpanded ? "13rem" : "3.5rem"}
+        sidebarEvents={{
+          onMouseEnter: () => setSidebarHovered(true),
+          onMouseLeave: () => setSidebarHovered(false),
+        }}
+        theme={{ sidebarBg: "#060e1a", pageBg: "#060e1a", headerBg: "rgba(6,14,26,0.92)" }}
+        accentColor={SENTRA_ACCENT}
+        topbar={
+          <div className="flex items-center gap-3 w-full md:hidden">
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="p-1.5 rounded transition-colors text-red-400/50"
+              aria-label="Toggle navigation"
+            >
+              <Menu className="w-4 h-4" />
+            </button>
+            <span className="text-[10px] font-mono uppercase tracking-wider text-red-400/80">
+              Sentra Cyber Resilience
+            </span>
+          </div>
+        }
+      >
+        <main className="flex-1 overflow-auto h-full">
+          <DashboardRouter />
+        </main>
+      </SharedDashboardShell>
+      <Toaster position="bottom-right" theme="dark" />
+    </div>
   );
 }
 
@@ -213,56 +289,18 @@ export default function App() {
     });
   }, [setPreference]);
 
-  const sidebarExpanded = !sidebarCollapsed || sidebarHovered;
-
   return (
     <AnalyticsProvider appName="sentra">
       <QueryClientProvider client={queryClient}>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <div className="flex flex-col h-screen" style={{ background: "#060e1a" }}>
-            <EcosystemNav
-              currentAppId="sentra"
-              currentAppName="Sentra Cyber Resilience"
-              accentColor={SENTRA_ACCENT}
-            />
-            <SharedDashboardShell
-              sidebar={
-                <SentraSidebarContent
-                  expanded={sidebarExpanded}
-                  onMobileClose={() => setSidebarOpen(false)}
-                  onToggleCollapse={toggleCollapsed}
-                />
-              }
-              mobileOpen={sidebarOpen}
-              onMobileClose={() => setSidebarOpen(false)}
-              sidebarWidth={sidebarExpanded ? "13rem" : "3.5rem"}
-              sidebarEvents={{
-                onMouseEnter: () => setSidebarHovered(true),
-                onMouseLeave: () => setSidebarHovered(false),
-              }}
-              theme={{ sidebarBg: "#060e1a", pageBg: "#060e1a", headerBg: "rgba(6,14,26,0.92)" }}
-              accentColor={SENTRA_ACCENT}
-              topbar={
-                <div className="flex items-center gap-3 w-full md:hidden">
-                  <button
-                    onClick={() => setSidebarOpen(!sidebarOpen)}
-                    className="p-1.5 rounded transition-colors text-red-400/50"
-                    aria-label="Toggle navigation"
-                  >
-                    <Menu className="w-4 h-4" />
-                  </button>
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-red-400/80">
-                    Sentra Cyber Resilience
-                  </span>
-                </div>
-              }
-            >
-              <main className="flex-1 overflow-auto h-full">
-                <DashboardRouter />
-              </main>
-            </SharedDashboardShell>
-            <Toaster position="bottom-right" theme="dark" />
-          </div>
+          <AppShell
+            sidebarOpen={sidebarOpen}
+            setSidebarOpen={setSidebarOpen}
+            sidebarCollapsed={sidebarCollapsed}
+            onToggleCollapse={toggleCollapsed}
+            sidebarHovered={sidebarHovered}
+            setSidebarHovered={setSidebarHovered}
+          />
         </WouterRouter>
       </QueryClientProvider>
     </AnalyticsProvider>

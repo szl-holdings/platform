@@ -135,6 +135,7 @@ const MarketingSecurityPage = lazy(() => import("@/pages/marketing-security"));
 const MarketingPricingPage = lazy(() => import("@/pages/marketing-pricing"));
 const MarketingDemoPage = lazy(() => import("@/pages/marketing-demo"));
 const SignInPage = lazy(() => import("@/pages/marketing-sign-in"));
+const FleetAssessmentPage = lazy(() => import("@/pages/fleet-assessment"));
 const LegalPrivacyPage = lazy(() => import("@/pages/legal-privacy"));
 const LegalTermsPage = lazy(() => import("@/pages/legal-terms"));
 
@@ -832,6 +833,7 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
         <Route path="/pricing" component={MarketingPricingPage} />
         <Route path="/demo" component={MarketingDemoPage} />
         <Route path="/sign-in" component={SignInPage} />
+        <Route path="/fleet-assessment" component={FleetAssessmentPage} />
         <Route path="/legal/privacy" component={LegalPrivacyPage} />
         <Route path="/legal/terms" component={LegalTermsPage} />
         <Route component={MarketingHomePage} />

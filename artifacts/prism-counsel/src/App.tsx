@@ -1,7 +1,7 @@
 import { CookieBanner } from "@szl-holdings/shared-ui/cookie-banner";
 import { OnboardingWizard } from "@szl-holdings/shared-ui/onboarding";
 import { lazy, Suspense, useEffect } from "react";
-import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
+import { Switch, Route, Router as WouterRouter, Redirect, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import { persistQueryClient } from "@tanstack/query-persist-client-core";
@@ -36,6 +36,7 @@ if (typeof window !== "undefined") {
 }
 
 const MarketingLanding = lazy(() => import("@/pages/marketing-landing"));
+const ObligationTimelinePage = lazy(() => import("@/pages/obligation-timeline"));
 const MatterBoard = lazy(() => import("@/pages/matter-board"));
 const ObligationGraph = lazy(() => import("@/pages/obligation-graph"));
 const DeadlineHeatmap = lazy(() => import("@/pages/deadline-heatmap"));
@@ -57,6 +58,7 @@ function PrivateRouter() {
       <Suspense fallback={<PageLoader />}>
         <Switch>
           <Route path="/" component={() => <Redirect to="/matters" />} />
+          <Route path="/obligation-timeline" component={ObligationTimelinePage} />
           <Route path="/matters" component={MatterBoard} />
           <Route path="/obligation-graph" component={ObligationGraph} />
           <Route path="/obligation-graph/:matterId" component={ObligationGraph} />
@@ -96,6 +98,7 @@ const prismShortcuts: KeyboardShortcut[] = [
 function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v: boolean) => void }) {
   const { isAuthenticated, isLoading, login } = useAuth();
   const { sandboxActive, enableSandbox } = useSandboxMode();
+  const [currentPath] = useLocation();
 
   const params = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
   const demoMode = params.get("view") === "app" || params.get("demo") === "true";
@@ -119,6 +122,14 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
         <CommandPalette open={cmdOpen} onClose={() => setCmdOpen(false)} commands={prismCommands} appName="PRISM Counsel" accentColor={PRISM_ACCENT} />
         <OnboardingWizard config={PRISM_ONBOARDING_CONFIG} />
       </PowerUserProvider>
+    );
+  }
+
+  if (currentPath === "/obligation-timeline" || currentPath.startsWith("/obligation-timeline?")) {
+    return (
+      <Suspense fallback={<div style={{ height: "100vh", background: "#080810" }} />}>
+        <ObligationTimelinePage />
+      </Suspense>
     );
   }
 

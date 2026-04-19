@@ -72,6 +72,7 @@ const KnowledgeVault = lazy(() => import("@/pages/knowledge-vault"));
 const BenchmarkDatabase = lazy(() => import("@/pages/benchmark-database"));
 const GovernedCockpitPage = lazy(() => import("@/pages/governed-cockpit"));
 const ReadinessChecklistPage = lazy(() => import("@/pages/readiness-checklist"));
+const StrategicReadinessPage = lazy(() => import("@/pages/strategic-readiness"));
 const DeliverableWorkflow = lazy(() => import("@/pages/deliverable-workflow"));
 const ProfitabilityAnalytics = lazy(() => import("@/pages/profitability-analytics"));
 const CarlotaJoAtlasExecute = lazy(() => import("@/pages/atlas-execute"));
@@ -144,6 +145,7 @@ function Router() {
         <Route path="/engage" component={EngagementIntake} />
         <Route path="/about" component={AboutPage} />
         <Route path="/inquiries" component={InquiriesPage} />
+        <Route path="/readiness" component={StrategicReadinessPage} />
         <Route path="/legal/privacy" component={LegalPrivacyPage} />
         <Route path="/legal/terms" component={LegalTermsPage} />
 

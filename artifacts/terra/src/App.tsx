@@ -55,6 +55,7 @@ const Ingestion = lazy(() => import("@/pages/ingestion"));
 const InvestorMode = lazy(() => import("@/pages/investor-mode"));
 const Pipeline = lazy(() => import("@/pages/pipeline"));
 const TerraMarketingLanding = lazy(() => import("@/pages/marketing-landing"));
+const InvestmentReadinessPage = lazy(() => import("@/pages/investment-readiness"));
 const CommercialIntelligence = lazy(() => import("@/pages/commercial-intelligence"));
 const MarketIntelligence = lazy(() => import("@/pages/market-intelligence"));
 const MarketAnalytics = lazy(() => import("@/pages/market-analytics"));
@@ -143,6 +144,7 @@ function PrivateRouter() {
         <Route path="/agents" component={AgentsPage} />
         <Route path="/case-study" component={CaseStudyPage} />
         <Route path="/market" component={Market} />
+        <Route path="/market-assessment" component={InvestmentReadinessPage} />
         <Route path="/transactions" component={Transactions} />
         <Route path="/documents" component={Documents} />
         <Route path="/offers" component={Offers} />
@@ -302,6 +304,10 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
   const normalizedPath = location.replace(/\/+$/, "") || "/";
   if (normalizedPath === "/pulse") {
     return <Suspense fallback={<div style={{ height: "100vh", background: "#0a0c10" }} />}><TerraPulse /></Suspense>;
+  }
+
+  if (normalizedPath === "/market-assessment") {
+    return <Suspense fallback={<div style={{ height: "100vh", background: "#0a0c10" }} />}><InvestmentReadinessPage /></Suspense>;
   }
 
   if (demoMode) {
