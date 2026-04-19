@@ -534,7 +534,7 @@ Priority order for remediation:
 | ID | Category | Severity | Finding | Status |
 |----|----------|----------|---------|--------|
 | RT-009 | Commercial / Demo | P2 | DEMO_GUIDE.md references PRISM Counsel (`/prism-counsel/`) as "deprecated (task #579)" — if PRISM Counsel is still being shown to legal buyers, this discrepancy will confuse sales | ⚠️ Open — clarify PRISM Counsel status in all commercial docs before legal-buyer demos |
-| RT-010 | Commercial / Demo | P2 | Domain-specific mobile apps listed in PRODUCT-SURFACES.md (aegis-mobile, vessels-mobile, terra-mobile, lyte-mobile) are described as "Functional Alpha" but are not registered artifacts — a buyer who asks for a demo of aegis-mobile will find it does not exist | ⚠️ Open — TD-006. Must update PRODUCT-SURFACES.md to mark these as "Concept / Planned" before external product evaluations |
+| RT-010 | Commercial / Demo | P2 | Domain-specific mobile apps listed in PRODUCT-SURFACES.md (aegis-mobile, vessels-mobile, terra-mobile, lyte-mobile) are described as "Functional Alpha" but are not registered artifacts — a buyer who asks for a demo of aegis-mobile will find it does not exist | ✅ Resolved Apr-2026 — TD-006 / DOC-002. PRODUCT-SURFACES.md § "Domain-Specific Mobile Apps — Roadmap (Not Yet Built)" now annotates each domain-specific mobile app (aegis-mobile, vessels-mobile, terra-mobile, lyte-mobile, carlota-jo-mobile) as "Roadmap — not yet built" with planned artifact path marked "(not registered)" and earliest build window contingent on customer/design-partner demand. Live mobile coverage today is delivered via CORTEX (`artifacts/szl-holdings-mobile`). |
 
 ---
 
@@ -572,8 +572,8 @@ Priority order for remediation:
 - **Finding RT-016:** The VP Engineering hire will find a strong codebase with weak operational instrumentation. The highest-friction items are: no production error tracking, no SLI/SLOs, no CODEOWNERS, no OTEL in production.
 
 **7 — Future VP Product**
-- **Concern:** "Where is the product today vs. roadmap?" → PRODUCT-SURFACES.md and PRODUCT_ROADMAP.md are accurate, but domain-specific mobile apps listed as "Functional Alpha" do not exist as artifacts (TD-006). This is the biggest credibility risk in the product narrative.
-- **Finding RT-010 (repeated):** Fix PRODUCT-SURFACES.md domain-specific mobile status before any VP Product hire or product-focused investor meeting.
+- **Concern:** "Where is the product today vs. roadmap?" → PRODUCT-SURFACES.md and PRODUCT_ROADMAP.md are accurate. The earlier credibility risk around domain-specific mobile apps (TD-006) has been resolved: PRODUCT-SURFACES.md now demarcates a "Domain-Specific Mobile Apps — Roadmap (Not Yet Built)" section with each entry annotated as "Roadmap — not yet built" and the planned artifact path marked "(not registered)". Live mobile coverage is delivered via CORTEX (`artifacts/szl-holdings-mobile`).
+- **Finding RT-010 (resolved Apr-2026):** PRODUCT-SURFACES.md domain-specific mobile status corrected; safe for VP Product hires and product-focused investor meetings.
 
 **8 — Future VP Sales**
 - **Concern:** "What is the ICP and how do I close a deal?" → GO_TO_MARKET_MOTION.md, SALES_NARRATIVE.md, OBJECTION_HANDLING.md, and DESIGN_PARTNER_PROGRAM.md are complete, internally consistent, and tied to platform reality.
@@ -600,7 +600,7 @@ Priority order for remediation:
 | RT-007 | P3 | END_USER_GUIDE.md text-only for visual workflows | ⚠️ Open — low priority |
 | RT-008 | P3 | CONTRIBUTING.md references non-existent CODEOWNERS | ⚠️ Open — resolves with KG013 |
 | RT-009 | P2 | PRISM Counsel deprecation inconsistency across sales vs. demo docs | ⚠️ Open — before legal-buyer demos |
-| RT-010 | P2 | Domain-specific mobile apps listed as "Functional Alpha" — do not exist as artifacts | ⚠️ Open — TD-006 |
+| RT-010 | P2 | Domain-specific mobile apps listed as "Functional Alpha" — do not exist as artifacts | ✅ Resolved Apr-2026 — TD-006 / DOC-002 |
 | RT-011 | P2 | No `/.well-known/security.txt` published | ⚠️ Open — VD1 |
 | RT-012 | P1 (existing) | Three P1 security gaps remain (AF-001, AF-003/007, SEC-007) — known from Phase 2–3 | ⚠️ Open — Sprint 3 |
 | RT-013 | P1 (existing) | No onboarding wizard — highest-friction operator UX gap | ⚠️ Open — FLOW-001 |
