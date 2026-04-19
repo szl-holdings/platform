@@ -1,4 +1,4 @@
-import { useState, useEffect, createContext, useContext, useCallback } from "react";
+import { useState, useEffect, createContext, useContext, useCallback, useRef } from "react";
 import { m, AnimatePresence } from "framer-motion";
 import {
   Activity, AlertTriangle, ArrowRight, BarChart3, Brain, CheckCircle2,
@@ -83,23 +83,42 @@ function applyPatchLocal(prev: ActionStore, patch: ActionStorePatch): ActionStor
   return next;
 }
 
+const POLL_INTERVAL_MS = 4000;
+
+function storesEqual(a: ActionStore, b: ActionStore): boolean {
+  try { return JSON.stringify(a) === JSON.stringify(b); } catch { return false; }
+}
+
 function useActionStore() {
   const [store, setStore] = useState<ActionStore>(readCache);
+  const pendingRef = useRef(0);
+
+  const refresh = useCallback(async () => {
+    if (pendingRef.current > 0) return;
+    try {
+      const r = await fetch(STORE_URL, { credentials: "include" });
+      if (!r.ok) return;
+      const json = await r.json();
+      const server = (json.data ?? json) as Partial<ActionStore>;
+      const merged = { ...emptyStore(), ...server };
+      setStore(prev => {
+        if (storesEqual(prev, merged)) return prev;
+        writeCache(merged);
+        return merged;
+      });
+    } catch { /* keep cached store */ }
+  }, []);
 
   useEffect(() => {
-    let cancelled = false;
-    fetch(STORE_URL, { credentials: "include" })
-      .then(r => (r.ok ? r.json() : null))
-      .then(json => {
-        if (cancelled || !json) return;
-        const server = (json.data ?? json) as Partial<ActionStore>;
-        const merged = { ...emptyStore(), ...server };
-        setStore(merged);
-        writeCache(merged);
-      })
-      .catch(() => { /* keep cached store */ });
-    return () => { cancelled = true; };
-  }, []);
+    refresh();
+    const id = window.setInterval(refresh, POLL_INTERVAL_MS);
+    const onVis = () => { if (document.visibilityState === "visible") refresh(); };
+    document.addEventListener("visibilitychange", onVis);
+    return () => {
+      window.clearInterval(id);
+      document.removeEventListener("visibilitychange", onVis);
+    };
+  }, [refresh]);
 
   const patch = useCallback((partial: ActionStorePatch) => {
     setStore(prev => {
@@ -107,12 +126,23 @@ function useActionStore() {
       writeCache(next);
       return next;
     });
+    pendingRef.current += 1;
     fetch(STORE_URL, {
       method: "PATCH",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(partial),
-    }).catch(() => { /* offline / network — local state retained */ });
+    })
+      .then(r => (r.ok ? r.json() : null))
+      .then(json => {
+        if (!json) return;
+        const server = (json.data ?? json) as Partial<ActionStore>;
+        const merged = { ...emptyStore(), ...server };
+        setStore(merged);
+        writeCache(merged);
+      })
+      .catch(() => { /* offline / network — local state retained */ })
+      .finally(() => { pendingRef.current = Math.max(0, pendingRef.current - 1); });
   }, []);
 
   return { store, patch };
