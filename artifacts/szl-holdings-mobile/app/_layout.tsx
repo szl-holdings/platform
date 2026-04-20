@@ -39,6 +39,7 @@ import {
   SyncStatusBanner,
   ConflictResolutionModal,
   CopilotFab,
+  parseMobileEnv,
 } from "@szl-holdings/mobile-shared";
 import { trackEvent, isAnalyticsEnabled } from "@/lib/analytics";
 import { initSentryGlobalHandlers, captureException } from "@/lib/sentry";
@@ -52,6 +53,10 @@ import { AuthProvider, AUTH_TOKEN_KEY } from "@/context/AuthContext";
 import { WorkspaceProvider } from "@/context/WorkspaceContext";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
 import { ScreenshotGuardProvider } from "@/context/ScreenshotGuardContext";
+
+// Validate EXPO_PUBLIC_* env vars at startup so a misconfigured DOMAIN/API URL
+// fails fast with a clear error instead of silently falling back to defaults.
+parseMobileEnv();
 
 if (process.env.EXPO_PUBLIC_DOMAIN) {
   setBaseUrl(`https://${process.env.EXPO_PUBLIC_DOMAIN}`);

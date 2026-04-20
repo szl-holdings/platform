@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { Platform } from "react-native";
+import { getDomainBaseUrl } from "../env";
 
 export type UploadStatus = "idle" | "requesting" | "uploading" | "registering" | "done" | "error";
 
@@ -125,10 +126,7 @@ function inferCategory(mimeType: string, explicit?: FileCategory): FileCategory 
 }
 
 function getApiBase(): string {
-  const domain =
-    typeof process !== "undefined" && process.env.EXPO_PUBLIC_DOMAIN;
-  if (domain) return `https://${domain}`;
-  return "";
+  return getDomainBaseUrl() ?? "";
 }
 
 export function useFileUpload(options: FileUploadOptions = {}) {

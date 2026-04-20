@@ -2558,6 +2558,9 @@ importers:
       '@tanstack/query-sync-storage-persister':
         specifier: ^5.99.0
         version: 5.99.0
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
     devDependencies:
       '@react-native-async-storage/async-storage':
         specifier: 2.2.0

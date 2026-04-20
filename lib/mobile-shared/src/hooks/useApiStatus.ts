@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { getDomainBaseUrl } from "../env";
 
 type ApiStatus = "checking" | "connected" | "degraded" | "offline";
 
@@ -18,9 +19,7 @@ export interface ApiStatusResult {
   setSyncState: (state: { isSyncing?: boolean; pendingCount?: number; conflictCount?: number }) => void;
 }
 
-const API_BASE = process.env.EXPO_PUBLIC_DOMAIN
-  ? `https://${process.env.EXPO_PUBLIC_DOMAIN}`
-  : null;
+const API_BASE = getDomainBaseUrl();
 
 const CHECK_INTERVAL_MS = 30_000;
 const DEGRADED_LATENCY_MS = 3_000;

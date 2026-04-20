@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useApiStatus } from "./useApiStatus";
+import { getDomainBaseUrl } from "../env";
 import {
   getLocalReplica,
   applyDeltaToReplica,
@@ -11,9 +12,7 @@ import {
   type LocalReplica,
 } from "../offline-persistence";
 
-const API_BASE = process.env.EXPO_PUBLIC_DOMAIN
-  ? `https://${process.env.EXPO_PUBLIC_DOMAIN}`
-  : null;
+const API_BASE = getDomainBaseUrl();
 
 export interface MobileCrdtMergeEvent {
   actorId: string;

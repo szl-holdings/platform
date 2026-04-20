@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
+import { getApiBaseUrl } from "../env";
 import {
   View,
   Text,
@@ -35,7 +36,7 @@ interface ChatMessage {
   content: string;
 }
 
-const API_BASE = process.env.EXPO_PUBLIC_API_URL ?? "https://szl-holdings.replit.app";
+const API_BASE = getApiBaseUrl("https://szl-holdings.replit.app") ?? "https://szl-holdings.replit.app";
 
 function loadHistory(key?: string): ChatMessage[] {
   return [];

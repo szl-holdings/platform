@@ -1,4 +1,5 @@
 import { useCallback, useRef } from "react";
+import { getDomainBaseUrl } from "../env";
 
 export interface EmbeddingSearchResult {
   content: string;
@@ -15,11 +16,7 @@ export interface EmbeddingSearchOptions {
 }
 
 function getApiBase(): string {
-  const domain = (
-    typeof process !== "undefined" && process.env.EXPO_PUBLIC_DOMAIN
-  );
-  if (domain) return `https://${domain}`;
-  return "";
+  return getDomainBaseUrl() ?? "";
 }
 
 export function useEmbeddingSearch(options: EmbeddingSearchOptions = {}) {
