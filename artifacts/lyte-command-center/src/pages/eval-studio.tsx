@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Shield, CheckCircle2, XCircle, AlertTriangle, Clock, ChevronDown, ChevronUp, BarChart3 } from "lucide-react";
 import { evalRuns, type EvalRun, type EvalRunStatus } from "@/data/seed";
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tooltip } from "recharts";
+import { useAutoEvalSuites } from "@/data/api";
 
 const STATUS_CONFIG: Record<EvalRunStatus, { icon: React.ReactNode; color: string; bg: string; border: string; label: string }> = {
   passed: { icon: <CheckCircle2 className="w-3.5 h-3.5" />, color: "text-emerald-400", bg: "bg-emerald-500/8", border: "border-emerald-500/20", label: "PASSED" },
@@ -138,6 +139,54 @@ function EvalCard({ run }: { run: EvalRun }) {
   );
 }
 
+function AutoSuitesPanel() {
+  // Renders auto-generated tool & prompt eval suites built via
+  // createToolEvalSuite / createPromptEvalSuite from agents-evals.
+  const { data, isLoading, isError } = useAutoEvalSuites();
+  const tools = data?.toolSuites ?? [];
+  const prompts = data?.promptSuites ?? [];
+  return (
+    <div className="cockpit-panel p-4 space-y-3 border border-amber-500/15">
+      <div className="flex items-center justify-between">
+        <p className="text-[10px] font-mono text-amber-400/40 uppercase tracking-widest">
+          Auto Suites <span className="text-amber-400/30">· agents-evals</span>
+        </p>
+        <span className="text-[9px] font-mono text-amber-400/30">
+          {data ? `${data.totals.tools} tools · ${data.totals.prompts} prompts · ${data.totals.cases} cases` : ""}
+        </span>
+      </div>
+      {isLoading && <p className="text-[10px] text-amber-400/40">Building suites…</p>}
+      {isError && <p className="text-[10px] text-red-400/70">Failed to load auto suites.</p>}
+      {!isLoading && !isError && (
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <p className="text-[9px] font-mono text-amber-400/40 uppercase mb-2">Tool Reliability</p>
+            <ul className="space-y-1">
+              {tools.map((s) => (
+                <li key={s.suiteId} className="flex items-center justify-between text-[10px] font-mono">
+                  <span className="text-amber-200/70 truncate">{s.name}</span>
+                  <span className="text-amber-400/40 shrink-0 ml-2">{s.cases.length} cases · v{s.version}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <p className="text-[9px] font-mono text-amber-400/40 uppercase mb-2">Prompt Eval</p>
+            <ul className="space-y-1">
+              {prompts.map((s) => (
+                <li key={s.suiteId} className="flex items-center justify-between text-[10px] font-mono">
+                  <span className="text-amber-200/70 truncate">{s.name}</span>
+                  <span className="text-amber-400/40 shrink-0 ml-2">{s.cases.length} cases · v{s.version}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function EvalStudioPage() {
   const passing = evalRuns.filter(r => r.status === "passed");
   const partial = evalRuns.filter(r => r.status === "partial");
@@ -173,6 +222,8 @@ export default function EvalStudioPage() {
           <p className="text-xl font-mono font-bold text-red-400">{failing.length}</p>
         </div>
       </div>
+
+      <AutoSuitesPanel />
 
       {failing.length > 0 && (
         <div className="space-y-3">

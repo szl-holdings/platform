@@ -6,13 +6,10 @@ export * from "./dead-letter.js";
 export * from "./run.js";
 export * from "./step-io-store.js";
 
-export {
-  run as cognitiveRun,
-  PostgresCheckpointStore,
-  type CognitiveRuntimeOptions,
-  type RunResult as CognitiveRunResult,
-  COGNITIVE_RUNTIME_VERSION,
-} from "@workspace/cognitive-runtime";
+// Note: cognitive-runtime re-exports were removed to break the agents-core ↔
+// cognitive-runtime dependency cycle (cognitive-runtime now depends on
+// agents-core for the AgentRun lifecycle). Consumers should import directly
+// from "@workspace/cognitive-runtime".
 
 export {
   GuardianDecisionEngine,

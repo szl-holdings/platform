@@ -482,9 +482,24 @@ importers:
       '@types/pdfkit':
         specifier: ^0.17.5
         version: 0.17.5
+      '@workspace/agents-core':
+        specifier: workspace:*
+        version: link:../../packages/agents-core
+      '@workspace/agents-evals':
+        specifier: workspace:*
+        version: link:../../packages/agents-evals
+      '@workspace/agents-prompts':
+        specifier: workspace:*
+        version: link:../../packages/agents-prompts
+      '@workspace/agents-tools':
+        specifier: workspace:*
+        version: link:../../packages/agents-tools
       '@workspace/alloy':
         specifier: workspace:*
         version: link:../../packages/alloy
+      '@workspace/approvals-inbox':
+        specifier: workspace:*
+        version: link:../../packages/approvals-inbox
       '@workspace/cognitive-runtime':
         specifier: workspace:*
         version: link:../../packages/cognitive-runtime
@@ -2997,9 +3012,6 @@ importers:
       '@workspace/cognitive-observability':
         specifier: workspace:*
         version: link:../cognitive-observability
-      '@workspace/cognitive-runtime':
-        specifier: workspace:*
-        version: link:../cognitive-runtime
       '@workspace/guardian':
         specifier: workspace:*
         version: link:../guardian
@@ -3186,6 +3198,9 @@ importers:
 
   packages/cognitive-runtime:
     dependencies:
+      '@workspace/agents-core':
+        specifier: workspace:*
+        version: link:../agents-core
       '@workspace/cognitive-observability':
         specifier: workspace:*
         version: link:../cognitive-observability

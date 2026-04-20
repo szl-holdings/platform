@@ -23,6 +23,7 @@
     }
   },
   "dependencies": {
+    "@workspace/agents-core": "workspace:*",
     "@workspace/trace-graph": "workspace:*",
     "@workspace/planner": "workspace:*",
     "@workspace/verifier": "workspace:*",

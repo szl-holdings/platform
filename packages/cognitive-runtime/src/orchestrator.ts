@@ -6,6 +6,8 @@ import type { MemoryStore } from "@workspace/memory-fabric";
 import { defaultSelfModelStore } from "@workspace/self-model";
 import type { SelfModelStore } from "@workspace/self-model";
 import { globalCollector } from "@workspace/cognitive-observability";
+import { AgentRun, type RunStatus as AgentRunStatus } from "@workspace/agents-core/run";
+import { emitStepLog } from "@workspace/agents-core/step-log";
 
 import {
   CognitiveContextSchema,
@@ -68,6 +70,32 @@ export async function run(
   const traceWriter = new TraceWriter(traceStore);
   const globalStartedAt = Date.now();
 
+  // ─── AgentRun (agents-core) ─────────────────────────────────────────────────
+  // Use the agents-core AgentRun primitive to drive the run-level lifecycle
+  // (status transitions, structured step-log emission, observability counters)
+  // instead of managing those concerns ad-hoc in this orchestrator.
+  const agentRunOptions: ConstructorParameters<typeof AgentRun>[1] = {
+    runId,
+    agentId: ctx.agentId,
+    surface: "cognitive-runtime",
+    metadata: { sessionId: ctx.sessionId, traceId, ...ctx.metadata },
+  };
+  if (ctx.domain !== undefined) {
+    agentRunOptions.domain = ctx.domain;
+  }
+  const agentRun = new AgentRun(objective, agentRunOptions);
+
+  function mapToAgentRunStatus(status: CognitiveLoopRun["status"]): AgentRunStatus {
+    switch (status) {
+      case "running": return "running";
+      case "pending_approval": return "pending_approval";
+      case "completed": return "completed";
+      case "failed": return "failed";
+      case "guardian_blocked": return "failed";
+      default: return "idle";
+    }
+  }
+
   const loopRun: CognitiveLoopRun = {
     runId,
     objective,
@@ -92,6 +120,9 @@ export async function run(
     objective,
   });
 
+  // Drive AgentRun lifecycle (status -> running, emits run.start step-log entry)
+  void agentRun.start();
+
   globalCollector.recordKnown("token_count", 0, { agentId: ctx.agentId, phase: "start" });
 
   function recordPhase(result: PhaseResult): void {
@@ -106,8 +137,41 @@ export async function run(
       status: result.status === "ok" || result.status === "skipped" ? "ok" : "error",
       attributes: { ...result.metadata, phase: result.phase, durationMs: result.durationMs },
     });
+
+    // Emit a structured StepLogEntry into agents-core/step-log for every phase.
+    // The Lyte Run Console reads these records via the agents API to render
+    // the live step log instead of raw trace spans.
+    void emitStepLog({
+      runId,
+      stepId: `phase:${result.phase}`,
+      stepName: result.phase,
+      level: result.status === "error" ? "error" : "info",
+      message:
+        result.status === "error"
+          ? `Phase '${result.phase}' failed: ${result.error ?? "unknown error"}`
+          : `Phase '${result.phase}' ${result.status} in ${result.durationMs}ms`,
+      durationMs: result.durationMs,
+      data: {
+        phase: result.phase,
+        status: result.status,
+        ...(result.metadata ?? {}),
+      },
+      otelTraceId: traceId,
+    });
+
     if (options.onPhaseComplete) {
       void Promise.resolve(options.onPhaseComplete(result.phase, result));
+    }
+  }
+
+  function syncRunStatus(): void {
+    // Mirror loopRun.status -> AgentRun via lifecycle calls. start() was already
+    // invoked above; only complete/fail need to be relayed.
+    const target = mapToAgentRunStatus(loopRun.status);
+    if (target === "completed" && agentRun.status !== "completed") {
+      void agentRun.complete(`Cognitive loop ${loopRun.status} (phases: ${loopRun.phases.length})`);
+    } else if ((target === "failed") && agentRun.status !== "failed") {
+      void agentRun.fail(loopRun.error ?? new Error(`Cognitive loop status: ${loopRun.status}`));
     }
   }
 
@@ -296,6 +360,7 @@ export async function run(
         loopRun.currentPhase = "guardian_blocked";
         loopRun.error = executeResult.error;
         tryCompleteTrace(traceWriter, traceId, "error", loopRun.error);
+        syncRunStatus();
         await finalize(lastExecuteOutput, undefined, undefined);
         return terminalResult(loopRun, globalStartedAt, false,
           `Run halted — step requires human approval: ${loopRun.error}`);
@@ -307,6 +372,7 @@ export async function run(
         loopRun.currentPhase = "guardian_blocked";
         loopRun.error = executeResult.error;
         tryCompleteTrace(traceWriter, traceId, "error", loopRun.error);
+        syncRunStatus();
         await finalize(lastExecuteOutput, undefined, undefined);
         return terminalResult(loopRun, globalStartedAt, false,
           `Run blocked by guardian: ${loopRun.error}`);
@@ -338,6 +404,7 @@ export async function run(
         loopRun.currentPhase = "failed";
         loopRun.error = verifyResult.error;
         tryCompleteTrace(traceWriter, traceId, "error", loopRun.error);
+        syncRunStatus();
 
         if (ctx.reflectionEnabled) {
           // ─── PHASE 6: REFLECT (on failure) ───────────────────────────────
@@ -418,6 +485,7 @@ export async function run(
         `Verifier did not approve after ${loopRun.verifyRevisions + 1} attempt(s): ` +
         `${lastVerifyOutput.reasoning.slice(0, 200)}`;
       tryCompleteTrace(traceWriter, traceId, "error", loopRun.error);
+      syncRunStatus();
 
       if (ctx.reflectionEnabled && !lastReflectOutput) {
         loopRun.currentPhase = "reflect";
@@ -461,6 +529,7 @@ export async function run(
     const completedAt = Date.now();
     loopRun.completedAt = completedAt;
     loopRun.durationMs = completedAt - globalStartedAt;
+    syncRunStatus();
 
     globalCollector.recordKnown(
       "agent_reliability_score",
@@ -485,6 +554,7 @@ export async function run(
     loopRun.error = err instanceof Error ? err.message : String(err);
 
     tryCompleteTrace(traceWriter, traceId, "error", loopRun.error);
+    syncRunStatus();
 
     // Guaranteed finalization even on unexpected errors
     await finalize(lastExecuteOutput, lastVerifyOutput, lastReflectOutput);

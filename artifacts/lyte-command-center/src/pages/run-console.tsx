@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Shield, Play, CheckCircle2, XCircle, Clock, AlertTriangle, Loader, ChevronDown, ChevronUp, Zap } from "lucide-react";
 import { runItems, type RunItem, type RunStatus } from "@/data/seed";
 import { SubstrateWorkflowPanel } from "@/components/SubstrateWorkflowPanel";
+import { useAgentRunStepLog, usePendingApprovals } from "@/data/api";
 
 const STATUS_CONFIG: Record<RunStatus, { icon: React.ReactNode; color: string; bg: string; border: string; label: string }> = {
   completed: { icon: <CheckCircle2 className="w-3.5 h-3.5" />, color: "text-emerald-400", bg: "bg-emerald-500/8", border: "border-emerald-500/20", label: "COMPLETED" },
@@ -97,6 +98,94 @@ function RunRow({ run }: { run: RunItem }) {
   );
 }
 
+function levelClass(level: string): string {
+  if (level === "error") return "text-red-400";
+  if (level === "warn") return "text-amber-400";
+  if (level === "debug") return "text-amber-400/40";
+  return "text-amber-200/70";
+}
+
+function StepLogPanel({ runId }: { runId: string | undefined }) {
+  // Reads StepLogEntry records emitted by the cognitive-runtime orchestrator
+  // through agents-core/step-log. Polls every 4s for live updates.
+  const { data, isLoading, isError } = useAgentRunStepLog(runId);
+  return (
+    <div className="cockpit-panel p-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <p className="text-[10px] font-mono text-amber-400/40 uppercase tracking-widest">
+          Step Log <span className="text-amber-400/30">· agents-core</span>
+        </p>
+        <span className="text-[9px] font-mono text-amber-400/30">
+          {runId ? `run ${runId.slice(0, 8)}…` : "select a run"} · {data?.count ?? 0} entries
+        </span>
+      </div>
+      {!runId && <p className="text-[10px] text-amber-400/40">No run selected.</p>}
+      {runId && isLoading && <p className="text-[10px] text-amber-400/40">Loading step log…</p>}
+      {runId && isError && <p className="text-[10px] text-red-400/70">Failed to load step log.</p>}
+      {runId && data && data.entries.length === 0 && (
+        <p className="text-[10px] text-amber-400/40">No step log entries yet.</p>
+      )}
+      {runId && data && data.entries.length > 0 && (
+        <div className="space-y-1 max-h-72 overflow-y-auto font-mono text-[10px] leading-relaxed">
+          {data.entries.map((e) => (
+            <div key={`${e.stepId}-${e.timestamp}`} className="flex gap-2">
+              <span className="text-amber-400/30 shrink-0">{new Date(e.timestamp).toLocaleTimeString()}</span>
+              <span className={`uppercase shrink-0 ${levelClass(e.level)}`}>{e.level}</span>
+              <span className="text-amber-300/70 shrink-0">{e.stepName}</span>
+              <span className={levelClass(e.level)}>{e.message}</span>
+              {e.durationMs !== undefined && (
+                <span className="text-amber-400/30 shrink-0">{e.durationMs}ms</span>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function PendingApprovalsPanel() {
+  // Polls approvals-inbox PendingApprovalRequest entries written by the
+  // ApprovalGate in agents-core. Operators can act on any pending step here.
+  const { data, isLoading } = usePendingApprovals();
+  const items = data?.pending ?? [];
+  return (
+    <div className="cockpit-panel p-4 space-y-3 border border-amber-500/20">
+      <div className="flex items-center justify-between">
+        <p className="text-[10px] font-mono text-amber-400/40 uppercase tracking-widest">
+          Guardian Approvals <span className="text-amber-400/30">· approvals-inbox</span>
+        </p>
+        <span className="text-[9px] font-mono text-amber-400/30">{items.length} pending</span>
+      </div>
+      {isLoading && <p className="text-[10px] text-amber-400/40">Loading approvals…</p>}
+      {!isLoading && items.length === 0 && (
+        <p className="text-[10px] text-amber-400/40">No pending approvals — runs are clear.</p>
+      )}
+      {items.length > 0 && (
+        <div className="space-y-2">
+          {items.map((p) => (
+            <div key={p.id} className="rounded p-3 bg-amber-500/4 border border-amber-500/15 space-y-1">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-semibold text-amber-100">{p.stepName}</p>
+                <span className="text-[9px] font-mono text-amber-400/40">
+                  run {p.runId.slice(0, 8)}…
+                </span>
+              </div>
+              <p className="text-[10px] text-amber-200/70 font-mono">action: {p.action}</p>
+              <p className="text-[10px] text-amber-100/60">{p.justification}</p>
+              <div className="flex flex-wrap gap-3 text-[10px] text-amber-400/40 font-mono">
+                <span>impact: {p.projectedImpact}</span>
+                <span>risk: {p.projectedRisk}</span>
+                <span>by: {p.requestedBy}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function RunConsolePage() {
   const running = runItems.filter(r => r.status === "running");
   const failed = runItems.filter(r => r.status === "failed");
@@ -104,6 +193,9 @@ export default function RunConsolePage() {
 
   const totalTokens = runItems.reduce((sum, r) => sum + (r.tokensUsed ?? 0), 0);
   const totalRuns = runItems.length;
+
+  // First active or most recent run is selected for live step log
+  const activeRunId = (running[0] ?? failed[0] ?? completed[0])?.id;
 
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-5">
@@ -115,6 +207,10 @@ export default function RunConsolePage() {
       </div>
 
       <SubstrateWorkflowPanel />
+
+      {/* Live agents-core surfaces */}
+      <PendingApprovalsPanel />
+      <StepLogPanel runId={activeRunId} />
 
       {/* Summary */}
       <div className="grid grid-cols-4 gap-3">

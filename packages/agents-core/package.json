@@ -35,7 +35,6 @@
     }
   },
   "dependencies": {
-    "@workspace/cognitive-runtime": "workspace:*",
     "@workspace/guardian": "workspace:*",
     "@szl-holdings/policy-engine": "workspace:*",
     "@workspace/approvals-inbox": "workspace:*",
