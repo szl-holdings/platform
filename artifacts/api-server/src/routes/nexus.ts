@@ -1246,26 +1246,20 @@ async function loadOrchestrationsFromDB(): Promise<void> {
   if (!db) return;
   try {
     const rows = await db.select().from(nexusOrchestrationPlansTable);
-    let recovered = 0;
+    let resumed = 0;
     for (const row of rows) {
       const plan = rowToOrchestrationPlan(row);
-      // In-flight plans were interrupted by the restart — mark as failed
-      // so the UI doesn't show them as eternally "running".
-      if (plan.status === "planning" || plan.status === "running") {
-        plan.status = "failed";
-        plan.completedAt = new Date().toISOString();
-        for (const step of plan.steps) {
-          if (step.status === "pending" || step.status === "running") {
-            step.status = "error";
-            step.output = step.output ?? "Interrupted by api-server restart.";
-          }
-        }
-        recovered++;
-        void persistOrchestrationPlanToDB(plan);
-      }
       orchestrationStore.set(plan.id, plan);
+      // In-flight plans were interrupted by the restart — resume them.
+      // Steps wrap idempotent read-only HTTP calls, so re-running pending/running
+      // steps is safe; completed steps are skipped so we don't duplicate work.
+      if (plan.status === "planning" || plan.status === "running") {
+        resumed++;
+        logger.info({ planId: plan.id, intent: plan.intent }, "Resuming interrupted orchestration after restart");
+        void runOrchestration(plan.id, plan.intent);
+      }
     }
-    logger.info({ count: rows.length, recovered }, "NEXUS orchestration plans hydrated");
+    logger.info({ count: rows.length, resumed }, "NEXUS orchestration plans hydrated");
   } catch (dbErr) {
     logger.warn({ dbErr }, "Failed to hydrate NEXUS orchestrations from DB (non-fatal)");
   }
@@ -1328,24 +1322,32 @@ async function loadIngestJobsFromDB(): Promise<void> {
   if (!db) return;
   try {
     const rows = await db.select().from(nexusIngestJobsTable);
-    let recovered = 0;
+    let resumed = 0;
     for (const row of rows) {
       const job = rowToIngestJob(row);
+      ingestStore.set(job.id, job);
       if (
         job.status === "queued" ||
         job.status === "fetching" ||
         job.status === "adapting" ||
         job.status === "publishing"
       ) {
-        job.status = "failed";
-        job.error = job.error ?? "Interrupted by api-server restart.";
-        job.completedAt = new Date().toISOString();
-        recovered++;
+        // Ingest pipeline phases are not individually idempotent (random
+        // skill counts, append-only log). Restart from the beginning rather
+        // than leaving the job stuck or marked failed.
+        job.status = "queued";
+        job.skillsGenerated = 0;
+        job.patternsFound = [];
+        job.log = [...job.log, "▸ Resumed after api-server restart — restarting ingest from beginning."];
+        delete job.error;
+        delete job.completedAt;
+        resumed++;
+        logger.info({ jobId: job.id, repoUrl: job.repoUrl }, "Resuming interrupted ingest after restart");
         void persistIngestJobToDB(job);
+        void runIngest(job.id, job.repoUrl);
       }
-      ingestStore.set(job.id, job);
     }
-    logger.info({ count: rows.length, recovered }, "NEXUS ingest jobs hydrated");
+    logger.info({ count: rows.length, resumed }, "NEXUS ingest jobs hydrated");
   } catch (dbErr) {
     logger.warn({ dbErr }, "Failed to hydrate NEXUS ingest jobs from DB (non-fatal)");
   }
@@ -2121,14 +2123,40 @@ async function runOrchestration(planId: string, intent: string) {
   if (!plan) return;
 
   try {
-    const steps = await planOrchestration(intent);
-    plan.steps = steps;
+    // Resume-aware: if steps already exist (e.g. recovered from DB after a
+    // restart), keep completed step outputs and only re-run pending/running
+    // steps. Steps wrap idempotent read-only HTTP GETs so re-running is safe.
+    let hasPendingWork = false;
+    if (plan.steps.length === 0) {
+      plan.steps = await planOrchestration(intent);
+      hasPendingWork = plan.steps.length > 0;
+    } else {
+      for (const step of plan.steps) {
+        if (step.status === "running") {
+          // Was interrupted mid-execution — reset so it gets re-run below.
+          step.status = "pending";
+        }
+        if (step.status !== "done") hasPendingWork = true;
+      }
+    }
+    // If any step still needs to run, the previous stitched output (if any)
+    // is stale — drop it so we recompute from the fresh combined results.
+    if (hasPendingWork) {
+      delete plan.stitchedOutput;
+    }
+    const steps = plan.steps;
     plan.status = "running";
+    delete plan.completedAt;
     void persistOrchestrationPlanToDB(plan);
 
     const outputs: string[] = [];
 
     for (const step of steps) {
+      // Skip steps that completed successfully on a previous attempt.
+      if (step.status === "done" && step.output) {
+        outputs.push(`[${step.app} — ${step.endpoint}] ${step.output}`);
+        continue;
+      }
       step.status = "running";
       void persistOrchestrationPlanToDB(plan);
       const stepStart = Date.now();
@@ -2168,12 +2196,12 @@ async function runOrchestration(planId: string, intent: string) {
       outputs.push(`[${step.app} — ${step.endpoint}] ${summary}`);
     }
 
-    const stitched = await callLLM(
-      `Stitch these per-app results into a single coherent executive output for the intent: "${intent}"\n\n${outputs.join("\n\n")}`,
-      "You are the NEXUS Cross-App Orchestrator stitcher. Produce a clear, executive-grade synthesis of multi-app data. Structure: Intent → Per-App Findings → Cross-Domain Insights → Recommended Actions."
-    );
-
-    plan.stitchedOutput = stitched;
+    if (!plan.stitchedOutput) {
+      plan.stitchedOutput = await callLLM(
+        `Stitch these per-app results into a single coherent executive output for the intent: "${intent}"\n\n${outputs.join("\n\n")}`,
+        "You are the NEXUS Cross-App Orchestrator stitcher. Produce a clear, executive-grade synthesis of multi-app data. Structure: Intent → Per-App Findings → Cross-Domain Insights → Recommended Actions."
+      );
+    }
     plan.status = "completed";
     plan.completedAt = new Date().toISOString();
     orchestrationsToday++;
@@ -2229,6 +2257,26 @@ router.get("/orchestrate/:id", async (req: Request, res: Response) => {
     sendSuccess(res, plan);
   } catch (err) {
     handleRouteError(res, err, "GET /api/nexus/orchestrate/:id");
+  }
+});
+
+router.post("/orchestrate/:id/retry", perUserWriteSlidingLimiter, async (req: Request, res: Response) => {
+  try {
+    const plan = orchestrationStore.get(req.params.id as string);
+    if (!plan) { sendError(res, "Orchestration not found", 404); return; }
+    if (plan.status === "planning" || plan.status === "running") {
+      sendError(res, "Orchestration is already in progress", 409); return;
+    }
+    // Reset for a fresh re-run of the same intent.
+    plan.status = "planning";
+    plan.steps = [];
+    delete plan.stitchedOutput;
+    delete plan.completedAt;
+    void persistOrchestrationPlanToDB(plan);
+    void runOrchestration(plan.id, plan.intent);
+    sendSuccess(res, { id: plan.id });
+  } catch (err) {
+    handleRouteError(res, err, "POST /api/nexus/orchestrate/:id/retry");
   }
 });
 
@@ -2371,6 +2419,32 @@ router.get("/ingest/:id", async (req: Request, res: Response) => {
     sendSuccess(res, job);
   } catch (err) {
     handleRouteError(res, err, "GET /api/nexus/ingest/:id");
+  }
+});
+
+router.post("/ingest/:id/retry", perUserWriteSlidingLimiter, async (req: Request, res: Response) => {
+  try {
+    const job = ingestStore.get(req.params.id as string);
+    if (!job) { sendError(res, "Ingest job not found", 404); return; }
+    if (
+      job.status === "queued" ||
+      job.status === "fetching" ||
+      job.status === "adapting" ||
+      job.status === "publishing"
+    ) {
+      sendError(res, "Ingest job is already in progress", 409); return;
+    }
+    job.status = "queued";
+    job.skillsGenerated = 0;
+    job.patternsFound = [];
+    job.log = [`Retrying ingest for ${job.repoUrl}`];
+    delete job.error;
+    delete job.completedAt;
+    void persistIngestJobToDB(job);
+    void runIngest(job.id, job.repoUrl);
+    sendSuccess(res, { id: job.id });
+  } catch (err) {
+    handleRouteError(res, err, "POST /api/nexus/ingest/:id/retry");
   }
 });
 
