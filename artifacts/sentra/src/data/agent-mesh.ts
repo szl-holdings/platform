@@ -263,6 +263,19 @@ export const agentMesh: AgentMeshState = {
       allowedEgressDomains: [],
       detectedEgressDomains: ["collect.ext-scraper.io", "telemetry.scraper-cdn.net"],
     },
+    {
+      id: "mcp-szl-substrate",
+      name: "szl-substrate-mcp-gateway",
+      packageRef: "@szl/substrate-mcp-gateway",
+      version: "1.0.0",
+      pinned: true,
+      sourceRegistry: "workspace",
+      lastSeen: minsAgo(1),
+      trustState: "trusted",
+      runtimeIds: ["rt-claude-desktop", "rt-cursor", "rt-claude-code"],
+      allowedEgressDomains: ["substrate-mcp-gateway"],
+      detectedEgressDomains: [],
+    },
   ],
 
   secrets: [

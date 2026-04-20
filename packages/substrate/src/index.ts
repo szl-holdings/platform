@@ -103,7 +103,7 @@ export function defineWorkflow(def: WorkflowDefinition): WorkflowDefinition {
 }
 
 // ─── Runtime ──────────────────────────────────────────────────────────────────
-export { SubstrateRuntime, defaultRuntime, registerWorkflow, lookupWorkflow } from "./engine.js";
+export { SubstrateRuntime, defaultRuntime, registerWorkflow, lookupWorkflow, listWorkflows } from "./engine.js";
 export type { SubstrateRuntimeOptions } from "./engine.js";
 
 // ─── Compiler ─────────────────────────────────────────────────────────────────

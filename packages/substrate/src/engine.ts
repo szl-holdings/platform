@@ -51,6 +51,10 @@ export function lookupWorkflow(workflowId: string): WorkflowDefinition | undefin
   return workflowRegistry.get(workflowId);
 }
 
+export function listWorkflows(): WorkflowDefinition[] {
+  return [...workflowRegistry.values()];
+}
+
 // ─── Default Stage Executor ───────────────────────────────────────────────────
 //
 // The default executor routes to the registered adapters based on stage type.
@@ -864,6 +868,63 @@ export class SubstrateRuntime {
       false,
       telemetry,
     );
+  }
+
+  /**
+   * reject() — terminate a run that is paused at an approval gate as "rejected/failed".
+   *
+   * Mirrors resume(): loads the run from the store, marks the pending approval
+   * gate as failed with the rejector identity, writes a signed evidence bundle,
+   * and persists the run with status "failed". Returns null when the run does not
+   * exist or is not in pending-approval state.
+   */
+  async reject(runId: string, rejectedBy?: string, reason?: string): Promise<PipelineRun | null> {
+    const run = await this.runStore.get(runId);
+    if (!run) return null;
+    if (run.status !== "pending-approval") return run;
+
+    const snapshotDef = run.metadata?.["__workflowSnapshot"] as WorkflowDefinition | undefined;
+    const workflow = snapshotDef ?? workflowRegistry.get(run.workflowId);
+
+    const rejector = rejectedBy ?? "operator";
+    const rejectedAt = new Date().toISOString();
+
+    const pendingGate = run.stageResults.find((r) => r.status === "pending-approval");
+    if (pendingGate) {
+      pendingGate.status = "failed";
+      pendingGate.output = {
+        approved: false,
+        rejectedBy: rejector,
+        rejectedAt,
+        ...(reason ? { reason } : {}),
+      };
+
+      if (workflow) {
+        const gateStage = workflow.stages.find((s) => s.id === pendingGate.stageId);
+        if (gateStage) {
+          await this.journal.writeStageTransition({
+            run,
+            stage: gateStage,
+            result: pendingGate,
+            input: null,
+            policyOutcome: "blocked",
+            metadata: {
+              event: "approval-gate-rejected",
+              rejectedBy: rejector,
+              rejectedAt,
+              runId,
+              ...(reason ? { reason } : {}),
+            },
+          });
+        }
+      }
+    }
+
+    run.status = "failed";
+    run.error = reason ? `Rejected by ${rejector}: ${reason}` : `Rejected by ${rejector}`;
+    run.metadata = { ...run.metadata, rejectedBy: rejector, rejectedAt };
+    await this.runStore.save(run);
+    return run;
   }
 
   // ─── Helpers ───────────────────────────────────────────────────────────────
