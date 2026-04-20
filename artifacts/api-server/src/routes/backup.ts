@@ -1,12 +1,14 @@
 import { Router, type IRouter } from "express";
 import archiver from "archiver";
 import { authMiddleware, requireRole } from "../middlewares/auth";
+import { sendForbidden } from "../lib/api-response";
 import {
   getBackupHealthStatus,
   listBackups,
   runBackup,
   exportTenantData,
 } from "../lib/backup-service";
+import { logger } from "../lib/logger";
 
 const backupRouter: IRouter = Router();
 
@@ -43,6 +45,42 @@ backupRouter.post("/admin/backup/run", async (_req, res) => {
 
 backupRouter.post("/admin/backup/export-tenant", async (req, res) => {
   const { orgId } = req.body as { orgId?: number };
+
+  // AF-004: Verify the requesting admin has authority over the requested org.
+  // Only super_admin may export across orgs (orgId omitted = all tenants, or
+  // an orgId not in the caller's membership list). A plain `admin` role user
+  // is constrained to exporting orgs they belong to.
+  const user = req.user;
+  if (!user) {
+    sendForbidden(res, "Authentication required");
+    return;
+  }
+  const isSuperAdmin = user.roles.includes("super_admin");
+  if (!isSuperAdmin) {
+    if (orgId == null) {
+      logger.warn(
+        { userId: user.id, roles: user.roles },
+        "[backup] Cross-org tenant export blocked — super_admin required"
+      );
+      sendForbidden(
+        res,
+        "Cross-org backup export requires super_admin role"
+      );
+      return;
+    }
+    const memberOfOrg = user.orgs.some((o) => o.orgId === orgId);
+    if (!memberOfOrg) {
+      logger.warn(
+        { userId: user.id, requestedOrgId: orgId, memberOrgs: user.orgs.map((o) => o.orgId) },
+        "[backup] Tenant export blocked — admin lacks authority over requested org"
+      );
+      sendForbidden(
+        res,
+        "You do not have authority to export data for the requested organization"
+      );
+      return;
+    }
+  }
 
   try {
     const data = await exportTenantData(orgId);

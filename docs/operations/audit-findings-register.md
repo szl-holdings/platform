@@ -117,7 +117,7 @@ This register catalogs every finding from all operational audit phases (Phase 0�
 | AF-001 | Auth | P1 | `middlewares/admin-guard.ts` | `adminGuard` non-timing-safe token comparison | ⚠️ Open | No | Conditional |
 | AF-003 | Tenancy | P1 | `routes/vessels.ts` | Vessels fleet routes return all tenants' data | ✅ Resolved (Task #1048) | No | Conditional |
 | AF-007 | Tenancy / DB | P1 | `lib/db/src/schema/vessels.ts` | `vessels.*` tables missing `org_id` | ✅ Resolved (Task #1048) | No | Conditional |
-| AF-004 | Admin / Privileged | P2 | `routes/backup.ts` | Backup export lacks orgId authority check | ⚠️ Open | No | No |
+| AF-004 | Admin / Privileged | P2 | `routes/backup.ts` | Backup export lacks orgId authority check | ✅ Resolved (Task #2694) | No | No |
 | AF-008 | Tenancy / DB | P2 | `lib/db/src/schema/conversations.ts` | `conversations` table missing `org_id` | ⚠️ Open | No | No |
 | AF-010 | Auth / Session | P2 | `lib/auth/` | Sessions not invalidated on role change | ✅ Resolved (Task #1049) | No | No |
 | AF-012 | Auth / Session | P2 | `lib/auth/` | Sessions not invalidated on `SESSION_SECRET` rotation | ✅ Resolved (Task #1049) | No | No |
@@ -377,7 +377,7 @@ The original vessels product schema defines `vessels_fleets`, `vessels`, `vessel
 
 ---
 
-### AF-004: Backup Export Lacks `orgId` Authority Validation
+### AF-004: Backup Export Lacks `orgId` Authority Validation — ✅ Resolved (Task #2694, 2026-04-20)
 
 | Field | Value |
 |-------|-------|
@@ -385,7 +385,11 @@ The original vessels product schema defines `vessels_fleets`, `vessels`, `vessel
 | **Severity** | P2 — Medium |
 | **Area** | Admin / Privileged Data Access |
 | **File** | `artifacts/api-server/src/routes/backup.ts` |
-| **Status** | ⚠️ Open |
+| **Status** | ✅ Resolved |
+
+**Resolution:** `POST /admin/backup/export-tenant` (artifacts/api-server/src/routes/backup.ts:49) now performs an explicit org-authority check before invoking `exportTenantData`. Plain `admin` role users may only request `orgId` values present in their own `req.user.orgs` membership list — any other value returns 403 with a structured error and an `[backup] Tenant export blocked` warn-level audit log. Omitting `orgId` (the cross-tenant dump path) is restricted to `super_admin` only; admin-role attempts return 403. Coverage: `artifacts/api-server/src/routes/__tests__/backup-export-org-authority.test.ts` exercises (a) admin requesting another org → 403, (b) admin omitting orgId → 403, (c) admin exporting their own org → 200, (d) super_admin exporting any org → 200, (e) super_admin omitting orgId → 200.
+
+#### Original finding
 
 **Finding:** `POST /admin/backup/export-tenant` accepts `orgId` in the request body without validating that the requesting admin has authority over that specific org. Any `admin`-role user could export data from any org by specifying an arbitrary `orgId`.
 
