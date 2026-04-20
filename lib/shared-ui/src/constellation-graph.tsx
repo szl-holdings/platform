@@ -618,6 +618,7 @@ export function ConstellationGraph({
   const [savedViewsBusy, setSavedViewsBusy] = useState(false);
   const [savedViewsError, setSavedViewsError] = useState<string | null>(null);
   const [activeSavedViewId, setActiveSavedViewId] = useState<number | null>(null);
+  const [pendingDeleteView, setPendingDeleteView] = useState<SavedConstellationView | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
   const simRef = useRef<SimNode[]>([]);
@@ -790,27 +791,34 @@ export function ConstellationGraph({
     [],
   );
 
-  const deleteSavedView = useCallback(
-    async (view: SavedConstellationView) => {
-      if (typeof window === "undefined") return;
-      if (!window.confirm(`Delete saved view "${view.name}"?`)) return;
-      setSavedViewsBusy(true);
-      setSavedViewsError(null);
-      try {
-        await apiFetch<void>(`/constellation/views/${view.id}`, {
-          method: "DELETE",
-          retries: 0,
-        });
-        setSavedViews((prev) => (prev ?? []).filter((v) => v.id !== view.id));
-        setActiveSavedViewId((curr) => (curr === view.id ? null : curr));
-      } catch (err) {
-        setSavedViewsError((err as Error)?.message ?? "Failed to delete view");
-      } finally {
-        setSavedViewsBusy(false);
-      }
-    },
-    [],
-  );
+  const requestDeleteSavedView = useCallback((view: SavedConstellationView) => {
+    setSavedViewsError(null);
+    setPendingDeleteView(view);
+  }, []);
+
+  const cancelDeleteSavedView = useCallback(() => {
+    setPendingDeleteView(null);
+  }, []);
+
+  const confirmDeleteSavedView = useCallback(async () => {
+    const view = pendingDeleteView;
+    if (!view) return;
+    setSavedViewsBusy(true);
+    setSavedViewsError(null);
+    try {
+      await apiFetch<void>(`/constellation/views/${view.id}`, {
+        method: "DELETE",
+        retries: 0,
+      });
+      setSavedViews((prev) => (prev ?? []).filter((v) => v.id !== view.id));
+      setActiveSavedViewId((curr) => (curr === view.id ? null : curr));
+      setPendingDeleteView(null);
+    } catch (err) {
+      setSavedViewsError((err as Error)?.message ?? "Failed to delete view");
+    } finally {
+      setSavedViewsBusy(false);
+    }
+  }, [pendingDeleteView]);
 
   // --- URL state persistence -------------------------------------------------
   // Filters are mirrored to the URL query string so views survive reloads and
@@ -2202,7 +2210,7 @@ export function ConstellationGraph({
                     type="button"
                     onClick={() => {
                       const v = (savedViews ?? []).find((sv) => sv.id === activeSavedViewId);
-                      if (v) deleteSavedView(v);
+                      if (v) requestDeleteSavedView(v);
                     }}
                     disabled={savedViewsBusy}
                     data-testid="constellation-delete-view"
@@ -3951,6 +3959,112 @@ export function ConstellationGraph({
                 </div>
               </>
             )}
+          </div>
+        </div>
+      )}
+
+      {pendingDeleteView && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="constellation-delete-view-title"
+          data-testid="constellation-delete-view-modal"
+          onClick={() => !savedViewsBusy && cancelDeleteSavedView()}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") {
+              e.stopPropagation();
+              if (!savedViewsBusy) cancelDeleteSavedView();
+            }
+          }}
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 70,
+            background: "rgba(2,6,23,0.7)",
+            backdropFilter: "blur(4px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 16,
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: "100%",
+              maxWidth: 420,
+              background: "#0a0f1c",
+              border: "1px solid rgba(239,68,68,0.5)",
+              borderRadius: 10,
+              padding: 18,
+              color: "#e2e8f0",
+              boxShadow: "0 24px 60px rgba(0,0,0,0.5)",
+            }}
+          >
+            <div
+              id="constellation-delete-view-title"
+              style={{
+                fontSize: 13,
+                fontWeight: 700,
+                color: "#fca5a5",
+                letterSpacing: "0.05em",
+                textTransform: "uppercase",
+              }}
+            >
+              Delete saved view?
+            </div>
+            <div style={{ fontSize: 12, color: "#cbd5e1", marginTop: 10, lineHeight: 1.5 }}>
+              This will permanently remove{" "}
+              <span
+                data-testid="constellation-delete-view-name"
+                style={{ color: "#f8fafc", fontWeight: 600 }}
+              >
+                “{pendingDeleteView.name}”
+              </span>
+              . This action cannot be undone.
+            </div>
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 16 }}>
+              <button
+                type="button"
+                onClick={cancelDeleteSavedView}
+                disabled={savedViewsBusy}
+                data-testid="constellation-delete-view-cancel"
+                style={{
+                  fontSize: 11,
+                  padding: "6px 12px",
+                  borderRadius: 4,
+                  border: "1px solid rgba(255,255,255,0.15)",
+                  background: "transparent",
+                  color: "#cbd5e1",
+                  cursor: savedViewsBusy ? "default" : "pointer",
+                  letterSpacing: "0.06em",
+                  textTransform: "uppercase",
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                autoFocus
+                onClick={() => void confirmDeleteSavedView()}
+                disabled={savedViewsBusy}
+                data-testid="constellation-delete-view-confirm"
+                style={{
+                  fontSize: 11,
+                  padding: "6px 12px",
+                  borderRadius: 4,
+                  border: "1px solid rgba(239,68,68,0.6)",
+                  background: "rgba(239,68,68,0.18)",
+                  color: "#fecaca",
+                  cursor: savedViewsBusy ? "wait" : "pointer",
+                  fontWeight: 700,
+                  letterSpacing: "0.06em",
+                  textTransform: "uppercase",
+                }}
+              >
+                {savedViewsBusy ? "Deleting…" : "Delete"}
+              </button>
+            </div>
           </div>
         </div>
       )}
