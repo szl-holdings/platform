@@ -1,6 +1,6 @@
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
 import { EnvironmentLabel } from "@szl-holdings/shared-ui/alloy-decision-card";
-import { useState, ReactNode } from "react";
+import { useEffect, useRef, useState, ReactNode } from "react";
 import { useLocation, Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { EvidenceDrawer } from "@szl-holdings/design-system/cockpit/evidence-drawer";
@@ -502,6 +502,21 @@ function UnifiedLayoutInner({ children, mode, onModeChange }: {
     : mode === "operations" ? OPERATIONS_NAV
     : INFRASTRUCTURE_NAV;
 
+  const navScrollRef = useRef<HTMLElement | null>(null);
+  const cognitiveSectionRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (mode !== "operations") return;
+    if (!location.startsWith("/cognitive")) return;
+    const scroller = navScrollRef.current;
+    const target = cognitiveSectionRef.current;
+    if (!scroller || !target) return;
+    const scrollerRect = scroller.getBoundingClientRect();
+    const targetRect = target.getBoundingClientRect();
+    const offset = targetRect.top - scrollerRect.top + scroller.scrollTop;
+    scroller.scrollTo({ top: offset, behavior: "smooth" });
+  }, [location, mode]);
+
   return (
     <div className="flex h-full overflow-hidden" style={{ background: "#060a12" }}>
       {sidebarOpen && (
@@ -530,9 +545,12 @@ function UnifiedLayoutInner({ children, mode, onModeChange }: {
 
         <WorkspaceSwitcher mode={mode} onModeChange={(m) => { onModeChange(m); setSidebarOpen(false); }} />
 
-        <nav className="flex-1 min-h-0 px-1.5 py-1 overflow-y-auto flex flex-col">
+        <nav ref={navScrollRef} className="flex-1 min-h-0 px-1.5 py-1 overflow-y-auto flex flex-col">
           {navGroups.map((group) => (
-            <div key={group.section}>
+            <div
+              key={group.section}
+              ref={group.section === "Cognitive Consoles" ? cognitiveSectionRef : undefined}
+            >
               <SectionHeader label={group.section} />
               {group.items.map((item) => {
                 const exactOnlyRoutes = ["/strategy", "/operations", "/infrastructure", "/cognitive", "/strategy/cross-platform"];
