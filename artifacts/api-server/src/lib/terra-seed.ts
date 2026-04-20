@@ -21,6 +21,45 @@ export async function seedTerraDemo() {
   }
   console.log("[terra-seed] Starting Terra demo data seed...");
 
+  // terra_properties has no natural unique constraint on (address, city) —
+  // only on the (nullable) external_id — so re-running this seed without an
+  // early-return would duplicate every property row. Guard up-front by
+  // checking ALL Terra tables; if any are populated treat the seed as done
+  // and surface partial-state explicitly so it can be diagnosed.
+  const counts = await Promise.all([
+    db.select({ c: sql<number>`count(*)::int` }).from(terraBrokeragesTable),
+    db.select({ c: sql<number>`count(*)::int` }).from(terraAgentsTable),
+    db.select({ c: sql<number>`count(*)::int` }).from(terraPropertiesTable),
+    db.select({ c: sql<number>`count(*)::int` }).from(terraListingsTable),
+    db.select({ c: sql<number>`count(*)::int` }).from(terraInquiriesTable),
+    db.select({ c: sql<number>`count(*)::int` }).from(terraTransactionsTable),
+  ]);
+  const brokerageCount = counts[0][0]?.c ?? 0;
+  const agentCountExisting = counts[1][0]?.c ?? 0;
+  const propCount = counts[2][0]?.c ?? 0;
+  const listingCountExisting = counts[3][0]?.c ?? 0;
+  const inquiryCount = counts[4][0]?.c ?? 0;
+  const txCount = counts[5][0]?.c ?? 0;
+  if (
+    brokerageCount > 0 &&
+    agentCountExisting > 0 &&
+    propCount > 0 &&
+    listingCountExisting > 0 &&
+    inquiryCount > 0 &&
+    txCount > 0
+  ) {
+    console.log(
+      `[terra-seed] All Terra tables already populated (brokerages=${brokerageCount}, agents=${agentCountExisting}, properties=${propCount}, listings=${listingCountExisting}, inquiries=${inquiryCount}, transactions=${txCount}), skipping.`,
+    );
+    return;
+  }
+  if (propCount > 0 || agentCountExisting > 0 || brokerageCount > 0) {
+    console.warn(
+      `[terra-seed] Partial Terra seed state detected (brokerages=${brokerageCount}, agents=${agentCountExisting}, properties=${propCount}, listings=${listingCountExisting}, inquiries=${inquiryCount}, transactions=${txCount}). Aborting to avoid duplicating rows (terra_properties has no natural unique key); please clear terra_* tables to re-seed.`,
+    );
+    return;
+  }
+
   await db.execute(sql`
     INSERT INTO feature_flags (key, name, description, is_enabled, rollout_percentage, scope, product)
     VALUES

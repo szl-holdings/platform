@@ -293,53 +293,80 @@ export async function seedVesselsData(): Promise<void> {
   }
   console.log("[seed-vessels] Starting vessels comprehensive seed...");
 
-  try {
-    const [[{ count: existingCount }], [{ count: positionCount }]] = await Promise.all([
-      db.select({ count: sql<number>`count(*)::int` }).from(vesselsTable),
-      db.select({ count: sql<number>`count(*)::int` }).from(vesselsPositionsTable),
-    ]);
-    if (existingCount >= 50 && positionCount >= 50) {
-      console.log(`[seed-vessels] Already have ${existingCount} vessels + ${positionCount} positions, skipping...`);
-      return;
+  // Existence checks must fail loudly. Previously this block was wrapped in
+  // an empty `catch {}` with the comment "table might be empty, continue
+  // seeding" — that swallowed every error (including schema drift) and made
+  // problems show up later as silently-empty downstream tables.
+  const tableCounts = await Promise.all([
+    db.select({ count: sql<number>`count(*)::int` }).from(vesselsTable),
+    db.select({ count: sql<number>`count(*)::int` }).from(vesselsPositionsTable),
+    db.select({ count: sql<number>`count(*)::int` }).from(vesselVoyageEconomicsTable),
+    db.select({ count: sql<number>`count(*)::int` }).from(vesselPortCallsTable),
+    db.select({ count: sql<number>`count(*)::int` }).from(fleetExceptionsTable),
+    db.select({ count: sql<number>`count(*)::int` }).from(vesselMaintenanceTable),
+    db.select({ count: sql<number>`count(*)::int` }).from(vesselSanctionsScreeningTable),
+  ]);
+  const existingCount = tableCounts[0][0]?.count ?? 0;
+  const positionCount = tableCounts[1][0]?.count ?? 0;
+  const voyageCount = tableCounts[2][0]?.count ?? 0;
+  const portCallCount = tableCounts[3][0]?.count ?? 0;
+  const exceptionCount = tableCounts[4][0]?.count ?? 0;
+  const maintenanceCount = tableCounts[5][0]?.count ?? 0;
+  const sanctionsCount = tableCounts[6][0]?.count ?? 0;
+
+  // Only treat the seed as fully complete if every downstream table also has
+  // rows. This protects against partial-state restarts where vessels exist
+  // but a sibling table failed to populate on a previous run.
+  if (
+    existingCount >= 50 &&
+    positionCount >= 50 &&
+    voyageCount > 0 &&
+    portCallCount > 0 &&
+    exceptionCount > 0 &&
+    maintenanceCount > 0 &&
+    sanctionsCount > 0
+  ) {
+    console.log(
+      `[seed-vessels] All vessel tables already populated (vessels=${existingCount}, positions=${positionCount}, voyages=${voyageCount}, portCalls=${portCallCount}, exceptions=${exceptionCount}, maintenance=${maintenanceCount}, sanctions=${sanctionsCount}), skipping...`,
+    );
+    return;
+  }
+  if (existingCount >= 50 && positionCount < 50) {
+    // Vessels exist but positions are missing — seed positions only
+    console.log(`[seed-vessels] Seeding missing positions for ${existingCount} existing vessels...`);
+    const existingVessels = await db.select({ id: vesselsTable.id, status: vesselsTable.status }).from(vesselsTable).orderBy(vesselsTable.id);
+    const POSITION_REGIONS: Array<{ latMin: number; latMax: number; lonMin: number; lonMax: number }> = [
+      { latMin: 49, latMax: 60, lonMin: -5, lonMax: 10 },
+      { latMin: 20, latMax: 40, lonMin: 110, lonMax: 130 },
+      { latMin: -5, latMax: 5, lonMin: 95, lonMax: 110 },
+      { latMin: 25, latMax: 30, lonMin: 51, lonMax: 57 },
+      { latMin: 10, latMax: 20, lonMin: 40, lonMax: 55 },
+      { latMin: 35, latMax: 50, lonMin: -80, lonMax: -60 },
+      { latMin: -35, latMax: -10, lonMin: 10, lonMax: 30 },
+      { latMin: 30, latMax: 45, lonMin: -10, lonMax: 30 },
+    ];
+    const posOnlyRows: InsertVesselPosition[] = existingVessels.map((vessel, _i) => {
+      const region = POSITION_REGIONS[vessel.id % POSITION_REGIONS.length];
+      const lat = region.latMin + seeded(vessel.id, 200, region.latMax - region.latMin);
+      const lon = region.lonMin + seeded(vessel.id, 201, region.lonMax - region.lonMin);
+      const heading = seeded(vessel.id, 202, 360);
+      const speed = vessel.status === "at_sea" ? 8 + seeded(vessel.id, 203, 10) :
+                    vessel.status === "anchored" ? seeded(vessel.id, 204, 2) : 0;
+      return {
+        vesselId: vessel.id,
+        latitude: lat.toFixed(7),
+        longitude: lon.toFixed(7),
+        heading: heading.toFixed(2),
+        speed: speed.toFixed(2),
+        recordedAt: new Date(now.getTime() - seeded(vessel.id, 205, 7200) * 1000),
+      };
+    });
+    for (let i = 0; i < posOnlyRows.length; i += 50) {
+      await db.insert(vesselsPositionsTable).values(posOnlyRows.slice(i, i + 50)).onConflictDoNothing();
     }
-    if (existingCount >= 50 && positionCount < 50) {
-      // Vessels exist but positions are missing — seed positions only
-      console.log(`[seed-vessels] Seeding missing positions for ${existingCount} existing vessels...`);
-      const existingVessels = await db.select({ id: vesselsTable.id, status: vesselsTable.status }).from(vesselsTable).orderBy(vesselsTable.id);
-      const POSITION_REGIONS: Array<{ latMin: number; latMax: number; lonMin: number; lonMax: number }> = [
-        { latMin: 49, latMax: 60, lonMin: -5, lonMax: 10 },
-        { latMin: 20, latMax: 40, lonMin: 110, lonMax: 130 },
-        { latMin: -5, latMax: 5, lonMin: 95, lonMax: 110 },
-        { latMin: 25, latMax: 30, lonMin: 51, lonMax: 57 },
-        { latMin: 10, latMax: 20, lonMin: 40, lonMax: 55 },
-        { latMin: 35, latMax: 50, lonMin: -80, lonMax: -60 },
-        { latMin: -35, latMax: -10, lonMin: 10, lonMax: 30 },
-        { latMin: 30, latMax: 45, lonMin: -10, lonMax: 30 },
-      ];
-      const posOnlyRows: InsertVesselPosition[] = existingVessels.map((vessel, _i) => {
-        const region = POSITION_REGIONS[vessel.id % POSITION_REGIONS.length];
-        const lat = region.latMin + seeded(vessel.id, 200, region.latMax - region.latMin);
-        const lon = region.lonMin + seeded(vessel.id, 201, region.lonMax - region.lonMin);
-        const heading = seeded(vessel.id, 202, 360);
-        const speed = vessel.status === "at_sea" ? 8 + seeded(vessel.id, 203, 10) :
-                      vessel.status === "anchored" ? seeded(vessel.id, 204, 2) : 0;
-        return {
-          vesselId: vessel.id,
-          latitude: lat.toFixed(7),
-          longitude: lon.toFixed(7),
-          heading: heading.toFixed(2),
-          speed: speed.toFixed(2),
-          recordedAt: new Date(now.getTime() - seeded(vessel.id, 205, 7200) * 1000),
-        };
-      });
-      for (let i = 0; i < posOnlyRows.length; i += 50) {
-        await db.insert(vesselsPositionsTable).values(posOnlyRows.slice(i, i + 50)).onConflictDoNothing();
-      }
-      console.log(`[seed-vessels] Seeded ${posOnlyRows.length} positions for existing vessels`);
-      return;
-    }
-  } catch {
-    // table might be empty, continue seeding
+    console.log(`[seed-vessels] Seeded ${posOnlyRows.length} positions for existing vessels`);
+    // Fall through so missing voyages/port-calls/exceptions/etc. can still be
+    // backfilled below if needed.
   }
 
   // Create fleets
@@ -397,11 +424,28 @@ export async function seedVesselsData(): Promise<void> {
     };
   });
 
-  const insertedVessels = await db.insert(vesselsTable).values(vesselRows).onConflictDoNothing().returning();
-  console.log(`[seed-vessels] Created ${insertedVessels.length} vessels`);
+  const newlyInsertedVessels = await db.insert(vesselsTable).values(vesselRows).onConflictDoNothing().returning();
+  console.log(`[seed-vessels] Created ${newlyInsertedVessels.length} vessels`);
+
+  // If the vessels insert no-op'd because rows already exist, look them up so
+  // downstream tables (voyages, port calls, exceptions, maintenance,
+  // sanctions) can still be backfilled when they are empty. Previously we
+  // returned early here, which meant a partial-state restart left those
+  // tables silently empty.
+  const insertedVessels = newlyInsertedVessels.length > 0
+    ? newlyInsertedVessels
+    : await db
+        .select({
+          id: vesselsTable.id,
+          name: vesselsTable.name,
+          status: vesselsTable.status,
+          flag: vesselsTable.flag,
+        })
+        .from(vesselsTable)
+        .orderBy(vesselsTable.id);
 
   if (insertedVessels.length === 0) {
-    console.log("[seed-vessels] No vessels were inserted, aborting further seeding");
+    console.log("[seed-vessels] No vessels available after insert/lookup, aborting further seeding");
     return;
   }
 
@@ -582,7 +626,7 @@ export async function seedVesselsData(): Promise<void> {
         acknowledgedAt: status !== "active" ? new Date(now.getTime() - (detectedHoursAgo - 2) * 3600000) : null,
         resolvedAt: status === "resolved" ? new Date(now.getTime() - (detectedHoursAgo - 8) * 3600000) : null,
         metadata: { source: "system", correlationId: `COR-${vessel.id}-${j}` },
-      } as any);
+      });
       excCount++;
     }
   }

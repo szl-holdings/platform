@@ -7,8 +7,12 @@ import {
   mspDevicesTable,
   mspContractsTable,
 } from "@szl-holdings/db";
+import type { InferInsertModel } from "drizzle-orm";
 import { sql } from "drizzle-orm";
+
 import { logger } from "./logger";
+
+type InsertMspDevice = InferInsertModel<typeof mspDevicesTable>;
 
 export async function seedMspData(): Promise<void> {
   if (!isSeedDataAllowed()) {
@@ -18,9 +22,30 @@ export async function seedMspData(): Promise<void> {
         `Seed data is only permitted in local-dev, internal-preview, and demo modes.`,
     );
   }
-  const existing = await db.select({ c: sql<number>`count(*)::int` }).from(mspClientsTable);
-  if (existing[0].c > 0) {
-    logger.debug("[msp-seed] MSP data already seeded, skipping.");
+  // Check ALL MSP tables before considering the seed complete. Previously
+  // only mspClientsTable was checked, which meant a partial-state restart
+  // (clients seeded but a downstream insert failed) would silently skip the
+  // re-seed and leave technicians/tickets/devices/contracts empty forever.
+  const counts = await Promise.all([
+    db.select({ c: sql<number>`count(*)::int` }).from(mspClientsTable),
+    db.select({ c: sql<number>`count(*)::int` }).from(mspTechniciansTable),
+    db.select({ c: sql<number>`count(*)::int` }).from(mspTicketsTable),
+    db.select({ c: sql<number>`count(*)::int` }).from(mspDevicesTable),
+    db.select({ c: sql<number>`count(*)::int` }).from(mspContractsTable),
+  ]);
+  const clientsCount = counts[0][0]?.c ?? 0;
+  const techCount = counts[1][0]?.c ?? 0;
+  const ticketCount = counts[2][0]?.c ?? 0;
+  const deviceCount = counts[3][0]?.c ?? 0;
+  const contractCount = counts[4][0]?.c ?? 0;
+  if (clientsCount > 0 && techCount > 0 && ticketCount > 0 && deviceCount > 0 && contractCount > 0) {
+    logger.debug({ clientsCount, techCount, ticketCount, deviceCount, contractCount }, "[msp-seed] All MSP tables already populated, skipping.");
+    return;
+  }
+  if (clientsCount > 0) {
+    // Partial state — log loudly so operators can investigate why prior runs
+    // didn't complete instead of silently re-trying.
+    logger.warn({ clientsCount, techCount, ticketCount, deviceCount, contractCount }, "[msp-seed] Partial MSP seed state detected — clients exist but downstream tables are empty. Aborting to avoid duplicating clients; please clear msp_* tables to re-seed.");
     return;
   }
 
@@ -109,7 +134,7 @@ export async function seedMspData(): Promise<void> {
     printer: ["HP Firmware", "Brother Firmware", "Canon Firmware"],
   };
 
-  const deviceData = [];
+  const deviceData: InsertMspDevice[] = [];
   let devNum = 100;
 
   for (const client of clients) {
@@ -147,7 +172,7 @@ export async function seedMspData(): Promise<void> {
     }
   }
 
-  await db.insert(mspDevicesTable).values(deviceData as any);
+  await db.insert(mspDevicesTable).values(deviceData);
   logger.info({ count: deviceData.length }, "[msp-seed] Devices inserted");
 
   const contracts = await db.insert(mspContractsTable).values([

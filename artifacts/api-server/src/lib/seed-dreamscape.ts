@@ -20,9 +20,41 @@ export async function seedDreamscapeData(): Promise<void> {
   }
   console.log("[seed-dreamscape] Starting Creative Workflows seed data...");
 
-  const [{ count }] = await db.select({ count: sql<number>`count(*)::int` }).from(dreamscapeCampaignsTable);
-  if (count > 0) {
-    console.log("[seed-dreamscape] Campaigns already seeded, skipping.");
+  // Check ALL Dreamscape tables — previously only campaigns was checked, so a
+  // partial-state restart (campaigns inserted but a downstream table failed)
+  // would silently skip the re-seed and leave scripts/storyboards/voice/
+  // assets/reviews permanently empty.
+  const counts = await Promise.all([
+    db.select({ c: sql<number>`count(*)::int` }).from(dreamscapeCampaignsTable),
+    db.select({ c: sql<number>`count(*)::int` }).from(dreamscapeScriptsTable),
+    db.select({ c: sql<number>`count(*)::int` }).from(dreamscapeStoryboardsTable),
+    db.select({ c: sql<number>`count(*)::int` }).from(dreamscapeVoiceAssetsTable),
+    db.select({ c: sql<number>`count(*)::int` }).from(dreamscapeCampaignAssetsTable),
+    db.select({ c: sql<number>`count(*)::int` }).from(dreamscapeReviewsTable),
+  ]);
+  const campaignCount = counts[0][0]?.c ?? 0;
+  const scriptCount = counts[1][0]?.c ?? 0;
+  const storyboardCount = counts[2][0]?.c ?? 0;
+  const voiceCount = counts[3][0]?.c ?? 0;
+  const assetCount = counts[4][0]?.c ?? 0;
+  const reviewCount = counts[5][0]?.c ?? 0;
+  if (
+    campaignCount > 0 &&
+    scriptCount > 0 &&
+    storyboardCount > 0 &&
+    voiceCount > 0 &&
+    assetCount > 0 &&
+    reviewCount > 0
+  ) {
+    console.log(
+      `[seed-dreamscape] All Dreamscape tables already populated (campaigns=${campaignCount}, scripts=${scriptCount}, storyboards=${storyboardCount}, voice=${voiceCount}, assets=${assetCount}, reviews=${reviewCount}), skipping.`,
+    );
+    return;
+  }
+  if (campaignCount > 0) {
+    console.warn(
+      `[seed-dreamscape] Partial seed state detected — campaigns=${campaignCount} exist but downstream tables are empty (scripts=${scriptCount}, storyboards=${storyboardCount}, voice=${voiceCount}, assets=${assetCount}, reviews=${reviewCount}). Aborting to avoid duplicating campaigns; please clear dreamscape_* tables to re-seed.`,
+    );
     return;
   }
 
