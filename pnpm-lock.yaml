@@ -367,6 +367,9 @@ importers:
       '@szl-holdings/domain-claims':
         specifier: workspace:*
         version: link:../../packages/domain-claims
+      '@szl-holdings/env':
+        specifier: workspace:*
+        version: link:../../packages/env
       '@szl-holdings/graphql-client':
         specifier: workspace:*
         version: link:../../lib/graphql-client
