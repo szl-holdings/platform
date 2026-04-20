@@ -37,6 +37,7 @@ import S07SeriesDomains from "./pages/slides/S07SeriesDomains";
 import S08BusinessModel from "./pages/slides/S08BusinessModel";
 import S09Ask from "./pages/slides/S09Ask";
 import AllSlides from "./pages/slides/AllSlides";
+import PresenterMode from "./pages/slides/PresenterMode";
 
 const SLIDES = [S01Cover, S02SeriesProblem, S03Category, S04Product, S05Demo, S06Market, S07SeriesDomains, S08BusinessModel, S09Ask];
 const TOTAL = SLIDES.length;
@@ -466,21 +467,64 @@ function SlideDeck() {
     return 1;
   }
 
+  const isEmbed =
+    typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).get("embed") === "1";
+
   const [current, setCurrent] = useState(getInitialSlide);
   const Slide = SLIDES[current - 1];
+  const channelRef = useRef<BroadcastChannel | null>(null);
 
   const goTo = useCallback((n: number) => {
     const clamped = Math.min(Math.max(n, 1), TOTAL);
     setCurrent(clamped);
-    history.replaceState(null, "", `${BASE}/slides/${clamped}`);
-  }, []);
+    history.replaceState(null, "", `${BASE}/slides/${clamped}${isEmbed ? "?embed=1" : ""}`);
+    channelRef.current?.postMessage({ type: "audience:current", slide: clamped });
+  }, [isEmbed]);
 
   useEffect(() => {
+    if (typeof BroadcastChannel === "undefined") return;
+    const channel = new BroadcastChannel("aegis-deck-sync");
+    channelRef.current = channel;
+    channel.onmessage = (ev) => {
+      const data = ev.data ?? {};
+      if (data.type === "presenter:goto" && typeof data.slide === "number") {
+        setCurrent((c) => {
+          if (c === data.slide) return c;
+          history.replaceState(null, "", `${BASE}/slides/${data.slide}${isEmbed ? "?embed=1" : ""}`);
+          return data.slide;
+        });
+      } else if (data.type === "presenter:hello") {
+        setCurrent((c) => {
+          channel.postMessage({ type: "audience:current", slide: c });
+          return c;
+        });
+      }
+    };
+    channel.postMessage({ type: "audience:current", slide: current });
+    return () => {
+      channel.close();
+      channelRef.current = null;
+    };
+    // current intentionally excluded — channel is keyed once per mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEmbed]);
+
+  useEffect(() => {
+    if (isEmbed) return;
     const handler = (e: KeyboardEvent) => {
+      if (e.key === "p" || e.key === "P") {
+        if (e.metaKey || e.ctrlKey || e.altKey) return;
+        e.preventDefault();
+        const url = `${BASE}/slides/presenter?slide=${current}`;
+        window.open(url, "aegis-presenter", "width=1280,height=860,noopener");
+        return;
+      }
       if (e.key === "ArrowRight" || e.key === "ArrowDown" || e.key === " ") {
         setCurrent((c) => {
           const next = Math.min(c + 1, TOTAL);
           history.replaceState(null, "", `${BASE}/slides/${next}`);
+          channelRef.current?.postMessage({ type: "audience:current", slide: next });
           return next;
         });
       }
@@ -488,6 +532,7 @@ function SlideDeck() {
         setCurrent((c) => {
           const prev = Math.max(c - 1, 1);
           history.replaceState(null, "", `${BASE}/slides/${prev}`);
+          channelRef.current?.postMessage({ type: "audience:current", slide: prev });
           return prev;
         });
       }
@@ -499,9 +544,12 @@ function SlideDeck() {
   return (
     <div
       style={{ position: "relative", width: "100vw", height: "100vh", overflow: "hidden" }}
-      onClick={() => goTo(current + 1)}
+      onClick={() => {
+        if (!isEmbed) goTo(current + 1);
+      }}
     >
       <Slide />
+      {!isEmbed && (
       <div
         style={{
           position: "fixed",
@@ -531,6 +579,8 @@ function SlideDeck() {
           />
         ))}
       </div>
+      )}
+      {!isEmbed && (
       <Link
         href="/"
         onClick={(e) => e.stopPropagation()}
@@ -551,30 +601,61 @@ function SlideDeck() {
       >
         ← Exit deck
       </Link>
-      <button
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          window.open(`${BASE}/slides/print?print=1`, "_blank", "noopener");
-        }}
-        title="Export deck as PDF (P)"
+      )}
+      {!isEmbed && (
+      <div
         style={{
           position: "fixed",
           top: "2vh",
           right: "2vw",
-          fontFamily: "Inter, sans-serif",
-          fontSize: "11px",
-          color: "rgba(255,255,255,0.7)",
-          padding: "6px 10px",
-          background: "rgba(12,200,217,0.12)",
-          border: "1px solid rgba(12,200,217,0.35)",
-          borderRadius: "6px",
+          display: "flex",
+          gap: 8,
           zIndex: 100,
-          cursor: "pointer",
         }}
+        onClick={(e) => e.stopPropagation()}
       >
-        Export PDF
-      </button>
+        <button
+          type="button"
+          onClick={() => {
+            const url = `${BASE}/slides/presenter?slide=${current}`;
+            window.open(url, "aegis-presenter", "width=1280,height=860,noopener");
+          }}
+          title="Open presenter mode (P)"
+          style={{
+            fontFamily: "Inter, sans-serif",
+            fontSize: "11px",
+            color: "rgba(255,255,255,0.85)",
+            padding: "6px 10px",
+            background: "rgba(99,102,241,0.18)",
+            border: "1px solid rgba(99,102,241,0.45)",
+            borderRadius: "6px",
+            cursor: "pointer",
+          }}
+        >
+          Presenter (P)
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            window.open(`${BASE}/slides/print?print=1`, "_blank", "noopener");
+          }}
+          title="Export deck as PDF"
+          style={{
+            fontFamily: "Inter, sans-serif",
+            fontSize: "11px",
+            color: "rgba(255,255,255,0.7)",
+            padding: "6px 10px",
+            background: "rgba(12,200,217,0.12)",
+            border: "1px solid rgba(12,200,217,0.35)",
+            borderRadius: "6px",
+            cursor: "pointer",
+          }}
+        >
+          Export PDF
+        </button>
+      </div>
+      )}
+      {!isEmbed && (
       <div
         style={{
           position: "fixed",
@@ -588,6 +669,7 @@ function SlideDeck() {
       >
         {current} / {TOTAL}
       </div>
+      )}
     </div>
   );
 }
@@ -631,10 +713,16 @@ function AppShell({
 
   const isPrintAllSlides =
     location === "/slides/print" || location.startsWith("/slides/print");
+  const isPresenter =
+    location === "/slides/presenter" || location.startsWith("/slides/presenter");
   const isSlides = location.startsWith("/slides") || location.startsWith("/slide");
 
   if (isPrintAllSlides) {
     return <AllSlides />;
+  }
+
+  if (isPresenter) {
+    return <PresenterMode />;
   }
 
   if (isSlides) {

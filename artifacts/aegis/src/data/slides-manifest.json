@@ -5,7 +5,7 @@
     "filepath": "src/pages/slides/S01Cover.tsx",
     "title": "Governed Decision Infrastructure",
     "description": "Series A pitch deck cover — SZL Holdings, 2026",
-    "speakerNotes": ""
+    "speakerNotes": "Open with the thesis in one line: SZL Holdings builds the governance layer that makes AI decisions accountable.\n\nBeat: pause for two seconds. Let the cover land.\n\nThen: 'For the next twelve minutes I'm going to show you a category, a product, and a market — and a real platform you can click on today.'"
   },
   {
     "id": "sa-0002-4000-8000-000000000002",
@@ -13,7 +13,7 @@
     "filepath": "src/pages/slides/S02SeriesProblem.tsx",
     "title": "Problem: AI Without Accountability",
     "description": "Every AI recommendation happens without a source, approval gate, or outcome record",
-    "speakerNotes": ""
+    "speakerNotes": "Three statistics to anchor the room:\n  • 89% of enterprise AI deployments have no auditable decision trail.\n  • Only 11% of regulated industries can answer 'why did the model recommend this?' under audit.\n  • Average time to investigate one AI-driven incident: 14 days.\n\nName the pain in plain English: 'Today AI gives an answer. Nobody can prove where it came from, who approved it, or whether it worked.'"
   },
   {
     "id": "sa-0003-4000-8000-000000000003",
@@ -21,7 +21,7 @@
     "filepath": "src/pages/slides/S03Category.tsx",
     "title": "Category: Governed Decision Infrastructure",
     "description": "$16.3B market growing at 24.7% CAGR to $50.1B by 2030",
-    "speakerNotes": ""
+    "speakerNotes": "Frame the category. We are not 'an AI tool.' We are the layer underneath every AI tool that an enterprise will eventually be required to install.\n\nAnalog: just as observability emerged underneath microservices, governance emerges underneath agentic AI.\n\nMarket: $16.3B today, $50.1B by 2030 — 24.7% CAGR. Source: composite of Gartner GRC + IDC AI Governance + analyst extrapolation."
   },
   {
     "id": "sa-0004-4000-8000-000000000004",
@@ -29,7 +29,7 @@
     "filepath": "src/pages/slides/S04Product.tsx",
     "title": "Product: The Nine-Step Governance Loop",
     "description": "Signal, Context, Recommendation, Simulation, Policy, Execution, Proof, Outcome, Learning",
-    "speakerNotes": ""
+    "speakerNotes": "Walk the loop end-to-end in under 90 seconds. Don't read every step — group them:\n  1. Sense (Signal, Context)\n  2. Decide (Recommendation, Simulation, Policy)\n  3. Act (Execution)\n  4. Account (Proof, Outcome, Learning)\n\nKey line: 'Every step is hashed, versioned, and replayable. This is the audit trail regulators will demand by 2027.'"
   },
   {
     "id": "sa-0005-4000-8000-000000000005",
@@ -37,7 +37,7 @@
     "filepath": "src/pages/slides/S05Demo.tsx",
     "title": "Demo: The Platform Is Real",
     "description": "Decision Theater — live, presentable, production-grade",
-    "speakerNotes": ""
+    "speakerNotes": "TRANSITION TO LIVE DEMO HERE. Open Decision Theater in a second tab.\n\nIf time is short: skip to slide 6. The demo is in the appendix link.\n\nIf you do show it: pick ONE vertical (Vessels port-call decision is fastest — 90 seconds end-to-end). Show signal → recommendation → policy block → human approval → proof entry. Do not narrate every field; let the loop speak."
   },
   {
     "id": "sa-0006-4000-8000-000000000006",
@@ -45,7 +45,7 @@
     "filepath": "src/pages/slides/S06Market.tsx",
     "title": "Market: $16.3B to $50.1B",
     "description": "Competitive matrix — five capabilities no named competitor closes",
-    "speakerNotes": ""
+    "speakerNotes": "Competitive matrix is the meat. Five capabilities across the top: provenance, policy-as-code, simulation, multi-domain, replayability.\n\nDataRobot, Credo, Fiddler, Holistic AI — none ship more than two. We ship all five today.\n\nIf asked about hyperscalers: AWS Bedrock Guardrails and Azure AI Content Safety are filters, not loops. They block bad outputs; they don't account for decisions."
   },
   {
     "id": "sa-0007-4000-8000-000000000007",
@@ -53,7 +53,7 @@
     "filepath": "src/pages/slides/S07SeriesDomains.tsx",
     "title": "Domain Breadth: Six Verticals, One Loop",
     "description": "Aegis, Vessels, Terra, Carlota Jo, Command, SZL Holdings — all governed by the same nine-step loop",
-    "speakerNotes": ""
+    "speakerNotes": "The defensibility is the loop, not the vertical. We've already shipped six verticals on the same primitives:\n  • Aegis — cyber resilience\n  • Vessels — maritime risk and trading\n  • Terra — real estate intelligence\n  • Carlota Jo — private advisory\n  • Command — unified ops\n  • SZL Holdings — portfolio decisions\n\nMessage: 'Adding a seventh vertical is a configuration job, not a rebuild.'"
   },
   {
     "id": "sa-0008-4000-8000-000000000008",
@@ -61,7 +61,7 @@
     "filepath": "src/pages/slides/S08BusinessModel.tsx",
     "title": "Business Model: Platform + Domain Pack",
     "description": "$50K–$500K/year enterprise tier — three-phase commercial path",
-    "speakerNotes": ""
+    "speakerNotes": "Pricing: platform license + per-domain pack. Enterprise band $50K–$500K ARR, anchored to decision volume and number of domains.\n\nThree-phase commercial motion:\n  1. Pilot (60 days, fixed-fee, one domain)\n  2. Production (annual platform + one pack)\n  3. Expand (additional packs, audit/compliance modules)\n\nGross margin target: 78%. Logo retention target: 95%."
   },
   {
     "id": "sa-0009-4000-8000-000000000009",
@@ -69,6 +69,6 @@
     "filepath": "src/pages/slides/S09Ask.tsx",
     "title": "The Ask",
     "description": "Series A — use of funds, team plan, and the opportunity",
-    "speakerNotes": ""
+    "speakerNotes": "The ask in one breath: 'We are raising a Series A to harden the platform, ship two more verticals, and land the first ten enterprise logos.'\n\nUse of funds: 55% engineering, 25% go-to-market, 15% security and compliance, 5% operating runway.\n\nClose with the line of the deck: 'Every AI decision will eventually need an audit trail. We're already shipping the one that survives.'\n\nThen stop talking. Let them ask the next question."
   }
 ]
