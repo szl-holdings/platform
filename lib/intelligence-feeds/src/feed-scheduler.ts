@@ -35,6 +35,24 @@ type EntityIngestionFn = (
   source: string,
 ) => Promise<{ entitiesUpserted: OntologyEntity[]; relationshipsCreated: OntologyRelationship[] }>;
 
+export interface FeedIngestionEvent {
+  pollAt: string;
+  entitiesCreated: number;
+  entitiesMerged: number;
+  entitiesUpserted: number;
+  relationshipsCreated: number;
+}
+
+export interface FeedIngestionSummary {
+  feedId: string;
+  totalCreated: number;
+  totalMerged: number;
+  lastIngestedAt: string | null;
+  recent: FeedIngestionEvent[];
+}
+
+const INGESTION_HISTORY_LIMIT = 20;
+
 export class FeedScheduler {
   private feeds = new Map<string, FeedRegistration>();
   private schedulerInterval: ReturnType<typeof setInterval> | null = null;
@@ -43,6 +61,8 @@ export class FeedScheduler {
   private config: SchedulerConfig;
   private entityIngestionFn: EntityIngestionFn | null = null;
   private isStarted = false;
+  private ingestionHistory = new Map<string, FeedIngestionEvent[]>();
+  private ingestionTotals = new Map<string, { totalCreated: number; totalMerged: number; lastIngestedAt: string | null }>();
 
   constructor(config: Partial<SchedulerConfig> = {}) {
     this.config = {
@@ -220,7 +240,7 @@ export class FeedScheduler {
     isStarted: boolean;
     activePolls: number;
     feedCount: number;
-    feedStatuses: Array<{ feedId: string; feedName: string; status: string; nextPollIn: number }>;
+    feedStatuses: Array<{ feedId: string; feedName: string; status: string; enabled: boolean; nextPollIn: number }>;
   } {
     const now = Date.now();
     return {
@@ -231,9 +251,51 @@ export class FeedScheduler {
         feedId,
         feedName: reg.adapter.getHealth().feedName,
         status: reg.adapter.getHealth().status,
+        enabled: reg.enabled,
         nextPollIn: Math.max(0, Math.round((reg.nextPollAt - now) / 1000)),
       })),
     };
+  }
+
+  isFeedEnabled(feedId: string): boolean {
+    return this.feeds.get(feedId)?.enabled ?? false;
+  }
+
+  recordIngestion(feedId: string, event: Omit<FeedIngestionEvent, "pollAt"> & { pollAt?: string }): void {
+    const pollAt = event.pollAt ?? new Date().toISOString();
+    const entry: FeedIngestionEvent = {
+      pollAt,
+      entitiesCreated: event.entitiesCreated,
+      entitiesMerged: event.entitiesMerged,
+      entitiesUpserted: event.entitiesUpserted,
+      relationshipsCreated: event.relationshipsCreated,
+    };
+
+    const history = this.ingestionHistory.get(feedId) ?? [];
+    history.push(entry);
+    if (history.length > INGESTION_HISTORY_LIMIT) history.shift();
+    this.ingestionHistory.set(feedId, history);
+
+    const totals = this.ingestionTotals.get(feedId) ?? { totalCreated: 0, totalMerged: 0, lastIngestedAt: null };
+    totals.totalCreated += entry.entitiesCreated;
+    totals.totalMerged += entry.entitiesMerged;
+    totals.lastIngestedAt = pollAt;
+    this.ingestionTotals.set(feedId, totals);
+  }
+
+  getIngestionSummary(feedId: string): FeedIngestionSummary {
+    const totals = this.ingestionTotals.get(feedId) ?? { totalCreated: 0, totalMerged: 0, lastIngestedAt: null };
+    return {
+      feedId,
+      totalCreated: totals.totalCreated,
+      totalMerged: totals.totalMerged,
+      lastIngestedAt: totals.lastIngestedAt,
+      recent: [...(this.ingestionHistory.get(feedId) ?? [])],
+    };
+  }
+
+  getAllIngestionSummaries(): FeedIngestionSummary[] {
+    return [...this.feeds.keys()].map((feedId) => this.getIngestionSummary(feedId));
   }
 
   setFeedEnabled(feedId: string, enabled: boolean): boolean {

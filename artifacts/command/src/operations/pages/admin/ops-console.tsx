@@ -5,7 +5,7 @@ import {
   Server, Database, HardDrive, Users, Zap, Activity, CheckCircle,
   AlertTriangle, WifiOff, RefreshCw, Clock, Shield, Cpu, BarChart3,
   FileText, AlertCircle, Package, GitBranch, Globe, Radio, Target,
-  Lock, TrendingUp, X,
+  Lock, TrendingUp, X, Rss,
 } from "lucide-react";
 import { useState } from "react";
 import { useStandardQuery } from "@szl-holdings/api-client-react";
@@ -125,7 +125,56 @@ function ProgressBar({ pct, color = "#d4a054" }: { pct: number; color?: string }
   );
 }
 
-type TabKey = "overview" | "health" | "jobs" | "connectors" | "seed" | "errors" | "infrastructure";
+type TabKey = "overview" | "health" | "jobs" | "connectors" | "seed" | "feeds" | "errors" | "infrastructure";
+
+interface FeedIngestionView {
+  feedId: string;
+  feedName: string;
+  status: string;
+  enabled: boolean;
+  consecutiveFailures: number;
+  avgPollDurationMs: number;
+  lastSuccessAt: string | null;
+  lastIngestedAt: string | null;
+  totalEntitiesCreated: number;
+  totalEntitiesMerged: number;
+  recentPolls: Array<{ pollAt: string; entitiesCreated: number; entitiesMerged: number; entitiesUpserted: number; relationshipsCreated: number }>;
+}
+
+interface FeedHealth {
+  timestamp: string;
+  summary: { totalFeeds: number; healthy: number; degraded: number; down: number; totalEntitiesCreated: number; totalEntitiesMerged: number };
+  feeds: FeedIngestionView[];
+}
+
+function relativeTime(iso: string | null): string {
+  if (!iso) return "never";
+  const diff = Date.now() - new Date(iso).getTime();
+  if (diff < 0) return "just now";
+  const s = Math.floor(diff / 1000);
+  if (s < 60) return `${s}s ago`;
+  const m = Math.floor(s / 60);
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  return `${Math.floor(h / 24)}d ago`;
+}
+
+function Sparkline({ values, color = "#d4a054", width = 96, height = 22 }: { values: number[]; color?: string; width?: number; height?: number }) {
+  if (values.length === 0) {
+    return <div style={{ width, height, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "9px", color: "rgba(255,255,255,0.2)", fontFamily: "var(--font-mono)" }}>no polls</div>;
+  }
+  const max = Math.max(...values, 1);
+  const step = values.length > 1 ? width / (values.length - 1) : 0;
+  const points = values.map((v, i) => `${(i * step).toFixed(1)},${(height - (v / max) * height).toFixed(1)}`).join(" ");
+  const areaPoints = `0,${height} ${points} ${(width).toFixed(1)},${height}`;
+  return (
+    <svg width={width} height={height} style={{ display: "block" }} aria-hidden="true">
+      <polygon points={areaPoints} fill={color} fillOpacity={0.12} />
+      <polyline points={points} fill="none" stroke={color} strokeWidth={1.25} strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
 
 export default function OpsConsole() {
   const [activeTab, setActiveTab] = useState<TabKey>("overview");
@@ -143,6 +192,7 @@ export default function OpsConsole() {
   const jobsData = useStandardQuery<JobStats>({ queryKey: ["ops-jobs", refreshKey], queryFn: () => apiFetch("/admin/jobs/stats"), refetchInterval: 30000 });
   const connectorsData = useStandardQuery<ConnectorSummary>({ queryKey: ["ops-connectors", refreshKey], queryFn: () => apiFetch("/admin/connectors"), refetchInterval: 60000 });
   const seedData = useStandardQuery<SeedValidation>({ queryKey: ["ops-seed", refreshKey], queryFn: () => apiFetch("/admin/seed/validate"), staleTime: 5 * 60 * 1000 });
+  const feedHealth = useStandardQuery<FeedHealth>({ queryKey: ["ops-feed-health", refreshKey], queryFn: () => apiFetch("/admin/feed-health"), refetchInterval: 30000 });
   const rmmHealth = useStandardQuery<{ overallStatus: string; providers: { total: number; active: number; error: number; list: Array<{ id: number; name: string; provider: string; status: string; lastSyncAt: string | null; deviceCount: number | null }> }; devices: { total: number; online: number; warning: number; critical: number; offline: number; avgCpu: number; avgMemory: number; avgDisk: number; totalAlerts: number }; healing: { pendingApprovals: number; stats: Record<string, number> } }>({
     queryKey: ["lyte-rmm-health", refreshKey],
     queryFn: () => apiFetch("/msp/rmm/health"),
@@ -164,6 +214,7 @@ export default function OpsConsole() {
     { key: "jobs", label: "Jobs & Queue", icon: Activity, badge: jd?.stats?.running },
     { key: "connectors", label: "Connectors", icon: Globe, badge: cd ? cd.summary.manualRequired : undefined },
     { key: "seed", label: "Seed Data", icon: Database, badge: sd ? sd.summary.failed + sd.summary.errors : undefined },
+    { key: "feeds", label: "Intel Feeds", icon: Rss, badge: feedHealth.data ? feedHealth.data.summary.degraded + feedHealth.data.summary.down : undefined },
     { key: "errors", label: "Error Summary", icon: AlertCircle },
     { key: "infrastructure", label: "Infrastructure", icon: Server, badge: rmmHealth.data?.devices.critical ?? undefined },
   ];
@@ -557,6 +608,81 @@ export default function OpsConsole() {
               <div style={{ width: 20, height: 20, border: "2px solid rgba(212,160,84,0.2)", borderTopColor: "#d4a054", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
             </div>
           )}
+        </div>
+      )}
+
+      {activeTab === "feeds" && (
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+          {feedHealth.data && (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "0.75rem" }}>
+              <MetricCard icon={Rss} label="Feeds" value={feedHealth.data.summary.totalFeeds} color="#d4a054" />
+              <MetricCard icon={CheckCircle} label="Healthy" value={feedHealth.data.summary.healthy} color="#6b8f71" />
+              <MetricCard icon={AlertTriangle} label="Degraded" value={feedHealth.data.summary.degraded} color="#d4a054" />
+              <MetricCard icon={X} label="Down" value={feedHealth.data.summary.down} color="#c45a4a" />
+              <MetricCard icon={TrendingUp} label="Created / Merged" value={`${feedHealth.data.summary.totalEntitiesCreated} / ${feedHealth.data.summary.totalEntitiesMerged}`} sub="since startup" color="#4a90b8" />
+            </div>
+          )}
+
+          <div style={{ padding: "1rem", borderRadius: "0.75rem", background: BG.card, border: `1px solid ${BORDER.subtle}` }}>
+            <SectionHeader
+              icon={Rss}
+              title="Sanctions & Intelligence Feed Activity"
+              subtitle="Per-feed entity churn (created vs. merged) across recent polls — totals reset on API restart"
+              action={feedHealth.data && (
+                <span style={{ fontSize: "10px", color: TEXT.muted, fontFamily: "var(--font-mono)" }}>
+                  Updated {formatTime(feedHealth.data.timestamp)}
+                </span>
+              )}
+            />
+            {feedHealth.isLoading && !feedHealth.data && (
+              <div style={{ color: TEXT.muted, fontSize: "12px", textAlign: "center", padding: "2rem 0" }}>Loading feed activity…</div>
+            )}
+            {feedHealth.data && feedHealth.data.feeds.length === 0 && (
+              <div style={{ color: TEXT.muted, fontSize: "12px", textAlign: "center", padding: "2rem 0" }}>
+                No intelligence feeds registered. Enable feeds via env flags (e.g. <span style={{ fontFamily: "var(--font-mono)" }}>SANCTIONS_FEED_ENABLED</span>) and restart the API server.
+              </div>
+            )}
+            {feedHealth.data && feedHealth.data.feeds.length > 0 && (
+              <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1.6fr 0.7fr 0.9fr 0.9fr 1.1fr 1.1fr", gap: "10px", fontSize: "9px", textTransform: "uppercase", letterSpacing: "0.08em", color: TEXT.muted, fontFamily: "var(--font-mono)", padding: "4px 8px" }}>
+                  <span>Feed</span>
+                  <span>Status</span>
+                  <span style={{ textAlign: "right" }}>Created</span>
+                  <span style={{ textAlign: "right" }}>Merged</span>
+                  <span>Last ingest</span>
+                  <span style={{ textAlign: "right" }}>Churn (recent polls)</span>
+                </div>
+                {feedHealth.data.feeds.map((f) => {
+                  const sparkSeries = f.recentPolls.map(p => p.entitiesCreated + p.entitiesMerged);
+                  const stalled = f.recentPolls.length === 0 || (f.lastIngestedAt !== null && Date.now() - new Date(f.lastIngestedAt).getTime() > 30 * 60 * 1000);
+                  return (
+                    <div
+                      key={f.feedId}
+                      style={{ display: "grid", gridTemplateColumns: "1.6fr 0.7fr 0.9fr 0.9fr 1.1fr 1.1fr", gap: "10px", alignItems: "center", padding: "8px", borderRadius: "6px", background: BG.section, border: `1px solid ${stalled ? "rgba(212,160,84,0.18)" : BORDER.muted}` }}
+                    >
+                      <div style={{ minWidth: 0 }}>
+                        <div style={{ fontSize: "12px", fontWeight: 500, color: TEXT.primary, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{f.feedName}</div>
+                        <div style={{ fontSize: "10px", color: TEXT.muted, fontFamily: "var(--font-mono)" }}>{f.feedId} · avg {f.avgPollDurationMs}ms{f.consecutiveFailures > 0 ? ` · ${f.consecutiveFailures} fails` : ""}</div>
+                      </div>
+                      <StatusBadge status={f.status === "healthy" ? "healthy" : f.status === "down" ? "down" : "degraded"} />
+                      <span style={{ textAlign: "right", color: "#6b8f71", fontFamily: "var(--font-mono)", fontSize: "12px", fontWeight: 600 }}>{f.totalEntitiesCreated}</span>
+                      <span style={{ textAlign: "right", color: "#4a90b8", fontFamily: "var(--font-mono)", fontSize: "12px", fontWeight: 600 }}>{f.totalEntitiesMerged}</span>
+                      <span style={{ fontSize: "11px", color: stalled ? "#d4a054" : TEXT.secondary, fontFamily: "var(--font-mono)" }}>{relativeTime(f.lastIngestedAt)}</span>
+                      <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "6px" }}>
+                        <Sparkline values={sparkSeries} color="#6b8f71" />
+                        <span style={{ fontSize: "9px", color: TEXT.muted, fontFamily: "var(--font-mono)", minWidth: "30px", textAlign: "right" }}>{f.recentPolls.length} polls</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+            {feedHealth.error && (
+              <div style={{ marginTop: "0.75rem", padding: "0.75rem", borderRadius: "0.5rem", background: "rgba(196,90,74,0.06)", border: "1px solid rgba(196,90,74,0.2)", color: "#c45a4a", fontSize: "11px" }}>
+                Feed activity unavailable — admin endpoint not reachable.
+              </div>
+            )}
+          </div>
         </div>
       )}
 

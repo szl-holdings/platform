@@ -276,6 +276,25 @@ export function register(router: IRouter): void {
     res.json({ timestamp: new Date().toISOString(), status: overallStatus, checks, summary: { total: checks.length, healthy: checks.filter((c) => c.status === "healthy").length, degraded: checks.filter((c) => c.status === "degraded").length, down: checks.filter((c) => c.status === "down").length } });
   });
 
+  router.get("/admin/feed-health", async (_req, res) => {
+    try {
+      const { getFeedIngestionView } = await import("../../lib/intelligence-feeds-init.js");
+      const feeds = await getFeedIngestionView();
+      const summary = {
+        totalFeeds: feeds.length,
+        healthy: feeds.filter(f => f.status === "healthy").length,
+        degraded: feeds.filter(f => f.status === "degraded").length,
+        down: feeds.filter(f => f.status === "down").length,
+        totalEntitiesCreated: feeds.reduce((s, f) => s + f.totalEntitiesCreated, 0),
+        totalEntitiesMerged: feeds.reduce((s, f) => s + f.totalEntitiesMerged, 0),
+      };
+      res.json({ timestamp: new Date().toISOString(), summary, feeds });
+    } catch (err) {
+      logger.warn({ err }, "[admin] feed-health route failed");
+      res.json({ timestamp: new Date().toISOString(), summary: { totalFeeds: 0, healthy: 0, degraded: 0, down: 0, totalEntitiesCreated: 0, totalEntitiesMerged: 0 }, feeds: [] });
+    }
+  });
+
   router.get("/admin/seed/validate", async (_req, res) => {
     const results: { table: string; description: string; expected: number; actual: number; status: "pass" | "fail" | "error" }[] = [];
     for (const expectation of SEED_TABLE_EXPECTATIONS) {

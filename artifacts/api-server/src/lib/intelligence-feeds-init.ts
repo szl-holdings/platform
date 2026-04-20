@@ -136,6 +136,15 @@ export async function startIntelligenceFeeds(): Promise<void> {
       } else {
         logger.debug({ source }, "[feeds] Ingestion batch complete (no entities)");
       }
+      // Record every successful poll — including zero-churn batches — so the
+      // operator dashboard reflects true poll cadence and lastIngestedAt
+      // never goes stale while polls are still succeeding.
+      feedScheduler.recordIngestion(source, {
+        entitiesCreated,
+        entitiesMerged,
+        entitiesUpserted: upserted.length,
+        relationshipsCreated: created.length,
+      });
       return { entitiesUpserted: upserted, relationshipsCreated: created };
     });
 
@@ -184,6 +193,58 @@ export async function getFeedHealthSummary(): Promise<Array<{
       avgPollDurationMs: h.avgPollDurationMs,
       lastSuccessAt: h.lastSuccessAt,
     }));
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Operator-facing per-feed ingestion summary.
+ * Combines health (status, failures, last success) with sync activity counters
+ * (entitiesCreated / entitiesMerged) and a recent-poll history for sparklines.
+ */
+export interface FeedIngestionView {
+  feedId: string;
+  feedName: string;
+  status: string;
+  enabled: boolean;
+  consecutiveFailures: number;
+  avgPollDurationMs: number;
+  lastSuccessAt: string | null;
+  lastIngestedAt: string | null;
+  totalEntitiesCreated: number;
+  totalEntitiesMerged: number;
+  recentPolls: Array<{
+    pollAt: string;
+    entitiesCreated: number;
+    entitiesMerged: number;
+    entitiesUpserted: number;
+    relationshipsCreated: number;
+  }>;
+}
+
+export async function getFeedIngestionView(): Promise<FeedIngestionView[]> {
+  try {
+    const { feedScheduler } = await import("@szl-holdings/intelligence-feeds/feed-scheduler");
+    const health = feedScheduler.getAllHealth();
+    const status = feedScheduler.getSchedulerStatus();
+    const enabledMap = new Map(status.feedStatuses.map(f => [f.feedId, f.enabled]));
+    return health.map((h) => {
+      const summary = feedScheduler.getIngestionSummary(h.feedId);
+      return {
+        feedId: h.feedId,
+        feedName: h.feedName,
+        status: h.status,
+        enabled: enabledMap.get(h.feedId) ?? false,
+        consecutiveFailures: h.consecutiveFailures,
+        avgPollDurationMs: h.avgPollDurationMs,
+        lastSuccessAt: h.lastSuccessAt,
+        lastIngestedAt: summary.lastIngestedAt,
+        totalEntitiesCreated: summary.totalCreated,
+        totalEntitiesMerged: summary.totalMerged,
+        recentPolls: summary.recent,
+      };
+    });
   } catch {
     return [];
   }
