@@ -32,9 +32,31 @@ import { validateBody, validateQuery, listQuerySchema, anyQuerySchema, lyteCogni
 
 const router: IRouter = Router();
 
-router.post("/lyte/cognitive/signal-fusion/run", authMiddleware(), validateBody(bodyShape({})), async (req, res) => {
-  try {
-    const [signals, alerts, escalations, metrics] = await Promise.all([
+export type SignalFusionTrigger = "manual" | "scheduled";
+
+export interface SignalFusionResult {
+  status: "completed";
+  trigger: SignalFusionTrigger;
+  fusedCount: number;
+  errorCount: number;
+  bySource: Record<string, number>;
+  bySeverity: Record<string, number>;
+  anomalyMetrics: number;
+  constellationNodes: Array<{ id: string; entityType: string; name: string; source: string; domain: string }>;
+  ranAt: string;
+}
+
+let _lastFusion: SignalFusionResult | null = null;
+
+export function getLastSignalFusion(): SignalFusionResult | null {
+  return _lastFusion;
+}
+
+export async function runSignalFusion(
+  options: { trigger?: SignalFusionTrigger } = {},
+): Promise<SignalFusionResult> {
+  const trigger: SignalFusionTrigger = options.trigger ?? "manual";
+  const [signals, alerts, escalations, metrics] = await Promise.all([
       db.select().from(lyteSignalsTable).orderBy(desc(lyteSignalsTable.receivedAt)).limit(200),
       db.select().from(lyteAlertsTable).where(eq(lyteAlertsTable.status, "firing")).limit(100),
       db.select().from(lyteEscalationsTable)
@@ -130,16 +152,25 @@ router.post("/lyte/cognitive/signal-fusion/run", authMiddleware(), validateBody(
       bySeverityGroup[s.severity] = (bySeverityGroup[s.severity] ?? 0) + 1;
     }
 
-    sendSuccess(res, {
-      status: "completed",
-      fusedCount: fusedNodes.length,
-      errorCount: errors.length,
-      bySource,
-      bySeverity: bySeverityGroup,
-      anomalyMetrics: metrics.length,
-      constellationNodes: fusedNodes.slice(0, 20),
-      ranAt: new Date().toISOString(),
-    });
+  const result: SignalFusionResult = {
+    status: "completed",
+    trigger,
+    fusedCount: fusedNodes.length,
+    errorCount: errors.length,
+    bySource,
+    bySeverity: bySeverityGroup,
+    anomalyMetrics: metrics.length,
+    constellationNodes: fusedNodes.slice(0, 20),
+    ranAt: new Date().toISOString(),
+  };
+  _lastFusion = result;
+  return result;
+}
+
+router.post("/lyte/cognitive/signal-fusion/run", authMiddleware(), validateBody(bodyShape({})), async (_req, res) => {
+  try {
+    const result = await runSignalFusion({ trigger: "manual" });
+    sendSuccess(res, result);
   } catch (err) {
     handleRouteError(res, err, "Signal fusion run failed");
   }
@@ -189,6 +220,15 @@ router.get("/lyte/cognitive/signal-fusion", authMiddleware(), async (req, res) =
       firingAlerts: alerts.filter(a => a.status === "firing").length,
       openEscalations: escalations.filter(e => ["open", "in_progress"].includes(e.status)).length,
       recentSignals: signals.slice(0, 10),
+      lastFusion: _lastFusion ? {
+        ranAt: _lastFusion.ranAt,
+        trigger: _lastFusion.trigger,
+        fusedCount: _lastFusion.fusedCount,
+        errorCount: _lastFusion.errorCount,
+        bySource: _lastFusion.bySource,
+        bySeverity: _lastFusion.bySeverity,
+        anomalyMetrics: _lastFusion.anomalyMetrics,
+      } : null,
       fetchedAt: new Date().toISOString(),
     });
   } catch (err) {

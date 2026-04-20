@@ -186,6 +186,37 @@ export async function bootstrap(server: http.Server, port: number): Promise<http
   }, driftSampleIntervalMs);
   driftSampleInterval.unref();
 
+  // Schedule automatic Lyte signal fusion runs so CONSTELLATION stays current
+  // without requiring an operator to click "Run Fusion". Configurable via
+  // SIGNAL_FUSION_INTERVAL_MINUTES (default: 15 minutes, minimum: 1).
+  const signalFusionIntervalMinutes = Math.max(
+    1,
+    parseInt(process.env["SIGNAL_FUSION_INTERVAL_MINUTES"] ?? "15", 10) || 15
+  );
+  const signalFusionIntervalMs = signalFusionIntervalMinutes * 60 * 1000;
+  logger.info({ intervalMinutes: signalFusionIntervalMinutes }, "[signal-fusion] Scheduling automatic signal fusion runs");
+  const runScheduledSignalFusion = () => {
+    import("./routes/lyte-cognitive.js").then(({ runSignalFusion }) => {
+      runSignalFusion({ trigger: "scheduled" })
+        .then((result) => {
+          logger.info(
+            { ranAt: result.ranAt, fusedCount: result.fusedCount, errorCount: result.errorCount },
+            "[signal-fusion] Scheduled fusion run complete"
+          );
+        })
+        .catch((err) => {
+          logger.warn({ err }, "[signal-fusion] Scheduled fusion run failed (non-fatal)");
+        });
+    }).catch((err) => logger.warn({ err }, "[signal-fusion] Failed to load lyte-cognitive module for scheduling"));
+  };
+  // Prime the state with an initial run shortly after boot so the Signal
+  // Fusion tab shows a fresh lastFusion snapshot without needing a manual
+  // trigger. Delayed so it doesn't contend with the bootstrap work above.
+  const signalFusionKickoff = setTimeout(runScheduledSignalFusion, 30_000);
+  signalFusionKickoff.unref();
+  const signalFusionInterval = setInterval(runScheduledSignalFusion, signalFusionIntervalMs);
+  signalFusionInterval.unref();
+
   import("./routes/rmm").then(m => m.startSyncScheduler()).catch(err => logger.warn({ err }, "RMM sync scheduler start failed (non-fatal)"));
   pingRedis().catch(err => logger.warn({ err }, "[redis] Startup ping failed (non-fatal)"));
   prewarmIntelligenceCache().catch(err => {
