@@ -124,6 +124,8 @@ The platform is a pnpm monorepo using TypeScript 5.9, React 19, Vite, and Node.j
 
 **NEXUS — Unified Agentic AI Layer:** NEXUS is the unified agentic AI orchestration layer, accessible at `/nexus/`, serving as a static build from the API server. Its four pillars include a Parallel Research Swarm, Persistent Memory + Skills Library, Universal Protocol Bridge, and Cross-App Orchestrator. The frontend is built from `artifacts/mockup-sandbox/` and the backend endpoints are in `artifacts/api-server/src/routes/nexus.ts`.
 
+**NEXUS Rebuild Pipeline:** `artifacts/api-server/start.sh` rebuilds `mockup-sandbox/dist/public` on workflow startup whenever any source under `mockup-sandbox/src` (or `index.html`/`vite.config.ts`/`package.json`) is newer than the built `index.html`. In addition, the same script spawns a background `vite build --watch` (logs to `/tmp/nexus-vite-watch.log`) that keeps `dist/public` in sync with edits in real time — refresh `/nexus/` in the browser to see changes without restarting the `artifacts/api-server: api` workflow. Toggle env vars: `FORCE_NEXUS_BUILD=1` (force initial rebuild), `SKIP_NEXUS_BUILD=1` (skip initial rebuild), `WATCH_NEXUS=0` (disable the background watcher). The watcher is killed automatically when the workflow exits.
+
 ## External Dependencies
 -   **Database:** PostgreSQL 16
 -   **Authentication:** Replit Auth

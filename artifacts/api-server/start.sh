@@ -56,4 +56,23 @@ else
 fi
 # -----------------------------------------------------------------------------
 
+# --- NEXUS frontend watch-mode rebuild ---------------------------------------
+# Run `vite build --watch` in the background so edits in mockup-sandbox/src are
+# rebuilt into dist/public on every save without restarting this workflow.
+# Disable with WATCH_NEXUS=0. The watcher is killed when this script exits.
+NEXUS_WATCH_LOG="/tmp/nexus-vite-watch.log"
+NEXUS_WATCH_PID=""
+if [ "${WATCH_NEXUS:-1}" = "1" ]; then
+  echo "[api-server start.sh] Starting NEXUS frontend watch (vite build --watch) — log: $NEXUS_WATCH_LOG"
+  (
+    cd "$NEXUS_DIR" && NODE_ENV=production exec node_modules/.bin/vite build --watch --logLevel warn
+  ) >"$NEXUS_WATCH_LOG" 2>&1 &
+  NEXUS_WATCH_PID=$!
+  echo "[api-server start.sh] NEXUS watcher pid=$NEXUS_WATCH_PID"
+  trap 'if [ -n "$NEXUS_WATCH_PID" ] && kill -0 "$NEXUS_WATCH_PID" 2>/dev/null; then kill "$NEXUS_WATCH_PID" 2>/dev/null || true; fi' EXIT INT TERM
+else
+  echo "[api-server start.sh] WATCH_NEXUS=0 — skipping NEXUS watcher."
+fi
+# -----------------------------------------------------------------------------
+
 exec node --max-old-space-size=1536 --expose-gc --optimize-for-size --enable-source-maps ./dist/index.mjs
