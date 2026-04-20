@@ -14,7 +14,7 @@ const router = Router();
 
 router.use("/agent-os", tenantScope({ required: true }));
 
-router.get("/agent-os/status", (_req, res) => {
+router.get("/agent-os/status", authMiddleware(), (_req, res) => {
   const schedulerStats = agentScheduler.getStats();
   const knowledgeStats = knowledgeStore.getStats();
   const eventBusStats = agentEventBus.getStats();
@@ -27,7 +27,7 @@ router.get("/agent-os/status", (_req, res) => {
   });
 });
 
-router.get("/agent-os/schedules", (_req, res) => {
+router.get("/agent-os/schedules", authMiddleware(), (_req, res) => {
   const stats = agentScheduler.getStats();
   sendSuccess(res, {
     schedules: stats.schedules,
@@ -52,7 +52,7 @@ router.post("/agent-os/run/:agentId", authMiddleware(), requireRole("admin", "su
   }
 });
 
-router.get("/agent-os/runs", validateQuery(listQuerySchema), (req, res) => {
+router.get("/agent-os/runs", authMiddleware(), validateQuery(listQuerySchema), (req, res) => {
   const { agentId, domain, limit } = req.query;
   const runs = agentScheduler.getRunHistory({
     agentId: agentId as string,
@@ -62,7 +62,7 @@ router.get("/agent-os/runs", validateQuery(listQuerySchema), (req, res) => {
   sendSuccess(res, { runs, total: runs.length });
 });
 
-router.get("/agent-os/knowledge", validateQuery(listQuerySchema), (req, res) => {
+router.get("/agent-os/knowledge", authMiddleware(), validateQuery(listQuerySchema), (req, res) => {
   const { domain, type, limit, since, minConfidence, tags } = req.query;
 
   const entries = knowledgeStore.query({
@@ -77,7 +77,7 @@ router.get("/agent-os/knowledge", validateQuery(listQuerySchema), (req, res) => 
   sendSuccess(res, { entries, total: entries.length, stats: knowledgeStore.getStats() });
 });
 
-router.get("/agent-os/events", validateQuery(listQuerySchema), (req, res) => {
+router.get("/agent-os/events", authMiddleware(), validateQuery(listQuerySchema), (req, res) => {
   const { type, sourceDomain, limit, since } = req.query;
   const events = agentEventBus.getHistory({
     type: type as unknown as undefined,
@@ -88,7 +88,7 @@ router.get("/agent-os/events", validateQuery(listQuerySchema), (req, res) => {
   sendSuccess(res, { events, stats: agentEventBus.getStats() });
 });
 
-router.get("/agent-os/feed/:domain", validateQuery(listQuerySchema), (req, res) => {
+router.get("/agent-os/feed/:domain", authMiddleware(), validateQuery(listQuerySchema), (req, res) => {
   const { domain } = req.params;
   const { limit } = req.query;
   const maxResults = limit ? parseInt(limit as string, 10) : 20;
@@ -140,7 +140,7 @@ router.get("/agent-os/feed/:domain", validateQuery(listQuerySchema), (req, res) 
   });
 });
 
-router.get("/agent-os/feed", validateQuery(listQuerySchema), (req, res) => {
+router.get("/agent-os/feed", authMiddleware(), validateQuery(listQuerySchema), (req, res) => {
   const { limit } = req.query;
   const maxResults = limit ? parseInt(limit as string, 10) : 30;
 
@@ -166,7 +166,7 @@ router.get("/agent-os/feed", validateQuery(listQuerySchema), (req, res) => {
   });
 });
 
-router.get("/agent-os/agent-stats", (_req, res) => {
+router.get("/agent-os/agent-stats", authMiddleware(), (_req, res) => {
   const stats = agentScheduler.getStats();
   const knowledgeStats = knowledgeStore.getStats();
   const eventBusStats = agentEventBus.getStats();
