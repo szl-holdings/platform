@@ -10,6 +10,7 @@ import {
   vesselTwins, voyageTwins,
   type VesselTwin, type VoyageTwin
 } from "@/data/fleet-twin";
+import { BalticPill } from "@/components/baltic-pill";
 
 const ACCENT = "hsl(205 70% 50%)";
 const ACCENT_DIM = "hsl(205 70% 38%)";
@@ -205,12 +206,15 @@ export default function VoyageDesk() {
                     {activeVoyage.originPort} → {activeVoyage.destinationPort} · {activeVoyage.cargo}
                   </div>
                 </div>
-                <span className="text-xs px-2 py-0.5 rounded-full" style={{
-                  background: `${RISK_COLOR[activeVoyage.routeRisk]}20`,
-                  color: RISK_COLOR[activeVoyage.routeRisk],
-                }}>
-                  Route: {activeVoyage.routeRisk} risk
-                </span>
+                <div className="flex items-center gap-2">
+                  <BalticPill voyageTce={activeVoyage.economics.tcEquivalent} cargo={activeVoyage.cargo} />
+                  <span className="text-xs px-2 py-0.5 rounded-full" style={{
+                    background: `${RISK_COLOR[activeVoyage.routeRisk]}20`,
+                    color: RISK_COLOR[activeVoyage.routeRisk],
+                  }}>
+                    Route: {activeVoyage.routeRisk} risk
+                  </span>
+                </div>
               </div>
 
               <div className="grid grid-cols-4 gap-3 mb-4">

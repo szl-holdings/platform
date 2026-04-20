@@ -2,8 +2,10 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import {
   TrendingUp, TrendingDown, RefreshCw, BarChart3,
   Plus, X, ChevronUp, ChevronDown, AlertCircle,
-  DollarSign, Activity, Layers, Clock,
+  DollarSign, Activity, Layers, Clock, Anchor,
 } from "lucide-react";
+import { voyageTwins } from "@/data/fleet-twin";
+import { BalticPill } from "@/components/baltic-pill";
 
 const ACCENT = "#38bdf8";
 const GREEN = "#22c55e";
@@ -66,7 +68,7 @@ interface PnlSummary {
   netPnl: number; openPositions: number; winRate: number; sharpeRatio: number;
 }
 
-type Tab = "instruments" | "orders" | "positions" | "fills" | "pnl";
+type Tab = "instruments" | "orders" | "positions" | "fills" | "pnl" | "voyages";
 type Side = "buy" | "sell";
 type OrderType = "market" | "limit";
 
@@ -340,6 +342,7 @@ export default function TradingDeskPage() {
     { key: "positions", label: "Positions", icon: Activity, count: positions.length || undefined },
     { key: "fills", label: "Fills", icon: Clock },
     { key: "pnl", label: "P&L", icon: DollarSign },
+    { key: "voyages", label: "Voyages", icon: Anchor, count: voyageTwins.filter(v => v.status === "active" || v.status === "deviating" || v.status === "exception").length || undefined },
   ];
 
   const totalUnrealized = positions.reduce((s, p) => s + (p.unrealizedPnl ?? 0), 0);
@@ -639,6 +642,42 @@ export default function TradingDeskPage() {
                     All prices are simulated for demonstration purposes. Live integration available via Baltic Exchange API subscription.
                   </p>
                 </div>
+              </div>
+            )}
+
+            {tab === "voyages" && (
+              <div className="p-4">
+                {voyageTwins.length === 0 ? (
+                  <p className="text-[12px] text-center mt-8" style={{ color: TEXT.muted }}>No voyages</p>
+                ) : (
+                  <table className="w-full">
+                    <thead>
+                      <tr className="text-[10px] uppercase tracking-wider" style={{ color: TEXT.muted }}>
+                        {["Voyage", "Vessel", "Route", "Cargo", "TC Equiv", "vs Baltic", "Margin", "Status"].map(h => (
+                          <th key={h} className="text-left pb-2 pr-3">{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {voyageTwins.map(v => {
+                        const tce = v.economics.tcEquivalent;
+                        const margin = v.economics.profitMarginPct;
+                        return (
+                          <tr key={v.id} className="text-[11px] hover:bg-white/[0.02]" style={{ borderTop: `1px solid ${BORDER.subtle}` }}>
+                            <td className="py-2.5 pr-3 font-mono text-[10px]" style={{ color: TEXT.tertiary }}>{v.voyageNumber}</td>
+                            <td className="py-2.5 pr-3 font-semibold" style={{ color: ACCENT }}>{v.vesselName}</td>
+                            <td className="py-2.5 pr-3" style={{ color: TEXT.secondary }}>{v.originPort} → {v.destinationPort}</td>
+                            <td className="py-2.5 pr-3" style={{ color: TEXT.secondary }}>{v.cargo}</td>
+                            <td className="py-2.5 pr-3 font-mono" style={{ color: TEXT.primary }}>${fmt(tce, 0)}/d</td>
+                            <td className="py-2.5 pr-3"><BalticPill voyageTce={tce} cargo={v.cargo} /></td>
+                            <td className="py-2.5 pr-3 font-mono" style={{ color: margin >= 20 ? GREEN : margin >= 0 ? AMBER : RED }}>{margin.toFixed(1)}%</td>
+                            <td className="py-2.5 pr-3 capitalize text-[10px]" style={{ color: TEXT.muted }}>{v.status}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                )}
               </div>
             )}
           </div>
