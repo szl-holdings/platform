@@ -8,5 +8,5 @@ export function register(router: IRouter): void {
 
   router.use("/guardian", perUserApiSlidingLimiter);
   router.use("/guardian/decide", perUserWriteSlidingLimiter);
-  router.use(lazyMatch(["/policies", "/tools", "/actions", "/tool-approvals", "/approvals", "/audit", "/rollback-events", "/guardian", "/guardrail-configs"], () => import("../guardian"), "guardian"));
+  router.use(lazyMatch(["/policies", "/tools", "/actions", "/tool-approvals", "/approvals", "/audit", "/rollback-events", "/guardian", "/guardrail-configs", "/ledger"], () => import("../guardian"), "guardian"));
 }

@@ -1,5 +1,5 @@
 import { useStandardQuery } from "@szl-holdings/api-client-react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { m, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
 import { apiRequest } from "@/lib/api";
@@ -8,7 +8,7 @@ import {
   Ship, Building2, Briefcase, Users, Zap, Layers, ArrowRight,
   ChevronRight, TrendingUp, TrendingDown, BarChart3, Activity,
   Lock, Eye, FileCheck, ArrowUpRight, GitBranch, Filter,
-  Database, Radio,
+  Database, Radio, ExternalLink,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -228,6 +228,283 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
+interface LedgerRow {
+  id: number;
+  requestId: string;
+  agentId: string | null;
+  sessionId: string | null;
+  workflowId: string | null;
+  tier: string;
+  action: string;
+  toolId: string | null;
+  model: string | null;
+  decision: "allow" | "require-approval" | "require-dual-approval" | "block";
+  matchedRuleId: string | null;
+  reason: string;
+  rollbackRequired: boolean;
+  controlViolations: unknown[];
+  domain: string | null;
+  latencyMs: number | null;
+  traceId: string | null;
+  traceStatus: string | null;
+  decidedAt: string;
+}
+
+interface LedgerResponse {
+  items: LedgerRow[];
+  domains: string[];
+  decisions: readonly string[];
+  count: number;
+  limit: number;
+}
+
+const WINDOW_TO_MS: Record<"15m" | "1h" | "24h" | "7d", number> = {
+  "15m": 15 * 60_000,
+  "1h": 60 * 60_000,
+  "24h": 24 * 60 * 60_000,
+  "7d": 7 * 24 * 60 * 60_000,
+};
+
+const DECISION_COLORS: Record<string, string> = {
+  allow: GREEN,
+  "require-approval": YELLOW,
+  "require-dual-approval": ORANGE,
+  block: RED,
+};
+
+function DecisionBadge({ decision }: { decision: string }) {
+  const c = DECISION_COLORS[decision] ?? TEXT_FAINT;
+  return (
+    <span style={{ fontSize: "0.575rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: MONO, padding: "2px 6px", borderRadius: 3, background: `${c}15`, border: `1px solid ${c}30`, color: c, whiteSpace: "nowrap" }}>
+      {decision}
+    </span>
+  );
+}
+
+function formatRelative(iso: string): string {
+  const ms = Date.now() - new Date(iso).getTime();
+  if (!Number.isFinite(ms) || ms < 0) return "just now";
+  const s = Math.floor(ms / 1000);
+  if (s < 60) return `${s}s ago`;
+  const m = Math.floor(s / 60);
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  return `${Math.floor(h / 24)}d ago`;
+}
+
+function formatLatency(ms: number | null): string {
+  if (ms === null || !Number.isFinite(ms)) return "—";
+  if (ms < 1) return "<1ms";
+  if (ms < 1000) return `${Math.round(ms)}ms`;
+  return `${(ms / 1000).toFixed(2)}s`;
+}
+
+function LiveActivityTab(props: {
+  ledgerDecision: string;
+  setLedgerDecision: (v: string) => void;
+  ledgerDomain: string;
+  setLedgerDomain: (v: string) => void;
+  ledgerWindow: "15m" | "1h" | "24h" | "7d";
+  setLedgerWindow: (v: "15m" | "1h" | "24h" | "7d") => void;
+}) {
+  const { ledgerDecision, setLedgerDecision, ledgerDomain, setLedgerDomain, ledgerWindow, setLedgerWindow } = props;
+
+  // Tick every 5s so the time-window slides with wall-clock time. Without this
+  // a frozen `since` would cause the effective window to widen as time passes
+  // (e.g. a "1h" filter would creep to 1h05m, 1h10m, ...).
+  const [nowBucket, setNowBucket] = useState(() => Math.floor(Date.now() / 5000));
+  useEffect(() => {
+    const id = window.setInterval(() => setNowBucket(Math.floor(Date.now() / 5000)), 5000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  const ledgerQuery = useStandardQuery<LedgerResponse>({
+    queryKey: ["guardian", "ledger", ledgerDecision, ledgerDomain, ledgerWindow, nowBucket],
+    queryFn: async () => {
+      // Compute `since` at fetch time so each refetch uses a fresh window edge.
+      const sinceIso = new Date(Date.now() - WINDOW_TO_MS[ledgerWindow]).toISOString();
+      const params = new URLSearchParams();
+      if (ledgerDecision) params.set("decision", ledgerDecision);
+      if (ledgerDomain) params.set("domain", ledgerDomain);
+      params.set("since", sinceIso);
+      params.set("limit", "100");
+      return apiRequest<LedgerResponse>("GET", `/api/ledger?${params.toString()}`);
+    },
+    refetchInterval: 5000,
+    staleTime: 2000,
+  });
+
+  const items = ledgerQuery.data?.items ?? [];
+  const domains = ledgerQuery.data?.domains ?? [];
+  const decisions = ledgerQuery.data?.decisions ?? ["allow", "require-approval", "require-dual-approval", "block"];
+  const counts = useMemo(() => {
+    const c: Record<string, number> = { allow: 0, "require-approval": 0, "require-dual-approval": 0, block: 0 };
+    for (const r of items) c[r.decision] = (c[r.decision] ?? 0) + 1;
+    return c;
+  }, [items]);
+
+  const inputStyle: React.CSSProperties = {
+    background: BG,
+    color: TEXT,
+    border: `1px solid ${BORDER}`,
+    borderRadius: 6,
+    padding: "0.4rem 0.625rem",
+    fontSize: "0.75rem",
+    fontFamily: MONO,
+    cursor: "pointer",
+  };
+
+  return (
+    <m.div key="live-activity" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+      {/* Header + filters */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem", marginBottom: "1rem" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
+          <div style={{ width: 8, height: 8, borderRadius: "50%", background: GREEN, boxShadow: `0 0 8px ${GREEN}` }} />
+          <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: TEXT_FAINT, margin: 0 }}>
+            Live agent activity — {items.length} decision{items.length === 1 ? "" : "s"} in last {ledgerWindow}
+          </p>
+          {ledgerQuery.isFetching && (
+            <span style={{ fontSize: "0.6rem", fontFamily: MONO, color: TEXT_FAINT }}>refreshing…</span>
+          )}
+        </div>
+        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
+          <select aria-label="Decision filter" value={ledgerDecision} onChange={(e) => setLedgerDecision(e.target.value)} style={inputStyle}>
+            <option value="">All decisions</option>
+            {decisions.map((d) => <option key={d} value={d}>{d}</option>)}
+          </select>
+          <select aria-label="Domain filter" value={ledgerDomain} onChange={(e) => setLedgerDomain(e.target.value)} style={inputStyle}>
+            <option value="">All domains</option>
+            {domains.map((d) => <option key={d} value={d}>{d}</option>)}
+          </select>
+          <div style={{ display: "flex", gap: "1px", background: BORDER, borderRadius: 6, overflow: "hidden", border: `1px solid ${BORDER}` }}>
+            {(["15m", "1h", "24h", "7d"] as const).map((w) => (
+              <button
+                key={w}
+                onClick={() => setLedgerWindow(w)}
+                style={{
+                  padding: "0.4rem 0.625rem",
+                  border: "none",
+                  background: ledgerWindow === w ? `${LYTE}25` : BG,
+                  color: ledgerWindow === w ? LYTE : TEXT_SEC,
+                  fontSize: "0.6875rem",
+                  fontFamily: MONO,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                }}
+              >
+                {w}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Decision counts strip */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1px", background: BORDER, borderRadius: 8, overflow: "hidden", border: `1px solid ${BORDER}`, marginBottom: "1.25rem" }}>
+        {(["allow", "require-approval", "require-dual-approval", "block"] as const).map((d) => (
+          <div key={d} style={{ background: BG, padding: "0.75rem 1rem" }}>
+            <p style={{ fontSize: "1.125rem", fontWeight: 700, fontFamily: MONO, color: DECISION_COLORS[d], margin: 0 }}>{counts[d] ?? 0}</p>
+            <p style={{ fontSize: "0.575rem", fontFamily: MONO, textTransform: "uppercase", letterSpacing: "0.1em", color: TEXT_FAINT, margin: 0 }}>{d}</p>
+          </div>
+        ))}
+      </div>
+
+      {ledgerQuery.isError && (
+        <div style={{ padding: "1rem", borderRadius: 8, background: `${RED}10`, border: `1px solid ${RED}25`, color: RED, fontSize: "0.8125rem", marginBottom: "1rem" }}>
+          Could not load the live activity feed. {ledgerQuery.error instanceof Error ? ledgerQuery.error.message : ""}
+        </div>
+      )}
+
+      {!ledgerQuery.isError && items.length === 0 && !ledgerQuery.isLoading && (
+        <div style={{ padding: "2.5rem", borderRadius: 8, background: SURFACE, border: `1px solid ${BORDER}`, textAlign: "center", color: TEXT_FAINT, fontSize: "0.8125rem" }}>
+          No agent decisions recorded in the last {ledgerWindow}{ledgerDecision ? ` for "${ledgerDecision}"` : ""}{ledgerDomain ? ` in domain "${ledgerDomain}"` : ""}.
+        </div>
+      )}
+
+      {/* Timeline */}
+      <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+        {items.map((row, i) => {
+          const decisionColor = DECISION_COLORS[row.decision] ?? TEXT_FAINT;
+          return (
+            <m.div
+              key={row.id}
+              initial={{ opacity: 0, x: -8 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.2, delay: Math.min(i * 0.015, 0.3) }}
+              style={{
+                display: "grid",
+                gridTemplateColumns: "auto 1fr auto auto auto",
+                gap: "1rem",
+                alignItems: "center",
+                padding: "0.875rem 1rem",
+                borderRadius: 8,
+                background: SURFACE,
+                border: `1px solid ${decisionColor}20`,
+                borderLeft: `3px solid ${decisionColor}`,
+              }}
+            >
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.2rem", minWidth: 96 }}>
+                <DecisionBadge decision={row.decision} />
+                <span style={{ fontSize: "0.6rem", fontFamily: MONO, color: TEXT_FAINT }}>{formatRelative(row.decidedAt)}</span>
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem", minWidth: 0 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
+                  <span style={{ fontSize: "0.8125rem", fontWeight: 600, color: TEXT, fontFamily: MONO, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {row.action}
+                  </span>
+                  {row.domain && (
+                    <span style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: TEXT_FAINT, background: "hsla(0,0%,100%,0.05)", border: `1px solid ${BORDER}`, padding: "1px 5px", borderRadius: 3 }}>
+                      {row.domain}
+                    </span>
+                  )}
+                  <span style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: PURPLE, background: `${PURPLE}10`, border: `1px solid ${PURPLE}25`, padding: "1px 5px", borderRadius: 3 }}>
+                    tier:{row.tier}
+                  </span>
+                </div>
+                <div style={{ fontSize: "0.6875rem", color: TEXT_SEC, lineHeight: 1.4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={row.reason}>
+                  {row.reason}
+                </div>
+                <div style={{ display: "flex", gap: "0.875rem", flexWrap: "wrap", fontSize: "0.6rem", fontFamily: MONO, color: TEXT_FAINT }}>
+                  <span>agent: <span style={{ color: TEXT_SEC }}>{row.agentId ?? "—"}</span></span>
+                  {row.toolId && <span>tool: <span style={{ color: TEXT_SEC }}>{row.toolId}</span></span>}
+                  {row.matchedRuleId && <span>rule: <span style={{ color: TEXT_SEC }}>{row.matchedRuleId}</span></span>}
+                  {Array.isArray(row.controlViolations) && row.controlViolations.length > 0 && (
+                    <span style={{ color: RED }}>{row.controlViolations.length} violation{row.controlViolations.length === 1 ? "" : "s"}</span>
+                  )}
+                </div>
+              </div>
+
+              <div style={{ textAlign: "right", minWidth: 70 }}>
+                <p style={{ fontSize: "0.8125rem", fontWeight: 700, fontFamily: MONO, color: TEXT, margin: 0 }}>{formatLatency(row.latencyMs)}</p>
+                <p style={{ fontSize: "0.575rem", fontFamily: MONO, textTransform: "uppercase", letterSpacing: "0.08em", color: TEXT_FAINT, margin: 0 }}>latency</p>
+              </div>
+
+              <div style={{ minWidth: 110, fontFamily: MONO, fontSize: "0.625rem", color: TEXT_FAINT, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={row.requestId}>
+                {row.requestId.length > 14 ? row.requestId.slice(0, 14) + "…" : row.requestId}
+              </div>
+
+              <div>
+                {row.traceId ? (
+                  <Link
+                    href={`/intelligence/fabric?trace=${encodeURIComponent(row.traceId)}`}
+                    style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem", padding: "0.375rem 0.625rem", borderRadius: 5, background: `${LYTE}15`, border: `1px solid ${LYTE}25`, fontSize: "0.6875rem", fontWeight: 600, color: LYTE, textDecoration: "none" }}
+                  >
+                    Trace <ExternalLink size={11} />
+                  </Link>
+                ) : (
+                  <span style={{ fontSize: "0.625rem", fontFamily: MONO, color: TEXT_FAINT, padding: "0.375rem 0.625rem" }}>no trace</span>
+                )}
+              </div>
+            </m.div>
+          );
+        })}
+      </div>
+    </m.div>
+  );
+}
+
 export default function GovernancePosturePage() {
   usePageMeta({
     title: "Governance Posture Dashboard — Lyte | SZL Holdings",
@@ -235,7 +512,10 @@ export default function GovernancePosturePage() {
     canonical: "https://szlholdings.com/lyte/governance-posture",
   });
 
-  const [activeTab, setActiveTab] = useState<"overview" | "approvals" | "violations" | "domains">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "approvals" | "violations" | "domains" | "live-activity">("overview");
+  const [ledgerDecision, setLedgerDecision] = useState<string>("");
+  const [ledgerDomain, setLedgerDomain] = useState<string>("");
+  const [ledgerWindow, setLedgerWindow] = useState<"15m" | "1h" | "24h" | "7d">("1h");
   const [activeDomain, setActiveDomain] = useState<string>("Aegis");
 
   interface GovApiResponse {
@@ -324,7 +604,7 @@ export default function GovernancePosturePage() {
         {/* Tabs */}
         <div style={{ borderBottom: `1px solid ${BORDER}` }}>
           <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)", display: "flex", gap: 0 }}>
-            {(["overview", "domains", "approvals", "violations"] as const).map(tab => (
+            {(["overview", "domains", "approvals", "violations", "live-activity"] as const).map(tab => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -341,7 +621,7 @@ export default function GovernancePosturePage() {
                   transition: "all 0.15s ease",
                 }}
               >
-                {tab}
+                {tab === "live-activity" ? "Live activity" : tab}
               </button>
             ))}
           </div>
@@ -661,6 +941,17 @@ export default function GovernancePosturePage() {
                   ))}
                 </div>
               </m.div>
+            )}
+
+            {activeTab === "live-activity" && (
+              <LiveActivityTab
+                ledgerDecision={ledgerDecision}
+                setLedgerDecision={setLedgerDecision}
+                ledgerDomain={ledgerDomain}
+                setLedgerDomain={setLedgerDomain}
+                ledgerWindow={ledgerWindow}
+                setLedgerWindow={setLedgerWindow}
+              />
             )}
 
           </AnimatePresence>

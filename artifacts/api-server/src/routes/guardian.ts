@@ -52,6 +52,7 @@ import {
   toolMeshToolPermissionsTable,
   toolMeshActionApprovalsTable,
   auditEventsTable,
+  tracesTable,
   usersTable,
   type GuardianPolicy,
   type GuardianPolicyAssignment,
@@ -1294,6 +1295,152 @@ router.get("/actions", authMiddleware(), requireRole("super_admin", "admin", "op
     handleRouteError(res, err, "Failed to list guardian actions");
   }
 });
+
+// ============================================================
+// LIVE AGENT ACTIVITY LEDGER
+// Returns recent guardian decisions joined with their trace span
+// so operators can see what agents are doing in near-real-time.
+// Filters: decision (outcome), domain (from joined trace), agentId,
+// since (ISO), limit (1-200, default 50).
+// ============================================================
+router.get(
+  "/ledger",
+  authMiddleware(),
+  requireRole("super_admin", "admin", "ops", "analyst", "compliance"),
+  async (req: Request, res: Response) => {
+    try {
+      const ALLOWED_DECISIONS = ["allow", "require-approval", "require-dual-approval", "block"] as const;
+      type GuardianDecision = (typeof ALLOWED_DECISIONS)[number];
+      const rawDecision = typeof req.query["decision"] === "string" ? (req.query["decision"] as string) : "";
+      let decision: GuardianDecision | null = null;
+      if (rawDecision) {
+        if (!(ALLOWED_DECISIONS as readonly string[]).includes(rawDecision)) {
+          sendBadRequest(res, `Invalid decision: must be one of ${ALLOWED_DECISIONS.join(", ")}`);
+          return;
+        }
+        decision = rawDecision as GuardianDecision;
+      }
+      const domain = req.query["domain"] as string | undefined;
+      const agentId = req.query["agentId"] as string | undefined;
+      const sinceParam = req.query["since"] as string | undefined;
+      const rawLimit = parseInt((req.query["limit"] as string) ?? "50", 10);
+      const limit = isNaN(rawLimit) ? 50 : Math.min(200, Math.max(1, rawLimit));
+
+      const conditions: Parameters<typeof and>[0][] = [];
+      const user = req.user;
+      if (!isAdminUser(user)) {
+        const orgId = userOrgId(user);
+        if (orgId === null) {
+          sendForbidden(res, "No organization membership — cannot access governance records");
+          return;
+        }
+        conditions.push(eq(guardianActionsTable.orgId, orgId));
+      }
+      if (decision) conditions.push(eq(guardianActionsTable.outcome, decision));
+      if (agentId) conditions.push(eq(guardianActionsTable.agentId, agentId));
+      if (domain) conditions.push(eq(tracesTable.domain, domain));
+      if (sinceParam) {
+        const sinceDate = new Date(sinceParam);
+        if (!isNaN(sinceDate.getTime())) {
+          conditions.push(sql`${guardianActionsTable.decidedAt} >= ${sinceDate}`);
+        }
+      }
+
+      const where = conditions.length > 0 ? and(...conditions) : undefined;
+
+      const rows = await db
+        .select({
+          id: guardianActionsTable.id,
+          requestId: guardianActionsTable.requestId,
+          agentId: guardianActionsTable.agentId,
+          sessionId: guardianActionsTable.sessionId,
+          workflowId: guardianActionsTable.workflowId,
+          tier: guardianActionsTable.tier,
+          action: guardianActionsTable.action,
+          toolId: guardianActionsTable.toolId,
+          model: guardianActionsTable.model,
+          environment: guardianActionsTable.environment,
+          outcome: guardianActionsTable.outcome,
+          matchedRuleId: guardianActionsTable.matchedRuleId,
+          reason: guardianActionsTable.reason,
+          rollbackRequired: guardianActionsTable.rollbackRequired,
+          controlViolations: guardianActionsTable.controlViolations,
+          decidedAt: guardianActionsTable.decidedAt,
+          // Trace join (left): a guardian action may not yet have a trace recorded.
+          traceId: tracesTable.traceId,
+          traceDomain: tracesTable.domain,
+          traceLatencyMs: tracesTable.latencyMs,
+          traceStatus: tracesTable.status,
+          traceStartedAt: tracesTable.startedAt,
+        })
+        .from(guardianActionsTable)
+        .leftJoin(tracesTable, eq(tracesTable.requestId, guardianActionsTable.requestId))
+        .where(where as ReturnType<typeof and>)
+        .orderBy(desc(guardianActionsTable.decidedAt))
+        .limit(limit);
+
+      // Distinct domains observed in the recent window — populates the filter UI
+      // even when the operator hasn't drilled into a specific decision yet.
+      const domainRows = await db
+        .selectDistinct({ domain: tracesTable.domain })
+        .from(guardianActionsTable)
+        .leftJoin(tracesTable, eq(tracesTable.requestId, guardianActionsTable.requestId))
+        .where(
+          (!isAdminUser(user)
+            ? and(eq(guardianActionsTable.orgId, userOrgId(user) ?? -1), sql`${tracesTable.domain} IS NOT NULL`)
+            : sql`${tracesTable.domain} IS NOT NULL`) as ReturnType<typeof and>,
+        )
+        .limit(50);
+
+      const items = rows.map((r) => {
+        const decidedAtIso = r.decidedAt instanceof Date ? r.decidedAt.toISOString() : String(r.decidedAt);
+        const startedAtMs = r.traceStartedAt instanceof Date ? r.traceStartedAt.getTime() : null;
+        const decidedAtMs = r.decidedAt instanceof Date ? r.decidedAt.getTime() : null;
+        // Prefer the trace's recorded latency; fall back to the wall-clock gap
+        // between trace start and the policy decision so the timeline always
+        // shows something meaningful even before the trace closes.
+        const latencyMs =
+          typeof r.traceLatencyMs === "number"
+            ? r.traceLatencyMs
+            : startedAtMs !== null && decidedAtMs !== null
+              ? Math.max(0, decidedAtMs - startedAtMs)
+              : null;
+        return {
+          id: r.id,
+          requestId: r.requestId,
+          agentId: r.agentId,
+          sessionId: r.sessionId,
+          workflowId: r.workflowId,
+          tier: r.tier,
+          action: r.action,
+          toolId: r.toolId,
+          model: r.model,
+          environment: r.environment,
+          decision: r.outcome,
+          matchedRuleId: r.matchedRuleId,
+          reason: r.reason,
+          rollbackRequired: r.rollbackRequired,
+          controlViolations: (r.controlViolations as unknown[]) ?? [],
+          domain: r.traceDomain ?? null,
+          latencyMs,
+          traceId: r.traceId ?? null,
+          traceStatus: r.traceStatus ?? null,
+          decidedAt: decidedAtIso,
+        };
+      });
+
+      sendSuccess(res, {
+        items,
+        domains: domainRows.map((d) => d.domain).filter((d): d is string => typeof d === "string" && d.length > 0),
+        decisions: ["allow", "require-approval", "require-dual-approval", "block"] as const,
+        count: items.length,
+        limit,
+      });
+    } catch (err) {
+      handleRouteError(res, err, "Failed to query guardian ledger");
+    }
+  },
+);
 
 router.get("/actions/:id", authMiddleware(), async (req: Request, res: Response) => {
   try {
