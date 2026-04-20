@@ -317,6 +317,93 @@ export async function getGatewayLiveSummary(
   };
 }
 
+export interface GatewayLatencyBucket {
+  mcpServerId: string;
+  tool: string | null;
+  calls: number;
+  avgMs: number;
+  p50Ms: number;
+  p95Ms: number;
+  maxMs: number;
+}
+
+export interface GatewayLatencyBreakdown {
+  windowHours: number;
+  perServer: GatewayLatencyBucket[];
+  perTool: GatewayLatencyBucket[];
+}
+
+// Returns p50/p95/avg/max latency for the last `windowHours` hours, grouped
+// by mcpServerId and (server, tool). Rows where latency_ms is NULL are
+// ignored — those events were recorded before the latency column existed.
+export async function getGatewayLatencyBreakdown(
+  windowHours = 24,
+): Promise<GatewayLatencyBreakdown> {
+  await ensureSeeded();
+  const since = new Date(Date.now() - windowHours * 60 * 60 * 1000);
+  const latencyCol = agentMeshGatewayEventsTable.latencyMs;
+  const baseFilter = and(
+    gte(agentMeshGatewayEventsTable.occurredAt, since),
+    isNotNull(latencyCol),
+  );
+
+  const perServerRows = await db
+    .select({
+      mcpServerId: agentMeshGatewayEventsTable.mcpServerId,
+      calls: count(),
+      avgMs: sql<number | string>`avg(${latencyCol})`,
+      p50Ms: sql<number | string>`percentile_cont(0.5) within group (order by ${latencyCol})`,
+      p95Ms: sql<number | string>`percentile_cont(0.95) within group (order by ${latencyCol})`,
+      maxMs: sql<number | string>`max(${latencyCol})`,
+    })
+    .from(agentMeshGatewayEventsTable)
+    .where(baseFilter)
+    .groupBy(agentMeshGatewayEventsTable.mcpServerId);
+
+  const perToolRows = await db
+    .select({
+      mcpServerId: agentMeshGatewayEventsTable.mcpServerId,
+      tool: agentMeshGatewayEventsTable.tool,
+      calls: count(),
+      avgMs: sql<number | string>`avg(${latencyCol})`,
+      p50Ms: sql<number | string>`percentile_cont(0.5) within group (order by ${latencyCol})`,
+      p95Ms: sql<number | string>`percentile_cont(0.95) within group (order by ${latencyCol})`,
+      maxMs: sql<number | string>`max(${latencyCol})`,
+    })
+    .from(agentMeshGatewayEventsTable)
+    .where(baseFilter)
+    .groupBy(agentMeshGatewayEventsTable.mcpServerId, agentMeshGatewayEventsTable.tool);
+
+  const toMs = (v: number | string | null | undefined): number =>
+    v == null ? 0 : Math.round(Number(v));
+
+  const perServer: GatewayLatencyBucket[] = perServerRows
+    .map((r) => ({
+      mcpServerId: r.mcpServerId,
+      tool: null,
+      calls: Number(r.calls ?? 0),
+      avgMs: toMs(r.avgMs),
+      p50Ms: toMs(r.p50Ms),
+      p95Ms: toMs(r.p95Ms),
+      maxMs: toMs(r.maxMs),
+    }))
+    .sort((a, b) => b.p95Ms - a.p95Ms);
+
+  const perTool: GatewayLatencyBucket[] = perToolRows
+    .map((r) => ({
+      mcpServerId: r.mcpServerId,
+      tool: r.tool,
+      calls: Number(r.calls ?? 0),
+      avgMs: toMs(r.avgMs),
+      p50Ms: toMs(r.p50Ms),
+      p95Ms: toMs(r.p95Ms),
+      maxMs: toMs(r.maxMs),
+    }))
+    .sort((a, b) => b.p95Ms - a.p95Ms);
+
+  return { windowHours, perServer, perTool };
+}
+
 function buildExposureRow(opts: {
   rule: GatewayRule;
   decision: Decision;
@@ -397,6 +484,19 @@ router.get("/mcp-gateway/events", async (req: Request, res: Response) => {
     return sendSuccess(res, { events, total: Number(total ?? 0) });
   } catch (err) {
     return handleRouteError(res, err, "mcp-gateway-events");
+  }
+});
+
+router.get("/mcp-gateway/latency", async (req: Request, res: Response) => {
+  try {
+    const hoursRaw = Number(req.query["hours"]);
+    const windowHours = Number.isFinite(hoursRaw) && hoursRaw > 0 && hoursRaw <= 24 * 30
+      ? hoursRaw
+      : 24;
+    const breakdown = await getGatewayLatencyBreakdown(windowHours);
+    return sendSuccess(res, breakdown);
+  } catch (err) {
+    return handleRouteError(res, err, "mcp-gateway-latency");
   }
 });
 

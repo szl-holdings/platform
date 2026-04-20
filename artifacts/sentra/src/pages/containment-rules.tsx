@@ -1,13 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   Shield, Plus, AlertTriangle, CheckCircle2, Edit2, Server, Globe,
-  Activity, Ban, Lock, Radio, ShieldOff, Clock, X,
+  Activity, Ban, Lock, Radio, ShieldOff, Clock, X, Gauge,
 } from "lucide-react";
 import {
   useAgentMesh,
   useAgentMeshGateway,
+  useAgentMeshGatewayLatency,
   type EnforcementMode,
   type GatewayDecisionFilter,
+  type GatewayLatencyBucket,
   MESH_AGENT_CLASS_DISPLAY_NAMES,
 } from "@/data/agent-mesh";
 import { cn } from "@szl-holdings/shared-ui/utils";
@@ -67,6 +69,151 @@ function timeAgo(iso: string): string {
 
 const DECISION_FILTER_OPTIONS: GatewayDecisionFilter[] = ["blocked", "quarantined", "allowed", "logged"];
 
+function latencyTone(p95: number): { row: string; p95: string } {
+  if (p95 >= 1500) {
+    return { row: "border-red-500/30 bg-red-500/10", p95: "text-red-300" };
+  }
+  if (p95 >= 600) {
+    return { row: "border-amber-500/30 bg-amber-500/10", p95: "text-amber-300" };
+  }
+  return { row: "border-slate-800/60 bg-slate-900/40", p95: "text-emerald-300" };
+}
+
+interface LatencyBreakdownPanelProps {
+  breakdown: {
+    windowHours: number;
+    perServer: GatewayLatencyBucket[];
+    perTool: GatewayLatencyBucket[];
+  } | null;
+  source: "live" | "empty";
+  getMcpName: (id: string) => string;
+}
+
+function LatencyBreakdownPanel({ breakdown, source, getMcpName }: LatencyBreakdownPanelProps) {
+  const perServer = breakdown?.perServer ?? [];
+  const perTool = breakdown?.perTool ?? [];
+  const windowHours = breakdown?.windowHours ?? 24;
+
+  // Show the slowest 5 (server, tool) combos so operators can pinpoint
+  // which downstream call is dragging — not just which server.
+  const topTools = perTool.slice(0, 5);
+
+  return (
+    <section className="sentra-panel p-5">
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <div className="text-[10px] text-slate-500 font-mono uppercase flex items-center gap-1.5">
+            <Gauge className="w-3 h-3" /> MCP Server Latency · last {windowHours}h
+          </div>
+          <p className="text-xs text-slate-400 mt-0.5">
+            p50/p95 latency per downstream MCP server, computed from gateway proxy events. Identifies which service is slow.
+          </p>
+        </div>
+        <div className={cn(
+          "flex items-center gap-2 text-[10px] font-mono",
+          source === "live" && perServer.length > 0 ? "text-emerald-400" : "text-amber-400"
+        )}>
+          <span className={cn(
+            "w-1.5 h-1.5 rounded-full",
+            source === "live" && perServer.length > 0 ? "bg-emerald-400 animate-pulse" : "bg-amber-400"
+          )} />
+          {source === "live" && perServer.length > 0 ? "STREAMING" : "AWAITING TIMED CALLS"}
+        </div>
+      </div>
+
+      {perServer.length === 0 ? (
+        <div className="text-[11px] font-mono text-slate-500 text-center py-6 border border-slate-800/60 rounded bg-slate-900/40">
+          No timed gateway calls recorded in the last {windowHours}h. Per-server latency will appear here once calls flow through the MCP gateway.
+        </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-12 gap-3 px-3 py-2 text-[9px] font-mono uppercase text-slate-500 border-b border-slate-800/60">
+            <div className="col-span-4">MCP Server</div>
+            <div className="col-span-2 text-right">Calls</div>
+            <div className="col-span-2 text-right">p50</div>
+            <div className="col-span-2 text-right">p95</div>
+            <div className="col-span-2 text-right">Max</div>
+          </div>
+          <div className="space-y-1.5 mt-1.5">
+            {perServer.map((row) => {
+              const tone = latencyTone(row.p95Ms);
+              return (
+                <div
+                  key={row.mcpServerId}
+                  className={cn(
+                    "grid grid-cols-12 items-center gap-3 rounded border px-3 py-2",
+                    tone.row,
+                  )}
+                >
+                  <div className="col-span-4 flex items-center gap-2 text-xs font-mono text-slate-200 truncate">
+                    <Server className="w-3 h-3 text-slate-500 shrink-0" />
+                    <span className="truncate">{getMcpName(row.mcpServerId)}</span>
+                    <span className="text-[10px] text-slate-600 truncate">{row.mcpServerId}</span>
+                  </div>
+                  <div className="col-span-2 text-right text-[11px] font-mono text-slate-300">
+                    {row.calls.toLocaleString()}
+                  </div>
+                  <div className="col-span-2 text-right text-[11px] font-mono text-slate-300">
+                    {row.p50Ms}<span className="text-slate-600 ml-0.5">ms</span>
+                  </div>
+                  <div className={cn("col-span-2 text-right text-[11px] font-mono font-bold", tone.p95)}>
+                    {row.p95Ms}<span className="text-slate-600 ml-0.5">ms</span>
+                  </div>
+                  <div className="col-span-2 text-right text-[11px] font-mono text-slate-400">
+                    {row.maxMs}<span className="text-slate-600 ml-0.5">ms</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {topTools.length > 0 && (
+            <div className="mt-5 pt-4 border-t border-slate-800/60">
+              <div className="text-[10px] text-slate-500 font-mono uppercase mb-2">
+                Slowest tool calls (server / tool, by p95)
+              </div>
+              <div className="grid grid-cols-12 gap-3 px-3 py-1.5 text-[9px] font-mono uppercase text-slate-500">
+                <div className="col-span-3">Server</div>
+                <div className="col-span-3">Tool</div>
+                <div className="col-span-2 text-right">Calls</div>
+                <div className="col-span-2 text-right">p50</div>
+                <div className="col-span-2 text-right">p95</div>
+              </div>
+              <div className="space-y-1">
+                {topTools.map((row) => {
+                  const tone = latencyTone(row.p95Ms);
+                  return (
+                    <div
+                      key={`${row.mcpServerId}::${row.tool ?? ""}`}
+                      className="grid grid-cols-12 items-center gap-3 rounded bg-slate-900/40 border border-slate-800/60 px-3 py-1.5"
+                    >
+                      <div className="col-span-3 text-[11px] font-mono text-slate-300 truncate">
+                        {getMcpName(row.mcpServerId)}
+                      </div>
+                      <div className="col-span-3 text-[11px] font-mono text-slate-200 truncate">
+                        {row.tool ?? "—"}
+                      </div>
+                      <div className="col-span-2 text-right text-[11px] font-mono text-slate-400">
+                        {row.calls.toLocaleString()}
+                      </div>
+                      <div className="col-span-2 text-right text-[11px] font-mono text-slate-300">
+                        {row.p50Ms}<span className="text-slate-600 ml-0.5">ms</span>
+                      </div>
+                      <div className={cn("col-span-2 text-right text-[11px] font-mono font-bold", tone.p95)}>
+                        {row.p95Ms}<span className="text-slate-600 ml-0.5">ms</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </>
+      )}
+    </section>
+  );
+}
+
 export default function ContainmentRules() {
   const { state } = useAgentMesh();
   const { containmentRules: liveRules, mcpServers } = state;
@@ -86,6 +233,7 @@ export default function ContainmentRules() {
   // straight from the agent_mesh_gateway_events table. Falls back to seed
   // when the API is unreachable.
   const { gateway, gatewayEvents, filteredEventCount, source: gatewaySource } = useAgentMeshGateway(gatewayFilters);
+  const { breakdown: latencyBreakdown, source: latencySource } = useAgentMeshGatewayLatency();
   const [rules, setRules] = useState(liveRules);
   // Re-sync local rule state whenever the live mesh refreshes.
   useEffect(() => { setRules(liveRules); }, [liveRules]);
@@ -228,6 +376,12 @@ export default function ContainmentRules() {
           <Clock className="w-3 h-3" /> Uptime {formatUptime(gateway.uptimeSeconds)} · Critical-tier mode changes require Guardian approval before taking effect.
         </div>
       </section>
+
+      <LatencyBreakdownPanel
+        breakdown={latencyBreakdown}
+        source={latencySource}
+        getMcpName={getMcpName}
+      />
 
       <div className="grid grid-cols-4 gap-4 mb-2">
         <div className="sentra-panel p-4 text-center">

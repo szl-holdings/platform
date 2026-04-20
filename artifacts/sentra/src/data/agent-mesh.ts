@@ -952,6 +952,95 @@ export function useAgentMeshGateway(filters: GatewayEventFilters = {}): UseAgent
   return { gateway, gatewayEvents, filteredEventCount, source, loading, refresh };
 }
 
+export interface GatewayLatencyBucket {
+  mcpServerId: string;
+  tool: string | null;
+  calls: number;
+  avgMs: number;
+  p50Ms: number;
+  p95Ms: number;
+  maxMs: number;
+}
+
+export interface GatewayLatencyBreakdown {
+  windowHours: number;
+  perServer: GatewayLatencyBucket[];
+  perTool: GatewayLatencyBucket[];
+}
+
+export interface UseAgentMeshGatewayLatencyResult {
+  breakdown: GatewayLatencyBreakdown | null;
+  source: "live" | "empty";
+  loading: boolean;
+  refresh: () => Promise<void>;
+}
+
+const GATEWAY_LATENCY_REFRESH_MS = 30_000;
+
+async function loadAgentMeshGatewayLatency(): Promise<{
+  breakdown: GatewayLatencyBreakdown | null;
+  source: "live" | "empty";
+}> {
+  try {
+    const res = await fetch("/api/agent-mesh/gateway/latency", { credentials: "include" });
+    if (!res.ok) return { breakdown: null, source: "empty" };
+    const data = (await res.json()) as Partial<GatewayLatencyBreakdown> | null;
+    if (!data || !Array.isArray(data.perServer) || !Array.isArray(data.perTool)) {
+      return { breakdown: null, source: "empty" };
+    }
+    return {
+      breakdown: {
+        windowHours: data.windowHours ?? 24,
+        perServer: data.perServer,
+        perTool: data.perTool,
+      },
+      source: "live",
+    };
+  } catch {
+    return { breakdown: null, source: "empty" };
+  }
+}
+
+export function useAgentMeshGatewayLatency(): UseAgentMeshGatewayLatencyResult {
+  const [breakdown, setBreakdown] = useState<GatewayLatencyBreakdown | null>(null);
+  const [source, setSource] = useState<"live" | "empty">("empty");
+  const [loading, setLoading] = useState<boolean>(true);
+  const mounted = useRef(true);
+
+  useEffect(() => {
+    mounted.current = true;
+    return () => { mounted.current = false; };
+  }, []);
+
+  const refresh = useCallback(async () => {
+    setLoading(true);
+    const next = await loadAgentMeshGatewayLatency();
+    if (!mounted.current) return;
+    setBreakdown(next.breakdown);
+    setSource(next.source);
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const tick = async () => {
+      const next = await loadAgentMeshGatewayLatency();
+      if (cancelled || !mounted.current) return;
+      setBreakdown(next.breakdown);
+      setSource(next.source);
+      setLoading(false);
+    };
+    void tick();
+    const id = window.setInterval(() => { void tick(); }, GATEWAY_LATENCY_REFRESH_MS);
+    return () => {
+      cancelled = true;
+      window.clearInterval(id);
+    };
+  }, []);
+
+  return { breakdown, source, loading, refresh };
+}
+
 export const DISALLOWED_TERMS = [
   "RootShield", "Skill Shield", "Context Shield", "Posture Score",
   "Lakera Guard", "Lakera", "Runlayer", "GitGuardian",

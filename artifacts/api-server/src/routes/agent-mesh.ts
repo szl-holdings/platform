@@ -2,7 +2,11 @@ import { Router, type IRouter, type Request, type Response } from "express";
 import { db, agentMeshDriftSnapshotsTable } from "@szl-holdings/db";
 import { and, eq, sql } from "drizzle-orm";
 import { runMeshScan, loadMeshState } from "../services/agent-mesh-collector";
-import { getGatewayLiveSummary, type GatewayLiveSummaryFilters } from "./mcp-gateway";
+import {
+  getGatewayLiveSummary,
+  getGatewayLatencyBreakdown,
+  type GatewayLiveSummaryFilters,
+} from "./mcp-gateway";
 import { authMiddleware } from "../middlewares/auth";
 import { logger } from "../lib/logger";
 
@@ -76,6 +80,20 @@ router.get("/agent-mesh/gateway", async (req: Request, res: Response) => {
   } catch (err) {
     logger.warn({ err }, "[agent-mesh] gateway summary failed");
     res.status(500).json({ error: "agent-mesh gateway unavailable" });
+  }
+});
+
+router.get("/agent-mesh/gateway/latency", async (req: Request, res: Response) => {
+  try {
+    const hoursRaw = Number(req.query["hours"]);
+    const windowHours = Number.isFinite(hoursRaw) && hoursRaw > 0 && hoursRaw <= 24 * 30
+      ? hoursRaw
+      : 24;
+    const breakdown = await getGatewayLatencyBreakdown(windowHours);
+    res.json(breakdown);
+  } catch (err) {
+    logger.warn({ err }, "[agent-mesh] gateway latency breakdown failed");
+    res.status(500).json({ error: "agent-mesh gateway latency unavailable" });
   }
 });
 
