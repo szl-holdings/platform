@@ -32,6 +32,7 @@ import {
   parsePagination,
 } from "../lib/api-response";
 import { logger } from "../lib/logger";
+import { notifyRunFailure } from "../lib/alloy-run-failure-notifications";
 import { broadcastWs, pubsub, ALLOY_EVENTS } from "../lib/pubsub-bridge.js";
 import { listQuerySchema, validateBody, validateQuery, autonomyModeQuerySchema, alloyIngestSignalSchema, alloyIngestBatchSchema, alloyWorkflowMutationSchema, alloyWorkflowDeleteSchema, alloyRunActionSchema, alloyDecisionTransitionSchema, alloyResourceBodySchema } from "../lib/validation";
 import {
@@ -415,6 +416,9 @@ router.post("/alloy/workflows/:id/run", authMiddleware(), validateBody(workflowR
               ],
             }).where(eq(alloyWorkflowRunsTable.id, run.id));
             broadcastWs("workflow-runs", "run-updated", { id: run.id, workflowId: id, state: "failed" });
+            void notifyRunFailure(run.id, "failed").catch((err) =>
+              logger.warn({ err, runId: run.id }, "notifyRunFailure (artifact_quota_exceeded) threw"),
+            );
             return;
           }
         }
@@ -456,6 +460,9 @@ router.post("/alloy/workflows/:id/run", authMiddleware(), validateBody(workflowR
       } catch (err) {
         logger.error({ err, runId: run.id }, "Failed to execute workflow run");
         await db.update(alloyWorkflowRunsTable).set({ state: "failed", errorMessage: "Execution error" }).where(eq(alloyWorkflowRunsTable.id, run.id));
+        void notifyRunFailure(run.id, "failed").catch((notifyErr) =>
+          logger.warn({ err: notifyErr, runId: run.id }, "notifyRunFailure (execution_error) threw"),
+        );
       }
     }, 1500);
 
@@ -622,6 +629,9 @@ router.post("/alloy/artifacts/:id/reject", authMiddleware(), requireRole("super_
         decisionAt: new Date(),
       }).where(eq(alloyApprovalsTable.workflowRunId, updated.workflowRunId));
       await db.update(alloyWorkflowRunsTable).set({ state: "failed", errorMessage: "Artifact rejected by reviewer" }).where(eq(alloyWorkflowRunsTable.id, updated.workflowRunId));
+      void notifyRunFailure(updated.workflowRunId, "failed").catch((err) =>
+        logger.warn({ err, runId: updated.workflowRunId }, "notifyRunFailure (artifact_rejected) threw"),
+      );
     }
     await writeAudit({ userId: req.user?.id, action: "reject_artifact", resourceType: "alloy_artifact", resourceId: String(id) });
     sendSuccess(res, updated);

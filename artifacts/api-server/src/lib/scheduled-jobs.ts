@@ -30,6 +30,7 @@ export const NAMED_JOB_TYPES = {
   MESH_TELEMETRY_SCAN: "mesh_telemetry_scan",
   HOURLY_GUARDIAN_APPROVAL_EXPIRY: "hourly_guardian_approval_expiry",
   ON_CALL_HANDOFF_NOTIFY: "on_call_handoff_notify",
+  STUCK_RUN_NOTIFY: "stuck_run_notify",
 } as const;
 
 export type NamedJobType = typeof NAMED_JOB_TYPES[keyof typeof NAMED_JOB_TYPES];
@@ -79,6 +80,7 @@ registerEntry({ type: NAMED_JOB_TYPES.ATLAS_RETENTION_PRUNE, name: "ATLAS Retent
 registerEntry({ type: NAMED_JOB_TYPES.DAILY_COMPETITIVE_INTEL_POLL, name: "Daily Competitive Intel Poll", description: "Polls product blogs / RSS feeds for the champions tracked in the SZL Competitive Atlas (CrowdStrike, Clio, CoStar, Windward, Palantir, ThoughtSpot, Darktrace) and surfaces new major-feature announcements as Intel Update alerts in the Command Competitive Atlas page with adopt/counter/monitor recommendations.", schedule: "daily", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.LAUNCH_PUBLISH_SCAN, name: "Launch Publish Scheduler", description: "Sweeps Distribution OS (dos_articles, dos_carousel_projects, dos_x_posts, dos_content_calendar_items) every 5 minutes for items whose scheduled publish time has arrived but whose status is still ready/approved/queued/scheduled, and triggers the matching Medium / Substack / LinkedIn / X publish helper. Newsletters auto-publish only when pinned to a calendar slot whose scheduledDate has arrived. Successful publishes flip the source row to published and record the external URL; failures are retried with per-item exponential backoff (1 min → 1 hr cap, terminal flip after 5 attempts) and surfaced on the Distribution OS dashboard via dos_automation_runs.", schedule: "minutely" as JobScheduleEntry["schedule"], enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.MESH_TELEMETRY_SCAN, name: "Agent Mesh Telemetry Scan", description: "Re-scans local agent runtime config files (Claude Desktop, Cursor, Claude Code, Codex), refreshes the Sentra Mesh Map data, recomputes the resilience index, and fires Sentra alerts whenever the overall index or any sub-index drops materially since the last run. Runs every 15 minutes per scheduled org.", schedule: "hourly", enabled: true });
+registerEntry({ type: NAMED_JOB_TYPES.STUCK_RUN_NOTIFY, name: "Stuck Run Notifier", description: "Runs every 5 minutes. Scans platform_workflow_runs for runs that have been in state='running' past the stuck threshold (default 10 minutes since startedAt) and pushes a one-time 'agent run stuck' alert to the run owner via Expo, deep-linking to /(shell)/intelligence/run-review. Idempotent via the alloy_run_failure_notifications dedup table — re-running the sweeper never duplicates an alert.", schedule: "hourly", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.ON_CALL_HANDOFF_NOTIFY, name: "On-Call Hand-off Notifier", description: "Runs every minute. Inspects on_call_schedules + on_call_shifts for upcoming hand-off boundaries (rotation slot edges, override start/end). Notifies the next on-call user N minutes before (per schedule.warningMinutes, default 30) and at the moment of hand-off. Idempotent via on_call_handoff_notifications dedup table. Uses dispatchToExternalChannels so email/SMS/Slack work per the recipient's notification_preferences.", schedule: "minutely" as JobScheduleEntry["schedule"], enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.HOURLY_GUARDIAN_APPROVAL_EXPIRY, name: "Guardian Approval Expiry Sweeper", description: "Scans guardian_approval_requests every 5 minutes for pending entries whose expires_at is in the past and flips them to status='expired' so agents waiting on the request can detect the timeout and retry or escalate. Per-tier expiry windows are configured in TIER_CONTROLS (T2=24h, T3=48h, T4=72h; T0/T1/T5 do not auto-expire).", schedule: "hourly", enabled: true });
 
@@ -1258,6 +1260,69 @@ durableJobQueue.register(NAMED_JOB_TYPES.HOURLY_GUARDIAN_APPROVAL_EXPIRY, async 
       lastStatus: "failed",
       lastDurationMs: Date.now() - start,
       failCount: (jobRegistry.get(NAMED_JOB_TYPES.HOURLY_GUARDIAN_APPROVAL_EXPIRY)?.failCount || 0) + 1,
+    });
+    throw err;
+  }
+});
+
+/**
+ * Stuck-run notifier (#2538).
+ *
+ * Runs every 5 minutes. Finds platform_workflow_runs that have been in
+ * state='running' past STUCK_THRESHOLD_MS (10 min by default) and pushes
+ * a one-time "agent run stuck" alert to the run owner via Expo. The
+ * notifyRunFailure helper claims a (run_id, user_id, kind) slot in
+ * alloy_run_failure_notifications via INSERT ... ON CONFLICT DO NOTHING,
+ * so re-running this sweeper never duplicates an alert for the same run.
+ */
+durableJobQueue.register(NAMED_JOB_TYPES.STUCK_RUN_NOTIFY, async (job) => {
+  const start = Date.now();
+  const STUCK_THRESHOLD_MS = 10 * 60 * 1000;
+  let candidates = 0;
+  let notified = 0;
+  try {
+    const { db, alloyWorkflowRunsTable } = await import("@szl-holdings/db");
+    const { and, eq, lt, isNotNull } = await import("drizzle-orm");
+    const { notifyRunFailure } = await import("./alloy-run-failure-notifications");
+
+    const cutoff = new Date(Date.now() - STUCK_THRESHOLD_MS);
+    const stuckRuns = await db
+      .select({ id: alloyWorkflowRunsTable.id })
+      .from(alloyWorkflowRunsTable)
+      .where(
+        and(
+          eq(alloyWorkflowRunsTable.state, "running"),
+          isNotNull(alloyWorkflowRunsTable.startedAt),
+          lt(alloyWorkflowRunsTable.startedAt, cutoff),
+        ),
+      );
+
+    candidates = stuckRuns.length;
+    for (const r of stuckRuns) {
+      const result = await notifyRunFailure(r.id, "stuck");
+      if (result.notified) notified += 1;
+    }
+
+    serverTelemetry.recordBusinessEvent({
+      type: "stuck_run_notify_completed",
+      domain: "platform",
+      durationMs: Date.now() - start,
+      success: true,
+      metadata: { candidates, notified, thresholdMs: STUCK_THRESHOLD_MS },
+    });
+    updateRegistry(NAMED_JOB_TYPES.STUCK_RUN_NOTIFY, {
+      lastStatus: "completed",
+      lastDurationMs: Date.now() - start,
+    });
+    if (notified > 0) {
+      logger.info({ jobId: job.id, candidates, notified }, "stuck_run_notify: dispatched");
+    }
+  } catch (err) {
+    logger.error({ err, jobId: job.id }, "stuck_run_notify: fatal");
+    updateRegistry(NAMED_JOB_TYPES.STUCK_RUN_NOTIFY, {
+      lastStatus: "failed",
+      lastDurationMs: Date.now() - start,
+      failCount: (jobRegistry.get(NAMED_JOB_TYPES.STUCK_RUN_NOTIFY)?.failCount || 0) + 1,
     });
     throw err;
   }

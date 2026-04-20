@@ -324,6 +324,7 @@ const DEFAULT_SCHEDULES: ScheduleDefinition[] = [
   { name: "mesh_telemetry_scan_15m", jobType: NAMED_JOB_TYPES.MESH_TELEMETRY_SCAN, cronExpression: "*/15 * * * *", payload: {}, maxRetries: 1 },
   { name: "guardian_approval_expiry_5m", jobType: NAMED_JOB_TYPES.HOURLY_GUARDIAN_APPROVAL_EXPIRY, cronExpression: "*/5 * * * *", payload: {}, maxRetries: 2 },
   { name: "on_call_handoff_notify_minutely", jobType: NAMED_JOB_TYPES.ON_CALL_HANDOFF_NOTIFY, cronExpression: "* * * * *", payload: {}, maxRetries: 1 },
+  { name: "stuck_run_notify_5m", jobType: NAMED_JOB_TYPES.STUCK_RUN_NOTIFY, cronExpression: "*/5 * * * *", payload: {}, maxRetries: 1 },
 ] as const;
 
 export async function startDurableQueue(): Promise<void> {
