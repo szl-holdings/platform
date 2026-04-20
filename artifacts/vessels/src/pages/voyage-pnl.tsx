@@ -10,19 +10,7 @@ import {
 } from "lucide-react";
 import { BarChart, Bar, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid, LineChart, Line, Cell } from "recharts";
 import { EmptyState } from "@szl-holdings/shared-ui/EmptyState";
-
-// Baltic Exchange-style TCE benchmarks per vessel class (USD/day)
-// Mirrors the data on the Freight Rate Benchmarking page (freight-rates.tsx)
-const CLASS_BENCHMARKS: Record<string, { tce: number; changePct: number; fleetAvg: number; topQuartile: number; bottomQuartile: number }> = {
-  VLCC:         { tce: 58200, changePct: +3.21, fleetAvg: 55400, topQuartile: 64800, bottomQuartile: 49100 },
-  Suezmax:      { tce: 41600, changePct: +1.48, fleetAvg: 39800, topQuartile: 46200, bottomQuartile: 35100 },
-  Aframax:      { tce: 32400, changePct: -0.92, fleetAvg: 31200, topQuartile: 36800, bottomQuartile: 27600 },
-  Capesize:     { tce: 28450, changePct: +6.84, fleetAvg: 27100, topQuartile: 32500, bottomQuartile: 23400 },
-  Panamax:      { tce: 16280, changePct: -2.05, fleetAvg: 16100, topQuartile: 18900, bottomQuartile: 14200 },
-  Supramax:     { tce: 13840, changePct: +1.61, fleetAvg: 13500, topQuartile: 15800, bottomQuartile: 11600 },
-  Handysize:    { tce: 12150, changePct: +4.11, fleetAvg: 11900, topQuartile: 13700, bottomQuartile: 10400 },
-  "LNG Carrier":{ tce: 78500, changePct: +5.42, fleetAvg: 74200, topQuartile: 86400, bottomQuartile: 64800 },
-};
+import { CLASS_BENCHMARKS, type VesselClassKey } from "../lib/freight-benchmarks";
 
 const VOYAGES = [
   {
@@ -250,7 +238,7 @@ function VoyagePnLCard({ voyage }: { voyage: typeof VOYAGES[0] }) {
   ].filter(d => d.value > 0);
 
   // Freight benchmarking — compare voyage TCE against Baltic Exchange class benchmark
-  const benchmark = CLASS_BENCHMARKS[voyage.type];
+  const benchmark = CLASS_BENCHMARKS[voyage.type as VesselClassKey];
   const totalDays = voyage.baseDaysAtSea + (s.weatherDelay || 0);
   const voyageTCE = totalDays > 0 ? s.netRevenue / totalDays : 0;
   const tceDelta = benchmark ? voyageTCE - benchmark.tce : 0;

@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useVoyages, useVoyageEconomicsAnalytics, type VoyageRow } from "@/hooks/use-vessels-data";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
-import { TrendingUp, TrendingDown, DollarSign, Fuel, Clock, Ship, BarChart3, Loader2, Anchor } from "lucide-react";
+import { TrendingUp, TrendingDown, DollarSign, Fuel, Clock, Ship, BarChart3, Loader2, Anchor, Activity } from "lucide-react";
 import { cn } from "@szl-holdings/shared-ui/utils";
+import { compareVoyageToBenchmark, inferVesselClassFromCargo } from "../lib/freight-benchmarks";
 
 const charterColors: Record<string, string> = {
   time_charter: "text-sky-400 bg-sky-500/10 border-sky-500/20",
@@ -43,6 +44,10 @@ function VoyageCard({ voyage }: { voyage: VoyageRow }) {
   const portCost = voyage.portCost || 0;
   const delayCost = voyage.delayCost || 0;
 
+  // Freight benchmarking — same Baltic comparison used on Voyage P&L
+  const inferredClass = inferVesselClassFromCargo(voyage.cargoType);
+  const benchmark = compareVoyageToBenchmark(inferredClass, voyage.tce || 0);
+
   return (
     <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl overflow-hidden hover:border-sky-500/20 transition-all">
       <button className="w-full text-left" onClick={() => setExpanded(!expanded)}>
@@ -82,6 +87,20 @@ function VoyageCard({ voyage }: { voyage: VoyageRow }) {
                 <div className={cn("flex items-center gap-1 justify-end mt-1 text-[10px] font-mono", isPositiveMargin ? "text-emerald-400" : "text-red-400")}>
                   {isPositiveMargin ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
                   {isPositiveMargin ? "+" : ""}{(voyage.marginEstimate / 1000).toFixed(0)}K net
+                </div>
+              )}
+              {benchmark && (
+                <div
+                  className={cn(
+                    "inline-flex items-center gap-1 justify-end mt-1 px-1.5 py-0.5 rounded border text-[10px] font-mono",
+                    benchmark.aboveMarket
+                      ? "text-emerald-300 border-emerald-500/20 bg-emerald-500/5"
+                      : "text-red-300 border-red-500/20 bg-red-500/5",
+                  )}
+                  title={`Voyage TCE $${(benchmark.voyageTce / 1000).toFixed(1)}K/day vs Baltic ${benchmark.classKey} $${(benchmark.benchmark.tce / 1000).toFixed(1)}K/day`}
+                >
+                  <Activity className="w-3 h-3" />
+                  vs Market: {benchmark.aboveMarket ? "+" : ""}{benchmark.deltaPct.toFixed(1)}%
                 </div>
               )}
             </div>

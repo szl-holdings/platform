@@ -3,31 +3,67 @@ import { TrendingUp, TrendingDown, BarChart3, Activity, DollarSign, Globe } from
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { Badge } from "@szl-holdings/shared-ui/ui/badge";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
+import { CLASS_BENCHMARKS, type VesselClassKey } from "../lib/freight-benchmarks";
 
 type VesselClass = "capesize" | "panamax" | "supramax" | "handysize";
 
-const CLASS_CONFIG: Record<VesselClass, { label: string; dwt: string; color: string; routes: string[]; currentRate: number; change: number; changePct: number; forward: number[] }> = {
+// Map this page's lowercase class keys to the shared benchmark keys so
+// the current rate and weekly change come from a single source of truth
+// (lib/freight-benchmarks.ts). Page-specific metadata (DWT range, color,
+// route list, forward curve) stays here.
+const SHARED_KEY: Record<VesselClass, VesselClassKey> = {
+  capesize: "Capesize",
+  panamax: "Panamax",
+  supramax: "Supramax",
+  handysize: "Handysize",
+};
+
+interface ClassMeta {
+  label: string;
+  dwt: string;
+  color: string;
+  routes: string[];
+  forward: number[];
+}
+
+const CLASS_META: Record<VesselClass, ClassMeta> = {
   capesize: {
     label: "Capesize", dwt: "100,000–180,000 DWT", color: "#38bdf8",
     routes: ["C5 (WA→CHN)", "C3 (BRA→CHN)", "Transatlantic"],
-    currentRate: 28450, change: +1820, changePct: +6.84, forward: [28000, 29200, 31000, 30100, 28800, 27500],
+    forward: [28000, 29200, 31000, 30100, 28800, 27500],
   },
   panamax: {
     label: "Panamax", dwt: "60,000–100,000 DWT", color: "#818cf8",
     routes: ["P1A (Transatlantic)", "P2A (Fronthaul)", "P3A (Backhaul)"],
-    currentRate: 16280, change: -340, changePct: -2.05, forward: [16500, 17100, 17800, 17400, 16900, 16600],
+    forward: [16500, 17100, 17800, 17400, 16900, 16600],
   },
   supramax: {
     label: "Supramax", dwt: "45,000–65,000 DWT", color: "#34d399",
     routes: ["S1C (US Gulf/Far East)", "S5 (USG/Cont)", "S4B (USG/SKorea)"],
-    currentRate: 13840, change: +220, changePct: +1.61, forward: [14000, 14500, 15200, 14800, 14200, 13900],
+    forward: [14000, 14500, 15200, 14800, 14200, 13900],
   },
   handysize: {
     label: "Handysize", dwt: "25,000–45,000 DWT", color: "#fb923c",
     routes: ["HS1 (Cont-FEast)", "HS2 (FEast-Cont)", "HS3 (USG-FEast)"],
-    currentRate: 12150, change: +480, changePct: +4.11, forward: [12400, 12800, 13200, 13000, 12700, 12400],
+    forward: [12400, 12800, 13200, 13000, 12700, 12400],
   },
 };
+
+type ClassConfig = ClassMeta & { currentRate: number; change: number; changePct: number };
+
+const CLASS_CONFIG: Record<VesselClass, ClassConfig> = (Object.keys(CLASS_META) as VesselClass[]).reduce(
+  (acc, key) => {
+    const meta = CLASS_META[key];
+    const bench = CLASS_BENCHMARKS[SHARED_KEY[key]];
+    const currentRate = bench.tce;
+    const changePct = bench.changePct;
+    // Derive absolute weekly change from rate * pct so the two stay consistent.
+    const change = Math.round(currentRate - currentRate / (1 + changePct / 100));
+    acc[key] = { ...meta, currentRate, change, changePct };
+    return acc;
+  },
+  {} as Record<VesselClass, ClassConfig>,
+);
 
 const months = ["May", "Jun", "Jul", "Aug", "Sep", "Oct"];
 
