@@ -37,7 +37,7 @@ const APP_ICONS: Record<string, typeof Ship> = {
   "sentra": Shield,
   "carlota-jo": Brain,
   "szl-holdings": Users,
-  "prism-counsel": Brain,
+  "counsel": Brain,
 };
 
 const APP_COLORS: Record<string, string> = {
@@ -47,7 +47,7 @@ const APP_COLORS: Record<string, string> = {
   "sentra": "hsl(0,80%,60%)",
   "carlota-jo": "hsl(320,65%,62%)",
   "szl-holdings": ACCENT,
-  "prism-counsel": "hsl(45,90%,55%)",
+  "counsel": "hsl(45,90%,55%)",
 };
 
 const METRIC_CARDS = [
@@ -71,7 +71,7 @@ function formatApp(app: string) {
     "sentra": "Sentra",
     "carlota-jo": "Carlota Jo",
     "szl-holdings": "SZL Holdings",
-    "prism-counsel": "PRISM Counsel",
+    "counsel": "Counsel",
   };
   return map[app] ?? app;
 }

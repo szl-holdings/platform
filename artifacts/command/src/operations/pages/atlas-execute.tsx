@@ -6,7 +6,7 @@ import {
   Play, FileText, Activity, Layers, XCircle, Info, ChevronDown, ChevronUp, Scale
 } from "lucide-react";
 
-const DOMAIN = "prism-counsel";
+const DOMAIN = "counsel";
 const ACCENT = "#6366f1";
 const DOMAIN_LABEL = "PRISM Counsel — Legal Intelligence";
 const WORKFLOW_KEY = "prism-matter-execution";
