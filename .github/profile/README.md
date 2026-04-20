@@ -57,15 +57,15 @@ SZL Holdings Platform
 ├── Aegis        Unified defense & security intelligence command (SOC + SOAR + threat intel)
 ├── Vessels      Maritime fleet command, AIS tracking, sanctions screening, voyage economics
 ├── Terra        Real estate intelligence — distress signals, ownership graph, deal pipeline
-├── PRISM Counsel Legal matter command — court filings, multi-jurisdictional compliance, recovery tracking
 ├── Carlota Jo   Premium advisory operations for UHNW clients
-├── IMPERIUM     Cloud sovereignty — multi-tenant infrastructure control plane
+├── PRISM Counsel [archived] Legal matter command — archived (domain API routes retained)
+├── IMPERIUM     [archived] Cloud sovereignty — merged into Command Portal
 │
-├── CORTEX       Unified mobile command — all 8 domain workspaces in one native app
+├── CORTEX       Unified mobile command — all domain workspaces in one native app
 └── Command Portal Cross-domain ecosystem hub — real-time SSE, executive briefing, global Cmd+K search
 ```
 
-**Lyte + Alloy** form the core platform. The vertical platforms (Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM) run on this shared foundation and share intelligence through the PRISM Bus — a cross-domain event system that makes every new vertical make the whole platform smarter.
+**Lyte + Alloy** form the core platform. The active vertical platforms (Aegis, Vessels, Terra, Carlota Jo) run on this shared foundation and share intelligence through the PRISM Bus — a cross-domain event system that makes every new vertical make the whole platform smarter.
 
 ---
 
@@ -92,7 +92,7 @@ From the raw signal that triggered an alert, through the routing logic that assi
 Each new vertical doesn't just add surface area — it makes the whole platform more intelligent. A maritime anomaly enriches a threat intelligence profile. A legal filing surfaces a distress property signal. A financial irregularity triggers a compliance workflow. This is **compounding moat architecture**.
 
 ### Unified Mobile Command (CORTEX)
-All 8 domain workspaces in a single Expo/React Native app. Biometric auth, cross-domain badge counts, workspace-adaptive AI copilot, and a unified command feed. Operators in the field have full platform coverage from one authenticated session on iOS or Android.
+All active domain workspaces in a single Expo/React Native app. Biometric auth, cross-domain badge counts, workspace-adaptive AI copilot, and a unified command feed. Operators in the field have full platform coverage from one authenticated session on iOS or Android.
 
 ---
 
@@ -142,9 +142,9 @@ All 8 domain workspaces in a single Expo/React Native app. Biometric auth, cross
 
 ---
 
-### PRISM Counsel — Legal Matter Command
-![PRISM Counsel](../assets/screenshots/prism-counsel-hero.jpg)
-*Full matter management with court filing integration, multi-jurisdictional support, recovery tracking, and approval chains. 127 components. Rivals standalone LegalTech platforms with cross-domain intelligence from defense and maritime verticals.*
+### PRISM Counsel — Legal Matter Command *(Archived)*
+
+PRISM Counsel was the legal matter command workspace — court filing integration, multi-jurisdictional compliance, recovery tracking, and approval chains. The domain API routes remain active; the web interface has been archived. Source retained in the monorepo.
 
 ---
 

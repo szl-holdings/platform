@@ -16,7 +16,7 @@ AI outputs without traceability create noise, not trust. Signal to routing to ap
 
 ## Current Build
 
-**SZL Holdings Platform** — 16-artifact pnpm monorepo. TypeScript throughout.
+**SZL Holdings Platform** — 11-artifact registered pnpm monorepo. TypeScript throughout.
 
 **Lyte** — Flagship command surface. Surfaces execution risk, ownership drift, and workflow friction before they compound. PRISM framework: People, Revenue, Infrastructure, Security, Market.
 
@@ -31,9 +31,9 @@ AI outputs without traceability create noise, not trust. Signal to routing to ap
 | **Aegis** | Security and defense intelligence |
 | **Vessels** | Maritime fleet command |
 | **Terra** | Real estate intelligence |
-| **PRISM Counsel** | Legal matter command |
+| **PRISM Counsel** | Legal matter command *(archived)* |
 | **Carlota Jo** | Premium advisory operations |
-| **IMPERIUM** | Cloud sovereignty |
+| **IMPERIUM** | Cloud sovereignty *(archived)* |
 
 ---
 
@@ -61,7 +61,7 @@ OpenAI  Anthropic  Gemini  Apollo GraphQL  Vite
 
 ## Featured Repository
 
-**[szl-holdings-platform](https://github.com/szl-holdings/szl-holdings-platform)** — Full platform monorepo. 16 deployable artifacts. TypeScript throughout.
+**[szl-holdings-platform](https://github.com/szl-holdings/szl-holdings-platform)** — Full platform monorepo. 11 registered artifacts. TypeScript throughout.
 
 [Security Policy](https://github.com/szl-holdings/szl-holdings-platform/blob/master/SECURITY.md) · [Architecture](https://github.com/szl-holdings/szl-holdings-platform/blob/master/ARCHITECTURE.md) · [Platform Primitives](https://github.com/szl-holdings/szl-holdings-platform/blob/master/PLATFORM_PRIMITIVES.md)
 

@@ -1,0 +1,126 @@
+{
+  "version": "1.1",
+  "produced": "2026-04-20",
+  "phase": "Phase D — Series A Hardening",
+  "description": "Curated set of verified public screenshots for use in the main README, org profile, and investor materials.",
+  "curatedScreenshots": [
+    {
+      "id": "szl-holdings-dashboard",
+      "file": "assets/readme/products/szl-holdings-dashboard.jpg",
+      "altText": "SZL Holdings Dashboard",
+      "category": "command-portal-hero",
+      "product": "SZL Holdings Dashboard",
+      "status": "active",
+      "inReadme": true,
+      "notes": "Primary command portal hero — cross-domain executive view"
+    },
+    {
+      "id": "aegis-command",
+      "file": "assets/readme/products/aegis-command.jpg",
+      "altText": "Aegis Command",
+      "category": "enterprise-security",
+      "product": "Aegis",
+      "status": "active",
+      "inReadme": true,
+      "notes": "SOC command surface; enterprise admin and security view; also serves as trust/security visual"
+    },
+    {
+      "id": "vessels-maritime",
+      "file": "assets/readme/products/vessels-maritime.jpg",
+      "altText": "Vessels Maritime Intelligence",
+      "category": "domain-pack",
+      "product": "Vessels",
+      "status": "active",
+      "inReadme": true,
+      "notes": "Maritime fleet intelligence; domain pack depth signal"
+    },
+    {
+      "id": "terra-real-estate",
+      "file": "assets/readme/products/terra-real-estate.jpg",
+      "altText": "Terra Real Estate Intelligence",
+      "category": "domain-pack",
+      "product": "Terra",
+      "status": "active",
+      "inReadme": true,
+      "notes": "Real estate intelligence; deal pipeline and distress signals"
+    },
+    {
+      "id": "command-portal",
+      "file": "assets/readme/products/command-portal.jpg",
+      "altText": "Command Portal",
+      "category": "observability-workflow",
+      "product": "Command Portal",
+      "status": "active",
+      "inReadme": true,
+      "notes": "Cross-domain real-time aggregation; observability and workflow view"
+    },
+    {
+      "id": "cortex-mobile",
+      "file": "assets/readme/products/cortex-mobile.jpg",
+      "altText": "CORTEX — Unified Mobile Command",
+      "category": "mobile",
+      "product": "CORTEX",
+      "status": "active",
+      "inReadme": true,
+      "notes": "iOS/Android unified mobile command; biometric auth, offline sync"
+    }
+  ],
+  "excludedFromReadme": [
+    {
+      "file": "assets/readme/products/carlota-jo.jpg",
+      "reason": "Removed to keep curated set at 6 screenshots; file retained on disk for marketing use",
+      "status": "kept-on-disk"
+    },
+    {
+      "file": "assets/readme/products/prism-counsel.jpg",
+      "reason": "Product archived (Task #634); removed from README Screens section",
+      "status": "kept-on-disk"
+    },
+    {
+      "file": "assets/readme/products/imperium-cloud.jpg",
+      "reason": "Product archived (Task #920); removed from README Screens section",
+      "status": "kept-on-disk"
+    },
+    {
+      "file": "assets/readme/products/prism-counsel-command.jpg",
+      "reason": "Archived product variant",
+      "status": "kept-on-disk"
+    },
+    {
+      "file": "assets/readme/products/prism-counsel-matter-board.jpg",
+      "reason": "Archived product variant",
+      "status": "kept-on-disk"
+    },
+    {
+      "file": "assets/readme/products/prism-counsel-obligation-timeline.jpg",
+      "reason": "Archived product variant",
+      "status": "kept-on-disk"
+    },
+    {
+      "file": "assets/readme/products/atlas-spatial-runtime.jpg",
+      "reason": "Internal ATLAS feature; not a public product in the README",
+      "status": "kept-on-disk"
+    },
+    {
+      "file": "assets/readme/products/atlas-spatial-runtime-correlation.jpg",
+      "reason": "Internal ATLAS feature",
+      "status": "kept-on-disk"
+    },
+    {
+      "file": "assets/readme/products/atlas-spatial-runtime-execute.jpg",
+      "reason": "Internal ATLAS feature",
+      "status": "kept-on-disk"
+    }
+  ],
+  "coverageAssessment": {
+    "commandPortalHero": "szl-holdings-dashboard",
+    "mobileView": "cortex-mobile",
+    "enterpriseSecurityView": "aegis-command",
+    "observabilityWorkflowView": "command-portal",
+    "trustSecurityVisual": "aegis-command",
+    "gaps": [
+      "No dedicated trust/proof-chain visual in the curated set — consider adding a Proof Chain or audit trail screenshot if one is generated",
+      "Screenshots not verified as live captures vs. design mockups — recommend regenerating via scripts/capture-screenshots.sh"
+    ]
+  }
+}
