@@ -20,7 +20,12 @@ import {
 const POLL_INTERVAL_MS = 5 * 60_000;
 const SIGNAL_COOLDOWN_MS = 10 * 60_000;
 const AUTH_FAILURE_RATE_THRESHOLD_PER_MIN = 10;
+const DB_POOL_SATURATION_PCT = 80;
 let lastTenantViolationCheckAt = Date.now();
+// OBS-007: track consecutive cycles where DB pool usage exceeded the
+// threshold so we only alert after sustained pressure (avoids paging on a
+// single transient burst).
+let dbPoolHighCycles = 0;
 const SIGNAL_MAX_AGE_DAYS = 30;
 const SIGNAL_MAX_COUNT = 200;
 let pruneCounter = 0;
@@ -34,6 +39,16 @@ interface HealthCheck {
   details?: string;
 }
 
+interface DbPoolStats {
+  total: number;
+  idle: number;
+  active: number;
+  waiting: number;
+  max: number;
+  usedPct: number;
+  status: "ok" | "elevated" | "saturated";
+}
+
 interface HealthDetailedResponse {
   status: string;
   uptime: number;
@@ -43,6 +58,7 @@ interface HealthDetailedResponse {
     rssMb: number;
   };
   checks: Record<string, HealthCheck>;
+  dbPool?: DbPoolStats;
 }
 
 let monitorInterval: ReturnType<typeof setInterval> | null = null;
@@ -505,6 +521,55 @@ async function runMonitoringCycle(): Promise<void> {
         });
       }
     }
+  }
+
+  // OBS-007: DB connection pool saturation alert.
+  // Pool stats come from /api/health/detailed (`dbPool`) so the same view
+  // operators see is what gates the alert. Usage = active / max. We only
+  // fire after two consecutive cycles above 80% so a single momentary
+  // burst doesn't page the on-call. `waitingCount > 0` means queries are
+  // already queued for a connection and is treated as immediate critical.
+  try {
+    const dbPool = health.dbPool;
+    if (dbPool && dbPool.max > 0) {
+      if (dbPool.usedPct > DB_POOL_SATURATION_PCT || dbPool.waiting > 0) {
+        dbPoolHighCycles += 1;
+      } else {
+        dbPoolHighCycles = 0;
+      }
+
+      const sustained = dbPoolHighCycles >= 2;
+      const queuedWaiters = dbPool.waiting > 0;
+      if (sustained || queuedWaiters) {
+        if (shouldEmitSignal("db-pool-saturation")) {
+          const severity: "critical" | "high" =
+            queuedWaiters || dbPool.usedPct >= 95 ? "critical" : "high";
+          await createSignal({
+            severity,
+            title: `DB connection pool near saturation — ${dbPool.usedPct.toFixed(0)}% used (${dbPool.active}/${dbPool.max})`,
+            body: `Database connection pool usage has stayed above ${DB_POOL_SATURATION_PCT}% for ${dbPoolHighCycles} consecutive cycle(s). Active: ${dbPool.active}, idle: ${dbPool.idle}, total: ${dbPool.total}, waiting: ${dbPool.waiting}, max: ${dbPool.max}. Sustained pressure causes user-visible 500s when queries time out waiting for a free connection.`,
+            metadata: {
+              affectedFunction: "Database Infrastructure",
+              owner: "Platform Team",
+              ownerTeam: "SRE",
+              recommendedAction: "Identify long-running transactions via pg_stat_activity. Look for connection leaks (un-released clients) in recent deploys. Consider raising DB_POOL_MAX or scaling read replicas.",
+              anomaly: `Pool used ${dbPool.usedPct.toFixed(0)}% (${dbPool.active}/${dbPool.max}); waiters=${dbPool.waiting}`,
+              sourceData: "/api/health/detailed — dbPool",
+              dbPoolUsedPct: dbPool.usedPct,
+              dbPoolActive: dbPool.active,
+              dbPoolIdle: dbPool.idle,
+              dbPoolWaiting: dbPool.waiting,
+              dbPoolMax: dbPool.max,
+              consecutiveCycles: dbPoolHighCycles,
+              thresholdPct: DB_POOL_SATURATION_PCT,
+              obsRef: "OBS-007",
+            },
+          });
+        }
+      }
+    }
+  } catch (err) {
+    logger.warn({ err }, "Self-monitor: db pool saturation check failed (non-fatal)");
   }
 
   // OBS-006: Auth failure rate alert.

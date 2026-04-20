@@ -184,7 +184,7 @@ The following were addressed:
 | OBS-004 | Log shipping — stdout only, no aggregator | P1 | Wire Azure Monitor / Log Analytics for Azure production | Pre-GA |
 | OBS-005 | Tenant isolation violation — logged, no auto-alert | P1 | ✅ Resolved 2026-04-20 — `serverTelemetry.recordTenantIsolationViolation()` wired into tenant-scope middleware and route 403 paths; self-monitor fires a critical alert on any new occurrence each cycle | Done |
 | OBS-006 | Auth failure rate — no alert threshold | P2 | ✅ Resolved 2026-04-20 — `serverTelemetry.getAuthFailureRatePerMin()` checked each self-monitor cycle; alert fires when > 10/min (critical when > 50/min) | Done |
-| OBS-007 | DB pool saturation — no alert | P2 | Add threshold check in self-monitor (e.g., > 80% pool used) | Q2 2026 |
+| OBS-007 | DB pool saturation — no alert | P2 | ✅ Resolved 2026-04-20 — `/api/health/detailed` now exposes `dbPool` (active/idle/waiting/max/usedPct); self-monitor fires a high alert when usage stays > 80% for two consecutive cycles, escalates to critical when waiters are queued or usage ≥ 95% | Done |
 | OBS-008 | Slow query alert — logged, no alert | P3 | Add aggregated alert for repeated slow queries | Q3 2026 |
 | OBS-009 | Grafana / dashboard — no external dashboard | P2 | Set up Application Insights workbook or Grafana after OTLP wiring | Post-GA |
 | OBS-010 | `Slack_WEBHOOK_URL` must be set in production | P1 | Add secret before launch | Pre-GA |

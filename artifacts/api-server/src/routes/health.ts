@@ -59,6 +59,37 @@ async function checkDatabase(): Promise<{ status: string; latencyMs: number; tab
   }
 }
 
+/**
+ * Snapshot of pg connection pool saturation. Used by the self-monitor
+ * (OBS-007) to alert when usage approaches the configured pool max.
+ *   - total:   pool.totalCount   (all connections currently held by the pool)
+ *   - idle:    pool.idleCount    (connections sitting idle, available for checkout)
+ *   - waiting: pool.waitingCount (queries queued waiting for a free connection)
+ *   - active:  total - idle      (connections currently executing a query)
+ *   - max:     pool.options.max  (the configured ceiling)
+ *   - usedPct: active / max * 100
+ */
+function getPoolStats(): {
+  total: number;
+  idle: number;
+  active: number;
+  waiting: number;
+  max: number;
+  usedPct: number;
+  status: "ok" | "elevated" | "saturated";
+} {
+  const total = (pool as unknown as { totalCount: number }).totalCount ?? 0;
+  const idle = (pool as unknown as { idleCount: number }).idleCount ?? 0;
+  const waiting = (pool as unknown as { waitingCount: number }).waitingCount ?? 0;
+  const max = ((pool as unknown as { options?: { max?: number } }).options?.max ?? 10) || 10;
+  const active = Math.max(0, total - idle);
+  const usedPct = max > 0 ? (active / max) * 100 : 0;
+  let status: "ok" | "elevated" | "saturated" = "ok";
+  if (usedPct > 80 || waiting > 0) status = "saturated";
+  else if (usedPct > 60) status = "elevated";
+  return { total, idle, active, waiting, max, usedPct: Math.round(usedPct * 10) / 10, status };
+}
+
 router.get("/healthz", async (_req, res) => {
   const base = HealthCheckResponse.parse({ status: "ok" });
   const backupHealth = getBackupHealthStatus();
@@ -123,6 +154,7 @@ router.get("/health", async (req, res) => {
  */
 router.get("/health/detailed", productionAdminGuard, async (_req: Request, res: Response) => {
   const dbHealth = await checkDatabase();
+  const dbPool = getPoolStats();
   const backupHealth = getBackupHealthStatus();
   const memUsage = process.memoryUsage();
 
@@ -152,6 +184,7 @@ router.get("/health/detailed", productionAdminGuard, async (_req: Request, res: 
     env: process.env.NODE_ENV,
     runtimeMode: process.env.RUNTIME_MODE ?? process.env.APP_ENV ?? "unknown",
     database: dbHealth,
+    dbPool,
     backup: {
       status: backupHealth.status,
       lastBackupAt: backupHealth.lastBackupAt,
