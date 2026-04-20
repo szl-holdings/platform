@@ -157,14 +157,82 @@ All web artifacts use the project's own session-based auth (not Clerk or externa
 
 ## Findings Summary
 
-| ID | Severity | Description | Phase |
-|----|----------|-------------|-------|
-| F-01 | High | No rate limiting on login endpoint | Phase B |
-| F-02 | High | `MFA_SECRET_ENCRYPTION_KEY` not set → TOTP secrets stored unencrypted | Immediate — add to Replit Secrets |
-| F-03 | Medium | Cookie `secure`/`sameSite` flags not confirmed | Phase B |
-| F-04 | Medium | Dual role system (`platform_role` + `user_roles`) creates inconsistency risk | Phase B |
-| F-05 | Medium | Individual routes may not validate `org_id` against `req.user.orgs` | Phase B |
-| F-06 | Medium | Password reset token single-use consumption not confirmed | Phase B |
-| F-07 | Medium | Mobile token storage mechanism not confirmed (should use secure store) | Phase B |
+| ID | Severity | Description | Phase | Status |
+|----|----------|-------------|-------|--------|
+| F-01 | High | No rate limiting on login endpoint | Phase B | **RESOLVED** (Task 2686) |
+| F-02 | High | `MFA_SECRET_ENCRYPTION_KEY` not set → TOTP secrets stored unencrypted | Immediate — add to Replit Secrets | **RESOLVED** (Task 2686) |
+| F-03 | Medium | Cookie `secure`/`sameSite` flags not confirmed | Phase B | **RESOLVED** (Task 2686) |
+| F-04 | Medium | Dual role system (`platform_role` + `user_roles`) creates inconsistency risk | Phase B | **RESOLVED** (Task 2686) |
+| F-05 | Medium | Individual routes may not validate `org_id` against `req.user.orgs` | Phase B | **RESOLVED** (Task 2686) |
+| F-06 | Medium | Password reset token single-use consumption not confirmed | Phase B | **RESOLVED** (Task 2686) |
+| F-07 | Medium | Mobile token storage mechanism not confirmed (should use secure store) | Phase B | **RESOLVED** (Task 2686) |
 
-All findings are **documented only** in this phase. No auth code was modified.
+## Phase B Remediation (Task 2686)
+
+Each finding was resolved as follows:
+
+- **F-01 — Rate limiting on login.** A strict `loginLimiter`
+  (`artifacts/api-server/src/middlewares/rate-limiters.ts`) was added
+  and applied to `POST /auth/login`, `POST /auth/login-password`,
+  `POST /auth/refresh`, `POST /auth/mfa/challenge`,
+  `POST /auth/mfa/setup-required`, and `POST /auth/mfa/enable-required`.
+  Production cap: 10 attempts / 15 min per IP, with
+  `skipSuccessfulRequests: true` so legitimate users mistyping once are
+  not locked out. Returns `429 RATE_LIMITED` with `Retry-After`.
+
+- **F-02 — `MFA_SECRET_ENCRYPTION_KEY` startup enforcement.**
+  Confirmed in `src/lib/startup-validation.ts` (lines 196–221) and
+  invoked at boot via `failFastOnInvalidConfig()` in `src/index.ts:57`.
+  In production a missing or malformed key is a *fatal* startup error
+  (process exits before serving requests); in dev it is a warning.
+  Operators must set this in Replit Secrets before any production
+  deploy.
+
+- **F-03 — Cookie flags.** Verified in `src/lib/auth.ts`
+  `setSessionCookie` (lines 357–373): `httpOnly: true`,
+  `secure: true`, `sameSite: "lax"`, `path: "/"`. The cookie is named
+  `__Host-sid` (RFC 6265bis `__Host-` prefix), which the browser
+  refuses to set unless Secure=true, Path=/, and no Domain attribute
+  are present — preventing subdomain cookie injection.
+
+- **F-04 — Dual role system rationalized.** Documented in
+  `artifacts/api-server/docs/rbac-authoritative-source.md`. Summary:
+  `user_roles` (join table) is authoritative for all HTTP routes
+  protected by `authMiddleware()` + `requireRole(...)`;
+  `users.platform_role` is authoritative for surfaces that use
+  `platform-auth.ts` (teams, SCIM, GDPR, monte-carlo, command,
+  demo-reset) and for WebSocket ticket issuance. The two are kept in
+  sync transactionally by `replaceUserRoles()` /
+  `setUserRoles()` in `lib/db/src/auth/role-management.ts`.
+
+- **F-05 — Org-scope per-route audit.** Already completed under
+  Task 2635, captured in `artifacts/api-server/docs/tenant-scope-audit.md`.
+  All 148 group-prefix surfaces enforce
+  `tenantScope({ required: true })`; intentional public/pre-membership
+  surfaces (`/orgs`, `/user`, `/onboarding`, `/auth`, `/healthz`,
+  `/contact`, `/demo-requests`, `/feedback`, `/public`,
+  `/graph-stream`, `/admin`, `/cross-platform`) are documented with
+  rationale. Regression coverage:
+  `routes/__tests__/org-gated-routers.test.ts`,
+  `alloy-nuro-org-gated.test.ts`, and `handler-cross-tenant.test.ts`.
+
+- **F-06 — Password reset single-use.** Confirmed in
+  `src/routes/org-settings.ts` `POST /user/password-reset/confirm`
+  (lines 845–887): the same `UPDATE` statement that writes the new
+  password hash also clears `password_reset_token` and
+  `password_reset_token_expires_at` to `NULL`, and the lookup query
+  filters on `password_reset_token IS NOT NULL` and
+  `password_reset_token_expires_at > NOW()`, so a consumed or expired
+  token cannot be replayed. The endpoint is gated by `writeLimiter`.
+
+- **F-07 — Mobile token storage.** Confirmed in
+  `artifacts/szl-holdings-mobile/context/AuthContext.tsx` (lines
+  165–186): `secureGet/secureSet/secureDel` use `expo-secure-store`
+  (iOS Keychain / Android Keystore) on native platforms;
+  `window.localStorage` is the fallback only on `Platform.OS === "web"`
+  (Expo web build), where `SecureStore` is not available. No use of
+  `AsyncStorage` for auth tokens.
+
+The original findings register above is preserved as-is for audit
+provenance; the Status column and this section reflect the resolved
+state as of Task 2686.

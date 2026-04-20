@@ -22,6 +22,7 @@ import { z } from "zod";
 import { listQuerySchema, loginPasswordSchema, validateBody, validateQuery } from "../lib/validation";
 import { generateSecret as otpGenerateSecret, verifySync as otpVerifySync, generateURI as otpGenerateURI } from "otplib";
 import { redisGet, redisSet, redisDel } from "../lib/redis-client.js";
+import { loginLimiter } from "../middlewares/rate-limiters";
 
 const router: IRouter = Router();
 const authService = createAuthService();
@@ -198,7 +199,7 @@ const loginBodySchema = z.object({
   credential: z.string().min(1, "credential is required"),
 });
 
-router.post("/auth/login", validateBody(loginBodySchema), async (req, res) => {
+router.post("/auth/login", loginLimiter, validateBody(loginBodySchema), async (req, res) => {
   try {
     const { credential } = req.body as z.infer<typeof loginBodySchema>;
 
@@ -345,7 +346,7 @@ const refreshBodySchema = z.object({
  * Old refresh token is single-use and replay attempts revoke all sessions
  * for the user.
  */
-router.post("/auth/refresh", validateBody(refreshBodySchema), async (req, res) => {
+router.post("/auth/refresh", loginLimiter, validateBody(refreshBodySchema), async (req, res) => {
   try {
     const { refreshToken } = req.body as z.infer<typeof refreshBodySchema>;
     const next = await rotateRefreshToken({
@@ -647,7 +648,7 @@ router.get("/auth/verify-email", validateQuery(listQuerySchema), async (req, res
   }
 });
 
-router.post("/auth/login-password", validateBody(loginPasswordSchema), async (req, res) => {
+router.post("/auth/login-password", loginLimiter, validateBody(loginPasswordSchema), async (req, res) => {
   try {
     const { email, password } = req.body as z.infer<typeof loginPasswordSchema>;
 
@@ -829,7 +830,7 @@ const mfaChallengeSchema = z.object({
   code: z.string().length(6, "TOTP code must be exactly 6 digits").regex(/^\d{6}$/, "TOTP code must be 6 digits"),
 });
 
-router.post("/auth/mfa/challenge", validateBody(mfaChallengeSchema), async (req, res) => {
+router.post("/auth/mfa/challenge", loginLimiter, validateBody(mfaChallengeSchema), async (req, res) => {
   try {
     const { mfa_challenge_token, code } = req.body as z.infer<typeof mfaChallengeSchema>;
 
@@ -953,7 +954,7 @@ const mfaSetupRequiredSchema = z.object({
   mfa_setup_token: z.string().min(1, "mfa_setup_token is required"),
 });
 
-router.post("/auth/mfa/setup-required", validateBody(mfaSetupRequiredSchema), async (req, res) => {
+router.post("/auth/mfa/setup-required", loginLimiter, validateBody(mfaSetupRequiredSchema), async (req, res) => {
   try {
     const { mfa_setup_token } = req.body as z.infer<typeof mfaSetupRequiredSchema>;
     const challenge = await readMfaSetupToken(mfa_setup_token);
@@ -1009,7 +1010,7 @@ const mfaEnableRequiredSchema = z.object({
   code: z.string().length(6, "TOTP code must be exactly 6 digits").regex(/^\d{6}$/, "TOTP code must be 6 digits"),
 });
 
-router.post("/auth/mfa/enable-required", validateBody(mfaEnableRequiredSchema), async (req, res) => {
+router.post("/auth/mfa/enable-required", loginLimiter, validateBody(mfaEnableRequiredSchema), async (req, res) => {
   try {
     const { mfa_setup_token, code } = req.body as z.infer<typeof mfaEnableRequiredSchema>;
     const challenge = await readMfaSetupToken(mfa_setup_token);

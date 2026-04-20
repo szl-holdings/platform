@@ -83,6 +83,37 @@ export const publicUploadLimiter = rateLimit({
   handler: makeRateLimitHandler("Too many file uploads from this IP. Please try again in an hour."),
 }) as unknown as RequestHandler;
 
+/**
+ * Login / credential-verification limiter (FINDING F-01, Phase A auth review).
+ *
+ * Strict per-IP cap on credential-verification endpoints to mitigate online
+ * password / TOTP brute-force attacks. Applied to:
+ *   - POST /auth/login            (Replit identity verification)
+ *   - POST /auth/login-password   (email + password)
+ *   - POST /auth/refresh          (refresh-token rotation; replay-detected)
+ *   - POST /auth/mfa/challenge    (TOTP verification at login)
+ *   - POST /auth/mfa/setup-required, /auth/mfa/enable-required (post-login MFA setup)
+ *
+ * The limit is intentionally small (production: 10 attempts / 15 min) so that
+ * a credential-stuffing burst is throttled long before it can enumerate
+ * realistic password lists. Successful logins are NOT counted (skipSuccessful)
+ * so a legitimate user mistyping once does not get locked out.
+ *
+ * NOTE: This is per-IP only. A distributed attacker rotating IPs is not
+ * stopped by this limiter alone — that requires per-account lockout, which
+ * is tracked as a separate hardening item (out of scope for this finding).
+ */
+export const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: isProduction ? 10 : 100,
+  standardHeaders: true,
+  legacyHeaders: true,
+  skipSuccessfulRequests: true,
+  handler: makeRateLimitHandler(
+    "Too many login attempts from this IP. Please wait a few minutes before trying again.",
+  ),
+}) as unknown as RequestHandler;
+
 export const gdprLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   max: isProduction ? 3 : 30,
