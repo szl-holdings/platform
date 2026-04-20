@@ -58,6 +58,16 @@ export interface ApmSpan {
   correlationId?: string;
 }
 
+export interface TenantIsolationViolation {
+  timestamp: number;
+  userId?: number | null;
+  userOrgIds: number[];
+  attemptedOrgId: number | null;
+  path?: string;
+  method?: string;
+  reason: string;
+}
+
 export interface ExternalCallRecord {
   provider: string;
   durationMs: number;
@@ -72,6 +82,8 @@ export class ServerTelemetryCollector {
   private businessEvents: BusinessEvent[] = [];
   private activeAlerts: AlertRecord[] = [];
   private authFailureCount = 0;
+  private authFailureTimestamps: number[] = [];
+  private tenantIsolationViolations: TenantIsolationViolation[] = [];
   private retryCount = 0;
   private dbQueryLatencies: Array<{ durationMs: number; timestamp: number; query?: string }> = [];
   private apmSpans: ApmSpan[] = [];
@@ -150,6 +162,54 @@ export class ServerTelemetryCollector {
 
   recordAuthFailure() {
     this.authFailureCount++;
+    const now = Date.now();
+    this.authFailureTimestamps.push(now);
+    const cutoff = now - WINDOW_SIZE;
+    while (this.authFailureTimestamps.length > 0 && this.authFailureTimestamps[0]! < cutoff) {
+      this.authFailureTimestamps.shift();
+    }
+  }
+
+  /**
+   * Returns the auth failure rate per minute, averaged over the recent window.
+   * Backed by the same rolling window used for HTTP request telemetry.
+   */
+  getAuthFailureRatePerMin(): number {
+    const now = Date.now();
+    const cutoff = now - WINDOW_SIZE;
+    while (this.authFailureTimestamps.length > 0 && this.authFailureTimestamps[0]! < cutoff) {
+      this.authFailureTimestamps.shift();
+    }
+    const windowMin = WINDOW_SIZE / 60_000;
+    if (windowMin <= 0) return 0;
+    return this.authFailureTimestamps.length / windowMin;
+  }
+
+  recordTenantIsolationViolation(details: Omit<TenantIsolationViolation, "timestamp">) {
+    const entry: TenantIsolationViolation = { ...details, timestamp: Date.now() };
+    this.tenantIsolationViolations.push(entry);
+    // Cap at the same window the rest of the collector uses; keep generous tail
+    // so the self-monitor can pick up bursts even on a slightly delayed cycle.
+    const cutoff = Date.now() - WINDOW_SIZE;
+    while (this.tenantIsolationViolations.length > 0 && this.tenantIsolationViolations[0]!.timestamp < cutoff) {
+      this.tenantIsolationViolations.shift();
+    }
+    if (this.tenantIsolationViolations.length > 500) {
+      this.tenantIsolationViolations.splice(0, this.tenantIsolationViolations.length - 500);
+    }
+  }
+
+  /**
+   * Returns tenant isolation violations recorded since the given timestamp.
+   * The self-monitor uses this to fire an immediate alert on any new
+   * occurrence between polling cycles.
+   */
+  getTenantIsolationViolationsSince(sinceTimestamp: number): TenantIsolationViolation[] {
+    return this.tenantIsolationViolations.filter((v) => v.timestamp > sinceTimestamp);
+  }
+
+  getTenantIsolationViolationCount(): number {
+    return this.tenantIsolationViolations.length;
   }
 
   recordRetry() {
@@ -361,6 +421,8 @@ export class ServerTelemetryCollector {
       workflowCompletions: this.getWorkflowCompletionCount(),
       activeAlerts: this.getActiveAlerts().length,
       authFailures: this.authFailureCount,
+      authFailureRatePerMin: this.getAuthFailureRatePerMin(),
+      tenantIsolationViolations: this.tenantIsolationViolations.length,
       retryCount: this.retryCount,
       dbLatency: {
         p50: this.getDbLatencyP50(),

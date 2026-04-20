@@ -31,6 +31,46 @@ import { db, orgMembersTable, organizationsTable } from "@szl-holdings/db";
 import { eq } from "drizzle-orm";
 import type { AuthenticatedUser } from "./auth";
 import { isAllowlistedPublicPath, fullApiPath } from "./global-auth-enforcer";
+import { serverTelemetry } from "@szl-holdings/observability";
+import { logger } from "../lib/logger";
+
+export function recordTenantIsolationViolation(
+  req: Request,
+  user: AuthenticatedUser | undefined,
+  attemptedOrgId: number | null,
+  reason: string,
+): void {
+  reportTenantIsolationViolation(req, user, attemptedOrgId, reason);
+}
+
+function reportTenantIsolationViolation(
+  req: Request,
+  user: AuthenticatedUser | undefined,
+  attemptedOrgId: number | null,
+  reason: string,
+) {
+  const userOrgIds = user?.orgs.map((o) => o.orgId) ?? [];
+  serverTelemetry.recordTenantIsolationViolation({
+    userId: user?.id ?? null,
+    userOrgIds,
+    attemptedOrgId,
+    path: req.originalUrl ?? req.path,
+    method: req.method,
+    reason,
+  });
+  logger.error(
+    {
+      event: "tenant_isolation_violation",
+      userId: user?.id ?? null,
+      userOrgIds,
+      attemptedOrgId,
+      path: req.originalUrl ?? req.path,
+      method: req.method,
+      reason,
+    },
+    "[tenant-scope] tenant isolation violation",
+  );
+}
 
 declare global {
   namespace Express {
@@ -142,6 +182,7 @@ export function tenantScope(options: { required?: boolean } = {}) {
       if (paramSlug) {
         const membership = user.orgs.find((o) => o.orgSlug === paramSlug);
         if (!membership) {
+          reportTenantIsolationViolation(req, user, null, `cross-tenant access by orgSlug=${paramSlug}`);
           res.status(403).json({ error: "Access denied: not a member of this organization" });
           return;
         }
@@ -159,6 +200,7 @@ export function tenantScope(options: { required?: boolean } = {}) {
         }
         const membership = user.orgs.find((o) => o.orgId === id);
         if (!membership) {
+          reportTenantIsolationViolation(req, user, id, `cross-tenant access by orgId=${id}`);
           res.status(403).json({ error: "Access denied: not a member of this organization" });
           return;
         }
@@ -203,12 +245,14 @@ export function assertTenantAccess(
   if (isElevated(user)) return true;
 
   if (recordOrgId == null) {
+    reportTenantIsolationViolation(req, user, null, "record has no org_id");
     res.status(403).json({ error: "Record has no organization — access denied" });
     return false;
   }
 
   const isMember = user.orgs.some((o) => o.orgId === recordOrgId);
   if (!isMember) {
+    reportTenantIsolationViolation(req, user, recordOrgId, "cross-tenant record access");
     res.status(403).json({ error: "Cross-tenant access denied" });
     return false;
   }

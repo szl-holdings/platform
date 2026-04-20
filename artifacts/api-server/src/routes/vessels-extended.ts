@@ -34,7 +34,7 @@ import {
 } from "../lib/api-response";
 import { authMiddleware, parseIdParam } from "../middlewares/auth";
 import { adminGuard } from "../middlewares/admin-guard";
-import { tenantScope } from "../middlewares/tenant-scope";
+import { tenantScope, recordTenantIsolationViolation } from "../middlewares/tenant-scope";
 import { logger } from "../lib/logger";
 import { seedVesselsData } from "../lib/seed-vessels";
 import { listQuerySchema, validateBody, validateQuery } from "../lib/validation";
@@ -658,7 +658,7 @@ router.post("/vessels/exceptions", authMiddleware(), tenantScope(), validateBody
     // Cross-tenant guard on the parent vessel reference
     if (data.vesselId !== null && data.vesselId !== undefined) {
       const own = await getVesselInOrg(data.vesselId, req.tenantOrgId);
-      if (!own) { res.status(403).json({ error: "Cross-tenant access denied" }); return; }
+      if (!own) { recordTenantIsolationViolation(req, req.user, req.tenantOrgId ?? null, "vessels exception cross-tenant create"); res.status(403).json({ error: "Cross-tenant access denied" }); return; }
     }
     const [row] = await db.insert(fleetExceptionsTable).values(data).returning();
     sendCreated(res, row);

@@ -4,6 +4,7 @@ import { LRUCache } from "lru-cache";
 import { publish, WS_CHANNELS } from "./websocket";
 import { logger } from "./logger";
 import { sendEmail, hasEmailProviderConfigured } from "./email";
+import { serverTelemetry } from "@szl-holdings/observability";
 import {
   startRemediation,
   advanceRemediation,
@@ -18,6 +19,8 @@ import {
 
 const POLL_INTERVAL_MS = 5 * 60_000;
 const SIGNAL_COOLDOWN_MS = 10 * 60_000;
+const AUTH_FAILURE_RATE_THRESHOLD_PER_MIN = 10;
+let lastTenantViolationCheckAt = Date.now();
 const SIGNAL_MAX_AGE_DAYS = 30;
 const SIGNAL_MAX_COUNT = 200;
 let pruneCounter = 0;
@@ -502,6 +505,74 @@ async function runMonitoringCycle(): Promise<void> {
         });
       }
     }
+  }
+
+  // OBS-006: Auth failure rate alert.
+  // We pull the rolling rate from the in-process telemetry collector and
+  // alert when failures sustained over the recent telemetry window exceed
+  // the per-minute threshold. Cool-down de-dupes repeat alerts inside the
+  // same incident window.
+  try {
+    const authRate = serverTelemetry.getAuthFailureRatePerMin();
+    if (authRate > AUTH_FAILURE_RATE_THRESHOLD_PER_MIN) {
+      if (shouldEmitSignal("auth-failure-rate")) {
+        await createSignal({
+          severity: authRate > AUTH_FAILURE_RATE_THRESHOLD_PER_MIN * 5 ? "critical" : "high",
+          title: `Auth failure rate elevated — ${authRate.toFixed(1)}/min (threshold: ${AUTH_FAILURE_RATE_THRESHOLD_PER_MIN}/min)`,
+          body: `Auth middleware is rejecting ${authRate.toFixed(1)} requests per minute on average. Possible credential-stuffing, token-replay, or expired-session storm. Review auth logs and IP distribution.`,
+          metadata: {
+            affectedFunction: "Authentication",
+            owner: "Security Team",
+            ownerTeam: "Security",
+            recommendedAction: "Inspect auth.failure logs (org_id, route, reason). Check for IP / UA clustering. If credential stuffing is suspected, enable rate limiting on /api/auth/login or rotate suspect credentials.",
+            anomaly: `Auth failure rate: ${authRate.toFixed(1)}/min (threshold: ${AUTH_FAILURE_RATE_THRESHOLD_PER_MIN}/min)`,
+            sourceData: "serverTelemetry.getAuthFailureRatePerMin()",
+            authFailureRatePerMin: authRate,
+            thresholdPerMin: AUTH_FAILURE_RATE_THRESHOLD_PER_MIN,
+            obsRef: "OBS-006",
+          },
+        });
+      }
+    }
+  } catch (err) {
+    logger.warn({ err }, "Self-monitor: auth failure rate check failed (non-fatal)");
+  }
+
+  // OBS-005: Tenant isolation violation alert.
+  // Any cross-tenant access blocked at the middleware or route layer is a
+  // P1 security event. We fire an alert for any new violations recorded
+  // since the previous monitoring cycle (no threshold — first occurrence
+  // is the alert) and bypass the cool-down so a sustained attack continues
+  // to surface signals.
+  try {
+    const checkedAt = Date.now();
+    const newViolations = serverTelemetry.getTenantIsolationViolationsSince(lastTenantViolationCheckAt);
+    lastTenantViolationCheckAt = checkedAt;
+    if (newViolations.length > 0) {
+      const sample = newViolations.slice(0, 5);
+      const distinctUsers = new Set(newViolations.map((v) => v.userId).filter((id) => id != null)).size;
+      const distinctOrgs = new Set(newViolations.map((v) => v.attemptedOrgId).filter((id) => id != null)).size;
+      await createSignal({
+        severity: "critical",
+        title: `Tenant isolation violation detected — ${newViolations.length} blocked attempt(s)`,
+        body: `${newViolations.length} cross-tenant access attempt(s) were blocked since the last monitoring cycle (${distinctUsers} distinct user(s), ${distinctOrgs} target org(s)). Sample: ${sample.map((v) => `${v.method ?? "?"} ${v.path ?? "?"} (user=${v.userId ?? "?"} → org=${v.attemptedOrgId ?? "?"})`).join("; ")}. This is treated as a P1 security event regardless of count.`,
+        metadata: {
+          affectedFunction: "Multi-Tenant Isolation",
+          owner: "Security Team",
+          ownerTeam: "Security",
+          recommendedAction: "Inspect tenant_isolation_violation log entries. Confirm no data crossed tenant boundary. Review the user(s) and IP(s) for compromise; rotate sessions if account takeover is suspected.",
+          anomaly: `Cross-tenant access blocked: ${newViolations.length} attempts`,
+          sourceData: "serverTelemetry.getTenantIsolationViolationsSince()",
+          violationCount: newViolations.length,
+          distinctUsers,
+          distinctOrgs,
+          sample,
+          obsRef: "OBS-005",
+        },
+      });
+    }
+  } catch (err) {
+    logger.warn({ err }, "Self-monitor: tenant isolation violation check failed (non-fatal)");
   }
 
   if (overallStatus === "healthy" && dbCheck?.status === "connected") {

@@ -41,8 +41,8 @@ The SZL Holdings platform has a well-structured observability stack built on Ope
 | HTTP request rate | OTel HTTP instrumentation via `packages/observability-core` | — | PASS |
 | P95 / P99 latency | Tracked in `lib/observability` telemetry snapshot; exposed on `/api/health/detailed` | Alert at P95 > 2s | PASS |
 | Error rate (5xx) | `lib/self-monitor.ts` polls health endpoint; alerts fire at > 5% | 5% | PASS |
-| Auth failure rate | Auth middleware logs each failure with `org_id`, route, reason | No auto-alert threshold | PARTIAL — logging present, no dedicated metric/alert |
-| Tenant isolation violations | Logged at ERROR level when `org_id` mismatch detected at DB query layer | No auto-alert threshold | PARTIAL — logging present, no dedicated metric/alert |
+| Auth failure rate | Auth middleware logs each failure with `org_id`, route, reason; rolling rate computed in `serverTelemetry`; self-monitor alerts when > 10/min | 10 failures/min | PASS |
+| Tenant isolation violations | Recorded via `serverTelemetry.recordTenantIsolationViolation` at every middleware/route 403; self-monitor fires a critical alert on any new occurrence | Any (1+) occurrence | PASS |
 
 ### Queue Depth
 
@@ -116,8 +116,8 @@ The SZL Holdings platform has a well-structured observability stack built on Ope
 | DB unreachable | Self-monitor + health endpoint | Immediate | PASS |
 | Queue depth | Self-monitor | > 50 pending | PASS |
 | AI provider down | AI health probe every 2 min | On failure | PASS |
-| Auth failure spike | **NOT WIRED** — failures logged but no threshold alert | — | GAP |
-| Tenant isolation violation | **NOT WIRED** — logged at ERROR but no auto-alert | — | GAP |
+| Auth failure spike | Self-monitor checks `serverTelemetry.getAuthFailureRatePerMin()` each cycle | > 10 failures/min | PASS |
+| Tenant isolation violation | Self-monitor reads `serverTelemetry.getTenantIsolationViolationsSince()` each cycle | Any (1+) occurrence | PASS |
 | Backup age > 24 hours | Backup manifest read by health endpoint | > 24 hours — warning status | PASS |
 | DB connection pool near max | **NOT WIRED** — pool metrics visible but no alert threshold | — | GAP |
 | External uptime monitor | Documented in `OPERATIONS-RUNBOOK.md §5.3` — Betterstack / UptimeRobot not yet configured | — | GAP |
@@ -147,8 +147,8 @@ The SZL Holdings platform has a well-structured observability stack built on Ope
 | Structured logs (stdout) | PASS | — |
 | Log shipping to aggregator | GAP | P1 — required before GA |
 | HTTP request rate / latency / error rate | PASS | — |
-| Auth failure rate alert | PARTIAL (logged, no alert) | P2 |
-| Tenant isolation violation alert | PARTIAL (logged, no alert) | P1 |
+| Auth failure rate alert | PASS (self-monitor alerts > 10/min) | — |
+| Tenant isolation violation alert | PASS (self-monitor alerts on any occurrence) | — |
 | Queue depth monitoring | PASS | — |
 | DB reachability alert | PASS | — |
 | DB pool saturation alert | PARTIAL (visible, no alert) | P2 |
@@ -182,8 +182,8 @@ The following were addressed:
 | OBS-002 | Sentry DSN not set — error tracking inactive | P1 | Create Sentry project, set `SENTRY_DSN` secret | Pre-GA |
 | OBS-003 | External uptime monitor not provisioned | P1 | Configure Betterstack per `OPERATIONS-RUNBOOK.md §5.3` | Pre-GA |
 | OBS-004 | Log shipping — stdout only, no aggregator | P1 | Wire Azure Monitor / Log Analytics for Azure production | Pre-GA |
-| OBS-005 | Tenant isolation violation — logged, no auto-alert | P1 | Add dedicated metric + alert threshold in self-monitor | Q2 2026 |
-| OBS-006 | Auth failure rate — no alert threshold | P2 | Add counter metric + alert when > N failures/min | Q2 2026 |
+| OBS-005 | Tenant isolation violation — logged, no auto-alert | P1 | ✅ Resolved 2026-04-20 — `serverTelemetry.recordTenantIsolationViolation()` wired into tenant-scope middleware and route 403 paths; self-monitor fires a critical alert on any new occurrence each cycle | Done |
+| OBS-006 | Auth failure rate — no alert threshold | P2 | ✅ Resolved 2026-04-20 — `serverTelemetry.getAuthFailureRatePerMin()` checked each self-monitor cycle; alert fires when > 10/min (critical when > 50/min) | Done |
 | OBS-007 | DB pool saturation — no alert | P2 | Add threshold check in self-monitor (e.g., > 80% pool used) | Q2 2026 |
 | OBS-008 | Slow query alert — logged, no alert | P3 | Add aggregated alert for repeated slow queries | Q3 2026 |
 | OBS-009 | Grafana / dashboard — no external dashboard | P2 | Set up Application Insights workbook or Grafana after OTLP wiring | Post-GA |

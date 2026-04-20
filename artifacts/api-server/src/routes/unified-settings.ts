@@ -22,7 +22,7 @@ import { hashIp } from "@szl-holdings/audit";
 import { eq, and, desc, asc, like, gte, lte } from "drizzle-orm";
 import { sendSuccess, sendCreated, sendNoContent, sendNotFound, sendBadRequest, sendForbidden, handleRouteError } from "../lib/api-response";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
-import { assertTenantAccess } from "../middlewares/tenant-scope";
+import { assertTenantAccess, recordTenantIsolationViolation } from "../middlewares/tenant-scope";
 import { listQuerySchema, validateBody, validateQuery } from "../lib/validation";
 
 import { bodyShape } from "@szl-holdings/contracts/common";
@@ -39,6 +39,7 @@ function assertTenantAdminAccess(req: Request, res: Response, orgId: number): bo
   if (user.roles.includes("super_admin") || user.roles.includes("admin")) return true;
   const membership = user.orgs.find((o) => o.orgId === orgId);
   if (!membership) {
+    recordTenantIsolationViolation(req, user, orgId, "settings cross-tenant write");
     sendForbidden(res, "Cross-tenant access denied");
     return false;
   }
