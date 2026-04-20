@@ -78,11 +78,11 @@ Capture at the specified artifact, page, and viewport. Dark mode where specified
 ---
 
 ### 08-pulse-executive-briefing.png
-**Artifact:** Pulse — AI Executive Briefing (`/pulse/`)
-**Page:** Executive briefing dashboard or daily AI brief view
+**Artifact:** Pulse — AI Executive Briefing (`/pulse/?demo=true`)
+**Page:** Today's Brief dashboard (PIN-gated demo route — enter the dev `ADMIN_PIN` in the access modal)
 **Viewport:** 1440 × 900
 **Mode:** Dark mode
-**What to show:** The AI-generated executive briefing surface — daily digest, top signals, recommended actions for executives.
+**What to show:** The AI-generated executive briefing surface — daily digest headline, domain chips, and the "Recommended Actions — Today" priority queue (P0–P3).
 **Used in:** Medium body (domain packs section)
 
 ---

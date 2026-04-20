@@ -1,7 +1,7 @@
 # SZL Holdings Platform
 
 ## Overview
-The SZL Holdings Platform is a governed decision infrastructure designed to enforce governance, attribution, and outcome tracking for critical decisions. It integrates signal detection with action execution through a canonical nine-step loop: Signal → Context → Recommendation → Simulation → Policy → Execution → Proof → Outcome → Learning. The platform is a pnpm monorepo consisting of web and mobile applications, an API, a design system, and a development sandbox. Its core capabilities are built around six platform primitives: Outcome Graph, Proof Chain, Covenant Policy, Decision Simulation, Workflow Engine, and Event Fabric. The project aims to provide comprehensive decision-making support with robust governance and observability, driving a vision of evidence-backed and traceable autonomy.
+The SZL Holdings Platform is a governed decision infrastructure enforcing governance, attribution, and outcome tracking for critical decisions. It integrates signal detection with action execution through a canonical nine-step loop. The platform is a pnpm monorepo encompassing web/mobile applications, an API, a design system, and a development sandbox. Its core capabilities are built around six platform primitives: Outcome Graph, Proof Chain, Covenant Policy, Decision Simulation, Workflow Engine, and Event Fabric. The project aims to provide comprehensive decision-making support with robust governance and observability, driving evidence-backed and traceable autonomy.
 
 ## User Preferences
 I prefer detailed explanations.
@@ -10,77 +10,29 @@ Ask before making major changes.
 Do not make changes to the folder `Z`.
 Do not make changes to the file `Y`.
 
-## Toolchain (Phase 1 Modernization — Task #2381)
-- **Node:** 24 LTS (pinned in `.nvmrc` / `.node-version`; `engines.node: >=24.0.0`)
-- **Package manager:** pnpm 10.26.1
-- **Build orchestration:** Turborepo 2.9.6 (`turbo.json` — cached pipelines: `build`, `test`, `lint`, `lint:ci`, `typecheck`, `format`)
-- **Linter:** Biome 2.4.12 (`biome.json`) + Oxlint 1.60.0 (`.oxlintrc.json`)
-- **Root scripts:** `pnpm lint` → Biome lint; `pnpm lint:ci` → Oxlint + Biome; `pnpm format` → Biome format --write; `pnpm typecheck` → turbo run typecheck; `pnpm test` → turbo run test
-- **ESLint + Prettier removed:** `eslint.config.js` and `.prettierrc.cjs` deleted; `@eslint/js`, `eslint`, `prettier`, `@typescript-eslint/*` devDeps removed
-- **Pre-commit hook:** `scripts/setup-hooks.sh` installs a hook that runs Biome + Oxlint on staged `.ts/.tsx/.js/.jsx/.json/.css` files only (fast path)
-- **tsconfig.base.json strict flags added:** `strict: true`, `noImplicitOverride: true`, `forceConsistentCasingInFileNames: true`, `verbatimModuleSyntax: true`, `target: ESNext`. Note: `module/moduleResolution` kept as `esnext/bundler` to preserve Vite compatibility; `noUncheckedIndexedAccess` and `exactOptionalPropertyTypes` deferred to a later phase to avoid widespread breakage.
-- **Override errors fixed:** `lib/shared-ui/src/error-boundary.tsx`, `lib/mobile-shared/src/components/ErrorBoundary.tsx`, `lib/api-client-react/src/custom-fetch.ts`
-- **Duplicate package names resolved:** `lib/action-engine`, `lib/decision-engine`, `lib/policy-engine`, `lib/domain-claims` renamed to `@szl-holdings/lib-*` variants so turbo's package graph is valid
-- **Script normalization:** All 97 workspace packages (packages/*, lib/*, artifacts/*) now expose `lint`, `lint:ci`, `format`, `typecheck`, `test:watch` scripts where applicable
-
-## Platform Modernization Phase 2 (Task #2382)
-- **`packages/env`** (`@szl-holdings/env`): Single typed env loader — `parseEnv()`, `getEnv()`, typed `Env`. ~150 env vars validated with Zod. `artifacts/api-server/src/lib/env-config.ts` now delegates to `getEnv()`.
-- **`packages/contracts`** (`@szl-holdings/contracts`): Zod-validated request/response schemas for all API boundaries (auth, alloy, ai, webhooks, admin, common). TS types inferred from schemas — never written in parallel.
-- **`packages/schemas`** (`@szl-holdings/schemas`): Domain entity schemas (entities, alloy, vessels, terra, firestorm, ai) for queue payloads, DB-adjacent parsing, and LLM structured output.
-- **`packages/otel`** (`@szl-holdings/otel`): Wraps `@szl-holdings/observability` with `startSpan`, `toolCallSpan`, `dbSpan`, `httpOutboundSpan`, `jobSpan`, correlation helpers, and Drizzle instrumentation.
-- **`packages/db-schema`** / **`packages/db-repository`** / **`packages/db-migrations`**: Facade layer over `@szl-holdings/db`. Domain-namespaced re-exports, typed repository classes (auth/alloy/audit/vessels/terra/firestorm), and migration status helper.
-- **Contract wiring in api-server:** 5 routes in `ai-ops-dashboard.ts` replaced `jsonObjectBodySchema`/`listQuerySchema` with typed schemas from `@szl-holdings/contracts/ai` (`traceListQuerySchema`, `traceCapturBodySchema`, `traceStatusPatchSchema`, `reviewQueueListQuerySchema`, `reviewDecisionBodySchema`).
-- **Observability admin panel** (`GET /api/admin/observability`): New route `artifacts/api-server/src/routes/admin/observability.ts`. Accepts `?window=1h|6h|24h|7d`. Returns HTTP p50/p95 latency, job stats (pending/running/failed/completed/retryCount), agent tool success rate, top error hotspots.
-- **Biome boundary rules** (`biome.json`): `style.noRestrictedImports` added — enforces cross-artifact import prohibition.
-- **`scripts/check-package-boundaries.ts`**: Standalone boundary check script; exits non-zero on violations. Run via `pnpm check-boundaries`. Checks: artifact→artifact cross-imports, lib/packages→artifacts imports.
-- **pnpm `.npmrc`:** Added `public-hoist-pattern[]=zod` to ensure zod is resolvable from source-only workspace packages.
-
-## Platform Modernization Phase 4 — Agent Layer Refactor (Task #2384)
-- **`packages/agents-core`** (`@workspace/agents-core`): Typed, replayable, auditable agent orchestration. `AgentRun` class with `.start()`, `.step()`, `.complete()`, `.fail()` lifecycle. Typed `RetryPolicy` with bounded retries and exponential backoff. `ApprovalGate` that pauses runs and writes to `approvals-inbox`; resumes on approval, hard-fails on rejection/timeout. `StepLogEntry` structured-log emitter (per-step, with toolId/promptId/spanId fields). `DeadLetterStore` for runs that exhaust all retries. `RunErrorCategory` typed enum: `timeout | validation | provider | policy | approval_rejected | approval_timeout | unknown`. Re-exports from `cognitive-runtime`, `guardian`, `policy-engine`, `approvals-inbox`.
-- **`packages/agents-tools`** (`@workspace/agents-tools`): Typed tool interface: `TypedTool<TInput, TOutput>` = manifest + `inputSchema: ZodType` + `outputSchema: ZodType` + typed handler. `registerTypedTool()` rejects untyped tools at registration time (missing schema → `ToolRegistrationError`). `TypedToolGateway` validates input/output schemas on every invocation; blocks approval-required tools until the `ApprovalGate` in `agents-core` has cleared them. Domain tools migrated as `TypedTool<>`: `threatScanTool`, `alertEscalationTool`, `fundTransferTool`, `portfolioSnapshotTool`, `systemHealthCheckTool`, `incidentCreateTool`. Re-exports from `tool-mesh`.
-- **`packages/agents-prompts`** (`@workspace/agents-prompts`): `PromptRef` = `{ id, versionConstraint? }` — typed reference replacing inline string templates. `resolvePrompt(ref, vars)` resolves to a `ResolvedPrompt` with `rendered`, `systemPrompt`, and `modelHints`. `registerSeedPrompts()` seeds six built-in cognitive-loop prompts: `agents.perceive`, `agents.orient`, `agents.plan`, `agents.reflect`, `agents.verify`, `agents.approval-justification`. Re-exports from `prompt-registry`.
-- **`packages/agents-evals`** (`@workspace/agents-evals`): `createToolEvalSuite(tool, cases)` auto-generates `tool-reliability` eval suites. `createPromptEvalSuite(ref, cases)` auto-generates `prompt-eval` suites. `captureRunForReplay(manifest)` + `replayRunAsEval(runId)` for deterministic trace replay evals. Re-exports from `eval-forge`, `replay-core`, `trace-graph`.
-- **`docs/agents-refactor-map.md`**: One-page module mapping showing which existing modules move into each `agents-*` package, migration status, and the post-migration dependency graph.
-- **Old packages:** `tool-registry`, `evals-core`, `eval-os` remain as compatibility shims during the transition. `cognitive-runtime`, `tool-mesh`, `prompt-registry`, `eval-forge` remain fully active but now have a clean `agents-*` surface on top. No consumers were broken.
-
-## Platform Modernization Phase 3 — Testing Stack (Task #2383)
-- **Per-package Vitest configs:** `packages/guardian`, `packages/eval-os`, `packages/eval-forge` now have their own `vitest.config.ts` files with `pool: "forks"` + `isolate: true`. Guardian gained a `test` script. These packages are no longer included in the root `vitest.config.ts`; turbo runs them independently with per-package caching.
-- **Async leak detection:** All three root Vitest configs (`vitest.config.ts`, `vitest.components.config.ts`, `vitest.integration.config.ts`) now use `pool: "forks"` + `isolate: true` + explicit `hookTimeout`/`teardownTimeout` bounds (10 s unit/components, 15 s integration). Unclosed handles surface as timeouts instead of silent hangs.
-- **Playwright smoke coverage complete:** Added `tests/e2e/sentra.spec.ts`, `tests/e2e/counsel.spec.ts`, `tests/e2e/pulse.spec.ts` — all 11 primary artifact domains now have at least one smoke spec + failure-path test.
-- **Auth fixture:** `tests/e2e/fixtures/auth-session.ts` exports `authenticatedPage` and `adminPage` Playwright fixtures (network-mock strategy, no real OIDC required). New specs import this instead of re-implementing mock routing.
-- **Turbo:** `test:e2e` registered in `turbo.json` with `cache: false` and correct input/output globs.
-- **Python sidecar deferred:** No `services/ai-python` created. All eval logic is TypeScript (`eval-forge`, `eval-os`). Deferral rationale and creation criteria documented in `TEST_STRATEGY.md §10.4`.
-- **`scripts/qa/*`:** All qa scripts remain operational via existing `pnpm qa:*` named scripts. No migration needed — they are already documented and wired.
-
 ## System Architecture
-The platform is a pnpm monorepo using TypeScript 5.9, React 19, Vite, and Node.js. It employs a micro-frontend architecture for web applications, routed via a shared gateway proxy on port 9090.
+The platform is a pnpm monorepo utilizing TypeScript 5.9, React 19, Vite, and Node.js. It employs a micro-frontend architecture for web applications, routed via a shared gateway proxy.
 
 **Core Platform Primitives:**
--   **Outcome Graph:** Manages the decision lifecycle and outcomes.
+-   **Outcome Graph:** Manages decision lifecycle and outcomes.
 -   **Proof Chain:** Ensures an immutable audit trail with provenance.
 -   **Covenant Policy:** Handles permissions and human approval gates.
 -   **Monte Carlo (Decision Simulation):** Provides probabilistic risk assessment.
 -   **Workflow Engine:** Orchestrates durable business processes.
 -   **Event Fabric (PRISM Bus):** A cross-domain event bus for signal routing.
--   **Sovereign Execution Substrate (`@szl/substrate`, `packages/substrate/`):** The single opinionated execution runtime for all SZL workflows. Unifies orchestrator/planner/guardian/policy-engine/evidence-graph/replay-core into one durable, governed, evidence-chained runtime. Distinctive via (1) policy-shaped graphs (compiler rejects high-risk side effects without ApprovalGate ancestors at build time), (2) evidence-chained transitions (SHA-256 hash-stable EvidenceBundles linked to proof-chain), (3) confidence-budget routing (escalate-model/escalate-human declaratively), (4) counterfactual replay. Five stage primitives: Reason, Retrieve, ToolCall, Verify, Decide + ApprovalGate. Four modes: live, dry-run, replay, counterfactual. Phase 1 reference workflow: Opportunity Audit (Lyte domain). Python worker channel protocol v1.0. API endpoints: POST /control-tower/substrate/replay, GET /control-tower/substrate/run/:id, GET /control-tower/substrate/metrics. Architecture docs: docs/substrate/.
+-   **Sovereign Execution Substrate (`@szl/substrate`):** Unifies orchestration, planning, governance, policy enforcement, and evidence chaining into a durable, governed, and replayable runtime. It features policy-shaped graphs, evidence-chained transitions, confidence-budget routing, and counterfactual replay.
 
-**Monorepo Structure:** The monorepo includes active and archived artifact directories, shared library packages for infrastructure and primitives, and dedicated packages for business observability, AI Control Plane, and NVIDIA-Ready Modules. The database schema is managed by Drizzle ORM across ~700 tables in `lib/db/src/schema/` (154 schema files). The `skill_library.ts` schema file was removed (dead duplicate of `cognitive_runtime.ts`'s `skill_runs` table). The `/beacon/*` Terra route alias was removed — canonical Terra routes are `/terra/*` only. Full consolidation report: `launch/data/db_consolidation.md`.
+**Monorepo Structure:** Includes active and archived artifact directories, shared library packages for infrastructure and primitives, and dedicated packages for business observability, AI Control Plane, and NVIDIA-Ready Modules. The database schema is managed by Drizzle ORM.
 
 **Business Observability Fabric (ATLAS):** Implemented via `@szl-holdings/observability-core`, `@szl-holdings/business-events`, and `@szl-holdings/telemetry-standards` for OpenTelemetry setup, event emission, and semantic conventions.
 
-**Canonical Artifacts (Active Applications):** The platform supports 15 active applications including `szl-holdings` (corporate dashboard), `api-server` (backend), `command` (unified operations with Demo Launchpad at `/command/demo`), `vessels` (maritime intelligence), `terra` (real estate), `carlota-jo` (advisory), `pulse` (AI executive briefing), `szl-holdings-mobile` (mobile command), `szl-demo-video`, `mockup-sandbox`/NEXUS (agentic AI layer), `lyte-command-center` (Decision Intelligence — Decision Twin, Policy Center with Policy Compiler link), `sentra` (Cyber Resilience), `counsel` (Legal Matter Command), `prism-counsel` (PRISM Legal Command), and `aegis` (Cyber Resilience Command / Investor Pitch Deck). All 15 artifact workflows are confirmed running.
+**Canonical Artifacts (Active Applications):** The platform supports 15 active applications including `szl-holdings` (corporate dashboard), `api-server` (backend), `command` (unified operations), `vessels` (maritime intelligence), `terra` (real estate), `pulse` (AI executive briefing), `lyte-command-center` (Decision Intelligence), and `aegis` (Cyber Resilience Command).
 
-**Demo Launchpad (`/command/demo`):** A single presenter control surface for investor demos. Features: 10/20/45-minute scripted tracks, audience persona switcher (Investor/CEO/COO/CISO/Analyst), one-click reset, six-stop sequence with progress tracking, platform status panel (all six domain packs), and quick-access to all six signature innovations. Central demo narrative: Vantex Acquisition ($4.2M / 47-day stalled approval) — LYTE-SEED-v2. Located at `artifacts/command/src/pages/demo-launchpad.tsx`.
+**Six Signature Innovations:** Includes Decision Twin, Policy Compiler, Why This Property Now, Adversary Narrative Engine, Voyage Risk Twin, and White-Glove Command.
 
-**Six Signature Innovations (One-of-One):** Decision Twin (761 lines, `/lyte/decision-twin`), Policy Compiler (1252 lines, `/command/operations/alloy/policy-compiler`), Why This Property Now (912 lines, `/terra/why-this-property-now`), Adversary Narrative Engine (1806 lines, `/aegis/adversary-narrative-engine`), Voyage Risk Twin (1063 lines, `/vessels/voyage-risk-twin`), White-Glove Command (`/carlota-jo/concierge`). All six verified working.
+**Lyte — Decision Intelligence:** A flagship application providing nine surfaces for executive narrative, signal feeds, entity graphs, decision centers, workflow health, agent trace logs, evidence explorers, policy centers, and evaluation studios. It features a dark amber design language and uses the Vantex Acquisition scenario as its central demo narrative.
 
-**Internal Audit (`artifacts/internal-audit/`):** 18 documents created by the Singularity Program (Task #2239) covering capability manifest (89 capabilities, 81% working), workflow health, live vs demo data classification, commercial activation checklist, gap register, investor readiness scorecard (7.8/10), demo script (10/20/45 min), founder review summary, and full changelog.
-
-**Media Kit (`media/`):** Production media assets committed at a known path. `media/screenshots/<artifact>/` — hero and secondary-view PNG screenshots at 1920×1080 (deviceScaleFactor 2) for all 10 artifact surfaces (szl-holdings, pulse, sentra, lyte, vessels, terra, prism-counsel, counsel, aegis, command, szl-demo-video). `media/brand-kit/tokens.md` — authoritative visual brand tokens (colors, typography, intro/outro card specs, lower-thirds, caption style, screenshot standards). `media/README.md` — top-level media kit docs. Screenshot regeneration: `bash scripts/capture-screenshots.sh [artifact-id?]`. All artifact READMEs now contain screenshot tables and regeneration commands.
-
-**Lyte — Decision Intelligence (`artifacts/lyte-command-center`, shared proxy port 9090 / Vite port 7099, preview path `/lyte/`):** Nine flagship surfaces — Overview (executive narrative, KPIs, critical signals), Signals Console (47-signal live feed), Entity Graph (SVG relationship map), Decision Center (recommendation backlog + Monte Carlo simulation panel), Workflow Health (per-workflow bottleneck tracking), Run Console (agent trace log), Evidence Explorer (proof chain browser), Policy Center (covenant policy registry), and Eval Studio (radar chart + eval logs). All surfaces use the Vantex Acquisition $4.2M / 47-day stalled approval chain as the central demo narrative. Dark amber design language (#f59e0b accent), `cockpit-panel` CSS, `proof-badge` chips. Seed data in `artifacts/lyte-command-center/src/data/seed.ts`. Navigation groups: Command / Operations / Governance / Legacy (board, ownership-drift, pressure-map, action-debt, decision-replay).
-
-**Vite Sub-Path App Configuration:** Sub-path applications (e.g., aegis, terra) share `PORT=9090` via a shared gateway proxy (`reusePort: true`), while each app has its own Vite dev server on a dedicated `VITE_PORT`. Vite configurations for sub-path apps require `fs.strict: false` for workspace library file access.
+**Vite Sub-Path App Configuration:** Sub-path applications share `PORT=9090` via a shared gateway proxy, each having its own Vite dev server on a dedicated `VITE_PORT`.
 
 **Technology Stack:**
 -   **Frontend:** React 19, Vite, TanStack React Query, Wouter, Tailwind CSS v4, Framer Motion.
@@ -91,40 +43,35 @@ The platform is a pnpm monorepo using TypeScript 5.9, React 19, Vite, and Node.j
 -   **AI:** Multi-provider (OpenAI, Anthropic, Gemini) with schema-validated decision types, AI evaluation infrastructure, and an AI Ops Dashboard.
 -   **Real-time:** WebSocket, Server-Sent Events (SSE), push notifications.
 
-**AI Control Plane & NVIDIA-Ready Packages:** Packages like `@szl-holdings/ai-control-plane`, `@szl-holdings/prompt-registry`, `@szl-holdings/tool-registry`, `@szl-holdings/nvidia-adapters`, and `@szl-holdings/openusd-export` provide provider-agnostic AI infrastructure, prompt/tool management, NVIDIA integration, and OpenUSD digital twin export.
+**AI Control Plane & NVIDIA-Ready Packages:** Provide provider-agnostic AI infrastructure, prompt/tool management, NVIDIA integration, and OpenUSD digital twin export.
 
-**UI/UX and Design System:** A premium, dark-first governed-intelligence design language is provided by `@szl-holdings/design-system` (`packages/design-system`), offering proof-envelope and cockpit primitives. A Storybook-style preview is available at `/nexus/#design-system`. A forbidden-copy linter enforces specific terminology. `@szl-holdings/ui-command` provides higher-level business components.
+**UI/UX and Design System:** A premium, dark-first governed-intelligence design language is provided by `@szl-holdings/design-system`, offering proof-envelope and cockpit primitives. `@szl-holdings/ui-command` provides higher-level business components.
 
-**OS Layer (Decision Center):** A unified "Operating System" layer in `lib/shared-ui/src/` provides shared primitives like `Recommendation`, `Evidence`, `PolicyVerdict`, `Run` types, and UI components such as `DecisionCenter.tsx` for ranked recommendations, `RunConsole.tsx` for trace viewing, and `AutonomyDial.tsx`.
+**OS Layer (Decision Center):** Provides shared primitives and UI components for recommendations, evidence, policy verdicts, and agent run tracing.
 
-**One-of-One Platform Shell (Task #2308):** Four new canonical shared modules were added to `lib/shared-ui/src/` as part of the platform cohesion pass: `sentient-layer.tsx` (⌘J intelligence rail with Now/Next/Links tabs), `agent-run-card.tsx` (compact agent trace card), `incident-commander.tsx` (full incident management shell), `scenario-branches-panel.tsx` (Monte Carlo branch comparison). `⌘K` CommandPalette was wired into Sentra and Counsel. All 13 surfaces now share DashboardShell + EcosystemNav + CommandPalette chrome. Duplicate components removed from aegis/vessels/terra. SZL Holdings landing.tsx updated with "One Shell. Thirteen Surfaces." section. Audit docs at `docs/audit/one-of-one/`.
+**One-of-One Platform Shell:** Introduced four canonical shared modules for an intelligence rail, agent run card, incident management, and scenario comparison, unifying the user interface across all surfaces with a DashboardShell, EcosystemNav, and CommandPalette.
 
-**API Layers:** The platform includes a REST API, a GraphQL API using Apollo Server, and an MCP Gateway for tool integration.
+**API Layers:** Includes a REST API, a GraphQL API using Apollo Server, and an MCP Gateway for tool integration.
 
-**Key Features:** Reporting & Analytics Engine, Authentication & RBAC, Alloy Execution Fabric for workflow orchestration, 12 specialized AI Agents, PRISM Bus, Monte Carlo Engine, Multi-Tenant Provisioning, and GCS-backed Object Storage.
+**Forge — AI Runtime, Agent Factory & Promotion Pipeline:** Manages the governed lifecycle of AI agents, including registry, runtime capture, drift evaluation, promotion validation, rollback orchestration, and auditing.
 
-**Forge — AI Runtime, Agent Factory & Promotion Pipeline:** This system manages the governed lifecycle of AI agents, including registry, runtime capture, drift evaluation, promotion validation, rollback orchestration, and auditing.
+**Replay, Eval & Trust Infrastructure:** Enables incident capture, scenario replay, comprehensive evaluation of agent behavior, and regression detection with dedicated UI surfaces.
 
-**Replay, Eval & Trust Infrastructure:** Packages like `@szl-holdings/replay-core`, `@szl-holdings/evals-core`, and `@workspace/eval-os` enable incident capture, scenario replay, comprehensive evaluation of agent behavior, and regression detection, with dedicated UI surfaces.
+**SZL Foundation — Trace Graph:** Provides a canonical trace layer linking all agent runs, model calls, tool invocations, retrievals, memory operations, and workflow steps into a queryable graph.
 
-**SZL Foundation — Trace Graph:** The `@workspace/trace-graph` package provides a canonical trace layer linking all agent runs, model calls, tool invocations, retrievals, memory operations, and workflow steps into a queryable graph.
+**ATLAS Enterprise State Model:** Defines a shared entity vocabulary and standardized event taxonomy.
 
-**ATLAS Enterprise State Model:** `@szl-holdings/atlas-core`, `@szl-holdings/atlas-types`, and `@szl-holdings/atlas-events` define a shared entity vocabulary and standardized event taxonomy.
+**Living Signal Mesh & Evidence Graph:** Unifies event/signal handling into a typed, pipeline-driven mesh, providing `Signal` and `EvidenceItem` definitions, a 9-stage signal pipeline, an `EvidenceStore`, and various `ConnectorAdapter` implementations.
 
-**Living Signal Mesh & Evidence Graph:** New packages (`@workspace/ontology`, `@szl-holdings/signal-mesh`, `@szl-holdings/evidence-graph`, `@szl-holdings/connectors`) unify event/signal handling into a typed, pipeline-driven mesh, providing `Signal` and `EvidenceItem` definitions, a 9-stage signal pipeline, an `EvidenceStore`, and various `ConnectorAdapter` implementations for external data sources.
+**Memory Fabric & Alloy Runtime:** Provides a tiered memory layer with provenance, freshness, retention, and sensitivity tracking, and acts as the cognitive runtime and execution control plane for workflows.
 
-**Memory Fabric & Alloy Runtime:** `@workspace/memory-fabric` provides a tiered memory layer with provenance, freshness, retention, and sensitivity tracking. `@workspace/alloy` acts as the cognitive runtime and execution control plane for workflows, policy integration, and action management.
+**Reflection Engine:** A structured self-improvement package that scores run quality, classifies failure modes, identifies best-performing routes, and drafts candidate skills.
 
-**Reflection Engine (`@workspace/reflection-engine`):** A structured self-improvement package that scores run quality, classifies failure modes, identifies best-performing routes, and drafts candidate skills, persisting lessons to memory fabric and surfacing skills for governance review.
+**Cognitive Consoles (Command App):** Three read-only inspection surfaces in the Command app provide insights into the system's runtime state: Cognitive Command Center, Self Model Console, and World Model Graph Explorer.
 
-**Cognitive Consoles (Command App):** Three read-only inspection surfaces under `/cognitive/` in the Command app provide insights into the system's runtime state:
-- **Cognitive Command Center:** Live dashboard for agent runs, objectives, verifier decisions, and system reflections.
-- **Self Model Console:** Read-only inspection of ATLAS-Core's self-model, including identity, capabilities, calibration accuracy, and trust score.
-- **World Model Graph Explorer:** CONSTELLATION graph visualization of the system's world model, with entity provenance drill-down and freshness indicators.
+**NEXUS — Unified Agentic AI Layer:** The unified agentic AI orchestration layer, accessible at `/nexus/`, featuring a Parallel Research Swarm, Persistent Memory + Skills Library, Universal Protocol Bridge, and Cross-App Orchestrator.
 
-**NEXUS — Unified Agentic AI Layer:** NEXUS is the unified agentic AI orchestration layer, accessible at `/nexus/`, serving as a static build from the API server. Its four pillars include a Parallel Research Swarm, Persistent Memory + Skills Library, Universal Protocol Bridge, and Cross-App Orchestrator. The frontend is built from `artifacts/mockup-sandbox/` and the backend endpoints are in `artifacts/api-server/src/routes/nexus.ts`.
-
-**NEXUS Rebuild Pipeline:** `artifacts/api-server/start.sh` rebuilds `mockup-sandbox/dist/public` on workflow startup whenever any source under `mockup-sandbox/src` (or `index.html`/`vite.config.ts`/`package.json`) is newer than the built `index.html`. In addition, the same script spawns a background `vite build --watch` (logs to `/tmp/nexus-vite-watch.log`) that keeps `dist/public` in sync with edits in real time — refresh `/nexus/` in the browser to see changes without restarting the `artifacts/api-server: api` workflow. Toggle env vars: `FORCE_NEXUS_BUILD=1` (force initial rebuild), `SKIP_NEXUS_BUILD=1` (skip initial rebuild), `WATCH_NEXUS=0` (disable the background watcher). The watcher is killed automatically when the workflow exits.
+**Substrate Command Center:** A cross-vertical operator UI for the governed decision substrate, integrated into the `command` artifact at `/command/substrate/`. It offers four operator perspectives, a live trajectory map of in-flight runs, detailed run views, a counterfactual diff viewer, and a unified approval queue.
 
 ## External Dependencies
 -   **Database:** PostgreSQL 16
@@ -137,21 +84,3 @@ The platform is a pnpm monorepo using TypeScript 5.9, React 19, Vite, and Node.j
 -   **Government Data:** CISA KEV, NVD CVE, MITRE ATT&CK, Census/BLS, FEMA NRI, NYC Open Data, SEC EDGAR
 -   **Legal Data:** CourtListener REST API
 -   **Other APIs/Services:** GitHub API, Figma, Google APIs, HubSpot
-
-## Substrate Command Center (Task #2394)
-
-A cross-vertical operator UI for the governed decision substrate, added as a dedicated section of the `artifacts/command` (Unified Command) artifact at `/command/substrate/`.
-
-**Route:** `/command/substrate/`
-**Source files:** `artifacts/command/src/pages/substrate/`
-**Documentation:** `docs/substrate/command-center.md`
-
-### Features
-- **Four operator perspectives:** Executive, Operator, Analyst, Approver — one-click switching, persisted in localStorage
-- **Live Trajectory Map** (`/substrate/`): All in-flight runs across every vertical in a live-updating table (5s refresh). KPI row, full filter set (tenant/vertical/status/risk/approval), 9-segment stage progress bars, confidence bars, risk badges
-- **Run Detail View** (`/substrate/runs/:id`): Tabbed view with stage timeline (expandable per-stage I/O, evidence drawers, policy results), OTel trace waterfall, approval history, rollback checkpoints
-- **Counterfactual Diff Viewer** (`/substrate/counterfactual`): Load any run, change model adapter and policy profile, compare decisions stage-by-stage in a side-by-side diff
-- **Unified Approval Queue** (`/substrate/approvals`): All pending decisions across every vertical, with Approve/Reject/Escalate actions, required justification (10-char minimum), urgency indicators, resolved session log
-
-### Data Layer
-Currently simulated from `artifacts/command/src/pages/substrate/mock-data.ts`. Designed to be replaced with `@szl/substrate-client` SDK calls when the substrate Phase 2 SDK ships. The `SubstrateRun` type is structurally compatible with the substrate's typed run model.

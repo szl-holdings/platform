@@ -110,6 +110,14 @@ router.use(
     "pulse",
   ),
 );
+// Aliased mount so the Pulse client (and CSRF / global-auth-enforcer
+// exemptions) can address these routes under the canonical `/api/pulse/...`
+// prefix that they were always documented as.
+router.use(
+  "/pulse",
+  perUserApiSlidingLimiter,
+  lazyMount(() => import("./pulse"), "pulse-aliased"),
+);
 router.use("/executive", perUserApiSlidingLimiter, lazyMount(() => import("./executive-briefings"), "executive-briefings"));
 router.use(lazyMatch("/evals", () => import("./evals"), "evals"));
 router.use(lazyMatch("/briefings", () => import("./briefings"), "briefings"));
