@@ -521,6 +521,22 @@ router.get("/approvals/:id/audit-trail", authMiddleware(), requireRole("super_ad
   }
 });
 
+router.get("/approvals/:id/comments", authMiddleware(), async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params["id"] as string, 10);
+    if (isNaN(id)) { sendBadRequest(res, "Invalid approval ID"); return; }
+
+    const guard = await loadAccessibleApproval(req, res, id);
+    if (!guard) return;
+
+    const { getApprovalComments } = await import("@szl-holdings/covenant-policy");
+    const comments = await getApprovalComments(id);
+    sendSuccess(res, comments);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to get approval comments");
+  }
+});
+
 router.get("/approvals/by-resource/:resourceType/:resourceId", authMiddleware(), async (req: Request, res: Response) => {
   try {
     const { resourceType, resourceId } = req.params as { resourceType: string; resourceId: string };

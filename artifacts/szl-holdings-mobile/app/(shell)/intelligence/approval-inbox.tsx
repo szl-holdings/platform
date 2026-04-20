@@ -37,10 +37,33 @@ interface Approval {
 interface AuditEntry {
   id: number;
   action: string;
-  actorRole?: string;
-  note?: string;
+  actorId?: number | null;
+  actorRole?: string | null;
+  note?: string | null;
+  metadata?: Record<string, unknown> | null;
   createdAt: string;
 }
+
+interface ApprovalComment {
+  id: number;
+  approvalId: number;
+  authorId?: number | null;
+  authorRole?: string | null;
+  body: string;
+  isInternal: boolean;
+  createdAt: string;
+}
+
+const AUDIT_ACTION_COLORS: Record<string, string> = {
+  created: "#3b82f6",
+  approved: "#22c55e",
+  rejected: "#ef4444",
+  revised: "#f59e0b",
+  escalated: "#a855f7",
+  expired: "#6b7280",
+  withdrawn: "#6b7280",
+  comment: "#64748b",
+};
 
 interface QueuedDecision {
   approvalId: number;
@@ -87,14 +110,184 @@ function timeUntil(iso?: string): string {
   return `Expires in ${Math.floor(hrs / 24)}d`;
 }
 
+function AuditTrailSection({
+  approvalId,
+  colors,
+  enabled,
+}: {
+  approvalId: number;
+  colors: ReturnType<typeof useColors>;
+  enabled: boolean;
+}) {
+  const trailQuery = useQuery<AuditEntry[]>({
+    queryKey: ["approval-audit-trail", approvalId],
+    queryFn: async () => {
+      const raw = await apiFetch<{ data: AuditEntry[] } | AuditEntry[]>(
+        `/api/approvals/${approvalId}/audit-trail`
+      );
+      return Array.isArray(raw) ? raw : ((raw as { data: AuditEntry[] }).data ?? []);
+    },
+    enabled,
+    staleTime: 15000,
+  });
+
+  if (!enabled) return null;
+
+  return (
+    <View style={[styles.threadBox, { backgroundColor: colors.background, borderColor: colors.border }]}>
+      <Text style={[styles.evidenceLabel, { color: colors.mutedForeground }]}>AUDIT TRAIL</Text>
+      {trailQuery.isLoading ? (
+        <ActivityIndicator size="small" color={ACCENT} style={{ marginVertical: 8 }} />
+      ) : trailQuery.isError ? (
+        <Text style={[styles.threadEmpty, { color: "#ef4444" }]}>Failed to load audit trail</Text>
+      ) : (trailQuery.data ?? []).length === 0 ? (
+        <Text style={[styles.threadEmpty, { color: colors.mutedForeground }]}>No audit events yet</Text>
+      ) : (
+        (trailQuery.data ?? []).map((entry) => {
+          const c = AUDIT_ACTION_COLORS[entry.action] ?? "#64748b";
+          return (
+            <View key={entry.id} style={styles.auditRow}>
+              <View style={[styles.auditDot, { backgroundColor: c }]} />
+              <View style={{ flex: 1 }}>
+                <View style={styles.auditMetaRow}>
+                  <Text style={[styles.auditAction, { color: c }]}>{entry.action.toUpperCase()}</Text>
+                  {entry.actorRole && (
+                    <Text style={[styles.auditActor, { color: colors.mutedForeground }]}>
+                      · {entry.actorRole}
+                    </Text>
+                  )}
+                  <Text style={[styles.auditTime, { color: colors.mutedForeground }]}>
+                    {formatRelative(entry.createdAt)}
+                  </Text>
+                </View>
+                {entry.note && (
+                  <Text style={[styles.auditNote, { color: colors.foreground }]}>{entry.note}</Text>
+                )}
+              </View>
+            </View>
+          );
+        })
+      )}
+    </View>
+  );
+}
+
+function CommentThreadSection({
+  approvalId,
+  colors,
+  enabled,
+}: {
+  approvalId: number;
+  colors: ReturnType<typeof useColors>;
+  enabled: boolean;
+}) {
+  const qc = useQueryClient();
+  const [draft, setDraft] = useState("");
+
+  const commentsQuery = useQuery<ApprovalComment[]>({
+    queryKey: ["approval-comments", approvalId],
+    queryFn: async () => {
+      const raw = await apiFetch<{ data: ApprovalComment[] } | ApprovalComment[]>(
+        `/api/approvals/${approvalId}/comments`
+      );
+      return Array.isArray(raw) ? raw : ((raw as { data: ApprovalComment[] }).data ?? []);
+    },
+    enabled,
+    staleTime: 15000,
+  });
+
+  const postMutation = useMutation({
+    mutationFn: async (body: string) => {
+      return apiFetch(`/api/approvals/${approvalId}/comment`, {
+        method: "POST",
+        body: JSON.stringify({ body }),
+      });
+    },
+    onSuccess: () => {
+      setDraft("");
+      qc.invalidateQueries({ queryKey: ["approval-comments", approvalId] });
+      qc.invalidateQueries({ queryKey: ["approval-audit-trail", approvalId] });
+    },
+    onError: () => {
+      Alert.alert("Error", "Failed to post comment. Please try again.");
+    },
+  });
+
+  if (!enabled) return null;
+
+  return (
+    <View style={[styles.threadBox, { backgroundColor: colors.background, borderColor: colors.border }]}>
+      <Text style={[styles.evidenceLabel, { color: colors.mutedForeground }]}>COMMENTS</Text>
+      {commentsQuery.isLoading ? (
+        <ActivityIndicator size="small" color={ACCENT} style={{ marginVertical: 8 }} />
+      ) : commentsQuery.isError ? (
+        <Text style={[styles.threadEmpty, { color: "#ef4444" }]}>Failed to load comments</Text>
+      ) : (commentsQuery.data ?? []).length === 0 ? (
+        <Text style={[styles.threadEmpty, { color: colors.mutedForeground }]}>No comments yet</Text>
+      ) : (
+        (commentsQuery.data ?? []).map((c) => (
+          <View key={c.id} style={[styles.commentRow, { borderBottomColor: colors.border }]}>
+            <View style={styles.commentHeader}>
+              <Text style={[styles.commentAuthor, { color: colors.foreground }]}>
+                {c.authorRole ?? "user"}
+              </Text>
+              <Text style={[styles.commentTime, { color: colors.mutedForeground }]}>
+                {formatRelative(c.createdAt)}
+              </Text>
+            </View>
+            <Text style={[styles.commentBody, { color: colors.foreground }]}>{c.body}</Text>
+          </View>
+        ))
+      )}
+
+      <View style={styles.commentInputRow}>
+        <TextInput
+          value={draft}
+          onChangeText={setDraft}
+          placeholder="Add a comment…"
+          placeholderTextColor={colors.mutedForeground}
+          multiline
+          style={[
+            styles.commentInput,
+            { color: colors.foreground, borderColor: colors.border, backgroundColor: colors.card },
+          ]}
+        />
+        <TouchableOpacity
+          onPress={() => {
+            const trimmed = draft.trim();
+            if (!trimmed) return;
+            postMutation.mutate(trimmed);
+          }}
+          disabled={postMutation.isPending || draft.trim().length === 0}
+          style={[
+            styles.commentSendBtn,
+            { backgroundColor: ACCENT + "18", borderColor: ACCENT + "50" },
+            (postMutation.isPending || draft.trim().length === 0) && { opacity: 0.5 },
+          ]}
+        >
+          {postMutation.isPending ? (
+            <ActivityIndicator size="small" color={ACCENT} />
+          ) : (
+            <Feather name="send" size={14} color={ACCENT} />
+          )}
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+}
+
 function ApprovalCard({
   approval,
   colors,
   onReview,
+  onEscalate,
+  isOffline,
 }: {
   approval: Approval;
   colors: ReturnType<typeof useColors>;
   onReview: (approval: Approval) => void;
+  onEscalate: (approval: Approval) => void;
+  isOffline: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
   const prioColor = PRIORITY_COLORS[approval.priority] ?? "#6b7280";
@@ -182,16 +375,116 @@ function ApprovalCard({
             </View>
           )}
 
-          <TouchableOpacity
-            onPress={() => onReview(approval)}
-            style={[styles.reviewBtn, { backgroundColor: ACCENT + "18", borderColor: ACCENT + "50" }]}
-          >
-            <Feather name="check-circle" size={14} color={ACCENT} />
-            <Text style={[styles.reviewBtnText, { color: ACCENT }]}>Review &amp; Decide</Text>
-          </TouchableOpacity>
+          <AuditTrailSection approvalId={approval.id} colors={colors} enabled={expanded} />
+          <CommentThreadSection approvalId={approval.id} colors={colors} enabled={expanded} />
+
+          <View style={styles.actionRow}>
+            <TouchableOpacity
+              onPress={() => onReview(approval)}
+              style={[styles.reviewBtn, { backgroundColor: ACCENT + "18", borderColor: ACCENT + "50", flex: 2 }]}
+            >
+              <Feather name="check-circle" size={14} color={ACCENT} />
+              <Text style={[styles.reviewBtnText, { color: ACCENT }]}>Review &amp; Decide</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => onEscalate(approval)}
+              disabled={isOffline}
+              style={[
+                styles.reviewBtn,
+                { backgroundColor: "#a855f718", borderColor: "#a855f750", flex: 1 },
+                isOffline && { opacity: 0.5 },
+              ]}
+            >
+              <Feather name="alert-triangle" size={14} color="#a855f7" />
+              <Text style={[styles.reviewBtnText, { color: "#a855f7" }]}>Escalate</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       )}
     </TouchableOpacity>
+  );
+}
+
+function EscalateModal({
+  approval,
+  visible,
+  onClose,
+  onSubmit,
+  isPending,
+}: {
+  approval: Approval | null;
+  visible: boolean;
+  onClose: () => void;
+  onSubmit: (reason: string) => void;
+  isPending: boolean;
+}) {
+  const [reason, setReason] = useState("");
+
+  const reset = () => {
+    setReason("");
+    onClose();
+  };
+
+  const handleSubmit = () => {
+    const trimmed = reason.trim();
+    if (trimmed.length < 4) {
+      Alert.alert("Reason required", "Please describe why this approval needs to be escalated.");
+      return;
+    }
+    onSubmit(trimmed);
+  };
+
+  return (
+    <Modal visible={visible} animationType="slide" transparent onRequestClose={reset}>
+      <View style={styles.modalOverlay}>
+        <View style={[styles.modalSheet, { backgroundColor: "#0d1220" }]}>
+          <View style={styles.modalHandle} />
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Escalate Approval</Text>
+            <TouchableOpacity onPress={reset}>
+              <Feather name="x" size={18} color="#6b7280" />
+            </TouchableOpacity>
+          </View>
+
+          {approval && (
+            <>
+              <Text style={styles.modalApprovalTitle} numberOfLines={2}>{approval.title}</Text>
+              <Text style={styles.modalApprovalSub}>
+                {approval.resourceType} · {approval.actionClass}
+              </Text>
+
+              <Text style={styles.modalSectionLabel}>ESCALATION REASON</Text>
+              <TextInput
+                value={reason}
+                onChangeText={setReason}
+                placeholder="Why does this need senior review?"
+                placeholderTextColor="#4b5563"
+                multiline
+                numberOfLines={3}
+                textAlignVertical="top"
+                style={styles.noteInput}
+              />
+
+              <TouchableOpacity
+                onPress={handleSubmit}
+                disabled={isPending}
+                style={[
+                  styles.submitBtn,
+                  { backgroundColor: "#a855f718", borderColor: "#a855f750" },
+                  isPending && { opacity: 0.6 },
+                ]}
+              >
+                {isPending ? (
+                  <ActivityIndicator size="small" color="#a855f7" />
+                ) : (
+                  <Text style={[styles.submitBtnText, { color: "#a855f7" }]}>Submit Escalation</Text>
+                )}
+              </TouchableOpacity>
+            </>
+          )}
+        </View>
+      </View>
+    </Modal>
   );
 }
 
@@ -403,6 +696,8 @@ export default function ApprovalInboxScreen() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("pending");
   const [reviewTarget, setReviewTarget] = useState<Approval | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [escalateTarget, setEscalateTarget] = useState<Approval | null>(null);
+  const [escalateVisible, setEscalateVisible] = useState(false);
   const [offlineQueue, setOfflineQueue] = useState<QueuedDecision[]>([]);
   const [queueLoaded, setQueueLoaded] = useState(false);
 
@@ -462,14 +757,34 @@ export default function ApprovalInboxScreen() {
         body: JSON.stringify({ decision, note: note || undefined }),
       });
     },
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: ["cognitive-approvals"] });
+      qc.invalidateQueries({ queryKey: ["approval-audit-trail", variables.id] });
       setModalVisible(false);
       setReviewTarget(null);
       Alert.alert("Decision recorded", "The approval decision has been submitted and logged.");
     },
     onError: () => {
       Alert.alert("Error", "Failed to submit decision. Please try again.");
+    },
+  });
+
+  const escalateMutation = useMutation({
+    mutationFn: async ({ id, reason }: { id: number; reason: string }) => {
+      return apiFetch(`/api/approvals/${id}/escalate`, {
+        method: "POST",
+        body: JSON.stringify({ reason }),
+      });
+    },
+    onSuccess: (_data, variables) => {
+      qc.invalidateQueries({ queryKey: ["cognitive-approvals"] });
+      qc.invalidateQueries({ queryKey: ["approval-audit-trail", variables.id] });
+      setEscalateVisible(false);
+      setEscalateTarget(null);
+      Alert.alert("Escalated", "This approval has been escalated for senior review.");
+    },
+    onError: () => {
+      Alert.alert("Error", "Failed to escalate. Please try again.");
     },
   });
 
@@ -543,6 +858,23 @@ export default function ApprovalInboxScreen() {
     setReviewTarget(approval);
     setModalVisible(true);
   }, []);
+
+  const openEscalate = useCallback((approval: Approval) => {
+    if (isOffline) {
+      Alert.alert("Offline", "Escalation requires an internet connection.");
+      return;
+    }
+    setEscalateTarget(approval);
+    setEscalateVisible(true);
+  }, [isOffline]);
+
+  const handleSubmitEscalation = useCallback(
+    (reason: string) => {
+      if (!escalateTarget) return;
+      escalateMutation.mutate({ id: escalateTarget.id, reason });
+    },
+    [escalateTarget, escalateMutation]
+  );
 
   const handleSubmitDecision = useCallback(
     async (decision: Decision, note: string) => {
@@ -687,6 +1019,8 @@ export default function ApprovalInboxScreen() {
               approval={approval}
               colors={colors}
               onReview={openReview}
+              onEscalate={openEscalate}
+              isOffline={isOffline}
             />
           ))
         )}
@@ -700,6 +1034,15 @@ export default function ApprovalInboxScreen() {
         onSubmit={handleSubmitDecision}
         isPending={reviewMutation.isPending}
         isOffline={isOffline}
+      />
+
+      <EscalateModal
+        key={`escalate-${escalateTarget?.id ?? "empty"}`}
+        approval={escalateTarget}
+        visible={escalateVisible}
+        onClose={() => { setEscalateVisible(false); setEscalateTarget(null); }}
+        onSubmit={handleSubmitEscalation}
+        isPending={escalateMutation.isPending}
       />
     </View>
   );
@@ -805,6 +1148,31 @@ const styles = StyleSheet.create({
     gap: 6, paddingVertical: 10, borderRadius: 8, borderWidth: 1,
   },
   reviewBtnText: { fontSize: 13, fontWeight: "600" },
+  actionRow: { flexDirection: "row", gap: 8 },
+  threadBox: { borderRadius: 8, borderWidth: 1, padding: 10, gap: 8 },
+  threadEmpty: { fontSize: 11, fontStyle: "italic", paddingVertical: 4 },
+  auditRow: { flexDirection: "row", alignItems: "flex-start", gap: 8 },
+  auditDot: { width: 8, height: 8, borderRadius: 4, marginTop: 5 },
+  auditMetaRow: { flexDirection: "row", alignItems: "center", gap: 4, flexWrap: "wrap" },
+  auditAction: { fontSize: 10, fontWeight: "700", letterSpacing: 0.4 },
+  auditActor: { fontSize: 10, fontWeight: "500" },
+  auditTime: { fontSize: 10, marginLeft: "auto" },
+  auditNote: { fontSize: 11, lineHeight: 16, marginTop: 2 },
+  commentRow: { paddingVertical: 6, borderBottomWidth: StyleSheet.hairlineWidth, gap: 2 },
+  commentHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  commentAuthor: { fontSize: 11, fontWeight: "700" },
+  commentTime: { fontSize: 10 },
+  commentBody: { fontSize: 12, lineHeight: 17 },
+  commentInputRow: { flexDirection: "row", alignItems: "flex-end", gap: 6, marginTop: 4 },
+  commentInput: {
+    flex: 1, borderWidth: 1, borderRadius: 8,
+    paddingHorizontal: 10, paddingVertical: 8,
+    fontSize: 12, minHeight: 36, maxHeight: 100,
+  },
+  commentSendBtn: {
+    width: 36, height: 36, borderRadius: 8, borderWidth: 1,
+    alignItems: "center", justifyContent: "center",
+  },
   empty: { alignItems: "center", paddingTop: 60, gap: 10 },
   emptyText: { fontSize: 15, fontWeight: "500" },
   emptySub: { fontSize: 12, textAlign: "center" },
