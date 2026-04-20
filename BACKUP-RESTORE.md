@@ -1,6 +1,6 @@
 # Backup & Restore — SZL Holdings Platform
 
-**Version:** 1.1 · **Last updated:** 2026-04-20 (updated after first DR drill)
+**Version:** 1.2 · **Last updated:** 2026-04-20 (object-storage archival enabled)
 **Audience:** Engineering, DevOps, security reviewers, enterprise evaluators
 **Companion docs:** [DATA-RETENTION.md](DATA-RETENTION.md) · [INCIDENT_RESPONSE.md](INCIDENT_RESPONSE.md) · [TENANCY-MODEL.md](TENANCY-MODEL.md)
 
@@ -154,18 +154,51 @@ Untested backups are not real backups. The cadence above is enforced via reminde
 ### Backup Automation
 
 Backup runs automatically via `.github/workflows/backup.yml` on a nightly cron (`0 2 * * *` UTC). The workflow:
-- Installs `pg_dump` and runs `scripts/backup-db.sh` against `DATABASE_URL`
-- Verifies the manifest status is `ok` before completing
-- Uploads the backup artifact to GitHub Actions (7-day retention) and the manifest (30-day retention)
+- Installs `pg_dump` and the Azure CLI, then runs `scripts/backup-db.sh` against `DATABASE_URL`
+- Ships the dump to durable object storage via `scripts/backup-upload.sh` (Azure Blob in production)
+- Verifies both the local manifest status and the remote upload status before completing — the job **fails** if the remote upload was required and did not succeed
+- Uploads a short-lived secondary copy to GitHub Actions artifacts (7-day retention) for fast incident-response access; this is **not** the system of record
 - Can be triggered manually via `workflow_dispatch` with `--dry-run` support
 
-**Rotation policy (persistent storage / server deployments):** `scripts/backup-db.sh` enforces 7 daily + 4 weekly retention against a persistent `BACKUP_DIR`. This rotation is effective when the script runs on a server or VM with mounted persistent storage where prior backup files accumulate.
+**Rotation policy (object storage — production system of record):** `scripts/backup-upload.sh` enforces remote rotation against the configured backend after each upload:
+- `daily_*.sql.gz` files older than `BACKUP_REMOTE_DAILY_RETENTION_DAYS` (default 30) are deleted (Starter tier).
+- `weekly_*.sql.gz` files older than `BACKUP_REMOTE_WEEKLY_RETENTION_DAYS` (default 90) are deleted (Pro tier).
+- File age is derived from the timestamp embedded in the filename (`<label>_YYYYMMDDTHHMMSSZ.sql.gz`), so rotation is correct even when remote `Last-Modified` is reset by re-uploads.
+- Retention is enforced both via this script-level prune and via an Azure Blob lifecycle policy (defense in depth).
 
-**Rotation policy (CI / ephemeral runners):** GitHub Actions runners start with a clean filesystem each run, so script-level rotation across runs is a no-op (there are no prior files to prune). In the CI path, retention is instead governed by artifact `retention-days`: 7 days for backup dumps, 30 days for manifests. For production-grade 30-day or 90-day retention tiers, backup artifacts must be shipped to object storage with a lifecycle policy — this is a documented known gap (see below).
+**Rotation policy (persistent storage / server deployments):** `scripts/backup-db.sh` additionally enforces a local 7 daily + 4 weekly window against `BACKUP_DIR`. This handles VM/container deployments that retain a working set of recent dumps locally.
 
-**Security note for CI artifacts:** SQL dump artifacts contain sensitive data. The repository must be private; GitHub access controls gate artifact access. Artifacts are stored unencrypted in CI storage. Before the first production customer, migrate to encrypted object storage with explicit key management.
+**Rotation policy (CI ephemeral runners):** Each run starts with a clean filesystem, so the local-window logic is a no-op there. The remote-rotation logic above is what enforces retention for the CI path.
 
-**Required CI secret:** `DATABASE_URL` must be set as a GitHub Actions secret for automated backups to run against the production database.
+**Security note for CI artifacts:** SQL dump artifacts contain sensitive data. The CI artifact copy is unencrypted — the repository must remain private. The object-storage copy uses Azure Blob server-side encryption (Microsoft-managed keys today; customer-managed keys planned). Before the first regulated-tier customer, migrate to customer-managed keys (BYOK).
+
+**Required CI secrets:**
+- `DATABASE_URL` — connection string for the production database.
+- One of:
+  - `AZURE_STORAGE_CONNECTION_STRING` (preferred), **or**
+  - `AZURE_STORAGE_ACCOUNT` + `AZURE_STORAGE_SAS_TOKEN` (SAS must include `rwdl` permissions on the container).
+- `AZURE_STORAGE_CONTAINER` — destination container (e.g. `szl-backups`).
+- Optional: `AZURE_STORAGE_PREFIX` — key prefix inside the container (e.g. `prod/`).
+
+If the Azure secrets are absent the workflow logs a warning, falls back to artifact-only mode, and stays green — keeping CI usable for forks and preview environments. Production CI **must** set the secrets to meet the documented retention SLA.
+
+### Restoring from Object Storage
+
+The end-to-end restore path is exercised by `scripts/backup-restore.sh`:
+
+```bash
+# Restore the most recent remote backup into a scratch schema
+DATABASE_URL=$DATABASE_URL \
+  BACKUP_REMOTE_BACKEND=azure-blob \
+  AZURE_STORAGE_CONNECTION_STRING=... \
+  AZURE_STORAGE_CONTAINER=szl-backups \
+  ./scripts/backup-restore.sh --latest --target-schema restore_scratch
+
+# Restore a specific filename
+./scripts/backup-restore.sh daily_20260420T020000Z.sql.gz --target-schema restore_scratch
+```
+
+The script downloads the blob, verifies gzip integrity, rewrites the dump's `search_path` to the target schema, and pipes it into `psql` with `ON_ERROR_STOP=1`. The transport pipeline (upload, rotation, download, verification) is regression-tested by `tests/scripts/backup-upload-restore.test.sh` using the `local-fs` backend, which runs without cloud credentials in CI.
 
 ---
 
@@ -203,7 +236,7 @@ From [KNOWN-GAPS.md](KNOWN-GAPS.md) and updated after 2026-04-20 DR drill:
 - **Backup automation now configured** — RESOLVED. `.github/workflows/backup.yml` runs nightly. Requires `DATABASE_URL` CI secret to be set for production database.
 - **Hourly WAL streaming (Pro tier RPO)** — Replit-managed PostgreSQL does not expose WAL streaming. 4-hour RPO target for Pro tier requires Azure PostgreSQL Flexible Server in production. Not a silent gap; production architecture targets Azure.
 - **Cross-region failover runbook not yet executed against live load** — planned tabletop scheduled per first Enterprise customer provisioning.
-- **Object storage backup target not configured** — backup artifacts are currently stored as unencrypted GitHub Actions CI artifacts (7-day retention). Script-level rotation (7 daily / 4 weekly) functions correctly for persistent-storage deployments but is a no-op on ephemeral CI runners. Object storage with a lifecycle policy and encryption at rest is required before GA to meet stated retention periods and security requirements. See follow-up task #2679.
+- **Object storage backup target configured** — RESOLVED (task #2679). Nightly backups are now shipped to Azure Blob via `scripts/backup-upload.sh`, with 30-day daily / 90-day weekly remote rotation enforced after each run. Restore path (`scripts/backup-restore.sh`) downloads from object storage and replays into a scratch schema. Transport plumbing is regression-tested by `tests/scripts/backup-upload-restore.test.sh`. Encryption at rest uses Microsoft-managed keys; CMK/BYOK remains FY27 roadmap.
 - **Customer BYOK for backup encryption** — not yet implemented; FY27 roadmap.
 
 These gaps are documented honestly. They do not represent silent risk.

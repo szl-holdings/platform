@@ -15,8 +15,13 @@
 #   DATABASE_URL   PostgreSQL connection string
 #
 # Optional env:
-#   BACKUP_DIR     Override backup directory (default: ./backups)
-#   PG_DUMP_ARGS   Extra args passed to pg_dump
+#   BACKUP_DIR              Override backup directory (default: ./backups)
+#   PG_DUMP_ARGS            Extra args passed to pg_dump
+#   BACKUP_REMOTE_BACKEND   If set to azure-blob | local-fs, the dump is
+#                           shipped to object storage via scripts/backup-upload.sh
+#                           after the local dump completes. Remote rotation
+#                           (30-day daily / 90-day weekly) is enforced there.
+#                           If unset or "none", upload is skipped (back-compat).
 # ─────────────────────────────────────────────────────────────────────────────
 
 set -euo pipefail
@@ -94,4 +99,57 @@ cat > "${MANIFEST_FILE}" <<EOF
 EOF
 
 echo "[backup] Manifest written to ${MANIFEST_FILE}"
+
+# ─── Remote upload (object storage) ───────────────────────────────────────────
+# Skipped automatically if BACKUP_REMOTE_BACKEND is unset or "none".
+# On success, merges remote-upload status into the manifest.
+REMOTE_BACKEND="${BACKUP_REMOTE_BACKEND:-none}"
+if [[ "$DRY_RUN" == "--dry-run" ]]; then
+  echo "[backup] DRY RUN — skipping remote upload."
+  REMOTE_STATUS_JSON='{"status":"skipped","backend":"'"$REMOTE_BACKEND"'","message":"dry-run"}'
+elif [[ "$REMOTE_BACKEND" == "none" ]]; then
+  echo "[backup] BACKUP_REMOTE_BACKEND not configured — local-only backup."
+  REMOTE_STATUS_JSON='{"status":"skipped","backend":"none","message":"remote backend disabled"}'
+else
+  UPLOAD_SCRIPT="$(dirname "$0")/backup-upload.sh"
+  if [[ ! -x "$UPLOAD_SCRIPT" ]]; then
+    chmod +x "$UPLOAD_SCRIPT" 2>/dev/null || true
+  fi
+  echo "[backup] Uploading to remote backend: $REMOTE_BACKEND"
+  set +e
+  REMOTE_STATUS_JSON=$("$UPLOAD_SCRIPT" "$FILENAME")
+  UPLOAD_RC=$?
+  set -e
+  if [[ $UPLOAD_RC -ne 0 ]]; then
+    echo "[backup] ERROR: remote upload failed (rc=$UPLOAD_RC)" >&2
+    # Rewrite manifest with failed remote status, then exit non-zero
+    if [[ -z "$REMOTE_STATUS_JSON" ]]; then
+      REMOTE_STATUS_JSON='{"status":"error","backend":"'"$REMOTE_BACKEND"'","message":"upload script failed"}'
+    fi
+  fi
+fi
+
+# Merge remote status into manifest. If jq is unavailable, fall back to a
+# simpler concatenation (Linux runners always have jq).
+if command -v jq >/dev/null 2>&1; then
+  TMP_MANIFEST=$(mktemp)
+  jq --argjson r "$REMOTE_STATUS_JSON" '. + {remoteUpload: $r}' "${MANIFEST_FILE}" > "$TMP_MANIFEST"
+  mv "$TMP_MANIFEST" "${MANIFEST_FILE}"
+else
+  # Strip trailing } and append remoteUpload field
+  sed -i.bak 's/}$/,/' "${MANIFEST_FILE}"
+  printf '  "remoteUpload": %s\n}\n' "$REMOTE_STATUS_JSON" >> "${MANIFEST_FILE}"
+  rm -f "${MANIFEST_FILE}.bak"
+fi
+
+# If remote was required and failed, fail the whole job
+if [[ "$REMOTE_BACKEND" != "none" && "$DRY_RUN" != "--dry-run" ]]; then
+  REMOTE_STATUS=$(echo "$REMOTE_STATUS_JSON" | grep -oE '"status":"[^"]+"' | head -1 | cut -d'"' -f4)
+  if [[ "$REMOTE_STATUS" != "ok" ]]; then
+    echo "[backup] FATAL: remote upload status='$REMOTE_STATUS' — failing job." >&2
+    exit 1
+  fi
+  echo "[backup] Remote upload OK."
+fi
+
 echo "[backup] Done. Last backup: ${LAST_BACKUP_TIME}"
