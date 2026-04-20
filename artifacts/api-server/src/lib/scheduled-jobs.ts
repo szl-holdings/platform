@@ -1278,14 +1278,20 @@ durableJobQueue.register(NAMED_JOB_TYPES.HOURLY_GUARDIAN_APPROVAL_EXPIRY, async 
 durableJobQueue.register(NAMED_JOB_TYPES.STUCK_RUN_NOTIFY, async (job) => {
   const start = Date.now();
   const STUCK_THRESHOLD_MS = 10 * 60 * 1000;
+  const HARD_TIMEOUT_MS = Math.max(
+    STUCK_THRESHOLD_MS,
+    Number(process.env.STUCK_RUN_HARD_TIMEOUT_MS) || 30 * 60 * 1000,
+  );
   let candidates = 0;
   let notified = 0;
+  let autoCanceled = 0;
+  let autoRetried = 0;
   try {
-    const { db, alloyWorkflowRunsTable } = await import("@szl-holdings/db");
+    const { db, alloyWorkflowRunsTable, alloyWorkflowsTable, alloyAuditLogTable } = await import("@szl-holdings/db");
     const { and, eq, lt, isNotNull } = await import("drizzle-orm");
     const { notifyRunFailure } = await import("./alloy-run-failure-notifications");
 
-    const cutoff = new Date(Date.now() - STUCK_THRESHOLD_MS);
+    const notifyCutoff = new Date(Date.now() - STUCK_THRESHOLD_MS);
     const stuckRuns = await db
       .select({ id: alloyWorkflowRunsTable.id })
       .from(alloyWorkflowRunsTable)
@@ -1293,7 +1299,7 @@ durableJobQueue.register(NAMED_JOB_TYPES.STUCK_RUN_NOTIFY, async (job) => {
         and(
           eq(alloyWorkflowRunsTable.state, "running"),
           isNotNull(alloyWorkflowRunsTable.startedAt),
-          lt(alloyWorkflowRunsTable.startedAt, cutoff),
+          lt(alloyWorkflowRunsTable.startedAt, notifyCutoff),
         ),
       );
 
@@ -1303,19 +1309,163 @@ durableJobQueue.register(NAMED_JOB_TYPES.STUCK_RUN_NOTIFY, async (job) => {
       if (result.notified) notified += 1;
     }
 
+    // Hard-timeout sweep: flip runs stuck past HARD_TIMEOUT_MS to "failed"
+    // with errorMessage="stuck timeout", write an audit log entry, and
+    // optionally re-queue runs for workflows whose triggerConfig.idempotent
+    // is true (subject to maxRetries).
+    const hardCutoff = new Date(Date.now() - HARD_TIMEOUT_MS);
+    const hardStuck = await db
+      .select()
+      .from(alloyWorkflowRunsTable)
+      .where(
+        and(
+          eq(alloyWorkflowRunsTable.state, "running"),
+          isNotNull(alloyWorkflowRunsTable.startedAt),
+          lt(alloyWorkflowRunsTable.startedAt, hardCutoff),
+        ),
+      );
+
+    for (const run of hardStuck) {
+      try {
+        const failedAt = new Date();
+        const prevHistory = Array.isArray(run.stateHistory) ? (run.stateHistory as unknown[]) : [];
+        const newHistory = [
+          ...prevHistory,
+          {
+            state: "failed",
+            at: failedAt.toISOString(),
+            by: "system",
+            reason: "stuck_timeout",
+          },
+        ];
+        const startedMs = run.startedAt ? run.startedAt.getTime() : failedAt.getTime();
+        const [updated] = await db
+          .update(alloyWorkflowRunsTable)
+          .set({
+            state: "failed",
+            errorMessage: "stuck timeout",
+            completedAt: failedAt,
+            durationMs: failedAt.getTime() - startedMs,
+            stateHistory: newHistory,
+          })
+          .where(
+            and(
+              eq(alloyWorkflowRunsTable.id, run.id),
+              eq(alloyWorkflowRunsTable.state, "running"),
+            ),
+          )
+          .returning();
+
+        if (!updated) continue; // Another tick won the race.
+        autoCanceled += 1;
+
+        const [workflow] = await db
+          .select()
+          .from(alloyWorkflowsTable)
+          .where(eq(alloyWorkflowsTable.id, run.workflowId))
+          .limit(1);
+
+        try {
+          await db.insert(alloyAuditLogTable).values({
+            orgId: workflow?.orgId ?? null,
+            userId: run.triggeredBy ?? null,
+            action: "auto_cancel_stuck_run",
+            resourceType: "alloy_workflow_run",
+            resourceId: String(run.id),
+            before: { state: "running", startedAt: run.startedAt, errorMessage: run.errorMessage },
+            after: { state: "failed", errorMessage: "stuck timeout", completedAt: failedAt },
+            metadata: {
+              reason: "stuck_timeout",
+              hardTimeoutMs: HARD_TIMEOUT_MS,
+              workflowId: run.workflowId,
+            },
+          });
+        } catch (auditErr) {
+          logger.warn({ err: auditErr, runId: run.id }, "stuck_run_notify: audit log insert failed");
+        }
+
+        try {
+          const { broadcastWs } = await import("./pubsub-bridge.js");
+          broadcastWs("workflow-runs", "run-updated", {
+            id: run.id,
+            workflowId: run.workflowId,
+            state: "failed",
+          });
+        } catch (broadcastErr) {
+          logger.debug({ err: broadcastErr, runId: run.id }, "stuck_run_notify: ws broadcast skipped");
+        }
+
+        // Notify the run owner of the auto-cancellation as a regular
+        // failure — notifyRunFailure is idempotent, so the prior "stuck"
+        // notification doesn't block a subsequent "failed" notification.
+        void notifyRunFailure(run.id, "failed").catch((notifyErr) =>
+          logger.warn({ err: notifyErr, runId: run.id }, "stuck_run_notify: failure notify threw"),
+        );
+
+        // Optional auto-retry for idempotent workflows.
+        const triggerCfg = (workflow?.triggerConfig ?? {}) as Record<string, unknown>;
+        const isIdempotent = triggerCfg.idempotent === true;
+        const nextRetry = (run.retryCount ?? 0) + 1;
+        if (isIdempotent && nextRetry <= (run.maxRetries ?? 3)) {
+          try {
+            const queuedAt = new Date();
+            const [retryRun] = await db
+              .insert(alloyWorkflowRunsTable)
+              .values({
+                workflowId: run.workflowId,
+                signalId: run.signalId,
+                triggeredBy: run.triggeredBy,
+                state: "queued",
+                input: run.input ?? {},
+                retryCount: nextRetry,
+                maxRetries: run.maxRetries ?? 3,
+                stateHistory: [
+                  {
+                    state: "queued",
+                    at: queuedAt.toISOString(),
+                    by: "system",
+                    reason: "auto_retry_after_stuck_timeout",
+                    parentRunId: run.id,
+                  },
+                ],
+              })
+              .returning();
+            if (retryRun) {
+              autoRetried += 1;
+              logger.info(
+                { originalRunId: run.id, retryRunId: retryRun.id, workflowId: run.workflowId, retryCount: nextRetry },
+                "stuck_run_notify: auto-retry enqueued for idempotent workflow",
+              );
+            }
+          } catch (retryErr) {
+            logger.warn({ err: retryErr, runId: run.id }, "stuck_run_notify: auto-retry enqueue failed");
+          }
+        }
+      } catch (cancelErr) {
+        logger.warn({ err: cancelErr, runId: run.id }, "stuck_run_notify: hard-timeout cancel failed");
+      }
+    }
+
     serverTelemetry.recordBusinessEvent({
       type: "stuck_run_notify_completed",
       domain: "platform",
       durationMs: Date.now() - start,
       success: true,
-      metadata: { candidates, notified, thresholdMs: STUCK_THRESHOLD_MS },
+      metadata: {
+        candidates,
+        notified,
+        autoCanceled,
+        autoRetried,
+        thresholdMs: STUCK_THRESHOLD_MS,
+        hardTimeoutMs: HARD_TIMEOUT_MS,
+      },
     });
     updateRegistry(NAMED_JOB_TYPES.STUCK_RUN_NOTIFY, {
       lastStatus: "completed",
       lastDurationMs: Date.now() - start,
     });
-    if (notified > 0) {
-      logger.info({ jobId: job.id, candidates, notified }, "stuck_run_notify: dispatched");
+    if (notified > 0 || autoCanceled > 0) {
+      logger.info({ jobId: job.id, candidates, notified, autoCanceled, autoRetried }, "stuck_run_notify: dispatched");
     }
   } catch (err) {
     logger.error({ err, jobId: job.id }, "stuck_run_notify: fatal");
